@@ -1,57 +1,52 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:23365 "EHLO mx1.redhat.com"
+Received: from cantor2.suse.de ([195.135.220.15]:54852 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751430AbaEWDoB (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 22 May 2014 23:44:01 -0400
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v2] xfs/005: filter _scratch_mount output to match golden image
-Date: Fri, 23 May 2014 11:43:23 +0800
-Message-Id: <1400816603-2263-1-git-send-email-eguan@redhat.com>
+	id S1751458AbaEWJbn (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 23 May 2014 05:31:43 -0400
+Date: Fri, 23 May 2014 11:39:36 +0200
+From: David Disseldorp <ddiss@suse.de>
+Subject: Re: [PATCH 1/2] xfstests: add helper require function
+ _require_btrfs_cloner
+Message-ID: <20140523113936.6dace4f7@f163.suse.de>
+In-Reply-To: <1400817931-32326-1-git-send-email-fdmanana@gmail.com>
+References: <1400817931-32326-1-git-send-email-fdmanana@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Sender: xfstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com, Eryu Guan <eguan@redhat.com>
+To: Filipe David Borba Manana <fdmanana@gmail.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Failure message of mount has been changed since util-linux v2.21, to
-something like:
+On Fri, 23 May 2014 05:05:30 +0100, Filipe David Borba Manana wrote:
 
-mount: mount /dev/sda5 on /mnt/scratch failed: Structure needs cleaning
+> So that the same check (btrfs cloner program presence) can be reused
+> by other tests.
+> 
+> Signed-off-by: Filipe David Borba Manana <fdmanana@gmail.com>
+> ---
+>  common/rc       | 7 +++++++
+>  tests/btrfs/035 | 4 +---
+>  2 files changed, 8 insertions(+), 3 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index d1788d1..f27ee53 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2085,6 +2085,13 @@ _require_fssum()
+>  	[ -x $FSSUM_PROG ] || _notrun "fssum not built"
+>  }
+>  
+> +_require_btrfs_cloner()
+> +{
+> +	CLONER_PROG=$here/src/cloner
+> +	[ -x $CLONER_PROG ] || \
+> +		_notrun "cloner binary not present at $CLONER_PROG"
+> +}
 
-Filter the output to match the golden image for newer mount binary so
-that both old and new version of mount work correctly.
+Would prefer to avoid the reliance on $here, but it appears that other
+common/rc functions make the same assumption.
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
-v2: filter the mount error message instead of changing the golden image
+Reviewed-by: David Disseldorp <ddiss@suse.de>
 
- tests/xfs/005 | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
-
-diff --git a/tests/xfs/005 b/tests/xfs/005
-index 94157c4..509ac61 100755
---- a/tests/xfs/005
-+++ b/tests/xfs/005
-@@ -40,6 +40,11 @@ _cleanup()
-     rm -f $tmp.*
- }
- 
-+filter_mount()
-+{
-+	sed -e "s/mount .* failed: //"
-+}
-+
- # get standard environment, filters and checks
- . ./common/rc
- . ./common/filter
-@@ -59,7 +64,7 @@ _scratch_mkfs_xfs -m crc=1 >> $seqres.full 2>&1 || _fail "mkfs failed"
- $XFS_IO_PROG -c "pwrite 224 4" $SCRATCH_DEV | _filter_xfs_io
- 
- # should FAIL, the crc is bad; golden output contains mount failure
--_scratch_mount
-+_scratch_mount 2>&1 | filter_mount
- 
- # success, all done
- status=0
--- 
-1.9.0
-
+Cheers, David
