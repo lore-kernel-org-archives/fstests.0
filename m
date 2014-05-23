@@ -1,53 +1,63 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-wg0-f49.google.com ([74.125.82.49]:40449 "EHLO
-	mail-wg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750936AbaEWMTS (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 23 May 2014 08:19:18 -0400
-From: Filipe David Borba Manana <fdmanana@gmail.com>
-Subject: [PATCH 2/2 v2] xfstests: add test for btrfs ioctl clone operation
-Date: Fri, 23 May 2014 14:19:08 +0100
-Message-Id: <1400851148-597-1-git-send-email-fdmanana@gmail.com>
-In-Reply-To: <1400817931-32326-2-git-send-email-fdmanana@gmail.com>
-References: <1400817931-32326-2-git-send-email-fdmanana@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:3930 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751427AbaEWM6e (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 23 May 2014 08:58:34 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: [PATCH] xfstests: test speculative preallocation reclaim on ENOSPC
+Date: Fri, 23 May 2014 08:58:31 -0400
+Message-Id: <1400849911-46606-1-git-send-email-bfoster@redhat.com>
 Sender: xfstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, ddiss@suse.de, Filipe David Borba Manana <fdmanana@gmail.com>
+Cc: xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-This is a test to verify that the btrfs ioctl clone operation is
-able to clone extents of a file to different positions of the file,
-that is, the source and target files are the same. Existing tests
-only cover the case where the source and target files are different.
+XFS can allocate significant amounts of space to files via speculative
+preallocation. Such preallocation may not be reclaimed automatically on
+file close() if a file is repeatedly opened and extended. For smaller
+filesystems with relatively large and slow growing files, this
+preallocation can linger for some time, including contributing to out of
+space conditions.
 
-Signed-off-by: Filipe David Borba Manana <fdmanana@gmail.com>
+Create a situation where an fs is near out of space while several files
+still have lingering, significant preallocations. Verify that new
+writers reclaim the preallocated space rather than return ENOSPC.
+
+Signed-off-by: Brian Foster <bfoster@redhat.com>
 ---
 
-V2: Made the test exercise a more complex code path in the btrfs ioctl clone
-    code. Now we have extents with different sizes and make the cloner process
-    partial extents and split existing extents with smaller ones.
+Hi all,
 
- tests/btrfs/052     | 116 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/052.out |  51 +++++++++++++++++++++++
- tests/btrfs/group   |   1 +
- 3 files changed, 168 insertions(+)
- create mode 100755 tests/btrfs/052
- create mode 100644 tests/btrfs/052.out
+This test is associated with the recently posted eofblocks scan on
+ENOSPC series. It currently fails and should pass with the
+aforementioned patches applied. Thanks.
 
-diff --git a/tests/btrfs/052 b/tests/btrfs/052
+Brian
+
+ tests/xfs/014     | 141 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/014.out |  95 ++++++++++++++++++++++++++++++++++++
+ tests/xfs/group   |   1 +
+ 3 files changed, 237 insertions(+)
+ create mode 100755 tests/xfs/014
+ create mode 100644 tests/xfs/014.out
+
+diff --git a/tests/xfs/014 b/tests/xfs/014
 new file mode 100755
-index 0000000..9b98521
+index 0000000..53bc9e1
 --- /dev/null
-+++ b/tests/btrfs/052
-@@ -0,0 +1,116 @@
-+#! /bin/bash
-+# FS QA Test No. btrfs/052
++++ b/tests/xfs/014
+@@ -0,0 +1,141 @@
++#!/bin/bash
++# FS QA Test No. xfs/014
 +#
-+# Verify that the btrfs ioctl clone operation can operate on the same
-+# file as a source and target. That is, clone extents within the same
-+# file.
++# Test the behavior of XFS dynamic speculative preallocation at ENOSPC
++# conditions. Speculative preallocation allocates post-EOF space to files as
++# they are extended. This test creates conditions that bypass natural low space
++# preallocation throttling and verifies that when no other space is available,
++# writers reclaim the preallocated space and do not fail with premature ENOSPC.
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2014 Filipe Manana.  All Rights Reserved.
++# Copyright (c) 2014 Red Hat, Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -61,6 +71,7 @@ index 0000000..9b98521
 +# You should have received a copy of the GNU General Public License
 +# along with this program; if not, write the Free Software Foundation,
 +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#
 +#-----------------------------------------------------------------------
 +#
 +
@@ -68,159 +79,228 @@ index 0000000..9b98521
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
++here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    rm -fr $tmp
-+}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
 +
++_cleanup()
++{
++	cd /
++	umount $SCRATCH_MNT 2>/dev/null
++	rm -f $tmp.*
++}
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++# create a file that is likely to retain speculative preallocation after close
++_spec_prealloc_file()
++{
++	file=$1
++
++	rm -f $file
++
++	# a few file extending open-write-close cycles should be enough to
++	# trigger the fs to retain preallocation. write 256k in 32k intervals to
++	# be sure
++	for i in $(seq 0 32768 262144)
++	do
++		$XFS_IO_PROG -fc "pwrite $i 32k" $file | _filter_xfs_io
++	done
++
++	# write a 4k aligned amount of data to keep the calculations simple
++	$XFS_IO_PROG -c "pwrite 0 128m" $file | _filter_xfs_io
++
++	size=`stat -c "%s" $file`
++	blocks=`stat -c "%b" $file`
++	blocksize=`stat -c "%B" $file`
++
++	prealloc_size=$((blocks * blocksize - size))
++	if [ $prealloc_size -eq 0 ]
++	then
++		echo "Warning: No speculative preallocation for $file." \
++			"Check use of the allocsize= mount option."
++	fi
++
++	# keep a running total of how much preallocation we've created
++	TOTAL_PREALLOC=$((TOTAL_PREALLOC + prealloc_size))
++}
++
++_consume_free_space()
++{
++	dir=$1
++
++	# calculate the rough amount of free space in MB
++	fsblocksize=`$XFS_IO_PROG -x -c "statfs" $dir | grep f_bsize | \
++			awk '{ print $3 }'`
++	blocksavail=`$XFS_IO_PROG -x -c "statfs" $dir | grep f_bavail | \
++			awk '{ print $3 }'`
++	freesp=$((fsblocksize * blocksavail / 1024 / 1024))
++
++	# allocate all but 10MB
++	freesp=$((freesp - 10))
++	$XFS_IO_PROG -fc "falloc 0 ${freesp}M" $dir/spc
++}
++
 +# real QA test starts here
-+_supported_fs btrfs
++_supported_fs xfs
 +_supported_os Linux
++
 +_require_scratch
-+_require_btrfs_cloner
-+_need_to_be_root
++_require_xfs_io_command "falloc"
 +
 +rm -f $seqres.full
 +
-+_scratch_mkfs >/dev/null 2>&1
++# 10GB fs
++_scratch_mkfs_xfs_opts "-d size=$((1024*1024*1024 * 10))" | \
++	 _filter_mkfs 2>> $seqres.full
 +_scratch_mount
 +
-+# Create a file with 5 extents, 4 of 8Kb each and 1 of 64Kb.
-+$XFS_IO_PROG -f -c "pwrite -S 0x01 -b 8192 0 8192" $SCRATCH_MNT/foo \
-+	| _filter_xfs_io
-+sync
-+$XFS_IO_PROG -c "pwrite -S 0x02 -b 8192 8192 8192" $SCRATCH_MNT/foo \
-+	| _filter_xfs_io
-+sync
-+$XFS_IO_PROG -c "pwrite -S 0x03 -b 8192 16384 8192" $SCRATCH_MNT/foo \
-+	| _filter_xfs_io
-+sync
-+$XFS_IO_PROG -c "pwrite -S 0x04 -b 8192 24576 8192" $SCRATCH_MNT/foo \
-+	| _filter_xfs_io
-+sync
-+$XFS_IO_PROG -c "pwrite -S 0x05 -b 65536 32768 65536" $SCRATCH_MNT/foo \
-+	| _filter_xfs_io
-+sync
++# make sure the background eofblocks scanner doesn't interfere
++orig_sp_time=`cat /proc/sys/fs/xfs/speculative_prealloc_lifetime`
++echo 9999 > /proc/sys/fs/xfs/speculative_prealloc_lifetime
 +
-+# Digest of initial content.
-+md5sum $SCRATCH_MNT/foo | _filter_scratch
++# create a few files with relatively significant preallocation
++TOTAL_PREALLOC=0
++for i in $(seq 0 3)
++do
++	_spec_prealloc_file $SCRATCH_MNT/pre$i
++done
 +
-+# Same source and target ranges - must fail.
-+$CLONER_PROG -s 8192 -d 8192 -l 8192 $SCRATCH_MNT/foo $SCRATCH_MNT/foo
-+# Check file content didn't change.
-+md5sum $SCRATCH_MNT/foo | _filter_scratch
++# consume most of the remaining free space in the fs to put us near ENOSPC
++_consume_free_space $SCRATCH_MNT
 +
-+# Intersection between source and target ranges - must fail too.
-+$CLONER_PROG -s 4096 -d 8192 -l 8192 $SCRATCH_MNT/foo $SCRATCH_MNT/foo
-+# Check file content didn't change.
-+md5sum $SCRATCH_MNT/foo | _filter_scratch
++# start a few background writers to consume the bulk of the space that has been
++# previously preallocated to other files. this space should be reclaimed such
++# these writers complete without hitting ENOSPC
++write_size=$((TOTAL_PREALLOC / 2 / 4))
++for i in $(seq 0 3)
++do
++	$XFS_IO_PROG -fc "pwrite 0 $write_size" $SCRATCH_MNT/file.$i | \
++		_filter_xfs_io &
++done
++wait
 +
-+# Clone an entire extent from a higher range to a lower range.
-+$CLONER_PROG -s 24576 -d 0 -l 8192 $SCRATCH_MNT/foo $SCRATCH_MNT/foo
-+
-+# Check entire file, the 8Kb block at offset 0 now has the same content as the
-+# 8Kb block at offset 24576.
-+od -t x1 $SCRATCH_MNT/foo
-+
-+# Clone an entire extent from a lower range to a higher range.
-+$CLONER_PROG -s 8192 -d 16384 -l 8192 $SCRATCH_MNT/foo $SCRATCH_MNT/foo
-+
-+# Check entire file, the 8Kb block at offset 0 now has the same content as the
-+# 8Kb block at offset 24576, and the 8Kb block at offset 16384 now has the same
-+# content as the 8Kb block at offset 8192.
-+od -t x1 $SCRATCH_MNT/foo
-+
-+# Now clone 1 extent and an half into the file range starting at offset 65536.
-+# So we get the second half of the extent at offset 16384 and the whole extent
-+# at 24576 cloned into the middle of the 64Kb extent that starts at file offset
-+# 32768. This makes the clone ioctl process more extent items from the b+tree
-+# and forces a split of the large 64Kb extent at the end of the file.
-+$CLONER_PROG -s 20480 -d 65536 -l 12288 $SCRATCH_MNT/foo $SCRATCH_MNT/foo
-+
-+# Check entire file. Besides the previous changes, we now should have 4096 bytes
-+# with the value 0x02 at file offset 65536, and 8192 bytes with value 0x04 at
-+# the file offset 69632. The ranges [32768, 65536[ and [77824, 98304[ should
-+# remain with all bytes having a value of 0x05.
-+od -t x1 $SCRATCH_MNT/foo
-+
-+_check_scratch_fs
++echo $orig_sp_time > /proc/sys/fs/xfs/speculative_prealloc_lifetime
++umount $SCRATCH_MNT
 +
 +status=0
 +exit
-diff --git a/tests/btrfs/052.out b/tests/btrfs/052.out
+diff --git a/tests/xfs/014.out b/tests/xfs/014.out
 new file mode 100644
-index 0000000..1070517
+index 0000000..aed3c0f
 --- /dev/null
-+++ b/tests/btrfs/052.out
-@@ -0,0 +1,51 @@
-+QA output created by 052
-+wrote 8192/8192 bytes at offset 0
++++ b/tests/xfs/014.out
+@@ -0,0 +1,95 @@
++QA output created by 014
++meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
++data     = bsize=XXX blocks=XXX, imaxpct=PCT
++         = sunit=XXX swidth=XXX, unwritten=X
++naming   =VERN bsize=XXX
++log      =LDEV bsize=XXX blocks=XXX
++realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
++wrote 32768/32768 bytes at offset 0
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 8192
++wrote 32768/32768 bytes at offset 32768
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 16384
++wrote 32768/32768 bytes at offset 65536
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 24576
++wrote 32768/32768 bytes at offset 98304
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 65536/65536 bytes at offset 32768
++wrote 32768/32768 bytes at offset 131072
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
-+clone failed: Invalid argument
-+5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
-+clone failed: Invalid argument
-+5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
-+0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
-+*
-+0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
-+*
-+0040000 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03
-+*
-+0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
-+*
-+0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
-+*
-+0300000
-+0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
-+*
-+0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
-+*
-+0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
-+*
-+0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
-+*
-+0300000
-+0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
-+*
-+0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
-+*
-+0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
-+*
-+0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
-+*
-+0200000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
-+*
-+0210000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
-+*
-+0230000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
-+*
-+0300000
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 0673449..5ff9b8e 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -54,3 +54,4 @@
- 049 auto quick
- 050 auto
- 051 auto quick
-+052 auto quick
++wrote 32768/32768 bytes at offset 163840
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 196608
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 229376
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 262144
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 134217728/134217728 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 32768
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 65536
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 98304
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 131072
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 163840
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 196608
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 229376
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 262144
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 134217728/134217728 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 32768
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 65536
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 98304
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 131072
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 163840
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 196608
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 229376
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 262144
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 134217728/134217728 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 32768
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 65536
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 98304
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 131072
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 163840
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 196608
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 229376
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 262144
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 134217728/134217728 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 67076096/67076096 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 67076096/67076096 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 67076096/67076096 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 67076096/67076096 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 19fd968..a39afc1 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -10,6 +10,7 @@
+ 010 auto quick repair
+ 012 rw auto quick
+ 013 auto metadata stress
++014 auto enospc quick
+ 016 rw auto quick
+ 017 mount auto quick stress
+ 018 deprecated # log logprint v2log
 -- 
-1.9.1
+1.8.3.1
 
