@@ -1,63 +1,55 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:3930 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751427AbaEWM6e (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 23 May 2014 08:58:34 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: [PATCH] xfstests: test speculative preallocation reclaim on ENOSPC
-Date: Fri, 23 May 2014 08:58:31 -0400
-Message-Id: <1400849911-46606-1-git-send-email-bfoster@redhat.com>
+Received: from mail-wi0-f180.google.com ([209.85.212.180]:38448 "EHLO
+	mail-wi0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751042AbaEWSPm (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 23 May 2014 14:15:42 -0400
+From: Filipe David Borba Manana <fdmanana@gmail.com>
+Subject: [PATCH] xfstests: add test for btrfs send with large xattrs
+Date: Fri, 23 May 2014 20:15:30 +0100
+Message-Id: <1400872530-7706-1-git-send-email-fdmanana@gmail.com>
 Sender: xfstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com
+Cc: linux-btrfs@vger.kernel.org, Filipe David Borba Manana <fdmanana@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-XFS can allocate significant amounts of space to files via speculative
-preallocation. Such preallocation may not be reclaimed automatically on
-file close() if a file is repeatedly opened and extended. For smaller
-filesystems with relatively large and slow growing files, this
-preallocation can linger for some time, including contributing to out of
-space conditions.
+Verify that btrfs send is able to replicate xattrs larger than
+PATH_MAX. This is possible if the b+tree leaf size is larger
+than 4Kb (mkfs.btrfs's default is max(16Kb, PAGE_SIZE) as of
+btrfs-progs v3.12, and max(4Kb, PAGE_SIZE in older versions).
 
-Create a situation where an fs is near out of space while several files
-still have lingering, significant preallocations. Verify that new
-writers reclaim the preallocated space rather than return ENOSPC.
+This issue is fixed by the following linux kernel btrfs patch:
 
-Signed-off-by: Brian Foster <bfoster@redhat.com>
+   Btrfs: send, use the right limits for xattr names and values
+
+Signed-off-by: Filipe David Borba Manana <fdmanana@gmail.com>
 ---
+ tests/btrfs/053     | 108 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/053.out |   1 +
+ tests/btrfs/group   |   1 +
+ 3 files changed, 110 insertions(+)
+ create mode 100755 tests/btrfs/053
+ create mode 100644 tests/btrfs/053.out
 
-Hi all,
-
-This test is associated with the recently posted eofblocks scan on
-ENOSPC series. It currently fails and should pass with the
-aforementioned patches applied. Thanks.
-
-Brian
-
- tests/xfs/014     | 141 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/014.out |  95 ++++++++++++++++++++++++++++++++++++
- tests/xfs/group   |   1 +
- 3 files changed, 237 insertions(+)
- create mode 100755 tests/xfs/014
- create mode 100644 tests/xfs/014.out
-
-diff --git a/tests/xfs/014 b/tests/xfs/014
+diff --git a/tests/btrfs/053 b/tests/btrfs/053
 new file mode 100755
-index 0000000..53bc9e1
+index 0000000..4dbdf59
 --- /dev/null
-+++ b/tests/xfs/014
-@@ -0,0 +1,141 @@
-+#!/bin/bash
-+# FS QA Test No. xfs/014
++++ b/tests/btrfs/053
+@@ -0,0 +1,108 @@
++#! /bin/bash
++# FS QA Test No. btrfs/053
 +#
-+# Test the behavior of XFS dynamic speculative preallocation at ENOSPC
-+# conditions. Speculative preallocation allocates post-EOF space to files as
-+# they are extended. This test creates conditions that bypass natural low space
-+# preallocation throttling and verifies that when no other space is available,
-+# writers reclaim the preallocated space and do not fail with premature ENOSPC.
++# Verify that btrfs send is able to replicate xattrs larger than PATH_MAX.
++# This is possible if the b+tree leaf size is larger than 4Kb (mkfs.btrfs's
++# default is max(16Kb, PAGE_SIZE) as of btrfs-progs v3.12, and max(4Kb,
++# PAGE_SIZE in older versions).
++#
++# This issue is fixed by the following linux kernel btrfs patch:
++#
++#   Btrfs: send, use the right limits for xattr names and values
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2014 Red Hat, Inc.  All Rights Reserved.
++# Copyright (c) 2014 Filipe Manana.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -71,7 +63,6 @@ index 0000000..53bc9e1
 +# You should have received a copy of the GNU General Public License
 +# along with this program; if not, write the Free Software Foundation,
 +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
 +#-----------------------------------------------------------------------
 +#
 +
@@ -79,228 +70,96 @@ index 0000000..53bc9e1
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
-+here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    rm -fr $send_files_dir
++    rm -fr $tmp
++}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+
-+_cleanup()
-+{
-+	cd /
-+	umount $SCRATCH_MNT 2>/dev/null
-+	rm -f $tmp.*
-+}
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+# create a file that is likely to retain speculative preallocation after close
-+_spec_prealloc_file()
-+{
-+	file=$1
-+
-+	rm -f $file
-+
-+	# a few file extending open-write-close cycles should be enough to
-+	# trigger the fs to retain preallocation. write 256k in 32k intervals to
-+	# be sure
-+	for i in $(seq 0 32768 262144)
-+	do
-+		$XFS_IO_PROG -fc "pwrite $i 32k" $file | _filter_xfs_io
-+	done
-+
-+	# write a 4k aligned amount of data to keep the calculations simple
-+	$XFS_IO_PROG -c "pwrite 0 128m" $file | _filter_xfs_io
-+
-+	size=`stat -c "%s" $file`
-+	blocks=`stat -c "%b" $file`
-+	blocksize=`stat -c "%B" $file`
-+
-+	prealloc_size=$((blocks * blocksize - size))
-+	if [ $prealloc_size -eq 0 ]
-+	then
-+		echo "Warning: No speculative preallocation for $file." \
-+			"Check use of the allocsize= mount option."
-+	fi
-+
-+	# keep a running total of how much preallocation we've created
-+	TOTAL_PREALLOC=$((TOTAL_PREALLOC + prealloc_size))
-+}
-+
-+_consume_free_space()
-+{
-+	dir=$1
-+
-+	# calculate the rough amount of free space in MB
-+	fsblocksize=`$XFS_IO_PROG -x -c "statfs" $dir | grep f_bsize | \
-+			awk '{ print $3 }'`
-+	blocksavail=`$XFS_IO_PROG -x -c "statfs" $dir | grep f_bavail | \
-+			awk '{ print $3 }'`
-+	freesp=$((fsblocksize * blocksavail / 1024 / 1024))
-+
-+	# allocate all but 10MB
-+	freesp=$((freesp - 10))
-+	$XFS_IO_PROG -fc "falloc 0 ${freesp}M" $dir/spc
-+}
++. ./common/attr
 +
 +# real QA test starts here
-+_supported_fs xfs
++_supported_fs btrfs
 +_supported_os Linux
-+
 +_require_scratch
-+_require_xfs_io_command "falloc"
++_require_fssum
++_require_attrs
++_need_to_be_root
++
++# max(16384, PAGE_SIZE) is the default leaf/node size on btrfs-progs v3.12+.
++# Older versions just use max(4096, PAGE_SIZE).
++# mkfs.btrfs can't create an fs with a leaf/node size smaller than PAGE_SIZE.
++leaf_size=$(echo -e "16384\n`getconf PAGE_SIZE`" | sort -nr | head -1)
++
++send_files_dir=$TEST_DIR/btrfs-test-$seq
 +
 +rm -f $seqres.full
++rm -fr $send_files_dir
++mkdir $send_files_dir
 +
-+# 10GB fs
-+_scratch_mkfs_xfs_opts "-d size=$((1024*1024*1024 * 10))" | \
-+	 _filter_mkfs 2>> $seqres.full
++_scratch_mkfs "-l $leaf_size" >/dev/null 2>&1
 +_scratch_mount
 +
-+# make sure the background eofblocks scanner doesn't interfere
-+orig_sp_time=`cat /proc/sys/fs/xfs/speculative_prealloc_lifetime`
-+echo 9999 > /proc/sys/fs/xfs/speculative_prealloc_lifetime
++echo "hello world" > $SCRATCH_MNT/foobar
 +
-+# create a few files with relatively significant preallocation
-+TOTAL_PREALLOC=0
-+for i in $(seq 0 3)
-+do
-+	_spec_prealloc_file $SCRATCH_MNT/pre$i
-+done
++$SETFATTR_PROG -n user.xattr_name_1 -v `$PERL_PROG -e 'print "A" x 6000;'` \
++	$SCRATCH_MNT/foobar
 +
-+# consume most of the remaining free space in the fs to put us near ENOSPC
-+_consume_free_space $SCRATCH_MNT
++_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap1
++run_check $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
 +
-+# start a few background writers to consume the bulk of the space that has been
-+# previously preallocated to other files. this space should be reclaimed such
-+# these writers complete without hitting ENOSPC
-+write_size=$((TOTAL_PREALLOC / 2 / 4))
-+for i in $(seq 0 3)
-+do
-+	$XFS_IO_PROG -fc "pwrite 0 $write_size" $SCRATCH_MNT/file.$i | \
-+		_filter_xfs_io &
-+done
-+wait
++# Update existing xattr value and add a new xattr too.
++$SETFATTR_PROG -n user.xattr_name_1 -v `$PERL_PROG -e 'print "Z" x 6666;'` \
++	$SCRATCH_MNT/foobar
++$SETFATTR_PROG -n user.xattr_name_2 -v `$PERL_PROG -e 'print "U" x 5555;'` \
++	$SCRATCH_MNT/foobar
 +
-+echo $orig_sp_time > /proc/sys/fs/xfs/speculative_prealloc_lifetime
-+umount $SCRATCH_MNT
++_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap2
++run_check $FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
++	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
++
++_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
++_run_btrfs_util_prog send $SCRATCH_MNT/mysnap2 -f $send_files_dir/2.snap
++
++_scratch_unmount
++_check_scratch_fs
++
++_scratch_mkfs "-l $leaf_size" >/dev/null 2>&1
++_scratch_mount
++
++_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
++run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
++
++_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
++run_check $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
++
++_check_scratch_fs
 +
 +status=0
 +exit
-diff --git a/tests/xfs/014.out b/tests/xfs/014.out
+diff --git a/tests/btrfs/053.out b/tests/btrfs/053.out
 new file mode 100644
-index 0000000..aed3c0f
+index 0000000..4c61638
 --- /dev/null
-+++ b/tests/xfs/014.out
-@@ -0,0 +1,95 @@
-+QA output created by 014
-+meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-+data     = bsize=XXX blocks=XXX, imaxpct=PCT
-+         = sunit=XXX swidth=XXX, unwritten=X
-+naming   =VERN bsize=XXX
-+log      =LDEV bsize=XXX blocks=XXX
-+realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-+wrote 32768/32768 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 32768
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 65536
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 98304
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 131072
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 163840
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 196608
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 229376
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 262144
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 134217728/134217728 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 32768
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 65536
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 98304
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 131072
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 163840
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 196608
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 229376
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 262144
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 134217728/134217728 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 32768
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 65536
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 98304
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 131072
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 163840
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 196608
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 229376
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 262144
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 134217728/134217728 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 32768
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 65536
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 98304
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 131072
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 163840
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 196608
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 229376
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 32768/32768 bytes at offset 262144
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 134217728/134217728 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 67076096/67076096 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 67076096/67076096 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 67076096/67076096 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 67076096/67076096 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 19fd968..a39afc1 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -10,6 +10,7 @@
- 010 auto quick repair
- 012 rw auto quick
- 013 auto metadata stress
-+014 auto enospc quick
- 016 rw auto quick
- 017 mount auto quick stress
- 018 deprecated # log logprint v2log
++++ b/tests/btrfs/053.out
+@@ -0,0 +1 @@
++QA output created by 053
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 5ff9b8e..ea49c5c 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -55,3 +55,4 @@
+ 050 auto
+ 051 auto quick
+ 052 auto quick
++053 auto quick
 -- 
-1.8.3.1
+1.9.1
 
