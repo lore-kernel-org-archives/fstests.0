@@ -1,46 +1,107 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:44436 "EHLO
-	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751682AbaE2XVT (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 29 May 2014 19:21:19 -0400
-Date: Fri, 30 May 2014 09:21:14 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: Unionmount and overlayfs testsuite
-Message-ID: <20140529232114.GJ6677@dastard>
-References: <1400838223-30844-1-git-send-email-miklos@szeredi.hu>
- <28592.1401382081@warthog.procyon.org.uk>
+Received: from cn.fujitsu.com ([59.151.112.132]:51083 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751665AbaE3Ixk (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 30 May 2014 04:53:40 -0400
+From: Xing Gu <gux.fnst@cn.fujitsu.com>
+Subject: [PATCH] btrfs: add regression test for remount with thread_pool resized
+Date: Fri, 30 May 2014 16:52:51 +0800
+Message-ID: <1401439971-18589-1-git-send-email-gux.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <28592.1401382081@warthog.procyon.org.uk>
+Content-Type: text/plain
 Sender: xfstests-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, viro@ZenIV.linux.org.uk, torvalds@linux-foundation.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, hch@infradead.org, akpm@linux-foundation.org, apw@canonical.com, nbd@openwrt.org, neilb@suse.de, jordipujolp@gmail.com, ezk@fsl.cs.sunysb.edu, sedat.dilek@gmail.com, hooanon05@yahoo.co.jp, mszeredi@suse.cz, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Xing Gu <gux.fnst@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-[cc fstests@vger.kernel.org]
+Regression test for resizing 'thread_pool' when remount the fs.
 
-On Thu, May 29, 2014 at 05:48:01PM +0100, David Howells wrote:
-> 
-> http://git.infradead.org/users/dhowells/unionmount-testsuite.git
-> 
-> Check it out and read the README file as to how to drive it.  Sorry, it's a
-> bit crude.  I may rewrite it in python or perl at some point.
-> 
-> Make sure you turn on CONFIG_LOCKDEP before running it - you don't want to
-> miss any locking conflicts!
-> 
-> Further tests would be appreciated.  There are no rename tests, for instance.
+Signed-off-by: Xing Gu <gux.fnst@cn.fujitsu.com>
+---
+ tests/btrfs/055     | 55 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/055.out |  1 +
+ tests/btrfs/group   |  1 +
+ 3 files changed, 57 insertions(+)
+ create mode 100755 tests/btrfs/055
+ create mode 100644 tests/btrfs/055.out
 
-Rather than keeping this a standalone test suite that nobody really
-knows about or runs regularly, perhaps it might be an idea to push
-this toward inclusion in xfstests? We have filesystem specific test
-sections that would suit this, and the test structure is actually
-not all that different to what xfstests uses...
-
-Cheers,
-
-Dave.
+diff --git a/tests/btrfs/055 b/tests/btrfs/055
+new file mode 100755
+index 0000000..0a0dd34
+--- /dev/null
++++ b/tests/btrfs/055
+@@ -0,0 +1,55 @@
++#!/bin/bash
++# FS QA Test No. btrfs/055
++#
++# Regression test for resizing 'thread_pool' when remount the fs.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2014 Fujitsu.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++
++_cleanup()
++{
++    rm -f $tmp.*
++}
++
++trap "_cleanup ; exit \$status" 0 1 2 3 15
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++
++_scratch_mkfs > /dev/null 2>&1
++
++_scratch_mount "-o thread_pool=6"
++
++_scratch_mount "-o remount,thread_pool=10"
++
++status=0 ; exit
+diff --git a/tests/btrfs/055.out b/tests/btrfs/055.out
+new file mode 100644
+index 0000000..2fdd8f4
+--- /dev/null
++++ b/tests/btrfs/055.out
+@@ -0,0 +1 @@
++QA output created by 055
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index b668485..2c10c5b 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -57,3 +57,4 @@
+ 052 auto quick
+ 053 auto quick
+ 054 auto quick
++055 auto quick
 -- 
-Dave Chinner
-david@fromorbit.com
+1.9.0
+
