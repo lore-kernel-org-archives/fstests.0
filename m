@@ -1,79 +1,215 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-ie0-f179.google.com ([209.85.223.179]:64764 "EHLO
-	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751380AbaFET3p (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 5 Jun 2014 15:29:45 -0400
-Received: by mail-ie0-f179.google.com with SMTP id rd18so1271697iec.24
-        for <fstests@vger.kernel.org>; Thu, 05 Jun 2014 12:29:45 -0700 (PDT)
-Message-ID: <5390C532.2060706@ieee.org>
-Date: Thu, 05 Jun 2014 14:29:54 -0500
-From: Alex Elder <elder@ieee.org>
-MIME-Version: 1.0
-Subject: Re: [patch] resvtest.c: fix invalid use of sizeof()
-References: <x49lhtbw42a.fsf@segfault.boston.devel.redhat.com>
-In-Reply-To: <x49lhtbw42a.fsf@segfault.boston.devel.redhat.com>
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Received: from mx1.redhat.com ([209.132.183.28]:33190 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751060AbaFFNOq (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 6 Jun 2014 09:14:46 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: [PATCH] xfstests: create a test for xfs log grant head leak detection
+Date: Fri,  6 Jun 2014 09:14:43 -0400
+Message-Id: <1402060483-22195-1-git-send-email-bfoster@redhat.com>
 Sender: xfstests-owner@vger.kernel.org
-To: Jeff Moyer <jmoyer@redhat.com>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On 06/05/2014 02:26 PM, Jeff Moyer wrote:
-> Hi,
-> 
-> sizeof(pointer) will give you the size of a pointer, not the space
-> allocated to it.  I noticed this when gcc complained:
-> 
-> resvtest.c:76:33: warning: argument to 'sizeof' in 'memset' call is the same expression as the destination; did you mean to provide an explicit length? [-Wsizeof-pointer-memaccess]
->   memset(writebuffer, 'A', sizeof(writebuffer));
+Changes in the XFS logging code have lead to small leaks in the log
+grant heads that consume log space slowly over time. Such problems have
+gone undetected for an unnecessarily long time due to code complexity
+and potential for very subtle problems. Losing only a few bytes per
+logged item on a reasonably large enough fs (10s of GB) means only the
+most continuously stressful workloads will cause a severe enough failure
+(deadlock due to log reservation exhaustion) quickly enough to indicate
+something is seriously wrong.
 
-Nice catch, gcc!
+Recent changes in XFS export the state of the various log heads through
+sysfs to aid in userspace/runtime analysis of the log. This test runs a
+workload against an XFS filesystem, quiesces the fs and verifies that
+the log reserve and write grant heads have not leaked any space with
+respect to the current head of the physical log.
 
-Looks good.
+Signed-off-by: Brian Foster <bfoster@redhat.com>
+---
 
-Reviewed-by: Alex Elder <elder@linaro.org>
+v1:
+- Use updated attribute names and value format.
+rfc: http://oss.sgi.com/archives/xfs/2014-05/msg00428.html
 
-> Signed-off-by: Jeff Moyer <jmoyer@redhat.com>
-> 
-> diff --git a/src/resvtest.c b/src/resvtest.c
-> index 037d9ea..ecad031 100644
-> --- a/src/resvtest.c
-> +++ b/src/resvtest.c
-> @@ -73,7 +73,7 @@ main(int argc, char **argv)
->  		perror("open");
->  		exit(1);
->  	}
-> -	memset(writebuffer, 'A', sizeof(writebuffer));
-> +	memset(writebuffer, 'A', bsize);
->  
->  	unlink(filename);
->  	writefd = open(filename, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
-> @@ -111,7 +111,7 @@ main(int argc, char **argv)
->  		char *p;
->  		int numerrors;
->  
-> -		if (write(writefd, writebuffer, sizeof(writebuffer)) < 0) {
-> +		if (write(writefd, writebuffer, bsize) < 0) {
->  			perror("write");
->  			exit(1);
->  		}
-> @@ -128,11 +128,11 @@ main(int argc, char **argv)
->  		lseek(readfd, SEEK_SET, 0);
->  		numerrors = 0;
->  		for (j = 0; j < n; j++) {
-> -			if (read(readfd, readbuffer, sizeof(readbuffer)) < 0) {
-> +			if (read(readfd, readbuffer, bsize) < 0) {
->  				perror("read");
->  				exit(1);
->  			}
-> -			for (i = 0; i < sizeof(readbuffer); i++) {
-> +			for (i = 0; i < bsize; i++) {
->  				if (readbuffer[i] != 'A') {
->  					fprintf(stderr,
->  "errors detected in file, pos: %d (%lld+%d), nwrites: %d [val=0x%x].\n",
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+ tests/xfs/011     | 134 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/011.out |  11 +++++
+ tests/xfs/group   |   1 +
+ 3 files changed, 146 insertions(+)
+ create mode 100755 tests/xfs/011
+ create mode 100644 tests/xfs/011.out
+
+diff --git a/tests/xfs/011 b/tests/xfs/011
+new file mode 100755
+index 0000000..193e6dd
+--- /dev/null
++++ b/tests/xfs/011
+@@ -0,0 +1,134 @@
++#!/bin/bash
++# FS QA Test No. xfs/011
++#
++# Test the xfs log reservation mechanism for leaks. Run a short fsstress
++# workload to include a variety of fs operations, freeze the filesystem and
++# verify that there are no oustanding reservations against the log.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2014 Red Hat, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++_cleanup()
++{
++	killall -9 fsstress 2>/dev/null
++	wait
++	cd /
++	umount $SCRATCH_MNT 2>/dev/null
++	rm -f $tmp.*
++}
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++# Determine the system device name for a particular block device. The device
++# name is how the block dev is referenced under sysfs.
++_get_device_name()
++{
++	devpath=$1
++
++	# check for a symlink (i.e., device mapper)
++	if [ -L $devpath ]
++	then
++		devpath=`readlink -f $devpath`
++	fi
++
++	# grab the major minor and convert from hex to decimal
++	major=$((0x`stat -c %t $devpath`))
++	minor=$((0x`stat -c %T $devpath`))
++
++	# refer to sysfs by major minor
++	basename `readlink /sys/dev/block/$major:$minor`
++}
++
++# Use the information exported by XFS to sysfs to determine whether the log has
++# active reservations after a filesystem freeze.
++_check_scratch_log_state()
++{
++	devname=`_get_device_name $SCRATCH_DEV`
++	attrpath="/sys/fs/xfs/$devname/log"
++
++	# freeze the fs to ensure data is synced and the log is flushed. this
++	# means no outstanding transactions, and thus no outstanding log
++	# reservations, should exist
++	xfs_freeze -f $SCRATCH_MNT
++
++	# the log head is exported in basic blocks and the log grant heads in
++	# bytes. convert the log head to bytes for precise comparison
++	log_head_cycle=`cat $attrpath/log_head_lsn | awk -F : '{ print $1 }'`
++	log_head_bytes=`cat $attrpath/log_head_lsn | awk -F : '{ print $2 }'`
++	log_head_bytes=$((log_head_bytes * 512))
++
++	for attr in "reserve_grant_head" "write_grant_head"
++	do
++		cycle=`cat $attrpath/$attr | awk -F : '{ print $1 }'`
++		bytes=`cat $attrpath/$attr | awk -F : '{ print $2 }'`
++
++		if [ $cycle != $log_head_cycle ] ||
++		   [ $bytes != $log_head_bytes ]
++		then
++			echo "$attr ($cycle:$bytes) does not match" \
++				"log_head_lsn ($log_head_cycle:$log_head_bytes)," \
++				"possible leak detected."
++		else
++			echo "$attr matches log_head_lsn"
++		fi
++	done
++
++	xfs_freeze -u $SCRATCH_MNT
++}
++
++# real QA test starts here
++_supported_fs xfs
++_supported_os Linux
++
++_require_scratch
++_require_freeze
++
++if [ ! -e /sys/fs/xfs ]
++then
++	_notrun "no kernel support for XFS sysfs attributes"
++fi
++
++rm -f $seqres.full
++
++_scratch_mkfs_xfs | _filter_mkfs 2>> $seqres.full
++_scratch_mount
++
++_check_scratch_log_state
++
++$FSSTRESS_PROG -d $SCRATCH_MNT/fsstress -n 1000 -p 2 -S t \
++	>> $seqres.full 2>&1
++
++_check_scratch_log_state
++
++umount $SCRATCH_MNT
++_check_scratch_fs
++
++status=0
++exit
+diff --git a/tests/xfs/011.out b/tests/xfs/011.out
+new file mode 100644
+index 0000000..a3f3805
+--- /dev/null
++++ b/tests/xfs/011.out
+@@ -0,0 +1,11 @@
++QA output created by 011
++meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
++data     = bsize=XXX blocks=XXX, imaxpct=PCT
++         = sunit=XXX swidth=XXX, unwritten=X
++naming   =VERN bsize=XXX
++log      =LDEV bsize=XXX blocks=XXX
++realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
++reserve_grant_head matches log_head_lsn
++write_grant_head matches log_head_lsn
++reserve_grant_head matches log_head_lsn
++write_grant_head matches log_head_lsn
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 19fd968..99bf0e1 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -8,6 +8,7 @@
+ 008 rw ioctl auto quick
+ 009 rw ioctl auto prealloc quick
+ 010 auto quick repair
++011 auto quick freeze
+ 012 rw auto quick
+ 013 auto metadata stress
+ 016 rw auto quick
+-- 
+1.8.3.1
 
