@@ -1,65 +1,182 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-wi0-f173.google.com ([209.85.212.173]:50899 "EHLO
-	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753512AbaFIBtE (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 8 Jun 2014 21:49:04 -0400
-From: Filipe David Borba Manana <fdmanana@gmail.com>
-Subject: [PATCH v2] xfstests: add test for btrfs clone + fsync durability
-Date: Mon,  9 Jun 2014 03:48:52 +0100
-Message-Id: <1402282132-618-1-git-send-email-fdmanana@gmail.com>
-In-Reply-To: <1402027700-9813-1-git-send-email-fdmanana@gmail.com>
-References: <1402027700-9813-1-git-send-email-fdmanana@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:29550 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751611AbaFILi3 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 9 Jun 2014 07:38:29 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id s59BcSJA001447
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
+	for <fstests@vger.kernel.org>; Mon, 9 Jun 2014 07:38:28 -0400
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] generic: new case to test getcwd(2)
+Date: Mon,  9 Jun 2014 19:37:53 +0800
+Message-Id: <1402313873-9983-1-git-send-email-eguan@redhat.com>
 Sender: xfstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe David Borba Manana <fdmanana@gmail.com>
+Cc: Eryu Guan <eguan@redhat.com>, Artem Savkov <asavkov@redhat.com>, Jan Stancek <jstancek@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Regression test for btrfs ioctl clone operation + fsync + log
-recovery. The issue was that doing an fsync after cloning into
-a file didn't gave any persistence guarantees as it should.
-What happened was that the in memory metadata (extent maps)
-weren't updated, which made the fsync code not able to detect
-that file data has been changed and must be persisted to the
-log.
+getcwd(2) may return "/" instead of the correct cwd on buggy kernel.
 
-This issue is fixed by the following linux kernel btrfs patch:
+Regression test for:
+ede4ceb prepend_path() needs to reinitialize dentry/vfsmount/mnt on restarts
+f650080 __dentry_path() fixes
 
-    Btrfs: make fsync work after cloning into a file
-
-Signed-off-by: Filipe David Borba Manana <fdmanana@gmail.com>
+Cc: Artem Savkov <asavkov@redhat.com>
+Cc: Jan Stancek <jstancek@redhat.com>
+Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
 
-V2: Test small files too, consisting of a single inline extent, as
-    it triggers different code paths.
+This case was originally written by Artem Savkov and I made minor
+updates and ported it to xfstests.
 
- tests/btrfs/056     | 150 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/056.out | 129 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/group   |   1 +
- 3 files changed, 280 insertions(+)
- create mode 100755 tests/btrfs/056
- create mode 100644 tests/btrfs/056.out
+ .gitignore            |  1 +
+ src/Makefile          |  2 +-
+ src/t_getcwd.c        | 90 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/028     | 54 +++++++++++++++++++++++++++++++
+ tests/generic/028.out |  2 ++
+ tests/generic/group   |  1 +
+ 6 files changed, 149 insertions(+), 1 deletion(-)
+ create mode 100644 src/t_getcwd.c
+ create mode 100755 tests/generic/028
+ create mode 100644 tests/generic/028.out
 
-diff --git a/tests/btrfs/056 b/tests/btrfs/056
-new file mode 100755
-index 0000000..e066442
+diff --git a/.gitignore b/.gitignore
+index 66e6ee8..5353439 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -83,6 +83,7 @@
+ /src/t_dir_offset
+ /src/t_dir_offset2
+ /src/t_futimens
++/src/t_getcwd
+ /src/t_holes
+ /src/t_immutable
+ /src/t_mmap_writev
+diff --git a/src/Makefile b/src/Makefile
+index d754048..7a7984a 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -19,7 +19,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	bulkstat_unlink_test_modified t_dir_offset t_futimens t_immutable \
+ 	stale_handle pwrite_mmap_blocked t_dir_offset2 seek_sanity_test \
+ 	seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
+-	renameat2
++	renameat2 t_getcwd
+ 
+ SUBDIRS =
+ 
+diff --git a/src/t_getcwd.c b/src/t_getcwd.c
+new file mode 100644
+index 0000000..891de75
 --- /dev/null
-+++ b/tests/btrfs/056
-@@ -0,0 +1,150 @@
++++ b/src/t_getcwd.c
+@@ -0,0 +1,90 @@
++#include <sys/types.h>
++#include <sys/wait.h>
++#include <errno.h>
++#include <fcntl.h>
++#include <signal.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <unistd.h>
++
++#define TIMEOUT 60
++#define BUF_SIZE 256
++
++static sig_atomic_t end;
++
++void test_getcwd(char *init_cwd)
++{
++	int i = 0;
++	char cur_cwd[BUF_SIZE];
++	while (!end) {
++		getcwd(cur_cwd, BUF_SIZE);
++		if (strncmp(init_cwd, cur_cwd, BUF_SIZE)) {
++			printf("[%u] %s != %s\n", i, init_cwd, cur_cwd);
++			break;
++		}
++		i++;
++	}
++}
++
++void do_rename(char *prefix)
++{
++	int i = 0;
++	int fd;
++	char c_name[BUF_SIZE];
++	char n_name[BUF_SIZE];
++
++	strncpy(c_name, prefix, BUF_SIZE);
++
++	fd = open(c_name, O_CREAT | O_RDWR);
++	if (fd < 0) {
++		fprintf(stderr, "failed to create file %s: %s\n",
++			c_name, strerror(errno));
++		exit(1);
++	}
++	close(fd);
++
++	while (1) {
++		i++;
++		snprintf(n_name, BUF_SIZE, "%s%u", prefix, i);
++		rename(c_name, n_name);
++		strncpy(c_name, n_name, BUF_SIZE);
++	}
++}
++
++void sigproc(int sig)
++{
++	end = 1;
++}
++
++int main(int argc, char *argv[])
++{
++	char init_cwd[BUF_SIZE];
++	pid_t pid;
++	int status;
++	int ret = 1;
++
++	getcwd(init_cwd, BUF_SIZE);
++
++	if (signal(SIGALRM, sigproc) == SIG_ERR) {
++		perror("signal failed");
++		exit(1);
++	}
++
++	alarm(TIMEOUT);
++
++	pid = fork();
++	if (pid < 0) {
++		perror("fork failed");
++		exit(1);
++	} else if (pid == 0) {
++		do_rename("testfile");
++	} else {
++		test_getcwd(init_cwd);
++		ret = !end;
++		kill(pid, SIGTERM);
++		waitpid(pid, &status, 0);
++	}
++
++	exit(ret);
++}
+diff --git a/tests/generic/028 b/tests/generic/028
+new file mode 100755
+index 0000000..12216df
+--- /dev/null
++++ b/tests/generic/028
+@@ -0,0 +1,54 @@
 +#! /bin/bash
-+# FS QA Test No. btrfs/056
++# FS QA Test No. generic/028
 +#
-+# Regression test for btrfs ioctl clone operation + fsync + log recovery.
-+# The issue was that doing an fsync after cloning into a file didn't gave any
-+# persistence guarantees as it should. What happened was that the in memory
-+# metadata (extent maps) weren't updated, which made the fsync code not able
-+# to detect that file data has been changed.
-+#
-+# This issue is fixed by the following linux kernel btrfs patch:
-+#
-+#    Btrfs: make fsync work after cloning into a file
++# Regression test for
++# ede4ceb prepend_path() needs to reinitialize dentry/vfsmount/mnt on restarts
++# f650080 __dentry_path() fixes
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2014 Filipe Manana.  All Rights Reserved.
++# Copyright (c) 2014 Red Hat Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -80,265 +197,51 @@ index 0000000..e066442
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
++here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+	_cleanup_flakey
-+	rm -fr $tmp
++    cd /
++    rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/dmflakey
 +
 +# real QA test starts here
-+_supported_fs btrfs
++_supported_fs generic
 +_supported_os Linux
-+_require_scratch
-+_require_btrfs_cloner
-+_require_btrfs_fs_feature "no_holes"
-+_require_btrfs_mkfs_feature "no-holes"
-+_require_dm_flakey
-+_need_to_be_root
 +
 +rm -f $seqres.full
++echo "Silence is golden"
 +
-+test_btrfs_clone_fsync_log_recover()
-+{
-+	_scratch_mkfs "$1" >/dev/null 2>&1
-+	_init_flakey
-+	SAVE_MOUNT_OPTIONS="$MOUNT_OPTIONS"
-+	MOUNT_OPTIONS="$MOUNT_OPTIONS $2"
-+	_mount_flakey
-+
-+	# Create a file with 4 extents and 1 hole, all with a size of 8Kb each.
-+	# The hole is in the range [16384, 24576[.
-+	$XFS_IO_PROG -f -c "pwrite -S 0x01 -b 8192 0 8192" \
-+			-c "fsync" \
-+			-c "pwrite -S 0x02 -b 8192 8192 8192" \
-+			-c "fsync" \
-+			-c "pwrite -S 0x04 -b 8192 24576 8192" \
-+			-c "fsync" \
-+			-c "pwrite -S 0x05 -b 8192 32768 8192" \
-+			-c "fsync" \
-+		$SCRATCH_MNT/foo | _filter_xfs_io
-+
-+	# Clone destination file, 1 extent of 96kb.
-+	$XFS_IO_PROG -f -c "pwrite -S 0xff -b 98304 0 98304" -c "fsync" \
-+		$SCRATCH_MNT/bar | _filter_xfs_io
-+
-+	# Clone second half of the 2nd extent, the 8kb hole, the 3rd extent
-+	# and the first half of the 4th extent into file bar.
-+	$CLONER_PROG -s 12288 -d 0 -l 24576 $SCRATCH_MNT/foo $SCRATCH_MNT/bar
-+
-+	$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/bar
-+
-+	# Test small files too consisting of 1 inline extent
-+	$XFS_IO_PROG -f -c "pwrite -S 0x00 -b 3500 0 3500" -c "fsync" \
-+		$SCRATCH_MNT/foo2 | _filter_xfs_io
-+
-+	$XFS_IO_PROG -f -c "pwrite -S 0xcc -b 1000 0 1000" -c "fsync" \
-+		$SCRATCH_MNT/bar2 | _filter_xfs_io
-+
-+	# Clone the entire foo2 file into bar2, overwriting all data in bar2
-+	# and increasing its size.
-+	$CLONER_PROG -s 0 -d 0 -l 3500 $SCRATCH_MNT/foo2 $SCRATCH_MNT/bar2
-+	$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/bar2
-+
-+	_load_flakey_table $FLAKEY_DROP_WRITES
-+	_unmount_flakey
-+
-+	# Verify that there are no consistency errors.
-+	_check_scratch_fs $FLAKEY_DEV
-+
-+	_load_flakey_table $FLAKEY_ALLOW_WRITES
-+	_mount_flakey
-+
-+	# Verify the cloned range was persisted by fsync and the log recovery
-+	# code did its work well.
-+	echo "Verifying file bar content"
-+	od -t x1 $SCRATCH_MNT/bar
-+
-+	echo "Verifying file bar2 content"
-+	od -t x1 $SCRATCH_MNT/bar2
-+
-+	_unmount_flakey
-+
-+	# Verify that there are no consistency errors.
-+	_check_scratch_fs $FLAKEY_DEV
-+
-+	_cleanup_flakey
-+	MOUNT_OPTIONS="$SAVE_MOUNT_OPTIONS"
-+}
-+
-+# Regardless of the NO_HOLES feature being enabled or not, the test results
-+# should be exactly the same for both cases.
-+
-+echo "Testing without the NO_HOLES feature"
-+# As of btrfs-progs 3.14.x, the no-holes feature isn't enabled by default.
-+# But explicitly disable it at mkfs time as it might be enabled by default
-+# in future versions.
-+test_btrfs_clone_fsync_log_recover "-O ^no-holes"
-+
-+echo "Testing without the NO_HOLES feature and compression (lzo)"
-+test_btrfs_clone_fsync_log_recover "-O ^no-holes" "-o compress-force=lzo"
-+
-+echo "Testing with the NO_HOLES feature enabled"
-+test_btrfs_clone_fsync_log_recover "-O no-holes"
-+
-+echo "Testing with the NO_HOLES feature enabled and compression (lzo)"
-+test_btrfs_clone_fsync_log_recover "-O no-holes" "-o compress-force=lzo"
-+
-+status=0
++$here/src/t_getcwd
++status=$?
 +exit
-diff --git a/tests/btrfs/056.out b/tests/btrfs/056.out
+diff --git a/tests/generic/028.out b/tests/generic/028.out
 new file mode 100644
-index 0000000..1b77ae3
+index 0000000..2615f73
 --- /dev/null
-+++ b/tests/btrfs/056.out
-@@ -0,0 +1,129 @@
-+QA output created by 056
-+Testing without the NO_HOLES feature
-+wrote 8192/8192 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 8192
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 24576
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 32768
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 98304/98304 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 3500/3500 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 1000/1000 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Verifying file bar content
-+0000000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
-+*
-+0010000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+0030000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
-+*
-+0050000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
-+*
-+0060000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
-+*
-+0300000
-+Verifying file bar2 content
-+0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+0006640 00 00 00 00 00 00 00 00 00 00 00 00
-+0006654
-+Testing without the NO_HOLES feature and compression (lzo)
-+wrote 8192/8192 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 8192
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 24576
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 32768
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 98304/98304 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 3500/3500 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 1000/1000 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Verifying file bar content
-+0000000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
-+*
-+0010000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+0030000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
-+*
-+0050000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
-+*
-+0060000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
-+*
-+0300000
-+Verifying file bar2 content
-+0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+0006640 00 00 00 00 00 00 00 00 00 00 00 00
-+0006654
-+Testing with the NO_HOLES feature enabled
-+wrote 8192/8192 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 8192
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 24576
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 32768
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 98304/98304 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 3500/3500 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 1000/1000 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Verifying file bar content
-+0000000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
-+*
-+0010000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+0030000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
-+*
-+0050000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
-+*
-+0060000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
-+*
-+0300000
-+Verifying file bar2 content
-+0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+0006640 00 00 00 00 00 00 00 00 00 00 00 00
-+0006654
-+Testing with the NO_HOLES feature enabled and compression (lzo)
-+wrote 8192/8192 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 8192
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 24576
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 32768
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 98304/98304 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 3500/3500 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 1000/1000 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Verifying file bar content
-+0000000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
-+*
-+0010000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+0030000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
-+*
-+0050000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
-+*
-+0060000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
-+*
-+0300000
-+Verifying file bar2 content
-+0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+0006640 00 00 00 00 00 00 00 00 00 00 00 00
-+0006654
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 2c10c5b..2da7127 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -58,3 +58,4 @@
- 053 auto quick
- 054 auto quick
- 055 auto quick
-+056 auto quick
++++ b/tests/generic/028.out
+@@ -0,0 +1,2 @@
++QA output created by 028
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index e851c62..8f4b491 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -30,6 +30,7 @@
+ 025 auto quick
+ 026 acl quick auto
+ 027 auto enospc
++028 auto
+ 053 acl repair auto quick
+ 062 attr udf auto quick
+ 068 other auto freeze dangerous stress
 -- 
-1.9.1
+1.9.3
 
