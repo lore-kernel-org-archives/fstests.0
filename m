@@ -1,208 +1,240 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:56372 "EHLO
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:61972 "EHLO
 	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932345AbaFJBj3 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 9 Jun 2014 21:39:29 -0400
-Date: Tue, 10 Jun 2014 11:39:25 +1000
+	by vger.kernel.org with ESMTP id S932345AbaFJCGb (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 9 Jun 2014 22:06:31 -0400
+Date: Tue, 10 Jun 2014 12:06:26 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v5] xfstests: add test for btrfs cloning with file holes
-Message-ID: <20140610013925.GJ4453@dastard>
-References: <1401499053-11162-1-git-send-email-fdmanana@gmail.com>
- <1401806261-14232-1-git-send-email-fdmanana@gmail.com>
+Subject: Re: [PATCH v2] xfstests: test speculative preallocation reclaim on
+ ENOSPC/EDQUOT
+Message-ID: <20140610020626.GK4453@dastard>
+References: <1401807238-59437-1-git-send-email-bfoster@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1401806261-14232-1-git-send-email-fdmanana@gmail.com>
+In-Reply-To: <1401807238-59437-1-git-send-email-bfoster@redhat.com>
 Sender: xfstests-owner@vger.kernel.org
-To: Filipe David Borba Manana <fdmanana@gmail.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, lczerner@redhat.com
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jun 03, 2014 at 03:37:41PM +0100, Filipe David Borba Manana wrote:
-> Regression test for the btrfs ioctl clone operation when the source range
-> contains hole(s) and the FS has the NO_HOLES feature enabled (file holes
-> don't need file extent items in the btree to represent them).
+On Tue, Jun 03, 2014 at 10:53:58AM -0400, Brian Foster wrote:
+> XFS can allocate significant amounts of space to files via speculative
+> preallocation. Such preallocation may not be reclaimed automatically on
+> file close() if a file is repeatedly opened and extended. For smaller
+> filesystems with relatively large and slow growing files, this
+> preallocation can linger for some time, including contributing to out of
+> space conditions.
 > 
-> This issue is fixed by the following linux kernel btrfs patch:
+> Create a situation where an fs is near out of space while several files
+> still have lingering, significant preallocations. Verify that new
+> writers reclaim the preallocated space rather than return ENOSPC. Repeat
+> a similar test for quota limits and EDQUOT.
 > 
->     Btrfs: fix clone to deal with holes when NO_HOLES feature is enabled
-> 
-> Signed-off-by: Filipe David Borba Manana <fdmanana@gmail.com>
-> ---
-> 
-> V2: Increased test coverage by testing the cases where a hole overlaps
->     the start and end of the cloning range.
-> 
-> V3: Test the case where the cloning range includes an hole at the end
->     of the source file and might increase the size of the target file.
-> 
-> V4: Added test for the case where the clone range covers only a hole at
->     the beginning of the source file.
->     Made the test be skipped if the available version of mkfs.btrfs
->     doesn't support the no-holes feature. And when testing the case
->     where the no-holes feature isn't enabled, explicitly ask mkfs.btrfs
->     to disable no-holes (future versions of mkfs.btrfs might enable
->     this feature by default).
-> 
-> V5: Detect if kernel supports NO_HOLES feature too. Added some messages
->     (echoes) before each od call to make it easier to match output
->     with each specific test.
-> 
->  common/rc           |  25 ++++
->  tests/btrfs/055     | 173 ++++++++++++++++++++++++++
->  tests/btrfs/055.out | 347 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/group   |   1 +
->  4 files changed, 546 insertions(+)
->  create mode 100755 tests/btrfs/055
->  create mode 100644 tests/btrfs/055.out
-> 
-> diff --git a/common/rc b/common/rc
-> index f27ee53..e2136d0 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2177,6 +2177,31 @@ _require_btrfs_send_stream_version()
->  	fi
->  }
->  
-> +_require_btrfs_mkfs_feature()
+> Signed-off-by: Brian Foster <bfoster@redhat.com>
+
+Couple of minor things.
+
+> +# Create a file using a repeated open, extending write and close pattern. This
+> +# causes the preallocation to persist after the file is closed. Preallocation
+> +# will not be reclaimed unless the inode is evicted or we hit an allocation
+> +# failure.
+> +_spec_prealloc_file()
 > +{
-> +	if [ -z $1 ]; then
-> +		echo "Missing feature name argument for _require_btrfs_mkfs_feature"
-> +		exit 1
+> +	file=$1
+> +
+> +	rm -f $file
+> +
+> +	# a few file extending open-write-close cycles should be enough to
+> +	# trigger the fs to retain preallocation. write 256k in 32k intervals to
+> +	# be sure
+> +	for i in $(seq 0 32768 262144)
+> +	do
+
+	for .... ; do
+
+> +		$XFS_IO_PROG -fc "pwrite $i 32k" $file | \
+> +			_filter_xfs_io >> $seqres.full
+> +	done
+
+If you are dumping the output into $seqres.full, then it doesn't
+need to be filtered. Filtering is only necessary for golden image
+matching; $seqres.full is for debug output and so should be
+pristine...
+
+Also, I prefer $XFS_IO_PROG -f -c "..." (separate -c "...") because
+the -c arg must be followed by the command and so order is
+important...
+
+> +	# write a 4k aligned amount of data to keep the calculations simple
+> +	$XFS_IO_PROG -c "pwrite 0 128m" $file | _filter_xfs_io >> $seqres.full
+> +
+> +	size=`stat -c "%s" $file`
+> +	blocks=`stat -c "%b" $file`
+> +	blocksize=`stat -c "%B" $file`
+> +
+> +	prealloc_size=$((blocks * blocksize - size))
+> +	if [ $prealloc_size -eq 0 ]
+> +	then
+
+	if [ ... ]; then
+
+> +		echo "Warning: No speculative preallocation for $file." \
+> +			"Check use of the allocsize= mount option."
 > +	fi
-> +	feat=$1
-> +	$MKFS_BTRFS_PROG -O list-all 2>&1 | \
-> +		grep '^[ \t]*'"$feat"'\b' > /dev/null 2>&1
-> +	[ $? -eq 0 ] || \
-> +		_notrun "Feature $feat not supported in the available version of mkfs.btrfs"
+> +
+> +	# keep a running total of how much preallocation we've created
+> +	TOTAL_PREALLOC=$((TOTAL_PREALLOC + prealloc_size))
 > +}
 > +
-> +_require_btrfs_fs_feature()
+> +_consume_free_space()
 > +{
-> +	if [ -z $1 ]; then
-> +		echo "Missing feature name argument for _require_btrfs_fs_feature"
-> +		exit 1
-> +	fi
-> +	feat=$1
-> +	modprobe btrfs > /dev/null 2>&1
-> +	[ -e /sys/fs/btrfs/features/$feat ] || \
-> +		_notrun "Feature $feat not supported by the available btrfs version"
+> +	dir=$1
+> +
+> +	# calculate the rough amount of free space in MB
+> +	fsblocksize=`$XFS_IO_PROG -x -c "statfs" $dir | grep f_bsize | \
+> +			awk '{ print $3 }'`
+> +	blocksavail=`$XFS_IO_PROG -x -c "statfs" $dir | grep f_bavail | \
+> +			awk '{ print $3 }'`
+> +	freesp=$((fsblocksize * blocksavail / 1024 / 1024))
+> +
+> +	# allocate all but 10MB
+> +	freesp=$((freesp - 10))
+
+	freesp=`$DF_PROG -m $dir | awk '/^\// { print $4 - 10 }'`
+ 
+> +	$XFS_IO_PROG -fc "falloc 0 ${freesp}M" $dir/spc
 > +}
 > +
->  init_rc()
->  {
->  	if [ "$iam" == new ]
-> diff --git a/tests/btrfs/055 b/tests/btrfs/055
-> new file mode 100755
-> index 0000000..be38d09
-> --- /dev/null
-> +++ b/tests/btrfs/055
-> @@ -0,0 +1,173 @@
-> +#! /bin/bash
-> +# FS QA Test No. btrfs/055
-> +#
-> +# Regression test for the btrfs ioctl clone operation when the source range
-> +# contains hole(s) and the FS has the NO_HOLES feature enabled (file holes
-> +# don't need file extent items in the btree to represent them).
-> +#
-> +# This issue is fixed by the following linux kernel btrfs patch:
-> +#
-> +#    Btrfs: fix clone to deal with holes when NO_HOLES feature is enabled
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2014 Filipe Manana.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
+> +# Create several files with preallocation and consume the remaining free space
+> +# via fallocate to the put the fs at ENOSPC. Create a set of background writers
+> +# to write into ENOSPC and cause the preallocation to be reclaimed and
+> +# reallocated to the new writers.
+> +_test_enospc()
 > +{
-> +    rm -fr $tmp
+> +	dir=$1
+> +
+> +	rm -rf $dir/*
+> +
+> +	TOTAL_PREALLOC=0
+> +	for i in $(seq 0 3)
+> +	do
+
+for (); do
+
+> +		_spec_prealloc_file $dir/pre$i
+> +	done
+> +
+> +	_consume_free_space $dir
+> +
+> +	# consume 1/2 of the current preallocation across the set of 4 writers
+> +	write_size=$((TOTAL_PREALLOC / 2 / 4))
+> +	for i in $(seq 0 3)
+> +	do
+> +		$XFS_IO_PROG -fc "pwrite 0 $write_size" $dir/file.$i | \
+> +			_filter_xfs_io >> $seqres.full &
+
+no filter, for (); do
+
+> +	done
+> +
+> +	wait
 > +}
 > +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
+> +# Create preallocations accounted by both user and group quotas. Set the
+> +# associated quota hard limits to put them at EDQUOT. Verify that a new writer
+> +# reclaims the preallocated space and proceeds without error.
+> +_test_edquot()
+> +{
+> +	dir=$1
+> +
+> +	rm -rf $dir/*
+> +
+> +	TOTAL_PREALLOC=0
+> +	_spec_prealloc_file $dir/user
+> +	chown $qa_user $dir/user
+> +
+> +	_spec_prealloc_file $dir/group
+> +	chgrp $qa_group $dir/group
+> +
+> +	# writing to a file under both quotas means both will be reclaimed on
+> +	# allocation failure
+> +	touch $dir/file
+> +	chown $qa_user $dir/file
+> +	chgrp $qa_group $dir/file
+> +
+> +	# put both quotas at EDQUOT
+> +	blks=`$XFS_QUOTA_PROG -xc "quota -u $qa_user" $dir | \
+> +		tail -n 1 | awk '{ print $2 }'`
+> +	$XFS_QUOTA_PROG -xc "limit -u bhard=${blks}k $qa_user" $dir
+> +	blks=`$XFS_QUOTA_PROG -xc "quota -g $qa_grup" $dir | \
+> +		tail -n 1 | awk '{ print $2 }'`
+> +	$XFS_QUOTA_PROG -xc "limit -g bhard=${blks}k $qa_group" $dir
+> +
+> +	# each quota has a single file worth of preallocation to reclaim. leave
+> +	# some wiggle room and write to 1/3 the total.
+> +	write_size=$((TOTAL_PREALLOC / 3))
+> +	$XFS_IO_PROG -c "pwrite 0 $write_size" $dir/file | \
+> +		_filter_xfs_io >> $seqres.full
+
+no filter.
+
+> +}
 > +
 > +# real QA test starts here
-> +_supported_fs btrfs
+> +_supported_fs xfs
 > +_supported_os Linux
+> +
 > +_require_scratch
-> +_require_btrfs_cloner
-> +_require_btrfs_fs_feature "no_holes"
-> +_require_btrfs_mkfs_feature "no-holes"
-
-Nice kernel/userspace consistency in naming there ;)
-
-> +_need_to_be_root
+> +_require_xfs_io_command "falloc"
+> +_require_loop
+> +_require_quota
+> +_require_user
+> +_require_group
 > +
 > +rm -f $seqres.full
 > +
-> +test_btrfs_clone_with_holes()
-> +{
-> +	_scratch_mkfs "$1" >/dev/null 2>&1
-> +	_scratch_mount
+> +_scratch_mkfs_xfs | _filter_mkfs >> $seqres.full 2>&1
+> +_scratch_mount
 > +
-> +	# Create a file with 4 extents and 1 hole, all with a size of 8Kb each.
-> +	$XFS_IO_PROG -f -c "pwrite -S 0x01 -b 8192 0 8192" $SCRATCH_MNT/foo \
-> +		| _filter_xfs_io
-> +	sync
-> +	$XFS_IO_PROG -c "pwrite -S 0x02 -b 8192 8192 8192" $SCRATCH_MNT/foo \
-> +		| _filter_xfs_io
-> +	sync
-> +	# After the following write we get an hole in the range [16384, 24576[
-> +	$XFS_IO_PROG -c "pwrite -S 0x04 -b 8192 24576 8192" $SCRATCH_MNT/foo \
-> +		| _filter_xfs_io
-> +	sync
-> +	$XFS_IO_PROG -c "pwrite -S 0x05 -b 8192 32768 8192" $SCRATCH_MNT/foo \
-> +		| _filter_xfs_io
-> +	sync
+> +# make sure the background eofblocks scanner doesn't interfere
+> +orig_sp_time=`cat /proc/sys/fs/xfs/speculative_prealloc_lifetime`
+> +echo 9999 > /proc/sys/fs/xfs/speculative_prealloc_lifetime
 > +
-> +	# Clone destination file, 1 extent of 96kb.
-> +	$XFS_IO_PROG -f -c "pwrite -S 0xff -b 98304 0 98304" $SCRATCH_MNT/bar \
-> +		| _filter_xfs_io
-> +	sync
+> +LOOP_FILE=$SCRATCH_MNT/$seq.fs
+> +LOOP_MNT=$SCRATCH_MNT/$seq.mnt
+> +
+> +$MKFS_XFS_PROG -d "file=1,name=$LOOP_FILE,size=$((1024*1024*1024 * 10))" | \
+> +	_filter_mkfs >> $seqres.full 2>&1
 
-As Lukas mentioned, this is way too verbose and hard to read.
-This:
+mkfs takes "size=10g" as a valid size.
 
-	# Create a file with 4 extents and 1 hole, all with a size of 8Kb each.
-	$XFS_IO_PROG -fs \
-		-c "pwrite -S 0x01 -b 8192 0 8192" \
-		-c "pwrite -S 0x02 -b 8192 8192 8192" \
-		-c "pwrite -S 0x04 -b 8192 24576 8192" \
-		-c "pwrite -S 0x05 -b 8192 32768 8192" \
-		$SCRATCH_MNT/foo | _filter_xfs_io
+> +mkdir -p $LOOP_MNT
+> +mount -t xfs -o loop,uquota,gquota $LOOP_FILE $LOOP_MNT || \
+> +	_fail "Failed to mount loop fs."
+> +
+> +_test_enospc $LOOP_MNT
+> +_test_edquot $LOOP_MNT
+> +
+> +umount $LOOP_MNT
+> +
+> +echo $orig_sp_time > /proc/sys/fs/xfs/speculative_prealloc_lifetime
+> +
+> +umount $SCRATCH_MNT
+> +_check_scratch_fs
+> +
+> +status=0
+> +exit
+> diff --git a/tests/xfs/014.out b/tests/xfs/014.out
+> new file mode 100644
+> index 0000000..a825535
+> --- /dev/null
+> +++ b/tests/xfs/014.out
+> @@ -0,0 +1 @@
+> +QA output created by 014
 
-	# Clone destination file, 1 extent of 96kb.
-	$XFS_IO_PROG -fs -c "pwrite -S 0xff -b 98304 0 98304" \
-		$SCRATCH_MNT/bar | _filter_xfs_io
-
-is much more compact and far easier to read. It's also the same
-style as many of the other tests use for compound operations like
-this.
-
-Other than that the test look sgood.
+The test writes nothing to the output file? Perhaps it should
+indicate that (silence is golden....)....
 
 Cheers,
 
