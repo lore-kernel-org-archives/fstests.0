@@ -1,151 +1,48 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:12044 "EHLO
-	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S933028AbaFJCKU (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 9 Jun 2014 22:10:20 -0400
-Date: Tue, 10 Jun 2014 12:10:17 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v2] xfstests: add test for btrfs clone + fsync durability
-Message-ID: <20140610021017.GL4453@dastard>
-References: <1402027700-9813-1-git-send-email-fdmanana@gmail.com>
- <1402282132-618-1-git-send-email-fdmanana@gmail.com>
+Received: from mail-yh0-f54.google.com ([209.85.213.54]:39641 "EHLO
+	mail-yh0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932860AbaFJC6r (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 9 Jun 2014 22:58:47 -0400
+Received: by mail-yh0-f54.google.com with SMTP id i57so1646164yha.41
+        for <fstests@vger.kernel.org>; Mon, 09 Jun 2014 19:58:47 -0700 (PDT)
+Received: from [192.168.0.129] (rrcs-97-79-21-178.se.biz.rr.com. [97.79.21.178])
+        by mx.google.com with ESMTPSA id u5sm28492765yhg.25.2014.06.09.19.58.45
+        for <fstests@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Mon, 09 Jun 2014 19:58:46 -0700 (PDT)
+Message-ID: <53967465.9050006@gmail.com>
+Date: Mon, 09 Jun 2014 22:58:45 -0400
+From: "Michael L. Semon" <mlsemon35@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1402282132-618-1-git-send-email-fdmanana@gmail.com>
+Subject: [PATCH] xfstests: Enter JFS max ACL count into common/attr
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Sender: xfstests-owner@vger.kernel.org
-To: Filipe David Borba Manana <fdmanana@gmail.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jun 09, 2014 at 03:48:52AM +0100, Filipe David Borba Manana wrote:
-> Regression test for btrfs ioctl clone operation + fsync + log
-> recovery. The issue was that doing an fsync after cloning into
-> a file didn't gave any persistence guarantees as it should.
-> What happened was that the in memory metadata (extent maps)
-> weren't updated, which made the fsync code not able to detect
-> that file data has been changed and must be persisted to the
-> log.
-> 
-> This issue is fixed by the following linux kernel btrfs patch:
-> 
->     Btrfs: make fsync work after cloning into a file
-> 
-> Signed-off-by: Filipe David Borba Manana <fdmanana@gmail.com>
-> ---
-> 
-> V2: Test small files too, consisting of a single inline extent, as
->     it triggers different code paths.
-> 
->  tests/btrfs/056     | 150 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/056.out | 129 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/group   |   1 +
->  3 files changed, 280 insertions(+)
->  create mode 100755 tests/btrfs/056
->  create mode 100644 tests/btrfs/056.out
-> 
-> diff --git a/tests/btrfs/056 b/tests/btrfs/056
-> new file mode 100755
-> index 0000000..e066442
-> --- /dev/null
-> +++ b/tests/btrfs/056
-> @@ -0,0 +1,150 @@
-> +#! /bin/bash
-> +# FS QA Test No. btrfs/056
-> +#
-> +# Regression test for btrfs ioctl clone operation + fsync + log recovery.
-> +# The issue was that doing an fsync after cloning into a file didn't gave any
-> +# persistence guarantees as it should. What happened was that the in memory
-> +# metadata (extent maps) weren't updated, which made the fsync code not able
-> +# to detect that file data has been changed.
-> +#
-> +# This issue is fixed by the following linux kernel btrfs patch:
-> +#
-> +#    Btrfs: make fsync work after cloning into a file
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2014 Filipe Manana.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	_cleanup_flakey
-> +	rm -fr $tmp
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/dmflakey
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +_require_btrfs_cloner
-> +_require_btrfs_fs_feature "no_holes"
-> +_require_btrfs_mkfs_feature "no-holes"
-> +_require_dm_flakey
-> +_need_to_be_root
-> +
-> +rm -f $seqres.full
-> +
-> +test_btrfs_clone_fsync_log_recover()
-> +{
-> +	_scratch_mkfs "$1" >/dev/null 2>&1
-> +	_init_flakey
-> +	SAVE_MOUNT_OPTIONS="$MOUNT_OPTIONS"
-> +	MOUNT_OPTIONS="$MOUNT_OPTIONS $2"
-> +	_mount_flakey
-> +
-> +	# Create a file with 4 extents and 1 hole, all with a size of 8Kb each.
-> +	# The hole is in the range [16384, 24576[.
-> +	$XFS_IO_PROG -f -c "pwrite -S 0x01 -b 8192 0 8192" \
-> +			-c "fsync" \
-> +			-c "pwrite -S 0x02 -b 8192 8192 8192" \
-> +			-c "fsync" \
-> +			-c "pwrite -S 0x04 -b 8192 24576 8192" \
-> +			-c "fsync" \
-> +			-c "pwrite -S 0x05 -b 8192 32768 8192" \
-> +			-c "fsync" \
-> +		$SCRATCH_MNT/foo | _filter_xfs_io
-> +
-> +	# Clone destination file, 1 extent of 96kb.
-> +	$XFS_IO_PROG -f -c "pwrite -S 0xff -b 98304 0 98304" -c "fsync" \
-> +		$SCRATCH_MNT/bar | _filter_xfs_io
+Enter max ACL count into common/attr for JFS, with the purpose of
+getting JFS to pass xfstests generic/026.
 
-I've seen this pattern before ;)
+Signed-off-by: Michael L. Semon <mlsemon35@gmail.com>
+---
+ common/attr | 3 +++
+ 1 file changed, 3 insertions(+)
 
-Use the "-s" option to xfs_io rather than repeated "pwrite/fsync"
-pairs.
-
-Otherwise looks fine.
-
-Cheers,
-
-Dave.
+diff --git a/common/attr b/common/attr
+index 6fdcbf2..42a1a16 100644
+--- a/common/attr
++++ b/common/attr
+@@ -39,6 +39,9 @@ _acl_get_max()
+ 			echo 5461
+ 		fi
+ 		;;
++	jfs)
++		echo 8191
++		;;
+ 	*)
+ 		echo 0
+ 		;;
 -- 
-Dave Chinner
-david@fromorbit.com
+1.8.4
+
