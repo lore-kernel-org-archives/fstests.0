@@ -1,229 +1,116 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:10435 "EHLO
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:56372 "EHLO
 	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S933020AbaFJAtT (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 9 Jun 2014 20:49:19 -0400
-Date: Tue, 10 Jun 2014 10:49:11 +1000
+	by vger.kernel.org with ESMTP id S932345AbaFJBj3 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 9 Jun 2014 21:39:29 -0400
+Date: Tue, 10 Jun 2014 11:39:25 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [patch] add an aio test which closes the fd before destroying
- the ioctx
-Message-ID: <20140610004911.GF4453@dastard>
-References: <x4961k97o9o.fsf@segfault.boston.devel.redhat.com>
+Subject: Re: [PATCH v5] xfstests: add test for btrfs cloning with file holes
+Message-ID: <20140610013925.GJ4453@dastard>
+References: <1401499053-11162-1-git-send-email-fdmanana@gmail.com>
+ <1401806261-14232-1-git-send-email-fdmanana@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <x4961k97o9o.fsf@segfault.boston.devel.redhat.com>
+In-Reply-To: <1401806261-14232-1-git-send-email-fdmanana@gmail.com>
 Sender: xfstests-owner@vger.kernel.org
-To: Jeff Moyer <jmoyer@redhat.com>
-Cc: fstests@vger.kernel.org, Matt Cross <matt.cross@gmail.com>
+To: Filipe David Borba Manana <fdmanana@gmail.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, lczerner@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jun 09, 2014 at 05:42:59PM -0400, Jeff Moyer wrote:
-> Hi,
+On Tue, Jun 03, 2014 at 03:37:41PM +0100, Filipe David Borba Manana wrote:
+> Regression test for the btrfs ioctl clone operation when the source range
+> contains hole(s) and the FS has the NO_HOLES feature enabled (file holes
+> don't need file extent items in the btree to represent them).
 > 
-> By closing the file descriptor before calling io_destroy, you pretty
-> much guarantee that the last put on the ioctx will be done in interrupt
-> context (during I/O completion).  This behavior has unearthed bugs in
-> the kernel in several different kernel versions, so let's add a test to
-> poke at it.
+> This issue is fixed by the following linux kernel btrfs patch:
 > 
-> The original test case was provided by Matt Cross.  He has graciously
-> relicensed it under the GPL v2 or later so that it can be included in
-> xfstests.  I've modified the test a bit so that it would generate a
-> stable output format and to run for a fixed amount of time.
+>     Btrfs: fix clone to deal with holes when NO_HOLES feature is enabled
 > 
-> Feedback is welcome and appreciated.
-
-Mostly pretty good....
-
-> +/* Code to reproduce the aio lockup.
-> + *
-> + * Make a test file that is at least 4MB long.  Something like this:
-> + * 'dd if=/dev/zero of=/tmp/testfile bs=1M count=10'
-> + *
-> + * Run this test as './aio_test 0 100 /tmp/testfile' to induce the
-> + * failure.
-> + *
-> + * Run this test as './aio_test 1 100 /tmp/testfile' to demonstrate an
-> + * incomplete workaround (close fd, then wait for all io to complete
-> + * on an io context before calling io_destroy()).  This still induces
-> + * the failure.
-> + *
-> + * Run this test as './aio_test 2 100 /tmp/testfile' to demonstrate
-> + * the workaround (wait for all io to complete on an io context before
-> + * calling io_destroy(), then close fd).
-> + */
-
-Ok, so the xfstest never runs the "waitevent == 2" case here, so
-perhaps all that workaround demonstration code can be removed?
-
-....
-> +char *
-> +round_up_to_page(unsigned char *ptr)
+> Signed-off-by: Filipe David Borba Manana <fdmanana@gmail.com>
+> ---
+> 
+> V2: Increased test coverage by testing the cases where a hole overlaps
+>     the start and end of the cloning range.
+> 
+> V3: Test the case where the cloning range includes an hole at the end
+>     of the source file and might increase the size of the target file.
+> 
+> V4: Added test for the case where the clone range covers only a hole at
+>     the beginning of the source file.
+>     Made the test be skipped if the available version of mkfs.btrfs
+>     doesn't support the no-holes feature. And when testing the case
+>     where the no-holes feature isn't enabled, explicitly ask mkfs.btrfs
+>     to disable no-holes (future versions of mkfs.btrfs might enable
+>     this feature by default).
+> 
+> V5: Detect if kernel supports NO_HOLES feature too. Added some messages
+>     (echoes) before each od call to make it easier to match output
+>     with each specific test.
+> 
+>  common/rc           |  25 ++++
+>  tests/btrfs/055     | 173 ++++++++++++++++++++++++++
+>  tests/btrfs/055.out | 347 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/group   |   1 +
+>  4 files changed, 546 insertions(+)
+>  create mode 100755 tests/btrfs/055
+>  create mode 100644 tests/btrfs/055.out
+> 
+> diff --git a/common/rc b/common/rc
+> index f27ee53..e2136d0 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2177,6 +2177,31 @@ _require_btrfs_send_stream_version()
+>  	fi
+>  }
+>  
+> +_require_btrfs_mkfs_feature()
 > +{
-> +  unsigned long buf = (unsigned long) ptr;
-> +
-> +  if (buf % 4096) {
-> +    buf += 4096 - buf%4096;
-> +  }
-> +
-> +  return (char *)buf;
-> +}
-
-Urk. Just use memalign() to allocate "page" aligned buffers and all
-this can go away.
-
-Also, can you change this code to 8 space tabs and generally clean
-it up to be the same as the kernel coding style? The mix of 2 space
-indents and tabs really screws up the indenting here...
-
-> +
-> +pid_t
-> +gettid(void)
-> +{
-> +  return (pid_t)syscall(SYS_gettid);
+> +	if [ -z $1 ]; then
+> +		echo "Missing feature name argument for _require_btrfs_mkfs_feature"
+> +		exit 1
+> +	fi
+> +	feat=$1
+> +	$MKFS_BTRFS_PROG -O list-all 2>&1 | \
+> +		grep '^[ \t]*'"$feat"'\b' > /dev/null 2>&1
+> +	[ $? -eq 0 ] || \
+> +		_notrun "Feature $feat not supported in the available version of mkfs.btrfs"
 > +}
 > +
-> +void *
-> +aio_test_thread(void *data)
+> +_require_btrfs_fs_feature()
 > +{
-> +  int fd;
-> +  io_context_t ioctx;
-> +  int ioctx_initted;
-> +  int ios_submitted;
-> +  struct iocb iocbs[NUM_IOS];
-> +  int i;
-> +  static unsigned char buffer[IOSIZE + 4096];
-> +  long mycpu = (long)data;
-> +  pid_t mytid = gettid();
-> +  cpu_set_t cpuset;
+> +	if [ -z $1 ]; then
+> +		echo "Missing feature name argument for _require_btrfs_fs_feature"
+> +		exit 1
+> +	fi
+> +	feat=$1
+> +	modprobe btrfs > /dev/null 2>&1
+> +	[ -e /sys/fs/btrfs/features/$feat ] || \
+> +		_notrun "Feature $feat not supported by the available btrfs version"
+> +}
 > +
-> +  dprintf ("setting thread %d to run on cpu %ld\n", mytid, mycpu);
-> +
-> +  CPU_ZERO(&cpuset);
-> +  CPU_SET(mycpu, &cpuset);
-> +  if (sched_setaffinity(mytid, sizeof(cpuset), &cpuset)) {
-> +    printf("FAILED to set thread %d to run on cpu %ld\n", mytid, mycpu);
-> +  }
-
-Any reason why process layout like this is necessary? Comments are
-nice, even in test code...
-
-> +  ioctx_initted = 0;
-> +  ios_submitted = 0;
-> +
-> +  while (1) {
-> +    fd = open(filename, O_RDONLY | O_DIRECT);
-> +    if (fd < 0) {
-> +      printf ("%lu: Failed to open file '%s'\n", pthread_self(), filename);
-> +      goto done;
-> +    }
-> +
-> +    memset(&ioctx, 0, sizeof(ioctx));
-> +    if (io_setup(NUM_IOS, &ioctx)) {
-> +      printf ("%lu: Failed to setup io context\n", pthread_self());
-> +      goto done;
-> +    }
-> +    ioctx_initted = 1;
-> +
-> +    if (mycpu != 0) {
-> +      for (i=0; i<NUM_IOS; i++) {
-> +	struct iocb *iocb = &iocbs[i];
-> +
-> +	memset(iocb, 0, sizeof(*iocb));
-> +	io_prep_pread(iocb, fd, round_up_to_page(buffer), sizeof(buffer) - 4096, i * (sizeof(buffer) - 4096));
-
-Is that really just for page alignment, or is there some other magic
-going on here?
-
-> +	if (io_submit(ioctx, 1, &iocb) != 1) {
-> +	  printf ("%lu: failed to submit io #%d\n", pthread_self(), i+1);
-> +	}
-> +      }
-> +      ios_submitted = 1;
-> +    }
-> +
-> +  done:
-> +    if ((fd >= 0) && (wait_for_events < 2)) {
-> +      close(fd);
-> +      fd = -1;
-> +    }
-> +    if (wait_for_events && ios_submitted) {
-> +      struct io_event io_events[NUM_IOS];
-> +
-> +      if (io_getevents(ioctx, NUM_IOS, NUM_IOS, io_events, NULL) != NUM_IOS)
-> +	printf ("io_getevents failed to wait for all IO\n");
-> +    }
-> +
-> +    if (ioctx_initted) {
-> +      io_destroy(ioctx);
-> +      ioctx_initted = 0;
-> +    }
-> +
-> +    if (fd >= 0) /* pass '2' (or higher) in for wait_for_events to close after calling io_destroy(). */
-> +      close(fd);
-> +
-> +    if (ios_submitted) {
-> +      pthread_mutex_lock(&count_mutex);
-> +      total_loop_count++;
-> +      pthread_mutex_unlock(&count_mutex);
-> +
-> +      ios_submitted = 0;
-> +    }
-> +  }
-
-Ok, so this runs in an endless loop....
-
-> +  printf ("All threads spawned\n");
-> +
-> +  gettimeofday(&start, NULL);
-> +
-> +  while (delta.tv_sec < 300) {
-> +    sleep(1);
-> +    gettimeofday(&now, NULL);
-> +    timersub(&now, &start, &delta);
-> +    dprintf("%lu loops completed in %ld seconds\n", total_loop_count, delta.tv_sec);
-> +  }
-> +
-> +  return 0;
-
-And it just exits when the timer expires, with still active AIOs in
-flight. Which means that the tst harness may well finsih up and try
-to unmount the filesystem while IOs are still in flight. That will
-cause spurious test failures because the scratch filesystem can't be
-unmounted....
-
-> index 0000000..2202489
+>  init_rc()
+>  {
+>  	if [ "$iam" == new ]
+> diff --git a/tests/btrfs/055 b/tests/btrfs/055
+> new file mode 100755
+> index 0000000..be38d09
 > --- /dev/null
-> +++ b/tests/generic/323
-> @@ -0,0 +1,74 @@
+> +++ b/tests/btrfs/055
+> @@ -0,0 +1,173 @@
 > +#! /bin/bash
-> +# FS QA Test No. 323
+> +# FS QA Test No. btrfs/055
 > +#
-> +# Run aio-last-ref-in-irq-context - last put of ioctx not in process
-> +# context We've had a couple of intances in the past where having the
-           ^.                      instances
-> +# last reference to an ioctx be held by the IO (instead of the
-> +# process) would cause problems (hung system, crashes).
-
-OK.
-
-> This test was
-> +# written several years ago by Matt Cross, and he has graciously
-> +# allowed me to post it for inclusion in xfstests.  I modified it
-> +# slightly to reduce the output (since the output was pretty much
-> +# different every time) and to only run for a fixed amount of time (5
-> +# minutes).
-
-The history of the code should be in the commit message rather than
-here in the test description.
-
+> +# Regression test for the btrfs ioctl clone operation when the source range
+> +# contains hole(s) and the FS has the NO_HOLES feature enabled (file holes
+> +# don't need file extent items in the btree to represent them).
+> +#
+> +# This issue is fixed by the following linux kernel btrfs patch:
+> +#
+> +#    Btrfs: fix clone to deal with holes when NO_HOLES feature is enabled
+> +#
 > +#-----------------------------------------------------------------------
-> +# Copyright (c) 2014 Jeff Moyer.  All Rights Reserved.
-
-Sent from a Red Hat email address. Can you please clarify who owns
-the copyright?
-
+> +# Copyright (c) 2014 Filipe Manana.  All Rights Reserved.
 > +#
 > +# This program is free software; you can redistribute it and/or
 > +# modify it under the terms of the GNU General Public License as
@@ -244,15 +131,13 @@ the copyright?
 > +seqres=$RESULT_DIR/$seq
 > +echo "QA output created by $seq"
 > +
-> +here=`pwd`
 > +tmp=/tmp/$$
 > +status=1	# failure is the default!
 > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
 > +_cleanup()
 > +{
-> +	cd /
-> +	rm -f $tmp.*
+> +    rm -fr $tmp
 > +}
 > +
 > +# get standard environment, filters and checks
@@ -260,74 +145,64 @@ the copyright?
 > +. ./common/filter
 > +
 > +# real QA test starts here
-> +
-> +_supported_fs generic
+> +_supported_fs btrfs
 > +_supported_os Linux
+> +_require_scratch
+> +_require_btrfs_cloner
+> +_require_btrfs_fs_feature "no_holes"
+> +_require_btrfs_mkfs_feature "no-holes"
+
+Nice kernel/userspace consistency in naming there ;)
+
+> +_need_to_be_root
 > +
-> +AIO_TEST=src/aio-dio-regress/aio-last-ref-in-irq-context
-> +if [ ! -x $AIO_TEST ]; then
-> +	_notrun "$AIO_TEST not built"
-> +fi
-
-_require_aiodio aio-last-ref-in-irq-context
-
-That also sets up the AIO_TEST variable.
-
+> +rm -f $seqres.full
 > +
-> +_run_323() {
-> +	local testtemp=$TEST_DIR/aio-testfile
-
-testfile?
-
-> +	rm -f $testtemp
-> +	dd if=/dev/zero of=$testtemp bs=1M count=10
-
-Use xfs_io rather than dd:
-
-	$XFS_IO_PROG -ftc "pwrite 0 10m" $testfile | _filter_xfs_io
-
-And the "-ft" options mean you don't need to rm the $testfile
-because it'll get truncated to empty first or created if it doesn't
-exist.
-
-> +	$AIO_TEST 0 100 $testtemp
-> +	$AIO_TEST 1 100 $testtemp
-> +	status=$?
-> +	rm -f $testtemp
-
-no need to remove the test file - the $TEST_DIR is supposed to age
-with the tests that are run, so leaving scraps around is a good
-idea...
-
-> +	return $status
-> +}
+> +test_btrfs_clone_with_holes()
+> +{
+> +	_scratch_mkfs "$1" >/dev/null 2>&1
+> +	_scratch_mount
 > +
-> +_run_323
-
-Like I said, no need for a function for such a simple test... 
-
-Ah, I see where that all came from - you just copied and renamed
-_run_aiodio. Fair enough, but we can do better than that ;)
-
+> +	# Create a file with 4 extents and 1 hole, all with a size of 8Kb each.
+> +	$XFS_IO_PROG -f -c "pwrite -S 0x01 -b 8192 0 8192" $SCRATCH_MNT/foo \
+> +		| _filter_xfs_io
+> +	sync
+> +	$XFS_IO_PROG -c "pwrite -S 0x02 -b 8192 8192 8192" $SCRATCH_MNT/foo \
+> +		| _filter_xfs_io
+> +	sync
+> +	# After the following write we get an hole in the range [16384, 24576[
+> +	$XFS_IO_PROG -c "pwrite -S 0x04 -b 8192 24576 8192" $SCRATCH_MNT/foo \
+> +		| _filter_xfs_io
+> +	sync
+> +	$XFS_IO_PROG -c "pwrite -S 0x05 -b 8192 32768 8192" $SCRATCH_MNT/foo \
+> +		| _filter_xfs_io
+> +	sync
 > +
-> +exit $status
-> diff --git a/tests/generic/323.out b/tests/generic/323.out
-> new file mode 100644
-> index 0000000..8405271
-> --- /dev/null
-> +++ b/tests/generic/323.out
-> @@ -0,0 +1,11 @@
-> +QA output created by 323
-> +10+0 records in
-> +10+0 records out
-> +wait_for_events: 0
-> +num_threads: 100
-> +filename: '/mnt/test/aio-testfile'
+> +	# Clone destination file, 1 extent of 96kb.
+> +	$XFS_IO_PROG -f -c "pwrite -S 0xff -b 98304 0 98304" $SCRATCH_MNT/bar \
+> +		| _filter_xfs_io
+> +	sync
 
-This output needs to pass through _filter_testdir - so the $AIO_TEST
-executions need to be:
+As Lukas mentioned, this is way too verbose and hard to read.
+This:
 
-	$AIO_TEST 0 100 $testfile | _filter_test_dir
+	# Create a file with 4 extents and 1 hole, all with a size of 8Kb each.
+	$XFS_IO_PROG -fs \
+		-c "pwrite -S 0x01 -b 8192 0 8192" \
+		-c "pwrite -S 0x02 -b 8192 8192 8192" \
+		-c "pwrite -S 0x04 -b 8192 24576 8192" \
+		-c "pwrite -S 0x05 -b 8192 32768 8192" \
+		$SCRATCH_MNT/foo | _filter_xfs_io
+
+	# Clone destination file, 1 extent of 96kb.
+	$XFS_IO_PROG -fs -c "pwrite -S 0xff -b 98304 0 98304" \
+		$SCRATCH_MNT/bar | _filter_xfs_io
+
+is much more compact and far easier to read. It's also the same
+style as many of the other tests use for compound operations like
+this.
+
+Other than that the test look sgood.
 
 Cheers,
 
