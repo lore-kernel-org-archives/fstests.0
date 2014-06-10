@@ -1,341 +1,216 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-we0-f182.google.com ([74.125.82.182]:53615 "EHLO
-	mail-we0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751204AbaFJJOt (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 10 Jun 2014 05:14:49 -0400
-From: Filipe David Borba Manana <fdmanana@gmail.com>
-Subject: [PATCH v3] xfstests: add test for btrfs clone + fsync durability
-Date: Tue, 10 Jun 2014 11:14:31 +0100
-Message-Id: <1402395271-17619-1-git-send-email-fdmanana@gmail.com>
-In-Reply-To: <1402027700-9813-1-git-send-email-fdmanana@gmail.com>
-References: <1402027700-9813-1-git-send-email-fdmanana@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:18982 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750883AbaFJLSB (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 10 Jun 2014 07:18:01 -0400
+Date: Tue, 10 Jun 2014 07:17:50 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: Re: [PATCH] xfstests: create a test for xfs log grant head leak
+ detection
+Message-ID: <20140610111750.GA46344@bfoster.bfoster>
+References: <1402060483-22195-1-git-send-email-bfoster@redhat.com>
+ <20140610012149.GH4453@dastard>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20140610012149.GH4453@dastard>
 Sender: xfstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe David Borba Manana <fdmanana@gmail.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-Regression test for btrfs ioctl clone operation + fsync + log
-recovery. The issue was that doing an fsync after cloning into
-a file didn't gave any persistence guarantees as it should.
-What happened was that the in memory metadata (extent maps)
-weren't updated, which made the fsync code not able to detect
-that file data has been changed and must be persisted to the
-log.
+On Tue, Jun 10, 2014 at 11:21:49AM +1000, Dave Chinner wrote:
+> On Fri, Jun 06, 2014 at 09:14:43AM -0400, Brian Foster wrote:
+> > Changes in the XFS logging code have lead to small leaks in the log
+> > grant heads that consume log space slowly over time. Such problems have
+> > gone undetected for an unnecessarily long time due to code complexity
+> > and potential for very subtle problems. Losing only a few bytes per
+> > logged item on a reasonably large enough fs (10s of GB) means only the
+> > most continuously stressful workloads will cause a severe enough failure
+> > (deadlock due to log reservation exhaustion) quickly enough to indicate
+> > something is seriously wrong.
+> > 
+> > Recent changes in XFS export the state of the various log heads through
+> > sysfs to aid in userspace/runtime analysis of the log. This test runs a
+> > workload against an XFS filesystem, quiesces the fs and verifies that
+> > the log reserve and write grant heads have not leaked any space with
+> > respect to the current head of the physical log.
+> > 
+> > Signed-off-by: Brian Foster <bfoster@redhat.com>
+> > ---
+> ....
+> >
+> > +# Determine the system device name for a particular block device. The device
+> > +# name is how the block dev is referenced under sysfs.
+> > +_get_device_name()
+> > +{
+> > +	devpath=$1
+> > +
+> > +	# check for a symlink (i.e., device mapper)
+> > +	if [ -L $devpath ]
+> > +	then
+> > +		devpath=`readlink -f $devpath`
+> > +	fi
+> > +
+> > +	# grab the major minor and convert from hex to decimal
+> > +	major=$((0x`stat -c %t $devpath`))
+> > +	minor=$((0x`stat -c %T $devpath`))
+> > +
+> > +	# refer to sysfs by major minor
+> > +	basename `readlink /sys/dev/block/$major:$minor`
+> > +}
+> 
+> $ basename `readlink -f /dev/mapper/vg0-home`
+> dm-2
+> $ basename `readlink /sys/dev/block/253:2`
+> dm-2
+> 
+> Why is _short_dev() not sufficient?
+> 
 
-This issue is fixed by the following linux kernel btrfs patch:
+That should work... I guess I missed it.
 
-    Btrfs: make fsync work after cloning into a file
+> > +# Use the information exported by XFS to sysfs to determine whether the log has
+> > +# active reservations after a filesystem freeze.
+> > +_check_scratch_log_state()
+> > +{
+> > +	devname=`_get_device_name $SCRATCH_DEV`
+> > +	attrpath="/sys/fs/xfs/$devname/log"
+> > +
+> > +	# freeze the fs to ensure data is synced and the log is flushed. this
+> > +	# means no outstanding transactions, and thus no outstanding log
+> > +	# reservations, should exist
+> > +	xfs_freeze -f $SCRATCH_MNT
+> > +
+> > +	# the log head is exported in basic blocks and the log grant heads in
+> > +	# bytes. convert the log head to bytes for precise comparison
+> > +	log_head_cycle=`cat $attrpath/log_head_lsn | awk -F : '{ print $1 }'`
+> > +	log_head_bytes=`cat $attrpath/log_head_lsn | awk -F : '{ print $2 }'`
+> 
+> awk can read files directly:
+> 
+> 	log_head_cycle=`awk -F : '{ print $1 }' $attrpath/log_head_lsn`
+> 
+> > +	log_head_bytes=$((log_head_bytes * 512))
+> > +
+> > +	for attr in "reserve_grant_head" "write_grant_head"
+> > +	do
+> > +		cycle=`cat $attrpath/$attr | awk -F : '{ print $1 }'`
+> > +		bytes=`cat $attrpath/$attr | awk -F : '{ print $2 }'`
+> > +
+> > +		if [ $cycle != $log_head_cycle ] ||
+> > +		   [ $bytes != $log_head_bytes ]
+> > +		then
+> > +			echo "$attr ($cycle:$bytes) does not match" \
+> > +				"log_head_lsn ($log_head_cycle:$log_head_bytes)," \
+> > +				"possible leak detected."
+> > +		else
+> > +			echo "$attr matches log_head_lsn"
+> > +		fi
+> > +	done
+> > +
+> > +	xfs_freeze -u $SCRATCH_MNT
+> > +}
+> > +
+> > +# real QA test starts here
+> > +_supported_fs xfs
+> > +_supported_os Linux
+> > +
+> > +_require_scratch
+> > +_require_freeze
+> > +
+> > +if [ ! -e /sys/fs/xfs ]
+> > +then
+> > +	_notrun "no kernel support for XFS sysfs attributes"
+> > +fi
+> 
+> _requires_xfs_sysfs
+> 
 
-Signed-off-by: Filipe David Borba Manana <fdmanana@gmail.com>
----
+I was mulling this over as I think we'll probably end up in a situation
+where a test that depends on sysfs bits will need to check for a
+specific attribute file. E.g., some new test comes along using a new
+attribute file. Checking for /sys/fs/xfs is not sufficient for that test
+once we release a version that so far only exports the log bits.
 
-V2: Test small files too, consisting of a single inline extent, as
-    it triggers different code paths.
+I think we could handle that by supporting a parameter to
+_requires_xfs_sysfs that specifies the sub-attribute that must exist
+(similar to what we have for xfs_io commands). We don't need that at the
+moment, but that's good enough for me to create the requires func.
 
-V3: Pass -s to xfs_io when creating test files.
+> > +
+> > +rm -f $seqres.full
+> > +
+> > +_scratch_mkfs_xfs | _filter_mkfs 2>> $seqres.full
+> > +_scratch_mount
+> > +
+> > +_check_scratch_log_state
+> > +
+> > +$FSSTRESS_PROG -d $SCRATCH_MNT/fsstress -n 1000 -p 2 -S t \
+> > +	>> $seqres.full 2>&1
+> > +
+> > +_check_scratch_log_state
+> 
+> wouldn't it be better to run fsstress as a background process and do
+> several freeze/check/thaw cycles on a running workload?
+> 
 
- tests/btrfs/056     | 145 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/056.out | 129 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/group   |   1 +
- 3 files changed, 275 insertions(+)
- create mode 100755 tests/btrfs/056
- create mode 100644 tests/btrfs/056.out
+Good idea, that might be a more effective test for catching future
+issues. As it is, this test runs in a few seconds so I think we could
+beef it up a little without losing the 'quick' categorization. I'll play
+around with it.
 
-diff --git a/tests/btrfs/056 b/tests/btrfs/056
-new file mode 100755
-index 0000000..9ecfeb8
---- /dev/null
-+++ b/tests/btrfs/056
-@@ -0,0 +1,145 @@
-+#! /bin/bash
-+# FS QA Test No. btrfs/056
-+#
-+# Regression test for btrfs ioctl clone operation + fsync + log recovery.
-+# The issue was that doing an fsync after cloning into a file didn't gave any
-+# persistence guarantees as it should. What happened was that the in memory
-+# metadata (extent maps) weren't updated, which made the fsync code not able
-+# to detect that file data has been changed.
-+#
-+# This issue is fixed by the following linux kernel btrfs patch:
-+#
-+#    Btrfs: make fsync work after cloning into a file
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2014 Filipe Manana.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	_cleanup_flakey
-+	rm -fr $tmp
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmflakey
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_btrfs_cloner
-+_require_btrfs_fs_feature "no_holes"
-+_require_btrfs_mkfs_feature "no-holes"
-+_require_dm_flakey
-+_need_to_be_root
-+
-+rm -f $seqres.full
-+
-+test_btrfs_clone_fsync_log_recover()
-+{
-+	_scratch_mkfs "$1" >/dev/null 2>&1
-+	_init_flakey
-+	SAVE_MOUNT_OPTIONS="$MOUNT_OPTIONS"
-+	MOUNT_OPTIONS="$MOUNT_OPTIONS $2"
-+	_mount_flakey
-+
-+	# Create a file with 4 extents and 1 hole, all with a size of 8Kb each.
-+	# The hole is in the range [16384, 24576[.
-+	$XFS_IO_PROG -s -f -c "pwrite -S 0x01 -b 8192 0 8192" \
-+			-c "pwrite -S 0x02 -b 8192 8192 8192" \
-+			-c "pwrite -S 0x04 -b 8192 24576 8192" \
-+			-c "pwrite -S 0x05 -b 8192 32768 8192" \
-+		$SCRATCH_MNT/foo | _filter_xfs_io
-+
-+	# Clone destination file, 1 extent of 96kb.
-+	$XFS_IO_PROG -f -c "pwrite -S 0xff -b 98304 0 98304" -c "fsync" \
-+		$SCRATCH_MNT/bar | _filter_xfs_io
-+
-+	# Clone second half of the 2nd extent, the 8kb hole, the 3rd extent
-+	# and the first half of the 4th extent into file bar.
-+	$CLONER_PROG -s 12288 -d 0 -l 24576 $SCRATCH_MNT/foo $SCRATCH_MNT/bar
-+	$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/bar
-+
-+	# Test small files too consisting of 1 inline extent
-+	$XFS_IO_PROG -f -c "pwrite -S 0x00 -b 3500 0 3500" -c "fsync" \
-+		$SCRATCH_MNT/foo2 | _filter_xfs_io
-+
-+	$XFS_IO_PROG -f -c "pwrite -S 0xcc -b 1000 0 1000" -c "fsync" \
-+		$SCRATCH_MNT/bar2 | _filter_xfs_io
-+
-+	# Clone the entire foo2 file into bar2, overwriting all data in bar2
-+	# and increasing its size.
-+	$CLONER_PROG -s 0 -d 0 -l 3500 $SCRATCH_MNT/foo2 $SCRATCH_MNT/bar2
-+	$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/bar2
-+
-+	_load_flakey_table $FLAKEY_DROP_WRITES
-+	_unmount_flakey
-+
-+	# Verify that there are no consistency errors.
-+	_check_scratch_fs $FLAKEY_DEV
-+
-+	_load_flakey_table $FLAKEY_ALLOW_WRITES
-+	_mount_flakey
-+
-+	# Verify the cloned range was persisted by fsync and the log recovery
-+	# code did its work well.
-+	echo "Verifying file bar content"
-+	od -t x1 $SCRATCH_MNT/bar
-+
-+	echo "Verifying file bar2 content"
-+	od -t x1 $SCRATCH_MNT/bar2
-+
-+	_unmount_flakey
-+
-+	# Verify that there are no consistency errors.
-+	_check_scratch_fs $FLAKEY_DEV
-+
-+	_cleanup_flakey
-+	MOUNT_OPTIONS="$SAVE_MOUNT_OPTIONS"
-+}
-+
-+# Regardless of the NO_HOLES feature being enabled or not, the test results
-+# should be exactly the same for both cases.
-+
-+echo "Testing without the NO_HOLES feature"
-+# As of btrfs-progs 3.14.x, the no-holes feature isn't enabled by default.
-+# But explicitly disable it at mkfs time as it might be enabled by default
-+# in future versions.
-+test_btrfs_clone_fsync_log_recover "-O ^no-holes"
-+
-+echo "Testing without the NO_HOLES feature and compression (lzo)"
-+test_btrfs_clone_fsync_log_recover "-O ^no-holes" "-o compress-force=lzo"
-+
-+echo "Testing with the NO_HOLES feature enabled"
-+test_btrfs_clone_fsync_log_recover "-O no-holes"
-+
-+echo "Testing with the NO_HOLES feature enabled and compression (lzo)"
-+test_btrfs_clone_fsync_log_recover "-O no-holes" "-o compress-force=lzo"
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/056.out b/tests/btrfs/056.out
-new file mode 100644
-index 0000000..1b77ae3
---- /dev/null
-+++ b/tests/btrfs/056.out
-@@ -0,0 +1,129 @@
-+QA output created by 056
-+Testing without the NO_HOLES feature
-+wrote 8192/8192 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 8192
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 24576
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 32768
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 98304/98304 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 3500/3500 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 1000/1000 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Verifying file bar content
-+0000000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
-+*
-+0010000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+0030000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
-+*
-+0050000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
-+*
-+0060000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
-+*
-+0300000
-+Verifying file bar2 content
-+0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+0006640 00 00 00 00 00 00 00 00 00 00 00 00
-+0006654
-+Testing without the NO_HOLES feature and compression (lzo)
-+wrote 8192/8192 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 8192
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 24576
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 32768
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 98304/98304 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 3500/3500 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 1000/1000 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Verifying file bar content
-+0000000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
-+*
-+0010000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+0030000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
-+*
-+0050000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
-+*
-+0060000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
-+*
-+0300000
-+Verifying file bar2 content
-+0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+0006640 00 00 00 00 00 00 00 00 00 00 00 00
-+0006654
-+Testing with the NO_HOLES feature enabled
-+wrote 8192/8192 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 8192
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 24576
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 32768
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 98304/98304 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 3500/3500 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 1000/1000 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Verifying file bar content
-+0000000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
-+*
-+0010000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+0030000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
-+*
-+0050000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
-+*
-+0060000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
-+*
-+0300000
-+Verifying file bar2 content
-+0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+0006640 00 00 00 00 00 00 00 00 00 00 00 00
-+0006654
-+Testing with the NO_HOLES feature enabled and compression (lzo)
-+wrote 8192/8192 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 8192
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 24576
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 32768
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 98304/98304 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 3500/3500 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 1000/1000 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Verifying file bar content
-+0000000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
-+*
-+0010000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+0030000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
-+*
-+0050000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
-+*
-+0060000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
-+*
-+0300000
-+Verifying file bar2 content
-+0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+0006640 00 00 00 00 00 00 00 00 00 00 00 00
-+0006654
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 2c10c5b..2da7127 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -58,3 +58,4 @@
- 053 auto quick
- 054 auto quick
- 055 auto quick
-+056 auto quick
--- 
-1.9.1
+> > +
+> > +umount $SCRATCH_MNT
+> > +_check_scratch_fs
+> > +
+> > +status=0
+> > +exit
+> > diff --git a/tests/xfs/011.out b/tests/xfs/011.out
+> > new file mode 100644
+> > index 0000000..a3f3805
+> > --- /dev/null
+> > +++ b/tests/xfs/011.out
+> > @@ -0,0 +1,11 @@
+> > +QA output created by 011
+> > +meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
+> > +data     = bsize=XXX blocks=XXX, imaxpct=PCT
+> > +         = sunit=XXX swidth=XXX, unwritten=X
+> > +naming   =VERN bsize=XXX
+> > +log      =LDEV bsize=XXX blocks=XXX
+> > +realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+> 
+> Any particular reason for dumping the filtered mkfs information
+> here? It won't ever cause a test failure unless we break
+> _filter_mkfs...
+> 
 
+Not really, I'll clean that up.
+
+> > +reserve_grant_head matches log_head_lsn
+> > +write_grant_head matches log_head_lsn
+> > +reserve_grant_head matches log_head_lsn
+> > +write_grant_head matches log_head_lsn
+> > diff --git a/tests/xfs/group b/tests/xfs/group
+> > index 19fd968..99bf0e1 100644
+> > --- a/tests/xfs/group
+> > +++ b/tests/xfs/group
+> > @@ -8,6 +8,7 @@
+> >  008 rw ioctl auto quick
+> >  009 rw ioctl auto prealloc quick
+> >  010 auto quick repair
+> > +011 auto quick freeze
+> 
+> log and metadata, too.
+> 
+
+Ok. Thanks for the review.
+
+Brian
+
+> Cheers,
+> 
+> Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
