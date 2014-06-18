@@ -1,185 +1,180 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:12513 "EHLO
-	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754325AbaFJBVx (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 9 Jun 2014 21:21:53 -0400
-Date: Tue, 10 Jun 2014 11:21:49 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] xfstests: create a test for xfs log grant head leak
- detection
-Message-ID: <20140610012149.GH4453@dastard>
-References: <1402060483-22195-1-git-send-email-bfoster@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:35287 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754601AbaFRSRI (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 18 Jun 2014 14:17:08 -0400
+From: Jeff Moyer <jmoyer@redhat.com>
+Subject: Re: [patch] add an aio test which closes the fd before destroying the ioctx
+References: <x4961k97o9o.fsf@segfault.boston.devel.redhat.com>
+	<20140610004911.GF4453@dastard>
+Date: Wed, 18 Jun 2014 14:17:01 -0400
+In-Reply-To: <20140610004911.GF4453@dastard> (Dave Chinner's message of "Tue,
+	10 Jun 2014 10:49:11 +1000")
+Message-ID: <x49k38eozfm.fsf@segfault.boston.devel.redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1402060483-22195-1-git-send-email-bfoster@redhat.com>
+Content-Type: text/plain
 Sender: xfstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, Matt Cross <matt.cross@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jun 06, 2014 at 09:14:43AM -0400, Brian Foster wrote:
-> Changes in the XFS logging code have lead to small leaks in the log
-> grant heads that consume log space slowly over time. Such problems have
-> gone undetected for an unnecessarily long time due to code complexity
-> and potential for very subtle problems. Losing only a few bytes per
-> logged item on a reasonably large enough fs (10s of GB) means only the
-> most continuously stressful workloads will cause a severe enough failure
-> (deadlock due to log reservation exhaustion) quickly enough to indicate
-> something is seriously wrong.
-> 
-> Recent changes in XFS export the state of the various log heads through
-> sysfs to aid in userspace/runtime analysis of the log. This test runs a
-> workload against an XFS filesystem, quiesces the fs and verifies that
-> the log reserve and write grant heads have not leaked any space with
-> respect to the current head of the physical log.
-> 
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
-> ---
-....
+Dave Chinner <david@fromorbit.com> writes:
+
+> Ok, so the xfstest never runs the "waitevent == 2" case here, so
+> perhaps all that workaround demonstration code can be removed?
+
+sure
+
+>> +char *
+>> +round_up_to_page(unsigned char *ptr)
+>> +{
+>> +  unsigned long buf = (unsigned long) ptr;
+>> +
+>> +  if (buf % 4096) {
+>> +    buf += 4096 - buf%4096;
+>> +  }
+>> +
+>> +  return (char *)buf;
+>> +}
 >
-> +# Determine the system device name for a particular block device. The device
-> +# name is how the block dev is referenced under sysfs.
-> +_get_device_name()
-> +{
-> +	devpath=$1
-> +
-> +	# check for a symlink (i.e., device mapper)
-> +	if [ -L $devpath ]
-> +	then
-> +		devpath=`readlink -f $devpath`
-> +	fi
-> +
-> +	# grab the major minor and convert from hex to decimal
-> +	major=$((0x`stat -c %t $devpath`))
-> +	minor=$((0x`stat -c %T $devpath`))
-> +
-> +	# refer to sysfs by major minor
-> +	basename `readlink /sys/dev/block/$major:$minor`
-> +}
+> Urk. Just use memalign() to allocate "page" aligned buffers and all
+> this can go away.
+>
+> Also, can you change this code to 8 space tabs and generally clean
+> it up to be the same as the kernel coding style? The mix of 2 space
+> indents and tabs really screws up the indenting here...
 
-$ basename `readlink -f /dev/mapper/vg0-home`
-dm-2
-$ basename `readlink /sys/dev/block/253:2`
-dm-2
+Yeah.  I was just trying to keep things close to original.  I'll update
+the coding style.
 
-Why is _short_dev() not sufficient?
+>> +  CPU_ZERO(&cpuset);
+>> +  CPU_SET(mycpu, &cpuset);
+>> +  if (sched_setaffinity(mytid, sizeof(cpuset), &cpuset)) {
+>> +    printf("FAILED to set thread %d to run on cpu %ld\n", mytid, mycpu);
+>> +  }
+>
+> Any reason why process layout like this is necessary? Comments are
+> nice, even in test code...
 
-> +# Use the information exported by XFS to sysfs to determine whether the log has
-> +# active reservations after a filesystem freeze.
-> +_check_scratch_log_state()
-> +{
-> +	devname=`_get_device_name $SCRATCH_DEV`
-> +	attrpath="/sys/fs/xfs/$devname/log"
-> +
-> +	# freeze the fs to ensure data is synced and the log is flushed. this
-> +	# means no outstanding transactions, and thus no outstanding log
-> +	# reservations, should exist
-> +	xfs_freeze -f $SCRATCH_MNT
-> +
-> +	# the log head is exported in basic blocks and the log grant heads in
-> +	# bytes. convert the log head to bytes for precise comparison
-> +	log_head_cycle=`cat $attrpath/log_head_lsn | awk -F : '{ print $1 }'`
-> +	log_head_bytes=`cat $attrpath/log_head_lsn | awk -F : '{ print $2 }'`
+I honestly don't remember the specifics, other than it gave a better
+probability for reproducing the failure.  I can at least make a comment
+stating that.
 
-awk can read files directly:
+>> +	io_prep_pread(iocb, fd, round_up_to_page(buffer), sizeof(buffer) - 4096, i * (sizeof(buffer) - 4096));
+>
+> Is that really just for page alignment, or is there some other magic
+> going on here?
 
-	log_head_cycle=`awk -F : '{ print $1 }' $attrpath/log_head_lsn`
+Just page alignment.
 
-> +	log_head_bytes=$((log_head_bytes * 512))
-> +
-> +	for attr in "reserve_grant_head" "write_grant_head"
-> +	do
-> +		cycle=`cat $attrpath/$attr | awk -F : '{ print $1 }'`
-> +		bytes=`cat $attrpath/$attr | awk -F : '{ print $2 }'`
-> +
-> +		if [ $cycle != $log_head_cycle ] ||
-> +		   [ $bytes != $log_head_bytes ]
-> +		then
-> +			echo "$attr ($cycle:$bytes) does not match" \
-> +				"log_head_lsn ($log_head_cycle:$log_head_bytes)," \
-> +				"possible leak detected."
-> +		else
-> +			echo "$attr matches log_head_lsn"
-> +		fi
-> +	done
-> +
-> +	xfs_freeze -u $SCRATCH_MNT
-> +}
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_supported_os Linux
-> +
-> +_require_scratch
-> +_require_freeze
-> +
-> +if [ ! -e /sys/fs/xfs ]
-> +then
-> +	_notrun "no kernel support for XFS sysfs attributes"
-> +fi
+> Ok, so this runs in an endless loop....
+>
+>> +  printf ("All threads spawned\n");
+>> +
+>> +  gettimeofday(&start, NULL);
+>> +
+>> +  while (delta.tv_sec < 300) {
+>> +    sleep(1);
+>> +    gettimeofday(&now, NULL);
+>> +    timersub(&now, &start, &delta);
+>> +    dprintf("%lu loops completed in %ld seconds\n", total_loop_count, delta.tv_sec);
+>> +  }
+>> +
+>> +  return 0;
+>
+> And it just exits when the timer expires, with still active AIOs in
+> flight. Which means that the tst harness may well finsih up and try
+> to unmount the filesystem while IOs are still in flight. That will
+> cause spurious test failures because the scratch filesystem can't be
+> unmounted....
 
-_requires_xfs_sysfs
+No, the exit path will block on outstanding I/Os.  By the time the
+process exits, all I/O should be complete.
 
-> +
-> +rm -f $seqres.full
-> +
-> +_scratch_mkfs_xfs | _filter_mkfs 2>> $seqres.full
-> +_scratch_mount
-> +
-> +_check_scratch_log_state
-> +
-> +$FSSTRESS_PROG -d $SCRATCH_MNT/fsstress -n 1000 -p 2 -S t \
-> +	>> $seqres.full 2>&1
-> +
-> +_check_scratch_log_state
+>> +#-----------------------------------------------------------------------
+>> +# Copyright (c) 2014 Jeff Moyer.  All Rights Reserved.
+>
+> Sent from a Red Hat email address. Can you please clarify who owns
+> the copyright?
 
-wouldn't it be better to run fsstress as a background process and do
-several freeze/check/thaw cycles on a running workload?
+The script is mine, the code is Matt's.  There are copyright headers in
+both, and they attribute the copyright to the proper individual.  What
+isn't clear about that?
 
-> +
-> +umount $SCRATCH_MNT
-> +_check_scratch_fs
-> +
-> +status=0
-> +exit
-> diff --git a/tests/xfs/011.out b/tests/xfs/011.out
-> new file mode 100644
-> index 0000000..a3f3805
-> --- /dev/null
-> +++ b/tests/xfs/011.out
-> @@ -0,0 +1,11 @@
-> +QA output created by 011
-> +meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-> +data     = bsize=XXX blocks=XXX, imaxpct=PCT
-> +         = sunit=XXX swidth=XXX, unwritten=X
-> +naming   =VERN bsize=XXX
-> +log      =LDEV bsize=XXX blocks=XXX
-> +realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+>> +AIO_TEST=src/aio-dio-regress/aio-last-ref-in-irq-context
+>> +if [ ! -x $AIO_TEST ]; then
+>> +	_notrun "$AIO_TEST not built"
+>> +fi
+>
+> _require_aiodio aio-last-ref-in-irq-context
+>
+> That also sets up the AIO_TEST variable.
 
-Any particular reason for dumping the filtered mkfs information
-here? It won't ever cause a test failure unless we break
-_filter_mkfs...
+ok
 
-> +reserve_grant_head matches log_head_lsn
-> +write_grant_head matches log_head_lsn
-> +reserve_grant_head matches log_head_lsn
-> +write_grant_head matches log_head_lsn
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 19fd968..99bf0e1 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -8,6 +8,7 @@
->  008 rw ioctl auto quick
->  009 rw ioctl auto prealloc quick
->  010 auto quick repair
-> +011 auto quick freeze
+>> +
+>> +_run_323() {
+>> +	local testtemp=$TEST_DIR/aio-testfile
+>
+> testfile?
 
-log and metadata, too.
+Are you suggesting that I rename aio-tesfile to testfile?  Or rename
+testtempt to testfile?  Something else?
 
-Cheers,
+>> +	rm -f $testtemp
+>> +	dd if=/dev/zero of=$testtemp bs=1M count=10
+>
+> Use xfs_io rather than dd:
+>
+> 	$XFS_IO_PROG -ftc "pwrite 0 10m" $testfile | _filter_xfs_io
+>
+> And the "-ft" options mean you don't need to rm the $testfile
+> because it'll get truncated to empty first or created if it doesn't
+> exist.
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+ok
+
+>> +	$AIO_TEST 0 100 $testtemp
+>> +	$AIO_TEST 1 100 $testtemp
+>> +	status=$?
+>> +	rm -f $testtemp
+>
+> no need to remove the test file - the $TEST_DIR is supposed to age
+> with the tests that are run, so leaving scraps around is a good
+> idea...
+>
+>> +	return $status
+>> +}
+>> +
+>> +_run_323
+>
+> Like I said, no need for a function for such a simple test... 
+
+I'm no bash guru.  I created a function in order to avoid creating a
+global testtemp variable.  If that doesn't matter, I'm happen to flatten
+things out.
+
+>> +exit $status
+>> diff --git a/tests/generic/323.out b/tests/generic/323.out
+>> new file mode 100644
+>> index 0000000..8405271
+>> --- /dev/null
+>> +++ b/tests/generic/323.out
+>> @@ -0,0 +1,11 @@
+>> +QA output created by 323
+>> +10+0 records in
+>> +10+0 records out
+>> +wait_for_events: 0
+>> +num_threads: 100
+>> +filename: '/mnt/test/aio-testfile'
+>
+> This output needs to pass through _filter_testdir - so the $AIO_TEST
+> executions need to be:
+>
+> 	$AIO_TEST 0 100 $testfile | _filter_test_dir
+
+OK
+
+Thanks for the review, Dave!
+
+-Jeff
