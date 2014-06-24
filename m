@@ -1,117 +1,104 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44602 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750838AbaFXF2u (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 24 Jun 2014 01:28:50 -0400
-Date: Tue, 24 Jun 2014 07:28:43 +0200 (CEST)
-From: =?ISO-8859-15?Q?Luk=E1=A8_Czerner?= <lczerner@redhat.com>
-Subject: Re: [PATCH] generic/017: skip invalid block sizes for btrfs
-In-Reply-To: <20140624042646.GD9508@dastard>
-Message-ID: <alpine.LFD.2.00.1406240724030.2556@localhost.localdomain>
-References: <1403519280-24216-1-git-send-email-fdmanana@gmail.com> <alpine.LFD.2.00.1406231413400.2169@localhost.localdomain> <alpine.LFD.2.00.1406231606570.2169@localhost.localdomain> <20140624042646.GD9508@dastard>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:4042 "EHLO
+	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750710AbaFXFs6 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 24 Jun 2014 01:48:58 -0400
+Date: Tue, 24 Jun 2014 15:48:54 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 2/2] generic/017: Do not create file systems with
+ different block sizes
+Message-ID: <20140624054854.GG9508@dastard>
+References: <1403535255-14601-1-git-send-email-lczerner@redhat.com>
+ <1403535255-14601-2-git-send-email-lczerner@redhat.com>
+ <20140624043835.GF9508@dastard>
+ <alpine.LFD.2.00.1406240643160.2556@localhost.localdomain>
 MIME-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323328-652543338-1403587727=:2556"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <alpine.LFD.2.00.1406240643160.2556@localhost.localdomain>
 Sender: xfstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Filipe David Borba Manana <fdmanana@gmail.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: =?utf-8?B?THVrw6HFoQ==?= Czerner <lczerner@redhat.com>
+Cc: fstests@vger.kernel.org, fdmanana@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---8323328-652543338-1403587727=:2556
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-
-On Tue, 24 Jun 2014, Dave Chinner wrote:
-
-> Date: Tue, 24 Jun 2014 14:26:46 +1000
-> From: Dave Chinner <david@fromorbit.com>
-> To: Lukáš Czerner <lczerner@redhat.com>
-> Cc: Filipe David Borba Manana <fdmanana@gmail.com>, fstests@vger.kernel.org,
->     linux-btrfs@vger.kernel.org
-> Subject: Re: [PATCH] generic/017: skip invalid block sizes for btrfs
+On Tue, Jun 24, 2014 at 06:50:15AM +0200, Lukáš Czerner wrote:
+> On Tue, 24 Jun 2014, Dave Chinner wrote:
 > 
-> On Mon, Jun 23, 2014 at 04:09:18PM +0200, Lukáš Czerner wrote:
-> > On Mon, 23 Jun 2014, Lukáš Czerner wrote:
+> > Date: Tue, 24 Jun 2014 14:38:35 +1000
+> > From: Dave Chinner <david@fromorbit.com>
+> > To: Lukas Czerner <lczerner@redhat.com>
+> > Cc: fstests@vger.kernel.org, fdmanana@gmail.com
+> > Subject: Re: [PATCH 2/2] generic/017: Do not create file systems with
+> >     different block sizes
 > > 
-> > > Date: Mon, 23 Jun 2014 14:35:50 +0200 (CEST)
-> > > From: Lukáš Czerner <lczerner@redhat.com>
-> > > To: Filipe David Borba Manana <fdmanana@gmail.com>
-> > > Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-> > > Subject: Re: [PATCH] generic/017: skip invalid block sizes for btrfs
+> > On Mon, Jun 23, 2014 at 04:54:15PM +0200, Lukas Czerner wrote:
+> > > User takes care about specifying mkfs options he wishes to test and the
+> > > test itself should not change it if it's not strictly necessary for the
+> > > test itself.
 > > > 
-> > > On Mon, 23 Jun 2014, Filipe David Borba Manana wrote:
-> > > 
-> > > > Date: Mon, 23 Jun 2014 11:28:00 +0100
-> > > > From: Filipe David Borba Manana <fdmanana@gmail.com>
-> > > > To: fstests@vger.kernel.org
-> > > > Cc: linux-btrfs@vger.kernel.org,
-> > > >     Filipe David Borba Manana <fdmanana@gmail.com>
-> > > > Subject: [PATCH] generic/017: skip invalid block sizes for btrfs
-> > > > 
-> > > > In btrfs the block size (called sector size in btrfs) can not be
-> > > > smaller then the page size. Therefore skip block sizes smaller
-> > > > then page size if the fs is btrfs, so that the test can succeed
-> > > > on btrfs (testing only with block sizes of 4kb on systems with a
-> > > > page size of 4Kb).
-> > > 
-> > > The test itself is wrong, it's trying to do _scratch_mkfs with
-> > > different block size, but the block size might already be specified
-> > > by the user (in fact it should be user responsibility to test
-> > > different block sizes). In the case that mkfs can not handle
-> > > multiple of the same option like mkfs.xfs for example it will fail,
-> > > but the test will go on with the original file system.
-> > > 
-> > > The test needs to be fixed to just test the file system with options
-> > > specified by the user. Also we should change _scratch_mkfs() to fail
-> > > the test if the mkfs failed (no one is actually testing mkfs_status
-> > > variable anyway.
+> > > In this case it is not necessary and we should only test configuration
+> > > provided by the user. Moreover if the block size was already specified
+> > > some mkfs utilities does not handle multiple of the same parameters and
+> > > the mkfs utility fails making it re-try with only provided options
+> > > (ignoring what user specified), which is wrong.
 > > 
-> > Correction, _scratch_mkfs_xfs() is actually testing mkfs_status and
-> > will attempt to re-run mkfs only with provided options if it failed
-> > before. But my point remains the same, block size to test should be
-> > in users hands and we should run all tests with different block
-> > sizes, if supported.
+> > I disagree strongly with this justification. The test is perfectly
+> > fine: it is allowed to do whatever it wants with mkfs and mount
+> > options.
+> > 
+> > It is up to the implementations of the specific FSTYP mkfs
+> > implementation called from _scratch_mkfs to handle
+> > conflicting/unsupported options sanely, not the test....
 > 
-> Follow that line of reasoning to other options. If we take that
-> argument to it's logical conclusion, no test should be able to set
-> any mount or mkfs option because that's for the user to control.
-> This implies we can't even have quota specific tests because they
-> need to override the mount options (and perhaps mkfs options) the
-> user has specified to be properly tested.
+> I agree, the test should not care about those options at all.
 
-I acknowledge that there are tests that actually needs to set its
-own options. That's usually in the nature of the test, but it's not
-the case with this particular test. Here, it's not needed and in my
-view it's wrong because it brings unnecessary limitations and
-problems.
+That's not what I said. I said the test is perfectly entitled
+to test whatever options it wants to.
 
-> 
-> Some tests only work on specific configurations and therefore they
-> need to be able to control the execution environment directly. Hence
-> the behaviour of _scratch_mkfs_xfs(), where it will *attempt* to use
-> the user provided options. However, if they conflict with what the
-> test requires it will drop the user options and use what the test
-> requires.
-> 
-> It's better that the test overrides user provided options than fail
-> due to incompatible configuration. It makes maintenance of the tests
-> much easier because we don't have to declare and maintain the
-> supported list of user options for every test. Either the test works
-> for all configurations (i.e. whatever the user sets in
-> MKFS/MOUNT_OPTIONS), or it specifically defines the configuration
-> it is testing.
+The user specified configs are *behavioural modifiers*, not a
+draconian "this is all we test" rule. 
 
-I do agree with that, I do not think I've ever said otherwise. I was
-addressing this particular test where the specific configuration is
-not needed.
+> That's
+> why I removed it. What was done in this test was entirely
+> unnecessary and was not done in any other similar test before.
 
--Lukas
+Not true.  There are tests that override user specified configs all
+over the place. There's at least 50 calls to _scratch_mkfs_xfs with
+specific options across all the XFS tests, some of which
+specifically override block size so they can test sub-page block
+size behaviour.
 
-> 
-> Cheers,
-> 
-> Dave.
-> 
---8323328-652543338-1403587727=:2556--
+Indeed, there's a bunch of specific options passed into
+_scratch_mkfs in the btrfs tests, too, so this sort of constrained
+test configuration behaviour is not limited to just XFS.
+
+IOWs, what needs to happen here is that btrfs needs to grow an
+equivalent _scratch_mkfs_btrfs that drops conflicting options and
+filters unsupported options so that tests don't need to care about
+what a filesystem supports or doesn't support....
+
+> Yes, we can test all block size in every test from now on, but
+> what's the point?  We have a config file and the user can set
+> whatever block size he wants to test. I do not dispute that there
+> is a time when we really want to set a specific mkfs options in
+> the test, but this is not the case at all.
+
+Most people don't test multiple different block sizes, so unless
+there is excessive runtime saying "but you can specify it manually"
+is not a valid reason for preventing a single test from iterating
+over multiple mkfs and/or mount configurations.
+
+> Moreover, if I want to test specific mkfs configuration the current
+> approach might not work as it will replace the options.
+
+Only if they conflict. And in that case, it's better to simply run
+the test the way it was intended to be run than it is to fail or
+not_run it...
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
