@@ -1,63 +1,64 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:61760 "EHLO
+Received: from cn.fujitsu.com ([59.151.112.132]:7717 "EHLO
 	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752771AbaFYKG0 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 25 Jun 2014 06:06:26 -0400
-Message-ID: <53AA9EDE.8020001@cn.fujitsu.com>
-Date: Wed, 25 Jun 2014 18:05:18 +0800
-From: "gux.fnst" <gux.fnst@cn.fujitsu.com>
+	with ESMTP id S1751413AbaFYLDh (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 25 Jun 2014 07:03:37 -0400
+Received: from G08CNEXCHPEKD03.g08.fujitsu.local (localhost.localdomain [127.0.0.1])
+	by edo.cn.fujitsu.com (8.14.3/8.13.1) with ESMTP id s5PB3XVW022067
+	for <fstests@vger.kernel.org>; Wed, 25 Jun 2014 19:03:33 +0800
+From: Xing Gu <gux.fnst@cn.fujitsu.com>
+Subject: [PATCH] xfs/292: fix format of expected message
+Date: Wed, 25 Jun 2014 19:02:26 +0800
+Message-ID: <1403694146-16910-1-git-send-email-gux.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Subject: Re: [PATCH] xfstests: add test for ext4 fallocate collapse range
- check
-References: <1403157004-25112-1-git-send-email-gux.fnst@cn.fujitsu.com> <20140619065644.GL4453@dastard>
-In-Reply-To: <20140619065644.GL4453@dastard>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Sender: xfstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>, =?UTF-8?B?THVrw6HFoSBDemVybmVy?= <lczerner@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Xing Gu <gux.fnst@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
+In mkfs.xfs, it uses left-align and fixed width format when outputting
+device name, so variable length of devicename makes different space's
+number between "meta-data=devicename" and "isize". But in the expected
+output, the space' number between them is fixed. This behavior often
+results in the case failure. So fix the format of expected message.
 
+Signed-off-by: Xing Gu <gux.fnst@cn.fujitsu.com>
+---
+ tests/xfs/292     | 6 ++++--
+ tests/xfs/292.out | 4 ++--
+ 2 files changed, 6 insertions(+), 4 deletions(-)
 
-On 06/19/2014 02:56 PM, Dave Chinner wrote:
-> On Thu, Jun 19, 2014 at 01:50:04PM +0800, Xing Gu wrote:
->> This is a test to verify the procedure which checks whether
->> offset + len is bigger than i_size is removed from do_fallocate
->> in collapse range to the file system, and ensure that i_size is
->> not going to change.
->>
->> Signed-off-by: Xing Gu <gux.fnst@cn.fujitsu.com>
->
-> Does the test really need 3 minutes?
+diff --git a/tests/xfs/292 b/tests/xfs/292
+index 2910118..1762215 100755
+--- a/tests/xfs/292
++++ b/tests/xfs/292
+@@ -53,9 +53,11 @@ rm -f $fsfile
+ $XFS_IO_PROG -f -c "truncate 256g" $fsfile
+ 
+ echo "mkfs.xfs without geometry"
+-mkfs.xfs -f $fsfile 2>&1 | sed -e "s:$fsfile:FILENAME:g" | grep meta-data
++mkfs.xfs -f $fsfile 2>&1 | grep meta-data | \
++    sed -e "s:$fsfile:FILENAME:g" -e "s:[ ][ ]*: :g"
+ echo "mkfs.xfs with cmdline geometry"
+-mkfs.xfs -f -d su=16k,sw=5 $fsfile 2>&1 | sed -e "s:$fsfile:FILENAME:g" | grep meta-data
++mkfs.xfs -f -d su=16k,sw=5 $fsfile 2>&1 | grep meta-data | \
++    sed -e "s:$fsfile:FILENAME:g" -e "s:[ ][ ]*: :g"
+ 
+ rm -f $fsfile
+ 
+diff --git a/tests/xfs/292.out b/tests/xfs/292.out
+index fd88105..abed9f9 100644
+--- a/tests/xfs/292.out
++++ b/tests/xfs/292.out
+@@ -1,5 +1,5 @@
+ QA output created by 292
+ mkfs.xfs without geometry
+-meta-data=FILENAME   isize=256    agcount=4, agsize=16777216 blks
++meta-data=FILENAME isize=256 agcount=4, agsize=16777216 blks
+ mkfs.xfs with cmdline geometry
+-meta-data=FILENAME   isize=256    agcount=16, agsize=4194304 blks
++meta-data=FILENAME isize=256 agcount=16, agsize=4194304 blks
+-- 
+1.9.3
 
-Actually, this case can easily reproduce the issue below 30s.
-
->
-> We can't keep adding tests that take minutes to *maybe* hit a
-> regression. This isn't even testing a regression - the
-> COLLAPSE_RANGE feature was introduced in 3.15-rc1 and this bug fixed
-> in 3.15-rc3, so there are no kernels out there that have this
-> bug in them.
->
-> IOWs, I really don't think we should be the runtime of a typical
-> test cycle by 5% to exercise this non-bug. Maybe 30s at most, but a
-> shorter, directly targeted test would be better.
->
-> And FWIW, there's nothing ext4 specific about this test - it should
-> be in the generic group if we are going to add it.
-
-Indeed, it's not ext4 specific.
-
-What about modifying this case according to Lukas's comment?
-
-Thanks!
-
-Regards,
-Xing Gu
-
->
-> Cheers,
->
-> Dave.
->
