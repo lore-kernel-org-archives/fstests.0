@@ -1,110 +1,63 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:65112 "EHLO
+Received: from cn.fujitsu.com ([59.151.112.132]:61760 "EHLO
 	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753297AbaFYKGR convert rfc822-to-8bit (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 25 Jun 2014 06:06:17 -0400
-Message-ID: <53AA9ED5.5080408@cn.fujitsu.com>
-Date: Wed, 25 Jun 2014 18:05:09 +0800
+	with ESMTP id S1752771AbaFYKG0 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 25 Jun 2014 06:06:26 -0400
+Message-ID: <53AA9EDE.8020001@cn.fujitsu.com>
+Date: Wed, 25 Jun 2014 18:05:18 +0800
 From: "gux.fnst" <gux.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
 Subject: Re: [PATCH] xfstests: add test for ext4 fallocate collapse range
  check
-References: <1403157004-25112-1-git-send-email-gux.fnst@cn.fujitsu.com> <alpine.LFD.2.00.1406191105220.2182@localhost.localdomain>
-In-Reply-To: <alpine.LFD.2.00.1406191105220.2182@localhost.localdomain>
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 8BIT
+References: <1403157004-25112-1-git-send-email-gux.fnst@cn.fujitsu.com> <20140619065644.GL4453@dastard>
+In-Reply-To: <20140619065644.GL4453@dastard>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: xfstests-owner@vger.kernel.org
-To: =?windows-1252?Q?Luk=E1=9A_Czerner?= <lczerner@redhat.com>, Dave Chinner <david@fromorbit.com>
+To: Dave Chinner <david@fromorbit.com>, =?UTF-8?B?THVrw6HFoSBDemVybmVy?= <lczerner@redhat.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
 
 
-On 06/19/2014 05:12 PM, Lukáš Czerner wrote:
-> On Thu, 19 Jun 2014, Xing Gu wrote:
->
->> Date: Thu, 19 Jun 2014 13:50:04 +0800
->> From: Xing Gu <gux.fnst@cn.fujitsu.com>
->> To: fstests@vger.kernel.org
->> Cc: Xing Gu <gux.fnst@cn.fujitsu.com>
->> Subject: [PATCH] xfstests: add test for ext4 fallocate collapse range check
+On 06/19/2014 02:56 PM, Dave Chinner wrote:
+> On Thu, Jun 19, 2014 at 01:50:04PM +0800, Xing Gu wrote:
+>> This is a test to verify the procedure which checks whether
+>> offset + len is bigger than i_size is removed from do_fallocate
+>> in collapse range to the file system, and ensure that i_size is
+>> not going to change.
 >>
->> +
->> +testfile=$SCRATCH_MNT/file.$seq
->> +# fcollapse/truncate continuously and simultaneously
->> +# a same file
->> +for ((i=1; i <= 100; i++))
->> +do
->> +	while true;do
->> +		$XFS_IO_PROG -f -c 'truncate 100k' $testfile 2>> $seqres.full
->> +		$XFS_IO_PROG -f -c 'fcollapse 0 16k' $testfile 2>> $seqres.full
->> +	done &
->> +	PIDS="$PIDS $!"
->> +	while true;do
->> +		$XFS_IO_PROG -f -c 'truncate 0' $testfile 2>> $seqres.full
->> +	done &
->> +	PIDS="$PIDS $!"
+>> Signed-off-by: Xing Gu <gux.fnst@cn.fujitsu.com>
 >
-> It does not look like it's just checking whether we correctly bail
-> out if collapse range ends past i_size, but rather it's checking for
-> the truncate/collapse range race.
->
-> Also in description you're saying that we need to make sure that
-> i_size is not going to change, which is not tested here at all.
->
-> So I think that you need to split it in two tests:
->
->   - test truncate/collapse range race (what is the failure
->     condition?)
->   - test whether we correctly bail out when collapse range is past
->     i_size and make sure that i_size did not change at all.
+> Does the test really need 3 minutes?
 
+Actually, this case can easily reproduce the issue below 30s.
 
-Indeed, this case is not ext4 specific, and just checks for the 
-truncate/collapse range race.
-If this case is needed by xfstests, I will modify the classification and 
-description of this case according to your comment.
+>
+> We can't keep adding tests that take minutes to *maybe* hit a
+> regression. This isn't even testing a regression - the
+> COLLAPSE_RANGE feature was introduced in 3.15-rc1 and this bug fixed
+> in 3.15-rc3, so there are no kernels out there that have this
+> bug in them.
+>
+> IOWs, I really don't think we should be the runtime of a typical
+> test cycle by 5% to exercise this non-bug. Maybe 30s at most, but a
+> shorter, directly targeted test would be better.
+>
+> And FWIW, there's nothing ext4 specific about this test - it should
+> be in the generic group if we are going to add it.
 
-Thanks for your review!
+Indeed, it's not ext4 specific.
+
+What about modifying this case according to Lukas's comment?
+
+Thanks!
 
 Regards,
 Xing Gu
 
-
 >
-> Thanks!
-> -Lukas
+> Cheers,
 >
->> +done
->> +# sleep for 180s, BUG_ON is triggered within 3 minutes
->> +# in most case
->> +sleep 180
->> +
->> +new_bug=`dmesg | grep -c "kernel BUG"`
->> +if [ $new_bug -ne $old_bug ]; then
->> +	echo "kernel bug detected, check dmesg for more infomation."
->> +fi
->> +
->> +kill $PIDS >/dev/null 2>&1
->> +wait
->> +status=0
->> +exit
->> diff --git a/tests/ext4/307.out b/tests/ext4/307.out
->> new file mode 100644
->> index 0000000..260c17c
->> --- /dev/null
->> +++ b/tests/ext4/307.out
->> @@ -0,0 +1 @@
->> +QA output created by 307
->> diff --git a/tests/ext4/group b/tests/ext4/group
->> index 7e66035..0f1852f 100644
->> --- a/tests/ext4/group
->> +++ b/tests/ext4/group
->> @@ -12,3 +12,4 @@
->>   304 aio dangerous ioctl rw stress
->>   305 auto
->>   306 auto rw resize quick
->> +307 auto
->>
-> .
+> Dave.
 >
