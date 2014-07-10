@@ -1,56 +1,42 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:42646 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751364AbaGJTYl (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 10 Jul 2014 15:24:41 -0400
-Date: Thu, 10 Jul 2014 12:24:38 -0700
-From: Mark Fasheh <mfasheh@suse.de>
-Subject: Re: [PATCH] xfstests/btrfs: add test for quota groups and drop
-	snapshot
-Message-ID: <20140710192438.GD5484@wotan.suse.de>
-Reply-To: Mark Fasheh <mfasheh@suse.de>
-References: <20140709224150.GA5484@wotan.suse.de> <20140710004330.GG4453@dastard> <20140710173614.GB5484@wotan.suse.de> <20140710183228.GD17201@lenny.home.zabbo.net> <20140710190055.GC5484@wotan.suse.de> <20140710190505.GE17201@lenny.home.zabbo.net>
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:30551 "EHLO
+	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751213AbaGJUuP (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 10 Jul 2014 16:50:15 -0400
+Date: Fri, 11 Jul 2014 06:50:11 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 2/2] xfstests: Check fs consistency on TEST_DEV only when
+ needed
+Message-ID: <20140710205011.GL4453@dastard>
+References: <1403617014-17870-1-git-send-email-lczerner@redhat.com>
+ <1403617014-17870-2-git-send-email-lczerner@redhat.com>
+ <20140710010711.GJ4453@dastard>
+ <alpine.LFD.2.00.1407101031150.2659@localhost.localdomain>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20140710190505.GE17201@lenny.home.zabbo.net>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <alpine.LFD.2.00.1407101031150.2659@localhost.localdomain>
 Sender: fstests-owner@vger.kernel.org
-To: Zach Brown <zab@zabbo.net>
-Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Chris Mason <clm@fb.com>, Josef Bacik <jbacik@fb.com>
+To: =?utf-8?B?THVrw6HFoQ==?= Czerner <lczerner@redhat.com>
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 10, 2014 at 12:05:05PM -0700, Zach Brown wrote:
-> On Thu, Jul 10, 2014 at 12:00:55PM -0700, Mark Fasheh wrote:
-> > On Thu, Jul 10, 2014 at 11:32:28AM -0700, Zach Brown wrote:
-> > > On Thu, Jul 10, 2014 at 10:36:14AM -0700, Mark Fasheh wrote:
-> > > > On Thu, Jul 10, 2014 at 10:43:30AM +1000, Dave Chinner wrote:
-> > > > > On Wed, Jul 09, 2014 at 03:41:50PM -0700, Mark Fasheh wrote:
-> > > > > > +
-> > > > > > +# Enable qgroups now that we have our filesystem prepared. This
-> > > > > > +# will kick off a scan which we will have to wait for below.
-> > > > > > +$BTRFS_UTIL_PROG qu en $SCRATCH_MNT
-> > > > > > +sleep 30
-> > > > > 
-> > > > > That seems rather arbitrary. The sleeps you are adding add well over
-> > > > > a minute to the runtime, and a quota scan of a filesystem with 200
-> > > > > files should be almost instantenous.
-> > > > 
-> > > > Yeah I'll bring that back down to 5 seconds?
-> > > 
-> > > How long does it usually take?
-> > > 
-> > > What interfaces would be needed for this to work precisely so we don't
-> > > have to play this game ever again?
-> > 
-> > Well there's also the 'sleep 45' below because we need to be certain that
-> > btrfs_drop_snapshot gets run. This was all a bit of a pain during debugging
-> > to be honest.
-> 
-> Yeah.  It seems like there's an opportunity for sync flags in the
-> commands.
+On Thu, Jul 10, 2014 at 10:38:45AM +0200, Lukáš Czerner wrote:
+> On Thu, 10 Jul 2014, Dave Chinner wrote:
+> I like the idea Eric proposed with the _require_test check for the
+> test that actually require test device and then actually check the
+> device only after such test. Will that be acceptable ? If so I'll
+> rework the patches.
 
-Yep, that would've helped.
-	--Mark
+Works for me. Don't forget to add it to the "new" script as well
+so the default is to check the test device. That will trigger us to
+check if it is necessary during test development review, rather than
+forgetting we need to add it. ;)
 
---
-Mark Fasheh
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
