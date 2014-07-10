@@ -1,62 +1,95 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:40336 "EHLO
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:60235 "EHLO
 	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753923AbaGJAw3 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 9 Jul 2014 20:52:29 -0400
-Date: Thu, 10 Jul 2014 10:51:19 +1000
+	by vger.kernel.org with ESMTP id S1755786AbaGJBHn (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 9 Jul 2014 21:07:43 -0400
+Date: Thu, 10 Jul 2014 11:07:11 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] xfs/292: fix format of expected message
-Message-ID: <20140710005119.GI4453@dastard>
-References: <1403694146-16910-1-git-send-email-gux.fnst@cn.fujitsu.com>
+Subject: Re: [PATCH 2/2] xfstests: Check fs consistency on TEST_DEV only when
+ needed
+Message-ID: <20140710010711.GJ4453@dastard>
+References: <1403617014-17870-1-git-send-email-lczerner@redhat.com>
+ <1403617014-17870-2-git-send-email-lczerner@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1403694146-16910-1-git-send-email-gux.fnst@cn.fujitsu.com>
+In-Reply-To: <1403617014-17870-2-git-send-email-lczerner@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Xing Gu <gux.fnst@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org
+To: Lukas Czerner <lczerner@redhat.com>
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jun 25, 2014 at 07:02:26PM +0800, Xing Gu wrote:
-> In mkfs.xfs, it uses left-align and fixed width format when outputting
-> device name, so variable length of devicename makes different space's
-> number between "meta-data=devicename" and "isize". But in the expected
-> output, the space' number between them is fixed. This behavior often
-> results in the case failure. So fix the format of expected message.
-> 
-> Signed-off-by: Xing Gu <gux.fnst@cn.fujitsu.com>
+On Tue, Jun 24, 2014 at 03:36:54PM +0200, Lukas Czerner wrote:
+> Currently we're checking file system consistency on TEST_DEV after every
+> successful test run even though the TEST_DEV might not even be used in
+> that test.
+
+It gets mounted/unmounted for each test, so even if it is not used,
+it might still get modified...
+
+> Fix it by checking for number of write io on TEST_DEV device before the
+> test and compare it with the value after the test.
+
+Doesn't work for ram disks:
+
+# ./setup 
+TEST: DIR=/mnt/test DEV=/dev/ram0 rt=[] log=[]
+TAPE: dev=[] rmt=[] rmtirix=[@]
+SCRATCH: MNT=/mnt/scr DEV=/dev/ram1 rt=[] log=[]
+VARIABLES: external=no largeblk=no fstyp=xfs
+           large_scratch_dev=no attrsecure=no
+# ls -l /dev/ram0
+brw-rw---- 1 root disk 1, 0 Jul  9 15:51 /dev/ram0
+# cat /sys/dev/block/1\:0/stat
+       0        0        0        0        0        0        0        0        0        0        0
+#
+
+Nor does it work on loop devices.
+
+> Signed-off-by: Lukas Czerner <lczerner@redhat.com>
 > ---
->  tests/xfs/292     | 6 ++++--
->  tests/xfs/292.out | 4 ++--
->  2 files changed, 6 insertions(+), 4 deletions(-)
+>  check     |  6 +++++-
+>  common/rc | 11 +++++++++++
+>  2 files changed, 16 insertions(+), 1 deletion(-)
 > 
-> diff --git a/tests/xfs/292 b/tests/xfs/292
-> index 2910118..1762215 100755
-> --- a/tests/xfs/292
-> +++ b/tests/xfs/292
-> @@ -53,9 +53,11 @@ rm -f $fsfile
->  $XFS_IO_PROG -f -c "truncate 256g" $fsfile
+> diff --git a/check b/check
+> index 40f99d7..66d0f72 100755
+> --- a/check
+> +++ b/check
+> @@ -544,6 +544,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+>  		rm -f core $seqres.notrun
 >  
->  echo "mkfs.xfs without geometry"
-> -mkfs.xfs -f $fsfile 2>&1 | sed -e "s:$fsfile:FILENAME:g" | grep meta-data
-> +mkfs.xfs -f $fsfile 2>&1 | grep meta-data | \
-> +    sed -e "s:$fsfile:FILENAME:g" -e "s:[ ][ ]*: :g"
->  echo "mkfs.xfs with cmdline geometry"
-> -mkfs.xfs -f -d su=16k,sw=5 $fsfile 2>&1 | sed -e "s:$fsfile:FILENAME:g" | grep meta-data
-> +mkfs.xfs -f -d su=16k,sw=5 $fsfile 2>&1 | grep meta-data | \
-> +    sed -e "s:$fsfile:FILENAME:g" -e "s:[ ][ ]*: :g"
->  
->  rm -f $fsfile
+>  		scratch_atime=`stat -c %X $SCRATCH_DEV`
+> +		test_write_io=`_get_write_io_count $TEST_DEV`
+>  		start=`_wallclock`
+>  		$timestamp && echo -n "	["`date "+%T"`"]"
+>  		[ ! -x $seq ] && chmod u+x $seq # ensure we can run it
+> @@ -626,7 +627,10 @@ for section in $HOST_OPTIONS_SECTIONS; do
+>  	    then
+>  		try="$try $seqnum"
+>  		n_try=`expr $n_try + 1`
+> -		_check_test_fs
+> +		write_io=`_get_write_io_count $TEST_DEV`
+> +		if [ -z $test_write_io ] || [ $write_io -ne $test_write_io ]; then
+> +			_check_test_fs
+> +		fi
 
-I think this test could be better rewritten to use _filter_mkfs. ie.
+Which you work around without mentioning the reason for the zero
+value check. ;)
 
-mkfs.xfs -f $fsfile | _filter_mkfs 2> $tmp.mkfs > /dev/null
-grep ddev $tmp.mkfs
+Personally, I want the test devices on my systems checked regardless
+of whether the test tries to modify them or not. I, quite frankly,
+don't trust the block device stats because they often get broken or
+are inaccurate. Indeed, there were recent virtio block device
+changes in 3.14-rc1 (or was it 3.15?) that broke the device stats
+and that took several weeks to get fixed properly.
 
-So that it uses the generic mkfs filter and pulls just the info
-needed from the variable file that the filter produces. That way we
-only have to update one filter whenever the mkfs output format
-changes.
+Hence I don't think using the block device stats for something as
+critical as determining whether we should check a filesystem or not.
+
+Reducing runtime of the test harness is a good idea, but we should
+not do that if the cost is that it reduces the reliability of error
+detection.
 
 Cheers,
 
