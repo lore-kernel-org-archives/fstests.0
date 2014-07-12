@@ -1,88 +1,48 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:11864 "EHLO
-	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752009AbaGJVKa (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 10 Jul 2014 17:10:30 -0400
-Date: Fri, 11 Jul 2014 07:10:27 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] xfstests/btrfs: add test for quota groups and drop
- snapshot
-Message-ID: <20140710211027.GM4453@dastard>
-References: <20140709224150.GA5484@wotan.suse.de>
- <20140710004330.GG4453@dastard>
- <20140710173614.GB5484@wotan.suse.de>
+Received: from mx1.redhat.com ([209.132.183.28]:56919 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752029AbaGLB6s (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 11 Jul 2014 21:58:48 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id s6C1wmTd006508
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
+	for <fstests@vger.kernel.org>; Fri, 11 Jul 2014 21:58:48 -0400
+Message-ID: <53C09658.2000905@redhat.com>
+Date: Fri, 11 Jul 2014 20:58:48 -0500
+From: Eric Sandeen <sandeen@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20140710173614.GB5484@wotan.suse.de>
+Subject: [PATCH] xfs/291: use xfs_repair -f when repairing a fs image
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Mark Fasheh <mfasheh@suse.de>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Chris Mason <clm@fb.com>, Josef Bacik <jbacik@fb.com>
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 10, 2014 at 10:36:14AM -0700, Mark Fasheh wrote:
-> Hey Dave, thanks for the patch review! Pretty much all of what you wrote
-> sounds good to me, there's just one or two items I wanted to clarify - those
-> comments are inline. Thanks again,
-> 
-> On Thu, Jul 10, 2014 at 10:43:30AM +1000, Dave Chinner wrote:
-> > On Wed, Jul 09, 2014 at 03:41:50PM -0700, Mark Fasheh wrote:
-> > > +
-> > > +# Enable qgroups now that we have our filesystem prepared. This
-> > > +# will kick off a scan which we will have to wait for below.
-> > > +$BTRFS_UTIL_PROG qu en $SCRATCH_MNT
-> > > +sleep 30
-> > 
-> > That seems rather arbitrary. The sleeps you are adding add well over
-> > a minute to the runtime, and a quota scan of a filesystem with 200
-> > files should be almost instantenous.
-> 
-> Yeah I'll bring that back down to 5 seconds? It's 30 from my testing because
-> I was being paranoid and neglected to update it for the rest of the world.
+test xfs/291 creates an xfs_metadump image and runs repair on it.
+Technically, this is supposed to require "-f" to specify that
+the target of the repair is a file; this allows buffered IO fallback
+in the case where the image sector size is smaller than the device
+sector size.  And in fact if we create the image on a hard 4k device,
+the test will fail when repair is unable to operate on the image.
 
-Be nice to have the btrfs command wait for it to complete. Not being
-able to query the status of background work or wait for it is
-somewhat user unfriendly. If you could poll, then a 1s sleep in a
-poll loop would be fine. Short of that, then I guess sleep 5 is the
-best we can do.
+So add that -f!
 
-> 
-> > > +_scratch_unmount
-> > > +_scratch_mount
-> > 
-> > What is the purpose of this?
-> 
-> This is kind of 'maximum paranoia' again from my own test script. The idea
-> was to make _absolutely_ certain that all metadata found it's way to disk
-> and won't be optimized in layout any more. There's a decent chance it
-> doesn't do anything but it doesn't seem a huge deal. I wasn't clear though -
-> do you want it removed or can I comment it for clarity?
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
 
-Comment. If someone reads the test in 2 years time they won't
-have to ask "wtf?"...
 
-> > > +# Ok, delete the snapshot we made previously. Since btrfs drop
-> > > +# snapshot is a delayed action with no way to force it, we have to
-> > > +# impose another sleep here.
-> > > +$BTRFS_UTIL_PROG su de $SCRATCH_MNT/snap1
-> > > +sleep 45
-> > 
-> > That's indicative of a bug, yes?
-> 
-> No, that's just how it happens. In fact, if you unmount while a snapshot is
-> being dropped, progress of the drop will be recorded and it will be
-> continued on next mount. However, since we *must* have the drop_snapshot
-> complete for this test I have the large sleep. Unlike the previous sleep I
-> don't think this can be reduced by much :(
+diff --git a/tests/xfs/291 b/tests/xfs/291
+index 0f3f051..fbf9c51 100755
+--- a/tests/xfs/291
++++ b/tests/xfs/291
+@@ -122,7 +122,7 @@ _xfs_check $SCRATCH_DEV >> $seqres.full 2>&1 || _fail "xfs_check failed"
+ # Can xfs_metadump cope with this monster?
+ _scratch_metadump $tmp.metadump || _fail "xfs_metadump failed"
+ xfs_mdrestore $tmp.metadump $tmp.img || _fail "xfs_mdrestore failed"
+-xfs_repair $tmp.img >> $seqres.full 2>&1 || _fail "xfs_repair of metadump failed"
++xfs_repair -f $tmp.img >> $seqres.full 2>&1 || _fail "xfs_repair of metadump failed"
+ 
+ # Yes it can; success, all done
+ status=0
 
-Right, again the "can't wait or poll for status of background work"
-issue comes up.  That's the bug in the UI I was refering to. I guess
-that we'll just have to wait for a long time here. Pretty hacky,
-though...
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
