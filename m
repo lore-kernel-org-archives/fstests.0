@@ -1,67 +1,30 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from aserp1040.oracle.com ([141.146.126.69]:45023 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753658AbaGQG4t (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 17 Jul 2014 02:56:49 -0400
-From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH] xfstests/btrfs: _devmgt_add() to check if the device is back online
-Date: Thu, 17 Jul 2014 15:17:41 +0800
-Message-Id: <1405581461-12379-1-git-send-email-anand.jain@oracle.com>
+Received: from bombadil.infradead.org ([198.137.202.9]:58078 "EHLO
+	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754137AbaGQJHP (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 17 Jul 2014 05:07:15 -0400
+Date: Thu, 17 Jul 2014 02:07:14 -0700
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH] xfs/007: add project quota Q_XQUOTRM test
+Message-ID: <20140717090714.GA16015@infradead.org>
+References: <53C73562.3010005@oracle.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <53C73562.3010005@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: Jeff Liu <jeff.liu@oracle.com>
+Cc: fstests@vger.kernel.org, "xfs@oss.sgi.com" <xfs@oss.sgi.com>
 List-ID: <fstests@vger.kernel.org>
 
-btrfs/003 uses a method to remove the device as part of the test
-case, and after the test completes the removed device is added
-back to the system. However on certain system, albeit the slow
-running system the device comes back a bit later, and so the
-latter occurring sub-test with in the btrfs/003 fails.
+On Thu, Jul 17, 2014 at 10:30:58AM +0800, Jeff Liu wrote:
+> From: Jie Liu <jeff.liu@oracle.com>
+> 
+> Add test for project quota Q_XQUOTRM operations, this patch also
+> update the golden output file to match the new output.
 
-This patch adds script to wait and test if the device is back online,
-and thus report the same to to the full log.
+Changing the test to require crc filesystems seems like a bad idea.
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
----
- common/rc | 25 +++++++++++++++++++++++++
- 1 file changed, 25 insertions(+)
-
-diff --git a/common/rc b/common/rc
-index 2c83340..4a6511f 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2054,6 +2054,31 @@ _devmgt_add()
- 	tdl=`echo ${1} | cut -d":" -f 2-|sed 's/:/ /g'`
- 
- 	echo ${tdl} >  /sys/class/scsi_host/host${h}/scan || _fail "Add disk failed"
-+
-+	# ensure the device comes online
-+	dev_back_oneline=0
-+	for i in `seq 1 10`; do
-+		if [ -d /sys/class/scsi_device/${1}/device/block ]; then
-+			dev=`ls /sys/class/scsi_device/${1}/device/block`
-+			for j in `seq 1 10`;
-+			do
-+				stat /dev/$dev > /dev/null 2>&1
-+				if [ $? -eq 0 ]; then
-+					dev_back_oneline=1
-+					break
-+				fi
-+				sleep 1
-+			done
-+			break
-+		else
-+			sleep 1
-+		fi
-+	done
-+	if [ $dev_back_oneline -eq 0 ]; then
-+		echo "/dev/$dev online failed" >> $seqres.full
-+	else
-+		echo "/dev/$dev is back online" >> $seqres.full
-+	fi
- }
- 
- _require_fstrim()
--- 
-2.0.0.153.g79dcccc
+I'd suggest to simply do two passes instead: the first one unchanged,
+and the second one testing project instead of group quotas.
 
