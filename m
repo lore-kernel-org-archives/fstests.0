@@ -1,41 +1,93 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:35969 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933645AbaGPQxi (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 16 Jul 2014 12:53:38 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id s6GGrcJF026236
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
-	for <fstests@vger.kernel.org>; Wed, 16 Jul 2014 12:53:38 -0400
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 2/2] shared/006: use _get_free_inode helper
-Date: Thu, 17 Jul 2014 00:53:19 +0800
-Message-Id: <1405529599-31281-1-git-send-email-eguan@redhat.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:36914 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752324AbaGQCbI (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 16 Jul 2014 22:31:08 -0400
+Message-ID: <53C73562.3010005@oracle.com>
+Date: Thu, 17 Jul 2014 10:30:58 +0800
+From: Jeff Liu <jeff.liu@oracle.com>
+MIME-Version: 1.0
+Subject: [PATCH] xfs/007: add project quota Q_XQUOTRM test
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+Cc: "xfs@oss.sgi.com" <xfs@oss.sgi.com>
 List-ID: <fstests@vger.kernel.org>
 
-Use _get_free_inode helper to get free inode count.
+From: Jie Liu <jeff.liu@oracle.com>
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
+Add test for project quota Q_XQUOTRM operations, this patch also
+update the golden output file to match the new output.
+
+Signed-off-by: Jie Liu <jeff.liu@oracle.com>
 ---
- tests/shared/006 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ tests/xfs/007     | 15 ++++++++++-----
+ tests/xfs/007.out |  4 +++-
+ 2 files changed, 13 insertions(+), 6 deletions(-)
 
-diff --git a/tests/shared/006 b/tests/shared/006
-index 445c35d..f7240c1 100755
---- a/tests/shared/006
-+++ b/tests/shared/006
-@@ -69,7 +69,7 @@ _scratch_mkfs_sized $((1024 * 1024 * 1024)) >>$seqres.full 2>&1
- _scratch_mount
+diff --git a/tests/xfs/007 b/tests/xfs/007
+index 8cc5bf3..ca05a3c 100755
+--- a/tests/xfs/007
++++ b/tests/xfs/007
+@@ -47,10 +47,12 @@ _supported_os Linux Irix
  
- i=0
--free_inode=`$DF_PROG -i $SCRATCH_MNT | tail -1 | awk '{print $3}'`
-+free_inode=`_get_free_inode $SCRATCH_MNT`
- file_per_dir=1000
- loop=$((free_inode / file_per_dir + 1))
- mkdir -p $SCRATCH_MNT/testdir
+ _require_scratch
+ _require_xfs_quota
++_require_xfs_mkfs_crc
++_require_xfs_crc
+ 
+-_scratch_mkfs_xfs >/dev/null 2>&1
++_scratch_mkfs_xfs -m crc=1 >/dev/null 2>&1
+ 
+-_qmount_option "uquota,gquota"
++_qmount_option "uquota,gquota,pquota"
+ _qmount
+ 
+ echo "*** umount"
+@@ -58,21 +60,24 @@ umount $SCRATCH_MNT
+ 
+ UQUOTINO=`xfs_db -c "sb 0" -c "p" $SCRATCH_DEV | grep uquotino | awk '{print $NF}'`
+ GQUOTINO=`xfs_db -c "sb 0" -c "p" $SCRATCH_DEV | grep gquotino | awk '{print $NF}'` 
++PQUOTINO=`xfs_db -c "sb 0" -c "p" $SCRATCH_DEV | grep pquotino | awk '{print $NF}'`
+ 
+ echo "*** Usage before quotarm ***"
+ xfs_db -c "inode $UQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
+ xfs_db -c "inode $GQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
++xfs_db -c "inode $PQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
+ 
+ _qmount
+-echo "*** turn off user and group quotas"
+-xfs_quota -x -c 'off -ug' $SCRATCH_MNT
+-xfs_quota -x -c "remove -ug" $SCRATCH_MNT
++echo "*** turn off user/group/project quotas"
++xfs_quota -x -c 'off -ugp' $SCRATCH_MNT
++xfs_quota -x -c "remove -ugp" $SCRATCH_MNT
+ echo "*** umount"
+ umount $SCRATCH_MNT
+ 
+ echo "*** Usage after quotarm ***"
+ xfs_db -c "inode $UQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
+ xfs_db -c "inode $GQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
++xfs_db -c "inode $PQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
+ 
+ # success, all done
+ status=0
+diff --git a/tests/xfs/007.out b/tests/xfs/007.out
+index 0fc17ae..f370e5f 100644
+--- a/tests/xfs/007.out
++++ b/tests/xfs/007.out
+@@ -3,8 +3,10 @@ QA output created by 007
+ *** Usage before quotarm ***
+ core.nblocks = 1
+ core.nblocks = 1
+-*** turn off user and group quotas
++core.nblocks = 1
++*** turn off user/group/project quotas
+ *** umount
+ *** Usage after quotarm ***
+ core.nblocks = 0
+ core.nblocks = 0
++core.nblocks = 0
 -- 
-1.9.3
-
+1.8.3.2
