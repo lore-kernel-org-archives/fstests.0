@@ -1,78 +1,49 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:16372 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752007AbaGUD14 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 20 Jul 2014 23:27:56 -0400
-From: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
-Subject: [PATCH v2] ext4: regression test for wrong assert in ext4_mb_normalize_request()
-Date: Mon, 21 Jul 2014 11:27:05 +0800
-Message-ID: <1405913225-1920-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
-In-Reply-To: <53CC87A0.1060204@cn.fujitsu.com>
-References: <53CC87A0.1060204@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from mx1.redhat.com ([209.132.183.28]:46394 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751033AbaGUEMQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 21 Jul 2014 00:12:16 -0400
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] xfs: new test to test xfs_repair segfault issue
+Date: Mon, 21 Jul 2014 12:11:49 +0800
+Message-Id: <1405915909-31383-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Cc: lczerner@redhat.com, Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
+To: fstests@vger.kernel.org
+Cc: xfs@oss.sgi.com, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Regression test for:
-    b5b6077 ext4: fix wrong assert in ext4_mb_normalize_request()
+Test segfault issue when repairing large xfs.
 
-Signed-off-by: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
+Regression test for xfsprogs commit
+7f2d6b8 xfs_repair: avoid segfault if reporting progress early in repair
+
+The original test is from the commit log, written by Eric Sandeen.
+
+Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- common/rc          | 18 ++++++++++++++++++
- tests/ext4/003     | 55 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/003.out |  2 ++
- tests/ext4/group   |  1 +
- 4 files changed, 76 insertions(+)
- create mode 100755 tests/ext4/003
- create mode 100644 tests/ext4/003.out
+ tests/xfs/020     | 57 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/020.out |  2 ++
+ tests/xfs/group   |  1 +
+ 3 files changed, 60 insertions(+)
+ create mode 100755 tests/xfs/020
+ create mode 100644 tests/xfs/020.out
 
-diff --git a/common/rc b/common/rc
-index 2c83340..018e569 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1113,6 +1113,24 @@ _require_xfs_crc()
- 	umount $SCRATCH_MNT
- }
- 
-+# this test requires the bigalloc feature to be available in mkfs.ext4
-+#
-+_require_ext4_mkfs_bigalloc()
-+{
-+	_scratch_mkfs_ext4 -O bigalloc >/dev/null 2>&1 \
-+	   || _notrun "mkfs.ext4 doesn't have bigalloc feature"
-+}
-+
-+# this test requires the ext4 kernel support bigalloc feature
-+#
-+_require_ext4_bigalloc()
-+{
-+	_scratch_mkfs_ext4 -O bigalloc >/dev/null 2>&1
-+	_scratch_mount >/dev/null 2>&1 \
-+	   || _notrun "Ext4 kernel doesn't support bigalloc feature"
-+	umount $SCRATCH_MNT
-+}
-+
- # this test requires the finobt feature to be available in mkfs.xfs
- #
- _require_xfs_mkfs_finobt()
-diff --git a/tests/ext4/003 b/tests/ext4/003
+diff --git a/tests/xfs/020 b/tests/xfs/020
 new file mode 100755
-index 0000000..4ca282f
+index 0000000..3405b38
 --- /dev/null
-+++ b/tests/ext4/003
-@@ -0,0 +1,55 @@
++++ b/tests/xfs/020
+@@ -0,0 +1,57 @@
 +#! /bin/bash
-+# FS QA Test No. ext4/003
++# FS QA Test No. xfs/020
 +#
-+# Regression test for commit:
-+# b5b6077 ext4: fix wrong assert in ext4_mb_normalize_request()
-+# This testcase checks whether this bug has been fixed.
++# Test segfault issue when repairing large xfs.
++#
++# Regression test for xfsprogs commit
++# 7f2d6b8 xfs_repair: avoid segfault if reporting progress early in repair
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2014 Fujitsu.  All Rights Reserved.
++# Copyright (c) 2014 Red Hat Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -82,17 +53,27 @@ index 0000000..4ca282f
 +# but WITHOUT ANY WARRANTY; without even the implied warranty of
 +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 +# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 +#-----------------------------------------------------------------------
++#
 +
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+    _scratch_unmount
++    cd /
++    rm -f $tmp.*
++    rm -f $TEST_DIR/fsfile
 +}
 +
 +# get standard environment, filters and checks
@@ -100,45 +81,36 @@ index 0000000..4ca282f
 +. ./common/filter
 +
 +# real QA test starts here
-+_supported_fs ext4
++_supported_fs xfs
 +_supported_os Linux
 +
-+_require_scratch
-+_require_ext4_mkfs_bigalloc
-+_require_ext4_bigalloc
++echo "Silence is golden"
 +
-+rm -f $seqres.full
++$MKFS_PROG -t xfs -d size=60t,file,name=$TEST_DIR/fsfile >/dev/null
++$XFS_REPAIR_PROG -o ag_stride=32 -t 1 $TEST_DIR/fsfile >/dev/null 2>&1
 +
-+yes | mkfs.ext4 -O bigalloc -C 65536  -g 256 $SCRATCH_DEV 512m \
-+    >> $seqres.full 2>&1
-+_scratch_mount || _fail "couldn't mount fs"
-+
-+dd if=/dev/zero of=$SCRATCH_MNT/testfile bs=1M count=256 2>&1 | _filter_dd
-+
-+echo "Slience is golden"
-+
-+status=0
++status=$?
 +exit
-diff --git a/tests/ext4/003.out b/tests/ext4/003.out
+diff --git a/tests/xfs/020.out b/tests/xfs/020.out
 new file mode 100644
-index 0000000..07f245d
+index 0000000..20d7944
 --- /dev/null
-+++ b/tests/ext4/003.out
++++ b/tests/xfs/020.out
 @@ -0,0 +1,2 @@
-+QA output created by 003
-+Slience is golden
-diff --git a/tests/ext4/group b/tests/ext4/group
-index 7e66035..152196c 100644
---- a/tests/ext4/group
-+++ b/tests/ext4/group
-@@ -5,6 +5,7 @@
- #
- 001 auto prealloc quick
- 002 auto quick prealloc
-+003 auto quick
- 271 auto rw quick
- 301 aio dangerous ioctl rw stress
- 302 aio dangerous ioctl rw stress
++QA output created by 020
++Silence is golden
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 0aab336..4d35df5 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -17,6 +17,7 @@
+ 017 mount auto quick stress
+ 018 deprecated # log logprint v2log
+ 019 mkfs auto quick
++020 auto repair
+ 021 db attr auto quick
+ 022 dump ioctl tape
+ 023 dump ioctl tape
 -- 
-1.8.2.1
+1.9.3
 
