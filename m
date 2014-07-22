@@ -1,104 +1,90 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:50600 "EHLO
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:32801 "EHLO
 	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756938AbaGVU4J (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 22 Jul 2014 16:56:09 -0400
-Date: Wed, 23 Jul 2014 06:56:05 +1000
+	by vger.kernel.org with ESMTP id S1752579AbaGVVFp (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 22 Jul 2014 17:05:45 -0400
+Date: Wed, 23 Jul 2014 07:05:33 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: Problem building xfsprogs
-Message-ID: <20140722205605.GJ20518@dastard>
-References: <20140722160641.GU17967@beardog.cce.hp.com>
+Subject: Re: [PATCH 1/2] xfstests: add data integtiry test for e4defrag
+ ext4/307
+Message-ID: <20140722210533.GK20518@dastard>
+References: <1406061455-731-1-git-send-email-dmonakhov@openvz.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20140722160641.GU17967@beardog.cce.hp.com>
+In-Reply-To: <1406061455-731-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
-To: scameron@beardog.cce.hp.com
-Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
+To: Dmitry Monakhov <dmonakhov@openvz.org>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-[cc xfs@oss.sgi.com - list for XFS issues]
-
-On Tue, Jul 22, 2014 at 11:06:41AM -0500, scameron@beardog.cce.hp.com wrote:
+On Wed, Jul 23, 2014 at 12:37:34AM +0400, Dmitry Monakhov wrote:
 > 
-> I'm trying to build xfsprogs (in order to run xfstests), and I'm running into this:
-> 
-> [scameron@localhost xfsprogs]$ git log --oneline | head -1
-> ba24eb7 logprint: Fix printing of AGF and AGI buffers
-> [scameron@localhost xfsprogs]$ git pull
-> Already up-to-date.
-> [scameron@localhost xfsprogs]$ git diff
-> [scameron@localhost xfsprogs]$ ./configure
-> checking build system type... x86_64-unknown-linux-gnu
-> checking host system type... x86_64-unknown-linux-gnu
-> checking for gcc... gcc
-> checking for C compiler default output file name... a.out
-> 
-> [...snip...]
-> 
-> checking for library containing blkid_probe_all... -lblkid
-> checking for blkid_probe_get_topology... yes
-> checking for readdir... yes
-> checking size of long... 8
-> checking size of char *... 8
-> checking for __psint_t ... no
-> checking for __psunsigned_t ... no
-> checking for __u32 ... yes
-> checking for umode_t... yes
-> configure: creating ./config.status
-> config.status: creating include/builddefs
-> config.status: creating include/platform_defs.h
-> config.status: include/platform_defs.h is unchanged
-> config.status: executing libtool commands
-> [scameron@localhost xfsprogs]$ make
-> Building include
+> Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
 
-Nothing built in the include directory - is this a clean build area?
+Needs a proper commit message.
 
-> Building libxfs
-> gmake[2]: *** No rule to make target `.ltdep', needed by `ltdepend'.  Stop.
-> gmake[1]: *** [libxfs] Error 2
-> make: *** [default] Error 2
-> 
-> Any ideas what's wrong here?
+Also, what makes this ext4 specific? Why can't it run on any
+filesystem with a defrag operation?
 
-The automatic dependency generation failed to generate the .ltdep
-file. But it can't be a clean build area, because the libxfs build
-rule is:
+> +_need_to_be_root
+> +_require_scratch
+> +_require_defrag
+> +
+> +rm -f $seqres.full
+> +
+> +_workout()
+> +{
+> +    	nr=$1
+> +	echo "Defragment file with $nr * 2 fragments"
+> +	# Create sparse file
+> +    	for ((i=0;i<nr;i++))
+> +	do
+> +	    fallocate -l 4k -o $((409600*i)) $SCRATCH_MNT/test.$nr
+> +	done
 
-default: crc32selftest ltdepend $(LTLIBRARY)
+please use $XFS_IO_PROG -c "falloc" ... for these operations to minimise
+the number of external dependencies...
 
-and I don't see the crc32selftest rule being executed before the
-dependencies are generated. It shoul dlook something like:
 
-$ make
-....
-configure: creating ./config.status
-config.status: creating include/builddefs
-config.status: creating include/platform_defs.h
-config.status: executing libtool commands
-Building include
-    [LN]     xfs
-    [LN]     disk
-Building libxfs
-    [CC]     gen_crc32table
-    [GENERATE] crc32table.h
-    [TEST]    CRC32
-CRC_LE_BITS = 32
-crc32: tests passed, 225944 bytes in 131 usec
-crc32c: tests passed, 225944 bytes in 131 usec
-    [CC]     cache.lo
-....
+> +	# Fill holes for half of range , as result file will contain nr*1.5 fragments
+> +	fallocate -l $((204800*nr)) $SCRATCH_MNT/test.$nr
+> +	# Data wrilte will convert extetns to inialized ones
+> +    	for ((i=0;i<nr;i++))
 
-So the first thing I'd do is run 'make realclean; make' to restart
-the build for a clean workarea first. If that doesn't fix the
-problem, then I'll need to know versions of libtool, gcc, etc that
-you are using and you'll need to post the output of "make realclean;
-make Q=" so we can see the command line that is actually failing.
+whitespace
 
-Cheers,
+> +	do
+> +	    dd if=/dev/urandom bs=1234 seek=$((100*i)) of=$SCRATCH_MNT/test.$nr \
+> +		conv=notrunc count=3 >> $seqres.full 2>&1
+> +	done
 
-Dave.
+again, $XFS_IO_PROG -c "pwrite .." rather than dd. And use a fixed
+pattern, so that the hash of the file is predictable.
+
+
+> +	filefrag -v $SCRATCH_MNT/test.$nr >> $seqres.full
+
+$XFS_IO_PROG -c "fiemap" ....
+
+> +	sha1sum $SCRATCH_MNT/test.$nr > $SCRATCH_MNT/test.$nr.sha1sum
+
+md5sum is sufficient and faster for this sort of testing, and used
+everywhere else in xfstests for this purpose. And with predictable
+file contents, the output can be dumped into the output file like:
+
+	md5sum $SCRATCH_MNT/test.$nr | _filter_scratch
+
+And so we get file contents integrity checking from both the initial
+write and the defrag command...
+
+> +	$DEFRAG_PROG $SCRATCH_MNT $SCRATCH_DEV >> $seqres.full 2>&1
+> +	filefrag -v $SCRATCH_MNT/test.$nr >> $seqres.full
+> +	run_check sha1sum -c $SCRATCH_MNT/test.$nr.sha1sum
+
+And this run_check can go away - just dump the md5sum again.
+
+-Dave.
 -- 
 Dave Chinner
 david@fromorbit.com
