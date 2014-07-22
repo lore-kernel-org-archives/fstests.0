@@ -1,57 +1,69 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:36897 "EHLO
-	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750831AbaGVA2j (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 21 Jul 2014 20:28:39 -0400
-Date: Tue, 22 Jul 2014 10:23:22 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 1/2] xfs: new case to test inode allocations in
- post-growfs disk space
-Message-ID: <20140722002322.GN4453@dastard>
-References: <1405529554-31225-1-git-send-email-eguan@redhat.com>
- <20140721134638.GA45794@bfoster.bfoster>
-MIME-Version: 1.0
+Received: from g9t1613g.houston.hp.com ([15.240.0.71]:55550 "EHLO
+	g9t1613g.houston.hp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750963AbaGVQIG (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 22 Jul 2014 12:08:06 -0400
+Received: from g2t2352.austin.hp.com (g2t2352.austin.hp.com [15.217.128.51])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by g9t1613g.houston.hp.com (Postfix) with ESMTPS id 97D676491A
+	for <fstests@vger.kernel.org>; Tue, 22 Jul 2014 16:07:58 +0000 (UTC)
+Received: from g2t2360.austin.hp.com (g2t2360.austin.hp.com [16.197.8.247])
+	by g2t2352.austin.hp.com (Postfix) with ESMTP id 8D6FC110
+	for <fstests@vger.kernel.org>; Tue, 22 Jul 2014 16:07:33 +0000 (UTC)
+Received: from beardog.cce.hp.com (beardog.cce.hp.com [16.84.84.24])
+	by g2t2360.austin.hp.com (Postfix) with ESMTP id 7454256
+	for <fstests@vger.kernel.org>; Tue, 22 Jul 2014 16:07:33 +0000 (UTC)
+Date: Tue, 22 Jul 2014 11:06:41 -0500
+From: scameron@beardog.cce.hp.com
+Subject: Problem building xfsprogs
+Message-ID: <20140722160641.GU17967@beardog.cce.hp.com>
+Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20140721134638.GA45794@bfoster.bfoster>
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: Eryu Guan <eguan@redhat.com>, Boris Ranto <branto@redhat.com>, Eric Sandeen <esandeen@redhat.com>, fstests@vger.kernel.org, xfs@oss.sgi.com
+To: fstests@vger.kernel.org
+Cc: scameron@beardog.cce.hp.com
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jul 21, 2014 at 09:46:38AM -0400, Brian Foster wrote:
-> On Thu, Jul 17, 2014 at 12:52:33AM +0800, Eryu Guan wrote:
-> > Make sure inodes can be allocated in new space added by xfs_growfs.
-> > 
-> > Regression test for
-> > xfs: allow inode allocations in post-growfs disk space
-....
-> > +# Create files to consume free inodes in background
-> > +(
-> > +	i=0
-> > +	while [ $i -lt 1000 ]; do
-> > +		mkdir $SCRATCH_MNT/testdir_$i
-> > +		create_file $SCRATCH_MNT/testdir_$i &
-> > +		let i=$i+1
-> > +	done
-> > +) >/dev/null 2>&1 &
-> > +
-> > +# Grow fs at the same time, at least x4
-> > +# doubling or tripling the size couldn't reproduce
-> > +$XFS_GROWFS_PROG -D $((dblocks * 4)) $SCRATCH_MNT >>$seqres.full
-> > +
-> 
-> Even though this is still relatively small based on what people probably
-> typically test, we're still making assumptions about the size of the
-> scratch device.
 
-_require_fs_space $SCRATCH_MNT <size>
+I'm trying to build xfsprogs (in order to run xfstests), and I'm running into this:
 
-solves that problem. And in places we require 10GB of space, so a
-few hundred MB isn't an issue.
+[scameron@localhost xfsprogs]$ git log --oneline | head -1
+ba24eb7 logprint: Fix printing of AGF and AGI buffers
+[scameron@localhost xfsprogs]$ git pull
+Already up-to-date.
+[scameron@localhost xfsprogs]$ git diff
+[scameron@localhost xfsprogs]$ ./configure
+checking build system type... x86_64-unknown-linux-gnu
+checking host system type... x86_64-unknown-linux-gnu
+checking for gcc... gcc
+checking for C compiler default output file name... a.out
 
+[...snip...]
 
--Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+checking for library containing blkid_probe_all... -lblkid
+checking for blkid_probe_get_topology... yes
+checking for readdir... yes
+checking size of long... 8
+checking size of char *... 8
+checking for __psint_t ... no
+checking for __psunsigned_t ... no
+checking for __u32 ... yes
+checking for umode_t... yes
+configure: creating ./config.status
+config.status: creating include/builddefs
+config.status: creating include/platform_defs.h
+config.status: include/platform_defs.h is unchanged
+config.status: executing libtool commands
+[scameron@localhost xfsprogs]$ make
+Building include
+Building libxfs
+gmake[2]: *** No rule to make target `.ltdep', needed by `ltdepend'.  Stop.
+gmake[1]: *** [libxfs] Error 2
+make: *** [default] Error 2
+
+Any ideas what's wrong here?
+
+-- steve
+
