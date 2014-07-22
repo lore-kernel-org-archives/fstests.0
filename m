@@ -1,63 +1,135 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:52004 "EHLO mx2.suse.de"
+Received: from mailhub.sw.ru ([195.214.232.25]:33829 "EHLO relay.sw.ru"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752179AbaGVTFe (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 22 Jul 2014 15:05:34 -0400
-Date: Tue, 22 Jul 2014 21:05:32 +0200
-From: David Sterba <dsterba@suse.cz>
-Subject: Re: [PATCH] xfstests/btrfs: add test for quota groups and drop
- snapshot
-Message-ID: <20140722190532.GI1553@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-References: <20140709224150.GA5484@wotan.suse.de>
- <20140710004330.GG4453@dastard>
- <20140710173614.GB5484@wotan.suse.de>
- <20140710183228.GD17201@lenny.home.zabbo.net>
- <20140710190055.GC5484@wotan.suse.de>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20140710190055.GC5484@wotan.suse.de>
+	id S1751482AbaGVUhp (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 22 Jul 2014 16:37:45 -0400
+From: Dmitry Monakhov <dmonakhov@openvz.org>
+Subject: [PATCH 1/2] xfstests: add data integtiry test for e4defrag ext4/307
+Date: Wed, 23 Jul 2014 00:37:34 +0400
+Message-Id: <1406061455-731-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
-To: Mark Fasheh <mfasheh@suse.de>
-Cc: Zach Brown <zab@zabbo.net>, Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Chris Mason <clm@fb.com>, Josef Bacik <jbacik@fb.com>
+To: fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org, Dmitry Monakhov <dmonakhov@openvz.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 10, 2014 at 12:00:55PM -0700, Mark Fasheh wrote:
-> On Thu, Jul 10, 2014 at 11:32:28AM -0700, Zach Brown wrote:
-> > What interfaces would be needed for this to work precisely so we don't
-> > have to play this game ever again?
-> 
-> Well there's also the 'sleep 45' below because we need to be certain that
-> btrfs_drop_snapshot gets run. This was all a bit of a pain during debugging
-> to be honest.
-> 
-> So in my experience, an interface to make debugging easier would involve
-> running every delayed action in the file system to completion, including a
-> sync of dirty blocks to disk. In theory, this would include any delayed
-> actions that were kicked off as a result of the actions you are syncing.
-> You'd do it all from a point in time of course so that we don't spin forever
-> on a busy filesystem. I do not know whether this is feasible.
-> 
-> Given something like that, you'd just replace the calls to sleep with 'btrfs
-> fi synctheworldandwait' and know that on return, the actions you just queued
-> up completed.
 
-Waiting until some subvolume gets completely removed needs some work. In
-your case the cleaner thread sleeps and is woken up at the transaction
-commit time. As there is no other activity on the filesystem this
-happens at the periodic commit time, usually 30 seconds. 'sync' will not
-help, because it needs a transaction in progress.
+Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
+---
+ tests/ext4/307     |   82 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/307.out |    5 +++
+ tests/ext4/group   |    1 +
+ 3 files changed, 88 insertions(+), 0 deletions(-)
+ create mode 100755 tests/ext4/307
+ create mode 100644 tests/ext4/307.out
 
-I have patchset in works that addresses a different problem but
-introduces a functionality that keeps track of some global pending
-actions. This could be easily enhanced to trigger the commit with sync
-if there was a snapshot deletion since last commit regardless of a
-transaction running status.
+diff --git a/tests/ext4/307 b/tests/ext4/307
+new file mode 100755
+index 0000000..99da61f
+--- /dev/null
++++ b/tests/ext4/307
+@@ -0,0 +1,82 @@
++#! /bin/bash
++# FS QA Test No. ext4/307
++# 
++# Test defrag for a single file
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2013 Red Hat, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++PIDS=""
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    _scratch_unmount
++}
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/defrag
++
++# real QA test starts here
++_supported_os Linux
++_supported_fs ext4
++_need_to_be_root
++_require_scratch
++_require_defrag
++
++rm -f $seqres.full
++
++_workout()
++{
++    	nr=$1
++	echo "Defragment file with $nr * 2 fragments"
++	# Create sparse file
++    	for ((i=0;i<nr;i++))
++	do
++	    fallocate -l 4k -o $((409600*i)) $SCRATCH_MNT/test.$nr
++	done
++	# Fill holes for half of range , as result file will contain nr*1.5 fragments
++	fallocate -l $((204800*nr)) $SCRATCH_MNT/test.$nr
++	# Data wrilte will convert extetns to inialized ones
++    	for ((i=0;i<nr;i++))
++	do
++	    dd if=/dev/urandom bs=1234 seek=$((100*i)) of=$SCRATCH_MNT/test.$nr \
++		conv=notrunc count=3 >> $seqres.full 2>&1
++	done
++	filefrag -v $SCRATCH_MNT/test.$nr >> $seqres.full
++	sha1sum $SCRATCH_MNT/test.$nr > $SCRATCH_MNT/test.$nr.sha1sum
++	$DEFRAG_PROG $SCRATCH_MNT $SCRATCH_DEV >> $seqres.full 2>&1
++	filefrag -v $SCRATCH_MNT/test.$nr >> $seqres.full
++	run_check sha1sum -c $SCRATCH_MNT/test.$nr.sha1sum
++}
++
++
++# Actual testing starting from here
++_scratch_mkfs  >> $seqres.full 2>&1
++_scratch_mount
++_workout 10
++_workout 250
++_workout 500
++_workout 1000
++_check_scratch_fs
++status=$?
+diff --git a/tests/ext4/307.out b/tests/ext4/307.out
+new file mode 100644
+index 0000000..e231d11
+--- /dev/null
++++ b/tests/ext4/307.out
+@@ -0,0 +1,5 @@
++QA output created by 307
++Defragment file with 10 * 2 fragments
++Defragment file with 250 * 2 fragments
++Defragment file with 500 * 2 fragments
++Defragment file with 1000 * 2 fragments
+diff --git a/tests/ext4/group b/tests/ext4/group
+index 7e66035..5c5cb05 100644
+--- a/tests/ext4/group
++++ b/tests/ext4/group
+@@ -12,3 +12,4 @@
+ 304 aio dangerous ioctl rw stress
+ 305 auto
+ 306 auto rw resize quick
++307 auto ioctl rw quick
+-- 
+1.7.1
 
-This still does not cover the part where we want a command that waits
-until a given subvolume is completely removed, but I have a draft for
-that as well.
-
-Unfortunatelly until both parts are in place the sleep is the only
-reliable way. Oh well.
