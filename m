@@ -1,43 +1,50 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from imap.thunk.org ([74.207.234.97]:50834 "EHLO imap.thunk.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932102AbaGVVv4 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 22 Jul 2014 17:51:56 -0400
-Date: Tue, 22 Jul 2014 17:51:51 -0400
-From: Theodore Ts'o <tytso@mit.edu>
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:36041 "EHLO
+	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756996AbaGVV47 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 22 Jul 2014 17:56:59 -0400
+Date: Wed, 23 Jul 2014 07:56:57 +1000
+From: Dave Chinner <david@fromorbit.com>
 Subject: Re: Problem building xfsprogs
-Message-ID: <20140722215151.GO25291@thunk.org>
+Message-ID: <20140722215656.GQ4453@dastard>
 References: <20140722160641.GU17967@beardog.cce.hp.com>
+ <20140722205605.GJ20518@dastard>
+ <CAK2EqxR93J8441Ajj8no7_Pu1WSDLaVsKG=_FLMYvTnOUEzKGQ@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20140722160641.GU17967@beardog.cce.hp.com>
+In-Reply-To: <CAK2EqxR93J8441Ajj8no7_Pu1WSDLaVsKG=_FLMYvTnOUEzKGQ@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: scameron@beardog.cce.hp.com
-Cc: fstests@vger.kernel.org
+To: Martin Furuhjelm <martin.furuhjelm@seagate.com>
+Cc: scameron@beardog.cce.hp.com, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jul 22, 2014 at 11:06:41AM -0500, scameron@beardog.cce.hp.com wrote:
+On Tue, Jul 22, 2014 at 03:14:42PM -0600, Martin Furuhjelm wrote:
+> I have just recently gone through the process of attempting to build and
+> run xfstests based on the current sources from oss.sgi.com.
+> Not having exactly the correct packages and kernel version creates
+> problems. The build on FEDORA fails complaining about too many symlinks, I
+> was successful on SUSE V 13 updated to kernel v3.15 and adding the
+> following packages before attempting git and the build:
 > 
-> I'm trying to build xfsprogs (in order to run xfstests), and I'm running into this:
+> git gcc libtool automake make gettext-tools libattr-devel libacl-devel
+> libuuid-devel ncurses-devel quota indent libcap-progs btrfsprogs
+> 
+> I then git and built xfsprogs followed by xfsdump and finally xfstests
+> 
+> After adding the fsgqa group and user the appropriate definitions of
+> TEST_DEV and SCRATCH_DEV the quick test (./check -g quick)
+> runs with 5 errors on xfs and one error on ext4.
+> 
+> If you just want xfstest to run - you may want to start with SUSE and the
+> procedure above.
 
-What distribution are you building on?  I had a frustrating enough
-time getting it to build on Ubuntu and Debian systems a while back
-(not xfstests' fault; sometimes the distro doesn't ship all of the
-header files or have recent enough libraries) that I created
-xfstests-bld which does a hermetic build of xfstests.  That way, it
-doesn't depend on anything getting shipped by the distribution.
+Perhaps it would be good to document that in the INSTALL file? Can
+you write a patch to do that, please?
 
-It's also useful if you are running in a very restrictive run-time
-environment, such as what you might find in a highly opimized cloud
-data center, and you can't depend on any shared libraries, etc.  Or if
-you need to do a build for an embedded platform where again, you can't
-depend on anything getting provided by the distribution.
+Cheers,
 
-Anyway, give it a try and see if it helps,
-
-	git://git.kernel.org/pub/scm/fs/ext2/xfstests-bld.git
-
-If you have any problems, let me know!
-
-						- Ted
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
