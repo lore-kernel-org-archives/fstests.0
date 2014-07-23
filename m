@@ -1,363 +1,78 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mailhub.sw.ru ([195.214.232.25]:39146 "EHLO relay.sw.ru"
+Received: from cantor2.suse.de ([195.135.220.15]:38608 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753766AbaGWLIh (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 23 Jul 2014 07:08:37 -0400
-From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: [PATCH 3/3] xfstests: add new defragmentation test (compacting case)
-Date: Wed, 23 Jul 2014 15:08:18 +0400
-Message-Id: <1406113698-9387-4-git-send-email-dmonakhov@openvz.org>
-In-Reply-To: <1406113698-9387-1-git-send-email-dmonakhov@openvz.org>
-References: <1406113698-9387-1-git-send-email-dmonakhov@openvz.org>
+	id S1751437AbaGWMa7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 23 Jul 2014 08:30:59 -0400
+Date: Wed, 23 Jul 2014 14:30:56 +0200
+From: David Sterba <dsterba@suse.cz>
+Subject: Re: [PATCH] xfstests/btrfs: add test for quota groups and drop
+ snapshot
+Message-ID: <20140723123056.GL1553@twin.jikos.cz>
+Reply-To: dsterba@suse.cz
+References: <20140709224150.GA5484@wotan.suse.de>
+ <20140710004330.GG4453@dastard>
+ <20140710173614.GB5484@wotan.suse.de>
+ <20140710183228.GD17201@lenny.home.zabbo.net>
+ <20140710190055.GC5484@wotan.suse.de>
+ <20140722190532.GI1553@twin.jikos.cz>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20140722190532.GI1553@twin.jikos.cz>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: david@fromorbit.com, Dmitry Monakhov <dmonakhov@openvz.org>
+To: dsterba@suse.cz, Mark Fasheh <mfasheh@suse.de>, Zach Brown <zab@zabbo.net>, Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Chris Mason <clm@fb.com>, Josef Bacik <jbacik@fb.com>
 List-ID: <fstests@vger.kernel.org>
 
-EXT4_MOVE_EXTENT is ready to support case where orig_offset != donor_offset.
-This case is usable for compacting small files together.
-Test generate file hierarchy via fsstress and then compact all files
-to one adjacent block.
+On Tue, Jul 22, 2014 at 09:05:32PM +0200, David Sterba wrote:
+> On Thu, Jul 10, 2014 at 12:00:55PM -0700, Mark Fasheh wrote:
+> > On Thu, Jul 10, 2014 at 11:32:28AM -0700, Zach Brown wrote:
+> > > What interfaces would be needed for this to work precisely so we don't
+> > > have to play this game ever again?
+> > 
+> > Well there's also the 'sleep 45' below because we need to be certain that
+> > btrfs_drop_snapshot gets run. This was all a bit of a pain during debugging
+> > to be honest.
+> > 
+> > So in my experience, an interface to make debugging easier would involve
+> > running every delayed action in the file system to completion, including a
+> > sync of dirty blocks to disk. In theory, this would include any delayed
+> > actions that were kicked off as a result of the actions you are syncing.
+> > You'd do it all from a point in time of course so that we don't spin forever
+> > on a busy filesystem. I do not know whether this is feasible.
+> > 
+> > Given something like that, you'd just replace the calls to sleep with 'btrfs
+> > fi synctheworldandwait' and know that on return, the actions you just queued
+> > up completed.
+> 
+> Waiting until some subvolume gets completely removed needs some work. In
+> your case the cleaner thread sleeps and is woken up at the transaction
+> commit time. As there is no other activity on the filesystem this
+> happens at the periodic commit time, usually 30 seconds. 'sync' will not
+> help, because it needs a transaction in progress.
+> 
+> I have patchset in works that addresses a different problem but
+> introduces a functionality that keeps track of some global pending
+> actions. This could be easily enhanced to trigger the commit with sync
+> if there was a snapshot deletion since last commit regardless of a
+> transaction running status.
+> 
+> This still does not cover the part where we want a command that waits
+> until a given subvolume is completely removed, but I have a draft for
+> that as well.
+> 
+> Unfortunatelly until both parts are in place the sleep is the only
+> reliable way. Oh well.
 
-Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
----
- src/Makefile       |    2 +-
- src/e4compact.c    |  206 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/307     |   74 +++++++++++++++++++
- tests/ext4/307.out |    6 ++
- tests/ext4/group   |    1 +
- 5 files changed, 288 insertions(+), 1 deletions(-)
- create mode 100644 src/e4compact.c
- create mode 100755 tests/ext4/307
- create mode 100644 tests/ext4/307.out
+And it turned out to be much simpler, I was wrong about transaction
+commit poking the cleaner thread. It's actually the transaction commit
+thread that wakes up cleaner and that's why it's always at the periodic
+commit time.
 
-diff --git a/src/Makefile b/src/Makefile
-index 7a7984a..a539c4a 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -19,7 +19,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	bulkstat_unlink_test_modified t_dir_offset t_futimens t_immutable \
- 	stale_handle pwrite_mmap_blocked t_dir_offset2 seek_sanity_test \
- 	seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
--	renameat2 t_getcwd
-+	renameat2 t_getcwd e4compact
- 
- SUBDIRS =
- 
-diff --git a/src/e4compact.c b/src/e4compact.c
-new file mode 100644
-index 0000000..de0aeb6
---- /dev/null
-+++ b/src/e4compact.c
-@@ -0,0 +1,206 @@
-+/* E4COMPACT
-+ *
-+ * Compact list of files sequentially
-+ *
-+ * Usage example:
-+ * find /etc -type f > etc_list
-+ * fallocate -l100M /etc/.tmp_donor_file
-+ * cat etc_list | ./e4defrag /etc/.tmp_donor_file
-+ * unlink /etc/.tmp_donor_file
-+ */
-+#ifndef _GNU_SOURCE
-+#define _GNU_SOURCE
-+#endif
-+
-+#include <assert.h>
-+#include <ctype.h>
-+#include <limits.h>
-+#include <errno.h>
-+#include <linux/types.h>
-+#include <fcntl.h>
-+#include <sys/ioctl.h>
-+#include <sys/types.h>
-+#include <sys/stat.h>
-+#include <sys/param.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <string.h>
-+
-+#include <unistd.h>
-+
-+#ifndef EXT4_IOC_MOVE_EXT
-+struct move_extent {
-+	__s32 reserved;	/* original file descriptor */
-+	__u32 donor_fd;	/* donor file descriptor */
-+	__u64 orig_start;	/* logical start offset in block for orig */
-+	__u64 donor_start;	/* logical start offset in block for donor */
-+	__u64 len;	/* block length to be moved */
-+	__u64 moved_len;	/* moved block length */
-+};
-+
-+#define EXT4_IOC_MOVE_EXT      _IOWR('f', 15, struct move_extent)
-+#endif
-+
-+struct donor_info
-+{
-+	int fd;
-+	__u64 offset;
-+	__u64 length;
-+};
-+
-+static int ignore_error = 0;
-+static int verbose = 0;
-+
-+
-+static int do_defrag_one(int fd, char *name,__u64 start, __u64 len, struct donor_info *donor)
-+{
-+	int ret, retry;
-+	struct move_extent mv_ioc;
-+	__u64 moved = 0;
-+	int i = 0;
-+
-+	assert(donor->length >= len);
-+
-+	mv_ioc.donor_fd = donor->fd;
-+	mv_ioc.orig_start = start;
-+	mv_ioc.donor_start = donor->offset;
-+	mv_ioc.moved_len = 0;
-+	mv_ioc.len = len;
-+
-+	if (verbose)
-+		printf("%s %s start:%lld len:%lld donor [%lld, %lld]\n",  __func__,
-+		       name, (unsigned long long) start,
-+		       (unsigned long long) len,
-+		       (unsigned long long)donor->offset,
-+		       (unsigned long long)donor->length);
-+	retry= 3;
-+	do {
-+		i++;
-+		errno = 0;
-+		ret = ioctl(fd, EXT4_IOC_MOVE_EXT, &mv_ioc);
-+		if (verbose)
-+			printf("process %s  it:%d start:%lld len:%lld donor:%lld,"
-+			       "moved:%lld ret:%d errno:%d\n",
-+			       name, i,
-+			       (unsigned long long) mv_ioc.orig_start,
-+			       (unsigned long long) mv_ioc.len,
-+			       (unsigned long long)mv_ioc.donor_start,
-+			       (unsigned long long)mv_ioc.moved_len,
-+		       ret, errno);
-+		if (ret < 0) {
-+			if (verbose)
-+				printf("%s EXT4_IOC_MOVE_EXT failed err:%d\n",
-+				       __func__, errno);
-+			if (errno != EBUSY || !retry--)
-+				break;
-+		} else {
-+			retry = 3;
-+			/* Nothing to swap */
-+			if (mv_ioc.moved_len == 0)
-+				break;
-+		}
-+		assert(mv_ioc.len >= mv_ioc.moved_len);
-+		mv_ioc.len -= mv_ioc.moved_len;
-+		mv_ioc.orig_start += mv_ioc.moved_len;
-+		mv_ioc.donor_start = mv_ioc.orig_start;
-+		moved += mv_ioc.moved_len;
-+
-+	} while (mv_ioc.len);
-+
-+	if (ret && (errno == EBUSY || errno == ENODATA))
-+		ret = 0;
-+	donor->length -= moved;
-+	donor->offset += moved;
-+	return ret;
-+}
-+
-+void usage()
-+{
-+	printf("Usage: -f donor_file [-o donor_offset] [-v] [-i]\n"
-+	       "\t\t -v: verbose\n"
-+	       "\t\t -i: ignore errors\n");
-+}
-+
-+int main(int argc, char **argv)
-+{
-+	int fd, ret = 0;
-+	char *line = NULL;
-+	size_t len = 0;
-+	ssize_t read;
-+	struct donor_info donor;
-+	struct stat st;
-+	extern char *optarg;
-+	extern int optind;
-+	int c;
-+	char * donor_name = NULL;
-+	donor.offset = 0;
-+	while ((c = getopt(argc, argv, "f:o:iv")) != -1) {
-+		switch (c) {
-+		case 'o':
-+			donor.offset = atol(optarg);
-+			break;
-+		case 'i':
-+			ignore_error = 1;
-+			break;
-+		case 'v':
-+			verbose = 1;
-+			break;
-+		case 'f':
-+			donor_name = (optarg);
-+			break;
-+
-+		default:
-+			usage();
-+			exit(1);
-+		}
-+	}
-+	donor.fd = open(donor_name, O_RDWR);
-+	if (donor.fd < 0) {
-+		perror("can not open donor file");
-+		exit(1);
-+	}
-+	if (fstat(donor.fd, &st)) {
-+		perror("can not stat donor fd");
-+		exit(1);
-+	}
-+	donor.length = st.st_size / st.st_blksize;
-+	if (donor.offset)
-+		donor.offset /= st.st_blksize;
-+
-+	if (verbose)
-+		printf("Init donor :%s off:%lld len:%lld\n", argv[1], donor.offset, donor.length);
-+	while ((read = getline(&line, &len, stdin)) != -1) {
-+
-+		if (line[read -1] == '\n')
-+			line[read -1] = 0;
-+
-+		fd = open(line, O_RDWR);
-+		if (fd < 0) {
-+			if (verbose)
-+				printf("Can not open %s errno:%d\n", line, errno);
-+			if (ignore_error)
-+				continue;
-+			else
-+				break;
-+		}
-+		if(fstat(fd, &st)) {
-+			if (verbose)
-+				perror("Can not stat ");
-+			continue;
-+			if (ignore_error)
-+				continue;
-+			else
-+				break;
-+
-+		}
-+		if (st.st_size && st.st_blocks) {
-+			ret = do_defrag_one(fd, line, 0,
-+					    (st.st_size  + st.st_blksize-1)/
-+					    st.st_blksize, &donor);
-+			if (ret && ignore_error)
-+				break;
-+		}
-+	}
-+	free(line);
-+	return ret;
-+}
-diff --git a/tests/ext4/307 b/tests/ext4/307
-new file mode 100755
-index 0000000..9ab02a5
---- /dev/null
-+++ b/tests/ext4/307
-@@ -0,0 +1,74 @@
-+#! /bin/bash
-+# FSQA Test No. 307
-+#
-+# Check data integrity during defrag compacting
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2006 Silicon Graphics, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/defrag
-+# Disable all sync operations to get higher load
-+FSSTRESS_AVOID="$FSSTRESS_AVOID -ffsync=0 -fsync=0 -ffdatasync=0"
-+_workout()
-+{
-+	echo ""
-+	echo "Run fsstress"
-+	out=$SCRATCH_MNT/fsstress.$$
-+	args=`_scale_fsstress_args -p4 -n999 -f setattr=1 $FSSTRESS_AVOID -d $out`
-+	echo "fsstress $args" >> $seqres.full
-+	$FSSTRESS_PROG $args > /dev/null 2>&1
-+	find $out -type f > $out.list
-+	cat $out.list | xargs  md5sum > $out.md5sum
-+	usage=`du -sch $out | tail -n1 | gawk '{ print $1 }'`
-+	echo "Allocate donor file"
-+	$XFS_IO_PROG -c "falloc 0 250M" -f $SCRATCH_MNT/donor | _filter_xfs_io
-+	echo "Perform compacting"
-+	cat $out.list | run_check $here/src/e4compact \
-+		-i -v -f $SCRATCH_MNT/donor  >> $seqres.full 2>&1
-+	echo "Check data"
-+	run_check md5sum -c $out.md5sum
-+}
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_fs ext4
-+_supported_os Linux
-+_need_to_be_root
-+_require_scratch
-+_require_defrag
-+
-+_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
-+_scratch_mount
-+
-+_workout
-+_check_scratch_fs
-+status=$?
-+exit
-diff --git a/tests/ext4/307.out b/tests/ext4/307.out
-new file mode 100644
-index 0000000..f48e9f3
---- /dev/null
-+++ b/tests/ext4/307.out
-@@ -0,0 +1,6 @@
-+QA output created by 307
-+
-+Run fsstress
-+Allocate donor file
-+Perform compacting
-+Check data
-diff --git a/tests/ext4/group b/tests/ext4/group
-index 7e66035..4409485 100644
---- a/tests/ext4/group
-+++ b/tests/ext4/group
-@@ -12,3 +12,4 @@
- 304 aio dangerous ioctl rw stress
- 305 auto
- 306 auto rw resize quick
-+307 auto ioctl rw
-\ No newline at end of file
--- 
-1.7.1
+The proposed fix is to wake up transaction thread from the sync ioctl
+(not the generic sync call through).
 
+For the qgroup test needs it's enough to delete subvolumes, issue 'btrfs
+fi sync' and wait until there are no subvols listed (btrfs list -d).
+
+Without the fix, this will take up to 30 seconds, with the fix it's
+immediate. The test script will not need any change.
