@@ -1,194 +1,58 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:9209 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:18312 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758932AbaGXNG4 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 24 Jul 2014 09:06:56 -0400
-Date: Thu, 24 Jul 2014 09:06:47 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH 1/2] xfs: new case to test inode allocations in
- post-growfs disk space
-Message-ID: <20140724130646.GA37832@bfoster.bfoster>
-References: <1405529554-31225-1-git-send-email-eguan@redhat.com>
- <20140721134638.GA45794@bfoster.bfoster>
- <20140724103658.GB6210@dhcp-13-216.nay.redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20140724103658.GB6210@dhcp-13-216.nay.redhat.com>
+	id S1752068AbaG0QjF (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sun, 27 Jul 2014 12:39:05 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id s6RGd4pT023475
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
+	for <fstests@vger.kernel.org>; Sun, 27 Jul 2014 12:39:04 -0400
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] common: get fs type again using device canonical name in _fs_type
+Date: Mon, 28 Jul 2014 00:37:30 +0800
+Message-Id: <1406479050-10601-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Eryu Guan <eguan@redhat.com>, Boris Ranto <branto@redhat.com>, Eric Sandeen <esandeen@redhat.com>, fstests@vger.kernel.org, xfs@oss.sgi.com
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 24, 2014 at 06:36:58PM +0800, Eryu Guan wrote:
-> On Mon, Jul 21, 2014 at 09:46:38AM -0400, Brian Foster wrote:
-> > On Thu, Jul 17, 2014 at 12:52:33AM +0800, Eryu Guan wrote:
-> [snip]
-> > > +
-> > > +create_file()
-> > > +{
-> > > +	local dir=$1
-> > > +	local i=0
-> > > +
-> > > +	while echo -n >$dir/testfile_$i; do
-> > > +		let i=$i+1
-> > > +	done
-> > > +}
-> > > +
-> > > +# get standard environment, filters and checks
-> > > +. ./common/rc
-> > > +. ./common/filter
-> > > +
-> > > +# real QA test starts here
-> > > +_supported_fs xfs
-> > > +_supported_os Linux
-> > > +
-> > > +_require_scratch
-> > > +
-> > > +rm -f $seqres.full
-> > > +echo "Silence is golden"
-> > > +
-> > > +_scratch_mkfs_sized $((128 * 1024 * 1024)) | _filter_mkfs >$seqres.full 2>$tmp.mkfs
-> > > +# get original data blocks number
-> > > +. $tmp.mkfs
-> > > +_scratch_mount
-> > > +
-> > 
-> 
-> Hi Brian,
-> 
-> Thanks for the review, and sorry for the late response..
-> 
-> > You could probably even make this smaller and make the test quicker.
-> > E.g., I can create an fs down to 20M or so without any problems.  Also,
-> > setting imaxpct=0 might be a good idea so you don't hit that artificial
-> > limit.
-> 
-> Yes, a smaller fs could make the test much more quicker. I tested with
-> 16M fs and the test time reduced from 70s to ~10s on my test host.
-> 
+When testing with lvm, a previous btrfsck run could change df output
+from something like
 
-That sounds great.
+/dev/mapper/rhel_hp--dl388eg8--01-testlv1 btrfs 15728640 900 13602172 1% /mnt/btrfs
 
-> But setting imaxpct=0 could increase the total available inode number
-> which could make test run longer. So I tend to use default mkfs
-> options here.
->
+to
 
-True... I don't really want to make a big deal out of imaxpct. I think
-the consensus now is that it's a useless relic and will probably be
-removed. That does mean this test will eventually use the full fs space
-by default and we should make sure it runs in a reasonable amount of
-time. FWIW, it seems to in my tests, running in under 2 minutes on a
-single spindle.
+/dev/dm-3 btrfs 15728640 900 13602172 1% /mnt/btrfs
 
-The other issue is that if I set imaxpct=1 in my mkfs options, the test
-passes. Should it? Is it actually testing what it should be in that
-scenario? ;) Note that when imaxpct is set, the 'df -i' information will
-be based on the cap that imaxpct sets. E.g., it will show 100% usage
-even though we've only used a few MB for inodes.
+So "_fs_type $device" couldn't find the mounted btrfs in
+_check_btrfs_filesystem and the fs couldn't get unmounted, then a latter
+btrfsck reports the btrfs is currently mounted, which could fail the test.
 
-Brian
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+ common/rc | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
 
-> > 
-> > > +# Create files to consume free inodes in background
-> > > +(
-> > > +	i=0
-> > > +	while [ $i -lt 1000 ]; do
-> > > +		mkdir $SCRATCH_MNT/testdir_$i
-> > > +		create_file $SCRATCH_MNT/testdir_$i &
-> > > +		let i=$i+1
-> > > +	done
-> > > +) >/dev/null 2>&1 &
-> > > +
-> > > +# Grow fs at the same time, at least x4
-> > > +# doubling or tripling the size couldn't reproduce
-> > > +$XFS_GROWFS_PROG -D $((dblocks * 4)) $SCRATCH_MNT >>$seqres.full
-> > > +
-> > 
-> > Even though this is still relatively small based on what people probably
-> > typically test, we're still making assumptions about the size of the
-> > scratch device. It may be better to create the fs as a file on TEST_DEV.
-> > Then you could do something like truncate to a fixed starting size, mkfs
-> > at ~20MB and just growfs to the full size of the file. A 4x grow at that
-> > point is then still only ~80MB, though hopefully it still doesn't run
-> > too long on slower machines.
-> 
-> I'll use _require_fs_space here as Dave suggested.
-> 
-> > 
-> > > +# Wait for background create_file to hit ENOSPC
-> > > +wait
-> > > +
-> > > +# log inode status in $seqres.full for debug purpose
-> > > +echo "Inode status after growing fs" >>$seqres.full
-> > > +$DF_PROG -i $SCRATCH_MNT >>$seqres.full
-> > > +
-> > > +# Check free inode count, we expect all free inodes are taken
-> > > +free_inode=`_get_free_inode $SCRATCH_MNT`
-> > > +if [ $free_inode -gt 0 ]; then
-> > > +	echo "$free_inode free inodes available, newly added space not being used"
-> > > +else
-> > > +	status=0
-> > > +fi
-> > 
-> > This might not be the best metric either. I believe the free inodes
-> > count that 'df -Ti' returns is a somewhat artificial calculation based
-> > on the number of free blocks available, since we can do dynamic inode
-> > allocation. It doesn't necessarily mean that all blocks can be allocated
-> > to inodes however (e.g., due to alignment or extent length constraints),
-> > so it might never actually read 0 unless the filesystem is perfectly
-> > full.
-> > 
-> > Perhaps consider something like the IUse percentage over a certain
-> > threshold?
-> 
-> I'm not sure about the proper percentage here, I'll try %99. But in my
-> test on RHEL6 the free inode count is always 0 after test.
-> 
-> Will send out v2 soon.
-> 
-> Thanks,
-> Eryu
-> 
-> > 
-> > Brian
-> > 
-> > > +
-> > > +exit
-> > > diff --git a/tests/xfs/015.out b/tests/xfs/015.out
-> > > new file mode 100644
-> > > index 0000000..fee0fcf
-> > > --- /dev/null
-> > > +++ b/tests/xfs/015.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 015
-> > > +Silence is golden
-> > > diff --git a/tests/xfs/group b/tests/xfs/group
-> > > index d5b50b7..0aab336 100644
-> > > --- a/tests/xfs/group
-> > > +++ b/tests/xfs/group
-> > > @@ -12,6 +12,7 @@
-> > >  012 rw auto quick
-> > >  013 auto metadata stress
-> > >  014 auto enospc quick quota
-> > > +015 auto enospc growfs
-> > >  016 rw auto quick
-> > >  017 mount auto quick stress
-> > >  018 deprecated # log logprint v2log
-> > > -- 
-> > > 1.9.3
-> > > 
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > _______________________________________________
-> > xfs mailing list
-> > xfs@oss.sgi.com
-> > http://oss.sgi.com/mailman/listinfo/xfs
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/common/rc b/common/rc
+index 2c83340..a4fb21d 100644
+--- a/common/rc
++++ b/common/rc
+@@ -802,7 +802,13 @@ _fs_type()
+     # Fix the filesystem type up here so that the callers don't
+     # have to bother with this quirk.
+     #
+-    _df_device $1 | $AWK_PROG '{ print $2 }' | sed -e 's/nfs4/nfs/'
++    local fstype=`_df_device $1 | $AWK_PROG '{ print $2 }' | sed -e 's/nfs4/nfs/'`
++    # in case $device is a symlink(lvm) and df gives out the canonical name
++    if [ "$fstype" == "" ]; then
++        _df_device `_real_dev $1` | $AWK_PROG '{ print $2 }' | sed -e 's/nfs4/nfs/'`
++    else
++        echo $fstype
++    fi
+ }
+ 
+ # return the FS mount options of a mounted device
+-- 
+1.9.3
+
