@@ -1,182 +1,209 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:64585 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751758AbaG3J2J (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 30 Jul 2014 05:28:09 -0400
-From: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
-Subject: [PATCH v3] xfstests/ext4: regression test for wrong assert in ext4_mb_normalize_request()
-Date: Wed, 30 Jul 2014 17:27:17 +0800
-Message-ID: <1406712437-2184-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
-In-Reply-To: <alpine.LFD.2.00.1407231048490.2207@localhost.localdomain>
-References: <alpine.LFD.2.00.1407231048490.2207@localhost.localdomain>
+Received: from mx1.redhat.com ([209.132.183.28]:6782 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755888AbaGaDco (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 30 Jul 2014 23:32:44 -0400
+Date: Thu, 31 Jul 2014 11:32:38 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 1/2] xfs: new case to test inode allocations in
+ post-growfs disk space
+Message-ID: <20140731033238.GY7382@dhcp-13-216.nay.redhat.com>
+References: <1405529554-31225-1-git-send-email-eguan@redhat.com>
+ <20140721134638.GA45794@bfoster.bfoster>
+ <20140724103658.GB6210@dhcp-13-216.nay.redhat.com>
+ <20140724130646.GA37832@bfoster.bfoster>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20140724130646.GA37832@bfoster.bfoster>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Cc: lczerner@redhat.com, Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
+To: Brian Foster <bfoster@redhat.com>
+Cc: Eryu Guan <guaneryu@gmail.com>, Boris Ranto <branto@redhat.com>, Eric Sandeen <esandeen@redhat.com>, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-Regression test for:
-    b5b6077 ext4: fix wrong assert in ext4_mb_normalize_request()
+On Thu, Jul 24, 2014 at 09:06:47AM -0400, Brian Foster wrote:
+> On Thu, Jul 24, 2014 at 06:36:58PM +0800, Eryu Guan wrote:
+> > On Mon, Jul 21, 2014 at 09:46:38AM -0400, Brian Foster wrote:
+> > > On Thu, Jul 17, 2014 at 12:52:33AM +0800, Eryu Guan wrote:
+> > [snip]
+> > > > +
+> > > > +create_file()
+> > > > +{
+> > > > +	local dir=$1
+> > > > +	local i=0
+> > > > +
+> > > > +	while echo -n >$dir/testfile_$i; do
+> > > > +		let i=$i+1
+> > > > +	done
+> > > > +}
+> > > > +
+> > > > +# get standard environment, filters and checks
+> > > > +. ./common/rc
+> > > > +. ./common/filter
+> > > > +
+> > > > +# real QA test starts here
+> > > > +_supported_fs xfs
+> > > > +_supported_os Linux
+> > > > +
+> > > > +_require_scratch
+> > > > +
+> > > > +rm -f $seqres.full
+> > > > +echo "Silence is golden"
+> > > > +
+> > > > +_scratch_mkfs_sized $((128 * 1024 * 1024)) | _filter_mkfs >$seqres.full 2>$tmp.mkfs
+> > > > +# get original data blocks number
+> > > > +. $tmp.mkfs
+> > > > +_scratch_mount
+> > > > +
+> > > 
+> > 
+> > Hi Brian,
+> > 
+> > Thanks for the review, and sorry for the late response..
+> > 
+> > > You could probably even make this smaller and make the test quicker.
+> > > E.g., I can create an fs down to 20M or so without any problems.  Also,
+> > > setting imaxpct=0 might be a good idea so you don't hit that artificial
+> > > limit.
+> > 
+> > Yes, a smaller fs could make the test much more quicker. I tested with
+> > 16M fs and the test time reduced from 70s to ~10s on my test host.
+> > 
+> 
+> That sounds great.
+> 
+> > But setting imaxpct=0 could increase the total available inode number
+> > which could make test run longer. So I tend to use default mkfs
+> > options here.
+> >
+> 
+> True... I don't really want to make a big deal out of imaxpct. I think
+> the consensus now is that it's a useless relic and will probably be
+> removed. That does mean this test will eventually use the full fs space
+> by default and we should make sure it runs in a reasonable amount of
+> time. FWIW, it seems to in my tests, running in under 2 minutes on a
+> single spindle.
+> 
+> The other issue is that if I set imaxpct=1 in my mkfs options, the test
+> passes. Should it? Is it actually testing what it should be in that
+> scenario? ;) Note that when imaxpct is set, the 'df -i' information will
+> be based on the cap that imaxpct sets. E.g., it will show 100% usage
+> even though we've only used a few MB for inodes.
 
-Meanwhile make minor changes to _scratch_mkfs_ext4() in common/rc, _scratch_mkfs_ext4()
-might fail due to conflicts between being passed options and MKFS_OPTIONS. We fix this
-by ignoring MKFS_OPTIONS if it fails the first time(see _scratch_mkfs_xfs()), as suggested
-by Lukas Czerner.
+Yes, I can pass the test too with imaxpct=1 set. But I'm not really
+sure about imaxpct impact on the test result.
 
-Signed-off-by: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
----
- common/rc          | 39 +++++++++++++++++++++++++++++++++++++-
- tests/ext4/003     | 55 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/003.out |  2 ++
- tests/ext4/group   |  1 +
- 4 files changed, 96 insertions(+), 1 deletion(-)
- create mode 100755 tests/ext4/003
- create mode 100644 tests/ext4/003.out
+Eric, do you have any suggestions here? Because I saw you send out the
+kernel patch to fix this problem :)
 
-diff --git a/common/rc b/common/rc
-index 2c83340..f39e472 100644
---- a/common/rc
-+++ b/common/rc
-@@ -446,12 +446,31 @@ _setup_large_ext4_fs()
- 
- _scratch_mkfs_ext4()
- {
-+	# extra mkfs options can be added by tests
-+	local extra_mkfs_options=$*
-+
- 	local tmp_dir=/tmp/
- 
--	/sbin/mkfs -t $FSTYP -- -F $MKFS_OPTIONS $* $SCRATCH_DEV \
-+	/sbin/mkfs -t ext4 -- -F $MKFS_OPTIONS $extra_mkfs_options $SCRATCH_DEV \
- 			2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
- 	local mkfs_status=$?
- 
-+	# a mkfs failure may be caused by conflicts between
-+	# $MKFS_OPTIONS and $extra_mkfs_options
-+	if [ $mkfs_status -ne 0 -a ! -z "$extra_mkfs_options" ]; then
-+		(
-+		echo -n "** mkfs failed with extra mkfs options "
-+		echo "added to \"$MKFS_OPTIONS\" by test $seq **"
-+		echo -n "** attempting to mkfs using only test $seq "
-+		echo "options: $extra_mkfs_options **"
-+		) >> $seqres.full
-+
-+		# running mkfs again. overwrite previous mkfs output files
-+		/sbin/mkfs -t ext4 -- -F $extra_mkfs_options $SCRATCH_DEV \
-+				2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
-+		local mkfs_status=$?
-+	fi
-+
- 	if [ $mkfs_status -eq 0 -a "$LARGE_SCRATCH_DEV" = yes ]; then
- 		# manually parse the mkfs output to get the fs size in bytes
- 		fs_size=`cat $tmp_dir.mkfsstd | awk ' \
-@@ -1113,6 +1132,24 @@ _require_xfs_crc()
- 	umount $SCRATCH_MNT
- }
- 
-+# this test requires the bigalloc feature to be available in mkfs.ext4
-+#
-+_require_ext4_mkfs_bigalloc()
-+{
-+	_scratch_mkfs_ext4 -O bigalloc >/dev/null 2>&1 \
-+	   || _notrun "mkfs.ext4 doesn't have bigalloc feature"
-+}
-+
-+# this test requires the ext4 kernel support bigalloc feature
-+#
-+_require_ext4_bigalloc()
-+{
-+	_scratch_mkfs_ext4 -O bigalloc >/dev/null 2>&1
-+	_scratch_mount >/dev/null 2>&1 \
-+	   || _notrun "Ext4 kernel doesn't support bigalloc feature"
-+	umount $SCRATCH_MNT
-+}
-+
- # this test requires the finobt feature to be available in mkfs.xfs
- #
- _require_xfs_mkfs_finobt()
-diff --git a/tests/ext4/003 b/tests/ext4/003
-new file mode 100755
-index 0000000..4ca282f
---- /dev/null
-+++ b/tests/ext4/003
-@@ -0,0 +1,55 @@
-+#! /bin/bash
-+# FS QA Test No. ext4/003
-+#
-+# Regression test for commit:
-+# b5b6077 ext4: fix wrong assert in ext4_mb_normalize_request()
-+# This testcase checks whether this bug has been fixed.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2014 Fujitsu.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    _scratch_unmount
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs ext4
-+_supported_os Linux
-+
-+_require_scratch
-+_require_ext4_mkfs_bigalloc
-+_require_ext4_bigalloc
-+
-+rm -f $seqres.full
-+
-+yes | mkfs.ext4 -O bigalloc -C 65536  -g 256 $SCRATCH_DEV 512m \
-+    >> $seqres.full 2>&1
-+_scratch_mount || _fail "couldn't mount fs"
-+
-+dd if=/dev/zero of=$SCRATCH_MNT/testfile bs=1M count=256 2>&1 | _filter_dd
-+
-+echo "Slience is golden"
-+
-+status=0
-+exit
-diff --git a/tests/ext4/003.out b/tests/ext4/003.out
-new file mode 100644
-index 0000000..07f245d
---- /dev/null
-+++ b/tests/ext4/003.out
-@@ -0,0 +1,2 @@
-+QA output created by 003
-+Slience is golden
-diff --git a/tests/ext4/group b/tests/ext4/group
-index 7e66035..152196c 100644
---- a/tests/ext4/group
-+++ b/tests/ext4/group
-@@ -5,6 +5,7 @@
- #
- 001 auto prealloc quick
- 002 auto quick prealloc
-+003 auto quick
- 271 auto rw quick
- 301 aio dangerous ioctl rw stress
- 302 aio dangerous ioctl rw stress
--- 
-1.8.2.1
-
+Thanks,
+Eryu
+> 
+> Brian
+> 
+> > > 
+> > > > +# Create files to consume free inodes in background
+> > > > +(
+> > > > +	i=0
+> > > > +	while [ $i -lt 1000 ]; do
+> > > > +		mkdir $SCRATCH_MNT/testdir_$i
+> > > > +		create_file $SCRATCH_MNT/testdir_$i &
+> > > > +		let i=$i+1
+> > > > +	done
+> > > > +) >/dev/null 2>&1 &
+> > > > +
+> > > > +# Grow fs at the same time, at least x4
+> > > > +# doubling or tripling the size couldn't reproduce
+> > > > +$XFS_GROWFS_PROG -D $((dblocks * 4)) $SCRATCH_MNT >>$seqres.full
+> > > > +
+> > > 
+> > > Even though this is still relatively small based on what people probably
+> > > typically test, we're still making assumptions about the size of the
+> > > scratch device. It may be better to create the fs as a file on TEST_DEV.
+> > > Then you could do something like truncate to a fixed starting size, mkfs
+> > > at ~20MB and just growfs to the full size of the file. A 4x grow at that
+> > > point is then still only ~80MB, though hopefully it still doesn't run
+> > > too long on slower machines.
+> > 
+> > I'll use _require_fs_space here as Dave suggested.
+> > 
+> > > 
+> > > > +# Wait for background create_file to hit ENOSPC
+> > > > +wait
+> > > > +
+> > > > +# log inode status in $seqres.full for debug purpose
+> > > > +echo "Inode status after growing fs" >>$seqres.full
+> > > > +$DF_PROG -i $SCRATCH_MNT >>$seqres.full
+> > > > +
+> > > > +# Check free inode count, we expect all free inodes are taken
+> > > > +free_inode=`_get_free_inode $SCRATCH_MNT`
+> > > > +if [ $free_inode -gt 0 ]; then
+> > > > +	echo "$free_inode free inodes available, newly added space not being used"
+> > > > +else
+> > > > +	status=0
+> > > > +fi
+> > > 
+> > > This might not be the best metric either. I believe the free inodes
+> > > count that 'df -Ti' returns is a somewhat artificial calculation based
+> > > on the number of free blocks available, since we can do dynamic inode
+> > > allocation. It doesn't necessarily mean that all blocks can be allocated
+> > > to inodes however (e.g., due to alignment or extent length constraints),
+> > > so it might never actually read 0 unless the filesystem is perfectly
+> > > full.
+> > > 
+> > > Perhaps consider something like the IUse percentage over a certain
+> > > threshold?
+> > 
+> > I'm not sure about the proper percentage here, I'll try %99. But in my
+> > test on RHEL6 the free inode count is always 0 after test.
+> > 
+> > Will send out v2 soon.
+> > 
+> > Thanks,
+> > Eryu
+> > 
+> > > 
+> > > Brian
+> > > 
+> > > > +
+> > > > +exit
+> > > > diff --git a/tests/xfs/015.out b/tests/xfs/015.out
+> > > > new file mode 100644
+> > > > index 0000000..fee0fcf
+> > > > --- /dev/null
+> > > > +++ b/tests/xfs/015.out
+> > > > @@ -0,0 +1,2 @@
+> > > > +QA output created by 015
+> > > > +Silence is golden
+> > > > diff --git a/tests/xfs/group b/tests/xfs/group
+> > > > index d5b50b7..0aab336 100644
+> > > > --- a/tests/xfs/group
+> > > > +++ b/tests/xfs/group
+> > > > @@ -12,6 +12,7 @@
+> > > >  012 rw auto quick
+> > > >  013 auto metadata stress
+> > > >  014 auto enospc quick quota
+> > > > +015 auto enospc growfs
+> > > >  016 rw auto quick
+> > > >  017 mount auto quick stress
+> > > >  018 deprecated # log logprint v2log
+> > > > -- 
+> > > > 1.9.3
+> > > > 
+> > > > --
+> > > > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > > > the body of a message to majordomo@vger.kernel.org
+> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > 
+> > > _______________________________________________
+> > > xfs mailing list
+> > > xfs@oss.sgi.com
+> > > http://oss.sgi.com/mailman/listinfo/xfs
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
