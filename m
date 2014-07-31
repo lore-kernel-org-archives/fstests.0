@@ -1,90 +1,139 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:35414 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750853AbaGaMmK (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 31 Jul 2014 08:42:10 -0400
-Date: Thu, 31 Jul 2014 20:42:03 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 1/2] xfs: new case to test inode allocations in
- post-growfs disk space
-Message-ID: <20140731124203.GH7382@dhcp-13-216.nay.redhat.com>
-References: <1405529554-31225-1-git-send-email-eguan@redhat.com>
- <20140721134638.GA45794@bfoster.bfoster>
- <20140724103658.GB6210@dhcp-13-216.nay.redhat.com>
- <20140724130646.GA37832@bfoster.bfoster>
- <20140731033238.GY7382@dhcp-13-216.nay.redhat.com>
- <20140731114537.GA43383@bfoster.bfoster>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20140731114537.GA43383@bfoster.bfoster>
+Received: from victor.provo.novell.com ([137.65.250.26]:59596 "EHLO
+	victor.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751759AbaGaWcZ (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 31 Jul 2014 18:32:25 -0400
+From: Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] xfstests: add regression test for btrfs send with orphans
+Date: Fri,  1 Aug 2014 00:11:08 +0100
+Message-Id: <1406848268-20620-1-git-send-email-fdmanana@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: fstests@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>, Eric Sandeen <esandeen@redhat.com>, Boris Ranto <branto@redhat.com>, xfs@oss.sgi.com
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 31, 2014 at 07:45:37AM -0400, Brian Foster wrote:
-> On Thu, Jul 31, 2014 at 11:32:38AM +0800, Eryu Guan wrote:
-> > On Thu, Jul 24, 2014 at 09:06:47AM -0400, Brian Foster wrote:
-> > > On Thu, Jul 24, 2014 at 06:36:58PM +0800, Eryu Guan wrote:
-> > > > On Mon, Jul 21, 2014 at 09:46:38AM -0400, Brian Foster wrote:
-> > > > > On Thu, Jul 17, 2014 at 12:52:33AM +0800, Eryu Guan wrote:
-[snip]
-> > > > Hi Brian,
-> > > > 
-> > > > Thanks for the review, and sorry for the late response..
-> > > > 
-> > > > > You could probably even make this smaller and make the test quicker.
-> > > > > E.g., I can create an fs down to 20M or so without any problems.  Also,
-> > > > > setting imaxpct=0 might be a good idea so you don't hit that artificial
-> > > > > limit.
-> > > > 
-> > > > Yes, a smaller fs could make the test much more quicker. I tested with
-> > > > 16M fs and the test time reduced from 70s to ~10s on my test host.
-> > > > 
-> > > 
-> > > That sounds great.
-> > > 
-> > > > But setting imaxpct=0 could increase the total available inode number
-> > > > which could make test run longer. So I tend to use default mkfs
-> > > > options here.
-> > > >
-> > > 
-> > > True... I don't really want to make a big deal out of imaxpct. I think
-> > > the consensus now is that it's a useless relic and will probably be
-> > > removed. That does mean this test will eventually use the full fs space
-> > > by default and we should make sure it runs in a reasonable amount of
-> > > time. FWIW, it seems to in my tests, running in under 2 minutes on a
-> > > single spindle.
-> > > 
-> > > The other issue is that if I set imaxpct=1 in my mkfs options, the test
-> > > passes. Should it? Is it actually testing what it should be in that
-> > > scenario? ;) Note that when imaxpct is set, the 'df -i' information will
-> > > be based on the cap that imaxpct sets. E.g., it will show 100% usage
-> > > even though we've only used a few MB for inodes.
-> > 
-> > Yes, I can pass the test too with imaxpct=1 set. But I'm not really
-> > sure about imaxpct impact on the test result.
-> > 
-> > Eric, do you have any suggestions here? Because I saw you send out the
-> > kernel patch to fix this problem :)
-> > 
-> 
-> (I think Eric might be away.)
-> 
-> To be clear, I'm just suggesting we verify whether the test is as
-> focused as possible. Put another way, have we verified whether this test
-> detects the problem with this potential configuration? E.g., run a
-> kernel without Eric's growfs fix, run the test and verify it fails.
-> Repeat with '-i imaxpct=1' in MKFS_OPTIONS and verify the test still
-> fails. If it does, then it's probably fine. If it passes, that's a hole
-> in the test case we should close up.
-> 
-> Brian
+Regression test for a btrfs issue where we create a RO snapshot
+to use for a send operation, which fails with a -ESTALE error,
+due to the presence of orphan inodes accessible through the
+snapshot's commit root but no longer present through the main
+root.
 
-Thanks Brian, I'll look into it and try to work it out.
+This issue is fixed by the following linux kernel btrfs patch:
 
-(Note that with my v2 patch, the maxpct number in question is 5 instead of 1)
+  Btrfs: update commit root on snapshot creation after orphan cleanup
 
-Thanks,
-Eryu
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/057     | 81 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/057.out |  1 +
+ tests/btrfs/group   |  1 +
+ 3 files changed, 83 insertions(+)
+ create mode 100755 tests/btrfs/057
+ create mode 100644 tests/btrfs/057.out
+
+diff --git a/tests/btrfs/057 b/tests/btrfs/057
+new file mode 100755
+index 0000000..2174077
+--- /dev/null
++++ b/tests/btrfs/057
+@@ -0,0 +1,81 @@
++#! /bin/bash
++# FS QA Test No. btrfs/057
++#
++# Regression test for a btrfs issue where we create a RO snapshot to use for
++# a send operation which fails with a -ESTALE error, due to the presence of
++# orphan inodes accessible through the snapshot's commit root but no longer
++# present through the main root.
++#
++# This issue is fixed by the following linux kernel btrfs patch:
++#
++#    Btrfs: update commit root on snapshot creation after orphan cleanup
++#
++#-----------------------------------------------------------------------
++# Copyright (C) 2014 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	if [ ! -z $XFS_IO_PID ]; then
++		kill $XFS_IO_PID > /dev/null 2>&1
++	fi
++	rm -fr $tmp
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++# Requiring flink command tests for the presence of the -T option used
++# to pass O_TMPFILE to open(2).
++_require_xfs_io_command "flink"
++_need_to_be_root
++
++rm -f $seqres.full
++
++_scratch_mkfs >/dev/null 2>&1
++_scratch_mount
++
++# Create a tmpfile file, write some data to it and leave it open, so that our
++# main subvolume has an orphan inode item.
++$XFS_IO_PROG -T $SCRATCH_MNT >$seqres.full 2>&1 < <(
++	echo "pwrite 0 65536"
++	read
++) &
++XFS_IO_PID=$!
++
++# With the tmpfile open, create a RO snapshot and use it for a send operation.
++# The send operation used to fail with -ESTALE due to the presence of the
++# orphan inode.
++_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap
++_run_btrfs_util_prog send $SCRATCH_MNT/mysnap -f /dev/null
++
++status=0
++exit
+diff --git a/tests/btrfs/057.out b/tests/btrfs/057.out
+new file mode 100644
+index 0000000..b26eefe
+--- /dev/null
++++ b/tests/btrfs/057.out
+@@ -0,0 +1 @@
++QA output created by 057
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 2da7127..ebc38c5 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -59,3 +59,4 @@
+ 054 auto quick
+ 055 auto quick
+ 056 auto quick
++057 auto quick
+-- 
+1.9.1
+
