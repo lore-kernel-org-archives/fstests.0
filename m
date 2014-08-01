@@ -1,130 +1,149 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:29907 "EHLO
-	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754189AbaHAIsq (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 1 Aug 2014 04:48:46 -0400
-Date: Fri, 1 Aug 2014 18:48:30 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v2] common: get fs type again using device canonical name
- in _fs_type
-Message-ID: <20140801084830.GW26465@dastard>
-References: <1406479050-10601-1-git-send-email-eguan@redhat.com>
- <1406803957-10488-1-git-send-email-eguan@redhat.com>
- <20140801002159.GU26465@dastard>
- <20140801040240.GK7382@dhcp-13-216.nay.redhat.com>
- <20140801044910.GV26465@dastard>
- <20140801050258.GL7382@dhcp-13-216.nay.redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20140801050258.GL7382@dhcp-13-216.nay.redhat.com>
+Received: from victor.provo.novell.com ([137.65.250.26]:44889 "EHLO
+	victor.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750738AbaHAJwL (ORCPT
+	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
+	Fri, 1 Aug 2014 05:52:11 -0400
+From: Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH v2] xfstests: add regression test for btrfs send with orphans
+Date: Fri,  1 Aug 2014 11:51:53 +0100
+Message-Id: <1406890313-11780-1-git-send-email-fdmanana@suse.com>
+In-Reply-To: <1406848268-20620-1-git-send-email-fdmanana@suse.com>
+References: <1406848268-20620-1-git-send-email-fdmanana@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Aug 01, 2014 at 01:02:58PM +0800, Eryu Guan wrote:
-> On Fri, Aug 01, 2014 at 02:49:10PM +1000, Dave Chinner wrote:
-> > On Fri, Aug 01, 2014 at 12:02:41PM +0800, Eryu Guan wrote:
-> > > On Fri, Aug 01, 2014 at 10:21:59AM +1000, Dave Chinner wrote:
-> > > > On Thu, Jul 31, 2014 at 06:52:37PM +0800, Eryu Guan wrote:
-> > > > > When testing with lvm, a previous btrfsck run could change df output
-> > > > > from something like
-> > > > > 
-> > > > > /dev/mapper/rhel_hp--dl388eg8--01-testlv1 btrfs 15728640 900 13602172 1% /mnt/btrfs
-> > > > > 
-> > > > > to
-> > > > > 
-> > > > > /dev/dm-3 btrfs 15728640 900 13602172 1% /mnt/btrfs
-> > > > 
-> > > > I don't follow you. Why would running btrfsck change the name of the
-> > > > device? If the filesystem is umounted and mounted again, then the
-> > > > device could change, but btrfsck should not be not doing the
-> > > > unmount/mount, and so unless the TEST_DEV/SCRATCH_DEV is changing
-> > > > the output of df should be identical...
-> > > > 
-> > > > So before we change the _fs_type() code, can you explain exactly
-> > > > how, when and why the device name is changing to me?
-> > > 
-> > > Assume that we have two btrfs filesystems, kernel is 3.16.0-rc4+
-> > > 
-> > > [root@hp-dl388eg8-01 btrfs-progs]# btrfs fi show
-> > > Label: none  uuid: 1aba7da5-ce2b-4af0-a716-db732abc60b2
-> > >         Total devices 1 FS bytes used 384.00KiB
-> > >         devid    1 size 15.00GiB used 2.04GiB path /dev/mapper/rhel_hp--dl388eg8--01-testlv1
-> > > 
-> > > Label: none  uuid: 26ff4f12-f6d9-4cbc-aae2-57febeefde37
-> > >         Total devices 2 FS bytes used 112.00KiB
-> > >         devid    1 size 15.00GiB used 2.03GiB path /dev/mapper/rhel_hp--dl388eg8--01-testlv2
-> > >         devid    2 size 15.00GiB used 2.01GiB path /dev/mapper/rhel_hp--dl388eg8--01-testlv3
-> > > 
-> > > Btrfs v3.14.2
-> > > 
-> > > And testlv1 was mounted at /mnt/btrfs
-> > > 
-> > > [root@hp-dl388eg8-01 btrfs-progs]# df -TP /mnt/btrfs
-> > > Filesystem                                Type  1024-blocks  Used Available Capacity Mounted on
-> > > /dev/mapper/rhel_hp--dl388eg8--01-testlv1 btrfs    15728640   512  13602560       1% /mnt/btrfs
-> > > 
-> > > Now run btrfsck on testlv2, btrfsck will scan all btrfs devices and
-> > > somehow change the device name.
-> > > 
-> > > [root@hp-dl388eg8-01 btrfs-progs]# btrfsck /dev/mapper/rhel_hp--dl388eg8--01-testlv2 >/dev/null 2>&1
-> > > 
-> > > # device name changed in df output and btrfs fi show output
-> > > [root@hp-dl388eg8-01 btrfs-progs]# df -TP /mnt/btrfs
-> > > Filesystem     Type  1024-blocks  Used Available Capacity Mounted on
-> > > /dev/dm-3      btrfs    15728640   512  13602560       1% /mnt/btrfs
-> > > [root@hp-dl388eg8-01 btrfs-progs]# btrfs fi show
-> > > Label: none  uuid: 1aba7da5-ce2b-4af0-a716-db732abc60b2
-> > >         Total devices 1 FS bytes used 384.00KiB
-> > >         devid    1 size 15.00GiB used 2.04GiB path /dev/dm-3
-> > > 
-> > > Label: none  uuid: 26ff4f12-f6d9-4cbc-aae2-57febeefde37
-> > >         Total devices 2 FS bytes used 112.00KiB
-> > >         devid    1 size 15.00GiB used 2.03GiB path /dev/mapper/rhel_hp--dl388eg8--01-testlv2
-> > >         devid    2 size 15.00GiB used 2.01GiB path /dev/mapper/rhel_hp--dl388eg8--01-testlv3
-> > > 
-> > > Btrfs v3.14.2
-> > > 
-> > > This only happens when btrfsck a btrfs with multiple devices, so this
-> > > only affects xfstests run on btrfs with SCRATCH_DEV_POOL set to lvm
-> > > lvs.
-> > > 
-> > > Maybe this is a bug of btrfs-progs and we should fix it there?
-> > 
-> > Yes, that smells of a btrfs-progs bug. If your /etc/mtab a link to
-> > /proc/mounts? If not, does the contents change when you run btrfsck,
-> > and does the problem go away when you replace /etc/mtab with a link
-> > to /proc/mounts?
-> 
-> /etc/mtab is a symlink to /proc/self/mounts, so does /proc/mounts
-> 
-> [root@hp-dl388eg8-01 btrfs-progs]# ls -l /etc/mtab
-> lrwxrwxrwx. 1 root root 17 Sep 22  2013 /etc/mtab -> /proc/self/mounts
-> [root@hp-dl388eg8-01 btrfs-progs]# ls -l /proc/mounts
-> lrwxrwxrwx. 1 root root 11 Aug  1 00:59 /proc/mounts -> self/mounts
-> 
-> And the device name also changed in /proc/mounts
-> 
-> [root@hp-dl388eg8-01 btrfs-progs]# grep btrfs /proc/mounts
-> /dev/dm-3 /mnt/btrfs btrfs rw,seclabel,relatime,space_cache 0 0
+Regression test for a btrfs issue where we create a RO snapshot
+to use for a send operation, which fails with a -ESTALE error,
+due to the presence of orphan inodes accessible through the
+snapshot's commit root but no longer present through the main
+root.
 
-Well, that's exactly the last thing *I* expected. The kernel just
-doesn't change device names on mounted filesystems like that.
+This issue is fixed by the following linux kernel btrfs patch:
 
-Oh, the device name comes from btrfs_show_devname().
+  Btrfs: update commit root on snapshot creation after orphan cleanup
 
-So this definitely seems to me to be a btrfs bug - btrfsck is
-causing the btrfs kernel code to change the name of devices
-associated with unrelated, mounted filesystems to that which it is
-operating on. That's just wrong. IOWs, btrfs needs fixing, not
-xfstests, because that can bite during any test that runs btrfsck in
-the middle of it....
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
 
-Cheers,
+V2: Replaced a > redirect with a >> redirect to $seqres.full, and added a
+    sleep.
 
-Dave.
+ tests/btrfs/057     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/057.out |  1 +
+ tests/btrfs/group   |  1 +
+ 3 files changed, 86 insertions(+)
+ create mode 100755 tests/btrfs/057
+ create mode 100644 tests/btrfs/057.out
+
+diff --git a/tests/btrfs/057 b/tests/btrfs/057
+new file mode 100755
+index 0000000..1e313e9
+--- /dev/null
++++ b/tests/btrfs/057
+@@ -0,0 +1,84 @@
++#! /bin/bash
++# FS QA Test No. btrfs/057
++#
++# Regression test for a btrfs issue where we create a RO snapshot to use for
++# a send operation which fails with a -ESTALE error, due to the presence of
++# orphan inodes accessible through the snapshot's commit root but no longer
++# present through the main root.
++#
++# This issue is fixed by the following linux kernel btrfs patch:
++#
++#    Btrfs: update commit root on snapshot creation after orphan cleanup
++#
++#-----------------------------------------------------------------------
++# Copyright (C) 2014 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	if [ ! -z $XFS_IO_PID ]; then
++		kill $XFS_IO_PID > /dev/null 2>&1
++	fi
++	rm -fr $tmp
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++# Requiring flink command tests for the presence of the -T option used
++# to pass O_TMPFILE to open(2).
++_require_xfs_io_command "flink"
++_need_to_be_root
++
++rm -f $seqres.full
++
++_scratch_mkfs >/dev/null 2>&1
++_scratch_mount
++
++# Create a tmpfile file, write some data to it and leave it open, so that our
++# main subvolume has an orphan inode item.
++$XFS_IO_PROG -T $SCRATCH_MNT >>$seqres.full 2>&1 < <(
++	echo "pwrite 0 65536"
++	read
++) &
++XFS_IO_PID=$!
++
++# Give it some time to the xfs_io process to create the tmpfile.
++sleep 3
++
++# With the tmpfile open, create a RO snapshot and use it for a send operation.
++# The send operation used to fail with -ESTALE due to the presence of the
++# orphan inode.
++_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap
++_run_btrfs_util_prog send $SCRATCH_MNT/mysnap -f /dev/null
++
++status=0
++exit
+diff --git a/tests/btrfs/057.out b/tests/btrfs/057.out
+new file mode 100644
+index 0000000..b26eefe
+--- /dev/null
++++ b/tests/btrfs/057.out
+@@ -0,0 +1 @@
++QA output created by 057
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 2da7127..ebc38c5 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -59,3 +59,4 @@
+ 054 auto quick
+ 055 auto quick
+ 056 auto quick
++057 auto quick
 -- 
-Dave Chinner
-david@fromorbit.com
+1.9.1
+
