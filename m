@@ -1,139 +1,46 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from victor.provo.novell.com ([137.65.250.26]:59596 "EHLO
-	victor.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751759AbaGaWcZ (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 31 Jul 2014 18:32:25 -0400
-From: Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] xfstests: add regression test for btrfs send with orphans
-Date: Fri,  1 Aug 2014 00:11:08 +0100
-Message-Id: <1406848268-20620-1-git-send-email-fdmanana@suse.com>
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:41018 "EHLO
+	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750952AbaHAAWS (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 31 Jul 2014 20:22:18 -0400
+Date: Fri, 1 Aug 2014 10:21:59 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH v2] common: get fs type again using device canonical name
+ in _fs_type
+Message-ID: <20140801002159.GU26465@dastard>
+References: <1406479050-10601-1-git-send-email-eguan@redhat.com>
+ <1406803957-10488-1-git-send-email-eguan@redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1406803957-10488-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Regression test for a btrfs issue where we create a RO snapshot
-to use for a send operation, which fails with a -ESTALE error,
-due to the presence of orphan inodes accessible through the
-snapshot's commit root but no longer present through the main
-root.
+On Thu, Jul 31, 2014 at 06:52:37PM +0800, Eryu Guan wrote:
+> When testing with lvm, a previous btrfsck run could change df output
+> from something like
+> 
+> /dev/mapper/rhel_hp--dl388eg8--01-testlv1 btrfs 15728640 900 13602172 1% /mnt/btrfs
+> 
+> to
+> 
+> /dev/dm-3 btrfs 15728640 900 13602172 1% /mnt/btrfs
 
-This issue is fixed by the following linux kernel btrfs patch:
+I don't follow you. Why would running btrfsck change the name of the
+device? If the filesystem is umounted and mounted again, then the
+device could change, but btrfsck should not be not doing the
+unmount/mount, and so unless the TEST_DEV/SCRATCH_DEV is changing
+the output of df should be identical...
 
-  Btrfs: update commit root on snapshot creation after orphan cleanup
+So before we change the _fs_type() code, can you explain exactly
+how, when and why the device name is changing to me?
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/057     | 81 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/057.out |  1 +
- tests/btrfs/group   |  1 +
- 3 files changed, 83 insertions(+)
- create mode 100755 tests/btrfs/057
- create mode 100644 tests/btrfs/057.out
+Cheers,
 
-diff --git a/tests/btrfs/057 b/tests/btrfs/057
-new file mode 100755
-index 0000000..2174077
---- /dev/null
-+++ b/tests/btrfs/057
-@@ -0,0 +1,81 @@
-+#! /bin/bash
-+# FS QA Test No. btrfs/057
-+#
-+# Regression test for a btrfs issue where we create a RO snapshot to use for
-+# a send operation which fails with a -ESTALE error, due to the presence of
-+# orphan inodes accessible through the snapshot's commit root but no longer
-+# present through the main root.
-+#
-+# This issue is fixed by the following linux kernel btrfs patch:
-+#
-+#    Btrfs: update commit root on snapshot creation after orphan cleanup
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2014 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	if [ ! -z $XFS_IO_PID ]; then
-+		kill $XFS_IO_PID > /dev/null 2>&1
-+	fi
-+	rm -fr $tmp
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+# Requiring flink command tests for the presence of the -T option used
-+# to pass O_TMPFILE to open(2).
-+_require_xfs_io_command "flink"
-+_need_to_be_root
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >/dev/null 2>&1
-+_scratch_mount
-+
-+# Create a tmpfile file, write some data to it and leave it open, so that our
-+# main subvolume has an orphan inode item.
-+$XFS_IO_PROG -T $SCRATCH_MNT >$seqres.full 2>&1 < <(
-+	echo "pwrite 0 65536"
-+	read
-+) &
-+XFS_IO_PID=$!
-+
-+# With the tmpfile open, create a RO snapshot and use it for a send operation.
-+# The send operation used to fail with -ESTALE due to the presence of the
-+# orphan inode.
-+_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap
-+_run_btrfs_util_prog send $SCRATCH_MNT/mysnap -f /dev/null
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/057.out b/tests/btrfs/057.out
-new file mode 100644
-index 0000000..b26eefe
---- /dev/null
-+++ b/tests/btrfs/057.out
-@@ -0,0 +1 @@
-+QA output created by 057
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 2da7127..ebc38c5 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -59,3 +59,4 @@
- 054 auto quick
- 055 auto quick
- 056 auto quick
-+057 auto quick
+Dave.
 -- 
-1.9.1
-
+Dave Chinner
+david@fromorbit.com
