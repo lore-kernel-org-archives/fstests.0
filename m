@@ -1,149 +1,28 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from victor.provo.novell.com ([137.65.250.26]:44889 "EHLO
-	victor.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750738AbaHAJwL (ORCPT
-	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
-	Fri, 1 Aug 2014 05:52:11 -0400
-From: Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH v2] xfstests: add regression test for btrfs send with orphans
-Date: Fri,  1 Aug 2014 11:51:53 +0100
-Message-Id: <1406890313-11780-1-git-send-email-fdmanana@suse.com>
-In-Reply-To: <1406848268-20620-1-git-send-email-fdmanana@suse.com>
-References: <1406848268-20620-1-git-send-email-fdmanana@suse.com>
+Received: from mail-wg0-f51.google.com ([74.125.82.51]:52232 "EHLO
+	mail-wg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752268AbaHDLTe (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 4 Aug 2014 07:19:34 -0400
+Received: by mail-wg0-f51.google.com with SMTP id b13so7518765wgh.10
+        for <fstests@vger.kernel.org>; Mon, 04 Aug 2014 04:19:30 -0700 (PDT)
+Message-ID: <53DF6C3F.6010406@plexistor.com>
+Date: Mon, 04 Aug 2014 14:19:27 +0300
+From: Omer Caspi <omer.caspi@plexistor.com>
+MIME-Version: 1.0
+Subject: generic/076 cleanup
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Cc: Boaz <boaz@plexistor.com>
 List-ID: <fstests@vger.kernel.org>
 
-Regression test for a btrfs issue where we create a RO snapshot
-to use for a send operation, which fails with a -ESTALE error,
-due to the presence of orphan inodes accessible through the
-snapshot's commit root but no longer present through the main
-root.
+While running some tests from the xfstests suite (quick group), I noticed 
+that generic test 076 doesn't clean after itself. Specifically, a couple 
+of directories (p1 and p2) remain on $TEST_DIR once the test is completed. 
+To my understanding, a test should cleanup the files it had created, so I 
+added a rm command to test's _cleanup function to fix it, which seems to 
+be OK, but I thought I'll check: is there a reason for these directories 
+to remain there after the test completion?
 
-This issue is fixed by the following linux kernel btrfs patch:
-
-  Btrfs: update commit root on snapshot creation after orphan cleanup
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
-
-V2: Replaced a > redirect with a >> redirect to $seqres.full, and added a
-    sleep.
-
- tests/btrfs/057     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/057.out |  1 +
- tests/btrfs/group   |  1 +
- 3 files changed, 86 insertions(+)
- create mode 100755 tests/btrfs/057
- create mode 100644 tests/btrfs/057.out
-
-diff --git a/tests/btrfs/057 b/tests/btrfs/057
-new file mode 100755
-index 0000000..1e313e9
---- /dev/null
-+++ b/tests/btrfs/057
-@@ -0,0 +1,84 @@
-+#! /bin/bash
-+# FS QA Test No. btrfs/057
-+#
-+# Regression test for a btrfs issue where we create a RO snapshot to use for
-+# a send operation which fails with a -ESTALE error, due to the presence of
-+# orphan inodes accessible through the snapshot's commit root but no longer
-+# present through the main root.
-+#
-+# This issue is fixed by the following linux kernel btrfs patch:
-+#
-+#    Btrfs: update commit root on snapshot creation after orphan cleanup
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2014 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	if [ ! -z $XFS_IO_PID ]; then
-+		kill $XFS_IO_PID > /dev/null 2>&1
-+	fi
-+	rm -fr $tmp
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+# Requiring flink command tests for the presence of the -T option used
-+# to pass O_TMPFILE to open(2).
-+_require_xfs_io_command "flink"
-+_need_to_be_root
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >/dev/null 2>&1
-+_scratch_mount
-+
-+# Create a tmpfile file, write some data to it and leave it open, so that our
-+# main subvolume has an orphan inode item.
-+$XFS_IO_PROG -T $SCRATCH_MNT >>$seqres.full 2>&1 < <(
-+	echo "pwrite 0 65536"
-+	read
-+) &
-+XFS_IO_PID=$!
-+
-+# Give it some time to the xfs_io process to create the tmpfile.
-+sleep 3
-+
-+# With the tmpfile open, create a RO snapshot and use it for a send operation.
-+# The send operation used to fail with -ESTALE due to the presence of the
-+# orphan inode.
-+_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap
-+_run_btrfs_util_prog send $SCRATCH_MNT/mysnap -f /dev/null
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/057.out b/tests/btrfs/057.out
-new file mode 100644
-index 0000000..b26eefe
---- /dev/null
-+++ b/tests/btrfs/057.out
-@@ -0,0 +1 @@
-+QA output created by 057
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 2da7127..ebc38c5 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -59,3 +59,4 @@
- 054 auto quick
- 055 auto quick
- 056 auto quick
-+057 auto quick
--- 
-1.9.1
-
+Omer
