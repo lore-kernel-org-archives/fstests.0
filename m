@@ -1,51 +1,30 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:25586 "EHLO mx1.redhat.com"
+Received: from sandeen.net ([63.231.237.45]:42878 "EHLO sandeen.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754303AbaHGMcN (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 7 Aug 2014 08:32:13 -0400
-Date: Thu, 7 Aug 2014 08:32:02 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [DISCUSS] Moving from oss.sgi.com to kernel.org
-Message-ID: <20140807123202.GA53888@bfoster.bfoster>
-References: <20140807000922.GA26465@dastard>
+	id S1750874AbaHGUOh (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 7 Aug 2014 16:14:37 -0400
+Message-ID: <53E3DE2B.6080205@sandeen.net>
+Date: Thu, 07 Aug 2014 15:14:35 -0500
+From: Eric Sandeen <sandeen@sandeen.net>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Subject: Re: [DISCUSS] Moving from oss.sgi.com to kernel.org
+References: <20140807000922.GA26465@dastard>
 In-Reply-To: <20140807000922.GA26465@dastard>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: xfs@oss.sgi.com, fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>, xfs@oss.sgi.com
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Aug 07, 2014 at 10:09:22AM +1000, Dave Chinner wrote:
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+On 8/6/14, 7:09 PM, Dave Chinner wrote:
 > Hi folks,
-> 
-> A few recent incidents, discoveries and comments have me concerned
-> about the viability of using oss.sgi.com to host XFS deveopment and
-> community support.
-> 
-> We are very grateful for the time, effort and money that SGI has put
-> into providing oss.sgi.com for us over many, many years, but these
-> recent issues have brought the state of oss.sgi.com and hence it's
-> viability as a host for XFS development to my immediate attention.
-> 
-> Ultimately, as the XFS maintainer, I'm responsible for the contents
-> of the pull requests sent to Linus and the code we distribute to
-> users, distros and developers. That means I need to be able to trust
-> that the hosting infrastructure is secure and well maintained.
-> 
-> The short story is that I can't trust oss.sgi.com to be maintained
-> and secure anymore. The recent DOS issues with oss.sgi.com made it
-> clear that it is essentially unmaintained and the SGI admins don't
-> have time to address issues that arise. This little snippet of the
-> conversion about blocking the rogue spider causing the recent
-> ftp and gitweb DOS problems is instructive:
-> 
-> [19/07/14 09:07] <sandeen> trev, it's you guys' box :)
-> [19/07/14 09:07] <sandeen> you get to make it work 
-> [19/07/14 09:07] <dchinner__> I am not eh administrator, and if I'm forced to do this sort of thing I'll just take the content elsewhere....
-> [19/07/14 09:08] <trev> dchinner__, please do so. I don't have much time for oss anymore
-> 
+
+<rationale>
+
 > It should be no surprise that since this conversation I've been
 > looking at what is involved in moving everything XFS off oss.sgi.com
 > to kernel.org.  Right now I have the main XFS repositories up to
@@ -61,141 +40,50 @@ On Thu, Aug 07, 2014 at 10:09:22AM +1000, Dave Chinner wrote:
 > (e.g. some people don't like the -dev suffix on the trees) so it's
 > best for people to continue to use the trees on oss.sgi.com until
 > this disucssion comes to a conclusion.
-> 
 
-These should be renamed, IMO. -dev implies the repo is some kind of
-subtree. Furthermore, aside from the issue of updating current
-references to point to new trees, I'm sure there's a decent enough
-archive of references on the mailing list to these particular trees
-being deprecated.
+I agree with the move to kernel.org; they have paid staff with time
+and resources to look after this stuff; it's a resource we should use,
+and it'll save us all time and/or money.
 
-> My new kernel dev tree can be found here:
-> 
-> 	git://git.kernel.org/pub/scm/linux/kernel/git/dgc/linux-xfs.git
-> 
-> This is my immediate concern: this tree, regardless of anything
-> else, the tree I am going to be asking Linus to pull from - it is
-> now *my* master tree and the tree on oss.sgi.com will simply mirror
-> that tree.
-> 
-> For the short term, I will set up a cron job to keep the oss trees
-> up to date with the trees on kernel.org. By "short-term" I mean till
-> the end of the year at most. This will allow people time to change
-> their workflows, update their repos, bookmarks, etc in their own
-> time so hopefully not take anyone by surprise when the trees on
-> oss.sgi.com stop updating. "short-term" is a rubbery concept - if
-> anyone things it should be longer or shorter or whether a completely
-> different approach is warranted, please speak up.
-> 
+But I'm one of the "some people" who don't want to re-use the -dev
+trees; let's just get properly named repos up there.  These served
+a different purpose, long ago.
 
-What's the expected frequency of mirror updates? I'm assuming something
-nightly, so changes should reflect generally within 24 hours..?
+If you want to rename to fstests, that's ok with me, but that's
+potentially a different scope; depending on how much content in
+the tree needs to be updated etc, I could see doing that a bit later
+if needed.
 
-> Over the next few days I will move the remaining xfs trees to
-> kernel.org - the historical kernel archive and documentation trees -
-> and then I'll maintain them as the primary trees with the same
-> short term mirroring backup.
-> 
-> In moving these trees, we will need to update some documentation
-> (e.g. the "where to get" documentation on the xfs.org wiki) and
-> links, as well as place a "readme" in the gitweb main page on
-> oss.sgi.com to indicate that the up-to-date XFS trees are now on
-> kernel.org and documenting the drop-dead date to when the trees on
-> oss will no longer be kept up to date.
-> 
+If/when you get the names truly settled, let me know and I'll help
+with updating the wiki etc if you like.
 
-It might be a good idea to somehow mark those repos when that drop dead
-date hits. Perhaps rename master and drop a single README file with a
-reference to the new repo, etc. Just a thought considering it seems like
-at that point we could have up to three repos (if the -dev renames end
-up being new repo creations or something, and if nuking the old ones
-isn't an option) for some projects.
+As for the old tarballs - they do claim to be signed, right?  So
+if we can verify their identity, I see no harm in keeping them around.
 
-> The only remaining issue is what to do about tarball releases for
-> xfsprogs/xfsdump/fstests. We currently have a bunch of historic
-> releases in the ftp release area on oss.sgi.com. I will organise a
-> release directory on kernel.org for future releases (location yet to
-> be confirmed), but I'm not sure what to do with the older releases.
-> I'm open to suggestions here, but the limit of what I will try to
-> move to kernel.org is signed tarballs that I have verified.
-> 
-> For xfstests, I think this would be a good time to rename the
-> project officially as well (i.e. to "fstests"). I'll need to talk to
-> the kernel.org admins on where to locate it (pub/scm/fs/fstests is
-> the best candidate, I think), but in the mean time I'll just mirror
-> to oss.sgi.com as per the above so nobody needs to change anything
-> until we sort out the final location/name of the tree. If anyone has
-> any other ideas on this, please let me know, otherwise I'll just
-> proceed with this plan.
-> 
+As for mailing lists, is it possible to forward for a while, and
+also send a reply back about the address change?  That might be most
+foolproof, then eventually stop the forwarding and just add a reply
+about the list move, and leave that there until oss crumbles into
+dust.  ;)
 
-Personally, I can switch kernel trees fairly easily. I've cloned the
-linux-xfs tree and can either move over whatever things I'm working on
-or just start new efforts in the new tree.
+Thanks, and "May the source be with you" ;)
+- -Eric
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG/MacGPG2 v2.0.17 (Darwin)
+Comment: GPGTools - http://gpgtools.org
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-That said, I'm hesitant to bother with any of the -dev repos until it's
-clear what's going to happen with them (which is pretty much what you
-suggested above). In other words, it's easiest to move once rather than
-from oss.sgi.com xfstests, to kernel.org xfstests-dev then to kernel.org
-fstests. Of course, it's good to have the latest repos replicated
-somewhere if there is concern about the stability of the current host.
-
-> In conjunction with this source tree move, I'd also like to start the
-> move the mailing list. We have ongoing spam, performance and user
-> access issues with oss.sgi.com, so IMO if we are moving source trees
-> off this host we should also move the mailing list to kernel.org
-> infrastructure.
-> 
-
-I hope that doesn't mean we lose our megatron subscription. ;)
-
-Brian
-
-> To that end, there is a linux-xfs@vger.kernel.org
-> list already - it was created at the same time that the above
-> kernel.org repositories were created, but we've never used it. It
-> is archived here:
-> 
-> 	http://www.spinics.net/lists/linux-xfs/
-> 
-> Moving the mailing list is going to be something that affects more
-> than just the developers - we've got lots of documentation that
-> points at this list and there are lots of users that are subscribed,
-> read it though nntp gateways, have aliases for it, etc so we need
-> a good transition plan here.
-> 
-> I'm not sure what the best approach - perhaps just
-> forwarding all email from xfs@oss.sgi.com to
-> linux-xfs@vger.kernel.org will solve most transitional problems
-> for users that aren't aware of the change or are following old
-> documentation or "please report bug" messages from xfs_repair.
-> But it means that everyone needs to subscribe to the new list
-> and probably unsubscribe from the old list. I dont see how we can
-> avoid that in the long term, but I'd like to minimise the pain
-> as much as possible for everyone.
-> 
-> Again, I'm open to suggestions on how to approach this and maintain
-> the oss list aliases for long enough that people and search engines
-> learn about the new list.
-> 
-> I would like to make this as painless as possible for everyone. This
-> isn't the only solution to the problems we have with oss.sgi.com,
-> but it's the path of least effort/greatest gain for me. If anyone
-> has any ideas on alternative solutions, reservations about moving to
-> kernel.org infrastructure and/or suggestions to make it less painful
-> for everyone, please speak up now.
-> 
-> Cheers,
-> 
-> Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
-
-
-
-> _______________________________________________
-> xfs mailing list
-> xfs@oss.sgi.com
-> http://oss.sgi.com/mailman/listinfo/xfs
-
+iQIbBAEBAgAGBQJT494qAAoJECCuFpLhPd7gJm4P93Eas7qaiftU6WF4qKkvkKpD
+0MzWk/b17wBR2cHqG9eLnw6Y4AuXCuYb3DTa77B1+8G+v7RBL1NWzbHAJBfc8KUe
+mfVNbNfGfTBdgUC7FAyvYZtPlHotcG5ghv8pkdIZNT1aazgZ0Eztjkbfz1NnF5Ia
+RwlqGdCyRNB3NsKn+rWypIPaIfUXcCwiSp94YfTiIPvuYIwRnBY4MjKzQa1i+eBl
+qNjziJDxNLuHdsnCRClxiDubnLbxlBoQiu4hHNblA+ogC+xvdjAknqbmq2oF825R
+9P1BM8gwYJIqvZtoDT1P1NFSPt4NpSYL41Eakn5d8KoprbB3FWwsnYV/biX6UyMX
+692Vw5GTtKD6wLeu7Ovi4C8JA+zCFHuMbd8wdmji1IwylRrTvGyGFOdel+caD9ua
+sWoTgJfA8ZZBFgbzmEb6jRJe8x8zx5jobaS1w1KxR2gHXL39/8WOGQ7/TukQnzeE
+omZ2QFqfJTaCbPlns01qrNOvZJHgX7XUPFZ1BxL7kSfptDfCMYnGiACxjhYiWrFf
+H/wPEq4F4itgn2L+eyIpiSlLfLZffsqUFAUKot/raV9+SwjXHfp3zFlbw5Mbw/Co
+H6krvTY0ZN4OzgyrT/16BsC8JUjKMSsN05oTDHfB0ldl2gaFGOuDYv20yzHAKN5m
+WJLBciq+9DFYsBiOnIw=
+=nbLn
+-----END PGP SIGNATURE-----
