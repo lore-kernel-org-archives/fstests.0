@@ -1,50 +1,46 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from sandeen.net ([63.231.237.45]:35889 "EHLO sandeen.net"
+Received: from imap.thunk.org ([74.207.234.97]:53698 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751645AbaHIN3Y (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sat, 9 Aug 2014 09:29:24 -0400
-Message-ID: <53E62233.50807@sandeen.net>
-Date: Sat, 09 Aug 2014 08:29:23 -0500
-From: Eric Sandeen <sandeen@sandeen.net>
-MIME-Version: 1.0
-Subject: Re: [PATCH] generic/077: fall back to /usr if /lib/modules doesn't
- exist
-References: <1407562753-11033-1-git-send-email-tytso@mit.edu>
-In-Reply-To: <1407562753-11033-1-git-send-email-tytso@mit.edu>
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+	id S1751841AbaHKDI1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sun, 10 Aug 2014 23:08:27 -0400
+From: Theodore Ts'o <tytso@mit.edu>
+Subject: [PATCH] common: allow dmflakey tests to work without udev
+Date: Sun, 10 Aug 2014 23:08:20 -0400
+Message-Id: <1407726500-27480-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-On 8/9/14, 12:39 AM, Theodore Ts'o wrote:
-> We need a source of "filler" that can fill up a 50M file system.
-> Unfortunately, on some systems /lib/modules might not exist at all.
-> In that case, use /usr instead.
-> 
-> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+If udev is not present, we need to run "dmsetup mknodes" to make sure
+/dev/mapper/flakey-test is created or destroyed as appropriate.  On a
+system with udev, running "dmsetup mknodes" will be a no-op.
 
-Seems reasonable.
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ common/dmflakey | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-
-> ---
->  tests/generic/077 | 3 +++
->  1 file changed, 3 insertions(+)
-> 
-> diff --git a/tests/generic/077 b/tests/generic/077
-> index 172ce6e..0d6aec7 100755
-> --- a/tests/generic/077
-> +++ b/tests/generic/077
-> @@ -32,6 +32,9 @@ status=1
->  # Something w/ enough data to fill 50M of fs...
->  filler=/lib/modules/
->  
-> +# fall back in case /lib/modules doesn't exist
-> +[ -d $filler ] || filler=/usr
-> +
->  _cleanup()
->  {
->  	cd /
-> 
+diff --git a/common/dmflakey b/common/dmflakey
+index bc984bd..e55aefd 100644
+--- a/common/dmflakey
++++ b/common/dmflakey
+@@ -29,6 +29,7 @@ _init_flakey()
+ 	FLAKEY_TABLE_DROP="0 $BLK_DEV_SIZE flakey $SCRATCH_DEV 0 0 180 1 drop_writes"
+ 	$DMSETUP_PROG create flakey-test --table "$FLAKEY_TABLE" || \
+ 		_fatal "failed to create flakey device"
++	$DMSETUP_PROG mknodes > /dev/null 2>&1
+ }
+ 
+ _mount_flakey()
+@@ -48,6 +49,7 @@ _cleanup_flakey()
+ 	$DMSETUP_PROG resume flakey-test > /dev/null 2>&1
+ 	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
+ 	$DMSETUP_PROG remove flakey-test > /dev/null 2>&1
++	$DMSETUP_PROG mknodes > /dev/null 2>&1
+ }
+ 
+ # _load_flakey_table <table> [lockfs]
+-- 
+2.0.0
 
