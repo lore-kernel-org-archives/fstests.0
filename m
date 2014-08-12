@@ -1,46 +1,40 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from imap.thunk.org ([74.207.234.97]:53698 "EHLO imap.thunk.org"
+Received: from cantor2.suse.de ([195.135.220.15]:39585 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751841AbaHKDI1 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sun, 10 Aug 2014 23:08:27 -0400
-From: Theodore Ts'o <tytso@mit.edu>
-Subject: [PATCH] common: allow dmflakey tests to work without udev
-Date: Sun, 10 Aug 2014 23:08:20 -0400
-Message-Id: <1407726500-27480-1-git-send-email-tytso@mit.edu>
+	id S1752593AbaHLPYT (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 12 Aug 2014 11:24:19 -0400
+Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
+	by mx2.suse.de (Postfix) with ESMTP id 8AB56AC64
+	for <fstests@vger.kernel.org>; Tue, 12 Aug 2014 15:24:17 +0000 (UTC)
+From: Jan Kara <jack@suse.cz>
+Subject: [PATCH] generic/225: Require fiemap support
+Date: Tue, 12 Aug 2014 17:24:08 +0200
+Message-Id: <1407857048-10682-1-git-send-email-jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>
+Cc: Jan Kara <jack@suse.cz>
 List-ID: <fstests@vger.kernel.org>
 
-If udev is not present, we need to run "dmsetup mknodes" to make sure
-/dev/mapper/flakey-test is created or destroyed as appropriate.  On a
-system with udev, running "dmsetup mknodes" will be a no-op.
+Add _require_xfs_io_command "fiemap" to test 225 to properly handle the
+situation when fiemap isn't supported by the filesystem.
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+Signed-off-by: Jan Kara <jack@suse.cz>
 ---
- common/dmflakey | 2 ++
- 1 file changed, 2 insertions(+)
+ tests/generic/225 |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
 
-diff --git a/common/dmflakey b/common/dmflakey
-index bc984bd..e55aefd 100644
---- a/common/dmflakey
-+++ b/common/dmflakey
-@@ -29,6 +29,7 @@ _init_flakey()
- 	FLAKEY_TABLE_DROP="0 $BLK_DEV_SIZE flakey $SCRATCH_DEV 0 0 180 1 drop_writes"
- 	$DMSETUP_PROG create flakey-test --table "$FLAKEY_TABLE" || \
- 		_fatal "failed to create flakey device"
-+	$DMSETUP_PROG mknodes > /dev/null 2>&1
- }
+diff --git a/tests/generic/225 b/tests/generic/225
+index 73b125a..6134c8c 100755
+--- a/tests/generic/225
++++ b/tests/generic/225
+@@ -44,6 +44,7 @@ _cleanup()
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
++_require_xfs_io_command "fiemap"
  
- _mount_flakey()
-@@ -48,6 +49,7 @@ _cleanup_flakey()
- 	$DMSETUP_PROG resume flakey-test > /dev/null 2>&1
- 	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
- 	$DMSETUP_PROG remove flakey-test > /dev/null 2>&1
-+	$DMSETUP_PROG mknodes > /dev/null 2>&1
- }
- 
- # _load_flakey_table <table> [lockfs]
+ _scratch_mkfs > /dev/null 2>&1
+ _scratch_mount > /dev/null 2>&1
 -- 
-2.0.0
+1.6.0.2
 
