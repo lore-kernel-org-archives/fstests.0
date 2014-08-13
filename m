@@ -1,39 +1,178 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mailhub.sw.ru ([195.214.232.25]:43716 "EHLO relay.sw.ru"
+Received: from mailhub.sw.ru ([195.214.232.25]:32437 "EHLO relay.sw.ru"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752090AbaHMPgp (ORCPT <rfc822;fstests@vger.kernel.org>);
+	id S1753461AbaHMPgp (ORCPT <rfc822;fstests@vger.kernel.org>);
 	Wed, 13 Aug 2014 11:36:45 -0400
 From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: [PATCH 1/2] xfstest: shared/298 fixup mkfs options
-Date: Wed, 13 Aug 2014 19:36:27 +0400
-Message-Id: <1407944188-4099-1-git-send-email-dmonakhov@openvz.org>
+Subject: [PATCH 2/2] xfstest: ext4/307 cleanup
+Date: Wed, 13 Aug 2014 19:36:28 +0400
+Message-Id: <1407944188-4099-2-git-send-email-dmonakhov@openvz.org>
+In-Reply-To: <1407944188-4099-1-git-send-email-dmonakhov@openvz.org>
+References: <1407944188-4099-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: david@fromorbit.com, Dmitry Monakhov <dmonakhov@openvz.org>
 List-ID: <fstests@vger.kernel.org>
 
-Currently mkfs faile due to incorrect options
+ tests/ext4/307:
+ - test various block sizes
+ src/e4compact.c:
+ - fix incorrect offset for donor file
+ - add support for tunable block size
 
 Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
 ---
- tests/shared/298 |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
+ src/e4compact.c    |   22 +++++++++++++++++-----
+ tests/ext4/307     |   16 +++++++++++-----
+ tests/ext4/307.out |   13 +++++++++++++
+ 3 files changed, 41 insertions(+), 10 deletions(-)
 
-diff --git a/tests/shared/298 b/tests/shared/298
-index 372fd02..685ba27 100755
---- a/tests/shared/298
-+++ b/tests/shared/298
-@@ -134,8 +134,8 @@ mkdir $loop_mnt
+diff --git a/src/e4compact.c b/src/e4compact.c
+index de0aeb6..c0284ff 100644
+--- a/src/e4compact.c
++++ b/src/e4compact.c
+@@ -48,6 +48,8 @@ struct donor_info
+ 	__u64 length;
+ };
  
- [ "$FSTYP" = "xfs" ] && MKFS_OPTIONS="-f $MKFS_OPTIONS"
++static long page_size;
++static long block_size;
+ static int ignore_error = 0;
+ static int verbose = 0;
  
--$MKFS_PROG -t $FSTYP $MKFS_OPTIONS $loop_dev &> /dev/null
--$MOUNT_PROG $loop_dev $loop_mnt
-+run_check $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $loop_dev
-+run_check $MOUNT_PROG $loop_dev $loop_mnt
+@@ -64,7 +66,6 @@ static int do_defrag_one(int fd, char *name,__u64 start, __u64 len, struct donor
+ 	mv_ioc.donor_fd = donor->fd;
+ 	mv_ioc.orig_start = start;
+ 	mv_ioc.donor_start = donor->offset;
+-	mv_ioc.moved_len = 0;
+ 	mv_ioc.len = len;
  
- echo -n "Generating garbage on loop..."
- # Goal is to fill it up, ignore any errors.
+ 	if (verbose)
+@@ -77,6 +78,7 @@ static int do_defrag_one(int fd, char *name,__u64 start, __u64 len, struct donor
+ 	do {
+ 		i++;
+ 		errno = 0;
++		mv_ioc.moved_len = 0;
+ 		ret = ioctl(fd, EXT4_IOC_MOVE_EXT, &mv_ioc);
+ 		if (verbose)
+ 			printf("process %s  it:%d start:%lld len:%lld donor:%lld,"
+@@ -102,12 +104,12 @@ static int do_defrag_one(int fd, char *name,__u64 start, __u64 len, struct donor
+ 		assert(mv_ioc.len >= mv_ioc.moved_len);
+ 		mv_ioc.len -= mv_ioc.moved_len;
+ 		mv_ioc.orig_start += mv_ioc.moved_len;
+-		mv_ioc.donor_start = mv_ioc.orig_start;
++		mv_ioc.donor_start += mv_ioc.moved_len;
+ 		moved += mv_ioc.moved_len;
+-
+ 	} while (mv_ioc.len);
+ 
+-	if (ret && (errno == EBUSY || errno == ENODATA))
++	if (ret && ignore_error &&
++	    (errno == EBUSY || errno == ENODATA || errno == EOPNOTSUPP))
+ 		ret = 0;
+ 	donor->length -= moved;
+ 	donor->offset += moved;
+@@ -133,9 +135,16 @@ int main(int argc, char **argv)
+ 	extern int optind;
+ 	int c;
+ 	char * donor_name = NULL;
++	int blk_per_pg;
+ 	donor.offset = 0;
+-	while ((c = getopt(argc, argv, "f:o:iv")) != -1) {
++
++	page_size = sysconf(_SC_PAGESIZE);
++	block_size = page_size;
++
++	while ((c = getopt(argc, argv, "b:f:o:iv")) != -1) {
+ 		switch (c) {
++		case 'b':
++			block_size = atol(optarg);
+ 		case 'o':
+ 			donor.offset = atol(optarg);
+ 			break;
+@@ -167,6 +176,7 @@ int main(int argc, char **argv)
+ 	if (donor.offset)
+ 		donor.offset /= st.st_blksize;
+ 
++	blk_per_pg = page_size / block_size;
+ 	if (verbose)
+ 		printf("Init donor :%s off:%lld len:%lld\n", argv[1], donor.offset, donor.length);
+ 	while ((read = getline(&line, &len, stdin)) != -1) {
+@@ -194,6 +204,8 @@ int main(int argc, char **argv)
+ 
+ 		}
+ 		if (st.st_size && st.st_blocks) {
++
++			donor.offset =  (donor.offset + blk_per_pg -1) & ~(blk_per_pg -1);
+ 			ret = do_defrag_one(fd, line, 0,
+ 					    (st.st_size  + st.st_blksize-1)/
+ 					    st.st_blksize, &donor);
+diff --git a/tests/ext4/307 b/tests/ext4/307
+index 081f819..ee20f61 100755
+--- a/tests/ext4/307
++++ b/tests/ext4/307
+@@ -39,7 +39,11 @@ trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
+ FSSTRESS_AVOID="$FSSTRESS_AVOID -ffsync=0 -fsync=0 -ffdatasync=0"
+ _workout()
+ {
++	blk_sz=$1
+ 	echo ""
++	echo " Start test for $blk_sz blocksize "
++	_scratch_mkfs_sized $((512 * 1024 * 1024)) $blk_sz >> $seqres.full 2>&1
++	_scratch_mount
+ 	echo "Run fsstress"
+ 	out=$SCRATCH_MNT/fsstress.$$
+ 	args=`_scale_fsstress_args -p4 -n999 -f setattr=1 $FSSTRESS_AVOID -d $out`
+@@ -52,9 +56,12 @@ _workout()
+ 	$XFS_IO_PROG -c "falloc 0 250M" -f $SCRATCH_MNT/donor | _filter_xfs_io
+ 	echo "Perform compacting"
+ 	cat $out.list | run_check $here/src/e4compact \
+-		-i -v -f $SCRATCH_MNT/donor  >> $seqres.full 2>&1
++		-i -v -b $blk_sz -f $SCRATCH_MNT/donor  >> $seqres.full 2>&1
++	$XFS_IO_PROG -c "fiemap" -f $SCRATCH_MNT/donor  >> $seqres.full 2>&1
+ 	echo "Check data"
+ 	run_check md5sum -c $out.md5sum
++	_scratch_unmount
++	_check_scratch_fs
+ }
+ 
+ # real QA test starts here
+@@ -65,9 +72,8 @@ _need_to_be_root
+ _require_scratch
+ _require_defrag
+ 
+-_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
+-_scratch_mount
+-
+-_workout
++_workout 4096
++_workout 2048
++_workout 1024
+ status=0
+ exit
+diff --git a/tests/ext4/307.out b/tests/ext4/307.out
+index f48e9f3..9cbd1ab 100644
+--- a/tests/ext4/307.out
++++ b/tests/ext4/307.out
+@@ -1,5 +1,18 @@
+ QA output created by 307
+ 
++ Start test for 4096 blocksize 
++Run fsstress
++Allocate donor file
++Perform compacting
++Check data
++
++ Start test for 2048 blocksize 
++Run fsstress
++Allocate donor file
++Perform compacting
++Check data
++
++ Start test for 1024 blocksize 
+ Run fsstress
+ Allocate donor file
+ Perform compacting
 -- 
 1.7.1
 
