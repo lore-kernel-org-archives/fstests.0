@@ -1,49 +1,27 @@
-Return-Path: <rjevskiy@gmail.com>
-Sender: Dmitry Monakhov <rjevskiy@gmail.com>
+Return-Path: <fstests-owner@vger.kernel.org>
+Received: from mail-lb0-f181.google.com ([209.85.217.181]:40806 "EHLO
+	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752459AbaHOKab (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 15 Aug 2014 06:30:31 -0400
+Received: by mail-lb0-f181.google.com with SMTP id 10so1766642lbg.40
+        for <fstests@vger.kernel.org>; Fri, 15 Aug 2014 03:30:30 -0700 (PDT)
 From: Dmitry Monakhov <dmonakhov@openvz.org>
 Subject: Re: [PATCH 1/2] xfstest: shared/298 fixup mkfs options
-In-Reply-To: <53ECED1E.4070106@sandeen.net>
-References: <1407944188-4099-1-git-send-email-dmonakhov@openvz.org> <53ECED1E.4070106@sandeen.net>
-Date: Fri, 15 Aug 2014 14:20:44 +0400
-Message-ID: <87vbpucav7.fsf@openvz.org>
+In-Reply-To: <20140815004420.GI20518@dastard>
+References: <1407944188-4099-1-git-send-email-dmonakhov@openvz.org> <20140815004420.GI20518@dastard>
+Date: Fri, 15 Aug 2014 14:30:27 +0400
+Message-ID: <87sikycaf0.fsf@openvz.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-To: Eric Sandeen <sandeen@sandeen.net>, fstests@vger.kernel.org
-Cc: david@fromorbit.com
+Sender: fstests-owner@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, 14 Aug 2014 10:08:46 -0700, Eric Sandeen <sandeen@sandeen.net> wrote:
-> On 8/13/14, 8:36 AM, Dmitry Monakhov wrote:
+On Fri, 15 Aug 2014 10:44:20 +1000, Dave Chinner <david@fromorbit.com> wrote:
+> On Wed, Aug 13, 2014 at 07:36:27PM +0400, Dmitry Monakhov wrote:
 > > Currently mkfs faile due to incorrect options
-> 
-> fails how, for what fs, with what options?
-FSTYP         -- ext4
-PLATFORM      -- Linux/x86_64 ts105 3.16.0-rc5-00015-g15eb408
-MKFS_OPTIONS  -- -b4096 /dev/mapper/vg-scratch_dev
-MOUNT_OPTIONS -- -o acl,user_xattr /dev/mapper/vg-scratch_dev /mnt_scratch
-
-shared/298 18s ... - output mismatch (see
-/root/xfstests-dev.git/results//shared/298.out.bad)
-    --- tests/shared/298.out    2014-08-13 18:22:08.297016412 +0400
-    +++ /root/xfstests-dev.git/results//shared/298.out.bad    2014-08-15
-    14:19:00.847434929 +0400
-    @@ -1,4 +1,5 @@
-     QA output created by 298
-    +mount: you must specify the filesystem type
-     Generating garbage on loop...done.
-     Running fstrim...done.
-     Detecting interesting holes in image...done.
-    ...
-    (Run 'diff -u tests/shared/298.out
-    /root/xfstests-dev.git/results//shared/298.out.bad'  to see the
-    entire diff)
-Ran: shared/298
-Failures: shared/298
-Failed 1 of 1 tests
-> 
-> Thanks,
-> -Eric
-> 
+> > 
 > > Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
 > > ---
 > >  tests/shared/298 |    4 ++--
@@ -61,11 +39,24 @@ Failed 1 of 1 tests
 > > -$MOUNT_PROG $loop_dev $loop_mnt
 > > +run_check $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $loop_dev
 > > +run_check $MOUNT_PROG $loop_dev $loop_mnt
-> >  
-> >  echo -n "Generating garbage on loop..."
-> >  # Goal is to fill it up, ignore any errors.
-> > 
 > 
+> Urk. Please don't propagate run_check into code that doesn't need
+> it.
+Ok. My idea was to check result before starting any IO activity
+> 
+> What we should do here is write a generic wrapper - _mkfs_dev -
+> which allows you to pass in a device to run mkfs on.  This can then
+> be implemented similar to _scratch_mkfs, and so avoid the need for
+> everyone to re-invent the wheel slightly differently to support
+> different filesystems on loop devices in generic/shared tests.
+Agree, this is the only way to make things right. Will send new
+version soon.
+> Cheers,
+> 
+> Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
 > the body of a message to majordomo@vger.kernel.org
