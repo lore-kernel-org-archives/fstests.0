@@ -1,30 +1,25 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from sandeen.net ([63.231.237.45]:37013 "EHLO sandeen.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751131AbaHNRIv (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 14 Aug 2014 13:08:51 -0400
-Message-ID: <53ECED1E.4070106@sandeen.net>
-Date: Thu, 14 Aug 2014 10:08:46 -0700
-From: Eric Sandeen <sandeen@sandeen.net>
-MIME-Version: 1.0
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:1590 "EHLO
+	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751365AbaHOAog (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 14 Aug 2014 20:44:36 -0400
+Date: Fri, 15 Aug 2014 10:44:20 +1000
+From: Dave Chinner <david@fromorbit.com>
 Subject: Re: [PATCH 1/2] xfstest: shared/298 fixup mkfs options
+Message-ID: <20140815004420.GI20518@dastard>
 References: <1407944188-4099-1-git-send-email-dmonakhov@openvz.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 In-Reply-To: <1407944188-4099-1-git-send-email-dmonakhov@openvz.org>
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Dmitry Monakhov <dmonakhov@openvz.org>, fstests@vger.kernel.org
-Cc: david@fromorbit.com
+To: Dmitry Monakhov <dmonakhov@openvz.org>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 8/13/14, 8:36 AM, Dmitry Monakhov wrote:
+On Wed, Aug 13, 2014 at 07:36:27PM +0400, Dmitry Monakhov wrote:
 > Currently mkfs faile due to incorrect options
-
-fails how, for what fs, with what options?
-
-Thanks,
--Eric
-
+> 
 > Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
 > ---
 >  tests/shared/298 |    4 ++--
@@ -42,8 +37,19 @@ Thanks,
 > -$MOUNT_PROG $loop_dev $loop_mnt
 > +run_check $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $loop_dev
 > +run_check $MOUNT_PROG $loop_dev $loop_mnt
->  
->  echo -n "Generating garbage on loop..."
->  # Goal is to fill it up, ignore any errors.
-> 
 
+Urk. Please don't propagate run_check into code that doesn't need
+it.
+
+What we should do here is write a generic wrapper - _mkfs_dev -
+which allows you to pass in a device to run mkfs on.  This can then
+be implemented similar to _scratch_mkfs, and so avoid the need for
+everyone to re-invent the wheel slightly differently to support
+different filesystems on loop devices in generic/shared tests.
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
