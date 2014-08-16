@@ -1,95 +1,94 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mailhub.sw.ru ([195.214.232.25]:36731 "EHLO relay.sw.ru"
+Received: from mailhub.sw.ru ([195.214.232.25]:32237 "EHLO relay.sw.ru"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751495AbaHPNNc (ORCPT <rfc822;fstests@vger.kernel.org>);
+	id S1751493AbaHPNNc (ORCPT <rfc822;fstests@vger.kernel.org>);
 	Sat, 16 Aug 2014 09:13:32 -0400
 From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: [PATCH 1/6] common: add _mkfs_dev helper
-Date: Sat, 16 Aug 2014 17:13:06 +0400
-Message-Id: <1408194791-1797-1-git-send-email-dmonakhov@openvz.org>
+Subject: [PATCH 3/6] src/e4compact cleanup
+Date: Sat, 16 Aug 2014 17:13:08 +0400
+Message-Id: <1408194791-1797-3-git-send-email-dmonakhov@openvz.org>
+In-Reply-To: <1408194791-1797-1-git-send-email-dmonakhov@openvz.org>
+References: <1408194791-1797-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: david@fromorbit.com, Dmitry Monakhov <dmonakhov@openvz.org>
 List-ID: <fstests@vger.kernel.org>
 
-It is not good practice to directly use MKFS_PROG.
+- fix incorrect donor offset initialization.
+- fix donor name logging.
+- handle EOPNOTSUPP correctly
 
 Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
 ---
- common/rc        |   28 ++++++++++++++++++++++++++++
- tests/btrfs/020  |    4 ++--
- tests/shared/298 |    4 ++--
- 3 files changed, 32 insertions(+), 4 deletions(-)
+ src/e4compact.c |   17 +++++++++++------
+ 1 files changed, 11 insertions(+), 6 deletions(-)
 
-diff --git a/common/rc b/common/rc
-index 16da898..84fef35 100644
---- a/common/rc
-+++ b/common/rc
-@@ -509,6 +509,34 @@ _test_mkfs()
-     esac
- }
+diff --git a/src/e4compact.c b/src/e4compact.c
+index de0aeb6..ecc6906 100644
+--- a/src/e4compact.c
++++ b/src/e4compact.c
+@@ -64,7 +64,6 @@ static int do_defrag_one(int fd, char *name,__u64 start, __u64 len, struct donor
+ 	mv_ioc.donor_fd = donor->fd;
+ 	mv_ioc.orig_start = start;
+ 	mv_ioc.donor_start = donor->offset;
+-	mv_ioc.moved_len = 0;
+ 	mv_ioc.len = len;
  
-+_mkfs_dev()
-+{
-+    case $FSTYP in
-+    nfs*)
-+	# do nothing for nfs
-+	;;
-+    udf)
-+        $MKFS_UDF_PROG $MKFS_OPTIONS $* 2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
-+	;;
-+    btrfs)
-+        $MKFS_BTRFS_PROG $MKFS_OPTIONS $* 2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
-+	;;
-+    *)
-+	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* \
-+		2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
-+	;;
-+    esac
-+
-+    if [ $? -ne 0 ]; then
-+	# output stored mkfs output
-+	cat $tmp_dir.mkfserr >&2
-+	cat $tmp_dir.mkfsstd
-+	status=1
-+	exit 1
-+    fi
-+    rm -f $tmp_dir.mkfserr $tmp_dir.mkfsstd
-+}
-+
- _scratch_mkfs()
- {
-     case $FSTYP in
-diff --git a/tests/btrfs/020 b/tests/btrfs/020
-index 5a928dd..84251f3 100755
---- a/tests/btrfs/020
-+++ b/tests/btrfs/020
-@@ -73,8 +73,8 @@ loop_dev1=`_create_loop_device $fs_img1`
- loop_dev2=`_create_loop_device $fs_img2`
- loop_dev3=`_create_loop_device $fs_img3`
+ 	if (verbose)
+@@ -77,6 +76,7 @@ static int do_defrag_one(int fd, char *name,__u64 start, __u64 len, struct donor
+ 	do {
+ 		i++;
+ 		errno = 0;
++		mv_ioc.moved_len = 0;
+ 		ret = ioctl(fd, EXT4_IOC_MOVE_EXT, &mv_ioc);
+ 		if (verbose)
+ 			printf("process %s  it:%d start:%lld len:%lld donor:%lld,"
+@@ -102,12 +102,12 @@ static int do_defrag_one(int fd, char *name,__u64 start, __u64 len, struct donor
+ 		assert(mv_ioc.len >= mv_ioc.moved_len);
+ 		mv_ioc.len -= mv_ioc.moved_len;
+ 		mv_ioc.orig_start += mv_ioc.moved_len;
+-		mv_ioc.donor_start = mv_ioc.orig_start;
++		mv_ioc.donor_start += mv_ioc.moved_len;
+ 		moved += mv_ioc.moved_len;
+-
+ 	} while (mv_ioc.len);
  
--$MKFS_BTRFS_PROG -m raid1 -d raid1 $loop_dev1 $loop_dev2 >>$seqres.full 2>&1
--$MOUNT_PROG -o ro $loop_dev1 $loop_mnt
-+_mkfs_dev -m raid1 -d raid1 $loop_dev1 $loop_dev2 >>$seqres.full 2>&1
-+_mount -o ro $loop_dev1 $loop_mnt
+-	if (ret && (errno == EBUSY || errno == ENODATA))
++	if (ret && ignore_error &&
++	    (errno == EBUSY || errno == ENODATA || errno == EOPNOTSUPP))
+ 		ret = 0;
+ 	donor->length -= moved;
+ 	donor->offset += moved;
+@@ -154,6 +154,10 @@ int main(int argc, char **argv)
+ 			exit(1);
+ 		}
+ 	}
++	if (!donor_name) {
++		usage();
++		exit(1);
++	}
+ 	donor.fd = open(donor_name, O_RDWR);
+ 	if (donor.fd < 0) {
+ 		perror("can not open donor file");
+@@ -168,7 +172,8 @@ int main(int argc, char **argv)
+ 		donor.offset /= st.st_blksize;
  
- # Fail the second device and replace with the third
- _destroy_loop_device $loop_dev2
-diff --git a/tests/shared/298 b/tests/shared/298
-index 372fd02..2b7fdd1 100755
---- a/tests/shared/298
-+++ b/tests/shared/298
-@@ -134,8 +134,8 @@ mkdir $loop_mnt
+ 	if (verbose)
+-		printf("Init donor :%s off:%lld len:%lld\n", argv[1], donor.offset, donor.length);
++		printf("Init donor :%s off:%lld len:%lld\n",
++		       donor_name, donor.offset, donor.length);
+ 	while ((read = getline(&line, &len, stdin)) != -1) {
  
- [ "$FSTYP" = "xfs" ] && MKFS_OPTIONS="-f $MKFS_OPTIONS"
- 
--$MKFS_PROG -t $FSTYP $MKFS_OPTIONS $loop_dev &> /dev/null
--$MOUNT_PROG $loop_dev $loop_mnt
-+_mkfs_dev $loop_dev
-+_mount $loop_dev $loop_mnt
- 
- echo -n "Generating garbage on loop..."
- # Goal is to fill it up, ignore any errors.
+ 		if (line[read -1] == '\n')
+@@ -197,7 +202,7 @@ int main(int argc, char **argv)
+ 			ret = do_defrag_one(fd, line, 0,
+ 					    (st.st_size  + st.st_blksize-1)/
+ 					    st.st_blksize, &donor);
+-			if (ret && ignore_error)
++			if (ret && !ignore_error)
+ 				break;
+ 		}
+ 	}
 -- 
 1.7.1
 
