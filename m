@@ -1,41 +1,41 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:5649 "EHLO
-	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752775AbaHTXOx (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 20 Aug 2014 19:14:53 -0400
-Date: Thu, 21 Aug 2014 09:14:50 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 2/6] common: _scratch_mkfs_sized should inherent default
- block size from test_dev
-Message-ID: <20140820231450.GI26465@dastard>
-References: <1408194791-1797-1-git-send-email-dmonakhov@openvz.org>
- <1408194791-1797-2-git-send-email-dmonakhov@openvz.org>
+Received: from mx1.redhat.com ([209.132.183.28]:21543 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753122AbaHTXn2 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 20 Aug 2014 19:43:28 -0400
+From: Jeff Moyer <jmoyer@redhat.com>
+Subject: Re: [patch, v3] add an aio test which closes the fd before destroying the ioctx
+References: <x49vbrq6r0c.fsf@segfault.boston.devel.redhat.com>
+	<20140820225701.GG26465@dastard>
+Date: Wed, 20 Aug 2014 19:43:19 -0400
+In-Reply-To: <20140820225701.GG26465@dastard> (Dave Chinner's message of "Thu,
+	21 Aug 2014 08:57:01 +1000")
+Message-ID: <x49vbpmwwvc.fsf@segfault.boston.devel.redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1408194791-1797-2-git-send-email-dmonakhov@openvz.org>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Dmitry Monakhov <dmonakhov@openvz.org>
+To: Dave Chinner <david@fromorbit.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Aug 16, 2014 at 05:13:07PM +0400, Dmitry Monakhov wrote:
-> Currently default block size is frozen to 4096 which is bad for
-> various reasons for example:
-> 1) It ignores MKFS_OPT
+Hi, Dave,
 
-It still ignores MKFS_OPTIONS. The test device is not made with
-those parameters unless you specifically remake it before every
-xfstests run with a different configuration.
+Dave Chinner <david@fromorbit.com> writes:
 
-> 2) Not works for architectures where PG_SIZE != 4096
+> IOWs, we now have two AIO+DIO tests showing the same symptoms that
+> no other tests show. This tends to point at AIO not being fully
+> cleaned up and completely freed by the time the processes
+> dispatching it have exit()d. This failure generally occurs when
+> there is other load on the system/disks backing the test VM (e.g.
+> running xfstests in multiple VMs at the same time) so I suspect it
+> has to do with IO completion taking a long time.
 
-That I don't understand. 4k block size filesystems work just fine
-on architectures with page size > 4k....
+Process exit waits for all outstanding I/O, but maybe it's an rcu thing.
+
+> Can you spend some time trying to reproduce this and getting to the
+> bottom of whatever is triggering the unmount error?
+
+I can take a look, but not until next week.  Hopefully that's ok?
 
 Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Jeff
