@@ -1,12 +1,12 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:62210 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:15957 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751468AbaHTRfM (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 20 Aug 2014 13:35:12 -0400
+	id S1752568AbaHTRfQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 20 Aug 2014 13:35:16 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 02/15] btrfs: new test to run btrfs balance and scrub simltaneously
-Date: Thu, 21 Aug 2014 01:33:51 +0800
-Message-Id: <1408556044-907-4-git-send-email-eguan@redhat.com>
+Subject: [PATCH 04/15] btrfs: new case to run btrfs balance and remount with different compress algorithms
+Date: Thu, 21 Aug 2014 01:33:53 +0800
+Message-Id: <1408556044-907-6-git-send-email-eguan@redhat.com>
 In-Reply-To: <1408556044-907-1-git-send-email-eguan@redhat.com>
 References: <1408556044-907-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -14,29 +14,29 @@ To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Run btrfs balance and scrub operations simultaneously with fsstress
-running in background.
+Run btrfs balance and remount with different compress algorithms
+simultaneously, with fsstress running in background.
 
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- tests/btrfs/058     | 141 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/058.out |   2 +
+ tests/btrfs/060     | 142 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/060.out |   2 +
  tests/btrfs/group   |   1 +
- 3 files changed, 144 insertions(+)
- create mode 100755 tests/btrfs/058
- create mode 100644 tests/btrfs/058.out
+ 3 files changed, 145 insertions(+)
+ create mode 100755 tests/btrfs/060
+ create mode 100644 tests/btrfs/060.out
 
-diff --git a/tests/btrfs/058 b/tests/btrfs/058
+diff --git a/tests/btrfs/060 b/tests/btrfs/060
 new file mode 100755
-index 0000000..999727d
+index 0000000..8410a99
 --- /dev/null
-+++ b/tests/btrfs/058
-@@ -0,0 +1,141 @@
++++ b/tests/btrfs/060
+@@ -0,0 +1,142 @@
 +#! /bin/bash
-+# FSQA Test No. btrfs/058
++# FSQA Test No. btrfs/060
 +#
-+# Run btrfs balance and scrub operations simultaneously with fsstress
-+# running in background.
++# Run btrfs balance and remount with different compress algorithms
++# simultaneously, with fsstress running in background.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (C) 2014 Red Hat Inc. All rights reserved.
@@ -133,25 +133,26 @@ index 0000000..999727d
 +	balance_pid=$!
 +	echo "$balance_pid" >>$seqres.full
 +
-+	echo -n "Start scrub worker: " >>$seqres.full
++	echo -n "Start remount worker: " >>$seqres.full
 +	(
 +		while true; do
-+			$BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >>$seqres.full 2>&1
++			for algo in no zlib lzo; do
++				$MOUNT_PROG -o remount,compress=$algo $SCRATCH_MNT >>$seqres.full 2>&1
++			done
 +		done
-+	) &
-+	scrub_pid=$!
-+	echo "$scrub_pid" >>$seqres.full
++	) >/dev/null 2>&1 &
++	remount_pid=$!
++	echo "$remount_pid" >>$seqres.full
 +
 +	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
 +	wait $fsstress_pid
-+	kill $balance_pid $scrub_pid
++	kill $balance_pid $remount_pid
 +	wait
-+	# the balance/scrub process might be still in D state and cannot be killed
-+	# which could block umount, wait for it to finish
++	# wait for the balance and remount loop to finish
 +	while ps aux | grep "balance start" | grep -qv grep; do
 +		sleep 1
 +	done
-+	while ps aux | grep "scrub start" | grep -qv grep; do
++	while ps aux | grep "mount.*$SCRATCH_MNT" | grep -qv grep; do
 +		sleep 1
 +	done
 +
@@ -173,23 +174,23 @@ index 0000000..999727d
 +
 +status=0
 +exit
-diff --git a/tests/btrfs/058.out b/tests/btrfs/058.out
+diff --git a/tests/btrfs/060.out b/tests/btrfs/060.out
 new file mode 100644
-index 0000000..fb5ca60
+index 0000000..8ffce4d
 --- /dev/null
-+++ b/tests/btrfs/058.out
++++ b/tests/btrfs/060.out
 @@ -0,0 +1,2 @@
-+QA output created by 058
++QA output created by 060
 +Silence is golden
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 08fd54a..c6b1baa 100644
+index 73bae0f..5971993 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -60,3 +60,4 @@
- 055 auto quick
- 056 auto quick
+@@ -62,3 +62,4 @@
  057 auto stress balance subvol
-+058 auto stress balance scrub
+ 058 auto stress balance scrub
+ 059 auto stress balance defrag compress
++060 auto stress balance remount compress
 -- 
 1.8.3.1
 
