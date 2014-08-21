@@ -1,151 +1,53 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:45226 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753772AbaHUJPD convert rfc822-to-8bit (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 21 Aug 2014 05:15:03 -0400
-Message-ID: <53F5B895.3000403@cn.fujitsu.com>
-Date: Thu, 21 Aug 2014 17:15:01 +0800
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:6664 "EHLO
+	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753468AbaHUJRE (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 21 Aug 2014 05:17:04 -0400
+Date: Thu, 21 Aug 2014 19:16:29 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [patch, v3] add an aio test which closes the fd before
+ destroying the ioctx
+Message-ID: <20140821091629.GZ20518@dastard>
+References: <x49vbrq6r0c.fsf@segfault.boston.devel.redhat.com>
+ <20140820225701.GG26465@dastard>
+ <x49vbpmwwvc.fsf@segfault.boston.devel.redhat.com>
 MIME-Version: 1.0
-Subject: Re: [PATCH 01/15] btrfs: new test to run btrfs balance and subvolume
- test simultaneously
-References: <1408556044-907-1-git-send-email-eguan@redhat.com> <1408556044-907-3-git-send-email-eguan@redhat.com> <53F553AE.5060707@cn.fujitsu.com> <20140821090105.GJ26465@dastard>
-In-Reply-To: <20140821090105.GJ26465@dastard>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <x49vbpmwwvc.fsf@segfault.boston.devel.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Jeff Moyer <jmoyer@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+On Wed, Aug 20, 2014 at 07:43:19PM -0400, Jeff Moyer wrote:
+> Hi, Dave,
+> 
+> Dave Chinner <david@fromorbit.com> writes:
+> 
+> > IOWs, we now have two AIO+DIO tests showing the same symptoms that
+> > no other tests show. This tends to point at AIO not being fully
+> > cleaned up and completely freed by the time the processes
+> > dispatching it have exit()d. This failure generally occurs when
+> > there is other load on the system/disks backing the test VM (e.g.
+> > running xfstests in multiple VMs at the same time) so I suspect it
+> > has to do with IO completion taking a long time.
+> 
+> Process exit waits for all outstanding I/O, but maybe it's an rcu thing.
 
--------- Original Message --------
-Subject: Re: [PATCH 01/15] btrfs: new test to run btrfs balance and 
-subvolume test simultaneously
-From: Dave Chinner <david@fromorbit.com>
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Date: 2014年08月21日 17:01
-> On Thu, Aug 21, 2014 at 10:04:30AM +0800, Qu Wenruo wrote:
->> -------- Original Message --------
->> Subject: [PATCH 01/15] btrfs: new test to run btrfs balance and
->> subvolume test simultaneously
->> From: Eryu Guan <eguan@redhat.com>
->> To: <fstests@vger.kernel.org>
->> Date: 2014年08月21日 01:33
->>> Run btrfs balance and subvolume create/mount/umount/delete simultaneously,
->>> with fsstress running in background.
->>>
->>> Signed-off-by: Eryu Guan <eguan@redhat.com>
->>> ---
->>>   tests/btrfs/057     | 147 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->>>   tests/btrfs/057.out |   2 +
->>>   tests/btrfs/group   |   1 +
->>>   3 files changed, 150 insertions(+)
->>>   create mode 100755 tests/btrfs/057
->>>   create mode 100644 tests/btrfs/057.out
->>>
->>> diff --git a/tests/btrfs/057 b/tests/btrfs/057
->>> new file mode 100755
->>> index 0000000..2f507a7
->>> --- /dev/null
->>> +++ b/tests/btrfs/057
->>> @@ -0,0 +1,147 @@
->>> +#! /bin/bash
->>> +# FSQA Test No. btrfs/057
->>> +#
->>> +# Run btrfs balance and subvolume create/mount/umount/delete simultaneously,
->>> +# with fsstress running in background.
->>> +#
->>> +#-----------------------------------------------------------------------
->>> +# Copyright (C) 2014 Red Hat Inc. All rights reserved.
->>> +#
->>> +# This program is free software; you can redistribute it and/or
->>> +# modify it under the terms of the GNU General Public License as
->>> +# published by the Free Software Foundation.
->>> +#
->>> +# This program is distributed in the hope that it would be useful,
->>> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
->>> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
->>> +# GNU General Public License for more details.
->>> +#
->>> +# You should have received a copy of the GNU General Public License
->>> +# along with this program; if not, write the Free Software Foundation,
->>> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
->>> +#
->>> +#-----------------------------------------------------------------------
->>> +#
->>> +
->>> +seq=`basename $0`
->>> +seqres=$RESULT_DIR/$seq
->>> +echo "QA output created by $seq"
->>> +
->>> +here=`pwd`
->>> +tmp=/tmp/$$
->>> +status=1
->>> +trap "_cleanup; exit \$status" 0 1 2 3 15
->>> +
->>> +_cleanup()
->>> +{
->>> +	cd /
->>> +	rm -fr $tmp.*
->>> +}
->>> +
->>> +# get standard environment, filters and checks
->>> +. ./common/rc
->>> +. ./common/filter
->>> +
->>> +# real QA test starts here
->>> +_supported_fs btrfs
->>> +_supported_os Linux
->>> +_require_scratch
->>> +_require_scratch_dev_pool 4
->>> +
->>> +rm -f $seqres.full
->>> +
->>> +# test case array
->>> +tcs=(
->>> +	"-m single -d single"
->>> +	"-m dup -d single"
->>> +	"-m raid0 -d raid0"
->>> +	"-m raid1 -d raid0"
->>> +	"-m raid1 -d raid1"
->>> +	"-m raid10 -d raid10"
->>> +	"-m raid5 -d raid5"
->>> +	"-m raid6 -d raid6"
->>> +)
->> I wonder should we add the mkfs options there.
->> Since xfstests already use environment MKFS_OPTIONS to do mkfs,
->> if really need to test all mkfs options, IMO it is better to change
->> MKFS_OPTIONS on each test round.
-> Hmmm - I you didn't read the code, because:
->
->>> +run_test()
->>> +{
->>> +	local mkfs_opts=$1
->>> +	local saved_mkfs_opts=$MKFS_OPTIONS
->>> +	local subvol_mnt=$tmp.mnt
->>> +
->>> +	echo "Test $mkfs_opts" >>$seqres.full
->>> +
->>> +	MKFS_OPTIONS="$MKFS_OPTIONS $mkfs_opts"
->>> +	# dup only works on single device
-> it's doing exactly what you suggest.
-I am afraid that you misunderstand what I mean...
-I just mean these mount option should be done by setting environment 
-before runing check or set in local.conf.
+Hmmm - __fput()?
 
-Although Eryu Guan has already explaines this and it is still needed.
+> > Can you spend some time trying to reproduce this and getting to the
+> > bottom of whatever is triggering the unmount error?
+> 
+> I can take a look, but not until next week.  Hopefully that's ok?
 
-Thanks,
-Qu
->
-> And it's wrong. This:
->
-> _scratch_mkfs $mkfs_opts
->
-> is all that is needed. This wheel does not need reinventing. ;)
->
-> Cheers,
->
-> Dave.
+Yeah, that's fine. I don't have the bandwidth to look at it either
+right now, so I'll just expunge the test for the meantime.
 
+Thanks, Jeff!
+
+-Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
