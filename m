@@ -1,71 +1,88 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:34453 "EHLO
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:22239 "EHLO
 	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754257AbaHUJXq (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 21 Aug 2014 05:23:46 -0400
-Date: Thu, 21 Aug 2014 19:23:44 +1000
+	by vger.kernel.org with ESMTP id S1750791AbaHUJ3z (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 21 Aug 2014 05:29:55 -0400
+Date: Thu, 21 Aug 2014 19:29:52 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 2/6] common: _scratch_mkfs_sized should inherent default
- block size from test_dev
-Message-ID: <20140821092344.GK26465@dastard>
-References: <1408194791-1797-1-git-send-email-dmonakhov@openvz.org>
- <1408194791-1797-2-git-send-email-dmonakhov@openvz.org>
- <20140820231450.GI26465@dastard>
- <87mwayqooo.fsf@openvz.org>
+Subject: Re: [PATCH 01/15] btrfs: new test to run btrfs balance and subvolume
+ test simultaneously
+Message-ID: <20140821092952.GL26465@dastard>
+References: <1408556044-907-1-git-send-email-eguan@redhat.com>
+ <1408556044-907-3-git-send-email-eguan@redhat.com>
+ <53F553AE.5060707@cn.fujitsu.com>
+ <20140821090105.GJ26465@dastard>
+ <53F5B895.3000403@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <87mwayqooo.fsf@openvz.org>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <53F5B895.3000403@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dmitry Monakhov <dmonakhov@openvz.org>
-Cc: fstests@vger.kernel.org
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Aug 21, 2014 at 11:36:39AM +0400, Dmitry Monakhov wrote:
-> On Thu, 21 Aug 2014 09:14:50 +1000, Dave Chinner <david@fromorbit.com> wrote:
-> > On Sat, Aug 16, 2014 at 05:13:07PM +0400, Dmitry Monakhov wrote:
-> > > Currently default block size is frozen to 4096 which is bad for
-> > > various reasons for example:
-> > > 1) It ignores MKFS_OPT
-> > 
-> > It still ignores MKFS_OPTIONS. The test device is not made with
-> > those parameters unless you specifically remake it before every
-> > xfstests run with a different configuration.
-> Yes. Usually I recreate test_dev after config was updated.
-> And I tend to agree that this may not be suitable for others.
-> In order to fix original issue I'll remove block_size argument from
-> _scratch_mkfs_sized and pass MKFS_OPTIONS instead. This will be valid
+On Thu, Aug 21, 2014 at 05:15:01PM +0800, Qu Wenruo wrote:
+> 
+> -------- Original Message --------
+> Subject: Re: [PATCH 01/15] btrfs: new test to run btrfs balance and
+> subvolume test simultaneously
+> From: Dave Chinner <david@fromorbit.com>
+> To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+> Date: 2014年08月21日 17:01
+> >On Thu, Aug 21, 2014 at 10:04:30AM +0800, Qu Wenruo wrote:
+> >>-------- Original Message --------
+> >>Subject: [PATCH 01/15] btrfs: new test to run btrfs balance and
+> >>subvolume test simultaneously
+> >>From: Eryu Guan <eguan@redhat.com>
+> >>To: <fstests@vger.kernel.org>
+> >>Date: 2014年08月21日 01:33
+> >>>Run btrfs balance and subvolume create/mount/umount/delete simultaneously,
+> >>>with fsstress running in background.
+....
+> >>>+# test case array
+> >>>+tcs=(
+> >>>+	"-m single -d single"
+> >>>+	"-m dup -d single"
+> >>>+	"-m raid0 -d raid0"
+> >>>+	"-m raid1 -d raid0"
+> >>>+	"-m raid1 -d raid1"
+> >>>+	"-m raid10 -d raid10"
+> >>>+	"-m raid5 -d raid5"
+> >>>+	"-m raid6 -d raid6"
+> >>>+)
+> >>I wonder should we add the mkfs options there.
+> >>Since xfstests already use environment MKFS_OPTIONS to do mkfs,
+> >>if really need to test all mkfs options, IMO it is better to change
+> >>MKFS_OPTIONS on each test round.
+> >Hmmm - I you didn't read the code, because:
+> >
+> >>>+run_test()
+> >>>+{
+> >>>+	local mkfs_opts=$1
+> >>>+	local saved_mkfs_opts=$MKFS_OPTIONS
+> >>>+	local subvol_mnt=$tmp.mnt
+> >>>+
+> >>>+	echo "Test $mkfs_opts" >>$seqres.full
+> >>>+
+> >>>+	MKFS_OPTIONS="$MKFS_OPTIONS $mkfs_opts"
+> >>>+	# dup only works on single device
+> >it's doing exactly what you suggest.
+> I am afraid that you misunderstand what I mean...
+> I just mean these mount option should be done by setting environment
+> before runing check or set in local.conf.
 
-_scratch_mkfs_sized already appends MKFS_OPTIONS to the mkfs
-command. So, really, it seems like you are trying to solve the wrong
-problem. i.e. if MKFS_OPTIONS already specifies a block size, then
-this code is causing it to be specified twice?
+You can override or append to MKFS_OPTIONS and MOUNT_OPTIONS in
+tests if required - lots of tests do exactly that (e.g. any quota
+test your care to name). That modification, however, is only valid
+for the specific test being run because the modification is to the
+environment of the test process, not the environment of check
+process that is running the tests....
 
-i.e. this code works for XFS because it checks MKFS_OPTIONS for a
-custom block size and lets that override the test specified default.
-It can do this because it uses $fssize for the siz eof the
-filesystem to create, not a block count. For ext4, you need to first
-determine if ther eis a block size in MKFS_OPTIONS, extract it if
-there is, then use that to calculate the size of the fs in blocks to
-pass to mkfs.ext4....
-
-What you want the code already does for XFS - you just need to make
-the ext4 (and any other fs you care about) also work correctly with
-MKFS_OPTIONS....
-
-> change because currently no one pass block_size to _scratch_mkfs_sized anyway.
-
-perhaps because it already does the right thing for XFS... ;)
-
-> > > 2) Not works for architectures where PG_SIZE != 4096
-> > 
-> > That I don't understand. 4k block size filesystems work just fine
-> > on architectures with page size > 4k....
-> Off course. But I meant to say that this arch may use different
-> block_size by default.
-
-Typically default block size is set by mkfs, not the arch mkfs is
-run on.
+i.e. Running custom mkfs or mount options like this is perfectly
+acceptable and I'm just commenting that the implementation of those
+custom options could be a lot better.
 
 Cheers,
 
