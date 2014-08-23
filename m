@@ -1,56 +1,38 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:45857 "EHLO
-	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752476AbaHWAcG (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 22 Aug 2014 20:32:06 -0400
-Date: Sat, 23 Aug 2014 10:31:33 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 2/6] common: _scratch_mkfs_sized should inherent default
- block size from test_dev
-Message-ID: <20140823003133.GS26465@dastard>
-References: <1408194791-1797-1-git-send-email-dmonakhov@openvz.org>
- <1408194791-1797-2-git-send-email-dmonakhov@openvz.org>
- <20140820231450.GI26465@dastard>
- <87mwayqooo.fsf@openvz.org>
- <20140821092344.GK26465@dastard>
- <877g20r72g.fsf@openvz.org>
- <20140822150915.GN11085@thunk.org>
- <874mx4r0eg.fsf@openvz.org>
- <20140822163712.GP11085@thunk.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20140822163712.GP11085@thunk.org>
+Received: from mail-la0-f52.google.com ([209.85.215.52]:46337 "EHLO
+	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752440AbaHWIQW (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sat, 23 Aug 2014 04:16:22 -0400
+From: Pavel Shilovsky <pshilovsky@samba.org>
+Subject: [PATCH 0/2] CIFS support for XFS test suite
+Date: Sat, 23 Aug 2014 12:16:01 +0400
+Message-Id: <1408781763-30127-1-git-send-email-pshilovsky@samba.org>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Dmitry Monakhov <dmonakhov@openvz.org>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-cifs@vger.kernel.org, David Disseldorp <ddiss@suse.de>, Steve French <smfrench@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Aug 22, 2014 at 12:37:12PM -0400, Theodore Ts'o wrote:
-> On Fri, Aug 22, 2014 at 07:48:07PM +0400, Dmitry Monakhov wrote:
-> > No, This will not works. Looks like you have missed the point.
-> > helper has following signature:
-> > _scratch_mkfs_sized <size in bytes> [optional blocksize]
-> > But mke2fs accept filesystem size accounted in fs-blocks, so in order
-> > to convert size in blocks to number of blocks we have to figure out blocksize.
-> 
-> Ah, sorry.  I didn't understand what problem you were trying to solve.
-> 
-> But mke2fs does accept the filesystem size accounted in kilobytes (and
-> megabytes, gigabytes, etc.).  So you could just take the size in
-> bytes, divide by 1024, and then append 'k', i.e:
-> 
->        mke2fs $MKFS_OPTS $DEVICE $(expr $bytes / 1024)k
+These are two patches that adds CIFS support to XFS tests.
 
-Not according to the man page:
+The first patch adds "-cifs" command line argument and CIFS specific variables. The second patch setups a directory tree for possible CIFS specific tests.
 
-	blocks-count is the number of blocks on the device.
+With these patches applied, most of generic/shared $TEST_DEV tests pass for the recent kernel cifs module.
 
-Perhaps the documentation needs to be updated to match reality?
+Pavel Shilovsky (2):
+  common: add cifs support
+  common: add a directory tree for cifs tests
 
-Cheers,
+ README              |  5 +++--
+ check               |  2 ++
+ common/config       | 17 +++++++++++++----
+ common/rc           | 33 +++++++++++++++++++++++++++++++++
+ tests/cifs/Makefile | 14 ++++++++++++++
+ tests/cifs/group    |  5 +++++
+ tests/generic/013   |  7 ++++++-
+ 7 files changed, 76 insertions(+), 7 deletions(-)
+ create mode 100644 tests/cifs/Makefile
+ create mode 100644 tests/cifs/group
 
-Dave.
 -- 
-Dave Chinner
-david@fromorbit.com
+1.9.1
+
