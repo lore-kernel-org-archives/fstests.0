@@ -1,13 +1,13 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from imap.thunk.org ([74.207.234.97]:44848 "EHLO imap.thunk.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932244AbaHVQhS (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 22 Aug 2014 12:37:18 -0400
-Date: Fri, 22 Aug 2014 12:37:12 -0400
-From: Theodore Ts'o <tytso@mit.edu>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:45857 "EHLO
+	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752476AbaHWAcG (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 22 Aug 2014 20:32:06 -0400
+Date: Sat, 23 Aug 2014 10:31:33 +1000
+From: Dave Chinner <david@fromorbit.com>
 Subject: Re: [PATCH 2/6] common: _scratch_mkfs_sized should inherent default
  block size from test_dev
-Message-ID: <20140822163712.GP11085@thunk.org>
+Message-ID: <20140823003133.GS26465@dastard>
 References: <1408194791-1797-1-git-send-email-dmonakhov@openvz.org>
  <1408194791-1797-2-git-send-email-dmonakhov@openvz.org>
  <20140820231450.GI26465@dastard>
@@ -16,32 +16,41 @@ References: <1408194791-1797-1-git-send-email-dmonakhov@openvz.org>
  <877g20r72g.fsf@openvz.org>
  <20140822150915.GN11085@thunk.org>
  <874mx4r0eg.fsf@openvz.org>
+ <20140822163712.GP11085@thunk.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <874mx4r0eg.fsf@openvz.org>
+In-Reply-To: <20140822163712.GP11085@thunk.org>
 Sender: fstests-owner@vger.kernel.org
-To: Dmitry Monakhov <dmonakhov@openvz.org>
-Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Dmitry Monakhov <dmonakhov@openvz.org>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Aug 22, 2014 at 07:48:07PM +0400, Dmitry Monakhov wrote:
-> No, This will not works. Looks like you have missed the point.
-> helper has following signature:
-> _scratch_mkfs_sized <size in bytes> [optional blocksize]
-> But mke2fs accept filesystem size accounted in fs-blocks, so in order
-> to convert size in blocks to number of blocks we have to figure out blocksize.
+On Fri, Aug 22, 2014 at 12:37:12PM -0400, Theodore Ts'o wrote:
+> On Fri, Aug 22, 2014 at 07:48:07PM +0400, Dmitry Monakhov wrote:
+> > No, This will not works. Looks like you have missed the point.
+> > helper has following signature:
+> > _scratch_mkfs_sized <size in bytes> [optional blocksize]
+> > But mke2fs accept filesystem size accounted in fs-blocks, so in order
+> > to convert size in blocks to number of blocks we have to figure out blocksize.
+> 
+> Ah, sorry.  I didn't understand what problem you were trying to solve.
+> 
+> But mke2fs does accept the filesystem size accounted in kilobytes (and
+> megabytes, gigabytes, etc.).  So you could just take the size in
+> bytes, divide by 1024, and then append 'k', i.e:
+> 
+>        mke2fs $MKFS_OPTS $DEVICE $(expr $bytes / 1024)k
 
-Ah, sorry.  I didn't understand what problem you were trying to solve.
+Not according to the man page:
 
-But mke2fs does accept the filesystem size accounted in kilobytes (and
-megabytes, gigabytes, etc.).  So you could just take the size in
-bytes, divide by 1024, and then append 'k', i.e:
+	blocks-count is the number of blocks on the device.
 
-       mke2fs $MKFS_OPTS $DEVICE $(expr $bytes / 1024)k
-
-This will work regardless of the block size.
+Perhaps the documentation needs to be updated to match reality?
 
 Cheers,
 
-						- Ted
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
