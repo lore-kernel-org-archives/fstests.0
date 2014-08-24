@@ -1,16 +1,15 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-pa0-f47.google.com ([209.85.220.47]:51350 "EHLO
-	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752073AbaHXHyu (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 24 Aug 2014 03:54:50 -0400
+Received: from mail-pd0-f171.google.com ([209.85.192.171]:37963 "EHLO
+	mail-pd0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752422AbaHXKl1 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sun, 24 Aug 2014 06:41:27 -0400
 MIME-Version: 1.0
-In-Reply-To: <20140823115606.GA29808@infradead.org>
+In-Reply-To: <20140823114950.GB24896@infradead.org>
 References: <1408781763-30127-1-git-send-email-pshilovsky@samba.org>
-	<1408781763-30127-2-git-send-email-pshilovsky@samba.org>
-	<20140823115606.GA29808@infradead.org>
-Date: Sun, 24 Aug 2014 11:54:50 +0400
-Message-ID: <CAKywueS=X4fyVYhy8_LGzwN5YO=E5Z8rS7MGG-fS8_GQ86LdOA@mail.gmail.com>
-Subject: Re: [PATCH 1/2] common: add cifs support
+	<20140823114950.GB24896@infradead.org>
+Date: Sun, 24 Aug 2014 14:41:27 +0400
+Message-ID: <CAKywueT-cYeotYBo1CGk1u2+bLN28OUjm5hpfo5xgQ=DFFV42g@mail.gmail.com>
+Subject: Re: [PATCH 0/2] CIFS support for XFS test suite
 From: Pavel Shilovsky <pshilovsky@samba.org>
 Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
@@ -18,113 +17,24 @@ To: Christoph Hellwig <hch@infradead.org>
 Cc: fstests@vger.kernel.org, linux-cifs <linux-cifs@vger.kernel.org>, David Disseldorp <ddiss@suse.de>, Steve French <smfrench@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-2014-08-23 15:56 GMT+04:00 Christoph Hellwig <hch@infradead.org>:
-> On Sat, Aug 23, 2014 at 12:16:02PM +0400, Pavel Shilovsky wrote:
->> Pass -cifs argument from command line to enable cifs testing.
->
-> Looks mostly fine, but a few nitpicks below:
-
-Thank you for reviewing this.
-
->
->>  _mount_opts()
->>  {
->> +
->>       case $FSTYP in
->
-> Remove this spurious new empty line, please.
-
-This was added by mistake - will remove.
-
->
->> -     echo $TEST_DEV | grep -q ":" > /dev/null 2>&1
->> +     echo $TEST_DEV | grep -qE ":|//" > /dev/null 2>&1
->>       if [ ! -b "$TEST_DEV" -a "$?" != "0" ]; then
->> -             echo "common/config: Error: \$TEST_DEV ($TEST_DEV) is not a block device or a NFS filesystem"
->> +             echo "common/config: Error: \$TEST_DEV ($TEST_DEV) is not a block device or a NFS or CIFS filesystem"
->>               exit 1
->>       fi
->
-> I'd just generalize this to ".. is not a block device or network
-> filesystem"
-
-Agree.
-
->
->> -     echo $SCRATCH_DEV | grep -q ":" > /dev/null 2>&1
->> +     echo $SCRATCH_DEV | grep -qE ":|//" > /dev/null 2>&1
->>       if [ ! -z "$SCRATCH_DEV" -a ! -b "$SCRATCH_DEV" -a "$?" != "0" ]; then
->> -             echo "common/config: Error: \$SCRATCH_DEV ($SCRATCH_DEV) is not a block device or a NFS filesystem"
->> +             echo "common/config: Error: \$SCRATCH_DEV ($SCRATCH_DEV) is not a block device or a NFS or CIFS filesystem"
->>               exit 1
->>       fi
->
-> Same here.
->
+2014-08-23 15:49 GMT+04:00 Christoph Hellwig <hch@infradead.org>:
+> On Sat, Aug 23, 2014 at 12:16:01PM +0400, Pavel Shilovsky wrote:
+>> These are two patches that adds CIFS support to XFS tests.
 >>
->>  # make sure we have a standard umask
->> @@ -148,6 +150,11 @@ _test_options()
->>      type=$1
->>      TEST_OPTIONS=""
+>> The first patch adds "-cifs" command line argument and CIFS specific variables. The second patch setups a directory tree for possible CIFS specific tests.
 >>
->> +    if [ "$FSTYP" = "cifs" ]; then
->> +        TEST_OPTIONS="$MOUNT_OPTIONS"
->> +        return
->> +    fi
+>> With these patches applied, most of generic/shared $TEST_DEV tests pass for the recent kernel cifs module.
 >
-> What's this for?  This doesn't really make sense to me as this function adds
-> mkfs/mount options to the already normally specified ones.
+> That's against an smb1 server with posix extentions?  don't you need
+> various new _require_foo checks for things not support on normal
+> SMB1/2/3?
 
-1) We included common/rc -- init_rc() is called.
-2) init_rc() checks if $TEST_DEV is mounted and if not -- calls _test_mount().
-3) _test_mount() calls _test_options() that:
-  a) initializes TEST_OPTIONS=''
-  b) adds rtdev,logdev options to TEST_OPTIONS for XFS; for others
-filesystems it simply returns leaving TEST_OPTIONS as empty string.
+It was tested in posix and non-posix modes.The difference is in tests
+005, 023, 024, 131 that are fail on non-posix.
 
-That's why we need to initialize TEST_OPTIONS as MOUN_OPTIONS for CIFS
-because we can't mount a remote share without specifying a username,
-password, etc.
-
->> +     cifs)
->> +             echo $TEST_DEV | grep -q "//" > /dev/null 2>&1
->> +             if [ -z "$TEST_DEV" -o "$?" != "0" ];
->> +             then
->> +                     _notrun "this test requires a valid \$TEST_DEV"
->> +             fi
->> +             if [ ! -d "$TEST_DIR" ];
->> +             then
->> +                  _notrun "this test requires a valid \$TEST_DIR"
->> +             fi
->> +             ;;
->
-> Please put the then on the same line as the if for new code.
-
-Ok.
-
->
->> diff --git a/tests/generic/013 b/tests/generic/013
->> index 93d9904..ae57c67 100755
->> --- a/tests/generic/013
->> +++ b/tests/generic/013
->> @@ -35,7 +35,12 @@ _cleanup()
->>  {
->>      cd /
->>      # we might get here with a RO FS
->> -    mount -o remount,rw $TEST_DEV >/dev/null 2>&1
->> +    REMOUNT_OPTIONS="remount,rw"
->> +    if [ "$FSTYP" = "cifs" ];
->> +    then
->> +        REMOUNT_OPTIONS="$REMOUNT_OPTIONS,$MOUNT_OPTIONS"
->> +    fi
->> +    mount -o $REMOUNT_OPTIONS $TEST_DEV >/dev/null 2>&1
->
-> This looks wrong and will need an explanation.
-
-We can't remount the existing CIFS mount without specifying username
-and password. Also we need to keep others options as well since they
-are user-defined (e.g. nounix, noserverino, etc) while during
-remounting mount options are changed to the specified ones.
+We can add _require_posix() that checks if the mounted filesystem is
+cifs and nounix (for example through cat /proc/mounts | grep $TEST_DEV
+| grep cifs | grep nounix) and disable the above tests for this case.
 
 -- 
 Best regards,
