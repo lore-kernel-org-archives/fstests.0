@@ -1,41 +1,87 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-pd0-f171.google.com ([209.85.192.171]:37963 "EHLO
-	mail-pd0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752422AbaHXKl1 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 24 Aug 2014 06:41:27 -0400
-MIME-Version: 1.0
-In-Reply-To: <20140823114950.GB24896@infradead.org>
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:50385 "EHLO
+	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752624AbaHYA6G (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sun, 24 Aug 2014 20:58:06 -0400
+Date: Mon, 25 Aug 2014 10:56:18 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 1/2] common: add cifs support
+Message-ID: <20140825005618.GV26465@dastard>
 References: <1408781763-30127-1-git-send-email-pshilovsky@samba.org>
-	<20140823114950.GB24896@infradead.org>
-Date: Sun, 24 Aug 2014 14:41:27 +0400
-Message-ID: <CAKywueT-cYeotYBo1CGk1u2+bLN28OUjm5hpfo5xgQ=DFFV42g@mail.gmail.com>
-Subject: Re: [PATCH 0/2] CIFS support for XFS test suite
-From: Pavel Shilovsky <pshilovsky@samba.org>
-Content-Type: text/plain; charset=UTF-8
+ <1408781763-30127-2-git-send-email-pshilovsky@samba.org>
+ <20140823115606.GA29808@infradead.org>
+ <CAKywueS=X4fyVYhy8_LGzwN5YO=E5Z8rS7MGG-fS8_GQ86LdOA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAKywueS=X4fyVYhy8_LGzwN5YO=E5Z8rS7MGG-fS8_GQ86LdOA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: fstests@vger.kernel.org, linux-cifs <linux-cifs@vger.kernel.org>, David Disseldorp <ddiss@suse.de>, Steve French <smfrench@gmail.com>
+To: Pavel Shilovsky <pshilovsky@samba.org>
+Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org, linux-cifs <linux-cifs@vger.kernel.org>, David Disseldorp <ddiss@suse.de>, Steve French <smfrench@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-2014-08-23 15:49 GMT+04:00 Christoph Hellwig <hch@infradead.org>:
-> On Sat, Aug 23, 2014 at 12:16:01PM +0400, Pavel Shilovsky wrote:
->> These are two patches that adds CIFS support to XFS tests.
->>
->> The first patch adds "-cifs" command line argument and CIFS specific variables. The second patch setups a directory tree for possible CIFS specific tests.
->>
->> With these patches applied, most of generic/shared $TEST_DEV tests pass for the recent kernel cifs module.
->
-> That's against an smb1 server with posix extentions?  don't you need
-> various new _require_foo checks for things not support on normal
-> SMB1/2/3?
+On Sun, Aug 24, 2014 at 11:54:50AM +0400, Pavel Shilovsky wrote:
+> 2014-08-23 15:56 GMT+04:00 Christoph Hellwig <hch@infradead.org>:
+> > On Sat, Aug 23, 2014 at 12:16:02PM +0400, Pavel Shilovsky wrote:
+> >> Pass -cifs argument from command line to enable cifs testing.
+> >
+> > Looks mostly fine, but a few nitpicks below:
+....
+> >>
+> >> +    if [ "$FSTYP" = "cifs" ]; then
+> >> +        TEST_OPTIONS="$MOUNT_OPTIONS"
+> >> +        return
+> >> +    fi
+> >
+> > What's this for?  This doesn't really make sense to me as this function adds
+> > mkfs/mount options to the already normally specified ones.
+> 
+> 1) We included common/rc -- init_rc() is called.
+> 2) init_rc() checks if $TEST_DEV is mounted and if not -- calls _test_mount().
+> 3) _test_mount() calls _test_options() that:
+>   a) initializes TEST_OPTIONS=''
+>   b) adds rtdev,logdev options to TEST_OPTIONS for XFS; for others
+> filesystems it simply returns leaving TEST_OPTIONS as empty string.
+> 
+> That's why we need to initialize TEST_OPTIONS as MOUN_OPTIONS for CIFS
+> because we can't mount a remote share without specifying a username,
+> password, etc.
 
-It was tested in posix and non-posix modes.The difference is in tests
-005, 023, 024, 131 that are fail on non-posix.
+That is what $TEST_FS_MOUNT_OPTS is supposed to be for. Make that
+work properly when specified on the CLI or via the config file
+just like MOUNT_OPTIONS does for the scratch device.
 
-We can add _require_posix() that checks if the mounted filesystem is
-cifs and nounix (for example through cat /proc/mounts | grep $TEST_DEV
-| grep cifs | grep nounix) and disable the above tests for this case.
+> >>      cd /
+> >>      # we might get here with a RO FS
+> >> -    mount -o remount,rw $TEST_DEV >/dev/null 2>&1
+> >> +    REMOUNT_OPTIONS="remount,rw"
+> >> +    if [ "$FSTYP" = "cifs" ];
+> >> +    then
+> >> +        REMOUNT_OPTIONS="$REMOUNT_OPTIONS,$MOUNT_OPTIONS"
+> >> +    fi
+> >> +    mount -o $REMOUNT_OPTIONS $TEST_DEV >/dev/null 2>&1
+> >
+> > This looks wrong and will need an explanation.
+> 
+> We can't remount the existing CIFS mount without specifying username
+> and password. Also we need to keep others options as well since they
+> are user-defined (e.g. nounix, noserverino, etc) while during
+> remounting mount options are changed to the specified ones.
 
+filesystem configuration details like this should not pollute the
+test code. Write a helper similar to _scratch_remount():
+
+_test_remount()
+{
+	$UNMOUNT_PROG $TEST_DIR
+	_test_mount
+}
+
+and use that in the test instead.
+
+Cheers,
+
+Dave.
 -- 
-Best regards,
-Pavel Shilovsky.
+Dave Chinner
+david@fromorbit.com
