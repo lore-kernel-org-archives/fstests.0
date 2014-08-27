@@ -1,81 +1,77 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:20526 "EHLO
-	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755288AbaH0KIz (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 27 Aug 2014 06:08:55 -0400
-Date: Wed, 27 Aug 2014 20:08:51 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [patch, v3] add an aio test which closes the fd before
- destroying the ioctx
-Message-ID: <20140827100851.GC26465@dastard>
-References: <x49vbrq6r0c.fsf@segfault.boston.devel.redhat.com>
- <20140820225701.GG26465@dastard>
- <x49vbpmwwvc.fsf@segfault.boston.devel.redhat.com>
- <20140821165750.GA7116@lenny.home.zabbo.net>
- <20140825165043.GF20070@kvack.org>
- <x49oav76xu0.fsf@segfault.boston.devel.redhat.com>
- <20140826172740.GA18337@lenny.home.zabbo.net>
- <20140827084922.GB26465@dastard>
+Received: from bombadil.infradead.org ([198.137.202.9]:49607 "EHLO
+	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934686AbaH0P6c (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 27 Aug 2014 11:58:32 -0400
+Date: Wed, 27 Aug 2014 08:58:32 -0700
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH v2 3/3] cifs: skip tests that need POSIX support for
+ nounix mounts
+Message-ID: <20140827155832.GA3103@infradead.org>
+References: <1409084918-17764-1-git-send-email-pshilovsky@samba.org>
+ <1409084918-17764-4-git-send-email-pshilovsky@samba.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20140827084922.GB26465@dastard>
+In-Reply-To: <1409084918-17764-4-git-send-email-pshilovsky@samba.org>
 Sender: fstests-owner@vger.kernel.org
-To: Zach Brown <zab@zabbo.net>
-Cc: Jeff Moyer <jmoyer@redhat.com>, Benjamin LaHaise <bcrl@kvack.org>, fstests@vger.kernel.org
+To: Pavel Shilovsky <pshilovsky@samba.org>
+Cc: fstests@vger.kernel.org, linux-cifs@vger.kernel.org, samba-technical@samba.org, David Disseldorp <ddiss@suse.de>, Steve French <smfrench@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 27, 2014 at 06:49:22PM +1000, Dave Chinner wrote:
-> On Tue, Aug 26, 2014 at 10:27:40AM -0700, Zach Brown wrote:
-> > On Tue, Aug 26, 2014 at 12:05:11PM -0400, Jeff Moyer wrote:
-> > > Benjamin LaHaise <bcrl@kvack.org> writes:
-> > > 
-> > > > Does someone already have a simple test case we can add to the libaio test 
-> > > > suite to verify this behaviour?
-> > > 
-> > > I can't reproduce this problem using a loop device, which is what the
-> > > libaio test suite uses.  Even when using real hardware, you have to have
-> > > disks that are slow enough in order for this to trigger reliably (or
-> > > at all).
-> > 
-> > I wonder if you could use something like dm suspend to abuse indefinite
-> > latencies.
-> > 
-> > > I could write a more targeted test within xfstests, but I don't think
-> > > that's strictly necessary (it would just make it more clear what the
-> > > expectations are, and maybe bump the hit rate percentage up).
-> > 
-> > I think it'd be worth it (he says, not commiting *his* time).  It would
-> > have been nice if a targeted test helped Dave raise the alarm
-> > immediately rather than gnaw away at his brain with inconsistent mostly
-> > unrelated failures for months.
-> 
-> I'm not sure it's worth the effort. now we have two tests that have
-> triggered the same problem, I've been easily able to reproduce it
-> with 2 VMs with test/scratch image files sharing the same spindle.
-> i.e. run xfstests in one VM, run generic/323 in the other VM, and
-> it reproduces fairly easily.
-> 
-> I'm just running it in a loop now to measure how successfully I'm
-> reproducing the problem, then I'll apply the fix and see if it gets
-> better. If it does get better, then I'll keep the patch around
-> locally until it is upstream, and then I'll shout whenever I see
-> this problem occur again....
+On Wed, Aug 27, 2014 at 12:28:38AM +0400, Pavel Shilovsky wrote:
+> CIFS/SMB protocol without POSIX extensions doesn't support operations
+> with symbolic links and advisory byte-range locks from the same process.
+> Add a check for nounix mounts and use it in generic tests that
+> require such operations.
 
-Ok, so of 32 executions in a tight loop of generic/323, only 5
-executions passed while 27 failed.
++_require_test_posix_ext seems very cifs specific.  Can you take
+a look at the tests and see what posix feature they require and
+add features based on that?  Let's have a quick discussion here on the
+requirements of the tests before even writing the code.
 
-With the patch suggested, it failed the first 5 executions, so I
-don't think it fixes the problem.
+> diff --git a/tests/generic/005 b/tests/generic/005
+> index d78e43f..0c2b51f 100755
+> --- a/tests/generic/005
+> +++ b/tests/generic/005
+> @@ -67,6 +67,7 @@ _touch()
+>  # real QA test starts here
+>  _supported_fs generic
+>  _require_test
+> +_require_test_posix_ext
+>  
+>  # IRIX UDF does not support symlinks
+>  if [ $FSTYP == 'udf' ]; then
 
-BTW, generic/323 is pulling 8,000 read IOPS and 500MB/s from my
-single spindle. Methinks that the test file is resident in the BBWC
-on the RAID controller, which may be why nobody else is reproducing
-this problem....
+this suggest 005 needs symlinks and plain cifs doesn't support them.
+We should also fold this test for IRIX udf into the _requires_symlink
+tests.
 
-Cheers,
+> diff --git a/tests/generic/023 b/tests/generic/023
+> index 114485c..91b8a37 100755
+> --- a/tests/generic/023
+> +++ b/tests/generic/023
+> @@ -45,6 +45,7 @@ _supported_os Linux
+>  
+>  _require_test
+>  _requires_renameat2
+> +_require_test_posix_ext
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+
+023-025 just require a working renameat2, and nothing in Posix.  What's
+the problem for cifs here?
+
+> diff --git a/tests/generic/131 b/tests/generic/131
+> index b4e3ff0..9736963 100755
+> --- a/tests/generic/131
+> +++ b/tests/generic/131
+> @@ -45,6 +45,7 @@ _cleanup()
+>  _supported_fs generic
+>  _supported_os Linux
+>  _require_test
+> +_require_test_posix_ext
+>  
+>  TESTFILE=$TEST_DIR/lock_file
+
+131 tests fcntl style file locking, so we should test for that.
+
