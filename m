@@ -1,249 +1,159 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:51273 "EHLO
-	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S934503AbaH1KQd (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 28 Aug 2014 06:16:33 -0400
-Date: Thu, 28 Aug 2014 20:16:28 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH xfstests] xfs: add tests for XFS_IOC_FSSETXATTR behaviour
-Message-ID: <20140828101628.GS20518@dastard>
-References: <20140718191314.GB27801@teal.hq.k1024.org>
- <1409199840-16907-1-git-send-email-iusty@k1024.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1409199840-16907-1-git-send-email-iusty@k1024.org>
+Received: from mx1.redhat.com ([209.132.183.28]:57506 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751129AbaH1Nsl (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 28 Aug 2014 09:48:41 -0400
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH 00/15 v2] xfstests: new btrfs stress test cases
+Date: Thu, 28 Aug 2014 21:47:41 +0800
+Message-Id: <1409233676-22787-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Iustin Pop <iusty@k1024.org>
-Cc: xfs@oss.sgi.com, hch@infradead.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-[cc fstests@vger.kernel.org]
+This patchset add new stress test cases for btrfs by running two
+different btrfs operations simultaneously under fsstress to ensure
+btrfs doesn't hang or oops in such situations. btrfs scrub and
+btrfs check will be run after each test.
 
-On Wed, Aug 27, 2014 at 09:24:00PM -0700, Iustin Pop wrote:
-> Add two tests that check for correct behaviour of XFS_IOC_FSSETXATTR:
-> 
-> - 307: check that extent size can always be set on a directory
-> - 308: check that setting a non-zero extent size directly via the ioctl
->   sets the expected flags (EXTSIZE and EXTSZINHERIT)
-> 
-> Signed-off-by: Iustin Pop <iusty@k1024.org>
+The test matrix is the combination of 6 btrfs operations:
 
-Minor stuff first:
+	balance
+	create/mount/umount/delete subvolume
+	replace device
+	scrub
+	defrag
+	remount with different compress algorithms
+	
+Short descriptions:
 
-- xfstests patches should be sent to fstests@vger.kernel.org now.
-- can you pick the first unused numbers in the sequence for new
-  tests (xfs/032, xfs/051) so I don't have to renumber them before
-  applying them?
-- a patch per new test - it makes it easier to review and apply as i
-  don't have to split patches into multiple commits...
+	059: balance-subvolume
+	060: balance-scrub
+	061: balance-defrag
+	062: balance-remount
+	063: balance-replace
+	064: subvolume-replace
+	065: subvolume-scrub
+	066: subvolume-defrag
+	067: subvolume-remount
+	068: replace-scrub
+	069: replace-defrag
+	070: replace-remount
+	071: scrub-defrag
+	072: scrub-remount
+	073: defrag-remount
 
-> diff --git a/tests/xfs/307 b/tests/xfs/307
-> new file mode 100755
-> index 0000000..e8f3576
-> --- /dev/null
-> +++ b/tests/xfs/307
-> @@ -0,0 +1,87 @@
-> +#! /bin/bash
-> +# FS QA Test No. 307
-> +#
-> +# Test that setting extent size on directories work even for large
-> +# directories.
+Some issues I've seen:
 
-What is a "large directory"? Wouldn't it be better to describe the
-test as "Determine whether the extent size hint can be set on
-directories with allocated extents correctly"?
+1. subvolume cannot be mounted with selinux context, so you may see
+   such logs in dmesg
 
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2014 Google Inc.  All Rights Reserved.
+   SELinux: mount invalid.  Same superblock, different security settings for (dev dm-8, type btrfs)
 
-Is that correct? It doesn't match the email address you sent this
-from and I've never seen you post from a @google.com address.  I
-always like to check that the copyright assignment is correct in
-situations like this...
+   I've reported the bug to btrfs list, see
+   [BUG] cannot mount subvolume with selinux context
 
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs xfs
-> +_supported_os Linux
-> +_require_test
+2. btrfs replace operation always returns ENOENT if balance is running
+   So in 063.full you'll see
 
-Not needed, doesn't use the test device.
+   ERROR: ioctl(DEV_REPLACE_START) failed on "/mnt/testarea/scratch": No such file or directory, no error
 
-> +_require_scratch
-> +
-> +_scratch_mkfs_xfs >/dev/null 2>&1
-> +_scratch_mount
-> +
-> +small=$SCRATCH_MNT/small
-> +big=$SCRATCH_MNT/big
-> +
-> +# sanity check on a small directory
-> +mkdir $small
-> +# expect that an empty directory has no extents
-> +xfs_bmap $small | grep -q "no extents"
+   Not sure if it's btrfs bug, at least I think the error code is misleading
 
-Better to use xfs_io directly and filter out $SCRATCH_MNT into the
-golden output file like so:
+3. replace operation hangs the kernel(3.16-rc4+) with fsstress running
+   So case 064/068/069/070 will hang
 
-$XFS_IO_PROG -c "bmap" $small | _filter_scratch
 
-which will give:
+Changes since v1:
+- put common operations in common/rc as functions and share them across these tests
+- append mkfs options to _scratch_mkfs and _scratch_pool_mkfs instead of updating $MKFS_OPTIONS
+- rebase on top of master and re-number starting from btrfs/059
 
-SCRATCH_MNT/small: no extents
+Thanks,
+Eryu Guan
 
-> +# and that we can set an extent size on it
-> +xfs_io -c 'extsize 8m' $small
+Eryu Guan (15):
+  btrfs: new test to run btrfs balance and subvolume test simultaneously
+  btrfs: new test to run btrfs balance and scrub simltaneously
+  btrfs: new test to run btrfs balance and defrag operations simultaneously
+  btrfs: new case to run btrfs balance and remount with different compress algorithms
+  btrfs: new case to run btrfs balance and device replace simultaneously
+  btrfs: new case to run btrfs subvolume create/delete operations and device replace simultaneously
+  btrfs: new case to run btrfs subvolume create/delete operations and scrub simultaneously
+  btrfs: new case to run btrfs subvolume create/delete and defrag operations simultaneously
+  btrfs: new case to run subvolume create/delete and remount with different compress algorithms
+  btrfs: new case to run device replace and scrub operations simultaneously
+  btrfs: new case to run device replace and defrag operations simultaneously
+  btrfs: new case to run device replace and remount with different compress algorithms simultaneously
+  btrfs: new case to run btrfs scrub and defrag operations simultaneously
+  btrfs: new case to run btrfs scrub and remount with different compress algorithms simultaneously
+  btrfs: new case to run defrag and remount with different compress algorithms simultaneously
 
-$XFS_IO_PROG
+ common/rc           | 115 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/059     | 129 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/059.out |   2 +
+ tests/btrfs/060     | 128 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/060.out |   2 +
+ tests/btrfs/061     | 130 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/061.out |   2 +
+ tests/btrfs/062     | 128 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/062.out |   2 +
+ tests/btrfs/063     | 130 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/063.out |   2 +
+ tests/btrfs/064     | 131 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/064.out |   2 +
+ tests/btrfs/065     | 129 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/065.out |   2 +
+ tests/btrfs/066     | 131 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/066.out |   2 +
+ tests/btrfs/067     | 130 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/067.out |   2 +
+ tests/btrfs/068     | 131 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/068.out |   2 +
+ tests/btrfs/069     | 133 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/069.out |   2 +
+ tests/btrfs/070     | 131 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/070.out |   2 +
+ tests/btrfs/071     | 130 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/071.out |   2 +
+ tests/btrfs/072     | 128 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/072.out |   2 +
+ tests/btrfs/073     | 130 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/073.out |   2 +
+ tests/btrfs/group   |  15 ++++++
+ 32 files changed, 2109 insertions(+)
+ create mode 100755 tests/btrfs/059
+ create mode 100644 tests/btrfs/059.out
+ create mode 100755 tests/btrfs/060
+ create mode 100644 tests/btrfs/060.out
+ create mode 100755 tests/btrfs/061
+ create mode 100644 tests/btrfs/061.out
+ create mode 100755 tests/btrfs/062
+ create mode 100644 tests/btrfs/062.out
+ create mode 100755 tests/btrfs/063
+ create mode 100644 tests/btrfs/063.out
+ create mode 100755 tests/btrfs/064
+ create mode 100644 tests/btrfs/064.out
+ create mode 100755 tests/btrfs/065
+ create mode 100644 tests/btrfs/065.out
+ create mode 100755 tests/btrfs/066
+ create mode 100644 tests/btrfs/066.out
+ create mode 100755 tests/btrfs/067
+ create mode 100644 tests/btrfs/067.out
+ create mode 100755 tests/btrfs/068
+ create mode 100644 tests/btrfs/068.out
+ create mode 100755 tests/btrfs/069
+ create mode 100644 tests/btrfs/069.out
+ create mode 100755 tests/btrfs/070
+ create mode 100644 tests/btrfs/070.out
+ create mode 100755 tests/btrfs/071
+ create mode 100644 tests/btrfs/071.out
+ create mode 100755 tests/btrfs/072
+ create mode 100644 tests/btrfs/072.out
+ create mode 100755 tests/btrfs/073
+ create mode 100644 tests/btrfs/073.out
 
-> +# and finally check that the extent size update has taken place
-> +(cd $SCRATCH_MNT; xfs_io -c 'extsize' small)
-
-$XFS_IO_PROG -c 'extsize' $small | _filter_scratch
-
-> +# now create a 'big' (with extents) directory
-> +mkdir $big
-> +idx=1
-> +while xfs_bmap $big | grep -q "no extents"; do
-> +	touch $big/$idx
-> +	idx=$((idx+1))
-> +	if [ "$idx" -gt 1048576 ]; then
-> +		# still no extents? giving up
-> +		echo "Can't make a directory to have extents even after 1M files" 1>&2
-> +		exit
-> +	fi
-> +done
-
-urk. largest inode size is 2kb, which means at most it can fit less
-than 100 dirents in the inode before spilling to extent form. So
-just do a loop that creates 1000 files - there's no need to
-overengineer the test code.
-
-> +# expect that we can set the extent size on $big as well
-> +xfs_io -c 'extsize 8m' $big
-
-$XFS_IO_PROG
-
-> +# and that it took effect
-> +(cd $SCRATCH_MNT; xfs_io -c 'extsize' big)
-
-$XFS_IO_PROG -c 'extsize' $big | _filter_scratch
-
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/307.out b/tests/xfs/307.out
-> new file mode 100644
-> index 0000000..f825525
-> --- /dev/null
-> +++ b/tests/xfs/307.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 307
-> +[8388608] small
-> +[8388608] big
-> diff --git a/tests/xfs/308 b/tests/xfs/308
-> new file mode 100755
-> index 0000000..7b43836
-> --- /dev/null
-> +++ b/tests/xfs/308
-> @@ -0,0 +1,98 @@
-> +#! /bin/bash
-> +# FS QA Test No. 308
-> +#
-> +# Test that setting extent size on files and directories (directly via
-> +# ioctl and not via xfs_io) sets the correct flags.
-
-xfs_io uses the ioctl directly - there's no need to write a special
-c program to do this, especially as....
-
-> +touch $file
-> +mkdir $dir
-> +
-> +cat > $cprog << EOF
-> +#include <stdio.h>
-> +#include <xfs/xfs.h>
-> +
-> +int main(int argc, char **argv) {
-> +	struct fsxattr fa;
-> +	int fd = open(argv[1], O_RDONLY);
-> +	if (fd < 0) {
-> +		perror("open");
-> +		return 1;
-> +	}
-> +	fa.fsx_xflags = 0;
-> +	fa.fsx_extsize = 1048576 * 8;
-> +	int r = xfsctl(argv[1], fd, XFS_IOC_FSSETXATTR, &fa);
-
-.... that code is quite broken. Yes, it would work to set the
-appropriate extent size flags with the kernel
-changes you made, but that's not how this ioctl works.
-
-i.e. it will cause any flag bits that are set on the inode to be
-cleared and it's likely to fail on old kernels beacuse they have
-very different behaviour to what your patch does.
-
-IOWs, setting fsx_extsize without setting either XFS_XFLAG_EXTSIZE
-or XFS_XFLAG_EXTSZINHERIT is bad practice. The kernel is left to
-guess what you actually wanted to be done - the flags are supposed
-to tell the kernel that the fsx_extsize value is meaningful, not the
-other way around.
-
-FWIW, the xfs_io code is *exactly* what applications should be
-doing to set the extent size or any other inode flag. i.e:
-
-1. stat the fd to determine the type.
-2. populate the fsxattr structure with the existing inode flags
-3. change the flags/fields of the fsxattr structure appropriately
-4. set the new values to the inode.
-
-i.e, from io/open.c:
-
-static int
-set_extsize(const char *path, int fd, long extsz)
-{
-        struct fsxattr  fsx;
-        struct stat64   stat;
-
-        if (fstat64(fd, &stat) < 0) {
-                perror("fstat64");
-                return 0;
-        }
-        if ((xfsctl(path, fd, XFS_IOC_FSGETXATTR, &fsx)) < 0) {
-                printf("%s: XFS_IOC_FSGETXATTR %s: %s\n",
-                        progname, path, strerror(errno));
-                return 0;
-        }
-
-        if (S_ISREG(stat.st_mode)) {
-                fsx.fsx_xflags |= XFS_XFLAG_EXTSIZE;
-        } else if (S_ISDIR(stat.st_mode)) {
-                fsx.fsx_xflags |= XFS_XFLAG_EXTSZINHERIT;
-        } else {
-                printf(_("invalid target file type - file %s\n"), path);
-                return 0;
-        }
-        fsx.fsx_extsize = extsz;
-
-        if ((xfsctl(path, fd, XFS_IOC_FSSETXATTR, &fsx)) < 0) {
-                printf("%s: XFS_IOC_FSSETXATTR %s: %s\n",
-                        progname, path, strerror(errno));
-                return 0;
-        }
-
-        return 0;
-}
-
-We have xfs_io precisely so that we don't have to maintain random
-test code like this throughout xfstests - do it once, do it right,
-use it everywhere.
-
-Cheers,
-
-Dave.
 -- 
-Dave Chinner
-david@fromorbit.com
+1.8.3.1
+
