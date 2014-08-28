@@ -1,12 +1,12 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:13184 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:2496 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751852AbaH1NtH (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 28 Aug 2014 09:49:07 -0400
+	id S1751118AbaH1NtN (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 28 Aug 2014 09:49:13 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 12/15 v2] btrfs: new case to run device replace and remount with different compress algorithms simultaneously
-Date: Thu, 28 Aug 2014 21:47:53 +0800
-Message-Id: <1409233676-22787-13-git-send-email-eguan@redhat.com>
+Subject: [PATCH 15/15 v2] btrfs: new case to run defrag and remount with different compress algorithms simultaneously
+Date: Thu, 28 Aug 2014 21:47:56 +0800
+Message-Id: <1409233676-22787-16-git-send-email-eguan@redhat.com>
 In-Reply-To: <1409233676-22787-1-git-send-email-eguan@redhat.com>
 References: <1409233676-22787-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -14,29 +14,29 @@ To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Run btrfs replace operations and remount with different compress
+Run btrfs defrag operations and remount with different compress
 algorithms simultaneously with fsstress running in background.
 
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- tests/btrfs/070     | 131 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/070.out |   2 +
+ tests/btrfs/073     | 130 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/073.out |   2 +
  tests/btrfs/group   |   1 +
- 3 files changed, 134 insertions(+)
- create mode 100755 tests/btrfs/070
- create mode 100644 tests/btrfs/070.out
+ 3 files changed, 133 insertions(+)
+ create mode 100755 tests/btrfs/073
+ create mode 100644 tests/btrfs/073.out
 
-diff --git a/tests/btrfs/070 b/tests/btrfs/070
+diff --git a/tests/btrfs/073 b/tests/btrfs/073
 new file mode 100755
-index 0000000..315d84f
+index 0000000..c0d464a
 --- /dev/null
-+++ b/tests/btrfs/070
-@@ -0,0 +1,131 @@
++++ b/tests/btrfs/073
+@@ -0,0 +1,130 @@
 +#! /bin/bash
-+# FSQA Test No. btrfs/070
++# FSQA Test No. btrfs/073
 +#
-+# Run btrfs replace operations and remount with different compress
-+# algorithms simultaneously with fsstress running in background.
++# Run btrfs defrag operations and remount with different compress algorithms
++# simultaneously with fsstress running in background.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (C) 2014 Red Hat Inc. All rights reserved.
@@ -80,52 +80,51 @@ index 0000000..315d84f
 +_supported_fs btrfs
 +_supported_os Linux
 +_require_scratch
-+_require_scratch_dev_pool 5
-+_require_scratch_dev_pool_equal_size
++_require_scratch_dev_pool 4
 +
 +rm -f $seqres.full
 +
 +# test case array
 +tcs=(
 +	"-m single -d single"
++	"-m dup -d single"
 +	"-m raid0 -d raid0"
 +	"-m raid1 -d raid0"
 +	"-m raid1 -d raid1"
 +	"-m raid10 -d raid10"
-+#	"-m raid5 -d raid5"	# raid5 does not support replace operation yet
-+#	"-m raid6 -d raid6"	# raid6 does not support replace operation yet
++	"-m raid5 -d raid5"
++	"-m raid6 -d raid6"
 +)
 +
 +run_test()
 +{
 +	local mkfs_opts=$1
-+	local saved_scratch_dev_pool=$SCRATCH_DEV_POOL
++	local with_compress=$2
 +
-+	echo "Test $mkfs_opts" >>$seqres.full
++	echo "Test $mkfs_opts with $with_compress" >>$seqres.full
 +
-+	# remove the last device from the SCRATCH_DEV_POOL list so
-+	# _scratch_pool_mkfs won't use all devices in pool
-+	local last_dev="`echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $NF}'`"
-+	SCRATCH_DEV_POOL=`echo $SCRATCH_DEV_POOL | sed -e "s# *$last_dev *##"`
-+	_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
++	# dup only works on single device
++	if [[ "$mkfs_opts" =~ dup ]]; then
++		_scratch_mkfs $mkfs_opts >>$seqres.full 2>&1
++	else
++		_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
++	fi
 +	# make sure we created btrfs with desired options
 +	if [ $? -ne 0 ]; then
 +		echo "mkfs $mkfs_opts failed"
-+		SCRATCH_DEV_POOL=$saved_scratch_dev_pool
 +		return
 +	fi
 +	_scratch_mount >>$seqres.full 2>&1
-+	SCRATCH_DEV_POOL=$saved_scratch_dev_pool
 +
 +	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
 +	echo "Run fsstress $args" >>$seqres.full
 +	$FSSTRESS_PROG $args >/dev/null 2>&1 &
 +	fsstress_pid=$!
 +
-+	echo -n "Start replace worker: " >>$seqres.full
-+	_btrfs_stress_replace $SCRATCH_MNT >>$seqres.full 2>&1 &
-+	replace_pid=$!
-+	echo "$replace_pid" >>$seqres.full
++	echo -n "Start defrag worker: " >>$seqres.full
++	_btrfs_stress_defrag $SCRATCH_MNT $with_compress >/dev/null 2>&1 &
++	defrag_pid=$!
++	echo "$defrag_pid" >>$seqres.full
 +
 +	echo -n "Start remount worker: " >>$seqres.full
 +	_btrfs_stress_remount $SCRATCH_MNT >/dev/null 2>&1 &
@@ -134,10 +133,9 @@ index 0000000..315d84f
 +
 +	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
 +	wait $fsstress_pid
-+	kill $replace_pid $remount_pid
++	kill $defrag_pid $remount_pid
 +	wait
-+
-+	# wait for the remount and replace operations to finish
++	# wait for the defrag and remount operations to finish
 +	while ps aux | grep "btrfs filesystem defrag" | grep -qv grep; do
 +		sleep 1
 +	done
@@ -158,28 +156,29 @@ index 0000000..315d84f
 +
 +echo "Silence is golden"
 +for t in "${tcs[@]}"; do
-+	run_test "$t"
++	run_test "$t" nocompress
++	run_test "$t" compress
 +done
 +
 +status=0
 +exit
-diff --git a/tests/btrfs/070.out b/tests/btrfs/070.out
+diff --git a/tests/btrfs/073.out b/tests/btrfs/073.out
 new file mode 100644
-index 0000000..8940c5d
+index 0000000..d107704
 --- /dev/null
-+++ b/tests/btrfs/070.out
++++ b/tests/btrfs/073.out
 @@ -0,0 +1,2 @@
-+QA output created by 070
++QA output created by 073
 +Silence is golden
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 53f5f4b..f68370d 100644
+index e631d5b..2e3fb6a 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -72,3 +72,4 @@
- 067 auto subvol remount compress
- 068 auto replace scrub
- 069 auto replace defrag compress
-+070 auto replace remount compress
+@@ -75,3 +75,4 @@
+ 070 auto replace remount compress
+ 071 auto scrub defrag compress
+ 072 auto scrub remount compress
++073 auto defrag remount compress
 -- 
 1.8.3.1
 
