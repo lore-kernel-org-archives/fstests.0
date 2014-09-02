@@ -1,263 +1,67 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-lb0-f181.google.com ([209.85.217.181]:48114 "EHLO
-	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753085AbaH2Tmh (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 29 Aug 2014 15:42:37 -0400
-From: Pavel Shilovsky <pshilovsky@samba.org>
-Subject: [PATCH v3 2/3] common: add cifs support
-Date: Fri, 29 Aug 2014 23:42:19 +0400
-Message-Id: <1409341340-27031-3-git-send-email-pshilovsky@samba.org>
-In-Reply-To: <1409341340-27031-1-git-send-email-pshilovsky@samba.org>
-References: <1409341340-27031-1-git-send-email-pshilovsky@samba.org>
+Received: from mx1.redhat.com ([209.132.183.28]:7130 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750752AbaIBOWo (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 2 Sep 2014 10:22:44 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: [PATCH 1/2] xfstests/common: don't assume sysfs attrs all reside under test dev
+Date: Tue,  2 Sep 2014 10:22:40 -0400
+Message-Id: <1409667761-50248-2-git-send-email-bfoster@redhat.com>
+In-Reply-To: <1409667761-50248-1-git-send-email-bfoster@redhat.com>
+References: <1409667761-50248-1-git-send-email-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-fsdevel@vger.kernel.org, linux-cifs@vger.kernel.org, samba-technical@samba.org, David Disseldorp <ddiss@suse.de>, Steve French <smfrench@gmail.com>
+Cc: xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-Pass -cifs argument from the command line to enable cifs testing
-for $TEST_DEV. Also mention CIFS and missed UDF in README.
+_require_xfs_sysfs() currently assumes that all sysfs attributes reside
+under a device-specific subdirectory in the XFS sysfs hierarchy. It is
+hardcoded to use the TEST_DEV mount and expect the relative attribute
+path as a parameter.
 
-Reviewed-by: Steve French <smfrench@gmail.com>
-Signed-off-by: Pavel Shilovsky <pshilovsky@samba.org>
+Not all sysfs attributes are associated with specific devices or mount
+points, however. Remove the hardcoded device name part of the attribute
+path from _require_xfs_sysfs() and let the caller construct the relative
+path based on the sysfs XFS root directory.
+
+Signed-off-by: Brian Foster <bfoster@redhat.com>
 ---
- README        |  5 +++--
- check         |  2 ++
- common/config | 31 +++++++++++++++++++++++++++----
- common/rc     | 26 ++++++++++++++++++++++++++
- 4 files changed, 58 insertions(+), 6 deletions(-)
+ common/rc     | 3 +--
+ tests/xfs/011 | 2 +-
+ 2 files changed, 2 insertions(+), 3 deletions(-)
 
-diff --git a/README b/README
-index b299c8f..8a362bd 100644
---- a/README
-+++ b/README
-@@ -91,14 +91,15 @@ Running tests:
-     - By default the tests suite will run xfs tests:
-     - ./check '*/001' '*/002' '*/003'
-     - ./check '*/06?'
--    - You can explicitly specify NFS, otherwise the filesystem type will be
--      autodetected from $TEST_DEV:
-+    - You can explicitly specify NFS/CIFS/UDF, otherwise the filesystem type will
-+      be autodetected from $TEST_DEV:
-       ./check -nfs [test(s)]
-     - Groups of tests maybe ran by: ./check -g [group(s)]
-       See the 'group' file for details on groups
-     - for udf tests: ./check -udf [test(s)]
-       Running all the udf tests: ./check -udf -g udf
-     - for running nfs tests: ./check -nfs [test(s)]
-+    - for running cifs/smb3 tests: ./check -cifs [test(s)]
-     - To randomize test order: ./check -r [test(s)]
- 
-     
-diff --git a/check b/check
-index 77c6559..42a1ac2 100755
---- a/check
-+++ b/check
-@@ -68,6 +68,7 @@ usage()
- 
- check options
-     -nfs                test NFS
-+    -cifs               test CIFS
-     -tmpfs              test TMPFS
-     -l			line mode diff
-     -udiff		show unified diff (default)
-@@ -205,6 +206,7 @@ while [ $# -gt 0 ]; do
- 	-\? | -h | --help) usage ;;
- 
- 	-nfs)	FSTYP=nfs ;;
-+	-cifs)	FSTYP=cifs ;;
- 	-tmpfs)	FSTYP=tmpfs ;;
- 
- 	-g)	group=$2 ; shift ;
-diff --git a/common/config b/common/config
-index 10cc6fe..fc21b37 100644
---- a/common/config
-+++ b/common/config
-@@ -206,6 +206,7 @@ case "$HOSTOS" in
-         export MKFS_UDF_PROG="`set_prog_path mkfs_udf`"
-         export XFS_FSR_PROG="`set_prog_path /usr/etc/fsr_xfs`"
-         export MKFS_NFS_PROG="false"
-+        export MKFS_CIFS_PROG="false"
-         ;;
-     Linux)
-         export MKFS_XFS_PROG="`set_prog_path mkfs.xfs`"
-@@ -215,6 +216,7 @@ case "$HOSTOS" in
-         export BTRFS_SHOW_SUPER_PROG="`set_prog_path btrfs-show-super`"
-         export XFS_FSR_PROG="`set_prog_path xfs_fsr`"
-         export MKFS_NFS_PROG="false"
-+        export MKFS_CIFS_PROG="false"
-         ;;
- esac
- 
-@@ -238,6 +240,9 @@ _mount_opts()
- 	nfs)
- 		export MOUNT_OPTIONS=$NFS_MOUNT_OPTIONS
- 		;;
-+	cifs)
-+		export MOUNT_OPTIONS=$CIFS_MOUNT_OPTIONS
-+		;;
- 	ext2|ext3|ext4|ext4dev)
- 		# acls & xattrs aren't turned on by default on ext$FOO
- 		export MOUNT_OPTIONS="-o acl,user_xattr $EXT_MOUNT_OPTIONS"
-@@ -259,6 +264,17 @@ _mount_opts()
- 	esac
- }
- 
-+_test_mount_opts()
-+{
-+	case $FSTYP in
-+	cifs)
-+		export TEST_FS_MOUNT_OPTS=$CIFS_MOUNT_OPTIONS
-+		;;
-+	*)
-+		;;
-+	esac
-+}
-+
- _mkfs_opts()
- {
- 	case $FSTYP in
-@@ -273,6 +289,9 @@ _mkfs_opts()
- 	nfs)
- 		export MKFS_OPTIONS=$NFS_MKFS_OPTIONS
- 		;;
-+	cifs)
-+		export MKFS_OPTIONS=$CIFS_MKFS_OPTIONS
-+		;;
- 	reiserfs)
- 		export MKFS_OPTIONS="$REISERFS_MKFS_OPTIONS -q"
- 		;;
-@@ -366,6 +385,7 @@ get_next_config() {
- 
- 	local OLD_FSTYP=$FSTYP
- 	local OLD_MOUNT_OPTIONS=$MOUNT_OPTIONS
-+	local OLD_TEST_FS_MOUNT_OPTS=$TEST_FS_MOUNT_OPTS
- 	local OLD_MKFS_OPTIONS=$MKFS_OPTIONS
- 	local OLD_FSCK_OPTIONS=$FSCK_OPTIONS
- 
-@@ -382,10 +402,12 @@ get_next_config() {
- 
- 	if [ ! -z "$OLD_FSTYP" ] && [ $OLD_FSTYP != $FSTYP ]; then
- 		[ -z "$MOUNT_OPTIONS" ] && _mount_opts
-+		[ -z "$TEST_FS_MOUNT_OPTS" ] && _test_mount_opts
- 		[ -z "$MKFS_OPTIONS" ] && _mkfs_opts
- 		[ -z "$FSCK_OPTIONS" ] && _fsck_opts
- 	else
- 		[ -z "$MOUNT_OPTIONS" ] && export MOUNT_OPTIONS=$OLD_MOUNT_OPTIONS
-+		[ -z "$TEST_FS_MOUNT_OPTS" ] && export TEST_FS_MOUNT_OPTS=$OLD_TEST_FS_MOUNT_OPTS
- 		[ -z "$MKFS_OPTIONS" ] && export MKFS_OPTIONS=$OLD_MKFS_OPTIONS
- 		[ -z "$FSCK_OPTIONS" ] && export FSCK_OPTIONS=$OLD_FSCK_OPTIONS
- 	fi
-@@ -408,9 +430,9 @@ get_next_config() {
- 		exit 1
- 	fi
- 
--	echo $TEST_DEV | grep -q ":" > /dev/null 2>&1
-+	echo $TEST_DEV | grep -qE ":|//" > /dev/null 2>&1
- 	if [ ! -b "$TEST_DEV" -a "$?" != "0" ]; then
--		echo "common/config: Error: \$TEST_DEV ($TEST_DEV) is not a block device or a NFS filesystem"
-+		echo "common/config: Error: \$TEST_DEV ($TEST_DEV) is not a block device or a network filesystem"
- 		exit 1
- 	fi
- 
-@@ -431,9 +453,9 @@ get_next_config() {
- 		export SCRATCH_DEV_NOT_SET=true
- 	fi
- 
--	echo $SCRATCH_DEV | grep -q ":" > /dev/null 2>&1
-+	echo $SCRATCH_DEV | grep -qE ":|//" > /dev/null 2>&1
- 	if [ ! -z "$SCRATCH_DEV" -a ! -b "$SCRATCH_DEV" -a "$?" != "0" ]; then
--		echo "common/config: Error: \$SCRATCH_DEV ($SCRATCH_DEV) is not a block device or a NFS filesystem"
-+		echo "common/config: Error: \$SCRATCH_DEV ($SCRATCH_DEV) is not a block device or a network filesystem"
- 		exit 1
- 	fi
- 
-@@ -457,6 +479,7 @@ if [ -z "$CONFIG_INCLUDED" ]; then
- 	FSTYP=${FSTYP:=xfs}
- 	export FSTYP
- 	[ -z "$MOUNT_OPTIONS" ] && _mount_opts
-+	[ -z "$TEST_FS_MOUNT_OPTS" ] && _test_mount_opts
- 	[ -z "$MKFS_OPTIONS" ] && _mkfs_opts
- 	[ -z "$FSCK_OPTIONS" ] && _fsck_opts
- fi
 diff --git a/common/rc b/common/rc
-index d9c9995..8b427fc 100644
+index 16da898..01f573e 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -107,6 +107,8 @@ case "$FSTYP" in
- 	 ;;
-     nfs)
- 	 ;;
-+    cifs)
-+	 ;;
- esac
+@@ -1224,13 +1224,12 @@ _require_xfs_sysfs()
+ {
+ 	attr=$1
+ 	sysfsdir=/sys/fs/xfs
+-	testdev=`_short_dev $TEST_DEV`
  
- # make sure we have a standard umask
-@@ -503,6 +505,9 @@ _test_mkfs()
-     nfs*)
- 	# do nothing for nfs
- 	;;
-+    cifs)
-+	# do nothing for cifs
-+	;;
-     udf)
-         $MKFS_UDF_PROG $MKFS_OPTIONS $* $TEST_DEV > /dev/null
- 	;;
-@@ -524,6 +529,9 @@ _scratch_mkfs()
-     nfs*)
- 	# do nothing for nfs
- 	;;
-+    cifs)
-+	# do nothing for cifs
-+	;;
-     udf)
-         $MKFS_UDF_PROG $MKFS_OPTIONS $* $SCRATCH_DEV > /dev/null
- 	;;
-@@ -973,6 +981,9 @@ _require_scratch()
- 	nfs*)
-                  _notrun "requires a scratch device"
- 		 ;;
-+	cifs)
-+		_notrun "requires a scratch device"
-+		;;
- 	tmpfs)
- 		if [ -z "$SCRATCH_DEV" -o ! -d "$SCRATCH_MNT" ];
- 		then
-@@ -1022,6 +1033,15 @@ _require_test()
- 	nfs*)
-                  _notrun "requires a test device"
- 		 ;;
-+	cifs)
-+		echo $TEST_DEV | grep -q "//" > /dev/null 2>&1
-+		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
-+			_notrun "this test requires a valid \$TEST_DEV"
-+		fi
-+		if [ ! -d "$TEST_DIR" ]; then
-+		     _notrun "this test requires a valid \$TEST_DIR"
-+		fi
-+		;;
- 	tmpfs)
- 		if [ -z "$TEST_DEV" -o ! -d "$TEST_DIR" ];
- 		then
-@@ -1812,6 +1832,9 @@ _check_test_fs()
-     nfs)
- 	# no way to check consistency for nfs
- 	;;
-+    cifs)
-+	# no way to check consistency for cifs
-+	;;
-     udf)
- 	# do nothing for now
- 	;;
-@@ -1850,6 +1873,9 @@ _check_scratch_fs()
-     nfs*)
- 	# Don't know how to check an NFS filesystem, yet.
- 	;;
-+    cifs)
-+	# Don't know how to check a CIFS filesystem, yet.
-+	;;
-     btrfs)
- 	_check_btrfs_filesystem $device
- 	;;
+ 	if [ ! -e $sysfsdir ]; then
+ 		_notrun "no kernel support for XFS sysfs attributes"
+ 	fi
+ 
+-	if [ ! -z $1 ] && [ ! -e $sysfsdir/$testdev/$attr ]; then
++	if [ ! -z $1 ] && [ ! -e $sysfsdir/$attr ]; then
+ 		_notrun "sysfs attribute '$attr' is not supported"
+ 	fi
+ }
+diff --git a/tests/xfs/011 b/tests/xfs/011
+index 658a822..197752c 100755
+--- a/tests/xfs/011
++++ b/tests/xfs/011
+@@ -85,7 +85,7 @@ _supported_os Linux
+ 
+ _require_scratch
+ _require_freeze
+-_require_xfs_sysfs log
++_require_xfs_sysfs $(_short_dev $TEST_DEV)/log
+ 
+ rm -f $seqres.full
+ 
 -- 
-1.9.1
+1.8.3.1
 
