@@ -1,164 +1,56 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:15459 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753522AbaIBOWq (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 2 Sep 2014 10:22:46 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: [PATCH 2/2] xfs/051: test buffer use after free race on I/O failure in XFS log recovery
-Date: Tue,  2 Sep 2014 10:22:41 -0400
-Message-Id: <1409667761-50248-3-git-send-email-bfoster@redhat.com>
-In-Reply-To: <1409667761-50248-1-git-send-email-bfoster@redhat.com>
-References: <1409667761-50248-1-git-send-email-bfoster@redhat.com>
+Received: from mail-pd0-f173.google.com ([209.85.192.173]:55987 "EHLO
+	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752873AbaICGXr convert rfc822-to-8bit (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 3 Sep 2014 02:23:47 -0400
+MIME-Version: 1.0
+In-Reply-To: <1409341340-27031-1-git-send-email-pshilovsky@samba.org>
+References: <1409341340-27031-1-git-send-email-pshilovsky@samba.org>
+Date: Wed, 3 Sep 2014 10:23:47 +0400
+Message-ID: <CAKywueRns+hehrZ3dQ8a8XnaHbd6tNh1BnZAwsTxNTV_w6V6SQ@mail.gmail.com>
+Subject: Re: [PATCH v3 0/3] CIFS support for XFS test suite
+From: Pavel Shilovsky <pshilovsky@samba.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com
+To: "fstests@vger.kernel.org" <fstests@vger.kernel.org>, Dave Chinner <david@fromorbit.com>, Christoph Hellwig <hch@infradead.org>
+Cc: linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-cifs <linux-cifs@vger.kernel.org>, "samba-technical@samba.org" <samba-technical@samba.org>, David Disseldorp <ddiss@suse.de>, Steve French <smfrench@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-A buffer use after free race was discovered in the XFS log recovery
-codepath if I/O failures occur during recovery. The I/O submission path
-can abort the mount and release the only reference held on some buffers
-before I/O completion processing (e.g., async workqueue processing)
-might have completed. Badness ensues if the I/O completion path
-subsequently attempts to access said buffers.
+2014-08-29 23:42 GMT+04:00 Pavel Shilovsky <pshilovsky@samba.org>:
+> These are patches that adds CIFS support to XFS tests.
+>
+> The first patch changes generic/013 test to use mount options provided for $TEST_DEV for remount. The second patch adds "-cifs" command line argument and CIFS specific variables. The third patch disables tests that need POSIX behavior from filesystem for unix cifs mounts.
+>
+> With these patches applied, most of generic/shared $TEST_DEV tests pass for the recent kernel cifs module.
+>
+> Changes since v2:
+> 1) patch #3 uses separate _require_test_{feature} functions rather than generic _require_test_posix_ext
+> 2) patch #2 adds UDF notes to README
+>
+> Pavel Shilovsky (3):
+>   generic/013: encapsulate remount during cleanup
+>   common: add cifs support
+>   cifs: skip tests that need POSIX support for nounix mounts
+>
+>  README            |  5 +++--
+>  check             |  2 ++
+>  common/config     | 31 +++++++++++++++++++++++++++----
+>  common/rc         | 55 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/005 |  8 ++------
+>  tests/generic/013 |  2 +-
+>  tests/generic/023 |  1 +
+>  tests/generic/024 |  1 +
+>  tests/generic/025 |  1 +
+>  tests/generic/131 |  1 +
+>  10 files changed, 94 insertions(+), 13 deletions(-)
+>
+> --
+> 1.9.1
+>
 
-The test manufactures the race by forcing all writes to fail (via
-dm-flakey) after a fixed period of time. A delay is inserted into the
-mount codepath to synchronize write failures with log recovery.
+Any comments on the series?
 
-Credit for discovery of the race and definition of the reproducible test
-case goes to Alex Lyakas.
-
-Signed-off-by: Brian Foster <bfoster@redhat.com>
-Reported-by: Alex Lyakas <alex@zadarastorage.com>
----
- tests/xfs/051     | 95 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/051.out |  2 ++
- tests/xfs/group   |  1 +
- 3 files changed, 98 insertions(+)
- create mode 100755 tests/xfs/051
- create mode 100644 tests/xfs/051.out
-
-diff --git a/tests/xfs/051 b/tests/xfs/051
-new file mode 100755
-index 0000000..a84746b
---- /dev/null
-+++ b/tests/xfs/051
-@@ -0,0 +1,95 @@
-+#! /bin/bash
-+# FS QA Test No. 051
-+#
-+# Simulate a buffer use after free race in XFS log recovery. The race triggers
-+# on I/O failures during log recovery. Note that this test is dangerous as it
-+# causes BUG() errors or a panic.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2013 Oracle, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	killall -9 $FSSTRESS_PROG > /dev/null 2>&1
-+	_scratch_unmount > /dev/null 2>&1
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/dmflakey
-+
-+# Modify as appropriate.
-+_supported_fs xfs
-+_supported_os Linux
-+
-+_require_scratch
-+_require_dm_flakey
-+_require_xfs_sysfs debug/log_recovery_delay
-+
-+echo "Silence is golden."
-+
-+_scratch_mkfs_xfs >/dev/null 2>&1
-+_scratch_mount
-+
-+# Start a workload and shutdown the fs. The subsequent mount will require log
-+# recovery.
-+$FSSTRESS_PROG -n 9999 -p 2 -w -d $SCRATCH_MNT > /dev/null 2>&1 &
-+sleep 5
-+src/godown -f $SCRATCH_MNT
-+killall -q $FSSTRESS_PROG
-+wait
-+_scratch_unmount
-+
-+# Initialize a dm-flakey device that will pass I/Os for 5s and fail thereafter.
-+_init_flakey
-+BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
-+FLAKEY_TABLE="0 $BLK_DEV_SIZE flakey $SCRATCH_DEV 0 5 180"
-+_load_flakey_table $FLAKEY_ALLOW_WRITES
-+
-+# Set a 10s log recovery delay and mount the flakey device. This should allow
-+# initial writes to proceed (e.g., stale log block reset) and then let the
-+# flakey uptime timer expire such that I/Os will fail by the time log recovery
-+# starts.
-+echo 10 > /sys/fs/xfs/debug/log_recovery_delay
-+
-+# The mount should fail due to dm-flakey. Note that this is dangerous on kernels
-+# without the xfs_buf log recovery race fixes.
-+_mount_flakey > /dev/null 2>&1
-+
-+echo 0 > /sys/fs/xfs/debug/log_recovery_delay
-+
-+_cleanup_flakey
-+
-+# replay the log
-+_scratch_mount
-+_scratch_unmount
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/051.out b/tests/xfs/051.out
-new file mode 100644
-index 0000000..5180bc4
---- /dev/null
-+++ b/tests/xfs/051.out
-@@ -0,0 +1,2 @@
-+QA output created by 051
-+Silence is golden.
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 4d35df5..9784dea 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -47,6 +47,7 @@
- 048 other auto quick
- 049 rw auto quick
- 050 quota auto quick
-+051 dangerous
- 052 quota db auto quick
- 054 quota auto quick
- 055 dump ioctl remote tape
 -- 
-1.8.3.1
-
+Best regards,
+Pavel Shilovsky.
