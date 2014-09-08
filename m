@@ -1,51 +1,50 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from imap.thunk.org ([74.207.234.97]:42617 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:42837 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752082AbaIGTVX (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sun, 7 Sep 2014 15:21:23 -0400
-Date: Sun, 7 Sep 2014 15:21:10 -0400
+	id S1750715AbaIHCGV (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sun, 7 Sep 2014 22:06:21 -0400
 From: Theodore Ts'o <tytso@mit.edu>
-Subject: Re: [PATCH] ext4: use mkfs.ext4 -F instead of piping in yes
-Message-ID: <20140907192110.GC1066@thunk.org>
-References: <1410092942-22201-1-git-send-email-tytso@mit.edu>
- <20140907154927.GA23630@infradead.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20140907154927.GA23630@infradead.org>
+Subject: [PATCH 2/2] ext4: speed up _require_ext4_bigalloc and _require_ext4_mkfs_bigalloc
+Date: Sun,  7 Sep 2014 22:06:08 -0400
+Message-Id: <1410141968-17551-2-git-send-email-tytso@mit.edu>
+In-Reply-To: <1410141968-17551-1-git-send-email-tytso@mit.edu>
+References: <20140907192110.GC1066@thunk.org>
+ <1410141968-17551-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: fstests@vger.kernel.org, Ext4 Developers List <linux-ext4@vger.kernel.org>, Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>, Eryu Guan <eguan@redhat.com>
+To: fstests@vger.kernel.org
+Cc: hch@infradead.org, linux-ext4@vger.kernel.org, wangxg.fnst@cn.fujitsu.com, eguan@redhat.com, Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Sep 07, 2014 at 08:49:27AM -0700, Christoph Hellwig wrote:
-> On Sun, Sep 07, 2014 at 08:29:02AM -0400, Theodore Ts'o wrote:
-> > Using "yes | mkfs.ext4 ..." results in the error message results in
-> > the test failing, at least for some versions of e2fsprogs:
-> > 
-> >     +yes: standard output: Broken pipe
-> >     +yes: write error
-> > 
-> > It better to use the -F option, which will eliminate the questions.
-> 
-> Looks good, but maybe we should have a $MKFS_EXT4_PROG variable similar
-> to $MKFS_XFS_PROG so that we can set this in one place?
+We don't need to make a full-sized file system in order to test
+whether "mkfs.ext4 -O bigalloc" works.
 
-Agreed, I'll send a separate patch to fix that.   One amusing thing:
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ common/rc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-% git grep mkfs.ext4
-common/rc:_scratch_mkfs_ext4()
-common/rc:      _scratch_mkfs_ext4 $*
-common/rc:# this test requires the bigalloc feature to be available in mkfs.ext4
-common/rc:      _scratch_mkfs_ext4 -O bigalloc >/dev/null 2>&1 \
-common/rc:         || _notrun "mkfs.ext4 doesn't have bigalloc feature"
-common/rc:      _scratch_mkfs_ext4 -O bigalloc >/dev/null 2>&1
-tests/btrfs/012:MKFS_EXT4_PROG="`set_prog_path mkfs.ext4`"
-tests/btrfs/012:_require_command $MKFS_EXT4_PROG mkfs.ext4
-tests/ext4/003:mkfs.ext4 -F -O bigalloc -C 65536  -g 256 $SCRATCH_DEV 512m \
-tests/ext4/306:mkfs.ext4 -F -O ^extents,^64bit $SCRATCH_DEV 512m >> $seqres.full 2>&1
-
-(note the btrfs test is the one place using and defining MKFS_EXT4_PROG :-)
-
-      	  	     	    	      	       - Ted
+diff --git a/common/rc b/common/rc
+index 285bd7c..56e1847 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1189,7 +1189,7 @@ _require_xfs_crc()
+ #
+ _require_ext4_mkfs_bigalloc()
+ {
+-	_scratch_mkfs_ext4 -O bigalloc >/dev/null 2>&1 \
++	$MKFS_EXT4_PROG -F -O bigalloc $SCRATCH_DEV 200k >/dev/null 2>&1 \
+ 	   || _notrun "mkfs.ext4 doesn't have bigalloc feature"
+ }
+ 
+@@ -1197,7 +1197,7 @@ _require_ext4_mkfs_bigalloc()
+ #
+ _require_ext4_bigalloc()
+ {
+-	_scratch_mkfs_ext4 -O bigalloc >/dev/null 2>&1
++	$MKFS_EXT4_PROG -F -O bigalloc $SCRATCH_DEV 200k >/dev/null 2>&1
+ 	_scratch_mount >/dev/null 2>&1 \
+ 	   || _notrun "Ext4 kernel doesn't support bigalloc feature"
+ 	umount $SCRATCH_MNT
+-- 
+2.1.0
 
