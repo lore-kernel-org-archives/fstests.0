@@ -1,74 +1,46 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:52533 "EHLO
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:23741 "EHLO
 	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751404AbaIHKJN (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 8 Sep 2014 06:09:13 -0400
-Date: Mon, 8 Sep 2014 20:08:59 +1000
+	by vger.kernel.org with ESMTP id S1751404AbaIHKsE (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 8 Sep 2014 06:48:04 -0400
+Date: Mon, 8 Sep 2014 20:47:49 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 04/15 v2] btrfs: new case to run btrfs balance and
- remount with different compress algorithms
-Message-ID: <20140908100859.GH30012@dastard>
-References: <1409233676-22787-1-git-send-email-eguan@redhat.com>
- <1409233676-22787-5-git-send-email-eguan@redhat.com>
+Subject: Re: [PATCH 2/2] xfs/051: test buffer use after free race on I/O
+ failure in XFS log recovery
+Message-ID: <20140908104749.GI30012@dastard>
+References: <1409667761-50248-1-git-send-email-bfoster@redhat.com>
+ <1409667761-50248-3-git-send-email-bfoster@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1409233676-22787-5-git-send-email-eguan@redhat.com>
+In-Reply-To: <1409667761-50248-3-git-send-email-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Aug 28, 2014 at 09:47:45PM +0800, Eryu Guan wrote:
-> Run btrfs balance and remount with different compress algorithms
-> simultaneously, with fsstress running in background.
+On Tue, Sep 02, 2014 at 10:22:41AM -0400, Brian Foster wrote:
+> A buffer use after free race was discovered in the XFS log recovery
+> codepath if I/O failures occur during recovery. The I/O submission path
+> can abort the mount and release the only reference held on some buffers
+> before I/O completion processing (e.g., async workqueue processing)
+> might have completed. Badness ensues if the I/O completion path
+> subsequently attempts to access said buffers.
+.....
 > 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> ---
->  common/rc           |  10 ++++
->  tests/btrfs/062     | 128 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/062.out |   2 +
->  tests/btrfs/group   |   1 +
->  4 files changed, 141 insertions(+)
->  create mode 100755 tests/btrfs/062
->  create mode 100644 tests/btrfs/062.out
-> 
-> diff --git a/common/rc b/common/rc
-> index b0f5064..b5fc1c8 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2424,6 +2424,16 @@ _btrfs_stress_defrag()
->  	done
->  }
->  
-> +_btrfs_stress_remount()
-> +{
-> +	local btrfs_mnt=$1
-> +	while true; do
-> +		for algo in no zlib lzo; do
-> +			$MOUNT_PROG -o remount,compress=$algo $btrfs_mnt
-> +		done
-> +	done
-> +}
+> case goes to Alex Lyakas.
+> index 4d35df5..9784dea 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -47,6 +47,7 @@
+>  048 other auto quick
+>  049 rw auto quick
+>  050 quota auto quick
+> +051 dangerous
 
-This has nothing to do with "stress" - it tries 3
-different compression algorithms. What is the purpose of
-this (comments, please!), and can you us a more descriptive name?
-
-> +# test case array
-> +tcs=(
-> +	"-m single -d single"
-> +	"-m dup -d single"
-> +	"-m raid0 -d raid0"
-> +	"-m raid1 -d raid0"
-> +	"-m raid1 -d raid1"
-> +	"-m raid10 -d raid10"
-> +	"-m raid5 -d raid5"
-> +	"-m raid6 -d raid6"
-> +)
-
-This is pretty common, right? Perhaps this should be a config
-variable that can be overridden by the config file configuration?
+I'm going to consider this auto/log/metadata rather than dangerous.
+Once the bug is fixed, we want to continue running this test as a
+regression test, and nobody does that with the dangerous group....
 
 Cheers,
 
