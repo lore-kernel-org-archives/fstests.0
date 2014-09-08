@@ -1,36 +1,49 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from imap.thunk.org ([74.207.234.97]:43424 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:43456 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753771AbaIHMCr (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 8 Sep 2014 08:02:47 -0400
-Date: Mon, 8 Sep 2014 08:02:13 -0400
+	id S1753172AbaIHMPz (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 8 Sep 2014 08:15:55 -0400
 From: Theodore Ts'o <tytso@mit.edu>
-Subject: Re: [PATCH 2/2] ext4: speed up _require_ext4_bigalloc and
- _require_ext4_mkfs_bigalloc
-Message-ID: <20140908120213.GF1066@thunk.org>
-References: <20140907192110.GC1066@thunk.org>
- <1410141968-17551-1-git-send-email-tytso@mit.edu>
- <1410141968-17551-2-git-send-email-tytso@mit.edu>
- <20140908095000.GD30012@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20140908095000.GD30012@dastard>
+Subject: [PATCH -v2] ext4: speed up _require_ext4_bigalloc and _require_ext4_mkfs_bigalloc
+Date: Mon,  8 Sep 2014 08:15:41 -0400
+Message-Id: <1410178541-15192-1-git-send-email-tytso@mit.edu>
+In-Reply-To: <20140908120213.GF1066@thunk.org>
+References: <20140908120213.GF1066@thunk.org>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, hch@infradead.org, linux-ext4@vger.kernel.org, wangxg.fnst@cn.fujitsu.com, eguan@redhat.com
+To: fstests@vger.kernel.org
+Cc: Ext4 Developers List <linux-ext4@vger.kernel.org>, david@fromorbit.com, Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Sep 08, 2014 at 07:50:00PM +1000, Dave Chinner wrote:
-> On Sun, Sep 07, 2014 at 10:06:08PM -0400, Theodore Ts'o wrote:
-> > We don't need to make a full-sized file system in order to test
-> > whether "mkfs.ext4 -O bigalloc" works.
-> 
-> Why wouldn't you just use the "-n" option? If bigalloc is not
-> supported, that should still fail, right?
+We don't need to make a full-sized file system in order to test
+whether "mkfs.ext4 -O bigalloc" works.
 
-Good point.  We still need to make the file system for
-_require_ext4_bigalloc, but there's no need to create one for
-_require_ext4_mkfs_bigalloc.
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ common/rc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-					- Ted
+diff --git a/common/rc b/common/rc
+index 285bd7c..0baac86 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1189,7 +1189,7 @@ _require_xfs_crc()
+ #
+ _require_ext4_mkfs_bigalloc()
+ {
+-	_scratch_mkfs_ext4 -O bigalloc >/dev/null 2>&1 \
++	$MKFS_EXT4_PROG -F -O bigalloc -n $SCRATCH_DEV 200k >/dev/null 2>&1 \
+ 	   || _notrun "mkfs.ext4 doesn't have bigalloc feature"
+ }
+ 
+@@ -1197,7 +1197,7 @@ _require_ext4_mkfs_bigalloc()
+ #
+ _require_ext4_bigalloc()
+ {
+-	_scratch_mkfs_ext4 -O bigalloc >/dev/null 2>&1
++	$MKFS_EXT4_PROG -F -O bigalloc $SCRATCH_DEV 200k >/dev/null 2>&1
+ 	_scratch_mount >/dev/null 2>&1 \
+ 	   || _notrun "Ext4 kernel doesn't support bigalloc feature"
+ 	umount $SCRATCH_MNT
+-- 
+2.1.0
+
