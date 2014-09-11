@@ -1,150 +1,61 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from victor.provo.novell.com ([137.65.250.26]:44414 "EHLO
-	victor.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753918AbaIKJqZ (ORCPT
-	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
-	Thu, 11 Sep 2014 05:46:25 -0400
-From: Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] xfstests: btrfs: add test regarding clearing compression flag/property
-Date: Thu, 11 Sep 2014 11:45:34 +0100
-Message-Id: <1410432334-21796-1-git-send-email-fdmanana@suse.com>
+Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:61051 "EHLO
+	mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756445AbaIKUCc (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 11 Sep 2014 16:02:32 -0400
+Received: from pps.filterd (m0004346 [127.0.0.1])
+	by mx0a-00082601.pphosted.com (8.14.5/8.14.5) with SMTP id s8BJwehN017007
+	for <fstests@vger.kernel.org>; Thu, 11 Sep 2014 13:02:32 -0700
+Received: from mail.thefacebook.com (mailwest.thefacebook.com [173.252.71.148])
+	by mx0a-00082601.pphosted.com with ESMTP id 1pb43v9ewa-1
+	(version=TLSv1/SSLv3 cipher=AES128-SHA bits=128 verify=OK)
+	for <fstests@vger.kernel.org>; Thu, 11 Sep 2014 13:02:32 -0700
+From: Josef Bacik <jbacik@fb.com>
+Subject: [PATCH] btrfs: use _nocheck for btrfs/011 and btrfs/012
+Date: Thu, 11 Sep 2014 16:02:28 -0400
+Message-ID: <1410465748-1226-1-git-send-email-jbacik@fb.com>
+MIME-Version: 1.0
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Regression test for btrfs where removing the flag FS_COMPR_FL
-(chattr -c) from an inode wouldn't clear its compression property.
-This was fixed in the following linux kernel patch:
+These two tests blow up on the scratch test, but 011 leaves the devices in a
+state where the first scratch dev is no longer part of any file system and 012
+leaves the scratch dev as an ext4 file system.  Thanks,
 
-  Btrfs: add missing compression property remove in btrfs_ioctl_setflags
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Josef Bacik <jbacik@fb.com>
 ---
- tests/btrfs/059     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/059.out | 11 +++++++
- tests/btrfs/group   |  1 +
- 3 files changed, 97 insertions(+)
- create mode 100755 tests/btrfs/059
- create mode 100644 tests/btrfs/059.out
+ tests/btrfs/011 | 2 +-
+ tests/btrfs/012 | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/tests/btrfs/059 b/tests/btrfs/059
-new file mode 100755
-index 0000000..3379ead
---- /dev/null
-+++ b/tests/btrfs/059
-@@ -0,0 +1,85 @@
-+#! /bin/bash
-+# FS QA Test No. btrfs/059
-+#
-+# Regression test for btrfs where removing the flag FS_COMPR_FL (chattr -c)
-+# from an inode wouldn't clear its compression property.
-+# This was fixed in the following linux kernel patch:
-+#
-+#     Btrfs: add missing compression property remove in btrfs_ioctl_setflags
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2014 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	rm -fr $tmp
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+_require_btrfs "property"
-+_need_to_be_root
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+
-+mkdir $SCRATCH_MNT/testdir
-+echo "Setting compression flag in the directory..."
-+chattr +c $SCRATCH_MNT/testdir
-+echo "Directory compression property value:"
-+$BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir compression
-+
-+touch $SCRATCH_MNT/testdir/file1
-+echo "file1 compression property value:"
-+$BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir/file1 compression
-+
-+echo "Clearing compression flag from directory..."
-+chattr -c $SCRATCH_MNT/testdir
-+echo "Directory compression property value:"
-+$BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir compression
-+
-+touch $SCRATCH_MNT/testdir/file2
-+echo "file2 compression property value:"
-+$BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir/file2 compression
-+
-+touch $SCRATCH_MNT/testdir/file1
-+echo "file1 compression property value:"
-+$BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir/file1 compression
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/059.out b/tests/btrfs/059.out
-new file mode 100644
-index 0000000..9ec9a53
---- /dev/null
-+++ b/tests/btrfs/059.out
-@@ -0,0 +1,11 @@
-+QA output created by 059
-+Setting compression flag in the directory...
-+Directory compression property value:
-+compression=zlib
-+file1 compression property value:
-+compression=zlib
-+Clearing compression flag from directory...
-+Directory compression property value:
-+file2 compression property value:
-+file1 compression property value:
-+compression=zlib
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 3fa9778..68b5c79 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -61,3 +61,4 @@
- 056 auto quick
- 057 auto quick
- 058 auto quick
-+059 auto quick
+diff --git a/tests/btrfs/011 b/tests/btrfs/011
+index faa0402..0207057 100755
+--- a/tests/btrfs/011
++++ b/tests/btrfs/011
+@@ -61,7 +61,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ # real QA test starts here
+ _need_to_be_root
+ _supported_fs btrfs
+-_require_scratch
++_require_scratch_nocheck
+ _require_scratch_dev_pool 4
+ _require_command $BTRFS_SHOW_SUPER_PROG btrfs-show-super
+ 
+diff --git a/tests/btrfs/012 b/tests/btrfs/012
+index f7e5da5..407acbc 100755
+--- a/tests/btrfs/012
++++ b/tests/btrfs/012
+@@ -52,7 +52,7 @@ _cleanup()
+ # Modify as appropriate.
+ _supported_fs btrfs
+ _supported_os Linux
+-_require_scratch
++_require_scratch_nocheck
+ 
+ BTRFS_CONVERT_PROG="`set_prog_path btrfs-convert`"
+ MKFS_EXT4_PROG="`set_prog_path mkfs.ext4`"
 -- 
-1.9.1
+1.8.3.1
 
