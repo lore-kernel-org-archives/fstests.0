@@ -1,138 +1,46 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from a.ns.miles-group.at ([95.130.255.143]:65275 "EHLO radon.swed.at"
+Received: from mx1.redhat.com ([209.132.183.28]:43103 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753413AbaIPNuy (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 16 Sep 2014 09:50:54 -0400
-Message-ID: <5418403A.8020004@nod.at>
-Date: Tue, 16 Sep 2014 15:50:50 +0200
-From: Richard Weinberger <richard@nod.at>
+	id S1754594AbaIPSqO (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 16 Sep 2014 14:46:14 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id s8GIkCnb015505
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <fstests@vger.kernel.org>; Tue, 16 Sep 2014 14:46:13 -0400
+Received: from liberator.sandeen.net (ovpn01.gateway.prod.ext.phx2.redhat.com [10.5.9.1])
+	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id s8GIkBZo005730
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES128-SHA bits=128 verify=NO)
+	for <fstests@vger.kernel.org>; Tue, 16 Sep 2014 14:46:12 -0400
+Message-ID: <54188573.3070907@redhat.com>
+Date: Tue, 16 Sep 2014 13:46:11 -0500
+From: Eric Sandeen <sandeen@redhat.com>
 MIME-Version: 1.0
-Subject: Re: [PATCH] Add UBIFS support
-References: <1410772280-9771-1-git-send-email-richard@nod.at> <20140915215218.GH4322@dastard>
-In-Reply-To: <20140915215218.GH4322@dastard>
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Subject: [PATCH] xfs/005: sync superblock modification to disk before mount
+ test
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, linux-mtd@lists.infradead.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Am 15.09.2014 23:52, schrieb Dave Chinner:
-> On Mon, Sep 15, 2014 at 11:11:20AM +0200, Richard Weinberger wrote:
->> UBIFS needs some extra care, the device node is of type character and
->> it has no fsck tool.
-> 
-> Not being familiar with UBIFS, the explaination is rather brief and
-> doesn't explain anything to me. Can you document how where supposed
-> to treat a filesystem that doesn't exist on a block device for all
-> the tests that assume that the local fileystem is on a block device?
-> e.g. how do all the generic tests that use loopback devices work?
-> What about dm-flakey?
+This test tries to directly corrupt the CRC field of the primary
+superblock by using xfs_io pwrite, but never syncs it to disk,
+so it's quite likely that the mount will not see the bad data.
 
-UBIFS is a filesystem designed for MTD devices.
-It works on top of UBI which is kind of a LVM for NAND and NOR flashes.
-On Linux MTD devices are represented as character devices, this is why
-the UBI device nodes are of type character.
-For more details please see:
-http://www.linux-mtd.infradead.org/doc/ubi.html
-http://www.linux-mtd.infradead.org/doc/ubifs.html
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
 
-Of course UBIFS will not work on top of loop or dm-flakey.
-AFAIK the generic tests don't use them anyway.
+diff --git a/tests/xfs/005 b/tests/xfs/005
+index 5d4534b..fade4bb 100755
+--- a/tests/xfs/005
++++ b/tests/xfs/005
+@@ -61,7 +61,7 @@ rm -f $seqres.full
+ _scratch_mkfs_xfs -m crc=1 >> $seqres.full 2>&1 || _fail "mkfs failed"
+ 
+ # Zap the crc.  xfs_db updates the CRC post-write, so poke it directly
+-$XFS_IO_PROG -c "pwrite 224 4" $SCRATCH_DEV | _filter_xfs_io
++$XFS_IO_PROG -c "pwrite 224 4" -c fsync $SCRATCH_DEV | _filter_xfs_io
+ 
+ # should FAIL, the crc is bad; golden output contains mount failure
+ _scratch_mount 2>&1 | filter_mount
 
-I'd like to have UBIFS tested with xfstests because xfstests has a very
-good set of generic fs tests.
-Currently UBIFS fails 20 out of 76 generic tests.
-At least one issue is real. As soon I have the time I'll
-inspect all other failures in detail.
-
->> Signed-off-by: Richard Weinberger <richard@nod.at>
->> ---
->>  README        |  1 +
->>  check         |  2 ++
->>  common/config |  4 ++--
->>  common/rc     | 18 ++++++++++++++++++
->>  4 files changed, 23 insertions(+), 2 deletions(-)
->>
->> diff --git a/README b/README
->> index 8a362bd..96adc44 100644
->> --- a/README
->> +++ b/README
->> @@ -100,6 +100,7 @@ Running tests:
->>        Running all the udf tests: ./check -udf -g udf
->>      - for running nfs tests: ./check -nfs [test(s)]
->>      - for running cifs/smb3 tests: ./check -cifs [test(s)]
->> +    - for running ubifs tests: ./check -ubifs [test(s)]
->>      - To randomize test order: ./check -r [test(s)]
->>  
->>      
->> diff --git a/check b/check
->> index 42a1ac2..57ec612 100755
->> --- a/check
->> +++ b/check
->> @@ -70,6 +70,7 @@ check options
->>      -nfs                test NFS
->>      -cifs               test CIFS
->>      -tmpfs              test TMPFS
->> +    -ubifs              test UBIFS
->>      -l			line mode diff
->>      -udiff		show unified diff (default)
->>      -n			show me, do not run tests
-> 
-> I'd like to avoid adding command line switches for random filesystem
-> types if at all possible. I'd much prefer that it be derived from
-> the current TEST_DEV if at all possible. Can you probe for UBIFS
-> similar to using blkid for local filesystems?
-
-I fear blkid does not detect UBIFS, but we can match it from the device node name.
-UBIFS can only work on top of an UBI volume. UBI volumes have names like /dev/ubiX_Y.
-Where X is the UBI image number and Y the volume number.
-
->> diff --git a/common/config b/common/config
->> index fc21b37..af082ea 100644
->> --- a/common/config
->> +++ b/common/config
->> @@ -430,7 +430,7 @@ get_next_config() {
->>  		exit 1
->>  	fi
->>  
->> -	echo $TEST_DEV | grep -qE ":|//" > /dev/null 2>&1
->> +	echo $TEST_DEV | grep -qE ":|//|ubi" > /dev/null 2>&1
->>  	if [ ! -b "$TEST_DEV" -a "$?" != "0" ]; then
->>  		echo "common/config: Error: \$TEST_DEV ($TEST_DEV) is not a block device or a network filesystem"
->>  		exit 1
-> 
-> Needs a comment explaining what format we are searching for there?
-
-See above. I match the string "ubi" in /dev/ubiX_Y.
-
->> @@ -453,7 +453,7 @@ get_next_config() {
->>  		export SCRATCH_DEV_NOT_SET=true
->>  	fi
->>  
->> -	echo $SCRATCH_DEV | grep -qE ":|//" > /dev/null 2>&1
->> +	echo $SCRATCH_DEV | grep -qE ":|//|ubi" > /dev/null 2>&1
->>  	if [ ! -z "$SCRATCH_DEV" -a ! -b "$SCRATCH_DEV" -a "$?" != "0" ]; then
->>  		echo "common/config: Error: \$SCRATCH_DEV ($SCRATCH_DEV) is not a block device or a network filesystem"
->>  		exit 1
->> diff --git a/common/rc b/common/rc
->> index b8f711a..064b987 100644
->> --- a/common/rc
->> +++ b/common/rc
->> @@ -1034,6 +1034,12 @@ _require_scratch_nocheck()
->>  		    _notrun "this test requires a valid \$SCRATCH_MNT and unique $SCRATCH_DEV"
->>  		fi
->>  		;;
->> +	ubifs)
->> +		if [ -z "$SCRATCH_DEV" -o ! -c "$SCRATCH_DEV" -o ! -d "$SCRATCH_MNT" ];
->> +		then
->> +		    _notrun "this test requires a valid \$SCRATCH_MNT and unique $SCRATCH_DEV"
->> +		fi
->> +		;;
-> 
-> s/unique/valid/
-
-Will fix!
-
-Thanks,
-//richard
