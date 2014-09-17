@@ -1,274 +1,168 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from sandeen.net ([63.231.237.45]:53723 "EHLO sandeen.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750900AbaIQEcN (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 17 Sep 2014 00:32:13 -0400
-Message-ID: <54190ECB.2070900@sandeen.net>
-Date: Tue, 16 Sep 2014 23:32:11 -0500
-From: Eric Sandeen <sandeen@sandeen.net>
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:6826 "EHLO
+	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750900AbaIQErk (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 17 Sep 2014 00:47:40 -0400
+Date: Wed, 17 Sep 2014 14:47:23 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] Add UBIFS support
+Message-ID: <20140917044723.GH4267@dastard>
+References: <1410772280-9771-1-git-send-email-richard@nod.at>
+ <20140915215218.GH4322@dastard>
+ <5418403A.8020004@nod.at>
 MIME-Version: 1.0
-Subject: Re: [PATCH 4/5] generic: add mmap write vs truncate/remap test
-References: <1410918113-23516-1-git-send-email-david@fromorbit.com> <1410918113-23516-5-git-send-email-david@fromorbit.com>
-In-Reply-To: <1410918113-23516-5-git-send-email-david@fromorbit.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <5418403A.8020004@nod.at>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org
+To: Richard Weinberger <richard@nod.at>
+Cc: fstests@vger.kernel.org, linux-mtd@lists.infradead.org
 List-ID: <fstests@vger.kernel.org>
 
-On 9/16/14 8:41 PM, Dave Chinner wrote:
-> This test exposed a problem with mapped writes to the tail page of a
-> file in XFS and potentially ext4. Eric did all the hard work of
-> taking the bug report and generating the reproducable test case
-> on ext4, but I haven't been able to reproduce then problem on ext4.
-
-Hm, not even w/ the last test case below, on the byte boundaries?
-
-FWIW, I think I can simplify that one - the repeated ops aren't
-necessary.  Probably no need to carry that along if they aren't
-relevant to the bug.
-
-I'll look at this more closely tomorrow, thanks for encapsulating
-this in an xfstest.
-
--Eric
-
-> Regardless, make it a generic test so that we can ensure that all
-> filesystems handle the case correctly.
+On Tue, Sep 16, 2014 at 03:50:50PM +0200, Richard Weinberger wrote:
+> Am 15.09.2014 23:52, schrieb Dave Chinner:
+> > On Mon, Sep 15, 2014 at 11:11:20AM +0200, Richard Weinberger wrote:
+> >> UBIFS needs some extra care, the device node is of type character and
+> >> it has no fsck tool.
+> > 
+> > Not being familiar with UBIFS, the explaination is rather brief and
+> > doesn't explain anything to me. Can you document how where supposed
+> > to treat a filesystem that doesn't exist on a block device for all
+> > the tests that assume that the local fileystem is on a block device?
+> > e.g. how do all the generic tests that use loopback devices work?
+> > What about dm-flakey?
 > 
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> ---
->  tests/generic/030     | 148 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/030.out |  53 ++++++++++++++++++
->  tests/generic/group   |   1 +
->  3 files changed, 202 insertions(+)
->  create mode 100644 tests/generic/030
->  create mode 100644 tests/generic/030.out
-> 
-> diff --git a/tests/generic/030 b/tests/generic/030
-> new file mode 100644
-> index 0000000..9947b96
-> --- /dev/null
-> +++ b/tests/generic/030
-> @@ -0,0 +1,148 @@
-> +#! /bin/bash
-> +# FS QA Test No. generic/030
-> +#
-> +# Test mapped writes against remap+truncate down/up to ensure we get the data
-> +# correctly written. This can expose data corruption bugs on filesystems where
-> +# the block size is smaller than the page size.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2014 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +    cd /
-> +    rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os IRIX Linux
-> +_require_scratch
-> +_require_xfs_io_command "mremap"
-> +
-> +testfile=$SCRATCH_MNT/testfile
-> +
-> +_scratch_mkfs > /dev/null 2>&1
-> +_scratch_mount
-> +
-> +# first case is just truncate down/truncate up to check that the mapped
-> +# write after the truncate up is correctly handled.
-> +$XFS_IO_PROG -t -f \
-> +-c "truncate 5017k"             `# truncate     |       |` \
-> +-c "pwrite -S 0x58 0 5017k"     `# write        |X...XXX|` \
-> +-c "mmap -rw 0 5017k"           `# mmap         |       |` \
-> +-c "truncate 5020k"             `# truncate up  |                        |` \
-> +-c "mremap -m 5020k"            `# mremap up    |                        |` \
-> +-c "mwrite -S 0x57 5017k 3k"    `# mwrite       |        WWWWWWWWWWWWWWWW|` \
-> +-c "mremap 5017k "              `# mremap dn    |       |` \
-> +-c "truncate 5017k"             `# mremap dn    |       |` \
-> +-c "truncate 5020k"             `# truncate up  |                        |` \
-> +-c "mremap -m 5020k"            `# mremap up    |                        |` \
-> +-c "mwrite -S 0x59 5017k 3k"    `# mwrite       |        YYYYYYYYYYYYYYYY|` \
-> +-c "close"      \
-> +$testfile | _filter_xfs_io
-> +
-> +echo "==== Pre-Remount ==="
-> +hexdump -C $testfile
-> +_scratch_remount
-> +echo "==== Post-Remount =="
-> +hexdump -C $testfile
-> +
-> +rm -f $testfile
-> +sync
-> +
-> +# second case is to do a mwrite between the truncate to a block on the
-> +# same page we are truncating within the EOF. This checks that a mapped
-> +# write between truncate down and truncate up a further mapped
-> +# write to the same page into the new space doesn't result in data being lost.
-> +$XFS_IO_PROG -t -f \
-> +-c "truncate 5017k"             `# truncate     |       |` \
-> +-c "pwrite -S 0x58 0 5017k"     `# write        |X...XXX|` \
-> +-c "mmap -rw 0 5017k"           `# mmap         |       |` \
-> +-c "truncate 5020k"             `# truncate up  |                        |` \
-> +-c "mremap -m 5020k"            `# mremap up    |                        |` \
-> +-c "mwrite -S 0x57 5017k 3k"    `# mwrite       |        WWWWWWWWWWWWWWWW|` \
-> +-c "mremap 5017k "              `# mremap dn    |       |` \
-> +-c "truncate 5017k"             `# mremap dn    |       |` \
-> +-c "mwrite -S 0x5a 5016k 1k"    `# mwrite       |    ZZZ                 |` \
-> +-c "truncate 5020k"             `# truncate up  |                        |` \
-> +-c "mremap -m 5020k"            `# mremap up    |                        |` \
-> +-c "mwrite -S 0x59 5017k 3k"    `# mwrite       |        YYYYYYYYYYYYYYYY|` \
-> +-c "close"      \
-> +$testfile | _filter_xfs_io
-> +
-> +echo "==== Pre-Remount ==="
-> +hexdump -C $testfile
-> +_scratch_remount
-> +echo "==== Post-Remount =="
-> +hexdump -C $testfile
-> +
-> +# third case is the same as the first, but this time on unaligned byte
-> +# boundaries rather than block boundaries. This mimics the exact mmap write
-> +# patterns of the application that exposed the bug in the first place, and
-> +# so is somewhat more complex and has repeated operations in it. 
-> +$XFS_IO_PROG -t -f \
-> +-c "truncate 5136912" \
-> +-c "pwrite -S 0x58 0 5136912" \
-> +-c "mmap -rw 0 5136912" \
-> +-c "mremap 5136912" \
-> +-c "truncate 5136912" \
-> +-c "truncate 5139720" \
-> +-c "mremap -m 5139720" \
-> +-c "mwrite -S 0 5136912 2808" \
-> +-c "mwrite -S 0 5136912 2808" \
-> +-c "mwrite -S 0 5136912 2808" \
-> +-c "mremap 5136912 " \
-> +-c "truncate 5136912" \
-> +-c "truncate 5139720" \
-> +-c "mremap -m 5139720" \
-> +-c "mwrite -S 0 5136912 2808" \
-> +-c "mwrite -S 0 5136912 2808" \
-> +-c "mwrite -S 0x59 5136912 2808" \
-> +-c "truncate 5140480" \
-> +-c "mremap 5140480" \
-> +-c "msync -s 0 5140480" \
-> +-c "mremap 5139720" \
-> +-c "munmap" \
-> +-c "close" \
-> +$testfile | _filter_xfs_io
-> +
-> +echo "==== Pre-Remount ==="
-> +hexdump -C $testfile
-> +_scratch_remount
-> +echo "==== Post-Remount =="
-> +hexdump -C $testfile
-> +
-> +status=0
-> +exit
-> +
-> diff --git a/tests/generic/030.out b/tests/generic/030.out
-> new file mode 100644
-> index 0000000..20f6561
-> --- /dev/null
-> +++ b/tests/generic/030.out
-> @@ -0,0 +1,53 @@
-> +QA output created by 030
-> +wrote 5137408/5137408 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +==== Pre-Remount ===
-> +00000000  58 58 58 58 58 58 58 58  58 58 58 58 58 58 58 58  |XXXXXXXXXXXXXXXX|
-> +*
-> +004e6400  59 59 59 59 59 59 59 59  59 59 59 59 59 59 59 59  |YYYYYYYYYYYYYYYY|
-> +*
-> +004e7000
-> +==== Post-Remount ==
-> +00000000  58 58 58 58 58 58 58 58  58 58 58 58 58 58 58 58  |XXXXXXXXXXXXXXXX|
-> +*
-> +004e6400  59 59 59 59 59 59 59 59  59 59 59 59 59 59 59 59  |YYYYYYYYYYYYYYYY|
-> +*
-> +004e7000
-> +wrote 5137408/5137408 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +==== Pre-Remount ===
-> +00000000  58 58 58 58 58 58 58 58  58 58 58 58 58 58 58 58  |XXXXXXXXXXXXXXXX|
-> +*
-> +004e6000  5a 5a 5a 5a 5a 5a 5a 5a  5a 5a 5a 5a 5a 5a 5a 5a  |ZZZZZZZZZZZZZZZZ|
-> +*
-> +004e6400  59 59 59 59 59 59 59 59  59 59 59 59 59 59 59 59  |YYYYYYYYYYYYYYYY|
-> +*
-> +004e7000
-> +==== Post-Remount ==
-> +00000000  58 58 58 58 58 58 58 58  58 58 58 58 58 58 58 58  |XXXXXXXXXXXXXXXX|
-> +*
-> +004e6000  5a 5a 5a 5a 5a 5a 5a 5a  5a 5a 5a 5a 5a 5a 5a 5a  |ZZZZZZZZZZZZZZZZ|
-> +*
-> +004e6400  59 59 59 59 59 59 59 59  59 59 59 59 59 59 59 59  |YYYYYYYYYYYYYYYY|
-> +*
-> +004e7000
-> +wrote 5136912/5136912 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +==== Pre-Remount ===
-> +00000000  58 58 58 58 58 58 58 58  58 58 58 58 58 58 58 58  |XXXXXXXXXXXXXXXX|
-> +*
-> +004e6210  59 59 59 59 59 59 59 59  59 59 59 59 59 59 59 59  |YYYYYYYYYYYYYYYY|
-> +*
-> +004e6d00  59 59 59 59 59 59 59 59  00 00 00 00 00 00 00 00  |YYYYYYYY........|
-> +004e6d10  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-> +*
-> +004e7000
-> +==== Post-Remount ==
-> +00000000  58 58 58 58 58 58 58 58  58 58 58 58 58 58 58 58  |XXXXXXXXXXXXXXXX|
-> +*
-> +004e6210  59 59 59 59 59 59 59 59  59 59 59 59 59 59 59 59  |YYYYYYYYYYYYYYYY|
-> +*
-> +004e6d00  59 59 59 59 59 59 59 59  00 00 00 00 00 00 00 00  |YYYYYYYY........|
-> +004e6d10  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-> +*
-> +004e7000
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 18c94de..ba1c913 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -32,6 +32,7 @@
->  027 auto enospc
->  028 auto quick
->  029 auto quick rw
-> +030 auto quick rw
->  053 acl repair auto quick
->  062 attr udf auto quick
->  068 other auto freeze dangerous stress
-> 
+> UBIFS is a filesystem designed for MTD devices.
+> It works on top of UBI which is kind of a LVM for NAND and NOR flashes.
+> On Linux MTD devices are represented as character devices, this is why
+> the UBI device nodes are of type character.
 
+Ok, so that needs to be in the commit message, and a comment
+where we validate the device config on startup.  ;)
+
+> For more details please see:
+> http://www.linux-mtd.infradead.org/doc/ubi.html
+> http://www.linux-mtd.infradead.org/doc/ubifs.html
+> 
+> Of course UBIFS will not work on top of loop or dm-flakey.
+> AFAIK the generic tests don't use them anyway.
+
+Generic tests do use dm-flakey:
+
+$ git grep _require_dm_flakey tests/generic
+tests/generic/311:_require_dm_flakey
+tests/generic/321:_require_dm_flakey
+tests/generic/322:_require_dm_flakey
+tests/generic/325:_require_dm_flakey
+$
+
+There's no reason why generic tests can't use the loop device,
+either. Indeed, 10 days ago we added an abstraction to allow generic
+tests to easily use the loop device (i.e. added _mkfs_dev).
+
+> I'd like to have UBIFS tested with xfstests because xfstests has a very
+> good set of generic fs tests.
+
+Understood - all I'm trying to do is work out what exactly what the
+impact of TEST_DEV/SCRATCH_DEV not being block devices on a local
+filesystem. Network filesystems are sufficiently different that this
+isn't an issue, but char vs block local devices is a little more
+subtle.
+
+> Currently UBIFS fails 20 out of 76 generic tests.
+
+Hmmm - there's ~140 generic tests in the auto group - I would have
+expected a lot more of them to run than 76....
+
+> At least one issue is real. As soon I have the time I'll
+> inspect all other failures in detail.
+
+... and what I'm particularly interested in is how many of those
+are a result of tests assumes that they are running on a block or
+network device.
+
+> >> diff --git a/check b/check
+> >> index 42a1ac2..57ec612 100755
+> >> --- a/check
+> >> +++ b/check
+> >> @@ -70,6 +70,7 @@ check options
+> >>      -nfs                test NFS
+> >>      -cifs               test CIFS
+> >>      -tmpfs              test TMPFS
+> >> +    -ubifs              test UBIFS
+> >>      -l			line mode diff
+> >>      -udiff		show unified diff (default)
+> >>      -n			show me, do not run tests
+> > 
+> > I'd like to avoid adding command line switches for random filesystem
+> > types if at all possible. I'd much prefer that it be derived from
+> > the current TEST_DEV if at all possible. Can you probe for UBIFS
+> > similar to using blkid for local filesystems?
+> 
+> I fear blkid does not detect UBIFS, but we can match it from the device node name.
+> UBIFS can only work on top of an UBI volume. UBI volumes have names like /dev/ubiX_Y.
+> Where X is the UBI image number and Y the volume number.
+
+Ok, so that probing can be done fairly easily. Right at the end of
+common/config there's a blkid command run to grab the FSTYP value
+from the $TEST_DEV. If returns a null, then we can check for it
+being a UBI volume and set FSTYP automatically.
+
+> >> diff --git a/common/config b/common/config
+> >> index fc21b37..af082ea 100644
+> >> --- a/common/config
+> >> +++ b/common/config
+> >> @@ -430,7 +430,7 @@ get_next_config() {
+> >>  		exit 1
+> >>  	fi
+> >>  
+> >> -	echo $TEST_DEV | grep -qE ":|//" > /dev/null 2>&1
+> >> +	echo $TEST_DEV | grep -qE ":|//|ubi" > /dev/null 2>&1
+> >>  	if [ ! -b "$TEST_DEV" -a "$?" != "0" ]; then
+> >>  		echo "common/config: Error: \$TEST_DEV ($TEST_DEV) is not a block device or a network filesystem"
+> >>  		exit 1
+> > 
+> > Needs a comment explaining what format we are searching for there?
+> 
+> See above. I match the string "ubi" in /dev/ubiX_Y.
+
+Ok, I can see the match, but you're not validating that it is a char
+device once you have a match, and so that will accept anything with
+"/ubi" in it....
+
+> >> @@ -453,7 +453,7 @@ get_next_config() {
+> >>  		export SCRATCH_DEV_NOT_SET=true
+> >>  	fi
+> >>  
+> >> -	echo $SCRATCH_DEV | grep -qE ":|//" > /dev/null 2>&1
+> >> +	echo $SCRATCH_DEV | grep -qE ":|//|ubi" > /dev/null 2>&1
+> >>  	if [ ! -z "$SCRATCH_DEV" -a ! -b "$SCRATCH_DEV" -a "$?" != "0" ]; then
+> >>  		echo "common/config: Error: \$SCRATCH_DEV ($SCRATCH_DEV) is not a block device or a network filesystem"
+> >>  		exit 1
+> >> diff --git a/common/rc b/common/rc
+> >> index b8f711a..064b987 100644
+> >> --- a/common/rc
+> >> +++ b/common/rc
+> >> @@ -1034,6 +1034,12 @@ _require_scratch_nocheck()
+> >>  		    _notrun "this test requires a valid \$SCRATCH_MNT and unique $SCRATCH_DEV"
+> >>  		fi
+> >>  		;;
+> >> +	ubifs)
+> >> +		if [ -z "$SCRATCH_DEV" -o ! -c "$SCRATCH_DEV" -o ! -d "$SCRATCH_MNT" ];
+> >> +		then
+> >> +		    _notrun "this test requires a valid \$SCRATCH_MNT and unique $SCRATCH_DEV"
+> >> +		fi
+> >> +		;;
+
+Hmmm, now I see you check for char device here - it shouldn't be
+necessary as we shouldn't even have got to this statement if the
+SCRATCH_DEV is not a char device. i.e. validate it when pulling in
+the config, then it can simply be assumed valid everywhere else if
+it is set.
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
