@@ -1,82 +1,52 @@
-Return-Path: <david@fromorbit.com>
-Date: Wed, 17 Sep 2014 14:51:57 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 4/5] generic: add mmap write vs truncate/remap test
-Message-ID: <20140917045157.GI4267@dastard>
-References: <1410918113-23516-1-git-send-email-david@fromorbit.com>
- <1410918113-23516-5-git-send-email-david@fromorbit.com>
- <54190ECB.2070900@sandeen.net>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <54190ECB.2070900@sandeen.net>
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: fstests@vger.kernel.org
+Return-Path: <fstests-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:1375 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754025AbaIQIsr (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 17 Sep 2014 04:48:47 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id s8H8ml7a020327
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <fstests@vger.kernel.org>; Wed, 17 Sep 2014 04:48:47 -0400
+Message-ID: <1410943724.31777.31.camel@jtulak>
+Subject: Performance testing
+From: Jan Tulak <jtulak@redhat.com>
+Date: Wed, 17 Sep 2014 10:48:44 +0200
+Content-Type: text/plain; charset="UTF-8"
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Sender: fstests-owner@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Lukas Czerner <lczerner@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 16, 2014 at 11:32:11PM -0500, Eric Sandeen wrote:
-> On 9/16/14 8:41 PM, Dave Chinner wrote:
-> > This test exposed a problem with mapped writes to the tail page of a
-> > file in XFS and potentially ext4. Eric did all the hard work of
-> > taking the bug report and generating the reproducable test case
-> > on ext4, but I haven't been able to reproduce then problem on ext4.
-> 
-> Hm, not even w/ the last test case below, on the byte boundaries?
+Hi,
 
-Sorry, I forgot to rewrite that once I got the byte boundary test
-from you. It does, indeed, fail on ext4 as does the previous
-mmap/truncate test:
+I have began to work on some set of performance tests. I think it would
+be useful to have some standard set, because as far as I know, there is
+just little of performance testing and every of the few tests someone
+does is unique. I want to propose my ideas before I start to really
+write it, to fix possible complications.
 
-$ sudo MKFS_OPTIONS="-b 1024" ./check generic/029 generic/03[01]
-FSTYP         -- ext4
-PLATFORM      -- Linux/x86_64 test4 3.17.0-rc4-dgc+
-MKFS_OPTIONS  -- -b 1024 /dev/ram1
-MOUNT_OPTIONS -- -o acl,user_xattr /dev/ram1 /mnt/scr
+Mixing performance with regressions tests wouldn't be a good idea, so I
+thought about creating another category on the main level of tests
+(something like xfstests/tests/performance). Or it would be better to
+put it into entirely new directory, like xfstests/performance?
 
-generic/029 2s ... - output mismatch (see /home/dave/src/xfstests-dev/results//generic/029.out.bad)
-    --- tests/generic/029.out   2014-09-17 10:33:15.000000000 +1000
-    +++ /home/dave/src/xfstests-dev/results//generic/029.out.bad        2014-09-17 14:50:02.000000000 +1000
-    @@ -10,7 +10,9 @@
-     ==== Post-Remount ==
-     00000000  58 58 58 58 58 58 58 58  58 58 58 58 58 58 58 58  |XXXXXXXXXXXXXXXX|
-     *
-    -00000800  59 59 59 59 59 59 59 59  59 59 59 59 59 59 59 59  |YYYYYYYYYYYYYYYY|
-    +00000800  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-    +*
-    +00001000  59 59 59 59 59 59 59 59  59 59 59 59 59 59 59 59  |YYYYYYYYYYYYYYYY|
-    ...
-    (Run 'diff -u tests/generic/029.out /home/dave/src/xfstests-dev/results//generic/029.out.bad'  to see the entire diff)
-generic/030 1s ... - output mismatch (see /home/dave/src/xfstests-dev/results//generic/030.out.bad)
-    --- tests/generic/030.out   2014-09-17 11:13:55.000000000 +1000
-    +++ /home/dave/src/xfstests-dev/results//generic/030.out.bad        2014-09-17 14:50:03.000000000 +1000
-    @@ -10,7 +10,7 @@
-     ==== Post-Remount ==
-     00000000  58 58 58 58 58 58 58 58  58 58 58 58 58 58 58 58  |XXXXXXXXXXXXXXXX|
-     *
-    -004e6400  59 59 59 59 59 59 59 59  59 59 59 59 59 59 59 59  |YYYYYYYYYYYYYYYY|
-    +004e6400  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-     *
-     004e7000
-    ...
-    (Run 'diff -u tests/generic/030.out /home/dave/src/xfstests-dev/results//generic/030.out.bad'  to see the entire diff)
-generic/031 2s ... 2s
-Ran: generic/029 generic/030 generic/031
-Failures: generic/029 generic/030
-Failed 2 of 3 tests
+>From the beginning there would be some basic test cases, like sync/async
+read and write. Hopefully more natural cases, like a database server
+would be added later. For the IO testing, I want to use FIO for the
+specific workflow and eventually iozone for the basic synthetic tests.
+
+What I'm not sure is how a comparison between different versions could
+be done, because I don't see any infrastructure within fstests for
+cross-version comparison. (What would it do with regression tests
+anyway...) So I wonder if it should be done in this set at all. So the
+set would only print the measured values. Some other tool (which can be
+also included, but is not directly part of the performance tests set)
+could then be used to compare and/or plot graphs.
+
+Comments and questions? :-)
+
+Jan Tulak
 
 
-> FWIW, I think I can simplify that one - the repeated ops aren't
-> necessary.  Probably no need to carry that along if they aren't
-> relevant to the bug.
-> 
-> I'll look at this more closely tomorrow, thanks for encapsulating
-> this in an xfstest.
-
-Can you send any updates as delta patches to this one?
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
