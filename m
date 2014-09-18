@@ -1,134 +1,170 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:61827 "EHLO
-	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932338AbaIRBdT (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 17 Sep 2014 21:33:19 -0400
-Date: Thu, 18 Sep 2014 11:33:13 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 5/5] generic: add write vs fcollapse test
-Message-ID: <20140918013313.GY4322@dastard>
-References: <1410918113-23516-1-git-send-email-david@fromorbit.com>
- <1410918113-23516-6-git-send-email-david@fromorbit.com>
- <20140917124029.GA29222@bfoster.bfoster>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20140917124029.GA29222@bfoster.bfoster>
+Received: from mx1.redhat.com ([209.132.183.28]:37204 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751279AbaIRFuR (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 18 Sep 2014 01:50:17 -0400
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH v3 00/15] xfstests: new btrfs stress test cases
+Date: Thu, 18 Sep 2014 13:49:24 +0800
+Message-Id: <1411019379-8104-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 17, 2014 at 08:40:30AM -0400, Brian Foster wrote:
-> On Wed, Sep 17, 2014 at 11:41:53AM +1000, Dave Chinner wrote:
-> > This test exposed a problem with XFS where it failed to write back a
-> > partial page correctly during a fcollapse operation. This left a
-> > stray dirty buffer on the page, and hence invalidation of the page
-> > then failed of the fcollapse returned an EBUSY error.
-> > 
-> > Make this a generic test so that we can ensure that all filesystems
-> > handle the case correctly. Test case originally worked out and
-> > written by Brian Foster.
-> > 
-> > Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> > ---
-> >  tests/generic/031     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/031.out | 19 ++++++++++++++
-> >  tests/generic/group   |  1 +
-> >  3 files changed, 93 insertions(+)
-> >  create mode 100644 tests/generic/031
-> >  create mode 100644 tests/generic/031.out
-> > 
-> > diff --git a/tests/generic/031 b/tests/generic/031
-> > new file mode 100644
-> > index 0000000..7d615c0
-> > --- /dev/null
-> > +++ b/tests/generic/031
-> > @@ -0,0 +1,73 @@
-> > +#! /bin/bash
-> > +# FS QA Test No. generic/031
-> > +#
-> > +# Test non-aligned writes against fcollapse to ensure that partial pages are
-> > +# correctly written and aren't left behind causing invalidation or data
-> > +# corruption issues.
+This patchset add new stress test cases for btrfs by running two
+different btrfs operations simultaneously under fsstress to ensure
+btrfs doesn't hang or oops in such situations. btrfs scrub and
+btrfs check will be run after each test.
 
-Note the test already documents what the problem it is trying to
-expose in it's description....
+The test matrix is the combination of 6 btrfs operations:
 
-......
-> > +$XFS_IO_PROG -f \
-> > +	-c "pwrite 185332 55756" \
-> > +	-c "fcollapse 28672 40960" \
-> > +	-c "pwrite 133228 63394" \
-> > +	-c "fcollapse 0 4096" \
-> > +$testfile | _filter_xfs_io
-> > +
-> 
-> A comment (or per-line comments as in the other tests) would be good
-> here to explain what's going on. E.g.:
-> 
-> # This sequence of operations exploits a known failure to handle partial
-> # page writeback on sub page sized fsb filesystems. This occurs when a
-> # page has a non-contiguous mix of dirty and clean blocks (e.g., dirty
-> # block, clean block, dirty block, ...).
-> #
-> # The first write and collapse creates a dirty range in the file,
-> # flushes and truncates the file down to an unaligned boundary. The
-> # truncate implicit in the collapse dirties a block somewhere in the 2nd
-> # half of the new EOF page. The second write creates more dirty data,
-> # but specifically only writes to the first few bytes of the EOF page.
-> # This and the previous truncate creates the mixed page state described
-> # above.
-> #
-> # The final collapse attempts to flush and invalidate the entire cached
-> # set for the file. If the writeback of the mixed page does not
-> # complete, the invalidate fails with -EBUSY upon hitting a dirty page
-> # and aborts the collapse.
+	balance
+	create/mount/umount/delete subvolume
+	replace device
+	scrub
+	defrag
+	remount with different compress algorithms
+	
+Short descriptions:
 
-Details of how XFS failed really aren't relevant to the test case -
-that belongs in the commit message for the XFS fix.  The test case
-simply needs to document is what condition the test is supposed to
-be exercising. That's done in the intial test description, so
-there's no need to duplicate it again.
+	059: balance-subvolume
+	060: balance-scrub
+	061: balance-defrag
+	062: balance-remount
+	063: balance-replace
+	064: subvolume-replace
+	065: subvolume-scrub
+	066: subvolume-defrag
+	067: subvolume-remount
+	068: replace-scrub
+	069: replace-defrag
+	070: replace-remount
+	071: scrub-defrag
+	072: scrub-remount
+	073: defrag-remount
 
-> $XFS_IO_PROG -f \
-> 	-c "pwrite 185332 55756"	# write extend file
-> 	-c "fcollapse 28672 40960"	# collapse to unaligned boundary
-> 	-c "pwrite 133228 63394"	# dirty first part of new eof page
-> 	-c "fcollapse 0 4096"		# try a collapse
-> $testfile | _filter_xfs_io
+Some issues I've seen:
 
-That's about as much as is necessary, I think.
+1. subvolume cannot be mounted with selinux context, so you may see
+   such logs in dmesg
 
-> > +echo "==== Pre-Remount ==="
-> > +hexdump -C $testfile
-> > +_scratch_remount
-> > +echo "==== Post-Remount =="
-> > +hexdump -C $testfile
-> > +
-> 
-> Note that this test is a collapse failure moreso than the data
-> corruption error (e.g., collapse returns EBUSY), though the reason
-> for that occurrence (data sync failure) is certainly a data
-> corruption issue. The hexdump/remount checks are fine, I just want
-> to clarify that they aren't necessary and they will probably just
-> reflect the fact that the collapse failed. I think the comment is
-> sufficient to provide that context and avoid any confusion.
+   SELinux: mount invalid.  Same superblock, different security settings for (dev dm-8, type btrfs)
 
-Again, this focuses on the specific XFS failure. How XFS failed is
-mostly irrelevant - we know that ext4 had a similar problem that
-showed up as data corruption and not a syscall failure. Further, now
-that we've fixed the XFS problem that lead to syscall failure we
-still need to check that we are actually writing the data correctly.
+   I've reported the bug to btrfs list, see
+   [BUG] cannot mount subvolume with selinux context
+   http://www.spinics.net/lists/linux-btrfs/msg36779.html
 
-Simply put: a test doesn't care what the failure is, it just needs to
-verify the functionality is operating correctly. And for a data
-manipulation operation, checking that data isn't corrupted is a
-pretty important check to make. ;)
+2. btrfs replace operation always returns ENOENT if balance is running
+   So in 063.full you'll see
 
-Cheers,
+   ERROR: ioctl(DEV_REPLACE_START) failed on "/mnt/testarea/scratch": No such file or directory, no error
 
-Dave.
+   Not sure if it's btrfs bug, at least I think the error code is misleading
+
+3. replace operation hangs the kernel(3.16-rc4+ and 3.17-rc2+) with fsstress running
+   So case 064/068/069/070 will hang
+
+
+Changes since v2:
+- mount subvolume at $TEST_DIR/$seq.mnt not $tmp.mnt
+- don't rm -rf $tmp.* which is dangerous
+- remove unnecessary btrfs filesystem sync operation
+- update _scratch_pool_mkfs to deal with dup profile
+- add more comments for each stress operation
+- rename _btrfs_stress_remount to _btrfs_stress_remount_compress (hope it's better...)
+- add _btrfs_get_profile_configs to remove duplicated test case array in each case
+- use _require_scratch_nocheck and _check_scratch_fs after each loop
+
+Changes since v1:
+- put common operations in common/rc as functions and share them across these tests
+- append mkfs options to _scratch_mkfs and _scratch_pool_mkfs instead of updating $MKFS_OPTIONS
+- rebase on top of master and re-number starting from btrfs/059
+
+Thanks,
+Eryu Guan
+
+Eryu Guan (15):
+  btrfs: new test to run btrfs balance and subvolume test simultaneously
+  btrfs: new test to run btrfs balance and scrub simultaneously
+  btrfs: new test to run btrfs balance and defrag operations simultaneously
+  btrfs: new case to run btrfs balance and remount with different compress algorithms
+  btrfs: new case to run btrfs balance and device replace operations simultaneously
+  btrfs: new case to run btrfs subvolume create/delete operations and device replace simultaneously
+  btrfs: new case to run btrfs subvolume create/delete operations and scrub simultaneously
+  btrfs: new case to run btrfs subvolume create/delete and defrag operations simultaneously
+  btrfs: new case to run subvolume create/delete and remount with defferent compress algorithms
+  btrfs: new case to run device replace and scrub operations simultaneously
+  btrfs: new case to run device replace and defrag operations simultaneously
+  btrfs: new case to run device replace and remount with different compress algorithms simultaneously
+  btrfs: new case to run btrfs scrub and defrag operations simultaneously
+  btrfs: new case to run btrfs scrub and remount with different compress algorithms simultaneously
+  btrfs: new case to run defrag and remount with different compress algorithms simultaneously
+
+ common/rc           | 225 +++++++++++++++++++++++++++++++++++++++++++++++++++-
+ tests/btrfs/059     | 115 +++++++++++++++++++++++++++
+ tests/btrfs/059.out |   2 +
+ tests/btrfs/060     | 114 ++++++++++++++++++++++++++
+ tests/btrfs/060.out |   2 +
+ tests/btrfs/061     | 116 +++++++++++++++++++++++++++
+ tests/btrfs/061.out |   2 +
+ tests/btrfs/062     | 114 ++++++++++++++++++++++++++
+ tests/btrfs/062.out |   2 +
+ tests/btrfs/063     | 122 ++++++++++++++++++++++++++++
+ tests/btrfs/063.out |   2 +
+ tests/btrfs/064     | 123 ++++++++++++++++++++++++++++
+ tests/btrfs/064.out |   2 +
+ tests/btrfs/065     | 115 +++++++++++++++++++++++++++
+ tests/btrfs/065.out |   2 +
+ tests/btrfs/066     | 117 +++++++++++++++++++++++++++
+ tests/btrfs/066.out |   2 +
+ tests/btrfs/067     | 116 +++++++++++++++++++++++++++
+ tests/btrfs/067.out |   2 +
+ tests/btrfs/068     | 123 ++++++++++++++++++++++++++++
+ tests/btrfs/068.out |   2 +
+ tests/btrfs/069     | 125 +++++++++++++++++++++++++++++
+ tests/btrfs/069.out |   2 +
+ tests/btrfs/070     | 123 ++++++++++++++++++++++++++++
+ tests/btrfs/070.out |   2 +
+ tests/btrfs/071     | 116 +++++++++++++++++++++++++++
+ tests/btrfs/071.out |   2 +
+ tests/btrfs/072     | 114 ++++++++++++++++++++++++++
+ tests/btrfs/072.out |   2 +
+ tests/btrfs/073     | 116 +++++++++++++++++++++++++++
+ tests/btrfs/073.out |   2 +
+ tests/btrfs/group   |  15 ++++
+ 32 files changed, 2035 insertions(+), 4 deletions(-)
+ create mode 100755 tests/btrfs/059
+ create mode 100644 tests/btrfs/059.out
+ create mode 100755 tests/btrfs/060
+ create mode 100644 tests/btrfs/060.out
+ create mode 100755 tests/btrfs/061
+ create mode 100644 tests/btrfs/061.out
+ create mode 100755 tests/btrfs/062
+ create mode 100644 tests/btrfs/062.out
+ create mode 100755 tests/btrfs/063
+ create mode 100644 tests/btrfs/063.out
+ create mode 100755 tests/btrfs/064
+ create mode 100644 tests/btrfs/064.out
+ create mode 100755 tests/btrfs/065
+ create mode 100644 tests/btrfs/065.out
+ create mode 100755 tests/btrfs/066
+ create mode 100644 tests/btrfs/066.out
+ create mode 100755 tests/btrfs/067
+ create mode 100644 tests/btrfs/067.out
+ create mode 100755 tests/btrfs/068
+ create mode 100644 tests/btrfs/068.out
+ create mode 100755 tests/btrfs/069
+ create mode 100644 tests/btrfs/069.out
+ create mode 100755 tests/btrfs/070
+ create mode 100644 tests/btrfs/070.out
+ create mode 100755 tests/btrfs/071
+ create mode 100644 tests/btrfs/071.out
+ create mode 100755 tests/btrfs/072
+ create mode 100644 tests/btrfs/072.out
+ create mode 100755 tests/btrfs/073
+ create mode 100644 tests/btrfs/073.out
+
 -- 
-Dave Chinner
-david@fromorbit.com
+1.8.3.1
+
