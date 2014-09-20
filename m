@@ -1,73 +1,89 @@
-Return-Path: <fstests-owner@vger.kernel.org>
-Received: from sandeen.net ([63.231.237.45]:59665 "EHLO sandeen.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756709AbaITARX (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 19 Sep 2014 20:17:23 -0400
-Message-ID: <541CC790.7060306@sandeen.net>
-Date: Fri, 19 Sep 2014 19:17:20 -0500
-From: Eric Sandeen <sandeen@sandeen.net>
-MIME-Version: 1.0
+Return-Path: <david@fromorbit.com>
+Date: Sun, 21 Sep 2014 09:32:09 +1000
+From: Dave Chinner <david@fromorbit.com>
 Subject: Re: [PATCH 4/5] generic: add mmap write vs truncate/remap test
-References: <1410918113-23516-1-git-send-email-david@fromorbit.com> <1410918113-23516-5-git-send-email-david@fromorbit.com>
-In-Reply-To: <1410918113-23516-5-git-send-email-david@fromorbit.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org
+Message-ID: <20140920233209.GJ4267@dastard>
+References: <1410918113-23516-1-git-send-email-david@fromorbit.com>
+ <1410918113-23516-5-git-send-email-david@fromorbit.com>
+ <541CC790.7060306@sandeen.net>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <541CC790.7060306@sandeen.net>
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 9/16/14 8:41 PM, Dave Chinner wrote:
-> This test exposed a problem with mapped writes to the tail page of a
-> file in XFS and potentially ext4. Eric did all the hard work of
-> taking the bug report and generating the reproducable test case
-> on ext4, but I haven't been able to reproduce then problem on ext4.
+On Fri, Sep 19, 2014 at 07:17:20PM -0500, Eric Sandeen wrote:
+> On 9/16/14 8:41 PM, Dave Chinner wrote:
+> > This test exposed a problem with mapped writes to the tail page of a
+> > file in XFS and potentially ext4. Eric did all the hard work of
+> > taking the bug report and generating the reproducable test case
+> > on ext4, but I haven't been able to reproduce then problem on ext4.
+> > 
+> > Regardless, make it a generic test so that we can ensure that all
+> > filesystems handle the case correctly.
 > 
-> Regardless, make it a generic test so that we can ensure that all
-> filesystems handle the case correctly.
+> Oof, kermit on #xfs points out that even this is sufficient to show
+> a problem:
+> 
+>  mkfs.ext4 -b 1024 -F empty.img
+>   mount -o loop empty.img mnt
+>   sync
+> 
+> xfs_io -f -t \
+> -c            "pwrite               0          0x210  "      \
+> -c            "mmap      -rw        0          0xd08  "      \
+> -c            "mwrite    -S         0x50       0x210  0xaf8"  \
+> -c            "truncate                        0x1000"  \
+> mnt/testfile
 
-Oof, kermit on #xfs points out that even this is sufficient to show
-a problem:
+That's supposed to SIGBUS. From the mmap man page:
 
- mkfs.ext4 -b 1024 -F empty.img
-  mount -o loop empty.img mnt
-  sync
+SIGBUS	Attempted  access to a portion of the buffer that does not
+	correspond to the file (for example, beyond the end of the
+	file, including the case where another process has truncated
+	the file).
+
+I'm not sure that can be fixed in the filesystem, though, because
+after a page fault inside the valid file region we can't prevent
+mmap from writing beyond EOF in the same page. It's one of those "we
+can't really do anything sane here" interface problems.
+
+However, the truncate up is supposed to leave the newly exposed
+regions full of zeros and not expose stale data from beyond the old
+EOF. XFS results in the correct output which is:
+
+00000000  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd |................|
+*
+00000210  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 |................|
+*
+00001000
+
+Because it zeros allocated space between the old EOF and new EOF on
+truncate up.
+
+What is really interesting is this addition:
 
 xfs_io -f -t \
 -c            "pwrite               0          0x210  "      \
 -c            "mmap      -rw        0          0xd08  "      \
 -c            "mwrite    -S         0x50       0x210  0xaf8"  \
+-c            "fsync" \
 -c            "truncate                        0x1000"  \
 mnt/testfile
 
-  echo "==== Pre-Remount ==="
-  hexdump -C mnt/testfile | tail -n 8
-  umount mnt/
-  mount -o loop empty.img mnt
-  echo "==== Post-Remount =="
-  hexdump -C mnt/testfile | tail -n 8
+Causes the ext4 data corruption goes away, probably because the act
+of writing the page zeroes the tail blocks beyond EOF before writing
+them. XFS has code to specifically do this in xfs_vm_writepage, and
+I'm pretty sure we got that from ext4. So in the absence of ext4
+zeroing on truncate up, I suspect it needs to write the tail page
+at the old EOF on truncate up just like we have needed to add to
+XFS to solve the other problems...
 
+Cheers,
 
-
-i'm not sure about the testcase - mmapping beyond EOF? - but seeing data
-change after remount looks scary regardless.
-
-==== Pre-Remount ===
-00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-*
-00000210  50 50 50 50 50 50 50 50  50 50 50 50 50 50 50 50  |PPPPPPPPPPPPPPPP|
-*
-00000d00  50 50 50 50 50 50 50 50  00 00 00 00 00 00 00 00  |PPPPPPPP........|
-00000d10  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-*
-00001000
-==== Post-Remount ==
-00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-*
-00000210  50 50 50 50 50 50 50 50  50 50 50 50 50 50 50 50  |PPPPPPPPPPPPPPPP|
-*
-00000400  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-*
-00001000
-
--Eric
-
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
