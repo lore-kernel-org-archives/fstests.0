@@ -1,98 +1,51 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-pd0-f173.google.com ([209.85.192.173]:49574 "EHLO
-	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751281AbaIYDyU (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 24 Sep 2014 23:54:20 -0400
-Received: by mail-pd0-f173.google.com with SMTP id w10so236675pde.4
-        for <fstests@vger.kernel.org>; Wed, 24 Sep 2014 20:54:20 -0700 (PDT)
-Date: Thu, 25 Sep 2014 11:54:16 +0800
+Received: from mail-pd0-f179.google.com ([209.85.192.179]:65326 "EHLO
+	mail-pd0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751736AbaIYDzs (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 24 Sep 2014 23:55:48 -0400
+Received: by mail-pd0-f179.google.com with SMTP id ft15so9864635pdb.38
+        for <fstests@vger.kernel.org>; Wed, 24 Sep 2014 20:55:47 -0700 (PDT)
+Date: Thu, 25 Sep 2014 11:55:44 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] generic/033: add xfs delalloc indirect block depletion
- reproducer
-Message-ID: <20140925035416.GC13950@dhcp-13-216.nay.redhat.com>
-References: <1411584425-52709-1-git-send-email-bfoster@redhat.com>
+Subject: Re: [PATCH v2] xfstests: add test for truncate/collapse range race
+Message-ID: <20140925035544.GD13950@dhcp-13-216.nay.redhat.com>
+References: <1403157004-25112-1-git-send-email-gux.fnst@cn.fujitsu.com>
+ <1410948180-32610-1-git-send-email-gux.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1411584425-52709-1-git-send-email-bfoster@redhat.com>
+In-Reply-To: <1410948180-32610-1-git-send-email-gux.fnst@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
+To: Xing Gu <gux.fnst@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 24, 2014 at 02:47:05PM -0400, Brian Foster wrote:
-> XFS allocates extra indirect blocks for delayed allocation extents at
-> write time. When delalloc extents are split, the existing indirect block
-> reservation was historically divided up evenly among the new extents
-> even though the overall requirement for two extents could exceed the
-> requirement for the original. Repeated delalloc extent splits ultimately
-> leads to extents with 0 indirect blocks and in turn leads to assert
-> failures in XFS.
+On Wed, Sep 17, 2014 at 06:03:00PM +0800, Xing Gu wrote:
+> This case tests truncate/collapse range race. If
+> the race occurs, it will trigger BUG_ON.
 > 
-> Add a test to stress indirect block reservation for delayed allocation
-> extents. The test converts a single delalloc extent to many and operates
-> on the remaining extents to detect or trigger potential problems.
-> 
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
+> Signed-off-by: Xing Gu <gux.fnst@cn.fujitsu.com>
 > ---
-> 
-> Here's a simple reproducer for the indirect block reservation problem
-> called out here:
-> 
-> http://oss.sgi.com/archives/xfs/2014-09/msg00337.html
-> 
-> It reproduces the assert failures described therein:
-> 
-> XFS: Assertion failed: startblockval(del.br_startblock) > 0, file: fs/xfs/libxfs/xfs_bmap.c, line: 5281
-> 
-> Note that this test also unintentionally fails on XFS. The test file
-> ends up zero-sized after the remount and thus hexdump doesn't produce
-> any output. This doesn't occur on ext4, I suspect due to the fact that
-> the range being zeroed is flushed beforehand, though I could be wrong
-> about that.
-
-Tested with ext4 and xfs, and ext4 passes/xfs fails the test as
-described here.
-
-Reviewed-by: Eryu Guan <eguan@redhat.com>
-
-With one nitpick below..
-
-> 
-> In any event, this calls out a separate bug in XFS where if appending
-> data is chucked from cache by zero range before written back (eof is
-> page aligned), we lose the on-disk inode size update and the inode size
-> changes unexpectedly across the remount (assuming nothing else changes
-> the size, of course).
-> 
-> Brian
-> 
->  tests/generic/033     | 88 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/033.out |  4 +++
+>  tests/generic/326     | 76 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/326.out |  1 +
 >  tests/generic/group   |  1 +
->  3 files changed, 93 insertions(+)
->  create mode 100755 tests/generic/033
->  create mode 100644 tests/generic/033.out
+>  3 files changed, 78 insertions(+)
+>  create mode 100755 tests/generic/326
+>  create mode 100644 tests/generic/326.out
 > 
-> diff --git a/tests/generic/033 b/tests/generic/033
+> diff --git a/tests/generic/326 b/tests/generic/326
 > new file mode 100755
-> index 0000000..41198b7
+> index 0000000..8a66180
 > --- /dev/null
-> +++ b/tests/generic/033
-> @@ -0,0 +1,88 @@
+> +++ b/tests/generic/326
+> @@ -0,0 +1,76 @@
 > +#! /bin/bash
-> +# FS QA Test No. 033
+> +# FS QA Test No. 326
 > +#
-> +# This test stresses indirect block reservation for delayed allocation extents.
-> +# XFS reserves extra blocks for deferred allocation of delalloc extents. These
-> +# reserved blocks can be divided among more extents than anticipated if the
-> +# original extent for which the blocks were reserved is split into multiple
-> +# delalloc extents. If this scenario repeats, eventually some extents are left
-> +# without any indirect block reservation whatsoever. This leads to assert
-> +# failures and possibly other problems in XFS.
+> +# Test truncate/collapse range race.
 > +#
 > +#-----------------------------------------------------------------------
-> +# Copyright (c) 2014 Red Hat, Inc.  All Rights Reserved.
+> +# Copyright (c) 2014 Fujitsu.  All Rights Reserved.
 > +#
 > +# This program is free software; you can redistribute it and/or
 > +# modify it under the terms of the GNU General Public License as
@@ -116,93 +69,77 @@ With one nitpick below..
 > +here=`pwd`
 > +tmp=/tmp/$$
 > +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
 > +_cleanup()
 > +{
-> +	cd /
-> +	rm -f $tmp.*
+> +    rm -f $tmp.*
 > +}
+> +
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
 > +# get standard environment, filters and checks
 > +. ./common/rc
 > +. ./common/filter
 > +
 > +# real QA test starts here
-> +rm -f $seqres.full
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
 > +_supported_os Linux
-> +_require_scratch
-> +_require_xfs_io_command "fzero"
-> +
-> +_scratch_mkfs >/dev/null 2>&1
-> +_scratch_mount
-> +
-> +file=$SCRATCH_MNT/file.$seq
-> +bytes=$((64 * 1024))
-> +
-> +# create sequential delayed allocation
-> +$XFS_IO_PROG -f -c "pwrite 0 $bytes" $file | _filter_xfs_io \
-> +	>> $seqres.full 2>&1
 
-The output of xfs_io is redirected to $seqres.full, so it's not
-necessary to be filtered, for debug purpose.
-
-And the following two xfs_io calls.
+Missing "_supported_fs generic" here.
 
 Thanks,
 Eryu
-
+> +_require_scratch
+> +_require_xfs_io_command "fcollapse"
 > +
-> +# Zero every other 4k range to split the larger delalloc extent into many more
-> +# smaller extents. Use zero instead of hole punch because the former does not
-> +# force writeback (and hence delalloc conversion). It can simply discard
-> +# delalloc blocks and convert the ranges to unwritten.
-> +endoff=$((bytes - 4096))
-> +for i in $(seq 0 8192 $endoff); do
-> +	$XFS_IO_PROG -c "fzero -k $i 4k" $file | _filter_xfs_io \
-> +		>> $seqres.full 2>&1
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +old_bug=`dmesg | grep -c "kernel BUG"`
+> +
+> +testfile=$SCRATCH_MNT/file.$seq
+> +# fcollapse/truncate continuously and simultaneously
+> +# a same file
+> +for ((i=1; i <= 100; i++))
+> +do
+> +	for ((i=1; i <= 1000; i++))
+> +	do
+> +		$XFS_IO_PROG -f -c 'truncate 100k' $testfile 2>> $seqres.full
+> +		$XFS_IO_PROG -f -c 'fcollapse 0 16k' $testfile 2>> $seqres.full
+> +	done &
+> +	for ((i=1; i <= 1000; i++))
+> +	do
+> +		$XFS_IO_PROG -f -c 'truncate 0' $testfile 2>> $seqres.full
+> +	done &
 > +done
 > +
-> +# now zero the opposite set to remove remaining delalloc extents
-> +for i in $(seq 4096 8192 $endoff); do
-> +	$XFS_IO_PROG -c "fzero -k $i 4k" $file | _filter_xfs_io	\
-> +		>> $seqres.full 2>&1
-> +done
+> +wait
 > +
-> +_scratch_remount
-> +hexdump $file
+> +new_bug=`dmesg | grep -c "kernel BUG"`
+> +if [ $new_bug -ne $old_bug ]; then
+> +	echo "kernel bug detected, check dmesg for more infomation."
+> +fi
 > +
-> +status=0
-> +exit
-> diff --git a/tests/generic/033.out b/tests/generic/033.out
+> +status=0 ; exit
+> diff --git a/tests/generic/326.out b/tests/generic/326.out
 > new file mode 100644
-> index 0000000..419d831
+> index 0000000..90a76cc
 > --- /dev/null
-> +++ b/tests/generic/033.out
-> @@ -0,0 +1,4 @@
-> +QA output created by 033
-> +0000000 0000 0000 0000 0000 0000 0000 0000 0000
-> +*
-> +0010000
+> +++ b/tests/generic/326.out
+> @@ -0,0 +1 @@
+> +QA output created by 326
 > diff --git a/tests/generic/group b/tests/generic/group
-> index 8e0c22a..1227408 100644
+> index bdcfd9d..b690f5c 100644
 > --- a/tests/generic/group
 > +++ b/tests/generic/group
-> @@ -32,6 +32,7 @@
->  027 auto enospc
->  028 auto quick
->  032 auto quick rw
-> +033 auto quick rw
->  053 acl repair auto quick
->  062 attr udf auto quick
->  068 other auto freeze dangerous stress
+> @@ -145,3 +145,4 @@
+>  323 auto aio stress
+>  324 auto fsr quick
+>  325 auto quick data log
+> +326 auto
 > -- 
-> 1.8.3.1
+> 1.9.3
 > 
-> _______________________________________________
-> xfs mailing list
-> xfs@oss.sgi.com
-> http://oss.sgi.com/mailman/listinfo/xfs
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
