@@ -1,38 +1,31 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from bombadil.infradead.org ([198.137.202.9]:44327 "EHLO
-	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753984AbaIZNFi (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 26 Sep 2014 09:05:38 -0400
-Received: from hch by bombadil.infradead.org with local (Exim 4.80.1 #2 (Red Hat Linux))
-	id 1XXVDO-0004Lt-BP
-	for fstests@vger.kernel.org; Fri, 26 Sep 2014 13:05:38 +0000
-Date: Fri, 26 Sep 2014 06:05:38 -0700
-From: Christoph Hellwig <hch@infradead.org>
-Subject: [PATCH] fstest: fix dumping of miscompare buffer
-Message-ID: <20140926130538.GB9240@infradead.org>
+Received: from imap.thunk.org ([74.207.234.97]:51076 "EHLO imap.thunk.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755166AbaIZOWw (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 26 Sep 2014 10:22:52 -0400
+Date: Fri, 26 Sep 2014 10:22:43 -0400
+From: Theodore Ts'o <tytso@mit.edu>
+Subject: Re: [PATCH] fsx: increase number of logged operations
+Message-ID: <20140926142243.GA21714@thunk.org>
+References: <20140926130430.GA9240@infradead.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20140926130430.GA9240@infradead.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Christoph Hellwig <hch@infradead.org>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-When fstests finds a miscompare it tries to dump the corrupted
-bytes from the buffer, but due to an incorrect comparism actully
-dumps the correct part of it.
+On Fri, Sep 26, 2014 at 06:04:30AM -0700, Christoph Hellwig wrote:
+> 1000 operations is nearly enough to debug complex data integrity
+                 ^^^^^
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
+is not nearly enough?
 
-diff --git a/src/fstest.c b/src/fstest.c
-index 2e92fd8..f7e2d3e 100644
---- a/src/fstest.c
-+++ b/src/fstest.c
-@@ -73,7 +73,7 @@ static void check_buffer(uchar *buf, int loop, int child, int fnum, int ofs)
- 		for (j=0;j<MIN(20, block_size-i);j++) {
- 			printf("%02x ", buf[j+i]);
- 		}
--		for (j=i;buf[j] == buf2[j] && j<block_size;j++) ;
-+		for (j=i;buf[j] != buf2[j] && j<block_size;j++) ;
- 		printf("Corruption length: %d\n", j - i);
- 		printf("\n");
- 		exit(1);
+> issues, so increase the log buffer by an order of magnitude.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+
+Reviewed-by: Theodore Ts'o <tytso@mit.edu>
+
