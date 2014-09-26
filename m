@@ -1,37 +1,37 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:63166 "EHLO
-	mx0b-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754617AbaIZM4o (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 26 Sep 2014 08:56:44 -0400
-Message-ID: <5425627E.8000300@fb.com>
-Date: Fri, 26 Sep 2014 08:56:30 -0400
-From: Josef Bacik <jbacik@fb.com>
+Received: from bombadil.infradead.org ([198.137.202.9]:42922 "EHLO
+	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754073AbaIZNEa (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 26 Sep 2014 09:04:30 -0400
+Received: from hch by bombadil.infradead.org with local (Exim 4.80.1 #2 (Red Hat Linux))
+	id 1XXVCI-0002me-1a
+	for fstests@vger.kernel.org; Fri, 26 Sep 2014 13:04:30 +0000
+Date: Fri, 26 Sep 2014 06:04:30 -0700
+From: Christoph Hellwig <hch@infradead.org>
+Subject: [PATCH] fsx: increase number of logged operations
+Message-ID: <20140926130430.GA9240@infradead.org>
 MIME-Version: 1.0
-Subject: Re: [PATCH v3 00/15] xfstests: new btrfs stress test cases
-References: <1411019379-8104-1-git-send-email-eguan@redhat.com> <20140925053907.GC4758@dastard>
-In-Reply-To: <20140925053907.GC4758@dastard>
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>, Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 09/25/2014 01:39 AM, Dave Chinner wrote:
-> Btrfs developers,
->
-> Can someone who knows how this is all supposed to work pass an eye
-> over this patch series to determine the validity of what is being
-> tested?  Given the number of problems this patchset seems to expose,
-> it looks pretty important to me to get this into all of your regular
-> testing. I can't make judgement on whether the tests are valid
-> things to do to btrfs, so I'm reliant on people with actual btrfs
-> expertise to vet these patches...
->
+1000 operations is nearly enough to debug complex data integrity
+issues, so increase the log buffer by an order of magnitude.
 
-Yeah sorry Dave I've been meaning to get to this, I'll go through them 
-all today.  Thanks,
+Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-Josef
-
-
+diff --git a/ltp/fsx.c b/ltp/fsx.c
+index 47d3ee8..3709419 100644
+--- a/ltp/fsx.c
++++ b/ltp/fsx.c
+@@ -49,7 +49,7 @@ struct log_entry {
+ 	int	args[3];
+ };
+ 
+-#define	LOGSIZE	1000
++#define	LOGSIZE	10000
+ 
+ struct log_entry	oplog[LOGSIZE];	/* the log */
+ int			logptr = 0;	/* current position in log */
