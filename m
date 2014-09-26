@@ -1,12 +1,12 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54446 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:23045 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753232AbaIZEVd (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 26 Sep 2014 00:21:33 -0400
+	id S1750960AbaIZEVZ (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 26 Sep 2014 00:21:25 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v4 07/15] btrfs: new case to run btrfs subvolume create/delete operations and scrub simultaneously
-Date: Fri, 26 Sep 2014 12:14:53 +0800
-Message-Id: <1411704901-12723-8-git-send-email-eguan@redhat.com>
+Subject: [PATCH v4 04/15] btrfs: new case to run btrfs balance and remount with different compress algorithms
+Date: Fri, 26 Sep 2014 12:14:50 +0800
+Message-Id: <1411704901-12723-5-git-send-email-eguan@redhat.com>
 In-Reply-To: <1411704901-12723-1-git-send-email-eguan@redhat.com>
 References: <1411704901-12723-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -14,29 +14,55 @@ To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Run btrfs subvolume create/mount/umount/delete and btrfs scrub
-operation simultaneously, with fsstress running in background.
+Run btrfs balance and remount with different compress algorithms
+simultaneously, with fsstress running in background.
 
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- tests/btrfs/065     | 115 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/065.out |   2 +
+ common/rc           |  14 +++++++
+ tests/btrfs/062     | 114 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/062.out |   2 +
  tests/btrfs/group   |   1 +
- 3 files changed, 118 insertions(+)
- create mode 100755 tests/btrfs/065
- create mode 100644 tests/btrfs/065.out
+ 4 files changed, 131 insertions(+)
+ create mode 100755 tests/btrfs/062
+ create mode 100644 tests/btrfs/062.out
 
-diff --git a/tests/btrfs/065 b/tests/btrfs/065
+diff --git a/common/rc b/common/rc
+index b66fa79..b19533f 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2620,6 +2620,20 @@ _btrfs_stress_defrag()
+ 	done
+ }
+ 
++# stress btrfs by remounting it with different compression algorithms in a loop
++# run this with fsstress running at background could exercise the compression
++# code path and ensure no race when switching compression algorithm with constant
++# I/O activity.
++_btrfs_stress_remount_compress()
++{
++	local btrfs_mnt=$1
++	while true; do
++		for algo in no zlib lzo; do
++			$MOUNT_PROG -o remount,compress=$algo $btrfs_mnt
++		done
++	done
++}
++
+ init_rc()
+ {
+ 	if [ "$iam" == new ]
+diff --git a/tests/btrfs/062 b/tests/btrfs/062
 new file mode 100755
-index 0000000..14fee63
+index 0000000..274da5c
 --- /dev/null
-+++ b/tests/btrfs/065
-@@ -0,0 +1,115 @@
++++ b/tests/btrfs/062
+@@ -0,0 +1,114 @@
 +#! /bin/bash
-+# FSQA Test No. btrfs/065
++# FSQA Test No. btrfs/062
 +#
-+# Run btrfs subvolume create/mount/umount/delete and btrfs scrub
-+# operation simultaneously, with fsstress running in background.
++# Run btrfs balance and remount with different compress algorithms
++# simultaneously, with fsstress running in background.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (C) 2014 Red Hat Inc. All rights reserved.
@@ -89,7 +115,6 @@ index 0000000..14fee63
 +run_test()
 +{
 +	local mkfs_opts=$1
-+	local subvol_mnt=$TEST_DIR/$seq.mnt
 +
 +	echo "Test $mkfs_opts" >>$seqres.full
 +
@@ -106,23 +131,25 @@ index 0000000..14fee63
 +	$FSSTRESS_PROG $args >/dev/null 2>&1 &
 +	fsstress_pid=$!
 +
-+	echo -n "Start subvolume worker: " >>$seqres.full
-+	_btrfs_stress_subvolume $SCRATCH_DEV $SCRATCH_MNT subvol_$$ $subvol_mnt >/dev/null 2>&1 &
-+	subvol_pid=$!
-+	echo "$subvol_pid" >>$seqres.full
++	echo -n "Start balance worker: " >>$seqres.full
++	_btrfs_stress_balance $SCRATCH_MNT >/dev/null 2>&1 &
++	balance_pid=$!
++	echo "$balance_pid" >>$seqres.full
 +
-+	echo -n "Start scrub worker: " >>$seqres.full
-+	_btrfs_stress_scrub $SCRATCH_MNT >/dev/null 2>&1 &
-+	scrub_pid=$!
-+	echo "$scrub_pid" >>$seqres.full
++	echo -n "Start remount worker: " >>$seqres.full
++	_btrfs_stress_remount_compress $SCRATCH_MNT >/dev/null 2>&1 &
++	remount_pid=$!
++	echo "$remount_pid" >>$seqres.full
 +
 +	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
 +	wait $fsstress_pid
-+
-+	kill $subvol_pid $scrub_pid
++	kill $balance_pid $remount_pid
 +	wait
-+	# wait for the scrub operation to finish
-+	while ps aux | grep "scrub start" | grep -qv grep; do
++	# wait for the balance and remount loop to finish
++	while ps aux | grep "balance start" | grep -qv grep; do
++		sleep 1
++	done
++	while ps aux | grep "mount.*$SCRATCH_MNT" | grep -qv grep; do
 +		sleep 1
 +	done
 +
@@ -132,8 +159,6 @@ index 0000000..14fee63
 +		echo "Scrub find errors in \"$mkfs_opts\" test" | tee -a $seqres.full
 +	fi
 +
-+	# in case the subvolume is still mounted
-+	$UMOUNT_PROG $subvol_mnt >/dev/null 2>&1
 +	_scratch_unmount
 +	# we called _require_scratch_nocheck instead of _require_scratch
 +	# do check after test for each profile config
@@ -147,23 +172,23 @@ index 0000000..14fee63
 +
 +status=0
 +exit
-diff --git a/tests/btrfs/065.out b/tests/btrfs/065.out
+diff --git a/tests/btrfs/062.out b/tests/btrfs/062.out
 new file mode 100644
-index 0000000..94476cd
+index 0000000..a1578f4
 --- /dev/null
-+++ b/tests/btrfs/065.out
++++ b/tests/btrfs/062.out
 @@ -0,0 +1,2 @@
-+QA output created by 065
++QA output created by 062
 +Silence is golden
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index a214920..4685970 100644
+index 85d30b3..7aa9bf3 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -67,3 +67,4 @@
- 062 auto balance remount compress
- 063 auto balance replace
- 064 auto subvol replace
-+065 auto subvol scrub
+@@ -64,3 +64,4 @@
+ 059 auto balance subvol
+ 060 auto balance scrub
+ 061 auto balance defrag compress
++062 auto balance remount compress
 -- 
 1.8.3.1
 
