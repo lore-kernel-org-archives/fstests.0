@@ -1,156 +1,186 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:29988 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:12900 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752600AbaIYQ0g (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 25 Sep 2014 12:26:36 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: [PATCH v2] generic/033: add xfs delalloc indirect block depletion reproducer
-Date: Thu, 25 Sep 2014 12:26:31 -0400
-Message-Id: <1411662391-56463-1-git-send-email-bfoster@redhat.com>
+	id S1753357AbaIZDzc (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 25 Sep 2014 23:55:32 -0400
+Date: Fri, 26 Sep 2014 11:55:30 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v3 00/15] xfstests: new btrfs stress test cases
+Message-ID: <20140926035529.GF13912@dhcp-13-216.nay.redhat.com>
+References: <1411019379-8104-1-git-send-email-eguan@redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1411019379-8104-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-XFS allocates extra indirect blocks for delayed allocation extents at
-write time. When delalloc extents are split, the existing indirect block
-reservation was historically divided up evenly among the new extents
-even though the overall requirement for two extents could exceed the
-requirement for the original. Repeated delalloc extent splits ultimately
-leads to extents with 0 indirect blocks and in turn leads to assert
-failures in XFS.
+On Thu, Sep 18, 2014 at 01:49:24PM +0800, Eryu Guan wrote:
+> This patchset add new stress test cases for btrfs by running two
+> different btrfs operations simultaneously under fsstress to ensure
+> btrfs doesn't hang or oops in such situations. btrfs scrub and
+> btrfs check will be run after each test.
+> 
+> The test matrix is the combination of 6 btrfs operations:
+> 
+> 	balance
+> 	create/mount/umount/delete subvolume
+> 	replace device
+> 	scrub
+> 	defrag
+> 	remount with different compress algorithms
+> 	
+> Short descriptions:
+> 
+> 	059: balance-subvolume
+> 	060: balance-scrub
+> 	061: balance-defrag
+> 	062: balance-remount
+> 	063: balance-replace
+> 	064: subvolume-replace
+> 	065: subvolume-scrub
+> 	066: subvolume-defrag
+> 	067: subvolume-remount
+> 	068: replace-scrub
+> 	069: replace-defrag
+> 	070: replace-remount
+> 	071: scrub-defrag
+> 	072: scrub-remount
+> 	073: defrag-remount
+> 
+> Some issues I've seen:
+> 
+> 1. subvolume cannot be mounted with selinux context, so you may see
+>    such logs in dmesg
+> 
+>    SELinux: mount invalid.  Same superblock, different security settings for (dev dm-8, type btrfs)
+> 
+>    I've reported the bug to btrfs list, see
+>    [BUG] cannot mount subvolume with selinux context
+>    http://www.spinics.net/lists/linux-btrfs/msg36779.html
+> 
+> 2. btrfs replace operation always returns ENOENT if balance is running
+>    So in 063.full you'll see
+> 
+>    ERROR: ioctl(DEV_REPLACE_START) failed on "/mnt/testarea/scratch": No such file or directory, no error
+> 
+>    Not sure if it's btrfs bug, at least I think the error code is misleading
+> 
+> 3. replace operation hangs the kernel(3.16-rc4+ and 3.17-rc2+) with fsstress running
+>    So case 064/068/069/070 will hang
 
-Add a test to stress indirect block reservation for delayed allocation
-extents. The test converts a single delalloc extent to many and operates
-on the remaining extents to detect or trigger potential problems.
+I found some bugs in 070 after applying the patch manually which fixes
+the hang. And 070 exposes one more bug (scrub finds correctable and
+uncorrectable errors), will state this issue in v4.
 
-Signed-off-by: Brian Foster <bfoster@redhat.com>
-Reviewed-by: Eryu Guan <eguan@redhat.com>
----
+Also did minor update in the _btrfs_stress_replace() function. Will
+send v4 out soon.
 
-v2:
-- Remove xfs_io output filter from output to $seqres.full.
-v1: http://oss.sgi.com/archives/xfs/2014-09/msg00371.html
-
- tests/generic/033     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/033.out |  4 +++
- tests/generic/group   |  1 +
- 3 files changed, 89 insertions(+)
- create mode 100755 tests/generic/033
- create mode 100644 tests/generic/033.out
-
-diff --git a/tests/generic/033 b/tests/generic/033
-new file mode 100755
-index 0000000..d221fcd
---- /dev/null
-+++ b/tests/generic/033
-@@ -0,0 +1,84 @@
-+#! /bin/bash
-+# FS QA Test No. 033
-+#
-+# This test stresses indirect block reservation for delayed allocation extents.
-+# XFS reserves extra blocks for deferred allocation of delalloc extents. These
-+# reserved blocks can be divided among more extents than anticipated if the
-+# original extent for which the blocks were reserved is split into multiple
-+# delalloc extents. If this scenario repeats, eventually some extents are left
-+# without any indirect block reservation whatsoever. This leads to assert
-+# failures and possibly other problems in XFS.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2014 Red Hat, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+
-+# real QA test starts here
-+rm -f $seqres.full
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_xfs_io_command "fzero"
-+
-+_scratch_mkfs >/dev/null 2>&1
-+_scratch_mount
-+
-+file=$SCRATCH_MNT/file.$seq
-+bytes=$((64 * 1024))
-+
-+# create sequential delayed allocation
-+$XFS_IO_PROG -f -c "pwrite 0 $bytes" $file >> $seqres.full 2>&1
-+
-+# Zero every other 4k range to split the larger delalloc extent into many more
-+# smaller extents. Use zero instead of hole punch because the former does not
-+# force writeback (and hence delalloc conversion). It can simply discard
-+# delalloc blocks and convert the ranges to unwritten.
-+endoff=$((bytes - 4096))
-+for i in $(seq 0 8192 $endoff); do
-+	$XFS_IO_PROG -c "fzero -k $i 4k" $file >> $seqres.full 2>&1
-+done
-+
-+# now zero the opposite set to remove remaining delalloc extents
-+for i in $(seq 4096 8192 $endoff); do
-+	$XFS_IO_PROG -c "fzero -k $i 4k" $file >> $seqres.full 2>&1
-+done
-+
-+_scratch_remount
-+hexdump $file
-+
-+status=0
-+exit
-diff --git a/tests/generic/033.out b/tests/generic/033.out
-new file mode 100644
-index 0000000..419d831
---- /dev/null
-+++ b/tests/generic/033.out
-@@ -0,0 +1,4 @@
-+QA output created by 033
-+0000000 0000 0000 0000 0000 0000 0000 0000 0000
-+*
-+0010000
-diff --git a/tests/generic/group b/tests/generic/group
-index 8e0c22a..1227408 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -32,6 +32,7 @@
- 027 auto enospc
- 028 auto quick
- 032 auto quick rw
-+033 auto quick rw
- 053 acl repair auto quick
- 062 attr udf auto quick
- 068 other auto freeze dangerous stress
--- 
-1.8.3.1
-
+Thanks,
+Eryu
+> 
+> 
+> Changes since v2:
+> - mount subvolume at $TEST_DIR/$seq.mnt not $tmp.mnt
+> - don't rm -rf $tmp.* which is dangerous
+> - remove unnecessary btrfs filesystem sync operation
+> - update _scratch_pool_mkfs to deal with dup profile
+> - add more comments for each stress operation
+> - rename _btrfs_stress_remount to _btrfs_stress_remount_compress (hope it's better...)
+> - add _btrfs_get_profile_configs to remove duplicated test case array in each case
+> - use _require_scratch_nocheck and _check_scratch_fs after each loop
+> 
+> Changes since v1:
+> - put common operations in common/rc as functions and share them across these tests
+> - append mkfs options to _scratch_mkfs and _scratch_pool_mkfs instead of updating $MKFS_OPTIONS
+> - rebase on top of master and re-number starting from btrfs/059
+> 
+> Thanks,
+> Eryu Guan
+> 
+> Eryu Guan (15):
+>   btrfs: new test to run btrfs balance and subvolume test simultaneously
+>   btrfs: new test to run btrfs balance and scrub simultaneously
+>   btrfs: new test to run btrfs balance and defrag operations simultaneously
+>   btrfs: new case to run btrfs balance and remount with different compress algorithms
+>   btrfs: new case to run btrfs balance and device replace operations simultaneously
+>   btrfs: new case to run btrfs subvolume create/delete operations and device replace simultaneously
+>   btrfs: new case to run btrfs subvolume create/delete operations and scrub simultaneously
+>   btrfs: new case to run btrfs subvolume create/delete and defrag operations simultaneously
+>   btrfs: new case to run subvolume create/delete and remount with defferent compress algorithms
+>   btrfs: new case to run device replace and scrub operations simultaneously
+>   btrfs: new case to run device replace and defrag operations simultaneously
+>   btrfs: new case to run device replace and remount with different compress algorithms simultaneously
+>   btrfs: new case to run btrfs scrub and defrag operations simultaneously
+>   btrfs: new case to run btrfs scrub and remount with different compress algorithms simultaneously
+>   btrfs: new case to run defrag and remount with different compress algorithms simultaneously
+> 
+>  common/rc           | 225 +++++++++++++++++++++++++++++++++++++++++++++++++++-
+>  tests/btrfs/059     | 115 +++++++++++++++++++++++++++
+>  tests/btrfs/059.out |   2 +
+>  tests/btrfs/060     | 114 ++++++++++++++++++++++++++
+>  tests/btrfs/060.out |   2 +
+>  tests/btrfs/061     | 116 +++++++++++++++++++++++++++
+>  tests/btrfs/061.out |   2 +
+>  tests/btrfs/062     | 114 ++++++++++++++++++++++++++
+>  tests/btrfs/062.out |   2 +
+>  tests/btrfs/063     | 122 ++++++++++++++++++++++++++++
+>  tests/btrfs/063.out |   2 +
+>  tests/btrfs/064     | 123 ++++++++++++++++++++++++++++
+>  tests/btrfs/064.out |   2 +
+>  tests/btrfs/065     | 115 +++++++++++++++++++++++++++
+>  tests/btrfs/065.out |   2 +
+>  tests/btrfs/066     | 117 +++++++++++++++++++++++++++
+>  tests/btrfs/066.out |   2 +
+>  tests/btrfs/067     | 116 +++++++++++++++++++++++++++
+>  tests/btrfs/067.out |   2 +
+>  tests/btrfs/068     | 123 ++++++++++++++++++++++++++++
+>  tests/btrfs/068.out |   2 +
+>  tests/btrfs/069     | 125 +++++++++++++++++++++++++++++
+>  tests/btrfs/069.out |   2 +
+>  tests/btrfs/070     | 123 ++++++++++++++++++++++++++++
+>  tests/btrfs/070.out |   2 +
+>  tests/btrfs/071     | 116 +++++++++++++++++++++++++++
+>  tests/btrfs/071.out |   2 +
+>  tests/btrfs/072     | 114 ++++++++++++++++++++++++++
+>  tests/btrfs/072.out |   2 +
+>  tests/btrfs/073     | 116 +++++++++++++++++++++++++++
+>  tests/btrfs/073.out |   2 +
+>  tests/btrfs/group   |  15 ++++
+>  32 files changed, 2035 insertions(+), 4 deletions(-)
+>  create mode 100755 tests/btrfs/059
+>  create mode 100644 tests/btrfs/059.out
+>  create mode 100755 tests/btrfs/060
+>  create mode 100644 tests/btrfs/060.out
+>  create mode 100755 tests/btrfs/061
+>  create mode 100644 tests/btrfs/061.out
+>  create mode 100755 tests/btrfs/062
+>  create mode 100644 tests/btrfs/062.out
+>  create mode 100755 tests/btrfs/063
+>  create mode 100644 tests/btrfs/063.out
+>  create mode 100755 tests/btrfs/064
+>  create mode 100644 tests/btrfs/064.out
+>  create mode 100755 tests/btrfs/065
+>  create mode 100644 tests/btrfs/065.out
+>  create mode 100755 tests/btrfs/066
+>  create mode 100644 tests/btrfs/066.out
+>  create mode 100755 tests/btrfs/067
+>  create mode 100644 tests/btrfs/067.out
+>  create mode 100755 tests/btrfs/068
+>  create mode 100644 tests/btrfs/068.out
+>  create mode 100755 tests/btrfs/069
+>  create mode 100644 tests/btrfs/069.out
+>  create mode 100755 tests/btrfs/070
+>  create mode 100644 tests/btrfs/070.out
+>  create mode 100755 tests/btrfs/071
+>  create mode 100644 tests/btrfs/071.out
+>  create mode 100755 tests/btrfs/072
+>  create mode 100644 tests/btrfs/072.out
+>  create mode 100755 tests/btrfs/073
+>  create mode 100644 tests/btrfs/073.out
+> 
+> -- 
+> 1.8.3.1
+> 
