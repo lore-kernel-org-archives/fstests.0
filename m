@@ -1,96 +1,32 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from bombadil.infradead.org ([198.137.202.9]:58806 "EHLO
-	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751911AbaI0GdO (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sat, 27 Sep 2014 02:33:14 -0400
-Date: Fri, 26 Sep 2014 23:33:11 -0700
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH] shmem: fix nlink for rename overwrite directory
-Message-ID: <20140927063311.GA8006@infradead.org>
-References: <20140924155617.GD7441@tucsk.piliscsaba.szeredi.hu>
+Received: from imap.thunk.org ([74.207.234.97]:52784 "EHLO imap.thunk.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752581AbaI0WPE (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sat, 27 Sep 2014 18:15:04 -0400
+Date: Sat, 27 Sep 2014 18:12:34 -0400
+From: Theodore Ts'o <tytso@mit.edu>
+Subject: Re: [PATCH 1/2] ext4: define MKFS_EXT4_PROG and use it instead of
+ "mkfs.ext4" / "mkfs -t ext4"
+Message-ID: <20140927221234.GC11222@thunk.org>
+References: <20140907192110.GC1066@thunk.org>
+ <1410141968-17551-1-git-send-email-tytso@mit.edu>
+ <20140908123528.GK30012@dastard>
+ <20140927001141.GI4758@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20140924155617.GD7441@tucsk.piliscsaba.szeredi.hu>
+In-Reply-To: <20140927001141.GI4758@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Miklos Szeredi <miklos@szeredi.hu>
-Cc: Hugh Dickins <hughd@google.com>, Al Viro <viro@ZenIV.linux.org.uk>, linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, hch@infradead.org, linux-ext4@vger.kernel.org, wangxg.fnst@cn.fujitsu.com, eguan@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 24, 2014 at 05:56:17PM +0200, Miklos Szeredi wrote:
-> From: Miklos Szeredi <mszeredi@suse.cz>
+On Sat, Sep 27, 2014 at 10:11:41AM +1000, Dave Chinner wrote:
 > 
-> If overwriting an empty directory with rename, then need to drop the extra
-> nlink.
-> 
-> Test prog:
+> Can you send an update for this patch if you still need it?
 
-Can you send a patch to wire this up for xfstests?
+Thanks for pinging me; I've been so busy these past few weeks I forgot
+to check to see if the fstests repo had been updated.  I see you did
+so quite a while ago, my bad.
 
-> 
-> #include <stdio.h>
-> #include <fcntl.h>
-> #include <err.h>
-> #include <sys/stat.h>
-> 
-> int main(void)
-> {
-> 	const char *test_dir1 = "test-dir1";
-> 	const char *test_dir2 = "test-dir2";
-> 	int res;
-> 	int fd;
-> 	struct stat statbuf;
-> 
-> 	res = mkdir(test_dir1, 0777);
-> 	if (res == -1)
-> 		err(1, "mkdir(\"%s\")", test_dir1);
-> 
-> 	res = mkdir(test_dir2, 0777);
-> 	if (res == -1)
-> 		err(1, "mkdir(\"%s\")", test_dir2);
-> 
-> 	fd = open(test_dir2, O_RDONLY);
-> 	if (fd == -1)
-> 		err(1, "open(\"%s\")", test_dir2);
-> 
-> 	res = rename(test_dir1, test_dir2);
-> 	if (res == -1)
-> 		err(1, "rename(\"%s\", \"%s\")", test_dir1, test_dir2);
-> 
-> 	res = fstat(fd, &statbuf);
-> 	if (res == -1)
-> 		err(1, "fstat(%i)", fd);
-> 
-> 	if (statbuf.st_nlink != 0) {
-> 		fprintf(stderr, "nlink is %lu, should be 0\n", statbuf.st_nlink);
-> 		return 1;
-> 	}
-> 
-> 	return 0;
-> }
-> 
-> Signed-off-by: Miklos Szeredi <mszeredi@suse.cz>
-> Cc: stable@vger.kernel.org
-> ---
->  mm/shmem.c |    4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
-> 
-> --- a/mm/shmem.c
-> +++ b/mm/shmem.c
-> @@ -2367,8 +2367,10 @@ static int shmem_rename2(struct inode *o
->  
->  	if (new_dentry->d_inode) {
->  		(void) shmem_unlink(new_dir, new_dentry);
-> -		if (they_are_dirs)
-> +		if (they_are_dirs) {
-> +			drop_nlink(new_dentry->d_inode);
->  			drop_nlink(old_dir);
-> +		}
->  	} else if (they_are_dirs) {
->  		drop_nlink(old_dir);
->  		inc_nlink(new_dir);
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-fsdevel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
----end quoted text---
+   	    	       	       	    	     - Ted
