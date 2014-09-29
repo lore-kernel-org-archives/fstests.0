@@ -1,62 +1,93 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from imap.thunk.org ([74.207.234.97]:52797 "EHLO imap.thunk.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752785AbaI0WR7 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sat, 27 Sep 2014 18:17:59 -0400
-From: Theodore Ts'o <tytso@mit.edu>
-Subject: [PATCH 2/3] ext4: use mkfs.ext4 -F instead of piping in yes
-Date: Sat, 27 Sep 2014 18:17:50 -0400
-Message-Id: <1411856271-30789-2-git-send-email-tytso@mit.edu>
-In-Reply-To: <1411856271-30789-1-git-send-email-tytso@mit.edu>
-References: <20140927221234.GC11222@thunk.org>
- <1411856271-30789-1-git-send-email-tytso@mit.edu>
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:8773 "EHLO
+	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751396AbaI2Dcr (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sun, 28 Sep 2014 23:32:47 -0400
+Date: Mon, 29 Sep 2014 13:32:44 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] xfs/053: test for stale data exposure via
+ falloc/writeback interaction
+Message-ID: <20140929033244.GL4758@dastard>
+References: <1411756349-4537-1-git-send-email-bfoster@redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1411756349-4537-1-git-send-email-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>, Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-Using "yes | mkfs.ext4 ..." results in the error message results in
-the test failing, at least for some versions of e2fsprogs:
+On Fri, Sep 26, 2014 at 02:32:29PM -0400, Brian Foster wrote:
+> XFS buffered I/O writeback has a subtle race condition that leads to
+> stale data exposure if the filesystem happens to crash after delayed
+> allocation blocks are converted on disk and before data is written back
+> to said blocks.
+> 
+> Use file allocation commands to attempt to reproduce a related, but
+> slightly different variant of this problem. The associated falloc
+> commands can lead to partial writeback that converts an extent larger
+> than the range affected by falloc. If the filesystem crashes after the
+> extent conversion but before all other cached data is written to the
+> extent, stale data can be exposed.
+> 
+> Signed-off-by: Brian Foster <bfoster@redhat.com>
+> ---
+> 
+> This fell out of a combination of a conversation with Dave about XFS
+> writeback and buffer/cache coherency and some hacking I'm doing on the
+> XFS zero range implementation. Note that fpunch currently fails the
+> test. Also, this test is XFS specific primarily due to the use of
+> godown.
+.....
+> +_crashtest()
+> +{
+> +	cmd=$1
+> +	img=$SCRATCH_MNT/$seq.img
+> +	mnt=$SCRATCH_MNT/$seq.mnt
+> +	file=$mnt/file
+> +
+> +	# Create an fs on a small, initialized image. The pattern is written to
+> +	# the image to detect stale data exposure.
+> +	$XFS_IO_PROG -f -c "truncate 0" -c "pwrite 0 25M" $img \
+> +		>> $seqres.full 2>&1
+> +	$MKFS_XFS_PROG $MKFS_OPTIONS $img >> $seqres.full 2>&1
+> +
+> +	mkdir -p $mnt
+> +	mount $img $mnt
+> +
+> +	echo $cmd
+> +
+> +	# write, run the test command and shutdown the fs
+> +	$XFS_IO_PROG -f -c "pwrite -S 1 0 64k" -c "$cmd 60k 4k" $file | \
+> +		_filter_xfs_io
 
-    +yes: standard output: Broken pipe
-    +yes: write error
+So at this point the file is correctly 64k in size in memory.
 
-It better to use the -F option, which will eliminate the questions.
+> +	./src/godown -f $mnt
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-Reviewed-by: Eryu Guan <eguan@redhat.com>
-Cc: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
----
- tests/ext4/003 | 2 +-
- tests/ext4/306 | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+And here you tell godown to flush the log, so if there's a
+transaction in the that sets the inode size to 64k.
 
-diff --git a/tests/ext4/003 b/tests/ext4/003
-index fde0e9c..53875a9 100755
---- a/tests/ext4/003
-+++ b/tests/ext4/003
-@@ -43,7 +43,7 @@ _require_ext4_bigalloc
- 
- rm -f $seqres.full
- 
--yes | $MKFS_EXT4_PROG -O bigalloc -C 65536  -g 256 $SCRATCH_DEV 512m \
-+$MKFS_EXT4_PROG -F -O bigalloc -C 65536  -g 256 $SCRATCH_DEV 512m \
- 	>> $seqres.full 2>&1
- _scratch_mount || _fail "couldn't mount fs"
- 
-diff --git a/tests/ext4/306 b/tests/ext4/306
-index caffe0e..edc0204 100755
---- a/tests/ext4/306
-+++ b/tests/ext4/306
-@@ -48,7 +48,7 @@ _require_scratch
- rm -f $seqres.full
- 
- # Make a small ext4 fs with extents disabled & mount it
--yes | $MKFS_EXT4_PROG -O ^extents,^64bit $SCRATCH_DEV 512m >> $seqres.full 2>&1
-+$MKFS_EXT4_PROG -F -O ^extents,^64bit $SCRATCH_DEV 512m >> $seqres.full 2>&1
- _scratch_mount || _fail "couldn't mount fs"
- 
- # Create a small non-extent-based file
+> +	umount $mnt
+> +	mount $img $mnt
+
+Then log recovery will set the file size to 64k, and:
+
+> +
+> +	# we generally expect a zero-sized file (this should be silent)
+> +	hexdump $file
+
+This comment is not actually correct. I'm actually seeing 64k length
+files after recovery in 2 of 3 cases being tested, so I don't think
+this is a correct observation.
+
+Some clarification of what is actually being tested is needed
+here. 
+
+Cheers,
+
+Dave.
 -- 
-2.1.0
-
+Dave Chinner
+david@fromorbit.com
