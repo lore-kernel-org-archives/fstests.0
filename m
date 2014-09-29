@@ -1,111 +1,119 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41905 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:40681 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754173AbaI2OJe (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 29 Sep 2014 10:09:34 -0400
-Date: Mon, 29 Sep 2014 10:09:27 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH] xfs/053: test for stale data exposure via
- falloc/writeback interaction
-Message-ID: <20140929140926.GC65297@bfoster.bfoster>
-References: <1411756349-4537-1-git-send-email-bfoster@redhat.com>
- <20140929033244.GL4758@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20140929033244.GL4758@dastard>
+	id S1754498AbaI2QHP (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 29 Sep 2014 12:07:15 -0400
+Message-ID: <1412006829.3471.23.camel@jtulak>
+Subject: Re: Performance testing
+From: Jan Tulak <jtulak@redhat.com>
+Date: Mon, 29 Sep 2014 18:07:09 +0200
+In-Reply-To: <20140927004711.GJ4758@dastard>
+References: <1410943724.31777.31.camel@jtulak>
+	 <20140918003628.GX4322@dastard> <1411657420.26791.48.camel@jtulak>
+	 <20140927004711.GJ4758@dastard>
+Content-Type: text/plain; charset="UTF-8"
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
+Cc: fstests@vger.kernel.org, Lukas Czerner <lczerner@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Sep 29, 2014 at 01:32:44PM +1000, Dave Chinner wrote:
-> On Fri, Sep 26, 2014 at 02:32:29PM -0400, Brian Foster wrote:
-> > XFS buffered I/O writeback has a subtle race condition that leads to
-> > stale data exposure if the filesystem happens to crash after delayed
-> > allocation blocks are converted on disk and before data is written back
-> > to said blocks.
+On Sat, 2014-09-27 at 10:47 +1000, Dave Chinner wrote:
+> On Thu, Sep 25, 2014 at 05:03:40PM +0200, Jan Tulak wrote:
+> > On Thu, 2014-09-18 at 10:36 +1000, Dave Chinner wrote:
+> > > On Wed, Sep 17, 2014 at 10:48:44AM +0200, Jan Tulak wrote:
+> > > ...
+> > This is not needed in the quick suite, but just testing simple
+> > read/write will not find regression appearing during some more
+> > complicated situations. If the only thing changed is the filesystem,
+> > any big difference in results can be attributed to the filesystem
+> > change. Right? 
+> 
+> No. A change in a filesystem can causing things like more context
+> switches to occur due to additional serialisation on a sleeping
+> lock. A change of context switch behaviour can expose issuing in
+> other subsystems, like the scheduler or even bugs in the locking
+> code. This happens more frequently than you think...
+> 
+> > I do not expect everyone will run this test suite all
+> > day, but it could notice us about regressions between versions of a
+> > filesystem.
+> 
+> It's rare that developers run tests directly comparing released
+> versions of the kernel. We'll compare "unpatched vs patched" in
+> back-to-back tests, so the tests we do run need to be cover a good
+> portion of the performance matrix in a useful fashion....
+> 
+
+I can't argue about that. :-)
+
+> > > > ...
+> > > ...
 > > 
-> > Use file allocation commands to attempt to reproduce a related, but
-> > slightly different variant of this problem. The associated falloc
-> > commands can lead to partial writeback that converts an extent larger
-> > than the range affected by falloc. If the filesystem crashes after the
-> > extent conversion but before all other cached data is written to the
-> > extent, stale data can be exposed.
+> > The initial focus should really aim at this, I agree. Creating this
+> > quick and small suite should not take a long time. If you have
+> > something, that could be useful once I will create some kind of template
+> > for performance tests.
+> 
+> I've attached an example script I use to run a file creation
+> micro-benchmark.
+> 
+> What is important here is that once the files are created, I then
+> run several more performance tests on the filesystem - xfs_repair
+> performance, bulkstat performance, find and ls -R performance, and
+> finally unlink performance.
+> 
+> So it's really 5 or 6 tests in one. We are going to need to be able
+> to support such "sub-test" categories so that we don't waste lots of
+> time having to create filesystem pre-conditions for various
+> micro-benchmarks. Any ideas on how we could group tests like this
+> so they are run sequentially as a group, but also can be run
+> individually and correctly invking the setup test if the filesystem
+> is not in the correct state?
+
+One idea I thought about and didn't see big problems in existing
+infrastructure would be to add another level for tests. So there could
+be something like tests/something/001/001. Not specifying the last level
+would mean "every test in a sub-level". 
+
+>From what I saw, that would need some smaller changes in ./check script
+and a mechanism for the sub-levels to share their environment. The
+mechanism could work as follows:
+In a sub-level there would be an init script, invoked by the tests and
+used for setting the filesystem and other things. After first run, it
+would export a variable with its own file path/group name. On subsequent
+tests, the variable would already have the specified value, so no
+initialization would be done again, until another sub-level.
+
+An alternative for the mechanism would be to really check if the
+filesystem is in required state, but this seems to me like a test in a
+test (in a test...) :-)
+
+> 
+> > > > ...
+> > > > ...
+> > > 
+> > > ...
+> > > 
 > > 
-> > Signed-off-by: Brian Foster <bfoster@redhat.com>
-> > ---
-> > 
-> > This fell out of a combination of a conversation with Dave about XFS
-> > writeback and buffer/cache coherency and some hacking I'm doing on the
-> > XFS zero range implementation. Note that fpunch currently fails the
-> > test. Also, this test is XFS specific primarily due to the use of
-> > godown.
-> .....
-> > +_crashtest()
-> > +{
-> > +	cmd=$1
-> > +	img=$SCRATCH_MNT/$seq.img
-> > +	mnt=$SCRATCH_MNT/$seq.mnt
-> > +	file=$mnt/file
-> > +
-> > +	# Create an fs on a small, initialized image. The pattern is written to
-> > +	# the image to detect stale data exposure.
-> > +	$XFS_IO_PROG -f -c "truncate 0" -c "pwrite 0 25M" $img \
-> > +		>> $seqres.full 2>&1
-> > +	$MKFS_XFS_PROG $MKFS_OPTIONS $img >> $seqres.full 2>&1
-> > +
-> > +	mkdir -p $mnt
-> > +	mount $img $mnt
-> > +
-> > +	echo $cmd
-> > +
-> > +	# write, run the test command and shutdown the fs
-> > +	$XFS_IO_PROG -f -c "pwrite -S 1 0 64k" -c "$cmd 60k 4k" $file | \
-> > +		_filter_xfs_io
+> > I expected something like this, so it shouldn't be a big trouble. What I
+> > see as a good way: at first to create some small tests. Then, once they
+> > works as intended, I can work on the external tool for managing the
+> > results, rather than at first creating the tool. That will also give me
+> > more time to find some good solution. (What I see, there is already some
+> > work with autotest running xfstest, so maybe it will needs just a little
+> > work to add the new tests.)
 > 
-> So at this point the file is correctly 64k in size in memory.
+> Yes, that seems like the sensible approach to take.
 > 
-> > +	./src/godown -f $mnt
-> 
-> And here you tell godown to flush the log, so if there's a
-> transaction in the that sets the inode size to 64k.
-> 
-> > +	umount $mnt
-> > +	mount $img $mnt
-> 
-> Then log recovery will set the file size to 64k, and:
-> 
-> > +
-> > +	# we generally expect a zero-sized file (this should be silent)
-> > +	hexdump $file
-> 
-> This comment is not actually correct. I'm actually seeing 64k length
-> files after recovery in 2 of 3 cases being tested, so I don't think
-> this is a correct observation.
-> 
-> Some clarification of what is actually being tested is needed
-> here. 
-> 
+> FWIW, I'm pretty sure most developers run xfstests directly, so I'd
+> concentrate on making reporting work well for this case first, then
+> concentrate on what extra functionality external harnesses like
+> autotest require....
 
-What output is dumped for the file? I normally see either a zero length
-file or data that was never written to the file. For example, punch
-fails with this:
+Yes, exactly.
 
-+0000000 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
-+*
-+000f000 0000 0000 0000 0000 0000 0000 0000 0000
-+*
-+0010000
+Cheers,
+Jan
 
-I suppose it could be possible to see a non-zero length file with valid
-data, but I've not seen that occur.
-
-Brian
-
-> Cheers,
-> 
-> Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
