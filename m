@@ -1,118 +1,52 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:8179 "EHLO
-	mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751563AbaI3Qnm (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 30 Sep 2014 12:43:42 -0400
-Message-ID: <542ADDAF.8010503@fb.com>
-Date: Tue, 30 Sep 2014 12:43:27 -0400
-From: Josef Bacik <jbacik@fb.com>
+Received: from mail-qc0-f170.google.com ([209.85.216.170]:33404 "EHLO
+	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751042AbaI3RGs (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 30 Sep 2014 13:06:48 -0400
+Date: Tue, 30 Sep 2014 13:06:36 -0400
+From: Eric Whitney <enwlinux@gmail.com>
+Subject: [PATCH] generic/015: improve error logging
+Message-ID: <20140930170636.GA5803@wallace>
 MIME-Version: 1.0
-Subject: Re: [PATCH v4 01/15] btrfs: new test to run btrfs balance and subvolume
- test simultaneously
-References: <1411704901-12723-1-git-send-email-eguan@redhat.com> <1411704901-12723-2-git-send-email-eguan@redhat.com> <5429AD14.5000805@fb.com> <20140930154809.GQ13912@dhcp-13-216.nay.redhat.com> <542AD236.2000609@fb.com> <20140930160810.GR13912@dhcp-13-216.nay.redhat.com>
-In-Reply-To: <20140930160810.GR13912@dhcp-13-216.nay.redhat.com>
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 09/30/2014 12:08 PM, Eryu Guan wrote:
-> On Tue, Sep 30, 2014 at 11:54:30AM -0400, Josef Bacik wrote:
->> On 09/30/2014 11:48 AM, Eryu Guan wrote:
->>> On Mon, Sep 29, 2014 at 03:03:48PM -0400, Josef Bacik wrote:
->>>> On 09/26/2014 12:14 AM, Eryu Guan wrote:
->>>>> Run btrfs balance and subvolume create/mount/umount/delete simultaneously,
->>>>> with fsstress running in background.
->>>>>
->>>>> Signed-off-by: Eryu Guan <eguan@redhat.com>
->>>>> ---
->>> [snip]
->>>>> +	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
->>>>> +	echo "Run fsstress $args" >>$seqres.full
->>>>> +	$FSSTRESS_PROG $args >/dev/null 2>&1 &
->>>>> +	fsstress_pid=$!
->>>>> +
->>>>> +	echo -n "Start balance worker: " >>$seqres.full
->>>>> +	_btrfs_stress_balance $SCRATCH_MNT >/dev/null 2>&1 &
->>>>> +	balance_pid=$!
->>>>> +	echo "$balance_pid" >>$seqres.full
->>>>> +
->>>>> +	echo -n "Start subvolume worker: " >>$seqres.full
->>>>> +	_btrfs_stress_subvolume $SCRATCH_DEV $SCRATCH_MNT subvol_$$ $subvol_mnt >/dev/null 2>&1 &
->>>>> +	subvol_pid=$!
->>>>> +	echo "$subvol_pid" >>$seqres.full
->>>>> +
->>>>> +	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
->>>>> +	wait $fsstress_pid
->>>>> +
->>>>> +	kill $balance_pid $subvol_pid
->>>>> +	wait
->>>>> +	# wait for the balance operation to finish
->>>>> +	while ps aux | grep "balance start" | grep -qv grep; do
->>>>> +		sleep 1
->>>>> +	done
->>>>
->>>> This bit isn't needed, killing the balance pid also won't do anything, just
->>>> waiting is enough, it'll only exit once the balance is finished. If you
->>>> really want to stop the balance you can use
->>>
->>> I think it's still needed, or the balance process would block the
->>> later umount and test fails like
->>>
->>> --- tests/btrfs/059.out 2014-09-26 11:35:43.932850826 +0800
->>> +++ /root/xfstests/results//btrfs/059.out.bad   2014-09-30 23:29:47.538310375 +0800
->>> @@ -1,2 +1,9 @@
->>>   QA output created by 059
->>>   Silence is golden
->>> +umount: /mnt/testarea/scratch: target is busy.
->>> +        (In some cases useful info about processes that use
->>> +         the device is found by lsof(8) or fuser(1))
->>> +umount: /mnt/testarea/scratch: target is busy.
->>> +        (In some cases useful info about processes that use
->>> +         the device is found by lsof(8) or fuser(1))
->>> +_check_btrfs_filesystem: filesystem on /dev/mapper/rhel_hp--dl388eg8--01-testlv2 is inconsistent (see /root/xfstests/results//btrfs/059.full)
->>>
->>> Adding debug output of "lsof $SCRATCH_MNT" and "ps aux | grep btrfs"
->>> before umount shows it's the balance process is still running and
->>> blocks the umount.
->>>
->>> lsof /mnt/testarea/scratch
->>> btrfs   13491 root    3r   DIR   0,40       42  256 /mnt/testarea/scratch
->>> ps aux | grep btrfs
->>> ....
->>> root     13491  7.0  0.0  18660  1312 pts/1    D+   23:29   0:00 /usr/sbin/btrfs balance start /mnt/testarea/scratch
->>>
->>> Killing the balance pid is to stop any further balance operation, wait
->>> is waiting for the child process (_btrfs_stress_balance), not the
->>> child's child process (balance process). So only wait is not enough,
->>> we should wait for the balance to finish explicitly.
->>>
->>> This is also true for the rest of the test cases in this series. This
->>> is kind of ugly, but I cannot figure out a better solution right now..
->>>
->>
->> Oh duh sorry, I missed that it was a loop of btrfs balance start, not just
->> btrfs balance start &.  Ok in that case instead use
->>
->> btrfs balance status
->>
->> and loop on that until it is done and then exit, that way it is clear what
->> we are waiting on, but really I'm not married to the idea either so if it
->> ends up being too much trouble just skip it.  You can add
->>
->> Reviewed-by: Josef Bacik <jbacik@fb.com>
->>
->> Whenever you re-roll with your whitespace changes and whatever other
->> cleanups you add.  Thanks,
->
-> Thanks for your review!
->
-> Just want to confirm with you, do you mean I can add your reviewed-by
-> for the whole patchset or just the first one?
+015 currently discards useful diagnostic information should making or
+mounting the scratch file system fail.  This can be captured with minimal
+additional disk space consumption in a manner similar to other xfstests.
+Noted during an ext4 debugging session involving a mkfs failure; small
+ext4 file systems (as used in this test) by default use small inodes that
+are not compatible with the inline data feature.
 
-Oh sorry, the whole patchset.  Thanks,
+Signed-off-by: Eric Whitney <enwlinux@gmail.com>
+---
+ tests/generic/015 | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-Josef
+diff --git a/tests/generic/015 b/tests/generic/015
+index 8d3fd5f..4d96b4e 100755
+--- a/tests/generic/015
++++ b/tests/generic/015
+@@ -53,11 +53,12 @@ _supported_os IRIX Linux
+ _require_scratch
+ _require_no_large_scratch_dev
+ 
+-_scratch_mkfs_sized `expr 50 \* 1024 \* 1024` >/dev/null 2>&1 \
++rm -f $seqres.full
++
++_scratch_mkfs_sized `expr 50 \* 1024 \* 1024` >>$seqres.full 2>&1 \
+     || _fail "mkfs failed"
+-_scratch_mount || _fail "mount failed"
++_scratch_mount >>$seqres.full 2>&1 || _fail "mount failed"
+ out=$SCRATCH_MNT/fillup.$$
+-rm -f $seqres.full
+ 
+ free0=`_free`
+ if [ -z "$free0" ]
+-- 
+1.9.1
 
