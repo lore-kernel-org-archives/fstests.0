@@ -1,160 +1,165 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:25376 "EHLO
-	mx0b-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754122AbaI2TEm (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 29 Sep 2014 15:04:42 -0400
-Message-ID: <5429AD44.4090402@fb.com>
-Date: Mon, 29 Sep 2014 15:04:36 -0400
-From: Josef Bacik <jbacik@fb.com>
-MIME-Version: 1.0
-Subject: Re: [PATCH v4 02/15] btrfs: new test to run btrfs balance and scrub
- simultaneously
-References: <1411704901-12723-1-git-send-email-eguan@redhat.com> <1411704901-12723-3-git-send-email-eguan@redhat.com>
-In-Reply-To: <1411704901-12723-3-git-send-email-eguan@redhat.com>
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:4688 "EHLO
+	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753926AbaI3ChU (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 29 Sep 2014 22:37:20 -0400
+Received: from disappointment.disaster.area ([192.168.1.110] helo=disappointment)
+	by dastard with esmtp (Exim 4.80)
+	(envelope-from <dave@fromorbit.com>)
+	id 1XYnJU-0004XA-Ny
+	for fstests@vger.kernel.org; Tue, 30 Sep 2014 12:37:16 +1000
+Received: from dave by disappointment with local (Exim 4.82_1-5b7a7c0-XX)
+	(envelope-from <dave@disappointment.disaster>)
+	id 1XYnJU-0005Zk-Mk
+	for fstests@vger.kernel.org; Tue, 30 Sep 2014 12:37:16 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: [PATCH] xfs/007: check correct quota inodes
+Date: Tue, 30 Sep 2014 12:37:16 +1000
+Message-Id: <1412044636-21398-1-git-send-email-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 09/26/2014 12:14 AM, Eryu Guan wrote:
-> Run btrfs balance and scrub operations simultaneously with fsstress
-> running in background.
->
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> ---
->   common/rc           |   9 +++++
->   tests/btrfs/060     | 114 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->   tests/btrfs/060.out |   2 +
->   tests/btrfs/group   |   1 +
->   4 files changed, 126 insertions(+)
->   create mode 100755 tests/btrfs/060
->   create mode 100644 tests/btrfs/060.out
->
-> diff --git a/common/rc b/common/rc
-> index 2393c4b..d1dec8a 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2591,6 +2591,15 @@ _btrfs_stress_subvolume()
->   	done
->   }
->
-> +# stress btrfs by running scrub in a loop
-> +_btrfs_stress_scrub()
-> +{
-> +	local btrfs_mnt=$1
-> +	while true; do
-> +		$BTRFS_UTIL_PROG scrub start -B $btrfs_mnt
-> +	done
-> +}
-> +
->   init_rc()
->   {
->   	if [ "$iam" == new ]
-> diff --git a/tests/btrfs/060 b/tests/btrfs/060
-> new file mode 100755
-> index 0000000..b270c7b
-> --- /dev/null
-> +++ b/tests/btrfs/060
-> @@ -0,0 +1,114 @@
-> +#! /bin/bash
-> +# FSQA Test No. btrfs/060
-> +#
-> +# Run btrfs balance and scrub operations simultaneously with fsstress
-> +# running in background.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (C) 2014 Red Hat Inc. All rights reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +# we check scratch dev after each loop
-> +_require_scratch_nocheck
-> +_require_scratch_dev_pool 4
-> +_btrfs_get_profile_configs
-> +
-> +rm -f $seqres.full
-> +
-> +run_test()
-> +{
-> +	local mkfs_opts=$1
-> +
-> +	echo "Test $mkfs_opts" >>$seqres.full
-> +
-> +	_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
-> +	# make sure we created btrfs with desired options
-> +	if [ $? -ne 0 ]; then
-> +		echo "mkfs $mkfs_opts failed"
-> +		return
-> +	fi
-> +	_scratch_mount >>$seqres.full 2>&1
-> +
-> +	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
-> +	echo "Run fsstress $args" >>$seqres.full
-> +	$FSSTRESS_PROG $args >/dev/null 2>&1 &
-> +	fsstress_pid=$!
-> +
-> +	echo -n "Start balance worker: " >>$seqres.full
-> +	_btrfs_stress_balance $SCRATCH_MNT >/dev/null 2>&1 &
-> +	balance_pid=$!
-> +	echo "$balance_pid" >>$seqres.full
-> +
-> +	echo -n "Start scrub worker: " >>$seqres.full
-> +	_btrfs_stress_scrub $SCRATCH_MNT >/dev/null 2>&1 &
-> +	scrub_pid=$!
-> +	echo "$scrub_pid" >>$seqres.full
-> +
-> +	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
-> +	wait $fsstress_pid
-> +	kill $balance_pid $scrub_pid
-> +	wait
-> +	# wait for the balance and scrub operations to finish
-> +	while ps aux | grep "balance start" | grep -qv grep; do
-> +		sleep 1
-> +	done
-> +	while ps aux | grep "scrub start" | grep -qv grep; do
-> +		sleep 1
-> +	done
+From: Dave Chinner <dchinner@redhat.com>
 
-I'm just going to point this out here again and assume that it applies 
-for every other patch in this series.  Thanks,
+Commit b8cac56 ("xfs/007: add project quota Q_XQUOTARM test") has
+been broken since it was added - the new code checked the group
+quota inode rather than the project quota inode and so always
+reported a pre-RM block count of zero.  This occurred due to a copy
+and paste of the existing user/group test code and didn't fix up all
+the code properly.
 
-Josef
+Factor the common code into a single function, and pass in the
+correct variables the tests require. While there, make sure that we
+remove the 007.full file before the test starts to aid future
+debugging and also check that project quotas are supported before
+trying to test them.
+
+Signed-off-by: Dave Chinner <dchinner@redhat.com>
+---
+ tests/xfs/007     | 78 ++++++++++++++++++++++++++-----------------------------
+ tests/xfs/007.out |  4 +--
+ 2 files changed, 39 insertions(+), 43 deletions(-)
+
+diff --git a/tests/xfs/007 b/tests/xfs/007
+index 247c5b3..22ee27d 100755
+--- a/tests/xfs/007
++++ b/tests/xfs/007
+@@ -48,55 +48,51 @@ _supported_os Linux Irix
+ _require_scratch
+ _require_xfs_quota
+ 
+-_scratch_mkfs_xfs >/dev/null 2>&1
+-
+-_qmount_option "uquota,gquota"
+-_qmount
++rm -f $seqres.full
+ 
+-echo "*** umount"
+-umount $SCRATCH_MNT
++_scratch_mkfs_xfs >/dev/null 2>&1
+ 
+-UQUOTINO=`xfs_db -c "sb 0" -c "p" $SCRATCH_DEV | grep uquotino | awk '{print $NF}'`
+-GQUOTINO=`xfs_db -c "sb 0" -c "p" $SCRATCH_DEV | grep gquotino | awk '{print $NF}'` 
++do_test()
++{
++	qino_1=$1
++	qino_2=$2
++	off_opts=$3
++
++	echo "*** umount"
++	umount $SCRATCH_MNT
++
++	QINO_1=`xfs_db -c "sb 0" -c "p" $SCRATCH_DEV | \
++			grep $qino_1 | awk '{print $NF}'`
++	QINO_2=`xfs_db -c "sb 0" -c "p" $SCRATCH_DEV | \
++			grep $qino_2 | awk '{print $NF}'` 
++
++	echo "*** Usage before quotarm ***"
++	xfs_db -c "inode $QINO_1" -c "p core.nblocks" $SCRATCH_DEV
++	xfs_db -c "inode $QINO_2" -c "p core.nblocks" $SCRATCH_DEV
++
++	_qmount
++	echo "*** turn off $off_opts quotas"
++	xfs_quota -x -c "off -$off_opts" $SCRATCH_MNT
++	xfs_quota -x -c "remove -$off_opts" $SCRATCH_MNT
++	echo "*** umount"
++	umount $SCRATCH_MNT
++
++	echo "*** Usage after quotarm ***"
++	xfs_db -c "inode $QINO_1" -c "p core.nblocks" $SCRATCH_DEV
++	xfs_db -c "inode $QINO_2" -c "p core.nblocks" $SCRATCH_DEV
++}
+ 
+-echo "*** Usage before quotarm ***"
+-xfs_db -c "inode $UQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
+-xfs_db -c "inode $GQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
+ 
++# Test user and group first
++_qmount_option "uquota,gquota"
+ _qmount
+-echo "*** turn off user and group quotas"
+-xfs_quota -x -c 'off -ug' $SCRATCH_MNT
+-xfs_quota -x -c "remove -ug" $SCRATCH_MNT
+-echo "*** umount"
+-umount $SCRATCH_MNT
+-
+-echo "*** Usage after quotarm ***"
+-xfs_db -c "inode $UQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
+-xfs_db -c "inode $GQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
++do_test uquotino gquotino ug
+ 
++# Test user and project
+ _qmount_option "uquota,pquota"
+ _qmount
+-
+-echo "*** umount"
+-umount $SCRATCH_MNT
+-
+-UQUOTINO=`xfs_db -c "sb 0" -c "p" $SCRATCH_DEV | grep uquotino | awk '{print $NF}'`
+-PQUOTINO=`xfs_db -c "sb 0" -c "p" $SCRATCH_DEV | grep gquotino | awk '{print $NF}'`
+-
+-echo "*** Usage before quotarm ***"
+-xfs_db -c "inode $UQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
+-xfs_db -c "inode $PQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
+-
+-_qmount
+-echo "*** turn off user and project quotas"
+-xfs_quota -x -c 'off -up' $SCRATCH_MNT
+-xfs_quota -x -c "remove -up" $SCRATCH_MNT
+-echo "*** umount"
+-umount $SCRATCH_MNT
+-
+-echo "*** Usage after quotarm ***"
+-xfs_db -c "inode $UQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
+-xfs_db -c "inode $PQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
++_require_prjquota $SCRATCH_DEV
++do_test uquotino pquotino up
+ 
+ # success, all done
+ status=0
+diff --git a/tests/xfs/007.out b/tests/xfs/007.out
+index 7c5bff5..8b5f3ea 100644
+--- a/tests/xfs/007.out
++++ b/tests/xfs/007.out
+@@ -3,7 +3,7 @@ QA output created by 007
+ *** Usage before quotarm ***
+ core.nblocks = 1
+ core.nblocks = 1
+-*** turn off user and group quotas
++*** turn off ug quotas
+ *** umount
+ *** Usage after quotarm ***
+ core.nblocks = 0
+@@ -12,7 +12,7 @@ core.nblocks = 0
+ *** Usage before quotarm ***
+ core.nblocks = 1
+ core.nblocks = 1
+-*** turn off user and project quotas
++*** turn off up quotas
+ *** umount
+ *** Usage after quotarm ***
+ core.nblocks = 0
+-- 
+2.0.0
 
