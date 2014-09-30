@@ -1,135 +1,95 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:33529 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750945AbaI3Jwu (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 30 Sep 2014 05:52:50 -0400
-Received: from G08CNEXCHPEKD03.g08.fujitsu.local (localhost.localdomain [127.0.0.1])
-	by edo.cn.fujitsu.com (8.14.3/8.13.1) with ESMTP id s8U9qoTq005392
-	for <fstests@vger.kernel.org>; Tue, 30 Sep 2014 17:52:50 +0800
-From: Xing Gu <gux.fnst@cn.fujitsu.com>
-Subject: [PATCH v3] xfstests: add test for truncate/collapse range race
-Date: Tue, 30 Sep 2014 17:50:17 +0800
-Message-ID: <1412070617-17136-1-git-send-email-gux.fnst@cn.fujitsu.com>
-In-Reply-To: <1403157004-25112-1-git-send-email-gux.fnst@cn.fujitsu.com>
-References: <1403157004-25112-1-git-send-email-gux.fnst@cn.fujitsu.com>
+Received: from mx1.redhat.com ([209.132.183.28]:42016 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752154AbaI3Pun (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 30 Sep 2014 11:50:43 -0400
+Date: Tue, 30 Sep 2014 23:48:09 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v4 01/15] btrfs: new test to run btrfs balance and
+ subvolume test simultaneously
+Message-ID: <20140930154809.GQ13912@dhcp-13-216.nay.redhat.com>
+References: <1411704901-12723-1-git-send-email-eguan@redhat.com>
+ <1411704901-12723-2-git-send-email-eguan@redhat.com>
+ <5429AD14.5000805@fb.com>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <5429AD14.5000805@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Xing Gu <gux.fnst@cn.fujitsu.com>
+To: Josef Bacik <jbacik@fb.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This case tests truncate/collapse range race. If
-the race occurs, it will trigger BUG_ON.
+On Mon, Sep 29, 2014 at 03:03:48PM -0400, Josef Bacik wrote:
+> On 09/26/2014 12:14 AM, Eryu Guan wrote:
+> >Run btrfs balance and subvolume create/mount/umount/delete simultaneously,
+> >with fsstress running in background.
+> >
+> >Signed-off-by: Eryu Guan <eguan@redhat.com>
+> >---
+[snip]
+> >+	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
+> >+	echo "Run fsstress $args" >>$seqres.full
+> >+	$FSSTRESS_PROG $args >/dev/null 2>&1 &
+> >+	fsstress_pid=$!
+> >+
+> >+	echo -n "Start balance worker: " >>$seqres.full
+> >+	_btrfs_stress_balance $SCRATCH_MNT >/dev/null 2>&1 &
+> >+	balance_pid=$!
+> >+	echo "$balance_pid" >>$seqres.full
+> >+
+> >+	echo -n "Start subvolume worker: " >>$seqres.full
+> >+	_btrfs_stress_subvolume $SCRATCH_DEV $SCRATCH_MNT subvol_$$ $subvol_mnt >/dev/null 2>&1 &
+> >+	subvol_pid=$!
+> >+	echo "$subvol_pid" >>$seqres.full
+> >+
+> >+	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
+> >+	wait $fsstress_pid
+> >+
+> >+	kill $balance_pid $subvol_pid
+> >+	wait
+> >+	# wait for the balance operation to finish
+> >+	while ps aux | grep "balance start" | grep -qv grep; do
+> >+		sleep 1
+> >+	done
+> 
+> This bit isn't needed, killing the balance pid also won't do anything, just
+> waiting is enough, it'll only exit once the balance is finished. If you
+> really want to stop the balance you can use
 
-Signed-off-by: Xing Gu <gux.fnst@cn.fujitsu.com>
----
- tests/generic/326     | 77 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/326.out |  1 +
- tests/generic/group   |  1 +
- 3 files changed, 79 insertions(+)
- create mode 100755 tests/generic/326
- create mode 100644 tests/generic/326.out
+I think it's still needed, or the balance process would block the
+later umount and test fails like
 
-diff --git a/tests/generic/326 b/tests/generic/326
-new file mode 100755
-index 0000000..c24e3ba
---- /dev/null
-+++ b/tests/generic/326
-@@ -0,0 +1,77 @@
-+#! /bin/bash
-+# FS QA Test No. 326
-+#
-+# Test truncate/collapse range race.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2014 Fujitsu.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+
-+_cleanup()
-+{
-+    rm -f $tmp.*
-+}
-+
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs generic
-+_require_scratch
-+_require_xfs_io_command "fcollapse"
-+
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount
-+
-+old_bug=`dmesg | grep -c "kernel BUG"`
-+
-+testfile=$SCRATCH_MNT/file.$seq
-+# fcollapse/truncate continuously and simultaneously
-+# a same file
-+for ((i=1; i <= 100; i++))
-+do
-+	for ((i=1; i <= 1000; i++))
-+	do
-+		$XFS_IO_PROG -f -c 'truncate 100k' $testfile 2>> $seqres.full
-+		$XFS_IO_PROG -f -c 'fcollapse 0 16k' $testfile 2>> $seqres.full
-+	done &
-+	for ((i=1; i <= 1000; i++))
-+	do
-+		$XFS_IO_PROG -f -c 'truncate 0' $testfile 2>> $seqres.full
-+	done &
-+done
-+
-+wait
-+
-+new_bug=`dmesg | grep -c "kernel BUG"`
-+if [ $new_bug -ne $old_bug ]; then
-+	echo "kernel bug detected, check dmesg for more infomation."
-+fi
-+
-+status=0 ; exit
-diff --git a/tests/generic/326.out b/tests/generic/326.out
-new file mode 100644
-index 0000000..90a76cc
---- /dev/null
-+++ b/tests/generic/326.out
-@@ -0,0 +1 @@
-+QA output created by 326
-diff --git a/tests/generic/group b/tests/generic/group
-index 799bfd8..5ef8acb 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -151,3 +151,4 @@
- 323 auto aio stress
- 324 auto fsr quick
- 325 auto quick data log
-+326 auto
--- 
-1.9.3
+--- tests/btrfs/059.out 2014-09-26 11:35:43.932850826 +0800
++++ /root/xfstests/results//btrfs/059.out.bad   2014-09-30 23:29:47.538310375 +0800
+@@ -1,2 +1,9 @@
+ QA output created by 059
+ Silence is golden
++umount: /mnt/testarea/scratch: target is busy.
++        (In some cases useful info about processes that use
++         the device is found by lsof(8) or fuser(1))
++umount: /mnt/testarea/scratch: target is busy.
++        (In some cases useful info about processes that use
++         the device is found by lsof(8) or fuser(1))
++_check_btrfs_filesystem: filesystem on /dev/mapper/rhel_hp--dl388eg8--01-testlv2 is inconsistent (see /root/xfstests/results//btrfs/059.full)
 
+Adding debug output of "lsof $SCRATCH_MNT" and "ps aux | grep btrfs"
+before umount shows it's the balance process is still running and
+blocks the umount.
+
+lsof /mnt/testarea/scratch
+btrfs   13491 root    3r   DIR   0,40       42  256 /mnt/testarea/scratch
+ps aux | grep btrfs
+....
+root     13491  7.0  0.0  18660  1312 pts/1    D+   23:29   0:00 /usr/sbin/btrfs balance start /mnt/testarea/scratch
+
+Killing the balance pid is to stop any further balance operation, wait
+is waiting for the child process (_btrfs_stress_balance), not the
+child's child process (balance process). So only wait is not enough,
+we should wait for the balance to finish explicitly.
+
+This is also true for the rest of the test cases in this series. This
+is kind of ugly, but I cannot figure out a better solution right now..
+
+Thanks,
+Eryu
