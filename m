@@ -1,52 +1,50 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-qg0-f42.google.com ([209.85.192.42]:37762 "EHLO
-	mail-qg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750901AbaI3TuQ (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 30 Sep 2014 15:50:16 -0400
-Date: Tue, 30 Sep 2014 15:50:04 -0400
-From: Eric Whitney <enwlinux@gmail.com>
-Subject: [PATCH] shared/272: fail quickly on mkfs errors and improve logging
-Message-ID: <20140930195004.GB5803@wallace>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Received: from cantor2.suse.de ([195.135.220.15]:39722 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751473AbaJAP11 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 1 Oct 2014 11:27:27 -0400
+Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
+	by mx2.suse.de (Postfix) with ESMTP id 77615AD35
+	for <fstests@vger.kernel.org>; Wed,  1 Oct 2014 15:27:26 +0000 (UTC)
+From: Jan Kara <jack@suse.cz>
+Subject: [PATCH] xfs/195: Use XFSDUMP_PROG instead of xfsdump directly
+Date: Wed,  1 Oct 2014 17:27:18 +0200
+Message-Id: <1412177239-27241-1-git-send-email-jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org
+Cc: Jan Kara <jack@suse.cz>
 List-ID: <fstests@vger.kernel.org>
 
-272 will log diagnostic information if it fails to make its scratch file
-system, but the test itself won't fail immediately.  If the scratch
-device had previously contained a valid filesystem, and the attempt to
-make a small scratch file system on it fails, 272 will mount and run on
-the pre-existing file system (as seen during ext4 inline data testing).
-Since 272 tests to ENOSPC, it can take a long time to learn mkfs failed.
-This behavior can also lead to invalid positive test results unless
-272.full is examined separately.
+Use appropriate environment variable (XFSDUMP_PROG) instead of hardcoding
+'xfsdump' name. This also makes the test fail graciously when xfsdump
+isn't installed.
 
-Signed-off-by: Eric Whitney <enwlinux@gmail.com>
+Signed-off-by: Jan Kara <jack@suse.cz>
 ---
- tests/shared/272 | 7 +++++--
- 1 file changed, 5 insertions(+), 2 deletions(-)
+ tests/xfs/195 |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
 
-diff --git a/tests/shared/272 b/tests/shared/272
-index 4417535..9695e59 100755
---- a/tests/shared/272
-+++ b/tests/shared/272
-@@ -87,8 +87,11 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
+diff --git a/tests/xfs/195 b/tests/xfs/195
+index c7bc7b8..b86aedb 100755
+--- a/tests/xfs/195
++++ b/tests/xfs/195
+@@ -48,7 +48,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ #
+ _do_dump()
+ {
+-	xfsdump -l 0 -s d -F  \
++	$XFSDUMP_PROG -l 0 -s d -F  \
+ 		-L prova -M prova \
+ 		-f $TEST_DIR/dumpfile -e -v excluded_files=debug $TEST_DIR \
+ 		| grep "ino $inum" \
+@@ -58,6 +58,7 @@ _do_dump()
+ # get standard environment, filters and checks
+ . ./common/rc
+ . ./common/filter
++. ./common/dump
  
--_scratch_mkfs_sized $((64 * 1024 * 1024)) >> $seqres.full 2>&1
--_scratch_mount
-+rm -f $seqres.full
-+
-+_scratch_mkfs_sized $((64 * 1024 * 1024)) >> $seqres.full 2>&1 \
-+	|| _fail "mkfs failed"
-+_scratch_mount >> $seqres.full 2>&1 || _fail "mount failed"
- 
- if ! _workout; then
- 	echo "workout failed"
+ # real QA test starts here
+ _supported_fs xfs
 -- 
-1.9.1
+1.6.0.2
 
