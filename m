@@ -1,12 +1,12 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:34627 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:19044 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752068AbaJFKFh (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 6 Oct 2014 06:05:37 -0400
+	id S1752133AbaJFKFl (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 6 Oct 2014 06:05:41 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v5 11/15] btrfs: new case to run device replace and defrag operations simultaneously
-Date: Mon,  6 Oct 2014 18:04:50 +0800
-Message-Id: <1412589894-10675-12-git-send-email-eguan@redhat.com>
+Subject: [PATCH v5 13/15] btrfs: new case to run btrfs scrub and defrag operations simultaneously
+Date: Mon,  6 Oct 2014 18:04:52 +0800
+Message-Id: <1412589894-10675-14-git-send-email-eguan@redhat.com>
 In-Reply-To: <1412589894-10675-1-git-send-email-eguan@redhat.com>
 References: <1412589894-10675-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -14,29 +14,29 @@ To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Run btrfs replace operations and defrag simultaneously with fsstress
+Run btrfs scrub and defrag operations simultaneously with fsstress
 running in background.
 
 Reviewed-by: Josef Bacik <jbacik@fb.com>
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- tests/btrfs/070     | 125 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/070.out |   2 +
+ tests/btrfs/072     | 116 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/072.out |   2 +
  tests/btrfs/group   |   1 +
- 3 files changed, 128 insertions(+)
- create mode 100755 tests/btrfs/070
- create mode 100644 tests/btrfs/070.out
+ 3 files changed, 119 insertions(+)
+ create mode 100755 tests/btrfs/072
+ create mode 100644 tests/btrfs/072.out
 
-diff --git a/tests/btrfs/070 b/tests/btrfs/070
+diff --git a/tests/btrfs/072 b/tests/btrfs/072
 new file mode 100755
-index 0000000..6ef86c9
+index 0000000..07cc766
 --- /dev/null
-+++ b/tests/btrfs/070
-@@ -0,0 +1,125 @@
++++ b/tests/btrfs/072
+@@ -0,0 +1,116 @@
 +#! /bin/bash
-+# FSQA Test No. btrfs/070
++# FSQA Test No. btrfs/072
 +#
-+# Run btrfs replace operations and defrag simultaneously with fsstress
++# Run btrfs scrub and defrag operations simultaneously with fsstress
 +# running in background.
 +#
 +#-----------------------------------------------------------------------
@@ -82,9 +82,8 @@ index 0000000..6ef86c9
 +_supported_os Linux
 +# we check scratch dev after each loop
 +_require_scratch_nocheck
-+_require_scratch_dev_pool 5
-+_require_scratch_dev_pool_equal_size
-+_btrfs_get_profile_configs replace
++_require_scratch_dev_pool 4
++_btrfs_get_profile_configs
 +
 +rm -f $seqres.full
 +
@@ -92,33 +91,26 @@ index 0000000..6ef86c9
 +{
 +	local mkfs_opts=$1
 +	local with_compress=$2
-+	local saved_scratch_dev_pool=$SCRATCH_DEV_POOL
 +
 +	echo "Test $mkfs_opts with $with_compress" >>$seqres.full
 +
-+	# remove the last device from the SCRATCH_DEV_POOL list so
-+	# _scratch_pool_mkfs won't use all devices in pool
-+	local last_dev="`echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $NF}'`"
-+	SCRATCH_DEV_POOL=`echo $SCRATCH_DEV_POOL | sed -e "s# *$last_dev *##"`
 +	_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
 +	# make sure we created btrfs with desired options
 +	if [ $? -ne 0 ]; then
 +		echo "mkfs $mkfs_opts failed"
-+		SCRATCH_DEV_POOL=$saved_scratch_dev_pool
 +		return
 +	fi
 +	_scratch_mount >>$seqres.full 2>&1
-+	SCRATCH_DEV_POOL=$saved_scratch_dev_pool
 +
 +	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
 +	echo "Run fsstress $args" >>$seqres.full
 +	$FSSTRESS_PROG $args >/dev/null 2>&1 &
 +	fsstress_pid=$!
 +
-+	echo -n "Start replace worker: " >>$seqres.full
-+	_btrfs_stress_replace $SCRATCH_MNT >>$seqres.full 2>&1 &
-+	replace_pid=$!
-+	echo "$replace_pid" >>$seqres.full
++	echo -n "Start scrub worker: " >>$seqres.full
++	_btrfs_stress_scrub $SCRATCH_MNT >/dev/null 2>&1 &
++	scrub_pid=$!
++	echo "$scrub_pid" >>$seqres.full
 +
 +	echo -n "Start defrag worker: " >>$seqres.full
 +	_btrfs_stress_defrag $SCRATCH_MNT $with_compress >/dev/null 2>&1 &
@@ -127,14 +119,13 @@ index 0000000..6ef86c9
 +
 +	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
 +	wait $fsstress_pid
-+	kill $replace_pid $defrag_pid
++	kill $scrub_pid $defrag_pid
 +	wait
-+
-+	# wait for the defrag and replace operations to finish
-+	while ps aux | grep "btrfs filesystem defrag" | grep -qv grep; do
++	# wait for the scrub and defrag operations to finish
++	while ps aux | grep "scrub start" | grep -qv grep; do
 +		sleep 1
 +	done
-+	while ps aux | grep "replace start" | grep -qv grep; do
++	while ps aux | grep "btrfs filesystem defrag" | grep -qv grep; do
 +		sleep 1
 +	done
 +
@@ -158,23 +149,23 @@ index 0000000..6ef86c9
 +
 +status=0
 +exit
-diff --git a/tests/btrfs/070.out b/tests/btrfs/070.out
+diff --git a/tests/btrfs/072.out b/tests/btrfs/072.out
 new file mode 100644
-index 0000000..8940c5d
+index 0000000..590bbc6
 --- /dev/null
-+++ b/tests/btrfs/070.out
++++ b/tests/btrfs/072.out
 @@ -0,0 +1,2 @@
-+QA output created by 070
++QA output created by 072
 +Silence is golden
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 31cb02b..869c061 100644
+index 13bbeb3..7bded39 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -72,3 +72,4 @@
- 067 auto subvol defrag compress
- 068 auto subvol remount compress
+@@ -74,3 +74,4 @@
  069 auto replace scrub
-+070 auto replace defrag compress
+ 070 auto replace defrag compress
+ 071 auto replace remount compress
++072 auto scrub defrag compress
 -- 
 1.8.3.1
 
