@@ -1,12 +1,12 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41432 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:19363 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751978AbaJFKFq (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 6 Oct 2014 06:05:46 -0400
+	id S1752163AbaJFKFn (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 6 Oct 2014 06:05:43 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v5 15/15] btrfs: new case to run defrag and remount with different compress algorithms simultaneously
-Date: Mon,  6 Oct 2014 18:04:54 +0800
-Message-Id: <1412589894-10675-16-git-send-email-eguan@redhat.com>
+Subject: [PATCH v5 14/15] btrfs: new case to run btrfs scrub and remount with different compress algorithms simultaneously
+Date: Mon,  6 Oct 2014 18:04:53 +0800
+Message-Id: <1412589894-10675-15-git-send-email-eguan@redhat.com>
 In-Reply-To: <1412589894-10675-1-git-send-email-eguan@redhat.com>
 References: <1412589894-10675-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -14,29 +14,29 @@ To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Run btrfs defrag operations and remount with different compress
-algorithms simultaneously with fsstress running in background.
+Run btrfs scrub and remount with different compress algorithms
+simultaneously with fsstress running in background.
 
 Reviewed-by: Josef Bacik <jbacik@fb.com>
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- tests/btrfs/074     | 116 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/074.out |   2 +
+ tests/btrfs/073     | 114 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/073.out |   2 +
  tests/btrfs/group   |   1 +
- 3 files changed, 119 insertions(+)
- create mode 100755 tests/btrfs/074
- create mode 100644 tests/btrfs/074.out
+ 3 files changed, 117 insertions(+)
+ create mode 100755 tests/btrfs/073
+ create mode 100644 tests/btrfs/073.out
 
-diff --git a/tests/btrfs/074 b/tests/btrfs/074
+diff --git a/tests/btrfs/073 b/tests/btrfs/073
 new file mode 100755
-index 0000000..08f3b41
+index 0000000..bdd6308
 --- /dev/null
-+++ b/tests/btrfs/074
-@@ -0,0 +1,116 @@
++++ b/tests/btrfs/073
+@@ -0,0 +1,114 @@
 +#! /bin/bash
-+# FSQA Test No. btrfs/074
++# FSQA Test No. btrfs/073
 +#
-+# Run btrfs defrag operations and remount with different compress algorithms
++# Run btrfs scrub and remount with different compress algorithms
 +# simultaneously with fsstress running in background.
 +#
 +#-----------------------------------------------------------------------
@@ -90,9 +90,8 @@ index 0000000..08f3b41
 +run_test()
 +{
 +	local mkfs_opts=$1
-+	local with_compress=$2
 +
-+	echo "Test $mkfs_opts with $with_compress" >>$seqres.full
++	echo "Test $mkfs_opts" >>$seqres.full
 +
 +	_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
 +	# make sure we created btrfs with desired options
@@ -107,10 +106,10 @@ index 0000000..08f3b41
 +	$FSSTRESS_PROG $args >/dev/null 2>&1 &
 +	fsstress_pid=$!
 +
-+	echo -n "Start defrag worker: " >>$seqres.full
-+	_btrfs_stress_defrag $SCRATCH_MNT $with_compress >/dev/null 2>&1 &
-+	defrag_pid=$!
-+	echo "$defrag_pid" >>$seqres.full
++	echo -n "Start scrub worker: " >>$seqres.full
++	_btrfs_stress_scrub $SCRATCH_MNT >/dev/null 2>&1 &
++	scrub_pid=$!
++	echo "$scrub_pid" >>$seqres.full
 +
 +	echo -n "Start remount worker: " >>$seqres.full
 +	_btrfs_stress_remount_compress $SCRATCH_MNT >/dev/null 2>&1 &
@@ -119,10 +118,10 @@ index 0000000..08f3b41
 +
 +	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
 +	wait $fsstress_pid
-+	kill $defrag_pid $remount_pid
++	kill $scrub_pid $remount_pid
 +	wait
-+	# wait for the defrag and remount operations to finish
-+	while ps aux | grep "btrfs filesystem defrag" | grep -qv grep; do
++	# wait for the scrub and remount operations to finish
++	while ps aux | grep "scrub start" | grep -qv grep; do
 +		sleep 1
 +	done
 +	while ps aux | grep "mount.*$SCRATCH_MNT" | grep -qv grep; do
@@ -143,29 +142,28 @@ index 0000000..08f3b41
 +
 +echo "Silence is golden"
 +for t in "${_btrfs_profile_configs[@]}"; do
-+	run_test "$t" nocompress
-+	run_test "$t" compress
++	run_test "$t"
 +done
 +
 +status=0
 +exit
-diff --git a/tests/btrfs/074.out b/tests/btrfs/074.out
+diff --git a/tests/btrfs/073.out b/tests/btrfs/073.out
 new file mode 100644
-index 0000000..380f065
+index 0000000..d107704
 --- /dev/null
-+++ b/tests/btrfs/074.out
++++ b/tests/btrfs/073.out
 @@ -0,0 +1,2 @@
-+QA output created by 074
++QA output created by 073
 +Silence is golden
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 921ec9b..c8ac72c 100644
+index 7bded39..921ec9b 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -76,3 +76,4 @@
+@@ -75,3 +75,4 @@
+ 070 auto replace defrag compress
  071 auto replace remount compress
  072 auto scrub defrag compress
- 073 auto scrub remount compress
-+074 auto defrag remount compress
++073 auto scrub remount compress
 -- 
 1.8.3.1
 
