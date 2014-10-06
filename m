@@ -1,12 +1,12 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:33359 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:4768 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751961AbaJFKFX (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 6 Oct 2014 06:05:23 -0400
+	id S1751705AbaJFKFV (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 6 Oct 2014 06:05:21 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v5 04/15] btrfs: new case to run btrfs balance and remount with different compress algorithms
-Date: Mon,  6 Oct 2014 18:04:43 +0800
-Message-Id: <1412589894-10675-5-git-send-email-eguan@redhat.com>
+Subject: [PATCH v5 03/15] btrfs: new test to run btrfs balance and defrag operations simultaneously
+Date: Mon,  6 Oct 2014 18:04:42 +0800
+Message-Id: <1412589894-10675-4-git-send-email-eguan@redhat.com>
 In-Reply-To: <1412589894-10675-1-git-send-email-eguan@redhat.com>
 References: <1412589894-10675-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -14,56 +14,62 @@ To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Run btrfs balance and remount with different compress algorithms
-simultaneously, with fsstress running in background.
+Run btrfs balance and defrag operations simultaneously with fsstress
+running in background.
 
 Reviewed-by: Josef Bacik <jbacik@fb.com>
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- common/rc           |  14 +++++++
- tests/btrfs/063     | 114 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/063.out |   2 +
+ common/rc           |  20 +++++++++
+ tests/btrfs/062     | 116 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/062.out |   2 +
  tests/btrfs/group   |   1 +
- 4 files changed, 131 insertions(+)
- create mode 100755 tests/btrfs/063
- create mode 100644 tests/btrfs/063.out
+ 4 files changed, 139 insertions(+)
+ create mode 100755 tests/btrfs/062
+ create mode 100644 tests/btrfs/062.out
 
 diff --git a/common/rc b/common/rc
-index 9c2aa8e..a158ea3 100644
+index fac1fad..9c2aa8e 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -2617,6 +2617,20 @@ _btrfs_stress_defrag()
+@@ -2597,6 +2597,26 @@ _btrfs_stress_scrub()
  	done
  }
  
-+# stress btrfs by remounting it with different compression algorithms in a loop
-+# run this with fsstress running at background could exercise the compression
-+# code path and ensure no race when switching compression algorithm with constant
-+# I/O activity.
-+_btrfs_stress_remount_compress()
++# stress btrfs by defragmenting every file/dir in a loop and compress file
++# contents while defragmenting if second argument is not "nocompress"
++_btrfs_stress_defrag()
 +{
 +	local btrfs_mnt=$1
++	local compress=$2
++
 +	while true; do
-+		for algo in no zlib lzo; do
-+			$MOUNT_PROG -o remount,compress=$algo $btrfs_mnt
-+		done
++		if [ "$compress" == "nocompress" ]; then
++			find $btrfs_mnt \( -type f -o -type d \) -exec \
++			$BTRFS_UTIL_PROG filesystem defrag {} \;
++		else
++			find $btrfs_mnt \( -type f -o -type d \) -exec \
++			$BTRFS_UTIL_PROG filesystem defrag -clzo {} \;
++			find $btrfs_mnt \( -type f -o -type d \) -exec \
++			$BTRFS_UTIL_PROG filesystem defrag -czlib {} \;
++		fi
 +	done
 +}
 +
  init_rc()
  {
  	if [ "$iam" == new ]
-diff --git a/tests/btrfs/063 b/tests/btrfs/063
+diff --git a/tests/btrfs/062 b/tests/btrfs/062
 new file mode 100755
-index 0000000..854c941
+index 0000000..74c2a51
 --- /dev/null
-+++ b/tests/btrfs/063
-@@ -0,0 +1,114 @@
++++ b/tests/btrfs/062
+@@ -0,0 +1,116 @@
 +#! /bin/bash
-+# FSQA Test No. btrfs/063
++# FSQA Test No. btrfs/062
 +#
-+# Run btrfs balance and remount with different compress algorithms
-+# simultaneously, with fsstress running in background.
++# Run btrfs balance and defrag operations simultaneously with fsstress
++# running in background.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (C) 2014 Red Hat Inc. All rights reserved.
@@ -116,8 +122,9 @@ index 0000000..854c941
 +run_test()
 +{
 +	local mkfs_opts=$1
++	local with_compress=$2
 +
-+	echo "Test $mkfs_opts" >>$seqres.full
++	echo "Test $mkfs_opts with $with_compress" >>$seqres.full
 +
 +	_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
 +	# make sure we created btrfs with desired options
@@ -137,20 +144,20 @@ index 0000000..854c941
 +	balance_pid=$!
 +	echo "$balance_pid" >>$seqres.full
 +
-+	echo -n "Start remount worker: " >>$seqres.full
-+	_btrfs_stress_remount_compress $SCRATCH_MNT >/dev/null 2>&1 &
-+	remount_pid=$!
-+	echo "$remount_pid" >>$seqres.full
++	echo -n "Start defrag worker: " >>$seqres.full
++	_btrfs_stress_defrag $SCRATCH_MNT $with_compress >/dev/null 2>&1 &
++	defrag_pid=$!
++	echo "$defrag_pid" >>$seqres.full
 +
 +	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
 +	wait $fsstress_pid
-+	kill $balance_pid $remount_pid
++	kill $balance_pid $defrag_pid
 +	wait
-+	# wait for the balance and remount loop to finish
++	# wait for the balance and defrag operations to finish
 +	while ps aux | grep "balance start" | grep -qv grep; do
 +		sleep 1
 +	done
-+	while ps aux | grep "mount.*$SCRATCH_MNT" | grep -qv grep; do
++	while ps aux | grep "btrfs filesystem defrag" | grep -qv grep; do
 +		sleep 1
 +	done
 +
@@ -168,28 +175,29 @@ index 0000000..854c941
 +
 +echo "Silence is golden"
 +for t in "${_btrfs_profile_configs[@]}"; do
-+	run_test "$t"
++	run_test "$t" nocompress
++	run_test "$t" compress
 +done
 +
 +status=0
 +exit
-diff --git a/tests/btrfs/063.out b/tests/btrfs/063.out
+diff --git a/tests/btrfs/062.out b/tests/btrfs/062.out
 new file mode 100644
-index 0000000..de35fc5
+index 0000000..a1578f4
 --- /dev/null
-+++ b/tests/btrfs/063.out
++++ b/tests/btrfs/062.out
 @@ -0,0 +1,2 @@
-+QA output created by 063
++QA output created by 062
 +Silence is golden
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index a6c39f7..b7025f6 100644
+index 5064ef3..a6c39f7 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -65,3 +65,4 @@
+@@ -64,3 +64,4 @@
+ 059 auto quick
  060 auto balance subvol
  061 auto balance scrub
- 062 auto balance defrag compress
-+063 auto balance remount compress
++062 auto balance defrag compress
 -- 
 1.8.3.1
 
