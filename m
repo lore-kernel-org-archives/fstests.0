@@ -1,178 +1,117 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58451 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752045AbaJFKF2 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 6 Oct 2014 06:05:28 -0400
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v5 06/15] btrfs: new case to run btrfs subvolume create/delete operations and device replace simultaneously
-Date: Mon,  6 Oct 2014 18:04:45 +0800
-Message-Id: <1412589894-10675-7-git-send-email-eguan@redhat.com>
-In-Reply-To: <1412589894-10675-1-git-send-email-eguan@redhat.com>
-References: <1412589894-10675-1-git-send-email-eguan@redhat.com>
+Received: from mx0a-00003501.pphosted.com ([67.231.144.15]:11210 "EHLO
+	mx0a-00003501.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753155AbaJFSi2 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 6 Oct 2014 14:38:28 -0400
+Received: from pps.filterd (m0075552.ppops.net [127.0.0.1])
+	by mx0a-00003501.pphosted.com (8.14.5/8.14.5) with SMTP id s96IJNu6012524
+	for <fstests@vger.kernel.org>; Mon, 6 Oct 2014 14:24:01 -0400
+Received: from pps.reinject (localhost [127.0.0.1])
+	by mx0a-00003501.pphosted.com with ESMTP id 1puy7ggcwr-1
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NOT)
+	for <fstests@vger.kernel.org>; Mon, 06 Oct 2014 14:23:58 -0400
+Received: from m0075552.ppops.net (m0075552.ppops.net [127.0.0.1])
+	by pps.reinject (8.14.5/8.14.5) with SMTP id s96ILmsg015560
+	for <fstests@vger.kernel.org>; Mon, 6 Oct 2014 14:23:58 -0400
+From: Paul Paulson <paul.paulson@seagate.com>
+Subject: [PATCH] generic/017: skip tests with mkfs failures
+Date: Mon,  6 Oct 2014 13:23:50 -0500
+Message-Id: <1412619830-23088-1-git-send-email-paul.paulson@seagate.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
+Cc: linux-ext4@vger.kernel.org, Paul Paulson <paul.paulson@seagate.com>
 List-ID: <fstests@vger.kernel.org>
 
-Run btrfs subvolume create/mount/umount/delete and device replace
-operation simultaneously, with fsstress running in background.
+The mkfs command fails to create ext4 filesystems on partition sizes
+greater than 1998080 MiB when using 1024 byte blocks and the default
+calculation for the number of inodes reserved for the filesystem.
 
-Reviewed-by: Josef Bacik <jbacik@fb.com>
-Signed-off-by: Eryu Guan <eguan@redhat.com>
+The following error message is produced when the maximum number of
+inodes is exceeded:
+
+    "Cannot create filesystem with requested number of inodes while
+     setting up superblock"
+
+The generic/017 test was modified to skip the 1K block size test
+for partitions with an inode count that exceeds the maximum.
+
+The QA output for the test was also changed to a simple pass/fail
+indication to account for a variable number of test iterations.
 ---
- tests/btrfs/065     | 123 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/065.out |   2 +
- tests/btrfs/group   |   1 +
- 3 files changed, 126 insertions(+)
- create mode 100755 tests/btrfs/065
- create mode 100644 tests/btrfs/065.out
+ common/config         |  1 +
+ tests/generic/017     | 21 +++++++++++++++++++--
+ tests/generic/017.out |  4 +---
+ 3 files changed, 21 insertions(+), 5 deletions(-)
 
-diff --git a/tests/btrfs/065 b/tests/btrfs/065
-new file mode 100755
-index 0000000..7d8249b
---- /dev/null
-+++ b/tests/btrfs/065
-@@ -0,0 +1,123 @@
-+#! /bin/bash
-+# FSQA Test No. btrfs/065
-+#
-+# Run btrfs subvolume create/mount/umount/delete and device replace
-+# operation simultaneously, with fsstress running in background.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2014 Red Hat Inc. All rights reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
-+#-----------------------------------------------------------------------
-+#
+diff --git a/common/config b/common/config
+index d68d4d0..824985e 100644
+--- a/common/config
++++ b/common/config
+@@ -184,6 +184,7 @@ export LOGGER_PROG="`set_prog_path logger`"
+ export DBENCH_PROG="`set_prog_path dbench`"
+ export DMSETUP_PROG="`set_prog_path dmsetup`"
+ export WIPEFS_PROG="`set_prog_path wipefs`"
++export TUNE2FS_PROG="`set_prog_path tune2fs`"
+ 
+ # Generate a comparable xfsprogs version number in the form of
+ # major * 10000 + minor * 100 + release
+diff --git a/tests/generic/017 b/tests/generic/017
+index 13b7254..eb38d4d 100755
+--- a/tests/generic/017
++++ b/tests/generic/017
+@@ -49,8 +49,16 @@ _do_die_on_error=y
+ testfile=$SCRATCH_MNT/$seq.$$
+ BLOCKS=10240
+ 
+-for (( BSIZE = 1024; BSIZE <= 4096; BSIZE *= 2 )); do
++MAX_INODE_COUNT_1K=127877120
++inode_count=`$TUNE2FS_PROG -l $SCRATCH_DEV | awk '/Inode count:/ { print $3 }'`
++initial_bsize=$(($inode_count <= $MAX_INODE_COUNT_1K ? 1024 : 2048))
+ 
++iterations=0
++passcount=0
 +
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
++for (( BSIZE = $initial_bsize; BSIZE <= 4096; BSIZE *= 2 )); do
 +
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+# we check scratch dev after each loop
-+_require_scratch_nocheck
-+_require_scratch_dev_pool 5
-+_require_scratch_dev_pool_equal_size
-+_btrfs_get_profile_configs replace
-+
-+rm -f $seqres.full
-+
-+run_test()
-+{
-+	local mkfs_opts=$1
-+	local saved_scratch_dev_pool=$SCRATCH_DEV_POOL
-+	local subvol_mnt=$TEST_DIR/$seq.mnt
-+
-+	echo "Test $mkfs_opts" >>$seqres.full
-+
-+	# remove the last device from the SCRATCH_DEV_POOL list so
-+	# _scratch_pool_mkfs won't use all devices in pool
-+	local last_dev="`echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $NF}'`"
-+	SCRATCH_DEV_POOL=`echo $SCRATCH_DEV_POOL | sed -e "s# *$last_dev *##"`
-+	_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
-+	# make sure we created btrfs with desired options
-+	if [ $? -ne 0 ]; then
-+		echo "mkfs $mkfs_opts failed"
-+		SCRATCH_DEV_POOL=$saved_scratch_dev_pool
-+		return
++	let iterations++
+ 	length=$(($BLOCKS * $BSIZE))
+ 	case $FSTYP in
+ 	xfs)
+@@ -74,7 +82,10 @@ for (( BSIZE = 1024; BSIZE <= 4096; BSIZE *= 2 )); do
+ 	done
+ 
+ 	# Check if 80 extents are present
+-	$XFS_IO_PROG -c "fiemap -v" $testfile | grep "^ *[0-9]*:" |wc -l
++	extents=`$XFS_IO_PROG -c "fiemap -v" $testfile | grep "^ *[0-9]*:" | wc -l`
++	if [ $extents -eq 80 ]; then
++		let passcount++
 +	fi
-+	_scratch_mount >>$seqres.full 2>&1
-+	SCRATCH_DEV_POOL=$saved_scratch_dev_pool
+ 
+ 	_check_scratch_fs
+ 	if [ $? -ne 0 ]; then
+@@ -85,6 +96,12 @@ for (( BSIZE = 1024; BSIZE <= 4096; BSIZE *= 2 )); do
+ 	umount $SCRATCH_MNT
+ done
+ 
++if [ $iterations -gt 0 -a $passcount -eq $iterations ]; then
++	echo pass
++else
++	echo fail
++fi
 +
-+	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
-+	echo "Run fsstress $args" >>$seqres.full
-+	$FSSTRESS_PROG $args >/dev/null 2>&1 &
-+	fsstress_pid=$!
-+
-+	echo -n "Start subvolume worker: " >>$seqres.full
-+	_btrfs_stress_subvolume $SCRATCH_DEV $SCRATCH_MNT subvol_$$ $subvol_mnt >/dev/null 2>&1 &
-+	subvol_pid=$!
-+	echo "$subvol_pid" >>$seqres.full
-+
-+	echo -n "Start replace worker: " >>$seqres.full
-+	_btrfs_stress_replace $SCRATCH_MNT >>$seqres.full 2>&1 &
-+	replace_pid=$!
-+	echo "$replace_pid" >>$seqres.full
-+
-+	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
-+	wait $fsstress_pid
-+
-+	kill $subvol_pid $replace_pid
-+	wait
-+	# wait for the replace operation to finish
-+	while ps aux | grep "replace start" | grep -qv grep; do
-+		sleep 1
-+	done
-+
-+	echo "Scrub the filesystem" >>$seqres.full
-+	$BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >>$seqres.full 2>&1
-+	if [ $? -ne 0 ]; then
-+		echo "Scrub find errors in \"$mkfs_opts\" test" | tee -a $seqres.full
-+	fi
-+
-+	# in case the subvolume is still mounted
-+	$UMOUNT_PROG $subvol_mnt >/dev/null 2>&1
-+	_scratch_unmount
-+	# we called _require_scratch_nocheck instead of _require_scratch
-+	# do check after test for each profile config
-+	_check_scratch_fs
-+}
-+
-+echo "Silence is golden"
-+for t in "${_btrfs_profile_configs[@]}"; do
-+	run_test "$t"
-+done
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/065.out b/tests/btrfs/065.out
-new file mode 100644
-index 0000000..94476cd
---- /dev/null
-+++ b/tests/btrfs/065.out
-@@ -0,0 +1,2 @@
-+QA output created by 065
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 9455b4d..697a913 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -67,3 +67,4 @@
- 062 auto balance defrag compress
- 063 auto balance remount compress
- 064 auto balance replace
-+065 auto subvol replace
+ # success, all done
+ status=0
+ exit
+diff --git a/tests/generic/017.out b/tests/generic/017.out
+index cc524ac..008ac18 100644
+--- a/tests/generic/017.out
++++ b/tests/generic/017.out
+@@ -1,4 +1,2 @@
+ QA output created by 017
+-80
+-80
+-80
++pass
 -- 
-1.8.3.1
+1.9.1
 
