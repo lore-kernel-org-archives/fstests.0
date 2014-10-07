@@ -1,129 +1,52 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-pd0-f178.google.com ([209.85.192.178]:47547 "EHLO
-	mail-pd0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754108AbaJGPVg (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 7 Oct 2014 11:21:36 -0400
-From: Wang Shilong <wangshilong1991@gmail.com>
-Subject: [PATCH] xfstests: add regression for inode bad compression ratio detection
-Date: Tue,  7 Oct 2014 19:20:49 -0400
-Message-Id: <1412724049-50613-1-git-send-email-wangshilong1991@gmail.com>
+Received: from mx0b-00003501.pphosted.com ([67.231.152.68]:53337 "EHLO
+	mx0b-00003501.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753176AbaJGSMx (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 7 Oct 2014 14:12:53 -0400
+Received: from pps.filterd (m0075032.ppops.net [127.0.0.1])
+	by mx0b-00003501.pphosted.com (8.14.5/8.14.5) with SMTP id s97I3sYd014545
+	for <fstests@vger.kernel.org>; Tue, 7 Oct 2014 14:12:52 -0400
+Received: from mail-qg0-f50.google.com (mail-qg0-f50.google.com [209.85.192.50])
+	by mx0b-00003501.pphosted.com with ESMTP id 1pvm5r0a5h-1
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=NOT)
+	for <fstests@vger.kernel.org>; Tue, 07 Oct 2014 14:12:52 -0400
+Received: by mail-qg0-f50.google.com with SMTP id q108so5782324qgd.37
+        for <fstests@vger.kernel.org>; Tue, 07 Oct 2014 11:12:51 -0700 (PDT)
+MIME-Version: 1.0
+In-Reply-To: <20141007005300.GA11741@thunk.org>
+References: <1412619830-23088-1-git-send-email-paul.paulson@seagate.com>
+	<20141007005300.GA11741@thunk.org>
+Date: Tue, 7 Oct 2014 13:12:51 -0500
+Message-ID: <CAG4SSaSQt15AOOVR50EruW8sq_9Az3W26z+7pHy-2E9D3gOcgg@mail.gmail.com>
+Subject: Re: [PATCH] generic/017: skip tests with mkfs failures
+From: Paul Paulson <paul.paulson@seagate.com>
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This test add a regression test to make sure btrfs dosen't set
-inode NOCOMPRESS flag when a small write(<=blocksize) happens.
-
-Signed-off-by: Wang Shilong <wangshilong1991@gmail.com>
----
-Test is a little relying on btrfs now have a max 128k limit write, not sure
-whether it is good since it is possible we may change it in the future, let me
-know if you have better idea ^_^.
----
- tests/btrfs/060     | 72 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/060.out |  3 +++
- tests/btrfs/group   |  1 +
- 3 files changed, 76 insertions(+)
- create mode 100644 tests/btrfs/060
- create mode 100644 tests/btrfs/060.out
-
-diff --git a/tests/btrfs/060 b/tests/btrfs/060
-new file mode 100644
-index 0000000..6ef2e0f
---- /dev/null
-+++ b/tests/btrfs/060
-@@ -0,0 +1,72 @@
-+#! /bin/bash
-+# FS QA Test No. btrfs/060
-+#
-+# Regression test for btrfs incorrection inode ratio detection.
-+# This was fixed in the following linux kernel patch:
-+#
-+#     Btrfs: fix incorrect compression ratio detection
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2014 Wang Shilong.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -fr $tmp
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+_need_to_be_root
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount "-o compress=lzo"
-+
-+$XFS_IO_PROG -f -c "pwrite 0 10M" -c "fsync" \
-+	$SCRATCH_MNT/data >> $seqres.full 2>&1
-+
-+filefrag $SCRATCH_MNT/data | $AWK_PROG '{print $2}'
-+
-+$XFS_IO_PROG -f -c "pwrite 0 $((4096*33))" -c "fsync" \
-+	$SCRATCH_MNT/data >> $seqres.full 2>&1
-+
-+$XFS_IO_PROG -f -c "pwrite 0 10M" -c "fsync" \
-+	$SCRATCH_MNT/data >> $seqres.full 2>&1
-+filefrag $SCRATCH_MNT/data | $AWK_PROG '{print $2}'
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/060.out b/tests/btrfs/060.out
-new file mode 100644
-index 0000000..1c306d2
---- /dev/null
-+++ b/tests/btrfs/060.out
-@@ -0,0 +1,3 @@
-+QA output created by 060
-+80
-+80
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 68b5c79..d06c163 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -62,3 +62,4 @@
- 057 auto quick
- 058 auto quick
- 059 auto quick
-+060 auto quick
--- 
-1.8.3.1
-
+On Mon, Oct 6, 2014 at 7:53 PM, Theodore Ts'o <tytso@mit.edu> wrote:
+>
+> On Mon, Oct 06, 2014 at 01:23:50PM -0500, Paul Paulson wrote:
+> > The mkfs command fails to create ext4 filesystems on partition sizes
+> > greater than 1998080 MiB when using 1024 byte blocks and the default
+> > calculation for the number of inodes reserved for the filesystem.
+>
+> I've never noticed a problem because creating a partition that large
+> makes the xfstests runs take a long, long time.  I typically use a 5
+> GB or 20GB partition.  Is there a particular reason why you are trying
+> to do test ext4 using a 1k blocksize for a 2T file system?  We can fix
+> mke2fs so it doesn't fail when you create a > 2T file system with a 1k
+> block size, but the bigger question in my mind is why anyone would
+> ever want to do that?
+>
+>                                         - Ted
+We'd like to run the full test suite using maximum partition sizes on
+SMR drives for functional and performance evaluation purposes. Since
+drive capacities are increasing so rapidly it would be nice if mke2fs
+would support filesystems up to the maximum configurations specified
+in the Ext4_Disk_Layout document using default filesystem configs. For
+example, the 127877120 inode limit that we ran into is only 3% of the
+number of inodes specified in the document (2^32 inodes in a 4 TiB
+filesystem with 1KiB block sizes for 32-bit mode).
