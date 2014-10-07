@@ -1,33 +1,127 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from imap.thunk.org ([74.207.234.97]:39341 "EHLO imap.thunk.org"
+Received: from mx1.redhat.com ([209.132.183.28]:38430 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752094AbaJGAxJ (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 6 Oct 2014 20:53:09 -0400
-Date: Mon, 6 Oct 2014 20:53:00 -0400
-From: Theodore Ts'o <tytso@mit.edu>
-Subject: Re: [PATCH] generic/017: skip tests with mkfs failures
-Message-ID: <20141007005300.GA11741@thunk.org>
-References: <1412619830-23088-1-git-send-email-paul.paulson@seagate.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1412619830-23088-1-git-send-email-paul.paulson@seagate.com>
+	id S1752794AbaJGHu1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 7 Oct 2014 03:50:27 -0400
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] btrfs: test mount btrfs subvolume with selinux context
+Date: Tue,  7 Oct 2014 15:49:09 +0800
+Message-Id: <1412668149-16890-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Paul Paulson <paul.paulson@seagate.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>, Qu Wenruo <quwenruo@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Oct 06, 2014 at 01:23:50PM -0500, Paul Paulson wrote:
-> The mkfs command fails to create ext4 filesystems on partition sizes
-> greater than 1998080 MiB when using 1024 byte blocks and the default
-> calculation for the number of inodes reserved for the filesystem.
+If one subvolume was mounted with selinux context, other subvolumes
+should be able to be mounted with the same selinux context too.
 
-I've never noticed a problem because creating a partition that large
-makes the xfstests runs take a long, long time.  I typically use a 5
-GB or 20GB partition.  Is there a particular reason why you are trying
-to do test ext4 using a 1k blocksize for a 2T file system?  We can fix
-mke2fs so it doesn't fail when you create a > 2T file system with a 1k
-block size, but the bigger question in my mind is why anyone would
-ever want to do that?
+Cc: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
 
-					- Ted
+Note that this is based on my btrfs stress test patches.
+
+[PATCH v5 00/15] xfstests: new btrfs stress test cases
+
+ tests/btrfs/075     | 69 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/075.out |  2 ++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 72 insertions(+)
+ create mode 100755 tests/btrfs/075
+ create mode 100644 tests/btrfs/075.out
+
+diff --git a/tests/btrfs/075 b/tests/btrfs/075
+new file mode 100755
+index 0000000..b2fd3df
+--- /dev/null
++++ b/tests/btrfs/075
+@@ -0,0 +1,69 @@
++#! /bin/bash
++# FSQA Test No. btrfs/075
++#
++# If one subvolume was mounted with selinux context, other subvolumes
++# should be able to be mounted with the same selinux context too.
++#
++#-----------------------------------------------------------------------
++# Copyright (C) 2014 Red Hat Inc. All rights reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	$UMOUNT_PROG $subvol_mnt >/dev/null 2>&1
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++
++# SELINUX_MOUNT_OPTIONS will be set in common/config if selinux is enabled
++if [ "$SELINUX_MOUNT_OPTIONS" == "" ]; then
++	_notrun "Require selinux to be enabled"
++fi
++
++echo "Silence is golden"
++
++# first mount default subvolume with selinux context set
++_scratch_mkfs
++_scratch_mount
++
++# create a new subvolume and mount it with the same selinux context
++subvol_mnt=$TEST_DIR/$seq.mnt
++mkdir -p $subvol_mnt
++$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol >/dev/null 2>&1
++$MOUNT_PROG -o subvol=subvol $SELINUX_MOUNT_OPTIONS $SCRATCH_DEV $subvol_mnt
++status=$?
++
++exit
+diff --git a/tests/btrfs/075.out b/tests/btrfs/075.out
+new file mode 100644
+index 0000000..ded801b
+--- /dev/null
++++ b/tests/btrfs/075.out
+@@ -0,0 +1,2 @@
++QA output created by 075
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index c8ac72c..00ae8ce 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -77,3 +77,4 @@
+ 072 auto scrub defrag compress
+ 073 auto scrub remount compress
+ 074 auto defrag remount compress
++075 auto quick subvol
+-- 
+1.8.3.1
+
