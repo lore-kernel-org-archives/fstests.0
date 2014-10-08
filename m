@@ -1,63 +1,65 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:43129 "EHLO
-	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750737AbaJHFyt (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 8 Oct 2014 01:54:49 -0400
-Date: Wed, 8 Oct 2014 16:54:44 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 2/2] xfstests,btrfs/004: use FILEFRAG_PROG macro
-Message-ID: <20141008055444.GJ12693@dastard>
-References: <1412764522-15754-1-git-send-email-wangshilong1991@gmail.com>
- <1412764522-15754-2-git-send-email-wangshilong1991@gmail.com>
- <20141008042043.GG12693@dastard>
- <773629AA-9F58-4A1A-A5D0-6CC0B5121233@gmail.com>
- <F03A6FA1-97B6-41B9-B12B-26626B7B3CF2@gmail.com>
+Received: from mx0b-00003501.pphosted.com ([67.231.152.68]:7634 "EHLO
+	mx0b-00003501.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754812AbaJHNRm (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 8 Oct 2014 09:17:42 -0400
+Received: from pps.filterd (m0075032.ppops.net [127.0.0.1])
+	by mx0b-00003501.pphosted.com (8.14.5/8.14.5) with SMTP id s98DDdjp015543
+	for <fstests@vger.kernel.org>; Wed, 8 Oct 2014 09:17:42 -0400
+Received: from mail-qa0-f50.google.com (mail-qa0-f50.google.com [209.85.216.50])
+	by mx0b-00003501.pphosted.com with ESMTP id 1pw4gerd3j-1
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=NOT)
+	for <fstests@vger.kernel.org>; Wed, 08 Oct 2014 09:17:41 -0400
+Received: by mail-qa0-f50.google.com with SMTP id w8so5770937qac.9
+        for <fstests@vger.kernel.org>; Wed, 08 Oct 2014 06:17:41 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <F03A6FA1-97B6-41B9-B12B-26626B7B3CF2@gmail.com>
+In-Reply-To: <20141008021102.GA20071@thunk.org>
+References: <1412619830-23088-1-git-send-email-paul.paulson@seagate.com>
+	<20141007005300.GA11741@thunk.org>
+	<CAG4SSaSQt15AOOVR50EruW8sq_9Az3W26z+7pHy-2E9D3gOcgg@mail.gmail.com>
+	<20141008021102.GA20071@thunk.org>
+Date: Wed, 8 Oct 2014 08:17:41 -0500
+Message-ID: <CAG4SSaTFcfM8KkyJbiCed6URHa3YcMWc84+3toLA12q_V_QtDg@mail.gmail.com>
+Subject: Re: [PATCH] generic/017: skip tests with mkfs failures
+From: Paul Paulson <paul.paulson@seagate.com>
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Wang Shilong <wangshilong1991@gmail.com>
-Cc: linux-btrfs <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests <fstests@vger.kernel.org>, linux-ext4 <linux-ext4@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Oct 08, 2014 at 01:31:24PM +0800, Wang Shilong wrote:
-> Cc list
-> 
-> > On Wed, Oct 08, 2014 at 06:35:22AM -0400, Wang Shilong wrote:
-> >>> Signed-off-by: Wang Shilong <wangshilong1991@gmail.com>
-> >>> ---
-> >>> i didn't find a way to remove filefrag here, but let us
-> >>> use macro firstly...
-> >> 
-> >> YOu shoul dbe able to use fiemap to calculate the same output.
-> >> i.e. _check_file_extents() outputs a strings of the format 
-> >> #physical#length#logical#flags and this is then cut up later
-> >> later by the test. fiemap outputs the same information,
-> >> it just requires slightly different processing via the
-> >> _filter_extents function to munge it into the same format…
-> > 
-> > I supposed there are some differences between fiemap and filefrag:
-> > 
-> > [root@vm01 mnt]# filefrag -v data 
-> > Filesystem type is: 9123683e
-> > File size of data is 1024 (1 block of 4096 bytes)
-> > ext:     logical_offset:        physical_offset: length:   expected: flags:
-> >   0:        0..    4095:          0..      4095:   4096:             not_aligned,inline,eof
-> > data: 1 extent found
-> > 
-> > [root@vm01 mnt]# xfs_io -c fiemap data 
-> > data:
-> > 	0: [0..7]: 0..7
+On Tue, Oct 7, 2014 at 9:11 PM, Theodore Ts'o <tytso@mit.edu> wrote:
+> On Tue, Oct 07, 2014 at 01:12:51PM -0500, Paul Paulson wrote:
+>> We'd like to run the full test suite using maximum partition sizes on
+>> SMR drives for functional and performance evaluation purposes. Since
+>> drive capacities are increasing so rapidly it would be nice if mke2fs
+>> would support filesystems up to the maximum configurations specified
+>> in the Ext4_Disk_Layout document using default filesystem configs. For
+>> example, the 127877120 inode limit that we ran into is only 3% of the
+>> number of inodes specified in the document (2^32 inodes in a 4 TiB
+>> filesystem with 1KiB block sizes for 32-bit mode).
+>
+> Sure, but the default file system configs don't include 1k block
+> sizes.  There really is only one reason that I care about the 1k block
+> size --- it's to make it easy to validate on an x86 architecture what
+> happens when a file system with a default 4k block size is mounted on
+> an architectures such as PowerPC or Itanium which has a page size of
+> 16k or 64k.  That is, to test the case where block size < page size.
+>
+> But we really don't encourage people use a 1k block size in
+> production.  And while it would make sense from a performance point of
+> view to use a 16k or 64k block size file system on a PowerPC or
+> Itanium system, people who care about making their file system
+> portable across PowerPC and x86 (for example) will need to use a 4k
+> block file system (since Linux doesn't support block size > page
+> size).
+>
+> So using a 1k block file system on a terabyte file system is neither
+> the default nor a sane thing to do.  I'll look into making mke2fs
+> handle this case more smoothly, but it's not something that I consider
+> a high priority or something I would encourage as a realstic
+> production use case.
 
-Of course. Units, for one: the output of filefrag is in bytes, while
-fiemap is in 512 byte blocks. And fiemap needs the  "-v" option to
-output the flag state. Same information, different presentation.
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Thank you for your informative explanation. It sounds like Dave will
+bring in the patch to eliminate the multiple block size loop so we'll
+just wait for that.
