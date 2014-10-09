@@ -1,43 +1,50 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx12.netapp.com ([216.240.18.77]:24734 "EHLO mx12.netapp.com"
+Received: from mx12.netapp.com ([216.240.18.77]:31553 "EHLO mx12.netapp.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750855AbaJIRg5 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 9 Oct 2014 13:36:57 -0400
-Message-ID: <5436C7B5.7040700@Netapp.com>
-Date: Thu, 9 Oct 2014 13:36:53 -0400
+	id S1751135AbaJIS1t (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 9 Oct 2014 14:27:49 -0400
 From: Anna Schumaker <Anna.Schumaker@netapp.com>
+Subject: [PATCH] common: Re-enable testing over NFS
+Date: Thu, 9 Oct 2014 14:27:45 -0400
+Message-ID: <1412879265-32385-1-git-send-email-Anna.Schumaker@Netapp.com>
 MIME-Version: 1.0
-Subject: Re: xfstests and linux nfs testing
-References: <20141009162127.GA12500@infradead.org>
-In-Reply-To: <20141009162127.GA12500@infradead.org>
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Steve French <smfrench@gmail.com>, "linux-nfs@vger.kernel.org" <linux-nfs@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, fstests@vger.kernel.org, Lukas Czerner <lczerner@redhat.com>
+To: fstests@vger.kernel.org, hch@infradead.org
+Cc: linux-nfs@vger.kernel.org, smfrench@gmail.com, lczerner@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On 10/09/14 12:21, Christoph Hellwig wrote:
-> On Thu, Oct 09, 2014 at 08:41:54AM -0400, Anna Schumaker wrote:
->> I think this is a bug in xfstests.  This fixes it for me, but I'm not sure what needs to be checked in the NFS case:
-> 
-> Lukas broke this with:
->  common: Check fs consistency on TEST_DEV only when needed
-> 
-> as far as I can tell it blindly copied the _require_scratch code
-> to _require_test, which is bad for two reasons:
-> 
->  a) due to lots of code duplication
->  b) because it broke filesystems that don't support a scratch dev
->     like nfs.
-> 
-> Anna fix should work, can you resend it to the fstests lists with a
-> proper signoff?  Even better would be some validation that the
-> passed in "device" is a valid format for a nfs export, but that's not
-> strictly required.
+83ef157 (common: Check fs consistency on TEST_DEV only when needed) has
+_require_test unconditionally return _notrun when testing on an NFS
+filesystem, essentially disabling NFS.  This patch changes the code to
+validate $TEST_DEV and only call _notrun if validation fails.
 
-Sure!  I'll fix up the patch so it doesn't have commented out lines while I'm at it :).  I'll take a stab at server format validation, and then send something out!
+Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
+---
+ common/rc | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
 
-Anna
-> 
+diff --git a/common/rc b/common/rc
+index 34d7c19..868007f 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1086,8 +1086,14 @@ _require_test()
+ {
+     case "$FSTYP" in
+ 	nfs*)
+-                 _notrun "requires a test device"
+-		 ;;
++		echo $TEST_DEV | grep -q ":/" > /dev/null 2>&1
++		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
++			_notrun "this test requires a valid \$TEST_DIR"
++		fi
++		if [ ! -d "$TEST_DIR" ]; then
++			_notrun "this test requires a valid \$TEST_DIR"
++		fi
++		;;
+ 	cifs)
+ 		echo $TEST_DEV | grep -q "//" > /dev/null 2>&1
+ 		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
+-- 
+2.1.2
 
