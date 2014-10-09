@@ -1,60 +1,35 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-pd0-f169.google.com ([209.85.192.169]:49449 "EHLO
-	mail-pd0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751571AbaJIQRu (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 9 Oct 2014 12:17:50 -0400
-Received: by mail-pd0-f169.google.com with SMTP id w10so44671pde.28
-        for <fstests@vger.kernel.org>; Thu, 09 Oct 2014 09:17:49 -0700 (PDT)
-Received: from vm01.localdomain ([221.181.146.136])
-        by mx.google.com with ESMTPSA id gw1sm957956pbd.49.2014.10.09.09.17.48
-        for <fstests@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 09 Oct 2014 09:17:49 -0700 (PDT)
-From: Wang Shilong <wangshilong1991@gmail.com>
-Subject: [PATCH v3] xfstests,shared/032: fix fsck failure
-Date: Thu,  9 Oct 2014 20:16:57 -0400
-Message-Id: <1412900217-58174-1-git-send-email-wangshilong1991@gmail.com>
+Received: from bombadil.infradead.org ([198.137.202.9]:58068 "EHLO
+	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752456AbaJIQVa (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 9 Oct 2014 12:21:30 -0400
+Date: Thu, 9 Oct 2014 09:21:27 -0700
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: xfstests and linux nfs testing
+Message-ID: <20141009162127.GA12500@infradead.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <54368292.8060209@Netapp.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Anna Schumaker <Anna.Schumaker@netapp.com>
+Cc: Steve French <smfrench@gmail.com>, "linux-nfs@vger.kernel.org" <linux-nfs@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, fstests@vger.kernel.org, Lukas Czerner <lczerner@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-while running ./check tests/shared/032, it outputs something like:
+On Thu, Oct 09, 2014 at 08:41:54AM -0400, Anna Schumaker wrote:
+> I think this is a bug in xfstests.  This fixes it for me, but I'm not sure what needs to be checked in the NFS case:
 
-FSTYP         -- btrfs
-PLATFORM      -- Linux/x86_64 vm01 3.17.0-rc5+
-MKFS_OPTIONS  -- /dev/sdc
-MOUNT_OPTIONS -- /dev/sdc /mnt/scratch
+Lukas broke this with:
+ common: Check fs consistency on TEST_DEV only when needed
 
-shared/032 2s ... 2s
-_check_btrfs_filesystem: filesystem on /dev/sdc is inconsistent (see /root/xfstests-dev/results//shared/032.full)
-Ran: shared/032
-Passed all 1 tests
+as far as I can tell it blindly copied the _require_scratch code
+to _require_test, which is bad for two reasons:
 
-This is because xfstests will run fsck after each unit test,
-for tests/shared/032, we have reformated SCRATCH_DEV to other fs,
-fix this problem by skipping fsck here.
+ a) due to lots of code duplication
+ b) because it broke filesystems that don't support a scratch dev
+    like nfs.
 
-Signed-off-by: Wang Shilong <wangshilong1991@gmail.com>
----
- v2->v3: fix commit message....
- v1->v2: use _require_scratch_nocheck helper to skip fsck.(pointed by Eryu Guan)
----
- tests/shared/032 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/tests/shared/032 b/tests/shared/032
-index 7835e30..a410003 100755
---- a/tests/shared/032
-+++ b/tests/shared/032
-@@ -40,7 +40,7 @@ rm -f $seqres.full
- _supported_fs xfs btrfs
- _supported_os Linux
- 
--_require_scratch
-+_require_scratch_nocheck
- _require_no_large_scratch_dev
- 
- # mkfs.btrfs did not have overwrite detection at first
--- 
-1.8.3.1
-
+Anna fix should work, can you resend it to the fstests lists with a
+proper signoff?  Even better would be some validation that the
+passed in "device" is a valid format for a nfs export, but that's not
+strictly required.
