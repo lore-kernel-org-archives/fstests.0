@@ -1,65 +1,76 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx0b-00003501.pphosted.com ([67.231.152.68]:7634 "EHLO
-	mx0b-00003501.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754812AbaJHNRm (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 8 Oct 2014 09:17:42 -0400
-Received: from pps.filterd (m0075032.ppops.net [127.0.0.1])
-	by mx0b-00003501.pphosted.com (8.14.5/8.14.5) with SMTP id s98DDdjp015543
-	for <fstests@vger.kernel.org>; Wed, 8 Oct 2014 09:17:42 -0400
-Received: from mail-qa0-f50.google.com (mail-qa0-f50.google.com [209.85.216.50])
-	by mx0b-00003501.pphosted.com with ESMTP id 1pw4gerd3j-1
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=NOT)
-	for <fstests@vger.kernel.org>; Wed, 08 Oct 2014 09:17:41 -0400
-Received: by mail-qa0-f50.google.com with SMTP id w8so5770937qac.9
-        for <fstests@vger.kernel.org>; Wed, 08 Oct 2014 06:17:41 -0700 (PDT)
-MIME-Version: 1.0
-In-Reply-To: <20141008021102.GA20071@thunk.org>
-References: <1412619830-23088-1-git-send-email-paul.paulson@seagate.com>
-	<20141007005300.GA11741@thunk.org>
-	<CAG4SSaSQt15AOOVR50EruW8sq_9Az3W26z+7pHy-2E9D3gOcgg@mail.gmail.com>
-	<20141008021102.GA20071@thunk.org>
-Date: Wed, 8 Oct 2014 08:17:41 -0500
-Message-ID: <CAG4SSaTFcfM8KkyJbiCed6URHa3YcMWc84+3toLA12q_V_QtDg@mail.gmail.com>
-Subject: Re: [PATCH] generic/017: skip tests with mkfs failures
-From: Paul Paulson <paul.paulson@seagate.com>
-Content-Type: text/plain; charset=UTF-8
+Received: from mx1.redhat.com ([209.132.183.28]:16254 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751230AbaJIIj2 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 9 Oct 2014 04:39:28 -0400
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] xfs/262: update filter to deal with long device name correctly
+Date: Thu,  9 Oct 2014 16:38:51 +0800
+Message-Id: <1412843931-10447-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests <fstests@vger.kernel.org>, linux-ext4 <linux-ext4@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: xfs@oss.sgi.com, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Oct 7, 2014 at 9:11 PM, Theodore Ts'o <tytso@mit.edu> wrote:
-> On Tue, Oct 07, 2014 at 01:12:51PM -0500, Paul Paulson wrote:
->> We'd like to run the full test suite using maximum partition sizes on
->> SMR drives for functional and performance evaluation purposes. Since
->> drive capacities are increasing so rapidly it would be nice if mke2fs
->> would support filesystems up to the maximum configurations specified
->> in the Ext4_Disk_Layout document using default filesystem configs. For
->> example, the 127877120 inode limit that we ran into is only 3% of the
->> number of inodes specified in the document (2^32 inodes in a 4 TiB
->> filesystem with 1KiB block sizes for 32-bit mode).
->
-> Sure, but the default file system configs don't include 1k block
-> sizes.  There really is only one reason that I care about the 1k block
-> size --- it's to make it easy to validate on an x86 architecture what
-> happens when a file system with a default 4k block size is mounted on
-> an architectures such as PowerPC or Itanium which has a page size of
-> 16k or 64k.  That is, to test the case where block size < page size.
->
-> But we really don't encourage people use a 1k block size in
-> production.  And while it would make sense from a performance point of
-> view to use a 16k or 64k block size file system on a PowerPC or
-> Itanium system, people who care about making their file system
-> portable across PowerPC and x86 (for example) will need to use a 4k
-> block file system (since Linux doesn't support block size > page
-> size).
->
-> So using a 1k block file system on a terabyte file system is neither
-> the default nor a sane thing to do.  I'll look into making mke2fs
-> handle this case more smoothly, but it's not something that I consider
-> a high priority or something I would encourage as a realstic
-> production use case.
+If the device name is too long, the output of xfs_quota -c "df" will be
+broke into two lines as
 
-Thank you for your informative explanation. It sounds like Dave will
-bring in the patch to eliminate the multiple block size loop so we'll
-just wait for that.
+Filesystem           1K-blocks       Used  Available  Use% Pathname
+/dev/mapper/rhel_hp--dl388eg8--01-testlv2
+                      15718400      32932   15685468    0% /mnt/testarea/scratch
+/dev/mapper/rhel_hp--dl388eg8--01-testlv2
+                        512000          0     512000    0% /mnt/testarea/scratch/test
+
+and _filter_quota_rpt() couldn't catch the correct available number and
+test will fail as
+
+	[root@hp-dl388g8-01 xfstests]# diff -u tests/xfs/262.out /root/xfstests/results//xfs/262.out.bad
+	--- tests/xfs/262.out   2014-10-08 20:16:19.000000000 +0800
+	+++ /root/xfstests/results//xfs/262.out.bad  2014-10-09 14:29:38.795813323 +0800
+	@@ -1,2 +1,4 @@
+	 QA output created by 262
+	 Silence is golden.
+	+hard limit 0 bytes, expected 524288000
+	+hard limit 0 bytes, expected 524288000
+
+Update the filter so it could catch the correct value.
+
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+ tests/xfs/262 | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/tests/xfs/262 b/tests/xfs/262
+index 6040f62..9d8b838 100755
+--- a/tests/xfs/262
++++ b/tests/xfs/262
+@@ -76,6 +76,8 @@ _require_scratch
+ # both the "df" and the "report" output.  For "report", the line we're
+ # interested in contains our project name in the first field.  For "df"
+ # it contains our project directory in the last field.
++# But if the device name is too long, the "df" output is broke into two
++# lines, the fourth field is not correct, so take $(nf-2) of "df"
+ _filter_quota_rpt() {
+ 	awk '
+ 	BEGIN {
+@@ -96,9 +98,15 @@ _filter_quota_rpt() {
+ 		return result;
+ 	}
+ 	{
+-		if ($1 !~ proj_name && $nf !~ proj_dir)
++		if ($1 =~ proj_name) {
++			# this is the "report" output
++			bsize = byte_size($4);
++		} else if ($nf =~ proj_dir) {
++			# this is the "df" output
++			bsize = byte_size($(nf-2));
++		} else {
+ 			next;
+-		bsize = byte_size($4);
++		}
+ 		if (bsize != qlimit)
+ 			printf("hard limit %d bytes, expected %d\n",
+ 				bsize, qlimit);
+-- 
+1.8.3.1
+
