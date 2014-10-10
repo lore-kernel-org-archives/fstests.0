@@ -1,26 +1,21 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:50981 "EHLO
-	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754719AbaJIWUd (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 9 Oct 2014 18:20:33 -0400
-Received: from dave by dastard with local (Exim 4.80)
-	(envelope-from <david@fromorbit.com>)
-	id 1XcM4C-0004HE-VC
-	for fstests@vger.kernel.org; Fri, 10 Oct 2014 09:20:12 +1100
-Date: Fri, 10 Oct 2014 09:20:12 +1100
-From: Dave Chinner <david@fromorbit.com>
+Received: from mx1.redhat.com ([209.132.183.28]:38612 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753236AbaJJLgh (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 10 Oct 2014 07:36:37 -0400
+Date: Fri, 10 Oct 2014 07:36:29 -0400
+From: Brian Foster <bfoster@redhat.com>
 Subject: Re: [PATCH] xfs/007: check correct quota inodes
-Message-ID: <20141009222012.GA4503@dastard>
+Message-ID: <20141010113628.GA18297@bfoster.bfoster>
 References: <1412044636-21398-1-git-send-email-david@fromorbit.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 In-Reply-To: <1412044636-21398-1-git-send-email-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
-
-ping?
 
 On Tue, Sep 30, 2014 at 12:37:16PM +1000, Dave Chinner wrote:
 > From: Dave Chinner <dchinner@redhat.com>
@@ -77,6 +72,11 @@ On Tue, Sep 30, 2014 at 12:37:16PM +1000, Dave Chinner wrote:
 > +			grep $qino_1 | awk '{print $NF}'`
 > +	QINO_2=`xfs_db -c "sb 0" -c "p" $SCRATCH_DEV | \
 > +			grep $qino_2 | awk '{print $NF}'` 
+
+Extra space at the end of this line. Otherwise, looks good to me:
+
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+
 > +
 > +	echo "*** Usage before quotarm ***"
 > +	xfs_db -c "inode $QINO_1" -c "p core.nblocks" $SCRATCH_DEV
@@ -170,8 +170,3 @@ On Tue, Sep 30, 2014 at 12:37:16PM +1000, Dave Chinner wrote:
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
--- 
-Dave Chinner
-david@fromorbit.com
