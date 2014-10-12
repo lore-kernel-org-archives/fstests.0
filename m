@@ -1,172 +1,202 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38612 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:21291 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753236AbaJJLgh (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 10 Oct 2014 07:36:37 -0400
-Date: Fri, 10 Oct 2014 07:36:29 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH] xfs/007: check correct quota inodes
-Message-ID: <20141010113628.GA18297@bfoster.bfoster>
-References: <1412044636-21398-1-git-send-email-david@fromorbit.com>
+	id S1751107AbaJLV0K (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sun, 12 Oct 2014 17:26:10 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id s9CLQ9At027480
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <fstests@vger.kernel.org>; Sun, 12 Oct 2014 17:26:09 -0400
+Received: from liberator.sandeen.net (ovpn01.gateway.prod.ext.phx2.redhat.com [10.5.9.1])
+	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id s9CLQ8Mg007819
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES128-SHA bits=128 verify=NO)
+	for <fstests@vger.kernel.org>; Sun, 12 Oct 2014 17:26:09 -0400
+Message-ID: <543AF1F1.8010103@redhat.com>
+Date: Sun, 12 Oct 2014 16:26:09 -0500
+From: Eric Sandeen <sandeen@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1412044636-21398-1-git-send-email-david@fromorbit.com>
+Subject: [PATCH] xfs: test larger dump/restore to/from file
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 30, 2014 at 12:37:16PM +1000, Dave Chinner wrote:
-> From: Dave Chinner <dchinner@redhat.com>
-> 
-> Commit b8cac56 ("xfs/007: add project quota Q_XQUOTARM test") has
-> been broken since it was added - the new code checked the group
-> quota inode rather than the project quota inode and so always
-> reported a pre-RM block count of zero.  This occurred due to a copy
-> and paste of the existing user/group test code and didn't fix up all
-> the code properly.
-> 
-> Factor the common code into a single function, and pass in the
-> correct variables the tests require. While there, make sure that we
-> remove the 007.full file before the test starts to aid future
-> debugging and also check that project quotas are supported before
-> trying to test them.
-> 
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> ---
->  tests/xfs/007     | 78 ++++++++++++++++++++++++++-----------------------------
->  tests/xfs/007.out |  4 +--
->  2 files changed, 39 insertions(+), 43 deletions(-)
-> 
-> diff --git a/tests/xfs/007 b/tests/xfs/007
-> index 247c5b3..22ee27d 100755
-> --- a/tests/xfs/007
-> +++ b/tests/xfs/007
-> @@ -48,55 +48,51 @@ _supported_os Linux Irix
->  _require_scratch
->  _require_xfs_quota
->  
-> -_scratch_mkfs_xfs >/dev/null 2>&1
-> -
-> -_qmount_option "uquota,gquota"
-> -_qmount
-> +rm -f $seqres.full
->  
-> -echo "*** umount"
-> -umount $SCRATCH_MNT
-> +_scratch_mkfs_xfs >/dev/null 2>&1
->  
-> -UQUOTINO=`xfs_db -c "sb 0" -c "p" $SCRATCH_DEV | grep uquotino | awk '{print $NF}'`
-> -GQUOTINO=`xfs_db -c "sb 0" -c "p" $SCRATCH_DEV | grep gquotino | awk '{print $NF}'` 
-> +do_test()
-> +{
-> +	qino_1=$1
-> +	qino_2=$2
-> +	off_opts=$3
-> +
-> +	echo "*** umount"
-> +	umount $SCRATCH_MNT
-> +
-> +	QINO_1=`xfs_db -c "sb 0" -c "p" $SCRATCH_DEV | \
-> +			grep $qino_1 | awk '{print $NF}'`
-> +	QINO_2=`xfs_db -c "sb 0" -c "p" $SCRATCH_DEV | \
-> +			grep $qino_2 | awk '{print $NF}'` 
+This test creates a large-ish directory structure using
+fsstress, and does a dump/restore to make sure we dump
+all the files.
 
-Extra space at the end of this line. Otherwise, looks good to me:
+Without the fix for the regression caused by:
+c7cb51d xfs: fix error handling at xfs_inumbers
 
-Reviewed-by: Brian Foster <bfoster@redhat.com>
+we will see failures like:
 
-> +
-> +	echo "*** Usage before quotarm ***"
-> +	xfs_db -c "inode $QINO_1" -c "p core.nblocks" $SCRATCH_DEV
-> +	xfs_db -c "inode $QINO_2" -c "p core.nblocks" $SCRATCH_DEV
-> +
-> +	_qmount
-> +	echo "*** turn off $off_opts quotas"
-> +	xfs_quota -x -c "off -$off_opts" $SCRATCH_MNT
-> +	xfs_quota -x -c "remove -$off_opts" $SCRATCH_MNT
-> +	echo "*** umount"
-> +	umount $SCRATCH_MNT
-> +
-> +	echo "*** Usage after quotarm ***"
-> +	xfs_db -c "inode $QINO_1" -c "p core.nblocks" $SCRATCH_DEV
-> +	xfs_db -c "inode $QINO_2" -c "p core.nblocks" $SCRATCH_DEV
-> +}
->  
-> -echo "*** Usage before quotarm ***"
-> -xfs_db -c "inode $UQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
-> -xfs_db -c "inode $GQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
->  
-> +# Test user and group first
-> +_qmount_option "uquota,gquota"
->  _qmount
-> -echo "*** turn off user and group quotas"
-> -xfs_quota -x -c 'off -ug' $SCRATCH_MNT
-> -xfs_quota -x -c "remove -ug" $SCRATCH_MNT
-> -echo "*** umount"
-> -umount $SCRATCH_MNT
-> -
-> -echo "*** Usage after quotarm ***"
-> -xfs_db -c "inode $UQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
-> -xfs_db -c "inode $GQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
-> +do_test uquotino gquotino ug
->  
-> +# Test user and project
->  _qmount_option "uquota,pquota"
->  _qmount
-> -
-> -echo "*** umount"
-> -umount $SCRATCH_MNT
-> -
-> -UQUOTINO=`xfs_db -c "sb 0" -c "p" $SCRATCH_DEV | grep uquotino | awk '{print $NF}'`
-> -PQUOTINO=`xfs_db -c "sb 0" -c "p" $SCRATCH_DEV | grep gquotino | awk '{print $NF}'`
-> -
-> -echo "*** Usage before quotarm ***"
-> -xfs_db -c "inode $UQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
-> -xfs_db -c "inode $PQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
-> -
-> -_qmount
-> -echo "*** turn off user and project quotas"
-> -xfs_quota -x -c 'off -up' $SCRATCH_MNT
-> -xfs_quota -x -c "remove -up" $SCRATCH_MNT
-> -echo "*** umount"
-> -umount $SCRATCH_MNT
-> -
-> -echo "*** Usage after quotarm ***"
-> -xfs_db -c "inode $UQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
-> -xfs_db -c "inode $PQUOTINO" -c "p core.nblocks" $SCRATCH_DEV
-> +_require_prjquota $SCRATCH_DEV
-> +do_test uquotino pquotino up
->  
->  # success, all done
->  status=0
-> diff --git a/tests/xfs/007.out b/tests/xfs/007.out
-> index 7c5bff5..8b5f3ea 100644
-> --- a/tests/xfs/007.out
-> +++ b/tests/xfs/007.out
-> @@ -3,7 +3,7 @@ QA output created by 007
->  *** Usage before quotarm ***
->  core.nblocks = 1
->  core.nblocks = 1
-> -*** turn off user and group quotas
-> +*** turn off ug quotas
->  *** umount
->  *** Usage after quotarm ***
->  core.nblocks = 0
-> @@ -12,7 +12,7 @@ core.nblocks = 0
->  *** Usage before quotarm ***
->  core.nblocks = 1
->  core.nblocks = 1
-> -*** turn off user and project quotas
-> +*** turn off up quotas
->  *** umount
->  *** Usage after quotarm ***
->  core.nblocks = 0
-> -- 
-> 2.0.0
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+    -xfsrestore: 486 directories and 1590 entries processed
+    +xfsrestore: 30 directories and 227 entries processed
+
+as it fails to process all inodes.
+
+I think that existing tests have a much smaller set of files,
+and so don't trip the bug.
+
+I don't do a file-by-file comparison here, because for some
+reason the diff output gets garbled; this test only checks
+that we've dumped & restored the correct number of files.
+
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
+
+diff --git a/common/dump b/common/dump
+index 7fe50f6..c42eb2c 100644
+--- a/common/dump
++++ b/common/dump
+@@ -298,15 +298,16 @@ _stable_fs()
+ # files,dirs,links,symlinks
+ #
+ # Pinched from test 013.
++# Takes one argument, the number of ops to perform
+ #
+-_create_dumpdir_stress()
++_create_dumpdir_stress_num()
+ {
+     echo "Creating directory system to dump using fsstress."
+ 
++    _count=$1
+     _wipe_fs
+ 
+     _param="-f link=10 -f creat=10 -f mkdir=10 -f truncate=5 -f symlink=10"
+-    _count=240
+     rm -rf $dump_dir
+     if ! mkdir $dump_dir; then
+         echo "    failed to mkdir $dump_dir"
+@@ -331,6 +332,10 @@ _create_dumpdir_stress()
+     _stable_fs
+ }
+ 
++_create_dumpdir_stress() {
++	_create_dumpdir_stress_num 240
++}
++
+ _mk_fillconfig1()
+ {
+     cat <<End-of-File >$tmp.config
+diff --git a/tests/xfs/307 b/tests/xfs/307
+new file mode 100755
+index 0000000..cc267ad
+--- /dev/null
++++ b/tests/xfs/307
+@@ -0,0 +1,50 @@
++#! /bin/bash
++# FS QA Test No. 307
++#
++# Test out a level 0 dump/restore of a subdir to a file
++#
++# Use fsstress to create a larger directory structure with a mix of files
++# Test for regression caused by
++# c7cb51d xfs: fix error handling at xfs_inumbers
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2014 Eric Sandeen.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#
++#-----------------------------------------------------------------------
++#
++
++seqfull=$0
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=0	# success is the default!
++trap "rm -rf $tmp.*; exit \$status" 0 1 2 3 15
++
++. ./common/rc
++. ./common/dump
++
++# real QA test starts here
++_supported_fs xfs
++_supported_os Linux
++
++_create_dumpdir_stress_num 4096
++_do_dump_restore
++
++# success, all done
++exit
+diff --git a/tests/xfs/307.out b/tests/xfs/307.out
+new file mode 100644
+index 0000000..61b8c12
+--- /dev/null
++++ b/tests/xfs/307.out
+@@ -0,0 +1,47 @@
++QA output created by 307
++Creating directory system to dump using fsstress.
++
++-----------------------------------------------
++fsstress : -f link=10 -f creat=10 -f mkdir=10 -f truncate=5 -f symlink=10
++-----------------------------------------------
++xfsdump|xfsrestore ...
++xfsdump  -s DUMP_SUBDIR - SCRATCH_MNT | xfsrestore  - RESTORE_DIR
++xfsrestore: using file dump (drive_simple) strategy
++xfsrestore: searching media for dump
++xfsrestore: examining media file 0
++xfsrestore: dump description: 
++xfsrestore: hostname: HOSTNAME
++xfsrestore: mount point: SCRATCH_MNT
++xfsrestore: volume: SCRATCH_DEV
++xfsrestore: session time: TIME
++xfsrestore: level: 0
++xfsrestore: session label: ""
++xfsrestore: media label: ""
++xfsrestore: file system ID: ID
++xfsrestore: session id: ID
++xfsrestore: media ID: ID
++xfsrestore: searching media for directory dump
++xfsrestore: reading directories
++xfsrestore: 486 directories and 1590 entries processed
++xfsrestore: directory post-processing
++xfsrestore: restoring non-directory files
++xfsrestore: restore complete: SECS seconds elapsed
++xfsrestore: Restore Status: SUCCESS
++xfsdump: using file dump (drive_simple) strategy
++xfsdump: level 0 dump of HOSTNAME:SCRATCH_MNT
++xfsdump: dump date: DATE
++xfsdump: session id: ID
++xfsdump: session label: ""
++xfsdump: ino map <PHASES>
++xfsdump: ino map construction complete
++xfsdump: estimated dump size: NUM bytes
++xfsdump: /var/xfsdump/inventory created
++xfsdump: creating dump session media file 0 (media 0, file 0)
++xfsdump: dumping ino map
++xfsdump: dumping directories
++xfsdump: dumping non-directory files
++xfsdump: ending media file
++xfsdump: media file size NUM bytes
++xfsdump: dump size (non-dir files) : NUM bytes
++xfsdump: dump complete: SECS seconds elapsed
++xfsdump: Dump Status: SUCCESS
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 09bce15..c1eace0 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -198,3 +198,4 @@
+ 304 auto quick quota
+ 305 auto quota
+ 306 auto stress log metadata repair
++307 auto stress dump
+
+
