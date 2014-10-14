@@ -1,85 +1,70 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:56696 "EHLO
-	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750746AbaJNFL5 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 14 Oct 2014 01:11:57 -0400
-Date: Tue, 14 Oct 2014 16:11:51 +1100
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:23124 "EHLO
+	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754977AbaJNL6Z (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 14 Oct 2014 07:58:25 -0400
+Date: Tue, 14 Oct 2014 22:58:08 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] add aio/dio regression test race between write and fcntl
- V2
-Message-ID: <20141014051151.GK5267@dastard>
-References: <1412866642-25191-1-git-send-email-dmonakhov@openvz.org>
+Subject: Re: [PATCH] xfs/195: Use XFSDUMP_PROG instead of xfsdump directly
+Message-ID: <20141014115808.GF17506@dastard>
+References: <1412177239-27241-1-git-send-email-jack@suse.cz>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1412866642-25191-1-git-send-email-dmonakhov@openvz.org>
+In-Reply-To: <1412177239-27241-1-git-send-email-jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: Dmitry Monakhov <dmonakhov@openvz.org>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+To: Jan Kara <jack@suse.cz>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Oct 09, 2014 at 06:57:22PM +0400, Dmitry Monakhov wrote:
-> Original report: https://lkml.org/lkml/2014/10/8/545
-> perform AIO-DIO and fcntl(F_SETFL) concurently
-> Unaligned AIO likely result in synchronization which makes racewindow wider.
+On Wed, Oct 01, 2014 at 05:27:18PM +0200, Jan Kara wrote:
+> Use appropriate environment variable (XFSDUMP_PROG) instead of hardcoding
+> 'xfsdump' name. This also makes the test fail graciously when xfsdump
+> isn't installed.
 > 
-> changes from v1->v2
->  - Properly reuse aio context
-
-Couple of things below....
-
-> 
-> Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
+> Signed-off-by: Jan Kara <jack@suse.cz>
 > ---
->  src/aio-dio-regress/aio-dio-fcntl-race.c |  148 ++++++++++++++++++++++++++++++
->  tests/generic/326                        |   51 ++++++++++
->  tests/generic/326.out                    |    2 +
->  tests/generic/group                      |    1 +
->  4 files changed, 202 insertions(+), 0 deletions(-)
->  create mode 100644 src/aio-dio-regress/aio-dio-fcntl-race.c
->  create mode 100755 tests/generic/326
->  create mode 100644 tests/generic/326.out
+>  tests/xfs/195 |    3 ++-
+>  1 files changed, 2 insertions(+), 1 deletions(-)
 > 
-> diff --git a/src/aio-dio-regress/aio-dio-fcntl-race.c b/src/aio-dio-regress/aio-dio-fcntl-race.c
-> new file mode 100644
-> index 0000000..835dbdf
-> --- /dev/null
-> +++ b/src/aio-dio-regress/aio-dio-fcntl-race.c
-> @@ -0,0 +1,148 @@
-> +/*
-> + * Perform aio writes to file and toggle O_DIRECT flag concurrently
-> + * this may trigger race between file->f_flags read and modification
-> + * unuligned aio allow to makes race window wider.
-> + * Regression test for https://lkml.org/lkml/2014/10/8/545
-> + *
-> + * Copyright (C) 2010 Red Hat, Inc. All Rights reserved.
+> diff --git a/tests/xfs/195 b/tests/xfs/195
+> index c7bc7b8..b86aedb 100755
+> --- a/tests/xfs/195
+> +++ b/tests/xfs/195
+> @@ -48,7 +48,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+>  #
+>  _do_dump()
+>  {
+> -	xfsdump -l 0 -s d -F  \
+> +	$XFSDUMP_PROG -l 0 -s d -F  \
+>  		-L prova -M prova \
+>  		-f $TEST_DIR/dumpfile -e -v excluded_files=debug $TEST_DIR \
+>  		| grep "ino $inum" \
+> @@ -58,6 +58,7 @@ _do_dump()
+>  # get standard environment, filters and checks
+>  . ./common/rc
+>  . ./common/filter
+> +. ./common/dump
 
-YOu must have copied the code from somewhere. Can you add a note to
-say where it came from in the patch description? And if you added
-any significant modifications, you should add your own copyright to
-it as well...
-
-> diff --git a/tests/generic/326 b/tests/generic/326
-> new file mode 100755
-> index 0000000..8975a91
-> --- /dev/null
-> +++ b/tests/generic/326
-> @@ -0,0 +1,51 @@
-> +#! /bin/bash
-> +# FS QA Test No. 326
-
-Can you rename this to the first unused generic test?
-
-> +# Run aio-dio-fcntl-race - test aio write race with O_DIRECT toggle
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2009 Dmitry Monakhov.  All Rights Reserved.
-
-2009 doesn't seem right for a test that was just written...
+This causes the test to fail, because _do_dump() is defined in
+common/dump as well. I'll fix the conflict...
 
 Cheers,
 
 Dave.
+
+>  
+>  # real QA test starts here
+>  _supported_fs xfs
+> -- 
+> 1.6.0.2
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
 -- 
 Dave Chinner
 david@fromorbit.com
