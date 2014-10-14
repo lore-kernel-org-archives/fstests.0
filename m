@@ -1,70 +1,172 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:34914 "EHLO
-	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932073AbaJNMP3 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 14 Oct 2014 08:15:29 -0400
-Date: Tue, 14 Oct 2014 23:15:27 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] xfs/195: Use XFSDUMP_PROG instead of xfsdump directly
-Message-ID: <20141014121527.GH17506@dastard>
-References: <1412177239-27241-1-git-send-email-jack@suse.cz>
- <20141014115808.GF17506@dastard>
- <20141014121204.GG17506@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20141014121204.GG17506@dastard>
+Received: from mailhub.sw.ru ([195.214.232.25]:7058 "EHLO relay.sw.ru"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755286AbaJNN75 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 14 Oct 2014 09:59:57 -0400
+From: Dmitry Monakhov <dmonakhov@openvz.org>
+Subject: [PATCH 1/2] xfstests: update 'new' script
+Date: Tue, 14 Oct 2014 17:59:48 +0400
+Message-Id: <1413295189-28530-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
-To: Jan Kara <jack@suse.cz>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org, Dmitry Monakhov <dmonakhov@openvz.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Oct 14, 2014 at 11:12:04PM +1100, Dave Chinner wrote:
-> On Tue, Oct 14, 2014 at 10:58:08PM +1100, Dave Chinner wrote:
-> > On Wed, Oct 01, 2014 at 05:27:18PM +0200, Jan Kara wrote:
-> > > Use appropriate environment variable (XFSDUMP_PROG) instead of hardcoding
-> > > 'xfsdump' name. This also makes the test fail graciously when xfsdump
-> > > isn't installed.
-> > > 
-> > > Signed-off-by: Jan Kara <jack@suse.cz>
-> > > ---
-> > >  tests/xfs/195 |    3 ++-
-> > >  1 files changed, 2 insertions(+), 1 deletions(-)
-> > > 
-> > > diff --git a/tests/xfs/195 b/tests/xfs/195
-> > > index c7bc7b8..b86aedb 100755
-> > > --- a/tests/xfs/195
-> > > +++ b/tests/xfs/195
-> > > @@ -48,7 +48,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
-> > >  #
-> > >  _do_dump()
-> > >  {
-> > > -	xfsdump -l 0 -s d -F  \
-> > > +	$XFSDUMP_PROG -l 0 -s d -F  \
-> > >  		-L prova -M prova \
-> > >  		-f $TEST_DIR/dumpfile -e -v excluded_files=debug $TEST_DIR \
-> > >  		| grep "ino $inum" \
-> > > @@ -58,6 +58,7 @@ _do_dump()
-> > >  # get standard environment, filters and checks
-> > >  . ./common/rc
-> > >  . ./common/filter
-> > > +. ./common/dump
-> > 
-> > This causes the test to fail, because _do_dump() is defined in
-> > common/dump as well. I'll fix the conflict...
-> 
-> Actually, this has problems with duplicate _cleanup functions too,
-> so It' would just be better to check for xfsdump being defined
-> directly rather than including common/dump....
+- Update script to support new test cheme tests/$fs_type/$TEST_IDX
+- Try to use first unused ID
 
-I've dropped this for now. Can you rework it, Jan? Maybe best to use
-_require_command or something like that as common/dump implies
-certain specific usage patterns and functions are used, which this
-test doesn't follow...
+Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
+---
+ new |   78 +++++++++++++++++++++++++++++++++++++++++++++++-------------------
+ 1 files changed, 55 insertions(+), 23 deletions(-)
 
-Cheers,
-
-Dave.
+diff --git a/new b/new
+index f3e6fa1..9fa522e 100755
+--- a/new
++++ b/new
+@@ -32,10 +32,22 @@ _cleanup()
+     :
+ }
+ 
+-if [ ! -f group ]
++SRC_GROUPS=`find tests -not -path tests -type d -printf "%f "`
++function usage 
++{
++    echo "Usage $0 test_dir"
++    echo "Available dirs are: $SRC_GROUPS"
++    exit
++}
++
++[ $# -eq 0 ] && usage
++tdir=tests/$1
++shift
++
++if [ ! -f $tdir/group ]
+ then
+-    echo "Creating the group index ..."
+-    cat <<'End-of-File' >group
++    echo "Creating the $tdir/group index ..."
++    cat <<'End-of-File' >$tdir/group
+ # QA groups control
+ #
+ # define groups and default group owners
+@@ -51,10 +63,10 @@ other		some-user-login
+ End-of-File
+ fi
+ 
+-if [ ! -w group ]
++if [ ! -w $tdir/group ]
+ then
+-    chmod u+w group
+-    echo "Warning: making the index file \"group\" writeable"
++    chmod u+w $tdir/group
++    echo "Warning: making the index file \"$tdir/group\" writeable"
+ fi
+ 
+ if make
+@@ -64,13 +76,26 @@ else
+     echo "Warning: make failed -- some tests may be missing"
+ fi
+ 
+-last=`grep '^[0-9][0-9]* ' group | sort | tail -1 | sed -e 's/[ 	].*//'`
+-# get rid of leading 0s as can be interpreted as octal
+-last=`echo $last | sed 's/^0*//'`
+-id=`$AWK_PROG </dev/null 'BEGIN{printf "%03d\n",'$last'+1}'`
++i=0
++line=0
++[ -f "$tdir/group" ] || usage
++
++for found in `cat $tdir/group | gawk '{ print $1 }'`
++do
++    line=$((line+1))
++    if [ -z "$found" ] || [ "$found" == "#" ];then
++	continue
++    fi
++    i=$((i+1))
++    id=`printf "%03d" $i`
++    if [ "$id" != "$found" ];then
++	break
++    fi
++done
++
+ echo "Next test is $id"
+ 
+-if [ -f $id ]
++if [ -f $tdir/$id ]
+ then
+     echo "Error: test $id already exists!"
+     _cleanup
+@@ -81,7 +106,7 @@ echo -n "Creating skeletal script for you to edit ..."
+ 
+ year=`date +%Y`
+ 
+-cat <<End-of-File >$id
++cat <<End-of-File >$tdir/$id
+ #! /bin/bash
+ # FS QA Test No. $id
+ #
+@@ -146,11 +171,12 @@ End-of-File
+ sleep 2		# latency to read messages to this point
+ echo ""
+ 
+-chmod 755 $id
+-${EDITOR-vi} $id
++chmod 755 $tdir/$id
++${EDITOR-vi} $tdir/$id
+ 
+ if [ $# -eq 0 ]
+ then
++
+     while true
+     do
+ 	echo -n "Add to group(s) [other] (? for list): "
+@@ -158,12 +184,15 @@ then
+ 	[ -z "$ans" ] && ans=other
+ 	if [ "X$ans" = "X?" ]
+ 	then
+-	    $AWK_PROG <group '
+-BEGIN		{ text = "# ???" }
+-/^[a-z]/	{ printf "%-16.16s %s\n",$1,text; text = "# ???"; next }
+-NF < 2		{ next }
+-		{ text = $0 }' \
+-	    | sort
++	    for d in $SRC_GROUPS; do
++		l=$(sed -n < tests/$d/group \
++		    -e 's/#.*//' \
++		    -e 's/$/ /' \
++		    -e 's;\(^[0-9][0-9][0-9]\)\(.*$\);\2;p')
++		grpl="$grpl $l"
++	    done
++	    lst=`for word in $grpl; do echo $word; done | sort| uniq `
++	    echo $lst
+ 	else
+ 	    break
+ 	fi
+@@ -173,18 +202,21 @@ else
+     #
+     for g in $*
+     do
+-	if grep "^$g[ 	]" group >/dev/null
++	if grep "^$g[ 	]" $tdir/group >/dev/null
+ 	then
+ 	    :
+ 	else
+-	    echo "Warning: group \"$g\" not defined in ./group"
++	    echo "Warning: group \"$g\" not defined in $tdir/group"
+ 	fi
+     done
+     ans="$*"
+ fi
+ 
+ echo -n "Adding $id to group index ..."
+-echo "$id $ans" >>group
++head -n $(($line-1)) $tdir/group > /tmp/$$.group
++echo "$id $ans" >> /tmp/$$.group
++tail -n +$((line)) $tdir/group >> /tmp/$$.group
++mv /tmp/$$.group $tdir/group
+ echo " done."
+ 
+ exit 0
 -- 
-Dave Chinner
-david@fromorbit.com
+1.7.1
+
