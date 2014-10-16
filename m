@@ -1,45 +1,191 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:28542 "EHLO
-	mx0b-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751298AbaJOTFO (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 15 Oct 2014 15:05:14 -0400
-Message-ID: <543EC561.8000200@fb.com>
-Date: Wed, 15 Oct 2014 15:05:05 -0400
-From: Josef Bacik <jbacik@fb.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:42234 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751001AbaJPBmY (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 15 Oct 2014 21:42:24 -0400
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Subject: [PATCH] btrfs: regression test for btrfs extent merge
+Date: Thu, 16 Oct 2014 09:42:20 +0800
+Message-ID: <1413423740-7022-1-git-send-email-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
-Subject: Re: [PATCH] fstests: btrfs: regression test for ro snapshot creation
-References: <1413398276-17365-1-git-send-email-fdmanana@suse.com>
-In-Reply-To: <1413398276-17365-1-git-send-email-fdmanana@suse.com>
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Filipe Manana <fdmanana@gmail.com>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 10/15/2014 02:37 PM, Filipe Manana wrote:
-> Regression test for a btrfs issue where creation of readonly snapshots caused
-> the filesystem to get into an inconsistent state.
->
-> This regression was introduced in the 3.17 kernel and fixed by reverting the
-> following linux kernel commit:
->
->       Btrfs: race free update of commit root for ro snapshots
->       9c3b306e1c9e6be4be09e99a8fe2227d1005effc
->
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> ---
->   tests/btrfs/078     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->   tests/btrfs/078.out |  2 ++
->   tests/btrfs/group   |  1 +
->   3 files changed, 88 insertions(+)
->   create mode 100755 tests/btrfs/078
->   create mode 100644 tests/btrfs/078.out
->
+The following kernel commit introduced the bug:
+51f395ad btrfs: Use right extent length when inserting overlap extent map.
 
-Reviewed-by: Josef Bacik <jbacik@fb.com>
+When btrfs commit race with btrfs_get_extent(), merge_extent_mapping()
+may build up a new extent which length overflows and cause extent map
+insert fail, causing the caller get a -EEXIST error.
 
-Thanks,
+This regression is fixed by the following patches:
+btrfs: Fix and enhance merge_extent_mapping() to insert best fitted extent map
+btrfs: Fix the wrong condition judgment about subset extent map
 
-Josef
+Cc: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+---
+ tests/btrfs/078     | 128 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/078.out |   2 +
+ tests/btrfs/group   |   1 +
+ 3 files changed, 131 insertions(+)
+ create mode 100755 tests/btrfs/078
+ create mode 100644 tests/btrfs/078.out
+
+diff --git a/tests/btrfs/078 b/tests/btrfs/078
+new file mode 100755
+index 0000000..bdc20af
+--- /dev/null
++++ b/tests/btrfs/078
+@@ -0,0 +1,128 @@
++#! /bin/bash
++# FS QA Test No. btrfs/078
++#
++# Do write along with fiemap ioctl.
++# Regression test for the kernel comit:
++# 51f395ad btrfs: Use right extent length when inserting overlap extent map.
++#
++# When calling fiemap(without SYNC flag) and btrfs fs is commiting,
++# it will cause race condition and cause btrfs to generate a wrong extent
++# whose len is overflow and fail to insert into the extent map tree,
++# returning -EEXIST.
++#
++# Fixed by the following patches (not merged in mainline yet):
++# btrfs: Fix and enhance merge_extent_mapping() to insert best fitted extent map
++# btrfs: Fix the wrong condition judgment about subset extent map
++#
++#-----------------------------------------------------------------------
++# Copyright (C) 2014 Fujitsu All Rights Reserved.
++# Author: Qu Wenruo <quwenruo@cn.fujitsu.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++tmp=`mktemp -d`
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	kill $dd_pid &> /dev/null
++	kill $fiemap_pid &> /dev/null
++	wait
++	rm -fr $test_file
++	rm -fr $tmp
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_need_to_be_root
++# Since xfs_io's fiemap always use SYNC flag and can't be unset,
++# we must use filefrag to call fiemap without SYNC flag.
++_require_command "/usr/sbin/filefrag"
++_require_xfs_io_command "falloc"
++
++test_file=$SCRATCH_MNT/testfile
++filesize=$((10 * 1024 * 1024 * 1024)) #10G size
++buffersize=$((1024 * 1024)) # 1M bs for dd
++count=$(($filesize / $buffersize))
++testfile=$SCRATCH_MNT/testfile
++
++rm -f $seqres.full
++rm -f $test_file
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++$XFS_IO_PROG -f -c "falloc 0 $filesize" $testfile || \
++	_fail 'need device larger than 10G'
++
++dd_work() {
++	out=$1
++	dd if=/dev/zero of=$out bs=$buffersize count=$count \
++	   conv=notrunc &> /dev/null
++}
++
++# There is a bug for e2fsprogs, at least in version 1.42.9, filefrag will
++# leak the return value, so we can't judge return value only,
++# but also to filter the output
++_filter_error() {
++	# when filefrag fails FIEMAP ioctl, it will fall back to FIBMAP,
++	# which is not supported by btrfs and will report "FIBMAP: strerr()"
++	# However due to other btrfs commits, kernel will return -ENOTTY
++	# or -EINVAL, so only grep for "FIBMAP" for max compatibility.
++	grep "FIBMAP"
++}
++
++fiemap_work() {
++	filename=$1
++	while true; do
++		filefrag $filename 2> $tmp/output 1> /dev/null
++		ret=$?
++		err=`cat $tmp/output | _filter_error`
++		if [ $ret -ne 0 -o -n "$err" ]; then
++			kill $dd_pid
++			return 1
++		fi
++	done
++}
++
++dd_work $testfile &
++dd_pid=$!
++fiemap_work $testfile &
++fiemap_pid=$!
++wait $dd_pid
++ddret=$?
++kill $fiemap_pid &> /dev/null
++wait $fiemap_pid
++
++if [ $ddret -ne 0 ]; then
++	echo "Extent merge bug detected"
++	status=1
++	exit
++else
++	echo "Silence is golden"
++	status=0
++	exit
++fi
+diff --git a/tests/btrfs/078.out b/tests/btrfs/078.out
+new file mode 100644
+index 0000000..b8acea8
+--- /dev/null
++++ b/tests/btrfs/078.out
+@@ -0,0 +1,2 @@
++QA output created by 078
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 9adf862..40e7430 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -80,3 +80,4 @@
+ 075 auto quick subvol
+ 076 auto quick
+ 077 auto quick
++078 auto
+-- 
+2.1.2
 
