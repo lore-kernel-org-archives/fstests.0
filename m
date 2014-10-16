@@ -1,197 +1,71 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:39268 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752442AbaJPJJD (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 16 Oct 2014 05:09:03 -0400
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH v2] btrfs: regression test for btrfs extent merge
-Date: Thu, 16 Oct 2014 17:08:58 +0800
-Message-ID: <1413450538-9783-1-git-send-email-quwenruo@cn.fujitsu.com>
+Received: from cantor2.suse.de ([195.135.220.15]:42918 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753044AbaJPKiI (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 16 Oct 2014 06:38:08 -0400
+Date: Thu, 16 Oct 2014 12:38:06 +0200
+From: Jan Kara <jack@suse.cz>
+Subject: Re: [PATCH] xfs/195: Use XFSDUMP_PROG instead of xfsdump directly
+Message-ID: <20141016103806.GB6085@quack.suse.cz>
+References: <1412177239-27241-1-git-send-email-jack@suse.cz>
+ <20141014115808.GF17506@dastard>
+ <20141014121204.GG17506@dastard>
+ <20141014121527.GH17506@dastard>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20141014121527.GH17506@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Jan Kara <jack@suse.cz>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-The following kernel commit introduced the bug:
-51f395ad btrfs: Use right extent length when inserting overlap extent map.
-
-When btrfs commit race with btrfs_get_extent(), merge_extent_mapping()
-may build up a new extent which length overflows and cause extent map
-insert fail, causing the caller get a -EEXIST error.
-
-This regression is fixed by the following patches:
-btrfs: Fix and enhance merge_extent_mapping() to insert best fitted extent map
-btrfs: Fix the wrong condition judgment about subset extent map
-
-Cc: Filipe Manana <fdmanana@suse.com>
-Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-Tested-by: Filipe Manana <fdmanana@suse.com>
----
-changlog:
-v2:
-   Remove duplicated variant
-   Use _require_fs_space helper
-   Use temp file other than temp dir
----
- tests/btrfs/078     | 126 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/078.out |   2 +
- tests/btrfs/group   |   1 +
- 3 files changed, 129 insertions(+)
- create mode 100755 tests/btrfs/078
- create mode 100644 tests/btrfs/078.out
-
-diff --git a/tests/btrfs/078 b/tests/btrfs/078
-new file mode 100755
-index 0000000..78132c3
---- /dev/null
-+++ b/tests/btrfs/078
-@@ -0,0 +1,126 @@
-+#! /bin/bash
-+# FS QA Test No. btrfs/078
-+#
-+# Do write along with fiemap ioctl.
-+# Regression test for the kernel comit:
-+# 51f395ad btrfs: Use right extent length when inserting overlap extent map.
-+#
-+# When calling fiemap(without SYNC flag) and btrfs fs is commiting,
-+# it will cause race condition and cause btrfs to generate a wrong extent
-+# whose len is overflow and fail to insert into the extent map tree,
-+# returning -EEXIST.
-+#
-+# Fixed by the following patches (not merged in mainline yet):
-+# btrfs: Fix and enhance merge_extent_mapping() to insert best fitted extent map
-+# btrfs: Fix the wrong condition judgment about subset extent map
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2014 Fujitsu All Rights Reserved.
-+# Author: Qu Wenruo <quwenruo@cn.fujitsu.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	kill $dd_pid &> /dev/null
-+	kill $fiemap_pid &> /dev/null
-+	wait
-+	rm -fr $testfile
-+	rm -fr $tmp.* $tmp
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_need_to_be_root
-+# Since xfs_io's fiemap always use SYNC flag and can't be unset,
-+# we must use filefrag to call fiemap without SYNC flag.
-+_require_command "/usr/sbin/filefrag"
-+_require_xfs_io_command "falloc"
-+
-+filesize=$((10 * 1024 * 1024 * 1024)) #10G size
-+buffersize=$((1024 * 1024)) # 1M bs for dd
-+count=$(($filesize / $buffersize))
-+testfile=$SCRATCH_MNT/testfile
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+_require_fs_space $SCRATCH_MNT $(($filesize / 1024 / 1024 / 1024))
-+$XFS_IO_PROG -f -c "falloc 0 $filesize" $testfile
-+
-+dd_work() {
-+	out=$1
-+	dd if=/dev/zero of=$out bs=$buffersize count=$count \
-+	   conv=notrunc &> /dev/null
-+}
-+
-+# There is a bug for e2fsprogs, at least in version 1.42.9, filefrag will
-+# leak the return value, so we can't judge return value only,
-+# but also to filter the output
-+_filter_error() {
-+	# when filefrag fails FIEMAP ioctl, it will fall back to FIBMAP,
-+	# which is not supported by btrfs and will report "FIBMAP: strerr()"
-+	# However old e2fsprogs will use wrong errno EINVAL other than ENOTTY
-+	# so only grep for "FIBMAP" for max compatibility.
-+	grep "FIBMAP"
-+}
-+
-+fiemap_work() {
-+	filename=$1
-+	while true; do
-+		filefrag $filename 2> $tmp.output 1> /dev/null
-+		ret=$?
-+		err=`cat $tmp.output | _filter_error`
-+		if [ $ret -ne 0 -o -n "$err" ]; then
-+			kill $dd_pid
-+			return 1
-+		fi
-+	done
-+}
-+
-+dd_work $testfile &
-+dd_pid=$!
-+fiemap_work $testfile &
-+fiemap_pid=$!
-+wait $dd_pid
-+ddret=$?
-+kill $fiemap_pid &> /dev/null
-+wait $fiemap_pid
-+
-+if [ $ddret -ne 0 ]; then
-+	echo "Extent merge bug detected"
-+	status=1
-+	exit
-+else
-+	echo "Silence is golden"
-+	status=0
-+	exit
-+fi
-diff --git a/tests/btrfs/078.out b/tests/btrfs/078.out
-new file mode 100644
-index 0000000..b8acea8
---- /dev/null
-+++ b/tests/btrfs/078.out
-@@ -0,0 +1,2 @@
-+QA output created by 078
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 9adf862..40e7430 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -80,3 +80,4 @@
- 075 auto quick subvol
- 076 auto quick
- 077 auto quick
-+078 auto
+On Tue 14-10-14 23:15:27, Dave Chinner wrote:
+> On Tue, Oct 14, 2014 at 11:12:04PM +1100, Dave Chinner wrote:
+> > On Tue, Oct 14, 2014 at 10:58:08PM +1100, Dave Chinner wrote:
+> > > On Wed, Oct 01, 2014 at 05:27:18PM +0200, Jan Kara wrote:
+> > > > Use appropriate environment variable (XFSDUMP_PROG) instead of hardcoding
+> > > > 'xfsdump' name. This also makes the test fail graciously when xfsdump
+> > > > isn't installed.
+> > > > 
+> > > > Signed-off-by: Jan Kara <jack@suse.cz>
+> > > > ---
+> > > >  tests/xfs/195 |    3 ++-
+> > > >  1 files changed, 2 insertions(+), 1 deletions(-)
+> > > > 
+> > > > diff --git a/tests/xfs/195 b/tests/xfs/195
+> > > > index c7bc7b8..b86aedb 100755
+> > > > --- a/tests/xfs/195
+> > > > +++ b/tests/xfs/195
+> > > > @@ -48,7 +48,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > >  #
+> > > >  _do_dump()
+> > > >  {
+> > > > -	xfsdump -l 0 -s d -F  \
+> > > > +	$XFSDUMP_PROG -l 0 -s d -F  \
+> > > >  		-L prova -M prova \
+> > > >  		-f $TEST_DIR/dumpfile -e -v excluded_files=debug $TEST_DIR \
+> > > >  		| grep "ino $inum" \
+> > > > @@ -58,6 +58,7 @@ _do_dump()
+> > > >  # get standard environment, filters and checks
+> > > >  . ./common/rc
+> > > >  . ./common/filter
+> > > > +. ./common/dump
+> > > 
+> > > This causes the test to fail, because _do_dump() is defined in
+> > > common/dump as well. I'll fix the conflict...
+> > 
+> > Actually, this has problems with duplicate _cleanup functions too,
+> > so It' would just be better to check for xfsdump being defined
+> > directly rather than including common/dump....
+> 
+> I've dropped this for now. Can you rework it, Jan? Maybe best to use
+> _require_command or something like that as common/dump implies
+> certain specific usage patterns and functions are used, which this
+> test doesn't follow...
+  OK, I'll try to fix it differently. I just wonder why things work for me
+here...
+								Honza
 -- 
-2.1.2
-
+Jan Kara <jack@suse.cz>
+SUSE Labs, CR
