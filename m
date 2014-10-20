@@ -1,57 +1,74 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from userp1040.oracle.com ([156.151.31.81]:27963 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751869AbaJSMoM (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 19 Oct 2014 08:44:12 -0400
-From: Liu Bo <bo.li.liu@oracle.com>
-Subject: [PATCH] fstests: fix memory corruption in aio-last-ref-held-by-io
-Date: Sun, 19 Oct 2014 20:43:54 +0800
-Message-Id: <1413722634-25514-1-git-send-email-bo.li.liu@oracle.com>
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:56174 "EHLO
+	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751647AbaJTBsZ (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sun, 19 Oct 2014 21:48:25 -0400
+Date: Mon, 20 Oct 2014 12:47:50 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: Can't build RPM of xfstests
+Message-ID: <20141020014750.GL7169@dastard>
+References: <648473255763364B961A02AC3BE1060D03C7940C13@MX19A.corp.emc.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <648473255763364B961A02AC3BE1060D03C7940C13@MX19A.corp.emc.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs <linux-btrfs@vger.kernel.org>
+To: "Kaul, Yaniv" <Yaniv.Kaul@emc.com>
+Cc: "xfs@oss.sgi.com" <xfs@oss.sgi.com>, fstests@vger.kernel.org, esandeen@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Liu Bo <liub.liubo@gmail.com>
+[ cc fstests@vger.kernel.org ]
 
-This's been detected by testing generic/323 on btrfs, it keeps producing chaos
-of checksum errors.
+On Sun, Oct 12, 2014 at 02:58:50AM -0400, Kaul, Yaniv wrote:
+> I'm getting the sources from https://kernel.googlesource.com/pub/scm/fs/xfs/xfstests-dev (as I can't use git directly, only over HTTP(s) due to company policy)
+> I'm trying to compile the RPM on either CentOS 6.5 or 7, both fail identically. Log snippets:
+> 
+> == dist, log is Logs/dist
+> make: Entering directory `/var/jenkins/workspace/xfstests-build/build'
+> /bin/tar: xfstests-1.1.1/m4/general_headers.m4: Cannot stat: No such file or directory
+> /bin/tar: Exiting with failure status due to previous errors
+> Wrote: /var/jenkins/workspace/xfstests-build/build/xfstests-1.1.1.src.tar.gz
+> === install ===
+> gmake[1]: Entering directory `/var/jenkins/workspace/xfstests-build'
+> Building include
+> Building lib
+> Building ltp
+> Building src
+> Building aio-dio-regress
+> Building m4
+> Building common
+> Building tests
+> /usr/bin/gmake --no-print-directory Q=@ -C include install
+> ...
+> gmake[1]: Leaving directory `/var/jenkins/workspace/xfstests-build'
+> === tar ===
+> Wrote: /var/jenkins/workspace/xfstests-build/build/tar/xfstests-1.1.1.tar.gz
+> === rpm ===
+> /bin/sed -e's|@pkg_name@|xfstests|g' \
+> 	    -e's|@pkg_version@|1.1.1|g' \
+> 	    -e's|@pkg_release@|1|g' \
+> 	    -e's|@pkg_distribution@|Linux|g' \
+> 	    -e's|@build_root@|/tmp/34943|g' \
+> 	    -e'/^BuildRoot: *$/d' \
+> 	    -e's|@make@|/usr/bin/gmake|g' < xfstests.spec.in > xfstests.spec
+> /usr/bin/rpmbuild -ba --rcfile ./rpm-4.rc xfstests.spec
+> error: File /root/rpmbuild/SOURCES/xfstests-1.1.1.src.tar.gz: No such file or directory
+> gmake[1]: *** [dist] Error 1
 
-It is because aio-last-ref-held-by-io uses a static buffer that is been used
-repeatedly for every io_submit() call, but we'll issue NUM_IOS(=16) io_sumbit()
-in a 'for' loop at a time, and when those data read by aio has not finish its
-endio(), its memory is likely to be used in the next io_submit, which ends up
-data corruption and numerous checksum errors.
+I've never tried to build xfstests packages, so I'd make the
+assumption that the package build infrastructure is broken and needs
+fixing.  That's looking for the tarball in the wrong place. My naive
+reading of that is rpmbuild is expecting to run as root, not as a
+jenkins user....
 
-This allocates memory for each io_submit() and generic/323 runs fine after this.
+Eric, you're the local RPM expert - any ideas?
 
-Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
----
- src/aio-dio-regress/aio-last-ref-held-by-io.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+FWIW, I'll take whatever patches you guys come up with that make it
+build rpms properly. ;)
 
-diff --git a/src/aio-dio-regress/aio-last-ref-held-by-io.c b/src/aio-dio-regress/aio-last-ref-held-by-io.c
-index a73dc3b..7633831 100644
---- a/src/aio-dio-regress/aio-last-ref-held-by-io.c
-+++ b/src/aio-dio-regress/aio-last-ref-held-by-io.c
-@@ -109,7 +109,7 @@ aio_test_thread(void *data)
- 	ioctx_initted = 0;
- 	ios_submitted = 0;
- 
--	ret = posix_memalign((void **)&buffer, getpagesize(), IOSIZE);
-+	ret = posix_memalign((void **)&buffer, getpagesize(), IOSIZE * NUM_IOS);
- 	if (ret != 0) {
- 		printf("%lu: Failed to allocate buffer for IO: %d\n",
- 		       pthread_self(), ret);
-@@ -137,7 +137,7 @@ aio_test_thread(void *data)
- 				struct iocb *iocb = &iocbs[i];
- 
- 				memset(iocb, 0, sizeof(*iocb));
--				io_prep_pread(iocb, fd, buffer,
-+				io_prep_pread(iocb, fd, (buffer + i * IOSIZE),
- 					      IOSIZE, i * IOSIZE);
- 				if (io_submit(ioctx, 1, &iocb) != 1) {
- 					printf("%lu: failed to submit io #%d\n",
+Cheers,
+
+Dave.
 -- 
-1.8.1.4
-
+Dave Chinner
+david@fromorbit.com
