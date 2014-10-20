@@ -1,74 +1,68 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:56174 "EHLO
-	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751647AbaJTBsZ (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 19 Oct 2014 21:48:25 -0400
-Date: Mon, 20 Oct 2014 12:47:50 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: Can't build RPM of xfstests
-Message-ID: <20141020014750.GL7169@dastard>
-References: <648473255763364B961A02AC3BE1060D03C7940C13@MX19A.corp.emc.com>
+Received: from sandeen.net ([63.231.237.45]:58473 "EHLO sandeen.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751845AbaJTDfu (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sun, 19 Oct 2014 23:35:50 -0400
+Message-ID: <54448313.7040602@sandeen.net>
+Date: Sun, 19 Oct 2014 22:35:47 -0500
+From: Eric Sandeen <sandeen@sandeen.net>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <648473255763364B961A02AC3BE1060D03C7940C13@MX19A.corp.emc.com>
+Subject: Re: Can't build RPM of xfstests
+References: <648473255763364B961A02AC3BE1060D03C7940C13@MX19A.corp.emc.com> <20141020014750.GL7169@dastard>
+In-Reply-To: <20141020014750.GL7169@dastard>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: "Kaul, Yaniv" <Yaniv.Kaul@emc.com>
+To: Dave Chinner <david@fromorbit.com>, "Kaul, Yaniv" <Yaniv.Kaul@emc.com>
 Cc: "xfs@oss.sgi.com" <xfs@oss.sgi.com>, fstests@vger.kernel.org, esandeen@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-[ cc fstests@vger.kernel.org ]
+On 10/19/14 8:47 PM, Dave Chinner wrote:
+> [ cc fstests@vger.kernel.org ]
 
-On Sun, Oct 12, 2014 at 02:58:50AM -0400, Kaul, Yaniv wrote:
-> I'm getting the sources from https://kernel.googlesource.com/pub/scm/fs/xfs/xfstests-dev (as I can't use git directly, only over HTTP(s) due to company policy)
-> I'm trying to compile the RPM on either CentOS 6.5 or 7, both fail identically. Log snippets:
+...
+
+>> === rpm ===
+>> /bin/sed -e's|@pkg_name@|xfstests|g' \
+>> 	    -e's|@pkg_version@|1.1.1|g' \
+>> 	    -e's|@pkg_release@|1|g' \
+>> 	    -e's|@pkg_distribution@|Linux|g' \
+>> 	    -e's|@build_root@|/tmp/34943|g' \
+>> 	    -e'/^BuildRoot: *$/d' \
+>> 	    -e's|@make@|/usr/bin/gmake|g' < xfstests.spec.in > xfstests.spec
+>> /usr/bin/rpmbuild -ba --rcfile ./rpm-4.rc xfstests.spec
+>> error: File /root/rpmbuild/SOURCES/xfstests-1.1.1.src.tar.gz: No such file or directory
+>> gmake[1]: *** [dist] Error 1
 > 
-> == dist, log is Logs/dist
-> make: Entering directory `/var/jenkins/workspace/xfstests-build/build'
-> /bin/tar: xfstests-1.1.1/m4/general_headers.m4: Cannot stat: No such file or directory
-> /bin/tar: Exiting with failure status due to previous errors
-> Wrote: /var/jenkins/workspace/xfstests-build/build/xfstests-1.1.1.src.tar.gz
-> === install ===
-> gmake[1]: Entering directory `/var/jenkins/workspace/xfstests-build'
-> Building include
-> Building lib
-> Building ltp
-> Building src
-> Building aio-dio-regress
-> Building m4
-> Building common
-> Building tests
-> /usr/bin/gmake --no-print-directory Q=@ -C include install
-> ...
-> gmake[1]: Leaving directory `/var/jenkins/workspace/xfstests-build'
-> === tar ===
-> Wrote: /var/jenkins/workspace/xfstests-build/build/tar/xfstests-1.1.1.tar.gz
-> === rpm ===
-> /bin/sed -e's|@pkg_name@|xfstests|g' \
-> 	    -e's|@pkg_version@|1.1.1|g' \
-> 	    -e's|@pkg_release@|1|g' \
-> 	    -e's|@pkg_distribution@|Linux|g' \
-> 	    -e's|@build_root@|/tmp/34943|g' \
-> 	    -e'/^BuildRoot: *$/d' \
-> 	    -e's|@make@|/usr/bin/gmake|g' < xfstests.spec.in > xfstests.spec
-> /usr/bin/rpmbuild -ba --rcfile ./rpm-4.rc xfstests.spec
-> error: File /root/rpmbuild/SOURCES/xfstests-1.1.1.src.tar.gz: No such file or directory
-> gmake[1]: *** [dist] Error 1
+> I've never tried to build xfstests packages, so I'd make the
+> assumption that the package build infrastructure is broken and needs
+> fixing.  That's looking for the tarball in the wrong place. My naive
+> reading of that is rpmbuild is expecting to run as root, not as a
+> jenkins user....
+> 
+> Eric, you're the local RPM expert - any ideas?
+> 
+> FWIW, I'll take whatever patches you guys come up with that make it
+> build rpms properly. ;)
 
-I've never tried to build xfstests packages, so I'd make the
-assumption that the package build infrastructure is broken and needs
-fixing.  That's looking for the tarball in the wrong place. My naive
-reading of that is rpmbuild is expecting to run as root, not as a
-jenkins user....
+xfstests rpms have just never been a priority for me.  I run it just fine out
+of a checked-out git repo, and it doesn't require installation; on the other
+hand, making it palatable for a proper FHS-compliant distro package would
+require a fair bit of restructuring beyond just the packaging scripts.
 
-Eric, you're the local RPM expert - any ideas?
+And... I honestly have no idea how the Makepkgs stuff is supposed to work.
 
-FWIW, I'll take whatever patches you guys come up with that make it
-build rpms properly. ;)
+I've never been a fan of upstream containing packaging bits anyway; different
+distros have different requirements, and the Makepkgs script has always seemed
+weird.  RPM/specfiles are supposed to drive the build - the build isn't supposed
+to drive rpm.  I think it'd be best to make a distro-specific specfile which knows how
+to handle an xfstests tarball.  Trying to reverse engineer Makepkgs doesn't sound
+fun to me; rpmbuild knows how to do this stuff.  Dropping a generic RPM specfile
+into the top level dir would probably be enough to get it off the ground even if
+it doesn't conform to any particular distro's packaging rules.
 
-Cheers,
+I think it's up to those who want rpms to dig into this, for now.  Dumping all
+files into /opt/xfstests is probably simplest, since FHS-compliance is probably a
+long ways off.
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+-Eric
