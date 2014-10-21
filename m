@@ -1,112 +1,215 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:12695 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932151AbaJUDQM (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 20 Oct 2014 23:16:12 -0400
-Date: Tue, 21 Oct 2014 11:15:43 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: Can't build RPM of xfstests
-Message-ID: <20141021031543.GB13850@dhcp-13-216.nay.redhat.com>
-References: <648473255763364B961A02AC3BE1060D03C7940C13@MX19A.corp.emc.com>
- <20141020014750.GL7169@dastard>
- <54448313.7040602@sandeen.net>
- <30CA1845-C213-49EA-8809-F1E7A98AE7F9@gmail.com>
- <54451427.9060306@sandeen.net>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <54451427.9060306@sandeen.net>
+Received: from victor.provo.novell.com ([137.65.250.26]:40575 "EHLO
+	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S932098AbaJUJOx (ORCPT
+	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
+	Tue, 21 Oct 2014 05:14:53 -0400
+From: Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] fstests: btrfs, add test for snapshoting after file write + truncate
+Date: Tue, 21 Oct 2014 11:13:09 +0100
+Message-Id: <1413886389-16144-1-git-send-email-fdmanana@suse.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Greg Freemyer <greg.freemyer@gmail.com>, Dave Chinner <david@fromorbit.com>, "Kaul, Yaniv" <Yaniv.Kaul@emc.com>, esandeen@redhat.com, "xfs@oss.sgi.com" <xfs@oss.sgi.com>
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Oct 20, 2014 at 08:54:47AM -0500, Eric Sandeen wrote:
-> On 10/20/14 6:55 AM, Greg Freemyer wrote:
-> 
-> > Opensuse is building rpms of 1.1.1 so the build infrastructure isn't
-> > too badly broken.  I don't know if they are following FHS, but I
-> > doubt they use /opt.
-> 
-> The build works fine, it's the "Makepkgs" that I think is a bit odd,
-> at least for RPM packaging.
-> 
-> Also, if we really want to encourage packaging, we should probably start
-> sticking official version numbers on it.  "1.1.1" was tagged in Dec 2012,
-> and there have been no "releases" since.
-> 
-> > The opensuse package/specfile can be found at:
-> > https://build.opensuse.org/package/show/filesystems/xfstests
-> > 
-> > The rpms including the source rpm can be downloaded from: 
-> > http://software.opensuse.org/download.html?project=filesystems&package=xfstests
-> >
-> >  Note the specfile applies a patch to change the install aspect of
-> > the tarball immediately after untar'ing it.
-> > 
-> > I don't maintain that so I don't know why the patch is needed.
-> 
-> Ok, cool, I'll take a look at the specfile & patch.  I had also packaged
-> it up for our internal QA use long ago, and had to make a few changes
-> as well.
+Regression test for a btrfs issue where if right after the snapshot
+creation ioctl started, a file write followed by a file truncate
+happened, with both operations increasing the file's size, the created
+snapshot would capture an inconsistent state of the file system tree.
+That state reflected the file truncation but it didn't reflect the
+write operation, and left a gap between two file extent items (and
+that gap corresponded to the total or a partial area of the write
+operation's range).
 
-This is the spec file used internally by Red Hat, just for your reference
+This issue was fixed by the following linux kernel patch:
 
-Thanks,
-Eryu
+    Btrfs: fix snapshot inconsistency after a file write followed by truncate
 
-Name:	    xfstests
-Version:    20141014
-Release:    1.git
-Summary:    xfs qa tests
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/080     | 152 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/080.out |   2 +
+ tests/btrfs/group   |   1 +
+ 3 files changed, 155 insertions(+)
+ create mode 100755 tests/btrfs/080
+ create mode 100644 tests/btrfs/080.out
 
-Group:	    	misc
-License:	GPL
-URL:            http://oss.sgi.com/cgi-bin/gitweb.cgi?p=xfs/cmds/xfstests.git
-Source0:        $RPM_BUILD_ROOT/SOURCES/xfstests-dev.tar.bz2
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+diff --git a/tests/btrfs/080 b/tests/btrfs/080
+new file mode 100755
+index 0000000..a73e534
+--- /dev/null
++++ b/tests/btrfs/080
+@@ -0,0 +1,152 @@
++#! /bin/bash
++# FSQA Test No. 080
++#
++# Regression test for a btrfs issue where if right after the snapshot creation
++# ioctl started, a file write followed by a file truncate happened, with both
++# operations increasing the file's size, the created snapshot would capture an
++# inconsistent state of the file system tree. That state reflected the file
++# truncation but it didn't reflect the write operation, and left a gap between
++# two file extent items (and that gap corresponded to the total or a partial
++# area of the write operation's range).
++#
++# This issue was fixed by the following linux kernel patch:
++#
++#     Btrfs: fix snapshot inconsistency after a file write followed by truncate
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2014 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_need_to_be_root
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch_nocheck
++
++rm -f $seqres.full
++
++create_snapshots()
++{
++	count=$1
++	ts=`date +'%H_%M_%S_%N'`
++
++	for ((i = 1; i <= $count; i++)); do
++		_run_btrfs_util_prog subvolume snapshot -r \
++			$SCRATCH_MNT $SCRATCH_MNT/"${ts}_snap_$i"
++	done
++}
++
++create_file()
++{
++	name=$1
++
++	run_check $XFS_IO_PROG -f \
++		-c "pwrite -S 0xaa -b 32K 0 32K" \
++		-c "fsync" \
++		-c "pwrite -S 0xbb -b 32770 16K 32770" \
++		-c "truncate 90123" \
++		$SCRATCH_MNT/$name
++}
++
++workout()
++{
++	name=$1
++	snapshots=$2
++
++	create_file $name &
++	fpid=$!
++	create_snapshots $snapshots &
++	spid=$!
++	wait $fpid
++	create_ret=$?
++	wait $spid
++	snap_ret=$?
++	if [ $create_ret != 0 -o $snap_ret != 0 ]; then
++		_fail "Failure creating file or snapshots, check $seqres.full for details"
++	fi
++}
++
++# If the installed btrfs mkfs supports the no-holes feature, make sure the
++# created fs doesn't get that feature enabled. With it enabled, the below fsck
++# call wouldn't fail. This feature hasn't been enabled by default since it was
++# introduced, but be safe and explicitly disable it.
++_scratch_mkfs -O list-all 2>&1 | grep -q '\bno\-holes\b'
++if [ $? -eq 0 ]; then
++	mkfs_options="-O ^no-holes"
++fi
++_scratch_mkfs "$mkfs_options" >>$seqres.full 2>&1
++
++_scratch_mount
++for ((i = 1; i <= 100; i++)); do
++	workout "foobar_$i" 1
++done
++
++for f in $(find $SCRATCH_MNT -name 'foobar_*'); do
++	digest=`md5sum $f | cut -d ' ' -f 1`
++	case $digest in
++	"d41d8cd98f00b204e9800998ecf8427e")
++		# ok, empty file
++		;;
++	"c28418534a020122aca59fd3ff9581b5")
++		# ok, only first write captured
++		;;
++	"cd0032da89254cdc498fda396e6a9b54")
++		# ok, only 2 first writes captured
++		;;
++	"a1963f914baf4d2579d643425f4e54bc")
++		# ok, the 2 writes and the truncate were captured
++		;;
++	*)
++		# not ok, truncate captured but not one or both writes
++		_fail "Unexpected digest for file $f"
++	esac
++done
++
++# Check the filesystem for inconsistencies.
++# Before the btrfs kernel fix mentioned above, we would very often get fsck
++# error messages like: "root 306 inode 338 errors 100, file extent discount".
++#
++# This was because if right after the snapshot creation ioctl started, a file
++# write followed by a file truncate, with both operations increasing the file's
++# size, we would get a snapshot that reflected a state where the file truncation
++# was visible but the previous file write was not visible, breaking expected
++# total ordering of operations and causing a gap between 2 file extents, where a
++# file extent item representing the range [32K .. ALIGN(16K + 32770, 4096)] was
++# missing in the snapshot's btree.
++_check_scratch_fs
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/btrfs/080.out b/tests/btrfs/080.out
+new file mode 100644
+index 0000000..11a4a1a
+--- /dev/null
++++ b/tests/btrfs/080.out
+@@ -0,0 +1,2 @@
++QA output created by 080
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 40e7430..801fc73 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -81,3 +81,4 @@
+ 076 auto quick
+ 077 auto quick
+ 078 auto
++080 auto
+-- 
+1.9.1
 
-BuildRequires:	autoconf, libtool, e2fsprogs-devel, xfsprogs-devel
-BuildRequires:	libacl-devel, libattr-devel, libaio-devel
-Requires:       bash, perl, acl, attr, bind-utils
-Requires:	bc, indent, quota, xfsprogs
-
-%description
-The xfsqa test available at http://git.kernel.org/?p=fs/xfs/xfstests-dev.git or http://oss.sgi.com/cgi-bin/gitweb.cgi?p=xfs/cmds/xfstests.git
-
-%prep
-%setup -q -n xfstests-dev
-
-%build
-autoheader
-autoconf
-%configure
-make %{?_smp_mflags}
-
-%install
-rm -rf $RPM_BUILD_ROOT
-# Dirty workaround, xfstets won't build if these two directories do not exist...
-mkdir -p /var/lib/xfstests/{ltp,src}
-
-make DIST_ROOT=$RPM_BUILD_ROOT install
-
-%clean
-rm -rf $RPM_BUILD_ROOT
-
-
-%files
-%defattr(-,root,root,-)
-%doc README
-/var/lib/xfstests
-
-
-%changelog
-......
-
-> 
-> -Eric
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
