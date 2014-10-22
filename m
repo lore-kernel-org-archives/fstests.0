@@ -1,195 +1,207 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from victor.provo.novell.com ([137.65.250.26]:33410 "EHLO
-	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1755344AbaJUTnx (ORCPT
-	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
-	Tue, 21 Oct 2014 15:43:53 -0400
-From: Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] fstests: btrfs, add regression test for clone ioctl
-Date: Tue, 21 Oct 2014 21:43:11 +0100
-Message-Id: <1413924191-30467-1-git-send-email-fdmanana@suse.com>
+Received: from mx1.redhat.com ([209.132.183.28]:52242 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754196AbaJVIK5 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 22 Oct 2014 04:10:57 -0400
+Date: Wed, 22 Oct 2014 16:10:46 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 1/2] xfstests: update 'new' script v2
+Message-ID: <20141022081046.GC14167@dhcp-13-216.nay.redhat.com>
+References: <1413648393-17845-1-git-send-email-dmonakhov@openvz.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1413648393-17845-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Dmitry Monakhov <dmonakhov@openvz.org>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Regression test for a btrfs clone ioctl issue where races between
-a clone operation and concurrent target file reads would result in
-leaving stale data in the page cache. After the clone operation
-finished, reading from the clone target file would return the old
-and no longer valid data. This affected only buffered reads (i.e.
-didn't affect direct IO reads).
+On Sat, Oct 18, 2014 at 08:06:32PM +0400, Dmitry Monakhov wrote:
+> - Update script to support new test cheme tests/$fs_type/$TEST_IDX
+> - Try to use first unused ID
+> 
+> 
+> placed in root dir.
+> 
+> Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
 
-This issue was fixed by the following linux kernel patch:
+Looks good to me.
 
-    Btrfs: ensure readers see new data after a clone operation
-    (commit c125b8bff1d9f6c8c91ce4eb8bd5616058c7d510)
+Reviewed-by: Eryu Guan <eguan@redhat.com>
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/081     | 131 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/081.out |   4 ++
- tests/btrfs/group   |   1 +
- 3 files changed, 136 insertions(+)
- create mode 100755 tests/btrfs/081
- create mode 100644 tests/btrfs/081.out
+Two picky comments inline..
 
-diff --git a/tests/btrfs/081 b/tests/btrfs/081
-new file mode 100755
-index 0000000..d2e3767
---- /dev/null
-+++ b/tests/btrfs/081
-@@ -0,0 +1,131 @@
-+#! /bin/bash
-+# FSQA Test No. 081
-+#
-+# Regression test for a btrfs clone ioctl issue where races between
-+# a clone operation and concurrent target file reads would result in
-+# leaving stale data in the page cache. After the clone operation
-+# finished, reading from the clone target file would return the old
-+# and no longer valid data. This affected only buffered reads (i.e.
-+# didn't affect direct IO reads).
-+#
-+# This issue was fixed by the following linux kernel patch:
-+#
-+#     Btrfs: ensure readers see new data after a clone operation
-+#     (commit c125b8bff1d9f6c8c91ce4eb8bd5616058c7d510)
-+#
-+#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2014 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_need_to_be_root
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_btrfs_cloner
-+
-+rm -f $seqres.full
-+
-+num_extents=100
-+extent_size=8192
-+
-+create_source_file()
-+{
-+	name=$1
-+
-+	# Create a file with $num_extents extents, each with a size of
-+	# $extent_size bytes.
-+	touch $SCRATCH_MNT/$name
-+	for ((i = 0; i < $num_extents; i++)); do
-+		off=$((i * $extent_size))
-+		run_check $XFS_IO_PROG \
-+			-c "pwrite -S $i -b $extent_size $off $extent_size" \
-+			-c "fsync" $SCRATCH_MNT/$name
-+	done
-+}
-+
-+create_target_file()
-+{
-+	name=$1
-+	file_size=$(($num_extents * $extent_size))
-+
-+	run_check $XFS_IO_PROG -f -c "pwrite -S 0xff 0 $file_size" \
-+		-c "fsync" $SCRATCH_MNT/$name
-+}
-+
-+reader_loop()
-+{
-+	name=$1
-+
-+	while true; do
-+		cat $SCRATCH_MNT/$name > /dev/null
-+	done
-+}
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+create_source_file "foo"
-+create_target_file "bar"
-+
-+reader_loop "bar" &
-+reader_pid=$!
-+
-+$CLONER_PROG -s 0 -d 0 -l $(($num_extents * $extent_size)) \
-+	$SCRATCH_MNT/foo $SCRATCH_MNT/bar
-+
-+kill $reader_pid > /dev/null 2>&1
-+
-+# Now both foo and bar should have exactly the same content.
-+# This didn't use to be the case before the btrfs kernel fix mentioned
-+# above. The clone ioctl was racy, as it removed bar's pages from the
-+# page cache and only after it would update bar's metadata to point to
-+# the same extents that foo's metadata points to - and this was done in
-+# an unprotected way, so that a file read request done right after the
-+# clone ioctl removed the pages from the page cache and before it updated
-+# bar's metadata, would result in populating the page cache with stale
-+# data. Therefore a file read after the clone operation finished would
-+# not get the cloned data but it would get instead the old and no longer
-+# valid data.
-+md5sum $SCRATCH_MNT/foo | _filter_scratch
-+md5sum $SCRATCH_MNT/bar | _filter_scratch
-+
-+# Validate the content of bar still matches foo's content even after
-+# clearing all of bar's data from the page cache.
-+_scratch_remount
-+md5sum $SCRATCH_MNT/bar | _filter_scratch
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/081.out b/tests/btrfs/081.out
-new file mode 100644
-index 0000000..3c7c3d2
---- /dev/null
-+++ b/tests/btrfs/081.out
-@@ -0,0 +1,4 @@
-+QA output created by 081
-+14968c092c68e32fa35e776392d14523  SCRATCH_MNT/foo
-+14968c092c68e32fa35e776392d14523  SCRATCH_MNT/bar
-+14968c092c68e32fa35e776392d14523  SCRATCH_MNT/bar
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 801fc73..fc60c63 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -82,3 +82,4 @@
- 077 auto quick
- 078 auto
- 080 auto
-+081 auto quick
--- 
-1.9.1
+> ---
+>  new |   85 ++++++++++++++++++++++++++++++++++++++++++++++++------------------
+>  1 files changed, 62 insertions(+), 23 deletions(-)
+> 
+> diff --git a/new b/new
+> index f3e6fa1..88cb7c7 100755
+> --- a/new
+> +++ b/new
+> @@ -32,10 +32,22 @@ _cleanup()
+>      :
+>  }
+>  
+> -if [ ! -f group ]
+> +SRC_GROUPS=`find tests -not -path tests -type d -printf "%f "`
+> +usage()
+> +{
+> +    echo "Usage $0 test_dir"
+> +    echo "Available dirs are: $SRC_GROUPS"
+> +    exit
+> +}
+> +
+> +[ $# -eq 0 ] && usage
+> +tdir=tests/$1
+> +shift
+> +
+> +if [ ! -f $tdir/group ]
+>  then
+> -    echo "Creating the group index ..."
+> -    cat <<'End-of-File' >group
+> +    echo "Creating the $tdir/group index ..."
+> +    cat <<'End-of-File' >$tdir/group
+>  # QA groups control
+>  #
+>  # define groups and default group owners
+> @@ -51,10 +63,10 @@ other		some-user-login
+>  End-of-File
+>  fi
+>  
+> -if [ ! -w group ]
+> +if [ ! -w $tdir/group ]
+>  then
+> -    chmod u+w group
+> -    echo "Warning: making the index file \"group\" writeable"
+> +    chmod u+w $tdir/group
+> +    echo "Warning: making the index file \"$tdir/group\" writeable"
+>  fi
+>  
+>  if make
+> @@ -64,13 +76,33 @@ else
+>      echo "Warning: make failed -- some tests may be missing"
+>  fi
+>  
+> -last=`grep '^[0-9][0-9]* ' group | sort | tail -1 | sed -e 's/[ 	].*//'`
+> -# get rid of leading 0s as can be interpreted as octal
+> -last=`echo $last | sed 's/^0*//'`
+> -id=`$AWK_PROG </dev/null 'BEGIN{printf "%03d\n",'$last'+1}'`
+> +i=0
+> +line=0
+> +eof=1
+> +[ -f "$tdir/group" ] || usage
+> +
+> +for found in `cat $tdir/group | gawk '{ print $1 }'`
 
+I prefer $AWK_PROG here, as it's already defined in common/rc
+
+> +do
+> +    line=$((line+1))
+> +    if [ -z "$found" ] || [ "$found" == "#" ];then
+> +	continue
+> +    fi
+> +    i=$((i+1))
+> +    id=`printf "%03d" $i`
+> +    if [ "$id" != "$found" ];then
+> +	eof=0
+> +	break
+> +    fi
+> +done
+> +if [ $eof -eq 1 ]; then
+> +   line=$((line+1))
+> +   i=$((i+1))
+> +   id=`printf "%03d" $i`
+> +fi
+> +
+>  echo "Next test is $id"
+>  
+> -if [ -f $id ]
+> +if [ -f $tdir/$id ]
+>  then
+>      echo "Error: test $id already exists!"
+>      _cleanup
+> @@ -81,7 +113,7 @@ echo -n "Creating skeletal script for you to edit ..."
+>  
+>  year=`date +%Y`
+>  
+> -cat <<End-of-File >$id
+> +cat <<End-of-File >$tdir/$id
+>  #! /bin/bash
+>  # FS QA Test No. $id
+>  #
+> @@ -146,11 +178,12 @@ End-of-File
+>  sleep 2		# latency to read messages to this point
+>  echo ""
+>  
+> -chmod 755 $id
+> -${EDITOR-vi} $id
+> +chmod 755 $tdir/$id
+> +${EDITOR-vi} $tdir/$id
+>  
+>  if [ $# -eq 0 ]
+>  then
+> +
+
+Extra empty line added here.
+
+Thanks,
+Eryu
+>      while true
+>      do
+>  	echo -n "Add to group(s) [other] (? for list): "
+> @@ -158,12 +191,15 @@ then
+>  	[ -z "$ans" ] && ans=other
+>  	if [ "X$ans" = "X?" ]
+>  	then
+> -	    $AWK_PROG <group '
+> -BEGIN		{ text = "# ???" }
+> -/^[a-z]/	{ printf "%-16.16s %s\n",$1,text; text = "# ???"; next }
+> -NF < 2		{ next }
+> -		{ text = $0 }' \
+> -	    | sort
+> +	    for d in $SRC_GROUPS; do
+> +		l=$(sed -n < tests/$d/group \
+> +		    -e 's/#.*//' \
+> +		    -e 's/$/ /' \
+> +		    -e 's;\(^[0-9][0-9][0-9]\)\(.*$\);\2;p')
+> +		grpl="$grpl $l"
+> +	    done
+> +	    lst=`for word in $grpl; do echo $word; done | sort| uniq `
+> +	    echo $lst
+>  	else
+>  	    break
+>  	fi
+> @@ -173,18 +209,21 @@ else
+>      #
+>      for g in $*
+>      do
+> -	if grep "^$g[ 	]" group >/dev/null
+> +	if grep "^$g[ 	]" $tdir/group >/dev/null
+>  	then
+>  	    :
+>  	else
+> -	    echo "Warning: group \"$g\" not defined in ./group"
+> +	    echo "Warning: group \"$g\" not defined in $tdir/group"
+>  	fi
+>      done
+>      ans="$*"
+>  fi
+>  
+>  echo -n "Adding $id to group index ..."
+> -echo "$id $ans" >>group
+> +head -n $(($line-1)) $tdir/group > /tmp/$$.group
+> +echo "$id $ans" >> /tmp/$$.group
+> +tail -n +$((line)) $tdir/group >> /tmp/$$.group
+> +mv /tmp/$$.group $tdir/group
+>  echo " done."
+>  
+>  exit 0
+> -- 
+> 1.7.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
