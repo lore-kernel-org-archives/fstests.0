@@ -1,207 +1,141 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52242 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754196AbaJVIK5 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 22 Oct 2014 04:10:57 -0400
-Date: Wed, 22 Oct 2014 16:10:46 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 1/2] xfstests: update 'new' script v2
-Message-ID: <20141022081046.GC14167@dhcp-13-216.nay.redhat.com>
-References: <1413648393-17845-1-git-send-email-dmonakhov@openvz.org>
+Received: from cn.fujitsu.com ([59.151.112.132]:35792 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1755004AbaJVJ7Y (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 22 Oct 2014 05:59:24 -0400
+Message-ID: <54477F57.9020905@cn.fujitsu.com>
+Date: Wed, 22 Oct 2014 17:56:39 +0800
+From: "gux.fnst" <gux.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1413648393-17845-1-git-send-email-dmonakhov@openvz.org>
+Subject: Re: [PATCH v3] xfstests: add test for truncate/collapse range race
+References: <1403157004-25112-1-git-send-email-gux.fnst@cn.fujitsu.com> <1412070617-17136-1-git-send-email-gux.fnst@cn.fujitsu.com>
+In-Reply-To: <1412070617-17136-1-git-send-email-gux.fnst@cn.fujitsu.com>
+Content-Type: text/plain; charset="GB2312"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Dmitry Monakhov <dmonakhov@openvz.org>
+To: Dave Chinner <david@fromorbit.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Oct 18, 2014 at 08:06:32PM +0400, Dmitry Monakhov wrote:
-> - Update script to support new test cheme tests/$fs_type/$TEST_IDX
-> - Try to use first unused ID
+Hi, Dave
+
+    I'd like to know whether this test case is meaningful for xfstests.
+If it is not, I will drop it.
+    Thanks!
+
+Regards,
+Xing Gu
+
+On 09/30/2014 05:50 PM, Xing Gu wrote:
+> This case tests truncate/collapse range race. If
+> the race occurs, it will trigger BUG_ON.
 > 
-> 
-> placed in root dir.
-> 
-> Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
-
-Looks good to me.
-
-Reviewed-by: Eryu Guan <eguan@redhat.com>
-
-Two picky comments inline..
-
+> Signed-off-by: Xing Gu <gux.fnst@cn.fujitsu.com>
 > ---
->  new |   85 ++++++++++++++++++++++++++++++++++++++++++++++++------------------
->  1 files changed, 62 insertions(+), 23 deletions(-)
+>   tests/generic/326     | 77 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>   tests/generic/326.out |  1 +
+>   tests/generic/group   |  1 +
+>   3 files changed, 79 insertions(+)
+>   create mode 100755 tests/generic/326
+>   create mode 100644 tests/generic/326.out
 > 
-> diff --git a/new b/new
-> index f3e6fa1..88cb7c7 100755
-> --- a/new
-> +++ b/new
-> @@ -32,10 +32,22 @@ _cleanup()
->      :
->  }
->  
-> -if [ ! -f group ]
-> +SRC_GROUPS=`find tests -not -path tests -type d -printf "%f "`
-> +usage()
+> diff --git a/tests/generic/326 b/tests/generic/326
+> new file mode 100755
+> index 0000000..c24e3ba
+> --- /dev/null
+> +++ b/tests/generic/326
+> @@ -0,0 +1,77 @@
+> +#! /bin/bash
+> +# FS QA Test No. 326
+> +#
+> +# Test truncate/collapse range race.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2014 Fujitsu.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +
+> +_cleanup()
 > +{
-> +    echo "Usage $0 test_dir"
-> +    echo "Available dirs are: $SRC_GROUPS"
-> +    exit
+> +    rm -f $tmp.*
 > +}
 > +
-> +[ $# -eq 0 ] && usage
-> +tdir=tests/$1
-> +shift
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
-> +if [ ! -f $tdir/group ]
->  then
-> -    echo "Creating the group index ..."
-> -    cat <<'End-of-File' >group
-> +    echo "Creating the $tdir/group index ..."
-> +    cat <<'End-of-File' >$tdir/group
->  # QA groups control
->  #
->  # define groups and default group owners
-> @@ -51,10 +63,10 @@ other		some-user-login
->  End-of-File
->  fi
->  
-> -if [ ! -w group ]
-> +if [ ! -w $tdir/group ]
->  then
-> -    chmod u+w group
-> -    echo "Warning: making the index file \"group\" writeable"
-> +    chmod u+w $tdir/group
-> +    echo "Warning: making the index file \"$tdir/group\" writeable"
->  fi
->  
->  if make
-> @@ -64,13 +76,33 @@ else
->      echo "Warning: make failed -- some tests may be missing"
->  fi
->  
-> -last=`grep '^[0-9][0-9]* ' group | sort | tail -1 | sed -e 's/[ 	].*//'`
-> -# get rid of leading 0s as can be interpreted as octal
-> -last=`echo $last | sed 's/^0*//'`
-> -id=`$AWK_PROG </dev/null 'BEGIN{printf "%03d\n",'$last'+1}'`
-> +i=0
-> +line=0
-> +eof=1
-> +[ -f "$tdir/group" ] || usage
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
 > +
-> +for found in `cat $tdir/group | gawk '{ print $1 }'`
-
-I prefer $AWK_PROG here, as it's already defined in common/rc
-
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs generic
+> +_require_scratch
+> +_require_xfs_io_command "fcollapse"
+> +
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +old_bug=`dmesg | grep -c "kernel BUG"`
+> +
+> +testfile=$SCRATCH_MNT/file.$seq
+> +# fcollapse/truncate continuously and simultaneously
+> +# a same file
+> +for ((i=1; i <= 100; i++))
 > +do
-> +    line=$((line+1))
-> +    if [ -z "$found" ] || [ "$found" == "#" ];then
-> +	continue
-> +    fi
-> +    i=$((i+1))
-> +    id=`printf "%03d" $i`
-> +    if [ "$id" != "$found" ];then
-> +	eof=0
-> +	break
-> +    fi
+> +	for ((i=1; i <= 1000; i++))
+> +	do
+> +		$XFS_IO_PROG -f -c 'truncate 100k' $testfile 2>> $seqres.full
+> +		$XFS_IO_PROG -f -c 'fcollapse 0 16k' $testfile 2>> $seqres.full
+> +	done &
+> +	for ((i=1; i <= 1000; i++))
+> +	do
+> +		$XFS_IO_PROG -f -c 'truncate 0' $testfile 2>> $seqres.full
+> +	done &
 > +done
-> +if [ $eof -eq 1 ]; then
-> +   line=$((line+1))
-> +   i=$((i+1))
-> +   id=`printf "%03d" $i`
+> +
+> +wait
+> +
+> +new_bug=`dmesg | grep -c "kernel BUG"`
+> +if [ $new_bug -ne $old_bug ]; then
+> +	echo "kernel bug detected, check dmesg for more infomation."
 > +fi
 > +
->  echo "Next test is $id"
->  
-> -if [ -f $id ]
-> +if [ -f $tdir/$id ]
->  then
->      echo "Error: test $id already exists!"
->      _cleanup
-> @@ -81,7 +113,7 @@ echo -n "Creating skeletal script for you to edit ..."
->  
->  year=`date +%Y`
->  
-> -cat <<End-of-File >$id
-> +cat <<End-of-File >$tdir/$id
->  #! /bin/bash
->  # FS QA Test No. $id
->  #
-> @@ -146,11 +178,12 @@ End-of-File
->  sleep 2		# latency to read messages to this point
->  echo ""
->  
-> -chmod 755 $id
-> -${EDITOR-vi} $id
-> +chmod 755 $tdir/$id
-> +${EDITOR-vi} $tdir/$id
->  
->  if [ $# -eq 0 ]
->  then
-> +
-
-Extra empty line added here.
-
-Thanks,
-Eryu
->      while true
->      do
->  	echo -n "Add to group(s) [other] (? for list): "
-> @@ -158,12 +191,15 @@ then
->  	[ -z "$ans" ] && ans=other
->  	if [ "X$ans" = "X?" ]
->  	then
-> -	    $AWK_PROG <group '
-> -BEGIN		{ text = "# ???" }
-> -/^[a-z]/	{ printf "%-16.16s %s\n",$1,text; text = "# ???"; next }
-> -NF < 2		{ next }
-> -		{ text = $0 }' \
-> -	    | sort
-> +	    for d in $SRC_GROUPS; do
-> +		l=$(sed -n < tests/$d/group \
-> +		    -e 's/#.*//' \
-> +		    -e 's/$/ /' \
-> +		    -e 's;\(^[0-9][0-9][0-9]\)\(.*$\);\2;p')
-> +		grpl="$grpl $l"
-> +	    done
-> +	    lst=`for word in $grpl; do echo $word; done | sort| uniq `
-> +	    echo $lst
->  	else
->  	    break
->  	fi
-> @@ -173,18 +209,21 @@ else
->      #
->      for g in $*
->      do
-> -	if grep "^$g[ 	]" group >/dev/null
-> +	if grep "^$g[ 	]" $tdir/group >/dev/null
->  	then
->  	    :
->  	else
-> -	    echo "Warning: group \"$g\" not defined in ./group"
-> +	    echo "Warning: group \"$g\" not defined in $tdir/group"
->  	fi
->      done
->      ans="$*"
->  fi
->  
->  echo -n "Adding $id to group index ..."
-> -echo "$id $ans" >>group
-> +head -n $(($line-1)) $tdir/group > /tmp/$$.group
-> +echo "$id $ans" >> /tmp/$$.group
-> +tail -n +$((line)) $tdir/group >> /tmp/$$.group
-> +mv /tmp/$$.group $tdir/group
->  echo " done."
->  
->  exit 0
-> -- 
-> 1.7.1
+> +status=0 ; exit
+> diff --git a/tests/generic/326.out b/tests/generic/326.out
+> new file mode 100644
+> index 0000000..90a76cc
+> --- /dev/null
+> +++ b/tests/generic/326.out
+> @@ -0,0 +1 @@
+> +QA output created by 326
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 799bfd8..5ef8acb 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -151,3 +151,4 @@
+>   323 auto aio stress
+>   324 auto fsr quick
+>   325 auto quick data log
+> +326 auto
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
