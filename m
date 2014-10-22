@@ -1,15 +1,16 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:35792 "EHLO
+Received: from cn.fujitsu.com ([59.151.112.132]:27914 "EHLO
 	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755004AbaJVJ7Y (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 22 Oct 2014 05:59:24 -0400
-Message-ID: <54477F57.9020905@cn.fujitsu.com>
-Date: Wed, 22 Oct 2014 17:56:39 +0800
+	with ESMTP id S1754305AbaJVJ7b (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 22 Oct 2014 05:59:31 -0400
+Message-ID: <54477F5F.7090201@cn.fujitsu.com>
+Date: Wed, 22 Oct 2014 17:56:47 +0800
 From: "gux.fnst" <gux.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Subject: Re: [PATCH v3] xfstests: add test for truncate/collapse range race
-References: <1403157004-25112-1-git-send-email-gux.fnst@cn.fujitsu.com> <1412070617-17136-1-git-send-email-gux.fnst@cn.fujitsu.com>
-In-Reply-To: <1412070617-17136-1-git-send-email-gux.fnst@cn.fujitsu.com>
+Subject: Re: [PATCH] btrfs: add regression test for remount with thread_pool
+ resized
+References: <1401439971-18589-1-git-send-email-gux.fnst@cn.fujitsu.com>
+In-Reply-To: <1401439971-18589-1-git-send-email-gux.fnst@cn.fujitsu.com>
 Content-Type: text/plain; charset="GB2312"
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
@@ -19,36 +20,33 @@ List-ID: <fstests@vger.kernel.org>
 
 Hi, Dave
 
-    I'd like to know whether this test case is meaningful for xfstests.
-If it is not, I will drop it.
-    Thanks!
+    Could you help to review this patch? Thanks!
 
 Regards,
 Xing Gu
 
-On 09/30/2014 05:50 PM, Xing Gu wrote:
-> This case tests truncate/collapse range race. If
-> the race occurs, it will trigger BUG_ON.
+On 05/30/2014 04:52 PM, Xing Gu wrote:
+> Regression test for resizing 'thread_pool' when remount the fs.
 > 
 > Signed-off-by: Xing Gu <gux.fnst@cn.fujitsu.com>
 > ---
->   tests/generic/326     | 77 +++++++++++++++++++++++++++++++++++++++++++++++++++
->   tests/generic/326.out |  1 +
->   tests/generic/group   |  1 +
->   3 files changed, 79 insertions(+)
->   create mode 100755 tests/generic/326
->   create mode 100644 tests/generic/326.out
+>   tests/btrfs/055     | 55 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>   tests/btrfs/055.out |  1 +
+>   tests/btrfs/group   |  1 +
+>   3 files changed, 57 insertions(+)
+>   create mode 100755 tests/btrfs/055
+>   create mode 100644 tests/btrfs/055.out
 > 
-> diff --git a/tests/generic/326 b/tests/generic/326
+> diff --git a/tests/btrfs/055 b/tests/btrfs/055
 > new file mode 100755
-> index 0000000..c24e3ba
+> index 0000000..0a0dd34
 > --- /dev/null
-> +++ b/tests/generic/326
-> @@ -0,0 +1,77 @@
-> +#! /bin/bash
-> +# FS QA Test No. 326
+> +++ b/tests/btrfs/055
+> @@ -0,0 +1,55 @@
+> +#!/bin/bash
+> +# FS QA Test No. btrfs/055
 > +#
-> +# Test truncate/collapse range race.
+> +# Regression test for resizing 'thread_pool' when remount the fs.
 > +#
 > +#-----------------------------------------------------------------------
 > +# Copyright (c) 2014 Fujitsu.  All Rights Reserved.
@@ -65,6 +63,7 @@ On 09/30/2014 05:50 PM, Xing Gu wrote:
 > +# You should have received a copy of the GNU General Public License
 > +# along with this program; if not, write the Free Software Foundation,
 > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#
 > +#-----------------------------------------------------------------------
 > +#
 > +
@@ -81,61 +80,38 @@ On 09/30/2014 05:50 PM, Xing Gu wrote:
 > +    rm -f $tmp.*
 > +}
 > +
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +trap "_cleanup ; exit \$status" 0 1 2 3 15
 > +
 > +# get standard environment, filters and checks
 > +. ./common/rc
 > +. ./common/filter
 > +
 > +# real QA test starts here
+> +_supported_fs btrfs
 > +_supported_os Linux
-> +_supported_fs generic
 > +_require_scratch
-> +_require_xfs_io_command "fcollapse"
 > +
-> +_scratch_mkfs > $seqres.full 2>&1
-> +_scratch_mount
+> +_scratch_mkfs > /dev/null 2>&1
 > +
-> +old_bug=`dmesg | grep -c "kernel BUG"`
+> +_scratch_mount "-o thread_pool=6"
 > +
-> +testfile=$SCRATCH_MNT/file.$seq
-> +# fcollapse/truncate continuously and simultaneously
-> +# a same file
-> +for ((i=1; i <= 100; i++))
-> +do
-> +	for ((i=1; i <= 1000; i++))
-> +	do
-> +		$XFS_IO_PROG -f -c 'truncate 100k' $testfile 2>> $seqres.full
-> +		$XFS_IO_PROG -f -c 'fcollapse 0 16k' $testfile 2>> $seqres.full
-> +	done &
-> +	for ((i=1; i <= 1000; i++))
-> +	do
-> +		$XFS_IO_PROG -f -c 'truncate 0' $testfile 2>> $seqres.full
-> +	done &
-> +done
-> +
-> +wait
-> +
-> +new_bug=`dmesg | grep -c "kernel BUG"`
-> +if [ $new_bug -ne $old_bug ]; then
-> +	echo "kernel bug detected, check dmesg for more infomation."
-> +fi
+> +_scratch_mount "-o remount,thread_pool=10"
 > +
 > +status=0 ; exit
-> diff --git a/tests/generic/326.out b/tests/generic/326.out
+> diff --git a/tests/btrfs/055.out b/tests/btrfs/055.out
 > new file mode 100644
-> index 0000000..90a76cc
+> index 0000000..2fdd8f4
 > --- /dev/null
-> +++ b/tests/generic/326.out
+> +++ b/tests/btrfs/055.out
 > @@ -0,0 +1 @@
-> +QA output created by 326
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 799bfd8..5ef8acb 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -151,3 +151,4 @@
->   323 auto aio stress
->   324 auto fsr quick
->   325 auto quick data log
-> +326 auto
+> +QA output created by 055
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index b668485..2c10c5b 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -57,3 +57,4 @@
+>   052 auto quick
+>   053 auto quick
+>   054 auto quick
+> +055 auto quick
 > 
