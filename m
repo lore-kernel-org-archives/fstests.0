@@ -1,117 +1,184 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:27914 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1754305AbaJVJ7b (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 22 Oct 2014 05:59:31 -0400
-Message-ID: <54477F5F.7090201@cn.fujitsu.com>
-Date: Wed, 22 Oct 2014 17:56:47 +0800
-From: "gux.fnst" <gux.fnst@cn.fujitsu.com>
-MIME-Version: 1.0
-Subject: Re: [PATCH] btrfs: add regression test for remount with thread_pool
- resized
-References: <1401439971-18589-1-git-send-email-gux.fnst@cn.fujitsu.com>
-In-Reply-To: <1401439971-18589-1-git-send-email-gux.fnst@cn.fujitsu.com>
-Content-Type: text/plain; charset="GB2312"
-Content-Transfer-Encoding: 7bit
+Received: from mailhub.sw.ru ([195.214.232.25]:20847 "EHLO relay.sw.ru"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753351AbaJWLIn (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 23 Oct 2014 07:08:43 -0400
+From: Dmitry Monakhov <dmonakhov@openvz.org>
+Subject: [PATCH 1/2] xfstests: update 'new' script v3
+Date: Thu, 23 Oct 2014 15:08:37 +0400
+Message-Id: <1414062518-30942-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org, root <root@ts105.qa.sw.ru>
 List-ID: <fstests@vger.kernel.org>
 
-Hi, Dave
+From: root <root@ts105.qa.sw.ru>
 
-    Could you help to review this patch? Thanks!
+- Update script to support new test cheme tests/$fs_type/$TEST_IDX
+- Try to use first unused ID
 
-Regards,
-Xing Gu
+changes from v2
+  - gawk->$AWK_PROG
 
-On 05/30/2014 04:52 PM, Xing Gu wrote:
-> Regression test for resizing 'thread_pool' when remount the fs.
-> 
-> Signed-off-by: Xing Gu <gux.fnst@cn.fujitsu.com>
-> ---
->   tests/btrfs/055     | 55 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->   tests/btrfs/055.out |  1 +
->   tests/btrfs/group   |  1 +
->   3 files changed, 57 insertions(+)
->   create mode 100755 tests/btrfs/055
->   create mode 100644 tests/btrfs/055.out
-> 
-> diff --git a/tests/btrfs/055 b/tests/btrfs/055
-> new file mode 100755
-> index 0000000..0a0dd34
-> --- /dev/null
-> +++ b/tests/btrfs/055
-> @@ -0,0 +1,55 @@
-> +#!/bin/bash
-> +# FS QA Test No. btrfs/055
-> +#
-> +# Regression test for resizing 'thread_pool' when remount the fs.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2014 Fujitsu.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +
-> +_cleanup()
-> +{
-> +    rm -f $tmp.*
-> +}
-> +
-> +trap "_cleanup ; exit \$status" 0 1 2 3 15
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +
-> +_scratch_mkfs > /dev/null 2>&1
-> +
-> +_scratch_mount "-o thread_pool=6"
-> +
-> +_scratch_mount "-o remount,thread_pool=10"
-> +
-> +status=0 ; exit
-> diff --git a/tests/btrfs/055.out b/tests/btrfs/055.out
-> new file mode 100644
-> index 0000000..2fdd8f4
-> --- /dev/null
-> +++ b/tests/btrfs/055.out
-> @@ -0,0 +1 @@
-> +QA output created by 055
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index b668485..2c10c5b 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -57,3 +57,4 @@
->   052 auto quick
->   053 auto quick
->   054 auto quick
-> +055 auto quick
-> 
+Reviewed-by: Eryu Guan <eguan@redhat.com>
+---
+ new |   85 ++++++++++++++++++++++++++++++++++++++++++++++++------------------
+ 1 files changed, 62 insertions(+), 23 deletions(-)
+
+diff --git a/new b/new
+index f3e6fa1..86f9075 100755
+--- a/new
++++ b/new
+@@ -32,10 +32,22 @@ _cleanup()
+     :
+ }
+ 
+-if [ ! -f group ]
++SRC_GROUPS=`find tests -not -path tests -type d -printf "%f "`
++usage()
++{
++    echo "Usage $0 test_dir"
++    echo "Available dirs are: $SRC_GROUPS"
++    exit
++}
++
++[ $# -eq 0 ] && usage
++tdir=tests/$1
++shift
++
++if [ ! -f $tdir/group ]
+ then
+-    echo "Creating the group index ..."
+-    cat <<'End-of-File' >group
++    echo "Creating the $tdir/group index ..."
++    cat <<'End-of-File' >$tdir/group
+ # QA groups control
+ #
+ # define groups and default group owners
+@@ -51,10 +63,10 @@ other		some-user-login
+ End-of-File
+ fi
+ 
+-if [ ! -w group ]
++if [ ! -w $tdir/group ]
+ then
+-    chmod u+w group
+-    echo "Warning: making the index file \"group\" writeable"
++    chmod u+w $tdir/group
++    echo "Warning: making the index file \"$tdir/group\" writeable"
+ fi
+ 
+ if make
+@@ -64,13 +76,33 @@ else
+     echo "Warning: make failed -- some tests may be missing"
+ fi
+ 
+-last=`grep '^[0-9][0-9]* ' group | sort | tail -1 | sed -e 's/[ 	].*//'`
+-# get rid of leading 0s as can be interpreted as octal
+-last=`echo $last | sed 's/^0*//'`
+-id=`$AWK_PROG </dev/null 'BEGIN{printf "%03d\n",'$last'+1}'`
++i=0
++line=0
++eof=1
++[ -f "$tdir/group" ] || usage
++
++for found in `cat $tdir/group | $AWK_PROG '{ print $1 }'`
++do
++    line=$((line+1))
++    if [ -z "$found" ] || [ "$found" == "#" ];then
++	continue
++    fi
++    i=$((i+1))
++    id=`printf "%03d" $i`
++    if [ "$id" != "$found" ];then
++	eof=0
++	break
++    fi
++done
++if [ $eof -eq 1 ]; then
++   line=$((line+1))
++   i=$((i+1))
++   id=`printf "%03d" $i`
++fi
++
+ echo "Next test is $id"
+ 
+-if [ -f $id ]
++if [ -f $tdir/$id ]
+ then
+     echo "Error: test $id already exists!"
+     _cleanup
+@@ -81,7 +113,7 @@ echo -n "Creating skeletal script for you to edit ..."
+ 
+ year=`date +%Y`
+ 
+-cat <<End-of-File >$id
++cat <<End-of-File >$tdir/$id
+ #! /bin/bash
+ # FS QA Test No. $id
+ #
+@@ -146,11 +178,12 @@ End-of-File
+ sleep 2		# latency to read messages to this point
+ echo ""
+ 
+-chmod 755 $id
+-${EDITOR-vi} $id
++chmod 755 $tdir/$id
++${EDITOR-vi} $tdir/$id
+ 
+ if [ $# -eq 0 ]
+ then
++
+     while true
+     do
+ 	echo -n "Add to group(s) [other] (? for list): "
+@@ -158,12 +191,15 @@ then
+ 	[ -z "$ans" ] && ans=other
+ 	if [ "X$ans" = "X?" ]
+ 	then
+-	    $AWK_PROG <group '
+-BEGIN		{ text = "# ???" }
+-/^[a-z]/	{ printf "%-16.16s %s\n",$1,text; text = "# ???"; next }
+-NF < 2		{ next }
+-		{ text = $0 }' \
+-	    | sort
++	    for d in $SRC_GROUPS; do
++		l=$(sed -n < tests/$d/group \
++		    -e 's/#.*//' \
++		    -e 's/$/ /' \
++		    -e 's;\(^[0-9][0-9][0-9]\)\(.*$\);\2;p')
++		grpl="$grpl $l"
++	    done
++	    lst=`for word in $grpl; do echo $word; done | sort| uniq `
++	    echo $lst
+ 	else
+ 	    break
+ 	fi
+@@ -173,18 +209,21 @@ else
+     #
+     for g in $*
+     do
+-	if grep "^$g[ 	]" group >/dev/null
++	if grep "^$g[ 	]" $tdir/group >/dev/null
+ 	then
+ 	    :
+ 	else
+-	    echo "Warning: group \"$g\" not defined in ./group"
++	    echo "Warning: group \"$g\" not defined in $tdir/group"
+ 	fi
+     done
+     ans="$*"
+ fi
+ 
+ echo -n "Adding $id to group index ..."
+-echo "$id $ans" >>group
++head -n $(($line-1)) $tdir/group > /tmp/$$.group
++echo "$id $ans" >> /tmp/$$.group
++tail -n +$((line)) $tdir/group >> /tmp/$$.group
++mv /tmp/$$.group $tdir/group
+ echo " done."
+ 
+ exit 0
+-- 
+1.7.1
+
