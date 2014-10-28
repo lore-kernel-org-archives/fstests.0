@@ -1,45 +1,38 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46741 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752071AbaJ1NQ7 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 28 Oct 2014 09:16:59 -0400
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 4/4] generic/277: add _require_attrs
-Date: Tue, 28 Oct 2014 21:16:11 +0800
-Message-Id: <1414502171-10319-5-git-send-email-eguan@redhat.com>
-In-Reply-To: <1414502171-10319-1-git-send-email-eguan@redhat.com>
+Received: from bombadil.infradead.org ([198.137.202.9]:45232 "EHLO
+	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751427AbaJ1NWw (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 28 Oct 2014 09:22:52 -0400
+Date: Tue, 28 Oct 2014 06:22:52 -0700
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH 1/4] common: re-enable tests that require scratch dev on
+ NFS
+Message-ID: <20141028132252.GA26453@infradead.org>
 References: <1414502171-10319-1-git-send-email-eguan@redhat.com>
+ <1414502171-10319-2-git-send-email-eguan@redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1414502171-10319-2-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-nfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, linux-nfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-NFS doesn't support attr yet, add _require_attrs in generic/277 to avoid
-failure when testing on NFS.
+On Tue, Oct 28, 2014 at 09:16:08PM +0800, Eryu Guan wrote:
+> index 747cf72..8738da7 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -558,7 +558,11 @@ _scratch_mkfs()
+>          _scratch_mkfs_xfs $*
+>  	;;
+>      nfs*)
+> -	# do nothing for nfs
+> +	# unable to re-create NFS, just remove all files in $SCRATCH_MNT to
+> +	# avoid EEXIST caused by the leftover files created in previous runs
+> +	_scratch_mount
+> +	rm -rf $SCRATCH_MNT/*
+> +	_scratch_unmount
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
- tests/generic/277 | 2 ++
- 1 file changed, 2 insertions(+)
-
-diff --git a/tests/generic/277 b/tests/generic/277
-index 8461ad9..39ebdc3 100755
---- a/tests/generic/277
-+++ b/tests/generic/277
-@@ -38,11 +38,13 @@ trap "_cleanup ; exit \$status" 0 1 2 3 15
- # get standard environment, filters and checks
- . ./common/rc
- . ./common/filter
-+. ./common/attr
- 
- # real QA test starts here
- _supported_fs generic
- _supported_os Linux
- _require_scratch
-+_require_attrs
- 
- _scratch_mkfs > /dev/null 2>&1
- _scratch_mount
--- 
-1.8.3.1
+Please move this into a helper, and wire it up for cifs as well.
 
