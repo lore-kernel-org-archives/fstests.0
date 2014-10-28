@@ -1,38 +1,27 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from bombadil.infradead.org ([198.137.202.9]:45232 "EHLO
+Received: from bombadil.infradead.org ([198.137.202.9]:45433 "EHLO
 	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751427AbaJ1NWw (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 28 Oct 2014 09:22:52 -0400
-Date: Tue, 28 Oct 2014 06:22:52 -0700
+	with ESMTP id S1751377AbaJ1NXq (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 28 Oct 2014 09:23:46 -0400
+Date: Tue, 28 Oct 2014 06:23:45 -0700
 From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 1/4] common: re-enable tests that require scratch dev on
- NFS
-Message-ID: <20141028132252.GA26453@infradead.org>
+Subject: Re: [PATCH 4/4] generic/277: add _require_attrs
+Message-ID: <20141028132345.GB26453@infradead.org>
 References: <1414502171-10319-1-git-send-email-eguan@redhat.com>
- <1414502171-10319-2-git-send-email-eguan@redhat.com>
+ <1414502171-10319-5-git-send-email-eguan@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1414502171-10319-2-git-send-email-eguan@redhat.com>
+In-Reply-To: <1414502171-10319-5-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
 Cc: fstests@vger.kernel.org, linux-nfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Oct 28, 2014 at 09:16:08PM +0800, Eryu Guan wrote:
-> index 747cf72..8738da7 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -558,7 +558,11 @@ _scratch_mkfs()
->          _scratch_mkfs_xfs $*
->  	;;
->      nfs*)
-> -	# do nothing for nfs
-> +	# unable to re-create NFS, just remove all files in $SCRATCH_MNT to
-> +	# avoid EEXIST caused by the leftover files created in previous runs
-> +	_scratch_mount
-> +	rm -rf $SCRATCH_MNT/*
-> +	_scratch_unmount
+On Tue, Oct 28, 2014 at 09:16:11PM +0800, Eryu Guan wrote:
+> NFS doesn't support attr yet, add _require_attrs in generic/277 to avoid
+> failure when testing on NFS.
 
-Please move this into a helper, and wire it up for cifs as well.
+Looks good,
 
+Reviewed-by: Christoph Hellwig <hch@lst.de>
