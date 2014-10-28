@@ -1,26 +1,31 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from bombadil.infradead.org ([198.137.202.9]:45433 "EHLO
+Received: from bombadil.infradead.org ([198.137.202.9]:45566 "EHLO
 	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751377AbaJ1NXq (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 28 Oct 2014 09:23:46 -0400
-Date: Tue, 28 Oct 2014 06:23:45 -0700
+	with ESMTP id S1751747AbaJ1NYH (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 28 Oct 2014 09:24:07 -0400
+Date: Tue, 28 Oct 2014 06:24:06 -0700
 From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 4/4] generic/277: add _require_attrs
-Message-ID: <20141028132345.GB26453@infradead.org>
+Subject: Re: [PATCH 2/4] common: add _require_block_device() helper
+Message-ID: <20141028132406.GC26453@infradead.org>
 References: <1414502171-10319-1-git-send-email-eguan@redhat.com>
- <1414502171-10319-5-git-send-email-eguan@redhat.com>
+ <1414502171-10319-3-git-send-email-eguan@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1414502171-10319-5-git-send-email-eguan@redhat.com>
+In-Reply-To: <1414502171-10319-3-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
 Cc: fstests@vger.kernel.org, linux-nfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Oct 28, 2014 at 09:16:11PM +0800, Eryu Guan wrote:
-> NFS doesn't support attr yet, add _require_attrs in generic/277 to avoid
-> failure when testing on NFS.
+On Tue, Oct 28, 2014 at 09:16:09PM +0800, Eryu Guan wrote:
+> Add _require_block_device() helper and use it in _require_dm_flakey()
+> and generic/076.
+> 
+> _require_dm_flakey() assumes $SCRATCH_DEV is a block device, now it can
+> also be a NFS export.
+> 
+> generic/076 does "cat $SCRATCH_DEV" which will fail when testing on NFS.
 
 Looks good,
 
