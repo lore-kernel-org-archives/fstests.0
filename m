@@ -1,12 +1,12 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43522 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:35061 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752143AbaJ1NQz (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 28 Oct 2014 09:16:55 -0400
+	id S1752399AbaJ1NQ5 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 28 Oct 2014 09:16:57 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 2/4] common: add _require_block_device() helper
-Date: Tue, 28 Oct 2014 21:16:09 +0800
-Message-Id: <1414502171-10319-3-git-send-email-eguan@redhat.com>
+Subject: [PATCH 3/4] common: skip atime related tests on NFS
+Date: Tue, 28 Oct 2014 21:16:10 +0800
+Message-Id: <1414502171-10319-4-git-send-email-eguan@redhat.com>
 In-Reply-To: <1414502171-10319-1-git-send-email-eguan@redhat.com>
 References: <1414502171-10319-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -14,62 +14,67 @@ To: fstests@vger.kernel.org
 Cc: linux-nfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Add _require_block_device() helper and use it in _require_dm_flakey()
-and generic/076.
+>From nfs(5) we can know that atime related mount options have no effect
+on NFS mounts, so add _require_atime() helper to skip atime tests on NFS
 
-_require_dm_flakey() assumes $SCRATCH_DEV is a block device, now it can
-also be a NFS export.
-
-generic/076 does "cat $SCRATCH_DEV" which will fail when testing on NFS.
+Also change the way how _require_relatime() mount $SCRATCH_DEV, use
+_scratch_mount helper so it's mounted with selinux context, to avoid
+"same superblock, different selinux context" failure.
 
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- common/rc         | 15 +++++++++++++++
- tests/generic/076 |  1 +
- 2 files changed, 16 insertions(+)
+ common/rc         | 9 ++++++++-
+ tests/generic/003 | 1 +
+ tests/generic/192 | 1 +
+ 3 files changed, 10 insertions(+), 1 deletion(-)
 
 diff --git a/common/rc b/common/rc
-index 8738da7..42f00cb 100644
+index 42f00cb..b50577f 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -1237,10 +1237,25 @@ _require_command()
-     [ -n "$1" -a -x "$1" ] || _notrun "$_cmd utility required, skipped this test"
+@@ -2379,10 +2379,17 @@ _verify_reflink()
+                || echo "$1 and $2 are not reflinks: different extents"
  }
  
-+# this test requires the device to be valid block device
-+# $1 - device
-+_require_block_device()
++_require_atime()
 +{
-+	if [ -z "$1" ]; then
-+		echo "Usage: _require_block_device <dev>" 1>&2
-+		exit 1
-+	fi
-+	if [ "`_is_block_dev $SCRATCH_DEV`" == "" ]; then
-+		_notrun "require $1 to be valid block disk"
++	if [ "$FSTYP" == "nfs" ]; then
++		_notrun "atime related mount options have no effect on NFS"
 +	fi
 +}
 +
- # this test requires the device mapper flakey target
- #
- _require_dm_flakey()
+ _require_relatime()
  {
-+    # require SCRATCH_DEV to be a valid block device
-+    _require_block_device $SCRATCH_DEV
-     _require_command $DMSETUP_PROG
- 
-     modprobe dm-flakey >/dev/null 2>&1
-diff --git a/tests/generic/076 b/tests/generic/076
-index 02af762..aa0aae0 100755
---- a/tests/generic/076
-+++ b/tests/generic/076
-@@ -56,6 +56,7 @@ _supported_fs generic
- _supported_os IRIX Linux
- 
+         _scratch_mkfs > /dev/null 2>&1
+-        _mount -t $FSTYP -o relatime $SCRATCH_DEV $SCRATCH_MNT || \
++        _scratch_mount -o relatime || \
+                 _notrun "relatime not supported by the current kernel"
+ 	_scratch_unmount
+ }
+diff --git a/tests/generic/003 b/tests/generic/003
+index 83d6f90..7ffd09a 100755
+--- a/tests/generic/003
++++ b/tests/generic/003
+@@ -47,6 +47,7 @@ _cleanup()
+ _supported_fs generic
+ _supported_os Linux
  _require_scratch
-+_require_block_device $SCRATCH_DEV
++_require_atime
+ _require_relatime
  
- echo "*** init fs"
- 
+ rm -f $seqres.full
+diff --git a/tests/generic/192 b/tests/generic/192
+index b2da358..5b6cfbc 100755
+--- a/tests/generic/192
++++ b/tests/generic/192
+@@ -54,6 +54,7 @@ is_noatime_set() {
+ _supported_fs generic
+ _supported_os Linux
+ _require_test
++_require_atime
+ #delay=150
+ #delay=75
+ #delay=60
 -- 
 1.8.3.1
 
