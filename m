@@ -1,12 +1,12 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:35061 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:46741 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752399AbaJ1NQ5 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 28 Oct 2014 09:16:57 -0400
+	id S1752071AbaJ1NQ7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 28 Oct 2014 09:16:59 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 3/4] common: skip atime related tests on NFS
-Date: Tue, 28 Oct 2014 21:16:10 +0800
-Message-Id: <1414502171-10319-4-git-send-email-eguan@redhat.com>
+Subject: [PATCH 4/4] generic/277: add _require_attrs
+Date: Tue, 28 Oct 2014 21:16:11 +0800
+Message-Id: <1414502171-10319-5-git-send-email-eguan@redhat.com>
 In-Reply-To: <1414502171-10319-1-git-send-email-eguan@redhat.com>
 References: <1414502171-10319-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -14,67 +14,32 @@ To: fstests@vger.kernel.org
 Cc: linux-nfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
->From nfs(5) we can know that atime related mount options have no effect
-on NFS mounts, so add _require_atime() helper to skip atime tests on NFS
-
-Also change the way how _require_relatime() mount $SCRATCH_DEV, use
-_scratch_mount helper so it's mounted with selinux context, to avoid
-"same superblock, different selinux context" failure.
+NFS doesn't support attr yet, add _require_attrs in generic/277 to avoid
+failure when testing on NFS.
 
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- common/rc         | 9 ++++++++-
- tests/generic/003 | 1 +
- tests/generic/192 | 1 +
- 3 files changed, 10 insertions(+), 1 deletion(-)
+ tests/generic/277 | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/common/rc b/common/rc
-index 42f00cb..b50577f 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2379,10 +2379,17 @@ _verify_reflink()
-                || echo "$1 and $2 are not reflinks: different extents"
- }
+diff --git a/tests/generic/277 b/tests/generic/277
+index 8461ad9..39ebdc3 100755
+--- a/tests/generic/277
++++ b/tests/generic/277
+@@ -38,11 +38,13 @@ trap "_cleanup ; exit \$status" 0 1 2 3 15
+ # get standard environment, filters and checks
+ . ./common/rc
+ . ./common/filter
++. ./common/attr
  
-+_require_atime()
-+{
-+	if [ "$FSTYP" == "nfs" ]; then
-+		_notrun "atime related mount options have no effect on NFS"
-+	fi
-+}
-+
- _require_relatime()
- {
-         _scratch_mkfs > /dev/null 2>&1
--        _mount -t $FSTYP -o relatime $SCRATCH_DEV $SCRATCH_MNT || \
-+        _scratch_mount -o relatime || \
-                 _notrun "relatime not supported by the current kernel"
- 	_scratch_unmount
- }
-diff --git a/tests/generic/003 b/tests/generic/003
-index 83d6f90..7ffd09a 100755
---- a/tests/generic/003
-+++ b/tests/generic/003
-@@ -47,6 +47,7 @@ _cleanup()
+ # real QA test starts here
  _supported_fs generic
  _supported_os Linux
  _require_scratch
-+_require_atime
- _require_relatime
++_require_attrs
  
- rm -f $seqres.full
-diff --git a/tests/generic/192 b/tests/generic/192
-index b2da358..5b6cfbc 100755
---- a/tests/generic/192
-+++ b/tests/generic/192
-@@ -54,6 +54,7 @@ is_noatime_set() {
- _supported_fs generic
- _supported_os Linux
- _require_test
-+_require_atime
- #delay=150
- #delay=75
- #delay=60
+ _scratch_mkfs > /dev/null 2>&1
+ _scratch_mount
 -- 
 1.8.3.1
 
