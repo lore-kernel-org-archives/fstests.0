@@ -1,40 +1,46 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51032 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:43886 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751971AbaJ2E6p (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 29 Oct 2014 00:58:45 -0400
-Message-ID: <54507402.4000600@redhat.com>
-Date: Tue, 28 Oct 2014 23:58:42 -0500
-From: Eric Sandeen <sandeen@redhat.com>
+	id S1754795AbaJ2HAD (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 29 Oct 2014 03:00:03 -0400
+Date: Wed, 29 Oct 2014 14:59:36 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 1/4] common: re-enable tests that require scratch dev on
+ NFS
+Message-ID: <20141029065936.GK14167@dhcp-13-216.nay.redhat.com>
+References: <1414502171-10319-1-git-send-email-eguan@redhat.com>
+ <1414502171-10319-2-git-send-email-eguan@redhat.com>
+ <20141028132252.GA26453@infradead.org>
 MIME-Version: 1.0
-Subject: [PATCH] xfs/068: fix expected output file for proper restore output
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20141028132252.GA26453@infradead.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, xfs-oss <xfs@oss.sgi.com>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: fstests@vger.kernel.org, linux-nfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Oh my, I did a very bad thing - I wrote a new test to
-check for xfsdump regressions, but did not create the
-.out file with a known-good kernel.
+On Tue, Oct 28, 2014 at 06:22:52AM -0700, Christoph Hellwig wrote:
+> On Tue, Oct 28, 2014 at 09:16:08PM +0800, Eryu Guan wrote:
+> > index 747cf72..8738da7 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -558,7 +558,11 @@ _scratch_mkfs()
+> >          _scratch_mkfs_xfs $*
+> >  	;;
+> >      nfs*)
+> > -	# do nothing for nfs
+> > +	# unable to re-create NFS, just remove all files in $SCRATCH_MNT to
+> > +	# avoid EEXIST caused by the leftover files created in previous runs
+> > +	_scratch_mount
+> > +	rm -rf $SCRATCH_MNT/*
+> > +	_scratch_unmount
+> 
+> Please move this into a helper, and wire it up for cifs as well.
+> 
 
-This matches output from older, stable kernels, and is the
-proper expected output.  Sorry about that!
+Will do in v2.
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
----
+Thanks for the review!
 
-diff --git a/tests/xfs/068.out b/tests/xfs/068.out
-index c270c66..2196eee 100644
---- a/tests/xfs/068.out
-+++ b/tests/xfs/068.out
-@@ -22,7 +22,7 @@ xfsrestore: session id: ID
- xfsrestore: media ID: ID
- xfsrestore: searching media for directory dump
- xfsrestore: reading directories
--xfsrestore: 486 directories and 1590 entries processed
-+xfsrestore: 495 directories and 1593 entries processed
- xfsrestore: directory post-processing
- xfsrestore: restoring non-directory files
- xfsrestore: restore complete: SECS seconds elapsed
-
+Eryu
