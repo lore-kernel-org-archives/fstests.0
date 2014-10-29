@@ -1,46 +1,67 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43886 "EHLO mx1.redhat.com"
+Received: from mx12.netapp.com ([216.240.18.77]:31996 "EHLO mx12.netapp.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754795AbaJ2HAD (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 29 Oct 2014 03:00:03 -0400
-Date: Wed, 29 Oct 2014 14:59:36 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 1/4] common: re-enable tests that require scratch dev on
- NFS
-Message-ID: <20141029065936.GK14167@dhcp-13-216.nay.redhat.com>
-References: <1414502171-10319-1-git-send-email-eguan@redhat.com>
- <1414502171-10319-2-git-send-email-eguan@redhat.com>
- <20141028132252.GA26453@infradead.org>
+	id S1756730AbaJ2TcN (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 29 Oct 2014 15:32:13 -0400
+From: Anna Schumaker <Anna.Schumaker@netapp.com>
+Subject: [PATCH] common:  Fixes for testing NFS over IPv6
+Date: Wed, 29 Oct 2014 15:32:07 -0400
+Message-ID: <1414611127-14246-1-git-send-email-Anna.Schumaker@Netapp.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20141028132252.GA26453@infradead.org>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: fstests@vger.kernel.org, linux-nfs@vger.kernel.org
+To: fstests@vger.kernel.org, hch@infradead.org
+Cc: linux-nfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Oct 28, 2014 at 06:22:52AM -0700, Christoph Hellwig wrote:
-> On Tue, Oct 28, 2014 at 09:16:08PM +0800, Eryu Guan wrote:
-> > index 747cf72..8738da7 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -558,7 +558,11 @@ _scratch_mkfs()
-> >          _scratch_mkfs_xfs $*
-> >  	;;
-> >      nfs*)
-> > -	# do nothing for nfs
-> > +	# unable to re-create NFS, just remove all files in $SCRATCH_MNT to
-> > +	# avoid EEXIST caused by the leftover files created in previous runs
-> > +	_scratch_mount
-> > +	rm -rf $SCRATCH_MNT/*
-> > +	_scratch_unmount
-> 
-> Please move this into a helper, and wire it up for cifs as well.
-> 
+When testing NFS over IPv6, the user will set a $TEST_DEV of the form
+[fe80::42]:/export.  The use of square brackets surrounding the IPv6
+address is an accepted convention, but grep and awk think that our IPv6
+address is actually a regex and tries to evaluate it instead.  The
+result is that xfstests reports our filesystem "is busy or already
+mounted".
 
-Will do in v2.
+This patch fixes the IPv6 problem by telling awk and grep to treat
+$TEST_DEV as a fixed string rather than a regex.
 
-Thanks for the review!
+Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
+---
+ common/rc | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-Eryu
+diff --git a/common/rc b/common/rc
+index 747cf72..5f24eb0 100644
+--- a/common/rc
++++ b/common/rc
+@@ -810,13 +810,13 @@ _df_device()
+     fi
+ 
+     $DF_PROG 2>/dev/null | $AWK_PROG -v what=$1 '
+-        match($1,what) && NF==1 {
++        ($1==what) && (NF==1) {
+             v=$1
+             getline
+             print v, $0
+             exit
+         }
+-        match($1,what) {
++        ($1==what) {
+             print
+             exit
+         }
+@@ -1132,10 +1132,10 @@ _require_test()
+     esac
+ 
+     # mounted?
+-    if _mount | grep -q $TEST_DEV
++    if _mount | grep -F -q $TEST_DEV
+     then
+         # if it's mounted, make sure its on $TEST_DIR
+-        if ! _mount | grep $TEST_DEV | grep -q $TEST_DIR
++        if ! _mount | grep -F $TEST_DEV | grep -q $TEST_DIR
+         then
+             echo "\$TEST_DEV is mounted but not on \$TEST_DIR - aborting"
+             exit 1
+-- 
+2.1.2
+
