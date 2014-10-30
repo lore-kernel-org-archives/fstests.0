@@ -1,37 +1,44 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from bombadil.infradead.org ([198.137.202.9]:33601 "EHLO
-	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754579AbaJ3JDG (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 30 Oct 2014 05:03:06 -0400
-Date: Thu, 30 Oct 2014 02:03:06 -0700
-From: Christoph Hellwig <hch@infradead.org>
-Subject: nfs atime semantics, was: Re: [PATCH 3/4] common: skip atime related
- tests on NFS
-Message-ID: <20141030090306.GA23917@infradead.org>
-References: <1414502171-10319-1-git-send-email-eguan@redhat.com>
- <1414502171-10319-4-git-send-email-eguan@redhat.com>
+Received: from mx11.netapp.com ([216.240.18.76]:50690 "EHLO mx11.netapp.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1759792AbaJ3Mmm (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 30 Oct 2014 08:42:42 -0400
+Message-ID: <5452323F.5010703@Netapp.com>
+Date: Thu, 30 Oct 2014 08:42:39 -0400
+From: Anna Schumaker <Anna.Schumaker@netapp.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1414502171-10319-4-git-send-email-eguan@redhat.com>
+Subject: Re: [PATCH] common:  Fixes for testing NFS over IPv6
+References: <1414611127-14246-1-git-send-email-Anna.Schumaker@Netapp.com> <20141029233331.GO16186@dastard>
+In-Reply-To: <20141029233331.GO16186@dastard>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-nfs@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, hch@infradead.org, linux-nfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Oct 28, 2014 at 09:16:10PM +0800, Eryu Guan wrote:
-> >From nfs(5) we can know that atime related mount options have no effect
-> on NFS mounts, so add _require_atime() helper to skip atime tests on NFS
+On 10/29/2014 07:33 PM, Dave Chinner wrote:
+> On Wed, Oct 29, 2014 at 03:32:07PM -0400, Anna Schumaker wrote:
+>> When testing NFS over IPv6, the user will set a $TEST_DEV of the form
+>> [fe80::42]:/export.  The use of square brackets surrounding the IPv6
+>> address is an accepted convention, but grep and awk think that our IPv6
+>> address is actually a regex and tries to evaluate it instead.  The
+>> result is that xfstests reports our filesystem "is busy or already
+>> mounted".
+>>
+>> This patch fixes the IPv6 problem by telling awk and grep to treat
+>> $TEST_DEV as a fixed string rather than a regex.
+>>
+>> Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
+> 
+> Seems sensible, but it needs comments so that when someone copies
+> the code they know why it's using these sorts of matches.
 
-I' like to use this opportunity to start a discussion on NFS atime
-handlign again, which I think is broken.  I think relatime is perfectly
-fine default semantics for NFS, and not supporting it can cause all
-kidns of application breakage.  Supporting normal atime semantics when
-explicity requested is also something NFS shouldn't sneak out of.
+Sure.  I'll add that in, thanks!
 
-> Also change the way how _require_relatime() mount $SCRATCH_DEV, use
-> _scratch_mount helper so it's mounted with selinux context, to avoid
-> "same superblock, different selinux context" failure.
-
-Can you please split this part into a separate patch?
+> 
+> Cheers,
+> 
+> Dave.
+> 
 
