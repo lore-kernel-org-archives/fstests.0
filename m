@@ -1,94 +1,79 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from aserp1040.oracle.com ([141.146.126.69]:49578 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932248AbaJaOyU (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 31 Oct 2014 10:54:20 -0400
-Date: Fri, 31 Oct 2014 10:53:01 -0400
-From: Dwight Engen <dwight.engen@oracle.com>
-Subject: Re: [PATCH] xfs/242: fix for archs with 8k page size
-Message-ID: <20141031105301.3527a546@Delphi.home>
-In-Reply-To: <20141016112949.4ace4e4a@oracle.com>
-References: <20141007191259.7e5b5ee3@oracle.com>
-	<20141008043341.GH12693@dastard>
-	<20141016112949.4ace4e4a@oracle.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Received: from mx1.redhat.com ([209.132.183.28]:53551 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750708AbaJaREW (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 31 Oct 2014 13:04:22 -0400
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH v2 0/5] re-enable tests that require scratch dev on NFS
+Date: Sat,  1 Nov 2014 01:03:55 +0800
+Message-Id: <1414775040-4051-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, Dave Chinner <david@fromorbit.com>
+To: fstests@vger.kernel.org
+Cc: linux-nfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave, any further comments on this?
+The commit below disables tests requires scratch dev running on NFS
 
-On Thu, 16 Oct 2014 11:29:49 -0400
-Dwight Engen <dwight.engen@oracle.com> wrote:
+c041421 xfstests: stop special casing nfs and udf
 
-> On Wed, 8 Oct 2014 15:33:41 +1100
-> Dave Chinner <david@fromorbit.com> wrote:
-> 
-> > On Tue, Oct 07, 2014 at 07:12:59PM -0400, Dwight Engen wrote:
-> > > This test was failing on sparc64 because there is a minimum
-> > > granularity of PAGE_CACHE_SIZE in
-> > > xfs_vnodeops.c:xfs_zero_file_space(). This change follows the
-> > > approach taken in xfs/194 to filter the bmap output to be in terms
-> > > of "blocksize" which is computed from pagesize.
-> > 
-> > xfs/194 existed long before xfs/242, so it's not necessarily the
-> > best example to follow. You've missed various things that make the
-> > special hackery xfs/194 does to make it work. e.g.  clearing
-> > mkfs/mount options. Your change doesn't do this, so it will make it
-> > fail on CRC enable XFS filesystems because 4k / 8 = 512 bytes and
-> > that's smaller than the minimum block size support on CRC enabled
-> > XFS filesystems.
-> 
-> Hi Dave, I sure did miss that 194 was doing unset MKFS_OPTIONS. Partly
-> because running check '*/194' outputs:
-> 
-> MKFS_OPTIONS  -- -f -bsize=4096 /dev/vdiskd
-> 
-> but this is only for the mkfs that check itself does, and as you note
-> 194 will redo the mkfs with its computed block size. Thats a bit
-> confusing :( 242 doesn't do a second mkfs, so there isn't really a
-> need to unset MKFS_OPTIONS.
-> 
-> What I thought 194 was doing, and what I made 242 do was to be page
-> size independent by computing the size of things and filtering the
-> output to be in units of some factor of a page size, which is why I
-> put blksize in quotes, its not the actual block size (ie we don't
-> pass it to mkfs). Maybe I should have used a different name for less
-> confusion, suggestions welcome. Doing this does make it so 242 passes
-> with no MKFS_OPTIONS (which will be 4k blocksize) or with
-> MKFS_OPTIONS="-b size=8k", and both of those with -m crc=1 also. 
-> 
-> > > _test_generic_punch is modified to optionally take multiple as an
-> > > argument, so the file under test will be twice the size on an 8k
-> > > machine as a 4k machine. Since the files will be different sizes,
-> > > we can no longer use md5sum so od -x is used instead with the byte
-> > > offsets converted to "blocksize" offsets.
-> > 
-> > Brian posted patches yesterday on the XFS list to fix zero range
-> > problems, and they remove the page size rounding from
-> > xfs_zero_file_space(). Hence this strange corner case behaviour is
-> > likely to go away real soon, and so I don't think we should change
-> > the test to work around it now...
-> 
-> That sounds good, but I'd think we want 242 to be able to pass
-> regardless of page size on 3.12-3.17 too?
-> 
-> > Would would be much more useful for you to do would with a platform
-> > like sparc64 is use it to test MKFS_OPTION="-b size=8k" and make all
-> > these extent-map-output dependent tests work properly with >4k block
-> > size filesystems.  ;)
-> 
-> This does do that for 242 :) I can look at the others also if the
-> approach here is okay. Thanks.
-> 
-> > Cheers,
-> > 
-> > Dave.
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Now re-enable them to get a larger test coverage on NFS.
+
+Also do more updates to avoid unnecessary failures on NFS.
+
+I tested against NFSv3 NFSv4.0 NFSv4.1 (both server and client are linux
+running 3.18-rc1 kernel), the results look good.
+
+Failures on NFSv3:
+generic/035 generic/089 generic/258 generic/294
+
+Failures on NFSv4.0:
+generic/035 generic/169 generic/294
+
+Failures on NFSv4.1:
+I hit kernel BUG_ON when testing on NFSv4.1 in generic/285
+SEEK_DATA/SEEK_HOLE test. I think there's already a patch to fix it.
+
+http://www.spinics.net/lists/linux-nfs/msg47359.html
+
+Note that generic/294 does remount,ro on SCRATCH_DEV, but TEST_DEV is
+affected too, so some tests after generic/294 fail because of EROFS.
+Run the failed tests separately and they all passed.
+
+I'm not sure if it's a bug, but I filed one, please see
+https://bugzilla.redhat.com/show_bug.cgi?id=1158046
+
+
+The third patch disables all atime related tests on NFS, and Christoph
+starts a discussion about NFS atime handling issue in v1 thread. Before
+there's a conclusion I keep the patch as it is, and we can update it
+later when we decide to test atime on NFS again.
+
+v2:
+- introduce _scratch_cleanup_files helper to remove all files on
+  $SCRATCH_MNT, for later CIFS use. (Christoph Hellwig)
+- split _require_relatime change into another patch (Christoph Hellwig)
+
+v1: http://www.spinics.net/lists/linux-nfs/msg47423.html
+
+Thanks,
+Eryu
+
+---
+
+Eryu Guan (5):
+  common: re-enable tests that require scratch dev on NFS
+  common: add _require_block_device() helper
+  common: skip atime related tests on NFS
+  common: use _scratch_mount helper in _require_relatime()
+  generic/277: add _require_attrs
+
+ common/rc         | 46 ++++++++++++++++++++++++++++++++++++++++++----
+ tests/generic/003 |  1 +
+ tests/generic/076 |  1 +
+ tests/generic/192 |  1 +
+ tests/generic/277 |  2 ++
+ 5 files changed, 47 insertions(+), 4 deletions(-)
+
+-- 
+1.9.3
 
