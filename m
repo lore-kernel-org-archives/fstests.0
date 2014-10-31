@@ -1,12 +1,12 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:56329 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49646 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752552AbaJaRE0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 31 Oct 2014 13:04:26 -0400
+	id S1751211AbaJaREa (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 31 Oct 2014 13:04:30 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v2 2/5] common: add _require_block_device() helper
-Date: Sat,  1 Nov 2014 01:03:57 +0800
-Message-Id: <1414775040-4051-3-git-send-email-eguan@redhat.com>
+Subject: [PATCH v2 3/5] common: skip atime related tests on NFS
+Date: Sat,  1 Nov 2014 01:03:58 +0800
+Message-Id: <1414775040-4051-4-git-send-email-eguan@redhat.com>
 In-Reply-To: <1414775040-4051-1-git-send-email-eguan@redhat.com>
 References: <1414775040-4051-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -14,63 +14,58 @@ To: fstests@vger.kernel.org
 Cc: linux-nfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Add _require_block_device() helper and use it in _require_dm_flakey()
-and generic/076.
+>From nfs(5) we can know that atime related mount options have no effect
+on NFS mounts, so add _require_atime() helper to skip atime tests on NFS
 
-_require_dm_flakey() assumes $SCRATCH_DEV is a block device, now it can
-also be a NFS export.
-
-generic/076 does "cat $SCRATCH_DEV" which will fail when testing on NFS.
-
-Reviewed-by: Christoph Hellwig <hch@lst.de>
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- common/rc         | 15 +++++++++++++++
- tests/generic/076 |  1 +
- 2 files changed, 16 insertions(+)
+ common/rc         | 7 +++++++
+ tests/generic/003 | 1 +
+ tests/generic/192 | 1 +
+ 3 files changed, 9 insertions(+)
 
 diff --git a/common/rc b/common/rc
-index ae03712..ca8c4a2 100644
+index ca8c4a2..2d2b40f 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -1243,10 +1243,25 @@ _require_command()
-     [ -n "$1" -a -x "$1" ] || _notrun "$_cmd utility required, skipped this test"
+@@ -2385,6 +2385,13 @@ _verify_reflink()
+                || echo "$1 and $2 are not reflinks: different extents"
  }
  
-+# this test requires the device to be valid block device
-+# $1 - device
-+_require_block_device()
++_require_atime()
 +{
-+	if [ -z "$1" ]; then
-+		echo "Usage: _require_block_device <dev>" 1>&2
-+		exit 1
-+	fi
-+	if [ "`_is_block_dev $SCRATCH_DEV`" == "" ]; then
-+		_notrun "require $1 to be valid block disk"
++	if [ "$FSTYP" == "nfs" ]; then
++		_notrun "atime related mount options have no effect on NFS"
 +	fi
 +}
 +
- # this test requires the device mapper flakey target
- #
- _require_dm_flakey()
+ _require_relatime()
  {
-+    # require SCRATCH_DEV to be a valid block device
-+    _require_block_device $SCRATCH_DEV
-     _require_command $DMSETUP_PROG
- 
-     modprobe dm-flakey >/dev/null 2>&1
-diff --git a/tests/generic/076 b/tests/generic/076
-index 02af762..aa0aae0 100755
---- a/tests/generic/076
-+++ b/tests/generic/076
-@@ -56,6 +56,7 @@ _supported_fs generic
- _supported_os IRIX Linux
- 
+         _scratch_mkfs > /dev/null 2>&1
+diff --git a/tests/generic/003 b/tests/generic/003
+index 83d6f90..7ffd09a 100755
+--- a/tests/generic/003
++++ b/tests/generic/003
+@@ -47,6 +47,7 @@ _cleanup()
+ _supported_fs generic
+ _supported_os Linux
  _require_scratch
-+_require_block_device $SCRATCH_DEV
++_require_atime
+ _require_relatime
  
- echo "*** init fs"
- 
+ rm -f $seqres.full
+diff --git a/tests/generic/192 b/tests/generic/192
+index b2da358..5b6cfbc 100755
+--- a/tests/generic/192
++++ b/tests/generic/192
+@@ -54,6 +54,7 @@ is_noatime_set() {
+ _supported_fs generic
+ _supported_os Linux
+ _require_test
++_require_atime
+ #delay=150
+ #delay=75
+ #delay=60
 -- 
 1.9.3
 
