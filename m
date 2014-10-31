@@ -1,44 +1,51 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41361 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750912AbaJaIOD (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 31 Oct 2014 04:14:03 -0400
-Date: Fri, 31 Oct 2014 16:13:36 +0800
-From: Eryu Guan <eguan@redhat.com>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:60768 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757934AbaJaLbi (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 31 Oct 2014 07:31:38 -0400
+Received: by mail-wg0-f44.google.com with SMTP id x12so5738172wgg.3
+        for <fstests@vger.kernel.org>; Fri, 31 Oct 2014 04:31:36 -0700 (PDT)
+MIME-Version: 1.0
+In-Reply-To: <20141030090306.GA23917@infradead.org>
+References: <1414502171-10319-1-git-send-email-eguan@redhat.com>
+	<1414502171-10319-4-git-send-email-eguan@redhat.com>
+	<20141030090306.GA23917@infradead.org>
+Date: Fri, 31 Oct 2014 13:31:36 +0200
+Message-ID: <CAHQdGtRFMcJGNZvU_V22Xh-3LadD2bYc=TwrkmBVBK81RkWCvw@mail.gmail.com>
 Subject: Re: nfs atime semantics, was: Re: [PATCH 3/4] common: skip atime
  related tests on NFS
-Message-ID: <20141031081335.GK7196@dhcp-13-216.nay.redhat.com>
-References: <1414502171-10319-1-git-send-email-eguan@redhat.com>
- <1414502171-10319-4-git-send-email-eguan@redhat.com>
- <20141030090306.GA23917@infradead.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20141030090306.GA23917@infradead.org>
+From: Trond Myklebust <trond.myklebust@primarydata.com>
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
 To: Christoph Hellwig <hch@infradead.org>
-Cc: fstests@vger.kernel.org, linux-nfs@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, Linux NFS Mailing List <linux-nfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Oct 30, 2014 at 02:03:06AM -0700, Christoph Hellwig wrote:
+On Thu, Oct 30, 2014 at 11:03 AM, Christoph Hellwig <hch@infradead.org> wrote:
 > On Tue, Oct 28, 2014 at 09:16:10PM +0800, Eryu Guan wrote:
-> > >From nfs(5) we can know that atime related mount options have no effect
-> > on NFS mounts, so add _require_atime() helper to skip atime tests on NFS
-> 
+>> >From nfs(5) we can know that atime related mount options have no effect
+>> on NFS mounts, so add _require_atime() helper to skip atime tests on NFS
+>
 > I' like to use this opportunity to start a discussion on NFS atime
 > handlign again, which I think is broken.  I think relatime is perfectly
 > fine default semantics for NFS, and not supporting it can cause all
 > kidns of application breakage.  Supporting normal atime semantics when
 > explicity requested is also something NFS shouldn't sneak out of.
-> 
-> > Also change the way how _require_relatime() mount $SCRATCH_DEV, use
-> > _scratch_mount helper so it's mounted with selinux context, to avoid
-> > "same superblock, different selinux context" failure.
-> 
-> Can you please split this part into a separate patch?
-> 
 
-Sure, will do in v2.
+If there is no read on the wire, then there is no way to update the
+atime without doing an explicit SETATTR. Courtesy of POSIX filesystem
+semantics on the server, that means we get a bonus change attribute
+and ctime update (no extra charge).
 
-Thanks,
-Eryu
+Unless there are new suggestions for how to solve the atime issue that
+do not involve introducing this or similar regressions, then the
+standing NACK applies.
+
+Cheers
+  Trond
+-- 
+Trond Myklebust
+
+Linux NFS client maintainer, PrimaryData
+
+trond.myklebust@primarydata.com
