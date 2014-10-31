@@ -1,12 +1,12 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53560 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:56329 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751798AbaJaREY (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 31 Oct 2014 13:04:24 -0400
+	id S1752552AbaJaRE0 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 31 Oct 2014 13:04:26 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v2 1/5] common: re-enable tests that require scratch dev on NFS
-Date: Sat,  1 Nov 2014 01:03:56 +0800
-Message-Id: <1414775040-4051-2-git-send-email-eguan@redhat.com>
+Subject: [PATCH v2 2/5] common: add _require_block_device() helper
+Date: Sat,  1 Nov 2014 01:03:57 +0800
+Message-Id: <1414775040-4051-3-git-send-email-eguan@redhat.com>
 In-Reply-To: <1414775040-4051-1-git-send-email-eguan@redhat.com>
 References: <1414775040-4051-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -14,64 +14,63 @@ To: fstests@vger.kernel.org
 Cc: linux-nfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-This commit disables tests requires scratch dev running on NFS
+Add _require_block_device() helper and use it in _require_dm_flakey()
+and generic/076.
 
-c041421 xfstests: stop special casing nfs and udf
+_require_dm_flakey() assumes $SCRATCH_DEV is a block device, now it can
+also be a NFS export.
 
-Now re-enable them to get a larger test coverage on NFS.
+generic/076 does "cat $SCRATCH_DEV" which will fail when testing on NFS.
 
+Reviewed-by: Christoph Hellwig <hch@lst.de>
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- common/rc | 22 +++++++++++++++++++---
- 1 file changed, 19 insertions(+), 3 deletions(-)
+ common/rc         | 15 +++++++++++++++
+ tests/generic/076 |  1 +
+ 2 files changed, 16 insertions(+)
 
 diff --git a/common/rc b/common/rc
-index 747cf72..ae03712 100644
+index ae03712..ca8c4a2 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -551,6 +551,14 @@ _mkfs_dev()
-     rm -f $tmp_dir.mkfserr $tmp_dir.mkfsstd
+@@ -1243,10 +1243,25 @@ _require_command()
+     [ -n "$1" -a -x "$1" ] || _notrun "$_cmd utility required, skipped this test"
  }
  
-+# remove all files in $SCRATCH_MNT, useful when testing on NFS/CIFS
-+_scratch_cleanup_files()
++# this test requires the device to be valid block device
++# $1 - device
++_require_block_device()
 +{
-+	_scratch_mount
-+	rm -rf $SCRATCH_MNT/*
-+	_scratch_unmount
++	if [ -z "$1" ]; then
++		echo "Usage: _require_block_device <dev>" 1>&2
++		exit 1
++	fi
++	if [ "`_is_block_dev $SCRATCH_DEV`" == "" ]; then
++		_notrun "require $1 to be valid block disk"
++	fi
 +}
 +
- _scratch_mkfs()
+ # this test requires the device mapper flakey target
+ #
+ _require_dm_flakey()
  {
-     case $FSTYP in
-@@ -558,7 +566,9 @@ _scratch_mkfs()
-         _scratch_mkfs_xfs $*
- 	;;
-     nfs*)
--	# do nothing for nfs
-+	# unable to re-create NFS, just remove all files in $SCRATCH_MNT to
-+	# avoid EEXIST caused by the leftover files created in previous runs
-+        _scratch_cleanup_files
- 	;;
-     cifs)
- 	# do nothing for cifs
-@@ -1032,8 +1042,14 @@ _require_scratch_nocheck()
- {
-     case "$FSTYP" in
- 	nfs*)
--                 _notrun "requires a scratch device"
--		 ;;
-+		echo $SCRATCH_DEV | grep -q ":/" > /dev/null 2>&1
-+		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
-+			_notrun "this test requires a valid \$SCRATCH_DEV"
-+		fi
-+		if [ ! -d "$SCRATCH_MNT" ]; then
-+			_notrun "this test requires a valid \$SCRATCH_MNT"
-+		fi
-+		;;
- 	cifs)
- 		_notrun "requires a scratch device"
- 		;;
++    # require SCRATCH_DEV to be a valid block device
++    _require_block_device $SCRATCH_DEV
+     _require_command $DMSETUP_PROG
+ 
+     modprobe dm-flakey >/dev/null 2>&1
+diff --git a/tests/generic/076 b/tests/generic/076
+index 02af762..aa0aae0 100755
+--- a/tests/generic/076
++++ b/tests/generic/076
+@@ -56,6 +56,7 @@ _supported_fs generic
+ _supported_os IRIX Linux
+ 
+ _require_scratch
++_require_block_device $SCRATCH_DEV
+ 
+ echo "*** init fs"
+ 
 -- 
 1.9.3
 
