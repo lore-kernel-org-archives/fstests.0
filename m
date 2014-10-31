@@ -1,79 +1,77 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53551 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:53560 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750708AbaJaREW (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 31 Oct 2014 13:04:22 -0400
+	id S1751798AbaJaREY (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 31 Oct 2014 13:04:24 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v2 0/5] re-enable tests that require scratch dev on NFS
-Date: Sat,  1 Nov 2014 01:03:55 +0800
-Message-Id: <1414775040-4051-1-git-send-email-eguan@redhat.com>
+Subject: [PATCH v2 1/5] common: re-enable tests that require scratch dev on NFS
+Date: Sat,  1 Nov 2014 01:03:56 +0800
+Message-Id: <1414775040-4051-2-git-send-email-eguan@redhat.com>
+In-Reply-To: <1414775040-4051-1-git-send-email-eguan@redhat.com>
+References: <1414775040-4051-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-nfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-The commit below disables tests requires scratch dev running on NFS
+This commit disables tests requires scratch dev running on NFS
 
 c041421 xfstests: stop special casing nfs and udf
 
 Now re-enable them to get a larger test coverage on NFS.
 
-Also do more updates to avoid unnecessary failures on NFS.
-
-I tested against NFSv3 NFSv4.0 NFSv4.1 (both server and client are linux
-running 3.18-rc1 kernel), the results look good.
-
-Failures on NFSv3:
-generic/035 generic/089 generic/258 generic/294
-
-Failures on NFSv4.0:
-generic/035 generic/169 generic/294
-
-Failures on NFSv4.1:
-I hit kernel BUG_ON when testing on NFSv4.1 in generic/285
-SEEK_DATA/SEEK_HOLE test. I think there's already a patch to fix it.
-
-http://www.spinics.net/lists/linux-nfs/msg47359.html
-
-Note that generic/294 does remount,ro on SCRATCH_DEV, but TEST_DEV is
-affected too, so some tests after generic/294 fail because of EROFS.
-Run the failed tests separately and they all passed.
-
-I'm not sure if it's a bug, but I filed one, please see
-https://bugzilla.redhat.com/show_bug.cgi?id=1158046
-
-
-The third patch disables all atime related tests on NFS, and Christoph
-starts a discussion about NFS atime handling issue in v1 thread. Before
-there's a conclusion I keep the patch as it is, and we can update it
-later when we decide to test atime on NFS again.
-
-v2:
-- introduce _scratch_cleanup_files helper to remove all files on
-  $SCRATCH_MNT, for later CIFS use. (Christoph Hellwig)
-- split _require_relatime change into another patch (Christoph Hellwig)
-
-v1: http://www.spinics.net/lists/linux-nfs/msg47423.html
-
-Thanks,
-Eryu
-
+Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
+ common/rc | 22 +++++++++++++++++++---
+ 1 file changed, 19 insertions(+), 3 deletions(-)
 
-Eryu Guan (5):
-  common: re-enable tests that require scratch dev on NFS
-  common: add _require_block_device() helper
-  common: skip atime related tests on NFS
-  common: use _scratch_mount helper in _require_relatime()
-  generic/277: add _require_attrs
-
- common/rc         | 46 ++++++++++++++++++++++++++++++++++++++++++----
- tests/generic/003 |  1 +
- tests/generic/076 |  1 +
- tests/generic/192 |  1 +
- tests/generic/277 |  2 ++
- 5 files changed, 47 insertions(+), 4 deletions(-)
-
+diff --git a/common/rc b/common/rc
+index 747cf72..ae03712 100644
+--- a/common/rc
++++ b/common/rc
+@@ -551,6 +551,14 @@ _mkfs_dev()
+     rm -f $tmp_dir.mkfserr $tmp_dir.mkfsstd
+ }
+ 
++# remove all files in $SCRATCH_MNT, useful when testing on NFS/CIFS
++_scratch_cleanup_files()
++{
++	_scratch_mount
++	rm -rf $SCRATCH_MNT/*
++	_scratch_unmount
++}
++
+ _scratch_mkfs()
+ {
+     case $FSTYP in
+@@ -558,7 +566,9 @@ _scratch_mkfs()
+         _scratch_mkfs_xfs $*
+ 	;;
+     nfs*)
+-	# do nothing for nfs
++	# unable to re-create NFS, just remove all files in $SCRATCH_MNT to
++	# avoid EEXIST caused by the leftover files created in previous runs
++        _scratch_cleanup_files
+ 	;;
+     cifs)
+ 	# do nothing for cifs
+@@ -1032,8 +1042,14 @@ _require_scratch_nocheck()
+ {
+     case "$FSTYP" in
+ 	nfs*)
+-                 _notrun "requires a scratch device"
+-		 ;;
++		echo $SCRATCH_DEV | grep -q ":/" > /dev/null 2>&1
++		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
++			_notrun "this test requires a valid \$SCRATCH_DEV"
++		fi
++		if [ ! -d "$SCRATCH_MNT" ]; then
++			_notrun "this test requires a valid \$SCRATCH_MNT"
++		fi
++		;;
+ 	cifs)
+ 		_notrun "requires a scratch device"
+ 		;;
 -- 
 1.9.3
 
