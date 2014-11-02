@@ -1,46 +1,47 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53600 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753717AbaJaREd (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 31 Oct 2014 13:04:33 -0400
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v2 5/5] generic/277: add _require_attrs
-Date: Sat,  1 Nov 2014 01:04:00 +0800
-Message-Id: <1414775040-4051-6-git-send-email-eguan@redhat.com>
-In-Reply-To: <1414775040-4051-1-git-send-email-eguan@redhat.com>
-References: <1414775040-4051-1-git-send-email-eguan@redhat.com>
+Received: from mail-wg0-f46.google.com ([74.125.82.46]:42005 "EHLO
+	mail-wg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751454AbaKBSDA (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sun, 2 Nov 2014 13:03:00 -0500
+Message-ID: <545671D0.2090506@electrozaur.com>
+Date: Sun, 02 Nov 2014 20:02:56 +0200
+From: Boaz Harrosh <ooo@electrozaur.com>
+MIME-Version: 1.0
+Subject: Re: nfs atime semantics, was: Re: [PATCH 3/4] common: skip atime
+ related tests on NFS
+References: <1414502171-10319-1-git-send-email-eguan@redhat.com>	<1414502171-10319-4-git-send-email-eguan@redhat.com>	<20141030090306.GA23917@infradead.org> <CAHQdGtRFMcJGNZvU_V22Xh-3LadD2bYc=TwrkmBVBK81RkWCvw@mail.gmail.com>
+In-Reply-To: <CAHQdGtRFMcJGNZvU_V22Xh-3LadD2bYc=TwrkmBVBK81RkWCvw@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-nfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
+To: Trond Myklebust <trond.myklebust@primarydata.com>, Christoph Hellwig <hch@infradead.org>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, Linux NFS Mailing List <linux-nfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-NFS doesn't support attr yet, add _require_attrs in generic/277 to avoid
-failure when testing on NFS.
+On 10/31/2014 01:31 PM, Trond Myklebust wrote:
+<>
+> If there is no read on the wire, then there is no way to update the
+> atime without doing an explicit SETATTR. Courtesy of POSIX filesystem
+> semantics on the server, that means we get a bonus change attribute
+> and ctime update (no extra charge).
+> 
+> Unless there are new suggestions for how to solve the atime issue that
+> do not involve introducing this or similar regressions, then the
+> standing NACK applies.
+> 
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
- tests/generic/277 | 2 ++
- 1 file changed, 2 insertions(+)
+Say the user asks, realy (realy^3) nicely, can we instead of sending
+SETATTR (BAD) send in its place an async READ of say one byte (or one
+word)
 
-diff --git a/tests/generic/277 b/tests/generic/277
-index 8461ad9..39ebdc3 100755
---- a/tests/generic/277
-+++ b/tests/generic/277
-@@ -38,11 +38,13 @@ trap "_cleanup ; exit \$status" 0 1 2 3 15
- # get standard environment, filters and checks
- . ./common/rc
- . ./common/filter
-+. ./common/attr
- 
- # real QA test starts here
- _supported_fs generic
- _supported_os Linux
- _require_scratch
-+_require_attrs
- 
- _scratch_mkfs > /dev/null 2>&1
- _scratch_mount
--- 
-1.9.3
+It will do what we want. Just need to collect the updates and atime vs rel-atime
+correctly, and to not hurt performance as well. (Like only send when no real
+READS went through)
+
+> Cheers
+>   Trond
+> 
+
+Cheers
+Boaz
 
