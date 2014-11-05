@@ -1,71 +1,41 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-lb0-f180.google.com ([209.85.217.180]:42189 "EHLO
-	mail-lb0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751025AbaKCI3m convert rfc822-to-8bit (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 3 Nov 2014 03:29:42 -0500
-Received: by mail-lb0-f180.google.com with SMTP id u10so444359lbd.25
-        for <fstests@vger.kernel.org>; Mon, 03 Nov 2014 00:29:41 -0800 (PST)
+Received: from bombadil.infradead.org ([198.137.202.9]:57637 "EHLO
+	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751298AbaKEI3m (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 5 Nov 2014 03:29:42 -0500
+Date: Wed, 5 Nov 2014 00:29:41 -0800
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: nfs atime semantics, was: Re: [PATCH 3/4] common: skip atime
+ related tests on NFS
+Message-ID: <20141105082941.GA404@infradead.org>
+References: <1414502171-10319-1-git-send-email-eguan@redhat.com>
+ <1414502171-10319-4-git-send-email-eguan@redhat.com>
+ <20141030090306.GA23917@infradead.org>
+ <CAHQdGtRFMcJGNZvU_V22Xh-3LadD2bYc=TwrkmBVBK81RkWCvw@mail.gmail.com>
 MIME-Version: 1.0
-Reply-To: fdmanana@gmail.com
-In-Reply-To: <707521534.1995887.1415000464631.JavaMail.zimbra@redhat.com>
-References: <195605038.1993779.1414999815830.JavaMail.zimbra@redhat.com>
-	<707521534.1995887.1415000464631.JavaMail.zimbra@redhat.com>
-Date: Mon, 3 Nov 2014 08:29:41 +0000
-Message-ID: <CAL3q7H5Zfyvc-Ovq6ssMWrd_mdp_QTX9xs718Miqi6MK7Jybvw@mail.gmail.com>
-Subject: Re: btrfs/010: what's the purpose of test case
-From: Filipe David Manana <fdmanana@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAHQdGtRFMcJGNZvU_V22Xh-3LadD2bYc=TwrkmBVBK81RkWCvw@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Xu Wang <xuw@redhat.com>
-Cc: fstests@vger.kernel.org
+To: Trond Myklebust <trond.myklebust@primarydata.com>
+Cc: Christoph Hellwig <hch@infradead.org>, Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, Linux NFS Mailing List <linux-nfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Nov 3, 2014 at 7:41 AM, Xu Wang <xuw@redhat.com> wrote:
-> Hi,
->
->   I run the btrfs/010 for kernel 3.10, the result is failed. When I read the case, I think it may be wrong.
->   So I post this letter, and wanna to verify it.
->
->   The case(btrfs/010) firstly produced a file with some extents in a sub volume, then created 2 snaps of the
->   sub volume. Then defrag the file in sub volume, and hope the extents numbers are same for sub volume, snap1
->   and snap2.
->   The btrfs's snapshot is based on cow, so defrag the original sub volume's file will not affect the file in
->   snapshot? Am I right?
->   If I am right, the operation "num_extent_orig=`_extent_count $subvol/foobar`" in btrfs/010 should be before
->   the defrag operation. And I will send a patch to fix it.
+On Fri, Oct 31, 2014 at 01:31:36PM +0200, Trond Myklebust wrote:
+> If there is no read on the wire, then there is no way to update the
+> atime without doing an explicit SETATTR. Courtesy of POSIX filesystem
+> semantics on the server, that means we get a bonus change attribute
+> and ctime update (no extra charge).
+> 
+> Unless there are new suggestions for how to solve the atime issue that
+> do not involve introducing this or similar regressions, then the
+> standing NACK applies.
 
-The test fails because snapshot aware defrag was disabled in the
-kernel sometime ago due to some issues with that feature. The change
-that disabled it was backported to 3.10:
+I think various network filesystems are fairly lax on updating the atime
+on the server.  What xfstests generic/192 tests is that we don't lose
+an atime update after an unmount/remount.  I think we should be able
+to expect local atime updates, and updates to the server on unmount.
 
-https://git.kernel.org/cgit/linux/kernel/git/stable/linux-stable.git/commit/?id=a082f872743e09fe2cdf870b2d8f1b5dccd36cf7
-
-The test is correct and works without that patch.
-
->
->   Best regards,
->
-> --
-> George Wang 王旭
->
-> Kernel Quantity Engineer
-> Red Hat Software (Beijing) Co.,Ltd
-> IRC:xuw
-> Tel:+86-010-62608041
-> Phone:15901231579
-> 9/F, Tower C, Raycom
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Filipe David Manana,
-
-"Reasonable men adapt themselves to the world.
- Unreasonable men adapt the world to themselves.
- That's why all progress depends on unreasonable men."
+Or at least claim that the filesystem is mounted by noatime if it is so
+that users (including xfstests) notice, and can enable strict atime mode
+if really needed, including the above mentioned drawbacks.
