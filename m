@@ -1,55 +1,58 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:50335 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751176AbaKFROZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 6 Nov 2014 12:14:25 -0500
-From: Brian Foster <bfoster@redhat.com>
-Subject: [PATCH] xfs/062: verify bulkstat finds all inodes
-Date: Thu,  6 Nov 2014 12:14:22 -0500
-Message-Id: <1415294062-1552-1-git-send-email-bfoster@redhat.com>
+Received: from victor.provo.novell.com ([137.65.250.26]:34997 "EHLO
+	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751678AbaKGUlx (ORCPT
+	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
+	Fri, 7 Nov 2014 15:41:53 -0500
+From: Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] fstests: add generic test to verify xattr replace operations are atomic
+Date: Fri,  7 Nov 2014 20:40:26 +0000
+Message-Id: <1415392826-11606-1-git-send-email-fdmanana@suse.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-The bulkstat mechanism is used by xfsdump and other tools to index all
-inodes allocated in a filesystem. Run some simple tests with varying
-inode layouts and bulkstat batch sizes to verify bulkstat finds the
-expected number of inodes.
+This test verifies that replacing a xattr's value is an atomic
+operation. This is motivated by an issue in btrfs where replacing
+a xattr's value wasn't an atomic operation, it consisted of
+removing the old value and then inserting the new value in a
+btree. This made readers (getxattr and listxattrs) not getting
+neither the old nor the new value during a short time window.
 
-Signed-off-by: Brian Foster <bfoster@redhat.com>
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
+ tests/generic/326     | 107 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/326.out |   2 +
+ tests/generic/group   |   1 +
+ 3 files changed, 110 insertions(+)
+ create mode 100755 tests/generic/326
+ create mode 100644 tests/generic/326.out
 
-Here's a test based on some of the review discussion for Dave's recent
-bulkstat fixup. This doesn't reproduce problems in current code (perhaps
-it can be enhanced to detect some of the original problems?), but it
-detects some tricky regressions found during the development cycle and
-only takes a few seconds to run.
-
-Brian
-
- tests/xfs/062     | 110 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/062.out |  17 +++++++++
- tests/xfs/group   |   1 +
- 3 files changed, 128 insertions(+)
- create mode 100755 tests/xfs/062
- create mode 100644 tests/xfs/062.out
-
-diff --git a/tests/xfs/062 b/tests/xfs/062
+diff --git a/tests/generic/326 b/tests/generic/326
 new file mode 100755
-index 0000000..cc3782e
+index 0000000..c110fc0
 --- /dev/null
-+++ b/tests/xfs/062
-@@ -0,0 +1,110 @@
++++ b/tests/generic/326
+@@ -0,0 +1,107 @@
 +#! /bin/bash
-+# FS QA Test No. 062
++# FSQA Test No. 326
 +#
-+# Use the bstat utility to verify bulkstat finds all inodes in a filesystem.
-+# Test under various inode counts, inobt record layouts and bulkstat batch
-+# sizes.
++# Verify that replacing a xattr's value is an atomic operation.
++# This is motivated by an issue in btrfs where replacing a xattr's value
++# wasn't an atomic operation, it consisted of removing the old value and
++# then inserting the new value in a btree. This made readers (getxattr
++# and listxattrs) not getting neither the old nor the new value during
++# a short time window.
++#
++# The btrfs issue was fixed by the following linux kernel patch:
++#
++#    Btrfs: make xattr replace operations atomic
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2014 Red Hat, Inc.  All Rights Reserved.
++#
++# Copyright (C) 2014 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -64,128 +67,98 @@ index 0000000..cc3782e
 +# along with this program; if not, write the Free Software Foundation,
 +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 +#-----------------------------------------------------------------------
++#
 +
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
-+
-+here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+    cd /
-+    rm -f $tmp.*
-+}
-+
-+# print the number of inodes counted by bulkstat
-+_bstat_count()
-+{
-+	batchsize=$1
-+	./src/bstat $SCRATCH_MNT $batchsize | grep ino | wc -l
-+}
-+
-+# print bulkstat counts using varied batch sizes
-+_bstat_test()
-+{
-+	expect=`find $SCRATCH_MNT -print | wc -l`
-+	echo "expect $expect"
-+
-+	_bstat_count 4096
-+	_bstat_count 32
-+	_bstat_count 1
++	if [ ! -z $setter_pid ]; then
++		kill $setter_pid &> /dev/null
++	fi
++	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+
-+_require_scratch
++. ./common/attr
 +
 +# real QA test starts here
-+
-+_supported_fs xfs
++_need_to_be_root
++_supported_fs generic
 +_supported_os Linux
++_require_scratch
++_require_attrs
 +
 +rm -f $seqres.full
 +
-+DIRCOUNT=8
-+INOCOUNT=$((2048 / DIRCOUNT))
++xattr_name="user.something"
++xattr_value1="foobar"
++xattr_value2="rabbit_hole"
 +
-+_scratch_mkfs "-d agcount=$DIRCOUNT" >> $seqres.full 2>&1 || _fail "mkfs failed"
++set_xattr_loop()
++{
++	local name=$1
++
++	local cur_val=$xattr_value1
++	while true; do
++		$SETFATTR_PROG -n $xattr_name -v $cur_val $SCRATCH_MNT/$name
++		if [ "$cur_val" == "$xattr_value1" ]; then
++			cur_val=$xattr_value2
++		else
++			cur_val=$xattr_value1
++		fi
++	done
++}
++
++_scratch_mkfs >>$seqres.full 2>&1
 +_scratch_mount
 +
-+# create a set of directories and fill each with a fixed number of files
-+for dir in $(seq 1 $DIRCOUNT); do
-+	mkdir -p $SCRATCH_MNT/$dir
-+	for i in $(seq 1 $INOCOUNT); do
-+		touch $SCRATCH_MNT/$dir/$i
-+	done
-+done
-+_bstat_test
++test_file="test_xattr_replace"
++touch $SCRATCH_MNT/$test_file
++$SETFATTR_PROG -n $xattr_name -v $xattr_value1 $SCRATCH_MNT/$test_file
 +
-+# remove every other file from each dir
-+for dir in $(seq 1 $DIRCOUNT); do
-+	for i in $(seq 2 2 $INOCOUNT); do
-+		rm -f $SCRATCH_MNT/$dir/$i
-+	done
-+done
-+_bstat_test
++set_xattr_loop $test_file &
++setter_pid=$!
 +
-+# remove the entire second half of files
-+for dir in $(seq 1 $DIRCOUNT); do
-+	for i in $(seq $((INOCOUNT / 2)) $INOCOUNT); do
-+		rm -f $SCRATCH_MNT/$dir/$i
-+	done
++for ((i = 0; i < 1000; i++)); do
++	xattr_val=$($GETFATTR_PROG --absolute-names -n $xattr_name \
++		$SCRATCH_MNT/$test_file | grep "$xattr_name=" | cut -d '=' -f 2)
++	if [ "$xattr_val" != "\"$xattr_value1\"" -a \
++		"$xattr_val" != "\"$xattr_value2\"" ]; then
++		_fail "Missing or unexpected xattr value: $xattr_val"
++	fi
 +done
-+_bstat_test
 +
-+# remove all regular files
-+for dir in $(seq 1 $DIRCOUNT); do
-+	rm -f $SCRATCH_MNT/$dir/*
-+done
-+_bstat_test
++kill $setter_pid &> /dev/null
++unset setter_pid
 +
-+# success, all done
++echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/xfs/062.out b/tests/xfs/062.out
+diff --git a/tests/generic/326.out b/tests/generic/326.out
 new file mode 100644
-index 0000000..fbc25b1
+index 0000000..4ac0db5
 --- /dev/null
-+++ b/tests/xfs/062.out
-@@ -0,0 +1,17 @@
-+QA output created by 062
-+expect 2057
-+2057
-+2057
-+2057
-+expect 1033
-+1033
-+1033
-+1033
-+expect 521
-+521
-+521
-+521
-+expect 9
-+9
-+9
-+9
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 222942e..4b8e51a 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -58,6 +58,7 @@
- 059 dump ioctl auto quick
- 060 dump ioctl auto quick
- 061 dump ioctl auto quick
-+062 auto ioctl quick
- 063 dump attr auto quick
- 064 dump auto
- 065 dump auto
++++ b/tests/generic/326.out
+@@ -0,0 +1,2 @@
++QA output created by 326
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 9c82a6f..01f442d 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -152,3 +152,4 @@
+ 323 auto aio stress
+ 324 auto fsr quick
+ 325 auto quick data log
++326 auto quick xattr
 -- 
-1.8.3.1
+1.9.1
 
