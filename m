@@ -1,42 +1,255 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:14757 "EHLO
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:5357 "EHLO
 	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751295AbaKJBfk (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 9 Nov 2014 20:35:40 -0500
-Date: Mon, 10 Nov 2014 12:35:34 +1100
+	by vger.kernel.org with ESMTP id S1751295AbaKJBpr (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sun, 9 Nov 2014 20:45:47 -0500
+Date: Mon, 10 Nov 2014 12:45:37 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] btrfs: regression test for btrfs extent merge
-Message-ID: <20141110013534.GM28565@dastard>
-References: <1413423740-7022-1-git-send-email-quwenruo@cn.fujitsu.com>
- <20141016081307.GZ13912@dhcp-13-216.nay.redhat.com>
- <543F8286.4060200@cn.fujitsu.com>
+Subject: Re: [PATCH v2] fstests: btrfs, add test for snapshoting after file
+ write + truncate
+Message-ID: <20141110014537.GN28565@dastard>
+References: <1413886389-16144-1-git-send-email-fdmanana@suse.com>
+ <1414323543-31557-1-git-send-email-fdmanana@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <543F8286.4060200@cn.fujitsu.com>
+In-Reply-To: <1414323543-31557-1-git-send-email-fdmanana@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Filipe Manana <fdmanana@suse.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Oct 16, 2014 at 04:32:06PM +0800, Qu Wenruo wrote:
-> -------- Original Message --------
-> Subject: Re: [PATCH] btrfs: regression test for btrfs extent merge
-> From: Eryu Guan <eguan@redhat.com>
-> >>+
-> >>+tmp=`mktemp -d`
-> >I'm a bit concerned about this. Some functions in common/rc use
-> >$tmp.some_sufix as temp file. If $tmp defined as a dir here, I'm not
-> >sure if it will cause any trouble.
-> It seems that most tests uses /tmp/$$ as tmp, only some exception
-> like btrfs/077 uses mktemp -d.
-> So I'd better use the old /tmp/$$ method.
+Ping for Btrfs folks, review please...
 
-Can you please send a patch to fix btrfs/077 as well?
+On Sun, Oct 26, 2014 at 11:39:03AM +0000, Filipe Manana wrote:
+> Regression test for a btrfs issue where if right after the snapshot
+> creation ioctl started, a file write followed by a file truncate
+> happened, with both operations increasing the file's size, the created
+> snapshot would capture an inconsistent state of the file system tree.
+> That state reflected the file truncation but it didn't reflect the
+> write operation, and left a gap between two file extent items (and
+> that gap corresponded to the total or a partial area of the write
+> operation's range).
+> 
+> This issue was fixed by the following linux kernel patch:
+> 
+>     Btrfs: fix snapshot inconsistency after a file write followed by truncate
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> ---
+> 
+> V2: Added some background processes to cause some cpu load. This makes the
+>     test fail always on environments with a non-debug kernel and where no
+>     other significant load (other the test itself) is running.
+> 
+>  tests/btrfs/080     | 169 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/080.out |   2 +
+>  tests/btrfs/group   |   1 +
+>  3 files changed, 172 insertions(+)
+>  create mode 100755 tests/btrfs/080
+>  create mode 100644 tests/btrfs/080.out
+> 
+> diff --git a/tests/btrfs/080 b/tests/btrfs/080
+> new file mode 100755
+> index 0000000..a5d3b38
+> --- /dev/null
+> +++ b/tests/btrfs/080
+> @@ -0,0 +1,169 @@
+> +#! /bin/bash
+> +# FSQA Test No. 080
+> +#
+> +# Regression test for a btrfs issue where if right after the snapshot creation
+> +# ioctl started, a file write followed by a file truncate happened, with both
+> +# operations increasing the file's size, the created snapshot would capture an
+> +# inconsistent state of the file system tree. That state reflected the file
+> +# truncation but it didn't reflect the write operation, and left a gap between
+> +# two file extent items (and that gap corresponded to the total or a partial
+> +# area of the write operation's range).
+> +#
+> +# This issue was fixed by the following linux kernel patch:
+> +#
+> +#     Btrfs: fix snapshot inconsistency after a file write followed by truncate
+> +#
+> +#-----------------------------------------------------------------------
+> +#
+> +# Copyright (C) 2014 SUSE Linux Products GmbH. All Rights Reserved.
+> +# Author: Filipe Manana <fdmanana@suse.com>
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	for p in ${cpu_stress_pids[*]}; do
+> +		kill $p &> /dev/null
+> +	done
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_need_to_be_root
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch_nocheck
+> +
+> +rm -f $seqres.full
+> +
+> +create_snapshot()
+> +{
+> +	local ts=`date +'%H_%M_%S_%N'`
+> +
+> +	_run_btrfs_util_prog subvolume snapshot -r \
+> +		$SCRATCH_MNT $SCRATCH_MNT/"${ts}_snap"
+> +}
+> +
+> +create_file()
+> +{
+> +	local name=$1
+> +
+> +	run_check $XFS_IO_PROG -f \
+> +		-c "pwrite -S 0xaa -b 32K 0 32K" \
+> +		-c "fsync" \
+> +		-c "pwrite -S 0xbb -b 32770 16K 32770" \
+> +		-c "truncate 90123" \
+> +		$SCRATCH_MNT/$name
+> +}
+> +
+> +workout()
+> +{
+> +	local name=$1
+> +
+> +	create_file $name &
+> +	fpid=$!
+> +	create_snapshot &
+> +	spid=$!
+> +	wait $fpid
+> +	create_ret=$?
+> +	wait $spid
+> +	snap_ret=$?
+> +	if [ $create_ret != 0 -o $snap_ret != 0 ]; then
+> +		_fail "Failure creating file or snapshot, check $seqres.full for details"
+> +	fi
+> +}
+> +
+> +# If the installed btrfs mkfs supports the no-holes feature, make sure the
+> +# created fs doesn't get that feature enabled. With it enabled, the below fsck
+> +# call wouldn't fail. This feature hasn't been enabled by default since it was
+> +# introduced, but be safe and explicitly disable it.
+> +_scratch_mkfs -O list-all 2>&1 | grep -q '\bno\-holes\b'
+> +if [ $? -eq 0 ]; then
+> +	mkfs_options="-O ^no-holes"
+> +fi
+> +_scratch_mkfs "$mkfs_options" >>$seqres.full 2>&1
+> +
+> +_scratch_mount
+> +
+> +# Run some background load in order to make the issue easier to trigger.
+> +# Specially needed when testing with non-debug kernels and there isn't
+> +# any other significant load on the test machine other than this test.
+> +num_cpus=`$here/src/feature -o`
+> +num_procs=$(($num_cpus * 20))
+> +for ((i = 0; i < $num_procs; i++)); do
+> +	while true; do
+> +		true
+> +	done &
+> +	cpu_stress_pids[$i]=$!
+> +done
+> +
+> +for ((i = 1; i <= 100; i++)); do
+> +	workout "foobar_$i"
+> +done
+> +
+> +for ((i = 0; i < $num_procs; i++)); do
+> +	kill ${cpu_stress_pids[$i]} &> /dev/null
+> +	unset cpu_stress_pids[$i]
+> +done
+> +
+> +for f in $(find $SCRATCH_MNT -type f -name 'foobar_*'); do
+> +	digest=`md5sum $f | cut -d ' ' -f 1`
+> +	case $digest in
+> +	"d41d8cd98f00b204e9800998ecf8427e")
+> +		# ok, empty file
+> +		;;
+> +	"c28418534a020122aca59fd3ff9581b5")
+> +		# ok, only first write captured
+> +		;;
+> +	"cd0032da89254cdc498fda396e6a9b54")
+> +		# ok, only 2 first writes captured
+> +		;;
+> +	"a1963f914baf4d2579d643425f4e54bc")
+> +		# ok, the 2 writes and the truncate were captured
+> +		;;
+> +	*)
+> +		# not ok, truncate captured but not one or both writes
+> +		_fail "Unexpected digest for file $f"
+> +	esac
+> +done
+> +
+> +# Check the filesystem for inconsistencies.
+> +# Before the btrfs kernel fix mentioned above, we would very often get fsck
+> +# error messages like: "root 306 inode 338 errors 100, file extent discount".
+> +#
+> +# This was because if right after the snapshot creation ioctl started, a file
+> +# write followed by a file truncate, with both operations increasing the file's
+> +# size, we would get a snapshot that reflected a state where the file truncation
+> +# was visible but the previous file write was not visible, breaking expected
+> +# total ordering of operations and causing a gap between 2 file extents, where a
+> +# file extent item representing the range [32K .. ALIGN(16K + 32770, 4096)] was
+> +# missing in the snapshot's btree.
+> +_check_scratch_fs
+> +
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/080.out b/tests/btrfs/080.out
+> new file mode 100644
+> index 0000000..11a4a1a
+> --- /dev/null
+> +++ b/tests/btrfs/080.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 080
+> +Silence is golden
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 40e7430..801fc73 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -81,3 +81,4 @@
+>  076 auto quick
+>  077 auto quick
+>  078 auto
+> +080 auto
+> -- 
+> 1.9.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-Cheers,
-
-Dave.
 -- 
 Dave Chinner
 david@fromorbit.com
