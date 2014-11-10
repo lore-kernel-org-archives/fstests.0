@@ -1,139 +1,72 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:53806 "EHLO
-	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750812AbaKJHIl (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 10 Nov 2014 02:08:41 -0500
-Date: Mon, 10 Nov 2014 18:08:36 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: [ANNOUNCE] fstests: master branch updated to 6676905
-Message-ID: <20141110070836.GP23575@dastard>
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="mYCpIKhGyMATD0i+"
-Content-Disposition: inline
+Received: from mx1.redhat.com ([209.132.183.28]:38228 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752179AbaKJLAv (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 10 Nov 2014 06:00:51 -0500
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] common: enable tests that require scratch device on CIFS
+Date: Mon, 10 Nov 2014 18:59:51 +0800
+Message-Id: <1415617191-17246-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-fsdevel@vger.kernel.org
+Cc: linux-cifs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
+Just like commit
 
---mYCpIKhGyMATD0i+
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+76c5f3c common: re-enable tests that require scratch dev on NFS
 
-Hi folks,
+Enable tests that require scratch device on CIFS too to get a better
+test coverage.
 
-The xfstests repository at git://oss.sgi.com/xfs/cmds/xfstests has
-just been updated. Patches often get missed, so please check if your
-outstanding patches were in this update. If they have not been in
-this update, please resubmit them to fstests@vger.kernel.org so they
-can be picked up in the next update.
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
 
-The new head of the master branch is commit:
+Tested with samba server on localhost, the results are
 
-6676905 generic: add test to verify xattr replace operations are atomic
+Ran: generic/001 generic/002 generic/005 generic/006 generic/007 generic/010 generic/011 generic/013 generic/014 generic/023 generic/024 generic/028 generic/029 generic/035 generic/036 generic/053 generic/069 generic/074 generic/075 generic/088 generic/089 generic/091 generic/100 generic/105 generic/112 generic/113 generic/120 generic/123 generic/124 generic/125 generic/126 generic/127 generic/128 generic/129 generic/130 generic/131 generic/132 generic/133 generic/135 generic/141 generic/169 generic/184 generic/192 generic/193 generic/198 generic/207 generic/208 generic/209 generic/210 generic/211 generic/212 generic/215 generic/221 generic/236 generic/237 generic/239 generic/241 generic/245 generic/246 generic/247 generic/248 generic/249 generic/257 generic/258 generic/263 generic/285 generic/286 generic/294 generic/306 generic/307 generic/308 generic/309 generic/310 generic/313 generic/314 generic/315 generic/317 generic/318 generic/319 generic/323
 
-New Commits:
+Not run: generic/003 generic/004 generic/008 generic/009 generic/012 generic/015 generic/016 generic/017 generic/018 generic/019 generic/020 generic/021 generic/022 generic/025 generic/026 generic/027 generic/030 generic/031 generic/032 generic/033 generic/034 generic/037 generic/062 generic/068 generic/070 generic/076 generic/077 generic/079 generic/083 generic/093 generic/097 generic/099 generic/117 generic/204 generic/213 generic/214 generic/219 generic/223 generic/224 generic/225 generic/226 generic/228 generic/230 generic/231 generic/232 generic/233 generic/234 generic/235 generic/240 generic/251 generic/255 generic/256 generic/260 generic/269 generic/270 generic/273 generic/274 generic/275 generic/277 generic/280 generic/288 generic/299 generic/300 generic/311 generic/312 generic/316 generic/320 generic/321 generic/322 generic/324 generic/325 shared/006 shared/032 shared/051 shared/272 shared/289 shared/298
 
-Anna Schumaker (1):
-      [73dfa4a] common: Fixes for testing NFS over IPv6
+Failures: generic/035 generic/074 generic/120 generic/184 generic/192 generic/193 generic/215 generic/237 generic/258 generic/294 generic/306 generic/307 generic/313 generic/317 generic/319
 
-Brian Foster (1):
-      [e62dbea] xfs/062: verify bulkstat finds all inodes
+Failed 15 of 80 tests
 
-Dmitry Monakhov (2):
-      [fd730cf] fstests: update 'new' script
-      [33e0889] aio: add regression test race between write and fcntl
+I haven't looked into the failures and filtered out unnecessary failures yet.
 
-Eric Sandeen (1):
-      [155cf51] xfs/068: fix expected output file for proper restore output
+ common/rc | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
 
-Eryu Guan (5):
-      [76c5f3c] common: re-enable tests that require scratch dev on NFS
-      [129444c] common: add _require_block_device() helper
-      [f72abf5] generic: skip atime related tests on NFS
-      [1bc9c1a] common: use _scratch_mount helper in _require_relatime()
-      [664f1f0] generic/277: add _require_attrs
+diff --git a/common/rc b/common/rc
+index d5e3aff..435f74f 100644
+--- a/common/rc
++++ b/common/rc
+@@ -571,7 +571,9 @@ _scratch_mkfs()
+         _scratch_cleanup_files
+ 	;;
+     cifs)
+-	# do nothing for cifs
++	# unable to re-create CIFS, just remove all files in $SCRATCH_MNT to
++	# avoid EEXIST caused by the leftover files created in previous runs
++        _scratch_cleanup_files
+ 	;;
+     udf)
+         $MKFS_UDF_PROG $MKFS_OPTIONS $* $SCRATCH_DEV > /dev/null
+@@ -1053,7 +1055,13 @@ _require_scratch_nocheck()
+ 		fi
+ 		;;
+ 	cifs)
+-		_notrun "requires a scratch device"
++		echo $SCRATCH_DEV | grep -q "//" > /dev/null 2>&1
++		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
++			_notrun "this test requires a valid \$SCRATCH_DEV"
++		fi
++		if [ ! -d "$SCRATCH_MNT" ]; then
++		     _notrun "this test requires a valid \$SCRATCH_MNT"
++		fi
+ 		;;
+ 	tmpfs)
+ 		if [ -z "$SCRATCH_DEV" -o ! -d "$SCRATCH_MNT" ];
+-- 
+1.8.3.1
 
-Filipe Manana (2):
-      [8c7c07e] btrfs: regression test for ro snapshot creation
-      [6676905] generic: add test to verify xattr replace operations are at=
-omic
-
-Jan Kara (1):
-      [fa7f9fb] xfs/195: Use XFSDUMP_PROG instead of xfsdump directly
-
-Liu Bo (1):
-      [181ba03] aio: fix memory corruption in aio-last-ref-held-by-io
-
-Qu Wenruo (1):
-      [027bcfa] btrfs: regression test for btrfs extent merge
-
-
-Code Diffstat:
-
- common/config                                 |    6 +-
- common/rc                                     |   58 +-
- new                                           |   85 ++-
- src/aio-dio-regress/aio-dio-fcntl-race.c      |  150 ++++
- src/aio-dio-regress/aio-last-ref-held-by-io.c |    4 +-
- tests/btrfs/078                               |   85 +++
- tests/btrfs/078.out                           |    2 +
- tests/btrfs/079                               |  126 ++++
- tests/btrfs/079.out                           |    2 +
- tests/btrfs/group                             |    2 +
- tests/generic/003                             |    1 +
- tests/generic/036                             |   51 ++
- tests/generic/036.out                         |    2 +
- tests/generic/037                             |  102 +++
- tests/generic/037.out                         | 1001 +++++++++++++++++++++=
-++++
- tests/generic/076                             |    1 +
- tests/generic/192                             |    1 +
- tests/generic/277                             |    2 +
- tests/generic/group                           |    2 +
- tests/xfs/062                                 |  110 +++
- tests/xfs/062.out                             |   17 +
- tests/xfs/068.out                             |    2 +-
- tests/xfs/195                                 |    7 +-
- tests/xfs/group                               |    1 +
- 24 files changed, 1782 insertions(+), 38 deletions(-)
- create mode 100644 src/aio-dio-regress/aio-dio-fcntl-race.c
- create mode 100755 tests/btrfs/078
- create mode 100644 tests/btrfs/078.out
- create mode 100755 tests/btrfs/079
- create mode 100644 tests/btrfs/079.out
- create mode 100755 tests/generic/036
- create mode 100644 tests/generic/036.out
- create mode 100755 tests/generic/037
- create mode 100644 tests/generic/037.out
- create mode 100755 tests/xfs/062
- create mode 100644 tests/xfs/062.out
---=20
-Dave Chinner
-david@fromorbit.com
-
---mYCpIKhGyMATD0i+
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJUYGR0AAoJEK3oKUf0dfodwmcQANTrzSrRC1ne6kFEErN8VTZU
-4KaLsSlxb+IxGmFsdAC17YcaB1+9CMmK6Dv+sq5HLdiyQv7VcotJokG4hygmw6t5
-cy8jI+uVvPOvF14eF9EgW2JlCx4gXFRARlQWeVIDNMkg5xpbMTZeEBWxJ5maTACk
-vO/pf1dIUl/IIb/h8/dewBW2rUe0n+7ije+Dcfri5YqRbexQ9ROMzHErLwkFk4fr
-Fq8teWFFQlbt+7dPgAL2mqv61U+kUTvbsQWVgz1WXtaGuUGTAtxI1zyUtE8DZSJb
-HgX3tBD5NRsGkBAZKCGAUN8F0fwT3m1G22xAoC33OA+qgsvfFXC1VhfhlqHd1Gjg
-vxik0InUZQNvXPZohprmQYuAqliO01/smYLmccQ0RD0D5aIEqfmldDsjPeK4Krjo
-4MlyFlWa64JMKuCHuyZ/1C4iJzSAhxBZtiPAU8ErlfDGCzipW5ZwRnjrV1Wb4GaD
-bE+w/Pf3dOe5fD9y3psuhj7jzZlC6RW42NZFB9mdx733t6o9N4Pi/5kyUWKgnKrN
-G8CZDFZYdM78IUF/GHFKgyQpzusdXgcHhqccPc3eF595zXeCYboTdEQM0aM9uvKf
-1zRFBXTGGUxYWvZDJPUlnIun90QrisFgZ94yRGhR31OxiSBdL2WUjCv6+kXGUHeH
-IPIlU4bTsHkAZ9Vwzyrj
-=xbmX
------END PGP SIGNATURE-----
-
---mYCpIKhGyMATD0i+--
