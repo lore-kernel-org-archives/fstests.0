@@ -1,88 +1,105 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-la0-f49.google.com ([209.85.215.49]:41119 "EHLO
-	mail-la0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752621AbaKJLxD (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 10 Nov 2014 06:53:03 -0500
+Received: from mail-qa0-f47.google.com ([209.85.216.47]:35269 "EHLO
+	mail-qa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750928AbaKJPc4 convert rfc822-to-8bit (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 10 Nov 2014 10:32:56 -0500
 MIME-Version: 1.0
-Reply-To: fdmanana@gmail.com
-In-Reply-To: <20141110013115.GL28565@dastard>
-References: <1415392826-11606-1-git-send-email-fdmanana@suse.com>
-	<20141109234522.GK28565@dastard>
-	<CAL3q7H5JqquwHeWSTMCnTiTGBTuh77w9HS2V2LW06TpON_saUg@mail.gmail.com>
-	<20141110013115.GL28565@dastard>
-Date: Mon, 10 Nov 2014 11:53:00 +0000
-Message-ID: <CAL3q7H4=-xRRWXUcLGfH1NW8riX4k0sRB3JPdb71n_rKKNeOmQ@mail.gmail.com>
-Subject: Re: [PATCH] fstests: add generic test to verify xattr replace
- operations are atomic
-From: Filipe David Manana <fdmanana@gmail.com>
+In-Reply-To: <1415617191-17246-1-git-send-email-eguan@redhat.com>
+References: <1415617191-17246-1-git-send-email-eguan@redhat.com>
+From: Steve French <smfrench@gmail.com>
+Date: Mon, 10 Nov 2014 09:32:34 -0600
+Message-ID: <CAH2r5muXH7HSoM0TQUsPXq1RM-dLdZSfzuOKK1zZdKe0OANAhg@mail.gmail.com>
+Subject: Re: [PATCH] common: enable tests that require scratch device on CIFS
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, "linux-cifs@vger.kernel.org" <linux-cifs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Nov 10, 2014 at 1:31 AM, Dave Chinner <david@fromorbit.com> wrote:
-> On Mon, Nov 10, 2014 at 12:49:12AM +0000, Filipe David Manana wrote:
->> On Sun, Nov 9, 2014 at 11:45 PM, Dave Chinner <david@fromorbit.com> wrote:
->> > On Fri, Nov 07, 2014 at 08:40:26PM +0000, Filipe Manana wrote:
->> >> This test verifies that replacing a xattr's value is an atomic
->> >> operation. This is motivated by an issue in btrfs where replacing
->> >> a xattr's value wasn't an atomic operation, it consisted of
->> >> removing the old value and then inserting the new value in a
->> >> btree. This made readers (getxattr and listxattrs) not getting
->> >> neither the old nor the new value during a short time window.
->> >
->> > OK, seems like a good thing to test that the application can only
->> > see the old or the new value.
->> >
->> > However, I can't help but wonder about whether the btrfs behaviour
->> > is crash safe as it wasn't designed to be atomic from the ground up.
->> > i.e. if the system crashes half way through a attribute overwrite,
->> > what does btrfs end up with as a result? XFS is guaranteed at a
->> > transactional level to return either the old or the new value,
->> > depending on where in the operaiton the crash occurred, but I'd just
->> > assumed that everyone did attribute replace atomically so it never
->> > occurred to me that it might be an issue...
->>
->> It's crash safe. Both the delete and insert were done in the same
->> transaction, so a crash in between both operations (or after both and
->> before the transaction commit) would result in always seeing the old
->> value (or better saying, the last persisted value by a transaction
->> commit or fsync).
+Failures: generic/035 generic/074 generic/120 generic/184 generic/192
+generic/193 generic/215 generic/237 generic/258 generic/294
+generic/306 generic/307 generic/313 generic/317 generic/319
+
+Test 258 is a Samba server bug (and does work to Windows server).  074
+and 215 are passing for me for both CIFS and SMB3, 035 was only
+failing for SMB2/SMB3 (and NFS) for me, not CIFS
+Test 184 passes to Samba, but requires "sfu" (mount.cifs mount option)
+if mounting with SMB2/SMB3 or mounting to Windows (in order to emulate
+FIFO and device files)
+
+192 and 193 and 313 are time stamp related problems.
+
+Are you using at least 3.17 kernel?  We put various fixes in 3.17 to
+address problems fsx pointed out.
+
+On Mon, Nov 10, 2014 at 4:59 AM, Eryu Guan <eguan@redhat.com> wrote:
+> Just like commit
 >
-> Alright, so no crash issues because all the modifications are in a
-> single transaction. However, if both modifications are made in the
-> same transaction, then this bug implies that a user can read a
-> metadata object in the btree whilst somethign else is concurrently
-> modifying it, right? i.e. that there is no serialisation between
-> inode metadata reads and transactional modification operations?
-
-Nop, not exactly the possibility to read while being modified. The
-replace steps were:
-
-lock btree node(s), delete current value from leaf, unlock btree
-nodes, lock btree nodes, write new value to leaf, unlock btree nodes
-
-Readers (a getxattr or listxattrs syscall for e.g.), could just after
-the first btree node unlocking done by the writer: lock btree nodes,
-get current value (none found), unlock btree nodes, and then return
--ENODATA.
-
-
-
+> 76c5f3c common: re-enable tests that require scratch dev on NFS
 >
-> Cheers,
+> Enable tests that require scratch device on CIFS too to get a better
+> test coverage.
 >
-> Dave.
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> ---
+>
+> Tested with samba server on localhost, the results are
+>
+> Ran: generic/001 generic/002 generic/005 generic/006 generic/007 generic/010 generic/011 generic/013 generic/014 generic/023 generic/024 generic/028 generic/029 generic/035 generic/036 generic/053 generic/069 generic/074 generic/075 generic/088 generic/089 generic/091 generic/100 generic/105 generic/112 generic/113 generic/120 generic/123 generic/124 generic/125 generic/126 generic/127 generic/128 generic/129 generic/130 generic/131 generic/132 generic/133 generic/135 generic/141 generic/169 generic/184 generic/192 generic/193 generic/198 generic/207 generic/208 generic/209 generic/210 generic/211 generic/212 generic/215 generic/221 generic/236 generic/237 generic/239 generic/241 generic/245 generic/246 generic/247 generic/248 generic/249 generic/257 generic/258 generic/263 generic/285 generic/286 generic/294 generic/306 generic/307 generic/308 generic/309 generic/310 generic/313 generic/314 generic/315 generic/317 generic/318 generic/319 generic/323
+>
+> Not run: generic/003 generic/004 generic/008 generic/009 generic/012 generic/015 generic/016 generic/017 generic/018 generic/019 generic/020 generic/021 generic/022 generic/025 generic/026 generic/027 generic/030 generic/031 generic/032 generic/033 generic/034 generic/037 generic/062 generic/068 generic/070 generic/076 generic/077 generic/079 generic/083 generic/093 generic/097 generic/099 generic/117 generic/204 generic/213 generic/214 generic/219 generic/223 generic/224 generic/225 generic/226 generic/228 generic/230 generic/231 generic/232 generic/233 generic/234 generic/235 generic/240 generic/251 generic/255 generic/256 generic/260 generic/269 generic/270 generic/273 generic/274 generic/275 generic/277 generic/280 generic/288 generic/299 generic/300 generic/311 generic/312 generic/316 generic/320 generic/321 generic/322 generic/324 generic/325 shared/006 shared/032 shared/051 shared/272 shared/289 shared/298
+>
+> Failures: generic/035 generic/074 generic/120 generic/184 generic/192 generic/193 generic/215 generic/237 generic/258 generic/294 generic/306 generic/307 generic/313 generic/317 generic/319
+>
+> Failed 15 of 80 tests
+>
+> I haven't looked into the failures and filtered out unnecessary failures yet.
+>
+>  common/rc | 12 ++++++++++--
+>  1 file changed, 10 insertions(+), 2 deletions(-)
+>
+> diff --git a/common/rc b/common/rc
+> index d5e3aff..435f74f 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -571,7 +571,9 @@ _scratch_mkfs()
+>          _scratch_cleanup_files
+>         ;;
+>      cifs)
+> -       # do nothing for cifs
+> +       # unable to re-create CIFS, just remove all files in $SCRATCH_MNT to
+> +       # avoid EEXIST caused by the leftover files created in previous runs
+> +        _scratch_cleanup_files
+>         ;;
+>      udf)
+>          $MKFS_UDF_PROG $MKFS_OPTIONS $* $SCRATCH_DEV > /dev/null
+> @@ -1053,7 +1055,13 @@ _require_scratch_nocheck()
+>                 fi
+>                 ;;
+>         cifs)
+> -               _notrun "requires a scratch device"
+> +               echo $SCRATCH_DEV | grep -q "//" > /dev/null 2>&1
+> +               if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
+> +                       _notrun "this test requires a valid \$SCRATCH_DEV"
+> +               fi
+> +               if [ ! -d "$SCRATCH_MNT" ]; then
+> +                    _notrun "this test requires a valid \$SCRATCH_MNT"
+> +               fi
+>                 ;;
+>         tmpfs)
+>                 if [ -z "$SCRATCH_DEV" -o ! -d "$SCRATCH_MNT" ];
 > --
-> Dave Chinner
-> david@fromorbit.com
+> 1.8.3.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-cifs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
 
 -- 
-Filipe David Manana,
+Thanks,
 
-"Reasonable men adapt themselves to the world.
- Unreasonable men adapt the world to themselves.
- That's why all progress depends on unreasonable men."
+Steve
