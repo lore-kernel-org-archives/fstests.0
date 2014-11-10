@@ -1,90 +1,130 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:39834 "EHLO
-	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751264AbaKJTry (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 10 Nov 2014 14:47:54 -0500
-Date: Tue, 11 Nov 2014 06:47:48 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] fstests: add generic test to verify xattr replace
- operations are atomic
-Message-ID: <20141110194748.GQ23575@dastard>
-References: <1415392826-11606-1-git-send-email-fdmanana@suse.com>
- <20141109234522.GK28565@dastard>
- <CAL3q7H5JqquwHeWSTMCnTiTGBTuh77w9HS2V2LW06TpON_saUg@mail.gmail.com>
- <20141110013115.GL28565@dastard>
- <CAL3q7H4=-xRRWXUcLGfH1NW8riX4k0sRB3JPdb71n_rKKNeOmQ@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:38177 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751352AbaKJXDw (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 10 Nov 2014 18:03:52 -0500
+Message-ID: <54614454.9080009@redhat.com>
+Date: Mon, 10 Nov 2014 17:03:48 -0600
+From: Eric Sandeen <sandeen@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAL3q7H4=-xRRWXUcLGfH1NW8riX4k0sRB3JPdb71n_rKKNeOmQ@mail.gmail.com>
+Subject: [PATCH] xfstests: test xfs_copy for various sector and block sizes
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Filipe David Manana <fdmanana@gmail.com>
-Cc: Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
+To: fstests@vger.kernel.org, xfs-oss <xfs@oss.sgi.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Nov 10, 2014 at 11:53:00AM +0000, Filipe David Manana wrote:
-> On Mon, Nov 10, 2014 at 1:31 AM, Dave Chinner <david@fromorbit.com> wrote:
-> > On Mon, Nov 10, 2014 at 12:49:12AM +0000, Filipe David Manana wrote:
-> >> On Sun, Nov 9, 2014 at 11:45 PM, Dave Chinner <david@fromorbit.com> wrote:
-> >> > On Fri, Nov 07, 2014 at 08:40:26PM +0000, Filipe Manana wrote:
-> >> >> This test verifies that replacing a xattr's value is an atomic
-> >> >> operation. This is motivated by an issue in btrfs where replacing
-> >> >> a xattr's value wasn't an atomic operation, it consisted of
-> >> >> removing the old value and then inserting the new value in a
-> >> >> btree. This made readers (getxattr and listxattrs) not getting
-> >> >> neither the old nor the new value during a short time window.
-> >> >
-> >> > OK, seems like a good thing to test that the application can only
-> >> > see the old or the new value.
-> >> >
-> >> > However, I can't help but wonder about whether the btrfs behaviour
-> >> > is crash safe as it wasn't designed to be atomic from the ground up.
-> >> > i.e. if the system crashes half way through a attribute overwrite,
-> >> > what does btrfs end up with as a result? XFS is guaranteed at a
-> >> > transactional level to return either the old or the new value,
-> >> > depending on where in the operaiton the crash occurred, but I'd just
-> >> > assumed that everyone did attribute replace atomically so it never
-> >> > occurred to me that it might be an issue...
-> >>
-> >> It's crash safe. Both the delete and insert were done in the same
-> >> transaction, so a crash in between both operations (or after both and
-> >> before the transaction commit) would result in always seeing the old
-> >> value (or better saying, the last persisted value by a transaction
-> >> commit or fsync).
-> >
-> > Alright, so no crash issues because all the modifications are in a
-> > single transaction. However, if both modifications are made in the
-> > same transaction, then this bug implies that a user can read a
-> > metadata object in the btree whilst somethign else is concurrently
-> > modifying it, right? i.e. that there is no serialisation between
-> > inode metadata reads and transactional modification operations?
-> 
-> Nop, not exactly the possibility to read while being modified. The
-> replace steps were:
-> 
-> lock btree node(s), delete current value from leaf, unlock btree
-> nodes, lock btree nodes, write new value to leaf, unlock btree nodes
+This tests xfs_copy, copying all combinations of sector
+size and block size possible on the platform running the
+test.
 
-You missed "transaction start" and "transaction commit", which
-define the boundaries of a modification in progress.
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
 
-> Readers (a getxattr or listxattrs syscall for e.g.), could just after
-> the first btree node unlocking done by the writer: lock btree nodes,
-> get current value (none found), unlock btree nodes, and then return
-> -ENODATA.
+diff --git a/tests/xfs/032 b/tests/xfs/032
+new file mode 100755
+index 0000000..edd9069
+--- /dev/null
++++ b/tests/xfs/032
+@@ -0,0 +1,80 @@
++#! /bin/bash
++# FS QA Test No. 032
++#
++# Test xfs_copy for all filesystem sector size / block size
++# combinations possible on this platform.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2014 Red Hat, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=0	# success is the default!
++trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
++
++# get standard environment, filters and checks
++. ./common/rc
++
++# real QA test starts here
++_supported_fs xfs
++_supported_os IRIX Linux
++
++_require_scratch
++
++[ $here/src/feature ] || _notrun "src/feature not built, skipping this test"
++
++[ "$USE_EXTERNAL" = yes ] && _notrun "Cannot xfs_copy with external devices"
++[ -n "$XFS_COPY_PROG" ] || _notrun "xfs_copy binary not yet installed"
++
++rm -f $seqres.full
++
++SECTORSIZE=`blockdev --getss $SCRATCH_DEV`
++PAGESIZE=`src/feature -s`
++IMGFILE=$TEST_DIR/${seq}_copy.img
++
++echo "Silence is golden."
++
++while [ $SECTORSIZE -le $PAGESIZE ]; do
++	BLOCKSIZE=$SECTORSIZE;
++
++	while [ $BLOCKSIZE -le $PAGESIZE ]; do
++
++		echo "=== Sector size $SECTORSIZE Block size $BLOCKSIZE ==" >> $seqres.full
++		_scratch_mkfs -s size=$SECTORSIZE -b size=$BLOCKSIZE -d size=1g >> $seqres.full 2>&1
++		_scratch_mount
++		# light population of the fs
++		$FSSTRESS_PROG -n 100 -d $SCRATCH_MNT >> $seqres.full 2>&1
++		_scratch_unmount
++
++		$XFS_COPY_PROG $SCRATCH_DEV $IMGFILE >> $seqres.full 2>&1 || \
++			_fail "Copy failed for Sector size $SECTORSIZE Block size $BLOCKSIZE"
++		$XFS_REPAIR_PROG $IMGFILE >> $seqres.full 2>&1 || \
++			_fail "Copy corrupted for Sector size $SECTORSIZE Block size $BLOCKSIZE"
++
++		BLOCKSIZE=$(($BLOCKSIZE * 2));
++	done
++	SECTORSIZE=$(($SECTORSIZE * 2));
++done
++
++# success, all done
++exit
+diff --git a/tests/xfs/032.out b/tests/xfs/032.out
+new file mode 100644
+index 0000000..9265732
+--- /dev/null
++++ b/tests/xfs/032.out
+@@ -0,0 +1,2 @@
++QA output created by 032
++Silence is golden.
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 4b8e51a..dd7f01f 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -29,6 +29,7 @@
+ 029 mkfs logprint log auto quick
+ 030 repair auto quick
+ 031 repair mkfs auto quick
++032 copy auto quick
+ 033 repair auto quick
+ 034 other auto quick
+ 035 dump ioctl tape auto
 
-Right, and that's a exact demonstration "read while modifying" when
-"modifying" means an object has been modified in an uncommitted
-transaction. This indicates the transaction failed both the
-Atomicity and Isolation properties of an ACID transaction model.
-
-I hope this isn't a common pattern in btrfs -  it worries me just to
-know that the btrfs transaction subsytem does not, at minimum, throw
-warnings when ACID attributes are violated...
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
