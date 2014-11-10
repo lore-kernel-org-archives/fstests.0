@@ -1,42 +1,35 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:63403 "EHLO
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:37309 "EHLO
 	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751746AbaKJB6w (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 9 Nov 2014 20:58:52 -0500
-Date: Mon, 10 Nov 2014 12:58:49 +1100
+	by vger.kernel.org with ESMTP id S1751320AbaKJCMw (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sun, 9 Nov 2014 21:12:52 -0500
+Date: Mon, 10 Nov 2014 13:12:48 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 1/2] xfstests: update 'new' script v3
-Message-ID: <20141110015849.GP28565@dastard>
-References: <1414062518-30942-1-git-send-email-dmonakhov@openvz.org>
+Subject: Re: [PATCH v2 1/5] common: re-enable tests that require scratch dev
+ on NFS
+Message-ID: <20141110021248.GQ28565@dastard>
+References: <1414775040-4051-1-git-send-email-eguan@redhat.com>
+ <1414775040-4051-2-git-send-email-eguan@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1414062518-30942-1-git-send-email-dmonakhov@openvz.org>
+In-Reply-To: <1414775040-4051-2-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dmitry Monakhov <dmonakhov@openvz.org>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, linux-nfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dimitry,
-
-On Thu, Oct 23, 2014 at 03:08:37PM +0400, Dmitry Monakhov wrote:
-> From: root <root@ts105.qa.sw.ru>
-
-I think there is a problem with your git repo config....
-
-> - Update script to support new test cheme tests/$fs_type/$TEST_IDX
-> - Try to use first unused ID
+On Sat, Nov 01, 2014 at 01:03:56AM +0800, Eryu Guan wrote:
+> This commit disables tests requires scratch dev running on NFS
 > 
-> changes from v2
->   - gawk->$AWK_PROG
+> c041421 xfstests: stop special casing nfs and udf
 > 
-> Reviewed-by: Eryu Guan <eguan@redhat.com>
+> Now re-enable them to get a larger test coverage on NFS.
+> 
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
 
-And it's also missing your sign-off.
-
-The previous versions were correctly attributed, I'll pull them from
-those patches, but please be a little more careful about this next
-time...
+I'll commit this as is, but can you send another patch to wire this
+same functionality up for CIFS?
 
 Cheers,
 
