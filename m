@@ -1,130 +1,314 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38177 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751352AbaKJXDw (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 10 Nov 2014 18:03:52 -0500
-Message-ID: <54614454.9080009@redhat.com>
-Date: Mon, 10 Nov 2014 17:03:48 -0600
-From: Eric Sandeen <sandeen@redhat.com>
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:51480 "EHLO
+	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751887AbaKKFgr (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 11 Nov 2014 00:36:47 -0500
+Date: Tue, 11 Nov 2014 16:36:41 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCHv2 2/3] selftests: Add test of O_BENEATH & openat(2)
+Message-ID: <20141111053641.GR23575@dastard>
+References: <1415094884-18349-1-git-send-email-drysdale@google.com>
+ <1415094884-18349-3-git-send-email-drysdale@google.com>
 MIME-Version: 1.0
-Subject: [PATCH] xfstests: test xfs_copy for various sector and block sizes
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1415094884-18349-3-git-send-email-drysdale@google.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, xfs-oss <xfs@oss.sgi.com>
+To: David Drysdale <drysdale@google.com>
+Cc: linux-kernel@vger.kernel.org, Alexander Viro <viro@zeniv.linux.org.uk>, Kees Cook <keescook@chromium.org>, "Eric W. Biederman" <ebiederm@xmission.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Meredydd Luff <meredydd@senatehouse.org>, Will Drewry <wad@chromium.org>, Jorge Lucangeli Obes <jorgelo@google.com>, Ricky Zhou <rickyz@google.com>, Lee Campbell <leecam@google.com>, Julien Tinnes <jln@google.com>, Mike Depinet <mdepinet@google.com>, James Morris <james.l.morris@oracle.com>, Andy Lutomirski <luto@amacapital.net>, Paolo Bonzini <pbonzini@redhat.com>, Paul Moore <paul@paul-moore.com>, Christoph Hellwig <hch@infradead.org>, linux-api@vger.kernel.org, linux-security-module@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This tests xfs_copy, copying all combinations of sector
-size and block size possible on the platform running the
-test.
+[cc fstests@vger.kernel.org]
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
----
+On Tue, Nov 04, 2014 at 09:54:43AM +0000, David Drysdale wrote:
+> Add simple tests of openat(2) variations, including examples that
+> check the new O_BENEATH flag.
+> 
+> Signed-off-by: David Drysdale <drysdale@google.com>
 
-diff --git a/tests/xfs/032 b/tests/xfs/032
-new file mode 100755
-index 0000000..edd9069
---- /dev/null
-+++ b/tests/xfs/032
-@@ -0,0 +1,80 @@
-+#! /bin/bash
-+# FS QA Test No. 032
-+#
-+# Test xfs_copy for all filesystem sector size / block size
-+# combinations possible on this platform.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2014 Red Hat, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=0	# success is the default!
-+trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_supported_os IRIX Linux
-+
-+_require_scratch
-+
-+[ $here/src/feature ] || _notrun "src/feature not built, skipping this test"
-+
-+[ "$USE_EXTERNAL" = yes ] && _notrun "Cannot xfs_copy with external devices"
-+[ -n "$XFS_COPY_PROG" ] || _notrun "xfs_copy binary not yet installed"
-+
-+rm -f $seqres.full
-+
-+SECTORSIZE=`blockdev --getss $SCRATCH_DEV`
-+PAGESIZE=`src/feature -s`
-+IMGFILE=$TEST_DIR/${seq}_copy.img
-+
-+echo "Silence is golden."
-+
-+while [ $SECTORSIZE -le $PAGESIZE ]; do
-+	BLOCKSIZE=$SECTORSIZE;
-+
-+	while [ $BLOCKSIZE -le $PAGESIZE ]; do
-+
-+		echo "=== Sector size $SECTORSIZE Block size $BLOCKSIZE ==" >> $seqres.full
-+		_scratch_mkfs -s size=$SECTORSIZE -b size=$BLOCKSIZE -d size=1g >> $seqres.full 2>&1
-+		_scratch_mount
-+		# light population of the fs
-+		$FSSTRESS_PROG -n 100 -d $SCRATCH_MNT >> $seqres.full 2>&1
-+		_scratch_unmount
-+
-+		$XFS_COPY_PROG $SCRATCH_DEV $IMGFILE >> $seqres.full 2>&1 || \
-+			_fail "Copy failed for Sector size $SECTORSIZE Block size $BLOCKSIZE"
-+		$XFS_REPAIR_PROG $IMGFILE >> $seqres.full 2>&1 || \
-+			_fail "Copy corrupted for Sector size $SECTORSIZE Block size $BLOCKSIZE"
-+
-+		BLOCKSIZE=$(($BLOCKSIZE * 2));
-+	done
-+	SECTORSIZE=$(($SECTORSIZE * 2));
-+done
-+
-+# success, all done
-+exit
-diff --git a/tests/xfs/032.out b/tests/xfs/032.out
-new file mode 100644
-index 0000000..9265732
---- /dev/null
-+++ b/tests/xfs/032.out
-@@ -0,0 +1,2 @@
-+QA output created by 032
-+Silence is golden.
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 4b8e51a..dd7f01f 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -29,6 +29,7 @@
- 029 mkfs logprint log auto quick
- 030 repair auto quick
- 031 repair mkfs auto quick
-+032 copy auto quick
- 033 repair auto quick
- 034 other auto quick
- 035 dump ioctl tape auto
+Wouldn't this be better added to fstests? That's the regression
+test suite used by filesystem developers and most distro QA
+organisations and where the fs developers aggregate all their new
+regression tests.
 
+IMO, the fewer places we aggregate VFS/filesystem tests the better.
+I really don't think the kernel tree is the best place for adding
+VFS behavioural tests because it has none of the infrastructure
+around it to test arbitrary filesystems and configurations and hence
+is not particularly useful to the people whoa re likely to notice
+and care about fs regression tests suddenly breaking.
+
+As an example, the recent renameat() syscall additions (e.g.
+RENAME_EXCHANGE, RENAME_NOREPLACE) have unit tests in fstests, so
+these new O_BENEATH tests should really follow the same model...
+
+Cheers,
+
+Dave.
+
+> ---
+>  tools/testing/selftests/Makefile          |   1 +
+>  tools/testing/selftests/openat/.gitignore |   4 +
+>  tools/testing/selftests/openat/Makefile   |  28 +++++
+>  tools/testing/selftests/openat/openat.c   | 180 ++++++++++++++++++++++++++++++
+>  4 files changed, 213 insertions(+)
+>  create mode 100644 tools/testing/selftests/openat/.gitignore
+>  create mode 100644 tools/testing/selftests/openat/Makefile
+>  create mode 100644 tools/testing/selftests/openat/openat.c
+> 
+> diff --git a/tools/testing/selftests/Makefile b/tools/testing/selftests/Makefile
+> index 36ff2e4c7b6f..812e973233d2 100644
+> --- a/tools/testing/selftests/Makefile
+> +++ b/tools/testing/selftests/Makefile
+> @@ -14,6 +14,7 @@ TARGETS += powerpc
+>  TARGETS += user
+>  TARGETS += sysctl
+>  TARGETS += firmware
+> +TARGETS += openat
+> 
+>  TARGETS_HOTPLUG = cpu-hotplug
+>  TARGETS_HOTPLUG += memory-hotplug
+> diff --git a/tools/testing/selftests/openat/.gitignore b/tools/testing/selftests/openat/.gitignore
+> new file mode 100644
+> index 000000000000..835b2dcd8678
+> --- /dev/null
+> +++ b/tools/testing/selftests/openat/.gitignore
+> @@ -0,0 +1,4 @@
+> +openat
+> +subdir
+> +topfile
+> +symlinkdown
+> \ No newline at end of file
+> diff --git a/tools/testing/selftests/openat/Makefile b/tools/testing/selftests/openat/Makefile
+> new file mode 100644
+> index 000000000000..84cd06e7ee82
+> --- /dev/null
+> +++ b/tools/testing/selftests/openat/Makefile
+> @@ -0,0 +1,28 @@
+> +CC = $(CROSS_COMPILE)gcc
+> +CFLAGS = -Wall
+> +BINARIES = openat
+> +DEPS = subdir topfile symlinkdown subdir/bottomfile subdir/symlinkup subdir/symlinkout subdir/symlinkin
+> +all: $(BINARIES) $(DEPS)
+> +
+> +subdir:
+> +	mkdir -p subdir
+> +topfile:
+> +	echo 0123456789 > $@
+> +subdir/bottomfile: | subdir
+> +	echo 0123456789 > $@
+> +subdir/symlinkup: | subdir
+> +	ln -s ../topfile $@
+> +subdir/symlinkout: | subdir
+> +	ln -s /etc/passwd $@
+> +subdir/symlinkin: | subdir
+> +	ln -s bottomfile $@
+> +symlinkdown:
+> +	ln -s subdir/bottomfile $@
+> +%: %.c
+> +	$(CC) $(CFLAGS) -o $@ $^
+> +
+> +run_tests: all
+> +	./openat
+> +
+> +clean:
+> +	rm -rf $(BINARIES) $(DEPS)
+> diff --git a/tools/testing/selftests/openat/openat.c b/tools/testing/selftests/openat/openat.c
+> new file mode 100644
+> index 000000000000..0c030cbd10dc
+> --- /dev/null
+> +++ b/tools/testing/selftests/openat/openat.c
+> @@ -0,0 +1,180 @@
+> +#include <sys/types.h>
+> +#include <sys/stat.h>
+> +#include <sys/syscall.h>
+> +#include <stdio.h>
+> +#include <stdlib.h>
+> +#include <unistd.h>
+> +#include <string.h>
+> +#include <errno.h>
+> +
+> +#include <linux/fcntl.h>
+> +
+> +/* Bypass glibc */
+> +static int openat_(int dirfd, const char *pathname, int flags)
+> +{
+> +	return syscall(__NR_openat, dirfd, pathname, flags);
+> +}
+> +
+> +static int openat_or_die(int dfd, const char *path, int flags)
+> +{
+> +	int fd = openat_(dfd, path, flags);
+> +
+> +	if (fd < 0) {
+> +		printf("Failed to openat(%d, '%s'); "
+> +			"check prerequisites are available\n", dfd, path);
+> +		exit(1);
+> +	}
+> +	return fd;
+> +}
+> +
+> +static int check_openat(int dfd, const char *path, int flags)
+> +{
+> +	int rc;
+> +	int fd;
+> +	char buffer[4];
+> +
+> +	errno = 0;
+> +	printf("Check success of openat(%d, '%s', %x)... ",
+> +	       dfd, path?:"(null)", flags);
+> +	fd = openat_(dfd, path, flags);
+> +	if (fd < 0) {
+> +		printf("[FAIL]: openat() failed, rc=%d errno=%d (%s)\n",
+> +			fd, errno, strerror(errno));
+> +		return 1;
+> +	}
+> +	errno = 0;
+> +	rc = read(fd, buffer, sizeof(buffer));
+> +	if (rc < 0) {
+> +		printf("[FAIL]: read() failed, rc=%d errno=%d (%s)\n",
+> +			rc, errno, strerror(errno));
+> +		return 1;
+> +	}
+> +	close(fd);
+> +	printf("[OK]\n");
+> +	return 0;
+> +}
+> +
+> +#define check_openat_fail(dfd, path, flags, errno)	\
+> +	_check_openat_fail(dfd, path, flags, errno, #errno)
+> +static int _check_openat_fail(int dfd, const char *path, int flags,
+> +			      int expected_errno, const char *errno_str)
+> +{
+> +	int rc;
+> +
+> +	errno = 0;
+> +	printf("Check failure of openat(%d, '%s', %x) with %s... ",
+> +		dfd, path?:"(null)", flags, errno_str);
+> +	rc = openat_(dfd, path, flags);
+> +	if (rc > 0) {
+> +		printf("[FAIL] (unexpected success from openat(2))\n");
+> +		close(rc);
+> +		return 1;
+> +	}
+> +	if (errno != expected_errno) {
+> +		printf("[FAIL] (expected errno %d (%s) not %d (%s)\n",
+> +			expected_errno, strerror(expected_errno),
+> +			errno, strerror(errno));
+> +		return 1;
+> +	}
+> +	printf("[OK]\n");
+> +	return 0;
+> +}
+> +
+> +int check_proc(void)
+> +{
+> +	int proc_dfd = openat_(AT_FDCWD, "/proc/self", O_RDONLY);
+> +	int fail = 0;
+> +
+> +	if (proc_dfd < 0) {
+> +		printf("'/proc/self' unavailable (errno=%d '%s'), skipping\n",
+> +			errno, strerror(errno));
+> +		return 1;
+> +	}
+> +	fail |= check_openat(proc_dfd, "root/etc/passwd", O_RDONLY);
+> +#ifdef O_BENEATH
+> +	fail |= check_openat_fail(proc_dfd, "root/etc/passwd",
+> +				  O_RDONLY|O_BENEATH, EPERM);
+> +#endif
+> +	return fail;
+> +}
+> +
+> +int main(int argc, char *argv[])
+> +{
+> +	int fail = 0;
+> +	int dot_dfd = openat_or_die(AT_FDCWD, ".", O_RDONLY);
+> +	int subdir_dfd = openat_or_die(AT_FDCWD, "subdir", O_RDONLY);
+> +	int file_fd = openat_or_die(AT_FDCWD, "topfile", O_RDONLY);
+> +
+> +	/* Sanity check normal behavior */
+> +	fail |= check_openat(AT_FDCWD, "topfile", O_RDONLY);
+> +	fail |= check_openat(AT_FDCWD, "subdir/bottomfile", O_RDONLY);
+> +
+> +	fail |= check_openat(dot_dfd, "topfile", O_RDONLY);
+> +	fail |= check_openat(dot_dfd, "subdir/bottomfile", O_RDONLY);
+> +	fail |= check_openat(dot_dfd, "subdir/../topfile", O_RDONLY);
+> +
+> +	fail |= check_openat(subdir_dfd, "../topfile", O_RDONLY);
+> +	fail |= check_openat(subdir_dfd, "bottomfile", O_RDONLY);
+> +	fail |= check_openat(subdir_dfd, "../subdir/bottomfile", O_RDONLY);
+> +	fail |= check_openat(subdir_dfd, "symlinkup", O_RDONLY);
+> +	fail |= check_openat(subdir_dfd, "symlinkout", O_RDONLY);
+> +
+> +	fail |= check_openat(AT_FDCWD, "/etc/passwd", O_RDONLY);
+> +	fail |= check_openat(dot_dfd, "/etc/passwd", O_RDONLY);
+> +	fail |= check_openat(subdir_dfd, "/etc/passwd", O_RDONLY);
+> +
+> +	fail |= check_openat_fail(AT_FDCWD, "bogus", O_RDONLY, ENOENT);
+> +	fail |= check_openat_fail(dot_dfd, "bogus", O_RDONLY, ENOENT);
+> +	fail |= check_openat_fail(999, "bogus", O_RDONLY, EBADF);
+> +	fail |= check_openat_fail(file_fd, "bogus", O_RDONLY, ENOTDIR);
+> +
+> +#ifdef O_BENEATH
+> +	/* Test out O_BENEATH */
+> +	fail |= check_openat(AT_FDCWD, "topfile", O_RDONLY|O_BENEATH);
+> +	fail |= check_openat(AT_FDCWD, "subdir/bottomfile",
+> +			     O_RDONLY|O_BENEATH);
+> +
+> +	fail |= check_openat(dot_dfd, "topfile", O_RDONLY|O_BENEATH);
+> +	fail |= check_openat(dot_dfd, "subdir/bottomfile",
+> +			     O_RDONLY|O_BENEATH);
+> +	fail |= check_openat(subdir_dfd, "bottomfile", O_RDONLY|O_BENEATH);
+> +
+> +	/* Symlinks without .. or leading / are OK */
+> +	fail |= check_openat(dot_dfd, "symlinkdown", O_RDONLY|O_BENEATH);
+> +	fail |= check_openat(dot_dfd, "subdir/symlinkin", O_RDONLY|O_BENEATH);
+> +	fail |= check_openat(subdir_dfd, "symlinkin", O_RDONLY|O_BENEATH);
+> +	/* ... unless of course we specify O_NOFOLLOW */
+> +	fail |= check_openat_fail(dot_dfd, "symlinkdown",
+> +				  O_RDONLY|O_BENEATH|O_NOFOLLOW, ELOOP);
+> +	fail |= check_openat_fail(dot_dfd, "subdir/symlinkin",
+> +				  O_RDONLY|O_BENEATH|O_NOFOLLOW, ELOOP);
+> +	fail |= check_openat_fail(subdir_dfd, "symlinkin",
+> +				  O_RDONLY|O_BENEATH|O_NOFOLLOW, ELOOP);
+> +
+> +	/* Can't open paths with ".." in them */
+> +	fail |= check_openat_fail(dot_dfd, "subdir/../topfile",
+> +				O_RDONLY|O_BENEATH, EPERM);
+> +	fail |= check_openat_fail(subdir_dfd, "../topfile",
+> +				  O_RDONLY|O_BENEATH, EPERM);
+> +	fail |= check_openat_fail(subdir_dfd, "../subdir/bottomfile",
+> +				O_RDONLY|O_BENEATH, EPERM);
+> +
+> +	/* Can't open paths starting with "/" */
+> +	fail |= check_openat_fail(AT_FDCWD, "/etc/passwd",
+> +				  O_RDONLY|O_BENEATH, EPERM);
+> +	fail |= check_openat_fail(dot_dfd, "/etc/passwd",
+> +				  O_RDONLY|O_BENEATH, EPERM);
+> +	fail |= check_openat_fail(subdir_dfd, "/etc/passwd",
+> +				  O_RDONLY|O_BENEATH, EPERM);
+> +	/* Can't sneak around constraints with symlinks */
+> +	fail |= check_openat_fail(subdir_dfd, "symlinkup",
+> +				  O_RDONLY|O_BENEATH, EPERM);
+> +	fail |= check_openat_fail(subdir_dfd, "symlinkout",
+> +				  O_RDONLY|O_BENEATH, EPERM);
+> +#else
+> +	printf("Skipping O_BENEATH tests due to missing #define\n");
+> +#endif
+> +	fail |= check_proc();
+> +
+> +	return fail ? -1 : 0;
+> +}
+> --
+> 2.1.0.rc2.206.gedb03e5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
+> 
+
+-- 
+Dave Chinner
+david@fromorbit.com
