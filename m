@@ -1,33 +1,68 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-qc0-f170.google.com ([209.85.216.170]:59308 "EHLO
-	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752798AbaKLXbm (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 12 Nov 2014 18:31:42 -0500
-Received: by mail-qc0-f170.google.com with SMTP id l6so10395623qcy.29
-        for <fstests@vger.kernel.org>; Wed, 12 Nov 2014 15:31:40 -0800 (PST)
+Received: from mail-qa0-f44.google.com ([209.85.216.44]:33621 "EHLO
+	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752462AbaKLXey (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 12 Nov 2014 18:34:54 -0500
 MIME-Version: 1.0
+In-Reply-To: <20141110160309.GI2863@dhcp-13-216.nay.redhat.com>
+References: <1415617191-17246-1-git-send-email-eguan@redhat.com>
+ <CAH2r5muXH7HSoM0TQUsPXq1RM-dLdZSfzuOKK1zZdKe0OANAhg@mail.gmail.com> <20141110160309.GI2863@dhcp-13-216.nay.redhat.com>
 From: Steve French <smfrench@gmail.com>
-Date: Wed, 12 Nov 2014 17:31:20 -0600
-Message-ID: <CAH2r5mu40qp-m7qZTnbsCKORPn_YYdWGZti32WYPFAJMUs1fhw@mail.gmail.com>
-Subject: xfstest status on current kernels
+Date: Wed, 12 Nov 2014 17:26:13 -0600
+Message-ID: <CAH2r5mtCPVt7+fyCjvDrLtOSzX1-+YQ_ZPhyU5gjFP7c1DJFKw@mail.gmail.com>
+Subject: Re: [PATCH] common: enable tests that require scratch device on CIFS
 Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, "linux-cifs@vger.kernel.org" <linux-cifs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Is there a list somewhere of the full set of xfstests that are
-expected to run (and presumably pass) on current Linux kernels for the
-local file systems (ext4, btrfs and/or xfs)?
+I get newly enabled test 294 passing on cifs mounts to Samba.
 
-I want to make sure that I don't accidentally ignore a test (e.g. test
-generic/003 doesn't run with a message " [not run] relatime not
-supported by the current kernel" and want to make sure I am not
-missing something).
+What is best way to get the mount options passed to the mount of
+scratch dev so it doesn't prompt for it?
 
-Obviously cifs/smb3 and nfs are not going to run all the tests that
-ext4, btrfs and xfs do but it is easy to leave a test out for the
-wrong reasons (build dependency etc.) so want to know the list that
-should run on a local Linux fs.
+(seems to ignore the mount options in TEST_FS_MOUNT_OPTS so prompts
+multiple times for password of scratch mount)
+
+On Mon, Nov 10, 2014 at 10:03 AM, Eryu Guan <eguan@redhat.com> wrote:
+> On Mon, Nov 10, 2014 at 09:32:34AM -0600, Steve French wrote:
+>> Failures: generic/035 generic/074 generic/120 generic/184 generic/192
+>> generic/193 generic/215 generic/237 generic/258 generic/294
+>> generic/306 generic/307 generic/313 generic/317 generic/319
+>>
+>> Test 258 is a Samba server bug (and does work to Windows server).  074
+>> and 215 are passing for me for both CIFS and SMB3, 035 was only
+>> failing for SMB2/SMB3 (and NFS) for me, not CIFS
+>
+> generic/074 is passing for me too now.
+>
+> generic/215 fails like:
+> --- tests/generic/215.out       2013-10-19 01:23:10.352848003 +0800
+> +++ /root/xfstests/results//generic/215.out.bad 2014-11-10 23:59:41.619045914 +0800
+> @@ -5,4 +5,6 @@
+>  4096+0 records out
+>
+>  writing via mmap
+> +FAIL: mtime not update after mapped write
+> +FAIL: ctime not update after mapped write
+>  *** done
+>
+>> Test 184 passes to Samba, but requires "sfu" (mount.cifs mount option)
+>> if mounting with SMB2/SMB3 or mounting to Windows (in order to emulate
+>> FIFO and device files)
+>>
+>> 192 and 193 and 313 are time stamp related problems.
+>>
+>> Are you using at least 3.17 kernel?  We put various fixes in 3.17 to
+>> address problems fsx pointed out.
+>
+> Yes, I'm using 3.18-rc2+ kernel.
+>
+> Thanks,
+> Eryu
+
+
 
 -- 
 Thanks,
