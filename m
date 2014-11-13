@@ -1,40 +1,41 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:54919 "EHLO
-	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751975AbaKMF0U (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 13 Nov 2014 00:26:20 -0500
-Date: Thu, 13 Nov 2014 16:26:17 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: xfstest status on current kernels
-Message-ID: <20141113052617.GH28565@dastard>
-References: <CAH2r5mu40qp-m7qZTnbsCKORPn_YYdWGZti32WYPFAJMUs1fhw@mail.gmail.com>
- <20141113032626.GA28565@dastard>
- <CAH2r5mtdRt+ZX72s-0NO=uxmhMaiFENC1uRUFSPveKZm3S8X=Q@mail.gmail.com>
- <20141113042231.GD28565@dastard>
- <CAH2r5mu47ev3=+z7D9tC-jwBpmys=uYe_eooiCa3CtXBNzMXXg@mail.gmail.com>
- <20141113044405.GF28565@dastard>
- <CAH2r5mtibBSeNmcbmOsfvaTny7_7AS7Rhh9z8qagGU6T4wjE8w@mail.gmail.com>
+Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:34465 "EHLO
+	mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752938AbaKMPpX (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 13 Nov 2014 10:45:23 -0500
+Message-ID: <5464D20B.3040101@fb.com>
+Date: Thu, 13 Nov 2014 10:45:15 -0500
+From: Josef Bacik <jbacik@fb.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAH2r5mtibBSeNmcbmOsfvaTny7_7AS7Rhh9z8qagGU6T4wjE8w@mail.gmail.com>
+Subject: Re: [PATCH v2] fstests: btrfs, add test for snapshoting after file
+ write + truncate
+References: <1413886389-16144-1-git-send-email-fdmanana@suse.com> <1414323543-31557-1-git-send-email-fdmanana@suse.com>
+In-Reply-To: <1414323543-31557-1-git-send-email-fdmanana@suse.com>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Steve French <smfrench@gmail.com>
-Cc: fstests@vger.kernel.org
+To: Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Nov 12, 2014 at 11:09:44PM -0600, Steve French wrote:
-> This (generic/test3) will likely be one that we want to continue
-> to skip on a network fs.
+On 10/26/2014 07:39 AM, Filipe Manana wrote:
+> Regression test for a btrfs issue where if right after the snapshot
+> creation ioctl started, a file write followed by a file truncate
+> happened, with both operations increasing the file's size, the created
+> snapshot would capture an inconsistent state of the file system tree.
+> That state reflected the file truncation but it didn't reflect the
+> write operation, and left a gap between two file extent items (and
+> that gap corresponded to the total or a partial area of the write
+> operation's range).
+>
+> This issue was fixed by the following linux kernel patch:
+>
+>      Btrfs: fix snapshot inconsistency after a file write followed by truncate
+>
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-Then you want to add send a patch that adds CIFS to very recent
-check added for NFS:
+Ran with and without the patch applied to make sure it did the right 
+thing, the test looks sane.  Thanks for this
 
-f72abf5 generic: skip atime related tests on NFS
+Reviewed-by: Josef Bacik <jbacik@fb.com>
 
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
