@@ -1,427 +1,95 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54732 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S965250AbaKNNb3 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 14 Nov 2014 08:31:29 -0500
-From: =?UTF-8?q?Jan=20=C5=A4ul=C3=A1k?= <jtulak@redhat.com>
-Subject: [PATCH 3/7] Created new performance test category
-Date: Fri, 14 Nov 2014 14:27:43 +0100
-Message-Id: <1415971667-16873-3-git-send-email-jtulak@redhat.com>
-In-Reply-To: <1415971667-16873-1-git-send-email-jtulak@redhat.com>
-References: <1415971667-16873-1-git-send-email-jtulak@redhat.com>
+Received: from mail-qc0-f179.google.com ([209.85.216.179]:53052 "EHLO
+	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933486AbaKNRDN (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 14 Nov 2014 12:03:13 -0500
 MIME-Version: 1.0
+In-Reply-To: <20141113033317.GC28565@dastard>
+References: <1414775040-4051-1-git-send-email-eguan@redhat.com>
+ <1414775040-4051-2-git-send-email-eguan@redhat.com> <CAH2r5muuJRcC4YgFkwUeUcCeEntgY+4POF8-bwmox64wXykuTw@mail.gmail.com>
+ <20141113033317.GC28565@dastard>
+From: Steve French <smfrench@gmail.com>
+Date: Fri, 14 Nov 2014 11:02:50 -0600
+Message-ID: <CAH2r5msD-FDDvUL5Gt+7Fzt-tvduS93sxM-PG9dZjvk0ED53QA@mail.gmail.com>
+Subject: Re: [PATCH v2 1/5] common: re-enable tests that require scratch dev
+ on NFS
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: =?UTF-8?q?Jan=20=C5=A4ul=C3=A1k?= <jtulak@redhat.com>, lczerner@redhat.com, david@fromorbit.com
+To: Dave Chinner <david@fromorbit.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, "linux-nfs@vger.kernel.org" <linux-nfs@vger.kernel.org>, "linux-cifs@vger.kernel.org" <linux-cifs@vger.kernel.org>, Weston Andros Adamson <dros@primarydata.com>
 List-ID: <fstests@vger.kernel.org>
 
-This tests category is currently used only for demonstration of the environment setup, but later there are going to be performance tests.
+On Wed, Nov 12, 2014 at 9:33 PM, Dave Chinner <david@fromorbit.com> wrote:
+> On Wed, Nov 12, 2014 at 12:36:13PM -0600, Steve French wrote:
+>> On Fri, Oct 31, 2014 at 12:03 PM, Eryu Guan <eguan@redhat.com> wrote:
+>> > This commit disables tests requires scratch dev running on NFS
+>> >
+>> > c041421 xfstests: stop special casing nfs and udf
+>> >
+>> > Now re-enable them to get a larger test coverage on NFS.
+>> >
+>> > Signed-off-by: Eryu Guan <eguan@redhat.com>
+>> > ---
+>> >  common/rc | 22 +++++++++++++++++++---
+>> >  1 file changed, 19 insertions(+), 3 deletions(-)
+>> >
+>> > diff --git a/common/rc b/common/rc
+>> > index 747cf72..ae03712 100644
+>> > --- a/common/rc
+>> > +++ b/common/rc
+>> > @@ -551,6 +551,14 @@ _mkfs_dev()
+>> >      rm -f $tmp_dir.mkfserr $tmp_dir.mkfsstd
+>> >  }
+>> >
+>> > +# remove all files in $SCRATCH_MNT, useful when testing on NFS/CIFS
+>> > +_scratch_cleanup_files()
+>> > +{
+>> > +       _scratch_mount
+>> > +       rm -rf $SCRATCH_MNT/*
+>> > +       _scratch_unmount
+>> > +}
+>>
+>> There should be a check to make sure SCRATCH_MNT exists before you
+>> wipe the whole disk ....
+>>
+>> so if no SCRATCH_MNT then this does rm -rf/*
+>> right ... (and wipes out your whole system ...)
+>
+> You can't get to that function until after all the checks that
+> SCRATCH_MNT exists. i.e. this happens during _scratch_mkfs, and that
+> is only called in tests after all the startup checks validate
+> devices and mounts exist. i.e. see common/config::get_next_config()
 
-Signed-off-by: Jan Ťulák <jtulak@redhat.com>
----
- check                         |  2 +-
- tests/performance/001         | 63 +++++++++++++++++++++++++++++++++++++++++++
- tests/performance/001.out     |  1 +
- tests/performance/002         | 63 +++++++++++++++++++++++++++++++++++++++++++
- tests/performance/002.out     |  1 +
- tests/performance/003         | 63 +++++++++++++++++++++++++++++++++++++++++++
- tests/performance/003.out     |  1 +
- tests/performance/004         | 63 +++++++++++++++++++++++++++++++++++++++++++
- tests/performance/004.out     |  1 +
- tests/performance/Makefile    | 21 +++++++++++++++
- tests/performance/environment | 11 ++++++++
- tests/performance/group       |  9 +++++++
- 12 files changed, 298 insertions(+), 1 deletion(-)
- create mode 100755 tests/performance/001
- create mode 100644 tests/performance/001.out
- create mode 100755 tests/performance/002
- create mode 100644 tests/performance/002.out
- create mode 100755 tests/performance/003
- create mode 100644 tests/performance/003.out
- create mode 100755 tests/performance/004
- create mode 100644 tests/performance/004.out
- create mode 100644 tests/performance/Makefile
- create mode 100644 tests/performance/environment
- create mode 100644 tests/performance/group
+Well, I reproduced it easily enough again today (after taking a
+snapshot of the VM)
+by simply running generic/120 against NFS with SCRATCH_MNT not
+specified in local.config
+Dros also ran into this problem.
 
-diff --git a/check b/check
-index 42a1ac2..a246d92 100755
---- a/check
-+++ b/check
-@@ -59,7 +59,7 @@ then
- fi
- 
- SUPPORTED_TESTS="[0-9][0-9][0-9] [0-9][0-9][0-9][0-9]"
--SRC_GROUPS="generic shared"
-+SRC_GROUPS="generic shared performance"
- export SRC_DIR="tests"
- 
- usage()
-diff --git a/tests/performance/001 b/tests/performance/001
-new file mode 100755
-index 0000000..d8f2dad
---- /dev/null
-+++ b/tests/performance/001
-@@ -0,0 +1,63 @@
-+#! /bin/bash
-+# FS QA Test No. 001
-+#
-+# Random file copier to produce chains of identical files so the head
-+# and the tail can be diff'd at the end of each iteration.
-+#
-+# Exercises creat, write and unlink for a variety of directory sizes, and
-+# checks for data corruption.
-+#
-+# run [config]
-+#
-+# config has one line per file with filename and byte size, else use
-+# the default one below.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2000-2001 Silicon Graphics, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+tmp=/tmp/$$
-+here=`pwd`
-+status=1
-+done_cleanup=false
-+trap "_cleanup; rm -f $tmp.*; exit \$status" 0 1 2 3 15
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os IRIX Linux
-+_require_test
-+_require_environment $TEST_DIR
-+
-+verbose=true
-+
-+
-+
-+_cleanup(){
-+	_environment_clean $TEST_DIR
-+}
-+
-+status=0
-+exit
-diff --git a/tests/performance/001.out b/tests/performance/001.out
-new file mode 100644
-index 0000000..097d046
---- /dev/null
-+++ b/tests/performance/001.out
-@@ -0,0 +1 @@
-+QA output created by 001
-diff --git a/tests/performance/002 b/tests/performance/002
-new file mode 100755
-index 0000000..d8f2dad
---- /dev/null
-+++ b/tests/performance/002
-@@ -0,0 +1,63 @@
-+#! /bin/bash
-+# FS QA Test No. 001
-+#
-+# Random file copier to produce chains of identical files so the head
-+# and the tail can be diff'd at the end of each iteration.
-+#
-+# Exercises creat, write and unlink for a variety of directory sizes, and
-+# checks for data corruption.
-+#
-+# run [config]
-+#
-+# config has one line per file with filename and byte size, else use
-+# the default one below.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2000-2001 Silicon Graphics, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+tmp=/tmp/$$
-+here=`pwd`
-+status=1
-+done_cleanup=false
-+trap "_cleanup; rm -f $tmp.*; exit \$status" 0 1 2 3 15
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os IRIX Linux
-+_require_test
-+_require_environment $TEST_DIR
-+
-+verbose=true
-+
-+
-+
-+_cleanup(){
-+	_environment_clean $TEST_DIR
-+}
-+
-+status=0
-+exit
-diff --git a/tests/performance/002.out b/tests/performance/002.out
-new file mode 100644
-index 0000000..c57ca23
---- /dev/null
-+++ b/tests/performance/002.out
-@@ -0,0 +1 @@
-+QA output created by 002
-diff --git a/tests/performance/003 b/tests/performance/003
-new file mode 100755
-index 0000000..d8f2dad
---- /dev/null
-+++ b/tests/performance/003
-@@ -0,0 +1,63 @@
-+#! /bin/bash
-+# FS QA Test No. 001
-+#
-+# Random file copier to produce chains of identical files so the head
-+# and the tail can be diff'd at the end of each iteration.
-+#
-+# Exercises creat, write and unlink for a variety of directory sizes, and
-+# checks for data corruption.
-+#
-+# run [config]
-+#
-+# config has one line per file with filename and byte size, else use
-+# the default one below.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2000-2001 Silicon Graphics, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+tmp=/tmp/$$
-+here=`pwd`
-+status=1
-+done_cleanup=false
-+trap "_cleanup; rm -f $tmp.*; exit \$status" 0 1 2 3 15
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os IRIX Linux
-+_require_test
-+_require_environment $TEST_DIR
-+
-+verbose=true
-+
-+
-+
-+_cleanup(){
-+	_environment_clean $TEST_DIR
-+}
-+
-+status=0
-+exit
-diff --git a/tests/performance/003.out b/tests/performance/003.out
-new file mode 100644
-index 0000000..e8cf537
---- /dev/null
-+++ b/tests/performance/003.out
-@@ -0,0 +1 @@
-+QA output created by 003
-diff --git a/tests/performance/004 b/tests/performance/004
-new file mode 100755
-index 0000000..d8f2dad
---- /dev/null
-+++ b/tests/performance/004
-@@ -0,0 +1,63 @@
-+#! /bin/bash
-+# FS QA Test No. 001
-+#
-+# Random file copier to produce chains of identical files so the head
-+# and the tail can be diff'd at the end of each iteration.
-+#
-+# Exercises creat, write and unlink for a variety of directory sizes, and
-+# checks for data corruption.
-+#
-+# run [config]
-+#
-+# config has one line per file with filename and byte size, else use
-+# the default one below.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2000-2001 Silicon Graphics, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+tmp=/tmp/$$
-+here=`pwd`
-+status=1
-+done_cleanup=false
-+trap "_cleanup; rm -f $tmp.*; exit \$status" 0 1 2 3 15
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os IRIX Linux
-+_require_test
-+_require_environment $TEST_DIR
-+
-+verbose=true
-+
-+
-+
-+_cleanup(){
-+	_environment_clean $TEST_DIR
-+}
-+
-+status=0
-+exit
-diff --git a/tests/performance/004.out b/tests/performance/004.out
-new file mode 100644
-index 0000000..8e2d391
---- /dev/null
-+++ b/tests/performance/004.out
-@@ -0,0 +1 @@
-+QA output created by 004
-diff --git a/tests/performance/Makefile b/tests/performance/Makefile
-new file mode 100644
-index 0000000..5a50b07
---- /dev/null
-+++ b/tests/performance/Makefile
-@@ -0,0 +1,21 @@
-+#
-+# Copyright (c) 2003-2005 Silicon Graphics, Inc.  All Rights Reserved.
-+#
-+
-+TOPDIR = ../..
-+include $(TOPDIR)/include/builddefs
-+
-+PERFORMANCE_DIR = performance
-+TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(PERFORMANCE_DIR)
-+
-+include $(BUILDRULES)
-+
-+install:
-+	$(INSTALL) -m 755 -d $(TARGET_DIR)
-+	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 644 group $(TARGET_DIR)
-+	$(INSTALL) -m 644 environment $(TARGET_DIR)
-+	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+
-+# Nothing.
-+install-dev install-lib:
-diff --git a/tests/performance/environment b/tests/performance/environment
-new file mode 100644
-index 0000000..9fb2e06
---- /dev/null
-+++ b/tests/performance/environment
-@@ -0,0 +1,11 @@
-+# QA setups control file
-+# Defines test environments 
-+# - Do not start environment names with a digit.
-+# - If an environment is prefixed with underscore, the environment is prepared
-+#   clean again, even if previously run test had the same environment. 
-+#   So big-files and _big-files are the same, only the first one is
-+#   prepared only once, while the second one is prepared every time.
-+001 none fill90-dvd dummy1
-+002 dummy1 dummy2
-+003 dummy1 _dummy2
-+004 _dummy1 _dummy2
-diff --git a/tests/performance/group b/tests/performance/group
-new file mode 100644
-index 0000000..f5854b9
---- /dev/null
-+++ b/tests/performance/group
-@@ -0,0 +1,9 @@
-+# QA groups control file
-+# Defines test groups and nominal group owners
-+# - do not start group names with a digit
-+# - comment line before each group is "new" description
-+#
-+001 auto performance
-+002 auto performance
-+003 auto performance
-+004 auto performance
+The patch below fixes it for me but it wasn't immediately obvious how to best
+return info to the user (ie print messages that make sense here -
+"echo" seems to be supressed
+in common/rc and notrun exits and logs it to a file but not to the
+screen in this case)
+
+sfrench@ubuntu:~/xfstests$ git diff -a
+diff --git a/common/rc b/common/rc
+index d5e3aff..866244b 100644
+--- a/common/rc
++++ b/common/rc
+@@ -555,6 +555,9 @@ _mkfs_dev()
+ _scratch_cleanup_files()
+ {
+        _scratch_mount
++       if ! [ "$SCRATCH_MNT" ]; then
++               _notrun "this test requires a \$SCRATCH_MNT to be specified"
++       fi
+        rm -rf $SCRATCH_MNT/*
+        _scratch_unmount
+ }
+
+
 -- 
-1.9.3
+Thanks,
 
+Steve
