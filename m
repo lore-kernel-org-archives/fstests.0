@@ -1,12 +1,12 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:45809 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:48019 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S965207AbaKNN3O (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 14 Nov 2014 08:29:14 -0500
+	id S933794AbaKNNaQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 14 Nov 2014 08:30:16 -0500
 From: =?UTF-8?q?Jan=20=C5=A4ul=C3=A1k?= <jtulak@redhat.com>
-Subject: [PATCH 6/7] Integrates environment functionality into existing code
-Date: Fri, 14 Nov 2014 14:27:46 +0100
-Message-Id: <1415971667-16873-6-git-send-email-jtulak@redhat.com>
+Subject: [PATCH 7/7] Adds functions for tests to call environment setup/cleaning
+Date: Fri, 14 Nov 2014 14:27:47 +0100
+Message-Id: <1415971667-16873-7-git-send-email-jtulak@redhat.com>
 In-Reply-To: <1415971667-16873-1-git-send-email-jtulak@redhat.com>
 References: <1415971667-16873-1-git-send-email-jtulak@redhat.com>
 MIME-Version: 1.0
@@ -17,154 +17,84 @@ To: fstests@vger.kernel.org
 Cc: =?UTF-8?q?Jan=20=C5=A4ul=C3=A1k?= <jtulak@redhat.com>, lczerner@redhat.com, david@fromorbit.com
 List-ID: <fstests@vger.kernel.org>
 
-This patch:
-1) adds new arguments to --help and to the parser:
-   -e                                 use testing environments
-   -eo environment[,environment...]   test only in these environments
-   -ex environment[,environment...]   exclude these environments
+This patch adds two functions into common/rc. These two functions are
+called by tests to setup and clean environment. They have a single
+argument - a target directory. So everything required in a test to
+support environments is to call _require_environment $target after
+requireing test or scratch dir, and then call the clean function at
+the end.
 
-2) Adds call of sort_tests_by_environment() when -e is supplied.
-   Currently, randomization of tests order and environments are
-   mutually exclusive. I plan to add this later.
+Specific environment name is taken from variables exported by check
+script.
 
-3) It slightly changes the main loop where tests are run. The change
-is done because the tests and environments are paired in two variables
-and it needs to access both of them. Here the required environment
-name is exported and then when the test requires an environment, the
-exported variable is used to determine the current one.
+Calling of the cleaning function is not critical as before setup,
+cleaning is called automatically.
 
 Signed-off-by: Jan Ťulák <jtulak@redhat.com>
 ---
- check | 53 +++++++++++++++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 51 insertions(+), 2 deletions(-)
+ common/rc | 49 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 49 insertions(+)
 
-diff --git a/check b/check
-index 777c7a2..ca5082b 100755
---- a/check
-+++ b/check
-@@ -34,6 +34,7 @@ diff="diff -u"
- showme=false
- have_test_arg=false
- randomize=false
-+environments_used=false
- export here=`pwd`
- xfile=""
- 
-@@ -76,12 +77,15 @@ check options
-     -n			show me, do not run tests
-     -T			output timestamps
-     -r			randomize test order
-+    -e			use testing environments
-     --large-fs		optimise scratch device for large filesystems
-     -s section		run only specified section from config file
- 
- testlist options
-     -g group[,group...]	include tests from these groups
-     -x group[,group...]	exclude tests from these groups
-+    -eo environment[,environment...]	test only in these environments
-+    -ex environment[,environment...]	exclude these environments
-     -X file		exclude individual tests
-     -E external_file	exclude individual tests
-     [testlist]		include tests matching names in testlist
-@@ -283,7 +287,7 @@ get_all_tests()
- 	for d in $SRC_GROUPS $FSTYP; do
- 		ls $SRC_DIR/$d/* | \
- 			grep -v "\..*" | \
--			grep -v "group\|Makefile" >> $tmp.list 2>/dev/null
-+			grep -v "group\|Makefile\|environment" >> $tmp.list 2>/dev/null
- 	done
+diff --git a/common/rc b/common/rc
+index d5e3aff..14dbb1f 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1037,6 +1037,55 @@ _supported_os()
+     _notrun "not suitable for this OS: $HOSTOS"
  }
  
-@@ -325,6 +329,7 @@ _timestamp()
- _prepare_test_list()
- {
- 	unset list
-+	unset list_env
- 	# Tests specified on the command line
- 	if [ -s $tmp.arglist ]; then
- 		cat $tmp.arglist > $tmp.list
-@@ -366,6 +371,15 @@ _prepare_test_list()
- 	list=`sort -n $tmp.list | uniq`
- 	rm -f $tmp.list $tmp.tmp $tmp.grep
- 
-+	if $environments_used
-+	then
-+		sort_tests_by_environment $list
-+		list=$(cat $tmp.list)
-+		list_env=$(cat $tmp.list_env)
-+		rm -f $tmp.list $tmp.list_env
-+		# TODO add randomizing also for environments
++_require_environment()
++{
++	target="$1"
++	if [ "$target" = "" ];then
++		1>&2 echo "Target directory for environment can't be empty! Aborting."
++		exit 1
 +	fi
 +
- 	if $randomize
- 	then
- 		list=`echo $list | awk -f randomize.awk`
-@@ -389,6 +403,16 @@ while [ $# -gt 0 ]; do
- 		XGROUP_LIST="$XGROUP_LIST $xgroup"
- 		;;
- 
-+	-e)	environments_used=true ;;
-+
-+	-eo)	environment=$2 ; shift ;
-+		ENVIRONMENT_LIST="$ENVIRONMENT_LIST $environment"
-+		;;
-+
-+	-ex)	xenvironment=$2 ; shift ;
-+		XENVIRONMENT_LIST="$XENVIRONMENT_LIST $xenvironment"
-+		;;
-+
- 	-X)	xfile=$2; shift ;
- 		for d in $SRC_GROUPS $FSTYP; do
- 			[ -f $SRC_DIR/$d/$xfile ] || continue
-@@ -429,6 +453,13 @@ while [ $# -gt 0 ]; do
- 	shift
- done
- 
-+# Test we don't have test randomizing and environment testing at the same time
-+if [ $environments_used = true -a $randomize = true ];then
-+	>&2 echo "Environments can't be used at the same time"\
-+		" as randomized test order!"
-+	exit 1
-+fi
-+
- # Process tests from command line now.
- if $have_test_arg; then
- 	while [ $# -gt 0 ]; do
-@@ -665,8 +696,20 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 	seqres="$check"
- 	_check_test_fs
- 
--	for seq in $list
-+	read -a list_a <<< $list
-+	read -a list_env_a <<< $list_env
-+	for i in "${!list_a[@]}"
- 	do
-+		seq="${list_a[$i]}"
-+		export env_last="$env"
-+		export env="${list_env_a[$i]}"
-+		export env_next="${list_env_a[$(($i+1))]}"
-+		export env_force=false
-+		if [ "${env:0:1}" = "_" ];then
-+			env_force=true
-+			env="${env#?}"
++	if [ "$env" != "" -a "$env" != "none" ];then
++		prepare_method="prepare-once"
++		if $env_force;then
++			prepare_method="prepare-always"
 +		fi
-+
- 	    err=false
- 
- 	    # the filename for the test and the name output are different.
-@@ -688,6 +731,12 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 
- 	    echo -n "$seqnum"
- 
-+		# If an environment is requested, print it.
-+		# When not requested, output is not changed.
-+		if [ "$env" != "" ];then
-+			echo -n " [$env]"
++		bash ./environments/$env $prepare_method $target 
++		sts=$?
++		if [ "$sts" != 0 ]; then
++			echo "       [skipped]"
++			1>&2 echo "Failed to prepare environment $env "\
++				" (will skip the test)!"
++			1>&2 echo ""
++			exit 1
 +		fi
++	fi
++}
 +
- 	    if $showme
- 	    then
- 		echo
++
++
++_environment_clean()
++{
++	target="$1"
++	if [ "$target" = "" ];then
++		1>&2 echo "Target directory for environment cleaning can't be empty!"\
++		" Aborting."
++		exit 1
++	fi
++	# Clean environment if there was some
++	# and the next environment is different.
++	# The variables are exported from check script.
++	if [ "$env" != "" -a "$env" != "none" -a "$env" != "$env_next" ];then
++		bash ./environments/$env clean $target
++		sts=$?
++		if [ "$sts" != "0" ];then
++			1>&2 echo "An error happened when cleaning environment $env!"
++			1>&2 echo ""
++		fi
++	fi
++
++}
++
+ # this test needs a scratch partition - check we're ok & unmount it
+ # No post-test check of the device is required. e.g. the test intentionally
+ # finishes the test with the filesystem in a corrupt state
 -- 
 1.9.3
 
