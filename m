@@ -1,51 +1,46 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:11993 "EHLO
-	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932093AbaKRU2h (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 18 Nov 2014 15:28:37 -0500
-Date: Wed, 19 Nov 2014 07:28:18 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: xfstests and ext4
-Message-ID: <20141118202818.GP23575@dastard>
-References: <CAH2r5murzVmOVnRchq=U-jx74U96g7N6Y42CW0iX4HKpWnbmxw@mail.gmail.com>
- <20141114000216.GN28565@dastard>
- <CAH2r5mvi2LijxWia2sCf+em7rfPtBn_fg6WKU=aftVUTuzXMgw@mail.gmail.com>
- <20141117203804.GO23575@dastard>
- <CAH2r5mti8hVXqmKu9kJg4Xk=5nkESCAQys1BFXhR6JSDVHOTEA@mail.gmail.com>
+Received: from sandeen.net ([63.231.237.45]:34418 "EHLO sandeen.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754350AbaKSPde (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 19 Nov 2014 10:33:34 -0500
+Message-ID: <546CB84B.8010200@sandeen.net>
+Date: Wed, 19 Nov 2014 09:33:31 -0600
+From: Eric Sandeen <sandeen@sandeen.net>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAH2r5mti8hVXqmKu9kJg4Xk=5nkESCAQys1BFXhR6JSDVHOTEA@mail.gmail.com>
+Subject: [PATCH] fstests: mark replace tests in btrfs/group
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Steve French <smfrench@gmail.com>
-Cc: "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Nov 17, 2014 at 08:35:39PM -0600, Steve French wrote:
-> On Mon, Nov 17, 2014 at 2:38 PM, Dave Chinner <david@fromorbit.com> wrote:
-> 
-> > the other as a base64 encoded attachment so can't be quoted and
-> > replied to easily. In future, can you send patches as separate
-> > emails according to:
-> 
-> Yes.  WIll do.  It is a pain in test  VMs to setup git with gmail two
-> phase authentication
-> but doable if I set it up to send mail from a different host.
+A couple tests exercise replace but were not marked as such
+in the group file.
 
-No need for that. Keep the xfstests source tree on your
-laptop/workstation and do all your edits there. When you've done
-that, simply rsync the tree to the test VM(s) and run "make; ./check
-..." from the shell you are running in the test VM.
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
 
-That way you can manage the code multiple test VMs run from a single
-source tree, all in one location, and you don't have to worry about
-setting up for mail, backups, losing changes because a test machine
-crash ate your recent changes, accidentally sending changes are
-root, etc...
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 9adf862..1f23979 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -13,7 +13,7 @@
+ 008 auto quick
+ 009 auto quick
+ 010 auto quick
+-011 auto
++011 auto replace
+ 012 auto
+ 013 auto quick
+ 014 auto
+@@ -22,7 +22,7 @@
+ 017 auto quick
+ 018 auto quick
+ 019 auto quick
+-020 auto quick
++020 auto quick replace
+ 021 auto quick
+ 022 auto
+ 023 auto
 
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
