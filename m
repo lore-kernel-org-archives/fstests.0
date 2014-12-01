@@ -1,125 +1,107 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:51620 "EHLO
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:51730 "EHLO
 	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751013AbaLAFIt (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 1 Dec 2014 00:08:49 -0500
-Date: Mon, 1 Dec 2014 16:08:22 +1100
+	by vger.kernel.org with ESMTP id S1751013AbaLAFJL (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 1 Dec 2014 00:09:11 -0500
+Received: from dave by dastard with local (Exim 4.80)
+	(envelope-from <david@fromorbit.com>)
+	id 1XvJEH-0001hU-8l
+	for fstests@vger.kernel.org; Mon, 01 Dec 2014 16:08:57 +1100
+Date: Mon, 1 Dec 2014 16:08:57 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: Support overlayfs testing.
-Message-ID: <20141201050822.GI16151@dastard>
-References: <CAK9uKkcDnJzNyJBxb9jaONUHDwn9Z35c=ixa96pX=tc=ws93LA@mail.gmail.com>
+Subject: Re: [PATCH V2] xfs/096: strip log stripe warnings from mkfs.xfs
+Message-ID: <20141201050857.GJ16151@dastard>
+References: <1416442106-14140-1-git-send-email-david@fromorbit.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAK9uKkcDnJzNyJBxb9jaONUHDwn9Z35c=ixa96pX=tc=ws93LA@mail.gmail.com>
+In-Reply-To: <1416442106-14140-1-git-send-email-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
-To: Li Mengyang <li.mengyang@stonybrook.edu>
-Cc: xfs@oss.sgi.com, Erez Zadok <ezk@fsl.cs.sunysb.edu>, miklos@szeredi.hu, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-[cc fstests@vger.kernel.org]
+ping?
 
-On Sat, Nov 15, 2014 at 03:41:39PM -0500, Li Mengyang wrote:
-> Hi,
->  Recently people are proposing overlayfs for inclusion into the mainline, I
-> found it could be helpful if xfstests supports overlayfs testing. Here is
-> the patch and example configuration file for that. Thank you.
-
-Sorry, I missed this in all the other stuff going paston the xfs
-list. In future, can you send patches to xfstests to
-fstests@vger.kernel.org?
-
-> diff --git a/common/rc b/common/rc
-> index d5e3aff..efa0fac 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1133,6 +1133,24 @@ _require_test()
->  		    _notrun "this test requires a valid \$TEST_DIR and unique $TEST_DEV"
->  		fi
->  		;;
-> +	overlayfs)
-> +		if [ -z "$OVLFS_LOWERDIR" -o ! -d "$OVLFS_LOWERDIR" ];
-> +		then
-> +		    _notrun "this test requires a valid \$OVLFS_LOWERDIR"
-> +		fi
-> +		if [ -z "$OVLFS_UPPERDIR" -o ! -d "$OVLFS_UPPERDIR" ];
-> +		then
-> +		    _notrun "this test requires a valid \$OVLFS_UPPERDIR"
-> +		fi
-> +		if [ -z "$OVLFS_WORKDIR" -o ! -d "$OVLFS_WORKDIR" ];
-> +		then
-> +		    _notrun "this test requires a valid \$OVLFS_WORKDIR"
-> +		fi
-
-Why do these varibles need to be declared and checked by the test
-harness? They are purely mount option fields, and so if they don't
-exist mount will fail, right?
-
-Indeed, if you're going to start validating such variables, then
-you'd need to check they don't point at the same directory, etc.
-i.e. I don't think this actually belongs here....
-
-> +		if [ -z "$TEST_DIR" -o ! -d "$TEST_DIR" ];
-> +		then
-> +		    _notrun "this test requires a valid \$TEST_DIR"
-> +		fi
-
-Why would you not test for $TEST_DEV, too?
-
-> +		;;
->  	*)
->  		 if [ -z "$TEST_DEV" -o "`_is_block_dev $TEST_DEV`" = "" ]
->  		 then
-> @@ -1947,6 +1965,9 @@ _check_test_fs()
->      tmpfs)
->  	# no way to check consistency for tmpfs
->  	;;
-> +    overlayfs)
-> +	# no way to check consistency for overlayfs
-> +	;;
->      *)
->  	_check_generic_filesystem $TEST_DEV
->  	;;
-> diff --git a/configs/overlayfs.config b/configs/overlayfs.config
-> new file mode 100644
-> index 0000000..42ef975
-> --- /dev/null
-> +++ b/configs/overlayfs.config
-> @@ -0,0 +1,16 @@
-> +# Example config for overlayfs
-> +# source me before run ./check
-> +
-> +export OVLFS_LOWERDIR=/mnt/ovllower
-> +export OVLFS_UPPERDIR=/mnt/ovlupper
-> +export OVLFS_WORKDIR=/mnt/workdir
-> +
-> +export TEST_DIR=/mnt/merged
-> +export TEST_DEV=/dev/loop0
-
-Slightly confused.  I'm trying to understand what the TEST_DEV has
-to do with the overlayfs mount. Understand that I know *nothing*
-about how overlayfs should be set up, and neither will most people
-who want to add a FSTYP=overlayfs to their config section to test
-that overlayfs works on the filesystem they develop/maintain.
-
-I think that the "How to set up overlayfs" needs to be documented in
-the README file, not left as an exercise for the reader to reverse
-engineer what a template is supposed to do.  i.e. if I want to test
-overlayfs on XFS and I already have /dev/vda as an XFS filesystem,
-exactly what do I do need to do to make xfstests work?
-
-> +export TEST_FS_MOUNT_OPTS=-olowerdir=$OVLFS_LOWERDIR,\
-> +upperdir=$OVLFS_UPPERDIR,workdir=$OVLFS_WORKDIR
-> +
-> +unset SCRATCH_DEV
-> +unset SCRATCH_MNT
-
-No need to unset variables you don't need, nor is there any need to
-export them - the test harness will export them as appropriate
-
-Cheers,
-
-Dave.
+On Thu, Nov 20, 2014 at 11:08:26AM +1100, Dave Chinner wrote:
+> From: Dave Chinner <dchinner@redhat.com>
+> 
+> The warnings have been removed when stripe unit/width are too big
+> for the log stripe unit to be set. Hence add them to the mkfs.xfs
+> filter and strip them from golden output file so the test succeeds
+> on both new and old mfks binaries.
+> 
+> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> ---
+>  tests/xfs/096          | 4 +++-
+>  tests/xfs/096.external | 2 --
+>  tests/xfs/096.internal | 4 ----
+>  3 files changed, 3 insertions(+), 7 deletions(-)
+> 
+> diff --git a/tests/xfs/096 b/tests/xfs/096
+> index b2719bc..0ecf88f 100755
+> --- a/tests/xfs/096
+> +++ b/tests/xfs/096
+> @@ -88,6 +88,8 @@ _mkfs_filter()
+>  	-e '/.*crc=/d' \
+>  	-e 's/ *$//' \
+>  	-e 's/ ftype=[01]//' \
+> +	-e '/^log stripe unit.*too large/d' \
+> +	-e '/^log stripe unit adjusted/d' \
+>     | grep -v parent
+>  }
+>  
+> @@ -143,7 +145,7 @@ do
+>      fi
+>      echo "--- mkfs=$mkfs ---"
+>      export MKFS_OPTIONS="$mkfs"
+> -    _scratch_mkfs_xfs | _mkfs_filter
+> +    _scratch_mkfs_xfs 2>&1 | _mkfs_filter
+>      echo ""
+>      echo ""
+>  done
+> diff --git a/tests/xfs/096.external b/tests/xfs/096.external
+> index 9175904..95833c8 100644
+> --- a/tests/xfs/096.external
+> +++ b/tests/xfs/096.external
+> @@ -7,8 +7,6 @@ log stripe unit (262656) must be a multiple of the block size (4096)
+>  
+>  # test log stripe greater than LR size
+>  --- mkfs=-l version=2,su=266240 ---
+> -log stripe unit (266240 bytes) is too large (maximum is 256KiB)
+> -log stripe unit adjusted to 32KiB
+>  meta-data=DEV isize=256    agcount=N, agsize=N blks
+>  data     =                       bsize=4096   blocks=N, imaxpct=N
+>           =                       sunit=0      swidth=0 blks, unwritten=1
+> diff --git a/tests/xfs/096.internal b/tests/xfs/096.internal
+> index cf75037..7bf848c 100644
+> --- a/tests/xfs/096.internal
+> +++ b/tests/xfs/096.internal
+> @@ -7,8 +7,6 @@ log stripe unit (262656) must be a multiple of the block size (4096)
+>  
+>  # test log stripe greater than LR size
+>  --- mkfs=-l version=2,su=266240 ---
+> -log stripe unit (266240 bytes) is too large (maximum is 256KiB)
+> -log stripe unit adjusted to 32KiB
+>  meta-data=DEV isize=256    agcount=N, agsize=N blks
+>  data     =                       bsize=4096   blocks=N, imaxpct=N
+>           =                       sunit=0      swidth=0 blks, unwritten=1
+> @@ -20,8 +18,6 @@ realtime =REALTIME               extsz=N, blocks=N, rtextents=N
+>  
+>  # same test but get log stripe from data stripe
+>  --- mkfs=-l version=2 -d su=266240,sw=1 ---
+> -log stripe unit (266240 bytes) is too large (maximum is 256KiB)
+> -log stripe unit adjusted to 32KiB
+>  meta-data=DEV isize=256    agcount=N, agsize=N blks
+>  data     =                       bsize=4096   blocks=N, imaxpct=N
+>           =                       sunit=65     swidth=65 blks, unwritten=1
+> -- 
+> 2.0.0
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
 -- 
 Dave Chinner
