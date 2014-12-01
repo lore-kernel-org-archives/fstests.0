@@ -1,108 +1,147 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:51730 "EHLO
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:19693 "EHLO
 	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751013AbaLAFJL (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 1 Dec 2014 00:09:11 -0500
-Received: from dave by dastard with local (Exim 4.80)
-	(envelope-from <david@fromorbit.com>)
-	id 1XvJEH-0001hU-8l
-	for fstests@vger.kernel.org; Mon, 01 Dec 2014 16:08:57 +1100
-Date: Mon, 1 Dec 2014 16:08:57 +1100
+	by vger.kernel.org with ESMTP id S1752504AbaLAFZW (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 1 Dec 2014 00:25:22 -0500
+Date: Mon, 1 Dec 2014 16:25:07 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH V2] xfs/096: strip log stripe warnings from mkfs.xfs
-Message-ID: <20141201050857.GJ16151@dastard>
-References: <1416442106-14140-1-git-send-email-david@fromorbit.com>
+Subject: Re: [PATCH] fstests: add btrfs test to stress chunk
+ allocation/removal and fstrim
+Message-ID: <20141201052507.GK16151@dastard>
+References: <1417015839-26985-1-git-send-email-fdmanana@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1416442106-14140-1-git-send-email-david@fromorbit.com>
+In-Reply-To: <1417015839-26985-1-git-send-email-fdmanana@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Filipe Manana <fdmanana@suse.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-ping?
+On Wed, Nov 26, 2014 at 03:30:39PM +0000, Filipe Manana wrote:
+> Stress btrfs' block group allocation and deallocation while running
+> fstrim in parallel. Part of the goal is also to get data block groups
+> deallocated so that new metadata block groups, using the same physical
+> device space ranges, get allocated while fstrim is running. This caused
+> several issues ranging from invalid memory accesses, kernel crashes,
+> metadata or data corruption, free space cache inconsistencies and free
+> space leaks.
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-On Thu, Nov 20, 2014 at 11:08:26AM +1100, Dave Chinner wrote:
-> From: Dave Chinner <dchinner@redhat.com>
-> 
-> The warnings have been removed when stripe unit/width are too big
-> for the log stripe unit to be set. Hence add them to the mkfs.xfs
-> filter and strip them from golden output file so the test succeeds
-> on both new and old mfks binaries.
-> 
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> ---
->  tests/xfs/096          | 4 +++-
->  tests/xfs/096.external | 2 --
->  tests/xfs/096.internal | 4 ----
->  3 files changed, 3 insertions(+), 7 deletions(-)
-> 
-> diff --git a/tests/xfs/096 b/tests/xfs/096
-> index b2719bc..0ecf88f 100755
-> --- a/tests/xfs/096
-> +++ b/tests/xfs/096
-> @@ -88,6 +88,8 @@ _mkfs_filter()
->  	-e '/.*crc=/d' \
->  	-e 's/ *$//' \
->  	-e 's/ ftype=[01]//' \
-> +	-e '/^log stripe unit.*too large/d' \
-> +	-e '/^log stripe unit adjusted/d' \
->     | grep -v parent
->  }
->  
-> @@ -143,7 +145,7 @@ do
->      fi
->      echo "--- mkfs=$mkfs ---"
->      export MKFS_OPTIONS="$mkfs"
-> -    _scratch_mkfs_xfs | _mkfs_filter
-> +    _scratch_mkfs_xfs 2>&1 | _mkfs_filter
->      echo ""
->      echo ""
->  done
-> diff --git a/tests/xfs/096.external b/tests/xfs/096.external
-> index 9175904..95833c8 100644
-> --- a/tests/xfs/096.external
-> +++ b/tests/xfs/096.external
-> @@ -7,8 +7,6 @@ log stripe unit (262656) must be a multiple of the block size (4096)
->  
->  # test log stripe greater than LR size
->  --- mkfs=-l version=2,su=266240 ---
-> -log stripe unit (266240 bytes) is too large (maximum is 256KiB)
-> -log stripe unit adjusted to 32KiB
->  meta-data=DEV isize=256    agcount=N, agsize=N blks
->  data     =                       bsize=4096   blocks=N, imaxpct=N
->           =                       sunit=0      swidth=0 blks, unwritten=1
-> diff --git a/tests/xfs/096.internal b/tests/xfs/096.internal
-> index cf75037..7bf848c 100644
-> --- a/tests/xfs/096.internal
-> +++ b/tests/xfs/096.internal
-> @@ -7,8 +7,6 @@ log stripe unit (262656) must be a multiple of the block size (4096)
->  
->  # test log stripe greater than LR size
->  --- mkfs=-l version=2,su=266240 ---
-> -log stripe unit (266240 bytes) is too large (maximum is 256KiB)
-> -log stripe unit adjusted to 32KiB
->  meta-data=DEV isize=256    agcount=N, agsize=N blks
->  data     =                       bsize=4096   blocks=N, imaxpct=N
->           =                       sunit=0      swidth=0 blks, unwritten=1
-> @@ -20,8 +18,6 @@ realtime =REALTIME               extsz=N, blocks=N, rtextents=N
->  
->  # same test but get log stripe from data stripe
->  --- mkfs=-l version=2 -d su=266240,sw=1 ---
-> -log stripe unit (266240 bytes) is too large (maximum is 256KiB)
-> -log stripe unit adjusted to 32KiB
->  meta-data=DEV isize=256    agcount=N, agsize=N blks
->  data     =                       bsize=4096   blocks=N, imaxpct=N
->           =                       sunit=65     swidth=65 blks, unwritten=1
-> -- 
-> 2.0.0
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+There's nothing btrfs specific about this test. Pleas emake it
+generic.
 
+....
+
+> +
+> +# real QA test starts here
+> +_need_to_be_root
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch_nocheck
+> +_require_fstrim
+> +
+> +rm -f $seqres.full
+
+# needs 40GB of space in the filesystem
+_scratch_mkfs
+_require_fs_space $SCRATCH_MNT $((40 * 1024 * 1024))	
+
+However, does it really need 40GB? It needs 2GB for the large alloc,
+and then 400,000 * 4k is only 1.6GB. So This would fit in a 10GB
+filesystem without a problem, right? And if it's a generic test,
+keeping it under 10GB would mean it runs on the majority of
+filesystem developers test VMs, small or large....
+
+
+> +# Create a bunch of small files that get their single extent inlined in the
+> +# btree, so that we consume a lot of metadata space and get a chance of a
+> +# data block group getting deleted and reused for metadata later. Sometimes
+> +# the creation of all these files succeeds other times we get ENOSPC failures
+> +# at some point - this depends on how fast the btrfs' cleaner kthread is
+> +# notified about empty block groups, how fast it deletes them and how fast
+> +# the fallocate calls happen. So we don't really care if they all succeed or
+> +# not, the goal is just to keep metadata space usage growing while data block
+> +# groups are deleted.
+> +create_files()
+> +{
+> +	local prefix=$1
+> +
+> +	for ((i = 1; i <= 400000; i++)); do
+> +		echo "Creating file ${prefix}_$i" >>$seqres.full 2>&1
+> +		$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 3900" \
+> +			$SCRATCH_MNT/"${prefix}_$i" >>$seqres.full 2>&1
+
+You don't need to echo 400,000 file creates to $seqres.full.
+
+This is one of those times that directing output to /dev/null makes
+sense, especially as:
+
+> +		ret=$?
+> +		if [ $ret -ne 0 ]; then
+> +			break
+> +		fi
+
+you can do this:
+
+		if [ $? -ne 0 ]; then
+			echo "failed creating file $prefix.$i" >> $seqres.full
+			break
+		fi
+
+> +	done
+> +
+> +}
+> +
+> +fsz=`expr 40 \* 1024 \* 1024 \* 1024`
+> +_scratch_mkfs_sized $fsz >>$seqres.full 2>&1 || \
+> +	_fail "size=$fsz mkfs failed"
+> +_scratch_mount
+> +
+> +for ((i = 0; i < 4; i++)); do
+> +	trim_loop &
+> +	trim_pids[$i]=$!
+> +done
+> +
+> +fallocate_loop "falloc_file" &
+> +fallocate_pid=$!
+> +
+> +create_files "foobar"
+> +
+> +kill $fallocate_pid
+> +kill ${trim_pids[@]}
+> +wait
+> +
+> +# Sleep a bit, otherwise umount fails often with EBUSY (TODO: investigate why).
+> +sleep 3
+> +
+> +# Check for fs consistency. The trimming was racy and caused some btree nodes
+> +# to get full of zeroes on disk, which obviously caused fs metadata corruption.
+> +# The race often lead to missing free space entries in a block group's free
+> +# space cache too.
+> +_check_scratch_fs
+
+Ummm, if you just use _require_scratch, you don't need to do this.
+The test harness will check it for you.
+
+> index e79b848..6608005 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -84,3 +84,4 @@
+>  079 auto
+>  080 auto
+>  081 auto quick
+> +082 auto
+
+I'd suggest that for a generic test we'd want to add the stress
+group to this, and allow the test to be scaled in terms of
+filesystem size and the number of concurrent trim and fallocate
+loops by $LOAD_FACTOR....
+
+Cheers,
+
+Dave.
 -- 
 Dave Chinner
 david@fromorbit.com
