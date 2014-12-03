@@ -1,222 +1,233 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from victor.provo.novell.com ([137.65.250.26]:40844 "EHLO
-	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1754631AbaLBSLR (ORCPT
-	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
-	Tue, 2 Dec 2014 13:11:17 -0500
-From: Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH v3] fstests: add btrfs test to stress chunk allocation/removal and fstrim
-Date: Tue,  2 Dec 2014 18:10:43 +0000
-Message-Id: <1417543843-31117-1-git-send-email-fdmanana@suse.com>
-In-Reply-To: <1417015839-26985-1-git-send-email-fdmanana@suse.com>
-References: <1417015839-26985-1-git-send-email-fdmanana@suse.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:41372 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750860AbaLCCr6 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 2 Dec 2014 21:47:58 -0500
+Message-ID: <547E7926.6030907@cn.fujitsu.com>
+Date: Wed, 3 Dec 2014 10:44:54 +0800
+From: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
+MIME-Version: 1.0
+Subject: Re: [PATCH] ext4/004: add dump/restore test
+References: <1416910869-28538-1-git-send-email-wangxg.fnst@cn.fujitsu.com> <20141201054514.GL16151@dastard>
+In-Reply-To: <20141201054514.GL16151@dastard>
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Stress btrfs' block group allocation and deallocation while running
-fstrim in parallel. Part of the goal is also to get data block groups
-deallocated so that new metadata block groups, using the same physical
-device space ranges, get allocated while fstrim is running. This caused
-several issues ranging from invalid memory accesses, kernel crashes,
-metadata or data corruption, free space cache inconsistencies, free
-space leaks and memory leaks.
+hello,
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
+    Thanks, I'll send a new version today according to your comments.
 
-V2: Addressed Dave's comments.
+Regards,
+Xiaoguang Wang
 
-V3: Missing s/_supported_fs btrfs/_supported_fs generic/
-    Thanks Eryu.
-
- tests/generic/038     | 153 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/038.out |   2 +
- tests/generic/group   |   1 +
- 3 files changed, 156 insertions(+)
- create mode 100755 tests/generic/038
- create mode 100644 tests/generic/038.out
-
-diff --git a/tests/generic/038 b/tests/generic/038
-new file mode 100755
-index 0000000..5db718c
---- /dev/null
-+++ b/tests/generic/038
-@@ -0,0 +1,153 @@
-+#! /bin/bash
-+# FSQA Test No. 038
-+#
-+# This test was motivated by btrfs issues, but it's generic enough as it
-+# doesn't use any btrfs specific features.
-+#
-+# Stress btrfs' block group allocation and deallocation while running fstrim in
-+# parallel. Part of the goal is also to get data block groups deallocated so
-+# that new metadata block groups, using the same physical device space ranges,
-+# get allocated while fstrim is running. This caused several issues ranging
-+# from invalid memory accesses, kernel crashes, metadata or data corruption,
-+# free space cache inconsistencies, free space leaks and memory leaks.
-+#
-+# These issues were fixed by the following btrfs linux kernel patches:
-+#
-+#   Btrfs: fix invalid block group rbtree access after bg is removed
-+#   Btrfs: fix crash caused by block group removal
-+#   Btrfs: fix freeing used extents after removing empty block group
-+#   Btrfs: fix race between fs trimming and block group remove/allocation
-+#   Btrfs: fix race between writing free space cache and trimming
-+#   Btrfs: make btrfs_abort_transaction consider existence of new block groups
-+#   Btrfs: fix memory leak after block remove + trimming
-+#   Btrfs: fix fs mapping extent map leak
-+#   Btrfs: fix unprotected deletion from pending_chunks list
-+#
-+# The issues were found on a qemu/kvm guest with 4 virtual CPUs, 4Gb of ram and
-+# scsi-hd devices with discard support enabled (that means hole punching in the
-+# disk's image file is performed by the host).
-+#
-+#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2014 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	rm -fr $tmp
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_need_to_be_root
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_fstrim
-+
-+rm -f $seqres.full
-+
-+# Keep allocating and deallocating 1G of data space with the goal of creating
-+# and deleting 1 block group constantly. The intention is to race with the
-+# fstrim loop below.
-+fallocate_loop()
-+{
-+	local name=$1
-+	while true; do
-+		$XFS_IO_PROG -f -c "falloc -k 0 1G" \
-+			$SCRATCH_MNT/$name &> /dev/null
-+		sleep 3
-+		$XFS_IO_PROG -c "truncate 0" \
-+			$SCRATCH_MNT/$name &> /dev/null
-+		sleep 3
-+	done
-+}
-+
-+trim_loop()
-+{
-+	while true; do
-+		$FSTRIM_PROG $SCRATCH_MNT
-+	done
-+}
-+
-+# Create a bunch of small files that get their single extent inlined in the
-+# btree, so that we consume a lot of metadata space and get a chance of a
-+# data block group getting deleted and reused for metadata later. Sometimes
-+# the creation of all these files succeeds other times we get ENOSPC failures
-+# at some point - this depends on how fast the btrfs' cleaner kthread is
-+# notified about empty block groups, how fast it deletes them and how fast
-+# the fallocate calls happen. So we don't really care if they all succeed or
-+# not, the goal is just to keep metadata space usage growing while data block
-+# groups are deleted.
-+create_files()
-+{
-+	local prefix=$1
-+
-+	for ((i = 1; i <= 400000; i++)); do
-+		$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 3900" \
-+			$SCRATCH_MNT/"${prefix}_$i" &> /dev/null
-+		if [ $? -ne 0 ]; then
-+			echo "Failed creating file ${prefix}_$i" >>$seqres.full
-+			break
-+		fi
-+	done
-+
-+}
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_require_fs_space $SCRATCH_MNT $((10 * 1024 * 1024))
-+_scratch_mount
-+
-+for ((i = 0; i < $((4 * $LOAD_FACTOR)); i++)); do
-+	trim_loop &
-+	trim_pids[$i]=$!
-+done
-+
-+for ((i = 0; i < $((1 * $LOAD_FACTOR)); i++)); do
-+	fallocate_loop "falloc_file_$i" &
-+	fallocate_pids[$i]=$!
-+done
-+
-+create_files "foobar"
-+
-+kill ${fallocate_pids[@]}
-+kill ${trim_pids[@]}
-+wait
-+
-+# Sleep a bit, otherwise umount fails often with EBUSY (TODO: investigate why).
-+sleep 3
-+
-+# The fstests framework will now check for fs consistency with fsck.
-+# The trimming was racy and caused some btree nodes to get full of zeroes on
-+# disk, which obviously caused fs metadata corruption. The race often lead
-+# to missing free space entries in a block group's free space cache too.
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/038.out b/tests/generic/038.out
-new file mode 100644
-index 0000000..5e0f13e
---- /dev/null
-+++ b/tests/generic/038.out
-@@ -0,0 +1,2 @@
-+QA output created by 038
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 9f355fc..1e89848 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -40,6 +40,7 @@
- 035 auto quick
- 036 auto aio rw stress
- 037 metadata auto quick
-+038 auto stress
- 053 acl repair auto quick
- 062 attr udf auto quick
- 068 other auto freeze dangerous stress
--- 
-2.1.3
+On 12/01/2014 01:45 PM, Dave Chinner wrote:
+> On Tue, Nov 25, 2014 at 06:21:09PM +0800, Xiaoguang Wang wrote:
+>> This test case will first use fsstress to fill a file system, then
+>> dump it to standard output and restore it from standard input, finally
+>> check that the original contents and the new contents generated by
+>> restore tool will be same.
+>>
+>> Signed-off-by: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
+>> ---
+>>  common/config      |   2 ++
+>>  common/rc          |   7 ++++
+>>  tests/ext4/004     | 104 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/ext4/004.out |   7 ++++
+>>  tests/ext4/group   |   3 +-
+>>  5 files changed, 122 insertions(+), 1 deletion(-)
+>>  create mode 100755 tests/ext4/004
+>>  create mode 100644 tests/ext4/004.out
+>>
+>> diff --git a/common/config b/common/config
+>> index 1cb08c0..8ea70ec 100644
+>> --- a/common/config
+>> +++ b/common/config
+>> @@ -188,6 +188,8 @@ export LOGGER_PROG="`set_prog_path logger`"
+>>  export DBENCH_PROG="`set_prog_path dbench`"
+>>  export DMSETUP_PROG="`set_prog_path dmsetup`"
+>>  export WIPEFS_PROG="`set_prog_path wipefs`"
+>> +export E2FS_DUMP_PROG="`set_prog_path dump`"
+>> +export E2FS_RESTORE_PROG="`set_prog_path restore`"
+> 
+> So now we have DUMPE2FS_PROG and E2FS_DUMP_PROG, which are different
+> programs altogether but are going to be very easy to confuse.
+> 
+> I would suggest that follow the convention of all the other *_PROG
+> variables dump -> $DUMP_PROG is probably a good idea to avoid
+> confusion.
+> 
+>>  # Generate a comparable xfsprogs version number in the form of
+>>  # major * 10000 + minor * 100 + release
+>> diff --git a/common/rc b/common/rc
+>> index d5e3aff..ef7939d 100644
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -2258,6 +2258,13 @@ _require_fio()
+>>  	[ $? -eq 0 ] || _notrun "$FIO_PROG too old, see $seqres.full"
+>>  }
+>>  
+>> +# Check that dump/restore is present
+>> +_require_dump_restore()
+>> +{
+>> +	_require_command $E2FS_DUMP_PROG "dump"
+>> +	_require_command $E2FS_RESTORE_PROG "restore"
+>> +}
+> 
+> No need for the wrapper, just call _require_command directly.
+> 
+>> +
+>>  # Does freeze work on this fs?
+>>  _require_freeze()
+>>  {
+>> diff --git a/tests/ext4/004 b/tests/ext4/004
+>> new file mode 100755
+>> index 0000000..cbf35e5
+>> --- /dev/null
+>> +++ b/tests/ext4/004
+>> @@ -0,0 +1,104 @@
+>> +#! /bin/bash
+>> +# FSQA Test No. 004
+>> +#
+>> +# Test "dump | restore"(as opposed to a tape)
+>> +#
+>> +#-----------------------------------------------------------------------
+>> +# Copyright (c) 2014 Fujitsu.  All Rights Reserved.
+>> +#
+>> +# This program is free software; you can redistribute it and/or
+>> +# modify it under the terms of the GNU General Public License as
+>> +# published by the Free Software Foundation.
+>> +#
+>> +# This program is distributed in the hope that it would be useful,
+>> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+>> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>> +# GNU General Public License for more details.
+>> +#
+>> +# You should have received a copy of the GNU General Public License
+>> +# along with this program; if not, write the Free Software Foundation,
+>> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+>> +#
+>> +#-----------------------------------------------------------------------
+>> +#
+>> +
+>> +seq=`basename $0`
+>> +seqres=$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +
+>> +here=`pwd`
+>> +tmp=/tmp/$$
+>> +status=1	# failure is the default!
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +	cd /
+>> +	rm -f $tmp.*
+>> +	rm -rf $restore_dir
+>> +	rm -rf $dump_dir
+>> +	_scratch_unmount
+> 
+> scratch does not need to be unmounted here, nor does it need to be
+> cleaned up. Also, you have to assume that the previous run of the
+> test did not clean up (i.e. system crashed before cleanup ran),
+> so you are going to want to do the rm on $restore_dir as part of the
+> test setup, not cleanup....
+> 
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +
+>> +dump_dir=$SCRATCH_MNT/dump_restore_dir
+>> +restore_dir=$TEST_DIR/dump_restore_dir
+>> +
+>> +_diff_compare()
+> 
+> "_" prefix is for library functions (i.e. from common/...), not
+> local functions.
+> 
+>> +{
+>> +	echo "Comparing dump directory with restore directory"
+>> +	diff -rs $dump_dir $restore_dir >> $seqres.full 2>&1
+>> +	if [ $? -ne 0 ];then
+>> +		echo "Dump/Restore compare failed"
+>> +		exit
+>> +	fi
+>> +	echo "Dump/Restore compare success"
+>> +}
+> 
+> There is no need for this entire function. just running:
+> 
+> 	diff -r $dump_dir $restore_dir
+> 
+> will tell us everything. i.e. it is silent if both directories are
+> the same, but will throw output if there are differences. That will
+> output will cause the golden image match (and hence the test) to fail....
+> 
+>> +
+>> +_workout()
+>> +{
+>> +	echo ""
+>> +	echo "Run fsstress"
+>> +	args=`_scale_fsstress_args -z -f creat=5 -f write=20 -f mkdir=5 -n 1000 -p 15 -d $dump_dir`
+>> +	echo "fsstress $args" >> $seqres.full
+>> +
+>> +	$FSSTRESS_PROG $args >> $seqres.full 2>&1
+>> +
+>> +	echo "start Dump/Restore"
+>> +	cd $TEST_DIR
+>> +
+>> +	$E2FS_DUMP_PROG	-0 -f - $dump_dir 2>/dev/null | $E2FS_RESTORE_PROG -urvf - >> $seqres.full 2>&1
+>> +	if [ $? -ne 0 ];then
+>> +		echo "Dump/Restore failed"
+>> +		exit
+> 
+> _fail?
+> 
+>> +	else
+>> +		echo "Dump/Restore success"
+>> +	fi
+> 
+> And there's no need to echo anything on success.
+> 
+>> +	rm -rf restoresymtable
+>> +	_diff_compare
+>> +}
+> 
+> No need to put all of this in a function.
+> 
+>> +# real QA test starts here
+>> +_supported_fs ext4
+>> +_supported_os Linux
+>> +
+>> +_require_scratch
+>> +_require_dump_restore
+> 
+> _require_test
+> 
+>> +
+>> +rm -f $seqres.full
+>> +
+>> +_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
+>> +_scratch_mount || _fail "couldn't mount fs"
+> 
+> No need to check for mount failure.
+> 
+>> +
+>> +umount $TEST_DEV
+>> +_test_mkfs >> $seqres.full 2>&1
+>> +_test_mount
+> 
+> No. That is just not allowed. The test device should *never* be
+> mkfs'd by a test. It shouldn't even be unmounted. Prep should be 
+> just an rm...
+> 
+> Cheers,
+> 
+> Dave.
+> 
 
