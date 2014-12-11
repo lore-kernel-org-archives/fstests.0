@@ -1,52 +1,86 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from imap.thunk.org ([74.207.234.97]:50473 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:50491 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933315AbaLKCPV (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 10 Dec 2014 21:15:21 -0500
-Date: Wed, 10 Dec 2014 21:15:17 -0500
+	id S933514AbaLKCZ1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 10 Dec 2014 21:25:27 -0500
 From: Theodore Ts'o <tytso@mit.edu>
-Subject: Re: generic/256 test failure?
-Message-ID: <20141211021517.GF3370@thunk.org>
-References: <20141211005030.GA30240@thunk.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20141211005030.GA30240@thunk.org>
+Subject: [PATCH] common: suppress "Broken pipe" errors
+Date: Wed, 10 Dec 2014 21:25:18 -0500
+Message-Id: <1418264718-31198-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-I figured it out; the problem is that Debian uses /bin/dash as the
-default shell (which is good, it meant that most Debian systems didn't
-get screwed by the bash security hole).  But it's also bad, because
-xfstests has a few /bin/bashisms.  Normally, this isn't a problem
-because most of the scripts are started by #!/bin/bash.  However, on
-my test system fsgqa had a shell of /dev/sh, and in Debian this is
-/bin/dash.
+It's possible based on a race conditions (and possibly the version of
+coreutils which supplies /usr/bin/yes) that commands of the form:
 
-So there are a couple of ways I can fix this.
+yes | $MKFS_PROG ...
 
-1) Document in README that fsgqa must use a shell of fsgqa to
-/bin/bash or some tests might fail.
+will end up causing the following failure:
 
-2) Change _user_do() to use "su -s /bin/bash $qa_user ...".
+shared/298 16s ...	[23:49:03] [23:49:19] - output mismatch (see /results/results-4k/shared/298.out.bad)
+    --- tests/shared/298.out	2014-10-31 10:13:04.000000000 -0400
+    +++ /results/results-4k/shared/298.out.bad	2014-11-29 23:49:19.118138099 -0500
+    @@ -1,4 +1,6 @@
+     QA output created by 298
+    +yes: standard output: Broken pipe
+    +yes: write error
+     Generating garbage on loop...done.
+     Running fstrim...done.
+     Detecting interesting holes in image...done.
+    ...
+    (Run 'diff -u tests/shared/298.out /results/results-4k/shared/298.out.bad'  to see the entire diff)
 
-3) Change tests/generic/256 so that instead of
+The simplest way to fix this is to redirect the stderr of the yes
+command to /dev/null.
 
-   	  _user_do "$XFS_IO_PROG -f -c \"pwrite 0 $file_size\" $dir/$file_count.bin &> /dev/null"
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ common/rc | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
 
-we use:
-
-   	  _user_do "$XFS_IO_PROG -f -c \"pwrite 0 $file_size\" $dir/$file_count.bin > /dev/null 2>&1"
-
-or:
-
-   	  _user_do "$XFS_IO_PROG -f -c \"pwrite 0 $file_size\" $dir/$file_count.bin" &> /dev/null
-
-Any preference which patch, if any, I should send?  (If #1, then we
-probably document the fact that fsgqa must have a shell of bash).
-
-Thanks,
-
-							- Ted
+diff --git a/common/rc b/common/rc
+index d5e3aff..39a1432 100644
+--- a/common/rc
++++ b/common/rc
+@@ -518,7 +518,7 @@ _test_mkfs()
+         $MKFS_BTRFS_PROG $MKFS_OPTIONS $* $TEST_DEV > /dev/null
+ 	;;
+     *)
+-	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* $TEST_DEV
++	yes 2>/dev/null | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* $TEST_DEV
+ 	;;
+     esac
+ }
+@@ -536,7 +536,7 @@ _mkfs_dev()
+         $MKFS_BTRFS_PROG $MKFS_OPTIONS $* 2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
+ 	;;
+     *)
+-	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* \
++	yes 2>/dev/null | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* \
+ 		2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
+ 	;;
+     esac
+@@ -586,7 +586,7 @@ _scratch_mkfs()
+ 	# do nothing for tmpfs
+ 	;;
+     *)
+-	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* $SCRATCH_DEV
++	yes 2>/dev/null | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* $SCRATCH_DEV
+ 	;;
+     esac
+ }
+@@ -655,7 +655,8 @@ _scratch_mkfs_sized()
+ 	fi
+ 	;;
+     ext2|ext3|ext4|ext4dev)
+-	yes | ${MKFS_PROG}.$FSTYP $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
++	yes 2>/dev/null | ${MKFS_PROG}.$FSTYP $MKFS_OPTIONS -b $blocksize \
++		$SCRATCH_DEV $blocks
+ 	;;
+     udf)
+ 	$MKFS_UDF_PROG $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
+-- 
+2.1.0
 
