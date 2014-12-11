@@ -1,53 +1,52 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from imap.thunk.org ([74.207.234.97]:50396 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:50473 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932623AbaLKAu2 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 10 Dec 2014 19:50:28 -0500
-Date: Wed, 10 Dec 2014 19:50:30 -0500
+	id S933315AbaLKCPV (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 10 Dec 2014 21:15:21 -0500
+Date: Wed, 10 Dec 2014 21:15:17 -0500
 From: Theodore Ts'o <tytso@mit.edu>
-Subject: generic/256 test failure?
-Message-ID: <20141211005030.GA30240@thunk.org>
+Subject: Re: generic/256 test failure?
+Message-ID: <20141211021517.GF3370@thunk.org>
+References: <20141211005030.GA30240@thunk.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20141211005030.GA30240@thunk.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-I've been trying to debug generic/256 failing under ext4, and I
-realized that it's actually failing with xfs as well:
+I figured it out; the problem is that Debian uses /bin/dash as the
+default shell (which is good, it meant that most Debian systems didn't
+get screwed by the bash security hole).  But it's also bad, because
+xfstests has a few /bin/bashisms.  Normally, this isn't a problem
+because most of the scripts are started by #!/bin/bash.  However, on
+my test system fsgqa had a shell of /dev/sh, and in Debian this is
+/bin/dash.
 
-BEGIN TEST: XFS Wed Dec 10 19:36:38 EST 2014
-Device: /dev/vdd
-mk2fs options:
-mount options:
-FSTYP         -- xfs (non-debug)
-PLATFORM      -- Linux/i686 kvm-xfstests 3.18.0-rc3-00029-g754c126
-MKFS_OPTIONS  -- -f -bsize=4096 /dev/vdc
-MOUNT_OPTIONS -- /dev/vdc /vdc
+So there are a couple of ways I can fix this.
 
-generic/256		[19:36:40] [19:37:31] - output mismatch (see /results/results-xfs/generic/256.out.bad)
-    --- tests/generic/256.out	2014-12-10 18:15:22.000000000 -0500
-    +++ /results/results-xfs/generic/256.out.bad	2014-12-10 19:37:32.002538550 -0500
-    @@ -1 +1,2229 @@
-     QA output created by 256
-    +wrote 1073741824/1073741824 bytes at offset 0
-    +1 GiB, 262144 ops; 0:00:11.00 (92.306 MiB/sec and 23630.3397 ops/sec)
-    +pwrite64: No space left on device
-    +pwrite64: No space left on device
-    +pwrite64: No space left on device
-    +pwrite64: No space left on device
-    ...
-    (Run 'diff -u tests/generic/256.out /results/results-xfs/generic/256.out.bad'  to see the entire diff)
-Ran: generic/256
-Failures: generic/256
-Failed 1 of 1 tests
+1) Document in README that fsgqa must use a shell of fsgqa to
+/bin/bash or some tests might fail.
 
-root@kvm-xfstests:~# blkid /dev/vdc
-/dev/vdc: UUID="6a820f3b-109f-465e-941e-6bc2bfae6e42" TYPE="xfs"
+2) Change _user_do() to use "su -s /bin/bash $qa_user ...".
 
-This is failing with xfstests commit 6676905, and xfsprogs v3.2.2.
+3) Change tests/generic/256 so that instead of
 
-Is anyone else seeing this failure?
+   	  _user_do "$XFS_IO_PROG -f -c \"pwrite 0 $file_size\" $dir/$file_count.bin &> /dev/null"
 
-						- Ted
+we use:
+
+   	  _user_do "$XFS_IO_PROG -f -c \"pwrite 0 $file_size\" $dir/$file_count.bin > /dev/null 2>&1"
+
+or:
+
+   	  _user_do "$XFS_IO_PROG -f -c \"pwrite 0 $file_size\" $dir/$file_count.bin" &> /dev/null
+
+Any preference which patch, if any, I should send?  (If #1, then we
+probably document the fact that fsgqa must have a shell of bash).
+
+Thanks,
+
+							- Ted
+
