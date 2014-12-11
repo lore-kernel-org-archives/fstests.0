@@ -1,59 +1,69 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from imap.thunk.org ([74.207.234.97]:50970 "EHLO imap.thunk.org"
+Received: from mx1.redhat.com ([209.132.183.28]:56454 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756252AbaLKMYO (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 11 Dec 2014 07:24:14 -0500
-Date: Thu, 11 Dec 2014 07:24:08 -0500
-From: Theodore Ts'o <tytso@mit.edu>
-Subject: Re: [PATCH] common: suppress "Broken pipe" errors
-Message-ID: <20141211122408.GA31008@thunk.org>
-References: <1418264718-31198-1-git-send-email-tytso@mit.edu>
- <20141211041323.GF24183@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20141211041323.GF24183@dastard>
+	id S1753006AbaLKM3e (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 11 Dec 2014 07:29:34 -0500
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id sBBCTRlg012851
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <fstests@vger.kernel.org>; Thu, 11 Dec 2014 07:29:33 -0500
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] generic/299: various fixes
+Date: Thu, 11 Dec 2014 18:49:12 +0800
+Message-Id: <1418294952-20035-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Dec 11, 2014 at 03:13:23PM +1100, Dave Chinner wrote:
-> On Wed, Dec 10, 2014 at 09:25:18PM -0500, Theodore Ts'o wrote:
-> > It's possible based on a race conditions (and possibly the version of
-> > coreutils which supplies /usr/bin/yes) that commands of the form:
-> > 
-> > yes | $MKFS_PROG ...
-> > 
-> > will end up causing the following failure:
-> 
-> What race conditions?
+Fix three problems in generic/299
 
-It looks like under some circumstances, mkfs reads from stdin and then
-exits quickly; in the mean time, since the pipe has read from, yes
-then tries to send more "y\n" to stdout, and then it gets an EPIPE
-error and complains.
+1. Use $XFS_IO_PROG instead of fallocate/truncate, old distros like
+RHEL5 don't have these commands.
 
-> But thats indicative that something failed and you need to analyse
-> the reason, yes? So AFAICT this is deisred behaviour, and hiding the
-> error will actually hide other failures, right?
+2. Remove $seqres.full before test, otherwise the file is growing all
+the time.
 
-No, I don't think anything fails; it's perfectly OK that mkfs can read
-from stdin and then exit very quickly.  It seems to happen primarily
-when we're running a test where mkfs can exit quickly enough to hit
-this race.
+3. Make sure fio really exits, otherwise fio would block umount. $pid is
+the pid of function run_check not fio, sometimes fio is still there when
+$pid is dead and blocking umount.
 
-> I'd highly recommend you add ext4 specific mkfs branches so you can
-> use the non-interactive/force mkfs flags so that "yes |" is not
-> necessary for your (and everyone elses ext4) test environments.
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+ tests/generic/299 | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
 
-Sure, I'd be happy to add a ext2/3/4 specific mkfs branch.  Does any
-other file system's mkfs try to do interactive I/O?  If so, then they
-could hit this too, so I think the "yes 2> /dev/null | ..."
-formulation is still a good thing to do.  If not, maybe we should be
-removing the "yes | ..." construct entirely, since it's pretty ugly
-IMHO.
+diff --git a/tests/generic/299 b/tests/generic/299
+index e8685a4..ae1bf74 100755
+--- a/tests/generic/299
++++ b/tests/generic/299
+@@ -125,20 +125,23 @@ _workout()
+ 	do
+ 	    for ((k=1; k <= NUM_JOBS; k++))
+ 	    do
+-		fallocate -l $FILE_SIZE $SCRATCH_MNT/direct_aio.$k.0 \
++		$XFS_IO_PROG -f -c "falloc 0 $FILE_SIZE" $SCRATCH_MNT/direct_aio.$k.0 \
+ 			>> $seqres.full 2>&1
+ 	    done
+ 	    for ((k=1; k <= NUM_JOBS; k++))
+ 	    do
+-		truncate -s 0 $SCRATCH_MNT/direct_aio.$k.0 >> $seqres.full 2>&1
++		$XFS_IO_PROG -f -c "truncate 0" $SCRATCH_MNT/direct_aio.$k.0 \
++			>>$seqres.full 2>&1
+ 	    done
+ 	    # Following like will check that pid is still run.
+ 	    # Once fio exit we can stop fallocate/truncate loop
+-	    kill -0 $pid > /dev/null 2>&1 || break
++	    pgrep fio >/dev/null 2>&1 || break
+ 	done
+ 	wait $pid
+ }
+ 
++rm -f $seqres.full
++
+ _scratch_mkfs >> $seqres.full 2>&1
+ _scratch_mount
+ 
+-- 
+1.8.3.1
 
-Cheers,
-
-						- Ted
