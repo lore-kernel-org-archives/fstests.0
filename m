@@ -1,44 +1,28 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43706 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751514AbaLKRTq (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 11 Dec 2014 12:19:46 -0500
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id sBBHJeM8030334
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <fstests@vger.kernel.org>; Thu, 11 Dec 2014 12:19:45 -0500
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 4/4] common: fix comment about _require_test
-Date: Fri, 12 Dec 2014 01:16:11 +0800
-Message-Id: <1418318171-5892-5-git-send-email-eguan@redhat.com>
-In-Reply-To: <1418318171-5892-1-git-send-email-eguan@redhat.com>
-References: <1418318171-5892-1-git-send-email-eguan@redhat.com>
+Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:64407 "EHLO
+	mx0b-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756270AbaLKS1K (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 11 Dec 2014 13:27:10 -0500
+Message-ID: <5489E1F6.8010607@fb.com>
+Date: Thu, 11 Dec 2014 13:27:02 -0500
+From: Josef Bacik <jbacik@fb.com>
+MIME-Version: 1.0
+Subject: Re: [PATCH 3/4] btrfs/017: remove duplicate test
+References: <1418318171-5892-1-git-send-email-eguan@redhat.com> <1418318171-5892-4-git-send-email-eguan@redhat.com>
+In-Reply-To: <1418318171-5892-4-git-send-email-eguan@redhat.com>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+To: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-_require_test will mount test dev if not mounted, fix the comment to
-reflect that.
+On 12/11/2014 12:16 PM, Eryu Guan wrote:
+> btrfs/017 is same as btrfs/015, remove it.
+>
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
- common/rc | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Reviewed-by: Josef Bacik <jbacik@fb.com>
 
-diff --git a/common/rc b/common/rc
-index d5e3aff..9a4da56 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1104,7 +1104,7 @@ _require_scratch()
- }
- 
- 
--# this test needs a test partition - check we're ok & unmount it
-+# this test needs a test partition - check we're ok & mount it
- #
- _require_test()
- {
--- 
-1.8.3.1
+Thanks,
 
+Josef
