@@ -1,52 +1,89 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:28449 "EHLO
-	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1759114AbaLLFWO (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 12 Dec 2014 00:22:14 -0500
-Date: Fri, 12 Dec 2014 16:21:59 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] xfstests: generic/315: make sure the test file exists
- and is zero length
-Message-ID: <20141212052159.GL24183@dastard>
-References: <1418267623-29612-1-git-send-email-tytso@mit.edu>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1418267623-29612-1-git-send-email-tytso@mit.edu>
+Received: from imap.thunk.org ([74.207.234.97]:53655 "EHLO imap.thunk.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932581AbaLLTnH (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 12 Dec 2014 14:43:07 -0500
+From: Theodore Ts'o <tytso@mit.edu>
+Subject: [PATCH] common: use mke2fs -F instead of piping in yes
+Date: Fri, 12 Dec 2014 14:42:54 -0500
+Message-Id: <1418413374-17380-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Linux Filesystem Development List <linux-fsdevel@vger.kernel.org>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-[cc fstests@vger.kernel.org]
+It's possible based on a race conditions (and possibly the version of
+coreutils which supplies /usr/bin/yes) that commands of the form:
 
-On Wed, Dec 10, 2014 at 10:13:43PM -0500, Theodore Ts'o wrote:
-> Before we determine how much space is available to be fallocated, and
-> before trying to fallocate the file, we need to make sure testfile.315
-> exists and is zero-length.  Otherwise the fallocate program will fail
-> the first time generic/315 is run on a freshly mkfs'ed file system:
->
-> generic/315 0s ...	[06:31:43] [06:31:44] [failed, exit status 1] - output mismatch (see /results/results-ext3conv/generic/315.out.bad)
->     --- tests/generic/315.out	2014-10-31 10:13:04.000000000 -0400
->     +++ /results/results-ext3conv/generic/315.out.bad	2014-11-24 06:31:44.111279060 -0500
->     @@ -1,2 +1,6 @@
->      QA output created by 315
->      Slience is golden
->     +ls: cannot access /vdd/testfile.315: No such file or directory
->     +./tests/generic/315: line 69: [: : integer expression expected
->     +File size is changed to ( Bytes)
->     +(see /results/results-ext3conv/generic/315.full for details)
+yes | $MKFS_PROG ...
 
-Already fixed by commit ca28228 ("generic: use xfs_io falloc, not
-fallocate").
+will end up causing the following failure:
 
-Yet another demonstration of why we have a "use xfs_io whereever
-possible" rule for new tests: we don't have to hack around semantic
-oddities of random CLI tools. ;)
+shared/298 16s ...	[23:49:03] [23:49:19] - output mismatch (see /results/results-4k/shared/298.out.bad)
+    --- tests/shared/298.out	2014-10-31 10:13:04.000000000 -0400
+    +++ /results/results-4k/shared/298.out.bad	2014-11-29 23:49:19.118138099 -0500
+    @@ -1,4 +1,6 @@
+     QA output created by 298
+    +yes: standard output: Broken pipe
+    +yes: write error
+     Generating garbage on loop...done.
+     Running fstrim...done.
+     Detecting interesting holes in image...done.
+    ...
+    (Run 'diff -u tests/shared/298.out /results/results-4k/shared/298.out.bad'  to see the entire diff)
 
-Cheers,
+Using mke2fs's -F option instad of "yes | $MKFS_PROG" fixes this issue.
 
-Dave.
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ common/rc | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/common/rc b/common/rc
+index 692d45c..ec4440b 100644
+--- a/common/rc
++++ b/common/rc
+@@ -517,6 +517,9 @@ _test_mkfs()
+     btrfs)
+         $MKFS_BTRFS_PROG $MKFS_OPTIONS $* $TEST_DEV > /dev/null
+ 	;;
++    ext2|ext3|ext4)
++	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* $TEST_DEV
++	;;
+     *)
+ 	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* $TEST_DEV
+ 	;;
+@@ -535,6 +538,11 @@ _mkfs_dev()
+     btrfs)
+         $MKFS_BTRFS_PROG $MKFS_OPTIONS $* 2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
+ 	;;
++    ext2|ext3|ext4)
++	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* \
++		2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
++	;;
++
+     *)
+ 	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* \
+ 		2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
+@@ -581,6 +589,9 @@ _scratch_mkfs()
+     btrfs)
+         $MKFS_BTRFS_PROG $MKFS_OPTIONS $* $SCRATCH_DEV > /dev/null
+ 	;;
++    ext2|ext3)
++	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* $SCRATCH_DEV
++	;;
+     ext4)
+ 	_scratch_mkfs_ext4 $*
+ 	;;
+@@ -657,7 +668,7 @@ _scratch_mkfs_sized()
+ 	fi
+ 	;;
+     ext2|ext3|ext4|ext4dev)
+-	yes | ${MKFS_PROG}.$FSTYP $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
++	${MKFS_PROG}.$FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
+ 	;;
+     udf)
+ 	$MKFS_UDF_PROG $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
 -- 
-Dave Chinner
-david@fromorbit.com
+2.1.0
+
