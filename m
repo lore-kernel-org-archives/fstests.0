@@ -1,85 +1,351 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:35323 "EHLO
-	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S933361AbaLLAKy (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 11 Dec 2014 19:10:54 -0500
-Date: Fri, 12 Dec 2014 11:05:25 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCHv2 2/3] selftests: Add test of O_BENEATH & openat(2)
-Message-ID: <20141212000524.GI24183@dastard>
-References: <1415094884-18349-1-git-send-email-drysdale@google.com>
- <1415094884-18349-3-git-send-email-drysdale@google.com>
- <20141111053641.GR23575@dastard>
- <CAHse=S9OwP8tSErW59Hd3VPbKVrE9VJM=5gMgZQwsv3kB9Ax0w@mail.gmail.com>
-MIME-Version: 1.0
+Received: from mail-pd0-f181.google.com ([209.85.192.181]:59629 "EHLO
+	mail-pd0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965485AbaLLAML convert rfc822-to-8bit (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 11 Dec 2014 19:12:11 -0500
+Received: by mail-pd0-f181.google.com with SMTP id v10so5982960pde.12
+        for <fstests@vger.kernel.org>; Thu, 11 Dec 2014 16:12:11 -0800 (PST)
 Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAHse=S9OwP8tSErW59Hd3VPbKVrE9VJM=5gMgZQwsv3kB9Ax0w@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 8.1 \(1993\))
+Subject: Re: max_dir_size_kb option list
+From: Andreas Dilger <adilger@dilger.ca>
+In-Reply-To: <548988D2.3030100@oracle.com>
+Date: Thu, 11 Dec 2014 17:12:08 -0700
+Content-Transfer-Encoding: 8BIT
+Message-Id: <7A899EFD-73A6-4B4E-B061-9773B083AC3A@dilger.ca>
+References: <548988D2.3030100@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: David Drysdale <drysdale@google.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexander Viro <viro@zeniv.linux.org.uk>, Kees Cook <keescook@chromium.org>, "Eric W. Biederman" <ebiederm@xmission.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Meredydd Luff <meredydd@senatehouse.org>, Will Drewry <wad@chromium.org>, Jorge Lucangeli Obes <jorgelo@google.com>, Ricky Zhou <rickyz@google.com>, Lee Campbell <leecam@google.com>, Julien Tinnes <jln@google.com>, Mike Depinet <mdepinet@google.com>, James Morris <james.l.morris@oracle.com>, Andy Lutomirski <luto@amacapital.net>, Paolo Bonzini <pbonzini@redhat.com>, Paul Moore <paul@paul-moore.com>, Christoph Hellwig <hch@infradead.org>, Linux API <linux-api@vger.kernel.org>, LSM List <linux-security-module@vger.kernel.org>, fstests@vger.kernel.org
+To: Alexander Tsvetkov <alexander.tsvetkov@oracle.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Nov 21, 2014 at 02:19:41PM +0000, David Drysdale wrote:
-> On Tue, Nov 11, 2014 at 5:36 AM, Dave Chinner <david@fromorbit.com> wrote:
-> > [cc fstests@vger.kernel.org]
-> >
-> > On Tue, Nov 04, 2014 at 09:54:43AM +0000, David Drysdale wrote:
-> >> Add simple tests of openat(2) variations, including examples that
-> >> check the new O_BENEATH flag.
-> >>
-> >> Signed-off-by: David Drysdale <drysdale@google.com>
-> >
-> > Wouldn't this be better added to fstests? That's the regression
-> > test suite used by filesystem developers and most distro QA
-> > organisations and where the fs developers aggregate all their new
-> > regression tests.
-> >
-> > IMO, the fewer places we aggregate VFS/filesystem tests the better.
-> > I really don't think the kernel tree is the best place for adding
-> > VFS behavioural tests because it has none of the infrastructure
-> > around it to test arbitrary filesystems and configurations and hence
-> > is not particularly useful to the people whoa re likely to notice
-> > and care about fs regression tests suddenly breaking.
-> >
-> > As an example, the recent renameat() syscall additions (e.g.
-> > RENAME_EXCHANGE, RENAME_NOREPLACE) have unit tests in fstests, so
-> > these new O_BENEATH tests should really follow the same model...
+On Dec 11, 2014, at 5:06 AM, Alexander Tsvetkov <alexander.tsvetkov@oracle.com> wrote:
 > 
-> Fair enough, that makes sense -- I've now got a version of the selftest
-> running within xfstests (git://oss.sgi.com/xfs/cmds/xfstests.git is the
-> master repo, right?).
+> Hello,
+> 
+> I've prepared test for xfstests suite that runs some checks for ext4 mount option max_dir_size_kb introduced in Linux Kernel 3.7, could someone please look on it?
 
-Or git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git, which is
-where I typically update first and push dev branches to.
+For future reference, inline patches as plain text are best.
 
-> Given that xfstests is independent of the kernel, what's the expected
-> way to deal with flags (or syscalls) that are only in specific kernel
-> versions?  At the moment I've just got a primitive override at
-> compile time (#ifndef O_BENEATH #define O_BENEATH ...), and
-> then the test will fail at run-time against an older kernel -- is there a
-> need for anything more sophisticated?  (And if so, are there any
-> examples I can crib from?)
+> From 21b1da618d0fcb4cd4666d10c41583274ed4eeed Mon Sep 17 00:00:00 2001
+> From: Alexander Tsvetkov <alexander.tsvetkov@oracle.com>
+> Date: Wed, 10 Dec 2014 15:31:02 +0300
+> Subject: [PATCH] added test for max_dir_size_kb mount option
+> 
+> ---
+>  tests/ext4/309     | 213 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/309.out |   2 +
+>  tests/ext4/group   |   3 +-
+>  3 files changed, 217 insertions(+), 1 deletion(-)
+>  create mode 100755 tests/ext4/309
+>  create mode 100755 tests/ext4/309.out
+> 
+> diff --git a/tests/ext4/309 b/tests/ext4/309
+> new file mode 100755
+> index 0000000..e2f4e43
+> --- /dev/null
+> +++ b/tests/ext4/309
+> @@ -0,0 +1,213 @@
+> +#! /bin/bash
+> +# FS QA Test
+> +#
+> +# Test for mount option max_dir_size_kb
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2014 Oracle and/or its affiliates.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +tmp=/tmp/$$
+> +
+> +testdir=$SCRATCH_MNT/testdir
+> +testfile=$SCRATCH_MNT/testfile
+> +sdir=`dirname $0`
+> +sdir=`cd "$sdir"; pwd`
 
-See the code in the src/renameat2.c for an example of how syscalls
-and their flags are added prior to their being kernel and userspace
-header support.
+Since this script is /bin/bash, I'd recommend to use $(...) instead
+of `...` for subshells, since the former can be nested, is much easier
+to see the start/end, and isn't confused for '...' quotes.
 
-Also, note the "-t" CLI option for the "test" option in that little
-program.  This is used by the _require_renameat2 function that the
-tests that make use of this functionality call to determine if th
-etest shoul dbe run on this kernel or not.
+> +echo "QA output created by $seq"
+> +echo "Silence is golden"
+> +rm -f $seqres.full
+> +
+> +status=1 # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup() {
+> +   if [ ! -z SCRATCH_MNT ]; then
+> +      rm -fr $SCRATCH_MNT/test*
+> +      _scratch_unmount
+> +   fi
+> +}
+> +
+> +_filter_error() {
+> +   sed -n -e "s/.*\($1\).*/\"\1\"/p"
+> +}
+> +
+> +_clear_testdir() {
+> +   dirs="$testdir *$"
 
-> Also, is there an archive of the fstests@ mailing list somewhere?
+This "*$" looks like a bug.  Do you mean "$*"?
 
-I wish. I've tried to get it archived on all the major sites like
-marc, spinics, etc repeatedly since the list was created and not a
-single one of them have responded to any of my requests, let alone
-started to archive the list....
+> +   for i in $dirs; do
+> +      rm -fr $i/*
+> +   done
+> +}
+> +
+> +# $1 - device
+> +# $2 - options
+> +_make_ext4fs() {
+> +   device=$1
+> +   opts=$2
+> +   umount $device 1>/dev/null 2>&1
+> +   mkfs.ext4 $opts $device 1>/dev/null 2>&1
+> +}
+> +
+> +# $1 - options
+> +# $2 - mount point
+> +_make_loopfs() {
+> +   lpf=$testfile
+> +   dd if=/dev/zero of=$lpf bs=4k count=256 1>/dev/null 2>&1
+> +   loopdev=$(losetup -f)
+> +   losetup $loopdev $lpf
+> +   mkfs.ext4 -O ^dir_index,^has_journal $loopdev 1>/dev/null 2>&1
+> +   mount -t ext4 $1 $loopdev $2
+> +}
+> +
+> +# $1 - expected limit after items creation
+> +# $2 - command to create item
+> +# $3 - where to create (testdir by default)
+> +_create_items() {
+> +    limit=$1
+> +    create_cmd=$2
+> +    dir=${3:-$testdir}
+> +    sync
+> +    echo 3 > /proc/sys/vm/drop_caches
+> +    MAX_INUM=$(((limit*1024*2)/24))
 
-Cheers,
+(style) spaces around operators, and no need for extra () around
+multiplication.
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+> +    for i in $(seq 0 $MAX_INUM); do
+> +       tmp_name=`mktemp -u`
+
+Is there a reason to use mktemp instead of just some sequential names
+like item="f.$limit.$i" or similar?  There are several problems with
+the complexity here that could be avoided.
+
+- since mktemp is creating temp files in $TMPDIR by default and "-u"
+  is unlinking them, this is doing double the work needed
+- the "continue" below implies that some items may not be created,
+  due to name collisions (since mktemp doesn't actually see the entries
+  created in the "real" directory), so fewer than $MAX_INUM entries may
+  be created, causing the test to be inconsistent
+
+This could just be something simple like:
+
+         tmp_name=$(mktemp $dir/f.XXXXXX)
+
+and if we need to get directory creation involved, then something like:
+
+         [ "$2" = "mkdir" ] && MKTEMP_OPT="-d"
+         tmp_name=$(mktemp $MKTEMP_OPT $dir/f.XXXXXX 2>$tmp.out)
+
+I see that there are callers of _create_items() that are not "touch"
+or "mkdir", but I don't think those are adding much value to this
+test (more on that below).
+
+> +       item=`basename $tmp_name`
+
+Use $(...), especially since this style is already used here.
+
+> +       if [ -e $dir/$item ]; then
+> +          continue
+> +       fi 
+> +       create_cmd="$2 $dir/$item 2>$tmp.out 1>/dev/null"
+> +       eval "$create_cmd"
+> +       res=$?
+> +       if [ $res -ne 0 ]; then
+> +          _filter_error "No space left on device" < $tmp.out > $tmp.out2
+> +          if [ -s $tmp.out2 ]; then
+> +             cat $tmp.out2 | tr -d '\n' >> $seqres.full
+> +          else
+> +             echo "FAIL! expected ENOSPC" | tee -a $seqres.full
+> +          fi
+> +          break
+> +      fi
+> +   done
+> +   size=$(stat -c %s $dir)
+> +   size=$((size/1024))
+> +   if [ $size -gt $limit ]; then
+> +      echo "FAIL! expected dir size: $limit, actually: $size" | tee -a $seqres.full
+> +   fi
+> +   rm -f $tmp*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +
+> +# real QA test starts here
+> +
+> +_supported_fs ext4
+> +_supported_os Linux
+> +_require_scratch
+> +
+> +LIMIT1=8
+> +LIMIT2=16
+> +
+> +_make_ext4fs $SCRATCH_DEV "-O ^dir_index,^filetype"
+
+It isn't clear why you disable the filetype option?  That has been a
+standard ext2/3/4 feature for 10+ years, so it doesn't make sense to
+test without it.
+
+It makes sense to test both with and without the dir_index option
+(this is enabled by default for ext4), but it doesn't make sense to
+only test with it disabled.  Better to increase the LIMIT1 and LIMIT2
+values to allow testing with this enabled (e.g. 16 and 32) as well as
+disabled.
+
+> +_scratch_mount "-o max_dir_size_kb=$LIMIT1"
+> +mkdir $testdir 2>/dev/null
+> +
+> +echo -e "\nExceed $LIMIT1 Kb limit with new files in testdir/: " >> $seqres.full
+> +_create_items $LIMIT1 "touch"
+> +
+> +echo -e "\nRemount with $LIMIT1 Kb limit,\nnew item in testdir/ should result to ENOSPC: " >>$seqres.full
+> +_scratch_mount "-o remount,max_dir_size_kb=$LIMIT1"
+> +_create_items $LIMIT1 "touch"
+> +
+> +echo -e "\nExceed $LIMIT2 Kb limit with new files in testdir/: " >> $seqres.full
+> +_scratch_mount "-o remount,max_dir_size_kb=$LIMIT2"
+> +_create_items $LIMIT2 "touch"
+> +
+> +echo -e "\nExceed $LIMIT2 Kb limit with new files in testdir2/: " >> $seqres.full
+> +mkdir $SCRATCH_MNT/testdir2 2>/dev/null
+> +_create_items $LIMIT2 "touch" "$SCRATCH_MNT/testdir2"
+> +
+> +echo -e "\nRemount with $LIMIT1 Kb limit,\nnew item in testdir/ should result to ENOSPC: " >> $seqres.full
+> +_scratch_mount "-o remount,max_dir_size_kb=$LIMIT1"
+> +_create_items $LIMIT2 "touch"
+> +echo -e "\nnew item in testdir2/ should result to ENOSPC: " >> $seqres.full
+> +_create_items $LIMIT2 "touch" "$SCRATCH_MNT/testdir2"
+> +_clear_testdir "$SCRATCH_MNT/testdir2"
+> +rmdir $testdir
+> +mkdir $testdir
+> +
+> +echo -e "\nExceed $LIMIT1 Kb directory limit with new subdirectories: " >> $seqres.full
+> +_create_items $LIMIT1 "mkdir"
+> +_clear_testdir
+> +
+> +echo -e "\nExceed $LIMIT1 Kb directory limit with symlinks: " >> $seqres.full
+> +dd if=/dev/urandom of=$testfile bs=1 seek=4096 count=4096 > /dev/null 2>&1
+> +_create_items $LIMIT1 "ln -s $testfile"
+> +_clear_testdir
+
+It isn't clear there is any value to test with symlinks, hard links,
+and FIFOs, since the limit is imposed in the common code for inserting
+the name into the directory, and it doesn't care what type of inode
+the name is referencing.
+
+> +echo -e "\nExceed $LIMIT1 Kb directory limit with hardlinks: " >> $seqres.full
+> +_create_items $LIMIT1 "ln $testfile"
+> +_clear_testdir
+> +
+> +echo -e "\nExceed $LIMIT1 Kb directory limit with FIFOs: " >> $seqres.full
+> +_create_items $LIMIT1 "mkfifo"
+> +_clear_testdir
+> +
+> +echo -e "\nCreate ext4 fs on testdir/subdir with $LIMIT2 Kb limit," >> $seqres.full
+> +mkdir $testdir/subdir 2>/dev/null
+> +_make_ext4fs $TEST_DEV "-O ^dir_index,^filetype"
+> +mount -t ext4 -o max_dir_size_kb=$LIMIT2 $TEST_DEV $testdir/subdir
+> +
+> +echo "exceed $LIMIT1 Kb limit of testdir/:" >> $seqres.full
+> +_create_items $LIMIT1 "touch"
+> +
+> +echo -e "\nexceed $LIMIT2 Kb limit of testdir/subdir:" >> $seqres.full
+> +_create_items $LIMIT2 "touch" "$testdir/subdir"
+> +
+> +echo -e "\ntestdir/ limit $LIMIT2 Kb, testdir/subdir limit $LIMIT1 Kb," >> $seqres.full
+
+I think this message is backward. testdir has a limit of $LIMIT1, and
+testdir/subdir has a limit of $LIMIT2.
+
+> +umount $TEST_DEV 1>/dev/null 2>&1
+> +_scratch_mount "-o remount,max_dir_size_kb=$LIMIT2"
+> +mount -t ext4 -o max_dir_size_kb=$LIMIT1 $TEST_DEV $testdir/subdir
+> +
+> +echo "exceed new $LIMIT2 Kb limit of testdir/ with a set of files:" >> $seqres.full
+> +_create_items $LIMIT2 "touch"
+> +echo -e "\nnew item in testdir/subdir should result to ENOSPC: " >> $seqres.full
+> +_create_items $LIMIT2 "touch" "$testdir/subdir"
+> +
+> +umount $TEST_DEV 1>/dev/null 2>&1
+> +_clear_testdir
+> +
+> +echo -e "\ntestdir/ limit $LIMIT2 Kb, loop fs: testdir/subdir limit $LIMIT1 Kb," >> $seqres.full
+> +mkdir $testdir/subdir
+> +
+> +_make_loopfs "-o max_dir_size_kb=$LIMIT1" "$testdir/subdir"
+> +
+> +echo "exceed $LIMIT1 Kb limit of testdir/subdir with a set of files:" >> $seqres.full
+> +_create_items $LIMIT1 "touch" "$testdir/subdir"
+> +
+> +echo -e "\nexceed $LIMIT2 Kb limit of testdir/ with a set of files:" >> $seqres.full
+> +_create_items $LIMIT2 "touch"
+> +
+> +umount $testdir/subdir
+> +losetup -d $loopdev
+> +_clear_testdir
+> +
+> +# success, all done
+> +status=0
+> +exit 0
+> diff --git a/tests/ext4/309.out b/tests/ext4/309.out
+> new file mode 100755
+> index 0000000..56330d6
+> --- /dev/null
+> +++ b/tests/ext4/309.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 309
+> +Silence is golden
+> diff --git a/tests/ext4/group b/tests/ext4/group
+> index aa6a53b..9bf1061 100644
+> --- a/tests/ext4/group
+> +++ b/tests/ext4/group
+> @@ -14,4 +14,5 @@
+>  305 auto
+>  306 auto rw resize quick
+>  307 auto ioctl rw
+> -308 auto ioctl rw prealloc quick
+> \ No newline at end of file
+> +308 auto ioctl rw prealloc quick
+> +309 auto
+> -- 
+> 1.9.3
+> 
+> 
+
+Cheers, Andreas
+
+
+
+
+
