@@ -1,45 +1,81 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:33203 "EHLO
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:35323 "EHLO
 	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1758846AbaLKXvJ (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 11 Dec 2014 18:51:09 -0500
-Date: Fri, 12 Dec 2014 10:50:53 +1100
+	by vger.kernel.org with ESMTP id S933361AbaLLAKy (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 11 Dec 2014 19:10:54 -0500
+Date: Fri, 12 Dec 2014 11:05:25 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v2] generic/299: various fixes
-Message-ID: <20141211235053.GH24183@dastard>
-References: <1418294952-20035-1-git-send-email-eguan@redhat.com>
- <1418295529-20565-1-git-send-email-eguan@redhat.com>
+Subject: Re: [PATCHv2 2/3] selftests: Add test of O_BENEATH & openat(2)
+Message-ID: <20141212000524.GI24183@dastard>
+References: <1415094884-18349-1-git-send-email-drysdale@google.com>
+ <1415094884-18349-3-git-send-email-drysdale@google.com>
+ <20141111053641.GR23575@dastard>
+ <CAHse=S9OwP8tSErW59Hd3VPbKVrE9VJM=5gMgZQwsv3kB9Ax0w@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1418295529-20565-1-git-send-email-eguan@redhat.com>
+In-Reply-To: <CAHse=S9OwP8tSErW59Hd3VPbKVrE9VJM=5gMgZQwsv3kB9Ax0w@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: David Drysdale <drysdale@google.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexander Viro <viro@zeniv.linux.org.uk>, Kees Cook <keescook@chromium.org>, "Eric W. Biederman" <ebiederm@xmission.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Meredydd Luff <meredydd@senatehouse.org>, Will Drewry <wad@chromium.org>, Jorge Lucangeli Obes <jorgelo@google.com>, Ricky Zhou <rickyz@google.com>, Lee Campbell <leecam@google.com>, Julien Tinnes <jln@google.com>, Mike Depinet <mdepinet@google.com>, James Morris <james.l.morris@oracle.com>, Andy Lutomirski <luto@amacapital.net>, Paolo Bonzini <pbonzini@redhat.com>, Paul Moore <paul@paul-moore.com>, Christoph Hellwig <hch@infradead.org>, Linux API <linux-api@vger.kernel.org>, LSM List <linux-security-module@vger.kernel.org>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Dec 11, 2014 at 06:58:49PM +0800, Eryu Guan wrote:
-> Fix three problems in generic/299
+On Fri, Nov 21, 2014 at 02:19:41PM +0000, David Drysdale wrote:
+> On Tue, Nov 11, 2014 at 5:36 AM, Dave Chinner <david@fromorbit.com> wrote:
+> > [cc fstests@vger.kernel.org]
+> >
+> > On Tue, Nov 04, 2014 at 09:54:43AM +0000, David Drysdale wrote:
+> >> Add simple tests of openat(2) variations, including examples that
+> >> check the new O_BENEATH flag.
+> >>
+> >> Signed-off-by: David Drysdale <drysdale@google.com>
+> >
+> > Wouldn't this be better added to fstests? That's the regression
+> > test suite used by filesystem developers and most distro QA
+> > organisations and where the fs developers aggregate all their new
+> > regression tests.
+> >
+> > IMO, the fewer places we aggregate VFS/filesystem tests the better.
+> > I really don't think the kernel tree is the best place for adding
+> > VFS behavioural tests because it has none of the infrastructure
+> > around it to test arbitrary filesystems and configurations and hence
+> > is not particularly useful to the people whoa re likely to notice
+> > and care about fs regression tests suddenly breaking.
+> >
+> > As an example, the recent renameat() syscall additions (e.g.
+> > RENAME_EXCHANGE, RENAME_NOREPLACE) have unit tests in fstests, so
+> > these new O_BENEATH tests should really follow the same model...
 > 
-> 1. Use $XFS_IO_PROG instead of fallocate/truncate, old distros like
-> RHEL5 don't have these commands.
-> 
-> 2. Remove $seqres.full before test, otherwise the file is growing all
-> the time.
-> 
-> 3. Make sure fio really exits, otherwise fio would block umount. $pid is
-> the pid of function run_check not fio, sometimes fio is still there when
-> $pid is dead and blocking umount.
-> 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> ---
-> 
-> v2:
-> - remove $seqres.full before _require_fio, which writes to $seqres.full too
+> Fair enough, that makes sense -- I've now got a version of the selftest
+> running within xfstests (git://oss.sgi.com/xfs/cmds/xfstests.git is the
+> master repo, right?).
 
-Does not apply after Eric's earlier patch "[PATCH] use xfs_io
-falloc, not fallocate". Once I push out an updated tree with this
-patch in it, can you rebase this patch and resend it?
+Or git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git, which is
+where I typically update first and push dev branches to.
+
+> Given that xfstests is independent of the kernel, what's the expected
+> way to deal with flags (or syscalls) that are only in specific kernel
+> versions?  At the moment I've just got a primitive override at
+> compile time (#ifndef O_BENEATH #define O_BENEATH ...), and
+> then the test will fail at run-time against an older kernel -- is there a
+> need for anything more sophisticated?  (And if so, are there any
+> examples I can crib from?)
+
+See the code in the src/renameat2.c for an example of how syscalls
+and their flags are added prior to their being kernel and userspace
+header support.
+
+Also, note the "-t" CLI option for the "test" option in that little
+program.  This is used by the _require_renameat2 function that the
+tests that make use of this functionality call to determine if th
+etest shoul dbe run on this kernel or not.
+
+> Also, is there an archive of the fstests@ mailing list somewhere?
+
+I wish. I've tried to get it archived on all the major sites like
+marc, spinics, etc repeatedly since the list was created and not a
+single one of them have responded to any of my requests, let alone
+started to archive the list....
 
 Cheers,
 
