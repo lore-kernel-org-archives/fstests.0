@@ -1,89 +1,45 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from imap.thunk.org ([74.207.234.97]:53655 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:55632 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932581AbaLLTnH (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 12 Dec 2014 14:43:07 -0500
+	id S1751023AbaLNWMY (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sun, 14 Dec 2014 17:12:24 -0500
+Date: Sun, 14 Dec 2014 17:12:21 -0500
 From: Theodore Ts'o <tytso@mit.edu>
-Subject: [PATCH] common: use mke2fs -F instead of piping in yes
-Date: Fri, 12 Dec 2014 14:42:54 -0500
-Message-Id: <1418413374-17380-1-git-send-email-tytso@mit.edu>
+Subject: Re: [PATCH v3] generic/299: various fixes
+Message-ID: <20141214221221.GP29787@thunk.org>
+References: <1418295529-20565-1-git-send-email-eguan@redhat.com>
+ <1418359401-8240-1-git-send-email-eguan@redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1418359401-8240-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-It's possible based on a race conditions (and possibly the version of
-coreutils which supplies /usr/bin/yes) that commands of the form:
+On Fri, Dec 12, 2014 at 12:43:21PM +0800, Eryu Guan wrote:
+> @@ -136,7 +138,7 @@ _workout()
+>  	    done
+>  	    # Following like will check that pid is still run.
+>  	    # Once fio exit we can stop fallocate/truncate loop
+> -	    kill -0 $pid > /dev/null 2>&1 || break
+> +	    pgrep fio > /dev/null 2>&1 || break
+>  	done
+>  	wait $pid
 
-yes | $MKFS_PROG ...
+This patch is causing generic/299 to loop forever for me.  The problem
+is that "fio" is too easy to match:
 
-will end up causing the following failure:
+root@kvm-xfstests:~# pgrep fio
+1407
+root@kvm-xfstests:~# ps augxww | grep 1407
+root      1407  0.0  0.0      0     0 ?        S<   16:52   0:00 [dm_bufio_cache]
+root      8386  0.0  0.0   2704   492 ttyS1    S+   17:06   0:00 grep 1407
 
-shared/298 16s ...	[23:49:03] [23:49:19] - output mismatch (see /results/results-4k/shared/298.out.bad)
-    --- tests/shared/298.out	2014-10-31 10:13:04.000000000 -0400
-    +++ /results/results-4k/shared/298.out.bad	2014-11-29 23:49:19.118138099 -0500
-    @@ -1,4 +1,6 @@
-     QA output created by 298
-    +yes: standard output: Broken pipe
-    +yes: write error
-     Generating garbage on loop...done.
-     Running fstrim...done.
-     Detecting interesting holes in image...done.
-    ...
-    (Run 'diff -u tests/shared/298.out /results/results-4k/shared/298.out.bad'  to see the entire diff)
+I'm currently a testing a patch which uses "pgrep -f $XFS_IO_PROG"
+instead, but I'm a bit surprised no once else noticed this, I guess
+people aren't building their xfstests test kernels with DM_SNAPSHOP or
+DM_VERITY configured (either of which will seleect DM_BUFIO)?
 
-Using mke2fs's -F option instad of "yes | $MKFS_PROG" fixes this issue.
-
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
- common/rc | 13 ++++++++++++-
- 1 file changed, 12 insertions(+), 1 deletion(-)
-
-diff --git a/common/rc b/common/rc
-index 692d45c..ec4440b 100644
---- a/common/rc
-+++ b/common/rc
-@@ -517,6 +517,9 @@ _test_mkfs()
-     btrfs)
-         $MKFS_BTRFS_PROG $MKFS_OPTIONS $* $TEST_DEV > /dev/null
- 	;;
-+    ext2|ext3|ext4)
-+	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* $TEST_DEV
-+	;;
-     *)
- 	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* $TEST_DEV
- 	;;
-@@ -535,6 +538,11 @@ _mkfs_dev()
-     btrfs)
-         $MKFS_BTRFS_PROG $MKFS_OPTIONS $* 2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
- 	;;
-+    ext2|ext3|ext4)
-+	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* \
-+		2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
-+	;;
-+
-     *)
- 	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* \
- 		2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
-@@ -581,6 +589,9 @@ _scratch_mkfs()
-     btrfs)
-         $MKFS_BTRFS_PROG $MKFS_OPTIONS $* $SCRATCH_DEV > /dev/null
- 	;;
-+    ext2|ext3)
-+	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* $SCRATCH_DEV
-+	;;
-     ext4)
- 	_scratch_mkfs_ext4 $*
- 	;;
-@@ -657,7 +668,7 @@ _scratch_mkfs_sized()
- 	fi
- 	;;
-     ext2|ext3|ext4|ext4dev)
--	yes | ${MKFS_PROG}.$FSTYP $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
-+	${MKFS_PROG}.$FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
- 	;;
-     udf)
- 	$MKFS_UDF_PROG $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
--- 
-2.1.0
-
+	  	     	     	      	   - Ted
