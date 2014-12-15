@@ -1,58 +1,52 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:53750 "EHLO mx2.suse.de"
+Received: from imap.thunk.org ([74.207.234.97]:56992 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751206AbaLOKnm (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 15 Dec 2014 05:43:42 -0500
-Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
-	by mx2.suse.de (Postfix) with ESMTP id 7CE1FAD6F
-	for <fstests@vger.kernel.org>; Mon, 15 Dec 2014 10:43:41 +0000 (UTC)
-From: David Disseldorp <ddiss@suse.de>
-Subject: [PATCH] cifs: add missing Makefile
-Date: Mon, 15 Dec 2014 11:43:30 +0100
-Message-Id: <1418640210-16914-1-git-send-email-ddiss@suse.de>
-In-Reply-To: <20141215110431.65c8bd80@plati.site>
-References: <20141215110431.65c8bd80@plati.site>
+	id S1750801AbaLOPra (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 15 Dec 2014 10:47:30 -0500
+From: Theodore Ts'o <tytso@mit.edu>
+Subject: [PATCH] ext4/308,generic/324: require fallocate support
+Date: Mon, 15 Dec 2014 10:47:23 -0500
+Message-Id: <1418658443-31670-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: David Disseldorp <ddiss@suse.de>
+Cc: Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-This fixes the make install target, which traverses all tests/*
-subdirectories.
+These tests use the falloc command in xfs_io, and there are some file
+systems (ext3) or file system configurations (ext4 in ext3
+compatibility mode) which do not support fallocate.  So add the
+explicit requirement to avoid false test failures.
 
-Reported-by: David Drysdale <drysdale@google.com>
-Signed-off-by: David Disseldorp <ddiss@suse.de>
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 ---
- tests/cifs/Makefile | 20 ++++++++++++++++++++
- 1 file changed, 20 insertions(+)
- create mode 100644 tests/cifs/Makefile
+ tests/ext4/308    | 1 +
+ tests/generic/324 | 1 +
+ 2 files changed, 2 insertions(+)
 
-diff --git a/tests/cifs/Makefile b/tests/cifs/Makefile
-new file mode 100644
-index 0000000..9176e5c
---- /dev/null
-+++ b/tests/cifs/Makefile
-@@ -0,0 +1,20 @@
-+#
-+# Copyright (c) 2003-2005 Silicon Graphics, Inc.  All Rights Reserved.
-+#
-+
-+TOPDIR = ../..
-+include $(TOPDIR)/include/builddefs
-+
-+CIFS_DIR = cifs
-+TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(CIFS_DIR)
-+
-+include $(BUILDRULES)
-+
-+install:
-+	$(INSTALL) -m 755 -d $(TARGET_DIR)
-+	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 644 group $(TARGET_DIR)
-+	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+
-+# Nothing.
-+install-dev install-lib:
+diff --git a/tests/ext4/308 b/tests/ext4/308
+index 8df24ba..948ff3f 100755
+--- a/tests/ext4/308
++++ b/tests/ext4/308
+@@ -46,6 +46,7 @@ _supported_os Linux
+ _need_to_be_root
+ _require_scratch
+ _require_defrag
++_require_xfs_io_command "falloc"
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/324 b/tests/generic/324
+index 1868bbc..5e642dc 100755
+--- a/tests/generic/324
++++ b/tests/generic/324
+@@ -44,6 +44,7 @@ _supported_os Linux
+ _need_to_be_root
+ _require_scratch
+ _require_defrag
++_require_xfs_io_command "falloc"
+ 
+ rm -f $seqres.full
+ 
 -- 
-2.1.2
+2.1.0
 
