@@ -1,52 +1,41 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:41600 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751100AbaLOUYp (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 15 Dec 2014 15:24:45 -0500
-From: Vishal Verma <vishal.l.verma@linux.intel.com>
-Subject: [PATCH] cifs: Add Makefile
-Date: Mon, 15 Dec 2014 13:24:05 -0700
-Message-Id: <1418675045-22541-1-git-send-email-vishal.l.verma@linux.intel.com>
+Received: from mail-wi0-f181.google.com ([209.85.212.181]:62726 "EHLO
+	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750786AbaLOU0I (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 15 Dec 2014 15:26:08 -0500
+Received: by mail-wi0-f181.google.com with SMTP id r20so10334258wiv.8
+        for <fstests@vger.kernel.org>; Mon, 15 Dec 2014 12:26:05 -0800 (PST)
+Received: from [192.168.0.2] (178-222-112-234.dynamic.isp.telekom.rs. [178.222.112.234])
+        by mx.google.com with ESMTPSA id ex8sm14286931wjd.41.2014.12.15.12.26.04
+        for <fstests@vger.kernel.org>
+        (version=TLSv1.2 cipher=AES128-GCM-SHA256 bits=128/128);
+        Mon, 15 Dec 2014 12:26:04 -0800 (PST)
+Date: Mon, 15 Dec 2014 23:26:35 +0100 (CET)
+From: Dushan Tcholich <dusanc@gmail.com>
+Subject: [PATCH] generic/038: require fallocate support and test for trim
+ support
+Message-ID: <alpine.LNX.2.00.1412152322070.21847@reiser4.gekom>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: pshilovsky@samba.org, Vishal Verma <vishal.l.verma@linux.intel.com>
 List-ID: <fstests@vger.kernel.org>
 
-tests/cifs lacked a Makefile, and this caused the %install section of
-rpmbuild to fail. Add a boilerplate Makefile (from tests/ext4)
+Add tests for allocate support and test if TRIM really works on tested 
+partition.
 
-Signed-off-by: Vishal Verma <vishal.l.verma@linux.intel.com>
----
- tests/cifs/Makefile | 20 ++++++++++++++++++++
- 1 file changed, 20 insertions(+)
- create mode 100644 tests/cifs/Makefile
+Signed-off-by: Dushan Tcholich <dusanc@gmail.com>
 
-diff --git a/tests/cifs/Makefile b/tests/cifs/Makefile
-new file mode 100644
-index 0000000..9176e5c
---- /dev/null
-+++ b/tests/cifs/Makefile
-@@ -0,0 +1,20 @@
-+#
-+# Copyright (c) 2003-2005 Silicon Graphics, Inc.  All Rights Reserved.
-+#
+--- xfstests.orig/tests/generic/038	2014-12-14 15:18:00.000000000 +0100
++++ xfstests/tests/generic/038	2014-12-15 23:21:11.000000000 +0100
+@@ -70,6 +70,10 @@
+ _supported_os Linux
+ _require_scratch
+ _require_fstrim
++_require_xfs_io_command "falloc"
++_require_xfs_io_command "truncate"
 +
-+TOPDIR = ../..
-+include $(TOPDIR)/include/builddefs
-+
-+CIFS_DIR = cifs
-+TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(CIFS_DIR)
-+
-+include $(BUILDRULES)
-+
-+install:
-+	$(INSTALL) -m 755 -d $(TARGET_DIR)
-+	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 644 group $(TARGET_DIR)
-+	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+
-+# Nothing.
-+install-dev install-lib:
--- 
-2.1.0
-
++_test_batched_discard $SCRATCH_MNT || _notrun "FITRIM not supported on $SCRATCH_DEV"
+ 
+ rm -f $seqres.full
+ 
