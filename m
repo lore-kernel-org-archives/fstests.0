@@ -1,69 +1,159 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47645 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750714AbaLOFDC (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 15 Dec 2014 00:03:02 -0500
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id sBF531wK002184
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <fstests@vger.kernel.org>; Mon, 15 Dec 2014 00:03:01 -0500
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v4] generic/299: various fixes
-Date: Mon, 15 Dec 2014 13:02:34 +0800
-Message-Id: <1418619754-15620-1-git-send-email-eguan@redhat.com>
-In-Reply-To: <1418359401-8240-1-git-send-email-eguan@redhat.com>
-References: <1418359401-8240-1-git-send-email-eguan@redhat.com>
+Received: from mail-qa0-f44.google.com ([209.85.216.44]:45541 "EHLO
+	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751819AbaLOJcS (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 15 Dec 2014 04:32:18 -0500
+Received: by mail-qa0-f44.google.com with SMTP id j7so383395qaq.17
+        for <fstests@vger.kernel.org>; Mon, 15 Dec 2014 01:32:17 -0800 (PST)
+MIME-Version: 1.0
+In-Reply-To: <1418170485-3732-2-git-send-email-ddiss@suse.de>
+References: <1418170485-3732-1-git-send-email-ddiss@suse.de> <1418170485-3732-2-git-send-email-ddiss@suse.de>
+From: David Drysdale <drysdale@google.com>
+Date: Mon, 15 Dec 2014 09:31:57 +0000
+Message-ID: <CAHse=S91DYDaevHeFa51k2PAgHzoWO68QmGZrC7RNQ4Dm1Pojw@mail.gmail.com>
+Subject: Re: [PATCH 2/2] cifs: add server-side copy sanity test
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+To: David Disseldorp <ddiss@suse.de>
+Cc: fstests@vger.kernel.org, linux-cifs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Fix two problems in generic/299
+On Wed, Dec 10, 2014 at 12:14 AM, David Disseldorp <ddiss@suse.de> wrote:
+>
+> This test uses the cloner binary to issue CIFS_IOC_COPYCHUNK_FILE
+> server-side copy requests.
+>
+> Signed-off-by: David Disseldorp <ddiss@suse.de>
+> ---
+>  tests/cifs/001     | 69 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/cifs/001.out | 21 +++++++++++++++++
+>  tests/cifs/group   |  6 +++++
+>  3 files changed, 96 insertions(+)
+>  create mode 100755 tests/cifs/001
+>  create mode 100644 tests/cifs/001.out
+>  create mode 100644 tests/cifs/group
 
-1. Remove $seqres.full before test, otherwise the file is growing all
-the time.
+Does this also need a new tests/cifs/Makefile (so that e.g. the install
+target in tests/Makefile still works)?
 
-2. Make sure fio really exits, otherwise fio would block umount. $pid is
-the pid of function run_check not fio, sometimes fio is still there when
-$pid is dead and blocking umount.
-
-Reviewed-by: Theodore Ts'o <tytso@mit.edu>
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
-v4:
-- use pgrep -f instead of pgrep to search for fio (Ted)
-
-v3:
-- rebase and skip the replacing fallocate/truncate part (Dave)
-
-v2:
-- remove $seqres.full before _require_fio, which writes to $seqres.full too
-
- tests/generic/299 | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
-
-diff --git a/tests/generic/299 b/tests/generic/299
-index e49eba9..953f1bd 100755
---- a/tests/generic/299
-+++ b/tests/generic/299
-@@ -109,6 +109,8 @@ rw=randrw
- filename=buffered-aio-verifier
- EOF
- 
-+rm -f $seqres.full
-+
- _require_fio $fio_config
- _require_xfs_io_command "falloc"
- 
-@@ -136,7 +138,7 @@ _workout()
- 	    done
- 	    # Following like will check that pid is still run.
- 	    # Once fio exit we can stop fallocate/truncate loop
--	    kill -0 $pid > /dev/null 2>&1 || break
-+	    pgrep -f "$FIO_PROG" > /dev/null 2>&1 || break
- 	done
- 	wait $pid
- }
--- 
-2.1.0
-
+> diff --git a/tests/cifs/001 b/tests/cifs/001
+> new file mode 100755
+> index 0000000..57ce728
+> --- /dev/null
+> +++ b/tests/cifs/001
+> @@ -0,0 +1,69 @@
+> +#!/bin/bash
+> +# FS QA Test No. cifs/001
+> +#
+> +# Sanity test for server-side copies initiated via CIFS_IOC_COPYCHUNK_FILE
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (C) 2014 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1       # failure is the default!
+> +
+> +_cleanup()
+> +{
+> +       rm -f $tmp.*
+> +       rm -rf $TEST_DIR/$$
+> +}
+> +
+> +trap "_cleanup ; exit \$status" 0 1 2 3 15
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs cifs
+> +_supported_os Linux
+> +_require_cloner
+> +_require_test
+> +
+> +mkdir -p $TEST_DIR/$$/src || _fail "failed to create clone src dir"
+> +mkdir -p $TEST_DIR/$$/dest || _fail "failed to create clone dest dir"
+> +
+> +# populate 10 files, 1K-10K in size
+> +for i in `seq 1 10`; do
+> +       len=$(($i * 1024))
+> +       $XFS_IO_PROG -f -c "pwrite -S $i 0 $len" $TEST_DIR/$$/src/${i} \
+> +               | _filter_xfs_io
+> +done
+> +sync
+> +
+> +# clone each, then compare both versions
+> +for i in `seq 1 10`; do
+> +       $CLONER_PROG $TEST_DIR/$$/src/${i} $TEST_DIR/$$/dest/${i}
+> +       diff $TEST_DIR/$$/src/${i} $TEST_DIR/$$/dest/${i}
+> +done
+> +
+> +status=0
+> +exit
+> diff --git a/tests/cifs/001.out b/tests/cifs/001.out
+> new file mode 100644
+> index 0000000..54e2bbe
+> --- /dev/null
+> +++ b/tests/cifs/001.out
+> @@ -0,0 +1,21 @@
+> +QA output created by 001
+> +wrote 1024/1024 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +wrote 2048/2048 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +wrote 3072/3072 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +wrote 4096/4096 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +wrote 5120/5120 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +wrote 6144/6144 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +wrote 7168/7168 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +wrote 8192/8192 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +wrote 9216/9216 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +wrote 10240/10240 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> diff --git a/tests/cifs/group b/tests/cifs/group
+> new file mode 100644
+> index 0000000..6d07b1c
+> --- /dev/null
+> +++ b/tests/cifs/group
+> @@ -0,0 +1,6 @@
+> +# QA groups control file
+> +# Defines test groups and nominal group owners
+> +# - do not start group names with a digit
+> +# - comment line before each group is "new" description
+> +#
+> +001 auto quick
+> --
+> 2.1.2
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
