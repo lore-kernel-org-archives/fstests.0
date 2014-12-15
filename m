@@ -1,118 +1,69 @@
-Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:65450 "EHLO
-	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751357AbaLOX1y (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 15 Dec 2014 18:27:54 -0500
-Date: Tue, 16 Dec 2014 10:27:39 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 2/2] check: treat _check_{test,scratch}_fs failures as
- test failures
-Message-ID: <20141215232739.GC2152@dastard>
-References: <1418663367-18755-1-git-send-email-eguan@redhat.com>
- <1418663367-18755-2-git-send-email-eguan@redhat.com>
+Return-Path: <dusanc@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1418663367-18755-2-git-send-email-eguan@redhat.com>
-Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+In-Reply-To: <20141215231812.GB2152@dastard>
+References: <alpine.LNX.2.00.1412152315300.21847@reiser4.gekom>
+	<20141215210631.GT24183@dastard>
+	<548F5505.4050807@sandeen.net>
+	<20141215231812.GB2152@dastard>
+Date: Tue, 16 Dec 2014 00:30:39 +0100
+Message-ID: <CADW=+3kcNFLwjMO6N7=XkyxBjYd8v2opoX4VBRPsHNiayZWq-Q@mail.gmail.com>
+Subject: Re: [PATCH] Reiser4 initial implementation
+From: =?UTF-8?B?RHXFoWFuIMSMb2xpxIc=?= <dusanc@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+To: Dave Chinner <david@fromorbit.com>
+Cc: Eric Sandeen <sandeen@sandeen.net>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Dec 16, 2014 at 01:09:27AM +0800, Eryu Guan wrote:
-> Currently if _check_test_fs and/or _check_scratch_fs find corruption,
-> the test itself is still reported as pass, like
-> 
-> 	[root@hp-dl388eg8-01 xfstests]# ./check xfs/071 xfs/072
-> 	FSTYP         -- xfs (non-debug)
-> 	PLATFORM      -- Linux/x86_64 hp-dl388eg8-01 3.18.0-rc7+
-> 	MKFS_OPTIONS  -- -f -bsize=4096 /dev/sda6
-> 	MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 /dev/sda6 /mnt/testarea/scratch
-> 
-> 	xfs/071  2s
-> 	_check_xfs_filesystem: filesystem on /dev/sda6 is inconsistent (r) (see /root/xfstests/results//xfs/071.full)
-> 	xfs/072  1s
-> 	Ran: xfs/071 xfs/072
-> 	Passed all 2 tests
-> 
-> 	[root@hp-dl388eg8-01 xfstests]# echo $?
-> 	0
-> 
-> Usually it's not a problem, but it does confuse scripts that depend on
-> return value of check. Update check to treat _check_{test,scratch}_fs
-> failures as test failures too, new test output is like
-> 
-> 	[root@hp-dl388eg8-01 xfstests]# ./check xfs/071 xfs/072
-> 	FSTYP         -- xfs (non-debug)
-> 	PLATFORM      -- Linux/x86_64 hp-dl388eg8-01 3.18.0-rc7+
-> 	MKFS_OPTIONS  -- -f -bsize=4096 /dev/sda6
-> 	MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 /dev/sda6 /mnt/testarea/scratch
-> 
-> 	xfs/071 2s ... 2s
-> 	_check_xfs_filesystem: filesystem on /dev/sda6 is inconsistent (r) (see /root/xfstests/results//xfs/071.full)
-> 	xfs/072 1s ... 1s
-> 	Ran: xfs/071 xfs/072
-> 	Failures: xfs/071
-> 	Failed 1 of 2 tests
-> 
-> 	[root@hp-dl388eg8-01 xfstests]# echo $?
-> 	1
-> 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> ---
-> 
-> Note that the xfs/071 corruption issue is an xfs_repair bug,
-> Eric has sent a patch to fix it, see
-> 
-> http://www.spinics.net/lists/xfs/msg31018.html
-> 
->  check | 19 ++++++++++---------
->  1 file changed, 10 insertions(+), 9 deletions(-)
-> 
-> diff --git a/check b/check
-> index 42a1ac2..4cf7070 100755
-> --- a/check
-> +++ b/check
-> @@ -611,6 +611,16 @@ for section in $HOST_OPTIONS_SECTIONS; do
->  			    err=true
->  			fi
->  		    fi
-> +		    try="$try $seqnum"
-> +		    n_try=`expr $n_try + 1`
-> +		    if [ -f ${RESULT_DIR}/require_test ]; then
-> +			_check_test_fs || err=true
-> +			rm -f ${RESULT_DIR}/require_test
-> +		    fi
-> +		    if [ -f ${RESULT_DIR}/require_scratch ]; then
-> +			_check_scratch_fs || err=true
-> +			rm -f ${RESULT_DIR}/require_scratch
-> +		    fi
->  		fi
->  
->  	    fi
-> @@ -623,15 +633,6 @@ for section in $HOST_OPTIONS_SECTIONS; do
->  		n_bad=`expr $n_bad + 1`
->  		quick=false
->  	    fi
-> -	    if [ ! -f $seqres.notrun ]
-> -	    then
-> -		try="$try $seqnum"
-> -		n_try=`expr $n_try + 1`
-> -		test -f ${RESULT_DIR}/require_test && _check_test_fs
-> -		rm -f ${RESULT_DIR}/require_test
-> -		test -f ${RESULT_DIR}/require_scratch && _check_scratch_fs
-> -		rm -f ${RESULT_DIR}/require_scratch
-> -	    fi
->  
->  	    seq="after_$seqnum"
+On Tue, Dec 16, 2014 at 12:18 AM, Dave Chinner <david@fromorbit.com> wrote:
+> On Mon, Dec 15, 2014 at 03:39:17PM -0600, Eric Sandeen wrote:
+>> On 12/15/14 3:06 PM, Dave Chinner wrote:
+>> > On Mon, Dec 15, 2014 at 11:19:43PM +0100, Dushan Tcholich wrote:
+>> >>
+>> >> This is initial xfstests implementation for Reiser4 filesystem.
+>> >>
+>> >
+>> > Policy question to the wider audience: should we support out of tree
+>> > filesystems in fstests? I can't verify the patches nor maintain
+>> > support for such filesystems, nor is there a wide developer or
+>> > distro demand for testing such filesystems. If there's only one or
+>> > two developers that need support for reiser4, then it might be best
+>> > for to maintain the xfstests patches out of tree, too.
+>> >
+>> > What does everyone think?
+>>
+>> I think you have your hands completely full with in-tree filesystems,
+>> and opening the door to many new tests for out-of-tree filesystems could
+>> lead to Too Much Work.
+>>
+>> But simply adding the simple things in this patch to make generic tests
+>> work seems fairly harmless; it should be a one-shot deal, with no ongoing load.
+>> So from where I sit I don't see a big problem with a patch like this.
+>
+> That seems fair enough, though I do wonder if we should try to
+> structure the common code to make it easier to add/maintain support
+> like this.
+>
+>> Adding a lot of reiser4 specific tests is probably a different question,
+>> though.
+>
+> Yup, and that's my main concern.
+>
 
-Looks fine as is, but in the interest of slowly cleaning up check,
-can you factor this out into a helper function such as
-"check_filesystems" using 8 space tabs?
+There won't be any specific tests until it gets in mainline.
 
-Cheers,
+>> In theory it shouldn't be hard for out-of-tree filesystems to maintain
+>> their own tree of tests which could just drop in under tests/ right?
+>
+> Yes, the high level scripts source fs specific tests from
+> tests/$FSTYP, so such test directories would be easy to maintain as
+> out of tree patches.
+>
+I agree with this.
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+> Cheers,
+>
+> Dave.
+>
+> --
+> Dave Chinner
+> david@fromorbit.com
