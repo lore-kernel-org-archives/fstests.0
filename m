@@ -1,116 +1,98 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:32420 "EHLO
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:54528 "EHLO
 	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750722AbaLOVHM (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 15 Dec 2014 16:07:12 -0500
-Date: Tue, 16 Dec 2014 08:06:31 +1100
+	by vger.kernel.org with ESMTP id S1750907AbaLOVcv (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 15 Dec 2014 16:32:51 -0500
+Date: Tue, 16 Dec 2014 08:32:49 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] Reiser4 initial implementation
-Message-ID: <20141215210631.GT24183@dastard>
-References: <alpine.LNX.2.00.1412152315300.21847@reiser4.gekom>
+Subject: Re: [PATCH] Check O_DIRECT support before testing direct I/O
+Message-ID: <20141215213248.GU24183@dastard>
+References: <alpine.LNX.2.00.1412152332120.21847@reiser4.gekom>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <alpine.LNX.2.00.1412152315300.21847@reiser4.gekom>
+In-Reply-To: <alpine.LNX.2.00.1412152332120.21847@reiser4.gekom>
 Sender: fstests-owner@vger.kernel.org
 To: Dushan Tcholich <dusanc@gmail.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 15, 2014 at 11:19:43PM +0100, Dushan Tcholich wrote:
+On Tue, Dec 16, 2014 at 12:03:35AM +0100, Dushan Tcholich wrote:
 > 
-> This is initial xfstests implementation for Reiser4 filesystem.
+> In december 2013 Juhno Ryu posted a patch xfstests: check O_DIRECT 
+> support before testing direct I/O to xfs@oss.sgi.com 
+> http://oss.sgi.com/archives/xfs/2013-12/msg00759.html
+
+At the time, xfstests was going through maintainer issues - SGI was
+dropping the ball, and I didn't start to pick stuff up until mid
+january 2014.
+
+http://oss.sgi.com/archives/xfs/2014-01/msg00283.html
+
+"Note that I didn't pull in the tmpfs support patch series this time
+around as I'm not sure the discussions ever came to a conclusion
+before xmas/new year/LCA intervened. That will need to be picked up
+again..."
+
+And there was no followup reposts of the patchset, so it's not gone
+anywhere since.
+
+> As there are no archives of fstests m-l I couldn't find why his 
+> patches weren't applied so apologise if this is innapropriate but  
+> I rebased his patch upon current xfstests code:
+
+Tell me about it. If anyone knows the magic incantation to get the
+usual mailing list archive sites to answer a simple "can you archive
+this list" request, let me know, because I've tried repeatedly since
+this list was created and haven't had a single reply from any of
+them.
+
+FYI, when send patches with comments like this, the comments should
+be below the first "---" divider so that utilities like git am,
+patch, etc strip the comments away. In this case, they strip this:
+
+> ---
 > 
-
-Policy question to the wider audience: should we support out of tree
-filesystems in fstests? I can't verify the patches nor maintain
-support for such filesystems, nor is there a wide developer or
-distro demand for testing such filesystems. If there's only one or
-two developers that need support for reiser4, then it might be best
-for to maintain the xfstests patches out of tree, too.
-
-What does everyone think?
-
+> Some filesystems do not support O_DIRECT.  Check whether TEST_DIR supports 
+> it by running xfs_io with and without -d flag.
+> 
+> Signed-off-by: Junho Ryu <jayr@google.com>
 > Signed-off-by: Dushan Tcholich <dusanc@gmail.com>
+> 
+> ---
+
+away. i.e. commit message first, commentary second. Also, this needs
+a "From: Junho Ryu <jayr@google.com>" in the commit message.
+
+> 
 > 
 > --- xfstests.orig/common/rc	2014-12-14 15:17:59.000000000 +0100
 > +++ xfstests/common/rc	2014-12-15 19:40:36.000000000 +0100
-> @@ -622,7 +622,7 @@
->      xfs)
->  	def_blksz=`echo $MKFS_OPTIONS|sed -rn 's/.*-b ?size= ?+([0-9]+).*/\1/p'`
->  	;;
-> -    ext2|ext3|ext4|ext4dev|udf|btrfs)
-> +    ext2|ext3|ext4|ext4dev|udf|btrfs|reiser4)
->  	def_blksz=`echo $MKFS_OPTIONS| sed -rn 's/.*-b ?+([0-9]+).*/\1/p'`
->  	;;
->      esac
-> @@ -640,6 +640,7 @@
+> @@ -1391,6 +1395,7 @@
+>          AIO_TEST=src/aio-dio-regress/$1
+>          [ -x $AIO_TEST ] || _notrun "$AIO_TEST not built"
 >      fi
+> +    _require_odirect
+>  }
 >  
->      blocks=`expr $fssize / $blocksize`
-> +    fssizeK=`expr $fssize / 1024`K
-
-Is mkfs.resier4 really unable to take a byte or block size count for
-the filesystem size?
-
+>  # run an aio-dio program
+> @@ -1519,6 +1524,20 @@
+>  		_notrun "xfs_io $command failed (old kernel/wrong fs?)"
+>  }
 >  
->      if [ "$HOSTOS" == "Linux" ]; then
->  	devsize=`blockdev --getsize64 $SCRATCH_DEV`
-> @@ -665,6 +666,9 @@
->      btrfs)
->  	$MKFS_BTRFS_PROG $MKFS_OPTIONS -b $fssize $SCRATCH_DEV
->  	;;
-> +    reiser4)
-> +        ${MKFS_PROG}.$FSTYP $MKFS_OPTIONS -y -b $blocksize $SCRATCH_DEV $fssizeK 
-> +        ;;
+> +# check that kernel and filesystem support direct I/O
+> +_require_odirect()
+> +{
+> +       testfile=$TEST_DIR/$$.direct
+> +       $XFS_IO_PROG -F -f -c "pwrite 0 20k" $testfile 2>&1
+> +       if [ $? -eq 0 ]; then
+> +               $XFS_IO_PROG -F -f -d -c "pwrite 0 20k" $testfile 2>&1
+> +               if [ $? -ne 0 ]; then
+> +                       _notrun "O_DIRECT is not supported"
+> +               fi
+> +       fi
 
-You need to add support for MKFS_REISER4_PROG, etc. into
-common/config
-
->      *)
->  	_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized"
->  	;;
-> 
-> --- xfstests.orig/common/config	2014-12-14 15:17:59.000000000 +0100
-> +++ xfstests/common/config	2014-12-12 13:27:40.000000000 +0100
-> @@ -258,6 +256,9 @@
->  		# acls & xattrs aren't turned on by default on reiserfs
->  		export MOUNT_OPTIONS="-o acl,user_xattr $REISERFS_MOUNT_OPTIONS"
->  		;;
-> +	reiser4)
-> +		export MOUNT_OPTIONS=$REISER4_MOUNT_OPTIONS
-> +		;;
->  	gfs2)
->  		# acls aren't turned on by default on gfs2
->  		export MOUNT_OPTIONS="-o acl $GFS2_MOUNT_OPTIONS"
-> @@ -302,6 +303,9 @@
->  	reiserfs)
->  		export MKFS_OPTIONS="$REISERFS_MKFS_OPTIONS -q"
->  		;;
-> +	reiser4)
-> +                export MKFS_OPTIONS=$REISER4_MKFS_OPTIONS
-> +                ;;
-
-whitespae damage.
-
->  	gfs2)
->  		export MKFS_OPTIONS="$GFS2_MKFS_OPTIONS -O -p lock_nolock"
->  		;;
-> @@ -322,6 +326,9 @@
->  	reiserfs)
->  		export FSCK_OPTIONS="--yes"
->  		;;
-> +	reiser4)
-> +                export FSCK_OPTIONS="--yes"
-> +                ;;
-
-Whitespace damage. You could also just do:
-
--	reiserfs)
-+	reiser*)
-
-You also need to add the setup checks to the top of common/rc (i.e
-after the "check for correct setup" comment).
+Why test for buffered IO, then test for direct IO?
 
 Cheers,
 
