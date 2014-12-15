@@ -1,53 +1,37 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from imap.thunk.org ([74.207.234.97]:55642 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:55723 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751023AbaLNWRP (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sun, 14 Dec 2014 17:17:15 -0500
-Date: Sun, 14 Dec 2014 17:17:13 -0500
+	id S1750702AbaLOAEu (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sun, 14 Dec 2014 19:04:50 -0500
+Date: Sun, 14 Dec 2014 19:04:49 -0500
 From: Theodore Ts'o <tytso@mit.edu>
-Subject: Re: [PATCH v3] generic/299: various fixes
-Message-ID: <20141214221713.GQ29787@thunk.org>
-References: <1418295529-20565-1-git-send-email-eguan@redhat.com>
- <1418359401-8240-1-git-send-email-eguan@redhat.com>
- <20141214221221.GP29787@thunk.org>
+Subject: Re: [PATCH v2] ext4: the _require checks for bigalloc need a larger
+ fs size
+Message-ID: <20141215000449.GR29787@thunk.org>
+References: <1418335880-27252-1-git-send-email-vishal.l.verma@linux.intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20141214221221.GP29787@thunk.org>
+In-Reply-To: <1418335880-27252-1-git-send-email-vishal.l.verma@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
+To: Vishal Verma <vishal.l.verma@linux.intel.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Dec 14, 2014 at 05:12:21PM -0500, Theodore Ts'o wrote:
-> I'm currently a testing a patch which uses "pgrep -f $XFS_IO_PROG"
-> instead, but I'm a bit surprised no once else noticed this, I guess
-> people aren't building their xfstests test kernels with DM_SNAPSHOP or
-> DM_VERITY configured (either of which will seleect DM_BUFIO)?
+On Thu, Dec 11, 2014 at 03:11:20PM -0700, Vishal Verma wrote:
+> _require_ext4_bigalloc and _require_ext4_mkfs_bigalloc create a
+> 200k fs. DAX (as XIP before it) relies on a fs block size ==
+> system page size; ie 4k for us.  With a 200k fs size limit,
+> mkfs refuses to create a filesystem with a 4k block size, so
+> the check fails, but for a bogus reason.
+> Increasing the fs size to 512m allows mkfs to create a filesystem
+> with 4k block size, so the test passes.
+> 
+> Signed-off-by: Vishal Verma <vishal.l.verma@linux.intel.com>
+> Signed-off-by: Matthew Wilcox <willy@linux.intel.com>
 
-Ah, right, this hasn't gone upstream yet; I had just pulled it in
-because I was seeing the problem with the umount hanging and killing
-my test runs.
-
-Anyway, Eryu, I'd suggest you resend your patch with the following
-change, which seems to fix things up for me.
-
-And with this patch included, feel free to add:
+LGTM
 
 Reviewed-by: Theodore Ts'o <tytso@mit.edu>
 
-	      	       	   	     	 - Ted
-
-diff --git a/tests/generic/299 b/tests/generic/299
-index e5de45b..9b99a66 100755
---- a/tests/generic/299
-+++ b/tests/generic/299
-@@ -138,7 +138,7 @@ _workout()
- 	    done
- 	    # Following like will check that pid is still run.
- 	    # Once fio exit we can stop fallocate/truncate loop
--	    pgrep fio > /dev/null 2>&1 || break
-+	    pgrep -f $XFS_IO_PROG > /dev/null 2>&1 || break
- 	done
- 	wait $pid
- }
+						- Ted
