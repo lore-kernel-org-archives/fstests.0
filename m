@@ -1,41 +1,44 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-wi0-f181.google.com ([209.85.212.181]:62726 "EHLO
-	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750786AbaLOU0I (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 15 Dec 2014 15:26:08 -0500
-Received: by mail-wi0-f181.google.com with SMTP id r20so10334258wiv.8
-        for <fstests@vger.kernel.org>; Mon, 15 Dec 2014 12:26:05 -0800 (PST)
-Received: from [192.168.0.2] (178-222-112-234.dynamic.isp.telekom.rs. [178.222.112.234])
-        by mx.google.com with ESMTPSA id ex8sm14286931wjd.41.2014.12.15.12.26.04
-        for <fstests@vger.kernel.org>
-        (version=TLSv1.2 cipher=AES128-GCM-SHA256 bits=128/128);
-        Mon, 15 Dec 2014 12:26:04 -0800 (PST)
-Date: Mon, 15 Dec 2014 23:26:35 +0100 (CET)
-From: Dushan Tcholich <dusanc@gmail.com>
-Subject: [PATCH] generic/038: require fallocate support and test for trim
- support
-Message-ID: <alpine.LNX.2.00.1412152322070.21847@reiser4.gekom>
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:25450 "EHLO
+	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750811AbaLOUbi (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 15 Dec 2014 15:31:38 -0500
+Date: Tue, 16 Dec 2014 07:31:29 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 1/2] common: return failure if _check_xxx_filesystem
+ finds corruption
+Message-ID: <20141215203129.GR24183@dastard>
+References: <1418663367-18755-1-git-send-email-eguan@redhat.com>
 MIME-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1418663367-18755-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Add tests for allocate support and test if TRIM really works on tested 
-partition.
+On Tue, Dec 16, 2014 at 01:09:26AM +0800, Eryu Guan wrote:
+> Tests like xfs/179 depend on the return value of _check_scratch_fs to
+> detect fs corruption, but _check_$FSTYP_filesystem always returns 0.
 
-Signed-off-by: Dushan Tcholich <dusanc@gmail.com>
+which means xfs/179 is wrong, because when _check_scratch_fs fails it
+exits immediately with status = 1, which triggers the test harness
+to record a test failure. (i.e. xfs/179 != check, so exits)
 
---- xfstests.orig/tests/generic/038	2014-12-14 15:18:00.000000000 +0100
-+++ xfstests/tests/generic/038	2014-12-15 23:21:11.000000000 +0100
-@@ -70,6 +70,10 @@
- _supported_os Linux
- _require_scratch
- _require_fstrim
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_command "truncate"
-+
-+_test_batched_discard $SCRATCH_MNT || _notrun "FITRIM not supported on $SCRATCH_DEV"
- 
- rm -f $seqres.full
- 
+So this change is not actually going to allow tests to check the
+return value of _check_scratch_fs, and check itself doesn't care if
+the filesystem is corrupt or not - it just reports the state and
+moves on to the next test....
+
+> Also don't exit if these functions called by 'check', like what
+> _check_xfs_filesystem() does.
+
+That's a separate issue, and should be in it's own patch ;)
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
