@@ -1,30 +1,29 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from victor.provo.novell.com ([137.65.250.26]:45580 "EHLO
+Received: from victor.provo.novell.com ([137.65.250.26]:57473 "EHLO
 	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751867AbaLOJxA (ORCPT
+	by vger.kernel.org with ESMTP id S1752317AbaLOJzQ (ORCPT
 	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
-	Mon, 15 Dec 2014 04:53:00 -0500
+	Mon, 15 Dec 2014 04:55:16 -0500
 From: Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH RESEND] fstests: btrfs, add test for snapshoting after file write + truncate
-Date: Mon, 15 Dec 2014 09:52:46 +0000
-Message-Id: <1418637166-7470-1-git-send-email-fdmanana@suse.com>
+Subject: [PATCH RESEND] fstests: btrfs, add regression test for clone ioctl
+Date: Mon, 15 Dec 2014 09:53:37 +0000
+Message-Id: <1418637217-7523-1-git-send-email-fdmanana@suse.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Regression test for a btrfs issue where if right after the snapshot
-creation ioctl started, a file write followed by a file truncate
-happened, with both operations increasing the file's size, the created
-snapshot would capture an inconsistent state of the file system tree.
-That state reflected the file truncation but it didn't reflect the
-write operation, and left a gap between two file extent items (and
-that gap corresponded to the total or a partial area of the write
-operation's range).
+Regression test for a btrfs clone ioctl issue where races between
+a clone operation and concurrent target file reads would result in
+leaving stale data in the page cache. After the clone operation
+finished, reading from the clone target file would return the old
+and no longer valid data. This affected only buffered reads (i.e.
+didn't affect direct IO reads).
 
 This issue was fixed by the following linux kernel patch:
 
-    Btrfs: fix snapshot inconsistency after a file write followed by truncate
+    Btrfs: ensure readers see new data after a clone operation
+    (commit c125b8bff1d9f6c8c91ce4eb8bd5616058c7d510)
 
 Signed-off-by: Filipe Manana <fdmanana@suse.com>
 Reviewed-by: Josef Bacik <jbacik@fb.com>
@@ -32,33 +31,33 @@ Reviewed-by: Josef Bacik <jbacik@fb.com>
 
 Resending because it was missed in the last git update.
 
- tests/btrfs/080     | 169 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/080.out |   2 +
+ tests/btrfs/081     | 135 +++++++++++++++++++++++++++++++++
+ tests/btrfs/081.out | 210 ++++++++++++++++++++++++++++++++++++++++++++++++++++
  tests/btrfs/group   |   1 +
- 3 files changed, 172 insertions(+)
- create mode 100755 tests/btrfs/080
- create mode 100644 tests/btrfs/080.out
+ 3 files changed, 346 insertions(+)
+ create mode 100755 tests/btrfs/081
+ create mode 100644 tests/btrfs/081.out
 
-diff --git a/tests/btrfs/080 b/tests/btrfs/080
+diff --git a/tests/btrfs/081 b/tests/btrfs/081
 new file mode 100755
-index 0000000..a5d3b38
+index 0000000..51d0e84
 --- /dev/null
-+++ b/tests/btrfs/080
-@@ -0,0 +1,169 @@
++++ b/tests/btrfs/081
+@@ -0,0 +1,135 @@
 +#! /bin/bash
-+# FSQA Test No. 080
++# FSQA Test No. 081
 +#
-+# Regression test for a btrfs issue where if right after the snapshot creation
-+# ioctl started, a file write followed by a file truncate happened, with both
-+# operations increasing the file's size, the created snapshot would capture an
-+# inconsistent state of the file system tree. That state reflected the file
-+# truncation but it didn't reflect the write operation, and left a gap between
-+# two file extent items (and that gap corresponded to the total or a partial
-+# area of the write operation's range).
++# Regression test for a btrfs clone ioctl issue where races between
++# a clone operation and concurrent target file reads would result in
++# leaving stale data in the page cache. After the clone operation
++# finished, reading from the clone target file would return the old
++# and no longer valid data. This affected only buffered reads (i.e.
++# didn't affect direct IO reads).
 +#
 +# This issue was fixed by the following linux kernel patch:
 +#
-+#     Btrfs: fix snapshot inconsistency after a file write followed by truncate
++#     Btrfs: ensure readers see new data after a clone operation
++#     (commit c125b8bff1d9f6c8c91ce4eb8bd5616058c7d510)
 +#
 +#-----------------------------------------------------------------------
 +#
@@ -89,9 +88,6 @@ index 0000000..a5d3b38
 +
 +_cleanup()
 +{
-+	for p in ${cpu_stress_pids[*]}; do
-+		kill $p &> /dev/null
-+	done
 +	rm -f $tmp.*
 +}
 +
@@ -103,134 +99,311 @@ index 0000000..a5d3b38
 +_need_to_be_root
 +_supported_fs btrfs
 +_supported_os Linux
-+_require_scratch_nocheck
++_require_scratch
++_require_cloner
 +
 +rm -f $seqres.full
 +
-+create_snapshot()
-+{
-+	local ts=`date +'%H_%M_%S_%N'`
++num_extents=100
++extent_size=8192
 +
-+	_run_btrfs_util_prog subvolume snapshot -r \
-+		$SCRATCH_MNT $SCRATCH_MNT/"${ts}_snap"
++create_source_file()
++{
++	name=$1
++
++	# Create a file with $num_extents extents, each with a size of
++	# $extent_size bytes.
++	touch $SCRATCH_MNT/$name
++	for ((i = 0; i < $num_extents; i++)); do
++		off=$((i * $extent_size))
++		$XFS_IO_PROG \
++			-c "pwrite -S $i -b $extent_size $off $extent_size" \
++			-c "fsync" $SCRATCH_MNT/$name | _filter_xfs_io
++	done
 +}
 +
-+create_file()
++create_target_file()
 +{
-+	local name=$1
++	name=$1
++	file_size=$(($num_extents * $extent_size))
 +
-+	run_check $XFS_IO_PROG -f \
-+		-c "pwrite -S 0xaa -b 32K 0 32K" \
-+		-c "fsync" \
-+		-c "pwrite -S 0xbb -b 32770 16K 32770" \
-+		-c "truncate 90123" \
-+		$SCRATCH_MNT/$name
++	$XFS_IO_PROG -f -c "pwrite -S 0xff 0 $file_size" \
++		-c "fsync" $SCRATCH_MNT/$name | _filter_xfs_io
 +}
 +
-+workout()
++reader_loop()
 +{
-+	local name=$1
++	name=$1
 +
-+	create_file $name &
-+	fpid=$!
-+	create_snapshot &
-+	spid=$!
-+	wait $fpid
-+	create_ret=$?
-+	wait $spid
-+	snap_ret=$?
-+	if [ $create_ret != 0 -o $snap_ret != 0 ]; then
-+		_fail "Failure creating file or snapshot, check $seqres.full for details"
-+	fi
++	while true; do
++		cat $SCRATCH_MNT/$name > /dev/null
++	done
 +}
 +
-+# If the installed btrfs mkfs supports the no-holes feature, make sure the
-+# created fs doesn't get that feature enabled. With it enabled, the below fsck
-+# call wouldn't fail. This feature hasn't been enabled by default since it was
-+# introduced, but be safe and explicitly disable it.
-+_scratch_mkfs -O list-all 2>&1 | grep -q '\bno\-holes\b'
-+if [ $? -eq 0 ]; then
-+	mkfs_options="-O ^no-holes"
-+fi
-+_scratch_mkfs "$mkfs_options" >>$seqres.full 2>&1
-+
++_scratch_mkfs >>$seqres.full 2>&1
 +_scratch_mount
 +
-+# Run some background load in order to make the issue easier to trigger.
-+# Specially needed when testing with non-debug kernels and there isn't
-+# any other significant load on the test machine other than this test.
-+num_cpus=`$here/src/feature -o`
-+num_procs=$(($num_cpus * 20))
-+for ((i = 0; i < $num_procs; i++)); do
-+	while true; do
-+		true
-+	done &
-+	cpu_stress_pids[$i]=$!
-+done
++echo "Creating source file..."
++create_source_file "foo"
++echo "Creating target file..."
++create_target_file "bar"
 +
-+for ((i = 1; i <= 100; i++)); do
-+	workout "foobar_$i"
-+done
++reader_loop "bar" &
++reader_pid=$!
 +
-+for ((i = 0; i < $num_procs; i++)); do
-+	kill ${cpu_stress_pids[$i]} &> /dev/null
-+	unset cpu_stress_pids[$i]
-+done
++$CLONER_PROG -s 0 -d 0 -l $(($num_extents * $extent_size)) \
++	$SCRATCH_MNT/foo $SCRATCH_MNT/bar
 +
-+for f in $(find $SCRATCH_MNT -type f -name 'foobar_*'); do
-+	digest=`md5sum $f | cut -d ' ' -f 1`
-+	case $digest in
-+	"d41d8cd98f00b204e9800998ecf8427e")
-+		# ok, empty file
-+		;;
-+	"c28418534a020122aca59fd3ff9581b5")
-+		# ok, only first write captured
-+		;;
-+	"cd0032da89254cdc498fda396e6a9b54")
-+		# ok, only 2 first writes captured
-+		;;
-+	"a1963f914baf4d2579d643425f4e54bc")
-+		# ok, the 2 writes and the truncate were captured
-+		;;
-+	*)
-+		# not ok, truncate captured but not one or both writes
-+		_fail "Unexpected digest for file $f"
-+	esac
-+done
++kill $reader_pid > /dev/null 2>&1
 +
-+# Check the filesystem for inconsistencies.
-+# Before the btrfs kernel fix mentioned above, we would very often get fsck
-+# error messages like: "root 306 inode 338 errors 100, file extent discount".
-+#
-+# This was because if right after the snapshot creation ioctl started, a file
-+# write followed by a file truncate, with both operations increasing the file's
-+# size, we would get a snapshot that reflected a state where the file truncation
-+# was visible but the previous file write was not visible, breaking expected
-+# total ordering of operations and causing a gap between 2 file extents, where a
-+# file extent item representing the range [32K .. ALIGN(16K + 32770, 4096)] was
-+# missing in the snapshot's btree.
-+_check_scratch_fs
++# Now both foo and bar should have exactly the same content.
++# This didn't use to be the case before the btrfs kernel fix mentioned
++# above. The clone ioctl was racy, as it removed bar's pages from the
++# page cache and only after it would update bar's metadata to point to
++# the same extents that foo's metadata points to - and this was done in
++# an unprotected way, so that a file read request done right after the
++# clone ioctl removed the pages from the page cache and before it updated
++# bar's metadata, would result in populating the page cache with stale
++# data. Therefore a file read after the clone operation finished would
++# not get the cloned data but it would get instead the old and no longer
++# valid data.
++echo "Verifying file digests after cloning"
++md5sum $SCRATCH_MNT/foo | _filter_scratch
++md5sum $SCRATCH_MNT/bar | _filter_scratch
 +
-+echo "Silence is golden"
++# Validate the content of bar still matches foo's content even after
++# clearing all of bar's data from the page cache.
++_scratch_remount
++echo "Verifying target file digest after umount + mount"
++md5sum $SCRATCH_MNT/bar | _filter_scratch
++
 +status=0
 +exit
-diff --git a/tests/btrfs/080.out b/tests/btrfs/080.out
+diff --git a/tests/btrfs/081.out b/tests/btrfs/081.out
 new file mode 100644
-index 0000000..11a4a1a
+index 0000000..9ccd942
 --- /dev/null
-+++ b/tests/btrfs/080.out
-@@ -0,0 +1,2 @@
-+QA output created by 080
-+Silence is golden
++++ b/tests/btrfs/081.out
+@@ -0,0 +1,210 @@
++QA output created by 081
++Creating source file...
++wrote 8192/8192 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 8192
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 16384
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 24576
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 32768
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 40960
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 49152
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 57344
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 65536
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 73728
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 81920
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 90112
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 98304
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 106496
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 114688
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 122880
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 131072
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 139264
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 147456
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 155648
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 163840
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 172032
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 180224
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 188416
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 196608
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 204800
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 212992
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 221184
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 229376
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 237568
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 245760
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 253952
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 262144
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 270336
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 278528
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 286720
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 294912
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 303104
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 311296
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 319488
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 327680
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 335872
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 344064
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 352256
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 360448
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 368640
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 376832
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 385024
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 393216
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 401408
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 409600
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 417792
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 425984
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 434176
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 442368
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 450560
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 458752
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 466944
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 475136
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 483328
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 491520
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 499712
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 507904
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 516096
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 524288
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 532480
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 540672
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 548864
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 557056
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 565248
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 573440
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 581632
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 589824
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 598016
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 606208
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 614400
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 622592
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 630784
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 638976
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 647168
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 655360
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 663552
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 671744
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 679936
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 688128
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 696320
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 704512
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 712704
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 720896
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 729088
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 737280
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 745472
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 753664
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 761856
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 770048
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 778240
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 786432
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 794624
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 802816
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 811008
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Creating target file...
++wrote 819200/819200 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Verifying file digests after cloning
++14968c092c68e32fa35e776392d14523  SCRATCH_MNT/foo
++14968c092c68e32fa35e776392d14523  SCRATCH_MNT/bar
++Verifying target file digest after umount + mount
++14968c092c68e32fa35e776392d14523  SCRATCH_MNT/bar
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 8db4618..340cc50 100644
+index 340cc50..4eb1e92 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -81,3 +81,4 @@
- 077 auto quick
+@@ -82,3 +82,4 @@
  078 auto
  079 auto
-+080 auto snapshot
+ 080 auto snapshot
++081 auto quick clone
 -- 
 2.1.3
 
