@@ -1,159 +1,236 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-qa0-f44.google.com ([209.85.216.44]:45541 "EHLO
-	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751819AbaLOJcS (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 15 Dec 2014 04:32:18 -0500
-Received: by mail-qa0-f44.google.com with SMTP id j7so383395qaq.17
-        for <fstests@vger.kernel.org>; Mon, 15 Dec 2014 01:32:17 -0800 (PST)
-MIME-Version: 1.0
-In-Reply-To: <1418170485-3732-2-git-send-email-ddiss@suse.de>
-References: <1418170485-3732-1-git-send-email-ddiss@suse.de> <1418170485-3732-2-git-send-email-ddiss@suse.de>
-From: David Drysdale <drysdale@google.com>
-Date: Mon, 15 Dec 2014 09:31:57 +0000
-Message-ID: <CAHse=S91DYDaevHeFa51k2PAgHzoWO68QmGZrC7RNQ4Dm1Pojw@mail.gmail.com>
-Subject: Re: [PATCH 2/2] cifs: add server-side copy sanity test
-Content-Type: text/plain; charset=UTF-8
+Received: from victor.provo.novell.com ([137.65.250.26]:45580 "EHLO
+	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751867AbaLOJxA (ORCPT
+	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
+	Mon, 15 Dec 2014 04:53:00 -0500
+From: Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH RESEND] fstests: btrfs, add test for snapshoting after file write + truncate
+Date: Mon, 15 Dec 2014 09:52:46 +0000
+Message-Id: <1418637166-7470-1-git-send-email-fdmanana@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: David Disseldorp <ddiss@suse.de>
-Cc: fstests@vger.kernel.org, linux-cifs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Dec 10, 2014 at 12:14 AM, David Disseldorp <ddiss@suse.de> wrote:
->
-> This test uses the cloner binary to issue CIFS_IOC_COPYCHUNK_FILE
-> server-side copy requests.
->
-> Signed-off-by: David Disseldorp <ddiss@suse.de>
-> ---
->  tests/cifs/001     | 69 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/cifs/001.out | 21 +++++++++++++++++
->  tests/cifs/group   |  6 +++++
->  3 files changed, 96 insertions(+)
->  create mode 100755 tests/cifs/001
->  create mode 100644 tests/cifs/001.out
->  create mode 100644 tests/cifs/group
+Regression test for a btrfs issue where if right after the snapshot
+creation ioctl started, a file write followed by a file truncate
+happened, with both operations increasing the file's size, the created
+snapshot would capture an inconsistent state of the file system tree.
+That state reflected the file truncation but it didn't reflect the
+write operation, and left a gap between two file extent items (and
+that gap corresponded to the total or a partial area of the write
+operation's range).
 
-Does this also need a new tests/cifs/Makefile (so that e.g. the install
-target in tests/Makefile still works)?
+This issue was fixed by the following linux kernel patch:
 
-> diff --git a/tests/cifs/001 b/tests/cifs/001
-> new file mode 100755
-> index 0000000..57ce728
-> --- /dev/null
-> +++ b/tests/cifs/001
-> @@ -0,0 +1,69 @@
-> +#!/bin/bash
-> +# FS QA Test No. cifs/001
-> +#
-> +# Sanity test for server-side copies initiated via CIFS_IOC_COPYCHUNK_FILE
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (C) 2014 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +
-> +_cleanup()
-> +{
-> +       rm -f $tmp.*
-> +       rm -rf $TEST_DIR/$$
-> +}
-> +
-> +trap "_cleanup ; exit \$status" 0 1 2 3 15
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs cifs
-> +_supported_os Linux
-> +_require_cloner
-> +_require_test
-> +
-> +mkdir -p $TEST_DIR/$$/src || _fail "failed to create clone src dir"
-> +mkdir -p $TEST_DIR/$$/dest || _fail "failed to create clone dest dir"
-> +
-> +# populate 10 files, 1K-10K in size
-> +for i in `seq 1 10`; do
-> +       len=$(($i * 1024))
-> +       $XFS_IO_PROG -f -c "pwrite -S $i 0 $len" $TEST_DIR/$$/src/${i} \
-> +               | _filter_xfs_io
-> +done
-> +sync
-> +
-> +# clone each, then compare both versions
-> +for i in `seq 1 10`; do
-> +       $CLONER_PROG $TEST_DIR/$$/src/${i} $TEST_DIR/$$/dest/${i}
-> +       diff $TEST_DIR/$$/src/${i} $TEST_DIR/$$/dest/${i}
-> +done
-> +
-> +status=0
-> +exit
-> diff --git a/tests/cifs/001.out b/tests/cifs/001.out
-> new file mode 100644
-> index 0000000..54e2bbe
-> --- /dev/null
-> +++ b/tests/cifs/001.out
-> @@ -0,0 +1,21 @@
-> +QA output created by 001
-> +wrote 1024/1024 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 2048/2048 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 3072/3072 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 4096/4096 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 5120/5120 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 6144/6144 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 7168/7168 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 8192/8192 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 9216/9216 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 10240/10240 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> diff --git a/tests/cifs/group b/tests/cifs/group
-> new file mode 100644
-> index 0000000..6d07b1c
-> --- /dev/null
-> +++ b/tests/cifs/group
-> @@ -0,0 +1,6 @@
-> +# QA groups control file
-> +# Defines test groups and nominal group owners
-> +# - do not start group names with a digit
-> +# - comment line before each group is "new" description
-> +#
-> +001 auto quick
-> --
-> 2.1.2
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+    Btrfs: fix snapshot inconsistency after a file write followed by truncate
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Reviewed-by: Josef Bacik <jbacik@fb.com>
+---
+
+Resending because it was missed in the last git update.
+
+ tests/btrfs/080     | 169 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/080.out |   2 +
+ tests/btrfs/group   |   1 +
+ 3 files changed, 172 insertions(+)
+ create mode 100755 tests/btrfs/080
+ create mode 100644 tests/btrfs/080.out
+
+diff --git a/tests/btrfs/080 b/tests/btrfs/080
+new file mode 100755
+index 0000000..a5d3b38
+--- /dev/null
++++ b/tests/btrfs/080
+@@ -0,0 +1,169 @@
++#! /bin/bash
++# FSQA Test No. 080
++#
++# Regression test for a btrfs issue where if right after the snapshot creation
++# ioctl started, a file write followed by a file truncate happened, with both
++# operations increasing the file's size, the created snapshot would capture an
++# inconsistent state of the file system tree. That state reflected the file
++# truncation but it didn't reflect the write operation, and left a gap between
++# two file extent items (and that gap corresponded to the total or a partial
++# area of the write operation's range).
++#
++# This issue was fixed by the following linux kernel patch:
++#
++#     Btrfs: fix snapshot inconsistency after a file write followed by truncate
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2014 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	for p in ${cpu_stress_pids[*]}; do
++		kill $p &> /dev/null
++	done
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_need_to_be_root
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch_nocheck
++
++rm -f $seqres.full
++
++create_snapshot()
++{
++	local ts=`date +'%H_%M_%S_%N'`
++
++	_run_btrfs_util_prog subvolume snapshot -r \
++		$SCRATCH_MNT $SCRATCH_MNT/"${ts}_snap"
++}
++
++create_file()
++{
++	local name=$1
++
++	run_check $XFS_IO_PROG -f \
++		-c "pwrite -S 0xaa -b 32K 0 32K" \
++		-c "fsync" \
++		-c "pwrite -S 0xbb -b 32770 16K 32770" \
++		-c "truncate 90123" \
++		$SCRATCH_MNT/$name
++}
++
++workout()
++{
++	local name=$1
++
++	create_file $name &
++	fpid=$!
++	create_snapshot &
++	spid=$!
++	wait $fpid
++	create_ret=$?
++	wait $spid
++	snap_ret=$?
++	if [ $create_ret != 0 -o $snap_ret != 0 ]; then
++		_fail "Failure creating file or snapshot, check $seqres.full for details"
++	fi
++}
++
++# If the installed btrfs mkfs supports the no-holes feature, make sure the
++# created fs doesn't get that feature enabled. With it enabled, the below fsck
++# call wouldn't fail. This feature hasn't been enabled by default since it was
++# introduced, but be safe and explicitly disable it.
++_scratch_mkfs -O list-all 2>&1 | grep -q '\bno\-holes\b'
++if [ $? -eq 0 ]; then
++	mkfs_options="-O ^no-holes"
++fi
++_scratch_mkfs "$mkfs_options" >>$seqres.full 2>&1
++
++_scratch_mount
++
++# Run some background load in order to make the issue easier to trigger.
++# Specially needed when testing with non-debug kernels and there isn't
++# any other significant load on the test machine other than this test.
++num_cpus=`$here/src/feature -o`
++num_procs=$(($num_cpus * 20))
++for ((i = 0; i < $num_procs; i++)); do
++	while true; do
++		true
++	done &
++	cpu_stress_pids[$i]=$!
++done
++
++for ((i = 1; i <= 100; i++)); do
++	workout "foobar_$i"
++done
++
++for ((i = 0; i < $num_procs; i++)); do
++	kill ${cpu_stress_pids[$i]} &> /dev/null
++	unset cpu_stress_pids[$i]
++done
++
++for f in $(find $SCRATCH_MNT -type f -name 'foobar_*'); do
++	digest=`md5sum $f | cut -d ' ' -f 1`
++	case $digest in
++	"d41d8cd98f00b204e9800998ecf8427e")
++		# ok, empty file
++		;;
++	"c28418534a020122aca59fd3ff9581b5")
++		# ok, only first write captured
++		;;
++	"cd0032da89254cdc498fda396e6a9b54")
++		# ok, only 2 first writes captured
++		;;
++	"a1963f914baf4d2579d643425f4e54bc")
++		# ok, the 2 writes and the truncate were captured
++		;;
++	*)
++		# not ok, truncate captured but not one or both writes
++		_fail "Unexpected digest for file $f"
++	esac
++done
++
++# Check the filesystem for inconsistencies.
++# Before the btrfs kernel fix mentioned above, we would very often get fsck
++# error messages like: "root 306 inode 338 errors 100, file extent discount".
++#
++# This was because if right after the snapshot creation ioctl started, a file
++# write followed by a file truncate, with both operations increasing the file's
++# size, we would get a snapshot that reflected a state where the file truncation
++# was visible but the previous file write was not visible, breaking expected
++# total ordering of operations and causing a gap between 2 file extents, where a
++# file extent item representing the range [32K .. ALIGN(16K + 32770, 4096)] was
++# missing in the snapshot's btree.
++_check_scratch_fs
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/btrfs/080.out b/tests/btrfs/080.out
+new file mode 100644
+index 0000000..11a4a1a
+--- /dev/null
++++ b/tests/btrfs/080.out
+@@ -0,0 +1,2 @@
++QA output created by 080
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 8db4618..340cc50 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -81,3 +81,4 @@
+ 077 auto quick
+ 078 auto
+ 079 auto
++080 auto snapshot
+-- 
+2.1.3
+
