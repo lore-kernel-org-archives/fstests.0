@@ -1,36 +1,68 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-wi0-f181.google.com ([209.85.212.181]:50544 "EHLO
-	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750777AbaLOXEz (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 15 Dec 2014 18:04:55 -0500
-Received: by mail-wi0-f181.google.com with SMTP id r20so10737958wiv.2
-        for <fstests@vger.kernel.org>; Mon, 15 Dec 2014 15:04:54 -0800 (PST)
-Received: from [192.168.0.2] (178-222-112-234.dynamic.isp.telekom.rs. [178.222.112.234])
-        by mx.google.com with ESMTPSA id e7sm14677899wjx.31.2014.12.15.15.04.53
-        for <fstests@vger.kernel.org>
-        (version=TLSv1.2 cipher=AES128-GCM-SHA256 bits=128/128);
-        Mon, 15 Dec 2014 15:04:54 -0800 (PST)
-Date: Tue, 16 Dec 2014 02:05:23 +0100 (CET)
-From: Dushan Tcholich <dusanc@gmail.com>
-Subject: [PATCH v2]generic/038: require fallocate support
-Message-ID: <alpine.LNX.2.00.1412160201390.862@reiser4.gekom>
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:5996 "EHLO
+	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750777AbaLOXST (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 15 Dec 2014 18:18:19 -0500
+Date: Tue, 16 Dec 2014 10:18:12 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] Reiser4 initial implementation
+Message-ID: <20141215231812.GB2152@dastard>
+References: <alpine.LNX.2.00.1412152315300.21847@reiser4.gekom>
+ <20141215210631.GT24183@dastard>
+ <548F5505.4050807@sandeen.net>
 MIME-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <548F5505.4050807@sandeen.net>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: Dushan Tcholich <dusanc@gmail.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Add test for fallocate(2) support
+On Mon, Dec 15, 2014 at 03:39:17PM -0600, Eric Sandeen wrote:
+> On 12/15/14 3:06 PM, Dave Chinner wrote:
+> > On Mon, Dec 15, 2014 at 11:19:43PM +0100, Dushan Tcholich wrote:
+> >>
+> >> This is initial xfstests implementation for Reiser4 filesystem.
+> >>
+> > 
+> > Policy question to the wider audience: should we support out of tree
+> > filesystems in fstests? I can't verify the patches nor maintain
+> > support for such filesystems, nor is there a wide developer or
+> > distro demand for testing such filesystems. If there's only one or
+> > two developers that need support for reiser4, then it might be best
+> > for to maintain the xfstests patches out of tree, too.
+> > 
+> > What does everyone think?
+> 
+> I think you have your hands completely full with in-tree filesystems,
+> and opening the door to many new tests for out-of-tree filesystems could
+> lead to Too Much Work.
+> 
+> But simply adding the simple things in this patch to make generic tests
+> work seems fairly harmless; it should be a one-shot deal, with no ongoing load.
+> So from where I sit I don't see a big problem with a patch like this.
 
-Signed-off-by: Dushan Tcholich <dusanc@gmail.com>
+That seems fair enough, though I do wonder if we should try to
+structure the common code to make it easier to add/maintain support
+like this.
 
---- xfstests.orig/tests/generic/038	2014-12-14 15:18:00.000000000 +0100
-+++ xfstests/tests/generic/038	2014-12-15 23:21:11.000000000 +0100
-@@ -70,6 +70,7 @@
- _supported_os Linux
- _require_scratch
- _require_fstrim
-+_require_xfs_io_command "falloc"
- 
- rm -f $seqres.full
- 
+> Adding a lot of reiser4 specific tests is probably a different question,
+> though.
+
+Yup, and that's my main concern.
+
+> In theory it shouldn't be hard for out-of-tree filesystems to maintain
+> their own tree of tests which could just drop in under tests/ right?
+
+Yes, the high level scripts source fs specific tests from
+tests/$FSTYP, so such test directories would be easy to maintain as
+out of tree patches.
+
+Cheers,
+
+Dave.
+
+-- 
+Dave Chinner
+david@fromorbit.com
