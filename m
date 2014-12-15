@@ -1,109 +1,55 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60453 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:43069 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750763AbaLORKJ (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 15 Dec 2014 12:10:09 -0500
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id sBFHA951022943
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <fstests@vger.kernel.org>; Mon, 15 Dec 2014 12:10:09 -0500
+	id S1750773AbaLORcH (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 15 Dec 2014 12:32:07 -0500
+Date: Tue, 16 Dec 2014 01:32:00 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 2/2] check: treat _check_{test,scratch}_fs failures as test failures
-Date: Tue, 16 Dec 2014 01:09:27 +0800
-Message-Id: <1418663367-18755-2-git-send-email-eguan@redhat.com>
-In-Reply-To: <1418663367-18755-1-git-send-email-eguan@redhat.com>
-References: <1418663367-18755-1-git-send-email-eguan@redhat.com>
+Subject: Re: [PATCH] ext4/308,generic/324: require fallocate support
+Message-ID: <20141215172937.GX15495@dhcp-13-216.nay.redhat.com>
+References: <1418658443-31670-1-git-send-email-tytso@mit.edu>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1418658443-31670-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Currently if _check_test_fs and/or _check_scratch_fs find corruption,
-the test itself is still reported as pass, like
+On Mon, Dec 15, 2014 at 10:47:23AM -0500, Theodore Ts'o wrote:
+> These tests use the falloc command in xfs_io, and there are some file
+> systems (ext3) or file system configurations (ext4 in ext3
+> compatibility mode) which do not support fallocate.  So add the
+> explicit requirement to avoid false test failures.
 
-	[root@hp-dl388eg8-01 xfstests]# ./check xfs/071 xfs/072
-	FSTYP         -- xfs (non-debug)
-	PLATFORM      -- Linux/x86_64 hp-dl388eg8-01 3.18.0-rc7+
-	MKFS_OPTIONS  -- -f -bsize=4096 /dev/sda6
-	MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 /dev/sda6 /mnt/testarea/scratch
+The two tests fail because of no defrag support on ext3 on my test host.
 
-	xfs/071  2s
-	_check_xfs_filesystem: filesystem on /dev/sda6 is inconsistent (r) (see /root/xfstests/results//xfs/071.full)
-	xfs/072  1s
-	Ran: xfs/071 xfs/072
-	Passed all 2 tests
+ext4/308         [not run] defragmentation not supported for fstype "ext3"                                                                                     
+generic/324 19s ... [not run] defragmentation not supported for fstype "ext3"
 
-	[root@hp-dl388eg8-01 xfstests]# echo $?
-	0
+But the check makes sense to me.
 
-Usually it's not a problem, but it does confuse scripts that depend on
-return value of check. Update check to treat _check_{test,scratch}_fs
-failures as test failures too, new test output is like
+> 
+> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> ---
+>  tests/ext4/308    | 1 +
+>  tests/generic/324 | 1 +
+>  2 files changed, 2 insertions(+)
+> 
+> diff --git a/tests/ext4/308 b/tests/ext4/308
+> index 8df24ba..948ff3f 100755
+> --- a/tests/ext4/308
+> +++ b/tests/ext4/308
+> @@ -46,6 +46,7 @@ _supported_os Linux
+>  _need_to_be_root
+>  _require_scratch
+>  _require_defrag
+> +_require_xfs_io_command "falloc"
 
-	[root@hp-dl388eg8-01 xfstests]# ./check xfs/071 xfs/072
-	FSTYP         -- xfs (non-debug)
-	PLATFORM      -- Linux/x86_64 hp-dl388eg8-01 3.18.0-rc7+
-	MKFS_OPTIONS  -- -f -bsize=4096 /dev/sda6
-	MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 /dev/sda6 /mnt/testarea/scratch
+ext4/308 also uses fiemap command, I think we need another check here
 
-	xfs/071 2s ... 2s
-	_check_xfs_filesystem: filesystem on /dev/sda6 is inconsistent (r) (see /root/xfstests/results//xfs/071.full)
-	xfs/072 1s ... 1s
-	Ran: xfs/071 xfs/072
-	Failures: xfs/071
-	Failed 1 of 2 tests
+_require_xfs_io_command "fiemap"
 
-	[root@hp-dl388eg8-01 xfstests]# echo $?
-	1
-
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
-
-Note that the xfs/071 corruption issue is an xfs_repair bug,
-Eric has sent a patch to fix it, see
-
-http://www.spinics.net/lists/xfs/msg31018.html
-
- check | 19 ++++++++++---------
- 1 file changed, 10 insertions(+), 9 deletions(-)
-
-diff --git a/check b/check
-index 42a1ac2..4cf7070 100755
---- a/check
-+++ b/check
-@@ -611,6 +611,16 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 			    err=true
- 			fi
- 		    fi
-+		    try="$try $seqnum"
-+		    n_try=`expr $n_try + 1`
-+		    if [ -f ${RESULT_DIR}/require_test ]; then
-+			_check_test_fs || err=true
-+			rm -f ${RESULT_DIR}/require_test
-+		    fi
-+		    if [ -f ${RESULT_DIR}/require_scratch ]; then
-+			_check_scratch_fs || err=true
-+			rm -f ${RESULT_DIR}/require_scratch
-+		    fi
- 		fi
- 
- 	    fi
-@@ -623,15 +633,6 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 		n_bad=`expr $n_bad + 1`
- 		quick=false
- 	    fi
--	    if [ ! -f $seqres.notrun ]
--	    then
--		try="$try $seqnum"
--		n_try=`expr $n_try + 1`
--		test -f ${RESULT_DIR}/require_test && _check_test_fs
--		rm -f ${RESULT_DIR}/require_test
--		test -f ${RESULT_DIR}/require_scratch && _check_scratch_fs
--		rm -f ${RESULT_DIR}/require_scratch
--	    fi
- 
- 	    seq="after_$seqnum"
- 	done
--- 
-1.8.3.1
-
+Thanks,
+Eryu
