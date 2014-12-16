@@ -1,160 +1,124 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47545 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750894AbaLPMKr (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 16 Dec 2014 07:10:47 -0500
-Date: Tue, 16 Dec 2014 20:10:43 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] xfstests: btrfs/080 add test case for qgroup account on
- shared extents
-Message-ID: <20141216121043.GF15495@dhcp-13-216.nay.redhat.com>
-References: <1418723004-30543-1-git-send-email-bo.li.liu@oracle.com>
+Received: from mail-lb0-f181.google.com ([209.85.217.181]:39837 "EHLO
+	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750907AbaLPOI4 convert rfc822-to-8bit (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 16 Dec 2014 09:08:56 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1418723004-30543-1-git-send-email-bo.li.liu@oracle.com>
+Reply-To: fdmanana@gmail.com
+In-Reply-To: <548F8C4E.4020905@cn.fujitsu.com>
+References: <1418615699-18169-1-git-send-email-quwenruo@cn.fujitsu.com>
+	<CAL3q7H5TrEGT87by4Zgs_Gy-OagBBEQVdk0A54snC9334wRP1w@mail.gmail.com>
+	<CAL3q7H5XAR1UBYeNzcV6AXRFEpN7=gZ2znDycsDDE2opLovK3g@mail.gmail.com>
+	<20141215181953.GT27601@twin.jikos.cz>
+	<548F8C4E.4020905@cn.fujitsu.com>
+Date: Tue, 16 Dec 2014 14:08:53 +0000
+Message-ID: <CAL3q7H4tTSshBauZc8J7OgQhMSf=ks9qt9qLGCVHF9Rep-ULLg@mail.gmail.com>
+Subject: Re: [PATCH 1/2] btrfs-progs: Add support for btrfs-image + corrupt
+ script fsck test case.
+From: Filipe David Manana <fdmanana@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Sender: fstests-owner@vger.kernel.org
-To: Liu Bo <bo.li.liu@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: "dsterba@suse.cz" <dsterba@suse.cz>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org, Dave Chinner <david@fromorbit.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Dec 16, 2014 at 05:43:24PM +0800, Liu Bo wrote:
-> This is a regression test of
-> 'commit fcebe4562dec ("Btrfs: rework qgroup accounting")'
-> 
-> It can produce qgroup related warnings.
-> 
-> Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+On Tue, Dec 16, 2014 at 1:35 AM, Qu Wenruo <quwenruo@cn.fujitsu.com> wrote:
+>
+> -------- Original Message --------
+> Subject: Re: [PATCH 1/2] btrfs-progs: Add support for btrfs-image + corrupt
+> script fsck test case.
+> From: David Sterba <dsterba@suse.cz>
+> To: Filipe David Manana <fdmanana@gmail.com>
+> Date: 2014年12月16日 02:19
+>>
+>> On Mon, Dec 15, 2014 at 10:13:45AM +0000, Filipe David Manana wrote:
+>>>>
+>>>> So another thing I would like to see is doing a more comprehensive
+>>>> verification that the repair code worked as expected. Currently we
+>>>> only check that a readonly fsck, after running fsck --repair, returns
+>>>> 0.
+>>>>
+>>>> For the improvements you've been doing, it's equally important to
+>>>> verify that --repair recovered the inodes, links, etc to the
+>>>> lost+found directory (or whatever is the directory's name).
+>>>>
+>>>> So perhaps adding a verify.sh script to the tarball for example?
+>>>
+>>> Or, forgot before, it might be better to do such verification/test in
+>>> xfstests since we can create the fs and use the new btrfs-progs
+>>> programs to corrupt leafs/nodes. xfstests has a lot of infrastructure
+>>> already and probably run by a lot more people (compared to the fsck
+>>> tests of btrfs-progs).
+>>
+>> I'm thinking about the best way how to integrate that, but it seems that
+>> there will be always some level of code or infrastructure duplication
+>> (or other hassle).
+>>
+>> btrfs-corrupt-block is not installed by default (make install) and it's
+>> not a type of utility I'd consider for default installations. The tests
+>> would be skipped in absence of the utility, so there will be test
+>> environments where "install xfstests, install btrfspprogs" will not add
+>> the desired test coverage. Solvable by packaging the extra progs.
+>>
+>> Adding corrupt-block into xfsprogs is infeasible (IMO too much code from
+>> btrfs-progs to be added).
+>>
+>> I don't know how much infrastructure code we'd have to either write or
+>> copy from fstests, but I think it would not be that much. Ideally we
+>> could write the tests within btrfs-progs and then submit them to fstests
+>> once they're considered reliable. If we keep the same "syntax" of the
+>> tests, provide stubs where applicable, the code duplication in test
+>> itself would be zero. We'd only have to write the stubs in btrfs-progs
+>> and probably extend fstests to provide helpers for preparing/unpacking
+>> the images.
+>
+> In my wildest idea, if we have a good enough btrfs debugger(maybe even
+> stronger than debugfs), which can
+> do almost everything from read key/item to corrupt given structure, then we
+> can resolve them all.
+> No binary image since corruption can be done by it and verify can also done
+> by it.
+> (OK, it's just a daydream)
+>
+> But IMHO, isn't xfstests designed to mainly detect kernel defeats?
+> I don't see any fsck tool test case in it.
 
-I have trouble applying the patch, can you please take a look?
+I don't think xfstests is specific to test the kernel implementation
+of filesystems. I believe it includes user space code too, but I might
+be wrong so I'm CCing fstests and Dave to get an authoritative answer.
 
-patch: **** malformed patch at line 83: diff --git a/tests/btrfs/080.out b/tests/btrfs/080.out
+And I don't see a big problem with btrfs-corrupt not being built by
+default when running "make" on btrfs-progs. We can make the xfstest
+not run and print an informative message if the btrfs-corrupt program
+isn't available - several xfstests do this, they require some
+executable which isn't either in the xfstests nor xfsprogs
+repositories - for example generic/241 which requires 'dbench' and
+generic/299 which requires 'fio'.
 
-And for new test case, "btrfs: add test case for qgroup ..." is good
-enough, the seq number may be changed in future.
+Sure it would be ideal not requiring people to go into btrfs-progs,
+type "make btrfs-corrupt" and put in a $PATH directory. But that's
+certainly much better than not having automated tests, and I think
+even with that extra "work" developers at least would be willing to do
+it in their test machines. I also have a slight preference to get all
+tests in the same place (xfstests) rather than in multiple
+repositories (btrfs-progs, xfstests).
 
-Some comments inline by looking at the patch.
+thanks
 
-> ---
->  tests/btrfs/080     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/080.out |  3 +++
->  2 files changed, 76 insertions(+)
->  create mode 100755 tests/btrfs/080
->  create mode 100644 tests/btrfs/080.out
+>
+> Thanks,
+> Qu
+>
+>>
+>> Also, collecting the crafted binary images may bloat the git repo
+>> nicely, even if we use xz.
 
-You need to add test description to tests/btrfs/group too. And you can
-use the first unused seq number, I think it's 017 now.
 
-> 
-> diff --git a/tests/btrfs/080 b/tests/btrfs/080
-> new file mode 100755
-> index 0000000..2a12bf2
-> --- /dev/null
-> +++ b/tests/btrfs/080
-> @@ -0,0 +1,73 @@
-> +#! /bin/bash
-> +# FS QA Test No. 080
-> +#
-> +# Regression of 'commit fcebe4562dec ("Btrfs: rework qgroup accounting")'
-> +# this will throw a warning into dmesg.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2014 Liu Bo.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +    cd /
-> +    rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +
-> +_need_to_be_root
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +
-> +run_check _scratch_mkfs "-b 1g --nodesize 4096"
-> +run_check _scratch_mount
 
-I'm not sure if we need run_check here, I'll look at it again when I
-can run the test.
+-- 
+Filipe David Manana,
 
-> +
-> +run_check xfs_io -f -d -c "pwrite 0 8K" $SCRATCH_MNT/foo
-
-Use $XFS_IO_PROG here, which adds "-F" option if fs is not xfs.
-
-> +
-> +_run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/snap
-> +
-> +run_check cp --reflink $SCRATCH_MNT/foo $SCRATCH_MNT/foo-reflink
-> +run_check cp --reflink $SCRATCH_MNT/foo $SCRATCH_MNT/snap/foo-reflink
-> +run_check cp --reflink $SCRATCH_MNT/foo $SCRATCH_MNT/snap/foo-reflink2
-
-Need _require_cp_reflink first.
-
-> +
-> +_run_btrfs_util_prog quota enable $SCRATCH_MNT
-> +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-> +
-> +rm -fr $SCRATCH_MNT/* >& /dev/null
-
-I prefer "rm -fr $SCRATCH_MNT/* >/dev/null 2>&1"
-
-But we use /bin/bash for all fstests tests, >& can work too..
-
-> +
-> +_run_btrfs_util_prog filesystem sync $SCRATCH_MNT
-> +
-> +$BTRFS_UTIL_PROG qgroup show $SCRATCH_MNT | $SED_PROG -n '/[0-9]/p' | $AWK_PROG '{print $2" "$3}'
-
-Will dmesg log be checked? As the test will trigger warnings in dmesg, I
-assume that's how the test determine pass/fail.
-
-Thanks,
-Eryu
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/080.out b/tests/btrfs/080.out
-> new file mode 100644
-> index 0000000..eafa7c3
-> --- /dev/null
-> +++ b/tests/btrfs/080.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 080
-> +4096 4096
-> +4096 4096
-> -- 
-> 1.8.2.1
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+"Reasonable men adapt themselves to the world.
+ Unreasonable men adapt the world to themselves.
+ That's why all progress depends on unreasonable men."
