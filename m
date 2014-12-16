@@ -1,114 +1,59 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from userp1040.oracle.com ([156.151.31.81]:20231 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751088AbaLPJn5 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 16 Dec 2014 04:43:57 -0500
-From: Liu Bo <bo.li.liu@oracle.com>
-Subject: [PATCH] xfstests: btrfs/080 add test case for qgroup account on shared extents
-Date: Tue, 16 Dec 2014 17:43:24 +0800
-Message-Id: <1418723004-30543-1-git-send-email-bo.li.liu@oracle.com>
+Received: from mx1.redhat.com ([209.132.183.28]:33820 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751066AbaLPLmX (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 16 Dec 2014 06:42:23 -0500
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id sBGBgMZg017105
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <fstests@vger.kernel.org>; Tue, 16 Dec 2014 06:42:23 -0500
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH 1/3] common: exit only if _check_xxx_filesystem called by tests when corruption found
+Date: Tue, 16 Dec 2014 19:41:40 +0800
+Message-Id: <1418730102-17061-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-This is a regression test of
-'commit fcebe4562dec ("Btrfs: rework qgroup accounting")'
+Otherwise these functions cause check to exit if they find corruption
+and terminate the whole test.
 
-It can produce qgroup related warnings.
+_check_xfs_filesystem already behaves correctly, make
+_check_generic_filesystem and _check_btrfs_filesystem follow the same
+behavior.
 
-Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- tests/btrfs/080     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/080.out |  3 +++
- 2 files changed, 76 insertions(+)
- create mode 100755 tests/btrfs/080
- create mode 100644 tests/btrfs/080.out
+ common/rc | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/tests/btrfs/080 b/tests/btrfs/080
-new file mode 100755
-index 0000000..2a12bf2
---- /dev/null
-+++ b/tests/btrfs/080
-@@ -0,0 +1,73 @@
-+#! /bin/bash
-+# FS QA Test No. 080
-+#
-+# Regression of 'commit fcebe4562dec ("Btrfs: rework qgroup accounting")'
-+# this will throw a warning into dmesg.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2014 Liu Bo.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+_need_to_be_root
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+
-+run_check _scratch_mkfs "-b 1g --nodesize 4096"
-+run_check _scratch_mount
-+
-+run_check xfs_io -f -d -c "pwrite 0 8K" $SCRATCH_MNT/foo
-+
-+_run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/snap
-+
-+run_check cp --reflink $SCRATCH_MNT/foo $SCRATCH_MNT/foo-reflink
-+run_check cp --reflink $SCRATCH_MNT/foo $SCRATCH_MNT/snap/foo-reflink
-+run_check cp --reflink $SCRATCH_MNT/foo $SCRATCH_MNT/snap/foo-reflink2
-+
-+_run_btrfs_util_prog quota enable $SCRATCH_MNT
-+_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-+
-+rm -fr $SCRATCH_MNT/* >& /dev/null
-+
-+_run_btrfs_util_prog filesystem sync $SCRATCH_MNT
-+
-+$BTRFS_UTIL_PROG qgroup show $SCRATCH_MNT | $SED_PROG -n '/[0-9]/p' | $AWK_PROG '{print $2" "$3}'
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/080.out b/tests/btrfs/080.out
-new file mode 100644
-index 0000000..eafa7c3
---- /dev/null
-+++ b/tests/btrfs/080.out
-@@ -0,0 +1,3 @@
-+QA output created by 080
-+4096 4096
-+4096 4096
+diff --git a/common/rc b/common/rc
+index 765e05a..6bbdc69 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1719,7 +1719,9 @@ _check_generic_filesystem()
+ 
+     if [ $ok -eq 0 ]; then
+ 	status=1
+-	exit 1
++	if [ "$iam" != "check" ]; then
++		exit 1
++	fi
+     fi
+ 
+     return 0
+@@ -1930,7 +1932,9 @@ _check_btrfs_filesystem()
+ 
+     if [ $ok -eq 0 ]; then
+ 	status=1
+-	exit 1
++	if [ "$iam" != "check" ]; then
++		exit 1
++	fi
+     fi
+ 
+     return 0
 -- 
-1.8.2.1
+2.1.0
 
