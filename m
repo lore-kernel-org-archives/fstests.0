@@ -1,124 +1,160 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:48510 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:47545 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750994AbaLPLm1 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 16 Dec 2014 06:42:27 -0500
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id sBGBgRNc028698
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <fstests@vger.kernel.org>; Tue, 16 Dec 2014 06:42:27 -0500
+	id S1750894AbaLPMKr (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 16 Dec 2014 07:10:47 -0500
+Date: Tue, 16 Dec 2014 20:10:43 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v2 3/3] check: treat _check_{test,scratch}_fs failures as test failures
-Date: Tue, 16 Dec 2014 19:41:42 +0800
-Message-Id: <1418730102-17061-3-git-send-email-eguan@redhat.com>
-In-Reply-To: <1418730102-17061-1-git-send-email-eguan@redhat.com>
-References: <1418730102-17061-1-git-send-email-eguan@redhat.com>
+Subject: Re: [PATCH] xfstests: btrfs/080 add test case for qgroup account on
+ shared extents
+Message-ID: <20141216121043.GF15495@dhcp-13-216.nay.redhat.com>
+References: <1418723004-30543-1-git-send-email-bo.li.liu@oracle.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1418723004-30543-1-git-send-email-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+To: Liu Bo <bo.li.liu@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Currently if _check_test_fs and/or _check_scratch_fs find corruption,
-the test itself is still reported as pass, like
+On Tue, Dec 16, 2014 at 05:43:24PM +0800, Liu Bo wrote:
+> This is a regression test of
+> 'commit fcebe4562dec ("Btrfs: rework qgroup accounting")'
+> 
+> It can produce qgroup related warnings.
+> 
+> Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
 
-	[root@hp-dl388eg8-01 xfstests]# ./check xfs/071 xfs/072
-	FSTYP         -- xfs (non-debug)
-	PLATFORM      -- Linux/x86_64 hp-dl388eg8-01 3.18.0-rc7+
-	MKFS_OPTIONS  -- -f -bsize=4096 /dev/sda6
-	MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 /dev/sda6 /mnt/testarea/scratch
+I have trouble applying the patch, can you please take a look?
 
-	xfs/071  2s
-	_check_xfs_filesystem: filesystem on /dev/sda6 is inconsistent (r) (see /root/xfstests/results//xfs/071.full)
-	xfs/072  1s
-	Ran: xfs/071 xfs/072
-	Passed all 2 tests
+patch: **** malformed patch at line 83: diff --git a/tests/btrfs/080.out b/tests/btrfs/080.out
 
-	[root@hp-dl388eg8-01 xfstests]# echo $?
-	0
+And for new test case, "btrfs: add test case for qgroup ..." is good
+enough, the seq number may be changed in future.
 
-Usually it's not a problem, but it does confuse scripts that depend on
-return value of check. Update check to treat _check_{test,scratch}_fs
-failures as test failures too, new test output is like
+Some comments inline by looking at the patch.
 
-	[root@hp-dl388eg8-01 xfstests]# ./check xfs/071 xfs/072
-	FSTYP         -- xfs (non-debug)
-	PLATFORM      -- Linux/x86_64 hp-dl388eg8-01 3.18.0-rc7+
-	MKFS_OPTIONS  -- -f -bsize=4096 /dev/sda6
-	MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 /dev/sda6 /mnt/testarea/scratch
+> ---
+>  tests/btrfs/080     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/080.out |  3 +++
+>  2 files changed, 76 insertions(+)
+>  create mode 100755 tests/btrfs/080
+>  create mode 100644 tests/btrfs/080.out
 
-	xfs/071 2s ... 2s
-	_check_xfs_filesystem: filesystem on /dev/sda6 is inconsistent (r) (see /root/xfstests/results//xfs/071.full)
-	xfs/072 1s ... 1s
-	Ran: xfs/071 xfs/072
-	Failures: xfs/071
-	Failed 1 of 2 tests
+You need to add test description to tests/btrfs/group too. And you can
+use the first unused seq number, I think it's 017 now.
 
-	[root@hp-dl388eg8-01 xfstests]# echo $?
-	1
+> 
+> diff --git a/tests/btrfs/080 b/tests/btrfs/080
+> new file mode 100755
+> index 0000000..2a12bf2
+> --- /dev/null
+> +++ b/tests/btrfs/080
+> @@ -0,0 +1,73 @@
+> +#! /bin/bash
+> +# FS QA Test No. 080
+> +#
+> +# Regression of 'commit fcebe4562dec ("Btrfs: rework qgroup accounting")'
+> +# this will throw a warning into dmesg.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2014 Liu Bo.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +    cd /
+> +    rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +
+> +_need_to_be_root
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
+> +
+> +run_check _scratch_mkfs "-b 1g --nodesize 4096"
+> +run_check _scratch_mount
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
+I'm not sure if we need run_check here, I'll look at it again when I
+can run the test.
 
-v2:
-- introduce new _check_filesystems helper using 8 spaces tabs
+> +
+> +run_check xfs_io -f -d -c "pwrite 0 8K" $SCRATCH_MNT/foo
 
-Note that the xfs/071 corruption issue is an xfs_repair bug,
-Eric has sent a patch to fix it, see
+Use $XFS_IO_PROG here, which adds "-F" option if fs is not xfs.
 
-http://www.spinics.net/lists/xfs/msg31018.html
+> +
+> +_run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/snap
+> +
+> +run_check cp --reflink $SCRATCH_MNT/foo $SCRATCH_MNT/foo-reflink
+> +run_check cp --reflink $SCRATCH_MNT/foo $SCRATCH_MNT/snap/foo-reflink
+> +run_check cp --reflink $SCRATCH_MNT/foo $SCRATCH_MNT/snap/foo-reflink2
 
- check | 24 +++++++++++++++---------
- 1 file changed, 15 insertions(+), 9 deletions(-)
+Need _require_cp_reflink first.
 
-diff --git a/check b/check
-index 42a1ac2..10f4a18 100755
---- a/check
-+++ b/check
-@@ -385,6 +385,18 @@ _summary()
- 	rm -f $tmp.*
- }
- 
-+_check_filesystems()
-+{
-+	if [ -f ${RESULT_DIR}/require_test ]; then
-+		_check_test_fs || err=true
-+		rm -f ${RESULT_DIR}/require_test
-+	fi
-+	if [ -f ${RESULT_DIR}/require_scratch ]; then
-+		_check_scratch_fs || err=true
-+		rm -f ${RESULT_DIR}/require_scratch
-+	fi
-+}
-+
- _prepare_test_list
- 
- if $OPTIONS_HAVE_SECTIONS; then
-@@ -611,6 +623,9 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 			    err=true
- 			fi
- 		    fi
-+		    try="$try $seqnum"
-+		    n_try=`expr $n_try + 1`
-+		    _check_filesystems
- 		fi
- 
- 	    fi
-@@ -623,15 +638,6 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 		n_bad=`expr $n_bad + 1`
- 		quick=false
- 	    fi
--	    if [ ! -f $seqres.notrun ]
--	    then
--		try="$try $seqnum"
--		n_try=`expr $n_try + 1`
--		test -f ${RESULT_DIR}/require_test && _check_test_fs
--		rm -f ${RESULT_DIR}/require_test
--		test -f ${RESULT_DIR}/require_scratch && _check_scratch_fs
--		rm -f ${RESULT_DIR}/require_scratch
--	    fi
- 
- 	    seq="after_$seqnum"
- 	done
--- 
-2.1.0
+> +
+> +_run_btrfs_util_prog quota enable $SCRATCH_MNT
+> +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
+> +
+> +rm -fr $SCRATCH_MNT/* >& /dev/null
 
+I prefer "rm -fr $SCRATCH_MNT/* >/dev/null 2>&1"
+
+But we use /bin/bash for all fstests tests, >& can work too..
+
+> +
+> +_run_btrfs_util_prog filesystem sync $SCRATCH_MNT
+> +
+> +$BTRFS_UTIL_PROG qgroup show $SCRATCH_MNT | $SED_PROG -n '/[0-9]/p' | $AWK_PROG '{print $2" "$3}'
+
+Will dmesg log be checked? As the test will trigger warnings in dmesg, I
+assume that's how the test determine pass/fail.
+
+Thanks,
+Eryu
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/080.out b/tests/btrfs/080.out
+> new file mode 100644
+> index 0000000..eafa7c3
+> --- /dev/null
+> +++ b/tests/btrfs/080.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 080
+> +4096 4096
+> +4096 4096
+> -- 
+> 1.8.2.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
