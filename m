@@ -1,69 +1,151 @@
-Return-Path: <dusanc@gmail.com>
+Return-Path: <fstests-owner@vger.kernel.org>
+Received: from mail-wg0-f42.google.com ([74.125.82.42]:38985 "EHLO
+	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751021AbaLOXjD (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 15 Dec 2014 18:39:03 -0500
+Received: by mail-wg0-f42.google.com with SMTP id z12so16001650wgg.1
+        for <fstests@vger.kernel.org>; Mon, 15 Dec 2014 15:39:01 -0800 (PST)
+Received: from [192.168.0.2] (178-222-112-234.dynamic.isp.telekom.rs. [178.222.112.234])
+        by mx.google.com with ESMTPSA id bj3sm14881045wib.3.2014.12.15.15.39.00
+        for <fstests@vger.kernel.org>
+        (version=TLSv1.2 cipher=AES128-GCM-SHA256 bits=128/128);
+        Mon, 15 Dec 2014 15:39:00 -0800 (PST)
+Date: Tue, 16 Dec 2014 02:39:30 +0100 (CET)
+From: Dushan Tcholich <dusanc@gmail.com>
+Subject: [PATCH v2] Check O_DIRECT support before testing direct I/O
+Message-ID: <alpine.LNX.2.00.1412160233180.862@reiser4.gekom>
 MIME-Version: 1.0
-In-Reply-To: <20141215231812.GB2152@dastard>
-References: <alpine.LNX.2.00.1412152315300.21847@reiser4.gekom>
-	<20141215210631.GT24183@dastard>
-	<548F5505.4050807@sandeen.net>
-	<20141215231812.GB2152@dastard>
-Date: Tue, 16 Dec 2014 00:30:39 +0100
-Message-ID: <CADW=+3kcNFLwjMO6N7=XkyxBjYd8v2opoX4VBRPsHNiayZWq-Q@mail.gmail.com>
-Subject: Re: [PATCH] Reiser4 initial implementation
-From: =?UTF-8?B?RHXFoWFuIMSMb2xpxIc=?= <dusanc@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-To: Dave Chinner <david@fromorbit.com>
-Cc: Eric Sandeen <sandeen@sandeen.net>, fstests <fstests@vger.kernel.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: fstests-owner@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Dec 16, 2014 at 12:18 AM, Dave Chinner <david@fromorbit.com> wrote:
-> On Mon, Dec 15, 2014 at 03:39:17PM -0600, Eric Sandeen wrote:
->> On 12/15/14 3:06 PM, Dave Chinner wrote:
->> > On Mon, Dec 15, 2014 at 11:19:43PM +0100, Dushan Tcholich wrote:
->> >>
->> >> This is initial xfstests implementation for Reiser4 filesystem.
->> >>
->> >
->> > Policy question to the wider audience: should we support out of tree
->> > filesystems in fstests? I can't verify the patches nor maintain
->> > support for such filesystems, nor is there a wide developer or
->> > distro demand for testing such filesystems. If there's only one or
->> > two developers that need support for reiser4, then it might be best
->> > for to maintain the xfstests patches out of tree, too.
->> >
->> > What does everyone think?
->>
->> I think you have your hands completely full with in-tree filesystems,
->> and opening the door to many new tests for out-of-tree filesystems could
->> lead to Too Much Work.
->>
->> But simply adding the simple things in this patch to make generic tests
->> work seems fairly harmless; it should be a one-shot deal, with no ongoing load.
->> So from where I sit I don't see a big problem with a patch like this.
->
-> That seems fair enough, though I do wonder if we should try to
-> structure the common code to make it easier to add/maintain support
-> like this.
->
->> Adding a lot of reiser4 specific tests is probably a different question,
->> though.
->
-> Yup, and that's my main concern.
->
+Some filesystems do not support O_DIRECT.  Check whether TEST_DIR supports
+it by running xfs_io with -d flag.
 
-There won't be any specific tests until it gets in mainline.
+v1: initial implementation
+v2: removed unnecessary check for buffered IO
 
->> In theory it shouldn't be hard for out-of-tree filesystems to maintain
->> their own tree of tests which could just drop in under tests/ right?
->
-> Yes, the high level scripts source fs specific tests from
-> tests/$FSTYP, so such test directories would be easy to maintain as
-> out of tree patches.
->
-I agree with this.
+From: Junho Ryu <jayr@google.com
+Signed-off-by: Junho Ryu <jayr@google.com>
+Signed-off-by: Dushan Tcholich <dusanc@gmail.com> 
 
-> Cheers,
->
-> Dave.
->
-> --
-> Dave Chinner
-> david@fromorbit.com
+---
+
+diff -urN xfstests.orig/common/rc xfstests.2/common/rc
+--- xfstests.orig/common/rc	2014-12-16 00:33:28.000000000 +0100
++++ xfstests.2/common/rc	2014-12-16 02:24:15.000000000 +0100
+@@ -1391,6 +1391,7 @@
+         AIO_TEST=src/aio-dio-regress/$1
+         [ -x $AIO_TEST ] || _notrun "$AIO_TEST not built"
+     fi
++    _require_odirect
+ }
+ 
+ # run an aio-dio program
+@@ -1519,6 +1520,17 @@
+ 		_notrun "xfs_io $command failed (old kernel/wrong fs?)"
+ }
+ 
++# check that kernel and filesystem support direct I/O
++_require_odirect()
++{
++       testfile=$TEST_DIR/$$.direct
++       $XFS_IO_PROG -F -f -d -c "pwrite 0 20k" $testfile 2>&1
++       if [ $? -ne 0 ]; then
++               _notrun "O_DIRECT is not supported"
++       fi
++       rm -f $testfile 2>&1 > /dev/null
++}
++
+ # Check that a fs has enough free space (in 1024b blocks)
+ #
+ _require_fs_space()
+diff -urN xfstests.orig/tests/generic/091 xfstests.2/tests/generic/091
+--- xfstests.orig/tests/generic/091	2014-12-16 00:33:30.000000000 +0100
++++ xfstests.2/tests/generic/091	2014-12-16 02:21:50.000000000 +0100
+@@ -39,6 +39,7 @@
+ _supported_fs generic
+ _supported_os Linux
+ _require_test
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
+diff -urN xfstests.orig/tests/generic/130 xfstests.2/tests/generic/130
+--- xfstests.orig/tests/generic/130	2014-12-16 00:33:30.000000000 +0100
++++ xfstests.2/tests/generic/130	2014-12-16 02:21:50.000000000 +0100
+@@ -50,6 +50,7 @@
+ 
+ _require_scratch
+ _require_sparse_files
++_require_odirect
+ 
+ _scratch_mkfs >/dev/null 2>&1
+ _scratch_mount
+diff -urN xfstests.orig/tests/generic/133 xfstests.2/tests/generic/133
+--- xfstests.orig/tests/generic/133	2014-12-16 00:33:30.000000000 +0100
++++ xfstests.2/tests/generic/133	2014-12-16 02:21:50.000000000 +0100
+@@ -39,6 +39,7 @@
+ _supported_fs generic
+ _supported_os Linux IRIX
+ _require_test
++_require_odirect
+ 
+ echo "Buffered writer, buffered reader"
+ $XFS_IO_PROG -f -d -c 'pwrite -b 64k 0 512m' $TEST_DIR/io_test > /dev/null
+diff -urN xfstests.orig/tests/generic/135 xfstests.2/tests/generic/135
+--- xfstests.orig/tests/generic/135	2014-12-16 00:33:30.000000000 +0100
++++ xfstests.2/tests/generic/135	2014-12-16 02:21:50.000000000 +0100
+@@ -39,6 +39,7 @@
+ _supported_fs generic
+ _supported_os Linux IRIX
+ 
++_require_odirect
+ _require_scratch
+ _scratch_mkfs >/dev/null 2>&1
+ 
+diff -urN xfstests.orig/tests/generic/226 xfstests.2/tests/generic/226
+--- xfstests.orig/tests/generic/226	2014-12-16 00:33:30.000000000 +0100
++++ xfstests.2/tests/generic/226	2014-12-16 02:21:50.000000000 +0100
+@@ -37,6 +37,7 @@
+ _supported_fs generic
+ _supported_os Linux IRIX
+ _require_scratch
++_require_odirect
+ 
+ # real QA test starts here
+ rm -f $seqres.full
+diff -urN xfstests.orig/tests/generic/263 xfstests.2/tests/generic/263
+--- xfstests.orig/tests/generic/263	2014-12-16 00:33:30.000000000 +0100
++++ xfstests.2/tests/generic/263	2014-12-16 02:21:50.000000000 +0100
+@@ -39,6 +39,7 @@
+ _supported_fs generic
+ _supported_os Linux
+ _require_test
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
+diff -urN xfstests.orig/tests/generic/299 xfstests.2/tests/generic/299
+--- xfstests.orig/tests/generic/299	2014-12-16 00:33:30.000000000 +0100
++++ xfstests.2/tests/generic/299	2014-12-16 02:21:50.000000000 +0100
+@@ -43,6 +43,7 @@
+ _supported_os Linux
+ _need_to_be_root
+ _require_scratch
++_require_odirect
+ 
+ NUM_JOBS=$((4*LOAD_FACTOR))
+ BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
+diff -urN xfstests.orig/tests/generic/300 xfstests.2/tests/generic/300
+--- xfstests.orig/tests/generic/300	2014-12-16 00:33:30.000000000 +0100
++++ xfstests.2/tests/generic/300	2014-12-16 02:21:50.000000000 +0100
+@@ -43,6 +43,7 @@
+ _supported_os Linux
+ _need_to_be_root
+ _require_scratch
++_require_odirect
+ 
+ # xfs_io is not required for this test, but it's the best way to verify
+ # the test system supports fallocate() for allocation and hole punching
