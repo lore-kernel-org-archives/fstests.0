@@ -1,39 +1,68 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from imap.thunk.org ([74.207.234.97]:58993 "EHLO imap.thunk.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750936AbaLPP4a (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 16 Dec 2014 10:56:30 -0500
-From: Theodore Ts'o <tytso@mit.edu>
-Subject: [PATCH] ext4/004: limit the amount of data written so test runs faster
-Date: Tue, 16 Dec 2014 10:56:27 -0500
-Message-Id: <1418745387-27930-1-git-send-email-tytso@mit.edu>
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:50033 "EHLO
+	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751142AbaLPTgb (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 16 Dec 2014 14:36:31 -0500
+Date: Wed, 17 Dec 2014 06:36:27 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] ext4/004: add dump/restore test
+Message-ID: <20141216193627.GA15665@dastard>
+References: <1416910869-28538-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
+ <20141206214040.GA27484@thunk.org>
+ <54850290.2070201@cn.fujitsu.com>
+ <20141216025827.GO17575@thunk.org>
+ <20141216035942.GE2152@dastard>
+ <20141216155328.GP17575@thunk.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20141216155328.GP17575@thunk.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Previously this test was taking 6-7 minutes, and writing half a
-gigabyte of data in the dump/restore test directory.  Change this to
-be about 60 megs, and to take ~20 seconds.
+On Tue, Dec 16, 2014 at 10:53:28AM -0500, Theodore Ts'o wrote:
+> On Tue, Dec 16, 2014 at 02:59:43PM +1100, Dave Chinner wrote:
+> > 
+> > Yes, that is too long for an "auto" test. A couple of minutes is
+> > about the limit we should be trying to stick to for auto tests; we
+> > don't really add any extra coverage by making such tests run for a
+> > long time.
+> > 
+> > As it is, most of the xfsdump/restore tests take around 30-60s to
+> > run, so that's probably a good guide to follow for this.
+> 
+> I'm currently running with a patch that cuts it down to ~22 seconds
+> (and about 60 megs worth of data in the dump and restore directory).
+> I'll send a patch....
+> 
+> > > And I'll note that using the current fsstress arguments, you are only
+> > > creating regular files and directories, and there are no symlinks,
+> > > device nodes, or FIFO's being created to test whether those files are
+> > > correctly being backed up and restored.
+> > 
+> > Probably a good idea, too. Thanks for looking at this, Ted.
+> 
+> I looked a bit more closely at this, and unfortunately it's not a
+> quick fix.  The issue is that the test is currently using diff -r to
+> verify that the restore directory == the dump directory, and diff
+> doesn't handle special files.
+> 
+> Doing this right might require writing a special case directory
+> comparison script in perl, or some such; if we do this, then we can
+> also have the directory comparison tool also check to make sure the
+> uid/gid/mode bits match, which diff also doesn't handle.
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
- tests/ext4/004 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+See common/dump, specifically _ls_compare_sub,
+_ls_nodate_compare_sub, _diff_compare_sub and _diff_compare_eas.
+THere are also routines for creating directory structures with
+symlinks, hardlinks and xattrs for dump/restore testing. Yes, it's
+all xfsdump/restore specific, but we already have a wheel ;)
 
-diff --git a/tests/ext4/004 b/tests/ext4/004
-index b24b627..68f02b6 100755
---- a/tests/ext4/004
-+++ b/tests/ext4/004
-@@ -49,7 +49,7 @@ restore_dir=$TEST_DIR/dump_restore_dir
- workout()
- {
- 	echo "Run fsstress" >> $seqres.full
--	args=`_scale_fsstress_args -z -f creat=5 -f write=20 -f mkdir=5 -n 1000 -p 15 -d $dump_dir`
-+	args=`_scale_fsstress_args -z -f creat=5 -f write=20 -f mkdir=5 -n 100 -p 15 -d $dump_dir`
- 	echo "fsstress $args" >> $seqres.full
- 
- 	$FSSTRESS_PROG $args >> $seqres.full 2>&1
+Cheers,
+
+Dave.
 -- 
-2.1.0
-
+Dave Chinner
+david@fromorbit.com
