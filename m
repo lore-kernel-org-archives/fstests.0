@@ -1,108 +1,96 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-wi0-f179.google.com ([209.85.212.179]:45239 "EHLO
-	mail-wi0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750995AbaLQU3d (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 17 Dec 2014 15:29:33 -0500
-Received: by mail-wi0-f179.google.com with SMTP id ex7so98208wid.6
-        for <fstests@vger.kernel.org>; Wed, 17 Dec 2014 12:29:31 -0800 (PST)
-Received: from [192.168.0.2] (109-93-61-240.dynamic.isp.telekom.rs. [109.93.61.240])
-        by mx.google.com with ESMTPSA id bs2sm6372762wjc.43.2014.12.17.12.29.30
-        for <fstests@vger.kernel.org>
-        (version=TLSv1.2 cipher=AES128-GCM-SHA256 bits=128/128);
-        Wed, 17 Dec 2014 12:29:31 -0800 (PST)
-Date: Wed, 17 Dec 2014 23:29:55 +0100 (CET)
-From: Dushan Tcholich <dusanc@gmail.com>
-Subject: [PATCH v2] Reiser4 initial implementation
-Message-ID: <alpine.LNX.2.00.1412172318240.29081@reiser4.gekom>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:25244 "EHLO
+	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751030AbaLRAHG (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 17 Dec 2014 19:07:06 -0500
+Date: Thu, 18 Dec 2014 11:05:30 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH v3] xfstests: btrfs: add test case for qgroup account on
+ shared extents
+Message-ID: <20141218000530.GE15665@dastard>
+References: <1418723004-30543-1-git-send-email-bo.li.liu@oracle.com>
+ <1418805047-24636-1-git-send-email-bo.li.liu@oracle.com>
 MIME-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1418805047-24636-1-git-send-email-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Liu Bo <bo.li.liu@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Initial xfstests implementation for Reiser4 filesystem.
+On Wed, Dec 17, 2014 at 04:30:47PM +0800, Liu Bo wrote:
+> This is a regression test of
+> 'commit fcebe4562dec ("Btrfs: rework qgroup accounting")'
+> 
+> It can produce qgroup related warnings.
+> 
+> The fix is https://patchwork.kernel.org/patch/5499981/
+> "Btrfs: fix a warning of qgroup account on shared extents"
+....
+> +#! /bin/bash
+> +# FS QA Test No. 017
+> +#
+> +# Regression of 'commit fcebe4562dec ("Btrfs: rework qgroup accounting")',
+> +# this will throw a warning into dmesg.
+> +#
+> +# For more details, the fix is https://patchwork.kernel.org/patch/5499981/
+> +# "Btrfs: fix a warning of qgroup account on shared extents"
 
-Signed-off-by: Dushan Tcholich <dusanc@gmail.com>
+Please describe the test directly.
 
----
-v2:
-Added support for MKFS_REISER4_PROG into common/config
-Used reiser* wherever possible
-Added setup checks for mkfs.reiser4 in common/rc
-Added comment that mkfs.reiser4 expects KB for size
+> +
+> +_need_to_be_root
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
+> +_require_cloner
+> +
+> +run_check _scratch_mkfs "--nodesize 4096"
+> +run_check _scratch_mount
 
-diff -urN xfstests.orig/common/config xfstests/common/config
---- xfstests.orig/common/config	2014-12-17 01:00:05.000000000 +0100
-+++ xfstests/common/config	2014-12-17 01:22:41.000000000 +0100
-@@ -224,6 +224,7 @@
-         export XFS_FSR_PROG="`set_prog_path xfs_fsr`"
-         export MKFS_NFS_PROG="false"
-         export MKFS_CIFS_PROG="false"
-+        export MKFS_REISER4_PROG="`set_prog_path mkfs.reiser4`"
-         ;;
- esac
- 
-@@ -258,6 +259,10 @@
- 		# acls & xattrs aren't turned on by default on reiserfs
- 		export MOUNT_OPTIONS="-o acl,user_xattr $REISERFS_MOUNT_OPTIONS"
- 		;;
-+       reiser4)
-+               # acls & xattrs aren't supported by reiser4
-+               export MOUNT_OPTIONS=$REISER4_MOUNT_OPTIONS
-+               ;;
- 	gfs2)
- 		# acls aren't turned on by default on gfs2
- 		export MOUNT_OPTIONS="-o acl $GFS2_MOUNT_OPTIONS"
-@@ -302,6 +307,9 @@
- 	reiserfs)
- 		export MKFS_OPTIONS="$REISERFS_MKFS_OPTIONS -q"
- 		;;
-+       reiser4)
-+		export MKFS_OPTIONS=$REISER4_MKFS_OPTIONS
-+		;;
- 	gfs2)
- 		export MKFS_OPTIONS="$GFS2_MKFS_OPTIONS -O -p lock_nolock"
- 		;;
-@@ -319,7 +327,7 @@
- 	ext2|ext3|ext4|ext4dev)
- 		export FSCK_OPTIONS="-nf"
- 		;;
--	reiserfs)
-+	reiser*)
- 		export FSCK_OPTIONS="--yes"
- 		;;
- 	*)
-diff -urN xfstests.orig/common/rc xfstests/common/rc
---- xfstests.orig/common/rc	2014-12-17 01:00:05.000000000 +0100
-+++ xfstests/common/rc	2014-12-17 22:58:38.000000000 +0100
-@@ -112,6 +112,9 @@
- 	 ;;
-     cifs)
- 	 ;;
-+    reiser4)
-+	 [ "$MKFS_REISER4_PROG" = "" ] && _fatal "mkfs.reiser4 not found"
-+	 ;;
- esac
- 
- # make sure we have a standard umask
-@@ -633,7 +636,7 @@
-     xfs)
- 	def_blksz=`echo $MKFS_OPTIONS|sed -rn 's/.*-b ?size= ?+([0-9]+).*/\1/p'`
- 	;;
--    ext2|ext3|ext4|ext4dev|udf|btrfs)
-+    ext2|ext3|ext4|ext4dev|udf|btrfs|reiser4)
- 	def_blksz=`echo $MKFS_OPTIONS| sed -rn 's/.*-b ?+([0-9]+).*/\1/p'`
- 	;;
-     esac
-@@ -676,6 +679,11 @@
-     btrfs)
- 	$MKFS_BTRFS_PROG $MKFS_OPTIONS -b $fssize $SCRATCH_DEV
- 	;;
-+    reiser4)
-+	# mkfs.resier4 requires size in KB as input for creating filesystem
-+	$MKFS_REISER4_PROG $MKFS_OPTIONS -y -b $blocksize $SCRATCH_DEV \
-+			   `expr $fssize / 1024`
-+	;;
-     *)
- 	_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized"
- 	;;
+No, please don't use run_check like this.
+
+Errors will end up in the output file, and that will cause the test
+to fail.
+
+> +run_check $XFS_IO_PROG -f -d -c "pwrite 0 8K" $SCRATCH_MNT/foo
+
+Same - filter the output, and errors will be verbose and cause a
+failure.
+
+> +
+> +_run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/snap
+> +
+> +run_check $CLONER_PROG -s 0 -d 0 -l 8192 $SCRATCH_MNT/foo $SCRATCH_MNT/foo-reflink
+> +run_check $CLONER_PROG -s 0 -d 0 -l 8192 $SCRATCH_MNT/foo $SCRATCH_MNT/snap/foo-reflink
+> +run_check $CLONER_PROG -s 0 -d 0 -l 8192 $SCRATCH_MNT/foo $SCRATCH_MNT/snap/foo-reflink2
+
+Filter the output, not "run_check".
+
+If CLONER_PROG is silent when it fails, then it is broken and needs
+fixing because users need to know that something failed and they
+don't check exit codes.
+
+> +_run_btrfs_util_prog quota enable $SCRATCH_MNT
+> +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
+> +
+> +rm -fr $SCRATCH_MNT/* >/dev/null 2>&1
+
+Don't redirect the output. If an unlink fails, we want to know about
+it.
+
+> +_run_btrfs_util_prog filesystem sync $SCRATCH_MNT
+
+What's wrong with "sync"?
+
+> +$BTRFS_UTIL_PROG qgroup show $SCRATCH_MNT | $SED_PROG -n '/[0-9]/p' | $AWK_PROG '{print $2" "$3}'
+
+You can do regex matches with awk.
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
