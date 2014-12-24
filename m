@@ -1,125 +1,234 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:23709 "EHLO
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:28352 "EHLO
 	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751297AbaLXAEK (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 23 Dec 2014 19:04:10 -0500
-Date: Wed, 24 Dec 2014 11:03:54 +1100
+	by vger.kernel.org with ESMTP id S1751297AbaLXAfN (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 23 Dec 2014 19:35:13 -0500
+Date: Wed, 24 Dec 2014 11:34:49 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 1/2] btrfs-progs: Add support for btrfs-image + corrupt
- script fsck test case.
-Message-ID: <20141224000354.GJ4521@dastard>
-References: <1418615699-18169-1-git-send-email-quwenruo@cn.fujitsu.com>
- <CAL3q7H5TrEGT87by4Zgs_Gy-OagBBEQVdk0A54snC9334wRP1w@mail.gmail.com>
- <CAL3q7H5XAR1UBYeNzcV6AXRFEpN7=gZ2znDycsDDE2opLovK3g@mail.gmail.com>
- <20141215181953.GT27601@twin.jikos.cz>
- <548F8C4E.4020905@cn.fujitsu.com>
- <CAL3q7H4tTSshBauZc8J7OgQhMSf=ks9qt9qLGCVHF9Rep-ULLg@mail.gmail.com>
+Subject: Re: max_dir_size_kb option list
+Message-ID: <20141224003449.GK4521@dastard>
+References: <548988D2.3030100@oracle.com>
+ <20141212005517.GK24183@dastard>
+ <548F070F.2050808@oracle.com>
+ <20141215215147.GV24183@dastard>
+ <549052ED.6070405@oracle.com>
+ <54995AC8.6070707@oracle.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAL3q7H4tTSshBauZc8J7OgQhMSf=ks9qt9qLGCVHF9Rep-ULLg@mail.gmail.com>
+In-Reply-To: <54995AC8.6070707@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: Filipe David Manana <fdmanana@gmail.com>
-Cc: Qu Wenruo <quwenruo@cn.fujitsu.com>, "dsterba@suse.cz" <dsterba@suse.cz>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org
+To: Alexander Tsvetkov <alexander.tsvetkov@oracle.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-
-[ Sorry to take some time to get to this, it got caught by a spam
-filter and I only just noticed. ]
-
-On Tue, Dec 16, 2014 at 02:08:53PM +0000, Filipe David Manana wrote:
-> On Tue, Dec 16, 2014 at 1:35 AM, Qu Wenruo <quwenruo@cn.fujitsu.com> wrote:
-> >
-> > -------- Original Message --------
-> > Subject: Re: [PATCH 1/2] btrfs-progs: Add support for btrfs-image + corrupt
-> > script fsck test case.
-> > From: David Sterba <dsterba@suse.cz>
-> > To: Filipe David Manana <fdmanana@gmail.com>
-> > Date: 2014年12月16日 02:19
-> >>
-> >> On Mon, Dec 15, 2014 at 10:13:45AM +0000, Filipe David Manana wrote:
-> >>>>
-> >>>> So another thing I would like to see is doing a more comprehensive
-> >>>> verification that the repair code worked as expected. Currently we
-> >>>> only check that a readonly fsck, after running fsck --repair, returns
-> >>>> 0.
-> >>>>
-> >>>> For the improvements you've been doing, it's equally important to
-> >>>> verify that --repair recovered the inodes, links, etc to the
-> >>>> lost+found directory (or whatever is the directory's name).
-> >>>>
-> >>>> So perhaps adding a verify.sh script to the tarball for example?
-> >>>
-> >>> Or, forgot before, it might be better to do such verification/test in
-> >>> xfstests since we can create the fs and use the new btrfs-progs
-> >>> programs to corrupt leafs/nodes. xfstests has a lot of infrastructure
-> >>> already and probably run by a lot more people (compared to the fsck
-> >>> tests of btrfs-progs).
-> >>
-> >> I'm thinking about the best way how to integrate that, but it seems that
-> >> there will be always some level of code or infrastructure duplication
-> >> (or other hassle).
-> >>
-> >> btrfs-corrupt-block is not installed by default (make install) and it's
-> >> not a type of utility I'd consider for default installations. The tests
-> >> would be skipped in absence of the utility, so there will be test
-> >> environments where "install xfstests, install btrfspprogs" will not add
-> >> the desired test coverage. Solvable by packaging the extra progs.
-> >>
-> >> Adding corrupt-block into xfsprogs is infeasible (IMO too much code from
-> >> btrfs-progs to be added).
-> >>
-> >> I don't know how much infrastructure code we'd have to either write or
-> >> copy from fstests, but I think it would not be that much. Ideally we
-> >> could write the tests within btrfs-progs and then submit them to fstests
-> >> once they're considered reliable. If we keep the same "syntax" of the
-> >> tests, provide stubs where applicable, the code duplication in test
-> >> itself would be zero. We'd only have to write the stubs in btrfs-progs
-> >> and probably extend fstests to provide helpers for preparing/unpacking
-> >> the images.
-> >
-> > In my wildest idea, if we have a good enough btrfs debugger(maybe even
-> > stronger than debugfs), which can
-> > do almost everything from read key/item to corrupt given structure, then we
-> > can resolve them all.
-> > No binary image since corruption can be done by it and verify can also done
-> > by it.
-> > (OK, it's just a daydream)
-> >
-> > But IMHO, isn't xfstests designed to mainly detect kernel defeats?
-> > I don't see any fsck tool test case in it.
+On Tue, Dec 23, 2014 at 03:06:32PM +0300, Alexander Tsvetkov wrote:
+> Hello Dave,
 > 
-> I don't think xfstests is specific to test the kernel implementation
-> of filesystems. I believe it includes user space code too, but I might
-> be wrong so I'm CCing fstests and Dave to get an authoritative answer.
+> Attached updated version of the test.
 
-We use fstests to test everything we ship for XFS - kernel and
-userspace. i.e. we have tests that corrupt filesystems with xfs_db
-and then test that xfs_repair can fix them, and once fixed the
-filesystem can be mounted and used by the kernel...
+[snip entire quoted previous emails]
 
-i.e. fstests is for testing both the kernel code and the utilities
-used to manipulate filesystems.
+Closer, but still not quite all there.
 
-> And I don't see a big problem with btrfs-corrupt not being built by
-> default when running "make" on btrfs-progs. We can make the xfstest
-> not run and print an informative message if the btrfs-corrupt program
-> isn't available - several xfstests do this, they require some
-> executable which isn't either in the xfstests nor xfsprogs
-> repositories - for example generic/241 which requires 'dbench' and
-> generic/299 which requires 'fio'.
+A couple of things about posting patches, first. please don't top
+post and when sending a new version of a patch, please send it with
+an appropriate subject such as:
 
-_require_btrfs_corrupt_prog()
+[PATCH v4] ext4: Add new test for max_dir_size_kb mount option
 
-Just like we do with lots of other optional userspace tools that are
-required for various tests to run.
+So it's clear that there's a new version of the patch been sent.
+Also, the patch should be in-line, not an attachment.
 
-> I also have a slight preference to get all
-> tests in the same place (xfstests) rather than in multiple
-> repositories (btrfs-progs, xfstests).
+> From 6f90894347d579e6cc6be9af159eb5d4a12c059e Mon Sep 17 00:00:00 2001
+> From: Alexander Tsvetkov <alexander.tsvetkov@oracle.com>
+> Date: Tue, 23 Dec 2014 14:58:13 +0300
+> Subject: [PATCH] added test for max_dir_size_kb mount option
+> 
+> ---
 
-Definitely my preference as well.
+The commit message should not be blank - it needs to explain why the
+new test is needed.
+
+Also, the change history of the patch (what's changed between each
+version posted)  should be documented here below the first "---"
+delimiter so people who have already commented on previous versions
+know what you have and haven't changed.
+
+Fo more information, please go and read
+Documentation/SubmittingPatches from your local kernel source tree.
+
+>  tests/ext4/005     | 137 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/005.out |   2 +
+>  tests/ext4/group   |   1 +
+>  3 files changed, 140 insertions(+)
+>  create mode 100755 tests/ext4/005
+>  create mode 100644 tests/ext4/005.out
+> 
+> diff --git a/tests/ext4/005 b/tests/ext4/005
+> new file mode 100755
+> index 0000000..4cfcb25
+> --- /dev/null
+> +++ b/tests/ext4/005
+> @@ -0,0 +1,137 @@
+> +#! /bin/bash
+> +# FS QA Test
+> +#
+> +# Test for mount option max_dir_size_kb
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2014 Oracle and/or its affiliates.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=$(basename $0)
+> +seqres=$RESULT_DIR/$seq
+> +tmp=/tmp/$$
+> +
+> +testdir=$SCRATCH_MNT/dir1.$seq
+> +testdir2=$testdir/dir2.$seq
+> +testfile=$SCRATCH_MNT/testfile
+
+I think I've already pointed out that "testdir" should not be used
+as a local variable to point to something on the scratch device.
+It's too easily confused with TEST_DIR. Please rename them to
+something less confusing e.g. dir1, dir2, and fsimg_file.
+
+> +
+> +echo "QA output created by $seq"
+> +echo "Silence is golden"
+> +rm -f $seqres.full
+> +
+> +status=1 # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -rf $tmp.*
+> +}
+> +
+> +# filter expected output with ENOSPC error
+> +filter_enospc()
+> +{
+> +	sed -e "/^.*No space left on device$/d"
+> +}
+> +
+> +# $1 - expected limit after filling
+> +# $2 - where to create
+> +create_items() 
+> +{
+> +	limit=$1
+> +	dir=${2:-$testdir}
+
+Just pass the variable at the call site.
+
+> +	sync
+> +	echo 3 > /proc/sys/vm/drop_caches
+
+Why is this necessary given there's always a remount just before
+this is called?
+
+> +	MAX_INUM=$((limit * 1024 * 3 / 24))
+> +	for i in $(seq 0 $MAX_INUM); do
+> +		touch $dir/$i 2>&1 1>/dev/null | filter_enospc
+
+touch is silent when it succeeds, so there's no need to redirect
+anything to /dev/null.
+
+> +		if [ ${PIPESTATUS[0]} -ne 0 ]; then
+> +			break
+> +		fi
+> +	done
+> +	size=$(stat -c %s $dir)
+> +	size=$((size / 1024))
+> +	if [ $size -gt $limit ]; then
+> +		echo "FAIL! expected dir size: $limit, actually: $size"
+> +	fi
+> +}
+> +
+> +# $1 - low directory limit value
+> +# $2 - high directory limit value 
+> +# $3 - mkfs options
+> +run_test()
+> +{
+> +	LIMIT1=$1
+> +	LIMIT2=$2
+> +	MKFS_OPT=$3
+> +
+> +	_scratch_mkfs $MKFS_OPT >>$seqres.full 2>&1
+> +	_scratch_mount -o max_dir_size_kb=$LIMIT1
+> +	mkdir $testdir
+> +
+> +	# Exceed with low limit
+> +	create_items $LIMIT1
+> +
+> +	# Exceed with the same limit after remount
+> +	_scratch_mount "-o remount,max_dir_size_kb=$LIMIT1"
+
+Urk. We have _scratch_remount, so this is kinda confusing as to
+be using _scratch_mount to do remounts. You need to document why
+this is a safe thing to do.
+
+> +	create_items $LIMIT1
+
+And. well, after a remount, running sync and dropping caches is
+unnecessary...
+
+> +	# Exceed with high limit after remount 
+> +	_scratch_mount "-o remount,max_dir_size_kb=$LIMIT2"
+> +	create_items $LIMIT2
+> +
+> +	# Exceed with low limit after remount 
+> +	_scratch_mount "-o remount,max_dir_size_kb=$LIMIT1"
+> +	create_items $LIMIT2
+> +
+> +	# Exceed limits of two test dirs resided on different fs, 
+> +	# second fs is mounted on nested test dir of the first fs
+> +	rm -fr $testdir/*
+> +	rmdir $testdir
+> +	mkdir -p $testdir2
+> +	touch $testfile
+> +	$MKFS_EXT4_PROG -F $MKFS_OPT $testfile 4m >> $seqres.full 2>&1
+
+_mkfs_dev $testfile 4m ?
+
+> +	_mount -o loop,max_dir_size_kb=$LIMIT2 $testfile $testdir2
+> +	create_items $LIMIT1
+> +	create_items $LIMIT2 $testdir2
+> +	_scratch_mount "-o remount,max_dir_size_kb=$LIMIT2"
+> +	_mount -o remount,max_dir_size_kb=$LIMIT1 $testfile $testdir2
+> +	create_items $LIMIT2
+> +	create_items $LIMIT2 $testdir2
+> +
+> +	umount -d $testdir2
+> +	_scratch_unmount >/dev/null 2>&1
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +
+> +# real QA test starts here
+> +
+> +_supported_fs ext4
+> +_supported_os Linux
+> +_require_scratch
+> +_require_loop
+
+Put these at the top after the _cleanup function.
 
 Cheers,
 
