@@ -1,106 +1,171 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:43646 "EHLO
-	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750718AbaLXECQ (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 23 Dec 2014 23:02:16 -0500
-Received: from dave by dastard with local (Exim 4.80)
-	(envelope-from <david@fromorbit.com>)
-	id 1Y3d9J-0003e0-GK
-	for fstests@vger.kernel.org; Wed, 24 Dec 2014 15:02:13 +1100
-Date: Wed, 24 Dec 2014 15:02:13 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: [ANNOUNCE] xfstests: master branch updated to 521cc6f
-Message-ID: <20141224040213.GM24183@dastard>
+Received: from mx1.redhat.com ([209.132.183.28]:34319 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751602AbaLXLig (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 24 Dec 2014 06:38:36 -0500
+Date: Wed, 24 Dec 2014 19:38:25 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2] btrfs: add regression test for remount with
+ thread_pool resized
+Message-ID: <20141224113825.GA11929@dhcp-13-216.nay.redhat.com>
+References: <1401439971-18589-1-git-send-email-gux.fnst@cn.fujitsu.com>
+ <1419313262-3664-1-git-send-email-gux.fnst@cn.fujitsu.com>
+ <20141223072310.GL11929@dhcp-13-216.nay.redhat.com>
+ <20141223205607.GH4521@dastard>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="fUYQa+Pmc3FrFX/N"
-Content-Disposition: inline
-Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-List-ID: <fstests@vger.kernel.org>
-
-
---fUYQa+Pmc3FrFX/N
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20141223205607.GH4521@dastard>
+Sender: fstests-owner@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: Xing Gu <gux.fnst@cn.fujitsu.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, slyfox@gentoo.org, quwenruo@cn.fujitsu.com
+List-ID: <fstests@vger.kernel.org>
 
-Hi folks,
+On Wed, Dec 24, 2014 at 07:56:07AM +1100, Dave Chinner wrote:
+> On Tue, Dec 23, 2014 at 03:23:10PM +0800, Eryu Guan wrote:
+> > On Tue, Dec 23, 2014 at 01:41:02PM +0800, Xing Gu wrote:
+> > > Regression test for a btrfs issue of resizing 'thread_pool'
+> > > when remount the fs.
+> > > 
+> > > Signed-off-by: Xing Gu <gux.fnst@cn.fujitsu.com>
+> > > ---
+> > >  tests/btrfs/017     | 64 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/btrfs/017.out |  1 +
+> > >  tests/btrfs/group   |  1 +
+> > >  3 files changed, 66 insertions(+)
+> > >  create mode 100755 tests/btrfs/017
+> > >  create mode 100644 tests/btrfs/017.out
+> > > 
+> > > diff --git a/tests/btrfs/017 b/tests/btrfs/017
+> > > new file mode 100755
+> > > index 0000000..81f5af6
+> > > --- /dev/null
+> > > +++ b/tests/btrfs/017
+> > > @@ -0,0 +1,64 @@
+> > > +#!/bin/bash
+> > > +# FS QA Test No. btrfs/017
+> > > +#
+> > > +# Regression test for a btrfs issue of resizing 'thread_pool' when
+> > > +# remount the fs.
+> > > +# This was fixed in the following linux kernel patch:
+> > > +#     800ee22 btrfs: fix crash in remount(thread_pool=) case
+> > > +#
+> > > +#-----------------------------------------------------------------------
+> > > +# Copyright (c) 2014 Fujitsu.  All Rights Reserved.
+> > > +#
+> > > +# This program is free software; you can redistribute it and/or
+> > > +# modify it under the terms of the GNU General Public License as
+> > > +# published by the Free Software Foundation.
+> > > +#
+> > > +# This program is distributed in the hope that it would be useful,
+> > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > > +# GNU General Public License for more details.
+> > > +#
+> > > +# You should have received a copy of the GNU General Public License
+> > > +# along with this program; if not, write the Free Software Foundation,
+> > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > > +#
+> > > +#-----------------------------------------------------------------------
+> > > +#
+> > > +
+> > > +seq=`basename $0`
+> > > +seqres=$RESULT_DIR/$seq
+> > > +echo "QA output created by $seq"
+> > > +
+> > > +here=`pwd`
+> > > +tmp=/tmp/$$
+> > > +status=1	# failure is the default!
+> > > +
+> > > +_cleanup()
+> > > +{
+> > > +    rm -f $tmp.*
+> > > +}
+> > > +
+> > > +trap "_cleanup ; exit \$status" 0 1 2 3 15
+> > > +
+> > > +# get standard environment, filters and checks
+> > > +. ./common/rc
+> > > +. ./common/filter
+> > > +
+> > > +# real QA test starts here
+> > > +_supported_fs btrfs
+> > > +_supported_os Linux
+> > > +_require_scratch
+> > > +
+> > > +_scratch_mkfs > /dev/null
+> > > +
+> > > +dmesg -c > /dev/null
+> > > +nr_null=`dmesg | grep -c "kernel NULL pointer dereference"`
+> > 
+> > dmesg -c cleared dmesg buffer and nr_null is zero, I think this is
+> > duplicated work, either dmesg -c or check nr_null before remount.
+> 
+> Please don't clear the dmesg buffer - it means that people can't
+> review the kernel error messages across the entire test run for
+> errors unless they are capturing that information elsewhere.
+> 
+> And yes, I don't use syslog for capturing dmesg output on my test
+> boxes because that leads to root filesystem ENOSPC whenever I'm
+> dumping a lot of debug to the console....
+> 
+> > Actually I'm thinking about checking dmesg log in check after each test,
+> > which could detect kernel BUG, WARNING and NULL pointer dereference etc.
+> > so test doesn't need to check dmesg itself. I'll send it out for review
+> > soon.
+> 
+> Some tests actually generate errors/warnings on purpose. IOWs, the
+> presence of messages in dmesg is not always indicative of an
+> error....
 
-The xfstests repository at git://oss.sgi.com/xfs/cmds/xfstests has
-just been updated. Patches often get missed, so please check if your
-outstanding patches were in this update. If they have not been in
-this update, please resubmit them to fstests@vger.kernel.org so they
-can be picked up in the next update.
+Yes, not all tests should be checked, something like
+_require_scratch_nocheck may help here, and add that function call to all
+tests that generate errors/warnings on purpose.
 
-The new head of the master branch is commit:
+I'll think about it more, to see how to avoid clearing dmesg buffer also
+avoid dumping all the dmesg log to some file, if all the checking dmesg
+log thing is reasonable.
 
-521cc6f xfstests: f2fs support
-
-New Commits:
-
-Dushan Tcholich (1):
-      [469ec09] Reiser4 initial implementation
-
-Eryu Guan (3):
-      [974e2ba] common: exit only if tests find corruption
-      [fe10af5] common: return failure if _check_xxx_filesystem find corrup=
-tion
-      [d3e4857] check: treat _check_{test,scratch}_fs failures as test fail=
-ures
-
-Jaegeuk Kim (1):
-      [521cc6f] xfstests: f2fs support
-
-Liu Bo (1):
-      [e4aa15b] btrfs: add test case for qgroup account on shared extents
-
-Theodore Ts'o (1):
-      [08e57cd] ext4/004: limit the amount of data written so test runs fas=
-ter
-
-Xing Gu (1):
-      [04312bb] xfs/111: fix cp of missing file
-
-
-Code Diffstat:
-
- check               | 24 ++++++++++------
- common/config       | 17 ++++++++++-
- common/rc           | 30 +++++++++++++++++---
- tests/btrfs/017     | 82 +++++++++++++++++++++++++++++++++++++++++++++++++=
-++++
- tests/btrfs/017.out |  5 ++++
- tests/btrfs/group   |  1 +
- tests/ext4/004      |  2 +-
- tests/xfs/111       |  2 +-
- 8 files changed, 147 insertions(+), 16 deletions(-)
- create mode 100755 tests/btrfs/017
- create mode 100644 tests/btrfs/017.out
---=20
-Dave Chinner
-david@fromorbit.com
-
---fUYQa+Pmc3FrFX/N
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJUmjrEAAoJEK3oKUf0dfodiiMP/2y2+73yg4+wwEHUvTv/u6DC
-NWAj8H+8ScxnmKSCc2o+OlCL9vzBx6UUrEwtl+hrK0iN27FjXkwASXPGmDIxezyN
-xoV8ogb2ZJQjAkTSlSKEfYD2IszGMLTpMpd8y6NMLTuUAyVZv8m2SBguJS6TaBy+
-nf1BAvaeJ8uYGT9txW7Myn/0nIIipszWq8emtR4i0KdJKdTwVgeFBgG/SYzKP4+8
-Y7Sk4qFsYMRLOcaG2v/ZQfvuuP19qB4n8wd/8oRL4Cj5ksGe+haP1/5DZJ2v+SjZ
-frRpbrY5omTbTtJbppefFt8NQ1eT2zwSbIRMbR9gbgef731BbK4qEhVHWyBoNiX5
-+x7oUISIarOKv2GMAM0xlNAWOZ24ppKWCGNyDTD4oUAHASuf8XAu85SYvVsbA1kz
-uA11zYQQCwC/CNugDxIG+eYT8+CZjnHlhTMN+xqEsM0DCBELyIXyej2+XEVzKieK
-fs0gdghxBzAbRes+JlUl6wcflSG0PaKKXkTG0imvUGNAVe91dHbOvcKnKaPDHkFR
-xL0C5vV70xmkHrs+AkRh7nwJPAsjgQu6YmsOnvyvrKWniIMU5hrOa6AQA5hHAtkS
-RaL9ZtRXPgVij9C6uQ2nskWxJUi7ddb7b/lrPEWhfdDobRvd9H5zmf4h4W0bAi2D
-YW0JSGKAEgyZ6HFEFoJL
-=6gew
------END PGP SIGNATURE-----
-
---fUYQa+Pmc3FrFX/N--
+Thanks,
+Eryu
+> 
+> > > +_scratch_mount "-o remount,thread_pool=10"
+> > > +new_null=`dmesg | grep -c "kernel NULL pointer dereference"`
+> > > +if [ $new_null -ne $nr_null ]; then
+> > > +	_fatal "kernel bug detected, check dmesg for more infomation."
+> > 
+> > _fail is better than _fatal, and don't forget to remove $seqres.full before
+> > test if you use _fail, cause it dumps errors to $seqres.full
+> > 
+> > But simply echo the error message could fail the test too, I'm fine with
+> > either way..
+> 
+> Echo the error message, set status=1 and exit.
+> 
+> Oh, wait, that's what _fail does. ;)
+> 
+> > > +exit
+> > > diff --git a/tests/btrfs/017.out b/tests/btrfs/017.out
+> > > new file mode 100644
+> > > index 0000000..90c4b69
+> > > --- /dev/null
+> > > +++ b/tests/btrfs/017.out
+> > > @@ -0,0 +1 @@
+> > > +QA output created by 017
+> 
+> Empty output with no indication that it should be empty is bad form
+> as well. The test should echo something to indicate that an empty
+> output file is expected. "Silence is golden" is the usual string
+> used to indicate that the golden output expects no output from the
+> test.
+> 
+> Cheers,
+> 
+> Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
