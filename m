@@ -1,234 +1,117 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:28352 "EHLO
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:12832 "EHLO
 	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751297AbaLXAfN (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 23 Dec 2014 19:35:13 -0500
-Date: Wed, 24 Dec 2014 11:34:49 +1100
+	by vger.kernel.org with ESMTP id S1750740AbaLXBxj (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 23 Dec 2014 20:53:39 -0500
+Date: Wed, 24 Dec 2014 12:53:35 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: max_dir_size_kb option list
-Message-ID: <20141224003449.GK4521@dastard>
-References: <548988D2.3030100@oracle.com>
- <20141212005517.GK24183@dastard>
- <548F070F.2050808@oracle.com>
- <20141215215147.GV24183@dastard>
- <549052ED.6070405@oracle.com>
- <54995AC8.6070707@oracle.com>
+Subject: Re: [PATCH] xfs: add test for truncate/collapse range race
+Message-ID: <20141224015335.GL4521@dastard>
+References: <1419060301-26830-1-git-send-email-gux.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <54995AC8.6070707@oracle.com>
+In-Reply-To: <1419060301-26830-1-git-send-email-gux.fnst@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Alexander Tsvetkov <alexander.tsvetkov@oracle.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+To: Xing Gu <gux.fnst@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, guaneryu@gmail.com, lczerner@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Dec 23, 2014 at 03:06:32PM +0300, Alexander Tsvetkov wrote:
-> Hello Dave,
+On Sat, Dec 20, 2014 at 03:25:01PM +0800, Xing Gu wrote:
+> This case tests truncate/collapse range race. If
+> the race occurs, it will trigger BUG_ON.
 > 
-> Attached updated version of the test.
-
-[snip entire quoted previous emails]
-
-Closer, but still not quite all there.
-
-A couple of things about posting patches, first. please don't top
-post and when sending a new version of a patch, please send it with
-an appropriate subject such as:
-
-[PATCH v4] ext4: Add new test for max_dir_size_kb mount option
-
-So it's clear that there's a new version of the patch been sent.
-Also, the patch should be in-line, not an attachment.
-
-> From 6f90894347d579e6cc6be9af159eb5d4a12c059e Mon Sep 17 00:00:00 2001
-> From: Alexander Tsvetkov <alexander.tsvetkov@oracle.com>
-> Date: Tue, 23 Dec 2014 14:58:13 +0300
-> Subject: [PATCH] added test for max_dir_size_kb mount option
-> 
+> Signed-off-by: Xing Gu <gux.fnst@cn.fujitsu.com>
 > ---
 
-The commit message should not be blank - it needs to explain why the
-new test is needed.
+What changed from the previous version?
 
-Also, the change history of the patch (what's changed between each
-version posted)  should be documented here below the first "---"
-delimiter so people who have already commented on previous versions
-know what you have and haven't changed.
-
-Fo more information, please go and read
-Documentation/SubmittingPatches from your local kernel source tree.
-
->  tests/ext4/005     | 137 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/ext4/005.out |   2 +
->  tests/ext4/group   |   1 +
->  3 files changed, 140 insertions(+)
->  create mode 100755 tests/ext4/005
->  create mode 100644 tests/ext4/005.out
-> 
-> diff --git a/tests/ext4/005 b/tests/ext4/005
-> new file mode 100755
-> index 0000000..4cfcb25
-> --- /dev/null
-> +++ b/tests/ext4/005
-> @@ -0,0 +1,137 @@
-> +#! /bin/bash
-> +# FS QA Test
-> +#
-> +# Test for mount option max_dir_size_kb
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2014 Oracle and/or its affiliates.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=$(basename $0)
-> +seqres=$RESULT_DIR/$seq
-> +tmp=/tmp/$$
-> +
-> +testdir=$SCRATCH_MNT/dir1.$seq
-> +testdir2=$testdir/dir2.$seq
-> +testfile=$SCRATCH_MNT/testfile
-
-I think I've already pointed out that "testdir" should not be used
-as a local variable to point to something on the scratch device.
-It's too easily confused with TEST_DIR. Please rename them to
-something less confusing e.g. dir1, dir2, and fsimg_file.
-
-> +
-> +echo "QA output created by $seq"
-> +echo "Silence is golden"
+...
 > +rm -f $seqres.full
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_scratch_mount
 > +
-> +status=1 # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +old_bug=`dmesg | grep -c "kernel BUG"`
 > +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -rf $tmp.*
-> +}
-> +
-> +# filter expected output with ENOSPC error
-> +filter_enospc()
-> +{
-> +	sed -e "/^.*No space left on device$/d"
-> +}
-> +
-> +# $1 - expected limit after filling
-> +# $2 - where to create
-> +create_items() 
-> +{
-> +	limit=$1
-> +	dir=${2:-$testdir}
+> +testfile=$SCRATCH_MNT/file.$seq
+> +# fcollapse/truncate continuously and simultaneously a same file
+> +for ((i=1; i <= 100; i++)); do
+> +	for ((i=1; i <= 1000; i++)); do
+> +		$XFS_IO_PROG -f -c 'truncate 100k' $testfile 2>> $seqres.full
+> +		$XFS_IO_PROG -f -c 'fcollapse 0 16k' $testfile 2>> $seqres.full
+> +	done &
+> +	for ((i=1; i <= 1000; i++)); do
+> +		$XFS_IO_PROG -f -c 'truncate 0' $testfile 2>> $seqres.full
+> +	done &
+> +done
 
-Just pass the variable at the call site.
+The previous version of this ran a loop for 3 minutes, which we
+talked about being too long. This loop forks 300,000 processes
+and generates a 1.5MB $seqres.full file.  On my single CPU test VM 
+it takes:
 
-> +	sync
-> +	echo 3 > /proc/sys/vm/drop_caches
+generic/039      302s
 
-Why is this necessary given there's always a remount just before
-this is called?
+About 5 minutes to run, so it takes longer than the 3 minute version
+of the same test we said was too long. FYI, my 16p test VM still
+takes 35s to crunch through this test and it pegs all 16 CPUs to
+100% usage.
 
-> +	MAX_INUM=$((limit * 1024 * 3 / 24))
-> +	for i in $(seq 0 $MAX_INUM); do
-> +		touch $dir/$i 2>&1 1>/dev/null | filter_enospc
+We don't need to record the output of the xfs_io commands, so
+avoiding a fork and throwing away the output such as:
 
-touch is silent when it succeeds, so there's no need to redirect
-anything to /dev/null.
+	$XFS_IO_PROG -f -c 'truncate 100k' \
+			-c 'fcollapse 0 16k' \
+			$testfile > /dev/null 2>&1
 
-> +		if [ ${PIPESTATUS[0]} -ne 0 ]; then
-> +			break
-> +		fi
-> +	done
-> +	size=$(stat -c %s $dir)
-> +	size=$((size / 1024))
-> +	if [ $size -gt $limit ]; then
-> +		echo "FAIL! expected dir size: $limit, actually: $size"
-> +	fi
-> +}
+makes the runtime on the 16p VM drop by 40% (22s) and by 33% (200s)
+on the single CPU VM. but that's still too long on the smaller CPU
+systems.
+
+I think the loop iterations need to be tuned to the number of CPUs
+in the system. This:
+
+NCPUS=`$here/src/feature -o`
+OUTER_LOOPS=$((10 * $NCPUS * $LOAD_FACTOR))
+INNER_LOOPS=$((50 * $NCPUS * $LOAD_FACTOR))
+
+plus the above xfs_io optimisations give a runtime of 3s on my 1p
+machien and 30s on my 16p machine. That would be more acceptible
+to everyone, I think.
+
+> +wait
 > +
-> +# $1 - low directory limit value
-> +# $2 - high directory limit value 
-> +# $3 - mkfs options
-> +run_test()
-> +{
-> +	LIMIT1=$1
-> +	LIMIT2=$2
-> +	MKFS_OPT=$3
-> +
-> +	_scratch_mkfs $MKFS_OPT >>$seqres.full 2>&1
-> +	_scratch_mount -o max_dir_size_kb=$LIMIT1
-> +	mkdir $testdir
-> +
-> +	# Exceed with low limit
-> +	create_items $LIMIT1
-> +
-> +	# Exceed with the same limit after remount
-> +	_scratch_mount "-o remount,max_dir_size_kb=$LIMIT1"
+> +new_bug=`dmesg | grep -c "kernel BUG"`
+> +if [ $new_bug -ne $old_bug ]; then
+> +	_fail "kernel bug detected, check dmesg for more infomation."
+> +fi
 
-Urk. We have _scratch_remount, so this is kinda confusing as to
-be using _scratch_mount to do remounts. You need to document why
-this is a safe thing to do.
+A kernel bug in a process with an open file descriptor will cause
+the filesystem to be unmountable. It will hang the test, require a
+reboot.  Hence there's no point in checking dmesg for a bug message
+as it will be noticed by the test failing to complete.
 
-> +	create_items $LIMIT1
+> +status=0
+> +exit
+> diff --git a/tests/generic/039.out b/tests/generic/039.out
+> new file mode 100644
+> index 0000000..0cacac7
+> --- /dev/null
+> +++ b/tests/generic/039.out
+> @@ -0,0 +1 @@
+> +QA output created by 039
 
-And. well, after a remount, running sync and dropping caches is
-unnecessary...
+The test needs to echo something to indicate that an empty golden
+output file is expected. "Silence is golden" is the usual phrase
+here....
 
-> +	# Exceed with high limit after remount 
-> +	_scratch_mount "-o remount,max_dir_size_kb=$LIMIT2"
-> +	create_items $LIMIT2
-> +
-> +	# Exceed with low limit after remount 
-> +	_scratch_mount "-o remount,max_dir_size_kb=$LIMIT1"
-> +	create_items $LIMIT2
-> +
-> +	# Exceed limits of two test dirs resided on different fs, 
-> +	# second fs is mounted on nested test dir of the first fs
-> +	rm -fr $testdir/*
-> +	rmdir $testdir
-> +	mkdir -p $testdir2
-> +	touch $testfile
-> +	$MKFS_EXT4_PROG -F $MKFS_OPT $testfile 4m >> $seqres.full 2>&1
+>  036 auto aio rw stress
+>  037 metadata auto quick
+>  038 auto stress
+> +039 auto metadata rw
 
-_mkfs_dev $testfile 4m ?
-
-> +	_mount -o loop,max_dir_size_kb=$LIMIT2 $testfile $testdir2
-> +	create_items $LIMIT1
-> +	create_items $LIMIT2 $testdir2
-> +	_scratch_mount "-o remount,max_dir_size_kb=$LIMIT2"
-> +	_mount -o remount,max_dir_size_kb=$LIMIT1 $testfile $testdir2
-> +	create_items $LIMIT2
-> +	create_items $LIMIT2 $testdir2
-> +
-> +	umount -d $testdir2
-> +	_scratch_unmount >/dev/null 2>&1
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +
-> +# real QA test starts here
-> +
-> +_supported_fs ext4
-> +_supported_os Linux
-> +_require_scratch
-> +_require_loop
-
-Put these at the top after the _cleanup function.
+With the addition of $LOAD_FACTOR, this can be added to the stress
+group as well.
 
 Cheers,
 
