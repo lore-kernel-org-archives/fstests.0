@@ -1,150 +1,125 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:7327 "EHLO
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:23709 "EHLO
 	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751542AbaLWU4U (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 23 Dec 2014 15:56:20 -0500
-Date: Wed, 24 Dec 2014 07:56:07 +1100
+	by vger.kernel.org with ESMTP id S1751297AbaLXAEK (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 23 Dec 2014 19:04:10 -0500
+Date: Wed, 24 Dec 2014 11:03:54 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v2] btrfs: add regression test for remount with
- thread_pool resized
-Message-ID: <20141223205607.GH4521@dastard>
-References: <1401439971-18589-1-git-send-email-gux.fnst@cn.fujitsu.com>
- <1419313262-3664-1-git-send-email-gux.fnst@cn.fujitsu.com>
- <20141223072310.GL11929@dhcp-13-216.nay.redhat.com>
+Subject: Re: [PATCH 1/2] btrfs-progs: Add support for btrfs-image + corrupt
+ script fsck test case.
+Message-ID: <20141224000354.GJ4521@dastard>
+References: <1418615699-18169-1-git-send-email-quwenruo@cn.fujitsu.com>
+ <CAL3q7H5TrEGT87by4Zgs_Gy-OagBBEQVdk0A54snC9334wRP1w@mail.gmail.com>
+ <CAL3q7H5XAR1UBYeNzcV6AXRFEpN7=gZ2znDycsDDE2opLovK3g@mail.gmail.com>
+ <20141215181953.GT27601@twin.jikos.cz>
+ <548F8C4E.4020905@cn.fujitsu.com>
+ <CAL3q7H4tTSshBauZc8J7OgQhMSf=ks9qt9qLGCVHF9Rep-ULLg@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20141223072310.GL11929@dhcp-13-216.nay.redhat.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAL3q7H4tTSshBauZc8J7OgQhMSf=ks9qt9qLGCVHF9Rep-ULLg@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Xing Gu <gux.fnst@cn.fujitsu.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, slyfox@gentoo.org, quwenruo@cn.fujitsu.com
+To: Filipe David Manana <fdmanana@gmail.com>
+Cc: Qu Wenruo <quwenruo@cn.fujitsu.com>, "dsterba@suse.cz" <dsterba@suse.cz>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Dec 23, 2014 at 03:23:10PM +0800, Eryu Guan wrote:
-> On Tue, Dec 23, 2014 at 01:41:02PM +0800, Xing Gu wrote:
-> > Regression test for a btrfs issue of resizing 'thread_pool'
-> > when remount the fs.
-> > 
-> > Signed-off-by: Xing Gu <gux.fnst@cn.fujitsu.com>
-> > ---
-> >  tests/btrfs/017     | 64 +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/btrfs/017.out |  1 +
-> >  tests/btrfs/group   |  1 +
-> >  3 files changed, 66 insertions(+)
-> >  create mode 100755 tests/btrfs/017
-> >  create mode 100644 tests/btrfs/017.out
-> > 
-> > diff --git a/tests/btrfs/017 b/tests/btrfs/017
-> > new file mode 100755
-> > index 0000000..81f5af6
-> > --- /dev/null
-> > +++ b/tests/btrfs/017
-> > @@ -0,0 +1,64 @@
-> > +#!/bin/bash
-> > +# FS QA Test No. btrfs/017
-> > +#
-> > +# Regression test for a btrfs issue of resizing 'thread_pool' when
-> > +# remount the fs.
-> > +# This was fixed in the following linux kernel patch:
-> > +#     800ee22 btrfs: fix crash in remount(thread_pool=) case
-> > +#
-> > +#-----------------------------------------------------------------------
-> > +# Copyright (c) 2014 Fujitsu.  All Rights Reserved.
-> > +#
-> > +# This program is free software; you can redistribute it and/or
-> > +# modify it under the terms of the GNU General Public License as
-> > +# published by the Free Software Foundation.
-> > +#
-> > +# This program is distributed in the hope that it would be useful,
-> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > +# GNU General Public License for more details.
-> > +#
-> > +# You should have received a copy of the GNU General Public License
-> > +# along with this program; if not, write the Free Software Foundation,
-> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > +#
-> > +#-----------------------------------------------------------------------
-> > +#
-> > +
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +
-> > +_cleanup()
-> > +{
-> > +    rm -f $tmp.*
-> > +}
-> > +
-> > +trap "_cleanup ; exit \$status" 0 1 2 3 15
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +# real QA test starts here
-> > +_supported_fs btrfs
-> > +_supported_os Linux
-> > +_require_scratch
-> > +
-> > +_scratch_mkfs > /dev/null
-> > +
-> > +dmesg -c > /dev/null
-> > +nr_null=`dmesg | grep -c "kernel NULL pointer dereference"`
+
+[ Sorry to take some time to get to this, it got caught by a spam
+filter and I only just noticed. ]
+
+On Tue, Dec 16, 2014 at 02:08:53PM +0000, Filipe David Manana wrote:
+> On Tue, Dec 16, 2014 at 1:35 AM, Qu Wenruo <quwenruo@cn.fujitsu.com> wrote:
+> >
+> > -------- Original Message --------
+> > Subject: Re: [PATCH 1/2] btrfs-progs: Add support for btrfs-image + corrupt
+> > script fsck test case.
+> > From: David Sterba <dsterba@suse.cz>
+> > To: Filipe David Manana <fdmanana@gmail.com>
+> > Date: 2014年12月16日 02:19
+> >>
+> >> On Mon, Dec 15, 2014 at 10:13:45AM +0000, Filipe David Manana wrote:
+> >>>>
+> >>>> So another thing I would like to see is doing a more comprehensive
+> >>>> verification that the repair code worked as expected. Currently we
+> >>>> only check that a readonly fsck, after running fsck --repair, returns
+> >>>> 0.
+> >>>>
+> >>>> For the improvements you've been doing, it's equally important to
+> >>>> verify that --repair recovered the inodes, links, etc to the
+> >>>> lost+found directory (or whatever is the directory's name).
+> >>>>
+> >>>> So perhaps adding a verify.sh script to the tarball for example?
+> >>>
+> >>> Or, forgot before, it might be better to do such verification/test in
+> >>> xfstests since we can create the fs and use the new btrfs-progs
+> >>> programs to corrupt leafs/nodes. xfstests has a lot of infrastructure
+> >>> already and probably run by a lot more people (compared to the fsck
+> >>> tests of btrfs-progs).
+> >>
+> >> I'm thinking about the best way how to integrate that, but it seems that
+> >> there will be always some level of code or infrastructure duplication
+> >> (or other hassle).
+> >>
+> >> btrfs-corrupt-block is not installed by default (make install) and it's
+> >> not a type of utility I'd consider for default installations. The tests
+> >> would be skipped in absence of the utility, so there will be test
+> >> environments where "install xfstests, install btrfspprogs" will not add
+> >> the desired test coverage. Solvable by packaging the extra progs.
+> >>
+> >> Adding corrupt-block into xfsprogs is infeasible (IMO too much code from
+> >> btrfs-progs to be added).
+> >>
+> >> I don't know how much infrastructure code we'd have to either write or
+> >> copy from fstests, but I think it would not be that much. Ideally we
+> >> could write the tests within btrfs-progs and then submit them to fstests
+> >> once they're considered reliable. If we keep the same "syntax" of the
+> >> tests, provide stubs where applicable, the code duplication in test
+> >> itself would be zero. We'd only have to write the stubs in btrfs-progs
+> >> and probably extend fstests to provide helpers for preparing/unpacking
+> >> the images.
+> >
+> > In my wildest idea, if we have a good enough btrfs debugger(maybe even
+> > stronger than debugfs), which can
+> > do almost everything from read key/item to corrupt given structure, then we
+> > can resolve them all.
+> > No binary image since corruption can be done by it and verify can also done
+> > by it.
+> > (OK, it's just a daydream)
+> >
+> > But IMHO, isn't xfstests designed to mainly detect kernel defeats?
+> > I don't see any fsck tool test case in it.
 > 
-> dmesg -c cleared dmesg buffer and nr_null is zero, I think this is
-> duplicated work, either dmesg -c or check nr_null before remount.
+> I don't think xfstests is specific to test the kernel implementation
+> of filesystems. I believe it includes user space code too, but I might
+> be wrong so I'm CCing fstests and Dave to get an authoritative answer.
 
-Please don't clear the dmesg buffer - it means that people can't
-review the kernel error messages across the entire test run for
-errors unless they are capturing that information elsewhere.
+We use fstests to test everything we ship for XFS - kernel and
+userspace. i.e. we have tests that corrupt filesystems with xfs_db
+and then test that xfs_repair can fix them, and once fixed the
+filesystem can be mounted and used by the kernel...
 
-And yes, I don't use syslog for capturing dmesg output on my test
-boxes because that leads to root filesystem ENOSPC whenever I'm
-dumping a lot of debug to the console....
+i.e. fstests is for testing both the kernel code and the utilities
+used to manipulate filesystems.
 
-> Actually I'm thinking about checking dmesg log in check after each test,
-> which could detect kernel BUG, WARNING and NULL pointer dereference etc.
-> so test doesn't need to check dmesg itself. I'll send it out for review
-> soon.
+> And I don't see a big problem with btrfs-corrupt not being built by
+> default when running "make" on btrfs-progs. We can make the xfstest
+> not run and print an informative message if the btrfs-corrupt program
+> isn't available - several xfstests do this, they require some
+> executable which isn't either in the xfstests nor xfsprogs
+> repositories - for example generic/241 which requires 'dbench' and
+> generic/299 which requires 'fio'.
 
-Some tests actually generate errors/warnings on purpose. IOWs, the
-presence of messages in dmesg is not always indicative of an
-error....
+_require_btrfs_corrupt_prog()
 
-> > +_scratch_mount "-o remount,thread_pool=10"
-> > +new_null=`dmesg | grep -c "kernel NULL pointer dereference"`
-> > +if [ $new_null -ne $nr_null ]; then
-> > +	_fatal "kernel bug detected, check dmesg for more infomation."
-> 
-> _fail is better than _fatal, and don't forget to remove $seqres.full before
-> test if you use _fail, cause it dumps errors to $seqres.full
-> 
-> But simply echo the error message could fail the test too, I'm fine with
-> either way..
+Just like we do with lots of other optional userspace tools that are
+required for various tests to run.
 
-Echo the error message, set status=1 and exit.
+> I also have a slight preference to get all
+> tests in the same place (xfstests) rather than in multiple
+> repositories (btrfs-progs, xfstests).
 
-Oh, wait, that's what _fail does. ;)
-
-> > +exit
-> > diff --git a/tests/btrfs/017.out b/tests/btrfs/017.out
-> > new file mode 100644
-> > index 0000000..90c4b69
-> > --- /dev/null
-> > +++ b/tests/btrfs/017.out
-> > @@ -0,0 +1 @@
-> > +QA output created by 017
-
-Empty output with no indication that it should be empty is bad form
-as well. The test should echo something to indicate that an empty
-output file is expected. "Silence is golden" is the usual string
-used to indicate that the golden output expects no output from the
-test.
+Definitely my preference as well.
 
 Cheers,
 
