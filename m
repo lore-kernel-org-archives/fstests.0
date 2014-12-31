@@ -1,44 +1,41 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:53091 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750934AbaL2HTW (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 29 Dec 2014 02:19:22 -0500
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH] fstests: btrfs/079: Fix wrong value passed to available space check.
-Date: Mon, 29 Dec 2014 15:17:18 +0800
-Message-ID: <1419837438-13771-1-git-send-email-quwenruo@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from userp1040.oracle.com ([156.151.31.81]:25006 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751177AbbABLmD (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 2 Jan 2015 06:42:03 -0500
+From: Anand Jain <anand.jain@oracle.com>
+Subject: [PATCH] xfstests: btrfs: fix up 001.out
+Date: Thu,  1 Jan 2015 03:48:24 +0800
+Message-Id: <1420055304-4633-1-git-send-email-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Before the patch, we passed wrong value to _require_fs_space, which
-should be in unit of 1024, but passed in unit of GB.
+The subvol delete output has changed with btrfs-progs
+    -Delete subvolume 'SCRATCH_MNT/snap'
+    +Delete subvolume (no-commit): 'SCRATCH_MNT/snap'
 
-Fix it and add better prompt for falloc failure.
+make the matching changes in the xfstests btrfs 001.out
 
-Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
 ---
- tests/btrfs/079 | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ tests/btrfs/001.out | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/tests/btrfs/079 b/tests/btrfs/079
-index 202d3e6..99d0187 100755
---- a/tests/btrfs/079
-+++ b/tests/btrfs/079
-@@ -73,8 +73,9 @@ rm -f $seqres.full
- 
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
--_require_fs_space $SCRATCH_MNT $(($filesize / 1024 / 1024 / 1024))
--$XFS_IO_PROG -f -c "falloc 0 $filesize" $testfile
-+_require_fs_space $SCRATCH_MNT $(($filesize / 1024))
-+$XFS_IO_PROG -f -c "falloc 0 $filesize" $testfile || \
-+	_fail "falloc failed"
- 
- dd_work() {
- 	out=$1
+diff --git a/tests/btrfs/001.out b/tests/btrfs/001.out
+index c782bde..8dc6eac 100644
+--- a/tests/btrfs/001.out
++++ b/tests/btrfs/001.out
+@@ -33,7 +33,7 @@ subvol
+ Listing subvolumes
+ snap
+ subvol
+-Delete subvolume 'SCRATCH_MNT/snap'
++Delete subvolume (no-commit): 'SCRATCH_MNT/snap'
+ List root dir
+ subvol
+ List root dir
 -- 
-2.2.1
+2.0.0.153.g79dcccc
 
