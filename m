@@ -1,167 +1,157 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from victor.provo.novell.com ([137.65.250.26]:37905 "EHLO
-	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1756548AbbAFUVe (ORCPT
-	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
-	Tue, 6 Jan 2015 15:21:34 -0500
-From: Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] fstests: add generic test for fsync after unlink
-Date: Tue,  6 Jan 2015 20:21:20 +0000
-Message-Id: <1420575680-9809-1-git-send-email-fdmanana@suse.com>
+Received: from mail.kernel.org ([198.145.29.136]:59827 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752008AbbAHSbo (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 8 Jan 2015 13:31:44 -0500
+From: Jaegeuk Kim <jaegeuk@kernel.org>
+Subject: [PATCH 1/2] src/godown: support f2fs triggering specific ioctl
+Date: Thu,  8 Jan 2015 10:31:18 -0800
+Message-Id: <1420741879-73691-1-git-send-email-jaegeuk@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Jaegeuk Kim <jaegeuk@kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-This test is motivated by an fsync issue discovered in btrfs.
-The issue was that after fsyncing an inode that got its link count
-decremented, and the new link count is greater than zero, after the
-fsync log replay the inode's parent directory metadata became
-inconsistent - it had a wrong i_size which prevented the directory
-from ever being removed (rmdir always failed with -ENOTEMPTY, even
-if the directory had no more child inodes).
+This patch triggers the F2FS-related ioctl for godown.
 
-The btrfs issue was fixed by the following linux kernel patch:
-
-    Btrfs: fix directory inconsistency after fsync log replay
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
 ---
- tests/generic/039     | 102 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/039.out |   2 +
- tests/generic/group   |   1 +
- 3 files changed, 105 insertions(+)
- create mode 100755 tests/generic/039
- create mode 100644 tests/generic/039.out
+ src/godown.c | 88 ++++++++++++++++++++++++++++++++++++++++++++----------------
+ 1 file changed, 65 insertions(+), 23 deletions(-)
 
-diff --git a/tests/generic/039 b/tests/generic/039
-new file mode 100755
-index 0000000..85646f9
---- /dev/null
-+++ b/tests/generic/039
-@@ -0,0 +1,102 @@
-+#! /bin/bash
-+# FS QA Test No. 039
-+#
-+# This test is motivated by an fsync issue discovered in btrfs.
-+# The issue was that after fsyncing an inode that got its link count
-+# decremented, and the new link count is greater than zero, after the
-+# fsync log replay the inode's parent directory metadata became
-+# inconsistent - it had a wrong i_size which prevented the directory
-+# from ever being removed (rmdir always failed with -ENOTEMPTY, even
-+# if the directory had no more child inodes).
-+#
-+# The btrfs issue was fixed by the following linux kernel patch:
-+#
-+#    Btrfs: fix directory inconsistency after fsync log replay
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2014 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
+diff --git a/src/godown.c b/src/godown.c
+index b140a41..b44790b 100644
+--- a/src/godown.c
++++ b/src/godown.c
+@@ -19,33 +19,82 @@
+ #include <syslog.h>
+ #include "global.h"
+ 
++#define F2FS_IOCTL_MAGIC	0xf5
++#define F2FS_IOC_GOINGDOWN	_IO(F2FS_IOCTL_MAGIC, 6)
 +
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
++enum ftypes {
++	XFS_FS,
++	F2FS_FS,
++};
 +
-+here=`pwd`
-+status=1	# failure is the default!
-+
-+_cleanup()
-+{
-+	_cleanup_flakey
+ static char *xprogname;
++static char *mnt_dir;
++static int verbose_opt = 0;
++static int flushlog_opt = 0;
+ 
++static enum ftypes fs = XFS_FS;
+ 
+ static void
+ usage(void)
+ {
+-	fprintf(stderr, "usage: %s [-f] [-v] mnt-dir\n", xprogname);
++	fprintf(stderr, "usage: %s [-f] [-v] [-s 0/1] mnt-dir\n", xprogname);
 +}
-+trap "_cleanup; exit \$status" 0 1 2 3 15
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmflakey
++static int
++xfs_goingdown(int fd)
++{
++	int flag;
 +
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_need_to_be_root
-+_require_scratch
-+_require_dm_flakey
++	flag = (flushlog_opt ? XFS_FSOP_GOING_FLAGS_LOGFLUSH
++			    : XFS_FSOP_GOING_FLAGS_NOLOGFLUSH);
++	if (verbose_opt) {
++		printf("Calling XFS_IOC_GOINGDOWN\n");
++	}
 +
-+rm -f $seqres.full
++	syslog(LOG_WARNING, "xfstests-induced forced shutdown of %s:\n",
++			mnt_dir);
++	if ((xfsctl(mnt_dir, fd, XFS_IOC_GOINGDOWN, &flag)) == -1) {
++		fprintf(stderr, "%s: error on xfsctl(GOINGDOWN) of \"%s\": %s\n",
++				xprogname, mnt_dir, strerror(errno));
++		return 1;
++	}
++	return 0;
++}
 +
-+_scratch_mkfs >> $seqres.full 2>&1
++static int
++f2fs_goingdown(int fd)
++{
++	if (verbose_opt) {
++		printf("Calling F2FS_IOC_GOINGDOWN\n");
++	}
++	syslog(LOG_WARNING, "xfstests-induced forced shutdown of %s:\n",
++			mnt_dir);
++	if ((ioctl(fd, F2FS_IOC_GOINGDOWN)) == -1) {
++		fprintf(stderr, "%s: error on ioctl(GOINGDOWN) of \"%s\": %s\n",
++				xprogname, mnt_dir, strerror(errno));
++		return 1;
++	}
++	return 0;
 +
-+_init_flakey
-+_mount_flakey
-+
-+# Create a test file with 2 hard links.
-+mkdir -p $SCRATCH_MNT/a/b
-+echo "hello world" > $SCRATCH_MNT/a/b/foo
-+ln $SCRATCH_MNT/a/b/foo $SCRATCH_MNT/a/b/bar
-+
-+# Make sure all metadata and data are durably persisted.
-+sync
-+
-+# Now remove one of the hard links and fsync the inode.
-+rm -f $SCRATCH_MNT/a/b/bar
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/a/b/foo
-+
-+# Simulate a crash/power loss. This makes sure the next mount
-+# will see an fsync log and will replay that log.
-+
-+_load_flakey_table $FLAKEY_DROP_WRITES
-+_unmount_flakey
-+
-+_load_flakey_table $FLAKEY_ALLOW_WRITES
-+_mount_flakey
-+
-+# Remove the last hard link of the file and attempt to remove its parent
-+# directory - this failed in btrfs because the fsync log and replay code
-+# didn't decrement the parent directory's i_size - this made the btrfs
-+# rmdir implementation always fail with -ENOTEMPTY.
-+#
-+# The parent directory's metadata inconsistency was also detected by btrfs'
-+# fsck tool, which is run automatically by the fstests framework when the
-+# test finishes.
-+rm -f $SCRATCH_MNT/a/b/foo
-+rmdir $SCRATCH_MNT/a/b
-+rmdir $SCRATCH_MNT/a
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/039.out b/tests/generic/039.out
-new file mode 100644
-index 0000000..d4e7ef6
---- /dev/null
-+++ b/tests/generic/039.out
-@@ -0,0 +1,2 @@
-+QA output created by 039
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 1e89848..6af5a1a 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -41,6 +41,7 @@
- 036 auto aio rw stress
- 037 metadata auto quick
- 038 auto stress
-+039 metadata auto quick
- 053 acl repair auto quick
- 062 attr udf auto quick
- 068 other auto freeze dangerous stress
+ }
+ 
+ int
+ main(int argc, char *argv[])
+ {
+-	int c;
+-	int flag;
+-	int flushlog_opt = 0;
+-	int verbose_opt = 0;
++	int c, fd;
+ 	struct stat st;
+-	char *mnt_dir;
+-	int fd;
++	int ret = 0;
+ 
+       	xprogname = argv[0];
+ 
+-	while ((c = getopt(argc, argv, "fv")) != -1) {
++	while ((c = getopt(argc, argv, "fs:v")) != -1) {
+ 		switch (c) {
+ 		case 'f':
+ 			flushlog_opt = 1;
+ 			break;
++		case 's':
++			fs = atoi(optarg);
++			break;
+ 		case 'v':
+ 			verbose_opt = 1;
+ 			break;
+@@ -94,10 +143,6 @@ main(int argc, char *argv[])
+ 	}
+ #endif
+ 
+-
+-	flag = (flushlog_opt ? XFS_FSOP_GOING_FLAGS_LOGFLUSH 
+-			    : XFS_FSOP_GOING_FLAGS_NOLOGFLUSH);
+-
+ 	if (verbose_opt) {
+ 		printf("Opening \"%s\"\n", mnt_dir);
+ 	}
+@@ -107,18 +152,15 @@ main(int argc, char *argv[])
+ 		return 1;
+ 	}
+ 
+-	if (verbose_opt) {
+-		printf("Calling XFS_IOC_GOINGDOWN\n");
++	switch (fs) {
++	case XFS_FS:
++		ret = xfs_goingdown(fd);
++		break;
++	case F2FS_FS:
++		ret = f2fs_goingdown(fd);
++		break;
+ 	}
+-	syslog(LOG_WARNING, "xfstests-induced forced shutdown of %s:\n",
+-		mnt_dir);
+-	if ((xfsctl(mnt_dir, fd, XFS_IOC_GOINGDOWN, &flag)) == -1) {
+-		fprintf(stderr, "%s: error on xfsctl(GOINGDOWN) of \"%s\": %s\n",
+-			xprogname, mnt_dir, strerror(errno));
+-		return 1;
+-	}
+-
+ 	close(fd);
+ 
+-	return 0;
++	return ret;
+ }
 -- 
-2.1.3
+2.1.1
 
