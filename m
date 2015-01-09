@@ -1,193 +1,112 @@
-Return-Path: <jaegeuk@kernel.org>
-Date: Thu, 8 Jan 2015 12:09:07 -0800
+Return-Path: <fstests-owner@vger.kernel.org>
+Received: from mail.kernel.org ([198.145.29.136]:48860 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752531AbbAICIp (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 8 Jan 2015 21:08:45 -0500
 From: Jaegeuk Kim <jaegeuk@kernel.org>
-Subject: Re: [PATCH 1/2] src/godown: support f2fs triggering specific ioctl
-Message-ID: <20150108200907.GA74189@jaegeuk-mac02>
-References: <1420741879-73691-1-git-send-email-jaegeuk@kernel.org>
- <54AED028.10101@sandeen.net>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <54AED028.10101@sandeen.net>
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
+Subject: [PATCH 1/2 v2] xfs/087: test f2fs selectively
+Date: Thu,  8 Jan 2015 18:08:37 -0800
+Message-Id: <1420769318-81382-1-git-send-email-jaegeuk@kernel.org>
+Sender: fstests-owner@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Jaegeuk Kim <jaegeuk@kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 08, 2015 at 12:44:56PM -0600, Eric Sandeen wrote:
-> On 1/8/15 12:31 PM, Jaegeuk Kim wrote:
-> > This patch triggers the F2FS-related ioctl for godown.
-> 
-> hohum, wouldn't it be a whole lot easier to just re-use the XFS ioctl
-> number in f2fs?  Then you wouldn't have to duplicate all this code.
+This patch add the f2fs support for xfs/087 with goingdown.
 
-Actually I tried to do like that. But, xfs's goingdown has some specific options
-wrt flushing logs which provide some rules on data recovery.
+Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
+---
+ tests/xfs/087 | 38 +++++++++++++++++++++++++++-----------
+ 1 file changed, 27 insertions(+), 11 deletions(-)
 
-So, I decided to add a new ioctl and a test script, (i.e., f2fs/087) which is
-different from xfs/087.
+diff --git a/tests/xfs/087 b/tests/xfs/087
+index 3a3fb49..9dc81c7 100755
+--- a/tests/xfs/087
++++ b/tests/xfs/087
+@@ -54,13 +54,16 @@ _do_meta()
+ }
+ 
+ # real QA test starts here
+-_supported_fs xfs
++_supported_fs xfs f2fs
+ _supported_os IRIX Linux
+ 
+ rm -f $seqres.full $tmp.*
+ _require_scratch
+-_require_v2log 
+-_require_xfs_quota
++
++if [ "$FSTYP" == "xfs" ]; then
++    _require_v2log
++    _require_xfs_quota
++fi
+ 
+ echo "*** init FS"
+ umount $SCRATCH_DEV >/dev/null 2>&1
+@@ -87,12 +90,15 @@ do
+     fi
+ 
+     echo "--- mkfs=$mkfs, mnt=$mnt ---"
+-    export MKFS_OPTIONS="-l $mkfs"
+-    export MOUNT_OPTIONS="-o $mnt"
++
++    if [ "$FSTYP" == "xfs" ]; then
++        export MKFS_OPTIONS="-l $mkfs"
++        export MOUNT_OPTIONS="-o $mnt"
++    fi
+ 
+     # mkfs the FS
+     _echofull "mkfs"
+-    _scratch_mkfs_xfs >>$seqres.full 2>&1
++    _scratch_mkfs >>$seqres.full 2>&1
+     if [ $? -ne 0 ] ; then 
+ 	_echofull "mkfs failed: $MKFS_OPTIONS"
+ 	continue
+@@ -100,7 +106,7 @@ do
+ 
+     # mount the FS
+     _echofull "mount"
+-    if ! _scratch_mount -o uquota >>$seqres.full 2>&1; then
++    if ! _scratch_mount >>$seqres.full 2>&1; then
+ 	_echofull "mount failed: $MOUNT_OPTIONS"
+ 	continue
+     fi
+@@ -120,13 +126,19 @@ do
+ 	|| _fail "umount failed"
+ 
+     _echofull "logprint after going down..."
+-    _print_logstate
++    if [ "$FSTYP" == "xfs" ]; then
++        _print_logstate
++    else
++	echo "dirty log"
++    fi
+ 
+     _full "logprint headers"
+-    _scratch_xfs_logprint -n >>$seqres.full 2>&1
++    if [ "$FSTYP" == "xfs" ]; then
++        _scratch_xfs_logprint -n >>$seqres.full 2>&1
++    fi
+ 
+     _echofull "mount with replay"
+-    _scratch_mount -o uquota >>$seqres.full 2>&1 \
++    _scratch_mount >>$seqres.full 2>&1 \
+ 	|| _fail "mount failed: $MOUNT_OPTIONS"
+ 
+     # check on what FS looks like after log recovery
+@@ -140,7 +152,11 @@ do
+     umount $SCRATCH_MNT
+ 
+     _echofull "logprint after mount and replay..."
+-    _print_logstate
++    if [ "$FSTYP" == "xfs" ]; then
++        _print_logstate
++    else
++	echo "clean log"
++    fi
+ 
+     if _check_scratch_fs; then
+ 	_echofull "filesystem is checked ok"
+-- 
+2.1.1
 
-> 
-> If you really want your own unique ioctl number, what about
-> just doing statfs on the target, and if f_type returns F2FS_SUPER_MAGIC,
-> swictch the ioctl nr to F2FS_IOC_GOINGDOWN.
-
-Oh, I'll change detecting the file system type.
-For the common ioctl, it needs to consider ioctl's format where xfs calls xfsctl
-with flushing options while f2fs triggers ioctl without paramter.
-
-> 
-> Then if not F2FS_SUPER_MAGIC, leave the ioctl nr at XFS_IOC_GOINGDOWN, and
-> if it fails, it fails (other filesystems might support the original nr.)
-> 
-> And then you can probably just add "f2fs" to the existing testcase,
-> and move it to tests/shared?
-
-I can't use the same scripts due to the different options used by xfs's
-goingdown.
-
-Thank you for the comments. :)
-
-Thanks,
-
-> 
-> -Eric
-> 
-> > Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
-> > ---
-> >  src/godown.c | 88 ++++++++++++++++++++++++++++++++++++++++++++----------------
-> >  1 file changed, 65 insertions(+), 23 deletions(-)
-> > 
-> > diff --git a/src/godown.c b/src/godown.c
-> > index b140a41..b44790b 100644
-> > --- a/src/godown.c
-> > +++ b/src/godown.c
-> > @@ -19,33 +19,82 @@
-> >  #include <syslog.h>
-> >  #include "global.h"
-> >  
-> > +#define F2FS_IOCTL_MAGIC	0xf5
-> > +#define F2FS_IOC_GOINGDOWN	_IO(F2FS_IOCTL_MAGIC, 6)
-> > +
-> > +enum ftypes {
-> > +	XFS_FS,
-> > +	F2FS_FS,
-> > +};
-> > +
-> >  static char *xprogname;
-> > +static char *mnt_dir;
-> > +static int verbose_opt = 0;
-> > +static int flushlog_opt = 0;
-> >  
-> > +static enum ftypes fs = XFS_FS;
-> >  
-> >  static void
-> >  usage(void)
-> >  {
-> > -	fprintf(stderr, "usage: %s [-f] [-v] mnt-dir\n", xprogname);
-> > +	fprintf(stderr, "usage: %s [-f] [-v] [-s 0/1] mnt-dir\n", xprogname);
-> > +}
-> > +
-> > +static int
-> > +xfs_goingdown(int fd)
-> > +{
-> > +	int flag;
-> > +
-> > +	flag = (flushlog_opt ? XFS_FSOP_GOING_FLAGS_LOGFLUSH
-> > +			    : XFS_FSOP_GOING_FLAGS_NOLOGFLUSH);
-> > +	if (verbose_opt) {
-> > +		printf("Calling XFS_IOC_GOINGDOWN\n");
-> > +	}
-> > +
-> > +	syslog(LOG_WARNING, "xfstests-induced forced shutdown of %s:\n",
-> > +			mnt_dir);
-> > +	if ((xfsctl(mnt_dir, fd, XFS_IOC_GOINGDOWN, &flag)) == -1) {
-> > +		fprintf(stderr, "%s: error on xfsctl(GOINGDOWN) of \"%s\": %s\n",
-> > +				xprogname, mnt_dir, strerror(errno));
-> > +		return 1;
-> > +	}
-> > +	return 0;
-> > +}
-> > +
-> > +static int
-> > +f2fs_goingdown(int fd)
-> > +{
-> > +	if (verbose_opt) {
-> > +		printf("Calling F2FS_IOC_GOINGDOWN\n");
-> > +	}
-> > +	syslog(LOG_WARNING, "xfstests-induced forced shutdown of %s:\n",
-> > +			mnt_dir);
-> > +	if ((ioctl(fd, F2FS_IOC_GOINGDOWN)) == -1) {
-> > +		fprintf(stderr, "%s: error on ioctl(GOINGDOWN) of \"%s\": %s\n",
-> > +				xprogname, mnt_dir, strerror(errno));
-> > +		return 1;
-> > +	}
-> > +	return 0;
-> > +
-> >  }
-> >  
-> >  int
-> >  main(int argc, char *argv[])
-> >  {
-> > -	int c;
-> > -	int flag;
-> > -	int flushlog_opt = 0;
-> > -	int verbose_opt = 0;
-> > +	int c, fd;
-> >  	struct stat st;
-> > -	char *mnt_dir;
-> > -	int fd;
-> > +	int ret = 0;
-> >  
-> >        	xprogname = argv[0];
-> >  
-> > -	while ((c = getopt(argc, argv, "fv")) != -1) {
-> > +	while ((c = getopt(argc, argv, "fs:v")) != -1) {
-> >  		switch (c) {
-> >  		case 'f':
-> >  			flushlog_opt = 1;
-> >  			break;
-> > +		case 's':
-> > +			fs = atoi(optarg);
-> > +			break;
-> >  		case 'v':
-> >  			verbose_opt = 1;
-> >  			break;
-> > @@ -94,10 +143,6 @@ main(int argc, char *argv[])
-> >  	}
-> >  #endif
-> >  
-> > -
-> > -	flag = (flushlog_opt ? XFS_FSOP_GOING_FLAGS_LOGFLUSH 
-> > -			    : XFS_FSOP_GOING_FLAGS_NOLOGFLUSH);
-> > -
-> >  	if (verbose_opt) {
-> >  		printf("Opening \"%s\"\n", mnt_dir);
-> >  	}
-> > @@ -107,18 +152,15 @@ main(int argc, char *argv[])
-> >  		return 1;
-> >  	}
-> >  
-> > -	if (verbose_opt) {
-> > -		printf("Calling XFS_IOC_GOINGDOWN\n");
-> > +	switch (fs) {
-> > +	case XFS_FS:
-> > +		ret = xfs_goingdown(fd);
-> > +		break;
-> > +	case F2FS_FS:
-> > +		ret = f2fs_goingdown(fd);
-> > +		break;
-> >  	}
-> > -	syslog(LOG_WARNING, "xfstests-induced forced shutdown of %s:\n",
-> > -		mnt_dir);
-> > -	if ((xfsctl(mnt_dir, fd, XFS_IOC_GOINGDOWN, &flag)) == -1) {
-> > -		fprintf(stderr, "%s: error on xfsctl(GOINGDOWN) of \"%s\": %s\n",
-> > -			xprogname, mnt_dir, strerror(errno));
-> > -		return 1;
-> > -	}
-> > -
-> >  	close(fd);
-> >  
-> > -	return 0;
-> > +	return ret;
-> >  }
-> > 
