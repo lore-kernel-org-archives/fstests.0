@@ -1,60 +1,232 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-qc0-f169.google.com ([209.85.216.169]:63631 "EHLO
-	mail-qc0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751853AbbASM1p (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 19 Jan 2015 07:27:45 -0500
-From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: Re: [PATCH] ext4/30[23]: ignore EBUSY error
-In-Reply-To: <1421650955-29350-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
-References: <1421650955-29350-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
-Date: Mon, 19 Jan 2015 16:27:41 +0400
-Message-ID: <87sif7arb6.fsf@openvz.org>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from mx1.redhat.com ([209.132.183.28]:49204 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751066AbbASOal (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 19 Jan 2015 09:30:41 -0500
+From: Brian Foster <bfoster@redhat.com>
+Subject: [PATCH] xfstests/xfs: xfs_repair secondary sb verification regression test
+Date: Mon, 19 Jan 2015 09:30:21 -0500
+Message-Id: <1421677821-30752-1-git-send-email-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Cc: tytso@mit.edu, david@fromorbit.com
+To: fstests@vger.kernel.org
+Cc: xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
+The secondary superblock verification in xfs_repair was subject to a bug
+that unnecessarily leads to a brute force superblock scan if the last
+superblock in the fs happens to be corrupt. Normally, xfs_repair handles
+one-off superblock corruption gracefully using a heuristic that finds
+the most consistent superblock content across the set of secondary
+superblocks.
 
-Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com> writes:
+Create a regression test for xfs_repair that corrupts the last
+superblock in the fs. Verify the superblock is updated from the
+previously verified sb content and a brute force scan is not initiated.
+In the event of failure, detect that a brute force scan has started and
+abort the repair in order to fail the test quickly.
 
-Acked-by Dmitry Monakhov <dmonakhov@openvz.org>
-> xfstests ext4/302, ext4/303 are ext4 defragmentation stress test,
-> which will ioctl(EXT4_IOC_MOVE_EXT), so EBUSY is expected to happen,
-> for example, when page's corresponding buffer_head's state is BH_Dirty.
->
-> Signed-off-by: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
-> ---
->  tests/ext4/302 | 2 ++
->  tests/ext4/303 | 2 ++
->  2 files changed, 4 insertions(+)
->
-> diff --git a/tests/ext4/302 b/tests/ext4/302
-> index 1e90016..c604c8f 100755
-> --- a/tests/ext4/302
-> +++ b/tests/ext4/302
-> @@ -60,6 +60,8 @@ filesize=${FILE_SIZE}
->  size=999G
->  buffered=0
->  fadvise_hint=0
-> +continue_on_error=write
-> +ignore_error=,EBUSY
->  
->  ##########################################
->  # Test2
-> diff --git a/tests/ext4/303 b/tests/ext4/303
-> index 9573872..2d01f0f 100755
-> --- a/tests/ext4/303
-> +++ b/tests/ext4/303
-> @@ -60,6 +60,8 @@ filesize=${FILE_SIZE}
->  size=999G
->  buffered=0
->  fadvise_hint=0
-> +continue_on_error=write
-> +ignore_error=,EBUSY
->  
->  #################################
->  # Test3
-> -- 
-> 1.8.3.1
+To support the test, extend the xfs_repair filter to handle corrupted
+superblock repair output and provide generic test output for arbitrary
+AG counts.
+
+Signed-off-by: Brian Foster <bfoster@redhat.com>
+---
+
+Hi all,
+
+This is an xfs_repair regression test to trigger the problem fixed by
+the following previously posted fix:
+
+http://oss.sgi.com/archives/xfs/2015-01/msg00244.html
+
+Thoughts appreciated, thanks.
+
+Brian
+
+ common/repair     |   4 ++
+ tests/xfs/069     | 110 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/069.out |  27 ++++++++++++++
+ tests/xfs/group   |   1 +
+ 4 files changed, 142 insertions(+)
+ create mode 100755 tests/xfs/069
+ create mode 100644 tests/xfs/069.out
+
+diff --git a/common/repair b/common/repair
+index a157580..7a99546 100644
+--- a/common/repair
++++ b/common/repair
+@@ -88,6 +88,10 @@ s/(inode chunk) (\d+)\/(\d+)/AGNO\/INO/;
+ # sunit/swidth reset messages
+ s/^(Note - .*) were copied.*/\1 fields have been reset./;
+ s/^(Please) reset (with .*) if necessary/\1 set \2/;
++# corrupt sb messages
++s/(superblock) (\d+)/\1 AGNO/;
++s/(AG \#)(\d+)/\1AGNO/;
++s/(reset bad sb for ag) (\d+)/\1 AGNO/;
+ 	print;'
+ }
+ 
+diff --git a/tests/xfs/069 b/tests/xfs/069
+new file mode 100755
+index 0000000..b1ed425
+--- /dev/null
++++ b/tests/xfs/069
+@@ -0,0 +1,110 @@
++#! /bin/bash
++# FS QA Test No. 069
++#
++# As part of superblock verification, xfs_repair checks the primary sb and
++# verifies all secondary sb's against the primary. In the event of geometry
++# inconsistency, repair uses a heuristic that tracks the most frequently
++# occurring settings across the set of N (agcount) superblocks.
++#
++# xfs_repair was subject to a bug that disregards this heuristic in the event
++# that the last secondary superblock in the fs is corrupt. The side effect is an
++# unnecessary and potentially time consuming brute force superblock scan.
++#
++# This is a regression test for the aforementioned xfs_repair bug. We
++# intentionally corrupt the last superblock in the fs, run xfs_repair and
++# verify it repairs the fs correctly. We explicitly detect a brute force scan
++# and abort the repair to save time in the failure case.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Red Hat, Inc. All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	killall -9 $XFS_REPAIR_PROG > /dev/null 2>&1
++	wait > /dev/null 2>&1
++}
++
++# Start and monitor an xfs_repair of the scratch device. This test can induce a
++# time consuming brute force superblock scan. Since a brute force scan means
++# test failure, detect it and end the repair.
++_xfs_repair_noscan()
++{
++	# invoke repair directly so we can kill the process if need be
++	$XFS_REPAIR_PROG $SCRATCH_DEV 2>&1 | tee -a $seqres.full > $tmp.repair &
++	repair_pid=$!
++
++	# monitor progress for as long as it is running
++	while [ `ps -q $repair_pid > /dev/null; echo $?` == 0 ]; do
++		grep "couldn't verify primary superblock" $tmp.repair \
++			> /dev/null 2>&1
++		if [ $? == 0 ]; then
++			# we've started a brute force scan. kill repair and
++			# fail the test
++			kill -9 $repair_pid >> $seqres.full 2>&1
++			wait >> $seqres.full 2>&1
++
++			_fail "xfs_repair resorted to brute force scan"
++		fi
++
++		sleep 1
++	done
++
++	wait
++
++	cat $tmp.repair | _filter_repair
++}
++
++rm -f $seqres.full
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/repair
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs xfs
++_supported_os Linux
++_require_scratch_nocheck
++
++_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
++
++# corrupt the last secondary sb in the fs
++agcount=`$XFS_DB_PROG -c "sb" -c "p agcount" $SCRATCH_DEV | awk '{ print $3 }'`
++last_secondary=$((agcount - 1))
++$XFS_DB_PROG -x -c "sb $last_secondary" -c "type data" \
++	-c "write fill 0xff 0 512" $SCRATCH_DEV
++
++# attempt to repair
++_xfs_repair_noscan
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/069.out b/tests/xfs/069.out
+new file mode 100644
+index 0000000..c6b11d1
+--- /dev/null
++++ b/tests/xfs/069.out
+@@ -0,0 +1,27 @@
++QA output created by 069
++Phase 1 - find and verify superblock...
++Phase 2 - using <TYPEOF> log
++        - zero log...
++        - scan filesystem freespace and inode maps...
++bad magic number
++bad on-disk superblock AGNO - bad magic number
++primary/secondary superblock AGNO conflict - AG superblock geometry info conflicts with filesystem geometry
++zeroing unused portion of secondary superblock (AG #AGNO)
++reset bad sb for ag AGNO
++        - found root inode chunk
++Phase 3 - for each AG...
++        - scan and clear agi unlinked lists...
++        - process known inodes and perform inode discovery...
++        - process newly discovered inodes...
++Phase 4 - check for duplicate blocks...
++        - setting up duplicate extent list...
++        - check for inodes claiming duplicate blocks...
++Phase 5 - rebuild AG headers and trees...
++        - reset superblock...
++Phase 6 - check inode connectivity...
++        - resetting contents of realtime bitmap and summary inodes
++        - traversing filesystem ...
++        - traversal finished ...
++        - moving disconnected inodes to lost+found ...
++Phase 7 - verify and correct link counts...
++done
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 496630d..9394703 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -66,6 +66,7 @@
+ 066 dump ioctl auto quick
+ 067 acl attr auto quick
+ 068 auto stress dump
++069 auto quick repair
+ 071 rw auto
+ 072 rw auto prealloc quick
+ 073 copy auto
+-- 
+1.8.3.1
+
