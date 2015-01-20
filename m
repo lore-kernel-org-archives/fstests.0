@@ -1,232 +1,160 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:49204 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751066AbbASOal (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 19 Jan 2015 09:30:41 -0500
-From: Brian Foster <bfoster@redhat.com>
-Subject: [PATCH] xfstests/xfs: xfs_repair secondary sb verification regression test
-Date: Mon, 19 Jan 2015 09:30:21 -0500
-Message-Id: <1421677821-30752-1-git-send-email-bfoster@redhat.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:10888 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751597AbbATDEV (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 19 Jan 2015 22:04:21 -0500
+Message-ID: <54BDC49F.6040305@cn.fujitsu.com>
+Date: Tue, 20 Jan 2015 10:59:43 +0800
+From: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
+MIME-Version: 1.0
+Subject: xfstests tests/ext4/304
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com
+To: "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>, fstests@vger.kernel.org, fio@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-The secondary superblock verification in xfs_repair was subject to a bug
-that unnecessarily leads to a brute force superblock scan if the last
-superblock in the fs happens to be corrupt. Normally, xfs_repair handles
-one-off superblock corruption gracefully using a heuristic that finds
-the most consistent superblock content across the set of secondary
-superblocks.
+Hi,
 
-Create a regression test for xfs_repair that corrupts the last
-superblock in the fs. Verify the superblock is updated from the
-previously verified sb content and a brute force scan is not initiated.
-In the event of failure, detect that a brute force scan has started and
-abort the repair in order to fail the test quickly.
+Does anyone see xfstests tests/ext4/304 failed in your test environment. I run
+this case in v3.19-rc5, it always fails to me... I tried to figure out the true
+reason, below is my analysis, I think either fio tool, or this 304 case has some
+bugs, please have a check. But sorry firstly, I don't have much time to check fio
+code that deep, I just checked how fio/engines/e4defrag.c is implemented, so you
+can take my analysis as a bug report, thanks in advance :)
 
-To support the test, extend the xfs_repair filter to handle corrupted
-superblock repair output and provide generic test output for arbitrary
-AG counts.
+When I run tests/ext4/304, this corresponding fio config file is:
+########################################################
+# Common e4defrag regression tests
+[global]
+ioengine=ioe_e4defrag
+iodepth=1
+directory=/mnt/xfstests/scratch
+filesize=3565158400
+size=999G
+buffered=0
+fadvise_hint=0
 
-Signed-off-by: Brian Foster <bfoster@redhat.com>
----
+# Test4
+# Stress test defragmentation engine
+# Several threads perform defragmentation at random position
+# use inplace=1 will allocate and free blocks inside defrag event
+# which highly increase defragmentation
+[defrag-fuzzer]
+ioengine=e4defrag
+iodepth=1
+bs=8k
+donorname=test4.def
+filename=test4
+inplace=1
+rw=randwrite
+numjobs=4*1
+runtime=30*1
+time_based
 
-Hi all,
+[aio-dio-verifier]
+ioengine=libaio
+iodepth=128
+iomem_align=4k
+numjobs=1
+verify=crc32c-intel
+verify_fatal=1
+verify_dump=1
+verify_backlog=1024
+verify_async=1
+verifysort=1
+direct=1
+bs=64k
+rw=write
+filename=test4
+runtime=30*1
+time_based
+########################################################
+You can "fio config-file" directly in an ext4 file system. 
 
-This is an xfs_repair regression test to trigger the problem fixed by
-the following previously posted fix:
+When I run this case in my v3.19-rc5 virtual machine, I always got a EINVAL error.
+This EINVAL error is returned from mext_check_arguments() in fs/ext4/move_extent.c:
 
-http://oss.sgi.com/archives/xfs/2015-01/msg00244.html
+	if ((!orig_inode->i_size) || (!donor_inode->i_size)) {
+		printk(KERN_ERR "ext4 move extent: File size is 0 byte\n");
+		return -EINVAL;
+	}
 
-Thoughts appreciated, thanks.
+I think there is nothing wrong with ext4 kernel side, so could anyone help to confirm
+whether e4defrag engine(inplace=1 mode) in fio tool or this 304 case is not implemented correctly.
+See my analysis below: I have removed some irrelevant codes.
 
-Brian
+in fio/engines/e4defrag.c. We check inplace=1 mode.
+###############################################
+static int fio_e4defrag_init(struct thread_data *td)
+{
+	int r, len = 0;
+	struct e4defrag_options *o = td->eo;
+	struct e4defrag_data *ed;
+	struct stat stub;
+	char donor_name[PATH_MAX];
 
- common/repair     |   4 ++
- tests/xfs/069     | 110 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/069.out |  27 ++++++++++++++
- tests/xfs/group   |   1 +
- 4 files changed, 142 insertions(+)
- create mode 100755 tests/xfs/069
- create mode 100644 tests/xfs/069.out
+	....
 
-diff --git a/common/repair b/common/repair
-index a157580..7a99546 100644
---- a/common/repair
-+++ b/common/repair
-@@ -88,6 +88,10 @@ s/(inode chunk) (\d+)\/(\d+)/AGNO\/INO/;
- # sunit/swidth reset messages
- s/^(Note - .*) were copied.*/\1 fields have been reset./;
- s/^(Please) reset (with .*) if necessary/\1 set \2/;
-+# corrupt sb messages
-+s/(superblock) (\d+)/\1 AGNO/;
-+s/(AG \#)(\d+)/\1AGNO/;
-+s/(reset bad sb for ag) (\d+)/\1 AGNO/;
- 	print;'
- }
- 
-diff --git a/tests/xfs/069 b/tests/xfs/069
-new file mode 100755
-index 0000000..b1ed425
---- /dev/null
-+++ b/tests/xfs/069
-@@ -0,0 +1,110 @@
-+#! /bin/bash
-+# FS QA Test No. 069
-+#
-+# As part of superblock verification, xfs_repair checks the primary sb and
-+# verifies all secondary sb's against the primary. In the event of geometry
-+# inconsistency, repair uses a heuristic that tracks the most frequently
-+# occurring settings across the set of N (agcount) superblocks.
-+#
-+# xfs_repair was subject to a bug that disregards this heuristic in the event
-+# that the last secondary superblock in the fs is corrupt. The side effect is an
-+# unnecessary and potentially time consuming brute force superblock scan.
-+#
-+# This is a regression test for the aforementioned xfs_repair bug. We
-+# intentionally corrupt the last superblock in the fs, run xfs_repair and
-+# verify it repairs the fs correctly. We explicitly detect a brute force scan
-+# and abort the repair to save time in the failure case.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Red Hat, Inc. All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	killall -9 $XFS_REPAIR_PROG > /dev/null 2>&1
-+	wait > /dev/null 2>&1
-+}
-+
-+# Start and monitor an xfs_repair of the scratch device. This test can induce a
-+# time consuming brute force superblock scan. Since a brute force scan means
-+# test failure, detect it and end the repair.
-+_xfs_repair_noscan()
-+{
-+	# invoke repair directly so we can kill the process if need be
-+	$XFS_REPAIR_PROG $SCRATCH_DEV 2>&1 | tee -a $seqres.full > $tmp.repair &
-+	repair_pid=$!
-+
-+	# monitor progress for as long as it is running
-+	while [ `ps -q $repair_pid > /dev/null; echo $?` == 0 ]; do
-+		grep "couldn't verify primary superblock" $tmp.repair \
-+			> /dev/null 2>&1
-+		if [ $? == 0 ]; then
-+			# we've started a brute force scan. kill repair and
-+			# fail the test
-+			kill -9 $repair_pid >> $seqres.full 2>&1
-+			wait >> $seqres.full 2>&1
-+
-+			_fail "xfs_repair resorted to brute force scan"
-+		fi
-+
-+		sleep 1
-+	done
-+
-+	wait
-+
-+	cat $tmp.repair | _filter_repair
-+}
-+
-+rm -f $seqres.full
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/repair
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs xfs
-+_supported_os Linux
-+_require_scratch_nocheck
-+
-+_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
-+
-+# corrupt the last secondary sb in the fs
-+agcount=`$XFS_DB_PROG -c "sb" -c "p agcount" $SCRATCH_DEV | awk '{ print $3 }'`
-+last_secondary=$((agcount - 1))
-+$XFS_DB_PROG -x -c "sb $last_secondary" -c "type data" \
-+	-c "write fill 0xff 0 512" $SCRATCH_DEV
-+
-+# attempt to repair
-+_xfs_repair_noscan
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/069.out b/tests/xfs/069.out
-new file mode 100644
-index 0000000..c6b11d1
---- /dev/null
-+++ b/tests/xfs/069.out
-@@ -0,0 +1,27 @@
-+QA output created by 069
-+Phase 1 - find and verify superblock...
-+Phase 2 - using <TYPEOF> log
-+        - zero log...
-+        - scan filesystem freespace and inode maps...
-+bad magic number
-+bad on-disk superblock AGNO - bad magic number
-+primary/secondary superblock AGNO conflict - AG superblock geometry info conflicts with filesystem geometry
-+zeroing unused portion of secondary superblock (AG #AGNO)
-+reset bad sb for ag AGNO
-+        - found root inode chunk
-+Phase 3 - for each AG...
-+        - scan and clear agi unlinked lists...
-+        - process known inodes and perform inode discovery...
-+        - process newly discovered inodes...
-+Phase 4 - check for duplicate blocks...
-+        - setting up duplicate extent list...
-+        - check for inodes claiming duplicate blocks...
-+Phase 5 - rebuild AG headers and trees...
-+        - reset superblock...
-+Phase 6 - check inode connectivity...
-+        - resetting contents of realtime bitmap and summary inodes
-+        - traversing filesystem ...
-+        - traversal finished ...
-+        - moving disconnected inodes to lost+found ...
-+Phase 7 - verify and correct link counts...
-+done
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 496630d..9394703 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -66,6 +66,7 @@
- 066 dump ioctl auto quick
- 067 acl attr auto quick
- 068 auto stress dump
-+069 auto quick repair
- 071 rw auto
- 072 rw auto prealloc quick
- 073 copy auto
--- 
-1.8.3.1
+	if (!o->inplace) {
+		long long len = td->o.file_size_high - td->o.start_offset;
+		r = fallocate(ed->donor_fd, 0, td->o.start_offset, len);
+		if (r)
+			goto err;
+	}
+	...
+}
+...
 
+
+static int fio_e4defrag_queue(struct thread_data *td, struct io_u *io_u)
+{
+
+	int ret;
+	unsigned long long len;
+	struct move_extent me;
+	
+	....
+
+	if (o->inplace) {
+		ret = fallocate(ed->donor_fd, 0, io_u->offset, io_u->xfer_buflen);  //race point
+		if (ret)
+			goto out;
+	}
+	
+	...
+
+	ret = ioctl(f->fd, EXT4_IOC_MOVE_EXT, &me);  //race point
+	len = me.moved_len * ed->bsz;
+
+	...
+
+	if (o->inplace)
+		ret = ftruncate(ed->donor_fd, 0);  // race point
+
+	...
+}
+###############################################
+
+In this case, we fork 4 process to do defragment work. Assume that 3 process have fallocated some
+physical blocks, but before they started to do ioctl(EXT4_IOC_MOVE_EXT), another process has finished
+its job, and did a ftruncate operation, now donor file's size is 0, then the first 3 process will fail
+(because donor file's size is 0, being truncated). I think it's the reason that tests/ext4/304 fails.
+
+To be honest, I do not know whether there have been some fio internal mechanisms to serialize these operations,
+such as:
+	/* for inplace=1 mode*/
+	lock();
+	fallocate(...);
+	ioctl(EXT4_IOC_MOVE_EXT);
+	ftruncate(fd, 0);
+	unlock();
+
+If there are already some mechanisms to protect these races, it'll mean that there are no much meaning to
+set numjobs greater than 1, because these operation have already been serialized. If there are no such
+mechanisms,  I think the above scenario will surely be triggered.
+
+I don't know whether I have missed something, but this test 304 really failed to me. 
+
+Regards,
+Xiaoguang Wang
