@@ -1,118 +1,58 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:3877 "EHLO
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:4872 "EHLO
 	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752283AbbAUENI (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 20 Jan 2015 23:13:08 -0500
-Date: Wed, 21 Jan 2015 15:12:30 +1100
+	by vger.kernel.org with ESMTP id S1753896AbbAUET0 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 20 Jan 2015 23:19:26 -0500
+Date: Wed, 21 Jan 2015 15:19:11 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] xfstests/xfs: xfs_repair secondary sb verification
- regression test
-Message-ID: <20150121041230.GD16510@dastard>
-References: <1421677821-30752-1-git-send-email-bfoster@redhat.com>
+Subject: Re: [PATCH] fstests: btrfs/079: Fix wrong value passed to available
+ space check.
+Message-ID: <20150121041911.GE16510@dastard>
+References: <1419837438-13771-1-git-send-email-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1421677821-30752-1-git-send-email-bfoster@redhat.com>
+In-Reply-To: <1419837438-13771-1-git-send-email-quwenruo@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jan 19, 2015 at 09:30:21AM -0500, Brian Foster wrote:
-> The secondary superblock verification in xfs_repair was subject to a bug
-> that unnecessarily leads to a brute force superblock scan if the last
-> superblock in the fs happens to be corrupt. Normally, xfs_repair handles
-> one-off superblock corruption gracefully using a heuristic that finds
-> the most consistent superblock content across the set of secondary
-> superblocks.
+On Mon, Dec 29, 2014 at 03:17:18PM +0800, Qu Wenruo wrote:
+> Before the patch, we passed wrong value to _require_fs_space, which
+> should be in unit of 1024, but passed in unit of GB.
+
+Yes, that needs fixing.
+
+> Fix it and add better prompt for falloc failure.
+
+That doesn't....
+
 > 
-> Create a regression test for xfs_repair that corrupts the last
-> superblock in the fs. Verify the superblock is updated from the
-> previously verified sb content and a brute force scan is not initiated.
-> In the event of failure, detect that a brute force scan has started and
-> abort the repair in order to fail the test quickly.
-> 
-> To support the test, extend the xfs_repair filter to handle corrupted
-> superblock repair output and provide generic test output for arbitrary
-> AG counts.
-> 
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
+> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 > ---
+>  tests/btrfs/079 | 5 +++--
+>  1 file changed, 3 insertions(+), 2 deletions(-)
 > 
-> Hi all,
-> 
-> This is an xfs_repair regression test to trigger the problem fixed by
-> the following previously posted fix:
-> 
-> http://oss.sgi.com/archives/xfs/2015-01/msg00244.html
-> 
-> Thoughts appreciated, thanks.
-...
-> +# Start and monitor an xfs_repair of the scratch device. This test can induce a
-> +# time consuming brute force superblock scan. Since a brute force scan means
-> +# test failure, detect it and end the repair.
-> +_xfs_repair_noscan()
-> +{
-> +	# invoke repair directly so we can kill the process if need be
-> +	$XFS_REPAIR_PROG $SCRATCH_DEV 2>&1 | tee -a $seqres.full > $tmp.repair &
-> +	repair_pid=$!
-> +
-> +	# monitor progress for as long as it is running
-> +	while [ `ps -q $repair_pid > /dev/null; echo $?` == 0 ]; do
+> diff --git a/tests/btrfs/079 b/tests/btrfs/079
+> index 202d3e6..99d0187 100755
+> --- a/tests/btrfs/079
+> +++ b/tests/btrfs/079
+> @@ -73,8 +73,9 @@ rm -f $seqres.full
+>  
+>  _scratch_mkfs >>$seqres.full 2>&1
+>  _scratch_mount
+> -_require_fs_space $SCRATCH_MNT $(($filesize / 1024 / 1024 / 1024))
+> -$XFS_IO_PROG -f -c "falloc 0 $filesize" $testfile
+> +_require_fs_space $SCRATCH_MNT $(($filesize / 1024))
+> +$XFS_IO_PROG -f -c "falloc 0 $filesize" $testfile || \
+> +	_fail "falloc failed"
 
-	while [ `pgrep xfs_repair` -eq 0 ]; do
-
-> +		grep "couldn't verify primary superblock" $tmp.repair \
-> +			> /dev/null 2>&1
-> +		if [ $? == 0 ]; then
-> +			# we've started a brute force scan. kill repair and
-> +			# fail the test
-> +			kill -9 $repair_pid >> $seqres.full 2>&1
-> +			wait >> $seqres.full 2>&1
-> +
-> +			_fail "xfs_repair resorted to brute force scan"
-> +		fi
-> +
-> +		sleep 1
-> +	done
-> +
-> +	wait
-> +
-> +	cat $tmp.repair | _filter_repair
-> +}
-> +
-> +rm -f $seqres.full
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/repair
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs xfs
-> +_supported_os Linux
-> +_require_scratch_nocheck
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
-> +
-> +# corrupt the last secondary sb in the fs
-> +agcount=`$XFS_DB_PROG -c "sb" -c "p agcount" $SCRATCH_DEV | awk '{ print $3 }'`
-
-scratch_mkfs | _filter_mkfs 2> $tmp.mkfs
-. $tmp.mkfs
-
-And now you have the agcount variable already set up (and most other
-fs geometry variables that mkfs outputs).
-
-> +last_secondary=$((agcount - 1))
-> +$XFS_DB_PROG -x -c "sb $last_secondary" -c "type data" \
-
-you can just use  "sb $((agcount - 1))" directly. The comment above
-tells us that it's the last secondary sb we are corrupting....
-
-Otherwise look sok.
+If the falloc fails, then the golden output match will fail. Let the
+test run, regardless, because the first thing it does is try to
+overwrite the fallocated region where the success or failure of the
+writes are completely ignored. Hence a falloc failure should also be
+ignored...
 
 Cheers,
 
