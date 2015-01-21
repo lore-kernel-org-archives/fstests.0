@@ -1,16 +1,16 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:22203 "EHLO
+Received: from cn.fujitsu.com ([59.151.112.132]:55136 "EHLO
 	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753888AbbAUETg convert rfc822-to-8bit (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 20 Jan 2015 23:19:36 -0500
-Message-ID: <54BF28D4.80303@cn.fujitsu.com>
-Date: Wed, 21 Jan 2015 12:19:32 +0800
+	with ESMTP id S1754367AbbAUEVu convert rfc822-to-8bit (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 20 Jan 2015 23:21:50 -0500
+Message-ID: <54BF295C.6060902@cn.fujitsu.com>
+Date: Wed, 21 Jan 2015 12:21:48 +0800
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
-Subject: Re: [PATCH] fstest: btrfs/006: Add extra check on return value and
- 'fi show' by device
-References: <1421373430-21915-1-git-send-email-quwenruo@cn.fujitsu.com> <20150121040315.GC16510@dastard>
-In-Reply-To: <20150121040315.GC16510@dastard>
+Subject: Re: [PATCH] fstests: btrfs/079: Fix wrong value passed to available
+ space check.
+References: <1419837438-13771-1-git-send-email-quwenruo@cn.fujitsu.com> <20150121041911.GE16510@dastard>
+In-Reply-To: <20150121041911.GE16510@dastard>
 Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Transfer-Encoding: 8BIT
 Sender: fstests-owner@vger.kernel.org
@@ -20,105 +20,47 @@ List-ID: <fstests@vger.kernel.org>
 
 
 -------- Original Message --------
-Subject: Re: [PATCH] fstest: btrfs/006: Add extra check on return value 
-and 'fi show' by device
+Subject: Re: [PATCH] fstests: btrfs/079: Fix wrong value passed to 
+available space check.
 From: Dave Chinner <david@fromorbit.com>
 To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Date: 2015年01月21日 12:03
-> On Fri, Jan 16, 2015 at 09:57:10AM +0800, Qu Wenruo wrote:
->> Reported in Red Hat BZ#1181627, 'btrfs fi show' on unmounted device will
->> return 1 even no error happens.
-> Please describe the bug in the commit message, don't make me have to
-> go look at some web page to work out what you are trying to fix.
-OK, I'll make the description more detailed.
+Date: 2015年01月21日 12:19
+> On Mon, Dec 29, 2014 at 03:17:18PM +0800, Qu Wenruo wrote:
+>> Before the patch, we passed wrong value to _require_fs_space, which
+>> should be in unit of 1024, but passed in unit of GB.
+> Yes, that needs fixing.
 >
->> Introduced by: commit 2513077f
->> btrfs-progs: fix device missing of btrfs fi show with seed devices
->>
->> Patch fixing it:
->> https://patchwork.kernel.org/patch/5626001/
->> btrfs-progs: Fix wrong return value when executing 'fi show' on
->> umounted device.
-> What btrfs progs commit introduced and fixed is not actually
-> relevant to fstests.
-This just saves some time for some users who failed the test and what to 
-check if the bug is fixed or not.
-> If I have to go read other stuff to understand
-> the change you are making, then the description needs more detail
-> and less external references....
-I understand that I need to make the description more detailed.
-Although external reference does not help much for fstests, but it will 
-really saves time
-for some tests.
-Like Fillipe Manana's test, which embedded such info into the test 
-script, saved me a lot of
-time to find the regression commit.
+>> Fix it and add better prompt for falloc failure.
+> That doesn't....
 >
->
->> Reported-by: Vratislav Podzimek <vpodzime@redhat.com>
 >> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 >> ---
->>   tests/btrfs/006     | 51 ++++++++++++++++++++++++++++++++++++++++++++-------
->>   tests/btrfs/006.out | 10 ++++++++++
->>   2 files changed, 54 insertions(+), 7 deletions(-)
+>>   tests/btrfs/079 | 5 +++--
+>>   1 file changed, 3 insertions(+), 2 deletions(-)
 >>
->> diff --git a/tests/btrfs/006 b/tests/btrfs/006
->> index 715fd80..2d8c1c0 100755
->> --- a/tests/btrfs/006
->> +++ b/tests/btrfs/006
->> @@ -62,33 +62,70 @@ _scratch_pool_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+>> diff --git a/tests/btrfs/079 b/tests/btrfs/079
+>> index 202d3e6..99d0187 100755
+>> --- a/tests/btrfs/079
+>> +++ b/tests/btrfs/079
+>> @@ -73,8 +73,9 @@ rm -f $seqres.full
 >>   
->>   # These have to be done unmounted...?
->>   echo "== Set filesystem label to $LABEL"
->> -$BTRFS_UTIL_PROG filesystem label $SCRATCH_DEV $LABEL
->> +$BTRFS_UTIL_PROG filesystem label $SCRATCH_DEV $LABEL || \
->> +	_fail "set lable failed"
-> Apart from the typo, why not _run_btrfs_util_prog?
-Oh thanks a lot for the existing infrastructure.
-
-With this one, the PIPESTATUS[] is no longer needed.
->
-> However, this will make the test fail on older btrfs progs
-> installations that we previously passing the test just fine, right?
-No, old tests will still pass, since it returns 0 as expected.
-Add the return values test just in case.
->
-> IOWs, if you want to test that `btrfs fi show` always returns the
-> correct value, don't add that checking to an existing test: write a
-> new test that tests the validity of the return value....
-OK, creating a new one seems reasonable enough for me.
->
->
->>   echo "== Get filesystem label"
->> -$BTRFS_UTIL_PROG filesystem label $SCRATCH_DEV
->> +$BTRFS_UTIL_PROG filesystem label $SCRATCH_DEV || \
->> +	_fail "get lable failed"
->> +
->> +echo "== Show filesystem by device(offline)"
->> +$BTRFS_UTIL_PROG filesystem show $FIRST_POOL_DEV | \
->> +	_filter_btrfs_filesystem_show $TOTAL_DEVS $UUID
->> +[ ${PIPESTATUS[0]} -ne 0 ] && \
->> +	_fail "show filesystem by device(offline) return value wrong"
-> That's a new function being tested. Again, this belongs in a new
-> test, not an existing regression test....
->
-> FWIW, Now that I've seen it used a couple of times, I don't really
-> like the mess that checking errors via PIPESTATUS results in,
-> especially as
->
-> _run_btrfs_util_prog filesystem show $FIRST_POOL_DEV | \
-> 	_filter_btrfs_filesystem_show $TOTAL_DEVS $UUID
->
-> Gives *exactly* the same failure detection....
-Thanks for the _run_btrfs_util_prog macro hint. That's great and makes 
-codes look much nicer.
-
-BTW, do I need to cleanup all the $BTRFS_UTIL_PROG in the original test?
-
-Thanks,
-Qu
+>>   _scratch_mkfs >>$seqres.full 2>&1
+>>   _scratch_mount
+>> -_require_fs_space $SCRATCH_MNT $(($filesize / 1024 / 1024 / 1024))
+>> -$XFS_IO_PROG -f -c "falloc 0 $filesize" $testfile
+>> +_require_fs_space $SCRATCH_MNT $(($filesize / 1024))
+>> +$XFS_IO_PROG -f -c "falloc 0 $filesize" $testfile || \
+>> +	_fail "falloc failed"
+> If the falloc fails, then the golden output match will fail. Let the
+> test run, regardless, because the first thing it does is try to
+> overwrite the fallocated region where the success or failure of the
+> writes are completely ignored. Hence a falloc failure should also be
+> ignored...
 >
 > Cheers,
 >
 > Dave.
+OK, I'll send a V2 one for this.
 
+Thanks for reviewing.
+Qu
