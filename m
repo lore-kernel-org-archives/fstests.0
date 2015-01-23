@@ -1,30 +1,53 @@
-Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:37912 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755659AbbAWQK0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 23 Jan 2015 11:10:26 -0500
-Date: Fri, 23 Jan 2015 17:10:25 +0100
-From: David Sterba <dsterba@suse.cz>
-Subject: Re: [PATCH v2] fstests: btrfs/079: Fix wrong value passed to
- available space check.
-Message-ID: <20150123161025.GP13289@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-References: <1421820518-27797-1-git-send-email-quwenruo@cn.fujitsu.com>
+Return-Path: <smfrench@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1421820518-27797-1-git-send-email-quwenruo@cn.fujitsu.com>
-Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+In-Reply-To: <54C1DDA8.5040103@sandeen.net>
+References: <CAH2r5mvSUc0-Z1Kn3NfowUzH1Jw4x_8UF46+uXKBPshuFkb1dw@mail.gmail.com>
+ <54C1DDA8.5040103@sandeen.net>
+From: Steve French <smfrench@gmail.com>
+Date: Fri, 23 Jan 2015 14:09:27 -0600
+Message-ID: <CAH2r5mtL52=MYu225w5G-D8X9kAb1w0Zi-GhvOfyBzm-WVT0pQ@mail.gmail.com>
+Subject: Re: xfstest generic/299
+Content-Type: text/plain; charset=UTF-8
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: fstests@vger.kernel.org, "linux-nfs@vger.kernel.org" <linux-nfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jan 21, 2015 at 02:08:37PM +0800, Qu Wenruo wrote:
-> Wrong value is passed to _require_fs_space, which should be in unit of
-> kilobyte(1024), but passed in unit of gigabyte(1024^3).
-> 
-> Fix it.
-> 
-> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+On Thu, Jan 22, 2015 at 11:35 PM, Eric Sandeen <sandeen@sandeen.net> wrote:
+> On 1/22/15 11:23 PM, Steve French wrote:
+>> Noticed test generic/299 failing over NFS (v4.1 dialect) with the error
+>>
+>> "[not run] /usr/bin/fio too old"
+>>
+>> fio-2.1.11 version (which is what is installed on current Ubuntu) is
+>> presumably not too old
+>
+> Well, 2.1.11 was released 16-Jul-2014
+>
+> fio is up to 2.2.5 now, so it sure could be.
 
-Reviewed-by: David Sterba <dsterba@suse.cz>
+I updated to 2.2.5-3 (cloning and building from the repository on
+git.kernel.org) which did not seem to change the results.
+
+> The test sets up a config file, and tries to run fio against it;
+> if it fails, it's deemed "too old"
+>
+> And _require_fio dumps to $seqres.full,
+>
+>         $FIO_PROG --warnings-fatal --showcmd $job >> $seqres.full 2>&1
+>         [ $? -eq 0 ] || _notrun "$FIO_PROG too old, see $seqres.full"
+>
+> so what does 299.full look like?
+
+min value out of range: 0 (1 min)
+fio: failed parsing filesize=0
+fio: job global dropped
+fio --ioengine=libaio --bs=128k --directory=/mnt1/scratch --size=999G
+--iodepth=128*1 --continue_on_error=write --ignore_error=,ENOSPC
+--error_dump=0 --create_on_open=1 --fallocate=none --exitall=1
+
+
+
+-- 
+Thanks,
+
+Steve
