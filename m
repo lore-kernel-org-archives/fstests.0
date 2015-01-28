@@ -1,49 +1,46 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:22334 "EHLO
-	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757226AbbAZXq6 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 26 Jan 2015 18:46:58 -0500
-Date: Tue, 27 Jan 2015 10:46:54 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v5] btrfs: add regression test for remount with
- thread_pool resized
-Message-ID: <20150126234654.GB7621@dastard>
-References: <1422261834-8691-1-git-send-email-gux.fnst@cn.fujitsu.com>
- <54C6097F.8040600@cn.fujitsu.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:10774 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1760069AbbA1Fjf (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 28 Jan 2015 00:39:35 -0500
+From: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
+Subject: [PATCH] ext4/304: ignore EINVAL and ENODATA error
+Date: Wed, 28 Jan 2015 13:33:46 +0800
+Message-ID: <1422423226-12355-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <54C6097F.8040600@cn.fujitsu.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: Xing Gu <gux.fnst@cn.fujitsu.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, eguan@redhat.com
+To: fstests@vger.kernel.org
+Cc: dmonakhov@openvz.org, tytso@mit.edu, david@fromorbit.com, Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jan 26, 2015 at 05:31:43PM +0800, Qu Wenruo wrote:
-> >+# get standard environment, filters and checks
-> >+. ./common/rc
-> >+. ./common/filter
-> >+
-> >+# real QA test starts here
-> >+_supported_fs btrfs
-> >+_supported_os Linux
-> >+_require_scratch
-> >+
-> >+_scratch_mkfs > /dev/null 2>&1 || _fail "mkfs failed"
-> IMHO, it's better to add a new btrfs_mkfs_filter(or something
-> similar) to common/filter.btrfs,
-> and modify the btrfs case in common/rc:scratch_mkfs() to use the
-> filter to wipe the "Performing TRIM"
-> line *ONLY*, as other btrfs filters do.
+ext4/304 is also ext4 defragmentation stress test, which creates several
+threads to perform defragmentation using 'inplace' mode, but there is a
+possible race that the donor file has been truncated by thread_A, while
+thread_B starts to call ioctl(EXT4_IOC_MOVE_EXT), then we may get a
+EINVAL or ENODATA error.
 
-There's already common/filter:_filter_mkfs which has a $FSTYP switch
-in it. That's the place to add any btrfs specific mkfs filters,
-either in line or as a callout to a special functionin common/btrfs.
+Please see: http://www.spinics.net/lists/linux-ext4/msg46900.html for
+detailed information.
 
-Cheers.
+Signed-off-by: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
+---
+ tests/ext4/304 | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Dave.
-
+diff --git a/tests/ext4/304 b/tests/ext4/304
+index b9b4356..01c51a4 100755
+--- a/tests/ext4/304
++++ b/tests/ext4/304
+@@ -61,6 +61,8 @@ filesize=${FILE_SIZE}
+ size=999G
+ buffered=0
+ fadvise_hint=0
++continue_on_error=write
++ignore_error=,EINVAL:61
+ 
+ #################################
+ # Test4
 -- 
-Dave Chinner
-david@fromorbit.com
+1.8.3.1
+
