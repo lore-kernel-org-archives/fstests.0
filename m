@@ -1,46 +1,158 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:10774 "EHLO
+Received: from cn.fujitsu.com ([59.151.112.132]:61582 "EHLO
 	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1760069AbbA1Fjf (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 28 Jan 2015 00:39:35 -0500
-From: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
-Subject: [PATCH] ext4/304: ignore EINVAL and ENODATA error
-Date: Wed, 28 Jan 2015 13:33:46 +0800
-Message-ID: <1422423226-12355-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
+	with ESMTP id S1752809AbbA2BaE (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 28 Jan 2015 20:30:04 -0500
+From: Xing Gu <gux.fnst@cn.fujitsu.com>
+Subject: [PATCH v6] btrfs: add regression test for remount with thread_pool resized
+Date: Thu, 29 Jan 2015 08:46:00 +0800
+Message-ID: <1422492360-12243-1-git-send-email-gux.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: dmonakhov@openvz.org, tytso@mit.edu, david@fromorbit.com, Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
+Cc: linux-btrfs@vger.kernel.org, david@fromorbit.com, eguan@redhat.com, quwenruo@cn.fujitsu.com, Xing Gu <gux.fnst@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-ext4/304 is also ext4 defragmentation stress test, which creates several
-threads to perform defragmentation using 'inplace' mode, but there is a
-possible race that the donor file has been truncated by thread_A, while
-thread_B starts to call ioctl(EXT4_IOC_MOVE_EXT), then we may get a
-EINVAL or ENODATA error.
+Regression test for a btrfs issue of resizing 'thread_pool' when
+remount the fs.
 
-Please see: http://www.spinics.net/lists/linux-ext4/msg46900.html for
-detailed information.
+This regression was introduced by the following linux kernel commit:
+    btrfs: Added btrfs_workqueue_struct implemented ordered
+    execution based on kernel workqueue
+    08a9ff3264181986d1d692a4e6fce3669700c9f8
+And it was fixed by the following linux kernel commit:
+    btrfs: fix crash in remount(thread_pool=) case
+    800ee2247f483b6d05ed47ef3bbc90b56451746c
 
-Signed-off-by: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
+Signed-off-by: Xing Gu <gux.fnst@cn.fujitsu.com>
 ---
- tests/ext4/304 | 2 ++
- 1 file changed, 2 insertions(+)
+ v5->v6: Add a filter to wipe "Performing full device TRIM" and
+         "Turning ON incompat feature" in common/filter:_filter_mkfs.
 
-diff --git a/tests/ext4/304 b/tests/ext4/304
-index b9b4356..01c51a4 100755
---- a/tests/ext4/304
-+++ b/tests/ext4/304
-@@ -61,6 +61,8 @@ filesize=${FILE_SIZE}
- size=999G
- buffered=0
- fadvise_hint=0
-+continue_on_error=write
-+ignore_error=,EINVAL:61
- 
- #################################
- # Test4
+ v4->v5: Redirect stderr to /dev/null.
+
+ v3->v4: Remove the check for a bug message.
+
+ v2->v3: Add the regresssion commit in description.
+         Remove "dmesg -c > /dev/null".
+         Echo "Silence is golden" to indicate that an empty output
+         file is expected.
+
+ v1->v2: Add the fix commit in description.
+         Add the check for a bug message.
+---
+ common/filter       |  4 ++++
+ tests/btrfs/082     | 65 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/082.out |  2 ++
+ tests/btrfs/group   |  1 +
+ 4 files changed, 72 insertions(+)
+ create mode 100755 tests/btrfs/082
+ create mode 100644 tests/btrfs/082.out
+
+diff --git a/common/filter b/common/filter
+index 05dbae6..71ef2e2 100644
+--- a/common/filter
++++ b/common/filter
+@@ -137,6 +137,10 @@ _filter_mkfs()
+     case $FSTYP in
+     xfs)
+ 	;;
++	btrfs)
++	sed -e "/Performing full device TRIM/d" \
++		-e "/Turning ON incompat feature/d"
++	return ;;
+     *)
+ 	cat - >/dev/null
+ 	perl -e 'print STDERR "dbsize=4096\nisize=256\n"'
+diff --git a/tests/btrfs/082 b/tests/btrfs/082
+new file mode 100755
+index 0000000..dd3c87e
+--- /dev/null
++++ b/tests/btrfs/082
+@@ -0,0 +1,65 @@
++#!/bin/bash
++# FS QA Test No. btrfs/082
++#
++# Regression test for a btrfs issue of resizing 'thread_pool' when
++# remount the fs.
++#
++# This regression was introduced by the following linux kernel commit:
++#     btrfs: Added btrfs_workqueue_struct implemented ordered
++#     execution based on kernel workqueue
++#     08a9ff3264181986d1d692a4e6fce3669700c9f8
++# And it was fixed by the following linux kernel commit:
++#     btrfs: fix crash in remount(thread_pool=) case
++#     800ee2247f483b6d05ed47ef3bbc90b56451746c
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Fujitsu.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++
++_cleanup()
++{
++    rm -f $tmp.*
++}
++
++trap "_cleanup ; exit \$status" 0 1 2 3 15
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++
++_scratch_mkfs |& _filter_mkfs
++
++_scratch_mount "-o thread_pool=6"
++_scratch_mount "-o remount,thread_pool=10"
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/btrfs/082.out b/tests/btrfs/082.out
+new file mode 100644
+index 0000000..2977f14
+--- /dev/null
++++ b/tests/btrfs/082.out
+@@ -0,0 +1,2 @@
++QA output created by 082
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index e29999b..fd2fa76 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -84,3 +84,4 @@
+ 079 auto rw metadata
+ 080 auto snapshot
+ 081 auto quick clone
++082 auto quick remount
 -- 
-1.8.3.1
+1.9.3
 
