@@ -1,226 +1,113 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43942 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754183AbbAUPhM (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 21 Jan 2015 10:37:12 -0500
-From: Brian Foster <bfoster@redhat.com>
-Subject: [PATCH v2] xfstests/xfs: xfs_repair secondary sb verification regression test
-Date: Wed, 21 Jan 2015 10:37:07 -0500
-Message-Id: <1421854627-30558-1-git-send-email-bfoster@redhat.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:45031 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753162AbbBCKps (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 3 Feb 2015 05:45:48 -0500
+From: Liu Bo <bo.li.liu@oracle.com>
+Subject: [PATCH] Btrfs: use asynchronous submit for large DIO io in single profile
+Date: Tue,  3 Feb 2015 18:45:38 +0800
+Message-Id: <1422960338-12187-1-git-send-email-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-The secondary superblock verification in xfs_repair was subject to a bug
-that unnecessarily leads to a brute force superblock scan if the last
-superblock in the fs happens to be corrupt. Normally, xfs_repair handles
-one-off superblock corruption gracefully using a heuristic that finds
-the most consistent superblock content across the set of secondary
-superblocks.
+Commit 1ae399382512 ("Btrfs: do not use async submit for small DIO io's")
+benefits small DIO io's.
 
-Create a regression test for xfs_repair that corrupts the last
-superblock in the fs. Verify the superblock is updated from the
-previously verified sb content and a brute force scan is not initiated.
-In the event of failure, detect that a brute force scan has started and
-abort the repair in order to fail the test quickly.
+However, if we're owning the SINGLE profile, this also affects large DIO io's
+since in that case, map_length is (chunk_length - bio's offset_in_chunk),
+it's farily large so that it's very likely to be larger than a large bio's
+size, which avoids asynchronous submit.
+For instance, if we have a 512k bio, the efforts of calculating (512k/4k=128)
+checksums will be taken by the DIO task.
 
-To support the test, extend the xfs_repair filter to handle corrupted
-superblock repair output and provide generic test output for arbitrary
-AG counts.
+Test results with fio (tested on a hard disk, not tested on ssd, 4cpu, 8g memory)
 
-Signed-off-by: Brian Foster <bfoster@redhat.com>
+bs	async	sync		async	sync
+	bw	bw(KB/S)	iops	iop
+4k	115312	115480		28827.6	28869.6
+8k	114381	115586		14297.4	14447.6
+16k	115393	116290		7211.4	7267.6
+32k	114268	116589		3570.4	3643
+64k	115421	113417		1803	1771.8	<-----ASYNC wins here
+128k	115545	112585		902	879
+256k	115178	111521		449.2	435
+512k	115874	111620		226	217.6
+
+This adds a limit 'BTRFS_STRIPE_LEN(64k)' to decide if it's small enough to avoid
+asynchronous submit.
+
+Still, in this case we don't need to split the bio and can submit it directly.
+
+Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
 ---
+The job in the test,
 
-v2:
-- Use pgrep instead of ps to monitor xfs_repair process.
-- Use mkfs filter instead of xfs_db to obtain agcount of scratch fs.
-v1: http://oss.sgi.com/archives/xfs/2015-01/msg00321.html
+[global]
+rw=write
+ioengine=libaio
+direct=1
+iodepth=64
+iodepth_batch=64
+iodepth_batch_complete=64
+iodepth_low=64
+bs=4k
+size=8g
+sync=0
+group_reporting
+fallocate=posix
+invalidate=1
+runtime=30
 
- common/repair     |   4 ++
- tests/xfs/069     | 110 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/069.out |  27 ++++++++++++++
- tests/xfs/group   |   1 +
- 4 files changed, 142 insertions(+)
- create mode 100755 tests/xfs/069
- create mode 100644 tests/xfs/069.out
+[dio]
+directory=/mnt/btrfs
+filename=foobar
 
-diff --git a/common/repair b/common/repair
-index a157580..7a99546 100644
---- a/common/repair
-+++ b/common/repair
-@@ -88,6 +88,10 @@ s/(inode chunk) (\d+)\/(\d+)/AGNO\/INO/;
- # sunit/swidth reset messages
- s/^(Note - .*) were copied.*/\1 fields have been reset./;
- s/^(Please) reset (with .*) if necessary/\1 set \2/;
-+# corrupt sb messages
-+s/(superblock) (\d+)/\1 AGNO/;
-+s/(AG \#)(\d+)/\1AGNO/;
-+s/(reset bad sb for ag) (\d+)/\1 AGNO/;
- 	print;'
- }
+ fs/btrfs/inode.c | 16 ++++++++++++++--
+ 1 file changed, 14 insertions(+), 2 deletions(-)
+
+diff --git a/fs/btrfs/inode.c b/fs/btrfs/inode.c
+index e687bb0..c640d7e 100644
+--- a/fs/btrfs/inode.c
++++ b/fs/btrfs/inode.c
+@@ -7792,6 +7792,7 @@ static int btrfs_submit_direct_hook(int rw, struct btrfs_dio_private *dip,
+ 	int nr_pages = 0;
+ 	int ret;
+ 	int async_submit = 0;
++	u64 alloc_profile;
  
-diff --git a/tests/xfs/069 b/tests/xfs/069
-new file mode 100755
-index 0000000..1432761
---- /dev/null
-+++ b/tests/xfs/069
-@@ -0,0 +1,110 @@
-+#! /bin/bash
-+# FS QA Test No. 069
-+#
-+# As part of superblock verification, xfs_repair checks the primary sb and
-+# verifies all secondary sb's against the primary. In the event of geometry
-+# inconsistency, repair uses a heuristic that tracks the most frequently
-+# occurring settings across the set of N (agcount) superblocks.
-+#
-+# xfs_repair was subject to a bug that disregards this heuristic in the event
-+# that the last secondary superblock in the fs is corrupt. The side effect is an
-+# unnecessary and potentially time consuming brute force superblock scan.
-+#
-+# This is a regression test for the aforementioned xfs_repair bug. We
-+# intentionally corrupt the last superblock in the fs, run xfs_repair and
-+# verify it repairs the fs correctly. We explicitly detect a brute force scan
-+# and abort the repair to save time in the failure case.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Red Hat, Inc. All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
+ 	map_length = orig_bio->bi_iter.bi_size;
+ 	ret = btrfs_map_block(root->fs_info, rw, start_sector << 9,
+@@ -7799,15 +7800,26 @@ static int btrfs_submit_direct_hook(int rw, struct btrfs_dio_private *dip,
+ 	if (ret)
+ 		return -EIO;
+ 
++	alloc_profile = btrfs_get_alloc_profile(root, 1);
 +
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
+ 	if (map_length >= orig_bio->bi_iter.bi_size) {
+ 		bio = orig_bio;
+ 		dip->flags |= BTRFS_DIO_ORIG_BIO_SUBMITTED;
 +
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
++		/*
++		 * In the case of 'single' profile, the above check is very
++		 * likely to be true as map_length is (chunk_length - offset),
++		 * so checking BTRFS_STRIPE_LEN here.
++		 */
++		if ((alloc_profile & BTRFS_BLOCK_GROUP_PROFILE_MASK) == 0 &&
++		    orig_bio->bi_iter.bi_size >= BTRFS_STRIPE_LEN)
++			async_submit = 1;
 +
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	killall -9 $XFS_REPAIR_PROG > /dev/null 2>&1
-+	wait > /dev/null 2>&1
-+}
-+
-+# Start and monitor an xfs_repair of the scratch device. This test can induce a
-+# time consuming brute force superblock scan. Since a brute force scan means
-+# test failure, detect it and end the repair.
-+_xfs_repair_noscan()
-+{
-+	# invoke repair directly so we can kill the process if need be
-+	$XFS_REPAIR_PROG $SCRATCH_DEV 2>&1 | tee -a $seqres.full > $tmp.repair &
-+	repair_pid=$!
-+
-+	# monitor progress for as long as it is running
-+	while [ `pgrep xfs_repair` ]; do
-+		grep "couldn't verify primary superblock" $tmp.repair \
-+			> /dev/null 2>&1
-+		if [ $? == 0 ]; then
-+			# we've started a brute force scan. kill repair and
-+			# fail the test
-+			kill -9 $repair_pid >> $seqres.full 2>&1
-+			wait >> $seqres.full 2>&1
-+
-+			_fail "xfs_repair resorted to brute force scan"
-+		fi
-+
-+		sleep 1
-+	done
-+
-+	wait
-+
-+	cat $tmp.repair | _filter_repair
-+}
-+
-+rm -f $seqres.full
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/repair
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs xfs
-+_supported_os Linux
-+_require_scratch_nocheck
-+
-+_scratch_mkfs | _filter_mkfs > /dev/null 2> $tmp.mkfs || _fail "mkfs failed"
-+
-+. $tmp.mkfs # import agcount
-+
-+# corrupt the last secondary sb in the fs
-+$XFS_DB_PROG -x -c "sb $((agcount - 1))" -c "type data" \
-+	-c "write fill 0xff 0 512" $SCRATCH_DEV
-+
-+# attempt to repair
-+_xfs_repair_noscan
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/069.out b/tests/xfs/069.out
-new file mode 100644
-index 0000000..c6b11d1
---- /dev/null
-+++ b/tests/xfs/069.out
-@@ -0,0 +1,27 @@
-+QA output created by 069
-+Phase 1 - find and verify superblock...
-+Phase 2 - using <TYPEOF> log
-+        - zero log...
-+        - scan filesystem freespace and inode maps...
-+bad magic number
-+bad on-disk superblock AGNO - bad magic number
-+primary/secondary superblock AGNO conflict - AG superblock geometry info conflicts with filesystem geometry
-+zeroing unused portion of secondary superblock (AG #AGNO)
-+reset bad sb for ag AGNO
-+        - found root inode chunk
-+Phase 3 - for each AG...
-+        - scan and clear agi unlinked lists...
-+        - process known inodes and perform inode discovery...
-+        - process newly discovered inodes...
-+Phase 4 - check for duplicate blocks...
-+        - setting up duplicate extent list...
-+        - check for inodes claiming duplicate blocks...
-+Phase 5 - rebuild AG headers and trees...
-+        - reset superblock...
-+Phase 6 - check inode connectivity...
-+        - resetting contents of realtime bitmap and summary inodes
-+        - traversing filesystem ...
-+        - traversal finished ...
-+        - moving disconnected inodes to lost+found ...
-+Phase 7 - verify and correct link counts...
-+done
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 496630d..9394703 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -66,6 +66,7 @@
- 066 dump ioctl auto quick
- 067 acl attr auto quick
- 068 auto stress dump
-+069 auto quick repair
- 071 rw auto
- 072 rw auto prealloc quick
- 073 copy auto
+ 		goto submit;
+ 	}
+ 
+ 	/* async crcs make it difficult to collect full stripe writes. */
+-	if (btrfs_get_alloc_profile(root, 1) &
+-	    (BTRFS_BLOCK_GROUP_RAID5 | BTRFS_BLOCK_GROUP_RAID6))
++	if (alloc_profile & (BTRFS_BLOCK_GROUP_RAID5 | BTRFS_BLOCK_GROUP_RAID6))
+ 		async_submit = 0;
+ 	else
+ 		async_submit = 1;
 -- 
-1.8.3.1
+1.8.1.4
 
