@@ -1,42 +1,51 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from sandeen.net ([63.231.237.45]:50770 "EHLO sandeen.net"
+Received: from sandeen.net ([63.231.237.45]:51067 "EHLO sandeen.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751398AbbBKQz2 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 11 Feb 2015 11:55:28 -0500
-Message-ID: <54DB897E.7060703@sandeen.net>
-Date: Wed, 11 Feb 2015 10:55:26 -0600
+	id S1753344AbbBKRLL (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 11 Feb 2015 12:11:11 -0500
+Message-ID: <54DB8D2D.20104@sandeen.net>
+Date: Wed, 11 Feb 2015 11:11:09 -0600
 From: Eric Sandeen <sandeen@sandeen.net>
 MIME-Version: 1.0
-Subject: Re: shared/032 is broken on Fedora
-References: <54DB35F0.1010203@plexistor.com> <54DB886D.9060201@sandeen.net>
-In-Reply-To: <54DB886D.9060201@sandeen.net>
+Subject: [PATCH] fstests: shared/032 handle mkfs.* in either /sbin or /usr/sbin
+References: <54DB35F0.1010203@plexistor.com>
+In-Reply-To: <54DB35F0.1010203@plexistor.com>
 Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 To: Boaz Harrosh <boaz@plexistor.com>, Dave Chinner <david@fromorbit.com>, xfs@oss.sgi.com, linux-fsdevel <linux-fsdevel@vger.kernel.org>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 2/11/15 10:50 AM, Eric Sandeen wrote:
-> (cc: fstests list) 
-> 
-> On 2/11/15 4:58 AM, Boaz Harrosh wrote:
->>
->> This is not the proper patch just to show a working version for Fedora. But I think
->> it now breaks the other ARCHs.
->>
->> What happens is that the output of ${MKFS_PROG}.* is:
->> 	/usr/sbin/mkfs.bfs /usr/sbin/mkfs.btrfs /usr/sbin/mkfs.cramfs /usr/sbin/mkfs.ext2 /usr/sbin/mkfs.ext3 /usr/sbin/mkfs.ext4 ...
->>
->> So in Fedora sbin has moved to /usr/... and therefor the sed below fails.
->> My sed foo is not good enough. How to support both places for sbin?
-> 
-> All we really want is the mkfs filesystem type, i.e. the ${FS} in mkfs.${FS}
-> 
-> So 
-> 
-> sed -e 's/.*mkfs.//g'
+mkfs programs may live in either /sbin or /usr/sbin, and
+the current regexp in this test only catches the latter,
+and so the test wont' run properly for the former.
 
-Wait, no, I misunderstood what it was working on ;)  Hang on ...
+Fix this by iterating over each full path to every mkfs.${FS}
+program in ${MKFS.PROG}.*, and extracting the ${FS} part.
 
--Eric
+We found the paths in the first place by using a wildcard
+with the found ${MKFS_PROG}, so we can use that string to
+filter out everything except the wildcard match at the end,
+which is the fs name we are looking for.
+
+Reported-by: Boaz Harrosh <boaz@plexistor.com>
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
+
+diff --git a/tests/shared/032 b/tests/shared/032
+index a410003..8ffb54b 100755
+--- a/tests/shared/032
++++ b/tests/shared/032
+@@ -50,8 +50,9 @@ if [ "$FSTYP" == "btrfs" ]; then
+ fi
+ 
+ echo "Silence is golden."
+-for fs in `echo ${MKFS_PROG}.* | sed -e 's/.sbin.mkfs.//g'`
++for mkfs in `echo ${MKFS_PROG}.*`
+ do
++	fs=`echo $mkfs | sed -e s:${MKFS_PROG}.::`
+ 	preop=""	# for special input needs
+ 	preargs=""	# for any special pre-device options
+ 	postargs=""	# for any special post-device options
+
 
