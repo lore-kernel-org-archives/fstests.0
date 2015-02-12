@@ -1,70 +1,171 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:20528 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752766AbbBLMtg (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 12 Feb 2015 07:49:36 -0500
-Received: from G08CNEXCHPEKD03.g08.fujitsu.local (localhost.localdomain [127.0.0.1])
-	by edo.cn.fujitsu.com (8.14.3/8.13.1) with ESMTP id t1CCmbbA032440
-	for <fstests@vger.kernel.org>; Thu, 12 Feb 2015 20:48:37 +0800
-From: Zhaolei <zhaolei@cn.fujitsu.com>
-Subject: [PATCH] Fix warning of "Usage: _is_block_dev dev"
-Date: Thu, 12 Feb 2015 20:48:14 +0800
-Message-ID: <1423745294-20408-1-git-send-email-zhaolei@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from victor.provo.novell.com ([137.65.250.26]:52882 "EHLO
+	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1750801AbbBLQxv (ORCPT
+	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
+	Thu, 12 Feb 2015 11:53:51 -0500
+From: Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] fstests: add generic test for fsync after creating hard link
+Date: Thu, 12 Feb 2015 16:51:29 +0000
+Message-Id: <1423759889-30546-1-git-send-email-fdmanana@suse.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Zhao Lei <zhaolei@cn.fujitsu.com>
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Zhao Lei <zhaolei@cn.fujitsu.com>
+This test is motivated by an fsync issue discovered in btrfs.
+The issue was that we could lose file data, that was previously
+fsync'ed successfully, if we end up adding a hard link to our
+inode and then persist the fsync log later via an fsync of other
+inode for example.
 
-_is_block_dev() will show above warning when "$dev" is not exist.
-It happened when user hadn't set $SCRATCH_DEV(optional) and check
-$TEST_DEV.
+The btrfs issue was fixed by the following linux kernel patch:
 
-Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
+  Btrfs: fix fsync data loss after adding hard link to inode
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- common/rc | 23 +++++++++++++----------
- 1 file changed, 13 insertions(+), 10 deletions(-)
+ tests/generic/042     | 99 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/042.out | 11 ++++++
+ tests/generic/group   |  1 +
+ 3 files changed, 111 insertions(+)
+ create mode 100755 tests/generic/042
+ create mode 100644 tests/generic/042.out
 
-diff --git a/common/rc b/common/rc
-index 5377ba0..d9815c7 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1167,19 +1167,22 @@ _require_test()
- 		fi
- 		;;
- 	*)
--		 if [ -z "$TEST_DEV" -o "`_is_block_dev $TEST_DEV`" = "" ]
--		 then
--		     _notrun "this test requires a valid \$TEST_DEV"
--		 fi
--		 if [ "`_is_block_dev $SCRATCH_DEV`" = "`_is_block_dev $TEST_DEV`" ]
--		 then
--		     _notrun "this test requires a valid \$TEST_DEV"
--		 fi
-+		if [ -z "$TEST_DEV" -o "`_is_block_dev $TEST_DEV`" = "" ]
-+		then
-+		    _notrun "this test requires a valid \$TEST_DEV"
-+		fi
-+		if [ -n "$SCRATCH_DEV" ]
-+		then
-+		    if [ "`_is_block_dev $SCRATCH_DEV`" = "`_is_block_dev $TEST_DEV`" ]
-+		    then
-+			_notrun "this test requires a valid \$TEST_DEV"
-+		    fi
-+		fi
- 		if [ ! -d "$TEST_DIR" ]
- 		then
--		     _notrun "this test requires a valid \$TEST_DIR"
-+		    _notrun "this test requires a valid \$TEST_DIR"
- 		fi
--		 ;;
-+		;;
-     esac
- 
-     # mounted?
+diff --git a/tests/generic/042 b/tests/generic/042
+new file mode 100755
+index 0000000..615526e
+--- /dev/null
++++ b/tests/generic/042
+@@ -0,0 +1,99 @@
++#! /bin/bash
++# FS QA Test No. 042
++#
++# This test is motivated by an fsync issue discovered in btrfs.
++# The issue was that we could lose file data, that was previously fsync'ed
++# successfully, if we end up adding a hard link to our inode and then persist
++# the fsync log later via an fsync of other inode for example.
++#
++# The btrfs issue was fixed by the following linux kernel patch:
++#
++#  Btrfs: fix fsync data loss after adding hard link to inode
++#
++#-----------------------------------------------------------------------
++# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++
++_cleanup()
++{
++	_cleanup_flakey
++	rm -f $tmp.*
++}
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmflakey
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_need_to_be_root
++_require_scratch
++_require_dm_flakey
++
++rm -f $seqres.full
++
++_scratch_mkfs >> $seqres.full 2>&1
++_init_flakey
++_mount_flakey
++
++# Create one file with data and fsync it.
++# This made the btrfs fsync log persist the data and the inode metadata with
++# a correct inode->i_size (4096 bytes).
++$XFS_IO_PROG -f -c "pwrite -S 0xaa -b 4K 0 4K" -c "fsync" \
++	$SCRATCH_MNT/foo | _filter_xfs_io
++
++# Now add one hard link to our file. This made the btrfs code update the fsync
++# log, in memory only, with an inode metadata having a size of 0.
++ln $SCRATCH_MNT/foo $SCRATCH_MNT/foo_link
++
++# Now force persistence of the fsync log to disk, for example, by fsyncing some
++# other file.
++touch $SCRATCH_MNT/bar
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/bar
++
++# Before a power loss or crash, we could read the 4Kb of data from our file as
++# expected.
++echo "File content before:"
++od -t x1 $SCRATCH_MNT/foo
++
++# Simulate a crash/power loss.
++_load_flakey_table $FLAKEY_DROP_WRITES
++_unmount_flakey
++
++_load_flakey_table $FLAKEY_ALLOW_WRITES
++_mount_flakey
++
++# After the fsync log replay, because the fsync log had a value of 0 for our
++# inode's i_size, we couldn't read anymore the 4Kb of data that we previously
++# wrote and fsync'ed. The size of the file became 0 after the fsync log replay.
++echo "File content after:"
++od -t x1 $SCRATCH_MNT/foo
++
++status=0
++exit
+diff --git a/tests/generic/042.out b/tests/generic/042.out
+new file mode 100644
+index 0000000..a4ea5b6
+--- /dev/null
++++ b/tests/generic/042.out
+@@ -0,0 +1,11 @@
++QA output created by 042
++wrote 4096/4096 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File content before:
++0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
++*
++0010000
++File content after:
++0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
++*
++0010000
+diff --git a/tests/generic/group b/tests/generic/group
+index fb67b57..001ec80 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -44,6 +44,7 @@
+ 039 metadata auto quick
+ 040 metadata auto quick
+ 041 metadata auto quick
++042 metadata auto quick
+ 053 acl repair auto quick
+ 062 attr udf auto quick
+ 068 other auto freeze dangerous stress
 -- 
-1.8.5.1
+2.1.3
 
