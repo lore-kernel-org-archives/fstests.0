@@ -1,139 +1,89 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:37572 "EHLO
-	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751523AbbBPWDB (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 16 Feb 2015 17:03:01 -0500
-Date: Tue, 17 Feb 2015 09:02:34 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] fstests: generic test for fsync followed by truncate and
- link
-Message-ID: <20150216220234.GK12722@dastard>
-References: <1423831674-25678-1-git-send-email-fdmanana@suse.com>
- <20150216003337.GG12722@dastard>
- <CAL3q7H5utEhz7r8ZeWq00_tuLY_NS34XR6PMXsAE-TG0UGUM7A@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAL3q7H5utEhz7r8ZeWq00_tuLY_NS34XR6PMXsAE-TG0UGUM7A@mail.gmail.com>
+Received: from e23smtp05.au.ibm.com ([202.81.31.147]:59154 "EHLO
+	e23smtp05.au.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752304AbbBQPql (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 17 Feb 2015 10:46:41 -0500
+Received: from /spool/local
+	by e23smtp05.au.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+	for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
+	Wed, 18 Feb 2015 01:46:39 +1000
+From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Subject: [PATCH] generic/325: Fix test case to work on 64K page size.
+Date: Tue, 17 Feb 2015 21:15:28 +0530
+Message-Id: <1424187928-28487-1-git-send-email-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
-To: Filipe David Manana <fdmanana@gmail.com>
-Cc: Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Feb 16, 2015 at 09:45:22AM +0000, Filipe David Manana wrote:
-> On Mon, Feb 16, 2015 at 12:33 AM, Dave Chinner <david@fromorbit.com> wrote:
-> > On Fri, Feb 13, 2015 at 12:47:54PM +0000, Filipe Manana wrote:
-> >> This test is motivated by an fsync issue discovered in btrfs.
-> >> The issue was that we could lose file data, that was previously fsync'ed
-> >> successfully, if we end up shrinking (via truncate) the file, add a hard
-> >> link to our file and then persist the fsync log later via an fsync of
-> >> other inode for example. After a power loss our file content wouldn't
-> >> match what it had when we last fsync'ed, but instead it had the data
-> >> prior to that fsync.
-> >
-> > Prior to which fsync?
-> 
-> The fsync of file "foo" - this is the file we're testing for
-> correctness and we only fsync it once.
+The test case passes 32K as the offset value to msync. This fails on machines
+with 64K page size. Fix this by creating a larger file and passing offset
+values which are multiples of 64K.
 
-Ok. But there's also an implied fsync because btrfs is supposed to
-have an ordered metadata transaction subsystem.
+Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+---
+ tests/generic/325     | 10 +++++-----
+ tests/generic/325.out | 10 +++++-----
+ 2 files changed, 10 insertions(+), 10 deletions(-)
 
-> > XFS has strictly ordered metadata journalling, which means
-> > transactions committed prior to *any* fsync will be present on disk
-> > after the fsync. ext4 is not quite so strict, but has essentially
-> > the same behaviour. ext3 in ordered mode behaves like XFS.
-> >
-> > As such, ext3, ext4 and XFS return the state of the file as "0xaa for
-> > 0 to 5k, 0x00 out to 32k" and the hardlink foo_link is present after
-> > the filesystem is remounted and the log replayed.
-> 
-> Well, that's not I get with XFS, at least on a 3.19 kernel.
-> After log replay, I get a file with a size of 32Kb, the first 8192
-> bytes have the value 0xaa and the remaining 24Kb have value 0x00 -
-> this doesn't match the file content after any operation.
-
-See my previous reply in the thread. In memory behaviour appears
-correct, which means fsx will pass but we won't have picked up a
-regression in power failure behaviour.
-
-> I'm ok with changing the test to consider valid any of those 3 cases.
-> 
-> >
-> > So, as this test is written, it does not encapsulate the
-> > longstanding, expected behaviour of existing filesystems. btrfs
-> > should behave like XFS, ext3 and ext4 if possible - being different
-> > is only going to cause confusion and pain for application
-> > developers.
-> >
-> >> The btrfs issue was fixed by the following linux kernel patch:
-> >>
-> >>   Btrfs: don't remove extents and xattrs when logging new names
-> >
-> > Sounds like you've just introduced an ordered mode behavioural
-> > journalling regression into btrfs...
-> 
-> How can it be a regression?
-
-Maybe it's not a regression - I don't know what the old behaviour
-was - but it certainly seems like a bug to me.  Btrfs is supposed to
-have a strongly ordered transaction model, similar to XFS and ext4
-and the test as you've written it implies transactional change
-ordering is not preserved in btrfs (ouch!).
-
-Ordered mode on this test is tricky because you are running fsync on
-a newly created file. That implies fsync on the parent directory,
-because fsync means you are stabilising all the *transactions* that
-changed metadata on the new file. That means the dirent created to
-point to the new file should be fsync()d, too.
-
-So, order of modifications:
-
-file foo data written and synced
-file foo truncate/extent
-hard link foo_link to foo created
-new file bar created
-new file bar fsync
-
-In this case, it's the hard link of foo to foo_link that creates the
-ordered dependency between foo, the parent directory and bar. The
-directory is then modified in a future transaction by creating bar,
-and the fsync on bar stabilises the parent directory as
-transactional atomicity requires all objects in a transaction to be
-stabilised when one object is asked to be stabilised. And for the
-latest modification to an object to be stabilised, ordered metadata
-requires all previous modifications to that object also need to be
-stabilised at the same time.
-
-IOWs, the fsync on bar has this ordered change dependency
-resolution:
-
-fsync(bar)
-  - implied parent directory fsync for dirent pointing to bar
-    - stabilises parent directory, which
-      - also stabilises new hard link dirent to foo_link, which
-	- stabilises new link count in foo, which
-	  - stabilises inode core of foo, which
-	    - stabilises changed inode size from truncate/extent
-	    - stabilises extent list changes from truncate/extent
-
-IOWs, ordered metadata transactions mean the second fsync, through
-the chain of dependent modifications previously made, should also
-stabilise all the metadata changes made on foo since the fsync was
-called on it.
-
-> Before this change, after the fsync log replay, the file content
-> matched what it had when "sync" was called - i.e. doesn't match the
-> content when the fsync (on "foo") was performed nor the content after
-> any of the subsequent truncate operations.
-
-IOWs, btrfs did not follow ordered metadata behavioural rules before
-the change, nor does it follow them after the change, but it's
-now broken in a different, more subtle and surprising way.
-
-Cheers,
-
-Dave.
+diff --git a/tests/generic/325 b/tests/generic/325
+index c47e372..e62ac95 100755
+--- a/tests/generic/325
++++ b/tests/generic/325
+@@ -64,7 +64,7 @@ _init_flakey
+ _mount_flakey
+ 
+ # Create the file first.
+-$XFS_IO_PROG -f -c "pwrite -S 0xff 0 64K" $SCRATCH_MNT/foo | _filter_xfs_io
++$XFS_IO_PROG -f -c "pwrite -S 0xff 0 256K" $SCRATCH_MNT/foo | _filter_xfs_io
+ 
+ # Now sync the file data to disk using 'sync' and not an fsync. This is because
+ # in btrfs the first fsync clears the btrfs inode full fsync flag, which must
+@@ -80,11 +80,11 @@ sync
+ # This second msync() used to be a no-op for that btrfs bug (and the first fsync
+ # didn't log the last 4Kb extent as expected too).
+ $XFS_IO_PROG \
+-	-c "mmap -w 0 64K"         \
++	-c "mmap -w 0 256K"         \
+ 	-c "mwrite -S 0xaa 0 4K"   \
+-	-c "mwrite -S 0xbb 60K 4K" \
+-	-c "msync -s 0K 16K"       \
+-	-c "msync -s 32K 32K"      \
++	-c "mwrite -S 0xbb 252K 4K" \
++	-c "msync -s 0K 64K"       \
++	-c "msync -s 192K 64K"      \
+ 	-c "munmap"                \
+ 	$SCRATCH_MNT/foo | _filter_xfs_io
+ 
+diff --git a/tests/generic/325.out b/tests/generic/325.out
+index 9a78c3e..9373e01 100644
+--- a/tests/generic/325.out
++++ b/tests/generic/325.out
+@@ -1,19 +1,19 @@
+ QA output created by 325
+-wrote 65536/65536 bytes at offset 0
++wrote 262144/262144 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ File content before crash/reboot:
+ 0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+ *
+ 0010000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+ *
+-0170000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
++0770000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
+ *
+-0200000
++1000000
+ File content after crash/reboot and fs mount:
+ 0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+ *
+ 0010000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+ *
+-0170000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
++0770000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
+ *
+-0200000
++1000000
 -- 
-Dave Chinner
-david@fromorbit.com
+2.1.0
+
