@@ -1,59 +1,217 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:4044 "EHLO
-	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751719AbbBRBVm (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 17 Feb 2015 20:21:42 -0500
-Date: Wed, 18 Feb 2015 12:21:39 +1100
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:22528 "EHLO
+	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751103AbbBRFhz (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 18 Feb 2015 00:37:55 -0500
+Date: Wed, 18 Feb 2015 16:37:49 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 1/2] xfstests: fix a typo in _require_block_device()
-Message-ID: <20150218012139.GO4251@dastard>
+Subject: Re: [PATCH 2/2] Fix warning of "Usage: _is_block_dev dev"
+Message-ID: <20150218053749.GP4251@dastard>
 References: <1424069440-14957-1-git-send-email-zhaolei@cn.fujitsu.com>
+ <1424069440-14957-2-git-send-email-zhaolei@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1424069440-14957-1-git-send-email-zhaolei@cn.fujitsu.com>
+In-Reply-To: <1424069440-14957-2-git-send-email-zhaolei@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
 To: Zhaolei <zhaolei@cn.fujitsu.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Feb 16, 2015 at 02:50:39PM +0800, Zhaolei wrote:
+On Mon, Feb 16, 2015 at 02:50:40PM +0800, Zhaolei wrote:
 > From: Zhao Lei <zhaolei@cn.fujitsu.com>
 > 
-> We need to check "$1" instead "$SCRATCH_DEV" in this function.
-> And make tabs same with other code.
+> _is_block_dev() will show above warning when "$dev" is not exist.
+> It happened when the program check $TEST_DEV with blank $SCRATCH_DEV
+> which is optional.
 > 
+> Changelog v1->v2:
+>  Rewrite _is_block_dev() to make caller code simple.
+>  Suggested by: Dave Chinner <david@fromorbit.com>
+
+You haven't implemented what I suggested.
+
 > Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
 > ---
->  common/rc | 14 +++++++-------
->  1 file changed, 7 insertions(+), 7 deletions(-)
+>  common/rc | 63 ++++++++++++++++++++++++++++++++++-----------------------------
+>  1 file changed, 34 insertions(+), 29 deletions(-)
 > 
 > diff --git a/common/rc b/common/rc
-> index 7449a1d..76522d4 100644
+> index 76522d4..c5f6953 100644
 > --- a/common/rc
 > +++ b/common/rc
-> @@ -1284,13 +1284,13 @@ _require_command()
->  # $1 - device
->  _require_block_device()
+> @@ -947,12 +947,11 @@ _fs_options()
+>  
+>  # returns device number if a file is a block device
+>  #
+> -_is_block_dev()
+> +_dev_type()
 >  {
-> -	if [ -z "$1" ]; then
-> -		echo "Usage: _require_block_device <dev>" 1>&2
-> -		exit 1
-> -	fi
-> -	if [ "`_is_block_dev $SCRATCH_DEV`" == "" ]; then
-> -		_notrun "require $1 to be valid block disk"
-> -	fi
-> +    if [ -z "$1" ]; then
-> +	echo "Usage: _require_block_device <dev>" 1>&2
-> +	exit 1
-> +    fi
-> +    if [ "`_is_block_dev $1`" == "" ]; then
-> +	_notrun "require $1 to be valid block disk"
-> +    fi
->  }
+>      if [ $# -ne 1 ]
+>      then
+> -	echo "Usage: _is_block_dev dev" 1>&2
+> -	exit 1
+> +        return
+>      fi
+>  
+>      _dev=$1
 
-The change is fine - the reformating of the code is not. 8 space
-tabs for all new code and all new modifications, please.
+This will only output something if the device is a block device.
+It's not a generic function. it still only returns a major:minor
+device number if the device is a block device. Most callers do not
+use this value.
+
+# Returns:
+#	-1 if no argument passed
+#	0 if filename is not a block device
+#	1 if filename is a block device.
+_is_block_dev()
+{
+	if [ $# -ne 1 ]; then
+		return -1;
+	fi
+
+	if [ -b $1 ]; then
+		return 1;
+	fi
+	return 0;
+}
+
+
+> @@ -965,6 +964,25 @@ _is_block_dev()
+>      fi
+>  }
+>  
+> +_is_block_dev()
+> +{
+> +    _dev_type=`_dev_type "$1"`
+> +    if [ -z "$_dev_type" ]; then
+> +	return 1
+> +    fi
+> +
+> +    _not_same_dev_type=`_dev_type "$2"`
+> +    if [ -z "$_not_same_dev_type" ]; then
+> +	return 0
+> +    fi
+> +
+> +    if [ "$_dev_type" = "$_not_same_dev_type" ]; then
+> +	return 1
+> +    fi
+> +
+> +    return 0
+> +}
+
+This function is testing if two devices are the same device.
+
+# Returns:
+# 	0 if the devices are not the same
+# 	1 if the devices are the same.
+__same_block_dev()
+{
+	if [ $# -ne 2 ]; then
+		return 0;
+	fi
+
+	if [ ! -b $1 -o ! -b $2 ]; then
+		return 0;
+	fi
+
+	if [ `stat -c %t,%T $1` != `stat -c %t,%T $2` ]; then
+		return 0;
+	fi
+	return 1;
+}
+
+> +
+>  # Do a command, log it to $seqres.full, optionally test return status
+>  # and die if command fails. If called with one argument _do executes the
+>  # command, logs it, and returns its exit status. With two arguments _do
+> @@ -1095,19 +1113,14 @@ _require_scratch_nocheck()
+>  		fi
+>  		;;
+>  	*)
+> -		 if [ -z "$SCRATCH_DEV" -o "`_is_block_dev $SCRATCH_DEV`" = "" ]
+> -		 then
+> -		     _notrun "this test requires a valid \$SCRATCH_DEV"
+> -		 fi
+> -		 if [ "`_is_block_dev $SCRATCH_DEV`" = "`_is_block_dev $TEST_DEV`" ]
+> -		 then
+> -		     _notrun "this test requires a valid \$SCRATCH_DEV"
+> -		 fi
+> +		if ! _is_block_dev "$SCRATCH_DEV" "$TEST_DEV"; then
+> +		    _notrun "this test requires a valid \$SCRATCH_DEV"
+> +		fi
+
+This doesn't make sense when you read it - the two checks are
+logically separate, self documenting checks and should stay that
+way. i.e.  the two checks are "if (!_is_block_dev $SCRATCH_DEV)
+_notrun..." and "if (_same_block_dev $TEST_DEV $SCRATCH_DEV) _notrun
+...."
+
+>  		if [ ! -d "$SCRATCH_MNT" ]
+>  		then
+> -		     _notrun "this test requires a valid \$SCRATCH_MNT"
+> +		    _notrun "this test requires a valid \$SCRATCH_MNT"
+>  		fi
+> -		 ;;
+> +		;;
+>      esac
+>  
+>      # mounted?
+> @@ -1167,19 +1180,14 @@ _require_test()
+>  		fi
+>  		;;
+>  	*)
+> -		 if [ -z "$TEST_DEV" -o "`_is_block_dev $TEST_DEV`" = "" ]
+> -		 then
+> -		     _notrun "this test requires a valid \$TEST_DEV"
+> -		 fi
+> -		 if [ "`_is_block_dev $SCRATCH_DEV`" = "`_is_block_dev $TEST_DEV`" ]
+> -		 then
+> -		     _notrun "this test requires a valid \$TEST_DEV"
+> -		 fi
+> +		if ! _is_block_dev "$TEST_DEV" "$SCRATCH_DEV"; then
+> +		    _notrun "this test requires a valid \$TEST_DEV"
+> +		fi
+
+Same, but this time for $TEST_DEV
+
+>  		if [ ! -d "$TEST_DIR" ]
+>  		then
+> -		     _notrun "this test requires a valid \$TEST_DIR"
+> +		    _notrun "this test requires a valid \$TEST_DIR"
+>  		fi
+> -		 ;;
+> +		;;
+>      esac
+>  
+>      # mounted?
+> @@ -1288,7 +1296,7 @@ _require_block_device()
+>  	echo "Usage: _require_block_device <dev>" 1>&2
+>  	exit 1
+>      fi
+> -    if [ "`_is_block_dev $1`" == "" ]; then
+> +    if ! _is_block_dev "$1"; then
+>  	_notrun "require $1 to be valid block disk"
+
+Please keep the code using the if [ ]; then syntax.
+>      fi
+>  }
+> @@ -2236,11 +2244,8 @@ _require_scratch_dev_pool()
+>  	esac
+>  
+>  	for i in $SCRATCH_DEV_POOL; do
+> -		if [ "`_is_block_dev $i`" = "" ]; then
+> -			_notrun "this test requires valid block disk $i"
+> -		fi
+> -		if [ "`_is_block_dev $i`" = "`_is_block_dev $TEST_DEV`" ]; then
+> -			_notrun "$i is part of TEST_DEV, this test requires unique disks"
+> +		if ! _is_block_dev "$i" "$TEST_DEV"; then
+> +			_notrun "$i is not valid valid block disk, or part of TEST_DEV, this test requires unique valid disks"
+
+And that error message is too long. Seperate tests tell us exactly
+what the error is, not make us guess which of many errors it could
+have been.
 
 Cheers,
 
