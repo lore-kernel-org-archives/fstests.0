@@ -1,150 +1,190 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-lb0-f171.google.com ([209.85.217.171]:42996 "EHLO
-	mail-lb0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753445AbbBSSQc (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 19 Feb 2015 13:16:32 -0500
+Received: from mail-la0-f49.google.com ([209.85.215.49]:42515 "EHLO
+	mail-la0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751595AbbBSSTJ (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 19 Feb 2015 13:19:09 -0500
 MIME-Version: 1.0
 Reply-To: fdmanana@gmail.com
-In-Reply-To: <20150216220234.GK12722@dastard>
-References: <1423831674-25678-1-git-send-email-fdmanana@suse.com>
-	<20150216003337.GG12722@dastard>
-	<CAL3q7H5utEhz7r8ZeWq00_tuLY_NS34XR6PMXsAE-TG0UGUM7A@mail.gmail.com>
-	<20150216220234.GK12722@dastard>
-Date: Thu, 19 Feb 2015 18:16:29 +0000
-Message-ID: <CAL3q7H40rr2D9iSowsVBRBiPCp-UsV+56o4zPo89mDg1-=SMtQ@mail.gmail.com>
-Subject: Re: [PATCH] fstests: generic test for fsync followed by truncate and link
+In-Reply-To: <1422492360-12243-1-git-send-email-gux.fnst@cn.fujitsu.com>
+References: <1422492360-12243-1-git-send-email-gux.fnst@cn.fujitsu.com>
+Date: Thu, 19 Feb 2015 18:19:06 +0000
+Message-ID: <CAL3q7H4Ozf40iodhjfuaQLT0SXc8A_bJnBQugyf+EPsF3Xwuvg@mail.gmail.com>
+Subject: Re: [PATCH v6] btrfs: add regression test for remount with
+ thread_pool resized
 From: Filipe David Manana <fdmanana@gmail.com>
 Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
+To: Xing Gu <gux.fnst@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, Dave Chinner <david@fromorbit.com>, eguan@redhat.com, Qu Wenruo <quwenruo@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Feb 16, 2015 at 10:02 PM, Dave Chinner <david@fromorbit.com> wrote:
-> On Mon, Feb 16, 2015 at 09:45:22AM +0000, Filipe David Manana wrote:
->> On Mon, Feb 16, 2015 at 12:33 AM, Dave Chinner <david@fromorbit.com> wrote:
->> > On Fri, Feb 13, 2015 at 12:47:54PM +0000, Filipe Manana wrote:
->> >> This test is motivated by an fsync issue discovered in btrfs.
->> >> The issue was that we could lose file data, that was previously fsync'ed
->> >> successfully, if we end up shrinking (via truncate) the file, add a hard
->> >> link to our file and then persist the fsync log later via an fsync of
->> >> other inode for example. After a power loss our file content wouldn't
->> >> match what it had when we last fsync'ed, but instead it had the data
->> >> prior to that fsync.
->> >
->> > Prior to which fsync?
->>
->> The fsync of file "foo" - this is the file we're testing for
->> correctness and we only fsync it once.
+On Thu, Jan 29, 2015 at 12:46 AM, Xing Gu <gux.fnst@cn.fujitsu.com> wrote:
+> Regression test for a btrfs issue of resizing 'thread_pool' when
+> remount the fs.
 >
-> Ok. But there's also an implied fsync because btrfs is supposed to
-> have an ordered metadata transaction subsystem.
+> This regression was introduced by the following linux kernel commit:
+>     btrfs: Added btrfs_workqueue_struct implemented ordered
+>     execution based on kernel workqueue
+>     08a9ff3264181986d1d692a4e6fce3669700c9f8
+> And it was fixed by the following linux kernel commit:
+>     btrfs: fix crash in remount(thread_pool=) case
+>     800ee2247f483b6d05ed47ef3bbc90b56451746c
 >
->> > XFS has strictly ordered metadata journalling, which means
->> > transactions committed prior to *any* fsync will be present on disk
->> > after the fsync. ext4 is not quite so strict, but has essentially
->> > the same behaviour. ext3 in ordered mode behaves like XFS.
->> >
->> > As such, ext3, ext4 and XFS return the state of the file as "0xaa for
->> > 0 to 5k, 0x00 out to 32k" and the hardlink foo_link is present after
->> > the filesystem is remounted and the log replayed.
->>
->> Well, that's not I get with XFS, at least on a 3.19 kernel.
->> After log replay, I get a file with a size of 32Kb, the first 8192
->> bytes have the value 0xaa and the remaining 24Kb have value 0x00 -
->> this doesn't match the file content after any operation.
+> Signed-off-by: Xing Gu <gux.fnst@cn.fujitsu.com>
+> ---
+>  v5->v6: Add a filter to wipe "Performing full device TRIM" and
+>          "Turning ON incompat feature" in common/filter:_filter_mkfs.
 >
-> See my previous reply in the thread. In memory behaviour appears
-> correct, which means fsx will pass but we won't have picked up a
-> regression in power failure behaviour.
+>  v4->v5: Redirect stderr to /dev/null.
 >
->> I'm ok with changing the test to consider valid any of those 3 cases.
->>
->> >
->> > So, as this test is written, it does not encapsulate the
->> > longstanding, expected behaviour of existing filesystems. btrfs
->> > should behave like XFS, ext3 and ext4 if possible - being different
->> > is only going to cause confusion and pain for application
->> > developers.
->> >
->> >> The btrfs issue was fixed by the following linux kernel patch:
->> >>
->> >>   Btrfs: don't remove extents and xattrs when logging new names
->> >
->> > Sounds like you've just introduced an ordered mode behavioural
->> > journalling regression into btrfs...
->>
->> How can it be a regression?
+>  v3->v4: Remove the check for a bug message.
 >
-> Maybe it's not a regression - I don't know what the old behaviour
-> was - but it certainly seems like a bug to me.  Btrfs is supposed to
-> have a strongly ordered transaction model, similar to XFS and ext4
-> and the test as you've written it implies transactional change
-> ordering is not preserved in btrfs (ouch!).
+>  v2->v3: Add the regresssion commit in description.
+>          Remove "dmesg -c > /dev/null".
+>          Echo "Silence is golden" to indicate that an empty output
+>          file is expected.
 >
-> Ordered mode on this test is tricky because you are running fsync on
-> a newly created file. That implies fsync on the parent directory,
-> because fsync means you are stabilising all the *transactions* that
-> changed metadata on the new file. That means the dirent created to
-> point to the new file should be fsync()d, too.
+>  v1->v2: Add the fix commit in description.
+>          Add the check for a bug message.
+> ---
+>  common/filter       |  4 ++++
+>  tests/btrfs/082     | 65 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/082.out |  2 ++
+>  tests/btrfs/group   |  1 +
+>  4 files changed, 72 insertions(+)
+>  create mode 100755 tests/btrfs/082
+>  create mode 100644 tests/btrfs/082.out
 >
-> So, order of modifications:
->
-> file foo data written and synced
-> file foo truncate/extent
-> hard link foo_link to foo created
-> new file bar created
-> new file bar fsync
->
-> In this case, it's the hard link of foo to foo_link that creates the
-> ordered dependency between foo, the parent directory and bar. The
-> directory is then modified in a future transaction by creating bar,
-> and the fsync on bar stabilises the parent directory as
-> transactional atomicity requires all objects in a transaction to be
-> stabilised when one object is asked to be stabilised. And for the
-> latest modification to an object to be stabilised, ordered metadata
-> requires all previous modifications to that object also need to be
-> stabilised at the same time.
->
-> IOWs, the fsync on bar has this ordered change dependency
-> resolution:
->
-> fsync(bar)
->   - implied parent directory fsync for dirent pointing to bar
->     - stabilises parent directory, which
->       - also stabilises new hard link dirent to foo_link, which
->         - stabilises new link count in foo, which
->           - stabilises inode core of foo, which
->             - stabilises changed inode size from truncate/extent
->             - stabilises extent list changes from truncate/extent
->
-> IOWs, ordered metadata transactions mean the second fsync, through
-> the chain of dependent modifications previously made, should also
-> stabilise all the metadata changes made on foo since the fsync was
-> called on it.
->
->> Before this change, after the fsync log replay, the file content
->> matched what it had when "sync" was called - i.e. doesn't match the
->> content when the fsync (on "foo") was performed nor the content after
->> any of the subsequent truncate operations.
->
-> IOWs, btrfs did not follow ordered metadata behavioural rules before
-> the change, nor does it follow them after the change, but it's
-> now broken in a different, more subtle and surprising way.
+> diff --git a/common/filter b/common/filter
+> index 05dbae6..71ef2e2 100644
+> --- a/common/filter
+> +++ b/common/filter
+> @@ -137,6 +137,10 @@ _filter_mkfs()
+>      case $FSTYP in
+>      xfs)
+>         ;;
+> +       btrfs)
+> +       sed -e "/Performing full device TRIM/d" \
+> +               -e "/Turning ON incompat feature/d"
+> +       return ;;
 
-Dave, thanks for the detailed explanation.
-I'll update the test once I get btrfs to have the same behaviour as
-xfs and ext3/4.
+Hi,
+This change to the filter function makes generic/204 always fail like this:
+
+generic/204 5s ... - output mismatch (see
+/home/fdmanana/git/hub/xfstests/results//generic/204.out.bad)
+    --- tests/generic/204.out 2014-11-17 20:59:50.958203000 +0000
+    +++ /home/fdmanana/git/hub/xfstests/results//generic/204.out.bad
+2015-02-19 18:03:34.772608767 +0000
+    @@ -1,2 +1,3 @@
+     QA output created by 204
+    +./tests/generic/204: line 76: space / (isize + dbsize): division
+by 0 (error token is "(isize + dbsize)")
+     *** done
+    ...
+    (Run 'diff -u tests/generic/204.out
+/home/fdmanana/git/hub/xfstests/results//generic/204.out.bad'  to see
+the entire diff)
 
 
-
->
-> Cheers,
->
-> Dave.
+>      *)
+>         cat - >/dev/null
+>         perl -e 'print STDERR "dbsize=4096\nisize=256\n"'
+> diff --git a/tests/btrfs/082 b/tests/btrfs/082
+> new file mode 100755
+> index 0000000..dd3c87e
+> --- /dev/null
+> +++ b/tests/btrfs/082
+> @@ -0,0 +1,65 @@
+> +#!/bin/bash
+> +# FS QA Test No. btrfs/082
+> +#
+> +# Regression test for a btrfs issue of resizing 'thread_pool' when
+> +# remount the fs.
+> +#
+> +# This regression was introduced by the following linux kernel commit:
+> +#     btrfs: Added btrfs_workqueue_struct implemented ordered
+> +#     execution based on kernel workqueue
+> +#     08a9ff3264181986d1d692a4e6fce3669700c9f8
+> +# And it was fixed by the following linux kernel commit:
+> +#     btrfs: fix crash in remount(thread_pool=) case
+> +#     800ee2247f483b6d05ed47ef3bbc90b56451746c
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2015 Fujitsu.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1       # failure is the default!
+> +
+> +_cleanup()
+> +{
+> +    rm -f $tmp.*
+> +}
+> +
+> +trap "_cleanup ; exit \$status" 0 1 2 3 15
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
+> +
+> +_scratch_mkfs |& _filter_mkfs
+> +
+> +_scratch_mount "-o thread_pool=6"
+> +_scratch_mount "-o remount,thread_pool=10"
+> +
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/082.out b/tests/btrfs/082.out
+> new file mode 100644
+> index 0000000..2977f14
+> --- /dev/null
+> +++ b/tests/btrfs/082.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 082
+> +Silence is golden
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index e29999b..fd2fa76 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -84,3 +84,4 @@
+>  079 auto rw metadata
+>  080 auto snapshot
+>  081 auto quick clone
+> +082 auto quick remount
 > --
-> Dave Chinner
-> david@fromorbit.com
+> 1.9.3
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
 
