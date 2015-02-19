@@ -1,196 +1,219 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-la0-f49.google.com ([209.85.215.49]:42515 "EHLO
-	mail-la0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751595AbbBSSTJ (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 19 Feb 2015 13:19:09 -0500
-MIME-Version: 1.0
-Reply-To: fdmanana@gmail.com
-In-Reply-To: <1422492360-12243-1-git-send-email-gux.fnst@cn.fujitsu.com>
-References: <1422492360-12243-1-git-send-email-gux.fnst@cn.fujitsu.com>
-Date: Thu, 19 Feb 2015 18:19:06 +0000
-Message-ID: <CAL3q7H4Ozf40iodhjfuaQLT0SXc8A_bJnBQugyf+EPsF3Xwuvg@mail.gmail.com>
-Subject: Re: [PATCH v6] btrfs: add regression test for remount with
- thread_pool resized
-From: Filipe David Manana <fdmanana@gmail.com>
-Content-Type: text/plain; charset=UTF-8
+Received: from victor.provo.novell.com ([137.65.250.26]:34879 "EHLO
+	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751939AbbBSS3p (ORCPT
+	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
+	Thu, 19 Feb 2015 13:29:45 -0500
+From: Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] fstests: generic test for directory fsync after adding hard links
+Date: Thu, 19 Feb 2015 18:29:11 +0000
+Message-Id: <1424370551-18884-1-git-send-email-fdmanana@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Xing Gu <gux.fnst@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, Dave Chinner <david@fromorbit.com>, eguan@redhat.com, Qu Wenruo <quwenruo@cn.fujitsu.com>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 29, 2015 at 12:46 AM, Xing Gu <gux.fnst@cn.fujitsu.com> wrote:
-> Regression test for a btrfs issue of resizing 'thread_pool' when
-> remount the fs.
->
-> This regression was introduced by the following linux kernel commit:
->     btrfs: Added btrfs_workqueue_struct implemented ordered
->     execution based on kernel workqueue
->     08a9ff3264181986d1d692a4e6fce3669700c9f8
-> And it was fixed by the following linux kernel commit:
->     btrfs: fix crash in remount(thread_pool=) case
->     800ee2247f483b6d05ed47ef3bbc90b56451746c
->
-> Signed-off-by: Xing Gu <gux.fnst@cn.fujitsu.com>
-> ---
->  v5->v6: Add a filter to wipe "Performing full device TRIM" and
->          "Turning ON incompat feature" in common/filter:_filter_mkfs.
->
->  v4->v5: Redirect stderr to /dev/null.
->
->  v3->v4: Remove the check for a bug message.
->
->  v2->v3: Add the regresssion commit in description.
->          Remove "dmesg -c > /dev/null".
->          Echo "Silence is golden" to indicate that an empty output
->          file is expected.
->
->  v1->v2: Add the fix commit in description.
->          Add the check for a bug message.
-> ---
->  common/filter       |  4 ++++
->  tests/btrfs/082     | 65 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/082.out |  2 ++
->  tests/btrfs/group   |  1 +
->  4 files changed, 72 insertions(+)
->  create mode 100755 tests/btrfs/082
->  create mode 100644 tests/btrfs/082.out
->
-> diff --git a/common/filter b/common/filter
-> index 05dbae6..71ef2e2 100644
-> --- a/common/filter
-> +++ b/common/filter
-> @@ -137,6 +137,10 @@ _filter_mkfs()
->      case $FSTYP in
->      xfs)
->         ;;
-> +       btrfs)
-> +       sed -e "/Performing full device TRIM/d" \
-> +               -e "/Turning ON incompat feature/d"
-> +       return ;;
+This test is motivated by an fsync issue discovered in btrfs.
+The issue was that after adding a new hard link to an existing file
+(one that was created in a past transaction) and fsync'ing the parent
+directory of the new hard link, after the fsync log replay the file's
+inode link count did not get its link count incremented, while the new
+directory entry was visible.
+Also, unlike xfs and ext4, new files under the directory we fsync were
+not being written to the fsync log, nor were any child directories and
+new files and links under the children directories. So this test verifies
+too that btrfs has the same behaviour as xfs and ext4.
 
-Hi,
-This change to the filter function makes generic/204 always fail like this:
+The btrfs issue was fixed by the following linux kernel patch:
 
-generic/204 5s ... - output mismatch (see
-/home/fdmanana/git/hub/xfstests/results//generic/204.out.bad)
-    --- tests/generic/204.out 2014-11-17 20:59:50.958203000 +0000
-    +++ /home/fdmanana/git/hub/xfstests/results//generic/204.out.bad
-2015-02-19 18:03:34.772608767 +0000
-    @@ -1,2 +1,3 @@
-     QA output created by 204
-    +./tests/generic/204: line 76: space / (isize + dbsize): division
-by 0 (error token is "(isize + dbsize)")
-     *** done
-    ...
-    (Run 'diff -u tests/generic/204.out
-/home/fdmanana/git/hub/xfstests/results//generic/204.out.bad'  to see
-the entire diff)
+  Btrfs: fix metadata inconsistencies after directory fsync
 
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/generic/060     | 150 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/060.out |   3 +
+ tests/generic/group   |   1 +
+ 3 files changed, 154 insertions(+)
+ create mode 100755 tests/generic/060
+ create mode 100644 tests/generic/060.out
 
->      *)
->         cat - >/dev/null
->         perl -e 'print STDERR "dbsize=4096\nisize=256\n"'
-> diff --git a/tests/btrfs/082 b/tests/btrfs/082
-> new file mode 100755
-> index 0000000..dd3c87e
-> --- /dev/null
-> +++ b/tests/btrfs/082
-> @@ -0,0 +1,65 @@
-> +#!/bin/bash
-> +# FS QA Test No. btrfs/082
-> +#
-> +# Regression test for a btrfs issue of resizing 'thread_pool' when
-> +# remount the fs.
-> +#
-> +# This regression was introduced by the following linux kernel commit:
-> +#     btrfs: Added btrfs_workqueue_struct implemented ordered
-> +#     execution based on kernel workqueue
-> +#     08a9ff3264181986d1d692a4e6fce3669700c9f8
-> +# And it was fixed by the following linux kernel commit:
-> +#     btrfs: fix crash in remount(thread_pool=) case
-> +#     800ee2247f483b6d05ed47ef3bbc90b56451746c
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2015 Fujitsu.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +
-> +_cleanup()
-> +{
-> +    rm -f $tmp.*
-> +}
-> +
-> +trap "_cleanup ; exit \$status" 0 1 2 3 15
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +
-> +_scratch_mkfs |& _filter_mkfs
-> +
-> +_scratch_mount "-o thread_pool=6"
-> +_scratch_mount "-o remount,thread_pool=10"
-> +
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/082.out b/tests/btrfs/082.out
-> new file mode 100644
-> index 0000000..2977f14
-> --- /dev/null
-> +++ b/tests/btrfs/082.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 082
-> +Silence is golden
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index e29999b..fd2fa76 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -84,3 +84,4 @@
->  079 auto rw metadata
->  080 auto snapshot
->  081 auto quick clone
-> +082 auto quick remount
-> --
-> 1.9.3
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
+diff --git a/tests/generic/060 b/tests/generic/060
+new file mode 100755
+index 0000000..a3ff618
+--- /dev/null
++++ b/tests/generic/060
+@@ -0,0 +1,150 @@
++#! /bin/bash
++# FS QA Test No. 060
++#
++# This test is motivated by an fsync issue discovered in btrfs.
++# The issue was that after adding a new hard link to an existing file (one that
++# was created in a past transaction) and fsync'ing the parent directory of the
++# new hard link, after the fsync log replay the file's inode link count did not
++# get its link count incremented, while the new directory entry was visible.
++# Also, unlike xfs and ext4, new files under the directory we fsync were not
++# being written to the fsync log, nor were any child directories and new files
++# and links under the children directories. So this test verifies too that
++# btrfs has the same behaviour as xfs and ext4.
++#
++# The btrfs issue was fixed by the following linux kernel patch:
++#
++#  Btrfs: fix metadata inconsistencies after directory fsync
++#
++#-----------------------------------------------------------------------
++# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++
++_cleanup()
++{
++	_cleanup_flakey
++	rm -f $tmp.*
++}
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmflakey
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_need_to_be_root
++_require_scratch
++_require_dm_flakey
++
++rm -f $seqres.full
++
++_scratch_mkfs >> $seqres.full 2>&1
++_init_flakey
++_mount_flakey
++
++# Create our test file and directory.
++touch $SCRATCH_MNT/foo
++mkdir $SCRATCH_MNT/mydir
++
++# Make sure all metadata is durably persisted.
++sync
++
++# Add a hard link to 'foo' inside our test directory and fsync only the
++# directory. The btrfs fsync implementation had a bug that caused the new
++# directory entry to be visible after the fsync log replay but, the inode
++# of our file remained with a link count of 1.
++ln $SCRATCH_MNT/foo $SCRATCH_MNT/mydir/foo_2
++
++# Add a few more links and files created in the current transaction.
++# Just to verify nothing breaks or gives incorrect results.
++ln $SCRATCH_MNT/foo $SCRATCH_MNT/mydir/foo_3
++echo "hello world" > $SCRATCH_MNT/hello
++ln $SCRATCH_MNT/hello $SCRATCH_MNT/mydir/hello_2
++
++# Add some subdirectories and new files and links to them. This is to verify
++# that after fsyncing our top level directory 'mydir', all the subdirectories
++# and their files/links are registered in the fsync log and exist after the
++# fsync log is replayed - xfs and ext4 give this guarantee.
++mkdir -p $SCRATCH_MNT/mydir/x/y/z
++ln $SCRATCH_MNT/foo $SCRATCH_MNT/mydir/x/y/foo_y_link
++ln $SCRATCH_MNT/foo $SCRATCH_MNT/mydir/x/y/z/foo_z_link
++touch $SCRATCH_MNT/mydir/x/y/z/qwerty
++
++# Now fsync only our top directory.
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/mydir
++
++# Simulate a crash/power loss.
++_load_flakey_table $FLAKEY_DROP_WRITES
++_unmount_flakey
++
++_load_flakey_table $FLAKEY_ALLOW_WRITES
++_mount_flakey
++
++# Remove the first name of our inode. Because of the directory fsync bug, the
++# inode's link count was 1 instead of 5, so removing the 'foo' name ends up
++# deleting the inode and the other names are stale directory entries (and still
++# visible to applications). Attempting to remove or access the remaining
++# dentries pointing to that inode resulted in stale file handle errors, and
++# made it impossible to remove the parent directories since it was impossible
++# for them to become empty.
++echo "file 'foo' link count after log replay: $(stat -c %h $SCRATCH_MNT/foo)"
++rm -f $SCRATCH_MNT/foo
++
++# Now verify that all files, links and directories created before fsyncing our
++# directory exist after the fsync log was replayed.
++[ -f $SCRATCH_MNT/mydir/foo_2 ] || echo "Link mydir/foo_2 is missing"
++[ -f $SCRATCH_MNT/mydir/foo_3 ] || echo "Link mydir/foo_3 is missing"
++[ -f $SCRATCH_MNT/hello ] || echo "File hello is missing"
++echo "file 'hello' size after log replay: $(stat -c %s $SCRATCH_MNT/hello)"
++[ -f $SCRATCH_MNT/mydir/hello_2 ] || echo "Link mydir/hello_2 is missing"
++[ -f $SCRATCH_MNT/mydir/x/y/foo_y_link ] || \
++	echo "Link mydir/x/y/foo_y_link is missing"
++[ -f $SCRATCH_MNT/mydir/x/y/z/foo_z_link ] || \
++	echo "Link mydir/x/y/z/foo_z_link is missing"
++[ -f $SCRATCH_MNT/mydir/x/y/z/qwerty ] || \
++	echo "File mydir/x/y/z/qwerty is missing"
++
++# Now remove all files/links, under our test directory 'mydir', and verify we
++# can remove all the directories.
++rm -f $SCRATCH_MNT/mydir/x/y/z/*
++rmdir $SCRATCH_MNT/mydir/x/y/z
++rm -f $SCRATCH_MNT/mydir/x/y/*
++rmdir $SCRATCH_MNT/mydir/x/y
++rmdir $SCRATCH_MNT/mydir/x
++rm -f $SCRATCH_MNT/mydir/*
++rmdir $SCRATCH_MNT/mydir
++
++# An fsck, run by the fstests framework everytime a test finishes, also detected
++# the inconsistency and printed the following error message:
++#
++# root 5 inode 257 errors 2001, no inode item, link count wrong
++#    unresolved ref dir 258 index 2 namelen 5 name foo_2 filetype 1 errors 4, no inode ref
++#    unresolved ref dir 258 index 3 namelen 5 name foo_3 filetype 1 errors 4, no inode ref
++
++status=0
++exit
+diff --git a/tests/generic/060.out b/tests/generic/060.out
+new file mode 100644
+index 0000000..3ecb0a1
+--- /dev/null
++++ b/tests/generic/060.out
+@@ -0,0 +1,3 @@
++QA output created by 060
++file 'foo' link count after log replay: 5
++file 'hello' size after log replay: 0
+diff --git a/tests/generic/group b/tests/generic/group
+index f2eb87a..85ff384 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -61,6 +61,7 @@
+ 056 metadata auto quick
+ 057 metadata auto quick
+ 059 metadata auto quick
++060 metadata auto quick
+ 062 attr udf auto quick
+ 068 other auto freeze dangerous stress
+ 069 rw udf auto quick
 -- 
-Filipe David Manana,
+2.1.3
 
-"Reasonable men adapt themselves to the world.
- Unreasonable men adapt the world to themselves.
- That's why all progress depends on unreasonable men."
