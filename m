@@ -1,172 +1,91 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from sandeen.net ([63.231.237.45]:49529 "EHLO sandeen.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753144AbbBWWze (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 23 Feb 2015 17:55:34 -0500
-Message-ID: <54EBAFE4.4080000@sandeen.net>
-Date: Mon, 23 Feb 2015 16:55:32 -0600
-From: Eric Sandeen <sandeen@sandeen.net>
+Received: from mail-pa0-f42.google.com ([209.85.220.42]:35615 "EHLO
+	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751845AbbBWXLg (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 23 Feb 2015 18:11:36 -0500
+Received: by padfa1 with SMTP id fa1so31214756pad.2
+        for <fstests@vger.kernel.org>; Mon, 23 Feb 2015 15:11:36 -0800 (PST)
+Date: Mon, 23 Feb 2015 15:11:34 -0800
+From: Omar Sandoval <osandov@osandov.com>
+Subject: Re: [PATCH] ext4: add regression tests for ^extents punch hole
+Message-ID: <20150223231134.GA15327@mew.cs.washington.edu>
+References: <4c557308eb4e62752dc8b513495cb6d46ca5775d.1424730653.git.osandov@osandov.com>
+ <20150223224620.GL12722@dastard>
 MIME-Version: 1.0
-Subject: [PATCH V2] create _require_metadata_journaling, and add to tests
- that need it
-References: <54EBA093.3050401@redhat.com>
-In-Reply-To: <54EBA093.3050401@redhat.com>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20150223224620.GL12722@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@redhat.com>, fstests@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Many tests use dm_flakey to trigger log replay, but for filesystems that
-don't support metadata journaling, this causes failures when it shouldn't.
-(i.e. we can hardly test log replay if there is no log).
+On Tue, Feb 24, 2015 at 09:46:20AM +1100, Dave Chinner wrote:
+> On Mon, Feb 23, 2015 at 02:39:36PM -0800, Omar Sandoval wrote:
+> > Linux commit 6f30b7e37a82 (ext4: fix indirect punch hole corruption)
+> > fixes several bugs in the FALLOC_FL_PUNCH_HOLE implementation for an
+> > ext4 filesystem with indirect blocks.
+> > 
+> > Signed-off-by: Omar Sandoval <osandov@osandov.com>
+> > ---
+> >  tests/ext4/005     | 115 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/ext4/005.out |  29 ++++++++++++++
+> >  tests/ext4/group   |   1 +
+> >  3 files changed, 145 insertions(+)
+> >  create mode 100755 tests/ext4/005
+> >  create mode 100644 tests/ext4/005.out
+> 
+> What's ext4 specific about this test apart from the mkfs parameter?
+> Shouldn't it be generic and so test all the filesystems behave the
+> same?  i.e. when someone then runs
+> 
+> # MKFS_OPTIONS="-b size=1k -O ^extents" ./check -g auto
+> 
+> That will exercise this specific regression fix, not to mention give
+> much, much better test coverage of that configuration than just
+> making a single test use that config...
+> 
+> Cheers,
+> 
+> Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
 
-For some tests they actually sync everything we care about, and find
-inconsistencies elsewhere, but I erred on the side of simply not running
-the test in most cases.
+Hi, Dave,
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
----
+This test isn't completely generic bcause the output is dependent on the
+block size. In particular, fpunch+fiemap will have different results
+based on the block size:
 
-v2: MOAR COLUMNS.  Add default case.
+----
+# mkfs.ext3 -b1024 /dev/sdb1
+# mount /dev/sdb1 /mnt/test
+# xfs_io -f -c 'pwrite 0 8192' /mnt/test/a
+# xfs_io -c 'fpunch 0 1024' /mnt/test/a
+# xfs_io -c fiemap /mnt/test/a
+/mnt/test/a:
+        0: [0..1]: hole
+        1: [2..15]: 1028..1041
+# umount /mnt/test
+# mkfs.ext3 -b4096 /dev/sdb1
+# mount /dev/sdb1 /mnt/test
+# xfs_io -f -c 'pwrite 0 8192' /mnt/test/a
+# xfs_io -c 'fpunch 0 1024' /mnt/test/a
+# xfs_io -c fiemap /mnt/test/a
+/mnt/test/a:
+        0: [0..15]: 8192..8207
+----
 
-diff --git a/common/rc b/common/rc
-index 7449a1d..243cb93 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2340,6 +2340,38 @@ _require_norecovery()
- 	_scratch_unmount
- }
- 
-+# Does this filesystem support metadata journaling?
-+# We exclude ones here that don't; otherwise we assume that it does, so the
-+# test will run, fail, and motivate someone to update this test for a new
-+# filesystem.
-+#
-+# It's possible that TEST_DEV and SCRATCH_DEV have different features (it'd be
-+# odd, but possible) so check $TEST_DEV by default, but we can optionall pass
-+# any dev we want.
-+_require_metadata_journaling()
-+{
-+	if [ -z $1 ]; then
-+		DEV=$TEST_DEV
-+	else
-+		DEV=$1
-+	fi
-+
-+	case "$FSTYP" in
-+	ext2|vfat|msdos)
-+		_notrun "$FSTYP does not support metadata journaling"
-+		;;
-+	ext4)
-+		# ext4 could be mkfs'd without a journal...
-+		_require_dumpe2fs
-+		$DUMPE2FS_PROG -h $DEV | grep has_journal || \
-+			_notrun "$FSTYP on $DEV not configured with metadata journaling"
-+		;;
-+	*)
-+		# by default we pass; if you need to, add your fs above!
-+		;;
-+	esac
-+}
-+
- # Does fiemap support?
- _require_fiemap()
- {
+I could either remove the fiemap output from the test case and rely on
+the md5sum or round all of the punches to some larger block size so it
+will behave the same up to, say, 8k. Do either of those options sound
+better?
 
-diff --git a/tests/generic/034 b/tests/generic/034
-index 4ec1db8..966b3d2 100755
---- a/tests/generic/034
-+++ b/tests/generic/034
-@@ -53,6 +53,7 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- _require_dm_flakey
-+_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/040 b/tests/generic/040
-index 5f10f48..c841fbc 100755
---- a/tests/generic/040
-+++ b/tests/generic/040
-@@ -62,6 +62,7 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- _require_dm_flakey
-+_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/041 b/tests/generic/041
-index 36a6f42..f38b662 100755
---- a/tests/generic/041
-+++ b/tests/generic/041
-@@ -66,6 +66,7 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- _require_dm_flakey
-+_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/056 b/tests/generic/056
-index 9ec00e3..8bb1522 100755
---- a/tests/generic/056
-+++ b/tests/generic/056
-@@ -55,6 +55,7 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- _require_dm_flakey
-+_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/057 b/tests/generic/057
-index 4c0ffd1..3b9f89e 100755
---- a/tests/generic/057
-+++ b/tests/generic/057
-@@ -55,6 +55,7 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- _require_dm_flakey
-+_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/311 b/tests/generic/311
-index 85e52e8..d21b6eb 100755
---- a/tests/generic/311
-+++ b/tests/generic/311
-@@ -56,6 +56,7 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch_nocheck
- _require_dm_flakey
-+_require_metadata_journaling $SCRATCH_DEV
- 
- # xfs_io is not required for this test, but it's the best way to verify
- # the test system supports fallocate() for allocation
-diff --git a/tests/generic/321 b/tests/generic/321
-index 3bd6b12..c821a23 100755
---- a/tests/generic/321
-+++ b/tests/generic/321
-@@ -45,6 +45,7 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch_nocheck
- _require_dm_flakey
-+_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/322 b/tests/generic/322
-index 3ec2387..4c0edf6 100755
---- a/tests/generic/322
-+++ b/tests/generic/322
-@@ -45,6 +45,7 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch_nocheck
- _require_dm_flakey
-+_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
+Alternatively, is there a good way to have block size-dependent test
+output? Then we could have the test adapt to different block sizes and
+cover these regressions at any block size, not just 1k.
+
+Thanks!
+-- 
+Omar
