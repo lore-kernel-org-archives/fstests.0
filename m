@@ -1,46 +1,170 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36962 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:42733 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752350AbbBWVna (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 23 Feb 2015 16:43:30 -0500
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t1NLhUpY022502
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <fstests@vger.kernel.org>; Mon, 23 Feb 2015 16:43:30 -0500
-Received: from liberator.sandeen.net (ovpn01.gateway.prod.ext.phx2.redhat.com [10.5.9.1])
-	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t1NLhTub005843
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES128-SHA bits=128 verify=NO)
-	for <fstests@vger.kernel.org>; Mon, 23 Feb 2015 16:43:30 -0500
-Message-ID: <54EB9F01.2020303@redhat.com>
-Date: Mon, 23 Feb 2015 15:43:29 -0600
+	id S1751601AbbBWVuP (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 23 Feb 2015 16:50:15 -0500
+Message-ID: <54EBA093.3050401@redhat.com>
+Date: Mon, 23 Feb 2015 15:50:11 -0600
 From: Eric Sandeen <sandeen@redhat.com>
 MIME-Version: 1.0
-Subject: [PATCH] btrfs/049 is a btrfs test, not generic
+Subject: [PATCH] create _require_metadata_journaling, and add to tests that
+ need it
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: fstests@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-It's not much fun to run btrfs-specific tests on non-btrfs
-filesystems.  ;)
+Many tests use dm_flakey to trigger log replay, but for filesystems that
+don't support metadata journaling, this causes failures when it shouldn't.
+(i.e. we can hardly test log replay if there is no log).
 
-> EXT4-fs (dm-12): Unrecognized mount option "inode_cache" or missing value
+For some tests they actually sync everything we care about, and find
+inconsistencies elsewhere, but I erred on the side of simply not running
+the test in most cases.
 
 Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 ---
 
-diff --git a/tests/btrfs/049 b/tests/btrfs/049
-index 3101d09..5b17a77 100755
---- a/tests/btrfs/049
-+++ b/tests/btrfs/049
-@@ -46,7 +46,7 @@ _cleanup()
- . ./common/dmflakey
+
+
+diff --git a/common/rc b/common/rc
+index 7449a1d..015d2f5 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2340,6 +2340,35 @@ _require_norecovery()
+ 	_scratch_unmount
+ }
  
- # real QA test starts here
--_supported_fs generic
-+_supported_fs btrfs
- _supported_os Linux
++# Does this filesystem support metadata journaling?
++# We exclude ones here that don't; otherwise we assume
++# that it does, so the test will run, fail, and motivate
++# someone to update this test for a new filesystem.
++#
++# It's possible that TEST_DEV and SCRATCH_DEV have different
++# features (it'd be odd, but possible) so check $TEST_DEV
++# by default, but we can optionaly pass any dev we want.
++_require_metadata_journaling()
++{
++	if [ -z $1 ]; then
++		DEV=$TEST_DEV
++	else
++		DEV=$1
++	fi
++
++	case "$FSTYP" in
++	ext2|vfat|msdos)
++		_notrun "$FSTYP does not support metadata journaling"
++		;;
++	ext4)
++		# ext4 could be mkfs'd without a journal...
++		_require_dumpe2fs
++		$DUMPE2FS_PROG -h $DEV | grep has_journal || \
++			_notrun "$FSTYP on $DEV not configured with metadata journaling"
++		;;
++	esac
++}
++
+ # Does fiemap support?
+ _require_fiemap()
+ {
+
+
+
+diff --git a/tests/generic/034 b/tests/generic/034
+index 4ec1db8..966b3d2 100755
+--- a/tests/generic/034
++++ b/tests/generic/034
+@@ -53,6 +53,7 @@ _supported_os Linux
  _need_to_be_root
  _require_scratch
+ _require_dm_flakey
++_require_metadata_journaling $SCRATCH_DEV
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/040 b/tests/generic/040
+index 5f10f48..c841fbc 100755
+--- a/tests/generic/040
++++ b/tests/generic/040
+@@ -62,6 +62,7 @@ _supported_os Linux
+ _need_to_be_root
+ _require_scratch
+ _require_dm_flakey
++_require_metadata_journaling $SCRATCH_DEV
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/041 b/tests/generic/041
+index 36a6f42..f38b662 100755
+--- a/tests/generic/041
++++ b/tests/generic/041
+@@ -66,6 +66,7 @@ _supported_os Linux
+ _need_to_be_root
+ _require_scratch
+ _require_dm_flakey
++_require_metadata_journaling $SCRATCH_DEV
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/056 b/tests/generic/056
+index 9ec00e3..8bb1522 100755
+--- a/tests/generic/056
++++ b/tests/generic/056
+@@ -55,6 +55,7 @@ _supported_os Linux
+ _need_to_be_root
+ _require_scratch
+ _require_dm_flakey
++_require_metadata_journaling $SCRATCH_DEV
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/057 b/tests/generic/057
+index 4c0ffd1..3b9f89e 100755
+--- a/tests/generic/057
++++ b/tests/generic/057
+@@ -55,6 +55,7 @@ _supported_os Linux
+ _need_to_be_root
+ _require_scratch
+ _require_dm_flakey
++_require_metadata_journaling $SCRATCH_DEV
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/311 b/tests/generic/311
+index 85e52e8..d21b6eb 100755
+--- a/tests/generic/311
++++ b/tests/generic/311
+@@ -56,6 +56,7 @@ _supported_os Linux
+ _need_to_be_root
+ _require_scratch_nocheck
+ _require_dm_flakey
++_require_metadata_journaling $SCRATCH_DEV
+ 
+ # xfs_io is not required for this test, but it's the best way to verify
+ # the test system supports fallocate() for allocation
+diff --git a/tests/generic/321 b/tests/generic/321
+index 3bd6b12..c821a23 100755
+--- a/tests/generic/321
++++ b/tests/generic/321
+@@ -45,6 +45,7 @@ _supported_os Linux
+ _need_to_be_root
+ _require_scratch_nocheck
+ _require_dm_flakey
++_require_metadata_journaling $SCRATCH_DEV
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/322 b/tests/generic/322
+index 3ec2387..4c0edf6 100755
+--- a/tests/generic/322
++++ b/tests/generic/322
+@@ -45,6 +45,7 @@ _supported_os Linux
+ _need_to_be_root
+ _require_scratch_nocheck
+ _require_dm_flakey
++_require_metadata_journaling $SCRATCH_DEV
+ 
+ rm -f $seqres.full
+ 
 
