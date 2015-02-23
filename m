@@ -1,170 +1,200 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42733 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751601AbbBWVuP (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 23 Feb 2015 16:50:15 -0500
-Message-ID: <54EBA093.3050401@redhat.com>
-Date: Mon, 23 Feb 2015 15:50:11 -0600
-From: Eric Sandeen <sandeen@redhat.com>
-MIME-Version: 1.0
-Subject: [PATCH] create _require_metadata_journaling, and add to tests that
- need it
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Received: from mail-pd0-f177.google.com ([209.85.192.177]:45232 "EHLO
+	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751995AbbBWWjt (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 23 Feb 2015 17:39:49 -0500
+Received: by pdjz10 with SMTP id z10so28605762pdj.12
+        for <fstests@vger.kernel.org>; Mon, 23 Feb 2015 14:39:49 -0800 (PST)
+From: Omar Sandoval <osandov@osandov.com>
+Subject: [PATCH] ext4: add regression tests for ^extents punch hole
+Date: Mon, 23 Feb 2015 14:39:36 -0800
+Message-Id: <4c557308eb4e62752dc8b513495cb6d46ca5775d.1424730653.git.osandov@osandov.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Cc: Omar Sandoval <osandov@osandov.com>
 List-ID: <fstests@vger.kernel.org>
 
-Many tests use dm_flakey to trigger log replay, but for filesystems that
-don't support metadata journaling, this causes failures when it shouldn't.
-(i.e. we can hardly test log replay if there is no log).
+Linux commit 6f30b7e37a82 (ext4: fix indirect punch hole corruption)
+fixes several bugs in the FALLOC_FL_PUNCH_HOLE implementation for an
+ext4 filesystem with indirect blocks.
 
-For some tests they actually sync everything we care about, and find
-inconsistencies elsewhere, but I erred on the side of simply not running
-the test in most cases.
-
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+Signed-off-by: Omar Sandoval <osandov@osandov.com>
 ---
+ tests/ext4/005     | 115 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/005.out |  29 ++++++++++++++
+ tests/ext4/group   |   1 +
+ 3 files changed, 145 insertions(+)
+ create mode 100755 tests/ext4/005
+ create mode 100644 tests/ext4/005.out
 
-
-
-diff --git a/common/rc b/common/rc
-index 7449a1d..015d2f5 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2340,6 +2340,35 @@ _require_norecovery()
- 	_scratch_unmount
- }
- 
-+# Does this filesystem support metadata journaling?
-+# We exclude ones here that don't; otherwise we assume
-+# that it does, so the test will run, fail, and motivate
-+# someone to update this test for a new filesystem.
+diff --git a/tests/ext4/005 b/tests/ext4/005
+new file mode 100755
+index 0000000..d6fb6e9
+--- /dev/null
++++ b/tests/ext4/005
+@@ -0,0 +1,115 @@
++#! /bin/bash
++# FS QA Test No. 005
 +#
-+# It's possible that TEST_DEV and SCRATCH_DEV have different
-+# features (it'd be odd, but possible) so check $TEST_DEV
-+# by default, but we can optionaly pass any dev we want.
-+_require_metadata_journaling()
-+{
-+	if [ -z $1 ]; then
-+		DEV=$TEST_DEV
-+	else
-+		DEV=$1
-+	fi
++# Test fpunch on an ^extents ext4 filesystem.
++# Regression test for commit:
++# 6f30b7e37a82 (ext4: fix indirect punch hole corruption)
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Omar Sandoval.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
 +
-+	case "$FSTYP" in
-+	ext2|vfat|msdos)
-+		_notrun "$FSTYP does not support metadata journaling"
-+		;;
-+	ext4)
-+		# ext4 could be mkfs'd without a journal...
-+		_require_dumpe2fs
-+		$DUMPE2FS_PROG -h $DEV | grep has_journal || \
-+			_notrun "$FSTYP on $DEV not configured with metadata journaling"
-+		;;
-+	esac
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
 +}
 +
- # Does fiemap support?
- _require_fiemap()
- {
-
-
-
-diff --git a/tests/generic/034 b/tests/generic/034
-index 4ec1db8..966b3d2 100755
---- a/tests/generic/034
-+++ b/tests/generic/034
-@@ -53,6 +53,7 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- _require_dm_flakey
-+_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/040 b/tests/generic/040
-index 5f10f48..c841fbc 100755
---- a/tests/generic/040
-+++ b/tests/generic/040
-@@ -62,6 +62,7 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- _require_dm_flakey
-+_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/041 b/tests/generic/041
-index 36a6f42..f38b662 100755
---- a/tests/generic/041
-+++ b/tests/generic/041
-@@ -66,6 +66,7 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- _require_dm_flakey
-+_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/056 b/tests/generic/056
-index 9ec00e3..8bb1522 100755
---- a/tests/generic/056
-+++ b/tests/generic/056
-@@ -55,6 +55,7 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- _require_dm_flakey
-+_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/057 b/tests/generic/057
-index 4c0ffd1..3b9f89e 100755
---- a/tests/generic/057
-+++ b/tests/generic/057
-@@ -55,6 +55,7 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- _require_dm_flakey
-+_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/311 b/tests/generic/311
-index 85e52e8..d21b6eb 100755
---- a/tests/generic/311
-+++ b/tests/generic/311
-@@ -56,6 +56,7 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch_nocheck
- _require_dm_flakey
-+_require_metadata_journaling $SCRATCH_DEV
- 
- # xfs_io is not required for this test, but it's the best way to verify
- # the test system supports fallocate() for allocation
-diff --git a/tests/generic/321 b/tests/generic/321
-index 3bd6b12..c821a23 100755
---- a/tests/generic/321
-+++ b/tests/generic/321
-@@ -45,6 +45,7 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch_nocheck
- _require_dm_flakey
-+_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/322 b/tests/generic/322
-index 3ec2387..4c0edf6 100755
---- a/tests/generic/322
-+++ b/tests/generic/322
-@@ -45,6 +45,7 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch_nocheck
- _require_dm_flakey
-+_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/punch
++
++_write_blocks()
++{
++	$XFS_IO_PROG -f -c "pwrite $((1024 * $2)) $((1024 * ($3 - $2)))" $SCRATCH_MNT/$1 | _filter_xfs_io
++	_scratch_unmount
++	_scratch_mount
++}
++
++_punch_blocks()
++{
++	$XFS_IO_PROG -c "fpunch $((1024 * $2)) $((1024 * ($3 - $2)))" $SCRATCH_MNT/$1
++}
++
++_check_blocks()
++{
++	$XFS_IO_PROG -c 'fiemap -v' $SCRATCH_MNT/$1 | _filter_hole_fiemap
++	_md5_checksum $SCRATCH_MNT/$1
++}
++
++_supported_fs ext3 ext4
++_supported_os Linux
++_need_to_be_root
++_require_scratch
++_require_xfs_io_command "fiemap"
++_require_xfs_io_command "fpunch"
++
++rm -f $seqres.full
++
++NDIR=12
++ADDRS=$((1024 / 4))
++
++$MKFS_EXT4_PROG -F -b 1024 -O ^extents $SCRATCH_DEV >> $seqres.full 2>&1
++_scratch_mount || _fail "couldn't mount fs"
++
++# Bug 1: whole level of indirection is not freed when end is first block of a
++# level.
++_write_blocks testfile1 0 $((NDIR + ADDRS + ADDRS * ADDRS + 4))
++_punch_blocks testfile1 0 $((NDIR + ADDRS + ADDRS * ADDRS))
++_check_blocks testfile1
++
++# Bug 2: end is at higher level than start, end shared branch is not freed.
++_write_blocks testfile2 0 $((NDIR + ADDRS + 2 * ADDRS + 5))
++_punch_blocks testfile2 $((NDIR + ADDRS + 2 * ADDRS)) $((NDIR + ADDRS + 2 * ADDRS + 4))
++_punch_blocks testfile2 0 $((NDIR + ADDRS + 2 * ADDRS + 4))
++_check_blocks testfile2
++
++# Bug 3: start and end are within one level of indirection, extra blocks are
++# freed because partial branches don't converge. (This bug also masks the
++# remaining 2. That is, the test cases for 4 and 5 are also necessarily
++# affected by bug 3.)
++_write_blocks testfile3 0 $((NDIR + ADDRS + 2 * ADDRS))
++_punch_blocks testfile3 $((NDIR + ADDRS + ADDRS / 2)) $((NDIR + ADDRS + ADDRS))
++_check_blocks testfile3
++
++# Bug 4: start and end are within one level of indirection, top of start is not
++# freed.
++_write_blocks testfile4 0 $((NDIR + ADDRS + 4 * ADDRS))
++_punch_blocks testfile4 $((NDIR + ADDRS + ADDRS)) $((NDIR + ADDRS + ADDRS + 1))
++_punch_blocks testfile4 $((NDIR + ADDRS + ADDRS + 1)) $((NDIR + ADDRS + 3 * ADDRS))
++_check_blocks testfile4
++
++# Bug 5: start and end are within one level of indirection, extra blocks beyond
++# end of range are freed when end has top branch.
++_write_blocks testfile5 0 $((NDIR + ADDRS + 4 * ADDRS))
++_punch_blocks testfile5 $((NDIR + ADDRS + 3 * ADDRS)) $((NDIR + ADDRS + 3 * ADDRS + ADDRS / 2))
++_punch_blocks testfile5 $((NDIR + ADDRS + 2)) $((NDIR + ADDRS + 3 * ADDRS + 2))
++_check_blocks testfile5
++
++# success, all done
++status=0
++exit
+diff --git a/tests/ext4/005.out b/tests/ext4/005.out
+new file mode 100644
+index 0000000..763b4bb
+--- /dev/null
++++ b/tests/ext4/005.out
+@@ -0,0 +1,29 @@
++QA output created by 005
++wrote 67387392/67387392 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++0: [0..131607]: hole
++1: [131608..131615]: extent
++1f9503670a2a125a2110d5ad02e8f3ec
++wrote 803840/803840 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++0: [0..1567]: hole
++1: [1568..1569]: extent
++f1a1a9c1a1cbdb7203b487a14628dad2
++wrote 798720/798720 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++0: [0..791]: extent
++1: [792..1047]: hole
++2: [1048..1559]: extent
++b03901363691382cbe8ece10d66488f3
++wrote 1323008/1323008 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++0: [0..1047]: extent
++1: [1048..2071]: hole
++2: [2072..2583]: extent
++78f879dda9cc67b7f543d27bb7a39882
++wrote 1323008/1323008 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++0: [0..539]: extent
++1: [540..2327]: hole
++2: [2328..2583]: extent
++32b0d65d038d8804fd36ee8aedeff65b
+diff --git a/tests/ext4/group b/tests/ext4/group
+index e7f1f2a..f6db1da 100644
+--- a/tests/ext4/group
++++ b/tests/ext4/group
+@@ -7,6 +7,7 @@
+ 002 auto quick prealloc
+ 003 auto quick
+ 004 auto dump
++005 auto quick
+ 271 auto rw quick
+ 301 aio dangerous ioctl rw stress
+ 302 aio dangerous ioctl rw stress
+-- 
+2.3.0
 
