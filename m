@@ -1,103 +1,46 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from sandeen.net ([63.231.237.45]:46826 "EHLO sandeen.net"
+Received: from mx1.redhat.com ([209.132.183.28]:36962 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751861AbbBWUev (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 23 Feb 2015 15:34:51 -0500
-Message-ID: <54EB8EE5.3000303@sandeen.net>
-Date: Mon, 23 Feb 2015 14:34:45 -0600
-From: Eric Sandeen <sandeen@sandeen.net>
+	id S1752350AbbBWVna (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 23 Feb 2015 16:43:30 -0500
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t1NLhUpY022502
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <fstests@vger.kernel.org>; Mon, 23 Feb 2015 16:43:30 -0500
+Received: from liberator.sandeen.net (ovpn01.gateway.prod.ext.phx2.redhat.com [10.5.9.1])
+	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t1NLhTub005843
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES128-SHA bits=128 verify=NO)
+	for <fstests@vger.kernel.org>; Mon, 23 Feb 2015 16:43:30 -0500
+Message-ID: <54EB9F01.2020303@redhat.com>
+Date: Mon, 23 Feb 2015 15:43:29 -0600
+From: Eric Sandeen <sandeen@redhat.com>
 MIME-Version: 1.0
-Subject: Re: [PATCH] fstests: generic test for fsync after removing xattrs
-References: <1424721327-25972-1-git-send-email-fdmanana@suse.com>	<54EB8A1F.2050207@sandeen.net> <CAL3q7H49ZtC+5mgtp5C5fDyXjCzMysWOUsA=kFAg9KATq4ot5A@mail.gmail.com>
-In-Reply-To: <CAL3q7H49ZtC+5mgtp5C5fDyXjCzMysWOUsA=kFAg9KATq4ot5A@mail.gmail.com>
+Subject: [PATCH] btrfs/049 is a btrfs test, not generic
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fdmanana@gmail.com
-Cc: Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 2/23/15 2:24 PM, Filipe David Manana wrote:
-> On Mon, Feb 23, 2015 at 8:14 PM, Eric Sandeen <sandeen@sandeen.net> wrote:
->> On 2/23/15 1:55 PM, Filipe Manana wrote:
->>> This test is motivated by an fsync issue discovered in btrfs.
->>> The issue was that the fsync log replay code did not remove xattrs that
->>> were deleted before the inode was fsynced. The result was unexpected
->>> and differed from xfs and ext3/4 for example.
->>>
->>> The btrfs issue was fixed by the following linux kernel patch:
->>>
->>>    Btrfs: remove deleted xattrs on fsync log replay
->>>
->>> Signed-off-by: Filipe Manana <fdmanana@suse.com>
->>> ---
->>>  tests/generic/061     | 115 ++++++++++++++++++++++++++++++++++++++++++++++++++
->>>  tests/generic/061.out |  10 +++++
->>>  tests/generic/group   |   1 +
->>>  3 files changed, 126 insertions(+)
->>>  create mode 100755 tests/generic/061
->>>  create mode 100644 tests/generic/061.out
->>>
->>> diff --git a/tests/generic/061 b/tests/generic/061
->>> new file mode 100755
->>> index 0000000..a5eb668
->>> --- /dev/null
->>> +++ b/tests/generic/061
->>> @@ -0,0 +1,115 @@
->>> +#! /bin/bash
->>> +# FS QA Test No. 061
->>
->> Could you describe what the test actually does first in the header
->> comment?  You have the btrfs-specific flaw, but (I say this after
->> having looked at 034 just this morning) sometimes it's nice to
->> have a concise description of the test.
->>
->> i.e.:
->>
->> # Test that log replay properly handles deleted xattrs after an fsync
->> <or whatever is the proper operational description>
->>
->> at the very top, so it's clear from a glance what the test *does*
->> without having to read through it.
-> 
-> Hi Eric,
-> 
-> I thought the initial summary was clear enough:
-> 
-> # FS QA Test No. 061
-> #
-> # This test is motivated by an fsync issue discovered in btrfs.
-> # The issue was that the fsync log replay code did not remove xattrs that
-> # were deleted before the inode was fsynced.
-> 
-> How more detailed/clear would you put it?
+It's not much fun to run btrfs-specific tests on non-btrfs
+filesystems.  ;)
 
-Eh, it's ok; it describes why you decided to write the test, not what the
-test does.  Subtle difference?
+> EXT4-fs (dm-12): Unrecognized mount option "inode_cache" or missing value
 
-...
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
 
->> I think maybe a
->>
->> _requires_metadata_journaling
->>
->> or similar might be a good idea.  Thoughts?  Unfortunately that would
->> need some special-casing for ext4, to see if it has jbd2 turned on or
->> not, but I can help with that.
->>
->> (dumpe2fs -h $TEST_DEV | grep has_journal)
-> 
-> Thanks for the heads up on that detail.
-> 
-> For the ext4 case, since the test creates the fs, if FSTYP == ext4,
-> could we force passing -O has_journal to mkfs (or make sure -O
-> ^has_journal is filtered out).
-
-Well, if someone is explicitly testing nojournal ext4, I wouldn't turn
-it on behind their backs just for this test; that'd be a bit odd.
-
-Let me take a stab at a _requires_metadata_journaling() helper.
-
--Eric
-
+diff --git a/tests/btrfs/049 b/tests/btrfs/049
+index 3101d09..5b17a77 100755
+--- a/tests/btrfs/049
++++ b/tests/btrfs/049
+@@ -46,7 +46,7 @@ _cleanup()
+ . ./common/dmflakey
+ 
+ # real QA test starts here
+-_supported_fs generic
++_supported_fs btrfs
+ _supported_os Linux
+ _need_to_be_root
+ _require_scratch
 
