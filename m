@@ -1,197 +1,81 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from victor.provo.novell.com ([137.65.250.26]:39076 "EHLO
-	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751498AbbBXLbV (ORCPT
-	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
-	Tue, 24 Feb 2015 06:31:21 -0500
-From: Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH v2] fstests: generic test for fsync after removing xattrs
-Date: Tue, 24 Feb 2015 11:21:04 +0000
-Message-Id: <1424776864-16024-1-git-send-email-fdmanana@suse.com>
-In-Reply-To: <1424721327-25972-1-git-send-email-fdmanana@suse.com>
-References: <1424721327-25972-1-git-send-email-fdmanana@suse.com>
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:19341 "EHLO
+	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751498AbbBXLbY (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 24 Feb 2015 06:31:24 -0500
+Date: Tue, 24 Feb 2015 22:31:08 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] ext4: add regression tests for ^extents punch hole
+Message-ID: <20150224113108.GA4251@dastard>
+References: <4c557308eb4e62752dc8b513495cb6d46ca5775d.1424730653.git.osandov@osandov.com>
+ <20150223224620.GL12722@dastard>
+ <alpine.LFD.2.00.1502241106110.28736@localhost.localdomain>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <alpine.LFD.2.00.1502241106110.28736@localhost.localdomain>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: =?utf-8?B?THVrw6HFoQ==?= Czerner <lczerner@redhat.com>
+Cc: Omar Sandoval <osandov@osandov.com>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This test is motivated by an fsync issue discovered in btrfs.
-The issue was that the fsync log replay code did not remove xattrs that
-were deleted before the inode was fsynced. The result was unexpected
-and differed from xfs and ext3/4 for example.
+On Tue, Feb 24, 2015 at 11:11:04AM +0100, Lukáš Czerner wrote:
+> On Tue, 24 Feb 2015, Dave Chinner wrote:
+> 
+> > Date: Tue, 24 Feb 2015 09:46:20 +1100
+> > From: Dave Chinner <david@fromorbit.com>
+> > To: Omar Sandoval <osandov@osandov.com>
+> > Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+> > Subject: Re: [PATCH] ext4: add regression tests for ^extents punch hole
+> > 
+> > On Mon, Feb 23, 2015 at 02:39:36PM -0800, Omar Sandoval wrote:
+> > > Linux commit 6f30b7e37a82 (ext4: fix indirect punch hole corruption)
+> > > fixes several bugs in the FALLOC_FL_PUNCH_HOLE implementation for an
+> > > ext4 filesystem with indirect blocks.
+> > > 
+> > > Signed-off-by: Omar Sandoval <osandov@osandov.com>
+> > > ---
+> > >  tests/ext4/005     | 115 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/ext4/005.out |  29 ++++++++++++++
+> > >  tests/ext4/group   |   1 +
+> > >  3 files changed, 145 insertions(+)
+> > >  create mode 100755 tests/ext4/005
+> > >  create mode 100644 tests/ext4/005.out
+> > 
+> > What's ext4 specific about this test apart from the mkfs parameter?
+> > Shouldn't it be generic and so test all the filesystems behave the
+> > same?  i.e. when someone then runs
+> > 
+> > # MKFS_OPTIONS="-b size=1k -O ^extents" ./check -g auto
+> > 
+> > That will exercise this specific regression fix, not to mention give
+> > much, much better test coverage of that configuration than just
+> > making a single test use that config...
+> > 
+> > Cheers,
+> > 
+> > Dave.
+> 
+> Hi Dave,
+> 
+> it's not that long ago when we discussed very similar case, where
+> directly in the test itself the author would specify mkfs options. I
+> had the same comment as you have here and you argued that the test
+> was made specifically to test that mkfs option. I agree.
 
-The btrfs issue was fixed by the following linux kernel patch:
+The case I remember and was basing this off was commit 448efe1
+("generic/017: Do not create file systems with different block
+sizes") where you made the argument that we shouldn't be setting
+mkfs parameters inside the test and instead those specific cases
+would be tested by using test-wide mkfs parameters....
 
-   Btrfs: remove deleted xattrs on fsync log replay
+I don't recall any other discussion, so maybe you should remind me
+of it....
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
+Cheers,
 
-V2: Make use of the new function '_require_metadata_journaling' added by
-    Eric. Updated description of the test at the very top of the test file.
-
- tests/generic/061     | 121 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/061.out |  10 +++++
- tests/generic/group   |   1 +
- 3 files changed, 132 insertions(+)
- create mode 100755 tests/generic/061
- create mode 100644 tests/generic/061.out
-
-diff --git a/tests/generic/061 b/tests/generic/061
-new file mode 100755
-index 0000000..14eddac
---- /dev/null
-+++ b/tests/generic/061
-@@ -0,0 +1,121 @@
-+#! /bin/bash
-+# FS QA Test No. 061
-+#
-+# This test is motivated by an fsync issue discovered in btrfs.
-+# The issue was that the fsync log replay code did not remove xattrs that were
-+# deleted before the inode was fsynced. So verify that if we delete a xattr from
-+# a file and then fsync the file, after log replay the file does not have that
-+# xattr anymore. Also test the case where a file is fsynced, one of its xattrs
-+# is removed, a hard link to that file is created and the fsync log is committed
-+# by issuing an fsync on another file. This indirect case should also result in
-+# not having the xattr anymore after the fsync log is replayed.
-+#
-+# The btrfs issue was fixed by the following linux kernel patch:
-+#
-+#  Btrfs: remove deleted xattrs on fsync log replay
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+
-+_cleanup()
-+{
-+	_cleanup_flakey
-+	rm -f $tmp.*
-+}
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmflakey
-+. ./common/attr
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_need_to_be_root
-+_require_scratch
-+_require_dm_flakey
-+_require_attrs
-+_require_metadata_journaling $SCRATCH_DEV
-+
-+_crash_and_mount()
-+{
-+	# Simulate a crash/power loss.
-+	_load_flakey_table $FLAKEY_DROP_WRITES
-+	_unmount_flakey
-+	_load_flakey_table $FLAKEY_ALLOW_WRITES
-+	_mount_flakey
-+}
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_init_flakey
-+_mount_flakey
-+
-+# Create out test file and add 3 xattrs to it.
-+touch $SCRATCH_MNT/foobar
-+$SETFATTR_PROG -n user.attr1 -v val1 $SCRATCH_MNT/foobar
-+$SETFATTR_PROG -n user.attr2 -v val2 $SCRATCH_MNT/foobar
-+$SETFATTR_PROG -n user.attr3 -v val3 $SCRATCH_MNT/foobar
-+
-+# Make sure everything is durably persisted.
-+sync
-+
-+# Now delete the second xattr and fsync the inode.
-+$SETFATTR_PROG -x user.attr2 $SCRATCH_MNT/foobar
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foobar
-+
-+_crash_and_mount
-+
-+# After the fsync log is replayed, the file should have only 2 xattrs, the ones
-+# named user.attr1 and user.attr3. The btrfs fsync log replay bug left the file
-+# with the 3 xattrs that we had before deleting the second one and fsyncing the
-+# file.
-+echo "xattr names and values after first fsync log replay:"
-+$GETFATTR_PROG --absolute-names --dump $SCRATCH_MNT/foobar | _filter_scratch
-+
-+# Now write some data to our file, fsync it, remove the first xattr, add a new
-+# hard link to our file and commit the fsync log by fsyncing some other new
-+# file. This is to verify that after log replay our first xattr does not exist
-+# anymore.
-+echo "hello world!" >> $SCRATCH_MNT/foobar
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foobar
-+$SETFATTR_PROG -x user.attr1 $SCRATCH_MNT/foobar
-+ln $SCRATCH_MNT/foobar $SCRATCH_MNT/foobar_link
-+touch $SCRATCH_MNT/qwerty
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/qwerty
-+
-+_crash_and_mount
-+
-+# Now only the xattr with name user.attr3 should be set in our file.
-+echo "xattr names and values after second fsync log replay:"
-+$GETFATTR_PROG --absolute-names --dump $SCRATCH_MNT/foobar | _filter_scratch
-+
-+status=0
-+exit
-diff --git a/tests/generic/061.out b/tests/generic/061.out
-new file mode 100644
-index 0000000..028d9e6
---- /dev/null
-+++ b/tests/generic/061.out
-@@ -0,0 +1,10 @@
-+QA output created by 061
-+xattr names and values after first fsync log replay:
-+# file: SCRATCH_MNT/foobar
-+user.attr1="val1"
-+user.attr3="val3"
-+
-+xattr names and values after second fsync log replay:
-+# file: SCRATCH_MNT/foobar
-+user.attr3="val3"
-+
-diff --git a/tests/generic/group b/tests/generic/group
-index 85ff384..758f0e2 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -62,6 +62,7 @@
- 057 metadata auto quick
- 059 metadata auto quick
- 060 metadata auto quick
-+061 metadata auto quick
- 062 attr udf auto quick
- 068 other auto freeze dangerous stress
- 069 rw udf auto quick
+Dave.
 -- 
-2.1.3
-
+Dave Chinner
+david@fromorbit.com
