@@ -1,21 +1,21 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:20169 "EHLO
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:20177 "EHLO
 	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752587AbbBXW7v (ORCPT
+	by vger.kernel.org with ESMTP id S1752516AbbBXW7v (ORCPT
 	<rfc822;fstests@vger.kernel.org>); Tue, 24 Feb 2015 17:59:51 -0500
 Received: from disappointment.disaster.area ([192.168.1.110] helo=disappointment)
 	by dastard with esmtp (Exim 4.80)
 	(envelope-from <dave@fromorbit.com>)
-	id 1YQONF-0004vx-Ul
-	for fstests@vger.kernel.org; Wed, 25 Feb 2015 09:54:41 +1100
+	id 1YQONF-0004vy-V7
+	for fstests@vger.kernel.org; Wed, 25 Feb 2015 09:54:42 +1100
 Received: from dave by disappointment with local (Exim 4.82_1-5b7a7c0-XX)
 	(envelope-from <dave@disappointment.disaster>)
-	id 1YQONF-0002fz-Te
+	id 1YQONF-0002g4-Tx
 	for fstests@vger.kernel.org; Wed, 25 Feb 2015 09:54:41 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH 1/4] xfs/104: log size too small for 4k sector drives
-Date: Wed, 25 Feb 2015 09:54:36 +1100
-Message-Id: <1424818479-10083-2-git-send-email-david@fromorbit.com>
+Subject: [PATCH 2/4] xfs: don't output mkfs sector sizes into golden output
+Date: Wed, 25 Feb 2015 09:54:37 +1100
+Message-Id: <1424818479-10083-3-git-send-email-david@fromorbit.com>
 In-Reply-To: <1424818479-10083-1-git-send-email-david@fromorbit.com>
 References: <1424818479-10083-1-git-send-email-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
@@ -24,224 +24,222 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Dave Chinner <dchinner@redhat.com>
 
-xfs/104, xfs/119, xfs/291 and xfs/297 have small fixed log sizes. A
-recent change to the kernel ramdisk changed it's physical sector
-size from 512B to 4kB, and this results in mkfs calculating a log
-size larger than the fixed test size and hence the tests fail.
-
-Change the log size to a larger size that works with 4k sectors, and
-also increase the size of the filesystem being created so that the
-amount of data space in the filesystem does not change and hence
-does not perturb the rest of the test.
+The mkfs sector sizes are dependent on the underlying device in use,
+and so is not fixed. hence it needs to be filtered from any golden
+output file, otherwise tests that just differ by sector size will
+fail.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- tests/xfs/104     |  8 ++++----
- tests/xfs/104.out | 46 +++++++++++++++++++++++-----------------------
- tests/xfs/119     |  2 +-
- tests/xfs/291     |  2 +-
- tests/xfs/297     |  2 +-
- 5 files changed, 30 insertions(+), 30 deletions(-)
+ tests/xfs/096          |  8 ++++++--
+ tests/xfs/096.external | 15 +++++++--------
+ tests/xfs/096.internal | 16 ++++++++--------
+ tests/xfs/119          |  2 +-
+ tests/xfs/206          | 33 +++++++++++++++------------------
+ 5 files changed, 37 insertions(+), 37 deletions(-)
 
-diff --git a/tests/xfs/104 b/tests/xfs/104
-index 69fcc69..ca2ae21 100755
---- a/tests/xfs/104
-+++ b/tests/xfs/104
-@@ -81,10 +81,10 @@ modsize=`expr   4 \* $incsize`	# pause after this many increments
- [ `expr $endsize / $dbsize` -lt $dblocks ] || _notrun "Scratch device too small"
- 
- nags=4
--size=`expr 120 \* 1048576`	# 120 megabytes initially
-+size=`expr 125 \* 1048576`	# 120 megabytes initially
- sizeb=`expr $size / $dbsize`	# in data blocks
- echo "*** creating scratch filesystem"
--_create_scratch -lsize=5m -dsize=${size} -dagcount=${nags}
-+_create_scratch -lsize=10m -dsize=${size} -dagcount=${nags}
- 
- fillsize=`expr 110 \* 1048576`	# 110 megabytes of filling
- echo "*** using some initial space on scratch filesystem"
-@@ -95,13 +95,13 @@ _fill_scratch $fillsize
- # Kick off more stress threads on each iteration, grow; repeat.
+diff --git a/tests/xfs/096 b/tests/xfs/096
+index 0ecf88f..2da8fa1 100755
+--- a/tests/xfs/096
++++ b/tests/xfs/096
+@@ -47,6 +47,8 @@ _cleanup()
  #
- while [ $size -le $endsize ]; do
--	echo "*** stressing a ${size} byte filesystem"
-+	echo "*** stressing filesystem"
- 	echo "*** stressing a ${sizeb} block filesystem" >> $seqres.full
- 	_stress_scratch
- 	sleep 1
- 	size=`expr $size + $incsize`
- 	sizeb=`expr $size / $dbsize`	# in data blocks
--	echo "*** growing to a ${size} byte filesystem"
-+	echo "*** growing filesystem"
- 	echo "*** growing to a ${sizeb} block filesystem" >> $seqres.full
- 	xfs_growfs -D ${sizeb} $SCRATCH_MNT \
- 		| tee -a $seqres.full | _filter_mkfs 2>$tmp.growfs
-diff --git a/tests/xfs/104.out b/tests/xfs/104.out
-index f237e5e..de6c7f2 100644
---- a/tests/xfs/104.out
-+++ b/tests/xfs/104.out
-@@ -15,8 +15,8 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- *** mount
- *** using some initial space on scratch filesystem
--*** stressing a 125829120 byte filesystem
--*** growing to a 169869312 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -25,8 +25,8 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- AGCOUNT=4
+ # filter out counts which will vary
+ #   - extsz, blocks, agsize, agcount, device name, rtextents
++#   - log version varies for crc enabled fs
++#   - lsunit varies for 512/4k sector devices
+ # filter out differences between linux and irix:
+ #   - sectsz on Linux
+ #   - mmr, mixed-case on IRIX
+@@ -63,7 +65,7 @@ _cleanup()
+ #           =                       sunit=0 blks
+ #  realtime =none                   extsz=65536  blocks=N, rtextents=N
+ #
+-_mkfs_filter()
++mkfs_filter()
+ {
+    tee -a $seqres.full | \
+    sed \
+@@ -80,6 +82,8 @@ _mkfs_filter()
+ 	-e '/ *= *mmr=[0-9][0-9]* *$/d' \
+ 	-e 's/ *mixed-case=[YN]//' \
+ 	-e 's/ *ascii-ci=[01]//' \
++	-e 's/\(version=\)\([12]\)/\1N/' \
++	-e 's/\(sunit=\)\([018] blks\)/\1N blks/' \
+ 	-e 's/sectsz=[0-9][0-9]* *//' \
+ 	-e 's/, lazy-count.*//' \
+ 	-e '/inode-paths/d' \
+@@ -145,7 +149,7 @@ do
+     fi
+     echo "--- mkfs=$mkfs ---"
+     export MKFS_OPTIONS="$mkfs"
+-    _scratch_mkfs_xfs 2>&1 | _mkfs_filter
++    _scratch_mkfs_xfs 2>&1 | mkfs_filter
+     echo ""
+     echo ""
+ done
+diff --git a/tests/xfs/096.external b/tests/xfs/096.external
+index 95833c8..7923340 100644
+--- a/tests/xfs/096.external
++++ b/tests/xfs/096.external
+@@ -11,8 +11,7 @@ meta-data=DEV isize=256    agcount=N, agsize=N blks
+ data     =                       bsize=4096   blocks=N, imaxpct=N
+          =                       sunit=0      swidth=0 blks, unwritten=1
+ naming   =version 2              bsize=4096
+-log      =LOG                    bsize=4096   blocks=N, version=2
+-         =                       sunit=8 blks
++log      =LOG                    bsize=4096   blocks=N, version=N
+ realtime =REALTIME               extsz=N, blocks=N, rtextents=N
  
--*** stressing a 169869312 byte filesystem
--*** growing to a 213909504 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -35,8 +35,8 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- AGCOUNT=6
  
--*** stressing a 213909504 byte filesystem
--*** growing to a 257949696 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -45,8 +45,8 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- AGCOUNT=7
+@@ -22,8 +21,8 @@ meta-data=DEV isize=256    agcount=N, agsize=N blks
+ data     =                       bsize=4096   blocks=N, imaxpct=N
+          =                       sunit=65     swidth=65 blks, unwritten=1
+ naming   =version 2              bsize=4096
+-log      =LOG                    bsize=4096   blocks=N, version=2
+-         =                       sunit=0 blks
++log      =LOG                    bsize=4096   blocks=N, version=N
++         =                       sunit=N blks
+ realtime =REALTIME               extsz=N, blocks=N, rtextents=N
  
--*** stressing a 257949696 byte filesystem
--*** growing to a 301989888 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -55,8 +55,8 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- AGCOUNT=9
  
--*** stressing a 301989888 byte filesystem
--*** growing to a 346030080 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -65,8 +65,8 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- AGCOUNT=10
+@@ -33,8 +32,8 @@ meta-data=DEV isize=256    agcount=N, agsize=N blks
+ data     =                       bsize=4096   blocks=N, imaxpct=N
+          =                       sunit=65     swidth=65 blks, unwritten=1
+ naming   =version 2              bsize=4096
+-log      =LOG                    bsize=4096   blocks=N, version=1
+-         =                       sunit=0 blks
++log      =LOG                    bsize=4096   blocks=N, version=N
++         =                       sunit=N blks
+ realtime =REALTIME               extsz=N, blocks=N, rtextents=N
  
--*** stressing a 346030080 byte filesystem
--*** growing to a 390070272 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -75,8 +75,8 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- AGCOUNT=11
  
--*** stressing a 390070272 byte filesystem
--*** growing to a 434110464 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -85,8 +85,8 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- AGCOUNT=13
+@@ -44,8 +43,8 @@ meta-data=DEV isize=256    agcount=N, agsize=N blks
+ data     =                       bsize=4096   blocks=N, imaxpct=N
+          =                       sunit=65     swidth=65 blks, unwritten=1
+ naming   =version 2              bsize=4096
+-log      =LOG                    bsize=4096   blocks=N, version=1
+-         =                       sunit=0 blks
++log      =LOG                    bsize=4096   blocks=N, version=N
++         =                       sunit=N blks
+ realtime =REALTIME               extsz=N, blocks=N, rtextents=N
  
--*** stressing a 434110464 byte filesystem
--*** growing to a 478150656 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -95,18 +95,18 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- AGCOUNT=14
  
--*** stressing a 478150656 byte filesystem
--*** growing to a 522190848 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
- naming   =VERN bsize=XXX
- log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
--AGCOUNT=16
-+AGCOUNT=15
+diff --git a/tests/xfs/096.internal b/tests/xfs/096.internal
+index 7bf848c..eaba13f 100644
+--- a/tests/xfs/096.internal
++++ b/tests/xfs/096.internal
+@@ -11,8 +11,8 @@ meta-data=DEV isize=256    agcount=N, agsize=N blks
+ data     =                       bsize=4096   blocks=N, imaxpct=N
+          =                       sunit=0      swidth=0 blks, unwritten=1
+ naming   =version 2              bsize=4096
+-log      =LOG                    bsize=4096   blocks=N, version=2
+-         =                       sunit=8 blks
++log      =LOG                    bsize=4096   blocks=N, version=N
++         =                       sunit=N blks
+ realtime =REALTIME               extsz=N, blocks=N, rtextents=N
  
--*** stressing a 522190848 byte filesystem
--*** growing to a 566231040 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -115,8 +115,8 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- AGCOUNT=17
  
--*** stressing a 566231040 byte filesystem
--*** growing to a 610271232 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
+@@ -22,8 +22,8 @@ meta-data=DEV isize=256    agcount=N, agsize=N blks
+ data     =                       bsize=4096   blocks=N, imaxpct=N
+          =                       sunit=65     swidth=65 blks, unwritten=1
+ naming   =version 2              bsize=4096
+-log      =LOG                    bsize=4096   blocks=N, version=2
+-         =                       sunit=8 blks
++log      =LOG                    bsize=4096   blocks=N, version=N
++         =                       sunit=N blks
+ realtime =REALTIME               extsz=N, blocks=N, rtextents=N
+ 
+ 
+@@ -33,8 +33,8 @@ meta-data=DEV isize=256    agcount=N, agsize=N blks
+ data     =                       bsize=4096   blocks=N, imaxpct=N
+          =                       sunit=65     swidth=65 blks, unwritten=1
+ naming   =version 2              bsize=4096
+-log      =LOG                    bsize=4096   blocks=N, version=1
+-         =                       sunit=0 blks
++log      =LOG                    bsize=4096   blocks=N, version=N
++         =                       sunit=N blks
+ realtime =REALTIME               extsz=N, blocks=N, rtextents=N
+ 
+ 
+@@ -44,8 +44,8 @@ meta-data=DEV isize=256    agcount=N, agsize=N blks
+ data     =                       bsize=4096   blocks=N, imaxpct=N
+          =                       sunit=65     swidth=65 blks, unwritten=1
+ naming   =version 2              bsize=4096
+-log      =LOG                    bsize=4096   blocks=N, version=1
+-         =                       sunit=0 blks
++log      =LOG                    bsize=4096   blocks=N, version=N
++         =                       sunit=N blks
+ realtime =REALTIME               extsz=N, blocks=N, rtextents=N
+ 
+ 
 diff --git a/tests/xfs/119 b/tests/xfs/119
-index c7c46d9..490495b 100755
+index 490495b..156d5e4 100755
 --- a/tests/xfs/119
 +++ b/tests/xfs/119
 @@ -54,7 +54,7 @@ _require_scratch
  # this may hang
  sync
  
--export MKFS_OPTIONS="-l version=2,size=1200b,su=64k" 
-+export MKFS_OPTIONS="-l version=2,size=2500b,su=64k" 
+-export MKFS_OPTIONS="-l version=2,size=2500b,su=64k" 
++export MKFS_OPTIONS="-l version=2,size=2560b,su=64k" 
  export MOUNT_OPTIONS="-o logbsize=64k"
  _scratch_mkfs_xfs >/dev/null
  
-diff --git a/tests/xfs/291 b/tests/xfs/291
-index fbf9c51..c226e65 100755
---- a/tests/xfs/291
-+++ b/tests/xfs/291
-@@ -46,7 +46,7 @@ _supported_os IRIX Linux
- # real QA test starts here
- rm -f $seqres.full
- _require_scratch
--_scratch_mkfs_xfs -n size=16k -l size=5m -d size=128m >> $seqres.full 2>&1
-+_scratch_mkfs_xfs -n size=16k -l size=10m -d size=133m >> $seqres.full 2>&1
- _scratch_mount
+diff --git a/tests/xfs/206 b/tests/xfs/206
+index f6dcca6..198e413 100755
+--- a/tests/xfs/206
++++ b/tests/xfs/206
+@@ -73,34 +73,31 @@ echo "=== truncate file ==="
+ dd if=/dev/zero of=$tmpfile bs=1 seek=19998630180864 count=1 >/dev/null 2>&1 \
+ 	|| _fail "!!! failed to truncate loopback file to correct size"
  
- # First we cause very badly fragmented freespace, then
-diff --git a/tests/xfs/297 b/tests/xfs/297
-index 1cdbbb9..25b597e 100755
---- a/tests/xfs/297
-+++ b/tests/xfs/297
-@@ -50,7 +50,7 @@ _require_scratch
- _require_freeze
++mkfs_filter()
++{
++	sed -e "s,^meta-data=.*isize,meta-data=FILE                   isize,g" \
++	    -e "s/\(^log.*blocks=\)\([0-9]*,\)/\1XXXXX,/" \
++	    -e "s/, projid32bit=[0-9]//" \
++	    -e "s/ ftype=[0-9]//" \
++	    -e "s/\(sectsz\)\(=[0-9]* *\)/\1=512   /" \
++	    -e "s/\(sunit=\)\([0-9]* blks,\)/\10 blks,/" \
++	    -e "/.*crc=/d"
++}
++
+ # mkfs slightly smaller than that
+ echo "=== mkfs.xfs ==="
+-mkfs.xfs -f -bsize=4096 -dagsize=76288719b,size=3905982455b -llazy-count=0 $tmpfile \
+-	| sed -e "s,^meta-data=.*isize,meta-data=FILE                   isize,g" \
+-		-e "s/\(^log.*blocks=\)\([0-9]*,\)/\1XXXXX,/" \
+-		-e "s/, projid32bit=[0-9]//" \
+-		-e "s/ ftype=[0-9]//" \
+-		-e "/.*crc=/d"
++mkfs.xfs -f -bsize=4096 -dagsize=76288719b,size=3905982455b \
++	 -llazy-count=0 $tmpfile  | mkfs_filter
  
- rm -f $seqres.full
--_scratch_mkfs_xfs -d agcount=16,su=256k,sw=12 -l su=256k,size=2560b >/dev/null 2>&1
-+_scratch_mkfs_xfs -d agcount=16,su=256k,sw=12 -l su=256k,size=5120b >/dev/null 2>&1
- _scratch_mount >/dev/null 2>&1
+ mount -o loop $tmpfile $tmpdir || _fail "!!! failed to loopback mount"
  
- STRESS_DIR="$SCRATCH_MNT/testdir"
+ # see what happens when we growfs it
+ echo "=== xfs_growfs ==="
+-xfs_growfs $tmpdir \
+-	| sed -e "s,^meta-data=.*isize,meta-data=FILE                   isize,g" \
+-		-e "s/\(^log.*blocks=\)\([0-9]*,\)/\1XXXXX,/" \
+-		-e "s/, projid32bit=[0-9]//" \
+-		-e "s/ ftype=[0-9]//" \
+-		-e "/.*crc=/d"
++xfs_growfs $tmpdir  | mkfs_filter
+ 
+ # and double-check the new geometry
+ echo "=== xfs_info ==="
+-xfs_info $tmpdir \
+-	| sed -e "s,^meta-data=.*isize,meta-data=FILE                   isize,g" \
+-		-e "s/\(^log.*blocks=\)\([0-9]*,\)/\1XXXXX,/" \
+-		-e "s/, projid32bit=[0-9]//" \
+-		-e "s/ ftype=[0-9]//" \
+-		-e "/.*crc=/d"
++xfs_info $tmpdir | mkfs_filter
+ 
+ # _cleanup cleans up for us
+ 
 -- 
 2.0.0
 
