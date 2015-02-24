@@ -1,233 +1,72 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:62623 "EHLO
-	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752338AbbBXHUq (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 24 Feb 2015 02:20:46 -0500
-Received: from disappointment.disaster.area ([192.168.1.110] helo=disappointment)
-	by dastard with esmtp (Exim 4.80)
-	(envelope-from <dave@fromorbit.com>)
-	id 1YQ9nM-00033s-QF
-	for fstests@vger.kernel.org; Tue, 24 Feb 2015 18:20:40 +1100
-Received: from dave by disappointment with local (Exim 4.82_1-5b7a7c0-XX)
-	(envelope-from <dave@disappointment.disaster>)
-	id 1YQ9nM-0000rI-P8
-	for fstests@vger.kernel.org; Tue, 24 Feb 2015 18:20:40 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH 1/4] xfs/104: log size too small for 4k sector drives
-Date: Tue, 24 Feb 2015 18:20:32 +1100
-Message-Id: <1424762435-3237-2-git-send-email-david@fromorbit.com>
-In-Reply-To: <1424762435-3237-1-git-send-email-david@fromorbit.com>
-References: <1424762435-3237-1-git-send-email-david@fromorbit.com>
+Received: from mx1.redhat.com ([209.132.183.28]:56908 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751812AbbBXKLO (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 24 Feb 2015 05:11:14 -0500
+Date: Tue, 24 Feb 2015 11:11:04 +0100 (CET)
+From: =?ISO-8859-15?Q?Luk=E1=A8_Czerner?= <lczerner@redhat.com>
+Subject: Re: [PATCH] ext4: add regression tests for ^extents punch hole
+In-Reply-To: <20150223224620.GL12722@dastard>
+Message-ID: <alpine.LFD.2.00.1502241106110.28736@localhost.localdomain>
+References: <4c557308eb4e62752dc8b513495cb6d46ca5775d.1424730653.git.osandov@osandov.com> <20150223224620.GL12722@dastard>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: Omar Sandoval <osandov@osandov.com>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Dave Chinner <dchinner@redhat.com>
+On Tue, 24 Feb 2015, Dave Chinner wrote:
 
-xfs/104, xfs/119 and xfs/291 have small fixed log sizes. A recent
-change to the kernel ramdisk changed it's physical sector size from
-512B to 4kB, and this results in mkfs calculating a log size larger
-than the fixed test size and hence the tests fail.
+> Date: Tue, 24 Feb 2015 09:46:20 +1100
+> From: Dave Chinner <david@fromorbit.com>
+> To: Omar Sandoval <osandov@osandov.com>
+> Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+> Subject: Re: [PATCH] ext4: add regression tests for ^extents punch hole
+> 
+> On Mon, Feb 23, 2015 at 02:39:36PM -0800, Omar Sandoval wrote:
+> > Linux commit 6f30b7e37a82 (ext4: fix indirect punch hole corruption)
+> > fixes several bugs in the FALLOC_FL_PUNCH_HOLE implementation for an
+> > ext4 filesystem with indirect blocks.
+> > 
+> > Signed-off-by: Omar Sandoval <osandov@osandov.com>
+> > ---
+> >  tests/ext4/005     | 115 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/ext4/005.out |  29 ++++++++++++++
+> >  tests/ext4/group   |   1 +
+> >  3 files changed, 145 insertions(+)
+> >  create mode 100755 tests/ext4/005
+> >  create mode 100644 tests/ext4/005.out
+> 
+> What's ext4 specific about this test apart from the mkfs parameter?
+> Shouldn't it be generic and so test all the filesystems behave the
+> same?  i.e. when someone then runs
+> 
+> # MKFS_OPTIONS="-b size=1k -O ^extents" ./check -g auto
+> 
+> That will exercise this specific regression fix, not to mention give
+> much, much better test coverage of that configuration than just
+> making a single test use that config...
+> 
+> Cheers,
+> 
+> Dave.
 
-Change the log size to a larger size that works with 4k sectors, and
-also increase the size of the filesystem being created so that the
-amount of data space in the filesystem does not change and hence
-does not perturb the rest of the test.
+Hi Dave,
 
-Signed-off-by: Dave Chinner <dchinner@redhat.com>
----
- tests/xfs/104     |  8 ++++----
- tests/xfs/104.out | 46 +++++++++++++++++++++++-----------------------
- tests/xfs/119     |  2 +-
- tests/xfs/291     |  2 +-
- 4 files changed, 29 insertions(+), 29 deletions(-)
+it's not that long ago when we discussed very similar case, where
+directly in the test itself the author would specify mkfs options. I
+had the same comment as you have here and you argued that the test
+was made specifically to test that mkfs option. I agree.
 
-diff --git a/tests/xfs/104 b/tests/xfs/104
-index 69fcc69..ca2ae21 100755
---- a/tests/xfs/104
-+++ b/tests/xfs/104
-@@ -81,10 +81,10 @@ modsize=`expr   4 \* $incsize`	# pause after this many increments
- [ `expr $endsize / $dbsize` -lt $dblocks ] || _notrun "Scratch device too small"
- 
- nags=4
--size=`expr 120 \* 1048576`	# 120 megabytes initially
-+size=`expr 125 \* 1048576`	# 120 megabytes initially
- sizeb=`expr $size / $dbsize`	# in data blocks
- echo "*** creating scratch filesystem"
--_create_scratch -lsize=5m -dsize=${size} -dagcount=${nags}
-+_create_scratch -lsize=10m -dsize=${size} -dagcount=${nags}
- 
- fillsize=`expr 110 \* 1048576`	# 110 megabytes of filling
- echo "*** using some initial space on scratch filesystem"
-@@ -95,13 +95,13 @@ _fill_scratch $fillsize
- # Kick off more stress threads on each iteration, grow; repeat.
- #
- while [ $size -le $endsize ]; do
--	echo "*** stressing a ${size} byte filesystem"
-+	echo "*** stressing filesystem"
- 	echo "*** stressing a ${sizeb} block filesystem" >> $seqres.full
- 	_stress_scratch
- 	sleep 1
- 	size=`expr $size + $incsize`
- 	sizeb=`expr $size / $dbsize`	# in data blocks
--	echo "*** growing to a ${size} byte filesystem"
-+	echo "*** growing filesystem"
- 	echo "*** growing to a ${sizeb} block filesystem" >> $seqres.full
- 	xfs_growfs -D ${sizeb} $SCRATCH_MNT \
- 		| tee -a $seqres.full | _filter_mkfs 2>$tmp.growfs
-diff --git a/tests/xfs/104.out b/tests/xfs/104.out
-index f237e5e..de6c7f2 100644
---- a/tests/xfs/104.out
-+++ b/tests/xfs/104.out
-@@ -15,8 +15,8 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- *** mount
- *** using some initial space on scratch filesystem
--*** stressing a 125829120 byte filesystem
--*** growing to a 169869312 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -25,8 +25,8 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- AGCOUNT=4
- 
--*** stressing a 169869312 byte filesystem
--*** growing to a 213909504 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -35,8 +35,8 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- AGCOUNT=6
- 
--*** stressing a 213909504 byte filesystem
--*** growing to a 257949696 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -45,8 +45,8 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- AGCOUNT=7
- 
--*** stressing a 257949696 byte filesystem
--*** growing to a 301989888 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -55,8 +55,8 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- AGCOUNT=9
- 
--*** stressing a 301989888 byte filesystem
--*** growing to a 346030080 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -65,8 +65,8 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- AGCOUNT=10
- 
--*** stressing a 346030080 byte filesystem
--*** growing to a 390070272 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -75,8 +75,8 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- AGCOUNT=11
- 
--*** stressing a 390070272 byte filesystem
--*** growing to a 434110464 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -85,8 +85,8 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- AGCOUNT=13
- 
--*** stressing a 434110464 byte filesystem
--*** growing to a 478150656 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -95,18 +95,18 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- AGCOUNT=14
- 
--*** stressing a 478150656 byte filesystem
--*** growing to a 522190848 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
- naming   =VERN bsize=XXX
- log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
--AGCOUNT=16
-+AGCOUNT=15
- 
--*** stressing a 522190848 byte filesystem
--*** growing to a 566231040 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -115,8 +115,8 @@ log      =LDEV bsize=XXX blocks=XXX
- realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- AGCOUNT=17
- 
--*** stressing a 566231040 byte filesystem
--*** growing to a 610271232 byte filesystem
-+*** stressing filesystem
-+*** growing filesystem
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-diff --git a/tests/xfs/119 b/tests/xfs/119
-index c7c46d9..490495b 100755
---- a/tests/xfs/119
-+++ b/tests/xfs/119
-@@ -54,7 +54,7 @@ _require_scratch
- # this may hang
- sync
- 
--export MKFS_OPTIONS="-l version=2,size=1200b,su=64k" 
-+export MKFS_OPTIONS="-l version=2,size=2500b,su=64k" 
- export MOUNT_OPTIONS="-o logbsize=64k"
- _scratch_mkfs_xfs >/dev/null
- 
-diff --git a/tests/xfs/291 b/tests/xfs/291
-index fbf9c51..c226e65 100755
---- a/tests/xfs/291
-+++ b/tests/xfs/291
-@@ -46,7 +46,7 @@ _supported_os IRIX Linux
- # real QA test starts here
- rm -f $seqres.full
- _require_scratch
--_scratch_mkfs_xfs -n size=16k -l size=5m -d size=128m >> $seqres.full 2>&1
-+_scratch_mkfs_xfs -n size=16k -l size=10m -d size=133m >> $seqres.full 2>&1
- _scratch_mount
- 
- # First we cause very badly fragmented freespace, then
--- 
-2.0.0
+In this case it's the same. This test was specifically designed for
+this combination of options, because that's where the ext4 bug was.
 
+If we want to make the test generic and use those options just in
+ext4 case, I am fine with that, but the mkfs options needs to be a
+part of the test nevertheless.
+
+Thanks!
+-Lukas
+
+> 
