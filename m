@@ -1,196 +1,249 @@
-Return-Path: <fdmanana@gmail.com>
-MIME-Version: 1.0
-Reply-To: fdmanana@gmail.com
-In-Reply-To: <54EBE29F.2010902@redhat.com>
-References: <54EBA093.3050401@redhat.com>
-	<54EBAFE4.4080000@sandeen.net>
-	<54EBE29F.2010902@redhat.com>
-Date: Tue, 24 Feb 2015 11:30:24 +0000
-Message-ID: <CAL3q7H7biZVWhzGA0Nt0E3Ja8r9_r=ybYDqz6Ak6D69zddshAA@mail.gmail.com>
-Subject: Re: [PATCH V3] create _require_metadata_journaling, and add to tests
- that need it
-From: Filipe David Manana <fdmanana@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-To: Eric Sandeen <sandeen@redhat.com>
-Cc: Eric Sandeen <sandeen@sandeen.net>, fstests@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Return-Path: <fstests-owner@vger.kernel.org>
+Received: from victor.provo.novell.com ([137.65.250.26]:56138 "EHLO
+	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751812AbbBXLbH (ORCPT
+	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
+	Tue, 24 Feb 2015 06:31:07 -0500
+From: Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH v2] fstests: generic test for directory fsync after adding hard links
+Date: Tue, 24 Feb 2015 11:20:48 +0000
+Message-Id: <1424776848-15981-1-git-send-email-fdmanana@suse.com>
+In-Reply-To: <1424370551-18884-1-git-send-email-fdmanana@suse.com>
+References: <1424370551-18884-1-git-send-email-fdmanana@suse.com>
+Sender: fstests-owner@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Feb 24, 2015 at 2:31 AM, Eric Sandeen <sandeen@redhat.com> wrote:
-> Many tests use dm_flakey to trigger log replay, but for filesystems that
-> don't support metadata journaling, this causes failures when it shouldn't.
-> (i.e. we can hardly test log replay if there is no log, and the subsequent
-> filesystem check will turn up errors).
->
-> For some tests they actually sync everything we care about, and find
-> inconsistencies elsewhere, but I erred on the side of simply not running
-> the test in most cases.
->
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+This test is motivated by an fsync issue discovered in btrfs.
+The issue was that after adding a new hard link to an existing file
+(one that was created in a past transaction) and fsync'ing the parent
+directory of the new hard link, after the fsync log replay the file's
+inode link count did not get its link count incremented, while the new
+directory entry was visible.
+Also, unlike xfs and ext4, new files under the directory we fsync were
+not being written to the fsync log, nor were any child directories and
+new files and links under the children directories. So this test verifies
+too that btrfs has the same behaviour as xfs and ext4.
 
+The btrfs issue was fixed by the following linux kernel patch:
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-Tested-by: Filipe Manana <fdmanana@suse.com>
+  Btrfs: fix metadata inconsistencies after directory fsync
 
-Works like a charm.
-Thanks very much for this Eric.
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
 
-> ---
->
-> V2: MOAR COLUMNS.  Add default case.
-> V3: whoops, dumpe2fs &>1 | grep -q so it doesn't break output when found
->
-> diff --git a/common/rc b/common/rc
-> index 7449a1d..243cb93 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2340,6 +2340,38 @@ _require_norecovery()
->         _scratch_unmount
->  }
->
-> +# Does this filesystem support metadata journaling?
-> +# We exclude ones here that don't; otherwise we assume that it does, so the
-> +# test will run, fail, and motivate someone to update this test for a new
-> +# filesystem.
-> +#
-> +# It's possible that TEST_DEV and SCRATCH_DEV have different features (it'd be
-> +# odd, but possible) so check $TEST_DEV by default, but we can optionall pass
-> +# any dev we want.
-> +_require_metadata_journaling()
-> +{
-> +       if [ -z $1 ]; then
-> +               DEV=$TEST_DEV
-> +       else
-> +               DEV=$1
-> +       fi
-> +
-> +       case "$FSTYP" in
-> +       ext2|vfat|msdos)
-> +               _notrun "$FSTYP does not support metadata journaling"
-> +               ;;
-> +       ext4)
-> +               # ext4 could be mkfs'd without a journal...
-> +               _require_dumpe2fs
-> +               $DUMPE2FS_PROG -h $DEV 2>&1 | grep -q has_journal || \
-> +                       _notrun "$FSTYP on $DEV not configured with metadata journaling"
-> +               ;;
-> +       *)
-> +               # by default we pass; if you need to, add your fs above!
-> +               ;;
-> +       esac
-> +}
-> +
->  # Does fiemap support?
->  _require_fiemap()
->  {
->
-> diff --git a/tests/generic/034 b/tests/generic/034
-> index 4ec1db8..966b3d2 100755
-> --- a/tests/generic/034
-> +++ b/tests/generic/034
-> @@ -53,6 +53,7 @@ _supported_os Linux
->  _need_to_be_root
->  _require_scratch
->  _require_dm_flakey
-> +_require_metadata_journaling $SCRATCH_DEV
->
->  rm -f $seqres.full
->
-> diff --git a/tests/generic/040 b/tests/generic/040
-> index 5f10f48..c841fbc 100755
-> --- a/tests/generic/040
-> +++ b/tests/generic/040
-> @@ -62,6 +62,7 @@ _supported_os Linux
->  _need_to_be_root
->  _require_scratch
->  _require_dm_flakey
-> +_require_metadata_journaling $SCRATCH_DEV
->
->  rm -f $seqres.full
->
-> diff --git a/tests/generic/041 b/tests/generic/041
-> index 36a6f42..f38b662 100755
-> --- a/tests/generic/041
-> +++ b/tests/generic/041
-> @@ -66,6 +66,7 @@ _supported_os Linux
->  _need_to_be_root
->  _require_scratch
->  _require_dm_flakey
-> +_require_metadata_journaling $SCRATCH_DEV
->
->  rm -f $seqres.full
->
-> diff --git a/tests/generic/056 b/tests/generic/056
-> index 9ec00e3..8bb1522 100755
-> --- a/tests/generic/056
-> +++ b/tests/generic/056
-> @@ -55,6 +55,7 @@ _supported_os Linux
->  _need_to_be_root
->  _require_scratch
->  _require_dm_flakey
-> +_require_metadata_journaling $SCRATCH_DEV
->
->  rm -f $seqres.full
->
-> diff --git a/tests/generic/057 b/tests/generic/057
-> index 4c0ffd1..3b9f89e 100755
-> --- a/tests/generic/057
-> +++ b/tests/generic/057
-> @@ -55,6 +55,7 @@ _supported_os Linux
->  _need_to_be_root
->  _require_scratch
->  _require_dm_flakey
-> +_require_metadata_journaling $SCRATCH_DEV
->
->  rm -f $seqres.full
->
-> diff --git a/tests/generic/311 b/tests/generic/311
-> index 85e52e8..d21b6eb 100755
-> --- a/tests/generic/311
-> +++ b/tests/generic/311
-> @@ -56,6 +56,7 @@ _supported_os Linux
->  _need_to_be_root
->  _require_scratch_nocheck
->  _require_dm_flakey
-> +_require_metadata_journaling $SCRATCH_DEV
->
->  # xfs_io is not required for this test, but it's the best way to verify
->  # the test system supports fallocate() for allocation
-> diff --git a/tests/generic/321 b/tests/generic/321
-> index 3bd6b12..c821a23 100755
-> --- a/tests/generic/321
-> +++ b/tests/generic/321
-> @@ -45,6 +45,7 @@ _supported_os Linux
->  _need_to_be_root
->  _require_scratch_nocheck
->  _require_dm_flakey
-> +_require_metadata_journaling $SCRATCH_DEV
->
->  rm -f $seqres.full
->
-> diff --git a/tests/generic/322 b/tests/generic/322
-> index 3ec2387..4c0edf6 100755
-> --- a/tests/generic/322
-> +++ b/tests/generic/322
-> @@ -45,6 +45,7 @@ _supported_os Linux
->  _need_to_be_root
->  _require_scratch_nocheck
->  _require_dm_flakey
-> +_require_metadata_journaling $SCRATCH_DEV
->
->  rm -f $seqres.full
->
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+V2: Make use of the new function '_require_metadata_journaling' added
+    by Eric. Make the test pass on ext3 - unlike ext4 (and xfs), the
+    file hello gets all its data synced, so we don't get an empty file
+    after the fsync log is replayed.
 
+ tests/generic/060     | 170 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/060.out |   5 ++
+ tests/generic/group   |   1 +
+ 3 files changed, 176 insertions(+)
+ create mode 100755 tests/generic/060
+ create mode 100644 tests/generic/060.out
 
-
+diff --git a/tests/generic/060 b/tests/generic/060
+new file mode 100755
+index 0000000..9fa7823
+--- /dev/null
++++ b/tests/generic/060
+@@ -0,0 +1,170 @@
++#! /bin/bash
++# FS QA Test No. 060
++#
++# This test is motivated by an fsync issue discovered in btrfs.
++# The issue was that after adding a new hard link to an existing file (one that
++# was created in a past transaction) and fsync'ing the parent directory of the
++# new hard link, after the fsync log replay the file's inode link count did not
++# get its link count incremented, while the new directory entry was visible.
++# Also, unlike xfs and ext4, new files under the directory we fsync were not
++# being written to the fsync log, nor were any child directories and new files
++# and links under the children directories. So this test verifies too that
++# btrfs has the same behaviour as xfs and ext3/4.
++#
++# The btrfs issue was fixed by the following linux kernel patch:
++#
++#  Btrfs: fix metadata inconsistencies after directory fsync
++#
++#-----------------------------------------------------------------------
++# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++
++_cleanup()
++{
++	_cleanup_flakey
++	rm -f $tmp.*
++}
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmflakey
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_need_to_be_root
++_require_scratch
++_require_dm_flakey
++_require_metadata_journaling $SCRATCH_DEV
++
++rm -f $seqres.full
++
++_scratch_mkfs >> $seqres.full 2>&1
++_init_flakey
++_mount_flakey
++
++# Create our test file and directory.
++touch $SCRATCH_MNT/foo
++mkdir $SCRATCH_MNT/mydir
++
++# Make sure all metadata is durably persisted.
++sync
++
++# Add a hard link to 'foo' inside our test directory and fsync only the
++# directory. The btrfs fsync implementation had a bug that caused the new
++# directory entry to be visible after the fsync log replay but, the inode
++# of our file remained with a link count of 1.
++ln $SCRATCH_MNT/foo $SCRATCH_MNT/mydir/foo_2
++
++# Add a few more links and files created in the current transaction.
++# Just to verify nothing breaks or gives incorrect results.
++ln $SCRATCH_MNT/foo $SCRATCH_MNT/mydir/foo_3
++$XFS_IO_PROG -f -c "pwrite -S 0xff 0 64K" $SCRATCH_MNT/hello | _filter_xfs_io
++ln $SCRATCH_MNT/hello $SCRATCH_MNT/mydir/hello_2
++
++# Add some subdirectories and new files and links to them. This is to verify
++# that after fsyncing our top level directory 'mydir', all the subdirectories
++# and their files/links are registered in the fsync log and exist after the
++# fsync log is replayed - xfs and ext3/4 give this guarantee.
++mkdir -p $SCRATCH_MNT/mydir/x/y/z
++ln $SCRATCH_MNT/foo $SCRATCH_MNT/mydir/x/y/foo_y_link
++ln $SCRATCH_MNT/foo $SCRATCH_MNT/mydir/x/y/z/foo_z_link
++touch $SCRATCH_MNT/mydir/x/y/z/qwerty
++
++# Now fsync only our top directory.
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/mydir
++
++# Simulate a crash/power loss.
++_load_flakey_table $FLAKEY_DROP_WRITES
++_unmount_flakey
++
++_load_flakey_table $FLAKEY_ALLOW_WRITES
++_mount_flakey
++
++# Remove the first name of our inode. Because of the directory fsync bug, the
++# inode's link count was 1 instead of 5, so removing the 'foo' name ends up
++# deleting the inode and the other names are stale directory entries (and still
++# visible to applications). Attempting to remove or access the remaining
++# dentries pointing to that inode resulted in stale file handle errors, and
++# made it impossible to remove the parent directories since it was impossible
++# for them to become empty.
++echo "file 'foo' link count after log replay: $(stat -c %h $SCRATCH_MNT/foo)"
++rm -f $SCRATCH_MNT/foo
++
++# Now verify that all files, links and directories created before fsyncing our
++# directory exist after the fsync log was replayed.
++[ -f $SCRATCH_MNT/mydir/foo_2 ] || echo "Link mydir/foo_2 is missing"
++[ -f $SCRATCH_MNT/mydir/foo_3 ] || echo "Link mydir/foo_3 is missing"
++[ -f $SCRATCH_MNT/hello ] || echo "File hello is missing"
++[ -f $SCRATCH_MNT/mydir/hello_2 ] || echo "Link mydir/hello_2 is missing"
++[ -f $SCRATCH_MNT/mydir/x/y/foo_y_link ] || \
++	echo "Link mydir/x/y/foo_y_link is missing"
++[ -f $SCRATCH_MNT/mydir/x/y/z/foo_z_link ] || \
++	echo "Link mydir/x/y/z/foo_z_link is missing"
++[ -f $SCRATCH_MNT/mydir/x/y/z/qwerty ] || \
++	echo "File mydir/x/y/z/qwerty is missing"
++
++digest_ok=no
++hello_digest=$(md5sum $SCRATCH_MNT/hello | cut -d ' ' -f 1)
++
++case "$FSTYP" in
++ext3)
++	# a 64Kb file, with all bytes having the value 0xff
++	[ $hello_digest == "ecb99e6ffea7be1e5419350f725da86b" ] && digest_ok=yes
++	;;
++*)
++	# an empty file
++	[ $hello_digest == "d41d8cd98f00b204e9800998ecf8427e" ] && digest_ok=yes
++	;;
++esac
++
++if [ $digest_ok == "yes" ]; then
++	echo "file 'hello' has expected size and content"
++else
++	echo "file 'hello' has unexpected size or content"
++fi
++
++# Now remove all files/links, under our test directory 'mydir', and verify we
++# can remove all the directories.
++rm -f $SCRATCH_MNT/mydir/x/y/z/*
++rmdir $SCRATCH_MNT/mydir/x/y/z
++rm -f $SCRATCH_MNT/mydir/x/y/*
++rmdir $SCRATCH_MNT/mydir/x/y
++rmdir $SCRATCH_MNT/mydir/x
++rm -f $SCRATCH_MNT/mydir/*
++rmdir $SCRATCH_MNT/mydir
++
++# An fsck, run by the fstests framework everytime a test finishes, also detected
++# the inconsistency and printed the following error message:
++#
++# root 5 inode 257 errors 2001, no inode item, link count wrong
++#    unresolved ref dir 258 index 2 namelen 5 name foo_2 filetype 1 errors 4, no inode ref
++#    unresolved ref dir 258 index 3 namelen 5 name foo_3 filetype 1 errors 4, no inode ref
++
++status=0
++exit
+diff --git a/tests/generic/060.out b/tests/generic/060.out
+new file mode 100644
+index 0000000..1842d4b
+--- /dev/null
++++ b/tests/generic/060.out
+@@ -0,0 +1,5 @@
++QA output created by 060
++wrote 65536/65536 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++file 'foo' link count after log replay: 5
++file 'hello' has expected size and content
+diff --git a/tests/generic/group b/tests/generic/group
+index f2eb87a..85ff384 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -61,6 +61,7 @@
+ 056 metadata auto quick
+ 057 metadata auto quick
+ 059 metadata auto quick
++060 metadata auto quick
+ 062 attr udf auto quick
+ 068 other auto freeze dangerous stress
+ 069 rw udf auto quick
 -- 
-Filipe David Manana,
+2.1.3
 
-"Reasonable men adapt themselves to the world.
- Unreasonable men adapt the world to themselves.
- That's why all progress depends on unreasonable men."
