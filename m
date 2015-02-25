@@ -1,95 +1,102 @@
-Return-Path: <lczerner@redhat.com>
-Date: Wed, 25 Feb 2015 09:42:19 +0100 (CET)
+Return-Path: <fstests-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:52339 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751229AbbBYJP4 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 25 Feb 2015 04:15:56 -0500
+Date: Wed, 25 Feb 2015 10:15:49 +0100 (CET)
 From: =?ISO-8859-15?Q?Luk=E1=A8_Czerner?= <lczerner@redhat.com>
-Subject: Re: [PATCH] ext4: add regression tests for ^extents punch hole
-In-Reply-To: <20150225030356.GA6880@mew.dhcp4.washington.edu>
-Message-ID: <alpine.LFD.2.00.1502250941060.2212@localhost.localdomain>
-References: <20150225030356.GA6880@mew.dhcp4.washington.edu>
+Subject: Re: [PATCH v3] fstests: generic test for directory fsync after adding
+ hard links
+In-Reply-To: <20150225000625.GB18360@dastard>
+Message-ID: <alpine.LFD.2.00.1502251011130.2212@localhost.localdomain>
+References: <1424370551-18884-1-git-send-email-fdmanana@suse.com> <1424820589-3593-1-git-send-email-fdmanana@suse.com> <54ED0BD5.3040504@redhat.com> <20150225000625.GB18360@dastard>
 MIME-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323328-863826668-1424853743=:2212"
-To: Omar Sandoval <osandov@osandov.com>
-Cc: Theodore Ts'o <tytso@mit.edu>, Dave Chinner <david@fromorbit.com>, Eric Sandeen <sandeen@sandeen.net>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: fstests-owner@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: Eric Sandeen <sandeen@redhat.com>, Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Wed, 25 Feb 2015, Dave Chinner wrote:
 
---8323328-863826668-1424853743=:2212
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-
-On Tue, 24 Feb 2015, Omar Sandoval wrote:
-
-> Date: Tue, 24 Feb 2015 19:03:56 -0800
-> From: Omar Sandoval <osandov@osandov.com>
-> To: Theodore Ts'o <tytso@mit.edu>, Lukáš Czerner <lczerner@redhat.com>,
->     Dave Chinner <david@fromorbit.com>, Eric Sandeen <sandeen@sandeen.net>
-> Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-> Subject: Re: [PATCH] ext4: add regression tests for ^extents punch hole
+> Date: Wed, 25 Feb 2015 11:06:25 +1100
+> From: Dave Chinner <david@fromorbit.com>
+> To: Eric Sandeen <sandeen@redhat.com>
+> Cc: Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org,
+>     linux-btrfs@vger.kernel.org
+> Subject: Re: [PATCH v3] fstests: generic test for directory fsync after adding
+>      hard links
 > 
-> On Tue, Feb 24, 2015 at 07:24:37PM -0500, Theodore Ts'o wrote:
-> > I suspect our current generic fsstress and fsx tests would catch this
-> > already, and what I need to do is to make sure I add ext3/1k to my
-> > test configurations (currently I test an ext3 configuration, and a 1k
-> > block configuration, but I don't currently test ext3/1k together).
-> > That would probably round out my full test iteration to a very
-> > pleasing 24 hours or so, which is fine, although I wouldn't want it to
-> > take much longer than that.
+> On Tue, Feb 24, 2015 at 05:40:05PM -0600, Eric Sandeen wrote:
+> > On 2/24/15 5:29 PM, Filipe Manana wrote:
+> ....
+> > > diff --git a/tests/generic/060 b/tests/generic/060
+> > > new file mode 100755
+> > > index 0000000..0d459fa
+> > > --- /dev/null
+> > > +++ b/tests/generic/060
+> > > @@ -0,0 +1,175 @@
+> > > +#! /bin/bash
+> > > +# FS QA Test No. 060
+> > > +#
+> > > +# This test is motivated by an fsync issue discovered in btrfs.
+> > > +# The issue was that after adding a new hard link to an existing file (one that
+> > > +# was created in a past transaction) and fsync'ing the parent directory of the
+> > > +# new hard link, after the fsync log replay the file's inode link count did not
+> > > +# get its link count incremented, while the new directory entry was visible.
+> > > +# Also, unlike xfs and ext4, new files under the directory we fsync were not
+> > > +# being written to the fsync log, nor were any child directories and new files
+> > > +# and links under the children directories. So this test verifies too that
+> > > +# btrfs has the same behaviour as xfs and ext3/4.
+> > > +#
+> > > +# The btrfs issue was fixed by the following linux kernel patch:
+> > > +#
+> > > +#  Btrfs: fix metadata inconsistencies after directory fsync
 > > 
-> Actually, this issue isn't specific to 1k blocks, so I wouldn't count on
-> it :) That block size in my tests is an artifact of the initial
-> reproducer Lukas had (generic/270 on ext3 with 1k blocks). It just so
-> happens that the start/len arguments fsstress chooses for punch hole
-> operations in that setup straddles the indirect tree levels in the wrong
-> ways.
-
-Right, it's not specific to 1k but it was easier to hit it this way.
-Even though we've been able to detect this problem before I think
-it's very much worth to have a special test case for this particular
-problem anyway.
-
+> > 
+> > I still would like to know *what this test does* - not some narrative about
+> > btrfs's troubled past.  ;)
 > 
-> 
-> On Tue, Feb 24, 2015 at 03:58:06PM +0100, Lukáš Czerner wrote:
-> > Omar, can you make the test generic and can this be reproduced on 4k
-> > block size ? If not, can you make a generic reproducer which does
-> > not depend on the block size ?
-> > 
-> > Also if we want to include the special case for ext4, we need to
-> > have a function which allows us to alter the mkfs options without
-> > completely overriding the user specified options. I think that there
-> > is something like that for xfs, Omar can you do that for ext4 as
-> > well ?
-> > 
-> > Thanks!
-> > -Lukas
-> > 
-> > 
-> No problem, I'll have a go at it.
+> Right, the description in the test is supposed to be a consise
+> description of what the test does.  It is parsed by lsqa.pl to
+> inform the reader of what the test exercises and that's why we
+> actually care about the quality of the description.
 
-Great, thanks!
+Right, but if the test was written specifically to address a bug
+found in the code I'd love to see the commit id, or name preferably
+directly in the test description or at least in the commit
+description. It's very useful information to have and often we
+forget to include it.
 
+Thanks!
 -Lukas
 
+
 > 
-> 
-> On Wed, Feb 25, 2015 at 09:07:19AM +1100, Dave Chinner wrote:
-> > It's built into the _scratch_mkfs_xfs wrapper, where if the test
-> > supplies extra options and that conflicts with the CLI supplied
-> > options it drops the CLI specific options and just uses the test
-> > options.
+> > Could you please add that line or two, and feel free to keep all the detail about
+> > the btrfs-specific bug later?  We're getting a lot of these tests, and a
+> > short description of what a test does is just How We Do It(tm).  It saves having to 
+> > read a lot of bash code just to get some idea of what is under test.
 > > 
-> > I've mentioned this specificly in the past, too. i.e. that all
-> > _scratch_mkfs_$FSTYP wrappers should be handling CLI vs test
-> > specific options like this.... :/
+> > i.e. like this, or whatever is accurate:
 > > 
-> > Cheers,
-> > 
-> > Dave.
-> > 
-> I'll take that into account.
+> > # Test that link counts remain correct after fsyncing a parent directory
+> > # containing hardlinks, and subsequent log recovery
+> #
+> > # <insert fascinating btrfs story here>
 > 
+> The fascinating btrfs story belongs in the commit message, not
+> the test itself.  If people need to know what btrfs commit the test
+> exercises, the history, motivations and commentary on the code, then
+> they can look it up in the git history.
 > 
-> Thanks, everyone!
+> > Please just do this; it'll save people time, down the line, if/when
+> > this test fails in the future, or needs to be maintained by someone
+> > else.
 > 
---8323328-863826668-1424853743=:2212--
+> Precisely.
+> 
+> Cheers,
+> 
+> Dave.
+> 
