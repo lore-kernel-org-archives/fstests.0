@@ -1,71 +1,145 @@
-Return-Path: <osandov@osandov.com>
-Date: Tue, 24 Feb 2015 19:03:56 -0800
-From: Omar Sandoval <osandov@osandov.com>
-Subject: Re: [PATCH] ext4: add regression tests for ^extents punch hole
-Message-ID: <20150225030356.GA6880@mew.dhcp4.washington.edu>
+Return-Path: <fstests-owner@vger.kernel.org>
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:5963 "EHLO
+	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752244AbbBYEo5 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 24 Feb 2015 23:44:57 -0500
+Received: from dave by dastard with local (Exim 4.80)
+	(envelope-from <david@fromorbit.com>)
+	id 1YQTpJ-0005Zb-9S
+	for fstests@vger.kernel.org; Wed, 25 Feb 2015 15:44:01 +1100
+Date: Wed, 25 Feb 2015 15:44:01 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: [ANNOUNCE] xfstests: master branch updated to e020a49
+Message-ID: <20150225044401.GC18360@dastard>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="+HP7ph2BbKc20aGI"
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20150224220719.GD4251@dastard>
- <alpine.LFD.2.00.1502241538430.5931@localhost.localdomain>
- <20150225002437.GB3782@thunk.org>
-To: Theodore Ts'o <tytso@mit.edu>, =?utf-8?B?THVrw6HFoQ==?= Czerner <lczerner@redhat.com>, Dave Chinner <david@fromorbit.com>, Eric Sandeen <sandeen@sandeen.net>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Sender: fstests-owner@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Feb 24, 2015 at 07:24:37PM -0500, Theodore Ts'o wrote:
-> I suspect our current generic fsstress and fsx tests would catch this
-> already, and what I need to do is to make sure I add ext3/1k to my
-> test configurations (currently I test an ext3 configuration, and a 1k
-> block configuration, but I don't currently test ext3/1k together).
-> That would probably round out my full test iteration to a very
-> pleasing 24 hours or so, which is fine, although I wouldn't want it to
-> take much longer than that.
-> 
-Actually, this issue isn't specific to 1k blocks, so I wouldn't count on
-it :) That block size in my tests is an artifact of the initial
-reproducer Lukas had (generic/270 on ext3 with 1k blocks). It just so
-happens that the start/len arguments fsstress chooses for punch hole
-operations in that setup straddles the indirect tree levels in the wrong
-ways.
+
+--+HP7ph2BbKc20aGI
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+Hi folks,
+
+The xfstests repository at git://oss.sgi.com/xfs/cmds/xfstests has
+just been updated. Patches often get missed, so please check if your
+outstanding patches were in this update. If they have not been in
+this update, please resubmit them to fstests@vger.kernel.org so they
+can be picked up in the next update.
+
+The new head of the master branch is commit:
+
+e020a49 fstests: generic test for fsync after removing xattrs
+
+New Commits:
+
+Chandan Rajendra (1):
+      [1310589] generic/325: Fix test case to work on 64K page size.
+
+Eric Sandeen (2):
+      [6f6c471] btrfs/049: btrfs test, not generic
+      [68d3b93] create _require_metadata_journaling, and add to tests that =
+need it
+
+Filipe Manana (2):
+      [036a163] fstests: generic test for directory fsync after adding hard=
+ links
+      [e020a49] fstests: generic test for fsync after removing xattrs
+
+Namjae Jeon (7):
+      [520b9de] generic: Simple insert range tests
+      [abe1802] generic: Delayed allocation insert range
+      [045d133] generic: Multi insert range tests
+      [e3b6221] generic: Delayed allocation multi insert
+      [91843cb] generic: Test multiple fallocate insert/collapse range calls
+      [6e5194d] fsstress: Add fallocate insert range operation
+      [788b134] fsx: Add fallocate insert range operation
+
+Omar Sandoval (1):
+      [cd21040] build: add missing files to gitignore
 
 
-On Tue, Feb 24, 2015 at 03:58:06PM +0100, Lukáš Czerner wrote:
-> Omar, can you make the test generic and can this be reproduced on 4k
-> block size ? If not, can you make a generic reproducer which does
-> not depend on the block size ?
-> 
-> Also if we want to include the special case for ext4, we need to
-> have a function which allows us to alter the mkfs options without
-> completely overriding the user specified options. I think that there
-> is something like that for xfs, Omar can you do that for ext4 as
-> well ?
-> 
-> Thanks!
-> -Lukas
-> 
-> 
-No problem, I'll have a go at it.
+Code Diffstat:
 
+ .gitignore            |   7 ++
+ common/punch          |   5 ++
+ common/rc             |  34 +++++++++-
+ ltp/fsstress.c        |  19 +++++-
+ ltp/fsx.c             | 124 +++++++++++++++++++++++++++++++++---
+ src/global.h          |   4 ++
+ tests/btrfs/049       |   2 +-
+ tests/generic/034     |   1 +
+ tests/generic/040     |   1 +
+ tests/generic/041     |   1 +
+ tests/generic/056     |   1 +
+ tests/generic/057     |   1 +
+ tests/generic/058     |  65 +++++++++++++++++++
+ tests/generic/058.out |  78 +++++++++++++++++++++++
+ tests/generic/060     |  65 +++++++++++++++++++
+ tests/generic/060.out |  78 +++++++++++++++++++++++
+ tests/generic/061     |  65 +++++++++++++++++++
+ tests/generic/061.out |  80 +++++++++++++++++++++++
+ tests/generic/063     |  65 +++++++++++++++++++
+ tests/generic/063.out |  80 +++++++++++++++++++++++
+ tests/generic/064     |  95 ++++++++++++++++++++++++++++
+ tests/generic/064.out |   2 +
+ tests/generic/065     | 172 ++++++++++++++++++++++++++++++++++++++++++++++=
+++++
+ tests/generic/065.out |  11 ++++
+ tests/generic/066     | 121 +++++++++++++++++++++++++++++++++++
+ tests/generic/066.out |  10 +++
+ tests/generic/311     |   1 +
+ tests/generic/321     |   1 +
+ tests/generic/322     |   1 +
+ tests/generic/325     |  10 +--
+ tests/generic/325.out |  10 +--
+ tests/generic/group   |   7 ++
+ tests/xfs/068         |   2 +
+ 33 files changed, 1194 insertions(+), 25 deletions(-)
+ create mode 100644 tests/generic/058
+ create mode 100644 tests/generic/058.out
+ create mode 100644 tests/generic/060
+ create mode 100644 tests/generic/060.out
+ create mode 100644 tests/generic/061
+ create mode 100644 tests/generic/061.out
+ create mode 100644 tests/generic/063
+ create mode 100644 tests/generic/063.out
+ create mode 100644 tests/generic/064
+ create mode 100644 tests/generic/064.out
+ create mode 100755 tests/generic/065
+ create mode 100644 tests/generic/065.out
+ create mode 100755 tests/generic/066
+ create mode 100644 tests/generic/066.out
+--=20
+Dave Chinner
+david@fromorbit.com
 
-On Wed, Feb 25, 2015 at 09:07:19AM +1100, Dave Chinner wrote:
-> It's built into the _scratch_mkfs_xfs wrapper, where if the test
-> supplies extra options and that conflicts with the CLI supplied
-> options it drops the CLI specific options and just uses the test
-> options.
-> 
-> I've mentioned this specificly in the past, too. i.e. that all
-> _scratch_mkfs_$FSTYP wrappers should be handling CLI vs test
-> specific options like this.... :/
-> 
-> Cheers,
-> 
-> Dave.
-> 
-I'll take that into account.
+--+HP7ph2BbKc20aGI
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
 
-Thanks, everyone!
--- 
-Omar
+iQIcBAEBAgAGBQJU7VMQAAoJEK3oKUf0dfodLBAQAIzOCrnp0wOWtNS1JPE5qH0h
+cyi5VsrMhsnE2PXD9TjYIEtBe5fVer893ATj0qMucIMzikrGBSxxTk7MGi43mqQc
+R+ss5p3NK3dpCCo2pKwh2zjlojuEJ4N1IBS77+GaOivs4h2SfclS1lHOUfSIWqSK
+qFD9R+y13qT47HKr0ayQXpBhUnyQ3Bct6uX3fl5hSWXairxKhUEzJA2Xm4VolA4G
+4qqj/PbQcp4MBFmftyrRfbKnb0H+khLhCb0+l4AWCMP9kJs+clt42NlKY0GiIusz
+H2Ww3jYrQvU68qVLaexu1PqwFtV/G1NwYgSPC7aIDX3MgqS3gGghVGwJ3rqdbLrp
+56kOIa0FP9nWahIoLVClJWQB3rScFvQZv/NGPk6OQjGLYILuMWKrTha6sLi3RaeS
++2KljVoziHwikZnbUsbYkJEzSmt8A6L6rz+DIUYpvPpT3lOv3gzvVqbn91lsFU88
+Fk2UzyQrKU7u2byDYIP4BkCHjYs+ukBjDuNF7ErhdhtvCc3ZKSnNdS0NqkKd934l
++ckrpS1BFh4WPBzzeHnEFcYoSmB0Gf/T228OrGlhUu/CnHxwUQEqUmzu2nYAUPKQ
+psO93F3p3rY/rsJPVzRfXuaNXMTxwye70A+ble6xDwcBlfsQ/01WNxOgtdTDGr4l
+tjHTMdCNgw8C7MRr3dDE
+=zqSW
+-----END PGP SIGNATURE-----
+
+--+HP7ph2BbKc20aGI--
