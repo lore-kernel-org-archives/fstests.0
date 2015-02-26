@@ -1,214 +1,47 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52603 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49833 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752696AbbBZLaI (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 26 Feb 2015 06:30:08 -0500
-Date: Thu, 26 Feb 2015 12:29:35 +0100 (CET)
-From: =?ISO-8859-15?Q?Luk=E1=A8_Czerner?= <lczerner@redhat.com>
-Subject: Re: [PATCH v3 2/2] Fix warning of "Usage: _is_block_dev dev"
-In-Reply-To: <477b0e94819bea20d920822f0b88099ce19532a8.1424946979.git.zhaolei@cn.fujitsu.com>
-Message-ID: <alpine.LFD.2.00.1502261223250.25704@localhost.localdomain>
-References: <196cc72cb39e1a338339fa09c73f6334af63a2d6.1424946979.git.zhaolei@cn.fujitsu.com> <477b0e94819bea20d920822f0b88099ce19532a8.1424946979.git.zhaolei@cn.fujitsu.com>
+	id S1753559AbbBZLlN (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 26 Feb 2015 06:41:13 -0500
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t1QBfCIJ013211
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <fstests@vger.kernel.org>; Thu, 26 Feb 2015 06:41:12 -0500
+Message-ID: <54EF0656.6030206@fedoraproject.org>
+Date: Thu, 26 Feb 2015 11:41:10 +0000
+From: Andrew Price <andyp@fedoraproject.org>
 MIME-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Subject: Re: [PATCH 1/2] xfstests: fix a typo in _require_block_device()
+References: <1424069440-14957-1-git-send-email-zhaolei@cn.fujitsu.com> <20150218012139.GO4251@dastard> <54E4679C.7030309@fedoraproject.org> <20150218220204.GP12722@dastard> <alpine.LFD.2.00.1502261049520.25704@localhost.localdomain>
+In-Reply-To: <alpine.LFD.2.00.1502261049520.25704@localhost.localdomain>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Zhaolei <zhaolei@cn.fujitsu.com>
+To: =?windows-1252?Q?Luk=E1=9A_Czerner?= <lczerner@redhat.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, 26 Feb 2015, Zhaolei wrote:
 
-> Date: Thu, 26 Feb 2015 18:38:59 +0800
-> From: Zhaolei <zhaolei@cn.fujitsu.com>
-> To: fstests@vger.kernel.org
-> Cc: Zhao Lei <zhaolei@cn.fujitsu.com>
-> Subject: [PATCH v3 2/2] Fix warning of "Usage: _is_block_dev dev"
-> 
-> From: Zhao Lei <zhaolei@cn.fujitsu.com>
-> 
-> _is_block_dev() will show above warning when "$dev" is not exist.
-> It happened when the program check $TEST_DEV with blank $SCRATCH_DEV
-> which is optional.
-> 
-> Changelog v2->v3:
->  Separate __same_block_dev() from _is_block_dev() to make code
->  self documenting.
->  Suggested by: Dave Chinner <david@fromorbit.com>
-> 
-> Changelog v1->v2:
->  Rewrite _is_block_dev() to make caller code simple.
->  Suggested by: Dave Chinner <david@fromorbit.com>
+>>>> The change is fine - the reformating of the code is not. 8 space
+>>>> tabs
+>>>
+>>> To be clear, do you mean 8 spaces or single tabs?
+>>
+>> Single tab, but tabs are the width of 8 spaces. Same as you'd use
+>> for writing new kernel code.
+>
+> Even I was confused by that :) Just use tabs not spaces. Width of the
+> tab is whatever your editor decides it is
 
-This is all very confusing. Sometimes you consider links, sometimes
-you do not. Error messages are missing completely _is_block_dev()
-does not return device numbers anymore which might be useful.
+Exactly :)
 
-What about just using the original _is_block_dev() as it was
-intended ? Like this:
+> so it's irrelevant :)
 
-	if [ "`_is_block_dev "$SCRATCH_DEV"`" = "`_is_block_dev "$TEST_DEV"`" ]
+Well, unfortunately many use tabs for alignment as well as indentation 
+so changing the width of a tab can make code look ugly where there are 
+line continuations, aligned comments, etc. Using tabs for indentation 
+and spaces for alignment is ideal, but tabs-for-alignment is so common 
+that assuming tabs are always displayed 8 characters wide is often the 
+pragmatic option.
 
-Simply use quotes around the function argument so that the function
-always receives an argument even though it might be empty, but in
-this case you'll not get the error message and the _is_block_dev()
-will just return nothing - problem solved ?
-
--Lukas
-
-
-> 
-> Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
-> ---
->  common/rc | 101 +++++++++++++++++++++++++++++++++++++-------------------------
->  1 file changed, 61 insertions(+), 40 deletions(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 5a8c74d..f528c25 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -945,24 +945,51 @@ _fs_options()
->      ' </proc/mounts
->  }
->  
-> -# returns device number if a file is a block device
-> +# Returns:
-> +# 0: if filename is a block device
-> +# 1: if filename is not a block device
-> +# -1 if argument wrong
->  #
->  _is_block_dev()
->  {
-> -    if [ $# -ne 1 ]
-> -    then
-> -	echo "Usage: _is_block_dev dev" 1>&2
-> -	exit 1
-> -    fi
-> +	if [ $# -ne 1 ]; then
-> +		return -1
-> +	fi
-> +	if [ -b "$1" ]; then
-> +		return 0
-> +	fi
-> +	return 1;
-> +}
->  
-> -    _dev=$1
-> -    if [ -L "${_dev}" ]; then
-> -        _dev=`readlink -f ${_dev}`
-> -    fi
-> +# Returns:
-> +# 0: if the devices are same
-> +# 1: if the devices are not same
-> +#
-> +__same_block_dev()
-> +{
-> +	if [ $# -ne 2 ]; then
-> +		return 1
-> +	fi
->  
-> -    if [ -b "${_dev}" ]; then
-> -        src/lstat64 ${_dev} | $AWK_PROG '/Device type:/ { print $9 }'
-> -    fi
-> +	_dev1="$1"
-> +	_dev2="$2"
-> +
-> +	if [ ! -b "$_dev1" -o ! -b "$_dev2" ]; then
-> +		return 1
-> +	fi
-> +
-> +	if [ -L "${_dev1}" ]; then
-> +		_dev1=`readlink -f "$_dev1"`
-> +	fi
-> +	if [ -L "${_dev2}" ]; then
-> +		_dev2=`readlink -f "$_dev2"`
-> +	fi
-> +
-> +	if [ `stat -c %t,%T "$_dev1"` != `stat -c %t,%T "$_dev2"` ]; then
-> +		return 1
-> +	fi
-> +
-> +	return 0;
->  }
->  
->  # Do a command, log it to $seqres.full, optionally test return status
-> @@ -1095,19 +1122,16 @@ _require_scratch_nocheck()
->  		fi
->  		;;
->  	*)
-> -		 if [ -z "$SCRATCH_DEV" -o "`_is_block_dev $SCRATCH_DEV`" = "" ]
-> -		 then
-> -		     _notrun "this test requires a valid \$SCRATCH_DEV"
-> -		 fi
-> -		 if [ "`_is_block_dev $SCRATCH_DEV`" = "`_is_block_dev $TEST_DEV`" ]
-> -		 then
-> -		     _notrun "this test requires a valid \$SCRATCH_DEV"
-> -		 fi
-> -		if [ ! -d "$SCRATCH_MNT" ]
-> -		then
-> -		     _notrun "this test requires a valid \$SCRATCH_MNT"
-> +		if ! _is_block_dev "$SCRATCH_DEV"; then
-> +			_notrun "this test requires a valid \$SCRATCH_DEV"
-> +		fi
-> +		if __same_block_dev "$SCRATCH_DEV" "$TEST_DEV"; then
-> +			_notrun "\$SCRATCH_DEV and \$TEST_DEV are same device"
-> +		fi
-> +		if [ ! -d "$SCRATCH_MNT" ]; then
-> +			_notrun "this test requires a valid \$SCRATCH_MNT"
->  		fi
-> -		 ;;
-> +		;;
->      esac
->  
->      # mounted?
-> @@ -1167,19 +1191,16 @@ _require_test()
->  		fi
->  		;;
->  	*)
-> -		 if [ -z "$TEST_DEV" -o "`_is_block_dev $TEST_DEV`" = "" ]
-> -		 then
-> -		     _notrun "this test requires a valid \$TEST_DEV"
-> -		 fi
-> -		 if [ "`_is_block_dev $SCRATCH_DEV`" = "`_is_block_dev $TEST_DEV`" ]
-> -		 then
-> -		     _notrun "this test requires a valid \$TEST_DEV"
-> -		 fi
-> -		if [ ! -d "$TEST_DIR" ]
-> -		then
-> -		     _notrun "this test requires a valid \$TEST_DIR"
-> +		if ! _is_block_dev "$TEST_DEV"; then
-> +			_notrun "this test requires a valid \$TEST_DEV"
-> +		fi
-> +		if __same_block_dev "$TEST_DEV" "$SCRATCH_DEV"; then
-> +			_notrun "\$TEST_DEV and \$SCRATCH_DEV are same device"
->  		fi
-> -		 ;;
-> +		if [ ! -d "$TEST_DIR" ]; then
-> +			_notrun "this test requires a valid \$TEST_DIR"
-> +		fi
-> +		;;
->      esac
->  
->      # mounted?
-> @@ -1288,7 +1309,7 @@ _require_block_device()
->  		echo "Usage: _require_block_device <dev>" 1>&2
->  		exit 1
->  	fi
-> -	if [ "`_is_block_dev $1`" == "" ]; then
-> +	if ! _is_block_dev "$1"; then
->  		_notrun "require $1 to be valid block disk"
->  	fi
->  }
-> @@ -2236,10 +2257,10 @@ _require_scratch_dev_pool()
->  	esac
->  
->  	for i in $SCRATCH_DEV_POOL; do
-> -		if [ "`_is_block_dev $i`" = "" ]; then
-> +		if ! _is_block_dev "$i"; then
->  			_notrun "this test requires valid block disk $i"
->  		fi
-> -		if [ "`_is_block_dev $i`" = "`_is_block_dev $TEST_DEV`" ]; then
-> +		if __same_block_dev "$i" "$TEST_DEV"; then
->  			_notrun "$i is part of TEST_DEV, this test requires unique disks"
->  		fi
->  		if _mount | grep -q $i; then
-> 
+Andy
