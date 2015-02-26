@@ -1,17 +1,17 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-wg0-f54.google.com ([74.125.82.54]:43481 "EHLO
-	mail-wg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752762AbbBZIOt (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 26 Feb 2015 03:14:49 -0500
-Received: by wggy19 with SMTP id y19so8424004wgg.10
-        for <fstests@vger.kernel.org>; Thu, 26 Feb 2015 00:14:48 -0800 (PST)
-Message-ID: <54EED5F6.2030804@plexistor.com>
-Date: Thu, 26 Feb 2015 10:14:46 +0200
+Received: from mail-wg0-f53.google.com ([74.125.82.53]:41768 "EHLO
+	mail-wg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751340AbbBZIlt (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 26 Feb 2015 03:41:49 -0500
+Received: by wghl18 with SMTP id l18so8567210wgh.8
+        for <fstests@vger.kernel.org>; Thu, 26 Feb 2015 00:41:48 -0800 (PST)
+Message-ID: <54EEDC4A.8090000@plexistor.com>
+Date: Thu, 26 Feb 2015 10:41:46 +0200
 From: Boaz Harrosh <boaz@plexistor.com>
 MIME-Version: 1.0
-Subject: [PATCH] brd: Re-instate ram disk visibility option (part_show)
-References: <1424818479-10083-1-git-send-email-david@fromorbit.com> <1424818479-10083-2-git-send-email-david@fromorbit.com> <20150225161151.GC28053@bfoster.bfoster> <20150225223248.GH4251@dastard>
-In-Reply-To: <20150225223248.GH4251@dastard>
+Subject: [PATCH] brd: Only request 4K sectors if DAX is enabled
+References: <1424818479-10083-1-git-send-email-david@fromorbit.com> <1424818479-10083-2-git-send-email-david@fromorbit.com> <20150225161151.GC28053@bfoster.bfoster> <20150225223248.GH4251@dastard> <54EED5F6.2030804@plexistor.com>
+In-Reply-To: <54EED5F6.2030804@plexistor.com>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
@@ -20,56 +20,39 @@ Cc: Brian Foster <bfoster@redhat.com>, fstests@vger.kernel.org, linux-fsdevel@vg
 List-ID: <fstests@vger.kernel.org>
 
 
-This re-enables part_show option, so we can keep it false by
-default.
+People systems have been using ramdisk with
+smaller-than-page-size blocks in their mkfs.
 
-Here is what Dmitry said in the original patch:
-  [aeac318] brd: add ram disk visibility option
-	Currently ram disk is not visible inside /proc/partitions.
-	This was done for compatibility reasons here: 53978d0a7a27.
-	But some utilities expect disk presents in /proc/partitions.
-	Let's add module's option and let's administrator chose
-	visibility behavior. By default, old behavior preserved.
+The 4K sectors is only important if we will be
+using brd with a DAX filesystem.
 
-Dave Chinner and other have reported problems with current system
-when udev events start firing for ramdisk:
-	http://marc.info/?l=linux-fsdevel&m=142490357918672&w=2
+So only enable 4K sectors if DAX is configured
 
-It was me who enabled these notifications through this patch:
-   [937af5e] brd: Fix all partitions BUGs
-Sorry for the mess.
-
-CC: Dave Chinner <david@fromorbit.com>
-CC: Dmitry Monakhov <dmonakhov@openvz.org>
 Signed-off-by: Boaz Harrosh <boaz@plexistor.com>
 ---
- drivers/block/brd.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+ drivers/block/brd.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
 diff --git a/drivers/block/brd.c b/drivers/block/brd.c
-index 64ab495..6e0775b 100644
+index 6e0775b..e875f12 100644
 --- a/drivers/block/brd.c
 +++ b/drivers/block/brd.c
-@@ -450,6 +450,10 @@ static int max_part = 1;
- module_param(max_part, int, S_IRUGO);
- MODULE_PARM_DESC(max_part, "Num Minors to reserve between devices");
+@@ -495,6 +495,7 @@ static struct brd_device *brd_alloc(int i)
+ 	blk_queue_max_hw_sectors(brd->brd_queue, 1024);
+ 	blk_queue_bounce_limit(brd->brd_queue, BLK_BOUNCE_ANY);
  
-+static int part_show = 0;
-+module_param(part_show, int, S_IRUGO);
-+MODULE_PARM_DESC(part_show, "Control RAM disk visibility in /proc/partitions");
-+
- MODULE_LICENSE("GPL");
- MODULE_ALIAS_BLOCKDEV_MAJOR(RAMDISK_MAJOR);
- MODULE_ALIAS("rd");
-@@ -513,6 +517,8 @@ static struct brd_device *brd_alloc(int i)
- 	disk->private_data	= brd;
- 	disk->queue		= brd->brd_queue;
- 	disk->flags		= GENHD_FL_EXT_DEVT;
-+	if (!part_show)
-+		disk->flags |= GENHD_FL_SUPPRESS_PARTITION_INFO;
- 	sprintf(disk->disk_name, "ram%d", i);
- 	set_capacity(disk, rd_size * 2);
++#ifdef CONFIG_BLK_DEV_RAM_DAX
+ 	/* This is so fdisk will align partitions on 4k, because of
+ 	 * direct_access API needing 4k alignment, returning a PFN
+ 	 * (This is only a problem on very small devices <= 4M,
+@@ -502,6 +503,7 @@ static struct brd_device *brd_alloc(int i)
+ 	 *  is harmless)
+ 	 */
+ 	blk_queue_physical_block_size(brd->brd_queue, PAGE_SIZE);
++#endif
  
+ 	brd->brd_queue->limits.discard_granularity = PAGE_SIZE;
+ 	brd->brd_queue->limits.max_discard_sectors = UINT_MAX;
 -- 
 1.9.3
 
