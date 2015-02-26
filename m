@@ -1,135 +1,75 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-wg0-f42.google.com ([74.125.82.42]:34611 "EHLO
-	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753084AbbBZHqb (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 26 Feb 2015 02:46:31 -0500
-Received: by wghn12 with SMTP id n12so8371773wgh.1
-        for <fstests@vger.kernel.org>; Wed, 25 Feb 2015 23:46:29 -0800 (PST)
-Message-ID: <54EECF53.8010207@plexistor.com>
-Date: Thu, 26 Feb 2015 09:46:27 +0200
+Received: from mail-wg0-f54.google.com ([74.125.82.54]:43481 "EHLO
+	mail-wg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752762AbbBZIOt (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 26 Feb 2015 03:14:49 -0500
+Received: by wggy19 with SMTP id y19so8424004wgg.10
+        for <fstests@vger.kernel.org>; Thu, 26 Feb 2015 00:14:48 -0800 (PST)
+Message-ID: <54EED5F6.2030804@plexistor.com>
+Date: Thu, 26 Feb 2015 10:14:46 +0200
 From: Boaz Harrosh <boaz@plexistor.com>
 MIME-Version: 1.0
-Subject: Re: ramdisk problems in 4.0-rc1? (was Re: [PATCH 1/4] xfs/104: log
- size too small for 4k sector drives)
-References: <1424818479-10083-1-git-send-email-david@fromorbit.com> <1424818479-10083-2-git-send-email-david@fromorbit.com> <20150225161151.GC28053@bfoster.bfoster> <20150225223248.GH4251@dastard> <20150225233115.GA1009@bfoster.bfoster> <20150225234343.GI4251@dastard>
-In-Reply-To: <20150225234343.GI4251@dastard>
+Subject: [PATCH] brd: Re-instate ram disk visibility option (part_show)
+References: <1424818479-10083-1-git-send-email-david@fromorbit.com> <1424818479-10083-2-git-send-email-david@fromorbit.com> <20150225161151.GC28053@bfoster.bfoster> <20150225223248.GH4251@dastard>
+In-Reply-To: <20150225223248.GH4251@dastard>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>, Brian Foster <bfoster@redhat.com>
-Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, axboe@fb.com
+To: Jens Axboe <axboe@fb.com>, Dave Chinner <david@fromorbit.com>
+Cc: Brian Foster <bfoster@redhat.com>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 02/26/2015 01:43 AM, Dave Chinner wrote:
-> On Wed, Feb 25, 2015 at 06:31:15PM -0500, Brian Foster wrote:
->> On Thu, Feb 26, 2015 at 09:32:48AM +1100, Dave Chinner wrote:
->>> [cc linux-fsdevel, Boaz and others]
->>>
->>> On Wed, Feb 25, 2015 at 11:11:51AM -0500, Brian Foster wrote:
->>>> On Wed, Feb 25, 2015 at 09:54:36AM +1100, Dave Chinner wrote:
->>>>> From: Dave Chinner <dchinner@redhat.com>
->>>>>
->>>>> xfs/104, xfs/119, xfs/291 and xfs/297 have small fixed log sizes. A
->>>>> recent change to the kernel ramdisk changed it's physical sector
->>>>> size from 512B to 4kB, and this results in mkfs calculating a log
->>>>> size larger than the fixed test size and hence the tests fail.
->>>>>
->>>>> Change the log size to a larger size that works with 4k sectors, and
->>>>> also increase the size of the filesystem being created so that the
->>>>> amount of data space in the filesystem does not change and hence
->>>>> does not perturb the rest of the test.
->>>>>
->>>>> Signed-off-by: Dave Chinner <dchinner@redhat.com>
->>>>> ---
->>>>
->>>> Well for some reason I can't mount a ramdisk on the current tot to test
->>>> this. In fact, I can't mount _anything_ after the ramdisk mount attempt.
->>>> The mount actually reports success too, but there's nothing there... :/
->>>>
->>>> # modprobe brd
->>>> # mkfs.xfs -f /dev/ram0 
->>>> meta-data=/dev/ram0              isize=256    agcount=1, agsize=4096
->>>> blks
->>>>          =                       sectsz=4096  attr=2, projid32bit=1
->>>>          =                       crc=0        finobt=0
->>>> data     =                       bsize=4096   blocks=4096, imaxpct=25
->>>>          =                       sunit=0      swidth=0 blks
->>>> naming   =version 2              bsize=4096   ascii-ci=0 ftype=0
->>>> log      =internal log           bsize=4096   blocks=1605, version=2
->>>>          =                       sectsz=4096  sunit=1 blks, lazy-count=1
->>>> realtime =none                   extsz=4096   blocks=0, rtextents=0
->>>> # mount /dev/ram0 /mnt/
->>>> # mount | grep mnt
->>>> # umount  /mnt/
->>>> umount: /mnt/: not mounted
->>>>
->>>> ... and then I can't even mount my normal scratch device until after a
->>>> reboot:
->>>>
->>>> # mount /dev/test/scratch /mnt/
->>>> # mount | grep mnt
->>>> # umount  /mnt/
->>>> umount: /mnt/: not mounted
->>>
->>> Ok, so that's just plain broken. What's in dmesg?
->>>
->>
->> Once I got back to this I found that for some reason systemd is
->> immediately invoking a umount on the mount. :/ No idea why or how to
->> stop it, but if I do something like this:
->>
->> mount /dev/ram0 /mnt; cd /mnt
->>
->> ... I can occasionally win the race and get systemd to spin in a
->> umount() cycle trying to undo the mount. I haven't gone back to confirm
->> it's the same behavior with the normal devices at that point, but I
->> suspect it is, perhaps due to getting into some kind of bad state.
->>
->> So fyi that this particular problem doesn't appear to be directly kernel
->> related...
-> 
-> It may still be related to the kernel changes  e.g. by triggering
-> udev events when they didn't previously. The only machine I have
-> that is triggering the partition probing is also the only test
-> machine that I have that runs systemd and it didn't have this
-> problem on 3.19.
-> 
 
-Sigh, thanks Dave. Yes you are correct my patch enabled the
-udev events, as part of fixing ramdisk with partitions.
-This is because if you do not enable them then mount by UUID
-and all sort of lsblk and friends do not work.
+This re-enables part_show option, so we can keep it false by
+default.
 
-I did try to test this in all kind of ways, xfstest+ext4
-as well, and ran with it on Fedora 20 for a while, sorry
-about that.
+Here is what Dmitry said in the original patch:
+  [aeac318] brd: add ram disk visibility option
+	Currently ram disk is not visible inside /proc/partitions.
+	This was done for compatibility reasons here: 53978d0a7a27.
+	But some utilities expect disk presents in /proc/partitions.
+	Let's add module's option and let's administrator chose
+	visibility behavior. By default, old behavior preserved.
 
-It looks like the system anticipates that ramdisk "should
-not have these events"
+Dave Chinner and other have reported problems with current system
+when udev events start firing for ramdisk:
+	http://marc.info/?l=linux-fsdevel&m=142490357918672&w=2
 
-I will send a patch ASAP that re-instates the module_parameter
-for enabling notification, and leaving the default off. It should
-be easy to set the param if one intends to use these utilities.
+It was me who enabled these notifications through this patch:
+   [937af5e] brd: Fix all partitions BUGs
+Sorry for the mess.
 
-That said, please do agree with me that there is brokenness in
-systemd?
+CC: Dave Chinner <david@fromorbit.com>
+CC: Dmitry Monakhov <dmonakhov@openvz.org>
+Signed-off-by: Boaz Harrosh <boaz@plexistor.com>
+---
+ drivers/block/brd.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-BTW: You also said something about the 4k sectors thing, It looks
-like we are pulled in two different directions here. If you will
-want to use DAX on ramdisk then you want it on, if you are not
-using DAX, and wants to use smaller-then-page_size FS blocks than
-you do not want it.
-
-Please advise what we should do? Maybe only do 4k if BLK_DEV_RAM_DAX
-is set in Kconfig ?
-
-
-Sorry for the mess, I'll send a fix ASAP
-
-> Cheers,
-> Dave.
-> 
-
-Thanks
-Boaz
+diff --git a/drivers/block/brd.c b/drivers/block/brd.c
+index 64ab495..6e0775b 100644
+--- a/drivers/block/brd.c
++++ b/drivers/block/brd.c
+@@ -450,6 +450,10 @@ static int max_part = 1;
+ module_param(max_part, int, S_IRUGO);
+ MODULE_PARM_DESC(max_part, "Num Minors to reserve between devices");
+ 
++static int part_show = 0;
++module_param(part_show, int, S_IRUGO);
++MODULE_PARM_DESC(part_show, "Control RAM disk visibility in /proc/partitions");
++
+ MODULE_LICENSE("GPL");
+ MODULE_ALIAS_BLOCKDEV_MAJOR(RAMDISK_MAJOR);
+ MODULE_ALIAS("rd");
+@@ -513,6 +517,8 @@ static struct brd_device *brd_alloc(int i)
+ 	disk->private_data	= brd;
+ 	disk->queue		= brd->brd_queue;
+ 	disk->flags		= GENHD_FL_EXT_DEVT;
++	if (!part_show)
++		disk->flags |= GENHD_FL_SUPPRESS_PARTITION_INFO;
+ 	sprintf(disk->disk_name, "ram%d", i);
+ 	set_capacity(disk, rd_size * 2);
+ 
+-- 
+1.9.3
 
