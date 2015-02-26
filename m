@@ -1,14 +1,14 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:34542 "EHLO
+Received: from cn.fujitsu.com ([59.151.112.132]:18993 "EHLO
 	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752706AbbBZJFt convert rfc822-to-8bit (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 26 Feb 2015 04:05:49 -0500
+	with ESMTP id S1752193AbbBZJbH convert rfc822-to-8bit (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 26 Feb 2015 04:31:07 -0500
 From: Zhao Lei <zhaolei@cn.fujitsu.com>
 References: <1424069440-14957-1-git-send-email-zhaolei@cn.fujitsu.com> <1424069440-14957-2-git-send-email-zhaolei@cn.fujitsu.com> <20150218053749.GP4251@dastard>
 In-Reply-To: <20150218053749.GP4251@dastard>
 Subject: RE: [PATCH 2/2] Fix warning of "Usage: _is_block_dev dev"
-Date: Thu, 26 Feb 2015 17:05:35 +0800
-Message-ID: <00c201d051a3$61b49c90$251dd5b0$@cn.fujitsu.com>
+Date: Thu, 26 Feb 2015 17:30:55 +0800
+Message-ID: <00c301d051a6$ec2df440$c489dcc0$@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8BIT
@@ -20,9 +20,7 @@ List-ID: <fstests@vger.kernel.org>
 
 Hi, Dave Chinner
 
-Thanks for suggest.
-
-* From: Dave Chinner [mailto:david@fromorbit.com]
+> From: Dave Chinner [mailto:david@fromorbit.com]
 > Subject: Re: [PATCH 2/2] Fix warning of "Usage: _is_block_dev dev"
 > 
 > On Mon, Feb 16, 2015 at 02:50:40PM +0800, Zhaolei wrote:
@@ -83,16 +81,6 @@ Thanks for suggest.
 > 	return 0;
 > }
 > 
-Maybe better to return 0 if it is block dev,
-to avoid following code in caller:
-_is_block_dev "$dev"
-if [ "$?" != 1 ] ...
-
-Will send v3.
-
-Thanks
-Zhaolei
-
 > 
 > > @@ -965,6 +964,25 @@ _is_block_dev()
 > >      fi
@@ -163,6 +151,9 @@ Zhaolei
 > separate, self documenting checks and should stay that way. i.e.  the two
 > checks are "if (!_is_block_dev $SCRATCH_DEV) _notrun..." and "if
 > (_same_block_dev $TEST_DEV $SCRATCH_DEV) _notrun ...."
+
+ok.
+
 > 
 > >  		if [ ! -d "$SCRATCH_MNT" ]
 > >  		then
@@ -212,6 +203,14 @@ Zhaolei
 > >  	_notrun "require $1 to be valid block disk"
 > 
 > Please keep the code using the if [ ]; then syntax.
+
+It is hard to check return value in if [] format, unless we change function to
+echo result into stdout and run function in a subshell.
+We had discussed it in last mail, using return value is simple and stable than
+function stdout, for example, a function will output unwanted content when
+it call a failed command or changed-version command.
+
+
 > >      fi
 > >  }
 > > @@ -2236,11 +2244,8 @@ _require_scratch_dev_pool()
@@ -229,6 +228,12 @@ Zhaolei
 > 
 > And that error message is too long. Seperate tests tell us exactly what the
 > error is, not make us guess which of many errors it could have been.
+
+Agree.
+
+Thanks
+Zhaolei
+
 > 
 > Cheers,
 > 
