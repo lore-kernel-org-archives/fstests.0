@@ -1,81 +1,48 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:56290 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752193AbbBZJwS (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 26 Feb 2015 04:52:18 -0500
-Date: Thu, 26 Feb 2015 10:52:13 +0100 (CET)
-From: =?ISO-8859-15?Q?Luk=E1=A8_Czerner?= <lczerner@redhat.com>
-Subject: Re: [PATCH 1/2] xfstests: fix a typo in _require_block_device()
-In-Reply-To: <20150218220204.GP12722@dastard>
-Message-ID: <alpine.LFD.2.00.1502261049520.25704@localhost.localdomain>
-References: <1424069440-14957-1-git-send-email-zhaolei@cn.fujitsu.com> <20150218012139.GO4251@dastard> <54E4679C.7030309@fedoraproject.org> <20150218220204.GP12722@dastard>
+Received: from cn.fujitsu.com ([59.151.112.132]:1791 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751216AbbBZKkA (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 26 Feb 2015 05:40:00 -0500
+Received: from G08CNEXCHPEKD03.g08.fujitsu.local (localhost.localdomain [127.0.0.1])
+	by edo.cn.fujitsu.com (8.14.3/8.13.1) with ESMTP id t1QAd6i6026247
+	for <fstests@vger.kernel.org>; Thu, 26 Feb 2015 18:39:06 +0800
+From: Zhaolei <zhaolei@cn.fujitsu.com>
+Subject: [PATCH v2 1/2] xfstests: fix a typo in _require_block_device()
+Date: Thu, 26 Feb 2015 18:38:47 +0800
+Message-ID: <196cc72cb39e1a338339fa09c73f6334af63a2d6.1424946979.git.zhaolei@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Andrew Price <andyp@fedoraproject.org>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Zhao Lei <zhaolei@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, 19 Feb 2015, Dave Chinner wrote:
+From: Zhao Lei <zhaolei@cn.fujitsu.com>
 
-> Date: Thu, 19 Feb 2015 09:02:04 +1100
-> From: Dave Chinner <david@fromorbit.com>
-> To: Andrew Price <andyp@fedoraproject.org>
-> Cc: fstests@vger.kernel.org
-> Subject: Re: [PATCH 1/2] xfstests: fix a typo in _require_block_device()
-> 
-> On Wed, Feb 18, 2015 at 10:21:16AM +0000, Andrew Price wrote:
-> > On 18/02/15 01:21, Dave Chinner wrote:
-> > >On Mon, Feb 16, 2015 at 02:50:39PM +0800, Zhaolei wrote:
-> > >>From: Zhao Lei <zhaolei@cn.fujitsu.com>
-> > >>
-> > >>We need to check "$1" instead "$SCRATCH_DEV" in this function.
-> > >>And make tabs same with other code.
-> > >>
-> > >>Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
-> > >>---
-> > >>  common/rc | 14 +++++++-------
-> > >>  1 file changed, 7 insertions(+), 7 deletions(-)
-> > >>
-> > >>diff --git a/common/rc b/common/rc
-> > >>index 7449a1d..76522d4 100644
-> > >>--- a/common/rc
-> > >>+++ b/common/rc
-> > >>@@ -1284,13 +1284,13 @@ _require_command()
-> > >>  # $1 - device
-> > >>  _require_block_device()
-> > >>  {
-> > >>-	if [ -z "$1" ]; then
-> > >>-		echo "Usage: _require_block_device <dev>" 1>&2
-> > >>-		exit 1
-> > >>-	fi
-> > >>-	if [ "`_is_block_dev $SCRATCH_DEV`" == "" ]; then
-> > >>-		_notrun "require $1 to be valid block disk"
-> > >>-	fi
-> > >>+    if [ -z "$1" ]; then
-> > >>+	echo "Usage: _require_block_device <dev>" 1>&2
-> > >>+	exit 1
-> > >>+    fi
-> > >>+    if [ "`_is_block_dev $1`" == "" ]; then
-> > >>+	_notrun "require $1 to be valid block disk"
-> > >>+    fi
-> > >>  }
-> > >
-> > >The change is fine - the reformating of the code is not. 8 space
-> > >tabs
-> > 
-> > To be clear, do you mean 8 spaces or single tabs?
-> 
-> Single tab, but tabs are the width of 8 spaces. Same as you'd use
-> for writing new kernel code.
+We need to check "$1" instead "$SCRATCH_DEV" in this function.
 
-Even I was confused by that :) Just use tabs not spaces. Width of the
-tab is whatever your editor decides it is so it's irrelevant :)
+Changelog v1->v2:
+ Use tab instead of space to fit new code style.
+ Suggested by: Dave Chinner <david@fromorbit.com>
 
--Lukas
+Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
+---
+ common/rc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> 
-> Cheers,
-> 
-> Dave.
-> 
+diff --git a/common/rc b/common/rc
+index 1ed9df5..5a8c74d 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1288,7 +1288,7 @@ _require_block_device()
+ 		echo "Usage: _require_block_device <dev>" 1>&2
+ 		exit 1
+ 	fi
+-	if [ "`_is_block_dev $SCRATCH_DEV`" == "" ]; then
++	if [ "`_is_block_dev $1`" == "" ]; then
+ 		_notrun "require $1 to be valid block disk"
+ 	fi
+ }
+-- 
+1.8.5.1
+
