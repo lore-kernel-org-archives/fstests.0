@@ -1,220 +1,42 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37518 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:38486 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750837AbbB0JlE (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 27 Feb 2015 04:41:04 -0500
-Date: Fri, 27 Feb 2015 10:40:54 +0100 (CET)
+	id S1750716AbbB0Jpk (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 27 Feb 2015 04:45:40 -0500
+Date: Fri, 27 Feb 2015 10:45:09 +0100 (CET)
 From: =?ISO-8859-15?Q?Luk=E1=A8_Czerner?= <lczerner@redhat.com>
-Subject: Re: [PATCH] Generic test for file fsync after moving files across
- directories
-In-Reply-To: <1424980394-12592-1-git-send-email-fdmanana@suse.com>
-Message-ID: <alpine.LFD.2.00.1502271027140.2188@localhost.localdomain>
-References: <1424980394-12592-1-git-send-email-fdmanana@suse.com>
+Subject: RE: [PATCH v3 2/2] Fix warning of "Usage: _is_block_dev dev"
+In-Reply-To: <00d201d0522f$f4876980$dd963c80$@cn.fujitsu.com>
+Message-ID: <alpine.LFD.2.00.1502271043160.2188@localhost.localdomain>
+References: <196cc72cb39e1a338339fa09c73f6334af63a2d6.1424946979.git.zhaolei@cn.fujitsu.com> <477b0e94819bea20d920822f0b88099ce19532a8.1424946979.git.zhaolei@cn.fujitsu.com> <alpine.LFD.2.00.1502261223250.25704@localhost.localdomain>
+ <00c501d051bf$7a6c84c0$6f458e40$@cn.fujitsu.com> <alpine.LFD.2.00.1502261430120.25704@localhost.localdomain> <00d201d0522f$f4876980$dd963c80$@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Sender: fstests-owner@vger.kernel.org
-To: Filipe Manana <fdmanana@suse.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Zhao Lei <zhaolei@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, 26 Feb 2015, Filipe Manana wrote:
-
-> Date: Thu, 26 Feb 2015 19:53:14 +0000
-> From: Filipe Manana <fdmanana@suse.com>
-> To: fstests@vger.kernel.org
-> Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-> Subject: [PATCH] Generic test for file fsync after moving files across
->     directories
+> > Simply said
+> > 
+> > _is_block_dev "$TEST_DEV"
+> > 
+> > will return empty string if $TEST_DEV either does not exist or $TEST_DEV itself
+> > is empty string. However if someone calls
+> > 
+> > _is_block_dev
+> > 
+> > he'll get an error so he knows that he needs to fix his code.
+> > 
 > 
-> Test file fsync after moving one file between directories and fsyncing the
-> old parent directory before fsyncing the file. Verify that after a crash the
-> file data we fsynced is available.
+> These 2 way have the respective advantages.
+> For me, both way is acceptable as long as it can fix titled bug.
 > 
-> This test is motivated by an issue discovered in btrfs which caused the file
-> data to be lost (despite fsync returning success to user space). That btrfs
-> bug is fixed by the following linux kernel patch:
-> 
->    Btrfs: fix data loss in the fast fsync path
+> I'll send v4 based on your suggestion, to provide Dave Chinner a selection.
 
-Hi,
-
-some comments below.
-
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> ---
->  tests/generic/067     | 113 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/067.out |  11 +++++
->  tests/generic/group   |   1 +
->  3 files changed, 125 insertions(+)
->  create mode 100755 tests/generic/067
->  create mode 100644 tests/generic/067.out
-> 
-> diff --git a/tests/generic/067 b/tests/generic/067
-> new file mode 100755
-> index 0000000..90f26b2
-> --- /dev/null
-> +++ b/tests/generic/067
-> @@ -0,0 +1,113 @@
-> +#! /bin/bash
-> +# FS QA Test No. 067
-> +#
-> +# Test file fsync after moving one file between directories and fsyncing the
-> +# old parent directory before fsyncing the file. Verify that after a crash the
-> +# file data we fsynced is available.
-> +#
-> +# This test is motivated by an issue discovered in btrfs which caused the file
-> +# data to be lost (despite fsync returning success to user space). That btrfs
-> +# bug was fixed by the following linux kernel patch:
-> +#
-> +#   Btrfs: fix data loss in the fast fsync path
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
-> +# Author: Filipe Manana <fdmanana@suse.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +
-> +_cleanup()
-> +{
-> +	_cleanup_flakey
-> +	rm -f $tmp.*
-> +}
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/dmflakey
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_need_to_be_root
-> +_require_scratch
-> +_require_dm_flakey
-> +_require_metadata_journaling $SCRATCH_DEV
-> +
-> +rm -f $seqres.full
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1
-> +_init_flakey
-> +_mount_flakey
-> +
-> +# Create our main test file 'foo', the one we check for data loss.
-> +# By doing an fsync against our file, it makes btrfs clear the 'needs_full_sync'
-> +# bit from its flags (btrfs inode specific flags).
-
-
-I am not sure we need that last sentence, it's btrfs specific and I am sure
-it has been already explained in detail in the btrfs commit
-description.
-
-
-> +$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 8K" \
-> +		-c "fsync" $SCRATCH_MNT/foo | _filter_xfs_io
-> +
-> +# Now create one other file and 2 directories. We will move this second file
-> +# from one directory to the other later because it forces btrfs to commit its
-> +# currently open transaction if we fsync the old parent directory. This is
-> +# necessary to trigger the data loss bug that affected btrfs.
-> +mkdir $SCRATCH_MNT/testdir_1
-> +touch $SCRATCH_MNT/testdir_1/bar
-> +mkdir $SCRATCH_MNT/testdir_2
-> +
-> +# Make sure everything is durably persisted.
-> +sync
-> +
-> +# Write more 8Kb of data to our file.
-> +$XFS_IO_PROG -c "pwrite -S 0xbb 8K 8K" $SCRATCH_MNT/foo | _filter_xfs_io
-> +
-> +# Move our 'bar' file into a new directory.
-> +mv $SCRATCH_MNT/testdir_1/bar $SCRATCH_MNT/testdir_2/bar
-> +
-> +# Fsync our first directory. Because it had a file moved into some other
-> +# directory, this made btrfs commit the currently open transaction. This is
-> +# a condition necessary to trigger the data loss bug.
-> +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/testdir_1
-> +
-> +# Now fsync our main test file. If the fsync succeeds, we expect the 8Kb of
-> +# data we wrote previously to be persisted and available if a crash happens.
-> +# This did not happen with btrfs, because of the transaction commit that
-> +# happened when we fsynced the parent directory.
-> +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foo
-
-Ok, so from the description of the test I though that the data loss
-will happen on the file we're moving, but apparently its about a
-different unrelated file.
-
-Otherwise the test looks fine.
-
-Reviewed-by: Lukas Czerner <lczerner@redhat.com>
+Ok thanks, I think that simply using quotes is better then rewriting
+the thing and introducing new helpers. But in the end its Dave's decision
+to make.
 
 Thanks!
 -Lukas
-
-> +
-> +# Simulate a crash/power loss.
-> +_load_flakey_table $FLAKEY_DROP_WRITES
-> +_unmount_flakey
-> +
-> +_load_flakey_table $FLAKEY_ALLOW_WRITES
-> +_mount_flakey
-> +
-> +# Now check that all data we wrote before are available.
-> +echo "File content after log replay:"
-> +od -t x1 $SCRATCH_MNT/foo
-> +
-> +status=0
-> +exit
-> diff --git a/tests/generic/067.out b/tests/generic/067.out
-> new file mode 100644
-> index 0000000..f30f6ef
-> --- /dev/null
-> +++ b/tests/generic/067.out
-> @@ -0,0 +1,11 @@
-> +QA output created by 067
-> +wrote 8192/8192 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 8192/8192 bytes at offset 8192
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +File content after log replay:
-> +0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> +*
-> +0020000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
-> +*
-> +0040000
-> diff --git a/tests/generic/group b/tests/generic/group
-> index e5db772..05cc6a9 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -69,6 +69,7 @@
->  064 auto quick prealloc
->  065 metadata auto quick
->  066 metadata auto quick
-> +067 metadata auto quick
->  068 other auto freeze dangerous stress
->  069 rw udf auto quick
->  070 attr udf auto quick stress
-> 
