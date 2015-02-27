@@ -1,249 +1,183 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59049 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:32817 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751776AbbB0S44 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 27 Feb 2015 13:56:56 -0500
-Date: Fri, 27 Feb 2015 13:56:50 -0500
+	id S1751693AbbB0S5E (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 27 Feb 2015 13:57:04 -0500
+Date: Fri, 27 Feb 2015 13:56:59 -0500
 From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH 2/4] xfs: don't output mkfs sector sizes into golden
- output
-Message-ID: <20150227185650.GA17531@laptop.bfoster>
+Subject: Re: [PATCH 3/4] xfs/049: umount -d fails when kernel wins teardown
+ race
+Message-ID: <20150227185659.GB17531@laptop.bfoster>
 References: <1424818479-10083-1-git-send-email-david@fromorbit.com>
- <1424818479-10083-3-git-send-email-david@fromorbit.com>
+ <1424818479-10083-4-git-send-email-david@fromorbit.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1424818479-10083-3-git-send-email-david@fromorbit.com>
+In-Reply-To: <1424818479-10083-4-git-send-email-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Feb 25, 2015 at 09:54:37AM +1100, Dave Chinner wrote:
+On Wed, Feb 25, 2015 at 09:54:38AM +1100, Dave Chinner wrote:
 > From: Dave Chinner <dchinner@redhat.com>
 > 
-> The mkfs sector sizes are dependent on the underlying device in use,
-> and so is not fixed. hence it needs to be filtered from any golden
-> output file, otherwise tests that just differ by sector size will
-> fail.
+> When /etc/mtab is linked to /proc/mounts and we are using mount time
+> created loop devices (i.e. mount -o loop), the unmount can fail
+> with this amazingly informative error message:
+> 
+> umount: /mnt/scratch/test2: filesystem was unmounted, but mount(8) failed: Invalid argument
+> 
+> What it actually means in this case is that the kernel tore down the
+> loop device when the last reference went away, and it did it so fast
+> that mount was not able to find it in /etc/mtab after the unmount
+> syscall. Hence it could not find the loop device it was supposed to
+> tear down and has a hissy fit.
+> 
+> This is simple to fix: mount does not need to tear down the loop
+> device as the kernel does it automatically. Remove the "-d" from
+> the umount command, and the test passes again.
+> 
+> There's quite a few other tests that also use umount -d - fix them
+> as well.
 > 
 > Signed-off-by: Dave Chinner <dchinner@redhat.com>
 > ---
->  tests/xfs/096          |  8 ++++++--
->  tests/xfs/096.external | 15 +++++++--------
->  tests/xfs/096.internal | 16 ++++++++--------
->  tests/xfs/119          |  2 +-
->  tests/xfs/206          | 33 +++++++++++++++------------------
->  5 files changed, 37 insertions(+), 37 deletions(-)
-> 
-> diff --git a/tests/xfs/096 b/tests/xfs/096
-> index 0ecf88f..2da8fa1 100755
-> --- a/tests/xfs/096
-> +++ b/tests/xfs/096
-> @@ -47,6 +47,8 @@ _cleanup()
->  #
->  # filter out counts which will vary
->  #   - extsz, blocks, agsize, agcount, device name, rtextents
-> +#   - log version varies for crc enabled fs
-> +#   - lsunit varies for 512/4k sector devices
->  # filter out differences between linux and irix:
->  #   - sectsz on Linux
->  #   - mmr, mixed-case on IRIX
-> @@ -63,7 +65,7 @@ _cleanup()
->  #           =                       sunit=0 blks
->  #  realtime =none                   extsz=65536  blocks=N, rtextents=N
->  #
-> -_mkfs_filter()
-> +mkfs_filter()
->  {
->     tee -a $seqres.full | \
->     sed \
-> @@ -80,6 +82,8 @@ _mkfs_filter()
->  	-e '/ *= *mmr=[0-9][0-9]* *$/d' \
->  	-e 's/ *mixed-case=[YN]//' \
->  	-e 's/ *ascii-ci=[01]//' \
-> +	-e 's/\(version=\)\([12]\)/\1N/' \
-> +	-e 's/\(sunit=\)\([018] blks\)/\1N blks/' \
->  	-e 's/sectsz=[0-9][0-9]* *//' \
->  	-e 's/, lazy-count.*//' \
->  	-e '/inode-paths/d' \
-> @@ -145,7 +149,7 @@ do
->      fi
->      echo "--- mkfs=$mkfs ---"
->      export MKFS_OPTIONS="$mkfs"
-> -    _scratch_mkfs_xfs 2>&1 | _mkfs_filter
-> +    _scratch_mkfs_xfs 2>&1 | mkfs_filter
->      echo ""
->      echo ""
->  done
-> diff --git a/tests/xfs/096.external b/tests/xfs/096.external
-> index 95833c8..7923340 100644
-> --- a/tests/xfs/096.external
-> +++ b/tests/xfs/096.external
-> @@ -11,8 +11,7 @@ meta-data=DEV isize=256    agcount=N, agsize=N blks
->  data     =                       bsize=4096   blocks=N, imaxpct=N
->           =                       sunit=0      swidth=0 blks, unwritten=1
->  naming   =version 2              bsize=4096
-> -log      =LOG                    bsize=4096   blocks=N, version=2
-> -         =                       sunit=8 blks
-> +log      =LOG                    bsize=4096   blocks=N, version=N
->  realtime =REALTIME               extsz=N, blocks=N, rtextents=N
->  
->  
-> @@ -22,8 +21,8 @@ meta-data=DEV isize=256    agcount=N, agsize=N blks
->  data     =                       bsize=4096   blocks=N, imaxpct=N
->           =                       sunit=65     swidth=65 blks, unwritten=1
->  naming   =version 2              bsize=4096
-> -log      =LOG                    bsize=4096   blocks=N, version=2
-> -         =                       sunit=0 blks
-> +log      =LOG                    bsize=4096   blocks=N, version=N
-> +         =                       sunit=N blks
->  realtime =REALTIME               extsz=N, blocks=N, rtextents=N
->  
->  
-> @@ -33,8 +32,8 @@ meta-data=DEV isize=256    agcount=N, agsize=N blks
->  data     =                       bsize=4096   blocks=N, imaxpct=N
->           =                       sunit=65     swidth=65 blks, unwritten=1
->  naming   =version 2              bsize=4096
-> -log      =LOG                    bsize=4096   blocks=N, version=1
-> -         =                       sunit=0 blks
-> +log      =LOG                    bsize=4096   blocks=N, version=N
-> +         =                       sunit=N blks
->  realtime =REALTIME               extsz=N, blocks=N, rtextents=N
->  
->  
-> @@ -44,8 +43,8 @@ meta-data=DEV isize=256    agcount=N, agsize=N blks
->  data     =                       bsize=4096   blocks=N, imaxpct=N
->           =                       sunit=65     swidth=65 blks, unwritten=1
->  naming   =version 2              bsize=4096
-> -log      =LOG                    bsize=4096   blocks=N, version=1
-> -         =                       sunit=0 blks
-> +log      =LOG                    bsize=4096   blocks=N, version=N
-> +         =                       sunit=N blks
->  realtime =REALTIME               extsz=N, blocks=N, rtextents=N
->  
->  
-> diff --git a/tests/xfs/096.internal b/tests/xfs/096.internal
-> index 7bf848c..eaba13f 100644
-> --- a/tests/xfs/096.internal
-> +++ b/tests/xfs/096.internal
-> @@ -11,8 +11,8 @@ meta-data=DEV isize=256    agcount=N, agsize=N blks
->  data     =                       bsize=4096   blocks=N, imaxpct=N
->           =                       sunit=0      swidth=0 blks, unwritten=1
->  naming   =version 2              bsize=4096
-> -log      =LOG                    bsize=4096   blocks=N, version=2
-> -         =                       sunit=8 blks
-> +log      =LOG                    bsize=4096   blocks=N, version=N
-> +         =                       sunit=N blks
->  realtime =REALTIME               extsz=N, blocks=N, rtextents=N
->  
->  
-> @@ -22,8 +22,8 @@ meta-data=DEV isize=256    agcount=N, agsize=N blks
->  data     =                       bsize=4096   blocks=N, imaxpct=N
->           =                       sunit=65     swidth=65 blks, unwritten=1
->  naming   =version 2              bsize=4096
-> -log      =LOG                    bsize=4096   blocks=N, version=2
-> -         =                       sunit=8 blks
-> +log      =LOG                    bsize=4096   blocks=N, version=N
-> +         =                       sunit=N blks
->  realtime =REALTIME               extsz=N, blocks=N, rtextents=N
->  
->  
-> @@ -33,8 +33,8 @@ meta-data=DEV isize=256    agcount=N, agsize=N blks
->  data     =                       bsize=4096   blocks=N, imaxpct=N
->           =                       sunit=65     swidth=65 blks, unwritten=1
->  naming   =version 2              bsize=4096
-> -log      =LOG                    bsize=4096   blocks=N, version=1
-> -         =                       sunit=0 blks
-> +log      =LOG                    bsize=4096   blocks=N, version=N
-> +         =                       sunit=N blks
->  realtime =REALTIME               extsz=N, blocks=N, rtextents=N
->  
->  
-> @@ -44,8 +44,8 @@ meta-data=DEV isize=256    agcount=N, agsize=N blks
->  data     =                       bsize=4096   blocks=N, imaxpct=N
->           =                       sunit=65     swidth=65 blks, unwritten=1
->  naming   =version 2              bsize=4096
-> -log      =LOG                    bsize=4096   blocks=N, version=1
-> -         =                       sunit=0 blks
-> +log      =LOG                    bsize=4096   blocks=N, version=N
-> +         =                       sunit=N blks
->  realtime =REALTIME               extsz=N, blocks=N, rtextents=N
->  
->  
-> diff --git a/tests/xfs/119 b/tests/xfs/119
-> index 490495b..156d5e4 100755
-> --- a/tests/xfs/119
-> +++ b/tests/xfs/119
-> @@ -54,7 +54,7 @@ _require_scratch
->  # this may hang
->  sync
->  
-> -export MKFS_OPTIONS="-l version=2,size=2500b,su=64k" 
-> +export MKFS_OPTIONS="-l version=2,size=2560b,su=64k" 
-
-Not clear if this was intended to be part of the previous patch?
-Anyways, still a trailing space here. Otherwise this looks fine to me:
 
 Reviewed-by: Brian Foster <bfoster@redhat.com>
 
->  export MOUNT_OPTIONS="-o logbsize=64k"
->  _scratch_mkfs_xfs >/dev/null
+>  tests/xfs/049 | 8 ++++----
+>  tests/xfs/073 | 6 +++---
+>  tests/xfs/078 | 4 ++--
+>  tests/xfs/216 | 2 +-
+>  tests/xfs/217 | 2 +-
+>  tests/xfs/250 | 4 ++--
+>  6 files changed, 13 insertions(+), 13 deletions(-)
+> 
+> diff --git a/tests/xfs/049 b/tests/xfs/049
+> index 04c2c75..8d4e074 100755
+> --- a/tests/xfs/049
+> +++ b/tests/xfs/049
+> @@ -29,8 +29,8 @@ echo "QA output created by $seq"
+>  _cleanup()
+>  {
+>      cd /
+> -    umount -d $SCRATCH_MNT/test2 > /dev/null 2>&1
+> -    umount -d $SCRATCH_MNT/test > /dev/null 2>&1
+> +    umount $SCRATCH_MNT/test2 > /dev/null 2>&1
+> +    umount $SCRATCH_MNT/test > /dev/null 2>&1
+>      rm -f $tmp.*
 >  
-> diff --git a/tests/xfs/206 b/tests/xfs/206
-> index f6dcca6..198e413 100755
-> --- a/tests/xfs/206
-> +++ b/tests/xfs/206
-> @@ -73,34 +73,31 @@ echo "=== truncate file ==="
->  dd if=/dev/zero of=$tmpfile bs=1 seek=19998630180864 count=1 >/dev/null 2>&1 \
->  	|| _fail "!!! failed to truncate loopback file to correct size"
+>      if [ -w $seqres.full ]
+> @@ -123,11 +123,11 @@ rm -rf $SCRATCH_MNT/test/* >> $seqres.full 2>&1 \
+>      || _fail "!!! clean failed"
 >  
-> +mkfs_filter()
-> +{
-> +	sed -e "s,^meta-data=.*isize,meta-data=FILE                   isize,g" \
-> +	    -e "s/\(^log.*blocks=\)\([0-9]*,\)/\1XXXXX,/" \
-> +	    -e "s/, projid32bit=[0-9]//" \
-> +	    -e "s/ ftype=[0-9]//" \
-> +	    -e "s/\(sectsz\)\(=[0-9]* *\)/\1=512   /" \
-> +	    -e "s/\(sunit=\)\([0-9]* blks,\)/\10 blks,/" \
-> +	    -e "/.*crc=/d"
-> +}
-> +
->  # mkfs slightly smaller than that
->  echo "=== mkfs.xfs ==="
-> -mkfs.xfs -f -bsize=4096 -dagsize=76288719b,size=3905982455b -llazy-count=0 $tmpfile \
-> -	| sed -e "s,^meta-data=.*isize,meta-data=FILE                   isize,g" \
-> -		-e "s/\(^log.*blocks=\)\([0-9]*,\)/\1XXXXX,/" \
-> -		-e "s/, projid32bit=[0-9]//" \
-> -		-e "s/ ftype=[0-9]//" \
-> -		-e "/.*crc=/d"
-> +mkfs.xfs -f -bsize=4096 -dagsize=76288719b,size=3905982455b \
-> +	 -llazy-count=0 $tmpfile  | mkfs_filter
+>  _log "umount ext2 on xfs"
+> -umount -d $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
+> +umount $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
+>      || _fail "!!! umount ext2 failed"
 >  
->  mount -o loop $tmpfile $tmpdir || _fail "!!! failed to loopback mount"
+>  _log "umount xfs"
+> -umount -d $SCRATCH_MNT/test >> $seqres.full 2>&1 \
+> +umount $SCRATCH_MNT/test >> $seqres.full 2>&1 \
+>      || _fail "!!! umount xfs failed"
 >  
->  # see what happens when we growfs it
->  echo "=== xfs_growfs ==="
-> -xfs_growfs $tmpdir \
-> -	| sed -e "s,^meta-data=.*isize,meta-data=FILE                   isize,g" \
-> -		-e "s/\(^log.*blocks=\)\([0-9]*,\)/\1XXXXX,/" \
-> -		-e "s/, projid32bit=[0-9]//" \
-> -		-e "s/ ftype=[0-9]//" \
-> -		-e "/.*crc=/d"
-> +xfs_growfs $tmpdir  | mkfs_filter
+>  echo "--- mounts at end (before cleanup)" >> $seqres.full
+> diff --git a/tests/xfs/073 b/tests/xfs/073
+> index f955771..38ed2cb 100755
+> --- a/tests/xfs/073
+> +++ b/tests/xfs/073
+> @@ -41,9 +41,9 @@ _cleanup()
+>  {
+>  	cd /
+>  	umount $SCRATCH_MNT 2>/dev/null
+> -	umount -d $imgs.loop 2>/dev/null
+> +	umount $imgs.loop 2>/dev/null
+>  	[ -d $imgs.loop ] && rmdir $imgs.loop
+> -	umount -d $imgs.source_dir 2>/dev/null
+> +	umount $imgs.source_dir 2>/dev/null
+>  	[ -d $imgs.source_dir ] && rm -rf $imgs.source_dir
+>  	rm -f $imgs.* $tmp.* /var/tmp/xfs_copy.log.*
+>  }
+> @@ -119,7 +119,7 @@ _verify_copy()
 >  
->  # and double-check the new geometry
->  echo "=== xfs_info ==="
-> -xfs_info $tmpdir \
-> -	| sed -e "s,^meta-data=.*isize,meta-data=FILE                   isize,g" \
-> -		-e "s/\(^log.*blocks=\)\([0-9]*,\)/\1XXXXX,/" \
-> -		-e "s/, projid32bit=[0-9]//" \
-> -		-e "s/ ftype=[0-9]//" \
-> -		-e "/.*crc=/d"
-> +xfs_info $tmpdir | mkfs_filter
+>  	echo unmounting and removing new image
+>  	umount $source_dir
+> -	umount -d $target_dir > /dev/null 2>&1
+> +	umount $target_dir > /dev/null 2>&1
+>  	rm -f $target
+>  }
 >  
->  # _cleanup cleans up for us
+> diff --git a/tests/xfs/078 b/tests/xfs/078
+> index f859efc..d8cb919 100755
+> --- a/tests/xfs/078
+> +++ b/tests/xfs/078
+> @@ -36,7 +36,7 @@ _cleanup()
+>  {
+>      cd /
+>      rm -f $tmp.*
+> -    umount -d $LOOP_MNT 2>/dev/null
+> +    umount $LOOP_MNT 2>/dev/null
+>      rmdir $LOOP_MNT
+>  }
 >  
+> @@ -97,7 +97,7 @@ _grow_loop()
+>  	$XFS_GROWFS_PROG $LOOP_MNT 2>&1 |  _filter_growfs 2>&1
+>  
+>  	echo "*** unmount"
+> -	umount -d $LOOP_MNT > /dev/null 2>&1
+> +	umount $LOOP_MNT > /dev/null 2>&1
+>  
+>  	# Large grows takes forever to check..
+>  	if [ "$check" -gt "0" ]
+> diff --git a/tests/xfs/216 b/tests/xfs/216
+> index 8513479..76f79ca 100755
+> --- a/tests/xfs/216
+> +++ b/tests/xfs/216
+> @@ -60,7 +60,7 @@ _do_mkfs()
+>  			-d name=$LOOP_DEV,size=${i}g |grep log
+>  		mount -o loop -t xfs $LOOP_DEV $LOOP_MNT
+>  		echo "test write" > $LOOP_MNT/test
+> -		umount -d $LOOP_MNT > /dev/null 2>&1
+> +		umount $LOOP_MNT > /dev/null 2>&1
+>  	done
+>  }
+>  # make large holey file
+> diff --git a/tests/xfs/217 b/tests/xfs/217
+> index ab55a30..8aacdf9 100755
+> --- a/tests/xfs/217
+> +++ b/tests/xfs/217
+> @@ -62,7 +62,7 @@ _do_mkfs()
+>  			-d name=$LOOP_DEV,size=${i}g |grep log
+>  		mount -o loop -t xfs $LOOP_DEV $LOOP_MNT
+>  		echo "test write" > $LOOP_MNT/test
+> -		umount -d $LOOP_MNT > /dev/null 2>&1
+> +		umount $LOOP_MNT > /dev/null 2>&1
+>  
+>  		# punch out the previous blocks so that we keep the amount of
+>  		# disk space the test requires down to a minimum.
+> diff --git a/tests/xfs/250 b/tests/xfs/250
+> index c1622a4..0cdc382 100755
+> --- a/tests/xfs/250
+> +++ b/tests/xfs/250
+> @@ -33,7 +33,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+>  _cleanup()
+>  {
+>  	cd /
+> -	umount -d $LOOP_MNT 2>/dev/null
+> +	umount $LOOP_MNT 2>/dev/null
+>  	rm -f $LOOP_DEV
+>  	rmdir $LOOP_MNT
+>  }
+> @@ -84,7 +84,7 @@ _test_loop()
+>  	xfs_io -f -c "resvsp 0 $fsize" $LOOP_MNT/foo | _filter_io
+>  
+>  	echo "*** unmount loop filesystem"
+> -	umount -d $LOOP_MNT > /dev/null 2>&1
+> +	umount $LOOP_MNT > /dev/null 2>&1
+>  
+>  	echo "*** check loop filesystem"
+>  	 _check_xfs_filesystem $LOOP_DEV none none
 > -- 
 > 2.0.0
 > 
