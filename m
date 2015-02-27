@@ -1,211 +1,184 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59117 "EHLO mx1.redhat.com"
+Received: from mail.kernel.org ([198.145.29.136]:56437 "EHLO mail.kernel.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751693AbbB0S5J (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 27 Feb 2015 13:57:09 -0500
-Date: Fri, 27 Feb 2015 13:57:05 -0500
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH 4/4] generic: Add rudimetary RENAME_WHITEOUT test
-Message-ID: <20150227185705.GC17531@laptop.bfoster>
-References: <1424818479-10083-1-git-send-email-david@fromorbit.com>
- <1424818479-10083-5-git-send-email-david@fromorbit.com>
+	id S1751776AbbB0TCl (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 27 Feb 2015 14:02:41 -0500
+Date: Fri, 27 Feb 2015 11:02:37 -0800
+From: Jaegeuk Kim <jaegeuk@kernel.org>
+Subject: Re: [PATCH 2/2] generic/066: add _require_metadata_replay
+Message-ID: <20150227190153.GB71843@jaegeuk-mac02.mot.com>
+References: <1425000227-69601-1-git-send-email-jaegeuk@kernel.org>
+ <1425000227-69601-2-git-send-email-jaegeuk@kernel.org>
+ <alpine.LFD.2.00.1502271056110.2188@localhost.localdomain>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <1424818479-10083-5-git-send-email-david@fromorbit.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <alpine.LFD.2.00.1502271056110.2188@localhost.localdomain>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: =?utf-8?B?THVrw6HFoQ==?= Czerner <lczerner@redhat.com>
+Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Filipe Manana <fdmanana@suse.com>, Eric Sandeen <sandeen@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Feb 25, 2015 at 09:54:39AM +1100, Dave Chinner wrote:
-> From: Dave Chinner <dchinner@redhat.com>
-> 
-> There is no API documentation for RENAME_WHITEOUT. There is no
-> developer documentation for RENAME_WHITEOUT. There are not comments
-> in the overlayfs or ext4 implementation of RENAME_WHITEOUT.
-> 
-> Hence, this test simply tries to expose basic RENAME_WHITEOUT
-> behaviour from ext4 so we can reverse-engineer and verify
-> bug-for-bug renameat2(RENAME_WHITEOUT) ext4 compatibility.
-> 
-> Note: uses generic/078 just to keep out of the way of the 6-7 other
-> pending new tests.
-> 
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> ---
+Hi Lukas,
 
-Reviewed-by: Brian Foster <bfoster@redhat.com>
+On Fri, Feb 27, 2015 at 12:34:09PM +0100, Lukáš Czerner wrote:
+> On Thu, 26 Feb 2015, Jaegeuk Kim wrote:
+> 
+> > Date: Thu, 26 Feb 2015 17:23:47 -0800
+> > From: Jaegeuk Kim <jaegeuk@kernel.org>
+> > To: Dave Chinner <david@fromorbit.com>
+> > Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
+> >     Jaegeuk Kim <jaegeuk@kernel.org>, Filipe Manana <fdmanana@suse.com>,
+> >     Eric Sandeen <sandeen@redhat.com>
+> > Subject: [PATCH 2/2] generic/066: add _require_metadata_replay
+> > 
+> > This patch adds _require_metadata_replay to detect whether or not filesystem
+> > supports metadata replay.
+> > 
+> > This should be used when:
+> > 
+> > 1. create file A
+> > 2. write file A
+> > 3. fsync file A
+> > 
+> > 4. write file A
+> > 
+> > 5. create file B
+> > 6. fsync file B
+> > 7. crash!
+> > 
+> > In this case, if filesystem supports metadata_replay, file A's data written
+> > by #4 should be recovered.
+> 
+> What ? No it should not! file A was never fsync after the last
+> write, so there is no guarantee that we'll have the new content.
+> "Metadata replay" suggests that we only replay metadata, not data
+> and that's what file systems usually do with they journals, cows,
+> and so on...
 
->  src/renameat2.c       |  4 ++--
->  tests/generic/078     | 66 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/078.out | 51 +++++++++++++++++++++++++++++++++++++++
->  tests/generic/group   |  1 +
->  4 files changed, 120 insertions(+), 2 deletions(-)
->  create mode 100755 tests/generic/078
->  create mode 100644 tests/generic/078.out
+I totally wrote this description insanely.
+My apologies.
+
+Yes, what I wanted to point out was the coverage of xattr recovery, not data.
+1. create file A
+2. write file A
+3. fsync file A
+
+*4. setxattr file A
+
+5. create file B
+6. fsync file B
+7. crash!
+
+What I've focussed on actually was the coverage of metadata replay which depends
+on filesystem's design.
+
+In this case, I think the metadata log contains:
+...
+1. fsync'ed file A
+2. changed xattrs on file A
+3. fsync'ed file B
+
+Currently, xfs and ext4 recover #2, and btrfs without Filipe's patch does not.
+And, I understood that this testcase intends to check #2 is recoverable or not.
+
+IMHO, however, basically filesystem doesn't need to recover #2 at all.
+So, I tried to add _require_something to check whether filesystem recovers
+written xattrs followed by any fsync'ed file coincidentally.
+
+Thanks,
+
+>
 > 
-> diff --git a/src/renameat2.c b/src/renameat2.c
-> index 5ac0936..c59ce65 100644
-> --- a/src/renameat2.c
-> +++ b/src/renameat2.c
-> @@ -96,9 +96,9 @@ int main(int argc, char *argv[])
->  		 * Turn EEXIST into ENOTEMPTY.  E.g. XFS uses EEXIST, and that
->  		 * is also accepted by the standards.
->  		 *
-> -		 * This applies only to plain rename (flags == 0).
-> +		 * This applies only to plain rename and RENAME_WHITEOUT
->  		 */
-> -		if (!flags && errno == EEXIST)
-> +		if (errno == EEXIST && (!flags || (flags & RENAME_WHITEOUT)))
->  			errno = ENOTEMPTY;
->  
->  		perror("");
-> diff --git a/tests/generic/078 b/tests/generic/078
-> new file mode 100755
-> index 0000000..92ece0c
-> --- /dev/null
-> +++ b/tests/generic/078
-> @@ -0,0 +1,66 @@
-> +#! /bin/bash
-> +# FS QA Test No. generic/078
-> +#
-> +# Check renameat2 syscall with RENAME_WHITEOUT flag
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2014 Miklos Szeredi.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +    cd /
-> +    rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/renameat2
-> +
-> +_supported_fs generic
-> +_supported_os Linux
-> +
-> +_require_test
-> +_requires_renameat2
-> +_require_test_symlinks
-> +
-> +rename_dir=$TEST_DIR/$$
-> +mkdir $rename_dir
-> +touch $rename_dir/foo $rename_dir/bar
-> +if ! src/renameat2 -t -w $rename_dir/foo $rename_dir/bar; then
-> +    rm -f $rename_dir/foo $rename_dir/bar; rmdir $rename_dir
-> +    _notrun "fs doesn't support RENAME_WHITEOUT"
-> +fi
-> +rm -f $rename_dir/foo $rename_dir/bar
-> +
-> +# real QA test starts here
-> +
-> +_rename_tests $rename_dir -w
-> +rmdir $rename_dir
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/078.out b/tests/generic/078.out
-> new file mode 100644
-> index 0000000..5d5e3a0
-> --- /dev/null
-> +++ b/tests/generic/078.out
-> @@ -0,0 +1,51 @@
-> +QA output created by 078
-> +samedir  none/none -> No such file or directory
-> +samedir  none/regu -> No such file or directory
-> +samedir  none/symb -> No such file or directory
-> +samedir  none/dire -> No such file or directory
-> +samedir  none/tree -> No such file or directory
-> +samedir  regu/none -> char/regu.
-> +samedir  regu/regu -> char/regu.
-> +samedir  regu/symb -> char/regu.
-> +samedir  regu/dire -> Is a directory
-> +samedir  regu/tree -> Is a directory
-> +samedir  symb/none -> char/symb.
-> +samedir  symb/regu -> char/symb.
-> +samedir  symb/symb -> char/symb.
-> +samedir  symb/dire -> Is a directory
-> +samedir  symb/tree -> Is a directory
-> +samedir  dire/none -> char/dire.
-> +samedir  dire/regu -> Not a directory
-> +samedir  dire/symb -> Not a directory
-> +samedir  dire/dire -> char/dire.
-> +samedir  dire/tree -> Directory not empty
-> +samedir  tree/none -> char/tree.
-> +samedir  tree/regu -> Not a directory
-> +samedir  tree/symb -> Not a directory
-> +samedir  tree/dire -> char/tree.
-> +samedir  tree/tree -> Directory not empty
-> +crossdir none/none -> No such file or directory
-> +crossdir none/regu -> No such file or directory
-> +crossdir none/symb -> No such file or directory
-> +crossdir none/dire -> No such file or directory
-> +crossdir none/tree -> No such file or directory
-> +crossdir regu/none -> char/regu.
-> +crossdir regu/regu -> char/regu.
-> +crossdir regu/symb -> char/regu.
-> +crossdir regu/dire -> Is a directory
-> +crossdir regu/tree -> Is a directory
-> +crossdir symb/none -> char/symb.
-> +crossdir symb/regu -> char/symb.
-> +crossdir symb/symb -> char/symb.
-> +crossdir symb/dire -> Is a directory
-> +crossdir symb/tree -> Is a directory
-> +crossdir dire/none -> char/dire.
-> +crossdir dire/regu -> Not a directory
-> +crossdir dire/symb -> Not a directory
-> +crossdir dire/dire -> char/dire.
-> +crossdir dire/tree -> Directory not empty
-> +crossdir tree/none -> char/tree.
-> +crossdir tree/regu -> Not a directory
-> +crossdir tree/symb -> Not a directory
-> +crossdir tree/dire -> char/tree.
-> +crossdir tree/tree -> Directory not empty
-> diff --git a/tests/generic/group b/tests/generic/group
-> index f2eb87a..0f274a6 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -69,6 +69,7 @@
->  075 rw udf auto quick
->  076 metadata rw udf auto quick stress
->  077 acl attr auto enospc
-> +078 auto quick metadata
->  079 acl attr ioctl metadata auto quick
->  083 rw auto enospc stress
->  088 perms auto quick
-> -- 
-> 2.0.0
+> But this test is not about writing to a file, it's about changing
+> file xattr. And while extended attributes are metadata, they are
+> _not_ file system metadata and as such I think it can be very well
+> treated as data. Hence explicit fsync is needed to make sure it's
+> written to the disk.
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Now let's look at the test itself:
+> 
+> 
+> 	echo "hello world!" >> $SCRATCH_MNT/foobar
+> 	$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foobar
+> 	$SETFATTR_PROG -x user.attr1 $SCRATCH_MNT/foobar
+> 	ln $SCRATCH_MNT/foobar $SCRATCH_MNT/foobar_link
+> 	touch $SCRATCH_MNT/qwerty
+> 	$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/qwerty
+> 
+> 	_crash_and_mount
+> 
+> 	# Now only the xattr with name user.attr3 should be set in our file.
+> 	echo "xattr names and values after second fsync log replay:"
+> 	$GETFATTR_PROG --absolute-names --dump $SCRATCH_MNT/foobar |
+> 	_filter_scratch
+> 
+> No it should not have only attr3 because $SCRATCH_MNT/foobar was
+> never fsynced after attr3 removal. If the internal design of the
+> file system accidentally synces unrelated xattrs on unrelated fsync,
+> than that's fine, but that's not what we need to test for at all
+> because it might not be guaranteed by all the file systems. So I
+> think this last part of the test is rather pointless. So I think
+> this patch is not needed as well.
+> 
+> Or am I missing something Filipe ?
+> 
+> Thanks!
+> -Lukas
+> 
+> > Otherwise, file A is recovered to #3.
+> 
+> 
+> > 
+> > Cc: Filipe Manana <fdmanana@suse.com>
+> > Cc: Eric Sandeen <sandeen@redhat.com>
+> > Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
+> > ---
+> >  common/rc         | 18 ++++++++++++++++++
+> >  tests/generic/066 |  2 +-
+> >  2 files changed, 19 insertions(+), 1 deletion(-)
+> > 
+> > diff --git a/common/rc b/common/rc
+> > index 1ed9df5..e6e8d1f 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -2372,6 +2372,24 @@ _require_metadata_journaling()
+> >  	esac
+> >  }
+> >  
+> > +# Does this filesystem support metadata replay?
+> > +# Filesystem is able to recover metadata which were not written by fsync
+> > +# exlicitly. But another fsync'ed metadata should be followed by them.
+> > +_require_metadata_replay()
+> > +{
+> > +	_require_metadata_journaling $1
+> > +
+> > +	case "$FSTYP" in
+> > +	f2fs)
+> > +		# f2fs supports metadata_journaling, but does not recover any
+> > +		# intermediate metadata which was not fsync'ed explicitly.
+> > +		_notrun "$FSTYP does not support metadata replay"
+> > +		;;
+> > +	*)
+> > +		;;
+> > +	esac
+> > +}
+> > +
+> >  # Does fiemap support?
+> >  _require_fiemap()
+> >  {
+> > diff --git a/tests/generic/066 b/tests/generic/066
+> > index cb36506..3fefda4 100755
+> > --- a/tests/generic/066
+> > +++ b/tests/generic/066
+> > @@ -61,7 +61,7 @@ _need_to_be_root
+> >  _require_scratch
+> >  _require_dm_flakey
+> >  _require_attrs
+> > -_require_metadata_journaling $SCRATCH_DEV
+> > +_require_metadata_replay $SCRATCH_DEV
+> >  
+> >  _crash_and_mount()
+> >  {
+> > 
