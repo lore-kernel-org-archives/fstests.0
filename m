@@ -1,161 +1,143 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36513 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:40880 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751105AbbB0Lbt (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 27 Feb 2015 06:31:49 -0500
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 5/5] generic: test fs freeze/unfreeze and mount/umount race
-Date: Fri, 27 Feb 2015 19:30:25 +0800
-Message-Id: <1425036625-23361-6-git-send-email-eguan@redhat.com>
-In-Reply-To: <1425036625-23361-1-git-send-email-eguan@redhat.com>
-References: <1425036625-23361-1-git-send-email-eguan@redhat.com>
+	id S1751348AbbB0Le0 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 27 Feb 2015 06:34:26 -0500
+Date: Fri, 27 Feb 2015 12:34:09 +0100 (CET)
+From: =?ISO-8859-15?Q?Luk=E1=A8_Czerner?= <lczerner@redhat.com>
+Subject: Re: [PATCH 2/2] generic/066: add _require_metadata_replay
+In-Reply-To: <1425000227-69601-2-git-send-email-jaegeuk@kernel.org>
+Message-ID: <alpine.LFD.2.00.1502271056110.2188@localhost.localdomain>
+References: <1425000227-69601-1-git-send-email-jaegeuk@kernel.org> <1425000227-69601-2-git-send-email-jaegeuk@kernel.org>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>, Monakhov Dmitriy <dmonakhov@openvz.org>
+To: Jaegeuk Kim <jaegeuk@kernel.org>
+Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Filipe Manana <fdmanana@suse.com>, Eric Sandeen <sandeen@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Exercise fs freeze/unfreeze and mount/umount race, which could lead to
-use-after-free oops.
+On Thu, 26 Feb 2015, Jaegeuk Kim wrote:
 
-This commit fixed the issue:
-1494583 fix get_active_super()/umount() race
+> Date: Thu, 26 Feb 2015 17:23:47 -0800
+> From: Jaegeuk Kim <jaegeuk@kernel.org>
+> To: Dave Chinner <david@fromorbit.com>
+> Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
+>     Jaegeuk Kim <jaegeuk@kernel.org>, Filipe Manana <fdmanana@suse.com>,
+>     Eric Sandeen <sandeen@redhat.com>
+> Subject: [PATCH 2/2] generic/066: add _require_metadata_replay
+> 
+> This patch adds _require_metadata_replay to detect whether or not filesystem
+> supports metadata replay.
+> 
+> This should be used when:
+> 
+> 1. create file A
+> 2. write file A
+> 3. fsync file A
+> 
+> 4. write file A
+> 
+> 5. create file B
+> 6. fsync file B
+> 7. crash!
+> 
+> In this case, if filesystem supports metadata_replay, file A's data written
+> by #4 should be recovered.
 
-This test case is based on a script from Monakhov Dmitriy.
+What ? No it should not! file A was never fsync after the last
+write, so there is no guarantee that we'll have the new content.
+"Metadata replay" suggests that we only replay metadata, not data
+and that's what file systems usually do with they journals, cows,
+and so on...
 
-Cc: Monakhov Dmitriy <dmonakhov@openvz.org>
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
- tests/generic/073     | 98 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/073.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 101 insertions(+)
- create mode 100755 tests/generic/073
- create mode 100644 tests/generic/073.out
+But this test is not about writing to a file, it's about changing
+file xattr. And while extended attributes are metadata, they are
+_not_ file system metadata and as such I think it can be very well
+treated as data. Hence explicit fsync is needed to make sure it's
+written to the disk.
 
-diff --git a/tests/generic/073 b/tests/generic/073
-new file mode 100755
-index 0000000..084a2da
---- /dev/null
-+++ b/tests/generic/073
-@@ -0,0 +1,98 @@
-+#! /bin/bash
-+# FS QA Test No. 073
-+#
-+# Exercise fs freeze/unfreeze and mount/umount race, which could lead to
-+# use-after-free oops.
-+#
-+# This commit fixed the issue:
-+# 1494583 fix get_active_super()/umount() race
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	cleanup_dmdev
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_block_device $SCRATCH_DEV
-+_require_command $DMSETUP_PROG
-+_require_freeze
-+
-+setup_dmdev()
-+{
-+	table="0 $size_in_sector linear $SCRATCH_DEV 0"
-+	$DMSETUP_PROG create $node --table "$table" >>$seqres.full 2>&1
-+	$DMSETUP_PROG mknodes >/dev/null 2>&1
-+}
-+
-+cleanup_dmdev()
-+{
-+	# in case it's still suspended and/or mounted
-+	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
-+	$UMOUNT_PROG $lvdev >/dev/null 2>&1
-+
-+	$DMSETUP_PROG remove $node >>$seqres.full 2>&1
-+	$DMSETUP_PROG mknodes >/dev/null 2>&1
-+}
-+
-+rm -f $seqres.full
-+echo "Silence is golden"
-+
-+size=$((256 * 1024 * 1024))
-+size_in_sector=$((size / 512))
-+_scratch_mkfs_sized $size >>$seqres.full 2>&1
-+
-+node=$seq-test
-+lvdev=/dev/mapper/$node
-+setup_dmdev
-+
-+for ((i=0; i<100; i++)); do
-+	$DMSETUP_PROG suspend $lvdev >/dev/null 2>&1
-+	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
-+done &
-+pid=$!
-+for ((i=0; i<100; i++)); do
-+	$MOUNT_PROG $lvdev $SCRATCH_MNT >/dev/null 2>&1
-+	$UMOUNT_PROG $lvdev >/dev/null 2>&1
-+done &
-+pid="$pid $!"
-+
-+wait $pid
-+
-+status=0
-+exit
-diff --git a/tests/generic/073.out b/tests/generic/073.out
-new file mode 100644
-index 0000000..d107704
---- /dev/null
-+++ b/tests/generic/073.out
-@@ -0,0 +1,2 @@
-+QA output created by 073
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 7265b18..97b04b7 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -75,6 +75,7 @@
- 070 attr udf auto quick stress
- 071 auto quick quota
- 072 auto metadata
-+073 auto freeze mount
- 074 rw udf auto
- 075 rw udf auto quick
- 076 metadata rw udf auto quick stress
--- 
-1.8.3.1
+Now let's look at the test itself:
 
+
+	echo "hello world!" >> $SCRATCH_MNT/foobar
+	$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foobar
+	$SETFATTR_PROG -x user.attr1 $SCRATCH_MNT/foobar
+	ln $SCRATCH_MNT/foobar $SCRATCH_MNT/foobar_link
+	touch $SCRATCH_MNT/qwerty
+	$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/qwerty
+
+	_crash_and_mount
+
+	# Now only the xattr with name user.attr3 should be set in our file.
+	echo "xattr names and values after second fsync log replay:"
+	$GETFATTR_PROG --absolute-names --dump $SCRATCH_MNT/foobar |
+	_filter_scratch
+
+No it should not have only attr3 because $SCRATCH_MNT/foobar was
+never fsynced after attr3 removal. If the internal design of the
+file system accidentally synces unrelated xattrs on unrelated fsync,
+than that's fine, but that's not what we need to test for at all
+because it might not be guaranteed by all the file systems. So I
+think this last part of the test is rather pointless. So I think
+this patch is not needed as well.
+
+Or am I missing something Filipe ?
+
+Thanks!
+-Lukas
+
+> Otherwise, file A is recovered to #3.
+
+
+> 
+> Cc: Filipe Manana <fdmanana@suse.com>
+> Cc: Eric Sandeen <sandeen@redhat.com>
+> Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
+> ---
+>  common/rc         | 18 ++++++++++++++++++
+>  tests/generic/066 |  2 +-
+>  2 files changed, 19 insertions(+), 1 deletion(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 1ed9df5..e6e8d1f 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2372,6 +2372,24 @@ _require_metadata_journaling()
+>  	esac
+>  }
+>  
+> +# Does this filesystem support metadata replay?
+> +# Filesystem is able to recover metadata which were not written by fsync
+> +# exlicitly. But another fsync'ed metadata should be followed by them.
+> +_require_metadata_replay()
+> +{
+> +	_require_metadata_journaling $1
+> +
+> +	case "$FSTYP" in
+> +	f2fs)
+> +		# f2fs supports metadata_journaling, but does not recover any
+> +		# intermediate metadata which was not fsync'ed explicitly.
+> +		_notrun "$FSTYP does not support metadata replay"
+> +		;;
+> +	*)
+> +		;;
+> +	esac
+> +}
+> +
+>  # Does fiemap support?
+>  _require_fiemap()
+>  {
+> diff --git a/tests/generic/066 b/tests/generic/066
+> index cb36506..3fefda4 100755
+> --- a/tests/generic/066
+> +++ b/tests/generic/066
+> @@ -61,7 +61,7 @@ _need_to_be_root
+>  _require_scratch
+>  _require_dm_flakey
+>  _require_attrs
+> -_require_metadata_journaling $SCRATCH_DEV
+> +_require_metadata_replay $SCRATCH_DEV
+>  
+>  _crash_and_mount()
+>  {
+> 
