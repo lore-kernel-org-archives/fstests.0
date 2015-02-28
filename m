@@ -1,184 +1,227 @@
-Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.136]:56437 "EHLO mail.kernel.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751776AbbB0TCl (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 27 Feb 2015 14:02:41 -0500
-Date: Fri, 27 Feb 2015 11:02:37 -0800
-From: Jaegeuk Kim <jaegeuk@kernel.org>
-Subject: Re: [PATCH 2/2] generic/066: add _require_metadata_replay
-Message-ID: <20150227190153.GB71843@jaegeuk-mac02.mot.com>
-References: <1425000227-69601-1-git-send-email-jaegeuk@kernel.org>
- <1425000227-69601-2-git-send-email-jaegeuk@kernel.org>
- <alpine.LFD.2.00.1502271056110.2188@localhost.localdomain>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <alpine.LFD.2.00.1502271056110.2188@localhost.localdomain>
-Sender: fstests-owner@vger.kernel.org
-To: =?utf-8?B?THVrw6HFoQ==?= Czerner <lczerner@redhat.com>
-Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Filipe Manana <fdmanana@suse.com>, Eric Sandeen <sandeen@redhat.com>
+Return-Path: <osandov@osandov.com>
+From: Omar Sandoval <osandov@osandov.com>
+Subject: [PATCH v2] generic: regression tests for ext4 ^extents punch hole
+Date: Fri, 27 Feb 2015 17:29:06 -0800
+Message-Id: <b4af323097a2bf6b792f1b8bd6beac774a6cf3bf.1425085875.git.osandov@osandov.com>
+To: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, =?UTF-8?q?Luk=C3=A1=C5=A1=20Czerner?= <lczerner@redhat.com>, Theodore Ts'o <tytso@mit.edu>, Dave Chinner <david@fromorbit.com>, Eric Sandeen <sandeen@sandeen.net>
+Cc: Omar Sandoval <osandov@osandov.com>
 List-ID: <fstests@vger.kernel.org>
 
-Hi Lukas,
+Linux commit 6f30b7e37a82 (ext4: fix indirect punch hole corruption)
+fixes several bugs in the FALLOC_FL_PUNCH_HOLE implementation for an
+ext4 filesystem with indirect blocks. This is a regression test when run
+on ext4 with 4K blocks and a generic fpunch test on anything else, with
+the advantage that it doesn't depend on falloc like the other fpunch
+tests.
 
-On Fri, Feb 27, 2015 at 12:34:09PM +0100, Lukáš Czerner wrote:
-> On Thu, 26 Feb 2015, Jaegeuk Kim wrote:
-> 
-> > Date: Thu, 26 Feb 2015 17:23:47 -0800
-> > From: Jaegeuk Kim <jaegeuk@kernel.org>
-> > To: Dave Chinner <david@fromorbit.com>
-> > Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
-> >     Jaegeuk Kim <jaegeuk@kernel.org>, Filipe Manana <fdmanana@suse.com>,
-> >     Eric Sandeen <sandeen@redhat.com>
-> > Subject: [PATCH 2/2] generic/066: add _require_metadata_replay
-> > 
-> > This patch adds _require_metadata_replay to detect whether or not filesystem
-> > supports metadata replay.
-> > 
-> > This should be used when:
-> > 
-> > 1. create file A
-> > 2. write file A
-> > 3. fsync file A
-> > 
-> > 4. write file A
-> > 
-> > 5. create file B
-> > 6. fsync file B
-> > 7. crash!
-> > 
-> > In this case, if filesystem supports metadata_replay, file A's data written
-> > by #4 should be recovered.
-> 
-> What ? No it should not! file A was never fsync after the last
-> write, so there is no guarantee that we'll have the new content.
-> "Metadata replay" suggests that we only replay metadata, not data
-> and that's what file systems usually do with they journals, cows,
-> and so on...
+Signed-off-by: Omar Sandoval <osandov@osandov.com>
+---
+Hi, everyone,
 
-I totally wrote this description insanely.
-My apologies.
+Here's another go at this, now as a generic test. It turns out that making the
+output blocksize-independent isn't easy. We can't just scale things linearly
+because the number of blocks in an indirect level is different based on the
+blocksize. So, I just settled on using 4k blocks. If the test is run on ext4
+with a different block size, it doesn't actually test the original bugs, but I
+think that's okay.
 
-Yes, what I wanted to point out was the coverage of xattr recovery, not data.
-1. create file A
-2. write file A
-3. fsync file A
+I also went for the special case for ext4, because, like Lukas mentioned, I
+don't know how much coverage that code will get otherwise. It looks like
+_scratch_mkfs_ext4 already handles conflicting test options in the same way as
+_scratch_mkfs_xfs.
 
-*4. setxattr file A
+Summary of changes from v1:
 
-5. create file B
-6. fsync file B
-7. crash!
+- Move test to generic with special case for ext4
+- Use 4k blocks by default
 
-What I've focussed on actually was the coverage of metadata replay which depends
-on filesystem's design.
+Thanks!
 
-In this case, I think the metadata log contains:
-...
-1. fsync'ed file A
-2. changed xattrs on file A
-3. fsync'ed file B
+ tests/generic/080     | 126 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/080.out |  29 ++++++++++++
+ tests/generic/group   |   1 +
+ 3 files changed, 156 insertions(+)
+ create mode 100755 tests/generic/080
+ create mode 100644 tests/generic/080.out
 
-Currently, xfs and ext4 recover #2, and btrfs without Filipe's patch does not.
-And, I understood that this testcase intends to check #2 is recoverable or not.
-
-IMHO, however, basically filesystem doesn't need to recover #2 at all.
-So, I tried to add _require_something to check whether filesystem recovers
-written xattrs followed by any fsync'ed file coincidentally.
-
-Thanks,
-
->
-> 
-> But this test is not about writing to a file, it's about changing
-> file xattr. And while extended attributes are metadata, they are
-> _not_ file system metadata and as such I think it can be very well
-> treated as data. Hence explicit fsync is needed to make sure it's
-> written to the disk.
-> 
-> Now let's look at the test itself:
-> 
-> 
-> 	echo "hello world!" >> $SCRATCH_MNT/foobar
-> 	$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foobar
-> 	$SETFATTR_PROG -x user.attr1 $SCRATCH_MNT/foobar
-> 	ln $SCRATCH_MNT/foobar $SCRATCH_MNT/foobar_link
-> 	touch $SCRATCH_MNT/qwerty
-> 	$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/qwerty
-> 
-> 	_crash_and_mount
-> 
-> 	# Now only the xattr with name user.attr3 should be set in our file.
-> 	echo "xattr names and values after second fsync log replay:"
-> 	$GETFATTR_PROG --absolute-names --dump $SCRATCH_MNT/foobar |
-> 	_filter_scratch
-> 
-> No it should not have only attr3 because $SCRATCH_MNT/foobar was
-> never fsynced after attr3 removal. If the internal design of the
-> file system accidentally synces unrelated xattrs on unrelated fsync,
-> than that's fine, but that's not what we need to test for at all
-> because it might not be guaranteed by all the file systems. So I
-> think this last part of the test is rather pointless. So I think
-> this patch is not needed as well.
-> 
-> Or am I missing something Filipe ?
-> 
-> Thanks!
-> -Lukas
-> 
-> > Otherwise, file A is recovered to #3.
-> 
-> 
-> > 
-> > Cc: Filipe Manana <fdmanana@suse.com>
-> > Cc: Eric Sandeen <sandeen@redhat.com>
-> > Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
-> > ---
-> >  common/rc         | 18 ++++++++++++++++++
-> >  tests/generic/066 |  2 +-
-> >  2 files changed, 19 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/common/rc b/common/rc
-> > index 1ed9df5..e6e8d1f 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -2372,6 +2372,24 @@ _require_metadata_journaling()
-> >  	esac
-> >  }
-> >  
-> > +# Does this filesystem support metadata replay?
-> > +# Filesystem is able to recover metadata which were not written by fsync
-> > +# exlicitly. But another fsync'ed metadata should be followed by them.
-> > +_require_metadata_replay()
-> > +{
-> > +	_require_metadata_journaling $1
-> > +
-> > +	case "$FSTYP" in
-> > +	f2fs)
-> > +		# f2fs supports metadata_journaling, but does not recover any
-> > +		# intermediate metadata which was not fsync'ed explicitly.
-> > +		_notrun "$FSTYP does not support metadata replay"
-> > +		;;
-> > +	*)
-> > +		;;
-> > +	esac
-> > +}
-> > +
-> >  # Does fiemap support?
-> >  _require_fiemap()
-> >  {
-> > diff --git a/tests/generic/066 b/tests/generic/066
-> > index cb36506..3fefda4 100755
-> > --- a/tests/generic/066
-> > +++ b/tests/generic/066
-> > @@ -61,7 +61,7 @@ _need_to_be_root
-> >  _require_scratch
-> >  _require_dm_flakey
-> >  _require_attrs
-> > -_require_metadata_journaling $SCRATCH_DEV
-> > +_require_metadata_replay $SCRATCH_DEV
-> >  
-> >  _crash_and_mount()
-> >  {
-> > 
+diff --git a/tests/generic/080 b/tests/generic/080
+new file mode 100755
+index 0000000..1e67493
+--- /dev/null
++++ b/tests/generic/080
+@@ -0,0 +1,126 @@
++#! /bin/bash
++# FS QA Test No. 080
++#
++# Test fpunch on an ^extents ext4 filesystem.
++# Regression test for commit:
++# 6f30b7e37a82 (ext4: fix indirect punch hole corruption)
++#
++# The regression is exercised on ext4 when the blocksize is 4K. Otherwise, this
++# is just a generic fpunch test which doesn't depend on falloc.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Omar Sandoval.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/punch
++
++# The test output depends on this blocksize, but this doesn't have to be the
++# same as the filesystem block size for the test to pass.
++BLOCKSIZE=4096
++NDIR=12
++ADDRS=$((BLOCKSIZE / 4))
++
++_write_blocks()
++{
++	$XFS_IO_PROG -f -c "pwrite $((BLOCKSIZE * $2)) $((BLOCKSIZE * ($3 - $2)))" $SCRATCH_MNT/$1 | _filter_xfs_io
++	_scratch_unmount
++	_scratch_mount
++}
++
++_punch_blocks()
++{
++	$XFS_IO_PROG -c "fpunch $((BLOCKSIZE * $2)) $((BLOCKSIZE * ($3 - $2)))" $SCRATCH_MNT/$1
++}
++
++_check_blocks()
++{
++	$XFS_IO_PROG -c 'fiemap -v' $SCRATCH_MNT/$1 | _filter_hole_fiemap
++	_md5_checksum $SCRATCH_MNT/$1
++}
++
++_supported_fs generic
++_supported_os Linux
++_need_to_be_root
++_require_scratch
++_require_xfs_io_command "fiemap"
++_require_xfs_io_command "fpunch"
++
++rm -f $seqres.full
++
++if [ "$FSTYP" = "ext4" ]; then
++	# Special case to ensure that this configuration gets some coverage.
++	_scratch_mkfs -O ^extents >> $seqres.full 2>&1
++else
++	_scratch_mkfs >> $seqres.full 2>&1
++fi
++_scratch_mount || _fail "couldn't mount fs"
++
++# Bug 1: whole level of indirection is not freed when end is first block of a
++# level.
++_write_blocks testfile1 0 $((NDIR + ADDRS + ADDRS * ADDRS + 4))
++_punch_blocks testfile1 0 $((NDIR + ADDRS + ADDRS * ADDRS))
++_check_blocks testfile1
++
++# Bug 2: end is at higher level than start, end shared branch is not freed.
++_write_blocks testfile2 0 $((NDIR + ADDRS + 2 * ADDRS + 8))
++_punch_blocks testfile2 $((NDIR + ADDRS + 2 * ADDRS)) $((NDIR + ADDRS + 2 * ADDRS + 4))
++_punch_blocks testfile2 0 $((NDIR + ADDRS + 2 * ADDRS + 4))
++_check_blocks testfile2
++
++# Bug 3: start and end are within one level of indirection, extra blocks are
++# freed because partial branches don't converge. (This bug also masks the
++# remaining 2. That is, the test cases for 4 and 5 are also necessarily
++# affected by bug 3.)
++_write_blocks testfile3 0 $((NDIR + ADDRS + 2 * ADDRS))
++_punch_blocks testfile3 $((NDIR + ADDRS + ADDRS / 2)) $((NDIR + ADDRS + ADDRS))
++_check_blocks testfile3
++
++# Bug 4: start and end are within one level of indirection, top of start is not
++# freed.
++_write_blocks testfile4 0 $((NDIR + ADDRS + 8 * ADDRS))
++_punch_blocks testfile4 $((NDIR + ADDRS + ADDRS)) $((NDIR + ADDRS + ADDRS + 4))
++_punch_blocks testfile4 $((NDIR + ADDRS + ADDRS + 4)) $((NDIR + ADDRS + 4 * ADDRS))
++_check_blocks testfile4
++
++# Bug 5: start and end are within one level of indirection, extra blocks beyond
++# end of range are freed when end has top branch.
++_write_blocks testfile5 0 $((NDIR + ADDRS + 4 * ADDRS))
++_punch_blocks testfile5 $((NDIR + ADDRS + 2 * ADDRS)) $((NDIR + ADDRS + 2 * ADDRS + ADDRS / 2))
++_punch_blocks testfile5 $((NDIR + ADDRS + 2)) $((NDIR + ADDRS + 2 * ADDRS + 2))
++_check_blocks testfile5
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/080.out b/tests/generic/080.out
+new file mode 100644
+index 0000000..5301f80
+--- /dev/null
++++ b/tests/generic/080.out
+@@ -0,0 +1,29 @@
++QA output created by 080
++wrote 4299227136/4299227136 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++0: [0..8396895]: hole
++1: [8396896..8396927]: extent
++ca385f8981956660e3d698c0ca810e1b
++wrote 12664832/12664832 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++0: [0..24703]: hole
++1: [24704..24735]: extent
++1e2dda6f86f5d983a4a02c64da902fe4
++wrote 12632064/12632064 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++0: [0..12383]: extent
++1: [12384..16479]: hole
++2: [16480..24671]: extent
++e47bb56af5783e0a1022e00b25abefb2
++wrote 37797888/37797888 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++0: [0..16479]: extent
++1: [16480..41055]: hole
++2: [41056..73823]: extent
++337983ee561a9b756d21a29757fb4f62
++wrote 21020672/21020672 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++0: [0..8303]: extent
++1: [8304..28767]: hole
++2: [28768..41055]: extent
++eb0e1b76f866926089efe70d713a938c
+diff --git a/tests/generic/group b/tests/generic/group
+index e5db772..2c717b3 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -77,6 +77,7 @@
+ 076 metadata rw udf auto quick stress
+ 077 acl attr auto enospc
+ 079 acl attr ioctl metadata auto quick
++080 auto
+ 083 rw auto enospc stress
+ 088 perms auto quick
+ 089 metadata auto
+-- 
+2.3.1
