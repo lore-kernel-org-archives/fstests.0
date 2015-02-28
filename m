@@ -1,67 +1,58 @@
-Return-Path: <osandov@osandov.com>
-From: Omar Sandoval <osandov@osandov.com>
-Subject: [PATCH v2] generic: regression tests for ext4 ^extents punch hole
-Date: Fri, 27 Feb 2015 17:29:06 -0800
-Message-Id: <b4af323097a2bf6b792f1b8bd6beac774a6cf3bf.1425085875.git.osandov@osandov.com>
-To: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, =?UTF-8?q?Luk=C3=A1=C5=A1=20Czerner?= <lczerner@redhat.com>, Theodore Ts'o <tytso@mit.edu>, Dave Chinner <david@fromorbit.com>, Eric Sandeen <sandeen@sandeen.net>
-Cc: Omar Sandoval <osandov@osandov.com>
+Return-Path: <fstests-owner@vger.kernel.org>
+Received: from victor.provo.novell.com ([137.65.250.26]:60162 "EHLO
+	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751220AbbB1VFX (ORCPT
+	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
+	Sat, 28 Feb 2015 16:05:23 -0500
+From: Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] fstests: btrfs test for incremental send with directory renames
+Date: Sat, 28 Feb 2015 21:04:50 +0000
+Message-Id: <1425157490-24776-1-git-send-email-fdmanana@suse.com>
+Sender: fstests-owner@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Linux commit 6f30b7e37a82 (ext4: fix indirect punch hole corruption)
-fixes several bugs in the FALLOC_FL_PUNCH_HOLE implementation for an
-ext4 filesystem with indirect blocks. This is a regression test when run
-on ext4 with 4K blocks and a generic fpunch test on anything else, with
-the advantage that it doesn't depend on falloc like the other fpunch
-tests.
+Test for incremental send where the difference between the parent and
+child snapshots is that a directory A was renamed and a directory B was
+renamed to the name directory A had before (in the parent snapshot),
+but directory A's rename must happen before some other directory C is
+renamed.
 
-Signed-off-by: Omar Sandoval <osandov@osandov.com>
+This issue was fixed by the following linux kernel btrfs patch:
+
+  Btrfs: incremental send, don't rename a directory too soon
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
-Hi, everyone,
+ tests/btrfs/083     | 159 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/083.out |   2 +
+ tests/btrfs/group   |   1 +
+ 3 files changed, 162 insertions(+)
+ create mode 100755 tests/btrfs/083
+ create mode 100644 tests/btrfs/083.out
 
-Here's another go at this, now as a generic test. It turns out that making the
-output blocksize-independent isn't easy. We can't just scale things linearly
-because the number of blocks in an indirect level is different based on the
-blocksize. So, I just settled on using 4k blocks. If the test is run on ext4
-with a different block size, it doesn't actually test the original bugs, but I
-think that's okay.
-
-I also went for the special case for ext4, because, like Lukas mentioned, I
-don't know how much coverage that code will get otherwise. It looks like
-_scratch_mkfs_ext4 already handles conflicting test options in the same way as
-_scratch_mkfs_xfs.
-
-Summary of changes from v1:
-
-- Move test to generic with special case for ext4
-- Use 4k blocks by default
-
-Thanks!
-
- tests/generic/080     | 126 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/080.out |  29 ++++++++++++
- tests/generic/group   |   1 +
- 3 files changed, 156 insertions(+)
- create mode 100755 tests/generic/080
- create mode 100644 tests/generic/080.out
-
-diff --git a/tests/generic/080 b/tests/generic/080
+diff --git a/tests/btrfs/083 b/tests/btrfs/083
 new file mode 100755
-index 0000000..1e67493
+index 0000000..e4b6767
 --- /dev/null
-+++ b/tests/generic/080
-@@ -0,0 +1,126 @@
++++ b/tests/btrfs/083
+@@ -0,0 +1,159 @@
 +#! /bin/bash
-+# FS QA Test No. 080
++# FS QA Test No. btrfs/083
 +#
-+# Test fpunch on an ^extents ext4 filesystem.
-+# Regression test for commit:
-+# 6f30b7e37a82 (ext4: fix indirect punch hole corruption)
++# Test for incremental send where the difference between the parent and child
++# snapshots is that a directory A was renamed and a directory B was renamed to
++# the name directory A had before (in the parent snapshot), but directory A's
++# rename must happen before some other directory C is renamed.
 +#
-+# The regression is exercised on ext4 when the blocksize is 4K. Otherwise, this
-+# is just a generic fpunch test which doesn't depend on falloc.
++# This issue was fixed by the following linux kernel btrfs patch:
++#
++#   Btrfs: incremental send, don't rename a directory too soon
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Omar Sandoval.  All Rights Reserved.
++# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -82,146 +73,147 @@ index 0000000..1e67493
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
-+here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+	cd /
++	rm -fr $send_files_dir
 +	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/punch
 +
-+# The test output depends on this blocksize, but this doesn't have to be the
-+# same as the filesystem block size for the test to pass.
-+BLOCKSIZE=4096
-+NDIR=12
-+ADDRS=$((BLOCKSIZE / 4))
-+
-+_write_blocks()
-+{
-+	$XFS_IO_PROG -f -c "pwrite $((BLOCKSIZE * $2)) $((BLOCKSIZE * ($3 - $2)))" $SCRATCH_MNT/$1 | _filter_xfs_io
-+	_scratch_unmount
-+	_scratch_mount
-+}
-+
-+_punch_blocks()
-+{
-+	$XFS_IO_PROG -c "fpunch $((BLOCKSIZE * $2)) $((BLOCKSIZE * ($3 - $2)))" $SCRATCH_MNT/$1
-+}
-+
-+_check_blocks()
-+{
-+	$XFS_IO_PROG -c 'fiemap -v' $SCRATCH_MNT/$1 | _filter_hole_fiemap
-+	_md5_checksum $SCRATCH_MNT/$1
-+}
-+
-+_supported_fs generic
++# real QA test starts here
++_supported_fs btrfs
 +_supported_os Linux
-+_need_to_be_root
 +_require_scratch
-+_require_xfs_io_command "fiemap"
-+_require_xfs_io_command "fpunch"
++_require_fssum
++_need_to_be_root
++
++send_files_dir=$TEST_DIR/btrfs-test-$seq
 +
 +rm -f $seqres.full
++rm -fr $send_files_dir
++mkdir $send_files_dir
 +
-+if [ "$FSTYP" = "ext4" ]; then
-+	# Special case to ensure that this configuration gets some coverage.
-+	_scratch_mkfs -O ^extents >> $seqres.full 2>&1
-+else
-+	_scratch_mkfs >> $seqres.full 2>&1
-+fi
-+_scratch_mount || _fail "couldn't mount fs"
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
 +
-+# Bug 1: whole level of indirection is not freed when end is first block of a
-+# level.
-+_write_blocks testfile1 0 $((NDIR + ADDRS + ADDRS * ADDRS + 4))
-+_punch_blocks testfile1 0 $((NDIR + ADDRS + ADDRS * ADDRS))
-+_check_blocks testfile1
++mkdir $SCRATCH_MNT/a
++mkdir $SCRATCH_MNT/b
++mkdir $SCRATCH_MNT/c
++touch $SCRATCH_MNT/a/file
 +
-+# Bug 2: end is at higher level than start, end shared branch is not freed.
-+_write_blocks testfile2 0 $((NDIR + ADDRS + 2 * ADDRS + 8))
-+_punch_blocks testfile2 $((NDIR + ADDRS + 2 * ADDRS)) $((NDIR + ADDRS + 2 * ADDRS + 4))
-+_punch_blocks testfile2 0 $((NDIR + ADDRS + 2 * ADDRS + 4))
-+_check_blocks testfile2
++mkdir $SCRATCH_MNT/d
++mkdir $SCRATCH_MNT/e
++touch $SCRATCH_MNT/e/file2
++mkdir $SCRATCH_MNT/f
 +
-+# Bug 3: start and end are within one level of indirection, extra blocks are
-+# freed because partial branches don't converge. (This bug also masks the
-+# remaining 2. That is, the test cases for 4 and 5 are also necessarily
-+# affected by bug 3.)
-+_write_blocks testfile3 0 $((NDIR + ADDRS + 2 * ADDRS))
-+_punch_blocks testfile3 $((NDIR + ADDRS + ADDRS / 2)) $((NDIR + ADDRS + ADDRS))
-+_check_blocks testfile3
++# Filesystem looks like:
++#
++# .                                       (ino 256)
++# |---- a/                                (ino 257)
++# |     |---- file                        (ino 260)
++# |
++# |---- b/                                (ino 258)
++# |---- c/                                (ino 259)
++# |---- d/                                (ino 261)
++# |---- e/                                (ino 262)
++# |     |--- file2                        (ino 263)
++# |
++# |---- f/                                (ino 264)
++#
++_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap1
 +
-+# Bug 4: start and end are within one level of indirection, top of start is not
-+# freed.
-+_write_blocks testfile4 0 $((NDIR + ADDRS + 8 * ADDRS))
-+_punch_blocks testfile4 $((NDIR + ADDRS + ADDRS)) $((NDIR + ADDRS + ADDRS + 4))
-+_punch_blocks testfile4 $((NDIR + ADDRS + ADDRS + 4)) $((NDIR + ADDRS + 4 * ADDRS))
-+_check_blocks testfile4
++# Now make inode 257 a child of inode 259 and rename inode 258 to the name that
++# inode 257 had before. When the incremental send processes inode 257, it can't
++# do the rename immediately because inode 259 must be renamed first, so inode's
++# 257 rename is delayed and happens after the rename for inode 259 is done.
++# Since send processes inodes by ascending order of their number, inode 258
++# can't be renamed before inode 257 is renamed and therefore must be delayed
++# as well. So the send stream must issue rename commands in the following order:
++#
++# 1 - rename inode 259 ('c' -> 'x')
++# 2 - rename inode 257 ('a' -> 'x/y')
++# 3 - rename inode 258 ('b' -> 'a')
++#
++# Before the fix mentioned above, the send stream attempted to rename inode 258
++# before inode 257 was renamed, resulting in a client error mentioning
++# 'directory not empty'.
++#
++# Same logic applies to 'd', 'e' and 'f', but the difference is that in the
++# second snapshot 'e' is associated to an inode with a lower inode number than
++# in the first snapshot.
++#
++mv $SCRATCH_MNT/c $SCRATCH_MNT/x
++mv $SCRATCH_MNT/a $SCRATCH_MNT/x/y
++mv $SCRATCH_MNT/b $SCRATCH_MNT/a
 +
-+# Bug 5: start and end are within one level of indirection, extra blocks beyond
-+# end of range are freed when end has top branch.
-+_write_blocks testfile5 0 $((NDIR + ADDRS + 4 * ADDRS))
-+_punch_blocks testfile5 $((NDIR + ADDRS + 2 * ADDRS)) $((NDIR + ADDRS + 2 * ADDRS + ADDRS / 2))
-+_punch_blocks testfile5 $((NDIR + ADDRS + 2)) $((NDIR + ADDRS + 2 * ADDRS + 2))
-+_check_blocks testfile5
++mv $SCRATCH_MNT/f $SCRATCH_MNT/f2
++mv $SCRATCH_MNT/e $SCRATCH_MNT/f2/e2
++mv $SCRATCH_MNT/d $SCRATCH_MNT/e
 +
-+# success, all done
++# Filesystem now looks like:
++#
++#
++# .                                       (ino 256)
++# |---- a/                                (ino 258)
++# |---- x/                                (ino 259)
++# |     |---- y/                          (ino 257)
++# |           |----- file                 (ino 260)
++# |
++# |---- e/                                (ino 261)
++# |---- f2/                               (ino 264)
++# |     |----- e2/                        (ino 262)
++#              |---- file2                (ino 263)
++
++_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap2
++
++run_check $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
++run_check $FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
++	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
++
++_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
++_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
++	-f $send_files_dir/2.snap
++
++# Now recreate the filesystem by receiving both send streams and verify we get
++# the same content that the original filesystem had.
++_scratch_unmount
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
++run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
++
++_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
++run_check $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
++
++echo "Silence is golden"
++
 +status=0
 +exit
-diff --git a/tests/generic/080.out b/tests/generic/080.out
+diff --git a/tests/btrfs/083.out b/tests/btrfs/083.out
 new file mode 100644
-index 0000000..5301f80
+index 0000000..0beba30
 --- /dev/null
-+++ b/tests/generic/080.out
-@@ -0,0 +1,29 @@
-+QA output created by 080
-+wrote 4299227136/4299227136 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+0: [0..8396895]: hole
-+1: [8396896..8396927]: extent
-+ca385f8981956660e3d698c0ca810e1b
-+wrote 12664832/12664832 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+0: [0..24703]: hole
-+1: [24704..24735]: extent
-+1e2dda6f86f5d983a4a02c64da902fe4
-+wrote 12632064/12632064 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+0: [0..12383]: extent
-+1: [12384..16479]: hole
-+2: [16480..24671]: extent
-+e47bb56af5783e0a1022e00b25abefb2
-+wrote 37797888/37797888 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+0: [0..16479]: extent
-+1: [16480..41055]: hole
-+2: [41056..73823]: extent
-+337983ee561a9b756d21a29757fb4f62
-+wrote 21020672/21020672 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+0: [0..8303]: extent
-+1: [8304..28767]: hole
-+2: [28768..41055]: extent
-+eb0e1b76f866926089efe70d713a938c
-diff --git a/tests/generic/group b/tests/generic/group
-index e5db772..2c717b3 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -77,6 +77,7 @@
- 076 metadata rw udf auto quick stress
- 077 acl attr auto enospc
- 079 acl attr ioctl metadata auto quick
-+080 auto
- 083 rw auto enospc stress
- 088 perms auto quick
- 089 metadata auto
++++ b/tests/btrfs/083.out
+@@ -0,0 +1,2 @@
++QA output created by 083
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index fd2fa76..fe82a9c 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -85,3 +85,4 @@
+ 080 auto snapshot
+ 081 auto quick clone
+ 082 auto quick remount
++083 auto quick send
 -- 
-2.3.1
+2.1.3
+
