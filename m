@@ -1,75 +1,72 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-wg0-f52.google.com ([74.125.82.52]:46788 "EHLO
-	mail-wg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755974AbbCEOMM (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 5 Mar 2015 09:12:12 -0500
-Received: by wggy19 with SMTP id y19so53552853wgg.13
-        for <fstests@vger.kernel.org>; Thu, 05 Mar 2015 06:12:10 -0800 (PST)
-From: Boaz Harrosh <boaz@plexistor.com>
-Message-ID: <54F86437.9090609@panasas.com>
-Date: Thu, 05 Mar 2015 16:12:07 +0200
+Received: from mx1.redhat.com ([209.132.183.28]:38631 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751677AbbCFFGf (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 6 Mar 2015 00:06:35 -0500
+Date: Fri, 6 Mar 2015 13:06:00 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] fstest: btrfs: add a test for quota number when deleting
+ a subvol.
+Message-ID: <20150306050600.GQ16974@dhcp-13-216.nay.redhat.com>
+References: <54EEB798.1070105@cn.fujitsu.com>
+ <1425381210-13661-1-git-send-email-yangds.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Subject: Re: [PATCH 1/3 v2] xfstest: generic/080 test that mmap-write updates
- c/mtime
-References: <54F733BD.7060807@plexistor.com> <54F734C4.7080409@plexistor.com> <20150305001312.GA4251@dastard> <54F861F3.9000805@plexistor.com>
-In-Reply-To: <54F861F3.9000805@plexistor.com>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1425381210-13661-1-git-send-email-yangds.fnst@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Boaz Harrosh <boaz@plexistor.com>, Dave Chinner <david@fromorbit.com>
-Cc: Matthew Wilcox <matthew.r.wilcox@intel.com>, Andrew Morton <akpm@linux-foundation.org>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Jan Kara <jack@suse.cz>, Hugh Dickins <hughd@google.com>, Mel Gorman <mgorman@suse.de>, linux-mm@kvack.org, linux-nvdimm <linux-nvdimm@ml01.01.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Omer Zilberberg <omzg@plexistor.com>, fstests@vger.kernel.org
+To: Dongsheng Yang <yangds.fnst@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-I again forgot to CC: fstests@vger.kernel.org
+On Tue, Mar 03, 2015 at 07:13:30PM +0800, Dongsheng Yang wrote:
+> This regression is introduced by two commits:
+> 
+> e339a6b0 (Btrfs: __btrfs_mod_ref should always use no_quota)
+> 1152651a (btrfs: qgroup: account shared subtrees during snapshot delete)
 
-Thanks
-Boaz
+I think you should add more description about the issue you're going to
+test. I see only failures like
 
-On 03/05/2015 04:02 PM, Boaz Harrosh wrote:
-> From: Dave Chinner <dchinner@redhat.com>
+[root@dhcp-66-86-11 xfstests]# diff -u tests/btrfs/084.out /root/xfstests/results//btrfs/084.out.bad                                                                  
+--- tests/btrfs/084.out 2015-03-06 12:47:02.319000000 +0800
++++ /root/xfstests/results//btrfs/084.out.bad   2015-03-06
+12:48:03.707000000 +0800
+@@ -1,3 +1,3 @@
+ QA output created by 084
+ 24576 24576
+-0 0
++8192 0
+
+but from the test I don't know why "8192 0" is expected result not "0 0"
+
 > 
-> when using mmap() for file i/o, writing to the file should update
-> it's c/mtime. Specifically if we first mmap-read from a page, then
-> memap-write to the same page.
-> 
-> This test was failing for the initial submission of DAX because
-> pfn based mapping do not have an page_mkwrite called for them.
-> The new Kernel patches that introduce pfn_mkwrite fixes this test.
-> 
-> Written by Dave Chinner but edited and tested by:
-> 	Omer Zilberberg
-> 
-> Tested-by: Omer Zilberberg <omzg@plexistor.com>
-> Signed-off-by: Omer Zilberberg <omzg@plexistor.com>
-> Signed-off-by: Boaz Harrosh <boaz@plexistor.com>
+> Signed-off-by: Dongsheng Yang <yangds.fnst@cn.fujitsu.com>
 > ---
-> Dave hands-up man, it looks like you edited this directly
-> in the email, but there was not even a single typo.
+>  tests/btrfs/084     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/084.out |  3 ++
+>  tests/btrfs/group   |  1 +
+>  3 files changed, 88 insertions(+)
+>  create mode 100755 tests/btrfs/084
+>  create mode 100644 tests/btrfs/084.out
 > 
-> We have tested this both with and without the pfn_mkwrite patch.
-> And it works as expected fails without and success with.
-> 
-> Thanks
-> 
->  tests/generic/080     | 79 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/080.out |  2 ++
->  tests/generic/group   |  1 +
->  3 files changed, 82 insertions(+)
->  create mode 100755 tests/generic/080
->  create mode 100644 tests/generic/080.out
-> 
-> diff --git a/tests/generic/080 b/tests/generic/080
+> diff --git a/tests/btrfs/084 b/tests/btrfs/084
 > new file mode 100755
-> index 0000000..2bc580d
+> index 0000000..7b7c7ac
 > --- /dev/null
-> +++ b/tests/generic/080
-> @@ -0,0 +1,79 @@
+> +++ b/tests/btrfs/084
+> @@ -0,0 +1,84 @@
 > +#! /bin/bash
-> +# FS QA Test No. 080
+> +# FS QA Test No. 084
 > +#
-> +# Verify that mtime is updated when writing to mmap-ed pages
+> +# This is a case for the regression introduced by
+> +#
+> +# e339a6b0 (Btrfs: __btrfs_mod_ref should always use no_quota)
+> +# 1152651a (btrfs: qgroup: account shared subtrees during snapshot delete)
 > +#
 > +#-----------------------------------------------------------------------
+> +# Copyright (c) 2015 Fujitsu.  All Rights Reserved.
+> +#
 > +# This program is free software; you can redistribute it and/or
 > +# modify it under the terms of the GNU General Public License as
 > +# published by the Free Software Foundation.
@@ -91,14 +88,17 @@ On 03/05/2015 04:02 PM, Boaz Harrosh wrote:
 > +
 > +here=`pwd`
 > +tmp=/tmp/$$
-> +status=0
+> +status=1	# failure is the default!
 > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
 > +_cleanup()
 > +{
 > +    cd /
 > +    rm -f $tmp.*
-> +    rm -f $TEST_DIR/mmap_mtime_testfile
+
+Better to use a tab not 4 spaces, maybe "new" should be updated too (in
+another patch)
+
 > +}
 > +
 > +# get standard environment, filters and checks
@@ -106,62 +106,88 @@ On 03/05/2015 04:02 PM, Boaz Harrosh wrote:
 > +. ./common/filter
 > +
 > +# real QA test starts here
+> +_need_to_be_root
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
 > +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os IRIX Linux
-> +_require_test
-> +
-> +echo "Silence is golden."
-> +rm -f $seqres.full
-> +
-> +# pattern the file.
-> +testfile=$TEST_DIR/mmap_mtime_testfile
-> +$XFS_IO_PROG -f -c "pwrite 0 4k" -c fsync $testfile >> $seqres.full
-> +
-> +# sample timestamps.
-> +mtime1=`stat -c %Y $testfile`
-> +ctime1=`stat -c %Z $testfile`
-> +echo "before mwrite: $mtime1 $ctime1" >> $seqres.full
-> +
-> +# map read followed by map write to trigger timestamp change
-> +sleep 2
-> +$XFS_IO_PROG -c "mmap 0 4k" -c "mread 0 4k" -c "mwrite 0 4k" $testfile |_filter_xfs_io >> $seqres.full
-> +
-> +# sample and verify that timestamps have changed.
-> +mtime2=`stat -c %Y $testfile`
-> +ctime2=`stat -c %Z $testfile`
-> +echo "after mwrite : $mtime2 $ctime2" >> $seqres.full
-> +
-> +if [ "$mtime1" == "$mtime2" ]; then
-> +	echo "mtime not updated"
-> +	let status=$status+1
-> +fi
-> +if [ "$ctime1" == "$ctime2" ]; then
-> +	echo "ctime not updated"
-> +	let status=$status+1
-> +fi
-> +
-> +exit
-> diff --git a/tests/generic/080.out b/tests/generic/080.out
-> new file mode 100644
-> index 0000000..cccac52
-> --- /dev/null
-> +++ b/tests/generic/080.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 080
-> +Silence is golden.
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 11ce3e4..7ee5cdc 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -77,6 +77,7 @@
->  076 metadata rw udf auto quick stress
->  077 acl attr auto enospc
->  079 acl attr ioctl metadata auto quick
-> +080 auto quick
->  083 rw auto enospc stress
->  088 perms auto quick
->  089 metadata auto
-> 
+> +_scratch_mount
 
+_scratch_mkfs first before you mount it.
+
+And you need to remove $seqres.full before test, since you called
+_run_btrfs_util_prog and it will dump commands and outputs to
+$seqres.full, the file will keep growing over runs if you don't remove
+it first.
+
+rm -f $seqres.full
+
+> +
+> +$XFS_IO_PROG -f -d -c "pwrite 0 8K" $SCRATCH_MNT/foo 2>&1 > /dev/null
+> +
+> +_run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/snap
+> +
+> +_run_btrfs_util_prog quota enable $SCRATCH_MNT
+> +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
+> +
+> +units=`_btrfs_qgroup_units`
+> +orig_result=`$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | $AWK_PROG 'NR==NF {print $3}'`
+> +
+> +_run_btrfs_util_prog subvolume delete $SCRATCH_MNT/snap
+> +
+> +_run_btrfs_util_prog filesystem sync $SCRATCH_MNT
+> +
+> +timeout=100
+> +# There is a background thread doing the clean work
+> +for ((i=0; i<$timeout; i++))
+> +do
+> +	result=`$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | $AWK_PROG 'NR==NF {print $3}'`
+> +	if (($orig_result != $result))
+> +	then
+> +		break
+> +	fi
+> +	sleep 1
+
+I'm not sure if we need 100 iterations and sleeping 1 sec after each
+iteration, that means we need 100s for a PASS run.
+
+> +done
+
+Please follow this code style, as Dave pointed before
+
+for ; do
+	# code
+done
+
+if ; then
+	# code
+fi
+> +
+> +$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | $AWK_PROG '/[0-9]/ {print $2" "$3}'
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/084.out b/tests/btrfs/084.out
+> new file mode 100644
+> index 0000000..7bf6dbf
+> --- /dev/null
+> +++ b/tests/btrfs/084.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 084
+> +24576 24576
+> +0 0
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index fe82a9c..1be7392 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -86,3 +86,4 @@
+>  081 auto quick clone
+>  082 auto quick remount
+>  083 auto quick send
+> +084 qgroup
+
+Missed auto group?
+
+Thanks,
+Eryu
