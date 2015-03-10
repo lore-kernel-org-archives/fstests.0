@@ -1,135 +1,152 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-lb0-f171.google.com ([209.85.217.171]:32949 "EHLO
-	mail-lb0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932178AbbCIPzK convert rfc822-to-8bit (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 9 Mar 2015 11:55:10 -0400
+Received: from cn.fujitsu.com ([59.151.112.132]:54621 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751024AbbCJHsi (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 10 Mar 2015 03:48:38 -0400
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Subject: [PATCH] fstest: btrfs/083: Test for incorrect exclusive refernce number after file clone.
+Date: Tue, 10 Mar 2015 15:46:34 +0800
+Message-ID: <1425973594-31936-1-git-send-email-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
-Reply-To: mtk.manpages@gmail.com
-In-Reply-To: <CAHse=S_kMkiV8hB5Y1=kVGCi3ZusRm5G=EyXhY_+PRycSt7GSw@mail.gmail.com>
-References: <1425909612-28034-1-git-send-email-drysdale@google.com>
- <1425909612-28034-4-git-send-email-drysdale@google.com> <54FDAF16.2030407@gmail.com>
- <CAHse=S_kMkiV8hB5Y1=kVGCi3ZusRm5G=EyXhY_+PRycSt7GSw@mail.gmail.com>
-From: "Michael Kerrisk (man-pages)" <mtk.manpages@gmail.com>
-Date: Mon, 9 Mar 2015 16:54:47 +0100
-Message-ID: <CAKgNAkgoiA92nhYCXaze8KVsd1xw8v0xD=EZ2cD_7HnEtgA7BQ@mail.gmail.com>
-Subject: Re: [PATCHv3 man-pages 3/3] open.2: describe O_BENEATH flag
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: David Drysdale <drysdale@google.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexander Viro <viro@zeniv.linux.org.uk>, Kees Cook <keescook@chromium.org>, "Eric W. Biederman" <ebiederm@xmission.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Meredydd Luff <meredydd@senatehouse.org>, Will Drewry <wad@chromium.org>, Jorge Lucangeli Obes <jorgelo@google.com>, Ricky Zhou <rickyz@google.com>, Lee Campbell <leecam@google.com>, Julien Tinnes <jln@google.com>, Mike Depinet <mdepinet@google.com>, James Morris <james.l.morris@oracle.com>, Andy Lutomirski <luto@amacapital.net>, Paolo Bonzini <pbonzini@redhat.com>, Paul Moore <paul@paul-moore.com>, Christoph Hellwig <hch@infradead.org>, Linux API <linux-api@vger.kernel.org>, LSM List <linux-security-module@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: jbacik@fb.com
 List-ID: <fstests@vger.kernel.org>
 
-On 9 March 2015 at 16:16, David Drysdale <drysdale@google.com> wrote:
-> On Mon, Mar 9, 2015 at 2:32 PM, Michael Kerrisk (man-pages)
-> <mtk.manpages@gmail.com> wrote:
->> On 03/09/2015 03:00 PM, David Drysdale wrote:
->>> Signed-off-by: David Drysdale <drysdale@google.com>
->>
->> Hi David,
->>
->> The text looks good insofar as it goes. But, it would be helpful
->> to have sentence or to that explains why this flag exists.
->> Could you add that, please?
->>
->> Thanks,
->>
->> Michael
->
-> How about something like:
->
->   This feature allows applications to be sure that the opened file
->   is  within  the  specified directory, regardless of the original
->   source of the pathname argument.  Some  security-conscious  pro‐
->   grams  may  further ensure this by imposing a system call filter
->   (with seccomp(2)) that requires this flag for all open()  opera‐
->   tions,  so  that the program cannot open files outside of speci‐
->   fied directories even if subverted.
->
-> (Also, I realize that I somehow failed to notice that the flags
-> are listed in alphabetical order, so I'll move the text up, as
-> in the updated diff below).
+[Problem]
+Since commit fcebe4562dec83b3f8d308 ("Btrfs: rework qgroup accounting"),
+quota data update is delayed after delayed_ref calculation, and lacks
+correct protection to detect root reference which shouldn't be counted
+in current sequence number but already written into extent backref.
 
-That looks good to me. Thanks!
+This makes exclusive reference not decreased correctly and give incorrect
+result.
 
-Cheers,
+[Test procedure]
+1. Create a btrfs with 3 subvolumes, quota enabled and rescanned.
+2. Create a file in 1st subvolume
+3. Clone the file to 2nd and 3rd subvolume
+4. Sync the fs to reflect the changes in qgroup.
+5. Check the qgroup data
 
-Michael
+[Expected result]
+None of the subvolume has exclusive reference to the file.
 
+[Actual result]
+The first subvolume still have exclusive reference to the file.
 
-> ---
->  man2/open.2 | 44 ++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 44 insertions(+)
->
-> diff --git a/man2/open.2 b/man2/open.2
-> index 956531b24b26..ece1fa90775a 100644
-> --- a/man2/open.2
-> +++ b/man2/open.2
-> @@ -201,6 +201,43 @@ See
->  for further details.
->  See also BUGS, below.
->  .TP
-> +.B O_BENEATH " (since Linux 4.??)"
-> +Ensure that the
-> +.I pathname
-> +is beneath the current working directory (for
-> +.BR open (2))
-> +or the
-> +.I dirfd
-> +(for
-> +.BR openat (2)).
-> +If the
-> +.I pathname
-> +is absolute or contains a path component of "..", the
-> +.BR open ()
-> +fails with the error
-> +.BR EPERM.
-> +This occurs even if ".." path component would not actually
-> +escape the original directory; for example, a
-> +.I pathname
-> +of "subdir/../filename" would be rejected.
-> +Path components that are symbolic links to absolute paths, or that are
-> +relative paths containing a ".." component, will also cause the
-> +.BR open ()
-> +operation to fail with the error
-> +.BR EPERM.
-> +
-> +This feature allows applications to be sure that the opened file is
-> +within the specified directory, regardless of the original source of the
-> +.I pathname
-> +argument.
-> +Some security-conscious programs may further ensure
-> +this by imposing a system call filter (with
-> +.BR seccomp (2))
-> +that requires this flag for all
-> +.BR open ()
-> +operations, so that the program cannot open files outside of
-> +specified directories even if subverted.
-> +.TP
->  .BR O_CLOEXEC " (since Linux 2.6.23)"
->  .\" NOTE! several other man pages refer to this text
->  Enable the close-on-exec flag for the new file descriptor.
-> @@ -984,6 +1021,13 @@ did not match the owner of the file and the
-> caller was not privileged
->  The operation was prevented by a file seal; see
->  .BR fcntl (2).
->  .TP
-> +.B EPERM
-> +The
-> +.B O_BENEATH
-> +flag was specified and the
-> +.I pathname
-> +was not beneath the relevant directory.
-> +.TP
->  .B EROFS
->  .I pathname
->  refers to a file on a read-only filesystem and write access was
-> --
-> 2.2.0.rc0.207.ga3a616c
+Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+---
+ tests/btrfs/083     | 76 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/083.out |  5 ++++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 82 insertions(+)
+ create mode 100755 tests/btrfs/083
+ create mode 100644 tests/btrfs/083.out
 
-
-
+diff --git a/tests/btrfs/083 b/tests/btrfs/083
+new file mode 100755
+index 0000000..17fd30b
+--- /dev/null
++++ b/tests/btrfs/083
+@@ -0,0 +1,76 @@
++#! /bin/bash
++# FS QA Test No. 083
++#
++# Test for incorrect exclusive reference count after cloning file
++# between subvolumes.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Fujitsu. All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++
++# Modify as appropriate.
++_need_to_be_root
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_cp_reflink
++
++run_check _scratch_mkfs "--nodesize 4096"
++
++# inode cache will also take space in fs tree, disable them to get consistent
++# result.
++run_check _scratch_mount "-o noinode_cache"
++
++_run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv1
++_run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv2
++_run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv3
++
++_run_btrfs_util_prog quota enable $SCRATCH_MNT
++_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
++
++dd if=/dev/zero of=$SCRATCH_MNT/subv1/file1 bs=4K count=64 &> /dev/null
++cp --reflink $SCRATCH_MNT/subv1/file1 $SCRATCH_MNT/subv2/file1
++cp --reflink $SCRATCH_MNT/subv1/file1 $SCRATCH_MNT/subv3/file1
++_run_btrfs_util_prog filesystem sync $SCRATCH_MNT
++
++units=`_btrfs_qgroup_units`
++$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | $SED_PROG -n '/[0-9]/p' \
++	| $AWK_PROG '{print $2" "$3}'
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/083.out b/tests/btrfs/083.out
+new file mode 100644
+index 0000000..359b4a0
+--- /dev/null
++++ b/tests/btrfs/083.out
+@@ -0,0 +1,5 @@
++QA output created by 083
++4096 4096
++266240 4096
++266240 4096
++266240 4096
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index fd2fa76..04d5d67 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -85,3 +85,4 @@
+ 080 auto snapshot
+ 081 auto quick clone
+ 082 auto quick remount
++083 auto quick qgroup
 -- 
-Michael Kerrisk
-Linux man-pages maintainer; http://www.kernel.org/doc/man-pages/
-Linux/UNIX System Programming Training: http://man7.org/training/
+2.3.1
+
