@@ -1,76 +1,68 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from sandeen.net ([63.231.237.45]:34149 "EHLO sandeen.net"
+Received: from sandeen.net ([63.231.237.45]:34230 "EHLO sandeen.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753604AbbCKOsU (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 11 Mar 2015 10:48:20 -0400
-Message-ID: <550055B2.3040308@sandeen.net>
-Date: Wed, 11 Mar 2015 10:48:18 -0400
+	id S1752451AbbCKOv1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 11 Mar 2015 10:51:27 -0400
+Message-ID: <5500566D.5080401@sandeen.net>
+Date: Wed, 11 Mar 2015 10:51:25 -0400
 From: Eric Sandeen <sandeen@sandeen.net>
 MIME-Version: 1.0
-Subject: Re: [PATCH 3/4] common: append -d option to XFS_COPY_PROG when testing
- v5 xfs
-References: <1426072534-12246-1-git-send-email-eguan@redhat.com> <1426072534-12246-4-git-send-email-eguan@redhat.com>
-In-Reply-To: <1426072534-12246-4-git-send-email-eguan@redhat.com>
+Subject: Re: [PATCH 4/4] xfs/073: be quiet about mouting with nouuid option
+References: <1426072534-12246-1-git-send-email-eguan@redhat.com> <1426072534-12246-5-git-send-email-eguan@redhat.com>
+In-Reply-To: <1426072534-12246-5-git-send-email-eguan@redhat.com>
 Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
 On 3/11/15 7:15 AM, Eryu Guan wrote:
-> xfs_copy doesn't work on v5 xfs without -d option, this fails xfs/073
-> when testing xfs with MKFS_OPTIONS="-m crc=1" set.
+> v4 and v5 xfs generate different outputs because v4 xfs only retries
+> mount with nouuid option once in the test, v5 xfs tries more times(with
+> xfs_copy running with -d option).
+> 
+> Just be quiet about mounting with nouuid option, it's much easier than
+> preparing two different 073.outs and selecting the proper one at runtime
 
-Neat, I did not know about the "=~" trick ;)
+Ah, ok, I see now.  Might have been better to swap the order of your patches
+3 and 4 so things work after each patch application.
 
-Test xfs/073 adds -d already, but two -d's are accepted...
+This does make the test slightly less useful, as we don't know whether we've
+properly copied the UUID (if for some strange reason it changed when it
+shouldn't) but that doesn't seem too likely or important, so:
 
-... but the xfs/073 fails due to the fallback to nouuid, forced by
-the duplicate ID which is found:
-
-@@ -17,6 +17,7 @@
- All copies completed.
- checking new image
- mounting new image on loopback
-+retrying mount with nouuid option
-
-Also:
-
-* This will only work until crcs are made default
-* If $TEST_DEV was made with CRCs then "crc=1" might not be in MKFS_OPTIONS,
-  but xfs_copy of $TEST_DEV would still fail
-
-But we only ever use it on $SCRATCH_DEV in tests today, and if/when
-crcs are made default we can figure out how to test for that later...
-
-Still, need some solution that doesn't fail the existing test.
-
-We could just _notrun this test with crcs ... talking with hch, I wonder
-if we even have a use for xfs_copy anymore.   A changed-uuid xfs_copy
-will be very hard to do w/ v5 filesystems.
-
--Eric
+Reviewed-by: Eric Sandeen <sandeen@redhat.com>
 
 > Signed-off-by: Eryu Guan <eguan@redhat.com>
 > ---
->  common/rc | 5 +++++
->  1 file changed, 5 insertions(+)
+>  tests/xfs/073     | 2 +-
+>  tests/xfs/073.out | 1 -
+>  2 files changed, 1 insertion(+), 2 deletions(-)
 > 
-> diff --git a/common/rc b/common/rc
-> index 1ed9df5..ad87a18 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2926,6 +2926,11 @@ init_rc()
->  	# Figure out if we need to add -F ("foreign", deprecated) option to xfs_io
->  	xfs_io -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \
->  	export XFS_IO_PROG="$XFS_IO_PROG -F"
-> +
-> +	# xfs_copy doesn't work on v5 xfs yet without -d option
-> +	if [ "$FSTYP" == "xfs" ] && [[ $MKFS_OPTIONS =~ crc=1 ]]; then
-> +		export XFS_COPY_PROG="$XFS_COPY_PROG -d"
-> +	fi
->  }
+> diff --git a/tests/xfs/073 b/tests/xfs/073
+> index f955771..508725f 100755
+> --- a/tests/xfs/073
+> +++ b/tests/xfs/073
+> @@ -88,7 +88,7 @@ _verify_copy()
 >  
->  # get real device path name by following link
+>  	mount -t xfs -o loop $target $target_dir 2>/dev/null
+>  	if [ $? -ne 0 ]; then
+> -		echo retrying mount with nouuid option
+> +		echo retrying mount with nouuid option >>$seqres.full
+>  		mount -t xfs -o loop -o nouuid $target $target_dir
+>  		if [ $? -ne 0 ]; then
+>  			echo mount failed - evil!
+> diff --git a/tests/xfs/073.out b/tests/xfs/073.out
+> index f3b147e..3f27467 100644
+> --- a/tests/xfs/073.out
+> +++ b/tests/xfs/073.out
+> @@ -29,7 +29,6 @@ Creating file <FSIMAGE1>
+>  All copies completed.
+>  checking new image
+>  mounting new image on loopback
+> -retrying mount with nouuid option
+>  comparing new image files to old
+>  comparing new image directories to old
+>  comparing new image geometry to old
 > 
 
