@@ -1,16 +1,16 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:33168 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:33188 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751593AbbCKLPv (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 11 Mar 2015 07:15:51 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t2BBFoIK024380
+	id S1751639AbbCKLPz (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 11 Mar 2015 07:15:55 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t2BBFrmM024395
 	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <fstests@vger.kernel.org>; Wed, 11 Mar 2015 07:15:51 -0400
+	for <fstests@vger.kernel.org>; Wed, 11 Mar 2015 07:15:54 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 3/4] common: append -d option to XFS_COPY_PROG when testing v5 xfs
-Date: Wed, 11 Mar 2015 19:15:33 +0800
-Message-Id: <1426072534-12246-4-git-send-email-eguan@redhat.com>
+Subject: [PATCH 4/4] xfs/073: be quiet about mouting with nouuid option
+Date: Wed, 11 Mar 2015 19:15:34 +0800
+Message-Id: <1426072534-12246-5-git-send-email-eguan@redhat.com>
 In-Reply-To: <1426072534-12246-1-git-send-email-eguan@redhat.com>
 References: <1426072534-12246-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -18,30 +18,44 @@ To: fstests@vger.kernel.org
 Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-xfs_copy doesn't work on v5 xfs without -d option, this fails xfs/073
-when testing xfs with MKFS_OPTIONS="-m crc=1" set.
+v4 and v5 xfs generate different outputs because v4 xfs only retries
+mount with nouuid option once in the test, v5 xfs tries more times(with
+xfs_copy running with -d option).
+
+Just be quiet about mounting with nouuid option, it's much easier than
+preparing two different 073.outs and selecting the proper one at runtime
 
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- common/rc | 5 +++++
- 1 file changed, 5 insertions(+)
+ tests/xfs/073     | 2 +-
+ tests/xfs/073.out | 1 -
+ 2 files changed, 1 insertion(+), 2 deletions(-)
 
-diff --git a/common/rc b/common/rc
-index 1ed9df5..ad87a18 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2926,6 +2926,11 @@ init_rc()
- 	# Figure out if we need to add -F ("foreign", deprecated) option to xfs_io
- 	xfs_io -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \
- 	export XFS_IO_PROG="$XFS_IO_PROG -F"
-+
-+	# xfs_copy doesn't work on v5 xfs yet without -d option
-+	if [ "$FSTYP" == "xfs" ] && [[ $MKFS_OPTIONS =~ crc=1 ]]; then
-+		export XFS_COPY_PROG="$XFS_COPY_PROG -d"
-+	fi
- }
+diff --git a/tests/xfs/073 b/tests/xfs/073
+index f955771..508725f 100755
+--- a/tests/xfs/073
++++ b/tests/xfs/073
+@@ -88,7 +88,7 @@ _verify_copy()
  
- # get real device path name by following link
+ 	mount -t xfs -o loop $target $target_dir 2>/dev/null
+ 	if [ $? -ne 0 ]; then
+-		echo retrying mount with nouuid option
++		echo retrying mount with nouuid option >>$seqres.full
+ 		mount -t xfs -o loop -o nouuid $target $target_dir
+ 		if [ $? -ne 0 ]; then
+ 			echo mount failed - evil!
+diff --git a/tests/xfs/073.out b/tests/xfs/073.out
+index f3b147e..3f27467 100644
+--- a/tests/xfs/073.out
++++ b/tests/xfs/073.out
+@@ -29,7 +29,6 @@ Creating file <FSIMAGE1>
+ All copies completed.
+ checking new image
+ mounting new image on loopback
+-retrying mount with nouuid option
+ comparing new image files to old
+ comparing new image directories to old
+ comparing new image geometry to old
 -- 
 2.1.0
 
