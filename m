@@ -1,58 +1,76 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from sandeen.net ([63.231.237.45]:33380 "EHLO sandeen.net"
+Received: from sandeen.net ([63.231.237.45]:34149 "EHLO sandeen.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751390AbbCKOIW (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 11 Mar 2015 10:08:22 -0400
-Message-ID: <55004C56.9040004@sandeen.net>
-Date: Wed, 11 Mar 2015 10:08:22 -0400
+	id S1753604AbbCKOsU (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 11 Mar 2015 10:48:20 -0400
+Message-ID: <550055B2.3040308@sandeen.net>
+Date: Wed, 11 Mar 2015 10:48:18 -0400
 From: Eric Sandeen <sandeen@sandeen.net>
 MIME-Version: 1.0
-Subject: Re: [PATCH 2/4] generic/027: discard mkdir error message
-References: <1426072534-12246-1-git-send-email-eguan@redhat.com> <1426072534-12246-3-git-send-email-eguan@redhat.com>
-In-Reply-To: <1426072534-12246-3-git-send-email-eguan@redhat.com>
+Subject: Re: [PATCH 3/4] common: append -d option to XFS_COPY_PROG when testing
+ v5 xfs
+References: <1426072534-12246-1-git-send-email-eguan@redhat.com> <1426072534-12246-4-git-send-email-eguan@redhat.com>
+In-Reply-To: <1426072534-12246-4-git-send-email-eguan@redhat.com>
 Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
 On 3/11/15 7:15 AM, Eryu Guan wrote:
-> mkdir fails due to ENOSPC occasionally and will fail the whole test.
-> Redirect stdout and stderr to /dev/null.
-> 
-> Also fix the code style in _cleanup to use single tab.
-> 
+> xfs_copy doesn't work on v5 xfs without -d option, this fails xfs/073
+> when testing xfs with MKFS_OPTIONS="-m crc=1" set.
+
+Neat, I did not know about the "=~" trick ;)
+
+Test xfs/073 adds -d already, but two -d's are accepted...
+
+... but the xfs/073 fails due to the fallback to nouuid, forced by
+the duplicate ID which is found:
+
+@@ -17,6 +17,7 @@
+ All copies completed.
+ checking new image
+ mounting new image on loopback
++retrying mount with nouuid option
+
+Also:
+
+* This will only work until crcs are made default
+* If $TEST_DEV was made with CRCs then "crc=1" might not be in MKFS_OPTIONS,
+  but xfs_copy of $TEST_DEV would still fail
+
+But we only ever use it on $SCRATCH_DEV in tests today, and if/when
+crcs are made default we can figure out how to test for that later...
+
+Still, need some solution that doesn't fail the existing test.
+
+We could just _notrun this test with crcs ... talking with hch, I wonder
+if we even have a use for xfs_copy anymore.   A changed-uuid xfs_copy
+will be very hard to do w/ v5 filesystems.
+
+-Eric
+
 > Signed-off-by: Eryu Guan <eguan@redhat.com>
-
-Reviewed-by: Eric Sandeen <sandeen@redhat.com>
-
 > ---
->  tests/generic/027 | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
+>  common/rc | 5 +++++
+>  1 file changed, 5 insertions(+)
 > 
-> diff --git a/tests/generic/027 b/tests/generic/027
-> index 8dab117..d2e59d6 100755
-> --- a/tests/generic/027
-> +++ b/tests/generic/027
-> @@ -36,8 +36,8 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
->  
->  _cleanup()
->  {
-> -    cd /
-> -    rm -f $tmp.*
-> +	cd /
-> +	rm -f $tmp.*
+> diff --git a/common/rc b/common/rc
+> index 1ed9df5..ad87a18 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2926,6 +2926,11 @@ init_rc()
+>  	# Figure out if we need to add -F ("foreign", deprecated) option to xfs_io
+>  	xfs_io -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \
+>  	export XFS_IO_PROG="$XFS_IO_PROG -F"
+> +
+> +	# xfs_copy doesn't work on v5 xfs yet without -d option
+> +	if [ "$FSTYP" == "xfs" ] && [[ $MKFS_OPTIONS =~ crc=1 ]]; then
+> +		export XFS_COPY_PROG="$XFS_COPY_PROG -d"
+> +	fi
 >  }
 >  
->  create_file()
-> @@ -46,7 +46,7 @@ create_file()
->  	local direct=$2
->  	local i=0
->  
-> -	mkdir -p $dir
-> +	mkdir -p $dir >/dev/null 2>&1
->  	while $XFS_IO_PROG -f $direct -c "pwrite 0 1k" $dir/file_$i >/dev/null 2>&1; do
->  		let i=$i+1
->  	done
+>  # get real device path name by following link
 > 
 
