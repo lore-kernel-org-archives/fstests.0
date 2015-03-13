@@ -1,93 +1,56 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:58921 "EHLO
+Received: from cn.fujitsu.com ([59.151.112.132]:43205 "EHLO
 	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1754018AbbCMB66 convert rfc822-to-8bit (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 12 Mar 2015 21:58:58 -0400
-Message-ID: <55024460.3040706@cn.fujitsu.com>
-Date: Fri, 13 Mar 2015 09:58:56 +0800
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+	with ESMTP id S1751547AbbCMIxN (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 13 Mar 2015 04:53:13 -0400
+Received: from G08CNEXCHPEKD03.g08.fujitsu.local (localhost.localdomain [127.0.0.1])
+	by edo.cn.fujitsu.com (8.14.3/8.13.1) with ESMTP id t2D8piAF009014
+	for <fstests@vger.kernel.org>; Fri, 13 Mar 2015 16:51:44 +0800
+From: Zhaolei <zhaolei@cn.fujitsu.com>
+Subject: [PATCH] fix "utility required warning" with empty utility name
+Date: Fri, 13 Mar 2015 16:51:28 +0800
+Message-ID: <fb898cb6df594265e8677fc99e374e858b4cebea.1426236677.git.zhaolei@cn.fujitsu.com>
 MIME-Version: 1.0
-Subject: Re: [PATCH] fstest: btrfs/083: Test for incorrect exclusive refernce
- number after file clone.
-References: <1425973594-31936-1-git-send-email-quwenruo@cn.fujitsu.com> <CAL3q7H54-k-MEZnNzZn8Pyc6YH3okp+LUrncbMR=Kq6q5_xd7w@mail.gmail.com> <55018B3C.6070104@fb.com> <5502374C.8050607@cn.fujitsu.com>
-In-Reply-To: <5502374C.8050607@cn.fujitsu.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Josef Bacik <jbacik@fb.com>, fdmanana@gmail.com
-Cc: "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Zhao Lei <zhaolei@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
+From: Zhao Lei <zhaolei@cn.fujitsu.com>
 
+In generic/019, if we hadn't install fio, we will get following output:
+ FSTYP         -- btrfs
+ PLATFORM      -- Linux/x86_64 lenovo 4.0.0-rc3_HEAD_9eccca0843205f87c00404b663188b88eb248051_
+ MKFS_OPTIONS  -- /dev/sda6
+ MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 /dev/sda6 /var/ltf/tester/scratch_mnt
 
--------- Original Message  --------
-Subject: Re: [PATCH] fstest: btrfs/083: Test for incorrect exclusive 
-refernce number after file clone.
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-To: Josef Bacik <jbacik@fb.com>, fdmanana@gmail.com
-Date: 2015年03月13日 09:03
+ generic/019      [not run]  utility required, skipped this test <- *
+ Not run: generic/019
+ Passed all 0 tests
 
->
->
-> -------- Original Message  --------
-> Subject: Re: [PATCH] fstest: btrfs/083: Test for incorrect exclusive
-> refernce number after file clone.
-> From: Josef Bacik <jbacik@fb.com>
-> To: <fdmanana@gmail.com>, Qu Wenruo <quwenruo@cn.fujitsu.com>
-> Date: 2015年03月12日 20:49
->
->> On 03/12/2015 08:38 AM, Filipe David Manana wrote:
->>> On Tue, Mar 10, 2015 at 7:46 AM, Qu Wenruo <quwenruo@cn.fujitsu.com>
->>> wrote:
->>>> [Problem]
->>>> Since commit fcebe4562dec83b3f8d308 ("Btrfs: rework qgroup
->>>> accounting"),
->>>> quota data update is delayed after delayed_ref calculation, and lacks
->>>> correct protection to detect root reference which shouldn't be counted
->>>> in current sequence number but already written into extent backref.
->>>>
->>>> This makes exclusive reference not decreased correctly and give
->>>> incorrect
->>>> result.
->>>>
->>>> [Test procedure]
->>>> 1. Create a btrfs with 3 subvolumes, quota enabled and rescanned.
->>>> 2. Create a file in 1st subvolume
->>>> 3. Clone the file to 2nd and 3rd subvolume
->>>> 4. Sync the fs to reflect the changes in qgroup.
->>>> 5. Check the qgroup data
->>>>
->>>> [Expected result]
->>>> None of the subvolume has exclusive reference to the file.
->>>>
->>>> [Actual result]
->>>> The first subvolume still have exclusive reference to the file.
-[snip]
-> Thanks,
->>
->> Josef
-BTW, I'm somewhat worried about how to fix the problem.
+Reason of blank utility name is:
+$1 and $2 are reversed in _require_command(), this patch fixed
+this error.
 
-Two method comes to me, but neither seems perfect.
-1) Change qgroup counters update timing.
-Just change the actual qgroup update timing from current 
-btrfs_delayed_qgroup_accouting() to btrfs_qgroup_record_ref().
+Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
+---
+ common/rc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Although it seems we can get accurate old/new_roots, but delayed tree 
-block refs can be ordered/merged, causing data ref is run before its 
-tree block, causing btrfs_find_all_roots() always return 0 root.
+diff --git a/common/rc b/common/rc
+index 1ed9df5..febad8c 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1276,7 +1276,7 @@ _require_realtime()
+ #
+ _require_command()
+ {
+-    [ -n "$1" ] && _cmd="$1" || _cmd="$2"
++    [ -n "$2" ] && _cmd="$2" || _cmd="$1"
+     [ -n "$1" -a -x "$1" ] || _notrun "$_cmd utility required, skipped this test"
+ }
+ 
+-- 
+1.8.5.1
 
-So this method needs extra modification on delayed refs.
-
-2) Do "oper-replay" in qgroup codes.
-We can do things like log replay in qgroup operations, and do some black 
-magic to calculate the correct old/new_roots number even we can only see 
-the final result backrefs.
-
-But I didn't see a good algorithm to do this, and the complexity may 
-cause even more bugs.
-
-Any ideas?
-
-Thanks,
-Qu
