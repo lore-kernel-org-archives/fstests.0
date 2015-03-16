@@ -1,81 +1,74 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:53755 "EHLO
+Received: from cn.fujitsu.com ([59.151.112.132]:59364 "EHLO
 	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751831AbbCPBeY convert rfc822-to-8bit (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 15 Mar 2015 21:34:24 -0400
-Message-ID: <5506331C.2070003@cn.fujitsu.com>
-Date: Mon, 16 Mar 2015 09:34:20 +0800
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+	with ESMTP id S1750822AbbCPFKc (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 16 Mar 2015 01:10:32 -0400
+Message-ID: <550664EC.7090705@cn.fujitsu.com>
+Date: Mon, 16 Mar 2015 13:06:52 +0800
+From: Dongsheng Yang <yangds.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Subject: Re: [PATCH v2] fstest: btrfs/083: Test for incorrect exclusive refernce
- number after file clone.
-References: <1426211137-15233-1-git-send-email-quwenruo@cn.fujitsu.com> <CAL3q7H4TsmHANvMp548ssUvkteU6N4uCb5BVcyeZfAj64A0LKA@mail.gmail.com>
-In-Reply-To: <CAL3q7H4TsmHANvMp548ssUvkteU6N4uCb5BVcyeZfAj64A0LKA@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 8BIT
+Subject: Re: [PATCH] fstest: btrfs: add a test for quota number when deleting
+ a subvol.
+References: <54EEB798.1070105@cn.fujitsu.com> <1425381210-13661-1-git-send-email-yangds.fnst@cn.fujitsu.com> <20150306050600.GQ16974@dhcp-13-216.nay.redhat.com>
+In-Reply-To: <20150306050600.GQ16974@dhcp-13-216.nay.redhat.com>
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fdmanana@gmail.com
-Cc: "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+Hi Guan,  sorry for the late.
 
+On 03/06/2015 01:06 PM, Eryu Guan wrote:
+> On Tue, Mar 03, 2015 at 07:13:30PM +0800, Dongsheng Yang wrote:
+>> This regression is introduced by two commits:
+>>
+>> e339a6b0 (Btrfs: __btrfs_mod_ref should always use no_quota)
+>> 1152651a (btrfs: qgroup: account shared subtrees during snapshot delete)
+> I think you should add more description about the issue you're going to
+> test. I see only failures like
+>
+> [root@dhcp-66-86-11 xfstests]# diff -u tests/btrfs/084.out /root/xfstests/results//btrfs/084.out.bad
+> --- tests/btrfs/084.out 2015-03-06 12:47:02.319000000 +0800
+> +++ /root/xfstests/results//btrfs/084.out.bad   2015-03-06
+> 12:48:03.707000000 +0800
+> @@ -1,3 +1,3 @@
+>   QA output created by 084
+>   24576 24576
+> -0 0
+> +8192 0
+>
+> but from the test I don't know why "8192 0" is expected result not "0 0"
 
--------- Original Message  --------
-Subject: Re: [PATCH v2] fstest: btrfs/083: Test for incorrect exclusive 
-refernce number after file clone.
-From: Filipe David Manana <fdmanana@gmail.com>
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Date: 2015年03月13日 21:00
-
-> On Fri, Mar 13, 2015 at 1:45 AM, Qu Wenruo <quwenruo@cn.fujitsu.com> wrote:
->> [Problem]
->> Since commit fcebe4562dec83b3f8d308 ("Btrfs: rework qgroup accounting"),
->> quota data update is delayed after delayed_ref calculation, and lacks
->> correct protection to detect root reference which shouldn't be counted
->> in current sequence number but already written into extent backref.
->>
->> This makes exclusive reference not decreased correctly and give incorrect
->> result.
->>
->> [Test procedure]
->> 1. Create a btrfs with 3 subvolumes, quota enabled and rescanned.
->> 2. Create a file in 1st subvolume
->> 3. Clone the file to 2nd and 3rd subvolume
->> 4. Sync the fs to reflect the changes in qgroup.
->> 5. Check the qgroup data
->>
->> [Expected result]
->> None of the subvolume has exclusive reference to the file.
->>
->> [Actual result]
->> The first subvolume still have exclusive reference to the file.
->>
->> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Sure, I will add more description in V2 to explain why we are expecting 
+"0 0" here.
+>
+>> Signed-off-by: Dongsheng Yang <yangds.fnst@cn.fujitsu.com>
 >> ---
->> changelog:
->> v2: Redirect error output of dd to seqres.full for debug in case dd failed.
->> ---
->>   tests/btrfs/083     | 76 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->>   tests/btrfs/083.out |  5 ++++
+>>   tests/btrfs/084     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>>   tests/btrfs/084.out |  3 ++
 >>   tests/btrfs/group   |  1 +
->>   3 files changed, 82 insertions(+)
->>   create mode 100755 tests/btrfs/083
->>   create mode 100644 tests/btrfs/083.out
+>>   3 files changed, 88 insertions(+)
+>>   create mode 100755 tests/btrfs/084
+>>   create mode 100644 tests/btrfs/084.out
 >>
->> diff --git a/tests/btrfs/083 b/tests/btrfs/083
+>> diff --git a/tests/btrfs/084 b/tests/btrfs/084
 >> new file mode 100755
->> index 0000000..0996cff
+>> index 0000000..7b7c7ac
 >> --- /dev/null
->> +++ b/tests/btrfs/083
->> @@ -0,0 +1,76 @@
+>> +++ b/tests/btrfs/084
+>> @@ -0,0 +1,84 @@
 >> +#! /bin/bash
->> +# FS QA Test No. 083
+>> +# FS QA Test No. 084
 >> +#
->> +# Test for incorrect exclusive reference count after cloning file
->> +# between subvolumes.
+>> +# This is a case for the regression introduced by
+>> +#
+>> +# e339a6b0 (Btrfs: __btrfs_mod_ref should always use no_quota)
+>> +# 1152651a (btrfs: qgroup: account shared subtrees during snapshot delete)
 >> +#
 >> +#-----------------------------------------------------------------------
->> +# Copyright (c) 2015 Fujitsu. All Rights Reserved.
+>> +# Copyright (c) 2015 Fujitsu.  All Rights Reserved.
 >> +#
 >> +# This program is free software; you can redistribute it and/or
 >> +# modify it under the terms of the GNU General Public License as
@@ -98,12 +91,18 @@ Date: 2015年03月13日 21:00
 >> +
 >> +here=`pwd`
 >> +tmp=/tmp/$$
->> +status=1       # failure is the default!
+>> +status=1	# failure is the default!
 >> +trap "_cleanup; exit \$status" 0 1 2 3 15
 >> +
 >> +_cleanup()
 >> +{
+>> +    cd /
 >> +    rm -f $tmp.*
+> Better to use a tab not 4 spaces, maybe "new" should be updated too (in
+> another patch)
+
+Thanx, will send another patch for "./new".
+>
 >> +}
 >> +
 >> +# get standard environment, filters and checks
@@ -111,135 +110,103 @@ Date: 2015年03月13日 21:00
 >> +. ./common/filter
 >> +
 >> +# real QA test starts here
->> +
->> +# Modify as appropriate.
 >> +_need_to_be_root
 >> +_supported_fs btrfs
 >> +_supported_os Linux
 >> +_require_scratch
->> +_require_cp_reflink
 >> +
->> +run_check _scratch_mkfs "--nodesize 4096"
+>> +_scratch_mount
+> _scratch_mkfs first before you mount it.
 >
-> Replying to your and Josef's previous answers, I don't see it obvious
-> why it's easier to test with node size of 4Kb vs 64Kb (I would say
-> only the golden output's values would change).
+> And you need to remove $seqres.full before test, since you called
+> _run_btrfs_util_prog and it will dump commands and outputs to
+> $seqres.full, the file will keep growing over runs if you don't remove
+> it first.
 >
-> So ok, the patchset to allow for block sizes smaller then the page
-> size seems it will be merged soon. But what if some QA team wants to
-> test on an older kernel that doesn't have that commit that introduced
-> the regression? Then the test won't pass on a machine with a page size
->> 4Kb.
-> Same reasoning applies to the -o noinode_cache mount option.
->
-> I always thought fstests were supposed to run on the widest possible
-> range of platforms, kernel and utilities versions.
-For best compatibility, 64k is the valid choice.
-And for this case, I'm OK to change golden output and use 64K node/leafsize.
+> rm -f $seqres.full
 
-But I'm not a big fan to always use 64K to get compatibility, in some 
-case, for example, a hidden bug can only be triggered by a given number 
-of tree level, and 64K nodesize will makes things much much harder or 
-takes much longer time to reproduce.
-
-The best method should be determine the minimal nodesize automatically, 
-using options like --maxnodesize or --minnodesize, and fstests filter 
-the nodesize we need.
-
-> But I guess in this
-> case it's not too bad, since qgroups seem to have always been broken
-> in one way or another.
-Yep, poor quota seems not to be loved by a lot of devs :(
-
+Great! thanx for your review.
 >
 >> +
->> +# inode cache will also take space in fs tree, disable them to get consistent
->> +# result.
->> +run_check _scratch_mount "-o noinode_cache"
+>> +$XFS_IO_PROG -f -d -c "pwrite 0 8K" $SCRATCH_MNT/foo 2>&1 > /dev/null
 >> +
->> +_run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv1
->> +_run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv2
->> +_run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv3
+>> +_run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/snap
 >> +
 >> +_run_btrfs_util_prog quota enable $SCRATCH_MNT
 >> +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
 >> +
->> +dd if=/dev/zero of=$SCRATCH_MNT/subv1/file1 bs=4K count=64 2> $seqres.full
->
-> The idea was not to redirect stderr, so that if dd fails you'll see it
-> in the diff. This is just what all (or most at least) do, pretty sure
-> Dave makes this observation very often. Plus by using '>' you are
-> overriding the $seqtes.full's contents.
-Overriding is indeed a problem, but I don't consider redirect dd output 
-into golden output is needed.
-
-1) Most of the dd usage in test cases don't do it.
-Only cases which really cares how much dd writes will filter output into 
-golden output, the rest just redirect it to seqres.full.
-
-2) If a error really happens, golden output will diff in that case
-If dd fails, then seqres will diff from expected output, and fstest will 
-prompt you to check seqres.full, and you will find out the problem anyway.
-IIRC, Dave taught me this in such case, where I add "|| _fail" after a 
-dd command trying to catch error of dd.
-
-So I don't see the need to add output for minority error case in golden 
-output.
->
->> +cp --reflink $SCRATCH_MNT/subv1/file1 $SCRATCH_MNT/subv2/file1
->> +cp --reflink $SCRATCH_MNT/subv1/file1 $SCRATCH_MNT/subv3/file1
->> +_run_btrfs_util_prog filesystem sync $SCRATCH_MNT
->
-> The sync vs btrfs specific sync is also something I used to do and
-> Dave pointed it to me that it's always better to use standard/fs
-> independent commands whenever possible.
->
-> It wouldn't also hurt to add a comment or 2 here telling what's
-> happening and specifically why the sync is needed before qgroup show
-> is called.
-Both point makes sense. I'll update soon.
-
-Thanks,
-Qu
-
->
-> thanks
->
->> +
 >> +units=`_btrfs_qgroup_units`
->> +$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | $SED_PROG -n '/[0-9]/p' | \
->> +       $AWK_PROG '{print $2" "$3}'
+>> +orig_result=`$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | $AWK_PROG 'NR==NF {print $3}'`
+>> +
+>> +_run_btrfs_util_prog subvolume delete $SCRATCH_MNT/snap
+>> +
+>> +_run_btrfs_util_prog filesystem sync $SCRATCH_MNT
+>> +
+>> +timeout=100
+>> +# There is a background thread doing the clean work
+>> +for ((i=0; i<$timeout; i++))
+>> +do
+>> +	result=`$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | $AWK_PROG 'NR==NF {print $3}'`
+>> +	if (($orig_result != $result))
+>> +	then
+>> +		break
+>> +	fi
+>> +	sleep 1
+> I'm not sure if we need 100 iterations and sleeping 1 sec after each
+> iteration, that means we need 100s for a PASS run.
+
+The 100sec is the limit for the loop, it means if the clean work is done 
+in 100sec, we will
+break immediately. We don't have to wait for 100s in each test.
+>
+>> +done
+> Please follow this code style, as Dave pointed before
+>
+> for ; do
+> 	# code
+> done
+>
+> if ; then
+> 	# code
+> fi
+
+Great,
+>> +
+>> +$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | $AWK_PROG '/[0-9]/ {print $2" "$3}'
 >> +
 >> +# success, all done
 >> +status=0
 >> +exit
->> diff --git a/tests/btrfs/083.out b/tests/btrfs/083.out
+>> diff --git a/tests/btrfs/084.out b/tests/btrfs/084.out
 >> new file mode 100644
->> index 0000000..359b4a0
+>> index 0000000..7bf6dbf
 >> --- /dev/null
->> +++ b/tests/btrfs/083.out
->> @@ -0,0 +1,5 @@
->> +QA output created by 083
->> +4096 4096
->> +266240 4096
->> +266240 4096
->> +266240 4096
+>> +++ b/tests/btrfs/084.out
+>> @@ -0,0 +1,3 @@
+>> +QA output created by 084
+>> +24576 24576
+>> +0 0
 >> diff --git a/tests/btrfs/group b/tests/btrfs/group
->> index fd2fa76..04d5d67 100644
+>> index fe82a9c..1be7392 100644
 >> --- a/tests/btrfs/group
 >> +++ b/tests/btrfs/group
->> @@ -85,3 +85,4 @@
->>   080 auto snapshot
+>> @@ -86,3 +86,4 @@
 >>   081 auto quick clone
 >>   082 auto quick remount
->> +083 auto quick qgroup
->> --
->> 2.3.1
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe fstests" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>   083 auto quick send
+>> +084 qgroup
+> Missed auto group?
+
+Yea, as this is my first test case for fstest, there are lots of silly 
+problems in it.
+
+  Thanx a lot for your review and help, will update it soon.
+
+Thanx
+Yang
 >
+> Thanks,
+> Eryu
+> .
 >
->
+
