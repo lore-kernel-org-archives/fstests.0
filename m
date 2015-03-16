@@ -1,188 +1,113 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:37336 "EHLO
+Received: from cn.fujitsu.com ([59.151.112.132]:54814 "EHLO
 	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750844AbbCPHW4 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 16 Mar 2015 03:22:56 -0400
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH] fstest: btrfs/083: Test for incorrect exclusive refernce number after file clone.
-Date: Mon, 16 Mar 2015 15:22:55 +0800
-Message-ID: <1426490575-20955-1-git-send-email-quwenruo@cn.fujitsu.com>
+	with ESMTP id S1752932AbbCPIsA convert rfc822-to-8bit (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 16 Mar 2015 04:48:00 -0400
+From: Zhao Lei <zhaolei@cn.fujitsu.com>
+References: <fb898cb6df594265e8677fc99e374e858b4cebea.1426236677.git.zhaolei@cn.fujitsu.com> <20150314165342.GN14156@dhcp-13-216.nay.redhat.com>
+In-Reply-To: <20150314165342.GN14156@dhcp-13-216.nay.redhat.com>
+Subject: RE: [PATCH] fix "utility required warning" with empty utility name
+Date: Mon, 16 Mar 2015 16:46:55 +0800
+Message-ID: <04bd01d05fc5$c1c9d390$455d7ab0$@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
+Content-Language: zh-cn
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: 'Eryu Guan' <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-[Problem]
-Since commit fcebe4562dec83b3f8d308 ("Btrfs: rework qgroup accounting"),
-quota data update is delayed after delayed_ref calculation, and lacks
-correct protection to detect root reference which shouldn't be counted
-in current sequence number but already written into extent backref.
+Hi, Eryu
 
-This makes exclusive reference not decreased correctly and give incorrect
-result.
+> -----Original Message-----
+> From: Eryu Guan [mailto:eguan@redhat.com]
+> Sent: Sunday, March 15, 2015 12:54 AM
+> To: Zhaolei
+> Cc: fstests@vger.kernel.org
+> Subject: Re: [PATCH] fix "utility required warning" with empty utility name
+> 
+> On Fri, Mar 13, 2015 at 04:51:28PM +0800, Zhaolei wrote:
+> > From: Zhao Lei <zhaolei@cn.fujitsu.com>
+> >
+> > In generic/019, if we hadn't install fio, we will get following output:
+> >  FSTYP         -- btrfs
+> >  PLATFORM      -- Linux/x86_64 lenovo
+> 4.0.0-rc3_HEAD_9eccca0843205f87c00404b663188b88eb248051_
+> >  MKFS_OPTIONS  -- /dev/sda6
+> >  MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 /dev/sda6
+> > /var/ltf/tester/scratch_mnt
+> >
+> >  generic/019      [not run]  utility required, skipped this test <- *
+> >  Not run: generic/019
+> >  Passed all 0 tests
+> >
+> > Reason of blank utility name is:
+> > $1 and $2 are reversed in _require_command(), this patch fixed this
+> > error.
+> >
+> > Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
+> > ---
+> >  common/rc | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> >
+> > diff --git a/common/rc b/common/rc
+> > index 1ed9df5..febad8c 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -1276,7 +1276,7 @@ _require_realtime()  #
+> >  _require_command()
+> >  {
+> > -    [ -n "$1" ] && _cmd="$1" || _cmd="$2"
+> > +    [ -n "$2" ] && _cmd="$2" || _cmd="$1"
+> >      [ -n "$1" -a -x "$1" ] || _notrun "$_cmd utility required, skipped this
+> test"
+> 
+> This doesn't work for me, I tested with generic/299 which requires fio, $_cmd
+> name was still empty.
+> 
+Thanks for notice.
+So the _require_command() is designed to show second arg
+when first arg blank, and current code fits the design.
 
-[Test procedure]
-1. Create a btrfs with 3 subvolumes, quota enabled and rescanned.
-2. Create a file in 1st subvolume
-3. Clone the file to 2nd and 3rd subvolume
-4. Sync the fs to reflect the changes in qgroup.
-5. Check the qgroup data
+> I think the right fix is to fix _require_fio()
+> 
+> @@ -2302,7 +2302,7 @@ _require_fio()
+>  {
+>         job=$1
+> 
+> -       _require_command $FIO_PROG
+> +       _require_command $FIO_PROG fio
+Should be:
+_require_command "$FIO_PROG" fio
+To do right thing when first arg blank.
 
-[Expected result]
-None of the subvolume has exclusive reference to the file.
+>         if [ -z "$1" ]; then
+>                 return 1;
+>         fi
+> 
+> There're also some other places need the second arg for _require_command,
+> just grep _require_command in the source code.
+> 
+So the bug is misuse of _require_command(), and need fix them all.
 
-[Actual result]
-The first subvolume still have exclusive reference to the file.
+I'll send v2 patch.
 
-Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
----
-changelog:
-v2:
-   Redirect error output of dd to seqres.full for debug in case dd
-   failed.
-v3:
-   Add support and check for old kernel which doesn't support
-   noinode_cache mount option.
-   Change nodesize to 64K to support arch whose page size can be larger
-   than 4K.
----
- tests/btrfs/083     | 103 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/083.out |   5 +++
- tests/btrfs/group   |   1 +
- 3 files changed, 109 insertions(+)
- create mode 100755 tests/btrfs/083
- create mode 100644 tests/btrfs/083.out
+Thanks
+Zhaolei
 
-diff --git a/tests/btrfs/083 b/tests/btrfs/083
-new file mode 100755
-index 0000000..da9b92e
---- /dev/null
-+++ b/tests/btrfs/083
-@@ -0,0 +1,103 @@
-+#! /bin/bash
-+# FS QA Test No. 083
-+#
-+# Test for incorrect exclusive reference count after cloning file
-+# between subvolumes.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Fujitsu. All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+_need_to_be_root
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_cp_reflink
-+
-+rm -f $seqres.full
-+
-+# use largest node/leaf size (64K) to allow the test to be run on arch with
-+# page size > 4k.
-+NODESIZE=65536
-+SUPPORT_NOINODE_CACHE="yes"
-+
-+run_check _scratch_mkfs "--nodesize $NODESIZE"
-+
-+# inode cache will also take space in fs tree, disable them to get consistent
-+# result.
-+# discard error output since we will check return value manually.
-+_scratch_mount "-o noinode_cache" 2> /dev/null
-+
-+# Check for old kernel which doesn't support 'noinode_cache' mount option
-+if [ $? -ne 0 ]
-+then
-+	support_noinode_cache="no"
-+	run_check _scratch_mount
-+fi
-+
-+_run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv1
-+_run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv2
-+_run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv3
-+
-+_run_btrfs_util_prog quota enable $SCRATCH_MNT
-+_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-+
-+# if we don't support noinode_cache mount option, then we should double check
-+# whether inode cache is enabled before executing the real test payload.
-+if [ $SUPPORT_NOINODE_CACHE == "no" ]; then
-+	EMPTY_SIZE=`$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | \
-+		$SED_PROG -n '/[0-9]/p' | $AWK_PROG '{print $2}' | head -n1`
-+	if [ $EMPTY_SIZE != $NODESIZE ]; then
-+		_notrun "Kernel doesn't support to disable inode cache"
-+	fi
-+fi
-+
-+dd if=/dev/zero of=$SCRATCH_MNT/subv1/file1 bs=4K count=64 2>> $seqres.full
-+cp --reflink $SCRATCH_MNT/subv1/file1 $SCRATCH_MNT/subv2/file1
-+cp --reflink $SCRATCH_MNT/subv1/file1 $SCRATCH_MNT/subv3/file1
-+
-+# Current btrfs use tree search ioctl to show quota, which will only show info
-+# in commit tree. So need to sync to update the qgroup commit tree.
-+sync
-+
-+units=`_btrfs_qgroup_units`
-+$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | $SED_PROG -n '/[0-9]/p' | \
-+	$AWK_PROG '{print $2" "$3}'
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/083.out b/tests/btrfs/083.out
-new file mode 100644
-index 0000000..479966a
---- /dev/null
-+++ b/tests/btrfs/083.out
-@@ -0,0 +1,5 @@
-+QA output created by 083
-+65536 65536
-+327680 65536
-+327680 65536
-+327680 65536
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index fd2fa76..04d5d67 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -85,3 +85,4 @@
- 080 auto snapshot
- 081 auto quick clone
- 082 auto quick remount
-+083 auto quick qgroup
--- 
-1.8.3.1
+
+> Thanks,
+> Eryu Guan
+> 
+> >  }
+> >
+> > --
+> > 1.8.5.1
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org More majordomo info
+> > at  http://vger.kernel.org/majordomo-info.html
+
 
