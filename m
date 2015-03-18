@@ -1,100 +1,77 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:49253 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755436AbbCRKSQ (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 18 Mar 2015 06:18:16 -0400
-Received: by mail-vc0-f174.google.com with SMTP id la4so16660786vcb.5
-        for <fstests@vger.kernel.org>; Wed, 18 Mar 2015 03:18:15 -0700 (PDT)
+Received: from mail.kernel.org ([198.145.29.136]:57979 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755282AbbCRSBK (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 18 Mar 2015 14:01:10 -0400
+Date: Wed, 18 Mar 2015 11:01:06 -0700
+From: Jaegeuk Kim <jaegeuk@kernel.org>
+Subject: Re: [PATCH 1/2] generic/067: add a testcase to check some inline
+ truncation behaviors
+Message-ID: <20150318180106.GC7461@jaegeuk-mac02>
+References: <1426613572-2405-1-git-send-email-jaegeuk@kernel.org>
+ <20150318034653.GE10105@dastard>
 MIME-Version: 1.0
-In-Reply-To: <20150318025238.GC10105@dastard>
-References: <1425909612-28034-1-git-send-email-drysdale@google.com>
- <1425909612-28034-3-git-send-email-drysdale@google.com> <20150316232434.GJ28557@dastard>
- <CAGXu5jLfrGrVO=9sF6=TK0QQHq4SWRjL0urGu-e+e1H8gk9Y3Q@mail.gmail.com> <20150318025238.GC10105@dastard>
-From: David Drysdale <drysdale@google.com>
-Date: Wed, 18 Mar 2015 10:17:55 +0000
-Message-ID: <CAHse=S9gg=-TBHBORBPXRzP1zs8S1YbiWZs6yM+hQEV7dTJr3A@mail.gmail.com>
-Subject: Re: [PATCHv3 xfstests 2/3] generic: test openat and new O_BENEATH flag
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20150318034653.GE10105@dastard>
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>
-Cc: Kees Cook <keescook@chromium.org>, LKML <linux-kernel@vger.kernel.org>, Alexander Viro <viro@zeniv.linux.org.uk>, "Eric W. Biederman" <ebiederm@xmission.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Meredydd Luff <meredydd@senatehouse.org>, Will Drewry <wad@chromium.org>, Jorge Lucangeli Obes <jorgelo@google.com>, Ricky Zhou <rickyz@google.com>, Lee Campbell <leecam@google.com>, Julien Tinnes <jln@google.com>, Mike Depinet <mdepinet@google.com>, James Morris <james.l.morris@oracle.com>, Andy Lutomirski <luto@amacapital.net>, Paolo Bonzini <pbonzini@redhat.com>, Paul Moore <paul@paul-moore.com>, Christoph Hellwig <hch@infradead.org>, Michael Kerrisk <mtk.manpages@gmail.com>, Linux API <linux-api@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>, fstests@vger.kernel.org
+Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
 List-ID: <fstests@vger.kernel.org>
 
-[resend, remembering to tick the Plaintext button this time -- sorry]
+Hi Dave,
 
-On Wed, Mar 18, 2015 at 2:52 AM, Dave Chinner <david@fromorbit.com> wrote:
-> On Tue, Mar 17, 2015 at 08:33:27AM -0700, Kees Cook wrote:
->> On Mon, Mar 16, 2015 at 4:24 PM, Dave Chinner
->> <david@fromorbit.com> wrote:
->> > On Mon, Mar 09, 2015 at 02:00:11PM +0000, David Drysdale wrote:
->> >> Test basic openat(2) behaviour.
->> >>
->> >> Test that if O_BENEATH flag is set, openat() will only open
->> >> paths that have no .. component and do not start with /.
->> >> Symlinks are also checked for the same restrictions.
->> >>
->> >> Signed-off-by: David Drysdale <drysdale@google.com> ---
->> >> .gitignore            |   1 + common/openat         |  61
->> >> ++++++++++++++++++++++++++++++ src/Makefile          |   3 +-
->> >> src/openat.c          | 100
->> >> +++++++++++++++++++++++++++++++++++++++++++++++++
->> >
->> > This strikes me as something that shoul dbe added to xfs_io for
->> > testing, as it already supports a heap of other open flags and
->> > xfstests is already dependent on it.
->>
->> While I don't see a problem adding this to xfs_io, I'd still like
->> to see this test live in the kernel tree too.
->
-> You can do whatever you want with the kernel tree - it doesn't
-> concern me at all.
->
->> Having it in the
->> same source means more testing, IMO.
->
-> That's complete bunk, though.  This helper binary is a limited use,
-> one shot test that can't be combined with anything else.  "sharing"
-> the source code across multiple different test suites doesn't change
-> that. However, putting support into xfs_io means it will get more
-> testing because we can *easily* use the functionality in many, many
-> different ways.
-
-It's useful to have a simple self-test in the kernel tree, so
-that kernel developers (and their buildbots) can catch any
-obvious regressions that might arise when working in related
-areas, without requiring any other dependencies.
-
-(Personally, I also think it's good that new kernel APIs
-come with demonstrations of their use in userspace in a
-nearby commit.)
-
-OTOH, testing openat() behaviour should clearly be a part of
-the xfstests suite (as a general/comprehensive filesystem
-test repository), and Dave makes a good point that putting
-the openat() functionality into xfs_io allows for more flexible
-test combinations.
-
-So I guess ideally we should end up with:
- a) Reinstate the kernel-tree selftests from the earlier iteration.
- b) Add openat test functionality into xfs_io
- c) Migrate the new xfstests cases to use xfs_io rather than
-   a local openat utility program
-
-However, given that I've already moved the test code once,
-and that a)-c) involve three different source trees, I'd like
-to de-couple things:
-- Concentrate on kernel changes and a) on the LKML.
- - If & when the kernel changes make progress, return to
-   b) and c).
-
-Sound sensible?
+Thank you for the review.
+I'll resend this series with precise description and fixes as you pointed.
 
 Thanks,
-David.
 
+On Wed, Mar 18, 2015 at 02:46:53PM +1100, Dave Chinner wrote:
+> On Tue, Mar 17, 2015 at 10:32:51AM -0700, Jaegeuk Kim wrote:
+> > This patch introduces a new testcase, generic/067, to test several truncation
+> > cases under the inline feature supported by filesystems.
+> 
+> "inline feature" means what, exactly?
+> 
+> > 
+> > +_supported_os Linux
+> > +_require_scratch
+> > +
+> > +testfile=$SCRATCH_MNT/testfile
+> > +
+> > +_scratch_mkfs > /dev/null 2>&1
+> > +_scratch_mount
+> > +
+> > +# aligned inline truncation
+> 
+> Aligned to what, exactly?
+> 
+> > +$XFS_IO_PROG -t -f \
+> > +-c "pwrite -S 0x58 0 120"       `# write        |XXXXXXXXXXXXXXXXXXXXXXXX|` \
+> > +-c "fsync"	\
+> > +-c "truncate 0"                 `# truncate     |                        |` \
+> > +-c "truncate 160"               `# truncate     |                        |` \
+> > +-c "close"      \
+> > +$testfile | _filter_xfs_io
+> 
+> Please indent multiple line xfs_io command a little more clearly,
+> and align the "\" so it's clear it's amultiple line command
+> 
+> $XFS_IO_PROG -t -f								    \
+> 	-c "pwrite -S 0x58 0 120"       `# write        |XXXXXXXXXXXXXXXXXXXXXXXX|` \
+> 	-c "fsync"								    \
+> 	-c "truncate 0"                 `# truncate     |                        |` \
+> 	-c "truncate 160"               `# truncate     |                        |` \
+> 	-c "close"								    \
+> 	$testfile | _filter_xfs_io
+> 
+> (not sure the comment on the second truncate is correct, either)
+> 
+> Also, why do you need the "close" command?
+> 
 > Cheers,
->
+> 
 > Dave.
-> --
+> -- 
 > Dave Chinner
 > david@fromorbit.com
