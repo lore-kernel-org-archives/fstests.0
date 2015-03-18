@@ -1,83 +1,100 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53136 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750891AbbCREOS (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 18 Mar 2015 00:14:18 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t2I4EIdC004115
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <fstests@vger.kernel.org>; Wed, 18 Mar 2015 00:14:18 -0400
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v2] xfs/014: replace df with $DF_PROG
-Date: Wed, 18 Mar 2015 12:14:01 +0800
-Message-Id: <1426652041-1265-1-git-send-email-eguan@redhat.com>
-In-Reply-To: <1425914923-19220-1-git-send-email-eguan@redhat.com>
-References: <1425914923-19220-1-git-send-email-eguan@redhat.com>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:49253 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755436AbbCRKSQ (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 18 Mar 2015 06:18:16 -0400
+Received: by mail-vc0-f174.google.com with SMTP id la4so16660786vcb.5
+        for <fstests@vger.kernel.org>; Wed, 18 Mar 2015 03:18:15 -0700 (PDT)
+MIME-Version: 1.0
+In-Reply-To: <20150318025238.GC10105@dastard>
+References: <1425909612-28034-1-git-send-email-drysdale@google.com>
+ <1425909612-28034-3-git-send-email-drysdale@google.com> <20150316232434.GJ28557@dastard>
+ <CAGXu5jLfrGrVO=9sF6=TK0QQHq4SWRjL0urGu-e+e1H8gk9Y3Q@mail.gmail.com> <20150318025238.GC10105@dastard>
+From: David Drysdale <drysdale@google.com>
+Date: Wed, 18 Mar 2015 10:17:55 +0000
+Message-ID: <CAHse=S9gg=-TBHBORBPXRzP1zs8S1YbiWZs6yM+hQEV7dTJr3A@mail.gmail.com>
+Subject: Re: [PATCHv3 xfstests 2/3] generic: test openat and new O_BENEATH flag
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Kees Cook <keescook@chromium.org>, LKML <linux-kernel@vger.kernel.org>, Alexander Viro <viro@zeniv.linux.org.uk>, "Eric W. Biederman" <ebiederm@xmission.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Meredydd Luff <meredydd@senatehouse.org>, Will Drewry <wad@chromium.org>, Jorge Lucangeli Obes <jorgelo@google.com>, Ricky Zhou <rickyz@google.com>, Lee Campbell <leecam@google.com>, Julien Tinnes <jln@google.com>, Mike Depinet <mdepinet@google.com>, James Morris <james.l.morris@oracle.com>, Andy Lutomirski <luto@amacapital.net>, Paolo Bonzini <pbonzini@redhat.com>, Paul Moore <paul@paul-moore.com>, Christoph Hellwig <hch@infradead.org>, Michael Kerrisk <mtk.manpages@gmail.com>, Linux API <linux-api@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-I've seen xfs/014 fails as
+[resend, remembering to tick the Plaintext button this time -- sorry]
 
-        [root@dhcp-66-86-3 xfstests]# diff -u tests/xfs/014.out /var/lib/xfstests/results//xfs/014.out.bad
-        --- tests/xfs/014.out   2015-03-06 14:48:19.000000000 +0800
-        +++ /var/lib/xfstests/results//xfs/014.out.bad  2015-03-09
-        22:48:08.660001935 +0800
-        @@ -1,2 +1,9 @@
-         QA output created by 014
-          Silence is golden.
-          +falloc: invalid option -- '1'
-          +falloc: invalid option -- '0'
-          +falloc: invalid option -- 'M'
-          +falloc [-k] off len -- allocates space associated with part of a file
-          via fallocate
-          +falloc [-k] off len -- allocates space associated with part of a file
-          via fallocate
-          +falloc [-k] off len -- allocates space associated with part of a file
-          via fallocate
-          +falloc [-k] off len -- allocates space associated with part of a file
-          via fallocate
+On Wed, Mar 18, 2015 at 2:52 AM, Dave Chinner <david@fromorbit.com> wrote:
+> On Tue, Mar 17, 2015 at 08:33:27AM -0700, Kees Cook wrote:
+>> On Mon, Mar 16, 2015 at 4:24 PM, Dave Chinner
+>> <david@fromorbit.com> wrote:
+>> > On Mon, Mar 09, 2015 at 02:00:11PM +0000, David Drysdale wrote:
+>> >> Test basic openat(2) behaviour.
+>> >>
+>> >> Test that if O_BENEATH flag is set, openat() will only open
+>> >> paths that have no .. component and do not start with /.
+>> >> Symlinks are also checked for the same restrictions.
+>> >>
+>> >> Signed-off-by: David Drysdale <drysdale@google.com> ---
+>> >> .gitignore            |   1 + common/openat         |  61
+>> >> ++++++++++++++++++++++++++++++ src/Makefile          |   3 +-
+>> >> src/openat.c          | 100
+>> >> +++++++++++++++++++++++++++++++++++++++++++++++++
+>> >
+>> > This strikes me as something that shoul dbe added to xfs_io for
+>> > testing, as it already supports a heap of other open flags and
+>> > xfstests is already dependent on it.
+>>
+>> While I don't see a problem adding this to xfs_io, I'd still like
+>> to see this test live in the kernel tree too.
+>
+> You can do whatever you want with the kernel tree - it doesn't
+> concern me at all.
+>
+>> Having it in the
+>> same source means more testing, IMO.
+>
+> That's complete bunk, though.  This helper binary is a limited use,
+> one shot test that can't be combined with anything else.  "sharing"
+> the source code across multiple different test suites doesn't change
+> that. However, putting support into xfs_io means it will get more
+> testing because we can *easily* use the functionality in many, many
+> different ways.
 
-which is because output of "df -m" is split into two lines, and
-freesp is 0, in _consume_free_space() function.
+It's useful to have a simple self-test in the kernel tree, so
+that kernel developers (and their buildbots) can catch any
+obvious regressions that might arise when working in related
+areas, without requiring any other dependencies.
 
-        Filesystem           1M-blocks  Used Available Use% Mounted on
-        /mnt/testarea/scratch/014.fs
-                                 10230  1061      9170  11% /mnt/testarea/scratch/014.mnt
+(Personally, I also think it's good that new kernel APIs
+come with demonstrations of their use in userspace in a
+nearby commit.)
 
-Appending '-P' option to df fixes this issue. So use $DF_PROG which
-already has -P option set.
+OTOH, testing openat() behaviour should clearly be a part of
+the xfstests suite (as a general/comprehensive filesystem
+test repository), and Dave makes a good point that putting
+the openat() functionality into xfs_io allows for more flexible
+test combinations.
 
-$DF_PROG also sets -T option to print fs type in extra column, so change
-the awk command accordingly to get the correct freespace.
+So I guess ideally we should end up with:
+ a) Reinstate the kernel-tree selftests from the earlier iteration.
+ b) Add openat test functionality into xfs_io
+ c) Migrate the new xfstests cases to use xfs_io rather than
+   a local openat utility program
 
-Also replace awk with $AWK_PROG.
+However, given that I've already moved the test code once,
+and that a)-c) involve three different source trees, I'd like
+to de-couple things:
+- Concentrate on kernel changes and a) on the LKML.
+ - If & when the kernel changes make progress, return to
+   b) and c).
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
+Sound sensible?
 
-v2: address Dave's comments
-- use $DF_PROG not "df -P"
-- update awk arguments to get correct freespace, as $DF_PROG prints fs type too
-- use $AWK_PROG not awk
+Thanks,
+David.
 
- tests/xfs/014 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/tests/xfs/014 b/tests/xfs/014
-index 8866bfe..ab3d85b 100755
---- a/tests/xfs/014
-+++ b/tests/xfs/014
-@@ -88,7 +88,7 @@ _consume_free_space()
- 	dir=$1
- 
- 	# allocate all but 10MB of available space
--	freesp=`df -m $dir | awk '/^\// { print $4 - 10 }'`
-+	freesp=`$DF_PROG -m $dir | $AWK_PROG '/^\// { print $5 - 10 }'`
- 	$XFS_IO_PROG -f -c "falloc 0 ${freesp}M" $dir/spc
- }
- 
--- 
-1.8.3.1
-
+> Cheers,
+>
+> Dave.
+> --
+> Dave Chinner
+> david@fromorbit.com
