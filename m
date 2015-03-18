@@ -1,158 +1,65 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.136]:41846 "EHLO mail.kernel.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932620AbbCQRdI (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 17 Mar 2015 13:33:08 -0400
-From: Jaegeuk Kim <jaegeuk@kernel.org>
-Subject: [PATCH 2/2] f2fs/001: introduce a testcaes for -ENOSPC with inline operation
-Date: Tue, 17 Mar 2015 10:32:52 -0700
-Message-Id: <1426613572-2405-2-git-send-email-jaegeuk@kernel.org>
-In-Reply-To: <1426613572-2405-1-git-send-email-jaegeuk@kernel.org>
-References: <1426613572-2405-1-git-send-email-jaegeuk@kernel.org>
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:32656 "EHLO
+	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754316AbbCRCxU (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 17 Mar 2015 22:53:20 -0400
+Date: Wed, 18 Mar 2015 13:52:38 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCHv3 xfstests 2/3] generic: test openat and new O_BENEATH
+ flag
+Message-ID: <20150318025238.GC10105@dastard>
+References: <1425909612-28034-1-git-send-email-drysdale@google.com>
+ <1425909612-28034-3-git-send-email-drysdale@google.com>
+ <20150316232434.GJ28557@dastard>
+ <CAGXu5jLfrGrVO=9sF6=TK0QQHq4SWRjL0urGu-e+e1H8gk9Y3Q@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAGXu5jLfrGrVO=9sF6=TK0QQHq4SWRjL0urGu-e+e1H8gk9Y3Q@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Jaegeuk Kim <jaegeuk@kernel.org>
+To: Kees Cook <keescook@chromium.org>
+Cc: David Drysdale <drysdale@google.com>, LKML <linux-kernel@vger.kernel.org>, Alexander Viro <viro@zeniv.linux.org.uk>, "Eric W. Biederman" <ebiederm@xmission.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Meredydd Luff <meredydd@senatehouse.org>, Will Drewry <wad@chromium.org>, Jorge Lucangeli Obes <jorgelo@google.com>, Ricky Zhou <rickyz@google.com>, Lee Campbell <leecam@google.com>, Julien Tinnes <jln@google.com>, Mike Depinet <mdepinet@google.com>, James Morris <james.l.morris@oracle.com>, Andy Lutomirski <luto@amacapital.net>, Paolo Bonzini <pbonzini@redhat.com>, Paul Moore <paul@paul-moore.com>, Christoph Hellwig <hch@infradead.org>, Michael Kerrisk <mtk.manpages@gmail.com>, Linux API <linux-api@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This patch introduces f2fs/001 to test -ENOSPC when inline operation was
-activated.
+On Tue, Mar 17, 2015 at 08:33:27AM -0700, Kees Cook wrote:
+> On Mon, Mar 16, 2015 at 4:24 PM, Dave Chinner
+> <david@fromorbit.com> wrote:
+> > On Mon, Mar 09, 2015 at 02:00:11PM +0000, David Drysdale wrote:
+> >> Test basic openat(2) behaviour.
+> >>
+> >> Test that if O_BENEATH flag is set, openat() will only open
+> >> paths that have no .. component and do not start with /.
+> >> Symlinks are also checked for the same restrictions.
+> >>
+> >> Signed-off-by: David Drysdale <drysdale@google.com> ---
+> >> .gitignore            |   1 + common/openat         |  61
+> >> ++++++++++++++++++++++++++++++ src/Makefile          |   3 +-
+> >> src/openat.c          | 100
+> >> +++++++++++++++++++++++++++++++++++++++++++++++++
+> >
+> > This strikes me as something that shoul dbe added to xfs_io for
+> > testing, as it already supports a heap of other open flags and
+> > xfstests is already dependent on it.
+> 
+> While I don't see a problem adding this to xfs_io, I'd still like
+> to see this test live in the kernel tree too.
 
-Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
----
- tests/f2fs/001     | 81 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/f2fs/001.out | 21 ++++++++++++++
- tests/f2fs/group   |  6 ++++
- 3 files changed, 108 insertions(+)
- create mode 100755 tests/f2fs/001
- create mode 100644 tests/f2fs/001.out
- create mode 100644 tests/f2fs/group
+You can do whatever you want with the kernel tree - it doesn't
+concern me at all.
 
-diff --git a/tests/f2fs/001 b/tests/f2fs/001
-new file mode 100755
-index 0000000..775b0f1
---- /dev/null
-+++ b/tests/f2fs/001
-@@ -0,0 +1,81 @@
-+#! /bin/bash
-+# FS QA Test No. f2fs/001
-+#
-+# Test -ENSPC wth inline operations.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2014 Jaegeuk Kim.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+_supported_fs f2fs
-+_supported_os Linux
-+_require_scratch
-+
-+testfile=$SCRATCH_MNT/testfile
-+dummyfile=$SCRATCH_MNT/dummyfile
-+
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount
-+
-+echo "==== create small file ==="
-+$XFS_IO_PROG -t -f \
-+-c "pwrite -S 0x58 0 120" \
-+-c "close" \
-+$testfile | _filter_xfs_io
-+
-+echo "==== fill 100% partition ==="
-+$XFS_IO_PROG -t -f \
-+-c "falloc 0 8g" \
-+-c "close" \
-+$dummyfile | _filter_xfs_io
-+
-+echo "==== change i_size & write data ==="
-+$XFS_IO_PROG \
-+-c "truncate 4096" \
-+-c "pwrite -S 0x58 8192 4096" \
-+-c "close" \
-+$testfile | _filter_xfs_io
-+
-+echo "==== check data contents ==="
-+hexdump -C $testfile
-+_scratch_remount
-+hexdump -C $testfile
-+
-+rm $testfile
-+rm $dummyfile
-+
-+status=0
-+exit
-diff --git a/tests/f2fs/001.out b/tests/f2fs/001.out
-new file mode 100644
-index 0000000..8862156
---- /dev/null
-+++ b/tests/f2fs/001.out
-@@ -0,0 +1,21 @@
-+QA output created by 001
-+==== create small file ===
-+wrote 120/120 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+==== fill 100% partition ===
-+fallocate: No space left on device
-+==== change i_size & write data ===
-+pwrite64: No space left on device
-+==== check data contents ===
-+00000000  58 58 58 58 58 58 58 58  58 58 58 58 58 58 58 58  |XXXXXXXXXXXXXXXX|
-+*
-+00000070  58 58 58 58 58 58 58 58  00 00 00 00 00 00 00 00  |XXXXXXXX........|
-+00000080  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-+*
-+00001000
-+00000000  58 58 58 58 58 58 58 58  58 58 58 58 58 58 58 58  |XXXXXXXXXXXXXXXX|
-+*
-+00000070  58 58 58 58 58 58 58 58  00 00 00 00 00 00 00 00  |XXXXXXXX........|
-+00000080  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-+*
-+00001000
-diff --git a/tests/f2fs/group b/tests/f2fs/group
-new file mode 100644
-index 0000000..daba9a3
---- /dev/null
-+++ b/tests/f2fs/group
-@@ -0,0 +1,6 @@
-+# QA groups control file
-+# Defines test groups and nominal group owners
-+# - do not start group names with a digit
-+# - comment line before each group is "new" description
-+#
-+001 auto quick rw
+> Having it in the
+> same source means more testing, IMO.
+
+That's complete bunk, though.  This helper binary is a limited use,
+one shot test that can't be combined with anything else.  "sharing"
+the source code across multiple different test suites doesn't change
+that. However, putting support into xfs_io means it will get more
+testing because we can *easily* use the functionality in many, many
+different ways.
+
+Cheers,
+
+Dave.
 -- 
-2.1.1
-
+Dave Chinner
+david@fromorbit.com
