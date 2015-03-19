@@ -1,12 +1,12 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:63057 "EHLO
-	mx0b-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751081AbbCSUbX (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 19 Mar 2015 16:31:23 -0400
+Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:26051 "EHLO
+	mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750950AbbCSUdB (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 19 Mar 2015 16:33:01 -0400
 From: Josef Bacik <jbacik@fb.com>
-Subject: [PATCH 1/3] dm: log writes target
-Date: Thu, 19 Mar 2015 16:31:08 -0400
-Message-ID: <1426797070-27463-2-git-send-email-jbacik@fb.com>
+Subject: [PATCH 2/3] fstests: add dm-log-writes test and supporting code
+Date: Thu, 19 Mar 2015 16:31:09 -0400
+Message-ID: <1426797070-27463-3-git-send-email-jbacik@fb.com>
 In-Reply-To: <1426797070-27463-1-git-send-email-jbacik@fb.com>
 References: <1426797070-27463-1-git-send-email-jbacik@fb.com>
 MIME-Version: 1.0
@@ -15,1017 +15,653 @@ Sender: fstests-owner@vger.kernel.org
 To: linux-btrfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, dm-devel@redhat.com, zab@redhat.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This creates a new target that is meant for file system developers to test file
-system integrity at particular points in the life of a file system.  We capture
-all write requests and the data and log the requests and the data to a separate
-device for later replay.  There is a userspace utility to do this replay.  The
-idea behind this is to give file system developers to verify that the file
-system is always consistent.  Thanks,
+This patch adds the supporting code for using the dm-log-writes target.  The
+bash stuff is similar to the dmflakey code, it just gives us functions to build
+and tear down a dm-log-writes target.  We add a new LOGWRITES_DEV variable to
+take in the device we will use as the log and add checks for that.
+
+I've rigged up fsx to have an integrity check mode.  Basically it works like it
+normally works, but when it fsync()'s it marks the log with a unique mark and
+dumps it's buffer to a file with the mark in the filename.  I did this with a
+system() call simply because it was the fastest.  I can link the device-mapper
+libraries and do it programatically if that would be preferred, but this works
+pretty well.
+
+The test itself just runs 200 ops and exits, then finds all of the good buffers
+in the directory we provided and replays up to the mark given, mounts the file
+system and compares the md5sum, unmounts and fsck's to check for metadata
+integrity.  dm-log-writes will pretend to do discard and the replay tool will
+replay it properly depending on the underlying device, either by writing 0's or
+actually calling the discard ioctl, so I've enabled discard in the test for
+maximum fun.
+
+This test relies on the supporting userspace code I've written for
+dm-logs-writes.  It can be found here
+
+https://github.com/josefbacik/log-writes.git
+
+Thanks,
 
 Signed-off-by: Josef Bacik <jbacik@fb.com>
 ---
- Documentation/device-mapper/dm-log-writes.txt | 136 +++++
- drivers/md/Kconfig                            |  16 +
- drivers/md/Makefile                           |   1 +
- drivers/md/dm-log-writes.c                    | 809 ++++++++++++++++++++++++++
- 4 files changed, 962 insertions(+)
- create mode 100644 Documentation/device-mapper/dm-log-writes.txt
- create mode 100644 drivers/md/dm-log-writes.c
+ README                |   2 +
+ common/config         |   1 +
+ common/dmlogwrites    |  80 ++++++++++++++++++++++++++++++
+ common/rc             |  46 ++++++++++++++++++
+ ltp/fsx.c             | 131 ++++++++++++++++++++++++++++++++++++++++++--------
+ tests/generic/326     | 130 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/326.out |   2 +
+ tests/generic/group   |   1 +
+ 8 files changed, 374 insertions(+), 19 deletions(-)
+ create mode 100644 common/dmlogwrites
+ create mode 100644 tests/generic/326
+ create mode 100644 tests/generic/326.out
 
-diff --git a/Documentation/device-mapper/dm-log-writes.txt b/Documentation/device-mapper/dm-log-writes.txt
+diff --git a/README b/README
+index 0c9449a..112478e 100644
+--- a/README
++++ b/README
+@@ -78,6 +78,8 @@ Preparing system for tests (IRIX and Linux):
+                added to the end of fsstresss and fsx invocations, respectively,
+                in case you wish to exclude certain operational modes from these
+                tests.
++             - setenv LOGWRITES_DEV to a block device to use for power fail
++               testing.
+ 
+         - or add a case to the switch in common/config assigning
+           these variables based on the hostname of your test
+diff --git a/common/config b/common/config
+index e5c3579..563e48e 100644
+--- a/common/config
++++ b/common/config
+@@ -190,6 +190,7 @@ export DMSETUP_PROG="`set_prog_path dmsetup`"
+ export WIPEFS_PROG="`set_prog_path wipefs`"
+ export DUMP_PROG="`set_prog_path dump`"
+ export RESTORE_PROG="`set_prog_path restore`"
++export REPLAYLOG_PROG="`set_prog_path replay-log`"
+ 
+ # Generate a comparable xfsprogs version number in the form of
+ # major * 10000 + minor * 100 + release
+diff --git a/common/dmlogwrites b/common/dmlogwrites
 new file mode 100644
-index 0000000..f3a9fa2
+index 0000000..4df9ea7
 --- /dev/null
-+++ b/Documentation/device-mapper/dm-log-writes.txt
-@@ -0,0 +1,136 @@
-+dm-log-writes
-+=============
++++ b/common/dmlogwrites
+@@ -0,0 +1,80 @@
++##/bin/bash
++#
++# Copyright (c) 2015 Facebook, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#
++#
++# common functions for setting up and tearing down a dm log-writes device
 +
-+This target takes 2 devices, one to pass all IO to normally, and one to log all
-+of the write operations to.  This is intended for file system developers wishing
-+to verify the integrity of metadata or data as the file system is written to.
-+There is a log_writes_entry written for every WRITE request and the target is
-+able to take arbitrary data from userspace to insert into the log.  The data
-+that is in the WRITE requests is copied into the log to make the replay happen
-+exactly as it happened originally.
++_init_log_writes()
++{
++	local BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
++	LOGWRITES_NAME=logwrites-test
++	LOGWRITES_DMDEV=/dev/mapper/$LOGWRITES_NAME
++	LOGWRITES_TABLE="0 $BLK_DEV_SIZE log-writes $SCRATCH_DEV $LOGWRITES_DEV"
++	$DMSETUP_PROG create $LOGWRITES_NAME --table "$LOGWRITES_TABLE" || \
++		_fatal "failed to create log-writes device"
++	$DMSETUP_PROG mknodes > /dev/null 2>&1
++}
 +
-+Log Ordering
-+============
++_log_writes_mark()
++{
++	[ $# -ne 1 ] && _fatal "_log_writes_mark takes one argument"
++	$DMSETUP_PROG message $LOGWRITES_NAME 0 mark $1
++}
 +
-+We log things in order of completion once we are sure the write is no longer in
-+cache.  This means that normal WRITE requests are not actually logged until the
-+next REQ_FLUSH request.  This is to make it easier for userspace to replay the
-+log in a way that correlates to what is on disk and not what is in cache, to
-+make it easier to detect improper waiting/flushing.
++_log_writes_mkfs()
++{
++	_scratch_options mkfs
++	_mkfs_dev $SCRATCH_OPTIONS $LOGWRITES_DMDEV
++	_log_writes_mark mkfs
++}
 +
-+This works by attaching all WRITE requests to a list once the write completes.
-+Once we see a REQ_FLUSH request we splice this list onto the request and once
-+the FLUSH request completes we log all of the WRITE's and then the FLUSH.  Only
-+completeled WRITEs at the time of the issue of the REQ_FLUSH are added in order
-+to simulate the worst case scenario with regard to power failures.  Consider the
-+following example (W means write, C means complete)
++_mount_log_writes()
++{
++	mount -t $FSTYP $MOUNT_OPTIONS $* $LOGWRITES_DMDEV $SCRATCH_MNT
++}
 +
-+W1,W2,W3,C3,C2,Wflush,C1,Cflush
++_unmount_log_writes()
++{
++	$UMOUNT_PROG $SCRATCH_MNT
++}
 +
-+The log would show the following
++# _replay_log <mark>
++#
++# This replays the log contained on $INTEGRITY_DEV onto $SCRATCH_DEV upto the
++# mark passed in.
++_replay_log()
++{
++	_mark=$1
 +
-+W3,W2,flush,W1....
++	$REPLAYLOG_PROG --log $LOGWRITES_DEV --replay $SCRATCH_DEV \
++		--end-mark $_mark > /dev/null 2>&1
++	[ $? -ne 0 ] && _fatal "replay failed"
++}
 +
-+Again this is to simulate what is actually on disk, this allows us to detect
-+cases where a power failure at a particular point in time would create an
-+inconsistent file system.
++_log_writes_remove()
++{
++	$DMSETUP_PROG remove $LOGWRITES_NAME > /dev/null 2>&1
++	$DMSETUP_PROG mknodes > /dev/null 2>&1
++}
 +
-+Any REQ_FUA requests bypass this flushing mechanism and are logged as soon as
-+they complete as those requests will obviously bypass the device cache.
-+
-+Any REQ_DISCARD requests are treated like WRITE requests.  This is because
-+otherwise we would have all the DISCARD requests, and then the WRITE requests
-+and then the FLUSH request.  Consider the following example
-+
-+WRITE block 1, DISCARD block 1, FLUSH
-+
-+If we logged DISCARD when it completed, the replay would look like this
-+
-+DISCARD 1, WRITE 1, FLUSH
-+
-+which isn't quite what happened and wouldn't be caught during the log replay.
-+
-+Marks
-+=====
-+
-+You can use dmsetup to set an arbitrary mark in a log.  For example say you want
-+to fsck an file system after every write, but first you need to replay up to the
-+mkfs to make sure we're fsck'ing something reasonable, you would do something
-+like this
-+
-+mkfs.btrfs -f /dev/mapper/log
-+dmsetup message log 0 mark mkfs
-+<run test>
-+
-+This would allow you to replay the log up to the mkfs mark and then replay from
-+that point on doing the fsck check in the interval that you want.
-+
-+Every log has a mark at the end labeled "log-writes-end".
-+
-+Userspace component
-+===================
-+
-+There is a userspace tool that will replay the log for you in various ways.
-+As of this writing the options are not well documented, they will be in the
-+future.  It can be found here
-+
-+https://github.com/josefbacik/log-writes
-+
-+Example usage
-+=============
-+
-+Say you want to test fsync on your file system.  You would do something like
-+this
-+
-+TABLE="0 $(blockdev --getsz /dev/sdb) log-writes /dev/sdb /dev/sdc"
-+dmsetup create log --table "$TABLE"
-+mkfs.btrfs -f /dev/mapper/log
-+dmsetup message log 0 mark mkfs
-+
-+mount /dev/mapper/log /mnt/btrfs-test
-+<some test that does fsync at the end>
-+dmsetup message log 0 mark fsync
-+md5sum /mnt/btrfs-test/foo
-+umount /mnt/btrfs-test
-+
-+dmsetup remove log
-+replay-log --log /dev/sdc --replay /dev/sdb --end-mark fsync
-+mount /dev/sdb /mnt/btrfs-test
-+md5sum /mnt/btrfs-test/foo
-+<verify md5sum's are correct>
-+
-+Another option is to do a complicated file system operation and verify the file
-+system is consistent during the entire operation.  You could do this by doing
-+
-+
-+TABLE="0 $(blockdev --getsz /dev/sdb) log-writes /dev/sdb /dev/sdc"
-+dmsetup create log --table "$TABLE"
-+mkfs.btrfs -f /dev/mapper/log
-+dmsetup message log 0 mark mkfs
-+
-+mount /dev/mapper/log /mnt/btrfs-test
-+<fsstress to dirty the fs>
-+btrfs filesystem balance /mnt/btrfs-test
-+umount /mnt/btrfs-test
-+dmsetup remove log
-+
-+replay-log --log /dev/sdc --replay /dev/sdb --end-mark mkfs
-+btrfsck /dev/sdb
-+replay-log --log /dev/sdc --replay /dev/sdb --start-mark mkfs \
-+	--fsck "btrfsck /dev/sdb" --check fua
-+
-+And that will replay the log until it sees a FUA request, run the fsck command
-+and if the fsck passes it will replay to the next FUA, until it is completed or
-+the fsck command exists abnormally.
-+
-+Table Parameters
-+----------------
-+  <dev path> <dev path for log>
-+
-+Mandatory parameters:
-+  <dev path>: Full pathname to the underlying block-device, or a "major:minor"
-+              device-number.  This device is the one that all of the IO will go
-+              to normally, just think of it as a normal linear mapping.
-+  <dev path for log>: Same format as <dev path>, this is the device where the
-+                      log entries are written to.
-+
-diff --git a/drivers/md/Kconfig b/drivers/md/Kconfig
-index 63e05e3..f928ad5 100644
---- a/drivers/md/Kconfig
-+++ b/drivers/md/Kconfig
-@@ -432,4 +432,20 @@ config DM_SWITCH
++_cleanup_log_writes()
++{
++	# If dmsetup load fails then we need to make sure to do resume here
++	# otherwise the umount will hang
++	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
++	_log_writes_remove
++}
+diff --git a/common/rc b/common/rc
+index 857308a..c6c2059 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1311,6 +1311,24 @@ _require_dm_flakey()
+     fi
+ }
  
- 	  If unsure, say N.
++# this test requires the device mapper log-writes target
++#
++_require_dm_log_writes()
++{
++	[ -z $LOGWRITES_DEV ] && _notrun "This test requires a logwrites dev"
++	_require_block_device $SCRATCH_DEV
++	_require_block_device $LOGWRITES_DEV
++	_require_command $DMSETUP_PROG
++	_require_command $REPLAYLOG_PROG
++
++	modprobe dm-log-writes >/dev/null 2>&1
++	$DMSETUP_PROG targets | grep "log-writes" > /dev/null 2>&1
++	if [ $? -ne 0 ]
++	then
++		_notrun "This test requires dm log-writes support"
++	fi
++}
++
+ # this test requires the projid32bit feature to be available in mkfs.xfs.
+ #
+ _require_projid32bit()
+@@ -1545,6 +1563,34 @@ _require_xfs_io_command()
+ 		_notrun "xfs_io $command failed (old kernel/wrong fs?)"
+ }
  
-+config DM_LOG_WRITES
-+	tristate "Log writes target support"
-+	depends on BLK_DEV_DM
-+	---help---
-+	  This device-mapper target takes two devices, one device to use
-+	  normally, one to log all write operations done to the first device.
-+	  This is for use by file system developers wishing to verify that
-+	  their fs is writing a consitent file system at all times by allowing
-+	  them to replay the log in a variety of ways and to check the
-+	  contents.
++_test_falloc_support()
++{
++	if [ $# -ne 1 ]
++	then
++		echo "Usage: _test_falloc_support command" 1>&2
++		exit 1
++	fi
++	command=$1
 +
-+	  To compile this code as a module, choose M here: the module will
-+	  be called dm-log-writes.
++	testfile=$TEST_DIR/$$.xfs_io
++	case $command in
++	"fpunch" | "fcollapse" | "zero" | "fzero" | "finsert" )
++		testio=`$XFS_IO_PROG -F -f -c "pwrite 0 20k" -c "fsync" \
++			-c "$command 4k 8k" $testfile 2>&1`
++		;;
++	*)
++		echo "Not a valid falloc command" 1>&2
++		exit 1
++	esac
 +
-+	  If unsure, say N.
++	rm -f $testfile 2>&1 > /dev/null
++	echo $testio | grep -q "not found" && \
++		return 0
++	echo $testio | grep -q "Operation not supported" && \
++		return 0
++	return 1
++}
 +
- endif # MD
-diff --git a/drivers/md/Makefile b/drivers/md/Makefile
-index a2da532..1863fea 100644
---- a/drivers/md/Makefile
-+++ b/drivers/md/Makefile
-@@ -55,6 +55,7 @@ obj-$(CONFIG_DM_CACHE)		+= dm-cache.o
- obj-$(CONFIG_DM_CACHE_MQ)	+= dm-cache-mq.o
- obj-$(CONFIG_DM_CACHE_CLEANER)	+= dm-cache-cleaner.o
- obj-$(CONFIG_DM_ERA)		+= dm-era.o
-+obj-$(CONFIG_DM_LOG_WRITES)	+= dm-log-writes.o
+ # check that kernel and filesystem support direct I/O
+ _require_odirect()
+ {
+diff --git a/ltp/fsx.c b/ltp/fsx.c
+index 6da51e9..47ac865 100644
+--- a/ltp/fsx.c
++++ b/ltp/fsx.c
+@@ -61,15 +61,17 @@ int			logcount = 0;	/* total ops */
+  * be careful in how we select the different operations. The active operations
+  * are mapped to numbers as follows:
+  *
+- *		lite	!lite
+- * READ:	0	0
+- * WRITE:	1	1
+- * MAPREAD:	2	2
+- * MAPWRITE:	3	3
+- * TRUNCATE:	-	4
+- * FALLOCATE:	-	5
+- * PUNCH HOLE:	-	6
+- * ZERO RANGE:	-	7
++ *			lite	!lite	integrity
++ * READ:		0	0	0
++ * WRITE:		1	1	1
++ * MAPREAD:		2	2	2
++ * MAPWRITE:		3	3	3
++ * TRUNCATE:		-	4	4
++ * FALLOCATE:		-	5	5
++ * PUNCH HOLE:		-	6	6
++ * ZERO RANGE:		-	7	7
++ * COLLAPSE RANGE:	-	8	8
++ * FSYNC:		-	-	9
+  *
+  * When mapped read/writes are disabled, they are simply converted to normal
+  * reads and writes. When fallocate/fpunch calls are disabled, they are
+@@ -98,6 +100,10 @@ int			logcount = 0;	/* total ops */
+ #define OP_INSERT_RANGE	9
+ #define OP_MAX_FULL		10
  
- ifeq ($(CONFIG_DM_UEVENT),y)
- dm-mod-objs			+= dm-uevent.o
-diff --git a/drivers/md/dm-log-writes.c b/drivers/md/dm-log-writes.c
++/* integrity operations */
++#define OP_FSYNC		10
++#define OP_MAX_INTEGRITY	11
++
+ /* operation modifiers */
+ #define OP_CLOSEOPEN	100
+ #define OP_SKIPPED	101
+@@ -111,6 +117,9 @@ char	*original_buf;			/* a pointer to the original data */
+ char	*good_buf;			/* a pointer to the correct data */
+ char	*temp_buf;			/* a pointer to the current data */
+ char	*fname;				/* name of our test file */
++char	*bname;				/* basename of our test file */
++char	*logdev;			/* -I flag */
++char	dname[1024];			/* -P flag */
+ int	fd;				/* fd for our test file */
+ 
+ blksize_t	block_size = 0;
+@@ -149,9 +158,11 @@ int     zero_range_calls = 1;           /* -z flag disables */
+ int	collapse_range_calls = 1;	/* -C flag disables */
+ int	insert_range_calls = 1;		/* -I flag disables */
+ int 	mapped_reads = 1;		/* -R flag disables it */
++int	integrity = 0;			/* -I flag */
+ int	fsxgoodfd = 0;
+ int	o_direct;			/* -Z */
+ int	aio = 0;
++int	mark_nr = 0;
+ 
+ int page_size;
+ int page_mask;
+@@ -350,6 +361,9 @@ logdump(void)
+ 						     lp->args[0] + lp->args[1])
+ 				prt("\t******IIII");
+ 			break;
++		case OP_FSYNC:
++			prt("FSYNC");
++			break;
+ 		case OP_SKIPPED:
+ 			prt("SKIPPED (no operation)");
+ 			break;
+@@ -429,6 +443,42 @@ report_failure(int status)
+ 				        *(((unsigned char *)(cp)) + 1)))
+ 
+ void
++mark_log(void)
++{
++	char command[256];
++	int ret;
++
++	snprintf(command, 256, "dmsetup message %s 0 mark %s.mark%d", logdev,
++		 bname, mark_nr);
++	ret = system(command);
++	if (ret) {
++		prterr("dmsetup mark failed");
++		exit(1);
++	}
++}
++
++void
++dump_fsync_buffer(void)
++{
++	char fname_buffer[1024];
++	int good_fd;
++
++	if (!good_buf)
++		return;
++
++	snprintf(fname_buffer, 1024, "%s%s.mark%d", dname,
++		 bname, mark_nr);
++	good_fd = open(fname_buffer, O_WRONLY|O_CREAT|O_TRUNC, 0666);
++	if (good_fd < 0) {
++		prterr(fname_buffer);
++		exit(1);
++	}
++
++	save_buffer(good_buf, file_size, good_fd);
++	close(good_fd);
++}
++
++void
+ check_buffers(unsigned offset, unsigned size)
+ {
+ 	unsigned char c, t;
+@@ -1183,6 +1233,26 @@ docloseopen(void)
+ 	}
+ }
+ 
++void
++dofsync(void)
++{
++	int ret;
++
++	if (testcalls <= simulatedopcount)
++		return;
++	if (debug)
++		prt("%lu fsync\n", testcalls);
++	log4(OP_FSYNC, 0, 0, 0);
++	ret = fsync(fd);
++	if (ret < 0) {
++		prterr("dofsync");
++		report_failure(190);
++	}
++	mark_log();
++	dump_fsync_buffer();
++	printf("Dumped fsync buffer mark %d\n", mark_nr);
++	mark_nr++;
++}
+ 
+ #define TRIM_OFF(off, size)			\
+ do {						\
+@@ -1233,8 +1303,10 @@ test(void)
+ 	/* calculate appropriate op to run */
+ 	if (lite)
+ 		op = rv % OP_MAX_LITE;
+-	else
++	else if (!integrity)
+ 		op = rv % OP_MAX_FULL;
++	else
++		op = rv % OP_MAX_INTEGRITY;
+ 
+ 	switch (op) {
+ 	case OP_MAPREAD:
+@@ -1343,6 +1415,9 @@ test(void)
+ 
+ 		do_insert_range(offset, size);
+ 		break;
++	case OP_FSYNC:
++		dofsync();
++		break;
+ 	default:
+ 		prterr("test: unknown operation");
+ 		report_failure(42);
+@@ -1372,7 +1447,7 @@ void
+ usage(void)
+ {
+ 	fprintf(stdout, "usage: %s",
+-		"fsx [-dnqxAFLOWZ] [-b opnum] [-c Prob] [-l flen] [-m start:end] [-o oplen] [-p progressinterval] [-r readbdy] [-s style] [-t truncbdy] [-w writebdy] [-D startingop] [-N numops] [-P dirpath] [-S seed] fname\n\
++		"fsx [-dnqxAFLOWZ] [-b opnum] [-c Prob] [-l flen] [-m start:end] [-o oplen] [-p progressinterval] [-r readbdy] [-s style] [-t truncbdy] [-w writebdy] [-D startingop] [-N numops] [-P dirpath] [-S seed] [-I logdev] fname\n\
+ 	-b opnum: beginning operation number (default 1)\n\
+ 	-c P: 1 in P chance of file close+open at each op (default infinity)\n\
+ 	-d: debug output for all operations\n\
+@@ -1417,6 +1492,7 @@ usage(void)
+ 	-W: mapped write operations DISabled\n\
+         -R: read() system calls only (mapped reads disabled)\n\
+         -Z: O_DIRECT (use -R, -W, -r and -w too)\n\
++	-i logdev: do integrity testing, logdev is the dm log writes device\n\
+ 	fname: this filename is REQUIRED (no default)\n");
+ 	exit(90);
+ }
+@@ -1580,13 +1656,14 @@ int
+ main(int argc, char **argv)
+ {
+ 	int	i, style, ch;
+-	char	*endp;
++	char	*endp, *tmp;
+ 	char goodfile[1024];
+ 	char logfile[1024];
+ 	struct stat statbuf;
+ 
+ 	goodfile[0] = 0;
+ 	logfile[0] = 0;
++	dname[0] = 0;
+ 
+ 	page_size = getpagesize();
+ 	page_mask = page_size - 1;
+@@ -1595,7 +1672,7 @@ main(int argc, char **argv)
+ 
+ 	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
+ 
+-	while ((ch = getopt(argc, argv, "b:c:dfl:m:no:p:qr:s:t:w:xyAD:FKHzCILN:OP:RS:WZ"))
++	while ((ch = getopt(argc, argv, "b:c:dfl:m:no:p:qr:s:t:w:xyAD:FKHzCILN:OP:RS:WZi:"))
+ 	       != EOF)
+ 		switch (ch) {
+ 		case 'b':
+@@ -1719,10 +1796,11 @@ main(int argc, char **argv)
+ 			randomoplen = 0;
+ 			break;
+ 		case 'P':
+-			strncpy(goodfile, optarg, sizeof(goodfile));
+-			strcat(goodfile, "/");
+-			strncpy(logfile, optarg, sizeof(logfile));
+-			strcat(logfile, "/");
++			strncpy(dname, optarg, sizeof(dname));
++			strcat(dname, "/");
++
++			strncpy(goodfile, dname, sizeof(goodfile));
++			strncpy(logfile, dname, sizeof(logfile));
+ 			break;
+                 case 'R':
+                         mapped_reads = 0;
+@@ -1744,6 +1822,14 @@ main(int argc, char **argv)
+ 		case 'Z':
+ 			o_direct = O_DIRECT;
+ 			break;
++		case 'i':
++			integrity = 1;
++			logdev = strdup(optarg);
++			if (!logdev) {
++				prterr("malloc");
++				exit(1);
++			}
++			break;
+ 		default:
+ 			usage();
+ 			/* NOTREACHED */
+@@ -1753,6 +1839,12 @@ main(int argc, char **argv)
+ 	if (argc != 1)
+ 		usage();
+ 	fname = argv[0];
++	tmp = strdup(fname);
++	if (!tmp) {
++		prterr("strdup");
++		exit(1);
++	}
++	bname = basename(tmp);
+ 
+ 	signal(SIGHUP,	cleanup);
+ 	signal(SIGINT,	cleanup);
+@@ -1795,14 +1887,14 @@ main(int argc, char **argv)
+ 		}
+ 	}
+ #endif
+-	strncat(goodfile, fname, 256);
++	strncat(goodfile, bname, 256);
+ 	strcat (goodfile, ".fsxgood");
+ 	fsxgoodfd = open(goodfile, O_RDWR|O_CREAT|O_TRUNC, 0666);
+ 	if (fsxgoodfd < 0) {
+ 		prterr(goodfile);
+ 		exit(92);
+ 	}
+-	strncat(logfile, fname, 256);
++	strncat(logfile, bname, 256);
+ 	strcat (logfile, ".fsxlog");
+ 	fsxlogf = fopen(logfile, "w");
+ 	if (fsxlogf == NULL) {
+@@ -1874,6 +1966,7 @@ main(int argc, char **argv)
+ 	while (numops == -1 || numops--)
+ 		test();
+ 
++	free(tmp);
+ 	if (close(fd)) {
+ 		prterr("close");
+ 		report_failure(99);
+diff --git a/tests/generic/326 b/tests/generic/326
 new file mode 100644
-index 0000000..fddeb63
+index 0000000..b4346e6
 --- /dev/null
-+++ b/drivers/md/dm-log-writes.c
-@@ -0,0 +1,809 @@
-+/*
-+ * Copyright (C) 2014 Facebook. All rights reserved.
-+ *
-+ * This file is released under the GPL.
-+ */
++++ b/tests/generic/326
+@@ -0,0 +1,130 @@
++#! /bin/bash
++# FS QA Test No. 326
++#
++# Run fsx with log writes to verify power fail safeness.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Facebook. All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
 +
-+#include <linux/device-mapper.h>
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
 +
-+#include <linux/module.h>
-+#include <linux/init.h>
-+#include <linux/blkdev.h>
-+#include <linux/bio.h>
-+#include <linux/slab.h>
-+#include <linux/kthread.h>
-+#include <linux/freezer.h>
++here=`pwd`
++status=1	# failure is the default!
 +
-+#define DM_MSG_PREFIX "log-writes"
-+
-+/*
-+ * This target will log sequentially all writes to the target device onto the
-+ * log device.  This is helpful for replaying writes to check for fs consitency
-+ * at all times.  This target provides a mechanism to mark specific events to
-+ * check data at a later time.  So for example you would
-+ *
-+ * write data
-+ * fsync
-+ * dmsetup message /dev/whatever mark mymark
-+ * unmount /mnt/test
-+ *
-+ * Then replay the log up to mymark and check the contents of the replay to
-+ * verify it matches what was written.
-+ *
-+ * We log writes only after they have been flushed, this makes the log describe
-+ * close to the order in which the data hits the actual disk, not its cache.  So
-+ * for example the following sequence (W means write, C means complete)
-+ *
-+ * Wa,Wb,Wc,Cc,Ca,FLUSH,FUAd,Cb,CFLUSH,CFUAd
-+ *
-+ * Would result in the log looking like this
-+ *
-+ * c,a,flush,fuad,b,<other writes>,<next flush>
-+ *
-+ * This is meant to help expose problems where file systems do not properly wait
-+ * on data being written before invoking a FLUSH.  FUA bypasses cache so once it
-+ * completes it is added to the log as it should be on disk.
-+ *
-+ * We treat DISCARDs as if they don't bypass cache so that they are logged in
-+ * order of completion along with the normal writes.  If we didn't do it this
-+ * way we would process all the discards first and then write all the data, when
-+ * in fact we want to do the data and the discard in the order that they
-+ * completed.
-+ */
-+#define LOG_FLUSH_FLAG (1 << 0)
-+#define LOG_FUA_FLAG (1 << 1)
-+#define LOG_DISCARD_FLAG (1 << 2)
-+#define LOG_MARK_FLAG (1 << 3)
-+
-+#define WRITE_LOG_VERSION 1
-+#define WRITE_LOG_MAGIC 0x6a736677736872
-+
-+/*
-+ * The disk format for this is braindead simple.
-+ *
-+ * At byte 0 we have our super, followed by the following sequence for
-+ * nr_entries
-+ *
-+ * [   1 sector    ][  entry->nr_sectors ]
-+ * [log_write_entry][    data written    ]
-+ *
-+ * The log_write_entry takes up a full sector so we can have arbitrary length
-+ * marks and it leaves us room for extra content in the future.
-+ */
-+
-+/*
-+ * Basic info about the log for userspace.
-+ */
-+struct log_write_super {
-+	__le64 magic;
-+	__le64 version;
-+	__le64 nr_entries;
-+	__le32 sectorsize;
-+};
-+
-+/*
-+ * sector - the sector we wrote.
-+ * nr_sectors - the number of sectors we wrote.
-+ * flags - flags for this log entry.
-+ * data_len - the size of the data in this log entry, this is for private log
-+ * entry stuff, the MARK data provided by userspace for example.
-+ */
-+struct log_write_entry {
-+	__le64 sector;
-+	__le64 nr_sectors;
-+	__le64 flags;
-+	__le64 data_len;
-+};
-+
-+struct log_writes_c {
-+	struct dm_dev *dev;
-+	struct dm_dev *logdev;
-+	u64 logged_entries;
-+	u32 sectorsize;
-+	atomic_t io_blocks;
-+	atomic_t pending_blocks;
-+	sector_t next_sector;
-+	sector_t end_sector;
-+	bool logging_enabled;
-+	bool device_supports_discard;
-+	spinlock_t blocks_lock;
-+	struct list_head unflushed_blocks;
-+	struct list_head logging_blocks;
-+	wait_queue_head_t wait;
-+	struct task_struct *log_kthread;
-+};
-+
-+struct pending_block {
-+	int vec_cnt;
-+	u64 flags;
-+	sector_t sector;
-+	sector_t nr_sectors;
-+	char *data;
-+	u32 datalen;
-+	struct list_head list;
-+	struct bio_vec vecs[0];
-+};
-+
-+struct per_bio_data {
-+	struct pending_block *block;
-+};
-+
-+static void log_end_io(struct bio *bio, int err)
++_cleanup()
 +{
-+	struct log_writes_c *lc = bio->bi_private;
-+	struct bio_vec *bvec;
-+	int i;
++	_cleanup_log_writes
++}
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
-+	if (err) {
-+		unsigned long flags;
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmlogwrites
 +
-+		DMERR("Error writing log block %d", err);
-+		spin_lock_irqsave(&lc->blocks_lock, flags);
-+		lc->logging_enabled = false;
-+		spin_unlock_irqrestore(&lc->blocks_lock, flags);
-+	}
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_need_to_be_root
++_require_scratch_nocheck
++_require_dm_log_writes
 +
-+	bio_for_each_segment_all(bvec, bio, i)
-+		__free_page(bvec->bv_page);
++rm -f $seqres.full
++rm -rf $TEST_DIR/fsxtests
 +
-+	atomic_dec(&lc->io_blocks);
-+	wake_up(&lc->wait);
-+	bio_put(bio);
++_check_files()
++{
++	_name=$1
++	# Now look for our files
++	for i in $(find $SANITY_DIR -type f | grep $_name | grep mark)
++	do
++		filename=$(basename $i)
++		mark="${filename##*.}"
++		echo "checking $filename" >> $seqres.full
++		_replay_log $filename
++		_scratch_mount
++		expected_md5=$(md5sum $i | cut -f 1 -d ' ')
++		md5=$(md5sum $SCRATCH_MNT/$_name | cut -f 1 -d ' ')
++		[ "${md5}x" != "${expected_md5}x" ] && _fatal "md5sum mismatched"
++		_scratch_unmount
++		_check_scratch_fs
++	done
 +}
 +
-+/*
-+ * Meant to be called if there is an error, it will free all the pages
-+ * associated with the block.
-+ */
-+static void free_pending_block(struct log_writes_c *lc,
-+			       struct pending_block *block)
-+{
-+	int i;
-+
-+	for (i = 0; i < block->vec_cnt; i++) {
-+		if (block->vecs[i].bv_page)
-+			__free_page(block->vecs[i].bv_page);
-+	}
-+	kfree(block->data);
-+	kfree(block);
-+	atomic_dec(&lc->pending_blocks);
-+	wake_up(&lc->wait);
-+}
-+
-+static int write_metadata(struct log_writes_c *lc, void *entry,
-+			  size_t entrylen, void *data, size_t datalen,
-+			  sector_t sector)
-+{
-+	struct bio *bio;
-+	struct page *page;
-+	void *ptr;
-+	size_t ret;
-+
-+	bio = bio_alloc(GFP_KERNEL, 1);
-+	if (!bio) {
-+		DMERR("Couldn't alloc log bio");
-+		goto error;
-+	}
-+	bio->bi_iter.bi_size = 0;
-+	bio->bi_iter.bi_sector = sector;
-+	bio->bi_bdev = lc->logdev->bdev;
-+	bio->bi_end_io = log_end_io;
-+	bio->bi_private = lc;
-+	set_bit(BIO_UPTODATE, &bio->bi_flags);
-+
-+	page = alloc_page(GFP_KERNEL);
-+	if (!page) {
-+		DMERR("Couldn't alloc log page");
-+		bio_put(bio);
-+		goto error;
-+	}
-+
-+	ptr = kmap_atomic(page);
-+	memset(ptr, 0, lc->sectorsize);
-+	memcpy(ptr, entry, entrylen);
-+	if (datalen)
-+		memcpy(ptr + entrylen, data, datalen);
-+	kunmap_atomic(ptr);
-+
-+	ret = bio_add_page(bio, page, lc->sectorsize, 0);
-+	if (ret != lc->sectorsize) {
-+		DMERR("Couldn't add page to the log block");
-+		goto error_bio;
-+	}
-+	submit_bio(WRITE, bio);
-+	return 0;
-+error_bio:
-+	bio_put(bio);
-+	__free_page(page);
-+error:
-+	atomic_dec(&lc->io_blocks);
-+	wake_up(&lc->wait);
-+	return -1;
-+}
-+
-+static int log_one_block(struct log_writes_c *lc,
-+			 struct pending_block *block, sector_t sector)
-+{
-+	struct bio *bio;
-+	struct log_write_entry entry;
-+	size_t ret;
-+	int i;
-+
-+	entry.sector = cpu_to_le64(block->sector);
-+	entry.nr_sectors = cpu_to_le64(block->nr_sectors);
-+	entry.flags = cpu_to_le64(block->flags);
-+	entry.data_len = block->datalen;
-+	if (write_metadata(lc, &entry, sizeof(entry), block->data,
-+			   block->datalen, sector)) {
-+		free_pending_block(lc, block);
-+		return -1;
-+	}
-+
-+	if (!block->vec_cnt)
-+		goto out;
-+	sector++;
-+
-+	bio = bio_alloc(GFP_KERNEL, block->vec_cnt);
-+	if (!bio) {
-+		DMERR("Couldn't alloc log bio");
-+		goto error;
-+	}
-+	atomic_inc(&lc->io_blocks);
-+	bio->bi_iter.bi_size = 0;
-+	bio->bi_iter.bi_sector = sector;
-+	bio->bi_bdev = lc->logdev->bdev;
-+	bio->bi_end_io = log_end_io;
-+	bio->bi_private = lc;
-+	set_bit(BIO_UPTODATE, &bio->bi_flags);
-+
-+	for (i = 0; i < block->vec_cnt; i++) {
-+		ret = bio_add_page(bio, block->vecs[i].bv_page,
-+				   block->vecs[i].bv_len, 0);
-+		if (ret != block->vecs[i].bv_len) {
-+			atomic_inc(&lc->io_blocks);
-+			submit_bio(WRITE, bio);
-+			bio = bio_alloc(GFP_KERNEL, block->vec_cnt - i);
-+			if (!bio) {
-+				DMERR("Couldn't alloc log bio");
-+				goto error;
-+			}
-+			bio->bi_iter.bi_size = 0;
-+			bio->bi_iter.bi_sector = sector;
-+			bio->bi_bdev = lc->logdev->bdev;
-+			bio->bi_end_io = log_end_io;
-+			bio->bi_private = lc;
-+			set_bit(BIO_UPTODATE, &bio->bi_flags);
-+
-+			ret = bio_add_page(bio, block->vecs[i].bv_page,
-+					   block->vecs[i].bv_len, 0);
-+			if (ret != block->vecs[i].bv_len) {
-+				DMERR("Seriously?");
-+				wake_up(&lc->wait);
-+				bio_put(bio);
-+				goto error;
-+			}
-+		}
-+		sector += block->vecs[i].bv_len >> SECTOR_SHIFT;
-+	}
-+	submit_bio(WRITE, bio);
-+out:
-+	kfree(block->data);
-+	kfree(block);
-+	atomic_dec(&lc->pending_blocks);
-+	wake_up(&lc->wait);
-+	return 0;
-+error:
-+	free_pending_block(lc, block);
-+	atomic_dec(&lc->io_blocks);
-+	wake_up(&lc->wait);
-+	return -1;
-+}
-+
-+static int log_super(struct log_writes_c *lc)
-+{
-+	struct log_write_super super;
-+
-+	super.magic = cpu_to_le64(WRITE_LOG_MAGIC);
-+	super.version = cpu_to_le64(WRITE_LOG_VERSION);
-+	super.nr_entries = cpu_to_le64(lc->logged_entries);
-+	super.sectorsize = cpu_to_le32(lc->sectorsize);
-+
-+	if (write_metadata(lc, &super, sizeof(super), NULL, 0, 0)) {
-+		DMERR("Couldn't write super");
-+		return -1;
-+	}
-+
-+	return 0;
-+}
-+
-+static inline sector_t logdev_last_sector(struct log_writes_c *lc)
-+{
-+	return i_size_read(lc->logdev->bdev->bd_inode) >> SECTOR_SHIFT;
-+}
-+
-+static int log_writes_kthread(void *arg)
-+{
-+	struct log_writes_c *lc = (struct log_writes_c *)arg;
-+	sector_t sector = 0;
-+
-+	while (!kthread_should_stop()) {
-+		bool super = false;
-+		bool logging_enabled;
-+		struct pending_block *block = NULL;
-+		int ret;
-+
-+		spin_lock_irq(&lc->blocks_lock);
-+		if (!list_empty(&lc->logging_blocks)) {
-+			block = list_first_entry(&lc->logging_blocks,
-+						 struct pending_block, list);
-+			list_del_init(&block->list);
-+			if (!lc->logging_enabled)
-+				goto next;
-+
-+			sector = lc->next_sector;
-+			if (block->flags & LOG_DISCARD_FLAG)
-+				lc->next_sector++;
-+			else
-+				lc->next_sector += block->nr_sectors + 1;
-+
-+			/*
-+			 * Apparently the size of the device may not be known
-+			 * right away, so handle this properly.
-+			 */
-+			if (!lc->end_sector)
-+				lc->end_sector = logdev_last_sector(lc);
-+			if (lc->end_sector &&
-+			    lc->next_sector > lc->end_sector) {
-+				DMERR("Ran out of space on the logdev");
-+				lc->logging_enabled = false;
-+				goto next;
-+			}
-+			lc->logged_entries++;
-+			atomic_inc(&lc->io_blocks);
-+
-+			super = (block->flags & (LOG_FUA_FLAG | LOG_MARK_FLAG));
-+			if (super)
-+				atomic_inc(&lc->io_blocks);
-+		}
-+next:
-+		logging_enabled = lc->logging_enabled;
-+		spin_unlock_irq(&lc->blocks_lock);
-+		if (block) {
-+			if (logging_enabled) {
-+				ret = log_one_block(lc, block, sector);
-+				if (!ret && super)
-+					ret = log_super(lc);
-+				if (ret) {
-+					spin_lock_irq(&lc->blocks_lock);
-+					lc->logging_enabled = false;
-+					spin_unlock_irq(&lc->blocks_lock);
-+				}
-+			} else
-+				free_pending_block(lc, block);
-+			continue;
-+		}
-+
-+		if (!try_to_freeze()) {
-+			set_current_state(TASK_INTERRUPTIBLE);
-+			if (!kthread_should_stop() &&
-+			    !atomic_read(&lc->pending_blocks))
-+				schedule();
-+			__set_current_state(TASK_RUNNING);
-+		}
-+	}
-+	return 0;
-+}
-+
-+/*
-+ * Construct a log-writes mapping:
-+ * log-writes <dev_path> <log_dev_path>
-+ */
-+static int log_writes_ctr(struct dm_target *ti, unsigned int argc, char **argv)
-+{
-+	struct log_writes_c *lc;
-+	struct dm_arg_set as;
-+	const char *devname, *logdevname;
-+
-+	as.argc = argc;
-+	as.argv = argv;
-+
-+	if (argc < 2) {
-+		ti->error = "Invalid argument count";
-+		return -EINVAL;
-+	}
-+
-+	lc = kzalloc(sizeof(struct log_writes_c), GFP_KERNEL);
-+	if (!lc) {
-+		ti->error = "Cannot allocate context";
-+		return -ENOMEM;
-+	}
-+	spin_lock_init(&lc->blocks_lock);
-+	INIT_LIST_HEAD(&lc->unflushed_blocks);
-+	INIT_LIST_HEAD(&lc->logging_blocks);
-+	init_waitqueue_head(&lc->wait);
-+	lc->sectorsize = 1 << SECTOR_SHIFT;
-+	atomic_set(&lc->io_blocks, 0);
-+	atomic_set(&lc->pending_blocks, 0);
-+
-+	devname = dm_shift_arg(&as);
-+	if (dm_get_device(ti, devname, dm_table_get_mode(ti->table), &lc->dev)) {
-+		ti->error = "Device lookup failed";
-+		goto bad;
-+	}
-+
-+	logdevname = dm_shift_arg(&as);
-+	if (dm_get_device(ti, logdevname, dm_table_get_mode(ti->table), &lc->logdev)) {
-+		ti->error = "Log device lookup failed";
-+		dm_put_device(ti, lc->dev);
-+		goto bad;
-+	}
-+
-+	lc->log_kthread = kthread_run(log_writes_kthread, lc, "log-write");
-+	if (!lc->log_kthread) {
-+		ti->error = "Couldn't alloc kthread";
-+		dm_put_device(ti, lc->dev);
-+		dm_put_device(ti, lc->logdev);
-+		goto bad;
-+	}
-+
-+	/* We put the super at sector 0, start logging at sector 1 */
-+	lc->next_sector = 1;
-+	lc->logging_enabled = true;
-+	lc->end_sector = logdev_last_sector(lc);
-+	lc->device_supports_discard = true;
-+
-+	ti->num_flush_bios = 1;
-+	ti->flush_supported = true;
-+	ti->num_discard_bios = 1;
-+	ti->discards_supported = true;
-+	ti->per_bio_data_size = sizeof(struct per_bio_data);
-+	ti->private = lc;
-+	return 0;
-+
-+bad:
-+	kfree(lc);
-+	return -EINVAL;
-+}
-+
-+static int log_mark(struct log_writes_c *lc, char *data)
-+{
-+	struct pending_block *block;
-+	size_t maxsize = lc->sectorsize - sizeof(struct log_write_entry);
-+
-+	block = kzalloc(sizeof(struct pending_block), GFP_KERNEL);
-+	if (!block) {
-+		DMERR("Error allocating pending block");
-+		return -ENOMEM;
-+	}
-+
-+	block->data = kstrndup(data, maxsize, GFP_KERNEL);
-+	if (!block->data) {
-+		DMERR("Error copying mark data");
-+		kfree(block);
-+		return -ENOMEM;
-+	}
-+	atomic_inc(&lc->pending_blocks);
-+	block->datalen = strlen(block->data);
-+	block->flags |= LOG_MARK_FLAG;
-+	spin_lock_irq(&lc->blocks_lock);
-+	list_add_tail(&block->list, &lc->logging_blocks);
-+	spin_unlock_irq(&lc->blocks_lock);
-+	wake_up_process(lc->log_kthread);
-+	return 0;
-+}
-+
-+static void log_writes_dtr(struct dm_target *ti)
-+{
-+	struct log_writes_c *lc = ti->private;
-+
-+	spin_lock_irq(&lc->blocks_lock);
-+	list_splice_init(&lc->unflushed_blocks, &lc->logging_blocks);
-+	spin_unlock_irq(&lc->blocks_lock);
-+
-+	/*
-+	 * This is just nice to have since it'll update the super to include the
-+	 * unflushed blocks, if it fails we don't really care.
-+	 */
-+	log_mark(lc, "dm-log-writes-end");
-+	wake_up_process(lc->log_kthread);
-+	wait_event(lc->wait, !atomic_read(&lc->io_blocks) &&
-+		   !atomic_read(&lc->pending_blocks));
-+	kthread_stop(lc->log_kthread);
-+
-+	WARN_ON(!list_empty(&lc->logging_blocks));
-+	WARN_ON(!list_empty(&lc->unflushed_blocks));
-+	dm_put_device(ti, lc->dev);
-+	dm_put_device(ti, lc->logdev);
-+	kfree(lc);
-+}
-+
-+static void normal_map_bio(struct dm_target *ti, struct bio *bio)
-+{
-+	struct log_writes_c *lc = ti->private;
-+
-+	bio->bi_bdev = lc->dev->bdev;
-+}
-+
-+static int log_writes_map(struct dm_target *ti, struct bio *bio)
-+{
-+	struct log_writes_c *lc = ti->private;
-+	struct per_bio_data *pb = dm_per_bio_data(bio, sizeof(struct per_bio_data));
-+	struct pending_block *block;
-+	struct bvec_iter iter;
-+	struct bio_vec bv;
-+	size_t alloc_size;
-+	int i = 0;
-+	bool flush_bio = (bio->bi_rw & REQ_FLUSH);
-+	bool fua_bio = (bio->bi_rw & REQ_FUA);
-+	bool discard_bio = (bio->bi_rw & REQ_DISCARD);
-+
-+	pb->block = NULL;
-+
-+	/* Don't bother doing anything if logging has been disabled */
-+	if (!lc->logging_enabled)
-+		goto map_bio;
-+
-+	/*
-+	 * Map reads as normal.
-+	 */
-+	if (bio_data_dir(bio) == READ)
-+		goto map_bio;
-+
-+	/* No sectors and not a flush?  Don't care */
-+	if (!bio_sectors(bio) && !flush_bio)
-+		goto map_bio;
-+
-+	/*
-+	 * Discards will have bi_size set but there's no actual data, so just
-+	 * allocate the size of the pending block.
-+	 */
-+	if (discard_bio)
-+		alloc_size = sizeof(struct pending_block);
-+	else
-+		alloc_size = sizeof(struct pending_block) + sizeof(struct bio_vec) * bio_segments(bio);
-+
-+	block = kzalloc(alloc_size, GFP_NOIO);
-+	if (!block) {
-+		DMERR("Error allocating pending block");
-+		spin_lock_irq(&lc->blocks_lock);
-+		lc->logging_enabled = false;
-+		spin_unlock_irq(&lc->blocks_lock);
-+		return -ENOMEM;
-+	}
-+	INIT_LIST_HEAD(&block->list);
-+	pb->block = block;
-+	atomic_inc(&lc->pending_blocks);
-+
-+	if (flush_bio)
-+		block->flags |= LOG_FLUSH_FLAG;
-+	if (fua_bio)
-+		block->flags |= LOG_FUA_FLAG;
-+	if (discard_bio)
-+		block->flags |= LOG_DISCARD_FLAG;
-+
-+	block->sector = bio->bi_iter.bi_sector;
-+	block->nr_sectors = bio_sectors(bio);
-+
-+	/* We don't need the data, just submit */
-+	if (discard_bio) {
-+		WARN_ON(flush_bio || fua_bio);
-+		if (lc->device_supports_discard)
-+			goto map_bio;
-+		bio_endio(bio, 0);
-+		return DM_MAPIO_SUBMITTED;
-+	}
-+
-+	/* Flush bio, splice the unflushed blocks onto this list and submit */
-+	if (flush_bio && !bio_sectors(bio)) {
-+		spin_lock_irq(&lc->blocks_lock);
-+		list_splice_init(&lc->unflushed_blocks, &block->list);
-+		spin_unlock_irq(&lc->blocks_lock);
-+		goto map_bio;
-+	}
-+
-+	/*
-+	 * We will write this bio somewhere else way later so we need to copy
-+	 * the actual contents into new pages so we know the data will always be
-+	 * there.
-+	 *
-+	 * We do this because this could be a bio from O_DIRECT in which case we
-+	 * can't just hold onto the page until some later point, we have to
-+	 * manually copy the contents.
-+	 */
-+	bio_for_each_segment(bv, bio, iter) {
-+		struct page *page;
-+		void *src, *dst;
-+
-+		page = alloc_page(GFP_NOIO);
-+		if (!page) {
-+			DMERR("Error allocing page");
-+			free_pending_block(lc, block);
-+			spin_lock_irq(&lc->blocks_lock);
-+			lc->logging_enabled = false;
-+			spin_unlock_irq(&lc->blocks_lock);
-+			return -ENOMEM;
-+		}
-+
-+		src = kmap_atomic(bv.bv_page);
-+		dst = kmap_atomic(page);
-+		memcpy(dst, src + bv.bv_offset, bv.bv_len);
-+		kunmap_atomic(dst);
-+		kunmap_atomic(src);
-+		block->vecs[i].bv_page = page;
-+		block->vecs[i].bv_len = bv.bv_len;
-+		block->vec_cnt++;
-+		i++;
-+	}
-+
-+	/* Had a flush with data in it, weird */
-+	if (flush_bio) {
-+		spin_lock_irq(&lc->blocks_lock);
-+		list_splice_init(&lc->unflushed_blocks, &block->list);
-+		spin_unlock_irq(&lc->blocks_lock);
-+	}
-+map_bio:
-+	normal_map_bio(ti, bio);
-+	return DM_MAPIO_REMAPPED;
-+}
-+
-+static int normal_end_io(struct dm_target *ti, struct bio *bio, int error)
-+{
-+	struct log_writes_c *lc = ti->private;
-+	struct per_bio_data *pb = dm_per_bio_data(bio, sizeof(struct per_bio_data));
-+
-+	if (bio_data_dir(bio) == WRITE && pb->block) {
-+		struct pending_block *block = pb->block;
-+		unsigned long flags;
-+
-+		spin_lock_irqsave(&lc->blocks_lock, flags);
-+		if (block->flags & LOG_FLUSH_FLAG) {
-+			list_splice_tail_init(&block->list, &lc->logging_blocks);
-+			list_add_tail(&block->list, &lc->logging_blocks);
-+			wake_up_process(lc->log_kthread);
-+		} else if (block->flags & LOG_FUA_FLAG) {
-+			list_add_tail(&block->list, &lc->logging_blocks);
-+			wake_up_process(lc->log_kthread);
-+		} else
-+			list_add_tail(&block->list, &lc->unflushed_blocks);
-+		spin_unlock_irqrestore(&lc->blocks_lock, flags);
-+	}
-+
-+	return error;
-+}
-+
-+/*
-+ * INFO format: <logged entries> <highest allocated sector>
-+ */
-+static void log_writes_status(struct dm_target *ti, status_type_t type,
-+			      unsigned status_flags, char *result,
-+			      unsigned maxlen)
-+{
-+	unsigned sz = 0;
-+	struct log_writes_c *lc = ti->private;
-+
-+	switch (type) {
-+	case STATUSTYPE_INFO:
-+		DMEMIT("%llu %llu", lc->logged_entries,
-+		       (unsigned long long)lc->next_sector - 1);
-+		if (!lc->logging_enabled)
-+			DMEMIT(" logging_disabled");
-+		break;
-+
-+	case STATUSTYPE_TABLE:
-+		DMEMIT("%s %s", lc->dev->name, lc->logdev->name);
-+		break;
-+	}
-+}
-+
-+static int log_writes_ioctl(struct dm_target *ti, unsigned int cmd,
-+			    unsigned long arg)
-+{
-+	struct log_writes_c *lc = ti->private;
-+	struct dm_dev *dev = lc->dev;
-+	int r = 0;
-+
-+	/*
-+	 * Only pass ioctls through if the device sizes match exactly.
-+	 */
-+	if (ti->len != i_size_read(dev->bdev->bd_inode) >> SECTOR_SHIFT)
-+		r = scsi_verify_blk_ioctl(NULL, cmd);
-+
-+	return r ? : __blkdev_driver_ioctl(dev->bdev, dev->mode, cmd, arg);
-+}
-+
-+static int log_writes_merge(struct dm_target *ti, struct bvec_merge_data *bvm,
-+			    struct bio_vec *biovec, int max_size)
-+{
-+	struct log_writes_c *lc = ti->private;
-+	struct request_queue *q = bdev_get_queue(lc->dev->bdev);
-+
-+	if (!q->merge_bvec_fn)
-+		return max_size;
-+
-+	bvm->bi_bdev = lc->dev->bdev;
-+	bvm->bi_sector = dm_target_offset(ti, bvm->bi_sector);
-+
-+	return min(max_size, q->merge_bvec_fn(q, bvm, biovec));
-+}
-+
-+static int log_writes_iterate_devices(struct dm_target *ti,
-+				      iterate_devices_callout_fn fn,
-+				      void *data)
-+{
-+	struct log_writes_c *lc = ti->private;
-+
-+	return fn(ti, lc->dev, 0, ti->len, data);
-+}
-+
-+/*
-+ * Messages supported:
-+ *   mark <mark data> - specify the marked data.
-+ */
-+static int log_writes_message(struct dm_target *ti, unsigned argc, char **argv)
-+{
-+	int r = -EINVAL;
-+	struct log_writes_c *lc = ti->private;
-+
-+	if (argc != 2) {
-+		DMWARN("Invalid log-writes message arguments, expect 2 arguments, got %d", argc);
-+		return r;
-+	}
-+
-+	if (!strcasecmp(argv[0], "mark"))
-+		r = log_mark(lc, argv[1]);
-+	else
-+		DMWARN("Unrecognised log writes target message received: %s", argv[0]);
-+
-+	return r;
-+}
-+
-+static void log_writes_io_hints(struct dm_target *ti, struct queue_limits *limits)
-+{
-+	struct log_writes_c *lc = ti->private;
-+	struct request_queue *q = bdev_get_queue(lc->dev->bdev);
-+
-+	if (!q || !blk_queue_discard(q)) {
-+		lc->device_supports_discard = false;
-+		limits->discard_granularity = 1 << SECTOR_SHIFT;
-+		limits->max_discard_sectors = (UINT_MAX >> SECTOR_SHIFT);
-+	}
-+}
-+
-+static struct target_type log_writes_target = {
-+	.name   = "log-writes",
-+	.version = {1, 0, 0},
-+	.module = THIS_MODULE,
-+	.ctr    = log_writes_ctr,
-+	.dtr    = log_writes_dtr,
-+	.map    = log_writes_map,
-+	.end_io = normal_end_io,
-+	.status = log_writes_status,
-+	.ioctl	= log_writes_ioctl,
-+	.merge	= log_writes_merge,
-+	.message = log_writes_message,
-+	.iterate_devices = log_writes_iterate_devices,
-+	.io_hints = log_writes_io_hints,
-+};
-+
-+static int __init dm_log_writes_init(void)
-+{
-+	int r = dm_register_target(&log_writes_target);
-+
-+	if (r < 0)
-+		DMERR("register failed %d", r);
-+
-+	return r;
-+}
-+
-+static void __exit dm_log_writes_exit(void)
-+{
-+	dm_unregister_target(&log_writes_target);
-+}
-+
-+/* Module hooks */
-+module_init(dm_log_writes_init);
-+module_exit(dm_log_writes_exit);
-+
-+MODULE_DESCRIPTION(DM_NAME " log writes target");
-+MODULE_AUTHOR("Josef Bacik <jbacik@fb.com>");
-+MODULE_LICENSE("GPL");
++SANITY_DIR=$TEST_DIR/fsxtests
++mkdir $SANITY_DIR
++
++# Create the log
++_init_log_writes
++
++_log_writes_mkfs >> $seqres.full 2>&1
++
++# Log writes emulates discard support, turn it on for maximum crying.
++_mount_log_writes -o discard
++
++FSX_OPTS=""
++[ $(_test_falloc_support "fpunch") ] || FSX_OPTS="-H"
++[ $(_test_falloc_support "fcollapse") ] || FSX_OPTS="$FSX_OPTS -C"
++[ $(_test_falloc_support "fzero") ] || FSX_OPTS="$FSX_OPTS -z"
++[ $(_test_falloc_support "finsert") ] || FSX_OPTS="$FSX_OPTS -I"
++
++# Run fsx for a while
++run_check $here/ltp/fsx -P $SANITY_DIR -N 300 -S 0 -i $LOGWRITES_DMDEV \
++	$FSX_OPTS $SCRATCH_MNT/testfile1 &
++run_check $here/ltp/fsx -P $SANITY_DIR -N 300 -S 0 -i $LOGWRITES_DMDEV \
++	$FSX_OPTS $SCRATCH_MNT/testfile2 &
++run_check $here/ltp/fsx -P $SANITY_DIR -N 300 -S 0 -i $LOGWRITES_DMDEV \
++	$FSX_OPTS $SCRATCH_MNT/testfile3 &
++run_check $here/ltp/fsx -P $SANITY_DIR -N 300 -S 0 -i $LOGWRITES_DMDEV \
++	$FSX_OPTS $SCRATCH_MNT/testfile4 &
++wait
++test1_md5=$(md5sum $SCRATCH_MNT/testfile1 | cut -f 1 -d ' ')
++test2_md5=$(md5sum $SCRATCH_MNT/testfile2 | cut -f 1 -d ' ')
++test3_md5=$(md5sum $SCRATCH_MNT/testfile3 | cut -f 1 -d ' ')
++test4_md5=$(md5sum $SCRATCH_MNT/testfile4 | cut -f 1 -d ' ')
++
++# Unmount the scratch dir and tear down the log writes target
++_unmount_log_writes
++_log_writes_mark end
++_log_writes_remove
++
++for i in testfile1 testfile2 testfile3 testfile4
++do
++	_check_files $i
++done
++
++# Check the end
++_replay_log end
++_scratch_mount
++md5=$(md5sum $SCRATCH_MNT/testfile1 | cut -f 1 -d ' ')
++[ "${md5}x" != "${test1_md5}x" ] && _fatal "testfile1 end md5sum mismatched"
++md5=$(md5sum $SCRATCH_MNT/testfile2 | cut -f 1 -d ' ')
++[ "${md5}x" != "${test2_md5}x" ] && _fatal "testfile2 end md5sum mismatched"
++md5=$(md5sum $SCRATCH_MNT/testfile3 | cut -f 1 -d ' ')
++[ "${md5}x" != "${test3_md5}x" ] && _fatal "testfile3 end md5sum mismatched"
++md5=$(md5sum $SCRATCH_MNT/testfile4 | cut -f 1 -d ' ')
++[ "${md5}x" != "${test4_md5}x" ] && _fatal "testfile4 end md5sum mismatched"
++_scratch_unmount
++_check_scratch_fs
++
++echo "Silence is golden"
++status=0
++exit
++
+diff --git a/tests/generic/326.out b/tests/generic/326.out
+new file mode 100644
+index 0000000..4ac0db5
+--- /dev/null
++++ b/tests/generic/326.out
+@@ -0,0 +1,2 @@
++QA output created by 326
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index d56d3ce..31e5f7d 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -183,3 +183,4 @@
+ 323 auto aio stress
+ 324 auto fsr quick
+ 325 auto quick data log
++326 auto log
 -- 
 1.8.3.1
 
