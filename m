@@ -1,162 +1,163 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:36965 "EHLO
-	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756829AbbCRVe1 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 18 Mar 2015 17:34:27 -0400
-Received: from dave by dastard with local (Exim 4.80)
-	(envelope-from <david@fromorbit.com>)
-	id 1YYLb9-0007Er-Tm
-	for fstests@vger.kernel.org; Thu, 19 Mar 2015 08:33:55 +1100
-Date: Thu, 19 Mar 2015 08:33:55 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: [ANNOUNCE] xfstests: master branch updated to 7a1ad74
-Message-ID: <20150318213355.GG10105@dastard>
+Received: from mail-wi0-f171.google.com ([209.85.212.171]:38535 "EHLO
+	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753345AbbCSJxL (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 19 Mar 2015 05:53:11 -0400
+Received: by wifj2 with SMTP id j2so63843315wif.1
+        for <fstests@vger.kernel.org>; Thu, 19 Mar 2015 02:53:10 -0700 (PDT)
+Message-ID: <550A9C84.4090807@plexistor.com>
+Date: Thu, 19 Mar 2015 11:53:08 +0200
+From: Boaz Harrosh <boaz@plexistor.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="huq684BweRXVnRxX"
-Content-Disposition: inline
+Subject: [PATCH 1/3 v2 resend] xfstest: generic/080 test that mmap-write updates
+ c/mtime
+References: <54F733BD.7060807@plexistor.com> <54F734C4.7080409@plexistor.com> <20150305001312.GA4251@dastard>
+In-Reply-To: <20150305001312.GA4251@dastard>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: Matthew Wilcox <matthew.r.wilcox@intel.com>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+From: Dave Chinner <dchinner@redhat.com>
 
---huq684BweRXVnRxX
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+when using mmap() for file i/o, writing to the file should update
+it's c/mtime. Specifically if we first mmap-read from a page, then
+memap-write to the same page.
 
-Hi folks,
+This test was failing for the initial submission of DAX because
+pfn based mapping do not have an page_mkwrite called for them.
+The new Kernel patches that introduce pfn_mkwrite fixes this test.
 
-The xfstests repository at git://oss.sgi.com/xfs/cmds/xfstests has
-just been updated. Patches often get missed, so please check if your
-outstanding patches were in this update. If they have not been in
-this update, please resubmit them to fstests@vger.kernel.org so they
-can be picked up in the next update.
+Written by Dave Chinner but edited and tested by:
+	Omer Zilberberg
 
-IMPORTANT NOTE ABOUT PATCH REVIEW
----------------------------------
+Tested-by: Omer Zilberberg <omzg@plexistor.com>
+Tested-by: Boaz Harrosh <boaz@plexistor.com>
+Signed-off-by: Omer Zilberberg <omzg@plexistor.com>
+Signed-off-by: Boaz Harrosh <boaz@plexistor.com>
+---
+Dave hands-up man, it looks like you edited this directly
+in the email, but there was not even a single typo.
 
-I have not picked up all the outstanding patches on the list because
-I do have not the bandwidth to review and test every change posted
-over the past month (e.g. due to LSFMM/vault).  I've just picked up
-all the patches that have been reviewed (i.e. have a "Reviewed-by"
-tag attached) are fixes I thought were important enough to pick up
-immediately.
+We have tested this both with and without the pfn_mkwrite patch.
+And it works as expected fails without and success with.
 
-What it comes down to is this: review only scales when everyone who
-posts changes for review is also reviewing other changes. i.e.
-if you are posting patches and expect other people
-to review them for you, then you also need to be spending time
-reviewing other people's patches.
+Thanks
 
-As such, there are a large number of patches that I skipped over
-that still need review. They'll get committed much faster if the
-review bottleneck (i.e. me) is resolved. Hence if you want your
-patches committed quickly, then please find someone to review the
-patches you have posted to the list.
+ tests/generic/080     | 79 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/080.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 82 insertions(+)
+ create mode 100755 tests/generic/080
+ create mode 100644 tests/generic/080.out
 
--Dave.
+diff --git a/tests/generic/080 b/tests/generic/080
+new file mode 100755
+index 0000000..2bc580d
+--- /dev/null
++++ b/tests/generic/080
+@@ -0,0 +1,79 @@
++#! /bin/bash
++# FS QA Test No. 080
++#
++# Verify that mtime is updated when writing to mmap-ed pages
++#
++#-----------------------------------------------------------------------
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=0
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -f $tmp.*
++    rm -f $TEST_DIR/mmap_mtime_testfile
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os IRIX Linux
++_require_test
++
++echo "Silence is golden."
++rm -f $seqres.full
++
++# pattern the file.
++testfile=$TEST_DIR/mmap_mtime_testfile
++$XFS_IO_PROG -f -c "pwrite 0 4k" -c fsync $testfile >> $seqres.full
++
++# sample timestamps.
++mtime1=`stat -c %Y $testfile`
++ctime1=`stat -c %Z $testfile`
++echo "before mwrite: $mtime1 $ctime1" >> $seqres.full
++
++# map read followed by map write to trigger timestamp change
++sleep 2
++$XFS_IO_PROG -c "mmap 0 4k" -c "mread 0 4k" -c "mwrite 0 4k" $testfile |_filter_xfs_io >> $seqres.full
++
++# sample and verify that timestamps have changed.
++mtime2=`stat -c %Y $testfile`
++ctime2=`stat -c %Z $testfile`
++echo "after mwrite : $mtime2 $ctime2" >> $seqres.full
++
++if [ "$mtime1" == "$mtime2" ]; then
++	echo "mtime not updated"
++	let status=$status+1
++fi
++if [ "$ctime1" == "$ctime2" ]; then
++	echo "ctime not updated"
++	let status=$status+1
++fi
++
++exit
+diff --git a/tests/generic/080.out b/tests/generic/080.out
+new file mode 100644
+index 0000000..cccac52
+--- /dev/null
++++ b/tests/generic/080.out
+@@ -0,0 +1,2 @@
++QA output created by 080
++Silence is golden.
+diff --git a/tests/generic/group b/tests/generic/group
+index 11ce3e4..7ee5cdc 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -77,6 +77,7 @@
+ 076 metadata rw udf auto quick stress
+ 077 acl attr auto enospc
+ 079 acl attr ioctl metadata auto quick
++080 auto quick
+ 083 rw auto enospc stress
+ 088 perms auto quick
+ 089 metadata auto
+-- 
+1.9.3
 
-The new head of the master branch is commit:
-
-7a1ad74 common: fix "utility required warning" with empty utility name
-
-New Commits:
-
-Dave Chinner (4):
-      [d0a3cc5] xfs/104: log size too small for 4k sector drives
-      [354108e] xfs: don't output mkfs sector sizes into golden output
-      [ee6ad7f] xfs/049: umount -d fails when kernel wins teardown race
-      [4f9fb9d] generic: Add rudimetary RENAME_WHITEOUT test
-
-Eryu Guan (4):
-      [d3d25b0] new: fix template for new case to use a single tab not four=
- spaces
-      [30c7a09] generic/027: discard mkdir error message
-      [8346e53] common: append -d option to XFS_COPY_PROG when testing v5 x=
-fs
-      [74984c5] xfs/073: be quiet about mouting with nouuid option
-
-Filipe Manana (2):
-      [e22b586] generic/065: fsync file 'hello' before checking its content
-      [57914b8] fstests: generic test for fallocate
-
-Zhao Lei (2):
-      [9165e41] common: fix a typo in _require_block_device()
-      [7a1ad74] common: fix "utility required warning" with empty utility n=
-ame
-
-
-Code Diffstat:
-
- common/defrag          |  2 +-
- common/rc              | 13 ++++++---
- new                    |  4 +--
- src/renameat2.c        |  4 +--
- tests/btrfs/003        |  2 +-
- tests/btrfs/004        |  2 +-
- tests/btrfs/011        |  2 +-
- tests/btrfs/012        |  6 ++--
- tests/btrfs/079        |  2 +-
- tests/ext4/004         |  4 +--
- tests/generic/027      |  6 ++--
- tests/generic/065      | 28 ++++++------------
- tests/generic/065.out  |  5 +++-
- tests/generic/071      | 79 ++++++++++++++++++++++++++++++++++++++++++++++=
-++++
- tests/generic/071.out  |  9 ++++++
- tests/generic/078      | 66 +++++++++++++++++++++++++++++++++++++++++
- tests/generic/078.out  | 51 ++++++++++++++++++++++++++++++++
- tests/generic/group    |  2 ++
- tests/xfs/049          |  8 ++---
- tests/xfs/073          |  8 ++---
- tests/xfs/073.out      |  1 -
- tests/xfs/078          |  4 +--
- tests/xfs/094          |  2 +-
- tests/xfs/096          |  8 +++--
- tests/xfs/096.external | 15 +++++-----
- tests/xfs/096.internal | 16 +++++-----
- tests/xfs/103          |  2 +-
- tests/xfs/104          |  8 ++---
- tests/xfs/104.out      | 46 ++++++++++++++---------------
- tests/xfs/119          |  2 +-
- tests/xfs/122          |  2 +-
- tests/xfs/195          |  2 +-
- tests/xfs/206          | 33 ++++++++++-----------
- tests/xfs/216          |  2 +-
- tests/xfs/217          |  2 +-
- tests/xfs/250          |  4 +--
- tests/xfs/291          |  2 +-
- tests/xfs/297          |  2 +-
- 38 files changed, 330 insertions(+), 126 deletions(-)
- create mode 100755 tests/generic/071
- create mode 100644 tests/generic/071.out
- create mode 100755 tests/generic/078
- create mode 100644 tests/generic/078.out
---=20
-Dave Chinner
-david@fromorbit.com
-
---huq684BweRXVnRxX
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJVCe9DAAoJEK3oKUf0dfodbvoP/01gKD4bt0BT1mMM8HWNoMOs
-nLfuX3cTebPNUCmdSS1BTHHxunmj7cnDbo5VBRh262uiJQfVueh4piABh7CJQWTA
-5A8VOcLmR0Jd5m+OWlAbm4Bz3EMt0Zm3wjDsFPiEA+ae9Gp6EHxkEok2JOadBr7i
-Tpbp7qu76kv+HeE01PjC6ovYdt2MGn6Wth+dsfktjXxbNmvA81UFHKk61UY4kBWP
-8bA5MNgjpO4JwBjTyljY4OduADsD4hYA+jkZzhkj0wLeUKNPo2JjBersZARH45XE
-EiaMXQco9J3fAgzbUVshulmZHcGgabybPkvZeILRMmk5Yad8aAm8Ysqp8xH1HPHR
-a4vt5sCcc8brRLdKHPkPcfW8ozwbec7NZqbFff9tiMScHym6zs9AFUpqxTkIR3qn
-MRMk/gArUjY5oyl5B+tdH40E8Zz3Z83D5cpQt9D/AF+s7ST4GdnPMcCMd1u2/YEf
-fUrCWDB3zt8fw7x2S2/h0q476S/W2y7P0OprwNNq6ldF0d1bWSg+rwpxV/qlsMgT
-ZEai/wKm1qhvmJd9rzFjUZq/92h7sYjM10w86/KYituf7Sa2C8jDvdxM9ShoiNQ+
-YS0c0lwhk9weKpb9sVS9JErQAmxvOiU6azggfh5dPuSbhnNMr9smfTSI/TN68x9s
-fM46mybRaRzKhST/liDR
-=8ejK
------END PGP SIGNATURE-----
-
---huq684BweRXVnRxX--
