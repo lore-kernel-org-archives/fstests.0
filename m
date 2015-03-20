@@ -1,16 +1,15 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44152 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:33551 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751747AbbCTKRn (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 20 Mar 2015 06:17:43 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t2KAHglp021710
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <fstests@vger.kernel.org>; Fri, 20 Mar 2015 06:17:43 -0400
+	id S1751762AbbCTKRp (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 20 Mar 2015 06:17:45 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (Postfix) with ESMTPS id 887A1AB118
+	for <fstests@vger.kernel.org>; Fri, 20 Mar 2015 10:17:45 +0000 (UTC)
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 7/9] common: recognise NFS export over IPv6 in _require_scratch_nocheck()
-Date: Fri, 20 Mar 2015 18:16:56 +0800
-Message-Id: <1426846618-23413-8-git-send-email-eguan@redhat.com>
+Subject: [PATCH 8/9] xfs/014: replace df with $DF_PROG
+Date: Fri, 20 Mar 2015 18:16:57 +0800
+Message-Id: <1426846618-23413-9-git-send-email-eguan@redhat.com>
 In-Reply-To: <1426846618-23413-1-git-send-email-eguan@redhat.com>
 References: <1426846618-23413-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -18,43 +17,60 @@ To: fstests@vger.kernel.org
 Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-This commit
+I've seen xfs/014 fails as
 
-73dfa4a common: Fixes for testing NFS over IPv6
+        [root@dhcp-66-86-3 xfstests]# diff -u tests/xfs/014.out /var/lib/xfstests/results//xfs/014.out.bad
+        --- tests/xfs/014.out   2015-03-06 14:48:19.000000000 +0800
+        +++ /var/lib/xfstests/results//xfs/014.out.bad  2015-03-09
+        22:48:08.660001935 +0800
+        @@ -1,2 +1,9 @@
+         QA output created by 014
+          Silence is golden.
+          +falloc: invalid option -- '1'
+          +falloc: invalid option -- '0'
+          +falloc: invalid option -- 'M'
+          +falloc [-k] off len -- allocates space associated with part of a file
+          via fallocate
+          +falloc [-k] off len -- allocates space associated with part of a file
+          via fallocate
+          +falloc [-k] off len -- allocates space associated with part of a file
+          via fallocate
+          +falloc [-k] off len -- allocates space associated with part of a file
+          via fallocate
 
-adds NFS over IPv6 support, and commit
+which is because output of "df -m" is split into two lines, and
+freesp is 0, in _consume_free_space() function.
 
-76c5f3c common: re-enable tests that require scratch dev on NFS
+        Filesystem           1M-blocks  Used Available Use% Mounted on
+        /mnt/testarea/scratch/014.fs
+                                 10230  1061      9170  11% /mnt/testarea/scratch/014.mnt
 
-enables NFS tests on scratch device.
+Appending '-P' option to df fixes this issue. So use $DF_PROG which
+already has -P option set.
 
-Now do the same updates to _require_scratch_nocheck() to enable NFS over
-IPv6 support on scratch device.
+$DF_PROG also sets -T option to print fs type in extra column, so change
+the awk command accordingly to get the correct freespace.
+
+Also replace awk with $AWK_PROG.
 
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- common/rc | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ tests/xfs/014 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/common/rc b/common/rc
-index 857308a..fbb19c2 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1111,10 +1111,12 @@ _require_scratch_nocheck()
-     esac
+diff --git a/tests/xfs/014 b/tests/xfs/014
+index 8866bfe..ab3d85b 100755
+--- a/tests/xfs/014
++++ b/tests/xfs/014
+@@ -88,7 +88,7 @@ _consume_free_space()
+ 	dir=$1
  
-     # mounted?
--    if _mount | grep -q $SCRATCH_DEV
-+    # Note that we use -F here so grep doesn't try to interpret an NFS over
-+    # IPv6 server as a regular expression.
-+    if _mount | grep -F -q $SCRATCH_DEV
-     then
-         # if it's mounted, make sure its on $SCRATCH_MNT
--        if ! _mount | grep $SCRATCH_DEV | grep -q $SCRATCH_MNT
-+        if ! _mount | grep -F $SCRATCH_DEV | grep -q $SCRATCH_MNT
-         then
-             echo "\$SCRATCH_DEV is mounted but not on \$SCRATCH_MNT - aborting"
-             exit 1
+ 	# allocate all but 10MB of available space
+-	freesp=`df -m $dir | awk '/^\// { print $4 - 10 }'`
++	freesp=`$DF_PROG -m $dir | $AWK_PROG '/^\// { print $5 - 10 }'`
+ 	$XFS_IO_PROG -f -c "falloc 0 ${freesp}M" $dir/spc
+ }
+ 
 -- 
 2.1.0
 
