@@ -1,30 +1,47 @@
-Return-Path: <zab@zabbo.net>
-Date: Fri, 20 Mar 2015 11:56:41 -0700
-From: Zach Brown <zab@zabbo.net>
-Subject: Re: [PATCH 1/2] fstests: use mount/umount helpers everywhere
-Message-ID: <20150320185641.GA17374@lenny.home.zabbo.net>
-References: <550C46B2.8060407@sandeen.net>
- <550C473B.5010004@sandeen.net>
+Return-Path: <fstests-owner@vger.kernel.org>
+Received: from sandeen.net ([63.231.237.45]:57133 "EHLO sandeen.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750925AbbCTS5u (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 20 Mar 2015 14:57:50 -0400
+Received: from liberator.sandeen.net (liberator.sandeen.net [10.0.0.4])
+	(using TLSv1.2 with cipher DHE-RSA-AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by sandeen.net (Postfix) with ESMTPSA id E53E263C3A21
+	for <fstests@vger.kernel.org>; Fri, 20 Mar 2015 13:57:49 -0500 (CDT)
+Message-ID: <550C6DAD.4060602@sandeen.net>
+Date: Fri, 20 Mar 2015 13:57:49 -0500
+From: Eric Sandeen <sandeen@sandeen.net>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <550C473B.5010004@sandeen.net>
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH 2/2] fstests: Add overlayfs support
+References: <550C46B2.8060407@sandeen.net> <550C4951.1030804@sandeen.net>
+In-Reply-To: <550C4951.1030804@sandeen.net>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Sender: fstests-owner@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Mar 20, 2015 at 11:13:47AM -0500, Eric Sandeen wrote:
-> Replace every explicit mount/umount of scratch or test devices
-> with helper functions.  This allows the next patch to add in hooks
-> to these functions in order to set up & tear down overlayfs on
-> every mount/umount.
+On 3/20/15 11:22 AM, Eric Sandeen wrote:
+> If OVERLAYFS=1 is set, then every time we mount the scratch or
+> test device, set up overlayfs directories under it, and switch
+> the directory under test to the upper directory.
+> 
+> This doesn't specifically or directly test overlayfs, it simply
+> runs the existing tests over it.  As such, a few tests fail,
+> and may be expected to fail due to overlayfs limitations and
+> caveats.  I haven't sorted through the results yet.
+> 
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 
-Yeah, I don't know about this.
+Zach has almost convinced me that this is the wrong approach and/or
+not worth doing, or at least not merging.
 
-For nfs testing we don't setup xfstests to test xfs on block devices and
-then then magically configure nfs to export and mount it on the side.
+Many of the failures are as a result of this being tacked on, and
+several tests wouldn't be expected to work at all.
 
-Wouldn't we treat overlayfs the same way?  It'd be its own fstype whose
-underlying resources are fs paths?
+So I dunno.  What do people think; it's at least interesting on the
+side, to see what falls off.
 
-- z
+Good news is, no oopses yet! :)
+
+-Eric
