@@ -1,83 +1,73 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:49083 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:46629 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750967AbbCSXQ7 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 19 Mar 2015 19:16:59 -0400
-Date: Thu, 19 Mar 2015 16:16:55 -0700
-From: Zach Brown <zab@redhat.com>
-Subject: Re: [PATCH 1/3] dm: log writes target
-Message-ID: <20150319231655.GA6751@lenny.home.zabbo.net>
-References: <1426797070-27463-1-git-send-email-jbacik@fb.com>
- <1426797070-27463-2-git-send-email-jbacik@fb.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1426797070-27463-2-git-send-email-jbacik@fb.com>
+	id S1751451AbbCTKRY (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 20 Mar 2015 06:17:24 -0400
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t2KAHOsm010815
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <fstests@vger.kernel.org>; Fri, 20 Mar 2015 06:17:24 -0400
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH 0/9] some backlog patches and new test and fixes
+Date: Fri, 20 Mar 2015 18:16:49 +0800
+Message-Id: <1426846618-23413-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Josef Bacik <jbacik@fb.com>
-Cc: linux-btrfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, dm-devel@redhat.com, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 19, 2015 at 04:31:08PM -0400, Josef Bacik wrote:
-> This creates a new target that is meant for file system developers to test file
-> system integrity at particular points in the life of a file system.
+First five patches are backlogs from last fstests update(but rebased on current
+master and renumbered). The sixth patch is a new test case. And the last three
+patches are random fixes.
 
-Hi Josef, just a quick drive-by review for stuff that jumps out at me..
+Any reviews are welcomed!
 
-> +	atomic_dec(&lc->io_blocks);
-> +	wake_up(&lc->wait);
+Thanks,
+Eryu
 
-This waitqueue is only used by the destructor?  Seems worth putting this
-off in a helper that tests the waitqueue so that it avoids taking locks
-in the common case where nothing is waiting. 
+Eryu Guan (9):
+  generic: test some mount/umount corner cases
+  generic: test quota handling on remount ro failure
+  generic: test hardlink to unlinked file
+  shared: test truncate orphan inodes when mounting extN
+  generic: test fs freeze/unfreeze and mount/umount race
+  generic: test I/O error path by fully filling dm snapshot
+  common: recognise NFS export over IPv6 in _require_scratch_nocheck()
+  xfs/014: replace df with $DF_PROG
+  generic/077: add missing _require_scratch
 
-	atomic_dec(&lc->io_blocks);
-	smp_mb__after_atomic(); /* see wake_up_bit() comment */
-	if (waitqueue_active(&lc->wait))
-		wake_up(&lc->wait);
+ common/config         |   1 +
+ common/rc             |   6 ++-
+ tests/generic/067     | 143 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/067.out |   2 +
+ tests/generic/072     |  69 ++++++++++++++++++++++++
+ tests/generic/072.out |   3 ++
+ tests/generic/073     |  99 ++++++++++++++++++++++++++++++++++
+ tests/generic/073.out |   2 +
+ tests/generic/077     |   1 +
+ tests/generic/080     |  98 ++++++++++++++++++++++++++++++++++
+ tests/generic/080.out |   2 +
+ tests/generic/081     |  79 ++++++++++++++++++++++++++++
+ tests/generic/081.out |   2 +
+ tests/generic/group   |   5 ++
+ tests/shared/001      |  71 +++++++++++++++++++++++++
+ tests/shared/001.out  |   2 +
+ tests/shared/group    |   1 +
+ tests/xfs/014         |   2 +-
+ 18 files changed, 585 insertions(+), 3 deletions(-)
+ create mode 100755 tests/generic/067
+ create mode 100644 tests/generic/067.out
+ create mode 100755 tests/generic/072
+ create mode 100644 tests/generic/072.out
+ create mode 100755 tests/generic/073
+ create mode 100644 tests/generic/073.out
+ create mode 100755 tests/generic/080
+ create mode 100644 tests/generic/080.out
+ create mode 100755 tests/generic/081
+ create mode 100644 tests/generic/081.out
+ create mode 100755 tests/shared/001
+ create mode 100644 tests/shared/001.out
 
+-- 
+2.1.0
 
-> +	ptr = kmap_atomic(page);
-> +	memset(ptr, 0, lc->sectorsize);
-> +	memcpy(ptr, entry, entrylen);
-> +	if (datalen)
-> +		memcpy(ptr + entrylen, data, datalen);
-> +	kunmap_atomic(ptr);
-
-Drop the initial zeroing and only zero a remaining tail fragment?
-
-  memset(ptr + entry + data, 0, sector - (entry + data))
-
-> +	entry.sector = cpu_to_le64(block->sector);
-> +	entry.nr_sectors = cpu_to_le64(block->nr_sectors);
-> +	entry.flags = cpu_to_le64(block->flags);
-> +	entry.data_len = block->datalen;
-
-Missing cpu_to_le64?  Build with sparse?
-
-> +	for (i = 0; i < block->vec_cnt; i++) {
-> +		ret = bio_add_page(bio, block->vecs[i].bv_page,
-> +				   block->vecs[i].bv_len, 0);
-
-It took me a minute to figure out that the offsets are always 0 because
-each page starts with a copy of one bvec segment.
-
-> +			sector = lc->next_sector;
-> +			if (block->flags & LOG_DISCARD_FLAG)
-> +				lc->next_sector++;
-> +			else
-> +				lc->next_sector += block->nr_sectors + 1;
-> +
-> +			/*
-> +			 * Apparently the size of the device may not be known
-> +			 * right away, so handle this properly.
-> +			 */
-> +			if (!lc->end_sector)
-> +				lc->end_sector = logdev_last_sector(lc);
-> +			if (lc->end_sector &&
-> +			    lc->next_sector > lc->end_sector) {
-
-Does that need to be >= to avoid trying to write to the sector at the
-device's i_size?
-
-- z
