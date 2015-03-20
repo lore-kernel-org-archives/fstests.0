@@ -1,39 +1,30 @@
-Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-pa0-f42.google.com ([209.85.220.42]:33037 "EHLO
-	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751555AbbCTQbr (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 20 Mar 2015 12:31:47 -0400
-Received: by pabxg6 with SMTP id xg6so100809907pab.0
-        for <fstests@vger.kernel.org>; Fri, 20 Mar 2015 09:31:47 -0700 (PDT)
-Date: Fri, 20 Mar 2015 09:31:44 -0700
+Return-Path: <zab@zabbo.net>
+Date: Fri, 20 Mar 2015 11:56:41 -0700
 From: Zach Brown <zab@zabbo.net>
-Subject: Re: [PATCH 1/3] dm: log writes target V2
-Message-ID: <20150320163144.GA16200@lenny.home.zabbo.net>
-References: <20150319231655.GA6751@lenny.home.zabbo.net>
- <1426863037-5870-1-git-send-email-jbacik@fb.com>
+Subject: Re: [PATCH 1/2] fstests: use mount/umount helpers everywhere
+Message-ID: <20150320185641.GA17374@lenny.home.zabbo.net>
+References: <550C46B2.8060407@sandeen.net>
+ <550C473B.5010004@sandeen.net>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1426863037-5870-1-git-send-email-jbacik@fb.com>
-Sender: fstests-owner@vger.kernel.org
-To: Josef Bacik <jbacik@fb.com>
-Cc: linux-btrfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, dm-devel@redhat.com, fstests@vger.kernel.org, zab@redhat.com
+In-Reply-To: <550C473B.5010004@sandeen.net>
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Mar 20, 2015 at 10:50:37AM -0400, Josef Bacik wrote:
-> This creates a new target that is meant for file system developers to test file
-> system integrity at particular points in the life of a file system.  We capture
-> all write requests and the data and log the requests and the data to a separate
-> device for later replay.  There is a userspace utility to do this replay.  The
-> idea behind this is to give file system developers to verify that the file
-> system is always consistent.  Thanks,
-> 
-> Signed-off-by: Josef Bacik <jbacik@fb.com>
-> ---
-> V1->V2: fixed up stuff based on Zachs review.
+On Fri, Mar 20, 2015 at 11:13:47AM -0500, Eric Sandeen wrote:
+> Replace every explicit mount/umount of scratch or test devices
+> with helper functions.  This allows the next patch to add in hooks
+> to these functions in order to set up & tear down overlayfs on
+> every mount/umount.
 
-Cool,
+Yeah, I don't know about this.
 
-Reviewed-by: Zach Brown <zab@zabbo.net>
+For nfs testing we don't setup xfstests to test xfs on block devices and
+then then magically configure nfs to export and mount it on the side.
+
+Wouldn't we treat overlayfs the same way?  It'd be its own fstype whose
+underlying resources are fs paths?
 
 - z
