@@ -1,58 +1,54 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:39899 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:39909 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751604AbbCTKRd (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 20 Mar 2015 06:17:33 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (Postfix) with ESMTPS id 68445C1EEA
-	for <fstests@vger.kernel.org>; Fri, 20 Mar 2015 10:17:33 +0000 (UTC)
+	id S1751653AbbCTKRh (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 20 Mar 2015 06:17:37 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 4/9 RESEND] shared: test truncate orphan inodes when mounting extN
-Date: Fri, 20 Mar 2015 18:16:53 +0800
-Message-Id: <1426846618-23413-5-git-send-email-eguan@redhat.com>
+Subject: [PATCH 5/9 RESEND] generic: test fs freeze/unfreeze and mount/umount race
+Date: Fri, 20 Mar 2015 18:16:54 +0800
+Message-Id: <1426846618-23413-6-git-send-email-eguan@redhat.com>
 In-Reply-To: <1426846618-23413-1-git-send-email-eguan@redhat.com>
 References: <1426846618-23413-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>, Lukas Czerner <lczerner@redhat.com>
+Cc: Eryu Guan <eguan@redhat.com>, Monakhov Dmitriy <dmonakhov@openvz.org>
 List-ID: <fstests@vger.kernel.org>
 
-ext4 should hold i_mutex when truncating orhpan inodes, or a WARNING
-would be triggered. This commit fixed this issue.
+Exercise fs freeze/unfreeze and mount/umount race, which could lead to
+use-after-free oops.
 
-721e3eb ext4: lock i_mutex when truncating orphan inodes
+This commit fixed the issue:
+1494583 fix get_active_super()/umount() race
 
-Though it's an ext4 specific issue, there's no harm to test on ext2/3
-too, as debugfs is used to set orphan inode list.
+This test case is based on a script from Monakhov Dmitriy.
 
-This test is based on a script from Lukas Czerner.
-
-Cc: Lukas Czerner <lczerner@redhat.com>
+Cc: Monakhov Dmitriy <dmonakhov@openvz.org>
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- tests/shared/001     | 71 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/shared/001.out |  2 ++
- tests/shared/group   |  1 +
- 3 files changed, 74 insertions(+)
- create mode 100755 tests/shared/001
- create mode 100644 tests/shared/001.out
+ tests/generic/080     | 98 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/080.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 101 insertions(+)
+ create mode 100755 tests/generic/080
+ create mode 100644 tests/generic/080.out
 
-diff --git a/tests/shared/001 b/tests/shared/001
+diff --git a/tests/generic/080 b/tests/generic/080
 new file mode 100755
-index 0000000..7a4bc68
+index 0000000..7d9fa5c
 --- /dev/null
-+++ b/tests/shared/001
-@@ -0,0 +1,71 @@
++++ b/tests/generic/080
+@@ -0,0 +1,98 @@
 +#! /bin/bash
-+# FS QA Test No. 005
++# FS QA Test No. 080
 +#
-+# Test truncate orphan inodes when mounting extN.
-+# ext4 used to hit WARNING, this commit fixed the issue
++# Exercise fs freeze/unfreeze and mount/umount race, which could lead to
++# use-after-free oops.
 +#
-+# 721e3eb ext4: lock i_mutex when truncating orphan inodes
++# This commit fixed the issue:
++# 1494583 fix get_active_super()/umount() race
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
++# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -82,6 +78,7 @@ index 0000000..7a4bc68
 +{
 +	cd /
 +	rm -f $tmp.*
++	cleanup_dmdev
 +}
 +
 +# get standard environment, filters and checks
@@ -89,51 +86,76 @@ index 0000000..7a4bc68
 +. ./common/filter
 +
 +# real QA test starts here
-+_supported_fs ext2 ext3 ext4
++_supported_fs generic
 +_supported_os Linux
 +_require_scratch
++_require_block_device $SCRATCH_DEV
++_require_command $DMSETUP_PROG
++_require_freeze
++
++setup_dmdev()
++{
++	table="0 $size_in_sector linear $SCRATCH_DEV 0"
++	$DMSETUP_PROG create $node --table "$table" >>$seqres.full 2>&1
++	$DMSETUP_PROG mknodes >/dev/null 2>&1
++}
++
++cleanup_dmdev()
++{
++	# in case it's still suspended and/or mounted
++	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
++	$UMOUNT_PROG $lvdev >/dev/null 2>&1
++
++	$DMSETUP_PROG remove $node >>$seqres.full 2>&1
++	$DMSETUP_PROG mknodes >/dev/null 2>&1
++}
 +
 +rm -f $seqres.full
 +echo "Silence is golden"
 +
-+_scratch_mkfs_sized $((16*1024*1024)) >>$seqres.full 2>&1
-+_scratch_mount
++size=$((256 * 1024 * 1024))
++size_in_sector=$((size / 512))
++_scratch_mkfs_sized $size >>$seqres.full 2>&1
 +
-+# create a file and get its inode number, usually it's 12, but to be accurate
-+testfile=$SCRATCH_MNT/testfile
-+touch $testfile
-+inode=`ls -i $testfile | awk '{print $1}'`
++node=$seq-test
++lvdev=/dev/mapper/$node
++setup_dmdev
 +
-+# add the inode in orphan inode list
-+_scratch_unmount
-+debugfs -w -R "set_super_value last_orphan $inode" $SCRATCH_DEV \
-+	>>$seqres.full 2>&1
++for ((i=0; i<100; i++)); do
++	$DMSETUP_PROG suspend $lvdev >/dev/null 2>&1
++	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
++done &
++pid=$!
++for ((i=0; i<100; i++)); do
++	$MOUNT_PROG $lvdev $SCRATCH_MNT >/dev/null 2>&1
++	$UMOUNT_PROG $lvdev >/dev/null 2>&1
++done &
++pid="$pid $!"
 +
-+# mount again to truncate orphan inode, _check_dmesg will catch the WARNING
-+_scratch_mount
++wait $pid
 +
 +status=0
 +exit
-diff --git a/tests/shared/001.out b/tests/shared/001.out
+diff --git a/tests/generic/080.out b/tests/generic/080.out
 new file mode 100644
-index 0000000..88678b8
+index 0000000..11a4a1a
 --- /dev/null
-+++ b/tests/shared/001.out
++++ b/tests/generic/080.out
 @@ -0,0 +1,2 @@
-+QA output created by 001
++QA output created by 080
 +Silence is golden
-diff --git a/tests/shared/group b/tests/shared/group
-index 429f2b4..0134f81 100644
---- a/tests/shared/group
-+++ b/tests/shared/group
-@@ -3,6 +3,7 @@
- # - do not start group names with a digit
- # - comment line before each group is "new" description
- #
-+001 auto quick
- 006 auto enospc
- 032 mkfs auto quick
- 051 acl udf auto quick
+diff --git a/tests/generic/group b/tests/generic/group
+index ee5b642..cf7408c 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -82,6 +82,7 @@
+ 077 acl attr auto enospc
+ 078 auto quick metadata
+ 079 acl attr ioctl metadata auto quick
++080 auto freeze mount
+ 083 rw auto enospc stress
+ 088 perms auto quick
+ 089 metadata auto
 -- 
 2.1.0
 
