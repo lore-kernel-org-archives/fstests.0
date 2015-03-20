@@ -1,45 +1,56 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57344 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:33524 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751494AbbCTKR3 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 20 Mar 2015 06:17:29 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t2KAHTKn016320
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <fstests@vger.kernel.org>; Fri, 20 Mar 2015 06:17:29 -0400
+	id S1751597AbbCTKRb (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 20 Mar 2015 06:17:31 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (Postfix) with ESMTPS id 39C00B042C
+	for <fstests@vger.kernel.org>; Fri, 20 Mar 2015 10:17:31 +0000 (UTC)
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 2/9 RESEND] generic: test quota handling on remount ro failure
-Date: Fri, 20 Mar 2015 18:16:51 +0800
-Message-Id: <1426846618-23413-3-git-send-email-eguan@redhat.com>
+Subject: [PATCH 3/9 RESEND] generic: test hardlink to unlinked file
+Date: Fri, 20 Mar 2015 18:16:52 +0800
+Message-Id: <1426846618-23413-4-git-send-email-eguan@redhat.com>
 In-Reply-To: <1426846618-23413-1-git-send-email-eguan@redhat.com>
 References: <1426846618-23413-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+Cc: Eryu Guan <eguan@redhat.com>, Eric Sandeen <esandeen@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Remount ro should not turn qouta off unconditionally, even remount ro
-failed, also kernel should not oops on the next succeeded remount ro.
+Kernel commit
 
+aae8a97 fs: Don't allow to create hardlink for deleted file
+
+disabled hardlink to unlinked file.
+
+Test the race between link and unlink, which could end up adding link
+count to an unlinked file and leading to fs corruption on xfs.
+
+Test case was originally written by Eric Sandeen.
+
+Cc: Eric Sandeen <esandeen@redhat.com>
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- tests/generic/072     | 69 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/072.out |  3 +++
+ tests/generic/073     | 99 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/073.out |  2 ++
  tests/generic/group   |  1 +
- 3 files changed, 73 insertions(+)
- create mode 100755 tests/generic/072
- create mode 100644 tests/generic/072.out
+ 3 files changed, 102 insertions(+)
+ create mode 100755 tests/generic/073
+ create mode 100644 tests/generic/073.out
 
-diff --git a/tests/generic/072 b/tests/generic/072
+diff --git a/tests/generic/073 b/tests/generic/073
 new file mode 100755
-index 0000000..ef40822
+index 0000000..6a5261c
 --- /dev/null
-+++ b/tests/generic/072
-@@ -0,0 +1,69 @@
++++ b/tests/generic/073
+@@ -0,0 +1,99 @@
 +#! /bin/bash
-+# FS QA Test No. 072
++# FS QA Test No. 073
 +#
-+# Test quota handling on remount ro failure
++# Test hardlink to unlinked file.
++#
++# Regression test for commit:
++# aae8a97 fs: Don't allow to create hardlink for deleted file
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
@@ -77,7 +88,6 @@ index 0000000..ef40822
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/quota
 +
 +# real QA test starts here
 +
@@ -85,44 +95,71 @@ index 0000000..ef40822
 +_supported_fs generic
 +_supported_os Linux
 +_require_test
-+_require_scratch
-+_require_quota
++
++link_unlink_storm()
++{
++	local src=$1
++	local target=$2
++
++	while true; do
++		ln -f $src $target >/dev/null 2>&1
++		rm -f $target >/dev/null 2>&1
++	done
++}
 +
 +rm -f $seqres.full
++nr_cpu=`$here/src/feature -o`
++echo "Silence is golden"
 +
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount "-o usrquota,grpquota"
++# create, open & unlinked files so unlinked inode list is not empty
++for i in `seq 1 64`; do
++	testfile=$TEST_DIR/$seq.unlinked.$i
++	touch $testfile
++	tail -f $testfile &
++	tail_pids="$tail_pids $!"
++	rm -f $testfile
++done
 +
-+quotacheck -ug $SCRATCH_MNT >/dev/null 2>&1
-+quotaon $SCRATCH_MNT >/dev/null 2>&1
++# start link/unlink storm
++src=$TEST_DIR/$seq.target
++touch $testfile
++for i in `seq 1 $nr_cpu`; do
++	target=$TEST_DIR/$seq.target.link.$i
++	link_unlink_storm $src $target &
++	link_pids="$link_pids $!"
++done
 +
-+# first remount ro with a bad option, a failed remount ro should not disable quota
-+_scratch_mount "-o remount,ro,nosuchopt" >>$seqres.full 2>&1
-+quotaon -p $SCRATCH_MNT | _filter_scratch
-+# second remount should succeed, no oops or hang expected
-+_scratch_mount "-o remount,ro"
++# remove & re-create target to race with link/unlink
++while true; do
++	rm -f $src
++	touch $src
++done &
++sleep 5
++kill $! >/dev/null 2>&1
 +
-+# success, all done
++kill $tail_pids $link_pids >/dev/null 2>&1
++wait $tail_pids $link_pids
++
++# all done, no oops/hang expected, _check_filesystems checks TEST_DEV after test
 +status=0
 +exit
-diff --git a/tests/generic/072.out b/tests/generic/072.out
+diff --git a/tests/generic/073.out b/tests/generic/073.out
 new file mode 100644
-index 0000000..ff0e180
+index 0000000..d107704
 --- /dev/null
-+++ b/tests/generic/072.out
-@@ -0,0 +1,3 @@
-+QA output created by 072
-+group quota on SCRATCH_MNT (SCRATCH_DEV) is on
-+user quota on SCRATCH_MNT (SCRATCH_DEV) is on
++++ b/tests/generic/073.out
+@@ -0,0 +1,2 @@
++QA output created by 073
++Silence is golden
 diff --git a/tests/generic/group b/tests/generic/group
-index 03ad7b8..c0210d2 100644
+index c0210d2..ee5b642 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -74,6 +74,7 @@
- 069 rw udf auto quick
+@@ -75,6 +75,7 @@
  070 attr udf auto quick stress
  071 auto quick prealloc
-+072 auto quick quota
+ 072 auto quick quota
++073 auto metadata
  074 rw udf auto
  075 rw udf auto quick
  076 metadata rw udf auto quick stress
