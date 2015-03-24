@@ -1,34 +1,24 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:29454 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751708AbbCXJJU (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 24 Mar 2015 05:09:20 -0400
-Message-ID: <55112829.1060702@cn.fujitsu.com>
-Date: Tue, 24 Mar 2015 17:02:33 +0800
-From: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
-MIME-Version: 1.0
+Received: from mx1.redhat.com ([209.132.183.28]:44071 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751643AbbCXMZe (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 24 Mar 2015 08:25:34 -0400
+Date: Tue, 24 Mar 2015 20:25:32 +0800
+From: Eryu Guan <eguan@redhat.com>
 Subject: Re: [PATCH,RESEND v2] fstests: add test for truncate/collapse range
  race
+Message-ID: <20150324122531.GQ4810@dhcp-13-216.nay.redhat.com>
 References: <1427187163-12307-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 In-Reply-To: <1427187163-12307-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: david@fromorbit.com
-Cc: lczerner@redhat.com, gux.fnst@cn.fujitsu.com, fstests@vger.kernel.org
+To: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, david@fromorbit.com, lczerner@redhat.com, gux.fnst@cn.fujitsu.com
 List-ID: <fstests@vger.kernel.org>
 
-Hi,
-
-Sorry for bothering, but this patch still is not merged.
-Xing Gu has written a new version according to Dave's suggestions, but
-there is no response recently, so I re-send this patch and will follow
-up it. Any comments would be appreciated, thanks!
-
-Regards,
-Xiaoguang Wang
-
-On 03/24/2015 04:52 PM, Xiaoguang Wang wrote:
+On Tue, Mar 24, 2015 at 04:52:43PM +0800, Xiaoguang Wang wrote:
 > This case tests truncate/collapse range race. If the race occurs, it
 > will trigger a BUG_ON(). And this kernel patch has fixed this race:
 > 
@@ -36,6 +26,20 @@ On 03/24/2015 04:52 PM, Xiaoguang Wang wrote:
 >     Author: Lukas Czerner <lczerner@redhat.com>
 >     Date:   Sat Apr 12 09:56:41 2014 -0400
 >         fs: move falloc collapse range check into the filesystem methods
+
+I don't think we need so much about the commit, to me, a 
+'git log --oneline' format commit info is good enough, like:
+
+23fffa9 fs: move falloc collapse range check into the filesystem methods
+
+And checkpatch.pl is complaining about this part too :)
+
+I tested with kernel 4.0.0-rc4+, on ext4/xfs/btrfs/nfs/cifs, ext4 and
+xfs passed the test and btrfs/nfs/cifs notrun as they don't support
+collapse operation.
+
+Looks good to me, just some minor nits/questions inline
+
 > 
 > Signed-off-by: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
 > Signed-off-by: Xing Gu <gux.fnst@cn.fujitsu.com>
@@ -90,6 +94,9 @@ On 03/24/2015 04:52 PM, Xiaoguang Wang wrote:
 > +_cleanup()
 > +{
 > +    rm -f $tmp.*
+
+use tab here not 4 spaces
+
 > +}
 > +
 > +trap "_cleanup; exit \$status" 0 1 2 3 15
@@ -124,6 +131,15 @@ On 03/24/2015 04:52 PM, Xiaoguang Wang wrote:
 > +wait
 > +
 > +_scratch_unmount
+
+Is this really needed by the test? 'check' could umount it and check the
+fs anyway.
+
+Or it can be tested in $TEST_DIR directly and don't need to
+_require_scratch?
+
+Thanks,
+Eryu
 > +
 > +echo "Silence is golden"
 > +status=0
@@ -148,5 +164,10 @@ On 03/24/2015 04:52 PM, Xiaoguang Wang wrote:
 >  068 other auto freeze dangerous stress
 >  069 rw udf auto quick
 >  070 attr udf auto quick stress
+> -- 
+> 1.8.2.1
 > 
-
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
