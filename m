@@ -1,115 +1,186 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43579 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753239AbbCYPn1 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 25 Mar 2015 11:43:27 -0400
-Date: Wed, 25 Mar 2015 16:43:22 +0100 (CET)
-From: =?ISO-8859-15?Q?Luk=E1=A8_Czerner?= <lczerner@redhat.com>
-Subject: Re: [PATCH] fstests: Tests can use any name now, not 3 digits
- only.
-In-Reply-To: <497845904.2655152.1427297233349.JavaMail.zimbra@redhat.com>
-Message-ID: <alpine.LFD.2.00.1503251637110.16030@localhost.localdomain>
-References: <20150321131159.GA4810@dhcp-13-216.nay.redhat.com> <1427290055-32647-1-git-send-email-jtulak@redhat.com> <20150325144452.GH20767@twin.jikos.cz> <alpine.LFD.2.00.1503251608001.16030@localhost.localdomain>
- <497845904.2655152.1427297233349.JavaMail.zimbra@redhat.com>
-MIME-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323328-1709970685-1427298205=:16030"
+Received: from victor.provo.novell.com ([137.65.250.26]:44508 "EHLO
+	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753834AbbCYQ7v (ORCPT
+	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
+	Wed, 25 Mar 2015 12:59:51 -0400
+From: Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH RESEND] Generic test for file fsync after moving files across directories
+Date: Tue, 24 Mar 2015 14:24:48 +0000
+Message-Id: <1427207088-19555-1-git-send-email-fdmanana@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jan Tulak <jtulak@redhat.com>
-Cc: David Sterba <dsterba@suse.cz>, eguan@redhat.com, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Test file A fsync after moving one other unrelated file B between directories
+and fsyncing B's old parent directory before fsyncing the file A. Check that
+after a crash all the file A data we fsynced is available.
 
---8323328-1709970685-1427298205=:16030
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+This test is motivated by an issue discovered in btrfs which caused the file
+data to be lost (despite fsync returning success to user space). That btrfs
+bug is fixed by the following linux kernel patch:
 
-On Wed, 25 Mar 2015, Jan Tulak wrote:
+   Btrfs: fix data loss in the fast fsync path
 
-> Date: Wed, 25 Mar 2015 11:27:13 -0400 (EDT)
-> From: Jan Tulak <jtulak@redhat.com>
-> To: Lukáš Czerner <lczerner@redhat.com>
-> Cc: David Sterba <dsterba@suse.cz>, eguan@redhat.com, fstests@vger.kernel.org
-> Subject: Re: [PATCH] fstests: Tests can use any name now, not 3 digits only.
-> 
-> ----- Original Message -----
-> > From: "David Sterba" <dsterba@suse.cz>
-> > 
-> > I have a proposal for slight modification to the naming scheme:
-> > 
-> >   NNN-free-text
-> > 
-> > where NNN is a unique number among all tests in the same directory.
-> > 
-> > Why? Convenience, a shortcut for the long test descriptions. We usually
-> > say that test 123 fails and some other does not, I personally find it
-> > very handy and would like to keep that.
-> > 
-> > I've enforced this naming scheme for btrfs-progs userspace tests:
-> > https://github.com/kdave/btrfs-progs/tree/master/tests/fsck-tests
-> > 
-> > The preference might be different for others though, but we can still
-> > try to follow the scheme inside the tests/btrfs/ directory.
-> > 
-> 
-> I see the reason, but I have a note. This format breaks alphabetic ordering, so if we use names for grouping tests together, they are not listed that way. There is an example of what I mean by the grouping:
-> 
-> performance/group:
-> fsmark-small-files-001                fsmark small_files rw sequential
-> fsmark-small-files-002                fsmark small_files rw random
-> fsmark-small-files-003                fsmark small_files traverse
-> fsmark-small-files-004                fsmark small_files unlink
-> fsmark-large-files-001                fsmark large_files rw
-> fsmark-large-files-002                fsmark large_files unlink
-> fsmark-1m-empty-files-001        fsmark metadata scale create
-> fsmark-10m-empty-files-001        fsmark metadata scale create
-> fsmark-100m-empty-files-001        fsmark metadata scale create
-> fsmark-100m-empty-files-002        fsmark metadata scale traverse
-> fsmark-100m-empty-files-003        fsmark metadata scale unlink
-> .....
-> 
-> If we put the unique number at the end (some-name-NNN), then this issue is eliminated. Of course, with this you can't do NNN<tab> for completion, but it keeps the number reference. But this way it makes harder to find the test by number...
-> 
+Reviewed-by: Lukas Czerner <lczerner@redhat.com>
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/generic/067     | 113 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/067.out |  11 +++++
+ tests/generic/group   |   1 +
+ 3 files changed, 125 insertions(+)
+ create mode 100755 tests/generic/067
+ create mode 100644 tests/generic/067.out
 
-First of all, what's the point of the names if they are the same ?
-And secondly what's the point of numbers if they repeat so often ?
+diff --git a/tests/generic/067 b/tests/generic/067
+new file mode 100755
+index 0000000..7277c19
+--- /dev/null
++++ b/tests/generic/067
+@@ -0,0 +1,113 @@
++#! /bin/bash
++# FS QA Test No. 067
++#
++# Test file A fsync after moving one other unrelated file B between directories
++# and fsyncing B's old parent directory before fsyncing the file A. Check that
++# after a crash all the file A data we fsynced is available.
++#
++# This test is motivated by an issue discovered in btrfs which caused the file
++# data to be lost (despite fsync returning success to user space). That btrfs
++# bug was fixed by the following linux kernel patch:
++#
++#   Btrfs: fix data loss in the fast fsync path
++#
++#-----------------------------------------------------------------------
++# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++
++_cleanup()
++{
++	_cleanup_flakey
++	rm -f $tmp.*
++}
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmflakey
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_need_to_be_root
++_require_scratch
++_require_dm_flakey
++_require_metadata_journaling $SCRATCH_DEV
++
++rm -f $seqres.full
++
++_scratch_mkfs >> $seqres.full 2>&1
++_init_flakey
++_mount_flakey
++
++# Create our main test file 'foo', the one we check for data loss.
++# By doing an fsync against our file, it makes btrfs clear the 'needs_full_sync'
++# bit from its flags (btrfs inode specific flags).
++$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 8K" \
++		-c "fsync" $SCRATCH_MNT/foo | _filter_xfs_io
++
++# Now create one other file and 2 directories. We will move this second file
++# from one directory to the other later because it forces btrfs to commit its
++# currently open transaction if we fsync the old parent directory. This is
++# necessary to trigger the data loss bug that affected btrfs.
++mkdir $SCRATCH_MNT/testdir_1
++touch $SCRATCH_MNT/testdir_1/bar
++mkdir $SCRATCH_MNT/testdir_2
++
++# Make sure everything is durably persisted.
++sync
++
++# Write more 8Kb of data to our file.
++$XFS_IO_PROG -c "pwrite -S 0xbb 8K 8K" $SCRATCH_MNT/foo | _filter_xfs_io
++
++# Move our 'bar' file into a new directory.
++mv $SCRATCH_MNT/testdir_1/bar $SCRATCH_MNT/testdir_2/bar
++
++# Fsync our first directory. Because it had a file moved into some other
++# directory, this made btrfs commit the currently open transaction. This is
++# a condition necessary to trigger the data loss bug.
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/testdir_1
++
++# Now fsync our main test file. If the fsync succeeds, we expect the 8Kb of
++# data we wrote previously to be persisted and available if a crash happens.
++# This did not happen with btrfs, because of the transaction commit that
++# happened when we fsynced the parent directory.
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foo
++
++# Simulate a crash/power loss.
++_load_flakey_table $FLAKEY_DROP_WRITES
++_unmount_flakey
++
++_load_flakey_table $FLAKEY_ALLOW_WRITES
++_mount_flakey
++
++# Now check that all data we wrote before are available.
++echo "File content after log replay:"
++od -t x1 $SCRATCH_MNT/foo
++
++status=0
++exit
+diff --git a/tests/generic/067.out b/tests/generic/067.out
+new file mode 100644
+index 0000000..f30f6ef
+--- /dev/null
++++ b/tests/generic/067.out
+@@ -0,0 +1,11 @@
++QA output created by 067
++wrote 8192/8192 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 8192
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File content after log replay:
++0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
++*
++0020000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
++*
++0040000
+diff --git a/tests/generic/group b/tests/generic/group
+index d56d3ce..80e6289 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -69,6 +69,7 @@
+ 064 auto quick prealloc
+ 065 metadata auto quick
+ 066 metadata auto quick
++067 metadata auto quick
+ 068 other auto freeze dangerous stress
+ 069 rw udf auto quick
+ 070 attr udf auto quick stress
+-- 
+2.1.3
 
-This is probably only relevant to your performance patches, but can
-you elaborate a bit more on how you plan to name the tests ? Because I am
-not sure the example you've just shown is the best approach.
-
-Also is there a reason for you to see it grouped by the name when
-you do ls ? It's not like it'll help you run a group of the tests at
-once.
-
--Lukas
-
-
-> 
-> ----- Original Message -----
-> > From: "Lukáš Czerner" <lczerner@redhat.com>
-> > Sent: Wednesday, 25 March, 2015 4:20:24 PM
-> > 
-> > 
-> > Yes, I like that, but then we want to make sure that we do not have
-> > tests with the same numbers, but different name. Also having more more
-> > constrains on the names is a good thing especially when people feel like
-> > being creative with test names.
-> > 
-> > So we can make it
-> > 
-> > NNN-test-name
-> > 
-> > where we only allow numbers in the first three characters, and only
-> > alphabetic ASCII characters and a dash afterwards (or underscore,
-> > whichever you prefer).
-> > 
-> > Thanks!
-> > -Lukas
-> 
-> The stricter rules are all right, I agree with that too.
-> 
-> Jan
-> 
---8323328-1709970685-1427298205=:16030--
