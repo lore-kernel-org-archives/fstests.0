@@ -1,46 +1,39 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44520 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:33835 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752305AbbCXPdm (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 24 Mar 2015 11:33:42 -0400
-Date: Tue, 24 Mar 2015 11:33:39 -0400
-From: Mike Snitzer <snitzer@redhat.com>
-Subject: Re: [PATCH 1/3] dm: log writes target V2
-Message-ID: <20150324153338.GA2055@redhat.com>
-References: <20150319231655.GA6751@lenny.home.zabbo.net>
- <1426863037-5870-1-git-send-email-jbacik@fb.com>
+	id S1751803AbbCXViZ (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 24 Mar 2015 17:38:25 -0400
+Message-ID: <5511D94C.9090109@redhat.com>
+Date: Tue, 24 Mar 2015 16:38:20 -0500
+From: Eric Sandeen <sandeen@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1426863037-5870-1-git-send-email-jbacik@fb.com>
+Subject: [PATCH] fstests: update _filter_btrfs_version
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Josef Bacik <jbacik@fb.com>
-Cc: linux-btrfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, dm-devel@redhat.com, fstests@vger.kernel.org, zab@redhat.com
+To: fstests@vger.kernel.org
+Cc: linux-btrfs <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Mar 20 2015 at 10:50am -0400,
-Josef Bacik <jbacik@fb.com> wrote:
+The btrfs cmd now sometimes emits "btrfs-progs" not "Btrfs-progs"
+as it used to, so update the filter accordingly.
 
-> This creates a new target that is meant for file system developers to test file
-> system integrity at particular points in the life of a file system.  We capture
-> all write requests and the data and log the requests and the data to a separate
-> device for later replay.  There is a userspace utility to do this replay.  The
-> idea behind this is to give file system developers to verify that the file
-> system is always consistent.  Thanks,
-> 
-> Signed-off-by: Josef Bacik <jbacik@fb.com>
+(This fixes a failure on btrfs/006 w/ btrfs-progs v3.19)
 
-Hey Josef,
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
 
-Nice job with this target, you need to contribute to DM more ;)
+diff --git a/common/filter.btrfs b/common/filter.btrfs
+index c9b3f3a..ea047c5 100644
+--- a/common/filter.btrfs
++++ b/common/filter.btrfs
+@@ -5,7 +5,7 @@
+ # Some, but not all, commands emit "Btrfs <version>"
+ _filter_btrfs_version()
+ {
+-	sed -e "s/^Btrfs.*//g"
++	sed -e "s/^[Bb]trfs.*//g"
+ }
+ 
+ _filter_devid()
 
-I've staged your target for the 4.1 merge in linux-dm.git's 'for-next'
-branch (with a few small fixes for nits/typos).
-
-FYI, I'll likely rebase 'for-next' once more for 4.1 given a conflicting
-4.0 change to DM core still needs to land upstream (you can see the
-merge conflict in 'for-next' at the moment).  But that won't impact your
-target at all (other than changing the 4.1 commit id).
-
-Thanks,
-Mike
