@@ -1,64 +1,60 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:32868 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:33029 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751850AbbCYTcj (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 25 Mar 2015 15:32:39 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (Postfix) with ESMTPS id 41DE8C3289
-	for <fstests@vger.kernel.org>; Wed, 25 Mar 2015 19:32:39 +0000 (UTC)
-Date: Wed, 25 Mar 2015 15:32:36 -0400
+	id S1753374AbbCYToc (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 25 Mar 2015 15:44:32 -0400
+Date: Wed, 25 Mar 2015 15:44:29 -0400
 From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH 3/9 RESEND] generic: test hardlink to unlinked file
-Message-ID: <20150325193236.GD3436@laptop.bfoster>
+Subject: Re: [PATCH 5/9 RESEND] generic: test fs freeze/unfreeze and
+ mount/umount race
+Message-ID: <20150325194429.GE3436@laptop.bfoster>
 References: <1426846618-23413-1-git-send-email-eguan@redhat.com>
- <1426846618-23413-4-git-send-email-eguan@redhat.com>
+ <1426846618-23413-6-git-send-email-eguan@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1426846618-23413-4-git-send-email-eguan@redhat.com>
+In-Reply-To: <1426846618-23413-6-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, Eric Sandeen <esandeen@redhat.com>
+Cc: fstests@vger.kernel.org, Monakhov Dmitriy <dmonakhov@openvz.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Mar 20, 2015 at 06:16:52PM +0800, Eryu Guan wrote:
-> Kernel commit
+On Fri, Mar 20, 2015 at 06:16:54PM +0800, Eryu Guan wrote:
+> Exercise fs freeze/unfreeze and mount/umount race, which could lead to
+> use-after-free oops.
 > 
-> aae8a97 fs: Don't allow to create hardlink for deleted file
+> This commit fixed the issue:
+> 1494583 fix get_active_super()/umount() race
 > 
-> disabled hardlink to unlinked file.
+> This test case is based on a script from Monakhov Dmitriy.
 > 
-> Test the race between link and unlink, which could end up adding link
-> count to an unlinked file and leading to fs corruption on xfs.
-> 
-> Test case was originally written by Eric Sandeen.
-> 
-> Cc: Eric Sandeen <esandeen@redhat.com>
+> Cc: Monakhov Dmitriy <dmonakhov@openvz.org>
 > Signed-off-by: Eryu Guan <eguan@redhat.com>
 > ---
->  tests/generic/073     | 99 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/073.out |  2 ++
+>  tests/generic/080     | 98 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/080.out |  2 ++
 >  tests/generic/group   |  1 +
->  3 files changed, 102 insertions(+)
->  create mode 100755 tests/generic/073
->  create mode 100644 tests/generic/073.out
+>  3 files changed, 101 insertions(+)
+>  create mode 100755 tests/generic/080
+>  create mode 100644 tests/generic/080.out
 > 
-> diff --git a/tests/generic/073 b/tests/generic/073
+> diff --git a/tests/generic/080 b/tests/generic/080
 > new file mode 100755
-> index 0000000..6a5261c
+> index 0000000..7d9fa5c
 > --- /dev/null
-> +++ b/tests/generic/073
-> @@ -0,0 +1,99 @@
+> +++ b/tests/generic/080
+> @@ -0,0 +1,98 @@
 > +#! /bin/bash
-> +# FS QA Test No. 073
+> +# FS QA Test No. 080
 > +#
-> +# Test hardlink to unlinked file.
+> +# Exercise fs freeze/unfreeze and mount/umount race, which could lead to
+> +# use-after-free oops.
 > +#
-> +# Regression test for commit:
-> +# aae8a97 fs: Don't allow to create hardlink for deleted file
+> +# This commit fixed the issue:
+> +# 1494583 fix get_active_super()/umount() race
 > +#
 > +#-----------------------------------------------------------------------
-> +# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
+> +# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
 > +#
 > +# This program is free software; you can redistribute it and/or
 > +# modify it under the terms of the GNU General Public License as
@@ -88,6 +84,7 @@ On Fri, Mar 20, 2015 at 06:16:52PM +0800, Eryu Guan wrote:
 > +{
 > +	cd /
 > +	rm -f $tmp.*
+> +	cleanup_dmdev
 > +}
 > +
 > +# get standard environment, filters and checks
@@ -95,104 +92,83 @@ On Fri, Mar 20, 2015 at 06:16:52PM +0800, Eryu Guan wrote:
 > +. ./common/filter
 > +
 > +# real QA test starts here
-> +
-> +# Modify as appropriate.
 > +_supported_fs generic
 > +_supported_os Linux
-> +_require_test
+> +_require_scratch
+> +_require_block_device $SCRATCH_DEV
+> +_require_command $DMSETUP_PROG
+> +_require_freeze
 > +
-> +link_unlink_storm()
+> +setup_dmdev()
 > +{
-> +	local src=$1
-> +	local target=$2
-> +
-> +	while true; do
-> +		ln -f $src $target >/dev/null 2>&1
-> +		rm -f $target >/dev/null 2>&1
-> +	done
+> +	table="0 $size_in_sector linear $SCRATCH_DEV 0"
+> +	$DMSETUP_PROG create $node --table "$table" >>$seqres.full 2>&1
+> +	$DMSETUP_PROG mknodes >/dev/null 2>&1
 > +}
-
-This seems slightly different from the original reproducer in that it
-recreates the same link and unlinks/recreates the $src entry many times
-as well. That seems Ok, but out of curiousity, is this test confirmed to
-reproduce the original problem?
-
+> +
+> +cleanup_dmdev()
+> +{
+> +	# in case it's still suspended and/or mounted
+> +	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
+> +	$UMOUNT_PROG $lvdev >/dev/null 2>&1
+> +
+> +	$DMSETUP_PROG remove $node >>$seqres.full 2>&1
+> +	$DMSETUP_PROG mknodes >/dev/null 2>&1
+> +}
 > +
 > +rm -f $seqres.full
-> +nr_cpu=`$here/src/feature -o`
 > +echo "Silence is golden"
 > +
-> +# create, open & unlinked files so unlinked inode list is not empty
-> +for i in `seq 1 64`; do
-
-		   $nr_cpu
-
-> +	testfile=$TEST_DIR/$seq.unlinked.$i
-> +	touch $testfile
-> +	tail -f $testfile &
-> +	tail_pids="$tail_pids $!"
-> +	rm -f $testfile
-
-I get some file not found errors from 'tail' when I run this test. They
-go away if I add a sleep after the 'tail -f ... &,' so I suspect the rm
--f could be racing with the file removal.
-
-That might be unnecessarily slow, however. Perhaps create and tail all
-of the files in one loop, sleep for a bit, then remove them?
-
-> +done
+> +size=$((256 * 1024 * 1024))
+> +size_in_sector=$((size / 512))
+> +_scratch_mkfs_sized $size >>$seqres.full 2>&1
 > +
-> +# start link/unlink storm
-> +src=$TEST_DIR/$seq.target
-> +touch $testfile
-
-touch $src ?
-
-> +for i in `seq 1 $nr_cpu`; do
-> +	target=$TEST_DIR/$seq.target.link.$i
-> +	link_unlink_storm $src $target &
-> +	link_pids="$link_pids $!"
-> +done
+> +node=$seq-test
+> +lvdev=/dev/mapper/$node
+> +setup_dmdev
 > +
-> +# remove & re-create target to race with link/unlink
-> +while true; do
-> +	rm -f $src
-> +	touch $src
+> +for ((i=0; i<100; i++)); do
+> +	$DMSETUP_PROG suspend $lvdev >/dev/null 2>&1
+> +	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
 > +done &
-> +sleep 5
-> +kill $! >/dev/null 2>&1
-> +
-> +kill $tail_pids $link_pids >/dev/null 2>&1
-> +wait $tail_pids $link_pids
-> +
-> +# all done, no oops/hang expected, _check_filesystems checks TEST_DEV after test
-> +status=0
-> +exit
-> diff --git a/tests/generic/073.out b/tests/generic/073.out
-> new file mode 100644
-> index 0000000..d107704
-> --- /dev/null
-> +++ b/tests/generic/073.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 073
-> +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index c0210d2..ee5b642 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -75,6 +75,7 @@
->  070 attr udf auto quick stress
->  071 auto quick prealloc
->  072 auto quick quota
-> +073 auto metadata
 
-quick seems fine as well.
+Any reason we can't use xfs_freeze/fsfreeze for this test? That seems
+more simple (avoids the dm stuff), but I don't know enough about the
+original problem to know if that still reproduces it.
 
 Brian
 
->  074 rw udf auto
->  075 rw udf auto quick
->  076 metadata rw udf auto quick stress
+> +pid=$!
+> +for ((i=0; i<100; i++)); do
+> +	$MOUNT_PROG $lvdev $SCRATCH_MNT >/dev/null 2>&1
+> +	$UMOUNT_PROG $lvdev >/dev/null 2>&1
+> +done &
+> +pid="$pid $!"
+> +
+> +wait $pid
+> +
+> +status=0
+> +exit
+> diff --git a/tests/generic/080.out b/tests/generic/080.out
+> new file mode 100644
+> index 0000000..11a4a1a
+> --- /dev/null
+> +++ b/tests/generic/080.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 080
+> +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index ee5b642..cf7408c 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -82,6 +82,7 @@
+>  077 acl attr auto enospc
+>  078 auto quick metadata
+>  079 acl attr ioctl metadata auto quick
+> +080 auto freeze mount
+>  083 rw auto enospc stress
+>  088 perms auto quick
+>  089 metadata auto
 > -- 
 > 2.1.0
 > 
