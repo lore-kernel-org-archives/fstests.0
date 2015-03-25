@@ -1,50 +1,61 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:32834 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:32868 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751261AbbCYTc3 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 25 Mar 2015 15:32:29 -0400
+	id S1751850AbbCYTcj (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 25 Mar 2015 15:32:39 -0400
 Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (Postfix) with ESMTPS id C96BB2BCD6F
-	for <fstests@vger.kernel.org>; Wed, 25 Mar 2015 19:32:29 +0000 (UTC)
-Date: Wed, 25 Mar 2015 15:32:27 -0400
+	by mx1.redhat.com (Postfix) with ESMTPS id 41DE8C3289
+	for <fstests@vger.kernel.org>; Wed, 25 Mar 2015 19:32:39 +0000 (UTC)
+Date: Wed, 25 Mar 2015 15:32:36 -0400
 From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH 2/9 RESEND] generic: test quota handling on remount ro
- failure
-Message-ID: <20150325193227.GC3436@laptop.bfoster>
+Subject: Re: [PATCH 3/9 RESEND] generic: test hardlink to unlinked file
+Message-ID: <20150325193236.GD3436@laptop.bfoster>
 References: <1426846618-23413-1-git-send-email-eguan@redhat.com>
- <1426846618-23413-3-git-send-email-eguan@redhat.com>
+ <1426846618-23413-4-git-send-email-eguan@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1426846618-23413-3-git-send-email-eguan@redhat.com>
+In-Reply-To: <1426846618-23413-4-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+Cc: fstests@vger.kernel.org, Eric Sandeen <esandeen@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Mar 20, 2015 at 06:16:51PM +0800, Eryu Guan wrote:
-> Remount ro should not turn qouta off unconditionally, even remount ro
-> failed, also kernel should not oops on the next succeeded remount ro.
+On Fri, Mar 20, 2015 at 06:16:52PM +0800, Eryu Guan wrote:
+> Kernel commit
 > 
+> aae8a97 fs: Don't allow to create hardlink for deleted file
+> 
+> disabled hardlink to unlinked file.
+> 
+> Test the race between link and unlink, which could end up adding link
+> count to an unlinked file and leading to fs corruption on xfs.
+> 
+> Test case was originally written by Eric Sandeen.
+> 
+> Cc: Eric Sandeen <esandeen@redhat.com>
 > Signed-off-by: Eryu Guan <eguan@redhat.com>
 > ---
->  tests/generic/072     | 69 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/072.out |  3 +++
+>  tests/generic/073     | 99 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/073.out |  2 ++
 >  tests/generic/group   |  1 +
->  3 files changed, 73 insertions(+)
->  create mode 100755 tests/generic/072
->  create mode 100644 tests/generic/072.out
+>  3 files changed, 102 insertions(+)
+>  create mode 100755 tests/generic/073
+>  create mode 100644 tests/generic/073.out
 > 
-> diff --git a/tests/generic/072 b/tests/generic/072
+> diff --git a/tests/generic/073 b/tests/generic/073
 > new file mode 100755
-> index 0000000..ef40822
+> index 0000000..6a5261c
 > --- /dev/null
-> +++ b/tests/generic/072
-> @@ -0,0 +1,69 @@
+> +++ b/tests/generic/073
+> @@ -0,0 +1,99 @@
 > +#! /bin/bash
-> +# FS QA Test No. 072
+> +# FS QA Test No. 073
 > +#
-> +# Test quota handling on remount ro failure
+> +# Test hardlink to unlinked file.
+> +#
+> +# Regression test for commit:
+> +# aae8a97 fs: Don't allow to create hardlink for deleted file
 > +#
 > +#-----------------------------------------------------------------------
 > +# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
@@ -82,7 +93,6 @@ On Fri, Mar 20, 2015 at 06:16:51PM +0800, Eryu Guan wrote:
 > +# get standard environment, filters and checks
 > +. ./common/rc
 > +. ./common/filter
-> +. ./common/quota
 > +
 > +# real QA test starts here
 > +
@@ -90,57 +100,96 @@ On Fri, Mar 20, 2015 at 06:16:51PM +0800, Eryu Guan wrote:
 > +_supported_fs generic
 > +_supported_os Linux
 > +_require_test
-> +_require_scratch
-> +_require_quota
+> +
+> +link_unlink_storm()
+> +{
+> +	local src=$1
+> +	local target=$2
+> +
+> +	while true; do
+> +		ln -f $src $target >/dev/null 2>&1
+> +		rm -f $target >/dev/null 2>&1
+> +	done
+> +}
+
+This seems slightly different from the original reproducer in that it
+recreates the same link and unlinks/recreates the $src entry many times
+as well. That seems Ok, but out of curiousity, is this test confirmed to
+reproduce the original problem?
+
 > +
 > +rm -f $seqres.full
+> +nr_cpu=`$here/src/feature -o`
+> +echo "Silence is golden"
 > +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount "-o usrquota,grpquota"
-> +
-> +quotacheck -ug $SCRATCH_MNT >/dev/null 2>&1
-> +quotaon $SCRATCH_MNT >/dev/null 2>&1
-> +
+> +# create, open & unlinked files so unlinked inode list is not empty
+> +for i in `seq 1 64`; do
 
-What's the purpose of the above two commands? The quotacheck seems to
-fail (masked by the redirect to /dev/null) and shouldn't quota be on by
-virtue of the mount options?
+		   $nr_cpu
 
-> +# first remount ro with a bad option, a failed remount ro should not disable quota
-> +_scratch_mount "-o remount,ro,nosuchopt" >>$seqres.full 2>&1
-> +quotaon -p $SCRATCH_MNT | _filter_scratch
-> +# second remount should succeed, no oops or hang expected
-> +_scratch_mount "-o remount,ro"
+> +	testfile=$TEST_DIR/$seq.unlinked.$i
+> +	touch $testfile
+> +	tail -f $testfile &
+> +	tail_pids="$tail_pids $!"
+> +	rm -f $testfile
+
+I get some file not found errors from 'tail' when I run this test. They
+go away if I add a sleep after the 'tail -f ... &,' so I suspect the rm
+-f could be racing with the file removal.
+
+That might be unnecessarily slow, however. Perhaps create and tail all
+of the files in one loop, sleep for a bit, then remove them?
+
+> +done
 > +
+> +# start link/unlink storm
+> +src=$TEST_DIR/$seq.target
+> +touch $testfile
 
-FWIW, when I '-o remount,ro,nosuchopt' on XFS the remount ro actually
-succeeds and the bad option is dropped. Does that differ from other fs
-behavior? If not, I wonder whether the second remount,ro is necessary
-here as well.
+touch $src ?
+
+> +for i in `seq 1 $nr_cpu`; do
+> +	target=$TEST_DIR/$seq.target.link.$i
+> +	link_unlink_storm $src $target &
+> +	link_pids="$link_pids $!"
+> +done
+> +
+> +# remove & re-create target to race with link/unlink
+> +while true; do
+> +	rm -f $src
+> +	touch $src
+> +done &
+> +sleep 5
+> +kill $! >/dev/null 2>&1
+> +
+> +kill $tail_pids $link_pids >/dev/null 2>&1
+> +wait $tail_pids $link_pids
+> +
+> +# all done, no oops/hang expected, _check_filesystems checks TEST_DEV after test
+> +status=0
+> +exit
+> diff --git a/tests/generic/073.out b/tests/generic/073.out
+> new file mode 100644
+> index 0000000..d107704
+> --- /dev/null
+> +++ b/tests/generic/073.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 073
+> +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index c0210d2..ee5b642 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -75,6 +75,7 @@
+>  070 attr udf auto quick stress
+>  071 auto quick prealloc
+>  072 auto quick quota
+> +073 auto metadata
+
+quick seems fine as well.
 
 Brian
 
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/072.out b/tests/generic/072.out
-> new file mode 100644
-> index 0000000..ff0e180
-> --- /dev/null
-> +++ b/tests/generic/072.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 072
-> +group quota on SCRATCH_MNT (SCRATCH_DEV) is on
-> +user quota on SCRATCH_MNT (SCRATCH_DEV) is on
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 03ad7b8..c0210d2 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -74,6 +74,7 @@
->  069 rw udf auto quick
->  070 attr udf auto quick stress
->  071 auto quick prealloc
-> +072 auto quick quota
 >  074 rw udf auto
 >  075 rw udf auto quick
 >  076 metadata rw udf auto quick stress
