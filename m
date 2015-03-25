@@ -1,224 +1,222 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:49744 "EHLO mx2.suse.de"
+Received: from mx1.redhat.com ([209.132.183.28]:59217 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752502AbbCYS6V (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 25 Mar 2015 14:58:21 -0400
-Message-ID: <55130547.6090907@suse.com>
-Date: Wed, 25 Mar 2015 14:58:15 -0400
-From: Jeff Mahoney <jeffm@suse.com>
+	id S1751365AbbCYTcK (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 25 Mar 2015 15:32:10 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (Postfix) with ESMTPS id 82BD68E71B
+	for <fstests@vger.kernel.org>; Wed, 25 Mar 2015 19:32:10 +0000 (UTC)
+Date: Wed, 25 Mar 2015 15:32:08 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: Re: [PATCH 1/9 RESEND] generic: test some mount/umount corner cases
+Message-ID: <20150325193208.GB3436@laptop.bfoster>
+References: <1426846618-23413-1-git-send-email-eguan@redhat.com>
+ <1426846618-23413-2-git-send-email-eguan@redhat.com>
 MIME-Version: 1.0
-Subject: xfstests: btrfs: test for orphan item cleanup
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1426846618-23413-2-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-btrfs <linux-btrfs@vger.kernel.org>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This test tests three conditions where orphan items need to be cleaned up:
-1) Default subvolume is fs tree root (mkfs default)
-2) Default subvolume has been set explicitly to another subvolume (set-default)
-3) Looking up a subvolume during a traversal
+On Fri, Mar 20, 2015 at 06:16:50PM +0800, Eryu Guan wrote:
+> There're six test cases:
+>  - mount at a nonexistent mount point
+>  - mount a free loop device
+>  - mount with a wrong fs type
+>  - umount an symlink to device which is not mounted
+>  - umount a path with too long name
+>  - lazy umount a symlink
+> 
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> ---
 
-In the kernel, these three cases use separate mechanisms to look up
-the subvolumes. There was a bug in the kernel where case #2 wasn't getting
-handled and so orphan items would never be cleaned up if the default
-subvolume was explicitly set. This issue was fixed with the upstream commit:
-btrfs: cleanup orphans while looking up default subvolume
+Looks good to me:
 
-Signed-off-by: Jeff Mahoney <jeffm@suse.com>
----
- tests/btrfs/083     | 155 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/083.out |   5 ++
- tests/btrfs/group   |   1 +
- 3 files changed, 161 insertions(+)
- create mode 100755 tests/btrfs/083
- create mode 100644 tests/btrfs/083.out
+Reviewed-by: Brian Foster <bfoster@redhat.com>
 
-diff --git a/tests/btrfs/083 b/tests/btrfs/083
-new file mode 100755
-index 0000000..12416d9
---- /dev/null
-+++ b/tests/btrfs/083
-@@ -0,0 +1,155 @@
-+#!/bin/bash
-+# FS QA Test No. btrfs/083
-+#
-+# Tests to ensure that orphan items are properly created and cleaned up
-+# on next mount.
-+#
-+# There are three cases where orphan items may be cleaned up:
-+# 1) Default subvolume is fs tree root (mkfs default)
-+# 2) Default subvolume is explicitly created subvolume
-+#    (i.e. btrfs subvol set-default)
-+# 3) Non-default subvolume lookup
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015 SUSE.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+
-+_cleanup()
-+{
-+    _cleanup_flakey
-+    rm -f $tmp.*
-+}
-+
-+trap "_cleanup ; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmflakey
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_dm_flakey
-+_need_to_be_root
-+
-+rm -f $seqres.full
-+
-+has_orphan_item() {
-+	INO=$1
-+	if btrfs-debug-tree $SCRATCH_DEV | \
-+		grep -q "key (ORPHAN ORPHAN_ITEM $INO)"; then
-+		return 0
-+	fi
-+	return 1
-+}
-+
-+test_orphan() {
-+	PRECMD=$1
-+	SUB=0
-+
-+	_scratch_mkfs >> $seqres.full 2>&1
-+	_init_flakey
-+
-+	_mount_flakey
-+
-+	$PRECMD
-+
-+	TESTPATH=$SCRATCH_MNT/testdir/testfile
-+	DIR=$(dirname $TESTPATH)
-+
-+	[ -d "$DIR" ] || mkdir -p $DIR
-+
-+	SIZE=$(( 1024 * 1024 ))
-+	run_check dd if=/dev/zero of=$TESTPATH bs=$SIZE count=1
-+
-+	INO=$(stat -c %i $TESTPATH)
-+
-+	# Orphan item won't be created if the file doesn't make it to disk
-+	sync
-+
-+	# Open and delete the file
-+	exec 27<$TESTPATH
-+	rm -f $TESTPATH
-+
-+	# Ensure the unlink (and orphan item creation) hits the disk
-+	sync
-+
-+	# Turn off writes before closing so the orphan item will be left behind
-+	_load_flakey_table $FLAKEY_DROP_WRITES
-+
-+	# Close the file so we can umount
-+	exec 27>&-
-+
-+	# Orphan item should be on disk if operating correctly
-+	_unmount_flakey
-+	_load_flakey_table $FLAKEY_ALLOW_WRITES
-+	if ! has_orphan_item $INO; then
-+		echo "ERROR: No orphan item found after umount."
-+		return
-+	fi
-+	_mount_flakey
-+
-+	# If $DIR is a subvolume, this will cause a lookup and orphan cleanup
-+	(cd $DIR; true)
-+
-+	# Orphan item will be cleaned up during mount but won't be on
-+	# disk until there's a sync.
-+	sync
-+
-+	_unmount_flakey
-+	if has_orphan_item $INO; then
-+		echo "ERROR: Orphan item found after successful mount/sync."
-+	fi
-+	_cleanup_flakey
-+}
-+
-+new_subvolume() {
-+	_run_btrfs_util_prog subvol create $SCRATCH_MNT/testdir
-+}
-+
-+new_default() {
-+	new_subvolume
-+	SUB=$(btrfs subvol list $SCRATCH_MNT |awk '{print $2}')
-+	_run_btrfs_util_prog subvol set-default $SUB $SCRATCH_MNT
-+
-+	_unmount_flakey
-+	_mount_flakey
-+}
-+
-+echo "Testing with fs root as default subvolume"
-+test_orphan true
-+
-+echo "Testing with explicit default subvolume"
-+test_orphan new_default
-+
-+echo "Testing with orphan on non-default subvolume"
-+test_orphan new_subvolume
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/btrfs/083.out b/tests/btrfs/083.out
-new file mode 100644
-index 0000000..c3c99f1
---- /dev/null
-+++ b/tests/btrfs/083.out
-@@ -0,0 +1,5 @@
-+QA output created by 083
-+Testing with fs root as default subvolume
-+Testing with explicit default subvolume
-+Testing with orphan on non-default subvolume
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index fd2fa76..c48fc0c 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -85,3 +85,4 @@
- 080 auto snapshot
- 081 auto quick clone
- 082 auto quick remount
-+083 auto quick metadata subvol
--- 
-1.8.5.2
-
-
--- 
-Jeff Mahoney
-SUSE Labs
+>  tests/generic/067     | 143 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/067.out |   2 +
+>  tests/generic/group   |   1 +
+>  3 files changed, 146 insertions(+)
+>  create mode 100755 tests/generic/067
+>  create mode 100644 tests/generic/067.out
+> 
+> diff --git a/tests/generic/067 b/tests/generic/067
+> new file mode 100755
+> index 0000000..7a4840b
+> --- /dev/null
+> +++ b/tests/generic/067
+> @@ -0,0 +1,143 @@
+> +#! /bin/bash
+> +# FS QA Test No. 067
+> +#
+> +# Some random mount/umount corner case tests
+> +#
+> +# - mount at a nonexistent mount point
+> +# - mount a free loop device
+> +# - mount with a wrong fs type specified
+> +# - umount an symlink to device which is not mounted
+> +# - umount a path with too long name
+> +# - lazy umount a symlink
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_test
+> +_require_scratch
+> +_require_loop
+> +
+> +rm -f $seqres.full
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +
+> +# kernel should not hang nor oops when mounting fs to nonexistent mount point
+> +mount_nonexistent_mnt()
+> +{
+> +	echo "# mount to nonexistent mount point" >>$seqres.full
+> +	rm -rf $TEST_DIR/nosuchdir
+> +	$MOUNT_PROG $SCRATCH_DEV $TEST_DIR/nosuchdir >>$seqres.full 2>&1
+> +}
+> +
+> +# fs driver should be able to handle mounting a free loop device gracefully
+> +# xfs ever hung, "ec53d1d xfs: don't block on buffer read errors" fixed it
+> +mount_free_loopdev()
+> +{
+> +	echo "# mount a free loop device" >>$seqres.full
+> +	loopdev=`losetup -f`
+> +	$MOUNT_PROG -t $FSTYP $loopdev $SCRATCH_MNT >>$seqres.full 2>&1
+> +}
+> +
+> +# mount with wrong fs type specified.
+> +# This should fail gracefully, no hang no oops are expected
+> +mount_wrong_fstype()
+> +{
+> +	local fs=ext4
+> +	if [ "$FSTYP" == "ext4" ]; then
+> +		fs=xfs
+> +	fi
+> +	echo "# mount with wrong fs type" >>$seqres.full
+> +	$MOUNT_PROG -t $fs $SCRATCH_DEV $SCRATCH_MNT >>$seqres.full 2>&1
+> +}
+> +
+> +# umount a symlink to device, which is not mounted.
+> +# This should fail gracefully, no hang no oops are expected
+> +umount_symlink_device()
+> +{
+> +	local symlink=$TEST_DIR/$seq.scratch_dev_symlink
+> +	rm -f $symlink
+> +	echo "# umount symlink to device, which is not mounted" >>$seqres.full
+> +	ln -s $SCRATCH_DEV $symlink
+> +	$UMOUNT_PROG $symlink >>$seqres.full 2>&1
+> +}
+> +
+> +# umount a path name that is 256 bytes long, this should fail gracefully,
+> +# and the following umount should not hang nor oops
+> +umount_toolong_name()
+> +{
+> +	local longname=$SCRATCH_MNT/`$PERL_PROG -e 'print "a"x256;'`
+> +
+> +	_scratch_mount 2>&1 | tee -a $seqres.full
+> +
+> +	echo "# umount a too-long name" >>$seqres.full
+> +	$UMOUNT_PROG $longname >>$seqres.full 2>&1
+> +	_scratch_unmount 2>&1 | tee -a $seqres.full
+> +}
+> +
+> +# lazy umount a symlink should not block following umount.
+> +# This is the test case described in https://lkml.org/lkml/2014/7/21/98
+> +lazy_umount_symlink()
+> +{
+> +	local symlink=$SCRATCH_MNT/$seq.testdir_symlink
+> +	echo "# lazy umount a symlink" >>$seqres.full
+> +	_scratch_mount 2>&1 | tee -a $seqres.full
+> +	mkdir -p $SCRATCH_MNT/testdir
+> +	rm -f $symlink
+> +	ln -s $SCRATCH_MNT/testdir $symlink
+> +
+> +	$UMOUNT_PROG -l $symlink >>$seqres.full 2>&1
+> +	# umount $SCRATCH_MNT should not be blocked
+> +	_scratch_unmount 2>&1 | tee -a $seqres.full
+> +}
+> +
+> +echo "Silence is golden"
+> +
+> +mount_nonexistent_mnt
+> +mount_free_loopdev
+> +mount_wrong_fstype
+> +
+> +umount_symlink_device
+> +umount_toolong_name
+> +lazy_umount_symlink
+> +
+> +status=0
+> +exit
+> diff --git a/tests/generic/067.out b/tests/generic/067.out
+> new file mode 100644
+> index 0000000..daa1545
+> --- /dev/null
+> +++ b/tests/generic/067.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 067
+> +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index d56d3ce..03ad7b8 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -69,6 +69,7 @@
+>  064 auto quick prealloc
+>  065 metadata auto quick
+>  066 metadata auto quick
+> +067 auto quick mount
+>  068 other auto freeze dangerous stress
+>  069 rw udf auto quick
+>  070 attr udf auto quick stress
+> -- 
+> 2.1.0
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
