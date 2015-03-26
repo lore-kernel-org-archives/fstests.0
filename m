@@ -1,138 +1,999 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:53248 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750764AbbCZBl7 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 25 Mar 2015 21:41:59 -0400
-From: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
-Subject: [PATCH v4] fstests: add test for truncate/collapse range race
-Date: Thu, 26 Mar 2015 09:34:11 +0800
-Message-ID: <1427333651-15048-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
-In-Reply-To: <20150325033003.GT4810@dhcp-13-216.nay.redhat.com>
-References: <20150325033003.GT4810@dhcp-13-216.nay.redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from e28smtp02.in.ibm.com ([122.248.162.2]:35724 "EHLO
+	e28smtp02.in.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751312AbbCZJHu (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 26 Mar 2015 05:07:50 -0400
+Received: from /spool/local
+	by e28smtp02.in.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+	for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
+	Thu, 26 Mar 2015 14:37:47 +0530
+From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Subject: [RFC PATCH] btrfs/052: Fix test case to work on variable block size.
+Date: Thu, 26 Mar 2015 14:37:10 +0530
+Message-Id: <1427360830-6209-1-git-send-email-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: david@fromorbit.com, eguan@redhat.com, lczerner@redhat.com, gux.fnst@cn.fujitsu.com, Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
+To: fstests@vger.kernel.org, fdmanana@gmail.com
+Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, linux-btrfs@vger.kernel.org, chandan@mykolab.com
 List-ID: <fstests@vger.kernel.org>
 
-This case tests truncate/collapse range race. If the race occurs, it
-will trigger a BUG_ON(). And this kernel patch has fixed this race:
-    23fffa9 fs: move falloc collapse range check into the filesystem methods
+The test case passes file offsets which are aligned to 4k block size.  This
+causes btrfs_ioctl_clone() to return with -EINVAL for larger block sizes. Fix
+this by computing file offsets at run time based on the block size of the
+underlying filesystem.
 
-Changelog v3->v4:
-  This case will have test in TEST_DEV, so add _require_test().
-Changelog v2->v3:
-  Fix the space issue and do test in $TEST_DIR directly.
-
-Signed-off-by: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
-Signed-off-by: Xing Gu <gux.fnst@cn.fujitsu.com>
-Reviewed-by: Lukas Czerner <lczerner@redhat.com>
-Reviewed-by: Eryu Guan <eguan@redhat.com>
+Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
- tests/generic/067     | 70 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/067.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 73 insertions(+)
- create mode 100755 tests/generic/067
- create mode 100644 tests/generic/067.out
+There are some more test cases which assume 4k as the underlying
+filesystem's block size. I am planning to fix them using the
+final solution agreed upon by the community.
 
-diff --git a/tests/generic/067 b/tests/generic/067
-new file mode 100755
-index 0000000..36f65ce
---- /dev/null
-+++ b/tests/generic/067
-@@ -0,0 +1,70 @@
-+#! /bin/bash
-+# FS QA Test No. 067
-+#
-+# Test truncate/collapse range race.
-+# And this test is also a regression test for kernel commit 23fffa9,
-+#    fs: move falloc collapse range check into the filesystem methods
-+# If the race occurs, it will trigger a BUG_ON().
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Fujitsu.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+
-+_cleanup()
+ common/filter       |  37 ++++
+ tests/btrfs/052     | 125 +++++++-----
+ tests/btrfs/052.out | 546 +++++++++++++++++++++++-----------------------------
+ 3 files changed, 358 insertions(+), 350 deletions(-)
+
+diff --git a/common/filter b/common/filter
+index 71ef2e2..750e165 100644
+--- a/common/filter
++++ b/common/filter
+@@ -233,6 +233,30 @@ _filter_xfs_io_unique()
+     common_line_filter | _filter_xfs_io
+ }
+ 
++_filter_xfs_io_blocks_modified()
 +{
-+	rm -f $tmp.*
++	BLOCK_SIZE=$(get_block_size $SCRATCH_MNT)
++
++	$AWK_PROG -v block_size=$BLOCK_SIZE '
++		/wrote/ {
++			split($2, bytes, "/")
++
++			bytes_written = strtonum(bytes[1])
++
++			offset = strtonum($NF)
++
++			block_start = offset / block_size
++			block_start = int(block_start)
++			block_end = (offset + bytes_written - 1) / block_size
++			block_end = int(block_end)
++
++			printf("Blocks modified: [%d - %d]\n", block_start, block_end)
++
++			next
++		}
++	'
 +}
 +
-+trap "_cleanup; exit \$status" 0 1 2 3 15
+ _filter_test_dir()
+ {
+ 	sed -e "s,$TEST_DEV,TEST_DEV,g" -e "s,$TEST_DIR,TEST_DIR,g"
+@@ -327,5 +351,18 @@ _filter_ro_mount() {
+ 	    -e "s/mount: cannot mount block device/mount: cannot mount/g"
+ }
+ 
++_filter_od()
++{
++	BLOCK_SIZE=$(get_block_size $SCRATCH_MNT)
++	$AWK_PROG -v block_size=$BLOCK_SIZE '
++		/^[0-9]+/ {
++			offset = strtonum("0"$1);
++			$1 = sprintf("%o", offset / block_size);
++			print $0;
++		}
++		/\*/
++	'
++}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
+ # make sure this script returns success
+ /bin/true
+diff --git a/tests/btrfs/052 b/tests/btrfs/052
+index c75193d..8dd7243 100755
+--- a/tests/btrfs/052
++++ b/tests/btrfs/052
+@@ -59,78 +59,103 @@ test_btrfs_clone_same_file()
+ 	_scratch_mkfs >/dev/null 2>&1
+ 	_scratch_mount $MOUNT_OPTIONS
+ 
+-	# Create a file with 5 extents, 4 of 8Kb each and 1 of 64Kb.
+-	$XFS_IO_PROG -f -c "pwrite -S 0x01 -b 8192 0 8192" $SCRATCH_MNT/foo \
+-		| _filter_xfs_io
++	BLOCK_SIZE=$(get_block_size $SCRATCH_MNT)
 +
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs generic
-+_require_test
-+_require_xfs_io_command "fcollapse"
++	EXTENT_SIZE=$((2 * $BLOCK_SIZE))
 +
-+testfile=$TEST_DIR/testfile.$seq
-+NCPUS=`$here/src/feature -o`
-+OUTER_LOOPS=$((10 * $NCPUS * $LOAD_FACTOR))
-+INNER_LOOPS=$((50 * $NCPUS * $LOAD_FACTOR))
-+# fcollapse/truncate continuously and simultaneously a same file
-+for ((i=1; i <= OUTER_LOOPS; i++)); do
-+	for ((i=1; i <= INNER_LOOPS; i++)); do
-+		$XFS_IO_PROG -f -c 'truncate 100k' \
-+			-c 'fcollapse 0 16k' $testfile > /dev/null 2>&1
-+	done &
-+	for ((i=1; i <= INNER_LOOPS; i++)); do
-+		$XFS_IO_PROG -f -c 'truncate 0' $testfile > /dev/null 2>&1
-+	done &
-+done
-+wait
++	# Create a file with 5 extents, 4 of 2 blocks each and 1 of 16 blocks.
++	OFFSET=0
++	$XFS_IO_PROG -f -c "pwrite -S 0x01 -b $EXTENT_SIZE $OFFSET $EXTENT_SIZE" $SCRATCH_MNT/foo \
++		| _filter_xfs_io_blocks_modified
+ 	sync
+-	$XFS_IO_PROG -c "pwrite -S 0x02 -b 8192 8192 8192" $SCRATCH_MNT/foo \
+-		| _filter_xfs_io
 +
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/067.out b/tests/generic/067.out
-new file mode 100644
-index 0000000..daa1545
---- /dev/null
-+++ b/tests/generic/067.out
-@@ -0,0 +1,2 @@
-+QA output created by 067
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index d56d3ce..b2f0680 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -69,6 +69,7 @@
- 064 auto quick prealloc
- 065 metadata auto quick
- 066 metadata auto quick
-+067 auto metadata stress
- 068 other auto freeze dangerous stress
- 069 rw udf auto quick
- 070 attr udf auto quick stress
++	OFFSET=$(($OFFSET + $EXTENT_SIZE))
++	$XFS_IO_PROG -c "pwrite -S 0x02 -b $EXTENT_SIZE $OFFSET $EXTENT_SIZE" $SCRATCH_MNT/foo \
++		| _filter_xfs_io_blocks_modified
+ 	sync
+-	$XFS_IO_PROG -c "pwrite -S 0x03 -b 8192 16384 8192" $SCRATCH_MNT/foo \
+-		| _filter_xfs_io
++
++	OFFSET=$(($OFFSET + $EXTENT_SIZE))
++	$XFS_IO_PROG -c "pwrite -S 0x03 -b $EXTENT_SIZE $OFFSET $EXTENT_SIZE" $SCRATCH_MNT/foo \
++		| _filter_xfs_io_blocks_modified
+ 	sync
+-	$XFS_IO_PROG -c "pwrite -S 0x04 -b 8192 24576 8192" $SCRATCH_MNT/foo \
+-		| _filter_xfs_io
++
++	OFFSET=$(($OFFSET + $EXTENT_SIZE))
++	$XFS_IO_PROG -c "pwrite -S 0x04 -b $EXTENT_SIZE $OFFSET $EXTENT_SIZE" $SCRATCH_MNT/foo \
++		| _filter_xfs_io_blocks_modified
+ 	sync
+-	$XFS_IO_PROG -c "pwrite -S 0x05 -b 65536 32768 65536" $SCRATCH_MNT/foo \
+-		| _filter_xfs_io
++
++	OFFSET=$(($OFFSET + $EXTENT_SIZE))
++	EXTENT_SIZE=$((16 * $BLOCK_SIZE))
++	$XFS_IO_PROG -c "pwrite -S 0x05 -b $EXTENT_SIZE $OFFSET $EXTENT_SIZE" $SCRATCH_MNT/foo \
++		| _filter_xfs_io_blocks_modified
+ 	sync
+ 
+ 	# Digest of initial content.
+-	md5sum $SCRATCH_MNT/foo | _filter_scratch
++	orig_hash=$(md5sum $SCRATCH_MNT/foo | cut -f 1 -d ' ')
+ 
+ 	# Same source and target ranges - must fail.
+-	$CLONER_PROG -s 8192 -d 8192 -l 8192 $SCRATCH_MNT/foo $SCRATCH_MNT/foo
++	$CLONER_PROG -s $((2 * $BLOCK_SIZE)) -d $((2 * $BLOCK_SIZE)) \
++		     -l $((2 * $BLOCK_SIZE)) $SCRATCH_MNT/foo $SCRATCH_MNT/foo
+ 	# Check file content didn't change.
+-	md5sum $SCRATCH_MNT/foo | _filter_scratch
++	hash=$(md5sum $SCRATCH_MNT/foo | cut -f 1 -d ' ')
++	if [ $orig_hash != $hash ]; then
++		echo "Mismatching hash values detected."
++	fi
+ 
+ 	# Intersection between source and target ranges - must fail too.
+-	$CLONER_PROG -s 4096 -d 8192 -l 8192 $SCRATCH_MNT/foo $SCRATCH_MNT/foo
++	# $CLONER_PROG -s 4096 -d 8192 -l 8192 $SCRATCH_MNT/foo $SCRATCH_MNT/foo
++	$CLONER_PROG -s $((1 * $BLOCK_SIZE)) -d $((2 * $BLOCK_SIZE)) \
++		     -l $((2 * $BLOCK_SIZE)) $SCRATCH_MNT/foo $SCRATCH_MNT/foo
+ 	# Check file content didn't change.
+-	md5sum $SCRATCH_MNT/foo | _filter_scratch
++	hash=$(md5sum $SCRATCH_MNT/foo | cut -f 1 -d ' ')
++	if [ $orig_hash != $hash ]; then
++		echo "Mismatching hash values detected."
++	fi
+ 
+ 	# Clone an entire extent from a higher range to a lower range.
+-	$CLONER_PROG -s 24576 -d 0 -l 8192 $SCRATCH_MNT/foo $SCRATCH_MNT/foo
+-
+-	# Check entire file, the 8Kb block at offset 0 now has the same content
+-	# as the 8Kb block at offset 24576.
+-	od -t x1 $SCRATCH_MNT/foo
++	$CLONER_PROG -s $((6 * $BLOCK_SIZE)) -d 0 -l $((2 * $BLOCK_SIZE)) \
++		     $SCRATCH_MNT/foo $SCRATCH_MNT/foo
++	# Check entire file, 0th and 1st blocks now have the same content
++	# as the 6th and 7th blocks.
++	od -t x1 $SCRATCH_MNT/foo | _filter_od
+ 
+ 	# Clone an entire extent from a lower range to a higher range.
+-	$CLONER_PROG -s 8192 -d 16384 -l 8192 $SCRATCH_MNT/foo $SCRATCH_MNT/foo
+-
+-	# Check entire file, the 8Kb block at offset 0 now has the same content
+-	# as the 8Kb block at offset 24576, and the 8Kb block at offset 16384
+-	# now has the same content as the 8Kb block at offset 8192.
+-	od -t x1 $SCRATCH_MNT/foo
+-
+-	# Now clone 1 extent and an half into the file range starting at offset
+-	# 65536. So we get the second half of the extent at offset 16384 and the
+-	# whole extent at 24576 cloned into the middle of the 64Kb extent that
+-	# starts at file offset 32768. This makes the clone ioctl process more
+-	# extent items from the b+tree and forces a split of the large 64Kb
+-	# extent at the end of the file.
+-	$CLONER_PROG -s 20480 -d 65536 -l 12288 $SCRATCH_MNT/foo \
+-		$SCRATCH_MNT/foo
+-
+-	# Check entire file. Besides the previous changes, we now should have
+-	# 4096 bytes with the value 0x02 at file offset 65536, and 8192 bytes
+-	# with value 0x04 at the file offset 69632. The ranges [32768, 65536[
+-	# and [77824, 98304[ should remain with all bytes having the value 0x05.
+-	od -t x1 $SCRATCH_MNT/foo
+-
+-	# Now update 8Kb of data at offset 0. The extent at this position is a
+-	# clone of the extent at offset 24576. Check that writing to this offset
+-	# doesn't change data at offset 24576.
+-	$XFS_IO_PROG -c "pwrite -S 0xff -b 8192 0 8192" $SCRATCH_MNT/foo \
+-		| _filter_xfs_io
+-	od -t x1 $SCRATCH_MNT/foo
++	$CLONER_PROG -s $((2 * $BLOCK_SIZE)) -d $((4 * $BLOCK_SIZE)) \
++		     -l $((2 * $BLOCK_SIZE)) $SCRATCH_MNT/foo $SCRATCH_MNT/foo
++	# Check entire file, 0th and 1st blocks now have the same content
++	# as the 6th and 7th block, and 4th and 5th blocks now has the same
++	# content as the 2nd and 3rd blocks.
++	od -t x1 $SCRATCH_MNT/foo | _filter_od
++
++	# Now clone 1 extent and an half into the file range starting
++	# at 16th block So we get the second half of the extent
++	# starting at 4th block and the whole extent starting at 6th
++	# block cloned into the middle of the 16 blocks extent that
++	# starts at 8th block. This makes the clone ioctl process more
++	# extent items from the b+tree and forces a split of the large
++	# 16-block extent at the end of the file.
++	$CLONER_PROG -s $((5 * $BLOCK_SIZE)) -d $((16 * $BLOCK_SIZE)) \
++		     -l $((3 * $BLOCK_SIZE)) $SCRATCH_MNT/foo $SCRATCH_MNT/foo
++
++	# Check entire file. Besides the previous changes, we now
++	# should have 1 block with the value 0x02 at 16th block, and 2
++	# blocks with value 0x04 starting at the 17th block . The
++	# block ranges [8, 16[ and [19, 24[ should remain with all
++	# bytes having the value 0x05.
++	od -t x1 $SCRATCH_MNT/foo | _filter_od
++
++	# Now update 2 blocks of data at offset 0. The extent at this
++	# position is a clone of the extent at 6th block. Check that
++	# writing to this offset doesn't change data at 6th block.
++	$XFS_IO_PROG -c "pwrite -S 0xff -b $((2 * $BLOCK_SIZE)) 0 $((2 * $BLOCK_SIZE))" \
++		     $SCRATCH_MNT/foo | _filter_xfs_io_blocks_modified
++	od -t x1 $SCRATCH_MNT/foo | _filter_od
+ 
+ 	# Check that after defragmenting the file and re-mounting, the file
+ 	# content remains exactly the same as before.
+ 	_run_btrfs_util_prog filesystem defragment $SCRATCH_MNT/foo
+ 	_scratch_remount
+-	od -t x1 $SCRATCH_MNT/foo
++	od -t x1 $SCRATCH_MNT/foo | _filter_od
+ 
+ 	# Verify that there are no consistency errors.
+ 	_check_scratch_fs
+diff --git a/tests/btrfs/052.out b/tests/btrfs/052.out
+index 53a1868..cb1e047 100644
+--- a/tests/btrfs/052.out
++++ b/tests/btrfs/052.out
+@@ -1,499 +1,445 @@
+ QA output created by 052
+ Testing with a cow file (default)
+-wrote 8192/8192 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 8192/8192 bytes at offset 8192
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 8192/8192 bytes at offset 16384
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 8192/8192 bytes at offset 24576
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 65536/65536 bytes at offset 32768
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
++Blocks modified: [0 - 1]
++Blocks modified: [2 - 3]
++Blocks modified: [4 - 5]
++Blocks modified: [6 - 7]
++Blocks modified: [8 - 23]
+ clone failed: Invalid argument
+-5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
+ clone failed: Invalid argument
+-5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
+-0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++0 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0040000 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03
++4 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++30
++0 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++30
++0 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0200000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++20 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0210000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++21 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0230000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++23 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-wrote 8192/8192 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-0000000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
++30
++Blocks modified: [0 - 1]
++0 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0200000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++20 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0210000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++21 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0230000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++23 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-0000000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
++30
++0 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0200000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++20 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0210000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++21 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0230000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++23 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
++30
+ Testing with a nocow file (-O nodatacow)
+-wrote 8192/8192 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 8192/8192 bytes at offset 8192
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 8192/8192 bytes at offset 16384
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 8192/8192 bytes at offset 24576
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 65536/65536 bytes at offset 32768
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
++Blocks modified: [0 - 1]
++Blocks modified: [2 - 3]
++Blocks modified: [4 - 5]
++Blocks modified: [6 - 7]
++Blocks modified: [8 - 23]
+ clone failed: Invalid argument
+-5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
+ clone failed: Invalid argument
+-5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
+-0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++0 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0040000 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03
++4 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++30
++0 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++30
++0 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0200000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++20 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0210000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++21 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0230000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++23 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-wrote 8192/8192 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-0000000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
++30
++Blocks modified: [0 - 1]
++0 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0200000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++20 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0210000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++21 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0230000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++23 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-0000000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
++30
++0 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0200000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++20 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0210000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++21 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0230000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++23 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
++30
+ Testing with a cow file and lzo compression
+-wrote 8192/8192 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 8192/8192 bytes at offset 8192
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 8192/8192 bytes at offset 16384
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 8192/8192 bytes at offset 24576
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 65536/65536 bytes at offset 32768
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
++Blocks modified: [0 - 1]
++Blocks modified: [2 - 3]
++Blocks modified: [4 - 5]
++Blocks modified: [6 - 7]
++Blocks modified: [8 - 23]
+ clone failed: Invalid argument
+-5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
+ clone failed: Invalid argument
+-5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
+-0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++0 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0040000 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03
++4 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++30
++0 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++30
++0 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0200000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++20 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0210000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++21 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0230000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++23 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-wrote 8192/8192 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-0000000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
++30
++Blocks modified: [0 - 1]
++0 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0200000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++20 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0210000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++21 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0230000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++23 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-0000000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
++30
++0 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0200000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++20 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0210000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++21 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0230000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++23 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
++30
+ Testing with a cow file and zlib compression
+-wrote 8192/8192 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 8192/8192 bytes at offset 8192
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 8192/8192 bytes at offset 16384
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 8192/8192 bytes at offset 24576
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 65536/65536 bytes at offset 32768
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
++Blocks modified: [0 - 1]
++Blocks modified: [2 - 3]
++Blocks modified: [4 - 5]
++Blocks modified: [6 - 7]
++Blocks modified: [8 - 23]
+ clone failed: Invalid argument
+-5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
+ clone failed: Invalid argument
+-5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
+-0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++0 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0040000 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03
++4 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++30
++0 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++30
++0 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0200000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++20 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0210000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++21 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0230000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++23 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-wrote 8192/8192 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-0000000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
++30
++Blocks modified: [0 - 1]
++0 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0200000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++20 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0210000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++21 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0230000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++23 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-0000000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
++30
++0 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0200000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++20 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0210000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++21 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0230000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++23 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
++30
+ Testing with a nocow file and lzo compression
+-wrote 8192/8192 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 8192/8192 bytes at offset 8192
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 8192/8192 bytes at offset 16384
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 8192/8192 bytes at offset 24576
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 65536/65536 bytes at offset 32768
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
++Blocks modified: [0 - 1]
++Blocks modified: [2 - 3]
++Blocks modified: [4 - 5]
++Blocks modified: [6 - 7]
++Blocks modified: [8 - 23]
+ clone failed: Invalid argument
+-5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
+ clone failed: Invalid argument
+-5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
+-0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++0 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0040000 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03
++4 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++30
++0 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++30
++0 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0200000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++20 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0210000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++21 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0230000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++23 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-wrote 8192/8192 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-0000000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
++30
++Blocks modified: [0 - 1]
++0 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0200000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++20 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0210000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++21 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0230000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++23 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-0000000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
++30
++0 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0200000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++20 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0210000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++21 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0230000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++23 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
++30
+ Testing with a nocow file and zlib compression
+-wrote 8192/8192 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 8192/8192 bytes at offset 8192
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 8192/8192 bytes at offset 16384
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 8192/8192 bytes at offset 24576
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 65536/65536 bytes at offset 32768
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
++Blocks modified: [0 - 1]
++Blocks modified: [2 - 3]
++Blocks modified: [4 - 5]
++Blocks modified: [6 - 7]
++Blocks modified: [8 - 23]
+ clone failed: Invalid argument
+-5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
+ clone failed: Invalid argument
+-5af7a1d6d3757be1e3e911ba5fdf4cbe  SCRATCH_MNT/foo
+-0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++0 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0040000 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03
++4 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++30
++0 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-0000000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++30
++0 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0200000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++20 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0210000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++21 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0230000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++23 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-wrote 8192/8192 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-0000000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
++30
++Blocks modified: [0 - 1]
++0 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0200000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++20 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0210000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++21 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0230000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++23 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
+-0000000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
++30
++0 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+ *
+-0020000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++2 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0060000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++6 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0100000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++10 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0200000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
++20 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
+ *
+-0210000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
++21 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
+ *
+-0230000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
++23 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
+ *
+-0300000
++30
 -- 
-1.8.2.1
+2.1.0
 
