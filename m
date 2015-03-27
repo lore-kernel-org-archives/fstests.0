@@ -1,227 +1,197 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60795 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:57676 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753341AbbC0HZo (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 27 Mar 2015 03:25:44 -0400
-Date: Fri, 27 Mar 2015 15:25:39 +0800
+	id S1752980AbbC0Hi2 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 27 Mar 2015 03:38:28 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (Postfix) with ESMTPS id 6E8F3B6F44
+	for <fstests@vger.kernel.org>; Fri, 27 Mar 2015 07:38:28 +0000 (UTC)
+Date: Fri, 27 Mar 2015 15:38:26 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v6] fstests: Tests can use any name now, not 3 digits
- only.
-Message-ID: <20150327072539.GB4810@dhcp-13-216.nay.redhat.com>
-References: <20150321131159.GA4810@dhcp-13-216.nay.redhat.com>
- <1427383991-14789-1-git-send-email-jtulak@redhat.com>
+Subject: Re: [PATCH 6/9] generic: test I/O error path by fully filling dm
+ snapshot
+Message-ID: <20150327073826.GC4810@dhcp-13-216.nay.redhat.com>
+References: <1426846618-23413-1-git-send-email-eguan@redhat.com>
+ <1426846618-23413-7-git-send-email-eguan@redhat.com>
+ <20150325230838.GA13510@bfoster.bfoster>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <1427383991-14789-1-git-send-email-jtulak@redhat.com>
+In-Reply-To: <20150325230838.GA13510@bfoster.bfoster>
 Sender: fstests-owner@vger.kernel.org
-To: Jan =?utf-8?B?xaR1bMOhaw==?= <jtulak@redhat.com>
-Cc: fstests@vger.kernel.org, lczerner@redhat.com, dsterba@suse.cz
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 26, 2015 at 04:33:11PM +0100, Jan Ťulák wrote:
-> Tests can use any name now, not 3 digits only.
-> (e.g. a test can be named "tests/generic/001-some-name")
+On Wed, Mar 25, 2015 at 07:08:39PM -0400, Brian Foster wrote:
+> On Fri, Mar 20, 2015 at 06:16:55PM +0800, Eryu Guan wrote:
+> > xfs used to panic in this test, this xfs commit fix the bug
+> > 
+> > 8d6c121 xfs: fix buffer use after free on IO error
+> > 
+> > ext4 and btrfs trigger WARNING on current 4.0-rc3 kernel
+> > 
+> > Signed-off-by: Eryu Guan <eguan@redhat.com>
+> > ---
+> >  common/config         |  1 +
+> >  tests/generic/081     | 79 +++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/081.out |  2 ++
+> >  tests/generic/group   |  1 +
+> >  4 files changed, 83 insertions(+)
+> >  create mode 100755 tests/generic/081
+> >  create mode 100644 tests/generic/081.out
+> > 
+> > diff --git a/common/config b/common/config
+> > index e5c3579..3732287 100644
+> > --- a/common/config
+> > +++ b/common/config
+> > @@ -190,6 +190,7 @@ export DMSETUP_PROG="`set_prog_path dmsetup`"
+> >  export WIPEFS_PROG="`set_prog_path wipefs`"
+> >  export DUMP_PROG="`set_prog_path dump`"
+> >  export RESTORE_PROG="`set_prog_path restore`"
+> > +export LVM_PROG="`set_prog_path lvm`"
+> >  
+> >  # Generate a comparable xfsprogs version number in the form of
+> >  # major * 10000 + minor * 100 + release
+> > diff --git a/tests/generic/081 b/tests/generic/081
+> > new file mode 100755
+> > index 0000000..476bfb9
+> > --- /dev/null
+> > +++ b/tests/generic/081
+> > @@ -0,0 +1,79 @@
+> > +#! /bin/bash
+> > +# FS QA Test No. 081
+> > +#
+> > +# Test I/O error path by fully filling an dm snapshot.
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +#
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +	# lvm may have umounted it on I/O error, but in case it does not
+> > +	$UMOUNT_PROG $mnt >/dev/null 2>&1
+> > +	$LVM_PROG vgremove -f $vgname >>$seqres.full 2>&1
+> > +	$LVM_PROG pvremove -f $SCRATCH_DEV >>$seqres.full 2>&1
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# real QA test starts here
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +_require_test
+> > +_require_scratch_nocheck
+> > +_require_block_device $SCRATCH_DEV
+> > +_require_command $LVM_PROG lvm
+> > +
+> > +echo "Silence is golden"
+> > +rm -f $seqres.full
+> > +
+> > +vgname=vg_$seq
+> > +lvname=base_$seq
+> > +snapname=snap_$seq
+> > +mnt=$TEST_DIR/mnt_$seq
+> > +mkdir -p $mnt
+> > +
+> > +$LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
+> > +$LVM_PROG lvcreate --yes -L 256M -n $lvname $vgname >>$seqres.full 2>&1
+> > +
 > 
-> Names are limited to alphanumeric characters and dash and are always prefixed
-> with an unique id for easier identification of a specific test.
+> Hmm, I take it this introduces a block size size requirement of 256MB.
+> If so, perhaps we could use a sparse file and loop, seeing as we're not
+> actually using much space. It's not that big of a deal I suppose, even a
+> ramdisk probably has that much space. At the very least we should do
+> something like the following:
 > 
-> Signed-off-by: Jan Ťulák <jtulak@redhat.com>
-> ---
-
-Besides the version number in summary, it's better to put changelog
-under the "---", so it's clear what has been changed from last version
-
->  README |  7 ++++++-
->  check  | 11 ++++++-----
->  new    | 59 +++++++++++++++++++++++++++++++++++++++++++++++++++++------
->  3 files changed, 65 insertions(+), 12 deletions(-)
+> lvcreate -L 256M ... || _fail "lvcreate failed"
 > 
-> diff --git a/README b/README
-> index 0c9449a..1841052 100644
-> --- a/README
-> +++ b/README
-> @@ -202,10 +202,15 @@ Test script environment:
->  	- When calling getfacl in a test, pass the "-n" argument so
->  	  that numeric rather than symbolic identifiers are used in
->  	  the output.
-> +	- When creating a new test, it is possible to enter a custom name
-> +	  for the file. Filenames are in form NNN-custom-name, where NNN
-> +	  is automatically added by the ./new script as an unique ID,
-> +	  and "custom-name" is the optional string entered into a prompt
-> +	  in the ./new script. Note the "NNN-" part is added automatically.
->  
->  Verified output:
->  
-> -    Each test script has a numerical name, e.g. 007, and an associated
-> +    Each test script has a name, e.g. 007, and an associated
->      verified output, e.g. 007.out.
->  
->      It is important that the verified output is deterministic, and
-> diff --git a/check b/check
-> index 0830e0c..2730284 100755
-> --- a/check
-> +++ b/check
-> @@ -58,7 +58,7 @@ then
->      exit 1
->  fi
->  
-> -SUPPORTED_TESTS="[0-9][0-9][0-9] [0-9][0-9][0-9][0-9]"
-> +SUPPORTED_TESTS="[a-zA-Z0-9-]\+"
+> ... to catch any failures from these commands.
 
-I see this is used in both check and new, is it possible to put it in
-common/rc, then define it once there?
+If vgcreate/lvcreate fails to create lv, the following _mkfs_dev fails
+too and breaks the output match.
 
->  SRC_GROUPS="generic shared"
->  export SRC_DIR="tests"
->  
-> @@ -96,21 +96,22 @@ get_group_list()
->  		l=$(sed -n < $SRC_DIR/$d/group \
->  			-e 's/#.*//' \
->  			-e 's/$/ /' \
-> -			-e "s;\(^[0-9][0-9][0-9]\).* $grp .*;$SRC_DIR/$d/\1;p")
-> +			-e "s;^\($SUPPORTED_TESTS\).* $grp .*;$SRC_DIR/$d/\1;p")
->  		grpl="$grpl $l"
->  	done
->  	echo $grpl
->  }
->  
-> -# find all tests, excluding files that are test metadata such as group files.
-> -# This assumes that tests are defined purely by alphanumeric filenames with no
-> -# ".xyz" extensions in the name.
-> +# Find all tests, excluding files that are test metadata such as group files.
-> +# It matches test names against $SUPPORTED_TESTS defined at the top of this
-> +# file.
->  get_all_tests()
->  {
->  	touch $tmp.list
->  	for d in $SRC_GROUPS $FSTYP; do
->  		ls $SRC_DIR/$d/* | \
->  			grep -v "\..*" | \
-> +			grep "^$SRC_DIR/$d/$SUPPORTED_TESTS"| \
->  			grep -v "group\|Makefile" >> $tmp.list 2>/dev/null
->  	done
->  }
-> diff --git a/new b/new
-> index d1f8939..4ff71d3 100755
-> --- a/new
-> +++ b/new
-> @@ -25,6 +25,9 @@
->  iam=new
->  . ./common/rc
->  
-> +SUPPORTED_TESTS="^[a-zA-Z0-9-]\+$"
-> +
-> +
->  trap "rm -f /tmp/$$.; exit" 0 1 2 3 15
->  
->  _cleanup()
-> @@ -81,11 +84,14 @@ line=0
->  eof=1
->  [ -f "$tdir/group" ] || usage
->  
-> -for found in `cat $tdir/group | $AWK_PROG '{ print $1 }'`
-> +for found in `cat $tdir/group | tr - ' ' | $AWK_PROG '{ print $1 }'`
->  do
->      line=$((line+1))
-> -    if [ -z "$found" ] || [ "$found" == "#" ];then
-> -	continue
-> +    if [ -z "$found" ] || [ "$found" == "#" ]; then
-> +        continue
-> +    elif ! echo "$found" | grep -q "^[0-9][0-9][0-9]$"; then
-> +        # this one is for tests not named by a number
-> +        continue
->      fi
->      i=$((i+1))
->      id=`printf "%03d" $i`
-> @@ -99,8 +105,49 @@ if [ $eof -eq 1 ]; then
->     i=$((i+1))
->     id=`printf "%03d" $i`
->  fi
-> -
-> -echo "Next test is $id"
-> +auto_id=$id
+I think I can _require_fs_space <300M> of SCRATCH_DEV (in case lvm takes
+some space to store metadata)
 
-Seems auto_id is not used anywhere.
+> 
+> > +_mkfs_dev /dev/mapper/$vgname-$lvname
+> > +
+> > +# create a 4M snapshot
+> > +$LVM_PROG lvcreate -s -L 4M -n $snapname $vgname/$lvname >>$seqres.full 2>&1
+> 
+> Same thing here... I guess we're assuming dm-snapshot is available too.
+> We might want a require test for that...
 
-> +
-> +echo "Next test id is $id"
-> +
-> +read -p "Do you want to give a name to the test? y,[n]: " -r
-> +if [[ $REPLY = [Yy] ]]; then
-> +	# get the new name from user
-> +	name=""
-> +	while [ "$name" = "" ]; do
-> +		read -p "Enter the new name: "
+Yes, will do.
 
-This prompt is kind of misleading now, because it's appending test name
-to the current id.
-
-> +		if [ "$REPLY" = "" ]; then
-> +			echo "For canceling, use ctrl+c."
-> +		elif [ -e "$tdir/$REPLY" ]; then
-
-test "$tdir/$id-$REPLY"?
-
-> +			echo "File '$REPLY' already exists, use another one."
-> +			echo #
-> +		elif echo "$REPLY" | grep -q "$SUPPORTED_TESTS"; then
-> +			name="$REPLY"
-> +		else
-> +			echo "Filename must contain only alphanumeric symbols and dash!"
-> +			echo "(Used regex: $SUPPORTED_TESTS)"
-> +			echo
-> +		fi
-> +	done
-> +
-> +	# now find where to insert this name
-> +	eof=1
-> +	for found in `tail -n +$line $tdir/group | $AWK_PROG '{ print $1 }'`; do
-> +		foundId=$(echo "$found" | tr - ' ' | $AWK_PROG '{ print $1 }')
-
-foundid? there's no other var name in camel-case style
-
-> +		line=$((line+1))
-> +		if [ -z "$found" ] || [ "$found" == "#" ]; then
-> +			continue
-> +		elif [[ $found > $name ]] || (( 10#$foundId > 10#$id )); then
-
-(( 10#$foundId > 10#$id )) part is tricky, I have to lookup the bash
-manpage to understand it :)
-
-10 is the default base, the "10#" part can be omitted.
-
-But I think simple [ $foundId -gt $id ] is better, and David Sterba is
-OK with it too now (in another reply) :-)
-
-
-Thank you so much for continuous improvements!
+Thanks for the review!
 
 Eryu
-> +			eof=0
-> +			break
-> +		fi
-> +	done
-> +	if [ $eof -eq 0 ]; then
-> +		# If place wasn't found, let $line be the end of the file
-> +		line=$((line-1))
-> +	fi
-> +	id="$id-$name"
-> +fi
-> +echo "Creating test file '$id'"
->  
->  if [ -f $tdir/$id ]
->  then
-> @@ -115,7 +162,7 @@ year=`date +%Y`
->  
->  cat <<End-of-File >$tdir/$id
->  #! /bin/bash
-> -# FS QA Test No. $id
-> +# FS QA Test $id
->  #
->  # what am I here for?
->  #
-> -- 
-> 2.1.0
 > 
+> Brian
+> 
+> > +
+> > +_mount /dev/mapper/$vgname-$snapname $mnt
+> > +
+> > +# write 5M data to the snapshot
+> > +$XFS_IO_PROG -fc "pwrite 0 5m" $mnt/testfile >>$seqres.full 2>&1
+> > +
+> > +# _check_dmesg will check for WARNINGs/BUGs in dmesg
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/081.out b/tests/generic/081.out
+> > new file mode 100644
+> > index 0000000..663a886
+> > --- /dev/null
+> > +++ b/tests/generic/081.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 081
+> > +Silence is golden
+> > diff --git a/tests/generic/group b/tests/generic/group
+> > index cf7408c..f5ebe48 100644
+> > --- a/tests/generic/group
+> > +++ b/tests/generic/group
+> > @@ -83,6 +83,7 @@
+> >  078 auto quick metadata
+> >  079 acl attr ioctl metadata auto quick
+> >  080 auto freeze mount
+> > +081 auto quick
+> >  083 rw auto enospc stress
+> >  088 perms auto quick
+> >  089 metadata auto
+> > -- 
+> > 2.1.0
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
