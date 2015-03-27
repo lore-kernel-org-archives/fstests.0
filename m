@@ -1,193 +1,48 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58953 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753763AbbC0Iq5 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 27 Mar 2015 04:46:57 -0400
-Date: Fri, 27 Mar 2015 16:46:51 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 5/9 RESEND] generic: test fs freeze/unfreeze and
- mount/umount race
-Message-ID: <20150327084651.GD4810@dhcp-13-216.nay.redhat.com>
-References: <1426846618-23413-1-git-send-email-eguan@redhat.com>
- <1426846618-23413-6-git-send-email-eguan@redhat.com>
- <20150325194429.GE3436@laptop.bfoster>
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:55180 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752655AbbC0JPg convert rfc822-to-8bit (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 27 Mar 2015 05:15:36 -0400
+Date: Fri, 27 Mar 2015 05:15:33 -0400 (EDT)
+From: Jan Tulak <jtulak@redhat.com>
+Message-ID: <1261993987.3620806.1427447733123.JavaMail.zimbra@redhat.com>
+In-Reply-To: <20150327072539.GB4810@dhcp-13-216.nay.redhat.com>
+References: <20150321131159.GA4810@dhcp-13-216.nay.redhat.com> <1427383991-14789-1-git-send-email-jtulak@redhat.com> <20150327072539.GB4810@dhcp-13-216.nay.redhat.com>
+Subject: Re: [PATCH v6] fstests: Tests can use any name now, not 3 digits
+ only.
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20150325194429.GE3436@laptop.bfoster>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: fstests@vger.kernel.org, Monakhov Dmitriy <dmonakhov@openvz.org>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, lczerner@redhat.com, dsterba@suse.cz
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Mar 25, 2015 at 03:44:29PM -0400, Brian Foster wrote:
-> On Fri, Mar 20, 2015 at 06:16:54PM +0800, Eryu Guan wrote:
-> > Exercise fs freeze/unfreeze and mount/umount race, which could lead to
-> > use-after-free oops.
-> > 
-> > This commit fixed the issue:
-> > 1494583 fix get_active_super()/umount() race
-> > 
-> > This test case is based on a script from Monakhov Dmitriy.
-> > 
-> > Cc: Monakhov Dmitriy <dmonakhov@openvz.org>
-> > Signed-off-by: Eryu Guan <eguan@redhat.com>
-> > ---
-> >  tests/generic/080     | 98 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/080.out |  2 ++
-> >  tests/generic/group   |  1 +
-> >  3 files changed, 101 insertions(+)
-> >  create mode 100755 tests/generic/080
-> >  create mode 100644 tests/generic/080.out
-> > 
-> > diff --git a/tests/generic/080 b/tests/generic/080
-> > new file mode 100755
-> > index 0000000..7d9fa5c
-> > --- /dev/null
-> > +++ b/tests/generic/080
-> > @@ -0,0 +1,98 @@
-> > +#! /bin/bash
-> > +# FS QA Test No. 080
-> > +#
-> > +# Exercise fs freeze/unfreeze and mount/umount race, which could lead to
-> > +# use-after-free oops.
-> > +#
-> > +# This commit fixed the issue:
-> > +# 1494583 fix get_active_super()/umount() race
-> > +#
-> > +#-----------------------------------------------------------------------
-> > +# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
-> > +#
-> > +# This program is free software; you can redistribute it and/or
-> > +# modify it under the terms of the GNU General Public License as
-> > +# published by the Free Software Foundation.
-> > +#
-> > +# This program is distributed in the hope that it would be useful,
-> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > +# GNU General Public License for more details.
-> > +#
-> > +# You should have received a copy of the GNU General Public License
-> > +# along with this program; if not, write the Free Software Foundation,
-> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > +#-----------------------------------------------------------------------
-> > +#
-> > +
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +	cleanup_dmdev
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +# real QA test starts here
-> > +_supported_fs generic
-> > +_supported_os Linux
-> > +_require_scratch
-> > +_require_block_device $SCRATCH_DEV
-> > +_require_command $DMSETUP_PROG
-> > +_require_freeze
-> > +
-> > +setup_dmdev()
-> > +{
-> > +	table="0 $size_in_sector linear $SCRATCH_DEV 0"
-> > +	$DMSETUP_PROG create $node --table "$table" >>$seqres.full 2>&1
-> > +	$DMSETUP_PROG mknodes >/dev/null 2>&1
-> > +}
-> > +
-> > +cleanup_dmdev()
-> > +{
-> > +	# in case it's still suspended and/or mounted
-> > +	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
-> > +	$UMOUNT_PROG $lvdev >/dev/null 2>&1
-> > +
-> > +	$DMSETUP_PROG remove $node >>$seqres.full 2>&1
-> > +	$DMSETUP_PROG mknodes >/dev/null 2>&1
-> > +}
-> > +
-> > +rm -f $seqres.full
-> > +echo "Silence is golden"
-> > +
-> > +size=$((256 * 1024 * 1024))
-> > +size_in_sector=$((size / 512))
-> > +_scratch_mkfs_sized $size >>$seqres.full 2>&1
-> > +
-> > +node=$seq-test
-> > +lvdev=/dev/mapper/$node
-> > +setup_dmdev
-> > +
-> > +for ((i=0; i<100; i++)); do
-> > +	$DMSETUP_PROG suspend $lvdev >/dev/null 2>&1
-> > +	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
-> > +done &
+
+
+----- Original Message -----
+> From: "Eryu Guan" <eguan@redhat.com>
+> To: "Jan Ťulák" <jtulak@redhat.com>
+> Cc: fstests@vger.kernel.org, lczerner@redhat.com, dsterba@suse.cz
+> Sent: Friday, 27 March, 2015 8:25:39 AM
+> Subject: Re: [PATCH v6] fstests: Tests can use any name now, not 3 digits only.
 > 
-> Any reason we can't use xfs_freeze/fsfreeze for this test? That seems
-> more simple (avoids the dm stuff), but I don't know enough about the
-> original problem to know if that still reproduces it.
-
-Yes, fsfreeze/unfreeze can reproduce the problem too, and that was
-how Monakhov Dmitriy reproduced it at first, running fstests with
-xfs_freeze -f/xfs_freeze -u loop in background.
-
-The problem is it's racing with umount so it's possible SCRATCH_DEV is
-not mounted at SCRATCH_MNT when xfs_freeze tries to freeze it, then the
-root fs is freezed instead, then the host just hangs there.
-
-Using dmsetup is safer, just freezes the device we want to test.
-
-Thanks,
-Eryu
+> [...]
 > 
-> Brian
+> (( 10#$foundId > 10#$id )) part is tricky, I have to lookup the bash
+> manpage to understand it :)
 > 
-> > +pid=$!
-> > +for ((i=0; i<100; i++)); do
-> > +	$MOUNT_PROG $lvdev $SCRATCH_MNT >/dev/null 2>&1
-> > +	$UMOUNT_PROG $lvdev >/dev/null 2>&1
-> > +done &
-> > +pid="$pid $!"
-> > +
-> > +wait $pid
-> > +
-> > +status=0
-> > +exit
-> > diff --git a/tests/generic/080.out b/tests/generic/080.out
-> > new file mode 100644
-> > index 0000000..11a4a1a
-> > --- /dev/null
-> > +++ b/tests/generic/080.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 080
-> > +Silence is golden
-> > diff --git a/tests/generic/group b/tests/generic/group
-> > index ee5b642..cf7408c 100644
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -82,6 +82,7 @@
-> >  077 acl attr auto enospc
-> >  078 auto quick metadata
-> >  079 acl attr ioctl metadata auto quick
-> > +080 auto freeze mount
-> >  083 rw auto enospc stress
-> >  088 perms auto quick
-> >  089 metadata auto
-> > -- 
-> > 2.1.0
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 10 is the default base, the "10#" part can be omitted.
+> 
+> But I think simple [ $foundId -gt $id ] is better, and David Sterba is
+> OK with it too now (in another reply) :-)
+> 
+> 
+> Thank you so much for continuous improvements!
+> 
+> Eryu
+
+The 10 base was necessary here, because as I found, (( )) takes numbers beginning with zeroes as octal. So it complained about tests like 008, 009, 019, 029... The [ ] does not complain, so I will put it back here. :-)
+
+And thanks for patience. :-)
+Jan
