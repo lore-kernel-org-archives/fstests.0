@@ -1,234 +1,220 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:57030 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932104AbbC0JsZ convert rfc822-to-8bit (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 27 Mar 2015 05:48:25 -0400
-Date: Fri, 27 Mar 2015 05:48:23 -0400 (EDT)
-From: Jan Tulak <jtulak@redhat.com>
-Message-ID: <1503828376.3632362.1427449703440.JavaMail.zimbra@redhat.com>
-In-Reply-To: <20150327093940.GG4810@dhcp-13-216.nay.redhat.com>
-References: <20150327072539.GB4810@dhcp-13-216.nay.redhat.com> <1427447748-14598-1-git-send-email-jtulak@redhat.com> <20150327093940.GG4810@dhcp-13-216.nay.redhat.com>
-Subject: Re: [PATCH v7] fstests: Tests can use any name now, not 3 digits
- only.
+Received: from mx1.redhat.com ([209.132.183.28]:53037 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751434AbbC0KKs (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 27 Mar 2015 06:10:48 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	by mx1.redhat.com (Postfix) with ESMTPS id F0545B040F
+	for <fstests@vger.kernel.org>; Fri, 27 Mar 2015 10:10:47 +0000 (UTC)
+Date: Fri, 27 Mar 2015 18:10:45 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 3/9 RESEND] generic: test hardlink to unlinked file
+Message-ID: <20150327101045.GH4810@dhcp-13-216.nay.redhat.com>
+References: <1426846618-23413-1-git-send-email-eguan@redhat.com>
+ <1426846618-23413-4-git-send-email-eguan@redhat.com>
+ <20150325193236.GD3436@laptop.bfoster>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20150325193236.GD3436@laptop.bfoster>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, lczerner@redhat.com, dsterba@suse.cz
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org, Eric Sandeen <esandeen@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-
-
------ Original Message -----
-> From: "Eryu Guan" <eguan@redhat.com>
-> To: "Jan Ťulák" <jtulak@redhat.com>
-> Cc: fstests@vger.kernel.org, lczerner@redhat.com, dsterba@suse.cz
-> Sent: Friday, 27 March, 2015 10:39:40 AM
-> Subject: Re: [PATCH v7] fstests: Tests can use any name now, not 3 digits only.
-> 
-> On Fri, Mar 27, 2015 at 10:15:48AM +0100, Jan Ťulák wrote:
-> > Tests can use any name now, not 3 digits only.
-> > (e.g. a test can be named "tests/generic/001-some-name")
+On Wed, Mar 25, 2015 at 03:32:36PM -0400, Brian Foster wrote:
+> On Fri, Mar 20, 2015 at 06:16:52PM +0800, Eryu Guan wrote:
+> > Kernel commit
 > > 
-> > Names are limited to alphanumeric characters and dash and are always
-> > prefixed
-> > with an unique id for easier identification of a specific test.
+> > aae8a97 fs: Don't allow to create hardlink for deleted file
 > > 
-> > Signed-off-by: Jan Ťulák <jtulak@redhat.com>
+> > disabled hardlink to unlinked file.
+> > 
+> > Test the race between link and unlink, which could end up adding link
+> > count to an unlinked file and leading to fs corruption on xfs.
+> > 
+> > Test case was originally written by Eric Sandeen.
+> > 
+> > Cc: Eric Sandeen <esandeen@redhat.com>
+> > Signed-off-by: Eryu Guan <eguan@redhat.com>
 > > ---
+> >  tests/generic/073     | 99 +++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/073.out |  2 ++
+> >  tests/generic/group   |  1 +
+> >  3 files changed, 102 insertions(+)
+> >  create mode 100755 tests/generic/073
+> >  create mode 100644 tests/generic/073.out
 > > 
-> >  Changes in this patch version:
-> > 
-> >  SUPPORTED_TESTS regex moved into common/rc
-> >  removed unused variable auto_id
-> >  prompt for name changed to be less confusing
-> >  fixed test for existing file
-> >  foundId -> found_id
-> >  (( expression )) -> [ expression ]
-> > 
-> > 
-> >  README    |  7 ++++++-
-> >  check     | 10 +++++-----
-> >  common/rc |  1 +
-> >  new       | 53 ++++++++++++++++++++++++++++++++++++++++++++++++-----
-> >  4 files changed, 60 insertions(+), 11 deletions(-)
-> > 
-> > diff --git a/README b/README
-> > index 0c9449a..1841052 100644
-> > --- a/README
-> > +++ b/README
-> > @@ -202,10 +202,15 @@ Test script environment:
-> >  	- When calling getfacl in a test, pass the "-n" argument so
-> >  	  that numeric rather than symbolic identifiers are used in
-> >  	  the output.
-> > +	- When creating a new test, it is possible to enter a custom name
-> > +	  for the file. Filenames are in form NNN-custom-name, where NNN
-> > +	  is automatically added by the ./new script as an unique ID,
-> > +	  and "custom-name" is the optional string entered into a prompt
-> > +	  in the ./new script. Note the "NNN-" part is added automatically.
-> >  
-> >  Verified output:
-> >  
-> > -    Each test script has a numerical name, e.g. 007, and an associated
-> > +    Each test script has a name, e.g. 007, and an associated
-> >      verified output, e.g. 007.out.
-> >  
-> >      It is important that the verified output is deterministic, and
-> > diff --git a/check b/check
-> > index 0830e0c..b905259 100755
-> > --- a/check
-> > +++ b/check
-> > @@ -58,7 +58,6 @@ then
-> >      exit 1
-> >  fi
-> >  
-> > -SUPPORTED_TESTS="[0-9][0-9][0-9] [0-9][0-9][0-9][0-9]"
-> >  SRC_GROUPS="generic shared"
-> >  export SRC_DIR="tests"
-> >  
-> > @@ -96,21 +95,22 @@ get_group_list()
-> >  		l=$(sed -n < $SRC_DIR/$d/group \
-> >  			-e 's/#.*//' \
-> >  			-e 's/$/ /' \
-> > -			-e "s;\(^[0-9][0-9][0-9]\).* $grp .*;$SRC_DIR/$d/\1;p")
-> > +			-e "s;^\($SUPPORTED_TESTS\).* $grp .*;$SRC_DIR/$d/\1;p")
-> >  		grpl="$grpl $l"
-> >  	done
-> >  	echo $grpl
-> >  }
-> >  
-> > -# find all tests, excluding files that are test metadata such as group
-> > files.
-> > -# This assumes that tests are defined purely by alphanumeric filenames
-> > with no
-> > -# ".xyz" extensions in the name.
-> > +# Find all tests, excluding files that are test metadata such as group
-> > files.
-> > +# It matches test names against $SUPPORTED_TESTS defined at the top of
-> > this
-> > +# file.
-> >  get_all_tests()
-> >  {
-> >  	touch $tmp.list
-> >  	for d in $SRC_GROUPS $FSTYP; do
-> >  		ls $SRC_DIR/$d/* | \
-> >  			grep -v "\..*" | \
-> > +			grep "^$SRC_DIR/$d/$SUPPORTED_TESTS"| \
-> >  			grep -v "group\|Makefile" >> $tmp.list 2>/dev/null
-> >  	done
-> >  }
-> > diff --git a/common/rc b/common/rc
-> > index 857308a..cc9a894 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -21,6 +21,7 @@
-> >  #-----------------------------------------------------------------------
-> >  
-> >  BC=$(which bc 2> /dev/null) || BC=
-> > +SUPPORTED_TESTS="[a-zA-Z0-9-]\+"
-> >  
-> >  _require_math()
-> >  {
-> > diff --git a/new b/new
-> > index d1f8939..4257e00 100755
-> > --- a/new
-> > +++ b/new
-> > @@ -81,11 +81,14 @@ line=0
-> >  eof=1
-> >  [ -f "$tdir/group" ] || usage
-> >  
-> > -for found in `cat $tdir/group | $AWK_PROG '{ print $1 }'`
-> > +for found in `cat $tdir/group | tr - ' ' | $AWK_PROG '{ print $1 }'`
-> >  do
-> >      line=$((line+1))
-> > -    if [ -z "$found" ] || [ "$found" == "#" ];then
-> > -	continue
-> > +    if [ -z "$found" ] || [ "$found" == "#" ]; then
-> > +        continue
-> > +    elif ! echo "$found" | grep -q "^[0-9][0-9][0-9]$"; then
-> > +        # this one is for tests not named by a number
-> > +        continue
-> >      fi
-> >      i=$((i+1))
-> >      id=`printf "%03d" $i`
-> > @@ -100,7 +103,47 @@ if [ $eof -eq 1 ]; then
-> >     id=`printf "%03d" $i`
-> >  fi
-> >  
-> > -echo "Next test is $id"
-> > +echo "Next test id is $id"
+> > diff --git a/tests/generic/073 b/tests/generic/073
+> > new file mode 100755
+> > index 0000000..6a5261c
+> > --- /dev/null
+> > +++ b/tests/generic/073
+> > @@ -0,0 +1,99 @@
+> > +#! /bin/bash
+> > +# FS QA Test No. 073
+> > +#
+> > +# Test hardlink to unlinked file.
+> > +#
+> > +# Regression test for commit:
+> > +# aae8a97 fs: Don't allow to create hardlink for deleted file
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +#
 > > +
-> > +read -p "Do you want to append a name to the ID? y,[n]: " -r
-> > +if [[ $REPLY = [Yy] ]]; then
-> > +	# get the new name from user
-> > +	name=""
-> > +	while [ "$name" = "" ]; do
-> > +		read -p "Enter the new name: "
-> 
-> "new name" here still seems confusing to me. Otherwise look good to me.
-> 
-> Reviewed-by: Eryu Guan <eguan@redhat.com>
-> 
-> Thank you!
-> 
-> Eryu
-
-So perhaps just remove the "new" and leave only the "name"?
-Should I send one more patch for it?
-
-Jan
-
-> > +		if [ "$REPLY" = "" ]; then
-> > +			echo "For canceling, use ctrl+c."
-> > +		elif [ -e "$tdir/$id-$REPLY" ]; then
-> > +			echo "File '$id-$REPLY' already exists, use another one."
-> > +			echo #
-> > +		elif echo "$REPLY" | grep -q "^$SUPPORTED_TESTS$"; then
-> > +			name="$REPLY"
-> > +		else
-> > +			echo "Filename must contain only alphanumeric symbols and dash!"
-> > +			echo "(Used regex: ^$SUPPORTED_TESTS$)"
-> > +			echo
-> > +		fi
-> > +	done
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
 > > +
-> > +	# now find where to insert this name
-> > +	eof=1
-> > +	for found in `tail -n +$line $tdir/group | $AWK_PROG '{ print $1 }'`; do
-> > +		found_id=$(echo "$found" | tr - ' ' | $AWK_PROG '{ print $1 }')
-> > +		line=$((line+1))
-> > +		if [ -z "$found" ] || [ "$found" == "#" ]; then
-> > +			continue
-> > +		elif [[ $found > $name ]] || [ $found_id -gt $id ]; then
-> > +			eof=0
-> > +			break
-> > +		fi
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +_require_test
+> > +
+> > +link_unlink_storm()
+> > +{
+> > +	local src=$1
+> > +	local target=$2
+> > +
+> > +	while true; do
+> > +		ln -f $src $target >/dev/null 2>&1
+> > +		rm -f $target >/dev/null 2>&1
 > > +	done
-> > +	if [ $eof -eq 0 ]; then
-> > +		# If place wasn't found, let $line be the end of the file
-> > +		line=$((line-1))
-> > +	fi
-> > +	id="$id-$name"
-> > +fi
-> > +echo "Creating test file '$id'"
-> >  
-> >  if [ -f $tdir/$id ]
-> >  then
-> > @@ -115,7 +158,7 @@ year=`date +%Y`
-> >  
-> >  cat <<End-of-File >$tdir/$id
-> >  #! /bin/bash
-> > -# FS QA Test No. $id
-> > +# FS QA Test $id
-> >  #
-> >  # what am I here for?
-> >  #
-> > --
+> > +}
+> 
+> This seems slightly different from the original reproducer in that it
+> recreates the same link and unlinks/recreates the $src entry many times
+> as well. That seems Ok, but out of curiousity, is this test confirmed to
+> reproduce the original problem?
+
+The answer seems to be no..
+
+> 
+> > +
+> > +rm -f $seqres.full
+> > +nr_cpu=`$here/src/feature -o`
+> > +echo "Silence is golden"
+> > +
+> > +# create, open & unlinked files so unlinked inode list is not empty
+> > +for i in `seq 1 64`; do
+> 
+> 		   $nr_cpu
+> 
+
+Yes, typo here
+
+> > +	testfile=$TEST_DIR/$seq.unlinked.$i
+> > +	touch $testfile
+> > +	tail -f $testfile &
+> > +	tail_pids="$tail_pids $!"
+> > +	rm -f $testfile
+> 
+> I get some file not found errors from 'tail' when I run this test. They
+> go away if I add a sleep after the 'tail -f ... &,' so I suspect the rm
+> -f could be racing with the file removal.
+> 
+> That might be unnecessarily slow, however. Perhaps create and tail all
+> of the files in one loop, sleep for a bit, then remove them?
+
+This case has more issues than I thought, I haven't seen such errors in
+the test run before posting patch, but now I see, that's weird.
+
+I think I should have just followed Eric's orginal reproducer (with a c
+program to do the link/unlink storm).
+
+Sorry for the premature post, and thanks for your review!
+
+Eryu
+> 
+> > +done
+> > +
+> > +# start link/unlink storm
+> > +src=$TEST_DIR/$seq.target
+> > +touch $testfile
+> 
+> touch $src ?
+> 
+> > +for i in `seq 1 $nr_cpu`; do
+> > +	target=$TEST_DIR/$seq.target.link.$i
+> > +	link_unlink_storm $src $target &
+> > +	link_pids="$link_pids $!"
+> > +done
+> > +
+> > +# remove & re-create target to race with link/unlink
+> > +while true; do
+> > +	rm -f $src
+> > +	touch $src
+> > +done &
+> > +sleep 5
+> > +kill $! >/dev/null 2>&1
+> > +
+> > +kill $tail_pids $link_pids >/dev/null 2>&1
+> > +wait $tail_pids $link_pids
+> > +
+> > +# all done, no oops/hang expected, _check_filesystems checks TEST_DEV after test
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/073.out b/tests/generic/073.out
+> > new file mode 100644
+> > index 0000000..d107704
+> > --- /dev/null
+> > +++ b/tests/generic/073.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 073
+> > +Silence is golden
+> > diff --git a/tests/generic/group b/tests/generic/group
+> > index c0210d2..ee5b642 100644
+> > --- a/tests/generic/group
+> > +++ b/tests/generic/group
+> > @@ -75,6 +75,7 @@
+> >  070 attr udf auto quick stress
+> >  071 auto quick prealloc
+> >  072 auto quick quota
+> > +073 auto metadata
+> 
+> quick seems fine as well.
+> 
+> Brian
+> 
+> >  074 rw udf auto
+> >  075 rw udf auto quick
+> >  076 metadata rw udf auto quick stress
+> > -- 
 > > 2.1.0
 > > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
