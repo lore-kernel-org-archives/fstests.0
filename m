@@ -1,68 +1,59 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57676 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:58953 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752980AbbC0Hi2 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 27 Mar 2015 03:38:28 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (Postfix) with ESMTPS id 6E8F3B6F44
-	for <fstests@vger.kernel.org>; Fri, 27 Mar 2015 07:38:28 +0000 (UTC)
-Date: Fri, 27 Mar 2015 15:38:26 +0800
+	id S1753763AbbC0Iq5 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 27 Mar 2015 04:46:57 -0400
+Date: Fri, 27 Mar 2015 16:46:51 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 6/9] generic: test I/O error path by fully filling dm
- snapshot
-Message-ID: <20150327073826.GC4810@dhcp-13-216.nay.redhat.com>
+Subject: Re: [PATCH 5/9 RESEND] generic: test fs freeze/unfreeze and
+ mount/umount race
+Message-ID: <20150327084651.GD4810@dhcp-13-216.nay.redhat.com>
 References: <1426846618-23413-1-git-send-email-eguan@redhat.com>
- <1426846618-23413-7-git-send-email-eguan@redhat.com>
- <20150325230838.GA13510@bfoster.bfoster>
+ <1426846618-23413-6-git-send-email-eguan@redhat.com>
+ <20150325194429.GE3436@laptop.bfoster>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20150325230838.GA13510@bfoster.bfoster>
+In-Reply-To: <20150325194429.GE3436@laptop.bfoster>
 Sender: fstests-owner@vger.kernel.org
 To: Brian Foster <bfoster@redhat.com>
-Cc: fstests@vger.kernel.org
+Cc: fstests@vger.kernel.org, Monakhov Dmitriy <dmonakhov@openvz.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Mar 25, 2015 at 07:08:39PM -0400, Brian Foster wrote:
-> On Fri, Mar 20, 2015 at 06:16:55PM +0800, Eryu Guan wrote:
-> > xfs used to panic in this test, this xfs commit fix the bug
+On Wed, Mar 25, 2015 at 03:44:29PM -0400, Brian Foster wrote:
+> On Fri, Mar 20, 2015 at 06:16:54PM +0800, Eryu Guan wrote:
+> > Exercise fs freeze/unfreeze and mount/umount race, which could lead to
+> > use-after-free oops.
 > > 
-> > 8d6c121 xfs: fix buffer use after free on IO error
+> > This commit fixed the issue:
+> > 1494583 fix get_active_super()/umount() race
 > > 
-> > ext4 and btrfs trigger WARNING on current 4.0-rc3 kernel
+> > This test case is based on a script from Monakhov Dmitriy.
 > > 
+> > Cc: Monakhov Dmitriy <dmonakhov@openvz.org>
 > > Signed-off-by: Eryu Guan <eguan@redhat.com>
 > > ---
-> >  common/config         |  1 +
-> >  tests/generic/081     | 79 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/081.out |  2 ++
+> >  tests/generic/080     | 98 +++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/080.out |  2 ++
 > >  tests/generic/group   |  1 +
-> >  4 files changed, 83 insertions(+)
-> >  create mode 100755 tests/generic/081
-> >  create mode 100644 tests/generic/081.out
+> >  3 files changed, 101 insertions(+)
+> >  create mode 100755 tests/generic/080
+> >  create mode 100644 tests/generic/080.out
 > > 
-> > diff --git a/common/config b/common/config
-> > index e5c3579..3732287 100644
-> > --- a/common/config
-> > +++ b/common/config
-> > @@ -190,6 +190,7 @@ export DMSETUP_PROG="`set_prog_path dmsetup`"
-> >  export WIPEFS_PROG="`set_prog_path wipefs`"
-> >  export DUMP_PROG="`set_prog_path dump`"
-> >  export RESTORE_PROG="`set_prog_path restore`"
-> > +export LVM_PROG="`set_prog_path lvm`"
-> >  
-> >  # Generate a comparable xfsprogs version number in the form of
-> >  # major * 10000 + minor * 100 + release
-> > diff --git a/tests/generic/081 b/tests/generic/081
+> > diff --git a/tests/generic/080 b/tests/generic/080
 > > new file mode 100755
-> > index 0000000..476bfb9
+> > index 0000000..7d9fa5c
 > > --- /dev/null
-> > +++ b/tests/generic/081
-> > @@ -0,0 +1,79 @@
+> > +++ b/tests/generic/080
+> > @@ -0,0 +1,98 @@
 > > +#! /bin/bash
-> > +# FS QA Test No. 081
+> > +# FS QA Test No. 080
 > > +#
-> > +# Test I/O error path by fully filling an dm snapshot.
+> > +# Exercise fs freeze/unfreeze and mount/umount race, which could lead to
+> > +# use-after-free oops.
+> > +#
+> > +# This commit fixed the issue:
+> > +# 1494583 fix get_active_super()/umount() race
 > > +#
 > > +#-----------------------------------------------------------------------
 > > +# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
@@ -95,10 +86,7 @@ On Wed, Mar 25, 2015 at 07:08:39PM -0400, Brian Foster wrote:
 > > +{
 > > +	cd /
 > > +	rm -f $tmp.*
-> > +	# lvm may have umounted it on I/O error, but in case it does not
-> > +	$UMOUNT_PROG $mnt >/dev/null 2>&1
-> > +	$LVM_PROG vgremove -f $vgname >>$seqres.full 2>&1
-> > +	$LVM_PROG pvremove -f $SCRATCH_DEV >>$seqres.full 2>&1
+> > +	cleanup_dmdev
 > > +}
 > > +
 > > +# get standard environment, filters and checks
@@ -108,83 +96,91 @@ On Wed, Mar 25, 2015 at 07:08:39PM -0400, Brian Foster wrote:
 > > +# real QA test starts here
 > > +_supported_fs generic
 > > +_supported_os Linux
-> > +_require_test
-> > +_require_scratch_nocheck
+> > +_require_scratch
 > > +_require_block_device $SCRATCH_DEV
-> > +_require_command $LVM_PROG lvm
+> > +_require_command $DMSETUP_PROG
+> > +_require_freeze
 > > +
-> > +echo "Silence is golden"
+> > +setup_dmdev()
+> > +{
+> > +	table="0 $size_in_sector linear $SCRATCH_DEV 0"
+> > +	$DMSETUP_PROG create $node --table "$table" >>$seqres.full 2>&1
+> > +	$DMSETUP_PROG mknodes >/dev/null 2>&1
+> > +}
+> > +
+> > +cleanup_dmdev()
+> > +{
+> > +	# in case it's still suspended and/or mounted
+> > +	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
+> > +	$UMOUNT_PROG $lvdev >/dev/null 2>&1
+> > +
+> > +	$DMSETUP_PROG remove $node >>$seqres.full 2>&1
+> > +	$DMSETUP_PROG mknodes >/dev/null 2>&1
+> > +}
+> > +
 > > +rm -f $seqres.full
+> > +echo "Silence is golden"
 > > +
-> > +vgname=vg_$seq
-> > +lvname=base_$seq
-> > +snapname=snap_$seq
-> > +mnt=$TEST_DIR/mnt_$seq
-> > +mkdir -p $mnt
+> > +size=$((256 * 1024 * 1024))
+> > +size_in_sector=$((size / 512))
+> > +_scratch_mkfs_sized $size >>$seqres.full 2>&1
 > > +
-> > +$LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
-> > +$LVM_PROG lvcreate --yes -L 256M -n $lvname $vgname >>$seqres.full 2>&1
+> > +node=$seq-test
+> > +lvdev=/dev/mapper/$node
+> > +setup_dmdev
 > > +
+> > +for ((i=0; i<100; i++)); do
+> > +	$DMSETUP_PROG suspend $lvdev >/dev/null 2>&1
+> > +	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
+> > +done &
 > 
-> Hmm, I take it this introduces a block size size requirement of 256MB.
-> If so, perhaps we could use a sparse file and loop, seeing as we're not
-> actually using much space. It's not that big of a deal I suppose, even a
-> ramdisk probably has that much space. At the very least we should do
-> something like the following:
-> 
-> lvcreate -L 256M ... || _fail "lvcreate failed"
-> 
-> ... to catch any failures from these commands.
+> Any reason we can't use xfs_freeze/fsfreeze for this test? That seems
+> more simple (avoids the dm stuff), but I don't know enough about the
+> original problem to know if that still reproduces it.
 
-If vgcreate/lvcreate fails to create lv, the following _mkfs_dev fails
-too and breaks the output match.
+Yes, fsfreeze/unfreeze can reproduce the problem too, and that was
+how Monakhov Dmitriy reproduced it at first, running fstests with
+xfs_freeze -f/xfs_freeze -u loop in background.
 
-I think I can _require_fs_space <300M> of SCRATCH_DEV (in case lvm takes
-some space to store metadata)
+The problem is it's racing with umount so it's possible SCRATCH_DEV is
+not mounted at SCRATCH_MNT when xfs_freeze tries to freeze it, then the
+root fs is freezed instead, then the host just hangs there.
 
-> 
-> > +_mkfs_dev /dev/mapper/$vgname-$lvname
-> > +
-> > +# create a 4M snapshot
-> > +$LVM_PROG lvcreate -s -L 4M -n $snapname $vgname/$lvname >>$seqres.full 2>&1
-> 
-> Same thing here... I guess we're assuming dm-snapshot is available too.
-> We might want a require test for that...
+Using dmsetup is safer, just freezes the device we want to test.
 
-Yes, will do.
-
-Thanks for the review!
-
+Thanks,
 Eryu
 > 
 > Brian
 > 
+> > +pid=$!
+> > +for ((i=0; i<100; i++)); do
+> > +	$MOUNT_PROG $lvdev $SCRATCH_MNT >/dev/null 2>&1
+> > +	$UMOUNT_PROG $lvdev >/dev/null 2>&1
+> > +done &
+> > +pid="$pid $!"
 > > +
-> > +_mount /dev/mapper/$vgname-$snapname $mnt
+> > +wait $pid
 > > +
-> > +# write 5M data to the snapshot
-> > +$XFS_IO_PROG -fc "pwrite 0 5m" $mnt/testfile >>$seqres.full 2>&1
-> > +
-> > +# _check_dmesg will check for WARNINGs/BUGs in dmesg
 > > +status=0
 > > +exit
-> > diff --git a/tests/generic/081.out b/tests/generic/081.out
+> > diff --git a/tests/generic/080.out b/tests/generic/080.out
 > > new file mode 100644
-> > index 0000000..663a886
+> > index 0000000..11a4a1a
 > > --- /dev/null
-> > +++ b/tests/generic/081.out
+> > +++ b/tests/generic/080.out
 > > @@ -0,0 +1,2 @@
-> > +QA output created by 081
+> > +QA output created by 080
 > > +Silence is golden
 > > diff --git a/tests/generic/group b/tests/generic/group
-> > index cf7408c..f5ebe48 100644
+> > index ee5b642..cf7408c 100644
 > > --- a/tests/generic/group
 > > +++ b/tests/generic/group
-> > @@ -83,6 +83,7 @@
+> > @@ -82,6 +82,7 @@
+> >  077 acl attr auto enospc
 > >  078 auto quick metadata
 > >  079 acl attr ioctl metadata auto quick
-> >  080 auto freeze mount
-> > +081 auto quick
+> > +080 auto freeze mount
 > >  083 rw auto enospc stress
 > >  088 perms auto quick
 > >  089 metadata auto
