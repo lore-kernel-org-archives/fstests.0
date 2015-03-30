@@ -1,289 +1,252 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:29674 "EHLO
+Received: from cn.fujitsu.com ([59.151.112.132]:8894 "EHLO
 	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752476AbbC3CUP convert rfc822-to-8bit (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 29 Mar 2015 22:20:15 -0400
-From: Zhao Lei <zhaolei@cn.fujitsu.com>
-References: <7a5ac15c7ec2019aec97d6caa2fd98cc591ded95.1426497160.git.zhaolei@cn.fujitsu.com> <CAL3q7H7+NyWNnJmAwjsWzsm0pSU5VBV9QBXz5UhjBBpy7Tu45A@mail.gmail.com>
-In-Reply-To: <CAL3q7H7+NyWNnJmAwjsWzsm0pSU5VBV9QBXz5UhjBBpy7Tu45A@mail.gmail.com>
-Subject: RE: [PATCH v2] fix "utility required warning" with empty utility name
-Date: Mon, 30 Mar 2015 10:20:02 +0800
-Message-ID: <00bc01d06a90$0787a770$1696f650$@cn.fujitsu.com>
+	with ESMTP id S1751285AbbC3Fog (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 30 Mar 2015 01:44:36 -0400
+Message-ID: <5518E19C.2070202@cn.fujitsu.com>
+Date: Mon, 30 Mar 2015 13:39:40 +0800
+From: "gux.fnst" <gux.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8BIT
-Content-Language: zh-cn
+Subject: Re: [PATCH v2] xfstests/xfs: xfs_repair secondary sb verification
+ regression test
+References: <1421854627-30558-1-git-send-email-bfoster@redhat.com>
+In-Reply-To: <1421854627-30558-1-git-send-email-bfoster@redhat.com>
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fdmanana@gmail.com
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi, Filipe
+Hi,
 
-> -----Original Message-----
-> From: linux-btrfs-owner@vger.kernel.org
-> [mailto:linux-btrfs-owner@vger.kernel.org] On Behalf Of Filipe David Manana
-> Sent: Saturday, March 28, 2015 7:55 PM
-> To: Zhaolei
-> Cc: fstests@vger.kernel.org; linux-btrfs@vger.kernel.org
-> Subject: Re: [PATCH v2] fix "utility required warning" with empty utility name
-> 
-> On Mon, Mar 16, 2015 at 9:14 AM, Zhaolei <zhaolei@cn.fujitsu.com> wrote:
-> > From: Zhao Lei <zhaolei@cn.fujitsu.com>
-> >
-> > In generic/019, if we hadn't install fio, we will get following output:
-> >  FSTYP         -- btrfs
-> >  PLATFORM      -- Linux/x86_64 lenovo
-> 4.0.0-rc3_HEAD_9eccca0843205f87c00404b663188b88eb248051_
-> >  MKFS_OPTIONS  -- /dev/sda6
-> >  MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 /dev/sda6
-> > /var/ltf/tester/scratch_mnt
-> >
-> >  generic/019      [not run]  utility required, skipped this test <- *
-> >  Not run: generic/019
-> >  Passed all 0 tests
-> >
-> > When fio is not installed, "$FIO_PROG" is set to blank, and
-> > _require_fio() call _require_command() with none arguments.
-> >
-> > This patch fixed all misuse of _require_command(), add 2nd argument to
-> > let _require_command() output right message, and add quotes to first
-> > argument to avoid argument shifting.
-> >
-> > Changelog v1->v2:
-> >  Fix all misuse of _require_command(), suggested-by:
-> >  Eryu Guan <eguan@redhat.com>
-> >
-> > Suggested-by: Eryu Guan <eguan@redhat.com>
-> > Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
-> > ---
-> >  common/defrag   | 2 +-
-> >  common/rc       | 6 +++---
-> >  tests/btrfs/003 | 2 +-
-> >  tests/btrfs/004 | 2 +-
-> >  tests/btrfs/011 | 2 +-
-> >  tests/btrfs/012 | 6 +++---
-> >  tests/btrfs/079 | 2 +-
-> >  tests/ext4/004  | 4 ++--
-> >  tests/xfs/094   | 2 +-
-> >  tests/xfs/103   | 2 +-
-> >  tests/xfs/122   | 2 +-
-> >  tests/xfs/195   | 2 +-
-> >  12 files changed, 17 insertions(+), 17 deletions(-)
-> >
-> > diff --git a/common/defrag b/common/defrag index f5e36fb..f923dc0
-> > 100644
-> > --- a/common/defrag
-> > +++ b/common/defrag
-> > @@ -37,7 +37,7 @@ _require_defrag()
-> >         ;;
-> >      esac
-> >
-> > -    _require_command $DEFRAG_PROG
-> > +    _require_command "$DEFRAG_PROG" defragment
-> 
-> So with this change one can no longer run the test btrfs/005:
-> 
-> btrfs/005 96s ... [not run] /home/fdmanana/git/hub/btrfs-progs/btrfs
-> filesystem defragment utility required, skipped this test
-> 
-> The DEFRAG_PROG value is never an empty string when FSTYP is btrfs, and this
-> change makes _require_command think "btrfs filesystem defragment" is the
-> name of the program instead of just "btrfs".
-> 
-Thanks for notice, I'll fix it.
+This test case always fail like this:
+xfs/070	 - output mismatch (see /var/lib/xfstests/results//xfs/070.out.bad)
+     --- tests/xfs/070.out	2015-03-17 14:30:45.671000000 +0800
+     +++ /var/lib/xfstests/results//xfs/070.out.bad	2015-03-30 13:33:44.450000000 +0800
+     @@ -7,6 +7,7 @@
+      bad on-disk superblock AGNO - bad magic number
+      primary/secondary superblock AGNO conflict - AG superblock geometry info conflicts with filesystem geometry
+      zeroing unused portion of secondary superblock (AG #AGNO)
+     +non-null project quota inode field in superblock AGNO
+      reset bad sb for ag AGNO
+              - found root inode chunk
+      Phase 3 - for each AG...
+     ...
+     (Run 'diff -u tests/xfs/070.out /var/lib/xfstests/results//xfs/070.out.bad'  to see the entire diff)
+Is this failure caused by message loss in the golden output? Thanks!
 
-Thanks
-Zhaolei
+Regards,
+Xing Gu
 
-> >      _require_xfs_io_command "fiemap"
-> >  }
-> >
-> > diff --git a/common/rc b/common/rc
-> > index 1ed9df5..c1a50f2 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -1299,7 +1299,7 @@ _require_dm_flakey()  {
-> >      # require SCRATCH_DEV to be a valid block device
-> >      _require_block_device $SCRATCH_DEV
-> > -    _require_command $DMSETUP_PROG
-> > +    _require_command "$DMSETUP_PROG" dmsetup
-> >
-> >      modprobe dm-flakey >/dev/null 2>&1
-> >      $DMSETUP_PROG targets | grep flakey >/dev/null 2>&1
-> > @@ -2289,7 +2289,7 @@ _require_deletable_scratch_dev_pool()
-> >  _require_btrfs()
-> >  {
-> >         cmd=$1
-> > -       _require_command $BTRFS_UTIL_PROG btrfs
-> > +       _require_command "$BTRFS_UTIL_PROG" btrfs
-> >         if [ -z "$1" ]; then
-> >                 return 1;
-> >         fi
-> > @@ -2302,7 +2302,7 @@ _require_fio()
-> >  {
-> >         job=$1
-> >
-> > -       _require_command $FIO_PROG
-> > +       _require_command "$FIO_PROG" fio
-> >         if [ -z "$1" ]; then
-> >                 return 1;
-> >         fi
-> > diff --git a/tests/btrfs/003 b/tests/btrfs/003
-> > index d559f8e..9b60ea5 100755
-> > --- a/tests/btrfs/003
-> > +++ b/tests/btrfs/003
-> > @@ -51,7 +51,7 @@ _supported_os Linux
-> >  _require_scratch
-> >  _require_scratch_dev_pool 4
-> >  _require_deletable_scratch_dev_pool
-> > -_require_command $WIPEFS_PROG
-> > +_require_command "$WIPEFS_PROG" wipefs
-> >
-> >  rm -f $seqres.full
-> >
-> > diff --git a/tests/btrfs/004 b/tests/btrfs/004
-> > index 1d5b816..b548914 100755
-> > --- a/tests/btrfs/004
-> > +++ b/tests/btrfs/004
-> > @@ -53,7 +53,7 @@ _supported_os Linux
-> >  _require_scratch
-> >  _require_no_large_scratch_dev
-> >  _require_btrfs inspect-internal
-> > -_require_command "/usr/sbin/filefrag"
-> > +_require_command "/usr/sbin/filefrag" filefrag
-> >
-> >  rm -f $seqres.full
-> >
-> > diff --git a/tests/btrfs/011 b/tests/btrfs/011
-> > index 0207057..f4f2fbe 100755
-> > --- a/tests/btrfs/011
-> > +++ b/tests/btrfs/011
-> > @@ -63,7 +63,7 @@ _need_to_be_root
-> >  _supported_fs btrfs
-> >  _require_scratch_nocheck
-> >  _require_scratch_dev_pool 4
-> > -_require_command $BTRFS_SHOW_SUPER_PROG btrfs-show-super
-> > +_require_command "$BTRFS_SHOW_SUPER_PROG" btrfs-show-super
-> >
-> >  rm -f $seqres.full
-> >  rm -f $tmp.tmp
-> > diff --git a/tests/btrfs/012 b/tests/btrfs/012
-> > index 9e3f991..d513759 100755
-> > --- a/tests/btrfs/012
-> > +++ b/tests/btrfs/012
-> > @@ -57,9 +57,9 @@ _require_scratch_nocheck
-> >  BTRFS_CONVERT_PROG="`set_prog_path btrfs-convert`"
-> >  E2FSCK_PROG="`set_prog_path e2fsck`"
-> >
-> > -_require_command $BTRFS_CONVERT_PROG btrfs-convert
-> > -_require_command $MKFS_EXT4_PROG mkfs.ext4
-> > -_require_command $E2FSCK_PROG e2fsck
-> > +_require_command "$BTRFS_CONVERT_PROG" btrfs-convert
-> > +_require_command "$MKFS_EXT4_PROG" mkfs.ext4
-> > +_require_command "$E2FSCK_PROG" e2fsck
-> >
-> >  rm -f $seqres.full
-> >
-> > diff --git a/tests/btrfs/079 b/tests/btrfs/079
-> > index 202d3e6..4f59ff9 100755
-> > --- a/tests/btrfs/079
-> > +++ b/tests/btrfs/079
-> > @@ -61,7 +61,7 @@ _require_scratch
-> >  _need_to_be_root
-> >  # Since xfs_io's fiemap always use SYNC flag and can't be unset,
-> >  # we must use filefrag to call fiemap without SYNC flag.
-> > -_require_command "/usr/sbin/filefrag"
-> > +_require_command "/usr/sbin/filefrag" filefrag
-> >  _require_xfs_io_command "falloc"
-> >
-> >  filesize=$((10 * 1024 * 1024 * 1024)) #10G size
-> > diff --git a/tests/ext4/004 b/tests/ext4/004
-> > index 68f02b6..595cd7c 100755
-> > --- a/tests/ext4/004
-> > +++ b/tests/ext4/004
-> > @@ -72,8 +72,8 @@ _supported_os Linux
-> >  _require_test
-> >  _require_scratch
-> >
-> > -_require_command $DUMP_PROG
-> > -_require_command $RESTORE_PROG
-> > +_require_command "$DUMP_PROG" dump
-> > +_require_command "$RESTORE_PROG" restore
-> >
-> >  rm -f $seqres.full
-> >  echo "Silence is golden"
-> > diff --git a/tests/xfs/094 b/tests/xfs/094
-> > index cb27559..cee42d6 100755
-> > --- a/tests/xfs/094
-> > +++ b/tests/xfs/094
-> > @@ -46,7 +46,7 @@ _supported_fs xfs
-> >  _supported_os IRIX Linux
-> >  _require_realtime
-> >  _require_scratch
-> > -_require_command $XFS_IO_PROG xfs_io
-> > +_require_command "$XFS_IO_PROG" xfs_io
-> >
-> >  _filter_realtime_flag()
-> >  {
-> > diff --git a/tests/xfs/103 b/tests/xfs/103
-> > index 113f643..cbe884f 100755
-> > --- a/tests/xfs/103
-> > +++ b/tests/xfs/103
-> > @@ -66,7 +66,7 @@ _filter_noymlinks_flag()
-> >  # real QA test starts here
-> >  _supported_os Linux IRIX
-> >  _supported_fs xfs
-> > -_require_command $XFS_IO_PROG xfs_io
-> > +_require_command "$XFS_IO_PROG" xfs_io
-> >  _require_scratch
-> >
-> >  _create_scratch
-> > diff --git a/tests/xfs/122 b/tests/xfs/122
-> > index 8f1d5b4..682ffb4 100755
-> > --- a/tests/xfs/122
-> > +++ b/tests/xfs/122
-> > @@ -39,7 +39,7 @@ trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
-> >  # real QA test starts here
-> >  _supported_fs xfs
-> >  _supported_os Linux
-> > -_require_command $INDENT_PROG "indent"
-> > +_require_command "$INDENT_PROG" indent
-> >
-> >  # filter out known changes to xfs type sizes
-> >  _type_size_filter()
-> > diff --git a/tests/xfs/195 b/tests/xfs/195
-> > index 76f130e..21fcb00 100755
-> > --- a/tests/xfs/195
-> > +++ b/tests/xfs/195
-> > @@ -65,7 +65,7 @@ _supported_os Linux
-> >
-> >  _require_test
-> >  _require_user
-> > -_require_command $XFSDUMP_PROG xfsdump
-> > +_require_command "$XFSDUMP_PROG" xfsdump
-> >
-> >  echo "Preparing subtree"
-> >  mkdir $TEST_DIR/d
-> > --
-> > 1.8.5.1
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
-> --
-> Filipe David Manana,
-> 
-> "Reasonable men adapt themselves to the world.
->  Unreasonable men adapt the world to themselves.
->  That's why all progress depends on unreasonable men."
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
+On 01/21/2015 11:37 PM, Brian Foster wrote:
+> The secondary superblock verification in xfs_repair was subject to a bug
+> that unnecessarily leads to a brute force superblock scan if the last
+> superblock in the fs happens to be corrupt. Normally, xfs_repair handles
+> one-off superblock corruption gracefully using a heuristic that finds
+> the most consistent superblock content across the set of secondary
+> superblocks.
+>
+> Create a regression test for xfs_repair that corrupts the last
+> superblock in the fs. Verify the superblock is updated from the
+> previously verified sb content and a brute force scan is not initiated.
+> In the event of failure, detect that a brute force scan has started and
+> abort the repair in order to fail the test quickly.
+>
+> To support the test, extend the xfs_repair filter to handle corrupted
+> superblock repair output and provide generic test output for arbitrary
+> AG counts.
+>
+> Signed-off-by: Brian Foster <bfoster@redhat.com>
+> ---
+>
+> v2:
+> - Use pgrep instead of ps to monitor xfs_repair process.
+> - Use mkfs filter instead of xfs_db to obtain agcount of scratch fs.
+> v1: http://oss.sgi.com/archives/xfs/2015-01/msg00321.html
+>
+>   common/repair     |   4 ++
+>   tests/xfs/069     | 110 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>   tests/xfs/069.out |  27 ++++++++++++++
+>   tests/xfs/group   |   1 +
+>   4 files changed, 142 insertions(+)
+>   create mode 100755 tests/xfs/069
+>   create mode 100644 tests/xfs/069.out
+>
+> diff --git a/common/repair b/common/repair
+> index a157580..7a99546 100644
+> --- a/common/repair
+> +++ b/common/repair
+> @@ -88,6 +88,10 @@ s/(inode chunk) (\d+)\/(\d+)/AGNO\/INO/;
+>   # sunit/swidth reset messages
+>   s/^(Note - .*) were copied.*/\1 fields have been reset./;
+>   s/^(Please) reset (with .*) if necessary/\1 set \2/;
+> +# corrupt sb messages
+> +s/(superblock) (\d+)/\1 AGNO/;
+> +s/(AG \#)(\d+)/\1AGNO/;
+> +s/(reset bad sb for ag) (\d+)/\1 AGNO/;
+>   	print;'
+>   }
+>
+> diff --git a/tests/xfs/069 b/tests/xfs/069
+> new file mode 100755
+> index 0000000..1432761
+> --- /dev/null
+> +++ b/tests/xfs/069
+> @@ -0,0 +1,110 @@
+> +#! /bin/bash
+> +# FS QA Test No. 069
+> +#
+> +# As part of superblock verification, xfs_repair checks the primary sb and
+> +# verifies all secondary sb's against the primary. In the event of geometry
+> +# inconsistency, repair uses a heuristic that tracks the most frequently
+> +# occurring settings across the set of N (agcount) superblocks.
+> +#
+> +# xfs_repair was subject to a bug that disregards this heuristic in the event
+> +# that the last secondary superblock in the fs is corrupt. The side effect is an
+> +# unnecessary and potentially time consuming brute force superblock scan.
+> +#
+> +# This is a regression test for the aforementioned xfs_repair bug. We
+> +# intentionally corrupt the last superblock in the fs, run xfs_repair and
+> +# verify it repairs the fs correctly. We explicitly detect a brute force scan
+> +# and abort the repair to save time in the failure case.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2015 Red Hat, Inc. All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +	killall -9 $XFS_REPAIR_PROG > /dev/null 2>&1
+> +	wait > /dev/null 2>&1
+> +}
+> +
+> +# Start and monitor an xfs_repair of the scratch device. This test can induce a
+> +# time consuming brute force superblock scan. Since a brute force scan means
+> +# test failure, detect it and end the repair.
+> +_xfs_repair_noscan()
+> +{
+> +	# invoke repair directly so we can kill the process if need be
+> +	$XFS_REPAIR_PROG $SCRATCH_DEV 2>&1 | tee -a $seqres.full > $tmp.repair &
+> +	repair_pid=$!
+> +
+> +	# monitor progress for as long as it is running
+> +	while [ `pgrep xfs_repair` ]; do
+> +		grep "couldn't verify primary superblock" $tmp.repair \
+> +			> /dev/null 2>&1
+> +		if [ $? == 0 ]; then
+> +			# we've started a brute force scan. kill repair and
+> +			# fail the test
+> +			kill -9 $repair_pid >> $seqres.full 2>&1
+> +			wait >> $seqres.full 2>&1
+> +
+> +			_fail "xfs_repair resorted to brute force scan"
+> +		fi
+> +
+> +		sleep 1
+> +	done
+> +
+> +	wait
+> +
+> +	cat $tmp.repair | _filter_repair
+> +}
+> +
+> +rm -f $seqres.full
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/repair
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs xfs
+> +_supported_os Linux
+> +_require_scratch_nocheck
+> +
+> +_scratch_mkfs | _filter_mkfs > /dev/null 2> $tmp.mkfs || _fail "mkfs failed"
+> +
+> +. $tmp.mkfs # import agcount
+> +
+> +# corrupt the last secondary sb in the fs
+> +$XFS_DB_PROG -x -c "sb $((agcount - 1))" -c "type data" \
+> +	-c "write fill 0xff 0 512" $SCRATCH_DEV
+> +
+> +# attempt to repair
+> +_xfs_repair_noscan
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/069.out b/tests/xfs/069.out
+> new file mode 100644
+> index 0000000..c6b11d1
+> --- /dev/null
+> +++ b/tests/xfs/069.out
+> @@ -0,0 +1,27 @@
+> +QA output created by 069
+> +Phase 1 - find and verify superblock...
+> +Phase 2 - using <TYPEOF> log
+> +        - zero log...
+> +        - scan filesystem freespace and inode maps...
+> +bad magic number
+> +bad on-disk superblock AGNO - bad magic number
+> +primary/secondary superblock AGNO conflict - AG superblock geometry info conflicts with filesystem geometry
+> +zeroing unused portion of secondary superblock (AG #AGNO)
+> +reset bad sb for ag AGNO
+> +        - found root inode chunk
+> +Phase 3 - for each AG...
+> +        - scan and clear agi unlinked lists...
+> +        - process known inodes and perform inode discovery...
+> +        - process newly discovered inodes...
+> +Phase 4 - check for duplicate blocks...
+> +        - setting up duplicate extent list...
+> +        - check for inodes claiming duplicate blocks...
+> +Phase 5 - rebuild AG headers and trees...
+> +        - reset superblock...
+> +Phase 6 - check inode connectivity...
+> +        - resetting contents of realtime bitmap and summary inodes
+> +        - traversing filesystem ...
+> +        - traversal finished ...
+> +        - moving disconnected inodes to lost+found ...
+> +Phase 7 - verify and correct link counts...
+> +done
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index 496630d..9394703 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -66,6 +66,7 @@
+>   066 dump ioctl auto quick
+>   067 acl attr auto quick
+>   068 auto stress dump
+> +069 auto quick repair
+>   071 rw auto
+>   072 rw auto prealloc quick
+>   073 copy auto
+>
