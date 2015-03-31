@@ -1,147 +1,156 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from victor.provo.novell.com ([137.65.250.26]:58737 "EHLO
-	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1753360AbbC3XFX (ORCPT
-	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
-	Mon, 30 Mar 2015 19:05:23 -0400
-From: Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH v2] fstests: test for btrfs cloning of zero length ranges
-Date: Tue, 31 Mar 2015 00:04:58 +0100
-Message-Id: <1427756698-21338-1-git-send-email-fdmanana@suse.com>
-In-Reply-To: <1427736284-29469-1-git-send-email-fdmanana@suse.com>
-References: <1427736284-29469-1-git-send-email-fdmanana@suse.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:51984 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753953AbbCaCfM convert rfc822-to-8bit (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 30 Mar 2015 22:35:12 -0400
+From: Zhao Lei <zhaolei@cn.fujitsu.com>
+References: <9a1c40cb9eceb72543647cb4209269bc4aba86f0.1427706679.git.zhaolei@cn.fujitsu.com> <alpine.LFD.2.00.1503301522190.8076@localhost.localdomain>
+In-Reply-To: <alpine.LFD.2.00.1503301522190.8076@localhost.localdomain>
+Subject: RE: [PATCH] Fix caller's argument for _require_command()
+Date: Tue, 31 Mar 2015 10:34:51 +0800
+Message-ID: <018301d06b5b$43d78c60$cb86a520$@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8BIT
+Content-Language: zh-cn
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: =?utf-8?Q?'Luk=C3=A1=C5=A1_Czerner'?= <lczerner@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Test cloning a file range with a length of zero into a destination offset
-greater than zero.
+Hi, Czerner
 
-This made btrfs create an extent state record with a start offset greater than
-the end offset, resulting in chaos such as an infinite loop when evicting an
-inode.
+Thanks for review.
 
-This issue was fixed by the following linux kernel patch:
+> -----Original Message-----
+> From: Lukáš Czerner [mailto:lczerner@redhat.com]
+> Sent: Monday, March 30, 2015 9:25 PM
+> To: Zhaolei
+> Cc: fstests@vger.kernel.org
+> Subject: Re: [PATCH] Fix caller's argument for _require_command()
+> 
+> On Mon, 30 Mar 2015, Zhaolei wrote:
+> 
+> > Date: Mon, 30 Mar 2015 17:11:27 +0800
+> > From: Zhaolei <zhaolei@cn.fujitsu.com>
+> > To: fstests@vger.kernel.org
+> > Cc: Zhao Lei <zhaolei@cn.fujitsu.com>
+> > Subject: [PATCH] Fix caller's argument for _require_command()
+> >
+> > From: Zhao Lei <zhaolei@cn.fujitsu.com>
+> >
+> > _require_command() only accept 2 arguments but some caller misused
+> > this function, and caused "not_run" after we limit calling way.
+> >
+> > This patch fixed above caller.
+> >
+> > Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
+> > ---
+> >  common/defrag | 13 +++++++++----
+> >  tests/xfs/094 |  2 +-
+> >  tests/xfs/103 |  2 +-
+> >  tests/xfs/195 |  2 +-
+> >  4 files changed, 12 insertions(+), 7 deletions(-)
+> >
+> > diff --git a/common/defrag b/common/defrag index f923dc0..b44ef98
+> > 100644
+> > --- a/common/defrag
+> > +++ b/common/defrag
+> > @@ -22,22 +22,27 @@
+> >
+> >  _require_defrag()
+> >  {
+> > +    local defrag_cmd
+> > +
+> >      case "$FSTYP" in
+> >      xfs)
+> > -        DEFRAG_PROG="$XFS_FSR_PROG"
+> > +        defrag_cmd="$XFS_FSR_PROG"
+> > +        DEFRAG_PROG="$defrag_cmd"
+> >  	;;
+> >      ext4|ext4dev)
+> > -        DEFRAG_PROG="$E4DEFRAG_PROG"
+> > +        defrag_cmd="$E4DEFRAG_PROG"
+> > +        DEFRAG_PROG="$defrag_cmd"
+> >  	;;
+> >      btrfs)
+> > -	DEFRAG_PROG="$BTRFS_UTIL_PROG filesystem defragment"
+> > +        defrag_cmd="$BTRFS_UTIL_PROG"
+> > +        DEFRAG_PROG="defrag_cmd filesystem defragment"
+> >  	;;
+> >      *)
+> >          _notrun "defragmentation not supported for fstype \"$FSTYP\""
+> >  	;;
+> >      esac
+> >
+> > -    _require_command "$DEFRAG_PROG" defragment
+> > +    _require_command "$defrag_cmd" defragment
+> 
+> Hi,
+> 
+> what's the point of this change ?
+> 
 
-   Btrfs: fix inode eviction infinite loop after cloning into it
+"$DEFRAG_PROG" include program and argument,
+and can not passed test of:
+[[ -x "$DEFRAG_PROG" ]]
+in _require_command().
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
+> >      _require_xfs_io_command "fiemap"
+> >  }
+> >
+> > diff --git a/tests/xfs/094 b/tests/xfs/094 index cee42d6..5c6e98d
+> > 100755
+> > --- a/tests/xfs/094
+> > +++ b/tests/xfs/094
+> > @@ -46,7 +46,7 @@ _supported_fs xfs
+> >  _supported_os IRIX Linux
+> >  _require_realtime
+> >  _require_scratch
+> > -_require_command "$XFS_IO_PROG" xfs_io
+> > +[ -n "$XFS_IO_PROG" ] || _notrun "xfs_io executable not found"
+> 
+> Why ? Do not we get the same result from
+> 
+> _require_command "$XFS_IO_PROG" xfs_io
+> 
+> anyway if the $XFS_IO_PROG isn't set ?
+> 
+In some case, "$XFS_IO_PROG" include both program and argument,
+and cause wrong result in _require_command().
 
-V2: Use an offset of 64Kb so that the test can run on platforms with any
-    page size. In btrfs the fs block size must be a multiple of the page
-    size, so a 4Kb offset would make the test fail on machines with a
-    page size > 4Kb because the clone ioctl only accepts offsets and lengths
-    that are multiples of the block size.
+Thanks
+Zhaolei
 
- tests/btrfs/086     | 77 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/086.out |  2 ++
- tests/btrfs/group   |  1 +
- 3 files changed, 80 insertions(+)
- create mode 100755 tests/btrfs/086
- create mode 100644 tests/btrfs/086.out
+> -Lukas
+> 
+> >
+> >  _filter_realtime_flag()
+> >  {
+> > diff --git a/tests/xfs/103 b/tests/xfs/103 index cbe884f..d80dbf2
+> > 100755
+> > --- a/tests/xfs/103
+> > +++ b/tests/xfs/103
+> > @@ -66,7 +66,7 @@ _filter_noymlinks_flag()  # real QA test starts here
+> > _supported_os Linux IRIX  _supported_fs xfs -_require_command
+> > "$XFS_IO_PROG" xfs_io
+> > +[ -n "$XFS_IO_PROG" ] || _notrun "xfs_io executable not found"
+> >  _require_scratch
+> >
+> >  _create_scratch
+> > diff --git a/tests/xfs/195 b/tests/xfs/195 index 21fcb00..075022d
+> > 100755
+> > --- a/tests/xfs/195
+> > +++ b/tests/xfs/195
+> > @@ -65,7 +65,7 @@ _supported_os Linux
+> >
+> >  _require_test
+> >  _require_user
+> > -_require_command "$XFSDUMP_PROG" xfsdump
+> > +[ "$XFSDUMP_PROG" = "" ] && _notrun "xfsdump not found"
+> >
+> >  echo "Preparing subtree"
+> >  mkdir $TEST_DIR/d
+> >
 
-diff --git a/tests/btrfs/086 b/tests/btrfs/086
-new file mode 100755
-index 0000000..77c8da6
---- /dev/null
-+++ b/tests/btrfs/086
-@@ -0,0 +1,77 @@
-+#! /bin/bash
-+# FS QA Test No. btrfs/086
-+#
-+# Test cloning a file range with a length of zero into a destination offset
-+# greater than zero.
-+#
-+# This made btrfs create an extent state record with a start offset greater than
-+# the end offset, resulting in chaos such as an infinite loop when evicting an
-+# inode.
-+#
-+# This issue was fixed by the following linux kernel patch:
-+#
-+#   Btrfs: fix inode eviction infinite loop after cloning into it
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_cloner
-+_need_to_be_root
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+touch $SCRATCH_MNT/foo
-+touch $SCRATCH_MNT/bar
-+
-+# Now attempt to clone foo into bar. Because we pass a length of zero, the
-+# clone ioctl will adjust the length to match the size of the file foo (minus
-+# the source offset which is zero) - because the adjusted length value is
-+# zero, it made btrfs create an extent state record for file bar with a start
-+# offset (64k) greater then its end offset (64k - 1), which is something never
-+# supposed to happen and for example it made inode eviction enter an infinite
-+# loop that dumped a warning trace on each iteration.
-+$CLONER_PROG -s 0 -d 65536 -l 0 $SCRATCH_MNT/foo $SCRATCH_MNT/bar
-+echo "bar file size after clone operation: $(stat -c %s $SCRATCH_MNT/bar)"
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/086.out b/tests/btrfs/086.out
-new file mode 100644
-index 0000000..1ae87ba
---- /dev/null
-+++ b/tests/btrfs/086.out
-@@ -0,0 +1,2 @@
-+QA output created by 086
-+bar file size after clone operation: 0
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 81d462f..92bc0f9 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -88,3 +88,4 @@
- 083 auto quick send
- 084 auto quick send
- 085 auto quick send
-+086 auto quick clone
--- 
-2.1.3
 
