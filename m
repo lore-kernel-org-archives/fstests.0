@@ -1,156 +1,194 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:51984 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753953AbbCaCfM convert rfc822-to-8bit (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 30 Mar 2015 22:35:12 -0400
-From: Zhao Lei <zhaolei@cn.fujitsu.com>
-References: <9a1c40cb9eceb72543647cb4209269bc4aba86f0.1427706679.git.zhaolei@cn.fujitsu.com> <alpine.LFD.2.00.1503301522190.8076@localhost.localdomain>
-In-Reply-To: <alpine.LFD.2.00.1503301522190.8076@localhost.localdomain>
-Subject: RE: [PATCH] Fix caller's argument for _require_command()
-Date: Tue, 31 Mar 2015 10:34:51 +0800
-Message-ID: <018301d06b5b$43d78c60$cb86a520$@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8BIT
-Content-Language: zh-cn
+Received: from victor.provo.novell.com ([137.65.250.26]:59810 "EHLO
+	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1754692AbbCaPLd (ORCPT
+	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
+	Tue, 31 Mar 2015 11:11:33 -0400
+From: Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] fstests: regression test for btrfs file range cloning
+Date: Tue, 31 Mar 2015 16:10:56 +0100
+Message-Id: <1427814656-23227-1-git-send-email-fdmanana@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: =?utf-8?Q?'Luk=C3=A1=C5=A1_Czerner'?= <lczerner@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Hi, Czerner
+Test btrfs file range cloning with the same file as a source and
+destination.
 
-Thanks for review.
+This tests a specific scenario where the extent layout of the file
+confused the clone ioctl implementation making it return -EEXIST to
+userspace. This issue was fixed by the following linux kernel patch:
 
-> -----Original Message-----
-> From: Lukáš Czerner [mailto:lczerner@redhat.com]
-> Sent: Monday, March 30, 2015 9:25 PM
-> To: Zhaolei
-> Cc: fstests@vger.kernel.org
-> Subject: Re: [PATCH] Fix caller's argument for _require_command()
-> 
-> On Mon, 30 Mar 2015, Zhaolei wrote:
-> 
-> > Date: Mon, 30 Mar 2015 17:11:27 +0800
-> > From: Zhaolei <zhaolei@cn.fujitsu.com>
-> > To: fstests@vger.kernel.org
-> > Cc: Zhao Lei <zhaolei@cn.fujitsu.com>
-> > Subject: [PATCH] Fix caller's argument for _require_command()
-> >
-> > From: Zhao Lei <zhaolei@cn.fujitsu.com>
-> >
-> > _require_command() only accept 2 arguments but some caller misused
-> > this function, and caused "not_run" after we limit calling way.
-> >
-> > This patch fixed above caller.
-> >
-> > Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
-> > ---
-> >  common/defrag | 13 +++++++++----
-> >  tests/xfs/094 |  2 +-
-> >  tests/xfs/103 |  2 +-
-> >  tests/xfs/195 |  2 +-
-> >  4 files changed, 12 insertions(+), 7 deletions(-)
-> >
-> > diff --git a/common/defrag b/common/defrag index f923dc0..b44ef98
-> > 100644
-> > --- a/common/defrag
-> > +++ b/common/defrag
-> > @@ -22,22 +22,27 @@
-> >
-> >  _require_defrag()
-> >  {
-> > +    local defrag_cmd
-> > +
-> >      case "$FSTYP" in
-> >      xfs)
-> > -        DEFRAG_PROG="$XFS_FSR_PROG"
-> > +        defrag_cmd="$XFS_FSR_PROG"
-> > +        DEFRAG_PROG="$defrag_cmd"
-> >  	;;
-> >      ext4|ext4dev)
-> > -        DEFRAG_PROG="$E4DEFRAG_PROG"
-> > +        defrag_cmd="$E4DEFRAG_PROG"
-> > +        DEFRAG_PROG="$defrag_cmd"
-> >  	;;
-> >      btrfs)
-> > -	DEFRAG_PROG="$BTRFS_UTIL_PROG filesystem defragment"
-> > +        defrag_cmd="$BTRFS_UTIL_PROG"
-> > +        DEFRAG_PROG="defrag_cmd filesystem defragment"
-> >  	;;
-> >      *)
-> >          _notrun "defragmentation not supported for fstype \"$FSTYP\""
-> >  	;;
-> >      esac
-> >
-> > -    _require_command "$DEFRAG_PROG" defragment
-> > +    _require_command "$defrag_cmd" defragment
-> 
-> Hi,
-> 
-> what's the point of this change ?
-> 
+   Btrfs: fix range cloning when same inode used as source and destination
 
-"$DEFRAG_PROG" include program and argument,
-and can not passed test of:
-[[ -x "$DEFRAG_PROG" ]]
-in _require_command().
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/087     | 102 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/087.out |  35 ++++++++++++++++++
+ tests/btrfs/group   |   1 +
+ 3 files changed, 138 insertions(+)
+ create mode 100755 tests/btrfs/087
+ create mode 100644 tests/btrfs/087.out
 
-> >      _require_xfs_io_command "fiemap"
-> >  }
-> >
-> > diff --git a/tests/xfs/094 b/tests/xfs/094 index cee42d6..5c6e98d
-> > 100755
-> > --- a/tests/xfs/094
-> > +++ b/tests/xfs/094
-> > @@ -46,7 +46,7 @@ _supported_fs xfs
-> >  _supported_os IRIX Linux
-> >  _require_realtime
-> >  _require_scratch
-> > -_require_command "$XFS_IO_PROG" xfs_io
-> > +[ -n "$XFS_IO_PROG" ] || _notrun "xfs_io executable not found"
-> 
-> Why ? Do not we get the same result from
-> 
-> _require_command "$XFS_IO_PROG" xfs_io
-> 
-> anyway if the $XFS_IO_PROG isn't set ?
-> 
-In some case, "$XFS_IO_PROG" include both program and argument,
-and cause wrong result in _require_command().
-
-Thanks
-Zhaolei
-
-> -Lukas
-> 
-> >
-> >  _filter_realtime_flag()
-> >  {
-> > diff --git a/tests/xfs/103 b/tests/xfs/103 index cbe884f..d80dbf2
-> > 100755
-> > --- a/tests/xfs/103
-> > +++ b/tests/xfs/103
-> > @@ -66,7 +66,7 @@ _filter_noymlinks_flag()  # real QA test starts here
-> > _supported_os Linux IRIX  _supported_fs xfs -_require_command
-> > "$XFS_IO_PROG" xfs_io
-> > +[ -n "$XFS_IO_PROG" ] || _notrun "xfs_io executable not found"
-> >  _require_scratch
-> >
-> >  _create_scratch
-> > diff --git a/tests/xfs/195 b/tests/xfs/195 index 21fcb00..075022d
-> > 100755
-> > --- a/tests/xfs/195
-> > +++ b/tests/xfs/195
-> > @@ -65,7 +65,7 @@ _supported_os Linux
-> >
-> >  _require_test
-> >  _require_user
-> > -_require_command "$XFSDUMP_PROG" xfsdump
-> > +[ "$XFSDUMP_PROG" = "" ] && _notrun "xfsdump not found"
-> >
-> >  echo "Preparing subtree"
-> >  mkdir $TEST_DIR/d
-> >
-
+diff --git a/tests/btrfs/087 b/tests/btrfs/087
+new file mode 100755
+index 0000000..0a5deb7
+--- /dev/null
++++ b/tests/btrfs/087
+@@ -0,0 +1,102 @@
++#! /bin/bash
++# FS QA Test No. btrfs/087
++#
++# Test btrfs file range cloning with the same file as a source and destination.
++#
++# This tests a specific scenario where the extent layout of the file confused
++# the clone ioctl implementation making it return -EEXIST to userspace.
++# This issue was fixed by the following linux kernel patch:
++#
++#    Btrfs: fix range cloning when same inode used as source and destination
++#
++#-----------------------------------------------------------------------
++# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_cloner
++_need_to_be_root
++
++rm -f $seqres.full
++
++# Create a file with an extent layout that confused the btrfs clone ioctl
++# implementation. The first extent item that is cloned by the second call
++# to the cloner program will have only a trailing part of it referenced by
++# a new extent item, since the source offset starts in the middle of that
++# extent. This confused the clone ioctl because after inserting this new
++# extent item it would immediately after process it again thinking it
++# corresponded to an extent that existed before - this made it attempt to
++# insert a duplicated extent item pointing to the same extent again, which
++# made it return an -EEXIST error to userspace and turn the filesystem to
++# readonly mode (since the current transaction got aborted).
++test_clone()
++{
++	local bs=$1
++
++	$XFS_IO_PROG -f -c "pwrite -S 0xaa $(($bs * 2)) $(($bs * 2))" \
++		$SCRATCH_MNT/foo | _filter_xfs_io
++
++	$CLONER_PROG -s $((3 * $bs)) -d $((267 * $bs)) -l 0 $SCRATCH_MNT/foo \
++		$SCRATCH_MNT/foo
++	$CLONER_PROG -s $((217 * $bs)) -d $((95 * $bs)) -l 0 $SCRATCH_MNT/foo \
++		$SCRATCH_MNT/foo
++
++	echo "File content after clone operations:"
++	od -t x1 $SCRATCH_MNT/foo
++}
++
++# Make sure the test passes offsets and lengths to the btrfs clone ioctl that
++# are multiples of the fs block size. Currently the block size on btrfs must
++# be a multiple of the page size, so use a 64Kb fs block size in order to be
++# able to test on every platform supported by linux.
++bs=$((64 * 1024))
++
++echo "Testing without the no-holes feature"
++_scratch_mkfs "-O ^no-holes -l $bs" >>$seqres.full 2>&1
++_scratch_mount
++test_clone $bs
++_check_scratch_fs
++
++echo "Testing with the no-holes feature"
++_scratch_unmount
++_scratch_mkfs "-O no-holes -l $bs" >>$seqres.full 2>&1
++_scratch_mount
++test_clone $bs
++
++status=0
++exit
+diff --git a/tests/btrfs/087.out b/tests/btrfs/087.out
+new file mode 100644
+index 0000000..5ddede2
+--- /dev/null
++++ b/tests/btrfs/087.out
+@@ -0,0 +1,35 @@
++QA output created by 087
++Testing without the no-holes feature
++wrote 131072/131072 bytes at offset 131072
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File content after clone operations:
++0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
++*
++0400000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
++*
++1000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
++*
++44200000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
++*
++44400000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
++*
++102600000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
++*
++103000000
++Testing with the no-holes feature
++wrote 131072/131072 bytes at offset 131072
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File content after clone operations:
++0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
++*
++0400000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
++*
++1000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
++*
++44200000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
++*
++44400000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
++*
++102600000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
++*
++103000000
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 92bc0f9..b6b9157 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -89,3 +89,4 @@
+ 084 auto quick send
+ 085 auto quick send
+ 086 auto quick clone
++087 auto quick clone
+-- 
+2.1.3
 
