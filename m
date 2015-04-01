@@ -1,77 +1,63 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:35952 "EHLO
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:50053 "EHLO
 	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751690AbbDAWMG (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 1 Apr 2015 18:12:06 -0400
-Date: Thu, 2 Apr 2015 09:12:02 +1100
+	by vger.kernel.org with ESMTP id S1751149AbbDAWaP (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 1 Apr 2015 18:30:15 -0400
+Date: Thu, 2 Apr 2015 09:29:54 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] xfstests: generic: test for discard properly discarding
- unused extents
-Message-ID: <20150401221202.GE28621@dastard>
-References: <55199FCA.9040503@suse.com>
- <20150401184434.GG4756@bfoster.bfoster>
- <551C4073.8010201@suse.com>
+Subject: Re: [PATCH 6/9] generic: test I/O error path by fully filling dm
+ snapshot
+Message-ID: <20150401222954.GF28621@dastard>
+References: <1426846618-23413-7-git-send-email-eguan@redhat.com>
+ <1427896455-12048-1-git-send-email-eguan@redhat.com>
+ <20150401175710.GF4756@bfoster.bfoster>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <551C4073.8010201@suse.com>
+In-Reply-To: <20150401175710.GF4756@bfoster.bfoster>
 Sender: fstests-owner@vger.kernel.org
-To: Jeff Mahoney <jeffm@suse.com>
-Cc: Brian Foster <bfoster@redhat.com>, linux-btrfs <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org
+To: Brian Foster <bfoster@redhat.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 01, 2015 at 03:01:07PM -0400, Jeff Mahoney wrote:
-> -----BEGIN PGP SIGNED MESSAGE-----
-> Hash: SHA1
-> 
-> On 4/1/15 2:44 PM, Brian Foster wrote:
-> > On Mon, Mar 30, 2015 at 03:11:06PM -0400, Jeff Mahoney wrote:
-> >> This tests tests four conditions where discard can potentially 
-> >> not discard unused extents completely.
-> >> 
-> >> We test, with -o discard and with fstrim, scenarios of removing 
-> >> many relatively small files and removing several large files.
-> >> 
-> >> The important part of the two scenarios is that the large files 
-> >> must be large enough to span a blockgroup alone. It's possible 
-> >> for an entire block group to be emptied and dropped without an 
-> >> opportunity to discard individual extents as would happen with 
-> >> smaller files.
-> >> 
-> >> The test confirms the discards have occured by using a sparse 
-> >> file mounted via loopback to punch holes and then check how many 
-> >> blocks are still allocated within the file.
-> >> 
-> >> Signed-off-by: Jeff Mahoney <jeffm@suse.com> ---
+On Wed, Apr 01, 2015 at 01:57:10PM -0400, Brian Foster wrote:
+> On Wed, Apr 01, 2015 at 09:54:15PM +0800, Eryu Guan wrote:
+> > xfs used to panic in this test, this xfs commit fix the bug
 > > 
-> > The code looks mostly Ok to me, a few notes below. Those aside, 
-> > this is a longish test. It takes me about 8 minutes to run on my 
-> > typical low end vm.
-> 
-> My test hardware is a 16 core / 16 GB RAM machine using a commodity
-> SSD. It ran pretty quickly.
-
-Yup, I have a test VM like that, too. However, like many other
-people, I also have small VMs that share single spindles with other
-test VMs, so we need to cater for them, too.
-
-> >> +	if [ "$FSTYP" = "btrfs" ]; then
-> >> +		_run_btrfs_util_prog filesystem sync $tmpdir
-> >> +  fi
-> >> +	sync
-> >> +	sync
+> > 8d6c121 xfs: fix buffer use after free on IO error
 > > 
-> > Any reason for the double syncs?
+> > ext4 and btrfs trigger WARNING on current 4.0-rc3 kernel
+> > 
+> > Signed-off-by: Eryu Guan <eguan@redhat.com>
+> > ---
+> > v2:
+> > - add _require_dm_snapshot() function to require dm snapshot target
+> > - make sure SCRATCH_DEV has enough space for the test
+> > - fail the test directly when failures detected in setup phase
+> > 
 > 
-> Superstition? IIRC, at one point in what is probably the ancient past,
-> btrfs needed two syncs to be safe. I kept running into false failures
-> without both a sync and the btrfs filesystem sync, so I just hit the
-> "no really, just do it" button.
+> FYI, the mail subject header hasn't changed so Dave might not notice
+> this is a new patch.
 
-Urk. If btrfs requires two sync passes to really sync data/metadata,
-then that's a bug that needs to be fixed. Let's not encode
-superstition or work around bugs that really should be fixed in the
-test code....
+Saw it.
+
+> > +_mount /dev/mapper/$vgname-$snapname $mnt
+> > +
+> > +# write 5M data to the snapshot
+> > +$XFS_IO_PROG -fc "pwrite 0 5m" $mnt/testfile >>$seqres.full 2>&1
+> > +
+> 
+> I noticed there were no errors in $seqres.full when running this test.
+> E.g., the pwrite succeeds because nothing is written back to disk at
+> that point. The fs does shutdown due to the flush on umount, but it's
+> kind of hidden away up in the _cleanup() function.
+> 
+> Kind of a nit, but we could be a bit more explicit and do a '-c fsync'
+> after the pwrite here? That way it's clear that writeback to disk is
+> part of the core test and we have a little feedback in $seqres.full that
+> I/O errors occurred, as expected.
+
+Added the -c fsync as I pulled it in.
 
 Cheers,
 
