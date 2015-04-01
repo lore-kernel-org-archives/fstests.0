@@ -1,101 +1,88 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:40139 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:41480 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752277AbbDAR5L (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 1 Apr 2015 13:57:11 -0400
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t31HvBNn006422
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <fstests@vger.kernel.org>; Wed, 1 Apr 2015 13:57:11 -0400
-Date: Wed, 1 Apr 2015 13:57:10 -0400
+	id S1751429AbbDASoh (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 1 Apr 2015 14:44:37 -0400
+Date: Wed, 1 Apr 2015 14:44:34 -0400
 From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH 6/9] generic: test I/O error path by fully filling dm
- snapshot
-Message-ID: <20150401175710.GF4756@bfoster.bfoster>
-References: <1426846618-23413-7-git-send-email-eguan@redhat.com>
- <1427896455-12048-1-git-send-email-eguan@redhat.com>
+Subject: Re: [PATCH] xfstests: generic: test for discard properly discarding
+ unused extents
+Message-ID: <20150401184434.GG4756@bfoster.bfoster>
+References: <55199FCA.9040503@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1427896455-12048-1-git-send-email-eguan@redhat.com>
+In-Reply-To: <55199FCA.9040503@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: Jeff Mahoney <jeffm@suse.com>
+Cc: linux-btrfs <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 01, 2015 at 09:54:15PM +0800, Eryu Guan wrote:
-> xfs used to panic in this test, this xfs commit fix the bug
+On Mon, Mar 30, 2015 at 03:11:06PM -0400, Jeff Mahoney wrote:
+> This tests tests four conditions where discard can potentially not
+> discard unused extents completely.
 > 
-> 8d6c121 xfs: fix buffer use after free on IO error
+> We test, with -o discard and with fstrim, scenarios of removing many
+> relatively small files and removing several large files.
 > 
-> ext4 and btrfs trigger WARNING on current 4.0-rc3 kernel
+> The important part of the two scenarios is that the large files must be
+> large enough to span a blockgroup alone. It's possible for an
+> entire block group to be emptied and dropped without an opportunity to
+> discard individual extents as would happen with smaller files.
 > 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> The test confirms the discards have occured by using a sparse file
+> mounted via loopback to punch holes and then check how many blocks
+> are still allocated within the file.
+> 
+> Signed-off-by: Jeff Mahoney <jeffm@suse.com>
 > ---
-> v2:
-> - add _require_dm_snapshot() function to require dm snapshot target
-> - make sure SCRATCH_DEV has enough space for the test
-> - fail the test directly when failures detected in setup phase
-> 
 
-FYI, the mail subject header hasn't changed so Dave might not notice
-this is a new patch.
+The code looks mostly Ok to me, a few notes below. Those aside, this is
+a longish test. It takes me about 8 minutes to run on my typical low end
+vm.
 
->  common/config         |  1 +
->  common/rc             | 10 ++++++
->  tests/generic/081     | 86 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/081.out |  2 ++
->  tests/generic/group   |  1 +
->  5 files changed, 100 insertions(+)
->  create mode 100755 tests/generic/081
->  create mode 100644 tests/generic/081.out
+Is the 1GB block group magic value mutable in any way, or is it a
+hardcoded thing (for btrfs I presume)? It would be nice if we could
+shrink that a bit. If not, perhaps there are some other ways to reduce
+the runtime...
+
+- Is there any reason a single discard or trim test instance must be all
+large or small files? In other words, is there something that this
+wouldn't catch if the 10GB were 50% filled with large files and %50 with
+small files? That would allow us to trim the maximum on the range of
+small file creation and only have two invocations instead of four.
+
+- If the 1GB thing is in fact a btrfs thing, could we make the core test
+a bit more size agnostic (e.g., perhaps pass the file count/size
+values as parameters) and then scale the parameters up exclusively for
+btrfs? For example, set defaults of fssize=1G, largefile=100MB,
+smallfile=[512b-5MB] or something of that nature and override them to
+the 10GB, 1GB, 32k-... values for btrfs? That way we don't need to write
+as much data for fs' where it might not be necessary.
+
+>  tests/generic/326     | 164 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/326.out |   5 ++
+>  tests/generic/group   |   1 +
+>  3 files changed, 170 insertions(+)
+>  create mode 100644 tests/generic/326
+>  create mode 100644 tests/generic/326.out
 > 
-> diff --git a/common/config b/common/config
-> index e5c3579..3732287 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -190,6 +190,7 @@ export DMSETUP_PROG="`set_prog_path dmsetup`"
->  export WIPEFS_PROG="`set_prog_path wipefs`"
->  export DUMP_PROG="`set_prog_path dump`"
->  export RESTORE_PROG="`set_prog_path restore`"
-> +export LVM_PROG="`set_prog_path lvm`"
->  
->  # Generate a comparable xfsprogs version number in the form of
->  # major * 10000 + minor * 100 + release
-> diff --git a/common/rc b/common/rc
-> index 857308a..74df379 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1311,6 +1311,16 @@ _require_dm_flakey()
->      fi
->  }
->  
-> +_require_dm_snapshot()
-> +{
-> +	_require_command "$DMSETUP_PROG" dmsetup
-> +	modprobe dm-snapshot >/dev/null 2>&1
-> +	$DMSETUP_PROG targets | grep -q snapshot
-> +	if [ $? -ne 0 ]; then
-> +		_notrun "This test requires dm snapshot support"
-> +	fi
-> +}
-> +
->  # this test requires the projid32bit feature to be available in mkfs.xfs.
->  #
->  _require_projid32bit()
-> diff --git a/tests/generic/081 b/tests/generic/081
-> new file mode 100755
-> index 0000000..3e17d34
+> diff --git a/tests/generic/326 b/tests/generic/326
+> new file mode 100644
+> index 0000000..923a27f
 > --- /dev/null
-> +++ b/tests/generic/081
-> @@ -0,0 +1,86 @@
+> +++ b/tests/generic/326
+> @@ -0,0 +1,164 @@
 > +#! /bin/bash
-> +# FS QA Test No. 081
+> +# FSQA Test No. 326
 > +#
-> +# Test I/O error path by fully filling an dm snapshot.
+> +# This test uses a loopback mount with PUNCH_HOLE support to test
+> +# whether discard operations are working as expected.
 > +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
+> +# It tests both -odiscard and fstrim.
+> +#
+> +# Copyright (C) 2015 SUSE. All Rights Reserved.
+> +# Author: Jeff Mahoney <jeffm@suse.com>
 > +#
 > +# This program is free software; you can redistribute it and/or
 > +# modify it under the terms of the GNU General Public License as
@@ -116,19 +103,16 @@ this is a new patch.
 > +seqres=$RESULT_DIR/$seq
 > +echo "QA output created by $seq"
 > +
-> +here=`pwd`
 > +tmp=/tmp/$$
 > +status=1	# failure is the default!
 > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
+> +loopdev=
+> +tmpdir=
 > +_cleanup()
 > +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	# lvm may have umounted it on I/O error, but in case it does not
-> +	$UMOUNT_PROG $mnt >/dev/null 2>&1
-> +	$LVM_PROG vgremove -f $vgname >>$seqres.full 2>&1
-> +	$LVM_PROG pvremove -f $SCRATCH_DEV >>$seqres.full 2>&1
+> +	[ -n "$tmpdir" ] && umount $tmpdir
+> +	[ -n "$loopdev" ] && losetup -d $loopdev
 > +}
 > +
 > +# get standard environment, filters and checks
@@ -136,83 +120,165 @@ this is a new patch.
 > +. ./common/filter
 > +
 > +# real QA test starts here
+> +_need_to_be_root
 > +_supported_fs generic
 > +_supported_os Linux
-> +_require_test
-> +_require_scratch_nocheck
-> +_require_dm_snapshot
-> +_require_block_device $SCRATCH_DEV
-> +_require_command $LVM_PROG lvm
+> +_require_scratch
+> +_require_fstrim
 > +
-> +echo "Silence is golden"
 > +rm -f $seqres.full
 > +
-> +vgname=vg_$seq
-> +lvname=base_$seq
-> +snapname=snap_$seq
-> +mnt=$TEST_DIR/mnt_$seq
-> +mkdir -p $mnt
+> +_scratch_mkfs &>> $seqres.full
+> +_require_fs_space $SCRATCH_MNT $(( 10 * 1024 * 1024 ))
+> +_scratch_mount
 > +
-> +# make sure there's enough disk space for 256M lv, test for 300M here in case
-> +# lvm uses some space for metadata
-> +_scratch_mkfs_sized $((300 * 1024 * 1024)) >>$seqres.full 2>&1
-> +$LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
-> +$LVM_PROG lvcreate --yes -L 256M -n $lvname $vgname >>$seqres.full 2>&1
+> +test_discard()
+> +{
+> +	discard=$1
+> +	files=$2
 > +
-> +# _mkfs_dev exits the test on failure, this can make sure lv is created in
-> +# above vgcreate/lvcreate steps
-> +_mkfs_dev /dev/mapper/$vgname-$lvname
+> +	tmpfile=$SCRATCH_MNT/testfs.img.$$
+> +	tmpdir=$SCRATCH_MNT/testdir.$$
+> +	mkdir -p $tmpdir || _fail "!!! failed to create temp mount dir"
 > +
-> +# create a 4M snapshot
-> +$LVM_PROG lvcreate -s -L 4M -n $snapname $vgname/$lvname >>$seqres.full 2>&1 || \
-> +	_fail "Failed to create snapshot"
-> +
-> +_mount /dev/mapper/$vgname-$snapname $mnt
-> +
-> +# write 5M data to the snapshot
-> +$XFS_IO_PROG -fc "pwrite 0 5m" $mnt/testfile >>$seqres.full 2>&1
-> +
+> +	# Create a sparse file to host the file system
+> +	dd if=/dev/zero of=$tmpfile bs=1M count=1 seek=10240 &> $seqres.full \
+> +		|| _fail "!!! failed to create fs image file"
 
-I noticed there were no errors in $seqres.full when running this test.
-E.g., the pwrite succeeds because nothing is written back to disk at
-that point. The fs does shutdown due to the flush on umount, but it's
-kind of hidden away up in the _cleanup() function.
+xfs_io -c "truncate ..." ?
 
-Kind of a nit, but we could be a bit more explicit and do a '-c fsync'
-after the pwrite here? That way it's clear that writeback to disk is
-part of the core test and we have a little feedback in $seqres.full that
-I/O errors occurred, as expected.
+> +
+> +	opts=""
+> +	if [ "$discard" = "discard" ]; then
+> +		opts="-o discard"
+> +	fi
+> +	losetup -f $tmpfile
+> +	loopdev=$(losetup -j $tmpfile|awk -F: '{print $1}')
+> +	_mkfs_dev $loopdev &> $seqres.full
+> +	$MOUNT_PROG $opts $loopdev $tmpdir \
+> +		|| _fail "!!! failed to loopback mount"
+> +
+> +	if [ "$files" = "large" ]; then
+> +		# Create files larger than 1GB so each one occupies
+> +		# more than one block group
+> +		for n in $(seq 1 8); do
+> +			dd if=/dev/zero of=$tmpdir/file$n bs=1M count=1200 \
+> +				&> $seqres.full
+> +		done
+> +	else
+> +		# Create up to 40k files sized 32k-1GB.
+> +		mkdir -p $tmpdir/testdir
+> +		for ((i = 1; i <= 40000; i++)); do
+> +			SIZE=$(( $((1024*1024*1024)) / $(( $RANDOM + 1 )) ))
+> +			$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 $SIZE" \
+> +				$tmpdir/testdir/"${prefix}_$i" &> /dev/null
+> +			if [ $? -ne 0 ]; then
+> +				echo "Failed creating file ${prefix}_$i" \
 
-Otherwise, the rest looks Ok to me.
+${prefix} doesn't evaluate to anything in my run of this test. $seq
+perhaps?
+
+> +					>>$seqres.full
+> +				break
+> +			fi
+> +		done
+> +	fi
+> +
+> +	sync
+> +	OSIZE="$(du -k $tmpfile|awk '{print $1}')"
+> +	du -k $tmpfile >> $seqres.full
+> +
+> +	if [ "$files" = "large" ]; then
+> +		rm $tmpdir/file?
+> +	else
+> +		rm -rf $tmpdir/testdir
+> +	fi
+> +
+> +	# Ensure everything's actually on the hosted file system
+> +	if [ "$FSTYP" = "btrfs" ]; then
+> +		_run_btrfs_util_prog filesystem sync $tmpdir
+> +	fi
+> +	sync
+> +	sync
+
+Any reason for the double syncs?
+
+> +	if [ "$discard" = "trim" ]; then
+> +		$FSTRIM_PROG $tmpdir
+> +	fi
+> +
+> +	$UMOUNT_PROG $tmpdir
+> +	rmdir $tmpdir
+> +	tmpdir=
+> +
+> +	# Sync the backing file system to ensure the hole punches have
+> +	# happened and we can trust the result.
+> +	if [ "$FSTYP" = "btrfs" ]; then
+> +		_run_btrfs_util_prog filesystem sync $SCRATCH_MNT
+> +	fi
+> +	sync
+> +	sync
+> +
+> +	NSIZE="$(du -k $tmpfile|awk '{print $1}')"
+> +	du -k $tmpfile >> $seqres.full
+> +
+> +	# Going from ~ 10GB to 50MB is a good enough test to account for
+> +	# metadata remaining on different file systems.
+> +	if [ "$NSIZE" -gt $(( 50 * 1024 )) ]; then
+> +		_fail "TRIM failed: before rm ${OSIZE}kB, after rm ${NSIZE}kB"
+> +	fi
+> +	rm $tmpfile
+> +	losetup -d $loopdev
+> +	loopdev=
+> +}
+> +
+> +
+> +echo "Testing with -odiscard, many small files"
+> +test_discard discard many
+> +
+> +echo "Testing with -odiscard, several large files"
+> +test_discard discard large
+> +
+> +echo "Testing with fstrim, many small files"
+> +test_discard trim many
+> +
+> +echo "Testing with fstrim, several large files"
+> +test_discard trim large
+> +
+> +status=0
+> +exit
+> diff --git a/tests/generic/326.out b/tests/generic/326.out
+> new file mode 100644
+> index 0000000..37b0f2c
+> --- /dev/null
+> +++ b/tests/generic/326.out
+> @@ -0,0 +1,5 @@
+> +QA output created by 084
+
+326
 
 Brian
 
-> +# _check_dmesg will check for WARNINGs/BUGs in dmesg
-> +status=0
-> +exit
-> diff --git a/tests/generic/081.out b/tests/generic/081.out
-> new file mode 100644
-> index 0000000..663a886
-> --- /dev/null
-> +++ b/tests/generic/081.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 081
-> +Silence is golden
+> +Testing with -odiscard, many small files
+> +Testing with -odiscard, several large files
+> +Testing with fstrim, many small files
+> +Testing with fstrim, several large files
 > diff --git a/tests/generic/group b/tests/generic/group
-> index cf7408c..f5ebe48 100644
+> index d56d3ce..75e17fa 100644
 > --- a/tests/generic/group
 > +++ b/tests/generic/group
-> @@ -83,6 +83,7 @@
->  078 auto quick metadata
->  079 acl attr ioctl metadata auto quick
->  080 auto freeze mount
-> +081 auto quick
->  083 rw auto enospc stress
->  088 perms auto quick
->  089 metadata auto
+> @@ -183,3 +183,4 @@
+>  323 auto aio stress
+>  324 auto fsr quick
+>  325 auto quick data log
+> +326 auto metadata
 > -- 
-> 2.1.0
+> 1.8.5.6
 > 
+> 
+> -- 
+> Jeff Mahoney
+> SUSE Labs
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
 > the body of a message to majordomo@vger.kernel.org
