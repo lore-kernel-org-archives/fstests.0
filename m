@@ -1,200 +1,211 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:49148 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:35191 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753241AbbDAON0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 1 Apr 2015 10:13:26 -0400
+	id S1751210AbbDARys (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 1 Apr 2015 13:54:48 -0400
 Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t31EDQQQ023924
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <fstests@vger.kernel.org>; Wed, 1 Apr 2015 10:13:26 -0400
-Date: Wed, 1 Apr 2015 10:13:24 -0400
+	by mx1.redhat.com (Postfix) with ESMTPS id 99BD4BBF7B
+	for <fstests@vger.kernel.org>; Wed,  1 Apr 2015 17:54:48 +0000 (UTC)
+Date: Wed, 1 Apr 2015 13:54:47 -0400
 From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH 2/9 RESEND] generic: test quota handling on remount ro
- failure
-Message-ID: <20150401141324.GA4756@bfoster.bfoster>
-References: <1426846618-23413-1-git-send-email-eguan@redhat.com>
- <1426846618-23413-3-git-send-email-eguan@redhat.com>
- <20150325193227.GC3436@laptop.bfoster>
- <20150401060629.GC16808@dhcp-13-216.nay.redhat.com>
+Subject: Re: [PATCH v2 3/9] generic: test hardlink to unlinked file
+Message-ID: <20150401175446.GD4756@bfoster.bfoster>
+References: <1426846618-23413-4-git-send-email-eguan@redhat.com>
+ <1427896120-11520-1-git-send-email-eguan@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20150401060629.GC16808@dhcp-13-216.nay.redhat.com>
+In-Reply-To: <1427896120-11520-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 01, 2015 at 02:06:30PM +0800, Eryu Guan wrote:
-> On Wed, Mar 25, 2015 at 03:32:27PM -0400, Brian Foster wrote:
-> > On Fri, Mar 20, 2015 at 06:16:51PM +0800, Eryu Guan wrote:
-> > > Remount ro should not turn qouta off unconditionally, even remount ro
-> > > failed, also kernel should not oops on the next succeeded remount ro.
-> > > 
-> > > Signed-off-by: Eryu Guan <eguan@redhat.com>
-> > > ---
-> > >  tests/generic/072     | 69 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/generic/072.out |  3 +++
-> > >  tests/generic/group   |  1 +
-> > >  3 files changed, 73 insertions(+)
-> > >  create mode 100755 tests/generic/072
-> > >  create mode 100644 tests/generic/072.out
-> > > 
-> > > diff --git a/tests/generic/072 b/tests/generic/072
-> > > new file mode 100755
-> > > index 0000000..ef40822
-> > > --- /dev/null
-> > > +++ b/tests/generic/072
-> > > @@ -0,0 +1,69 @@
-> > > +#! /bin/bash
-> > > +# FS QA Test No. 072
-> > > +#
-> > > +# Test quota handling on remount ro failure
-> > > +#
-> > > +#-----------------------------------------------------------------------
-> > > +# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
-> > > +#
-> > > +# This program is free software; you can redistribute it and/or
-> > > +# modify it under the terms of the GNU General Public License as
-> > > +# published by the Free Software Foundation.
-> > > +#
-> > > +# This program is distributed in the hope that it would be useful,
-> > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > > +# GNU General Public License for more details.
-> > > +#
-> > > +# You should have received a copy of the GNU General Public License
-> > > +# along with this program; if not, write the Free Software Foundation,
-> > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > > +#-----------------------------------------------------------------------
-> > > +#
-> > > +
-> > > +seq=`basename $0`
-> > > +seqres=$RESULT_DIR/$seq
-> > > +echo "QA output created by $seq"
-> > > +
-> > > +here=`pwd`
-> > > +tmp=/tmp/$$
-> > > +status=1	# failure is the default!
-> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +	cd /
-> > > +	rm -f $tmp.*
-> > > +}
-> > > +
-> > > +# get standard environment, filters and checks
-> > > +. ./common/rc
-> > > +. ./common/filter
-> > > +. ./common/quota
-> > > +
-> > > +# real QA test starts here
-> > > +
-> > > +# Modify as appropriate.
-> > > +_supported_fs generic
-> > > +_supported_os Linux
-> > > +_require_test
-> > > +_require_scratch
-> > > +_require_quota
-> > > +
-> > > +rm -f $seqres.full
-> > > +
-> > > +_scratch_mkfs >>$seqres.full 2>&1
-> > > +_scratch_mount "-o usrquota,grpquota"
-> > > +
-> > > +quotacheck -ug $SCRATCH_MNT >/dev/null 2>&1
-> > > +quotaon $SCRATCH_MNT >/dev/null 2>&1
-> > > +
-> > 
-> > What's the purpose of the above two commands? The quotacheck seems to
-> > fail (masked by the redirect to /dev/null) and shouldn't quota be on by
-> > virtue of the mount options?
+On Wed, Apr 01, 2015 at 09:48:40PM +0800, Eryu Guan wrote:
+> Kernel commit
 > 
-> extN needs quotacheck and quotaon first to enable quota, xfs doesn't
-> need these commands and as you said quotacheck also fails on xfs. So
-> output of these commands are redirected to /dev/null
+> aae8a97 fs: Don't allow to create hardlink for deleted file
 > 
+> disabled hardlink to unlinked file.
+> 
+> Test the race between link and unlink, which could end up adding link
+> count to an unlinked file and leading to fs corruption on xfs.
+> 
+> Test case was originally written by Eric Sandeen.
+> 
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> ---
+> v2:
+> - create different link file in each iteration in link_unlink_storm(), which
+>   is confirmed to be able to reproduce the original corruption
+> - remove all newly created & tail'ed files at last, out of the loop, to avoid
+>   tail & rm race
+> - iterate $nr_cpu times to do the link_unlink_storm, not a fixed number
+> - add to quick group
+> 
+>  tests/generic/073     | 102 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/073.out |   2 +
+>  tests/generic/group   |   1 +
+>  3 files changed, 105 insertions(+)
+>  create mode 100755 tests/generic/073
+>  create mode 100644 tests/generic/073.out
+> 
+> diff --git a/tests/generic/073 b/tests/generic/073
+> new file mode 100755
+> index 0000000..6fd8c89
+> --- /dev/null
+> +++ b/tests/generic/073
+> @@ -0,0 +1,102 @@
+> +#! /bin/bash
+> +# FS QA Test No. 073
+> +#
+> +# Test hardlink to unlinked file.
+> +#
+> +# Regression test for commit:
+> +# aae8a97 fs: Don't allow to create hardlink for deleted file
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch
+> +
+> +link_unlink_storm()
+> +{
+> +	local src=$1
+> +	local target=$2
+> +	local i=0
+> +
+> +	while true; do
+> +		ln -f $src $target.$i >/dev/null 2>&1
+> +		rm -f $target.$i >/dev/null 2>&1
+> +		let i=i+1
+> +	done
+> +}
+> +
+> +rm -f $seqres.full
+> +nr_cpu=`$here/src/feature -o`
+> +echo "Silence is golden"
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_scratch_mount
+> +
+> +# create, open & unlinked files so unlinked inode list is not empty
+> +for i in `seq 1 $nr_cpu`; do
+> +	testfile=$SCRATCH_MNT/$seq.unlinked.$i
+> +	touch $testfile
+> +	tail -f $testfile &
+> +	tail_pids="$tail_pids $!"
+> +done
+> +rm -f $SCRATCH_MNT/$seq.unlinked.*
+> +
 
-Ok, comment please. :) We should point out that these commands are not
-necessary for all filesystems and could even fail, and therefore the
-output is thrown away and exit status is not important. We print the
-quota status at some point below, and ultimately that's all we care
-about.
+Still fails:
 
-> > 
-> > > +# first remount ro with a bad option, a failed remount ro should not disable quota
-> > > +_scratch_mount "-o remount,ro,nosuchopt" >>$seqres.full 2>&1
-> > > +quotaon -p $SCRATCH_MNT | _filter_scratch
-> > > +# second remount should succeed, no oops or hang expected
-> > > +_scratch_mount "-o remount,ro"
-> > > +
-> > 
-> > FWIW, when I '-o remount,ro,nosuchopt' on XFS the remount ro actually
-> > succeeds and the bad option is dropped. Does that differ from other fs
-> > behavior? If not, I wonder whether the second remount,ro is necessary
-> > here as well.
-> 
-> The first remount (with unsupported option) fails on extN.
-> 
-> Maybe this test should be in shared, and only support extN?
-> 
+generic/073      - output mismatch (see /root/xfstests-dev/results//generic/073.out.bad)
+    --- tests/generic/073.out   2015-04-01 12:45:25.633900350 -0400
+    +++ /root/xfstests-dev/results//generic/073.out.bad 2015-04-01 12:46:39.129900350 -0400
+    @@ -1,2 +1,10 @@
+     QA output created by 073
+     Silence is golden
+    +tail: cannot open '/mnt/scratch/073.unlinked.2' for reading: No such file or directory
+    +tail: cannot open '/mnt/scratch/073.unlinked.4' for readingtail: : No such file or directory
+    +cannot open '/mnt/scratch/073.unlinked.3' for reading: No such file or directory
+    +tail: cannot open '/mnt/scratch/073.unlinked.1' for reading: No such file or directory
+    +tail: no files remaining
+    ...
+    (Run 'diff -u tests/generic/073.out /root/xfstests-dev/results//generic/073.out.bad'  to see the entire diff)
 
-Perhaps the test is less interesting for xfs, but I don't think it
-necessarily precludes running it there. That behavior could change in
-the future. It's just that the test is ambiguous and could lead to
-confusion if somebody happens to look at this sometime down the road and
-doesn't have that context from author.
+We need a 'sleep 1' between the loop that runs the tail instances and
+actually removing the files to trigger the background tasks to run and
+open the files before they are removed.
 
-We should have a comment for the first remount that explains the remount
-may or may not return failure depending on fs, but regardless, quota
-should remain enabled. We should probably have '|| _fail "failed to
-remount ro"' for the final remount to indicate that this should always
-succeed (and not rely on whether _scratch_mount fails the test as a side
-effect).
+The rest looks pretty good to me.
 
 Brian
 
-> Thanks,
-> Eryu
-> > 
-> > Brian
-> > 
-> > > +# success, all done
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/generic/072.out b/tests/generic/072.out
-> > > new file mode 100644
-> > > index 0000000..ff0e180
-> > > --- /dev/null
-> > > +++ b/tests/generic/072.out
-> > > @@ -0,0 +1,3 @@
-> > > +QA output created by 072
-> > > +group quota on SCRATCH_MNT (SCRATCH_DEV) is on
-> > > +user quota on SCRATCH_MNT (SCRATCH_DEV) is on
-> > > diff --git a/tests/generic/group b/tests/generic/group
-> > > index 03ad7b8..c0210d2 100644
-> > > --- a/tests/generic/group
-> > > +++ b/tests/generic/group
-> > > @@ -74,6 +74,7 @@
-> > >  069 rw udf auto quick
-> > >  070 attr udf auto quick stress
-> > >  071 auto quick prealloc
-> > > +072 auto quick quota
-> > >  074 rw udf auto
-> > >  075 rw udf auto quick
-> > >  076 metadata rw udf auto quick stress
-> > > -- 
-> > > 2.1.0
-> > > 
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> +# start link/unlink storm
+> +src=$SCRATCH_MNT/$seq.target
+> +touch $src
+> +for i in `seq 1 $nr_cpu`; do
+> +	target=$SCRATCH_MNT/$seq.target.link.$i
+> +	link_unlink_storm $src $target &
+> +	link_pids="$link_pids $!"
+> +done
+> +
+> +# remove & re-create target to race with link/unlink
+> +while true; do
+> +	rm -f $src
+> +	touch $src
+> +done &
+> +sleep 5
+> +kill $! >/dev/null 2>&1
+> +
+> +kill $tail_pids $link_pids >/dev/null 2>&1
+> +wait $tail_pids $link_pids
+> +
+> +# all done, no oops/hang expected, _check_filesystems checks SCRATCH_DEV after test
+> +status=0
+> +exit
+> diff --git a/tests/generic/073.out b/tests/generic/073.out
+> new file mode 100644
+> index 0000000..d107704
+> --- /dev/null
+> +++ b/tests/generic/073.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 073
+> +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index c0210d2..ee5b642 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -75,6 +75,7 @@
+>  070 attr udf auto quick stress
+>  071 auto quick prealloc
+>  072 auto quick quota
+> +073 auto metadata quick
+>  074 rw udf auto
+>  075 rw udf auto quick
+>  076 metadata rw udf auto quick stress
+> -- 
+> 2.1.0
+> 
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
 > the body of a message to majordomo@vger.kernel.org
