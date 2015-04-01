@@ -1,189 +1,201 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37040 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49148 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752117AbbDANyY (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 1 Apr 2015 09:54:24 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (Postfix) with ESMTPS id 75B03BBF43
-	for <fstests@vger.kernel.org>; Wed,  1 Apr 2015 13:54:24 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 6/9] generic: test I/O error path by fully filling dm snapshot
-Date: Wed,  1 Apr 2015 21:54:15 +0800
-Message-Id: <1427896455-12048-1-git-send-email-eguan@redhat.com>
-In-Reply-To: <1426846618-23413-7-git-send-email-eguan@redhat.com>
-References: <1426846618-23413-7-git-send-email-eguan@redhat.com>
+	id S1753241AbbDAON0 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 1 Apr 2015 10:13:26 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t31EDQQQ023924
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <fstests@vger.kernel.org>; Wed, 1 Apr 2015 10:13:26 -0400
+Date: Wed, 1 Apr 2015 10:13:24 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: Re: [PATCH 2/9 RESEND] generic: test quota handling on remount ro
+ failure
+Message-ID: <20150401141324.GA4756@bfoster.bfoster>
+References: <1426846618-23413-1-git-send-email-eguan@redhat.com>
+ <1426846618-23413-3-git-send-email-eguan@redhat.com>
+ <20150325193227.GC3436@laptop.bfoster>
+ <20150401060629.GC16808@dhcp-13-216.nay.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20150401060629.GC16808@dhcp-13-216.nay.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-xfs used to panic in this test, this xfs commit fix the bug
+On Wed, Apr 01, 2015 at 02:06:30PM +0800, Eryu Guan wrote:
+> On Wed, Mar 25, 2015 at 03:32:27PM -0400, Brian Foster wrote:
+> > On Fri, Mar 20, 2015 at 06:16:51PM +0800, Eryu Guan wrote:
+> > > Remount ro should not turn qouta off unconditionally, even remount ro
+> > > failed, also kernel should not oops on the next succeeded remount ro.
+> > > 
+> > > Signed-off-by: Eryu Guan <eguan@redhat.com>
+> > > ---
+> > >  tests/generic/072     | 69 +++++++++++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/generic/072.out |  3 +++
+> > >  tests/generic/group   |  1 +
+> > >  3 files changed, 73 insertions(+)
+> > >  create mode 100755 tests/generic/072
+> > >  create mode 100644 tests/generic/072.out
+> > > 
+> > > diff --git a/tests/generic/072 b/tests/generic/072
+> > > new file mode 100755
+> > > index 0000000..ef40822
+> > > --- /dev/null
+> > > +++ b/tests/generic/072
+> > > @@ -0,0 +1,69 @@
+> > > +#! /bin/bash
+> > > +# FS QA Test No. 072
+> > > +#
+> > > +# Test quota handling on remount ro failure
+> > > +#
+> > > +#-----------------------------------------------------------------------
+> > > +# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
+> > > +#
+> > > +# This program is free software; you can redistribute it and/or
+> > > +# modify it under the terms of the GNU General Public License as
+> > > +# published by the Free Software Foundation.
+> > > +#
+> > > +# This program is distributed in the hope that it would be useful,
+> > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > > +# GNU General Public License for more details.
+> > > +#
+> > > +# You should have received a copy of the GNU General Public License
+> > > +# along with this program; if not, write the Free Software Foundation,
+> > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > > +#-----------------------------------------------------------------------
+> > > +#
+> > > +
+> > > +seq=`basename $0`
+> > > +seqres=$RESULT_DIR/$seq
+> > > +echo "QA output created by $seq"
+> > > +
+> > > +here=`pwd`
+> > > +tmp=/tmp/$$
+> > > +status=1	# failure is the default!
+> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > +
+> > > +_cleanup()
+> > > +{
+> > > +	cd /
+> > > +	rm -f $tmp.*
+> > > +}
+> > > +
+> > > +# get standard environment, filters and checks
+> > > +. ./common/rc
+> > > +. ./common/filter
+> > > +. ./common/quota
+> > > +
+> > > +# real QA test starts here
+> > > +
+> > > +# Modify as appropriate.
+> > > +_supported_fs generic
+> > > +_supported_os Linux
+> > > +_require_test
+> > > +_require_scratch
+> > > +_require_quota
+> > > +
+> > > +rm -f $seqres.full
+> > > +
+> > > +_scratch_mkfs >>$seqres.full 2>&1
+> > > +_scratch_mount "-o usrquota,grpquota"
+> > > +
+> > > +quotacheck -ug $SCRATCH_MNT >/dev/null 2>&1
+> > > +quotaon $SCRATCH_MNT >/dev/null 2>&1
+> > > +
+> > 
+> > What's the purpose of the above two commands? The quotacheck seems to
+> > fail (masked by the redirect to /dev/null) and shouldn't quota be on by
+> > virtue of the mount options?
+> 
+> extN needs quotacheck and quotaon first to enable quota, xfs doesn't
+> need these commands and as you said quotacheck also fails on xfs. So
+> output of these commands are redirected to /dev/null
+> 
 
-8d6c121 xfs: fix buffer use after free on IO error
+Ok, comment please. :) We should point out that these commands are not
+necessary for all filesystems and could even fail, and therefore the
+output is thrown away and exit status is not important. We print the
+quota status at some point below, and ultimately that's all we care
+about.
 
-ext4 and btrfs trigger WARNING on current 4.0-rc3 kernel
+> > 
+> > > +# first remount ro with a bad option, a failed remount ro should not disable quota
+> > > +_scratch_mount "-o remount,ro,nosuchopt" >>$seqres.full 2>&1
+> > > +quotaon -p $SCRATCH_MNT | _filter_scratch
+> > > +# second remount should succeed, no oops or hang expected
+> > > +_scratch_mount "-o remount,ro"
+> > > +
+> > 
+> > FWIW, when I '-o remount,ro,nosuchopt' on XFS the remount ro actually
+> > succeeds and the bad option is dropped. Does that differ from other fs
+> > behavior? If not, I wonder whether the second remount,ro is necessary
+> > here as well.
+> 
+> The first remount (with unsupported option) fails on extN.
+> 
+> Maybe this test should be in shared, and only support extN?
+> 
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
-v2:
-- add _require_dm_snapshot() function to require dm snapshot target
-- make sure SCRATCH_DEV has enough space for the test
-- fail the test directly when failures detected in setup phase
+Perhaps the test is less interesting for xfs, but I don't think it
+necessarily precludes running it there. That behavior could change in
+the future. It's just that the test is ambiguous and could lead to
+confusion if somebody happens to look at this sometime down the road and
+doesn't have that context from author.
 
- common/config         |  1 +
- common/rc             | 10 ++++++
- tests/generic/081     | 86 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/081.out |  2 ++
- tests/generic/group   |  1 +
- 5 files changed, 100 insertions(+)
- create mode 100755 tests/generic/081
- create mode 100644 tests/generic/081.out
+We should have a comment for the first remount that explains the remount
+may or may not return failure depending on fs, but regardless, quota
+should remain enabled. We should probably have '|| _fail "failed to
+remount ro"' for the final remount to indicate that this should always
+succeed (and not rely on whether _scratch_mount fails the test as a side
+effect).
 
-diff --git a/common/config b/common/config
-index e5c3579..3732287 100644
---- a/common/config
-+++ b/common/config
-@@ -190,6 +190,7 @@ export DMSETUP_PROG="`set_prog_path dmsetup`"
- export WIPEFS_PROG="`set_prog_path wipefs`"
- export DUMP_PROG="`set_prog_path dump`"
- export RESTORE_PROG="`set_prog_path restore`"
-+export LVM_PROG="`set_prog_path lvm`"
- 
- # Generate a comparable xfsprogs version number in the form of
- # major * 10000 + minor * 100 + release
-diff --git a/common/rc b/common/rc
-index 857308a..74df379 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1311,6 +1311,16 @@ _require_dm_flakey()
-     fi
- }
- 
-+_require_dm_snapshot()
-+{
-+	_require_command "$DMSETUP_PROG" dmsetup
-+	modprobe dm-snapshot >/dev/null 2>&1
-+	$DMSETUP_PROG targets | grep -q snapshot
-+	if [ $? -ne 0 ]; then
-+		_notrun "This test requires dm snapshot support"
-+	fi
-+}
-+
- # this test requires the projid32bit feature to be available in mkfs.xfs.
- #
- _require_projid32bit()
-diff --git a/tests/generic/081 b/tests/generic/081
-new file mode 100755
-index 0000000..3e17d34
---- /dev/null
-+++ b/tests/generic/081
-@@ -0,0 +1,86 @@
-+#! /bin/bash
-+# FS QA Test No. 081
-+#
-+# Test I/O error path by fully filling an dm snapshot.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	# lvm may have umounted it on I/O error, but in case it does not
-+	$UMOUNT_PROG $mnt >/dev/null 2>&1
-+	$LVM_PROG vgremove -f $vgname >>$seqres.full 2>&1
-+	$LVM_PROG pvremove -f $SCRATCH_DEV >>$seqres.full 2>&1
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+_require_scratch_nocheck
-+_require_dm_snapshot
-+_require_block_device $SCRATCH_DEV
-+_require_command $LVM_PROG lvm
-+
-+echo "Silence is golden"
-+rm -f $seqres.full
-+
-+vgname=vg_$seq
-+lvname=base_$seq
-+snapname=snap_$seq
-+mnt=$TEST_DIR/mnt_$seq
-+mkdir -p $mnt
-+
-+# make sure there's enough disk space for 256M lv, test for 300M here in case
-+# lvm uses some space for metadata
-+_scratch_mkfs_sized $((300 * 1024 * 1024)) >>$seqres.full 2>&1
-+$LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
-+$LVM_PROG lvcreate --yes -L 256M -n $lvname $vgname >>$seqres.full 2>&1
-+
-+# _mkfs_dev exits the test on failure, this can make sure lv is created in
-+# above vgcreate/lvcreate steps
-+_mkfs_dev /dev/mapper/$vgname-$lvname
-+
-+# create a 4M snapshot
-+$LVM_PROG lvcreate -s -L 4M -n $snapname $vgname/$lvname >>$seqres.full 2>&1 || \
-+	_fail "Failed to create snapshot"
-+
-+_mount /dev/mapper/$vgname-$snapname $mnt
-+
-+# write 5M data to the snapshot
-+$XFS_IO_PROG -fc "pwrite 0 5m" $mnt/testfile >>$seqres.full 2>&1
-+
-+# _check_dmesg will check for WARNINGs/BUGs in dmesg
-+status=0
-+exit
-diff --git a/tests/generic/081.out b/tests/generic/081.out
-new file mode 100644
-index 0000000..663a886
---- /dev/null
-+++ b/tests/generic/081.out
-@@ -0,0 +1,2 @@
-+QA output created by 081
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index cf7408c..f5ebe48 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -83,6 +83,7 @@
- 078 auto quick metadata
- 079 acl attr ioctl metadata auto quick
- 080 auto freeze mount
-+081 auto quick
- 083 rw auto enospc stress
- 088 perms auto quick
- 089 metadata auto
--- 
-2.1.0
+Brian
 
+> Thanks,
+> Eryu
+> > 
+> > Brian
+> > 
+> > > +# success, all done
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/generic/072.out b/tests/generic/072.out
+> > > new file mode 100644
+> > > index 0000000..ff0e180
+> > > --- /dev/null
+> > > +++ b/tests/generic/072.out
+> > > @@ -0,0 +1,3 @@
+> > > +QA output created by 072
+> > > +group quota on SCRATCH_MNT (SCRATCH_DEV) is on
+> > > +user quota on SCRATCH_MNT (SCRATCH_DEV) is on
+> > > diff --git a/tests/generic/group b/tests/generic/group
+> > > index 03ad7b8..c0210d2 100644
+> > > --- a/tests/generic/group
+> > > +++ b/tests/generic/group
+> > > @@ -74,6 +74,7 @@
+> > >  069 rw udf auto quick
+> > >  070 attr udf auto quick stress
+> > >  071 auto quick prealloc
+> > > +072 auto quick quota
+> > >  074 rw udf auto
+> > >  075 rw udf auto quick
+> > >  076 metadata rw udf auto quick stress
+> > > -- 
+> > > 2.1.0
+> > > 
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
