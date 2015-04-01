@@ -1,208 +1,178 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43610 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:44388 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753185AbbDANRQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 1 Apr 2015 09:17:16 -0400
-From: =?UTF-8?q?Jan=20=C5=A4ul=C3=A1k?= <jtulak@redhat.com>
-Subject: [PATCH v10] fstests: Tests can use any name now, not 3 digits only.
-Date: Wed,  1 Apr 2015 15:17:13 +0200
-Message-Id: <1427894233-10338-1-git-send-email-jtulak@redhat.com>
-In-Reply-To: <20150401043542.GD8465@dastard>
-References: <20150401043542.GD8465@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+	id S1751738AbbDANwV (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 1 Apr 2015 09:52:21 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (Postfix) with ESMTPS id CC4782B4E77
+	for <fstests@vger.kernel.org>; Wed,  1 Apr 2015 13:52:21 +0000 (UTC)
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH v2 3/9] generic: test hardlink to unlinked file
+Date: Wed,  1 Apr 2015 21:48:40 +0800
+Message-Id: <1427896120-11520-1-git-send-email-eguan@redhat.com>
+In-Reply-To: <1426846618-23413-4-git-send-email-eguan@redhat.com>
+References: <1426846618-23413-4-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: david@fromorbit.com, eguan@redhat.com
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Tests can use any name now, not 3 digits only.
-(e.g. a test can be named "tests/generic/001-some-name")
+Kernel commit
 
-Names are limited to alphanumeric characters and dash and are always prefixed
-with an unique id for easier identification of a specific test.
+aae8a97 fs: Don't allow to create hardlink for deleted file
 
-Signed-off-by: Jan Ťulák <jtulak@redhat.com>
+disabled hardlink to unlinked file.
+
+Test the race between link and unlink, which could end up adding link
+count to an unlinked file and leading to fs corruption on xfs.
+
+Test case was originally written by Eric Sandeen.
+
+Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
+v2:
+- create different link file in each iteration in link_unlink_storm(), which
+  is confirmed to be able to reproduce the original corruption
+- remove all newly created & tail'ed files at last, out of the loop, to avoid
+  tail & rm race
+- iterate $nr_cpu times to do the link_unlink_storm, not a fixed number
+- add to quick group
 
- ./new:
- - input validation is moved before file check
- - no longer printing regex to user
- - removed name comparison, as we have unique IDs.
- - better string cutting
+ tests/generic/073     | 102 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/073.out |   2 +
+ tests/generic/group   |   1 +
+ 3 files changed, 105 insertions(+)
+ create mode 100755 tests/generic/073
+ create mode 100644 tests/generic/073.out
 
- edited README, changed regex for valid test names
-
-
- README    |  8 +++++++-
- check     |  9 ++++-----
- common/rc | 10 ++++++++++
- new       | 54 +++++++++++++++++++++++++++++++++++++++++++++++++-----
- 4 files changed, 70 insertions(+), 11 deletions(-)
-
-diff --git a/README b/README
-index 0c9449a..f8a878c 100644
---- a/README
-+++ b/README
-@@ -202,10 +202,16 @@ Test script environment:
- 	- When calling getfacl in a test, pass the "-n" argument so
- 	  that numeric rather than symbolic identifiers are used in
- 	  the output.
-+	- When creating a new test, it is possible to enter a custom name
-+	  for the file. Filenames are in form NNN-custom-name, where NNN
-+	  is automatically added by the ./new script as an unique ID,
-+	  and "custom-name" is the optional string entered into a prompt
-+	  in the ./new script. It can contain only alphanumeric characters
-+	  and dash. Note the "NNN-" part is added automatically.
- 
- Verified output:
- 
--    Each test script has a numerical name, e.g. 007, and an associated
-+    Each test script has a name, e.g. 007, and an associated
-     verified output, e.g. 007.out.
- 
-     It is important that the verified output is deterministic, and
-diff --git a/check b/check
-index 0830e0c..4fa96ed 100755
---- a/check
-+++ b/check
-@@ -58,7 +58,6 @@ then
-     exit 1
- fi
- 
--SUPPORTED_TESTS="[0-9][0-9][0-9] [0-9][0-9][0-9][0-9]"
- SRC_GROUPS="generic shared"
- export SRC_DIR="tests"
- 
-@@ -96,21 +95,21 @@ get_group_list()
- 		l=$(sed -n < $SRC_DIR/$d/group \
- 			-e 's/#.*//' \
- 			-e 's/$/ /' \
--			-e "s;\(^[0-9][0-9][0-9]\).* $grp .*;$SRC_DIR/$d/\1;p")
-+			-e "s;^\($VALID_TEST_NAME\).* $grp .*;$SRC_DIR/$d/\1;p")
- 		grpl="$grpl $l"
- 	done
- 	echo $grpl
- }
- 
--# find all tests, excluding files that are test metadata such as group files.
--# This assumes that tests are defined purely by alphanumeric filenames with no
--# ".xyz" extensions in the name.
-+# Find all tests, excluding files that are test metadata such as group files.
-+# It matches test names against $VALID_TEST_NAME defined in common/rc
- get_all_tests()
- {
- 	touch $tmp.list
- 	for d in $SRC_GROUPS $FSTYP; do
- 		ls $SRC_DIR/$d/* | \
- 			grep -v "\..*" | \
-+			grep "^$SRC_DIR/$d/$VALID_TEST_NAME"| \
- 			grep -v "group\|Makefile" >> $tmp.list 2>/dev/null
- 	done
- }
-diff --git a/common/rc b/common/rc
-index 857308a..869b56b 100644
---- a/common/rc
-+++ b/common/rc
-@@ -22,6 +22,16 @@
- 
- BC=$(which bc 2> /dev/null) || BC=
- 
-+# Valid test names start with 3 digits "NNN":
-+#  "[0-9]\{3\}"
-+# followed by an optional "-":
-+#  "-\?"
-+# followed by an optional combination of alphanumeric and "-" chars:
-+#  "[[:alnum:]-]*"
-+# e.g. 999-the-mark-of-fstests
+diff --git a/tests/generic/073 b/tests/generic/073
+new file mode 100755
+index 0000000..6fd8c89
+--- /dev/null
++++ b/tests/generic/073
+@@ -0,0 +1,102 @@
++#! /bin/bash
++# FS QA Test No. 073
 +#
-+VALID_TEST_NAME="[0-9]\{3\}-\?[[:alnum:]-]*"
++# Test hardlink to unlinked file.
++#
++# Regression test for commit:
++# aae8a97 fs: Don't allow to create hardlink for deleted file
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
 +
- _require_math()
- {
- 	if [ -z "$BC" ]; then
-diff --git a/new b/new
-index d1f8939..c734bdc 100755
---- a/new
-+++ b/new
-@@ -81,11 +81,14 @@ line=0
- eof=1
- [ -f "$tdir/group" ] || usage
- 
--for found in `cat $tdir/group | $AWK_PROG '{ print $1 }'`
-+for found in `cat $tdir/group | tr - ' ' | $AWK_PROG '{ print $1 }'`
- do
-     line=$((line+1))
--    if [ -z "$found" ] || [ "$found" == "#" ];then
--	continue
-+    if [ -z "$found" ] || [ "$found" == "#" ]; then
-+        continue
-+    elif ! echo "$found" | grep -q "^$VALID_TEST_NAME$"; then
-+        # this one is for tests not named by a number
-+        continue
-     fi
-     i=$((i+1))
-     id=`printf "%03d" $i`
-@@ -100,7 +103,48 @@ if [ $eof -eq 1 ]; then
-    id=`printf "%03d" $i`
- fi
- 
--echo "Next test is $id"
-+echo "Next test id is $id"
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
 +
-+read -p "Append a name to the ID? Test name will be $id-\$name. y,[n]: " -r
-+if [[ $REPLY = [Yy] ]]; then
-+	# get the new name from user
-+	name=""
-+	while [ "$name" = "" ]; do
-+		read -p "Enter the name: "
-+		if [ "$REPLY" = "" ]; then
-+			echo "For canceling, use ctrl+c."
-+		elif echo "$id-$REPLY" | grep -q "^$VALID_TEST_NAME$"; then
-+			if [ -e "$tdir/$id-$REPLY" ]; then
-+				echo "File '$id-$REPLY' already exists, use another one."
-+				echo
-+			else
-+				name="$REPLY"
-+			fi
-+		else
-+			echo "A name can contain only alphanumeric symbols and dash!"
-+			echo
-+		fi
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++
++link_unlink_storm()
++{
++	local src=$1
++	local target=$2
++	local i=0
++
++	while true; do
++		ln -f $src $target.$i >/dev/null 2>&1
++		rm -f $target.$i >/dev/null 2>&1
++		let i=i+1
 +	done
++}
 +
-+	# now find where to insert this name
-+	eof=1
-+	for found in `tail -n +$line $tdir/group | $AWK_PROG '{ print $1 }'`; do
-+		found_id=$(echo "$found" | cut -d "-" -f 1 - )
-+		line=$((line+1))
-+		if [ -z "$found" ] || [ "$found" == "#" ]; then
-+			continue
-+		elif [ $found_id -gt $id ]; then
-+			eof=0
-+			break
-+		fi
-+	done
-+	if [ $eof -eq 0 ]; then
-+		# If place wasn't found, let $line be the end of the file
-+		line=$((line-1))
-+	fi
-+	id="$id-$name"
-+fi
-+echo "Creating test file '$id'"
- 
- if [ -f $tdir/$id ]
- then
-@@ -115,7 +159,7 @@ year=`date +%Y`
- 
- cat <<End-of-File >$tdir/$id
- #! /bin/bash
--# FS QA Test No. $id
-+# FS QA Test $id
- #
- # what am I here for?
- #
++rm -f $seqres.full
++nr_cpu=`$here/src/feature -o`
++echo "Silence is golden"
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++# create, open & unlinked files so unlinked inode list is not empty
++for i in `seq 1 $nr_cpu`; do
++	testfile=$SCRATCH_MNT/$seq.unlinked.$i
++	touch $testfile
++	tail -f $testfile &
++	tail_pids="$tail_pids $!"
++done
++rm -f $SCRATCH_MNT/$seq.unlinked.*
++
++# start link/unlink storm
++src=$SCRATCH_MNT/$seq.target
++touch $src
++for i in `seq 1 $nr_cpu`; do
++	target=$SCRATCH_MNT/$seq.target.link.$i
++	link_unlink_storm $src $target &
++	link_pids="$link_pids $!"
++done
++
++# remove & re-create target to race with link/unlink
++while true; do
++	rm -f $src
++	touch $src
++done &
++sleep 5
++kill $! >/dev/null 2>&1
++
++kill $tail_pids $link_pids >/dev/null 2>&1
++wait $tail_pids $link_pids
++
++# all done, no oops/hang expected, _check_filesystems checks SCRATCH_DEV after test
++status=0
++exit
+diff --git a/tests/generic/073.out b/tests/generic/073.out
+new file mode 100644
+index 0000000..d107704
+--- /dev/null
++++ b/tests/generic/073.out
+@@ -0,0 +1,2 @@
++QA output created by 073
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index c0210d2..ee5b642 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -75,6 +75,7 @@
+ 070 attr udf auto quick stress
+ 071 auto quick prealloc
+ 072 auto quick quota
++073 auto metadata quick
+ 074 rw udf auto
+ 075 rw udf auto quick
+ 076 metadata rw udf auto quick stress
 -- 
 2.1.0
 
