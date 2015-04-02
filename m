@@ -1,166 +1,233 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:54628 "EHLO
-	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751533AbbDAXGO (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 1 Apr 2015 19:06:14 -0400
-Received: from dave by dastard with local (Exim 4.80)
-	(envelope-from <david@fromorbit.com>)
-	id 1YdRey-000767-Ks
-	for fstests@vger.kernel.org; Thu, 02 Apr 2015 10:02:56 +1100
-Date: Thu, 2 Apr 2015 10:02:56 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: [ANNOUNCE] fstests: master branch updated to facff60
-Message-ID: <20150401230256.GH28621@dastard>
+Received: from mx1.redhat.com ([209.132.183.28]:38759 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751521AbbDBC71 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 1 Apr 2015 22:59:27 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t322xQB2016620
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <fstests@vger.kernel.org>; Wed, 1 Apr 2015 22:59:26 -0400
+Date: Thu, 2 Apr 2015 10:59:23 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2 3/9] generic: test hardlink to unlinked file
+Message-ID: <20150402025923.GE16808@dhcp-13-216.nay.redhat.com>
+References: <1426846618-23413-4-git-send-email-eguan@redhat.com>
+ <1427896120-11520-1-git-send-email-eguan@redhat.com>
+ <20150401175446.GD4756@bfoster.bfoster>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="UHN/qo2QbUvPLonB"
-Content-Disposition: inline
-Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-List-ID: <fstests@vger.kernel.org>
-
-
---UHN/qo2QbUvPLonB
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20150401175446.GD4756@bfoster.bfoster>
+Sender: fstests-owner@vger.kernel.org
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org
+List-ID: <fstests@vger.kernel.org>
 
-Hi folks.
+On Wed, Apr 01, 2015 at 01:54:47PM -0400, Brian Foster wrote:
+> On Wed, Apr 01, 2015 at 09:48:40PM +0800, Eryu Guan wrote:
+> > Kernel commit
+> > 
+> > aae8a97 fs: Don't allow to create hardlink for deleted file
+> > 
+> > disabled hardlink to unlinked file.
+> > 
+> > Test the race between link and unlink, which could end up adding link
+> > count to an unlinked file and leading to fs corruption on xfs.
+> > 
+> > Test case was originally written by Eric Sandeen.
+> > 
+> > Signed-off-by: Eryu Guan <eguan@redhat.com>
+> > ---
+> > v2:
+> > - create different link file in each iteration in link_unlink_storm(), which
+> >   is confirmed to be able to reproduce the original corruption
+> > - remove all newly created & tail'ed files at last, out of the loop, to avoid
+> >   tail & rm race
+> > - iterate $nr_cpu times to do the link_unlink_storm, not a fixed number
+> > - add to quick group
+> > 
+> >  tests/generic/073     | 102 ++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/073.out |   2 +
+> >  tests/generic/group   |   1 +
+> >  3 files changed, 105 insertions(+)
+> >  create mode 100755 tests/generic/073
+> >  create mode 100644 tests/generic/073.out
+> > 
+> > diff --git a/tests/generic/073 b/tests/generic/073
+> > new file mode 100755
+> > index 0000000..6fd8c89
+> > --- /dev/null
+> > +++ b/tests/generic/073
+> > @@ -0,0 +1,102 @@
+> > +#! /bin/bash
+> > +# FS QA Test No. 073
+> > +#
+> > +# Test hardlink to unlinked file.
+> > +#
+> > +# Regression test for commit:
+> > +# aae8a97 fs: Don't allow to create hardlink for deleted file
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +#
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# real QA test starts here
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +_require_scratch
+> > +
+> > +link_unlink_storm()
+> > +{
+> > +	local src=$1
+> > +	local target=$2
+> > +	local i=0
+> > +
+> > +	while true; do
+> > +		ln -f $src $target.$i >/dev/null 2>&1
+> > +		rm -f $target.$i >/dev/null 2>&1
+> > +		let i=i+1
+> > +	done
+> > +}
+> > +
+> > +rm -f $seqres.full
+> > +nr_cpu=`$here/src/feature -o`
+> > +echo "Silence is golden"
+> > +
+> > +_scratch_mkfs >>$seqres.full 2>&1
+> > +_scratch_mount
+> > +
+> > +# create, open & unlinked files so unlinked inode list is not empty
+> > +for i in `seq 1 $nr_cpu`; do
+> > +	testfile=$SCRATCH_MNT/$seq.unlinked.$i
+> > +	touch $testfile
+> > +	tail -f $testfile &
+> > +	tail_pids="$tail_pids $!"
+> > +done
+> > +rm -f $SCRATCH_MNT/$seq.unlinked.*
+> > +
+> 
+> Still fails:
+> 
+> generic/073      - output mismatch (see /root/xfstests-dev/results//generic/073.out.bad)
+>     --- tests/generic/073.out   2015-04-01 12:45:25.633900350 -0400
+>     +++ /root/xfstests-dev/results//generic/073.out.bad 2015-04-01 12:46:39.129900350 -0400
+>     @@ -1,2 +1,10 @@
+>      QA output created by 073
+>      Silence is golden
+>     +tail: cannot open '/mnt/scratch/073.unlinked.2' for reading: No such file or directory
+>     +tail: cannot open '/mnt/scratch/073.unlinked.4' for readingtail: : No such file or directory
+>     +cannot open '/mnt/scratch/073.unlinked.3' for reading: No such file or directory
+>     +tail: cannot open '/mnt/scratch/073.unlinked.1' for reading: No such file or directory
+>     +tail: no files remaining
+>     ...
+>     (Run 'diff -u tests/generic/073.out /root/xfstests-dev/results//generic/073.out.bad'  to see the entire diff)
+> 
+> We need a 'sleep 1' between the loop that runs the tail instances and
+> actually removing the files to trigger the background tasks to run and
+> open the files before they are removed.
 
-The xfstests repository at git://oss.sgi.com/xfs/cmds/xfstests has
-just been updated. Patches often get missed, so please check if your
-outstanding patches were in this update. If they have not been in
-this update, please resubmit them to fstests@vger.kernel.org so they
-can be picked up in the next update.
+This version passed on the host where originally I can see it fail.
+Seems it doesn't fail every time.
 
-I'd like to say a big THANKS to all the people who have reviewed
-patches in this cycle - it's been a big help to me, especially with
-the volume of changes that have been coming through. I've picked up
-all the reviewed patches, but there were a few that still hadn't
-completed review that I didn't pick up. I'll pick them up once
-reviews have completed on them.
+You mean adding 'sleep 1' before removing all the files?
 
--Dave.
+	for ; do
+	done
+	sleep 1
+	rm -f $SCRATCH_MNT/$seq.unlinked.*
 
-The new head of the master branch is commit:
+And what's your test vm setup? I want to see if I can reproduce the
+failure myself. I'm testing on a vm with 4 vcpus and 8G mem, running
+RHEL6.
 
-facff60 generic: test full dm snapshot devices
+Thanks for your review!
 
-New Commits:
-
-Dave Chinner (1):
-      [afd025f] xfs/078: remove loop device on failure
-
-Eric Sandeen (3):
-      [cf1b6d6] filter: btrfs-progs keeps changing version string
-      [552dcfb] filter: btrfs-progs subvolume delete output changed
-      [b2aa857] btrfs: fix _filter_mkfs regression
-
-Eryu Guan (5):
-      [822390a] generic: test some mount/umount corner cases
-      [6000122] nfs: recognise IPv6 export in _require_scratch_nocheck()
-      [c8ea6c0] xfs/014: replace df with $DF_PROG
-      [998f59d] generic/077: add missing _require_scratch
-      [facff60] generic: test full dm snapshot devices
-
-Filipe Manana (4):
-      [672a9f0] generic: test fsync after moving files across directories
-      [a752266] btrfs: test incremental send with directory renames
-      [40851f9] btrfs: test incremental send/receive
-      [9edaf22] btrfs: test cloning of zero length ranges
-
-Jan Tulak (1):
-      [03c633b] build: Allow alphanumeric test name suffixes
-
-Jeff Mahoney (1):
-      [dd26ee3] btrfs: test orphan item cleanup
-
-Omer Zilberberg (1):
-      [856ff26] generic: test that mmap-write updates c/mtime
-
-Xiaoguang Wang (1):
-      [cbc98cd] generic: add test for truncate/collapse range race
-
-
-Code Diffstat:
-
- README                |   8 ++-
- check                 |   9 ++-
- common/config         |   1 +
- common/filter         |   4 --
- common/filter.btrfs   |   9 +--
- common/rc             |  26 +++++++-
- new                   |  54 +++++++++++++++--
- tests/btrfs/082       |   2 +-
- tests/btrfs/083       | 159 ++++++++++++++++++++++++++++++++++++++++++++++=
-+++
- tests/btrfs/083.out   |   2 +
- tests/btrfs/084       | 132 +++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/084.out   |   2 +
- tests/btrfs/085       | 161 ++++++++++++++++++++++++++++++++++++++++++++++=
-++++
- tests/btrfs/085.out   |   4 ++
- tests/btrfs/086       |  77 ++++++++++++++++++++++++
- tests/btrfs/086.out   |   2 +
- tests/btrfs/group     |   4 ++
- tests/generic/067     | 143 ++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/067.out |   2 +
- tests/generic/072     |  70 ++++++++++++++++++++++
- tests/generic/072.out |   2 +
- tests/generic/073     | 113 +++++++++++++++++++++++++++++++++++
- tests/generic/073.out |  11 ++++
- tests/generic/077     |   1 +
- tests/generic/080     |  78 ++++++++++++++++++++++++
- tests/generic/080.out |   2 +
- tests/generic/081     |  86 +++++++++++++++++++++++++++
- tests/generic/081.out |   2 +
- tests/generic/204     |   1 +
- tests/generic/group   |   5 ++
- tests/xfs/014         |   2 +-
- tests/xfs/078         |   6 +-
- 32 files changed, 1156 insertions(+), 24 deletions(-)
- create mode 100755 tests/btrfs/083
- create mode 100644 tests/btrfs/083.out
- create mode 100755 tests/btrfs/084
- create mode 100644 tests/btrfs/084.out
- create mode 100755 tests/btrfs/085
- create mode 100644 tests/btrfs/085.out
- create mode 100755 tests/btrfs/086
- create mode 100644 tests/btrfs/086.out
- create mode 100755 tests/generic/067
- create mode 100644 tests/generic/067.out
- create mode 100755 tests/generic/072
- create mode 100644 tests/generic/072.out
- create mode 100755 tests/generic/073
- create mode 100644 tests/generic/073.out
- create mode 100755 tests/generic/080
- create mode 100644 tests/generic/080.out
- create mode 100755 tests/generic/081
- create mode 100644 tests/generic/081.out
---=20
-Dave Chinner
-david@fromorbit.com
-
---UHN/qo2QbUvPLonB
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJVHHkgAAoJEK3oKUf0dfodkAwP/1zJqr88cv3PkMLzeJzfj9sw
-m3Pn23KpzzTsMJI8yQKo8GVRqLuiiEsibDIXiWA6EQUnQZSZwTZT7+VOhuQiSSQC
-7SU5oQgw5Qn/3KJ8QR4HcSb0uDvPRX0BsHyjPpbgYrmr8ChxkALiaLz9LbyFFisq
-0BUg+fxlKZvhZUc1WQETu+5OBNeeDX2qzWmE2GgMzAygYIWKjqCKJ68g8FbVZBVv
-BflBjV0zQMXCYT9O9cZ5AHxBY+4CncD0LFlyFsX6zPb/aaU6ucBLde3vHxZjEWvY
-OZgaDtdFaL97k0A4S4gXyiGbLjovtBl076++GNffMBVDKE3+J5XoFEK70kCeLtY6
-3lH1cn2j2Jqf/Fb5G/bANKxs292ai3C5tadKIk1jyjFKtxk/KedUomtfhUfY2FD0
-EMWaz098kp+aY41UFuZp/MQgKmdpVZyCCjf00fyyKYzSQrvhL1ZPvf2xBAritpTU
-KQTyfsTv1ezvEjNaDDRf8XNkJpFiQiPSI6peMZuHlgZgoJvBUHzSgZ+XlnfKtb8y
-Qe3ojYZf8YDyFS+z/9XCdJKFCjY6h/4ffEyNq778LVchFqUIz+AoaWEFrQjxcjBN
-A8RW/1on2m8Pgc6etVA3MUh4XVgJlznFD5MradV6xaOHATGGxxAu8/l9OS5ZMVor
-2HRkcAxkw3cTYzOs+U3d
-=QOCR
------END PGP SIGNATURE-----
-
---UHN/qo2QbUvPLonB--
+Eryu
+> 
+> The rest looks pretty good to me.
+> 
+> Brian
+> 
+> > +# start link/unlink storm
+> > +src=$SCRATCH_MNT/$seq.target
+> > +touch $src
+> > +for i in `seq 1 $nr_cpu`; do
+> > +	target=$SCRATCH_MNT/$seq.target.link.$i
+> > +	link_unlink_storm $src $target &
+> > +	link_pids="$link_pids $!"
+> > +done
+> > +
+> > +# remove & re-create target to race with link/unlink
+> > +while true; do
+> > +	rm -f $src
+> > +	touch $src
+> > +done &
+> > +sleep 5
+> > +kill $! >/dev/null 2>&1
+> > +
+> > +kill $tail_pids $link_pids >/dev/null 2>&1
+> > +wait $tail_pids $link_pids
+> > +
+> > +# all done, no oops/hang expected, _check_filesystems checks SCRATCH_DEV after test
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/073.out b/tests/generic/073.out
+> > new file mode 100644
+> > index 0000000..d107704
+> > --- /dev/null
+> > +++ b/tests/generic/073.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 073
+> > +Silence is golden
+> > diff --git a/tests/generic/group b/tests/generic/group
+> > index c0210d2..ee5b642 100644
+> > --- a/tests/generic/group
+> > +++ b/tests/generic/group
+> > @@ -75,6 +75,7 @@
+> >  070 attr udf auto quick stress
+> >  071 auto quick prealloc
+> >  072 auto quick quota
+> > +073 auto metadata quick
+> >  074 rw udf auto
+> >  075 rw udf auto quick
+> >  076 metadata rw udf auto quick stress
+> > -- 
+> > 2.1.0
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
