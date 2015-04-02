@@ -1,99 +1,267 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59542 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750702AbbDBEKo (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 2 Apr 2015 00:10:44 -0400
-Date: Thu, 2 Apr 2015 12:10:41 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 6/9] generic: test I/O error path by fully filling dm
- snapshot
-Message-ID: <20150402041041.GF16808@dhcp-13-216.nay.redhat.com>
-References: <1426846618-23413-7-git-send-email-eguan@redhat.com>
- <1427896455-12048-1-git-send-email-eguan@redhat.com>
- <20150401175710.GF4756@bfoster.bfoster>
- <20150401222954.GF28621@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20150401222954.GF28621@dastard>
+Received: from victor.provo.novell.com ([137.65.250.26]:36610 "EHLO
+	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751210AbbDBKtJ (ORCPT
+	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
+	Thu, 2 Apr 2015 06:49:09 -0400
+From: Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH RESEND] fstests: test for btrfs send after complex directory hierarchy changes
+Date: Thu,  2 Apr 2015 11:48:46 +0100
+Message-Id: <1427971726-13160-1-git-send-email-fdmanana@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Brian Foster <bfoster@redhat.com>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Apr 02, 2015 at 09:29:54AM +1100, Dave Chinner wrote:
-> On Wed, Apr 01, 2015 at 01:57:10PM -0400, Brian Foster wrote:
-> > On Wed, Apr 01, 2015 at 09:54:15PM +0800, Eryu Guan wrote:
-> > > xfs used to panic in this test, this xfs commit fix the bug
-> > > 
-> > > 8d6c121 xfs: fix buffer use after free on IO error
-> > > 
-> > > ext4 and btrfs trigger WARNING on current 4.0-rc3 kernel
-> > > 
-> > > Signed-off-by: Eryu Guan <eguan@redhat.com>
-> > > ---
-> > > v2:
-> > > - add _require_dm_snapshot() function to require dm snapshot target
-> > > - make sure SCRATCH_DEV has enough space for the test
-> > > - fail the test directly when failures detected in setup phase
-> > > 
-> > 
-> > FYI, the mail subject header hasn't changed so Dave might not notice
-> > this is a new patch.
-> 
-> Saw it.
-> 
-> > > +_mount /dev/mapper/$vgname-$snapname $mnt
-> > > +
-> > > +# write 5M data to the snapshot
-> > > +$XFS_IO_PROG -fc "pwrite 0 5m" $mnt/testfile >>$seqres.full 2>&1
-> > > +
-> > 
-> > I noticed there were no errors in $seqres.full when running this test.
-> > E.g., the pwrite succeeds because nothing is written back to disk at
-> > that point. The fs does shutdown due to the flush on umount, but it's
-> > kind of hidden away up in the _cleanup() function.
-> > 
-> > Kind of a nit, but we could be a bit more explicit and do a '-c fsync'
-> > after the pwrite here? That way it's clear that writeback to disk is
-> > part of the core test and we have a little feedback in $seqres.full that
-> > I/O errors occurred, as expected.
-> 
-> Added the -c fsync as I pulled it in.
+Test a very complex scenario for a btrfs incremental send operation where a
+large directory hierarchy had many subtrees moved between parent directories,
+preserving the names of some directories and inverting the parent-child
+relationship between some directories (a child in the parent snapshot became
+a parent, in the send snapshot, of the directory that is its parent in the
+parent snapshot).
 
-I was thinking about adding fsync or sync at first, but it causes
-problems in cleanup. For some reason(I don't know clearly) fsync
-sometimes pins the snapshot in use and vgremove can't remove all lvs, so
-SCRATCH_DEV is still used by the test vg when running next test
+This test made the incremental send fail with -ENOMEM because it entered an
+infinite loop when building path strings that are used as operands of the
+rename operations issued in the send stream.
+This issue was fixed by the following linux kernel btrfs patch:
 
-our local _scratch_mkfs routine ...                                                                                                                                              
-mkfs.xfs: cannot open /dev/sda6: Device or resource busy                                                                                         
-check: failed to mkfs $SCRATCH_DEV using specified options
+   Btrfs: incremental send, don't delay directory renames unnecessarily
 
->From 081.full I can see
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
 
-Logical volume vg_081/snap_081 contains a filesystem in use.
+Rebased against latest master branch, which implied changing the test
+number. No changes otherwise.
 
-The test vg/lv has to be removed manually after the test
+ tests/btrfs/087     | 199 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/087.out |   2 +
+ tests/btrfs/group   |   1 +
+ 3 files changed, 202 insertions(+)
+ create mode 100644 tests/btrfs/087
+ create mode 100644 tests/btrfs/087.out
 
-vgremove -f vg_081
+diff --git a/tests/btrfs/087 b/tests/btrfs/087
+new file mode 100644
+index 0000000..b8ee3e1
+--- /dev/null
++++ b/tests/btrfs/087
+@@ -0,0 +1,199 @@
++#! /bin/bash
++# FS QA Test No. btrfs/087
++#
++# Test a very complex scenario for a btrfs incremental send operation where a
++# large directory hierarchy had many subtrees moved between parent directories,
++# preserving the names of some directories and inverting the parent-child
++# relationship between some directories (a child in the parent snapshot became
++# a parent, in the send snapshot, of the directory that is its parent in the
++# parent snapshot).
++#
++# This test made the incremental send fail with -ENOMEM because it entered an
++# infinite loop when building path strings that are used as operands of the
++# rename operations issued in the send stream.
++# This issue was fixed by the following linux kernel btrfs patch:
++#
++#   Btrfs: incremental send, don't delay directory renames unnecessarily
++#
++#-----------------------------------------------------------------------
++# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	rm -fr $send_files_dir
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_fssum
++_need_to_be_root
++
++send_files_dir=$TEST_DIR/btrfs-test-$seq
++
++rm -f $seqres.full
++rm -fr $send_files_dir
++mkdir $send_files_dir
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++mkdir $SCRATCH_MNT/data
++mkdir $SCRATCH_MNT/data/n1
++mkdir $SCRATCH_MNT/data/n1/n2
++mkdir $SCRATCH_MNT/data/n4
++mkdir $SCRATCH_MNT/data/n1/n2/p1
++mkdir $SCRATCH_MNT/data/n1/n2/p1/p2
++mkdir $SCRATCH_MNT/data/t6
++mkdir $SCRATCH_MNT/data/t7
++mkdir -p $SCRATCH_MNT/data/t5/t7
++mkdir $SCRATCH_MNT/data/t2
++mkdir $SCRATCH_MNT/data/t4
++mkdir -p $SCRATCH_MNT/data/t1/t3
++mkdir $SCRATCH_MNT/data/p1
++mv $SCRATCH_MNT/data/t1 $SCRATCH_MNT/data/p1
++mkdir -p $SCRATCH_MNT/data/p1/p2
++mv $SCRATCH_MNT/data/t4 $SCRATCH_MNT/data/p1/p2/t1
++mv $SCRATCH_MNT/data/t5 $SCRATCH_MNT/data/n4/t5
++mv $SCRATCH_MNT/data/n1/n2/p1/p2 $SCRATCH_MNT/data/n4/t5/p2
++mv $SCRATCH_MNT/data/t7 $SCRATCH_MNT/data/n4/t5/p2/t7
++mv $SCRATCH_MNT/data/t2 $SCRATCH_MNT/data/n4/t1
++mv $SCRATCH_MNT/data/p1 $SCRATCH_MNT/data/n4/t5/p2/p1
++mv $SCRATCH_MNT/data/n1/n2 $SCRATCH_MNT/data/n4/t5/p2/p1/p2/n2
++mv $SCRATCH_MNT/data/n4/t5/p2/p1/p2/t1 $SCRATCH_MNT/data/n4/t5/p2/p1/p2/n2/t1
++mv $SCRATCH_MNT/data/n4/t5/t7 $SCRATCH_MNT/data/n4/t5/p2/p1/p2/n2/t1/t7
++mv $SCRATCH_MNT/data/n4/t5/p2/p1/t1/t3 $SCRATCH_MNT/data/n4/t5/p2/p1/p2/n2/t1/t3
++mv $SCRATCH_MNT/data/n4/t5/p2/p1/p2/n2/p1 \
++	$SCRATCH_MNT/data/n4/t5/p2/p1/p2/n2/t1/t7/p1
++mv $SCRATCH_MNT/data/t6 $SCRATCH_MNT/data/n4/t5/p2/p1/p2/n2/t1/t3/t5
++mv $SCRATCH_MNT/data/n4/t5/p2/p1/t1 $SCRATCH_MNT/data/n4/t5/p2/p1/p2/n2/t1/t3/t1
++mv $SCRATCH_MNT/data/n1 $SCRATCH_MNT/data/n4/t5/p2/p1/p2/n2/t1/t7/p1/n1
++
++# Filesystem looks like:
++#
++# .                                                             (ino 256)
++# |--- data/                                                    (ino 257)
++#        |--- n4/                                               (ino 260)
++#             |--- t1/                                          (ino 267)
++#             |--- t5/                                          (ino 265)
++#                  |--- p2/                                     (ino 262)
++#                       |--- p1/                                (ino 271)
++#                       |    |--- p2/                           (ino 272)
++#                       |         |--- n2/                      (ino 259)
++#                       |              |--- t1/                 (ino 268)
++#                       |                   |--- t3/            (ino 270)
++#                       |                   |    |--- t1/       (ino 269)
++#                       |                   |    |--- t5/       (ino 263)
++#                       |                   |
++#                       |                   |--- t7/            (ino 266)
++#                       |                        |--- p1/       (ino 261)
++#                       |                             |--- n1   (ino 258)
++#                       |
++#                       |--- t7/                                (ino 264)
++#
++_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap1
++
++# The following sequence of directory renames resulted in an infinite path build
++# loop when attempting to build the path for inode 266. This is because the
++# inode's new parent, inode 261, was part of a circular dependency of delayed
++# rename operations. This circular dependency should jave never been built (it
++# happened due to a bug), and was the following:
++#
++#   ino 272 <- ino 261 <- ino 259 <- ino 268 <- ino 267 <- ino 261
++#
++# Where the notation "X <- Y" means that rename of inode X is delayed to happen
++# after the rename of inode Y.
++
++mv $SCRATCH_MNT/data/n4/t1 $SCRATCH_MNT/data/n4/t5/p2/p1/p2/n2/t1/t7/p1/t1
++mv $SCRATCH_MNT/data/n4/t5/p2/p1/p2/n2/t1 $SCRATCH_MNT/data/n4/
++mv $SCRATCH_MNT/data/n4/t5/p2/p1/p2/n2 $SCRATCH_MNT/data/n4/t1/n2
++mv $SCRATCH_MNT/data/n4/t1/t7/p1 $SCRATCH_MNT/data/n4/t1/n2/p1
++mv $SCRATCH_MNT/data/n4/t1/t3/t1 $SCRATCH_MNT/data/n4/t1/n2/t1
++mv $SCRATCH_MNT/data/n4/t1/t3 $SCRATCH_MNT/data/n4/t1/n2/t1/t3
++mv $SCRATCH_MNT/data/n4/t5/p2/p1/p2 $SCRATCH_MNT/data/n4/t1/n2/p1/p2
++mv $SCRATCH_MNT/data/n4/t1/t7 $SCRATCH_MNT/data/n4/t1/n2/p1/t7
++mv $SCRATCH_MNT/data/n4/t5/p2/p1 $SCRATCH_MNT/data/n4/t1/n2/p1/p2/p1
++mv $SCRATCH_MNT/data/n4/t1/n2/t1/t3/t5 $SCRATCH_MNT/data/n4/t1/n2/p1/p2/t5
++mv $SCRATCH_MNT/data/n4/t5 $SCRATCH_MNT/data/n4/t1/n2/p1/p2/p1/t5
++mv $SCRATCH_MNT/data/n4/t1/n2/p1/p2/p1/t5/p2 \
++	$SCRATCH_MNT/data/n4/t1/n2/p1/p2/p1/p2
++mv $SCRATCH_MNT/data/n4/t1/n2/p1/p2/p1/p2/t7 $SCRATCH_MNT/data/n4/t1/t7
++
++# Filesystem now looks like:
++#
++# .                                                   (ino 256)
++# |--- data                                           (ino 257)
++#        |--- n4/                                     (ino 260)
++#             |--- t1/                                (ino 268)
++#                  |--- n2/                           (ino 259)
++#                  |    |--- p1/                      (ino 261)
++#                  |    |    |--- n1/                 (ino 258)
++#                  |    |    |--- p2/                 (ino 272)
++#                  |    |    |    |--- p1/            (ino 271)
++#                  |    |    |    |    |--- p2/       (ino 262)
++#                  |    |    |    |    |--- t5/       (ino 265)
++#                  |    |    |    |
++#                  |    |    |    |--- t5/            (ino 263)
++#                  |    |    |
++#                  |    |    |--- t1/                 (ino 267)
++#                  |    |    |--- t7/                 (ino 266)
++#                  |    |
++#                  |    |--- t1/                      (ino 269)
++#                  |         |--- t3/                 (ino 270)
++#                  |
++#                  |--- t7/                           (ino 264)
++#
++_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap2
++
++run_check $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
++run_check $FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
++	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
++
++_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
++_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
++	-f $send_files_dir/2.snap
++
++# Now recreate the filesystem by receiving both send streams and verify we get
++# the same content that the original filesystem had.
++_scratch_unmount
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
++run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
++_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
++run_check $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/btrfs/087.out b/tests/btrfs/087.out
+new file mode 100644
+index 0000000..e84c64c
+--- /dev/null
++++ b/tests/btrfs/087.out
+@@ -0,0 +1,2 @@
++QA output created by 087
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index e9c15af..4bed1db 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -89,3 +89,4 @@
+ 084 auto quick send
+ 085 auto quick metadata subvol
+ 086 auto quick clone
++087 auto quick send
+-- 
+2.1.3
 
-I don't find a proper way to fix it yet, but simply adding 'sleep 1'
-before vgremove in _cleanup works for me
-
-[root@hp-dl388eg8-01 xfstests]# git diff
-diff --git a/tests/generic/081 b/tests/generic/081
-index 3e17d34..29b0240 100755
---- a/tests/generic/081
-+++ b/tests/generic/081
-@@ -36,6 +36,7 @@ _cleanup()
-        rm -f $tmp.*
-        # lvm may have umounted it on I/O error, but in case it does not
-        $UMOUNT_PROG $mnt >/dev/null 2>&1
-+       sleep 1
-        $LVM_PROG vgremove -f $vgname >>$seqres.full 2>&1
-        $LVM_PROG pvremove -f $SCRATCH_DEV >>$seqres.full 2>&1
- }
-
-Thanks,
-Eryu
