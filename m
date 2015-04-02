@@ -1,270 +1,166 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:34460 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753749AbbDBMdb (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 2 Apr 2015 08:33:31 -0400
-Date: Thu, 2 Apr 2015 14:33:28 +0200 (CEST)
-From: =?ISO-8859-15?Q?Luk=E1=A8_Czerner?= <lczerner@redhat.com>
-Subject: Re: [PATCH] xfstests: generic: test for discard properly discarding
- unused extents
-In-Reply-To: <55199FCA.9040503@suse.com>
-Message-ID: <alpine.LFD.2.00.1504021407530.3307@localhost.localdomain>
-References: <55199FCA.9040503@suse.com>
+Received: from mail-ie0-f171.google.com ([209.85.223.171]:36173 "EHLO
+	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753356AbbDBNRo convert rfc822-to-8bit (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 2 Apr 2015 09:17:44 -0400
+Received: by iedm5 with SMTP id m5so68515964ied.3
+        for <fstests@vger.kernel.org>; Thu, 02 Apr 2015 06:17:44 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Reply-To: fdmanana@gmail.com
+In-Reply-To: <alpine.LFD.2.00.1503301522190.8076@localhost.localdomain>
+References: <9a1c40cb9eceb72543647cb4209269bc4aba86f0.1427706679.git.zhaolei@cn.fujitsu.com>
+	<alpine.LFD.2.00.1503301522190.8076@localhost.localdomain>
+Date: Thu, 2 Apr 2015 14:17:43 +0100
+Message-ID: <CAL3q7H4vSiV1kA+OovLpXD9vz9ayLL+vDYYaMyyGy4aiWd+TOw@mail.gmail.com>
+Subject: Re: [PATCH] Fix caller's argument for _require_command()
+From: Filipe David Manana <fdmanana@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Sender: fstests-owner@vger.kernel.org
-To: Jeff Mahoney <jeffm@suse.com>
-Cc: linux-btrfs <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org
+To: =?UTF-8?B?THVrw6HFoSBDemVybmVy?= <lczerner@redhat.com>
+Cc: Zhaolei <zhaolei@cn.fujitsu.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, 30 Mar 2015, Jeff Mahoney wrote:
+On Mon, Mar 30, 2015 at 2:25 PM, Lukáš Czerner <lczerner@redhat.com> wrote:
+> On Mon, 30 Mar 2015, Zhaolei wrote:
+>
+>> Date: Mon, 30 Mar 2015 17:11:27 +0800
+>> From: Zhaolei <zhaolei@cn.fujitsu.com>
+>> To: fstests@vger.kernel.org
+>> Cc: Zhao Lei <zhaolei@cn.fujitsu.com>
+>> Subject: [PATCH] Fix caller's argument for _require_command()
+>>
+>> From: Zhao Lei <zhaolei@cn.fujitsu.com>
+>>
+>> _require_command() only accept 2 arguments but some caller
+>> misused this function, and caused "not_run" after we limit
+>> calling way.
+>>
+>> This patch fixed above caller.
+>>
+>> Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
+>> ---
+>>  common/defrag | 13 +++++++++----
+>>  tests/xfs/094 |  2 +-
+>>  tests/xfs/103 |  2 +-
+>>  tests/xfs/195 |  2 +-
+>>  4 files changed, 12 insertions(+), 7 deletions(-)
+>>
+>> diff --git a/common/defrag b/common/defrag
+>> index f923dc0..b44ef98 100644
+>> --- a/common/defrag
+>> +++ b/common/defrag
+>> @@ -22,22 +22,27 @@
+>>
+>>  _require_defrag()
+>>  {
+>> +    local defrag_cmd
+>> +
+>>      case "$FSTYP" in
+>>      xfs)
+>> -        DEFRAG_PROG="$XFS_FSR_PROG"
+>> +        defrag_cmd="$XFS_FSR_PROG"
+>> +        DEFRAG_PROG="$defrag_cmd"
+>>       ;;
+>>      ext4|ext4dev)
+>> -        DEFRAG_PROG="$E4DEFRAG_PROG"
+>> +        defrag_cmd="$E4DEFRAG_PROG"
+>> +        DEFRAG_PROG="$defrag_cmd"
+>>       ;;
+>>      btrfs)
+>> -     DEFRAG_PROG="$BTRFS_UTIL_PROG filesystem defragment"
+>> +        defrag_cmd="$BTRFS_UTIL_PROG"
+>> +        DEFRAG_PROG="defrag_cmd filesystem defragment"
+>>       ;;
+>>      *)
+>>          _notrun "defragmentation not supported for fstype \"$FSTYP\""
+>>       ;;
+>>      esac
+>>
+>> -    _require_command "$DEFRAG_PROG" defragment
+>> +    _require_command "$defrag_cmd" defragment
+>
+> Hi,
+>
+> what's the point of this change ?
 
-> Date: Mon, 30 Mar 2015 15:11:06 -0400
-> From: Jeff Mahoney <jeffm@suse.com>
-> To: linux-btrfs <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org
-> Subject: [PATCH] xfstests: generic: test for discard properly discarding
->     unused extents
-> 
-> This tests tests four conditions where discard can potentially not
-> discard unused extents completely.
-> 
-> We test, with -o discard and with fstrim, scenarios of removing many
-> relatively small files and removing several large files.
-> 
-> The important part of the two scenarios is that the large files must be
-> large enough to span a blockgroup alone. It's possible for an
-> entire block group to be emptied and dropped without an opportunity to
-> discard individual extents as would happen with smaller files.
-> 
-> The test confirms the discards have occured by using a sparse file
-> mounted via loopback to punch holes and then check how many blocks
-> are still allocated within the file.
-> 
-> Signed-off-by: Jeff Mahoney <jeffm@suse.com>
-> ---
->  tests/generic/326     | 164 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/326.out |   5 ++
->  tests/generic/group   |   1 +
->  3 files changed, 170 insertions(+)
->  create mode 100644 tests/generic/326
->  create mode 100644 tests/generic/326.out
-> 
-> diff --git a/tests/generic/326 b/tests/generic/326
-> new file mode 100644
-> index 0000000..923a27f
-> --- /dev/null
-> +++ b/tests/generic/326
-> @@ -0,0 +1,164 @@
-> +#! /bin/bash
-> +# FSQA Test No. 326
-> +#
-> +# This test uses a loopback mount with PUNCH_HOLE support to test
-> +# whether discard operations are working as expected.
-> +#
-> +# It tests both -odiscard and fstrim.
-> +#
-> +# Copyright (C) 2015 SUSE. All Rights Reserved.
-> +# Author: Jeff Mahoney <jeffm@suse.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +loopdev=
-> +tmpdir=
-> +_cleanup()
-> +{
-> +	[ -n "$tmpdir" ] && umount $tmpdir
-> +	[ -n "$loopdev" ] && losetup -d $loopdev
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_need_to_be_root
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch
-> +_require_fstrim
-> +
-> +rm -f $seqres.full
-> +
-> +_scratch_mkfs &>> $seqres.full
-> +_require_fs_space $SCRATCH_MNT $(( 10 * 1024 * 1024 ))
-> +_scratch_mount
-> +
-> +test_discard()
-> +{
-> +	discard=$1
-> +	files=$2
-> +
-> +	tmpfile=$SCRATCH_MNT/testfs.img.$$
-> +	tmpdir=$SCRATCH_MNT/testdir.$$
-> +	mkdir -p $tmpdir || _fail "!!! failed to create temp mount dir"
-> +
-> +	# Create a sparse file to host the file system
-> +	dd if=/dev/zero of=$tmpfile bs=1M count=1 seek=10240 &> $seqres.full \
-> +		|| _fail "!!! failed to create fs image file"
+Lukas, this is response to my comment at:
 
-You can just use truncate here.
+https://patchwork.kernel.org/patch/6016291/
 
-> +
-> +	opts=""
-> +	if [ "$discard" = "discard" ]; then
-> +		opts="-o discard"
-> +	fi
-> +	losetup -f $tmpfile
-> +	loopdev=$(losetup -j $tmpfile|awk -F: '{print $1}')
+But still I agree with you, this change seems a bit to come out of
+thin air. A more detailed explanation on the commit message would
+help, perhaps giving the example of btrfs/005 failing due to the
+reason I pointed out.
 
-you can just do
+>
+>>      _require_xfs_io_command "fiemap"
+>>  }
+>>
+>> diff --git a/tests/xfs/094 b/tests/xfs/094
+>> index cee42d6..5c6e98d 100755
+>> --- a/tests/xfs/094
+>> +++ b/tests/xfs/094
+>> @@ -46,7 +46,7 @@ _supported_fs xfs
+>>  _supported_os IRIX Linux
+>>  _require_realtime
+>>  _require_scratch
+>> -_require_command "$XFS_IO_PROG" xfs_io
+>> +[ -n "$XFS_IO_PROG" ] || _notrun "xfs_io executable not found"
+>
+> Why ? Do not we get the same result from
+>
+> _require_command "$XFS_IO_PROG" xfs_io
+>
+> anyway if the $XFS_IO_PROG isn't set ?
 
-loopdev=$(losetup --show -f $tmpfile)
+Agreed. Seems unneeded because XFS_IO_PROG is always a single word
+therefore not causing a problem like btrfs' "btrfs filesystem
+defragment" case.
 
-> +	_mkfs_dev $loopdev &> $seqres.full
-> +	$MOUNT_PROG $opts $loopdev $tmpdir \
-> +		|| _fail "!!! failed to loopback mount"
-> +
-> +	if [ "$files" = "large" ]; then
-> +		# Create files larger than 1GB so each one occupies
-> +		# more than one block group
+>
+> -Lukas
+>
+>>
+>>  _filter_realtime_flag()
+>>  {
+>> diff --git a/tests/xfs/103 b/tests/xfs/103
+>> index cbe884f..d80dbf2 100755
+>> --- a/tests/xfs/103
+>> +++ b/tests/xfs/103
+>> @@ -66,7 +66,7 @@ _filter_noymlinks_flag()
+>>  # real QA test starts here
+>>  _supported_os Linux IRIX
+>>  _supported_fs xfs
+>> -_require_command "$XFS_IO_PROG" xfs_io
+>> +[ -n "$XFS_IO_PROG" ] || _notrun "xfs_io executable not found"
+>>  _require_scratch
+>>
+>>  _create_scratch
+>> diff --git a/tests/xfs/195 b/tests/xfs/195
+>> index 21fcb00..075022d 100755
+>> --- a/tests/xfs/195
+>> +++ b/tests/xfs/195
+>> @@ -65,7 +65,7 @@ _supported_os Linux
+>>
+>>  _require_test
+>>  _require_user
+>> -_require_command "$XFSDUMP_PROG" xfsdump
+>> +[ "$XFSDUMP_PROG" = "" ] && _notrun "xfsdump not found"
+>>
+>>  echo "Preparing subtree"
+>>  mkdir $TEST_DIR/d
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Why it needs to be that big ? Can't you make btrfs groups smaller ?
 
-> +		for n in $(seq 1 8); do
-> +			dd if=/dev/zero of=$tmpdir/file$n bs=1M count=1200 \
-> +				&> $seqres.full
-> +		done
-> +	else
-> +		# Create up to 40k files sized 32k-1GB.
-> +		mkdir -p $tmpdir/testdir
-> +		for ((i = 1; i <= 40000; i++)); do
-> +			SIZE=$(( $((1024*1024*1024)) / $(( $RANDOM + 1 )) ))
-> +			$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 $SIZE" \
-> +				$tmpdir/testdir/"${prefix}_$i" &> /dev/null
-> +			if [ $? -ne 0 ]; then
-> +				echo "Failed creating file ${prefix}_$i" \
-> +					>>$seqres.full
-> +				break
-> +			fi
-> +		done
-> +	fi
-> +
-> +	sync
-> +	OSIZE="$(du -k $tmpfile|awk '{print $1}')"
-> +	du -k $tmpfile >> $seqres.full
-> +
-> +	if [ "$files" = "large" ]; then
-> +		rm $tmpdir/file?
-> +	else
-> +		rm -rf $tmpdir/testdir
-> +	fi
-> +
-> +	# Ensure everything's actually on the hosted file system
-> +	if [ "$FSTYP" = "btrfs" ]; then
-> +		_run_btrfs_util_prog filesystem sync $tmpdir
-> +	fi
-> +	sync
-> +	sync
 
-One too many :)
+-- 
+Filipe David Manana,
 
-> +	if [ "$discard" = "trim" ]; then
-> +		$FSTRIM_PROG $tmpdir
-> +	fi
-> +
-> +	$UMOUNT_PROG $tmpdir
-> +	rmdir $tmpdir
-> +	tmpdir=
-> +
-> +	# Sync the backing file system to ensure the hole punches have
-> +	# happened and we can trust the result.
-> +	if [ "$FSTYP" = "btrfs" ]; then
-> +		_run_btrfs_util_prog filesystem sync $SCRATCH_MNT
-> +	fi
-> +	sync
-> +	sync
-
-Four syncs ? Do we really need that many ?
-
-> +
-> +	NSIZE="$(du -k $tmpfile|awk '{print $1}')"
-> +	du -k $tmpfile >> $seqres.full
-> +
-> +	# Going from ~ 10GB to 50MB is a good enough test to account for
-
-It's not good enough, because empty ext4 file system of this size will
-take up about 133MB. The we can allocate additional metadata blocks which
-might not get discarded.
-
-So maybe get your baseline from at least double the initial empty fs
-size, or at least 200M ?
-
-Thanks!
--Lukas
-
-> +	# metadata remaining on different file systems.
-> +	if [ "$NSIZE" -gt $(( 50 * 1024 )) ]; then
-> +		_fail "TRIM failed: before rm ${OSIZE}kB, after rm ${NSIZE}kB"
-> +	fi
-> +	rm $tmpfile
-> +	losetup -d $loopdev
-> +	loopdev=
-> +}
-> +
-> +
-> +echo "Testing with -odiscard, many small files"
-> +test_discard discard many
-> +
-> +echo "Testing with -odiscard, several large files"
-> +test_discard discard large
-> +
-> +echo "Testing with fstrim, many small files"
-> +test_discard trim many
-> +
-> +echo "Testing with fstrim, several large files"
-> +test_discard trim large
-> +
-> +status=0
-> +exit
-> diff --git a/tests/generic/326.out b/tests/generic/326.out
-> new file mode 100644
-> index 0000000..37b0f2c
-> --- /dev/null
-> +++ b/tests/generic/326.out
-> @@ -0,0 +1,5 @@
-> +QA output created by 084
-> +Testing with -odiscard, many small files
-> +Testing with -odiscard, several large files
-> +Testing with fstrim, many small files
-> +Testing with fstrim, several large files
-> diff --git a/tests/generic/group b/tests/generic/group
-> index d56d3ce..75e17fa 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -183,3 +183,4 @@
->  323 auto aio stress
->  324 auto fsr quick
->  325 auto quick data log
-> +326 auto metadata
-> 
+"Reasonable men adapt themselves to the world.
+ Unreasonable men adapt the world to themselves.
+ That's why all progress depends on unreasonable men."
