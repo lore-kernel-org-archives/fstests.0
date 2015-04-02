@@ -1,183 +1,65 @@
-Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:48249 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753585AbbDBNrR (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 2 Apr 2015 09:47:17 -0400
-Date: Thu, 2 Apr 2015 15:47:14 +0200 (CEST)
-From: =?ISO-8859-15?Q?Luk=E1=A8_Czerner?= <lczerner@redhat.com>
-Subject: RE: [PATCH] Fix caller's argument for _require_command()
-In-Reply-To: <018301d06b5b$43d78c60$cb86a520$@cn.fujitsu.com>
-Message-ID: <alpine.LFD.2.00.1504021545520.3307@localhost.localdomain>
-References: <9a1c40cb9eceb72543647cb4209269bc4aba86f0.1427706679.git.zhaolei@cn.fujitsu.com> <alpine.LFD.2.00.1503301522190.8076@localhost.localdomain> <018301d06b5b$43d78c60$cb86a520$@cn.fujitsu.com>
+Return-Path: <jtulak@redhat.com>
+Date: Thu, 2 Apr 2015 10:41:34 -0400 (EDT)
+From: Jan Tulak <jtulak@redhat.com>
+Message-ID: <35967469.6829911.1427985694256.JavaMail.zimbra@redhat.com>
+In-Reply-To: <550C6DAD.4060602@sandeen.net>
+References: <550C46B2.8060407@sandeen.net> <550C4951.1030804@sandeen.net> <550C6DAD.4060602@sandeen.net>
+Subject: Re: [PATCH 2/2] fstests: Add overlayfs support
 MIME-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323328-557811732-1427982436=:3307"
-Sender: fstests-owner@vger.kernel.org
-To: Zhao Lei <zhaolei@cn.fujitsu.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+To: Eric Sandeen <sandeen@sandeen.net>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
 
---8323328-557811732-1427982436=:3307
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: 8BIT
 
-On Tue, 31 Mar 2015, Zhao Lei wrote:
+----- Original Message -----
+> From: "Eric Sandeen" <sandeen@sandeen.net>
+> To: fstests@vger.kernel.org
+> Sent: Friday, 20 March, 2015 7:57:49 PM
+> Subject: Re: [PATCH 2/2] fstests: Add overlayfs support
+> 
+> On 3/20/15 11:22 AM, Eric Sandeen wrote:
+> > If OVERLAYFS=1 is set, then every time we mount the scratch or
+> > test device, set up overlayfs directories under it, and switch
+> > the directory under test to the upper directory.
+> > 
+> > This doesn't specifically or directly test overlayfs, it simply
+> > runs the existing tests over it.  As such, a few tests fail,
+> > and may be expected to fail due to overlayfs limitations and
+> > caveats.  I haven't sorted through the results yet.
+> > 
+> > Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+> 
+> Zach has almost convinced me that this is the wrong approach and/or
+> not worth doing, or at least not merging.
+> 
+> Many of the failures are as a result of this being tacked on, and
+> several tests wouldn't be expected to work at all.
+> 
+> So I dunno.  What do people think; it's at least interesting on the
+> side, to see what falls off.
+> 
+> Good news is, no oopses yet! :)
+> 
 
-> Date: Tue, 31 Mar 2015 10:34:51 +0800
-> From: Zhao Lei <zhaolei@cn.fujitsu.com>
-> To: 'Lukáš Czerner' <lczerner@redhat.com>
-> Cc: fstests@vger.kernel.org
-> Subject: RE: [PATCH] Fix caller's argument for _require_command()
-> 
-> Hi, Czerner
-> 
-> Thanks for review.
-> 
-> > -----Original Message-----
-> > From: Lukáš Czerner [mailto:lczerner@redhat.com]
-> > Sent: Monday, March 30, 2015 9:25 PM
-> > To: Zhaolei
-> > Cc: fstests@vger.kernel.org
-> > Subject: Re: [PATCH] Fix caller's argument for _require_command()
-> > 
-> > On Mon, 30 Mar 2015, Zhaolei wrote:
-> > 
-> > > Date: Mon, 30 Mar 2015 17:11:27 +0800
-> > > From: Zhaolei <zhaolei@cn.fujitsu.com>
-> > > To: fstests@vger.kernel.org
-> > > Cc: Zhao Lei <zhaolei@cn.fujitsu.com>
-> > > Subject: [PATCH] Fix caller's argument for _require_command()
-> > >
-> > > From: Zhao Lei <zhaolei@cn.fujitsu.com>
-> > >
-> > > _require_command() only accept 2 arguments but some caller misused
-> > > this function, and caused "not_run" after we limit calling way.
-> > >
-> > > This patch fixed above caller.
-> > >
-> > > Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
-> > > ---
-> > >  common/defrag | 13 +++++++++----
-> > >  tests/xfs/094 |  2 +-
-> > >  tests/xfs/103 |  2 +-
-> > >  tests/xfs/195 |  2 +-
-> > >  4 files changed, 12 insertions(+), 7 deletions(-)
-> > >
-> > > diff --git a/common/defrag b/common/defrag index f923dc0..b44ef98
-> > > 100644
-> > > --- a/common/defrag
-> > > +++ b/common/defrag
-> > > @@ -22,22 +22,27 @@
-> > >
-> > >  _require_defrag()
-> > >  {
-> > > +    local defrag_cmd
-> > > +
-> > >      case "$FSTYP" in
-> > >      xfs)
-> > > -        DEFRAG_PROG="$XFS_FSR_PROG"
-> > > +        defrag_cmd="$XFS_FSR_PROG"
-> > > +        DEFRAG_PROG="$defrag_cmd"
-> > >  	;;
-> > >      ext4|ext4dev)
-> > > -        DEFRAG_PROG="$E4DEFRAG_PROG"
-> > > +        defrag_cmd="$E4DEFRAG_PROG"
-> > > +        DEFRAG_PROG="$defrag_cmd"
-> > >  	;;
-> > >      btrfs)
-> > > -	DEFRAG_PROG="$BTRFS_UTIL_PROG filesystem defragment"
-> > > +        defrag_cmd="$BTRFS_UTIL_PROG"
-> > > +        DEFRAG_PROG="defrag_cmd filesystem defragment"
-> > >  	;;
-> > >      *)
-> > >          _notrun "defragmentation not supported for fstype \"$FSTYP\""
-> > >  	;;
-> > >      esac
-> > >
-> > > -    _require_command "$DEFRAG_PROG" defragment
-> > > +    _require_command "$defrag_cmd" defragment
-> > 
-> > Hi,
-> > 
-> > what's the point of this change ?
-> > 
-> 
-> "$DEFRAG_PROG" include program and argument,
-> and can not passed test of:
-> [[ -x "$DEFRAG_PROG" ]]
-> in _require_command().
-> 
-> > >      _require_xfs_io_command "fiemap"
-> > >  }
-> > >
-> > > diff --git a/tests/xfs/094 b/tests/xfs/094 index cee42d6..5c6e98d
-> > > 100755
-> > > --- a/tests/xfs/094
-> > > +++ b/tests/xfs/094
-> > > @@ -46,7 +46,7 @@ _supported_fs xfs
-> > >  _supported_os IRIX Linux
-> > >  _require_realtime
-> > >  _require_scratch
-> > > -_require_command "$XFS_IO_PROG" xfs_io
-> > > +[ -n "$XFS_IO_PROG" ] || _notrun "xfs_io executable not found"
-> > 
-> > Why ? Do not we get the same result from
-> > 
-> > _require_command "$XFS_IO_PROG" xfs_io
-> > 
-> > anyway if the $XFS_IO_PROG isn't set ?
-> > 
-> In some case, "$XFS_IO_PROG" include both program and argument,
-> and cause wrong result in _require_command().
+Well, I agree with Zach. It would be good to have overlayfs, but I think it should be a standalone FS. Overlayfs has some specific things, though. As it needs more directories for work, we can suppose lowerdir is going to be TEST_DIR/SCRATCH_DIR, but what about upperdir? And o we need to be able to explicitly set what filesystem they should be on? Your patch put it all into a single directory, but I think we should be able to test it on different devices.
 
-It should not include any arguments. It's probably -F argument you
-have in mind, but that's deprecated and is not needed anymore. So if
-we have some places where we add those it needs to be fixed there.
+So I would say we need have both, something like 
 
-Thanks!
--Lukas
+_require_test_overlay # basically what your patch do, a single step to make $TEST_DIR in overlay
 
-> 
-> Thanks
-> Zhaolei
-> 
-> > -Lukas
-> > 
-> > >
-> > >  _filter_realtime_flag()
-> > >  {
-> > > diff --git a/tests/xfs/103 b/tests/xfs/103 index cbe884f..d80dbf2
-> > > 100755
-> > > --- a/tests/xfs/103
-> > > +++ b/tests/xfs/103
-> > > @@ -66,7 +66,7 @@ _filter_noymlinks_flag()  # real QA test starts here
-> > > _supported_os Linux IRIX  _supported_fs xfs -_require_command
-> > > "$XFS_IO_PROG" xfs_io
-> > > +[ -n "$XFS_IO_PROG" ] || _notrun "xfs_io executable not found"
-> > >  _require_scratch
-> > >
-> > >  _create_scratch
-> > > diff --git a/tests/xfs/195 b/tests/xfs/195 index 21fcb00..075022d
-> > > 100755
-> > > --- a/tests/xfs/195
-> > > +++ b/tests/xfs/195
-> > > @@ -65,7 +65,7 @@ _supported_os Linux
-> > >
-> > >  _require_test
-> > >  _require_user
-> > > -_require_command "$XFSDUMP_PROG" xfsdump
-> > > +[ "$XFSDUMP_PROG" = "" ] && _notrun "xfsdump not found"
-> > >
-> > >  echo "Preparing subtree"
-> > >  mkdir $TEST_DIR/d
-> > >
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
---8323328-557811732-1427982436=:3307--
+and
+
+OVERLAY_UPPER_FS="tmpfs"
+OVERLAY_LOWER_FS="xfs"
+_require_scratch_overlay
+
+I think we should be able to manipulate with underlying directories directly - though this can be the case only for some specific tests that will do all the work around overlayfs manually. I don't feel to answer this question myself.
+
+I'm afraid I'm bringing more question than answers, though. :-)
+
+-- 
+Jan Tulak
+jtulak@redhat.com
