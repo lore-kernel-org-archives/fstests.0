@@ -1,67 +1,55 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:40250 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:56967 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751335AbbDCHRc (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 3 Apr 2015 03:17:32 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (Postfix) with ESMTPS id ED1E5B0424
-	for <fstests@vger.kernel.org>; Fri,  3 Apr 2015 07:17:31 +0000 (UTC)
+	id S1752384AbbDCHSU (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 3 Apr 2015 03:18:20 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v3 2/4] generic: test hardlink to unlinked file
-Date: Fri,  3 Apr 2015 15:17:20 +0800
-Message-Id: <1428045440-10612-1-git-send-email-eguan@redhat.com>
+Subject: [PATCH v2 3/4] shared: test truncate orphan inodes when mounting extN
+Date: Fri,  3 Apr 2015 15:18:02 +0800
+Message-Id: <1428045482-10722-1-git-send-email-eguan@redhat.com>
 In-Reply-To: <1428045351-10446-1-git-send-email-eguan@redhat.com>
 References: <1428045351-10446-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+Cc: linux-ext4@vger.kernel.org, Eryu Guan <eguan@redhat.com>, Lukas Czerner <lczerner@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Kernel commit
+ext4 should hold i_mutex when truncating orhpan inodes, or a WARNING
+would be triggered. This commit fixed this issue.
 
-aae8a97 fs: Don't allow to create hardlink for deleted file
+721e3eb ext4: lock i_mutex when truncating orphan inodes
 
-disabled hardlink to unlinked file.
+Though it's an ext4 specific issue, there's no harm to test on ext2/3
+too, as debugfs is used to set orphan inode list.
 
-Test the race between link and unlink, which could end up adding link
-count to an unlinked file and leading to fs corruption on xfs.
+This test is based on a script from Lukas Czerner.
 
-Test case was originally written by Eric Sandeen.
-
+Cc: Lukas Czerner <lczerner@redhat.com>
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
-v3:
-- rebase and re-numbered to generic/084
-- sleep 1 before removing all files being tailed
-
 v2:
-- create different link file in each iteration in link_unlink_storm(), which
-  is confirmed to be able to reproduce the original corruption
-- remove all newly created & tail'ed files at last, out of the loop, to avoid
-  tail & rm race
-- iterate $nr_cpu times to do the link_unlink_storm, not a fixed number
-- add to quick group
+- fix wrong seq number at the beginning of the test
 
- tests/generic/084     | 104 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/084.out |   2 +
- tests/generic/group   |   1 +
- 3 files changed, 107 insertions(+)
- create mode 100755 tests/generic/084
- create mode 100644 tests/generic/084.out
+ tests/shared/001     | 71 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/shared/001.out |  2 ++
+ tests/shared/group   |  1 +
+ 3 files changed, 74 insertions(+)
+ create mode 100755 tests/shared/001
+ create mode 100644 tests/shared/001.out
 
-diff --git a/tests/generic/084 b/tests/generic/084
+diff --git a/tests/shared/001 b/tests/shared/001
 new file mode 100755
-index 0000000..3fec6c2
+index 0000000..49991fd
 --- /dev/null
-+++ b/tests/generic/084
-@@ -0,0 +1,104 @@
++++ b/tests/shared/001
+@@ -0,0 +1,71 @@
 +#! /bin/bash
-+# FS QA Test No. 084
++# FS QA Test No. 001
 +#
-+# Test hardlink to unlinked file.
++# Test truncate orphan inodes when mounting extN.
++# ext4 used to hit WARNING, this commit fixed the issue
 +#
-+# Regression test for commit:
-+# aae8a97 fs: Don't allow to create hardlink for deleted file
++# 721e3eb ext4: lock i_mutex when truncating orphan inodes
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
@@ -101,84 +89,51 @@ index 0000000..3fec6c2
 +. ./common/filter
 +
 +# real QA test starts here
-+_supported_fs generic
++_supported_fs ext2 ext3 ext4
 +_supported_os Linux
 +_require_scratch
 +
-+link_unlink_storm()
-+{
-+	local src=$1
-+	local target=$2
-+	local i=0
-+
-+	while true; do
-+		ln -f $src $target.$i >/dev/null 2>&1
-+		rm -f $target.$i >/dev/null 2>&1
-+		let i=i+1
-+	done
-+}
-+
 +rm -f $seqres.full
-+nr_cpu=`$here/src/feature -o`
 +echo "Silence is golden"
 +
-+_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mkfs_sized $((16*1024*1024)) >>$seqres.full 2>&1
 +_scratch_mount
 +
-+# create, open & unlinked files so unlinked inode list is not empty
-+for i in `seq 1 $nr_cpu`; do
-+	testfile=$SCRATCH_MNT/$seq.unlinked.$i
-+	touch $testfile
-+	tail -f $testfile &
-+	tail_pids="$tail_pids $!"
-+done
-+# give tail some time to open the file before the file is removed
-+sleep 1
-+rm -f $SCRATCH_MNT/$seq.unlinked.*
++# create a file and get its inode number, usually it's 12, but to be accurate
++testfile=$SCRATCH_MNT/testfile
++touch $testfile
++inode=`ls -i $testfile | awk '{print $1}'`
 +
-+# start link/unlink storm
-+src=$SCRATCH_MNT/$seq.target
-+touch $src
-+for i in `seq 1 $nr_cpu`; do
-+	target=$SCRATCH_MNT/$seq.target.link.$i
-+	link_unlink_storm $src $target &
-+	link_pids="$link_pids $!"
-+done
++# add the inode in orphan inode list
++_scratch_unmount
++debugfs -w -R "set_super_value last_orphan $inode" $SCRATCH_DEV \
++	>>$seqres.full 2>&1
 +
-+# remove & re-create target to race with link/unlink
-+while true; do
-+	rm -f $src
-+	touch $src
-+done &
-+sleep 5
-+kill $! >/dev/null 2>&1
++# mount again to truncate orphan inode, _check_dmesg will catch the WARNING
++_scratch_mount
 +
-+kill $tail_pids $link_pids >/dev/null 2>&1
-+wait $tail_pids $link_pids
-+
-+# all done, no oops/hang expected, _check_filesystems checks SCRATCH_DEV after test
 +status=0
 +exit
-diff --git a/tests/generic/084.out b/tests/generic/084.out
+diff --git a/tests/shared/001.out b/tests/shared/001.out
 new file mode 100644
-index 0000000..022f013
+index 0000000..88678b8
 --- /dev/null
-+++ b/tests/generic/084.out
++++ b/tests/shared/001.out
 @@ -0,0 +1,2 @@
-+QA output created by 084
++QA output created by 001
 +Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 4fe2189..5cbc1fe 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -86,6 +86,7 @@
- 081 auto quick
- 082 auto quick
- 083 rw auto enospc stress
-+084 auto metadata quick
- 088 perms auto quick
- 089 metadata auto
- 091 rw auto quick
+diff --git a/tests/shared/group b/tests/shared/group
+index 429f2b4..0134f81 100644
+--- a/tests/shared/group
++++ b/tests/shared/group
+@@ -3,6 +3,7 @@
+ # - do not start group names with a digit
+ # - comment line before each group is "new" description
+ #
++001 auto quick
+ 006 auto enospc
+ 032 mkfs auto quick
+ 051 acl udf auto quick
 -- 
 1.8.3.1
 
