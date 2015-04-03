@@ -1,48 +1,67 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:40197 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:40250 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751271AbbDCHQr (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 3 Apr 2015 03:16:47 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (Postfix) with ESMTPS id 53185B0424
-	for <fstests@vger.kernel.org>; Fri,  3 Apr 2015 07:16:47 +0000 (UTC)
+	id S1751335AbbDCHRc (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 3 Apr 2015 03:17:32 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	by mx1.redhat.com (Postfix) with ESMTPS id ED1E5B0424
+	for <fstests@vger.kernel.org>; Fri,  3 Apr 2015 07:17:31 +0000 (UTC)
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v2 1/4] generic: test quota handling on remount ro failure
-Date: Fri,  3 Apr 2015 15:15:51 +0800
-Message-Id: <1428045351-10446-1-git-send-email-eguan@redhat.com>
+Subject: [PATCH v3 2/4] generic: test hardlink to unlinked file
+Date: Fri,  3 Apr 2015 15:17:20 +0800
+Message-Id: <1428045440-10612-1-git-send-email-eguan@redhat.com>
+In-Reply-To: <1428045351-10446-1-git-send-email-eguan@redhat.com>
+References: <1428045351-10446-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Remount ro should not turn qouta off unconditionally, even remount ro
-failed, also kernel should not oops on the next succeeded remount ro.
+Kernel commit
+
+aae8a97 fs: Don't allow to create hardlink for deleted file
+
+disabled hardlink to unlinked file.
+
+Test the race between link and unlink, which could end up adding link
+count to an unlinked file and leading to fs corruption on xfs.
+
+Test case was originally written by Eric Sandeen.
 
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
+v3:
+- rebase and re-numbered to generic/084
+- sleep 1 before removing all files being tailed
+
 v2:
-- rebase and re-numbered to generic/082
-- add comments to quotacheck and quotaon
-- add comments to the first remount,ro with unknown option
-- fail the test if the second remount,ro failed
+- create different link file in each iteration in link_unlink_storm(), which
+  is confirmed to be able to reproduce the original corruption
+- remove all newly created & tail'ed files at last, out of the loop, to avoid
+  tail & rm race
+- iterate $nr_cpu times to do the link_unlink_storm, not a fixed number
+- add to quick group
 
- tests/generic/082     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/082.out |  3 +++
- tests/generic/group   |  1 +
- 3 files changed, 77 insertions(+)
- create mode 100755 tests/generic/082
- create mode 100644 tests/generic/082.out
+ tests/generic/084     | 104 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/084.out |   2 +
+ tests/generic/group   |   1 +
+ 3 files changed, 107 insertions(+)
+ create mode 100755 tests/generic/084
+ create mode 100644 tests/generic/084.out
 
-diff --git a/tests/generic/082 b/tests/generic/082
+diff --git a/tests/generic/084 b/tests/generic/084
 new file mode 100755
-index 0000000..ca77c25
+index 0000000..3fec6c2
 --- /dev/null
-+++ b/tests/generic/082
-@@ -0,0 +1,73 @@
++++ b/tests/generic/084
+@@ -0,0 +1,104 @@
 +#! /bin/bash
-+# FS QA Test No. 082
++# FS QA Test No. 084
 +#
-+# Test quota handling on remount ro failure
++# Test hardlink to unlinked file.
++#
++# Regression test for commit:
++# aae8a97 fs: Don't allow to create hardlink for deleted file
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
@@ -80,59 +99,86 @@ index 0000000..ca77c25
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/quota
 +
 +# real QA test starts here
 +_supported_fs generic
 +_supported_os Linux
-+_require_test
 +_require_scratch
-+_require_quota
++
++link_unlink_storm()
++{
++	local src=$1
++	local target=$2
++	local i=0
++
++	while true; do
++		ln -f $src $target.$i >/dev/null 2>&1
++		rm -f $target.$i >/dev/null 2>&1
++		let i=i+1
++	done
++}
 +
 +rm -f $seqres.full
++nr_cpu=`$here/src/feature -o`
++echo "Silence is golden"
 +
 +_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount "-o usrquota,grpquota"
++_scratch_mount
 +
-+# xfs doesn't need these setups and quotacheck even fails on xfs, so just
-+# redirect the output to $seqres.full for debug purpose and ignore the results,
-+# as we check the quota status later anyway.
-+quotacheck -ug $SCRATCH_MNT >>$seqres.full 2>&1
-+quotaon $SCRATCH_MNT >>$seqres.full 2>&1
++# create, open & unlinked files so unlinked inode list is not empty
++for i in `seq 1 $nr_cpu`; do
++	testfile=$SCRATCH_MNT/$seq.unlinked.$i
++	touch $testfile
++	tail -f $testfile &
++	tail_pids="$tail_pids $!"
++done
++# give tail some time to open the file before the file is removed
++sleep 1
++rm -f $SCRATCH_MNT/$seq.unlinked.*
 +
-+# first remount ro with a bad option, a failed remount ro should not disable
-+# quota, but currently xfs doesn't fail in this case, the unknown option is
-+# just ignored, but quota is still on. This may change in future, let's
-+# re-consider the case then.
-+_scratch_mount "-o remount,ro,nosuchopt" >>$seqres.full 2>&1
-+quotaon -p $SCRATCH_MNT | _filter_scratch
-+# second remount should succeed, no oops or hang expected
-+_scratch_mount "-o remount,ro" || _fail "second remount,ro failed"
++# start link/unlink storm
++src=$SCRATCH_MNT/$seq.target
++touch $src
++for i in `seq 1 $nr_cpu`; do
++	target=$SCRATCH_MNT/$seq.target.link.$i
++	link_unlink_storm $src $target &
++	link_pids="$link_pids $!"
++done
 +
-+# success, all done
++# remove & re-create target to race with link/unlink
++while true; do
++	rm -f $src
++	touch $src
++done &
++sleep 5
++kill $! >/dev/null 2>&1
++
++kill $tail_pids $link_pids >/dev/null 2>&1
++wait $tail_pids $link_pids
++
++# all done, no oops/hang expected, _check_filesystems checks SCRATCH_DEV after test
 +status=0
 +exit
-diff --git a/tests/generic/082.out b/tests/generic/082.out
+diff --git a/tests/generic/084.out b/tests/generic/084.out
 new file mode 100644
-index 0000000..1acc7e4
+index 0000000..022f013
 --- /dev/null
-+++ b/tests/generic/082.out
-@@ -0,0 +1,3 @@
-+QA output created by 082
-+group quota on SCRATCH_MNT (SCRATCH_DEV) is on
-+user quota on SCRATCH_MNT (SCRATCH_DEV) is on
++++ b/tests/generic/084.out
+@@ -0,0 +1,2 @@
++QA output created by 084
++Silence is golden
 diff --git a/tests/generic/group b/tests/generic/group
-index 63b883c..4fe2189 100644
+index 4fe2189..5cbc1fe 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -84,6 +84,7 @@
- 079 acl attr ioctl metadata auto quick
- 080 auto quick
+@@ -86,6 +86,7 @@
  081 auto quick
-+082 auto quick
+ 082 auto quick
  083 rw auto enospc stress
++084 auto metadata quick
  088 perms auto quick
  089 metadata auto
+ 091 rw auto quick
 -- 
 1.8.3.1
 
