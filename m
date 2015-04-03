@@ -1,189 +1,200 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:45157 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752683AbbDCMPJ (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 3 Apr 2015 08:15:09 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (Postfix) with ESMTPS id 6CBC9AECCE
-	for <fstests@vger.kernel.org>; Fri,  3 Apr 2015 12:15:09 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [RFC PATCH] fstests: _require_metadata_journaling in _require_dm_flakey
-Date: Fri,  3 Apr 2015 20:14:45 +0800
-Message-Id: <1428063285-31140-1-git-send-email-eguan@redhat.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:36544 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752363AbbDCMuj convert rfc822-to-8bit (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 3 Apr 2015 08:50:39 -0400
+From: Zhao Lei <zhaolei@cn.fujitsu.com>
+References: <9a1c40cb9eceb72543647cb4209269bc4aba86f0.1427706679.git.zhaolei@cn.fujitsu.com> <alpine.LFD.2.00.1503301522190.8076@localhost.localdomain> <018301d06b5b$43d78c60$cb86a520$@cn.fujitsu.com> <alpine.LFD.2.00.1504021545520.3307@localhost.localdomain>
+In-Reply-To: <alpine.LFD.2.00.1504021545520.3307@localhost.localdomain>
+Subject: RE: [PATCH] Fix caller's argument for _require_command()
+Date: Fri, 3 Apr 2015 20:50:32 +0800
+Message-ID: <036601d06e0c$c5611040$502330c0$@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8BIT
+Content-Language: zh-cn
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+To: =?utf-8?Q?'Luk=C3=A1=C5=A1_Czerner'?= <lczerner@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Tests take use of dm-flakey target should require metadata journaling,
-so move _require_metadata_journaling call from each test to
-_require_dm_flakey to ease the process, though it seems unnecessary to
-btrfs or xfs specific tests.
+Hi, Lukas
 
-This change also makes generic/039 generic/059 generic/325 require
-metadata journaling automatically, and any new test that calls
-_require_dm_flakey.
+> -----Original Message-----
+> From: Lukáš Czerner [mailto:lczerner@redhat.com]
+> Sent: Thursday, April 02, 2015 9:47 PM
+> To: Zhao Lei
+> Cc: fstests@vger.kernel.org
+> Subject: RE: [PATCH] Fix caller's argument for _require_command()
+> 
+> On Tue, 31 Mar 2015, Zhao Lei wrote:
+> 
+> > Date: Tue, 31 Mar 2015 10:34:51 +0800
+> > From: Zhao Lei <zhaolei@cn.fujitsu.com>
+> > To: 'Lukáš Czerner' <lczerner@redhat.com>
+> > Cc: fstests@vger.kernel.org
+> > Subject: RE: [PATCH] Fix caller's argument for _require_command()
+> >
+> > Hi, Czerner
+> >
+> > Thanks for review.
+> >
+> > > -----Original Message-----
+> > > From: Lukáš Czerner [mailto:lczerner@redhat.com]
+> > > Sent: Monday, March 30, 2015 9:25 PM
+> > > To: Zhaolei
+> > > Cc: fstests@vger.kernel.org
+> > > Subject: Re: [PATCH] Fix caller's argument for _require_command()
+> > >
+> > > On Mon, 30 Mar 2015, Zhaolei wrote:
+> > >
+> > > > Date: Mon, 30 Mar 2015 17:11:27 +0800
+> > > > From: Zhaolei <zhaolei@cn.fujitsu.com>
+> > > > To: fstests@vger.kernel.org
+> > > > Cc: Zhao Lei <zhaolei@cn.fujitsu.com>
+> > > > Subject: [PATCH] Fix caller's argument for _require_command()
+> > > >
+> > > > From: Zhao Lei <zhaolei@cn.fujitsu.com>
+> > > >
+> > > > _require_command() only accept 2 arguments but some caller misused
+> > > > this function, and caused "not_run" after we limit calling way.
+> > > >
+> > > > This patch fixed above caller.
+> > > >
+> > > > Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
+> > > > ---
+> > > >  common/defrag | 13 +++++++++----
+> > > >  tests/xfs/094 |  2 +-
+> > > >  tests/xfs/103 |  2 +-
+> > > >  tests/xfs/195 |  2 +-
+> > > >  4 files changed, 12 insertions(+), 7 deletions(-)
+> > > >
+> > > > diff --git a/common/defrag b/common/defrag index f923dc0..b44ef98
+> > > > 100644
+> > > > --- a/common/defrag
+> > > > +++ b/common/defrag
+> > > > @@ -22,22 +22,27 @@
+> > > >
+> > > >  _require_defrag()
+> > > >  {
+> > > > +    local defrag_cmd
+> > > > +
+> > > >      case "$FSTYP" in
+> > > >      xfs)
+> > > > -        DEFRAG_PROG="$XFS_FSR_PROG"
+> > > > +        defrag_cmd="$XFS_FSR_PROG"
+> > > > +        DEFRAG_PROG="$defrag_cmd"
+> > > >  	;;
+> > > >      ext4|ext4dev)
+> > > > -        DEFRAG_PROG="$E4DEFRAG_PROG"
+> > > > +        defrag_cmd="$E4DEFRAG_PROG"
+> > > > +        DEFRAG_PROG="$defrag_cmd"
+> > > >  	;;
+> > > >      btrfs)
+> > > > -	DEFRAG_PROG="$BTRFS_UTIL_PROG filesystem defragment"
+> > > > +        defrag_cmd="$BTRFS_UTIL_PROG"
+> > > > +        DEFRAG_PROG="defrag_cmd filesystem defragment"
+> > > >  	;;
+> > > >      *)
+> > > >          _notrun "defragmentation not supported for fstype
+> \"$FSTYP\""
+> > > >  	;;
+> > > >      esac
+> > > >
+> > > > -    _require_command "$DEFRAG_PROG" defragment
+> > > > +    _require_command "$defrag_cmd" defragment
+> > >
+> > > Hi,
+> > >
+> > > what's the point of this change ?
+> > >
+> >
+> > "$DEFRAG_PROG" include program and argument, and can not passed test
+> > of:
+> > [[ -x "$DEFRAG_PROG" ]]
+> > in _require_command().
+> >
+> > > >      _require_xfs_io_command "fiemap"
+> > > >  }
+> > > >
+> > > > diff --git a/tests/xfs/094 b/tests/xfs/094 index cee42d6..5c6e98d
+> > > > 100755
+> > > > --- a/tests/xfs/094
+> > > > +++ b/tests/xfs/094
+> > > > @@ -46,7 +46,7 @@ _supported_fs xfs  _supported_os IRIX Linux
+> > > > _require_realtime  _require_scratch -_require_command
+> > > > "$XFS_IO_PROG" xfs_io
+> > > > +[ -n "$XFS_IO_PROG" ] || _notrun "xfs_io executable not found"
+> > >
+> > > Why ? Do not we get the same result from
+> > >
+> > > _require_command "$XFS_IO_PROG" xfs_io
+> > >
+> > > anyway if the $XFS_IO_PROG isn't set ?
+> > >
+> > In some case, "$XFS_IO_PROG" include both program and argument, and
+> > cause wrong result in _require_command().
+> 
+> It should not include any arguments. It's probably -F argument you have in mind,
+> but that's deprecated and is not needed anymore. So if we have some places
+> where we add those it needs to be fixed there.
+> 
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
- common/rc         | 1 +
- tests/generic/034 | 1 -
- tests/generic/040 | 1 -
- tests/generic/041 | 1 -
- tests/generic/056 | 1 -
- tests/generic/057 | 1 -
- tests/generic/065 | 1 -
- tests/generic/066 | 1 -
- tests/generic/073 | 1 -
- tests/generic/311 | 1 -
- tests/generic/321 | 1 -
- tests/generic/322 | 1 -
- 12 files changed, 1 insertion(+), 11 deletions(-)
+Yes, current code support -F option although it is deprecated:
+ common/rc:
+ # Figure out if we need to add -F ("foreign", deprecated) option to xfs_io
+ xfs_io -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \
+     export XFS_IO_PROG="$XFS_IO_PROG -F"
 
-diff --git a/common/rc b/common/rc
-index c5db0dd..518bf38 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1311,6 +1311,7 @@ _require_dm_flakey()
- {
-     # require SCRATCH_DEV to be a valid block device
-     _require_block_device $SCRATCH_DEV
-+    _require_metadata_journaling $SCRATCH_DEV
-     _require_command "$DMSETUP_PROG" dmsetup
- 
-     modprobe dm-flakey >/dev/null 2>&1
-diff --git a/tests/generic/034 b/tests/generic/034
-index 966b3d2..4ec1db8 100755
---- a/tests/generic/034
-+++ b/tests/generic/034
-@@ -53,7 +53,6 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- _require_dm_flakey
--_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/040 b/tests/generic/040
-index c841fbc..5f10f48 100755
---- a/tests/generic/040
-+++ b/tests/generic/040
-@@ -62,7 +62,6 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- _require_dm_flakey
--_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/041 b/tests/generic/041
-index f38b662..36a6f42 100755
---- a/tests/generic/041
-+++ b/tests/generic/041
-@@ -66,7 +66,6 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- _require_dm_flakey
--_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/056 b/tests/generic/056
-index 8bb1522..9ec00e3 100755
---- a/tests/generic/056
-+++ b/tests/generic/056
-@@ -55,7 +55,6 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- _require_dm_flakey
--_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/057 b/tests/generic/057
-index 3b9f89e..4c0ffd1 100755
---- a/tests/generic/057
-+++ b/tests/generic/057
-@@ -55,7 +55,6 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- _require_dm_flakey
--_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/065 b/tests/generic/065
-index 739a4d5..4fdff5a 100755
---- a/tests/generic/065
-+++ b/tests/generic/065
-@@ -56,7 +56,6 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- _require_dm_flakey
--_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/066 b/tests/generic/066
-index cb36506..3fbce8f 100755
---- a/tests/generic/066
-+++ b/tests/generic/066
-@@ -61,7 +61,6 @@ _need_to_be_root
- _require_scratch
- _require_dm_flakey
- _require_attrs
--_require_metadata_journaling $SCRATCH_DEV
- 
- _crash_and_mount()
- {
-diff --git a/tests/generic/073 b/tests/generic/073
-index 9cf0d90..bf666ec 100755
---- a/tests/generic/073
-+++ b/tests/generic/073
-@@ -56,7 +56,6 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- _require_dm_flakey
--_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/311 b/tests/generic/311
-index d21b6eb..85e52e8 100755
---- a/tests/generic/311
-+++ b/tests/generic/311
-@@ -56,7 +56,6 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch_nocheck
- _require_dm_flakey
--_require_metadata_journaling $SCRATCH_DEV
- 
- # xfs_io is not required for this test, but it's the best way to verify
- # the test system supports fallocate() for allocation
-diff --git a/tests/generic/321 b/tests/generic/321
-index c821a23..3bd6b12 100755
---- a/tests/generic/321
-+++ b/tests/generic/321
-@@ -45,7 +45,6 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch_nocheck
- _require_dm_flakey
--_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/322 b/tests/generic/322
-index 4c0edf6..3ec2387 100755
---- a/tests/generic/322
-+++ b/tests/generic/322
-@@ -45,7 +45,6 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch_nocheck
- _require_dm_flakey
--_require_metadata_journaling $SCRATCH_DEV
- 
- rm -f $seqres.full
- 
--- 
-2.1.0
+Is it used to support old verion of xfs? Or could I remove your above code
+to make _require_command() works with $XFS_IO_PROG?
+
+Thanks
+Zhaolei
+
+> Thanks!
+> -Lukas
+> 
+> >
+> > Thanks
+> > Zhaolei
+> >
+> > > -Lukas
+> > >
+> > > >
+> > > >  _filter_realtime_flag()
+> > > >  {
+> > > > diff --git a/tests/xfs/103 b/tests/xfs/103 index cbe884f..d80dbf2
+> > > > 100755
+> > > > --- a/tests/xfs/103
+> > > > +++ b/tests/xfs/103
+> > > > @@ -66,7 +66,7 @@ _filter_noymlinks_flag()  # real QA test starts
+> > > > here _supported_os Linux IRIX  _supported_fs xfs -_require_command
+> > > > "$XFS_IO_PROG" xfs_io
+> > > > +[ -n "$XFS_IO_PROG" ] || _notrun "xfs_io executable not found"
+> > > >  _require_scratch
+> > > >
+> > > >  _create_scratch
+> > > > diff --git a/tests/xfs/195 b/tests/xfs/195 index 21fcb00..075022d
+> > > > 100755
+> > > > --- a/tests/xfs/195
+> > > > +++ b/tests/xfs/195
+> > > > @@ -65,7 +65,7 @@ _supported_os Linux
+> > > >
+> > > >  _require_test
+> > > >  _require_user
+> > > > -_require_command "$XFSDUMP_PROG" xfsdump
+> > > > +[ "$XFSDUMP_PROG" = "" ] && _notrun "xfsdump not found"
+> > > >
+> > > >  echo "Preparing subtree"
+> > > >  mkdir $TEST_DIR/d
+> > > >
+> >
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org More majordomo info
+> > at  http://vger.kernel.org/majordomo-info.html
+> >
+
 
