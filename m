@@ -1,75 +1,138 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-ig0-f172.google.com ([209.85.213.172]:37010 "EHLO
-	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751953AbbDBVFk (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 2 Apr 2015 17:05:40 -0400
-Received: by igcxg11 with SMTP id xg11so83981004igc.0
-        for <fstests@vger.kernel.org>; Thu, 02 Apr 2015 14:05:40 -0700 (PDT)
-MIME-Version: 1.0
-Reply-To: fdmanana@gmail.com
-In-Reply-To: <1427990168-21503-1-git-send-email-omzg@plexistor.com>
-References: <1427990168-21503-1-git-send-email-omzg@plexistor.com>
-Date: Thu, 2 Apr 2015 22:05:40 +0100
-Message-ID: <CAL3q7H4KPH22AptJaSMFapp1iOECuWHKUjEYznrCwe7mV5SUcg@mail.gmail.com>
-Subject: Re: [PATCH] generic/076: fixed incorrect fsstress parameters
-From: Filipe David Manana <fdmanana@gmail.com>
-Content-Type: text/plain; charset=UTF-8
+Received: from mx1.redhat.com ([209.132.183.28]:40197 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751271AbbDCHQr (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 3 Apr 2015 03:16:47 -0400
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	by mx1.redhat.com (Postfix) with ESMTPS id 53185B0424
+	for <fstests@vger.kernel.org>; Fri,  3 Apr 2015 07:16:47 +0000 (UTC)
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH v2 1/4] generic: test quota handling on remount ro failure
+Date: Fri,  3 Apr 2015 15:15:51 +0800
+Message-Id: <1428045351-10446-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Omer Zilberberg <omzg@plexistor.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Apr 2, 2015 at 4:56 PM, Omer Zilberberg <omzg@plexistor.com> wrote:
-> Test was not run because directory parameter was omitted.
-> Also return value was not tested, so this problem was not caught.
->
-> Signed-off-by: Omer Zilberberg <omzg@plexistor.com>
+Remount ro should not turn qouta off unconditionally, even remount ro
+failed, also kernel should not oops on the next succeeded remount ro.
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-Tested-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+v2:
+- rebase and re-numbered to generic/082
+- add comments to quotacheck and quotaon
+- add comments to the first remount,ro with unknown option
+- fail the test if the second remount,ro failed
 
-> ---
->  tests/generic/076 | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
->
-> diff --git a/tests/generic/076 b/tests/generic/076
-> index aa0aae0..3e1aa1a 100755
-> --- a/tests/generic/076
-> +++ b/tests/generic/076
-> @@ -74,9 +74,11 @@ echo "*** test concurrent block/fs access"
->  cat $SCRATCH_DEV >/dev/null &
->  pid=$!
->
-> -FSSTRESS_ARGS=`_scale_fsstress_args -p 2 -n 2000 $FSSTRESS_AVOID`
-> +FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -p 2 -n 2000 $FSSTRESS_AVOID`
->  echo "run fsstress with args: $FSSTRESS_ARGS" >>$seqres.full
->  $FSSTRESS_PROG $FSSTRESS_ARGS >>$seqres.full
-> +rc=$?
-> +[ $rc != 0 ] && echo "fsstress returned $rc - see $seqres.full"
+ tests/generic/082     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/082.out |  3 +++
+ tests/generic/group   |  1 +
+ 3 files changed, 77 insertions(+)
+ create mode 100755 tests/generic/082
+ create mode 100644 tests/generic/082.out
 
-run_check $FSSTRESS_PROG $FSSTRESS_ARGS
-
-Would also do it (some other tests do this).
-Just a minor detail.
-
-Thanks.
-
->  _lets_get_pidst
->
->  echo "*** done"
-> --
-> 1.9.3
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
+diff --git a/tests/generic/082 b/tests/generic/082
+new file mode 100755
+index 0000000..ca77c25
+--- /dev/null
++++ b/tests/generic/082
+@@ -0,0 +1,73 @@
++#! /bin/bash
++# FS QA Test No. 082
++#
++# Test quota handling on remount ro failure
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/quota
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_test
++_require_scratch
++_require_quota
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount "-o usrquota,grpquota"
++
++# xfs doesn't need these setups and quotacheck even fails on xfs, so just
++# redirect the output to $seqres.full for debug purpose and ignore the results,
++# as we check the quota status later anyway.
++quotacheck -ug $SCRATCH_MNT >>$seqres.full 2>&1
++quotaon $SCRATCH_MNT >>$seqres.full 2>&1
++
++# first remount ro with a bad option, a failed remount ro should not disable
++# quota, but currently xfs doesn't fail in this case, the unknown option is
++# just ignored, but quota is still on. This may change in future, let's
++# re-consider the case then.
++_scratch_mount "-o remount,ro,nosuchopt" >>$seqres.full 2>&1
++quotaon -p $SCRATCH_MNT | _filter_scratch
++# second remount should succeed, no oops or hang expected
++_scratch_mount "-o remount,ro" || _fail "second remount,ro failed"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/082.out b/tests/generic/082.out
+new file mode 100644
+index 0000000..1acc7e4
+--- /dev/null
++++ b/tests/generic/082.out
+@@ -0,0 +1,3 @@
++QA output created by 082
++group quota on SCRATCH_MNT (SCRATCH_DEV) is on
++user quota on SCRATCH_MNT (SCRATCH_DEV) is on
+diff --git a/tests/generic/group b/tests/generic/group
+index 63b883c..4fe2189 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -84,6 +84,7 @@
+ 079 acl attr ioctl metadata auto quick
+ 080 auto quick
+ 081 auto quick
++082 auto quick
+ 083 rw auto enospc stress
+ 088 perms auto quick
+ 089 metadata auto
 -- 
-Filipe David Manana,
+1.8.3.1
 
-"Reasonable men adapt themselves to the world.
- Unreasonable men adapt the world to themselves.
- That's why all progress depends on unreasonable men."
