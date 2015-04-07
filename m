@@ -1,121 +1,190 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42207 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:47478 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755560AbbDGNQI (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 7 Apr 2015 09:16:08 -0400
-Date: Tue, 7 Apr 2015 09:16:06 -0400
+	id S1753909AbbDGNQB (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 7 Apr 2015 09:16:01 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	by mx1.redhat.com (Postfix) with ESMTPS id 0E9298EB2E
+	for <fstests@vger.kernel.org>; Tue,  7 Apr 2015 13:16:01 +0000 (UTC)
+Date: Tue, 7 Apr 2015 09:15:59 -0400
 From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH] generic: LVM and ram disks don't play well
-Message-ID: <20150407131606.GD23208@bfoster.bfoster>
-References: <1428371810-11085-1-git-send-email-david@fromorbit.com>
+Subject: Re: [PATCH v3 4/4] generic: test fs freeze/unfreeze and mount/umount
+ race
+Message-ID: <20150407131559.GC23208@bfoster.bfoster>
+References: <1428045351-10446-1-git-send-email-eguan@redhat.com>
+ <1428045514-10811-1-git-send-email-eguan@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1428371810-11085-1-git-send-email-david@fromorbit.com>
+In-Reply-To: <1428045514-10811-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
+To: Eryu Guan <eguan@redhat.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Apr 07, 2015 at 11:56:50AM +1000, Dave Chinner wrote:
-> From: Dave Chinner <dchinner@redhat.com>
+On Fri, Apr 03, 2015 at 03:18:34PM +0800, Eryu Guan wrote:
+> Exercise fs freeze/unfreeze and mount/umount race, which could lead to
+> use-after-free oops.
 > 
-> The "brd" kernel ram disk abuses BLKFLSBUF to mean "free all memory
-> in the ram drive" when in fact it actually means "flush all dirty
-> buffers to stable storage". the brd driver ignores BLKFLSBUF if
-> there is an active reference to the block device, (e.g. a fs is
-> mounted on it), but when a device is layered over the top of it
-> (e.g. dm-flakey, lvm devices, etc) then the applications and
-> filesystems hold references to the upper device, not the brd device.
-> Hence when the upper device passes down BLKFLSBUF to brd, it removes
-> all the pages in the brd, effectively erasing it.  This causes all
-> sorts of problems.....
+> This commit fixed the issue:
+> 1494583 fix get_active_super()/umount() race
 > 
-> Fix this by black listing "/dev/ramXXX" devices from tests that
-> require DM in some way. The _requires_sane_bdev_flush() macro is
-> called by the _requires_dm.... checks so that we don't have to
-> remember to add this to all new tests that use dm in some way.
+> This test case is based on a script from Monakhov Dmitriy.
 > 
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
 > ---
-
-Sounds good to me... looks like we have a similar check in libxfs
-(platform_flush_device()).
 
 Reviewed-by: Brian Foster <bfoster@redhat.com>
 
->  common/rc         | 34 +++++++++++++++++++++++-----------
->  tests/generic/081 |  1 -
->  2 files changed, 23 insertions(+), 12 deletions(-)
+> v3:
+> - rebase and re-numbered to generic/085
+> - add more comments to explain why results of suspend/resume, mount/umount are ignored
 > 
-> diff --git a/common/rc b/common/rc
-> index c5db0dd..ca8da7f 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1305,26 +1305,38 @@ _require_block_device()
->  	fi
->  }
->  
-> +# brd based ram disks erase the device when they receive a flush command when no
-> +# active references are present. This causes problems for DM devices sitting on
-> +# top of brd devices as DM doesn't hold active references to the brd device.
-> +_require_sane_bdev_flush()
+> v2:
+> - add comments to explain dmsetup is used not xfs_freeze to freeze filesystem
+> - detect failures in setup phase, so test exits not continus with errors
+> 
+>  tests/generic/085     | 106 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/085.out |   2 +
+>  tests/generic/group   |   1 +
+>  3 files changed, 109 insertions(+)
+>  create mode 100755 tests/generic/085
+>  create mode 100644 tests/generic/085.out
+> 
+> diff --git a/tests/generic/085 b/tests/generic/085
+> new file mode 100755
+> index 0000000..8398752
+> --- /dev/null
+> +++ b/tests/generic/085
+> @@ -0,0 +1,106 @@
+> +#! /bin/bash
+> +# FS QA Test No. 085
+> +#
+> +# Exercise fs freeze/unfreeze and mount/umount race, which could lead to
+> +# use-after-free oops.
+> +#
+> +# This commit fixed the issue:
+> +# 1494583 fix get_active_super()/umount() race
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
 > +{
-> +	echo $1 | grep -q "^/dev/ram[0-9]\+$"
-> +	if [ $? -eq 0 ]; then
-> +		_notrun "This test requires a sane block device flush"
-> +	fi
+> +	cd /
+> +	rm -f $tmp.*
+> +	cleanup_dmdev
 > +}
 > +
->  # this test requires the device mapper flakey target
->  #
->  _require_dm_flakey()
->  {
-> -    # require SCRATCH_DEV to be a valid block device
-> -    _require_block_device $SCRATCH_DEV
-> -    _require_command "$DMSETUP_PROG" dmsetup
-> +	# require SCRATCH_DEV to be a valid block device with sane BLKFLSBUF
-> +	# behaviour
-> +	_require_block_device $SCRATCH_DEV
-> +	_require_sane_bdev_flush $SCRATCH_DEV
-> +	_require_command "$DMSETUP_PROG" dmsetup
->  
-> -    modprobe dm-flakey >/dev/null 2>&1
-> -    $DMSETUP_PROG targets | grep flakey >/dev/null 2>&1
-> -    if [ $? -eq 0 ]
-> -    then
-> -	:
-> -    else
-> -	_notrun "This test requires dm flakey support"
-> -    fi
-> +	modprobe dm-flakey >/dev/null 2>&1
-> +	$DMSETUP_PROG targets | grep flakey >/dev/null 2>&1
-> +	if [ $? -ne 0 ]; then
-> +		_notrun "This test requires dm flakey support"
-> +	fi
->  }
->  
->  _require_dm_snapshot()
->  {
-> +	_require_block_device $SCRATCH_DEV
-> +	_require_sane_bdev_flush $SCRATCH_DEV
->  	_require_command "$DMSETUP_PROG" dmsetup
->  	modprobe dm-snapshot >/dev/null 2>&1
->  	$DMSETUP_PROG targets | grep -q snapshot
-> diff --git a/tests/generic/081 b/tests/generic/081
-> index e242c4c..5d38c11 100755
-> --- a/tests/generic/081
-> +++ b/tests/generic/081
-> @@ -50,7 +50,6 @@ _supported_os Linux
->  _require_test
->  _require_scratch_nocheck
->  _require_dm_snapshot
-> -_require_block_device $SCRATCH_DEV
->  _require_command $LVM_PROG lvm
->  
->  echo "Silence is golden"
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch
+> +_require_block_device $SCRATCH_DEV
+> +_require_command $DMSETUP_PROG
+> +_require_freeze
+> +
+> +setup_dmdev()
+> +{
+> +	table="0 $size_in_sector linear $SCRATCH_DEV 0"
+> +	$DMSETUP_PROG create $node --table "$table" >>$seqres.full 2>&1 && \
+> +	$DMSETUP_PROG mknodes >/dev/null 2>&1
+> +	return $?
+> +}
+> +
+> +cleanup_dmdev()
+> +{
+> +	# in case it's still suspended and/or mounted
+> +	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
+> +	$UMOUNT_PROG $lvdev >/dev/null 2>&1
+> +
+> +	$DMSETUP_PROG remove $node >>$seqres.full 2>&1
+> +	$DMSETUP_PROG mknodes >/dev/null 2>&1
+> +}
+> +
+> +rm -f $seqres.full
+> +echo "Silence is golden"
+> +
+> +size=$((256 * 1024 * 1024))
+> +size_in_sector=$((size / 512))
+> +_scratch_mkfs_sized $size >>$seqres.full 2>&1
+> +
+> +node=$seq-test
+> +lvdev=/dev/mapper/$node
+> +setup_dmdev || _fail "setup dm device failed"
+> +
+> +# take use of dmsetup suspend to freeze the fs.
+> +# xfs_freeze/fsfreeze cannot be used in this test, because it can possibly
+> +# freeze the root fs of the host when SCRATCH_MNT is not mounted
+> +#
+> +# And the results of the racing commands (suspend/resume, mount/umount) are not
+> +# important, as long as they're racing with each other. So just throw away the
+> +# outputs and ignore the results.
+> +for ((i=0; i<100; i++)); do
+> +	$DMSETUP_PROG suspend $lvdev >/dev/null 2>&1
+> +	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
+> +done &
+> +pid=$!
+> +for ((i=0; i<100; i++)); do
+> +	$MOUNT_PROG $lvdev $SCRATCH_MNT >/dev/null 2>&1
+> +	$UMOUNT_PROG $lvdev >/dev/null 2>&1
+> +done &
+> +pid="$pid $!"
+> +
+> +wait $pid
+> +
+> +status=0
+> +exit
+> diff --git a/tests/generic/085.out b/tests/generic/085.out
+> new file mode 100644
+> index 0000000..76aef1a
+> --- /dev/null
+> +++ b/tests/generic/085.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 085
+> +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 5cbc1fe..a96b901 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -87,6 +87,7 @@
+>  082 auto quick
+>  083 rw auto enospc stress
+>  084 auto metadata quick
+> +085 auto freeze mount
+>  088 perms auto quick
+>  089 metadata auto
+>  091 rw auto quick
 > -- 
-> 2.0.0
+> 1.8.3.1
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
