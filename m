@@ -1,53 +1,36 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:3382 "EHLO
-	mx0b-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753416AbbDGOp6 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 7 Apr 2015 10:45:58 -0400
-Message-ID: <5523EDA0.9080504@fb.com>
-Date: Tue, 7 Apr 2015 10:45:52 -0400
+Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:2860 "EHLO
+	mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755106AbbDGPJe (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 7 Apr 2015 11:09:34 -0400
+Message-ID: <5523F317.5010007@fb.com>
+Date: Tue, 7 Apr 2015 11:09:11 -0400
 From: Josef Bacik <jbacik@fb.com>
 MIME-Version: 1.0
-Subject: Re: [dm-devel] [PATCH 1/3] dm: log writes target
-References: <1426797070-27463-1-git-send-email-jbacik@fb.com> <1426797070-27463-2-git-send-email-jbacik@fb.com> <20150323180245.GE3172@redhat.com>
-In-Reply-To: <20150323180245.GE3172@redhat.com>
+Subject: Re: [PATCH v2] fstests: regression test for btrfs file range cloning
+References: <1427481068-27414-1-git-send-email-fdmanana@suse.com> <1427971769-13224-1-git-send-email-fdmanana@suse.com>
+In-Reply-To: <1427971769-13224-1-git-send-email-fdmanana@suse.com>
 Content-Type: text/plain; charset="windows-1252"; format=flowed
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Vivek Goyal <vgoyal@redhat.com>
-Cc: linux-btrfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, dm-devel@redhat.com, zab@redhat.com, fstests@vger.kernel.org
+To: Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 03/23/2015 02:02 PM, Vivek Goyal wrote:
-> On Thu, Mar 19, 2015 at 04:31:08PM -0400, Josef Bacik wrote:
+On 04/02/2015 06:49 AM, Filipe Manana wrote:
+> Test btrfs file range cloning with the same file as a source and
+> destination.
 >
-> [..]
->> + * We log writes only after they have been flushed, this makes the log describe
->> + * close to the order in which the data hits the actual disk, not its cache.  So
->> + * for example the following sequence (W means write, C means complete)
->> + *
->> + * Wa,Wb,Wc,Cc,Ca,FLUSH,FUAd,Cb,CFLUSH,CFUAd
->> + *
->> + * Would result in the log looking like this
->> + *
->> + * c,a,flush,fuad,b,<other writes>,<next flush>
->> + *
+> This tests a specific scenario where the extent layout of the file
+> confused the clone ioctl implementation making it return -EEXIST to
+> userspace. This issue was fixed by the following linux kernel patch:
 >
-> A minor nit, Should this sequence be following.
+>     Btrfs: fix range cloning when same inode used as source and destination
 >
-> c,a,b, flush,fuad,<other writes>,<next flush>
->
-> when flush completed by that time write of b has completed too. So it
-> should be written first?
->
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-So we want to catch file systems behaving badly by not waiting for the 
-IO they care about to complete before issuing their flush, so we take 
-the super pessimistic view that only IO that has completed by FLUSH 
-issue time can truly be safe.  For all we know the flush could have 
-happened first and we just happen to get the endio called for b first 
-instead of the flush, so to make it mostly likely that we catch fs bugs 
-we enforce this idea that only completed IO can be sure to have been 
-flushed at flush submit time.  Thanks,
+Reviewed-by: Josef Bacik <jbacik@fb.com>
+
+Thanks,
 
 Josef
-
