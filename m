@@ -1,197 +1,121 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43590 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:42207 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932072AbbDGNP4 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 7 Apr 2015 09:15:56 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t37DFt7w027627
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <fstests@vger.kernel.org>; Tue, 7 Apr 2015 09:15:55 -0400
-Date: Tue, 7 Apr 2015 09:15:54 -0400
+	id S1755560AbbDGNQI (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 7 Apr 2015 09:16:08 -0400
+Date: Tue, 7 Apr 2015 09:16:06 -0400
 From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH v3 2/4] generic: test hardlink to unlinked file
-Message-ID: <20150407131554.GB23208@bfoster.bfoster>
-References: <1428045351-10446-1-git-send-email-eguan@redhat.com>
- <1428045440-10612-1-git-send-email-eguan@redhat.com>
+Subject: Re: [PATCH] generic: LVM and ram disks don't play well
+Message-ID: <20150407131606.GD23208@bfoster.bfoster>
+References: <1428371810-11085-1-git-send-email-david@fromorbit.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1428045440-10612-1-git-send-email-eguan@redhat.com>
+In-Reply-To: <1428371810-11085-1-git-send-email-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
+To: Dave Chinner <david@fromorbit.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Apr 03, 2015 at 03:17:20PM +0800, Eryu Guan wrote:
-> Kernel commit
+On Tue, Apr 07, 2015 at 11:56:50AM +1000, Dave Chinner wrote:
+> From: Dave Chinner <dchinner@redhat.com>
 > 
-> aae8a97 fs: Don't allow to create hardlink for deleted file
+> The "brd" kernel ram disk abuses BLKFLSBUF to mean "free all memory
+> in the ram drive" when in fact it actually means "flush all dirty
+> buffers to stable storage". the brd driver ignores BLKFLSBUF if
+> there is an active reference to the block device, (e.g. a fs is
+> mounted on it), but when a device is layered over the top of it
+> (e.g. dm-flakey, lvm devices, etc) then the applications and
+> filesystems hold references to the upper device, not the brd device.
+> Hence when the upper device passes down BLKFLSBUF to brd, it removes
+> all the pages in the brd, effectively erasing it.  This causes all
+> sorts of problems.....
 > 
-> disabled hardlink to unlinked file.
+> Fix this by black listing "/dev/ramXXX" devices from tests that
+> require DM in some way. The _requires_sane_bdev_flush() macro is
+> called by the _requires_dm.... checks so that we don't have to
+> remember to add this to all new tests that use dm in some way.
 > 
-> Test the race between link and unlink, which could end up adding link
-> count to an unlinked file and leading to fs corruption on xfs.
-> 
-> Test case was originally written by Eric Sandeen.
-> 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> Signed-off-by: Dave Chinner <dchinner@redhat.com>
 > ---
 
-Looks good and runs fine for me now:
+Sounds good to me... looks like we have a similar check in libxfs
+(platform_flush_device()).
 
 Reviewed-by: Brian Foster <bfoster@redhat.com>
 
-> v3:
-> - rebase and re-numbered to generic/084
-> - sleep 1 before removing all files being tailed
+>  common/rc         | 34 +++++++++++++++++++++++-----------
+>  tests/generic/081 |  1 -
+>  2 files changed, 23 insertions(+), 12 deletions(-)
 > 
-> v2:
-> - create different link file in each iteration in link_unlink_storm(), which
->   is confirmed to be able to reproduce the original corruption
-> - remove all newly created & tail'ed files at last, out of the loop, to avoid
->   tail & rm race
-> - iterate $nr_cpu times to do the link_unlink_storm, not a fixed number
-> - add to quick group
-> 
->  tests/generic/084     | 104 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/084.out |   2 +
->  tests/generic/group   |   1 +
->  3 files changed, 107 insertions(+)
->  create mode 100755 tests/generic/084
->  create mode 100644 tests/generic/084.out
-> 
-> diff --git a/tests/generic/084 b/tests/generic/084
-> new file mode 100755
-> index 0000000..3fec6c2
-> --- /dev/null
-> +++ b/tests/generic/084
-> @@ -0,0 +1,104 @@
-> +#! /bin/bash
-> +# FS QA Test No. 084
-> +#
-> +# Test hardlink to unlinked file.
-> +#
-> +# Regression test for commit:
-> +# aae8a97 fs: Don't allow to create hardlink for deleted file
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
+> diff --git a/common/rc b/common/rc
+> index c5db0dd..ca8da7f 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1305,26 +1305,38 @@ _require_block_device()
+>  	fi
+>  }
+>  
+> +# brd based ram disks erase the device when they receive a flush command when no
+> +# active references are present. This causes problems for DM devices sitting on
+> +# top of brd devices as DM doesn't hold active references to the brd device.
+> +_require_sane_bdev_flush()
 > +{
-> +	cd /
-> +	rm -f $tmp.*
+> +	echo $1 | grep -q "^/dev/ram[0-9]\+$"
+> +	if [ $? -eq 0 ]; then
+> +		_notrun "This test requires a sane block device flush"
+> +	fi
 > +}
 > +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch
-> +
-> +link_unlink_storm()
-> +{
-> +	local src=$1
-> +	local target=$2
-> +	local i=0
-> +
-> +	while true; do
-> +		ln -f $src $target.$i >/dev/null 2>&1
-> +		rm -f $target.$i >/dev/null 2>&1
-> +		let i=i+1
-> +	done
-> +}
-> +
-> +rm -f $seqres.full
-> +nr_cpu=`$here/src/feature -o`
-> +echo "Silence is golden"
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount
-> +
-> +# create, open & unlinked files so unlinked inode list is not empty
-> +for i in `seq 1 $nr_cpu`; do
-> +	testfile=$SCRATCH_MNT/$seq.unlinked.$i
-> +	touch $testfile
-> +	tail -f $testfile &
-> +	tail_pids="$tail_pids $!"
-> +done
-> +# give tail some time to open the file before the file is removed
-> +sleep 1
-> +rm -f $SCRATCH_MNT/$seq.unlinked.*
-> +
-> +# start link/unlink storm
-> +src=$SCRATCH_MNT/$seq.target
-> +touch $src
-> +for i in `seq 1 $nr_cpu`; do
-> +	target=$SCRATCH_MNT/$seq.target.link.$i
-> +	link_unlink_storm $src $target &
-> +	link_pids="$link_pids $!"
-> +done
-> +
-> +# remove & re-create target to race with link/unlink
-> +while true; do
-> +	rm -f $src
-> +	touch $src
-> +done &
-> +sleep 5
-> +kill $! >/dev/null 2>&1
-> +
-> +kill $tail_pids $link_pids >/dev/null 2>&1
-> +wait $tail_pids $link_pids
-> +
-> +# all done, no oops/hang expected, _check_filesystems checks SCRATCH_DEV after test
-> +status=0
-> +exit
-> diff --git a/tests/generic/084.out b/tests/generic/084.out
-> new file mode 100644
-> index 0000000..022f013
-> --- /dev/null
-> +++ b/tests/generic/084.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 084
-> +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 4fe2189..5cbc1fe 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -86,6 +86,7 @@
->  081 auto quick
->  082 auto quick
->  083 rw auto enospc stress
-> +084 auto metadata quick
->  088 perms auto quick
->  089 metadata auto
->  091 rw auto quick
+>  # this test requires the device mapper flakey target
+>  #
+>  _require_dm_flakey()
+>  {
+> -    # require SCRATCH_DEV to be a valid block device
+> -    _require_block_device $SCRATCH_DEV
+> -    _require_command "$DMSETUP_PROG" dmsetup
+> +	# require SCRATCH_DEV to be a valid block device with sane BLKFLSBUF
+> +	# behaviour
+> +	_require_block_device $SCRATCH_DEV
+> +	_require_sane_bdev_flush $SCRATCH_DEV
+> +	_require_command "$DMSETUP_PROG" dmsetup
+>  
+> -    modprobe dm-flakey >/dev/null 2>&1
+> -    $DMSETUP_PROG targets | grep flakey >/dev/null 2>&1
+> -    if [ $? -eq 0 ]
+> -    then
+> -	:
+> -    else
+> -	_notrun "This test requires dm flakey support"
+> -    fi
+> +	modprobe dm-flakey >/dev/null 2>&1
+> +	$DMSETUP_PROG targets | grep flakey >/dev/null 2>&1
+> +	if [ $? -ne 0 ]; then
+> +		_notrun "This test requires dm flakey support"
+> +	fi
+>  }
+>  
+>  _require_dm_snapshot()
+>  {
+> +	_require_block_device $SCRATCH_DEV
+> +	_require_sane_bdev_flush $SCRATCH_DEV
+>  	_require_command "$DMSETUP_PROG" dmsetup
+>  	modprobe dm-snapshot >/dev/null 2>&1
+>  	$DMSETUP_PROG targets | grep -q snapshot
+> diff --git a/tests/generic/081 b/tests/generic/081
+> index e242c4c..5d38c11 100755
+> --- a/tests/generic/081
+> +++ b/tests/generic/081
+> @@ -50,7 +50,6 @@ _supported_os Linux
+>  _require_test
+>  _require_scratch_nocheck
+>  _require_dm_snapshot
+> -_require_block_device $SCRATCH_DEV
+>  _require_command $LVM_PROG lvm
+>  
+>  echo "Silence is golden"
 > -- 
-> 1.8.3.1
+> 2.0.0
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
