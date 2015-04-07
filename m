@@ -1,73 +1,63 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47478 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:39599 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753909AbbDGNQB (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 7 Apr 2015 09:16:01 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (Postfix) with ESMTPS id 0E9298EB2E
-	for <fstests@vger.kernel.org>; Tue,  7 Apr 2015 13:16:01 +0000 (UTC)
-Date: Tue, 7 Apr 2015 09:15:59 -0400
+	id S1755525AbbDGNPt (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 7 Apr 2015 09:15:49 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t37DFmKi002523
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <fstests@vger.kernel.org>; Tue, 7 Apr 2015 09:15:49 -0400
+Date: Tue, 7 Apr 2015 09:15:46 -0400
 From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH v3 4/4] generic: test fs freeze/unfreeze and mount/umount
- race
-Message-ID: <20150407131559.GC23208@bfoster.bfoster>
+Subject: Re: [PATCH v2 1/4] generic: test quota handling on remount ro failure
+Message-ID: <20150407131546.GA23208@bfoster.bfoster>
 References: <1428045351-10446-1-git-send-email-eguan@redhat.com>
- <1428045514-10811-1-git-send-email-eguan@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1428045514-10811-1-git-send-email-eguan@redhat.com>
+In-Reply-To: <1428045351-10446-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Apr 03, 2015 at 03:18:34PM +0800, Eryu Guan wrote:
-> Exercise fs freeze/unfreeze and mount/umount race, which could lead to
-> use-after-free oops.
-> 
-> This commit fixed the issue:
-> 1494583 fix get_active_super()/umount() race
-> 
-> This test case is based on a script from Monakhov Dmitriy.
+On Fri, Apr 03, 2015 at 03:15:51PM +0800, Eryu Guan wrote:
+> Remount ro should not turn qouta off unconditionally, even remount ro
+> failed, also kernel should not oops on the next succeeded remount ro.
 > 
 > Signed-off-by: Eryu Guan <eguan@redhat.com>
 > ---
 
+Looks good to me:
+
 Reviewed-by: Brian Foster <bfoster@redhat.com>
 
-> v3:
-> - rebase and re-numbered to generic/085
-> - add more comments to explain why results of suspend/resume, mount/umount are ignored
-> 
 > v2:
-> - add comments to explain dmsetup is used not xfs_freeze to freeze filesystem
-> - detect failures in setup phase, so test exits not continus with errors
+> - rebase and re-numbered to generic/082
+> - add comments to quotacheck and quotaon
+> - add comments to the first remount,ro with unknown option
+> - fail the test if the second remount,ro failed
 > 
->  tests/generic/085     | 106 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/085.out |   2 +
->  tests/generic/group   |   1 +
->  3 files changed, 109 insertions(+)
->  create mode 100755 tests/generic/085
->  create mode 100644 tests/generic/085.out
+>  tests/generic/082     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/082.out |  3 +++
+>  tests/generic/group   |  1 +
+>  3 files changed, 77 insertions(+)
+>  create mode 100755 tests/generic/082
+>  create mode 100644 tests/generic/082.out
 > 
-> diff --git a/tests/generic/085 b/tests/generic/085
+> diff --git a/tests/generic/082 b/tests/generic/082
 > new file mode 100755
-> index 0000000..8398752
+> index 0000000..ca77c25
 > --- /dev/null
-> +++ b/tests/generic/085
-> @@ -0,0 +1,106 @@
+> +++ b/tests/generic/082
+> @@ -0,0 +1,73 @@
 > +#! /bin/bash
-> +# FS QA Test No. 085
+> +# FS QA Test No. 082
 > +#
-> +# Exercise fs freeze/unfreeze and mount/umount race, which could lead to
-> +# use-after-free oops.
-> +#
-> +# This commit fixed the issue:
-> +# 1494583 fix get_active_super()/umount() race
+> +# Test quota handling on remount ro failure
 > +#
 > +#-----------------------------------------------------------------------
-> +# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
+> +# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
 > +#
 > +# This program is free software; you can redistribute it and/or
 > +# modify it under the terms of the GNU General Public License as
@@ -97,92 +87,64 @@ Reviewed-by: Brian Foster <bfoster@redhat.com>
 > +{
 > +	cd /
 > +	rm -f $tmp.*
-> +	cleanup_dmdev
 > +}
 > +
 > +# get standard environment, filters and checks
 > +. ./common/rc
 > +. ./common/filter
+> +. ./common/quota
 > +
 > +# real QA test starts here
 > +_supported_fs generic
 > +_supported_os Linux
+> +_require_test
 > +_require_scratch
-> +_require_block_device $SCRATCH_DEV
-> +_require_command $DMSETUP_PROG
-> +_require_freeze
-> +
-> +setup_dmdev()
-> +{
-> +	table="0 $size_in_sector linear $SCRATCH_DEV 0"
-> +	$DMSETUP_PROG create $node --table "$table" >>$seqres.full 2>&1 && \
-> +	$DMSETUP_PROG mknodes >/dev/null 2>&1
-> +	return $?
-> +}
-> +
-> +cleanup_dmdev()
-> +{
-> +	# in case it's still suspended and/or mounted
-> +	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
-> +	$UMOUNT_PROG $lvdev >/dev/null 2>&1
-> +
-> +	$DMSETUP_PROG remove $node >>$seqres.full 2>&1
-> +	$DMSETUP_PROG mknodes >/dev/null 2>&1
-> +}
+> +_require_quota
 > +
 > +rm -f $seqres.full
-> +echo "Silence is golden"
 > +
-> +size=$((256 * 1024 * 1024))
-> +size_in_sector=$((size / 512))
-> +_scratch_mkfs_sized $size >>$seqres.full 2>&1
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_scratch_mount "-o usrquota,grpquota"
 > +
-> +node=$seq-test
-> +lvdev=/dev/mapper/$node
-> +setup_dmdev || _fail "setup dm device failed"
+> +# xfs doesn't need these setups and quotacheck even fails on xfs, so just
+> +# redirect the output to $seqres.full for debug purpose and ignore the results,
+> +# as we check the quota status later anyway.
+> +quotacheck -ug $SCRATCH_MNT >>$seqres.full 2>&1
+> +quotaon $SCRATCH_MNT >>$seqres.full 2>&1
 > +
-> +# take use of dmsetup suspend to freeze the fs.
-> +# xfs_freeze/fsfreeze cannot be used in this test, because it can possibly
-> +# freeze the root fs of the host when SCRATCH_MNT is not mounted
-> +#
-> +# And the results of the racing commands (suspend/resume, mount/umount) are not
-> +# important, as long as they're racing with each other. So just throw away the
-> +# outputs and ignore the results.
-> +for ((i=0; i<100; i++)); do
-> +	$DMSETUP_PROG suspend $lvdev >/dev/null 2>&1
-> +	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
-> +done &
-> +pid=$!
-> +for ((i=0; i<100; i++)); do
-> +	$MOUNT_PROG $lvdev $SCRATCH_MNT >/dev/null 2>&1
-> +	$UMOUNT_PROG $lvdev >/dev/null 2>&1
-> +done &
-> +pid="$pid $!"
+> +# first remount ro with a bad option, a failed remount ro should not disable
+> +# quota, but currently xfs doesn't fail in this case, the unknown option is
+> +# just ignored, but quota is still on. This may change in future, let's
+> +# re-consider the case then.
+> +_scratch_mount "-o remount,ro,nosuchopt" >>$seqres.full 2>&1
+> +quotaon -p $SCRATCH_MNT | _filter_scratch
+> +# second remount should succeed, no oops or hang expected
+> +_scratch_mount "-o remount,ro" || _fail "second remount,ro failed"
 > +
-> +wait $pid
-> +
+> +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/generic/085.out b/tests/generic/085.out
+> diff --git a/tests/generic/082.out b/tests/generic/082.out
 > new file mode 100644
-> index 0000000..76aef1a
+> index 0000000..1acc7e4
 > --- /dev/null
-> +++ b/tests/generic/085.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 085
-> +Silence is golden
+> +++ b/tests/generic/082.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 082
+> +group quota on SCRATCH_MNT (SCRATCH_DEV) is on
+> +user quota on SCRATCH_MNT (SCRATCH_DEV) is on
 > diff --git a/tests/generic/group b/tests/generic/group
-> index 5cbc1fe..a96b901 100644
+> index 63b883c..4fe2189 100644
 > --- a/tests/generic/group
 > +++ b/tests/generic/group
-> @@ -87,6 +87,7 @@
->  082 auto quick
+> @@ -84,6 +84,7 @@
+>  079 acl attr ioctl metadata auto quick
+>  080 auto quick
+>  081 auto quick
+> +082 auto quick
 >  083 rw auto enospc stress
->  084 auto metadata quick
-> +085 auto freeze mount
 >  088 perms auto quick
 >  089 metadata auto
->  091 rw auto quick
 > -- 
 > 1.8.3.1
 > 
