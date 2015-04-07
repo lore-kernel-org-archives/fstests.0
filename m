@@ -1,96 +1,229 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-ig0-f181.google.com ([209.85.213.181]:35873 "EHLO
-	mail-ig0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750994AbbDGJ1Q (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 7 Apr 2015 05:27:16 -0400
-Received: by igblo3 with SMTP id lo3so6735063igb.1
-        for <fstests@vger.kernel.org>; Tue, 07 Apr 2015 02:27:16 -0700 (PDT)
+Received: from mail-ig0-f180.google.com ([209.85.213.180]:36338 "EHLO
+	mail-ig0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753173AbbDGJwI (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 7 Apr 2015 05:52:08 -0400
 MIME-Version: 1.0
 Reply-To: fdmanana@gmail.com
-In-Reply-To: <20150407022937.GB13731@dastard>
-References: <1427990168-21503-1-git-send-email-omzg@plexistor.com>
-	<CAL3q7H4KPH22AptJaSMFapp1iOECuWHKUjEYznrCwe7mV5SUcg@mail.gmail.com>
-	<20150407022937.GB13731@dastard>
-Date: Tue, 7 Apr 2015 10:27:16 +0100
-Message-ID: <CAL3q7H4jncNw5L0HniAi-TQtGYNbEX_L=Yq5VmDexrjWMKrwBA@mail.gmail.com>
-Subject: Re: [PATCH] generic/076: fixed incorrect fsstress parameters
+In-Reply-To: <1428397482-13658-2-git-send-email-quwenruo@cn.fujitsu.com>
+References: <1428397482-13658-1-git-send-email-quwenruo@cn.fujitsu.com>
+	<1428397482-13658-2-git-send-email-quwenruo@cn.fujitsu.com>
+Date: Tue, 7 Apr 2015 10:52:07 +0100
+Message-ID: <CAL3q7H5JF9hRFBasU1DyW0uoW3MQ0tbByjEMru-KmbKp7Was4A@mail.gmail.com>
+Subject: Re: [PATCH v3 RESEND 2/2] fstests: btrfs/089: Test for incorrect
+ exclusive refernce number after file clone.
 From: Filipe David Manana <fdmanana@gmail.com>
 Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Omer Zilberberg <omzg@plexistor.com>, fstests@vger.kernel.org
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Apr 7, 2015 at 3:29 AM, Dave Chinner <david@fromorbit.com> wrote:
-> On Thu, Apr 02, 2015 at 10:05:40PM +0100, Filipe David Manana wrote:
->> On Thu, Apr 2, 2015 at 4:56 PM, Omer Zilberberg <omzg@plexistor.com> wrote:
->> > Test was not run because directory parameter was omitted.
->> > Also return value was not tested, so this problem was not caught.
->> >
->> > Signed-off-by: Omer Zilberberg <omzg@plexistor.com>
->>
->> Reviewed-by: Filipe Manana <fdmanana@suse.com>
->> Tested-by: Filipe Manana <fdmanana@suse.com>
->>
->> > ---
->> >  tests/generic/076 | 4 +++-
->> >  1 file changed, 3 insertions(+), 1 deletion(-)
->> >
->> > diff --git a/tests/generic/076 b/tests/generic/076
->> > index aa0aae0..3e1aa1a 100755
->> > --- a/tests/generic/076
->> > +++ b/tests/generic/076
->> > @@ -74,9 +74,11 @@ echo "*** test concurrent block/fs access"
->> >  cat $SCRATCH_DEV >/dev/null &
->> >  pid=$!
->> >
->> > -FSSTRESS_ARGS=`_scale_fsstress_args -p 2 -n 2000 $FSSTRESS_AVOID`
->> > +FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -p 2 -n 2000 $FSSTRESS_AVOID`
->> >  echo "run fsstress with args: $FSSTRESS_ARGS" >>$seqres.full
->> >  $FSSTRESS_PROG $FSSTRESS_ARGS >>$seqres.full
->> > +rc=$?
->> > +[ $rc != 0 ] && echo "fsstress returned $rc - see $seqres.full"
->>
->> run_check $FSSTRESS_PROG $FSSTRESS_ARGS
->>
->> Would also do it (some other tests do this).
+On Tue, Apr 7, 2015 at 10:04 AM, Qu Wenruo <quwenruo@cn.fujitsu.com> wrote:
+> [Problem]
+> Since commit fcebe4562dec83b3f8d308 ("Btrfs: rework qgroup accounting"),
+> quota data update is delayed after delayed_ref calculation, and lacks
+> correct protection to detect root reference which shouldn't be counted
+> in current sequence number but already written into extent backref.
 >
-> Please don't encourage run_check usage - it's cargo-cult programming
-> at it's worst. It stops people from thinking about what errors they
-> actually need to care about and capture exactly via other methods
-> (such as output filtering).
+> This makes exclusive reference not decreased correctly and give incorrect
+> result.
 >
-> To demonstrate: fsstress only ever returns non-zero when there's a
-> config or setup problem.
+> [Test procedure]
+> 1. Create a btrfs with 3 subvolumes, quota enabled and rescanned.
+> 2. Create a file in 1st subvolume
+> 3. Clone the file to 2nd and 3rd subvolume
+> 4. Sync the fs to reflect the changes in qgroup.
+> 5. Check the qgroup data
+>
+> [Expected result]
+> None of the subvolume has exclusive reference to the file.
+>
+> [Actual result]
+> The first subvolume still have exclusive reference to the file.
+>
+> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 
-That's exactly why here I don't see a problem with using run_check.
-Had we been using it, or checking the exit value with some other way,
-we would have know the test wasn't doing what is supposed to do (as
-Omer replied).
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Tested-by: Filipe Manana <fdmanana@suse.com>
 
-Sure run_check aborts the test immediately if an error happens,
-preventing further test code from running, but in this case the test
-is not doing anything else after calling fsstress.
+Thanks Qu, only a couple minor nitpicks below.
 
-Thanks.
+> ---
+> changelog:
+> v2:
+>    Redirect error output of dd to seqres.full for debug in case dd
+>    failed.
+> v3:
+>    Add support and check for old kernel which doesn't support
+>    noinode_cache mount option.
+>    Change nodesize to 64K to support arch whose page size can be larger
+>    than 4K.
+> RESEND:
+>    Rebase to latest xfstests.
+> ---
+> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+> ---
+>  tests/btrfs/089     | 103 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/089.out |   5 +++
+>  tests/btrfs/group   |   1 +
+>  3 files changed, 109 insertions(+)
+>  create mode 100755 tests/btrfs/089
+>  create mode 100644 tests/btrfs/089.out
+>
+> diff --git a/tests/btrfs/089 b/tests/btrfs/089
+> new file mode 100755
+> index 0000000..2f1adac
+> --- /dev/null
+> +++ b/tests/btrfs/089
+> @@ -0,0 +1,103 @@
+> +#! /bin/bash
+> +# FS QA Test No. 089
+> +#
+> +# Test for incorrect exclusive reference count after cloning file
+> +# between subvolumes.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2015 Fujitsu. All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1       # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +    rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +
+> +_need_to_be_root
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
+> +_require_cp_reflink
+> +
+> +rm -f $seqres.full
+> +
+> +# use largest node/leaf size (64K) to allow the test to be run on arch with
+> +# page size > 4k.
+> +NODESIZE=65536
+> +SUPPORT_NOINODE_CACHE="yes"
+> +
+> +run_check _scratch_mkfs "--nodesize $NODESIZE"
+> +
+> +# inode cache will also take space in fs tree, disable them to get consistent
+> +# result.
+> +# discard error output since we will check return value manually.
+> +_scratch_mount "-o noinode_cache" 2> /dev/null
+> +
+> +# Check for old kernel which doesn't support 'noinode_cache' mount option
+> +if [ $? -ne 0 ]
+> +then
 
-> This basically never happens once the test
-> has been written. Further, fsstress does not collect runtime errors
-> from child processes because it is designed to trigger errors and
-> still continue onwards. Finally, the output stream is really only
-> debug information, so that's not useful for anythign other than
-> debugging, either.
->
-> Hence there is never any need to check exit status of fsstress, nor
-> do anything with the output stream except redirect it to the
-> debug output file or the bit bucket.
->
-> Cheers,
->
-> Dave.
+Should be:
+
+if [ $? -ne 0 ]; then
+   ....
+fi
+
+Which is the preferred style for fstests.
+
+> +       support_noinode_cache="no"
+> +       run_check _scratch_mount
+> +fi
+> +
+> +_run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv1
+> +_run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv2
+> +_run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv3
+> +
+> +_run_btrfs_util_prog quota enable $SCRATCH_MNT
+> +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
+> +
+> +# if we don't support noinode_cache mount option, then we should double check
+> +# whether inode cache is enabled before executing the real test payload.
+> +if [ $SUPPORT_NOINODE_CACHE == "no" ]; then
+> +       EMPTY_SIZE=`$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | \
+> +               $SED_PROG -n '/[0-9]/p' | $AWK_PROG '{print $2}' | head -n1`
+> +       if [ $EMPTY_SIZE != $NODESIZE ]; then
+> +               _notrun "Kernel doesn't support to disable inode cache"
+> +       fi
+> +fi
+> +
+> +dd if=/dev/zero of=$SCRATCH_MNT/subv1/file1 bs=4K count=64 2>> $seqres.full
+
+Sorry I didn't ask in previous versions of the patch, but is dd really
+necessary here for some reason? Wouldn't the following work:
+
+$XFS_IO_PROG -f -c "pwrite 0 256K" $SCRATCH_MNT/subv1/file1 | _filter_xfs_io
+
+I tried your test, and using xfs_io worked as well here.
+
+> +cp --reflink $SCRATCH_MNT/subv1/file1 $SCRATCH_MNT/subv2/file1
+> +cp --reflink $SCRATCH_MNT/subv1/file1 $SCRATCH_MNT/subv3/file1
+> +
+> +# Current btrfs use tree search ioctl to show quota, which will only show info
+> +# in commit tree. So need to sync to update the qgroup commit tree.
+> +sync
+> +
+> +units=`_btrfs_qgroup_units`
+> +$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | $SED_PROG -n '/[0-9]/p' | \
+> +       $AWK_PROG '{print $2" "$3}'
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/089.out b/tests/btrfs/089.out
+> new file mode 100644
+> index 0000000..09a1077
+> --- /dev/null
+> +++ b/tests/btrfs/089.out
+> @@ -0,0 +1,5 @@
+> +QA output created by 089
+> +65536 65536
+> +327680 65536
+> +327680 65536
+> +327680 65536
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index a053d14..82f6fe6 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -90,3 +90,4 @@
+>  085 auto quick metadata subvol
+>  086 auto quick clone
+>  088 auto quick
+> +089 auto quick qgroup
 > --
-> Dave Chinner
-> david@fromorbit.com
+> 2.3.5
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
 
