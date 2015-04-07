@@ -1,159 +1,96 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-ig0-f179.google.com ([209.85.213.179]:35857 "EHLO
-	mail-ig0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752886AbbDGJZu (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 7 Apr 2015 05:25:50 -0400
+Received: from mail-ig0-f181.google.com ([209.85.213.181]:35873 "EHLO
+	mail-ig0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750994AbbDGJ1Q (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 7 Apr 2015 05:27:16 -0400
+Received: by igblo3 with SMTP id lo3so6735063igb.1
+        for <fstests@vger.kernel.org>; Tue, 07 Apr 2015 02:27:16 -0700 (PDT)
 MIME-Version: 1.0
 Reply-To: fdmanana@gmail.com
-In-Reply-To: <1428397482-13658-1-git-send-email-quwenruo@cn.fujitsu.com>
-References: <1428397482-13658-1-git-send-email-quwenruo@cn.fujitsu.com>
-Date: Tue, 7 Apr 2015 10:25:49 +0100
-Message-ID: <CAL3q7H5xTcsJ0kqNjnuc+_iTA=CpdR7TCzcwJj9vWyoKuwh3Fg@mail.gmail.com>
-Subject: Re: [PATCH RESEND 1/2] fstests: btrfs/088: Check return value of
- "btrfs filesystem show" command executed on umounted device.
+In-Reply-To: <20150407022937.GB13731@dastard>
+References: <1427990168-21503-1-git-send-email-omzg@plexistor.com>
+	<CAL3q7H4KPH22AptJaSMFapp1iOECuWHKUjEYznrCwe7mV5SUcg@mail.gmail.com>
+	<20150407022937.GB13731@dastard>
+Date: Tue, 7 Apr 2015 10:27:16 +0100
+Message-ID: <CAL3q7H4jncNw5L0HniAi-TQtGYNbEX_L=Yq5VmDexrjWMKrwBA@mail.gmail.com>
+Subject: Re: [PATCH] generic/076: fixed incorrect fsstress parameters
 From: Filipe David Manana <fdmanana@gmail.com>
 Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: Omer Zilberberg <omzg@plexistor.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Apr 7, 2015 at 10:04 AM, Qu Wenruo <quwenruo@cn.fujitsu.com> wrote:
-> The return value should always be 0 if no problem happens, but
-> "btrfs filesystem show" executed on umounted device will always return 1
-> even there is no problem.
+On Tue, Apr 7, 2015 at 3:29 AM, Dave Chinner <david@fromorbit.com> wrote:
+> On Thu, Apr 02, 2015 at 10:05:40PM +0100, Filipe David Manana wrote:
+>> On Thu, Apr 2, 2015 at 4:56 PM, Omer Zilberberg <omzg@plexistor.com> wrote:
+>> > Test was not run because directory parameter was omitted.
+>> > Also return value was not tested, so this problem was not caught.
+>> >
+>> > Signed-off-by: Omer Zilberberg <omzg@plexistor.com>
+>>
+>> Reviewed-by: Filipe Manana <fdmanana@suse.com>
+>> Tested-by: Filipe Manana <fdmanana@suse.com>
+>>
+>> > ---
+>> >  tests/generic/076 | 4 +++-
+>> >  1 file changed, 3 insertions(+), 1 deletion(-)
+>> >
+>> > diff --git a/tests/generic/076 b/tests/generic/076
+>> > index aa0aae0..3e1aa1a 100755
+>> > --- a/tests/generic/076
+>> > +++ b/tests/generic/076
+>> > @@ -74,9 +74,11 @@ echo "*** test concurrent block/fs access"
+>> >  cat $SCRATCH_DEV >/dev/null &
+>> >  pid=$!
+>> >
+>> > -FSSTRESS_ARGS=`_scale_fsstress_args -p 2 -n 2000 $FSSTRESS_AVOID`
+>> > +FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -p 2 -n 2000 $FSSTRESS_AVOID`
+>> >  echo "run fsstress with args: $FSSTRESS_ARGS" >>$seqres.full
+>> >  $FSSTRESS_PROG $FSSTRESS_ARGS >>$seqres.full
+>> > +rc=$?
+>> > +[ $rc != 0 ] && echo "fsstress returned $rc - see $seqres.full"
+>>
+>> run_check $FSSTRESS_PROG $FSSTRESS_ARGS
+>>
+>> Would also do it (some other tests do this).
 >
-> This testcase just checks it.
+> Please don't encourage run_check usage - it's cargo-cult programming
+> at it's worst. It stops people from thinking about what errors they
+> actually need to care about and capture exactly via other methods
+> (such as output filtering).
 >
-> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
-> ---
-> Rebased to latest fstests.
-> 087 is taken by Filipe's test case "fstests: test for btrfs transaction
-> abortion on device with discard support", so take 088.
+> To demonstrate: fsstress only ever returns non-zero when there's a
+> config or setup problem.
 
-And I just sent some days ago tests numbered 088 and 089.
-You should probably remove the number you assign to the tests from the
-patch subject, Dave often renumbers them and it adds no value to the
-subject.
+That's exactly why here I don't see a problem with using run_check.
+Had we been using it, or checking the exit value with some other way,
+we would have know the test wasn't doing what is supposed to do (as
+Omer replied).
 
-> ---
->  tests/btrfs/088     | 71 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/088.out |  2 ++
->  tests/btrfs/group   |  1 +
->  3 files changed, 74 insertions(+)
->  create mode 100644 tests/btrfs/088
->  create mode 100644 tests/btrfs/088.out
+Sure run_check aborts the test immediately if an error happens,
+preventing further test code from running, but in this case the test
+is not doing anything else after calling fsstress.
+
+Thanks.
+
+> This basically never happens once the test
+> has been written. Further, fsstress does not collect runtime errors
+> from child processes because it is designed to trigger errors and
+> still continue onwards. Finally, the output stream is really only
+> debug information, so that's not useful for anythign other than
+> debugging, either.
 >
-> diff --git a/tests/btrfs/088 b/tests/btrfs/088
-> new file mode 100644
-> index 0000000..768d2bf
-> --- /dev/null
-> +++ b/tests/btrfs/088
-> @@ -0,0 +1,71 @@
-> +#! /bin/bash
-> +# FS QA Test No. btrfs/088
-> +#
-> +# Check return value of "btrfs filesystem show" command executed on
-> +# umounted device.
-> +# It should return 0 if nothing wrong happens.
-> +#
-> +# Regression in v3.18 btrfs-progs and fixed by the following patch:
-> +#
-> +#    btrfs-progs: Fix wrong return value when executing 'fi show' on
-> +#    umounted device.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2015 Fujitsu, Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +    cd /
-> +    rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter.btrfs
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +_require_scratch_dev_pool
-
-Do we really need a device pool here, isn't a single device fs enough?
-If it needs a multiple devices fs, it would be a good idea to explain
-why in a comment and mention the need for it in the test description.
-
-Otherwise looks good to me.
-
-Thanks
-
-> +
-> +rm -f $seqres.full
-> +
-> +FIRST_POOL_DEV=`echo $SCRATCH_DEV_POOL | awk '{print $1}'`
-> +TOTAL_DEVS=`echo $SCRATCH_DEV_POOL | wc -w`
-> +
-> +_scratch_pool_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
-> +
-> +_run_btrfs_util_prog filesystem show $FIRST_POOL_DEV | \
-> +       _filter_btrfs_filesystem_show $TOTAL_DEVS
-> +
-> +# success, all done
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/088.out b/tests/btrfs/088.out
-> new file mode 100644
-> index 0000000..c24480a
-> --- /dev/null
-> +++ b/tests/btrfs/088.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 088
-> +Silence is golden
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index e9c15af..a053d14 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -89,3 +89,4 @@
->  084 auto quick send
->  085 auto quick metadata subvol
->  086 auto quick clone
-> +088 auto quick
+> Hence there is never any need to check exit status of fsstress, nor
+> do anything with the output stream except redirect it to the
+> debug output file or the bit bucket.
+>
+> Cheers,
+>
+> Dave.
 > --
-> 2.3.5
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Dave Chinner
+> david@fromorbit.com
 
 
 
