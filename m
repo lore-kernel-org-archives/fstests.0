@@ -1,90 +1,81 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-ig0-f180.google.com ([209.85.213.180]:36338 "EHLO
-	mail-ig0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753173AbbDGJwI (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 7 Apr 2015 05:52:08 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:43590 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932072AbbDGNP4 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 7 Apr 2015 09:15:56 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t37DFt7w027627
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <fstests@vger.kernel.org>; Tue, 7 Apr 2015 09:15:55 -0400
+Date: Tue, 7 Apr 2015 09:15:54 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: Re: [PATCH v3 2/4] generic: test hardlink to unlinked file
+Message-ID: <20150407131554.GB23208@bfoster.bfoster>
+References: <1428045351-10446-1-git-send-email-eguan@redhat.com>
+ <1428045440-10612-1-git-send-email-eguan@redhat.com>
 MIME-Version: 1.0
-Reply-To: fdmanana@gmail.com
-In-Reply-To: <1428397482-13658-2-git-send-email-quwenruo@cn.fujitsu.com>
-References: <1428397482-13658-1-git-send-email-quwenruo@cn.fujitsu.com>
-	<1428397482-13658-2-git-send-email-quwenruo@cn.fujitsu.com>
-Date: Tue, 7 Apr 2015 10:52:07 +0100
-Message-ID: <CAL3q7H5JF9hRFBasU1DyW0uoW3MQ0tbByjEMru-KmbKp7Was4A@mail.gmail.com>
-Subject: Re: [PATCH v3 RESEND 2/2] fstests: btrfs/089: Test for incorrect
- exclusive refernce number after file clone.
-From: Filipe David Manana <fdmanana@gmail.com>
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1428045440-10612-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Apr 7, 2015 at 10:04 AM, Qu Wenruo <quwenruo@cn.fujitsu.com> wrote:
-> [Problem]
-> Since commit fcebe4562dec83b3f8d308 ("Btrfs: rework qgroup accounting"),
-> quota data update is delayed after delayed_ref calculation, and lacks
-> correct protection to detect root reference which shouldn't be counted
-> in current sequence number but already written into extent backref.
->
-> This makes exclusive reference not decreased correctly and give incorrect
-> result.
->
-> [Test procedure]
-> 1. Create a btrfs with 3 subvolumes, quota enabled and rescanned.
-> 2. Create a file in 1st subvolume
-> 3. Clone the file to 2nd and 3rd subvolume
-> 4. Sync the fs to reflect the changes in qgroup.
-> 5. Check the qgroup data
->
-> [Expected result]
-> None of the subvolume has exclusive reference to the file.
->
-> [Actual result]
-> The first subvolume still have exclusive reference to the file.
->
-> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
-
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-Tested-by: Filipe Manana <fdmanana@suse.com>
-
-Thanks Qu, only a couple minor nitpicks below.
-
+On Fri, Apr 03, 2015 at 03:17:20PM +0800, Eryu Guan wrote:
+> Kernel commit
+> 
+> aae8a97 fs: Don't allow to create hardlink for deleted file
+> 
+> disabled hardlink to unlinked file.
+> 
+> Test the race between link and unlink, which could end up adding link
+> count to an unlinked file and leading to fs corruption on xfs.
+> 
+> Test case was originally written by Eric Sandeen.
+> 
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
 > ---
-> changelog:
-> v2:
->    Redirect error output of dd to seqres.full for debug in case dd
->    failed.
+
+Looks good and runs fine for me now:
+
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+
 > v3:
->    Add support and check for old kernel which doesn't support
->    noinode_cache mount option.
->    Change nodesize to 64K to support arch whose page size can be larger
->    than 4K.
-> RESEND:
->    Rebase to latest xfstests.
-> ---
-> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
-> ---
->  tests/btrfs/089     | 103 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/089.out |   5 +++
->  tests/btrfs/group   |   1 +
->  3 files changed, 109 insertions(+)
->  create mode 100755 tests/btrfs/089
->  create mode 100644 tests/btrfs/089.out
->
-> diff --git a/tests/btrfs/089 b/tests/btrfs/089
+> - rebase and re-numbered to generic/084
+> - sleep 1 before removing all files being tailed
+> 
+> v2:
+> - create different link file in each iteration in link_unlink_storm(), which
+>   is confirmed to be able to reproduce the original corruption
+> - remove all newly created & tail'ed files at last, out of the loop, to avoid
+>   tail & rm race
+> - iterate $nr_cpu times to do the link_unlink_storm, not a fixed number
+> - add to quick group
+> 
+>  tests/generic/084     | 104 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/084.out |   2 +
+>  tests/generic/group   |   1 +
+>  3 files changed, 107 insertions(+)
+>  create mode 100755 tests/generic/084
+>  create mode 100644 tests/generic/084.out
+> 
+> diff --git a/tests/generic/084 b/tests/generic/084
 > new file mode 100755
-> index 0000000..2f1adac
+> index 0000000..3fec6c2
 > --- /dev/null
-> +++ b/tests/btrfs/089
-> @@ -0,0 +1,103 @@
+> +++ b/tests/generic/084
+> @@ -0,0 +1,104 @@
 > +#! /bin/bash
-> +# FS QA Test No. 089
+> +# FS QA Test No. 084
 > +#
-> +# Test for incorrect exclusive reference count after cloning file
-> +# between subvolumes.
+> +# Test hardlink to unlinked file.
+> +#
+> +# Regression test for commit:
+> +# aae8a97 fs: Don't allow to create hardlink for deleted file
 > +#
 > +#-----------------------------------------------------------------------
-> +# Copyright (c) 2015 Fujitsu. All Rights Reserved.
+> +# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
 > +#
 > +# This program is free software; you can redistribute it and/or
 > +# modify it under the terms of the GNU General Public License as
@@ -107,12 +98,13 @@ Thanks Qu, only a couple minor nitpicks below.
 > +
 > +here=`pwd`
 > +tmp=/tmp/$$
-> +status=1       # failure is the default!
+> +status=1	# failure is the default!
 > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
 > +_cleanup()
 > +{
-> +    rm -f $tmp.*
+> +	cd /
+> +	rm -f $tmp.*
 > +}
 > +
 > +# get standard environment, filters and checks
@@ -120,116 +112,88 @@ Thanks Qu, only a couple minor nitpicks below.
 > +. ./common/filter
 > +
 > +# real QA test starts here
-> +
-> +_need_to_be_root
-> +_supported_fs btrfs
+> +_supported_fs generic
 > +_supported_os Linux
 > +_require_scratch
-> +_require_cp_reflink
+> +
+> +link_unlink_storm()
+> +{
+> +	local src=$1
+> +	local target=$2
+> +	local i=0
+> +
+> +	while true; do
+> +		ln -f $src $target.$i >/dev/null 2>&1
+> +		rm -f $target.$i >/dev/null 2>&1
+> +		let i=i+1
+> +	done
+> +}
 > +
 > +rm -f $seqres.full
+> +nr_cpu=`$here/src/feature -o`
+> +echo "Silence is golden"
 > +
-> +# use largest node/leaf size (64K) to allow the test to be run on arch with
-> +# page size > 4k.
-> +NODESIZE=65536
-> +SUPPORT_NOINODE_CACHE="yes"
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_scratch_mount
 > +
-> +run_check _scratch_mkfs "--nodesize $NODESIZE"
+> +# create, open & unlinked files so unlinked inode list is not empty
+> +for i in `seq 1 $nr_cpu`; do
+> +	testfile=$SCRATCH_MNT/$seq.unlinked.$i
+> +	touch $testfile
+> +	tail -f $testfile &
+> +	tail_pids="$tail_pids $!"
+> +done
+> +# give tail some time to open the file before the file is removed
+> +sleep 1
+> +rm -f $SCRATCH_MNT/$seq.unlinked.*
 > +
-> +# inode cache will also take space in fs tree, disable them to get consistent
-> +# result.
-> +# discard error output since we will check return value manually.
-> +_scratch_mount "-o noinode_cache" 2> /dev/null
+> +# start link/unlink storm
+> +src=$SCRATCH_MNT/$seq.target
+> +touch $src
+> +for i in `seq 1 $nr_cpu`; do
+> +	target=$SCRATCH_MNT/$seq.target.link.$i
+> +	link_unlink_storm $src $target &
+> +	link_pids="$link_pids $!"
+> +done
 > +
-> +# Check for old kernel which doesn't support 'noinode_cache' mount option
-> +if [ $? -ne 0 ]
-> +then
-
-Should be:
-
-if [ $? -ne 0 ]; then
-   ....
-fi
-
-Which is the preferred style for fstests.
-
-> +       support_noinode_cache="no"
-> +       run_check _scratch_mount
-> +fi
+> +# remove & re-create target to race with link/unlink
+> +while true; do
+> +	rm -f $src
+> +	touch $src
+> +done &
+> +sleep 5
+> +kill $! >/dev/null 2>&1
 > +
-> +_run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv1
-> +_run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv2
-> +_run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv3
+> +kill $tail_pids $link_pids >/dev/null 2>&1
+> +wait $tail_pids $link_pids
 > +
-> +_run_btrfs_util_prog quota enable $SCRATCH_MNT
-> +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-> +
-> +# if we don't support noinode_cache mount option, then we should double check
-> +# whether inode cache is enabled before executing the real test payload.
-> +if [ $SUPPORT_NOINODE_CACHE == "no" ]; then
-> +       EMPTY_SIZE=`$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | \
-> +               $SED_PROG -n '/[0-9]/p' | $AWK_PROG '{print $2}' | head -n1`
-> +       if [ $EMPTY_SIZE != $NODESIZE ]; then
-> +               _notrun "Kernel doesn't support to disable inode cache"
-> +       fi
-> +fi
-> +
-> +dd if=/dev/zero of=$SCRATCH_MNT/subv1/file1 bs=4K count=64 2>> $seqres.full
-
-Sorry I didn't ask in previous versions of the patch, but is dd really
-necessary here for some reason? Wouldn't the following work:
-
-$XFS_IO_PROG -f -c "pwrite 0 256K" $SCRATCH_MNT/subv1/file1 | _filter_xfs_io
-
-I tried your test, and using xfs_io worked as well here.
-
-> +cp --reflink $SCRATCH_MNT/subv1/file1 $SCRATCH_MNT/subv2/file1
-> +cp --reflink $SCRATCH_MNT/subv1/file1 $SCRATCH_MNT/subv3/file1
-> +
-> +# Current btrfs use tree search ioctl to show quota, which will only show info
-> +# in commit tree. So need to sync to update the qgroup commit tree.
-> +sync
-> +
-> +units=`_btrfs_qgroup_units`
-> +$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | $SED_PROG -n '/[0-9]/p' | \
-> +       $AWK_PROG '{print $2" "$3}'
-> +
-> +# success, all done
+> +# all done, no oops/hang expected, _check_filesystems checks SCRATCH_DEV after test
 > +status=0
 > +exit
-> diff --git a/tests/btrfs/089.out b/tests/btrfs/089.out
+> diff --git a/tests/generic/084.out b/tests/generic/084.out
 > new file mode 100644
-> index 0000000..09a1077
+> index 0000000..022f013
 > --- /dev/null
-> +++ b/tests/btrfs/089.out
-> @@ -0,0 +1,5 @@
-> +QA output created by 089
-> +65536 65536
-> +327680 65536
-> +327680 65536
-> +327680 65536
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index a053d14..82f6fe6 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -90,3 +90,4 @@
->  085 auto quick metadata subvol
->  086 auto quick clone
->  088 auto quick
-> +089 auto quick qgroup
-> --
-> 2.3.5
->
+> +++ b/tests/generic/084.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 084
+> +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 4fe2189..5cbc1fe 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -86,6 +86,7 @@
+>  081 auto quick
+>  082 auto quick
+>  083 rw auto enospc stress
+> +084 auto metadata quick
+>  088 perms auto quick
+>  089 metadata auto
+>  091 rw auto quick
+> -- 
+> 1.8.3.1
+> 
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Filipe David Manana,
-
-"Reasonable men adapt themselves to the world.
- Unreasonable men adapt the world to themselves.
- That's why all progress depends on unreasonable men."
