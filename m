@@ -1,249 +1,219 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from victor.provo.novell.com ([137.65.250.26]:58766 "EHLO
-	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1755606AbbDIO4w (ORCPT
-	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
-	Thu, 9 Apr 2015 10:56:52 -0400
-From: Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] fstests: test btrfs send after swapping directory names differently
-Date: Thu,  9 Apr 2015 15:56:29 +0100
-Message-Id: <1428591389-3668-1-git-send-email-fdmanana@suse.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:13675 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751030AbbDJLOL convert rfc822-to-8bit (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 10 Apr 2015 07:14:11 -0400
+From: Zhao Lei <zhaolei@cn.fujitsu.com>
+References: <9a1c40cb9eceb72543647cb4209269bc4aba86f0.1427706679.git.zhaolei@cn.fujitsu.com> <alpine.LFD.2.00.1503301522190.8076@localhost.localdomain> <018301d06b5b$43d78c60$cb86a520$@cn.fujitsu.com> <alpine.LFD.2.00.1504021545520.3307@localhost.localdomain> 
+In-Reply-To: 
+Subject: RE: [PATCH] Fix caller's argument for _require_command()
+Date: Fri, 10 Apr 2015 19:13:56 +0800
+Message-ID: <016801d0737f$70126940$50373bc0$@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8BIT
+Content-Language: zh-cn
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: =?utf-8?Q?'Luk=C3=A1=C5=A1_Czerner'?= <lczerner@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Test btrfs incremental send after renaming and moving directories around in a
-way that ends up making a directory have different dentries with the same name
-but pointing to different inodes in the parent and send snapshots, and also
-inverting the ancestor-descendent relationship between one of those inodes and
-some other inode.
+Hi, Lukas
 
-Cases like this made an incremental send enter an infinite lopp when building
-path strings, leading to -ENOMEM errors when the path string reached a length
-of PATH_MAX.
-This issue was fixed by the following linux kernel btrfs patch:
+> -----Original Message-----
+> From: Zhao Lei [mailto:zhaolei@cn.fujitsu.com]
+> Sent: Friday, April 03, 2015 8:51 PM
+> To: 'Lukáš Czerner'
+> Cc: 'fstests@vger.kernel.org'
+> Subject: RE: [PATCH] Fix caller's argument for _require_command()
+> 
+> Hi, Lukas
+> 
+> > -----Original Message-----
+> > From: Lukáš Czerner [mailto:lczerner@redhat.com]
+> > Sent: Thursday, April 02, 2015 9:47 PM
+> > To: Zhao Lei
+> > Cc: fstests@vger.kernel.org
+> > Subject: RE: [PATCH] Fix caller's argument for _require_command()
+> >
+> > On Tue, 31 Mar 2015, Zhao Lei wrote:
+> >
+> > > Date: Tue, 31 Mar 2015 10:34:51 +0800
+> > > From: Zhao Lei <zhaolei@cn.fujitsu.com>
+> > > To: 'Lukáš Czerner' <lczerner@redhat.com>
+> > > Cc: fstests@vger.kernel.org
+> > > Subject: RE: [PATCH] Fix caller's argument for _require_command()
+> > >
+> > > Hi, Czerner
+> > >
+> > > Thanks for review.
+> > >
+> > > > -----Original Message-----
+> > > > From: Lukáš Czerner [mailto:lczerner@redhat.com]
+> > > > Sent: Monday, March 30, 2015 9:25 PM
+> > > > To: Zhaolei
+> > > > Cc: fstests@vger.kernel.org
+> > > > Subject: Re: [PATCH] Fix caller's argument for _require_command()
+> > > >
+> > > > On Mon, 30 Mar 2015, Zhaolei wrote:
+> > > >
+> > > > > Date: Mon, 30 Mar 2015 17:11:27 +0800
+> > > > > From: Zhaolei <zhaolei@cn.fujitsu.com>
+> > > > > To: fstests@vger.kernel.org
+> > > > > Cc: Zhao Lei <zhaolei@cn.fujitsu.com>
+> > > > > Subject: [PATCH] Fix caller's argument for _require_command()
+> > > > >
+> > > > > From: Zhao Lei <zhaolei@cn.fujitsu.com>
+> > > > >
+> > > > > _require_command() only accept 2 arguments but some caller
+> > > > > misused this function, and caused "not_run" after we limit calling way.
+> > > > >
+> > > > > This patch fixed above caller.
+> > > > >
+> > > > > Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
+> > > > > ---
+> > > > >  common/defrag | 13 +++++++++----
+> > > > >  tests/xfs/094 |  2 +-
+> > > > >  tests/xfs/103 |  2 +-
+> > > > >  tests/xfs/195 |  2 +-
+> > > > >  4 files changed, 12 insertions(+), 7 deletions(-)
+> > > > >
+> > > > > diff --git a/common/defrag b/common/defrag index
+> > > > > f923dc0..b44ef98
+> > > > > 100644
+> > > > > --- a/common/defrag
+> > > > > +++ b/common/defrag
+> > > > > @@ -22,22 +22,27 @@
+> > > > >
+> > > > >  _require_defrag()
+> > > > >  {
+> > > > > +    local defrag_cmd
+> > > > > +
+> > > > >      case "$FSTYP" in
+> > > > >      xfs)
+> > > > > -        DEFRAG_PROG="$XFS_FSR_PROG"
+> > > > > +        defrag_cmd="$XFS_FSR_PROG"
+> > > > > +        DEFRAG_PROG="$defrag_cmd"
+> > > > >  	;;
+> > > > >      ext4|ext4dev)
+> > > > > -        DEFRAG_PROG="$E4DEFRAG_PROG"
+> > > > > +        defrag_cmd="$E4DEFRAG_PROG"
+> > > > > +        DEFRAG_PROG="$defrag_cmd"
+> > > > >  	;;
+> > > > >      btrfs)
+> > > > > -	DEFRAG_PROG="$BTRFS_UTIL_PROG filesystem defragment"
+> > > > > +        defrag_cmd="$BTRFS_UTIL_PROG"
+> > > > > +        DEFRAG_PROG="defrag_cmd filesystem defragment"
+> > > > >  	;;
+> > > > >      *)
+> > > > >          _notrun "defragmentation not supported for fstype
+> > \"$FSTYP\""
+> > > > >  	;;
+> > > > >      esac
+> > > > >
+> > > > > -    _require_command "$DEFRAG_PROG" defragment
+> > > > > +    _require_command "$defrag_cmd" defragment
+> > > >
+> > > > Hi,
+> > > >
+> > > > what's the point of this change ?
+> > > >
+> > >
+> > > "$DEFRAG_PROG" include program and argument, and can not passed test
+> > > of:
+> > > [[ -x "$DEFRAG_PROG" ]]
+> > > in _require_command().
+> > >
+> > > > >      _require_xfs_io_command "fiemap"
+> > > > >  }
+> > > > >
+> > > > > diff --git a/tests/xfs/094 b/tests/xfs/094 index
+> > > > > cee42d6..5c6e98d
+> > > > > 100755
+> > > > > --- a/tests/xfs/094
+> > > > > +++ b/tests/xfs/094
+> > > > > @@ -46,7 +46,7 @@ _supported_fs xfs  _supported_os IRIX Linux
+> > > > > _require_realtime  _require_scratch -_require_command
+> > > > > "$XFS_IO_PROG" xfs_io
+> > > > > +[ -n "$XFS_IO_PROG" ] || _notrun "xfs_io executable not found"
+> > > >
+> > > > Why ? Do not we get the same result from
+> > > >
+> > > > _require_command "$XFS_IO_PROG" xfs_io
+> > > >
+> > > > anyway if the $XFS_IO_PROG isn't set ?
+> > > >
+> > > In some case, "$XFS_IO_PROG" include both program and argument, and
+> > > cause wrong result in _require_command().
+> >
+> > It should not include any arguments. It's probably -F argument you
+> > have in mind, but that's deprecated and is not needed anymore. So if
+> > we have some places where we add those it needs to be fixed there.
+> >
+> 
+> Yes, current code support -F option although it is deprecated:
+>  common/rc:
+>  # Figure out if we need to add -F ("foreign", deprecated) option to xfs_io
+> xfs_io -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \
+>      export XFS_IO_PROG="$XFS_IO_PROG -F"
+> 
+> Is it used to support old verion of xfs? Or could I remove your above code to
+> make _require_command() works with $XFS_IO_PROG?
+> 
+Since this bug prevent some test cases,
+could you allow me to send v2 to delete your above 3 lines for -F option?
 
-  Btrfs: incremental send, check if orphanized dir inode needs delayed rename
+Thanks
+Zhaolei
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/090     | 186 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/090.out |   2 +
- tests/btrfs/group   |   1 +
- 3 files changed, 189 insertions(+)
- create mode 100755 tests/btrfs/090
- create mode 100644 tests/btrfs/090.out
+> Thanks
+> Zhaolei
+> 
+> > Thanks!
+> > -Lukas
+> >
+> > >
+> > > Thanks
+> > > Zhaolei
+> > >
+> > > > -Lukas
+> > > >
+> > > > >
+> > > > >  _filter_realtime_flag()
+> > > > >  {
+> > > > > diff --git a/tests/xfs/103 b/tests/xfs/103 index
+> > > > > cbe884f..d80dbf2
+> > > > > 100755
+> > > > > --- a/tests/xfs/103
+> > > > > +++ b/tests/xfs/103
+> > > > > @@ -66,7 +66,7 @@ _filter_noymlinks_flag()  # real QA test
+> > > > > starts here _supported_os Linux IRIX  _supported_fs xfs
+> > > > > -_require_command "$XFS_IO_PROG" xfs_io
+> > > > > +[ -n "$XFS_IO_PROG" ] || _notrun "xfs_io executable not found"
+> > > > >  _require_scratch
+> > > > >
+> > > > >  _create_scratch
+> > > > > diff --git a/tests/xfs/195 b/tests/xfs/195 index
+> > > > > 21fcb00..075022d
+> > > > > 100755
+> > > > > --- a/tests/xfs/195
+> > > > > +++ b/tests/xfs/195
+> > > > > @@ -65,7 +65,7 @@ _supported_os Linux
+> > > > >
+> > > > >  _require_test
+> > > > >  _require_user
+> > > > > -_require_command "$XFSDUMP_PROG" xfsdump
+> > > > > +[ "$XFSDUMP_PROG" = "" ] && _notrun "xfsdump not found"
+> > > > >
+> > > > >  echo "Preparing subtree"
+> > > > >  mkdir $TEST_DIR/d
+> > > > >
+> > >
+> > >
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe fstests"
+> > > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > > info at  http://vger.kernel.org/majordomo-info.html
+> > >
 
-diff --git a/tests/btrfs/090 b/tests/btrfs/090
-new file mode 100755
-index 0000000..3eb6f37
---- /dev/null
-+++ b/tests/btrfs/090
-@@ -0,0 +1,186 @@
-+#! /bin/bash
-+# FS QA Test No. btrfs/090
-+#
-+# Test btrfs incremental send after renaming and moving directories around in a
-+# way that ends up making a directory have different dentries with the same name
-+# but pointing to different inodes in the parent and send snapshots, and also
-+# inverting the ancestor-descendent relationship between one of those inodes and
-+# some other inode.
-+#
-+# Cases like this made an incremental send enter an infinite lopp when building
-+# path strings, leading to -ENOMEM errors when the path string reached a length
-+# of PATH_MAX.
-+# This issue was fixed by the following linux kernel btrfs patch:
-+#
-+#   Btrfs: incremental send, check if orphanized dir inode needs delayed rename
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	rm -fr $send_files_dir
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_fssum
-+_need_to_be_root
-+
-+send_files_dir=$TEST_DIR/btrfs-test-$seq
-+
-+rm -f $seqres.full
-+rm -fr $send_files_dir
-+mkdir $send_files_dir
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+mkdir -p $SCRATCH_MNT/data/n1/n2
-+mkdir $SCRATCH_MNT/data/n4
-+mkdir -p $SCRATCH_MNT/data/t6/t7
-+mkdir $SCRATCH_MNT/data/t5
-+mkdir $SCRATCH_MNT/data/t7
-+mkdir $SCRATCH_MNT/data/n4/t2
-+mkdir $SCRATCH_MNT/data/t4
-+mkdir $SCRATCH_MNT/data/t3
-+mv $SCRATCH_MNT/data/t7 $SCRATCH_MNT/data/n4/t2
-+mv $SCRATCH_MNT/data/t4 $SCRATCH_MNT/data/n4/t2/t7
-+mv $SCRATCH_MNT/data/t5 $SCRATCH_MNT/data/n4/t2/t7/t4
-+mv $SCRATCH_MNT/data/t6 $SCRATCH_MNT/data/n4/t2/t7/t4/t5
-+mv $SCRATCH_MNT/data/n1/n2 $SCRATCH_MNT/data/n4/t2/t7/t4/t5/t6
-+mv $SCRATCH_MNT/data/n1 $SCRATCH_MNT/data/n4/t2/t7/t4/t5/t6
-+mv $SCRATCH_MNT/data/n4/t2/t7/t4/t5/t6/t7 $SCRATCH_MNT/data/n4/t2/t7/t4/t5/t6/n2
-+mv $SCRATCH_MNT/data/t3 $SCRATCH_MNT/data/n4/t2/t7/t4/t5/t6/n2/t7
-+
-+# Filesystem looks like:
-+#
-+# .                                                                   (ino 256)
-+# |-- data/                                                           (ino 257)
-+#       |-- n4/                                                       (ino 260)
-+#            |-- t2/                                                  (ino 265)
-+#                 |-- t7/                                             (ino 264)
-+#                      |-- t4/                                        (ino 266)
-+#                           |-- t5/                                   (ino 263)
-+#                                |-- t6/                              (ino 261)
-+#                                     |-- n1/                         (ino 258)
-+#                                     |-- n2/                         (ino 259)
-+#                                          |-- t7/                    (ino 262)
-+#                                               |-- t3/               (ino 267)
-+#
-+_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap1
-+
-+# The sequence of directory rename operations below made the btrfs incremental
-+# send implementation enter an infinite loop when building path strings. The
-+# reason for this was the following:
-+#
-+# * While processing inode 262 it ended up orphanizing inode 264 (rename it to
-+#   "/o264-6-0"). This is because the parent inode 265 has a dentry with name
-+#   t7 in the parent snapshot that refers to inode 264, which is ahead of the
-+#   current send progress (inode 262) and our inode 262 has the name t7 in
-+#   the directory inode 265 in the send snapshot - so in order to rename inode
-+#   262 to its new name/location, it orphanizes (renames) 264 before 264 is
-+#   processed;
-+#
-+# * When it processes inode 264 it was not checking if it needed to delay its
-+#   rename operation. This was incorrect because in the parent snapshot inode
-+#   267 is a descendent of inode 264 and inode 267 is an ancestor of inode 264
-+#   in the send snapshot, which means the rename of inode 264 must happen after
-+#   inode 267 is renamed in order to avoid the infinite loops when building
-+#   path strings that involved inodes 264 and 267;
-+#
-+# * As a consequence as soon as the send progress moved to inode 265, the
-+#   following loop when building a path string for inode 264 happened:
-+#
-+#     start inode 264, send progress of 265 for example
-+#     parent of 264 -> 267
-+#     parent of 267 -> 262
-+#     parent of 262 -> 259
-+#     parent of 259 -> 261
-+#     parent of 261 -> 263
-+#     parent of 263 -> 266
-+#     parent of 266 -> 264
-+#       |--> back to first iteration while current path string length
-+#            is <= PATH_MAX, and fail with -ENOMEM otherwise
-+#
-+mv $SCRATCH_MNT/data/n4/t2/t7/t4/t5/t6/n1 $SCRATCH_MNT/data/n4
-+mv $SCRATCH_MNT/data/n4/t2 $SCRATCH_MNT/data/n4/n1
-+mv $SCRATCH_MNT/data/n4/n1/t2/t7/t4/t5/t6/n2 $SCRATCH_MNT/data/n4/n1/t2
-+mv $SCRATCH_MNT/data/n4/n1/t2/n2/t7/t3 $SCRATCH_MNT/data/n4/n1/t2
-+mv $SCRATCH_MNT/data/n4/n1/t2/t7/t4/t5/t6 $SCRATCH_MNT/data/n4/n1/t2
-+mv $SCRATCH_MNT/data/n4/n1/t2/t7/t4 $SCRATCH_MNT/data/n4/n1/t2/t6
-+mv $SCRATCH_MNT/data/n4/n1/t2/t7 $SCRATCH_MNT/data/n4/n1/t2/t3
-+mv $SCRATCH_MNT/data/n4/n1/t2/n2/t7 $SCRATCH_MNT/data/n4/n1/t2
-+
-+# Filesystem now looks like:
-+#
-+# .                                                                   (ino 256)
-+# |-- data/                                                           (ino 257)
-+#       |-- n4/                                                       (ino 260)
-+#            |-- n1/                                                  (ino 258)
-+#                 |-- t2/                                             (ino 265)
-+#                      |-- n2/                                        (ino 259)
-+#                      |-- t3/                                        (ino 267)
-+#                      |    |-- t7                                    (ino 264)
-+#                      |
-+#                      |-- t6/                                        (ino 261)
-+#                      |    |-- t4/                                   (ino 266)
-+#                      |         |-- t5/                              (ino 263)
-+#                      |
-+#                      |-- t7/                                        (ino 262)
-+#
-+_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap2
-+
-+run_check $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-+run_check $FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
-+	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
-+
-+_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
-+	-f $send_files_dir/2.snap
-+
-+# Now recreate the filesystem by receiving both send streams and verify we get
-+# the same content that the original filesystem had.
-+_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
-+run_check $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/btrfs/090.out b/tests/btrfs/090.out
-new file mode 100644
-index 0000000..2b5100d
---- /dev/null
-+++ b/tests/btrfs/090.out
-@@ -0,0 +1,2 @@
-+QA output created by 090
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 83c8ec2..67d6556 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -92,3 +92,4 @@
- 087 auto quick send
- 088 auto quick clone
- 089 auto quick metadata
-+090 auto quick send
--- 
-2.1.3
 
