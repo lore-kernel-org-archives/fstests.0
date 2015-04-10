@@ -1,246 +1,192 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53607 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:36666 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755599AbbDJL2U (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 10 Apr 2015 07:28:20 -0400
-Date: Fri, 10 Apr 2015 13:28:09 +0200 (CEST)
-From: =?ISO-8859-15?Q?Luk=E1=A8_Czerner?= <lczerner@redhat.com>
-Subject: RE: [PATCH] Fix caller's argument for _require_command()
-In-Reply-To: <016801d0737f$70126940$50373bc0$@cn.fujitsu.com>
-Message-ID: <alpine.LFD.2.00.1504101324310.21375@localhost.localdomain>
-References: <9a1c40cb9eceb72543647cb4209269bc4aba86f0.1427706679.git.zhaolei@cn.fujitsu.com> <alpine.LFD.2.00.1503301522190.8076@localhost.localdomain> <018301d06b5b$43d78c60$cb86a520$@cn.fujitsu.com> <alpine.LFD.2.00.1504021545520.3307@localhost.localdomain>
-  <016801d0737f$70126940$50373bc0$@cn.fujitsu.com>
+	id S932324AbbDJNCc (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 10 Apr 2015 09:02:32 -0400
+From: =?UTF-8?q?Jan=20=C5=A4ul=C3=A1k?= <jtulak@redhat.com>
+Subject: [PATCH 1/7] fstests: environments - add support for environments into the check script
+Date: Fri, 10 Apr 2015 15:02:23 +0200
+Message-Id: <1428670949-17524-2-git-send-email-jtulak@redhat.com>
+In-Reply-To: <1428670949-17524-1-git-send-email-jtulak@redhat.com>
+References: <1428670949-17524-1-git-send-email-jtulak@redhat.com>
 MIME-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323328-784444358-1428665294=:21375"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Zhao Lei <zhaolei@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: david@fromorbit.com
 List-ID: <fstests@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+This extends the ./check script for environments support. That includes
+arguments parsing for new options "-eo" and "-ex" and few functions
+for loading list of available environments from "environments" directory.
 
---8323328-784444358-1428665294=:21375
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+The last two hunks in the patch deals with a situation when a user limits
+available environments, so a test has no environment it can run in.
 
-On Fri, 10 Apr 2015, Zhao Lei wrote:
+Signed-off-by: Jan Ťulák <jtulak@redhat.com>
+---
+ check | 105 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 102 insertions(+), 3 deletions(-)
 
-> Date: Fri, 10 Apr 2015 19:13:56 +0800
-> From: Zhao Lei <zhaolei@cn.fujitsu.com>
-> To: 'Lukáš Czerner' <lczerner@redhat.com>
-> Cc: fstests@vger.kernel.org
-> Subject: RE: [PATCH] Fix caller's argument for _require_command()
-> 
-> Hi, Lukas
-> 
-> > -----Original Message-----
-> > From: Zhao Lei [mailto:zhaolei@cn.fujitsu.com]
-> > Sent: Friday, April 03, 2015 8:51 PM
-> > To: 'Lukáš Czerner'
-> > Cc: 'fstests@vger.kernel.org'
-> > Subject: RE: [PATCH] Fix caller's argument for _require_command()
-> > 
-> > Hi, Lukas
-> > 
-> > > -----Original Message-----
-> > > From: Lukáš Czerner [mailto:lczerner@redhat.com]
-> > > Sent: Thursday, April 02, 2015 9:47 PM
-> > > To: Zhao Lei
-> > > Cc: fstests@vger.kernel.org
-> > > Subject: RE: [PATCH] Fix caller's argument for _require_command()
-> > >
-> > > On Tue, 31 Mar 2015, Zhao Lei wrote:
-> > >
-> > > > Date: Tue, 31 Mar 2015 10:34:51 +0800
-> > > > From: Zhao Lei <zhaolei@cn.fujitsu.com>
-> > > > To: 'Lukáš Czerner' <lczerner@redhat.com>
-> > > > Cc: fstests@vger.kernel.org
-> > > > Subject: RE: [PATCH] Fix caller's argument for _require_command()
-> > > >
-> > > > Hi, Czerner
-> > > >
-> > > > Thanks for review.
-> > > >
-> > > > > -----Original Message-----
-> > > > > From: Lukáš Czerner [mailto:lczerner@redhat.com]
-> > > > > Sent: Monday, March 30, 2015 9:25 PM
-> > > > > To: Zhaolei
-> > > > > Cc: fstests@vger.kernel.org
-> > > > > Subject: Re: [PATCH] Fix caller's argument for _require_command()
-> > > > >
-> > > > > On Mon, 30 Mar 2015, Zhaolei wrote:
-> > > > >
-> > > > > > Date: Mon, 30 Mar 2015 17:11:27 +0800
-> > > > > > From: Zhaolei <zhaolei@cn.fujitsu.com>
-> > > > > > To: fstests@vger.kernel.org
-> > > > > > Cc: Zhao Lei <zhaolei@cn.fujitsu.com>
-> > > > > > Subject: [PATCH] Fix caller's argument for _require_command()
-> > > > > >
-> > > > > > From: Zhao Lei <zhaolei@cn.fujitsu.com>
-> > > > > >
-> > > > > > _require_command() only accept 2 arguments but some caller
-> > > > > > misused this function, and caused "not_run" after we limit calling way.
-> > > > > >
-> > > > > > This patch fixed above caller.
-> > > > > >
-> > > > > > Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
-> > > > > > ---
-> > > > > >  common/defrag | 13 +++++++++----
-> > > > > >  tests/xfs/094 |  2 +-
-> > > > > >  tests/xfs/103 |  2 +-
-> > > > > >  tests/xfs/195 |  2 +-
-> > > > > >  4 files changed, 12 insertions(+), 7 deletions(-)
-> > > > > >
-> > > > > > diff --git a/common/defrag b/common/defrag index
-> > > > > > f923dc0..b44ef98
-> > > > > > 100644
-> > > > > > --- a/common/defrag
-> > > > > > +++ b/common/defrag
-> > > > > > @@ -22,22 +22,27 @@
-> > > > > >
-> > > > > >  _require_defrag()
-> > > > > >  {
-> > > > > > +    local defrag_cmd
-> > > > > > +
-> > > > > >      case "$FSTYP" in
-> > > > > >      xfs)
-> > > > > > -        DEFRAG_PROG="$XFS_FSR_PROG"
-> > > > > > +        defrag_cmd="$XFS_FSR_PROG"
-> > > > > > +        DEFRAG_PROG="$defrag_cmd"
-> > > > > >  	;;
-> > > > > >      ext4|ext4dev)
-> > > > > > -        DEFRAG_PROG="$E4DEFRAG_PROG"
-> > > > > > +        defrag_cmd="$E4DEFRAG_PROG"
-> > > > > > +        DEFRAG_PROG="$defrag_cmd"
-> > > > > >  	;;
-> > > > > >      btrfs)
-> > > > > > -	DEFRAG_PROG="$BTRFS_UTIL_PROG filesystem defragment"
-> > > > > > +        defrag_cmd="$BTRFS_UTIL_PROG"
-> > > > > > +        DEFRAG_PROG="defrag_cmd filesystem defragment"
-> > > > > >  	;;
-> > > > > >      *)
-> > > > > >          _notrun "defragmentation not supported for fstype
-> > > \"$FSTYP\""
-> > > > > >  	;;
-> > > > > >      esac
-> > > > > >
-> > > > > > -    _require_command "$DEFRAG_PROG" defragment
-> > > > > > +    _require_command "$defrag_cmd" defragment
-> > > > >
-> > > > > Hi,
-> > > > >
-> > > > > what's the point of this change ?
-> > > > >
-> > > >
-> > > > "$DEFRAG_PROG" include program and argument, and can not passed test
-> > > > of:
-> > > > [[ -x "$DEFRAG_PROG" ]]
-> > > > in _require_command().
-> > > >
-> > > > > >      _require_xfs_io_command "fiemap"
-> > > > > >  }
-> > > > > >
-> > > > > > diff --git a/tests/xfs/094 b/tests/xfs/094 index
-> > > > > > cee42d6..5c6e98d
-> > > > > > 100755
-> > > > > > --- a/tests/xfs/094
-> > > > > > +++ b/tests/xfs/094
-> > > > > > @@ -46,7 +46,7 @@ _supported_fs xfs  _supported_os IRIX Linux
-> > > > > > _require_realtime  _require_scratch -_require_command
-> > > > > > "$XFS_IO_PROG" xfs_io
-> > > > > > +[ -n "$XFS_IO_PROG" ] || _notrun "xfs_io executable not found"
-> > > > >
-> > > > > Why ? Do not we get the same result from
-> > > > >
-> > > > > _require_command "$XFS_IO_PROG" xfs_io
-> > > > >
-> > > > > anyway if the $XFS_IO_PROG isn't set ?
-> > > > >
-> > > > In some case, "$XFS_IO_PROG" include both program and argument, and
-> > > > cause wrong result in _require_command().
-> > >
-> > > It should not include any arguments. It's probably -F argument you
-> > > have in mind, but that's deprecated and is not needed anymore. So if
-> > > we have some places where we add those it needs to be fixed there.
-> > >
-> > 
-> > Yes, current code support -F option although it is deprecated:
-> >  common/rc:
-> >  # Figure out if we need to add -F ("foreign", deprecated) option to xfs_io
-> > xfs_io -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \
-> >      export XFS_IO_PROG="$XFS_IO_PROG -F"
-> > 
-> > Is it used to support old verion of xfs? Or could I remove your above code to
-> > make _require_command() works with $XFS_IO_PROG?
-> > 
-> Since this bug prevent some test cases,
-> could you allow me to send v2 to delete your above 3 lines for -F option?
+diff --git a/check b/check
+index 4fa96ed..1a691e9 100755
+--- a/check
++++ b/check
+@@ -60,6 +60,7 @@ fi
+ 
+ SRC_GROUPS="generic shared"
+ export SRC_DIR="tests"
++export ENV_DIR="environments"
+ 
+ usage()
+ {
+@@ -80,6 +81,8 @@ check options
+ testlist options
+     -g group[,group...]	include tests from these groups
+     -x group[,group...]	exclude tests from these groups
++    -eo environment[,environment...]	test only in these environments
++    -ex environment[,environment...]	exclude these environments
+     -X file		exclude individual tests
+     -E external_file	exclude individual tests
+     [testlist]		include tests matching names in testlist
+@@ -87,6 +90,85 @@ testlist options
+ 	    exit 0
+ }
+ 
++
++
++# Find all environments with setup files in given directory.
++get_environments()
++{
++	local env_list=""
++
++	# ommit "none", this one always has to exists implicitly
++	# and we want it add later
++	env_list=$(ls $ENV_DIR|grep -v "none")
++
++	echo "none $env_list"
++}
++
++# Check if all tests passed in first argument exists in a list passed
++# as a second argument.
++environments_test_existence()
++{
++	local specified  existing
++	specified="$1"
++	existing="$2"
++
++	nonexisting=$(_get_lists_difference "$specified" "$existing")
++	if [ "$nonexisting" != "" ];then
++		echo "Unknown environment(s) were passed"\
++			" as an argument: $nonexisting"
++		exit 1
++	fi
++}
++
++# find which environments are required and which are excluded and export
++# them in "$list_env"
++#
++export_filtered_environments()
++{
++	active_tests="$*"
++	sorted_tests=""
++	sorted_envs=""
++	include_implicit=false
++	existing_environments=$(get_environments)
++
++	required_environments="${ENVIRONMENT_LIST/,/ }"
++	excluded_environments="${XENVIRONMENT_LIST/,/ }"
++
++	# test for nonexisting required
++	environments_test_existence \
++		"$required_environments $excluded_environments" \
++		"$existing_environments"
++
++	# filter environments based on -ex or -eo arguments
++	if [ "$required_environments" = "" ];then
++		# we have no explicit list of envs, so include all
++		required_environments="$existing_environments"
++		include_implicit=true
++
++	elif [ $(echo "$required_environments" |\
++		grep -cw "none") -gt 0 ]
++	then
++		# If there is an explicit list, but "none" is listed there,
++		# include implicit "none" too.
++		# Otherwise "none" is ignored.
++		include_implicit=true
++	fi
++
++	# remove any excluded environment from the list
++	for xenv in $excluded_environments; do
++		required_environments=$(echo "$required_environments" |\
++			sed "s/\b$xenv\b//g")
++
++		# do not include implicit none if explicitly blocked
++		if [ "$xenv" = "none" ];then
++			include_implicit=false
++		fi
++	done
++
++	export list_env="$required_environments"
++
++}
++
+ get_group_list()
+ {
+ 	grp=$1
+@@ -193,6 +275,8 @@ _prepare_test_list()
+ 	list=`sort -n $tmp.list | uniq`
+ 	rm -f $tmp.list $tmp.tmp $tmp.grep
+ 
++	export_filtered_environments $list
++
+ 	if $randomize
+ 	then
+ 		list=`echo $list | awk -f randomize.awk`
+@@ -216,6 +300,14 @@ while [ $# -gt 0 ]; do
+ 		XGROUP_LIST="$XGROUP_LIST $xgroup"
+ 		;;
+ 
++	-eo)	environment=$2 ; shift ;
++		ENVIRONMENT_LIST="$ENVIRONMENT_LIST $environment"
++		;;
++
++	-ex)	xenvironment=$2 ; shift ;
++		XENVIRONMENT_LIST="$XENVIRONMENT_LIST $xenvironment"
++		;;
++
+ 	-X)	xfile=$2; shift ;
+ 		for d in $SRC_GROUPS $FSTYP; do
+ 			[ -f $SRC_DIR/$d/$xfile ] || continue
+@@ -580,7 +672,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 		else
+ 			echo -n "	"	# prettier output with timestamps.
+ 		fi
+-		rm -f core $seqres.notrun
++		rm -f core $seqres.notrun $seqres.noenvironment
+ 
+ 		start=`_wallclock`
+ 		$timestamp && echo -n "	["`date "+%T"`"]"
+@@ -609,8 +701,15 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 
+ 		if [ -f $seqres.notrun ]
+ 		then
+-		    $timestamp || echo -n " [not run] "
+-		    $timestamp && echo " [not run]" && echo -n "	$seqnum -- "
++		    # tell user if the test wasn't run because
++		    # he forbid all environments this test supports
++		    # (by -eo/-ex argruments)
++		    nr="not run"
++		    if [ -f $seqres.noenvironment ];then
++		        nr="no environment available"
++		    fi
++		    $timestamp || echo -n " [$nr] "
++		    $timestamp && echo " [$nr]" && echo -n "	$seqnum -- "
+ 		    cat $seqres.notrun
+ 		    notrun="$notrun $seqnum"
+ 		else
+-- 
+2.1.0
 
-Ah, I am sorry for the delay I completely missed your email. Yes, I
-think that we should remove the -F option entirely.
-
-Thanks!
--Lukas
-
-> 
-> Thanks
-> Zhaolei
-> 
-> > Thanks
-> > Zhaolei
-> > 
-> > > Thanks!
-> > > -Lukas
-> > >
-> > > >
-> > > > Thanks
-> > > > Zhaolei
-> > > >
-> > > > > -Lukas
-> > > > >
-> > > > > >
-> > > > > >  _filter_realtime_flag()
-> > > > > >  {
-> > > > > > diff --git a/tests/xfs/103 b/tests/xfs/103 index
-> > > > > > cbe884f..d80dbf2
-> > > > > > 100755
-> > > > > > --- a/tests/xfs/103
-> > > > > > +++ b/tests/xfs/103
-> > > > > > @@ -66,7 +66,7 @@ _filter_noymlinks_flag()  # real QA test
-> > > > > > starts here _supported_os Linux IRIX  _supported_fs xfs
-> > > > > > -_require_command "$XFS_IO_PROG" xfs_io
-> > > > > > +[ -n "$XFS_IO_PROG" ] || _notrun "xfs_io executable not found"
-> > > > > >  _require_scratch
-> > > > > >
-> > > > > >  _create_scratch
-> > > > > > diff --git a/tests/xfs/195 b/tests/xfs/195 index
-> > > > > > 21fcb00..075022d
-> > > > > > 100755
-> > > > > > --- a/tests/xfs/195
-> > > > > > +++ b/tests/xfs/195
-> > > > > > @@ -65,7 +65,7 @@ _supported_os Linux
-> > > > > >
-> > > > > >  _require_test
-> > > > > >  _require_user
-> > > > > > -_require_command "$XFSDUMP_PROG" xfsdump
-> > > > > > +[ "$XFSDUMP_PROG" = "" ] && _notrun "xfsdump not found"
-> > > > > >
-> > > > > >  echo "Preparing subtree"
-> > > > > >  mkdir $TEST_DIR/d
-> > > > > >
-> > > >
-> > > >
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe fstests"
-> > > > in the body of a message to majordomo@vger.kernel.org More majordomo
-> > > > info at  http://vger.kernel.org/majordomo-info.html
-> > > >
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
---8323328-784444358-1428665294=:21375--
