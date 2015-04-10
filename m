@@ -1,14 +1,12 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36666 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:45060 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932324AbbDJNCc (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 10 Apr 2015 09:02:32 -0400
+	id S932551AbbDJNCe (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 10 Apr 2015 09:02:34 -0400
 From: =?UTF-8?q?Jan=20=C5=A4ul=C3=A1k?= <jtulak@redhat.com>
-Subject: [PATCH 1/7] fstests: environments - add support for environments into the check script
-Date: Fri, 10 Apr 2015 15:02:23 +0200
-Message-Id: <1428670949-17524-2-git-send-email-jtulak@redhat.com>
-In-Reply-To: <1428670949-17524-1-git-send-email-jtulak@redhat.com>
-References: <1428670949-17524-1-git-send-email-jtulak@redhat.com>
+Subject: [PATCH 0/7] fstests: add environments for tests
+Date: Fri, 10 Apr 2015 15:02:22 +0200
+Message-Id: <1428670949-17524-1-git-send-email-jtulak@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -17,176 +15,95 @@ To: fstests@vger.kernel.org
 Cc: david@fromorbit.com
 List-ID: <fstests@vger.kernel.org>
 
-This extends the ./check script for environments support. That includes
-arguments parsing for new options "-eo" and "-ex" and few functions
-for loading list of available environments from "environments" directory.
+This is a completely rewritten version of what I proposed some time ago. TLDR
+summary at first:
 
-The last two hunks in the patch deals with a situation when a user limits
-available environments, so a test has no environment it can run in.
+  - Allows to separate preparation of the environment (full fs, damaged fs,
+    lots of files...) from a test itself. So multiple tests can be run
+    in exactly the same conditions...
+  - ... and a single test can be run in multiple environments.
+  - It do not affects existing tests.
+  - Two environments and tests to demonstrate its function.
 
-Signed-off-by: Jan Ťulák <jtulak@redhat.com>
----
- check | 105 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 102 insertions(+), 3 deletions(-)
+Long version:
 
-diff --git a/check b/check
-index 4fa96ed..1a691e9 100755
---- a/check
-+++ b/check
-@@ -60,6 +60,7 @@ fi
- 
- SRC_GROUPS="generic shared"
- export SRC_DIR="tests"
-+export ENV_DIR="environments"
- 
- usage()
- {
-@@ -80,6 +81,8 @@ check options
- testlist options
-     -g group[,group...]	include tests from these groups
-     -x group[,group...]	exclude tests from these groups
-+    -eo environment[,environment...]	test only in these environments
-+    -ex environment[,environment...]	exclude these environments
-     -X file		exclude individual tests
-     -E external_file	exclude individual tests
-     [testlist]		include tests matching names in testlist
-@@ -87,6 +90,85 @@ testlist options
- 	    exit 0
- }
- 
-+
-+
-+# Find all environments with setup files in given directory.
-+get_environments()
-+{
-+	local env_list=""
-+
-+	# ommit "none", this one always has to exists implicitly
-+	# and we want it add later
-+	env_list=$(ls $ENV_DIR|grep -v "none")
-+
-+	echo "none $env_list"
-+}
-+
-+# Check if all tests passed in first argument exists in a list passed
-+# as a second argument.
-+environments_test_existence()
-+{
-+	local specified  existing
-+	specified="$1"
-+	existing="$2"
-+
-+	nonexisting=$(_get_lists_difference "$specified" "$existing")
-+	if [ "$nonexisting" != "" ];then
-+		echo "Unknown environment(s) were passed"\
-+			" as an argument: $nonexisting"
-+		exit 1
-+	fi
-+}
-+
-+# find which environments are required and which are excluded and export
-+# them in "$list_env"
-+#
-+export_filtered_environments()
-+{
-+	active_tests="$*"
-+	sorted_tests=""
-+	sorted_envs=""
-+	include_implicit=false
-+	existing_environments=$(get_environments)
-+
-+	required_environments="${ENVIRONMENT_LIST/,/ }"
-+	excluded_environments="${XENVIRONMENT_LIST/,/ }"
-+
-+	# test for nonexisting required
-+	environments_test_existence \
-+		"$required_environments $excluded_environments" \
-+		"$existing_environments"
-+
-+	# filter environments based on -ex or -eo arguments
-+	if [ "$required_environments" = "" ];then
-+		# we have no explicit list of envs, so include all
-+		required_environments="$existing_environments"
-+		include_implicit=true
-+
-+	elif [ $(echo "$required_environments" |\
-+		grep -cw "none") -gt 0 ]
-+	then
-+		# If there is an explicit list, but "none" is listed there,
-+		# include implicit "none" too.
-+		# Otherwise "none" is ignored.
-+		include_implicit=true
-+	fi
-+
-+	# remove any excluded environment from the list
-+	for xenv in $excluded_environments; do
-+		required_environments=$(echo "$required_environments" |\
-+			sed "s/\b$xenv\b//g")
-+
-+		# do not include implicit none if explicitly blocked
-+		if [ "$xenv" = "none" ];then
-+			include_implicit=false
-+		fi
-+	done
-+
-+	export list_env="$required_environments"
-+
-+}
-+
- get_group_list()
- {
- 	grp=$1
-@@ -193,6 +275,8 @@ _prepare_test_list()
- 	list=`sort -n $tmp.list | uniq`
- 	rm -f $tmp.list $tmp.tmp $tmp.grep
- 
-+	export_filtered_environments $list
-+
- 	if $randomize
- 	then
- 		list=`echo $list | awk -f randomize.awk`
-@@ -216,6 +300,14 @@ while [ $# -gt 0 ]; do
- 		XGROUP_LIST="$XGROUP_LIST $xgroup"
- 		;;
- 
-+	-eo)	environment=$2 ; shift ;
-+		ENVIRONMENT_LIST="$ENVIRONMENT_LIST $environment"
-+		;;
-+
-+	-ex)	xenvironment=$2 ; shift ;
-+		XENVIRONMENT_LIST="$XENVIRONMENT_LIST $xenvironment"
-+		;;
-+
- 	-X)	xfile=$2; shift ;
- 		for d in $SRC_GROUPS $FSTYP; do
- 			[ -f $SRC_DIR/$d/$xfile ] || continue
-@@ -580,7 +672,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 		else
- 			echo -n "	"	# prettier output with timestamps.
- 		fi
--		rm -f core $seqres.notrun
-+		rm -f core $seqres.notrun $seqres.noenvironment
- 
- 		start=`_wallclock`
- 		$timestamp && echo -n "	["`date "+%T"`"]"
-@@ -609,8 +701,15 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 
- 		if [ -f $seqres.notrun ]
- 		then
--		    $timestamp || echo -n " [not run] "
--		    $timestamp && echo " [not run]" && echo -n "	$seqnum -- "
-+		    # tell user if the test wasn't run because
-+		    # he forbid all environments this test supports
-+		    # (by -eo/-ex argruments)
-+		    nr="not run"
-+		    if [ -f $seqres.noenvironment ];then
-+		        nr="no environment available"
-+		    fi
-+		    $timestamp || echo -n " [$nr] "
-+		    $timestamp && echo " [$nr]" && echo -n "	$seqnum -- "
- 		    cat $seqres.notrun
- 		    notrun="$notrun $seqnum"
- 		else
+the goal of this patch set is to allow a single test to be run in different
+sitations, for example on empty filesystem, full fs, or damaged fs. it provides
+an interface for scripts that can prepare the requested environment and takes
+care of starting the test for each one.
+
+The changes in existing infrastructure are small. Most of the code is a new
+functionality which has to be invoked by a user or a test.
+
+How it works: Most of the it is done in the test itself: The test sets
+"$ENV_NAME" variable and calls "_environment_require $TEST_DIR". Where and when
+the test do this is in hands of its author. When using the ./new script for
+creating a skeleton, everything is prepared, so the author only lists desired
+environments.
+
+The test skeleton already contains code for for iterating over the environments
+and running each of them. Of course, if only one environment is given, then the
+test will run only once as before.
+
+Changes in ./check script are for allowing the user to somehow limit which
+environments are used through two new options: -ex and -eo, for exclude/include
+some environments. However, this only affects the tests that comply with it. So
+it won't select what tests to run or not. It only exports the limited list to a
+test, which is then free to do whatever it want. (The autogenerated skeleton is
+modified w.r.t. this.)
+
+Already existing tests are not affected by this new functionality at all. Also,
+this gives the author of a test the control over when and how the environments
+should be called. But if he does not wish to be bothered with it at all, he can
+ignore it. The change from what was before is small, only few more lines around
+"put your code here".
+
+Unlike in my previous patch set, I decided to not implement some persistency
+between different tests using the same environment. With the current code, it
+is possible to achieve it in the tests itself.
+
+To show how it works, I modified two performance tests (an important motivation
+for these patches) to work with the new environment functionality.
+
+
+I hope this version is in better shape. :-)
+
+Cheers,
+Jan
+
+Jan Ťulák (7):
+  fstests: environments - add support for environments into the check
+    script
+  fstests: environments - new functions in common/rc for environment
+    support
+  fstests: environments - add option for skipping output diff from a
+    test
+  fstests: environments - add performance tests (as example of usage)
+  fstests: environments - create the environment directory
+  fstests: environments - add envs to the skeleton in ./new script and
+    README
+  fstests: environments - enable performance tests in ./check
+
+ README                        |  12 +++-
+ check                         | 142 ++++++++++++++++++++++++++++++++++++++---
+ common/environments           |  64 +++++++++++++++++++
+ common/rc                     | 143 ++++++++++++++++++++++++++++++++++++++++++
+ environments/empty-files      |  77 +++++++++++++++++++++++
+ environments/overlayfs        | 136 +++++++++++++++++++++++++++++++++++++++
+ new                           |  37 ++++++++++-
+ tests/performance/001-readdir | 123 ++++++++++++++++++++++++++++++++++++
+ tests/performance/002-sqlite  | 124 ++++++++++++++++++++++++++++++++++++
+ tests/performance/Makefile    |  21 +++++++
+ tests/performance/group       |   7 +++
+ 11 files changed, 875 insertions(+), 11 deletions(-)
+ create mode 100644 common/environments
+ create mode 100644 environments/empty-files
+ create mode 100644 environments/overlayfs
+ create mode 100755 tests/performance/001-readdir
+ create mode 100755 tests/performance/002-sqlite
+ create mode 100644 tests/performance/Makefile
+ create mode 100644 tests/performance/group
+
 -- 
 2.1.0
 
