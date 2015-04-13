@@ -1,122 +1,111 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:5383 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751339AbbDMEeV convert rfc822-to-8bit (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 13 Apr 2015 00:34:21 -0400
-Received: from G08CNEXCHPEKD03.g08.fujitsu.local (localhost.localdomain [127.0.0.1])
-	by edo.cn.fujitsu.com (8.14.3/8.13.1) with ESMTP id t3D4XA0F001095
-	for <fstests@vger.kernel.org>; Mon, 13 Apr 2015 12:33:10 +0800
-From: Zhaolei <zhaolei@cn.fujitsu.com>
-Subject: [PATCH v2] Fix caller's argument for _require_command()
-Date: Mon, 13 Apr 2015 12:32:43 +0800
-Message-ID: <188af9eed150e2f7efb04b5d634a14ca50fdd694.1428899527.git.zhaolei@cn.fujitsu.com>
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:42347 "EHLO
+	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750845AbbDMFRJ (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 13 Apr 2015 01:17:09 -0400
+Date: Mon, 13 Apr 2015 15:16:54 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] generic/076: fixed incorrect fsstress parameters
+Message-ID: <20150413051654.GR15810@dastard>
+References: <1427990168-21503-1-git-send-email-omzg@plexistor.com>
+ <CAL3q7H4KPH22AptJaSMFapp1iOECuWHKUjEYznrCwe7mV5SUcg@mail.gmail.com>
+ <20150407022937.GB13731@dastard>
+ <552379F3.9090205@plexistor.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <552379F3.9090205@plexistor.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Zhao Lei <zhaolei@cn.fujitsu.com>
+To: Omer Zilberberg <omzg@plexistor.com>
+Cc: Filipe David Manana <fdmanana@gmail.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Zhao Lei <zhaolei@cn.fujitsu.com>
+On Tue, Apr 07, 2015 at 09:32:19AM +0300, Omer Zilberberg wrote:
+> On 04/07/2015 05:29 AM, Dave Chinner wrote:
+> > On Thu, Apr 02, 2015 at 10:05:40PM +0100, Filipe David Manana wrote:
+> >> On Thu, Apr 2, 2015 at 4:56 PM, Omer Zilberberg <omzg@plexistor.com> wrote:
+> >>> Test was not run because directory parameter was omitted.
+> >>> Also return value was not tested, so this problem was not caught.
+> >>>
+> >>> Signed-off-by: Omer Zilberberg <omzg@plexistor.com>
+> >>
+> >> Reviewed-by: Filipe Manana <fdmanana@suse.com>
+> >> Tested-by: Filipe Manana <fdmanana@suse.com>
+> >>
+> >>> ---
+> >>>  tests/generic/076 | 4 +++-
+> >>>  1 file changed, 3 insertions(+), 1 deletion(-)
+> >>>
+> >>> diff --git a/tests/generic/076 b/tests/generic/076
+> >>> index aa0aae0..3e1aa1a 100755
+> >>> --- a/tests/generic/076
+> >>> +++ b/tests/generic/076
+> >>> @@ -74,9 +74,11 @@ echo "*** test concurrent block/fs access"
+> >>>  cat $SCRATCH_DEV >/dev/null &
+> >>>  pid=$!
+> >>>
+> >>> -FSSTRESS_ARGS=`_scale_fsstress_args -p 2 -n 2000 $FSSTRESS_AVOID`
+> >>> +FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -p 2 -n 2000 $FSSTRESS_AVOID`
+> >>>  echo "run fsstress with args: $FSSTRESS_ARGS" >>$seqres.full
+> >>>  $FSSTRESS_PROG $FSSTRESS_ARGS >>$seqres.full
+> >>> +rc=$?
+> >>> +[ $rc != 0 ] && echo "fsstress returned $rc - see $seqres.full"
+> >>
+> >> run_check $FSSTRESS_PROG $FSSTRESS_ARGS
+> >>
+> >> Would also do it (some other tests do this).
+> > 
+> > Please don't encourage run_check usage - it's cargo-cult programming
+> > at it's worst. It stops people from thinking about what errors they
+> > actually need to care about and capture exactly via other methods
+> > (such as output filtering).
+> > 
+> > To demonstrate: fsstress only ever returns non-zero when there's a
+> > config or setup problem. This basically never happens once the test
+> > has been written. Further, fsstress does not collect runtime errors
+> > from child processes because it is designed to trigger errors and
+> > still continue onwards. Finally, the output stream is really only
+> > debug information, so that's not useful for anythign other than
+> > debugging, either.
+> > 
+> > Hence there is never any need to check exit status of fsstress, nor
+> > do anything with the output stream except redirect it to the
+> > debug output file or the bit bucket.
+> run_check usage notwithstanding, I would argue that checking the exit 
+> status of fsstress would have prevented this problem - the dir argument
+> was omitted during the introduction of load factor into fsstress in b84aade,
+> and the test has been printing fsstress usage message to the debug output 
+> file ever since, when IMHO it should have failed.
 
-_require_command() only accept 2 arguments, first one is pure command,
-and second one is name for error message.
+So there was a bug in a commit, which we need to fix. That's not
+justification for peppering every program we run with "run_check" so
+that the exit value is tested just in case someone makes a mistake
+somewhere that wasn't caught by the reviewer....
 
-But some caller misused this function, for example,
-  DEFRAG_PROG="$BTRFS_UTIL_PROG filesystem defragment"
-  _require_command $DEFRAG_PROG defragment
-In above code, _require_command get 4 arguments, the caller's
-second argument is never used, and the second field of first
-argument is treat as "error message" in _require_command.
+Remember, the test harness infrastructure is designed specifcally so
+that we don't need to check the error status of every program we
+run.  Programs need to give users obvious feedback of failure (i.e.
+stdout/stderr) because users *do not check return codes*, and the
+test harness is designed around ensuring programs generate useful
+error messages.
 
-We fixed above case by adding quotes to _require_command()'s
-arguments, it fixed most test case, but introduced a new bug,
-in above case, "btrfs filesystem defragment" is not a command,
-and always failed in _require_command(), it caused some testcase
-not work, as btrfs/005.
+IOWs, every place we use run_check to determine whether an operation
+passed or failed based on return code, we've failed to check if we
+informed the user of the error that occurred. Every utility a user
+runs should be reporting errors in text, not silently failing.
 
-This patch fixed above caller.
+Needing to use run_check to detect failures and advocating for
+widespread use is indicative of a bigger, more fundamental problem.
+i.e.  if the only way we can check if am operation has succeed is to
+check the error code via run_check, we're giving ours users the big
+finger. Errors messages matter to users more than the return code of
+a program and hence our regression tests should be checking error
+messages, not return codes. Every time we use run_check we fail
+our users...
 
-Changelog v1->v2:
-1: Add detail description, suggested by:
-   Lukáš Czerner <lczerner@redhat.com>
-2: Add missed Reported-by.
-3: Make $XFSDUMP_PROG always be a pure command, to avoid special
-   handling for it.
+Cheers,
 
-Reported-by: Filipe David Manana <fdmanana@gmail.com>
-Suggested-by: Lukáš Czerner <lczerner@redhat.com>
-Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
----
- common/defrag | 13 +++++++++----
- common/rc     |  3 ---
- tests/xfs/195 |  2 +-
- 3 files changed, 10 insertions(+), 8 deletions(-)
-
-diff --git a/common/defrag b/common/defrag
-index f923dc0..b44ef98 100644
---- a/common/defrag
-+++ b/common/defrag
-@@ -22,22 +22,27 @@
- 
- _require_defrag()
- {
-+    local defrag_cmd
-+
-     case "$FSTYP" in
-     xfs)
--        DEFRAG_PROG="$XFS_FSR_PROG"
-+        defrag_cmd="$XFS_FSR_PROG"
-+        DEFRAG_PROG="$defrag_cmd"
- 	;;
-     ext4|ext4dev)
--        DEFRAG_PROG="$E4DEFRAG_PROG"
-+        defrag_cmd="$E4DEFRAG_PROG"
-+        DEFRAG_PROG="$defrag_cmd"
- 	;;
-     btrfs)
--	DEFRAG_PROG="$BTRFS_UTIL_PROG filesystem defragment"
-+        defrag_cmd="$BTRFS_UTIL_PROG"
-+        DEFRAG_PROG="defrag_cmd filesystem defragment"
- 	;;
-     *)
-         _notrun "defragmentation not supported for fstype \"$FSTYP\""
- 	;;
-     esac
- 
--    _require_command "$DEFRAG_PROG" defragment
-+    _require_command "$defrag_cmd" defragment
-     _require_xfs_io_command "fiemap"
- }
- 
-diff --git a/common/rc b/common/rc
-index c1a50f2..02ac02a 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2923,9 +2923,6 @@ init_rc()
- 		$DF_PROG $TEST_DEV
- 		exit 1
- 	fi
--	# Figure out if we need to add -F ("foreign", deprecated) option to xfs_io
--	xfs_io -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \
--	export XFS_IO_PROG="$XFS_IO_PROG -F"
- }
- 
- # get real device path name by following link
-diff --git a/tests/xfs/195 b/tests/xfs/195
-index 21fcb00..075022d 100755
---- a/tests/xfs/195
-+++ b/tests/xfs/195
-@@ -65,7 +65,7 @@ _supported_os Linux
- 
- _require_test
- _require_user
--_require_command "$XFSDUMP_PROG" xfsdump
-+[ "$XFSDUMP_PROG" = "" ] && _notrun "xfsdump not found"
- 
- echo "Preparing subtree"
- mkdir $TEST_DIR/d
+Dave.
 -- 
-1.8.5.1
-
+Dave Chinner
+david@fromorbit.com
