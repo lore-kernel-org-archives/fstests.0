@@ -1,49 +1,44 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41558 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750894AbbDMLwf (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 13 Apr 2015 07:52:35 -0400
-Date: Mon, 13 Apr 2015 19:52:32 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [RFC PATCH] fstests: _require_metadata_journaling in
- _require_dm_flakey
-Message-ID: <20150413115232.GU16808@dhcp-13-216.nay.redhat.com>
-References: <1428063285-31140-1-git-send-email-eguan@redhat.com>
- <55229C4B.1090208@sandeen.net>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <55229C4B.1090208@sandeen.net>
+Received: from aserp1040.oracle.com ([141.146.126.69]:44262 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752464AbbDNJBJ (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 14 Apr 2015 05:01:09 -0400
+From: Liu Bo <bo.li.liu@oracle.com>
+Subject: [PATCH] xfstests: make "BTRFS_UTIL_PROG filesystem defragment" work
+Date: Tue, 14 Apr 2015 17:01:00 +0800
+Message-Id: <1429002060-16597-1-git-send-email-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Apr 06, 2015 at 09:46:35AM -0500, Eric Sandeen wrote:
-> On 4/3/15 7:14 AM, Eryu Guan wrote:
-> > Tests take use of dm-flakey target should require metadata journaling,
-> > so move _require_metadata_journaling call from each test to
-> > _require_dm_flakey to ease the process, though it seems unnecessary to
-> > btrfs or xfs specific tests.
-> > 
-> > This change also makes generic/039 generic/059 generic/325 require
-> > metadata journaling automatically, and any new test that calls
-> > _require_dm_flakey.
-> 
-> I'm not sure this is a great idea... I think _require_metadata_journaling
-> should only be used when we expect filesystem consistency after a
-> (flakey) shutdown.  We can use dm_flakey to test fsync persistence
-> on vfat, for example, right?  But with this change such a test won't
-> run on vfat or many other filesystems even though the test for persistent
-> data would be perfectly valid.
-> 
-> -Eric
+_require_defrag() needs to check if the command is executable, but btrfs has
+its subcommand "filesystem defragment", which makes this checking fail.
 
-Yes, you're right. Thanks for pointing this out!
+This workarounds it and now we can run case generic/324, generic/018, btrfs/005.
 
-Then I think generic/039 generic/059 and generic/325 still need
-_require_metadata_journaling, I've seen generic/059 fail on ext2(using
-ext4 driver). I'll send another patch to fix these issues.
+Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+---
+ common/defrag | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-Thanks,
-Eryu
+diff --git a/common/defrag b/common/defrag
+index f923dc0..f36a68b 100644
+--- a/common/defrag
++++ b/common/defrag
+@@ -37,7 +37,11 @@ _require_defrag()
+ 	;;
+     esac
+ 
+-    _require_command "$DEFRAG_PROG" defragment
++    if [ "$FSTYP" == "btrfs" ]; then
++	    _require_command "$BTRFS_UTIL_PROG" defragment
++    else
++	    _require_command "$DEFRAG_PROG" defragment
++    fi
+     _require_xfs_io_command "fiemap"
+ }
+ 
+-- 
+1.8.2.1
+
