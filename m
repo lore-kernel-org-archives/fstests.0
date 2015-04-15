@@ -1,111 +1,59 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([59.151.112.132]:33479 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751424AbbDONQJ convert rfc822-to-8bit (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 15 Apr 2015 09:16:09 -0400
-From: Zhao Lei <zhaolei@cn.fujitsu.com>
-References: <188af9eed150e2f7efb04b5d634a14ca50fdd694.1428899527.git.zhaolei@cn.fujitsu.com> <20150414214512.GR13731@dastard> <04b901d07777$a92c2300$fb846900$@cn.fujitsu.com> <20150415130008.GS13731@dastard>
-In-Reply-To: <20150415130008.GS13731@dastard>
-Subject: RE: [PATCH v2] Fix caller's argument for _require_command()
-Date: Wed, 15 Apr 2015 21:15:58 +0800
-Message-ID: <04ba01d0777e$4ff2ef10$efd8cd30$@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8BIT
-Content-Language: zh-cn
+Received: from e28smtp09.in.ibm.com ([122.248.162.9]:33165 "EHLO
+	e28smtp09.in.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754676AbbDONb1 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 15 Apr 2015 09:31:27 -0400
+Received: from /spool/local
+	by e28smtp09.in.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+	for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
+	Wed, 15 Apr 2015 19:01:24 +0530
+From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Subject: [RFC PATCH] fiemap-tester.c: Do not error out when FIEMAP_EXTENT_NOT_ALIGNED is set and extent is aligned.
+Date: Wed, 15 Apr 2015 18:59:53 +0530
+Message-Id: <1429104593-24136-1-git-send-email-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
-To: 'Dave Chinner' <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, linux-fsdevel@vger.kernel.org, chandan@mykolab.com
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave Chinner
+>From Linux kernel's Documentation/filesystems/fiemap.txt,
 
-> -----Original Message-----
-> From: Dave Chinner [mailto:david@fromorbit.com]
-> Sent: Wednesday, April 15, 2015 9:00 PM
-> To: Zhao Lei
-> Cc: fstests@vger.kernel.org
-> Subject: Re: [PATCH v2] Fix caller's argument for _require_command()
-> 
-> On Wed, Apr 15, 2015 at 08:28:21PM +0800, Zhao Lei wrote:
-> > Hi, Dave Chinner
-> >
-> > > -----Original Message-----
-> > > From: Dave Chinner [mailto:david@fromorbit.com]
-> > > Sent: Wednesday, April 15, 2015 5:45 AM
-> > > To: Zhaolei
-> > > Cc: fstests@vger.kernel.org
-> > > Subject: Re: [PATCH v2] Fix caller's argument for _require_command()
-> > >
-> > > On Mon, Apr 13, 2015 at 12:32:43PM +0800, Zhaolei wrote:
-> > > > From: Zhao Lei <zhaolei@cn.fujitsu.com>
-> > > >
-> > > > _require_command() only accept 2 arguments, first one is pure
-> > > > command, and second one is name for error message.
-> > > >
-> > > > But some caller misused this function, for example,
-> > > >   DEFRAG_PROG="$BTRFS_UTIL_PROG filesystem defragment"
-> > > >   _require_command $DEFRAG_PROG defragment In above code,
-> > > > _require_command get 4 arguments, the caller's second argument is
-> > > > never used, and the second field of first argument is treat as
-> > > > "error message" in _require_command.
-> > > >
-> > > > We fixed above case by adding quotes to _require_command()'s
-> > > > arguments, it fixed most test case, but introduced a new bug, in
-> > > > above case, "btrfs filesystem defragment" is not a command, and
-> > > > always failed in _require_command(), it caused some testcase not
-> > > > work, as btrfs/005.
-> > > >
-> > > > This patch fixed above caller.
-> > > >
-> > > > Changelog v1->v2:
-> > > > 1: Add detail description, suggested by:
-> > > >    Lukáš Czerner <lczerner@redhat.com>
-> > > > 2: Add missed Reported-by.
-> > > > 3: Make $XFSDUMP_PROG always be a pure command, to avoid special
-> > > >    handling for it.
-> > >
-> > > Having to change xfsdump checks means this is still the wrong fix.
-> > >
-> > > _require_command should simply handle multi-part command strings.
-> > >
-> > > Does the following patch fix your problems?
-> > >
-> > This patch can deal with current code, only can't deal with program with
-> blank in filename.
-> > But this is rarely happened, so we need not care about it.
-> 
-> It will work just fine with a minor tweak:
-> 
-> $ [ -x /bin/true ] && echo foo
-> foo
-> $ [ -x "" ] && echo foo
-> $
-> 
-> i.e. the -x check fails as expected when passed an empty command.
-> 
-> > > +	if [ ! -x $command ]; then
-> 
-> i.e this needs changing to [ ! -x "$command" ]....
-> 
-I means this command:
-[root@ZLLINUX ~]# cp /bin/cp ./"c    p"
-[root@ZLLINUX ~]# ./"c    p" --verion
-cp (GNU coreutils) 8.4
-...
+* FIEMAP_EXTENT_NOT_ALIGNED
+Extent offsets and length are not guaranteed to be block aligned.
 
-Above file of "c    p" is a command, but can not work with
-_require_command.
-Not real problem, please forgot it and apply your patch:)
+So this means that FIEMAP_EXTENT_NOT_ALIGNED is just a hint that indicates
+that the extent range could possibly be out of alignment w.r.t to the
+filesystem's blocksize. It should still be possible for fiemap ioctl to return
+extents with FIEMAP_EXTENT_NOT_ALIGNED flag set (e.g. Inline extents) but
+which have blocksize aligned ranges.
 
-Thanks
-Zhaolei
+Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+---
+ src/fiemap-tester.c | 11 -----------
+ 1 file changed, 11 deletions(-)
 
-> Cheers,
-> 
-> Dave.
-> --
-> Dave Chinner
-> david@fromorbit.com
-
+diff --git a/src/fiemap-tester.c b/src/fiemap-tester.c
+index 8e633ab..74dea17 100644
+--- a/src/fiemap-tester.c
++++ b/src/fiemap-tester.c
+@@ -195,17 +195,6 @@ check_flags(struct fiemap *fiemap, int blocksize)
+ 			return -1;
+ 		}
+ 
+-		if (extent->fe_flags & FIEMAP_EXTENT_NOT_ALIGNED &&
+-		    aligned_offset == extent->fe_physical &&
+-		    aligned_length == extent->fe_length) {
+-			printf("ERROR: FIEMAP_EXTENT_NOT_ALIGNED is set but "
+-			       "offset and length is blocksize aligned: "
+-			       "%llu\n",
+-			       (unsigned long long)
+-			       (extent->fe_logical / blocksize));
+-			return -1;
+-		}
+-
+ 		if (extent->fe_flags & FIEMAP_EXTENT_LAST &&
+ 		    c + 1 < fiemap->fm_mapped_extents) {
+ 			printf("ERROR: FIEMAP_EXTENT_LAST is set but there are"
+-- 
+2.1.0
 
