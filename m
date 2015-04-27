@@ -1,123 +1,71 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:39055 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:33737 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932705AbbD0OeJ (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 27 Apr 2015 10:34:09 -0400
-From: Lukas Czerner <lczerner@redhat.com>
-Subject: [PATCH v3 2/2] generic: test bug when zero range is crossing isize within single block
-Date: Mon, 27 Apr 2015 16:33:20 +0200
-Message-Id: <1430145200-20230-2-git-send-email-lczerner@redhat.com>
-In-Reply-To: <1430145200-20230-1-git-send-email-lczerner@redhat.com>
-References: <1430145200-20230-1-git-send-email-lczerner@redhat.com>
+	id S1753142AbbD0PSh (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 27 Apr 2015 11:18:37 -0400
+Message-ID: <553E534B.5000805@redhat.com>
+Date: Mon, 27 Apr 2015 10:18:35 -0500
+From: Eric Sandeen <esandeen@redhat.com>
+Reply-To: sandeen@redhat.com
+MIME-Version: 1.0
+Subject: Re: [PATCH] shared/289: do not special-case ext3
+References: <1430134449-16060-1-git-send-email-eguan@redhat.com>
+In-Reply-To: <1430134449-16060-1-git-send-email-eguan@redhat.com>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org, Lukas Czerner <lczerner@redhat.com>
+To: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Exercise the situation that cause ext4 to BUG_ON() when we use
-zero range to zero a range which starts within the isize but ends
-past the isize but still in the same block. This particular problem
-has only been seen on systems with page_size > block_size.
+On 4/27/15 6:34 AM, Eryu Guan wrote:
+> Commit "3574531 xfstests: count journal size in test 289" makes ext3 a
+> special case, but now it's not the case anymore after kernel commit
+> 
+> e6d8fb3 ext3: Count internal journal as bsddf overhead in ext3_statfs
+> 
+> So just remove the special case, now test passes on both ext3 and ext4,
+> also ext3 driven by ext4 module.
 
-This tests exercises the problem fixed in kernel with commit
-0f2af21aae11972fa924374ddcf52e88347cf5a8
-ext4: Allocate entire range in zero range
+I think perhaps it was actually:
 
-Signed-off-by: Lukas Czerner <lczerner@redhat.com>
-Reviewed-by: Eryu Guan <eguan@redhat.com>
----
- tests/generic/084     | 60 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/084.out |  1 +
- tests/generic/group   |  1 +
- 3 files changed, 62 insertions(+)
- create mode 100755 tests/generic/084
- create mode 100644 tests/generic/084.out
+2046fd1 ext3: Count journal as bsddf overhead in ext3_statfs
 
-diff --git a/tests/generic/084 b/tests/generic/084
-new file mode 100755
-index 0000000..5066b14
---- /dev/null
-+++ b/tests/generic/084
-@@ -0,0 +1,60 @@
-+#! /bin/bash
-+# FS QA Test 084
-+#
-+# Exercise the situation that cause ext4 to BUG_ON() when we use
-+# zero range to zero a range which starts within the isize but ends
-+# past the isize but still in the same block. This particular problem
-+# has only been seen on systems with page_size > block_size.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Red Hat, Inc., Lukas Czerner <lczerner@redhat.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os IRIX Linux
-+_require_test
-+_require_xfs_io_command "fzero"
-+
-+testfile=$TEST_DIR/$seq.$$
-+
-+$XFS_IO_PROG -f -c "pwrite 4096 512" -c "fzero 4351 512" $testfile > $seqres.full 2>&1
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/084.out b/tests/generic/084.out
-new file mode 100644
-index 0000000..d0aa380
---- /dev/null
-+++ b/tests/generic/084.out
-@@ -0,0 +1 @@
-+QA output created by 084
-diff --git a/tests/generic/group b/tests/generic/group
-index c6ea3d8..6cb7dc3 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -86,6 +86,7 @@
- 081 auto quick
- 082 auto prealloc preallocrw quick
- 083 rw auto enospc stress
-+084 auto prealloc quick
- 088 perms auto quick
- 089 metadata auto
- 091 rw auto quick
--- 
-1.8.3.1
+(in v3.13) which changed the behavior; the commit you mention only
+removes the overhead again for external journals, but your change
+below looks fine.
+
+Reviewed-by: Eric Sandeen <sandeen@redhat.com>
+
+
+.> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> ---
+>  tests/shared/289 | 13 +------------
+>  1 file changed, 1 insertion(+), 12 deletions(-)
+> 
+> diff --git a/tests/shared/289 b/tests/shared/289
+> index c53d38c..96c949d 100755
+> --- a/tests/shared/289
+> +++ b/tests/shared/289
+> @@ -58,18 +58,7 @@ TOTAL_BLOCKS=`dumpe2fs -h $SCRATCH_DEV 2>/dev/null \
+>  FREE_BLOCKS=`dumpe2fs -h $SCRATCH_DEV 2>/dev/null \
+>  		| awk '/Free blocks:/{print $3}'`
+>  
+> -# ext3 doesn't count journal blocks as overhead, ext4 does.
+> -if [ $FSTYP = "ext3" ]; then
+> -	JOURNAL_SIZE=`dumpe2fs -h $SCRATCH_DEV 2>/dev/null \
+> -		| awk '/Journal size:/{print $3}' | _filter_size_to_bytes`
+> -	BLOCK_SIZE=`dumpe2fs -h $SCRATCH_DEV 2>/dev/null \
+> -		| awk '/Block size:/{print $3}'`
+> -	JOURNAL_BLOCKS=$(($JOURNAL_SIZE/$BLOCK_SIZE))
+> -else
+> -	JOURNAL_BLOCKS=0
+> -fi
+> -
+> -OVERHEAD=$(($TOTAL_BLOCKS-$FREE_BLOCKS-$JOURNAL_BLOCKS))
+> +OVERHEAD=$(($TOTAL_BLOCKS-$FREE_BLOCKS))
+>  
+>  #  bsddf|minixdf
+>  #         Set the behaviour  for  the  statfs  system  call.  The  minixdf
+> 
 
