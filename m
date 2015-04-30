@@ -1,46 +1,67 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37292 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750730AbbD3Iou (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 30 Apr 2015 04:44:50 -0400
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] generic/204: use more space for inode allocation
-Date: Thu, 30 Apr 2015 16:44:20 +0800
-Message-Id: <1430383460-32206-1-git-send-email-eguan@redhat.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:20531 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751070AbbD3KC7 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 30 Apr 2015 06:02:59 -0400
+From: Anand Jain <anand.jain@oracle.com>
+Subject: [PATCH] xfstests: btrfs: 020 is bit diverted from its objective
+Date: Thu, 30 Apr 2015 17:59:14 +0800
+Message-Id: <1430387954-15682-1-git-send-email-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com, Eryu Guan <eguan@redhat.com>
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On v4/512b and v5/1k xfs, there're not enough free inodes for new files
-and generic/204 fails because of running out of inode not space.
+Not sure what this test case wanted to achieve by deleting the
+source device before the replace.
 
-Adding "-i maxpct=50" to MKFS_OPTIONS to bump up the inode limit at mkfs
-time, and test could pass on all configurations.
+As per the comments the objective of this test case seems to be
 
-Suggested-by: Dave Chinner <dchinner@redhat.com>
-Signed-off-by: Eryu Guan <eguan@redhat.com>
+~~~~
+btrfs device replace test on RO fs
+
+Regression test for commit:
+bbb651e Btrfs: don't allow the replace procedure on read only filesystems
+~~~~~
+
+Also there won't be EIO when you delete a loop device when its
+still mounted. as shown below.
+
+mount /dev/loop0 /mnt
+losetup -d /dev/loop0
+echo $?
+0
+dd if=/dev/zero of=/mnt/tf1 count=1
+1+0 records in
+1+0 records out
+512 bytes (512 B) copied, 0.00192936 s, 265 kB/s
+cd /mnt
+sync
+losetup -a
+/dev/loop0: [0802]:1291816 (/root/testdev/disk1)
+
+No errors in the dmesg as well.
+
+Instead of further confusing, I am deleting  the delete loop device part
+
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
 ---
- tests/generic/204 | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ tests/btrfs/020 | 2 --
+ 1 file changed, 2 deletions(-)
 
-diff --git a/tests/generic/204 b/tests/generic/204
-index 13069d8..42985ab 100755
---- a/tests/generic/204
-+++ b/tests/generic/204
-@@ -52,8 +52,10 @@ _scratch_mkfs 2> /dev/null | _filter_mkfs 2> $tmp.mkfs > /dev/null
- . $tmp.mkfs
+diff --git a/tests/btrfs/020 b/tests/btrfs/020
+index 84251f3..3752dcf 100755
+--- a/tests/btrfs/020
++++ b/tests/btrfs/020
+@@ -76,8 +76,6 @@ loop_dev3=`_create_loop_device $fs_img3`
+ _mkfs_dev -m raid1 -d raid1 $loop_dev1 $loop_dev2 >>$seqres.full 2>&1
+ _mount -o ro $loop_dev1 $loop_mnt
  
- # For xfs, we need to handle the different default log sizes that different
--# versions of mkfs create. All should be valid with a 5MB log, so use that.
--[ $FSTYP = "xfs" ] && MKFS_OPTIONS="$MKFS_OPTIONS -l size=7m"
-+# versions of mkfs create. All should be valid with a 7MB log, so use that.
-+# And v4/512 v5/1k xfs don't have enough free inodes, set imaxpct=50 at mkfs
-+# time solves this problem.
-+[ $FSTYP = "xfs" ] && MKFS_OPTIONS="$MKFS_OPTIONS -l size=7m -i maxpct=50"
+-# Fail the second device and replace with the third
+-_destroy_loop_device $loop_dev2
+ $BTRFS_UTIL_PROG replace start -B 2 $loop_dev3 $loop_mnt >>$seqres.full 2>&1 && \
+ _fail "FAIL: Device replaced on RO btrfs"
  
- SIZE=`expr 106 \* 1024 \* 1024`
- _scratch_mkfs_sized $SIZE $dbsize 2> /dev/null \
 -- 
-1.8.3.1
+2.0.0.153.g79dcccc
 
