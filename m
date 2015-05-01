@@ -1,155 +1,96 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from imap.thunk.org ([74.207.234.97]:39302 "EHLO imap.thunk.org"
+Received: from plane.gmane.org ([80.91.229.3]:43450 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753386AbbEAON1 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 1 May 2015 10:13:27 -0400
-Date: Fri, 1 May 2015 10:13:22 -0400
-From: Theodore Ts'o <tytso@mit.edu>
+	id S1751070AbbEASbt (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 1 May 2015 14:31:49 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcff-fstests@m.gmane.org>)
+	id 1YoFir-0007XA-6g
+	for fstests@vger.kernel.org; Fri, 01 May 2015 20:31:37 +0200
+Received: from ip4d14b39b.dynamic.kabel-deutschland.de ([77.20.179.155])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <fstests@vger.kernel.org>; Fri, 01 May 2015 20:31:37 +0200
+Received: from for-gmane by ip4d14b39b.dynamic.kabel-deutschland.de with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <fstests@vger.kernel.org>; Fri, 01 May 2015 20:31:37 +0200
+From: "U.Mutlu" <for-gmane@mutluit.com>
 Subject: Re: ext4 non-kernel standalone dev version for testing
-Message-ID: <20150501141322.GA9936@thunk.org>
-References: <mhukt7$9ce$1@ger.gmane.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <mhukt7$9ce$1@ger.gmane.org>
+Date: Fri, 1 May 2015 20:31:22 +0200
+Message-ID: <mi0gpq$mpk$1@ger.gmane.org>
+References: <mhukt7$9ce$1@ger.gmane.org> <20150501141322.GA9936@thunk.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
+In-Reply-To: <20150501141322.GA9936@thunk.org>
 Sender: fstests-owner@vger.kernel.org
-To: "U.Mutlu" <for-gmane@mutluit.com>
-Cc: linux-ext4@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, May 01, 2015 at 03:29:11AM +0200, U.Mutlu wrote:
-> can the developer-version (ie. that with the crypto extension) be tested
-> outside the kernel?
-> Ie. testing with file type filesystem, ie. file.img, on a system with old kernel.
-
-No, but you can test under KVM.  This is how I normally do most of my
-ext4 development.  Things are a little complicated at the moment
-because some e2fsprogs changes are needed that aren't in the binaries
-in the kvm-xfstests image, but I'll try to get a new version sent out
-soon.
-
-						- Ted
-
-
-Quick start instructions for kvm-xfstests
-==========================================
-
-0.  Make sure qemu with kvm support is installed on your system.
-
-1.  Run the following commands:
-
-    git clone git://git.kernel.org/pub/scm/fs/ext2/xfstests-bld.git fstests
-    cd fstests/kvm-xfstests
-    wget -O test_appliance/root_fs.img https://www.kernel.org/pub/linux/kernel/people/tytso/kvm-xfstests/root_fs.img.i386
-
-Substitute "i386" for "x86_64" in the above URL if you want to test
-using a native 64-bit userspace.  It should be possible to use the
-32-bit userspace with a 64-bit kernel, although you may run into some
-rough spots via-a-vis compat ioctls working correctly.  (If you do,
-let me know; those are bugs that should be fixed.  :-)
-
-2.  In the fstests/kvm-xfstests directory, take a look at the "config"
-    file and either edit that file in place, or put override values in
-    ~/.config/kvm-xfstests or config.custom.  The latter is preferred.
-
-3.  Build a kernel with all of the necessary drives for kvm built into
-    the kernel (i.e., no modules!).  There are some sample kernel
-    configs in the kernel-configs directory.
-
-4.  Run "./kvm-xfstests smoke" to do a quick test.  Or "./kvm-xfstests
-    -g auto" to do a full test.  You can also run specific tests on
-    specific configurations, i.e., "./kvm-xfstests -c bigalloc
-    generic/013 generic/127".   To run a shell, use "./kvm-xfstests shell"
-
-For more information, please see:
-
-https://git.kernel.org/cgit/fs/ext2/xfstests-bld.git/tree/kvm-xfstests/README
+Theodore Ts'o wrote on 05/01/2015 04:13 PM:
+> On Fri, May 01, 2015 at 03:29:11AM +0200, U.Mutlu wrote:
+>> can the developer-version (ie. that with the crypto extension) be tested
+>> outside the kernel?
+>> Ie. testing with file type filesystem, ie. file.img, on a system with old kernel.
+>
+> No, but you can test under KVM.  This is how I normally do most of my
+> ext4 development.  Things are a little complicated at the moment
+> because some e2fsprogs changes are needed that aren't in the binaries
+> in the kvm-xfstests image, but I'll try to get a new version sent out
+> soon.
+>
+> 						- Ted
+>
+>
+> Quick start instructions for kvm-xfstests
+...
 
 
-Building a 32-bit kernel
-========================
+Thx, but unfortunately the Makefile reports an error:
+
+...
+checking for attr_list_by_handle in -lhandle... yes
+checking attr/xattr.h usability... no
+checking attr/xattr.h presence... no
+checking for attr/xattr.h... no
+
+FATAL ERROR: attr/xattr.h does not exist.
+Install the extended attributes (attr) development package.
+Alternatively, run "make install-dev" from the attr source.
+Makefile:83: recipe for target 'include/builddefs' failed
+make[1]: *** [include/builddefs] Error 1
+make[1]: Leaving directory '/root/ext4crypto-test/fstests/xfstests-dev'
 
 
-To build a 32-bit kernel, create a /build/ext4 directory (or change
-directory name as you wish) and place a kernel configuration file in
-/build/ext4/.config.  (There are some example config files in the
-kernel-configs directory of the xfstests-bld git repo).  Then run:
-
-make O=/build/ext4 ARCH=i386 -j16 $*
-
-The reason for using a separate build directory is you can maintain a
-separate build directory for 64-bit builds, which you can now build
-using:
-
-make O=/build/ext4-64 ARCH=x86_64 -j16 $*
-
-I generally create shell scripts which look like this:
-
-#!/bin/dash
-cd /usr/projects/linux/ext4
-make O=/build/ext4-64 ARCH=x86_64 -j16 $*
-
-And store them as "make-ext4", "make-ext4-64", "make-ext4-crypto",
-etc., in /usr/projects/linux.  The reason for having the "cd" command
-is so that if you accidentally run "../make-ext4" while you are in the
-/usr/projects/linux/ext4-crypto directory, instead of the
-/usr/projects/linux/ext4 directory (for example), you won't end up
-accidentally contaminating the build directory.
-
-The remote ports feature
-========================
-
-While kvm-xfstests is running, you can telnet to a number of ports
-(which are bound to localhost).  Ports 7500, 7501, and 7502 will
-connect you to a shell prompts while the tests are running (if you
-want to check on /proc/slabinfo, enable tracing, etc.)  You can also
-use these ports in conjuction with "kvm-xfstests shell" if you want
-additional windows to capture traces using ftrace.
-
-You can also access the qemu monitor on port 7498, and you debug the
-kernel using remote gdb on localhost port 7499.  Just run "gdb
-/path/to/vmlinux", and then use the command "target remote
-localhost:7499".  (Pro tip: it's helpful to temporarily add
-"EXTRA_CFLAGS += -O0" to fs/{ext4,jbd2}/Makefile, and to make sure you
-have CONFIG_DEBUG_INFO, CONFIG_DEBUG_INFO_DWARF4, and
-CONFIG_FRAME_POINTER enabled.)
+root@c22:/root/ext4crypto-test/fstests/attr# find . -iname "*xattr*" -ls
+35786444    4 -rw-r--r--   1 root     root         2297 May  1 18:52 
+./include/xattr.h
 
 
-Miscellaneous kernel hacking hints
-==================================
+root@c22:/root/ext4crypto-test/fstests/attr/include# ls -l
+total 60
+lrwxrwxrwx 1 root root    1 May  1 19:46 attr -> .
+-rw-r--r-- 1 root root 7232 May  1 18:52 attributes.h
+-rw-r--r-- 1 root root 2180 May  1 19:46 builddefs
+-rw-r--r-- 1 root root 2155 May  1 18:52 builddefs.in
+-rw-r--r-- 1 root root 4633 May  1 18:52 buildmacros
+-rw-r--r-- 1 root root 1728 May  1 18:52 buildrules
+-rw-r--r-- 1 root root 1344 May  1 19:40 config.h
+-rw-r--r-- 1 root root 1282 May  1 18:52 config.h.in
+-rw-r--r-- 1 root root  846 May  1 18:52 error_context.h
+-rw-r--r-- 1 root root  688 May  1 18:52 libattr.h
+-rw-r--r-- 1 root root  521 May  1 18:52 Makefile
+-rw-r--r-- 1 root root  340 May  1 18:52 misc.h
+-rw-r--r-- 1 root root 1272 May  1 18:52 walk_tree.h
+-rw-r--r-- 1 root root 2297 May  1 18:52 xattr.h
 
-The following hints may be useful to folks who are new to kernel
-development.
 
-Using ccache
-------------
+Where/how should I fix this xattr.h build-bug?
 
-Enabling ccache can really help speed up your kernel builds.  I
-strongly recommend it.
+System is debian 8 x86_64, testing in a chrooted environment (lxc app container).
 
-Examples of using ftrace
-------------------------
+cu
+Uenal
 
-This is an example of how to debug the lazytime feature (which is
-when you mount a file system using -m lazytime using a 4.0-rcX and
-later kernels).
-
-cd /sys/kernel/debug/tracing
-echo 1 > events/writeback/writeback_lazytime/enable
-echo 1 > events/writeback/writeback_lazytime_iput/enable
-echo "state & 2048" > events/writeback/writeback_dirty_inode_enqueue/filter
-echo 1 > events/writeback/writeback_dirty_inode_enqueue/enable
-echo 1 > events/ext4/ext4_other_inode_update_time/enable
-cat trace_pipe
-
-The definition of the tracepoints can be found in
-include/linux/trace/events.  The tracepoints used by ext4 and be found
-in ext4.h, and by jbd2 in the jbd2.h files in that directory, and so
-on.
-
-For more information, please see:
-
-http://lwn.net/Articles/365835/
-http://lwn.net/Articles/366796/
-http://lwn.net/Articles/370423/
 
