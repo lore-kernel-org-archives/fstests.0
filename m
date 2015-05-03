@@ -1,120 +1,203 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:44493 "EHLO
-	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752776AbbEDM7w (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 4 May 2015 08:59:52 -0400
-Received: from dave by dastard with local (Exim 4.80)
-	(envelope-from <david@fromorbit.com>)
-	id 1YpFyN-0004O7-S5
-	for fstests@vger.kernel.org; Mon, 04 May 2015 22:59:47 +1000
-Date: Mon, 4 May 2015 22:59:47 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: [ANNOUNCE] xfstests master branch updated to c3d3e1e
-Message-ID: <20150504125947.GH15810@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Received: from victor.provo.novell.com ([137.65.250.26]:48608 "EHLO
+	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1750820AbbEDO0h (ORCPT
+	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
+	Mon, 4 May 2015 10:26:37 -0400
+From: Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH RESEND] fstests: regression test for btrfs file range cloning
+Date: Sun,  3 May 2015 01:53:34 +0100
+Message-Id: <1430614414-2752-1-git-send-email-fdmanana@suse.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Hi folks
+Test btrfs file range cloning with the same file as a source and
+destination.
 
-The xfstests repository at git://oss.sgi.com/xfs/cmds/xfstests has
-just been updated. Patches often get missed, so please check if your
-outstanding patches were in this update. If they have not been in
-this update, please resubmit them to fstests@vger.kernel.org so they
-can be picked up in the next update.
+This tests a specific scenario where the extent layout of the file
+confused the clone ioctl implementation making it return -EEXIST to
+userspace. This issue was fixed by the following linux kernel patch:
 
-The new head of the master branch is commit:
+   Btrfs: fix range cloning when same inode used as source and destination
 
-c3d3e1e xfstests: btrfs: 020 is bit diverted from its objective
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Reviewed-by: Josef Bacik <jbacik@fb.com>
+---
 
-New Commits:
+Resending as it was missed during last merge. Rebased on latest master
+branch, renumbered the test accordingly and included Josef's reviewed-by
+tag. No changes otherwise.
 
-Anand Jain (1):
-      [c3d3e1e] xfstests: btrfs: 020 is bit diverted from its objective
+ tests/btrfs/093     | 120 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/093.out |  20 +++++++++
+ tests/btrfs/group   |   1 +
+ 3 files changed, 141 insertions(+)
+ create mode 100755 tests/btrfs/093
+ create mode 100644 tests/btrfs/093.out
 
-Dave Chinner (2):
-      [d5425f4] generic: LVM and ram disks don't play well
-      [9435b92] common: _require_command needs to handle parameters
-
-Eryu Guan (7):
-      [0a0dd14] generic: test quota handling on remount ro failure
-      [ddb8f4e] generic: test hardlink to unlinked file
-      [3634bde] shared: test truncate orphan inodes when mounting extN
-      [6139f10] generic: test fs freeze/unfreeze and mount/umount race
-      [bd8febe] generic: add _require_metadata_journaling to more tests
-      [b928ca4] shared/289: do not special-case ext3
-      [69cb5fb] generic/204: use more space for inode allocation
-
-Filipe Manana (3):
-      [2fbdbfb] btrfs: test btrfs send after complex directory hierarchy changes
-      [1a9dfb7] btrfs: exercise transaction abort on device with discard support
-      [51c53eb] btrfs: test btrfs send after swapping directory names differently
-
-Lukas Czerner (1):
-      [7699037] generic: test data corruption on ext4 caused by written/delayed extent
-
-Qu Wenruo (2):
-      [842c5a5] btrfs: Check return value of "btrfs filesystem show" command
-      [f24afad] btrfs: Incorrect exclusive reference number after file clone.
-
-
-Code Diffstat:
-
- common/rc             |  50 +++++++++----
- tests/btrfs/020       |   2 -
- tests/btrfs/087       | 199 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/087.out   |   2 +
- tests/btrfs/088       | 133 +++++++++++++++++++++++++++++++++
- tests/btrfs/088.out   |   9 +++
- tests/btrfs/090       |  71 ++++++++++++++++++
- tests/btrfs/090.out   |   2 +
- tests/btrfs/091       | 102 ++++++++++++++++++++++++++
- tests/btrfs/091.out   |   7 ++
- tests/btrfs/092       | 186 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/092.out   |   2 +
- tests/btrfs/group     |   5 ++
- tests/generic/039     |   1 +
- tests/generic/059     |   1 +
- tests/generic/081     |   1 -
- tests/generic/082     |  73 ++++++++++++++++++
- tests/generic/082.out |   3 +
- tests/generic/084     | 104 ++++++++++++++++++++++++++
- tests/generic/084.out |   2 +
- tests/generic/085     | 106 +++++++++++++++++++++++++++
- tests/generic/085.out |   2 +
- tests/generic/086     |  85 +++++++++++++++++++++
- tests/generic/086.out |  14 ++++
- tests/generic/204     |   6 +-
- tests/generic/325     |   1 +
- tests/generic/group   |   4 +
- tests/shared/001      |  71 ++++++++++++++++++
- tests/shared/001.out  |   2 +
- tests/shared/289      |  13 +---
- tests/shared/group    |   1 +
- 31 files changed, 1230 insertions(+), 30 deletions(-)
- create mode 100755 tests/btrfs/087
- create mode 100644 tests/btrfs/087.out
- create mode 100755 tests/btrfs/088
- create mode 100644 tests/btrfs/088.out
- create mode 100755 tests/btrfs/090
- create mode 100644 tests/btrfs/090.out
- create mode 100755 tests/btrfs/091
- create mode 100644 tests/btrfs/091.out
- create mode 100755 tests/btrfs/092
- create mode 100644 tests/btrfs/092.out
- create mode 100755 tests/generic/082
- create mode 100644 tests/generic/082.out
- create mode 100755 tests/generic/084
- create mode 100644 tests/generic/084.out
- create mode 100755 tests/generic/085
- create mode 100644 tests/generic/085.out
- create mode 100755 tests/generic/086
- create mode 100644 tests/generic/086.out
- create mode 100755 tests/shared/001
- create mode 100644 tests/shared/001.out
+diff --git a/tests/btrfs/093 b/tests/btrfs/093
+new file mode 100755
+index 0000000..643c6be
+--- /dev/null
++++ b/tests/btrfs/093
+@@ -0,0 +1,120 @@
++#! /bin/bash
++# FS QA Test No. btrfs/093
++#
++# Test btrfs file range cloning with the same file as a source and destination.
++#
++# This tests a specific scenario where the extent layout of the file confused
++# the clone ioctl implementation making it return -EEXIST to userspace.
++# This issue was fixed by the following linux kernel patch:
++#
++#    Btrfs: fix range cloning when same inode used as source and destination
++#
++#-----------------------------------------------------------------------
++# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_cloner
++_need_to_be_root
++
++rm -f $seqres.full
++
++# Create a file with an extent layout that confused the btrfs clone ioctl
++# implementation. The first extent item that is cloned by the second call
++# to the cloner program will have only a trailing part of it referenced by
++# a new extent item, since the source offset starts in the middle of that
++# extent. This confused the clone ioctl because after inserting this new
++# extent item it would immediately after process it again thinking it
++# corresponded to an extent that existed before - this made it attempt to
++# insert a duplicated extent item pointing to the same extent again, which
++# made it return an -EEXIST error to userspace and turn the filesystem to
++# readonly mode (since the current transaction got aborted).
++test_clone()
++{
++	local bs=$1
++
++	$XFS_IO_PROG -f -c "pwrite -S 0xaa $((2 * $bs)) $((2 * $bs))" \
++		$SCRATCH_MNT/foo | _filter_xfs_io
++
++	$CLONER_PROG -s $((3 * $bs)) -d $((267 * $bs)) -l 0 $SCRATCH_MNT/foo \
++		$SCRATCH_MNT/foo
++	$CLONER_PROG -s $((217 * $bs)) -d $((95 * $bs)) -l 0 $SCRATCH_MNT/foo \
++		$SCRATCH_MNT/foo
++
++	echo "File digest after clone operations using same file as source and destination"
++	md5sum $SCRATCH_MNT/foo | _filter_scratch
++
++	# Test cloning using different source and destination files for the
++	# same exact data - it must produce the exact same result as the case
++	# before.
++	$XFS_IO_PROG -f -c "pwrite -S 0xaa $((2 * $bs)) $((2 * $bs))" \
++		$SCRATCH_MNT/a | _filter_xfs_io
++	cp $SCRATCH_MNT/a $SCRATCH_MNT/b
++
++	$CLONER_PROG -s $((3 * $bs)) -d $((267 * $bs)) -l 0 $SCRATCH_MNT/a \
++		$SCRATCH_MNT/b
++
++	cp $SCRATCH_MNT/b $SCRATCH_MNT/foo2
++	$CLONER_PROG -s $((217 * $bs)) -d $((95 * $bs)) -l 0 $SCRATCH_MNT/b \
++		$SCRATCH_MNT/foo2
++
++	echo "File digest after clone operations using different files as source and destination"
++	md5sum $SCRATCH_MNT/foo2 | _filter_scratch
++
++}
++
++# Make sure the test passes offsets and lengths to the btrfs clone ioctl that
++# are multiples of the fs block size. Currently the block size on btrfs must
++# be a multiple of the page size, so use a 64Kb fs block size in order to be
++# able to test on every platform supported by linux.
++bs=$((64 * 1024))
++
++echo "Testing without the no-holes feature"
++_scratch_mkfs "-O ^no-holes -n $bs" >>$seqres.full 2>&1
++_scratch_mount
++test_clone $bs
++_check_scratch_fs
++
++echo -e "\nTesting with the no-holes feature"
++_scratch_unmount
++_scratch_mkfs "-O no-holes -n $bs" >>$seqres.full 2>&1
++_scratch_mount
++test_clone $bs
++
++status=0
++exit
+diff --git a/tests/btrfs/093.out b/tests/btrfs/093.out
+new file mode 100644
+index 0000000..dd51cfd
+--- /dev/null
++++ b/tests/btrfs/093.out
+@@ -0,0 +1,20 @@
++QA output created by 093
++Testing without the no-holes feature
++wrote 131072/131072 bytes at offset 131072
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File digest after clone operations using same file as source and destination
++cc3cc722ad761bd10488a0f1232ead19  SCRATCH_MNT/foo
++wrote 131072/131072 bytes at offset 131072
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File digest after clone operations using different files as source and destination
++cc3cc722ad761bd10488a0f1232ead19  SCRATCH_MNT/foo2
++
++Testing with the no-holes feature
++wrote 131072/131072 bytes at offset 131072
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File digest after clone operations using same file as source and destination
++cc3cc722ad761bd10488a0f1232ead19  SCRATCH_MNT/foo
++wrote 131072/131072 bytes at offset 131072
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File digest after clone operations using different files as source and destination
++cc3cc722ad761bd10488a0f1232ead19  SCRATCH_MNT/foo2
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 8e32b20..a2112ab 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -94,3 +94,4 @@
+ 090 auto quick metadata
+ 091 auto quick qgroup
+ 092 auto quick send
++093 auto quick clone
 -- 
-Dave Chinner
-david@fromorbit.com
+2.1.3
+
