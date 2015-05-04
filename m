@@ -1,84 +1,92 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from imap.thunk.org ([74.207.234.97]:40258 "EHLO imap.thunk.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751040AbbEAXyO (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 1 May 2015 19:54:14 -0400
-Date: Fri, 1 May 2015 19:54:12 -0400
-From: Theodore Ts'o <tytso@mit.edu>
-Subject: Re: ext4 non-kernel standalone dev version for testing
-Message-ID: <20150501235412.GC9936@thunk.org>
-References: <mhukt7$9ce$1@ger.gmane.org>
- <20150501141322.GA9936@thunk.org>
- <mi0gpq$mpk$1@ger.gmane.org>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:12631 "EHLO
+	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751964AbbEDG1M (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 4 May 2015 02:27:12 -0400
+Date: Mon, 4 May 2015 16:27:08 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] generic/081: wait for lv to be settled before creating
+ fs on it
+Message-ID: <20150504062708.GF15810@dastard>
+References: <1428054075-20780-1-git-send-email-eguan@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <mi0gpq$mpk$1@ger.gmane.org>
+In-Reply-To: <1428054075-20780-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: "U.Mutlu" <for-gmane@mutluit.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, May 01, 2015 at 08:31:22PM +0200, U.Mutlu wrote:
+On Fri, Apr 03, 2015 at 05:41:15PM +0800, Eryu Guan wrote:
+> Call 'udevadm settle' or 'udevsettle' or 'sleep 1' to make sure new lv
+> is ready for use before making filesystem on it, depends on which
+> command is available on the system.
 > 
-> Thx, but unfortunately the Makefile reports an error:
+> Also sleep 1 before removing the test vg, as the snapshot may block the
+> test vg from removal for a while.
+> 
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> ---
+>  tests/generic/081 | 22 ++++++++++++++++++++++
+>  1 file changed, 22 insertions(+)
+> 
+> diff --git a/tests/generic/081 b/tests/generic/081
+> index e242c4c..8e1828b 100755
+> --- a/tests/generic/081
+> +++ b/tests/generic/081
+> @@ -36,6 +36,9 @@ _cleanup()
+>  	rm -f $tmp.*
+>  	# lvm may have umounted it on I/O error, but in case it does not
+>  	$UMOUNT_PROG $mnt >/dev/null 2>&1
+> +	# fsync from xfs_io pins the snapshot in use for a while and blocks
+> +	# vgremove, sleep 1 to avoid such failure
+> +	sleep 1
 
-First of all, it's not necessary for you to build the whole setup if
-you just want to use kvm-xfstests.  Just download the root_fs.img file
-as described in the quickstart.  In fact, if you follow the quickstart
-documentation I sent you **exactly** (which you will note doesn't
-include trying to build things), it should be enough so you can at
-least get something set up for testing generic ext4.  I will create an
-updated root_fs.img that can be used for testing encryption in a few
-days.
+Doesn't this indicate a bug in the LVM code? unmount flushes block
+device caches, so there should be no IO remaining on the device
+pinning it when unmount completes, right?
 
+>  	$LVM_PROG vgremove -f $vgname >>$seqres.full 2>&1
+>  	$LVM_PROG pvremove -f $SCRATCH_DEV >>$seqres.full 2>&1
+>  }
+> @@ -62,11 +65,30 @@ snapname=snap_$seq
+>  mnt=$TEST_DIR/mnt_$seq
+>  mkdir -p $mnt
+>  
+> +# use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+> +# newer systems have udevadm command but older systems like RHEL5 don't.
+> +# But if neither one is available, just set it to "sleep 1" to wait for lv to
+> +# be settled
+> +UDEV_SETTLE_PROG="`set_prog_path udevadm`"
+> +if [ "$UDEV_SETTLE_PROG" == "" ]; then
+> +	# try udevsettle command
+> +	UDEV_SETTLE_PROG="`set_prog_path udevsettle`"
+> +else
+> +	# udevadm is available, add 'settle' as subcommand
+> +	UDEV_SETTLE_PROG="$UDEV_SETTLE_PROG settle"
+> +fi
+> +# neither command is available, use sleep 1
+> +if [ "$UDEV_SETTLE_PROG" == "" ]; then
+> +	UDEV_SETTLE_PROG="sleep 1"
+> +fi
+> +
 
-That being said, the build *should* have worked, but you need to send
-me the full output of the make output if you want me to help you debug
-it.  (i.e., run "make clean ; make >& MAKELOG", and then send me the
-output of MAKELOGf.)  It would also be useful to send me the output of
-this command line, so I can see what versions of the subcomponents you
-are using:
+This should probably go into common/config....
 
-for i in $(find . -name .git) ; do echo $i $(cd $i ; git describe --always); done
+>  # make sure there's enough disk space for 256M lv, test for 300M here in case
+>  # lvm uses some space for metadata
+>  _scratch_mkfs_sized $((300 * 1024 * 1024)) >>$seqres.full 2>&1
+>  $LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
+>  $LVM_PROG lvcreate --yes -L 256M -n $lvname $vgname >>$seqres.full 2>&1
+> +# wait for lv to be settled
+> +$UDEV_SETTLE_PROG >>$seqres.full 2>&1
 
-specifically, the quota tree recently got autoconfiscated, and so at
-least at one point it wasn't building smoothly; doing a "(cd quota ;
-git checkout 022aabf)" is a good idea.  Similarly the fio tree is not
-necessarily always stable; it's sometimes a good idea to check out the
-most recent release tag, instead of using the bleeding edge
-development branch for safety reasons.  Here are the versions that I'm
-currently personally using for the various subcomponents needed to
-build xfstests:
+"# wait for lvcreation to fully complete"
 
-fio	   	 fio-2.2.6 (Fri, 27 Feb 2015 08:30:04 -0700)
-quota		 	   022aabf (Wed, 26 Nov 2014 10:22:08 +0100)
-xfsprogs		   v3.2.2 (Thu, 4 Dec 2014 07:56:44 +1100)
-xfstests-bld		   9fadb2d (Mon, 6 Apr 2015 18:38:24 -0400)
-xfstests		   linux-v3.8-640-gfacff60 (Thu, 2 Apr 2015 09:41:15 +1100)
+Cheers,
 
-
-Finally, note that when the build is done, there are still a few more
-steps before you can generate a root_fs.img that can be used with kvm,
-and that it requires that you are using a Debian or Ubuntu system (and
-I only really test on Debian).  The specifics of what you need to do
-can be found in the do-all script if you really want to go down this
-path ---- but I emphasize, this is all not really necessary unless you
-want to do your own test development and/or improve the kvm-xfstests
-test appliance.
-
-If you don't, it's *much* simpler to just follow the quickstart
-document I sent you very carefully, and just download the root_fs.img
-file using wget as I described in step #1.
-
-Finally, out of curiosity, what is your interest in testing/using the
-ext4 encryption feature?  It's still very much early days, and so if I
-know what you are trying to do, I might be able to provide more
-assistance.  Please note that it requires a pre-release version of
-e2fsprogs, and with all new features, it's not at the stage where I
-would recommend that users use it for critical data until it has gone
-through additional testing (and no doubt, bug fixing).
-
-Best regards,
-
-					- Ted
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
