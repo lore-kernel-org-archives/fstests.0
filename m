@@ -1,75 +1,83 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37328 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:60239 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751677AbbEGDLH (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 6 May 2015 23:11:07 -0400
-Date: Thu, 7 May 2015 11:11:03 +0800
+	id S1750812AbbEGDee (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 6 May 2015 23:34:34 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t473YXGt001127
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <fstests@vger.kernel.org>; Wed, 6 May 2015 23:34:34 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic/081: wait for lv to be settled before creating
- fs on it
-Message-ID: <20150507031103.GI1187@dhcp-13-216.nay.redhat.com>
+Subject: [PATCH v3] generic/081: wait for lv to be settled before creating fs on it
+Date: Thu,  7 May 2015 11:33:43 +0800
+Message-Id: <1430969623-20789-1-git-send-email-eguan@redhat.com>
+In-Reply-To: <1428054075-20780-1-git-send-email-eguan@redhat.com>
 References: <1428054075-20780-1-git-send-email-eguan@redhat.com>
- <20150504062708.GF15810@dastard>
- <20150506073251.GF1187@dhcp-13-216.nay.redhat.com>
- <20150506231318.GK21261@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20150506231318.GK21261@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 07, 2015 at 09:13:18AM +1000, Dave Chinner wrote:
-> On Wed, May 06, 2015 at 03:32:51PM +0800, Eryu Guan wrote:
-> > On Mon, May 04, 2015 at 04:27:08PM +1000, Dave Chinner wrote:
-> > > On Fri, Apr 03, 2015 at 05:41:15PM +0800, Eryu Guan wrote:
-> > > > Call 'udevadm settle' or 'udevsettle' or 'sleep 1' to make sure new lv
-> > > > is ready for use before making filesystem on it, depends on which
-> > > > command is available on the system.
-> > > > 
-> > > > Also sleep 1 before removing the test vg, as the snapshot may block the
-> > > > test vg from removal for a while.
-> > > > 
-> > > > Signed-off-by: Eryu Guan <eguan@redhat.com>
-> > > > ---
-> > > >  tests/generic/081 | 22 ++++++++++++++++++++++
-> > > >  1 file changed, 22 insertions(+)
-> > > > 
-> > > > diff --git a/tests/generic/081 b/tests/generic/081
-> > > > index e242c4c..8e1828b 100755
-> > > > --- a/tests/generic/081
-> > > > +++ b/tests/generic/081
-> > > > @@ -36,6 +36,9 @@ _cleanup()
-> > > >  	rm -f $tmp.*
-> > > >  	# lvm may have umounted it on I/O error, but in case it does not
-> > > >  	$UMOUNT_PROG $mnt >/dev/null 2>&1
-> > > > +	# fsync from xfs_io pins the snapshot in use for a while and blocks
-> > > > +	# vgremove, sleep 1 to avoid such failure
-> > > > +	sleep 1
-> > > 
-> > > Doesn't this indicate a bug in the LVM code? unmount flushes block
-> > > device caches, so there should be no IO remaining on the device
-> > > pinning it when unmount completes, right?
-> > 
-> > Maybe, I'm not sure here.. But it does cause problems to fstests, I have
-> > two workarounds now, adding sleep 1 before removing vg, delete fsync
-> > from xfs_io command. I preper to delete fsync, as bug is still
-> > reproducible without it and no extra workaround(sleep 1) is needed.
-> > 
-> > What do you think?
-> 
-> I think the bug should be triaged and fixed, not hidden by changing
-> or removing something from the test. I'd suggest trying to find what
-> the fsync is pinning in the filesyste/block device....
+Call 'udevadm settle' or 'udevsettle' or 'sleep 1' to make sure new lv
+is ready for use before making filesystem on it, depends on which
+command is available on the system.
 
-OK, I'll send out a v3 to get the udevadm settle part in first and leave
-this part as it is for now.
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+v3:
+- add fsync command back and no 'sleep 1' in cleanup either
 
-(I tried a self-built lvm binary to debug but I couldn't reproduce the
-issue with it, and I see the issue in only one of my kvm guests. I'll
-dig deeper.)
+v2:
+- move UDEV_SETTLE_PROG setup code to common/config
+- remove fsync from xfs_io command
+- update comments a bit about waiting for lv creation
 
-Thanks,
-Eryu
+ common/config     | 18 ++++++++++++++++++
+ tests/generic/081 |  2 ++
+ 2 files changed, 20 insertions(+)
+
+diff --git a/common/config b/common/config
+index 3732287..b7991ed 100644
+--- a/common/config
++++ b/common/config
+@@ -192,6 +192,24 @@ export DUMP_PROG="`set_prog_path dump`"
+ export RESTORE_PROG="`set_prog_path restore`"
+ export LVM_PROG="`set_prog_path lvm`"
+ 
++# use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
++# newer systems have udevadm command but older systems like RHEL5 don't.
++# But if neither one is available, just set it to "sleep 1" to wait for lv to
++# be settled
++UDEV_SETTLE_PROG="`set_prog_path udevadm`"
++if [ "$UDEV_SETTLE_PROG" == "" ]; then
++	# try udevsettle command
++	UDEV_SETTLE_PROG="`set_prog_path udevsettle`"
++else
++	# udevadm is available, add 'settle' as subcommand
++	UDEV_SETTLE_PROG="$UDEV_SETTLE_PROG settle"
++fi
++# neither command is available, use sleep 1
++if [ "$UDEV_SETTLE_PROG" == "" ]; then
++	UDEV_SETTLE_PROG="sleep 1"
++fi
++export UDEV_SETTLE_PROG
++
+ # Generate a comparable xfsprogs version number in the form of
+ # major * 10000 + minor * 100 + release
+ #
+diff --git a/tests/generic/081 b/tests/generic/081
+index 5d38c11..34da1ac 100755
+--- a/tests/generic/081
++++ b/tests/generic/081
+@@ -66,6 +66,8 @@ mkdir -p $mnt
+ _scratch_mkfs_sized $((300 * 1024 * 1024)) >>$seqres.full 2>&1
+ $LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
+ $LVM_PROG lvcreate --yes -L 256M -n $lvname $vgname >>$seqres.full 2>&1
++# wait for lvcreation to fully complete
++$UDEV_SETTLE_PROG >>$seqres.full 2>&1
+ 
+ # _mkfs_dev exits the test on failure, this can make sure lv is created in
+ # above vgcreate/lvcreate steps
+-- 
+2.1.0
+
