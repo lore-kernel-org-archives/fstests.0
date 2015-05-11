@@ -1,12 +1,12 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from aserp1040.oracle.com ([141.146.126.69]:42281 "EHLO
+Received: from aserp1040.oracle.com ([141.146.126.69]:42356 "EHLO
 	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751701AbbEKNi5 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 11 May 2015 09:38:57 -0400
+	with ESMTP id S1753920AbbEKNjB (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 11 May 2015 09:39:01 -0400
 From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH v3 1/3] xfstests: btrfs: add functions to create dm-error device
-Date: Mon, 11 May 2015 21:49:09 +0800
-Message-Id: <1431352151-3117-2-git-send-email-anand.jain@oracle.com>
+Subject: [PATCH v3 3/3] xfstests: btrfs: test device delete with EIO on src dev
+Date: Mon, 11 May 2015 21:49:11 +0800
+Message-Id: <1431352151-3117-4-git-send-email-anand.jain@oracle.com>
 In-Reply-To: <1430388527-16700-1-git-send-email-anand.jain@oracle.com>
 References: <1430388527-16700-1-git-send-email-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
@@ -16,36 +16,58 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Anand Jain <Anand.Jain@oracle.com>
 
-Controlled EIO from the device is achieved using the dm device.
-Helper functions are at common/dmerror.
+This test case tests if the device delete would work when
+the source device has failed with EIO errors.
 
-Broadly steps will include calling _init_dmerror().
-_init_dmerror() will use SCRATCH_DEV to create dm linear device and assign
-DMERROR_DEV to /dev/mapper/error-test.
+EIO errors are achieved usign the DM device.
 
-When test script is ready to get EIO, the test cases can call
-_load_dmerror_table() which then it will load the dm error.
-so that reading DMERROR_DEV will cause EIO. After the test case is
-complete, cleanup must be done by calling _cleanup_dmerror().
+Also this test needs the latest btrfs-progs and kernel patch
+under title
+  [PATCH] device delete by devid
+
+When this patch is not found in the btrfs-progs, this test
+will not run. However when the require patch is not found
+in the kernel it will fail gracefully.
 
 Signed-off-by: Anand Jain <anand.jain@oracle.com>
 ---
-v2.1->v3: accepts Filipe Manana's review comments, thanks
-v2->v2.1: fixed missed typo error fixup in the commit.
+v2->v3: accepts Filipe Manana's review comments, thanks
 v1->v2: accepts Dave Chinner's review comments, thanks
+ common/rc           |    6 ++++
+ tests/btrfs/088     |   77 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/088.out |   10 ++++++
+ tests/btrfs/group   |    1 +
+ 4 files changed, 94 insertions(+), 0 deletions(-)
+ create mode 100755 tests/btrfs/088
+ create mode 100644 tests/btrfs/088.out
 
- common/dmerror |   69 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- common/rc      |   15 ++++++++++++
- 2 files changed, 84 insertions(+), 0 deletions(-)
- create mode 100644 common/dmerror
-
-diff --git a/common/dmerror b/common/dmerror
-new file mode 100644
-index 0000000..f895d90
+diff --git a/common/rc b/common/rc
+index 447ab7f..aca7a62 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2685,6 +2685,12 @@ _require_test_fcntl_advisory_locks()
+ 		_notrun "Require fcntl advisory locks support"
+ }
+ 
++_require_btrfs_dev_del_by_devid()
++{
++	$BTRFS_UTIL_PROG device delete --help | egrep devid > /dev/null 2>&1
++	[ $? -eq 0 ] || _notrun "$BTRFS_UTIL_PROG too old (must support 'btrfs device delete <devid> /<mnt>')"
++}
++
+ _get_total_inode()
+ {
+ 	if [ -z "$1" ]; then
+diff --git a/tests/btrfs/088 b/tests/btrfs/088
+new file mode 100755
+index 0000000..5ab226f
 --- /dev/null
-+++ b/common/dmerror
-@@ -0,0 +1,69 @@
-+##/bin/bash
++++ b/tests/btrfs/088
+@@ -0,0 +1,77 @@
++#! /bin/bash
++# FS QA Test No. btrfs/088
++#
++# test device delete when the source device has EIO
 +#
 +# Copyright (c) 2015 Oracle.  All Rights Reserved.
 +#
@@ -62,84 +84,88 @@ index 0000000..f895d90
 +# along with this program; if not, write the Free Software Foundation,
 +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 +#
-+#
-+# common functions for setting up and tearing down a dmerror device
 +
-+_init_dmerror()
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++
++_cleanup()
 +{
-+	$DMSETUP_PROG remove error-test > /dev/null 2>&1
-+
-+	local BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
-+
-+	DMERROR_DEV='/dev/mapper/error-test'
-+
-+	DMLINEAR_TABLE="0 $BLK_DEV_SIZE linear $SCRATCH_DEV 0"
-+
-+	$DMSETUP_PROG create error-test --table "$DMLINEAR_TABLE" || \
-+		_fatal "failed to create dm linear device"
-+
-+	DMERROR_TABLE="0 $BLK_DEV_SIZE error $SCRATCH_DEV 0"
++	_cleanup_dmerror
++	rm -f $tmp
 +}
 +
-+_scratch_mkfs_dmerror()
-+{
-+	$MKFS_BTRFS_PROG $* $DMERROR_DEV >> $seqres.full 2>&1 || \
-+			_fatal "failed to create mkfs.btrfs $* $DMERROR_DEV"
-+}
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/filter.btrfs
++. ./common/dmerror
 +
-+_mount_dmerror()
-+{
-+	mount -t $FSTYP $MOUNT_OPTIONS $DMERROR_DEV $SCRATCH_MNT
-+}
++_supported_fs btrfs
++_supported_os Linux
++_need_to_be_root
++_require_scratch_dev_pool 3
++_require_btrfs_dev_del_by_devid
++_require_dmerror
 +
-+_unmount_dmerror()
-+{
-+	$UMOUNT_PROGS $SCRATCH_MNT
-+}
++rm -f $seqres.full
 +
-+_cleanup_dmerror()
-+{
-+	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
-+	$DMSETUP_PROG remove error-test > /dev/null 2>&1
-+}
++dev1="`echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $2}'`"
++dev2="`echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $3}'`"
 +
-+_load_dmerror_table()
-+{
-+	$DMSETUP_PROG suspend error-test
-+	[ $? -ne 0 ] && _fatal  "failed to suspend error-test"
++_init_dmerror
++_scratch_mkfs_dmerror "-f -d raid1 -m raid1 $dev1 $dev2"
++_mount_dmerror
 +
-+	$DMSETUP_PROG load error-test --table "$DMERROR_TABLE"
-+	[ $? -ne 0 ] && _fatal "failed to load error table error-test"
++$BTRFS_UTIL_PROG filesystem show -m $SCRATCH_MNT | _filter_btrfs_filesystem_show
 +
-+	$DMSETUP_PROG resume error-test
-+	[ $? -ne 0 ] && _fatal  "failed to resume error-test"
-+}
-diff --git a/common/rc b/common/rc
-index c5db0dd..447ab7f 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1305,6 +1305,21 @@ _require_block_device()
- 	fi
- }
- 
-+# this test requires the device mapper error target
-+#
-+_require_dmerror()
-+{
-+    _require_command "$DMSETUP_PROG" dmsetup
++error_devid=`$BTRFS_UTIL_PROG filesystem show -m $SCRATCH_MNT |\
++			egrep $DMERROR_DEV | $AWK_PROG '{print $2}'`
 +
-+    $DMSETUP_PROG targets | grep error >/dev/null 2>&1
-+    if [ $? -eq 0 ]
-+    then
-+	:
-+    else
-+	_notrun "This test requires dm error support"
-+    fi
-+}
++snapshot_cmd="$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT"
++snapshot_cmd="$snapshot_cmd $SCRATCH_MNT/snap_\`date +'%H_%M_%S_%N'\`"
++run_check $FSSTRESS_PROG -d $SCRATCH_MNT -n 200 -p 8 $FSSTRESS_AVOID -x "$snapshot_cmd" -X 50 >&/dev/null
 +
- # this test requires the device mapper flakey target
- #
- _require_dm_flakey()
++# now load the error into the DMERROR_DEV
++_load_dmerror_table
++
++_run_btrfs_util_prog device delete $error_devid $SCRATCH_MNT
++
++$BTRFS_UTIL_PROG filesystem show -m $SCRATCH_MNT | _filter_btrfs_filesystem_show
++
++status=0; exit
+diff --git a/tests/btrfs/088.out b/tests/btrfs/088.out
+new file mode 100644
+index 0000000..32ee8f4
+--- /dev/null
++++ b/tests/btrfs/088.out
+@@ -0,0 +1,10 @@
++QA output created by 088
++Label: none  uuid: <UUID>
++	Total devices <NUM> FS bytes used <SIZE>
++	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
++	devid <DEVID> size <SIZE> used <SIZE> path /dev/mapper/error-test
++
++Label: none  uuid: <UUID>
++	Total devices <NUM> FS bytes used <SIZE>
++	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
++
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index d66b4fc..d474c47 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -90,3 +90,4 @@
+ 085 auto quick metadata subvol
+ 086 auto quick clone
+ 087 auto quick replace
++088 auto quick replace
 -- 
 1.7.1
 
