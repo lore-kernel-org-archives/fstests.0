@@ -1,102 +1,145 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59123 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752344AbbEKIY3 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 11 May 2015 04:24:29 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (Postfix) with ESMTPS id 418818F303
-	for <fstests@vger.kernel.org>; Mon, 11 May 2015 08:24:29 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] check: set failure status before exit
-Date: Mon, 11 May 2015 16:22:13 +0800
-Message-Id: <1431332533-7557-1-git-send-email-eguan@redhat.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:42281 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751701AbbEKNi5 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 11 May 2015 09:38:57 -0400
+From: Anand Jain <anand.jain@oracle.com>
+Subject: [PATCH v3 1/3] xfstests: btrfs: add functions to create dm-error device
+Date: Mon, 11 May 2015 21:49:09 +0800
+Message-Id: <1431352151-3117-2-git-send-email-anand.jain@oracle.com>
+In-Reply-To: <1430388527-16700-1-git-send-email-anand.jain@oracle.com>
+References: <1430388527-16700-1-git-send-email-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+Cc: linux-btrfs@vger.kernel.org, david@fromorbit.com, fdmanana@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-check has trapped 'exit 1' and exit with $status, but check always
-returns 0 on error because status never gets updated. This causes
-problems while running some tests in a loop until it fails, e.g.
+From: Anand Jain <Anand.Jain@oracle.com>
 
-	while ./check generic/081; do : ; done
+Controlled EIO from the device is achieved using the dm device.
+Helper functions are at common/dmerror.
 
-Just set status to 1 before exit, as what we do in the tests.
+Broadly steps will include calling _init_dmerror().
+_init_dmerror() will use SCRATCH_DEV to create dm linear device and assign
+DMERROR_DEV to /dev/mapper/error-test.
 
-Also remove an unused $flag while we're at it.
+When test script is ready to get EIO, the test cases can call
+_load_dmerror_table() which then it will load the dm error.
+so that reading DMERROR_DEV will cause EIO. After the test case is
+complete, cleanup must be done by calling _cleanup_dmerror().
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
 ---
- check | 20 +++++++++++++-------
- 1 file changed, 13 insertions(+), 7 deletions(-)
+v2.1->v3: accepts Filipe Manana's review comments, thanks
+v2->v2.1: fixed missed typo error fixup in the commit.
+v1->v2: accepts Dave Chinner's review comments, thanks
 
-diff --git a/check b/check
-index 4fa96ed..a300130 100755
---- a/check
-+++ b/check
-@@ -451,7 +451,8 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 	mkdir -p $RESULT_BASE
- 	if [ ! -d $RESULT_BASE ]; then
- 		echo "failed to create results directory $RESULT_BASE"
--		exit 1;
-+		status=1
-+		exit
+ common/dmerror |   69 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ common/rc      |   15 ++++++++++++
+ 2 files changed, 84 insertions(+), 0 deletions(-)
+ create mode 100644 common/dmerror
+
+diff --git a/common/dmerror b/common/dmerror
+new file mode 100644
+index 0000000..f895d90
+--- /dev/null
++++ b/common/dmerror
+@@ -0,0 +1,69 @@
++##/bin/bash
++#
++# Copyright (c) 2015 Oracle.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#
++#
++# common functions for setting up and tearing down a dmerror device
++
++_init_dmerror()
++{
++	$DMSETUP_PROG remove error-test > /dev/null 2>&1
++
++	local BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
++
++	DMERROR_DEV='/dev/mapper/error-test'
++
++	DMLINEAR_TABLE="0 $BLK_DEV_SIZE linear $SCRATCH_DEV 0"
++
++	$DMSETUP_PROG create error-test --table "$DMLINEAR_TABLE" || \
++		_fatal "failed to create dm linear device"
++
++	DMERROR_TABLE="0 $BLK_DEV_SIZE error $SCRATCH_DEV 0"
++}
++
++_scratch_mkfs_dmerror()
++{
++	$MKFS_BTRFS_PROG $* $DMERROR_DEV >> $seqres.full 2>&1 || \
++			_fatal "failed to create mkfs.btrfs $* $DMERROR_DEV"
++}
++
++_mount_dmerror()
++{
++	mount -t $FSTYP $MOUNT_OPTIONS $DMERROR_DEV $SCRATCH_MNT
++}
++
++_unmount_dmerror()
++{
++	$UMOUNT_PROGS $SCRATCH_MNT
++}
++
++_cleanup_dmerror()
++{
++	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
++	$DMSETUP_PROG remove error-test > /dev/null 2>&1
++}
++
++_load_dmerror_table()
++{
++	$DMSETUP_PROG suspend error-test
++	[ $? -ne 0 ] && _fatal  "failed to suspend error-test"
++
++	$DMSETUP_PROG load error-test --table "$DMERROR_TABLE"
++	[ $? -ne 0 ] && _fatal "failed to load error table error-test"
++
++	$DMSETUP_PROG resume error-test
++	[ $? -ne 0 ] && _fatal  "failed to resume error-test"
++}
+diff --git a/common/rc b/common/rc
+index c5db0dd..447ab7f 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1305,6 +1305,21 @@ _require_block_device()
  	fi
+ }
  
- 	if $OPTIONS_HAVE_SECTIONS; then
-@@ -466,12 +467,14 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 			echo "our local _test_mkfs routine ..."
- 			cat $tmp.err
- 			echo "check: failed to mkfs \$TEST_DEV using specified options"
--			exit 1
-+			status=1
-+			exit
- 		fi
- 		out=`_mount_or_remount_rw "$MOUNT_OPTIONS" $TEST_DEV $TEST_DIR`
- 		if [ $? -ne 1 ]; then
- 			echo $out
--			exit 1
-+			status=1
-+			exit
- 		fi
- 		_prepare_test_list
- 	elif [ "$OLD_MOUNT_OPTIONS" != "$MOUNT_OPTIONS" ]; then
-@@ -479,7 +482,8 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 		out=`_mount_or_remount_rw "$MOUNT_OPTIONS" $TEST_DEV $TEST_DIR`
- 		if [ $? -ne 1 ]; then
- 			echo $out
--			exit 1
-+			status=1
-+			exit
- 		fi
- 	fi
- 
-@@ -508,12 +512,13 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 	  # call the overridden mkfs - make sure the FS is built
- 	  # the same as we'll create it later.
- 
--	  if ! _scratch_mkfs $flag >$tmp.err 2>&1
-+	  if ! _scratch_mkfs >$tmp.err 2>&1
- 	  then
- 	      echo "our local _scratch_mkfs routine ..."
- 	      cat $tmp.err
- 	      echo "check: failed to mkfs \$SCRATCH_DEV using specified options"
--	      exit 1
-+	      status=1
-+	      exit
- 	  fi
- 
- 	  # call the overridden mount - make sure the FS mounts with
-@@ -523,7 +528,8 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 	      echo "our local mount routine ..."
- 	      cat $tmp.err
- 	      echo "check: failed to mount \$SCRATCH_DEV using specified options"
--	      exit 1
-+	      status=1
-+	      exit
- 	  fi
- 	fi
- 
++# this test requires the device mapper error target
++#
++_require_dmerror()
++{
++    _require_command "$DMSETUP_PROG" dmsetup
++
++    $DMSETUP_PROG targets | grep error >/dev/null 2>&1
++    if [ $? -eq 0 ]
++    then
++	:
++    else
++	_notrun "This test requires dm error support"
++    fi
++}
++
+ # this test requires the device mapper flakey target
+ #
+ _require_dm_flakey()
 -- 
-2.1.0
+1.7.1
 
