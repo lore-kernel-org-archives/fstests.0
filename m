@@ -1,86 +1,114 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-wi0-f182.google.com ([209.85.212.182]:33689 "EHLO
+Received: from mail-wi0-f182.google.com ([209.85.212.182]:38794 "EHLO
 	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933069AbbELShG (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 12 May 2015 14:37:06 -0400
-Received: by wief7 with SMTP id f7so118962857wie.0
-        for <fstests@vger.kernel.org>; Tue, 12 May 2015 11:37:05 -0700 (PDT)
+	with ESMTP id S933539AbbELShW (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 12 May 2015 14:37:22 -0400
+Received: by wicnf17 with SMTP id nf17so27277897wic.1
+        for <fstests@vger.kernel.org>; Tue, 12 May 2015 11:37:21 -0700 (PDT)
 From: Andreas Gruenbacher <andreas.gruenbacher@gmail.com>
-Subject: [PATCH] generic: Fix _is_block_dev quoting
-Date: Tue, 12 May 2015 20:36:39 +0200
-Message-Id: <1431455799-13289-1-git-send-email-andreas.gruenbacher@gmail.com>
+Subject: [PATCH] generic/126: Test the permission to set file times
+Date: Tue, 12 May 2015 20:37:11 +0200
+Message-Id: <1431455831-13345-1-git-send-email-andreas.gruenbacher@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Christoph Hellwig <hch@lst.de>
 List-ID: <fstests@vger.kernel.org>
 
-Add more quoting so that test cases that don't require a SCRATCH_DEV won't
-fail.
+Check if setting the file access and modification times to the current time
+and to a specific timestamp is allowed when expected.
 
 Signed-off-by: Andreas Gruenbacher <andreas.gruenbacher@gmail.com>
 ---
- common/rc | 16 ++++++++--------
- 1 file changed, 8 insertions(+), 8 deletions(-)
+ src/fs_perms.c        | 14 +++++++++++++-
+ tests/generic/126     | 22 ++++++++++++++++++++++
+ tests/generic/126.out |  6 ++++++
+ 3 files changed, 41 insertions(+), 1 deletion(-)
 
-diff --git a/common/rc b/common/rc
-index 6ea107e..bec7417 100644
---- a/common/rc
-+++ b/common/rc
-@@ -967,11 +967,11 @@ _is_block_dev()
+diff --git a/src/fs_perms.c b/src/fs_perms.c
+index ea188c4..519db5b 100644
+--- a/src/fs_perms.c
++++ b/src/fs_perms.c
+@@ -37,6 +37,8 @@
+ #include <stdlib.h>
+ #include <unistd.h>
+ #include <sys/wait.h>
++#include <time.h>
++#include <utime.h>
  
-     _dev=$1
-     if [ -L "${_dev}" ]; then
--        _dev=`readlink -f ${_dev}`
-+        _dev=`readlink -f "${_dev}"`
-     fi
+ int testsetup(mode_t mode, int cuserId, int cgroupId);
+ int testfperm(int userId, int groupId, char* fperm);
+@@ -57,7 +59,7 @@ int main( int argc, char *argv[]) {
+               exresult = atoi(argv[7]);
+ 	      break;
+       default:
+-	      printf("Usage: %s <mode of file> <UID of file> <GID of file> <UID of tester> <GID of tester> <permission to test r|w|x> <expected result as 0|1>\n",argv[0]); 
++	      printf("Usage: %s <mode of file> <UID of file> <GID of file> <UID of tester> <GID of tester> <permission to test r|w|x|t|T> <expected result as 0|1>\n",argv[0]);
+ 	      exit(0);
+    }
  
-     if [ -b "${_dev}" ]; then
--        src/lstat64 ${_dev} | $AWK_PROG '/Device type:/ { print $9 }'
-+        src/lstat64 "${_dev}" | $AWK_PROG '/Device type:/ { print $9 }'
-     fi
- }
+@@ -113,6 +115,16 @@ int testfperm(int userId, int groupId, char* fperm) {
+           seteuid(0);
+           setegid(0);
+ 	  return(nuthertmpi);
++    } else if (!strcmp("t", fperm)) {
++	return utime("test.file", NULL) ? 0 : 1;
++    } else if (!strcmp("T", fperm)) {
++	time_t now = time(NULL);
++	struct utimbuf times = {
++		.actime = now - 1,
++		.modtime = now - 1
++	};
++
++	return utime("test.file", &times) ? 0 : 1;
+     } else {
+           if((testfile=fopen("test.file",fperm))){
+             fclose(testfile);
+diff --git a/tests/generic/126 b/tests/generic/126
+index a22d587..45500af 100755
+--- a/tests/generic/126
++++ b/tests/generic/126
+@@ -70,5 +70,27 @@ $QA_FS_PERMS 200 99 99 200 99 w 1
+ $QA_FS_PERMS 040 99 99 99 500 r 1
+ $QA_FS_PERMS 400 99 99 200 99 r 1
  
-@@ -1105,11 +1105,11 @@ _require_scratch_nocheck()
- 		fi
- 		;;
- 	*)
--		 if [ -z "$SCRATCH_DEV" -o "`_is_block_dev $SCRATCH_DEV`" = "" ]
-+		 if [ -z "$SCRATCH_DEV" -o "`_is_block_dev "$SCRATCH_DEV"`" = "" ]
- 		 then
- 		     _notrun "this test requires a valid \$SCRATCH_DEV"
- 		 fi
--		 if [ "`_is_block_dev $SCRATCH_DEV`" = "`_is_block_dev $TEST_DEV`" ]
-+		 if [ "`_is_block_dev "$SCRATCH_DEV"`" = "`_is_block_dev "$TEST_DEV"`" ]
- 		 then
- 		     _notrun "this test requires a valid \$SCRATCH_DEV"
- 		 fi
-@@ -1179,11 +1179,11 @@ _require_test()
- 		fi
- 		;;
- 	*)
--		 if [ -z "$TEST_DEV" -o "`_is_block_dev $TEST_DEV`" = "" ]
-+		 if [ -z "$TEST_DEV" ] || [ "`_is_block_dev "$TEST_DEV"`" = "" ]
- 		 then
- 		     _notrun "this test requires a valid \$TEST_DEV"
- 		 fi
--		 if [ "`_is_block_dev $SCRATCH_DEV`" = "`_is_block_dev $TEST_DEV`" ]
-+		 if [ "`_is_block_dev "$SCRATCH_DEV"`" = "`_is_block_dev "$TEST_DEV"`" ]
- 		 then
- 		     _notrun "this test requires a valid \$TEST_DEV"
- 		 fi
-@@ -2282,10 +2282,10 @@ _require_scratch_dev_pool()
- 	esac
- 
- 	for i in $SCRATCH_DEV_POOL; do
--		if [ "`_is_block_dev $i`" = "" ]; then
-+		if [ "`_is_block_dev "$i"`" = "" ]; then
- 			_notrun "this test requires valid block disk $i"
- 		fi
--		if [ "`_is_block_dev $i`" = "`_is_block_dev $TEST_DEV`" ]; then
-+		if [ "`_is_block_dev "$i"`" = "`_is_block_dev "$TEST_DEV"`" ]; then
- 			_notrun "$i is part of TEST_DEV, this test requires unique disks"
- 		fi
- 		if _mount | grep -q $i; then
++# Check if setting the file access and modification times to the current time
++# (t) and to a specific timestamp (T) is allowed when expected.
++#
++# From utime(2): Changing timestamps is permitted when: either the process has
++# appropriate privileges, or the effective user ID equals the user ID of the
++# file, or [the process is trying to set the timestamps to the current time]
++# and the process has write permission for the file.
++#
++# Note that the last of these tests will always wrongly succeed over NFSv2.
++# For NFSv3+, that test will wrongly succeed until kernel commit
++# "Disable NFSv2 timestamp workaround for NFSv3+".
++
++# The owner:
++$QA_FS_PERMS 600 99 99 99 99 t 1
++$QA_FS_PERMS 600 99 99 99 99 T 1
++
++# Other processes with and without write permission:
++$QA_FS_PERMS 600 99 99 100 99 t 0
++$QA_FS_PERMS 600 99 99 100 99 T 0
++$QA_FS_PERMS 660 99 99 100 99 t 1
++$QA_FS_PERMS 660 99 99 100 99 T 0
++
+ status=0
+ exit
+diff --git a/tests/generic/126.out b/tests/generic/126.out
+index 3347930..ad0e592 100644
+--- a/tests/generic/126.out
++++ b/tests/generic/126.out
+@@ -17,3 +17,9 @@ w a 020 file owned by (99/99) as user/group(99/500)  FAIL
+ w a 200 file owned by (99/99) as user/group(200/99)  FAIL
+ r a 040 file owned by (99/99) as user/group(99/500)  FAIL
+ r a 400 file owned by (99/99) as user/group(200/99)  FAIL
++t a 600 file owned by (99/99) as user/group(99/99)  PASS
++T a 600 file owned by (99/99) as user/group(99/99)  PASS
++t a 600 file owned by (99/99) as user/group(100/99)  PASS
++T a 600 file owned by (99/99) as user/group(100/99)  PASS
++t a 660 file owned by (99/99) as user/group(100/99)  PASS
++T a 660 file owned by (99/99) as user/group(100/99)  PASS
 -- 
 2.4.0
 
