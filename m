@@ -1,54 +1,39 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from userp1040.oracle.com ([156.151.31.81]:51488 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752850AbbEKNi6 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 11 May 2015 09:38:58 -0400
-From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH v3 0/3] dm error based test cases
-Date: Mon, 11 May 2015 21:49:08 +0800
-Message-Id: <1431352151-3117-1-git-send-email-anand.jain@oracle.com>
-In-Reply-To: <1430388527-16700-1-git-send-email-anand.jain@oracle.com>
-References: <1430388527-16700-1-git-send-email-anand.jain@oracle.com>
+Received: from cantor2.suse.de ([195.135.220.15]:50849 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932776AbbELPUA (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 12 May 2015 11:20:00 -0400
+Date: Tue, 12 May 2015 17:19:58 +0200
+From: David Sterba <dsterba@suse.cz>
+Subject: Re: [PATCH] fstests: test for btrfs send with compressed file extents
+Message-ID: <20150512151958.GC23255@twin.jikos.cz>
+Reply-To: dsterba@suse.cz
+References: <1430750059-4833-1-git-send-email-fdmanana@suse.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1430750059-4833-1-git-send-email-fdmanana@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, david@fromorbit.com, fdmanana@gmail.com
+To: Filipe Manana <fdmanana@suse.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, marc@merlins.org
 List-ID: <fstests@vger.kernel.org>
 
-Most likely user would replace or delete the device when
-there is a problem about it.
+On Mon, May 04, 2015 at 03:34:19PM +0100, Filipe Manana wrote:
+> Test that an incremental send issues valid clone operations for
+> compressed file extents.
+> 
+> For some compressed extents, namely those referred by a file extent item
+> with a non-zero data offset, btrfs could issue a clone operation in the
+> send stream with an offset and length pair that were not entirely
+> contained in the source file's range, causing the receiving side to get
+> -EINVAL errors from the clone ioctl when attempting to perform the clone
+> operations.
+> 
+> This issue was fixed by the following linux kernel btrfs patch:
+> 
+>   Btrfs: incremental send, fix clone operations for compressed extents
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-We want to test this condition by using the dm error target which
-will help to create the EIO when needed.
-Basically first create the linear device and then load the error
-table to get the EIO when needed.
-
-The fist patch will provide the helper dm functions to create such
-a test case using dm error device.
-
-2nd and 3rd patch uses it to test the device replace and delete,
-respectively. Note that device delete will need kernel and progs
-patch, which when not there tests will gracefully fail and 
-will not run respectively.
-
-v2->v3: accepts Filipe Manana's review comments, thanks.
-v1->v2: accepts Dave Chinner's review comments, thanks.
-
-Anand Jain (3):
-  xfstests: btrfs: add functions to create dm-error device
-  xfstests: btrfs: test device replace, with EIO on the src dev
-  xfstests: btrfs: test device delete with EIO on src dev
-
- common/dmerror      |   69 +++++++++++++++++++++++++++++++++++++++++++++
- common/rc           |   21 ++++++++++++++
- tests/btrfs/087     |   76 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/087.out |   10 ++++++
- tests/btrfs/088     |   77 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/088.out |   10 ++++++
- tests/btrfs/group   |    2 +
- 7 files changed, 265 insertions(+), 0 deletions(-)
- create mode 100644 common/dmerror
- create mode 100755 tests/btrfs/087
- create mode 100644 tests/btrfs/087.out
- create mode 100755 tests/btrfs/088
- create mode 100644 tests/btrfs/088.out
-
+Reviewed-by: David Sterba <dsterba@suse.cz>
+Tested-by: David Sterba <dsterba@suse.cz>
