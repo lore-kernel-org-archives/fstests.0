@@ -1,97 +1,138 @@
-Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:32857 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964799AbbEMAIr (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 12 May 2015 20:08:47 -0400
-Received: by wief7 with SMTP id f7so124085426wie.0
-        for <fstests@vger.kernel.org>; Tue, 12 May 2015 17:08:46 -0700 (PDT)
-From: Andreas Gruenbacher <andreas.gruenbacher@gmail.com>
-Subject: [PATCH] generic/326: Test the permission to set file times
-Date: Wed, 13 May 2015 02:07:34 +0200
-Message-Id: <1431475654-23274-1-git-send-email-andreas.gruenbacher@gmail.com>
-In-Reply-To: <20150512234005.GC4316@dastard>
-References: <20150512234005.GC4316@dastard>
-Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Christoph Hellwig <hch@lst.de>
+Return-Path: <alexander.tsvetkov@oracle.com>
+Message-ID: <5553652F.3090900@oracle.com>
+Date: Wed, 13 May 2015 17:52:31 +0300
+From: Alexander Tsvetkov <alexander.tsvetkov@oracle.com>
+MIME-Version: 1.0
+Subject: Re: [PATCH v2] xfs: log record crc mismatch test
+References: <553E5505.4070804@oracle.com> <553E6723.8090909@sandeen.net>
+In-Reply-To: <553E6723.8090909@sandeen.net>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-Check if setting the file access and modification times to the current time
-and to a specific timestamp is allowed when expected.
+Hi Eric,
 
-Signed-off-by: Andreas Gruenbacher <andreas.gruenbacher@gmail.com>
+On 04/27/2015 07:43 PM, Eric Sandeen wrote:
+> On 4/27/15 10:25 AM, Alexander Tsvetkov wrote:
+>> Added new test case for simulation of V5 filesystem
+>> log crc record corruption using of external log.
+>>
+>> Signed-off-by: Alexander Tsvetkov <alexander.tsvetkov@oracle.com>
+>> ---
+>>   tests/xfs/005     | 28 ++++++++++++++++++++++++++--
+>>   tests/xfs/005.out |  3 +++
+>>   2 files changed, 29 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/tests/xfs/005 b/tests/xfs/005
+>> index fade4bb..ba0dcbb 100755
+>> --- a/tests/xfs/005
+>> +++ b/tests/xfs/005
+>> @@ -1,7 +1,7 @@
+>>   #! /bin/bash
+>>   # FS QA Test No. 005
+>>   #
+>> -# Test that a bad crc on a primary V5 superblock will fail the mount
+>> +# Test that a bad crc on a V5 filesystem will fail the mount
+> bad crc on what?
+>
+>>   #
+>>   # 10e6e65 xfs: be more forgiving of a v4 secondary sb w/ junk in v5 fields
+>>   # inadvertently caused primary SB CRC failures to not error out, this
+>> @@ -55,10 +55,12 @@ _supported_os Linux
+>>
+>>   _require_scratch_nocheck
+>>   _require_xfs_mkfs_crc
+>> +_require_logdev
+>> +logsize=2560
+> No, this means that xfs/05 will no longer work without an external logdev,
+> right?  So you've stopped testing the internal case, and we've lost that
+> coverage.
+>
+> And, we generally don't want to add new testcases to old tests because then
+> it gets harder to investigate regressions.  It'd probably be best to
+> create a new test which specifically tests log crc corruption, and make
+> it handle both internal and external logs automatically.
+I've prepared the test with both cases, see at the bottom of this mail
+
+
+> Thanks,
+> -Eric
+>
+>>   rm -f $seqres.full
+>>
+>> -_scratch_mkfs_xfs -m crc=1 >> $seqres.full 2>&1 || _fail "mkfs failed"
+>> +_scratch_mkfs_xfs -m crc=1 -lsize=${logsize}b >> $seqres.full 2>&1 || _fail "mkfs failed"
+>>
+>>   # Zap the crc.  xfs_db updates the CRC post-write, so poke it directly
+>>   $XFS_IO_PROG -c "pwrite 224 4" -c fsync $SCRATCH_DEV | _filter_xfs_io
+>> @@ -66,6 +68,28 @@ $XFS_IO_PROG -c "pwrite 224 4" -c fsync $SCRATCH_DEV | _filter_xfs_io
+>>   # should FAIL, the crc is bad; golden output contains mount failure
+>>   _scratch_mount 2>&1 | filter_mount
+>>
+>> +_scratch_unmount &> /dev/null
+>> +_scratch_mkfs_xfs -m crc=1 -lsize=${logsize}b  >> $seqres.full 2>&1 || _fail "mkfs failed"
+>> +_scratch_mount >> $seqres.full 2>&1 || _fail "mount failed"
+>> +
+>> +# Run filesytem exercising for some time
+>> +_param="-f link=10 -f creat=10 -f mkdir=10 -f truncate=5 -f symlink=10"
+>> +$FSSTRESS_PROG $_param -s 1 $FSSTRESS_AVOID -n 1000 -d $SCRATCH_MNT &> /dev/null
+>> +sleep 3
+>> +
+>> +# Shutdown filesystem and unmount
+>> +src/godown -v $SCRATCH_MNT >> $seqres.full
+>> +killall -q fsstress
+>> +wait
+>> +sleep 3
+>> +_scratch_unmount
+>> +
+>> +# Zap log record crc.
+>> +$XFS_IO_PROG -c "pwrite 5000 5" $SCRATCH_LOGDEV | _filter_xfs_io
+>> +
+>> +# should FAIL, log record crc is bad; golden output contains mount failure
+>> +_scratch_mount 2>&1 | filter_mount
+>> +
+>>   # success, all done
+>>   status=0
+>>   exit
+>> diff --git a/tests/xfs/005.out b/tests/xfs/005.out
+>> index 13d0125..8907301 100644
+>> --- a/tests/xfs/005.out
+>> +++ b/tests/xfs/005.out
+>> @@ -2,3 +2,6 @@ QA output created by 005
+>>   wrote 4/4 bytes at offset 224
+>>   XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>>   mount: Structure needs cleaning
+>> +wrote 5/5 bytes at offset 5000
+>> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>> +mount: Structure needs cleaning
+Added new test for simulation of V5 filesystem
+log crc record corruption in internal and external logs
+
+Signed-off-by: Alexander Tsvetkov <alexander.tsvetkov@oracle.com>
 ---
- src/fs_perms.c        | 14 +++++++++-
- tests/generic/326     | 74 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/326.out |  7 +++++
- tests/generic/group   |  1 +
- 4 files changed, 95 insertions(+), 1 deletion(-)
- create mode 100755 tests/generic/326
- create mode 100644 tests/generic/326.out
+  tests/xfs/306     | 110 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  tests/xfs/306.out |   7 ++++
+  tests/xfs/group   |   1 +
+  3 files changed, 118 insertions(+)
+  create mode 100755 tests/xfs/306
+  create mode 100644 tests/xfs/306.out
 
-diff --git a/src/fs_perms.c b/src/fs_perms.c
-index ea188c4..519db5b 100644
---- a/src/fs_perms.c
-+++ b/src/fs_perms.c
-@@ -37,6 +37,8 @@
- #include <stdlib.h>
- #include <unistd.h>
- #include <sys/wait.h>
-+#include <time.h>
-+#include <utime.h>
- 
- int testsetup(mode_t mode, int cuserId, int cgroupId);
- int testfperm(int userId, int groupId, char* fperm);
-@@ -57,7 +59,7 @@ int main( int argc, char *argv[]) {
-               exresult = atoi(argv[7]);
- 	      break;
-       default:
--	      printf("Usage: %s <mode of file> <UID of file> <GID of file> <UID of tester> <GID of tester> <permission to test r|w|x> <expected result as 0|1>\n",argv[0]); 
-+	      printf("Usage: %s <mode of file> <UID of file> <GID of file> <UID of tester> <GID of tester> <permission to test r|w|x|t|T> <expected result as 0|1>\n",argv[0]);
- 	      exit(0);
-    }
- 
-@@ -113,6 +115,16 @@ int testfperm(int userId, int groupId, char* fperm) {
-           seteuid(0);
-           setegid(0);
- 	  return(nuthertmpi);
-+    } else if (!strcmp("t", fperm)) {
-+	return utime("test.file", NULL) ? 0 : 1;
-+    } else if (!strcmp("T", fperm)) {
-+	time_t now = time(NULL);
-+	struct utimbuf times = {
-+		.actime = now - 1,
-+		.modtime = now - 1
-+	};
-+
-+	return utime("test.file", &times) ? 0 : 1;
-     } else {
-           if((testfile=fopen("test.file",fperm))){
-             fclose(testfile);
-diff --git a/tests/generic/326 b/tests/generic/326
+diff --git a/tests/xfs/306 b/tests/xfs/306
 new file mode 100755
-index 0000000..16388c1
+index 0000000..6e025fe
 --- /dev/null
-+++ b/tests/generic/326
-@@ -0,0 +1,74 @@
++++ b/tests/xfs/306
+@@ -0,0 +1,110 @@
 +#! /bin/bash
-+# FSQA Test No. 326
++# FS QA Test No. 306
 +#
-+# Check if setting the file access and modification times to the current time
-+# (t) and to a specific timestamp (T) is allowed when expected.
-+#
-+# From utime(2): Changing timestamps is permitted when: either the process has
-+# appropriate privileges, or the effective user ID equals the user ID of the
-+# file, or [the process is trying to set the timestamps to the current time]
-+# and the process has write permission for the file.
-+#
-+# Note that the last of these tests will always wrongly succeed over NFSv2.
-+# For NFSv3+, that test will wrongly succeed until kernel commit
-+# "Disable NFSv2 timestamp workaround for NFSv3+".
++# Test that bad crc on a V5 log record will fail the mount
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Red Hat, Inc.
-+# Author: Andreas Gruenbacher <agruenba@redhat.com>
++# Copyright (c) 2015 Oracle and/or its affiliates.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -105,7 +146,6 @@ index 0000000..16388c1
 +# You should have received a copy of the GNU General Public License
 +# along with this program; if not, write the Free Software Foundation,
 +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
 +#-----------------------------------------------------------------------
 +#
 +
@@ -115,61 +155,112 @@ index 0000000..16388c1
 +
 +here=`pwd`
 +tmp=/tmp/$$
-+status=1	# failure is the default!
++status=1    # failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
 +    cd /
++    rm -f $tmp.*
++}
++
++filter_mount()
++{
++    sed -e "s/mount .* failed: //"
++}
++
++filter_io()
++{
++    sed -e "s/at offset .*/at offset XXX/"
++}
++
++# $1 - log start offset
++# $2 - log device
++do_test()
++{
++    off=$1
++    dev=$2
++
++    _scratch_unmount >/dev/null 2>&1
++    _scratch_mount >> $seqres.full 2>&1 || _fail "mount failed"
++
++    # Run filesytem exercising for some time
++    param="-f link=10 -f creat=10 -f mkdir=10 -f truncate=5 -f symlink=10"
++    $FSSTRESS_PROG $param -s 1 $FSSTRESS_AVOID -n 1000 -d $SCRATCH_MNT 
+&> /dev/null
++    sleep 3
++
++    # Shutdown filesystem and unmount
++    src/godown -v $SCRATCH_MNT >> $seqres.full
++    killall -q fsstress
++    wait
++    sleep 3
++    _scratch_unmount
++
++    # Zap log record crc
++    off=$((off + 5000))
++    $XFS_IO_PROG -c "pwrite $off 5" $dev | _filter_xfs_io | filter_io
++
++    # should FAIL, log record crc is bad; golden output contains mount 
+failure
++    _scratch_mount 2>&1 | filter_mount
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
 +
-+# real QA test starts here
-+_supported_fs generic
++_supported_fs xfs
 +_supported_os Linux
-+_require_test
 +
-+QA_FS_PERMS=$here/src/fs_perms
++_require_scratch_nocheck
++_require_xfs_mkfs_crc
++_require_logdev
 +
-+cd $TEST_DIR
++rm -f $seqres.full
++fssize=$((32 * 1024 * 1024))
++MKFS_OPTIONS="-m crc=1 $MKFS_OPTIONS"
++_scratch_mkfs_sized $fssize 2> /dev/null | _filter_mkfs 2> $tmp.mkfs > 
+/dev/null
++. $tmp.mkfs
 +
-+# The owner:
-+$QA_FS_PERMS 600 99 99 99 99 t 1
-+$QA_FS_PERMS 600 99 99 99 99 T 1
++# internal log corruption
++unset USE_EXTERNAL
++_scratch_mkfs_sized $fssize >> $seqres.full 2>&1 || _fail "mkfs failed"
++logstart=$($XFS_DB_PROG -c "sb 0" -c "print" $SCRATCH_DEV | grep 
+logstart | cut -f3 -d' ')
++offset=$((logstart * lbsize))
++do_test $offset $SCRATCH_DEV
 +
-+# Other processes with and without write permission:
-+$QA_FS_PERMS 600 99 99 100 99 t 0
-+$QA_FS_PERMS 600 99 99 100 99 T 0
-+$QA_FS_PERMS 660 99 99 100 99 t 1
-+$QA_FS_PERMS 660 99 99 100 99 T 0
++# external log corruption
++USE_EXTERNAL="yes"
++_scratch_mkfs_sized $fssize >> $seqres.full 2>&1 || _fail "mkfs failed"
++do_test 0 $SCRATCH_LOGDEV
 +
++# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/326.out b/tests/generic/326.out
+diff --git a/tests/xfs/306.out b/tests/xfs/306.out
 new file mode 100644
-index 0000000..78f7543
+index 0000000..aef98f2
 --- /dev/null
-+++ b/tests/generic/326.out
++++ b/tests/xfs/306.out
 @@ -0,0 +1,7 @@
-+QA output created by 326
-+t a 600 file owned by (99/99) as user/group(99/99)  PASS
-+T a 600 file owned by (99/99) as user/group(99/99)  PASS
-+t a 600 file owned by (99/99) as user/group(100/99)  PASS
-+T a 600 file owned by (99/99) as user/group(100/99)  PASS
-+t a 660 file owned by (99/99) as user/group(100/99)  PASS
-+T a 660 file owned by (99/99) as user/group(100/99)  PASS
-diff --git a/tests/generic/group b/tests/generic/group
-index b6f4b01..1f2f3d2 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -192,3 +192,4 @@
- 323 auto aio stress
- 324 auto fsr quick
- 325 auto quick data log
-+326 perms auto quick
++QA output created by 306
++wrote 5/5 bytes at offset XXX
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++mount: Structure needs cleaning
++wrote 5/5 bytes at offset XXX
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++mount: Structure needs cleaning
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 58144d2..f108377 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -191,3 +191,4 @@
+  303 auto quick quota
+  304 auto quick quota
+  305 auto quota
++306 auto quick
 -- 
-2.4.0
-
+1.9.3
