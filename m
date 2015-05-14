@@ -1,40 +1,158 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from sandeen.net ([63.231.237.45]:46937 "EHLO sandeen.net"
+Received: from sandeen.net ([63.231.237.45]:47073 "EHLO sandeen.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932871AbbENOXw (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 14 May 2015 10:23:52 -0400
-Message-ID: <5554AFF7.9040702@sandeen.net>
-Date: Thu, 14 May 2015 09:23:51 -0500
+	id S933440AbbENOaj (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 14 May 2015 10:30:39 -0400
+Message-ID: <5554B18D.1060006@sandeen.net>
+Date: Thu, 14 May 2015 09:30:37 -0500
 From: Eric Sandeen <sandeen@sandeen.net>
 MIME-Version: 1.0
-Subject: Re: [PATCH] xfs_repair: test for false positive reserved attr name
+Subject: [PATCH V2] xfs_repair: test for false positive reserved attr name
  use
-References: <555414EA.80301@redhat.com> <20150514045546.GC1140@dhcp-13-216.nay.redhat.com> <E4DB2C47-54FA-4DAF-84C0-2F585B7510A4@sandeen.net> <20150514054450.GD1140@dhcp-13-216.nay.redhat.com>
-In-Reply-To: <20150514054450.GD1140@dhcp-13-216.nay.redhat.com>
-Content-Type: text/plain; charset=windows-1252
+References: <555414EA.80301@redhat.com>
+In-Reply-To: <555414EA.80301@redhat.com>
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Eric Sandeen <sandeen@redhat.com>, "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+To: Eric Sandeen <sandeen@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 5/14/15 12:44 AM, Eryu Guan wrote:
-> On Thu, May 14, 2015 at 12:23:14AM -0500, Eric Sandeen wrote:
->> All good advice; sigh, I am rusty!  Thanks, will resend with fixes.
->>
->> (Started as using test dev so left some things out; not sure I need a trap if there is nothing to clean up?  Also do we need to require attr on xfs?  Can't remember if we can compile that out, but I guess it's harmless to include it)
-> 
-> I did a "grep _require_attrs tests/xfs/*" and result showed several
-> tests in xfs require attrs. At least it checks if ATTR_PROG exists :)
+xfs_repair compares attr names in the root namespace to
+two special/reserved names, "SGI_ACL_FILE" and "SGI_ACL_DEFAULT"
+and if the value in them aren't valid acls, flags this as
+an inconsistency.
 
-Yes, I forgot about that ;(
+However, due to various bugs, xfs_repair may only compare
+a smaller portion of the on-disk value; hence either
+substrings or superstrings may match, and false-positive
+corruption will be detected.  This test checks for those
+false positives; i.e. the ACL names created in this test
+may cause xfs_repair to "fix" them, but it should not.
 
-> And I think we need a trap and cleanup even if there's no obvious things
-> to clean, some functions use $tmp.xxx internally, a cleanup could remove
-> all these tmp files too, and trap plays with exit status, so it's still
-> needed.
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
 
-Fair enough, thanks for the review.
+V2: Fix all the dumb, thanks to Eryu :)
+Add it to more groups, too.
 
--Eric
+diff --git a/tests/xfs/053 b/tests/xfs/053
+new file mode 100755
+index 0000000..f1d62f6
+--- /dev/null
++++ b/tests/xfs/053
+@@ -0,0 +1,84 @@
++#! /bin/bash
++# FS QA Test 053
++#
++# Ensure that xfs_repair can properly spot SGI_ACL_FILE
++# and SGI_ACL_DEFAULT in the root attr namespace.
++#
++# Due to bugs here and there, we sometimes matched on partial
++# strings with those names, and threw off xfs_repair.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Red Hat, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++# real QA test starts here
++
++_supported_fs xfs
++_supported_os IRIX Linux
++_require_scratch
++_require_attrs
++
++_scratch_mkfs s >/dev/null 2>&1
++_scratch_mount
++
++# Create root attr names which are substrings or superstrings
++# of the reserved ACL names, and make sure xfs_repair copes.
++
++# Due to various bugs, either the compared length was shorter
++# than the reserved name (7 chars), so substrings matched, and/or only
++# the reserved name length was compared, so superstrings matched.
++
++rm -f $SCRATCH_MNT/$seq.*
++
++# actual reserved names:
++#           SGI_ACL_FILE	SGI_ACL_DEFAULT
++for NAME in SGI_ACL \
++	    SGI_ACL_F		SGI_ACL_D \
++	    SGI_ACL_FILE_FOO	SGI_ACL_DEFAULT_FOO; do
++	touch $SCRATCH_MNT/${seq}.${NAME}
++	$ATTR_PROG -R -s $NAME -V "Wow, such $NAME" $SCRATCH_MNT/$seq.$NAME \
++		| _filter_scratch
++done
++
++# Older repair failed because it sees the above names as matching
++# SGI_ACL_FILE / SGI_ACL_DEFAULT but w/o valid acls on them
++
++# The test harness will catch this (false positive) corruption
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/053.out b/tests/xfs/053.out
+new file mode 100644
+index 0000000..d876555
+--- /dev/null
++++ b/tests/xfs/053.out
+@@ -0,0 +1,11 @@
++QA output created by 053
++Attribute "SGI_ACL" set to a 17 byte value for SCRATCH_MNT/053.SGI_ACL:
++Wow, such SGI_ACL
++Attribute "SGI_ACL_F" set to a 19 byte value for SCRATCH_MNT/053.SGI_ACL_F:
++Wow, such SGI_ACL_F
++Attribute "SGI_ACL_D" set to a 19 byte value for SCRATCH_MNT/053.SGI_ACL_D:
++Wow, such SGI_ACL_D
++Attribute "SGI_ACL_FILE_FOO" set to a 26 byte value for SCRATCH_MNT/053.SGI_ACL_FILE_FOO:
++Wow, such SGI_ACL_FILE_FOO
++Attribute "SGI_ACL_DEFAULT_FOO" set to a 29 byte value for SCRATCH_MNT/053.SGI_ACL_DEFAULT_FOO:
++Wow, such SGI_ACL_DEFAULT_FOO
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 58144d2..26dd881 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -50,6 +50,7 @@
+ 050 quota auto quick
+ 051 auto log metadata
+ 052 quota db auto quick
++053 attr acl repair quick auto
+ 054 quota auto quick
+ 055 dump ioctl remote tape
+ 056 dump ioctl auto quick
+
 
