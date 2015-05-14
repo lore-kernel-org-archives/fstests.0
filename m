@@ -1,62 +1,70 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:50888 "EHLO
-	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932671AbbENKan (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 14 May 2015 06:30:43 -0400
-Date: Thu, 14 May 2015 20:30:28 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] generic/326: Test the permission to set file times
-Message-ID: <20150514103028.GR15721@dastard>
-References: <20150512234005.GC4316@dastard>
- <1431475654-23274-1-git-send-email-andreas.gruenbacher@gmail.com>
- <20150514031952.GP15721@dastard>
- <CAHpGcMKfobLMLXDzX2qQhpqvGotbwHh-n3o9+NeVEtwahUMXdQ@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:60610 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932313AbbENM3C (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 14 May 2015 08:29:02 -0400
+Date: Thu, 14 May 2015 20:28:59 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] fstests: be compatible with older mkfs.xfs which has no
+ v5 support
+Message-ID: <20150514122858.GE1140@dhcp-13-216.nay.redhat.com>
+References: <1431258643-13620-1-git-send-email-eguan@redhat.com>
+ <20150514021406.GO15721@dastard>
+ <20150514044031.GB1140@dhcp-13-216.nay.redhat.com>
+ <20150514102411.GQ15721@dastard>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAHpGcMKfobLMLXDzX2qQhpqvGotbwHh-n3o9+NeVEtwahUMXdQ@mail.gmail.com>
+In-Reply-To: <20150514102411.GQ15721@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Andreas =?iso-8859-1?Q?Gr=FCnbacher?= <andreas.gruenbacher@gmail.com>
-Cc: fstests@vger.kernel.org, Christoph Hellwig <hch@lst.de>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 14, 2015 at 09:56:50AM +0200, Andreas Grünbacher wrote:
-> 2015-05-14 5:19 GMT+02:00 Dave Chinner <david@fromorbit.com>:
-> > Fails on XFS.
-> >
-> > /me looks at fs_perms and shudders at all the system() calls.
-> >
-> > Looks like there is no testx.file created first.
+On Thu, May 14, 2015 at 08:24:11PM +1000, Dave Chinner wrote:
+> On Thu, May 14, 2015 at 12:40:31PM +0800, Eryu Guan wrote:
+> > On Thu, May 14, 2015 at 12:14:06PM +1000, Dave Chinner wrote:
+> > > On Sun, May 10, 2015 at 07:50:43PM +0800, Eryu Guan wrote:
+> > > > With the change to CRCs by default, some tests are updated to call mkfs
+> > > > with "-m crc=0" option directly, and this breaks testings on older
+> > > > distros where mkfs.xfs doesn't have crc support.
+> > > > 
+> > > > Introduce a new variable to tell if mkfs.xfs supports v5 xfs and do
+> > > > tweaks in _scratch_mkfs_xfs_opts() based on it.
+> > > > 
+> > > > Signed-off-by: Eryu Guan <eguan@redhat.com>
+[snip]
+> > > 
+> > > Shouldn't this be somewhere in common/config, not in the check
+> > > script itself?
+> > 
+> > When sourcing common/config, SCRATCH_DEV has not been validated, and
+> > things get messier when config sections are used.
 > 
-> Hmm, that file was lying around from a previous run here.
-> Leaky tests are fun.
+> Don't need a scratch dev:
 > 
-> > should this actually be doing "rm -f"?
+> touch /tmp/foo
+> mkfs.xfs -N -d file,name=/tmp/foo,size=32m -m crc=0
+> rm /tmp/foo
+
+Ah right, thanks, I'll work on v3.
+
+Thanks,
+Eryu
 > 
-> That's better, indeed.
-
-Except it still doesn't work:
-
-generic/087 1s ... - output mismatch (see /home/dave/src/xfstests-dev/results//xfs_v4/generic/087.out.bad)
-    --- tests/generic/087.out   2015-05-14 20:25:13.000000000 +1000
-    +++ /home/dave/src/xfstests-dev/results//xfs_v4/generic/087.out.bad 2015-05-14 20:28:13.000000000 +1000
-    @@ -1,7 +1,13 @@
-     QA output created by 087
-    +rm: cannot remove 'test.file': Permission denied
-     t a 600 file owned by (99/99) as user/group(99/99)  PASS
-    +rm: cannot remove 'test.file': Permission denied
-     T a 600 file owned by (99/99) as user/group(99/99)  PASS
-    +rm: cannot remove 'test.file': Permission denied
-     t a 600 file owned by (99/99) as user/group(100/99)  PASS
-.....
-
-So there's something else that needs to be done here to allow the
-test file to be removed....
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+> mkfs will succeed if "-m crc=X" is recognised, fail if it isn't.
+> the "-N" means it just does arg parsing and checks geometry, etc but
+> does not do try to create the filesystem....
+> 
+> > I missed it, it's better than _scratch_mkfs, thanks! But it's not
+> > available in common/config if we want to do the check there.
+> 
+> *nod*. In which case you'd just use MKFS_XFS_PROG directly, like
+> above.
+> 
+> Cheers,
+> 
+> Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
