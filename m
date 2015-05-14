@@ -1,203 +1,101 @@
-Return-Path: <eguan@redhat.com>
-Date: Thu, 14 May 2015 13:44:50 +0800
+Return-Path: <fstests-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:38844 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751263AbbENGr7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 14 May 2015 02:47:59 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t4E6lx28017845
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <fstests@vger.kernel.org>; Thu, 14 May 2015 02:47:59 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] xfs_repair: test for false positive reserved attr name
- use
-Message-ID: <20150514054450.GD1140@dhcp-13-216.nay.redhat.com>
-References: <555414EA.80301@redhat.com>
- <20150514045546.GC1140@dhcp-13-216.nay.redhat.com>
- <E4DB2C47-54FA-4DAF-84C0-2F585B7510A4@sandeen.net>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <E4DB2C47-54FA-4DAF-84C0-2F585B7510A4@sandeen.net>
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: Eric Sandeen <sandeen@redhat.com>, "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+Subject: [PATCH v2] fstests: be compatible with older mkfs.xfs which has no v5 support
+Date: Thu, 14 May 2015 14:42:57 +0800
+Message-Id: <1431585777-29894-1-git-send-email-eguan@redhat.com>
+In-Reply-To: <1431258643-13620-1-git-send-email-eguan@redhat.com>
+References: <1431258643-13620-1-git-send-email-eguan@redhat.com>
+Sender: fstests-owner@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 14, 2015 at 12:23:14AM -0500, Eric Sandeen wrote:
-> All good advice; sigh, I am rusty!  Thanks, will resend with fixes.
-> 
-> (Started as using test dev so left some things out; not sure I need a trap if there is nothing to clean up?  Also do we need to require attr on xfs?  Can't remember if we can compile that out, but I guess it's harmless to include it)
+With the change to CRCs by default, some tests are updated to call mkfs
+with "-m crc=0" option directly, and this breaks testings on older
+distros where mkfs.xfs doesn't have crc support.
 
-I did a "grep _require_attrs tests/xfs/*" and result showed several
-tests in xfs require attrs. At least it checks if ATTR_PROG exists :)
+Introduce a new variable to tell if mkfs.xfs supports v5 xfs and do
+tweaks in _scratch_mkfs_xfs_opts() based on it.
 
-And I think we need a trap and cleanup even if there's no obvious things
-to clean, some functions use $tmp.xxx internally, a cleanup could remove
-all these tmp files too, and trap plays with exit status, so it's still
-needed.
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
 
-Thanks,
-Eryu
-> 
-> Thanks,
-> -Eric 
-> 
-> > On May 13, 2015, at 11:55 PM, Eryu Guan <eguan@redhat.com> wrote:
-> > 
-> >> On Wed, May 13, 2015 at 10:22:18PM -0500, Eric Sandeen wrote:
-> >> xfs_repair compares attr names in the root namespace to
-> >> two special/reserved names, "SGI_ACL_FILE" and "SGI_ACL_DEFAULT"
-> >> and if the value in them aren't valid acls, flags this as
-> >> an inconsistency.
-> >> 
-> >> However, due to various bugs, xfs_repair may only compare
-> >> a smaller portion of the on-disk value; hence either
-> >> substrings or superstrings may match, and false-positive
-> >> corruption will be detected.  This test checks for those
-> >> false positives; i.e. the ACL names created in this test
-> >> may cause xfs_repair to "fix" them, but it should not.
-> >> 
-> >> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> >> ---
-> >> 
-> >> patch for xfs_repair will be sent shortly
-> >> 
-> >> diff --git a/tests/xfs/053 b/tests/xfs/053
-> >> new file mode 100755
-> >> index 0000000..284c014
-> >> --- /dev/null
-> >> +++ b/tests/xfs/053
-> >> @@ -0,0 +1,76 @@
-> >> +#! /bin/bash
-> >> +# FS QA Test 053
-> >> +#
-> >> +# Ensure that xfs_repair can properly spot SGI_ACL_FILE
-> >> +# and SGI_ACL_DEFAULT in the root attr namespace.
-> >> +#
-> >> +# Due to bugs here and there, we sometimes matched on partial
-> >> +# strings with those names, and threw off xfs_repair.
-> >> +#
-> >> +#-----------------------------------------------------------------------
-> >> +# Copyright (c) 2015 Red Hat, Inc.  All Rights Reserved.
-> >> +#
-> >> +# This program is free software; you can redistribute it and/or
-> >> +# modify it under the terms of the GNU General Public License as
-> >> +# published by the Free Software Foundation.
-> >> +#
-> >> +# This program is distributed in the hope that it would be useful,
-> >> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> >> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> >> +# GNU General Public License for more details.
-> >> +#
-> >> +# You should have received a copy of the GNU General Public License
-> >> +# along with this program; if not, write the Free Software Foundation,
-> >> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> >> +#-----------------------------------------------------------------------
-> >> +#
-> >> +
-> >> +seq=`basename $0`
-> >> +seqres=$RESULT_DIR/$seq
-> >> +echo "QA output created by $seq"
-> >> +
-> >> +here=`pwd`
-> >> +tmp=/tmp/$$
-> >> +status=1    # failure is the default!
-> > 
-> > I haven't run the test yet, but I don't see the trap and cleanup
-> > function, is that on purpose?
-> > 
-> >> +
-> >> +# get standard environment, filters and checks
-> >> +. ./common/rc
-> >> +. ./common/filter
-> > 
-> > . ./common/attr and _require_attrs ?
-> > 
-> >> +
-> >> +# real QA test starts here
-> >> +
-> >> +_supported_fs xfs
-> >> +_supported_os IRIX Linux
-> >> +_require_scratch
-> >> +
-> >> +rm -f $seqres.full
-> > 
-> > Seems this file is not used and the rm can be omitted.
-> > 
-> >> +
-> >> +_scratch_mount
-> > 
-> > Should _scratch_mkfs first
-> > 
-> >> +
-> >> +# Create root namespace attr names which are substrings or superstrings
-> >> +# of the reserved ACL names, and make sure xfs_repair copes.
-> >> +
-> >> +# Due to various bugs, either the compared length was shorter
-> >> +# than the reserved name (7 chars), so substrings matched, and/or only
-> >> +# the reserved name length was compared, so superstrings matched.
-> >> +
-> >> +rm -f $SCRATCH_MNT/$seq.*
-> > 
-> > If it's fresh fs, this seems unnecessary.
-> > 
-> >> +
-> >> +# actual reserved names:
-> >> +#           SGI_ACL_FILE    SGI_ACL_DEFAULT \
-> >> +for NAME in SGI_ACL \
-> >> +        SGI_ACL_F        SGI_ACL_D \
-> >> +        SGI_ACL_FILE_FOO    SGI_ACL_DEFAULT_FOO; do
-> >> +    touch $SCRATCH_MNT/${seq}.${NAME}
-> >> +    attr -R -s $NAME -V "Wow, such $NAME" $SCRATCH_MNT/${seq}.${NAME} \
-> >> +        | _filter_scratch
-> > 
-> > $ATTR_PROG
-> > 
-> > Thanks,
-> > Eryu
-> > 
-> >> +done
-> >> +
-> >> +# Older repair failed because it sees the above names as matching
-> >> +# SGI_ACL_FILE / SGI_ACL_DEFAULT but w/o valid acls on them
-> >> +
-> >> +# The test harness will catch this (false positive) corruption
-> >> +
-> >> +# success, all done
-> >> +status=0
-> >> +exit
-> >> diff --git a/tests/xfs/053.out b/tests/xfs/053.out
-> >> new file mode 100644
-> >> index 0000000..d876555
-> >> --- /dev/null
-> >> +++ b/tests/xfs/053.out
-> >> @@ -0,0 +1,11 @@
-> >> +QA output created by 053
-> >> +Attribute "SGI_ACL" set to a 17 byte value for SCRATCH_MNT/053.SGI_ACL:
-> >> +Wow, such SGI_ACL
-> >> +Attribute "SGI_ACL_F" set to a 19 byte value for SCRATCH_MNT/053.SGI_ACL_F:
-> >> +Wow, such SGI_ACL_F
-> >> +Attribute "SGI_ACL_D" set to a 19 byte value for SCRATCH_MNT/053.SGI_ACL_D:
-> >> +Wow, such SGI_ACL_D
-> >> +Attribute "SGI_ACL_FILE_FOO" set to a 26 byte value for SCRATCH_MNT/053.SGI_ACL_FILE_FOO:
-> >> +Wow, such SGI_ACL_FILE_FOO
-> >> +Attribute "SGI_ACL_DEFAULT_FOO" set to a 29 byte value for SCRATCH_MNT/053.SGI_ACL_DEFAULT_FOO:
-> >> +Wow, such SGI_ACL_DEFAULT_FOO
-> >> diff --git a/tests/xfs/group b/tests/xfs/group
-> >> index 58144d2..26dd881 100644
-> >> --- a/tests/xfs/group
-> >> +++ b/tests/xfs/group
-> >> @@ -50,6 +50,7 @@
-> >> 050 quota auto quick
-> >> 051 auto log metadata
-> >> 052 quota db auto quick
-> >> +053 acl auto
-> >> 054 quota auto quick
-> >> 055 dump ioctl remote tape
-> >> 056 dump ioctl auto quick
-> >> 
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This depends on Dave's commit "filter: inode size output of mkfs.xfs can change"
+
+v2:
+- use _scratch_mkfs_xfs_supported not _scratch_mkfs
+- use if/else not [ ] && ... in xfs/073
+
+ check         | 10 +++++++++-
+ common/rc     |  5 +++++
+ tests/xfs/073 |  7 ++++++-
+ 3 files changed, 20 insertions(+), 2 deletions(-)
+
+diff --git a/check b/check
+index 4fa96ed..9eecb44 100755
+--- a/check
++++ b/check
+@@ -505,9 +505,17 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 
+ 	if [ ! -z "$SCRATCH_DEV" ]; then
+ 	  umount $SCRATCH_DEV 2>/dev/null
++
++	  # check if mkfs.xfs supports v5 xfs
++	  if [ "$FSTYP" == "xfs" ]; then
++		export XFS_MKFS_HAS_NO_META_SUPPORT=""
++		if ! _scratch_mkfs_xfs_supported -m crc=1 >/dev/null 2>&1; then
++			export XFS_MKFS_HAS_NO_META_SUPPORT=true
++		fi
++	  fi
++
+ 	  # call the overridden mkfs - make sure the FS is built
+ 	  # the same as we'll create it later.
+-
+ 	  if ! _scratch_mkfs $flag >$tmp.err 2>&1
+ 	  then
+ 	      echo "our local _scratch_mkfs routine ..."
+diff --git a/common/rc b/common/rc
+index 242dedb..6af7f14 100644
+--- a/common/rc
++++ b/common/rc
+@@ -308,6 +308,11 @@ _scratch_mkfs_xfs_opts()
+ {
+ 	mkfs_opts=$*
+ 
++	# remove crc related mkfs options if mkfs.xfs doesn't support v5 support
++	if [ -n "$XFS_MKFS_HAS_NO_META_SUPPORT" ]; then
++		mkfs_opts=`echo $mkfs_opts | sed "s/-m\s\+crc=.//"`
++	fi
++
+ 	_scratch_options mkfs
+ 
+ 	$MKFS_XFS_PROG $SCRATCH_OPTIONS $mkfs_opts $SCRATCH_DEV
+diff --git a/tests/xfs/073 b/tests/xfs/073
+index 45a3fdf..32faffd 100755
+--- a/tests/xfs/073
++++ b/tests/xfs/073
+@@ -156,7 +156,12 @@ _verify_copy $imgs.image $SCRATCH_DEV $SCRATCH_MNT
+ 
+ echo 
+ echo === copying scratch device to single target, large ro device
+-${MKFS_XFS_PROG} -m crc=0 -dfile,name=$imgs.source,size=100g | _filter_mkfs 2>/dev/null
++mkfs_crc_opts="-m crc=0"
++if [ -n "$XFS_MKFS_HAS_NO_META_SUPPORT" ]; then
++	mkfs_crc_opts=""
++fi
++${MKFS_XFS_PROG} $mkfs_crc_opts -dfile,name=$imgs.source,size=100g \
++	| _filter_mkfs 2>/dev/null
+ rmdir $imgs.source_dir 2>/dev/null
+ mkdir $imgs.source_dir
+ 
+-- 
+1.8.3.1
+
