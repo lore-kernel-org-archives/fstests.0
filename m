@@ -1,21 +1,21 @@
 Return-Path: <fstests-owner@vger.kernel.org>
 Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:59570 "EHLO
 	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S933439AbbENBx5 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 13 May 2015 21:53:57 -0400
+	by vger.kernel.org with ESMTP id S933462AbbENBx7 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 13 May 2015 21:53:59 -0400
 Received: from disappointment.disaster.area ([192.168.1.110] helo=disappointment)
 	by dastard with esmtp (Exim 4.80)
 	(envelope-from <dave@fromorbit.com>)
-	id 1YsiLD-0004WV-FN
+	id 1YsiLD-0004WU-Ev
 	for fstests@vger.kernel.org; Thu, 14 May 2015 11:53:39 +1000
 Received: from dave by disappointment with local (Exim 4.82_1-5b7a7c0-XX)
 	(envelope-from <dave@disappointment.disaster>)
-	id 1YsiLD-0001hF-Ee
+	id 1YsiLD-0001hA-Do
 	for fstests@vger.kernel.org; Thu, 14 May 2015 11:53:39 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH 3/3] generic/275: writes may not partially succeed
-Date: Thu, 14 May 2015 11:53:37 +1000
-Message-Id: <1431568417-6462-4-git-send-email-david@fromorbit.com>
+Subject: [PATCH 2/3] generic/223, xfs/203: IO is not well aligned
+Date: Thu, 14 May 2015 11:53:36 +1000
+Message-Id: <1431568417-6462-3-git-send-email-david@fromorbit.com>
 In-Reply-To: <1431568417-6462-1-git-send-email-david@fromorbit.com>
 References: <1431568417-6462-1-git-send-email-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
@@ -24,57 +24,53 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Dave Chinner <dchinner@redhat.com>
 
-When a large IO is done as a single buffer, there is no guarantee
-that it will partially succeed when close to ENOSPC. The test
-assumes that the kernel is going to break the write down into
-smaller chunks (i.e. buffered IO breaking it down into PAGE_SIZE
-allocations), but certain configurations will not do this. e.g.
-extent size hints are set or DAX is being used) and hence the large
-write fails completely as there is not space for the entire
-allocation to be made.
+On certain configurations (e.g. MOUNT_OPTIONS="-o dax") we get
+different allocation patterns due to the writes being done in
+multiple pwrite() calls. e.g. the write is 8k, but the buffer size
+is 4k, and so the filesystem sees 4k writes. If the filesytem is not
+using delayed allocation, then the allocation context is a 4k write
+rather than an 8k write and so they don't get appropriately aligned.
 
-Hence break the final write in the test up into multiple small
-writes, thereby acheiving the same effect - ensuring that we can
-write more data after removing some space....
+Fix this by making the write buffer the same size and the writes
+being done.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- tests/generic/275 | 10 +++++++---
- 1 file changed, 7 insertions(+), 3 deletions(-)
+ tests/generic/223 | 2 +-
+ tests/xfs/203     | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/tests/generic/275 b/tests/generic/275
-index 7382edb..f1963d8 100755
---- a/tests/generic/275
-+++ b/tests/generic/275
-@@ -57,6 +57,8 @@ umount $SCRATCH_DEV 2>/dev/null
- _scratch_mkfs_sized $((2 * 1024 * 1024 * 1024)) >>$seqres.full 2>&1
- _scratch_mount
+diff --git a/tests/generic/223 b/tests/generic/223
+index a67b8d5..f150dc9 100755
+--- a/tests/generic/223
++++ b/tests/generic/223
+@@ -69,7 +69,7 @@ for SUNIT_K in 8 16 32 64 128; do
+ 			$XFS_IO_PROG -f -c "falloc 0 $SIZE" \
+ 				$SCRATCH_MNT/file-$FILE-$SIZE-falloc \
+ 					>> $seqres.full 2>&1
+-			$XFS_IO_PROG -f -c "pwrite 0 $SIZE" \
++			$XFS_IO_PROG -f -c "pwrite -b $SIZE 0 $SIZE" \
+ 				$SCRATCH_MNT/file-$FILE-$SIZE-write \
+ 					>> $seqres.full 2>&1
+ 			src/t_stripealign $SCRATCH_MNT/file-$FILE-$SIZE-falloc \
+diff --git a/tests/xfs/203 b/tests/xfs/203
+index 7e18ca3..2ac5290 100755
+--- a/tests/xfs/203
++++ b/tests/xfs/203
+@@ -38,11 +38,11 @@ _write_holes()
+ 	let fsize=$(($writes * 0x100000))
  
-+# this file will get removed to create 256k of free space after ENOSPC
-+# conditions are created.
- dd if=/dev/zero of=$SCRATCH_MNT/tmp1 bs=256K count=1 >>$seqres.full 2>&1
- [ $? -ne 0 ] && _fail "Error creating file"
+ 	# prevent EOF preallocation from affecting results
+-	xfs_io -f $file -c "truncate $fsize"
++	$XFS_IO_PROG -f $file -c "truncate $fsize"
  
-@@ -79,14 +81,16 @@ $DF_PROG $SCRATCH_MNT >>$seqres.full 2>&1
- _freespace=`$DF_PROG -k $SCRATCH_MNT | tail -n 1 | awk '{print $5}'`
- [ $_freespace -gt 1024 ] && _fail "could not sufficiently fill filesystem"
- 
--# Try a write larger than available space
--dd if=/dev/zero of=$SCRATCH_MNT/tmp1 bs=1M count=1 >>$seqres.full 2>&1
-+# Try to write more than available space in chunks that will allow at least one
-+# full write to succeed.
-+dd if=/dev/zero of=$SCRATCH_MNT/tmp1 bs=128k count=8 >>$seqres.full 2>&1
- echo "Bytes written until ENOSPC:" >>$seqres.full
- du $SCRATCH_MNT/tmp1 >>$seqres.full
- 
- # And at least some of it should succeed.
- _filesize=`ls -l $SCRATCH_MNT/tmp1 | awk '{print $5}'`
--[ $_filesize -eq 0 ] && _fail "write file err: Partial write until enospc failed; wrote 0 bytes."
-+[ $_filesize -lt $((128 * 1024)) ] && \
-+	_fail "Partial write until enospc failed; wrote $_filesize bytes."
- 
- echo "done"
- status=0
+ 	offset=0
+ 	for i in `seq 0 $writes`; do
+-		xfs_io -f $file -c "pwrite -q $offset 64k"
++		$XFS_IO_PROG -f $file -c "pwrite -b 64k -q $offset 64k"
+ 		let offset=$offset+0x100000
+ 	done
+ }
 -- 
 2.0.0
 
