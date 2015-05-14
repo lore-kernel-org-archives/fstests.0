@@ -1,21 +1,21 @@
 Return-Path: <fstests-owner@vger.kernel.org>
 Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:59570 "EHLO
 	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S933345AbbENBx4 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 13 May 2015 21:53:56 -0400
+	by vger.kernel.org with ESMTP id S933439AbbENBx5 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 13 May 2015 21:53:57 -0400
 Received: from disappointment.disaster.area ([192.168.1.110] helo=disappointment)
 	by dastard with esmtp (Exim 4.80)
 	(envelope-from <dave@fromorbit.com>)
-	id 1YsiLD-0004WT-E2
+	id 1YsiLD-0004WV-FN
 	for fstests@vger.kernel.org; Thu, 14 May 2015 11:53:39 +1000
 Received: from dave by disappointment with local (Exim 4.82_1-5b7a7c0-XX)
 	(envelope-from <dave@disappointment.disaster>)
-	id 1YsiLD-0001h4-Cr
+	id 1YsiLD-0001hF-Ee
 	for fstests@vger.kernel.org; Thu, 14 May 2015 11:53:39 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH 1/3] generic/018: use xfs_io and larger buffers for writes
-Date: Thu, 14 May 2015 11:53:35 +1000
-Message-Id: <1431568417-6462-2-git-send-email-david@fromorbit.com>
+Subject: [PATCH 3/3] generic/275: writes may not partially succeed
+Date: Thu, 14 May 2015 11:53:37 +1000
+Message-Id: <1431568417-6462-4-git-send-email-david@fromorbit.com>
 In-Reply-To: <1431568417-6462-1-git-send-email-david@fromorbit.com>
 References: <1431568417-6462-1-git-send-email-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
@@ -24,68 +24,57 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Dave Chinner <dchinner@redhat.com>
 
-The test currently uses 'dd' directly for writing to files; instead
-we should be using the xfs_io pwrite command.
+When a large IO is done as a single buffer, there is no guarantee
+that it will partially succeed when close to ENOSPC. The test
+assumes that the kernel is going to break the write down into
+smaller chunks (i.e. buffered IO breaking it down into PAGE_SIZE
+allocations), but certain configurations will not do this. e.g.
+extent size hints are set or DAX is being used) and hence the large
+write fails completely as there is not space for the entire
+allocation to be made.
 
-Also, when we have a configuration that does not do delayed
-allocation (e.g. dax), there is no guarantee that the files will be
-allocated in the pattern expected, so do all the writes from a
-single buffer so the kernel can allocate extents in the manner the
-test expects as much as possible.
+Hence break the final write in the test up into multiple small
+writes, thereby acheiving the same effect - ensuring that we can
+write more data after removing some space....
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- tests/generic/018 | 19 ++++++++++++-------
- 1 file changed, 12 insertions(+), 7 deletions(-)
+ tests/generic/275 | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
 
-diff --git a/tests/generic/018 b/tests/generic/018
-index 2b804b5..fbefbe2 100755
---- a/tests/generic/018
-+++ b/tests/generic/018
-@@ -57,6 +57,7 @@ fragfile=$SCRATCH_MNT/fragfile.$$
- rm -f $fragfile
+diff --git a/tests/generic/275 b/tests/generic/275
+index 7382edb..f1963d8 100755
+--- a/tests/generic/275
++++ b/tests/generic/275
+@@ -57,6 +57,8 @@ umount $SCRATCH_DEV 2>/dev/null
+ _scratch_mkfs_sized $((2 * 1024 * 1024 * 1024)) >>$seqres.full 2>&1
+ _scratch_mount
  
- # Craft some fragmented files, defrag them, check the result.
-+bsize=4096
++# this file will get removed to create 256k of free space after ENOSPC
++# conditions are created.
+ dd if=/dev/zero of=$SCRATCH_MNT/tmp1 bs=256K count=1 >>$seqres.full 2>&1
+ [ $? -ne 0 ] && _fail "Error creating file"
  
- echo "zero-length file:" | tee -a $seqres.full
- touch $fragfile
-@@ -67,24 +68,28 @@ $XFS_IO_PROG -f -c "truncate 1m" $fragfile
- _defrag --before 0 --after 0 $fragfile
+@@ -79,14 +81,16 @@ $DF_PROG $SCRATCH_MNT >>$seqres.full 2>&1
+ _freespace=`$DF_PROG -k $SCRATCH_MNT | tail -n 1 | awk '{print $5}'`
+ [ $_freespace -gt 1024 ] && _fail "could not sufficiently fill filesystem"
  
- echo "Contiguous file:" | tee -a $seqres.full
--dd if=/dev/zero of=$fragfile bs=4k count=4 &>/dev/null
-+$XFS_IO_PROG -f -c "pwrite -b $((4 * bsize)) 0 $((4 * bsize))" $fragfile \
-+					> /dev/null
- _defrag --before 1 --after 1 $fragfile
+-# Try a write larger than available space
+-dd if=/dev/zero of=$SCRATCH_MNT/tmp1 bs=1M count=1 >>$seqres.full 2>&1
++# Try to write more than available space in chunks that will allow at least one
++# full write to succeed.
++dd if=/dev/zero of=$SCRATCH_MNT/tmp1 bs=128k count=8 >>$seqres.full 2>&1
+ echo "Bytes written until ENOSPC:" >>$seqres.full
+ du $SCRATCH_MNT/tmp1 >>$seqres.full
  
- echo "Write backwards sync, but contiguous - should defrag to 1 extent" | tee -a $seqres.full
--for I in `seq 9 -1 0`; do
--	dd if=/dev/zero of=$fragfile bs=4k count=1 conv=notrunc seek=$I oflag=sync &>/dev/null
-+for i in `seq 9 -1 0`; do
-+	$XFS_IO_PROG -fs -c "pwrite $((i * bsize)) $bsize" $fragfile \
-+					> /dev/null
- done
- _defrag --before 10 --after 1 $fragfile
+ # And at least some of it should succeed.
+ _filesize=`ls -l $SCRATCH_MNT/tmp1 | awk '{print $5}'`
+-[ $_filesize -eq 0 ] && _fail "write file err: Partial write until enospc failed; wrote 0 bytes."
++[ $_filesize -lt $((128 * 1024)) ] && \
++	_fail "Partial write until enospc failed; wrote $_filesize bytes."
  
- echo "Write backwards sync leaving holes - defrag should do nothing" | tee -a $seqres.full
--for I in `seq 31 -2 0`; do
--	dd if=/dev/zero of=$fragfile bs=4k count=1 conv=notrunc seek=$I oflag=sync &>/dev/null
-+for i in `seq 31 -2 0`; do
-+	$XFS_IO_PROG -fs -c "pwrite $((i * bsize)) $bsize" $fragfile \
-+					> /dev/null
- done
- _defrag --before 16 --after 16 $fragfile
- 
- echo "Write forwards sync leaving holes - defrag should do nothing" | tee -a $seqres.full
--for I in `seq 0 2 31`; do
--	dd if=/dev/zero of=$fragfile bs=4k count=1 conv=notrunc seek=$I oflag=sync &>/dev/null
-+for i in `seq 0 2 31`; do
-+	$XFS_IO_PROG -fs -c "pwrite $((i * bsize)) $bsize" $fragfile \
-+					> /dev/null
- done
- _defrag --before 16 --after 16 $fragfile
- 
+ echo "done"
+ status=0
 -- 
 2.0.0
 
