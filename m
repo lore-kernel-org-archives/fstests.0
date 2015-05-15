@@ -1,101 +1,161 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47684 "EHLO mx1.redhat.com"
+Received: from sandeen.net ([63.231.237.45]:45506 "EHLO sandeen.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1423102AbbEONgv (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 15 May 2015 09:36:51 -0400
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t4FDaoqD000904
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <fstests@vger.kernel.org>; Fri, 15 May 2015 09:36:50 -0400
-Received: from plato.andrewprice.me.uk.com (ovpn-116-107.ams2.redhat.com [10.36.116.107])
-	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t4FDakLK015736
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO)
-	for <fstests@vger.kernel.org>; Fri, 15 May 2015 09:36:50 -0400
-From: Andrew Price <anprice@redhat.com>
-Subject: [PATCH 3/3] common/rc: support gfs2 in _scratch_mkfs_sized
-Date: Fri, 15 May 2015 14:36:44 +0100
-Message-Id: <1431697004-3032-3-git-send-email-anprice@redhat.com>
-In-Reply-To: <1431697004-3032-1-git-send-email-anprice@redhat.com>
-References: <1431697004-3032-1-git-send-email-anprice@redhat.com>
+	id S1753859AbbEOOXv (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 15 May 2015 10:23:51 -0400
+Message-ID: <55560175.60108@sandeen.net>
+Date: Fri, 15 May 2015 09:23:49 -0500
+From: Eric Sandeen <sandeen@sandeen.net>
+MIME-Version: 1.0
+Subject: [PATCH V3] xfs_repair: test for false positive reserved attr name
+ use
+References: <555414EA.80301@redhat.com> <5554B18D.1060006@sandeen.net>
+In-Reply-To: <5554B18D.1060006@sandeen.net>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Eric Sandeen <sandeen@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This enables tests which use _scratch_mkfs_sized when $FSTYP == gfs2.
-Where tests use a fs size too small to contain a gfs2 fs created with
-default options, specify a smaller journal size to make it fit.
+xfs_repair compares attr names in the root namespace to
+two special/reserved names, "SGI_ACL_FILE" and "SGI_ACL_DEFAULT"
+and if the value in them aren't valid acls, flags this as
+an inconsistency.
 
-Signed-off-by: Andrew Price <anprice@redhat.com>
+However, due to various bugs, xfs_repair may only compare
+a smaller portion of the on-disk value; hence either
+substrings or superstrings may match, and false-positive
+corruption will be detected.  This test checks for those
+false positives; i.e. the ACL names created in this test
+may cause xfs_repair to "fix" them, but it should not.
+
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+Reviewed-by: Eryu Guan <eguan@redhat.com>
 ---
- common/config     | 1 +
- common/rc         | 5 ++++-
- tests/generic/015 | 3 +++
- tests/generic/083 | 3 +++
- 4 files changed, 11 insertions(+), 1 deletion(-)
 
-diff --git a/common/config b/common/config
-index 3732287..2454418 100644
---- a/common/config
-+++ b/common/config
-@@ -228,6 +228,7 @@ case "$HOSTOS" in
-         export MKFS_NFS_PROG="false"
-         export MKFS_CIFS_PROG="false"
-         export MKFS_REISER4_PROG="`set_prog_path mkfs.reiser4`"
-+        export MKFS_GFS2_PROG="`set_prog_path mkfs.gfs2`"
-         ;;
- esac
- 
-diff --git a/common/rc b/common/rc
-index 6ea107e..a269c2b 100644
---- a/common/rc
-+++ b/common/rc
-@@ -652,7 +652,7 @@ _scratch_mkfs_sized()
-     xfs)
- 	def_blksz=`echo $MKFS_OPTIONS|sed -rn 's/.*-b ?size= ?+([0-9]+).*/\1/p'`
- 	;;
--    ext2|ext3|ext4|ext4dev|udf|btrfs|reiser4)
-+    ext2|ext3|ext4|ext4dev|udf|btrfs|reiser4|gfs2)
- 	def_blksz=`echo $MKFS_OPTIONS| sed -rn 's/.*-b ?+([0-9]+).*/\1/p'`
- 	;;
-     esac
-@@ -700,6 +700,9 @@ _scratch_mkfs_sized()
- 	$MKFS_REISER4_PROG $MKFS_OPTIONS -y -b $blocksize $SCRATCH_DEV \
- 			   `expr $fssize / 1024`
- 	;;
-+    gfs2)
-+	$MKFS_GFS2_PROG $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
-+	;;
-     *)
- 	_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized"
- 	;;
-diff --git a/tests/generic/015 b/tests/generic/015
-index 8d3fd5f..d1805a7 100755
---- a/tests/generic/015
-+++ b/tests/generic/015
-@@ -53,6 +53,9 @@ _supported_os IRIX Linux
- _require_scratch
- _require_no_large_scratch_dev
- 
-+# GFS2 needs a smaller journal size to fit in 50M
-+[ $FSTYP = "gfs2" ] && MKFS_OPTIONS="$MKFS_OPTIONS -J16"
+V2: Fix all the dumb, thanks to Eryu 
+    Add it to more groups, too.
+V3: fix stray 's' after scratch_mkfs
+
+diff --git a/tests/xfs/053 b/tests/xfs/053
+new file mode 100755
+index 0000000..f1d62f6
+--- /dev/null
++++ b/tests/xfs/053
+@@ -0,0 +1,84 @@
++#! /bin/bash
++# FS QA Test 053
++#
++# Ensure that xfs_repair can properly spot SGI_ACL_FILE
++# and SGI_ACL_DEFAULT in the root attr namespace.
++#
++# Due to bugs here and there, we sometimes matched on partial
++# strings with those names, and threw off xfs_repair.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Red Hat, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
 +
- _scratch_mkfs_sized `expr 50 \* 1024 \* 1024` >/dev/null 2>&1 \
-     || _fail "mkfs failed"
- _scratch_mount || _fail "mount failed"
-diff --git a/tests/generic/083 b/tests/generic/083
-index 61316bf..4e38f81 100755
---- a/tests/generic/083
-+++ b/tests/generic/083
-@@ -88,6 +88,9 @@ workout()
- 
- echo "*** test out-of-space handling for random write operations"
- 
-+# GFS2 needs a smaller journal size to fit in 100M
-+[ $FSTYP = "gfs2" ] && MKFS_OPTIONS="$MKFS_OPTIONS -J64"
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
 +
- filesize=`expr 100 \* 1024 \* 1024`
- agcount=6
- numprocs=15
--- 
-2.1.0
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++# real QA test starts here
++
++_supported_fs xfs
++_supported_os IRIX Linux
++_require_scratch
++_require_attrs
++
++_scratch_mkfs >/dev/null 2>&1
++_scratch_mount
++
++# Create root attr names which are substrings or superstrings
++# of the reserved ACL names, and make sure xfs_repair copes.
++
++# Due to various bugs, either the compared length was shorter
++# than the reserved name (7 chars), so substrings matched, and/or only
++# the reserved name length was compared, so superstrings matched.
++
++rm -f $SCRATCH_MNT/$seq.*
++
++# actual reserved names:
++#           SGI_ACL_FILE	SGI_ACL_DEFAULT
++for NAME in SGI_ACL \
++	    SGI_ACL_F		SGI_ACL_D \
++	    SGI_ACL_FILE_FOO	SGI_ACL_DEFAULT_FOO; do
++	touch $SCRATCH_MNT/${seq}.${NAME}
++	$ATTR_PROG -R -s $NAME -V "Wow, such $NAME" $SCRATCH_MNT/$seq.$NAME \
++		| _filter_scratch
++done
++
++# Older repair failed because it sees the above names as matching
++# SGI_ACL_FILE / SGI_ACL_DEFAULT but w/o valid acls on them
++
++# The test harness will catch this (false positive) corruption
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/053.out b/tests/xfs/053.out
+new file mode 100644
+index 0000000..d876555
+--- /dev/null
++++ b/tests/xfs/053.out
+@@ -0,0 +1,11 @@
++QA output created by 053
++Attribute "SGI_ACL" set to a 17 byte value for SCRATCH_MNT/053.SGI_ACL:
++Wow, such SGI_ACL
++Attribute "SGI_ACL_F" set to a 19 byte value for SCRATCH_MNT/053.SGI_ACL_F:
++Wow, such SGI_ACL_F
++Attribute "SGI_ACL_D" set to a 19 byte value for SCRATCH_MNT/053.SGI_ACL_D:
++Wow, such SGI_ACL_D
++Attribute "SGI_ACL_FILE_FOO" set to a 26 byte value for SCRATCH_MNT/053.SGI_ACL_FILE_FOO:
++Wow, such SGI_ACL_FILE_FOO
++Attribute "SGI_ACL_DEFAULT_FOO" set to a 29 byte value for SCRATCH_MNT/053.SGI_ACL_DEFAULT_FOO:
++Wow, such SGI_ACL_DEFAULT_FOO
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 58144d2..26dd881 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -50,6 +50,7 @@
+ 050 quota auto quick
+ 051 auto log metadata
+ 052 quota db auto quick
++053 attr acl repair quick auto
+ 054 quota auto quick
+ 055 dump ioctl remote tape
+ 056 dump ioctl auto quick
+
+
 
