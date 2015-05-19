@@ -1,61 +1,52 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:51183 "EHLO
-	mx0b-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932324AbbESPaW (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 19 May 2015 11:30:22 -0400
-Received: from pps.filterd (m0004077 [127.0.0.1])
-	by mx0b-00082601.pphosted.com (8.14.5/8.14.5) with SMTP id t4JFTw7w022577
-	for <fstests@vger.kernel.org>; Tue, 19 May 2015 08:30:22 -0700
+Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:49059 "EHLO
+	mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750931AbbESRNq (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 19 May 2015 13:13:46 -0400
+Received: from pps.filterd (m0044012 [127.0.0.1])
+	by mx0a-00082601.pphosted.com (8.14.5/8.14.5) with SMTP id t4JH79fW030863
+	for <fstests@vger.kernel.org>; Tue, 19 May 2015 10:13:45 -0700
 Received: from mail.thefacebook.com ([199.201.64.23])
-	by mx0b-00082601.pphosted.com with ESMTP id 1ug6ug88rk-5
+	by mx0a-00082601.pphosted.com with ESMTP id 1ug6pu8d3a-1
 	(version=TLSv1/SSLv3 cipher=AES128-SHA bits=128 verify=NOT)
-	for <fstests@vger.kernel.org>; Tue, 19 May 2015 08:30:22 -0700
+	for <fstests@vger.kernel.org>; Tue, 19 May 2015 10:13:45 -0700
 From: Josef Bacik <jbacik@fb.com>
-Subject: [PATCH] fstests: add generic/327 to test fallocate+truncate
-Date: Tue, 19 May 2015 11:29:42 -0400
-Message-ID: <1432049382-3700-1-git-send-email-jbacik@fb.com>
+Subject: [PATCH] generic: add fiemap test that does prealloc
+Date: Tue, 19 May 2015 13:13:42 -0400
+Message-ID: <1432055622-8638-1-git-send-email-jbacik@fb.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-There was some confused about what the fs was supposed to do when you truncate
-at i_size with preallocated space past i_size.  We decided on the following
-things
-
-1) truncate(i_size) will trim all blocks past i_size.
-2) truncate(x) where x > i_size will not trim all blocks past i_size.
-
-This test is to make sure we're all acting sanely.  Thanks,
+I noticed that btrfs wasn't setting unwritten on prealloc test, and then
+subsequently noticed that we weren't testing fiemap on prealloc extents with the
+fiemap-tester.  This patch adds another test that does the same as generic/225
+only with prealloc enabled.  Thanks,
 
 Signed-off-by: Josef Bacik <jbacik@fb.com>
 ---
- tests/generic/327     | 72 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/327.out |  6 +++++
+ tests/generic/328     | 78 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/328.out |  3 ++
  tests/generic/group   |  1 +
- 3 files changed, 79 insertions(+)
- create mode 100644 tests/generic/327
- create mode 100644 tests/generic/327.out
+ 3 files changed, 82 insertions(+)
+ create mode 100644 tests/generic/328
+ create mode 100644 tests/generic/328.out
 
-diff --git a/tests/generic/327 b/tests/generic/327
+diff --git a/tests/generic/328 b/tests/generic/328
 new file mode 100644
-index 0000000..a3eafeb
+index 0000000..b6d6917
 --- /dev/null
-+++ b/tests/generic/327
-@@ -0,0 +1,72 @@
++++ b/tests/generic/328
+@@ -0,0 +1,78 @@
 +#! /bin/bash
-+# FS QA Test No. 327
++# FS QA Test No. 328
 +#
-+# fallocate/truncate tests with FALLOC_FL_KEEP_SIZE option.
-+# Verify if the disk space is released after truncating a file to i_size after
-+# writing to a portion of a preallocated range.
-+#
-+# This also verifies that truncat'ing up past i_size doesn't remove the
-+# preallocated space.
++# Run the fiemap (file extent mapping) tester with preallocation enabled
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Facebook.  All Rights Reserved.
++# Copyright (c) 2009 Eric Sandeen.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -77,66 +68,74 @@ index 0000000..a3eafeb
 +echo "QA output created by $seq"
 +
 +here=`pwd`
-+tmp=/tmp/$$
-+status=0	# success is the default!
++tmp=tmp/$$
++status=1  # failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+    cd /
-+    rm -f $tmp.*
++	cd /
++	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/punch
 +
 +# real QA test starts here
-+
-+# Modify as appropriate.
 +_supported_fs generic
 +_supported_os Linux
-+_require_test
++_require_scratch
++_require_xfs_io_command "fiemap"
 +_require_xfs_io_command "falloc"
 +
++_scratch_mkfs > /dev/null 2>&1
++_scratch_mount > /dev/null 2>&1
++
 +rm -f $seqres.full
++fiemapfile=$SCRATCH_MNT/$seq.fiemap
++fiemaplog=$SCRATCH_MNT/$seq.log
 +
-+# First test to make sure that truncating at i_size trims the preallocated bit
-+# past i_size
-+$XFS_IO_PROG -f -c "falloc -k 0 10M" -c "pwrite 0 5M" -c "truncate 5M"\
-+	$TEST_DIR/testfile.$seq | _filter_xfs_io
-+sync
-+$XFS_IO_PROG -c "fiemap -v" $TEST_DIR/testfile.$seq | _filter_fiemap
++[ -x $here/src/fiemap-tester ] || _notrun "fiemap-tester not built"
 +
-+# Now verify that if we truncate up past i_size we don't trim the preallocated
-+# bit
-+$XFS_IO_PROG -c "falloc -k 5M 5M" -c "truncate 7M" $TEST_DIR/testfile.$seq
-+$XFS_IO_PROG -c "fiemap -v" $TEST_DIR/testfile.$seq | _filter_fiemap
++seed=`date +%s`
 +
-+# success, all done
++echo "using seed $seed" >> $fiemaplog
++
++echo "fiemap run with sync"
++$here/src/fiemap-tester -q -S -s $seed -r 200 $fiemapfile 2>&1 | tee -a $fiemaplog
++
++if [ $? -ne 0 ]; then
++	if grep -q "Operation not supported" $fiemaplog; then
++	      _notrun "FIEMAP not supported by this filesystem type: $FSTYP"
++	fi
++	status=$?
++	exit
++fi
++
++echo "fiemap run without sync"
++$here/src/fiemap-tester -q -s $seed -r 200 $fiemapfile 2>&1 | tee -a $fiemaplog
++
++status=0
 +exit
-diff --git a/tests/generic/327.out b/tests/generic/327.out
+diff --git a/tests/generic/328.out b/tests/generic/328.out
 new file mode 100644
-index 0000000..af35cd2
+index 0000000..a8f052a
 --- /dev/null
-+++ b/tests/generic/327.out
-@@ -0,0 +1,6 @@
-+QA output created by 327
-+wrote 5242880/5242880 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+0: [0..10239]: data
-+0: [0..10239]: data
-+1: [10240..20479]: unwritten
++++ b/tests/generic/328.out
+@@ -0,0 +1,3 @@
++QA output created by 328
++fiemap run with sync
++fiemap run without sync
 diff --git a/tests/generic/group b/tests/generic/group
-index 927a91a..09bf1a5 100644
+index 09bf1a5..3024cd5 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -193,3 +193,4 @@
- 324 auto fsr quick
+@@ -194,3 +194,4 @@
  325 auto quick data log
  326 auto log
-+327 auto quick
+ 327 auto quick
++328 auto quick prealloc
 -- 
 1.8.3.1
 
