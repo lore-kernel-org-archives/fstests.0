@@ -1,256 +1,142 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60322 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755604AbbESMYX (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 19 May 2015 08:24:23 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (Postfix) with ESMTPS id BA57FBDD80
-	for <fstests@vger.kernel.org>; Tue, 19 May 2015 12:24:23 +0000 (UTC)
-Date: Tue, 19 May 2015 08:24:22 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH] fix up xfs/111 a bit
-Message-ID: <20150519122422.GC40561@bfoster.bfoster>
-References: <555AAECA.4040102@redhat.com>
+Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:51183 "EHLO
+	mx0b-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932324AbbESPaW (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 19 May 2015 11:30:22 -0400
+Received: from pps.filterd (m0004077 [127.0.0.1])
+	by mx0b-00082601.pphosted.com (8.14.5/8.14.5) with SMTP id t4JFTw7w022577
+	for <fstests@vger.kernel.org>; Tue, 19 May 2015 08:30:22 -0700
+Received: from mail.thefacebook.com ([199.201.64.23])
+	by mx0b-00082601.pphosted.com with ESMTP id 1ug6ug88rk-5
+	(version=TLSv1/SSLv3 cipher=AES128-SHA bits=128 verify=NOT)
+	for <fstests@vger.kernel.org>; Tue, 19 May 2015 08:30:22 -0700
+From: Josef Bacik <jbacik@fb.com>
+Subject: [PATCH] fstests: add generic/327 to test fallocate+truncate
+Date: Tue, 19 May 2015 11:29:42 -0400
+Message-ID: <1432049382-3700-1-git-send-email-jbacik@fb.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <555AAECA.4040102@redhat.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@redhat.com>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, May 18, 2015 at 10:32:26PM -0500, Eric Sandeen wrote:
-> xfs/111 is failing today, primarily because it obliterates the
-> root inode chunk and the verifiers fail the mount - i.e. the test
-> fails to properly test the thing it's meant to test.
-> 
-> Change the test so that the induced corruption is further into the
-> filesystem, but still hitting the inodes which have been created
-> for the test, so that the fs can mount and continue.
-> 
-> This requires that the helper binary (itrash) take an offset, which
-> we will figure out by using xfs_db.
-> 
-> This changes the locations of the inodes we hit; we're not really
-> going to be able to predict that terribly well, so remove the
-> output which shows inode offsets, and just keep track of whether
-> we managed to obliterate any at all.
-> 
-> The test still fails, because the fs is corrupted; this was done
-> intentionally, so run xfs_repair before the test exits to fix
-> things up.
-> 
-> (This test doesn't run often; it's not in the auto group, and
-> all the failures are extremely noisy and time consuming...)
-> 
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> ---
-> 
-> diff --git a/src/itrash.c b/src/itrash.c
-> index 21e1c5c..42692d0 100644
-> --- a/src/itrash.c
-> +++ b/src/itrash.c
-> @@ -8,6 +8,7 @@
->  #include <fcntl.h>
->  
->  char buffer[32768];
-> +int overwrote;
->  
->  void die(char *func)
->  {
-> @@ -21,20 +22,32 @@ void nuke()
->  	for (i = 2048; i < 32768-1; i++)
->  		if (buffer[i] == 'I' && buffer[i+1] == 'N') {
->  			buffer[i] = buffer[i+1] = 'X';
-> -			printf("Overwrote IN @offset %d\n", i);
-> +			overwrote = 1;
+There was some confused about what the fs was supposed to do when you truncate
+at i_size with preallocated space past i_size.  We decided on the following
+things
 
-I'd probably do something like return a count of corrupted headers here
-but it's probably not worth getting into the minutiae of this test.
-This seems plenty good enough to me:
+1) truncate(i_size) will trim all blocks past i_size.
+2) truncate(x) where x > i_size will not trim all blocks past i_size.
 
-Reviewed-by: Brian Foster <bfoster@redhat.com>
+This test is to make sure we're all acting sanely.  Thanks,
 
->  		}
->  }
->  
->  int main(int argc, char* argv[])
->  {
-> -	int f = open(argv[1], O_RDWR);
-> +	int f;
-> +	loff_t offset;
-> +
-> +	if (argc != 3) {
-> +		printf("%s <device> <offset>\n", argv[0]);
-> +		exit(1);
-> +	}
-> +
-> +	f = open(argv[1], O_RDWR);
-> +	offset = atoll(argv[2]);
-> +
->  	if (f < 0) die("open");
-> -	if (lseek(f, 32768, SEEK_SET) < 0) die("lseek");
-> +	if (lseek(f, offset, SEEK_SET) < 0) die("lseek");
->  	if (read(f, buffer, 32768) != 32768) die("read");
->  	printf("Starting overwrite\n");
->  	nuke();
-> -	if (lseek(f, 32768, SEEK_SET) < 0) die("lseek");
-> +	if (lseek(f, offset, SEEK_SET) < 0) die("lseek");
->  	if (write(f, buffer, 32768) != 32768) die("write");
-> +	if (!overwrote)
-> +		printf("Did not overwrite any inodes\n");
->  	printf("Overwrite complete\n");
->  	close(f);
->  	return 0;
-> diff --git a/tests/xfs/111 b/tests/xfs/111
-> index f33f339..7c8f263 100755
-> --- a/tests/xfs/111
-> +++ b/tests/xfs/111
-> @@ -40,6 +40,8 @@ _supported_fs xfs
->  _supported_os Linux
->  _require_scratch
->  
-> +rm -f $seqres.full
-> +
->  [ "$XFS_FSR_PROG" = "" ] && _notrun "xfs_fsr not found"
->  
->  # real QA test starts here
-> @@ -56,16 +58,27 @@ do
->      $XFS_IO_PROG -f -c "pwrite 0 512" $SCRATCH_MNT/${I} > /dev/null
->      let I=$I+1
->  done
-> +
-> +# Roughly the middle of the created inodes
-> +INO=`ls -i $SCRATCH_MNT/512 | awk '{print $1}'`
->  umount $SCRATCH_DEV
->  
-> +# Figure out where that middle inode starts
-> +BYTE=`$XFS_DB_PROG -c "convert inode $INO byte" $SCRATCH_DEV \
-> +	| awk '{print $2}' | sed s/[\(\)]//g`
-> +
->  echo Blat inode clusters
-> -src/itrash $SCRATCH_DEV
-> +src/itrash $SCRATCH_DEV $BYTE
->  
-> -_scratch_mount
-> +_scratch_mount || _fail "Couldn't mount after itrash"
->  
->  echo Attempting bulkstat
->  #src/bstat -q $SCRATCH_MNT
-> -xfs_fsr $SCRATCH_MNT
-> +$XFS_FSR_PROG $SCRATCH_MNT | _filter_scratch
-> +
-> +# Fix up intentional corruption so test can pass
-> +umount $SCRATCH_DEV
-> +$XFS_REPAIR_PROG $SCRATCH_DEV >> $seqres.full 2>&1
->  
->  status=0
->  exit
-> diff --git a/tests/xfs/111.out b/tests/xfs/111.out
-> index 88a5c99..fd56c3c 100644
-> --- a/tests/xfs/111.out
-> +++ b/tests/xfs/111.out
-> @@ -8,93 +8,6 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
->  Create some files
->  Blat inode clusters
->  Starting overwrite
-> -Overwrote IN @offset 2048
-> -Overwrote IN @offset 2304
-> -Overwrote IN @offset 2560
-> -Overwrote IN @offset 2816
-> -Overwrote IN @offset 3072
-> -Overwrote IN @offset 3328
-> -Overwrote IN @offset 3584
-> -Overwrote IN @offset 3840
-> -Overwrote IN @offset 4096
-> -Overwrote IN @offset 4352
-> -Overwrote IN @offset 4608
-> -Overwrote IN @offset 4864
-> -Overwrote IN @offset 5120
-> -Overwrote IN @offset 5376
-> -Overwrote IN @offset 5632
-> -Overwrote IN @offset 5888
-> -Overwrote IN @offset 6144
-> -Overwrote IN @offset 6400
-> -Overwrote IN @offset 6656
-> -Overwrote IN @offset 6912
-> -Overwrote IN @offset 7168
-> -Overwrote IN @offset 7424
-> -Overwrote IN @offset 7680
-> -Overwrote IN @offset 7936
-> -Overwrote IN @offset 8192
-> -Overwrote IN @offset 8448
-> -Overwrote IN @offset 8704
-> -Overwrote IN @offset 8960
-> -Overwrote IN @offset 9216
-> -Overwrote IN @offset 9472
-> -Overwrote IN @offset 9728
-> -Overwrote IN @offset 9984
-> -Overwrote IN @offset 10240
-> -Overwrote IN @offset 10496
-> -Overwrote IN @offset 10752
-> -Overwrote IN @offset 11008
-> -Overwrote IN @offset 11264
-> -Overwrote IN @offset 11520
-> -Overwrote IN @offset 11776
-> -Overwrote IN @offset 12032
-> -Overwrote IN @offset 12288
-> -Overwrote IN @offset 12544
-> -Overwrote IN @offset 12800
-> -Overwrote IN @offset 13056
-> -Overwrote IN @offset 13312
-> -Overwrote IN @offset 13568
-> -Overwrote IN @offset 13824
-> -Overwrote IN @offset 14080
-> -Overwrote IN @offset 14336
-> -Overwrote IN @offset 14592
-> -Overwrote IN @offset 14848
-> -Overwrote IN @offset 15104
-> -Overwrote IN @offset 15360
-> -Overwrote IN @offset 15616
-> -Overwrote IN @offset 15872
-> -Overwrote IN @offset 16128
-> -Overwrote IN @offset 24576
-> -Overwrote IN @offset 24832
-> -Overwrote IN @offset 25088
-> -Overwrote IN @offset 25344
-> -Overwrote IN @offset 25600
-> -Overwrote IN @offset 25856
-> -Overwrote IN @offset 26112
-> -Overwrote IN @offset 26368
-> -Overwrote IN @offset 26624
-> -Overwrote IN @offset 26880
-> -Overwrote IN @offset 27136
-> -Overwrote IN @offset 27392
-> -Overwrote IN @offset 27648
-> -Overwrote IN @offset 27904
-> -Overwrote IN @offset 28160
-> -Overwrote IN @offset 28416
-> -Overwrote IN @offset 28672
-> -Overwrote IN @offset 28928
-> -Overwrote IN @offset 29184
-> -Overwrote IN @offset 29440
-> -Overwrote IN @offset 29696
-> -Overwrote IN @offset 29952
-> -Overwrote IN @offset 30208
-> -Overwrote IN @offset 30464
-> -Overwrote IN @offset 30720
-> -Overwrote IN @offset 30976
-> -Overwrote IN @offset 31232
-> -Overwrote IN @offset 31488
-> -Overwrote IN @offset 31744
-> -Overwrote IN @offset 32000
-> -Overwrote IN @offset 32256
-> -Overwrote IN @offset 32512
->  Overwrite complete
->  Attempting bulkstat
-> +SCRATCH_MNT start inode=0
-> 
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Signed-off-by: Josef Bacik <jbacik@fb.com>
+---
+ tests/generic/327     | 72 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/327.out |  6 +++++
+ tests/generic/group   |  1 +
+ 3 files changed, 79 insertions(+)
+ create mode 100644 tests/generic/327
+ create mode 100644 tests/generic/327.out
+
+diff --git a/tests/generic/327 b/tests/generic/327
+new file mode 100644
+index 0000000..a3eafeb
+--- /dev/null
++++ b/tests/generic/327
+@@ -0,0 +1,72 @@
++#! /bin/bash
++# FS QA Test No. 327
++#
++# fallocate/truncate tests with FALLOC_FL_KEEP_SIZE option.
++# Verify if the disk space is released after truncating a file to i_size after
++# writing to a portion of a preallocated range.
++#
++# This also verifies that truncat'ing up past i_size doesn't remove the
++# preallocated space.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Facebook.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=0	# success is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/punch
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_test
++_require_xfs_io_command "falloc"
++
++rm -f $seqres.full
++
++# First test to make sure that truncating at i_size trims the preallocated bit
++# past i_size
++$XFS_IO_PROG -f -c "falloc -k 0 10M" -c "pwrite 0 5M" -c "truncate 5M"\
++	$TEST_DIR/testfile.$seq | _filter_xfs_io
++sync
++$XFS_IO_PROG -c "fiemap -v" $TEST_DIR/testfile.$seq | _filter_fiemap
++
++# Now verify that if we truncate up past i_size we don't trim the preallocated
++# bit
++$XFS_IO_PROG -c "falloc -k 5M 5M" -c "truncate 7M" $TEST_DIR/testfile.$seq
++$XFS_IO_PROG -c "fiemap -v" $TEST_DIR/testfile.$seq | _filter_fiemap
++
++# success, all done
++exit
+diff --git a/tests/generic/327.out b/tests/generic/327.out
+new file mode 100644
+index 0000000..af35cd2
+--- /dev/null
++++ b/tests/generic/327.out
+@@ -0,0 +1,6 @@
++QA output created by 327
++wrote 5242880/5242880 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++0: [0..10239]: data
++0: [0..10239]: data
++1: [10240..20479]: unwritten
+diff --git a/tests/generic/group b/tests/generic/group
+index 927a91a..09bf1a5 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -193,3 +193,4 @@
+ 324 auto fsr quick
+ 325 auto quick data log
+ 326 auto log
++327 auto quick
+-- 
+1.8.3.1
+
