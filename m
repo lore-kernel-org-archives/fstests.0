@@ -1,276 +1,254 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36120 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:60322 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753935AbbESMYI (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 19 May 2015 08:24:08 -0400
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t4JCO83T006106
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <fstests@vger.kernel.org>; Tue, 19 May 2015 08:24:08 -0400
-Date: Tue, 19 May 2015 08:24:07 -0400
+	id S1755604AbbESMYX (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 19 May 2015 08:24:23 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (Postfix) with ESMTPS id BA57FBDD80
+	for <fstests@vger.kernel.org>; Tue, 19 May 2015 12:24:23 +0000 (UTC)
+Date: Tue, 19 May 2015 08:24:22 -0400
 From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH] xfs: test changing UUID on V5 sueprblock
-Message-ID: <20150519122406.GB40561@bfoster.bfoster>
-References: <555518AB.2030804@redhat.com>
+Subject: Re: [PATCH] fix up xfs/111 a bit
+Message-ID: <20150519122422.GC40561@bfoster.bfoster>
+References: <555AAECA.4040102@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <555518AB.2030804@redhat.com>
+In-Reply-To: <555AAECA.4040102@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eric Sandeen <sandeen@redhat.com>
 Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 14, 2015 at 04:50:35PM -0500, Eric Sandeen wrote:
-> Tests xfs_db's ability to change & restore UUIDs on
-> V5 filesystems, and tests xfs_copy's ability to
-> change the UUID on the copy.
+On Mon, May 18, 2015 at 10:32:26PM -0500, Eric Sandeen wrote:
+> xfs/111 is failing today, primarily because it obliterates the
+> root inode chunk and the verifiers fail the mount - i.e. the test
+> fails to properly test the thing it's meant to test.
 > 
-> Update to _filter_uuid is so that it will catch the
-> UUID output from xfs_admin -u, which is slightly different
-> than the regexp it was expecting.
+> Change the test so that the induced corruption is further into the
+> filesystem, but still hitting the inodes which have been created
+> for the test, so that the fs can mount and continue.
 > 
-> This requires new userspace which knows how to change the
-> UUID on a V5 superblock.
+> This requires that the helper binary (itrash) take an offset, which
+> we will figure out by using xfs_db.
+> 
+> This changes the locations of the inodes we hit; we're not really
+> going to be able to predict that terribly well, so remove the
+> output which shows inode offsets, and just keep track of whether
+> we managed to obliterate any at all.
+> 
+> The test still fails, because the fs is corrupted; this was done
+> intentionally, so run xfs_repair before the test exits to fix
+> things up.
+> 
+> (This test doesn't run often; it's not in the auto group, and
+> all the failures are extremely noisy and time consuming...)
 > 
 > Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 > ---
 > 
-> (I dunno, is 60s "quick?" - I could cut down the fsstress
-> ops, just wanted to populate the fs w/ metadata).
-> 
-
-Seems a bit on the long side to me, but not that bad. Might be worth a
-try to cut the fsstress activity in half or so?
-
-> diff --git a/common/filter b/common/filter
-> index 05dbae6..8db1b3e 100644
-> --- a/common/filter
-> +++ b/common/filter
-> @@ -275,9 +275,9 @@ _filter_uuid()
+> diff --git a/src/itrash.c b/src/itrash.c
+> index 21e1c5c..42692d0 100644
+> --- a/src/itrash.c
+> +++ b/src/itrash.c
+> @@ -8,6 +8,7 @@
+>  #include <fcntl.h>
+>  
+>  char buffer[32768];
+> +int overwrote;
+>  
+>  void die(char *func)
 >  {
->  	if [ ! -z $1 ]; then
->  		UUID=$1
-> -		sed -e "s/\(uuid:\) $UUID/\1 <EXACTUUID>/i"
-> +		sed -e "s/\(uuid[ :=]\+\) $UUID/\1 <EXACTUUID>/i"
->  	else
-> -		sed -e "s/\(uuid:\) *[0-9a-f-][0-9a-f-]*/\1 <UUID>/i"
-> +		sed -e "s/\(uuid[ :=]\+\) *[0-9a-f-][0-9a-f-]*/\1 <UUID>/ig"
->  	fi
+> @@ -21,20 +22,32 @@ void nuke()
+>  	for (i = 2048; i < 32768-1; i++)
+>  		if (buffer[i] == 'I' && buffer[i+1] == 'N') {
+>  			buffer[i] = buffer[i+1] = 'X';
+> -			printf("Overwrote IN @offset %d\n", i);
+> +			overwrote = 1;
+
+I'd probably do something like return a count of corrupted headers here
+but it's probably not worth getting into the minutiae of this test.
+This seems plenty good enough to me:
+
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+
+>  		}
 >  }
 >  
-> diff --git a/tests/xfs/074 b/tests/xfs/074
-> new file mode 100755
-> index 0000000..738050e
-> --- /dev/null
-> +++ b/tests/xfs/074
-> @@ -0,0 +1,139 @@
-> +#! /bin/bash
-> +# FS QA Test 074
-> +#
-> +# test UUID modification of CRC-enabled filesystems
-> +#
-> +# CRC-enabled / V5 superblock filesystems have a UUID stamped into
-> +# every piece of metadata, and a mechanism was added later to allow
-> +# changing the user-visible UUID by copying the original UUID (which
-> +# matches all the existing metadata) to a new superblock location.
-> +# Exercise some of that behavior.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2015 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
+>  int main(int argc, char* argv[])
+>  {
+> -	int f = open(argv[1], O_RDWR);
+> +	int f;
+> +	loff_t offset;
 > +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
+> +	if (argc != 3) {
+> +		printf("%s <device> <offset>\n", argv[0]);
+> +		exit(1);
+> +	}
 > +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +	f = open(argv[1], O_RDWR);
+> +	offset = atoll(argv[2]);
 > +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +
-> +_supported_fs xfs
-> +_supported_os Linux
-> +_require_scratch
-> +_require_xfs_crc
-> +
-> +_fs_has_META_UUID()
-> +{
-> +	FS=$1
-> +	$XFS_DB_PROG -r -c version $FS | grep -q META_UUID
-> +}
-> +
+>  	if (f < 0) die("open");
+> -	if (lseek(f, 32768, SEEK_SET) < 0) die("lseek");
+> +	if (lseek(f, offset, SEEK_SET) < 0) die("lseek");
+>  	if (read(f, buffer, 32768) != 32768) die("read");
+>  	printf("Starting overwrite\n");
+>  	nuke();
+> -	if (lseek(f, 32768, SEEK_SET) < 0) die("lseek");
+> +	if (lseek(f, offset, SEEK_SET) < 0) die("lseek");
+>  	if (write(f, buffer, 32768) != 32768) die("write");
+> +	if (!overwrote)
+> +		printf("Did not overwrite any inodes\n");
+>  	printf("Overwrite complete\n");
+>  	close(f);
+>  	return 0;
+> diff --git a/tests/xfs/111 b/tests/xfs/111
+> index f33f339..7c8f263 100755
+> --- a/tests/xfs/111
+> +++ b/tests/xfs/111
+> @@ -40,6 +40,8 @@ _supported_fs xfs
+>  _supported_os Linux
+>  _require_scratch
+>  
 > +rm -f $seqres.full
 > +
-> +_scratch_mkfs_xfs -m crc=1 >> $seqres.full 2>&1 || _fail "mkfs failed"
+>  [ "$XFS_FSR_PROG" = "" ] && _notrun "xfs_fsr not found"
+>  
+>  # real QA test starts here
+> @@ -56,16 +58,27 @@ do
+>      $XFS_IO_PROG -f -c "pwrite 0 512" $SCRATCH_MNT/${I} > /dev/null
+>      let I=$I+1
+>  done
 > +
-> +xfs_admin -U restore $SCRATCH_DEV 2>&1 | \
-> +	grep -q "invalid UUID\|supported on V5 fs" && \
-> +		_notrun "Userspace does not support V5 super UUID modifications"
+> +# Roughly the middle of the created inodes
+> +INO=`ls -i $SCRATCH_MNT/512 | awk '{print $1}'`
+>  umount $SCRATCH_DEV
+>  
+> +# Figure out where that middle inode starts
+> +BYTE=`$XFS_DB_PROG -c "convert inode $INO byte" $SCRATCH_DEV \
+> +	| awk '{print $2}' | sed s/[\(\)]//g`
 > +
-
-Could we use $XFS_DB_PROG throughout the test so it's possible to modify
-the test environment?
-
-> +ORIG_UUID=`xfs_admin -u $SCRATCH_DEV | awk '{print $NF}'`
+>  echo Blat inode clusters
+> -src/itrash $SCRATCH_DEV
+> +src/itrash $SCRATCH_DEV $BYTE
+>  
+> -_scratch_mount
+> +_scratch_mount || _fail "Couldn't mount after itrash"
+>  
+>  echo Attempting bulkstat
+>  #src/bstat -q $SCRATCH_MNT
+> -xfs_fsr $SCRATCH_MNT
+> +$XFS_FSR_PROG $SCRATCH_MNT | _filter_scratch
 > +
-> +_scratch_mount
-> +# Put some stuff on the fs
-> +$FSSTRESS_PROG -d $SCRATCH_MNT -n 1000 -p 4 >> $seqres.full 2>&1
-> +_scratch_unmount
-> +
-> +# Can xfs_db change it?
-> +
-> +echo "== Generate new UUID"
-> +xfs_admin -U generate $SCRATCH_DEV | _filter_uuid 
-> +NEW_UUID=`xfs_admin -u $SCRATCH_DEV | awk '{print $NF}'`
-> +[ "$NEW_UUID" == "$ORIG_UUID" ] && _fail "Failed to change UUID"
-> +_check_scratch_fs
-> +_scratch_mount || _notrun "Mount failed; no META_UUID kernel support?"
-> +_scratch_unmount
-
-Could we define a helper somewhere in common/ that determines whether
-this works (e.g., change the uuid and mount)? Then this check can be a
-less ambiguous failure and we wouldn't run part of the test in the case
-where it's not supported.
-
-> +_fs_has_META_UUID $SCRATCH_DEV || _fail "META_UUID feature not set"
-> +
-> +# This should be a no-op
-> +echo "== Rewrite UUID"
-> +xfs_admin -U rewrite $SCRATCH_DEV | _filter_uuid $NEW_UUID
-> +_check_scratch_fs
-> +_scratch_mount || _fail "Mount failed after UUID rewrite"
-> +_scratch_unmount
-> +_fs_has_META_UUID $SCRATCH_DEV || _fail "META_UUID feature not set"
-> +
-
-I also wonder if these hunks could be genericized a bit into a helper
-function above..? E.g., something invoked like:
-
-echo "== Rewrite UUID"
-_test_uuid "rewrite" $UUID_FILTER
-_fs_has_META_UUID $SCRATCH_DEV || _fail "META_UUID feature not set"
-
-... or maybe it could also return the current post-command uuid to
-support the explicit uuid checks as well. Just a thought, it might or
-might not be a worthwhile cleanup...
-
-> +# Can we change it back?
-> +echo "== Restore old UUID"
-> +xfs_admin -U restore $SCRATCH_DEV | _filter_uuid $ORIG_UUID
-> +NEW_UUID=`xfs_admin -u $SCRATCH_DEV | awk '{print $NF}'`
-> +[ "$NEW_UUID" != "$ORIG_UUID" ] && _fail "Failed to restore UUID"
-> +_check_scratch_fs
-> +_scratch_mount || _fail "Mount failed after UUID restore"
-> +_scratch_unmount
-> +_fs_has_META_UUID $SCRATCH_DEV &&  _fail "META_UUID feature should not be not set"
-> +
-> +# This should be a no-op too.
-> +echo "== Rewrite UUID"
-> +xfs_admin -U rewrite $SCRATCH_DEV | _filter_uuid  $ORIG_UUID
-> +_check_scratch_fs
-> +_scratch_mount || _fail "Mount failed after UUID rewrite"
-> +_scratch_unmount
-> +_fs_has_META_UUID $SCRATCH_DEV && _fail "META_UUID feature should not be not set"
-> +
-> +# Ok, now what does xfs_copy do; it changes UUID by default
-> +
-> +IMGFILE=$TEST_DIR/$seq.copy.img
-> +rm -f $IMGFILE
-> +
-> +# xfs_copy changes the UUID by default
-> +echo "== xfs_copy with new UUID"
-> +$XFS_COPY_PROG $SCRATCH_DEV $IMGFILE 2>&1 >> $seqres.full || \
-> +	_fail "xfs_copy (new UUID) failed"
-> +_check_xfs_filesystem $IMGFILE none none || _fail "Copy looks corrupted"
-> +# The copy should have META_UUID feature set
-> +_fs_has_META_UUID $IMGFILE || _fail "META_UUID feature not set on copy"
-> +
-
-I suppose repair might be sufficient, but a mount check of the copy
-target couldn't hurt here as well.
-
-Brian
-
-> +rm -f $IMGFILE
-> +
-> +# duplicating the UUID should be fine too
-> +echo "== xfs_copy with duplicate UUID"
-> +$XFS_COPY_PROG -d $SCRATCH_DEV $IMGFILE 2>&1 >> $seqres.full || \
-> +	_fail "xfs_copy (duplicate) failed"
-> +_check_xfs_filesystem $IMGFILE none none || _fail "Duplicate copy looks corrupted"
-> +# The copy should not have META_UUID feature set
-> +_fs_has_META_UUID $IMGFILE && _fail "META_UUID feature should not be set on copy"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/074.out b/tests/xfs/074.out
-> new file mode 100644
-> index 0000000..b511107
-> --- /dev/null
-> +++ b/tests/xfs/074.out
-> @@ -0,0 +1,21 @@
-> +QA output created by 074
-> +== Generate new UUID
-> +Clearing log and setting UUID
-> +writing all SBs
-> +new UUID =  <UUID>
-> +== Rewrite UUID
-> +old UUID = <EXACTUUID>
-> +Clearing log and setting UUID
-> +writing all SBs
-> +new UUID = <EXACTUUID>
-> +== Restore old UUID
-> +Clearing log and setting UUID
-> +writing all SBs
-> +new UUID = <EXACTUUID>
-> +== Rewrite UUID
-> +old UUID = <EXACTUUID>
-> +Clearing log and setting UUID
-> +writing all SBs
-> +new UUID = <EXACTUUID>
-> +== xfs_copy with new UUID
-> +== xfs_copy with duplicate UUID
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 58144d2..d1f6121 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -70,6 +71,7 @@
->  071 rw auto
->  072 rw auto prealloc quick
->  073 copy auto
-> +074 auto quick copy
->  078 growfs auto quick
->  080 rw ioctl
->  081 deprecated # log logprint quota
+> +# Fix up intentional corruption so test can pass
+> +umount $SCRATCH_DEV
+> +$XFS_REPAIR_PROG $SCRATCH_DEV >> $seqres.full 2>&1
+>  
+>  status=0
+>  exit
+> diff --git a/tests/xfs/111.out b/tests/xfs/111.out
+> index 88a5c99..fd56c3c 100644
+> --- a/tests/xfs/111.out
+> +++ b/tests/xfs/111.out
+> @@ -8,93 +8,6 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+>  Create some files
+>  Blat inode clusters
+>  Starting overwrite
+> -Overwrote IN @offset 2048
+> -Overwrote IN @offset 2304
+> -Overwrote IN @offset 2560
+> -Overwrote IN @offset 2816
+> -Overwrote IN @offset 3072
+> -Overwrote IN @offset 3328
+> -Overwrote IN @offset 3584
+> -Overwrote IN @offset 3840
+> -Overwrote IN @offset 4096
+> -Overwrote IN @offset 4352
+> -Overwrote IN @offset 4608
+> -Overwrote IN @offset 4864
+> -Overwrote IN @offset 5120
+> -Overwrote IN @offset 5376
+> -Overwrote IN @offset 5632
+> -Overwrote IN @offset 5888
+> -Overwrote IN @offset 6144
+> -Overwrote IN @offset 6400
+> -Overwrote IN @offset 6656
+> -Overwrote IN @offset 6912
+> -Overwrote IN @offset 7168
+> -Overwrote IN @offset 7424
+> -Overwrote IN @offset 7680
+> -Overwrote IN @offset 7936
+> -Overwrote IN @offset 8192
+> -Overwrote IN @offset 8448
+> -Overwrote IN @offset 8704
+> -Overwrote IN @offset 8960
+> -Overwrote IN @offset 9216
+> -Overwrote IN @offset 9472
+> -Overwrote IN @offset 9728
+> -Overwrote IN @offset 9984
+> -Overwrote IN @offset 10240
+> -Overwrote IN @offset 10496
+> -Overwrote IN @offset 10752
+> -Overwrote IN @offset 11008
+> -Overwrote IN @offset 11264
+> -Overwrote IN @offset 11520
+> -Overwrote IN @offset 11776
+> -Overwrote IN @offset 12032
+> -Overwrote IN @offset 12288
+> -Overwrote IN @offset 12544
+> -Overwrote IN @offset 12800
+> -Overwrote IN @offset 13056
+> -Overwrote IN @offset 13312
+> -Overwrote IN @offset 13568
+> -Overwrote IN @offset 13824
+> -Overwrote IN @offset 14080
+> -Overwrote IN @offset 14336
+> -Overwrote IN @offset 14592
+> -Overwrote IN @offset 14848
+> -Overwrote IN @offset 15104
+> -Overwrote IN @offset 15360
+> -Overwrote IN @offset 15616
+> -Overwrote IN @offset 15872
+> -Overwrote IN @offset 16128
+> -Overwrote IN @offset 24576
+> -Overwrote IN @offset 24832
+> -Overwrote IN @offset 25088
+> -Overwrote IN @offset 25344
+> -Overwrote IN @offset 25600
+> -Overwrote IN @offset 25856
+> -Overwrote IN @offset 26112
+> -Overwrote IN @offset 26368
+> -Overwrote IN @offset 26624
+> -Overwrote IN @offset 26880
+> -Overwrote IN @offset 27136
+> -Overwrote IN @offset 27392
+> -Overwrote IN @offset 27648
+> -Overwrote IN @offset 27904
+> -Overwrote IN @offset 28160
+> -Overwrote IN @offset 28416
+> -Overwrote IN @offset 28672
+> -Overwrote IN @offset 28928
+> -Overwrote IN @offset 29184
+> -Overwrote IN @offset 29440
+> -Overwrote IN @offset 29696
+> -Overwrote IN @offset 29952
+> -Overwrote IN @offset 30208
+> -Overwrote IN @offset 30464
+> -Overwrote IN @offset 30720
+> -Overwrote IN @offset 30976
+> -Overwrote IN @offset 31232
+> -Overwrote IN @offset 31488
+> -Overwrote IN @offset 31744
+> -Overwrote IN @offset 32000
+> -Overwrote IN @offset 32256
+> -Overwrote IN @offset 32512
+>  Overwrite complete
+>  Attempting bulkstat
+> +SCRATCH_MNT start inode=0
+> 
+> 
+> 
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
