@@ -1,58 +1,160 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:43827 "EHLO
-	mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753114AbbEZN7D (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 26 May 2015 09:59:03 -0400
-Message-ID: <55647C22.6040003@fb.com>
-Date: Tue, 26 May 2015 09:58:58 -0400
-From: Josef Bacik <jbacik@fb.com>
-MIME-Version: 1.0
-Subject: Re: [PATCH] generic: add fiemap test that does prealloc
-References: <1432055622-8638-1-git-send-email-jbacik@fb.com> <20150526013130.GX4316@dastard>
-In-Reply-To: <20150526013130.GX4316@dastard>
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:6109 "EHLO
+	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751670AbbE0Cno (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 26 May 2015 22:43:44 -0400
+Received: from disappointment.disaster.area ([192.168.1.110] helo=disappointment)
+	by dastard with esmtp (Exim 4.80)
+	(envelope-from <dave@fromorbit.com>)
+	id 1YxRJh-0001bE-RX
+	for fstests@vger.kernel.org; Wed, 27 May 2015 12:43:37 +1000
+Received: from dave by disappointment with local (Exim 4.82_1-5b7a7c0-XX)
+	(envelope-from <dave@disappointment.disaster>)
+	id 1YxRJh-000682-Qa
+	for fstests@vger.kernel.org; Wed, 27 May 2015 12:43:37 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: [PATCH] xfs: tests extent size hint size overflows
+Date: Wed, 27 May 2015 12:43:37 +1000
+Message-Id: <1432694617-23525-1-git-send-email-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 05/25/2015 09:31 PM, Dave Chinner wrote:
-> On Tue, May 19, 2015 at 01:13:42PM -0400, Josef Bacik wrote:
->> I noticed that btrfs wasn't setting unwritten on prealloc test, and then
->> subsequently noticed that we weren't testing fiemap on prealloc extents with the
->> fiemap-tester.  This patch adds another test that does the same as generic/225
->> only with prealloc enabled.  Thanks,
->
-> Fails on XFS, but that's because XFS is doing things fiemap-tester
-> does not understand (speculative prealloc beyond EOF when appending
-> writes occur on files larger than 64k) and hence XFS ends up with
-> zeroed data on disk in places where fiemaptester is expecting
-> preallocated blocks.
->
-> i.e. there's not data corruption, and nothing wrong with XFS's
-> behaioviour, just a broken assumption that the filesystem will lay
-> out data due to buffered writes and delayed allocation exactly as it
-> expects.
->
-> IOWs, i think that fiemap-tester might need to direct IO to get the
-> results it expects, not buffered IO...
->
+From: Dave Chinner <dchinner@redhat.com>
 
-Huh crap I thought I caught this case, but now I look at it I only 
-caught it for the HOLE case not the PREALLOC case, so I'll fix up the 
-tester to check if there's 0's where there should be a prealloc.
+in certain cases, the extent size hints can cause maximum extent
+size overflows resulting in extent tree corruptions. This test
+exercises the original reproducer, and another corner case
+demonstrated to expose problems on 1k block size filesystems.
 
->> +_scratch_mount > /dev/null 2>&1
->> +
->> +rm -f $seqres.full
->> +fiemapfile=$SCRATCH_MNT/$seq.fiemap
->> +fiemaplog=$SCRATCH_MNT/$seq.log
->
-> The log file to use for debug information is $seqres.full.
->
+Signed-off-by: Dave Chinner <dchinner@redhat.com>
+---
+ tests/xfs/074     | 93 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/074.out |  2 ++
+ tests/xfs/group   |  1 +
+ 3 files changed, 96 insertions(+)
+ create mode 100755 tests/xfs/074
+ create mode 100644 tests/xfs/074.out
 
-I'll fix it up, thanks,
-
-Josef
+diff --git a/tests/xfs/074 b/tests/xfs/074
+new file mode 100755
+index 0000000..810a1a0
+--- /dev/null
++++ b/tests/xfs/074
+@@ -0,0 +1,93 @@
++#! /bin/bash
++# FS QA Test 074-extsz-hints-vs-maxextlen
++#
++# Check some extent size hint boundary conditions that can result in
++# MAXEXTLEN overflows.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Red Hat, Inc. All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++_cleanup()
++{
++	cd /
++	_destroy_loop_device $LOOP_DEV
++	rm -f $tmp.* $LOOP_FILE
++}
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs xfs
++_supported_os Linux
++
++rm -f $seqres.full
++
++_require_test
++_require_xfs_io_command "falloc"
++
++# we use loop devices for this so that we can create large files for prealloc
++# without having to care about the underlying device size.
++_require_loop
++
++LOOP_FILE=$TESTDIR/$seq.img
++LOOP_MNT=$TESTDIR/$seq.mnt
++mkdir -p $LOOP_MNT
++$XFS_IO_PROG -ft -c "truncate 1t" $LOOP_FILE 2>&1 > $seqres.full
++LOOP_DEV=`_create_loop_device $LOOP_FILE`
++
++_mkfs_dev -d size=40051712b,agcount=4 -l size=32m $LOOP_DEV
++_mount $LOOP_DEV $LOOP_MNT
++
++# Corrupt the BMBT by creating extents larger than MAXEXTLEN
++$XFS_IO_PROG -ft \
++	-c "extsize 16m" \
++	-c "falloc 0 30g" \
++	$LOOP_MNT/foo 2>&1 > $seqres.full
++
++umount $LOOP_MNT
++_check_xfs_filesystem $LOOP_DEV none none
++
++_mkfs_dev -f -l size=32m $LOOP_DEV
++_mount $LOOP_DEV $LOOP_MNT
++
++# check we trim both ends of the extent approproiately; this will fail
++# on 1k block size filesystems without the correct fixes in place.
++$XFS_IO_PROG -ft \
++	-c "extsize 1g" \
++	-c "falloc 1023m 2g" \
++	$LOOP_MNT/foo 2>&1 > $seqres.full
++
++umount $LOOP_MNT
++_check_xfs_filesystem $LOOP_DEV none none
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/xfs/074.out b/tests/xfs/074.out
+new file mode 100644
+index 0000000..81a0d24
+--- /dev/null
++++ b/tests/xfs/074.out
+@@ -0,0 +1,2 @@
++QA output created by 074-extsz-hints-vs-maxextlen
++Silence is golden
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 848a1bd..c211fc1 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -71,6 +71,7 @@
+ 071 rw auto
+ 072 rw auto prealloc quick
+ 073 copy auto
++074 quick auto prealloc rw
+ 078 growfs auto quick
+ 080 rw ioctl
+ 081 deprecated # log logprint quota
+-- 
+2.0.0
 
