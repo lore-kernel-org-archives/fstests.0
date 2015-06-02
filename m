@@ -1,58 +1,45 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:35682 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752582AbbF3EPc (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 30 Jun 2015 00:15:32 -0400
-Subject: [RFC 00/11] xfstests: test the btrfs/xfs reflink/dedupe ioctls
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Mon, 29 Jun 2015 21:15:20 -0700
-Message-ID: <20150630041519.2476.23059.stgit@birch.djwong.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Return-Path: <fstests-owner@vger.kernel.org>
+Received: from smtpproxy19.qq.com ([184.105.206.84]:35049 "EHLO
+	smtpproxy19.qq.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751592AbbFBAdN (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 1 Jun 2015 20:33:13 -0400
+Received: from bjgrwang.internal.tilera.com (unknown [124.207.145.166])
+	by esmtp4.qq.com (ESMTP) with SMTP id 0
+	for <fstests@vger.kernel.org>; Tue, 02 Jun 2015 08:32:55 +0800 (CST)
+From: Wang Sheng-Hui <shhuiw@foxmail.com>
+Subject: [PATCH] generic/288: correct the testcase description
+Date: Tue,  2 Jun 2015 08:32:51 +0800
+Message-Id: <1433205171-7392-1-git-send-email-shhuiw@foxmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: david@fromorbit.com, darrick.wong@oracle.com
-Cc: linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+The testcase tests 2 corner cases:
+    Length is zero
+    Length is smaller than block size
+Correct the beginning description by changing "of" to "or".
 
-This is a RFC-quality pass at making xfstests perform more rigorous
-testing of the btrfs/xfs file clone, reflink, and dedupe ioctls.
-There are now tests of the basic functionality of the three ioctls;
-tests to ensure that the filesystem exhibits the expected copy on
-write semantics; tests to try to suss out race conditions in the new
-write paths; tests to ensure that the ioctls peform basic disk
-accounting correctly; tests of the interaction between reflink and the
-various fallocate verbs (allocate, punch, collapse, insert zeroes);
-and some attempts to test the upper limits of reflinking.  The first
-patch in the series adds fuzz testing to ext4 and XFS; aside from
-being first in line, it isn't tied to any of the reflink
-functionality.
+Signed-off-by: Wang Sheng-Hui <shhuiw@foxmail.com>
+---
+ tests/generic/288 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-To run these tests, you'll have to patch xfsprogs to have reflink and
-dedupe support[1]; the patch ought to apply fairly cleanly against the
-upstream git.  They should more or less work with the btrfs that
-appears in 4.1, though if you want to test the XFS implementation,
-you're going to have to apply a lot of patches to the kernel and
-xfsprogs.  See the cover letters[2][3] for those patchsets for more
-information.
+diff --git a/tests/generic/288 b/tests/generic/288
+index 0368828..aed6238 100755
+--- a/tests/generic/288
++++ b/tests/generic/288
+@@ -2,7 +2,7 @@
+ # FS QA Test No. 288
+ #
+ # This check the FITRIM argument handling in the corner case where length is
+-# smaller than block size of zero.
++# smaller than block size or zero.
+ #
+ #-----------------------------------------------------------------------
+ # Copyright 2012 (C) Red Hat, Inc., Lukas Czerner <lczerner@redhat.com>
+-- 
+1.8.3.2
 
-Known issues: 
- * I think the race checks for dedupe could be a little sharper at
-   finding mistakes.
- * I started the numbering really high to prevent the tests from
-   colliding with whatever new tests might arrive; this will require
-   some intervention to fix.
- * When ext4 gains reflink support, it shouldn't be difficult to make
-   these tests run on it.  The patch set is based on the current
-   xfstest master on kernel.org.
- * If the copy_file_range syscall ever comes around, we'll have to
-   adapt xfs_io to use that in addition to the btrfs ioctls.
 
-Comments and questions are, as always, welcome.
 
---D
 
-[1] http://djwong.org/docs/03-xfs_io-reflink-and-dedupe.patch
-[2] See thread "[RFC 00/15] xfsprogs: support the reflink btree" dated today.
-[3] http://oss.sgi.com/archives/xfs/2015-06/msg00407.html
