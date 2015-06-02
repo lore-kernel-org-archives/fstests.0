@@ -1,45 +1,80 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from smtpproxy19.qq.com ([184.105.206.84]:35049 "EHLO
-	smtpproxy19.qq.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751592AbbFBAdN (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 1 Jun 2015 20:33:13 -0400
-Received: from bjgrwang.internal.tilera.com (unknown [124.207.145.166])
-	by esmtp4.qq.com (ESMTP) with SMTP id 0
-	for <fstests@vger.kernel.org>; Tue, 02 Jun 2015 08:32:55 +0800 (CST)
-From: Wang Sheng-Hui <shhuiw@foxmail.com>
-Subject: [PATCH] generic/288: correct the testcase description
-Date: Tue,  2 Jun 2015 08:32:51 +0800
-Message-Id: <1433205171-7392-1-git-send-email-shhuiw@foxmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:51085 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751211AbbFBEE4 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 2 Jun 2015 00:04:56 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (Postfix) with ESMTPS id 5D2412BCD8C
+	for <fstests@vger.kernel.org>; Tue,  2 Jun 2015 04:04:56 +0000 (UTC)
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH v3 RESEND] generic/081: wait for lv to be settled before creating fs on it
+Date: Tue,  2 Jun 2015 12:04:23 +0800
+Message-Id: <1433217863-24200-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-The testcase tests 2 corner cases:
-    Length is zero
-    Length is smaller than block size
-Correct the beginning description by changing "of" to "or".
+Call 'udevadm settle' or 'udevsettle' or 'sleep 1' to make sure new lv
+is ready for use before making filesystem on it, depends on which
+command is available on the system.
 
-Signed-off-by: Wang Sheng-Hui <shhuiw@foxmail.com>
+Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- tests/generic/288 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+v3:
+- add fsync command back and no 'sleep 1' in cleanup either
 
-diff --git a/tests/generic/288 b/tests/generic/288
-index 0368828..aed6238 100755
---- a/tests/generic/288
-+++ b/tests/generic/288
-@@ -2,7 +2,7 @@
- # FS QA Test No. 288
+v2:
+- move UDEV_SETTLE_PROG setup code to common/config
+- remove fsync from xfs_io command
+- update comments a bit about waiting for lv creation
+
+ common/config     | 18 ++++++++++++++++++
+ tests/generic/081 |  2 ++
+ 2 files changed, 20 insertions(+)
+
+diff --git a/common/config b/common/config
+index 3732287..b7991ed 100644
+--- a/common/config
++++ b/common/config
+@@ -192,6 +192,24 @@ export DUMP_PROG="`set_prog_path dump`"
+ export RESTORE_PROG="`set_prog_path restore`"
+ export LVM_PROG="`set_prog_path lvm`"
+ 
++# use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
++# newer systems have udevadm command but older systems like RHEL5 don't.
++# But if neither one is available, just set it to "sleep 1" to wait for lv to
++# be settled
++UDEV_SETTLE_PROG="`set_prog_path udevadm`"
++if [ "$UDEV_SETTLE_PROG" == "" ]; then
++	# try udevsettle command
++	UDEV_SETTLE_PROG="`set_prog_path udevsettle`"
++else
++	# udevadm is available, add 'settle' as subcommand
++	UDEV_SETTLE_PROG="$UDEV_SETTLE_PROG settle"
++fi
++# neither command is available, use sleep 1
++if [ "$UDEV_SETTLE_PROG" == "" ]; then
++	UDEV_SETTLE_PROG="sleep 1"
++fi
++export UDEV_SETTLE_PROG
++
+ # Generate a comparable xfsprogs version number in the form of
+ # major * 10000 + minor * 100 + release
  #
- # This check the FITRIM argument handling in the corner case where length is
--# smaller than block size of zero.
-+# smaller than block size or zero.
- #
- #-----------------------------------------------------------------------
- # Copyright 2012 (C) Red Hat, Inc., Lukas Czerner <lczerner@redhat.com>
+diff --git a/tests/generic/081 b/tests/generic/081
+index 5d38c11..34da1ac 100755
+--- a/tests/generic/081
++++ b/tests/generic/081
+@@ -66,6 +66,8 @@ mkdir -p $mnt
+ _scratch_mkfs_sized $((300 * 1024 * 1024)) >>$seqres.full 2>&1
+ $LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
+ $LVM_PROG lvcreate --yes -L 256M -n $lvname $vgname >>$seqres.full 2>&1
++# wait for lvcreation to fully complete
++$UDEV_SETTLE_PROG >>$seqres.full 2>&1
+ 
+ # _mkfs_dev exits the test on failure, this can make sure lv is created in
+ # above vgcreate/lvcreate steps
 -- 
-1.8.3.2
-
-
-
+2.1.0
 
