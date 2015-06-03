@@ -1,171 +1,147 @@
-Return-Path: <fstests-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36464 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750701AbbE2ERa (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 29 May 2015 00:17:30 -0400
-Date: Fri, 29 May 2015 12:17:27 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] xfs: tests extent size hint size overflows
-Message-ID: <20150529041727.GO3672@dhcp-13-216.nay.redhat.com>
-References: <1432871570-18267-1-git-send-email-david@fromorbit.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1432871570-18267-1-git-send-email-david@fromorbit.com>
+Received: from mail-pa0-f43.google.com ([209.85.220.43]:32917 "EHLO
+	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752847AbbFCCfi (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 2 Jun 2015 22:35:38 -0400
+Received: by padj3 with SMTP id j3so80115091pad.0
+        for <fstests@vger.kernel.org>; Tue, 02 Jun 2015 19:35:37 -0700 (PDT)
+From: Omar Sandoval <osandov@osandov.com>
+Subject: [PATCH] btrfs: default subvolume deletion test
+Date: Tue,  2 Jun 2015 19:35:03 -0700
+Message-Id: <7bc395d36b55628462db15e4eb8ee8e772bb94c9.1433298839.git.osandov@osandov.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Omar Sandoval <osandov@osandov.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, May 29, 2015 at 01:52:50PM +1000, Dave Chinner wrote:
-> From: Dave Chinner <dchinner@redhat.com>
-> 
-> In certain cases, the extent size hints can cause maximum extent
-> size overflows resulting in extent tree corruptions. This test
-> exercises the original reproducer, and another corner case
-> demonstrated to expose problems on 1k block size filesystems.
-> 
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> --
-> Version 2:
-> - TESTDIR->TEST_DIR
-> - append output to $seqres.full
+Add a regression test for a problem where attempting to delete the
+default subvolume would fail (as expected), but not until after all
+submounts under the subvolume were unmounted.
 
-Looks good to me.
+Signed-off-by: Omar Sandoval <osandov@osandov.com>
+---
+ tests/btrfs/089     | 82 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/089.out | 10 +++++++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 93 insertions(+)
+ create mode 100755 tests/btrfs/089
+ create mode 100644 tests/btrfs/089.out
 
-Reviewed-by: Eryu Guan <eguan@redhat.com>
+diff --git a/tests/btrfs/089 b/tests/btrfs/089
+new file mode 100755
+index 000000000000..af28d996d5c6
+--- /dev/null
++++ b/tests/btrfs/089
+@@ -0,0 +1,82 @@
++#! /bin/bash
++# FS QA Test 089
++#
++# Test deleting the default subvolume, making sure that it fails and that
++# submounts under it are not unmounted prematurely. This is a regression test
++# for Linux commit "Btrfs: don't invalidate root dentry when subvolume deletion
++# fails".
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 YOUR NAME HERE.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/filter.btrfs
++
++# real QA test starts here
++
++# Modify as appropriate.
++_need_to_be_root
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++# Create a new subvolume and make it the default subvolume.
++$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/testvol" | _filter_scratch
++testvol_id=$($BTRFS_UTIL_PROG subvolume list "$SCRATCH_MNT/testvol" | awk '{print $2}')
++$BTRFS_UTIL_PROG subvolume set-default "$testvol_id" "$SCRATCH_MNT"
++
++# Bind-mount a directory under the default subvolume.
++mkdir "$SCRATCH_MNT/testvol/testdir"
++touch "$SCRATCH_MNT/testvol/testdir/testfile"
++mkdir "$SCRATCH_MNT/testvol/mnt"
++mount --bind "$SCRATCH_MNT/testvol/testdir" "$SCRATCH_MNT/testvol/mnt"
++
++# Now attempt to delete the default subvolume, which should fail.
++$BTRFS_UTIL_PROG subvolume delete "$SCRATCH_MNT/testvol" 2>&1 | _filter_btrfs_subvol_delete
++
++# Make sure that the subvolume and bind mount survived.
++cd "$SCRATCH_MNT"
++find | sort
++
++cd "$here"
++_scratch_unmount
++
++status=0
++exit
+diff --git a/tests/btrfs/089.out b/tests/btrfs/089.out
+new file mode 100644
+index 000000000000..eb9c5112e12e
+--- /dev/null
++++ b/tests/btrfs/089.out
+@@ -0,0 +1,10 @@
++QA output created by 089
++Create subvolume 'SCRATCH_MNT/testvol'
++ERROR: cannot delete 'SCRATCH_MNT/testvol' - Operation not permitted
++Delete subvolume 'SCRATCH_MNT/testvol'
++.
++./testvol
++./testvol/mnt
++./testvol/mnt/testfile
++./testvol/testdir
++./testvol/testdir/testfile
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index ffe18bff0d21..616d060758c1 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -91,6 +91,7 @@
+ 086 auto quick clone
+ 087 auto quick send
+ 088 auto quick metadata
++089 auto quick subvol
+ 090 auto quick metadata
+ 091 auto quick qgroup
+ 092 auto quick send
+-- 
+2.4.2
 
-> ---
->  tests/xfs/074     | 93 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/074.out |  2 ++
->  tests/xfs/group   |  1 +
->  3 files changed, 96 insertions(+)
->  create mode 100755 tests/xfs/074
->  create mode 100644 tests/xfs/074.out
-> 
-> diff --git a/tests/xfs/074 b/tests/xfs/074
-> new file mode 100755
-> index 0000000..a571a34
-> --- /dev/null
-> +++ b/tests/xfs/074
-> @@ -0,0 +1,93 @@
-> +#! /bin/bash
-> +# FS QA Test 074-extsz-hints-vs-maxextlen
-> +#
-> +# Check some extent size hint boundary conditions that can result in
-> +# MAXEXTLEN overflows.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2015 Red Hat, Inc. All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	_destroy_loop_device $LOOP_DEV
-> +	rm -f $tmp.* $LOOP_FILE
-> +}
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_supported_os Linux
-> +
-> +rm -f $seqres.full
-> +
-> +_require_test
-> +_require_xfs_io_command "falloc"
-> +
-> +# we use loop devices for this so that we can create large files for prealloc
-> +# without having to care about the underlying device size.
-> +_require_loop
-> +
-> +LOOP_FILE=$TEST_DIR/$seq.img
-> +LOOP_MNT=$TEST_DIR/$seq.mnt
-> +mkdir -p $LOOP_MNT
-> +$XFS_IO_PROG -ft -c "truncate 1t" $LOOP_FILE >> $seqres.full
-> +LOOP_DEV=`_create_loop_device $LOOP_FILE`
-> +
-> +_mkfs_dev -d size=40051712b,agcount=4 -l size=32m $LOOP_DEV
-> +_mount $LOOP_DEV $LOOP_MNT
-> +
-> +# Corrupt the BMBT by creating extents larger than MAXEXTLEN
-> +$XFS_IO_PROG -ft \
-> +	-c "extsize 16m" \
-> +	-c "falloc 0 30g" \
-> +	$LOOP_MNT/foo >> $seqres.full
-> +
-> +umount $LOOP_MNT
-> +_check_xfs_filesystem $LOOP_DEV none none
-> +
-> +_mkfs_dev -f -l size=32m $LOOP_DEV
-> +_mount $LOOP_DEV $LOOP_MNT
-> +
-> +# check we trim both ends of the extent approproiately; this will fail
-> +# on 1k block size filesystems without the correct fixes in place.
-> +$XFS_IO_PROG -ft \
-> +	-c "extsize 1g" \
-> +	-c "falloc 1023m 2g" \
-> +	$LOOP_MNT/foo >> $seqres.full
-> +
-> +umount $LOOP_MNT
-> +_check_xfs_filesystem $LOOP_DEV none none
-> +
-> +# success, all done
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/xfs/074.out b/tests/xfs/074.out
-> new file mode 100644
-> index 0000000..380f065
-> --- /dev/null
-> +++ b/tests/xfs/074.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 074
-> +Silence is golden
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 848a1bd..c211fc1 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -71,6 +71,7 @@
->  071 rw auto
->  072 rw auto prealloc quick
->  073 copy auto
-> +074 quick auto prealloc rw
->  078 growfs auto quick
->  080 rw ioctl
->  081 deprecated # log logprint quota
-> -- 
-> 2.0.0
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
