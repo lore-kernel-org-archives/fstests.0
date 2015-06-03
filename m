@@ -1,59 +1,182 @@
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:49798 "EHLO
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:4058 "EHLO
 	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752115AbbFIW1L (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 9 Jun 2015 18:27:11 -0400
-Date: Wed, 10 Jun 2015 08:27:09 +1000
+	by vger.kernel.org with ESMTP id S1753512AbbFCWdn (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 3 Jun 2015 18:33:43 -0400
+Date: Thu, 4 Jun 2015 08:32:04 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] generic: concurrent IO test with mixed IO types
-Message-ID: <20150609222709.GB24666@dastard>
-References: <1433760101-25540-1-git-send-email-eguan@redhat.com>
- <alpine.LFD.2.00.1506081300400.1273@localhost.localdomain>
+Subject: Re: [PATCH] xfstests/xfs: test inode allocation with fragmented free
+ space
+Message-ID: <20150603223204.GF9143@dastard>
+References: <1433358506-27002-1-git-send-email-bfoster@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <alpine.LFD.2.00.1506081300400.1273@localhost.localdomain>
+In-Reply-To: <1433358506-27002-1-git-send-email-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: =?utf-8?B?THVrw6HFoQ==?= Czerner <lczerner@redhat.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jun 08, 2015 at 01:02:48PM +0200, Luk=C3=A1=C5=A1 Czerner wrote:
-> On Mon, 8 Jun 2015, Eryu Guan wrote:
->=20
-> > Date: Mon,  8 Jun 2015 18:41:41 +0800 From: Eryu Guan
-> > <eguan@redhat.com> To: fstests@vger.kernel.org Cc:
-> > lczerner@redhat.com, Eryu Guan <eguan@redhat.com> Subject:
-> > [PATCH] generic: concurrent IO test with mixed IO types
-> >=20
-> > Test concurrent buffered I/O, DIO, AIO, mmap I/O and splice I/O
-> > on the same files.
->=20
-> Hi Eryu,
->=20
-> Great! Thanks for turning it into a test. Couple of comments
-> below.
-....
-> > + +seq=3D`basename $0` +seqres=3D$RESULT_DIR/$seq +echo "QA output
-> > created by $seq" + +here=3D`pwd` +tmp=3D/tmp/$$
->=20
-> Not a big deal, but using mktemp woud probably be better.
+On Wed, Jun 03, 2015 at 03:08:26PM -0400, Brian Foster wrote:
+> XFS dynamic inode allocation has a fundamental limitation in that an
+> inode chunk requires a contiguous extent of a minimum size. Depending on
+> the level of free space fragmentation, inode allocation can fail with
+> ENOSPC where the filesystem might not be near 100% usage.
+> 
+> The sparse inodes feature was implemented to provide an inode allocation
+> strategy that maximizes the ability to allocate inodes under free space
+> fragmentation. This test fragments free space and verifies that
+> filesystems that support sparse inode allocation can allocate a minimum
+> percentage of inodes on the fs.
+> 
+> Signed-off-by: Brian Foster <bfoster@redhat.com>
+> ---
+> 
+> This is a test I've been using to verify the effectiveness of the XFS
+> sparse inodes feature. I put some effort into trying to make it generic
+> and have kind of gone back and forth on the matter. That said, it's kind
+> of pointless on ext4, doesn't work well on btrfs because it doesn't
+> track inode counts, and is generally expected to fail on XFS filesystems
+> without sparse inodes support.
+> 
+> Given all of that, I kind of went in the other direction and let it run
+> only for XFS when sparse inodes is supported. We still have broader
+> functional sparse inodes testability by virtue of DEBUG, of course.
+> Thoughts?
 
-Not better at all - this reduces the easy of debugging problems.
-e.g.  if a test is hung, I know where it's temporary output files
-are just by looking at the process listing and grabbing the pid of
-the test process being run. IOWs, we *want* deterministic temporary
-filenames here - obscuring the temporary file names that tests use
-doesn't gain us anything.
+I think it's fine as an xfs specific test given the nature of what
+it is testing....
+> +
+> +_avail_bytes()
+> +{
+> +	avail_kb=`$DF_PROG $SCRATCH_MNT | tail -n1 | awk '{ print $5 }'`
+> +	echo $((avail_kb * 1024))
 
-Yes, I see that some btrfs tests have used mktemp  and a couple of
-generic tests use $TEST_DIR/$$ - they should be reverted to /tmp/$$
-so they are consistent with the majority of tests and the new test
-template....
+DF_PROG --output=avail ?
+
+And maybe should go into common/rc as _get_available_space, along
+with the _get_*_inode functions?
+
+> +
+> +_consume_freesp()
+> +{
+> +	file=$1
+> +
+> +	# consume nearly all available space (leave ~1MB)
+> +	avail=`_avail_bytes`
+> +	filesizemb=$((avail / 1024 / 1024 - 1))
+> +	$XFS_IO_PROG -fc "falloc 0 ${filesizemb}m" $file \
+> +		2>> $seqres.full || _fail "falloc failed"
+> +}
+
+Don't use _fail here - just have xfs_io output the error message
+and let the golden image catch it. It's only a small filesystem,
+if it fails it won't blow the runtime out badly, and we'll still get
+sparse inode test coverage...
+
+> +# Allocate inodes in a directory until failure.
+> +_alloc_inodes()
+> +{
+> +	dir=$1
+> +
+> +	i=0
+> +	while [ true ]; do
+> +		touch $dir/$i 2>> $seqres.full || break
+> +		i=$((i + 1))
+> +	done
+> +}
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +
+> +_require_scratch
+> +_require_xfs_io_command "falloc"
+> +_require_xfs_io_command "fpunch"
+> +
+> +rm -f $seqres.full
+> +
+> +echo "Silence is golden."
+> +
+> +_scratch_mkfs_sized $((1024*1024*50)) | _filter_mkfs > /dev/null 2> $tmp.mkfs ||
+> +	_fail "mkfs failed"
+> +. $tmp.mkfs	# for isize
+
+That should pass "-i sparse" to _scratch_mkfs_sized, after....
+
+> +
+> +# This test runs a workload that is known to fail on XFS unless the sparse
+> +# inodes chunk feature is enabled. Skip the test if it is not supported to avoid
+> +# unnecessary and expected test failures.
+> +$XFS_DB_PROG -c version $SCRATCH_DEV | grep SPARSE_INODES > /dev/null ||
+> +	_notrun "requires sparse inodes support"
+
+... calling this:
+
+_require_xfs_sparse_inodes()
+{
+	_scratch_mkfs_xfs_supported -m crc=1 -i sparse > /dev/null 2>&1 \
+		|| _notrun "mkfs.xfs does not support sparse inodes"
+	_scratch_mkfs_xfs -m crc=1 -i sparse > /dev/null 2>&1
+	_scratch_mount >/dev/null 2>&1 \
+		|| _notrun "kernel does not support sparse inodes"
+	umount $SCRATCH_MOUNT
+}
+
+> +
+> +_scratch_mount
+> +
+> +# magic heuristic value of 64 - # of inodes in an XFS inode record
+> +FRAG_FACTOR=$((isize * 64))
+> +[ $FRAG_FACTOR != 0 ] || _fail "could not calculate fragmentation factor"
+
+Why would isize be zero? And what does this magic hueristic do?
+
+> +_consume_freesp $SCRATCH_MNT/spc
+> +
+> +offset=`stat -c "%s" $SCRATCH_MNT/spc`
+> +offset=$((offset - $FRAG_FACTOR * 2))
+
+I dislike having to look up man pages to understand what code does.
+It is grabbing the file size, and stepping back a magic number from
+the EOF. I think it is punching inode chunk size holes in the file,
+but I could be mistaken...
+
+> +while [ $offset -ge 0 ]; do
+> +	# punch small holes in the file to fragment free space
+> +	$XFS_IO_PROG -c "fpunch $offset $FRAG_FACTOR" $SCRATCH_MNT/spc \
+> +		2>> $seqres.full || _fail "fpunch failed"
+> +
+> +	# allocate as many inodes as possible
+> +	mkdir -p $SCRATCH_MNT/offset.$offset > /dev/null 2>&1
+> +	_alloc_inodes $SCRATCH_MNT/offset.$offset
+> +
+> +	offset=$((offset - $FRAG_FACTOR * 2))
+> +done
+> +
+> +# check the inode % usage
+> +iusepct=`$DF_PROG -i $SCRATCH_MNT | tail -n 1 | awk '{ print $6 }' |
+> +	 sed -e 's/%//'`
+
+_get_inode_used_percent()
+{
+	$DF_PROG --output=ipcent $SCRATCH_MNT | tail -1 | sed -e 's/%//'
+}
+
+> +if [ $iusepct -lt 95 ]; then
+
+if [ ! _within_tolerance .... ]
+
+> +	$DF_PROG -i $SCRATCH_MNT
+> +	_fail "could not allocate enough inodes"
+> +fi
+> +
+> +_scratch_unmount
+
+No need to unmount scratch here.
 
 Cheers,
 
 Dave.
---=20
+-- 
 Dave Chinner
 david@fromorbit.com
