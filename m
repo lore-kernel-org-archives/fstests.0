@@ -1,212 +1,214 @@
-Received: from mx1.redhat.com ([209.132.183.28]:47249 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:60035 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753651AbbFIIjh (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 9 Jun 2015 04:39:37 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (Postfix) with ESMTPS id C6A903220FA
-	for <fstests@vger.kernel.org>; Tue,  9 Jun 2015 08:39:36 +0000 (UTC)
-Date: Tue, 9 Jun 2015 10:39:31 +0200 (CEST)
-From: =?ISO-8859-15?Q?Luk=E1=A8_Czerner?= <lczerner@redhat.com>
-Subject: Re: [PATCH v2] generic: concurrent IO test with mixed IO types
-In-Reply-To: <1433767271-30562-1-git-send-email-eguan@redhat.com>
-Message-ID: <alpine.LFD.2.00.1506091039010.26548@localhost.localdomain>
-References: <1433760101-25540-1-git-send-email-eguan@redhat.com> <1433767271-30562-1-git-send-email-eguan@redhat.com>
-MIME-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+	id S1754412AbbFCTI2 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 3 Jun 2015 15:08:28 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: [PATCH] xfstests/xfs: test inode allocation with fragmented free space
+Date: Wed,  3 Jun 2015 15:08:26 -0400
+Message-Id: <1433358506-27002-1-git-send-email-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, 8 Jun 2015, Eryu Guan wrote:
+XFS dynamic inode allocation has a fundamental limitation in that an
+inode chunk requires a contiguous extent of a minimum size. Depending on
+the level of free space fragmentation, inode allocation can fail with
+ENOSPC where the filesystem might not be near 100% usage.
 
-> Date: Mon,  8 Jun 2015 20:41:11 +0800
-> From: Eryu Guan <eguan@redhat.com>
-> To: fstests@vger.kernel.org
-> Cc: lczerner@redhat.com, Eryu Guan <eguan@redhat.com>
-> Subject: [PATCH v2] generic: concurrent IO test with mixed IO types
-> 
-> Test concurrent buffered I/O, DIO, AIO, mmap I/O and splice I/O on the
-> same files.
+The sparse inodes feature was implemented to provide an inode allocation
+strategy that maximizes the ability to allocate inodes under free space
+fragmentation. This test fragments free space and verifies that
+filesystems that support sparse inode allocation can allocate a minimum
+percentage of inodes on the fs.
 
-Great, it looks good to me. Thanks!
+Signed-off-by: Brian Foster <bfoster@redhat.com>
+---
 
-Reviewed-by: Lukas Czerner <lczerner@redhat.com>
+This is a test I've been using to verify the effectiveness of the XFS
+sparse inodes feature. I put some effort into trying to make it generic
+and have kind of gone back and forth on the matter. That said, it's kind
+of pointless on ext4, doesn't work well on btrfs because it doesn't
+track inode counts, and is generally expected to fail on XFS filesystems
+without sparse inodes support.
 
+Given all of that, I kind of went in the other direction and let it run
+only for XFS when sparse inodes is supported. We still have broader
+functional sparse inodes testability by virtue of DEBUG, of course.
+Thoughts?
 
-> 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> ---
-> 
-> This fio job file has been proven to be potent, it triggers WARNINGs on ext4
-> and xfs with 4.1-rc6 kernel.
-> 
-> ext4: WARNING: at fs/ext4/inode.c:1328
-> xfs: WARNING: CPU: 7 PID: 3090 at fs/xfs/xfs_file.c:726 xfs_file_dio_aio_write+0x176/0x2a8 [xfs]()
-> 
-> The ext4 issue should be fixed by Lukas's patch
-> ext4: fix reservation release on invalidatepage for delalloc fs
-> 
-> And it ever paniced kernel in mm code and hung xfs.
-> 
-> I reduced the numjobs and iodepth to reduce the test time(~25s on my test host)
-> and scale them by $LOAD_FACTOR. And it still could trigger the warning on ext4
-> and xfs with reduced workload.
-> 
-> v2:
-> - use mktemp to create tmp fio job file
-> 
->  tests/generic/090     | 120 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/090.out |   2 +
->  tests/generic/group   |   1 +
->  3 files changed, 123 insertions(+)
->  create mode 100755 tests/generic/090
->  create mode 100644 tests/generic/090.out
-> 
-> diff --git a/tests/generic/090 b/tests/generic/090
-> new file mode 100755
-> index 0000000..3521cd4
-> --- /dev/null
-> +++ b/tests/generic/090
-> @@ -0,0 +1,120 @@
-> +#! /bin/bash
-> +# FS QA Test generic/090
-> +#
-> +# Concurrent mixed I/O (buffer I/O, aiodio, mmap, splice) on the same files
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +fio_config=`mktemp`
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $fio_config
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch
-> +
-> +iodepth=$((16 * LOAD_FACTOR))
-> +iodepth_batch=$((8 * LOAD_FACTOR))
-> +numjobs=$((5 * LOAD_FACTOR))
-> +cat >$fio_config <<EOF
-> +[global]
-> +bs=8k
-> +iodepth=$iodepth
-> +iodepth_batch=$iodepth_batch
-> +randrepeat=1
-> +size=1m
-> +directory=$SCRATCH_MNT
-> +numjobs=$numjobs
-> +[job1]
-> +ioengine=sync
-> +bs=1k
-> +direct=1
-> +rw=randread
-> +filename=file1:file2
-> +[job2]
-> +ioengine=libaio
-> +rw=randwrite
-> +direct=1
-> +filename=file1:file2
-> +[job3]
-> +bs=1k
-> +ioengine=posixaio
-> +rw=randwrite
-> +direct=1
-> +filename=file1:file2
-> +[job4]
-> +ioengine=splice
-> +direct=1
-> +rw=randwrite
-> +filename=file1:file2
-> +[job5]
-> +bs=1k
-> +ioengine=sync
-> +rw=randread
-> +filename=file1:file2
-> +[job6]
-> +ioengine=posixaio
-> +rw=randwrite
-> +filename=file1:file2
-> +[job7]
-> +ioengine=splice
-> +rw=randwrite
-> +filename=file1:file2
-> +[job8]
-> +ioengine=mmap
-> +rw=randwrite
-> +bs=1k
-> +filename=file1:file2
-> +[job9]
-> +ioengine=mmap
-> +rw=randwrite
-> +direct=1
-> +filename=file1:file2
-> +EOF
-> +# with ioengine=mmap and direct=1, fio requires bs to be at least pagesize,
-> +# which is a fio built-in var.
-> +echo 'bs=$pagesize' >> $fio_config
-> +
-> +rm -f $seqres.full
-> +
-> +_require_fio $fio_config
-> +
-> +echo "Silence is golden"
-> +$FIO_PROG $fio_config >>$seqres.full 2>&1
-> +
-> +# all done, expect no hang no oops no fs corruption,
-> +# _check_dmesg and _check_filesystems will do the check work for us
-> +status=0
-> +exit
-> diff --git a/tests/generic/090.out b/tests/generic/090.out
-> new file mode 100644
-> index 0000000..2b5100d
-> --- /dev/null
-> +++ b/tests/generic/090.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 090
-> +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 0c8964c..2e534a5 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -92,6 +92,7 @@
->  087 perms auto quick
->  088 perms auto quick
->  089 metadata auto
-> +090 auto rw stress
->  091 rw auto quick
->  092 auto quick prealloc
->  093 attr cap udf auto
-> 
+Brian
+
+ tests/xfs/075     | 137 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/075.out |   2 +
+ tests/xfs/group   |   1 +
+ 3 files changed, 140 insertions(+)
+ create mode 100755 tests/xfs/075
+ create mode 100644 tests/xfs/075.out
+
+diff --git a/tests/xfs/075 b/tests/xfs/075
+new file mode 100755
+index 0000000..6f26cf5
+--- /dev/null
++++ b/tests/xfs/075
+@@ -0,0 +1,137 @@
++#!/bin/bash
++# FS QA Test No. xfs/075
++#
++# Verify that a filesystem can allocate inodes in the event of free space
++# fragmentation. This test is generic in nature but primarily relevant to
++# filesystems that implement dynamic inode allocation (e.g., XFS).
++#
++# The test is inspired by inode allocation limitations on XFS when available
++# free space is fragmented. XFS allocates inodes 64 at a time and thus requires
++# an extent of length that depends on inode size (64 * isize / blksize).
++#
++# The test creates a small filesystem, fragments free space, allocates inodes to
++# ENOSPC and then verifies that most of the available inodes have been consumed.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Red Hat, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++_cleanup()
++{
++	cd /
++	umount $SCRATCH_MNT 2>/dev/null
++	rm -f $tmp.*
++}
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_avail_bytes()
++{
++	avail_kb=`$DF_PROG $SCRATCH_MNT | tail -n1 | awk '{ print $5 }'`
++	echo $((avail_kb * 1024))
++}
++
++_consume_freesp()
++{
++	file=$1
++
++	# consume nearly all available space (leave ~1MB)
++	avail=`_avail_bytes`
++	filesizemb=$((avail / 1024 / 1024 - 1))
++	$XFS_IO_PROG -fc "falloc 0 ${filesizemb}m" $file \
++		2>> $seqres.full || _fail "falloc failed"
++}
++
++# Allocate inodes in a directory until failure.
++_alloc_inodes()
++{
++	dir=$1
++
++	i=0
++	while [ true ]; do
++		touch $dir/$i 2>> $seqres.full || break
++		i=$((i + 1))
++	done
++}
++
++# real QA test starts here
++_supported_os Linux
++
++_require_scratch
++_require_xfs_io_command "falloc"
++_require_xfs_io_command "fpunch"
++
++rm -f $seqres.full
++
++echo "Silence is golden."
++
++_scratch_mkfs_sized $((1024*1024*50)) | _filter_mkfs > /dev/null 2> $tmp.mkfs ||
++	_fail "mkfs failed"
++. $tmp.mkfs	# for isize
++
++# This test runs a workload that is known to fail on XFS unless the sparse
++# inodes chunk feature is enabled. Skip the test if it is not supported to avoid
++# unnecessary and expected test failures.
++$XFS_DB_PROG -c version $SCRATCH_DEV | grep SPARSE_INODES > /dev/null ||
++	_notrun "requires sparse inodes support"
++
++_scratch_mount
++
++# magic heuristic value of 64 - # of inodes in an XFS inode record
++FRAG_FACTOR=$((isize * 64))
++[ $FRAG_FACTOR != 0 ] || _fail "could not calculate fragmentation factor"
++
++_consume_freesp $SCRATCH_MNT/spc
++
++offset=`stat -c "%s" $SCRATCH_MNT/spc`
++offset=$((offset - $FRAG_FACTOR * 2))
++while [ $offset -ge 0 ]; do
++	# punch small holes in the file to fragment free space
++	$XFS_IO_PROG -c "fpunch $offset $FRAG_FACTOR" $SCRATCH_MNT/spc \
++		2>> $seqres.full || _fail "fpunch failed"
++
++	# allocate as many inodes as possible
++	mkdir -p $SCRATCH_MNT/offset.$offset > /dev/null 2>&1
++	_alloc_inodes $SCRATCH_MNT/offset.$offset
++
++	offset=$((offset - $FRAG_FACTOR * 2))
++done
++
++# check the inode % usage
++iusepct=`$DF_PROG -i $SCRATCH_MNT | tail -n 1 | awk '{ print $6 }' |
++	 sed -e 's/%//'`
++if [ $iusepct -lt 95 ]; then
++	$DF_PROG -i $SCRATCH_MNT
++	_fail "could not allocate enough inodes"
++fi
++
++_scratch_unmount
++
++status=0
++exit
+diff --git a/tests/xfs/075.out b/tests/xfs/075.out
+new file mode 100644
+index 0000000..73c3af2
+--- /dev/null
++++ b/tests/xfs/075.out
+@@ -0,0 +1,2 @@
++QA output created by 075
++Silence is golden.
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 848a1bd..b5d55ed 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -71,6 +71,7 @@
+ 071 rw auto
+ 072 rw auto prealloc quick
+ 073 copy auto
++075 auto enospc
+ 078 growfs auto quick
+ 080 rw ioctl
+ 081 deprecated # log logprint quota
+-- 
+1.9.3
+
