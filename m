@@ -1,77 +1,148 @@
-Received: from mx1.redhat.com ([209.132.183.28]:57271 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754007AbbFJLhc (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 10 Jun 2015 07:37:32 -0400
-Date: Wed, 10 Jun 2015 19:37:29 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2] generic: concurrent IO test with mixed IO types
-Message-ID: <20150610113729.GB3672@dhcp-13-216.nay.redhat.com>
-References: <1433760101-25540-1-git-send-email-eguan@redhat.com>
- <1433767271-30562-1-git-send-email-eguan@redhat.com>
- <20150609222933.GC24666@dastard>
- <20150610070744.GZ3672@dhcp-13-216.nay.redhat.com>
- <20150610111237.GY9143@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20150610111237.GY9143@dastard>
+Received: from mail-pa0-f48.google.com ([209.85.220.48]:36224 "EHLO
+	mail-pa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751939AbbFEVAm (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 5 Jun 2015 17:00:42 -0400
+Received: by pabqy3 with SMTP id qy3so57031341pab.3
+        for <fstests@vger.kernel.org>; Fri, 05 Jun 2015 14:00:42 -0700 (PDT)
+From: Omar Sandoval <osandov@osandov.com>
+Subject: [PATCH v3] btrfs: test premature submount unmounting when deleting default subvolume
+Date: Fri,  5 Jun 2015 14:00:32 -0700
+Message-Id: <1ebef916f54960cf6fef34be950e3d38cc3a50b0.1433537929.git.osandov@osandov.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, lczerner@redhat.com
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Omar Sandoval <osandov@osandov.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jun 10, 2015 at 09:12:37PM +1000, Dave Chinner wrote:
-> On Wed, Jun 10, 2015 at 03:07:44PM +0800, Eryu Guan wrote:
-> > On Wed, Jun 10, 2015 at 08:29:33AM +1000, Dave Chinner wrote:
-> > > On Mon, Jun 08, 2015 at 08:41:11PM +0800, Eryu Guan wrote:
-> > > > Test concurrent buffered I/O, DIO, AIO, mmap I/O and splice I/O on the
-> > > > same files.
-> > > > 
-> > > > Signed-off-by: Eryu Guan <eguan@redhat.com>
-> > > > ---
-> > > > 
-> > > > This fio job file has been proven to be potent, it triggers WARNINGs on ext4
-> > > > and xfs with 4.1-rc6 kernel.
-> > > > 
-> > > > ext4: WARNING: at fs/ext4/inode.c:1328
-> > > > xfs: WARNING: CPU: 7 PID: 3090 at fs/xfs/xfs_file.c:726 xfs_file_dio_aio_write+0x176/0x2a8 [xfs]()
-> > > > 
-> > > > The ext4 issue should be fixed by Lukas's patch
-> > > > ext4: fix reservation release on invalidatepage for delalloc fs
-> > > > 
-> > > > And it ever paniced kernel in mm code and hung xfs.
-> > > > 
-> > > > I reduced the numjobs and iodepth to reduce the test time(~25s on my test host)
-> > > > and scale them by $LOAD_FACTOR. And it still could trigger the warning on ext4
-> > > > and xfs with reduced workload.
-> > > > 
-> > > > v2:
-> > > > - use mktemp to create tmp fio job file
-> > > ....
-> > > > +seq=`basename $0`
-> > > > +seqres=$RESULT_DIR/$seq
-> > > > +echo "QA output created by $seq"
-> > > > +
-> > > > +here=`pwd`
-> > > > +fio_config=`mktemp`
-> > > > +status=1	# failure is the default!
-> > > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > 
-> > > By removing the definition of $tmp, you are now dumping all
-> > > the temporary files the test harnes creates in /.
-> > 
-> > You're right, I see /fsck.log on my test host.
-> > 
-> > I checked 'check' and common/rc and chech has its "tmp=/tmp/$$"
-> > definition and I thought I didn't use any functions from common/rc in my
-> > test directly that depends on $tmp definition. I must have missed
-> > something.
-> > 
-> > Should I send a v3 and roll back to v1? or you can just take v1?
-> 
-> You'll need a v3 to fix the problem with using an uninitialised,
-> unmounted SCRATCH_DEV in the test...
+Add a regression test for a problem where attempting to delete the
+default subvolume would fail (as expected), but not until after all
+submounts under the subvolume were unmounted.
 
-How can I miss that.. Sorry and thanks!
+Reviewed-by: Eryu Guan <eguan@redhat.com>
+Signed-off-by: Omar Sandoval <osandov@osandov.com>
+---
+v2->v3:
+- Update description (thanks, Eryu)
+- Remove unneeded touch
 
-Eryu
+v1->v2:
+- Simpler test: just depends on umount of the bind mount succeeding
+  instead of running find. Without the patch applied, the bind mount
+  will disappear so umount will fail.
+- Fix Eryu's comments (better subject, copyright, use
+  _btrfs_get_subvolid)
+
+ tests/btrfs/089     | 79 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/089.out |  2 ++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 82 insertions(+)
+ create mode 100755 tests/btrfs/089
+ create mode 100644 tests/btrfs/089.out
+
+diff --git a/tests/btrfs/089 b/tests/btrfs/089
+new file mode 100755
+index 000000000000..537269824b62
+--- /dev/null
++++ b/tests/btrfs/089
+@@ -0,0 +1,79 @@
++#! /bin/bash
++# FS QA Test 089
++#
++# Test deleting the default subvolume, making sure that submounts under it are
++# not unmounted prematurely. This is a regression test for Linux commit "Btrfs:
++# don't invalidate root dentry when subvolume deletion fails".
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Omar Sandoval.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/filter.btrfs
++
++# real QA test starts here
++
++# Modify as appropriate.
++_need_to_be_root
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++# Create a new subvolume and make it the default subvolume.
++$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/testvol" >>$seqres.full 2>&1 \
++	|| _fail "couldn't create subvol"
++testvol_id=$(_btrfs_get_subvolid "$SCRATCH_MNT" testvol)
++$BTRFS_UTIL_PROG subvolume set-default $testvol_id "$SCRATCH_MNT" >>$seqres.full 2>&1 \
++	|| _fail "couldn't set default"
++
++# Bind-mount a directory under the default subvolume.
++mkdir "$SCRATCH_MNT/testvol/testdir"
++mkdir "$SCRATCH_MNT/testvol/mnt"
++mount --bind "$SCRATCH_MNT/testvol/testdir" "$SCRATCH_MNT/testvol/mnt"
++
++# Now attempt to delete the default subvolume.
++$BTRFS_UTIL_PROG subvolume delete "$SCRATCH_MNT/testvol" >>$seqres.full 2>&1
++
++# Unmount the bind mount, which should still be alive.
++$UMOUNT_PROG "$SCRATCH_MNT/testvol/mnt"
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/btrfs/089.out b/tests/btrfs/089.out
+new file mode 100644
+index 000000000000..a7fcdee9b767
+--- /dev/null
++++ b/tests/btrfs/089.out
+@@ -0,0 +1,2 @@
++QA output created by 089
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index ffe18bff0d21..616d060758c1 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -91,6 +91,7 @@
+ 086 auto quick clone
+ 087 auto quick send
+ 088 auto quick metadata
++089 auto quick subvol
+ 090 auto quick metadata
+ 091 auto quick qgroup
+ 092 auto quick send
+-- 
+2.4.2
+
