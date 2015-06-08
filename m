@@ -1,201 +1,257 @@
-Received: from mail-pd0-f177.google.com ([209.85.192.177]:34897 "EHLO
-	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751058AbbFCEta (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 3 Jun 2015 00:49:30 -0400
-Received: by pdbnf5 with SMTP id nf5so87157748pdb.2
-        for <fstests@vger.kernel.org>; Tue, 02 Jun 2015 21:49:30 -0700 (PDT)
-Date: Tue, 2 Jun 2015 21:49:28 -0700
-From: Omar Sandoval <osandov@osandov.com>
-Subject: Re: [PATCH] btrfs: default subvolume deletion test
-Message-ID: <20150603044928.GB17048@mew>
-References: <7bc395d36b55628462db15e4eb8ee8e772bb94c9.1433298839.git.osandov@osandov.com>
- <20150603035337.GL3672@dhcp-13-216.nay.redhat.com>
- <20150603044013.GA17048@mew>
+Received: from mx1.redhat.com ([209.132.183.28]:55361 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751248AbbFHL7u (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 8 Jun 2015 07:59:50 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (Postfix) with ESMTPS id 029728EA26
+	for <fstests@vger.kernel.org>; Mon,  8 Jun 2015 11:59:50 +0000 (UTC)
+Date: Mon, 8 Jun 2015 19:59:47 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] generic: concurrent IO test with mixed IO types
+Message-ID: <20150608115947.GT3672@dhcp-13-216.nay.redhat.com>
+References: <1433760101-25540-1-git-send-email-eguan@redhat.com>
+ <alpine.LFD.2.00.1506081300400.1273@localhost.localdomain>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20150603044013.GA17048@mew>
+In-Reply-To: <alpine.LFD.2.00.1506081300400.1273@localhost.localdomain>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: =?utf-8?B?THVrw6HFoQ==?= Czerner <lczerner@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jun 02, 2015 at 09:40:13PM -0700, Omar Sandoval wrote:
-> On Wed, Jun 03, 2015 at 11:53:37AM +0800, Eryu Guan wrote:
-> > On Tue, Jun 02, 2015 at 07:35:03PM -0700, Omar Sandoval wrote:
-> > > Add a regression test for a problem where attempting to delete the
-> > > default subvolume would fail (as expected), but not until after all
-> > > submounts under the subvolume were unmounted.
-> > 
-> > I think the subject can be more specific than "btrfs: default subvolume
-> > deletion test", because btrfs/009 test the deletion of default subvol
-> > too, but this test tests more.
-> 
-> Agreed.
-> 
-> > > Signed-off-by: Omar Sandoval <osandov@osandov.com>
-> > > ---
-> > >  tests/btrfs/089     | 82 +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/btrfs/089.out | 10 +++++++
-> > >  tests/btrfs/group   |  1 +
-> > >  3 files changed, 93 insertions(+)
-> > >  create mode 100755 tests/btrfs/089
-> > >  create mode 100644 tests/btrfs/089.out
-> > > 
-> > > diff --git a/tests/btrfs/089 b/tests/btrfs/089
-> > > new file mode 100755
-> > > index 000000000000..af28d996d5c6
-> > > --- /dev/null
-> > > +++ b/tests/btrfs/089
-> > > @@ -0,0 +1,82 @@
-> > > +#! /bin/bash
-> > > +# FS QA Test 089
-> > > +#
-> > > +# Test deleting the default subvolume, making sure that it fails and that
-> > > +# submounts under it are not unmounted prematurely. This is a regression test
-> > > +# for Linux commit "Btrfs: don't invalidate root dentry when subvolume deletion
-> > > +# fails".
-> > > +#
-> > > +#-----------------------------------------------------------------------
-> > > +# Copyright (c) 2015 YOUR NAME HERE.  All Rights Reserved.
-> > 
-> > The copyright should be fixed.
-> 
-> Whoops, not sure how I missed that.
-> 
-> > > +#
-> > > +# This program is free software; you can redistribute it and/or
-> > > +# modify it under the terms of the GNU General Public License as
-> > > +# published by the Free Software Foundation.
-> > > +#
-> > > +# This program is distributed in the hope that it would be useful,
-> > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > > +# GNU General Public License for more details.
-> > > +#
-> > > +# You should have received a copy of the GNU General Public License
-> > > +# along with this program; if not, write the Free Software Foundation,
-> > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > > +#-----------------------------------------------------------------------
-> > > +#
-> > > +
-> > > +seq=`basename $0`
-> > > +seqres=$RESULT_DIR/$seq
-> > > +echo "QA output created by $seq"
-> > > +
-> > > +here=`pwd`
-> > > +tmp=/tmp/$$
-> > > +status=1	# failure is the default!
-> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +	cd /
-> > > +	rm -f $tmp.*
-> > > +}
-> > > +
-> > > +# get standard environment, filters and checks
-> > > +. ./common/rc
-> > > +. ./common/filter
-> > > +. ./common/filter.btrfs
-> > > +
-> > > +# real QA test starts here
-> > > +
-> > > +# Modify as appropriate.
-> > > +_need_to_be_root
-> > > +_supported_fs btrfs
-> > > +_supported_os Linux
-> > > +_require_scratch
-> > > +
-> > > +rm -f $seqres.full
-> > > +
-> > > +_scratch_mkfs >>$seqres.full 2>&1
-> > > +_scratch_mount
-> > > +
-> > > +# Create a new subvolume and make it the default subvolume.
-> > > +$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/testvol" | _filter_scratch
-> > > +testvol_id=$($BTRFS_UTIL_PROG subvolume list "$SCRATCH_MNT/testvol" | awk '{print $2}')
-> > 
-> > I found there's a helper to get subvol id, see _btrfs_get_subvolid in
-> > common/rc
-> 
-> Okay, I'll fix that.
-> 
-> > > +$BTRFS_UTIL_PROG subvolume set-default "$testvol_id" "$SCRATCH_MNT"
-> > > +
-> > > +# Bind-mount a directory under the default subvolume.
-> > > +mkdir "$SCRATCH_MNT/testvol/testdir"
-> > > +touch "$SCRATCH_MNT/testvol/testdir/testfile"
-> > > +mkdir "$SCRATCH_MNT/testvol/mnt"
-> > > +mount --bind "$SCRATCH_MNT/testvol/testdir" "$SCRATCH_MNT/testvol/mnt"
-> > > +
-> > > +# Now attempt to delete the default subvolume, which should fail.
-> > > +$BTRFS_UTIL_PROG subvolume delete "$SCRATCH_MNT/testvol" 2>&1 | _filter_btrfs_subvol_delete
-> > > +
-> > > +# Make sure that the subvolume and bind mount survived.
-> > > +cd "$SCRATCH_MNT"
-> > > +find | sort
-> > > +
-> > > +cd "$here"
-> > > +_scratch_unmount
-> > 
-> > The cd and _scratch_unmount are not necessary here, _require_scratch
-> > deals with the umount.
-> 
-> Ah, yes, I can definitely get rid of the _scratch_unmount, but the cd
-> $here was there because otherwise the filesystem wouldn't unmount and
-> fsck would error out. Instead of cd-ing to SCRATCH_MNT, I can replace
-> find with find | _filter_scratch and update the test output accordingly.
+On Mon, Jun 08, 2015 at 01:02:48PM +0200, Luk=C3=A1=C5=A1 Czerner wrote:
+> On Mon, 8 Jun 2015, Eryu Guan wrote:
+>=20
+> > Date: Mon,  8 Jun 2015 18:41:41 +0800
+> > From: Eryu Guan <eguan@redhat.com>
+> > To: fstests@vger.kernel.org
+> > Cc: lczerner@redhat.com, Eryu Guan <eguan@redhat.com>
+> > Subject: [PATCH] generic: concurrent IO test with mixed IO types
+> >=20
+> > Test concurrent buffered I/O, DIO, AIO, mmap I/O and splice I/O on th=
+e
+> > same files.
+>=20
+> Hi Eryu,
+>=20
+> Great! Thanks for turning it into a test. Couple of comments below.
+>=20
+> >=20
+> > Signed-off-by: Eryu Guan <eguan@redhat.com>
+> > ---
+> >=20
+> > This fio job file has been proven to be potent, it triggers WARNINGs =
+on ext4
+> > and xfs with 4.1-rc6 kernel.
+> >=20
+> > ext4: WARNING: at fs/ext4/inode.c:1328
+> > xfs: WARNING: CPU: 7 PID: 3090 at fs/xfs/xfs_file.c:726 xfs_file_dio_=
+aio_write+0x176/0x2a8 [xfs]()
+> >=20
+> > The ext4 issue should be fixed by Lukas's patch
+> > ext4: fix reservation release on invalidatepage for delalloc fs
+> >=20
+> > And it ever paniced kernel in mm code and hung xfs.
+> >=20
+> > I reduced the numjobs and iodepth to reduce the test time(~25s on my =
+test host)
+> > and scale them by $LOAD_FACTOR. And it still could trigger the warnin=
+g on ext4
+> > and xfs with reduced workload.
+> >=20
+> >  tests/generic/090     | 121 ++++++++++++++++++++++++++++++++++++++++=
+++++++++++
+> >  tests/generic/090.out |   2 +
+> >  tests/generic/group   |   1 +
+> >  3 files changed, 124 insertions(+)
+> >  create mode 100755 tests/generic/090
+> >  create mode 100644 tests/generic/090.out
+> >=20
+> > diff --git a/tests/generic/090 b/tests/generic/090
+> > new file mode 100755
+> > index 0000000..748e935
+> > --- /dev/null
+> > +++ b/tests/generic/090
+> > @@ -0,0 +1,121 @@
+> > +#! /bin/bash
+> > +# FS QA Test generic/090
+> > +#
+> > +# Concurrent mixed I/O (buffer I/O, aiodio, mmap, splice) on the sam=
+e files
+> > +#
+> > +#-------------------------------------------------------------------=
+----
+> > +# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundatio=
+n,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-------------------------------------------------------------------=
+----
+> > +#
+> > +
+> > +seq=3D`basename $0`
+> > +seqres=3D$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=3D`pwd`
+> > +tmp=3D/tmp/$$
+>=20
+> Not a big deal, but using mktemp woud probably be better.
 
-Oops, that was a big fat lie. The unmount was failing because the bind
-mount was still alive.
+Will do in v2.
 
-> > Thanks,
-> > Eryu
-> 
-> Thanks for reviewing! I'll send out v2.
-> 
-> > > +
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/btrfs/089.out b/tests/btrfs/089.out
-> > > new file mode 100644
-> > > index 000000000000..eb9c5112e12e
-> > > --- /dev/null
-> > > +++ b/tests/btrfs/089.out
-> > > @@ -0,0 +1,10 @@
-> > > +qa output created by 089
-> > > +create subvolume 'scratch_mnt/testvol'
-> > > +error: cannot delete 'scratch_mnt/testvol' - operation not permitted
-> > > +delete subvolume 'scratch_mnt/testvol'
-> > > +.
-> > > +./testvol
-> > > +./testvol/mnt
-> > > +./testvol/mnt/testfile
-> > > +./testvol/testdir
-> > > +./testvol/testdir/testfile
-> > > diff --git a/tests/btrfs/group b/tests/btrfs/group
-> > > index ffe18bff0d21..616d060758c1 100644
-> > > --- a/tests/btrfs/group
-> > > +++ b/tests/btrfs/group
-> > > @@ -91,6 +91,7 @@
-> > >  086 auto quick clone
-> > >  087 auto quick send
-> > >  088 auto quick metadata
-> > > +089 auto quick subvol
-> > >  090 auto quick metadata
-> > >  091 auto quick qgroup
-> > >  092 auto quick send
-> > > -- 
-> > > 2.4.2
-> > > 
-> > > --
-> > > to unsubscribe from this list: send the line "unsubscribe fstests" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > more majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> -- 
-> Omar
+>=20
+> > +fio_config=3D$tmp.fio
+> > +status=3D1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# real QA test starts here
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +_require_scratch
+> > +
+> > +iodepth=3D$((16 * LOAD_FACTOR))
+> > +iodepth_batch=3D$((8 * LOAD_FACTOR))
+> > +numjobs=3D$((5 * LOAD_FACTOR))
+> > +cat >$fio_config <<EOF
+> > +[global]
+> > +bs=3D8k
+> > +iodepth=3D$iodepth
+> > +iodepth_batch=3D$iodepth_batch
+> > +randrepeat=3D1
+> > +size=3D1m
+> > +directory=3D$SCRATCH_MNT
+> > +numjobs=3D$numjobs
+> > +[job1]
+> > +ioengine=3Dsync
+> > +bs=3D1k
+> > +direct=3D1
+> > +rw=3Drandread
+> > +filename=3Dfile1:file2
+> > +[job2]
+> > +ioengine=3Dlibaio
+> > +rw=3Drandwrite
+> > +direct=3D1
+> > +filename=3Dfile1:file2
+> > +[job3]
+> > +bs=3D1k
+> > +ioengine=3Dposixaio
+> > +rw=3Drandwrite
+> > +direct=3D1
+> > +filename=3Dfile1:file2
+> > +[job4]
+> > +ioengine=3Dsplice
+> > +direct=3D1
+> > +rw=3Drandwrite
+> > +filename=3Dfile1:file2
+> > +[job5]
+> > +bs=3D1k
+> > +ioengine=3Dsync
+> > +rw=3Drandread
+> > +filename=3Dfile1:file2
+> > +[job6]
+> > +ioengine=3Dposixaio
+> > +rw=3Drandwrite
+> > +filename=3Dfile1:file2
+> > +[job7]
+> > +ioengine=3Dsplice
+> > +rw=3Drandwrite
+> > +filename=3Dfile1:file2
+> > +[job8]
+> > +ioengine=3Dmmap
+> > +rw=3Drandwrite
+> > +bs=3D1k
+> > +filename=3Dfile1:file2
+> > +[job9]
+> > +ioengine=3Dmmap
+> > +rw=3Drandwrite
+> > +direct=3D1
+> > +filename=3Dfile1:file2
+> > +EOF
+> > +# with ioengine=3Dmmap and direct=3D1, fio requires bs to be at leas=
+t pagesize,
+> > +# which is a fio built-in var.
+> > +echo 'bs=3D$pagesize' >> $fio_config
+>=20
+> Can't this be part of the the fio script creation above ?
 
--- 
-Omar
+The 'here-document' replaces every var to its value, e.g. $numjobs =3D> 1=
+0
+(if LOAD_FACTOR is 1), so we don't have $pagesize set, and it'll be
+empty in the fio config file, that's not what we want.
+
+"bs=3D$pagesize" is literally what we want in the config file, $pagesize
+is a special var for fio, it will be replaced by real pagesize
+internally by fio.
+
+cat >file <<'EOF'
+text
+EOF
+
+This kind of 'here-document' ('' around EOF) won't do any variable
+expansion, but we need $numjobs to be expanded. So they can't be merged
+together.
+
+Thanks,
+Eryu
+
+>=20
+> Thanks!
+> -Lukas
+>=20
+> > +
+> > +rm -f $seqres.full
+> > +
+> > +_require_fio $fio_config
+> > +
+> > +echo "Silence is golden"
+> > +$FIO_PROG $fio_config >>$seqres.full 2>&1
+> > +
+> > +# all done, expect no hang no oops no fs corruption,
+> > +# _check_dmesg and _check_filesystems will do the check work for us
+> > +status=3D0
+> > +exit
+> > diff --git a/tests/generic/090.out b/tests/generic/090.out
+> > new file mode 100644
+> > index 0000000..2b5100d
+> > --- /dev/null
+> > +++ b/tests/generic/090.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 090
+> > +Silence is golden
+> > diff --git a/tests/generic/group b/tests/generic/group
+> > index 0c8964c..2e534a5 100644
+> > --- a/tests/generic/group
+> > +++ b/tests/generic/group
+> > @@ -92,6 +92,7 @@
+> >  087 perms auto quick
+> >  088 perms auto quick
+> >  089 metadata auto
+> > +090 auto rw stress
+> >  091 rw auto quick
+> >  092 auto quick prealloc
+> >  093 attr cap udf auto
+> >=20
