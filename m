@@ -1,45 +1,65 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:63401 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752302AbbFCHPv (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 3 Jun 2015 03:15:51 -0400
-From: Dongsheng Yang <yangds.fnst@cn.fujitsu.com>
-Subject: [PATCH] xfstests: btrfs: 022: add a quota rescan -w to wait rescan finished.
-Date: Wed, 3 Jun 2015 15:10:55 +0800
-Message-ID: <1433315455-814-1-git-send-email-yangds.fnst@cn.fujitsu.com>
-In-Reply-To: <CAL3q7H7yZyUXAsK41e1ZAwVsV3WB8_XNJR_sQ4p8UZLfEM5hDA@mail.gmail.com>
-References: <CAL3q7H7yZyUXAsK41e1ZAwVsV3WB8_XNJR_sQ4p8UZLfEM5hDA@mail.gmail.com>
+Received: from nebula-exfe-01.nebula.fi ([83.145.198.163]:26469 "EHLO
+	ex10.nebula.fi" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752946AbbFHSkG (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 8 Jun 2015 14:40:06 -0400
+Message-ID: <1433788464.28321.9.camel@ari-macbook>
+Subject: [PATCH] common/punch, generic/273: Minor things for busybox support.
+From: Ari Sundholm <ari@tuxera.com>
+Date: Mon, 8 Jun 2015 21:34:24 +0300
+Content-Type: text/plain; charset="UTF-8"
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, fdmanana@gmail.com
-Cc: Dongsheng Yang <yangds.fnst@cn.fujitsu.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-When we enable quota, btrfs will rescan quota numbers. We need
-to wait the rescan finished before any more operations on btrfs
-qgroups. Otherwith, the new btrfs-progs would WARN out:
+From: Ari Sundholm <ari@tuxera.com>
 
-WARNING: Rescan is running, qgroup data may be incorrect.
+These changes make it possible to run more of the tests on busybox.
 
-It would make btrfs/022 failed.
-
-Signed-off-by: Dongsheng Yang <yangds.fnst@cn.fujitsu.com>
+Signed-off-by: Ari Sundholm <ari@tuxera.com>
 ---
- tests/btrfs/022 | 1 +
- 1 file changed, 1 insertion(+)
+ common/punch      | 4 ++--
+ tests/generic/273 | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/tests/btrfs/022 b/tests/btrfs/022
-index 5c1a82d..56d4f3d 100755
---- a/tests/btrfs/022
-+++ b/tests/btrfs/022
-@@ -51,6 +51,7 @@ _basic_test()
+diff --git a/common/punch b/common/punch
+index a75f4cf..7f268cd 100644
+--- a/common/punch
++++ b/common/punch
+@@ -203,7 +203,7 @@ _coalesce_extents()
+ 
+ _filter_fiemap()
  {
- 	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/a
- 	_run_btrfs_util_prog quota enable $SCRATCH_MNT/a
-+	_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
- 	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT a)
- 	$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep $subvolid >> \
- 		$seqres.full 2>&1
+-	awk --posix '
++	awk '
+ 		$3 ~ /hole/ {
+ 			print $1, $2, $3;
+ 			next;
+@@ -223,7 +223,7 @@ _filter_fiemap()
+ # it is an extent or a hole
+ _filter_hole_fiemap()
+ {
+-	awk --posix '
++	awk '
+ 		$3 ~ /hole/ {
+ 			print $1, $2, $3; 
+ 			next;
+diff --git a/tests/generic/273 b/tests/generic/273
+index 1ceb6c4..f15fcf2 100755
+--- a/tests/generic/273
++++ b/tests/generic/273
+@@ -68,7 +68,7 @@ _file_create()
+ 
+ 	cd $SCRATCH_MNT/origin
+ 
+-	_disksize=`$DF_PROG --block-size=1 $SCRATCH_DEV | tail -1 | awk '{ print $5 }'`
++	_disksize=`$DF_PROG -B 1 $SCRATCH_DEV | tail -1 | awk '{ print $5 }'`
+ 	_disksize=$(($_disksize / 3))
+ 	_num=$(($_disksize / $count / $threads / 4096))
+ 	_count=$count
 -- 
-1.8.4.2
+1.9.1
+
+
 
