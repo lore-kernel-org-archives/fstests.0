@@ -1,67 +1,198 @@
-Received: from smtpbgau2.qq.com ([54.206.34.216]:46387 "EHLO smtpbgau2.qq.com"
+Received: from mx1.redhat.com ([209.132.183.28]:38264 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751288AbbFFK7Q (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sat, 6 Jun 2015 06:59:16 -0400
-Message-ID: <5572D133.6010304@foxmail.com>
-Date: Sat, 06 Jun 2015 18:53:39 +0800
-From: shhuiw <shhuiw@foxmail.com>
-MIME-Version: 1.0
-Subject: Re: [PATCH] generic/324: fix small typos in comment
-References: <1433464449-21027-1-git-send-email-shhuiw@foxmail.com> <20150605032850.GQ3672@dhcp-13-216.nay.redhat.com>
-In-Reply-To: <20150605032850.GQ3672@dhcp-13-216.nay.redhat.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+	id S1751570AbbFHMlz (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 8 Jun 2015 08:41:55 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (Postfix) with ESMTPS id 2443F30D336
+	for <fstests@vger.kernel.org>; Mon,  8 Jun 2015 12:41:55 +0000 (UTC)
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH v2] generic: concurrent IO test with mixed IO types
+Date: Mon,  8 Jun 2015 20:41:11 +0800
+Message-Id: <1433767271-30562-1-git-send-email-eguan@redhat.com>
+In-Reply-To: <1433760101-25540-1-git-send-email-eguan@redhat.com>
+References: <1433760101-25540-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: lczerner@redhat.com, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 06/05/2015 11:28 AM, Eryu Guan wrote:
-> On Fri, Jun 05, 2015 at 08:34:09AM +0800, Wang Sheng-Hui wrote:
->> Fix some spelling mistakes in the comment.
-> 
-> I'd recommend you fix all comment typos in one patch, as the one in
-> generic/288 and this one and any other spelling errors in comments. I'm
-> sure you can find more :)
-> 
+Test concurrent buffered I/O, DIO, AIO, mmap I/O and splice I/O on the
+same files.
 
-Got it, Eryu.
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
 
-Will collect the typos after walking through the code.
+This fio job file has been proven to be potent, it triggers WARNINGs on ext4
+and xfs with 4.1-rc6 kernel.
 
-Regards,
-Sheng-Hui
+ext4: WARNING: at fs/ext4/inode.c:1328
+xfs: WARNING: CPU: 7 PID: 3090 at fs/xfs/xfs_file.c:726 xfs_file_dio_aio_write+0x176/0x2a8 [xfs]()
 
-> Thanks,
-> Eryu
->>
->> Signed-off-by: Wang Sheng-Hui <shhuiw@foxmail.com>
->> ---
->>  tests/generic/324 | 2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/tests/generic/324 b/tests/generic/324
->> index 5e642dc..ac2ae8b 100755
->> --- a/tests/generic/324
->> +++ b/tests/generic/324
->> @@ -61,7 +61,7 @@ _workout()
->>  	# Fill holes for half of range , as result file will contain nr*1.5 fragments
->>  	$XFS_IO_PROG -c "falloc 0 $((204800*nr))"  \
->>  	    $SCRATCH_MNT/test.$nr | _filter_xfs_io
->> -	# Data wrilte will convert extetns to inialized ones
->> +	# Data write will convert extents to initialized ones
->>  	for ((i=0;i<nr;i++))
->>  	do
->>  		patt=`printf "0x%x" $i`
->> -- 
->> 1.8.3.2
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe fstests" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+The ext4 issue should be fixed by Lukas's patch
+ext4: fix reservation release on invalidatepage for delalloc fs
 
+And it ever paniced kernel in mm code and hung xfs.
 
+I reduced the numjobs and iodepth to reduce the test time(~25s on my test host)
+and scale them by $LOAD_FACTOR. And it still could trigger the warning on ext4
+and xfs with reduced workload.
+
+v2:
+- use mktemp to create tmp fio job file
+
+ tests/generic/090     | 120 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/090.out |   2 +
+ tests/generic/group   |   1 +
+ 3 files changed, 123 insertions(+)
+ create mode 100755 tests/generic/090
+ create mode 100644 tests/generic/090.out
+
+diff --git a/tests/generic/090 b/tests/generic/090
+new file mode 100755
+index 0000000..3521cd4
+--- /dev/null
++++ b/tests/generic/090
+@@ -0,0 +1,120 @@
++#! /bin/bash
++# FS QA Test generic/090
++#
++# Concurrent mixed I/O (buffer I/O, aiodio, mmap, splice) on the same files
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++fio_config=`mktemp`
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $fio_config
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++
++iodepth=$((16 * LOAD_FACTOR))
++iodepth_batch=$((8 * LOAD_FACTOR))
++numjobs=$((5 * LOAD_FACTOR))
++cat >$fio_config <<EOF
++[global]
++bs=8k
++iodepth=$iodepth
++iodepth_batch=$iodepth_batch
++randrepeat=1
++size=1m
++directory=$SCRATCH_MNT
++numjobs=$numjobs
++[job1]
++ioengine=sync
++bs=1k
++direct=1
++rw=randread
++filename=file1:file2
++[job2]
++ioengine=libaio
++rw=randwrite
++direct=1
++filename=file1:file2
++[job3]
++bs=1k
++ioengine=posixaio
++rw=randwrite
++direct=1
++filename=file1:file2
++[job4]
++ioengine=splice
++direct=1
++rw=randwrite
++filename=file1:file2
++[job5]
++bs=1k
++ioengine=sync
++rw=randread
++filename=file1:file2
++[job6]
++ioengine=posixaio
++rw=randwrite
++filename=file1:file2
++[job7]
++ioengine=splice
++rw=randwrite
++filename=file1:file2
++[job8]
++ioengine=mmap
++rw=randwrite
++bs=1k
++filename=file1:file2
++[job9]
++ioengine=mmap
++rw=randwrite
++direct=1
++filename=file1:file2
++EOF
++# with ioengine=mmap and direct=1, fio requires bs to be at least pagesize,
++# which is a fio built-in var.
++echo 'bs=$pagesize' >> $fio_config
++
++rm -f $seqres.full
++
++_require_fio $fio_config
++
++echo "Silence is golden"
++$FIO_PROG $fio_config >>$seqres.full 2>&1
++
++# all done, expect no hang no oops no fs corruption,
++# _check_dmesg and _check_filesystems will do the check work for us
++status=0
++exit
+diff --git a/tests/generic/090.out b/tests/generic/090.out
+new file mode 100644
+index 0000000..2b5100d
+--- /dev/null
++++ b/tests/generic/090.out
+@@ -0,0 +1,2 @@
++QA output created by 090
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 0c8964c..2e534a5 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -92,6 +92,7 @@
+ 087 perms auto quick
+ 088 perms auto quick
+ 089 metadata auto
++090 auto rw stress
+ 091 rw auto quick
+ 092 auto quick prealloc
+ 093 attr cap udf auto
+-- 
+2.4.2
 
