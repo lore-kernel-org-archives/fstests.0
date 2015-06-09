@@ -1,63 +1,212 @@
-Received: from mail-ie0-f170.google.com ([209.85.223.170]:36154 "EHLO
-	mail-ie0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754851AbbFCPxS (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 3 Jun 2015 11:53:18 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:47249 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753651AbbFIIjh (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 9 Jun 2015 04:39:37 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (Postfix) with ESMTPS id C6A903220FA
+	for <fstests@vger.kernel.org>; Tue,  9 Jun 2015 08:39:36 +0000 (UTC)
+Date: Tue, 9 Jun 2015 10:39:31 +0200 (CEST)
+From: =?ISO-8859-15?Q?Luk=E1=A8_Czerner?= <lczerner@redhat.com>
+Subject: Re: [PATCH v2] generic: concurrent IO test with mixed IO types
+In-Reply-To: <1433767271-30562-1-git-send-email-eguan@redhat.com>
+Message-ID: <alpine.LFD.2.00.1506091039010.26548@localhost.localdomain>
+References: <1433760101-25540-1-git-send-email-eguan@redhat.com> <1433767271-30562-1-git-send-email-eguan@redhat.com>
 MIME-Version: 1.0
-Reply-To: fdmanana@gmail.com
-In-Reply-To: <1433315455-814-1-git-send-email-yangds.fnst@cn.fujitsu.com>
-References: <CAL3q7H7yZyUXAsK41e1ZAwVsV3WB8_XNJR_sQ4p8UZLfEM5hDA@mail.gmail.com>
-	<1433315455-814-1-git-send-email-yangds.fnst@cn.fujitsu.com>
-Date: Wed, 3 Jun 2015 16:53:17 +0100
-Message-ID: <CAL3q7H71H1Q9_d7ogQ0mi+e14wySOuSUh3eEmbBcvkXyO1eSDg@mail.gmail.com>
-Subject: Re: [PATCH] xfstests: btrfs: 022: add a quota rescan -w to wait
- rescan finished.
-From: Filipe David Manana <fdmanana@gmail.com>
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Sender: fstests-owner@vger.kernel.org
-To: Dongsheng Yang <yangds.fnst@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jun 3, 2015 at 8:10 AM, Dongsheng Yang
-<yangds.fnst@cn.fujitsu.com> wrote:
-> When we enable quota, btrfs will rescan quota numbers. We need
-> to wait the rescan finished before any more operations on btrfs
-> qgroups. Otherwith, the new btrfs-progs would WARN out:
->
-> WARNING: Rescan is running, qgroup data may be incorrect.
->
-> It would make btrfs/022 failed.
->
-> Signed-off-by: Dongsheng Yang <yangds.fnst@cn.fujitsu.com>
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+On Mon, 8 Jun 2015, Eryu Guan wrote:
 
-Thanks, it works and it makes sense.
+> Date: Mon,  8 Jun 2015 20:41:11 +0800
+> From: Eryu Guan <eguan@redhat.com>
+> To: fstests@vger.kernel.org
+> Cc: lczerner@redhat.com, Eryu Guan <eguan@redhat.com>
+> Subject: [PATCH v2] generic: concurrent IO test with mixed IO types
+> 
+> Test concurrent buffered I/O, DIO, AIO, mmap I/O and splice I/O on the
+> same files.
 
+Great, it looks good to me. Thanks!
+
+Reviewed-by: Lukas Czerner <lczerner@redhat.com>
+
+
+> 
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
 > ---
->  tests/btrfs/022 | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/tests/btrfs/022 b/tests/btrfs/022
-> index 5c1a82d..56d4f3d 100755
-> --- a/tests/btrfs/022
-> +++ b/tests/btrfs/022
-> @@ -51,6 +51,7 @@ _basic_test()
->  {
->         _run_btrfs_util_prog subvolume create $SCRATCH_MNT/a
->         _run_btrfs_util_prog quota enable $SCRATCH_MNT/a
-> +       _run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
->         subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT a)
->         $BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep $subvolid >> \
->                 $seqres.full 2>&1
-> --
-> 1.8.4.2
->
-
-
-
--- 
-Filipe David Manana,
-
-"Reasonable men adapt themselves to the world.
- Unreasonable men adapt the world to themselves.
- That's why all progress depends on unreasonable men."
+> 
+> This fio job file has been proven to be potent, it triggers WARNINGs on ext4
+> and xfs with 4.1-rc6 kernel.
+> 
+> ext4: WARNING: at fs/ext4/inode.c:1328
+> xfs: WARNING: CPU: 7 PID: 3090 at fs/xfs/xfs_file.c:726 xfs_file_dio_aio_write+0x176/0x2a8 [xfs]()
+> 
+> The ext4 issue should be fixed by Lukas's patch
+> ext4: fix reservation release on invalidatepage for delalloc fs
+> 
+> And it ever paniced kernel in mm code and hung xfs.
+> 
+> I reduced the numjobs and iodepth to reduce the test time(~25s on my test host)
+> and scale them by $LOAD_FACTOR. And it still could trigger the warning on ext4
+> and xfs with reduced workload.
+> 
+> v2:
+> - use mktemp to create tmp fio job file
+> 
+>  tests/generic/090     | 120 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/090.out |   2 +
+>  tests/generic/group   |   1 +
+>  3 files changed, 123 insertions(+)
+>  create mode 100755 tests/generic/090
+>  create mode 100644 tests/generic/090.out
+> 
+> diff --git a/tests/generic/090 b/tests/generic/090
+> new file mode 100755
+> index 0000000..3521cd4
+> --- /dev/null
+> +++ b/tests/generic/090
+> @@ -0,0 +1,120 @@
+> +#! /bin/bash
+> +# FS QA Test generic/090
+> +#
+> +# Concurrent mixed I/O (buffer I/O, aiodio, mmap, splice) on the same files
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +fio_config=`mktemp`
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $fio_config
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch
+> +
+> +iodepth=$((16 * LOAD_FACTOR))
+> +iodepth_batch=$((8 * LOAD_FACTOR))
+> +numjobs=$((5 * LOAD_FACTOR))
+> +cat >$fio_config <<EOF
+> +[global]
+> +bs=8k
+> +iodepth=$iodepth
+> +iodepth_batch=$iodepth_batch
+> +randrepeat=1
+> +size=1m
+> +directory=$SCRATCH_MNT
+> +numjobs=$numjobs
+> +[job1]
+> +ioengine=sync
+> +bs=1k
+> +direct=1
+> +rw=randread
+> +filename=file1:file2
+> +[job2]
+> +ioengine=libaio
+> +rw=randwrite
+> +direct=1
+> +filename=file1:file2
+> +[job3]
+> +bs=1k
+> +ioengine=posixaio
+> +rw=randwrite
+> +direct=1
+> +filename=file1:file2
+> +[job4]
+> +ioengine=splice
+> +direct=1
+> +rw=randwrite
+> +filename=file1:file2
+> +[job5]
+> +bs=1k
+> +ioengine=sync
+> +rw=randread
+> +filename=file1:file2
+> +[job6]
+> +ioengine=posixaio
+> +rw=randwrite
+> +filename=file1:file2
+> +[job7]
+> +ioengine=splice
+> +rw=randwrite
+> +filename=file1:file2
+> +[job8]
+> +ioengine=mmap
+> +rw=randwrite
+> +bs=1k
+> +filename=file1:file2
+> +[job9]
+> +ioengine=mmap
+> +rw=randwrite
+> +direct=1
+> +filename=file1:file2
+> +EOF
+> +# with ioengine=mmap and direct=1, fio requires bs to be at least pagesize,
+> +# which is a fio built-in var.
+> +echo 'bs=$pagesize' >> $fio_config
+> +
+> +rm -f $seqres.full
+> +
+> +_require_fio $fio_config
+> +
+> +echo "Silence is golden"
+> +$FIO_PROG $fio_config >>$seqres.full 2>&1
+> +
+> +# all done, expect no hang no oops no fs corruption,
+> +# _check_dmesg and _check_filesystems will do the check work for us
+> +status=0
+> +exit
+> diff --git a/tests/generic/090.out b/tests/generic/090.out
+> new file mode 100644
+> index 0000000..2b5100d
+> --- /dev/null
+> +++ b/tests/generic/090.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 090
+> +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 0c8964c..2e534a5 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -92,6 +92,7 @@
+>  087 perms auto quick
+>  088 perms auto quick
+>  089 metadata auto
+> +090 auto rw stress
+>  091 rw auto quick
+>  092 auto quick prealloc
+>  093 attr cap udf auto
+> 
