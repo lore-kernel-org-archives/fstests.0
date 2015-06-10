@@ -1,167 +1,69 @@
-Received: from mx1.redhat.com ([209.132.183.28]:52805 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:48616 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751715AbbFDFaj (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 4 Jun 2015 01:30:39 -0400
-Date: Thu, 4 Jun 2015 13:30:36 +0800
+	id S1753159AbbFJHHr (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 10 Jun 2015 03:07:47 -0400
+Date: Wed, 10 Jun 2015 15:07:44 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2] btrfs: test premature submount unmounting when
- deleting default subvolume
-Message-ID: <20150604053036.GN3672@dhcp-13-216.nay.redhat.com>
-References: <cbf811009efa5a8bc78a75aa98c8f27cc4a4c7f3.1433307753.git.osandov@osandov.com>
+Subject: Re: [PATCH v2] generic: concurrent IO test with mixed IO types
+Message-ID: <20150610070744.GZ3672@dhcp-13-216.nay.redhat.com>
+References: <1433760101-25540-1-git-send-email-eguan@redhat.com>
+ <1433767271-30562-1-git-send-email-eguan@redhat.com>
+ <20150609222933.GC24666@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <cbf811009efa5a8bc78a75aa98c8f27cc4a4c7f3.1433307753.git.osandov@osandov.com>
+In-Reply-To: <20150609222933.GC24666@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Omar Sandoval <osandov@osandov.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, lczerner@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jun 02, 2015 at 10:05:30PM -0700, Omar Sandoval wrote:
-> Add a regression test for a problem where attempting to delete the
-> default subvolume would fail (as expected), but not until after all
-> submounts under the subvolume were unmounted.
+On Wed, Jun 10, 2015 at 08:29:33AM +1000, Dave Chinner wrote:
+> On Mon, Jun 08, 2015 at 08:41:11PM +0800, Eryu Guan wrote:
+> > Test concurrent buffered I/O, DIO, AIO, mmap I/O and splice I/O on the
+> > same files.
+> > 
+> > Signed-off-by: Eryu Guan <eguan@redhat.com>
+> > ---
+> > 
+> > This fio job file has been proven to be potent, it triggers WARNINGs on ext4
+> > and xfs with 4.1-rc6 kernel.
+> > 
+> > ext4: WARNING: at fs/ext4/inode.c:1328
+> > xfs: WARNING: CPU: 7 PID: 3090 at fs/xfs/xfs_file.c:726 xfs_file_dio_aio_write+0x176/0x2a8 [xfs]()
+> > 
+> > The ext4 issue should be fixed by Lukas's patch
+> > ext4: fix reservation release on invalidatepage for delalloc fs
+> > 
+> > And it ever paniced kernel in mm code and hung xfs.
+> > 
+> > I reduced the numjobs and iodepth to reduce the test time(~25s on my test host)
+> > and scale them by $LOAD_FACTOR. And it still could trigger the warning on ext4
+> > and xfs with reduced workload.
+> > 
+> > v2:
+> > - use mktemp to create tmp fio job file
+> ....
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +fio_config=`mktemp`
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > 
-> Signed-off-by: Omar Sandoval <osandov@osandov.com>
-> ---
-> v1->v2:
-> - Simpler test: just depends on umount of the bind mount succeeding
->   instead of running find. Without the patch applied, the bind mount
->   will disappear so umount will fail.
-> - Fix Eryu's comments (better subject, copyright, use
->   _btrfs_get_subvolid)
-> 
->  tests/btrfs/089     | 81 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/089.out |  2 ++
->  tests/btrfs/group   |  1 +
->  3 files changed, 84 insertions(+)
->  create mode 100755 tests/btrfs/089
->  create mode 100644 tests/btrfs/089.out
-> 
-> diff --git a/tests/btrfs/089 b/tests/btrfs/089
-> new file mode 100755
-> index 000000000000..c81df2a3b225
-> --- /dev/null
-> +++ b/tests/btrfs/089
-> @@ -0,0 +1,81 @@
-> +#! /bin/bash
-> +# FS QA Test 089
-> +#
-> +# Test deleting the default subvolume, making sure that it fails and that
+> By removing the definition of $tmp, you are now dumping all
+> the temporary files the test harnes creates in /.
 
-Here says to make sure the deletion of default subvol fails, but...
+You're right, I see /fsck.log on my test host.
 
-> +# submounts under it are not unmounted prematurely. This is a regression test
-> +# for Linux commit "Btrfs: don't invalidate root dentry when subvolume deletion
-> +# fails".
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2015 Omar Sandoval.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/filter.btrfs
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_need_to_be_root
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +
-> +rm -f $seqres.full
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount
-> +
-> +# Create a new subvolume and make it the default subvolume.
-> +$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/testvol" >> $seqres.full 2>&1 \
-> +	|| _fail "couldn't create subvol"
-> +testvol_id=$(_btrfs_get_subvolid "$SCRATCH_MNT" testvol)
-> +$BTRFS_UTIL_PROG subvolume set-default $testvol_id "$SCRATCH_MNT" >> $seqres.full 2>&1 \
-> +	|| _fail "couldn't set default"
-> +
-> +# Bind-mount a directory under the default subvolume.
-> +mkdir "$SCRATCH_MNT/testvol/testdir"
-> +touch "$SCRATCH_MNT/testvol/testdir/testfile"
-> +mkdir "$SCRATCH_MNT/testvol/mnt"
-> +mount --bind "$SCRATCH_MNT/testvol/testdir" "$SCRATCH_MNT/testvol/mnt"
-> +
-> +# Now attempt to delete the default subvolume, which should fail.
-> +$BTRFS_UTIL_PROG subvolume delete "$SCRATCH_MNT/testvol" >> $seqres.full 2>&1
+I checked 'check' and common/rc and chech has its "tmp=/tmp/$$"
+definition and I thought I didn't use any functions from common/rc in my
+test directly that depends on $tmp definition. I must have missed
+something.
 
-the result of deletion of default subvol is not checked and ignored
-here. The description should match the test.
-
-Otherwise looks good to me.
-
-Reviewed-by: Eryu Guan <eguan@redhat.com>
+Should I send a v3 and roll back to v1? or you can just take v1?
 
 Thanks,
 Eryu
-> +
-> +# Unmount the bind mount, which should still be alive.
-> +$UMOUNT_PROG "$SCRATCH_MNT/testvol/mnt"
-> +
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/089.out b/tests/btrfs/089.out
-> new file mode 100644
-> index 000000000000..a7fcdee9b767
-> --- /dev/null
-> +++ b/tests/btrfs/089.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 089
-> +Silence is golden
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index ffe18bff0d21..616d060758c1 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -91,6 +91,7 @@
->  086 auto quick clone
->  087 auto quick send
->  088 auto quick metadata
-> +089 auto quick subvol
->  090 auto quick metadata
->  091 auto quick qgroup
->  092 auto quick send
-> -- 
-> 2.4.2
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
