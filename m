@@ -1,198 +1,121 @@
-Received: from mx1.redhat.com ([209.132.183.28]:38264 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751570AbbFHMlz (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 8 Jun 2015 08:41:55 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (Postfix) with ESMTPS id 2443F30D336
-	for <fstests@vger.kernel.org>; Mon,  8 Jun 2015 12:41:55 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v2] generic: concurrent IO test with mixed IO types
-Date: Mon,  8 Jun 2015 20:41:11 +0800
-Message-Id: <1433767271-30562-1-git-send-email-eguan@redhat.com>
-In-Reply-To: <1433760101-25540-1-git-send-email-eguan@redhat.com>
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:13774 "EHLO
+	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S933562AbbFJN7c (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 10 Jun 2015 09:59:32 -0400
+Date: Wed, 10 Jun 2015 23:59:28 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH v2] generic: concurrent IO test with mixed IO types
+Message-ID: <20150610135928.GZ9143@dastard>
 References: <1433760101-25540-1-git-send-email-eguan@redhat.com>
+ <1433767271-30562-1-git-send-email-eguan@redhat.com>
+ <20150609222933.GC24666@dastard>
+ <alpine.LFD.2.00.1506101013540.15435@localhost.localdomain>
+ <20150610111153.GX9143@dastard>
+ <alpine.LFD.2.00.1506101346530.15435@localhost.localdomain>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <alpine.LFD.2.00.1506101346530.15435@localhost.localdomain>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: lczerner@redhat.com, Eryu Guan <eguan@redhat.com>
+Content-Transfer-Encoding: quoted-printable
+To: =?utf-8?B?THVrw6HFoQ==?= Czerner <lczerner@redhat.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Test concurrent buffered I/O, DIO, AIO, mmap I/O and splice I/O on the
-same files.
+On Wed, Jun 10, 2015 at 02:22:55PM +0200, Luk=C3=A1=C5=A1 Czerner wrote:
+> On Wed, 10 Jun 2015, Dave Chinner wrote:
+>=20
+> > Date: Wed, 10 Jun 2015 21:11:53 +1000
+> > From: Dave Chinner <david@fromorbit.com>
+> > To: Luk=C3=A1=C5=A1 Czerner <lczerner@redhat.com>
+> > Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
+> > Subject: Re: [PATCH v2] generic: concurrent IO test with mixed IO typ=
+es
+> >=20
+> > On Wed, Jun 10, 2015 at 11:01:57AM +0200, Luk=C3=A1=C5=A1 Czerner wro=
+te:
+> > > On Wed, 10 Jun 2015, Dave Chinner wrote:
+> > >=20
+> > > > Date: Wed, 10 Jun 2015 08:29:33 +1000
+> > > > From: Dave Chinner <david@fromorbit.com>
+> > > > To: Eryu Guan <eguan@redhat.com>
+> > > > Cc: fstests@vger.kernel.org, lczerner@redhat.com
+> > > > Subject: Re: [PATCH v2] generic: concurrent IO test with mixed IO=
+ types
+> > > >=20
+> > > > On Mon, Jun 08, 2015 at 08:41:11PM +0800, Eryu Guan wrote:
+> > > > > Test concurrent buffered I/O, DIO, AIO, mmap I/O and splice I/O=
+ on the
+> > > > > same files.
+> > > > >=20
+> > > > > Signed-off-by: Eryu Guan <eguan@redhat.com>
+> > > > > ---
+> > > > >=20
+> > > > > This fio job file has been proven to be potent, it triggers WAR=
+NINGs on ext4
+> > > > > and xfs with 4.1-rc6 kernel.
+> > > > >=20
+> > > > > ext4: WARNING: at fs/ext4/inode.c:1328
+> > > > > xfs: WARNING: CPU: 7 PID: 3090 at fs/xfs/xfs_file.c:726 xfs_fil=
+e_dio_aio_write+0x176/0x2a8 [xfs]()
+> > > > >=20
+> > > > > The ext4 issue should be fixed by Lukas's patch
+> > > > > ext4: fix reservation release on invalidatepage for delalloc fs
+> > > > >=20
+> > > > > And it ever paniced kernel in mm code and hung xfs.
+> > > > >=20
+> > > > > I reduced the numjobs and iodepth to reduce the test time(~25s =
+on my test host)
+> > > > > and scale them by $LOAD_FACTOR. And it still could trigger the =
+warning on ext4
+> > > > > and xfs with reduced workload.
+> > > > >=20
+> > > > > v2:
+> > > > > - use mktemp to create tmp fio job file
+> > > > ....
+> > > > > +seq=3D`basename $0`
+> > > > > +seqres=3D$RESULT_DIR/$seq
+> > > > > +echo "QA output created by $seq"
+> > > > > +
+> > > > > +here=3D`pwd`
+> > > > > +fio_config=3D`mktemp`
+> > > > > +status=3D1	# failure is the default!
+> > > > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > >=20
+> > > > By removing the definition of $tmp, you are now dumping all
+> > > > the temporary files the test harnes creates in /.
+> > >=20
+> > > What temp files ? Yes we're sometimes using $tmp even though there
+> > > is no obvious definition and if we want to rely on the existence of
+> > > this variable we better define it as environment variable in 'check=
+'
+> > > script.
+> >=20
+> > About 80% of the files in the repository use $tmp in some way.
+> > And it's used all over the place in common/*, too. e.g mkfs
+> > and check functions for storing output for parsing....
+>=20
+> Ah, come on. There are not that many functions using the $tmp and
+> some of them even removes the file immediately.
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
+$ git grep -lw "^tmp=3D" |wc -l
+484
+$ git grep -lw "\$tmp" |wc -l
+417
 
-This fio job file has been proven to be potent, it triggers WARNINGs on ext4
-and xfs with 4.1-rc6 kernel.
+That's roughly 80% of files that use $tmp /in some way/. The tests
+are all suppose dto define $tmp the same way, and they are all
+expected to clean up after themselves, thereby making it possible to
+safely use $tmp in linrary functions, whether they clean up after
+tehmselves or not.
 
-ext4: WARNING: at fs/ext4/inode.c:1328
-xfs: WARNING: CPU: 7 PID: 3090 at fs/xfs/xfs_file.c:726 xfs_file_dio_aio_write+0x176/0x2a8 [xfs]()
+You're spending way more time and effort than is necessary on basic
+infrastructure that has worked for 15 years and, quite frankly,
+*doesn't need fixing because it's not broken*.
 
-The ext4 issue should be fixed by Lukas's patch
-ext4: fix reservation release on invalidatepage for delalloc fs
+Cheers,
 
-And it ever paniced kernel in mm code and hung xfs.
-
-I reduced the numjobs and iodepth to reduce the test time(~25s on my test host)
-and scale them by $LOAD_FACTOR. And it still could trigger the warning on ext4
-and xfs with reduced workload.
-
-v2:
-- use mktemp to create tmp fio job file
-
- tests/generic/090     | 120 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/090.out |   2 +
- tests/generic/group   |   1 +
- 3 files changed, 123 insertions(+)
- create mode 100755 tests/generic/090
- create mode 100644 tests/generic/090.out
-
-diff --git a/tests/generic/090 b/tests/generic/090
-new file mode 100755
-index 0000000..3521cd4
---- /dev/null
-+++ b/tests/generic/090
-@@ -0,0 +1,120 @@
-+#! /bin/bash
-+# FS QA Test generic/090
-+#
-+# Concurrent mixed I/O (buffer I/O, aiodio, mmap, splice) on the same files
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+fio_config=`mktemp`
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $fio_config
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+
-+iodepth=$((16 * LOAD_FACTOR))
-+iodepth_batch=$((8 * LOAD_FACTOR))
-+numjobs=$((5 * LOAD_FACTOR))
-+cat >$fio_config <<EOF
-+[global]
-+bs=8k
-+iodepth=$iodepth
-+iodepth_batch=$iodepth_batch
-+randrepeat=1
-+size=1m
-+directory=$SCRATCH_MNT
-+numjobs=$numjobs
-+[job1]
-+ioengine=sync
-+bs=1k
-+direct=1
-+rw=randread
-+filename=file1:file2
-+[job2]
-+ioengine=libaio
-+rw=randwrite
-+direct=1
-+filename=file1:file2
-+[job3]
-+bs=1k
-+ioengine=posixaio
-+rw=randwrite
-+direct=1
-+filename=file1:file2
-+[job4]
-+ioengine=splice
-+direct=1
-+rw=randwrite
-+filename=file1:file2
-+[job5]
-+bs=1k
-+ioengine=sync
-+rw=randread
-+filename=file1:file2
-+[job6]
-+ioengine=posixaio
-+rw=randwrite
-+filename=file1:file2
-+[job7]
-+ioengine=splice
-+rw=randwrite
-+filename=file1:file2
-+[job8]
-+ioengine=mmap
-+rw=randwrite
-+bs=1k
-+filename=file1:file2
-+[job9]
-+ioengine=mmap
-+rw=randwrite
-+direct=1
-+filename=file1:file2
-+EOF
-+# with ioengine=mmap and direct=1, fio requires bs to be at least pagesize,
-+# which is a fio built-in var.
-+echo 'bs=$pagesize' >> $fio_config
-+
-+rm -f $seqres.full
-+
-+_require_fio $fio_config
-+
-+echo "Silence is golden"
-+$FIO_PROG $fio_config >>$seqres.full 2>&1
-+
-+# all done, expect no hang no oops no fs corruption,
-+# _check_dmesg and _check_filesystems will do the check work for us
-+status=0
-+exit
-diff --git a/tests/generic/090.out b/tests/generic/090.out
-new file mode 100644
-index 0000000..2b5100d
---- /dev/null
-+++ b/tests/generic/090.out
-@@ -0,0 +1,2 @@
-+QA output created by 090
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 0c8964c..2e534a5 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -92,6 +92,7 @@
- 087 perms auto quick
- 088 perms auto quick
- 089 metadata auto
-+090 auto rw stress
- 091 rw auto quick
- 092 auto quick prealloc
- 093 attr cap udf auto
--- 
-2.4.2
-
+Dave.
+--=20
+Dave Chinner
+david@fromorbit.com
