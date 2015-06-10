@@ -1,148 +1,188 @@
-Received: from mail-pa0-f48.google.com ([209.85.220.48]:36224 "EHLO
-	mail-pa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751939AbbFEVAm (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 5 Jun 2015 17:00:42 -0400
-Received: by pabqy3 with SMTP id qy3so57031341pab.3
-        for <fstests@vger.kernel.org>; Fri, 05 Jun 2015 14:00:42 -0700 (PDT)
-From: Omar Sandoval <osandov@osandov.com>
-Subject: [PATCH v3] btrfs: test premature submount unmounting when deleting default subvolume
-Date: Fri,  5 Jun 2015 14:00:32 -0700
-Message-Id: <1ebef916f54960cf6fef34be950e3d38cc3a50b0.1433537929.git.osandov@osandov.com>
+Received: from mx1.redhat.com ([209.132.183.28]:37718 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753171AbbFJMXA (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 10 Jun 2015 08:23:00 -0400
+Date: Wed, 10 Jun 2015 14:22:55 +0200 (CEST)
+From: =?ISO-8859-15?Q?Luk=E1=A8_Czerner?= <lczerner@redhat.com>
+Subject: Re: [PATCH v2] generic: concurrent IO test with mixed IO types
+In-Reply-To: <20150610111153.GX9143@dastard>
+Message-ID: <alpine.LFD.2.00.1506101346530.15435@localhost.localdomain>
+References: <1433760101-25540-1-git-send-email-eguan@redhat.com> <1433767271-30562-1-git-send-email-eguan@redhat.com> <20150609222933.GC24666@dastard> <alpine.LFD.2.00.1506101013540.15435@localhost.localdomain> <20150610111153.GX9143@dastard>
+MIME-Version: 1.0
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323328-1829186699-1433938980=:15435"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Omar Sandoval <osandov@osandov.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Add a regression test for a problem where attempting to delete the
-default subvolume would fail (as expected), but not until after all
-submounts under the subvolume were unmounted.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Reviewed-by: Eryu Guan <eguan@redhat.com>
-Signed-off-by: Omar Sandoval <osandov@osandov.com>
----
-v2->v3:
-- Update description (thanks, Eryu)
-- Remove unneeded touch
+--8323328-1829186699-1433938980=:15435
+Content-Type: TEXT/PLAIN; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+X-MIME-Autoconverted: from 8bit to quoted-printable by aserv0022.oracle.com id t5ACN4pi017498
 
-v1->v2:
-- Simpler test: just depends on umount of the bind mount succeeding
-  instead of running find. Without the patch applied, the bind mount
-  will disappear so umount will fail.
-- Fix Eryu's comments (better subject, copyright, use
-  _btrfs_get_subvolid)
+On Wed, 10 Jun 2015, Dave Chinner wrote:
 
- tests/btrfs/089     | 79 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/089.out |  2 ++
- tests/btrfs/group   |  1 +
- 3 files changed, 82 insertions(+)
- create mode 100755 tests/btrfs/089
- create mode 100644 tests/btrfs/089.out
+> Date: Wed, 10 Jun 2015 21:11:53 +1000
+> From: Dave Chinner <david@fromorbit.com>
+> To: Luk=C3=A1=C5=A1 Czerner <lczerner@redhat.com>
+> Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
+> Subject: Re: [PATCH v2] generic: concurrent IO test with mixed IO types
+>=20
+> On Wed, Jun 10, 2015 at 11:01:57AM +0200, Luk=C3=A1=C5=A1 Czerner wrote=
+:
+> > On Wed, 10 Jun 2015, Dave Chinner wrote:
+> >=20
+> > > Date: Wed, 10 Jun 2015 08:29:33 +1000
+> > > From: Dave Chinner <david@fromorbit.com>
+> > > To: Eryu Guan <eguan@redhat.com>
+> > > Cc: fstests@vger.kernel.org, lczerner@redhat.com
+> > > Subject: Re: [PATCH v2] generic: concurrent IO test with mixed IO t=
+ypes
+> > >=20
+> > > On Mon, Jun 08, 2015 at 08:41:11PM +0800, Eryu Guan wrote:
+> > > > Test concurrent buffered I/O, DIO, AIO, mmap I/O and splice I/O o=
+n the
+> > > > same files.
+> > > >=20
+> > > > Signed-off-by: Eryu Guan <eguan@redhat.com>
+> > > > ---
+> > > >=20
+> > > > This fio job file has been proven to be potent, it triggers WARNI=
+NGs on ext4
+> > > > and xfs with 4.1-rc6 kernel.
+> > > >=20
+> > > > ext4: WARNING: at fs/ext4/inode.c:1328
+> > > > xfs: WARNING: CPU: 7 PID: 3090 at fs/xfs/xfs_file.c:726 xfs_file_=
+dio_aio_write+0x176/0x2a8 [xfs]()
+> > > >=20
+> > > > The ext4 issue should be fixed by Lukas's patch
+> > > > ext4: fix reservation release on invalidatepage for delalloc fs
+> > > >=20
+> > > > And it ever paniced kernel in mm code and hung xfs.
+> > > >=20
+> > > > I reduced the numjobs and iodepth to reduce the test time(~25s on=
+ my test host)
+> > > > and scale them by $LOAD_FACTOR. And it still could trigger the wa=
+rning on ext4
+> > > > and xfs with reduced workload.
+> > > >=20
+> > > > v2:
+> > > > - use mktemp to create tmp fio job file
+> > > ....
+> > > > +seq=3D`basename $0`
+> > > > +seqres=3D$RESULT_DIR/$seq
+> > > > +echo "QA output created by $seq"
+> > > > +
+> > > > +here=3D`pwd`
+> > > > +fio_config=3D`mktemp`
+> > > > +status=3D1	# failure is the default!
+> > > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > >=20
+> > > By removing the definition of $tmp, you are now dumping all
+> > > the temporary files the test harnes creates in /.
+> >=20
+> > What temp files ? Yes we're sometimes using $tmp even though there
+> > is no obvious definition and if we want to rely on the existence of
+> > this variable we better define it as environment variable in 'check'
+> > script.
+>=20
+> About 80% of the files in the repository use $tmp in some way.
+> And it's used all over the place in common/*, too. e.g mkfs
+> and check functions for storing output for parsing....
 
-diff --git a/tests/btrfs/089 b/tests/btrfs/089
-new file mode 100755
-index 000000000000..537269824b62
---- /dev/null
-+++ b/tests/btrfs/089
-@@ -0,0 +1,79 @@
-+#! /bin/bash
-+# FS QA Test 089
-+#
-+# Test deleting the default subvolume, making sure that submounts under it are
-+# not unmounted prematurely. This is a regression test for Linux commit "Btrfs:
-+# don't invalidate root dentry when subvolume deletion fails".
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Omar Sandoval.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/filter.btrfs
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_need_to_be_root
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+# Create a new subvolume and make it the default subvolume.
-+$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/testvol" >>$seqres.full 2>&1 \
-+	|| _fail "couldn't create subvol"
-+testvol_id=$(_btrfs_get_subvolid "$SCRATCH_MNT" testvol)
-+$BTRFS_UTIL_PROG subvolume set-default $testvol_id "$SCRATCH_MNT" >>$seqres.full 2>&1 \
-+	|| _fail "couldn't set default"
-+
-+# Bind-mount a directory under the default subvolume.
-+mkdir "$SCRATCH_MNT/testvol/testdir"
-+mkdir "$SCRATCH_MNT/testvol/mnt"
-+mount --bind "$SCRATCH_MNT/testvol/testdir" "$SCRATCH_MNT/testvol/mnt"
-+
-+# Now attempt to delete the default subvolume.
-+$BTRFS_UTIL_PROG subvolume delete "$SCRATCH_MNT/testvol" >>$seqres.full 2>&1
-+
-+# Unmount the bind mount, which should still be alive.
-+$UMOUNT_PROG "$SCRATCH_MNT/testvol/mnt"
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/btrfs/089.out b/tests/btrfs/089.out
-new file mode 100644
-index 000000000000..a7fcdee9b767
---- /dev/null
-+++ b/tests/btrfs/089.out
-@@ -0,0 +1,2 @@
-+QA output created by 089
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index ffe18bff0d21..616d060758c1 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -91,6 +91,7 @@
- 086 auto quick clone
- 087 auto quick send
- 088 auto quick metadata
-+089 auto quick subvol
- 090 auto quick metadata
- 091 auto quick qgroup
- 092 auto quick send
--- 
-2.4.2
+Ah, come on. There are not that many functions using the $tmp and
+some of them even removes the file immediately.
 
+Removes immediatelly
+common/attr	_acl_get_max
+common/filter	_within_tolerance
+common/rc	_check_generic_filesystem
+common/rc	_check_xfs_filesystem
+common/rc	_check_btrfs_filesystem
+
+Does not remove
+common/dump	_check_onl
+		_create_dumpdir_stress_num
+		_mk_fillconfig1
+		_mk_fillconfig2
+		_mk_fillconfig_ea
+		_mk_fillconfig_xattr
+		_mk_fillconfig_multi
+		_append_dumpdir_fill
+		_do_create_dump_symlinks
+		_mk_symlink_config
+		_do_dump_restore
+		_ls_compare_sub
+		_ls_nodate_compare_sub
+		_create_dumpdir_stress_num
+common/quota	_check_quota_usage
+common/rc	_do
+
+Most of the users are in the common/dump, however it's broken anyway
+since on _cleanup() it does "rm -f $tmp.*" that'll remove all the
+tmp file xfstests supposedly use.
+
+>=20
+> > It may be enough to simply add
+> >
+> > export tmp
+> >=20
+> > to the 'check' script
+>=20
+> Then everything uses the same tmp file prefix (i.e. the pid of the
+> check script) rather than a test specific pid so we lose out on
+> debugging capability there, not to mention that "rm -f $tmp*" in a
+> test (like the majority of tests do in their cleanup() routine) will
+> remove all the tmp files that the test harness needs to do it's
+> stuff....
+
+What debugging ? First of all, all of the $tmp.* files are removed either
+immediately or when the script ends and some of them are actually
+dumped to the .full report anyway.
+
+But regardless, the "rm -f $tmp*" called from the test _cleanup()
+routine will _not_ remove tmp files that the test harness needs as
+long as it defined it's own $tmp, so really using 'export' is the
+right way for test that does not need their own tmp, or creates a
+different name for they temp file, or directory.
+
+Not even mentioning that there is not safety check to prevent us
+from overwriting each other tmp files, or even temp files of
+completely different unrelated process ( that's why we should use
+mktemp).
+
+>=20
+> > But regardless of this bug it does not affect this test in any way
+> > since it's not calling any of those functions and there are other
+> > tests that does not define $tmp as well.
+>=20
+> Which points out a couple more problems with the test to me. It uses
+> SCRATCH_MNT without calling _scratch_mkfs - which uses $tmp when
+> FSTYP=3Dxfs - and it doesn't call _scratch_mount, either, so it's
+> running on the underlying filesystem rather than the filesystem it
+> is supposed to test.
+
+Right, that's a bug. Moreover if the test is the first test, or the
+only test you run everything will be ok becuase 'check' script will
+_scratch_mkfs and _scratch_mount for you for some reason ...
+
+>=20
+> And because it uses _require_scratch(), then ./check will call
+> _check_scratch_fs() to check the filesystem, and if FSTYP=3Dxfs then
+> _check_xfs_filesystem is called and that uses $tmp....
+
+Not really. 'check' script calls _check_scratch_fs() and the $tmp is
+defined there regardless of what the test itself is doing.
+
+Regards,
+-Lukas
+
+>=20
+> Cheers,
+>=20
+> Dave.
+>=20
+--8323328-1829186699-1433938980=:15435--
