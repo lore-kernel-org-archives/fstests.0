@@ -1,204 +1,61 @@
-Received: from mail.kernel.org ([198.145.29.136]:57311 "EHLO mail.kernel.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756186AbbFQLwy (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 17 Jun 2015 07:52:54 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH] fstests: generic test for fsync after adding xattr to a file
-Date: Wed, 17 Jun 2015 12:52:47 +0100
-Message-Id: <1434541967-28402-1-git-send-email-fdmanana@kernel.org>
+Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:34072 "EHLO
+	mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752442AbbFQSiK (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 17 Jun 2015 14:38:10 -0400
+Received: from pps.filterd (m0044008 [127.0.0.1])
+	by mx0a-00082601.pphosted.com (8.14.5/8.14.5) with SMTP id t5HIaefP007384
+	for <fstests@vger.kernel.org>; Wed, 17 Jun 2015 11:38:09 -0700
+Received: from mail.thefacebook.com ([199.201.64.23])
+	by mx0a-00082601.pphosted.com with ESMTP id 1v380vgy2j-2
+	(version=TLSv1/SSLv3 cipher=AES128-SHA bits=128 verify=NOT)
+	for <fstests@vger.kernel.org>; Wed, 17 Jun 2015 11:38:09 -0700
+From: Josef Bacik <jbacik@fb.com>
+Subject: [PATCH] fstests: convert fiemap-tester to use O_DIRECT
+Date: Wed, 17 Jun 2015 11:37:57 -0700
+Message-ID: <1434566277-28967-1-git-send-email-jbacik@fb.com>
+MIME-Version: 1.0
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+We want to test fiemap, so we want to lay out a file exactly a certain way.  XFS
+tries to be smart and will allocate data in a hole if the write pattern is
 
-This test is motivated by an issue found in btrfs.
+[data][hole][data]
 
-It tests that after syncing the filesystem, adding a xattr to a file,
-syncing the filesystem again, writing to the file and then doing a fsync
-against that file, the xattr still exists after a power failure. That is,
-after the fsync log/journal is replayed, the xattr still exists and with
-the correct value.
+where the hole is small enough.  This screws with fiemap-tester sometimes, so
+make it easy and just do O_DIRECT so that we get the layout we want and can get
+back to testing fiemap.  Thanks,
 
-The btrfs issue is fixed by the patch titled:
-
-  "Btrfs: fix fsync xattr loss in the fast fsync path"
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Josef Bacik <jbacik@fb.com>
 ---
- tests/generic/094     | 112 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/094.out |  29 +++++++++++++
- tests/generic/group   |   1 +
- 3 files changed, 142 insertions(+)
- create mode 100755 tests/generic/094
- create mode 100644 tests/generic/094.out
+ src/fiemap-tester.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
-diff --git a/tests/generic/094 b/tests/generic/094
-new file mode 100755
-index 0000000..1c6d113
---- /dev/null
-+++ b/tests/generic/094
-@@ -0,0 +1,112 @@
-+#! /bin/bash
-+# FS QA Test No. 094
-+#
-+# Test that after syncing the filesystem, adding a xattr to a file, syncing
-+# the filesystem again, writing to the file and then doing a fsync against that
-+# file, the xattr still exists after a power failure. That is, after the fsync
-+# log/journal is replayed, the xattr still exists and with the correct value.
-+#
-+# This test is motivated by a bug found in btrfs.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+
-+_cleanup()
-+{
-+	_cleanup_flakey
-+	rm -f $tmp.*
-+}
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmflakey
-+. ./common/attr
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_need_to_be_root
-+_require_scratch
-+_require_dm_flakey
-+_require_attrs
-+_require_metadata_journaling $SCRATCH_DEV
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_init_flakey
-+_mount_flakey
-+
-+# Create the test file with some initial data and make sure everything is
-+# durably persisted. We do fsync before calling sync to make sure that if the
-+# filesystem is btrfs, we get the flag BTRFS_INODE_NEEDS_FULL_SYNC cleared
-+# from the btrfs inode - a condition necessary to trigger the issue in btrfs.
-+$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 32k" \
-+		-c "fsync" \
-+		$SCRATCH_MNT/foo | _filter_xfs_io
-+sync
-+
-+# Add a xattr to our file.
-+$SETFATTR_PROG -n user.attr -v somevalue $SCRATCH_MNT/foo
-+
-+# Sync the filesystem to force a commit of the current btrfs transaction, this
-+# is a necessary condition to trigger the bug on btrfs.
-+sync
-+
-+# Now update our file's data and fsync the file.
-+# After a successful fsync, if the fsync log/journal is replayed we expect to
-+# see the xattr named "user.attr" with a value of "somevalue" (and the updated
-+# file data of course). Btrfs used to remove the xattr when it replayed the
-+# fsync log/journal.
-+$XFS_IO_PROG -c "pwrite -S 0xbb 8K 16K" \
-+		-c "fsync" \
-+		$SCRATCH_MNT/foo | _filter_xfs_io
-+
-+echo "File content after fsync and before crash:"
-+od -t x1 $SCRATCH_MNT/foo
-+
-+echo "File xattrs after fsync and before crash:"
-+$GETFATTR_PROG --absolute-names --dump $SCRATCH_MNT/foo | _filter_scratch
-+
-+# Simulate a crash/power loss.
-+_load_flakey_table $FLAKEY_DROP_WRITES
-+_unmount_flakey
-+
-+# Allow writes again and mount. This makes the fs replay its fsync log.
-+_load_flakey_table $FLAKEY_ALLOW_WRITES
-+_mount_flakey
-+
-+echo "File content after crash and log replay:"
-+od -t x1 $SCRATCH_MNT/foo
-+
-+echo "File xattrs after crash and log replay:"
-+$GETFATTR_PROG --absolute-names --dump $SCRATCH_MNT/foo | _filter_scratch
-+
-+status=0
-+exit
-diff --git a/tests/generic/094.out b/tests/generic/094.out
-new file mode 100644
-index 0000000..2e5e0fa
---- /dev/null
-+++ b/tests/generic/094.out
-@@ -0,0 +1,29 @@
-+QA output created by 094
-+wrote 32768/32768 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 16384/16384 bytes at offset 8192
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+File content after fsync and before crash:
-+0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-+*
-+0020000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
-+*
-+0060000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-+*
-+0100000
-+File xattrs after fsync and before crash:
-+# file: SCRATCH_MNT/foo
-+user.attr="somevalue"
-+
-+File content after crash and log replay:
-+0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-+*
-+0020000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
-+*
-+0060000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-+*
-+0100000
-+File xattrs after crash and log replay:
-+# file: SCRATCH_MNT/foo
-+user.attr="somevalue"
-+
-diff --git a/tests/generic/group b/tests/generic/group
-index ae40fed..18f31a7 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -96,6 +96,7 @@
- 091 rw auto quick
- 092 auto quick prealloc
- 093 attr cap udf auto
-+094 metadata auto quick
- 097 udf auto
- 099 udf auto
- 100 udf auto
+diff --git a/src/fiemap-tester.c b/src/fiemap-tester.c
+index 8e633ab..5cb58fc 100644
+--- a/src/fiemap-tester.c
++++ b/src/fiemap-tester.c
+@@ -92,8 +92,7 @@ create_file_from_mapping(int fd, char *map, int blocks, int blocksize)
+ 	int i = 0;
+ 
+ 	bufsize = sizeof(char) * blocksize;
+-	buf = malloc(bufsize);
+-	if (!buf)
++	if (posix_memalign((void **)&buf, 4096, bufsize))
+ 		return -1;
+ 
+ 	memset(buf, 'a', bufsize);
+@@ -562,7 +561,7 @@ main(int argc, char **argv)
+ 	if (!fname)
+ 		usage();
+ 
+-	fd = open(fname, O_RDWR|O_CREAT|O_TRUNC, 0644);
++	fd = open(fname, O_RDWR|O_CREAT|O_TRUNC|O_DIRECT, 0644);
+ 	if (fd < 0) {
+ 		perror("Can't open file");
+ 		exit(1);
 -- 
-2.1.3
+2.1.0
 
