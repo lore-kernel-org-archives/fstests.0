@@ -1,68 +1,59 @@
-Received: from mx1.redhat.com ([209.132.183.28]:35486 "EHLO mx1.redhat.com"
+Received: from mail.kernel.org ([198.145.29.136]:57218 "EHLO mail.kernel.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751133AbbFKJSA (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 11 Jun 2015 05:18:00 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (Postfix) with ESMTPS id 67A7DB7A83
-	for <fstests@vger.kernel.org>; Thu, 11 Jun 2015 09:18:00 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v3] generic: concurrent IO test with mixed IO types
-Date: Thu, 11 Jun 2015 17:17:53 +0800
-Message-Id: <1434014273-1059-1-git-send-email-eguan@redhat.com>
-In-Reply-To: <1433760101-25540-1-git-send-email-eguan@redhat.com>
-References: <1433760101-25540-1-git-send-email-eguan@redhat.com>
+	id S1755496AbbFQLwX (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 17 Jun 2015 07:52:23 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] fstests: generic test for fsync after adding hard link to a file
+Date: Wed, 17 Jun 2015 12:52:16 +0100
+Message-Id: <1434541936-28353-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Test concurrent buffered I/O, DIO, AIO, mmap I/O and splice I/O on the
-same files.
+From: Filipe Manana <fdmanana@suse.com>
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
+This test is motivated by an issue found in btrfs.
+
+It tests that after syncing the filesystem, adding a hard link to a file,
+syncing the filesystem again, doing a write to the file that increases
+its size and then doing a fsync against that file, durably persists the
+data written to the file. That is, after log/journal replay, the data
+is available.
+
+The btrfs issue is fixed by the commit titled:
+
+  "Btrfs: fix fsync data loss after append write"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
-
-This fio job file has been proven to be potent, it triggers WARNINGs on ext4
-and xfs with 4.1-rc6 kernel.
-
-ext4: WARNING: at fs/ext4/inode.c:1328
-xfs: WARNING: CPU: 7 PID: 3090 at fs/xfs/xfs_file.c:726 xfs_file_dio_aio_write+0x176/0x2a8 [xfs]()
-
-The ext4 issue should be fixed by Lukas's patch
-ext4: fix reservation release on invalidatepage for delalloc fs
-
-And it ever paniced kernel in mm code and hung xfs.
-
-I reduced the numjobs and iodepth to reduce the test time(~25s on my test host)
-and scale them by $LOAD_FACTOR. And it still could trigger the warning on ext4
-and xfs with reduced workload.
-
-v2:
-- use mktemp to create tmp fio job file
-v3:
-- initialize scratch dev and mount it correctly before test
-- roll back to use /tmp/$$ as tmp
-
- tests/generic/090     | 122 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/090.out |   2 +
+ tests/generic/090     | 108 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/090.out |  17 ++++++++
  tests/generic/group   |   1 +
- 3 files changed, 125 insertions(+)
+ 3 files changed, 126 insertions(+)
  create mode 100755 tests/generic/090
  create mode 100644 tests/generic/090.out
 
 diff --git a/tests/generic/090 b/tests/generic/090
 new file mode 100755
-index 0000000..e7cca52
+index 0000000..a1f2b89
 --- /dev/null
 +++ b/tests/generic/090
-@@ -0,0 +1,122 @@
+@@ -0,0 +1,108 @@
 +#! /bin/bash
-+# FS QA Test generic/090
++# FS QA Test No. 090
 +#
-+# Concurrent mixed I/O (buffer I/O, aiodio, mmap, splice) on the same files
++# Test that after syncing the filesystem, adding a hard link to a file,
++# syncing the filesystem again, doing a write to the file that increases
++# its size and then doing a fsync against that file, durably persists the
++# data written to the file. That is, after log/journal replay, the data
++# is available.
++#
++# This test is motivated by a bug found in btrfs.
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
++# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -86,118 +77,112 @@ index 0000000..e7cca52
 +here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+	cd /
++	_cleanup_flakey
 +	rm -f $tmp.*
 +}
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
++. ./common/dmflakey
 +
 +# real QA test starts here
 +_supported_fs generic
 +_supported_os Linux
++_need_to_be_root
 +_require_scratch
-+
-+iodepth=$((16 * LOAD_FACTOR))
-+iodepth_batch=$((8 * LOAD_FACTOR))
-+numjobs=$((5 * LOAD_FACTOR))
-+fio_config=$tmp.fio
-+cat >$fio_config <<EOF
-+[global]
-+bs=8k
-+iodepth=$iodepth
-+iodepth_batch=$iodepth_batch
-+randrepeat=1
-+size=1m
-+directory=$SCRATCH_MNT
-+numjobs=$numjobs
-+[job1]
-+ioengine=sync
-+bs=1k
-+direct=1
-+rw=randread
-+filename=file1:file2
-+[job2]
-+ioengine=libaio
-+rw=randwrite
-+direct=1
-+filename=file1:file2
-+[job3]
-+bs=1k
-+ioengine=posixaio
-+rw=randwrite
-+direct=1
-+filename=file1:file2
-+[job4]
-+ioengine=splice
-+direct=1
-+rw=randwrite
-+filename=file1:file2
-+[job5]
-+bs=1k
-+ioengine=sync
-+rw=randread
-+filename=file1:file2
-+[job6]
-+ioengine=posixaio
-+rw=randwrite
-+filename=file1:file2
-+[job7]
-+ioengine=splice
-+rw=randwrite
-+filename=file1:file2
-+[job8]
-+ioengine=mmap
-+rw=randwrite
-+bs=1k
-+filename=file1:file2
-+[job9]
-+ioengine=mmap
-+rw=randwrite
-+direct=1
-+filename=file1:file2
-+EOF
-+# with ioengine=mmap and direct=1, fio requires bs to be at least pagesize,
-+# which is a fio built-in var.
-+echo 'bs=$pagesize' >> $fio_config
++_require_dm_flakey
++_require_metadata_journaling $SCRATCH_DEV
 +
 +rm -f $seqres.full
-+_require_fio $fio_config
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
 +
-+echo "Silence is golden"
-+$FIO_PROG $fio_config >>$seqres.full 2>&1
++_scratch_mkfs >> $seqres.full 2>&1
++_init_flakey
++_mount_flakey
 +
-+# all done, expect no hang no oops no fs corruption,
-+# _check_dmesg and _check_filesystems will do the check work for us
++# Create the test file with some initial data and then fsync it.
++# The fsync here is only needed to trigger the issue in btrfs, as it causes the
++# the flag BTRFS_INODE_NEEDS_FULL_SYNC to be removed from the btrfs inode.
++$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 32k" \
++		-c "fsync" \
++		$SCRATCH_MNT/foo | _filter_xfs_io
++sync
++
++# Add a hard link to our file.
++# On btrfs this sets the flag BTRFS_INODE_COPY_EVERYTHING on the btrfs inode,
++# which is a necessary condition to trigger the issue.
++ln $SCRATCH_MNT/foo $SCRATCH_MNT/bar
++
++# Sync the filesystem to force a commit of the current btrfs transaction, this
++# is a necessary condition to trigger the bug on btrfs.
++sync
++
++# Now append more data to our file, increasing its size, and fsync the file.
++# In btrfs because the inode flag BTRFS_INODE_COPY_EVERYTHING was set and the
++# write path did not update the inode item in the btree nor the delayed inode
++# item (in memory structure) in the current transaction (created by the fsync
++# handler), the fsync did not record the inode's new i_size in the fsync
++# log/journal. This made the data unavailable after the fsync log/journal is
++# replayed.
++$XFS_IO_PROG -c "pwrite -S 0xbb 32K 32K" \
++		-c "fsync" \
++		$SCRATCH_MNT/foo | _filter_xfs_io
++
++echo "File content after fsync and before crash:"
++od -t x1 $SCRATCH_MNT/foo
++
++# Simulate a crash/power loss.
++_load_flakey_table $FLAKEY_DROP_WRITES
++_unmount_flakey
++
++# Allow writes again and mount. This makes the fs replay its fsync log.
++_load_flakey_table $FLAKEY_ALLOW_WRITES
++_mount_flakey
++
++echo "File content after crash and log replay:"
++od -t x1 $SCRATCH_MNT/foo
++
 +status=0
 +exit
 diff --git a/tests/generic/090.out b/tests/generic/090.out
 new file mode 100644
-index 0000000..2b5100d
+index 0000000..4a4423a
 --- /dev/null
 +++ b/tests/generic/090.out
-@@ -0,0 +1,2 @@
+@@ -0,0 +1,17 @@
 +QA output created by 090
-+Silence is golden
++wrote 32768/32768 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 32768
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File content after fsync and before crash:
++0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
++*
++0100000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
++*
++0200000
++File content after crash and log replay:
++0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
++*
++0100000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
++*
++0200000
 diff --git a/tests/generic/group b/tests/generic/group
-index 0c8964c..2e534a5 100644
+index 0c8964c..ae40fed 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
 @@ -92,6 +92,7 @@
  087 perms auto quick
  088 perms auto quick
  089 metadata auto
-+090 auto rw stress
++090 metadata auto quick
  091 rw auto quick
  092 auto quick prealloc
  093 attr cap udf auto
 -- 
-2.4.2
+2.1.3
 
