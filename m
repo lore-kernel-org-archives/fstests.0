@@ -1,94 +1,205 @@
-Received: from mx1.redhat.com ([209.132.183.28]:55818 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:45455 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751224AbbFRDEg (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 17 Jun 2015 23:04:36 -0400
-Date: Thu, 18 Jun 2015 11:04:31 +0800
+	id S1751371AbbFRDk1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 17 Jun 2015 23:40:27 -0400
+Date: Thu, 18 Jun 2015 11:40:22 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v3] generic: concurrent IO test with mixed IO types
-Message-ID: <20150618030431.GU3672@dhcp-13-216.nay.redhat.com>
-References: <1433760101-25540-1-git-send-email-eguan@redhat.com>
- <1434014273-1059-1-git-send-email-eguan@redhat.com>
- <20150617221525.GJ10224@dastard>
+Subject: Re: [PATCH] fstests: generic test for fsync after adding hard link
+ to a file
+Message-ID: <20150618034022.GV3672@dhcp-13-216.nay.redhat.com>
+References: <1434541936-28353-1-git-send-email-fdmanana@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20150617221525.GJ10224@dastard>
+In-Reply-To: <1434541936-28353-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 18, 2015 at 08:15:25AM +1000, Dave Chinner wrote:
-> On Thu, Jun 11, 2015 at 05:17:53PM +0800, Eryu Guan wrote:
-> > Test concurrent buffered I/O, DIO, AIO, mmap I/O and splice I/O on the
-> > same files.
-> > 
-> > Signed-off-by: Eryu Guan <eguan@redhat.com>
-> > ---
-> > 
-> > This fio job file has been proven to be potent, it triggers WARNINGs on ext4
-> > and xfs with 4.1-rc6 kernel.
-> > 
-> > ext4: WARNING: at fs/ext4/inode.c:1328
-> > xfs: WARNING: CPU: 7 PID: 3090 at fs/xfs/xfs_file.c:726 xfs_file_dio_aio_write+0x176/0x2a8 [xfs]()
+On Wed, Jun 17, 2015 at 12:52:16PM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
-> Ok, so that warning is expected on XFS - that's intentional,
-> WARN_ONCE() output indicating a data coherency problem has occurred
-> because of the because the application is mixing buffered/mmap IO
-> with direct IO on the same file and direct Io has been unable to
-> cleanly invalidate the cache. i.e.  it's information to us
-> developers explaining why the user is complaining about data
-> corruption....
+> This test is motivated by an issue found in btrfs.
 > 
-> So this test is never going to pass on XFS unless you tell the test
-> harness to ignore the dmesg output...
+> It tests that after syncing the filesystem, adding a hard link to a file,
+> syncing the filesystem again, doing a write to the file that increases
+> its size and then doing a fsync against that file, durably persists the
+> data written to the file. That is, after log/journal replay, the data
+> is available.
+> 
+> The btrfs issue is fixed by the commit titled:
+> 
+>   "Btrfs: fix fsync data loss after append write"
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-I can send a v4 to disable dmesg check if FSTYP is xfs, but that will
-ignore any other WARNINGs/Oops too, which seems not ideal to me either.
+Looks good to me. Tested on ext2/3/4 xfs and btrfs, btrfs fails the
+test, and _notrun on ext2, as expected.
 
-I'm fine to go either way here(disable the dmesg check or not). But I
-personally prefer changing the WARN_ON_ONCE to something like xfs_warn()
-or xfs_warn_ratelimited() to give out the warning.
+Reviewed-by: Eryu Guan <eguan@redhat.com>
 
+> ---
+>  tests/generic/090     | 108 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/090.out |  17 ++++++++
+>  tests/generic/group   |   1 +
+>  3 files changed, 126 insertions(+)
+>  create mode 100755 tests/generic/090
+>  create mode 100644 tests/generic/090.out
 > 
-> > And it ever paniced kernel in mm code and hung xfs.
+> diff --git a/tests/generic/090 b/tests/generic/090
+> new file mode 100755
+> index 0000000..a1f2b89
+> --- /dev/null
+> +++ b/tests/generic/090
+> @@ -0,0 +1,108 @@
+> +#! /bin/bash
+> +# FS QA Test No. 090
+> +#
+> +# Test that after syncing the filesystem, adding a hard link to a file,
+> +# syncing the filesystem again, doing a write to the file that increases
+> +# its size and then doing a fsync against that file, durably persists the
+> +# data written to the file. That is, after log/journal replay, the data
+> +# is available.
+> +#
+> +# This test is motivated by a bug found in btrfs.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
+> +# Author: Filipe Manana <fdmanana@suse.com>
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +
+> +_cleanup()
+> +{
+> +	_cleanup_flakey
+> +	rm -f $tmp.*
+> +}
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/dmflakey
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_need_to_be_root
+> +_require_scratch
+> +_require_dm_flakey
+> +_require_metadata_journaling $SCRATCH_DEV
+> +
+> +rm -f $seqres.full
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +_init_flakey
+> +_mount_flakey
+> +
+> +# Create the test file with some initial data and then fsync it.
+> +# The fsync here is only needed to trigger the issue in btrfs, as it causes the
+> +# the flag BTRFS_INODE_NEEDS_FULL_SYNC to be removed from the btrfs inode.
+> +$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 32k" \
+> +		-c "fsync" \
+> +		$SCRATCH_MNT/foo | _filter_xfs_io
+> +sync
+> +
+> +# Add a hard link to our file.
+> +# On btrfs this sets the flag BTRFS_INODE_COPY_EVERYTHING on the btrfs inode,
+> +# which is a necessary condition to trigger the issue.
+> +ln $SCRATCH_MNT/foo $SCRATCH_MNT/bar
+> +
+> +# Sync the filesystem to force a commit of the current btrfs transaction, this
+> +# is a necessary condition to trigger the bug on btrfs.
+> +sync
+> +
+> +# Now append more data to our file, increasing its size, and fsync the file.
+> +# In btrfs because the inode flag BTRFS_INODE_COPY_EVERYTHING was set and the
+> +# write path did not update the inode item in the btree nor the delayed inode
+> +# item (in memory structure) in the current transaction (created by the fsync
+> +# handler), the fsync did not record the inode's new i_size in the fsync
+> +# log/journal. This made the data unavailable after the fsync log/journal is
+> +# replayed.
+> +$XFS_IO_PROG -c "pwrite -S 0xbb 32K 32K" \
+> +		-c "fsync" \
+> +		$SCRATCH_MNT/foo | _filter_xfs_io
+> +
+> +echo "File content after fsync and before crash:"
+> +od -t x1 $SCRATCH_MNT/foo
+> +
+> +# Simulate a crash/power loss.
+> +_load_flakey_table $FLAKEY_DROP_WRITES
+> +_unmount_flakey
+> +
+> +# Allow writes again and mount. This makes the fs replay its fsync log.
+> +_load_flakey_table $FLAKEY_ALLOW_WRITES
+> +_mount_flakey
+> +
+> +echo "File content after crash and log replay:"
+> +od -t x1 $SCRATCH_MNT/foo
+> +
+> +status=0
+> +exit
+> diff --git a/tests/generic/090.out b/tests/generic/090.out
+> new file mode 100644
+> index 0000000..4a4423a
+> --- /dev/null
+> +++ b/tests/generic/090.out
+> @@ -0,0 +1,17 @@
+> +QA output created by 090
+> +wrote 32768/32768 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +wrote 32768/32768 bytes at offset 32768
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +File content after fsync and before crash:
+> +0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+> +*
+> +0100000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
+> +*
+> +0200000
+> +File content after crash and log replay:
+> +0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+> +*
+> +0100000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
+> +*
+> +0200000
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 0c8964c..ae40fed 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -92,6 +92,7 @@
+>  087 perms auto quick
+>  088 perms auto quick
+>  089 metadata auto
+> +090 metadata auto quick
+>  091 rw auto quick
+>  092 auto quick prealloc
+>  093 attr cap udf auto
+> -- 
+> 2.1.3
 > 
-> The "hung XFS" case will probably be the pipe mutex inversion
-> problem in the generic splice code. i.e.
-> 
-> .splice_read -> xfs_file_splice_read -> IOLOCK_SHARED ->
-> generic_file_splice_read -> splice_to_pipe -> pipe_lock()
-> 
-> vs:
-> 
-> iter_file_splice_write -> pipe_lock() -> vfs_iter_write ->
-> xfs_file_write_iter -> xfs_file_buffered_aio_write -> IOLOCK_EXCL
-> 
-> Can you confirm this? If so, there's not much we can actually do
-> about this - the recent big splice rewrite replaced the
-> pipe_lock/i_mutex inversion deadlock with a different pipe_lock
-> inversion deadlock....
-
-Yes, XFS deadlocks in the splice code with RHEL7.1 kernel but doesn't
-deadlock with 4.1-rc[567] kernels (I only confirmed on these kernels
-just now), so ...
-
-> 
-> > diff --git a/tests/generic/group b/tests/generic/group
-> > index 0c8964c..2e534a5 100644
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -92,6 +92,7 @@
-> >  087 perms auto quick
-> >  088 perms auto quick
-> >  089 metadata auto
-> > +090 auto rw stress
-> 
-> Hence I'm not sure "auto" is the correct group here. "dangerous" is
-> more likely because it is exercising a problem we can't fix and will
-> prevent the auto test group from making progress past this test.
-
-I think the auto group should be fine here.
-
-Thanks,
-Eryu
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
