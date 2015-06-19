@@ -1,44 +1,119 @@
-Received: from imap.thunk.org ([74.207.234.97]:44050 "EHLO imap.thunk.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751818AbbFSC4u (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 18 Jun 2015 22:56:50 -0400
-Date: Thu, 18 Jun 2015 22:56:47 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: Test generic/299 stalling forever
-Message-ID: <20150619025647.GJ4076@thunk.org>
-References: <20150618155337.GA10439@thunk.org>
- <20150618233430.GK20262@dastard>
+Received: from cn.fujitsu.com ([59.151.112.132]:15391 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753866AbbFSIhg convert rfc822-to-8bit (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 19 Jun 2015 04:37:36 -0400
+Message-ID: <5583D4BC.6040509@cn.fujitsu.com>
+Date: Fri, 19 Jun 2015 16:37:16 +0800
+From: wangyf <wangyf-fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20150618233430.GK20262@dastard>
+Subject: Re: [PATCH] generic: busy loop of dd and rm test
+References: <1433983955-2591-1-git-send-email-wangyf-fnst@cn.fujitsu.com> <20150617214413.GH10224@dastard>
+In-Reply-To: <20150617214413.GH10224@dastard>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Sender: fstests-owner@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
 To: Dave Chinner <david@fromorbit.com>
-Cc: linux-ext4@vger.kernel.org, fstests@vger.kernel.org
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jun 19, 2015 at 09:34:30AM +1000, Dave Chinner wrote:
-> On Thu, Jun 18, 2015 at 11:53:37AM -0400, Theodore Ts'o wrote:
-> > I've been trying to figure out why generic/299 has occasionally been
-> > stalling forever.  After taking a closer look, it appears the problem
-> > is that the fio process is stalling in userspace.  Looking at the ps
-> > listing, the fio process hasn't run in over six hours, and using
-> > attaching strace to the fio process, it's stalled in a FUTUEX_WAIT.
-> > 
-> > Has anyone else seen this?  I'm using fio 2.2.6, and I have a feeling
-> > that I started seeing this when I started using a newer version of
-> > fio.  So I'm going to try roll back to an older version of fio and see
-> > if that causes the problem to go away.
-> 
-> I'm running on fio 2.1.3 at the moment and I havne't seen any
-> problems like this for months. Keep in mind that fio does tend to
-> break in strange ways fairly regularly, so I'd suggest an
-> upgrade/downgrade of fio as your first move.
 
-Yep, I've rolled back to fio-2.1.13-77-g0f9940a, which is what I had
-been using previously for a long time, and the problem with
-generic/299 seems to have gone away.  I had hoped that the days when
-new releases of fio wouldn't intrdouce random new bugs was a temporary
-aberration, but obviously that was a bit over-optimistic.
 
-	    		       	     - Ted
+=E5=9C=A8 2015=E5=B9=B406=E6=9C=8818=E6=97=A5 05:44, Dave Chinner =E5=86=99=
+=E9=81=93:
+> On Thu, Jun 11, 2015 at 08:52:35AM +0800, Wang Yanfeng wrote:
+>> generic/326 is a case about testing whether writing failed on
+>> NO_SPACE in a busy loop of write and delete when disk almost full.
+>> It is a long-term problem since very beginning in btrfs, and has been
+>> fixed by patchset titled "btrfs: Fix no_space on dd and rm loop" from
+>> zhaolei@cn.fujitsu.com.
+>>
+>> Signed-off-by: Wang Yanfeng <wangyf-fnst@cn.fujitsu.com>
+> ....
+>> @@ -0,0 +1,73 @@
+>> +#! /bin/bash
+>> +# FS QA Test No. 326
+>> +#
+>> +# TEST busy loop of write and delete in a filesystem.
+>> +# Sometimes writes will failed on NO_SPACE when disk almost full
+>> +# in btrfs. It is long-term problem since very beginning for btrfs
+>> +#
+>> +# This issue was fixed by the following linux kernel patch
+>> +#
+>> +# btrfs: Fix no_space on dd and rm loop < from zhaolei@cn.fujitsu.com=
+ >
+>> +#	btrfs: Fix NO_SPACE bug caused by delayed-iput
+>> +#	btrfs: Support busy loop of write and delete
+>> +#	btrfs: add WARN_ON() to check is space_info op current
+>> +#	btrfs: Set relative data on clear btrfs_block_group_cache->pinned
+>> +#	btrfs: Adjust commit-transaction condition to avoid NO_SPACE more
+>> +#	btrfs: Fix tail space processing in find_free_dev_extent()
+>> +#	btrfs: fix condition of commit transaction
+>> +#	btrfs: wait for delayed iputs on no space
+> This list of kernel commits does not belong in the test. If you
+> really need to put this anywhere, it belongs in the commit
+> message.
+Maybe we can use the sentence " The issue was fixed by the patchset named
+'btrfs: Fix no_space on dd and rm loop'< from zhaolei@cn.fujitsu.com> " =20
+to replace it
+>> +seq=3D`basename $0`
+>> +seqres=3D$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +
+>> +status=3D1
+>> +trap "exit \$status" 0 1 2 3 15
+> Why did you remove the "tmp=3D/tmp/$$" line from the new test
+> template?
+o,,,, at first I think I didn't use the tmp dir. I didn't notice it in=20
+the new template
+I will add it.
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +
+>> +# real QA test starts here
+>> +_need_to_be_root
+>> +_supported_fs generic
+>> +_supported_os Linux
+>> +_require_scratch
+>> +
+>> +rm -f $seqres.full
+>> +
+>> +dev_size=3D$((512 * 1024 * 1024))
+> So a 512MB filesystem...
+If we choose a small device, the Bug will be easy to trigger.
+In btrfs (other fs I don't know), the required smallest disk space is 256=
+MB.
+But in this situation,  we can only use about 100MB~ space, and it=20
+appears too small,
+so double it, I choose 512M as the size of the file system.
+>> +_scratch_mkfs_sized $dev_size >>$seqres.full 2>&1
+>> +_scratch_mount
+>> +file_size_m=3D$(($dev_size * 75 / 100 / 1024 / 1024))
+> and a ~400MB file, right? So you don't actually need this
+> magic calculation, because:
+>
+>> +for ((i =3D 0; i < 10; i++)); do
+>> +	echo "loop $i" >>$seqres.full
+>> +
+>> +	dd if=3D/dev/zero of=3D"$SCRATCH_MNT"/file0 bs=3D1M count=3D"$file_s=
+ize_m" \
+>> +	>>$seqres.full 2>&1 || _fail "dd failed"
+> You shouldn't be using dd for this, nor should you be using _fail:
+>
+> 	$XFS_IO_PROG -f -c "pwrite -b 1m 0 400m" $SCRATCH_MNT"/file0 | \
+> 		_filter_xfs_io | _filter_scratch
+>
+> If the write fails, then xfs_io will dump an unexpected error
+> message to the output, and the golden output mismatch will fail the
+> test.
+>
+>
+>> +	rm -f "$SCRATCH_MNT"/file0 || _fail "rm failed"
+> Same here - rm will output an error that will be caughti if it
+> fails...
+Agree, I will make a new patch under your advice.
+>
+> Cheers,
+>
+> Dave.
+
