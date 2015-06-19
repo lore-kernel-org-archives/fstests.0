@@ -1,119 +1,129 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:15391 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753866AbbFSIhg convert rfc822-to-8bit (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 19 Jun 2015 04:37:36 -0400
-Message-ID: <5583D4BC.6040509@cn.fujitsu.com>
-Date: Fri, 19 Jun 2015 16:37:16 +0800
-From: wangyf <wangyf-fnst@cn.fujitsu.com>
-MIME-Version: 1.0
-Subject: Re: [PATCH] generic: busy loop of dd and rm test
-References: <1433983955-2591-1-git-send-email-wangyf-fnst@cn.fujitsu.com> <20150617214413.GH10224@dastard>
-In-Reply-To: <20150617214413.GH10224@dastard>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+Received: from mx1.redhat.com ([209.132.183.28]:43762 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753246AbbFSJsW (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 19 Jun 2015 05:48:22 -0400
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	by mx1.redhat.com (Postfix) with ESMTPS id 60FDE38887D
+	for <fstests@vger.kernel.org>; Fri, 19 Jun 2015 09:48:22 +0000 (UTC)
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH 1/3] fstests: move _check_dmesg to common/rc
+Date: Fri, 19 Jun 2015 17:33:37 +0800
+Message-Id: <1434706419-5589-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
+Move _check_dmesg to common/rc so that tests could call it directly.
 
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+ check     | 32 +++-----------------------------
+ common/rc | 27 +++++++++++++++++++++++++++
+ 2 files changed, 30 insertions(+), 29 deletions(-)
 
-=E5=9C=A8 2015=E5=B9=B406=E6=9C=8818=E6=97=A5 05:44, Dave Chinner =E5=86=99=
-=E9=81=93:
-> On Thu, Jun 11, 2015 at 08:52:35AM +0800, Wang Yanfeng wrote:
->> generic/326 is a case about testing whether writing failed on
->> NO_SPACE in a busy loop of write and delete when disk almost full.
->> It is a long-term problem since very beginning in btrfs, and has been
->> fixed by patchset titled "btrfs: Fix no_space on dd and rm loop" from
->> zhaolei@cn.fujitsu.com.
->>
->> Signed-off-by: Wang Yanfeng <wangyf-fnst@cn.fujitsu.com>
-> ....
->> @@ -0,0 +1,73 @@
->> +#! /bin/bash
->> +# FS QA Test No. 326
->> +#
->> +# TEST busy loop of write and delete in a filesystem.
->> +# Sometimes writes will failed on NO_SPACE when disk almost full
->> +# in btrfs. It is long-term problem since very beginning for btrfs
->> +#
->> +# This issue was fixed by the following linux kernel patch
->> +#
->> +# btrfs: Fix no_space on dd and rm loop < from zhaolei@cn.fujitsu.com=
- >
->> +#	btrfs: Fix NO_SPACE bug caused by delayed-iput
->> +#	btrfs: Support busy loop of write and delete
->> +#	btrfs: add WARN_ON() to check is space_info op current
->> +#	btrfs: Set relative data on clear btrfs_block_group_cache->pinned
->> +#	btrfs: Adjust commit-transaction condition to avoid NO_SPACE more
->> +#	btrfs: Fix tail space processing in find_free_dev_extent()
->> +#	btrfs: fix condition of commit transaction
->> +#	btrfs: wait for delayed iputs on no space
-> This list of kernel commits does not belong in the test. If you
-> really need to put this anywhere, it belongs in the commit
-> message.
-Maybe we can use the sentence " The issue was fixed by the patchset named
-'btrfs: Fix no_space on dd and rm loop'< from zhaolei@cn.fujitsu.com> " =20
-to replace it
->> +seq=3D`basename $0`
->> +seqres=3D$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +status=3D1
->> +trap "exit \$status" 0 1 2 3 15
-> Why did you remove the "tmp=3D/tmp/$$" line from the new test
-> template?
-o,,,, at first I think I didn't use the tmp dir. I didn't notice it in=20
-the new template
-I will add it.
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +
->> +# real QA test starts here
->> +_need_to_be_root
->> +_supported_fs generic
->> +_supported_os Linux
->> +_require_scratch
->> +
->> +rm -f $seqres.full
->> +
->> +dev_size=3D$((512 * 1024 * 1024))
-> So a 512MB filesystem...
-If we choose a small device, the Bug will be easy to trigger.
-In btrfs (other fs I don't know), the required smallest disk space is 256=
-MB.
-But in this situation,  we can only use about 100MB~ space, and it=20
-appears too small,
-so double it, I choose 512M as the size of the file system.
->> +_scratch_mkfs_sized $dev_size >>$seqres.full 2>&1
->> +_scratch_mount
->> +file_size_m=3D$(($dev_size * 75 / 100 / 1024 / 1024))
-> and a ~400MB file, right? So you don't actually need this
-> magic calculation, because:
->
->> +for ((i =3D 0; i < 10; i++)); do
->> +	echo "loop $i" >>$seqres.full
->> +
->> +	dd if=3D/dev/zero of=3D"$SCRATCH_MNT"/file0 bs=3D1M count=3D"$file_s=
-ize_m" \
->> +	>>$seqres.full 2>&1 || _fail "dd failed"
-> You shouldn't be using dd for this, nor should you be using _fail:
->
-> 	$XFS_IO_PROG -f -c "pwrite -b 1m 0 400m" $SCRATCH_MNT"/file0 | \
-> 		_filter_xfs_io | _filter_scratch
->
-> If the write fails, then xfs_io will dump an unexpected error
-> message to the output, and the golden output mismatch will fail the
-> test.
->
->
->> +	rm -f "$SCRATCH_MNT"/file0 || _fail "rm failed"
-> Same here - rm will output an error that will be caughti if it
-> fails...
-Agree, I will make a new patch under your advice.
->
-> Cheers,
->
-> Dave.
+diff --git a/check b/check
+index a300130..866b706 100755
+--- a/check
++++ b/check
+@@ -396,32 +396,6 @@ _check_filesystems()
+ 	fi
+ }
+ 
+-_check_dmesg()
+-{
+-	if [ ! -f ${RESULT_DIR}/check_dmesg ]; then
+-		return
+-	fi
+-	rm -f ${RESULT_DIR}/check_dmesg
+-
+-	# search the dmesg log of last run of $seqnum for possible failures
+-	# use sed \cregexpc address type, since $seqnum contains "/"
+-	dmesg | tac | sed -ne "0,\#run fstests $seqnum at $date_time#p" | \
+-		tac >$seqres.dmesg
+-	grep -q -e "kernel BUG at" \
+-	     -e "WARNING:" \
+-	     -e "BUG:" \
+-	     -e "Oops:" \
+-	     -e "possible recursive locking detected" \
+-	     $seqres.dmesg
+-	if [ $? -eq 0 ]; then
+-		echo "_check_dmesg: something found in dmesg (see $seqres.dmesg)"
+-		err=true
+-	else
+-		rm -f $seqres.dmesg
+-	fi
+-}
+-
+-
+ _prepare_test_list
+ 
+ if $OPTIONS_HAVE_SECTIONS; then
+@@ -542,7 +516,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 
+ 	    # the filename for the test and the name output are different.
+ 	    # we don't include the tests/ directory in the name output.
+-	    seqnum=`echo $seq | sed -e "s;$SRC_DIR/;;"`
++	    export seqnum=`echo $seq | sed -e "s;$SRC_DIR/;;"`
+ 
+ 	    # Similarly, the result directory needs to replace the tests/
+ 	    # part of the test location.
+@@ -593,7 +567,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 		[ ! -x $seq ] && chmod u+x $seq # ensure we can run it
+ 		$LOGGER_PROG "run xfstest $seqnum"
+ 		if [ -w /dev/kmsg ]; then
+-			date_time=`date +"%F %T"`
++			export date_time=`date +"%F %T"`
+ 			echo "run fstests $seqnum at $date_time" > /dev/kmsg
+ 			# _check_dmesg depends on this log in dmesg
+ 			touch ${RESULT_DIR}/check_dmesg
+@@ -663,7 +637,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 		    try="$try $seqnum"
+ 		    n_try=`expr $n_try + 1`
+ 		    _check_filesystems
+-		    _check_dmesg
++		    _check_dmesg || err=true
+ 		fi
+ 
+ 	    fi
+diff --git a/common/rc b/common/rc
+index 610045e..141ab5c 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2936,6 +2936,33 @@ _get_device_size()
+ 	grep `_short_dev $1` /proc/partitions | awk '{print $3}'
+ }
+ 
++# check dmesg log for WARNING/Oops/etc.
++_check_dmesg()
++{
++	if [ ! -f ${RESULT_DIR}/check_dmesg ]; then
++		return 0
++	fi
++	rm -f ${RESULT_DIR}/check_dmesg
++
++	# search the dmesg log of last run of $seqnum for possible failures
++	# use sed \cregexpc address type, since $seqnum contains "/"
++	dmesg | tac | sed -ne "0,\#run fstests $seqnum at $date_time#p" | \
++		tac >$seqres.dmesg
++	grep -q -e "kernel BUG at" \
++	     -e "WARNING:" \
++	     -e "BUG:" \
++	     -e "Oops:" \
++	     -e "possible recursive locking detected" \
++	     $seqres.dmesg
++	if [ $? -eq 0 ]; then
++		echo "_check_dmesg: something found in dmesg (see $seqres.dmesg)"
++		return 1
++	else
++		rm -f $seqres.dmesg
++		return 0
++	fi
++}
++
+ # don't check dmesg log after test
+ _disable_dmesg_check()
+ {
+-- 
+1.8.3.1
 
