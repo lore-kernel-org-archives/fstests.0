@@ -1,98 +1,164 @@
-Received: from mx1.redhat.com ([209.132.183.28]:59581 "EHLO mx1.redhat.com"
+Received: from mail.kernel.org ([198.145.29.136]:58894 "EHLO mail.kernel.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751773AbbFXLJR (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 24 Jun 2015 07:09:17 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (Postfix) with ESMTPS id 04484359A5A
-	for <fstests@vger.kernel.org>; Wed, 24 Jun 2015 11:09:17 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] fstests: remove $seqres.full before test to avoid keep-growing log file
-Date: Wed, 24 Jun 2015 19:09:02 +0800
-Message-Id: <1435144142-10380-1-git-send-email-eguan@redhat.com>
+	id S1752043AbbFYNxj (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 25 Jun 2015 09:53:39 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] fstests: generic test for truncating a file into the middle of a hole
+Date: Thu, 25 Jun 2015 04:17:59 +0100
+Message-Id: <1435202279-23573-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Some tests append logs to $seqres.full and never remove the log, which
-keeps the log file growing. Remove $seqres.full before test in
-following tests:
+From: Filipe Manana <fdmanana@suse.com>
 
-   ext4/271
-   generic/019
-   generic/269
-   generic/270
-   shared/272
+Test that after truncating a file into the middle of a hole causes the
+new size of the file to be persisted after a clean unmount of the
+filesystem (or after the inode is evicted). This is for the case where
+all the data following the hole is not yet durably persisted, that is,
+that data is only present in the page cache.
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
+This test is motivated by an issue found in btrfs, which got fixed by
+the patch titled:
+
+  "Btrfs: fix shrinking truncate when the no_holes feature is enabled"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- tests/ext4/271    | 1 +
- tests/generic/019 | 1 +
- tests/generic/269 | 1 +
- tests/generic/270 | 1 +
- tests/shared/272  | 1 +
- 5 files changed, 5 insertions(+)
+ tests/generic/094     | 91 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/094.out | 11 +++++++
+ tests/generic/group   |  1 +
+ 3 files changed, 103 insertions(+)
+ create mode 100755 tests/generic/094
+ create mode 100644 tests/generic/094.out
 
-diff --git a/tests/ext4/271 b/tests/ext4/271
-index e77ae57..217d0d8 100755
---- a/tests/ext4/271
-+++ b/tests/ext4/271
-@@ -41,6 +41,7 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- 
+diff --git a/tests/generic/094 b/tests/generic/094
+new file mode 100755
+index 0000000..0876eb7
+--- /dev/null
++++ b/tests/generic/094
+@@ -0,0 +1,91 @@
++#! /bin/bash
++# FSQA Test No. 094
++#
++# Test that after truncating a file into the middle of a hole causes the new
++# size of the file to be persisted after a clean unmount of the filesystem (or
++# after the inode is evicted). This is for the case where all the data following
++# the hole is not yet durably persisted, that is, that data is only present in
++# the page cache.
++#
++# This test is motivated by an issue found in btrfs.
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_need_to_be_root
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++
++# This test was motivated by an issue found in btrfs when the btrfs no-holes
++# feature is enabled (introduced in kernel 3.14). So enable the feature if the
++# fs being tested is btrfs.
++if [ $FSTYP == "btrfs" ]; then
++	_require_btrfs_fs_feature "no_holes"
++	_require_btrfs_mkfs_feature "no-holes"
++	MKFS_OPTIONS="$MKFS_OPTIONS -O no-holes"
++fi
++
 +rm -f $seqres.full
- _scratch_mkfs_sized $((128 * 1024 * 1024)) >> $seqres.full 2>&1
- 
- # -onoload and EXT4_SYNC_FL on file is important becase result in
-diff --git a/tests/generic/019 b/tests/generic/019
-index ca196ca..76a09d5 100755
---- a/tests/generic/019
-+++ b/tests/generic/019
-@@ -173,6 +173,7 @@ _workout()
- 
- # real QA test starts here
- 
-+rm -f $seqres.full
- _scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
- _scratch_mount || _fail "mount failed"
- allow_fail_make_request
-diff --git a/tests/generic/269 b/tests/generic/269
-index cff5e54..fe648b5 100755
---- a/tests/generic/269
-+++ b/tests/generic/269
-@@ -66,6 +66,7 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- 
-+rm -f $seqres.full
- _scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
- _scratch_mount
- 
-diff --git a/tests/generic/270 b/tests/generic/270
-index cebd377..255ebf2 100755
---- a/tests/generic/270
-+++ b/tests/generic/270
-@@ -81,6 +81,7 @@ _require_user
- _need_to_be_root
- _require_scratch
- 
-+rm -f $seqres.full
- _scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
- _scratch_mount "-o usrquota,grpquota"
- chmod 777 $SCRATCH_MNT
-diff --git a/tests/shared/272 b/tests/shared/272
-index 4417535..11b2a00 100755
---- a/tests/shared/272
-+++ b/tests/shared/272
-@@ -87,6 +87,7 @@ _supported_os Linux
- _need_to_be_root
- _require_scratch
- 
-+rm -f $seqres.full
- _scratch_mkfs_sized $((64 * 1024 * 1024)) >> $seqres.full 2>&1
- _scratch_mount
- 
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++# Create our test file with some data and durably persist it.
++$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 128K" $SCRATCH_MNT/foo | _filter_xfs_io
++sync
++
++# Append some data to the file, increasing its size, and leave a hole between
++# the old size and the start offset if the following write. So our file gets
++# a hole in the range [128Kb, 256Kb[.
++$XFS_IO_PROG -c "pwrite -S 0xbb 256K 32K" $SCRATCH_MNT/foo | _filter_xfs_io
++
++# Now truncate our file to a smaller size that is in the middle of the hole we
++# previously created. On most truncate implementations the data we appended
++# before gets discarded from memory (with truncate_setsize()) and never ends
++# up being written to disk.
++$XFS_IO_PROG -c "truncate 160K" $SCRATCH_MNT/foo
++
++_scratch_remount
++
++# We expect to see a file with a size of 160Kb, with the first 128Kb of data all
++# having the value 0xaa and the remaining 32Kb of data all having the value 0x00
++echo "File content after remount:"
++od -t x1 $SCRATCH_MNT/foo
++
++status=0
++exit
+diff --git a/tests/generic/094.out b/tests/generic/094.out
+new file mode 100644
+index 0000000..47d1b63
+--- /dev/null
++++ b/tests/generic/094.out
+@@ -0,0 +1,11 @@
++QA output created by 094
++wrote 131072/131072 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 32768/32768 bytes at offset 262144
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File content after remount:
++0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
++*
++0400000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
++*
++0500000
+diff --git a/tests/generic/group b/tests/generic/group
+index ae40fed..c14ddb9 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -96,6 +96,7 @@
+ 091 rw auto quick
+ 092 auto quick prealloc
+ 093 attr cap udf auto
++094 auto quick metadata
+ 097 udf auto
+ 099 udf auto
+ 100 udf auto
 -- 
-2.4.3
+2.1.3
 
