@@ -1,53 +1,57 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:19736 "EHLO
+Received: from cn.fujitsu.com ([59.151.112.132]:50609 "EHLO
 	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751685AbbFZFVW (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 26 Jun 2015 01:21:22 -0400
+	with ESMTP id S1751539AbbFZFW4 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 26 Jun 2015 01:22:56 -0400
 Received: from G08CNEXCHPEKD03.g08.fujitsu.local (localhost.localdomain [127.0.0.1])
-	by edo.cn.fujitsu.com (8.14.3/8.13.1) with ESMTP id t5Q5Jfpc028850
-	for <fstests@vger.kernel.org>; Fri, 26 Jun 2015 13:19:41 +0800
+	by edo.cn.fujitsu.com (8.14.3/8.13.1) with ESMTP id t5Q5LG5Y028991
+	for <fstests@vger.kernel.org>; Fri, 26 Jun 2015 13:21:16 +0800
 From: Wang Yanfeng <wangyf-fnst@cn.fujitsu.com>
-Subject: [PATCH] btrfs: add a test of replace missing dev in diff raid
-Date: Fri, 26 Jun 2015 13:21:03 +0800
-Message-ID: <1435296063-10695-1-git-send-email-wangyf-fnst@cn.fujitsu.com>
+Subject: [PATCH v2] generic: busy loop of dd and rm test
+Date: Fri, 26 Jun 2015 13:22:38 +0800
+Message-ID: <1435296158-11198-1-git-send-email-wangyf-fnst@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Test of missing device replace in different raid modes.  This
-test requires SCRATCH_DEV_POOL contain 5 same size devices.
-
-This issue has been fixed by Omar's patch:
-	Btrfs: RAID 5/6 missing device scrub+replace
+generic/326 is a case about testing whether writing failed on
+NO_SPACE in a busy loop of write and delete when disk almost full.
+It is a long-term problem since very beginning in btrfs, and has been
+fixed by patchset titled "btrfs: Fix no_space on dd and rm loop" from
+zhaolei@cn.fujitsu.com.
 
 Signed-off-by: Wang Yanfeng <wangyf-fnst@cn.fujitsu.com>
 ---
- tests/btrfs/095     | 93 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/095.out |  2 ++
- tests/btrfs/group   |  1 +
- 3 files changed, 96 insertions(+)
- create mode 100755 tests/btrfs/095
- create mode 100644 tests/btrfs/095.out
+v1->v2:
+-add the 'tmp=/tmp/$$'
+-use xfs_io to replace dd and _fail
+-modify the description of case
 
-diff --git a/tests/btrfs/095 b/tests/btrfs/095
+ tests/generic/326     | 65 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/326.out | 21 +++++++++++++++++
+ tests/generic/group   |  1 +
+ 3 files changed, 87 insertions(+)
+ create mode 100755 tests/generic/326
+ create mode 100644 tests/generic/326.out
+
+diff --git a/tests/generic/326 b/tests/generic/326
 new file mode 100755
-index 0000000..012c327
+index 0000000..426762f
 --- /dev/null
-+++ b/tests/btrfs/095
-@@ -0,0 +1,93 @@
++++ b/tests/generic/326
+@@ -0,0 +1,65 @@
 +#! /bin/bash
-+# FS QA Test No. btrfs/095
++# FS QA Test No. 326
 +#
-+# Test of missing device replace in different raid mode
++# TEST busy loop of write and delete in a filesystem.
++# Sometimes writes will failed on NO_SPACE when disk almost full
++# in btrfs. It is long-term problem since very beginning for btrfs
 +#
-+# Be sure $SCRATCH_DEV_POOL including 5 devices. And all
-+# devices in pool must be in the same size.
-+# 
-+# To check the fs after replacing a dev, a scrub run is performed.
++# This issue was fixed by the patchset named:
 +#
-+# This issue has been fixed by Omar Sandoval's patch:
-+# 	Btrfs: RAID 5/6 missing device scrub+replace
++# btrfs: Fix no_space on dd and rm loop < from zhaolei@cn.fujitsu.com >
++#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2015 Fujitsu.  All Rights Reserved.
 +# Author: Wang Yanfeng <wangyf-fnst@cn.fujitsu.com>
@@ -71,6 +75,7 @@ index 0000000..012c327
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
++tmp=/tmp/$$
 +status=1
 +trap "exit \$status" 0 1 2 3 15
 +
@@ -80,72 +85,63 @@ index 0000000..012c327
 +
 +# real QA test starts here
 +_need_to_be_root
-+_supported_fs btrfs
++_supported_fs generic
 +_supported_os Linux
 +_require_scratch
-+_require_scratch_dev_pool 5
 +
 +rm -f $seqres.full
 +
-+REPLACE_DEV=`echo $SCRATCH_DEV_POOL | awk '{print $5}'`
-+export SCRATCH_DEV_POOL=`echo $SCRATCH_DEV_POOL | awk '{print $1,$2,$3,$4}'`
++dev_size=$((512 * 1024 * 1024))     # 512MB filesystem
++_scratch_mkfs_sized $dev_size >>$seqres.full 2>&1
++_scratch_mount
 +
-+_test () {
-+	export MKFS_OPTIONS="-m $1 -d $1"
-+	_scratch_pool_mkfs >>$seqres.full || _fail "mkfs failed"
-+	_scratch_mount
++for ((i = 0; i < 10; i++)); do
++	echo "loop $i" >>$seqres.full
 +
-+	PRUNE_DEV=`echo $SCRATCH_DEV_POOL | awk '{print $2}'`
-+	PRUNE_DEV_ID=`$BTRFS_UTIL_PROG fi show $SCRATCH_MNT | grep $PRUNE_DEV | awk '{print $2}'`
++	$XFS_IO_PROG -f -c "pwrite -b 1m 0 400m" "$SCRATCH_MNT"/file | \
++_filter_xfs_io | _filter_scratch
 +
-+	# dd some data
-+	dd if=/dev/urandom of="$SCRATCH_MNT"/file1 bs=1M count=1 \
-+ >>$seqres.full 2>&1 || _fail "dd failed"
-+	dd if=/dev/urandom of="$SCRATCH_MNT"/file2 bs=1M count=2 \
-+ >>$seqres.full 2>&1 || _fail "dd failed"
-+	dd if=/dev/urandom of="$SCRATCH_MNT"/file3 bs=1M count=4 \
-+ >>$seqres.full 2>&1 || _fail "dd failed"
++	rm -f "$SCRATCH_MNT"/file
++done
 +
-+	# prune the device PRUNE_DEV && remount by degraded mode
-+	umount $SCRATCH_MNT
-+	dd if=/dev/zero of=$PRUNE_DEV bs=1M count=1 >>$seqres.full 2>&1 \
-+ || _fail "dd failed"
-+	mount -o degraded $SCRATCH_DEV $SCRATCH_MNT
-+
-+	# replace the missing dev $PRUNE_DEV with $REPLACE_DEV and scrub it
-+	$BTRFS_UTIL_PROG  replace start -B -r $PRUNE_DEV_ID $REPLACE_DEV \
-+ $SCRATCH_MNT  -f >>$seqres.full 2>&1 || _fail "replace failed"
-+	$BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >>$seqres.full 2>&1 \
-+ || _fail "scrub failed"
-+
-+	umount $SCRATCH_MNT
-+}
-+
-+_test "raid1"
-+_test "raid10"
-+_test "raid5"
-+_test "raid6"
-+
-+echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/btrfs/095.out b/tests/btrfs/095.out
+diff --git a/tests/generic/326.out b/tests/generic/326.out
 new file mode 100644
-index 0000000..80ad3b9
+index 0000000..770f354
 --- /dev/null
-+++ b/tests/btrfs/095.out
-@@ -0,0 +1,2 @@
-+QA output created by 095
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index ffe18bf..f20a191 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -96,3 +96,4 @@
- 092 auto quick send
- 093 auto quick clone
- 094 auto quick send
-+095 auto
++++ b/tests/generic/326.out
+@@ -0,0 +1,21 @@
++QA output created by 326
++wrote 419430400/419430400 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 419430400/419430400 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 419430400/419430400 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 419430400/419430400 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 419430400/419430400 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 419430400/419430400 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 419430400/419430400 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 419430400/419430400 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 419430400/419430400 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 419430400/419430400 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+diff --git a/tests/generic/group b/tests/generic/group
+index 0c8964c..393a2cb 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -194,3 +194,4 @@
+ 323 auto aio stress
+ 324 auto fsr quick
+ 325 auto quick data log
++326 auto
 -- 
 1.9.1
 
