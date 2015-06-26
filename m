@@ -1,56 +1,72 @@
-Received: from mx1.redhat.com ([209.132.183.28]:39071 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49750 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750729AbbFZGPs (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 26 Jun 2015 02:15:48 -0400
-Date: Fri, 26 Jun 2015 14:15:45 +0800
+	id S1751720AbbFZGim (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 26 Jun 2015 02:38:42 -0400
+Date: Fri, 26 Jun 2015 14:38:40 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] xfstests: generic xattr enospc cleanup test
-Message-ID: <20150626061545.GF1210@dhcp-13-216.nay.redhat.com>
-References: <1435078044-21679-1-git-send-email-bfoster@redhat.com>
+Subject: Re: [PATCH] fstests: generic test for truncating a file into the
+ middle of a hole
+Message-ID: <20150626063839.GG1210@dhcp-13-216.nay.redhat.com>
+References: <1435202279-23573-1-git-send-email-fdmanana@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1435078044-21679-1-git-send-email-bfoster@redhat.com>
+In-Reply-To: <1435202279-23573-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jun 23, 2015 at 12:47:24PM -0400, Brian Foster wrote:
-> XFS had a regression where inode reclaim in the unlink codepath would
-> not correctly tear down extended attribute forks where no xattr extents
-> are present. Add a generic test to create this condition.
+On Thu, Jun 25, 2015 at 04:17:59AM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
-> The test sets extended attributes on a series of files under ENOSPC
-> conditions and then verifies that the files can be removed without
-> syslog warnings or errors.
+> Test that after truncating a file into the middle of a hole causes the
+> new size of the file to be persisted after a clean unmount of the
+> filesystem (or after the inode is evicted). This is for the case where
+> all the data following the hole is not yet durably persisted, that is,
+> that data is only present in the page cache.
 > 
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
+> This test is motivated by an issue found in btrfs, which got fixed by
+> the patch titled:
+> 
+>   "Btrfs: fix shrinking truncate when the no_holes feature is enabled"
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+
+Looks good to me. Test failed on btrfs as expect and passed on
+extN/xfs/nfs/cifs.
+
+Reviewed-by: Eryu Guan <eguan@redhat.com>
+
 > ---
->  tests/generic/103     | 91 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/103.out |  2 ++
+>  tests/generic/094     | 91 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/094.out | 11 +++++++
 >  tests/generic/group   |  1 +
->  3 files changed, 94 insertions(+)
->  create mode 100755 tests/generic/103
->  create mode 100644 tests/generic/103.out
+>  3 files changed, 103 insertions(+)
+>  create mode 100755 tests/generic/094
+>  create mode 100644 tests/generic/094.out
 > 
-> diff --git a/tests/generic/103 b/tests/generic/103
+> diff --git a/tests/generic/094 b/tests/generic/094
 > new file mode 100755
-> index 0000000..373cd9d
+> index 0000000..0876eb7
 > --- /dev/null
-> +++ b/tests/generic/103
+> +++ b/tests/generic/094
 > @@ -0,0 +1,91 @@
 > +#! /bin/bash
-> +# FSQA Test No. 103
+> +# FSQA Test No. 094
 > +#
-> +# Test attribute fork teardown. This test is inspired by a regression in XFS
-> +# that resulted in problematic removal of inodes with remote attribute forks
-> +# without attribute extents. The attribute fork condition is created by
-> +# attempting to set larger attribute values on a filesystem that is at or near
-> +# ENOSPC.
+> +# Test that after truncating a file into the middle of a hole causes the new
+> +# size of the file to be persisted after a clean unmount of the filesystem (or
+> +# after the inode is evicted). This is for the case where all the data following
+> +# the hole is not yet durably persisted, that is, that data is only present in
+> +# the page cache.
+> +#
+> +# This test is motivated by an issue found in btrfs.
 > +#
 > +#-----------------------------------------------------------------------
-> +# Copyright (c) 2015 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
+> +# Author: Filipe Manana <fdmanana@suse.com>
 > +#
 > +# This program is free software; you can redistribute it and/or
 > +# modify it under the terms of the GNU General Public License as
@@ -64,114 +80,100 @@ On Tue, Jun 23, 2015 at 12:47:24PM -0400, Brian Foster wrote:
 > +# You should have received a copy of the GNU General Public License
 > +# along with this program; if not, write the Free Software Foundation,
 > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#
 > +#-----------------------------------------------------------------------
 > +#
 > +
 > +seq=`basename $0`
 > +seqres=$RESULT_DIR/$seq
 > +echo "QA output created by $seq"
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
 > +_cleanup()
 > +{
-> +        cd /
-> +        rm -f $tmp.*
+> +	rm -f $tmp.*
 > +}
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15 25
 > +
 > +# get standard environment, filters and checks
 > +. ./common/rc
-> +. ./common/attr
+> +. ./common/filter
 > +
 > +# real QA test starts here
+> +_need_to_be_root
 > +_supported_fs generic
 > +_supported_os Linux
 > +_require_scratch
-> +_require_attrs
+> +
+> +# This test was motivated by an issue found in btrfs when the btrfs no-holes
+> +# feature is enabled (introduced in kernel 3.14). So enable the feature if the
+> +# fs being tested is btrfs.
+> +if [ $FSTYP == "btrfs" ]; then
+> +	_require_btrfs_fs_feature "no_holes"
+> +	_require_btrfs_mkfs_feature "no-holes"
+> +	MKFS_OPTIONS="$MKFS_OPTIONS -O no-holes"
+> +fi
 > +
 > +rm -f $seqres.full
 > +
-> +_consume_freesp()
-> +{
-> +	file=$1
-> +
-> +	# consume nearly all available space (leave ~512kB)
-> +	avail=`_get_available_space $SCRATCH_MNT`
-> +	filesizekb=$((avail / 1024 - 512))
-> +	$XFS_IO_PROG -fc "falloc 0 ${filesizekb}k" $file
-
-This fails ext2/3 which don't have fallocate(2) support, need
-_require_xfs_io_command "falloc".
-
-This blocks ext2/3 from testing but extN just doesn't support 64k xattr
-value, we don't lose much test coverage. On the other hand, changing
-falloc to pwrite extends test time significantly (2s -> 30+s) and
-doesn't gain much benefit.
-
-> +}
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mkfs >>$seqres.full 2>&1
 > +_scratch_mount
 > +
-> +for i in $(seq 0 63); do
-> +	touch $SCRATCH_MNT/$seq.$i
-> +done
+> +# Create our test file with some data and durably persist it.
+> +$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 128K" $SCRATCH_MNT/foo | _filter_xfs_io
+> +sync
 > +
-> +# Generate a large attribute value and consume the rest of the space in the
-> +# filesystem.
-> +$XFS_IO_PROG -fc "pwrite 0 64k" $SCRATCH_MNT/attrval > /dev/null 2>&1
-> +_consume_freesp $SCRATCH_MNT/spc
+> +# Append some data to the file, increasing its size, and leave a hole between
+> +# the old size and the start offset if the following write. So our file gets
+> +# a hole in the range [128Kb, 256Kb[.
+> +$XFS_IO_PROG -c "pwrite -S 0xbb 256K 32K" $SCRATCH_MNT/foo | _filter_xfs_io
 > +
-> +# Set attributes on the test files. These should start to hit ENOSPC.
-> +for i in $(seq 0 63); do
-> +	$SETFATTR_PROG -n user.test -v "`cat $SCRATCH_MNT/attrval`" \
-> +		$SCRATCH_MNT/$seq.$i >> $seqres.full 2>&1
-> +done
+> +# Now truncate our file to a smaller size that is in the middle of the hole we
+> +# previously created. On most truncate implementations the data we appended
+> +# before gets discarded from memory (with truncate_setsize()) and never ends
+> +# up being written to disk.
+> +$XFS_IO_PROG -c "truncate 160K" $SCRATCH_MNT/foo
 > +
-> +# Remove the files with attributes to test attribute fork teardown. Problems
-> +# result in dmesg output.
-> +rm -f $SCRATCH_MNT/$seq.*
-
-I see xfs corruption after the test, I think that's expected.
-
-But I just want to point out here that _check_dmesg is unable to detect
-the call traces in dmesg now, as the call trace doesn't have "WARNING",
-"kernel BUG" etc. keywords that _check_dmesg searches for, we rely on
-_check_fimesystems to fail the test.
-
-Thanks,
-Eryu
+> +_scratch_remount
 > +
-> +echo Silence is golden.
+> +# We expect to see a file with a size of 160Kb, with the first 128Kb of data all
+> +# having the value 0xaa and the remaining 32Kb of data all having the value 0x00
+> +echo "File content after remount:"
+> +od -t x1 $SCRATCH_MNT/foo
 > +
 > +status=0
 > +exit
-> diff --git a/tests/generic/103.out b/tests/generic/103.out
+> diff --git a/tests/generic/094.out b/tests/generic/094.out
 > new file mode 100644
-> index 0000000..ce229bf
+> index 0000000..47d1b63
 > --- /dev/null
-> +++ b/tests/generic/103.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 103
-> +Silence is golden.
+> +++ b/tests/generic/094.out
+> @@ -0,0 +1,11 @@
+> +QA output created by 094
+> +wrote 131072/131072 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +wrote 32768/32768 bytes at offset 262144
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +File content after remount:
+> +0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+> +*
+> +0400000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+> +*
+> +0500000
 > diff --git a/tests/generic/group b/tests/generic/group
-> index 0c8964c..41f3039 100644
+> index ae40fed..c14ddb9 100644
 > --- a/tests/generic/group
 > +++ b/tests/generic/group
-> @@ -98,6 +98,7 @@
+> @@ -96,6 +96,7 @@
+>  091 rw auto quick
+>  092 auto quick prealloc
+>  093 attr cap udf auto
+> +094 auto quick metadata
 >  097 udf auto
 >  099 udf auto
 >  100 udf auto
-> +103 auto enospc quick
->  105 acl auto quick
->  112 rw aio auto quick
->  113 rw aio auto quick
 > -- 
-> 1.9.3
+> 2.1.3
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
