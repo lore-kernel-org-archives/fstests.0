@@ -1,60 +1,149 @@
-Received: from mx1.redhat.com ([209.132.183.28]:40336 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:57133 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755013AbbGCRPc (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 3 Jul 2015 13:15:32 -0400
-From: xuw2015@gmail.com
-Subject: [PATCH] xfs/015: make it more robust
-Date: Sat,  4 Jul 2015 01:15:27 +0800
-Message-Id: <1435943727-6075-1-git-send-email-xuw2015@gmail.com>
+	id S1751074AbbGEIlx (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sun, 5 Jul 2015 04:41:53 -0400
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] ext4: test migration to non-extent based file format
+Date: Sun,  5 Jul 2015 00:08:58 +0800
+Message-Id: <1436026138-4278-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: George Wang <xuw2015@gmail.com>
+Cc: linux-ext4@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: George Wang <xuw2015@gmail.com>
+On unpatched kernel, converting file with a hole at the beginning to
+non-extent based format results in ext4 i_blocks corruption. Add a new
+regression test case for it.
 
-create_file may run over before growfs, which depends on many reasons. such as
-the schedule algorithm, the workload of testing machine, etc. we should always
-make sure the create_file run over after growfs, then we can get the valid
-result of this test.
+These two commits fixed the corruption:
+ext4: be more strict when migrating to non-extent based file
+ext4: correctly migrate a file with a hole at the beginning
+
+Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- tests/xfs/015 | 16 +++++++++++++---
- 1 file changed, 13 insertions(+), 3 deletions(-)
 
-diff --git a/tests/xfs/015 b/tests/xfs/015
-index 4dbf38a..d9d4446 100755
---- a/tests/xfs/015
-+++ b/tests/xfs/015
-@@ -43,9 +43,16 @@ create_file()
- {
- 	local dir=$1
- 	local i=0
--
--	while echo -n >$dir/testfile_$i; do
--		let i=$i+1
-+	local in_growfs=false
+Note that this patch applies cleanly only after my patch:
+generic/081: wait for lv to be settled before creating fs on it
+
+ common/config    |  1 +
+ tests/ext4/005   | 83 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/group |  1 +
+ 3 files changed, 85 insertions(+)
+ create mode 100755 tests/ext4/005
+
+diff --git a/common/config b/common/config
+index 73da60a..dca7aad 100644
+--- a/common/config
++++ b/common/config
+@@ -191,6 +191,7 @@ export WIPEFS_PROG="`set_prog_path wipefs`"
+ export DUMP_PROG="`set_prog_path dump`"
+ export RESTORE_PROG="`set_prog_path restore`"
+ export LVM_PROG="`set_prog_path lvm`"
++export CHATTR_PROG="`set_prog_path chattr`"
+ 
+ # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+ # newer systems have udevadm command but older systems like RHEL5 don't.
+diff --git a/tests/ext4/005 b/tests/ext4/005
+new file mode 100755
+index 0000000..1028bf3
+--- /dev/null
++++ b/tests/ext4/005
+@@ -0,0 +1,83 @@
++#! /bin/bash
++# FS QA Test 005
++#
++# Test corruption issue in converting file with a hole at the beginning to
++# non-extent based format
++#
++# These two commits fixed the corruption:
++# ext4: be more strict when migrating to non-extent based file
++# ext4: correctly migrate a file with a hole at the beginning
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
 +
-+	# keep run until failed after growfs
-+	while true; do
-+		[ -f $tmp.growfs ] && in_growfs=true
-+		while echo -n >$dir/testfile_$i; do
-+			let i=$i+1
-+		done
-+		$in_growfs && break
-+		usleep 1000
- 	done
- }
- 
-@@ -89,6 +96,9 @@ echo "Fork $nr_worker workers to consume free inodes in background" >>$seqres.fu
- echo "Grow fs to $((dblocks * 4)) blocks" >>$seqres.full
- $XFS_GROWFS_PROG -D $((dblocks * 4)) $SCRATCH_MNT >>$seqres.full
- 
-+# mark xfs_growfs finished to create_file
-+touch $tmp.growfs
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
 +
- # Wait for background create_file to hit ENOSPC
- wait
- 
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs ext4
++_supported_os Linux
++_require_scratch
++_require_command "$CHATTR_PROG" chattr
++
++rm -f $seqres.full
++
++echo "Silence is golden"
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++testfile=$SCRATCH_MNT/$seq.attrtest
++touch $testfile
++$CHATTR_PROG -e $testfile >>$seqres.full 2>&1
++if [ $? -ne 0 ]; then
++	_notrun "Clearing extent flag not supported, old chattr and/or kernel?"
++fi
++
++rm -f $testfile
++# skip the first 4k and write to the second 4k, leave the first 4k as a hole
++$XFS_IO_PROG -fc "pwrite 4k 4k" -c "fsync" $testfile >>$seqres.full 2>&1
++
++# convert to non-extent based file format, buggy ext4 moves the data blocks to
++# the beginning of the file, but extent status cache still marks that region as
++# a hole
++$CHATTR_PROG -e $testfile >>$seqres.full 2>&1
++
++# delayed allocation writes to the "hole", reclaim the same data block again,
++# results in i_blocks corruption
++$XFS_IO_PROG -c "pwrite 0 4k" $testfile >>$seqres.full 2>&1
++
++# success, all done
++status=0
++exit
+diff --git a/tests/ext4/group b/tests/ext4/group
+index e7f1f2a..96218b7 100644
+--- a/tests/ext4/group
++++ b/tests/ext4/group
+@@ -7,6 +7,7 @@
+ 002 auto quick prealloc
+ 003 auto quick
+ 004 auto dump
++005 auto quick metadata ioctl rw
+ 271 auto rw quick
+ 301 aio dangerous ioctl rw stress
+ 302 aio dangerous ioctl rw stress
 -- 
-1.8.4.2
+1.8.3.1
 
