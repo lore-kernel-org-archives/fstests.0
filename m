@@ -1,57 +1,96 @@
-Received: from mail.kernel.org ([198.145.29.136]:39726 "EHLO mail.kernel.org"
+Received: from sandeen.net ([63.231.237.45]:41958 "EHLO sandeen.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754599AbbGPJTE (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 16 Jul 2015 05:19:04 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH] fstests: generic test for fsync after adding hard links
-Date: Wed, 15 Jul 2015 23:59:27 +0100
-Message-Id: <1437001167-21510-1-git-send-email-fdmanana@kernel.org>
+	id S1755486AbbGPQLs (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 16 Jul 2015 12:11:48 -0400
+Message-ID: <55A7D5BD.7050805@sandeen.net>
+Date: Thu, 16 Jul 2015 11:03:09 -0500
+From: Eric Sandeen <sandeen@sandeen.net>
+MIME-Version: 1.0
+Subject: PATCH 3/3 V6] xfs: test changing UUID on V5 superblock
+References: <55A7D414.2050606@sandeen.net>
+In-Reply-To: <55A7D414.2050606@sandeen.net>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: xfs-oss <xfs@oss.sgi.com>, "fstests@vger.kernel.org" <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+Tests xfs_db's ability to change & restore UUIDs on V5 filesystems,
+and tests xfs_copy's ability to change the UUID on the copy.
 
-Test that if we add hard links (in the same directory) to two files and
-then fsync only one of the files, after the fsync log/journal is replayed
-all the links exist and the filesystem metadata (directory and file
-inodes) is in a consistent state.
+Update to _filter_uuid is so that it will catch the UUID output
+from xfs_admin -u, which is slightly different than the regexp it
+was expecting.
 
-This test is motivated by a bug found in btrfs that is fixed by linux
-kernel patch titled:
+This requires new userspace which knows how to change the UUID on
+a V5 superblock.
 
-  "Btrfs: fix stale directory entries after fsync log replay"
-
-Verified against ext3/4, xfs, f2fs and reiserfs on a 4.1 linux kernel.
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 ---
- tests/generic/096     | 99 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/096.out |  3 ++
- tests/generic/group   |  1 +
- 3 files changed, 103 insertions(+)
- create mode 100755 tests/generic/096
- create mode 100644 tests/generic/096.out
 
-diff --git a/tests/generic/096 b/tests/generic/096
-new file mode 100755
-index 0000000..877ea95
---- /dev/null
-+++ b/tests/generic/096
-@@ -0,0 +1,99 @@
-+#! /bin/bash
-+# FSQA Test No. 096
+V6: Take into account Brian's prior review.
+
+diff --git a/common/filter b/common/filter
+index 05dbae6..8db1b3e 100644
+--- a/common/filter
++++ b/common/filter
+@@ -275,9 +275,9 @@ _filter_uuid()
+ {
+ 	if [ ! -z $1 ]; then
+ 		UUID=$1
+-		sed -e "s/\(uuid:\) $UUID/\1 <EXACTUUID>/i"
++		sed -e "s/\(uuid[ :=]\+\) $UUID/\1 <EXACTUUID>/i"
+ 	else
+-		sed -e "s/\(uuid:\) *[0-9a-f-][0-9a-f-]*/\1 <UUID>/i"
++		sed -e "s/\(uuid[ :=]\+\) *[0-9a-f-][0-9a-f-]*/\1 <UUID>/ig"
+ 	fi
+ }
+ 
+diff --git a/common/rc b/common/rc
+index 610045e..00b529b 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2702,6 +2702,21 @@ _require_test_fcntl_advisory_locks()
+ 		_notrun "Require fcntl advisory locks support"
+ }
+ 
++# XFS ability to change UUIDs on V5/CRC filesystems
 +#
-+# Test that if we add hard links (in the same directory) to two files and then
-+# fsync only one of the files, after the fsync log/journal is replayed all the
-+# links exist and the filesystem metadata (directory and file inodes) is in a
-+# consistent state.
++_require_meta_uuid()
++{
++	# This will create a crc fs on $SCRATCH_DEV
++	_require_xfs_crc
++
++	$XFS_DB_PROG -x -c "uuid generate" $SCRATCH_DEV >/dev/null 2>&1 \
++	   || _notrun "Userspace doesn't support meta_uuid feature"
++
++	_scratch_mount >/dev/null 2>&1 \
++	   || _notrun "Kernel doesn't support meta_uuid feature"
++	umount $SCRATCH_MNT
++}
++
+ _get_total_inode()
+ {
+ 	if [ -z "$1" ]; then
+diff --git a/tests/xfs/074 b/tests/xfs/074
+new file mode 100755
+index 0000000..2592e89
+--- /dev/null
++++ b/tests/xfs/074
+@@ -0,0 +1,143 @@
++#! /bin/bash
++# FS QA Test 074
++#
++# test UUID modification of CRC-enabled filesystems
++#
++# CRC-enabled / V5 superblock filesystems have a UUID stamped into
++# every piece of metadata, and a mechanism was added later to allow
++# changing the user-visible UUID by copying the original UUID (which
++# matches all the existing metadata) to a new superblock location.
++# Exercise some of that behavior.
 +#
 +#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
++# Copyright (c) 2015 Red Hat, Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -71,95 +110,154 @@ index 0000000..877ea95
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
++
++here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+	_cleanup_flakey
++	cd /
 +	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/dmflakey
 +
 +# real QA test starts here
-+_need_to_be_root
-+_supported_fs generic
++
++_supported_fs xfs
 +_supported_os Linux
 +_require_scratch
-+_require_dm_flakey
-+_require_metadata_journaling $SCRATCH_DEV
++_require_xfs_crc
++_require_meta_uuid
++
++# Takes 2 args, 2nd optional:
++#  1: generate, rewrite, or restore
++#  2: Expected UUID after the action.  Blank if new uuid generated
++# After the action check the fs, and make sure it can be mounted
++# Sets NEW_UUID to the resulting UUID.
++_test_uuid()
++{
++	ACTION=$1
++	EXPECTED_UUID=$2
++
++	$XFS_DB_PROG -x -c "uuid $ACTION" $SCRATCH_DEV \
++					| _filter_uuid $EXPECTED_UUID
++	NEW_UUID=`$XFS_DB_PROG -c "uuid"  $SCRATCH_DEV | awk '{print $NF}'`
++	_check_scratch_fs
++	_scratch_mount || _fail "Mount failed after UUID $ACTION"
++	_scratch_unmount
++
++}
++
++_fs_has_META_UUID()
++{
++	FS=$1
++	$XFS_DB_PROG -r -c version $FS | grep -q META_UUID
++}
 +
 +rm -f $seqres.full
 +
-+_scratch_mkfs >>$seqres.full 2>&1
-+_init_flakey
-+_mount_flakey
++_scratch_mkfs_xfs -m crc=1 >> $seqres.full 2>&1 || _fail "mkfs failed"
 +
-+# Create our test directory and files.
-+mkdir $SCRATCH_MNT/testdir
-+touch $SCRATCH_MNT/testdir/foo
-+touch $SCRATCH_MNT/testdir/bar
++ORIG_UUID=`$XFS_DB_PROG -c "uuid" $SCRATCH_DEV | awk '{print $NF}'`
 +
-+# Make sure everything done so far is durably persisted.
-+sync
++_scratch_mount
++# Put some stuff on the fs
++$FSSTRESS_PROG -d $SCRATCH_MNT -n 100 -p 4 >> $seqres.full 2>&1
++_scratch_unmount
 +
-+# Create one hard link for file foo and another one for file bar. After that
-+# fsync only the file bar.
-+ln $SCRATCH_MNT/testdir/bar $SCRATCH_MNT/testdir/bar_link
-+ln $SCRATCH_MNT/testdir/foo $SCRATCH_MNT/testdir/foo_link
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/testdir/bar
++# Can xfs_db change it?
 +
-+# Silently drop all writes on our scratch device to simulate a power failure.
-+_load_flakey_table $FLAKEY_DROP_WRITES
-+_unmount_flakey
++echo "== Generate new UUID"
++_test_uuid generate
++[ "$NEW_UUID" == "$ORIG_UUID" ] && _fail "Failed to change UUID"
++_fs_has_META_UUID $SCRATCH_DEV || _fail "META_UUID feature not set"
 +
-+# Allow writes again and mount the fs to trigger log/journal replay.
-+_load_flakey_table $FLAKEY_ALLOW_WRITES
-+_mount_flakey
++# This should be a no-op
++echo "== Rewrite UUID"
++_test_uuid rewrite $NEW_UUID
++_fs_has_META_UUID $SCRATCH_DEV || _fail "META_UUID feature not set"
 +
-+# Now verify both our files have a link count of 2.
-+echo "Link count for file foo: $(stat --format=%h $SCRATCH_MNT/testdir/foo)"
-+echo "Link count for file bar: $(stat --format=%h $SCRATCH_MNT/testdir/bar)"
++# Can we change it back?
++echo "== Restore old UUID"
++_test_uuid restore $ORIG_UUID
++[ "$NEW_UUID" != "$ORIG_UUID" ] && _fail "Failed to restore UUID"
++_fs_has_META_UUID $SCRATCH_DEV && _fail "META_UUID feature should not be not set"
 +
-+# We should be able to remove all the links of our files in testdir, and after
-+# that the parent directory should become empty and therefore possible to
-+# remove it.
-+rm -f $SCRATCH_MNT/testdir/*
-+rmdir $SCRATCH_MNT/testdir
++# This should be a no-op too.
++echo "== Rewrite UUID"
++_test_uuid rewrite $ORIG_UUID
++_fs_has_META_UUID $SCRATCH_DEV && _fail "META_UUID feature should not be not set"
 +
-+_unmount_flakey
++# Ok, now what does xfs_copy do; it changes UUID by default
 +
-+# The fstests framework will call fsck against our filesystem which will verify
-+# that all metadata is in a consistent state.
++IMGFILE=$TEST_DIR/$seq.copy.img
++rm -f $IMGFILE
 +
++# xfs_copy changes the UUID by default
++echo "== xfs_copy with new UUID"
++$XFS_COPY_PROG $SCRATCH_DEV $IMGFILE 2>&1 >> $seqres.full || \
++	_fail "xfs_copy (new UUID) failed"
++_check_xfs_filesystem $IMGFILE none none || _fail "Copy looks corrupted"
++# The copy should have META_UUID feature set
++_fs_has_META_UUID $IMGFILE || _fail "META_UUID feature not set on copy"
++_scratch_mount || _fail "Mount failed after UUID rewrite"
++_scratch_unmount
++
++rm -f $IMGFILE
++
++# duplicating the UUID should be fine too
++echo "== xfs_copy with duplicate UUID"
++$XFS_COPY_PROG -d $SCRATCH_DEV $IMGFILE 2>&1 >> $seqres.full || \
++	_fail "xfs_copy (duplicate) failed"
++_check_xfs_filesystem $IMGFILE none none || _fail "Duplicate copy looks corrupted"
++# The copy should not have META_UUID feature set
++_fs_has_META_UUID $IMGFILE && _fail "META_UUID feature should not be set on copy"
++
++# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/096.out b/tests/generic/096.out
+diff --git a/tests/xfs/074.out b/tests/xfs/074.out
 new file mode 100644
-index 0000000..09544ad
+index 0000000..b511107
 --- /dev/null
-+++ b/tests/generic/096.out
-@@ -0,0 +1,3 @@
-+QA output created by 096
-+Link count for file foo: 2
-+Link count for file bar: 2
-diff --git a/tests/generic/group b/tests/generic/group
-index 1f1a0b0..1e21d17 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -98,6 +98,7 @@
- 093 attr cap udf auto
- 094 auto quick metadata
- 095 auto quick metadata
-+096 auto quick metadata
- 097 udf auto
- 099 udf auto
- 100 udf auto
--- 
-2.1.3
++++ b/tests/xfs/074.out
+@@ -0,0 +1,21 @@
++QA output created by 074
++== Generate new UUID
++Clearing log and setting UUID
++writing all SBs
++new UUID =  <UUID>
++== Rewrite UUID
++old UUID = <EXACTUUID>
++Clearing log and setting UUID
++writing all SBs
++new UUID = <EXACTUUID>
++== Restore old UUID
++Clearing log and setting UUID
++writing all SBs
++new UUID = <EXACTUUID>
++== Rewrite UUID
++old UUID = <EXACTUUID>
++Clearing log and setting UUID
++writing all SBs
++new UUID = <EXACTUUID>
++== xfs_copy with new UUID
++== xfs_copy with duplicate UUID
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 848a1bd..a66869a 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -71,6 +71,7 @@
+ 071 rw auto
+ 072 rw auto prealloc quick
+ 073 copy auto
++074 auto quick copy
+ 078 growfs auto quick
+ 080 rw ioctl
+ 081 deprecated # log logprint quota
 
