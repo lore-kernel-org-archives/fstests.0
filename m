@@ -1,263 +1,111 @@
-Received: from sandeen.net ([63.231.237.45]:41958 "EHLO sandeen.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755486AbbGPQLs (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 16 Jul 2015 12:11:48 -0400
-Message-ID: <55A7D5BD.7050805@sandeen.net>
-Date: Thu, 16 Jul 2015 11:03:09 -0500
-From: Eric Sandeen <sandeen@sandeen.net>
-MIME-Version: 1.0
-Subject: PATCH 3/3 V6] xfs: test changing UUID on V5 superblock
-References: <55A7D414.2050606@sandeen.net>
-In-Reply-To: <55A7D414.2050606@sandeen.net>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Received: from e28smtp06.in.ibm.com ([122.248.162.6]:48376 "EHLO
+	e28smtp06.in.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750872AbbGQE5G (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 17 Jul 2015 00:57:06 -0400
+Received: from /spool/local
+	by e28smtp06.in.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+	for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
+	Fri, 17 Jul 2015 10:27:03 +0530
+From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Subject: [PATCH] generic/311: Disable dmesg check
+Date: Fri, 17 Jul 2015 00:56:43 -0400
+Message-Id: <1437109003-2357-1-git-send-email-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
-To: xfs-oss <xfs@oss.sgi.com>, "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, linux-btrfs@vger.kernel.org, jbacik@fb.com
 List-ID: <fstests@vger.kernel.org>
 
-Tests xfs_db's ability to change & restore UUIDs on V5 filesystems,
-and tests xfs_copy's ability to change the UUID on the copy.
+When running generic/311 on Btrfs' subpagesize-blocksize patchset (on ppc64
+with 4k sectorsize and 16k node/leaf size) I noticed the following call trace,
 
-Update to _filter_uuid is so that it will catch the UUID output
-from xfs_admin -u, which is slightly different than the regexp it
-was expecting.
+BTRFS (device dm-0): parent transid verify failed on 29720576 wanted 160 found 158
+BTRFS (device dm-0): parent transid verify failed on 29720576 wanted 160 found 158
+BTRFS: Transaction aborted (error -5)
 
-This requires new userspace which knows how to change the UUID on
-a V5 superblock.
+WARNING: at /root/repos/linux/fs/btrfs/super.c:260
+Modules linked in:
+CPU: 3 PID: 30769 Comm: umount Tainted: G        W    L 4.0.0-rc5-11671-g8b82e73e #63
+task: c000000079aaddb0 ti: c000000079a48000 task.ti: c000000079a48000
+NIP: c000000000499aa0 LR: c000000000499a9c CTR: c000000000779630
+REGS: c000000079a4b480 TRAP: 0700   Tainted: G        W   L   (4.0.0-rc5-11671-g8b82e73e)
+MSR: 8000000100029032 <SF,EE,ME,IR,DR,RI>  CR: 28008828  XER: 20000000
+CFAR: c000000000a23914 SOFTE: 1
+GPR00: c000000000499a9c c000000079a4b700 c00000000103bdf8 0000000000000025
+GPR04: 0000000000000001 0000000000000502 c00000000107e918 0000000000000cda
+GPR08: 0000000000000007 0000000000000007 0000000000000001 c0000000010f5044
+GPR12: 0000000028008822 c00000000fdc0d80 0000000020000000 0000000010152e00
+GPR16: 0000010002979380 0000000010140724 0000000000000000 0000000000000000
+GPR20: ffffffffffffffff 0000000000000000 0000000000000000 0000000000000000
+GPR24: c0000000151f61a8 0000000000000000 c000000055e5e800 c000000000aac270
+GPR28: 00000000000004a4 fffffffffffffffb c000000055e5e800 c0000000679204d0
+NIP [c000000000499aa0] .__btrfs_abort_transaction+0x180/0x190
+LR [c000000000499a9c] .__btrfs_abort_transaction+0x17c/0x190
+Call Trace:
+[c000000079a4b700] [c000000000499a9c] .__btrfs_abort_transaction+0x17c/0x190 (unreliable)
+[c000000079a4b7a0] [c000000000541678] .__btrfs_run_delayed_items+0xe8/0x220
+[c000000079a4b850] [c0000000004d5b3c] .btrfs_commit_transaction+0x37c/0xca0
+[c000000079a4b960] [c00000000049824c] .btrfs_sync_fs+0x6c/0x1a0
+[c000000079a4ba00] [c000000000255270] .sync_filesystem+0xd0/0x100
+[c000000079a4ba80] [c000000000218070] .generic_shutdown_super+0x40/0x170
+[c000000079a4bb10] [c000000000218598] .kill_anon_super+0x18/0x30
+[c000000079a4bb90] [c000000000498418] .btrfs_kill_super+0x18/0xc0
+[c000000079a4bc10] [c000000000218ac8] .deactivate_locked_super+0x98/0xe0
+[c000000079a4bc90] [c00000000023e744] .cleanup_mnt+0x54/0xa0
+[c000000079a4bd10] [c0000000000b7d14] .task_work_run+0x114/0x150
+[c000000079a4bdb0] [c000000000015f84] .do_notify_resume+0x74/0x80
+[c000000079a4be30] [c000000000009838] .ret_from_except_lite+0x64/0x68
+Instruction dump:
+ebc1fff0 ebe1fff8 4bfffb28 60000000 3ce2ffcd 38e7e818 4bffffbc 3c62ffd2
+7fa4eb78 3863b808 48589e1d 60000000 <0fe00000> 4bfffedc 60000000 60000000
+BTRFS: error (device dm-0) in __btrfs_run_delayed_items:1188: errno=-5 IO failure
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+
+The call trace is seen when executing _run_test() for the 8th time.
+The above trace is actually a false-positive failure as indicated below,
+ fsync-tester
+   fsync(fd)
+   Write delayed inode item to fs tree
+     (assume transid to be 160)
+     (assume tree block to start at logical address 29720576)
+ md5sum $testfile
+   This causes a delayed inode to be added
+ Load flakey table
+   i.e. drop writes that are initiated from now onwards
+ Unmount filesystem
+   btrfs_sync_fs is invoked
+     Write 29720576 metadata block to disk
+     free_extent_buffer(29720576)
+       release_extent_buffer(29720576)
+   Start writing delayed inode
+     Traverse the fs tree
+       (assume the parent tree block of 29720576 is still in memory)
+       When reading 29720576 from disk, parent's blkptr will have generation
+       set to 160. But the on-disk tree block will have an older
+       generation (say, 158). Transid verification fails and hence the
+       transaction gets aborted
+
+The test only cares about the FS instance before the unmount
+operation (i.e. the synced FS). Hence to get the test to pass, ignore the
+false-positive trace that could be generated.
+
+Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
+ tests/generic/311 | 2 ++
+ 1 file changed, 2 insertions(+)
 
-V6: Take into account Brian's prior review.
-
-diff --git a/common/filter b/common/filter
-index 05dbae6..8db1b3e 100644
---- a/common/filter
-+++ b/common/filter
-@@ -275,9 +275,9 @@ _filter_uuid()
- {
- 	if [ ! -z $1 ]; then
- 		UUID=$1
--		sed -e "s/\(uuid:\) $UUID/\1 <EXACTUUID>/i"
-+		sed -e "s/\(uuid[ :=]\+\) $UUID/\1 <EXACTUUID>/i"
- 	else
--		sed -e "s/\(uuid:\) *[0-9a-f-][0-9a-f-]*/\1 <UUID>/i"
-+		sed -e "s/\(uuid[ :=]\+\) *[0-9a-f-][0-9a-f-]*/\1 <UUID>/ig"
- 	fi
- }
+diff --git a/tests/generic/311 b/tests/generic/311
+index d21b6eb..cd6391d 100755
+--- a/tests/generic/311
++++ b/tests/generic/311
+@@ -64,6 +64,8 @@ _require_xfs_io_command "falloc"
  
-diff --git a/common/rc b/common/rc
-index 610045e..00b529b 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2702,6 +2702,21 @@ _require_test_fcntl_advisory_locks()
- 		_notrun "Require fcntl advisory locks support"
- }
+ [ -x $here/src/fsync-tester ] || _notrun "fsync-tester not built"
  
-+# XFS ability to change UUIDs on V5/CRC filesystems
-+#
-+_require_meta_uuid()
-+{
-+	# This will create a crc fs on $SCRATCH_DEV
-+	_require_xfs_crc
++_disable_dmesg_check
 +
-+	$XFS_DB_PROG -x -c "uuid generate" $SCRATCH_DEV >/dev/null 2>&1 \
-+	   || _notrun "Userspace doesn't support meta_uuid feature"
-+
-+	_scratch_mount >/dev/null 2>&1 \
-+	   || _notrun "Kernel doesn't support meta_uuid feature"
-+	umount $SCRATCH_MNT
-+}
-+
- _get_total_inode()
- {
- 	if [ -z "$1" ]; then
-diff --git a/tests/xfs/074 b/tests/xfs/074
-new file mode 100755
-index 0000000..2592e89
---- /dev/null
-+++ b/tests/xfs/074
-@@ -0,0 +1,143 @@
-+#! /bin/bash
-+# FS QA Test 074
-+#
-+# test UUID modification of CRC-enabled filesystems
-+#
-+# CRC-enabled / V5 superblock filesystems have a UUID stamped into
-+# every piece of metadata, and a mechanism was added later to allow
-+# changing the user-visible UUID by copying the original UUID (which
-+# matches all the existing metadata) to a new superblock location.
-+# Exercise some of that behavior.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Red Hat, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+_supported_fs xfs
-+_supported_os Linux
-+_require_scratch
-+_require_xfs_crc
-+_require_meta_uuid
-+
-+# Takes 2 args, 2nd optional:
-+#  1: generate, rewrite, or restore
-+#  2: Expected UUID after the action.  Blank if new uuid generated
-+# After the action check the fs, and make sure it can be mounted
-+# Sets NEW_UUID to the resulting UUID.
-+_test_uuid()
-+{
-+	ACTION=$1
-+	EXPECTED_UUID=$2
-+
-+	$XFS_DB_PROG -x -c "uuid $ACTION" $SCRATCH_DEV \
-+					| _filter_uuid $EXPECTED_UUID
-+	NEW_UUID=`$XFS_DB_PROG -c "uuid"  $SCRATCH_DEV | awk '{print $NF}'`
-+	_check_scratch_fs
-+	_scratch_mount || _fail "Mount failed after UUID $ACTION"
-+	_scratch_unmount
-+
-+}
-+
-+_fs_has_META_UUID()
-+{
-+	FS=$1
-+	$XFS_DB_PROG -r -c version $FS | grep -q META_UUID
-+}
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs_xfs -m crc=1 >> $seqres.full 2>&1 || _fail "mkfs failed"
-+
-+ORIG_UUID=`$XFS_DB_PROG -c "uuid" $SCRATCH_DEV | awk '{print $NF}'`
-+
-+_scratch_mount
-+# Put some stuff on the fs
-+$FSSTRESS_PROG -d $SCRATCH_MNT -n 100 -p 4 >> $seqres.full 2>&1
-+_scratch_unmount
-+
-+# Can xfs_db change it?
-+
-+echo "== Generate new UUID"
-+_test_uuid generate
-+[ "$NEW_UUID" == "$ORIG_UUID" ] && _fail "Failed to change UUID"
-+_fs_has_META_UUID $SCRATCH_DEV || _fail "META_UUID feature not set"
-+
-+# This should be a no-op
-+echo "== Rewrite UUID"
-+_test_uuid rewrite $NEW_UUID
-+_fs_has_META_UUID $SCRATCH_DEV || _fail "META_UUID feature not set"
-+
-+# Can we change it back?
-+echo "== Restore old UUID"
-+_test_uuid restore $ORIG_UUID
-+[ "$NEW_UUID" != "$ORIG_UUID" ] && _fail "Failed to restore UUID"
-+_fs_has_META_UUID $SCRATCH_DEV && _fail "META_UUID feature should not be not set"
-+
-+# This should be a no-op too.
-+echo "== Rewrite UUID"
-+_test_uuid rewrite $ORIG_UUID
-+_fs_has_META_UUID $SCRATCH_DEV && _fail "META_UUID feature should not be not set"
-+
-+# Ok, now what does xfs_copy do; it changes UUID by default
-+
-+IMGFILE=$TEST_DIR/$seq.copy.img
-+rm -f $IMGFILE
-+
-+# xfs_copy changes the UUID by default
-+echo "== xfs_copy with new UUID"
-+$XFS_COPY_PROG $SCRATCH_DEV $IMGFILE 2>&1 >> $seqres.full || \
-+	_fail "xfs_copy (new UUID) failed"
-+_check_xfs_filesystem $IMGFILE none none || _fail "Copy looks corrupted"
-+# The copy should have META_UUID feature set
-+_fs_has_META_UUID $IMGFILE || _fail "META_UUID feature not set on copy"
-+_scratch_mount || _fail "Mount failed after UUID rewrite"
-+_scratch_unmount
-+
-+rm -f $IMGFILE
-+
-+# duplicating the UUID should be fine too
-+echo "== xfs_copy with duplicate UUID"
-+$XFS_COPY_PROG -d $SCRATCH_DEV $IMGFILE 2>&1 >> $seqres.full || \
-+	_fail "xfs_copy (duplicate) failed"
-+_check_xfs_filesystem $IMGFILE none none || _fail "Duplicate copy looks corrupted"
-+# The copy should not have META_UUID feature set
-+_fs_has_META_UUID $IMGFILE && _fail "META_UUID feature should not be set on copy"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/074.out b/tests/xfs/074.out
-new file mode 100644
-index 0000000..b511107
---- /dev/null
-+++ b/tests/xfs/074.out
-@@ -0,0 +1,21 @@
-+QA output created by 074
-+== Generate new UUID
-+Clearing log and setting UUID
-+writing all SBs
-+new UUID =  <UUID>
-+== Rewrite UUID
-+old UUID = <EXACTUUID>
-+Clearing log and setting UUID
-+writing all SBs
-+new UUID = <EXACTUUID>
-+== Restore old UUID
-+Clearing log and setting UUID
-+writing all SBs
-+new UUID = <EXACTUUID>
-+== Rewrite UUID
-+old UUID = <EXACTUUID>
-+Clearing log and setting UUID
-+writing all SBs
-+new UUID = <EXACTUUID>
-+== xfs_copy with new UUID
-+== xfs_copy with duplicate UUID
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 848a1bd..a66869a 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -71,6 +71,7 @@
- 071 rw auto
- 072 rw auto prealloc quick
- 073 copy auto
-+074 auto quick copy
- 078 growfs auto quick
- 080 rw ioctl
- 081 deprecated # log logprint quota
+ rm -f $seqres.full
+ SEED=1
+ testfile=$SCRATCH_MNT/$seq.fsync
+-- 
+2.1.0
 
