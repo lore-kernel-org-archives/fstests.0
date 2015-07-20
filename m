@@ -1,171 +1,159 @@
-Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:24007 "EHLO
-	mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1752108AbbGTMzo (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 20 Jul 2015 08:55:44 -0400
-Message-ID: <55ACEFC4.9040502@fb.com>
-Date: Mon, 20 Jul 2015 08:55:32 -0400
-From: Josef Bacik <jbacik@fb.com>
-MIME-Version: 1.0
-Subject: Re: [PATCH] generic/311: Disable dmesg check
-References: <1437109003-2357-1-git-send-email-chandan@linux.vnet.ibm.com> <20150717101602.GA39732@bfoster.bfoster> <2857206.7lmC8NzO7N@localhost.localdomain> <20150719235408.GT7943@dastard>
-In-Reply-To: <20150719235408.GT7943@dastard>
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
+Received: from mx1.redhat.com ([209.132.183.28]:46316 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752134AbbGTRYz (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 20 Jul 2015 13:24:55 -0400
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	by mx1.redhat.com (Postfix) with ESMTPS id 4474D3679F5
+	for <fstests@vger.kernel.org>; Mon, 20 Jul 2015 17:24:55 +0000 (UTC)
+Received: from bfoster.bfoster (dhcp-41-76.bos.redhat.com [10.18.41.76])
+	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t6KHOsAG013919
+	for <fstests@vger.kernel.org>; Mon, 20 Jul 2015 13:24:55 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: [PATCH] tests/xfs: test log recovery checksum with different log buf sizes
+Date: Mon, 20 Jul 2015 13:24:53 -0400
+Message-Id: <1437413093-28812-1-git-send-email-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>, Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Cc: Brian Foster <bfoster@redhat.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 07/19/2015 07:54 PM, Dave Chinner wrote:
-> On Fri, Jul 17, 2015 at 05:10:50PM +0530, Chandan Rajendra wrote:
->> On Friday 17 Jul 2015 06:16:02 Brian Foster wrote:
->>> On Fri, Jul 17, 2015 at 12:56:43AM -0400, Chandan Rajendra wrote:
->>>> When running generic/311 on Btrfs' subpagesize-blocksize patchset (on
->>>> ppc64
->>>> with 4k sectorsize and 16k node/leaf size) I noticed the following call
->>>> trace,
->>>>
->>>> BTRFS (device dm-0): parent transid verify failed on 29720576 wanted 160
->>>> found 158 BTRFS (device dm-0): parent transid verify failed on 29720576
->>>> wanted 160 found 158 BTRFS: Transaction aborted (error -5)
->>>>
->>>> WARNING: at /root/repos/linux/fs/btrfs/super.c:260
->>>> Modules linked in:
->>>> CPU: 3 PID: 30769 Comm: umount Tainted: G        W    L
->>>> 4.0.0-rc5-11671-g8b82e73e #63 task: c000000079aaddb0 ti: c000000079a48000
->>>> task.ti: c000000079a48000 NIP: c000000000499aa0 LR: c000000000499a9c CTR:
->>>> c000000000779630
->>>> REGS: c000000079a4b480 TRAP: 0700   Tainted: G        W   L
->>>> (4.0.0-rc5-11671-g8b82e73e) MSR: 8000000100029032 <SF,EE,ME,IR,DR,RI>
->>>> CR: 28008828  XER: 20000000 CFAR: c000000000a23914 SOFTE: 1
->>>> GPR00: c000000000499a9c c000000079a4b700 c00000000103bdf8 0000000000000025
->>>> GPR04: 0000000000000001 0000000000000502 c00000000107e918 0000000000000cda
->>>> GPR08: 0000000000000007 0000000000000007 0000000000000001 c0000000010f5044
->>>> GPR12: 0000000028008822 c00000000fdc0d80 0000000020000000 0000000010152e00
->>>> GPR16: 0000010002979380 0000000010140724 0000000000000000 0000000000000000
->>>> GPR20: ffffffffffffffff 0000000000000000 0000000000000000 0000000000000000
->>>> GPR24: c0000000151f61a8 0000000000000000 c000000055e5e800 c000000000aac270
->>>> GPR28: 00000000000004a4 fffffffffffffffb c000000055e5e800 c0000000679204d0
->>>> NIP [c000000000499aa0] .__btrfs_abort_transaction+0x180/0x190
->>>> LR [c000000000499a9c] .__btrfs_abort_transaction+0x17c/0x190
->>>> Call Trace:
->>>> [c000000079a4b700] [c000000000499a9c]
->>>> .__btrfs_abort_transaction+0x17c/0x190 (unreliable) [c000000079a4b7a0]
->>>> [c000000000541678] .__btrfs_run_delayed_items+0xe8/0x220
->>>> [c000000079a4b850] [c0000000004d5b3c]
->>>> .btrfs_commit_transaction+0x37c/0xca0 [c000000079a4b960]
->>>> [c00000000049824c] .btrfs_sync_fs+0x6c/0x1a0
->>>> [c000000079a4ba00] [c000000000255270] .sync_filesystem+0xd0/0x100
->>>> [c000000079a4ba80] [c000000000218070] .generic_shutdown_super+0x40/0x170
->>>> [c000000079a4bb10] [c000000000218598] .kill_anon_super+0x18/0x30
->>>> [c000000079a4bb90] [c000000000498418] .btrfs_kill_super+0x18/0xc0
->>>> [c000000079a4bc10] [c000000000218ac8] .deactivate_locked_super+0x98/0xe0
->>>> [c000000079a4bc90] [c00000000023e744] .cleanup_mnt+0x54/0xa0
->>>> [c000000079a4bd10] [c0000000000b7d14] .task_work_run+0x114/0x150
->>>> [c000000079a4bdb0] [c000000000015f84] .do_notify_resume+0x74/0x80
->>>> [c000000079a4be30] [c000000000009838] .ret_from_except_lite+0x64/0x68
->>>> Instruction dump:
->>>> ebc1fff0 ebe1fff8 4bfffb28 60000000 3ce2ffcd 38e7e818 4bffffbc 3c62ffd2
->>>> 7fa4eb78 3863b808 48589e1d 60000000 <0fe00000> 4bfffedc 60000000 60000000
->>>> BTRFS: error (device dm-0) in __btrfs_run_delayed_items:1188: errno=-5 IO
->>>> failure
->>>>
->>>>
->>>> The call trace is seen when executing _run_test() for the 8th time.
->>>> The above trace is actually a false-positive failure as indicated below,
->>>>
->>>>   fsync-tester
->>>>
->>>>     fsync(fd)
->>>>     Write delayed inode item to fs tree
->>>>
->>>>       (assume transid to be 160)
->>>>       (assume tree block to start at logical address 29720576)
->>>>
->>>>   md5sum $testfile
->>>>
->>>>     This causes a delayed inode to be added
->>>>
->>>>   Load flakey table
->>>>
->>>>     i.e. drop writes that are initiated from now onwards
->>>>
->>>>   Unmount filesystem
->>>>
->>>>     btrfs_sync_fs is invoked
->>>>
->>>>       Write 29720576 metadata block to disk
->>>>       free_extent_buffer(29720576)
->>>>
->>>>         release_extent_buffer(29720576)
->>>>
->>>>     Start writing delayed inode
->>>>
->>>>       Traverse the fs tree
->>>>
->>>>         (assume the parent tree block of 29720576 is still in memory)
->>>>         When reading 29720576 from disk, parent's blkptr will have
->>>>         generation
->>>>         set to 160. But the on-disk tree block will have an older
->>>>         generation (say, 158). Transid verification fails and hence the
->>>>         transaction gets aborted
->>>>
->>>> The test only cares about the FS instance before the unmount
->>>> operation (i.e. the synced FS). Hence to get the test to pass, ignore the
->>>> false-positive trace that could be generated.
->>>>
->>>> Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
->>>> ---
->>>>
->>>>   tests/generic/311 | 2 ++
->>>>   1 file changed, 2 insertions(+)
->>>>
->>>> diff --git a/tests/generic/311 b/tests/generic/311
->>>> index d21b6eb..cd6391d 100755
->>>> --- a/tests/generic/311
->>>> +++ b/tests/generic/311
->>>> @@ -64,6 +64,8 @@ _require_xfs_io_command "falloc"
->>>>
->>>>   [ -x $here/src/fsync-tester ] || _notrun "fsync-tester not built"
->>>>
->>>> +_disable_dmesg_check
->>>> +
->>>
->>> Hmm, I don't think this is something we'd want to do unconditionally.
->>> E.g., if something hits the logs for xfs or ext4, we probably want to
->>> hear about it.
->> Sorry, I forgot that I was dealing with generic tests. I agree with what you
->> say.
->>
->>>
->>> Perhaps check that the fs is btrfs and possibly the fs params are such
->>> that the known warning occurs..? I'd defer to the btrfs folks on how
->>> best to check that, so long as it doesn't affect other fs'.
->>>
->> The above trace is independent of any Btrfs parameters. Its just that it was
->> easily reproducible on ppc64 with the subpagesize-blocksize patchset
->> applied. So IMHO disabling call trace check when testing Btrfs filesystem is
->> the way to go. But again, as you said, we can wait for comments from other
->> Btrfs devs.
->
-> As a general principle, we don't disable warnings/errors in tests
-> just to make tests pass.  The bug in the code being tested should be
-> fixed so the warning/error is not generated. If you do not want
-> to see the error, then expung the test from your
-> subpagesize-blocksize test runs.
->
+XFS had a bug which lead to spurious checksum failures during
+verification of log records during recovery. This occurred when the
+filesystem was mounted for recovery with a different log buffer size
+(via the 'logbsize=...' mount option from when the filesystem crashed.
 
-The same problem would happen if you did echo 3> 
-/proc/sys/vm/drop_caches right after dropping writes before doing the 
-unmount.  The sub page blocksize stuff is just exposing the race and 
-thus causing this warning to happen.  The warning has nothing to do with 
-the test, it happens after drop writes so I think it's fine to ignore 
-it.  Maybe a different mechanism could be put into place to say "hey 
-ignore dmesg for this part" or something like that.
+Create a regression test that dirties the log using one particular log
+buffer size, shuts down the fs and attempts recovery using a larger log
+buffer size.
 
-That all being said, it is a little weird that the sub page blocksize 
-stuff hits this so consistently, I wonder why things are getting evicted 
-that quickly.  Thanks,
+Signed-off-by: Brian Foster <bfoster@redhat.com>
+---
 
-Josef
+Note that this test currently fails on XFS. I'll be posting a kernel fix
+shortly...
+
+Brian
+
+ tests/xfs/077     | 88 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/077.out |  2 ++
+ tests/xfs/group   |  1 +
+ 3 files changed, 91 insertions(+)
+ create mode 100755 tests/xfs/077
+ create mode 100644 tests/xfs/077.out
+
+diff --git a/tests/xfs/077 b/tests/xfs/077
+new file mode 100755
+index 0000000..8d442e6
+--- /dev/null
++++ b/tests/xfs/077
+@@ -0,0 +1,88 @@
++#! /bin/bash
++# FS QA Test No. 077
++#
++# Regression test for a bug in the log record checksum mechanism of XFS. Log
++# records are checksummed during recovery and a warning or mount failure occurs
++# on checksum verification failure. XFS had a bug where the checksum mechanism
++# verified different parts of a record depending on the current log buffer size.
++# This caused spurious checksum failures when a filesystem is recovered using a
++# different log buffer size from when the filesystem crashed.
++#
++# Test that log recovery succeeds with a different log buffer size from when the
++# filesystem crashed.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Red Hat, Inc. All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	killall -9 fsstress > /dev/null 2>&1
++	wait > /dev/null 2>&1
++}
++
++rm -f $seqres.full
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/log
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs xfs
++_supported_os Linux
++_require_scratch
++_require_v2log
++
++echo "Silence is golden."
++
++dmesg -c > /dev/null
++
++_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
++_scratch_mount "-o logbsize=32k"
++
++# Run a workload to dirty the log, wait a bit and shutdown the fs.
++$FSSTRESS_PROG -d $SCRATCH_MNT -p 4 -n 99999999 >> $seqres.full 2>&1 &
++sleep 10
++./src/godown -f $SCRATCH_MNT
++wait
++
++# Remount with a different log buffer size. Going from 32k to 64k increases the
++# log record extended header count, as the log record header can only handle 32k
++# of space.
++_scratch_unmount
++_scratch_mount "-o logbsize=64k"
++
++# The mount may not fail on v4 filesystems. Check for CRC mismatch warning
++# messages to detect failure in this case.
++dmesg -c | grep XFS | grep CRC
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/077.out b/tests/xfs/077.out
+new file mode 100644
+index 0000000..cbd2333
+--- /dev/null
++++ b/tests/xfs/077.out
+@@ -0,0 +1,2 @@
++QA output created by 077
++Silence is golden.
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 848a1bd..744393a 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -71,6 +71,7 @@
+ 071 rw auto
+ 072 rw auto prealloc quick
+ 073 copy auto
++077 auto log quick
+ 078 growfs auto quick
+ 080 rw ioctl
+ 081 deprecated # log logprint quota
+-- 
+2.1.0
 
