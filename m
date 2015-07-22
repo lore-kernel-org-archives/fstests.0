@@ -1,71 +1,73 @@
-Received: from sandeen.net ([63.231.237.45]:36219 "EHLO sandeen.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S934381AbbGVPWy (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 22 Jul 2015 11:22:54 -0400
-Message-ID: <55AFB550.5020904@sandeen.net>
-Date: Wed, 22 Jul 2015 10:22:56 -0500
-From: Eric Sandeen <sandeen@sandeen.net>
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:51509 "EHLO
+	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750779AbbGVVKx (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 22 Jul 2015 17:10:53 -0400
+Date: Thu, 23 Jul 2015 07:10:50 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] generic/311: Disable dmesg check
+Message-ID: <20150722211050.GZ3902@dastard>
+References: <1437109003-2357-1-git-send-email-chandan@linux.vnet.ibm.com>
+ <55ACEFC4.9040502@fb.com>
+ <20150720221220.GU7943@dastard>
+ <8410729.YTcdQ5sv7i@localhost.localdomain>
+ <20150722000105.GX3902@dastard>
+ <55AEE5D3.6020509@fb.com>
+ <20150722052700.GY3902@dastard>
+ <55AF7E77.5020803@fb.com>
 MIME-Version: 1.0
-Subject: Re: [PATCH] xfs/078: omit -m crc=0 mkfs option if mkfs.xfs has no
- meta support
-References: <1437553336-30408-1-git-send-email-eguan@redhat.com>
-In-Reply-To: <1437553336-30408-1-git-send-email-eguan@redhat.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <55AF7E77.5020803@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
+To: Josef Bacik <jbacik@fb.com>
+Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, Brian Foster <bfoster@redhat.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 7/22/15 3:22 AM, Eryu Guan wrote:
-> This basically does the same as in commit
+On Wed, Jul 22, 2015 at 07:28:55AM -0400, Josef Bacik wrote:
+> On 07/22/2015 01:27 AM, Dave Chinner wrote:
+> >>>Josef, Chris, is this really how btrfs handles metadata write
+> >>>failures? This handling of errors seems like a design flaw rather
+> >>>than a desireable behaviour to me....
+> >>>
+> >>
+> >>Jeeze you are cranky Dave, lets think about what this test is doing.
+> >
+> >Do you really see anything above that indicates I'm cranky? I'm just
+> >following the logic as i read it, reaching a conclusion and the
+> >saying "this doesn't sound right - can an expert please confirm I've
+> >got this right?".  Last thing I expected was to be shouted at and
+> >treated like an idiot.
+> >
+> >BTW, you'll know when I'm cranky - swearing is a real good
+> >indication that I'm pissed off at something or someone.
 > 
-> 90a3bfc xfs: be compatible with older mkfs.xfs which has no v5 support
+> Sorry, I didn't mean to come across angry or condescending.
+> Obviously I appreciate your expertise and questions, I wasn't pissed
+> or anything, this is just how I normally talk, you know I use
+> swearing as punctuation.
+
+Yes, I know that, and that doesn't worry me in the least.
+
+You don't normally shout, though.
+
+> >>This is part of the reason for dm-log-writes, to solve this kind of
+> >>shitty situation that dm-flakey introduces.
+> >
+> >Which you've also never explained in any of the dm-log-write patches
+> >you've posted in the past.  IOWs, get the dm-log-writes support code
+> >reviewed and fix the dm-flakey tests to use it so this problem goes
+> >away.
 > 
-> which left xfs/078 behind.
-> 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> The dm-log-writes target is already upstream, I sent the xfstests
+> stuff months ago, not sure if they ever made it in.  I'll check and
+> get them posted again if not.  Thanks,
 
-This is fine as far as it goes, but I think xfs/045 needs it too:
+They didn't, because it wasn't clear when the kernel code was going
+to be committed. I did notice yesterday that it was upstream.
 
+Cheers,
 
-if ! _scratch_mkfs_xfs -m crc=0 >$tmp.out 2>&1
-then
-    cat $tmp.out
-    echo "!!! failed to mkfs on $SCRATCH_DEV"
-    exit
-fi
-
-It fails "gracefully" but it doesn't need to, in this case.
-
-In case I'm wrong, for this patch:
-
-Reviewed-by: Eric Sandeen <sandeen@redhat.com>
-
-but xfs/045 might need a look too, either in this patch or a followup.
-
-Thanks,
--Eric
-
-> ---
->  tests/xfs/078 | 6 +++++-
->  1 file changed, 5 insertions(+), 1 deletion(-)
-> 
-> diff --git a/tests/xfs/078 b/tests/xfs/078
-> index 32436f7..0d6eb55 100755
-> --- a/tests/xfs/078
-> +++ b/tests/xfs/078
-> @@ -87,7 +87,11 @@ _grow_loop()
->  	echo
->  
->  	echo "*** mkfs loop file (size=$original)"
-> -	$MKFS_XFS_PROG -m crc=0 -b size=$bsize -d $dparam \
-> +	mkfs_crc_opts="-m crc=0"
-> +	if [ -n "$XFS_MKFS_HAS_NO_META_SUPPORT" ]; then
-> +		mkfs_crc_opts=""
-> +	fi
-> +	$MKFS_XFS_PROG $mkfs_crc_opts -b size=$bsize -d $dparam \
->  		| _filter_mkfs 2>/dev/null
->  
->  	echo "*** extend loop file"
-> 
-
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
