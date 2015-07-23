@@ -1,55 +1,76 @@
-Received: from sandeen.net ([63.231.237.45]:41638 "EHLO sandeen.net"
+Received: from mx1.redhat.com ([209.132.183.28]:47360 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753406AbbGWD4u (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 22 Jul 2015 23:56:50 -0400
-Message-ID: <55B06601.2080204@sandeen.net>
-Date: Wed, 22 Jul 2015 22:56:49 -0500
-From: Eric Sandeen <sandeen@sandeen.net>
-MIME-Version: 1.0
-Subject: Re: [PATCH] xfs/078: omit -m crc=0 mkfs option if mkfs.xfs has no
- meta support
-References: <1437553336-30408-1-git-send-email-eguan@redhat.com> <55AFB550.5020904@sandeen.net> <20150723035406.GG3945@dhcp-13-216.nay.redhat.com>
-In-Reply-To: <20150723035406.GG3945@dhcp-13-216.nay.redhat.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+	id S1754344AbbGWQp6 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 23 Jul 2015 12:45:58 -0400
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	by mx1.redhat.com (Postfix) with ESMTPS id CDCF49022B
+	for <fstests@vger.kernel.org>; Thu, 23 Jul 2015 16:45:58 +0000 (UTC)
+From: Jan Tulak <jtulak@redhat.com>
+Subject: [PATCH] xfstests: add a flag for direct printing of test output
+Date: Thu, 23 Jul 2015 18:45:55 +0200
+Message-Id: <1437669955-18454-1-git-send-email-jtulak@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Jan Tulak <jtulak@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 7/22/15 10:54 PM, Eryu Guan wrote:
-> On Wed, Jul 22, 2015 at 10:22:56AM -0500, Eric Sandeen wrote:
->> On 7/22/15 3:22 AM, Eryu Guan wrote:
->>> This basically does the same as in commit
->>>
->>> 90a3bfc xfs: be compatible with older mkfs.xfs which has no v5 support
->>>
->>> which left xfs/078 behind.
->>>
->>> Signed-off-by: Eryu Guan <eguan@redhat.com>
->>
->> This is fine as far as it goes, but I think xfs/045 needs it too:
->>
->>
->> if ! _scratch_mkfs_xfs -m crc=0 >$tmp.out 2>&1
->> then
->>     cat $tmp.out
->>     echo "!!! failed to mkfs on $SCRATCH_DEV"
->>     exit
->> fi
->>
->> It fails "gracefully" but it doesn't need to, in this case.
-> 
-> xfs/045 passed on my RHEL6 test box, I think that's because xfs/045 (and
-> some other tests) takes use of _scratch_mkfs_xfs not call $MKFS_XFS_PROG
-> directly, so commit 90a3bfc takes care of all the dirty work.
-> 
-> Thanks for the review!
+Add -d debug dump flag to ./check to directly print a test output
+to stdout, instead of just saving it into a file and showing a diff
+snippet.
 
-Oh, you are right ... how did I miss that it's calling _scratch_mkfs_xfs,
-I'm sorry!
+Useful e.g. when writing a new test.
 
-Yes, your patch is fine, and complete.  Oops! :)
+Signed-off-by: Jan Tulak <jtulak@redhat.com>
+---
+ check | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
 
-Thanks,
--Eric
+diff --git a/check b/check
+index a300130..a4ee224 100755
+--- a/check
++++ b/check
+@@ -37,6 +37,8 @@ randomize=false
+ export here=`pwd`
+ xfile=""
+ 
++DUMP_OUTPUT=false
++
+ # start the initialisation work now
+ iam=check
+ 
+@@ -74,6 +76,7 @@ check options
+     -n			show me, do not run tests
+     -T			output timestamps
+     -r			randomize test order
++    -d			dump test output to stdout
+     --large-fs		optimise scratch device for large filesystems
+     -s section		run only specified section from config file
+ 
+@@ -237,6 +240,7 @@ while [ $# -gt 0 ]; do
+         -r)	randomize=true ;;
+ 
+ 	-T)	timestamp=true ;;
++	-d)	DUMP_OUTPUT=true ;;
+ 
+ 	--large-fs) export LARGE_SCRATCH_DEV=yes ;;
+ 	--extra-space=*) export SCRATCH_DEV_EMPTY_SPACE=${r#*=} ;;
+@@ -598,8 +602,14 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 			# _check_dmesg depends on this log in dmesg
+ 			touch ${RESULT_DIR}/check_dmesg
+ 		fi
+-		./$seq >$tmp.rawout 2>&1
+-		sts=$?
++		if [ "$DUMP_OUTPUT" = true ]; then
++			./$seq 2>&1 | tee $tmp.rawout
++			# Because $? would get tee's return code
++			sts=${PIPESTATUS[0]}
++		else
++			./$seq >$tmp.rawout 2>&1
++			sts=$?
++		fi
+ 		$timestamp && _timestamp
+ 		stop=`_wallclock`
+ 
+-- 
+2.4.3
+
