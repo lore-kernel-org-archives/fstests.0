@@ -1,201 +1,49 @@
-Received: from mx1.redhat.com ([209.132.183.28]:33424 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752208AbbGXD2f (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 23 Jul 2015 23:28:35 -0400
-Date: Fri, 24 Jul 2015 11:28:32 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 3/3] btrfs: add a test of replace missing dev in diff raid
-Message-ID: <20150724032832.GO3945@dhcp-13-216.nay.redhat.com>
-References: <cover.1437683940.git.osandov@fb.com>
- <74be00ec0764de749fe43c1e4b20cc2cc35a4671.1437683940.git.osandov@fb.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <74be00ec0764de749fe43c1e4b20cc2cc35a4671.1437683940.git.osandov@fb.com>
+Received: from e28smtp04.in.ibm.com ([122.248.162.4]:35302 "EHLO
+	e28smtp04.in.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751071AbbGXJfN (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 24 Jul 2015 05:35:13 -0400
+Received: from /spool/local
+	by e28smtp04.in.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+	for <fstests@vger.kernel.org> from <kamalesh@linux.vnet.ibm.com>;
+	Fri, 24 Jul 2015 15:05:10 +0530
+Received: from d28relay02.in.ibm.com (d28relay02.in.ibm.com [9.184.220.59])
+	by d28dlp03.in.ibm.com (Postfix) with ESMTP id B952E125805E
+	for <fstests@vger.kernel.org>; Fri, 24 Jul 2015 15:08:06 +0530 (IST)
+Received: from d28av02.in.ibm.com (d28av02.in.ibm.com [9.184.220.64])
+	by d28relay02.in.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id t6O9YLwU19071166
+	for <fstests@vger.kernel.org>; Fri, 24 Jul 2015 15:04:22 +0530
+Received: from d28av02.in.ibm.com (localhost [127.0.0.1])
+	by d28av02.in.ibm.com (8.14.4/8.14.4/NCO v10.0 AVout) with ESMTP id t6O8CUdw010354
+	for <fstests@vger.kernel.org>; Fri, 24 Jul 2015 13:42:30 +0530
+From: Kamalesh Babulal <kamalesh@linux.vnet.ibm.com>
+Subject: [TRIVIAL PATCH] check: Fix a typo
+Date: Fri, 24 Jul 2015 15:04:04 +0530
+Message-Id: <1437730444-30933-1-git-send-email-kamalesh@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
-To: Omar Sandoval <osandov@fb.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Wang Yanfeng <wangyf-fnst@cn.fujitsu.com>
+To: fstests@vger.kernel.org
+Cc: Kamalesh Babulal <kamalesh@linux.vnet.ibm.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 23, 2015 at 01:51:51PM -0700, Omar Sandoval wrote:
-> From: Wang Yanfeng <wangyf-fnst@cn.fujitsu.com>
-> 
-> Test of missing device replace in different raid modes.  This
-> test requires SCRATCH_DEV_POOL contain 5 same size devices.
-> 
-> This issue has been fixed by Omar's patch:
-> 	Btrfs: RAID 5/6 missing device scrub+replace
-> 
-> Signed-off-by: Wang Yanfeng <wangyf-fnst@cn.fujitsu.com>
-> Signed-off-by: Omar Sandoval <osandov@fb.com>
-> ---
->  tests/btrfs/095     | 93 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/095.out |  2 ++
->  tests/btrfs/group   |  1 +
->  3 files changed, 96 insertions(+)
->  create mode 100755 tests/btrfs/095
->  create mode 100644 tests/btrfs/095.out
-> 
-> diff --git a/tests/btrfs/095 b/tests/btrfs/095
-> new file mode 100755
-> index 000000000000..2dfb919fe4f6
-> --- /dev/null
-> +++ b/tests/btrfs/095
-> @@ -0,0 +1,93 @@
-> +#! /bin/bash
-> +# FS QA Test No. btrfs/095
-> +#
-> +# Test of missing device replace in different raid mode
-> +#
-> +# Be sure $SCRATCH_DEV_POOL including 5 devices. And all
-> +# devices in pool must be in the same size.
-> +#
-> +# To check the fs after replacing a dev, a scrub run is performed.
-> +#
-> +# This issue has been fixed by Omar Sandoval's patch:
-> +# 	Btrfs: RAID 5/6 missing device scrub+replace
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2015 Fujitsu.  All Rights Reserved.
-> +# Author: Wang Yanfeng <wangyf-fnst@cn.fujitsu.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +status=1
-> +trap "exit \$status" 0 1 2 3 15
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_need_to_be_root
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +_require_scratch_dev_pool 5
+Fix the spelling of 'Argments' -> 'Arguments'.
 
-Need a call of _require_scratch_dev_pool_equal_size here
+Signed-off-by: Kamalesh Babulal <kamalesh@linux.vnet.ibm.com>
+---
+ check | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> +_btrfs_get_profile_configs replace-missing
-> +
-> +rm -f $seqres.full
-> +
-> +REPLACE_DEV=`echo $SCRATCH_DEV_POOL | awk '{print $5}'`
-> +export SCRATCH_DEV_POOL=`echo $SCRATCH_DEV_POOL | awk '{print $1,$2,$3,$4}'`
-> +
-> +run_test () {
-> +	local mkfs_opts=$1
+diff --git a/check b/check
+index a3001309e7a0..573c72826b18 100755
+--- a/check
++++ b/check
+@@ -260,7 +260,7 @@ done
+ if $have_test_arg; then
+	while [ $# -gt 0 ]; do
+		case "$1" in
+-		-*)	echo "Argments before tests, please!"
++		-*)	echo "Arguments before tests, please!"
+			status=1
+			exit $status
+			;;
+--
+2.1.2
 
-echo the $mkfs_opts to $seqres.full is useful for debug purpose, so if
-some profile config fails we know what config is failing.
-
-echo "Test $mkfs_opts" >>$seqres.full
-
-> +	_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1 || _fail "mkfs failed"
-
-Continue to test next profile config if mkfs failed, _fail breaks out
-the whole test.
-
-> +	_scratch_mount
-> +
-> +	PRUNE_DEV=`echo $SCRATCH_DEV_POOL | awk '{print $2}'`
-> +	PRUNE_DEV_ID=`$BTRFS_UTIL_PROG fi show $SCRATCH_MNT | grep $PRUNE_DEV | awk '{print $2}'`
-> +
-> +	# dd some data
-> +	dd if=/dev/urandom of="$SCRATCH_MNT"/file1 bs=1M count=1 \
-> +		>>$seqres.full 2>&1 || _fail "dd failed"
-> +	dd if=/dev/urandom of="$SCRATCH_MNT"/file2 bs=1M count=2 \
-> +		>>$seqres.full 2>&1 || _fail "dd failed"
-> +	dd if=/dev/urandom of="$SCRATCH_MNT"/file3 bs=1M count=4 \
-> +		>>$seqres.full 2>&1 || _fail "dd failed"
-
-I don't think the _fail here is necessary either.
-
-> +
-> +	# prune the device PRUNE_DEV && remount by degraded mode
-> +	umount $SCRATCH_MNT
-
-_scratch_unmount
-
-> +	dd if=/dev/zero of=$PRUNE_DEV bs=1M count=1 >>$seqres.full 2>&1 \
-> +		|| _fail "dd failed"
-
-$WIPEFS_PROG -a $PRUNE_DEV ?
-
-> +	mount -o degraded $SCRATCH_DEV $SCRATCH_MNT
-
-_scratch_mount "-o degraded"
-
-> +
-> +	# replace the missing dev $PRUNE_DEV with $REPLACE_DEV and scrub it
-> +	$BTRFS_UTIL_PROG replace start -B -r $PRUNE_DEV_ID $REPLACE_DEV \
-> +		$SCRATCH_MNT -f >>$seqres.full 2>&1 || _fail "replace failed"
-
-Don't _fail here, just echo error messages to break golden image. Better
-to append the error message to $seqres.full too, for debug purpose.
-
-> +	$BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >>$seqres.full 2>&1 \
-> +		|| _fail "scrub failed"
-
-Here too.
-
-> +
-> +	umount $SCRATCH_MNT
-
-_scratch_unmount
-
-> +}
-> +
-> +echo "Silence is golden"
-> +for t in "${_btrfs_profile_configs[@]}"; do
-> +	run_test "$t"
-> +done
-> +
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/095.out b/tests/btrfs/095.out
-> new file mode 100644
-> index 000000000000..80ad3b9c2a7b
-> --- /dev/null
-> +++ b/tests/btrfs/095.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 095
-> +Silence is golden
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index ffe18bff0d21..f20a191c24be 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -96,3 +96,4 @@
->  092 auto quick send
->  093 auto quick clone
->  094 auto quick send
-> +095 auto
-
-Should also be in "replace" group.
-
-Thanks,
-Eryu
-> -- 
-> 2.4.6
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
