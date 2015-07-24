@@ -1,49 +1,31 @@
-Received: from e28smtp04.in.ibm.com ([122.248.162.4]:35302 "EHLO
-	e28smtp04.in.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751071AbbGXJfN (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 24 Jul 2015 05:35:13 -0400
-Received: from /spool/local
-	by e28smtp04.in.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-	for <fstests@vger.kernel.org> from <kamalesh@linux.vnet.ibm.com>;
-	Fri, 24 Jul 2015 15:05:10 +0530
-Received: from d28relay02.in.ibm.com (d28relay02.in.ibm.com [9.184.220.59])
-	by d28dlp03.in.ibm.com (Postfix) with ESMTP id B952E125805E
-	for <fstests@vger.kernel.org>; Fri, 24 Jul 2015 15:08:06 +0530 (IST)
-Received: from d28av02.in.ibm.com (d28av02.in.ibm.com [9.184.220.64])
-	by d28relay02.in.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id t6O9YLwU19071166
-	for <fstests@vger.kernel.org>; Fri, 24 Jul 2015 15:04:22 +0530
-Received: from d28av02.in.ibm.com (localhost [127.0.0.1])
-	by d28av02.in.ibm.com (8.14.4/8.14.4/NCO v10.0 AVout) with ESMTP id t6O8CUdw010354
-	for <fstests@vger.kernel.org>; Fri, 24 Jul 2015 13:42:30 +0530
-From: Kamalesh Babulal <kamalesh@linux.vnet.ibm.com>
-Subject: [TRIVIAL PATCH] check: Fix a typo
-Date: Fri, 24 Jul 2015 15:04:04 +0530
-Message-Id: <1437730444-30933-1-git-send-email-kamalesh@linux.vnet.ibm.com>
+Received: from mx2.suse.de ([195.135.220.15]:39967 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752284AbbGXMJz (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 24 Jul 2015 08:09:55 -0400
+Date: Fri, 24 Jul 2015 14:09:46 +0200
+From: David Sterba <dsterba@suse.com>
+Subject: Re: [PATCH 2/3] btrfs: add replace missing and replace RAID 5/6 to
+ profile configs
+Message-ID: <20150724120946.GT6306@twin.jikos.cz>
+Reply-To: dsterba@suse.com
+References: <cover.1437683940.git.osandov@fb.com>
+ <6d332e954da29e8418689cb49294a68da2fa5376.1437683940.git.osandov@fb.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <6d332e954da29e8418689cb49294a68da2fa5376.1437683940.git.osandov@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Kamalesh Babulal <kamalesh@linux.vnet.ibm.com>
+To: Omar Sandoval <osandov@fb.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Wang Yanfeng <wangyf-fnst@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-Fix the spelling of 'Argments' -> 'Arguments'.
+On Thu, Jul 23, 2015 at 01:51:50PM -0700, Omar Sandoval wrote:
+> +			# We can't do replace with these profiles because they
+> +			# imply only one device ($SCRATCH_DEV), and we need to
+> +			# keep $SCRATCH_DEV around for _scratch_mount
+> +			# and _check_scratch_fs.
+> +			local unsupported=(
+> +				"single"
+> +				"dup"
 
-Signed-off-by: Kamalesh Babulal <kamalesh@linux.vnet.ibm.com>
----
- check | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/check b/check
-index a3001309e7a0..573c72826b18 100755
---- a/check
-+++ b/check
-@@ -260,7 +260,7 @@ done
- if $have_test_arg; then
-	while [ $# -gt 0 ]; do
-		case "$1" in
--		-*)	echo "Argments before tests, please!"
-+		-*)	echo "Arguments before tests, please!"
-			status=1
-			exit $status
-			;;
---
-2.1.2
-
+DUP does imply single device, but why does 'single' ?
