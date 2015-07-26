@@ -1,11 +1,11 @@
-Received: from imap.thunk.org ([74.207.234.97]:37878 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:37880 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751923AbbGZMVH (ORCPT <rfc822;fstests@vger.kernel.org>);
+	id S1752063AbbGZMVH (ORCPT <rfc822;fstests@vger.kernel.org>);
 	Sun, 26 Jul 2015 08:21:07 -0400
 From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH 2/6] xfsprogs: pull in libgen.h to get prototype for basename()
-Date: Sun, 26 Jul 2015 08:20:51 -0400
-Message-Id: <1437913255-7524-3-git-send-email-tytso@mit.edu>
+Subject: [PATCH 3/6] xfsprogs: define and use BUILD_CC in configure.ac for cross compilation
+Date: Sun, 26 Jul 2015 08:20:52 -0400
+Message-Id: <1437913255-7524-4-git-send-email-tytso@mit.edu>
 In-Reply-To: <1437913255-7524-1-git-send-email-tytso@mit.edu>
 References: <1437913255-7524-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
@@ -13,31 +13,70 @@ To: xfs@oss.sgi.com
 Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-The function prototype for basename() is in <libgen.h>, per Posix.
-Without the the function prototype, the build will throw errors due to
-the missing prototype.
-
-On glibc, using libgen.h will force the use of Poxis's basename(),
-instead of glibc's basename() with GNU extensions.  However, xfsprogs
-doesn't depend on any of the GNU extensions, so this is fine.
+In order to support cross-compilation, we need to build gen_crc32table
+using the C compiler targetted for the build platform, since it is run
+as part of the build process.
 
 Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 ---
- include/platform_defs.h.in | 1 +
- 1 file changed, 1 insertion(+)
+ configure.ac         | 8 ++++++++
+ include/builddefs.in | 1 +
+ libxfs/Makefile      | 4 ++--
+ 3 files changed, 11 insertions(+), 2 deletions(-)
 
-diff --git a/include/platform_defs.h.in b/include/platform_defs.h.in
-index 3e059af..bfab7cc 100644
---- a/include/platform_defs.h.in
-+++ b/include/platform_defs.h.in
-@@ -35,6 +35,7 @@
- #include <sys/types.h>
- #include <limits.h>
- #include <stdbool.h>
-+#include <libgen.h>
+diff --git a/configure.ac b/configure.ac
+index ae17c68..4cfbd4e 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -8,6 +8,14 @@ AC_PREFIX_DEFAULT(/usr)
  
- #undef HAVE___U32
- #ifdef HAVE___U32
+ AC_PROG_LIBTOOL
+ 
++AC_PROG_CC
++if test $cross_compiling = no; then
++  BUILD_CC="$CC"
++  AC_SUBST(BUILD_CC)
++else
++  AC_CHECK_PROGS(BUILD_CC, gcc cc)
++fi
++
+ AC_ARG_ENABLE(shared,
+ [ --enable-shared=[yes/no] Enable use of shared libraries [default=yes]],,
+ 	enable_shared=yes)
+diff --git a/include/builddefs.in b/include/builddefs.in
+index 7e9f53d..1d2d22e 100644
+--- a/include/builddefs.in
++++ b/include/builddefs.in
+@@ -64,6 +64,7 @@ PKG_DOC_DIR	= @datadir@/doc/@pkg_name@
+ PKG_LOCALE_DIR	= @datadir@/locale
+ 
+ CC		= @cc@
++BUILD_CC	= @BUILD_CC@
+ AWK		= @awk@
+ SED		= @sed@
+ TAR		= @tar@
+diff --git a/libxfs/Makefile b/libxfs/Makefile
+index ae15a5d..6323b81 100644
+--- a/libxfs/Makefile
++++ b/libxfs/Makefile
+@@ -67,7 +67,7 @@ default: crc32selftest ltdepend $(LTLIBRARY)
+ 
+ crc32table.h: gen_crc32table.c
+ 	@echo "    [CC]     gen_crc32table"
+-	$(Q) $(CC) $(CFLAGS) -o gen_crc32table $<
++	$(Q) $(BUILD_CC) $(CFLAGS) -o gen_crc32table $<
+ 	@echo "    [GENERATE] $@"
+ 	$(Q) ./gen_crc32table > crc32table.h
+ 
+@@ -78,7 +78,7 @@ crc32table.h: gen_crc32table.c
+ # disk.
+ crc32selftest: gen_crc32table.c crc32table.h crc32.c
+ 	@echo "    [TEST]    CRC32"
+-	$(Q) $(CC) $(CFLAGS) -D CRC32_SELFTEST=1 crc32.c -o $@
++	$(Q) $(BUILD_CC) $(CFLAGS) -D CRC32_SELFTEST=1 crc32.c -o $@
+ 	$(Q) ./$@
+ 
+ include $(BUILDRULES)
 -- 
 2.3.0
 
