@@ -1,61 +1,79 @@
-Received: from imap.thunk.org ([74.207.234.97]:46586 "EHLO imap.thunk.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754331AbbG0OWv (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 27 Jul 2015 10:22:51 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH 2/4] xfstests: Support C libraries that define SIGCHLD instead of SIGCLD
-Date: Mon, 27 Jul 2015 10:22:45 -0400
-Message-Id: <1438006967-18815-3-git-send-email-tytso@mit.edu>
-In-Reply-To: <1438006967-18815-1-git-send-email-tytso@mit.edu>
-References: <1438006967-18815-1-git-send-email-tytso@mit.edu>
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:59151 "EHLO
+	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752739AbbG0Vvc (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 27 Jul 2015 17:51:32 -0400
+Date: Tue, 28 Jul 2015 07:51:29 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: generic/064 test failures on ext4 (4.2-rc*)
+Message-ID: <20150727215129.GH3902@dastard>
+References: <20150727190957.GA1606@localhost.localdomain>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20150727190957.GA1606@localhost.localdomain>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>
+To: Eric Whitney <enwlinux@gmail.com>
+Cc: namjae.jeon@samsung.com, a.sangwan@samsung.com, linux-ext4@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-SIGCLD is the name used by System V; SIGCHLD is the name defined by
-Posix.  Some C libraries will only define SIGCHLD and not SIGCLD, so
-accomodate them.
+[cc fstests@vger.kernel.org. Please cc this list for questions
+about fstests behaviour, especially for generic tests that all
+filesystem run. ]
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
- ltp/doio.c      | 4 ++++
- ltp/growfiles.c | 6 +++++-
- 2 files changed, 9 insertions(+), 1 deletion(-)
+On Mon, Jul 27, 2015 at 03:10:03PM -0400, Eric Whitney wrote:
+> Hi Namjae:
+> 
+> I'm seeing generic/064 fail consistently when testing ext4 on 4.2-rc kernels
+> with Ted's kvm-xfstests test appliance.
+> 
+> The two kvm-xfstests test cases that fail are ext3conv and data_journal. Both
+> of them force disablement of delayed allocation.  The nodelalloc mount option
+> is used explicitly in the ext3conv case, and it's set implicitly in the kernel
+> when the data_journal mount option is used.  The size of the scratch device
+> used also matters.  The failure occurs when the device is 5 GB in size, but
+> does not when 20 GB in size.
+> 
+> What's happening is that when nodelalloc is set, ext4 produces a testfile.dest
+> containing 101 extents when generic/064 inserts 100 block ranges, and this does
+> not match the test's expected output of 100 extents.
+> 
+> Ted Ts'o says that ext4 does not guarantee a specific extent layout when
+> delayed allocation is disabled in these circumstances.
+> 
+> The header comment for generic/064 states that insert range is to be called
+> until 100 extents are created.  Would the intent of your test be preserved if
+> it was modified to verify that 100 holes were inserted rather than 100
+> extents created?
 
-diff --git a/ltp/doio.c b/ltp/doio.c
-index 966cff1..3e525d4 100644
---- a/ltp/doio.c
-+++ b/ltp/doio.c
-@@ -361,7 +361,11 @@ char	**argv;
- 		case SIGTSTP:
- 		case SIGSTOP:
- 		case SIGCONT:
-+#if defined(SIGCLD)
- 		case SIGCLD:
-+#elif defined (SIGCHLD)
-+		case SIGCHLD:
-+#endif
- 		case SIGBUS:
- 		case SIGSEGV:
- 		case SIGQUIT:
-diff --git a/ltp/growfiles.c b/ltp/growfiles.c
-index 06f179f..19ed013 100644
---- a/ltp/growfiles.c
-+++ b/ltp/growfiles.c
-@@ -1389,7 +1389,11 @@ set_sig()
- #ifdef SIGRESTART
- 	        case SIGRESTART:
- #endif /* SIGRESTART */
--                case SIGCLD:
-+#if defined(SIGCLD)
-+		case SIGCLD:
-+#elif defined(SIGCHLD)
-+		case SIGCHLD:
-+#endif
-                     break;
- 
-                 default:
+The block layout outside the insert range should not be modified at
+all, so if inserting 100 holes results in more data extents that the
+expected 100, then there's something wrong before we start inserting
+holes.  e.g. maybe the source file had two extents rather than 1.
+Can you confirm that this is occurring?
+
+> This would seem to be a more direct way to verify that
+> insert range was functioning correctly without assuming anything about other
+> test filesystem behavior.  ext4 does create 100 holes for generic/064 with
+> nodelalloc set.
+
+Really, the number of extents or holes at the intermediate stage
+doesn't matter. What matters is that after collapsing the holes back
+out of the file, then number of extents is identical to the original
+file (i.e. that fcollapse() undoes finsert() exactly).
+
+So changing this code to use _within_tolerance to say that 100 >=
+num_extents >= 105 is ok would probably be better:
+
+	_within_tolerance "Extent count" $nextents 100 0 5%
+
+This will output a standard pass/fail message rather than an exact
+count.  This allows some wiggle room for filesystem configurations
+that have unexpected non-contiguous baseline allocation behaviour to
+pass the test.
+
+Cheers,
+
+Dave.
 -- 
-2.3.0
-
+Dave Chinner
+david@fromorbit.com
