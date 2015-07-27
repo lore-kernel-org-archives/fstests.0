@@ -1,79 +1,58 @@
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:59151 "EHLO
-	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752739AbbG0Vvc (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 27 Jul 2015 17:51:32 -0400
-Date: Tue, 28 Jul 2015 07:51:29 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: generic/064 test failures on ext4 (4.2-rc*)
-Message-ID: <20150727215129.GH3902@dastard>
-References: <20150727190957.GA1606@localhost.localdomain>
+Received: from fw11a.wadns.net ([196.220.39.53]:47658 "EHLO fw11a.wadns.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754855AbbG0Wjc (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 27 Jul 2015 18:39:32 -0400
+Message-ID: <55B6AF40.5040107@swiftspirit.co.za>
+Date: Tue, 28 Jul 2015 00:22:56 +0200
+From: Brendan Hide <brendan@swiftspirit.co.za>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20150727190957.GA1606@localhost.localdomain>
+Subject: Re: [PATCH 2/3] btrfs: add replace missing and replace RAID 5/6 to
+ profile configs
+References: <cover.1437683940.git.osandov@fb.com> <6d332e954da29e8418689cb49294a68da2fa5376.1437683940.git.osandov@fb.com> <20150724120946.GT6306@twin.jikos.cz> <20150724175043.GA14974@huxley.DHCP.TheFacebook.com>
+In-Reply-To: <20150724175043.GA14974@huxley.DHCP.TheFacebook.com>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eric Whitney <enwlinux@gmail.com>
-Cc: namjae.jeon@samsung.com, a.sangwan@samsung.com, linux-ext4@vger.kernel.org, fstests@vger.kernel.org
+To: Omar Sandoval <osandov@fb.com>, dsterba@suse.com, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Wang Yanfeng <wangyf-fnst@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-[cc fstests@vger.kernel.org. Please cc this list for questions
-about fstests behaviour, especially for generic tests that all
-filesystem run. ]
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
 
-On Mon, Jul 27, 2015 at 03:10:03PM -0400, Eric Whitney wrote:
-> Hi Namjae:
+On 2015/07/24 07:50 PM, Omar Sandoval wrote:
+> On Fri, Jul 24, 2015 at 02:09:46PM +0200, David Sterba wrote:
+>> On Thu, Jul 23, 2015 at 01:51:50PM -0700, Omar Sandoval wrote:
+>>> +			# We can't do replace with these profiles because they +
+>>> # imply only one device ($SCRATCH_DEV), and we need to +			#
+>>> keep $SCRATCH_DEV around for _scratch_mount +			# and
+>>> _check_scratch_fs. +			local unsupported=( +				"single" +
+>>> "dup"
+>> 
+>> DUP does imply single device, but why does 'single' ?
 > 
-> I'm seeing generic/064 fail consistently when testing ext4 on 4.2-rc kernels
-> with Ted's kvm-xfstests test appliance.
+> It does not, I apparently forgot that you could use single to 
+> concatenate multiple devices. I'll fix that in v2.
 > 
-> The two kvm-xfstests test cases that fail are ext3conv and data_journal. Both
-> of them force disablement of delayed allocation.  The nodelalloc mount option
-> is used explicitly in the ext3conv case, and it's set implicitly in the kernel
-> when the data_journal mount option is used.  The size of the scratch device
-> used also matters.  The failure occurs when the device is 5 GB in size, but
-> does not when 20 GB in size.
+> Thanks for reviewing!
 > 
-> What's happening is that when nodelalloc is set, ext4 produces a testfile.dest
-> containing 101 extents when generic/064 inserts 100 block ranges, and this does
-> not match the test's expected output of 100 extents.
-> 
-> Ted Ts'o says that ext4 does not guarantee a specific extent layout when
-> delayed allocation is disabled in these circumstances.
-> 
-> The header comment for generic/064 states that insert range is to be called
-> until 100 extents are created.  Would the intent of your test be preserved if
-> it was modified to verify that 100 holes were inserted rather than 100
-> extents created?
+Late to the party. DUP *implies* single device but there are cases
+where dup is used on a multi-device fs. Even if the use-cases aren't
+good or intended to be long-term, they are still valid, right?
 
-The block layout outside the insert range should not be modified at
-all, so if inserting 100 holes results in more data extents that the
-expected 100, then there's something wrong before we start inserting
-holes.  e.g. maybe the source file had two extents rather than 1.
-Can you confirm that this is occurring?
 
-> This would seem to be a more direct way to verify that
-> insert range was functioning correctly without assuming anything about other
-> test filesystem behavior.  ext4 does create 100 holes for generic/064 with
-> nodelalloc set.
+- -- 
+__________
+Brendan Hide
+http://swiftspirit.co.za/
+http://www.webafrica.co.za/?AFF1E97
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (MingW32)
 
-Really, the number of extents or holes at the intermediate stage
-doesn't matter. What matters is that after collapsing the holes back
-out of the file, then number of extents is identical to the original
-file (i.e. that fcollapse() undoes finsert() exactly).
-
-So changing this code to use _within_tolerance to say that 100 >=
-num_extents >= 105 is ok would probably be better:
-
-	_within_tolerance "Extent count" $nextents 100 0 5%
-
-This will output a standard pass/fail message rather than an exact
-count.  This allows some wiggle room for filesystem configurations
-that have unexpected non-contiguous baseline allocation behaviour to
-pass the test.
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+iQEcBAEBAgAGBQJVtq9AAAoJEE+uni74c4qN5eYIAJAGznsi3RD1tchbSLwhMXJk
+bJJ4ORB9taLXHykSfYTsHIaUoVpcVR6tT/I1jz5070DY3mKkQ16a8nwtSxPba4Lv
+QiS8YRegFiHMYzZbH1T7Tnm6R9g/RZsaU7GS3JhP9HUYG7hIWGRRuoiOjYn/hoLw
+uMXuIFOkPKGYDgyAhDIp3KDYlBjMHT6Oun7CcpvTjXiOnzJFFp3MSt3b6mmmdMVV
+YKWpWyKVh7qlENEoqKb4exqr1WGYKU+kBLXRs4wdm3xb66EcWYs0Er1u6v+K1trx
+nryFrfUxYtMJsSuR9ZJm88DOsXKAuX1LEdRKVOlq7krsIK8HlTizccMXAl10gKk=
+=ndkL
+-----END PGP SIGNATURE-----
