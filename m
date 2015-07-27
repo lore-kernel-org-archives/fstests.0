@@ -1,46 +1,40 @@
-Received: from imap.thunk.org ([74.207.234.97]:37890 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:46576 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752817AbbGZMVI (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sun, 26 Jul 2015 08:21:08 -0400
+	id S1754313AbbG0OWv (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 27 Jul 2015 10:22:51 -0400
 From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH 0/6] Add cross-compilation support for android
-Date: Sun, 26 Jul 2015 08:20:49 -0400
-Message-Id: <1437913255-7524-1-git-send-email-tytso@mit.edu>
+Subject: [PATCH 4/4] xfstests: remove manual declaration of errno
+Date: Mon, 27 Jul 2015 10:22:47 -0400
+Message-Id: <1438006967-18815-5-git-send-email-tytso@mit.edu>
+In-Reply-To: <1438006967-18815-1-git-send-email-tytso@mit.edu>
+References: <1438006967-18815-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: xfs@oss.sgi.com
-Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-As part of my efforts to port xfstests so it can be used in an Android
-runtime environment (where running fsstress by hand seems to be the
-state-of-the-art in file system QA), I needed to make the following
-changes to xfsprogs so it can be built using cross compilation using
-Android's bionic C library.  Fortunately given XFS's Irix roots, the
-number of glibc'isms that have kept in was relatively small.
+locktest.c has already #included <errno.h>, so remove the unneeded
+(and in some cases, incorrect) manual declaration of errno as an
+integer.  Some C libraries use a macro to provide thread-safety for
+errno, so it's incorrect to try to provide a manual declaration.
 
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ src/locktest.c | 1 -
+ 1 file changed, 1 deletion(-)
 
-Theodore Ts'o (6):
-  xfsprogs: define NBBY if not defined by the system header files
-  xfsprogs: pull in libgen.h to get prototype for basename()
-  xfsprogs: define and use BUILD_CC in configure.ac for cross
-    compilation
-  xfsprogs: avoid use of si_tid in struct xlog_split_item
-  xfsprogs: use "unsigned short" instead of ushort
-  xfsprogs: add missing include of <stat.h>
-
- configure.ac               | 8 ++++++++
- include/builddefs.in       | 1 +
- include/platform_defs.h.in | 5 +++++
- include/xfs_inode_buf.h    | 4 ++--
- include/xfs_log_format.h   | 4 ++--
- include/xfs_log_recover.h  | 2 +-
- libdisk/evms.c             | 1 +
- libxfs/Makefile            | 4 ++--
- libxfs/logitem.c           | 2 +-
- libxfs/xfs_ialloc.c        | 4 ++--
- logprint/log_misc.c        | 8 ++++----
- 11 files changed, 29 insertions(+), 14 deletions(-)
-
+diff --git a/src/locktest.c b/src/locktest.c
+index 23bb240..adf8ce0 100644
+--- a/src/locktest.c
++++ b/src/locktest.c
+@@ -779,7 +779,6 @@ main(int argc, char *argv[])
+     char	*p;
+     extern char	*optarg;
+     extern int	optind;
+-    extern int	errno;
+     int fail_count = 0;; 
+     
+     atexit(cleanup);
 -- 
 2.3.0
 
