@@ -1,66 +1,36 @@
-Received: from mx1.redhat.com ([209.132.183.28]:53080 "EHLO mx1.redhat.com"
+Received: from mx2.suse.de ([195.135.220.15]:37417 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751873AbbG1OZY (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 28 Jul 2015 10:25:24 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (Postfix) with ESMTPS id 0D8108C1B2
-	for <fstests@vger.kernel.org>; Tue, 28 Jul 2015 14:25:24 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] common: fix _count_extents and _count_holes
-Date: Tue, 28 Jul 2015 22:25:04 +0800
-Message-Id: <1438093504-25230-1-git-send-email-eguan@redhat.com>
+	id S1751330AbbG1QwU (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 28 Jul 2015 12:52:20 -0400
+Date: Tue, 28 Jul 2015 18:52:07 +0200
+From: David Sterba <dsterba@suse.com>
+Subject: Re: [PATCH 2/3] btrfs: add replace missing and replace RAID 5/6 to
+ profile configs
+Message-ID: <20150728165207.GK6306@suse.cz>
+Reply-To: dsterba@suse.com
+References: <cover.1437683940.git.osandov@fb.com>
+ <6d332e954da29e8418689cb49294a68da2fa5376.1437683940.git.osandov@fb.com>
+ <20150724120946.GT6306@twin.jikos.cz>
+ <20150724175043.GA14974@huxley.DHCP.TheFacebook.com>
+ <55B6AF40.5040107@swiftspirit.co.za>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <55B6AF40.5040107@swiftspirit.co.za>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: zlang@redhat.com, Eryu Guan <eguan@redhat.com>
+To: Brendan Hide <brendan@swiftspirit.co.za>
+Cc: Wang Yanfeng <wangyf-fnst@cn.fujitsu.com>, Omar Sandoval <osandov@fb.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-In _count_extents and _count_holes, the output of 'xfs_io -c "fiemap"'
-is saved in var res, but the following "echo $res" will merge the
-original output into one line. e.g.
+On Tue, Jul 28, 2015 at 12:22:56AM +0200, Brendan Hide wrote:
+> > It does not, I apparently forgot that you could use single to 
+> > concatenate multiple devices. I'll fix that in v2.
+> > 
+> > Thanks for reviewing!
+> > 
+> Late to the party. DUP *implies* single device but there are cases
+> where dup is used on a multi-device fs. Even if the use-cases aren't
+> good or intended to be long-term, they are still valid, right?
 
-	0: [0..63]: 96..159
-	1: [64..127]: hole
-
-will be
-
-	0: [0..63]: 96..159 1: [64..127]: hole
-
-so the extent count is always 0 if there's a hole.
-
-This makes generic/046 fail occasionally. (Seems it's easier to
-reproduce when the system is under some presure, e.g. with fsstress
-running.)
-
-Tested the new _count_extents and _count_holes with generic/04[3-9] and
-tests all passed as expect.
-
-Reported-by: Zorro Lang <zlang@redhat.com>
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
- common/rc | 6 ++----
- 1 file changed, 2 insertions(+), 4 deletions(-)
-
-diff --git a/common/rc b/common/rc
-index 15e7795..0d3570f 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2434,14 +2434,12 @@ _require_fiemap()
- 
- _count_extents()
- {
--	res=`$XFS_IO_PROG -c "fiemap" $1 | tail -n +2`
--	echo $res | grep -v hole | wc -l | $AWK_PROG '{print $1}'
-+	$XFS_IO_PROG -c "fiemap" $1 | tail -n +2 | grep -v hole | wc -l
- }
- 
- _count_holes()
- {
--	res=`$XFS_IO_PROG -c "fiemap" $1 | tail -n +2`
--	echo $res | grep hole | wc -l | $AWK_PROG '{print $1}'
-+	$XFS_IO_PROG -c "fiemap" $1 | tail -n +2 | grep hole | wc -l
- }
- 
- # arg 1 is dev to remove and is output of the below eg.
--- 
-2.4.3
-
+You're right, DUP is reported by 'fi df' after 2nd device is added and
+this state (even if it's temporary) has to be taken into account.
