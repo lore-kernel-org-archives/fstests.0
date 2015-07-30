@@ -1,124 +1,64 @@
-Received: from mx1.redhat.com ([209.132.183.28]:59508 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753149AbbG2RI6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 29 Jul 2015 13:08:58 -0400
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (Postfix) with ESMTPS id CD3EEB7A9A
-	for <fstests@vger.kernel.org>; Wed, 29 Jul 2015 17:08:58 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH] generic/046: stress not enough to write something out
-Date: Thu, 30 Jul 2015 01:08:54 +0800
-Message-Id: <1438189734-1954-1-git-send-email-zlang@redhat.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:39160 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751212AbbG3GMe (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 30 Jul 2015 02:12:34 -0400
+From: Dongsheng Yang <yangds.fnst@cn.fujitsu.com>
+Subject: [PATCH 0/5] xfstests: introduce ubifs in xfstests
+Date: Thu, 30 Jul 2015 14:06:52 +0800
+Message-ID: <1438236417-24612-1-git-send-email-yangds.fnst@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: eguan@redhat.com, xuw@redhat.com, dchinner@redhat.com, bfoster@redhat.com, Zorro Lang <zlang@redhat.com>
+To: eguan@redhat.com, fstests@vger.kernel.org, dedekind1@gmail.com, richard.weinberger@gmail.com
+Cc: linux-mtd@lists.infradead.org, Dongsheng Yang <yangds.fnst@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-According to lots of our testing results, this case always
-can't write any files out until this case run over. This
-is not expected test condition.
+Hi all:
+	This patchset introduce a subtestset for ubifs.
 
-But when I run this case on a very poor performance machine,
-or run with other I/O stress, some file can write out.
-So I think the stress of this case is not enough, and create
- more files or sleep more time will be helpful.
+In kernel v4.1, we will find some cases fail for ubifs,
+I have post some patch for ubifs to fix it.
+[PATCH v3] ubifs: introduce UBIFS_ATIME_SUPPORT to ubifs
+[PATCH] ubifs: make ubifs_[get|set]xattr atomic
 
-I choose the former. Because if only increase sleep time,
-maybe cause all files be write out, nothing be cached.
+And I have send a patchset to add quota in ubifs.
 
-There're many other conditions maybe affect this problem,
-include "RAM size", "disk size", "vm.dirty_expire_centisecs",
-"vm.dirty_writeback_centisecs" and so on...
+Then we can get a all pass:
+ # ./check -ubifs
+FSTYP         -- ubifs
+PLATFORM      -- Linux/x86_64 atest-guest 4.1.0+
+MKFS_OPTIONS  -- /dev/ubi0_1
+MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 /dev/ubi0_1 /mnt/scratch
 
-I have to say "yes, the machine performance will affect test,
-but according to my experiment, their effect isn't so much."
+generic/001 7s ... 7s
+generic/002 1s ... 1s
 
-My test machine is 16G RAM, 20G test partation. I changed 16G
-ram to 2G, 20G disk to 2G, and create 3000 files in case, but
-useless. I also try to change vm.dirty_expire_centisecs and
-vm.dirty_writeback_centisecs, big change, but still useless.
+[...]
 
-So I think create more files to increase the stress is the most
-useful method. From my test, I find 60s is an enough time. So
-I try to make sure this case keep running 60s.
-
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
-
-Hi,
-
-As I said above, please check the below patch. I can't sure
-this's the best way. So if someone learn about XFS very well,
-please help to review.
-
-I find this problem from a bug which eguan@redhat.com has sent
-patch:
-  common: fix _count_extents and _count_holes
-
-We have ran xfstests thousands of times, but nearly can't trigger
-this bug, until I ran xfstests with fsstress. So I think the
-stress of generic/046 is not enough.
-
-I think Lachlan McIlroy is the author of this case, but I feel
-his email lmcilroy@redhat.com already invalid. So I can't cc
-him.
-
-Thanks,
-Zorro Lang
+Passed all 70 tests
 
 
- tests/generic/046 | 15 ++++++++++-----
- 1 file changed, 10 insertions(+), 5 deletions(-)
+Dongsheng Yang (5):
+  xfstest: add ubifs support
+  xfstest: generic/219 add _require_odirect
+  xfstest: generic/125 add _require_odirect
+  xfstest: introduce subtestset for ubifs
+  xfstest: add quota tests to ubifs
 
-diff --git a/tests/generic/046 b/tests/generic/046
-index 76993d4..dfc0967 100755
---- a/tests/generic/046
-+++ b/tests/generic/046
-@@ -47,16 +47,17 @@ _scratch_mount
- 
- # create files
- i=1;
--while [ $i -lt 1000 ]
-+t=`date +%s`
-+while [ $i -lt 5000 ]
- do
- 	file=$SCRATCH_MNT/$i
--	xfs_io -f -c "pwrite -b 32k -S 0xff 0 32k" $file > /dev/null
-+	xfs_io -f -c "pwrite -b 8k -S 0xff 0 8k" $file > /dev/null
- 	if [ $? -ne 0 ]
- 	then
- 		echo error creating/writing file $file
- 		exit
- 	fi
--	xfs_io -c "truncate 64k" $file > /dev/null
-+	xfs_io -c "truncate 16k" $file > /dev/null
- 	if [ $? -ne 0 ]
- 	then
- 		echo error truncating file $file
-@@ -64,9 +65,13 @@ do
- 	fi
- 	let i=$i+1
- done
-+t=$((`date +%s` - $t))
- 
- # give the system a chance to write something out
--sleep 10
-+if [ $t -lt 60 ]
-+then
-+	sleep $((60 - $t))
-+fi
- 
- src/godown $SCRATCH_MNT
- 
-@@ -82,7 +87,7 @@ _scratch_mount
- 
- # check file size and contents
- i=1;
--while [ $i -lt 1000 ]
-+while [ $i -lt 5000 ]
- do
- 	file=$SCRATCH_MNT/$i
- 	# if file does not exist, the create was not logged, skip it
+ check               |  2 ++
+ common/config       |  9 ++++---
+ common/quota        |  4 +--
+ common/rc           |  8 ++++--
+ tests/generic/125   |  1 +
+ tests/generic/219   |  1 +
+ tests/ubifs/001     | 71 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ubifs/001.out |  1 +
+ tests/ubifs/group   |  6 +++++
+ 9 files changed, 95 insertions(+), 8 deletions(-)
+ create mode 100755 tests/ubifs/001
+ create mode 100644 tests/ubifs/001.out
+ create mode 100644 tests/ubifs/group
+
 -- 
-1.9.3
+1.8.4.2
 
