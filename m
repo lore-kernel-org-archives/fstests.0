@@ -1,41 +1,33 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:57199 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751212AbbG3GNt (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 30 Jul 2015 02:13:49 -0400
-From: Dongsheng Yang <yangds.fnst@cn.fujitsu.com>
-Subject: [PATCH] xfstests: mount scratch before checking it
-Date: Thu, 30 Jul 2015 14:08:09 +0800
-Message-ID: <1438236489-24747-1-git-send-email-yangds.fnst@cn.fujitsu.com>
+Received: from bombadil.infradead.org ([198.137.202.9]:54438 "EHLO
+	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752772AbbG3RHf (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 30 Jul 2015 13:07:35 -0400
+Date: Thu, 30 Jul 2015 10:07:34 -0700
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH 1/6] xfsprogs: define NBBY if not defined by the system
+ header files
+Message-ID: <20150730170734.GA25395@infradead.org>
+References: <1437913255-7524-1-git-send-email-tytso@mit.edu>
+ <1437913255-7524-2-git-send-email-tytso@mit.edu>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1437913255-7524-2-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, fdmanana@suse.com
-Cc: Dongsheng Yang <yangds.fnst@cn.fujitsu.com>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: xfs@oss.sgi.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-We want to check the size of scratch with _require_fs_space,
-but we have to mount it firstly.
+On Sun, Jul 26, 2015 at 08:20:50AM -0400, Theodore Ts'o wrote:
+> Android's bionic libc doesn't define NBBY; this isn't a standard
+> define, and since all modern/sane platforms have 8 bits per byte, use
+> this as a default.
+> 
+> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 
-Reported-by: Zeng Linggang <zenglg.jy@cn.fujitsu.com>
-Signed-off-by: Dongsheng Yang <yangds.fnst@cn.fujitsu.com>
----
- tests/generic/038 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+This looks fine, but it'll clash with my patch that changes
+platform_defs.h so that it's not run through autoconfs m4 anymore.
 
-diff --git a/tests/generic/038 b/tests/generic/038
-index 7bfebfc..4d108cf 100755
---- a/tests/generic/038
-+++ b/tests/generic/038
-@@ -121,8 +121,8 @@ create_files()
- }
- 
- _scratch_mkfs >>$seqres.full 2>&1
--_require_fs_space $SCRATCH_MNT $((10 * 1024 * 1024))
- _scratch_mount
-+_require_fs_space $SCRATCH_MNT $((10 * 1024 * 1024))
- _require_batched_discard $SCRATCH_MNT
- 
- for ((i = 0; i < $((4 * $LOAD_FACTOR)); i++)); do
--- 
-1.8.4.2
+Otherwise:
 
+Reviewed-by: Christoph Hellwig <hch@lst.de>
