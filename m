@@ -1,56 +1,52 @@
-Received: from mailout2.samsung.com ([203.254.224.25]:34212 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751510AbbHCCB4 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 2 Aug 2015 22:01:56 -0400
-From: Namjae Jeon <namjae.jeon@samsung.com>
-References: <20150727190957.GA1606@localhost.localdomain>
- <20150727215129.GH3902@dastard> <20150728030913.GC2851@thunk.org>
-In-reply-to: <20150728030913.GC2851@thunk.org>
-Subject: RE: generic/064 test failures on ext4 (4.2-rc*)
-Date: Mon, 03 Aug 2015 11:01:46 +0900
-Message-id: <04d101d0cd90$5ac2b980$10482c80$@samsung.com>
-MIME-version: 1.0
-Content-type: text/plain; charset=us-ascii
-Content-transfer-encoding: 7bit
-Content-language: ko
+Received: from mx1.redhat.com ([209.132.183.28]:42293 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752482AbbHCDJr (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sun, 2 Aug 2015 23:09:47 -0400
+Date: Mon, 3 Aug 2015 11:09:43 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] xfstests: mount scratch before checking it
+Message-ID: <20150803030943.GN17933@dhcp-13-216.nay.redhat.com>
+References: <1438236489-24747-1-git-send-email-yangds.fnst@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1438236489-24747-1-git-send-email-yangds.fnst@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: 'Theodore Ts'o' <tytso@mit.edu>, 'Dave Chinner' <david@fromorbit.com>
-Cc: 'Eric Whitney' <enwlinux@gmail.com>, a.sangwan@samsung.com, linux-ext4@vger.kernel.org, fstests@vger.kernel.org
+To: Dongsheng Yang <yangds.fnst@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, fdmanana@suse.com
 List-ID: <fstests@vger.kernel.org>
 
-Hi,
+On Thu, Jul 30, 2015 at 02:08:09PM +0800, Dongsheng Yang wrote:
+> We want to check the size of scratch with _require_fs_space,
+> but we have to mount it firstly.
+> 
+> Reported-by: Zeng Linggang <zenglg.jy@cn.fujitsu.com>
+> Signed-off-by: Dongsheng Yang <yangds.fnst@cn.fujitsu.com>
 
-Sorry for late response.
-I am on vacation. I will check this issue as soon as getting back.
+Reviewed-by: Eryu Guan <eguan@redhat.com>
 
-Thanks!
-
-> Yes, that's what is going on.  If delayed allocation is disabled (as
-> it is in some configuration scenarios), ext4's block allocator doesn't
-> do as well, and in some cases it will pick a starting block number for
-> the file that ends up splitting the initial file across block groups'
-> meta data blocks.
+> ---
+>  tests/generic/038 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> > Really, the number of extents or holes at the intermediate stage
-> > doesn't matter. What matters is that after collapsing the holes back
-> > out of the file, then number of extents is identical to the original
-> > file (i.e. that fcollapse() undoes finsert() exactly).
+> diff --git a/tests/generic/038 b/tests/generic/038
+> index 7bfebfc..4d108cf 100755
+> --- a/tests/generic/038
+> +++ b/tests/generic/038
+> @@ -121,8 +121,8 @@ create_files()
+>  }
+>  
+>  _scratch_mkfs >>$seqres.full 2>&1
+> -_require_fs_space $SCRATCH_MNT $((10 * 1024 * 1024))
+>  _scratch_mount
+> +_require_fs_space $SCRATCH_MNT $((10 * 1024 * 1024))
+>  _require_batched_discard $SCRATCH_MNT
+>  
+>  for ((i = 0; i < $((4 * $LOAD_FACTOR)); i++)); do
+> -- 
+> 1.8.4.2
 > 
-> Yup.
-> 
-> > So changing this code to use _within_tolerance to say that 100 >=
-> > num_extents >= 105 is ok would probably be better:
-> >
-> > 	_within_tolerance "Extent count" $nextents 100 0 5%
-> >
-> > This will output a standard pass/fail message rather than an exact
-> > count.  This allows some wiggle room for filesystem configurations
-> > that have unexpected non-contiguous baseline allocation behaviour to
-> > pass the test.
-> 
-> Works for me.
-> 
-> Thanks,
-> 
-> 					- Ted
-
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
