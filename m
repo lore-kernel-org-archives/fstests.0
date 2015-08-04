@@ -1,89 +1,145 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:39621 "EHLO
-	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752185AbbHCFz6 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 3 Aug 2015 01:55:58 -0400
-Date: Mon, 3 Aug 2015 15:55:37 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 2/5] xfstest: generic/219 add _require_odirect
-Message-ID: <20150803055537.GS3902@dastard>
-References: <1438236417-24612-1-git-send-email-yangds.fnst@cn.fujitsu.com>
- <1438236417-24612-3-git-send-email-yangds.fnst@cn.fujitsu.com>
- <20150803035909.GP3902@dastard>
- <55BEF5A2.6090606@cn.fujitsu.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:14744 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750849AbbHDG3V (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 4 Aug 2015 02:29:21 -0400
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Subject: [PATCH] fstests: btrfs: Add regression test for reserved space leak.
+Date: Tue, 4 Aug 2015 14:27:17 +0800
+Message-ID: <1438669637-3666-1-git-send-email-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <55BEF5A2.6090606@cn.fujitsu.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Dongsheng Yang <yangds.fnst@cn.fujitsu.com>
-Cc: eguan@redhat.com, fstests@vger.kernel.org, dedekind1@gmail.com, richard.weinberger@gmail.com, linux-mtd@lists.infradead.org
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Aug 03, 2015 at 01:01:22PM +0800, Dongsheng Yang wrote:
-> On 08/03/2015 11:59 AM, Dave Chinner wrote:
-> >On Thu, Jul 30, 2015 at 02:06:54PM +0800, Dongsheng Yang wrote:
-> >>generic/219 is testing quota in three use cases including
-> >>Direct I/O. So we have to add a dependence to odirect in
-> >>this test.
-> >
-> >Hmmm - you've modified on only 2 tests here in this patch series
-> >that use direct IO. There are many more - just looking for direct IO
-> >comments, these generic tests use direct IO in some way, and there
-> >are others that such usage is not obvious (e.g. this patch to
-> >generic/219):
-> >
-> >generic/091
-> >generic/113
-> >generic/130
-> >generic/214
-> >generic/224
-> >generic/263
-> >shared/272
-> >
-> >And all the aio/dio tests:
-> >
-> >generic/036
-> >generic/198
-> >generic/207
-> >generic/208
-> >generic/209
-> >generic/210
-> >generic/211
-> >generic/212
-> >generic/239
-> >generic/240
-> >generic/323
-> >
-> >And there are others that run fio that uses DIO, too, like
-> >
-> >generic/299
-> >generic/300
-> >
-> >And so on. I haven't even looked at all the fsx tests that might
-> >use DIO, and I know that some of them are not listed above...
-> >
-> >On the whole, I think ubifs would be better to implement DIO via
-> >buffered fallback that to make us have to annotate every test that
-> >uses DIO in some way...
-> 
-> Fair point. Yes, It's difficult to find out all the tests which
-> would use DIO.
-> 
-> And we are discussing about dio in ubifs.
-> 
-> So if you are strongly rejecting this kind of change, I will drop
-> this patch in my next version.
+The regression is introduced in v4.2-rc1, with the big btrfs qgroup
+change.
+The problem is, qgroup reserved space is never freed, causing even we
+increase the limit, we can still hit the EDQUOT much faster than it
+should.
 
-I would say "strongy rejecting", more advising a different approach
-to solve the problem.  i.e. with a "return 0" ->direct_IO method,
-applications that use direct IO won't randomly fail or refuse to
-run.  That seems like a much better (and simpler!) solution compared
-to chasing down applications that use direct IO and changing
-them....
+Reported-by: Tsutomu Itoh <t-itoh@jp.fujitsu.com>
+Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+---
+ tests/btrfs/089     | 83 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/089.out |  5 ++++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 89 insertions(+)
+ create mode 100755 tests/btrfs/089
+ create mode 100644 tests/btrfs/089.out
 
-Cheers,
-
-Dave.
+diff --git a/tests/btrfs/089 b/tests/btrfs/089
+new file mode 100755
+index 0000000..0c018f2
+--- /dev/null
++++ b/tests/btrfs/089
+@@ -0,0 +1,83 @@
++#! /bin/bash
++# FS QA Test 089
++#
++# Regression test for btrfs qgroup reserved space leak.
++#
++# Due to qgroup reserved space leak, EDQUOT can be trigged even it's not
++# over limit after previous write.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Fujitsu. All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_need_to_be_root
++
++# Use big blocksize to ensure there is still enough space left
++# for metadata reserve after hitting EDQUOT
++BLOCKSIZE=$(( 2 * 1024 * 1024 ))
++FILESIZE=$(( 128 * 1024 * 1024 )) # 128Mbytes 
++
++# The last block won't be able to finish write, as metadata takes
++# $NODESIZE space, causing the last block triggering EDQUOT
++LENGTH=$(( $FILESIZE - $BLOCKSIZE ))
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++_require_fs_space $SCRATCH_MNT $(($FILESIZE * 2 / 1024))
++
++_run_btrfs_util_prog quota enable $SCRATCH_MNT
++_run_btrfs_util_prog qgroup limit $FILESIZE 5 $SCRATCH_MNT
++
++$XFS_IO_PROG -f -c "pwrite -b $BLOCKSIZE 0 $LENGTH" \
++	$SCRATCH_MNT/foo | _filter_xfs_io
++sync
++
++# Double the limit to allow further write
++_run_btrfs_util_prog qgroup limit $(($FILESIZE * 2)) 5 $SCRATCH_MNT
++
++# Test whether further write can succeed
++$XFS_IO_PROG -f -c "pwrite -b $BLOCKSIZE $LENGTH $LENGTH" \
++	$SCRATCH_MNT/foo | _filter_xfs_io
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/089.out b/tests/btrfs/089.out
+new file mode 100644
+index 0000000..396888f
+--- /dev/null
++++ b/tests/btrfs/089.out
+@@ -0,0 +1,5 @@
++QA output created by 089
++wrote 132120576/132120576 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 132120576/132120576 bytes at offset 132120576
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index ffe18bf..225b532 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -91,6 +91,7 @@
+ 086 auto quick clone
+ 087 auto quick send
+ 088 auto quick metadata
++089 auto quick qgroup
+ 090 auto quick metadata
+ 091 auto quick qgroup
+ 092 auto quick send
 -- 
-Dave Chinner
-david@fromorbit.com
+1.8.3.1
+
