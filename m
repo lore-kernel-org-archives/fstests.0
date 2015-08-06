@@ -1,93 +1,220 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:17795 "EHLO
-	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754185AbbHFA1n (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 5 Aug 2015 20:27:43 -0400
-Received: from disappointment.disaster.area ([192.168.1.110] helo=disappointment)
-	by dastard with esmtp (Exim 4.80)
-	(envelope-from <dave@fromorbit.com>)
-	id 1ZN91s-00087T-4J
-	for fstests@vger.kernel.org; Thu, 06 Aug 2015 10:27:28 +1000
-Received: from dave by disappointment with local (Exim 4.86_RC4)
-	(envelope-from <dave@disappointment.disaster>)
-	id 1ZN91s-0003TZ-3K
-	for fstests@vger.kernel.org; Thu, 06 Aug 2015 10:27:28 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH] generic/038: speed up file creation
-Date: Thu,  6 Aug 2015 10:27:28 +1000
-Message-Id: <1438820848-13325-1-git-send-email-david@fromorbit.com>
+Received: from mail.kernel.org ([198.145.29.136]:57875 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755135AbbHFKmB (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 6 Aug 2015 06:42:01 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] fstests: generic test for fsync of file with multiple links
+Date: Thu,  6 Aug 2015 05:11:30 +0100
+Message-Id: <1438834290-30636-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Dave Chinner <dchinner@redhat.com>
+From: Filipe Manana <fdmanana@suse.com>
 
-Now that generic/038 is running on my test machine, I notice how
-slow it is:
+Test that when we have a file with multiple hard links belonging to
+different parent directories, if we remove one of those links, fsync the
+file using one of its other links (that has a parent directory different
+from the one we removed a link from), power fail and then replay the
+fsync log/journal, the hard link we removed is not available anymore and
+all the filesystem metadata is in a consistent state.
 
-generic/038      692s
+This test is motivated by an issue found in btrfs, where the test fails
+with:
 
-11-12 minutes for a single test is way too long.
-The test is creating
-400,000 single block files, which can be easily parallelised and
-hence run much faster than the test is currently doing.
+  generic/107 2s ... - output mismatch (see .../results/generic/107.out.bad)
+    --- tests/generic/107.out	2015-08-04 09:47:46.922131256 +0100
+    +++ /home/fdmanana/git/hub/xfstests/results//generic/107.out.bad
+    @@ -1,3 +1,5 @@
+     QA output created by 107
+     Entries in testdir:
+     foo2
+    +foo3
+    +rmdir: failed to remove '/home/fdmanana/btrfs-tests/scratch_1/testdir': Directory not empty
+    ...
+    (Run 'diff -u tests/generic/107.out .../generic/107.out.bad'  to see the entire diff)
+  _check_btrfs_filesystem: filesystem on /dev/sdc is inconsistent (see .../generic/107.full)
+  _check_dmesg: something found in dmesg (see .../generic/107.dmesg)
 
-Split the file creation up into 4 threads that create 100,000 files
-each. 4 is chosen because XFS defaults to 4AGs, ext4 still has decent
-speedups at 4 concurrent creates, and other filesystems aren't hurt
-by excessive concurrency. The result:
+  $ cat /home/fdmanana/git/hub/xfstests/results//generic/107.full
+  _check_btrfs_filesystem: filesystem on /dev/sdc is inconsistent
+  *** fsck.btrfs output ***
+  checking extents
+  checking free space cache
+  checking fs roots
+  root 5 inode 257 errors 200, dir isize wrong
+	unresolved ref dir 257 index 3 namelen 4 name foo3 filetype 1 \
+          errors 5, no dir item, no inode ref
 
-generic/038      237s
+  $ cat /home/fdmanana/git/hub/xfstests/results//generic/107.dmesg
+  (...)
+  [188897.707311] BTRFS info (device dm-0): failed to delete reference to \
+    foo3, inode 258 parent 257
+  [188897.711345] ------------[ cut here ]------------
+  [188897.713369] WARNING: CPU: 10 PID: 19452 at fs/btrfs/inode.c:3956 \
+    __btrfs_unlink_inode+0x182/0x35a [btrfs]()
+  [188897.717661] BTRFS: Transaction aborted (error -2)
+  (...)
+  [188897.747898] Call Trace:
+  [188897.748519]  [<ffffffff8145f077>] dump_stack+0x4f/0x7b
+  [188897.749602]  [<ffffffff81095de5>] ? console_unlock+0x356/0x3a2
+  [188897.750682]  [<ffffffff8104b3b0>] warn_slowpath_common+0xa1/0xbb
+  [188897.751936]  [<ffffffffa04c5d09>] ? __btrfs_unlink_inode+0x182/0x35a [btrfs]
+  [188897.753485]  [<ffffffff8104b410>] warn_slowpath_fmt+0x46/0x48
+  [188897.754781]  [<ffffffffa04c5d09>] __btrfs_unlink_inode+0x182/0x35a [btrfs]
+  [188897.756295]  [<ffffffffa04c6e8f>] btrfs_unlink_inode+0x1e/0x40 [btrfs]
+  [188897.757692]  [<ffffffffa04c6f11>] btrfs_unlink+0x60/0x9b [btrfs]
+  [188897.758978]  [<ffffffff8116fb48>] vfs_unlink+0x9c/0xed
+  [188897.760151]  [<ffffffff81173481>] do_unlinkat+0x12b/0x1fb
+  [188897.761354]  [<ffffffff81253855>] ? lockdep_sys_exit_thunk+0x12/0x14
+  [188897.762692]  [<ffffffff81174056>] SyS_unlinkat+0x29/0x2b
+  [188897.763741]  [<ffffffff81465197>] system_call_fastpath+0x12/0x6f
+  [188897.764894] ---[ end trace bbfddacb7aaada8c ]---
+  [188897.765801] BTRFS warning (device dm-0): __btrfs_unlink_inode:3956: \
+    Aborting unused transaction(No such entry).
 
-on the same machine, which is roughly 3x faster and so it (just)
-fast enough to to be considered acceptible.
+Tested against ext3/4, xfs, reiserfs and f2fs too, and all these
+filesystems currently pass this test (on a 4.1 linux kernel at least).
 
-Signed-off-by: Dave Chinner <dchinner@redhat.com>
+The btrfs issue is fixed by the linux kernel patch titled:
+"Btrfs: fix stale dir entries after removing a link and fsync".
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- tests/generic/038 | 25 ++++++++++++++++++-------
- 1 file changed, 18 insertions(+), 7 deletions(-)
+ tests/generic/107     | 99 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/107.out |  3 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 103 insertions(+)
+ create mode 100755 tests/generic/107
+ create mode 100644 tests/generic/107.out
 
-diff --git a/tests/generic/038 b/tests/generic/038
-index 4d108cf..3c94a3b 100755
---- a/tests/generic/038
-+++ b/tests/generic/038
-@@ -105,19 +105,30 @@ trim_loop()
- # the fallocate calls happen. So we don't really care if they all succeed or
- # not, the goal is just to keep metadata space usage growing while data block
- # groups are deleted.
+diff --git a/tests/generic/107 b/tests/generic/107
+new file mode 100755
+index 0000000..7d107d7
+--- /dev/null
++++ b/tests/generic/107
+@@ -0,0 +1,99 @@
++#! /bin/bash
++# FSQA Test No. 107
 +#
-+# reating 400,000 files sequentially is really slow, so speed it up a bit
-+# by doing it concurrently with 4 threads in 4 separate directories.
- create_files()
- {
- 	local prefix=$1
- 
--	for ((i = 1; i <= 400000; i++)); do
--		$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 3900" \
--			$SCRATCH_MNT/"${prefix}_$i" &> /dev/null
--		if [ $? -ne 0 ]; then
--			echo "Failed creating file ${prefix}_$i" >>$seqres.full
--			break
--		fi
-+	for ((n = 0; n < 4; n++)); do
-+		mkdir $SCRATCH_MNT/$n
-+		(
-+		for ((i = 1; i <= 100000; i++)); do
-+			$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 3900" \
-+				$SCRATCH_MNT/$n/"${prefix}_$i" &> /dev/null
-+			if [ $? -ne 0 ]; then
-+				echo "Failed creating file $n/${prefix}_$i" >>$seqres.full
-+				break
-+			fi
-+		done
-+		) &
-+		create_pids[$n]=$!
- 	done
- 
-+	wait ${create_pids[@]}
++# Test that when we have a file with multiple hard links belonging to different
++# parent directories, if we remove one of those links, fsync the file using one
++# of its other links (that has a parent directory different from the one we
++# removed a link from), power fail and then replay the fsync log/journal, the
++# hard link we removed is not available anymore and all the filesystem metadata
++# is in a consistent state.
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
 +
- }
- 
- _scratch_mkfs >>$seqres.full 2>&1
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	_cleanup_flakey
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmflakey
++
++# real QA test starts here
++_need_to_be_root
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_dm_flakey
++_require_metadata_journaling $SCRATCH_DEV
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_init_flakey
++_mount_flakey
++
++# Create our test directory and file.
++mkdir $SCRATCH_MNT/testdir
++touch $SCRATCH_MNT/foo
++ln $SCRATCH_MNT/foo $SCRATCH_MNT/testdir/foo2
++ln $SCRATCH_MNT/foo $SCRATCH_MNT/testdir/foo3
++
++# Make sure everything done so far is durably persisted.
++sync
++
++# Now we remove one of our file's hardlinks in the directory testdir.
++unlink $SCRATCH_MNT/testdir/foo3
++
++# We now fsync our file using the "foo" link, which has a parent that
++# is not the directory "testdir".
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foo
++
++# Silently drop all writes and unmount to simulate a crash/power failure.
++_load_flakey_table $FLAKEY_DROP_WRITES
++_unmount_flakey
++
++# Allow writes again and mount the fs to trigger log/journal replay.
++_load_flakey_table $FLAKEY_ALLOW_WRITES
++_mount_flakey
++
++# After the journal/log is replayed we expect to not see the "foo3" link anymore
++# and we should be able to remove all names in the directory "testdir" and then
++# remove it (no stale directory entries left after the journal/log replay).
++echo "Entries in testdir:"
++ls -1 $SCRATCH_MNT/testdir
++
++rm -f $SCRATCH_MNT/testdir/*
++rmdir $SCRATCH_MNT/testdir
++
++_unmount_flakey
++
++status=0
++exit
+diff --git a/tests/generic/107.out b/tests/generic/107.out
+new file mode 100644
+index 0000000..5bb36ee
+--- /dev/null
++++ b/tests/generic/107.out
+@@ -0,0 +1,3 @@
++QA output created by 107
++Entries in testdir:
++foo2
+diff --git a/tests/generic/group b/tests/generic/group
+index a33536e..bc5150d 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -109,6 +109,7 @@
+ 104 auto quick metadata
+ 105 acl auto quick
+ 106 auto quick metadata
++107 auto quick metadata
+ 112 rw aio auto quick
+ 113 rw aio auto quick
+ 117 attr auto quick
 -- 
-2.1.4
+2.1.3
 
