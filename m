@@ -1,172 +1,93 @@
-Received: from mail-ig0-f176.google.com ([209.85.213.176]:35424 "EHLO
-	mail-ig0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750738AbbHEHqG (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 5 Aug 2015 03:46:06 -0400
-MIME-Version: 1.0
-Reply-To: fdmanana@gmail.com
-In-Reply-To: <1438736914-28147-1-git-send-email-quwenruo@cn.fujitsu.com>
-References: <1438736914-28147-1-git-send-email-quwenruo@cn.fujitsu.com>
-Date: Wed, 5 Aug 2015 08:46:04 +0100
-Message-ID: <CAL3q7H5FdqyUyQrP2jU7JSAvS7gA-YhgsRyDQTOuJozzn1i30Q@mail.gmail.com>
-Subject: Re: [PATCH v2] fstests: btrfs: Add regression test for reserved space leak.
-From: Filipe David Manana <fdmanana@gmail.com>
-Content-Type: text/plain; charset=UTF-8
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:17795 "EHLO
+	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754185AbbHFA1n (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 5 Aug 2015 20:27:43 -0400
+Received: from disappointment.disaster.area ([192.168.1.110] helo=disappointment)
+	by dastard with esmtp (Exim 4.80)
+	(envelope-from <dave@fromorbit.com>)
+	id 1ZN91s-00087T-4J
+	for fstests@vger.kernel.org; Thu, 06 Aug 2015 10:27:28 +1000
+Received: from dave by disappointment with local (Exim 4.86_RC4)
+	(envelope-from <dave@disappointment.disaster>)
+	id 1ZN91s-0003TZ-3K
+	for fstests@vger.kernel.org; Thu, 06 Aug 2015 10:27:28 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: [PATCH] generic/038: speed up file creation
+Date: Thu,  6 Aug 2015 10:27:28 +1000
+Message-Id: <1438820848-13325-1-git-send-email-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 5, 2015 at 2:08 AM, Qu Wenruo <quwenruo@cn.fujitsu.com> wrote:
-> The regression is introduced in v4.2-rc1, with the big btrfs qgroup
-> change.
-> The problem is, qgroup reserved space is never freed, causing even we
-> increase the limit, we can still hit the EDQUOT much faster than it
-> should.
->
-> Reported-by: Tsutomu Itoh <t-itoh@jp.fujitsu.com>
-> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+From: Dave Chinner <dchinner@redhat.com>
 
-Thanks!
+Now that generic/038 is running on my test machine, I notice how
+slow it is:
 
-> ---
->  tests/btrfs/089     | 88 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/089.out |  5 +++
->  tests/btrfs/group   |  1 +
->  3 files changed, 94 insertions(+)
->  create mode 100755 tests/btrfs/089
->  create mode 100644 tests/btrfs/089.out
->
-> diff --git a/tests/btrfs/089 b/tests/btrfs/089
-> new file mode 100755
-> index 0000000..82db96c
-> --- /dev/null
-> +++ b/tests/btrfs/089
-> @@ -0,0 +1,88 @@
-> +#! /bin/bash
-> +# FS QA Test 089
-> +#
-> +# Regression test for btrfs qgroup reserved space leak.
-> +#
-> +# Due to qgroup reserved space leak, EDQUOT can be trigged even it's not
-> +# over limit after previous write.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2015 Fujitsu. All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +_need_to_be_root
-> +
-> +# Use big blocksize to ensure there is still enough space left
-> +# for metadata reserve after hitting EDQUOT
-> +BLOCKSIZE=$(( 2 * 1024 * 1024 ))
-> +FILESIZE=$(( 128 * 1024 * 1024 )) # 128Mbytes
-> +
-> +# The last block won't be able to finish write, as metadata takes
-> +# $NODESIZE space, causing the last block triggering EDQUOT
-> +LENGTH=$(( $FILESIZE - $BLOCKSIZE ))
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount
-> +_require_fs_space $SCRATCH_MNT $(($FILESIZE * 2 / 1024))
-> +
-> +_run_btrfs_util_prog quota enable $SCRATCH_MNT
-> +_run_btrfs_util_prog qgroup limit $FILESIZE 5 $SCRATCH_MNT
-> +
-> +$XFS_IO_PROG -f -c "pwrite -b $BLOCKSIZE 0 $LENGTH" \
-> +       $SCRATCH_MNT/foo | _filter_xfs_io
-> +
-> +# A sync is needed to trigger a commit_transaction.
-> +# As the reserved space freeing happens at commit_transaction time,
-> +# without a transaction commit, no reserved space needs freeing and
-> +# won't trigger the bug.
-> +sync
-> +
-> +# Double the limit to allow further write
-> +_run_btrfs_util_prog qgroup limit $(($FILESIZE * 2)) 5 $SCRATCH_MNT
-> +
-> +# Test whether further write can succeed
-> +$XFS_IO_PROG -f -c "pwrite -b $BLOCKSIZE $LENGTH $LENGTH" \
-> +       $SCRATCH_MNT/foo | _filter_xfs_io
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/089.out b/tests/btrfs/089.out
-> new file mode 100644
-> index 0000000..396888f
-> --- /dev/null
-> +++ b/tests/btrfs/089.out
-> @@ -0,0 +1,5 @@
-> +QA output created by 089
-> +wrote 132120576/132120576 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 132120576/132120576 bytes at offset 132120576
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index ffe18bf..225b532 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -91,6 +91,7 @@
->  086 auto quick clone
->  087 auto quick send
->  088 auto quick metadata
-> +089 auto quick qgroup
->  090 auto quick metadata
->  091 auto quick qgroup
->  092 auto quick send
-> --
-> 1.8.3.1
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+generic/038      692s
 
+11-12 minutes for a single test is way too long.
+The test is creating
+400,000 single block files, which can be easily parallelised and
+hence run much faster than the test is currently doing.
 
+Split the file creation up into 4 threads that create 100,000 files
+each. 4 is chosen because XFS defaults to 4AGs, ext4 still has decent
+speedups at 4 concurrent creates, and other filesystems aren't hurt
+by excessive concurrency. The result:
 
+generic/038      237s
+
+on the same machine, which is roughly 3x faster and so it (just)
+fast enough to to be considered acceptible.
+
+Signed-off-by: Dave Chinner <dchinner@redhat.com>
+---
+ tests/generic/038 | 25 ++++++++++++++++++-------
+ 1 file changed, 18 insertions(+), 7 deletions(-)
+
+diff --git a/tests/generic/038 b/tests/generic/038
+index 4d108cf..3c94a3b 100755
+--- a/tests/generic/038
++++ b/tests/generic/038
+@@ -105,19 +105,30 @@ trim_loop()
+ # the fallocate calls happen. So we don't really care if they all succeed or
+ # not, the goal is just to keep metadata space usage growing while data block
+ # groups are deleted.
++#
++# reating 400,000 files sequentially is really slow, so speed it up a bit
++# by doing it concurrently with 4 threads in 4 separate directories.
+ create_files()
+ {
+ 	local prefix=$1
+ 
+-	for ((i = 1; i <= 400000; i++)); do
+-		$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 3900" \
+-			$SCRATCH_MNT/"${prefix}_$i" &> /dev/null
+-		if [ $? -ne 0 ]; then
+-			echo "Failed creating file ${prefix}_$i" >>$seqres.full
+-			break
+-		fi
++	for ((n = 0; n < 4; n++)); do
++		mkdir $SCRATCH_MNT/$n
++		(
++		for ((i = 1; i <= 100000; i++)); do
++			$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 3900" \
++				$SCRATCH_MNT/$n/"${prefix}_$i" &> /dev/null
++			if [ $? -ne 0 ]; then
++				echo "Failed creating file $n/${prefix}_$i" >>$seqres.full
++				break
++			fi
++		done
++		) &
++		create_pids[$n]=$!
+ 	done
+ 
++	wait ${create_pids[@]}
++
+ }
+ 
+ _scratch_mkfs >>$seqres.full 2>&1
 -- 
-Filipe David Manana,
+2.1.4
 
-"Reasonable men adapt themselves to the world.
- Unreasonable men adapt the world to themselves.
- That's why all progress depends on unreasonable men."
