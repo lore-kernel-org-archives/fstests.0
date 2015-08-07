@@ -1,168 +1,179 @@
-Received: from mx1.redhat.com ([209.132.183.28]:50035 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751471AbbHGJu0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 7 Aug 2015 05:50:26 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (Postfix) with ESMTPS id B05ACA2C0A
-	for <fstests@vger.kernel.org>; Fri,  7 Aug 2015 09:50:26 +0000 (UTC)
-Date: Fri, 7 Aug 2015 17:50:23 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v4] generic: test bug when zero range is crossing isize
- within single block
-Message-ID: <20150807095022.GH17933@dhcp-13-216.nay.redhat.com>
-References: <1435143925-10037-1-git-send-email-eguan@redhat.com>
- <20150807082518.GB3163@dhcp12-144.nay.redhat.com>
+Received: from mail-ig0-f170.google.com ([209.85.213.170]:33827 "EHLO
+	mail-ig0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750920AbbHGK0E (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 7 Aug 2015 06:26:04 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20150807082518.GB3163@dhcp12-144.nay.redhat.com>
+Reply-To: fdmanana@gmail.com
+In-Reply-To: <1437560043-336-2-git-send-email-anand.jain@oracle.com>
+References: <1430388527-16700-1-git-send-email-anand.jain@oracle.com>
+	<1437560043-336-1-git-send-email-anand.jain@oracle.com>
+	<1437560043-336-2-git-send-email-anand.jain@oracle.com>
+Date: Fri, 7 Aug 2015 11:26:03 +0100
+Message-ID: <CAL3q7H57aHmHnMsZqVOsT6T4vqp5ZDug4=8vSm9025ppGNiPJA@mail.gmail.com>
+Subject: Re: [PATCH v4 1/3] xfstests: btrfs: add functions to create dm-error device
+From: Filipe David Manana <fdmanana@gmail.com>
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Xiong Zhou <xzhou@redhat.com>
-Cc: fstests@vger.kernel.org
+To: Anand Jain <anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, "dsterba@suse.cz" <dsterba@suse.cz>, Dave Chinner <david@fromorbit.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Aug 07, 2015 at 04:25:18PM +0800, Xiong Zhou wrote:
-> ping.
-> 
-> Good to have this case..
+On Wed, Jul 22, 2015 at 11:14 AM, Anand Jain <anand.jain@oracle.com> wrote:
+> From: Anand Jain <Anand.Jain@oracle.com>
+>
+> Controlled EIO from the device is achieved using the dm device.
+> Helper functions are at common/dmerror.
+>
+> Broadly steps will include calling _init_dmerror().
+> _init_dmerror() will use SCRATCH_DEV to create dm linear device and assign
+> DMERROR_DEV to /dev/mapper/error-test.
+>
+> When test script is ready to get EIO, the test cases can call
+> _load_dmerror_table() which then it will load the dm error.
+> so that reading DMERROR_DEV will cause EIO. After the test case is
+> complete, cleanup must be done by calling _cleanup_dmerror().
+>
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> ---
+> v3->v4: rebase on latest xfstests code
+> v2.1->v3: accepts Filipe Manana's review comments, thanks
+> v2->v2.1: fixed missed typo error fixup in the commit.
+> v1->v2: accepts Dave Chinner's review comments, thanks
+>
+>  common/dmerror | 69 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  common/rc      | 15 +++++++++++++
+>  2 files changed, 84 insertions(+)
+>  create mode 100644 common/dmerror
+>
+> diff --git a/common/dmerror b/common/dmerror
+> new file mode 100644
+> index 0000000..f895d90
+> --- /dev/null
+> +++ b/common/dmerror
+> @@ -0,0 +1,69 @@
+> +##/bin/bash
+> +#
+> +# Copyright (c) 2015 Oracle.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#
+> +#
+> +# common functions for setting up and tearing down a dmerror device
+> +
+> +_init_dmerror()
+> +{
+> +       $DMSETUP_PROG remove error-test > /dev/null 2>&1
+> +
+> +       local BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
+> +
+> +       DMERROR_DEV='/dev/mapper/error-test'
+> +
+> +       DMLINEAR_TABLE="0 $BLK_DEV_SIZE linear $SCRATCH_DEV 0"
+> +
+> +       $DMSETUP_PROG create error-test --table "$DMLINEAR_TABLE" || \
+> +               _fatal "failed to create dm linear device"
+> +
+> +       DMERROR_TABLE="0 $BLK_DEV_SIZE error $SCRATCH_DEV 0"
+> +}
+> +
+> +_scratch_mkfs_dmerror()
+> +{
+> +       $MKFS_BTRFS_PROG $* $DMERROR_DEV >> $seqres.full 2>&1 || \
+> +                       _fatal "failed to create mkfs.btrfs $* $DMERROR_DEV"
+> +}
+> +
+> +_mount_dmerror()
+> +{
+> +       mount -t $FSTYP $MOUNT_OPTIONS $DMERROR_DEV $SCRATCH_MNT
+> +}
+> +
+> +_unmount_dmerror()
+> +{
+> +       $UMOUNT_PROGS $SCRATCH_MNT
+> +}
+> +
+> +_cleanup_dmerror()
+> +{
+> +       $UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
+> +       $DMSETUP_PROG remove error-test > /dev/null 2>&1
+> +}
+> +
+> +_load_dmerror_table()
+> +{
+> +       $DMSETUP_PROG suspend error-test
+> +       [ $? -ne 0 ] && _fatal  "failed to suspend error-test"
+> +
+> +       $DMSETUP_PROG load error-test --table "$DMERROR_TABLE"
+> +       [ $? -ne 0 ] && _fatal "failed to load error table error-test"
+> +
+> +       $DMSETUP_PROG resume error-test
+> +       [ $? -ne 0 ] && _fatal  "failed to resume error-test"
+> +}
+> diff --git a/common/rc b/common/rc
+> index 610045e..ff0732a 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1336,6 +1336,21 @@ _require_sane_bdev_flush()
+>         fi
+>  }
+>
+> +# this test requires the device mapper error target
+> +#
+> +_require_dmerror()
+> +{
+> +    _require_command "$DMSETUP_PROG" dmsetup
+> +
+> +    $DMSETUP_PROG targets | grep error >/dev/null 2>&1
+> +    if [ $? -eq 0 ]
+> +    then
+> +       :
+> +    else
+> +       _notrun "This test requires dm error support"
+> +    fi
 
-I think it's already in, see generic/096.
+Why not just:
 
-Thanks,
-Eryu
+[ $? -ne 0 ] && _notrun "This test requires dm error support"
 
-> 
-> Thanks,
-> Xiong
-> 
-> On Wed, Jun 24, 2015 at 07:05:25PM +0800, Eryu Guan wrote:
-> > From: Lukas Czerner <lczerner@redhat.com>
-> > 
-> > Exercise the situation that cause ext4 to BUG_ON() when we use
-> > zero range to zero a range which starts within the isize but ends
-> > past the isize but still in the same block. This particular problem
-> > has only been seen on systems with page_size > block_size.
-> > 
-> > This tests exercises the problem fixed in kernel with commit
-> > 0f2af21aae11972fa924374ddcf52e88347cf5a8
-> > ext4: Allocate entire range in zero range
-> > 
-> > Signed-off-by: Lukas Czerner <lczerner@redhat.com>
-> > Signed-off-by: Eryu Guan <eguan@redhat.com>
-> > ---
-> > 
-> > This patch got lost in previous fstests updates, I did minor updates and resent.
-> > 
-> > v4:
-> > - Use scratch dev instead of test dev, it's easy and common to test page_size > block_size scenario on scratch device
-> > - Add "Silence is golden" to indicate test expects no output
-> > - Renumber to generic/094
-> > 
-> >  tests/generic/094     | 64 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/094.out |  2 ++
-> >  tests/generic/group   |  1 +
-> >  3 files changed, 67 insertions(+)
-> >  create mode 100755 tests/generic/094
-> >  create mode 100644 tests/generic/094.out
-> > 
-> > diff --git a/tests/generic/094 b/tests/generic/094
-> > new file mode 100755
-> > index 0000000..602e5b6
-> > --- /dev/null
-> > +++ b/tests/generic/094
-> > @@ -0,0 +1,64 @@
-> > +#! /bin/bash
-> > +# FS QA Test 094
-> > +#
-> > +# Exercise the situation that cause ext4 to BUG_ON() when we use
-> > +# zero range to zero a range which starts within the isize but ends
-> > +# past the isize but still in the same block. This particular problem
-> > +# has only been seen on systems with page_size > block_size.
-> > +#
-> > +#-----------------------------------------------------------------------
-> > +# Copyright (c) 2015 Red Hat, Inc., Lukas Czerner <lczerner@redhat.com>
-> > +#
-> > +# This program is free software; you can redistribute it and/or
-> > +# modify it under the terms of the GNU General Public License as
-> > +# published by the Free Software Foundation.
-> > +#
-> > +# This program is distributed in the hope that it would be useful,
-> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > +# GNU General Public License for more details.
-> > +#
-> > +# You should have received a copy of the GNU General Public License
-> > +# along with this program; if not, write the Free Software Foundation,
-> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > +#-----------------------------------------------------------------------
-> > +#
-> > +
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +# real QA test starts here
-> > +_supported_fs generic
-> > +_supported_os IRIX Linux
-> > +_require_scratch
-> > +_require_xfs_io_command "fzero"
-> > +
-> > +rm -f $seqres.full
-> > +echo "Silence is golden"
-> > +
-> > +# Use smaller scratch fs to shorten the test time
-> > +_scratch_mkfs_sized $((512 * 1024 * 1024)) >>$seqres.full 2>&1
-> > +_scratch_mount
-> > +
-> > +testfile=$SCRATCH_MNT/$seq.$$
-> > +$XFS_IO_PROG -f -c "pwrite 4096 512" -c "fzero 4351 512" $testfile >> $seqres.full 2>&1
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/generic/094.out b/tests/generic/094.out
-> > new file mode 100644
-> > index 0000000..bcdcf29
-> > --- /dev/null
-> > +++ b/tests/generic/094.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 094
-> > +Silence is golden
-> > diff --git a/tests/generic/group b/tests/generic/group
-> > index ca15a3f..fcca238 100644
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -96,6 +96,7 @@
-> >  091 rw auto quick
-> >  092 auto quick prealloc
-> >  093 attr cap udf auto
-> > +094 auto prealloc quick
-> >  097 udf auto
-> >  099 udf auto
-> >  100 udf auto
-> > -- 
-> > 2.4.3
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The empty branch doesn't make much sense.
+
+Also, please indent the body of this function using an 8 spaces tab,
+which is the official style for fstests (just look at the surrounding
+functions for example).
+
+Other than that, it looks good to me. You can add:
+
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
+
+> +}
+> +
+>  # this test requires the device mapper flakey target
+>  #
+>  _require_dm_flakey()
 > --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> 2.4.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Filipe David Manana,
+
+"Reasonable men adapt themselves to the world.
+ Unreasonable men adapt the world to themselves.
+ That's why all progress depends on unreasonable men."
