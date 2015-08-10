@@ -1,48 +1,98 @@
-Received: from mx1.redhat.com ([209.132.183.28]:47697 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751691AbbHJNPr (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 10 Aug 2015 09:15:47 -0400
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (Postfix) with ESMTPS id 321778F266
-	for <fstests@vger.kernel.org>; Mon, 10 Aug 2015 13:15:47 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] xfs/074: double the data section size
-Date: Mon, 10 Aug 2015 21:15:41 +0800
-Message-Id: <1439212541-27554-1-git-send-email-eguan@redhat.com>
+Received: from mail-qk0-f182.google.com ([209.85.220.182]:35190 "EHLO
+	mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753472AbbHJRhM (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 10 Aug 2015 13:37:12 -0400
+Date: Mon, 10 Aug 2015 13:38:38 -0400
+From: Eric Whitney <enwlinux@gmail.com>
+Subject: [PATCH] generic/064: allow room for unexpected allocation behavior
+Message-ID: <20150810173838.GA1845@localhost.localdomain>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+Cc: namjae.jeon@samsung.com, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-When testing 512 block size xfs, xfs/074 fails as
+Per Dave Chinner's suggestion, modify generic/064 so that it won't fail
+if it finds a few more extents than it expects in its test file after
+inserting ranges.  When 064's test file is first created, some file
+systems may use more than the ideal minimum single extent to represent
+it, and this can lead to a mismatch between the actual and expected
+extent count after the ranges have been inserted.  Ext4 file systems
+mounted with delayed allocation disabled can exhibit this behavior
+if a test file's blocks happen to be allocated across regions of file
+system metadata.
 
-   QA output created by 074
-  +fallocate: No space left on device
-   Silence is golden
+Also, replace the open coded counting of extents and holes with a
+simpler call to _count_extents(), and clarify some comments.
 
-That's because 40051712*512=20G < 30G.
-
-Doubling the filesystem size makes the test on 512 block size xfs pass,
-and test still fails on unpatched kernel.
-
-Signed-off-by: Eryu Guan <eguan@redhat.com>
+Signed-off-by: Eric Whitney <enwlinux@gmail.com>
+Reviewed-by: Namjae Jeon <namjae.jeon@samsung.com>
 ---
- tests/xfs/074 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ tests/generic/064     | 16 +++++++++-------
+ tests/generic/064.out |  2 +-
+ 2 files changed, 10 insertions(+), 8 deletions(-)
+ mode change 100644 => 100755 tests/generic/064
 
-diff --git a/tests/xfs/074 b/tests/xfs/074
-index a571a34..e6d6787 100755
---- a/tests/xfs/074
-+++ b/tests/xfs/074
-@@ -62,7 +62,7 @@ mkdir -p $LOOP_MNT
- $XFS_IO_PROG -ft -c "truncate 1t" $LOOP_FILE >> $seqres.full
- LOOP_DEV=`_create_loop_device $LOOP_FILE`
+diff --git a/tests/generic/064 b/tests/generic/064
+old mode 100644
+new mode 100755
+index 760539a..d384a9a
+--- a/tests/generic/064
++++ b/tests/generic/064
+@@ -2,9 +2,9 @@
+ # FS QA Test No. generic/064
+ #
+ # Test multiple fallocate insert/collapse range calls on same file.
+-# Call insert range a single alternate block multiple times until the file
+-# is left with 100 extents and as much number of extents. And Call collapse
+-# range about the previously inserted ranges to test merge code of collapse
++# Call insert range on alternate blocks multiple times until the file
++# is left with 50 extents and as many holes. Then call collapse range
++# on the previously inserted ranges to test merge code of collapse
+ # range. Also check for data integrity and file system consistency.
+ #-----------------------------------------------------------------------
+ # Copyright (c) 2015 Samsung Electronics.  All Rights Reserved.
+@@ -59,7 +59,7 @@ length=$(($BLOCKS * $BSIZE))
+ # Write file
+ _do "$XFS_IO_PROG -f -c \"pwrite 0 $length\" -c fsync $src"
+ cp $src $dest
+-extent_before=`$XFS_IO_PROG -c "fiemap -v" $dest | grep "^ *[0-9]*:" |wc -l`
++extent_before=`_count_extents $dest`
  
--_mkfs_dev -d size=40051712b,agcount=4 -l size=32m $LOOP_DEV
-+_mkfs_dev -d size=80103424b,agcount=4 -l size=32m $LOOP_DEV
- _mount $LOOP_DEV $LOOP_MNT
+ # Insert alternate blocks
+ for (( j=0; j < $(($BLOCKS/2)); j++ )); do
+@@ -67,8 +67,10 @@ for (( j=0; j < $(($BLOCKS/2)); j++ )); do
+ 	_do "$XFS_IO_PROG -c \"finsert $offset $BSIZE\" $dest"
+ done
  
- # Corrupt the BMBT by creating extents larger than MAXEXTLEN
+-# Check if 100 extents are present
+-$XFS_IO_PROG -c "fiemap -v" $dest | grep "^ *[0-9]*:" |wc -l
++# Check if 50 extents are present, allowing some slop for file systems
++# that don't have ideal allocation behavior
++num_extents=`_count_extents $dest`
++_within_tolerance "Extent count after inserts" $num_extents 50 0 6% -v
+ 
+ _check_scratch_fs
+ if [ $? -ne 0 ]; then
+@@ -82,7 +84,7 @@ for (( j=0; j < $(($BLOCKS/2)); j++ )); do
+ 	_do "$XFS_IO_PROG -c \"fcollapse $offset $BSIZE\" $dest"
+ done
+ 
+-extent_after=`$XFS_IO_PROG -c "fiemap -v" $dest | grep "^ *[0-9]*:" |wc -l`
++extent_after=`_count_extents $dest`
+ if [ $extent_before -ne $extent_after ]; then
+ 	echo "extents mismatched before = $extent_before after = $extent_after"
+ fi
+diff --git a/tests/generic/064.out b/tests/generic/064.out
+index b217df5..329e447 100644
+--- a/tests/generic/064.out
++++ b/tests/generic/064.out
+@@ -1,2 +1,2 @@
+ QA output created by 064
+-100
++Extent count after inserts is in range
 -- 
-2.4.3
+2.1.4
 
