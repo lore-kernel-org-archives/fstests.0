@@ -1,50 +1,92 @@
-Received: from mail-wi0-f174.google.com ([209.85.212.174]:33759 "EHLO
-	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750728AbbHNFdj (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 14 Aug 2015 01:33:39 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:43775 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752082AbbHNG6L (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 14 Aug 2015 02:58:11 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	by mx1.redhat.com (Postfix) with ESMTPS id 3B9A5A103F
+	for <fstests@vger.kernel.org>; Fri, 14 Aug 2015 06:58:11 +0000 (UTC)
+Date: Fri, 14 Aug 2015 14:58:07 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] generic/084: check inotify limit before tail many files
+Message-ID: <20150814065807.GL17933@dhcp-13-216.nay.redhat.com>
+References: <1439482592-29611-1-git-send-email-zlang@redhat.com>
 MIME-Version: 1.0
-Reply-To: mtk.manpages@gmail.com
-In-Reply-To: <CALCETrWusE9CbQ6A1iqgBVjei-_JWL4o4ezS14JLEAbrGJmaNg@mail.gmail.com>
-References: <1439458366-8223-1-git-send-email-drysdale@google.com>
- <1439458366-8223-4-git-send-email-drysdale@google.com> <CALCETrWusE9CbQ6A1iqgBVjei-_JWL4o4ezS14JLEAbrGJmaNg@mail.gmail.com>
-From: "Michael Kerrisk (man-pages)" <mtk.manpages@gmail.com>
-Date: Fri, 14 Aug 2015 07:33:17 +0200
-Message-ID: <CAKgNAkj+fZJnzKbHb8UvZg-0kNfB7MQHQYoAz-dVhnkso0Uq2A@mail.gmail.com>
-Subject: Re: [PATCHv4 man-pages 3/3] open.2: describe O_BENEATH flag
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1439482592-29611-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Andy Lutomirski <luto@amacapital.net>
-Cc: David Drysdale <drysdale@google.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexander Viro <viro@zeniv.linux.org.uk>, Kees Cook <keescook@chromium.org>, "Eric W. Biederman" <ebiederm@xmission.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Meredydd Luff <meredydd@senatehouse.org>, Will Drewry <wad@chromium.org>, Jorge Lucangeli Obes <jorgelo@google.com>, Ricky Zhou <rickyz@google.com>, Lee Campbell <leecam@google.com>, Julien Tinnes <jln@google.com>, Mike Depinet <mdepinet@google.com>, James Morris <james.l.morris@oracle.com>, Paolo Bonzini <pbonzini@redhat.com>, Paul Moore <paul@paul-moore.com>, Christoph Hellwig <hch@infradead.org>, Dave Chinner <david@fromorbit.com>, Linux API <linux-api@vger.kernel.org>, linux-arch <linux-arch@vger.kernel.org>, LSM List <linux-security-module@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 13 August 2015 at 19:38, Andy Lutomirski <luto@amacapital.net> wrote:
-> On Thu, Aug 13, 2015 at 2:32 AM, David Drysdale <drysdale@google.com> wrote:
->> Signed-off-by: David Drysdale <drysdale@google.com>
->
-> What's the behavior wrt fcntl(F_GETFL, etc)?
+On Fri, Aug 14, 2015 at 12:16:32AM +0800, Zorro Lang wrote:
+> generic/084 try to run 'tail' command, tail will use
+> inotify, and there're some limit about inotify. I think
+> the most important is fs.inotify.max_user_instances, then
+> fs.inotify.max_user_watches is importand too.
 
-I would presume that O_BENEATH is one of the so-called "file creation
-flags". See this paragraph of the DESCRIPTION:
+max_user_watches is much larger (usually 8k?) than max_user_instances
+(128), I think we can skip the max_user_watches check here.
 
-       In addition, zero or more file creation  flags  and  file  status
-       flags  can be bitwise-or'd in flags.  The file creation flags are
-       O_CLOEXEC, O_CREAT, O_DIRECTORY,  O_EXCL,  O_NOCTTY,  O_NOFOLLOW,
-       O_TMPFILE,  O_TRUNC,  and  O_TTY_INIT.  The file status flags are
-       all of the remaining flags listed below.  The distinction between
-       these  two  groups  of flags is that the file status flags can be
-       retrieved and (in some cases) modified; see fcntl(2) for details.
+> 
+> When I test on a machine with 154 cpu cores, this case
+> run failed, and hit many warning likes:
+> 
+>     tail: inotify cannot be used, reverting to polling: Too many
+>     open files
 
-David, presuming this is correct (I can't see how O_BENEATH could be a
-"file *status* flag"), your patch should also add O_BENEATH to the
-list in that paragraph.
+No need to wrap lines for quoted logs.
 
-Cheers,
+> 
+> Because the fs.inotify.max_user_instances is 128, so if
+> we try to tail 154 files, it will be failed.
+> 
+> Of course, open files limit will effect this too. But generally
+> max_user_instances is the minimum number, so I don't check open
+> file limit.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> ---
+>  tests/generic/084 | 9 +++++++++
+>  1 file changed, 9 insertions(+)
+> 
+> diff --git a/tests/generic/084 b/tests/generic/084
+> index 3fec6c2..f34d4b2 100755
+> --- a/tests/generic/084
+> +++ b/tests/generic/084
+> @@ -63,6 +63,15 @@ link_unlink_storm()
+>  
+>  rm -f $seqres.full
+>  nr_cpu=`$here/src/feature -o`
+> +user_watches=`sysctl -n fs.inotify.max_user_watches`
+> +user_instances=`sysctl -n fs.inotify.max_user_instances`
 
-Michael
+I think we need some comments in the code too.
 
+> +
+> +user_limit=$((user_watches > user_instances ? user_instances : user_watches))
 
+Please use plain if:then
 
--- 
-Michael Kerrisk
-Linux man-pages maintainer; http://www.kernel.org/doc/man-pages/
-Linux/UNIX System Programming Training: http://man7.org/training/
+> +if [ $nr_cpu -ge $((user_limit/2)) ]
+> +then
+
+if []; then
+fi
+
+this is the preferred format in xfstests
+
+> +	nr_cpu=$((user_limit/2))
+
+Need comments to explain why divide by 2.
+
+Thanks,
+Eryu
+> +fi
+> +
+>  echo "Silence is golden"
+>  
+>  _scratch_mkfs >>$seqres.full 2>&1
+> -- 
+> 1.9.3
+> 
