@@ -1,12 +1,12 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:20591 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754051AbbHOBw4 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 14 Aug 2015 21:52:56 -0400
-Subject: [PATCH 7/7] xfs: test file/symlink metadata corruption checking and
+Received: from aserp1040.oracle.com ([141.146.126.69]:17733 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753063AbbHOBw2 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 14 Aug 2015 21:52:28 -0400
+Subject: [PATCH 3/7] ext4: test block group metadata corruption checking and
  repair
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Fri, 14 Aug 2015 18:52:49 -0700
-Message-ID: <20150815015249.4333.56792.stgit@birch.djwong.org>
+Date: Fri, 14 Aug 2015 18:52:20 -0700
+Message-ID: <20150815015220.4333.14758.stgit@birch.djwong.org>
 In-Reply-To: <20150815015200.4333.9278.stgit@birch.djwong.org>
 References: <20150815015200.4333.9278.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -17,52 +17,75 @@ To: david@fromorbit.com, darrick.wong@oracle.com
 Cc: linux-ext4@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-Targeted fuzzing tests which destroy various pieces of file and
-symlink metadata; the tests look for (a) kernel detection of
-corruption, (b) xfs_repair repair of said corruption, and (c)
-post-repair fs usability.
+Targeted fuzzing tests which destroy various pieces of filesystem or
+block group metadata; the tests look for (a) kernel detection of
+corruption, (b) e2fsck repair of said corruption, and (c) post-repair
+fs usability.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/xfs/717     |  132 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/717.out |   15 ++++++
- tests/xfs/718     |  111 +++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/718.out |   13 +++++
- tests/xfs/719     |   96 +++++++++++++++++++++++++++++++++++++++
- tests/xfs/719.out |   11 ++++
- tests/xfs/720     |  114 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/720.out |   14 ++++++
- tests/xfs/721     |  114 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/721.out |   14 ++++++
- tests/xfs/722     |  118 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/722.out |   14 ++++++
- tests/xfs/group   |    6 ++
- 13 files changed, 772 insertions(+)
- create mode 100755 tests/xfs/717
- create mode 100644 tests/xfs/717.out
- create mode 100755 tests/xfs/718
- create mode 100644 tests/xfs/718.out
- create mode 100755 tests/xfs/719
- create mode 100644 tests/xfs/719.out
- create mode 100755 tests/xfs/720
- create mode 100644 tests/xfs/720.out
- create mode 100755 tests/xfs/721
- create mode 100644 tests/xfs/721.out
- create mode 100755 tests/xfs/722
- create mode 100644 tests/xfs/722.out
+ common/rc          |   11 +++++
+ tests/ext4/701     |  122 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/701.out |   13 ++++++
+ tests/ext4/702     |  103 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/702.out |   10 ++++
+ tests/ext4/703     |  113 ++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/703.out |   12 +++++
+ tests/ext4/704     |  102 +++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/704.out |   12 +++++
+ tests/ext4/705     |   88 ++++++++++++++++++++++++++++++++++++++
+ tests/ext4/705.out |   10 ++++
+ tests/ext4/706     |   87 +++++++++++++++++++++++++++++++++++++
+ tests/ext4/706.out |   10 ++++
+ tests/ext4/group   |    6 +++
+ 14 files changed, 699 insertions(+)
+ create mode 100755 tests/ext4/701
+ create mode 100644 tests/ext4/701.out
+ create mode 100755 tests/ext4/702
+ create mode 100644 tests/ext4/702.out
+ create mode 100755 tests/ext4/703
+ create mode 100644 tests/ext4/703.out
+ create mode 100755 tests/ext4/704
+ create mode 100644 tests/ext4/704.out
+ create mode 100755 tests/ext4/705
+ create mode 100644 tests/ext4/705.out
+ create mode 100755 tests/ext4/706
+ create mode 100644 tests/ext4/706.out
 
 
-diff --git a/tests/xfs/717 b/tests/xfs/717
-new file mode 100755
-index 0000000..ffc0c4e
---- /dev/null
-+++ b/tests/xfs/717
-@@ -0,0 +1,132 @@
-+#! /bin/bash
-+# FS QA Test No. 717
+diff --git a/common/rc b/common/rc
+index 70d2fa8..f889103 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1398,6 +1398,17 @@ _require_xfs_crc()
+ 	umount $SCRATCH_MNT
+ }
+ 
++# this test requires the ext4 kernel support crc feature on scratch device
 +#
-+# Create and populate an XFS filesystem, corrupt an inode, then see how
-+# the kernel and xfs_repair deal with it.
++_require_scratch_ext4_crc()
++{
++	_scratch_mkfs_ext4 >/dev/null 2>&1
++	dumpe2fs -h $SCRATCH_DEV 2> /dev/null | grep -q metadata_csum || _notrun "metadata_csum not supported by this filesystem"
++	_scratch_mount >/dev/null 2>&1 \
++	   || _notrun "Kernel doesn't support metadata_csum feature"
++	umount $SCRATCH_MNT
++}
++
+ # this test requires the bigalloc feature to be available in mkfs.ext4
+ #
+ _require_ext4_mkfs_bigalloc()
+diff --git a/tests/ext4/701 b/tests/ext4/701
+new file mode 100755
+index 0000000..6833954
+--- /dev/null
++++ b/tests/ext4/701
+@@ -0,0 +1,122 @@
++#! /bin/bash
++# FS QA Test No. 701
++#
++# Create and populate an ext4 filesystem, corrupt the primary superblock, then
++# see how the kernel and e2fsck deal with it.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2015 Oracle, Inc.  All Rights Reserved.
@@ -101,35 +124,36 @@ index 0000000..ffc0c4e
 +. ./common/rc
 +. ./common/filter
 +. ./common/attr
-+. ./common/populate
 +
 +# real QA test starts here
-+_supported_fs xfs
++_supported_fs ext4
 +_supported_os Linux
 +
 +_require_scratch
-+test -n "${FORCE_FUZZ}" || _require_scratch_xfs_crc
++test -n "${FORCE_FUZZ}" || _require_scratch_ext4_crc
 +_require_attrs
-+_require_xfs_db_blocktrash_z_command
-+test -z "${FUZZ_ARGS}" && FUZZ_ARGS="-n 8 -3"
 +
 +rm -f $seqres.full
 +TESTDIR="${SCRATCH_MNT}/scratchdir"
 +TESTFILE="${TESTDIR}/testfile"
 +
 +echo "+ create scratch fs"
-+_scratch_mkfs_xfs > /dev/null
++_scratch_mkfs_ext4 > /dev/null 2>&1
++dumpe2fs -g "${SCRATCH_DEV}" > /dev/null 2>&1 || _notrun "dumpe2fs -g not supported"
 +
 +echo "+ mount fs image"
 +_scratch_mount
 +blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
++nr_groups="$(dumpe2fs -g "${SCRATCH_DEV}" 2> /dev/null | tail -n 1 | cut -d : -f 1)"
++test "${nr_groups}" -gt 0 || _notrun "scratch device not big enough for backup superblocks"
++backup_sb="$(dumpe2fs -g "${SCRATCH_DEV}" 2> /dev/null | awk -F ':' 'BEGIN {x = 0;} {if (x == 0 && int($3) > 1) {print $3; x++;}}')"
 +
 +echo "+ make some files"
 +mkdir -p "${TESTDIR}"
-+for x in `seq 1 1024`; do
++for x in `seq 1 128`; do
 +	touch "${SCRATCH_MNT}/junk.${x}"
 +	inode="$(stat -c '%i' "${SCRATCH_MNT}/junk.${x}")"
-+	if [ "$x" -gt 512 ] && [ "$((inode % 64))" -eq 0 ]; then
++	if [ "$x" -gt 64 ] && [ "$((inode % 64))" -eq 0 ]; then
 +		mv "${SCRATCH_MNT}/junk.${x}" "${TESTFILE}.1"
 +		break
 +	fi
@@ -137,33 +161,24 @@ index 0000000..ffc0c4e
 +for x in `seq 2 64`; do
 +	touch "${TESTFILE}.${x}"
 +done
-+inode="$(stat -c '%i' "${TESTFILE}.1")"
 +umount "${SCRATCH_MNT}"
 +
 +echo "+ check fs"
-+_scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
++e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
 +
 +echo "+ corrupt image"
-+seq "${inode}" "$((inode + 64))" | while read ino; do
-+	$XFS_DB_PROG -x -c "inode ${ino}" -c "stack" -c "blocktrash -x 32 -y $((blksz * 8)) -z ${FUZZ_ARGS}" "${SCRATCH_DEV}" >> $seqres.full 2>&1
++dumpe2fs -g "${SCRATCH_DEV}" 2>/dev/null | awk -F ':' '{if ($1 == 0) {print $3}}' | while read blk; do
++	debugfs -w -R "zap_block ${blk}" "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "primary sb fuzz failed"
 +done
 +
 +echo "+ mount image"
-+_scratch_mount
-+
-+echo "+ modify files"
-+broken=0
-+for x in `seq 1 64`; do
-+	stat "${TESTFILE}.${x}" >> $seqres.full 2>&1
-+	test $? -ne 0 && broken=1
-+	touch "${TESTFILE}.${x}" >> $seqres.full 2>&1
-+	test $? -ne 0 && broken=1
-+done
-+echo "broken: ${broken}"
-+umount "${SCRATCH_MNT}"
++_scratch_mount 2> /dev/null && _fail "mount should not succeed"
 +
 +echo "+ repair fs"
-+_scratch_xfs_repair >> $seqres.full 2>&1
++# Have to specify backup sb and blocksize here so we don't pick up superblocks
++# scattered elsewhere on the scratch device.
++echo e2fsck -f -y -B "${blksz}" -b "${backup_sb}" "${SCRATCH_DEV}" >> $seqres.full 2>&1
++e2fsck -f -y -B "${blksz}" -b "${backup_sb}" "${SCRATCH_DEV}" >> $seqres.full 2>&1
 +
 +echo "+ mount image (2)"
 +_scratch_mount
@@ -175,53 +190,49 @@ index 0000000..ffc0c4e
 +broken=0
 +for x in `seq 1 64`; do
 +	test -e "${TESTFILE}.${x}" || continue
-+	echo "test ${x}" >> $seqres.full
-+	stat "${TESTFILE}.${x}" >> $seqres.full 2>&1
++	stat "${TESTFILE}.${x}" >> /dev/null 2>&1
 +	test $? -ne 0 && broken=1
-+	touch "${TESTFILE}.${x}" >> $seqres.full 2>&1
++	echo moo | dd oflag=append of="${TESTFILE}.${x}" 2>/dev/null
 +	test $? -ne 0 && broken=1
-+	echo "${x}: broken=${broken}" >> $seqres.full
 +done
 +echo "broken: ${broken}"
 +umount "${SCRATCH_MNT}"
 +
 +echo "+ check fs (2)"
-+_scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
++e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
 +
 +status=0
 +exit
-diff --git a/tests/xfs/717.out b/tests/xfs/717.out
+diff --git a/tests/ext4/701.out b/tests/ext4/701.out
 new file mode 100644
-index 0000000..6446bb7
+index 0000000..a44edb2
 --- /dev/null
-+++ b/tests/xfs/717.out
-@@ -0,0 +1,15 @@
-+QA output created by 717
++++ b/tests/ext4/701.out
+@@ -0,0 +1,13 @@
++QA output created by 701
 ++ create scratch fs
 ++ mount fs image
 ++ make some files
 ++ check fs
 ++ corrupt image
 ++ mount image
-++ modify files
-+broken: 1
 ++ repair fs
 ++ mount image (2)
 ++ chattr -R -i
 ++ modify files (2)
 +broken: 0
 ++ check fs (2)
-diff --git a/tests/xfs/718 b/tests/xfs/718
+diff --git a/tests/ext4/702 b/tests/ext4/702
 new file mode 100755
-index 0000000..99519d2
+index 0000000..60c52f6
 --- /dev/null
-+++ b/tests/xfs/718
-@@ -0,0 +1,111 @@
++++ b/tests/ext4/702
+@@ -0,0 +1,103 @@
 +#! /bin/bash
-+# FS QA Test No. 718
++# FS QA Test No. 702
 +#
-+# Create and populate an XFS filesystem, corrupt the bmbt, then see how
-+# the kernel and xfs_repair deal with it.
++# Create and populate an ext4 filesystem, corrupt a group descriptor, then
++# see how the kernel and e2fsck deal with it.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2015 Oracle, Inc.  All Rights Reserved.
@@ -260,81 +271,208 @@ index 0000000..99519d2
 +. ./common/rc
 +. ./common/filter
 +. ./common/attr
-+. ./common/populate
 +
 +# real QA test starts here
-+_supported_fs xfs
++_supported_fs ext4
 +_supported_os Linux
 +
 +_require_scratch
-+test -n "${FORCE_FUZZ}" || _require_scratch_xfs_crc
++test -n "${FORCE_FUZZ}" || _require_scratch_ext4_crc
 +_require_attrs
-+_require_xfs_db_blocktrash_z_command
-+test -z "${FUZZ_ARGS}" && FUZZ_ARGS="-n 8 -3"
 +
 +rm -f $seqres.full
++TESTDIR="${SCRATCH_MNT}/scratchdir"
++TESTFILE="${TESTDIR}/testfile"
 +
 +echo "+ create scratch fs"
-+_scratch_mkfs_xfs > /dev/null
++_scratch_mkfs_ext4 > /dev/null 2>&1
++dumpe2fs -g "${SCRATCH_DEV}" > /dev/null 2>&1 || _notrun "dumpe2fs -g not supported"
 +
 +echo "+ mount fs image"
 +_scratch_mount
-+blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
-+nr="$((blksz * 2 / 16))"
 +
 +echo "+ make some files"
-+$XFS_IO_PROG -f -c "pwrite -S 0x62 0 $((blksz * nr))" -c 'fsync' "${SCRATCH_MNT}/bigfile" >> $seqres.full
-+for i in $(seq 1 2 ${nr}); do
-+	$XFS_IO_PROG -f -c "fpunch $((i * blksz)) ${blksz}" "${SCRATCH_MNT}/bigfile" >> $seqres.full
++mkdir -p "${TESTDIR}"
++for x in `seq 1 128`; do
++	touch "${SCRATCH_MNT}/junk.${x}"
++	inode="$(stat -c '%i' "${SCRATCH_MNT}/junk.${x}")"
++	if [ "$x" -gt 64 ] && [ "$((inode % 64))" -eq 0 ]; then
++		mv "${SCRATCH_MNT}/junk.${x}" "${TESTFILE}.1"
++		break
++	fi
 +done
-+inode="$(stat -c '%i' "${SCRATCH_MNT}/bigfile")"
++for x in `seq 2 64`; do
++	echo moo >> "${TESTFILE}.${x}"
++done
 +umount "${SCRATCH_MNT}"
 +
 +echo "+ check fs"
-+_scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
++e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
 +
 +echo "+ corrupt image"
-+$XFS_DB_PROG -x -c "inode ${inode}" -c "addr u.bmbt.ptrs[1]" -c "addr u3.bmbt.ptrs[1]" -c "stack" -c "blocktrash -x 32 -y $((blksz * 8)) -z ${FUZZ_ARGS}" "${SCRATCH_DEV}" >> $seqres.full
++dumpe2fs -g "${SCRATCH_DEV}" 2>/dev/null | awk -F ':' '{if (int($4) != -1) {print $4}}' | sed -e 's/-.*$//g' | awk '{if (int($1) > 0) {print $1}}' | while read blk; do
++	debugfs -w -R "zap_block ${blk}" "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "group descriptor fuzz failed"
++done
++
++echo "+ mount image"
++_scratch_mount 2> /dev/null && _fail "mount should not succeed"
++
++echo "+ repair fs"
++e2fsck -fy "${SCRATCH_DEV}" >> $seqres.full 2>&1
++e2fsck -fy "${SCRATCH_DEV}" >> $seqres.full 2>&1
++
++echo "+ mount image (2)"
++_scratch_mount
++
++umount "${SCRATCH_MNT}"
++
++echo "+ check fs (2)"
++e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
++
++status=0
++exit
+diff --git a/tests/ext4/702.out b/tests/ext4/702.out
+new file mode 100644
+index 0000000..66f3b3b
+--- /dev/null
++++ b/tests/ext4/702.out
+@@ -0,0 +1,10 @@
++QA output created by 702
+++ create scratch fs
+++ mount fs image
+++ make some files
+++ check fs
+++ corrupt image
+++ mount image
+++ repair fs
+++ mount image (2)
+++ check fs (2)
+diff --git a/tests/ext4/703 b/tests/ext4/703
+new file mode 100755
+index 0000000..61fb55b
+--- /dev/null
++++ b/tests/ext4/703
+@@ -0,0 +1,113 @@
++#! /bin/bash
++# FS QA Test No. 703
++#
++# Create and populate an ext4 filesystem, corrupt a block bitmap, then
++# see how the kernel and e2fsck deal with it.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Oracle, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    #rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++
++# real QA test starts here
++_supported_fs ext4
++_supported_os Linux
++
++_require_xfs_io_command "falloc"
++_require_scratch
++test -n "${FORCE_FUZZ}" || _require_scratch_ext4_crc
++_require_attrs
++
++rm -f $seqres.full
++TESTDIR="${SCRATCH_MNT}/scratchdir"
++TESTFILE="${TESTDIR}/testfile"
++
++echo "+ create scratch fs"
++_scratch_mkfs_ext4 > /dev/null 2>&1
++dumpe2fs -g "${SCRATCH_DEV}" > /dev/null 2>&1 || _notrun "dumpe2fs -g not supported"
++nr_groups="$(dumpe2fs -g "${SCRATCH_DEV}" 2> /dev/null | tail -n 1 | cut -d : -f 1)"
++
++echo "+ mount fs image"
++_scratch_mount
++# abuse orlov allocator in the hopes that each bg ends up with some inodes
++for i in `seq 1 $((nr_groups * 8))`; do
++	mkdir -p "${SCRATCH_MNT}/d_${i}"
++done
++blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
++freeblks="$(stat -f -c '%a' "${SCRATCH_MNT}")"
++$XFS_IO_PROG -f -c "falloc 0 $((blksz * freeblks))" "${SCRATCH_MNT}/bigfile2" >> $seqres.full
++umount "${SCRATCH_MNT}"
++
++echo "+ make some files"
++_scratch_mount
++rm -rf "${SCRATCH_MNT}/bigfile2"
++touch "${SCRATCH_MNT}/bigfile"
++umount "${SCRATCH_MNT}"
++
++echo "+ check fs"
++e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
++
++echo "+ corrupt image"
++dumpe2fs -g "${SCRATCH_DEV}" 2>/dev/null | awk -F ':' '{if (int($5) > 0) {print $5}}' | while read blk; do
++	debugfs -w -n -R "zap_block -p 0xff ${blk}" "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "block bitmap fuzz failed"
++done
 +
 +echo "+ mount image"
 +_scratch_mount
 +
 +echo "+ modify files"
-+before="$(stat -c '%b' "${SCRATCH_MNT}/bigfile")"
-+$XFS_IO_PROG -f -c "pwrite -S 0x62 ${blksz} ${blksz}" -c 'fsync' "${SCRATCH_MNT}/bigfile" >> $seqres.full 2> /dev/null
++b_bytes="$(stat -c '%B' "${SCRATCH_MNT}/bigfile")"
++$XFS_IO_PROG -f -c "falloc 0 $((blksz * freeblks))" "${SCRATCH_MNT}/bigfile" >> $seqres.full 2> /dev/null
 +after="$(stat -c '%b' "${SCRATCH_MNT}/bigfile")"
-+test "${before}" -eq "${after}" || _fail "pwrite should fail on corrupt bmbt"
++echo "$((after * b_bytes))" lt "$((blksz * freeblks / 4))" >> $seqres.full
++test "$((after * b_bytes))" -lt "$((blksz * freeblks / 4))" || _fail "falloc should fail"
 +umount "${SCRATCH_MNT}"
 +
 +echo "+ repair fs"
-+_scratch_xfs_repair >> $seqres.full 2>&1
++e2fsck -fy "${SCRATCH_DEV}" >> $seqres.full 2>&1
 +
 +echo "+ mount image (2)"
 +_scratch_mount
 +
-+echo "+ chattr -R -i"
-+chattr -R -f -i "${SCRATCH_MNT}/"
-+
 +echo "+ modify files (2)"
-+touch "${SCRATCH_MNT}/bigfile"
-+before="$(stat -c '%b' "${SCRATCH_MNT}/bigfile")"
-+$XFS_IO_PROG -f -c "pwrite -S 0x62 ${blksz} ${blksz}" -c 'fsync' "${SCRATCH_MNT}/bigfile" >> $seqres.full 2> /dev/null
-+after="$(stat -c '%b' "${SCRATCH_MNT}/bigfile")"
-+test "${before}" -ne "${after}" || _fail "pwrite failed after fixing corrupt bmbt"
++$XFS_IO_PROG -f -c "falloc 0 $((blksz * freeblks))" "${SCRATCH_MNT}/bigfile" >> $seqres.full
 +umount "${SCRATCH_MNT}"
 +
 +echo "+ check fs (2)"
-+_scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
++e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
 +
 +status=0
 +exit
-diff --git a/tests/xfs/718.out b/tests/xfs/718.out
+diff --git a/tests/ext4/703.out b/tests/ext4/703.out
 new file mode 100644
-index 0000000..0b53f4d
+index 0000000..42ecc84
 --- /dev/null
-+++ b/tests/xfs/718.out
-@@ -0,0 +1,13 @@
-+QA output created by 718
++++ b/tests/ext4/703.out
+@@ -0,0 +1,12 @@
++QA output created by 703
 ++ create scratch fs
 ++ mount fs image
 ++ make some files
@@ -344,20 +482,19 @@ index 0000000..0b53f4d
 ++ modify files
 ++ repair fs
 ++ mount image (2)
-++ chattr -R -i
 ++ modify files (2)
 ++ check fs (2)
-diff --git a/tests/xfs/719 b/tests/xfs/719
+diff --git a/tests/ext4/704 b/tests/ext4/704
 new file mode 100755
-index 0000000..459889e
+index 0000000..da94317
 --- /dev/null
-+++ b/tests/xfs/719
-@@ -0,0 +1,96 @@
++++ b/tests/ext4/704
+@@ -0,0 +1,102 @@
 +#! /bin/bash
-+# FS QA Test No. 719
++# FS QA Test No. 704
 +#
-+# Create and populate an XFS filesystem, corrupt a long symlink, then see how
-+# the kernel and xfs_repair deal with it.
++# Create and populate an ext4 filesystem, corrupt an inode bitmap, then
++# see how the kernel and e2fsck deal with it.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2015 Oracle, Inc.  All Rights Reserved.
@@ -396,87 +533,204 @@ index 0000000..459889e
 +. ./common/rc
 +. ./common/filter
 +. ./common/attr
-+. ./common/populate
 +
 +# real QA test starts here
-+_supported_fs xfs
++_supported_fs ext4
 +_supported_os Linux
 +
 +_require_scratch
-+test -n "${FORCE_FUZZ}" || _require_scratch_xfs_crc
++test -n "${FORCE_FUZZ}" || _require_scratch_ext4_crc
 +_require_attrs
-+_require_xfs_db_blocktrash_z_command
-+test -z "${FUZZ_ARGS}" && FUZZ_ARGS="-n 8 -3"
 +
 +rm -f $seqres.full
++TESTDIR="${SCRATCH_MNT}/scratchdir"
++TESTFILE="${TESTDIR}/testfile"
 +
 +echo "+ create scratch fs"
-+_scratch_mkfs_xfs > /dev/null
++_scratch_mkfs_ext4 > /dev/null 2>&1
++dumpe2fs -g "${SCRATCH_DEV}" > /dev/null 2>&1 || _notrun "dumpe2fs -g not supported"
++resize2fs -M "${SCRATCH_DEV}" >> $seqres.full 2>&1
++nr_groups="$(dumpe2fs -g "${SCRATCH_DEV}" 2> /dev/null | tail -n 1 | cut -d : -f 1)"
 +
 +echo "+ mount fs image"
 +_scratch_mount
-+blksz=1000
 +
 +echo "+ make some files"
-+echo "file contents: moo" > "${SCRATCH_MNT}/x"
-+str="$(perl -e "print './' x $(( (blksz / 2) - 16));")x"
-+(cd $SCRATCH_MNT; ln -s "${str}" "long_symlink")
-+cat "${SCRATCH_MNT}/long_symlink"
-+inode="$(stat -c '%i' "${SCRATCH_MNT}/long_symlink")"
++# abuse orlov allocator in the hopes that each bg ends up with some inodes
++for i in `seq 1 $((nr_groups * 8))`; do
++	mkdir -p "${SCRATCH_MNT}/d_${i}"
++done
 +umount "${SCRATCH_MNT}"
 +
 +echo "+ check fs"
-+_scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
++e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
 +
 +echo "+ corrupt image"
-+$XFS_DB_PROG -x -c "inode ${inode}" -c "dblock 0" -c "stack" -c "blocktrash -x 32 -o 256 -y $((blksz * 8)) -z ${FUZZ_ARGS}" "${SCRATCH_DEV}" >> $seqres.full
++dumpe2fs -g "${SCRATCH_DEV}" 2>/dev/null | awk -F ':' '{if (int($6) > 0) {print $6}}' | while read blk; do
++	debugfs -w -n -R "zap_block ${blk}" "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "inode bitmap fuzz failed"
++done
 +
 +echo "+ mount image"
 +_scratch_mount
-+cat "${SCRATCH_MNT}/long_symlink" 2>/dev/null && _fail "symlink should be broken"
++
++echo "+ modify files"
++touch "${SCRATCH_MNT}/file0" > /dev/null 2>&1 && _fail "touch should fail"
 +umount "${SCRATCH_MNT}"
 +
 +echo "+ repair fs"
-+_scratch_xfs_repair >> $seqres.full 2>&1
++e2fsck -fy "${SCRATCH_DEV}" >> $seqres.full 2>&1
 +
 +echo "+ mount image (2)"
 +_scratch_mount
-+cat "${SCRATCH_MNT}/long_symlink" 2>/dev/null && _fail "symlink should be broken"
++
++echo "+ modify files (2)"
++touch "${SCRATCH_MNT}/file1"
 +umount "${SCRATCH_MNT}"
 +
 +echo "+ check fs (2)"
-+_scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
++e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
 +
 +status=0
 +exit
-diff --git a/tests/xfs/719.out b/tests/xfs/719.out
+diff --git a/tests/ext4/704.out b/tests/ext4/704.out
 new file mode 100644
-index 0000000..bb64ddd
+index 0000000..e1b0dbd
 --- /dev/null
-+++ b/tests/xfs/719.out
-@@ -0,0 +1,11 @@
-+QA output created by 719
++++ b/tests/ext4/704.out
+@@ -0,0 +1,12 @@
++QA output created by 704
 ++ create scratch fs
 ++ mount fs image
 ++ make some files
-+file contents: moo
+++ check fs
+++ corrupt image
+++ mount image
+++ modify files
+++ repair fs
+++ mount image (2)
+++ modify files (2)
+++ check fs (2)
+diff --git a/tests/ext4/705 b/tests/ext4/705
+new file mode 100755
+index 0000000..11ff98f
+--- /dev/null
++++ b/tests/ext4/705
+@@ -0,0 +1,88 @@
++#! /bin/bash
++# FS QA Test No. 705
++#
++# Create and populate an ext4 filesystem, corrupt the MMP block, then
++# see how the kernel and e2fsck deal with it.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Oracle, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    #rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++
++# real QA test starts here
++_supported_fs ext4
++_supported_os Linux
++
++_require_scratch
++test -n "${FORCE_FUZZ}" || _require_scratch_ext4_crc
++_require_attrs
++
++rm -f $seqres.full
++TESTDIR="${SCRATCH_MNT}/scratchdir"
++TESTFILE="${TESTDIR}/testfile"
++
++echo "+ create scratch fs"
++_scratch_mkfs_ext4 -O mmp -E mmp_update_interval=2 > /dev/null 2>&1
++
++echo "+ mount fs image"
++_scratch_mount
++blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
++
++echo "+ make some files"
++echo moo > "${SCRATCH_MNT}/file0"
++umount "${SCRATCH_MNT}"
++
++echo "+ check fs"
++e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
++
++echo "+ corrupt image"
++blk="$(dumpe2fs "${SCRATCH_DEV}" 2> /dev/null | grep 'MMP block number' | sed -e 's/^MMP block number: *\([0-9]*\)$/\1/g')"
++$XFS_IO_PROG -f -c "pwrite -S 0x62 $((blk * blksz + 16)) 8" "${SCRATCH_DEV}" >> $seqres.full
++
++echo "+ mount image"
++_scratch_mount 2> /dev/null && _fail "mount should fail due to bad MMP"
++
++echo "+ repair fs"
++e2fsck -fy "${SCRATCH_DEV}" >> $seqres.full 2>&1
++
++echo "+ mount image (2)"
++_scratch_mount || _fail "mount should not fail; MMP has been fixed"
++
++echo "+ check fs (2)"
++e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
++
++status=0
++exit
+diff --git a/tests/ext4/705.out b/tests/ext4/705.out
+new file mode 100644
+index 0000000..60c43ef
+--- /dev/null
++++ b/tests/ext4/705.out
+@@ -0,0 +1,10 @@
++QA output created by 705
+++ create scratch fs
+++ mount fs image
+++ make some files
 ++ check fs
 ++ corrupt image
 ++ mount image
 ++ repair fs
 ++ mount image (2)
 ++ check fs (2)
-diff --git a/tests/xfs/720 b/tests/xfs/720
+diff --git a/tests/ext4/706 b/tests/ext4/706
 new file mode 100755
-index 0000000..ad4cad3
+index 0000000..505be41
 --- /dev/null
-+++ b/tests/xfs/720
-@@ -0,0 +1,114 @@
++++ b/tests/ext4/706
+@@ -0,0 +1,87 @@
 +#! /bin/bash
-+# FS QA Test No. 720
++# FS QA Test No. 706
 +#
-+# Create and populate an XFS filesystem, corrupt a block xattr, then see
-+# how the kernel and xfs_repair deal with it.
++# Create and populate an ext4 filesystem, corrupt the journal, then
++# see how the kernel and e2fsck deal with it.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2015 Oracle, Inc.  All Rights Reserved.
@@ -515,393 +769,78 @@ index 0000000..ad4cad3
 +. ./common/rc
 +. ./common/filter
 +. ./common/attr
-+. ./common/populate
 +
 +# real QA test starts here
-+_supported_fs xfs
++_supported_fs ext4
 +_supported_os Linux
 +
 +_require_scratch
-+test -n "${FORCE_FUZZ}" || _require_scratch_xfs_crc
++test -n "${FORCE_FUZZ}" || _require_scratch_ext4_crc
 +_require_attrs
-+_require_xfs_db_blocktrash_z_command
-+test -z "${FUZZ_ARGS}" && FUZZ_ARGS="-n 8 -3"
 +
 +rm -f $seqres.full
++TESTDIR="${SCRATCH_MNT}/scratchdir"
++TESTFILE="${TESTDIR}/testfile"
 +
 +echo "+ create scratch fs"
-+_scratch_mkfs_xfs > /dev/null
++_scratch_mkfs_ext4 -O journal > /dev/null 2>&1
 +
 +echo "+ mount fs image"
 +_scratch_mount
 +blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
-+nr="$((blksz / 40))"
-+leaf_lblk="$((32 * 1073741824 / blksz))"
-+node_lblk="$((64 * 1073741824 / blksz))"
 +
 +echo "+ make some files"
-+touch "${SCRATCH_MNT}/attrfile"
-+seq 0 "${nr}" | while read d; do
-+	setfattr -n "user.x$(printf "%.08d" "$d")" -v "0000000000000000" "${SCRATCH_MNT}/attrfile"
-+done
-+inode="$(stat -c '%i' "${SCRATCH_MNT}/attrfile")"
++echo moo > "${SCRATCH_MNT}/file0"
 +umount "${SCRATCH_MNT}"
 +
 +echo "+ check fs"
-+_scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
++e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
 +
-+echo "+ check xattr"
-+$XFS_DB_PROG -x -c "inode ${inode}" -c "bmap" "${SCRATCH_DEV}" >> $seqres.full
-+$XFS_DB_PROG -x -c "inode ${inode}" -c "ablock 0" -c "stack" "${SCRATCH_DEV}" | grep -q 'file attr block is unmapped' && _fail "failed to create a block xattr (data)"
-+$XFS_DB_PROG -x -c "inode ${inode}" -c "ablock ${leaf_lblk}" -c "stack" "${SCRATCH_DEV}" | grep -q 'file attr block is unmapped' || _fail "failed to create a block xattr (leaf)"
-+$XFS_DB_PROG -x -c "inode ${inode}" -c "ablock ${node_lblk}" -c "stack" "${SCRATCH_DEV}" | grep -q 'file attr block is unmapped' || _fail "failed to create a block xattr (free)"
-+
-+echo "+ corrupt xattr"
-+$XFS_DB_PROG -x -c "inode ${inode}" -c 'ablock 0' -c "stack" -c "blocktrash -x 32 -y $((blksz * 8)) -z ${FUZZ_ARGS}" "${SCRATCH_DEV}" >> $seqres.full
++echo "+ corrupt image"
++debugfs -w -R 'zap -f <8> 0' "${SCRATCH_DEV}" 2> /dev/null
 +
 +echo "+ mount image"
-+_scratch_mount
-+
-+echo "+ modify xattr"
-+setfattr -x "user.x00000000" "${SCRATCH_MNT}/attrfile" 2> /dev/null && _fail "modified corrupt xattr"
-+umount "${SCRATCH_MNT}"
++_scratch_mount 2> /dev/null && _fail "mount should fail due to bad journal"
 +
 +echo "+ repair fs"
-+_scratch_xfs_repair >> $seqres.full 2>&1
-+_scratch_xfs_repair >> $seqres.full 2>&1
++e2fsck -fy "${SCRATCH_DEV}" >> $seqres.full 2>&1
 +
 +echo "+ mount image (2)"
-+_scratch_mount
-+
-+echo "+ chattr -R -i"
-+chattr -R -f -i "${SCRATCH_MNT}/"
-+
-+echo "+ modify xattr (2)"
-+getfattr "${SCRATCH_MNT}/attrfile" -n "user.x00000000" > /dev/null 2>&1 && (setfattr -x "user.x00000000" "${SCRATCH_MNT}/attrfile" || _fail "remove corrupt xattr")
-+setfattr -n "user.x00000000" -v 'x0x0x0x0' "${SCRATCH_MNT}/attrfile" || _fail "add corrupt xattr"
-+umount "${SCRATCH_MNT}"
++_scratch_mount || _fail "mount should not fail; journal has been fixed"
 +
 +echo "+ check fs (2)"
-+_scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
++e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
 +
 +status=0
 +exit
-diff --git a/tests/xfs/720.out b/tests/xfs/720.out
+diff --git a/tests/ext4/706.out b/tests/ext4/706.out
 new file mode 100644
-index 0000000..4110f66
+index 0000000..f919d45
 --- /dev/null
-+++ b/tests/xfs/720.out
-@@ -0,0 +1,14 @@
-+QA output created by 720
++++ b/tests/ext4/706.out
+@@ -0,0 +1,10 @@
++QA output created by 706
 ++ create scratch fs
 ++ mount fs image
 ++ make some files
 ++ check fs
-++ check xattr
-++ corrupt xattr
+++ corrupt image
 ++ mount image
-++ modify xattr
 ++ repair fs
 ++ mount image (2)
-++ chattr -R -i
-++ modify xattr (2)
 ++ check fs (2)
-diff --git a/tests/xfs/721 b/tests/xfs/721
-new file mode 100755
-index 0000000..ec87139
---- /dev/null
-+++ b/tests/xfs/721
-@@ -0,0 +1,114 @@
-+#! /bin/bash
-+# FS QA Test No. 721
-+#
-+# Create and populate an XFS filesystem, corrupt a leaf xattr's index extent,
-+# then see how the kernel and xfs_repair deal with it.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Oracle, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    #rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+. ./common/populate
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_supported_os Linux
-+
-+_require_scratch
-+test -n "${FORCE_FUZZ}" || _require_scratch_xfs_crc
-+_require_attrs
-+_require_xfs_db_blocktrash_z_command
-+test -z "${FUZZ_ARGS}" && FUZZ_ARGS="-n 8 -3"
-+
-+rm -f $seqres.full
-+
-+echo "+ create scratch fs"
-+_scratch_mkfs_xfs > /dev/null
-+
-+echo "+ mount fs image"
-+_scratch_mount
-+blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
-+nr="$((8 * blksz / 40))"
-+
-+echo "+ make some files"
-+touch "${SCRATCH_MNT}/attrfile"
-+seq 0 "${nr}" | while read d; do
-+	setfattr -n "user.x$(printf "%.08d" "$d")" -v "0000000000000000" "${SCRATCH_MNT}/attrfile"
-+done
-+seq 1 2 "${nr}" | while read d; do
-+	setfattr -x "user.x$(printf "%.08d" "$d")" "${SCRATCH_MNT}/attrfile"
-+done
-+inode="$(stat -c '%i' "${SCRATCH_MNT}/attrfile")"
-+umount "${SCRATCH_MNT}"
-+
-+echo "+ check fs"
-+_scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
-+
-+echo "+ check xattr"
-+$XFS_DB_PROG -x -c "inode ${inode}" -c "bmap" "${SCRATCH_DEV}" >> $seqres.full
-+$XFS_DB_PROG -x -c "inode ${inode}" -c "ablock 0" -c "stack" "${SCRATCH_DEV}" | grep -q 'file attr block is unmapped' && _fail "failed to create a leaf xattr (index)"
-+$XFS_DB_PROG -x -c "inode ${inode}" -c "ablock 1" -c "stack" "${SCRATCH_DEV}" | grep -q 'file attr block is unmapped' && _fail "failed to create a leaf xattr (data)"
-+
-+echo "+ corrupt xattr"
-+$XFS_DB_PROG -x -c "inode ${inode}" -c 'ablock 0' -c "stack" -c "blocktrash -x 32 -o +32 -y $((blksz * 8)) -z ${FUZZ_ARGS}" "${SCRATCH_DEV}" >> $seqres.full
-+
-+echo "+ mount image"
-+_scratch_mount
-+
-+echo "+ modify xattr"
-+setfattr -x "user.x00000000" "${SCRATCH_MNT}/attrfile" 2> /dev/null && _fail "modified corrupt xattr"
-+umount "${SCRATCH_MNT}"
-+
-+echo "+ repair fs"
-+_scratch_xfs_repair >> $seqres.full 2>&1
-+_scratch_xfs_repair >> $seqres.full 2>&1
-+
-+echo "+ mount image (2)"
-+_scratch_mount
-+
-+echo "+ chattr -R -i"
-+chattr -R -f -i "${SCRATCH_MNT}/"
-+
-+echo "+ modify xattr (2)"
-+setfattr -n "user.x00000000" -v "1111111111111111" "${SCRATCH_MNT}/attrfile" || _fail "modified corrupt xattr"
-+setfattr -x "user.x00000000" "${SCRATCH_MNT}/attrfile" || _fail "delete corrupt xattr"
-+umount "${SCRATCH_MNT}"
-+
-+echo "+ check fs (2)"
-+_scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
-+
-+status=0
-+exit
-diff --git a/tests/xfs/721.out b/tests/xfs/721.out
-new file mode 100644
-index 0000000..2098e75
---- /dev/null
-+++ b/tests/xfs/721.out
-@@ -0,0 +1,14 @@
-+QA output created by 721
-++ create scratch fs
-++ mount fs image
-++ make some files
-++ check fs
-++ check xattr
-++ corrupt xattr
-++ mount image
-++ modify xattr
-++ repair fs
-++ mount image (2)
-++ chattr -R -i
-++ modify xattr (2)
-++ check fs (2)
-diff --git a/tests/xfs/722 b/tests/xfs/722
-new file mode 100755
-index 0000000..f2d7192
---- /dev/null
-+++ b/tests/xfs/722
-@@ -0,0 +1,118 @@
-+#! /bin/bash
-+# FS QA Test No. 722
-+#
-+# Create and populate an XFS filesystem, corrupt a leaf xattr's data extent,
-+# then see how the kernel and xfs_repair deal with it.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Oracle, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    #rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+. ./common/populate
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_supported_os Linux
-+
-+_require_scratch
-+test -n "${FORCE_FUZZ}" || _require_scratch_xfs_crc
-+_require_attrs
-+_require_xfs_db_blocktrash_z_command
-+test -z "${FUZZ_ARGS}" && FUZZ_ARGS="-n 8 -3"
-+
-+rm -f $seqres.full
-+
-+echo "+ create scratch fs"
-+_scratch_mkfs_xfs > /dev/null
-+
-+echo "+ mount fs image"
-+_scratch_mount
-+blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
-+nr="$((8 * blksz / 40))"
-+
-+echo "+ make some files"
-+touch "${SCRATCH_MNT}/attrfile"
-+seq 0 "${nr}" | while read d; do
-+	setfattr -n "user.x$(printf "%.08d" "$d")" -v "0000000000000000" "${SCRATCH_MNT}/attrfile"
-+done
-+seq 1 2 "${nr}" | while read d; do
-+	setfattr -x "user.x$(printf "%.08d" "$d")" "${SCRATCH_MNT}/attrfile"
-+done
-+inode="$(stat -c '%i' "${SCRATCH_MNT}/attrfile")"
-+umount "${SCRATCH_MNT}"
-+
-+echo "+ check fs"
-+_scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
-+
-+echo "+ check xattr"
-+$XFS_DB_PROG -x -c "inode ${inode}" -c "bmap" "${SCRATCH_DEV}" >> $seqres.full
-+$XFS_DB_PROG -x -c "inode ${inode}" -c "ablock 0" -c "stack" "${SCRATCH_DEV}" | grep -q 'file attr block is unmapped' && _fail "failed to create a leaf xattr (index)"
-+$XFS_DB_PROG -x -c "inode ${inode}" -c "ablock 1" -c "stack" "${SCRATCH_DEV}" | grep -q 'file attr block is unmapped' && _fail "failed to create a leaf xattr (data)"
-+
-+echo "+ corrupt xattr"
-+loff=1
-+while true; do
-+	$XFS_DB_PROG -x -c "inode ${inode}" -c "ablock ${loff}" -c "stack" "${SCRATCH_DEV}" | grep -q 'file attr block is unmapped' && break
-+	$XFS_DB_PROG -x -c "inode ${inode}" -c "ablock ${loff}" -c "stack" -c "blocktrash -x 32 -y $((blksz * 8)) -z ${FUZZ_ARGS}" "${SCRATCH_DEV}" >> $seqres.full
-+	loff="$((loff + 1))"
-+done
-+
-+echo "+ mount image"
-+_scratch_mount
-+
-+echo "+ modify xattr"
-+setfattr -x "user.x00000000" "${SCRATCH_MNT}/attrfile" 2> /dev/null && _fail "modified corrupt xattr"
-+umount "${SCRATCH_MNT}"
-+
-+echo "+ repair fs"
-+_scratch_xfs_repair >> $seqres.full 2>&1
-+_scratch_xfs_repair >> $seqres.full 2>&1
-+
-+echo "+ mount image (2)"
-+_scratch_mount
-+
-+echo "+ chattr -R -i"
-+chattr -R -f -i "${SCRATCH_MNT}/"
-+
-+echo "+ modify xattr (2)"
-+getfattr "${SCRATCH_MNT}/attrfile" -n "user.x00000000" 2> /dev/null && (setfattr -x "user.x00000000" "${SCRATCH_MNT}/attrfile" || _fail "modified corrupt xattr")
-+umount "${SCRATCH_MNT}"
-+
-+echo "+ check fs (2)"
-+_scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
-+
-+status=0
-+exit
-diff --git a/tests/xfs/722.out b/tests/xfs/722.out
-new file mode 100644
-index 0000000..d482a60
---- /dev/null
-+++ b/tests/xfs/722.out
-@@ -0,0 +1,14 @@
-+QA output created by 722
-++ create scratch fs
-++ mount fs image
-++ make some files
-++ check fs
-++ check xattr
-++ corrupt xattr
-++ mount image
-++ modify xattr
-++ repair fs
-++ mount image (2)
-++ chattr -R -i
-++ modify xattr (2)
-++ check fs (2)
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 8e4f8b7..1510251 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -214,3 +214,9 @@
- 714 fuzzers
- 715 fuzzers
- 716 fuzzers
-+717 fuzzers
-+718 fuzzers
-+719 fuzzers
-+720 fuzzers
-+721 fuzzers
-+722 fuzzers
+diff --git a/tests/ext4/group b/tests/ext4/group
+index dfadd91..d685076 100644
+--- a/tests/ext4/group
++++ b/tests/ext4/group
+@@ -18,3 +18,9 @@
+ 307 auto ioctl rw
+ 308 auto ioctl rw prealloc quick
+ 700 dangerous_fuzzers
++701 fuzzers
++702 fuzzers
++703 fuzzers
++704 fuzzers
++705 fuzzers
++706 fuzzers
 
