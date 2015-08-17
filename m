@@ -1,90 +1,178 @@
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:57551 "EHLO
-	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750731AbbHQFGP (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 17 Aug 2015 01:06:15 -0400
-Date: Mon, 17 Aug 2015 15:06:12 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] generic/084: check inotify limit before tail many files
-Message-ID: <20150817050612.GB714@dastard>
-References: <1439482592-29611-1-git-send-email-zlang@redhat.com>
- <20150817000336.GE20596@dastard>
- <55490920.9057342.1439773519504.JavaMail.zimbra@redhat.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:2955 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750710AbbHQFnS (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 17 Aug 2015 01:43:18 -0400
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Subject: [PATCH] fstests: btrfs: Add reserved space leak check for rewrite dirty page
+Date: Mon, 17 Aug 2015 13:41:08 +0800
+Message-ID: <1439790068-24470-1-git-send-email-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <55490920.9057342.1439773519504.JavaMail.zimbra@redhat.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Zirong Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, eguan@redhat.com
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Aug 16, 2015 at 09:05:19PM -0400, Zirong Lang wrote:
-> Hi Dave,
->=20
-> Thanks for your reply.
->=20
-> ----- =E5=8E=9F=E5=A7=8B=E9=82=AE=E4=BB=B6 -----
-> > =E5=8F=91=E4=BB=B6=E4=BA=BA: "Dave Chinner" <david@fromorbit.com>
-> > =E6=94=B6=E4=BB=B6=E4=BA=BA: "Zorro Lang" <zlang@redhat.com>
-> > =E6=8A=84=E9=80=81: fstests@vger.kernel.org, eguan@redhat.com
-> > =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: =E6=98=9F=E6=9C=9F=E4=B8=80, 20=
-15=E5=B9=B4 8 =E6=9C=88 17=E6=97=A5 =E4=B8=8A=E5=8D=88 8:03:36
-> > =E4=B8=BB=E9=A2=98: Re: [PATCH] generic/084: check inotify limit befo=
-re tail many files
-> >=20
-> > On Fri, Aug 14, 2015 at 12:16:32AM +0800, Zorro Lang wrote:
-> > > generic/084 try to run 'tail' command, tail will use
-> > > inotify, and there're some limit about inotify. I think
-> > > the most important is fs.inotify.max_user_instances, then
-> > > fs.inotify.max_user_watches is importand too.
-> > >
-> > > When I test on a machine with 154 cpu cores, this case
-> > > run failed, and hit many warning likes:
-> > >=20
-> > >     tail: inotify cannot be used, reverting to polling: Too many
-> > >     open files
-> > >=20
-> > > Because the fs.inotify.max_user_instances is 128, so if
-> > > we try to tail 154 files, it will be failed.
-> >=20
-> > We use 'tail' all over the place in xfstests, so why is only
-> > generic/084 affected?
->=20
-> Because generic/084 use try to create $nr_cpu tail processes:
-> for i in `seq 1 $nr_cpu`; do
->     ...
->     tail -f $testfile &
->     ...
-> done
->=20
-> And nr_cpu=3D`$here/src/feature -o`.
->=20
-> Generally fs.inotify.max_user_instances is 128, when a machine
-> have more than(or nearly the same) this number, this test will
-> failed.
+Btrfs qgroup reserve codes lacks check for rewrite dirty page, causing
+every write, even rewriting a uncommitted dirty page, to reserve space.
 
-This information should have been in the patch description - it's
-concurrently run tail commands that are the problem, not a single
-execution of tail...
+But only written data will free the reserved space, causing reserved
+space leaking.
 
-> Maybe other cases don't try to create so many tail processes, so
-> they passed.
+The bug exists almost from the beginning of btrfs qgroup codes, but
+nobody found it.
 
-Exactly. The answer is obvious when you explain it fully :)
+For example:
 
-So, we have other tests that use hundreds of open unlinked files and
-they don't have this problem. That means the issue is how
-generic/084 is creating the unlinked files, not an issue with
-inotify config.
+1)Write [0, 12K) into file A
+  reserve 12K space
 
-Go look at src/multi_open_unlink.c and tests/xfs/1[28]1, and then
-rewrite generic/084 to use multi_open_unlink to create and hold=20
-open unlinked files for a specified amount of time.
+File A:
+0	4K	8K	12K
+|<--------dirty-------->|
+reserved: 12K
 
-Cheers,
+2)Write [0,4K) into file A
+0	4K	8K	12K
+|<--------dirty-------->|
+reserved: 16K <<< Should be 12K
+As the dirty pages are not committed yet, we don't need to reserve extra space.
 
-Dave.
---=20
-Dave Chinner
-david@fromorbit.com
+3) Commit transaction
+Dirty pages [0,12) written to disk.
+Free 12K reserved space.
+reserved: 4K <<< Should be 0
+
+This testcase will test such problem.
+Kernel fix will need some huge change, so won't be soon.
+
+Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+---
+ tests/btrfs/089     | 82 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/089.out | 13 +++++++++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 96 insertions(+)
+ create mode 100755 tests/btrfs/089
+ create mode 100644 tests/btrfs/089.out
+
+diff --git a/tests/btrfs/089 b/tests/btrfs/089
+new file mode 100755
+index 0000000..76d733e
+--- /dev/null
++++ b/tests/btrfs/089
+@@ -0,0 +1,82 @@
++#! /bin/bash
++# FS QA Test 089
++#
++# Check for btrfs reserved space leaking caused by overlap dirty range.
++# This problem exists almost from qgroup function.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Fujitsu. All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_need_to_be_root
++
++# Use big blocksize to ensure there is still enough space left for metadata
++# space reserve.
++BLOCKSIZE=$(( 2 * 1024 * 1024 )) # 2M block size
++FILESIZE=$(( 128 * 1024 * 1024 )) # 128M file size
++
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount
++_require_fs_space $SCRATCH_MNT $(($FILESIZE * 2 / 1024))
++
++_run_btrfs_util_prog quota enable $SCRATCH_MNT
++_run_btrfs_util_prog qgroup limit $FILESIZE 5 $SCRATCH_MNT
++
++# loop 5 times without sync to ensure reserved space leak will happen
++for i in `seq 1 5`; do
++	$XFS_IO_PROG -f -c "pwrite -b $BLOCKSIZE 0 $(($FILESIZE / 2))" \
++		$SCRATCH_MNT/foo | _filter_xfs_io
++done
++
++# remove the file and sync, to ensure all space freed
++sync
++# shouldn't happen, as BLOCKSIZE is large enough for metdata cow
++rm $SCRATCH_MNT/foo || _fail "reserved space leak detected"
++sync
++
++# We should be able to write $FILESIZE - $BLOCKSIZE data
++$XFS_IO_PROG -f -c "pwrite -b $BLOCKSIZE 0 $(($FILESIZE - $BLOCKSIZE))" \
++	$SCRATCH_MNT/foo | _filter_xfs_io
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/089.out b/tests/btrfs/089.out
+new file mode 100644
+index 0000000..2690191
+--- /dev/null
++++ b/tests/btrfs/089.out
+@@ -0,0 +1,13 @@
++QA output created by 089
++wrote 67108864/67108864 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 67108864/67108864 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 67108864/67108864 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 67108864/67108864 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 67108864/67108864 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 132120576/132120576 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index ffe18bf..da37e46 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -91,6 +91,7 @@
+ 086 auto quick clone
+ 087 auto quick send
+ 088 auto quick metadata
++089 auto qgroup
+ 090 auto quick metadata
+ 091 auto quick qgroup
+ 092 auto quick send
+-- 
+1.8.3.1
+
