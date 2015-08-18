@@ -1,65 +1,61 @@
-Received: from mx1.redhat.com ([209.132.183.28]:52589 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751157AbbHRRwI (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 18 Aug 2015 13:52:08 -0400
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH] xfs/201: use min_dio_alignment size to replace 512b
-Date: Wed, 19 Aug 2015 01:52:05 +0800
-Message-Id: <1439920325-9723-1-git-send-email-zlang@redhat.com>
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:37386 "EHLO
+	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754157AbbHRWVs (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 18 Aug 2015 18:21:48 -0400
+Date: Wed, 19 Aug 2015 08:11:57 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH v6 1/3] xfstests: btrfs: add functions to create dm-error
+ device
+Message-ID: <20150818221157.GE3902@dastard>
+References: <1439549224-29784-1-git-send-email-anand.jain@oracle.com>
+ <1439566305-12460-1-git-send-email-anand.jain@oracle.com>
+ <1439566305-12460-2-git-send-email-anand.jain@oracle.com>
+ <20150816235218.GD20596@dastard>
+ <55D2B40E.5040801@oracle.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <55D2B40E.5040801@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: hch@lst.de, Zorro Lang <zlang@redhat.com>
+To: anand jain <anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, eguan@redhat.com, fdmanana@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-This case use hard-code 512, but in 4k sector size device,
-it will fail.
+On Tue, Aug 18, 2015 at 12:26:54PM +0800, anand jain wrote:
+> 
+> Hi Dave,
+> 
+>  All comments accepted thanks. except for this.
+> 
+> 
+> >>+_mount_dmerror()
+> >>+{
+> >>+	$MOUNT_PROG -t $FSTYP $MOUNT_OPTIONS $DMERROR_DEV $SCRATCH_MNT
+> >>+}
+> >
+> >Should mirror _scratch_mount.
+> >
+> >_mount -t $FSTYP `_scratch_mount_options` $DMERROR_DEV $SCRATCH_MNT
+> 
+> 
+> `_scratch_mount_options` also returns $SCRATCH_DEV.
+> in case of tests involving dmerror module, dmerror_init would use
+> $SCRATCH_DEV as backing device and provide $DMERROR_DEV to be used
+> instead of $SCRATCH_DEV. So I am proposing..
+> 
+> +	_mount -t $FSTYP $SCRATCH_OPTIONS $MOUNT_OPTIONS
+> $SELINUX_MOUNT_OPTIONS $* $DMERROR_DEV $SCRATCH_MNT
 
-So I call _min_dio_alignment() to get the sector size, then
-replace `512`.
+Ok, SCRATCH_OPTIONS might not be the best idea here, so feel free to
+drop it.
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
- tests/xfs/201 | 20 +++++++++++---------
- 1 file changed, 11 insertions(+), 9 deletions(-)
+However, you've still missed the primary reason I suggested
+_scratch_mount_options in the first place: what do we do instead of
+copy'n'paste of random code fragments?
 
-diff --git a/tests/xfs/201 b/tests/xfs/201
-index 88829d3..921d2a3 100755
---- a/tests/xfs/201
-+++ b/tests/xfs/201
-@@ -32,15 +32,6 @@ here=`pwd`
- tmp=/tmp/$$
- status=1	# failure is the default!
- 
--do_pwrite()
--{
--	offset=`expr $1 \* 512`
--	end=`expr $2 \* 512`
--	length=`expr $end - $offset`
--
--	xfs_io -d -f $file -c "pwrite $offset $length" >/dev/null
--}
--
- _cleanup()
- {
- 	umount $SCRATCH_MNT
-@@ -57,6 +48,17 @@ _supported_os Linux
- 
- file=$SCRATCH_MNT/f
- 
-+min_align=`_min_dio_alignment $SCRATCH_DEV`
-+
-+do_pwrite()
-+{
-+	offset=`expr $1 \* $min_align`
-+	end=`expr $2 \* $min_align`
-+	length=`expr $end - $offset`
-+
-+	xfs_io -d -f $file -c "pwrite $offset $length" >/dev/null
-+}
-+
- _require_scratch
- 
- _scratch_mkfs_xfs >/dev/null 2>&1
+Cheers,
+
+Dave.
 -- 
-1.9.3
-
+Dave Chinner
+david@fromorbit.com
