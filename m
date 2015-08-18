@@ -1,189 +1,60 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:12383 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750822AbbHRCGA (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 17 Aug 2015 22:06:00 -0400
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH v3] fstests: btrfs: Add reserved space leak check for rewrite dirty page
-Date: Tue, 18 Aug 2015 10:03:53 +0800
-Message-ID: <1439863433-27017-1-git-send-email-quwenruo@cn.fujitsu.com>
+Received: from mx1.redhat.com ([209.132.183.28]:52541 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751447AbbHRDzI (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 17 Aug 2015 23:55:08 -0400
+Date: Tue, 18 Aug 2015 11:55:05 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] ext4: ratelimit the file system mounted message
+Message-ID: <20150818035505.GZ17933@dhcp-13-216.nay.redhat.com>
+References: <1439665197-10766-1-git-send-email-tytso@mit.edu>
+ <20150817011215.GA714@dastard>
+ <20150817145056.GC27202@thunk.org>
+ <20150817230752.GB3902@dastard>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20150817230752.GB3902@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: Theodore Ts'o <tytso@mit.edu>, Ext4 Developers List <linux-ext4@vger.kernel.org>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Btrfs qgroup reserve codes lacks check for rewrite dirty page, causing
-every write, even rewriting a uncommitted dirty page, to reserve space.
+On Tue, Aug 18, 2015 at 09:07:52AM +1000, Dave Chinner wrote:
+> [cc fstests@vger.kernel.org as we are talking about the test rather
+> than the kernel behaviour. ]
+> 
+[snip]
+> > In all cases, ext3/305 reliably reproduced the failure within 30
+> > mount/unmount cycles, and in most cases, under a dozen cycles.  (i.e.,
+> > under two seconds, and usually in a fraction of a second).  So I'm not
+> > entirely sure why the test was written to run the loop for 3 minutes
+> > and thousands of mount/unmount cycles.
+> 
+> There were lots of tests being written at the time that used a 3
+> minute timeout. It's another of those red flags that I tend to
+> push back on these days, and this is an example of why - usually the
+> problem can be hit very quickly, or the test is extremely unreliable
+> and long runtime is the only way to trigger the race. Hence
+> running for X minutes doesn't really prove anything....
 
-But only written data will free the reserved space, causing reserved
-space leaking.
+IIRC, 3 minutes time limit was based on my testing before I submitted
+the patch, but I could be wrong, it was two years ago..
 
-The bug exists almost from the beginning of btrfs qgroup codes, but
-nobody found it.
+I think I have better understanding of xfstests and regression tests
+now than two years ago, after years education on the list (mainly by
+Dave :-))
 
-For example:
+> 
+> > Eryu, you wrote the test; any thoughts?  At the very least I'd suggest
+> > cutting the test down so that it runs for at most 2 seconds, if for no
+> > other reason than to speed up regression test runs.
+> 
+> Rather than time limiting, how about bounding the number of
+> mount/unmount cycles?
 
-1)Write [0, 12K) into file A
-  reserve 12K space
+Agreed, 30 cycles seem a reasonable number, I can prepare a patch if no
+objection.
 
-File A:
-0	4K	8K	12K
-|<--------dirty-------->|
-reserved: 12K
+Thanks Ted and Dave for looking into this!
 
-2)Write [0,4K) into file A
-0	4K	8K	12K
-|<--------dirty-------->|
-reserved: 16K <<< Should be 12K
-
-3) Commit transaction
-Dirty pages [0,12) written to disk.
-Free 12K reserved space.
-reserved: 4K <<< Should be 0
-
-This testcase will test such problem.
-Kernel fix will need some huge change, so won't be soon.
-
-Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
----
-Changelog:
-v2:
-  Use smaller write size inside loop, in case commit is trigger by dirty page
-  threshold, and ensure following write won't trigger EQUOT
-v3: 
-  Add more comments and fix some expression.
----
- tests/btrfs/089     | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/089.out | 13 ++++++++
- tests/btrfs/group   |  1 +
- 3 files changed, 101 insertions(+)
- create mode 100755 tests/btrfs/089
- create mode 100644 tests/btrfs/089.out
-
-diff --git a/tests/btrfs/089 b/tests/btrfs/089
-new file mode 100755
-index 0000000..afbb1e4
---- /dev/null
-+++ b/tests/btrfs/089
-@@ -0,0 +1,87 @@
-+#! /bin/bash
-+# FS QA Test 089
-+#
-+# Check for qgroup reserved space leaks caused by re-writing dirty ranges
-+# This bug has been present in btrfs qgroup for a long time
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Fujitsu. All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_need_to_be_root
-+
-+# Use big blocksize to ensure there is still enough space left for metadata
-+# space reserve.
-+BLOCKSIZE=$(( 2 * 1024 * 1024 )) # 2M block size
-+FILESIZE=$(( 128 * 1024 * 1024 )) # 128M file size
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+_require_fs_space $SCRATCH_MNT $(($FILESIZE * 2 / 1024))
-+
-+_run_btrfs_util_prog quota enable $SCRATCH_MNT
-+_run_btrfs_util_prog qgroup limit $FILESIZE 5 $SCRATCH_MNT
-+
-+# loop 5 times without sync to ensure reserved space leak will happen
-+for i in `seq 1 5`; do
-+	# Use 1/4 of the file size, to ensure even commit is trigger by
-+	# dirty page threshold or commit interval, we should still be
-+	# able to continue write
-+	$XFS_IO_PROG -f -c "pwrite -b $BLOCKSIZE 0 $(($FILESIZE / 4))" \
-+		$SCRATCH_MNT/foo | _filter_xfs_io
-+done
-+
-+# Sync to make sure all the dirty pages are written to disk, which should
-+# free all the reserved space
-+sync
-+
-+# remove the file and sync, to ensure all quota space freed
-+rm $SCRATCH_MNT/foo
-+sync
-+
-+# We should be able to write $FILESIZE - $BLOCKSIZE data now
-+$XFS_IO_PROG -f -c "pwrite -b $BLOCKSIZE 0 $(($FILESIZE - $BLOCKSIZE))" \
-+	$SCRATCH_MNT/foo | _filter_xfs_io
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/089.out b/tests/btrfs/089.out
-new file mode 100644
-index 0000000..642bede
---- /dev/null
-+++ b/tests/btrfs/089.out
-@@ -0,0 +1,13 @@
-+QA output created by 089
-+wrote 33554432/33554432 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 33554432/33554432 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 33554432/33554432 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 33554432/33554432 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 33554432/33554432 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 132120576/132120576 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index ffe18bf..da37e46 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -91,6 +91,7 @@
- 086 auto quick clone
- 087 auto quick send
- 088 auto quick metadata
-+089 auto qgroup
- 090 auto quick metadata
- 091 auto quick qgroup
- 092 auto quick send
--- 
-1.8.3.1
-
+Eryu
