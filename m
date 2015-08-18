@@ -1,173 +1,99 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:37879 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752459AbbHRGsT (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 18 Aug 2015 02:48:19 -0400
-From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH v7 2/3] xfstests: btrfs: test device replace, with EIO on the src dev
-Date: Tue, 18 Aug 2015 14:47:43 +0800
-Message-Id: <1439880464-23887-3-git-send-email-anand.jain@oracle.com>
-In-Reply-To: <1439880464-23887-1-git-send-email-anand.jain@oracle.com>
-References: <1439880464-23887-1-git-send-email-anand.jain@oracle.com>
+Received: from mx1.redhat.com ([209.132.183.28]:39391 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751813AbbHRRVz (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 18 Aug 2015 13:21:55 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (Postfix) with ESMTPS id 3B73F98C1D
+	for <fstests@vger.kernel.org>; Tue, 18 Aug 2015 17:21:55 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] xfs/194: fix the exception when run on 4k sector drives
+Date: Wed, 19 Aug 2015 01:21:51 +0800
+Message-Id: <1439918511-2859-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, david@fromorbit.com, eguan@redhat.com, fdmanana@gmail.com
+Cc: sandeen@redhat.com, Zorro Lang <zlang@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Anand Jain <Anand.Jain@oracle.com>
+The below command in "Test 4":
 
-This test case will test to confirm the replace works with
-the failed (EIO) replacing source device. EIO condition is
-achieved using the DM device.
+    xfs_io -c "pwrite -S 0x33 -b 512 `expr $blksize \* 2` 512"
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+will run failed on 4k sector drives. So I use min_alignment size
+to replace the hard-code 512.
+
+Also I make sure the blksize won't less than min_alignment size,
+after blksize=`expr $pgsize / 8`.
+
+If blksize really less than min_alignment size, I set blksize =
+min_alignment size, and for sure the consistency of test result,
+I repair pgsize(already not real page size) number according to
+the new blksize.
+
+Because IRIX can't use _min_dio_alignment(), so remove it from
+supported os list.
+
+At last, make the crc flag be disabled only when blksize=512.
+
+Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
-v6->v7: accepts Dave's comments
-    (. in line with changes as in 1/3)
+ tests/xfs/194 | 23 +++++++++++++++++++----
+ 1 file changed, 19 insertions(+), 4 deletions(-)
 
-v5->v6: accepts Eryu and Filipe's comments
-    (. commit update
-     . correct cleanup with tmp.*
-     .  don't redirect run_check $FSFTRESS_PROG to dev null
-    )
-
-v4->v5: rebase on latest xfstests code and accepts Filipe comment
-    (. cut line length to 80 char
-     . accommodate to the regression introduced by a092363bbdfa6cc6e44353136bae9d3aa81baae2
-    )
-      
-v3->v4: rebase on latest xfstests code
-
-v2->v3: accepts Filipe Manana's review comments, thanks
-    (. induce FS load using FSSTRESS_PROG, actually I missed it in v2
-    )
-
-v1->v2: accepts Dave Chinner's review comments, thanks
-    (. move 'start with the clean devices' code to actually at the
-       start of the script - damn why I didn't think like this before.
-       Thanks Dave.
-     . add .out file to contain the logs to verify.
-    )
- tests/btrfs/098     | 81 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/098.out | 11 ++++++++
- tests/btrfs/group   |  1 +
- 3 files changed, 93 insertions(+)
- create mode 100755 tests/btrfs/098
- create mode 100644 tests/btrfs/098.out
-
-diff --git a/tests/btrfs/098 b/tests/btrfs/098
-new file mode 100755
-index 0000000..8891655
---- /dev/null
-+++ b/tests/btrfs/098
-@@ -0,0 +1,81 @@
-+#! /bin/bash
-+# FS QA Test No. btrfs/098
-+#
-+# Test device replace works when the source device has EIO
-+#
-+# Copyright (c) 2015 Oracle.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+
-+_cleanup()
-+{
-+	_dmerror_cleanup
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/filter.btrfs
-+. ./common/dmerror
-+
-+_supported_fs btrfs
+diff --git a/tests/xfs/194 b/tests/xfs/194
+index e11b459..4491dd4 100755
+--- a/tests/xfs/194
++++ b/tests/xfs/194
+@@ -42,7 +42,7 @@ _cleanup()
+ 
+ # only xfs supported due to use of xfs_bmap
+ _supported_fs xfs
+-_supported_os IRIX Linux
 +_supported_os Linux
-+_need_to_be_root
-+_require_scratch_dev_pool 3
-+_dmerror_required
+ 
+ # real QA test starts here
+ rm -f $seqres.full
+@@ -50,6 +50,16 @@ rm -f $seqres.full
+ # For this test we use block size = 1/8 page size
+ pgsize=`$here/src/feature -s`
+ blksize=`expr $pgsize / 8`
++secsize=`_min_dio_alignment $SCRATCH_DEV`
 +
-+rm -f $seqres.full
-+
-+dev1="`echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $2}'`"
-+dev2="`echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $3}'`"
-+
-+_dmerror_init
-+_mkfs_dev "-f -d raid1 -m raid1 $dev1 $DMERROR_DEV"
-+_dmerror_mount
-+
-+_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
-+$BTRFS_UTIL_PROG filesystem show -m $SCRATCH_MNT | _filter_btrfs_filesystem_show
-+
-+error_devid=`$BTRFS_UTIL_PROG filesystem show -m $SCRATCH_MNT |\
-+			egrep $DMERROR_DEV | $AWK_PROG '{print $2}'`
-+
-+snapshot_cmd="$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT"
-+snapshot_cmd="$snapshot_cmd $SCRATCH_MNT/snap_\`date +'%H_%M_%S_%N'\`"
-+run_check $FSSTRESS_PROG -d $SCRATCH_MNT -n 200 -p 8 $FSSTRESS_AVOID -x \
-+							"$snapshot_cmd" -X 50
-+
-+# now load the error into the DMERROR_DEV
-+_dmerror_load_table
-+
-+_run_btrfs_util_prog replace start -B $error_devid $dev2 $SCRATCH_MNT
-+
-+_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
-+$BTRFS_UTIL_PROG filesystem show -m $SCRATCH_MNT | _filter_btrfs_filesystem_show
-+
-+echo "=== device replace completed"
-+
-+status=0; exit
-diff --git a/tests/btrfs/098.out b/tests/btrfs/098.out
-new file mode 100644
-index 0000000..eb2f87f
---- /dev/null
-+++ b/tests/btrfs/098.out
-@@ -0,0 +1,11 @@
-+QA output created by 098
-+Label: none  uuid:  <UUID>
-+	Total devices <NUM> FS bytes used <SIZE>
-+	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
-+	devid <DEVID> size <SIZE> used <SIZE> path /dev/mapper/error-test
-+
-+Label: none  uuid:  <UUID>
-+	Total devices <NUM> FS bytes used <SIZE>
-+	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
-+
-+=== device replace completed
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index e13865a..c8a53b5 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -100,3 +100,4 @@
- 095 auto quick metadata
- 096 auto quick clone
- 097 auto quick send clone
-+098 auto quick replace
++# The minimal blksize can't less than sector size, So if
++# blksize < secsize, we should adjust blksize and pgsize number.
++# Of course, if we adjust pgsize, pgsize won't equal to the
++# real page size of system.
++if [ $blksize -lt $secsize ];then
++        blksize=$secsize
++        pgsize=`expr $blksize \* 8`
++fi
+ 
+ # Filter out file mountpoint and physical location info
+ # Input:
+@@ -84,8 +94,13 @@ _require_scratch
+ unset MKFS_OPTIONS
+ unset XFS_MKFS_OPTIONS
+ 
+-# we need 512 byte block size, so crc's are turned off
+-_scratch_mkfs_xfs -m crc=0 -b size=$blksize >/dev/null 2>&1
++# If we use 512 byte block size, can't use crc
++if [ $blksize -eq 512 ];then
++        crcflag=0
++else
++        crcflag=1
++fi
++_scratch_mkfs_xfs -m crc=$crcflag -b size=$blksize >/dev/null 2>&1
+ _scratch_mount
+ 
+ # 512b block / 4k page example:
+@@ -209,7 +224,7 @@ xfs_io \
+ -c "truncate `expr $blksize / 2`" \
+ -c "truncate `expr $blksize + 1`" \
+ -c "pwrite -S 0x22 -b $blksize `expr $pgsize / 2` $blksize" \
+--c "pwrite -S 0x33 -b 512 `expr $blksize \* 2` 512" \
++-c "pwrite -S 0x33 -b $secsize `expr $blksize \* 2` $secsize" \
+ -t -d -f $SCRATCH_MNT/testfile4 >> $seqres.full
+ 
+ xfs_bmap -v $SCRATCH_MNT/testfile4 | _filter_bmap
 -- 
-2.4.1
+1.9.3
 
