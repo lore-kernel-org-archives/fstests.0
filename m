@@ -1,60 +1,47 @@
-Received: from mx1.redhat.com ([209.132.183.28]:52541 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751447AbbHRDzI (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 17 Aug 2015 23:55:08 -0400
-Date: Tue, 18 Aug 2015 11:55:05 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] ext4: ratelimit the file system mounted message
-Message-ID: <20150818035505.GZ17933@dhcp-13-216.nay.redhat.com>
-References: <1439665197-10766-1-git-send-email-tytso@mit.edu>
- <20150817011215.GA714@dastard>
- <20150817145056.GC27202@thunk.org>
- <20150817230752.GB3902@dastard>
+Received: from aserp1040.oracle.com ([141.146.126.69]:31781 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752102AbbHRE3c (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 18 Aug 2015 00:29:32 -0400
+Message-ID: <55D2B40E.5040801@oracle.com>
+Date: Tue, 18 Aug 2015 12:26:54 +0800
+From: anand jain <anand.jain@oracle.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20150817230752.GB3902@dastard>
+Subject: Re: [PATCH v6 1/3] xfstests: btrfs: add functions to create dm-error
+ device
+References: <1439549224-29784-1-git-send-email-anand.jain@oracle.com> <1439566305-12460-1-git-send-email-anand.jain@oracle.com> <1439566305-12460-2-git-send-email-anand.jain@oracle.com> <20150816235218.GD20596@dastard>
+In-Reply-To: <20150816235218.GD20596@dastard>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>
-Cc: Theodore Ts'o <tytso@mit.edu>, Ext4 Developers List <linux-ext4@vger.kernel.org>, fstests@vger.kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, eguan@redhat.com, fdmanana@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Aug 18, 2015 at 09:07:52AM +1000, Dave Chinner wrote:
-> [cc fstests@vger.kernel.org as we are talking about the test rather
-> than the kernel behaviour. ]
-> 
-[snip]
-> > In all cases, ext3/305 reliably reproduced the failure within 30
-> > mount/unmount cycles, and in most cases, under a dozen cycles.  (i.e.,
-> > under two seconds, and usually in a fraction of a second).  So I'm not
-> > entirely sure why the test was written to run the loop for 3 minutes
-> > and thousands of mount/unmount cycles.
-> 
-> There were lots of tests being written at the time that used a 3
-> minute timeout. It's another of those red flags that I tend to
-> push back on these days, and this is an example of why - usually the
-> problem can be hit very quickly, or the test is extremely unreliable
-> and long runtime is the only way to trigger the race. Hence
-> running for X minutes doesn't really prove anything....
 
-IIRC, 3 minutes time limit was based on my testing before I submitted
-the patch, but I could be wrong, it was two years ago..
+Hi Dave,
 
-I think I have better understanding of xfstests and regression tests
-now than two years ago, after years education on the list (mainly by
-Dave :-))
+  All comments accepted thanks. except for this.
 
-> 
-> > Eryu, you wrote the test; any thoughts?  At the very least I'd suggest
-> > cutting the test down so that it runs for at most 2 seconds, if for no
-> > other reason than to speed up regression test runs.
-> 
-> Rather than time limiting, how about bounding the number of
-> mount/unmount cycles?
 
-Agreed, 30 cycles seem a reasonable number, I can prepare a patch if no
-objection.
+>> +_mount_dmerror()
+>> +{
+>> +	$MOUNT_PROG -t $FSTYP $MOUNT_OPTIONS $DMERROR_DEV $SCRATCH_MNT
+>> +}
+>
+> Should mirror _scratch_mount.
+>
+> _mount -t $FSTYP `_scratch_mount_options` $DMERROR_DEV $SCRATCH_MNT
 
-Thanks Ted and Dave for looking into this!
 
-Eryu
+`_scratch_mount_options` also returns $SCRATCH_DEV.
+in case of tests involving dmerror module, dmerror_init would use 
+$SCRATCH_DEV as backing device and provide $DMERROR_DEV to be used 
+instead of $SCRATCH_DEV. So I am proposing..
+
++	_mount -t $FSTYP $SCRATCH_OPTIONS $MOUNT_OPTIONS 
+$SELINUX_MOUNT_OPTIONS $* $DMERROR_DEV $SCRATCH_MNT
+
+
+
+Thanks, Anand
+
