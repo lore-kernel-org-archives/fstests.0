@@ -1,62 +1,49 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:54515 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751015AbbHTCf3 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 19 Aug 2015 22:35:29 -0400
-Received: from G08CNEXCHPEKD01.g08.fujitsu.local (localhost.localdomain [127.0.0.1])
-	by edo.cn.fujitsu.com (8.14.3/8.13.1) with ESMTP id t7K2ZMMR022919
-	for <fstests@vger.kernel.org>; Thu, 20 Aug 2015 10:35:22 +0800
-From: Zhaolei <zhaolei@cn.fujitsu.com>
-Subject: [PATCH] Fix test fail of btrfs/006 caused by updated _filter_uuid()
-Date: Thu, 20 Aug 2015 10:33:49 +0800
-Message-ID: <5e1bb4aacc6c5b57585e6f66a708b8c21ce032ab.1440037988.git.zhaolei@cn.fujitsu.com>
+Received: from mail-la0-f54.google.com ([209.85.215.54]:33723 "EHLO
+	mail-la0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751284AbbHTGS3 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 20 Aug 2015 02:18:29 -0400
+Received: by lalv9 with SMTP id v9so16306872lal.0
+        for <fstests@vger.kernel.org>; Wed, 19 Aug 2015 23:18:28 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <1440032464-17626-1-git-send-email-yangds.fnst@cn.fujitsu.com>
+References: <55D52473.7050209@cn.fujitsu.com>
+	<1440032464-17626-1-git-send-email-yangds.fnst@cn.fujitsu.com>
+Date: Thu, 20 Aug 2015 08:18:28 +0200
+Message-ID: <CAHpGcMLZT5xYx5EUBLTPyLQd0f+jQ-g+c_f-oErsHP33m7-ROg@mail.gmail.com>
+Subject: Re: [PATCH] fstests: link .out to correct output when we set USE_ATTR_SECURE=yes
+From: =?UTF-8?Q?Andreas_Gr=C3=BCnbacher?= <andreas.gruenbacher@gmail.com>
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Zhao Lei <zhaolei@cn.fujitsu.com>
+To: Dongsheng Yang <yangds.fnst@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, linux-mtd@lists.infradead.org, richard.weinberger@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Zhao Lei <zhaolei@cn.fujitsu.com>
+Dongsheng,
 
-_filter_uuid() get updated and changed output from:
- uuid: <UUID>
- ->
- uuid:  <UUID>
+2015-08-20 3:01 GMT+02:00 Dongsheng Yang <yangds.fnst@cn.fujitsu.com>:
+>
+> When we set USE_ATTR_SECURE to yes or no, the expected outputs of generic/062
+> would be different. So we need to link the .out to different file.
 
-It is a typo introduced by xfs/077, this patch fixed this.
+Can the tests for the different namespaces please be separated from
+each other here (see below)?
 
-Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
----
- common/filter     | 2 +-
- tests/xfs/077.out | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+diff --git a/tests/generic/062 b/tests/generic/062
+index 194b638..9dd4498 100755
+--- a/tests/generic/062
++++ b/tests/generic/062
+@@ -142,6 +142,7 @@ for nsp in $ATTR_MODES; do
+                echo "*** final list (strings, type=$inode, nsp=$nsp)"
+                getfattr -m '.' -e hex $SCRATCH_MNT/$inode
 
-diff --git a/common/filter b/common/filter
-index 8db1b3e..af456c9 100644
---- a/common/filter
-+++ b/common/filter
-@@ -277,7 +277,7 @@ _filter_uuid()
- 		UUID=$1
- 		sed -e "s/\(uuid[ :=]\+\) $UUID/\1 <EXACTUUID>/i"
- 	else
--		sed -e "s/\(uuid[ :=]\+\) *[0-9a-f-][0-9a-f-]*/\1 <UUID>/ig"
-+		sed -e "s/\(uuid[ :=]\+\) [0-9a-f-][0-9a-f-]*/\1 <UUID>/ig"
- 	fi
- }
- 
-diff --git a/tests/xfs/077.out b/tests/xfs/077.out
-index fdc7d72..4e18087 100644
---- a/tests/xfs/077.out
-+++ b/tests/xfs/077.out
-@@ -2,7 +2,7 @@ QA output created by 077
- == Generate new UUID
- Clearing log and setting UUID
- writing all SBs
--new UUID =  <UUID>
-+new UUID = <UUID>
- == Rewrite UUID
- old UUID = <EXACTUUID>
- Clearing log and setting UUID
--- 
-1.8.5.1
++               # FIXME: Remove all remaining xattrs
+        done
+ done
 
+Next, can the security namespace tests be put in their own test case
+so that we don't need to switch between two different .out files? This
+could be done by setting ATTR_MODES and then invoking
+tests/generic/062 to avoid duplicating the entire test script.
+
+Thanks,
+Andreas
