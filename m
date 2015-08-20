@@ -1,63 +1,48 @@
-Received: from mx1.redhat.com ([209.132.183.28]:60670 "EHLO mx1.redhat.com"
+Received: from sandeen.net ([63.231.237.45]:56292 "EHLO sandeen.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752724AbbHTO2f (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 20 Aug 2015 10:28:35 -0400
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] ext4/305: reduce runtime by limiting mount/umount cycles
-Date: Thu, 20 Aug 2015 22:28:27 +0800
-Message-Id: <1440080907-25163-1-git-send-email-eguan@redhat.com>
+	id S1751842AbbHTUOc (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 20 Aug 2015 16:14:32 -0400
+Received: from liberator.sandeen.net (liberator.sandeen.net [10.0.0.4])
+	(using TLSv1.2 with cipher DHE-RSA-AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by sandeen.net (Postfix) with ESMTPSA id 87A1365476E1
+	for <fstests@vger.kernel.org>; Thu, 20 Aug 2015 15:14:31 -0500 (CDT)
+Message-ID: <55D63527.2050404@sandeen.net>
+Date: Thu, 20 Aug 2015 15:14:31 -0500
+From: Eric Sandeen <sandeen@sandeen.net>
+MIME-Version: 1.0
+Subject: [PATCH] xfs/077: fix test for userspace meta_uuid support
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: tytso@mit.edu, Eryu Guan <eguan@redhat.com>
+To: "fstests@vger.kernel.org" <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-ext4/305 sleeps 3 minutes and does mount/umount loop in background,
-which produces lots of logs in dmesg and 3 minutes is not necessary.
+The current _require_meta_uuid() test looks for a failure return
+code from xfs_db -x -c "uuid generate" but in fact this exits
+with success.  (In fact uuid_f always exits with success; perhaps
+this needs fixing, but that's in the wild now).
 
-Ted pointed out that 30 mount/umount cycles is enough to crash a buggy
-kernel, so just limit the mount/umount loop to reduce the runtime. And
-now the runtime is about 2s.
+So grep for the string(s) stating that it failed, instead.
 
-Reported-by: Theodore Ts'o <tytso@mit.edu>
-Suggested-by: Dave Chinner <dchinner@redhat.com>
-Signed-off-by: Eryu Guan <eguan@redhat.com>
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 ---
- tests/ext4/305 | 19 +++++++++----------
- 1 file changed, 9 insertions(+), 10 deletions(-)
 
-diff --git a/tests/ext4/305 b/tests/ext4/305
-index 860d0a6..1711aae 100755
---- a/tests/ext4/305
-+++ b/tests/ext4/305
-@@ -53,19 +53,18 @@ DEV_BASENAME=$(_short_dev $SCRATCH_DEV)
- echo "Start test on device $SCRATCH_DEV, basename $DEV_BASENAME" >$seqres.full
- _scratch_mkfs >>$seqres.full 2>&1
+diff --git a/common/rc b/common/rc
+index 70d2fa8..737a701 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2720,8 +2720,11 @@ _require_meta_uuid()
+ 	# This will create a crc fs on $SCRATCH_DEV
+ 	_require_xfs_crc
  
--while true;do
--	mount $SCRATCH_DEV $SCRATCH_MNT
--	umount $SCRATCH_DEV
--done &
--PIDS=$!
--
--while true;do
-+while true; do
- 	cat /proc/fs/ext4/$DEV_BASENAME/mb_groups > /dev/null 2>&1
- done &
--PIDS="$PIDS $!"
-+PIDS=$!
+-	$XFS_DB_PROG -x -c "uuid generate" $SCRATCH_DEV >/dev/null 2>&1 \
+-	   || _notrun "Userspace doesn't support meta_uuid feature"
++	$XFS_DB_PROG -x -c "uuid restore" $SCRATCH_DEV 2>&1 \
++	   | grep -q "invalid UUID\|supported on V5 fs" \
++	   && _notrun "Userspace doesn't support meta_uuid feature"
++
++	$XFS_DB_PROG -x -c "uuid generate" $SCRATCH_DEV >/dev/null 2>&1
  
--# sleep for 180s, in most cases a buggy kernel could hit BUG_ON within 3 minutes
--sleep 180
-+# 30 loops is enough to crash a buggy kernel
-+i=0
-+while [ $i -lt 30 ]; do
-+	mount $SCRATCH_DEV $SCRATCH_MNT
-+	umount $SCRATCH_DEV
-+	let i=i+1
-+done
- 
- # no BUG_ON, all done
- kill $PIDS >/dev/null 2>&1
--- 
-2.4.3
-
+ 	_scratch_mount >/dev/null 2>&1 \
+ 	   || _notrun "Kernel doesn't support meta_uuid feature"
