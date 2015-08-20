@@ -1,49 +1,69 @@
-Received: from mail-la0-f54.google.com ([209.85.215.54]:33723 "EHLO
-	mail-la0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751284AbbHTGS3 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 20 Aug 2015 02:18:29 -0400
-Received: by lalv9 with SMTP id v9so16306872lal.0
-        for <fstests@vger.kernel.org>; Wed, 19 Aug 2015 23:18:28 -0700 (PDT)
+Received: from userp1040.oracle.com ([156.151.31.81]:20056 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751807AbbHTHLq (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 20 Aug 2015 03:11:46 -0400
+Message-ID: <55D57D11.8050508@oracle.com>
+Date: Thu, 20 Aug 2015 15:09:05 +0800
+From: Anand Jain <anand.jain@oracle.com>
 MIME-Version: 1.0
-In-Reply-To: <1440032464-17626-1-git-send-email-yangds.fnst@cn.fujitsu.com>
-References: <55D52473.7050209@cn.fujitsu.com>
-	<1440032464-17626-1-git-send-email-yangds.fnst@cn.fujitsu.com>
-Date: Thu, 20 Aug 2015 08:18:28 +0200
-Message-ID: <CAHpGcMLZT5xYx5EUBLTPyLQd0f+jQ-g+c_f-oErsHP33m7-ROg@mail.gmail.com>
-Subject: Re: [PATCH] fstests: link .out to correct output when we set USE_ATTR_SECURE=yes
-From: =?UTF-8?Q?Andreas_Gr=C3=BCnbacher?= <andreas.gruenbacher@gmail.com>
-Content-Type: text/plain; charset=UTF-8
+Subject: Re: [PATCH v6 1/3] xfstests: btrfs: add functions to create dm-error
+ device
+References: <1439549224-29784-1-git-send-email-anand.jain@oracle.com> <1439566305-12460-1-git-send-email-anand.jain@oracle.com> <1439566305-12460-2-git-send-email-anand.jain@oracle.com> <20150816235218.GD20596@dastard> <55D2B40E.5040801@oracle.com> <20150818221157.GE3902@dastard> <55D3F4FA.6080309@oracle.com> <20150819064529.GJ3902@dastard>
+In-Reply-To: <20150819064529.GJ3902@dastard>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Dongsheng Yang <yangds.fnst@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, linux-mtd@lists.infradead.org, richard.weinberger@gmail.com
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, eguan@redhat.com, fdmanana@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-Dongsheng,
 
-2015-08-20 3:01 GMT+02:00 Dongsheng Yang <yangds.fnst@cn.fujitsu.com>:
->
-> When we set USE_ATTR_SECURE to yes or no, the expected outputs of generic/062
-> would be different. So we need to link the .out to different file.
+  (thanks for the off-ML emails from the people who helped me
+  to understand).
 
-Can the tests for the different namespaces please be separated from
-each other here (see below)?
+Dave,
 
-diff --git a/tests/generic/062 b/tests/generic/062
-index 194b638..9dd4498 100755
---- a/tests/generic/062
-+++ b/tests/generic/062
-@@ -142,6 +142,7 @@ for nsp in $ATTR_MODES; do
-                echo "*** final list (strings, type=$inode, nsp=$nsp)"
-                getfattr -m '.' -e hex $SCRATCH_MNT/$inode
+  looks like you are suggesting something like..
 
-+               # FIXME: Remove all remaining xattrs
-        done
- done
+-------
++_dmerror_mount_options()
++{
++       _scratch_options mount
++       echo $SCRATCH_OPTIONS $MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS \
++                                       $* $DMERROR_DEV $SCRATCH_MNT
++}
++
++_dmerror_mount()
++{
++       _mount -t $FSTYP `_dmerror_mount_options $*`
++}
+--------
 
-Next, can the security namespace tests be put in their own test case
-so that we don't need to switch between two different .out files? This
-could be done by setting ATTR_MODES and then invoking
-tests/generic/062 to avoid duplicating the entire test script.
+  Sorry that the word 'should mirror _scratch_mount()' confused me.
 
-Thanks,
-Andreas
+  Pls clarify.
+
+Thanks, Anand
+
+
+ >>> +_mount_dmerror()
+ >>> +{
+ >>> +	$MOUNT_PROG -t $FSTYP $MOUNT_OPTIONS $DMERROR_DEV $SCRATCH_MNT
+ >>> +}
+
+
+ >> Should mirror _scratch_mount.
+ >>
+ >> _mount -t $FSTYP `_scratch_mount_options` $DMERROR_DEV $SCRATCH_MNT
+
+
+ > So I am proposing..
+
+ > +	_mount -t $FSTYP $SCRATCH_OPTIONS $MOUNT_OPTIONS
+ > $SELINUX_MOUNT_OPTIONS $* $DMERROR_DEV $SCRATCH_MNT
+
+
+However, you've still missed the primary reason I suggested
+_scratch_mount_options in the first place: what do we do instead of
+copy'n'paste of random code fragments?
+
