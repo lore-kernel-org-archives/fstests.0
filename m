@@ -1,141 +1,72 @@
-Received: from mx2.suse.de ([195.135.220.15]:50752 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753715AbbHYJmT (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 25 Aug 2015 05:42:19 -0400
-From: Jan Kara <jack@suse.com>
-Subject: [PATCH] fstests: Add test of rename
-Date: Tue, 25 Aug 2015 11:42:10 +0200
-Message-Id: <1440495730-14093-1-git-send-email-jack@suse.com>
+Received: from nebula-exfe-01.nebula.fi ([83.145.198.163]:52690 "EHLO
+	ex10.nebula.fi" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751763AbbHYKMk (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 25 Aug 2015 06:12:40 -0400
+Message-ID: <1440497203.29614.1.camel@ari-macbook>
+Subject: [PATCH] busybox compat: use stat -c instead of stat --format
+From: Ari Sundholm <ari@tuxera.com>
+Date: Tue, 25 Aug 2015 13:06:43 +0300
+Content-Type: text/plain; charset="UTF-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com, Jan Kara <jack@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Test renaming of various entry types in directories of various sizes.
-Check that filesystem didn't get corrupted.
+From: Ari Sundholm <ari@tuxera.com>
 
-Signed-off-by: Jan Kara <jack@suse.com>
+Signed-off-by: Ari Sundholm <ari@tuxera.com>
 ---
- tests/generic/326   | 93 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/group |  1 +
- 2 files changed, 94 insertions(+)
- create mode 100755 tests/generic/326
+ tests/generic/040 |    4 ++--
+ tests/generic/041 |    2 +-
+ tests/generic/104 |    4 ++--
+ 3 files changed, 5 insertions(+), 5 deletions(-)
 
-This is a regression test for ftype handling bug I've fixed last week in XFS.
-I've made the test to iterate relatively densely over a wide range of directory
-sizes so that it can be used to test handling of different directory
-formats also for other filesystems (e.g. ext4 has inline & normal directories,
-UDF as well). I have verified that for XFS we test directory operations for all
-directory types.
-
-diff --git a/tests/generic/326 b/tests/generic/326
-new file mode 100755
-index 000000000000..a8d9e9b5a34f
---- /dev/null
-+++ b/tests/generic/326
-@@ -0,0 +1,93 @@
-+#! /bin/bash
-+# FS QA Test No. 326
-+#
-+# Test rename for various sizes of directories. This is motivated by a bug
-+# in XFS where directory entry file type was not updated properly on rename.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Jan Kara <jack@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+status=1	# failure is the default!
-+
-+filldir()
-+{
-+	for (( i = 0; i < $1; i++ )); do
-+		touch "fname$i"
-+	done
-+}
-+
-+# Test renaming of file, symlink over file, symlink, non-existent
-+# name
-+renamedir()
-+{
-+	touch fs1
-+	touch fs2
-+	touch fs3
-+	touch fd1
-+	touch fd2
-+	ln -s foo ss1
-+	ln -s foo ss2
-+	ln -s foo ss3
-+	ln -s foo sd1
-+	ln -s foo sd2
-+
-+	mv -T fs1 fd1
-+	mv -T fs2 sd1
-+	mv -T fs3 ed1
-+
-+	mv -T ss1 fd2
-+	mv -T ss2 sd2
-+	mv -T ss3 ed2
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/log
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+# Test different directory sizes to test various directory formats
-+for f in 1 2 3 4 5 8 12 18 27 40 60 90 135 202 303 454 681 1020 1530 2295; do
-+	mkdir $SCRATCH_MNT/dir$f
-+	pushd $SCRATCH_MNT/dir$f >/dev/null
-+	filldir $f
-+	renamedir
-+	popd >/dev/null
-+done
-+
-+if _check_scratch_fs; then
-+	_echofull "Scratch fs is fine after renames"
-+	status=0
-+fi
-+
-+exit
-diff --git a/tests/generic/group b/tests/generic/group
-index a33536ec2a0a..612cb8efe879 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -204,3 +204,4 @@
- 323 auto aio stress
- 324 auto fsr quick
- 325 auto quick data log
-+326 auto metadata dir
+diff --git a/tests/generic/040 b/tests/generic/040
+index c841fbc..b44a433 100755
+--- a/tests/generic/040
++++ b/tests/generic/040
+@@ -122,9 +122,9 @@ _mount_flakey
+ # The fstests framework automatically calls fsck after a test is run, so we
+ # don't need to call fsck explicitly here.
+ 
+-echo "Link count before rm foo_link_*: $(stat --format=%h $SCRATCH_MNT/foo)"
++echo "Link count before rm foo_link_*: $(stat -c %h $SCRATCH_MNT/foo)"
+ rm -f $SCRATCH_MNT/foo_link_*
+-echo "Link count after rm foo_link_*: $(stat --format=%h $SCRATCH_MNT/foo)"
++echo "Link count after rm foo_link_*: $(stat -c %h $SCRATCH_MNT/foo)"
+ cat $SCRATCH_MNT/foo
+ 
+ status=0
+diff --git a/tests/generic/041 b/tests/generic/041
+index f38b662..50fb26f 100755
+--- a/tests/generic/041
++++ b/tests/generic/041
+@@ -116,7 +116,7 @@ _mount_flakey
+ # the hard links and read the file's data. This is just to verify we don't
+ # get stale file handle errors (due to dangling directory index entries that
+ # point to inodes that no longer exist).
+-echo "Link count: $(stat --format=%h $SCRATCH_MNT/foo)"
++echo "Link count: $(stat -c %h $SCRATCH_MNT/foo)"
+ [ -f $SCRATCH_MNT/foo ] || echo "Link foo is missing"
+ for ((i = 1; i <= 3003; i++)); do
+ 	name=foo_link_`printf "%04d" $i`
+diff --git a/tests/generic/104 b/tests/generic/104
+index eeb7363..fef3583 100755
+--- a/tests/generic/104
++++ b/tests/generic/104
+@@ -81,8 +81,8 @@ _load_flakey_table $FLAKEY_ALLOW_WRITES
+ _mount_flakey
+ 
+ # Now verify both our files have a link count of 2.
+-echo "Link count for file foo: $(stat --format=%h $SCRATCH_MNT/testdir/foo)"
+-echo "Link count for file bar: $(stat --format=%h $SCRATCH_MNT/testdir/bar)"
++echo "Link count for file foo: $(stat -c %h $SCRATCH_MNT/testdir/foo)"
++echo "Link count for file bar: $(stat -c %h $SCRATCH_MNT/testdir/bar)"
+ 
+ # We should be able to remove all the links of our files in testdir, and after
+ # that the parent directory should become empty and therefore possible to
 -- 
-2.1.4
+1.7.10.4
+
 
