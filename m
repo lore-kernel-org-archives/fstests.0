@@ -1,98 +1,48 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:42000 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751478AbbHYEnD (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 25 Aug 2015 00:43:03 -0400
-From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH v8 3/3] xfstests: btrfs: test device delete with EIO on src dev
-Date: Tue, 25 Aug 2015 12:39:28 +0800
-Message-Id: <1440477568-4614-4-git-send-email-anand.jain@oracle.com>
-In-Reply-To: <1440477568-4614-1-git-send-email-anand.jain@oracle.com>
-References: <1440477568-4614-1-git-send-email-anand.jain@oracle.com>
+Received: from mx2.suse.de ([195.135.220.15]:50752 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753715AbbHYJmT (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 25 Aug 2015 05:42:19 -0400
+From: Jan Kara <jack@suse.com>
+Subject: [PATCH] fstests: Add test of rename
+Date: Tue, 25 Aug 2015 11:42:10 +0200
+Message-Id: <1440495730-14093-1-git-send-email-jack@suse.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Anand Jain <Anand.Jain@oracle.com>, david@fromorbit.com, linux-btrfs@vger.kernel.org, eguan@redhat.com, fdmanana@gmail.com
+Cc: xfs@oss.sgi.com, Jan Kara <jack@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Anand Jain <Anand.Jain@oracle.com>
+Test renaming of various entry types in directories of various sizes.
+Check that filesystem didn't get corrupted.
 
-This test case tests if the device delete works with
-the failed (EIO) source device. EIO errors are achieved
-usign the DM device.
-
-This test would need following btrfs-progs and btrfs
-kernel patch
-   btrfs-progs: device delete to accept devid
-   Btrfs: device delete by devid
-
-However when btrfs-progs patch is not found this test will
-not run, and when kernel patch is not found btrfs-progs
-will fail gracefully and thus the test script.
-
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
+Signed-off-by: Jan Kara <jack@suse.com>
 ---
-v7->v8:
- . Inline with the patch 1/3 v8 changes, use dmerror_mount()
+ tests/generic/326   | 93 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/group |  1 +
+ 2 files changed, 94 insertions(+)
+ create mode 100755 tests/generic/326
 
-v6->v7: accepts Dave's comments
- . in line with changes as in 1/3 mainly the renames
+This is a regression test for ftype handling bug I've fixed last week in XFS.
+I've made the test to iterate relatively densely over a wide range of directory
+sizes so that it can be used to test handling of different directory
+formats also for other filesystems (e.g. ext4 has inline & normal directories,
+UDF as well). I have verified that for XFS we test directory operations for all
+directory types.
 
-v5->v6: accepts Eryu and Filipe's comments, thanks
- . correct cleanup with tmp.*
- .  don't redirect run_check $FSFTRESS_PROG to dev null
-
-v4->v5: rebase on latest xfstests code, and accepts Filipe comment
- . cut line length to 80 char
- . accommodate to the regression introduced by a092363bbdfa6cc6e44353136bae9d3aa81baae2
-
-v3->v4: rebase on latest xfstests code
-
-v2->v3: accepts Filipe Manana's review comments, thanks
- . induce FS load using FSSTRESS_PROG
-
-v1->v2: accepts Dave Chinner's review comments, thanks
- . move 'start with the clean devices' code to actually at the
-   start of the script - damn why I didn't think like this
-   before. Thanks Dave.
- . update .out file to contain the logs to verify.
-
- common/rc           |  7 +++++
- tests/btrfs/099     | 82 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/099.out | 11 +++++++
- tests/btrfs/group   |  1 +
- 4 files changed, 101 insertions(+)
- create mode 100755 tests/btrfs/099
- create mode 100644 tests/btrfs/099.out
-
-diff --git a/common/rc b/common/rc
-index 7befa09..140ebd8 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2737,6 +2737,13 @@ _require_meta_uuid()
- 	umount $SCRATCH_MNT
- }
- 
-+_require_btrfs_dev_del_by_devid()
-+{
-+	$BTRFS_UTIL_PROG device delete --help | egrep devid > /dev/null 2>&1
-+	[ $? -eq 0 ] || _notrun "$BTRFS_UTIL_PROG too old "\
-+			"(must support 'btrfs device delete <devid> /<mnt>')"
-+}
-+
- _get_total_inode()
- {
- 	if [ -z "$1" ]; then
-diff --git a/tests/btrfs/099 b/tests/btrfs/099
+diff --git a/tests/generic/326 b/tests/generic/326
 new file mode 100755
-index 0000000..9793c9b
+index 000000000000..a8d9e9b5a34f
 --- /dev/null
-+++ b/tests/btrfs/099
-@@ -0,0 +1,82 @@
++++ b/tests/generic/326
+@@ -0,0 +1,93 @@
 +#! /bin/bash
-+# FS QA Test No. btrfs/099
++# FS QA Test No. 326
 +#
-+# Test device delete when the source device has EIO
++# Test rename for various sizes of directories. This is motivated by a bug
++# in XFS where directory entry file type was not updated properly on rename.
 +#
-+# Copyright (c) 2015 Oracle.  All Rights Reserved.
++#-----------------------------------------------------------------------
++# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Jan Kara <jack@suse.com>
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -106,6 +56,7 @@ index 0000000..9793c9b
 +# You should have received a copy of the GNU General Public License
 +# along with this program; if not, write the Free Software Foundation,
 +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
 +#
 +
 +seq=`basename $0`
@@ -113,88 +64,78 @@ index 0000000..9793c9b
 +echo "QA output created by $seq"
 +
 +here=`pwd`
-+tmp=/tmp/$$
-+
 +status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
 +
-+
-+_cleanup()
++filldir()
 +{
-+	_dmerror_cleanup
-+	rm -f $tmp.*
++	for (( i = 0; i < $1; i++ )); do
++		touch "fname$i"
++	done
++}
++
++# Test renaming of file, symlink over file, symlink, non-existent
++# name
++renamedir()
++{
++	touch fs1
++	touch fs2
++	touch fs3
++	touch fd1
++	touch fd2
++	ln -s foo ss1
++	ln -s foo ss2
++	ln -s foo ss3
++	ln -s foo sd1
++	ln -s foo sd2
++
++	mv -T fs1 fd1
++	mv -T fs2 sd1
++	mv -T fs3 ed1
++
++	mv -T ss1 fd2
++	mv -T ss2 sd2
++	mv -T ss3 ed2
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/filter.btrfs
-+. ./common/dmerror
++. ./common/log
 +
-+_supported_fs btrfs
++# real QA test starts here
++_supported_fs generic
 +_supported_os Linux
-+_need_to_be_root
-+_require_scratch_dev_pool 3
-+_require_btrfs_dev_del_by_devid
-+_dmerror_required
++_require_scratch
 +
 +rm -f $seqres.full
 +
-+dev1="`echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $2}'`"
-+dev2="`echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $3}'`"
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
 +
-+_dmerror_init
-+_mkfs_dev -f -d raid1 -m raid1 $dev1 $dev2 $DMERROR_DEV
-+_dmerror_mount
++# Test different directory sizes to test various directory formats
++for f in 1 2 3 4 5 8 12 18 27 40 60 90 135 202 303 454 681 1020 1530 2295; do
++	mkdir $SCRATCH_MNT/dir$f
++	pushd $SCRATCH_MNT/dir$f >/dev/null
++	filldir $f
++	renamedir
++	popd >/dev/null
++done
 +
-+_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
-+$BTRFS_UTIL_PROG filesystem show -m $SCRATCH_MNT | _filter_btrfs_filesystem_show
++if _check_scratch_fs; then
++	_echofull "Scratch fs is fine after renames"
++	status=0
++fi
 +
-+error_devid=`$BTRFS_UTIL_PROG filesystem show -m $SCRATCH_MNT |\
-+			egrep $DMERROR_DEV | $AWK_PROG '{print $2}'`
-+
-+snapshot_cmd="$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT"
-+snapshot_cmd="$snapshot_cmd $SCRATCH_MNT/snap_\`date +'%H_%M_%S_%N'\`"
-+run_check $FSSTRESS_PROG -d $SCRATCH_MNT -n 200 -p 8 $FSSTRESS_AVOID -x \
-+							"$snapshot_cmd" -X 50
-+
-+# now load the error into the DMERROR_DEV
-+_dmerror_load_table
-+
-+_run_btrfs_util_prog device delete $error_devid $SCRATCH_MNT
-+
-+_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
-+$BTRFS_UTIL_PROG filesystem show -m $SCRATCH_MNT | _filter_btrfs_filesystem_show
-+
-+echo "=== device delete completed"
-+
-+status=0; exit
-diff --git a/tests/btrfs/099.out b/tests/btrfs/099.out
-new file mode 100644
-index 0000000..ec74e45
---- /dev/null
-+++ b/tests/btrfs/099.out
-@@ -0,0 +1,11 @@
-+QA output created by 099
-+Label: none  uuid:  <UUID>
-+	Total devices <NUM> FS bytes used <SIZE>
-+	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
-+	devid <DEVID> size <SIZE> used <SIZE> path /dev/mapper/error-test
-+
-+Label: none  uuid:  <UUID>
-+	Total devices <NUM> FS bytes used <SIZE>
-+	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
-+
-+=== device delete completed
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index c8a53b5..968ee63 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -101,3 +101,4 @@
- 096 auto quick clone
- 097 auto quick send clone
- 098 auto quick replace
-+099 auto quick replace
++exit
+diff --git a/tests/generic/group b/tests/generic/group
+index a33536ec2a0a..612cb8efe879 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -204,3 +204,4 @@
+ 323 auto aio stress
+ 324 auto fsr quick
+ 325 auto quick data log
++326 auto metadata dir
 -- 
-2.4.1
+2.1.4
 
