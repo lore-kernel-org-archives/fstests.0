@@ -1,195 +1,206 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:38544 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1756289AbbHZHbG (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 26 Aug 2015 03:31:06 -0400
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH v6] fstests: btrfs: Add reserved space leak check for rewrite  dirty page
-Date: Wed, 26 Aug 2015 15:30:57 +0800
-Message-ID: <1440574257-1544-1-git-send-email-quwenruo@cn.fujitsu.com>
+Received: from nebula-exfe-01.nebula.fi ([83.145.198.163]:60492 "EHLO
+	ex10.nebula.fi" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1756610AbbHZJPN (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 26 Aug 2015 05:15:13 -0400
+Message-ID: <1440580477.29614.3.camel@ari-macbook>
+Subject: [PATCH 1/2] Add checks for hardlinks support.
+From: Ari Sundholm <ari@tuxera.com>
+Date: Wed, 26 Aug 2015 12:14:37 +0300
+Content-Type: text/plain; charset="UTF-8"
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Btrfs qgroup reserve codes lacks check for rewrite dirty page, causing
-every write, even rewriting a uncommitted dirty page, to reserve space.
+From: Ari Sundholm <ari@tuxera.com>
 
-But only written data will free the reserved space, causing reserved
-space leaking.
-
-The bug exists almost from the beginning of btrfs qgroup codes, but
-nobody found it.
-
-For example:
-
-1)Write [0, 12K) into file A
-  reserve 12K space
-
-File A:
-0	4K	8K	12K
-|<--------dirty-------->|
-reserved: 12K
-
-2)Write [0,4K) into file A
-0	4K	8K	12K
-|<--------dirty-------->|
-reserved: 16K <<< Should be 12K
-
-3) Commit transaction
-Dirty pages [0,12) written to disk.
-Free 12K reserved space.
-reserved: 4K <<< Should be 0
-
-This testcase will test such problem.
-Kernel fix will need some huge change, so won't be soon.
-
-Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Ari Sundholm <ari@tuxera.com>
 ---
-Changelog:
-v2:
-  Use smaller write size inside loop, in case commit is trigger by dirty
-page
-  threshold, and ensure following write won't trigger EQUOT
-v3:
-  Add more comments and fix some expression.
-v4:
-  Rebase to latest fstests.
-v5:
-  Use larger number to avoid conflicts with the test from Filipe Manana.
-v6:
-  Remove $seqres.full to avoid infinite file size grow.
----
- tests/btrfs/099     | 88 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/099.out | 13 ++++++++
- tests/btrfs/group   |  1 +
- 3 files changed, 102 insertions(+)
- create mode 100755 tests/btrfs/099
- create mode 100644 tests/btrfs/099.out
+ common/rc         |   12 ++++++++++++
+ tests/generic/002 |    1 +
+ tests/generic/039 |    1 +
+ tests/generic/040 |    1 +
+ tests/generic/041 |    1 +
+ tests/generic/056 |    1 +
+ tests/generic/057 |    1 +
+ tests/generic/065 |    1 +
+ tests/generic/066 |    1 +
+ tests/generic/084 |    1 +
+ tests/generic/090 |    1 +
+ tests/generic/104 |    1 +
+ tests/generic/106 |    1 +
+ 13 files changed, 24 insertions(+)
 
-diff --git a/tests/btrfs/099 b/tests/btrfs/099
-new file mode 100755
-index 0000000..05e1ad2
---- /dev/null
-+++ b/tests/btrfs/099
-@@ -0,0 +1,88 @@
-+#! /bin/bash
-+# FS QA Test 099
-+#
-+# Check for qgroup reserved space leaks caused by re-writing dirty ranges
-+# This bug has been present in btrfs qgroup for a long time
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Fujitsu. All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
+diff --git a/common/rc b/common/rc
+index 780b7ed..d3aeddf 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2714,6 +2714,18 @@ _require_test_symlinks()
+ 	rm -f $target $link
+ }
+ 
++_require_test_hardlinks()
 +{
-+	cd /
-+	rm -f $tmp.*
++	target=`mktemp -p $TEST_DIR`
++	link=`mktemp -p $TEST_DIR -u`
++	ln `basename $target` $link
++	if [ "$?" -ne 0 ]; then
++		rm -f $target
++		_notrun "Require hardlinks support"
++	fi
++	rm -f $target $link
 +}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_need_to_be_root
-+
-+# Use big blocksize to ensure there is still enough space left for metadata
-+# space reserve.
-+BLOCKSIZE=$(( 2 * 1024 * 1024 )) # 2M block size
-+FILESIZE=$(( 128 * 1024 * 1024 )) # 128M file size
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+_require_fs_space $SCRATCH_MNT $(($FILESIZE * 2 / 1024))
-+
-+_run_btrfs_util_prog quota enable $SCRATCH_MNT
-+_run_btrfs_util_prog qgroup limit $FILESIZE 5 $SCRATCH_MNT
-+
-+# loop 5 times without sync to ensure reserved space leak will happen
-+for i in `seq 1 5`; do
-+	# Use 1/4 of the file size, to ensure even commit is trigger by
-+	# dirty page threshold or commit interval, we should still be
-+	# able to continue write
-+	$XFS_IO_PROG -f -c "pwrite -b $BLOCKSIZE 0 $(($FILESIZE / 4))" \
-+		$SCRATCH_MNT/foo | _filter_xfs_io
-+done
-+
-+# Sync to make sure all the dirty pages are written to disk, which should
-+# free all the reserved space
-+sync
-+
-+# remove the file and sync, to ensure all quota space freed
-+rm $SCRATCH_MNT/foo
-+sync
-+
-+# We should be able to write $FILESIZE - $BLOCKSIZE data now
-+$XFS_IO_PROG -f -c "pwrite -b $BLOCKSIZE 0 $(($FILESIZE - $BLOCKSIZE))" \
-+	$SCRATCH_MNT/foo | _filter_xfs_io
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/099.out b/tests/btrfs/099.out
-new file mode 100644
-index 0000000..858bd38
---- /dev/null
-+++ b/tests/btrfs/099.out
-@@ -0,0 +1,13 @@
-+QA output created by 099
-+wrote 33554432/33554432 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 33554432/33554432 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 33554432/33554432 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 33554432/33554432 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 33554432/33554432 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 132120576/132120576 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index e13865a..68acbcf 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -100,3 +100,4 @@
- 095 auto quick metadata
- 096 auto quick clone
- 097 auto quick send clone
-+099 auto quick qgroup
+ _require_test_fcntl_advisory_locks()
+ {
+ 	[ "$FSTYP" != "cifs" ] && return 0
+diff --git a/tests/generic/002 b/tests/generic/002
+index f63b208..0b96709 100755
+--- a/tests/generic/002
++++ b/tests/generic/002
+@@ -43,6 +43,7 @@ _cleanup()
+ # real QA test starts here
+ _supported_fs generic
+ _supported_os IRIX Linux
++_require_test_hardlinks
+ _require_test
+ 
+ echo "Silence is goodness ..."
+diff --git a/tests/generic/039 b/tests/generic/039
+index 4bbfc50..367a6d0 100755
+--- a/tests/generic/039
++++ b/tests/generic/039
+@@ -55,6 +55,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _need_to_be_root
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_metadata_journaling $SCRATCH_DEV
+diff --git a/tests/generic/040 b/tests/generic/040
+index c841fbc..1b8287f 100755
+--- a/tests/generic/040
++++ b/tests/generic/040
+@@ -60,6 +60,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _need_to_be_root
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_metadata_journaling $SCRATCH_DEV
+diff --git a/tests/generic/041 b/tests/generic/041
+index f38b662..588d5ff 100755
+--- a/tests/generic/041
++++ b/tests/generic/041
+@@ -64,6 +64,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _need_to_be_root
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_metadata_journaling $SCRATCH_DEV
+diff --git a/tests/generic/056 b/tests/generic/056
+index 8bb1522..e111bec 100755
+--- a/tests/generic/056
++++ b/tests/generic/056
+@@ -53,6 +53,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _need_to_be_root
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_metadata_journaling $SCRATCH_DEV
+diff --git a/tests/generic/057 b/tests/generic/057
+index 3b9f89e..d3b1aa2 100755
+--- a/tests/generic/057
++++ b/tests/generic/057
+@@ -53,6 +53,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _need_to_be_root
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_metadata_journaling $SCRATCH_DEV
+diff --git a/tests/generic/065 b/tests/generic/065
+index 739a4d5..5403c53 100755
+--- a/tests/generic/065
++++ b/tests/generic/065
+@@ -54,6 +54,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _need_to_be_root
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_metadata_journaling $SCRATCH_DEV
+diff --git a/tests/generic/066 b/tests/generic/066
+index cb36506..51aa22a 100755
+--- a/tests/generic/066
++++ b/tests/generic/066
+@@ -58,6 +58,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _need_to_be_root
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_attrs
+diff --git a/tests/generic/084 b/tests/generic/084
+index 3fec6c2..86c38db 100755
+--- a/tests/generic/084
++++ b/tests/generic/084
+@@ -46,6 +46,7 @@ _cleanup()
+ # real QA test starts here
+ _supported_fs generic
+ _supported_os Linux
++_require_test_hardlinks
+ _require_scratch
+ 
+ link_unlink_storm()
+diff --git a/tests/generic/090 b/tests/generic/090
+index a1f2b89..c3eeb1a 100755
+--- a/tests/generic/090
++++ b/tests/generic/090
+@@ -52,6 +52,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _need_to_be_root
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_metadata_journaling $SCRATCH_DEV
+diff --git a/tests/generic/104 b/tests/generic/104
+index eeb7363..9fed5f2 100755
+--- a/tests/generic/104
++++ b/tests/generic/104
+@@ -48,6 +48,7 @@ _cleanup()
+ _need_to_be_root
+ _supported_fs generic
+ _supported_os Linux
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_metadata_journaling $SCRATCH_DEV
+diff --git a/tests/generic/106 b/tests/generic/106
+index 0afee41..59efe7c 100755
+--- a/tests/generic/106
++++ b/tests/generic/106
+@@ -47,6 +47,7 @@ _cleanup()
+ _need_to_be_root
+ _supported_fs generic
+ _supported_os Linux
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_metadata_journaling $SCRATCH_DEV
 -- 
-1.8.3.1
+1.7.10.4
+
+
 
