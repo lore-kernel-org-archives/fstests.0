@@ -1,85 +1,141 @@
-Received: from mx1.redhat.com ([209.132.183.28]:41484 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:37274 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752105AbbHZGcg (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 26 Aug 2015 02:32:36 -0400
-Date: Wed, 26 Aug 2015 14:32:31 +0800
+	id S1751216AbbHZGlt (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 26 Aug 2015 02:41:49 -0400
+Date: Wed, 26 Aug 2015 14:41:46 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] busybox compat: use stat -c instead of stat --format
-Message-ID: <20150826063231.GR17933@dhcp-13-216.nay.redhat.com>
-References: <1440497203.29614.1.camel@ari-macbook>
+Subject: Re: [PATCH v5] fstests: btrfs: Add reserved space leak check for
+ rewrite  dirty page
+Message-ID: <20150826064146.GS17933@dhcp-13-216.nay.redhat.com>
+References: <1440119834-31504-1-git-send-email-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1440497203.29614.1.camel@ari-macbook>
+In-Reply-To: <1440119834-31504-1-git-send-email-quwenruo@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ari Sundholm <ari@tuxera.com>
-Cc: fstests@vger.kernel.org
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Aug 25, 2015 at 01:06:43PM +0300, Ari Sundholm wrote:
-> From: Ari Sundholm <ari@tuxera.com>
+On Fri, Aug 21, 2015 at 09:17:14AM +0800, Qu Wenruo wrote:
+> Btrfs qgroup reserve codes lacks check for rewrite dirty page, causing
+> every write, even rewriting a uncommitted dirty page, to reserve space.
 > 
-> Signed-off-by: Ari Sundholm <ari@tuxera.com>
-
-Looks good to me.
-
-Reviewed-by: Eryu Guan <eguan@redhat.com>
-
+> But only written data will free the reserved space, causing reserved
+> space leaking.
+> 
+> The bug exists almost from the beginning of btrfs qgroup codes, but
+> nobody found it.
+> 
+> For example:
+> 
+> 1)Write [0, 12K) into file A
+>   reserve 12K space
+> 
+> File A:
+> 0	4K	8K	12K
+> |<--------dirty-------->|
+> reserved: 12K
+> 
+> 2)Write [0,4K) into file A
+> 0	4K	8K	12K
+> |<--------dirty-------->|
+> reserved: 16K <<< Should be 12K
+> 
+> 3) Commit transaction
+> Dirty pages [0,12) written to disk.
+> Free 12K reserved space.
+> reserved: 4K <<< Should be 0
+> 
+> This testcase will test such problem.
+> Kernel fix will need some huge change, so won't be soon.
+> 
+> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+> Reviewed-by: Filipe Manana <fdmanana@suse.com>
 > ---
->  tests/generic/040 |    4 ++--
->  tests/generic/041 |    2 +-
->  tests/generic/104 |    4 ++--
->  3 files changed, 5 insertions(+), 5 deletions(-)
+> Changelog:
+> v2:
+>   Use smaller write size inside loop, in case commit is trigger by dirty
+>   page threshold, and ensure following write won't trigger EQUOT
+> v3:
+>   Add more comments and fix some expression.
+> v4:
+>   Rebase to latest fstests.
+> v5:
+>   Use larger number to avoid conflicts with the test from Filipe Manana.
+> ---
+>  tests/btrfs/099     | 86 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/099.out | 13 ++++++++
+>  tests/btrfs/group   |  1 +
+>  3 files changed, 100 insertions(+)
+>  create mode 100755 tests/btrfs/099
+>  create mode 100644 tests/btrfs/099.out
 > 
-> diff --git a/tests/generic/040 b/tests/generic/040
-> index c841fbc..b44a433 100755
-> --- a/tests/generic/040
-> +++ b/tests/generic/040
-> @@ -122,9 +122,9 @@ _mount_flakey
->  # The fstests framework automatically calls fsck after a test is run, so we
->  # don't need to call fsck explicitly here.
->  
-> -echo "Link count before rm foo_link_*: $(stat --format=%h $SCRATCH_MNT/foo)"
-> +echo "Link count before rm foo_link_*: $(stat -c %h $SCRATCH_MNT/foo)"
->  rm -f $SCRATCH_MNT/foo_link_*
-> -echo "Link count after rm foo_link_*: $(stat --format=%h $SCRATCH_MNT/foo)"
-> +echo "Link count after rm foo_link_*: $(stat -c %h $SCRATCH_MNT/foo)"
->  cat $SCRATCH_MNT/foo
->  
->  status=0
-> diff --git a/tests/generic/041 b/tests/generic/041
-> index f38b662..50fb26f 100755
-> --- a/tests/generic/041
-> +++ b/tests/generic/041
-> @@ -116,7 +116,7 @@ _mount_flakey
->  # the hard links and read the file's data. This is just to verify we don't
->  # get stale file handle errors (due to dangling directory index entries that
->  # point to inodes that no longer exist).
-> -echo "Link count: $(stat --format=%h $SCRATCH_MNT/foo)"
-> +echo "Link count: $(stat -c %h $SCRATCH_MNT/foo)"
->  [ -f $SCRATCH_MNT/foo ] || echo "Link foo is missing"
->  for ((i = 1; i <= 3003; i++)); do
->  	name=foo_link_`printf "%04d" $i`
-> diff --git a/tests/generic/104 b/tests/generic/104
-> index eeb7363..fef3583 100755
-> --- a/tests/generic/104
-> +++ b/tests/generic/104
-> @@ -81,8 +81,8 @@ _load_flakey_table $FLAKEY_ALLOW_WRITES
->  _mount_flakey
->  
->  # Now verify both our files have a link count of 2.
-> -echo "Link count for file foo: $(stat --format=%h $SCRATCH_MNT/testdir/foo)"
-> -echo "Link count for file bar: $(stat --format=%h $SCRATCH_MNT/testdir/bar)"
-> +echo "Link count for file foo: $(stat -c %h $SCRATCH_MNT/testdir/foo)"
-> +echo "Link count for file bar: $(stat -c %h $SCRATCH_MNT/testdir/bar)"
->  
->  # We should be able to remove all the links of our files in testdir, and after
->  # that the parent directory should become empty and therefore possible to
-> -- 
-> 1.7.10.4
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> diff --git a/tests/btrfs/099 b/tests/btrfs/099
+> new file mode 100755
+> index 0000000..ba531e1
+> --- /dev/null
+> +++ b/tests/btrfs/099
+> @@ -0,0 +1,86 @@
+> +#! /bin/bash
+> +# FS QA Test 099
+> +#
+> +# Check for qgroup reserved space leaks caused by re-writing dirty ranges
+> +# This bug has been present in btrfs qgroup for a long time
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2015 Fujitsu. All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
+> +_need_to_be_root
+> +
+> +# Use big blocksize to ensure there is still enough space left for metadata
+> +# space reserve.
+> +BLOCKSIZE=$(( 2 * 1024 * 1024 )) # 2M block size
+> +FILESIZE=$(( 128 * 1024 * 1024 )) # 128M file size
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1
+
+Just one minor issue here, please remove $seqres.full before test,
+otherwise $seqres.full will keep growing.
+
+Thanks,
+Eryu
