@@ -1,76 +1,92 @@
-Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:28058 "EHLO
-	mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752674AbbH1VMx (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 28 Aug 2015 17:12:53 -0400
-Date: Fri, 28 Aug 2015 14:12:45 -0700
-From: Omar Sandoval <osandov@fb.com>
-Subject: Re: [PATCH] Fix test fail of btrfs/006 caused by updated
- _filter_uuid()
-Message-ID: <20150828211245.GA30052@huxley.DHCP.TheFacebook.com>
-References: <5e1bb4aacc6c5b57585e6f66a708b8c21ce032ab.1440037988.git.zhaolei@cn.fujitsu.com>
+Received: from mx1.redhat.com ([209.132.183.28]:32812 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752944AbbH1WqG (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 28 Aug 2015 18:46:06 -0400
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	by mx1.redhat.com (Postfix) with ESMTPS id C3DA7A465F
+	for <fstests@vger.kernel.org>; Fri, 28 Aug 2015 22:46:05 +0000 (UTC)
+Received: from liberator.sandeen.net (ovpn01.gateway.prod.ext.phx2.redhat.com [10.5.9.1])
+	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t7SMk46S020812
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <fstests@vger.kernel.org>; Fri, 28 Aug 2015 18:46:05 -0400
+Message-ID: <55E0E4AC.5050607@redhat.com>
+Date: Fri, 28 Aug 2015 17:46:04 -0500
+From: Eric Sandeen <sandeen@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Disposition: inline
-In-Reply-To: <5e1bb4aacc6c5b57585e6f66a708b8c21ce032ab.1440037988.git.zhaolei@cn.fujitsu.com>
+Subject: [PATCH] properly quote strings tested with -n
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Zhaolei <zhaolei@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org
+To: "fstests@vger.kernel.org" <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Aug 20, 2015 at 10:33:49AM +0800, Zhaolei wrote:
-> From: Zhao Lei <zhaolei@cn.fujitsu.com>
-> 
-> _filter_uuid() get updated and changed output from:
->  uuid: <UUID>
->  ->
->  uuid:  <UUID>
-> 
-> It is a typo introduced by xfs/077, this patch fixed this.
-> 
-> Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
+Per the Advanced Bash Scripting Guide:
 
-Thanks, Zhao Lei, I ran into this today.
+"The -n test requires that the string be quoted within the test brackets.
+Using an unquoted string with ! -z, or even just the unquoted string
+alone within test bracket normally works, however, this is an unsafe
+practice. Always quote a tested string."
 
-Reviewed-by: Omar Sandoval <osandov@fb.com>
+And indeed:
 
-> ---
->  common/filter     | 2 +-
->  tests/xfs/077.out | 2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/common/filter b/common/filter
-> index 8db1b3e..af456c9 100644
-> --- a/common/filter
-> +++ b/common/filter
-> @@ -277,7 +277,7 @@ _filter_uuid()
->  		UUID=$1
->  		sed -e "s/\(uuid[ :=]\+\) $UUID/\1 <EXACTUUID>/i"
->  	else
-> -		sed -e "s/\(uuid[ :=]\+\) *[0-9a-f-][0-9a-f-]*/\1 <UUID>/ig"
-> +		sed -e "s/\(uuid[ :=]\+\) [0-9a-f-][0-9a-f-]*/\1 <UUID>/ig"
->  	fi
->  }
->  
-> diff --git a/tests/xfs/077.out b/tests/xfs/077.out
-> index fdc7d72..4e18087 100644
-> --- a/tests/xfs/077.out
-> +++ b/tests/xfs/077.out
-> @@ -2,7 +2,7 @@ QA output created by 077
->  == Generate new UUID
->  Clearing log and setting UUID
->  writing all SBs
-> -new UUID =  <UUID>
-> +new UUID = <UUID>
->  == Rewrite UUID
->  old UUID = <EXACTUUID>
->  Clearing log and setting UUID
-> -- 
-> 1.8.5.1
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+$ unset FOOBAR
+$ [ -n $FOOBAR ] || echo nope
+$ [ -n "$FOOBAR" ] || echo nope
+nope
 
--- 
-Omar
+Ran into this on a box w/o the attr program installed, and passed
+_require_attrs.  Quoting the string fixes this; fix it there
+and other occurrences in common/* as well.
+
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
+
+diff --git a/common/attr b/common/attr
+index 48c81cc..cc9cfda 100644
+--- a/common/attr
++++ b/common/attr
+@@ -165,7 +165,7 @@ _filter_aces_notypes()
+ 
+ _require_acls()
+ {
+-    [ -n $CHACL_PROG ] || _notrun "chacl command not found"
++    [ -n "$CHACL_PROG" ] || _notrun "chacl command not found"
+ 
+     #
+     # Test if chacl is able to list ACLs on the target filesystems.  On really
+@@ -196,9 +196,9 @@ _list_acl()
+ 
+ _require_attrs()
+ {
+-    [ -n $ATTR_PROG ] || _notrun "attr command not found"
+-    [ -n $GETFATTR_PROG ] || _notrun "getfattr command not found"
+-    [ -n $SETFATTR_PROG ] || _notrun "setfattr command not found"
++    [ -n "$ATTR_PROG" ] || _notrun "attr command not found"
++    [ -n "$GETFATTR_PROG" ] || _notrun "getfattr command not found"
++    [ -n "$SETFATTR_PROG" ] || _notrun "setfattr command not found"
+ 
+     #
+     # Test if chacl is able to write an attribute on the target filesystems.
+diff --git a/common/quota b/common/quota
+index 23be4f8..658b1c3 100644
+--- a/common/quota
++++ b/common/quota
+@@ -26,7 +26,7 @@
+ #
+ _require_quota()
+ {
+-    [ -n $QUOTA_PROG ] || _notrun "Quota user tools not installed"
++    [ -n "$QUOTA_PROG" ] || _notrun "Quota user tools not installed"
+ 
+     case $FSTYP in
+     ext2|ext3|ext4|ext4dev|reiserfs)
+@@ -74,7 +74,7 @@ _require_xfs_quota()
+     if [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_RTDEV" ]; then
+ 	_notrun "Quotas not supported on realtime scratch device"
+     fi
+-    [ -n $XFS_QUOTA_PROG ] || _notrun "XFS quota user tools not installed"
++    [ -n "$XFS_QUOTA_PROG" ] || _notrun "XFS quota user tools not installed"
+ }
+ 
+ #
+
