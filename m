@@ -1,33 +1,39 @@
-Received: from nebula-exfe-02.nebula.fi ([83.145.198.164]:55912 "EHLO
-	ex10.nebula.fi" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750725AbbH0LCy (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 27 Aug 2015 07:02:54 -0400
-Message-ID: <1440673336.29614.17.camel@ari-macbook>
-Subject: Re: [PATCH 2/2] Add some missing symlinks and hardlinks
- requirements.
-From: Ari Sundholm <ari@tuxera.com>
-Date: Thu, 27 Aug 2015 14:02:16 +0300
-In-Reply-To: <20150827014822.GJ3902@dastard>
-References: <1440580548.29614.6.camel@ari-macbook>
-	 <20150827014822.GJ3902@dastard>
-Content-Type: text/plain; charset="UTF-8"
+Received: from cn.fujitsu.com ([59.151.112.132]:37420 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751881AbbH1Bmr (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 27 Aug 2015 21:42:47 -0400
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Subject: [PATCH] fstests: template: Add seqres.full cleanup
+Date: Fri, 28 Aug 2015 09:40:43 +0800
+Message-ID: <1440726043-17566-1-git-send-email-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hello Dave!
+Add cleanup for seqres.full for new test case template, as sometimes
+new testcase may forgot to cleanup seqres.full.
 
-On Thu, 2015-08-27 at 11:48 +1000, Dave Chinner wrote:
-> This belongs in the previous patch that introduced the check.
+Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+---
+ new | 3 +++
+ 1 file changed, 3 insertions(+)
 
-OK, I will combine the hard link part of the patches, but I think in
-this case the symlink part should have its own patch as it is sort of
-unrelated (even though it's a very small change by itself).
-
-Best regards,
-Ari Sundholm
-ari@tuxera.com
+diff --git a/new b/new
+index c734bdc..ab2af69 100755
+--- a/new
++++ b/new
+@@ -200,6 +200,9 @@ _cleanup()
+ . ./common/rc
+ . ./common/filter
+ 
++# remove previous \$seqres.full before test
++rm -f \$seqres.full
++
+ # real QA test starts here
+ 
+ # Modify as appropriate.
+-- 
+1.8.3.1
 
