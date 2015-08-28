@@ -1,81 +1,238 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:43701 "EHLO
-	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750698AbbH1EZw (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 28 Aug 2015 00:25:52 -0400
-Date: Fri, 28 Aug 2015 14:25:27 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 1/2] Add checks for hardlinks support.
-Message-ID: <20150828042527.GK3902@dastard>
-References: <1440580477.29614.3.camel@ari-macbook>
- <20150827014718.GI3902@dastard>
- <1440673103.29614.13.camel@ari-macbook>
+Received: from nebula-exfe-01.nebula.fi ([83.145.198.163]:43985 "EHLO
+	ex10.nebula.fi" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751965AbbH1KZm (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 28 Aug 2015 06:25:42 -0400
+Message-ID: <1440757500.29614.26.camel@ari-macbook>
+Subject: [PATCH 1/2 v2] Add checks for hard links support.
+From: Ari Sundholm <ari@tuxera.com>
+Date: Fri, 28 Aug 2015 13:25:00 +0300
+Content-Type: text/plain; charset="UTF-8"
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1440673103.29614.13.camel@ari-macbook>
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Ari Sundholm <ari@tuxera.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Aug 27, 2015 at 01:58:23PM +0300, Ari Sundholm wrote:
-> Hello Dave!
-> 
-> On Thu, 2015-08-27 at 11:47 +1000, Dave Chinner wrote:
-> > On Wed, Aug 26, 2015 at 12:14:37PM +0300, Ari Sundholm wrote:
-> > > From: Ari Sundholm <ari@tuxera.com>
-> > > 
-> > > Signed-off-by: Ari Sundholm <ari@tuxera.com>
-> > 
-> > Why?
-> > 
-> 
-> Do you mean why this patch is needed?
+From: Ari Sundholm <ari@tuxera.com>
 
-Of course.
+There are filesystems that do not support hard links that we want to run
+xfstests on. Add a function for checking for support and use it wherever
+hard links are used.
 
-Just because the answer migh be obvious to you, it doesn't mean it
-is obvious to anyone else, nor is an empty commit message useful in
-2-3 years time when someone reads the commit and wonders "why did
-they make that change?"
+v2: Move all checks for hard link support to this patch.
 
-> Because there are filesystems that
-> do not support hard links (at least not yet, but may support symlinks)
-> we would like to run xfstests on.
->
-> I'd be glad to add this explanation and reroll the patches, but I
-> thought this would be obvious from what the patch does.
+Signed-off-by: Ari Sundholm <ari@tuxera.com>
+---
+ common/rc         |   12 ++++++++++++
+ tests/generic/002 |    1 +
+ tests/generic/039 |    1 +
+ tests/generic/040 |    1 +
+ tests/generic/041 |    1 +
+ tests/generic/056 |    1 +
+ tests/generic/057 |    1 +
+ tests/generic/065 |    1 +
+ tests/generic/066 |    1 +
+ tests/generic/084 |    1 +
+ tests/generic/090 |    1 +
+ tests/generic/104 |    1 +
+ tests/generic/106 |    1 +
+ tests/generic/236 |    1 +
+ tests/generic/294 |    1 +
+ 15 files changed, 26 insertions(+)
 
-xfstests doesn't support any filesystems that don't have hardlinks.
-Why we should carry dead code, at minimum, needs explaining and
-discussing.
-
-> OTOH, if you meant to ask why I have both a From: line and a
-> Signed-off-by: line, it's just a habit due to a pedantic reading of the
-> kernel patch submission instructions, which I've since applied to other
-> contexts as well.
-
-Then I'm sure that you would have also read the entire section on
-writing a decent commit message:
-
-"
-2) Describe your changes.
--------------------------
-
-Describe your problem. ....
-
-Describe user-visible impact. ....
-
-Quantify optimizations and trade-offs. ....
-
-Once the problem is established, describe what you are actually
-doing about it in technical detail. ....
-"
-
-Develop the habits that make you a better software engineer - using
-a "from:" line in patch submissions does not do that.
-
--Dave.
+diff --git a/common/rc b/common/rc
+index 780b7ed..d3aeddf 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2714,6 +2714,18 @@ _require_test_symlinks()
+ 	rm -f $target $link
+ }
+ 
++_require_test_hardlinks()
++{
++	target=`mktemp -p $TEST_DIR`
++	link=`mktemp -p $TEST_DIR -u`
++	ln `basename $target` $link
++	if [ "$?" -ne 0 ]; then
++		rm -f $target
++		_notrun "Require hardlinks support"
++	fi
++	rm -f $target $link
++}
++
+ _require_test_fcntl_advisory_locks()
+ {
+ 	[ "$FSTYP" != "cifs" ] && return 0
+diff --git a/tests/generic/002 b/tests/generic/002
+index f63b208..0b96709 100755
+--- a/tests/generic/002
++++ b/tests/generic/002
+@@ -43,6 +43,7 @@ _cleanup()
+ # real QA test starts here
+ _supported_fs generic
+ _supported_os IRIX Linux
++_require_test_hardlinks
+ _require_test
+ 
+ echo "Silence is goodness ..."
+diff --git a/tests/generic/039 b/tests/generic/039
+index 4bbfc50..367a6d0 100755
+--- a/tests/generic/039
++++ b/tests/generic/039
+@@ -55,6 +55,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _need_to_be_root
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_metadata_journaling $SCRATCH_DEV
+diff --git a/tests/generic/040 b/tests/generic/040
+index c841fbc..1b8287f 100755
+--- a/tests/generic/040
++++ b/tests/generic/040
+@@ -60,6 +60,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _need_to_be_root
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_metadata_journaling $SCRATCH_DEV
+diff --git a/tests/generic/041 b/tests/generic/041
+index f38b662..588d5ff 100755
+--- a/tests/generic/041
++++ b/tests/generic/041
+@@ -64,6 +64,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _need_to_be_root
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_metadata_journaling $SCRATCH_DEV
+diff --git a/tests/generic/056 b/tests/generic/056
+index 8bb1522..e111bec 100755
+--- a/tests/generic/056
++++ b/tests/generic/056
+@@ -53,6 +53,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _need_to_be_root
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_metadata_journaling $SCRATCH_DEV
+diff --git a/tests/generic/057 b/tests/generic/057
+index 3b9f89e..d3b1aa2 100755
+--- a/tests/generic/057
++++ b/tests/generic/057
+@@ -53,6 +53,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _need_to_be_root
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_metadata_journaling $SCRATCH_DEV
+diff --git a/tests/generic/065 b/tests/generic/065
+index 739a4d5..5403c53 100755
+--- a/tests/generic/065
++++ b/tests/generic/065
+@@ -54,6 +54,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _need_to_be_root
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_metadata_journaling $SCRATCH_DEV
+diff --git a/tests/generic/066 b/tests/generic/066
+index cb36506..51aa22a 100755
+--- a/tests/generic/066
++++ b/tests/generic/066
+@@ -58,6 +58,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _need_to_be_root
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_attrs
+diff --git a/tests/generic/084 b/tests/generic/084
+index 3fec6c2..86c38db 100755
+--- a/tests/generic/084
++++ b/tests/generic/084
+@@ -46,6 +46,7 @@ _cleanup()
+ # real QA test starts here
+ _supported_fs generic
+ _supported_os Linux
++_require_test_hardlinks
+ _require_scratch
+ 
+ link_unlink_storm()
+diff --git a/tests/generic/090 b/tests/generic/090
+index a1f2b89..c3eeb1a 100755
+--- a/tests/generic/090
++++ b/tests/generic/090
+@@ -52,6 +52,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _need_to_be_root
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_metadata_journaling $SCRATCH_DEV
+diff --git a/tests/generic/104 b/tests/generic/104
+index eeb7363..9fed5f2 100755
+--- a/tests/generic/104
++++ b/tests/generic/104
+@@ -48,6 +48,7 @@ _cleanup()
+ _need_to_be_root
+ _supported_fs generic
+ _supported_os Linux
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_metadata_journaling $SCRATCH_DEV
+diff --git a/tests/generic/106 b/tests/generic/106
+index 0afee41..59efe7c 100755
+--- a/tests/generic/106
++++ b/tests/generic/106
+@@ -47,6 +47,7 @@ _cleanup()
+ _need_to_be_root
+ _supported_fs generic
+ _supported_os Linux
++_require_test_hardlinks
+ _require_scratch
+ _require_dm_flakey
+ _require_metadata_journaling $SCRATCH_DEV
+diff --git a/tests/generic/236 b/tests/generic/236
+index 12ea0bc..df0250f 100755
+--- a/tests/generic/236
++++ b/tests/generic/236
+@@ -43,6 +43,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ # only Linux supports fallocate
+ _supported_os Linux
++_require_test_hardlinks
+ _require_test
+ 
+ rm -f $TEST_DIR/ouch*
+diff --git a/tests/generic/294 b/tests/generic/294
+index 3fa6ba2..944b6a1 100755
+--- a/tests/generic/294
++++ b/tests/generic/294
+@@ -46,6 +46,7 @@ _cleanup()
+ # Modify as appropriate.
+ _supported_fs generic
+ _supported_os Linux
++_require_test_hardlinks
+ _require_scratch
+ 
+ rm -f $seqres.full
 -- 
-Dave Chinner
-david@fromorbit.com
+1.7.10.4
+
+
+
