@@ -1,61 +1,48 @@
-Received: from e23smtp08.au.ibm.com ([202.81.31.141]:59944 "EHLO
-	e23smtp08.au.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753463AbbH3OrV (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 30 Aug 2015 10:47:21 -0400
-Received: from /spool/local
-	by e23smtp08.au.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-	for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-	Mon, 31 Aug 2015 00:47:19 +1000
-From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH] generic/224: Increase filesystem instance size to 1.5 GiB
-Date: Sun, 30 Aug 2015 20:16:21 +0530
-Message-Id: <1440945981-323-1-git-send-email-chandan@linux.vnet.ibm.com>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:26320 "EHLO
+	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752411AbbH3XU2 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sun, 30 Aug 2015 19:20:28 -0400
+Date: Mon, 31 Aug 2015 09:20:24 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] Abort tests on mkfs failure
+Message-ID: <20150830232024.GL3902@dastard>
+References: <1440945888-32220-1-git-send-email-chandan@linux.vnet.ibm.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1440945888-32220-1-git-send-email-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, linux-btrfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, chandan@mykolab.com
+To: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, chandan@mykolab.com
 List-ID: <fstests@vger.kernel.org>
 
-For small filesystem instances (i.e. size <= 1 GiB), mkfs.btrfs fails when
-"data block size" does not match with the "metadata block size" specified on
-the mkfs.btrfs command line. This commit increases the size of filesystem
-instance created so that the test can be executed on subpagesize-blocksize
-Btrfs instances which have different values for data and metadata blocksizes.
+On Sun, Aug 30, 2015 at 08:14:48PM +0530, Chandan Rajendra wrote:
+> When creating small Btrfs filesystem instances (i.e. filesystem size <= 1GiB),
+> mkfs.btrfs can fail if "data block size" does not match "metadata block
+> size". In such cases this commit aborts the test instead of letting it to
+> continue and report misleading results.
 
-Increasing the filesystem size had a negligible impact on the runtime of the
-test as indicated by the following table:
+NACK. Running the test, even with the wrong mkfs parameters, is more
+valuable to us than not running the test at all. This has been
+explained several times in the past 18 months when similar patches
+have been posted.
 
-|------------+--------------+----------------|
-| Filesystem | 1GiB FS size | 1.5GiB FS size |
-|------------+--------------+----------------|
-| Btrfs      | 21secs       | 24secs         |
-| Ext4       | 12secs       | 15secs         |
-| Xfs        | 10secs       | 11secs         |
-|------------+--------------+----------------|
+What you need to do is prevent mkfs from failing in your new corner
+case on small filesystems, or fail the test in the the filesystem
+specific mkfs routine.
 
-Timing information reported in the above table were the worst-case times
-observed when running the test on a spinning disk.
+e.g. Filesystems like xfs have custom functions (i.e.
+_scratch_mkfs_xfs) that prevent mkfs from failing in weird corner
+cases or when conflicting options are given (e.g. test option
+conflict with MKFS_OPTIONS given on the CLI).
 
-Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
----
- tests/generic/224 | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+Or, you can make the btrfs mkfs command in _scratch_mkfs_sized()
+specially handle this specific btrfs configuration correctly, and if
+it can't then it should fail there.
 
-diff --git a/tests/generic/224 b/tests/generic/224
-index 391d877..8fae187 100755
---- a/tests/generic/224
-+++ b/tests/generic/224
-@@ -53,8 +53,9 @@ _supported_os Linux
- 
- _require_scratch
- 
--# make a 1GB filesystem
--_scratch_mkfs_sized `expr 1024 \* 1024 \* 1024` > $seqres.full 2>&1
-+# make a 1.5GB filesystem
-+FS_SIZE=$(echo "1.5 $((1024 * 1024 * 1024))" | awk '{printf "%d", $1 * $2}')
-+_scratch_mkfs_sized $FS_SIZE > $seqres.full 2>&1
- _scratch_mount >> $seqres.full 2>&1
- 
- # set the reserved block pool to almost empty for XFS
+Cheers,
+
+Dave.
 -- 
-2.1.0
-
+Dave Chinner
+david@fromorbit.com
