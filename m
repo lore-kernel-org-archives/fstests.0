@@ -1,92 +1,180 @@
-Received: from mx1.redhat.com ([209.132.183.28]:32812 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752944AbbH1WqG (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 28 Aug 2015 18:46:06 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (Postfix) with ESMTPS id C3DA7A465F
-	for <fstests@vger.kernel.org>; Fri, 28 Aug 2015 22:46:05 +0000 (UTC)
-Received: from liberator.sandeen.net (ovpn01.gateway.prod.ext.phx2.redhat.com [10.5.9.1])
-	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t7SMk46S020812
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <fstests@vger.kernel.org>; Fri, 28 Aug 2015 18:46:05 -0400
-Message-ID: <55E0E4AC.5050607@redhat.com>
-Date: Fri, 28 Aug 2015 17:46:04 -0500
-From: Eric Sandeen <sandeen@redhat.com>
-MIME-Version: 1.0
-Subject: [PATCH] properly quote strings tested with -n
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Received: from e28smtp03.in.ibm.com ([122.248.162.3]:37230 "EHLO
+	e28smtp03.in.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753449AbbH3OpC (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sun, 30 Aug 2015 10:45:02 -0400
+Received: from /spool/local
+	by e28smtp03.in.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+	for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
+	Sun, 30 Aug 2015 20:15:00 +0530
+From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Subject: [PATCH] Abort tests on mkfs failure
+Date: Sun, 30 Aug 2015 20:14:48 +0530
+Message-Id: <1440945888-32220-1-git-send-email-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
-To: "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, linux-btrfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, chandan@mykolab.com
 List-ID: <fstests@vger.kernel.org>
 
-Per the Advanced Bash Scripting Guide:
+When creating small Btrfs filesystem instances (i.e. filesystem size <= 1GiB),
+mkfs.btrfs can fail if "data block size" does not match "metadata block
+size". In such cases this commit aborts the test instead of letting it to
+continue and report misleading results.
 
-"The -n test requires that the string be quoted within the test brackets.
-Using an unquoted string with ! -z, or even just the unquoted string
-alone within test bracket normally works, however, this is an unsafe
-practice. Always quote a tested string."
-
-And indeed:
-
-$ unset FOOBAR
-$ [ -n $FOOBAR ] || echo nope
-$ [ -n "$FOOBAR" ] || echo nope
-nope
-
-Ran into this on a box w/o the attr program installed, and passed
-_require_attrs.  Quoting the string fixes this; fix it there
-and other occurrences in common/* as well.
-
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
+ tests/generic/027 | 3 ++-
+ tests/generic/081 | 3 ++-
+ tests/generic/085 | 3 ++-
+ tests/generic/096 | 3 ++-
+ tests/generic/102 | 3 ++-
+ tests/generic/204 | 4 ++++
+ tests/generic/226 | 3 ++-
+ tests/generic/269 | 3 ++-
+ tests/generic/270 | 3 ++-
+ tests/generic/300 | 3 ++-
+ 10 files changed, 22 insertions(+), 9 deletions(-)
 
-diff --git a/common/attr b/common/attr
-index 48c81cc..cc9cfda 100644
---- a/common/attr
-+++ b/common/attr
-@@ -165,7 +165,7 @@ _filter_aces_notypes()
+diff --git a/tests/generic/027 b/tests/generic/027
+index d2e59d6..3aef914 100755
+--- a/tests/generic/027
++++ b/tests/generic/027
+@@ -65,7 +65,8 @@ _require_scratch
+ rm -f $seqres.full
+ echo "Silence is golden"
  
- _require_acls()
- {
--    [ -n $CHACL_PROG ] || _notrun "chacl command not found"
-+    [ -n "$CHACL_PROG" ] || _notrun "chacl command not found"
+-_scratch_mkfs_sized $((256 * 1024 * 1024)) >>$seqres.full 2>&1
++_scratch_mkfs_sized $((256 * 1024 * 1024)) >>$seqres.full 2>&1 \
++	|| _fail "mkfs failed"
+ _scratch_mount
  
-     #
-     # Test if chacl is able to list ACLs on the target filesystems.  On really
-@@ -196,9 +196,9 @@ _list_acl()
+ echo "Reserve 2M space" >>$seqres.full
+diff --git a/tests/generic/081 b/tests/generic/081
+index 34da1ac..4044d12 100755
+--- a/tests/generic/081
++++ b/tests/generic/081
+@@ -63,7 +63,8 @@ mkdir -p $mnt
  
- _require_attrs()
- {
--    [ -n $ATTR_PROG ] || _notrun "attr command not found"
--    [ -n $GETFATTR_PROG ] || _notrun "getfattr command not found"
--    [ -n $SETFATTR_PROG ] || _notrun "setfattr command not found"
-+    [ -n "$ATTR_PROG" ] || _notrun "attr command not found"
-+    [ -n "$GETFATTR_PROG" ] || _notrun "getfattr command not found"
-+    [ -n "$SETFATTR_PROG" ] || _notrun "setfattr command not found"
+ # make sure there's enough disk space for 256M lv, test for 300M here in case
+ # lvm uses some space for metadata
+-_scratch_mkfs_sized $((300 * 1024 * 1024)) >>$seqres.full 2>&1
++_scratch_mkfs_sized $((300 * 1024 * 1024)) >>$seqres.full 2>&1 \
++	|| _fail "mkfs failed"
+ $LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
+ $LVM_PROG lvcreate --yes -L 256M -n $lvname $vgname >>$seqres.full 2>&1
+ # wait for lvcreation to fully complete
+diff --git a/tests/generic/085 b/tests/generic/085
+index 8398752..ec543be 100755
+--- a/tests/generic/085
++++ b/tests/generic/085
+@@ -76,7 +76,8 @@ echo "Silence is golden"
  
-     #
-     # Test if chacl is able to write an attribute on the target filesystems.
-diff --git a/common/quota b/common/quota
-index 23be4f8..658b1c3 100644
---- a/common/quota
-+++ b/common/quota
-@@ -26,7 +26,7 @@
- #
- _require_quota()
- {
--    [ -n $QUOTA_PROG ] || _notrun "Quota user tools not installed"
-+    [ -n "$QUOTA_PROG" ] || _notrun "Quota user tools not installed"
+ size=$((256 * 1024 * 1024))
+ size_in_sector=$((size / 512))
+-_scratch_mkfs_sized $size >>$seqres.full 2>&1
++_scratch_mkfs_sized $size >>$seqres.full 2>&1 \
++	|| _fail "mkfs failed"
  
-     case $FSTYP in
-     ext2|ext3|ext4|ext4dev|reiserfs)
-@@ -74,7 +74,7 @@ _require_xfs_quota()
-     if [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_RTDEV" ]; then
- 	_notrun "Quotas not supported on realtime scratch device"
-     fi
--    [ -n $XFS_QUOTA_PROG ] || _notrun "XFS quota user tools not installed"
-+    [ -n "$XFS_QUOTA_PROG" ] || _notrun "XFS quota user tools not installed"
- }
+ node=$seq-test
+ lvdev=/dev/mapper/$node
+diff --git a/tests/generic/096 b/tests/generic/096
+index daf9981..f9bdc81 100755
+--- a/tests/generic/096
++++ b/tests/generic/096
+@@ -53,7 +53,8 @@ rm -f $seqres.full
+ echo "Silence is golden"
  
- #
+ # Use smaller scratch fs to shorten the test time
+-_scratch_mkfs_sized $((512 * 1024 * 1024)) >>$seqres.full 2>&1
++_scratch_mkfs_sized $((512 * 1024 * 1024)) >>$seqres.full 2>&1 \
++	|| _fail "mkfs failed"
+ _scratch_mount
+ 
+ testfile=$SCRATCH_MNT/$seq.$$
+diff --git a/tests/generic/102 b/tests/generic/102
+index abc3994..d7f598b 100755
+--- a/tests/generic/102
++++ b/tests/generic/102
+@@ -49,7 +49,8 @@ _require_scratch
+ rm -f $seqres.full
+ 
+ dev_size=$((512 * 1024 * 1024))     # 512MB filesystem
+-_scratch_mkfs_sized $dev_size >>$seqres.full 2>&1
++_scratch_mkfs_sized $dev_size >>$seqres.full 2>&1 \
++	|| _fail "mkfs failed"
+ _scratch_mount
+ 
+ for ((i = 0; i < 10; i++)); do
+diff --git a/tests/generic/204 b/tests/generic/204
+index 42985ab..79de712 100755
+--- a/tests/generic/204
++++ b/tests/generic/204
+@@ -60,6 +60,10 @@ _scratch_mkfs 2> /dev/null | _filter_mkfs 2> $tmp.mkfs > /dev/null
+ SIZE=`expr 106 \* 1024 \* 1024`
+ _scratch_mkfs_sized $SIZE $dbsize 2> /dev/null \
+ 		| _filter_mkfs 2> $tmp.mkfs > /dev/null
++if [[ ${PIPESTATUS[0]} != 0 ]]; then
++	_fail "mkfs failed"
++fi
++
+ _scratch_mount
+ 
+ # Source $tmp.mkfs to get geometry
+diff --git a/tests/generic/226 b/tests/generic/226
+index 4ad56a5..a83ee0f 100755
+--- a/tests/generic/226
++++ b/tests/generic/226
+@@ -44,7 +44,8 @@ rm -f $seqres.full
+ 
+ umount $SCRATCH_DEV 2>/dev/null
+ echo "--> mkfs 256m filesystem"
+-_scratch_mkfs_sized `expr 256 \* 1024 \* 1024` >> $seqres.full 2>&1
++_scratch_mkfs_sized `expr 256 \* 1024 \* 1024` >> $seqres.full 2>&1 \
++	|| _fail "mkfs failed"
+ _scratch_mount
+ 
+ loops=16
+diff --git a/tests/generic/269 b/tests/generic/269
+index fe648b5..5ceedba 100755
+--- a/tests/generic/269
++++ b/tests/generic/269
+@@ -67,7 +67,8 @@ _need_to_be_root
+ _require_scratch
+ 
+ rm -f $seqres.full
+-_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
++_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1 \
++	|| _fail "mkfs failed"
+ _scratch_mount
+ 
+ if ! _workout; then
+diff --git a/tests/generic/270 b/tests/generic/270
+index 255ebf2..6d1c5f1 100755
+--- a/tests/generic/270
++++ b/tests/generic/270
+@@ -82,7 +82,8 @@ _need_to_be_root
+ _require_scratch
+ 
+ rm -f $seqres.full
+-_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
++_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1 \
++	|| _fail "mkfs failed"
+ _scratch_mount "-o usrquota,grpquota"
+ chmod 777 $SCRATCH_MNT
+ quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+diff --git a/tests/generic/300 b/tests/generic/300
+index d7523aa..72f1ab3 100755
+--- a/tests/generic/300
++++ b/tests/generic/300
+@@ -143,7 +143,8 @@ _workout()
+ 
+ _require_fio $fio_config
+ 
+-_scratch_mkfs_sized $FS_SIZE >> $seqres.full 2>&1
++_scratch_mkfs_sized $FS_SIZE >> $seqres.full 2>&1 \
++	|| _fail "mkfs failed"
+ _scratch_mount
+ 
+ if ! _workout; then
+-- 
+2.1.0
 
