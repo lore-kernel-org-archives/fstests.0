@@ -1,50 +1,42 @@
-Received: from e23smtp05.au.ibm.com ([202.81.31.147]:57107 "EHLO
-	e23smtp05.au.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754717AbbIACee (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 31 Aug 2015 22:34:34 -0400
-Received: from /spool/local
-	by e23smtp05.au.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-	for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-	Tue, 1 Sep 2015 12:34:31 +1000
-From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: Re: [PATCH] generic/224: Increase filesystem instance size to 1.5 GiB
-Date: Tue, 01 Sep 2015 08:03:38 +0530
-Message-ID: <2500094.kBUgEuDpMB@localhost.localdomain>
-In-Reply-To: <20150901021510.GE7642@thunk.org>
-References: <1440945981-323-1-git-send-email-chandan@linux.vnet.ibm.com> <160121092.hSkPuGCNnN@localhost.localdomain> <20150901021510.GE7642@thunk.org>
+Received: from mx1.redhat.com ([209.132.183.28]:32915 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752238AbbIAOWf (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 1 Sep 2015 10:22:35 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (Postfix) with ESMTPS id 63A6DC0EF9B7
+	for <fstests@vger.kernel.org>; Tue,  1 Sep 2015 14:22:35 +0000 (UTC)
+Received: from segfault.boston.devel.redhat.com (segfault.boston.devel.redhat.com [10.19.60.26])
+	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t81EMYkn010378
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO)
+	for <fstests@vger.kernel.org>; Tue, 1 Sep 2015 10:22:35 -0400
+From: Jeff Moyer <jmoyer@redhat.com>
+Subject: xfstests run to run variability
+Date: Tue, 01 Sep 2015 10:22:34 -0400
+Message-ID: <x4937yyrzh1.fsf@segfault.boston.devel.redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, chandan@mykolab.com
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Monday 31 Aug 2015 22:15:10 Theodore Ts'o wrote:
-> On Tue, Sep 01, 2015 at 05:49:14AM +0530, Chandan Rajendra wrote:
-> > mkfs.btrfs when invoked on small filesystems by "not" specifying any block
-> > sizes (i.e. mkfs.btrfs -f /dev/sda1) will automatically create filesystem
-> > instance with "data block size" == "metadata block size". However in the
-> > subpagesize-blocksize scenario, we need to specify both data and metadata
-> > block size on the command line (For e.g. mkfs.btrfs -f -s 4096 -n 16384
-> > /dev/sda1). In this case, Since the user is forcing the block sizes and it
-> > is impossible to have mixed block groups with differing data and metadata
-> > block sizes, mkfs.btrfs will fail.
-> 
-> Ok, so the issue is that for this particular test configuration, btrfs
-> has a minimum file system size.  What about changing
-> _scratch_mkfs_sized so that if MIN_FS_SIZE is set, the file system
-> created will be at least MIN_FS_SIZE in size.
-> 
-> This way it sets the minimum file system size for all tests, not just
-> generic/224, and any test configuration, whether it be ext4, xfs, or
-> btrfs where the data and metadata block size are the same, don't have
-> to take extra time -- only the test configuration of btrfs with
-> data_block_size != metadata_block_size.
-> 
-I agree with the approach you have suggested. I will write up a patch and send
-it across the mailing list. Thanks Ted.
+Hi,
 
--- 
-chandan
+I typically use ./check -g auto to test for regressions in my patches.
+However, I've noticed that there is some run-to-run variability in the
+results, even for a single kernel.  Here are the tests that fail, either
+reliably, or worse, intermittently:
 
+reproducible failures: generic/042 generic/311 xfs/032 xfs/053 xfs/070 xfs/071
+intermittent failures: generic/192 generic/247 generic/232 xfs/167
+
+I don't have time to dig into things right now (and so I haven't
+included logs here since I'm not looking for help diagnosing the
+issues).  What I'd like to know is if others also see this.  Second, I
+was wondering if someone else has the time and motivation to look into
+this inconsistency.
+
+In case it's interesting, I run my tests on a Micron P320h PCIe SSD as
+the test device, and a regular sata disk as the scratch device.
+
+Cheers,
+Jeff
