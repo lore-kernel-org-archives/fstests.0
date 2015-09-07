@@ -1,31 +1,33 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44871 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:45458 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750777AbbIGKcH (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 7 Sep 2015 06:32:07 -0400
-Date: Mon, 7 Sep 2015 18:32:04 +0800
+	id S1750840AbbIGKfp (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 7 Sep 2015 06:35:45 -0400
+Date: Mon, 7 Sep 2015 18:35:43 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] fstests: add regression test for a btrfs enospc issue
-Message-ID: <20150907103204.GD18060@dhcp-13-216.nay.redhat.com>
-References: <1441620566-10624-1-git-send-email-fdmanana@kernel.org>
+Subject: Re: [PATCH] fstests: btrfs regression test for fsync after extent
+ cloning
+Message-ID: <20150907103543.GE18060@dhcp-13-216.nay.redhat.com>
+References: <1439979128-14169-1-git-send-email-fdmanana@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1441620566-10624-1-git-send-email-fdmanana@kernel.org>
+In-Reply-To: <1439979128-14169-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fdmanana@kernel.org
 Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Sep 07, 2015 at 11:09:26AM +0100, fdmanana@kernel.org wrote:
+On Wed, Aug 19, 2015 at 11:12:08AM +0100, fdmanana@kernel.org wrote:
 > From: Filipe Manana <fdmanana@suse.com>
 > 
-> Regression test for an ENOSPC issue when attempting to write to a file in
-> a filesystem without any data block groups allocated.
+> Test that if we fsync a file that got one extent partially cloned into a
+> lower file offset, after a power failure our file has the same content it
+> had before the power failure and after the extent cloning operation.
 > 
-> The btrfs issue is fixed by the linux kernel patch titled
-> "Btrfs: don't initialize a space info as full to prevent ENOSPC" and the
-> regression was introduced by the patch titled
-> "Btrfs: fix block group ->space_info null pointer dereference".
+> This test is motivated by an issue found in btrfs that is fixed by the
+> linux kernel patch titled:
+> 
+>   "Btrfs: fix file read corruption after extent cloning and fsync"
 > 
 > Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
