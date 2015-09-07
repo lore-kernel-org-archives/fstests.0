@@ -1,106 +1,140 @@
-Received: from mx1.redhat.com ([209.132.183.28]:32844 "EHLO mx1.redhat.com"
+Received: from mail.kernel.org ([198.145.29.136]:44163 "EHLO mail.kernel.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750857AbbIFCoQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sat, 5 Sep 2015 22:44:16 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (Postfix) with ESMTPS id 769F7461C2
-	for <fstests@vger.kernel.org>; Sun,  6 Sep 2015 02:44:16 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] src/t_truncate_cmtime: test truncate up too
-Date: Sun,  6 Sep 2015 10:43:25 +0800
-Message-Id: <1441507405-15789-1-git-send-email-eguan@redhat.com>
+	id S1750883AbbIGKJd (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 7 Sep 2015 06:09:33 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] fstests: add regression test for a btrfs enospc issue
+Date: Mon,  7 Sep 2015 11:09:26 +0100
+Message-Id: <1441620566-10624-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Currently src/t_truncate_cmtime only tests the truncate down case,
-truncate up case should be tested too. A recent ext4 bug shows that we
-missed that coverage.
+From: Filipe Manana <fdmanana@suse.com>
 
-See kernel commit 911af577de4e ("ext4: update c/mtime on truncate up")
+Regression test for an ENOSPC issue when attempting to write to a file in
+a filesystem without any data block groups allocated.
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
+The btrfs issue is fixed by the linux kernel patch titled
+"Btrfs: don't initialize a space info as full to prevent ENOSPC" and the
+regression was introduced by the patch titled
+"Btrfs: fix block group ->space_info null pointer dereference".
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- src/t_truncate_cmtime.c | 43 ++++++++++++++++++++++++++++++++++++++-----
- 1 file changed, 38 insertions(+), 5 deletions(-)
+ tests/btrfs/099     | 82 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/099.out |  2 ++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 85 insertions(+)
+ create mode 100755 tests/btrfs/099
+ create mode 100644 tests/btrfs/099.out
 
-diff --git a/src/t_truncate_cmtime.c b/src/t_truncate_cmtime.c
-index b08ca44..4b28c2b 100644
---- a/src/t_truncate_cmtime.c
-+++ b/src/t_truncate_cmtime.c
-@@ -53,17 +53,18 @@ int do_test(const char *file, int is_ftrunc)
- 		exit(EXIT_FAILURE);
- 	}
- 
-+	/* Test [f]truncate(2) down */
- 	sleep(1);
- 	if (is_ftrunc) {
- 		ret = ftruncate(fd, 0);
- 		if (ret == -1) {
--			perror("ftruncate(2) failed");
-+			perror("ftruncate(2) down failed");
- 			exit(EXIT_FAILURE);
- 		}
- 	} else {
- 		ret = truncate(file, 0);
- 		if (ret == -1) {
--			perror("truncate(2) failed");
-+			perror("truncate(2) down failed");
- 			exit(EXIT_FAILURE);
- 		}
- 	}
-@@ -75,15 +76,47 @@ int do_test(const char *file, int is_ftrunc)
- 		exit(EXIT_FAILURE);
- 	}
- 
--	/* Check whether timestamps got updated */
-+	/* Check whether timestamps got updated on [f]truncate(2) down */
- 	if (statbuf1.st_ctime == statbuf2.st_ctime) {
- 		fprintf(stderr, "ctime not updated after %s\n",
--			is_ftrunc ? "ftruncate" : "truncate");
-+			is_ftrunc ? "ftruncate" : "truncate" " down");
- 		ret++;
- 	}
- 	if (statbuf1.st_mtime == statbuf2.st_mtime) {
- 		fprintf(stderr, "mtime not updated after %s\n",
--			is_ftrunc ? "ftruncate" : "truncate");
-+			is_ftrunc ? "ftruncate" : "truncate" " down");
-+		ret++;
-+	}
+diff --git a/tests/btrfs/099 b/tests/btrfs/099
+new file mode 100755
+index 0000000..0d6b269
+--- /dev/null
++++ b/tests/btrfs/099
+@@ -0,0 +1,82 @@
++#! /bin/bash
++# FSQA Test No. 099
++#
++# Regression test for an ENOSPC issue when attempting to write to a file in
++# a filesystem without any data block groups allocated.
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
 +
-+	/* Test [f]truncate(2) up */
-+	sleep(1);
-+	if (is_ftrunc) {
-+		ret = ftruncate(fd, 123);
-+		if (ret == -1) {
-+			perror("ftruncate(2) up failed");
-+			exit(EXIT_FAILURE);
-+		}
-+	} else {
-+		ret = truncate(file, 123);
-+		if (ret == -1) {
-+			perror("truncate(2) up failed");
-+			exit(EXIT_FAILURE);
-+		}
-+	}
-+	ret = fstat(fd, &statbuf1);
-+	if (ret == -1) {
-+		perror("fstat(2) failed");
-+		exit(EXIT_FAILURE);
-+	}
-+	/* Check whether timestamps got updated on [f]truncate(2) up */
-+	if (statbuf1.st_ctime == statbuf2.st_ctime) {
-+		fprintf(stderr, "ctime not updated after %s\n",
-+			is_ftrunc ? "ftruncate" : "truncate" " up");
-+		ret++;
-+	}
-+	if (statbuf1.st_mtime == statbuf2.st_mtime) {
-+		fprintf(stderr, "mtime not updated after %s\n",
-+			is_ftrunc ? "ftruncate" : "truncate" " up");
- 		ret++;
- 	}
- 
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_need_to_be_root
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++
++# Mount our filesystem without space caches enabled so that we do not get any
++# space used from the initial data block group that mkfs creates (space caches
++# used space from data block groups).
++_scratch_mount "-o nospace_cache"
++
++# Need an fs with at least 2Gb to make sure mkfs.btrfs does not create an fs
++# using mixed block groups (used both for data and metadata). We really need
++# to have dedicated block groups for data to reproduce the issue and mkfs.btrfs
++# defaults to mixed block groups only for small filesystems (up to 1Gb).
++_require_fs_space $SCRATCH_MNT $((2 * 1024 * 1024))
++
++# Run balance with the purpose of deleting the unused data block group that
++# mkfs created. We could also wait for the background kthread to automatically
++# delete the unused block group, but we do not have a way to make it run and
++# wait for it to complete, so just do a balance instead of some unreliable sleep
++_run_btrfs_util_prog balance start -dusage=0 $SCRATCH_MNT
++
++# Now unmount the filesystem, mount it again (either with or with space caches
++# enabled, it does not matter to trigger the problem) and attempt to create a
++# file with some data - this used to fail with ENOSPC because there were no
++# data block groups when the filesystem was mounted and the data space info
++# object was marked as full when initialized (because it had 0 total bytes),
++# which prevented the file write path from attempting to allocate a data block
++# group and fail immediately with ENOSPC.
++_scratch_remount
++echo "hello world" > $SCRATCH_MNT/foobar
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/btrfs/099.out b/tests/btrfs/099.out
+new file mode 100644
+index 0000000..4f36820
+--- /dev/null
++++ b/tests/btrfs/099.out
+@@ -0,0 +1,2 @@
++QA output created by 099
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 13cf0d7..a8f458a 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -101,3 +101,4 @@
+ 096 auto quick clone
+ 097 auto quick send clone
+ 098 auto quick metadata clone
++099 auto quick metadata enospc
 -- 
-2.4.3
+2.1.3
 
