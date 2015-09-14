@@ -1,163 +1,208 @@
-Received: from mail-ig0-f174.google.com ([209.85.213.174]:33493 "EHLO
-	mail-ig0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754192AbbINIf2 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 14 Sep 2015 04:35:28 -0400
-Received: by igbkq10 with SMTP id kq10so84838198igb.0
-        for <fstests@vger.kernel.org>; Mon, 14 Sep 2015 01:35:27 -0700 (PDT)
-MIME-Version: 1.0
-Reply-To: fdmanana@gmail.com
-In-Reply-To: <CAPBX1x+GZ0iorNojS90o7eAw4-0Z3LWsLN_8Bz8vscwJ0vEjQQ@mail.gmail.com>
-References: <1441971691-26427-1-git-send-email-xuw2015@gmail.com>
-	<CAL3q7H48_juhy1vagw6KR5MPgjc2GO4Spy7PU8tLMUiaqReCWw@mail.gmail.com>
-	<CAPBX1x+GZ0iorNojS90o7eAw4-0Z3LWsLN_8Bz8vscwJ0vEjQQ@mail.gmail.com>
-Date: Mon, 14 Sep 2015 09:35:27 +0100
-Message-ID: <CAL3q7H7+do645WXZkvVeFhyzcxdWuv=EvgXMVeT1kKN-RcLvcQ@mail.gmail.com>
-Subject: Re: [PATCH] generic/027: enlarge fs size for btrfs in bigger
- page-size machine
-From: Filipe David Manana <fdmanana@gmail.com>
-Content-Type: text/plain; charset=UTF-8
+Received: from mail.kernel.org ([198.145.29.136]:35254 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751603AbbINIaC (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 14 Sep 2015 04:30:02 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] fstests: regression test for btrfs read corruption of compressed extents
+Date: Mon, 14 Sep 2015 09:29:38 +0100
+Message-Id: <1442219378-16851-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: George Wang <xuw2015@gmail.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Sep 14, 2015 at 4:40 AM, George Wang <xuw2015@gmail.com> wrote:
-> On Fri, Sep 11, 2015 at 8:06 PM, Filipe David Manana <fdmanana@gmail.com> wrote:
->> On Fri, Sep 11, 2015 at 12:41 PM,  <xuw2015@gmail.com> wrote:
->>> From: George Wang <xuw2015@gmail.com>
->>>
->>> btrfs on bigger page-size machine(such as ppc64/ppc64le), the min fs
->>> size shoule be more than 480MB. Otherwise, the mount will fail.
->>
->> Interesting, wasn't aware of that.
->> How does it fail? What error message do you get?
->
-> The ppc64/ppc64le page size is 64KB, and if the fs size is less than
-> 480MB, the first
-> mount operation failed, the 2nd time succeeded.
+From: Filipe Manana <fdmanana@suse.com>
 
-(adding back fstests list)
+Regression test for file read corruption when using compressed extents
+that are shared by multiple consecutive ranges of the same file.
 
-Yes, but can you please mention if there's any btrfs
-error/warning/stack trace in syslog?
+The btrfs issue is fixed by the linux kernel patch titled:
+"Btrfs: fix read corruption of compressed and shared extents"
 
-> The following is my analysis:
->
-> btrfs do the space allocation by do_chunk_alloc, but this function
-> does not care about
-> the size wanted to allocate, it just alloc the chunk size on its rule.
->
-> the open_ctree will try to create the uuid tree, which needs to
-> reserve some space in
-> btrfs_start_transaction. if no engough space, the
-> reserve_metadata_bytes will call the
-> flush_space for space reclaiming. it will call flush_space many times,
-> every time with
-> different flush level. when the flush level is ALLOC_CHUNK, it will call the
-> do_chunk_alloc to allocate a chunk. Unfortunately, the new chunk may be smaller
-> than the size we want, so the first time to mount will fail. And we
-> mount it again, it
-> will allocate a chunk again, then the size can meet our requirement.
+Without the corresponding fix the test fails because the second time it
+reads the test files it gets different data (some pages are incorrectly
+filled with zeroes) from the data it wrote before doing a clean ummount.
 
-So the second mount succeeds and it's able to allocate a big enough
-chunk while the first mount isn't?
-If so, than that's more likely to be a bug in btrfs rather than a
-problem in the test imho.
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/100     | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/100.out |  41 ++++++++++++++++++++
+ tests/btrfs/group   |   1 +
+ 3 files changed, 151 insertions(+)
+ create mode 100755 tests/btrfs/100
+ create mode 100644 tests/btrfs/100.out
 
-On x86 running the test with MKFS_OPTIONS="-n 65536" should then
-theoretically allow to reproduce the issue, since the size of the
-files the test creates are multiples of both 4K and 64K. For me that
-(the mount "failure") doesn't happen, but instead the test has been
-running for over 2 hours with such a node size when it usually takes a
-couple minutes.
-
-thanks
-
->
->>
->> How did you calculate those values (480Mb and 512Mb)?
->
-> I did not calculate, just test many times by binary-search method. for example:
-> (256~512)->(384~512)->...
-> And I do not think 480MB is the accurate number, but for reproduce the
-> problem, it's
-> enough.
->
-> Thanks
->
-> George
->
->>
->> thanks
->>
->>> So we shoud adjust the fs size to 512MB for btrfs to run this test
->>> correctly. And we also provide a double check: if mount fails, we should
->>> never run this test.
->>>
->>> Signed-off-by: George Wang <xuw2015@gmail.com>
->>> ---
->>>  tests/generic/027 | 19 +++++++++++--------
->>>  1 file changed, 11 insertions(+), 8 deletions(-)
->>>
->>> diff --git a/tests/generic/027 b/tests/generic/027
->>> index d2e59d6..c42b9a6 100755
->>> --- a/tests/generic/027
->>> +++ b/tests/generic/027
->>> @@ -65,8 +65,17 @@ _require_scratch
->>>  rm -f $seqres.full
->>>  echo "Silence is golden"
->>>
->>> -_scratch_mkfs_sized $((256 * 1024 * 1024)) >>$seqres.full 2>&1
->>> -_scratch_mount
->>> +loop=100
->>> +fs_size=$((256 * 1024 * 1024))
->>> +# btrfs takes much longer time, reduce the loop count
->>> +# btrfs takes much more space when first mount on bigger page-size machine
->>> +if [ "$FSTYP" == "btrfs" ]; then
->>> +       loop=10
->>> +       fs_size=$((512 * 1024 * 1024))
->>> +fi
->>> +
->>> +_scratch_mkfs_sized $(fs_size) >>$seqres.full 2>&1
->>> +_scratch_mount || _notrun "scratch dev is not mounted successfully"
->>>
->>>  echo "Reserve 2M space" >>$seqres.full
->>>  $XFS_IO_PROG -f -c "pwrite 0 2m" $SCRATCH_MNT/testfile >>$seqres.full 2>&1
->>> @@ -75,12 +84,6 @@ $XFS_IO_PROG -f -c "pwrite 0 254m" $SCRATCH_MNT/bigfile >>$seqres.full 2>&1
->>>  echo "Remove reserved file" >>$seqres.full
->>>  rm -f $SCRATCH_MNT/testfile
->>>
->>> -loop=100
->>> -# btrfs takes much longer time, reduce the loop count
->>> -if [ "$FSTYP" == "btrfs" ]; then
->>> -       loop=10
->>> -fi
->>> -
->>>  dir=$SCRATCH_MNT/testdir
->>>  echo -n "iteration" >>$seqres.full
->>>  i=1
->>> --
->>> 1.9.3
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe fstests" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->>
->> --
->> Filipe David Manana,
->>
->> "Reasonable men adapt themselves to the world.
->>  Unreasonable men adapt the world to themselves.
->>  That's why all progress depends on unreasonable men."
-
-
-
+diff --git a/tests/btrfs/100 b/tests/btrfs/100
+new file mode 100755
+index 0000000..dfef32d
+--- /dev/null
++++ b/tests/btrfs/100
+@@ -0,0 +1,109 @@
++#! /bin/bash
++# FSQA Test No. 100
++#
++# Regression test for file read corruption when using compressed extents that
++# are shared by multiple consecutive ranges of the same file.
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_need_to_be_root
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_cloner
++
++rm -f $seqres.full
++
++test_clone_and_read_compressed_extent()
++{
++	local mount_opts=$1
++
++	_scratch_mkfs >>$seqres.full 2>&1
++	_scratch_mount $mount_opts
++
++	# Create a test file with a single extent that is compressed (the
++	# data we write into it is highly compressible no matter which
++	# compression algorithm is used, zlib or lzo).
++	$XFS_IO_PROG -f -c "pwrite -S 0xaa 0K 4K"        \
++			-c "pwrite -S 0xbb 4K 8K"        \
++			-c "pwrite -S 0xcc 12K 4K"       \
++			$SCRATCH_MNT/foo | _filter_xfs_io
++
++	# Now clone our extent into an adjacent offset.
++	$CLONER_PROG -s $((4 * 1024)) -d $((16 * 1024)) -l $((8 * 1024)) \
++		$SCRATCH_MNT/foo $SCRATCH_MNT/foo
++
++	# Same as before but for this file we clone the extent into a lower
++	# file offset.
++	$XFS_IO_PROG -f -c "pwrite -S 0xaa 8K 4K"         \
++			-c "pwrite -S 0xbb 12K 8K"        \
++			-c "pwrite -S 0xcc 20K 4K"        \
++			$SCRATCH_MNT/bar | _filter_xfs_io
++
++	$CLONER_PROG -s $((12 * 1024)) -d 0 -l $((8 * 1024)) \
++		$SCRATCH_MNT/bar $SCRATCH_MNT/bar
++
++	echo "File digests before unmounting filesystem:"
++	md5sum $SCRATCH_MNT/foo | _filter_scratch
++	md5sum $SCRATCH_MNT/bar | _filter_scratch
++
++	# Evicting the inode or clearing the page cache before reading again
++	# the file would also trigger the bug - reads were returning all bytes
++	# in the range corresponding to the second reference to the extent with
++	# a value of 0, but the correct data was persisted (it was a bug
++	# exclusively in the read path). The issue happened only if the same
++	# readpages() call targeted pages belonging to the first and second
++	# ranges that point to the same compressed extent.
++	_scratch_remount
++
++	echo "File digests after mounting filesystem again:"
++	# Must match the same digests we got before.
++	md5sum $SCRATCH_MNT/foo | _filter_scratch
++	md5sum $SCRATCH_MNT/bar | _filter_scratch
++}
++
++echo -e "\nTesting with zlib compression..."
++test_clone_and_read_compressed_extent "-o compress=zlib"
++
++_scratch_unmount
++
++echo -e "\nTesting with lzo compression..."
++test_clone_and_read_compressed_extent "-o compress=lzo"
++
++status=0
++exit
+diff --git a/tests/btrfs/100.out b/tests/btrfs/100.out
+new file mode 100644
+index 0000000..469b21e
+--- /dev/null
++++ b/tests/btrfs/100.out
+@@ -0,0 +1,41 @@
++QA output created by 100
++
++Testing with zlib compression...
++wrote 4096/4096 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 4096
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 4096/4096 bytes at offset 12288
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 4096/4096 bytes at offset 8192
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 12288
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 4096/4096 bytes at offset 20480
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File digests before unmounting filesystem:
++4b985a45790261a706c3ddbf22c5f765  SCRATCH_MNT/foo
++fd331e6b7a9ab105f48f71b53162d5b5  SCRATCH_MNT/bar
++File digests after mounting filesystem again:
++4b985a45790261a706c3ddbf22c5f765  SCRATCH_MNT/foo
++fd331e6b7a9ab105f48f71b53162d5b5  SCRATCH_MNT/bar
++
++Testing with lzo compression...
++wrote 4096/4096 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 4096
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 4096/4096 bytes at offset 12288
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 4096/4096 bytes at offset 8192
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 12288
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 4096/4096 bytes at offset 20480
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File digests before unmounting filesystem:
++4b985a45790261a706c3ddbf22c5f765  SCRATCH_MNT/foo
++fd331e6b7a9ab105f48f71b53162d5b5  SCRATCH_MNT/bar
++File digests after mounting filesystem again:
++4b985a45790261a706c3ddbf22c5f765  SCRATCH_MNT/foo
++fd331e6b7a9ab105f48f71b53162d5b5  SCRATCH_MNT/bar
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index a8f458a..ad6d537 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -102,3 +102,4 @@
+ 097 auto quick send clone
+ 098 auto quick metadata clone
+ 099 auto quick metadata enospc
++100 auto quick clone compress
 -- 
-Filipe David Manana,
+2.1.3
 
-"Reasonable men adapt themselves to the world.
- Unreasonable men adapt the world to themselves.
- That's why all progress depends on unreasonable men."
