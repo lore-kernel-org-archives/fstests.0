@@ -1,48 +1,67 @@
-Received: from mx1.redhat.com ([209.132.183.28]:16491 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751777AbbIQOeH (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 17 Sep 2015 10:34:07 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (Postfix) with ESMTPS id 79034C0B2001
-	for <fstests@vger.kernel.org>; Thu, 17 Sep 2015 14:34:07 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] xfs/167: remove duplicated _require_fs_space
-Date: Thu, 17 Sep 2015 22:34:00 +0800
-Message-Id: <1442500440-1328-1-git-send-email-eguan@redhat.com>
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:47647 "EHLO
+	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755514AbbIUATX (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sun, 20 Sep 2015 20:19:23 -0400
+Date: Mon, 21 Sep 2015 10:19:20 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] generic/027: enlarge fs size for btrfs in bigger
+ page-size machine
+Message-ID: <20150921001920.GI26895@dastard>
+References: <1441971691-26427-1-git-send-email-xuw2015@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1441971691-26427-1-git-send-email-xuw2015@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+To: xuw2015@gmail.com
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Seems the same patch was applied twice,
+On Fri, Sep 11, 2015 at 07:41:31PM +0800, xuw2015@gmail.com wrote:
+> From: George Wang <xuw2015@gmail.com>
+> 
+> btrfs on bigger page-size machine(such as ppc64/ppc64le), the min fs
+> size shoule be more than 480MB. Otherwise, the mount will fail.
+> So we shoud adjust the fs size to 512MB for btrfs to run this test
+> correctly. And we also provide a double check: if mount fails, we should
+> never run this test.
+> 
+> Signed-off-by: George Wang <xuw2015@gmail.com>
+> ---
+>  tests/generic/027 | 19 +++++++++++--------
+>  1 file changed, 11 insertions(+), 8 deletions(-)
+> 
+> diff --git a/tests/generic/027 b/tests/generic/027
+> index d2e59d6..c42b9a6 100755
+> --- a/tests/generic/027
+> +++ b/tests/generic/027
+> @@ -65,8 +65,17 @@ _require_scratch
+>  rm -f $seqres.full
+>  echo "Silence is golden"
+>  
+> -_scratch_mkfs_sized $((256 * 1024 * 1024)) >>$seqres.full 2>&1
+> -_scratch_mount
+> +loop=100
+> +fs_size=$((256 * 1024 * 1024)) 
+> +# btrfs takes much longer time, reduce the loop count
+> +# btrfs takes much more space when first mount on bigger page-size machine
+> +if [ "$FSTYP" == "btrfs" ]; then
+> +	loop=10
+> +	fs_size=$((512 * 1024 * 1024))
+> +fi
 
-6f55bbd xfs/167: need at least 10GB of scratch space to run
-b50473c xfs/167: need at least 10GB of scratch space to run
+No. Please don't sprinkle fs magic numbers like this through tests.
+This is the second "btrfs breaks with small filesystems on 64k page
+size machines so change the test" patch in recent times.
 
-and there're two _require_fs_space calls in the test, remove one.
+If btrfs has some special behaviour that it needs to support here
+(e.g. minimum fs size because of machine page size) then please
+modify the minimum size inside _scratch_mkfs_sized() via a callout
+to a new _mkfs_btrfs_sized() function.
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
- tests/xfs/167 | 6 ------
- 1 file changed, 6 deletions(-)
+Cheers,
 
-diff --git a/tests/xfs/167 b/tests/xfs/167
-index 499cc1f..875bd31 100755
---- a/tests/xfs/167
-+++ b/tests/xfs/167
-@@ -68,12 +68,6 @@ _scratch_mount
- # errors.
- _require_fs_space $SCRATCH_MNT 10485760
- 
--# fast devices can consume disk space at a rate of 1GB every 5s via the
--# background workload. With 50 test loops, at 1 second per loop, that means we
--# need at least 10GB of disk space to ensure this test will not fail with ENOSPC
--# errors.
--_require_fs_space $SCRATCH_MNT 10485760
--
- TEST_FILE=$SCRATCH_MNT/test_file
- TEST_PROG=$here/src/unwritten_sync
- LOOPS=50
+Dave.
 -- 
-2.4.3
-
+Dave Chinner
+david@fromorbit.com
