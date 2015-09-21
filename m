@@ -1,35 +1,41 @@
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:46589 "EHLO
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:27991 "EHLO
 	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755554AbbIUA3q (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 20 Sep 2015 20:29:46 -0400
-Date: Mon, 21 Sep 2015 10:29:44 +1000
+	by vger.kernel.org with ESMTP id S1755529AbbIUBTy (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sun, 20 Sep 2015 21:19:54 -0400
+Date: Mon, 21 Sep 2015 11:19:50 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v6] fstests: btrfs: Add reserved space leak check for
- rewrite  dirty page
-Message-ID: <20150921002944.GJ26895@dastard>
-References: <1440574257-1544-1-git-send-email-quwenruo@cn.fujitsu.com>
+Subject: Re: [PATCH] fstests: Add test of rename
+Message-ID: <20150921011950.GK26895@dastard>
+References: <1440495730-14093-1-git-send-email-jack@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1440574257-1544-1-git-send-email-quwenruo@cn.fujitsu.com>
+In-Reply-To: <1440495730-14093-1-git-send-email-jack@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Jan Kara <jack@suse.com>
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 26, 2015 at 03:30:57PM +0800, Qu Wenruo wrote:
-> +# Use big blocksize to ensure there is still enough space left for metadata
-> +# space reserve.
-> +BLOCKSIZE=$(( 2 * 1024 * 1024 )) # 2M block size
-> +FILESIZE=$(( 128 * 1024 * 1024 )) # 128M file size
+On Tue, Aug 25, 2015 at 11:42:10AM +0200, Jan Kara wrote:
+> Test renaming of various entry types in directories of various sizes.
+> Check that filesystem didn't get corrupted.
+> 
+> Signed-off-by: Jan Kara <jack@suse.com>
+> ---
+>  tests/generic/326   | 93 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/group |  1 +
+>  2 files changed, 94 insertions(+)
+>  create mode 100755 tests/generic/326
 
-Little thing in terms of style here: global variables that come from
-the test harness use upper case, local test variabled should use
-lowercase. It just makes it easy to see what variables have come
-from the environment/test harness versus those that are used only by
-the test.
+Missing an output file. I'll fix it on commit.
 
-I'll change this when I commit the patch....
+> +if _check_scratch_fs; then
+> +	_echofull "Scratch fs is fine after renames"
+> +	status=0
+> +fi
+
+This happens automatically now as a result of _require_scratch being
+called, so I'll remove it.
 
 Cheers,
 
