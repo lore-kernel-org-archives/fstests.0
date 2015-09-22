@@ -1,50 +1,88 @@
-Received: from e28smtp04.in.ibm.com ([122.248.162.4]:57090 "EHLO
-	e28smtp04.in.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752926AbbIVFSm (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 22 Sep 2015 01:18:42 -0400
-Received: from /spool/local
-	by e28smtp04.in.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-	for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-	Tue, 22 Sep 2015 10:48:39 +0530
-From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: Re: [PATCH] generic/224: Increase filesystem instance size to 1.5 GiB
-Date: Tue, 22 Sep 2015 10:48:32 +0530
-Message-ID: <2034993.iSlvTmyeNT@localhost.localdomain>
-In-Reply-To: <55F230A3.2070300@cn.fujitsu.com>
-References: <1440945981-323-1-git-send-email-chandan@linux.vnet.ibm.com> <2500094.kBUgEuDpMB@localhost.localdomain> <55F230A3.2070300@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="us-ascii"
+Received: from mail.kernel.org ([198.145.29.136]:57417 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751670AbbIVRAj (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 22 Sep 2015 13:00:39 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] fstests: Fix golden output for the new btrfs device replace tests
+Date: Tue, 22 Sep 2015 17:58:53 +0100
+Message-Id: <1442941133-14482-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, chandan@mykolab.com
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Friday 11 Sep 2015 09:38:43 Qu Wenruo wrote:
+From: Filipe Manana <fdmanana@suse.com>
 
-Qu, Sorry for the late response. My email client's filtering had broken and
-hence I did not see your response until now.
+As a workaround for a regression in the uuid filter introduced by
+a092363bbdfa ("xfs: test changing UUID on V5 superblock"), the btrfs
+100 and 101 tests included an extra white space before the uuid in their
+golden output files. However commit 48613832ad11 ("_filter_uuid: Fix
+output regression for btrfs/006"), which came later, fixed the regression
+in the uuid filter therefore making btrfs/100 and btrfs/101 fail due to
+the extra space in their expected golden output files. So just remove the
+extra white spaces from the golden output files.
 
-> Hi Chandan,
-> 
-> Although the reply may be a little late, but I think it's still better
-> to fix the bug in mkfs.btrfs.
-> 
-> The core problem is, why mkfs.btrfs is insisting on make the fs into
-> mixed-bg.
-> 
-> Auto detection for small device and make it into mixed-bg should be a
-> "OPTIONAL" feature, not a "mandatory" one.
-> 
-> So IMHO, the best method is to disable mixed-bg when nodesize/sectorsize
-> is given and differs and user doesn't force mkfs to create mixed-bg.
-> 
+  $ ./check btrfs/100
+  FSTYP         -- btrfs
+  PLATFORM      -- Linux/x86_64 debian3 4.2.0-rc5-btrfs-next-13+
+  MKFS_OPTIONS  -- /dev/sdc
+  MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
 
-My understanding of the chunk allocator (i.e. __btrfs_alloc_chunk()) was
-incomplete. Looking into the code more thoroughly I now realize that 'small 
-filesystem detection and mixed-bg creation' can be made optional. Thanks for
-the suggestion.
+  btrfs/100 4s ... - output mismatch (see .../results//btrfs/100.out.bad)
+    --- tests/btrfs/100.out	2015-09-22 02:56:35.031470334 +0100
+    +++ /home/fdmanana/git/hub/xfstests/results//btrfs/100.out.bad...
+    @@ -1,10 +1,10 @@
+     QA output created by 100
+    -Label: none  uuid:  <UUID>
+    +Label: none  uuid: <UUID>
+     	Total devices <NUM> FS bytes used <SIZE>
+     	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
+     	devid <DEVID> size <SIZE> used <SIZE> path /dev/mapper/error-test
 
+    (...)
+  Failures: btrfs/100
+  Failed 1 of 1 tests
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/100.out | 4 ++--
+ tests/btrfs/101.out | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/tests/btrfs/100.out b/tests/btrfs/100.out
+index 2eeefa4..aa49291 100644
+--- a/tests/btrfs/100.out
++++ b/tests/btrfs/100.out
+@@ -1,10 +1,10 @@
+ QA output created by 100
+-Label: none  uuid:  <UUID>
++Label: none  uuid: <UUID>
+ 	Total devices <NUM> FS bytes used <SIZE>
+ 	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
+ 	devid <DEVID> size <SIZE> used <SIZE> path /dev/mapper/error-test
+ 
+-Label: none  uuid:  <UUID>
++Label: none  uuid: <UUID>
+ 	Total devices <NUM> FS bytes used <SIZE>
+ 	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
+ 
+diff --git a/tests/btrfs/101.out b/tests/btrfs/101.out
+index 4621902..e1b88c2 100644
+--- a/tests/btrfs/101.out
++++ b/tests/btrfs/101.out
+@@ -1,10 +1,10 @@
+ QA output created by 101
+-Label: none  uuid:  <UUID>
++Label: none  uuid: <UUID>
+ 	Total devices <NUM> FS bytes used <SIZE>
+ 	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
+ 	devid <DEVID> size <SIZE> used <SIZE> path /dev/mapper/error-test
+ 
+-Label: none  uuid:  <UUID>
++Label: none  uuid: <UUID>
+ 	Total devices <NUM> FS bytes used <SIZE>
+ 	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
+ 
 -- 
-chandan
+2.1.3
 
