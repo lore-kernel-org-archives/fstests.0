@@ -1,84 +1,78 @@
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:38265 "EHLO
-	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752775AbbIWC4s (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 22 Sep 2015 22:56:48 -0400
-Received: from dave by dastard with local (Exim 4.80)
-	(envelope-from <david@fromorbit.com>)
-	id 1ZeaEH-000259-RO
-	for fstests@vger.kernel.org; Wed, 23 Sep 2015 12:56:21 +1000
-Date: Wed, 23 Sep 2015 12:56:21 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: [ANNOUNCE] fstests: master branch updated to f0c4b46
-Message-ID: <20150923025621.GL3902@dastard>
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="0NB0lE7sNnW8+0qW"
-Content-Disposition: inline
+Received: from mail.tuxera.com ([5.250.163.136]:56639 "EHLO mail.tuxera.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932079AbbIWRJ5 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 23 Sep 2015 13:09:57 -0400
+Message-ID: <1443027628.5929.46.camel@ari-lenovo>
+Subject: Re: [PATCH 1/2] Add checks for hardlinks support.
+From: Ari Sundholm <ari@tuxera.com>
+Date: Wed, 23 Sep 2015 20:00:28 +0300
+In-Reply-To: <20150828042527.GK3902@dastard>
+References: <1440580477.29614.3.camel@ari-macbook>
+	 <20150827014718.GI3902@dastard> <1440673103.29614.13.camel@ari-macbook>
+	 <20150828042527.GK3902@dastard>
+Content-Type: text/plain; charset="UTF-8"
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+On Fri, 2015-08-28 at 14:25 +1000, Dave Chinner wrote:
+> On Thu, Aug 27, 2015 at 01:58:23PM +0300, Ari Sundholm wrote: 
+> > Do you mean why this patch is needed?
+> 
+> Of course.
+> 
+> Just because the answer migh be obvious to you, it doesn't mean it
+> is obvious to anyone else, nor is an empty commit message useful in
+> 2-3 years time when someone reads the commit and wonders "why did
+> they make that change?"
+> 
 
---0NB0lE7sNnW8+0qW
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+I understand. I had simply thought that a longer explanation was not
+necessary in this case. I was wrong.
 
+> > Because there are filesystems that
+> > do not support hard links (at least not yet, but may support symlinks)
+> > we would like to run xfstests on.
+> >
+> > I'd be glad to add this explanation and reroll the patches, but I
+> > thought this would be obvious from what the patch does.
+> 
+> xfstests doesn't support any filesystems that don't have hardlinks.
+> Why we should carry dead code, at minimum, needs explaining and
+> discussing.
+> 
 
-Hi folks,
+But it does support filesystems which don't support symlinks. What I did
+is just an analog of that for hardlinks.
 
-The xfstests repositories at:
+Our company develops filesystem implementations, some of which support
+symlinks or hardlinks, but not necessarily both - at least not yet. We
+have found xfstests immensely useful in testing both work-in-progress
+and established FS implementations and are integrating it as part of our
+regular testing framework.
 
-	git://oss.sgi.com/xfs/cmds/xfstests
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+We try to contribute back as much as possible of those things that we
+find generally useful. I am strongly of the opinion that this patch *is*
+generally useful, as we are far from the only people developing new
+filesystems. This is why I do not find this patch to be dead code. The
+types of filesystems we work on might not always completely overlap with
+the typical features of the filesystems xfstests is usually run on, such
+as xfs, ext4 and btrfs, but I think the effort required to support our
+filesystems remains small enough to be worth it.
 
-have just been updated. This is a quick bug fix update for issues
-introduced in yesterday's large update.
+It will definitely not be the end of the world for us if you don't find
+this feature generally useful, but we try to upstream as much as
+possible of what we think might benefit not only us, but others as well.
 
-The new head of the master branch is commit:
+> Develop the habits that make you a better software engineer - using
+> a "from:" line in patch submissions does not do that.
 
-f0c4b46 btrfs: Fix _filter_uuid golden output for device replace tests
+Will do. I try to learn and hope to keep learning.
 
-New Commits:
+Best regards,
+Ari Sundholm
+ari@tuxera.com
 
-Dave Chinner (1):
-      [33ebff8] generic/109: fix status on completion
-
-Filipe Manana (1):
-      [f0c4b46] btrfs: Fix _filter_uuid golden output for device replace te=
-sts
-
-
-Code Diffstat:
-
- tests/btrfs/100.out | 4 ++--
- tests/btrfs/101.out | 4 ++--
- tests/generic/109   | 1 +
- 3 files changed, 5 insertions(+), 4 deletions(-)
---=20
-Dave Chinner
-david@fromorbit.com
-
---0NB0lE7sNnW8+0qW
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJWAhTVAAoJEK3oKUf0dfodrC4QALyW79XdZc94V2SVZd1vww8h
-M3mWGV9FRv38hRX+bG6JtotkBlD0AT3mDzqh01pe1iApWcjsa5MXnAUHp/9959+0
-H3eq2w/JD2AYMiak/snSBRlDvX5PCFUq1lBx7/DPS8Ktu/oCIDuO8uXb5ez35AY/
-08uCvzo/cff8OLChiw5CekvvQMo8e2qzhRjRy1nqBOQWZDVK32+34ON+jf/Azrv5
-kmLMy6q287Klx1cjSR9vmqF1CYj8QWcRamZQOrv3AzA8GEkhyL4FG7XK+9xFHjvV
-IUM51WJaNBH3Ty6aaQCHpSaOZJGBrBun3LOJ+A50thiJO1B3c4E8T0zlVCrP3fpM
-UmAMpE5VXALUW/kyh9Ul5tSKshkPfe5WroC/giK1fbyOMDvh7THo9optxQNSLsD5
-rRMWg6PHwmeYOAgqeMK6Rx1fw8rd3o/4nOT82EJ3tgstz5XTe2I1TlNIZ4XOKSYi
-I1T0jw+FfJ2UrbO1rla+s36iJUSb/dPdknJyAQ/fYblSm6DxplkjQeY2G6bMtBHD
-Jc/moSfm4QAYj3M7NNIgSf2jV+EhLHpsyNh3jOOOmLL85IG8xuOg1W6oh/138733
-giDUn/k6BiYHYIneq4hAVV6xpSPKW0RSqw6HAOVW9gUi7TiAd7IT1GSVIkLE/Ssr
-6+xqk+0v5moh+1u9igVR
-=xzIV
------END PGP SIGNATURE-----
-
---0NB0lE7sNnW8+0qW--
