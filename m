@@ -1,127 +1,84 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:31984 "EHLO
-	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752431AbbIWCrM (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 22 Sep 2015 22:47:12 -0400
-Date: Wed, 23 Sep 2015 12:47:08 +1000
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:38265 "EHLO
+	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752775AbbIWC4s (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 22 Sep 2015 22:56:48 -0400
+Received: from dave by dastard with local (Exim 4.80)
+	(envelope-from <david@fromorbit.com>)
+	id 1ZeaEH-000259-RO
+	for fstests@vger.kernel.org; Wed, 23 Sep 2015 12:56:21 +1000
+Date: Wed, 23 Sep 2015 12:56:21 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] fstests: btrfs: add test for quota groups and drop
- snapshot
-Message-ID: <20150923024708.GK3902@dastard>
-References: <20150922221649.GB17854@wotan.suse.de>
+Subject: [ANNOUNCE] fstests: master branch updated to f0c4b46
+Message-ID: <20150923025621.GL3902@dastard>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="0NB0lE7sNnW8+0qW"
 Content-Disposition: inline
-In-Reply-To: <20150922221649.GB17854@wotan.suse.de>
 Sender: fstests-owner@vger.kernel.org
-To: Mark Fasheh <mfasheh@suse.de>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 22, 2015 at 03:16:49PM -0700, Mark Fasheh wrote:
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	rm -fr $tmp
-> +}
 
-Missing a "cd /" (see the "new" template).
+--0NB0lE7sNnW8+0qW
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> +# Create an fs tree of a given height at a target location. This is
-> +# done by agressively creating inline extents to expand the number of
-> +# nodes required. We also add an traditional extent so that
-> +# drop_snapshot is forced to walk at least one extent that is not
-> +# stored in metadata.
-> +#
-> +# NOTE: The ability to vary tree height for this test is very useful
-> +# for debugging problems with drop_snapshot(). As a result we retain
-> +# that parameter even though the test below always does level 2 trees.
-> +_explode_fs_tree () {
-> +    local level=$1;
-> +    local loc="$2";
-> +    local bs=4095;
-> +    local cnt=1;
-> +    local n;
 
-8 space tabs, please.
+Hi folks,
 
-> +
-> +    mkdir -p $loc
-> +    for i in `seq -w 1 $n`;
-> +    do
+The xfstests repositories at:
 
-	for ... ; do
+	git://oss.sgi.com/xfs/cmds/xfstests
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-> +	dd status=none if=/dev/zero of=$loc/file$i bs=$bs count=$cnt
+have just been updated. This is a quick bug fix update for issues
+introduced in yesterday's large update.
 
-Please use xfs_io, not dd. It's also only ever writing a single
-block of 4095 bytes, so you can drop the bs/cnt variables and just
-use:
+The new head of the master branch is commit:
 
-	$XFS_IO_PROG -f -c "pwrite 0 4095" $loc/file$i > /dev/null 2>&1
+f0c4b46 btrfs: Fix _filter_uuid golden output for device replace tests
 
-> +    done
-> +
-> +    bs=131072
-> +    cnt=1
-> +    dd status=none if=/dev/zero of=$loc/extentfile bs=$bs count=$cnt
+New Commits:
 
-Variables for a single use? :P
+Dave Chinner (1):
+      [33ebff8] generic/109: fix status on completion
 
-	$XFS_IO_PROG -f -c "pwrite 0 128k $loc/extentfile > /dev/null 2>&1
+Filipe Manana (1):
+      [f0c4b46] btrfs: Fix _filter_uuid golden output for device replace te=
+sts
 
-> +# Force the default leaf size as the calculations for making our btree
-> +# heights are based on that.
-> +run_check _scratch_mkfs "--nodesize 16384"
 
-Please, no new users of run_check.
+Code Diffstat:
 
-> +# Remount to clear cache, force everything to disk
-> +_scratch_unmount
-> +_scratch_mount
-
-_scratch_remount
-
-> +# Finally, delete snap1 to trigger btrfs_drop_snapshot(). This
-> +# snapshot is most interesting to delete because it will cause some
-> +# nodes to go exclusively owned for snap2, while some will stay shared
-> +# with the default subvolume. That exercises a maximum of the drop
-> +# snapshot/qgroup interactions.
-> +#
-> +# snap2s imlied ref from to the 128K extent in files/ can be lost by
-> +# the root finding code in qgroup accounting due to snap1 no longer
-> +# providing a path to it. This was fixed by the first two patches
-> +# referenced above.
-> +_run_btrfs_util_prog subvolume delete $SCRATCH_MNT/snap1
-> +
-> +# There is no way from userspace to force btrfs_drop_snapshot to run
-> +# at a given time (even via mount/unmount). We must wait for it to
-> +# start and complete. This is the shortest time on my tests systems I
-> +# have found which always allows drop_snapshot to run to completion.
-> +sleep 45
-
-Which means it will not be long enough for someone else. We've had
-this discussion before - btrfs needs a way to query if a background
-operation is in progress or not....
-
-> +_scratch_unmount
-> +
-> +# generate a qgroup report and look for inconsistent groups
-> +#  - don't use _run_btrfs_util_prog here as it captures the output and
-> +#    we need to grep it.
-> +$BTRFS_UTIL_PROG check --qgroup-report $SCRATCH_DEV 2>&1 | grep -E -q "Counts for qgroup.*are different"
-> +if [ $? -ne 0 ]; then
-> +    status=0
-> +fi
-
-Thereby demonstrating why run_check and functions that use it are
-considered harmful.... :/
-
-Cheers,
-
-Dave.
--- 
+ tests/btrfs/100.out | 4 ++--
+ tests/btrfs/101.out | 4 ++--
+ tests/generic/109   | 1 +
+ 3 files changed, 5 insertions(+), 4 deletions(-)
+--=20
 Dave Chinner
 david@fromorbit.com
+
+--0NB0lE7sNnW8+0qW
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBAgAGBQJWAhTVAAoJEK3oKUf0dfodrC4QALyW79XdZc94V2SVZd1vww8h
+M3mWGV9FRv38hRX+bG6JtotkBlD0AT3mDzqh01pe1iApWcjsa5MXnAUHp/9959+0
+H3eq2w/JD2AYMiak/snSBRlDvX5PCFUq1lBx7/DPS8Ktu/oCIDuO8uXb5ez35AY/
+08uCvzo/cff8OLChiw5CekvvQMo8e2qzhRjRy1nqBOQWZDVK32+34ON+jf/Azrv5
+kmLMy6q287Klx1cjSR9vmqF1CYj8QWcRamZQOrv3AzA8GEkhyL4FG7XK+9xFHjvV
+IUM51WJaNBH3Ty6aaQCHpSaOZJGBrBun3LOJ+A50thiJO1B3c4E8T0zlVCrP3fpM
+UmAMpE5VXALUW/kyh9Ul5tSKshkPfe5WroC/giK1fbyOMDvh7THo9optxQNSLsD5
+rRMWg6PHwmeYOAgqeMK6Rx1fw8rd3o/4nOT82EJ3tgstz5XTe2I1TlNIZ4XOKSYi
+I1T0jw+FfJ2UrbO1rla+s36iJUSb/dPdknJyAQ/fYblSm6DxplkjQeY2G6bMtBHD
+Jc/moSfm4QAYj3M7NNIgSf2jV+EhLHpsyNh3jOOOmLL85IG8xuOg1W6oh/138733
+giDUn/k6BiYHYIneq4hAVV6xpSPKW0RSqw6HAOVW9gUi7TiAd7IT1GSVIkLE/Ssr
+6+xqk+0v5moh+1u9igVR
+=xzIV
+-----END PGP SIGNATURE-----
+
+--0NB0lE7sNnW8+0qW--
