@@ -1,16 +1,18 @@
-Received: from mx1.redhat.com ([209.132.183.28]:49880 "EHLO mx1.redhat.com"
+Received: from sandeen.net ([63.231.237.45]:47925 "EHLO sandeen.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753733AbbI1Vie (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 28 Sep 2015 17:38:34 -0400
-From: Eric Sandeen <sandeen@redhat.com>
-Subject: [PATCH] generic _require_dm_target() helper, use in generic/085
-Message-ID: <5609B358.9030601@redhat.com>
-Date: Mon, 28 Sep 2015 16:38:32 -0500
+	id S1751638AbbI1W0V (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 28 Sep 2015 18:26:21 -0400
+Subject: [PATCH V2] generic _require_dm_target() helper, use in generic/085
+References: <5609B358.9030601@redhat.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <5609BE8B.5010707@sandeen.net>
+Date: Mon, 28 Sep 2015 17:26:19 -0500
 MIME-Version: 1.0
+In-Reply-To: <5609B358.9030601@redhat.com>
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>
+To: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>
 Cc: Angelo Dureghello <angelo.dureghello@nomovok.com>
 List-ID: <fstests@vger.kernel.org>
 
@@ -31,11 +33,16 @@ Reported-by: Angelo Dureghello <angelo.dureghello@nomovok.com>
 Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 ---
 
+V2: assign _target using actual bash syntax!  o_O
+    combine dmsetup stdout & stderr for target grep
+    modprobe the target we're looking for
+    define cleanup_dmdev() before we _notrun, trap, and try to run it
+
 diff --git a/common/rc b/common/rc
-index 3e97060..5bc0924 100644
+index 3e97060..5110261 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -1346,32 +1346,21 @@ _require_sane_bdev_flush()
+@@ -1346,32 +1346,22 @@ _require_sane_bdev_flush()
  	fi
  }
  
@@ -45,7 +52,7 @@ index 3e97060..5bc0924 100644
 +# this test requires a specific device mapper target
 +_require_dm_target()
  {
-+	_target = $1
++	_target=$1
 +
  	# require SCRATCH_DEV to be a valid block device with sane BLKFLSBUF
  	# behaviour
@@ -65,9 +72,11 @@ index 3e97060..5bc0924 100644
 -	_require_block_device $SCRATCH_DEV
 -	_require_sane_bdev_flush $SCRATCH_DEV
 -	_require_command "$DMSETUP_PROG" dmsetup
- 	modprobe dm-snapshot >/dev/null 2>&1
+-	modprobe dm-snapshot >/dev/null 2>&1
 -	$DMSETUP_PROG targets | grep -q snapshot
-+	$DMSETUP_PROG targets | grep -q $_target
++	modprobe dm-$_target >/dev/null 2>&1
++	
++	$DMSETUP_PROG targets 2>&1 | grep -q ^$_target
  	if [ $? -ne 0 ]; then
 -		_notrun "This test requires dm snapshot support"
 +		_notrun "This test requires dm $_target support"
@@ -75,18 +84,52 @@ index 3e97060..5bc0924 100644
  }
  
 diff --git a/tests/generic/085 b/tests/generic/085
-index 8398752..f452e99 100755
+index 8398752..8fb313c 100755
 --- a/tests/generic/085
 +++ b/tests/generic/085
-@@ -50,7 +50,7 @@ _supported_fs generic
-_supported_os Linux
-_require_scratch
-_require_block_device $SCRATCH_DEV
+@@ -41,6 +41,16 @@ _cleanup()
+ 	cleanup_dmdev
+ }
+ 
++cleanup_dmdev()
++{
++	# in case it's still suspended and/or mounted
++	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
++	$UMOUNT_PROG $lvdev >/dev/null 2>&1
++
++	$DMSETUP_PROG remove $node >>$seqres.full 2>&1
++	$DMSETUP_PROG mknodes >/dev/null 2>&1
++}
++
+ # get standard environment, filters and checks
+ . ./common/rc
+ . ./common/filter
+@@ -50,7 +60,7 @@ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
+ _require_block_device $SCRATCH_DEV
 -_require_command $DMSETUP_PROG
 +_require_dm_target linear
-_require_freeze
-
-setup_dmdev()
+ _require_freeze
+ 
+ setup_dmdev()
+@@ -61,16 +71,6 @@ setup_dmdev()
+ 	return $?
+ }
+ 
+-cleanup_dmdev()
+-{
+-	# in case it's still suspended and/or mounted
+-	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
+-	$UMOUNT_PROG $lvdev >/dev/null 2>&1
+-
+-	$DMSETUP_PROG remove $node >>$seqres.full 2>&1
+-	$DMSETUP_PROG mknodes >/dev/null 2>&1
+-}
+-
+ rm -f $seqres.full
+ echo "Silence is golden"
+ 
 diff --git a/tests/btrfs/049 b/tests/btrfs/049
 index 5b17a77..38ed7ad 100755
 --- a/tests/btrfs/049
@@ -295,19 +338,6 @@ index 34da1ac..8334ec9 100755
  _require_command $LVM_PROG lvm
  
  echo "Silence is golden"
-diff --git a/tests/generic/085 b/tests/generic/085
-index 8398752..f452e99 100755
---- a/tests/generic/085
-+++ b/tests/generic/085
-@@ -50,7 +50,7 @@ _supported_fs generic
- _supported_os Linux
- _require_scratch
- _require_block_device $SCRATCH_DEV
--_require_command $DMSETUP_PROG
-+_require_dm_target linear
- _require_freeze
- 
- setup_dmdev()
 diff --git a/tests/generic/090 b/tests/generic/090
 index a1f2b89..3890fc1 100755
 --- a/tests/generic/090
@@ -451,4 +481,5 @@ index a84746b..3f33635 100755
  _require_xfs_sysfs debug/log_recovery_delay
  
  echo "Silence is golden."
+
 
