@@ -1,93 +1,65 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:49206 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751271AbbI1WiF (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 28 Sep 2015 18:38:05 -0400
-Date: Mon, 28 Sep 2015 15:38:01 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH] xfs: fix merge errors in fuzzer tests
-Message-ID: <20150928223801.GH10391@birch.djwong.org>
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:12992 "EHLO
+	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751049AbbI1X3j (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 28 Sep 2015 19:29:39 -0400
+Date: Tue, 29 Sep 2015 09:28:58 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] fstests: btrfs: add test for quota groups and drop
+ snapshot
+Message-ID: <20150928232858.GA27164@dastard>
+References: <20150922221649.GB17854@wotan.suse.de>
+ <20150923024708.GK3902@dastard>
+ <20150923210516.GC17854@wotan.suse.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20150923210516.GC17854@wotan.suse.de>
 Sender: fstests-owner@vger.kernel.org
-To: david@fromorbit.com
-Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
+To: Mark Fasheh <mfasheh@suse.de>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Fix some merge errors when the fuzzer tests went in.
+On Wed, Sep 23, 2015 at 02:05:16PM -0700, Mark Fasheh wrote:
+> Since the last time I sent this test, drop snapshot was broken again with
+> respect to qgroups. What practical step could I take to get a test for that
+> in here which I can beat the btrfs developers over the head with the next
+> time someone handwaves this problem away ;)
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/xfs/085.out |    2 --
- tests/xfs/098.out |    1 -
- tests/xfs/099.out |    2 +-
- tests/xfs/100.out |    2 +-
- tests/xfs/101.out |    2 +-
- tests/xfs/102.out |    2 +-
- 6 files changed, 4 insertions(+), 7 deletions(-)
+I'll merge tests that break a filesystem as a reminder to developers
+that there is a problem that needs fixing. We do that from time to
+time for XFS issues that are either really hard to fix or not urgent
+but require significant amounts of work to correct...
 
-diff --git a/tests/xfs/085.out b/tests/xfs/085.out
-index 6303081..ff3dccd 100644
---- a/tests/xfs/085.out
-+++ b/tests/xfs/085.out
-@@ -5,8 +5,6 @@ QA output created by 085
- + check fs
- + corrupt image
- + mount image
--+ modify files
--broken: 1
- + repair fs
- + mount image (2)
- + chattr -R -i
-diff --git a/tests/xfs/098.out b/tests/xfs/098.out
-index 84a2b4d..ef0554d 100644
---- a/tests/xfs/098.out
-+++ b/tests/xfs/098.out
-@@ -5,7 +5,6 @@ QA output created by 098
- + check fs
- + corrupt image
- + mount image
--broken: 1
- + repair fs
- + mount image (2)
- + chattr -R -i
-diff --git a/tests/xfs/099.out b/tests/xfs/099.out
-index 4426859..773200b 100644
---- a/tests/xfs/099.out
-+++ b/tests/xfs/099.out
-@@ -1,4 +1,4 @@
--QA output created by 016
-+QA output created by 099
- + create scratch fs
- + mount fs image
- + make some files
-diff --git a/tests/xfs/100.out b/tests/xfs/100.out
-index 98d8dbc..97dba7c 100644
---- a/tests/xfs/100.out
-+++ b/tests/xfs/100.out
-@@ -1,4 +1,4 @@
--QA output created by 017
-+QA output created by 100
- + create scratch fs
- + mount fs image
- + make some files
-diff --git a/tests/xfs/101.out b/tests/xfs/101.out
-index 49430f7..22ca620 100644
---- a/tests/xfs/101.out
-+++ b/tests/xfs/101.out
-@@ -1,4 +1,4 @@
--QA output created by 018
-+QA output created by 101
- + create scratch fs
- + mount fs image
- + make some files
-diff --git a/tests/xfs/102.out b/tests/xfs/102.out
-index 58f493c..d8a8fa1 100644
---- a/tests/xfs/102.out
-+++ b/tests/xfs/102.out
-@@ -1,4 +1,4 @@
--QA output created by 019
-+QA output created by 102
- + create scratch fs
- + mount fs image
- + make some files
+> From: Mark Fasheh <mfasheh@suse.de>
+> 
+> [PATCH] btrfs: add test for quota groups and drop snapshot
+....
+> +# NOTE: The ability to vary tree height for this test is very useful
+> +# for debugging problems with drop_snapshot(). As a result we retain
+> +# that parameter even though the test below always does level 2 trees.
+> +_explode_fs_tree () {
+> +	local level=$1;
+> +	local loc="$2";
+> +	local n;
+> +
+> +	if [ -z $loc ]; then
+> +	    echo "specify location for fileset"
+> +	    exit 1;
+> +	fi
+> +
+> +	case $level in
+> +	    1)# this always reproduces level 1 trees
+> +		n=10;
+> +		;;
+> +	    2)# this always reproduces level 2 trees
+> +		n=1500
+
+Still some minor whitespace issues, but I can fix that on commit
+as everything else looks fine.
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
