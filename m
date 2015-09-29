@@ -1,41 +1,50 @@
-Received: from mx1.redhat.com ([209.132.183.28]:37657 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756015AbbI2PKo (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 29 Sep 2015 11:10:44 -0400
-Date: Tue, 29 Sep 2015 23:10:40 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH V3] generic _require_dm_target() helper, use in
- generic/085
-Message-ID: <20150929151040.GK30949@dhcp-13-216.nay.redhat.com>
-References: <5609B358.9030601@redhat.com>
- <5609BE8B.5010707@sandeen.net>
- <560A9980.8040509@redhat.com>
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:6480 "EHLO
+	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752417AbbI2Vvj (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 29 Sep 2015 17:51:39 -0400
+Date: Wed, 30 Sep 2015 07:51:35 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH v2] fstests: generic: Check if a bull fallocate will
+ change extent number
+Message-ID: <20150929215135.GZ3902@dastard>
+References: <1443519264-19184-1-git-send-email-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <560A9980.8040509@redhat.com>
+In-Reply-To: <1443519264-19184-1-git-send-email-quwenruo@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@redhat.com>
-Cc: Eric Sandeen <sandeen@sandeen.net>, fstests <fstests@vger.kernel.org>, Angelo Dureghello <angelo.dureghello@nomovok.com>
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 29, 2015 at 09:00:32AM -0500, Eric Sandeen wrote:
-> generic/085 was failing on a machine w/o devicemapper kernel
-> support because it requires the linear target, but didn't
-> explicitly test for it.
-> 
-> I could have cut & pasted _require_dm_linear(), but chose
-> to go the route of a generic helper, _require_dm_target $FOO,
-> because some day someone will need the zero target, the error
-> target, or who knows.
-> 
-> Add the helper, use it in test generic/085, and convert
-> _require_dm_flakey, _require_dm_snapshot, and
-> _dmerror_required with this new helper.
-> 
-> Reported-by: Angelo Dureghello <angelo.dureghello@nomovok.com>
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+On Tue, Sep 29, 2015 at 05:34:24PM +0800, Qu Wenruo wrote:
+> Normally, a bull fallocate call on a fully written and synced file
+> should not add an extent.
 
-Looks good to me, thanks Eric!
+Why not? Filesystems can do whatever they want with extents during
+a fallocate call. e.g. if the blocks are shared, then fallocate
+might break the block sharing so future overwrites don't get
+ENOSPC. This is a requirement set down by posix_fallocate(3)
 
-Reviewed-by: Eryu Guan <eguan@redhat.com>
+"After a successful call to posix_fallocate(), subsequent writes to
+bytes in the specified range are guaranteed not  to fail because of
+lack of disk space."
+
+Hence if you've got a file with shared blocks, a "full fallocate"
+must change the extent layout to break the sharing. As such, the
+premise of this test is wrong.
+
+That's not to say that btrfs has a bug:
+
+> Btrfs has a bug to always truncate the last page if the fallocate start
+> offset is smaller than inode size.
+
+But it' not clear that this behaviour is actually a bug if it's not
+changing the file data.
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
