@@ -1,216 +1,77 @@
-Received: from mx1.redhat.com ([209.132.183.28]:58506 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754627AbbI3Qxj (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 30 Sep 2015 12:53:39 -0400
-Date: Wed, 30 Sep 2015 12:53:37 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH V2] test extending sub-block AIO writes for races
-Message-ID: <20150930165337.GB16725@bfoster.bfoster>
-References: <560B34E3.4080107@sandeen.net>
- <560C06E3.4090708@sandeen.net>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <560C06E3.4090708@sandeen.net>
+Received: from mail-la0-f52.google.com ([209.85.215.52]:33838 "EHLO
+	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932562AbbI3T6v (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 30 Sep 2015 15:58:51 -0400
+From: Roman Lebedev <lebedev.ri@gmail.com>
+Subject: kernel BUG when fsync'ing file in a overlayfs merged dir, located on btrfs
+Date: Wed, 30 Sep 2015 22:57:44 +0300
+Message-Id: <1443643065-16460-1-git-send-email-lebedev.ri@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: fstests <fstests@vger.kernel.org>, xfs@oss.sgi.com
+To: linux-btrfs@vger.kernel.org, linux-unionfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, fstests@vger.kernel.org
+Cc: Roman Lebedev <lebedev.ri@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 30, 2015 at 10:59:31AM -0500, Eric Sandeen wrote:
-> This tests bfoster's
-> [PATCH 1/2] xfs: always drain dio before extending aio write submission
-> patch; it launches four adjacent 1k IOs past EOF, then reads back
-> to see if we have 4k worth of the data we wrote, or something else - 
-> possibly zeros from sub-block zeroing and eof racing.
-> 
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> ---
-> 
-> V2:
-> 	do 4x512 IOs to get as much sub-block goodness as possible
-> 	fix up comments & typos
-> 
-> diff --git a/src/aio-dio-regress/aio-dio-eof-race.c b/src/aio-dio-regress/aio-dio-eof-race.c
-> new file mode 100644
-> index 0000000..ce5d715
-> --- /dev/null
-> +++ b/src/aio-dio-regress/aio-dio-eof-race.c
-> @@ -0,0 +1,173 @@
-...
-> +void
-> +dump_buffer(
-> +	void	*buf,
-> +	off64_t	offset,
-> +	ssize_t	len)
-> +{
-> +	int	i, j;
-> +	char	*p;
-> +	int	new;
-> +	
+Hello.
 
-Whitespace damage on the line above...
+My / is btrfs.
+To do some my local stuff more cleanly i wanted to use overlayfs, 
+but it didn't quite work.
 
-> +	for (i = 0, p = (char *)buf; i < len; i += 16) {
-> +		char    *s = p;
-> +
-...
-> +
-> +	}
-> +	printf("%08llx\n", (unsigned long long)offset + i);
-> +}
-> +
-> +int main(int argc, char *argv[])
-> +{
-...
-> +		/*
-> +		 * Split the buffer into multiple I/Os to send a mix of block
-> +		 * aligned/unaligned writes as well as writes that start beyond
-> +		 * the current EOF. This stresses things like inode size
-> +		 * management and stale block zeroing for races and can lead to
-> +		 * data corruption when not handled properly.
-> +		 */
-> +		io_prep_pwrite(&iocb1, fd, buf, BUF_SIZE/4, eof + 0*BUF_SIZE/4);
-> +		io_prep_pwrite(&iocb2, fd, buf, BUF_SIZE/4, eof + 1*BUF_SIZE/4);
-> +		io_prep_pwrite(&iocb3, fd, buf, BUF_SIZE/4, eof + 2*BUF_SIZE/4);
-> +		io_prep_pwrite(&iocb4, fd, buf, BUF_SIZE/4, eof + 3*BUF_SIZE/4);
-> +	
+Simple non-automatic sequence to reproduce the issue:
+ mkdir lower upper work merged
+ mount -t overlay overlay -olowerdir=lower,upperdir=upper,workdir=work merged
+ vi merged/file
+ :wq
 
-... and above here as well. Otherwise looks good to me. Thanks again!
+Results in vi being killed on exit, and the following trace appears in dmesg:
 
-Reviewed-by: Brian Foster <bfoster@redhat.com>
+[34304.047841] BUG: unable to handle kernel paging request at 0000000009618e56
+[34304.047846] IP: [<ffffffffa01667b6>] btrfs_sync_file+0xa6/0x350 [btrfs]
+[34304.047864] PGD 0 
+[34304.047866] Oops: 0002 [#12] SMP 
+[34304.047867] Modules linked in: overlay cpufreq_userspace cpufreq_stats cpufreq_powersave cpufreq_conservative binfmt_misc nfsd auth_rpcgss oid_registry nfs_acl nfs lockd grace fscache sunrpc fglrx(PO) nls_utf8 joydev nls_cp437 vfat fat hid_generic usbhid kvm_amd hid kvm crct10dif_pclmul crc32_pclmul ghash_clmulni_intel snd_hda_codec_realtek snd_hda_codec_generic snd_hda_codec_hdmi sha256_ssse3 sha256_generic snd_hda_intel snd_hda_codec hmac drbg ansi_cprng aesni_intel snd_hda_core aes_x86_64 mxm_wmi snd_hwdep lrw eeepc_wmi snd_pcm gf128mul asus_wmi sparse_keymap rfkill video snd_timer glue_helper sp5100_tco evdev ablk_helper e1000e ohci_pci pcspkr snd ohci_hcd xhci_pci edac_mce_amd ehci_pci serio_raw xhci_hcd soundcore fam15h_power ehci_hcd cryptd edac_core ptp pps_core usbcore k10temp i2c_piix4
+[34304.047893]  sg usb_common acpi_cpufreq wmi tpm_infineon button processor shpchp tpm_tis tpm thermal_sys tcp_yeah tcp_vegas it87 hwmon_vid loop parport_pc ppdev lp parport autofs4 crc32c_generic btrfs xor raid6_pq sd_mod crc32c_intel ahci libahci libata scsi_mod
+[34304.047905] CPU: 4 PID: 13990 Comm: vi Tainted: P      D    O    4.2.0-1-amd64 #1 Debian 4.2.1-2
+[34304.047906] Hardware name: To be filled by O.E.M. To be filled by O.E.M./CROSSHAIR V FORMULA-Z, BIOS 2201 03/23/2015
+[34304.047908] task: ffff8803d5f7f2c0 ti: ffff8806a3ec8000 task.ti: ffff8806a3ec8000
+[34304.047909] RIP: 0010:[<ffffffffa01667b6>]  [<ffffffffa01667b6>] btrfs_sync_file+0xa6/0x350 [btrfs]
+[34304.047920] RSP: 0018:ffff8806a3ecbe88  EFLAGS: 00010246
+[34304.047921] RAX: ffff8803d5f7f2c0 RBX: ffff8807b2d46600 RCX: ffffffff81a6ad00
+[34304.047922] RDX: 0000000080000000 RSI: 0000000000000000 RDI: ffff8807c19f8970
+[34304.047923] RBP: ffff8807c19f8970 R08: 0000000000000000 R09: 0000000000000001
+[34304.047924] R10: 0000000000000000 R11: 0000000000000246 R12: ffff8807c19f88c8
+[34304.047925] R13: 0000000000000000 R14: 0000000009618b22 R15: 000055cb20184a70
+[34304.047926] FS:  00007f31c5492800(0000) GS:ffff88082fd00000(0000) knlGS:0000000000000000
+[34304.047927] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[34304.047928] CR2: 0000000009618e56 CR3: 000000044af44000 CR4: 00000000000406e0
+[34304.047929] Stack:
+[34304.047930]  0000000000000001 7fffffffffffffff ffff880403d5b918 8000000000000000
+[34304.047932]  0000000000000000 0000000000000000 000055cb20186d40 ffff8807b2d46600
+[34304.047933]  0000000000000004 ffff88044b249000 0000000000000020 ffff8807b2d46600
+[34304.047935] Call Trace:
+[34304.047939]  [<ffffffff811e7038>] ? do_fsync+0x38/0x60
+[34304.047940]  [<ffffffff811e72b0>] ? SyS_fsync+0x10/0x20
+[34304.047943]  [<ffffffff8154de72>] ? system_call_fast_compare_end+0xc/0x6b
+[34304.047944] Code: 49 8b 0f 48 85 c9 75 e9 eb b3 48 8b 44 24 08 49 8d ac 24 a8 00 00 00 48 89 ef 4c 29 e8 48 83 c0 01 48 89 44 24 18 e8 3a 59 3e e1 <f0> 41 ff 86 34 03 00 00 49 8b 84 24 70 ff ff ff 48 c1 e8 07 83 
+[34304.047959] RIP  [<ffffffffa01667b6>] btrfs_sync_file+0xa6/0x350 [btrfs]
+[34304.047970]  RSP <ffff8806a3ecbe88>
+[34304.047970] CR2: 0000000009618e56
+[34304.047972] ---[ end trace 414199893a542949 ]---
 
-> +		err = io_submit(ctx, 4, iocbs);
-> +		if (err != 4) {
-> +			fprintf(stderr, "error %s during %s\n",
-> +				strerror(err),
-> +				"io_submit");
-> +			return 1;
-> +		}
-> +
-> +		err = io_getevents(ctx, 4, 4, evs, NULL);
-> +		if (err != 4) {
-> +			fprintf(stderr, "error %s during %s\n",
-> +				strerror(err),
-> +				"io_getevents");
-> +			return 1;
-> +		}
-> +
-> +		/*
-> +		 * And then read it back.
-> +		 *
-> +		 * Using pread to keep it simple, but AIO has the same effect.
-> +		 * eof is the prior eof; we just wrote BUF_SIZE more.
-> +		 */
-> +		if (pread(fd, buf, BUF_SIZE, eof) != BUF_SIZE) {
-> +			perror("pread");
-> +			return 1;
-> +		}
-> +
-> +		/*
-> +		 * We launched 4 AIOs which, stitched together, should write
-> +		 * a seamless BUF_SIZE worth of IO_PATTERN to the last block.
-> +		 */
-> +		if (memcmp(buf, cmp_buf, BUF_SIZE)) {
-> +			printf("corruption while extending from %ld\n", eof);
-> +			dump_buffer(buf, 0, BUF_SIZE);
-> +			return 1;
-> +		}
-> +	}
-> +
-> +	printf("Success, all done.\n");
-> +	return 0;
-> +}
-> diff --git a/tests/generic/326 b/tests/generic/326
-> new file mode 100755
-> index 0000000..f20375a
-> --- /dev/null
-> +++ b/tests/generic/326
-> @@ -0,0 +1,65 @@
-> +#! /bin/bash
-> +# FS QA Test No. 326
-> +#
-> +# Test races while extending past EOF via sub-block AIO writes
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2015 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +    cd /
-> +    rm -f $TEST_DIR/tst-aio-dio-eof-race
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +_supported_fs generic
-> +_supported_os Linux
-> +
-> +_require_test
-> +_require_sparse_files
-> +_require_aiodio aio-dio-eof-race
-> +
-> +# Test does 512 byte DIO, so make sure that'll work
-> +logical_block_size=`_min_dio_alignment $TEST_DEV`
-> +
-> +if [ "$logical_block_size" -gt "512" ]; then
-> +	_notrun "device block size: $logical_block_size greater than 512"
-> +fi
-> +
-> +# We don't mind 512-byte fs blocks; the IOs won't be sub-block,
-> +# but the test should still pass, even if it doesn't stress the code
-> +# we're targeting.
-> +
-> +# Note, this test does several extending loops internally
-> +$AIO_TEST $TEST_DIR/tst-aio-dio-eof-race
-> +
-> +status=$?
-> +exit
-> diff --git a/tests/generic/326.out b/tests/generic/326.out
-> new file mode 100644
-> index 0000000..22a3e78
-> --- /dev/null
-> +++ b/tests/generic/326.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 326
-> +Success, all done.
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 4ae256f..a5f3008 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -207,3 +207,4 @@
->  323 auto aio stress
->  324 auto fsr quick
->  325 auto quick data log
-> +326 auto quick aio
-> 
-> _______________________________________________
-> xfs mailing list
-> xfs@oss.sgi.com
-> http://oss.sgi.com/mailman/listinfo/xfs
+I was able to create a new fstests test that reproduces my issue,
+and i'm sending it as follow-up to this message.
+
+Roman Lebedev (1):
+  fstests: generic: Test that fsync works on file in overlayfs merged
+    directory
+
+ tests/generic/111     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/111.out |  5 ++++
+ tests/generic/group   |  1 +
+ 3 files changed, 86 insertions(+)
+ create mode 100755 tests/generic/111
+ create mode 100644 tests/generic/111.out
+
+-- 
+2.6.0
+
