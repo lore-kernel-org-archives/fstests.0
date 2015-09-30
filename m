@@ -1,59 +1,32 @@
-Received: from sandeen.net ([63.231.237.45]:39669 "EHLO sandeen.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751002AbbI3WH6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 30 Sep 2015 18:07:58 -0400
-Subject: Re: [RFC PATCH] fstests: generic: Test that fsync works on file in
- overlayfs merged directory
-References: <1443643065-16460-1-git-send-email-lebedev.ri@gmail.com>
- <1443643065-16460-2-git-send-email-lebedev.ri@gmail.com>
- <20150930215640.GH27164@dastard>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <560C5D3A.8010800@sandeen.net>
-Date: Wed, 30 Sep 2015 17:07:54 -0500
-MIME-Version: 1.0
-In-Reply-To: <20150930215640.GH27164@dastard>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>, Roman Lebedev <lebedev.ri@gmail.com>
-Cc: linux-unionfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-List-ID: <fstests@vger.kernel.org>
+From: Duncan <1i5t5.duncan@cox.net>
+Subject: Re: [PATCH v2] fstests: generic: Check if a bull fallocate will
+ change extent number
+Date: Wed, 30 Sep 2015 06:42:43 +0000 (UTC)
+Message-ID: <pan$59b34$7400fdb5$b216a68a$8bdcfb8f@cox.net>
+References: <1443519264-19184-1-git-send-email-quwenruo@cn.fujitsu.com>
+	<20150929100013.GD25907@carfax.org.uk> <560A6451.6050808@gmx.com>
+	<CAL3q7H4+xS7OOJd-Ny0zzA0a4JVrNHbhzCKStKcTReqriYyKrw@mail.gmail.com>
+	<560A6C85.2020809@gmx.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-btrfs-owner@vger.kernel.org>
+Sender: linux-btrfs-owner@vger.kernel.org
+To: linux-btrfs@vger.kernel.org
+Cc: fstests@vger.kernel.org
+List-Id: fstests@vger.kernel.org
 
+Qu Wenruo posted on Tue, 29 Sep 2015 18:48:37 +0800 as excerpted:
 
+> Both gives quite good expression, I'll pick one of them.
 
-On 9/30/15 4:56 PM, Dave Chinner wrote:
-> On Wed, Sep 30, 2015 at 10:57:45PM +0300, Roman Lebedev wrote:
->> As per overlayfs documentation, any activity on a merged directory
->> for a application that is doing such activity should work exactly
->> as if that would be a normal, non overlayfs-merged directory.
->>
->> That is, e.g. simple fopen-fwrite-fsync-fclose sequence should
->> work just fine.
-> 
-> We have plenty of tests that do things like that.
-> 
->> But apparently it does not. Add a simple generic test to check that.
->> As of right now (linux-4.2.1) this test fails at least on btrfs.
->>
->> PS: An alternative (and probably better approach) would be to run
->> fstests test suite with TEST_DIR set to overlayfs work directory.
-> 
-> Much better is to run xfstests directly on overlayfs. THere have
-> been some patches to do that posted in the past, but those patches
-> and discussions kinda ended up going nowhere:
-> 
-> http://www.mail-archive.com/fstests@vger.kernel.org/msg00474.html
-> 
-> Perhaps you'd like to pick this up, and then overlay will by much
-> easier to test and hence likely not to have bugs like this...
+... And for the one-line title, /bull/bad/ should do it. =:^)
 
-Yeah, that could still be used for fun, but Zach's POV was that
-we should just have a specific overlayfs config (dictating paths
-to over/under/merge/around/through/whatever directories), a special
-mount_overlayfs helper, etc, ala NFS & CIFS.  It may actually be
-easier than what I proposed.
+People wanting details about bad /how/ can look at the fuller description 
+or source.
 
-If you want to take a stab at it I'm happy to help, answer questions,
-etc - I'm not sure when I'll get back to it...
+-- 
+Duncan - List replies preferred.   No HTML msgs.
+"Every nonfree program has a lord, a master --
+and if you use the program, he is your master."  Richard Stallman
 
--Eric
