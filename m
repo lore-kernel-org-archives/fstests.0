@@ -1,291 +1,119 @@
-Received: from sandeen.net ([63.231.237.45]:46510 "EHLO sandeen.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752060AbbI3BDc (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 29 Sep 2015 21:03:32 -0400
-From: Eric Sandeen <sandeen@sandeen.net>
-Subject: [PATCH] test extending sub-block AIO writes for races
-Message-ID: <560B34E3.4080107@sandeen.net>
-Date: Tue, 29 Sep 2015 20:03:31 -0500
+Received: from cn.fujitsu.com ([59.151.112.132]:16878 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752159AbbI3BFT (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 29 Sep 2015 21:05:19 -0400
+Subject: Re: [PATCH v2] fstests: generic: Check if a bull fallocate will
+ change extent number
+References: <1443519264-19184-1-git-send-email-quwenruo@cn.fujitsu.com>
+ <20150929215135.GZ3902@dastard>
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Message-ID: <560B354B.9050400@cn.fujitsu.com>
+Date: Wed, 30 Sep 2015 09:05:15 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20150929215135.GZ3902@dastard>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>
-Cc: xfs@oss.sgi.com
+To: Dave Chinner <david@fromorbit.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This tests bfoster's
-[PATCH 1/2] xfs: always drain dio before extending aio write submission
-patch; it launches four adjacent 1k IOs past EOF, then reads back
-to see if we have 4k worth of the data we wrote, or something else - 
-possibly zeros from sub-block zeroing and eof racing.
-
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
----
 
 
-diff --git a/src/aio-dio-regress/aio-dio-eof-race.c b/src/aio-dio-regress/aio-dio-eof-race.c
-new file mode 100644
-index 0000000..c1ce695
---- /dev/null
-+++ b/src/aio-dio-regress/aio-dio-eof-race.c
-@@ -0,0 +1,170 @@
-+/*
-+ * Launch 4 file-extending extending sub-block AIOs and ensure that we
-+ * don't see data corruption when they're all complete.
-+ *
-+ * Copyright (C) 2015 Red Hat, Inc. All Rights reserved.
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License as published by
-+ * the Free Software Foundation; either version 2 of the License, or
-+ * (at your option) any later version.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-+ */
-+#include <sys/stat.h>
-+#include <sys/types.h>
-+#include <errno.h>
-+#include <fcntl.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <unistd.h>
-+#include <ctype.h>
-+
-+#include <libaio.h>
-+
-+#define BUF_SIZE	4096
-+#define IO_PATTERN	0xab
-+
-+void
-+dump_buffer(
-+	void	*buf,
-+	off64_t	offset,
-+	ssize_t	len)
-+{
-+	int	i, j;
-+	char	*p;
-+	int	new;
-+	
-+	for (i = 0, p = (char *)buf; i < len; i += 16) {
-+		char    *s = p;
-+
-+		if (i && !memcmp(p, p - 16, 16)) {
-+			new = 0;
-+		} else {
-+			if (i)
-+				printf("*\n");
-+			new = 1;
-+		}
-+
-+		if (!new) {
-+			p += 16;
-+			continue;
-+		}
-+
-+		printf("%08llx  ", (unsigned long long)offset + i);
-+		for (j = 0; j < 16 && i + j < len; j++, p++)
-+			printf("%02x ", *p);
-+		printf(" ");
-+		for (j = 0; j < 16 && i + j < len; j++, s++) {
-+			if (isalnum((int)*s))
-+				printf("%c", *s);
-+			else
-+				printf(".");
-+		}
-+		printf("\n");
-+
-+	}
-+	printf("%08llx\n", (unsigned long long)offset + i);
-+}
-+
-+int main(int argc, char *argv[])
-+{
-+	struct io_context *ctx = NULL;
-+	struct io_event evs[4];
-+	struct iocb iocb1, iocb2, iocb3, iocb4;
-+	struct iocb *iocbs[] = { &iocb1, &iocb2, &iocb3, &iocb4 };
-+	void *buf;
-+	struct stat statbuf;
-+	char cmp_buf[BUF_SIZE];
-+	int fd, err = 0;
-+	off_t eof;
-+
-+	fd = open(argv[1], O_DIRECT | O_CREAT | O_TRUNC | O_RDWR, 0600);
-+	if (fd == -1) {
-+		perror("open");
-+		return 1;
-+	}
-+
-+	err = posix_memalign(&buf, BUF_SIZE, BUF_SIZE);
-+	if (err) {
-+		fprintf(stderr, "error %s during %s\n",
-+			strerror(err),
-+			"posix_memalign");
-+		return 1;
-+	}
-+	memset(cmp_buf, IO_PATTERN, BUF_SIZE);
-+
-+	err = io_setup(4, &ctx);
-+	if (err) {
-+		fprintf(stderr, "error %s during %s\n",
-+			strerror(err),
-+			"io_setup");
-+		return 1;
-+	}
-+
-+	eof = 0;
-+
-+	/* Keep extending until 8MB */
-+	while (eof < 8 * 1024 * 1024) {
-+		memset(buf, IO_PATTERN, BUF_SIZE);
-+
-+		fstat(fd, &statbuf);
-+		eof = statbuf.st_size;
-+
-+		/*
-+		 * 4 ios, racing to extend EOF, combined they write full BUF_SIZE
-+		 */
-+		io_prep_pwrite(&iocb1, fd, buf, BUF_SIZE/4, eof + 0 * BUF_SIZE/4);
-+		io_prep_pwrite(&iocb2, fd, buf, BUF_SIZE/4, eof + 1 * BUF_SIZE/4);
-+		io_prep_pwrite(&iocb3, fd, buf, BUF_SIZE/4, eof + 2 * BUF_SIZE/4);
-+		io_prep_pwrite(&iocb4, fd, buf, BUF_SIZE/4, eof + 3 * BUF_SIZE/4);
-+	
-+		err = io_submit(ctx, 4, iocbs);
-+		if (err != 4) {
-+			fprintf(stderr, "error %s during %s\n",
-+				strerror(err),
-+				"io_submit");
-+			return 1;
-+		}
-+
-+		err = io_getevents(ctx, 4, 4, evs, NULL);
-+		if (err != 4) {
-+			fprintf(stderr, "error %s during %s\n",
-+				strerror(err),
-+				"io_getevents");
-+			return 1;
-+		}
-+
-+		/*
-+		 * And then read it back.
-+		 *
-+		 * Using pread to keep it simple, but AIO has the same effect.
-+		 *
-+		 * eof is the old eof, we just wrote BUF_SIZE more
-+		 */
-+		if (pread(fd, buf, BUF_SIZE, eof) != BUF_SIZE) {
-+			perror("pread");
-+			return 1;
-+		}
-+
-+		/*
-+		 * We launched 4 AIOs which, stiched together, should write
-+		 * a seamless BUF_SIZE worth of IO_PATTERN to the last block
-+		 */
-+		if (memcmp(buf, cmp_buf, BUF_SIZE)) {
-+			printf("corruption while extending from %ld\n", eof);
-+			dump_buffer(buf, 0, BUF_SIZE);
-+			return 1;
-+		}
-+	}
-+
-+	printf("Success, all done.\n");
-+	return 0;
-+}
-diff --git a/tests/generic/326 b/tests/generic/326
-new file mode 100755
-index 0000000..7db04ac
---- /dev/null
-+++ b/tests/generic/326
-@@ -0,0 +1,64 @@
-+#! /bin/bash
-+# FS QA Test No. 326
-+#
-+# Test races while extending past EOF via sub-block AIO writes
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Red Hat, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -f $TEST_DIR/tst-aio-dio-eof-race
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+_supported_fs generic
-+_supported_os Linux
-+
-+_require_test
-+_require_sparse_files
-+_require_aiodio aio-dio-eof-race
-+
-+# Test does 512 byte DIO, so make sure that'll work
-+logical_block_size=`_min_dio_alignment $TEST_DEV`
-+
-+if [ "$logical_block_size" -gt "512" ]; then
-+	_notrun "device block size: $logical_block_size greater than 512"
-+fi
-+
-+# If 512 isn't a sub-block IO, the test should still pass, so
-+# let that go.
-+
-+# This test does several extending loops internally
-+$AIO_TEST $TEST_DIR/tst-aio-dio-eof-race
-+
-+status=$?
-+exit
-diff --git a/tests/generic/326.out b/tests/generic/326.out
-new file mode 100644
-index 0000000..22a3e78
---- /dev/null
-+++ b/tests/generic/326.out
-@@ -0,0 +1,2 @@
-+QA output created by 326
-+Success, all done.
-diff --git a/tests/generic/group b/tests/generic/group
-index 4ae256f..a5f3008 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -207,3 +207,4 @@
- 323 auto aio stress
- 324 auto fsr quick
- 325 auto quick data log
-+326 auto quick aio
+Dave Chinner wrote on 2015/09/30 07:51 +1000:
+> On Tue, Sep 29, 2015 at 05:34:24PM +0800, Qu Wenruo wrote:
+>> Normally, a bull fallocate call on a fully written and synced file
+>> should not add an extent.
+>
+> Why not? Filesystems can do whatever they want with extents during
+> a fallocate call. e.g. if the blocks are shared, then fallocate
+> might break the block sharing so future overwrites don't get
+> ENOSPC. This is a requirement set down by posix_fallocate(3)
+>
+> "After a successful call to posix_fallocate(), subsequent writes to
+> bytes in the specified range are guaranteed not  to fail because of
+> lack of disk space."
+>
+> Hence if you've got a file with shared blocks, a "full fallocate"
+> must change the extent layout to break the sharing. As such, the
+> premise of this test is wrong.
 
+First, btrfs never meets the posix_fallocate requirement by its COW nature.
 
+Btrfs fallocate can only ensure at most next write will not cause ENOSPC.
+Only when btrfs fallocate a new prealloc extent, next write into it may 
+use the space if they are not shared between different snapshots.
+
+Under most case, btrfs fallocate follows the behavior of other non-COW 
+filesystems.
+Which means, btrfs won't alloc new extent if there is existing extent, 
+not matter if it's shared or not.
+
+As a result, fallocate in btrfs only works in a limited use-case, and 
+can easily break posix requirement.
+Like the following case without snapshots:
+1)Fallocate 0~50M
+2)Write 0~50M		<- Will not return ENOSPC
+3)Write 0~25M		<- COW happens, allocate another 25M,
+			   may cause ENOSPC.
+Or even easier with snapshot:
+1)Fallocate 0~50M in subvol A
+2)Snapshot subvol A into snap B
+3)Write 0~25M in subvol A *OR* snap B <- COW happens, may cause ENOSPC
+
+As in step 3), fallocated 50M is shared, so write will be forced COW.
+
+So I'd prefer to make btrfs follows the behavior of other non-COW 
+filesystems, as posix standard doesn't fit well here.
+>
+> That's not to say that btrfs has a bug:
+>
+>> Btrfs has a bug to always truncate the last page if the fallocate start
+>> offset is smaller than inode size.
+>
+> But it' not clear that this behaviour is actually a bug if it's not
+> changing the file data.
+File data is not changed, as btrfs just COW the last tailing page, as 
+reset the last already 0 part.
+
+Like the follow ascii arts:
+
+0)Before
+0	4K	8K	12K	16K
+|///////////////////////////|000|
+|<----------Extent A----------->|
+The file is 14K size, on disk(to be accurate, btrfs logical address 
+space) it takes 16K, with last 2K padding 0.
+
+And all that 16K is in extent A.
+
+1)Fallocate 0~14K
+In fact, all space in range 0~14K is allocated, so there is no need to 
+reallocate any space.
+
+2)But in btrfs
+Result will be:
+0	4K	8K	12K	16K
+|///////////////////////////|000|
+|<------Extent A------->|<--B-->|
+
+Btrfs has a wrong judgment, which will always re-padding the last page.
+Causing a new extent, extent B to be created.
+Even the contents is the same with original last page.
+
+It's OK not to consider it as a bug, at least data is not corrupted.
+But IMO the btrfs behavior is not needed and need optimization.
+So kernel patch is submitted to btrfs ml:
+https://patchwork.kernel.org/patch/7284431/
+
+And if fstests is not the proper place, any idea where such "test case" 
+should belong?
+
+Thanks,
+Qu
+
+>
+> Cheers,
+>
+> Dave.
+>
