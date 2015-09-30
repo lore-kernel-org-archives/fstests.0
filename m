@@ -1,144 +1,355 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:23552 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753319AbbI3Gbm (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 30 Sep 2015 02:31:42 -0400
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH] fstests: btrfs: Check if fallocate re-truncates page beyond EOF
-Date: Wed, 30 Sep 2015 14:31:38 +0800
-Message-ID: <1443594698-5285-1-git-send-email-quwenruo@cn.fujitsu.com>
+Received: from mx1.redhat.com ([209.132.183.28]:48727 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755402AbbI3Lrg (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 30 Sep 2015 07:47:36 -0400
+Date: Wed, 30 Sep 2015 07:47:34 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: Re: [PATCH] test extending sub-block AIO writes for races
+Message-ID: <20150930114733.GB62991@bfoster.bfoster>
+References: <560B34E3.4080107@sandeen.net>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <560B34E3.4080107@sandeen.net>
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: fstests <fstests@vger.kernel.org>, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-Even the fallocate range doesn't cover the last page of a file, btrfs
-will still re-truncate the last page.
+On Tue, Sep 29, 2015 at 08:03:31PM -0500, Eric Sandeen wrote:
+> This tests bfoster's
+> [PATCH 1/2] xfs: always drain dio before extending aio write submission
+> patch; it launches four adjacent 1k IOs past EOF, then reads back
+> to see if we have 4k worth of the data we wrote, or something else - 
+> possibly zeros from sub-block zeroing and eof racing.
+> 
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+> ---
+> 
 
-Such behavior is completely duplicated and unneeded, and fixed by the
-following kernel patch:
+Thanks for the test! A few high level comments...
 
-btrfs: Avoid truncate tailing page if fallocate range doesn't exceed
-inode size
+> 
+> diff --git a/src/aio-dio-regress/aio-dio-eof-race.c b/src/aio-dio-regress/aio-dio-eof-race.c
+> new file mode 100644
+> index 0000000..c1ce695
+> --- /dev/null
+> +++ b/src/aio-dio-regress/aio-dio-eof-race.c
+> @@ -0,0 +1,170 @@
+> +/*
+> + * Launch 4 file-extending extending sub-block AIOs and ensure that we
+> + * don't see data corruption when they're all complete.
+> + *
 
-Add this test case to check that malfunction.
+It might be good to point out that this stresses EOF zeroing, which also
+means a key point is not just file-extending I/O, but file-extending I/O
+beyond current EOF (e.g., I/O that creates holes between the current EOF
+and start of the new I/O).
 
-Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
----
- tests/btrfs/104     | 83 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/104.out |  3 ++
- tests/btrfs/group   |  1 +
- 3 files changed, 87 insertions(+)
- create mode 100755 tests/btrfs/104
- create mode 100644 tests/btrfs/104.out
+> + * Copyright (C) 2015 Red Hat, Inc. All Rights reserved.
+> + *
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License as published by
+> + * the Free Software Foundation; either version 2 of the License, or
+> + * (at your option) any later version.
+> + *
+> + * This program is distributed in the hope that it will be useful,
+> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
+> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> + * GNU General Public License for more details.
+> + *
+> + * You should have received a copy of the GNU General Public License
+> + * along with this program; if not, write to the Free Software
+> + * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+> + */
+> +#include <sys/stat.h>
+> +#include <sys/types.h>
+> +#include <errno.h>
+> +#include <fcntl.h>
+> +#include <stdio.h>
+> +#include <stdlib.h>
+> +#include <unistd.h>
+> +#include <ctype.h>
+> +
+> +#include <libaio.h>
+> +
+> +#define BUF_SIZE	4096
 
-diff --git a/tests/btrfs/104 b/tests/btrfs/104
-new file mode 100755
-index 0000000..f3ddc15
---- /dev/null
-+++ b/tests/btrfs/104
-@@ -0,0 +1,83 @@
-+#! /bin/bash
-+# FS QA Test 104
-+#
-+# Test that calling fallocate against a range which is already
-+# allocated does not truncate beyond EOF
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Fujitsu. All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/defrag
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_need_to_be_root
-+
-+# Use 64K file size to match any sectorsize
-+# And with a unaligned tailing range to ensure it will be at least 2 pages
-+filesize=$(( 64 * 1024 + 1024 ))
-+
-+# Fallocate a range that will not cover the tailing page
-+fallocrange=$(( 64 * 1024 ))
-+
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount
-+$XFS_IO_PROG -f -c "pwrite 0 $filesize" $SCRATCH_MNT/foo | _filter_xfs_io
-+sync
-+orig_extent_nr=`_extent_count $SCRATCH_MNT/foo`
-+
-+# As all space are allocated and even written to disk, this falloc
-+# should do nothing with extent modification.
-+$XFS_IO_PROG -f -c "falloc 0 $fallocrange" $SCRATCH_MNT/foo
-+sync
-+new_extent_nr=`_extent_count $SCRATCH_MNT/foo`
-+
-+echo "orig: $orig_extent_nr, new: $new_extent_nr" >> $seqres.full
-+
-+if [ "x$orig_extent_nr" != "x$new_extent_nr" ]; then
-+	echo "Extent beyond EOF is re-truncated"
-+	echo "orig_extent_nr: $orig_extent_nr new_extent_nr: $new_extent_nr"
-+fi
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/104.out b/tests/btrfs/104.out
-new file mode 100644
-index 0000000..4c43e17
---- /dev/null
-+++ b/tests/btrfs/104.out
-@@ -0,0 +1,3 @@
-+QA output created by 104
-+wrote 66560/66560 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index e92a65a..640336b 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -106,3 +106,4 @@
- 101 auto quick replace
- 102 auto quick metadata enospc
- 103 auto quick clone compress
-+104 auto quick prealloc
--- 
-1.8.3.1
+Have you considered making the buffer size variable? As is currently
+written, I don't think this will reproduce the problem on 512b or 1024b
+fsb filesystems because at least some of the file-extending I/Os must
+not be block aligned for it to trigger.
 
+> +#define IO_PATTERN	0xab
+> +
+> +void
+> +dump_buffer(
+> +	void	*buf,
+> +	off64_t	offset,
+> +	ssize_t	len)
+> +{
+> +	int	i, j;
+> +	char	*p;
+> +	int	new;
+> +	
+> +	for (i = 0, p = (char *)buf; i < len; i += 16) {
+> +		char    *s = p;
+> +
+> +		if (i && !memcmp(p, p - 16, 16)) {
+> +			new = 0;
+> +		} else {
+> +			if (i)
+> +				printf("*\n");
+> +			new = 1;
+> +		}
+> +
+> +		if (!new) {
+> +			p += 16;
+> +			continue;
+> +		}
+> +
+> +		printf("%08llx  ", (unsigned long long)offset + i);
+> +		for (j = 0; j < 16 && i + j < len; j++, p++)
+> +			printf("%02x ", *p);
+> +		printf(" ");
+> +		for (j = 0; j < 16 && i + j < len; j++, s++) {
+> +			if (isalnum((int)*s))
+> +				printf("%c", *s);
+> +			else
+> +				printf(".");
+> +		}
+> +		printf("\n");
+> +
+> +	}
+> +	printf("%08llx\n", (unsigned long long)offset + i);
+> +}
+> +
+> +int main(int argc, char *argv[])
+> +{
+> +	struct io_context *ctx = NULL;
+> +	struct io_event evs[4];
+> +	struct iocb iocb1, iocb2, iocb3, iocb4;
+> +	struct iocb *iocbs[] = { &iocb1, &iocb2, &iocb3, &iocb4 };
+> +	void *buf;
+> +	struct stat statbuf;
+> +	char cmp_buf[BUF_SIZE];
+> +	int fd, err = 0;
+> +	off_t eof;
+> +
+> +	fd = open(argv[1], O_DIRECT | O_CREAT | O_TRUNC | O_RDWR, 0600);
+> +	if (fd == -1) {
+> +		perror("open");
+> +		return 1;
+> +	}
+> +
+> +	err = posix_memalign(&buf, BUF_SIZE, BUF_SIZE);
+
+The alignment should technically be PAGE_SIZE (even though BUF_SIZE ==
+4096), right?
+
+> +	if (err) {
+> +		fprintf(stderr, "error %s during %s\n",
+> +			strerror(err),
+> +			"posix_memalign");
+> +		return 1;
+> +	}
+> +	memset(cmp_buf, IO_PATTERN, BUF_SIZE);
+> +
+> +	err = io_setup(4, &ctx);
+> +	if (err) {
+> +		fprintf(stderr, "error %s during %s\n",
+> +			strerror(err),
+> +			"io_setup");
+> +		return 1;
+> +	}
+> +
+> +	eof = 0;
+> +
+> +	/* Keep extending until 8MB */
+> +	while (eof < 8 * 1024 * 1024) {
+> +		memset(buf, IO_PATTERN, BUF_SIZE);
+> +
+> +		fstat(fd, &statbuf);
+> +		eof = statbuf.st_size;
+> +
+> +		/*
+> +		 * 4 ios, racing to extend EOF, combined they write full BUF_SIZE
+> +		 */
+
+I would expand on this comment with something like the following:
+
+"Split the buffer into multiple I/Os to send a mix of block
+aligned/unaligned writes as well as writes that start beyond the current
+EOF. This stresses things like inode size management and stale block
+zeroing for races and can lead to data corruption when not handled
+properly."
+
+... but feel free to reword that as necessary. I just wanted to point
+out that 1.) unaligned I/O is required and 2.) write offsets beyond EOF
+are required.
+
+> +		io_prep_pwrite(&iocb1, fd, buf, BUF_SIZE/4, eof + 0 * BUF_SIZE/4);
+> +		io_prep_pwrite(&iocb2, fd, buf, BUF_SIZE/4, eof + 1 * BUF_SIZE/4);
+> +		io_prep_pwrite(&iocb3, fd, buf, BUF_SIZE/4, eof + 2 * BUF_SIZE/4);
+> +		io_prep_pwrite(&iocb4, fd, buf, BUF_SIZE/4, eof + 3 * BUF_SIZE/4);
+> +	
+> +		err = io_submit(ctx, 4, iocbs);
+> +		if (err != 4) {
+> +			fprintf(stderr, "error %s during %s\n",
+> +				strerror(err),
+> +				"io_submit");
+> +			return 1;
+> +		}
+> +
+> +		err = io_getevents(ctx, 4, 4, evs, NULL);
+> +		if (err != 4) {
+> +			fprintf(stderr, "error %s during %s\n",
+> +				strerror(err),
+> +				"io_getevents");
+> +			return 1;
+> +		}
+> +
+> +		/*
+> +		 * And then read it back.
+> +		 *
+> +		 * Using pread to keep it simple, but AIO has the same effect.
+> +		 *
+> +		 * eof is the old eof, we just wrote BUF_SIZE more
+> +		 */
+> +		if (pread(fd, buf, BUF_SIZE, eof) != BUF_SIZE) {
+> +			perror("pread");
+> +			return 1;
+> +		}
+> +
+> +		/*
+> +		 * We launched 4 AIOs which, stiched together, should write
+
+Nit:					     stitched
+
+> +		 * a seamless BUF_SIZE worth of IO_PATTERN to the last block
+> +		 */
+> +		if (memcmp(buf, cmp_buf, BUF_SIZE)) {
+> +			printf("corruption while extending from %ld\n", eof);
+> +			dump_buffer(buf, 0, BUF_SIZE);
+> +			return 1;
+> +		}
+> +	}
+> +
+> +	printf("Success, all done.\n");
+> +	return 0;
+> +}
+> diff --git a/tests/generic/326 b/tests/generic/326
+> new file mode 100755
+> index 0000000..7db04ac
+> --- /dev/null
+> +++ b/tests/generic/326
+> @@ -0,0 +1,64 @@
+> +#! /bin/bash
+> +# FS QA Test No. 326
+> +#
+> +# Test races while extending past EOF via sub-block AIO writes
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2015 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +    cd /
+> +    rm -f $TEST_DIR/tst-aio-dio-eof-race
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +_supported_fs generic
+> +_supported_os Linux
+> +
+> +_require_test
+> +_require_sparse_files
+> +_require_aiodio aio-dio-eof-race
+> +
+> +# Test does 512 byte DIO, so make sure that'll work
+> +logical_block_size=`_min_dio_alignment $TEST_DEV`
+> +
+> +if [ "$logical_block_size" -gt "512" ]; then
+> +	_notrun "device block size: $logical_block_size greater than 512"
+> +fi
+> +
+
+Technically the test splits a 4k buffer into four parts and so sends 1k
+dio. Not that it really matters here, but I guess I'd update the
+comments. :)
+
+> +# If 512 isn't a sub-block IO, the test should still pass, so
+> +# let that go.
+> +
+
+Ok, so this at least points out the limitation to the test. I think it
+would be slightly better if the test were configurable as mentioned in
+the first comment above. For example, the test program could take a
+block size parameter and "do the right thing" based on that.
+Alternatively, we could specify buffer size and iocb count as parameters
+and let the xfstests script send the right params based on the test fs.
+I guess the latter would complicate things slightly because the program
+probably wants to ensure full buffers are written in each io_submit()
+instance for verification purposes.
+
+Just some thoughts... we could leave it as is too. In that case I would
+suggest to expand the comment above to be specific about which block
+sizes (512b, 1k) do not result in unaligned I/O.
+
+Brian
+
+> +# This test does several extending loops internally
+> +$AIO_TEST $TEST_DIR/tst-aio-dio-eof-race
+> +
+> +status=$?
+> +exit
+> diff --git a/tests/generic/326.out b/tests/generic/326.out
+> new file mode 100644
+> index 0000000..22a3e78
+> --- /dev/null
+> +++ b/tests/generic/326.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 326
+> +Success, all done.
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 4ae256f..a5f3008 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -207,3 +207,4 @@
+>  323 auto aio stress
+>  324 auto fsr quick
+>  325 auto quick data log
+> +326 auto quick aio
+> 
+> 
+> _______________________________________________
+> xfs mailing list
+> xfs@oss.sgi.com
+> http://oss.sgi.com/mailman/listinfo/xfs
