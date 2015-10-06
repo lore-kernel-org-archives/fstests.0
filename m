@@ -1,62 +1,63 @@
-Received: from tbjjbihbhebab.turbo-smtp.net ([199.187.174.101]:57260 "HELO
-	tbjjbihbhebab.turbo-smtp.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1751713AbbJERPN (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 5 Oct 2015 13:15:13 -0400
-Message-ID: <5612B01C.50600@sysam.it>
-Date: Mon, 05 Oct 2015 19:15:08 +0200
-From: Angelo Dureghello <angelo@sysam.it>
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:40526 "EHLO
+	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751304AbbJFBdJ (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 5 Oct 2015 21:33:09 -0400
+Date: Tue, 6 Oct 2015 12:31:41 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH v2] fstests: generic: Check if a bull fallocate will
+ change extent number
+Message-ID: <20151006013141.GA32150@dastard>
+References: <1443519264-19184-1-git-send-email-quwenruo@cn.fujitsu.com>
+ <20150929215135.GZ3902@dastard>
+ <560E41E9.2020204@gmx.com>
 MIME-Version: 1.0
-Subject: Re: help on xfs test results
-References: <560C69D9.6020807@sysam.it> <560CF355.7050200@sysam.it> <20151001235653.GH3902@dastard> <560DD051.4080407@sandeen.net> <20151002003834.GI3902@dastard>
-In-Reply-To: <20151002003834.GI3902@dastard>
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <560E41E9.2020204@gmx.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>, Eric Sandeen <sandeen@sandeen.net>
-Cc: fstests <fstests@vger.kernel.org>
+To: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Cc: Qu Wenruo <quwenruo@cn.fujitsu.com>, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave, Eric and all,
+On Fri, Oct 02, 2015 at 04:35:53PM +0800, Qu Wenruo wrote:
+> Hi Dave, I updated the patch and moved it to btrfs.
+> 
+> But I still has some question about the fallocate behavior.
+> 
+> Just as the new btrfs test case, I changed the fallocate range, not
+> to cover the last part, to make the problem more obvious:
+> 
+> Btrfs will truncate beyond EOF even that's *not covered* by the
+> fallocate range.
+> 
+> It's OK for a fs to modify the extent layout during fallocate, but
+> is it OK to modify extent layout completely *out* of the fallocate
+> range?
 
-still thanks.
+It's beyond EOF, so the filesystem can make whatever changes to
+allocated blocks in that space whenever it likes because userspace
+cannot access it.
 
-About generic/256 failing in my system,
+In XFS, we don't remove unwritten extents beyond EOF if they were
+placed there by fallocate except via explicit truncate() or
+fallocate() operations (e.g. hole punch) from userspace that
+manipulate that extent range beyond EOF.
 
-in the xfstests README there is:
+What other filesytems do with blocks beyond EOF in any given
+operation is up to the filesystem, really. If btrfs wants to
+truncate away all extents beyond EOF when punching a hole that spans
+EOF, then you can do that. It might not be what the user expects,
+but blocks beyond EOF don't fall under posix_fallocate() because
+it explicitly states:
 
-- create fsgqa test user ("sudo useradd fsgqa")
+"If the size of the file is less than offset+len, then the file is
+increased to this size; otherwise the file size is left unchanged."
 
-this creates the user, but in /etc/passwd comes "/bin/sh" as shell,
-and in this system is it "dash". Redirection to /dev/null as required
-from this test then fails. Setting to "/bin/bash" test passes.
+which means it can't allocate blocks beyond EOF....
 
+Cheers,
 
-About xfs/136,
-
-ack, thanks.
-
-
-
-On 02/10/2015 02:38, Dave Chinner wrote:
-> On Thu, Oct 01, 2015 at 07:31:13PM -0500, Eric Sandeen wrote:
->>
->>
->> On 10/1/15 6:56 PM, Dave Chinner wrote:
->>> Are you testing with something like selinux or some other security
->>> subsystem enabled that creates attributes at inode creation time?
->>
->> In theory, xfstests detects this and mounts with an fs-wide context
->> to avoid that...
->
-> For selinux, yes. i don't think it's aware of anything else,
-> though...
->
-> Cheers,
->
-> Dave.
->
-
-
-Best regards
-Angelo
-
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
