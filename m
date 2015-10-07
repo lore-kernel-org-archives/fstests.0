@@ -1,63 +1,57 @@
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:40526 "EHLO
-	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751304AbbJFBdJ (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 5 Oct 2015 21:33:09 -0400
-Date: Tue, 6 Oct 2015 12:31:41 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v2] fstests: generic: Check if a bull fallocate will
- change extent number
-Message-ID: <20151006013141.GA32150@dastard>
-References: <1443519264-19184-1-git-send-email-quwenruo@cn.fujitsu.com>
- <20150929215135.GZ3902@dastard>
- <560E41E9.2020204@gmx.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:40602 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751219AbbJGFND (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 7 Oct 2015 01:13:03 -0400
+Subject: [RFCv3 00/12] xfstests: test the btrfs/xfs reflink/dedupe ioctls
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Tue, 06 Oct 2015 22:12:57 -0700
+Message-ID: <20151007051257.3260.73072.stgit@birch.djwong.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <560E41E9.2020204@gmx.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Cc: Qu Wenruo <quwenruo@cn.fujitsu.com>, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: david@fromorbit.com, darrick.wong@oracle.com
+Cc: Anna.Schumaker@netapp.com, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Oct 02, 2015 at 04:35:53PM +0800, Qu Wenruo wrote:
-> Hi Dave, I updated the patch and moved it to btrfs.
-> 
-> But I still has some question about the fallocate behavior.
-> 
-> Just as the new btrfs test case, I changed the fallocate range, not
-> to cover the last part, to make the problem more obvious:
-> 
-> Btrfs will truncate beyond EOF even that's *not covered* by the
-> fallocate range.
-> 
-> It's OK for a fs to modify the extent layout during fallocate, but
-> is it OK to modify extent layout completely *out* of the fallocate
-> range?
+Hi all,
 
-It's beyond EOF, so the filesystem can make whatever changes to
-allocated blocks in that space whenever it likes because userspace
-cannot access it.
+This is part of the third revision of an RFC for adding to XFS support
+for tracking reverse-mappings of physical blocks to file and metadata;
+and support for mapping multiple file logical blocks to the same
+physical block, more commonly known as reflinking.
 
-In XFS, we don't remove unwritten extents beyond EOF if they were
-placed there by fallocate except via explicit truncate() or
-fallocate() operations (e.g. hole punch) from userspace that
-manipulate that extent range beyond EOF.
+This patchset aims to make xfstests perform more rigorous testing of
+the btrfs/XFS file clone, reflink, and dedupe ioctls.  There are now
+tests of the basic functionality of the three ioctls; tests to ensure
+that the filesystem exhibits the expected copy on write semantics;
+tests to try to suss out race conditions in the new write paths; tests
+to ensure that the ioctls peform basic disk accounting correctly;
+tests of the interaction between reflink and the various fallocate
+verbs (allocate, punch, collapse, insert zeroes); and some attempts to
+test the upper limits of reflinking and ENOSPC behavior.  The tests
+have been totally rewritten since the last posting to drop FIEMAP
+usage; this should enable the tests to cover NFS and CIFS.
 
-What other filesytems do with blocks beyond EOF in any given
-operation is up to the filesystem, really. If btrfs wants to
-truncate away all extents beyond EOF when punching a hole that spans
-EOF, then you can do that. It might not be what the user expects,
-but blocks beyond EOF don't fall under posix_fallocate() because
-it explicitly states:
+Issues: 
 
-"If the size of the file is less than offset+len, then the file is
-increased to this size; otherwise the file size is left unchanged."
+ * I think the race checks for dedupe could be a little sharper at
+   finding mistakes.
 
-which means it can't allocate blocks beyond EOF....
+ * I started the numbering really high to prevent the tests from
+   colliding with whatever new tests might arrive; this will require
+   some intervention to fix.
 
-Cheers,
+ * I don't have any interesting NFS/CIFS setups for test. :(
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+If you're going to start using this mess, you probably ought to just
+pull from my github trees for kernel[1], xfsprogs[2], and xfstests[3].
+They should just work with the btrfs that's in 4.3.
+
+Comments and questions are, as always, welcome.
+
+--D
+
+[1] https://github.com/djwong/linux-xfs-dev/commits/master
+[2] https://github.com/djwong/xfsprogs/commits/for-next
+[3] https://github.com/djwong/xfstests/commits/master
