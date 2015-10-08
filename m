@@ -1,185 +1,179 @@
-Received: from mail.kernel.org ([198.145.29.136]:34139 "EHLO mail.kernel.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751122AbbJHAY0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 7 Oct 2015 20:24:26 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH] fstests: test btrfs send with shared and compressed extents
-Date: Thu,  8 Oct 2015 01:24:14 +0100
-Message-Id: <1444263854-26683-1-git-send-email-fdmanana@kernel.org>
+Received: from mail-io0-f169.google.com ([209.85.223.169]:34991 "EHLO
+	mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755400AbbJHJjt (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 8 Oct 2015 05:39:49 -0400
+MIME-Version: 1.0
+Reply-To: fdmanana@gmail.com
+In-Reply-To: <1444230527-4639-1-git-send-email-jmaggard@netgear.com>
+References: <1444230527-4639-1-git-send-email-jmaggard@netgear.com>
+Date: Thu, 8 Oct 2015 10:39:48 +0100
+Message-ID: <CAL3q7H72PVQRXrWhT=uZcww2K+Y7-bZE5u5K4OMnz-FAKT3-ZA@mail.gmail.com>
+Subject: Re: [PATCH] btrfs: test unmount during quota rescan
+From: Filipe Manana <fdmanana@gmail.com>
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Justin Maggard <jmaggard10@gmail.com>
+Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, Justin Maggard <jmaggard@netgear.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Wed, Oct 7, 2015 at 4:08 PM, Justin Maggard <jmaggard10@gmail.com> wrote:
+> This test case tests if we are able to unmount a filesystem while
+> a quota rescan is running.  Up to now (4.3-rc4) this would result
+> in a kernel NULL pointer dereference.
 
-Test that a send operation works correctly for files that have shared
-extents which are compressed and partially overwritten after they are
-cloned.
+Please mention here the title of the patch that fixes this problem
+("btrfs: qgroup: exit the rescan worker during umount").
 
-This used to fail on btrfs, resulting in different file digests after
-receiving the send stream, and got fixed by the linux kernel patch
-titled:
+>
+> Signed-off-by: Justin Maggard <jmaggard@netgear.com>
+> ---
+>  tests/btrfs/104     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/104.out |  1 +
+>  tests/btrfs/group   |  1 +
+>  3 files changed, 87 insertions(+)
+>  create mode 100755 tests/btrfs/104
+>  create mode 100644 tests/btrfs/104.out
+>
+> diff --git a/tests/btrfs/104 b/tests/btrfs/104
+> new file mode 100755
+> index 0000000..7c51298
+> --- /dev/null
+> +++ b/tests/btrfs/104
+> @@ -0,0 +1,85 @@
+> +#! /bin/bash
+> +# FS QA Test No. btrfs/200
 
-  "Btrfs: send, fix file corruption due to incorrect cloning operations"
+104 (should match the file name)
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/107     | 112 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/107.out |  15 +++++++
- tests/btrfs/group   |   1 +
- 3 files changed, 128 insertions(+)
- create mode 100755 tests/btrfs/107
- create mode 100644 tests/btrfs/107.out
+> +#
+> +# btrfs quota scan/unmount sanity test
+> +#
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2015 NETGEAR, Inc.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +
+> +status=1       # failure is the default!
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       rm -f $tmp.*
+> +       $UMOUNT_PROG $loop_mnt >/dev/null 2>&1
+> +       _destroy_loop_device $loop_dev1
+> +       rm -rf $loop_mnt
+> +       rm -f $fs_img1
+> +}
+> +
+> +trap "_cleanup ; exit \$status" 0 1 2 3 15
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_test
+> +
+> +rm -f $seqres.full
+> +
+> +loop_mnt=$TEST_DIR/$seq.$$.mnt
+> +fs_img1=$TEST_DIR/$seq.$$.img1
+> +mkdir $loop_mnt
+> +$XFS_IO_PROG -f -c "truncate 1G" $fs_img1 >>$seqres.full 2>&1
 
-diff --git a/tests/btrfs/107 b/tests/btrfs/107
-new file mode 100755
-index 0000000..d305921
---- /dev/null
-+++ b/tests/btrfs/107
-@@ -0,0 +1,112 @@
-+#! /bin/bash
-+# FS QA Test No. btrfs/107
-+#
-+# Test that a send operation works correctly for files that have shared extents
-+# which are compressed and partially overwritten after they are cloned.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -fr $send_files_dir
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_need_to_be_root
-+_require_cloner
-+
-+send_files_dir=$TEST_DIR/btrfs-test-$seq
-+
-+rm -f $seqres.full
-+rm -fr $send_files_dir
-+mkdir $send_files_dir
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount "-o compress"
-+
-+# Create file foo first, so that it has a lower inode number than file bar.
-+# Btrfs send processes inodes in ascending order.
-+touch $SCRATCH_MNT/foo
-+
-+$XFS_IO_PROG -f -c "pwrite -S 0xaa 630K 20K" $SCRATCH_MNT/bar | _filter_xfs_io
-+
-+# Clone the whole extent into file foo.
-+$CLONER_PROG -s $((540 * 1024)) -d $((200 * 1024)) -l 0 \
-+	$SCRATCH_MNT/bar $SCRATCH_MNT/foo
-+
-+# After this write our file foo will reference the extent with a file extent
-+# item that starts at offset 300K, has a length of 8K and a data offset of 12K.
-+# So after this write file foo no longer refers to the first 12K of the extent
-+# we cloned before from file bar.
-+$XFS_IO_PROG -c "pwrite -S 0xcc 200K 100K" $SCRATCH_MNT/foo | _filter_xfs_io
-+
-+# Append some data to file foo. This is just to verify later that the send
-+# stream does not include clone operations for any of these data for file bar.
-+$XFS_IO_PROG -c "pwrite -S 0xbb 400K 100K" $SCRATCH_MNT/foo | _filter_xfs_io
-+
-+# Append some data to file bar. This is to verify later that the send stream
-+# included these data for file bar.
-+$XFS_IO_PROG -c "pwrite -S 0xdd 650K 100K" $SCRATCH_MNT/bar | _filter_xfs_io
-+
-+_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap
-+
-+echo "File digests in the original filesystem:"
-+md5sum $SCRATCH_MNT/snap/foo | _filter_scratch
-+md5sum $SCRATCH_MNT/snap/bar | _filter_scratch
-+
-+_run_btrfs_util_prog send $SCRATCH_MNT/snap -f $send_files_dir/1.snap
-+
-+# Now recreate the filesystem by receiving the send stream and verify we get
-+# the same file contents that the original filesystem had.
-+# Btrfs send had a bug where it sent a clone operation from file foo to bar
-+# that covered the range from file foo [300K, 308K[ into file bar's range
-+# [630K, 638K[ with the intention of cloning the whole extent that was cloned
-+# before. That was incorrect because file foo no longer pointed to the first
-+# 12K of the 20K extent that was originally cloned from file bar.
-+_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount "-o compress"
-+
-+_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+
-+echo "File digests in the new filesystem:"
-+# Must match the digests we got in the original filesystem.
-+md5sum $SCRATCH_MNT/snap/foo | _filter_scratch
-+md5sum $SCRATCH_MNT/snap/bar | _filter_scratch
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/107.out b/tests/btrfs/107.out
-new file mode 100644
-index 0000000..d5976aa
---- /dev/null
-+++ b/tests/btrfs/107.out
-@@ -0,0 +1,15 @@
-+QA output created by 107
-+wrote 20480/20480 bytes at offset 645120
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 102400/102400 bytes at offset 204800
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 102400/102400 bytes at offset 409600
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 102400/102400 bytes at offset 665600
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+File digests in the original filesystem:
-+58099eacfd30a8ce2fa68706892fcd4e  SCRATCH_MNT/snap/foo
-+d1ad0d166f78e04191a5bdb51e1f80b6  SCRATCH_MNT/snap/bar
-+File digests in the new filesystem:
-+58099eacfd30a8ce2fa68706892fcd4e  SCRATCH_MNT/snap/foo
-+d1ad0d166f78e04191a5bdb51e1f80b6  SCRATCH_MNT/snap/bar
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index ae16213..2416870 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -109,3 +109,4 @@
- 104 auto quick send
- 105 auto quick clone compress
- 106 auto quick send clone
-+107 auto quick send clone
+Don't redirect stdout/stderr here. If the truncate fails, xfs_io
+prints something to stderr, resulting in a test failure due to
+mismatch with the golden output.
+
+> +
+> +loop_dev1=`_create_loop_device $fs_img1`
+> +
+> +_mkfs_dev $loop_dev1 >>$seqres.full 2>&1
+> +_mount $loop_dev1 $loop_mnt
+
+Any reason to use a loop device on not the scratch device as most
+other tests do?
+
+> +for i in 0 1 2 3 4 5 6 7 8 9 a b c d e f g h i j k l m n o p
+> +do
+> +  for j in 0 1 2 3 4 5 6 7 8 9 a b c d e f g h i j k l m n o p
+
+Coding style in xfstests is:
+
+for ... ; do
+done
+
+Also use 8 spaces tabs for indentation.
+
+> +  do
+> +    for k in 0 1 2 3 4 5 6 7 8 9 a b c d e f g h i j k l m n o p
+> +    do
+> +      for l in 0 1 2 3 4 5 6 7 8 9 a b c d e f g h i j k l m n o p
+> +      do
+> +       touch $loop_mnt/${i}${j}${k}${l}
+> +      done
+> +    done
+> +  done
+> +done >>$seqres.full 2>&1
+> +echo 3 > /proc/sys/vm/drop_caches
+> +$BTRFS_UTIL_PROG quota enable $loop_mnt
+> +$UMOUNT_PROG $loop_mnt
+> +
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/104.out b/tests/btrfs/104.out
+> new file mode 100644
+> index 0000000..1ed84bc
+> --- /dev/null
+> +++ b/tests/btrfs/104.out
+> @@ -0,0 +1 @@
+> +QA output created by 104
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index e92a65a..6218adf 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -106,3 +106,4 @@
+>  101 auto quick replace
+>  102 auto quick metadata enospc
+>  103 auto quick clone compress
+> +104 auto qgroup
+> --
+> 2.6.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
 -- 
-2.1.3
+Filipe David Manana,
 
+"Reasonable men adapt themselves to the world.
+ Unreasonable men adapt the world to themselves.
+ That's why all progress depends on unreasonable men."
