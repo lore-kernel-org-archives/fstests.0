@@ -1,188 +1,139 @@
-Received: from mail.kernel.org ([198.145.29.136]:52544 "EHLO mail.kernel.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S964923AbbJIJRm (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 9 Oct 2015 05:17:42 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH v2] fstests: test btrfs send with shared and compressed extents
-Date: Fri,  9 Oct 2015 02:12:06 +0100
-Message-Id: <1444353126-31869-1-git-send-email-fdmanana@kernel.org>
-In-Reply-To: <1444263854-26683-1-git-send-email-fdmanana@kernel.org>
-References: <1444263854-26683-1-git-send-email-fdmanana@kernel.org>
+Received: from userp1040.oracle.com ([156.151.31.81]:30158 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753955AbbJIS6O (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 9 Oct 2015 14:58:14 -0400
+Date: Fri, 9 Oct 2015 11:58:02 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 03/12] generic/80[0-2]: support xfs in addition to btrfs
+Message-ID: <20151009185802.GF10397@birch.djwong.org>
+References: <20151007051257.3260.73072.stgit@birch.djwong.org>
+ <9163f8156b2742a0b003ba9fa0a26258@nebula-exfe-01.nebula.local>
+ <1444307639.4004.17.camel@ari-lenovo>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1444307639.4004.17.camel@ari-lenovo>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Ari Sundholm <ari@tuxera.com>
+Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>, "xfs@oss.sgi.com" <xfs@oss.sgi.com>, "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>, "Anna.Schumaker@netapp.com" <Anna.Schumaker@netapp.com>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Thu, Oct 08, 2015 at 03:33:59PM +0300, Ari Sundholm wrote:
+> On Wed, 2015-10-07 at 05:13 +0000, Darrick J. Wong wrote:
+> > Modify the reflink tests to support xfs.
+> > 
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> >  common/rc         |   37 +++++++++++++++++++++++++++++++++++++
+> >  tests/generic/800 |    2 +-
+> >  tests/generic/801 |    2 +-
+> >  tests/generic/802 |    2 +-
+> >  4 files changed, 40 insertions(+), 3 deletions(-)
+> > 
+> > 
+> > diff --git a/common/rc b/common/rc
+> > index 3e97060..7e2f140 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -1429,6 +1429,43 @@ _require_scratch_xfs_crc()
+> >  	umount $SCRATCH_MNT
+> >  }
+> >  
+> > +# this test requires the test fs support reflink...
+> > +#
+> > +_require_test_reflink()
+> > +{
+> > +    case $FSTYP in
+> > +    xfs)
+> > +	xfs_info "${TEST_DIR}" | grep reflink=1 -c -q || _notrun "Reflink not supported by this filesystem type: $FSTYP"
+> > +	;;
+> > +    btrfs)
+> > +        true
+> > +        ;;
+> > +    *)
+> > +        _notrun "Reflink not supported by this filesystem type: $FSTYP"
+> > +        ;;
+> > +    esac
+> > +}
+> > +
+> > +# this test requires the scratch fs support reflink...
+> > +#
+> > +_require_scratch_reflink()
+> > +{
+> > +    case $FSTYP in
+> > +    xfs)
+> > +	_scratch_mkfs > /dev/null 2>&1
+> > +	_scratch_mount
+> > +	xfs_info "${TEST_DIR}" | grep reflink=1 -c -q || _notrun "$FSTYP does not support reflink"
+> 
+> ${SCRATCH_MNT}?
 
-Test that a send operation works correctly with reflinked files (cloned
-extents which multiple files point to) that have compressed extents.
+Oops!  Thank you for catching this. :)
 
-This used to fail on btrfs, resulting in different file digests after
-receiving the send stream, and got fixed by the linux kernel patch
-titled:
+--D
 
-  "Btrfs: send, fix file corruption due to incorrect cloning operations"
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
-
-V2: Simplified the test. It also now covers a case that was failing before
-    with the initial version of the btrfs fix (and was failing too without
-    that fix).
-
- tests/btrfs/107     | 111 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/107.out |  13 ++++++
- tests/btrfs/group   |   1 +
- 3 files changed, 125 insertions(+)
- create mode 100755 tests/btrfs/107
- create mode 100644 tests/btrfs/107.out
-
-diff --git a/tests/btrfs/107 b/tests/btrfs/107
-new file mode 100755
-index 0000000..4fbfed9
---- /dev/null
-+++ b/tests/btrfs/107
-@@ -0,0 +1,111 @@
-+#! /bin/bash
-+# FS QA Test No. btrfs/107
-+#
-+# Test that a send operation works correctly with reflinked files (cloned
-+# extents which multiple files point to) that have compressed extents.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -fr $send_files_dir
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_need_to_be_root
-+_require_cp_reflink
-+
-+send_files_dir=$TEST_DIR/btrfs-test-$seq
-+
-+rm -f $seqres.full
-+rm -fr $send_files_dir
-+mkdir $send_files_dir
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount "-o compress"
-+
-+# Create our file with an extent of 100K starting at file offset 0K.
-+$XFS_IO_PROG -f -c "pwrite -S 0xaa 0K 100K"       \
-+		-c "fsync"                        \
-+		$SCRATCH_MNT/foo | _filter_xfs_io
-+
-+# Rewrite part of the previous extent (its first 40K) and write a new 100K
-+# extent starting at file offset 100K.
-+$XFS_IO_PROG -c "pwrite -S 0xbb 0K 40K"    \
-+		-c "pwrite -S 0xcc 100K 100K"      \
-+		$SCRATCH_MNT/foo | _filter_xfs_io
-+
-+# Our file foo now has 3 file extent items in its metadata:
-+#
-+# 1) One covering the file range 0 to 40K;
-+# 2) One covering the file range 40K to 100K, which points to the first extent
-+#    we wrote to the file and has a data offset field with value 40K (our file
-+#    no longer uses the first 40K of data from that extent);
-+# 3) One covering the file range 100K to 200K.
-+
-+# Now clone our file foo into file bar.
-+cp --reflink=always $SCRATCH_MNT/foo $SCRATCH_MNT/bar
-+
-+# Create our snapshot for the send operation.
-+_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap
-+
-+echo "File digests in the original filesystem:"
-+md5sum $SCRATCH_MNT/snap/foo | _filter_scratch
-+md5sum $SCRATCH_MNT/snap/bar | _filter_scratch
-+
-+_run_btrfs_util_prog send $SCRATCH_MNT/snap -f $send_files_dir/1.snap
-+
-+# Now recreate the filesystem by receiving the send stream and verify we get
-+# the same file contents that the original filesystem had.
-+# Btrfs send used to issue a clone operation from foo's range [80K, 140K[ to
-+# bar's range [40K, 100K[ when cloning the extent pointed to by foo's second
-+# file extent item, this was incorrect because of bad accounting of the file
-+# extent item's data offset field. The correct range to clone from should have
-+# been [40K, 100K[.
-+_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount "-o compress"
-+
-+_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+
-+echo "File digests in the new filesystem:"
-+# Must match the digests we got in the original filesystem.
-+md5sum $SCRATCH_MNT/snap/foo | _filter_scratch
-+md5sum $SCRATCH_MNT/snap/bar | _filter_scratch
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/107.out b/tests/btrfs/107.out
-new file mode 100644
-index 0000000..da251f3
---- /dev/null
-+++ b/tests/btrfs/107.out
-@@ -0,0 +1,13 @@
-+QA output created by 107
-+wrote 102400/102400 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 40960/40960 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 102400/102400 bytes at offset 102400
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+File digests in the original filesystem:
-+253f558dbd25727d7d2fdb77f9ad2590  SCRATCH_MNT/snap/foo
-+253f558dbd25727d7d2fdb77f9ad2590  SCRATCH_MNT/snap/bar
-+File digests in the new filesystem:
-+253f558dbd25727d7d2fdb77f9ad2590  SCRATCH_MNT/snap/foo
-+253f558dbd25727d7d2fdb77f9ad2590  SCRATCH_MNT/snap/bar
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index ae16213..886bdd8 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -109,3 +109,4 @@
- 104 auto quick send
- 105 auto quick clone compress
- 106 auto quick send clone
-+107 auto quick send clone compress
--- 
-2.1.3
-
+> 
+> > +	_scratch_unmount
+> > +	;;
+> > +    btrfs)
+> > +        true
+> > +        ;;
+> > +    *)
+> > +        _notrun "Reflink not supported by this filesystem type: $FSTYP"
+> > +        ;;
+> > +    esac
+> > +}
+> > +
+> >  # this test requires the bigalloc feature to be available in mkfs.ext4
+> >  #
+> >  _require_ext4_mkfs_bigalloc()
+> > diff --git a/tests/generic/800 b/tests/generic/800
+> > index a71f11a..954f39d 100755
+> > --- a/tests/generic/800
+> > +++ b/tests/generic/800
+> > @@ -45,7 +45,7 @@ _cleanup()
+> >  . common/filter
+> >  
+> >  # real QA test starts here
+> > -_supported_fs btrfs
+> > +_require_test_reflink
+> >  _supported_os Linux
+> >  
+> >  _require_xfs_io_command "fiemap"
+> > diff --git a/tests/generic/801 b/tests/generic/801
+> > index b21c44b..aedb6e9 100755
+> > --- a/tests/generic/801
+> > +++ b/tests/generic/801
+> > @@ -45,7 +45,7 @@ _cleanup()
+> >  . common/filter
+> >  
+> >  # real QA test starts here
+> > -_supported_fs btrfs
+> > +_require_test_reflink
+> >  _supported_os Linux
+> >  
+> >  _require_xfs_io_command "fiemap"
+> > diff --git a/tests/generic/802 b/tests/generic/802
+> > index afd8513..51d3414 100755
+> > --- a/tests/generic/802
+> > +++ b/tests/generic/802
+> > @@ -43,7 +43,7 @@ _cleanup()
+> >  . ./common/filter
+> >  
+> >  # real QA test starts here
+> > -_supported_fs btrfs
+> > +_require_test_reflink
+> >  _supported_os Linux
+> >  
+> >  _require_xfs_io_command "fiemap"
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> _______________________________________________
+> xfs mailing list
+> xfs@oss.sgi.com
+> http://oss.sgi.com/mailman/listinfo/xfs
