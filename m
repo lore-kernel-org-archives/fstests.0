@@ -1,48 +1,91 @@
-Received: from mail.kernel.org ([198.145.29.136]:43396 "EHLO mail.kernel.org"
+Received: from sandeen.net ([63.231.237.45]:34952 "EHLO sandeen.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750817AbbJNIqk (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 14 Oct 2015 04:46:40 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH] btrfs/112: add missing _require_xfs_io_command for falloc
-Date: Tue, 13 Oct 2015 22:24:59 +0100
-Message-Id: <1444771499-2151-1-git-send-email-fdmanana@kernel.org>
+	id S1753293AbbJNNWj (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 14 Oct 2015 09:22:39 -0400
+Received: from liberator.sandeen.net (liberator.sandeen.net [10.0.0.4])
+	(using TLSv1.2 with cipher DHE-RSA-AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by sandeen.net (Postfix) with ESMTPSA id 5D40363C3CA2
+	for <fstests@vger.kernel.org>; Wed, 14 Oct 2015 08:22:38 -0500 (CDT)
+From: Eric Sandeen <sandeen@sandeen.net>
+Subject: [PATCH resend] properly quote strings tested with -n
+Message-ID: <561E571D.3010500@sandeen.net>
+Date: Wed, 14 Oct 2015 08:22:37 -0500
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Filipe Manana <fdmanana@suse.com>
+To: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+Per the Advanced Bash Scripting Guide:
 
-I forgot to add the requirement for the xfs_io command "falloc", which
-the test makes use of. Also fixed a weird indentation (mix of spaces
-and tabs) for one line of a comment.
+"The -n test requires that the string be quoted within the test brackets.
+Using an unquoted string with ! -z, or even just the unquoted string
+alone within test bracket normally works, however, this is an unsafe
+practice. Always quote a tested string."
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+And indeed:
+
+$ unset FOOBAR
+$ [ -n $FOOBAR ] || echo nope
+$ [ -n "$FOOBAR" ] || echo nope
+nope
+
+Ran into this on a box w/o the attr program installed, and passed
+_require_attrs.  Quoting the string fixes this; fix it there
+and other occurrences in common/* as well.
+
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+Reviewed-by: Alex Elder <elder@linaro.org>
 ---
- tests/btrfs/112 | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/tests/btrfs/112 b/tests/btrfs/112
-index f4fad49..45f68fc 100755
---- a/tests/btrfs/112
-+++ b/tests/btrfs/112
-@@ -49,6 +49,7 @@ _require_scratch
- _require_cloner
- _require_btrfs_fs_feature "no_holes"
- _require_btrfs_mkfs_feature "no-holes"
-+_require_xfs_io_command "falloc"
+diff --git a/common/attr b/common/attr
+index 48c81cc..cc9cfda 100644
+--- a/common/attr
++++ b/common/attr
+@@ -165,7 +165,7 @@ _filter_aces_notypes()
  
- rm -f $seqres.full
+ _require_acls()
+ {
+-    [ -n $CHACL_PROG ] || _notrun "chacl command not found"
++    [ -n "$CHACL_PROG" ] || _notrun "chacl command not found"
  
-@@ -61,7 +62,7 @@ test_cloning_inline_extents()
- 	_scratch_mount $mount_opts
+     #
+     # Test if chacl is able to list ACLs on the target filesystems.  On really
+@@ -196,9 +196,9 @@ _list_acl()
  
- 	# File bar, the source for all the following clone operations, consists
--        # of a # single inline extent (50 bytes).
-+	# of a single inline extent (50 bytes).
- 	$XFS_IO_PROG -f -c "pwrite -S 0xbb 0 50" $SCRATCH_MNT/bar \
- 		| _filter_xfs_io
+ _require_attrs()
+ {
+-    [ -n $ATTR_PROG ] || _notrun "attr command not found"
+-    [ -n $GETFATTR_PROG ] || _notrun "getfattr command not found"
+-    [ -n $SETFATTR_PROG ] || _notrun "setfattr command not found"
++    [ -n "$ATTR_PROG" ] || _notrun "attr command not found"
++    [ -n "$GETFATTR_PROG" ] || _notrun "getfattr command not found"
++    [ -n "$SETFATTR_PROG" ] || _notrun "setfattr command not found"
  
--- 
-2.1.3
+     #
+     # Test if chacl is able to write an attribute on the target filesystems.
+diff --git a/common/quota b/common/quota
+index 23be4f8..658b1c3 100644
+--- a/common/quota
++++ b/common/quota
+@@ -26,7 +26,7 @@
+ #
+ _require_quota()
+ {
+-    [ -n $QUOTA_PROG ] || _notrun "Quota user tools not installed"
++    [ -n "$QUOTA_PROG" ] || _notrun "Quota user tools not installed"
+ 
+     case $FSTYP in
+     ext2|ext3|ext4|ext4dev|reiserfs)
+@@ -74,7 +74,7 @@ _require_xfs_quota()
+     if [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_RTDEV" ]; then
+ 	_notrun "Quotas not supported on realtime scratch device"
+     fi
+-    [ -n $XFS_QUOTA_PROG ] || _notrun "XFS quota user tools not installed"
++    [ -n "$XFS_QUOTA_PROG" ] || _notrun "XFS quota user tools not installed"
+ }
+ 
+ #
 
