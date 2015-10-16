@@ -1,53 +1,204 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:45806 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753147AbbJOOmU (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 15 Oct 2015 10:42:20 -0400
-Date: Thu, 15 Oct 2015 07:41:46 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 03/12] generic/80[0-2]: support xfs in addition to btrfs
-Message-ID: <20151015144146.GL10391@birch.djwong.org>
-References: <20151007051257.3260.73072.stgit@birch.djwong.org>
- <20151007051323.3260.60421.stgit@birch.djwong.org>
- <20151015091944.GA13683@infradead.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20151015091944.GA13683@infradead.org>
+Received: from mail.kernel.org ([198.145.29.136]:59342 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932273AbbJPOI4 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 16 Oct 2015 10:08:56 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] fstests: test btrfs cloning of compressed inline extent after truncation
+Date: Fri, 16 Oct 2015 15:08:45 +0100
+Message-Id: <1445004525-15202-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: david@fromorbit.com, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, Anna.Schumaker@netapp.com, linux-btrfs@vger.kernel.org, xfs@oss.sgi.com
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Oct 15, 2015 at 02:19:44AM -0700, Christoph Hellwig wrote:
-> > +# this test requires the test fs support reflink...
-> > +#
-> > +_require_test_reflink()
-> > +{
-> > +    case $FSTYP in
-> > +    xfs)
-> > +	xfs_info "${TEST_DIR}" | grep reflink=1 -c -q || _notrun "Reflink not supported by this filesystem type: $FSTYP"
-> > +	;;
-> > +    btrfs)
-> > +        true
-> > +        ;;
-> > +    *)
-> > +        _notrun "Reflink not supported by this filesystem type: $FSTYP"
-> > +        ;;
-> > +    esac
-> 
-> I don't think that's a good test - we need to check if it's supported by
-> trying it.  That'll automatically get us coverage for other file systems
-> like xfs.
-> 
-> Note that dedup should get it's own feature check, as currently hacking
-> nfs into this check will also run dedup tests that can't really be
-> supported.
+From: Filipe Manana <fdmanana@suse.com>
 
-Good point.  I'll throw that in while I rework the tests.
+Test that truncating a file that consists of a compressed and inlined extent
+to a smaller size and then cloning it into another file is not possible and
+does not result in leaking stale data (data past the truncation offset) nor
+losing data in the clone operation's destination file.
 
---D
+This btrfs issue is fixed by the linux kernel patch titled:
 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+  "Btrfs: fix truncation of compressed and inlined extents"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/113     | 135 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/113.out |  12 +++++
+ tests/btrfs/group   |   1 +
+ 3 files changed, 148 insertions(+)
+ create mode 100755 tests/btrfs/113
+ create mode 100644 tests/btrfs/113.out
+
+diff --git a/tests/btrfs/113 b/tests/btrfs/113
+new file mode 100755
+index 0000000..72866aa
+--- /dev/null
++++ b/tests/btrfs/113
+@@ -0,0 +1,135 @@
++#! /bin/bash
++# FSQA Test No. 113
++#
++# Test that truncating a file that consists of a compressed and inlined extent
++# to a smaller size and then cloning it into another file is not possible and
++# does not result in leaking stale data (data past the truncation offset) nor
++# losing data in the clone operation's destination file.
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_need_to_be_root
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_cloner
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount "-o compress"
++
++# Create our test files. File foo is going to be the source of a clone operation
++# and consists of a single inline extent with an uncompressed size of 512 bytes,
++# while file bar consists of a single inline extent with an uncompressed size of
++# 256 bytes. For our test's purpose, it's important that file bar has an inline
++# extent with a size smaller than foo's inline extent.
++$XFS_IO_PROG -f -c "pwrite -S 0xa1 0 128"   \
++		-c "pwrite -S 0x2a 128 384" \
++		$SCRATCH_MNT/foo | _filter_xfs_io
++$XFS_IO_PROG -f -c "pwrite -S 0xbb 0 256" $SCRATCH_MNT/bar | _filter_xfs_io
++
++# Now durably persist all metadata and data. We do this to make sure that we get
++# on disk an inline extent with a size of 512 bytes for file foo.
++sync
++
++# Now truncate our file foo to a smaller size. Because it consists of a
++# compressed and inline extent, btrfs did not shrink the inline extent to the
++# new size (if the extent was not compressed, btrfs would shrink it to 128
++# bytes), it only updates the inode's i_size to 128 bytes.
++$XFS_IO_PROG -c "truncate 128" $SCRATCH_MNT/foo
++
++# Now clone foo's inline extent into bar.
++# This clone operation should fail with errno EOPNOTSUPP because the source
++# file consists only of an inline extent and the file's size is smaller than
++# the inline extent of the destination (128 bytes < 256 bytes). However the
++# clone ioctl was not prepared to deal with a file that has a size smaller
++# than the size of its inline extent (something that happens only for compressed
++# inline extents), resulting in copying the full inline extent from the source
++# file into the destination file.
++#
++# Note that btrfs' clone operation for inline extents consists of removing the
++# inline extent from the destination inode and copy the inline extent from the
++# source inode into the destination inode, meaning that if the destination
++# inode's inline extent is larger (N bytes) than the source inode's inline
++# extent (M bytes), some bytes (N - M bytes) will be lost from the destination
++# file. Btrfs could copy the source inline extent's data into the destination's
++# inline extent so that we would not lose any data, but that's currently not
++# done due to the complexity that would be needed to deal with such cases
++# (specially when one or both extents are compressed), returning EOPNOTSUPP, as
++# it's normally not a very common case to clone very small files (only case
++# where we get inline extents) and copying inline extents does not save any
++# space (unlike for normal, non-inlined extents).
++$CLONER_PROG -s 0 -d 0 -l 0 $SCRATCH_MNT/foo $SCRATCH_MNT/bar
++
++# Now because the above clone operation used to succeed, and due to foo's inline
++# extent not being shinked by the truncate operation, our file bar got the whole
++# inline extent copied from foo, making us lose the last 128 bytes from bar
++# which got replaced by the bytes in range [128, 256[ from foo before foo was
++# truncated - in other words, data loss from bar and being able to read old and
++# stale data from foo that should not be possible to read anymore through normal
++# filesystem operations. Contrast with the case where we truncate a file from a
++# size N to a smaller size M, truncate it back to size N and then read the range
++# [M, N[, we should always get the value 0x00 for all the bytes in that range.
++
++# We expected the clone operation to fail with errno EOPNOTSUPP and therefore
++# not modify our file's bar data/metadata. So its content should be 256 bytes
++# long with all bytes having the value 0xbb.
++#
++# Without the btrfs bug fix, the clone operation succeeded and resulted in
++# leaking truncated data from foo, the bytes that belonged to its range
++# [128, 256[, and losing data from bar in that same range. So reading the
++# file gave us the following content:
++#
++# 0000000 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1
++# *
++# 0000200 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a
++# *
++# 0000400
++echo "File bar's content after the clone operation:"
++od -t x1 $SCRATCH_MNT/bar
++
++# Also because the foo's inline extent was not shrunk by the truncate
++# operation, btrfs' fsck, which is run by the fstests framework everytime a
++# test completes, failed reporting the following error:
++#
++#  root 5 inode 257 errors 400, nbytes wrong
++
++status=0
++exit
+diff --git a/tests/btrfs/113.out b/tests/btrfs/113.out
+new file mode 100644
+index 0000000..3847b35
+--- /dev/null
++++ b/tests/btrfs/113.out
+@@ -0,0 +1,12 @@
++QA output created by 113
++wrote 128/128 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 384/384 bytes at offset 128
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 256/256 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++clone failed: Operation not supported
++File bar's content after the clone operation:
++0000000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
++*
++0000400
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 9e24df3..7cf7dd7 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -115,3 +115,4 @@
+ 110 auto quick send
+ 111 auto quick send
+ 112 auto quick clone
++113 auto quick compress clone
+-- 
+2.1.3
+
