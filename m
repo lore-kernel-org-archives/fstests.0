@@ -1,81 +1,67 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:8663 "EHLO
-	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751154AbbJRViM (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 18 Oct 2015 17:38:12 -0400
-Date: Mon, 19 Oct 2015 08:37:45 +1100
-From: Dave Chinner <david@fromorbit.com>
+Received: from imap.thunk.org ([74.207.234.97]:57890 "EHLO imap.thunk.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752821AbbJRWII (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sun, 18 Oct 2015 18:08:08 -0400
+Date: Sun, 18 Oct 2015 18:08:05 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
 Subject: Re: [PATCH] common: introduce XFS_IO_AVOID env var
-Message-ID: <20151018213745.GX27164@dastard>
+Message-ID: <20151018220805.GN2678@thunk.org>
 References: <1445107518-32022-1-git-send-email-tytso@mit.edu>
+ <20151018213745.GX27164@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1445107518-32022-1-git-send-email-tytso@mit.edu>
+In-Reply-To: <20151018213745.GX27164@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
+To: Dave Chinner <david@fromorbit.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Oct 17, 2015 at 02:45:18PM -0400, Theodore Ts'o wrote:
-> Like FSSTRESS_AVOID and FSX_AVOID, XFS_IO_AVOID can be used to avoid
-> using various advanced file system features such as "fpunch"
-> "fcollapse", "finsert", or "zero".  Tests that require an xfs_io
-> command which is included in the space-separated list found in the
-> XFS_IO_AVOID environment variable will be skipped using _notrun.
-
-This tells me what the change does, not why you need it.
-
-> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> ---
->  README    | 4 ++++
->  common/rc | 5 +++++
->  2 files changed, 9 insertions(+)
+On Mon, Oct 19, 2015 at 08:37:45AM +1100, Dave Chinner wrote:
+> On Sat, Oct 17, 2015 at 02:45:18PM -0400, Theodore Ts'o wrote:
+> > Like FSSTRESS_AVOID and FSX_AVOID, XFS_IO_AVOID can be used to avoid
+> > using various advanced file system features such as "fpunch"
+> > "fcollapse", "finsert", or "zero".  Tests that require an xfs_io
+> > command which is included in the space-separated list found in the
+> > XFS_IO_AVOID environment variable will be skipped using _notrun.
 > 
-> diff --git a/README b/README
-> index f8a878c..bb0075b 100644
-> --- a/README
-> +++ b/README
-> @@ -78,6 +78,10 @@ Preparing system for tests (IRIX and Linux):
->                 added to the end of fsstresss and fsx invocations, respectively,
->                 in case you wish to exclude certain operational modes from these
->                 tests.
-> +	     - setenv XFS_IO_AVOID which may contain a list of space separated
-> +	       xfs_io commands which will be avoided in case you want to
-> +	       exclude tests that require the use of certain file system
-> +	       operations such as "fpunch", "fcollapse", "finsert", or "zero".
+> This tells me what the change does, not why you need it.
 
-Again, what, not why.
+We didn't go into as much detail for FSX_AVOID and FSSTRESS_AVOID, but
+it's basically for the same reason.  Sometimes we might want to
+exclude certain operational modes from the xfststs.
 
->          - or add a case to the switch in common/config assigning
->            these variables based on the hostname of your test
-> diff --git a/common/rc b/common/rc
-> index adf1edf..61de97e 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1603,6 +1603,11 @@ _require_xfs_io_command()
->  	fi
->  	command=$1
->  
-> +	if echo "$XFS_IO_AVOID" | grep -wq "$command"
-> +	then
-> +		_notrun "Avoiding xfs_io $command"
-> +	fi
-> +
->  	testfile=$TEST_DIR/$$.xfs_io
->  	case $command in
->  	"falloc" )
+As one example, currently xfstests doesn't understand the difference
+between the allocation cluster size and the block size.  In the case
+of collapse/insert range, it means operations need to be done in
+cluster-aligned chunks, as opposed to block-aligned clusters.  So to
+suppress test noise it's nice if we can suppress all attempts to use
+insert_range/collapse_range while running a test --- and using
+FSX_AVOID and FSSTRESS_AVOID isn't sufficient for this purpose.
 
-And the following case statement actually tests where the xfs_io
-command is supported by the binary and kernel, and notruns if it
-isn't supported by either. Why isn't this sufficient?
+(As you may recall, I while back had a test patch allowed the file
+system to claim that it doesn't support collapse or insert range, and
+you and Eric argued that the right way to handle this was using
+environment variables like FSX_AVOID and FSSTRESS_AVOID to cause
+xfstests to avoid to use certain fallocate operational modes.
+XFS_IO_AVOID is basically an extension of that same functionality.
+Without this, hacking the kernel to always fail certain fallocate mode
+is still needed in order to force certain tests to be skipped.)
 
-Can you describe the problem so we can understand why explicitly
-avoiding certain xfs_io operations rather than using probing is
-necessary?
+As another example, recently I was trying to debug a memory leak, both
+on the most recent version of the kernel, as well as old stable
+kernels, and it's very useful to be able to see if a particular bug
+might be caused by say, buggy collapse range support.
+
+So I wanted to be able to suppress all use of collapse range by being
+able to do something as simple as "gce-xfstests --no-collapse".  This
+gets expanded to setting the FSX_AVOID, FSSTRESS_AVOID, and
+XFS_IO_AVOID environment variables.
+
+This way it becomes easier to see if certain test failures go away if
+an fallocate operational mode is suppressed --- and hence, allows us
+to localize the failure to collapse_range or insert_range.
 
 Cheers,
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+							- Ted
