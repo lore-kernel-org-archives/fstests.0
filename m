@@ -1,44 +1,50 @@
-Received: from imap.thunk.org ([74.207.234.97]:58163 "EHLO imap.thunk.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752209AbbJSDno (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sun, 18 Oct 2015 23:43:44 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH] xfstests: move ext4/30[1234] from the dangerous to the auto group
-Date: Sun, 18 Oct 2015 23:43:39 -0400
-Message-Id: <1445226219-8496-1-git-send-email-tytso@mit.edu>
+Received: from aserp1040.oracle.com ([141.146.126.69]:34505 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751071AbbJTLeQ (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 20 Oct 2015 07:34:16 -0400
+From: Liu Bo <bo.li.liu@oracle.com>
+Subject: [PATCH] xfstests: btrfs/012: add a regression test for deleting ext2_saved
+Date: Tue, 20 Oct 2015 19:34:06 +0800
+Message-Id: <1445340846-9774-1-git-send-email-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-The ext4/301, ext4/302, ext4/303, and ext4/304 tests are not crashing
-on 3.10.89, 3.14.53, 3.18.21, 4.1.8, and 4.3-rc2.  So promote these
-tests from the dangerous to the auto group.
+Btrfs now has changed to delete subvolume/snapshot asynchronously,
+which means that after umount, if we've already deleted 'ext2_saved',
+rollback can still be completed, which should not.
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+So this adds a regression test for this.
+
+Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
 ---
- tests/ext4/group | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ tests/btrfs/012 | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
-diff --git a/tests/ext4/group b/tests/ext4/group
-index c947db6..1191441 100644
---- a/tests/ext4/group
-+++ b/tests/ext4/group
-@@ -23,10 +23,10 @@
- 018 fuzzers
- 019 fuzzers
- 271 auto rw quick
--301 aio dangerous ioctl rw stress
--302 aio dangerous ioctl rw stress
--303 aio dangerous ioctl rw stress
--304 aio dangerous ioctl rw stress
-+301 aio auto ioctl rw stress
-+302 aio auto ioctl rw stress
-+303 aio auto ioctl rw stress
-+304 aio auto ioctl rw stress
- 305 auto
- 306 auto rw resize quick
- 307 auto ioctl rw
+diff --git a/tests/btrfs/012 b/tests/btrfs/012
+index d513759..b39dec0 100755
+--- a/tests/btrfs/012
++++ b/tests/btrfs/012
+@@ -112,6 +112,18 @@ diff -r /lib/modules/`uname -r`/ $SCRATCH_MNT/`uname -r`/ 2>&1 | grep -vw "sourc
+ 
+ _scratch_unmount
+ 
++# Convert it to btrfs, mount it and delete "ext2_saved"
++$BTRFS_CONVERT_PROG $SCRATCH_DEV >> $seqres.full 2>&1 || \
++	_fail "btrfs-convert failed"
++_scratch_mount || _fail "Could not mount new btrfs fs"
++$BTRFS_UTIL_PROG subvolume delete $SCRATCH_MNT/ext2_saved >> $seqres.full 2>&1 ||
++	_fail "failed to delete ext2_saved subvolume"
++_scratch_unmount
++
++# Now restore the ext4 device, expecting a failure
++$BTRFS_CONVERT_PROG -r $SCRATCH_DEV >> $seqres.full 2>&1
++[ $? -eq 1 ] || _fail "Failure is expected, but btrfs-convert returns with rollback complete"
++
+ # success, all done
+ status=0
+ exit
 -- 
-2.5.0
+1.8.2.1
 
