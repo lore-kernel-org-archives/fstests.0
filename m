@@ -1,52 +1,52 @@
-Received: from mx1.redhat.com ([209.132.183.28]:38967 "EHLO mx1.redhat.com"
+Received: from imap.thunk.org ([74.207.234.97]:38934 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756713AbbJVOgJ (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 22 Oct 2015 10:36:09 -0400
-Subject: Re: [PATCH 2/2] dm-thinp demo test
-References: <5627FA00.70003@redhat.com> <5627FBE8.3030408@sandeen.net>
- <20151022094722.GL3558@dhcp-13-216.nay.redhat.com>
- <5628EF2A.3020604@sandeen.net>
-From: Eric Sandeen <sandeen@redhat.com>
-Message-ID: <5628F457.7020605@redhat.com>
-Date: Thu, 22 Oct 2015 09:36:07 -0500
+	id S1757354AbbJVTWR (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 22 Oct 2015 15:22:17 -0400
+Date: Thu, 22 Oct 2015 15:22:13 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: Test ext4/001
+Message-ID: <20151022192213.GP2972@thunk.org>
+References: <20151022091017.GC14445@quack.suse.cz>
 MIME-Version: 1.0
-In-Reply-To: <5628EF2A.3020604@sandeen.net>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20151022091017.GC14445@quack.suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>, Eryu Guan <eguan@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>, Mike Snitzer <snitzer@redhat.com>
+To: Jan Kara <jack@suse.cz>
+Cc: linux-ext4@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 10/22/15 9:14 AM, Eric Sandeen wrote:
->>> +_workout
->>> >> +_dmthin_check_fs
->> > 
->> > btrfs fails the fs check, because btrfs changes lv device name in df
->> > output, from /dev/mapper/xxx to /dev/dm-x, so _check_scratch_fs couldn't
->> > umount it and btrfsck runs on mounted btrfs.
-> Huh, weird.  I'll admit that I did not test btrfs.  Other filesystems
-> worked for you?  I'm not sure how btrfs can change df output...
+On Thu, Oct 22, 2015 at 11:10:17AM +0200, Jan Kara wrote:
 > 
-> mapper symlinks have been a constant source of pain for fstests.  :(
-> 
->> > Adding "$UMOUNT_PROG $SCRATCH_MNT" before _dmthin_check_fs is a
->> > workaround, though I think it's a btrfs issue.
-> Hm, ok, thanks; easy enough to do that I guess.
+> I've checked why test ext4/001 fails for me with DAX and after some
+> investigation I've realized that the test assumes that
+> extent_max_zeroout_kb is 32 KB and thus unwritten extent will get converted
+> to written as a whole and not split. With DAX that doesn't happen (because
+> of difference between EXT4_GET_BLOCKS_ flags passed in writeback path and
+> DAX write path) and so the result differs.
 
-ALthough, it seems to be working for me here; I do fail because btrfs
-emits a warning in dmesg:
+Out of curiosity, how much memory are you using to test ext4 with DAX?
+I assume you're doing something like what Matthew Wilcox documented
+at: http://patchwork.ozlabs.org/patch/491107/
 
-[215098.204612] BTRFS warning (device dm-6): Skipping commit of aborted transaction.
-[215098.212074] ------------[ cut here ]------------
-[215098.216794] WARNING: CPU: 3 PID: 19408 at fs/btrfs/transaction.c:1708 cleanup_transaction+0x86/0x2c0 [btrfs]()
+I should really figure out a way to automate doing DAX regression
+testing using my scripts.
 
-which leads to:
+> So I was wondering how to best fix this. Either we could switch
+> extent_max_zeroout_kb to 0 to make the result same (but that has a slight
+> disadvantage that we would lose testing of the zeroout logic) or we could
+> increase file size so that zeroout doesn't trigger or something else?
+> Anyone has some idea?
 
-_check_dmesg: something found in dmesg (see /mnt/test2/git/xfstests/results//generic/115.dmesg)
-Ran: generic/115
-Failures: generic/115
+The approach I would suggest is to fork 001.out to 001.out.zeroout and
+001.out.nozerrout, and then test to see if our output file matches
+either file.  That means we'll redirect the output to our own 001.tmp2
+file and do the check against the two possible 001.out files in the
+ext4/001 script, but the advantage of doing things that way is that is
+that will also solve a false positive we're seeing when ext4
+encryption is enabled, and for a similar reason (extent zero-out is
+disabled when encryption is enabled).
 
-It's "just" a warning, though, so I'm not really sure this should be failing the test.
+Cheers,
 
--Eric
+						- Ted
