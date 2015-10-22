@@ -1,67 +1,35 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43602 "EHLO mx1.redhat.com"
+Received: from mx2.suse.de ([195.135.220.15]:56268 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751553AbbJVHMM (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 22 Oct 2015 03:12:12 -0400
-Date: Thu, 22 Oct 2015 15:12:09 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] xfstests: btrfs/012: add a regression test for deleting
- ext2_saved
-Message-ID: <20151022071209.GK3558@dhcp-13-216.nay.redhat.com>
-References: <1445340846-9774-1-git-send-email-bo.li.liu@oracle.com>
+	id S1757084AbbJVJKU (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 22 Oct 2015 05:10:20 -0400
+Date: Thu, 22 Oct 2015 11:10:17 +0200
+From: Jan Kara <jack@suse.cz>
+Subject: Test ext4/001
+Message-ID: <20151022091017.GC14445@quack.suse.cz>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1445340846-9774-1-git-send-email-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: Liu Bo <bo.li.liu@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: linux-ext4@vger.kernel.org
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Oct 20, 2015 at 07:34:06PM +0800, Liu Bo wrote:
-> Btrfs now has changed to delete subvolume/snapshot asynchronously,
-> which means that after umount, if we've already deleted 'ext2_saved',
-> rollback can still be completed, which should not.
-> 
-> So this adds a regression test for this.
-> 
-> Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+Hi,
 
-I'm not sure if this belongs to a new test, but given that this test
-has very similar steps to existing tests, so I think that's fine.
+I've checked why test ext4/001 fails for me with DAX and after some
+investigation I've realized that the test assumes that
+extent_max_zeroout_kb is 32 KB and thus unwritten extent will get converted
+to written as a whole and not split. With DAX that doesn't happen (because
+of difference between EXT4_GET_BLOCKS_ flags passed in writeback path and
+DAX write path) and so the result differs.
 
-Reviewed-by: Eryu Guan <eguan@redhat.com>
+So I was wondering how to best fix this. Either we could switch
+extent_max_zeroout_kb to 0 to make the result same (but that has a slight
+disadvantage that we would lose testing of the zeroout logic) or we could
+increase file size so that zeroout doesn't trigger or something else?
+Anyone has some idea?
 
-> ---
->  tests/btrfs/012 | 12 ++++++++++++
->  1 file changed, 12 insertions(+)
-> 
-> diff --git a/tests/btrfs/012 b/tests/btrfs/012
-> index d513759..b39dec0 100755
-> --- a/tests/btrfs/012
-> +++ b/tests/btrfs/012
-> @@ -112,6 +112,18 @@ diff -r /lib/modules/`uname -r`/ $SCRATCH_MNT/`uname -r`/ 2>&1 | grep -vw "sourc
->  
->  _scratch_unmount
->  
-> +# Convert it to btrfs, mount it and delete "ext2_saved"
-> +$BTRFS_CONVERT_PROG $SCRATCH_DEV >> $seqres.full 2>&1 || \
-> +	_fail "btrfs-convert failed"
-> +_scratch_mount || _fail "Could not mount new btrfs fs"
-> +$BTRFS_UTIL_PROG subvolume delete $SCRATCH_MNT/ext2_saved >> $seqres.full 2>&1 ||
-> +	_fail "failed to delete ext2_saved subvolume"
-> +_scratch_unmount
-> +
-> +# Now restore the ext4 device, expecting a failure
-> +$BTRFS_CONVERT_PROG -r $SCRATCH_DEV >> $seqres.full 2>&1
-> +[ $? -eq 1 ] || _fail "Failure is expected, but btrfs-convert returns with rollback complete"
-> +
->  # success, all done
->  status=0
->  exit
-> -- 
-> 1.8.2.1
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+								Honza
+-- 
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
