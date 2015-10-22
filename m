@@ -1,145 +1,28 @@
-Received: from sandeen.net ([63.231.237.45]:38945 "EHLO sandeen.net"
+Received: from mx1.redhat.com ([209.132.183.28]:36878 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756389AbbJUU4K (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 21 Oct 2015 16:56:10 -0400
-Subject: [PATCH 2/2] dm-thinp demo test
-References: <5627FA00.70003@redhat.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <5627FBE8.3030408@sandeen.net>
-Date: Wed, 21 Oct 2015 15:56:08 -0500
+	id S1751367AbbJVGao (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 22 Oct 2015 02:30:44 -0400
+Date: Thu, 22 Oct 2015 14:30:41 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] btrfs/112: add missing _require_xfs_io_command for falloc
+Message-ID: <20151022063041.GH3558@dhcp-13-216.nay.redhat.com>
+References: <1444771499-2151-1-git-send-email-fdmanana@kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <5627FA00.70003@redhat.com>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1444771499-2151-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>
-Cc: Mike Snitzer <snitzer@redhat.com>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Fairly trivial test to use the dm-thin infrastructure.
+On Tue, Oct 13, 2015 at 10:24:59PM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> I forgot to add the requirement for the xfs_io command "falloc", which
+> the test makes use of. Also fixed a weird indentation (mix of spaces
+> and tabs) for one line of a comment.
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-Right now it exhausts space in queue-on-error mode,
-adds more space, does a bit more IO, then unmounts &
-checks the fs.
-
-Not sure if that's valid to test, but it works here and
-demonstrates the common/dmthin helpers.
-
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
----
-
-
-
-diff --git a/tests/generic/115 b/tests/generic/115
-new file mode 100755
-index 0000000..ef9d881
---- /dev/null
-+++ b/tests/generic/115
-@@ -0,0 +1,85 @@
-+#! /bin/bash
-+# FS QA Test No. generic/115
-+#
-+# Test very basic thin device usage, exhaustion, and growth
-+#
-+# Copyright (c) 2015 Red Hat, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+BACKING_SIZE=$((500 * 1024 * 1024 / 512))	# 500M
-+VIRTUAL_SIZE=$((10 * $BACKING_SIZE))		# 5000M
-+GROW_SIZE=$((100 * 1024 * 1024 / 512))		# 100M
-+
-+_cleanup()
-+{
-+	_dmthin_cleanup
-+	rm -f $tmp.*
-+}
-+
-+_setup_thin()
-+{
-+	_dmthin_init $BACKING_SIZE $VIRTUAL_SIZE
-+	_dmthin_set_queue
-+	_mkfs_dev $DMTHIN_VOL_DEV
-+	_dmthin_mount
-+}
-+
-+_workout()
-+{
-+	# Overfill it by a bit
-+	for I in `seq 1 500`; do
-+		$XFS_IO_PROG -f -c "pwrite -W 0 1M" $SCRATCH_MNT/file$I &>/dev/null
-+	done
-+
-+	sync
-+
-+	_dmthin_grow  $GROW_SIZE
-+
-+	# Write a little more, but don't fill
-+	for I in `seq 501 510`; do
-+		$XFS_IO_PROG -f -c "pwrite 0 1M" $SCRATCH_MNT/file$I &>/dev/null
-+	done
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/dmthin
-+
-+_supported_fs generic
-+_supported_os Linux
-+_need_to_be_root
-+_require_dm_target thin
-+
-+_setup_thin
-+_dmthin_set_queue
-+_workout
-+_dmthin_check_fs
-+_dmthin_cleanup
-+
-+echo "=== completed"
-+
-+status=0
-+exit
-diff --git a/tests/generic/115.out b/tests/generic/115.out
-new file mode 100644
-index 0000000..39ebd87
---- /dev/null
-+++ b/tests/generic/115.out
-@@ -0,0 +1,2 @@
-+QA output created by 115
-+=== completed
-diff --git a/tests/generic/group b/tests/generic/group
-index 1dd4269..729578d 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -115,6 +115,7 @@
- 112 rw aio auto quick
- 113 rw aio auto quick
- 114 rw aio auto quick
-+115 rw thin auto quick
- 117 attr auto quick
- 120 other auto quick
- 123 perms auto quick
-
-
+Reviewed-by: Eryu Guan <eguan@redhat.com>
