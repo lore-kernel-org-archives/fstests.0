@@ -1,105 +1,196 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:43983 "EHLO
-	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750701AbbKBAyp (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 1 Nov 2015 19:54:45 -0500
-Received: from dave by dastard with local (Exim 4.80)
-	(envelope-from <david@fromorbit.com>)
-	id 1Zt3O3-0000nB-6y
-	for fstests@vger.kernel.org; Mon, 02 Nov 2015 11:54:15 +1100
-Date: Mon, 2 Nov 2015 11:54:15 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: [ANNOUNCE] xfstests: master branch updated to 8deb635
-Message-ID: <20151102005415.GV19199@dastard>
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="HlL+5n6rz5pIUxbD"
-Content-Disposition: inline
+Received: from mail.kernel.org ([198.145.29.136]:53431 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751394AbbKBMdX (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 2 Nov 2015 07:33:23 -0500
+From: fdmanana@kernel.org
+Subject: [PATCH] fstests: generic test for fsync after hole punching
+Date: Mon,  2 Nov 2015 12:32:57 +0000
+Message-Id: <1446467577-32220-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
+From: Filipe Manana <fdmanana@suse.com>
 
---HlL+5n6rz5pIUxbD
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Test that a file fsync works after punching a hole for the same file
+range multiple times, and that after log/journal replay the file's
+content and layout are correct.
 
-Hi folks,
+This test is motivated by a bug found in btrfs, which is fixed by
+the following linux kernel patch:
 
-The xfstests repositories at:
+  "Btrfs: fix hole punching when using the no-holes feature"
 
-	git://oss.sgi.com/xfs/cmds/xfstests
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/generic/110     | 123 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/110.out |  13 ++++++
+ tests/generic/group   |   1 +
+ 3 files changed, 137 insertions(+)
+ create mode 100755 tests/generic/110
+ create mode 100644 tests/generic/110.out
 
-have just been updated.
+diff --git a/tests/generic/110 b/tests/generic/110
+new file mode 100755
+index 0000000..1e3daac
+--- /dev/null
++++ b/tests/generic/110
+@@ -0,0 +1,123 @@
++#! /bin/bash
++# FSQA Test No. 110
++#
++# Test that a file fsync works after punching a hole for the same file range
++# multiple times and that after log/journal replay the file's content is
++# correct.
++#
++# This test is motivated by a bug found in btrfs.
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/punch
++. ./common/dmflakey
++
++# real QA test starts here
++_need_to_be_root
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_xfs_io_command "fpunch"
++_require_xfs_io_command "fiemap"
++_require_dm_target flakey
++_require_metadata_journaling $SCRATCH_DEV
++
++# This test was motivated by an issue found in btrfs when the btrfs no-holes
++# feature is enabled (introduced in kernel 3.14). So enable the feature if the
++# fs being tested is btrfs.
++if [ $FSTYP == "btrfs" ]; then
++	_require_btrfs_fs_feature "no_holes"
++	_require_btrfs_mkfs_feature "no-holes"
++	MKFS_OPTIONS="$MKFS_OPTIONS -O no-holes"
++fi
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_init_flakey
++_mount_flakey
++
++# Create out test file with some data and then fsync it.
++# We do the fsync only to make sure the last fsync we do in this test triggers
++# the fast code path of btrfs' fsync implementation, a condition necessary to
++# trigger the bug btrfs had.
++$XFS_IO_PROG -f -c "pwrite -S 0xaa 0K 128K" \
++		-c "fsync"                  \
++		$SCRATCH_MNT/foobar | _filter_xfs_io
++
++# Now punch a hole against the range [96K, 128K[.
++$XFS_IO_PROG -c "fpunch 96K 32K" $SCRATCH_MNT/foobar
++
++# Punch another hole against a range that overlaps the previous range and ends
++# beyond eof.
++$XFS_IO_PROG -c "fpunch 64K 128K" $SCRATCH_MNT/foobar
++
++# Punch another hole against a range that overlaps the first range ([96K, 128K[)
++# and ends at eof.
++$XFS_IO_PROG -c "fpunch 32K 96K" $SCRATCH_MNT/foobar
++
++# Fsync our file. We want to verify that, after a power failure and mounting the
++# filesystem again, the file content reflects all the hole punch operations.
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foobar
++
++echo "File digest before power failure:"
++md5sum $SCRATCH_MNT/foobar | _filter_scratch
++
++echo "Fiemap before power failure:"
++$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foobar | _filter_fiemap
++
++# Silently drop all writes and unmount to simulate a crash/power failure.
++_load_flakey_table $FLAKEY_DROP_WRITES
++_unmount_flakey
++
++# Allow writes again, mount to trigger log replay and validate file contents.
++_load_flakey_table $FLAKEY_ALLOW_WRITES
++_mount_flakey
++
++echo "File digest after log replay:"
++# Must match the same digest we got before the power failure.
++md5sum $SCRATCH_MNT/foobar | _filter_scratch
++
++echo "Fiemap after log replay:"
++# Must match the same extent listing we got before the power failure.
++$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foobar | _filter_fiemap
++
++_unmount_flakey
++
++status=0
++exit
+diff --git a/tests/generic/110.out b/tests/generic/110.out
+new file mode 100644
+index 0000000..ba016c8
+--- /dev/null
++++ b/tests/generic/110.out
+@@ -0,0 +1,13 @@
++QA output created by 110
++wrote 131072/131072 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File digest before power failure:
++d26bbb9a8396a9c0dd76423471b72b15  SCRATCH_MNT/foobar
++Fiemap before power failure:
++0: [0..63]: data
++1: [64..255]: hole
++File digest after log replay:
++d26bbb9a8396a9c0dd76423471b72b15  SCRATCH_MNT/foobar
++Fiemap after log replay:
++0: [0..63]: data
++1: [64..255]: hole
+diff --git a/tests/generic/group b/tests/generic/group
+index 1dd4269..59a6f43 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -112,6 +112,7 @@
+ 107 auto quick metadata
+ 108 auto quick rw
+ 109 auto metadata dir
++110 auto quick prealloc metadata
+ 112 rw aio auto quick
+ 113 rw aio auto quick
+ 114 rw aio auto quick
+-- 
+2.1.3
 
-Patches often get missed, so please check if your outstanding
-patches were in this update. If they have not been in this update,
-please resubmit them to fstests@vger.kernel.org so they can be
-picked up in the next update.
-
-The new head of the master branch is commit:
-
-8deb635 generic/312: fix dev_blocks calculation
-
-New Commits:
-
-Eric Sandeen (1):
-      [a71e9bb] common: properly quote strings tested with -n
-
-Filipe Manana (2):
-      [64bd48f] btrfs/112: add missing _require_xfs_io_command for falloc
-      [7ff4bb2] btrfs: cloning of compressed inline extent after truncation
-
-Liu Bo (1):
-      [17f7ca2] btrfs/012: add a regression test for deleting ext2_saved
-
-Theodore Ts'o (1):
-      [8c94797] ext4: move 30[1234] from the dangerous to the auto group
-
-Xiong Zhou (1):
-      [8deb635] generic/312: fix dev_blocks calculation
-
-
-Code Diffstat:
-
- common/attr         |   8 ++--
- common/quota        |   4 +-
- tests/btrfs/012     |  12 +++++
- tests/btrfs/112     |   3 +-
- tests/btrfs/113     | 135 ++++++++++++++++++++++++++++++++++++++++++++++++=
-++++
- tests/btrfs/113.out |  12 +++++
- tests/btrfs/group   |   1 +
- tests/ext4/group    |   8 ++--
- tests/generic/312   |   2 +-
- 9 files changed, 173 insertions(+), 12 deletions(-)
- create mode 100755 tests/btrfs/113
- create mode 100644 tests/btrfs/113.out
---=20
-Dave Chinner
-david@fromorbit.com
-
---HlL+5n6rz5pIUxbD
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJWNrQ2AAoJEK3oKUf0dfodcwQP/0Ue0SDC2xMvyQK7TijmUYfF
-pS2EIYF0Bo4ePzv3Y6uz0o1WPOxUdrtjgjUFY28fqsPfQ5N6pv6Mi5KztIBoN+1F
-6ifb8iBvPD0b3+F62gBKuvVWhhdtQVP9mGHniwoMUj6yBOedmAouxqHWYyITqMSF
-TVjHukiP+WMrhVaLnYV+y9ErnyhlbxbXIo1KTXtO0XEJBwrM2pRDLTiz/BaNGswo
-561XePCjxUW53ggcYgmrHRTtmC9b+qOIixYF8WENmqAjutAvoqLWEQ9CkszxzEme
-sS77vqLE6tdfDxTfcOpaWgeRik1Z3jIDDqjnzMNEWhQWDLdh3pReCajDG/6JIt8S
-wcQwg50nRyTCXDsUfVgoB4ZIeZlg/OTDbAJZilGzOVWaLCP8q0IlFcIujGUKTV9y
-VyvXIp+3c0cLanxKClKSnWBJoF/5aCnUjEBLCIuF3JxCznZFYXb3xv+sgJGvtCto
-7CmnMpAgCxjmTJJXN7LiBnGo7HDkjJ63L6+B2X9WPGjOtiFo1O6+adFNUYlaJYbW
-022Pa+oHrnWIDBWj/a9GjFzIY01A/ZtidZgndoiNoMyPu9UA7Yw7qRsf1fWhDOAX
-K4t4PqmYEUyTKBNUCctCk34kk+/d9I/gFRU+Gt21oaaNa+XFzk+tFB0ZoETCs5a/
-exlJONqg90f8xcNvdJoh
-=i9EF
------END PGP SIGNATURE-----
-
---HlL+5n6rz5pIUxbD--
