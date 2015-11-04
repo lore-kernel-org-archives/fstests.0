@@ -1,34 +1,40 @@
-Received: from mx2.suse.de ([195.135.220.15]:35734 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:35733 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S965625AbbKDQbv (ORCPT <rfc822;fstests@vger.kernel.org>);
+	id S965576AbbKDQbv (ORCPT <rfc822;fstests@vger.kernel.org>);
 	Wed, 4 Nov 2015 11:31:51 -0500
 From: Jan Kara <jack@suse.com>
-Subject: [PATCH 0/4] Output selection, improvements for ext4/001
-Date: Wed,  4 Nov 2015 17:31:34 +0100
-Message-Id: <1446654698-23577-1-git-send-email-jack@suse.com>
+Subject: [PATCH 1/4] _filter_fiemap: Avoid awk interval regexps
+Date: Wed,  4 Nov 2015 17:31:35 +0100
+Message-Id: <1446654698-23577-2-git-send-email-jack@suse.com>
+In-Reply-To: <1446654698-23577-1-git-send-email-jack@suse.com>
+References: <1446654698-23577-1-git-send-email-jack@suse.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-ext4@vger.kernel.org, Jan Kara <jack@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Hello,
+Older versions of awk do not accept interval regexps by default. Avoid
+them in _filter_fiemap to keep better compatibility since it's pretty
+trivial.
 
-the patch series below addresses some issues with test ext4/001. The first
-patch is just a minor improvement to _filter_fiemap to work with older awk
-programs. The second patch updates expected output of the test because it
-slightly changes after punch hole fixes.
+Signed-off-by: Jan Kara <jack@suse.com>
+---
+ common/punch | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Patch 3 implements function which allows selecting different output file based
-on mount options (or basically any feature string that's passed to the function
-- e.g. selection based on fs blocksize can be easily done as well). Current
-helper _link_out_file() could be implemented using this as well but for now
-I left it alone. I think this feature can be useful when different mount
-options change behavior of the filesystem and thus different output is
-generated but we want to have test working all mount options.
+diff --git a/common/punch b/common/punch
+index e8770ab834a7..be193d67ee56 100644
+--- a/common/punch
++++ b/common/punch
+@@ -208,7 +208,7 @@ _filter_fiemap()
+ 			print $1, $2, $3;
+ 			next;
+ 		}
+-		$5 ~ /0x[[:xdigit:]]*8[[:xdigit:]]{2}/ {
++		$5 ~ /0x[[:xdigit:]]*8[[:xdigit:]][[:xdigit:]]/ {
+ 			print $1, $2, "unwritten";
+ 			next;
+ 		}
+-- 
+2.1.4
 
-Patch 4 uses the output selection function in ext4/001 to select different
-output files based on mount options.
-
-Comments welcome!
-
-								Honza
