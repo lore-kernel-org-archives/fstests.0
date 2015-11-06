@@ -1,114 +1,116 @@
-Received: from mx2.suse.de ([195.135.220.15]:34561 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751354AbbKFOqV (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 6 Nov 2015 09:46:21 -0500
-Subject: Re: kernel BUG when fsync'ing file in a overlayfs merged dir, located
- on btrfs
-References: <1443643065-16460-1-git-send-email-lebedev.ri@gmail.com>
- <563C171F.30702@jeffm.io> <20151106031845.GV22011@ZenIV.linux.org.uk>
- <563C26AE.1020403@jeffm.io>
-From: Jeff Mahoney <jeffm@suse.com>
-Message-ID: <563CBD36.3080105@suse.com>
-Date: Fri, 6 Nov 2015 09:46:14 -0500
-MIME-Version: 1.0
-In-Reply-To: <563C26AE.1020403@jeffm.io>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Received: from mail-pa0-f53.google.com ([209.85.220.53]:35819 "EHLO
+	mail-pa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751046AbbKFSk2 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 6 Nov 2015 13:40:28 -0500
+From: Justin Maggard <jmaggard10@gmail.com>
+Subject: [PATCH] btrfs: test quota disable during quota rescan
+Date: Fri,  6 Nov 2015 10:40:21 -0800
+Message-Id: <1446835221-11905-1-git-send-email-jmaggard@netgear.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jeff Mahoney <jeffm@jeffm.io>, Al Viro <viro@ZenIV.linux.org.uk>
-Cc: Roman Lebedev <lebedev.ri@gmail.com>, David Howells <dhowells@redhat.com>, linux-btrfs@vger.kernel.org, linux-unionfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, fstests@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Cc: Justin Maggard <jmaggard@netgear.com>
 List-ID: <fstests@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA1
+This test case tests if we are able to disable quotas on a filesystem
+while a quota rescan is running.  Up to now (4.3) this would result
+in a kernel NULL pointer dereference.
 
-On 11/5/15 11:03 PM, Jeff Mahoney wrote:
-> On 11/5/15 10:18 PM, Al Viro wrote:
->> On Thu, Nov 05, 2015 at 09:57:35PM -0500, Jeff Mahoney wrote:
->> 
->>> So now file_operations callbacks can't assume that
->>> file->f_path.dentry belongs to the same file system that
->>> implements the callback.  More than that, any code that could
->>> ultimately get a dentry that comes from an open file can't
->>> trust that it's from the same file system.
->> 
->> Use file_inode() for inode.
->> 
->>> This crash is due to this issue.  Unlike xfs and ext2/3/4, we
->>> use file->f_path.dentry->d_inode to resolve the inode.  Using
->>> file_inode() is an easy enough fix here, but we run into
->>> trouble later.  We have logic in the btrfs fsync() call path
->>> (check_parent_dirs_for_sync) that walks back up the dentry
->>> chain examining the inode's last transaction and last unlink
->>> transaction to determine whether a full transaction commit is
->>> required.  This obviously doesn't work if we're walking the 
->>> overlayfs path instead.  Regardless of any argument over
->>> whether that's doing the right thing, it's a pretty common
->>> pattern to assume that file->f_path.dentry comes from the same
->>> file system when using a file_operation.  Is it intended that
->>> that assumption is no longer valid?
->> 
->> It's actually rare, and your example is a perfect demonstration
->> of the reasons why it is so rare.  What's to protect
->> btrfs_log_dentry_safe() from racing with rename(2)?  Sure, you do
->> dget_parent().  Which protects you from having one-time parent
->> dentry freed under you.  What it doesn't do is making any
->> promises about its relationship with your file.
-> 
-> I suppose the irony here is that, AFAIK, that code is to ensure a
-> file doesn't get lost between transactions due to rename.
-> 
-> Isn't the file->f_path.dentry relationship stable otherwise,
-> though? The name might change and the parent might change but the
-> dentry that the file points to won't.
+Fixed by patch (btrfs: qgroup: fix quota disable during rescan).
 
-And, taking it a bit further, it's impossible for a rename to end up
-with a file pointing into a different file system.  So this btrfs case
-might misbehave, but it would never crash like we're seeing here.
+Signed-off-by: Justin Maggard <jmaggard@netgear.com>
+---
+ tests/btrfs/115     | 62 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/115.out |  2 ++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 65 insertions(+)
+ create mode 100755 tests/btrfs/115
+ create mode 100644 tests/btrfs/115.out
 
-- -Jeff
+diff --git a/tests/btrfs/115 b/tests/btrfs/115
+new file mode 100755
+index 0000000..0d1cb3a
+--- /dev/null
++++ b/tests/btrfs/115
+@@ -0,0 +1,62 @@
++#! /bin/bash
++# FS QA Test No. btrfs/115
++#
++# btrfs quota scan/disable sanity test
++# Make sure that disabling quotas during a quota rescan doesn't crash
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 NETGEAR, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++for i in `seq 0 1 450000`; do
++	echo -n > $SCRATCH_MNT/file.$i
++done
++echo 3 > /proc/sys/vm/drop_caches
++$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
++$BTRFS_UTIL_PROG quota disable $SCRATCH_MNT
++
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/btrfs/115.out b/tests/btrfs/115.out
+new file mode 100644
+index 0000000..d9dd136
+--- /dev/null
++++ b/tests/btrfs/115.out
+@@ -0,0 +1,2 @@
++QA output created by 115
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 10ab26b..39b9aff 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -117,3 +117,4 @@
+ 112 auto quick clone
+ 113 auto quick compress clone
+ 114 auto qgroup
++115 auto qgroup
+-- 
+2.6.3
 
-
-> I did find a few other places where that assumption happens without
-> any questionable traversals.  Sure, all three are in file systems
-> unlikely to be used with overlayfs.
-> 
-> ocfs2_prepare_inode_for_write uses file->f_path.dentry for 
-> should_remove_suid (due to needing to do it early since cluster
-> locking is unknown in setattr, according to the commit).  Having 
-> should_remove_suid operate on an inode would solve that easily.
-> 
-> fat_ioctl_set_attributes uses it to call fat_setattr, but that only
-> uses the inode and could have the inode_operation use a wrapper.
-> 
-> cifs_new_fileinfo keeps a reference to the dentry but it seems to
-> be used mostly to access the inode except for the nasty-looking
-> call to build_path_from_dentry in cifs_reopen_file, which I won't
-> be touching. That does look like a questionable traversal,
-> especially with the "we can't take the rename lock here" comment.
-> 
-> -Jeff
-> 
-
-
-- -- 
-Jeff Mahoney
-SUSE Labs
------BEGIN PGP SIGNATURE-----
-Version: GnuPG/MacGPG2 v2.0.19 (Darwin)
-Comment: GPGTools - http://gpgtools.org
-
-iQIcBAEBAgAGBQJWPL01AAoJEB57S2MheeWy1+IP/RfWvnpaXOCA2HJhzyR0attX
-D+SYah7Dc5OBicN0lghIg5ka0U2J1+l051yOOkT2sDRE23Lyu9/wmxhQVerx7hN4
-js/ZGwbmGfO9I3kXbAKzGdsAscVAgvTcEp8gYXWFCzYIRYyDKEJM8xrQMM+Z2mIy
-AMu6lzMRFGD7q2KIITZzML0cozgT0TREE9D9+IrT3ywxAegIPATxwFp3pDRDwl4F
-zb2QjJjJvw/z0LEAlatwV1H7AAIZxAVrMWVywlsrdvg+pwA508JvkN7Wk06dAcJ2
-YB+ddVIQsYyJuBYMA+IQsCM9q7LjIVPskoqi8BMxS2MvYObu6Z0zU+Iwcp0RnVa+
-FiKt3gfRR0yOAuulzg9wKylYasIC8kfKD1POaAmOBgLErhDFtXIsJSXuw5HgY/VR
-LsSAbyOMfWg+YvreswQ7d7VMnK0wIJuRnludWVbQIn8y+4RKbqj2jiYIlZ7FMeUu
-rSSPlNt0GKISaSM3iSBrR2qN8PLvVyxdXpZSCl5itfqNea6KAwL+Kj61x0rNZhhF
-GkQlwsxJxYEue1eqqZU8iEkd0y93yPo3puhH7yHtT+dJW0NahjKiJF6TAGHF3C4a
-dEatwl6FSvDJA1aXvHG2dMfbtIiywKM1LJ4VAP1TOsbL3sqG3i4Orh7cN4bl2tYv
-/D9wgUU17XXdK76ysaxM
-=iP2W
------END PGP SIGNATURE-----
