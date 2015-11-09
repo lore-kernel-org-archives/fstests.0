@@ -1,56 +1,41 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:36485 "EHLO
-	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751515AbbKHVwQ (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 8 Nov 2015 16:52:16 -0500
-Date: Mon, 9 Nov 2015 08:51:57 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] btrfs: test quota disable during quota rescan
-Message-ID: <20151108215157.GA14311@dastard>
-References: <1446835221-11905-1-git-send-email-jmaggard@netgear.com>
- <CAL3q7H6-DatA0-etkVrBjC5EA8n4mtk8oDbo4yG-BnEWUh0KvA@mail.gmail.com>
+Received: from bombadil.infradead.org ([198.137.202.9]:38918 "EHLO
+	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751465AbbKIH7c (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 9 Nov 2015 02:59:32 -0500
+Date: Sun, 8 Nov 2015 23:59:26 -0800
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [RFCv3 00/12] xfstests: test the btrfs/xfs reflink/dedupe ioctls
+Message-ID: <20151109075926.GB17974@infradead.org>
+References: <20151007051257.3260.73072.stgit@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAL3q7H6-DatA0-etkVrBjC5EA8n4mtk8oDbo4yG-BnEWUh0KvA@mail.gmail.com>
+In-Reply-To: <20151007051257.3260.73072.stgit@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: Filipe Manana <fdmanana@gmail.com>
-Cc: Justin Maggard <jmaggard10@gmail.com>, fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, Justin Maggard <jmaggard@netgear.com>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: david@fromorbit.com, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, Anna.Schumaker@netapp.com, linux-btrfs@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Nov 07, 2015 at 03:08:01PM +0000, Filipe Manana wrote:
-> On Fri, Nov 6, 2015 at 6:40 PM, Justin Maggard <jmaggard10@gmail.com> wrote:
-> > This test case tests if we are able to disable quotas on a filesystem
-> > while a quota rescan is running.  Up to now (4.3) this would result
-> > in a kernel NULL pointer dereference.
-> >
-> > Fixed by patch (btrfs: qgroup: fix quota disable during rescan).
-> >
-> > Signed-off-by: Justin Maggard <jmaggard@netgear.com>
-> Reviewed-by: Filipe Manana <fdmanana@suse.com>
+On Tue, Oct 06, 2015 at 10:12:57PM -0700, Darrick J. Wong wrote:
+>  * I don't have any interesting NFS/CIFS setups for test. :(
+
+I have a banrch with client and server support for NFSv4.2 CLONE
+support:
+
+http://git.infradead.org/users/hch/pnfs.git/shortlog/refs/heads/reflink+clone
+
+For now you want to use btrfs on the server, as using reflinks on XFS
+seems to be a little unstable over NFS.
+
+> If you're going to start using this mess, you probably ought to just
+> pull from my github trees for kernel[1], xfsprogs[2], and xfstests[3].
+> They should just work with the btrfs that's in 4.3.
 > 
-> Looks good and it triggers the bug without the btrfs kernel fix.
-> 
-> A side note, and if you would like you could do as a separate patch
-> imho, is to speedup creating the files by using multiple
-> jobs/processes (as we do in generic/038 for example) - the test takes
-> 150 seconds on a debug kernel here, about 130 seconds were spent
-> creating the files. Same observation applies to your previous test
-> case as well.
+> Comments and questions are, as always, welcome.
 
-Given how many people get such a basic operation "wrong", we need a
-helper function for efficiently creating lots of empty files in a
-filesystem.
+Any reason the groups are called clone?  I don't really have an opinion
+on clone vs reflink but given that the xfs_io command is reflink I'd
+rather be consistent.
 
-Note that we already have _populate_fs(), but it's not very
-efficient when it comes to empty files, nor does it use concurrency.
-It seems to me that fixing this function and then using it
-everywhere would be the best approach.  Perhaps even doing something
-like making fs_mark use deep directory structures, and just calling
-it instead to populate the filesystem?
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Otherwise I'd say get it merged ASAP, we can still fix up various
+details later.
