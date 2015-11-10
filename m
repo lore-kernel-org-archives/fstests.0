@@ -1,57 +1,47 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:16724 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751445AbbKISto (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 9 Nov 2015 13:49:44 -0500
-Date: Mon, 9 Nov 2015 10:49:13 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [RFCv3 00/12] xfstests: test the btrfs/xfs reflink/dedupe ioctls
-Message-ID: <20151109184913.GB3255@birch.djwong.org>
-References: <20151007051257.3260.73072.stgit@birch.djwong.org>
- <20151109075926.GB17974@infradead.org>
+Received: from mx2.suse.de ([195.135.220.15]:58940 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751565AbbKJAaD (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 9 Nov 2015 19:30:03 -0500
+Date: Mon, 9 Nov 2015 16:30:02 -0800
+From: Mark Fasheh <mfasheh@suse.de>
+Subject: [PATCH] btrfs/104: replace ugly sleep with subvol sync
+Message-ID: <20151110003002.GK15575@wotan.suse.de>
+Reply-To: Mark Fasheh <mfasheh@suse.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20151109075926.GB17974@infradead.org>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: david@fromorbit.com, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, Anna.Schumaker@netapp.com, linux-btrfs@vger.kernel.org, xfs@oss.sgi.com
+To: fstests@vger.kernel.org
+Cc: Dave Chinner <david@fromorbit.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Nov 08, 2015 at 11:59:26PM -0800, Christoph Hellwig wrote:
-> On Tue, Oct 06, 2015 at 10:12:57PM -0700, Darrick J. Wong wrote:
-> >  * I don't have any interesting NFS/CIFS setups for test. :(
-> 
-> I have a banrch with client and server support for NFSv4.2 CLONE
-> support:
-> 
-> http://git.infradead.org/users/hch/pnfs.git/shortlog/refs/heads/reflink+clone
-> 
-> For now you want to use btrfs on the server, as using reflinks on XFS
-> seems to be a little unstable over NFS.
+Btrfsprogs now has 'subvolume sync' which will wait until deleted subvolumes
+are cleaned from disk.
 
-I found a few more bugs in the kernel-side implementation, which might explain
-that.  I'm about to start working on making CoW less crappy, but I'll push all
-the patches out to github.  (I wasn't planning on patchbombing again until
-December.)
+Signed-off-by: Mark Fasheh <mfasheh@suse.de>
+---
+ tests/btrfs/104 | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
 
-> > If you're going to start using this mess, you probably ought to just
-> > pull from my github trees for kernel[1], xfsprogs[2], and xfstests[3].
-> > They should just work with the btrfs that's in 4.3.
-> > 
-> > Comments and questions are, as always, welcome.
-> 
-> Any reason the groups are called clone?  I don't really have an opinion
-> on clone vs reflink but given that the xfs_io command is reflink I'd
-> rather be consistent.
+diff --git a/tests/btrfs/104 b/tests/btrfs/104
+index 80161a3..6848b87 100644
+--- a/tests/btrfs/104
++++ b/tests/btrfs/104
+@@ -146,11 +146,9 @@ _scratch_remount
+ # referenced above.
+ _run_btrfs_util_prog subvolume delete $SCRATCH_MNT/snap1
+ 
+-# There is no way from userspace to force btrfs_drop_snapshot to run
+-# at a given time (even via mount/unmount). We must wait for it to
+-# start and complete. This is the shortest time on my tests systems I
+-# have found which always allows drop_snapshot to run to completion.
+-sleep 45
++# Subvol delete is a delayed operation, wait for it to complete before
++# unmounting.
++_run_btrfs_util_prog subvolume sync $SCRATCH_MNT
+ 
+ _scratch_unmount
+ 
+-- 
+2.1.2
 
-The existing btrfs reflink tests were tagged in the 'clone' group prior to my
-patchset.
-
-> Otherwise I'd say get it merged ASAP, we can still fix up various
-> details later.
-
-I'll merge your patch and repost the whole pile of tests.  I'm almost ready to
-send a pile of updates for the XFS on-disk structure document which add stuff
-about the v5 format, rmapbt, and reflink.
-
---D
