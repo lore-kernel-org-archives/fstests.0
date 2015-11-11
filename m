@@ -1,104 +1,67 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:48310 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751265AbbKKJ70 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 11 Nov 2015 04:59:26 -0500
-Received: from G08CNEXCHPEKD01.g08.fujitsu.local (localhost.localdomain [127.0.0.1])
-	by edo.cn.fujitsu.com (8.14.3/8.13.1) with ESMTP id tAB9wgEb013179
-	for <fstests@vger.kernel.org>; Wed, 11 Nov 2015 17:58:42 +0800
-From: Zhaolei <zhaolei@cn.fujitsu.com>
-Subject: [PATCH v2] fstests: Make generic/081 run in old version of lvm
-Date: Wed, 11 Nov 2015 17:57:33 +0800
-Message-ID: <0b5bab871522166ec55727e234c56004098dbc77.1447235833.git.zhaolei@cn.fujitsu.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:22328 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752679AbbKKT06 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 11 Nov 2015 14:26:58 -0500
+Subject: [RFCv3.1 00/11] xfstests: test the nfs/cifs/btrfs/xfs
+ reflink/dedupe ioctls
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Wed, 11 Nov 2015 11:26:28 -0800
+Message-ID: <20151111192628.15056.6451.stgit@birch.djwong.org>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Zhao Lei <zhaolei@cn.fujitsu.com>
+To: hch@infradead.org, david@fromorbit.com, darrick.wong@oracle.com
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com, tao.peng@primarydata.com, linux-ext4@vger.kernel.org, Anna.Schumaker@netapp.com, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Zhao Lei <zhaolei@cn.fujitsu.com>
+Hi all,
 
-generic/081 failed in RHEL 6.3:
- # ./check generic/081
- FSTYP         -- btrfs
- PLATFORM      -- Linux/x86_64 kerneldev 4.2.0-rc5_HEAD_d770e558e21961ad6cfdf0ff7df0eb5d7d4f0754_+
- MKFS_OPTIONS  -- /dev/vdd
- MOUNT_OPTIONS -- /dev/vdd /var/ltf/tester/scratch_mnt
+This is part of the third revision of an RFC for adding to XFS support
+for tracking reverse-mappings of physical blocks to file and metadata;
+and support for mapping multiple file logical blocks to the same
+physical block, more commonly known as reflinking.
 
- generic/081
- [failed, exit status 1] - output mismatch (see /var/lib/xfstests/results//generic/081.out.bad)
-    --- tests/generic/081.out   2015-07-13 17:07:03.000000000 +0800
-    +++ /var/lib/xfstests/results//generic/081.out.bad  2015-10-28 12:20:49.000000000 +0800
-    @@ -1,2 +1,3 @@
-     QA output created by 081
-     Silence is golden
-    +ERROR: checking status of /dev/mapper/vg_081-base_081: No such file or directory
- Ran: generic/081
- Failures: generic/081
- Failed 1 of 1 tests
+This patchset aims to make xfstests perform more rigorous testing of
+the NFS/CIFS/ocfs2/btrfs/XFS file clone, reflink, and dedupe ioctls.
+There are now tests of the basic functionality of the three ioctls;
+tests to ensure that the filesystem exhibits the expected copy on
+write semantics; tests to try to suss out race conditions in the new
+write paths; tests to ensure that the ioctls peform basic disk
+accounting correctly; tests of the interaction between reflink and the
+various fallocate verbs (allocate, punch, collapse, insert zeroes);
+and some attempts to test the upper limits of reflinking and ENOSPC
+behavior.
 
-Reason:
- Command of "lvm lvcreate --yes" failed because lvm in RHEL 6.3
- don't support '--yes' option.
+Since the last posting, each test tries to reflink (or dedupe) on the
+test or scratch FS to decide if they're going to run, instead of
+guessing based on FS type.  Per Dave's suggestion, I also converted
+the basic functionality tests to use fixed sizes so that I can use
+md5sum in the golden output to check that the file contents match
+exactly.
 
- RHEL 6.3(without --yes option):
- # lvm version
-   LVM version:     2.02.95(2)-RHEL6 (2012-05-16)
-   Library version: 1.02.74-RHEL6 (2012-05-16)
-   Driver version:  4.32.0
- # lvm lvcreate --yes --version
- lvcreate: unrecognized option '--yes'
-   Error during parsing of command line.
- # echo $?
- 3
- #
+Issues: 
 
- RHEL 7.1(with --yes option):
- # lvm version
-   LVM version:     2.02.115(2)-RHEL7 (2015-01-28)
-   Library version: 1.02.93-RHEL7 (2015-01-28)
-   Driver version:  4.33.0
- # lvm lvcreate --yes --version
-   LVM version:     2.02.115(2)-RHEL7 (2015-01-28)
-   Library version: 1.02.93-RHEL7 (2015-01-28)
-   Driver version:  4.33.0
- # echo $?
- 0
- #
+ * I think the race checks for dedupe could be a little sharper at
+   finding mistakes.
 
- Fedora release 20(with --yes option):
- (Support --yes like RHEL 7.1, omit logs)
- lvm version: 2.02.106(2) (2014-04-10)
+ * The realtime reflink test (xfs/804) crashes XFS before we even get
+   to the reflink attempt.
 
-Fix:
- Add a condition to to check if current lvm support --yes option,
- Tested in above RHEL 6.3 platform.
+ * I started the numbering really high to prevent the tests from
+   colliding with whatever new tests might arrive; this will require
+   some intervention to fix.
 
-Changelog v1->v2:
- Use yes pipe, suggested by: Eryu Guan <eguan@redhat.com>
+If you're going to start using this mess, you probably ought to just
+pull from my github trees for kernel[1], xfsprogs[2], xfstests[3], and
+xfs-docs[4].  They should just work with the btrfs that's in 4.3...
+and somewhat buggily with the 4.3 XFS patched with [1].
 
-Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
----
- tests/generic/081 | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+Comments and questions are, as always, welcome.
 
-diff --git a/tests/generic/081 b/tests/generic/081
-index 8334ec9..1970075 100755
---- a/tests/generic/081
-+++ b/tests/generic/081
-@@ -65,7 +65,11 @@ mkdir -p $mnt
- # lvm uses some space for metadata
- _scratch_mkfs_sized $((300 * 1024 * 1024)) >>$seqres.full 2>&1
- $LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
--$LVM_PROG lvcreate --yes -L 256M -n $lvname $vgname >>$seqres.full 2>&1
-+if $LVM_PROG lvcreate --yes --version >>$seqres.full 2>&1; then
-+	$LVM_PROG lvcreate --yes -L 256M -n $lvname $vgname >>$seqres.full 2>&1
-+else
-+	yes | $LVM_PROG lvcreate -L 256M -n $lvname $vgname >>$seqres.full 2>&1
-+fi
- # wait for lvcreation to fully complete
- $UDEV_SETTLE_PROG >>$seqres.full 2>&1
- 
--- 
-1.8.5.1
+--D
 
+[1] https://github.com/djwong/linux/tree/for-dave
+[2] https://github.com/djwong/xfsprogs/tree/for-dave
+[3] https://github.com/djwong/xfstests/tree/for-dave
+[4] https://github.com/djwong/xfs-documentation/tree/for-dave
