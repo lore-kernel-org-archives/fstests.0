@@ -1,12 +1,11 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:35002 "EHLO
+Received: from aserp1040.oracle.com ([141.146.126.69]:34635 "EHLO
 	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751048AbbKKT2O (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 11 Nov 2015 14:28:14 -0500
-Subject: [PATCH 11/11] reflink: test that CoW writes fail when we're out of
- space
+	with ESMTP id S1752098AbbKKT1b (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 11 Nov 2015 14:27:31 -0500
+Subject: [PATCH 04/11] reflink: test CoW behaviors of reflinked files
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Wed, 11 Nov 2015 11:27:44 -0800
-Message-ID: <20151111192744.15056.4781.stgit@birch.djwong.org>
+Date: Wed, 11 Nov 2015 11:26:56 -0800
+Message-ID: <20151111192656.15056.46709.stgit@birch.djwong.org>
 In-Reply-To: <20151111192628.15056.6451.stgit@birch.djwong.org>
 References: <20151111192628.15056.6451.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -17,57 +16,47 @@ To: hch@infradead.org, david@fromorbit.com, darrick.wong@oracle.com
 Cc: fstests@vger.kernel.org, xfs@oss.sgi.com, tao.peng@primarydata.com, linux-ext4@vger.kernel.org, Anna.Schumaker@netapp.com, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Ensure that copy-on-writing a reflinked file when there's no free disk
-space reflects the desired ENOSPC back to userspace during the write
-call.  Tests the buffered IO, direct IO, and mmap write paths.
+Ensure that CoW happens correctly with buffered, directio, and mmap writes.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- common/rc             |    2 -
- tests/generic/842     |  107 ++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/842.out |   10 ++++
- tests/generic/843     |  107 ++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/843.out |   10 ++++
- tests/generic/844     |  109 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/844.out |    8 ++++
- tests/generic/845     |  107 ++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/845.out |   10 ++++
- tests/generic/group   |    4 ++
- 10 files changed, 473 insertions(+), 1 deletion(-)
- create mode 100755 tests/generic/842
- create mode 100644 tests/generic/842.out
- create mode 100755 tests/generic/843
- create mode 100644 tests/generic/843.out
- create mode 100755 tests/generic/844
- create mode 100644 tests/generic/844.out
- create mode 100755 tests/generic/845
- create mode 100644 tests/generic/845.out
+ tests/generic/808     |  152 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/808.out |   19 ++++++
+ tests/generic/809     |  151 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/809.out |   19 ++++++
+ tests/generic/810     |  152 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/810.out |   19 ++++++
+ tests/generic/837     |   91 +++++++++++++++++++++++++++++
+ tests/generic/837.out |    8 +++
+ tests/generic/838     |   91 +++++++++++++++++++++++++++++
+ tests/generic/838.out |    8 +++
+ tests/generic/group   |    5 ++
+ 11 files changed, 715 insertions(+)
+ create mode 100755 tests/generic/808
+ create mode 100644 tests/generic/808.out
+ create mode 100755 tests/generic/809
+ create mode 100644 tests/generic/809.out
+ create mode 100755 tests/generic/810
+ create mode 100644 tests/generic/810.out
+ create mode 100755 tests/generic/837
+ create mode 100644 tests/generic/837.out
+ create mode 100755 tests/generic/838
+ create mode 100644 tests/generic/838.out
 
 
-diff --git a/common/rc b/common/rc
-index c016673..474fa84 100644
---- a/common/rc
-+++ b/common/rc
-@@ -101,7 +101,7 @@ _mwrite_byte() {
- 	mmap_len="$4"
- 	file="$5"
- 
--	"$XFS_IO_PROG" -f -c "mmap -rw 0 $mmap_len" -c "pwrite -S $pattern $offset $len" "$file"
-+	"$XFS_IO_PROG" -f -c "mmap -rw 0 $mmap_len" -c "mwrite -S $pattern $offset $len" "$file"
- }
- 
- # ls -l w/ selinux sometimes puts a dot at the end:
-diff --git a/tests/generic/842 b/tests/generic/842
+diff --git a/tests/generic/808 b/tests/generic/808
 new file mode 100755
-index 0000000..5eda56b
+index 0000000..3a3ec58
 --- /dev/null
-+++ b/tests/generic/842
-@@ -0,0 +1,107 @@
++++ b/tests/generic/808
+@@ -0,0 +1,152 @@
 +#! /bin/bash
-+# FS QA Test No. 842
++# FS QA Test No. 808
 +#
-+# Reflink a file, use up the rest of the space, then try to observe ENOSPC
-+# while copy-on-writing the file via the page cache.
++# Ensuring that copy on write through the page cache works:
++#   - Reflink two files together
++#   - Write to the beginning, middle, and end
++#   - Check that the files are now different where we say they're different.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2015, Oracle and/or its affiliates.  All Rights Reserved.
@@ -98,105 +87,159 @@ index 0000000..5eda56b
 +_cleanup()
 +{
 +    cd /
-+    rm -rf "$tmp".* "$TESTDIR1"
++    rm -rf "$tmp".* "$TESTDIR"
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/attr
 +. ./common/reflink
 +
 +# real QA test starts here
 +_supported_os Linux
-+_require_scratch_reflink
++_require_test_reflink
 +_require_cp_reflink
 +
 +rm -f "$seqres.full"
 +
-+echo "Format and mount"
-+_scratch_mkfs > "$seqres.full" 2>&1
-+_scratch_mount >> "$seqres.full" 2>&1
-+
-+TESTDIR="$SCRATCH_MNT/test-$seq"
++TESTDIR="$TEST_DIR/test-$seq"
 +rm -rf "$TESTDIR"
 +mkdir "$TESTDIR"
 +
-+echo "Reformat with appropriate size"
-+BLKSZ="$(stat -f "$TESTDIR" -c '%S')"
-+NR_BLKS=10240
-+umount "$SCRATCH_MNT"
-+SZ_BYTES=$((NR_BLKS * 8 * BLKSZ))
-+if [ $SZ_BYTES -lt $((32 * 1048576)) ]; then
-+	SZ_BYTES=$((32 * 1048576))
-+fi
-+_scratch_mkfs_sized $SZ_BYTES >> "$seqres.full" 2>&1
-+_scratch_mount >> "$seqres.full" 2>&1
-+rm -rf "$TESTDIR"
-+mkdir "$TESTDIR"
++echo "Create the original files"
++BLKSZ=65536
++_pwrite_byte 0x61 0 $((BLKSZ * 48 - 3)) "$TESTDIR/file1" >> "$seqres.full"
++_cp_reflink "$TESTDIR/file1" "$TESTDIR/file2" >> "$seqres.full"
++_pwrite_byte 0x61 0 $((BLKSZ * 48 - 3)) "$TESTDIR/file3" >> "$seqres.full"
++_test_remount
 +
-+echo "Create a big file and reflink it"
-+_pwrite_byte 0x61 0 $((BLKSZ * NR_BLKS)) "$TESTDIR/bigfile" >> "$seqres.full" 2>&1
-+_cp_reflink "$TESTDIR/bigfile" "$TESTDIR/clonefile"
-+sync
++echo "Compare files"
++md5sum "$TESTDIR/file1" | _filter_test_dir
++md5sum "$TESTDIR/file2" | _filter_test_dir
++md5sum "$TESTDIR/file3" | _filter_test_dir
 +
-+echo "Allocate the rest of the space"
-+NR_FREE="$(stat -f -c '%f' "$TESTDIR")"
-+touch "$TESTDIR/file0" "$TESTDIR/file1"
-+_pwrite_byte 0x61 0 $((BLKSZ * NR_FREE)) "$TESTDIR/eat_my_space" >> "$seqres.full" 2>&1
-+sync
++cmp -s "$TESTDIR/file1" "$TESTDIR/file2" || echo "Files 1-2 do not match"
++cmp -s "$TESTDIR/file1" "$TESTDIR/file3" || echo "Files 1-3 do not match"
++cmp -s "$TESTDIR/file2" "$TESTDIR/file3" || echo "Files 2-3 do not match"
 +
-+echo "CoW the big file"
-+out="$(_pwrite_byte 0x62 0 $((BLKSZ * NR_BLKS)) "$TESTDIR/bigfile" 2>&1)"
-+echo "${out}" | grep -q "No space left on device" || echo "CoW should have failed with ENOSPC"
-+echo "${out}" >> "$seqres.full" 2>&1
-+echo "${out}"
++echo "pagecache CoW the second file"
++_pwrite_byte 0x62 0 17 "$TESTDIR/file2" >> "$seqres.full"
++_pwrite_byte 0x62 0 17 "$TESTDIR/file3" >> "$seqres.full"
 +
-+echo "Remount and try CoW again"
-+_scratch_remount
++_pwrite_byte 0x62 $((BLKSZ * 16 - 34)) 17 "$TESTDIR/file2" >> "$seqres.full"
++_pwrite_byte 0x62 $((BLKSZ * 16 - 34)) 17 "$TESTDIR/file3" >> "$seqres.full"
 +
-+out="$(_pwrite_byte 0x62 0 $((BLKSZ * NR_BLKS)) "$TESTDIR/bigfile" 2>&1)"
-+echo "${out}" | grep -q "No space left on device" || echo "CoW should have failed with ENOSPC"
-+echo "${out}" >> "$seqres.full" 2>&1
-+echo "${out}"
++_pwrite_byte 0x62 $((BLKSZ * 48 - 8)) 17 "$TESTDIR/file2" >> "$seqres.full"
++_pwrite_byte 0x62 $((BLKSZ * 48 - 8)) 17 "$TESTDIR/file3" >> "$seqres.full"
++_test_remount
 +
-+#filefrag -v $TESTDIR/bigfile
-+#filefrag -v $TESTDIR/clonefile
++echo "Compare files"
++md5sum "$TESTDIR/file1" | _filter_test_dir
++md5sum "$TESTDIR/file2" | _filter_test_dir
++md5sum "$TESTDIR/file3" | _filter_test_dir
 +
-+echo "Check scratch fs"
-+umount "$SCRATCH_MNT"
-+_check_scratch_fs
++cmp -s "$TESTDIR/file1" "$TESTDIR/file2" || echo "Files 1-2 do not match (intentional)"
++cmp -s "$TESTDIR/file1" "$TESTDIR/file3" || echo "Files 1-3 do not match (intentional)"
++cmp -s "$TESTDIR/file2" "$TESTDIR/file3" || echo "Files 2-3 do not match"
++
++echo "Compare the CoW'd section to the before file"
++_compare_range "$TESTDIR/file1" 0 "$TESTDIR/file2" 0 17 \
++       || echo "Start sections do not match (intentional)"
++
++_compare_range  "$TESTDIR/file1" $((BLKSZ * 16 - 34)) \
++		"$TESTDIR/file2" $((BLKSZ * 16 - 34)) 17 \
++       || echo "Middle sections do not match (intentional)"
++
++_compare_range  "$TESTDIR/file1" $((BLKSZ * 48 - 8)) \
++		"$TESTDIR/file2" $((BLKSZ * 48 - 8)) 17 \
++       || echo "End sections do not match (intentional)"
++
++echo "Compare the CoW'd section to the after file"
++_compare_range "$TESTDIR/file2" 0 "$TESTDIR/file3" 0 17 \
++       || echo "Start sections do not match"
++
++_compare_range  "$TESTDIR/file2" $((BLKSZ * 16 - 34)) \
++		"$TESTDIR/file3" $((BLKSZ * 16 - 34)) 17 \
++       || echo "Middle sections do not match"
++
++_compare_range  "$TESTDIR/file2" $((BLKSZ * 48 - 8)) \
++		"$TESTDIR/file3" $((BLKSZ * 48 - 8)) 17 \
++       || echo "End sections do not match"
++
++echo "Compare the not CoW'd sections"
++_compare_range "$TESTDIR/file1" 18 "$TESTDIR/file2" 18 17 \
++       || echo "Start sections of 1-2 do not match"
++
++_compare_range "$TESTDIR/file2" 18 "$TESTDIR/file3" 18 17 \
++       || echo "Start sections of 2-3 do not match"
++
++
++_compare_range  "$TESTDIR/file1" $((BLKSZ * 16 - 17)) \
++		"$TESTDIR/file2" $((BLKSZ * 16 - 17)) 82 \
++       || echo "Middle sections of 1-2 do not match"
++
++_compare_range  "$TESTDIR/file2" $((BLKSZ * 16 - 17)) \
++		"$TESTDIR/file3" $((BLKSZ * 16 - 17)) 82 \
++       || echo "Middle sections of 2-3 do not match"
++
++_compare_range  "$TESTDIR/file1" $((BLKSZ * 48 - 108)) \
++		"$TESTDIR/file2" $((BLKSZ * 48 - 108)) 100 \
++       || echo "End sections of 1-2 do not match"
++
++_compare_range  "$TESTDIR/file2" $((BLKSZ * 48 - 108)) \
++		"$TESTDIR/file3" $((BLKSZ * 48 - 108)) 100 \
++       || echo "End sections of 2-3 do not match"
++
++
++_compare_range  "$TESTDIR/file1" $((BLKSZ * 14)) \
++		"$TESTDIR/file2" $((BLKSZ * 14)) $BLKSZ \
++       || echo "Untouched sections of 1-2 do not match"
++
++_compare_range  "$TESTDIR/file2" $((BLKSZ * 14)) \
++		"$TESTDIR/file3" $((BLKSZ * 14)) $BLKSZ \
++       || echo "Untouched sections of 2-3 do not match"
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/842.out b/tests/generic/842.out
+diff --git a/tests/generic/808.out b/tests/generic/808.out
 new file mode 100644
-index 0000000..df58025
+index 0000000..1e82e2d
 --- /dev/null
-+++ b/tests/generic/842.out
-@@ -0,0 +1,10 @@
-+QA output created by 842
-+Format and mount
-+Reformat with appropriate size
-+Create a big file and reflink it
-+Allocate the rest of the space
-+CoW the big file
-+pwrite64: No space left on device
-+Remount and try CoW again
-+pwrite64: No space left on device
-+Check scratch fs
-diff --git a/tests/generic/843 b/tests/generic/843
++++ b/tests/generic/808.out
+@@ -0,0 +1,19 @@
++QA output created by 808
++Create the original files
++Compare files
++60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-808/file1
++60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-808/file2
++60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-808/file3
++pagecache CoW the second file
++Compare files
++60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-808/file1
++4a879c2f322121f6f4b8ebede1909a7c  TEST_DIR/test-808/file2
++4a879c2f322121f6f4b8ebede1909a7c  TEST_DIR/test-808/file3
++Files 1-2 do not match (intentional)
++Files 1-3 do not match (intentional)
++Compare the CoW'd section to the before file
++Start sections do not match (intentional)
++Middle sections do not match (intentional)
++End sections do not match (intentional)
++Compare the CoW'd section to the after file
++Compare the not CoW'd sections
+diff --git a/tests/generic/809 b/tests/generic/809
 new file mode 100755
-index 0000000..03dc570
+index 0000000..99e88f6
 --- /dev/null
-+++ b/tests/generic/843
-@@ -0,0 +1,107 @@
++++ b/tests/generic/809
+@@ -0,0 +1,151 @@
 +#! /bin/bash
-+# FS QA Test No. 843
++# FS QA Test No. 809
 +#
-+# Reflink a file that uses more than half of the space, then try to observe
-+# ENOSPC while copy-on-writing the file via the page cache.
++# Ensuring that copy on write in direct-io mode works:
++#   - Reflink two files together
++#   - Write to the beginning, middle, and end in direct-io mode
++#   - Check that the files are now different where we say they're different.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2015, Oracle and/or its affiliates.  All Rights Reserved.
@@ -227,105 +270,158 @@ index 0000000..03dc570
 +_cleanup()
 +{
 +    cd /
-+    rm -rf "$tmp".* "$TESTDIR1"
++    rm -rf "$tmp".* "$TESTDIR"
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/attr
 +. ./common/reflink
 +
 +# real QA test starts here
 +_supported_os Linux
-+_require_scratch_reflink
++_require_test_reflink
 +_require_cp_reflink
 +
 +rm -f "$seqres.full"
 +
-+echo "Format and mount"
-+_scratch_mkfs > "$seqres.full" 2>&1
-+_scratch_mount >> "$seqres.full" 2>&1
++TESTDIR=$TEST_DIR/test-$seq
++rm -rf $TESTDIR
++mkdir $TESTDIR
 +
-+TESTDIR="$SCRATCH_MNT/test-$seq"
-+rm -rf "$TESTDIR"
-+mkdir "$TESTDIR"
++echo "Create the original files"
++BLKSZ=65536
++_pwrite_byte 0x61 0 $((BLKSZ * 48 - 3)) "$TESTDIR/file1" >> "$seqres.full"
++_cp_reflink "$TESTDIR/file1" "$TESTDIR/file2" >> "$seqres.full"
++_pwrite_byte 0x61 0 $((BLKSZ * 48 - 3)) "$TESTDIR/file3" >> "$seqres.full"
++_test_remount
 +
-+echo "Reformat with appropriate size"
-+BLKSZ="$(stat -f "$TESTDIR" -c '%S')"
-+NR_BLKS=10240
-+umount "$SCRATCH_MNT"
-+SZ_BYTES=$((NR_BLKS * 3 / 2 * BLKSZ))
-+if [ $SZ_BYTES -lt $((32 * 1048576)) ]; then
-+	SZ_BYTES=$((32 * 1048576))
-+fi
-+_scratch_mkfs_sized $SZ_BYTES >> "$seqres.full" 2>&1
-+_scratch_mount >> "$seqres.full" 2>&1
-+rm -rf "$TESTDIR"
-+mkdir "$TESTDIR"
++echo "Compare files"
++md5sum "$TESTDIR/file1" | _filter_test_dir
++md5sum "$TESTDIR/file2" | _filter_test_dir
++md5sum "$TESTDIR/file3" | _filter_test_dir
 +
-+echo "Create a big file and reflink it"
-+_pwrite_byte 0x61 0 $((BLKSZ * NR_BLKS)) "$TESTDIR/bigfile" >> "$seqres.full" 2>&1
-+_cp_reflink "$TESTDIR/bigfile" "$TESTDIR/clonefile"
-+sync
++cmp -s "$TESTDIR/file1" "$TESTDIR/file2" || echo "Files 1-2 should match"
++cmp -s "$TESTDIR/file1" "$TESTDIR/file3" || echo "Files 1-3 should match"
++cmp -s "$TESTDIR/file2" "$TESTDIR/file3" || echo "Files 2-3 should match"
 +
-+echo "Allocate the rest of the space"
-+NR_FREE="$(stat -f -c '%f' "$TESTDIR")"
-+touch "$TESTDIR/file0" "$TESTDIR/file1"
-+_pwrite_byte 0x61 0 $((BLKSZ * NR_FREE)) "$TESTDIR/eat_my_space" >> "$seqres.full" 2>&1
-+sync
++echo "directio CoW the second file"
++_pwrite_byte 0x62 0 $BLKSZ "$TESTDIR/file2" -d >> "$seqres.full"
++_pwrite_byte 0x62 0 $BLKSZ "$TESTDIR/file3" -d >> "$seqres.full"
 +
-+echo "CoW the big file"
-+out="$(_pwrite_byte 0x62 0 $((BLKSZ * NR_BLKS)) "$TESTDIR/bigfile" 2>&1)"
-+echo "${out}" | grep -q "No space left on device" || echo "CoW should have failed with ENOSPC"
-+echo "${out}" >> "$seqres.full" 2>&1
-+echo "${out}"
++_pwrite_byte 0x62 $((BLKSZ * 16 - 512)) 512 "$TESTDIR/file2" -d >> "$seqres.full"
++_pwrite_byte 0x62 $((BLKSZ * 16 - 512)) 512 "$TESTDIR/file3" -d >> "$seqres.full"
 +
-+echo "Remount and try CoW again"
-+_scratch_remount
++_pwrite_byte 0x62 $((BLKSZ * 48)) $BLKSZ "$TESTDIR/file2" -d >> "$seqres.full"
++_pwrite_byte 0x62 $((BLKSZ * 48)) $BLKSZ "$TESTDIR/file3" -d >> "$seqres.full"
++_test_remount
 +
-+out="$(_pwrite_byte 0x62 0 $((BLKSZ * NR_BLKS)) "$TESTDIR/bigfile" 2>&1)"
-+echo "${out}" | grep -q "No space left on device" || echo "CoW should have failed with ENOSPC"
-+echo "${out}" >> "$seqres.full" 2>&1
-+echo "${out}"
++echo "Compare files"
++md5sum "$TESTDIR/file1" | _filter_test_dir
++md5sum "$TESTDIR/file2" | _filter_test_dir
++md5sum "$TESTDIR/file3" | _filter_test_dir
 +
-+#filefrag -v $TESTDIR/bigfile
-+#filefrag -v $TESTDIR/clonefile
++cmp -s "$TESTDIR/file1" "$TESTDIR/file2" || echo "Files 1-2 should not match (intentional)"
++cmp -s "$TESTDIR/file1" "$TESTDIR/file3" || echo "Files 1-3 should not match (intentional)"
++cmp -s "$TESTDIR/file2" "$TESTDIR/file3" || echo "Files 2-3 should match"
 +
-+echo "Check scratch fs"
-+umount "$SCRATCH_MNT"
-+_check_scratch_fs
++echo "Compare the CoW'd section to the before file"
++_compare_range "$TESTDIR/file1" 0 "$TESTDIR/file2" 0 $BLKSZ \
++       || echo "Start sections do not match (intentional)"
++
++_compare_range  "$TESTDIR/file1" $((BLKSZ * 16 - 512)) \
++		"$TESTDIR/file2" $((BLKSZ * 16 - 512)) 512 \
++       || echo "Middle sections do not match (intentional)"
++
++_compare_range  "$TESTDIR/file1" $((BLKSZ * 48 - 512)) \
++		"$TESTDIR/file2" $((BLKSZ * 48 - 512)) $BLKSZ \
++       || echo "End sections do not match (intentional)"
++
++echo "Compare the CoW'd section to the after file"
++_compare_range "$TESTDIR/file2" 0 "$TESTDIR/file3" 0 $BLKSZ \
++       || echo "Start sections do not match"
++
++_compare_range  "$TESTDIR/file2" $((BLKSZ * 16 - 512)) \
++		"$TESTDIR/file3" $((BLKSZ * 16 - 512)) 512 \
++       || echo "Middle sections do not match"
++
++_compare_range  "$TESTDIR/file2" $((BLKSZ * 48 - 512)) \
++		"$TESTDIR/file3" $((BLKSZ * 48 - 512)) $BLKSZ \
++       || echo "End sections do not match"
++
++echo "Compare the not CoW'd sections"
++_compare_range "$TESTDIR/file1" $BLKSZ "$TESTDIR/file2" $BLKSZ 512 \
++       || echo "Start sections of 1-2 do not match"
++_compare_range "$TESTDIR/file2" $BLKSZ "$TESTDIR/file3" $BLKSZ 512 \
++       || echo "Start sections of 2-3 do not match"
++
++
++_compare_range  "$TESTDIR/file1" $((BLKSZ * 16 - 1024)) \
++		"$TESTDIR/file2" $((BLKSZ * 16 - 1024)) 512 \
++       || echo "Middle sections of 1-2 do not match"
++
++_compare_range  "$TESTDIR/file2" $((BLKSZ * 16 - 1024)) \
++		"$TESTDIR/file3" $((BLKSZ * 16 - 1024)) 512 \
++       || echo "Middle sections of 2-3 do not match"
++
++_compare_range  "$TESTDIR/file1" $((BLKSZ * 48 - 1024)) \
++		"$TESTDIR/file2" $((BLKSZ * 48 - 1024)) 512 \
++       || echo "End sections of 1-2 do not match"
++
++_compare_range  "$TESTDIR/file2" $((BLKSZ * 48 - 1024)) \
++		"$TESTDIR/file3" $((BLKSZ * 48 - 1024)) 512 \
++       || echo "End sections of 2-3 do not match"
++
++
++_compare_range  "$TESTDIR/file1" $((BLKSZ * 16)) \
++		"$TESTDIR/file2" $((BLKSZ * 16)) 512 \
++       || echo "Untouched sections of 1-2 do not match"
++
++_compare_range  "$TESTDIR/file2" $((BLKSZ * 16)) \
++		"$TESTDIR/file3" $((BLKSZ * 16)) 512 \
++       || echo "Untouched sections of 2-3 do not match"
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/843.out b/tests/generic/843.out
+diff --git a/tests/generic/809.out b/tests/generic/809.out
 new file mode 100644
-index 0000000..43c1cf6
+index 0000000..ad63e4e
 --- /dev/null
-+++ b/tests/generic/843.out
-@@ -0,0 +1,10 @@
-+QA output created by 843
-+Format and mount
-+Reformat with appropriate size
-+Create a big file and reflink it
-+Allocate the rest of the space
-+CoW the big file
-+pwrite64: No space left on device
-+Remount and try CoW again
-+pwrite64: No space left on device
-+Check scratch fs
-diff --git a/tests/generic/844 b/tests/generic/844
++++ b/tests/generic/809.out
+@@ -0,0 +1,19 @@
++QA output created by 809
++Create the original files
++Compare files
++60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-809/file1
++60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-809/file2
++60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-809/file3
++directio CoW the second file
++Compare files
++60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-809/file1
++ff5626fb6c71b242d6b1a43de25c9a85  TEST_DIR/test-809/file2
++ff5626fb6c71b242d6b1a43de25c9a85  TEST_DIR/test-809/file3
++Files 1-2 should not match (intentional)
++Files 1-3 should not match (intentional)
++Compare the CoW'd section to the before file
++Start sections do not match (intentional)
++Middle sections do not match (intentional)
++End sections do not match (intentional)
++Compare the CoW'd section to the after file
++Compare the not CoW'd sections
+diff --git a/tests/generic/810 b/tests/generic/810
 new file mode 100755
-index 0000000..70bc235
+index 0000000..3b635f8
 --- /dev/null
-+++ b/tests/generic/844
-@@ -0,0 +1,109 @@
++++ b/tests/generic/810
+@@ -0,0 +1,152 @@
 +#! /bin/bash
-+# FS QA Test No. 844
++# FS QA Test No. 810
 +#
-+# Reflink a file, use up the rest of the space, then try to observe ENOSPC
-+# while copy-on-writing the file via mmap.
++# Ensuring that mmap copy on write through the page cache works:
++#   - Reflink two files together
++#   - Write to the beginning, middle, and end
++#   - Check that the files are now different where we say they're different.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2015, Oracle and/or its affiliates.  All Rights Reserved.
@@ -356,105 +452,272 @@ index 0000000..70bc235
 +_cleanup()
 +{
 +    cd /
-+    rm -rf "$tmp".* "$TESTDIR1"
++    rm -rf "$tmp".* "$TESTDIR"
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/attr
 +. ./common/reflink
 +
 +# real QA test starts here
 +_supported_os Linux
-+_require_scratch_reflink
++_require_test_reflink
 +_require_cp_reflink
 +
 +rm -f "$seqres.full"
 +
-+echo "Format and mount"
-+_scratch_mkfs > "$seqres.full" 2>&1
-+_scratch_mount >> "$seqres.full" 2>&1
-+
-+TESTDIR="$SCRATCH_MNT/test-$seq"
++TESTDIR="$TEST_DIR/test-$seq"
 +rm -rf "$TESTDIR"
 +mkdir "$TESTDIR"
 +
-+echo "Reformat with appropriate size"
-+BLKSZ="$(stat -f "$TESTDIR" -c '%S')"
-+NR_BLKS=10240
-+umount "$SCRATCH_MNT"
-+SZ_BYTES=$((NR_BLKS * 8 * BLKSZ))
-+if [ $SZ_BYTES -lt $((32 * 1048576)) ]; then
-+	SZ_BYTES=$((32 * 1048576))
-+fi
-+_scratch_mkfs_sized $SZ_BYTES >> "$seqres.full" 2>&1
-+_scratch_mount >> "$seqres.full" 2>&1
-+rm -rf "$TESTDIR"
-+mkdir "$TESTDIR"
++echo "Create the original files"
++BLKSZ=65536
++_pwrite_byte 0x61 0 $((BLKSZ * 48 - 3)) "$TESTDIR/file1" >> "$seqres.full"
++_cp_reflink "$TESTDIR/file1" "$TESTDIR/file2" >> "$seqres.full"
++_pwrite_byte 0x61 0 $((BLKSZ * 48 - 3)) "$TESTDIR/file3" >> "$seqres.full"
++_test_remount
 +
-+echo "Create a big file and reflink it"
-+_pwrite_byte 0x61 0 $((BLKSZ * NR_BLKS)) "$TESTDIR/bigfile" >> "$seqres.full" 2>&1
-+_cp_reflink "$TESTDIR/bigfile" "$TESTDIR/clonefile"
-+sync
++echo "Compare files"
++md5sum "$TESTDIR/file1" | _filter_test_dir
++md5sum "$TESTDIR/file2" | _filter_test_dir
++md5sum "$TESTDIR/file3" | _filter_test_dir
 +
-+echo "Allocate the rest of the space"
-+NR_FREE="$(stat -f -c '%f' "$TESTDIR")"
-+touch "$TESTDIR/file0" "$TESTDIR/file1"
-+_pwrite_byte 0x61 0 $((BLKSZ * NR_FREE)) "$TESTDIR/eat_my_space" >> "$seqres.full" 2>&1
-+sync
++cmp -s "$TESTDIR/file1" "$TESTDIR/file2" || echo "Files 1-2 do not match"
++cmp -s "$TESTDIR/file1" "$TESTDIR/file3" || echo "Files 1-3 do not match"
++cmp -s "$TESTDIR/file2" "$TESTDIR/file3" || echo "Files 2-3 do not match"
 +
-+echo "mmap CoW the big file"
-+out="$(_mwrite_byte 0x62 0 $((BLKSZ * NR_BLKS)) $((BLKSZ * NR_BLKS)) "$TESTDIR/bigfile" 2>&1)"
-+err="$?"
-+if [ "$err" -lt 128 ]; then
-+	echo "mmap CoW should have failed with SIGBUS, got SIG$(kill -l $err)"
-+fi
++echo "mmap CoW the second file"
++_mwrite_byte 0x62 0 17 $((BLKSZ * 48 - 3)) "$TESTDIR/file2" >> "$seqres.full"
++_mwrite_byte 0x62 0 17 $((BLKSZ * 48 - 3)) "$TESTDIR/file3" >> "$seqres.full"
 +
-+echo "Remount and try CoW again"
-+_scratch_remount
++_mwrite_byte 0x62 $((BLKSZ * 16 - 34)) 17 $((BLKSZ * 48 - 3)) "$TESTDIR/file2" >> "$seqres.full"
++_mwrite_byte 0x62 $((BLKSZ * 16 - 34)) 17 $((BLKSZ * 48 - 3)) "$TESTDIR/file3" >> "$seqres.full"
 +
-+out="$(_mwrite_byte 0x62 0 $((BLKSZ * NR_BLKS)) $((BLKSZ * NR_BLKS)) "$TESTDIR/bigfile" 2>&1)"
-+err="$?"
-+if [ "$err" -lt 128 ]; then
-+	echo "mmap CoW should have failed with SIGBUS, got SIG$(kill -l $err)"
-+fi
++_mwrite_byte 0x62 $((BLKSZ * 48 - 20)) 17 $((BLKSZ * 48 - 3)) "$TESTDIR/file2" >> "$seqres.full"
++_mwrite_byte 0x62 $((BLKSZ * 48 - 20)) 17 $((BLKSZ * 48 - 3)) "$TESTDIR/file3" >> "$seqres.full"
++_test_remount
 +
-+#filefrag -v $TESTDIR/bigfile
-+#filefrag -v $TESTDIR/clonefile
++echo "Compare files"
++md5sum "$TESTDIR/file1" | _filter_test_dir
++md5sum "$TESTDIR/file2" | _filter_test_dir
++md5sum "$TESTDIR/file3" | _filter_test_dir
 +
-+echo "Check scratch fs"
-+umount "$SCRATCH_MNT"
-+_check_scratch_fs
++cmp -s "$TESTDIR/file1" "$TESTDIR/file2" || echo "Files 1-2 do not match (intentional)"
++cmp -s "$TESTDIR/file1" "$TESTDIR/file3" || echo "Files 1-3 do not match (intentional)"
++cmp -s "$TESTDIR/file2" "$TESTDIR/file3" || echo "Files 2-3 do not match"
++
++echo "Compare the CoW'd section to the before file"
++_compare_range "$TESTDIR/file1" 0 "$TESTDIR/file2" 0 17 \
++       || echo "Start sections do not match (intentional)"
++
++_compare_range  "$TESTDIR/file1" $((BLKSZ * 16 - 34)) \
++		"$TESTDIR/file2" $((BLKSZ * 16 - 34)) 17 \
++       || echo "Middle sections do not match (intentional)"
++
++_compare_range  "$TESTDIR/file1" $((BLKSZ * 48 - 20)) \
++		"$TESTDIR/file2" $((BLKSZ * 48 - 20)) 17 \
++       || echo "End sections do not match (intentional)"
++
++echo "Compare the CoW'd section to the after file"
++_compare_range "$TESTDIR/file2" 0 "$TESTDIR/file3" 0 17 \
++       || echo "Start sections do not match"
++
++_compare_range  "$TESTDIR/file2" $((BLKSZ * 16 - 34)) \
++		"$TESTDIR/file3" $((BLKSZ * 16 - 34)) 17 \
++       || echo "Middle sections do not match"
++
++_compare_range  "$TESTDIR/file2" $((BLKSZ * 48 - 20)) \
++		"$TESTDIR/file3" $((BLKSZ * 48 - 20)) 17 \
++       || echo "End sections do not match"
++
++echo "Compare the not CoW'd sections"
++_compare_range "$TESTDIR/file1" 18 "$TESTDIR/file2" 18 17 \
++       || echo "Start sections of 1-2 do not match"
++
++_compare_range "$TESTDIR/file2" 18 "$TESTDIR/file3" 18 17 \
++       || echo "Start sections of 2-3 do not match"
++
++
++_compare_range  "$TESTDIR/file1" $((BLKSZ * 16 - 17)) \
++		"$TESTDIR/file2" $((BLKSZ * 16 - 17)) 82 \
++       || echo "Middle sections of 1-2 do not match"
++
++_compare_range  "$TESTDIR/file2" $((BLKSZ * 16 - 17)) \
++		"$TESTDIR/file3" $((BLKSZ * 16 - 17)) 82 \
++       || echo "Middle sections of 2-3 do not match"
++
++_compare_range  "$TESTDIR/file1" $((BLKSZ * 48 - 120)) \
++		"$TESTDIR/file2" $((BLKSZ * 48 - 120)) 100 \
++       || echo "End sections of 1-2 do not match"
++
++_compare_range  "$TESTDIR/file2" $((BLKSZ * 48 - 120)) \
++		"$TESTDIR/file3" $((BLKSZ * 48 - 120)) 100 \
++       || echo "End sections of 2-3 do not match"
++
++
++_compare_range  "$TESTDIR/file1" $((BLKSZ * 14)) \
++		"$TESTDIR/file2" $((BLKSZ * 14)) $BLKSZ \
++       || echo "Untouched sections of 1-2 do not match"
++
++_compare_range  "$TESTDIR/file2" $((BLKSZ * 14)) \
++		"$TESTDIR/file3" $((BLKSZ * 14)) $BLKSZ \
++       || echo "Untouched sections of 2-3 do not match"
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/844.out b/tests/generic/844.out
+diff --git a/tests/generic/810.out b/tests/generic/810.out
 new file mode 100644
-index 0000000..130afc1
+index 0000000..8cc94ab
 --- /dev/null
-+++ b/tests/generic/844.out
++++ b/tests/generic/810.out
+@@ -0,0 +1,19 @@
++QA output created by 810
++Create the original files
++Compare files
++60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-810/file1
++60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-810/file2
++60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-810/file3
++mmap CoW the second file
++Compare files
++60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-810/file1
++795ecfd281dbda4916431376228e4187  TEST_DIR/test-810/file2
++795ecfd281dbda4916431376228e4187  TEST_DIR/test-810/file3
++Files 1-2 do not match (intentional)
++Files 1-3 do not match (intentional)
++Compare the CoW'd section to the before file
++Start sections do not match (intentional)
++Middle sections do not match (intentional)
++End sections do not match (intentional)
++Compare the CoW'd section to the after file
++Compare the not CoW'd sections
+diff --git a/tests/generic/837 b/tests/generic/837
+new file mode 100755
+index 0000000..de5f233
+--- /dev/null
++++ b/tests/generic/837
+@@ -0,0 +1,91 @@
++#! /bin/bash
++# FS QA Test No. 837
++#
++# Ensure that reflinking a file N times and CoWing the copies leaves the
++# original intact.
++#   - Create a file and record its hash
++#   - Create some reflink copies
++#   - Rewrite all the reflink copies
++#   - Compare the contents of the original file
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename "$0"`
++seqres="$RESULT_DIR/$seq"
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf "$tmp".* "$TESTDIR"
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_require_test_reflink
++_require_cp_reflink
++
++rm -f "$seqres.full"
++
++TESTDIR="$TEST_DIR/test-$seq"
++rm -rf "$TESTDIR"
++mkdir "$TESTDIR"
++
++echo "Create the original file blocks"
++BLKSZ=65536
++NR=9
++_pwrite_byte 0x61 0 $((BLKSZ * 256)) "$TESTDIR/file1" >> "$seqres.full"
++_test_remount
++
++md5sum "$TESTDIR/file1" | _filter_test_dir
++csum="$(_md5_checksum "$TESTDIR/file1")"
++
++echo "Create the reflink copies"
++seq 2 $NR | while read i; do
++	_cp_reflink "$TESTDIR/file1" "$TESTDIR/file$i"
++done
++_test_remount
++
++echo "Rewrite the copies"
++seq 2 $NR | while read i; do
++	_pwrite_byte 0x62 0 $((BLKSZ * 256)) "$TESTDIR/file$i" >> "$seqres.full"
++done
++_test_remount
++
++echo "Examine original file"
++md5sum "$TESTDIR/file1" | _filter_test_dir
++md5sum "$TESTDIR/file2" | _filter_test_dir
++
++mod_csum="$(_md5_checksum "$TESTDIR/file2")"
++new_csum="$(_md5_checksum "$TESTDIR/file1")"
++test "${csum}" != "${mod_csum}" || echo "checksums do not match"
++test "${csum}" = "${new_csum}" || echo "checksums do not match"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/837.out b/tests/generic/837.out
+new file mode 100644
+index 0000000..3f9c2e5
+--- /dev/null
++++ b/tests/generic/837.out
 @@ -0,0 +1,8 @@
-+QA output created by 844
-+Format and mount
-+Reformat with appropriate size
-+Create a big file and reflink it
-+Allocate the rest of the space
-+mmap CoW the big file
-+Remount and try CoW again
-+Check scratch fs
-diff --git a/tests/generic/845 b/tests/generic/845
++QA output created by 837
++Create the original file blocks
++f4820540fc0ac02750739896fe028d56  TEST_DIR/test-837/file1
++Create the reflink copies
++Rewrite the copies
++Examine original file
++f4820540fc0ac02750739896fe028d56  TEST_DIR/test-837/file1
++eb34153e9ed1e774db28cbbe4090a449  TEST_DIR/test-837/file2
+diff --git a/tests/generic/838 b/tests/generic/838
 new file mode 100755
-index 0000000..5efaf38
+index 0000000..1130a2c
 --- /dev/null
-+++ b/tests/generic/845
-@@ -0,0 +1,107 @@
++++ b/tests/generic/838
+@@ -0,0 +1,91 @@
 +#! /bin/bash
-+# FS QA Test No. 845
++# FS QA Test No. 838
 +#
-+# Reflink a file, use up the rest of the space, then try to observe ENOSPC
-+# while copy-on-writing the file via direct-io.
++# Ensure that reflinking a file N times and DIO CoWing the copies leaves the
++# original intact.
++#   - Create a file and record its hash
++#   - Create some reflink copies
++#   - Rewrite all the reflink copies w/ directio
++#   - Compare the contents of the original file
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2015, Oracle and/or its affiliates.  All Rights Reserved.
@@ -485,105 +748,86 @@ index 0000000..5efaf38
 +_cleanup()
 +{
 +    cd /
-+    rm -rf "$tmp".* "$TESTDIR1"
++    rm -rf "$tmp".* "$TESTDIR"
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/attr
 +. ./common/reflink
 +
 +# real QA test starts here
 +_supported_os Linux
-+_require_scratch_reflink
++_require_test_reflink
 +_require_cp_reflink
 +
 +rm -f "$seqres.full"
 +
-+echo "Format and mount"
-+_scratch_mkfs > "$seqres.full" 2>&1
-+_scratch_mount >> "$seqres.full" 2>&1
-+
-+TESTDIR="$SCRATCH_MNT/test-$seq"
++TESTDIR="$TEST_DIR/test-$seq"
 +rm -rf "$TESTDIR"
 +mkdir "$TESTDIR"
 +
-+echo "Reformat with appropriate size"
-+BLKSZ="$(stat -f "$TESTDIR" -c '%S')"
-+NR_BLKS=10240
-+umount "$SCRATCH_MNT"
-+SZ_BYTES=$((NR_BLKS * 8 * BLKSZ))
-+if [ $SZ_BYTES -lt $((32 * 1048576)) ]; then
-+	SZ_BYTES=$((32 * 1048576))
-+fi
-+_scratch_mkfs_sized $SZ_BYTES >> "$seqres.full" 2>&1
-+_scratch_mount >> "$seqres.full" 2>&1
-+rm -rf "$TESTDIR"
-+mkdir "$TESTDIR"
++echo "Create the original file blocks"
++BLKSZ=65536
++NR=9
++_pwrite_byte 0x61 0 $((BLKSZ * 256)) "$TESTDIR/file1" >> "$seqres.full"
++_test_remount
 +
-+echo "Create a big file and reflink it"
-+_pwrite_byte 0x61 0 $((BLKSZ * NR_BLKS)) "$TESTDIR/bigfile" >> "$seqres.full" 2>&1
-+_cp_reflink "$TESTDIR/bigfile" "$TESTDIR/clonefile"
-+sync
++md5sum "$TESTDIR/file1" | _filter_test_dir
++csum="$(_md5_checksum "$TESTDIR/file1")"
 +
-+echo "Allocate the rest of the space"
-+NR_FREE="$(stat -f -c '%f' "$TESTDIR")"
-+touch "$TESTDIR/file0" "$TESTDIR/file1"
-+_pwrite_byte 0x61 0 $((BLKSZ * NR_FREE)) "$TESTDIR/eat_my_space" >> "$seqres.full" 2>&1
-+sync
++echo "Create the reflink copies"
++seq 2 $NR | while read i; do
++	_cp_reflink "$TESTDIR/file1" "$TESTDIR/file$i"
++done
++_test_remount
 +
-+echo "CoW the big file"
-+out="$(_pwrite_byte 0x62 0 $((BLKSZ * NR_BLKS)) "$TESTDIR/bigfile" -d 2>&1)"
-+echo "${out}" | grep -q "No space left on device" || echo "CoW should have failed with ENOSPC"
-+echo "${out}" >> "$seqres.full" 2>&1
-+echo "${out}"
++echo "Rewrite the copies"
++seq 2 $NR | while read i; do
++	_pwrite_byte 0x62 0 $((BLKSZ * 256)) "$TESTDIR/file$i" -d >> "$seqres.full"
++done
++_test_remount
 +
-+echo "Remount and try CoW again"
-+_scratch_remount
++echo "Examine original file"
++md5sum "$TESTDIR/file1" | _filter_test_dir
++md5sum "$TESTDIR/file2" | _filter_test_dir
 +
-+out="$(_pwrite_byte 0x62 0 $((BLKSZ * NR_BLKS)) "$TESTDIR/bigfile" -d 2>&1)"
-+echo "${out}" | grep -q "No space left on device" || echo "CoW should have failed with ENOSPC"
-+echo "${out}" >> "$seqres.full" 2>&1
-+echo "${out}"
-+
-+#filefrag -v $TESTDIR/bigfile
-+#filefrag -v $TESTDIR/clonefile
-+
-+echo "Check scratch fs"
-+umount "$SCRATCH_MNT"
-+_check_scratch_fs
++mod_csum="$(_md5_checksum "$TESTDIR/file2")"
++new_csum="$(_md5_checksum "$TESTDIR/file1")"
++test "${csum}" != "${mod_csum}" || echo "checksums do not match"
++test "${csum}" = "${new_csum}" || echo "checksums do not match"
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/845.out b/tests/generic/845.out
+diff --git a/tests/generic/838.out b/tests/generic/838.out
 new file mode 100644
-index 0000000..d367a73
+index 0000000..cc44815
 --- /dev/null
-+++ b/tests/generic/845.out
-@@ -0,0 +1,10 @@
-+QA output created by 845
-+Format and mount
-+Reformat with appropriate size
-+Create a big file and reflink it
-+Allocate the rest of the space
-+CoW the big file
-+pwrite64: No space left on device
-+Remount and try CoW again
-+pwrite64: No space left on device
-+Check scratch fs
++++ b/tests/generic/838.out
+@@ -0,0 +1,8 @@
++QA output created by 838
++Create the original file blocks
++f4820540fc0ac02750739896fe028d56  TEST_DIR/test-838/file1
++Create the reflink copies
++Rewrite the copies
++Examine original file
++f4820540fc0ac02750739896fe028d56  TEST_DIR/test-838/file1
++eb34153e9ed1e774db28cbbe4090a449  TEST_DIR/test-838/file2
 diff --git a/tests/generic/group b/tests/generic/group
-index eef608f..e184473 100644
+index 7f25037..a72d416 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -249,4 +249,8 @@
- 839 auto quick clone
- 840 clone_stress
- 841 clone_stress
-+842 auto quick clone
-+843 auto quick clone
-+844 auto quick clone
-+845 auto quick clone
- 846 auto quick clone
+@@ -216,6 +216,11 @@
+ 805 auto quick clone
+ 806 auto quick clone
+ 807 auto quick clone
++808 auto quick clone
++809 auto quick clone
++810 auto quick clone
+ 817 auto quick clone
+ 818 auto quick clone
+ 819 auto quick clone
++837 auto quick clone
++838 auto quick clone
 
