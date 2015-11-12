@@ -1,53 +1,51 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:37468 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932446AbbKMSdO (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 13 Nov 2015 13:33:14 -0500
-Date: Fri, 13 Nov 2015 10:32:34 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [RFCv3.1 00/11] xfstests: test the nfs/cifs/btrfs/xfs
- reflink/dedupe ioctls
-Message-ID: <20151113183234.GD2224@birch.djwong.org>
-References: <20151111192628.15056.6451.stgit@birch.djwong.org>
- <20151112090756.GA25685@infradead.org>
- <20151112125115.GA28822@infradead.org>
- <20151112173427.GC2217@birch.djwong.org>
- <20151112173635.GA9247@infradead.org>
- <20151113090822.GB2214@birch.djwong.org>
- <20151113141228.GA7218@infradead.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20151113141228.GA7218@infradead.org>
+Received: from mail-pa0-f47.google.com ([209.85.220.47]:36121 "EHLO
+	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752511AbbKLAh3 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 11 Nov 2015 19:37:29 -0500
+Received: by pacdm15 with SMTP id dm15so46007501pac.3
+        for <fstests@vger.kernel.org>; Wed, 11 Nov 2015 16:37:29 -0800 (PST)
+From: Tahsin Erdogan <tahsin@google.com>
+Subject: [PATCH] generic/310: make ext[2-4] error patterns more specific
+Date: Wed, 11 Nov 2015 16:36:30 -0800
+Message-Id: <1447288590-31937-1-git-send-email-tahsin@google.com>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: fstests@vger.kernel.org, xfs@oss.sgi.com, tao.peng@primarydata.com, linux-ext4@vger.kernel.org, Anna.Schumaker@netapp.com, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Zhao Hongjiang <zhaohongjiang@huawei.com>, Theodore Ts'o <tytso@mit.edu>, Tahsin Erdogan <tahsin@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Nov 13, 2015 at 06:12:28AM -0800, Christoph Hellwig wrote:
-> On Fri, Nov 13, 2015 at 01:08:22AM -0800, Darrick J. Wong wrote:
-> > I think I got all the tests renumbered correctly and fixed all the other bugs.
-> > I'd like to send the updated patchpile to Dave tomorrow, but if you have a few
-> > spare cycles would you mind giving this a quick test to make sure I fixed
-> > everything?
-> > 
-> > https://github.com/djwong/xfstests/tree/for-dave
-> 
-> Looks good enough to go in
-> 
-> Acked-by: Christoph Hellwig <hch@lst.de>
-> 
-> I have for failing tests on NFS currently.  Two of them probably are
-> NFS issues (free block count), but and two others fail because NFS
-> doesn't support chattr/lsattr.  I will send an incremental check to adda
-> feature test for those.
+This test watches for ext[2-4] filesystem errors in kernel messages but it
+incorrectly identifies unrelated messages that contain string "error" as
+a failure condition.
 
-I separated the chattr +i tests into a separate test that doesn't run if lsattr
-doesn't make sense; will post patches shortly.
+Make grep pattern more specific to catch only relevant messages.
 
---D
+Signed-off-by: Tahsin Erdogan <tahsin@google.com>
+---
+ tests/generic/310 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-> 
-> _______________________________________________
-> xfs mailing list
-> xfs@oss.sgi.com
-> http://oss.sgi.com/mailman/listinfo/xfs
+diff --git a/tests/generic/310 b/tests/generic/310
+index c0a8645..9173fb9 100755
+--- a/tests/generic/310
++++ b/tests/generic/310
+@@ -62,7 +62,7 @@ _require_test
+ dmesg -c > /dev/null
+ 
+ nr_bug=`dmesg | grep -c "kernel BUG"`
+-nr_error=`dmesg | grep -c "error"`
++nr_error=`dmesg | grep -c "EXT[234]-fs .*error"`
+ nr_null=`dmesg | grep -c "kernel NULL pointer dereference"`
+ nr_warning=`dmesg | grep -c "^WARNING"`
+ nr_lockdep=`dmesg | grep -c "possible recursive locking detected"`
+@@ -71,7 +71,7 @@ nr_lockdep=`dmesg | grep -c "possible recursive locking detected"`
+ check_kernel_bug()
+ {
+ 	new_bug=`dmesg | grep -c "kernel BUG"`
+-	new_error=`dmesg | grep -c "error"`
++	new_error=`dmesg | grep -c "EXT[234]-fs .*error"`
+ 	new_null=`dmesg | grep -c "kernel NULL pointer dereference"`
+ 	new_warning=`dmesg | grep -c "^WARNING"`
+ 	new_lockdep=`dmesg | grep -c "possible recursive locking detected"`
+-- 
+2.6.0.rc2.230.g3dd15c0
+
