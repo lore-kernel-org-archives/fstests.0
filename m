@@ -1,61 +1,559 @@
-Received: from imap.thunk.org ([74.207.234.97]:56169 "EHLO imap.thunk.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751035AbbKLQPz (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 12 Nov 2015 11:15:55 -0500
-Date: Thu, 12 Nov 2015 11:15:50 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH] generic/310: make ext[2-4] error patterns more specific
-Message-ID: <20151112161550.GA3431@thunk.org>
-References: <1447288590-31937-1-git-send-email-tahsin@google.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:29786 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750824AbbKMViG (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 13 Nov 2015 16:38:06 -0500
+Subject: [PATCH 08/12] reflink: test error conditions due to bad inputs
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Fri, 13 Nov 2015 13:37:36 -0800
+Message-ID: <20151113213736.31124.61530.stgit@birch.djwong.org>
+In-Reply-To: <20151113213643.31124.80975.stgit@birch.djwong.org>
+References: <20151113213643.31124.80975.stgit@birch.djwong.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1447288590-31937-1-git-send-email-tahsin@google.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Tahsin Erdogan <tahsin@google.com>
-Cc: fstests@vger.kernel.org, Zhao Hongjiang <zhaohongjiang@huawei.com>
+To: david@fromorbit.com, darrick.wong@oracle.com
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com, hch@infradead.org, tao.peng@primarydata.com, linux-ext4@vger.kernel.org, Anna.Schumaker@netapp.com, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Nov 11, 2015 at 04:36:30PM -0800, Tahsin Erdogan wrote:
-> This test watches for ext[2-4] filesystem errors in kernel messages but it
-> incorrectly identifies unrelated messages that contain string "error" as
-> a failure condition.
-> 
-> Make grep pattern more specific to catch only relevant messages.
-> 
-> Signed-off-by: Tahsin Erdogan <tahsin@google.com>
+Check that we can feed bad inputs to reflink/dedupe and it'll reject
+them.
 
-The problem is this is a "generic" test, so it will be run on file
-systems other than just ext[234].  So making the regexp's specific to
-just ext[234] is probably going to be something acceptable for
-xfstests upstream.
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ tests/generic/157     |  122 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/157.out |   25 ++++++++++
+ tests/generic/158     |  123 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/158.out |   24 ++++++++++
+ tests/generic/159     |   74 +++++++++++++++++++++++++++++
+ tests/generic/159.out |    5 ++
+ tests/generic/160     |   74 +++++++++++++++++++++++++++++
+ tests/generic/160.out |    5 ++
+ tests/generic/group   |    4 ++
+ 9 files changed, 456 insertions(+)
+ create mode 100755 tests/generic/157
+ create mode 100644 tests/generic/157.out
+ create mode 100755 tests/generic/158
+ create mode 100644 tests/generic/158.out
+ create mode 100755 tests/generic/159
+ create mode 100755 tests/generic/159.out
+ create mode 100755 tests/generic/160
+ create mode 100755 tests/generic/160.out
 
-(For context, the problem was that there were some kernel messages
-coming fom an i2c device driver that happened to be spit out while
-generic/310 was running, this was causing a false test failure.)
 
-Alternate possible fixes:
+diff --git a/tests/generic/157 b/tests/generic/157
+new file mode 100755
+index 0000000..a43fb0d
+--- /dev/null
++++ b/tests/generic/157
+@@ -0,0 +1,122 @@
++#! /bin/bash
++# FS QA Test No. 157
++#
++# Check that various invalid reflink scenarios are rejected.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename "$0"`
++seqres="$RESULT_DIR/$seq"
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf "$tmp".* "$TESTDIR1"
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_require_test_reflink
++_require_scratch_reflink
++
++rm -f "$seqres.full"
++
++echo "Format and mount"
++_scratch_mkfs > "$seqres.full" 2>&1
++_scratch_mount >> "$seqres.full" 2>&1
++
++TESTDIR1="$TEST_DIR/test-$seq"
++rm -rf "$TESTDIR1"
++mkdir "$TESTDIR1"
++
++TESTDIR2=$SCRATCH_MNT/test-$seq
++rm -rf "$TESTDIR2"
++mkdir "$TESTDIR2"
++
++echo "Create the original files"
++BLKSZ="$(stat -f $TESTDIR1 -c '%S')"
++BLKS=1000
++MARGIN=50
++SZ=$((BLKSZ * BLKS))
++FREE_BLOCKS0=$(stat -f $TESTDIR1 -c '%f')
++NR=4
++_pwrite_byte 0x61 0 $SZ "$TESTDIR1/file1" >> "$seqres.full"
++_pwrite_byte 0x61 0 $SZ "$TESTDIR1/file2" >> "$seqres.full"
++_pwrite_byte 0x61 0 $SZ "$TESTDIR2/file1" >> "$seqres.full"
++_pwrite_byte 0x61 0 $SZ "$TESTDIR2/file2" >> "$seqres.full"
++mkdir "$TESTDIR1/dir1"
++seq 1 $((2 * BLKSZ / 250)) | while read f; do
++	touch "$TESTDIR1/dir1/$f"
++done
++mknod "$TESTDIR1/dev1" b 8 0
++mkfifo "$TESTDIR1/fifo1"
++sync
++
++echo "Try cross-device reflink"
++_reflink_range "$TESTDIR1/file1" 0 "$TESTDIR2/file1" 0 $BLKSZ
++
++echo "Try unaligned reflink"
++_reflink_range "$TESTDIR1/file1" 37 "$TESTDIR1/file1" 59 23
++
++echo "Try overlapping reflink"
++_reflink_range "$TESTDIR1/file1" 0 "$TESTDIR1/file1" 1 $((BLKSZ * 2))
++
++echo "Try reflink past EOF"
++_reflink_range "$TESTDIR1/file1" $(( (BLKS + 10) * BLKSZ)) "$TESTDIR1/file1" 0 $BLKSZ
++
++echo "Try to reflink a dir"
++_reflink_range "$TESTDIR1/dir1" 0 "$TESTDIR1/file2" 0 $BLKSZ
++
++echo "Try to reflink a device"
++_reflink_range "$TESTDIR1/dev1" 0 "$TESTDIR1/file2" 0 $BLKSZ
++
++echo "Try to reflink to a dir"
++_reflink_range "$TESTDIR1/file1" 0 "$TESTDIR1/dir1" 0 $BLKSZ
++
++echo "Try to reflink to a device"
++_reflink_range "$TESTDIR1/file1" 0 "$TESTDIR1/dev1" 0 $BLKSZ
++
++echo "Try to reflink to a fifo"
++_reflink_range "$TESTDIR1/file1" 0 "$TESTDIR1/fifo1" 0 $BLKSZ -n
++
++echo "Try to reflink an append-only file"
++_reflink_range "$TESTDIR1/file1" 0 "$TESTDIR1/file3" 0 $BLKSZ -a
++
++echo "Reflink two files"
++_reflink_range "$TESTDIR1/file1" 0 "$TESTDIR1/file2" 0 $BLKSZ >> "$seqres.full"
++_reflink_range "$TESTDIR2/file1" 0 "$TESTDIR2/file2" 0 $BLKSZ >> "$seqres.full"
++
++echo "Check scratch fs"
++umount $SCRATCH_MNT
++_check_scratch_fs
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/157.out b/tests/generic/157.out
+new file mode 100644
+index 0000000..177e7f8
+--- /dev/null
++++ b/tests/generic/157.out
+@@ -0,0 +1,25 @@
++QA output created by 157
++Format and mount
++Create the original files
++Try cross-device reflink
++XFS_IOC_CLONE_RANGE: Invalid cross-device link
++Try unaligned reflink
++XFS_IOC_CLONE_RANGE: Invalid argument
++Try overlapping reflink
++XFS_IOC_CLONE_RANGE: Invalid argument
++Try reflink past EOF
++XFS_IOC_CLONE_RANGE: Invalid argument
++Try to reflink a dir
++XFS_IOC_CLONE_RANGE: Is a directory
++Try to reflink a device
++XFS_IOC_CLONE_RANGE: Invalid argument
++Try to reflink to a dir
++/mnt/test-157/dir1: Is a directory
++Try to reflink to a device
++XFS_IOC_CLONE_RANGE: Operation not supported
++Try to reflink to a fifo
++XFS_IOC_CLONE_RANGE: Operation not supported
++Try to reflink an append-only file
++XFS_IOC_CLONE_RANGE: Bad file descriptor
++Reflink two files
++Check scratch fs
+diff --git a/tests/generic/158 b/tests/generic/158
+new file mode 100755
+index 0000000..a499b21
+--- /dev/null
++++ b/tests/generic/158
+@@ -0,0 +1,123 @@
++#! /bin/bash
++# FS QA Test No. 158
++#
++# Check that various invalid dedupe scenarios are rejected.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename "$0"`
++seqres="$RESULT_DIR/$seq"
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf "$tmp".* "$TESTDIR1"
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_require_test_dedupe
++_require_scratch_dedupe
++
++rm -f "$seqres.full"
++
++echo "Format and mount"
++_scratch_mkfs > "$seqres.full" 2>&1
++_scratch_mount >> "$seqres.full" 2>&1
++
++TESTDIR1="$TEST_DIR/test-$seq"
++rm -rf "$TESTDIR1"
++mkdir "$TESTDIR1"
++
++TESTDIR2=$SCRATCH_MNT/test-$seq
++rm -rf "$TESTDIR2"
++mkdir "$TESTDIR2"
++
++echo "Create the original files"
++BLKSZ="$(stat -f $TESTDIR1 -c '%S')"
++BLKS=1000
++MARGIN=50
++SZ=$((BLKSZ * BLKS))
++FREE_BLOCKS0=$(stat -f $TESTDIR1 -c '%f')
++NR=4
++_pwrite_byte 0x61 0 $SZ "$TESTDIR1/file1" >> "$seqres.full"
++_pwrite_byte 0x61 0 $SZ "$TESTDIR1/file2" >> "$seqres.full"
++_pwrite_byte 0x61 0 $SZ "$TESTDIR1/file3" >> "$seqres.full"
++_pwrite_byte 0x61 0 $SZ "$TESTDIR2/file1" >> "$seqres.full"
++_pwrite_byte 0x61 0 $SZ "$TESTDIR2/file2" >> "$seqres.full"
++mkdir "$TESTDIR1/dir1"
++seq 1 $((2 * BLKSZ / 250)) | while read f; do
++	touch "$TESTDIR1/dir1/$f"
++done
++mknod "$TESTDIR1/dev1" b 8 0
++mkfifo "$TESTDIR1/fifo1"
++sync
++
++echo "Try cross-device dedupe"
++_dedupe_range "$TESTDIR1/file1" 0 "$TESTDIR2/file1" 0 $BLKSZ
++
++echo "Try unaligned dedupe"
++_dedupe_range "$TESTDIR1/file1" 37 "$TESTDIR1/file1" 59 23
++
++echo "Try overlapping dedupe"
++_dedupe_range "$TESTDIR1/file1" 0 "$TESTDIR1/file1" 1 $((BLKSZ * 2))
++
++echo "Try dedupe past EOF"
++_dedupe_range "$TESTDIR1/file1" $(( (BLKS + 10) * BLKSZ)) "$TESTDIR1/file1" 0 $BLKSZ
++
++echo "Try to dedupe a dir"
++_dedupe_range "$TESTDIR1/dir1" 0 "$TESTDIR1/file2" 0 $BLKSZ
++
++echo "Try to dedupe a device"
++_dedupe_range "$TESTDIR1/dev1" 0 "$TESTDIR1/file2" 0 $BLKSZ
++
++echo "Try to dedupe to a dir"
++_dedupe_range "$TESTDIR1/file1" 0 "$TESTDIR1/dir1" 0 $BLKSZ
++
++echo "Try to dedupe to a device"
++_dedupe_range "$TESTDIR1/file1" 0 "$TESTDIR1/dev1" 0 $BLKSZ
++
++echo "Try to dedupe to a fifo"
++_dedupe_range "$TESTDIR1/file1" 0 "$TESTDIR1/fifo1" 0 $BLKSZ -n
++
++echo "Try to dedupe an append-only file"
++_dedupe_range "$TESTDIR1/file1" 0 "$TESTDIR1/file3" 0 $BLKSZ -a >> "$seqres.full"
++
++echo "Dedupe two files"
++_dedupe_range "$TESTDIR1/file1" 0 "$TESTDIR1/file2" 0 $BLKSZ >> "$seqres.full"
++_dedupe_range "$TESTDIR2/file1" 0 "$TESTDIR2/file2" 0 $BLKSZ >> "$seqres.full"
++
++echo "Check scratch fs"
++umount $SCRATCH_MNT
++_check_scratch_fs
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/158.out b/tests/generic/158.out
+new file mode 100644
+index 0000000..36a3f1f
+--- /dev/null
++++ b/tests/generic/158.out
+@@ -0,0 +1,24 @@
++QA output created by 158
++Format and mount
++Create the original files
++Try cross-device dedupe
++dedupe: Invalid cross-device link
++Try unaligned dedupe
++dedupe: Invalid argument
++Try overlapping dedupe
++dedupe: Invalid argument
++Try dedupe past EOF
++dedupe: Invalid argument
++Try to dedupe a dir
++XFS_IOC_FILE_EXTENT_SAME: Is a directory
++Try to dedupe a device
++XFS_IOC_FILE_EXTENT_SAME: Permission denied
++Try to dedupe to a dir
++/mnt/test-158/dir1: Is a directory
++Try to dedupe to a device
++dedupe: Permission denied
++Try to dedupe to a fifo
++dedupe: Permission denied
++Try to dedupe an append-only file
++Dedupe two files
++Check scratch fs
+diff --git a/tests/generic/159 b/tests/generic/159
+new file mode 100755
+index 0000000..7944267
+--- /dev/null
++++ b/tests/generic/159
+@@ -0,0 +1,74 @@
++#! /bin/bash
++# FS QA Test No. 159
++#
++# Check that we can't reflink immutable files
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename "$0"`
++seqres="$RESULT_DIR/$seq"
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++ #   rm -rf "$tmp".* "$TESTDIR1"
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_require_test_lsattr
++_require_test_reflink
++
++rm -f "$seqres.full"
++
++echo "Format and mount"
++TESTDIR1="$TEST_DIR/test-$seq"
++rm -rf "$TESTDIR1"
++mkdir "$TESTDIR1"
++
++echo "Create the original files"
++BLKSZ="$(stat -f $TESTDIR1 -c '%S')"
++BLKS=1000
++MARGIN=50
++SZ=$((BLKSZ * BLKS))
++FREE_BLOCKS0=$(stat -f $TESTDIR1 -c '%f')
++NR=4
++_pwrite_byte 0x61 0 $SZ "$TESTDIR1/file1" >> "$seqres.full"
++_pwrite_byte 0x61 0 $SZ "$TESTDIR1/file2" >> "$seqres.full"
++sync
++
++echo "Try reflink on immutable files"
++$CHATTR_PROG +i $TESTDIR1/file1 $TESTDIR1/file2
++_reflink_range "$TESTDIR1/file1" 0 "$TESTDIR1/file2" 0 $BLKSZ 2>&1 | _filter_test_dir
++$CHATTR_PROG -i $TESTDIR1/file1 $TESTDIR1/file2
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/159.out b/tests/generic/159.out
+new file mode 100755
+index 0000000..92fe33a
+--- /dev/null
++++ b/tests/generic/159.out
+@@ -0,0 +1,5 @@
++QA output created by 159
++Format and mount
++Create the original files
++Try reflink on immutable files
++TEST_DIR/test-159/file2: Permission denied
+diff --git a/tests/generic/160 b/tests/generic/160
+new file mode 100755
+index 0000000..e8c43df
+--- /dev/null
++++ b/tests/generic/160
+@@ -0,0 +1,74 @@
++#! /bin/bash
++# FS QA Test No. 160
++#
++# Check that we can't dedupe immutable files
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename "$0"`
++seqres="$RESULT_DIR/$seq"
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++ #   rm -rf "$tmp".* "$TESTDIR1"
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_require_test_lsattr
++_require_test_dedupe
++
++rm -f "$seqres.full"
++
++echo "Format and mount"
++TESTDIR1="$TEST_DIR/test-$seq"
++rm -rf "$TESTDIR1"
++mkdir "$TESTDIR1"
++
++echo "Create the original files"
++BLKSZ="$(stat -f $TESTDIR1 -c '%S')"
++BLKS=1000
++MARGIN=50
++SZ=$((BLKSZ * BLKS))
++FREE_BLOCKS0=$(stat -f $TESTDIR1 -c '%f')
++NR=4
++_pwrite_byte 0x61 0 $SZ "$TESTDIR1/file1" >> "$seqres.full"
++_pwrite_byte 0x61 0 $SZ "$TESTDIR1/file2" >> "$seqres.full"
++sync
++
++echo "Try dedupe on immutable files"
++$CHATTR_PROG +i $TESTDIR1/file1 $TESTDIR1/file2
++_dedupe_range "$TESTDIR1/file1" 0 "$TESTDIR1/file2" 0 $BLKSZ 2>&1 | _filter_test_dir
++$CHATTR_PROG -i $TESTDIR1/file1 $TESTDIR1/file2
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/160.out b/tests/generic/160.out
+new file mode 100755
+index 0000000..a999a9c
+--- /dev/null
++++ b/tests/generic/160.out
+@@ -0,0 +1,5 @@
++QA output created by 160
++Format and mount
++Create the original files
++Try dedupe on immutable files
++TEST_DIR/test-160/file2: Permission denied
+diff --git a/tests/generic/group b/tests/generic/group
+index 3141ae5..0a20421 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -159,6 +159,10 @@
+ 154 auto quick clone
+ 155 auto quick clone
+ 156 auto quick clone
++157 auto quick clone
++158 auto quick clone
++159 auto quick clone
++160 auto quick clone
+ 169 rw metadata auto quick
+ 184 metadata auto quick
+ 192 atime auto
 
-(1) we could make an ext4 version of this test, and then make
-generic/310 not run for ext4.  In that case we can use the EXT[234]-fs
-specific error.
-
-(2) we can fiter out the i2c error in generic/310
-
-(3) we can figure out why the i2c device driver is randomly spitting
-out errors and ask the team responsible for that driver to fix _that_
-bug
-
-(4) we can try to enumerate the file system specific error messages
-instead of assuming that any random kernel message that happens to
-contain the string "error" automatically means that there is a file
-system problem.
-
-We should probably do (3) no matter what, and arguably generic/310 is
-a badly written test and if there is some way we can do (4), that
-would be desirable.  As a fall back, we could do (2), and see if that
-is acceptable for xfstests upstream.
-
-Cheers,
-
-						- Ted
