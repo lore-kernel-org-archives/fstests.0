@@ -1,51 +1,70 @@
-Received: from mail-pa0-f47.google.com ([209.85.220.47]:36121 "EHLO
-	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752511AbbKLAh3 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 11 Nov 2015 19:37:29 -0500
-Received: by pacdm15 with SMTP id dm15so46007501pac.3
-        for <fstests@vger.kernel.org>; Wed, 11 Nov 2015 16:37:29 -0800 (PST)
-From: Tahsin Erdogan <tahsin@google.com>
-Subject: [PATCH] generic/310: make ext[2-4] error patterns more specific
-Date: Wed, 11 Nov 2015 16:36:30 -0800
-Message-Id: <1447288590-31937-1-git-send-email-tahsin@google.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:29439 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751167AbbKMVhO (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 13 Nov 2015 16:37:14 -0500
+Subject: [RFCv3.2 00/12] xfstests: test the nfs/cifs/btrfs/xfs
+ reflink/dedupe ioctls
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Fri, 13 Nov 2015 13:36:43 -0800
+Message-ID: <20151113213643.31124.80975.stgit@birch.djwong.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Zhao Hongjiang <zhaohongjiang@huawei.com>, Theodore Ts'o <tytso@mit.edu>, Tahsin Erdogan <tahsin@google.com>
+To: david@fromorbit.com, darrick.wong@oracle.com
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com, hch@infradead.org, tao.peng@primarydata.com, linux-ext4@vger.kernel.org, Anna.Schumaker@netapp.com, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This test watches for ext[2-4] filesystem errors in kernel messages but it
-incorrectly identifies unrelated messages that contain string "error" as
-a failure condition.
+Hi all,
 
-Make grep pattern more specific to catch only relevant messages.
+This is part of the third revision of an RFC for adding to XFS support
+for tracking reverse-mappings of physical blocks to file and metadata;
+and support for mapping multiple file logical blocks to the same
+physical block, more commonly known as reflinking.
 
-Signed-off-by: Tahsin Erdogan <tahsin@google.com>
----
- tests/generic/310 | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+This patchset aims to make xfstests perform more rigorous testing of
+the NFS/CIFS/btrfs/XFS file clone, reflink, and dedupe ioctls.
+There are now tests of the basic functionality of the three ioctls;
+tests to ensure that the filesystem exhibits the expected copy on
+write semantics; tests to try to suss out race conditions in the new
+write paths; tests to ensure that the ioctls peform basic disk
+accounting correctly; tests of the interaction between reflink and the
+various fallocate verbs (allocate, punch, collapse, insert zeroes);
+and some attempts to test the upper limits of reflinking and ENOSPC
+behavior.
 
-diff --git a/tests/generic/310 b/tests/generic/310
-index c0a8645..9173fb9 100755
---- a/tests/generic/310
-+++ b/tests/generic/310
-@@ -62,7 +62,7 @@ _require_test
- dmesg -c > /dev/null
- 
- nr_bug=`dmesg | grep -c "kernel BUG"`
--nr_error=`dmesg | grep -c "error"`
-+nr_error=`dmesg | grep -c "EXT[234]-fs .*error"`
- nr_null=`dmesg | grep -c "kernel NULL pointer dereference"`
- nr_warning=`dmesg | grep -c "^WARNING"`
- nr_lockdep=`dmesg | grep -c "possible recursive locking detected"`
-@@ -71,7 +71,7 @@ nr_lockdep=`dmesg | grep -c "possible recursive locking detected"`
- check_kernel_bug()
- {
- 	new_bug=`dmesg | grep -c "kernel BUG"`
--	new_error=`dmesg | grep -c "error"`
-+	new_error=`dmesg | grep -c "EXT[234]-fs .*error"`
- 	new_null=`dmesg | grep -c "kernel NULL pointer dereference"`
- 	new_warning=`dmesg | grep -c "^WARNING"`
- 	new_lockdep=`dmesg | grep -c "possible recursive locking detected"`
--- 
-2.6.0.rc2.230.g3dd15c0
+Since the last posting, each test tries to reflink (or dedupe) on the
+test or scratch FS to decide if they're going to run, instead of
+guessing based on FS type.  Per Dave's suggestion, I also converted
+the basic functionality tests to use fixed sizes so that I can use
+md5sum in the golden output to check that the file contents match
+exactly.
 
+Since "RFCv3.1", I've made the following changes:
+
+ * Renumbered the tests to the lowest numbers possible, per Dave's
+   request.
+
+ * Fixed the reflink and dedupe _require tests so that they can run
+   on things like NFS which support reflink but not dedupe.
+
+ * Added checks for lsattr/chattr support so that we don't produce
+   bogus failures on NFS, and put the *attr tests in separate test
+   files.
+
+ * Appended a couple of tools I wrote to handle finding minimal test
+   numbers and moving tests around.
+
+If you're going to start using this mess, you probably ought to just
+pull from my github trees for kernel[1], xfsprogs[2], xfstests[3], and
+xfs-docs[4].  They should just work with the btrfs that's in 4.3...
+and somewhat buggily with the 4.3 XFS patched with [1].
+
+Comments and questions are, as always, welcome.
+
+--D
+
+[1] https://github.com/djwong/linux/tree/for-dave
+[2] https://github.com/djwong/xfsprogs/tree/for-dave
+[3] https://github.com/djwong/xfstests/tree/for-dave
+[4] https://github.com/djwong/xfs-documentation/tree/for-dave
