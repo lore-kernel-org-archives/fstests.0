@@ -1,12 +1,13 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:29439 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751167AbbKMVhO (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 13 Nov 2015 16:37:14 -0500
-Subject: [RFCv3.2 00/12] xfstests: test the nfs/cifs/btrfs/xfs
- reflink/dedupe ioctls
+Received: from userp1040.oracle.com ([156.151.31.81]:23194 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752005AbbKMVii (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 13 Nov 2015 16:38:38 -0500
+Subject: [PATCH 12/12] reflink: test what happens when we hit resource limits
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Fri, 13 Nov 2015 13:36:43 -0800
-Message-ID: <20151113213643.31124.80975.stgit@birch.djwong.org>
+Date: Fri, 13 Nov 2015 13:38:02 -0800
+Message-ID: <20151113213802.31124.74408.stgit@birch.djwong.org>
+In-Reply-To: <20151113213643.31124.80975.stgit@birch.djwong.org>
+References: <20151113213643.31124.80975.stgit@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -15,56 +16,241 @@ To: david@fromorbit.com, darrick.wong@oracle.com
 Cc: fstests@vger.kernel.org, xfs@oss.sgi.com, hch@infradead.org, tao.peng@primarydata.com, linux-ext4@vger.kernel.org, Anna.Schumaker@netapp.com, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+Add a few horrible opt-in stress tests to see what happens if we try
+to reflink the same block billions of times, and what happens if we
+run out of space while reflinking a file.
 
-This is part of the third revision of an RFC for adding to XFS support
-for tracking reverse-mappings of physical blocks to file and metadata;
-and support for mapping multiple file logical blocks to the same
-physical block, more commonly known as reflinking.
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ tests/generic/175     |   99 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/175.out |    0 
+ tests/generic/176     |   81 ++++++++++++++++++++++++++++++++++++++++
+ tests/generic/176.out |    5 ++
+ tests/generic/group   |    2 +
+ 5 files changed, 187 insertions(+)
+ create mode 100755 tests/generic/175
+ create mode 100644 tests/generic/175.out
+ create mode 100755 tests/generic/176
+ create mode 100644 tests/generic/176.out
 
-This patchset aims to make xfstests perform more rigorous testing of
-the NFS/CIFS/btrfs/XFS file clone, reflink, and dedupe ioctls.
-There are now tests of the basic functionality of the three ioctls;
-tests to ensure that the filesystem exhibits the expected copy on
-write semantics; tests to try to suss out race conditions in the new
-write paths; tests to ensure that the ioctls peform basic disk
-accounting correctly; tests of the interaction between reflink and the
-various fallocate verbs (allocate, punch, collapse, insert zeroes);
-and some attempts to test the upper limits of reflinking and ENOSPC
-behavior.
 
-Since the last posting, each test tries to reflink (or dedupe) on the
-test or scratch FS to decide if they're going to run, instead of
-guessing based on FS type.  Per Dave's suggestion, I also converted
-the basic functionality tests to use fixed sizes so that I can use
-md5sum in the golden output to check that the file contents match
-exactly.
+diff --git a/tests/generic/175 b/tests/generic/175
+new file mode 100755
+index 0000000..a7da533
+--- /dev/null
++++ b/tests/generic/175
+@@ -0,0 +1,99 @@
++#! /bin/bash
++# FS QA Test No. 175
++#
++# Try to hit the maximum reference count (eek!)
++#
++# This test runs extremely slowly, so it's not automatically run anywhere.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename "$0"`
++seqres="$RESULT_DIR/$seq"
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf "$tmp".* "$TESTDIR1"
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch_reflink
++_require_cp_reflink
++
++rm -f "$seqres.full"
++
++echo "Format and mount"
++_scratch_mkfs > "$seqres.full" 2>&1
++_scratch_mount >> "$seqres.full" 2>&1
++
++TESTDIR="$SCRATCH_MNT/test-$seq"
++rm -rf "$TESTDIR"
++mkdir "$TESTDIR"
++
++# Well let's hope the maximum reflink count is (less than (ha!)) 2^32...
++
++echo "Create a one block file"
++BLKSZ="$(stat -f "$TESTDIR" -c '%S')"
++_pwrite_byte 0x61 0 $BLKSZ "$TESTDIR/file1" >> "$seqres.full"
++_pwrite_byte 0x62 0 $BLKSZ "$TESTDIR/file2" >> "$seqres.full"
++_cp_reflink "$TESTDIR/file1" "$TESTDIR/file2" >> "$seqres.full"
++
++nr=32
++fnr=32
++for i in $(seq 0 $fnr); do
++	echo " ++ Reflink size $i, $(( (2 ** i) * BLKSZ)) bytes" | tee -a "$seqres.full"
++	n=$(( (2 ** i) * BLKSZ))
++	_reflink_range "$TESTDIR/file1" 0 "$TESTDIR/file1" $n $n >> "$seqres.full" || break
++done
++
++nrf=$((nr - fnr))
++echo "Clone $((2 ** nrf)) files"
++seq 0 $((2 ** nrf)) | while read i; do
++	_cp-reflink "$TESTDIR/file1" "$TESTDIR/file1-$i"
++done
++
++echo "Check scratch fs"
++umount "$SCRATCH_MNT"
++_check_scratch_fs
++
++echo "Remove big file and recheck"
++_scratch_mount >> "$seqres.full" 2>&1
++umount "$SCRATCH_MNT"
++_check_scratch_fs
++
++echo "Remove all files and recheck"
++_scratch_mount >> "$seqres.full" 2>&1
++umount "$SCRATCH_MNT"
++_check_scratch_fs
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/175.out b/tests/generic/175.out
+new file mode 100644
+index 0000000..e69de29
+diff --git a/tests/generic/176 b/tests/generic/176
+new file mode 100755
+index 0000000..bf930b7
+--- /dev/null
++++ b/tests/generic/176
+@@ -0,0 +1,81 @@
++#! /bin/bash
++# FS QA Test No. 176
++#
++# Try to run out of space while cloning?
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename "$0"`
++seqres="$RESULT_DIR/$seq"
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf "$tmp".* "$TESTDIR1"
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch_reflink
++
++rm -f "$seqres.full"
++
++echo "Format and mount"
++_scratch_mkfs > "$seqres.full" 2>&1
++_scratch_mount >> "$seqres.full" 2>&1
++
++TESTDIR="$SCRATCH_MNT/test-$seq"
++rm -rf "$TESTDIR"
++mkdir "$TESTDIR"
++
++BLKSZ="$(stat -f "$TESTDIR" -c '%S')"
++NR_FREE="$(stat -f -c '%f' "$TESTDIR")"
++echo "Create a big file"
++touch "$TESTDIR/file0" "$TESTDIR/file1"
++_pwrite_byte 0x61 0 $((BLKSZ * NR_FREE)) "$TESTDIR/bigfile" >> "$seqres.full" 2>&1
++_scratch_remount
++sz="$(stat -c '%s' "$TESTDIR/bigfile")"
++
++blks="$((sz / BLKSZ))"
++echo "Try to reflink"
++seq 0 $blks | while read lblk; do
++	fname="$TESTDIR/file$((lblk % 2))"
++	out="$(_reflink_range "$TESTDIR/bigfile" $((lblk * BLKSZ)) "$fname" $((lblk * BLKSZ)) $BLKSZ 2>&1)"
++	echo "$fname: $out" >> "$seqres.full"
++	echo "$out" | grep -q "No space left on device" && break
++done
++
++echo "Check scratch fs"
++umount "$SCRATCH_MNT"
++_check_scratch_fs
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/176.out b/tests/generic/176.out
+new file mode 100644
+index 0000000..eec98eb
+--- /dev/null
++++ b/tests/generic/176.out
+@@ -0,0 +1,5 @@
++QA output created by 176
++Format and mount
++Create a big file
++Try to reflink
++Check scratch fs
+diff --git a/tests/generic/group b/tests/generic/group
+index 09a7828..8a40797 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -177,6 +177,8 @@
+ 172 auto quick clone
+ 173 auto quick clone
+ 174 auto quick clone
++175 clone_stress
++176 clone_stress
+ 184 metadata auto quick
+ 192 atime auto
+ 193 metadata auto quick
 
-Since "RFCv3.1", I've made the following changes:
-
- * Renumbered the tests to the lowest numbers possible, per Dave's
-   request.
-
- * Fixed the reflink and dedupe _require tests so that they can run
-   on things like NFS which support reflink but not dedupe.
-
- * Added checks for lsattr/chattr support so that we don't produce
-   bogus failures on NFS, and put the *attr tests in separate test
-   files.
-
- * Appended a couple of tools I wrote to handle finding minimal test
-   numbers and moving tests around.
-
-If you're going to start using this mess, you probably ought to just
-pull from my github trees for kernel[1], xfsprogs[2], xfstests[3], and
-xfs-docs[4].  They should just work with the btrfs that's in 4.3...
-and somewhat buggily with the 4.3 XFS patched with [1].
-
-Comments and questions are, as always, welcome.
-
---D
-
-[1] https://github.com/djwong/linux/tree/for-dave
-[2] https://github.com/djwong/xfsprogs/tree/for-dave
-[3] https://github.com/djwong/xfstests/tree/for-dave
-[4] https://github.com/djwong/xfs-documentation/tree/for-dave
