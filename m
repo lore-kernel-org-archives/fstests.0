@@ -1,53 +1,35 @@
-Date: Wed, 11 Nov 2015 05:56:39 -0800
+Date: Fri, 13 Nov 2015 06:12:28 -0800
 From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [RFCv3 00/12] xfstests: test the btrfs/xfs reflink/dedupe ioctls
-Message-ID: <20151111135639.GA4760@infradead.org>
-References: <20151007051257.3260.73072.stgit@birch.djwong.org>
- <20151109075926.GB17974@infradead.org>
- <20151109184913.GB3255@birch.djwong.org>
+Subject: Re: [RFCv3.1 00/11] xfstests: test the nfs/cifs/btrfs/xfs
+ reflink/dedupe ioctls
+Message-ID: <20151113141228.GA7218@infradead.org>
+References: <20151111192628.15056.6451.stgit@birch.djwong.org>
+ <20151112090756.GA25685@infradead.org>
+ <20151112125115.GA28822@infradead.org>
+ <20151112173427.GC2217@birch.djwong.org>
+ <20151112173635.GA9247@infradead.org>
+ <20151113090822.GB2214@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20151109184913.GB3255@birch.djwong.org>
+In-Reply-To: <20151113090822.GB2214@birch.djwong.org>
 To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Christoph Hellwig <hch@infradead.org>, david@fromorbit.com, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, Anna.Schumaker@netapp.com, linux-btrfs@vger.kernel.org, xfs@oss.sgi.com
+Cc: Christoph Hellwig <hch@infradead.org>, david@fromorbit.com, fstests@vger.kernel.org, xfs@oss.sgi.com, tao.peng@primarydata.com, linux-ext4@vger.kernel.org, Anna.Schumaker@netapp.com, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Nov 09, 2015 at 10:49:13AM -0800, Darrick J. Wong wrote:
-> I found a few more bugs in the kernel-side implementation, which might explain
-> that.  I'm about to start working on making CoW less crappy, but I'll push all
-> the patches out to github.  (I wasn't planning on patchbombing again until
-> December.)
+On Fri, Nov 13, 2015 at 01:08:22AM -0800, Darrick J. Wong wrote:
+> I think I got all the tests renumbered correctly and fixed all the other bugs.
+> I'd like to send the updated patchpile to Dave tomorrow, but if you have a few
+> spare cycles would you mind giving this a quick test to make sure I fixed
+> everything?
+> 
+> https://github.com/djwong/xfstests/tree/for-dave
 
-Yes, please push your WIP code out as often as possible!
+Looks good enough to go in
 
-Btw, here is another additional fixup, as two tests were wrongly
-tagged as needing reflink instead of dedupe:
+Acked-by: Christoph Hellwig <hch@lst.de>
 
-
-diff --git a/tests/generic/827 b/tests/generic/827
-index cc1bc52..c8ce7cf 100755
---- a/tests/generic/827
-+++ b/tests/generic/827
-@@ -47,7 +47,7 @@ _supported_fs generic
- _supported_os Linux
- 
- _require_scratch
--_require_xfs_io_command "reflink"
-+_require_xfs_io_command "dedupe"
- 
- echo "Format and mount"
- _scratch_mkfs > $seqres.full 2>&1
-diff --git a/tests/generic/828 b/tests/generic/828
-index 1757985..f5b7298 100755
---- a/tests/generic/828
-+++ b/tests/generic/828
-@@ -47,7 +47,7 @@ _supported_fs generic
- _supported_os Linux
- 
- _require_scratch
--_require_xfs_io_command "reflink"
-+_require_xfs_io_command "dedupe"
- 
- echo "Format and mount"
- _scratch_mkfs > $seqres.full 2>&1
+I have for failing tests on NFS currently.  Two of them probably are
+NFS issues (free block count), but and two others fail because NFS
+doesn't support chattr/lsattr.  I will send an incremental check to adda
+feature test for those.
