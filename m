@@ -1,191 +1,190 @@
-Received: from mail.kernel.org ([198.145.29.136]:44197 "EHLO mail.kernel.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751787AbbKQR7s (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 17 Nov 2015 12:59:48 -0500
-From: fdmanana@kernel.org
-Subject: [PATCH RESEND] fstests: test for btrfs direct IO write against compressed extent
-Date: Tue, 17 Nov 2015 17:59:34 +0000
-Message-Id: <1447783174-26877-1-git-send-email-fdmanana@kernel.org>
+Received: from userp1040.oracle.com ([156.151.31.81]:20331 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932349AbbKQVRw (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 17 Nov 2015 16:17:52 -0500
+Date: Tue, 17 Nov 2015 13:16:43 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 01/12] test-scripts: test migration scripts
+Message-ID: <20151117211643.GF2217@birch.djwong.org>
+References: <20151113213643.31124.80975.stgit@birch.djwong.org>
+ <20151113213650.31124.16817.stgit@birch.djwong.org>
+ <20151116205845.GK14311@dastard>
+ <20151116235111.GE2224@birch.djwong.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20151116235111.GE2224@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com, hch@infradead.org, tao.peng@primarydata.com, linux-ext4@vger.kernel.org, Anna.Schumaker@netapp.com, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Mon, Nov 16, 2015 at 03:51:11PM -0800, Darrick J. Wong wrote:
+> On Tue, Nov 17, 2015 at 07:58:45AM +1100, Dave Chinner wrote:
+> > On Fri, Nov 13, 2015 at 01:36:50PM -0800, Darrick J. Wong wrote:
+> > > Add two scripts: "nextid" finds the next available test ID number in a
+> > > group, and "mvtest" relocates a test, fixes the golden output, and
+> > > moves the group entry for that test.
+> > > 
+> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > > ---
+> > >  mvtest |   58 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+> > >  nextid |   35 +++++++++++++++++++++++++++++++++++
+> > 
+> > These should be placed in the "tools" directory.
+> 
+> <nod>
+> 
+> > 
+> > >  create mode 100755 mvtest
+> > >  create mode 100755 nextid
+> > > 
+> > > 
+> > > diff --git a/mvtest b/mvtest
+> > > new file mode 100755
+> > > index 0000000..b5406d1
+> > > --- /dev/null
+> > > +++ b/mvtest
+> > > @@ -0,0 +1,58 @@
+> > > +#!/bin/sh
+> > > +
+> > > +# Renumber a test
+> > > +
+> > > +if [ -z "$1" ] || [ "$1" = "--help" ]; then
+> > > +	echo "Usage: $0 path_to_test new_path_to_test"
+> > > +	exit 1
+> > > +fi
+> > > +
+> > > +src="$1"
+> > > +dest="$2"
+> > > +
+> > > +die() {
+> > > +	echo "$@"
+> > > +	exit 1
+> > > +}
+> > > +
+> > > +nsort() {
+> > > +	sort -g < "$1" > "$2"
+> > > +}
+> > > +
+> > > +append() {
+> > > +	out="$1"
+> > > +	shift
+> > > +	echo "$@" >> "${out}"
+> > > +}
+> > > +
+> > > +test "${src}" != "${dest}" || die "Test \"${src}\" is the same as dest."
+> > > +test -e "tests/${src}" || die "Test \"${src}\" does not exist."
+> > > +test ! -e "tests/${dest}" || die "Test \"${src}\" already exists."
+> > > +
+> > > +sid="$(basename "${src}")"
+> > > +did="$(basename "${dest}")"
+> > > +
+> > > +sgroup="$(basename "$(dirname "tests/${src}")")"
+> > > +dgroup="$(basename "$(dirname "tests/${dest}")")"
+> > > +
+> > > +sgroupfile="tests/${sgroup}/group"
+> > > +dgroupfile="tests/${sgroup}/group"
+> > > +
+> > > +$DBG git mv "tests/${src}" "tests/${dest}"
+> > 
+> > $DBG?
+> 
+> "DBG=echo ./mvtest foo bar" to see what it would have run, more or less.
+> 
+> (I suppose I could getopt a --dry-run, but I could also just get rid of them.)
+> 
+> > 
+> > ....
+> > > +$DBG sed -e "/^${sid}.*$/d" -i "${sgroupfile}"
+> > > +$DBG cp "${dgroupfile}" "${dgroupfile}.new"
+> > > +$DBG append "${dgroupfile}.new" "${newgrpline}"
+> > > +$DBG nsort "${dgroupfile}.new" "${dgroupfile}"
+> > 
+> > What does this do to comments in the group file?
+> 
+> Eats them.  I don't know of a good way to sort just the uncommented lines
+> in the file, short of writing a python script to do that.
+> 
+> I guess it's not that hard; I've sort of needed one here and there over
+> the years, but never wrote one, and $google doesn't immediately provide
+> any such thing.
+> 
+> > 
+> > ...
+> > 
+> > > diff --git a/nextid b/nextid
+> > > new file mode 100755
+> > > index 0000000..285b549
+> > > --- /dev/null
+> > > +++ b/nextid
+> > > @@ -0,0 +1,35 @@
+> > > +#!/bin/sh
+> > > +
+> > > +# Given a group name, find the next available test number.
+> > > +
+> > > +if [ -z "$1" ] || [ "$1" = "--help" ]; then
+> > > +	echo "Usage: $0 groupname[/start_looking_at_this_number]"
+> > > +	exit 1
+> > > +fi
+> > > +
+> > > +die() {
+> > > +	echo "$@"
+> > > +	exit 1
+> > > +}
+> > > +
+> > > +if [ "$(basename "$1")" != "$1" ]; then
+> > > +	group="$(dirname "$1")"
+> > > +	id="$(basename "$1")"
+> > > +else
+> > > +	group="$1"
+> > > +	id=1
+> > > +fi
+> > > +test -e "tests/${group}/group" || die "Unknown group \"${group}\"."
+> > > +
+> > > +while test "${id}" -lt 1000; do
+> > > +	name="$(printf "%.03d" "${id}")"
+> > > +	if [ ! -e "tests/${group}/${name}" ]; then
+> > > +		echo "${group}/${name}"
+> > > +		exit 0
+> > > +	fi
+> > > +	id=$((id + 1))
+> > > +done
+> > > +
+> > > +echo "No free IDs less than ${id} in group \"${group}\"."
+> > 
+> > So the "new" script does this differently, by reading the group
+> > file and looking for the first non-contiguous ID in the file. It
+> > doesn't need scan ID limits because EOF triggers that. Wouldn't it
+> > be better to to factor the code out of the "new" script to find the
+> > next id, and then have the new script call that?
+> 
+> Sure!
 
-Test that doing a direct IO write against a file range that contains one
-prealloc extent and one compressed extent works correctly.
+In the end I wrote a short Python program to sort group files and it wasn't
+much harder to reuse the code to implement nextid, so I did that instead.
 
->From the linux kernel 4.0 onwards, this either triggered an assertion
-failure (leading to a BUG_ON) when CONFIG_BTRFS_ASSERT=y or resulted
-in an arithmetic underflow of an inode's space reservation for write
-operations.
+I'll probably post this and a patch to fix the error codes in generic/157
+later this week.
 
-That issue is fixed by the following linux kernel patch:
+--D
 
-  "Btrfs: fix extent accounting for partial direct IO writes"
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
-
-Resending since it was not merged in the last branch update.
-Renumbered the test to reflect the latest branch update, otherwise it's
-unchanged.
-
- tests/btrfs/026     | 108 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/026.out |  15 ++++++++
- tests/btrfs/group   |   1 +
- 3 files changed, 124 insertions(+)
- create mode 100644 tests/btrfs/026
- create mode 100644 tests/btrfs/026.out
-
-diff --git a/tests/btrfs/026 b/tests/btrfs/026
-new file mode 100644
-index 0000000..0477ed4
---- /dev/null
-+++ b/tests/btrfs/026
-@@ -0,0 +1,108 @@
-+#! /bin/bash
-+# FSQA Test No. 026
-+#
-+# Test that doing a direct IO write against a file range that contains one
-+# prealloc extent and one compressed extent works correctly.
-+#
-+#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2015 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_need_to_be_root
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_xfs_io_command "falloc"
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount "-o compress"
-+
-+# Create a compressed extent covering the range [700K, 800K[.
-+$XFS_IO_PROG -f -s -c "pwrite -S 0xaa -b 100K 700K 100K" $SCRATCH_MNT/foo \
-+	| _filter_xfs_io
-+
-+# Create prealloc extent covering the range [600K, 700K[.
-+$XFS_IO_PROG -c "falloc 600K 100K" $SCRATCH_MNT/foo
-+
-+# Write 80K of data to the range [640K, 720K[ using direct IO. This range covers
-+# both the prealloc extent and the compressed extent. Because there's a
-+# compressed extent in the range we are writing to, the DIO write code path ends
-+# up only writing the first 60k of data, which goes to the prealloc extent, and
-+# then falls back to buffered IO for writing the remaining 20K of data - because
-+# that remaining data maps to a file range containing a compressed extent.
-+# When falling back to buffered IO, we used to trigger an assertion when
-+# releasing reserved space due to bad accounting of the inode's outstanding
-+# extents counter, which was set to 1 but we ended up decrementing it by 1 twice,
-+# once through the ordered extent for the 60K of data we wrote using direct IO,
-+# and once through the main direct IO handler (inode.cbtrfs_direct_IO()) because
-+# the direct IO write wrote less than 80K of data (60K).
-+$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 80K 640K 80K" $SCRATCH_MNT/foo \
-+	| _filter_xfs_io
-+
-+# Now similar test as above but for very large write operations. This triggers
-+# special cases for an inode's outstanding extents accounting, as internally
-+# btrfs logically splits extents into 128Mb units.
-+$XFS_IO_PROG -f -s \
-+	-c "pwrite -S 0xaa -b 128M 258M 128M" \
-+	-c "falloc 0 258M" \
-+	$SCRATCH_MNT/bar | _filter_xfs_io
-+$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 256M 3M 256M" $SCRATCH_MNT/bar \
-+	| _filter_xfs_io
-+
-+# Now verify the file contents are correct and that they are the same even after
-+# unmounting and mounting the fs again (or evicting the page cache).
-+#
-+# For file foo, all bytes in the range [0, 640K[ must have a value of 0x00, all
-+# bytes in the range [640K, 720K[ must have a value of 0xbb and all bytes in the
-+# range [720K, 800K[ must have a value of 0xaa.
-+#
-+# For file bar, all bytes in the range [0, 3M[ must havea value of 0x00, all
-+# bytes in the range [3M, 259M[ must have a value of 0xbb and all bytes in the
-+# range [259M, 386M[ must have a value of 0xaa.
-+#
-+echo "File digests before remounting the file system:"
-+md5sum $SCRATCH_MNT/foo | _filter_scratch
-+md5sum $SCRATCH_MNT/bar | _filter_scratch
-+_scratch_remount
-+echo "File digests after remounting the file system:"
-+md5sum $SCRATCH_MNT/foo | _filter_scratch
-+md5sum $SCRATCH_MNT/bar | _filter_scratch
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/026.out b/tests/btrfs/026.out
-new file mode 100644
-index 0000000..4183275
---- /dev/null
-+++ b/tests/btrfs/026.out
-@@ -0,0 +1,15 @@
-+QA output created by 026
-+wrote 102400/102400 bytes at offset 716800
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 81920/81920 bytes at offset 655360
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 134217728/134217728 bytes at offset 270532608
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 268435456/268435456 bytes at offset 3145728
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+File digests before remounting the file system:
-+647d815906324ccdf288c7681f900ec0  SCRATCH_MNT/foo
-+5876dba1217b4c2915cda86f4c67640e  SCRATCH_MNT/bar
-+File digests after remounting the file system:
-+647d815906324ccdf288c7681f900ec0  SCRATCH_MNT/foo
-+5876dba1217b4c2915cda86f4c67640e  SCRATCH_MNT/bar
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 9f99ddc..3a99289 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -28,6 +28,7 @@
- 023 auto
- 024 auto quick compress
- 025 auto quick send clone
-+026 auto quick compress prealloc
- 029 auto quick clone
- 030 auto quick send
- 031 auto quick subvol clone
--- 
-2.1.3
-
+> 
+> --D
+> 
+> > 
+> > Cheers,
+> > 
+> > Dave.
+> > -- 
+> > Dave Chinner
+> > david@fromorbit.com
+> > 
+> > _______________________________________________
+> > xfs mailing list
+> > xfs@oss.sgi.com
+> > http://oss.sgi.com/mailman/listinfo/xfs
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
