@@ -1,108 +1,77 @@
-Received: from mx2.suse.de ([195.135.220.15]:48476 "EHLO mx2.suse.de"
+Received: from mail.kernel.org ([198.145.29.136]:39030 "EHLO mail.kernel.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755191AbbKRPhR (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 18 Nov 2015 10:37:17 -0500
-Date: Wed, 18 Nov 2015 16:37:14 +0100
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH 3/4] common: Add function for selecting from different
- output files
-Message-ID: <20151118153714.GH6097@quack.suse.cz>
-References: <1446654698-23577-1-git-send-email-jack@suse.com>
- <1446654698-23577-4-git-send-email-jack@suse.com>
- <20151116212924.GL14311@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20151116212924.GL14311@dastard>
+	id S1754756AbbKRQK7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 18 Nov 2015 11:10:59 -0500
+From: fdmanana@kernel.org
+Subject: [PATCH] Add more checks to _check_dmesg
+Date: Wed, 18 Nov 2015 16:10:03 +0000
+Message-Id: <1447863003-26291-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Jan Kara <jack@suse.com>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue 17-11-15 08:29:24, Dave Chinner wrote:
-> On Wed, Nov 04, 2015 at 05:31:37PM +0100, Jan Kara wrote:
-> > Add function for selection of different output files. The idea is that
-> > in config file ($seq.cfg) there are several lines like:
-> > 
-> > feat1,feat2: suffix
-> > 
-> > The function is passed a feature string (or uses MOUNT_OPTIONS if no
-> > argument is passed) and selects output file with a suffix for which all
-> > features are present in the feature string. If there is no matching
-> > line, output with 'default' suffix is selected.
-> > 
-> > Signed-off-by: Jan Kara <jack@suse.com>
-> 
-> Looks like a good idea, but probably needs to be integrated into
-> _link_out_file(), which already does platform based output file
-> linking...
+From: Filipe Manana <fdmanana@suse.com>
 
-OK, will do.
+Teach _check_dmesg to look for improper RCU usage and circular locking
+dependency messages. It's useful to check for these as they might point
+to a real problem in the filesystem's implementation (or the current
+implementation just confuses the checker, probably worth simplifying
+the filesystem's implementation).
 
-> > ---
-> >  common/rc | 41 +++++++++++++++++++++++++++++++++++++++++
-> >  1 file changed, 41 insertions(+)
-> > 
-> > diff --git a/common/rc b/common/rc
-> > index adf1edf64d8d..543780c92c59 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -3142,6 +3142,47 @@ get_block_size()
-> >  	echo `stat -f -c %S $1`
-> >  }
-> >  
-> > +_select_output()
-> > +{
-> > +	if [ $# -eq 0 ]; then
-> > +		FEATURES=${MOUNT_OPTIONS##"-o "}
-> > +	else
-> > +		FEATURES=$1
-> > +	fi
-> > +
-> > +	export FEATURES
-> > +	seqfull=$SRC_DIR/$seqnum
-> > +	perl -e '
-> > +		my %feathash;
-> > +		my $feature, $result, $suffix, $opts;
-> > +
-> > +		foreach $feature (split(/,/, $ENV{"FEATURES"})) {
-> > +			$feathash{$feature} = 1;
-> > +		}
-> > +		$result = "default";
-> > +		while (<>) {
-> > +			my $found = 1;
-> > +
-> > +			chomp;
-> > +			($opts, $suffix) = split(/ *: */);
-> > +			foreach my $opt (split(/,/, $opts)) {
-> > +				if (!exists($feathash{$opt})) {
-> > +					$found = 0;
-> > +					last;
-> > +				}
-> > +			}
-> > +			if ($found == 1) {
-> > +				$result = $suffix;
-> > +				last;
-> > +			}
-> > +		}
-> > +		print $result
-> > +		' <$seqfull.cfg | {
-> > +			read SUFFIX
-> > +			ln -fs $seq.out.$SUFFIX $seqfull.out
-> > +		}
-> > +}
-> 
-> I'd much prefer the perl code simply returns the appropriately
-> matched suffix and then the shell code does the linking of the
-> output file. That way other things that the test harness is aware of
-> can also be taken into account.
+Currently the test btrfs/071 for example triggers such warnings:
 
-Well, the perl code does return (print) the selected suffix. But I guess
-you dislike the piping into a shell block where the linking happens. I
-wanted to save on some shell escaping but it actually won't be that bad.
-I'll remove the pipe.
+[  912.924839] ===============================
+[  912.925617] [ INFO: suspicious RCU usage. ]
+[  912.926394] 4.3.0-rc5-btrfs-next-17+ #1 Not tainted
+[  912.927274] -------------------------------
+[  912.928364] fs/btrfs/volumes.c:1977 suspicious rcu_dereference_check() usage!
+[  912.929626]
+[  912.929626] other info that might help us debug this:
+[  912.929626]
+[  912.931197]
+[  912.931197] rcu_scheduler_active = 1, debug_locks = 1
+[  912.933822] 4 locks held by btrfs/6400:
+[  912.934558]  #0:  (&fs_info->dev_replace.lock_finishing_cancel_unmount){+.+...}, at: [<ffffffffa046a193>] btrfs_dev_replace_finishing+0x3e/0x696 [btrfs]
+[  912.948929]  #1:  (uuid_mutex){+.+.+.}, at: [<ffffffffa046a24a>] btrfs_dev_replace_finishing+0xf5/0x696 [btrfs]
+[  912.950987]  #2:  (&fs_devs->device_list_mutex){+.+.+.}, at: [<ffffffffa046a263>] btrfs_dev_replace_finishing+0x10e/0x696 [btrfs]
+[  912.953265]  #3:  (&fs_info->chunk_mutex){+.+...}, at: [<ffffffffa046a278>] btrfs_dev_replace_finishing+0x123/0x696 [btrfs]
+(...)
 
-								Honza
+[  912.987973] ======================================================
+[  912.989242] [ INFO: possible circular locking dependency detected ]
+[  912.990583] 4.3.0-rc5-btrfs-next-17+ #1 Not tainted
+[  912.990801] -------------------------------------------------------
+[  912.990801] btrfs/6400 is trying to acquire lock:
+[  912.990801]  (&bdev->bd_mutex){+.+.+.}, at: [<ffffffff8119d202>] __blkdev_get+0xa3/0x3d9
+[  912.990801]
+[  912.990801] but task is already holding lock:
+[  912.990801]  (&fs_info->chunk_mutex){+.+.+.}, at: [<ffffffffa046a278>] btrfs_dev_replace_finishing+0x123/0x696 [btrfs]
+[  912.990801]
+[  912.990801] which lock already depends on the new lock.
+[  912.990801]
+[  912.990801]
+[  912.990801] the existing dependency chain (in reverse order) is:
+(...)
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ common/rc | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/common/rc b/common/rc
+index 4c2f42c..dd50aa9 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3055,6 +3055,8 @@ _check_dmesg()
+ 	     -e "Oops:" \
+ 	     -e "possible recursive locking detected" \
+ 	     -e "Internal error" \
++	     -e "INFO: suspicious RCU usage" \
++	     -e "INFO: possible circular locking dependency detected" \
+ 	     $seqres.dmesg
+ 	if [ $? -eq 0 ]; then
+ 		echo "_check_dmesg: something found in dmesg (see $seqres.dmesg)"
 -- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+2.1.3
+
