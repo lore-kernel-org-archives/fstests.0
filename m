@@ -1,190 +1,106 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:20331 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932349AbbKQVRw (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 17 Nov 2015 16:17:52 -0500
-Date: Tue, 17 Nov 2015 13:16:43 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 01/12] test-scripts: test migration scripts
-Message-ID: <20151117211643.GF2217@birch.djwong.org>
-References: <20151113213643.31124.80975.stgit@birch.djwong.org>
- <20151113213650.31124.16817.stgit@birch.djwong.org>
- <20151116205845.GK14311@dastard>
- <20151116235111.GE2224@birch.djwong.org>
+Received: from cn.fujitsu.com ([59.151.112.132]:38097 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753314AbbKRKVk (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 18 Nov 2015 05:21:40 -0500
+Received: from G08CNEXCHPEKD01.g08.fujitsu.local (localhost.localdomain [127.0.0.1])
+	by edo.cn.fujitsu.com (8.14.3/8.13.1) with ESMTP id tAIAKtVm001618
+	for <fstests@vger.kernel.org>; Wed, 18 Nov 2015 18:20:55 +0800
+From: Zhaolei <zhaolei@cn.fujitsu.com>
+Subject: [PATCH v3] fstests: Make generic/081 run in old version of lvm
+Date: Wed, 18 Nov 2015 18:19:49 +0800
+Message-ID: <06bb2b60251a0897a9b16b3f5d003b8749a36406.1447841971.git.zhaolei@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20151116235111.GE2224@birch.djwong.org>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, xfs@oss.sgi.com, hch@infradead.org, tao.peng@primarydata.com, linux-ext4@vger.kernel.org, Anna.Schumaker@netapp.com, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Zhao Lei <zhaolei@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Nov 16, 2015 at 03:51:11PM -0800, Darrick J. Wong wrote:
-> On Tue, Nov 17, 2015 at 07:58:45AM +1100, Dave Chinner wrote:
-> > On Fri, Nov 13, 2015 at 01:36:50PM -0800, Darrick J. Wong wrote:
-> > > Add two scripts: "nextid" finds the next available test ID number in a
-> > > group, and "mvtest" relocates a test, fixes the golden output, and
-> > > moves the group entry for that test.
-> > > 
-> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > > ---
-> > >  mvtest |   58 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  nextid |   35 +++++++++++++++++++++++++++++++++++
-> > 
-> > These should be placed in the "tools" directory.
-> 
-> <nod>
-> 
-> > 
-> > >  create mode 100755 mvtest
-> > >  create mode 100755 nextid
-> > > 
-> > > 
-> > > diff --git a/mvtest b/mvtest
-> > > new file mode 100755
-> > > index 0000000..b5406d1
-> > > --- /dev/null
-> > > +++ b/mvtest
-> > > @@ -0,0 +1,58 @@
-> > > +#!/bin/sh
-> > > +
-> > > +# Renumber a test
-> > > +
-> > > +if [ -z "$1" ] || [ "$1" = "--help" ]; then
-> > > +	echo "Usage: $0 path_to_test new_path_to_test"
-> > > +	exit 1
-> > > +fi
-> > > +
-> > > +src="$1"
-> > > +dest="$2"
-> > > +
-> > > +die() {
-> > > +	echo "$@"
-> > > +	exit 1
-> > > +}
-> > > +
-> > > +nsort() {
-> > > +	sort -g < "$1" > "$2"
-> > > +}
-> > > +
-> > > +append() {
-> > > +	out="$1"
-> > > +	shift
-> > > +	echo "$@" >> "${out}"
-> > > +}
-> > > +
-> > > +test "${src}" != "${dest}" || die "Test \"${src}\" is the same as dest."
-> > > +test -e "tests/${src}" || die "Test \"${src}\" does not exist."
-> > > +test ! -e "tests/${dest}" || die "Test \"${src}\" already exists."
-> > > +
-> > > +sid="$(basename "${src}")"
-> > > +did="$(basename "${dest}")"
-> > > +
-> > > +sgroup="$(basename "$(dirname "tests/${src}")")"
-> > > +dgroup="$(basename "$(dirname "tests/${dest}")")"
-> > > +
-> > > +sgroupfile="tests/${sgroup}/group"
-> > > +dgroupfile="tests/${sgroup}/group"
-> > > +
-> > > +$DBG git mv "tests/${src}" "tests/${dest}"
-> > 
-> > $DBG?
-> 
-> "DBG=echo ./mvtest foo bar" to see what it would have run, more or less.
-> 
-> (I suppose I could getopt a --dry-run, but I could also just get rid of them.)
-> 
-> > 
-> > ....
-> > > +$DBG sed -e "/^${sid}.*$/d" -i "${sgroupfile}"
-> > > +$DBG cp "${dgroupfile}" "${dgroupfile}.new"
-> > > +$DBG append "${dgroupfile}.new" "${newgrpline}"
-> > > +$DBG nsort "${dgroupfile}.new" "${dgroupfile}"
-> > 
-> > What does this do to comments in the group file?
-> 
-> Eats them.  I don't know of a good way to sort just the uncommented lines
-> in the file, short of writing a python script to do that.
-> 
-> I guess it's not that hard; I've sort of needed one here and there over
-> the years, but never wrote one, and $google doesn't immediately provide
-> any such thing.
-> 
-> > 
-> > ...
-> > 
-> > > diff --git a/nextid b/nextid
-> > > new file mode 100755
-> > > index 0000000..285b549
-> > > --- /dev/null
-> > > +++ b/nextid
-> > > @@ -0,0 +1,35 @@
-> > > +#!/bin/sh
-> > > +
-> > > +# Given a group name, find the next available test number.
-> > > +
-> > > +if [ -z "$1" ] || [ "$1" = "--help" ]; then
-> > > +	echo "Usage: $0 groupname[/start_looking_at_this_number]"
-> > > +	exit 1
-> > > +fi
-> > > +
-> > > +die() {
-> > > +	echo "$@"
-> > > +	exit 1
-> > > +}
-> > > +
-> > > +if [ "$(basename "$1")" != "$1" ]; then
-> > > +	group="$(dirname "$1")"
-> > > +	id="$(basename "$1")"
-> > > +else
-> > > +	group="$1"
-> > > +	id=1
-> > > +fi
-> > > +test -e "tests/${group}/group" || die "Unknown group \"${group}\"."
-> > > +
-> > > +while test "${id}" -lt 1000; do
-> > > +	name="$(printf "%.03d" "${id}")"
-> > > +	if [ ! -e "tests/${group}/${name}" ]; then
-> > > +		echo "${group}/${name}"
-> > > +		exit 0
-> > > +	fi
-> > > +	id=$((id + 1))
-> > > +done
-> > > +
-> > > +echo "No free IDs less than ${id} in group \"${group}\"."
-> > 
-> > So the "new" script does this differently, by reading the group
-> > file and looking for the first non-contiguous ID in the file. It
-> > doesn't need scan ID limits because EOF triggers that. Wouldn't it
-> > be better to to factor the code out of the "new" script to find the
-> > next id, and then have the new script call that?
-> 
-> Sure!
+From: Zhao Lei <zhaolei@cn.fujitsu.com>
 
-In the end I wrote a short Python program to sort group files and it wasn't
-much harder to reuse the code to implement nextid, so I did that instead.
+generic/081 failed in RHEL 6.3:
+ # ./check generic/081
+ FSTYP         -- btrfs
+ PLATFORM      -- Linux/x86_64 kerneldev 4.2.0-rc5_HEAD_d770e558e21961ad6cfdf0ff7df0eb5d7d4f0754_+
+ MKFS_OPTIONS  -- /dev/vdd
+ MOUNT_OPTIONS -- /dev/vdd /var/ltf/tester/scratch_mnt
 
-I'll probably post this and a patch to fix the error codes in generic/157
-later this week.
+ generic/081
+ [failed, exit status 1] - output mismatch (see /var/lib/xfstests/results//generic/081.out.bad)
+    --- tests/generic/081.out   2015-07-13 17:07:03.000000000 +0800
+    +++ /var/lib/xfstests/results//generic/081.out.bad  2015-10-28 12:20:49.000000000 +0800
+    @@ -1,2 +1,3 @@
+     QA output created by 081
+     Silence is golden
+    +ERROR: checking status of /dev/mapper/vg_081-base_081: No such file or directory
+ Ran: generic/081
+ Failures: generic/081
+ Failed 1 of 1 tests
 
---D
+Reason:
+ Command of "lvm lvcreate --yes" failed because lvm in RHEL 6.3
+ don't support '--yes' option.
 
-> 
-> --D
-> 
-> > 
-> > Cheers,
-> > 
-> > Dave.
-> > -- 
-> > Dave Chinner
-> > david@fromorbit.com
-> > 
-> > _______________________________________________
-> > xfs mailing list
-> > xfs@oss.sgi.com
-> > http://oss.sgi.com/mailman/listinfo/xfs
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ RHEL 6.3(without --yes option):
+ # lvm version
+   LVM version:     2.02.95(2)-RHEL6 (2012-05-16)
+   Library version: 1.02.74-RHEL6 (2012-05-16)
+   Driver version:  4.32.0
+ # lvm lvcreate --yes --version
+ lvcreate: unrecognized option '--yes'
+   Error during parsing of command line.
+ # echo $?
+ 3
+ #
+
+ RHEL 7.1(with --yes option):
+ # lvm version
+   LVM version:     2.02.115(2)-RHEL7 (2015-01-28)
+   Library version: 1.02.93-RHEL7 (2015-01-28)
+   Driver version:  4.33.0
+ # lvm lvcreate --yes --version
+   LVM version:     2.02.115(2)-RHEL7 (2015-01-28)
+   Library version: 1.02.93-RHEL7 (2015-01-28)
+   Driver version:  4.33.0
+ # echo $?
+ 0
+ #
+
+ Fedora release 20(with --yes option):
+ (Support --yes like RHEL 7.1, omit logs)
+ lvm version: 2.02.106(2) (2014-04-10)
+
+Fix:
+ Add a condition to to check if current lvm support --yes option,
+ Tested in above RHEL 6.3 platform.
+
+Changelog v2->v3:
+ Use unique way for old and new version of lvm, suggested-by:
+ Dave Chinner <david@fromorbit.com>
+
+Changelog v1->v2:
+ Use yes pipe, suggested by: Eryu Guan <eguan@redhat.com>
+
+Suggested-by: Dave Chinner <david@fromorbit.com>
+Suggested-by: Eryu Guan <eguan@redhat.com>
+Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
+---
+ tests/generic/081 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/generic/081 b/tests/generic/081
+index 8334ec9..54e7c3c 100755
+--- a/tests/generic/081
++++ b/tests/generic/081
+@@ -65,7 +65,7 @@ mkdir -p $mnt
+ # lvm uses some space for metadata
+ _scratch_mkfs_sized $((300 * 1024 * 1024)) >>$seqres.full 2>&1
+ $LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
+-$LVM_PROG lvcreate --yes -L 256M -n $lvname $vgname >>$seqres.full 2>&1
++yes | $LVM_PROG lvcreate -L 256M -n $lvname $vgname >>$seqres.full 2>&1
+ # wait for lvcreation to fully complete
+ $UDEV_SETTLE_PROG >>$seqres.full 2>&1
+ 
+-- 
+1.8.5.1
+
