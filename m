@@ -1,90 +1,117 @@
-Received: from mx1.redhat.com ([209.132.183.28]:38229 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:34930 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755226AbbKSDXI (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 18 Nov 2015 22:23:08 -0500
-Date: Thu, 19 Nov 2015 11:23:04 +0800
+	id S933201AbbKSDkr (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 18 Nov 2015 22:40:47 -0500
+Date: Thu, 19 Nov 2015 11:40:42 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] Add more checks to _check_dmesg
-Message-ID: <20151119032304.GM2535@eguan.usersys.redhat.com>
-References: <1447863003-26291-1-git-send-email-fdmanana@kernel.org>
+Subject: Re: [PATCH v3] fstests: Make generic/081 run in old version of lvm
+Message-ID: <20151119034042.GN2535@eguan.usersys.redhat.com>
+References: <06bb2b60251a0897a9b16b3f5d003b8749a36406.1447841971.git.zhaolei@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1447863003-26291-1-git-send-email-fdmanana@kernel.org>
+In-Reply-To: <06bb2b60251a0897a9b16b3f5d003b8749a36406.1447841971.git.zhaolei@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Zhaolei <zhaolei@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Nov 18, 2015 at 04:10:03PM +0000, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Wed, Nov 18, 2015 at 06:19:49PM +0800, Zhaolei wrote:
+> From: Zhao Lei <zhaolei@cn.fujitsu.com>
 > 
-> Teach _check_dmesg to look for improper RCU usage and circular locking
-> dependency messages. It's useful to check for these as they might point
-> to a real problem in the filesystem's implementation (or the current
-> implementation just confuses the checker, probably worth simplifying
-> the filesystem's implementation).
+> generic/081 failed in RHEL 6.3:
+>  # ./check generic/081
+>  FSTYP         -- btrfs
+>  PLATFORM      -- Linux/x86_64 kerneldev 4.2.0-rc5_HEAD_d770e558e21961ad6cfdf0ff7df0eb5d7d4f0754_+
+>  MKFS_OPTIONS  -- /dev/vdd
+>  MOUNT_OPTIONS -- /dev/vdd /var/ltf/tester/scratch_mnt
 > 
-> Currently the test btrfs/071 for example triggers such warnings:
+>  generic/081
+>  [failed, exit status 1] - output mismatch (see /var/lib/xfstests/results//generic/081.out.bad)
+>     --- tests/generic/081.out   2015-07-13 17:07:03.000000000 +0800
+>     +++ /var/lib/xfstests/results//generic/081.out.bad  2015-10-28 12:20:49.000000000 +0800
+>     @@ -1,2 +1,3 @@
+>      QA output created by 081
+>      Silence is golden
+>     +ERROR: checking status of /dev/mapper/vg_081-base_081: No such file or directory
+>  Ran: generic/081
+>  Failures: generic/081
+>  Failed 1 of 1 tests
 > 
-> [  912.924839] ===============================
-> [  912.925617] [ INFO: suspicious RCU usage. ]
-> [  912.926394] 4.3.0-rc5-btrfs-next-17+ #1 Not tainted
-> [  912.927274] -------------------------------
-> [  912.928364] fs/btrfs/volumes.c:1977 suspicious rcu_dereference_check() usage!
-> [  912.929626]
-> [  912.929626] other info that might help us debug this:
-> [  912.929626]
-> [  912.931197]
-> [  912.931197] rcu_scheduler_active = 1, debug_locks = 1
-> [  912.933822] 4 locks held by btrfs/6400:
-> [  912.934558]  #0:  (&fs_info->dev_replace.lock_finishing_cancel_unmount){+.+...}, at: [<ffffffffa046a193>] btrfs_dev_replace_finishing+0x3e/0x696 [btrfs]
-> [  912.948929]  #1:  (uuid_mutex){+.+.+.}, at: [<ffffffffa046a24a>] btrfs_dev_replace_finishing+0xf5/0x696 [btrfs]
-> [  912.950987]  #2:  (&fs_devs->device_list_mutex){+.+.+.}, at: [<ffffffffa046a263>] btrfs_dev_replace_finishing+0x10e/0x696 [btrfs]
-> [  912.953265]  #3:  (&fs_info->chunk_mutex){+.+...}, at: [<ffffffffa046a278>] btrfs_dev_replace_finishing+0x123/0x696 [btrfs]
-> (...)
+> Reason:
+>  Command of "lvm lvcreate --yes" failed because lvm in RHEL 6.3
+>  don't support '--yes' option.
 > 
-> [  912.987973] ======================================================
-> [  912.989242] [ INFO: possible circular locking dependency detected ]
-> [  912.990583] 4.3.0-rc5-btrfs-next-17+ #1 Not tainted
-> [  912.990801] -------------------------------------------------------
-> [  912.990801] btrfs/6400 is trying to acquire lock:
-> [  912.990801]  (&bdev->bd_mutex){+.+.+.}, at: [<ffffffff8119d202>] __blkdev_get+0xa3/0x3d9
-> [  912.990801]
-> [  912.990801] but task is already holding lock:
-> [  912.990801]  (&fs_info->chunk_mutex){+.+.+.}, at: [<ffffffffa046a278>] btrfs_dev_replace_finishing+0x123/0x696 [btrfs]
-> [  912.990801]
-> [  912.990801] which lock already depends on the new lock.
-> [  912.990801]
-> [  912.990801]
-> [  912.990801] the existing dependency chain (in reverse order) is:
-> (...)
+>  RHEL 6.3(without --yes option):
+>  # lvm version
+>    LVM version:     2.02.95(2)-RHEL6 (2012-05-16)
+>    Library version: 1.02.74-RHEL6 (2012-05-16)
+>    Driver version:  4.32.0
+>  # lvm lvcreate --yes --version
+>  lvcreate: unrecognized option '--yes'
+>    Error during parsing of command line.
+>  # echo $?
+>  3
+>  #
 > 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+>  RHEL 7.1(with --yes option):
+>  # lvm version
+>    LVM version:     2.02.115(2)-RHEL7 (2015-01-28)
+>    Library version: 1.02.93-RHEL7 (2015-01-28)
+>    Driver version:  4.33.0
+>  # lvm lvcreate --yes --version
+>    LVM version:     2.02.115(2)-RHEL7 (2015-01-28)
+>    Library version: 1.02.93-RHEL7 (2015-01-28)
+>    Driver version:  4.33.0
+>  # echo $?
+>  0
+>  #
+> 
+>  Fedora release 20(with --yes option):
+>  (Support --yes like RHEL 7.1, omit logs)
+>  lvm version: 2.02.106(2) (2014-04-10)
+> 
+> Fix:
+>  Add a condition to to check if current lvm support --yes option,
+>  Tested in above RHEL 6.3 platform.
 
-Makes sense to me.
+This "Fix" needs update too.
 
-Reviewed-by: Eryu Guan <eguan@redhat.com>
+And generic/108 uses "--yes" too, can you please fix it all together?
+Thanks!
 
+Eryu
+
+> 
+> Changelog v2->v3:
+>  Use unique way for old and new version of lvm, suggested-by:
+>  Dave Chinner <david@fromorbit.com>
+> 
+> Changelog v1->v2:
+>  Use yes pipe, suggested by: Eryu Guan <eguan@redhat.com>
+> 
+> Suggested-by: Dave Chinner <david@fromorbit.com>
+> Suggested-by: Eryu Guan <eguan@redhat.com>
+> Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
 > ---
->  common/rc | 2 ++
->  1 file changed, 2 insertions(+)
+>  tests/generic/081 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/common/rc b/common/rc
-> index 4c2f42c..dd50aa9 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3055,6 +3055,8 @@ _check_dmesg()
->  	     -e "Oops:" \
->  	     -e "possible recursive locking detected" \
->  	     -e "Internal error" \
-> +	     -e "INFO: suspicious RCU usage" \
-> +	     -e "INFO: possible circular locking dependency detected" \
->  	     $seqres.dmesg
->  	if [ $? -eq 0 ]; then
->  		echo "_check_dmesg: something found in dmesg (see $seqres.dmesg)"
+> diff --git a/tests/generic/081 b/tests/generic/081
+> index 8334ec9..54e7c3c 100755
+> --- a/tests/generic/081
+> +++ b/tests/generic/081
+> @@ -65,7 +65,7 @@ mkdir -p $mnt
+>  # lvm uses some space for metadata
+>  _scratch_mkfs_sized $((300 * 1024 * 1024)) >>$seqres.full 2>&1
+>  $LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
+> -$LVM_PROG lvcreate --yes -L 256M -n $lvname $vgname >>$seqres.full 2>&1
+> +yes | $LVM_PROG lvcreate -L 256M -n $lvname $vgname >>$seqres.full 2>&1
+>  # wait for lvcreation to fully complete
+>  $UDEV_SETTLE_PROG >>$seqres.full 2>&1
+>  
 > -- 
-> 2.1.3
+> 1.8.5.1
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
