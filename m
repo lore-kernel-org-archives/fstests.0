@@ -1,99 +1,224 @@
-Received: from mx1.redhat.com ([209.132.183.28]:50679 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754876AbbKSM01 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 19 Nov 2015 07:26:27 -0500
-Date: Thu, 19 Nov 2015 20:26:25 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v4] fstests: Make generic/081 and 108 run in old version
- of lvm
-Message-ID: <20151119122625.GP2535@eguan.usersys.redhat.com>
-References: <988846ee74aa4045c43465d954d05a385f02f683.1447922281.git.zhaolei@cn.fujitsu.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:48863 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1163147AbbKUAum (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 20 Nov 2015 19:50:42 -0500
+Subject: [PATCH 1/2] test-scripts: test migration scripts
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Fri, 20 Nov 2015 16:50:08 -0800
+Message-ID: <20151121005008.20398.37255.stgit@birch.djwong.org>
+In-Reply-To: <20151121005001.20398.92856.stgit@birch.djwong.org>
+References: <20151121005001.20398.92856.stgit@birch.djwong.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <988846ee74aa4045c43465d954d05a385f02f683.1447922281.git.zhaolei@cn.fujitsu.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Zhaolei <zhaolei@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org
+To: david@fromorbit.com, darrick.wong@oracle.com
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com, hch@infradead.org, tao.peng@primarydata.com, linux-ext4@vger.kernel.org, Anna.Schumaker@netapp.com, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Nov 19, 2015 at 04:38:08PM +0800, Zhaolei wrote:
-> From: Zhao Lei <zhaolei@cn.fujitsu.com>
-> 
-> generic/081 and 108 fails in RHEL 6.3, like:
->  # ./check generic/081
->  FSTYP         -- btrfs
->  PLATFORM      -- Linux/x86_64 kerneldev 4.2.0-rc5_HEAD_d770e558e21961ad6cfdf0ff7df0eb5d7d4f0754_+
->  MKFS_OPTIONS  -- /dev/vdd
->  MOUNT_OPTIONS -- /dev/vdd /var/ltf/tester/scratch_mnt
-> 
->  generic/081
->  [failed, exit status 1] - output mismatch (see /var/lib/xfstests/results//generic/081.out.bad)
->     --- tests/generic/081.out   2015-07-13 17:07:03.000000000 +0800
->     +++ /var/lib/xfstests/results//generic/081.out.bad  2015-10-28 12:20:49.000000000 +0800
->     @@ -1,2 +1,3 @@
->      QA output created by 081
->      Silence is golden
->     +ERROR: checking status of /dev/mapper/vg_081-base_081: No such file or directory
->  Ran: generic/081
->  Failures: generic/081
->  Failed 1 of 1 tests
-> 
-> Reason:
->  Command of "lvm lvcreate --yes" failed because lvm in RHEL 6.3
->  don't support '--yes' option.
-> 
->  RHEL 6.3(without --yes option):
->  # lvm version
->    LVM version:     2.02.95(2)-RHEL6 (2012-05-16)
->    Library version: 1.02.74-RHEL6 (2012-05-16)
->    Driver version:  4.32.0
->  # lvm lvcreate --yes --version
->  lvcreate: unrecognized option '--yes'
->    Error during parsing of command line.
->  # echo $?
->  3
->  #
-> 
->  RHEL 7.1(with --yes option):
->  # lvm version
->    LVM version:     2.02.115(2)-RHEL7 (2015-01-28)
->    Library version: 1.02.93-RHEL7 (2015-01-28)
->    Driver version:  4.33.0
->  # lvm lvcreate --yes --version
->    LVM version:     2.02.115(2)-RHEL7 (2015-01-28)
->    Library version: 1.02.93-RHEL7 (2015-01-28)
->    Driver version:  4.33.0
->  # echo $?
->  0
->  #
-> 
->  Fedora release 20(with --yes option):
->  (Support --yes like RHEL 7.1, omit logs)
->  lvm version: 2.02.106(2) (2014-04-10)
-> 
-> Fix:
->  Use yes pipe instead '--yes' option for lvm, to make the command
->  support both new and old version of lvm.
-> 
-> Changelog v3->v4:
->  1: Update description of "Fix:" in patch comment.
->     suggested by: Eryu Guan <eguan@redhat.com>
->  2: Add fix of generic/108
->     suggested by: Eryu Guan <eguan@redhat.com>
->  3: Add comment of why using yes pipe in code.
-> 
-> Changelog v2->v3:
->  Use unique way for old and new version of lvm, suggested-by:
->  Dave Chinner <david@fromorbit.com>
-> 
-> Changelog v1->v2:
->  Use yes pipe, suggested by: Eryu Guan <eguan@redhat.com>
-> 
-> Suggested-by: Dave Chinner <david@fromorbit.com>
-> Suggested-by: Eryu Guan <eguan@redhat.com>
-> Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
+Add two scripts: "nextid" finds the next available test ID number in a
+group, and "mvtest" relocates a test, fixes the golden output, and
+moves the group entry for that test.
 
-Thanks!
+v2: sorting group files should preserve group order; nextid should use
+the same algorithm as new; move both tools to tools/.
 
-Reviewed-by: Eryu Guan <eguan@redhat.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ tools/mvtest     |   55 +++++++++++++++++++++++++++
+ tools/nextid     |    1 
+ tools/sort-group |  112 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 168 insertions(+)
+ create mode 100755 tools/mvtest
+ create mode 120000 tools/nextid
+ create mode 100755 tools/sort-group
+
+
+diff --git a/tools/mvtest b/tools/mvtest
+new file mode 100755
+index 0000000..af601d6
+--- /dev/null
++++ b/tools/mvtest
+@@ -0,0 +1,55 @@
++#!/bin/sh
++
++# Renumber a test
++dir="$(dirname "$0")"
++
++if [ -z "$1" ] || [ "$1" = "--help" ]; then
++	echo "Usage: $0 path_to_test new_path_to_test"
++	exit 1
++fi
++
++src="$1"
++dest="$2"
++
++die() {
++	echo "$@"
++	exit 1
++}
++
++append() {
++	out="$1"
++	shift
++	echo "$@" >> "${out}"
++}
++
++test "${src}" != "${dest}" || die "Test \"${src}\" is the same as dest."
++test -e "tests/${src}" || die "Test \"${src}\" does not exist."
++test ! -e "tests/${dest}" || die "Test \"${src}\" already exists."
++
++sid="$(basename "${src}")"
++did="$(basename "${dest}")"
++
++sgroup="$(basename "$(dirname "tests/${src}")")"
++dgroup="$(basename "$(dirname "tests/${dest}")")"
++
++sgroupfile="tests/${sgroup}/group"
++dgroupfile="tests/${sgroup}/group"
++
++git mv "tests/${src}" "tests/${dest}"
++git mv "tests/${src}.out" "tests/${dest}.out"
++sed -e "s/^# FS QA Test No. ${sid}$/# FS QA Test No. ${did}/g" -i "tests/${dest}"
++sed -e "s/^QA output created by ${sid}$/QA output created by ${did}/g" -i "tests/${dest}.out"
++sed -e "s/test-${sid}/test-${did}/g" -i "tests/${dest}.out"
++
++grpline="$(grep "^${sid} " "${sgroupfile}")"
++newgrpline="$(echo "${grpline}" | sed -e "s/^${sid} /${did} /g")"
++
++sed -e "/^${sid}.*$/d" -i "${sgroupfile}"
++cp "${dgroupfile}" "${dgroupfile}.new"
++append "${dgroupfile}.new" "${newgrpline}"
++"${dir}/sort-group.py" "${dgroupfile}.new"
++mv "${dgroupfile}.new" "${dgroupfile}"
++
++echo "Moved \"${src}\" to \"${dest}\"."
++
++exit 0
+diff --git a/tools/nextid b/tools/nextid
+new file mode 120000
+index 0000000..5c31d60
+--- /dev/null
++++ b/tools/nextid
+@@ -0,0 +1 @@
++sort-group
+\ No newline at end of file
+diff --git a/tools/sort-group b/tools/sort-group
+new file mode 100755
+index 0000000..84944ed
+--- /dev/null
++++ b/tools/sort-group
+@@ -0,0 +1,112 @@
++#!/usr/bin/env python
++import sys
++
++# Sort a group list, carefully preserving comments.
++
++def xfstest_key(key):
++	'''Extract the numeric part of a test name if possible.'''
++	k = 0
++
++	assert type(key) == str
++
++	# No test number at all...
++	if not key[0].isdigit():
++		return key
++
++	# ...otherwise extract as much number as we can.
++	for digit in key:
++		if digit.isdigit():
++			k = k * 10 + int(digit)
++		else:
++			return k
++	return k
++
++def read_group(fd):
++	'''Read the group list, carefully attaching comments to the next test.'''
++	tests = {}
++	comments = None
++
++	for line in fd:
++		sline = line.strip()
++		tokens = sline.split()
++		if len(tokens) == 0 or tokens[0] == '#':
++			if comments == None:
++				comments = []
++			comments.append(sline)
++		else:
++			tests[tokens[0]] = (comments, tokens[1:])
++			comments = None
++	return tests
++
++def sort_keys(keys):
++	'''Separate keys into integer and non-integer tests.'''
++	int_keys = []
++	int_xkeys = []
++	str_keys = []
++
++	# Sort keys into integer(ish) tests and other
++	for key in keys:
++		xkey = xfstest_key(key)
++		if type(xkey) == int:
++			int_keys.append(key)
++			int_xkeys.append(xkey)
++		else:
++			str_keys.append(key)
++	return (int_keys, int_xkeys, str_keys)
++
++def write_sorted(tests, fd):
++	def dump_xkey(xkey):
++		(comments, tokens) = tests[key]
++		if comments:
++			for c in comments:
++				fd.write('%s\n' % c)
++		fd.write('%s %s\n' % (key, ' '.join(tokens)))
++	'''Print tests (and comments) in number order.'''
++
++	(int_keys, ignored, str_keys) = sort_keys(tests.keys())
++	for key in sorted(int_keys, key = xfstest_key):
++		dump_xkey(key)
++	for key in sorted(str_keys):
++		dump_xkey(key)
++
++def sort_main():
++	if '--help' in sys.argv[1:]:
++		print('Usage: %s groupfiles' % sys.argv[0])
++		sys.exit(0)
++
++	for arg in sys.argv[1:]:
++		with open(arg, 'r+') as fd:
++			x = read_group(fd)
++			fd.seek(0, 0)
++			write_sorted(x, fd)
++
++def nextid_main():
++	if '--help' in sys.argv[1:]:
++		print('Usage: %s group[/startid] ' % sys.argv[0])
++		sys.exit(0)
++
++	if len(sys.argv) != 2:
++		print('Specify exactly one group name.')
++		sys.exit(1)
++
++	c = sys.argv[1].split('/')
++	if len(c) > 1:
++		startid = int(c[1])
++	else:
++		startid = 1
++	group = c[0]
++
++	with open('tests/%s/group' % group, 'r') as fd:
++		x = read_group(fd)
++		xkeys = {int(x) for x in sort_keys(x.keys())[1]}
++
++		xid = startid
++		while xid in xkeys:
++			xid += 1
++		print('%s/%d' % (group, xid))
++
++if __name__ == '__main__':
++	if 'nextid' in sys.argv[0]:
++		nextid_main()
++	else:
++		sort_main()
+
