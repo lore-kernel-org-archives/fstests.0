@@ -1,38 +1,33 @@
-Date: Sat, 21 Nov 2015 10:14:51 -0800
+Date: Mon, 23 Nov 2015 23:41:59 -0800
 From: Christoph Hellwig <hch@infradead.org>
 Subject: Re: [PATCH 2/2] generic/15[78]: fix error messages in the golden
  output
-Message-ID: <20151121181451.GA17570@infradead.org>
+Message-ID: <20151124074159.GA32289@infradead.org>
 References: <20151121005001.20398.92856.stgit@birch.djwong.org>
  <20151121005014.20398.22316.stgit@birch.djwong.org>
  <20151121180644.GA23916@infradead.org>
+ <20151123212533.GC10589@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20151121180644.GA23916@infradead.org>
+In-Reply-To: <20151123212533.GC10589@birch.djwong.org>
 To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: david@fromorbit.com, fstests@vger.kernel.org, xfs@oss.sgi.com, hch@infradead.org, tao.peng@primarydata.com, linux-ext4@vger.kernel.org, Anna.Schumaker@netapp.com, linux-btrfs@vger.kernel.org
+Cc: Christoph Hellwig <hch@infradead.org>, david@fromorbit.com, fstests@vger.kernel.org, xfs@oss.sgi.com, tao.peng@primarydata.com, linux-ext4@vger.kernel.org, Anna.Schumaker@netapp.com, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-> Shouldn't these be Invalid argument just like the
-> to a device case above or the clone case?
+On Mon, Nov 23, 2015 at 01:25:33PM -0800, Darrick J. Wong wrote:
+> > Shouldn't these be Invalid argument just like the
+> > to a device case above or the clone case?
+> 
+> I was trying to mirror the behavior of reflink, which spits out
+> EOPNOTSUPP when the destination isn't a regular file and EINVAL
+> when the source isn't a regular file.
 
-E.g. something like this on top of your patch:
-
-
-diff --git a/tests/generic/158.out b/tests/generic/158.out
-index 1210429..dff3692 100644
---- a/tests/generic/158.out
-+++ b/tests/generic/158.out
-@@ -16,9 +16,9 @@ XFS_IOC_FILE_EXTENT_SAME: Invalid argument
- Try to dedupe to a dir
- TEST_DIR/test-158/dir1: Is a directory
- Try to dedupe to a device
--dedupe: Operation not supported
-+dedupe: Invalid argument
- Try to dedupe to a fifo
--dedupe: Operation not supported
-+dedupe: Invalid argument
- Try to dedupe an append-only file
- Dedupe two files
- Check scratch fs
+clone is called on the destination and takes the source from the
+ioctl argument.  dedupe is called on the source and then opens the
+destinations, so they're not really comparable.  Btrfs currently
+returns EACCES for non-dir, non-regular destinations which look
+wrong and I think EINVAL for a mismatch between source and destination
+types would make most sense.  I've also prepared a btrfs patch for
+this and clone, but I'd like to have consensus on the exact error
+first.
