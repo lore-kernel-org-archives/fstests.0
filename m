@@ -1,55 +1,40 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:8209 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752744AbbKXKOW (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 24 Nov 2015 05:14:22 -0500
-From: Zhaolei <zhaolei@cn.fujitsu.com>
-Subject: [PATCH] fstests: speedup generic/027 for new version of btrfs
-Date: Tue, 24 Nov 2015 18:11:54 +0800
-Message-ID: <604c80a86a7e58c9408abad851481be10b254f0c.1448359685.git.zhaolei@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from mx2.suse.de ([195.135.220.15]:39619 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754585AbbKXKkE (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 24 Nov 2015 05:40:04 -0500
+From: Jan Kara <jack@suse.cz>
+Subject: [PATCH 0/3 v2] Output selection
+Date: Tue, 24 Nov 2015 11:39:55 +0100
+Message-Id: <1448361598-28438-1-git-send-email-jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Zhao Lei <zhaolei@cn.fujitsu.com>
+Cc: linux-ext4@vger.kernel.org, Jan Kara <jack@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Zhao Lei <zhaolei@cn.fujitsu.com>
+From: Jan Kara <jack@suse.com>
 
-New version of btrfs create non-mixed blockgroups in all case.
+Hello,
 
-For generic/027, the filesystem in test is convert from
-mixed-blockgroup to non-mixed blockgroup.
-And test time is changed from 400s -> 2700s in my node.
+the patch series below addresses some issues with test ext4/001. First two
+patches improve _link_out_file helper function to allow selection of output
+(or in general linking any file when using _link_out_file_named() variant)
+based on a feature string (usually mount options, fs features, operating
+system) passed to the function (if no feature string is passed, the function
+defaults to using "operating system name","mount options"). This feature
+is useful when e.g. different mount options change behavior of the filesystem
+and thus different output is generated but we want to have the test working
+for all mount options.
 
-To test btrfs with all mountoptions, this testitem need about
-7.5H. (actually, some mountoption as compress needs more time)
+Patch 3 uses the output selection function in ext4/001 to select different
+output files based on mount options.
 
-This patch reduce test loop count, to make testtime about equal
-with old version.
+Comments welcome!
 
-Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
----
- tests/generic/027 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+								Honza
+--
 
-diff --git a/tests/generic/027 b/tests/generic/027
-index d2e59d6..42f0685 100755
---- a/tests/generic/027
-+++ b/tests/generic/027
-@@ -78,7 +78,7 @@ rm -f $SCRATCH_MNT/testfile
- loop=100
- # btrfs takes much longer time, reduce the loop count
- if [ "$FSTYP" == "btrfs" ]; then
--	loop=10
-+	loop=2
- fi
- 
- dir=$SCRATCH_MNT/testdir
--- 
-1.8.5.1
-
-
--- 
-This message has been scanned for viruses and
-dangerous content by Fujitsu, and is believed to be clean.
+Changes since v1:
+* rebased on the current head of xfstests
+* integrated output selection with _link_out_file and converted all tests
+  using it
 
