@@ -1,67 +1,50 @@
-Received: from e23smtp01.au.ibm.com ([202.81.31.143]:40028 "EHLO
-	e23smtp01.au.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751320AbbKYMEt (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 25 Nov 2015 07:04:49 -0500
-Received: from localhost
-	by e23smtp01.au.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-	for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-	Wed, 25 Nov 2015 22:04:46 +1000
-From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: Re: [PATCH 06/12] Fix btrfs/094 to work on non-4k block sized filesystems
-Date: Wed, 25 Nov 2015 17:33:50 +0530
-Message-ID: <1773494.Ogl3FMxuuo@localhost.localdomain>
-In-Reply-To: <CAL3q7H4U_b_OkpA4_5MU3DMdP1LPjxNYmFXCVU0j9Zi86c2szg@mail.gmail.com>
-References: <1448449386-4186-1-git-send-email-chandan@linux.vnet.ibm.com> <1984236.SDzE0v2Uyc@localhost.localdomain> <CAL3q7H4U_b_OkpA4_5MU3DMdP1LPjxNYmFXCVU0j9Zi86c2szg@mail.gmail.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="us-ascii"
+Received: from mx1.redhat.com ([209.132.183.28]:53550 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752303AbbKYUTw (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 25 Nov 2015 15:19:52 -0500
+From: Brian Foster <bfoster@redhat.com>
+Subject: [PATCH 0/2] xfstests: xfsprogs logformat tests
+Date: Wed, 25 Nov 2015 15:19:48 -0500
+Message-Id: <1448482790-44469-1-git-send-email-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fdmanana@gmail.com
-Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, chandan@mykolab.com
+To: fstests@vger.kernel.org
+Cc: xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wednesday 25 Nov 2015 11:51:52 Filipe Manana wrote:
-> On Wed, Nov 25, 2015 at 11:47 AM, Chandan Rajendra
-> 
-> <chandan@linux.vnet.ibm.com> wrote:
-> > On Wednesday 25 Nov 2015 11:11:27 Filipe Manana wrote:
-> >> Hi Chandan,
-> >> 
-> >> I can't agree with this change. We're no longer checking that file
-> >> data is correct after the cloning operations. The md5sum checks were
-> >> exactly for that. So essentially the test is only verifying the clone
-> >> operations don't fail with errors, it no longer checks for data
-> >> corruption...
-> >> 
-> >> Same comment applies to at least a few other patches in the series.
-> > 
-> > Hello Filipe,
-> > 
-> > All the tests where we had md5sum being echoed into output have been
-> > replaced with code to verify the md5sum values as shown below,
-> > 
-> >         if [ $foo_orig_hash != $foo_hash ]; then
-> >         
-> >                 echo "Read operation failed on $SCRATCH_MNT/foo: "\
-> >                 
-> >                      "Mimatching hash values detected."
-> >         
-> >         fi
-> > 
-> > This will cause a diff between the test's ideal output versus the output
-> > obtained during the test run.
-> 
-> Right, it compares the digests before and after some operation (which
-> should always match). However we no longer validate that the file
-> content is correct before the operation. For some of the tests that is
-> more important, like the ones that test read corruption after cloning
-> compressed extents.
+Hi all,
 
-Filipe, you are right. I will drop the fautly patches and send V2 containing
-fixes for only btrfs/017, btrfs/055 and btrfs/056.
+Here are a couple prospective tests that use the recently posted xfs_db
+logformat command:
 
-Thanks for providing the review comments.
+  http://oss.sgi.com/pipermail/xfs/2015-November/045139.html
+
+Note that these should not be merged until xfs_db logformat support is
+fully reviewed and merged into xfsprogs. Also note that the test numbers
+are arbitrarily high and should be renumbered.
+
+Patch 1 adds a test that uses xfs_logprint to verify that logformat
+formats the log correctly with various stripe unit alignments. Patch 2
+uses the logformat command to test invalid metadata LSN detection and
+recovery. Thoughts, reviews, flames appreciated.
+
+Brian
+
+Brian Foster (2):
+  tests/xfs: test xfsprogs log formatting infrastructure
+  tests/xfs: verify invalid metadata LSN detection
+
+ common/rc         | 14 +++++++++
+ tests/xfs/376     | 71 +++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/376.out |  6 ++++
+ tests/xfs/377     | 90 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/377.out |  3 ++
+ tests/xfs/group   |  2 ++
+ 6 files changed, 186 insertions(+)
+ create mode 100755 tests/xfs/376
+ create mode 100644 tests/xfs/376.out
+ create mode 100755 tests/xfs/377
+ create mode 100644 tests/xfs/377.out
 
 -- 
-chandan
+2.1.0
 
