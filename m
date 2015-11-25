@@ -1,15 +1,15 @@
-Received: from e23smtp07.au.ibm.com ([202.81.31.140]:36495 "EHLO
-	e23smtp07.au.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752561AbbKYLEx (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 25 Nov 2015 06:04:53 -0500
+Received: from e23smtp06.au.ibm.com ([202.81.31.148]:47646 "EHLO
+	e23smtp06.au.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753273AbbKYLFG (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 25 Nov 2015 06:05:06 -0500
 Received: from localhost
-	by e23smtp07.au.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+	by e23smtp06.au.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
 	for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-	Wed, 25 Nov 2015 21:04:51 +1000
+	Wed, 25 Nov 2015 21:05:03 +1000
 From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH 05/12] Fix btrfs/056 to work on non-4k block sized filesystems
-Date: Wed, 25 Nov 2015 16:32:59 +0530
-Message-Id: <1448449386-4186-6-git-send-email-chandan@linux.vnet.ibm.com>
+Subject: [PATCH 09/12] Fix btrfs/097 to work on non-4k block sized filesystems
+Date: Wed, 25 Nov 2015 16:33:03 +0530
+Message-Id: <1448449386-4186-10-git-send-email-chandan@linux.vnet.ibm.com>
 In-Reply-To: <1448449386-4186-1-git-send-email-chandan@linux.vnet.ibm.com>
 References: <1448449386-4186-1-git-send-email-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
@@ -17,289 +17,110 @@ To: fstests@vger.kernel.org
 Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, linux-btrfs@vger.kernel.org, fdmanana@gmail.com, chandan@mykolab.com
 List-ID: <fstests@vger.kernel.org>
 
-This commit makes use of the new _filter_xfs_io_blocks_modified and _filter_od
-filtering functions to print information in terms of file blocks rather than
-file offset.
+This commit makes use of the new _filter_xfs_io_blocks_modified filtering
+function to print information in terms of file blocks rather than file
+offset.
 
 Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
- tests/btrfs/056     |  51 ++++++++++--------
- tests/btrfs/056.out | 152 +++++++++++++++++++++-------------------------------
- 2 files changed, 90 insertions(+), 113 deletions(-)
+ tests/btrfs/097     | 42 +++++++++++++++++++++++++-----------------
+ tests/btrfs/097.out |  7 +------
+ 2 files changed, 26 insertions(+), 23 deletions(-)
 
-diff --git a/tests/btrfs/056 b/tests/btrfs/056
-index 66a59b8..6dc3bfd 100755
---- a/tests/btrfs/056
-+++ b/tests/btrfs/056
-@@ -68,33 +68,42 @@ test_btrfs_clone_fsync_log_recover()
- 	MOUNT_OPTIONS="$MOUNT_OPTIONS $2"
- 	_mount_flakey
+diff --git a/tests/btrfs/097 b/tests/btrfs/097
+index d9138ea..915ff9d 100755
+--- a/tests/btrfs/097
++++ b/tests/btrfs/097
+@@ -57,22 +57,29 @@ mkdir $send_files_dir
+ _scratch_mkfs >>$seqres.full 2>&1
+ _scratch_mount
  
--	# Create a file with 4 extents and 1 hole, all with a size of 8Kb each.
--	# The hole is in the range [16384, 24576[.
--	$XFS_IO_PROG -s -f -c "pwrite -S 0x01 -b 8192 0 8192" \
--			-c "pwrite -S 0x02 -b 8192 8192 8192" \
--			-c "pwrite -S 0x04 -b 8192 24576 8192" \
--			-c "pwrite -S 0x05 -b 8192 32768 8192" \
--		$SCRATCH_MNT/foo | _filter_xfs_io
--
--	# Clone destination file, 1 extent of 96kb.
--	$XFS_IO_PROG -f -c "pwrite -S 0xff -b 98304 0 98304" -c "fsync" \
--		$SCRATCH_MNT/bar | _filter_xfs_io
--
--	# Clone second half of the 2nd extent, the 8kb hole, the 3rd extent
-+	BLOCK_SIZE=$(get_block_size $SCRATCH_MNT)
+-# Create our test file with a single extent of 64K starting at file offset 128K.
+-$XFS_IO_PROG -f -c "pwrite -S 0xaa 128K 64K" $SCRATCH_MNT/foo | _filter_xfs_io
++BLOCK_SIZE=$(get_block_size $SCRATCH_MNT)
 +
-+	EXTENT_SIZE=$((2 * $BLOCK_SIZE))
++# Create our test file with a single extent of 16 blocks starting at a file
++# offset mapped by 32nd block.
++$XFS_IO_PROG -f -c "pwrite -S 0xaa $((32 * $BLOCK_SIZE)) $((16 * $BLOCK_SIZE))" \
++	     $SCRATCH_MNT/foo | _filter_xfs_io_blocks_modified
+ 
+ _run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap1
+ 
+ # Now clone parts of the original extent into lower offsets of the file.
+ #
+ # The first clone operation adds a file extent item to file offset 0 that points
+-# to our initial extent with a data offset of 16K. The corresponding data back
+-# reference in the extent tree has an offset of 18446744073709535232, which is
+-# the result of file_offset - data_offset = 0 - 16K.
+-#
+-# The second clone operation adds a file extent item to file offset 16K that
+-# points to our initial extent with a data offset of 48K. The corresponding data
+-# back reference in the extent tree has an offset of 18446744073709518848, which
+-# is the result of file_offset - data_offset = 16K - 48K.
++# to our initial extent with a data offset of 4 blocks. The corresponding data back
++# reference in the extent tree has a large value for the 'offset' field, which is
++# the result of file_offset - data_offset = 0 - (file offset of 4th block).  For
++# example in case of 4k block size, it will be 0 - 16k = 18446744073709535232.
 +
-+	# Create a file with 4 extents and 1 hole, all with a size of
-+	# 2 blocks each.
-+	# The hole is in the block range [4, 5].
-+	$XFS_IO_PROG -s -f -c "pwrite -S 0x01 -b $EXTENT_SIZE 0 $EXTENT_SIZE" \
-+			-c "pwrite -S 0x02 -b $EXTENT_SIZE $((2 * $BLOCK_SIZE)) $EXTENT_SIZE" \
-+			-c "pwrite -S 0x04 -b $EXTENT_SIZE $((6 * $BLOCK_SIZE)) $EXTENT_SIZE" \
-+			-c "pwrite -S 0x05 -b $EXTENT_SIZE $((8 * $BLOCK_SIZE)) $EXTENT_SIZE" \
-+		$SCRATCH_MNT/foo | _filter_xfs_io_blocks_modified
-+
-+	# Clone destination file, 1 extent of 24 blocks.
-+	$XFS_IO_PROG -f -c "pwrite -S 0xff -b $((24 * $BLOCK_SIZE)) 0 $((24 * $BLOCK_SIZE))" \
-+		     -c "fsync" $SCRATCH_MNT/bar | _filter_xfs_io_blocks_modified
-+
-+	# Clone second half of the 2nd extent, the 2 block hole, the 3rd extent
- 	# and the first half of the 4th extent into file bar.
--	$CLONER_PROG -s 12288 -d 0 -l 24576 $SCRATCH_MNT/foo $SCRATCH_MNT/bar
-+	$CLONER_PROG -s $((3 * $BLOCK_SIZE)) -d 0 -l $((6 * $BLOCK_SIZE)) \
-+		     $SCRATCH_MNT/foo $SCRATCH_MNT/bar
- 	$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/bar
++# The second clone operation adds a file extent item to file offset mapped by
++# 4th block that points to our initial extent with a data offset of 12
++# blocks. The corresponding data back reference in the extent tree has a large
++# value for the 'offset' field, which is the result of file_offset - data_offset
++# = (file offset of 4th block) - (file offset of 12th block). For example in
++# case of 4k block size, it will be 16K - 48K = 18446744073709518848.
+ #
+ # Those large back reference offsets (result of unsigned arithmetic underflow)
+ # confused the back reference walking code (used by an incremental send and
+@@ -83,10 +90,10 @@ _run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap1
+ # "BTRFS error (device sdc): did not find backref in send_root. inode=257, \
+ #  offset=0, disk_byte=12845056 found extent=12845056"
+ #
+-$CLONER_PROG -s $(((128 + 16) * 1024)) -d 0 -l $((16 * 1024)) \
+-	$SCRATCH_MNT/foo $SCRATCH_MNT/foo
+-$CLONER_PROG -s $(((128 + 48) * 1024)) -d $((16 * 1024)) -l $((16 * 1024)) \
++$CLONER_PROG -s $(((32 + 4) * $BLOCK_SIZE)) -d 0 -l $((4 * $BLOCK_SIZE)) \
+ 	$SCRATCH_MNT/foo $SCRATCH_MNT/foo
++$CLONER_PROG -s $(((32 + 12) * $BLOCK_SIZE)) -d $((4 * $BLOCK_SIZE)) \
++	     -l $((4 * $BLOCK_SIZE)) $SCRATCH_MNT/foo $SCRATCH_MNT/foo
  
- 	# Test small files too consisting of 1 inline extent
--	$XFS_IO_PROG -f -c "pwrite -S 0x00 -b 3500 0 3500" -c "fsync" \
--		$SCRATCH_MNT/foo2 | _filter_xfs_io
-+	EXTENT_SIZE=$(($BLOCK_SIZE - 48))
-+	$XFS_IO_PROG -f -c "pwrite -S 0x00 -b $EXTENT_SIZE 0 $EXTENT_SIZE" -c "fsync" \
-+		$SCRATCH_MNT/foo2 | _filter_xfs_io_blocks_modified
+ _run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap2
  
--	$XFS_IO_PROG -f -c "pwrite -S 0xcc -b 1000 0 1000" -c "fsync" \
--		$SCRATCH_MNT/bar2 | _filter_xfs_io
-+	EXTENT_SIZE=$(($BLOCK_SIZE - 1048))
-+	$XFS_IO_PROG -f -c "pwrite -S 0xcc -b $EXTENT_SIZE 0 $EXTENT_SIZE" -c "fsync" \
-+		$SCRATCH_MNT/bar2 | _filter_xfs_io_blocks_modified
+@@ -94,8 +101,7 @@ _run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
+ _run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
+ 	-f $send_files_dir/2.snap
  
- 	# Clone the entire foo2 file into bar2, overwriting all data in bar2
- 	# and increasing its size.
--	$CLONER_PROG -s 0 -d 0 -l 3500 $SCRATCH_MNT/foo2 $SCRATCH_MNT/bar2
-+	EXTENT_SIZE=$(($BLOCK_SIZE - 48))
-+	$CLONER_PROG -s 0 -d 0 -l $EXTENT_SIZE $SCRATCH_MNT/foo2 $SCRATCH_MNT/bar2
- 	$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/bar2
+-echo "File digest in the original filesystem:"
+-md5sum $SCRATCH_MNT/mysnap2/foo | _filter_scratch
++orig_hash=$(md5sum $SCRATCH_MNT/mysnap2/foo | cut -f 1 -d ' ')
  
- 	_flakey_drop_and_remount yes
-@@ -102,10 +111,10 @@ test_btrfs_clone_fsync_log_recover()
- 	# Verify the cloned range was persisted by fsync and the log recovery
- 	# code did its work well.
- 	echo "Verifying file bar content"
--	od -t x1 $SCRATCH_MNT/bar
-+	od -t x1 $SCRATCH_MNT/bar | _filter_od
+ # Now recreate the filesystem by receiving both send streams and verify we get
+ # the same file contents that the original filesystem had.
+@@ -106,8 +112,10 @@ _scratch_mount
+ _run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
+ _run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
  
- 	echo "Verifying file bar2 content"
--	od -t x1 $SCRATCH_MNT/bar2
-+	od -t x1 $SCRATCH_MNT/bar2 | _filter_od
+-echo "File digest in the new filesystem:"
+-md5sum $SCRATCH_MNT/mysnap2/foo | _filter_scratch
++hash=$(md5sum $SCRATCH_MNT/mysnap2/foo | cut -f 1 -d ' ')
++if [ $orig_hash != $hash ]; then
++	echo "Btrfs send/receive failed: Mismatching hash values detected."
++fi
  
- 	_unmount_flakey
- 
-diff --git a/tests/btrfs/056.out b/tests/btrfs/056.out
-index 1b77ae3..c4c6b2c 100644
---- a/tests/btrfs/056.out
-+++ b/tests/btrfs/056.out
-@@ -1,129 +1,97 @@
- QA output created by 056
- Testing without the NO_HOLES feature
--wrote 8192/8192 bytes at offset 0
+ status=0
+ exit
+diff --git a/tests/btrfs/097.out b/tests/btrfs/097.out
+index 5e87eb2..c3a19c1 100644
+--- a/tests/btrfs/097.out
++++ b/tests/btrfs/097.out
+@@ -1,7 +1,2 @@
+ QA output created by 097
+-wrote 65536/65536 bytes at offset 131072
 -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 8192/8192 bytes at offset 8192
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 8192/8192 bytes at offset 24576
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 8192/8192 bytes at offset 32768
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 98304/98304 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 3500/3500 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 1000/1000 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Blocks modified: [0 - 1]
-+Blocks modified: [2 - 3]
-+Blocks modified: [6 - 7]
-+Blocks modified: [8 - 9]
-+Blocks modified: [0 - 23]
-+Blocks modified: [0 - 0]
-+Blocks modified: [0 - 0]
- Verifying file bar content
--0000000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
-+0 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
- *
--0010000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+1 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
- *
--0030000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
-+3 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
- *
--0050000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
-+5 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
- *
--0060000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
-+6 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
- *
--0300000
-+30
- Verifying file bar2 content
--0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
- *
--0006640 00 00 00 00 00 00 00 00 00 00 00 00
--0006654
-+0
- Testing without the NO_HOLES feature and compression (lzo)
--wrote 8192/8192 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 8192/8192 bytes at offset 8192
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 8192/8192 bytes at offset 24576
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 8192/8192 bytes at offset 32768
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 98304/98304 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 3500/3500 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 1000/1000 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Blocks modified: [0 - 1]
-+Blocks modified: [2 - 3]
-+Blocks modified: [6 - 7]
-+Blocks modified: [8 - 9]
-+Blocks modified: [0 - 23]
-+Blocks modified: [0 - 0]
-+Blocks modified: [0 - 0]
- Verifying file bar content
--0000000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
-+0 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
- *
--0010000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+1 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
- *
--0030000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
-+3 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
- *
--0050000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
-+5 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
- *
--0060000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
-+6 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
- *
--0300000
-+30
- Verifying file bar2 content
--0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
- *
--0006640 00 00 00 00 00 00 00 00 00 00 00 00
--0006654
-+0
- Testing with the NO_HOLES feature enabled
--wrote 8192/8192 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 8192/8192 bytes at offset 8192
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 8192/8192 bytes at offset 24576
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 8192/8192 bytes at offset 32768
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 98304/98304 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 3500/3500 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 1000/1000 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Blocks modified: [0 - 1]
-+Blocks modified: [2 - 3]
-+Blocks modified: [6 - 7]
-+Blocks modified: [8 - 9]
-+Blocks modified: [0 - 23]
-+Blocks modified: [0 - 0]
-+Blocks modified: [0 - 0]
- Verifying file bar content
--0000000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
-+0 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
- *
--0010000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+1 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
- *
--0030000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
-+3 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
- *
--0050000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
-+5 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
- *
--0060000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
-+6 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
- *
--0300000
-+30
- Verifying file bar2 content
--0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
- *
--0006640 00 00 00 00 00 00 00 00 00 00 00 00
--0006654
-+0
- Testing with the NO_HOLES feature enabled and compression (lzo)
--wrote 8192/8192 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 8192/8192 bytes at offset 8192
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 8192/8192 bytes at offset 24576
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 8192/8192 bytes at offset 32768
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 98304/98304 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 3500/3500 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 1000/1000 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Blocks modified: [0 - 1]
-+Blocks modified: [2 - 3]
-+Blocks modified: [6 - 7]
-+Blocks modified: [8 - 9]
-+Blocks modified: [0 - 23]
-+Blocks modified: [0 - 0]
-+Blocks modified: [0 - 0]
- Verifying file bar content
--0000000 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
-+0 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02 02
- *
--0010000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+1 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
- *
--0030000 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
-+3 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04 04
- *
--0050000 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
-+5 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05
- *
--0060000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
-+6 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
- *
--0300000
-+30
- Verifying file bar2 content
--0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
- *
--0006640 00 00 00 00 00 00 00 00 00 00 00 00
--0006654
-+0
+-File digest in the original filesystem:
+-6c6079335cff141b8a31233ead04cbff  SCRATCH_MNT/mysnap2/foo
+-File digest in the new filesystem:
+-6c6079335cff141b8a31233ead04cbff  SCRATCH_MNT/mysnap2/foo
++Blocks modified: [32 - 47]
 -- 
 2.1.0
 
