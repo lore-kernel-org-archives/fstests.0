@@ -1,71 +1,25 @@
-Received: from sandeen.net ([63.231.237.45]:53209 "EHLO sandeen.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751894AbbLARuj (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 1 Dec 2015 12:50:39 -0500
-Subject: Re: [patch] make sure to _require_attrs when necessary
-References: <x49two2kr5r.fsf@segfault.boston.devel.redhat.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <565DDC56.9000901@sandeen.net>
-Date: Tue, 1 Dec 2015 11:43:50 -0600
+Received: from bombadil.infradead.org ([198.137.202.9]:53489 "EHLO
+	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756192AbbLASKR (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 1 Dec 2015 13:10:17 -0500
+Date: Tue, 1 Dec 2015 10:10:12 -0800
+From: Christoph Hellwig <hch@infradead.org>
+Subject: sys_copy_file_range tests
+Message-ID: <20151201181011.GA6202@infradead.org>
 MIME-Version: 1.0
-In-Reply-To: <x49two2kr5r.fsf@segfault.boston.devel.redhat.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: Jeff Moyer <jmoyer@redhat.com>, fstests@vger.kernel.org
+To: Anna.Schumaker@netapp.com
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 12/1/15 11:36 AM, Jeff Moyer wrote:
-> xfs/073 and xfs/295 forgot to _require_attrs.  Fix it.
+Hi Anna,
 
-Reviewed-by: Eric Sandeen <sandeen@redhat.com>
-
-thanks!
-
-> Signed-off-by: Jeff Moyer <jmoyer@redhat.com>
-> 
-> diff --git a/tests/xfs/073 b/tests/xfs/073
-> index 32faffd..9def3c6 100755
-> --- a/tests/xfs/073
-> +++ b/tests/xfs/073
-> @@ -33,6 +33,7 @@ status=1	# failure is the default!
->  # get standard environment, filters and checks
->  . ./common/rc
->  . ./common/filter
-> +. ./common/attr
->  
->  # don't put fs images in /tmp
->  imgs=$TEST_DIR/$$
-> @@ -127,6 +128,7 @@ _verify_copy()
->  _supported_fs xfs
->  _supported_os Linux
->  _require_test
-> +_require_attrs
->  
->  [ "$USE_EXTERNAL" = yes ] && _notrun "Cannot xfs_copy with external devices"
->  [ -n "$XFS_COPY_PROG" ] || _notrun "xfs_copy binary not yet installed"
-> diff --git a/tests/xfs/295 b/tests/xfs/295
-> index 79f27bd..2325537 100755
-> --- a/tests/xfs/295
-> +++ b/tests/xfs/295
-> @@ -39,6 +39,7 @@ _cleanup()
->  # get standard environment, filters and checks
->  . ./common/rc
->  . ./common/filter
-> +. ./common/attr
->  
->  # real QA test starts here
->  
-> @@ -46,6 +47,7 @@ _cleanup()
->  _supported_fs xfs
->  _supported_os IRIX Linux
->  _require_scratch
-> +_require_attrs
->  
->  rm -f $seqres.full
->  
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+I recently looked into allowing sys_copy_file_range to use the
+clone_file_range operation so that file systems don't have to support
+two methods if they only support clone-like features, and one thing
+I noticed is that unlike for clone there are no tests for
+clone_file_range in xfstests, and I couldn't find a testsuite anywhere
+else either.  Do you have any good tests available to verify the
+implementation?
