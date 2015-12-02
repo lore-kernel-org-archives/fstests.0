@@ -1,94 +1,95 @@
-Received: from mx1.redhat.com ([209.132.183.28]:50175 "EHLO mx1.redhat.com"
+Received: from sandeen.net ([63.231.237.45]:50365 "EHLO sandeen.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750998AbbLBQMB (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 2 Dec 2015 11:12:01 -0500
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (Postfix) with ESMTPS id 297C28F291
-	for <fstests@vger.kernel.org>; Wed,  2 Dec 2015 16:12:01 +0000 (UTC)
-Received: from segfault.boston.devel.redhat.com (segfault.boston.devel.redhat.com [10.19.60.26])
-	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id tB2GBxUl012727
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO)
-	for <fstests@vger.kernel.org>; Wed, 2 Dec 2015 11:12:00 -0500
-From: Jeff Moyer <jmoyer@redhat.com>
-Subject: [patch] dmflakey: filter out 'dax' from mount options
-Date: Wed, 02 Dec 2015 11:11:59 -0500
-Message-ID: <x49610gq180.fsf@segfault.boston.devel.redhat.com>
+	id S933226AbbLBRmV (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 2 Dec 2015 12:42:21 -0500
+From: Eric Sandeen <sandeen@sandeen.net>
+Subject: [PATCH] loosen input requirements on defrag testing
+Message-ID: <565F2D7B.90501@sandeen.net>
+Date: Wed, 2 Dec 2015 11:42:19 -0600
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: fstests <fstests@vger.kernel.org>
+Cc: Dmitry Monakhov <dmonakhov@openvz.org>, Jeff Moyer <jmoyer@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Hi,
+We don't have perfect control of file allocation for these tests;
+in some cases we may fail to adequately fragment a file prior to
+defragmentation testing, and today that will fail the test.
 
-In testing with MOUNT_OPTIONS="-o dax" ./check ..., I ran into issues
-with every single test that uses dmflakey.  The problem is that the
-mount will fail, since we're layering a stacking driver on top of the
-pmem device, and that stacking driver does not support direct access.
-To fix that, I decided to filter out the dax mount option from dmflakey
-mounts.  If there are suggestions for a better approach, I'm all ears.
+Attack this on 2 fronts:
 
-Signed-off-by: Jeff Moyer <jmoyer@redhat.com>
+1) Explicitly allow fewer extents on one of the input files in
+   generic/018 where the allocator has discretion.
+2) _notrun rather than _fail if we don't create enough extents;
+   this is a defrag test, not an allocator/fragmentation test,
+   so just skip the test if we can't create an acceptable file
+   for defrag testing.
 
-diff --git a/common/dmflakey b/common/dmflakey
-index e55aefd..693d231 100644
---- a/common/dmflakey
-+++ b/common/dmflakey
-@@ -21,6 +21,47 @@
- FLAKEY_ALLOW_WRITES=0
- FLAKEY_DROP_WRITES=1
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
+
+diff --git a/common/defrag b/common/defrag
+index f923dc0..2e0804d 100644
+--- a/common/defrag
++++ b/common/defrag
+@@ -53,15 +53,24 @@ _check_extent_count()
+ 	max=$2
+ 	ext_cnt=$3
  
-+_filter_mount_opt()
-+{
-+	local opts=''
-+	local old_opts=$1
-+	local filter=$2
-+
-+	# If there are no options, or if the filter isn't present,
-+	# just return.
-+	if [ -z "$old_opts" ]; then
-+		echo -n ""
-+		return
+-	[ "$min" -gt "$ext_cnt" ] && _fail "Found $ext_cnt extents  min:$max"
+-	[ "$max" -ne -1 ] && [ "$ext_cnt" -gt "$max" ] && _fail "Found $ext_cnt max: $max"
++	# Return failure if $3 isn't between $1 and $2; let caller decide
++	# action if it's not, we just return status here.
++	if [ "$min" -gt "$ext_cnt" ]; then
++		echo "Found $ext_cnt extents  min:$max"
++		return 1;
 +	fi
-+
-+	echo $old_opts | grep -q $filter
-+	if [ $? -ne 0 ]; then
-+		echo -n $old_opts
-+		return
++	if [ "$max" -ne -1 ] && [ "$ext_cnt" -gt "$max" ]; then
++		echo "Found $ext_cnt max: $max"
++		return 1;
 +	fi
-+
-+	# -o, --options opts
-+	#      Options are specified with a -o flag followed by a  comma  sepa-
-+	#      rated string of options. For example:
-+	#             mount LABEL=mydisk -o noatime,nouser
-+	#
-+	# There are several cases we have to handle:
-+	# -o dax; -o,dax
-+	# -o,ro,dax; -o,dax,ro
-+	# -o,ro,dax,discard
-+	#
-+	opts=$(echo $old_opts | sed -e "s/$filter//g")
-+	opts=$(echo $opts | sed -e 's/,,/,/g')
-+	opts=$(echo $opts | sed -e 's/ ,/ /g')
-+	# get rid of trailing whitespace or comma
-+	opts=$(echo $opts | sed -e 's/[[:space:]]$//g')
-+	opts=$(echo $opts | sed -e 's/,$//g')
-+	# finally, if there's nothing left, get rid of the -o
-+	opts=$(echo $opts | sed -e 's/-o$//g')
-+
-+	echo -n $opts
-+}
-+
- _init_flakey()
- {
- 	local BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
-@@ -34,7 +75,8 @@ _init_flakey()
  
- _mount_flakey()
- {
--	mount -t $FSTYP $MOUNT_OPTIONS $FLAKEY_DEV $SCRATCH_MNT
-+	mount_options=$(_filter_mount_opt "$MOUNT_OPTIONS" dax)
-+	mount -t $FSTYP $mount_options $FLAKEY_DEV $SCRATCH_MNT
+ 	if [ $max -ne $min ]; then
+ 	    echo "in_range($min, $max)"
+ 	else
+ 	    echo "$ext_cnt"
+ 	fi
+-	return $ext_cnt
++	# success
++	return 0
  }
  
- _unmount_flakey()
+ # Defrag file, check it, and remove it.
+@@ -129,6 +138,7 @@ _defrag()
+ 	echo -n "Before: "
+ 	ext_before=$(_extent_count $1)
+ 	_check_extent_count $min_before $max_before $ext_before
++	[ $? -eq 0 ] || _notrun "Could not adequately fragment file"
+ 
+ 	[ ! -z $csum ] && CSUM_BEFORE=`md5sum $1`
+ 	STAT_BEFORE=`stat -c "a: %x m: %y c: %z" $1`
+@@ -141,6 +151,7 @@ _defrag()
+ 	echo -n "After: "
+ 	ext_after=$(_extent_count $1)
+ 	_check_extent_count $min_after $max_after $ext_after
++	[ $? -eq 0 ] || _fail "Failed to adequately defragment file"
+ 
+ 	[ "$ext_before" -lt "$ext_after" ] && \
+ 		_fail "Number of extents increased after defragmentation," \
+diff --git a/tests/generic/018 b/tests/generic/018
+index d97bb88..21bcc63 100755
+--- a/tests/generic/018
++++ b/tests/generic/018
+@@ -77,7 +77,9 @@ for i in `seq 9 -1 0`; do
+ 	$XFS_IO_PROG -fs -c "pwrite -b $bsize $((i * bsize)) $bsize" $fragfile \
+ 					> /dev/null
+ done
+-_defrag --before 10 --after 1 $fragfile
++
++# Accept fewer fragments than we might expect; we don't have perfect control.
++_defrag --max-before 10 --min-before 5 --after 1 $fragfile
+ 
+ echo "Write backwards sync leaving holes - defrag should do nothing" | tee -a $seqres.full
+ for i in `seq 31 -2 0`; do
