@@ -1,95 +1,44 @@
-Received: from sandeen.net ([63.231.237.45]:50365 "EHLO sandeen.net"
+Received: from mx1.redhat.com ([209.132.183.28]:37322 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933226AbbLBRmV (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 2 Dec 2015 12:42:21 -0500
-From: Eric Sandeen <sandeen@sandeen.net>
-Subject: [PATCH] loosen input requirements on defrag testing
-Message-ID: <565F2D7B.90501@sandeen.net>
-Date: Wed, 2 Dec 2015 11:42:19 -0600
+	id S1750964AbbLBS2X (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 2 Dec 2015 13:28:23 -0500
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (Postfix) with ESMTPS id D3FE9C0CC636
+	for <fstests@vger.kernel.org>; Wed,  2 Dec 2015 18:28:23 +0000 (UTC)
+Received: from segfault.boston.devel.redhat.com (segfault.boston.devel.redhat.com [10.19.60.26])
+	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id tB2ISMta020226
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO)
+	for <fstests@vger.kernel.org>; Wed, 2 Dec 2015 13:28:23 -0500
+From: Jeff Moyer <jmoyer@redhat.com>
+Subject: [patch] fstests: remove generic/042 from the 'auto' group
+Date: Wed, 02 Dec 2015 13:28:22 -0500
+Message-ID: <x49wpswogc9.fsf@segfault.boston.devel.redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>
-Cc: Dmitry Monakhov <dmonakhov@openvz.org>, Jeff Moyer <jmoyer@redhat.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-We don't have perfect control of file allocation for these tests;
-in some cases we may fail to adequately fragment a file prior to
-defragmentation testing, and today that will fail the test.
+Hi,
 
-Attack this on 2 fronts:
+This test fails 100% of the time for me on xfs and current git head, and
+is not run for ext4 since ext4 does not support shutdown.  After talking
+with bfoster, it isn't expected to succeed right now.  Since the auto
+group is for tests that *are* expected to succeed, let's move this one
+out.
 
-1) Explicitly allow fewer extents on one of the input files in
-   generic/018 where the allocator has discretion.
-2) _notrun rather than _fail if we don't create enough extents;
-   this is a defrag test, not an allocator/fragmentation test,
-   so just skip the test if we can't create an acceptable file
-   for defrag testing.
+Signed-off-by: Jeff Moyer <jmoyer@redhat.com>
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
----
-
-diff --git a/common/defrag b/common/defrag
-index f923dc0..2e0804d 100644
---- a/common/defrag
-+++ b/common/defrag
-@@ -53,15 +53,24 @@ _check_extent_count()
- 	max=$2
- 	ext_cnt=$3
- 
--	[ "$min" -gt "$ext_cnt" ] && _fail "Found $ext_cnt extents  min:$max"
--	[ "$max" -ne -1 ] && [ "$ext_cnt" -gt "$max" ] && _fail "Found $ext_cnt max: $max"
-+	# Return failure if $3 isn't between $1 and $2; let caller decide
-+	# action if it's not, we just return status here.
-+	if [ "$min" -gt "$ext_cnt" ]; then
-+		echo "Found $ext_cnt extents  min:$max"
-+		return 1;
-+	fi
-+	if [ "$max" -ne -1 ] && [ "$ext_cnt" -gt "$max" ]; then
-+		echo "Found $ext_cnt max: $max"
-+		return 1;
-+	fi
- 
- 	if [ $max -ne $min ]; then
- 	    echo "in_range($min, $max)"
- 	else
- 	    echo "$ext_cnt"
- 	fi
--	return $ext_cnt
-+	# success
-+	return 0
- }
- 
- # Defrag file, check it, and remove it.
-@@ -129,6 +138,7 @@ _defrag()
- 	echo -n "Before: "
- 	ext_before=$(_extent_count $1)
- 	_check_extent_count $min_before $max_before $ext_before
-+	[ $? -eq 0 ] || _notrun "Could not adequately fragment file"
- 
- 	[ ! -z $csum ] && CSUM_BEFORE=`md5sum $1`
- 	STAT_BEFORE=`stat -c "a: %x m: %y c: %z" $1`
-@@ -141,6 +151,7 @@ _defrag()
- 	echo -n "After: "
- 	ext_after=$(_extent_count $1)
- 	_check_extent_count $min_after $max_after $ext_after
-+	[ $? -eq 0 ] || _fail "Failed to adequately defragment file"
- 
- 	[ "$ext_before" -lt "$ext_after" ] && \
- 		_fail "Number of extents increased after defragmentation," \
-diff --git a/tests/generic/018 b/tests/generic/018
-index d97bb88..21bcc63 100755
---- a/tests/generic/018
-+++ b/tests/generic/018
-@@ -77,7 +77,9 @@ for i in `seq 9 -1 0`; do
- 	$XFS_IO_PROG -fs -c "pwrite -b $bsize $((i * bsize)) $bsize" $fragfile \
- 					> /dev/null
- done
--_defrag --before 10 --after 1 $fragfile
-+
-+# Accept fewer fragments than we might expect; we don't have perfect control.
-+_defrag --max-before 10 --min-before 5 --after 1 $fragfile
- 
- echo "Write backwards sync leaving holes - defrag should do nothing" | tee -a $seqres.full
- for i in `seq 31 -2 0`; do
+diff --git a/tests/generic/group b/tests/generic/group
+index a33536e..4b70008 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -44,7 +44,7 @@
+ 039 metadata auto quick
+ 040 metadata auto quick
+ 041 metadata auto quick
+-042 auto quick rw
++042 quick rw
+ 043 metadata log auto
+ 044 metadata log auto
+ 045 metadata log auto
