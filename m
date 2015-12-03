@@ -1,46 +1,38 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:34756 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1759489AbbLCKKp (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 3 Dec 2015 05:10:45 -0500
-From: Zhaolei <zhaolei@cn.fujitsu.com>
-Subject: [PATCH] fstests: Fix generic/102 fail for btrfs
-Date: Thu, 3 Dec 2015 18:08:36 +0800
-Message-ID: <56d7fca5e2f5dadceb4a3ec3d4589fec54da8d3b.1449137276.git.zhaolei@cn.fujitsu.com>
+Received: from mx144.netapp.com ([216.240.21.25]:65262 "EHLO mx144.netapp.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753793AbbLCUng (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 3 Dec 2015 15:43:36 -0500
+Subject: Re: sys_copy_file_range tests
+References: <20151201181011.GA6202@infradead.org>
+From: Anna Schumaker <Anna.Schumaker@netapp.com>
+Message-ID: <5660A974.3010200@Netapp.com>
+Date: Thu, 3 Dec 2015 15:43:32 -0500
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <20151201181011.GA6202@infradead.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Zhao Lei <zhaolei@cn.fujitsu.com>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Zhao Lei <zhaolei@cn.fujitsu.com>
+Hi Christoph,
 
-generic/102 sometimes fails in newest btrfs toolchain,
-because it use non-mixed mode in default, which request more space
-for metadata, and no space for data writing.
+On 12/01/2015 01:10 PM, Christoph Hellwig wrote:
+> Hi Anna,
+> 
+> I recently looked into allowing sys_copy_file_range to use the
+> clone_file_range operation so that file systems don't have to support
+> two methods if they only support clone-like features, and one thing
+> I noticed is that unlike for clone there are no tests for
+> clone_file_range in xfstests, and I couldn't find a testsuite anywhere
+> else either.  Do you have any good tests available to verify the
+> implementation?
+> 
 
-This patch force mixed mode for btrfs in generic/102.
+Sadly, I don't have very good tests and I was mostly using the example program from the man page under various filesystems and setups.  At LPC, Darrick made it sound like he was going to work on adding vfs_copy_file_range() tests to xfstests but that probably turned into the reflink/dedupe ioctl tests.
 
-Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
----
- tests/generic/102 | 2 ++
- 1 file changed, 2 insertions(+)
+I can try to find time to write something for xfstests if that would be useful!
 
-diff --git a/tests/generic/102 b/tests/generic/102
-index abc3994..8c01fb5 100755
---- a/tests/generic/102
-+++ b/tests/generic/102
-@@ -48,6 +48,8 @@ _require_scratch
- 
- rm -f $seqres.full
- 
-+[[ "$FSTYP" = "btrfs" ]] && MKFS_OPTIONS+=" --mixed"
-+
- dev_size=$((512 * 1024 * 1024))     # 512MB filesystem
- _scratch_mkfs_sized $dev_size >>$seqres.full 2>&1
- _scratch_mount
--- 
-1.8.5.1
-
-
+Anna
 
