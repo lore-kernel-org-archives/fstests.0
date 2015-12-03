@@ -1,120 +1,46 @@
-Received: from mail-lf0-f41.google.com ([209.85.215.41]:35751 "EHLO
-	mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758905AbbLCIqp (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 3 Dec 2015 03:46:45 -0500
-Received: by lfdl133 with SMTP id l133so82572762lfd.2
-        for <fstests@vger.kernel.org>; Thu, 03 Dec 2015 00:46:43 -0800 (PST)
-From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: Re: [PATCH V2] loosen input requirements on defrag testing
-In-Reply-To: <565F6C16.8090405@sandeen.net>
-References: <565F2D7B.90501@sandeen.net> <565F6C16.8090405@sandeen.net>
-Date: Thu, 03 Dec 2015 11:46:40 +0300
-Message-ID: <87twnzor67.fsf@openvz.org>
+Received: from cn.fujitsu.com ([59.151.112.132]:34756 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1759489AbbLCKKp (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 3 Dec 2015 05:10:45 -0500
+From: Zhaolei <zhaolei@cn.fujitsu.com>
+Subject: [PATCH] fstests: Fix generic/102 fail for btrfs
+Date: Thu, 3 Dec 2015 18:08:36 +0800
+Message-ID: <56d7fca5e2f5dadceb4a3ec3d4589fec54da8d3b.1449137276.git.zhaolei@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>, fstests <fstests@vger.kernel.org>
-Cc: Jeff Moyer <jmoyer@redhat.com>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Zhao Lei <zhaolei@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-Eric Sandeen <sandeen@sandeen.net> writes:
+From: Zhao Lei <zhaolei@cn.fujitsu.com>
 
-> We don't have perfect control of file allocation for these tests;
-> in some cases we may fail to adequately fragment a file prior to
-> defragmentation testing, and today that will fail the test.
->
-> Attack this on 2 fronts:
->
-> 1) Explicitly allow fewer extents on one of the input files in
->    generic/018 where the allocator has discretion.
-> 2) _notrun rather than _fail if we don't create enough extents;
->    this is a defrag test, not an allocator/fragmentation test,
->    so just skip the test if we can't create an acceptable file
->    for defrag testing.
->
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+generic/102 sometimes fails in newest btrfs toolchain,
+because it use non-mixed mode in default, which request more space
+for metadata, and no space for data writing.
 
-> ---
->
-> V2 fix args to _defrag and fix 018.out.  what the ... I swear I tested
-> this... :/  This time for realz.
-Looks reasonable.
-Acked-by: Dmitry Monakhov <dmonakhov@openvz.org>
+This patch force mixed mode for btrfs in generic/102.
 
->
-> diff --git a/common/defrag b/common/defrag
-> index f923dc0..d2b137e 100644
-> --- a/common/defrag
-> +++ b/common/defrag
-> @@ -53,15 +53,24 @@ _check_extent_count()
->  	max=$2
->  	ext_cnt=$3
->  
-> -	[ "$min" -gt "$ext_cnt" ] && _fail "Found $ext_cnt extents  min:$max"
-> -	[ "$max" -ne -1 ] && [ "$ext_cnt" -gt "$max" ] && _fail "Found $ext_cnt max: $max"
-> +	# Return failure if $3 isn't between $1 and $2; let caller decide
-> +	# action if it's not, we just return status here.
-> +	if [ "$min" -gt "$ext_cnt" ]; then
-> +		echo "Found $ext_cnt extents  min:$max"
-> +		return 1;
-> +	fi
-> +	if [ "$max" -ne -1 ] && [ "$ext_cnt" -gt "$max" ]; then
-> +		echo "Found $ext_cnt max: $max"
-> +		return 1;
-> +	fi
->  
->  	if [ $max -ne $min ]; then
->  	    echo "in_range($min, $max)"
->  	else
->  	    echo "$ext_cnt"
->  	fi
-> -	return $ext_cnt
-> +	# success
-> +	return 0
->  }
->  
->  # Defrag file, check it, and remove it.
-> @@ -129,6 +138,7 @@ _defrag()
->  	echo -n "Before: "
->  	ext_before=$(_extent_count $1)
->  	_check_extent_count $min_before $max_before $ext_before
-> +	[ $? -eq 0 ] || _notrun "Could not adequately fragment file"
->  
->  	[ ! -z $csum ] && CSUM_BEFORE=`md5sum $1`
->  	STAT_BEFORE=`stat -c "a: %x m: %y c: %z" $1`
-> @@ -141,6 +151,7 @@ _defrag()
->  	echo -n "After: "
->  	ext_after=$(_extent_count $1)
->  	_check_extent_count $min_after $max_after $ext_after
-> +	[ $? -eq 0 ] || _fail "Failed to adequately defragment file"
->  
->  	[ "$ext_before" -lt "$ext_after" ] && \
->  		_fail "Number of extents increased after defragmentation," \
-> diff --git a/tests/generic/018 b/tests/generic/018
-> index d97bb88..e8dbab3 100755
-> --- a/tests/generic/018
-> +++ b/tests/generic/018
-> @@ -77,7 +77,9 @@ for i in `seq 9 -1 0`; do
->  	$XFS_IO_PROG -fs -c "pwrite -b $bsize $((i * bsize)) $bsize" $fragfile \
->  					> /dev/null
->  done
-> -_defrag --before 10 --after 1 $fragfile
-> +
-> +# Accept fewer fragments than we might expect; we don't have perfect control.
-> +_defrag --max_before 10 --min_before 5 --after 1 $fragfile
->  
->  echo "Write backwards sync leaving holes - defrag should do nothing" | tee -a $seqres.full
->  for i in `seq 31 -2 0`; do
-> diff --git a/tests/generic/018.out b/tests/generic/018.out
-> index 5f265d1..1746b32 100644
-> --- a/tests/generic/018.out
-> +++ b/tests/generic/018.out
-> @@ -9,7 +9,7 @@ Contiguous file:
->  Before: 1
->  After: 1
->  Write backwards sync, but contiguous - should defrag to 1 extent
-> -Before: 10
-> +Before: in_range(5, 10)
->  After: 1
->  Write backwards sync leaving holes - defrag should do nothing
->  Before: 16
+Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
+---
+ tests/generic/102 | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/tests/generic/102 b/tests/generic/102
+index abc3994..8c01fb5 100755
+--- a/tests/generic/102
++++ b/tests/generic/102
+@@ -48,6 +48,8 @@ _require_scratch
+ 
+ rm -f $seqres.full
+ 
++[[ "$FSTYP" = "btrfs" ]] && MKFS_OPTIONS+=" --mixed"
++
+ dev_size=$((512 * 1024 * 1024))     # 512MB filesystem
+ _scratch_mkfs_sized $dev_size >>$seqres.full 2>&1
+ _scratch_mount
+-- 
+1.8.5.1
+
+
+
