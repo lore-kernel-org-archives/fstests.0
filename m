@@ -1,32 +1,45 @@
-Received: from bombadil.infradead.org ([198.137.202.9]:50161 "EHLO
-	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752542AbbLDI2t (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 4 Dec 2015 03:28:49 -0500
-Date: Fri, 4 Dec 2015 00:28:43 -0800
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: sys_copy_file_range tests
-Message-ID: <20151204082843.GA23145@infradead.org>
-References: <20151201181011.GA6202@infradead.org>
- <5660A974.3010200@Netapp.com>
+Received: from mx1.redhat.com ([209.132.183.28]:42728 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753309AbbLDPlt (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 4 Dec 2015 10:41:49 -0500
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (Postfix) with ESMTPS id D277EC04FF81
+	for <fstests@vger.kernel.org>; Fri,  4 Dec 2015 15:41:49 +0000 (UTC)
+Received: from segfault.boston.devel.redhat.com (segfault.boston.devel.redhat.com [10.19.60.26])
+	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id tB4FfmdZ007578
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO)
+	for <fstests@vger.kernel.org>; Fri, 4 Dec 2015 10:41:49 -0500
+From: Jeff Moyer <jmoyer@redhat.com>
+Subject: [patch] xfs/259 - inherit $_fs_has_crcs
+Date: Fri, 04 Dec 2015 10:41:48 -0500
+Message-ID: <x494mfy5igz.fsf@segfault.boston.devel.redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <5660A974.3010200@Netapp.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Anna Schumaker <Anna.Schumaker@netapp.com>
-Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Dec 03, 2015 at 03:43:32PM -0500, Anna Schumaker wrote:
-> Sadly, I don't have very good tests and I was mostly using the example
-> program from the man page under various filesystems and setups.  At LPC,
-> Darrick made it sound like he was going to work on adding
-> vfs_copy_file_range() tests to xfstests but that probably turned into
-> the reflink/dedupe ioctl tests.
-> 
-> I can try to find time to write something for xfstests if that would
-> be useful!
+Hi,
 
-Yes, Darrick wrote a lot of clone tests.  Some of the aren't applicable
-to a pure copy, but I looking over them anc checking what should apply
-would be very useful!
+When running xfs/259 against a file system that has crcs disabled, the
+test will fail.  The problem is that mkfs.xfs now defaults to enabling
+crcs.  So, when the test checks the underlying file system and finds
+crcs are disabled, it tries to create a file system with a block size
+that is too small to support them.  The solution is to explicitly
+specify the crc feature.
+
+Signed-off-by: Jeff Moyer <jmoyer@redhat.com>
+
+diff --git a/tests/xfs/259 b/tests/xfs/259
+index 16c1935..e0022ce 100755
+--- a/tests/xfs/259
++++ b/tests/xfs/259
+@@ -72,7 +72,7 @@ for del in $sizes_to_check; do
+ 	lofile=$(losetup -f)
+ 	losetup $lofile "$testfile"
+ 	"$MKFS_XFS_PROG" -l size=32m -b size=$blocksize $lofile \
+-					>/dev/null || echo "mkfs failed!"
++			 -m crc=$_fs_has_crcs>/dev/null || echo "mkfs failed!"
+ 	sync
+ 	losetup -d $lofile
+ done
