@@ -1,54 +1,48 @@
-Received: from mx1.redhat.com ([209.132.183.28]:59970 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:54519 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754231AbbLDU45 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 4 Dec 2015 15:56:57 -0500
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (Postfix) with ESMTPS id 2E797C0A525E
-	for <fstests@vger.kernel.org>; Fri,  4 Dec 2015 20:56:57 +0000 (UTC)
-From: Jeff Moyer <jmoyer@redhat.com>
-Subject: Re: [patch] xfs/259 - inherit $_fs_has_crcs
-References: <x494mfy5igz.fsf@segfault.boston.devel.redhat.com>
-	<x49zixq43mk.fsf@segfault.boston.devel.redhat.com>
-	<20151204204557.GA64533@bfoster.bfoster>
-Date: Fri, 04 Dec 2015 15:56:56 -0500
-In-Reply-To: <20151204204557.GA64533@bfoster.bfoster> (Brian Foster's message
-	of "Fri, 4 Dec 2015 15:45:57 -0500")
-Message-ID: <x49egf23pbb.fsf@segfault.boston.devel.redhat.com>
+	id S1754725AbbLDVGP (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 4 Dec 2015 16:06:15 -0500
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	by mx1.redhat.com (Postfix) with ESMTPS id 9D828354195
+	for <fstests@vger.kernel.org>; Fri,  4 Dec 2015 21:06:15 +0000 (UTC)
+Received: from liberator.sandeen.net (ovpn01.gateway.prod.ext.phx2.redhat.com [10.5.9.1])
+	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id tB4L6E55026611
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <fstests@vger.kernel.org>; Fri, 4 Dec 2015 16:06:15 -0500
+From: Eric Sandeen <sandeen@redhat.com>
+Subject: [PATCH] 242: remove open-coded check for "zero" command
+Message-ID: <56620046.7060101@redhat.com>
+Date: Fri, 4 Dec 2015 15:06:14 -0600
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Brian Foster <bfoster@redhat.com> writes:
+We have helpers for this, no need to open-code it.
 
->> > @@ -72,7 +72,7 @@ for del in $sizes_to_check; do
->> >  	lofile=$(losetup -f)
->> >  	losetup $lofile "$testfile"
->> >  	"$MKFS_XFS_PROG" -l size=32m -b size=$blocksize $lofile \
->> > -					>/dev/null || echo "mkfs failed!"
->> > +			 -m crc=$_fs_has_crcs>/dev/null || echo "mkfs failed!"
->> 
->> It occurs to me that this may break on systems using a mkfs.xfs that
->> does not support the "-m crc" option.  Is there a standard way to test
->> for such things?
->> 
->
-> I suppose we could add a $crc_options to the mkfs command line that can
-> be set appropriately in the if/else. If the test fs has crc support, set
-> crc_options="-m crc=1". Otherwise, maybe use
-> '_scratch_mkfs_xfs_supported -m crc=0' (from
-> common/rc:_require_xfs_mkfs_crc()) in the else condition to either set
-> crc_options="-m crc=0" or drop the option (crc_options="")?
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
 
-How does one determine whether mkfs.xfs supports the crc= option?  That
-was the question I tried to ask.  ;-)
+diff --git a/tests/xfs/242 b/tests/xfs/242
+index 304e69f..4e1a8b4 100755
+--- a/tests/xfs/242
++++ b/tests/xfs/242
+@@ -47,14 +47,7 @@ _supported_fs xfs
+ _supported_os Linux
+ _require_test
+ 
+-_test_io_zero()
+-{
+-	$XFS_IO_PROG -c "zero help" 2>&1 | \
+-			grep 'command "zero" not found' > /dev/null
+-	echo $?
+-}
+-
+-[ $(_test_io_zero) -eq 0 ] && _notrun "zero command not supported"
++_require_xfs_io_command "zero"
+ 
+ testfile=$TEST_DIR/242.$$
+ 
 
-> Another option could be just to unconditionally set crc=[0|1] and add a
-> _require_xfs_crc() to the test, but that would just skip the test on
-> older systems.
-
-I think we can agree that would be a bad approach.  :)
-
--Jeff
