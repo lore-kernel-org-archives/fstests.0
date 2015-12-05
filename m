@@ -1,68 +1,56 @@
-Received: from mail-pf0-f178.google.com ([209.85.192.178]:34922 "EHLO
-	mail-pf0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752657AbbLEIR3 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sat, 5 Dec 2015 03:17:29 -0500
-Received: by pfu207 with SMTP id 207so37939008pfu.2
-        for <fstests@vger.kernel.org>; Sat, 05 Dec 2015 00:17:29 -0800 (PST)
-Date: Sat, 5 Dec 2015 16:09:33 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [patch] xfs/259 - inherit $_fs_has_crcs
-Message-ID: <20151205080915.GA19209@eguan.usersys.redhat.com>
-References: <x494mfy5igz.fsf@segfault.boston.devel.redhat.com>
- <x49zixq43mk.fsf@segfault.boston.devel.redhat.com>
- <20151204204557.GA64533@bfoster.bfoster>
- <x49egf23pbb.fsf@segfault.boston.devel.redhat.com>
+Received: from mail.kernel.org ([198.145.29.136]:53125 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751646AbbLENLh (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sat, 5 Dec 2015 08:11:37 -0500
+Subject: Re: [f2fs-dev] [PATCH 1/3] common/rc: support f2fs for
+ _scratch_mkfs_sized
+References: <1449267345-79400-1-git-send-email-jaegeuk@kernel.org>
+From: Chao Yu <chao@kernel.org>
+Message-ID: <5662E283.6090900@kernel.org>
+Date: Sat, 5 Dec 2015 21:11:31 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <x49egf23pbb.fsf@segfault.boston.devel.redhat.com>
+In-Reply-To: <1449267345-79400-1-git-send-email-jaegeuk@kernel.org>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Jeff Moyer <jmoyer@redhat.com>
-Cc: Brian Foster <bfoster@redhat.com>, fstests@vger.kernel.org
+To: Jaegeuk Kim <jaegeuk@kernel.org>, fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Dec 04, 2015 at 03:56:56PM -0500, Jeff Moyer wrote:
-> Brian Foster <bfoster@redhat.com> writes:
-> 
-> >> > @@ -72,7 +72,7 @@ for del in $sizes_to_check; do
-> >> >  	lofile=$(losetup -f)
-> >> >  	losetup $lofile "$testfile"
-> >> >  	"$MKFS_XFS_PROG" -l size=32m -b size=$blocksize $lofile \
-> >> > -					>/dev/null || echo "mkfs failed!"
-> >> > +			 -m crc=$_fs_has_crcs>/dev/null || echo "mkfs failed!"
-> >> 
-> >> It occurs to me that this may break on systems using a mkfs.xfs that
-> >> does not support the "-m crc" option.  Is there a standard way to test
-> >> for such things?
-> >> 
-> >
-> > I suppose we could add a $crc_options to the mkfs command line that can
-> > be set appropriately in the if/else. If the test fs has crc support, set
-> > crc_options="-m crc=1". Otherwise, maybe use
-> > '_scratch_mkfs_xfs_supported -m crc=0' (from
-> > common/rc:_require_xfs_mkfs_crc()) in the else condition to either set
-> > crc_options="-m crc=0" or drop the option (crc_options="")?
-> 
-> How does one determine whether mkfs.xfs supports the crc= option?  That
-> was the question I tried to ask.  ;-)
+Hi Jaegeuk,
 
-You can test for XFS_MKFS_HAS_NO_META_SUPPORT, if it's set to true then
-mkfs.xfs has no crc support. More details you can refer to
+On 12/5/15 6:15 AM, Jaegeuk Kim wrote:
+> The mkfs.f2fs has an option to build a certain sized filesystem by giving
+> the number of sectors.
+> 
+> So, this patch adds to use that.
+> 
+> Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
+> ---
+>  common/rc | 4 ++++
+>  1 file changed, 4 insertions(+)
+> 
+> diff --git a/common/rc b/common/rc
+> index 4c2f42c..ef913b4 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -739,6 +739,10 @@ _scratch_mkfs_sized()
+>  	$MKFS_REISER4_PROG $MKFS_OPTIONS -y -b $blocksize $SCRATCH_DEV \
+>  			   `expr $fssize / 1024`
+>  	;;
+> +    f2fs)
+> +	# mkfs.f2fs requires # of sectors as an input for the size
+> +	$MKFS_F2FS_PROG $MKFS_OPTIONS $SCRATCH_DEV `expr $fssize / 512`
 
-commit 90a3bfc5b673cc06ec81b7f7dc9788d3e30c5993
+In mkfs.f2fs, we will calculate fs size based on real sector size of block
+device and the input sectors, so if sector size of block device is not 512, our
+fs size calculated will be incorrect.
+
+How about fixing it for supporting different sector size?
 
 Thanks,
-Eryu
 
+> +	;;
+>      *)
+>  	_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized"
+>  	;;
 > 
-> > Another option could be just to unconditionally set crc=[0|1] and add a
-> > _require_xfs_crc() to the test, but that would just skip the test on
-> > older systems.
-> 
-> I think we can agree that would be a bad approach.  :)
-> 
-> -Jeff
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
