@@ -1,60 +1,68 @@
-Received: from mx1.redhat.com ([209.132.183.28]:53552 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752705AbbLDWsC (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 4 Dec 2015 17:48:02 -0500
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (Postfix) with ESMTPS id E8F124C508
-	for <fstests@vger.kernel.org>; Fri,  4 Dec 2015 22:48:01 +0000 (UTC)
-Received: from liberator.sandeen.net (ovpn01.gateway.prod.ext.phx2.redhat.com [10.5.9.1])
-	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id tB4Mm1p2029029
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <fstests@vger.kernel.org>; Fri, 4 Dec 2015 17:48:01 -0500
-From: Eric Sandeen <sandeen@redhat.com>
-Subject: [PATCH] common/punch: handle bmap output for unaligned extents
-Message-ID: <56621820.5090902@redhat.com>
-Date: Fri, 4 Dec 2015 16:48:00 -0600
+Received: from mail-pf0-f178.google.com ([209.85.192.178]:34922 "EHLO
+	mail-pf0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752657AbbLEIR3 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sat, 5 Dec 2015 03:17:29 -0500
+Received: by pfu207 with SMTP id 207so37939008pfu.2
+        for <fstests@vger.kernel.org>; Sat, 05 Dec 2015 00:17:29 -0800 (PST)
+Date: Sat, 5 Dec 2015 16:09:33 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [patch] xfs/259 - inherit $_fs_has_crcs
+Message-ID: <20151205080915.GA19209@eguan.usersys.redhat.com>
+References: <x494mfy5igz.fsf@segfault.boston.devel.redhat.com>
+ <x49zixq43mk.fsf@segfault.boston.devel.redhat.com>
+ <20151204204557.GA64533@bfoster.bfoster>
+ <x49egf23pbb.fsf@segfault.boston.devel.redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <x49egf23pbb.fsf@segfault.boston.devel.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>
+To: Jeff Moyer <jmoyer@redhat.com>
+Cc: Brian Foster <bfoster@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-xfs/242 fails if the mapping flags show unaligned extents;
-fix up the regexp to allow this, we really only care about
-the unwritten flag.
+On Fri, Dec 04, 2015 at 03:56:56PM -0500, Jeff Moyer wrote:
+> Brian Foster <bfoster@redhat.com> writes:
+> 
+> >> > @@ -72,7 +72,7 @@ for del in $sizes_to_check; do
+> >> >  	lofile=$(losetup -f)
+> >> >  	losetup $lofile "$testfile"
+> >> >  	"$MKFS_XFS_PROG" -l size=32m -b size=$blocksize $lofile \
+> >> > -					>/dev/null || echo "mkfs failed!"
+> >> > +			 -m crc=$_fs_has_crcs>/dev/null || echo "mkfs failed!"
+> >> 
+> >> It occurs to me that this may break on systems using a mkfs.xfs that
+> >> does not support the "-m crc" option.  Is there a standard way to test
+> >> for such things?
+> >> 
+> >
+> > I suppose we could add a $crc_options to the mkfs command line that can
+> > be set appropriately in the if/else. If the test fs has crc support, set
+> > crc_options="-m crc=1". Otherwise, maybe use
+> > '_scratch_mkfs_xfs_supported -m crc=0' (from
+> > common/rc:_require_xfs_mkfs_crc()) in the else condition to either set
+> > crc_options="-m crc=0" or drop the option (crc_options="")?
+> 
+> How does one determine whether mkfs.xfs supports the crc= option?  That
+> was the question I tried to ask.  ;-)
 
-Signed-off-by: eric Sandeen <sandeen@redhat.com>
----
+You can test for XFS_MKFS_HAS_NO_META_SUPPORT, if it's set to true then
+mkfs.xfs has no crc support. More details you can refer to
 
-diff --git a/common/punch b/common/punch
-index be193d6..8e770f7 100644
---- a/common/punch
-+++ b/common/punch
-@@ -234,6 +234,11 @@ _filter_hole_fiemap()
- 	_coalesce_extents
- }
- 
-+#     10000 Unwritten preallocated extent
-+#     01000 Doesn't begin on stripe unit
-+#     00100 Doesn't end   on stripe unit
-+#     00010 Doesn't begin on stripe width
-+#     00001 Doesn't end   on stripe width
- _filter_bmap()
- {
- 	awk '
-@@ -241,11 +246,11 @@ _filter_bmap()
- 			print $1, $2, $3;
- 			next;
- 		}
--		$7 ~ /10000/ {
-+		$7 ~ /1[01][01][01][01]/ {
- 			print $1, $2, "unwritten";
- 			next;
- 		}
--		$7 ~ /00000/ {
-+		$7 ~ /0[01][01][01][01]/ {
- 			print $1, $2, "data"
- 		}' |
- 	_coalesce_extents
+commit 90a3bfc5b673cc06ec81b7f7dc9788d3e30c5993
 
+Thanks,
+Eryu
+
+> 
+> > Another option could be just to unconditionally set crc=[0|1] and add a
+> > _require_xfs_crc() to the test, but that would just skip the test on
+> > older systems.
+> 
+> I think we can agree that would be a bad approach.  :)
+> 
+> -Jeff
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
