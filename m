@@ -1,56 +1,54 @@
-Received: from mail.kernel.org ([198.145.29.136]:53125 "EHLO mail.kernel.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751646AbbLENLh (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sat, 5 Dec 2015 08:11:37 -0500
-Subject: Re: [f2fs-dev] [PATCH 1/3] common/rc: support f2fs for
- _scratch_mkfs_sized
-References: <1449267345-79400-1-git-send-email-jaegeuk@kernel.org>
-From: Chao Yu <chao@kernel.org>
-Message-ID: <5662E283.6090900@kernel.org>
-Date: Sat, 5 Dec 2015 21:11:31 +0800
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:1037 "EHLO
+	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755840AbbLGWMK (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 7 Dec 2015 17:12:10 -0500
+Date: Tue, 8 Dec 2015 09:12:07 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] fstests: Fix generic/102 fail for btrfs
+Message-ID: <20151207221207.GF26718@dastard>
+References: <56d7fca5e2f5dadceb4a3ec3d4589fec54da8d3b.1449137276.git.zhaolei@cn.fujitsu.com>
 MIME-Version: 1.0
-In-Reply-To: <1449267345-79400-1-git-send-email-jaegeuk@kernel.org>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <56d7fca5e2f5dadceb4a3ec3d4589fec54da8d3b.1449137276.git.zhaolei@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jaegeuk Kim <jaegeuk@kernel.org>, fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
+To: Zhaolei <zhaolei@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Jaegeuk,
-
-On 12/5/15 6:15 AM, Jaegeuk Kim wrote:
-> The mkfs.f2fs has an option to build a certain sized filesystem by giving
-> the number of sectors.
+On Thu, Dec 03, 2015 at 06:08:36PM +0800, Zhaolei wrote:
+> From: Zhao Lei <zhaolei@cn.fujitsu.com>
 > 
-> So, this patch adds to use that.
+> generic/102 sometimes fails in newest btrfs toolchain,
+> because it use non-mixed mode in default, which request more space
+> for metadata, and no space for data writing.
 > 
-> Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
+> This patch force mixed mode for btrfs in generic/102.
+> 
+> Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
 > ---
->  common/rc | 4 ++++
->  1 file changed, 4 insertions(+)
+>  tests/generic/102 | 2 ++
+>  1 file changed, 2 insertions(+)
 > 
-> diff --git a/common/rc b/common/rc
-> index 4c2f42c..ef913b4 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -739,6 +739,10 @@ _scratch_mkfs_sized()
->  	$MKFS_REISER4_PROG $MKFS_OPTIONS -y -b $blocksize $SCRATCH_DEV \
->  			   `expr $fssize / 1024`
->  	;;
-> +    f2fs)
-> +	# mkfs.f2fs requires # of sectors as an input for the size
-> +	$MKFS_F2FS_PROG $MKFS_OPTIONS $SCRATCH_DEV `expr $fssize / 512`
+> diff --git a/tests/generic/102 b/tests/generic/102
+> index abc3994..8c01fb5 100755
+> --- a/tests/generic/102
+> +++ b/tests/generic/102
+> @@ -48,6 +48,8 @@ _require_scratch
+>  
+>  rm -f $seqres.full
+>  
+> +[[ "$FSTYP" = "btrfs" ]] && MKFS_OPTIONS+=" --mixed"
+> +
+>  dev_size=$((512 * 1024 * 1024))     # 512MB filesystem
+>  _scratch_mkfs_sized $dev_size >>$seqres.full 2>&1
 
-In mkfs.f2fs, we will calculate fs size based on real sector size of block
-device and the input sectors, so if sector size of block device is not 512, our
-fs size calculated will be incorrect.
+This sort of filesystem size specific mkfs requirement belongs in
+the filesystem specific section of _scratch_mkfs_sized().
 
-How about fixing it for supporting different sector size?
+Cheers,
 
-Thanks,
-
-> +	;;
->      *)
->  	_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized"
->  	;;
-> 
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
