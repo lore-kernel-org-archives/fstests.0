@@ -1,24 +1,33 @@
-Received: from imap.thunk.org ([74.207.234.97]:44227 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:44246 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755719AbbLGXYN (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 7 Dec 2015 18:24:13 -0500
-Date: Mon, 7 Dec 2015 18:24:11 -0500
+	id S964906AbbLGX0e (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 7 Dec 2015 18:26:34 -0500
+Date: Mon, 7 Dec 2015 18:26:31 -0500
 From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH 1/3] common: Factor out function to get OS name
-Message-ID: <20151207232411.GB3094@thunk.org>
+Subject: Re: [PATCH 3/3] ext4/001: Select different output based on mount
+ options
+Message-ID: <20151207232631.GD3094@thunk.org>
 References: <1448361598-28438-1-git-send-email-jack@suse.cz>
- <1448361598-28438-2-git-send-email-jack@suse.cz>
+ <1448361598-28438-4-git-send-email-jack@suse.cz>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1448361598-28438-2-git-send-email-jack@suse.cz>
+In-Reply-To: <1448361598-28438-4-git-send-email-jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
 To: Jan Kara <jack@suse.cz>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, Jan Kara <jack@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Nov 24, 2015 at 11:39:56AM +0100, Jan Kara wrote:
-> Signed-off-by: Jan Kara <jack@suse.cz>
+On Tue, Nov 24, 2015 at 11:39:58AM +0100, Jan Kara wrote:
+> From: Jan Kara <jack@suse.com>
+> 
+> Depending on mount options, we handle unwritten extents somewhat
+> differently. So sometimes we end up zeroing out unwritten extent and
+> converting it to written one and sometimes we just split it. Choose
+> expected output based on mount options.
+> 
+> Signed-off-by: Jan Kara <jack@suse.com>
 
 Reviewed-by: Theodore Ts'o <tytso@mit.edu>
 
+						- Ted
