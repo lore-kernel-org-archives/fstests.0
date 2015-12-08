@@ -1,86 +1,51 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:45356 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S932815AbbLHH1c convert rfc822-to-8bit (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 8 Dec 2015 02:27:32 -0500
-From: Zhao Lei <zhaolei@cn.fujitsu.com>
-References: <56d7fca5e2f5dadceb4a3ec3d4589fec54da8d3b.1449137276.git.zhaolei@cn.fujitsu.com> <20151207221207.GF26718@dastard>
-In-Reply-To: <20151207221207.GF26718@dastard>
-Subject: RE: [PATCH] fstests: Fix generic/102 fail for btrfs
-Date: Tue, 8 Dec 2015 15:26:41 +0800
-Message-ID: <039801d13189$c8e29c70$5aa7d550$@cn.fujitsu.com>
+Received: from sandeen.net ([63.231.237.45]:36699 "EHLO sandeen.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751033AbbLHRVS (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 8 Dec 2015 12:21:18 -0500
+Subject: Re: [PATCH] xfs/133: add quota name beginning with digits test
+References: <1449244857-19283-1-git-send-email-zlang@redhat.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <5667118D.2000502@sandeen.net>
+Date: Tue, 8 Dec 2015 11:21:17 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
-Content-Language: zh-cn
+In-Reply-To: <1449244857-19283-1-git-send-email-zlang@redhat.com>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: 'Dave Chinner' <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
+Cc: eguan@redhat.com, sandeen@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-Hi, Dave Chinner
-
-> -----Original Message-----
-> From: Dave Chinner [mailto:david@fromorbit.com]
-> Sent: Tuesday, December 08, 2015 6:12 AM
-> To: Zhaolei <zhaolei@cn.fujitsu.com>
-> Cc: fstests@vger.kernel.org; linux-btrfs@vger.kernel.org
-> Subject: Re: [PATCH] fstests: Fix generic/102 fail for btrfs
+On 12/4/15 10:00 AM, Zorro Lang wrote:
+> There're two bugs on xfsprogs:
+> 1. when a project name beinning with digits, it can't be found
+> by run xfs_quota 'quota -p -v ...' command, but 'report' command
+> can find it.
 > 
-> On Thu, Dec 03, 2015 at 06:08:36PM +0800, Zhaolei wrote:
-> > From: Zhao Lei <zhaolei@cn.fujitsu.com>
-> >
-> > generic/102 sometimes fails in newest btrfs toolchain, because it use
-> > non-mixed mode in default, which request more space for metadata, and
-> > no space for data writing.
-> >
-> > This patch force mixed mode for btrfs in generic/102.
-> >
-> > Signed-off-by: Zhao Lei <zhaolei@cn.fujitsu.com>
-> > ---
-> >  tests/generic/102 | 2 ++
-> >  1 file changed, 2 insertions(+)
-> >
-> > diff --git a/tests/generic/102 b/tests/generic/102 index
-> > abc3994..8c01fb5 100755
-> > --- a/tests/generic/102
-> > +++ b/tests/generic/102
-> > @@ -48,6 +48,8 @@ _require_scratch
-> >
-> >  rm -f $seqres.full
-> >
-> > +[[ "$FSTYP" = "btrfs" ]] && MKFS_OPTIONS+=" --mixed"
-> > +
-> >  dev_size=$((512 * 1024 * 1024))     # 512MB filesystem
-> >  _scratch_mkfs_sized $dev_size >>$seqres.full 2>&1
+> 2. When user or group names beginning with digits, we can't
+> create 'limit' for them, and can't find them either(likes above).
 > 
-> This sort of filesystem size specific mkfs requirement belongs in the filesystem
-> specific section of _scratch_mkfs_sized().
+> This case will create user, group and project names which beginning
+> with digits, then create limit for them, and query them.
 > 
-Thanks for review.
-
-Agree with you in generic, but for this case, if we changes to use
---mixed mode in _scratch_mkfs_sized() for all btrfs, xfstests will not able to check
-non-mixed mode of btrfs, which is more popular for real-world users.
-
-So we only use --mixed mode for btrfs in generic/102 will be a better choice.
-And similar way also exist in some tests of current xfstests:
-  generic/204:[ $FSTYP = "xfs" ] && MKFS_OPTIONS="$MKFS_OPTIONS -l size=7m -i maxpct=50"
-  generic/040:if [ "$FSTYP" = "btrfs" ]; then
-            _scratch_mkfs "-O extref" >> $seqres.full 2>&1
-  generic/041:if [ "$FSTYP" = "btrfs" ]; then
-            _scratch_mkfs "-O extref" >> $seqres.full 2>&1
-  ...
-
-Thanks
-Zhaolei
-
-> Cheers,
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> ---
 > 
-> Dave.
-> --
-> Dave Chinner
-> david@fromorbit.com
+> Hi,
+> 
+> This case need a test user, that doesn't like user 'fsqa', fsqa is a
+> common user for xfstests, but this case need a special and temporary
+> user and group. So I create and clean them in this case.
+> 
+> But this's the first time a xfstests case add test user/group by itself,
+> so please help to review, if this's appropriate?
 
-
-
+So, I came to the conclusion, and talking w/ Dave I think he concurs, that it
+would be better to document the need for these users in the README; then,
+just like the "fsgqa" user, your test can check for the existence of i.e.
+a "123456-fsgqa" user, and simply _notrun() if it's not present.  This way
+/etc/passwd stays under the system administrator's control, but it's clear why
+the test is skipped if the user doesn't exist.
+ 
+-Eric
 
