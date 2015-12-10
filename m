@@ -1,15 +1,16 @@
-Received: from sandeen.net ([63.231.237.45]:33893 "EHLO sandeen.net"
+Received: from sandeen.net ([63.231.237.45]:33905 "EHLO sandeen.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754236AbbLJRrd (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 10 Dec 2015 12:47:33 -0500
-Subject: Re: [PATCH 1/2] xfs/133: test project quota name beginning with
- digits
+	id S1752289AbbLJRrw (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 10 Dec 2015 12:47:52 -0500
+Subject: Re: [PATCH 2/2] xfs/135: test user and group quota names beginning
+ with digits
 References: <1449681026-4469-1-git-send-email-zlang@redhat.com>
+ <1449681026-4469-2-git-send-email-zlang@redhat.com>
 From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <5669BAB3.7040507@sandeen.net>
-Date: Thu, 10 Dec 2015 11:47:31 -0600
+Message-ID: <5669BAC7.3040001@sandeen.net>
+Date: Thu, 10 Dec 2015 11:47:51 -0600
 MIME-Version: 1.0
-In-Reply-To: <1449681026-4469-1-git-send-email-zlang@redhat.com>
+In-Reply-To: <1449681026-4469-2-git-send-email-zlang@redhat.com>
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
@@ -20,42 +21,85 @@ List-ID: <fstests@vger.kernel.org>
 
 
 On 12/9/15 11:10 AM, Zorro Lang wrote:
-> There's a known bug of xfsprogs, when a project name beinning with
-> digits, it can't be found by run xfs_quota 'quota -p -v ...' command.
+> There's a known bug of xfsprogs, when a user or group name beinning
+> with digits, xfs_quota can't create 'limit' for it.
 > 
 > Signed-off-by: Zorro Lang <zlang@redhat.com>
 
-Looks fine to me; however I get a failure that I didn't expect:
-
-Query project=123456-project Failed
-_check_xfs_filesystem: filesystem on /dev/sdb2 is inconsistent
-...
-disconnected inode 132, would move to lost+found
-Phase 7 - verify link counts...
-
-Is that failure expected?
+Reviewed-by: Eric Sandeen <sandeen@redhat.com>
 
 > ---
->  tests/xfs/133     | 101 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/133.out |   1 +
->  tests/xfs/group   |   1 +
->  3 files changed, 103 insertions(+)
->  create mode 100755 tests/xfs/133
->  create mode 100644 tests/xfs/133.out
+>  README            |  1 +
+>  common/rc         | 10 +++++--
+>  tests/xfs/135     | 83 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/135.out |  1 +
+>  tests/xfs/group   |  1 +
+>  5 files changed, 94 insertions(+), 2 deletions(-)
+>  create mode 100755 tests/xfs/135
+>  create mode 100644 tests/xfs/135.out
 > 
-> diff --git a/tests/xfs/133 b/tests/xfs/133
+> diff --git a/README b/README
+> index f8a878c..a824c10 100644
+> --- a/README
+> +++ b/README
+> @@ -12,6 +12,7 @@ Building Linux:
+>  	- run make
+>  	- run make install
+>  	- create fsgqa test user ("sudo useradd fsgqa")
+> +	- create 123456-fsgqa test user ("sudo useradd 123456-fsgqa")
+>  	
+>  Building IRIX:
+>  	- cd into the xfstests directory 
+> diff --git a/common/rc b/common/rc
+> index 4c2f42c..abb457e 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1575,22 +1575,28 @@ _cat_group()
+>  	cat /etc/group
+>  }
+>  
+> -# check for the fsgqa user on the machine
+> +# check for a user on the machine, fsgqa as default
+>  #
+>  _require_user()
+>  {
+>      qa_user=fsgqa
+> +    if [ -n "$1" ];then
+> +        qa_user=$1
+> +    fi
+>      _cat_passwd | grep -q $qa_user
+>      [ "$?" == "0" ] || _notrun "$qa_user user not defined."
+>      echo /bin/true | su $qa_user
+>      [ "$?" == "0" ] || _notrun "$qa_user cannot execute commands."
+>  }
+>  
+> -# check for the fsgqa group on the machine
+> +# check for a group on the machine, fsgqa as default
+>  #
+>  _require_group()
+>  {
+>      qa_group=fsgqa
+> +    if [ -n "$1" ];then
+> +        qa_group=$1
+> +    fi
+>      _cat_group | grep -q $qa_group
+>      [ "$?" == "0" ] || _notrun "$qa_group user not defined."
+>  }
+> diff --git a/tests/xfs/135 b/tests/xfs/135
 > new file mode 100755
-> index 0000000..330221f
+> index 0000000..6003895
 > --- /dev/null
-> +++ b/tests/xfs/133
-> @@ -0,0 +1,101 @@
+> +++ b/tests/xfs/135
+> @@ -0,0 +1,83 @@
 > +#! /bin/bash
-> +# FS QA Test 133
+> +# FS QA Test 135
 > +#
-> +# Test xfs_quota when project names beginning with digits.
+> +# Test xfs_quota when user or names beginning with digits.
+> +# For example, create a 'limit' for a user or group named
+> +# '12345678-abcd', then query this user and group.
 > +#
 > +#-----------------------------------------------------------------------
-> +# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
+> +# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
 > +#
 > +# This program is free software; you can redistribute it and/or
 > +# modify it under the terms of the GNU General Public License as
@@ -76,7 +120,6 @@ Is that failure expected?
 > +seqres=$RESULT_DIR/$seq
 > +echo "QA output created by $seq"
 > +
-> +qa_user=""
 > +here=`pwd`
 > +tmp=/tmp/$$
 > +status=1	# failure is the default!
@@ -102,71 +145,52 @@ Is that failure expected?
 > +_supported_fs xfs
 > +_supported_os Linux
 > +_require_scratch
-> +_require_xfs_quota
+> +_require_quota
+> +
+> +# need user and group named 123456-fsgqa
+> +_require_user 123456-fsgqa
+> +_require_group 123456-fsgqa
 > +
 > +_scratch_mkfs_xfs >/dev/null 2>&1
-> +
-> +do_project_test()
-> +{
-> +	local qa_project=123456-project
-> +	local dir=$SCRATCH_MNT/project
-> +
-> +	mkdir $dir 2>/dev/null
-> +
-> +	#project quota files
-> +	cat >$tmp.projects <<EOF
-> +10:$dir
-> +EOF
-> +
-> +	cat >$tmp.projid <<EOF
-> +$qa_project:10
-> +EOF
-> +
-> +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> +		-c "project -s $qa_project" $SCRATCH_MNT >>$seqres.full 2>&1
-> +	[ $? -ne 0 ] && _fail "Initalize project=$qa_project Failed"
-> +
-> +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> +		-c "limit -p bsoft=100m bhard=200m $qa_project" $SCRATCH_MNT >>$seqres.full 2>&1
-> +	[ $? -ne 0 ] && _fail "Create limit for project=$qa_project Failed"
-> +
-> +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> +		-c "quota -p -v $qa_project" $SCRATCH_MNT 2>>$seqres.full | grep -qw $qa_project
-> +	[ $? -ne 0 ] && _fail "Query project=$qa_project Failed"
-> +
-> +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> +		-c "report -p" $SCRATCH_MNT 2>>$seqres.full | grep -qw $qa_project
-> +	[ $? -ne 0 ] && _fail "Report project=$qa_project Failed"
-> +
-> +	return 0
-> +}
-> +
-> +# Test project
-> +_qmount_option "uquota,pquota"
+> +_qmount_option "uquota,gquota"
 > +_qmount
-> +_require_prjquota $SCRATCH_DEV
-> +do_project_test
+> +
+> +# user test
+> +xfs_quota -x -c "limit -u bsoft=100m bhard=200m 123456-fsgqa" $SCRATCH_MNT >>$seqres.full 2>&1
+> +[ $? -ne 0 ] && _fail "Create limit for user 123456-fsgqa Failed"
+> +xfs_quota -x -c "quota -u -v 123456-fsgqa" $SCRATCH_MNT 2>>$seqres.full | grep -qw 123456-fsgqa
+> +[ $? -ne 0 ] && _fail "Query user 123456-fsgqa Failed"
+> +xfs_quota -x -c "report -u" $SCRATCH_MNT 2>>$seqres.full | grep -qw 123456-fsgqa
+> +[ $? -ne 0 ] && _fail "Report user 123456-fsgqa Failed"
+> +
+> +# group test
+> +xfs_quota -x -c "limit -g bsoft=100m bhard=200m 123456-fsgqa" $SCRATCH_MNT >>$seqres.full 2>&1
+> +[ $? -ne 0 ] && _fail "Create limit for group 123456-fsgqa Failed"
+> +xfs_quota -x -c "quota -g -v 123456-fsgqa" $SCRATCH_MNT 2>>$seqres.full | grep -qw 123456-fsgqa
+> +[ $? -ne 0 ] && _fail "Query group 123456-fsgqa Failed"
+> +xfs_quota -x -c "report -u" $SCRATCH_MNT 2>>$seqres.full | grep -qw 123456-fsgqa
+> +[ $? -ne 0 ] && _fail "Report group 123456-fsgqa Failed"
 > +
 > +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/xfs/133.out b/tests/xfs/133.out
+> diff --git a/tests/xfs/135.out b/tests/xfs/135.out
 > new file mode 100644
-> index 0000000..189cb69
+> index 0000000..21b1bb7
 > --- /dev/null
-> +++ b/tests/xfs/133.out
+> +++ b/tests/xfs/135.out
 > @@ -0,0 +1 @@
-> +QA output created by 133
+> +QA output created by 135
 > diff --git a/tests/xfs/group b/tests/xfs/group
-> index 9884329..bae09de 100644
+> index bae09de..9623a97 100644
 > --- a/tests/xfs/group
 > +++ b/tests/xfs/group
-> @@ -130,6 +130,7 @@
->  130 fuzzers
->  131 auto quick clone
+> @@ -132,6 +132,7 @@
 >  132 auto quick clone
-> +133 auto quick quota
+>  133 auto quick quota
 >  134 quota auto quick
+> +135 auto quick quota
 >  136 attr2
 >  142 dmapi
+>  143 dmapi
 > 
