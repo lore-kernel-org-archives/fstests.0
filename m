@@ -1,147 +1,172 @@
-Received: from mail-ig0-f170.google.com ([209.85.213.170]:33389 "EHLO
-	mail-ig0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754195AbbLJR2f (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 10 Dec 2015 12:28:35 -0500
+Received: from sandeen.net ([63.231.237.45]:33893 "EHLO sandeen.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754236AbbLJRrd (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 10 Dec 2015 12:47:33 -0500
+Subject: Re: [PATCH 1/2] xfs/133: test project quota name beginning with
+ digits
+References: <1449681026-4469-1-git-send-email-zlang@redhat.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <5669BAB3.7040507@sandeen.net>
+Date: Thu, 10 Dec 2015 11:47:31 -0600
 MIME-Version: 1.0
-Reply-To: fdmanana@gmail.com
-In-Reply-To: <1448878644-16503-9-git-send-email-chandan@linux.vnet.ibm.com>
-References: <1448878644-16503-1-git-send-email-chandan@linux.vnet.ibm.com>
-	<1448878644-16503-9-git-send-email-chandan@linux.vnet.ibm.com>
-Date: Thu, 10 Dec 2015 17:28:34 +0000
-Message-ID: <CAL3q7H4Gkf289U0MVSEJpBGw7GzhCdXa5BABomLyueLTD=8GhA@mail.gmail.com>
-Subject: Re: [PATCH 8/8] Fix btrfs/106 to work on non-4k page sized machines
-From: Filipe Manana <fdmanana@gmail.com>
-Content-Type: text/plain; charset=UTF-8
+In-Reply-To: <1449681026-4469-1-git-send-email-zlang@redhat.com>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, chandan@mykolab.com
+To: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
+Cc: eguan@redhat.com, sandeen@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Nov 30, 2015 at 10:17 AM, Chandan Rajendra
-<chandan@linux.vnet.ibm.com> wrote:
-> This commit makes use of the new _filter_xfs_io_pages_modified filtering
-> function to print information in terms of page size units rather than file
-> offset.
->
-> Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
 
-Thanks!
+
+On 12/9/15 11:10 AM, Zorro Lang wrote:
+> There's a known bug of xfsprogs, when a project name beinning with
+> digits, it can't be found by run xfs_quota 'quota -p -v ...' command.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+
+Looks fine to me; however I get a failure that I didn't expect:
+
+Query project=123456-project Failed
+_check_xfs_filesystem: filesystem on /dev/sdb2 is inconsistent
+...
+disconnected inode 132, would move to lost+found
+Phase 7 - verify link counts...
+
+Is that failure expected?
 
 > ---
->  tests/btrfs/106     | 36 ++++++++++++++++++++----------------
->  tests/btrfs/106.out | 30 ++++++++++++++++++------------
->  2 files changed, 38 insertions(+), 28 deletions(-)
->
-> diff --git a/tests/btrfs/106 b/tests/btrfs/106
-> index 1670453..30c43fa 100755
-> --- a/tests/btrfs/106
-> +++ b/tests/btrfs/106
-> @@ -58,31 +58,35 @@ test_clone_and_read_compressed_extent()
->         _scratch_mkfs >>$seqres.full 2>&1
->         _scratch_mount $mount_opts
->
-> -       # Create our test file with a single extent of 64Kb that is going to be
-> -       # compressed no matter which compression algorithm is used (zlib/lzo).
-> -       $XFS_IO_PROG -f -c "pwrite -S 0xaa 0K 64K" \
-> -               $SCRATCH_MNT/foo | _filter_xfs_io
-> +       PAGE_SIZE=$(get_page_size)
+>  tests/xfs/133     | 101 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/133.out |   1 +
+>  tests/xfs/group   |   1 +
+>  3 files changed, 103 insertions(+)
+>  create mode 100755 tests/xfs/133
+>  create mode 100644 tests/xfs/133.out
+> 
+> diff --git a/tests/xfs/133 b/tests/xfs/133
+> new file mode 100755
+> index 0000000..330221f
+> --- /dev/null
+> +++ b/tests/xfs/133
+> @@ -0,0 +1,101 @@
+> +#! /bin/bash
+> +# FS QA Test 133
+> +#
+> +# Test xfs_quota when project names beginning with digits.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
 > +
-> +       # Create our test file with 16 pages worth of data in a single extent
-> +       # that is going to be compressed no matter which compression algorithm
-> +       # is used (zlib/lzo).
-> +       $XFS_IO_PROG -f -c "pwrite -S 0xaa 0K $((16 * $PAGE_SIZE))" \
-> +                    $SCRATCH_MNT/foo | _filter_xfs_io_pages_modified
->
->         # Now clone the compressed extent into an adjacent file offset.
-> -       $CLONER_PROG -s 0 -d $((64 * 1024)) -l $((64 * 1024)) \
-> +       $CLONER_PROG -s 0 -d $((16 * $PAGE_SIZE)) -l $((16 * $PAGE_SIZE)) \
->                 $SCRATCH_MNT/foo $SCRATCH_MNT/foo
->
-> -       echo "File digest before unmount:"
-> -       md5sum $SCRATCH_MNT/foo | _filter_scratch
-> +       echo "File contents before unmount:"
-> +       od -t x1 $SCRATCH_MNT/foo | _filter_od
->
->         # Remount the fs or clear the page cache to trigger the bug in btrfs.
-> -       # Because the extent has an uncompressed length that is a multiple of
-> -       # 16 pages, all the pages belonging to the second range of the file
-> -       # (64K to 128K), which points to the same extent as the first range
-> -       # (0K to 64K), had their contents full of zeroes instead of the byte
-> -       # 0xaa. This was a bug exclusively in the read path of compressed
-> -       # extents, the correct data was stored on disk, btrfs just failed to
-> -       # fill in the pages correctly.
-> +       # Because the extent has an uncompressed length that is a multiple of 16
-> +       # pages, all the pages belonging to the second range of the file that is
-> +       # mapped by the page index range [16, 31], which points to the same
-> +       # extent as the first file range mapped by the page index range [0, 15],
-> +       # had their contents full of zeroes instead of the byte 0xaa. This was a
-> +       # bug exclusively in the read path of compressed extents, the correct
-> +       # data was stored on disk, btrfs just failed to fill in the pages
-> +       # correctly.
->         _scratch_remount
->
-> -       echo "File digest after remount:"
-> +       echo "File contents after remount:"
->         # Must match the digest we got before.
-> -       md5sum $SCRATCH_MNT/foo | _filter_scratch
-> +       od -t x1 $SCRATCH_MNT/foo | _filter_od
->  }
->
->  echo -e "\nTesting with zlib compression..."
-> diff --git a/tests/btrfs/106.out b/tests/btrfs/106.out
-> index 692108d..1144a82 100644
-> --- a/tests/btrfs/106.out
-> +++ b/tests/btrfs/106.out
-> @@ -1,17 +1,23 @@
->  QA output created by 106
->
->  Testing with zlib compression...
-> -wrote 65536/65536 bytes at offset 0
-> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -File digest before unmount:
-> -be68df46e3cf60b559376a35f9fbb05d  SCRATCH_MNT/foo
-> -File digest after remount:
-> -be68df46e3cf60b559376a35f9fbb05d  SCRATCH_MNT/foo
-> +Pages modified: [0 - 15]
-> +File contents before unmount:
-> +0 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> +*
-> +40
-> +File contents after remount:
-> +0 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> +*
-> +40
->
->  Testing with lzo compression...
-> -wrote 65536/65536 bytes at offset 0
-> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -File digest before unmount:
-> -be68df46e3cf60b559376a35f9fbb05d  SCRATCH_MNT/foo
-> -File digest after remount:
-> -be68df46e3cf60b559376a35f9fbb05d  SCRATCH_MNT/foo
-> +Pages modified: [0 - 15]
-> +File contents before unmount:
-> +0 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> +*
-> +40
-> +File contents after remount:
-> +0 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> +*
-> +40
-> --
-> 2.1.0
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Filipe David Manana,
-
-"Reasonable men adapt themselves to the world.
- Unreasonable men adapt the world to themselves.
- That's why all progress depends on unreasonable men."
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +qa_user=""
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/quota
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs xfs
+> +_supported_os Linux
+> +_require_scratch
+> +_require_xfs_quota
+> +
+> +_scratch_mkfs_xfs >/dev/null 2>&1
+> +
+> +do_project_test()
+> +{
+> +	local qa_project=123456-project
+> +	local dir=$SCRATCH_MNT/project
+> +
+> +	mkdir $dir 2>/dev/null
+> +
+> +	#project quota files
+> +	cat >$tmp.projects <<EOF
+> +10:$dir
+> +EOF
+> +
+> +	cat >$tmp.projid <<EOF
+> +$qa_project:10
+> +EOF
+> +
+> +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+> +		-c "project -s $qa_project" $SCRATCH_MNT >>$seqres.full 2>&1
+> +	[ $? -ne 0 ] && _fail "Initalize project=$qa_project Failed"
+> +
+> +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+> +		-c "limit -p bsoft=100m bhard=200m $qa_project" $SCRATCH_MNT >>$seqres.full 2>&1
+> +	[ $? -ne 0 ] && _fail "Create limit for project=$qa_project Failed"
+> +
+> +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+> +		-c "quota -p -v $qa_project" $SCRATCH_MNT 2>>$seqres.full | grep -qw $qa_project
+> +	[ $? -ne 0 ] && _fail "Query project=$qa_project Failed"
+> +
+> +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+> +		-c "report -p" $SCRATCH_MNT 2>>$seqres.full | grep -qw $qa_project
+> +	[ $? -ne 0 ] && _fail "Report project=$qa_project Failed"
+> +
+> +	return 0
+> +}
+> +
+> +# Test project
+> +_qmount_option "uquota,pquota"
+> +_qmount
+> +_require_prjquota $SCRATCH_DEV
+> +do_project_test
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/133.out b/tests/xfs/133.out
+> new file mode 100644
+> index 0000000..189cb69
+> --- /dev/null
+> +++ b/tests/xfs/133.out
+> @@ -0,0 +1 @@
+> +QA output created by 133
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index 9884329..bae09de 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -130,6 +130,7 @@
+>  130 fuzzers
+>  131 auto quick clone
+>  132 auto quick clone
+> +133 auto quick quota
+>  134 quota auto quick
+>  136 attr2
+>  142 dmapi
+> 
