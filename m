@@ -1,196 +1,34 @@
-Received: from sandeen.net ([63.231.237.45]:33905 "EHLO sandeen.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752289AbbLJRrw (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 10 Dec 2015 12:47:52 -0500
-Subject: Re: [PATCH 2/2] xfs/135: test user and group quota names beginning
- with digits
-References: <1449681026-4469-1-git-send-email-zlang@redhat.com>
- <1449681026-4469-2-git-send-email-zlang@redhat.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <5669BAC7.3040001@sandeen.net>
-Date: Thu, 10 Dec 2015 11:47:51 -0600
+Received: from aserp1040.oracle.com ([141.146.126.69]:47638 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751467AbbLJTPO (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 10 Dec 2015 14:15:14 -0500
+Date: Thu, 10 Dec 2015 11:14:29 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 3/3] reflink: more tests
+Message-ID: <20151210191429.GN10580@birch.djwong.org>
+References: <20151208062844.21871.23644.stgit@birch.djwong.org>
+ <20151208062904.21871.30589.stgit@birch.djwong.org>
+ <20151210163449.GA15774@infradead.org>
 MIME-Version: 1.0
-In-Reply-To: <1449681026-4469-2-git-send-email-zlang@redhat.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20151210163449.GA15774@infradead.org>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
-Cc: eguan@redhat.com, sandeen@redhat.com
+To: Christoph Hellwig <hch@infradead.org>
+Cc: david@fromorbit.com, fstests@vger.kernel.org, xfs@oss.sgi.com, tao.peng@primarydata.com, linux-ext4@vger.kernel.org, Anna.Schumaker@netapp.com, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+On Thu, Dec 10, 2015 at 08:34:49AM -0800, Christoph Hellwig wrote:
+> The new 849 fails reliably on btrfs, which makes me wonder if either
+> the test is doing something wrong, or the btrfs whole file clone
+> behavior is broken, which wouldn't be very reasuring.  I didn't have
+> time to look into why it's failing yet.
 
+Huh.  Works reliably for /me; could you send me the output from 849?
 
-On 12/9/15 11:10 AM, Zorro Lang wrote:
-> There's a known bug of xfsprogs, when a user or group name beinning
-> with digits, xfs_quota can't create 'limit' for it.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
+--D
 
-Reviewed-by: Eric Sandeen <sandeen@redhat.com>
-
-> ---
->  README            |  1 +
->  common/rc         | 10 +++++--
->  tests/xfs/135     | 83 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/135.out |  1 +
->  tests/xfs/group   |  1 +
->  5 files changed, 94 insertions(+), 2 deletions(-)
->  create mode 100755 tests/xfs/135
->  create mode 100644 tests/xfs/135.out
-> 
-> diff --git a/README b/README
-> index f8a878c..a824c10 100644
-> --- a/README
-> +++ b/README
-> @@ -12,6 +12,7 @@ Building Linux:
->  	- run make
->  	- run make install
->  	- create fsgqa test user ("sudo useradd fsgqa")
-> +	- create 123456-fsgqa test user ("sudo useradd 123456-fsgqa")
->  	
->  Building IRIX:
->  	- cd into the xfstests directory 
-> diff --git a/common/rc b/common/rc
-> index 4c2f42c..abb457e 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1575,22 +1575,28 @@ _cat_group()
->  	cat /etc/group
->  }
->  
-> -# check for the fsgqa user on the machine
-> +# check for a user on the machine, fsgqa as default
->  #
->  _require_user()
->  {
->      qa_user=fsgqa
-> +    if [ -n "$1" ];then
-> +        qa_user=$1
-> +    fi
->      _cat_passwd | grep -q $qa_user
->      [ "$?" == "0" ] || _notrun "$qa_user user not defined."
->      echo /bin/true | su $qa_user
->      [ "$?" == "0" ] || _notrun "$qa_user cannot execute commands."
->  }
->  
-> -# check for the fsgqa group on the machine
-> +# check for a group on the machine, fsgqa as default
->  #
->  _require_group()
->  {
->      qa_group=fsgqa
-> +    if [ -n "$1" ];then
-> +        qa_group=$1
-> +    fi
->      _cat_group | grep -q $qa_group
->      [ "$?" == "0" ] || _notrun "$qa_group user not defined."
->  }
-> diff --git a/tests/xfs/135 b/tests/xfs/135
-> new file mode 100755
-> index 0000000..6003895
-> --- /dev/null
-> +++ b/tests/xfs/135
-> @@ -0,0 +1,83 @@
-> +#! /bin/bash
-> +# FS QA Test 135
-> +#
-> +# Test xfs_quota when user or names beginning with digits.
-> +# For example, create a 'limit' for a user or group named
-> +# '12345678-abcd', then query this user and group.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/quota
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs xfs
-> +_supported_os Linux
-> +_require_scratch
-> +_require_quota
-> +
-> +# need user and group named 123456-fsgqa
-> +_require_user 123456-fsgqa
-> +_require_group 123456-fsgqa
-> +
-> +_scratch_mkfs_xfs >/dev/null 2>&1
-> +_qmount_option "uquota,gquota"
-> +_qmount
-> +
-> +# user test
-> +xfs_quota -x -c "limit -u bsoft=100m bhard=200m 123456-fsgqa" $SCRATCH_MNT >>$seqres.full 2>&1
-> +[ $? -ne 0 ] && _fail "Create limit for user 123456-fsgqa Failed"
-> +xfs_quota -x -c "quota -u -v 123456-fsgqa" $SCRATCH_MNT 2>>$seqres.full | grep -qw 123456-fsgqa
-> +[ $? -ne 0 ] && _fail "Query user 123456-fsgqa Failed"
-> +xfs_quota -x -c "report -u" $SCRATCH_MNT 2>>$seqres.full | grep -qw 123456-fsgqa
-> +[ $? -ne 0 ] && _fail "Report user 123456-fsgqa Failed"
-> +
-> +# group test
-> +xfs_quota -x -c "limit -g bsoft=100m bhard=200m 123456-fsgqa" $SCRATCH_MNT >>$seqres.full 2>&1
-> +[ $? -ne 0 ] && _fail "Create limit for group 123456-fsgqa Failed"
-> +xfs_quota -x -c "quota -g -v 123456-fsgqa" $SCRATCH_MNT 2>>$seqres.full | grep -qw 123456-fsgqa
-> +[ $? -ne 0 ] && _fail "Query group 123456-fsgqa Failed"
-> +xfs_quota -x -c "report -u" $SCRATCH_MNT 2>>$seqres.full | grep -qw 123456-fsgqa
-> +[ $? -ne 0 ] && _fail "Report group 123456-fsgqa Failed"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/135.out b/tests/xfs/135.out
-> new file mode 100644
-> index 0000000..21b1bb7
-> --- /dev/null
-> +++ b/tests/xfs/135.out
-> @@ -0,0 +1 @@
-> +QA output created by 135
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index bae09de..9623a97 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -132,6 +132,7 @@
->  132 auto quick clone
->  133 auto quick quota
->  134 quota auto quick
-> +135 auto quick quota
->  136 attr2
->  142 dmapi
->  143 dmapi
-> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-ext4" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
