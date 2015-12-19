@@ -1,11 +1,11 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:39555 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753927AbbLSJMJ (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sat, 19 Dec 2015 04:12:09 -0500
-Subject: [PATCH 10/11] reflink: test a big CoW operation
+Received: from aserp1040.oracle.com ([141.146.126.69]:17149 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753695AbbLSJLE (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sat, 19 Dec 2015 04:11:04 -0500
+Subject: [PATCH 01/11] test-scripts: test migration scripts
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Sat, 19 Dec 2015 01:12:00 -0800
-Message-ID: <20151219091200.15320.21534.stgit@birch.djwong.org>
+Date: Sat, 19 Dec 2015 01:10:59 -0800
+Message-ID: <20151219091059.15320.77475.stgit@birch.djwong.org>
 In-Reply-To: <20151219091052.15320.94973.stgit@birch.djwong.org>
 References: <20151219091052.15320.94973.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -16,278 +16,209 @@ To: david@fromorbit.com, darrick.wong@oracle.com
 Cc: linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-Test what happens when we send largeish buffers to CoW all at once.
+Add two scripts: "nextid" finds the next available test ID number in a
+group, and "mvtest" relocates a test, fixes the golden output, and
+moves the group entry for that test.
+
+v2: sorting group files should preserve group order; nextid should use
+the same algorithm as new; move both tools to tools/.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/generic/878     |   99 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/878.out |   13 ++++++
- tests/generic/879     |   99 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/879.out |   13 ++++++
- tests/generic/group   |    2 +
- 5 files changed, 226 insertions(+)
- create mode 100755 tests/generic/878
- create mode 100644 tests/generic/878.out
- create mode 100755 tests/generic/879
- create mode 100644 tests/generic/879.out
+ tools/mvtest     |   55 +++++++++++++++++++++++++++
+ tools/nextid     |    1 
+ tools/sort-group |  112 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 168 insertions(+)
+ create mode 100755 tools/mvtest
+ create mode 120000 tools/nextid
+ create mode 100755 tools/sort-group
 
 
-diff --git a/tests/generic/878 b/tests/generic/878
+diff --git a/tools/mvtest b/tools/mvtest
 new file mode 100755
-index 0000000..342a94e
+index 0000000..af601d6
 --- /dev/null
-+++ b/tests/generic/878
-@@ -0,0 +1,99 @@
-+#! /bin/bash
-+# FS QA Test No. 878
-+#
-+# Reflink two large files and CoW them in big chunks.
-+#
-+# This test is dependent on the system page size, so we cannot use md5 in
-+# the golden output; we can only compare to a check file.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
++++ b/tools/mvtest
+@@ -0,0 +1,55 @@
++#!/bin/sh
 +
-+seq=`basename "$0"`
-+seqres="$RESULT_DIR/$seq"
-+echo "QA output created by $seq"
++# Renumber a test
++dir="$(dirname "$0")"
 +
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
++if [ -z "$1" ] || [ "$1" = "--help" ]; then
++	echo "Usage: $0 path_to_test new_path_to_test"
++	exit 1
++fi
 +
-+_cleanup()
-+{
-+    cd /
-+    rm -rf "$tmp".* "$TESTDIR"
++src="$1"
++dest="$2"
++
++die() {
++	echo "$@"
++	exit 1
 +}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scratch_reflink
-+_require_cp_reflink
-+
-+rm -f "$seqres.full"
-+
-+
-+echo "Format and mount"
-+_scratch_mkfs > "$seqres.full" 2>&1
-+_scratch_mount >> "$seqres.full" 2>&1
-+
-+TESTDIR="$SCRATCH_MNT/test-$seq"
-+rm -rf $TESTDIR
-+mkdir $TESTDIR
-+
-+BLKSZ=65536
-+NR=6400
-+BSZ=1280
-+
-+FREE_BLOCKS=$(stat -f -c '%a' "$TESTDIR")
-+REAL_BLKSZ=$(stat -f -c '%S' "$TESTDIR")
-+SPACE_NEEDED=$(((BLKSZ * NR * 3) * 5 / 4))
-+SPACE_AVAIL=$((FREE_BLOCKS * REAL_BLKSZ))
-+test $SPACE_NEEDED -gt $SPACE_AVAIL && _notrun "Not enough space. $SPACE_AVAIL < $SPACE_NEEDED"
-+
-+echo "Create the original files"
-+"$XFS_IO_PROG" -f -c "pwrite -S 0x61 -b $((BLKSZ * BSZ)) 0 $((BLKSZ * NR))" "$TESTDIR/file1" >> "$seqres.full"
-+_cp_reflink "$TESTDIR/file1" "$TESTDIR/file2" >> "$seqres.full"
-+"$XFS_IO_PROG" -f -c "pwrite -S 0x61 -b $((BLKSZ * BSZ)) 0 $((BLKSZ * NR))" "$TESTDIR/file2.chk" >> "$seqres.full"
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum "$TESTDIR/file1" | _filter_scratch
-+md5sum "$TESTDIR/file2" | _filter_scratch
-+md5sum "$TESTDIR/file2.chk" | _filter_scratch
-+
-+echo "CoW and unmount"
-+"$XFS_IO_PROG" -f -c "pwrite -S 0x63 -b $((BLKSZ * BSZ)) 0 $((BLKSZ * NR))" "$TESTDIR/file2" >> "$seqres.full"
-+"$XFS_IO_PROG" -f -c "pwrite -S 0x63 -b $((BLKSZ * BSZ)) 0 $((BLKSZ * NR))" "$TESTDIR/file2.chk" >> "$seqres.full"
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum "$TESTDIR/file1" | _filter_scratch
-+md5sum "$TESTDIR/file2" | _filter_scratch
-+md5sum "$TESTDIR/file2.chk" | _filter_scratch
-+
-+echo "Check for damage"
-+umount "$SCRATCH_MNT"
-+_check_scratch_fs
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/878.out b/tests/generic/878.out
-new file mode 100644
-index 0000000..0da5baa
---- /dev/null
-+++ b/tests/generic/878.out
-@@ -0,0 +1,13 @@
-+QA output created by 878
-+Format and mount
-+Create the original files
-+Compare files
-+01768a16d33c9bd21dc67a7fac006ee1  SCRATCH_MNT/test-878/file1
-+01768a16d33c9bd21dc67a7fac006ee1  SCRATCH_MNT/test-878/file2
-+01768a16d33c9bd21dc67a7fac006ee1  SCRATCH_MNT/test-878/file2.chk
-+CoW and unmount
-+Compare files
-+01768a16d33c9bd21dc67a7fac006ee1  SCRATCH_MNT/test-878/file1
-+c835fd53fa27b72511b250d51595c053  SCRATCH_MNT/test-878/file2
-+c835fd53fa27b72511b250d51595c053  SCRATCH_MNT/test-878/file2.chk
-+Check for damage
-diff --git a/tests/generic/879 b/tests/generic/879
-new file mode 100755
-index 0000000..83be543
---- /dev/null
-+++ b/tests/generic/879
-@@ -0,0 +1,99 @@
-+#! /bin/bash
-+# FS QA Test No. 879
-+#
-+# Reflink two large files and DIO CoW them in big chunks.
-+#
-+# This test is dependent on the system page size, so we cannot use md5 in
-+# the golden output; we can only compare to a check file.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename "$0"`
-+seqres="$RESULT_DIR/$seq"
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf "$tmp".* "$TESTDIR"
++append() {
++	out="$1"
++	shift
++	echo "$@" >> "${out}"
 +}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
++test "${src}" != "${dest}" || die "Test \"${src}\" is the same as dest."
++test -e "tests/${src}" || die "Test \"${src}\" does not exist."
++test ! -e "tests/${dest}" || die "Test \"${src}\" already exists."
 +
-+# real QA test starts here
-+_supported_os Linux
-+_require_scratch_reflink
-+_require_cp_reflink
++sid="$(basename "${src}")"
++did="$(basename "${dest}")"
 +
-+rm -f "$seqres.full"
++sgroup="$(basename "$(dirname "tests/${src}")")"
++dgroup="$(basename "$(dirname "tests/${dest}")")"
 +
++sgroupfile="tests/${sgroup}/group"
++dgroupfile="tests/${sgroup}/group"
 +
-+echo "Format and mount"
-+_scratch_mkfs > "$seqres.full" 2>&1
-+_scratch_mount >> "$seqres.full" 2>&1
++git mv "tests/${src}" "tests/${dest}"
++git mv "tests/${src}.out" "tests/${dest}.out"
++sed -e "s/^# FS QA Test No. ${sid}$/# FS QA Test No. ${did}/g" -i "tests/${dest}"
++sed -e "s/^QA output created by ${sid}$/QA output created by ${did}/g" -i "tests/${dest}.out"
++sed -e "s/test-${sid}/test-${did}/g" -i "tests/${dest}.out"
 +
-+TESTDIR="$SCRATCH_MNT/test-$seq"
-+rm -rf $TESTDIR
-+mkdir $TESTDIR
++grpline="$(grep "^${sid} " "${sgroupfile}")"
++newgrpline="$(echo "${grpline}" | sed -e "s/^${sid} /${did} /g")"
 +
-+BLKSZ=65536
-+NR=6400
-+BSZ=1280
++sed -e "/^${sid}.*$/d" -i "${sgroupfile}"
++cp "${dgroupfile}" "${dgroupfile}.new"
++append "${dgroupfile}.new" "${newgrpline}"
++"${dir}/sort-group.py" "${dgroupfile}.new"
++mv "${dgroupfile}.new" "${dgroupfile}"
 +
-+FREE_BLOCKS=$(stat -f -c '%a' "$TESTDIR")
-+REAL_BLKSZ=$(stat -f -c '%S' "$TESTDIR")
-+SPACE_NEEDED=$(((BLKSZ * NR * 3) * 5 / 4))
-+SPACE_AVAIL=$((FREE_BLOCKS * REAL_BLKSZ))
-+test $SPACE_NEEDED -gt $SPACE_AVAIL && _notrun "Not enough space. $SPACE_AVAIL < $SPACE_NEEDED"
++echo "Moved \"${src}\" to \"${dest}\"."
 +
-+echo "Create the original files"
-+"$XFS_IO_PROG" -f -c "pwrite -S 0x61 -b $((BLKSZ * BSZ)) 0 $((BLKSZ * NR))" "$TESTDIR/file1" >> "$seqres.full"
-+_cp_reflink "$TESTDIR/file1" "$TESTDIR/file2" >> "$seqres.full"
-+"$XFS_IO_PROG" -f -c "pwrite -S 0x61 -b $((BLKSZ * BSZ)) 0 $((BLKSZ * NR))" "$TESTDIR/file2.chk" >> "$seqres.full"
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum "$TESTDIR/file1" | _filter_scratch
-+md5sum "$TESTDIR/file2" | _filter_scratch
-+md5sum "$TESTDIR/file2.chk" | _filter_scratch
-+
-+echo "CoW and unmount"
-+"$XFS_IO_PROG" -d -f -c "pwrite -S 0x63 -b $((BLKSZ * BSZ)) 0 $((BLKSZ * NR))" "$TESTDIR/file2" >> "$seqres.full"
-+"$XFS_IO_PROG" -f -c "pwrite -S 0x63 -b $((BLKSZ * BSZ)) 0 $((BLKSZ * NR))" "$TESTDIR/file2.chk" >> "$seqres.full"
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum "$TESTDIR/file1" | _filter_scratch
-+md5sum "$TESTDIR/file2" | _filter_scratch
-+md5sum "$TESTDIR/file2.chk" | _filter_scratch
-+
-+echo "Check for damage"
-+umount "$SCRATCH_MNT"
-+_check_scratch_fs
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/879.out b/tests/generic/879.out
-new file mode 100644
-index 0000000..fc1363a
++exit 0
+diff --git a/tools/nextid b/tools/nextid
+new file mode 120000
+index 0000000..5c31d60
 --- /dev/null
-+++ b/tests/generic/879.out
-@@ -0,0 +1,13 @@
-+QA output created by 879
-+Format and mount
-+Create the original files
-+Compare files
-+01768a16d33c9bd21dc67a7fac006ee1  SCRATCH_MNT/test-879/file1
-+01768a16d33c9bd21dc67a7fac006ee1  SCRATCH_MNT/test-879/file2
-+01768a16d33c9bd21dc67a7fac006ee1  SCRATCH_MNT/test-879/file2.chk
-+CoW and unmount
-+Compare files
-+01768a16d33c9bd21dc67a7fac006ee1  SCRATCH_MNT/test-879/file1
-+c835fd53fa27b72511b250d51595c053  SCRATCH_MNT/test-879/file2
-+c835fd53fa27b72511b250d51595c053  SCRATCH_MNT/test-879/file2.chk
-+Check for damage
-diff --git a/tests/generic/group b/tests/generic/group
-index f3e3e2c..68853b4 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -289,3 +289,5 @@
- 875 auto quick clone
- 876 auto quick clone
- 877 auto quick clone
-+878 auto quick clone
-+879 auto quick clone
++++ b/tools/nextid
+@@ -0,0 +1 @@
++sort-group
+\ No newline at end of file
+diff --git a/tools/sort-group b/tools/sort-group
+new file mode 100755
+index 0000000..84944ed
+--- /dev/null
++++ b/tools/sort-group
+@@ -0,0 +1,112 @@
++#!/usr/bin/env python
++import sys
++
++# Sort a group list, carefully preserving comments.
++
++def xfstest_key(key):
++	'''Extract the numeric part of a test name if possible.'''
++	k = 0
++
++	assert type(key) == str
++
++	# No test number at all...
++	if not key[0].isdigit():
++		return key
++
++	# ...otherwise extract as much number as we can.
++	for digit in key:
++		if digit.isdigit():
++			k = k * 10 + int(digit)
++		else:
++			return k
++	return k
++
++def read_group(fd):
++	'''Read the group list, carefully attaching comments to the next test.'''
++	tests = {}
++	comments = None
++
++	for line in fd:
++		sline = line.strip()
++		tokens = sline.split()
++		if len(tokens) == 0 or tokens[0] == '#':
++			if comments == None:
++				comments = []
++			comments.append(sline)
++		else:
++			tests[tokens[0]] = (comments, tokens[1:])
++			comments = None
++	return tests
++
++def sort_keys(keys):
++	'''Separate keys into integer and non-integer tests.'''
++	int_keys = []
++	int_xkeys = []
++	str_keys = []
++
++	# Sort keys into integer(ish) tests and other
++	for key in keys:
++		xkey = xfstest_key(key)
++		if type(xkey) == int:
++			int_keys.append(key)
++			int_xkeys.append(xkey)
++		else:
++			str_keys.append(key)
++	return (int_keys, int_xkeys, str_keys)
++
++def write_sorted(tests, fd):
++	def dump_xkey(xkey):
++		(comments, tokens) = tests[key]
++		if comments:
++			for c in comments:
++				fd.write('%s\n' % c)
++		fd.write('%s %s\n' % (key, ' '.join(tokens)))
++	'''Print tests (and comments) in number order.'''
++
++	(int_keys, ignored, str_keys) = sort_keys(tests.keys())
++	for key in sorted(int_keys, key = xfstest_key):
++		dump_xkey(key)
++	for key in sorted(str_keys):
++		dump_xkey(key)
++
++def sort_main():
++	if '--help' in sys.argv[1:]:
++		print('Usage: %s groupfiles' % sys.argv[0])
++		sys.exit(0)
++
++	for arg in sys.argv[1:]:
++		with open(arg, 'r+') as fd:
++			x = read_group(fd)
++			fd.seek(0, 0)
++			write_sorted(x, fd)
++
++def nextid_main():
++	if '--help' in sys.argv[1:]:
++		print('Usage: %s group[/startid] ' % sys.argv[0])
++		sys.exit(0)
++
++	if len(sys.argv) != 2:
++		print('Specify exactly one group name.')
++		sys.exit(1)
++
++	c = sys.argv[1].split('/')
++	if len(c) > 1:
++		startid = int(c[1])
++	else:
++		startid = 1
++	group = c[0]
++
++	with open('tests/%s/group' % group, 'r') as fd:
++		x = read_group(fd)
++		xkeys = {int(x) for x in sort_keys(x.keys())[1]}
++
++		xid = startid
++		while xid in xkeys:
++			xid += 1
++		print('%s/%d' % (group, xid))
++
++if __name__ == '__main__':
++	if 'nextid' in sys.argv[0]:
++		nextid_main()
++	else:
++		sort_main()
 
