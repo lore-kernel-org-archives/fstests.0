@@ -1,39 +1,56 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:21740 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751028AbbLUFTS (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 21 Dec 2015 00:19:18 -0500
-Subject: Re: Ideas to do custom operation just after mount?
-References: <56721602.5050204@cn.fujitsu.com> <20151221001654.GM19802@dastard>
- <56776330.1090500@cn.fujitsu.com> <5677662F.2060806@cn.fujitsu.com>
-From: Anand Jain <anand.jain@oracle.com>
-Message-ID: <56778B9E.8050900@oracle.com>
-Date: Mon, 21 Dec 2015 13:18:22 +0800
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:60089 "EHLO
+	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750886AbbLUGbP (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 21 Dec 2015 01:31:15 -0500
+Date: Mon, 21 Dec 2015 17:31:11 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 06/11] reflink: more tests
+Message-ID: <20151221063111.GO19802@dastard>
+References: <20151219091052.15320.94973.stgit@birch.djwong.org>
+ <20151219091131.15320.12391.stgit@birch.djwong.org>
 MIME-Version: 1.0
-In-Reply-To: <5677662F.2060806@cn.fujitsu.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20151219091131.15320.12391.stgit@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, btrfs <linux-btrfs@vger.kernel.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
+On Sat, Dec 19, 2015 at 01:11:31AM -0800, Darrick J. Wong wrote:
+> Add more tests for unaligned copy-on-write things, and explicitly
+> test the ability to pass "len == 0" to mean reflink/dedupe all
+> the way to the end of the file".
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+.....
+> +_cleanup()
+> +{
+> +    cd /
+> +    rm -rf "$tmp".* "$TESTDIR"
+> +}
+.....
+> +
+> +TESTDIR="$TEST_DIR/test-$seq"
+> +rm -rf "$TESTDIR"
+> +mkdir "$TESTDIR"
 
+This use of TESTDIR is highly confusing. When I see TESTDIR I think
+that it's the mount point of the test device, not potentially some
+directory on the scratch device.
 
-> BTW, any good idea for btrfs to do such operation like
-> enabling/disabling some minor features? Especially when it can be set on
-> individual file/dirs.
->
-> Features like incoming write time deduplication, is designed to be
-> enabled/disabled for individual file/dirs, so it's not a quite good idea
-> to use mount option to do it.
->
-> Although some feature, like btrfs quota(qgroup), should be implemented
-> by mount option though.
-> I don't understand why qgroup is enabled/disabled by ioctl. :(
+I see that this occurs through lots of tests, not just these new
+ones. Can you do a pass across the tests with, say, sed and rename
+all these to something less confusing? e.g. "testdir", in lower
+case, makes it clear that it's a local variable, not the global test
+device mount point.... (i.e. test local variables are lower case,
+exported test harnes variables are upper case ;)
 
+Separate patch/pull req is fine.
 
-mount option won't persist across systems/computers unless remembered by 
-human.
+Cheers,
 
-
-Thanks, Anand
+dave.
+-- 
+Dave Chinner
+david@fromorbit.com
