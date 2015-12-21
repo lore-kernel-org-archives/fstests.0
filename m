@@ -1,79 +1,60 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:56846 "EHLO
-	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751081AbbLUAe0 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 20 Dec 2015 19:34:26 -0500
-Date: Mon, 21 Dec 2015 11:34:23 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 2/3] common: Improve _link_output_file to be more
- versatile
-Message-ID: <20151221003423.GN19802@dastard>
-References: <1448361598-28438-1-git-send-email-jack@suse.cz>
- <1448361598-28438-3-git-send-email-jack@suse.cz>
- <20151207232619.GC3094@thunk.org>
- <20151209122707.GE3137@quack.suse.cz>
+Received: from cn.fujitsu.com ([59.151.112.132]:64889 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751165AbbLUC0J (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sun, 20 Dec 2015 21:26:09 -0500
+Subject: Re: Ideas to do custom operation just after mount?
+References: <56721602.5050204@cn.fujitsu.com> <20151221001654.GM19802@dastard>
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Message-ID: <56776330.1090500@cn.fujitsu.com>
+Date: Mon, 21 Dec 2015 10:25:52 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20151209122707.GE3137@quack.suse.cz>
+In-Reply-To: <20151221001654.GM19802@dastard>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Jan Kara <jack@suse.cz>
-Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, Jan Kara <jack@suse.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, btrfs <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Dec 09, 2015 at 01:27:07PM +0100, Jan Kara wrote:
-> On Mon 07-12-15 18:26:19, Ted Tso wrote:
-> > On Tue, Nov 24, 2015 at 11:39:57AM +0100, Jan Kara wrote:
-> > > From: Jan Kara <jack@suse.com>
-> > > 
-> > > Currently _link_output_file() selects output file suffix based on the
-> > > current operating system. Make it more versatile by allowing selection
-> > > of output file suffix based on any feature string. The idea is that
-> > > in config file ($seq.cfg) there are several lines like:
-> > > 
-> > > feat1,feat2: suffix
-> > > 
-> > > The function is passed a feature string (or uses os_name,MOUNT_OPTIONS
-> > > if no argument is passed) and selects output file with a suffix for
-> > > which all features are present in the feature string. If there is no
-> > > matching line, output with 'default' suffix is selected.
-> > > 
-> > > Update all tests using _link_out_file to the new calling convention.
-> > > 
-> > > Signed-off-by: Jan Kara <jack@suse.com>
-> > 
-> > I made a slight change so that if $seqfull.cfg doesn't exist, we use
-> > ./common/default.cfg instead.  This avoids the need to create a large
-> > number of identical files:
-> > 
-> > >  tests/generic/088.cfg       |   2 +
-> > >  tests/xfs/018.cfg           |   2 +
-> > >  tests/xfs/022.cfg           |   2 +
-> > >  tests/xfs/023.cfg           |   2 +
-> > >  tests/xfs/030.cfg           |   2 +
-> > >  tests/xfs/031.cfg           |   2 +
-> > >  tests/xfs/035.cfg           |   2 +
-> > >  tests/xfs/036.cfg           |   2 +
-> > >  tests/xfs/039.cfg           |   2 +
-> > >  tests/xfs/043.cfg           |   2 +
-> > >  tests/xfs/082.cfg           |   2 +
-> > >  tests/xfs/146.cfg           |   2 +
-> > 
-> > What do you think?
-> 
-> So I'm somewhat undecided whether this is better or not ;). It certainly
-> saves us some churn with identical .cfg files for linux vs irix configs
-> but OTOH I don't expect there to be much more .cfg files selecting between
-> irix and linux so this is mostly one-time issue. So I guess I'll leave it
-> upto Dave and his taste to decide what he finds better.
 
-I'll take the one-time change here, but as Christoph suggested it
-really is getting to the point where we should stop considering
-xfstests to be a cross-platform test suite. Just another cleanup to
-be done...
 
-Cheers,
+Dave Chinner wrote on 2015/12/21 11:16 +1100:
+> On Thu, Dec 17, 2015 at 09:55:14AM +0800, Qu Wenruo wrote:
+>> Hi,
+>>
+>> Will xfstests provides some API to do some operation just after
+>> mounting a filesystem?
+>>
+>> Some filesystem(OK, btrfs again) has some function(now qgroup only)
+>> which needed to be enabled by ioctl instead of mount option.
+>
+> Irk.
+>
+> Seriously, I need ot find some time to split all the fs specific
+> stuff in common/rc into separate files and have each different
+> filesystem implement it's own version of the relevant functions
+> like _scratch_mkfs, _scratch_mount, etc.
+>
+> That will enable btrfs to do truly hideous stuff like this that
+> admins will hate you for requiring, and the rest of us won't have to
+> care about it.
+>
+>> So is there any good idea to do some operation just after mounting
+>> in xfstests?
+>
+> You're just going to have to wait a bit - the first piece of this
+> is in the overlayfs support patches, and the rest of it is in my
+> local work area in an incomplete state.
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Glad to hear that, I'll just wait for the formal implement.
+
+Thanks,
+Qu
+
+>
+> Cheers,
+>
+> Dave.
+>
+
+
