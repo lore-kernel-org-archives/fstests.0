@@ -1,427 +1,512 @@
-Received: from mx1.redhat.com ([209.132.183.28]:58603 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:57403 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933011AbbLVUyQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 22 Dec 2015 15:54:16 -0500
+	id S933011AbbLVUyT (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 22 Dec 2015 15:54:19 -0500
 Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (Postfix) with ESMTPS id E9FA3219E
-	for <fstests@vger.kernel.org>; Tue, 22 Dec 2015 20:54:16 +0000 (UTC)
+	by mx1.redhat.com (Postfix) with ESMTPS id 041FCC0B9301
+	for <fstests@vger.kernel.org>; Tue, 22 Dec 2015 20:54:19 +0000 (UTC)
 Received: from schleppi.home.com (vpn1-6-224.ams2.redhat.com [10.36.6.224])
-	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id tBMKs3S9007345
-	for <fstests@vger.kernel.org>; Tue, 22 Dec 2015 15:54:15 -0500
+	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id tBMKs3SA007345
+	for <fstests@vger.kernel.org>; Tue, 22 Dec 2015 15:54:17 -0500
 From: Andreas Gruenbacher <agruenba@redhat.com>
-Subject: [PATCH 5/6] fsx: Improve operation logging
-Date: Tue, 22 Dec 2015 21:53:55 +0100
-Message-Id: <1450817636-11416-6-git-send-email-agruenba@redhat.com>
+Subject: [PATCH 6/6] fsx: Add mechanism to replay failed operations
+Date: Tue, 22 Dec 2015 21:53:56 +0100
+Message-Id: <1450817636-11416-7-git-send-email-agruenba@redhat.com>
 In-Reply-To: <1450817636-11416-1-git-send-email-agruenba@redhat.com>
 References: <1450817636-11416-1-git-send-email-agruenba@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Add FL_SKIPPED, FL_CLOSE_OPEN, and FL_KEEP_SIZE flags to the log
-entries.  Use FL_SKIPPED to indicate that an operation was skipped.  Use
-FL_CLOSE_OPEN to encode when an operation is followed by a close/open
-cycle.  Use FL_KEEP_SIZE to indicate when the OP_ZERO_RANGE and
-OP_FALLOCATE operations should keep the file size unchanged and put the
-current file size into args[2] so that we can tell which operation was
-actually called from the log.
+Create a $name.fsxops file next to $test.fsxlog.  When a test fails,
+dump the operations in the log into that file in a simple, parseable
+format like:
 
-After that, arg2 of log4 is always either unused or the current file size, so
-remove it and unconditionally remember the current file size.
+  fallocate 0x2e0f2 0xf04a 0x0 keep_size
+  truncate 0x0 0x11e00 0x0 *
+  write 0x73400 0x6c00 0x11e00
+  skip punch_hole 0x71539913 0xdf76 0x7a000 close_open
+  mapread 0x56000 0x16d08 0x7a000
+
+Here, each operation is on a separate line. When the first word is
+"skip", the operation will be skipped.  The next parameters are offset,
+length, and the current file size, followed by optional flags like
+keep_size and clode_open.  A trailing asterisk indicates that the
+operation overlaps with the operation that has failed.
+
+Add a --replay-ops option that allows to replay the operations recorded
+in such a $name.fsxops file.  (The log can be modified to easily narrow
+down which operations are causing the failure.)
 
 Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
 ---
- ltp/fsx.c | 122 +++++++++++++++++++++++++++++++++-----------------------------
- 1 file changed, 66 insertions(+), 56 deletions(-)
+ ltp/fsx.c | 246 +++++++++++++++++++++++++++++++++++++++++++++++++++++---------
+ 1 file changed, 213 insertions(+), 33 deletions(-)
 
 diff --git a/ltp/fsx.c b/ltp/fsx.c
-index 5385ed3..50ca885 100644
+index 50ca885..28f109c 100644
 --- a/ltp/fsx.c
 +++ b/ltp/fsx.c
-@@ -40,6 +40,10 @@
+@@ -166,7 +166,10 @@ int aio_rw(int rw, int fd, char *buf, unsigned len, unsigned offset);
+ #define fsxwrite(a,b,c,d)	write(a,b,c)
+ #endif
  
- #define NUMPRINTCOLUMNS 32	/* # columns of data to print on each line */
++const char *replayops = NULL;
+ FILE *	fsxlogf = NULL;
++FILE *	replayopsf = NULL;
++char opsfile[1024];
+ int badoff = -1;
+ int closeopen = 0;
  
-+/* Operation flags */
-+
-+enum opflags { FL_NONE = 0, FL_SKIPPED = 1, FL_CLOSE_OPEN = 2, FL_KEEP_SIZE = 4 };
-+
- /*
-  *	A log entry is an operation and a bunch of arguments.
-  */
-@@ -47,6 +51,7 @@
- struct log_entry {
- 	int	operation;
- 	int	args[3];
-+	enum opflags flags;
- };
- 
- #define	LOGSIZE	10000
-@@ -73,9 +78,7 @@ int			logcount = 0;	/* total ops */
-  *
-  * When mapped read/writes are disabled, they are simply converted to normal
-  * reads and writes. When fallocate/fpunch calls are disabled, they are
-- * converted to OP_SKIPPED. Hence OP_SKIPPED needs to have a number higher than
-- * the operation selction matrix, as does the OP_CLOSEOPEN which is an
-- * operation modifier rather than an operation in itself.
-+ * skipped.
-  *
-  * Because of the "lite" version, we also need to have different "maximum
-  * operation" defines to allow the ops to be selected correctly based on the
-@@ -98,10 +101,6 @@ int			logcount = 0;	/* total ops */
- #define OP_INSERT_RANGE	9
- #define OP_MAX_FULL		10
- 
--/* operation modifiers */
--#define OP_CLOSEOPEN	100
--#define OP_SKIPPED	101
--
- #undef PAGE_SIZE
- #define PAGE_SIZE       getpagesize()
- #undef PAGE_MASK
-@@ -222,17 +221,18 @@ prterr(char *prefix)
- 
+@@ -200,7 +203,7 @@ warn(const char * fmt, ...)  {
+ #define BUF_SIZE 1024
  
  void
--log4(int operation, int arg0, int arg1, int arg2)
-+log4(int operation, int arg0, int arg1, enum opflags flags)
+-prt(char *fmt, ...)
++prt(const char *fmt, ...)
  {
- 	struct log_entry *le;
+ 	va_list args;
+ 	char buffer[BUF_SIZE];
+@@ -214,12 +217,43 @@ prt(char *fmt, ...)
+ }
  
- 	le = &oplog[logptr];
- 	le->operation = operation;
- 	if (closeopen)
--		le->operation = ~ le->operation;
-+		flags |= FL_CLOSE_OPEN;
- 	le->args[0] = arg0;
- 	le->args[1] = arg1;
--	le->args[2] = arg2;
-+	le->args[2] = file_size;
-+	le->flags = flags;
- 	logptr++;
- 	logcount++;
- 	if (logptr >= LOGSIZE)
-@@ -245,7 +245,6 @@ logdump(void)
+ void
+-prterr(char *prefix)
++prterr(const char *prefix)
  {
+ 	prt("%s%s%s\n", prefix, prefix ? ": " : "", strerror(errno));
+ }
+ 
+ 
++static const char *op_names[] = {
++	[OP_READ] = "read",
++	[OP_WRITE] = "write",
++	[OP_MAPREAD] = "mapread",
++	[OP_MAPWRITE] = "mapwrite",
++	[OP_TRUNCATE] = "truncate",
++	[OP_FALLOCATE] = "fallocate",
++	[OP_PUNCH_HOLE] = "punch_hole",
++	[OP_ZERO_RANGE] = "zero_range",
++	[OP_COLLAPSE_RANGE] = "collapse_range",
++	[OP_INSERT_RANGE] = "insert_range",
++};
++
++static const char *op_name(int operation)
++{
++	if (operation >= 0 &&
++	    operation < sizeof(op_names) / sizeof(op_names[0]))
++		return op_names[operation];
++	return NULL;
++}
++
++static int op_code(const char *name)
++{
++	int i;
++
++	for (i = 0; i < sizeof(op_names) / sizeof(op_names[0]); i++)
++		if (op_names[i] && strcmp(name, op_names[i]) == 0)
++			return i;
++	return -1;
++}
++
+ void
+ log4(int operation, int arg0, int arg1, enum opflags flags)
+ {
+@@ -243,10 +277,16 @@ log4(int operation, int arg0, int arg1, enum opflags flags)
+ void
+ logdump(void)
+ {
++	FILE	*logopsf;
  	int	i, count, down;
  	struct log_entry	*lp;
--	char *falloc_type[3] = {"PAST_EOF", "EXTENDING", "INTERIOR"};
  
  	prt("LOG DUMP (%d total operations):\n", logcount);
++
++	logopsf = fopen(opsfile, "w");
++	if (!logopsf)
++		prterr(opsfile);
++
  	if (logcount < LOGSIZE) {
-@@ -261,9 +260,12 @@ logdump(void)
+ 		i = 0;
+ 		count = logcount;
+@@ -255,12 +295,16 @@ logdump(void)
+ 		count = LOGSIZE;
+ 	}
+ 	for ( ; count > 0; count--) {
++		bool overlap;
+ 		int opnum;
+ 
  		opnum = i+1 + (logcount/LOGSIZE)*LOGSIZE;
  		prt("%d(%3d mod 256): ", opnum, opnum%256);
  		lp = &oplog[i];
--		if ((closeopen = lp->operation < 0))
--			lp->operation = ~ lp->operation;
--			
+ 
++		overlap = badoff >= lp->args[0] &&
++			  badoff < lp->args[0] + lp->args[1];
 +
-+		if (lp->flags & FL_SKIPPED) {
-+			prt("SKIPPED (no operation)");
-+			goto skipped;
-+		}
-+
- 		switch (lp->operation) {
- 		case OP_MAPREAD:
+ 		if (lp->flags & FL_SKIPPED) {
+ 			prt("SKIPPED (no operation)");
+ 			goto skipped;
+@@ -271,24 +315,21 @@ logdump(void)
  			prt("MAPREAD  0x%x thru 0x%x\t(0x%x bytes)",
-@@ -302,18 +304,24 @@ logdump(void)
+ 			    lp->args[0], lp->args[0] + lp->args[1] - 1,
+ 			    lp->args[1]);
+-			if (badoff >= lp->args[0] && badoff <
+-						     lp->args[0] + lp->args[1])
++			if (overlap)
+ 				prt("\t***RRRR***");
+ 			break;
+ 		case OP_MAPWRITE:
+ 			prt("MAPWRITE 0x%x thru 0x%x\t(0x%x bytes)",
+ 			    lp->args[0], lp->args[0] + lp->args[1] - 1,
+ 			    lp->args[1]);
+-			if (badoff >= lp->args[0] && badoff <
+-						     lp->args[0] + lp->args[1])
++			if (overlap)
+ 				prt("\t******WWWW");
+ 			break;
+ 		case OP_READ:
+ 			prt("READ     0x%x thru 0x%x\t(0x%x bytes)",
+ 			    lp->args[0], lp->args[0] + lp->args[1] - 1,
+ 			    lp->args[1]);
+-			if (badoff >= lp->args[0] &&
+-			    badoff < lp->args[0] + lp->args[1])
++			if (overlap)
+ 				prt("\t***RRRR***");
+ 			break;
+ 		case OP_WRITE:
+@@ -299,16 +340,19 @@ logdump(void)
+ 				prt(" HOLE");
+ 			else if (lp->args[0] + lp->args[1] > lp->args[2])
+ 				prt(" EXTEND");
+-			if ((badoff >= lp->args[0] || badoff >=lp->args[2]) &&
+-			    badoff < lp->args[0] + lp->args[1])
++			overlap = (badoff >= lp->args[0] ||
++				   badoff >=lp->args[2]) &&
++				  badoff < lp->args[0] + lp->args[1];
++			if (overlap)
  				prt("\t***WWWW");
  			break;
  		case OP_TRUNCATE:
--			down = lp->args[0] < lp->args[1];
-+			down = lp->args[1] < lp->args[2];
+ 			down = lp->args[1] < lp->args[2];
  			prt("TRUNCATE %s\tfrom 0x%x to 0x%x",
--			    down ? "DOWN" : "UP", lp->args[1], lp->args[0]);
--			if (badoff >= lp->args[!down] &&
--			    badoff < lp->args[!!down])
-+			    down ? "DOWN" : "UP", lp->args[2], lp->args[1]);
-+			if (badoff >= lp->args[1 + !down] &&
-+			    badoff < lp->args[1 + !!down])
+ 			    down ? "DOWN" : "UP", lp->args[2], lp->args[1]);
+-			if (badoff >= lp->args[1 + !down] &&
+-			    badoff < lp->args[1 + !!down])
++			overlap = badoff >= lp->args[1 + !down] &&
++				  badoff < lp->args[1 + !!down];
++			if (overlap)
  				prt("\t******WWWW");
  			break;
  		case OP_FALLOCATE:
- 			/* 0: offset 1: length 2: where alloced */
--			prt("FALLOC   0x%x thru 0x%x\t(0x%x bytes) %s",
-+			prt("FALLOC   0x%x thru 0x%x\t(0x%x bytes) ",
- 				lp->args[0], lp->args[0] + lp->args[1],
--				lp->args[1], falloc_type[lp->args[2]]);
-+				lp->args[1]);
-+			if (lp->args[0] + lp->args[1] <= lp->args[2])
-+				prt("INTERIOR");
-+			else if (lp->flags & FL_KEEP_SIZE)
-+				prt("PAST_EOF");
-+			else
-+				prt("EXTENDING");
- 			if (badoff >= lp->args[0] &&
- 			    badoff < lp->args[0] + lp->args[1])
+@@ -322,46 +366,43 @@ logdump(void)
+ 				prt("PAST_EOF");
+ 			else
+ 				prt("EXTENDING");
+-			if (badoff >= lp->args[0] &&
+-			    badoff < lp->args[0] + lp->args[1])
++			if (overlap)
  				prt("\t******FFFF");
-@@ -350,14 +358,12 @@ logdump(void)
- 						     lp->args[0] + lp->args[1])
+ 			break;
+ 		case OP_PUNCH_HOLE:
+ 			prt("PUNCH    0x%x thru 0x%x\t(0x%x bytes)",
+ 			    lp->args[0], lp->args[0] + lp->args[1] - 1,
+ 			    lp->args[1]);
+-			if (badoff >= lp->args[0] && badoff <
+-						     lp->args[0] + lp->args[1])
++			if (overlap)
+ 				prt("\t******PPPP");
+ 			break;
+ 		case OP_ZERO_RANGE:
+ 			prt("ZERO     0x%x thru 0x%x\t(0x%x bytes)",
+ 			    lp->args[0], lp->args[0] + lp->args[1] - 1,
+ 			    lp->args[1]);
+-			if (badoff >= lp->args[0] && badoff <
+-						     lp->args[0] + lp->args[1])
++			if (overlap)
+ 				prt("\t******ZZZZ");
+ 			break;
+ 		case OP_COLLAPSE_RANGE:
+ 			prt("COLLAPSE 0x%x thru 0x%x\t(0x%x bytes)",
+ 			    lp->args[0], lp->args[0] + lp->args[1] - 1,
+ 			    lp->args[1]);
+-			if (badoff >= lp->args[0] && badoff <
+-						     lp->args[0] + lp->args[1])
++			if (overlap)
+ 				prt("\t******CCCC");
+ 			break;
+ 		case OP_INSERT_RANGE:
+ 			prt("INSERT 0x%x thru 0x%x\t(0x%x bytes)",
+ 			    lp->args[0], lp->args[0] + lp->args[1] - 1,
+ 			    lp->args[1]);
+-			if (badoff >= lp->args[0] && badoff <
+-						     lp->args[0] + lp->args[1])
++			if (overlap)
  				prt("\t******IIII");
  			break;
--		case OP_SKIPPED:
--			prt("SKIPPED (no operation)");
--			break;
  		default:
  			prt("BOGUS LOG ENTRY (operation code = %d)!",
  			    lp->operation);
++			continue;
  		}
--		if (closeopen)
-+	    skipped:
-+		if (lp->flags & FL_CLOSE_OPEN)
++
+ 	    skipped:
+ 		if (lp->flags & FL_CLOSE_OPEN)
  			prt("\n\t\tCLOSE/OPEN");
- 		prt("\n");
+@@ -369,6 +410,30 @@ logdump(void)
  		i++;
-@@ -549,17 +555,17 @@ doread(unsigned offset, unsigned size)
- 	if (size == 0) {
- 		if (!quiet && testcalls > simulatedopcount && !o_direct)
- 			prt("skipping zero size read\n");
--		log4(OP_SKIPPED, OP_READ, offset, size);
-+		log4(OP_READ, offset, size, FL_SKIPPED);
- 		return;
+ 		if (i == LOGSIZE)
+ 			i = 0;
++
++		if (logopsf) {
++			if (lp->flags & FL_SKIPPED)
++				fprintf(logopsf, "skip ");
++			fprintf(logopsf, "%s 0x%x 0x%x 0x%x",
++				op_name(lp->operation),
++				lp->args[0], lp->args[1], lp->args[2]);
++			if (lp->flags & FL_KEEP_SIZE)
++				fprintf(logopsf, " keep_size");
++			if (lp->flags & FL_CLOSE_OPEN)
++				fprintf(logopsf, " close_open");
++			if (overlap)
++				fprintf(logopsf, " *");
++			fprintf(logopsf, "\n");
++		}
++	}
++
++	if (logopsf) {
++		if (fclose(logopsf) != 0)
++			prterr(opsfile);
++		else
++			prt("Log of operations saved to \"%s\"; "
++			    "replay with --replay-ops\n",
++			    opsfile);
  	}
- 	if (size + offset > file_size) {
- 		if (!quiet && testcalls > simulatedopcount)
- 			prt("skipping seek/read past end of file\n");
--		log4(OP_SKIPPED, OP_READ, offset, size);
-+		log4(OP_READ, offset, size, FL_SKIPPED);
- 		return;
- 	}
+ }
  
--	log4(OP_READ, offset, size, 0);
-+	log4(OP_READ, offset, size, FL_NONE);
+@@ -1206,12 +1271,78 @@ do {						\
+ 	TRIM_LEN(off, len, size);		\
+ } while (0)
  
- 	if (testcalls <= simulatedopcount)
- 		return;
-@@ -628,17 +634,17 @@ domapread(unsigned offset, unsigned size)
- 	if (size == 0) {
- 		if (!quiet && testcalls > simulatedopcount)
- 			prt("skipping zero size read\n");
--		log4(OP_SKIPPED, OP_MAPREAD, offset, size);
-+		log4(OP_MAPREAD, offset, size, FL_SKIPPED);
- 		return;
- 	}
- 	if (size + offset > file_size) {
- 		if (!quiet && testcalls > simulatedopcount)
- 			prt("skipping seek/read past end of file\n");
--		log4(OP_SKIPPED, OP_MAPREAD, offset, size);
-+		log4(OP_MAPREAD, offset, size, FL_SKIPPED);
- 		return;
- 	}
+-void
++void cleanup();
++
++static int
++read_op(struct log_entry *log_entry)
++{
++	char line[256];
++
++	memset(log_entry, 0, sizeof(*log_entry));
++	log_entry->operation = -1;
++
++	while (log_entry->operation == -1) {
++		char *str;
++		int i;
++
++		do {
++			if (!fgets(line, sizeof(line), replayopsf)) {
++				if (feof(replayopsf)) {
++					replayopsf = NULL;
++					return 0;
++				}
++				goto fail;
++			}
++			str = strtok(line, " \t\n");
++		} while (!str);
++
++		if (strcmp(str, "skip") == 0) {
++			log_entry->flags |= FL_SKIPPED;
++			str = strtok(NULL, " \t\n");
++			if (!str)
++				goto fail;
++		}
++		log_entry->operation = op_code(str);
++		if (log_entry->operation == -1)
++			goto fail;
++		for (i = 0; i < 3; i++) {
++			char *end;
++
++			str = strtok(NULL, " \t\n");
++			if (!str)
++				goto fail;
++			log_entry->args[i] = strtoul(str, &end, 0);
++			if (*end)
++				goto fail;
++		}
++		while ((str = strtok(NULL, " \t\n"))) {
++			if (strcmp(str, "keep_size") == 0)
++				log_entry->flags |= FL_KEEP_SIZE;
++			else if (strcmp(str, "close_open") == 0)
++				log_entry->flags |= FL_CLOSE_OPEN;
++			else if (strcmp(str, "*") == 0)
++				;  /* overlap marker; ignore */
++			else
++				goto fail;
++		}
++	}
++	return 1;
++
++fail:
++	fprintf(stderr, "%s: parse error\n", replayops);
++	fclose(replayopsf);
++	replayopsf = NULL;
++	cleanup(100);  /* doesn't return */
++	return 0;
++}
++
++
++int
+ test(void)
+ {
+ 	unsigned long	offset;
+-	unsigned long	size = maxoplen;
+-	unsigned long	rv = random();
++	unsigned long	size;
++	unsigned long	rv;
+ 	unsigned long	op;
+ 	int		keep_size = 0;
  
--	log4(OP_MAPREAD, offset, size, 0);
-+	log4(OP_MAPREAD, offset, size, FL_NONE);
+@@ -1220,16 +1351,39 @@ test(void)
  
- 	if (testcalls <= simulatedopcount)
- 		return;
-@@ -697,11 +703,11 @@ dowrite(unsigned offset, unsigned size)
- 	if (size == 0) {
- 		if (!quiet && testcalls > simulatedopcount && !o_direct)
- 			prt("skipping zero size write\n");
--		log4(OP_SKIPPED, OP_WRITE, offset, size);
-+		log4(OP_WRITE, offset, size, FL_SKIPPED);
- 		return;
- 	}
+ 	testcalls++;
  
--	log4(OP_WRITE, offset, size, file_size);
-+	log4(OP_WRITE, offset, size, FL_NONE);
+-	if (closeprob)
+-		closeopen = (rv >> 3) < (1 << 28) / closeprob;
+-
+ 	if (debugstart > 0 && testcalls >= debugstart)
+ 		debug = 1;
  
- 	gendata(original_buf, good_buf, offset, size);
- 	if (file_size < offset + size) {
-@@ -763,12 +769,12 @@ domapwrite(unsigned offset, unsigned size)
- 	if (size == 0) {
- 		if (!quiet && testcalls > simulatedopcount)
- 			prt("skipping zero size write\n");
--		log4(OP_SKIPPED, OP_MAPWRITE, offset, size);
-+		log4(OP_MAPWRITE, offset, size, FL_SKIPPED);
- 		return;
- 	}
- 	cur_filesize = file_size;
+ 	if (!quiet && testcalls < simulatedopcount && testcalls % 100000 == 0)
+ 		prt("%lu...\n", testcalls);
  
--	log4(OP_MAPWRITE, offset, size, 0);
-+	log4(OP_MAPWRITE, offset, size, FL_NONE);
++	if (replayopsf) {
++		struct log_entry log_entry;
++
++		while (read_op(&log_entry)) {
++			if (log_entry.flags & FL_SKIPPED) {
++				log4(log_entry.operation,
++				     log_entry.args[0], log_entry.args[1],
++				     log_entry.flags);
++				continue;
++			}
++
++			op = log_entry.operation;
++			offset = log_entry.args[0];
++			size = log_entry.args[1];
++			closeopen = !!(log_entry.flags & FL_CLOSE_OPEN);
++			keep_size = !!(log_entry.flags & FL_KEEP_SIZE);
++			goto have_op;
++		}
++		return 0;
++	}
++
++	rv = random();
++	if (closeprob)
++		closeopen = (rv >> 3) < (1 << 28) / closeprob;
++
+ 	offset = random();
++	size = maxoplen;
+ 	if (randomoplen)
+ 		size = random() % (maxoplen + 1);
  
- 	gendata(original_buf, good_buf, offset, size);
- 	if (file_size < offset + size) {
-@@ -835,7 +841,7 @@ dotruncate(unsigned size)
- 			prt("truncating to largest ever: 0x%x\n", size);
- 	}
+@@ -1240,6 +1394,10 @@ test(void)
+ 		op = rv % OP_MAX_FULL;
  
--	log4(OP_TRUNCATE, size, (unsigned)file_size, 0);
-+	log4(OP_TRUNCATE, 0, size, FL_NONE);
- 
- 	if (size > file_size)
- 		memset(good_buf + file_size, '\0', size - file_size);
-@@ -867,20 +873,20 @@ do_punch_hole(unsigned offset, unsigned length)
- 	if (length == 0) {
- 		if (!quiet && testcalls > simulatedopcount)
- 			prt("skipping zero length punch hole\n");
--			log4(OP_SKIPPED, OP_PUNCH_HOLE, offset, length);
-+			log4(OP_PUNCH_HOLE, offset, length, FL_SKIPPED);
- 		return;
- 	}
- 
- 	if (file_size <= (loff_t)offset) {
- 		if (!quiet && testcalls > simulatedopcount)
- 			prt("skipping hole punch off the end of the file\n");
--			log4(OP_SKIPPED, OP_PUNCH_HOLE, offset, length);
-+			log4(OP_PUNCH_HOLE, offset, length, FL_SKIPPED);
- 		return;
- 	}
- 
- 	end_offset = offset + length;
- 
--	log4(OP_PUNCH_HOLE, offset, length, 0);
-+	log4(OP_PUNCH_HOLE, offset, length, FL_NONE);
- 
- 	if (testcalls <= simulatedopcount)
- 		return;
-@@ -922,7 +928,8 @@ do_zero_range(unsigned offset, unsigned length, int keep_size)
- 	if (length == 0) {
- 		if (!quiet && testcalls > simulatedopcount)
- 			prt("skipping zero length zero range\n");
--			log4(OP_SKIPPED, OP_ZERO_RANGE, offset, length);
-+			log4(OP_ZERO_RANGE, offset, length, FL_SKIPPED |
-+			     (keep_size ? FL_KEEP_SIZE : FL_NONE));
- 		return;
- 	}
- 
-@@ -940,7 +947,8 @@ do_zero_range(unsigned offset, unsigned length, int keep_size)
- 	 * 	1: extending prealloc
- 	 * 	2: interior prealloc
- 	 */
--	log4(OP_ZERO_RANGE, offset, length, (end_offset > file_size) ? (keep_size ? 0 : 1) : 2);
-+	log4(OP_ZERO_RANGE, offset, length,
-+	     keep_size ? FL_KEEP_SIZE : FL_NONE);
- 
- 	if (testcalls <= simulatedopcount)
- 		return;
-@@ -978,7 +986,7 @@ do_collapse_range(unsigned offset, unsigned length)
- 	if (length == 0) {
- 		if (!quiet && testcalls > simulatedopcount)
- 			prt("skipping zero length collapse range\n");
--		log4(OP_SKIPPED, OP_COLLAPSE_RANGE, offset, length);
-+		log4(OP_COLLAPSE_RANGE, offset, length, FL_SKIPPED);
- 		return;
- 	}
- 
-@@ -986,11 +994,11 @@ do_collapse_range(unsigned offset, unsigned length)
- 	if ((loff_t)end_offset >= file_size) {
- 		if (!quiet && testcalls > simulatedopcount)
- 			prt("skipping collapse range behind EOF\n");
--		log4(OP_SKIPPED, OP_COLLAPSE_RANGE, offset, length);
-+		log4(OP_COLLAPSE_RANGE, offset, length, FL_SKIPPED);
- 		return;
- 	}
- 
--	log4(OP_COLLAPSE_RANGE, offset, length, 0);
-+	log4(OP_COLLAPSE_RANGE, offset, length, FL_NONE);
- 
- 	if (testcalls <= simulatedopcount)
- 		return;
-@@ -1030,18 +1038,18 @@ do_insert_range(unsigned offset, unsigned length)
- 	if (length == 0) {
- 		if (!quiet && testcalls > simulatedopcount)
- 			prt("skipping zero length insert range\n");
--		log4(OP_SKIPPED, OP_INSERT_RANGE, offset, length);
-+		log4(OP_INSERT_RANGE, offset, length, FL_SKIPPED);
- 		return;
- 	}
- 
- 	if ((loff_t)offset >= file_size) {
- 		if (!quiet && testcalls > simulatedopcount)
- 			prt("skipping insert range behind EOF\n");
--		log4(OP_SKIPPED, OP_INSERT_RANGE, offset, length);
-+		log4(OP_INSERT_RANGE, offset, length, FL_SKIPPED);
- 		return;
- 	}
- 
--	log4(OP_INSERT_RANGE, offset, length, 0);
-+	log4(OP_INSERT_RANGE, offset, length, FL_NONE);
- 
- 	if (testcalls <= simulatedopcount)
- 		return;
-@@ -1083,7 +1091,8 @@ do_preallocate(unsigned offset, unsigned length, int keep_size)
-         if (length == 0) {
-                 if (!quiet && testcalls > simulatedopcount)
-                         prt("skipping zero length fallocate\n");
--                log4(OP_SKIPPED, OP_FALLOCATE, offset, length);
-+                log4(OP_FALLOCATE, offset, length, FL_SKIPPED |
-+		     (keep_size ? FL_KEEP_SIZE : FL_NONE));
-                 return;
-         }
- 
-@@ -1101,7 +1110,8 @@ do_preallocate(unsigned offset, unsigned length, int keep_size)
- 	 * 	1: extending prealloc
- 	 * 	2: interior prealloc
- 	 */
--	log4(OP_FALLOCATE, offset, length, (end_offset > file_size) ? (keep_size ? 0 : 1) : 2);
-+	log4(OP_FALLOCATE, offset, length,
-+	     keep_size ? FL_KEEP_SIZE : FL_NONE);
- 
- 	if (end_offset > file_size) {
- 		memset(good_buf + file_size, '\0', end_offset - file_size);
-@@ -1251,31 +1261,31 @@ test(void)
- 		break;
+ 	switch(op) {
++	case OP_TRUNCATE:
++		if (!style)
++			size = random() % maxfilelen;
++		break;
  	case OP_FALLOCATE:
- 		if (!fallocate_calls) {
--			log4(OP_SKIPPED, OP_FALLOCATE, offset, size);
-+			log4(OP_FALLOCATE, offset, size, FL_SKIPPED);
- 			goto out;
- 		}
+ 		if (fallocate_calls && size && keep_size_calls)
+ 			keep_size = random() % 2;
+@@ -1250,6 +1408,8 @@ test(void)
  		break;
- 	case OP_PUNCH_HOLE:
- 		if (!punch_hole_calls) {
--			log4(OP_SKIPPED, OP_PUNCH_HOLE, offset, size);
-+			log4(OP_PUNCH_HOLE, offset, size, FL_SKIPPED);
- 			goto out;
- 		}
- 		break;
- 	case OP_ZERO_RANGE:
- 		if (!zero_range_calls) {
--			log4(OP_SKIPPED, OP_ZERO_RANGE, offset, size);
-+			log4(OP_ZERO_RANGE, offset, size, FL_SKIPPED);
- 			goto out;
- 		}
- 		break;
- 	case OP_COLLAPSE_RANGE:
- 		if (!collapse_range_calls) {
--			log4(OP_SKIPPED, OP_COLLAPSE_RANGE, offset, size);
-+			log4(OP_COLLAPSE_RANGE, offset, size, FL_SKIPPED);
- 			goto out;
- 		}
- 		break;
- 	case OP_INSERT_RANGE:
- 		if (!insert_range_calls) {
--			log4(OP_SKIPPED, OP_INSERT_RANGE, offset, size);
-+			log4(OP_INSERT_RANGE, offset, size, FL_SKIPPED);
- 			goto out;
- 		}
- 		break;
-@@ -1326,7 +1336,7 @@ test(void)
- 		offset = offset & ~(block_size - 1);
- 		size = size & ~(block_size - 1);
- 		if (size == 0) {
--			log4(OP_SKIPPED, OP_COLLAPSE_RANGE, offset, size);
-+			log4(OP_COLLAPSE_RANGE, offset, size, FL_SKIPPED);
- 			goto out;
- 		}
- 		do_collapse_range(offset, size);
-@@ -1337,11 +1347,11 @@ test(void)
- 		offset = offset & ~(block_size - 1);
- 		size = size & ~(block_size - 1);
- 		if (size == 0) {
--			log4(OP_SKIPPED, OP_INSERT_RANGE, offset, size);
-+			log4(OP_INSERT_RANGE, offset, size, FL_SKIPPED);
- 			goto out;
- 		}
- 		if (file_size + size > maxfilelen) {
--			log4(OP_SKIPPED, OP_INSERT_RANGE, offset, size);
-+			log4(OP_INSERT_RANGE, offset, size, FL_SKIPPED);
- 			goto out;
- 		}
+ 	}
  
++have_op:
++
+ 	switch (op) {
+ 	case OP_MAPREAD:
+ 		if (!mapped_reads)
+@@ -1313,8 +1473,6 @@ test(void)
+ 		break;
+ 
+ 	case OP_TRUNCATE:
+-		if (!style)
+-			size = random() % maxfilelen;
+ 		dotruncate(size);
+ 		break;
+ 
+@@ -1368,6 +1526,7 @@ out:
+ 		check_size();
+ 	if (closeopen)
+ 		docloseopen();
++	return 1;
+ }
+ 
+ 
+@@ -1594,6 +1753,11 @@ __test_fallocate(int mode, const char *mode_str)
+ #endif
+ }
+ 
++static struct option longopts[] = {
++	{"replay-ops", required_argument, 0, 256},
++	{ }
++};
++
+ int
+ main(int argc, char **argv)
+ {
+@@ -1613,8 +1777,9 @@ main(int argc, char **argv)
+ 
+ 	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
+ 
+-	while ((ch = getopt(argc, argv, "b:c:dfl:m:no:p:qr:s:t:w:xyAD:FKHzCILN:OP:RS:WZ"))
+-	       != EOF)
++	while ((ch = getopt_long(argc, argv,
++				 "b:c:dfl:m:no:p:qr:s:t:w:xyAD:FKHzCILN:OP:RS:WZ",
++				 longopts, NULL)) != EOF)
+ 		switch (ch) {
+ 		case 'b':
+ 			simulatedopcount = getnum(optarg, &endp);
+@@ -1762,6 +1927,9 @@ main(int argc, char **argv)
+ 		case 'Z':
+ 			o_direct = O_DIRECT;
+ 			break;
++		case 256:  /* --replay-ops */
++			replayops = optarg;
++			break;
+ 		default:
+ 			usage();
+ 			/* NOTREACHED */
+@@ -1827,6 +1995,17 @@ main(int argc, char **argv)
+ 		prterr(logfile);
+ 		exit(93);
+ 	}
++	strncat(opsfile, fname, 256);
++	strcat(opsfile, ".fsxops");
++	unlink(opsfile);
++
++	if (replayops) {
++		replayopsf = fopen(replayops, "r");
++		if (!replayopsf) {
++			prterr(replayops);
++			exit(93);
++		}
++	}
+ 
+ #ifdef AIO
+ 	if (aio) 
+@@ -1889,7 +2068,8 @@ main(int argc, char **argv)
+ 		insert_range_calls = test_fallocate(FALLOC_FL_INSERT_RANGE);
+ 
+ 	while (numops == -1 || numops--)
+-		test();
++		if (!test())
++			break;
+ 
+ 	if (close(fd)) {
+ 		prterr("close");
 -- 
 2.4.3
 
