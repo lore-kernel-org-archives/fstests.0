@@ -1,50 +1,43 @@
-Received: from mx1.redhat.com ([209.132.183.28]:32911 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:58576 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751703AbbLVMkO (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 22 Dec 2015 07:40:14 -0500
-Date: Tue, 22 Dec 2015 20:40:10 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 1/2] fstests: fix btrfs test failures after commit
- 27d077ec0bda
-Message-ID: <20151222124010.GB2535@eguan.usersys.redhat.com>
-References: <1450750960-5172-1-git-send-email-fdmanana@kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1450750960-5172-1-git-send-email-fdmanana@kernel.org>
+	id S932725AbbLVUyG (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 22 Dec 2015 15:54:06 -0500
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (Postfix) with ESMTPS id 2BF33219D
+	for <fstests@vger.kernel.org>; Tue, 22 Dec 2015 20:54:06 +0000 (UTC)
+Received: from schleppi.home.com (vpn1-6-224.ams2.redhat.com [10.36.6.224])
+	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id tBMKs3S4007345
+	for <fstests@vger.kernel.org>; Tue, 22 Dec 2015 15:54:04 -0500
+From: Andreas Gruenbacher <agruenba@redhat.com>
+Subject: [PATCH 0/6] fsx
+Date: Tue, 22 Dec 2015 21:53:50 +0100
+Message-Id: <1450817636-11416-1-git-send-email-agruenba@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Dec 22, 2015 at 02:22:40AM +0000, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
-> 
-> Commit 27d077ec0bda (common: use mount/umount helpers everywhere) made
-> a few btrfs test fail for 2 different reasons:
-> 
-> 1) Some tests (btrfs/029 and btrfs/031) use $SCRATCH_MNT as a mount
->    point for some subvolume created in $TEST_DEV, therefore calling
->    _scratch_unmount does not work as it passes $SCRATCH_DEV as the
->    argument to the umount program. This is intentional to test reflinks
->    accross different mountpoints of the same filesystem but for different
->    subvolumes;
-> 
-> 2) For multiple devices filesystems (btrfs/003 and btrfs/011) that test
->    the device replace feature, we need to unmount using the mount path
->    ($SCRATCH_MNT) because unmounting using one of the devices as an
->    argument ($SCRATCH_DEV) does not always work - after replace operations
->    we get in /proc/mounts a device other than $SCRATCH_DEV associated
->    with the mount point $SCRATCH_MNT (this is mentioned in a comment at
->    btrfs/011 for example), so we need to pass that other device to the
->    umount program or pass it the mount point.
-> 
-> Using $SCRATCH_MNT as a mountpoint for a device other than $SCRATCH_DEV is
-> misleading, but that's a different problem that existed long before and
-> this change attempts only to fix the regression from 27d077ec0bda.
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Here is a bunch of fixes / improvements to fsx.  The first patch was already
+posted two weeks ago with no reaction yet; the rest is new.
 
-Thanks for fixing this! And sorry for the trouble..
+Thanks,
+Andreas
 
-Reviewed-by: Eryu Guan <eguan@redhat.com>
+Andreas Gruenbacher (6):
+  fsx: Small improvements and fixes
+  fsx: Fix hex numbers in operation dump
+  fsx: Report number of successful operations
+  fsx: Generate test parameters in test()
+  fsx: Improve operation logging
+  fsx: Add mechanism to replay failed operations
+
+ common/rc             |  14 ++
+ ltp/fsx.c             | 415 +++++++++++++++++++++++++++++++++++++-------------
+ tests/generic/091     |  12 --
+ tests/generic/127.out |  12 +-
+ tests/generic/231.out |  12 +-
+ tests/generic/263     |  12 --
+ 6 files changed, 332 insertions(+), 145 deletions(-)
+
+-- 
+2.4.3
+
