@@ -1,24 +1,66 @@
-From: Michael@mail.microamerica.com.pe,
-	"J.Tynan <f.digeronimo"@federconsumatori.abruzzo.it
-Subject: Review & Reply
-Date: Fri, 18 Dec 2015 17:12:27 +0700
-Message-ID: <20151218101323.0640791A2644@mail.microamerica.com.pe>
-Reply-To: michaeljtynan8@gmail.com
+From: Duncan <1i5t5.duncan@cox.net>
+Subject: Re: Ideas to do custom operation just after mount?
+Date: Tue, 22 Dec 2015 09:28:15 +0000 (UTC)
+Message-ID: <pan$a07c5$8ea63042$e035dc2a$bbe2f2c1@cox.net>
+References: <56721602.5050204@cn.fujitsu.com>
+	<20151221001654.GM19802@dastard> <56776330.1090500@cn.fujitsu.com>
+	<5677662F.2060806@cn.fujitsu.com> <56778B9E.8050900@oracle.com>
+	<20151222011424.03247982@jupiter.sol.kaishome.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <fstests-owner@vger.kernel.org>
-Received: from mail.microamerica.com.pe ([200.37.170.69]:52910 "EHLO
-	mail.microamerica.com.pe" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932568AbbLRN7F convert rfc822-to-8bit (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 18 Dec 2015 08:59:05 -0500
-Content-Description: Mail message body
-Sender: fstests-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-btrfs-owner@vger.kernel.org>
+Sender: linux-btrfs-owner@vger.kernel.org
+To: linux-btrfs@vger.kernel.org
+Cc: fstests@vger.kernel.org
 List-Id: fstests@vger.kernel.org
-To: Recipients <f.digeronimo@federconsumatori.abruzzo.it>
 
-Greetings,
-My name is Mr.Michael J. Tynan, I am a banker with Bank Of America. It is true that we have not meet each other in person, but I strongly believe in trust and friendship in every business. I have a Lebanese deceased customer's abandoned fund, which I am his personal financial adviser before his accidental death, that being the main reason why I alone working in the bank here, know much about the existence of this fund and the secrets surrounding this money. But before I disclose the full details to you, I will like to know your interest and willingness to assist me. You can call me as soon you receive my message, so that i will send to you full details about the transaction.
-My best regards,
-Mr.Michael J. Tynan
-MOBILE: +1 347 269 3740
+Kai Krakow posted on Tue, 22 Dec 2015 01:14:24 +0100 as excerpted:
+
+> Am Mon, 21 Dec 2015 13:18:22 +0800 schrieb Anand Jain
+> <anand.jain@oracle.com>:
+> 
+> 
+>> 
+>> > BTW, any good idea for btrfs to do such operation like
+>> > enabling/disabling some minor features? Especially when it can be set
+>> > on individual file/dirs.
+>> >
+>> > Features like incoming write time deduplication, is designed to be
+>> > enabled/disabled for individual file/dirs, so it's not a quite good
+>> > idea to use mount option to do it.
+>> >
+>> > Although some feature, like btrfs quota(qgroup), should be
+>> > implemented by mount option though.
+>> > I don't understand why qgroup is enabled/disabled by ioctl. :(
+>> 
+>> 
+>> mount option won't persist across systems/computers unless remembered
+>> by human.
+> 
+> Valid point, tho here's an counter-example: space-cache is persisted.
+> Once enabled, it's always there until you clear AND disable it during
+> initial mount.
+
+Data point.  space_cache doesn't have to be manually enabled at all, 
+unless it was turned off at some point; it's automatically enabled on 
+mounting new btrfs.
+
+At least, I've never specifically enabled (or disabled) space_cache on 
+any of my btrfs here, yet they all have it enabled.
+
+(Years ago, with my first btrfs experiments, a corrupted space_cache 
+could cause the filesystem not to mount.  But then I left btrfs alone for 
+awhile, and I guess in the mean time it learned to auto-correct such 
+problems, as I've never had to worry about a bad space-cache failing a 
+mount since I returned to using it, and that itself was two and a half 
+years ago, now.  With the previous mount-blocker experience I was a 
+rather nervous when I saw it enabled without me initially enabling it, 
+but space_cache has basically "just worked" for me since then, tho I've 
+had a few other mount-blocking bugs.)
+
+-- 
+Duncan - List replies preferred.   No HTML msgs.
+"Every nonfree program has a lord, a master --
+and if you use the program, he is your master."  Richard Stallman
+
