@@ -1,42 +1,63 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44949 "EHLO mx1.redhat.com"
+Received: from plane.gmane.org ([80.91.229.3]:34162 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750785AbbLUNVZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 21 Dec 2015 08:21:25 -0500
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (Postfix) with ESMTPS id 722C2693E1
-	for <fstests@vger.kernel.org>; Mon, 21 Dec 2015 13:21:25 +0000 (UTC)
-Received: from localhost (dhcp-12-106.nay.redhat.com [10.66.12.106])
-	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id tBLDLM59010359
-	for <fstests@vger.kernel.org>; Mon, 21 Dec 2015 08:21:24 -0500
-Date: Mon, 21 Dec 2015 21:21:20 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic/263: be quiet about unsupported operation
-Message-ID: <20151221132120.GW2535@eguan.usersys.redhat.com>
-References: <1450703097-3162-1-git-send-email-eguan@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1450703097-3162-1-git-send-email-eguan@redhat.com>
+	id S1751275AbbLVDAF (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 21 Dec 2015 22:00:05 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcff-fstests@m.gmane.org>)
+	id 1aBDBE-00035L-6z
+	for fstests@vger.kernel.org; Tue, 22 Dec 2015 04:00:04 +0100
+Received: from ip5f5ae08a.dynamic.kabel-deutschland.de ([95.90.224.138])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <fstests@vger.kernel.org>; Tue, 22 Dec 2015 04:00:04 +0100
+Received: from hurikhan77 by ip5f5ae08a.dynamic.kabel-deutschland.de with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <fstests@vger.kernel.org>; Tue, 22 Dec 2015 04:00:04 +0100
+From: Kai Krakow <hurikhan77@gmail.com>
+Subject: Re: Ideas to do custom operation just after mount?
+Date: Tue, 22 Dec 2015 01:14:24 +0100
+Message-ID: <20151222011424.03247982@jupiter.sol.kaishome.de>
+References: <56721602.5050204@cn.fujitsu.com>
+	<20151221001654.GM19802@dastard>
+	<56776330.1090500@cn.fujitsu.com>
+	<5677662F.2060806@cn.fujitsu.com>
+	<56778B9E.8050900@oracle.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 21, 2015 at 09:04:57PM +0800, Eryu Guan wrote:
-> Old kernels don't support zero-range/collapse-range/insert-range
-> fallocate operations and fail the test as:
-> 
->   +fsx: main: filesystem does not support fallocate mode 0x10, disabling!
->   +: Operation not supported
->   +fsx: main: filesystem does not support fallocate mode 0x8, disabling!
->   +: Operation not supported
->   +fsx: main: filesystem does not support fallocate mode 0x20, disabling!
->   +: Operation not supported
-> 
-> Adding "-q" option to fsx to quiet the warning message.
-> 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
+Am Mon, 21 Dec 2015 13:18:22 +0800
+schrieb Anand Jain <anand.jain@oracle.com>:
 
-Please ignore this patch, the "unsupported operation messages" can only
-be seen when there're real problems. Sorry for the noise..
+> 
+> 
+> > BTW, any good idea for btrfs to do such operation like
+> > enabling/disabling some minor features? Especially when it can be
+> > set on individual file/dirs.
+> >
+> > Features like incoming write time deduplication, is designed to be
+> > enabled/disabled for individual file/dirs, so it's not a quite good
+> > idea to use mount option to do it.
+> >
+> > Although some feature, like btrfs quota(qgroup), should be
+> > implemented by mount option though.
+> > I don't understand why qgroup is enabled/disabled by ioctl. :(
+> 
+> 
+> mount option won't persist across systems/computers unless remembered
+> by human.
 
-Eryu
+Valid point, tho here's an counter-example: space-cache is persisted.
+Once enabled, it's always there until you clear AND disable it during
+initial mount.
+
+-- 
+Regards,
+Kai
+
+Replies to list-only preferred.
+
