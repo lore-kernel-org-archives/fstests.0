@@ -1,50 +1,51 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46836 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753797AbbLWOcS (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 23 Dec 2015 09:32:18 -0500
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (Postfix) with ESMTPS id 11147461C4
-	for <fstests@vger.kernel.org>; Wed, 23 Dec 2015 14:32:18 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] common/scsi_debug: fix removal of scsi_debug module
-Date: Wed, 23 Dec 2015 22:29:14 +0800
-Message-Id: <1450880954-26921-1-git-send-email-eguan@redhat.com>
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:59934 "EHLO
+	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S965814AbbLWXSe (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 23 Dec 2015 18:18:34 -0500
+Date: Thu, 24 Dec 2015 10:17:03 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: Ideas to do custom operation just after mount?
+Message-ID: <20151223231703.GH26718@dastard>
+References: <56721602.5050204@cn.fujitsu.com>
+ <20151221001654.GM19802@dastard>
+ <56776330.1090500@cn.fujitsu.com>
+ <5677662F.2060806@cn.fujitsu.com>
+ <56778B9E.8050900@oracle.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <56778B9E.8050900@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+To: Anand Jain <anand.jain@oracle.com>
+Cc: Qu Wenruo <quwenruo@cn.fujitsu.com>, fstests@vger.kernel.org, btrfs <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Occasionally scsi_debug cannot be removed because it's still in use and
-causes xfs/279 to fail.
+On Mon, Dec 21, 2015 at 01:18:22PM +0800, Anand Jain wrote:
+> 
+> 
+> >BTW, any good idea for btrfs to do such operation like
+> >enabling/disabling some minor features? Especially when it can be set on
+> >individual file/dirs.
+> >
+> >Features like incoming write time deduplication, is designed to be
+> >enabled/disabled for individual file/dirs, so it's not a quite good idea
+> >to use mount option to do it.
+> >
+> >Although some feature, like btrfs quota(qgroup), should be implemented
+> >by mount option though.
+> >I don't understand why qgroup is enabled/disabled by ioctl. :(
+> 
+> 
+> mount option won't persist across systems/computers unless
+> remembered by human.
 
-Now dryrun the removal by modprobe firstly then do the real rmmod.
+So record the mount option you want persistent in the filesystem at
+mount time and don't turn it off until a "no-...." mount option is
+provided at mount time.
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
- common/scsi_debug | 10 +++++++++-
- 1 file changed, 9 insertions(+), 1 deletion(-)
+Cheers,
 
-diff --git a/common/scsi_debug b/common/scsi_debug
-index d073b6d..eb08126 100644
---- a/common/scsi_debug
-+++ b/common/scsi_debug
-@@ -57,7 +57,15 @@ _get_scsi_debug_dev()
- 
- _put_scsi_debug_dev()
- {
--	sleep 1
- 	lsmod | grep -wq scsi_debug || return
-+
-+	n=2
-+	# use redirection not -q option of modprobe here, because -q of old
-+	# modprobe is only quiet when the module is not found, not when the
-+	# module is in use.
-+	while [ $n -ge 0 ] && ! modprobe -nr scsi_debug >/dev/null 2>&1; do
-+		sleep 1
-+		n=$((n-1))
-+	done
- 	rmmod scsi_debug || _fail "Could not remove scsi_debug module"
- }
+Dave.
 -- 
-1.8.3.1
-
+Dave Chinner
+david@fromorbit.com
