@@ -1,47 +1,58 @@
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:59934 "EHLO
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:5482 "EHLO
 	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S965814AbbLWXSe (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 23 Dec 2015 18:18:34 -0500
-Date: Thu, 24 Dec 2015 10:17:03 +1100
+	by vger.kernel.org with ESMTP id S1752284AbbLWXtz (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 23 Dec 2015 18:49:55 -0500
+Date: Thu, 24 Dec 2015 10:49:45 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: Ideas to do custom operation just after mount?
-Message-ID: <20151223231703.GH26718@dastard>
-References: <56721602.5050204@cn.fujitsu.com>
- <20151221001654.GM19802@dastard>
- <56776330.1090500@cn.fujitsu.com>
- <5677662F.2060806@cn.fujitsu.com>
- <56778B9E.8050900@oracle.com>
+Subject: Re: [PATCH 1/2] fstests: fix btrfs test failures after commit
+ 27d077ec0bda
+Message-ID: <20151223234945.GI26718@dastard>
+References: <1450750960-5172-1-git-send-email-fdmanana@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <56778B9E.8050900@oracle.com>
+In-Reply-To: <1450750960-5172-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Anand Jain <anand.jain@oracle.com>
-Cc: Qu Wenruo <quwenruo@cn.fujitsu.com>, fstests@vger.kernel.org, btrfs <linux-btrfs@vger.kernel.org>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 21, 2015 at 01:18:22PM +0800, Anand Jain wrote:
+On Tue, Dec 22, 2015 at 02:22:40AM +0000, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
+> Commit 27d077ec0bda (common: use mount/umount helpers everywhere) made
+> a few btrfs test fail for 2 different reasons:
 > 
-> >BTW, any good idea for btrfs to do such operation like
-> >enabling/disabling some minor features? Especially when it can be set on
-> >individual file/dirs.
-> >
-> >Features like incoming write time deduplication, is designed to be
-> >enabled/disabled for individual file/dirs, so it's not a quite good idea
-> >to use mount option to do it.
-> >
-> >Although some feature, like btrfs quota(qgroup), should be implemented
-> >by mount option though.
-> >I don't understand why qgroup is enabled/disabled by ioctl. :(
-> 
-> 
-> mount option won't persist across systems/computers unless
-> remembered by human.
+> 1) Some tests (btrfs/029 and btrfs/031) use $SCRATCH_MNT as a mount
+>    point for some subvolume created in $TEST_DEV, therefore calling
+>    _scratch_unmount does not work as it passes $SCRATCH_DEV as the
+>    argument to the umount program. This is intentional to test reflinks
+>    accross different mountpoints of the same filesystem but for different
+>    subvolumes;
 
-So record the mount option you want persistent in the filesystem at
-mount time and don't turn it off until a "no-...." mount option is
-provided at mount time.
+The correct way to fix this is to stop abusing $SCRATCH_MNT and
+to instead use a local mount point on the test device....
+
+> 2) For multiple devices filesystems (btrfs/003 and btrfs/011) that test
+>    the device replace feature, we need to unmount using the mount path
+>    ($SCRATCH_MNT) because unmounting using one of the devices as an
+>    argument ($SCRATCH_DEV) does not always work - after replace operations
+>    we get in /proc/mounts a device other than $SCRATCH_DEV associated
+>    with the mount point $SCRATCH_MNT (this is mentioned in a comment at
+>    btrfs/011 for example), so we need to pass that other device to the
+>    umount program or pass it the mount point.
+
+Which says to that _scratch_unmount should be using $SCRATCH_MNT
+rather than $SCRATCH_DEV. That would fix the problem without needing
+to modify any of the tests, right?
+
+> Using $SCRATCH_MNT as a mountpoint for a device other than $SCRATCH_DEV is
+> misleading, but that's a different problem that existed long before and
+> this change attempts only to fix the regression from 27d077ec0bda.
+
+It may be misleading, but that's the fundamental problem that needs
+fixing.  As always, we should be trying to fix the root cause of the
+problem, not working around them...
 
 Cheers,
 
