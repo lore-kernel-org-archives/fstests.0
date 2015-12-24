@@ -1,38 +1,67 @@
-Received: from mx1.redhat.com ([209.132.183.28]:48858 "EHLO mx1.redhat.com"
+Received: from mail.kernel.org ([198.145.29.136]:45289 "EHLO mail.kernel.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754555AbbLXIKO (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 24 Dec 2015 03:10:14 -0500
-Date: Thu, 24 Dec 2015 16:10:10 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] shared: test mount needs_recovery extN partition with
- noload option
-Message-ID: <20151224081010.GI2535@eguan.usersys.redhat.com>
-References: <1450942226-19882-1-git-send-email-xzhou@redhat.com>
+	id S1752128AbbLXMNr (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 24 Dec 2015 07:13:47 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1450942226-19882-1-git-send-email-xzhou@redhat.com>
+In-Reply-To: <20151223234945.GI26718@dastard>
+References: <1450750960-5172-1-git-send-email-fdmanana@kernel.org>
+	<20151223234945.GI26718@dastard>
+Date: Thu, 24 Dec 2015 12:13:44 +0000
+Message-ID: <CAL3q7H7n+5f_atuYUrNjbeBvsp6snHijJRKmo5cChCBbGgsbBw@mail.gmail.com>
+Subject: Re: [PATCH 1/2] fstests: fix btrfs test failures after commit 27d077ec0bda
+From: Filipe Manana <fdmanana@kernel.org>
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Xiong Zhou <xzhou@redhat.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, dmonakhov@openvz.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Dec 24, 2015 at 03:30:26PM +0800, Xiong Zhou wrote:
-> Once upon a time, ext4 encounter NULL pointer dereference under this
-> situaiton due to jump to a wrong label. Part of this commit fixed
-> this Oops:
-> 
-> 744692d ext4: use ext4_get_block_write in buffer write
-> 
-> We can also run this test on ext2/3. Note that fsck will fail on
-> ext2 due to:
->  "Superblock needs_recovery flag is set, but no journal is present"
+On Wed, Dec 23, 2015 at 11:49 PM, Dave Chinner <david@fromorbit.com> wrote:
+> On Tue, Dec 22, 2015 at 02:22:40AM +0000, fdmanana@kernel.org wrote:
+>> From: Filipe Manana <fdmanana@suse.com>
+>>
+>> Commit 27d077ec0bda (common: use mount/umount helpers everywhere) made
+>> a few btrfs test fail for 2 different reasons:
+>>
+>> 1) Some tests (btrfs/029 and btrfs/031) use $SCRATCH_MNT as a mount
+>>    point for some subvolume created in $TEST_DEV, therefore calling
+>>    _scratch_unmount does not work as it passes $SCRATCH_DEV as the
+>>    argument to the umount program. This is intentional to test reflinks
+>>    accross different mountpoints of the same filesystem but for different
+>>    subvolumes;
+>
+> The correct way to fix this is to stop abusing $SCRATCH_MNT and
+> to instead use a local mount point on the test device....
+>
+>> 2) For multiple devices filesystems (btrfs/003 and btrfs/011) that test
+>>    the device replace feature, we need to unmount using the mount path
+>>    ($SCRATCH_MNT) because unmounting using one of the devices as an
+>>    argument ($SCRATCH_DEV) does not always work - after replace operations
+>>    we get in /proc/mounts a device other than $SCRATCH_DEV associated
+>>    with the mount point $SCRATCH_MNT (this is mentioned in a comment at
+>>    btrfs/011 for example), so we need to pass that other device to the
+>>    umount program or pass it the mount point.
+>
+> Which says to that _scratch_unmount should be using $SCRATCH_MNT
+> rather than $SCRATCH_DEV. That would fix the problem without needing
+> to modify any of the tests, right?
+>
+>> Using $SCRATCH_MNT as a mountpoint for a device other than $SCRATCH_DEV is
+>> misleading, but that's a different problem that existed long before and
+>> this change attempts only to fix the regression from 27d077ec0bda.
+>
+> It may be misleading, but that's the fundamental problem that needs
+> fixing.  As always, we should be trying to fix the root cause of the
+> problem, not working around them...
 
-I don't think fsck is needed in this test, superblock is modified on
-purpose and ext2 always fails the check. So changing _require_scratch to
-_require_scratch_nocheck would be good.
+Sure, it's xmas season after all. I'll cleanup the tests and not just
+undo the regression.
+Thanks.
 
-Otherwise looks good to me.
-
-Thanks,
-Eryu
+>
+> Cheers,
+>
+> Dave.
+> --
+> Dave Chinner
+> david@fromorbit.com
