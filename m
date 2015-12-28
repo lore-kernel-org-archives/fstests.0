@@ -1,14 +1,14 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:26224 "EHLO
+Received: from cn.fujitsu.com ([59.151.112.132]:51109 "EHLO
 	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751221AbbL1Gff (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 28 Dec 2015 01:35:35 -0500
+	with ESMTP id S1751874AbbL1KcK (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 28 Dec 2015 05:32:10 -0500
 Received: from G08CNEXCHPEKD01.g08.fujitsu.local (unknown [10.167.33.80])
-	by cn.fujitsu.com (Postfix) with ESMTP id DC8D74092556
-	for <fstests@vger.kernel.org>; Mon, 28 Dec 2015 14:34:33 +0800 (CST)
+	by cn.fujitsu.com (Postfix) with ESMTP id C0C3441887CB
+	for <fstests@vger.kernel.org>; Mon, 28 Dec 2015 18:31:26 +0800 (CST)
 From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 Subject: [PATCH] f2fs: add Makefile for f2fs
-Date: Mon, 28 Dec 2015 14:30:55 +0800
-Message-ID: <1451284255-10383-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Date: Mon, 28 Dec 2015 18:27:48 +0800
+Message-ID: <1451298468-19509-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
