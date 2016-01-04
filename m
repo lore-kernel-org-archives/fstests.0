@@ -1,156 +1,65 @@
-Received: from mx1.redhat.com ([209.132.183.28]:48073 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752027AbcADQDm (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 4 Jan 2016 11:03:42 -0500
-From: Brian Foster <bfoster@redhat.com>
-Subject: [PATCH v2] xfs: test XFS torn log write detection
-Date: Mon,  4 Jan 2016 11:03:41 -0500
-Message-Id: <1451923421-16647-1-git-send-email-bfoster@redhat.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:34154 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752025AbcADTrY (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 4 Jan 2016 14:47:24 -0500
+Date: Mon, 4 Jan 2016 11:47:08 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 06/11] reflink: more tests
+Message-ID: <20160104194708.GA28357@birch.djwong.org>
+References: <20151219091052.15320.94973.stgit@birch.djwong.org>
+ <20151219091131.15320.12391.stgit@birch.djwong.org>
+ <20151221063111.GO19802@dastard>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20151221063111.GO19802@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com
+To: Dave Chinner <david@fromorbit.com>
+Cc: linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-XFS torn log write detection includes a mechanism to inject CRC errors
-into log records at runtime and shutdown the fs accordingly. This
-ensures that the CRC verification pass on the subsequent mount discovers
-an invalid record near the head of the log and considers it a torn
-write.
+On Mon, Dec 21, 2015 at 05:31:11PM +1100, Dave Chinner wrote:
+> On Sat, Dec 19, 2015 at 01:11:31AM -0800, Darrick J. Wong wrote:
+> > Add more tests for unaligned copy-on-write things, and explicitly
+> > test the ability to pass "len == 0" to mean reflink/dedupe all
+> > the way to the end of the file".
+> > 
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> .....
+> > +_cleanup()
+> > +{
+> > +    cd /
+> > +    rm -rf "$tmp".* "$TESTDIR"
+> > +}
+> .....
+> > +
+> > +TESTDIR="$TEST_DIR/test-$seq"
+> > +rm -rf "$TESTDIR"
+> > +mkdir "$TESTDIR"
+> 
+> This use of TESTDIR is highly confusing. When I see TESTDIR I think
+> that it's the mount point of the test device, not potentially some
+> directory on the scratch device.
+> 
+> I see that this occurs through lots of tests, not just these new
+> ones. Can you do a pass across the tests with, say, sed and rename
+> all these to something less confusing? e.g. "testdir", in lower
+> case, makes it clear that it's a local variable, not the global test
+> device mount point.... (i.e. test local variables are lower case,
+> exported test harnes variables are upper case ;)
+> 
+> Separate patch/pull req is fine.
 
-This test runs a workload with error injection enabled and verifies that
-the subsequent mount is successful. The test repeats for several
-iterations using a random frequency factor for the error event each
-time.
+No problem.  Will give it a spin on the test harness before sending.
 
-Signed-off-by: Brian Foster <bfoster@redhat.com>
----
+(Yikes, it's a 272K patch...)
 
-Here's a v2 of the XFS log crc verification test case now that the
-associated kernel code has been merged. The only change is the bugfix
-noted in the changelog below.
+--D
 
-Brian
-
-v2:
-- Update random failure frequency calculation to ensure factor is never
-  0.
-v1: http://article.gmane.org/gmane.comp.file-systems.fstests/1406
-
- tests/xfs/350     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/350.out |  2 ++
- tests/xfs/group   |  1 +
- 3 files changed, 88 insertions(+)
- create mode 100755 tests/xfs/350
- create mode 100644 tests/xfs/350.out
-
-diff --git a/tests/xfs/350 b/tests/xfs/350
-new file mode 100755
-index 0000000..1a1de6f
---- /dev/null
-+++ b/tests/xfs/350
-@@ -0,0 +1,85 @@
-+#! /bin/bash
-+# FS QA Test No. 350
-+#
-+# Use the XFS log record CRC error injection mechanism to test torn writes to
-+# the log. The error injection mechanism writes an invalid CRC and shuts down
-+# the filesystem. The test verifies that a subsequent remount recovers the log
-+# and that the filesystem is consistent.
-+#
-+# Note that this test requires a DEBUG mode kernel.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2015 Red Hat, Inc. All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	killall -9 fsstress > /dev/null 2>&1
-+	wait > /dev/null 2>&1
-+}
-+
-+rm -f $seqres.full
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs xfs
-+_supported_os Linux
-+_require_xfs_sysfs $(_short_dev $SCRATCH_DEV)/log/log_badcrc_factor
-+_require_scratch
-+
-+echo "Silence is golden."
-+
-+_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
-+_scratch_mount
-+
-+sdev=$(_short_dev $SCRATCH_DEV)
-+
-+for i in $(seq 1 5); do
-+	# Enable error injection. Use a random bad crc factor up to 100
-+	# (increase this value to run fsstress longer).
-+	factor=$((RANDOM % 100 + 1))
-+	echo iteration $i log_badcrc_factor: $factor >> $seqres.full 2>&1
-+	echo $factor > /sys/fs/xfs/$sdev/log/log_badcrc_factor
-+
-+	# Run fsstress until the filesystem shuts down. It will shut down
-+	# automatically when error injection triggers.
-+	$FSSTRESS_PROG -d $SCRATCH_MNT -p 4 -n 999999 >> $seqres.full 2>&1
-+
-+	# Verify that we can remount the fs. Log recovery should handle the torn
-+	# write.
-+	_scratch_unmount
-+	_scratch_mount || _fail "failed to mount"
-+done
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/350.out b/tests/xfs/350.out
-new file mode 100644
-index 0000000..c725135
---- /dev/null
-+++ b/tests/xfs/350.out
-@@ -0,0 +1,2 @@
-+QA output created by 350
-+Silence is golden.
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 634f7e7..5fbace9 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -232,3 +232,4 @@
- 303 auto quick quota
- 304 auto quick quota
- 305 auto quota
-+350 auto log metadata
--- 
-2.4.3
-
+> 
+> Cheers,
+> 
+> dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
