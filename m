@@ -1,65 +1,32 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:34154 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752025AbcADTrY (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 4 Jan 2016 14:47:24 -0500
-Date: Mon, 4 Jan 2016 11:47:08 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 06/11] reflink: more tests
-Message-ID: <20160104194708.GA28357@birch.djwong.org>
-References: <20151219091052.15320.94973.stgit@birch.djwong.org>
- <20151219091131.15320.12391.stgit@birch.djwong.org>
- <20151221063111.GO19802@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20151221063111.GO19802@dastard>
+Received: from mail-ob0-f176.google.com ([209.85.214.176]:34446 "EHLO
+	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750745AbcAGGhh (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 7 Jan 2016 01:37:37 -0500
+Received: by mail-ob0-f176.google.com with SMTP id wp13so183991718obc.1
+        for <fstests@vger.kernel.org>; Wed, 06 Jan 2016 22:37:36 -0800 (PST)
+From: Jia He <hejianet@gmail.com>
+Subject: [PATCH 0/2] fstests: help user to troubleshoot the re-mount issue quickly
+Date: Thu,  7 Jan 2016 14:37:27 +0800
+Message-Id: <1452148649-22451-1-git-send-email-hejianet@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
+To: fstests@vger.kernel.org
+Cc: Jia He <hejianet@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 21, 2015 at 05:31:11PM +1100, Dave Chinner wrote:
-> On Sat, Dec 19, 2015 at 01:11:31AM -0800, Darrick J. Wong wrote:
-> > Add more tests for unaligned copy-on-write things, and explicitly
-> > test the ability to pass "len == 0" to mean reflink/dedupe all
-> > the way to the end of the file".
-> > 
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> .....
-> > +_cleanup()
-> > +{
-> > +    cd /
-> > +    rm -rf "$tmp".* "$TESTDIR"
-> > +}
-> .....
-> > +
-> > +TESTDIR="$TEST_DIR/test-$seq"
-> > +rm -rf "$TESTDIR"
-> > +mkdir "$TESTDIR"
-> 
-> This use of TESTDIR is highly confusing. When I see TESTDIR I think
-> that it's the mount point of the test device, not potentially some
-> directory on the scratch device.
-> 
-> I see that this occurs through lots of tests, not just these new
-> ones. Can you do a pass across the tests with, say, sed and rename
-> all these to something less confusing? e.g. "testdir", in lower
-> case, makes it clear that it's a local variable, not the global test
-> device mount point.... (i.e. test local variables are lower case,
-> exported test harnes variables are upper case ;)
-> 
-> Separate patch/pull req is fine.
+When I tried to fix a mount issue of tests/xfs/003 failure, I found the 
+root cause is my mistake that I added "/" to the end of TEST_DIR, eg.
+export TEST_DIR=/root/xfstests/test/
+This patch set is to let user find the correct cause quickly
 
-No problem.  Will give it a spin on the test harness before sending.
+Jia He (2):
+  fstests: comments to prevent from adding "/" to the end of 2 environment variables
+  fstests: give user friendly prompts for already mounted dir
 
-(Yikes, it's a 272K patch...)
+ common/rc                | 8 ++++++--
+ configs/example.config   | 1 +
+ configs/localhost.config | 1 +
+ 3 files changed, 8 insertions(+), 2 deletions(-)
 
---D
+-- 
+2.1.4
 
-> 
-> Cheers,
-> 
-> dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
