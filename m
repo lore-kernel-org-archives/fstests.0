@@ -1,148 +1,71 @@
-Received: from mail.kernel.org ([198.145.29.136]:33057 "EHLO mail.kernel.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753654AbcAHLEw (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 8 Jan 2016 06:04:52 -0500
-From: fdmanana@kernel.org
-Subject: [PATCH] fstests: btrfs, verify fitrim does not discard reserved device area
-Date: Thu,  7 Jan 2016 21:21:46 +0000
-Message-Id: <1452201706-29080-1-git-send-email-fdmanana@kernel.org>
+Received: from mail-ob0-f195.google.com ([209.85.214.195]:34115 "EHLO
+	mail-ob0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752176AbcAHN2e (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 8 Jan 2016 08:28:34 -0500
+Received: by mail-ob0-f195.google.com with SMTP id q2so29485724obl.1
+        for <fstests@vger.kernel.org>; Fri, 08 Jan 2016 05:28:34 -0800 (PST)
+Subject: Re: [PATCH 1/2] fstests: comments to prevent from adding "/" to the
+ end of 2 environment variables
+References: <1452148649-22451-1-git-send-email-hejianet@gmail.com>
+ <1452148649-22451-2-git-send-email-hejianet@gmail.com>
+ <20160107102723.GD21019@eguan.usersys.redhat.com>
+ <568E7049.1020508@gmail.com>
+ <20160108093912.GH21019@eguan.usersys.redhat.com>
+From: hejianet <hejianet@gmail.com>
+Message-ID: <568FB97E.7020202@gmail.com>
+Date: Fri, 8 Jan 2016 21:28:30 +0800
+MIME-Version: 1.0
+In-Reply-To: <20160108093912.GH21019@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Content-Transfer-Encoding: quoted-printable
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+Hi Eryu
+Yes, you are wright
 
-Verify that when a fitrim operation is made against a btrfs filesystem,
-the ranges [0, 64Kb[ and [68Kb, 1Mb[ of the device are not discarded,
-they remain with the content they had before the fitrim operation. These
-regions of the device are reserved for a boot loader to use at its will.
+root@justin-u1504:~/xfstests/xfstests# ./check -d xfs/003
+common/config: Error: $TEST_DIR (/root/xfstests/test1) is not a directory
 
-In the 4.3 linux kernel we got a regression that allowed a fitrim
-operation to discard these reserved ranges of the device, resulting in
-the filesystem becoming unbootable after a fitrim. The issue is fixed
-by the following patch (targeted for 4.5 and 4.3/4.4 stable releases):
+B.R.
+Justin
 
- "Btrfs: fix fitrim discarding device area reserved for boot loader's use"
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/116     | 76 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/116.out | 12 +++++++++
- tests/btrfs/group   |  1 +
- 3 files changed, 89 insertions(+)
- create mode 100755 tests/btrfs/116
- create mode 100644 tests/btrfs/116.out
-
-diff --git a/tests/btrfs/116 b/tests/btrfs/116
-new file mode 100755
-index 0000000..c51e135
---- /dev/null
-+++ b/tests/btrfs/116
-@@ -0,0 +1,76 @@
-+#! /bin/bash
-+# FSQA Test No. 116
-+#
-+# Verify that when a fitrim operation is made against a btrfs filesystem, the
-+# ranges [0, 64Kb[ and [68Kb, 1Mb[ of the device are not discarded, they remain
-+# with the content they had before the fitrim operation. These regions of the
-+# device are reserved for a boot loader to use at its will.
-+#
-+#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_need_to_be_root
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+
-+# Write to the [0, 64Kb[ and [68Kb, 1Mb[ ranges of the device. These ranges are
-+# reserved for a boot loader to use (GRUB for example) and btrfs should never
-+# use them - neither for allocating metadata/data nor should trim/discard them.
-+# The range [64Kb, 68Kb[ is used for the primary superblock of the filesystem.
-+$XFS_IO_PROG -c "pwrite -S 0xfd 0 64K" $SCRATCH_DEV | _filter_xfs_io
-+$XFS_IO_PROG -c "pwrite -S 0xfd 68K 956K" $SCRATCH_DEV | _filter_xfs_io
-+
-+# Now mount the filesystem and perform a fitrim against it.
-+_scratch_mount
-+_require_batched_discard $SCRATCH_MNT
-+$FSTRIM_PROG $SCRATCH_MNT
-+
-+# Now unmount the filesystem and verify the content of the ranges was not
-+# modified (no trim/discard happened on them).
-+_scratch_unmount
-+echo "Content of the ranges [0, 64Kb] and [68Kb, 1Mb[ after fitrim:"
-+od -t x1 -N $((64 * 1024)) $SCRATCH_DEV
-+od -t x1 -j $((68 * 1024)) -N $((956 * 1024)) $SCRATCH_DEV
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/116.out b/tests/btrfs/116.out
-new file mode 100644
-index 0000000..9cec94d
---- /dev/null
-+++ b/tests/btrfs/116.out
-@@ -0,0 +1,12 @@
-+QA output created by 116
-+wrote 65536/65536 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 978944/978944 bytes at offset 69632
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Content of the ranges [0, 64Kb] and [68Kb, 1Mb[ after fitrim:
-+0000000 fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
-+*
-+0200000
-+0210000 fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
-+*
-+4000000
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 3a99289..de628be 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -116,3 +116,4 @@
- 113 auto quick compress clone
- 114 auto qgroup
- 115 auto qgroup
-+116 auto quick metadata
--- 
-2.1.3
+=E5=9C=A8 1/8/16 5:39 PM, Eryu Guan =E5=86=99=E9=81=93:
+> On Thu, Jan 07, 2016 at 10:03:53PM +0800, hejianet wrote:
+>> Hi Eryu Guan
+>> Thanks for the comments,  reasonable to me.
+>> I will add it into v2 patch together with other
+>> =E5=9C=A8 1/7/16 6:27 PM, Eryu Guan =E5=86=99=E9=81=93:
+>>> On Thu, Jan 07, 2016 at 02:37:28PM +0800, Jia He wrote:
+>>>> This adds comments to prevent user from adding "/" to the end of TES=
+T_DIR and
+>>>> SCRATCH_MNT
+>>> Instead of adding comments, how about removing the trailing "/" in th=
+e
+>>> code, something like:
+>>>
+>>> diff --git a/common/config b/common/config
+>>> index e82d279..cb34fd7 100644
+>>> --- a/common/config
+>>> +++ b/common/config
+>>> @@ -551,5 +551,10 @@ if [ -z "$CONFIG_INCLUDED" ]; then
+>>>   	[ -z "$FSCK_OPTIONS" ] && _fsck_opts
+>>>   fi
+>>> +# canonicalize the mount points
+>>> +# this follows symlinks and removes all trailing "/"s
+>>> +export TEST_DIR=3D`readlink -e "$TEST_DIR"`
+>>> +export SCRATCH_MNT=3D`readlink -e "$SCRATCH_MNT"`
+>>> +
+>> Thanks, but maybe it will empty the invalid path and the user doesn't =
+know
+>> why his TEST_DIR/SCRATCH_MNT are assigned to NULL?
+> These values have been proved to be a directory in get_next_config(), i=
+f
+> they're not, the test errors out there.
+>
+> Thanks,
+> Eryu
+>
 
