@@ -1,43 +1,61 @@
-Received: from mail-oi0-f67.google.com ([209.85.218.67]:34702 "EHLO
-	mail-oi0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750785AbcAIDzK (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 8 Jan 2016 22:55:10 -0500
-Received: by mail-oi0-f67.google.com with SMTP id x140so923455oif.1
-        for <fstests@vger.kernel.org>; Fri, 08 Jan 2016 19:55:10 -0800 (PST)
-From: Jia He <hejianet@gmail.com>
-Subject: [PATCH V2 2/2] fstests: canonicalize the mount points by removing the trailing "/"
-Date: Sat,  9 Jan 2016 11:54:53 +0800
-Message-Id: <1452311693-27529-3-git-send-email-hejianet@gmail.com>
-In-Reply-To: <1452311693-27529-1-git-send-email-hejianet@gmail.com>
-References: <1452311693-27529-1-git-send-email-hejianet@gmail.com>
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:13151 "EHLO
+	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757409AbcAJXaY (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sun, 10 Jan 2016 18:30:24 -0500
+Date: Mon, 11 Jan 2016 10:29:38 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 2/2] fstests: give user friendly prompts for already
+ mounted dir
+Message-ID: <20160110232938.GF10456@dastard>
+References: <1452148649-22451-1-git-send-email-hejianet@gmail.com>
+ <1452148649-22451-3-git-send-email-hejianet@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1452148649-22451-3-git-send-email-hejianet@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: eguan@redhat.com, Jia He <hejianet@gmail.com>
+To: Jia He <hejianet@gmail.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-removing all the trailing "/"s of mounting point name by readlink
+On Thu, Jan 07, 2016 at 02:37:29PM +0800, Jia He wrote:
+> This adds user friendly prompts to output the already mounted line from _mount.
+> xfstests will do the cleanup (ie. umount) and user can not get the mount directory
+> information.
+> 
+> Signed-off-by: Jia He <hejianet@gmail.com>
+> ---
+>  common/rc | 8 ++++++--
+>  1 file changed, 6 insertions(+), 2 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index d33e3fb..5b40fb4 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1271,7 +1271,9 @@ _require_scratch_nocheck()
+>          # if it's mounted, make sure its on $SCRATCH_MNT
+>          if ! _mount | grep -F $SCRATCH_DEV | grep -q $SCRATCH_MNT
+>          then
+> -            echo "\$SCRATCH_DEV is mounted but not on \$SCRATCH_MNT - aborting"
+> +            echo "\$SCRATCH_DEV=$SCRATCH_DEV is mounted but not on \$SCRATCH_MNT=$SCRATCH_MNT - aborting"
+> +            echo "Already mounted result:"
+> +            _mount | grep -F $SCRATCH_DEV
+>              exit 1
+>          fi
 
-Suggested-by: Eryu Guan <eguan@redhat.com>
-Signed-off-by: Jia He <hejianet@gmail.com>
----
- common/config | 5 +++++
- 1 file changed, 5 insertions(+)
+Should use a temporary local variable rather than looking at the
+mount table twice. e.g.
 
-diff --git a/common/config b/common/config
-index e82d279..cb34fd7 100644
---- a/common/config
-+++ b/common/config
-@@ -551,5 +551,10 @@ if [ -z "$CONFIG_INCLUDED" ]; then
- 	[ -z "$FSCK_OPTIONS" ] && _fsck_opts
- fi
- 
-+# canonicalize the mount points
-+# this follows symlinks and removes all trailing "/"s
-+export TEST_DIR=`readlink -e "$TEST_DIR"`
-+export SCRATCH_MNT=`readlink -e "$SCRATCH_MNT"`
-+
- # make sure this script returns success
- /bin/true
+	mount_rec=`_mount | grep -F $SCRATCH_DEV`
+	echo $mount_rec | grep -q $SCRATCH_MNT
+	if [ $? -ne 0 ]; then
+		# new error message
+		echo $mount_rec
+	fi
+
+Cheers,
+
+Dave.
 -- 
-2.1.4
-
+Dave Chinner
+david@fromorbit.com
