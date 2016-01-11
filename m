@@ -1,125 +1,139 @@
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:27168 "EHLO
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:37991 "EHLO
 	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1758016AbcAKEEi (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 10 Jan 2016 23:04:38 -0500
-Date: Mon, 11 Jan 2016 15:04:35 +1100
+	by vger.kernel.org with ESMTP id S1758252AbcAKEdH (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sun, 10 Jan 2016 23:33:07 -0500
+Received: from dave by dastard with local (Exim 4.80)
+	(envelope-from <david@fromorbit.com>)
+	id 1aIUAC-0001it-60
+	for fstests@vger.kernel.org; Mon, 11 Jan 2016 15:33:04 +1100
+Date: Mon, 11 Jan 2016 15:33:04 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v2] xfs: test XFS torn log write detection
-Message-ID: <20160111040435.GH10456@dastard>
-References: <1451923421-16647-1-git-send-email-bfoster@redhat.com>
+Subject: [ANNOUNCE] xfstests: master branch updated to dfe582d
+Message-ID: <20160111043304.GI10456@dastard>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="AqsLC8rIMeq19msA"
 Content-Disposition: inline
-In-Reply-To: <1451923421-16647-1-git-send-email-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jan 04, 2016 at 11:03:41AM -0500, Brian Foster wrote:
-> XFS torn log write detection includes a mechanism to inject CRC errors
-> into log records at runtime and shutdown the fs accordingly. This
-> ensures that the CRC verification pass on the subsequent mount discovers
-> an invalid record near the head of the log and considers it a torn
-> write.
-> 
-> This test runs a workload with error injection enabled and verifies that
-> the subsequent mount is successful. The test repeats for several
-> iterations using a random frequency factor for the error event each
-> time.
-> 
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
-> ---
-> 
-> Here's a v2 of the XFS log crc verification test case now that the
-> associated kernel code has been merged. The only change is the bugfix
-> noted in the changelog below.
-> 
-> Brian
-> 
-> v2:
-> - Update random failure frequency calculation to ensure factor is never
->   0.
-> v1: http://article.gmane.org/gmane.comp.file-systems.fstests/1406
-> 
->  tests/xfs/350     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/350.out |  2 ++
->  tests/xfs/group   |  1 +
->  3 files changed, 88 insertions(+)
->  create mode 100755 tests/xfs/350
->  create mode 100644 tests/xfs/350.out
-> 
-> diff --git a/tests/xfs/350 b/tests/xfs/350
-> new file mode 100755
-> index 0000000..1a1de6f
-> --- /dev/null
-> +++ b/tests/xfs/350
-> @@ -0,0 +1,85 @@
-> +#! /bin/bash
-> +# FS QA Test No. 350
-> +#
-> +# Use the XFS log record CRC error injection mechanism to test torn writes to
-> +# the log. The error injection mechanism writes an invalid CRC and shuts down
-> +# the filesystem. The test verifies that a subsequent remount recovers the log
-> +# and that the filesystem is consistent.
-> +#
-> +# Note that this test requires a DEBUG mode kernel.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2015 Red Hat, Inc. All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	killall -9 fsstress > /dev/null 2>&1
-> +	wait > /dev/null 2>&1
-> +}
-> +
-> +rm -f $seqres.full
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs xfs
-> +_supported_os Linux
-> +_require_xfs_sysfs $(_short_dev $SCRATCH_DEV)/log/log_badcrc_factor
 
-Scratch is not mounted at this point, so I don't think you can test
-the scratch device sysfs attrs here. I changed it to look at the
-test device instead and it works fine.
+--AqsLC8rIMeq19msA
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Cheers,
+Hi folks,
 
-Dave.
+The xfstests repositories at:
 
--- 
+	git://oss.sgi.com/xfs/cmds/xfstests
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated.
+
+Patches often get missed, so please check if your outstanding
+patches were in this update. If they have not been in this update,
+please resubmit them to fstests@vger.kernel.org so they can be
+picked up in the next update.
+
+The new head of the master branch is commit:
+
+dfe582d fstests: canonicalize the mount points by removing the trailing "/"
+
+New Commits:
+
+Andreas Gruenbacher (6):
+      [3597757] fsx: Small improvements and fixes
+      [c8ba071] fsx: Fix hex numbers in operation dump
+      [6b7be00] fsx: Report number of successful operations
+      [e1598eb] fsx: Generate test parameters in test()
+      [ed49ff0] fsx: Improve operation logging
+      [2a78c1d] fsx: Add mechanism to replay failed operations
+
+Brian Foster (1):
+      [05754e6] xfs: test XFS torn log write detection
+
+Eryu Guan (1):
+      [ef19328] common/scsi_debug: fix removal of scsi_debug module
+
+Filipe Manana (4):
+      [7a9cfc2] fstests: cleanup test btrfs/029
+      [a6630c0] fstests: cleanup test btrfs/031
+      [cc2dce7] fstests: fix cleanup of test btrfs/003
+      [315e6b4] fstests: btrfs, verify fitrim does not discard reserved dev=
+ice area
+
+Jia He (1):
+      [dfe582d] fstests: canonicalize the mount points by removing the trai=
+ling "/"
+
+Xiao Yang (1):
+      [37de4bf] f2fs: add Makefile for f2fs
+
+Xiong Zhou (1):
+      [20516cd] shared: test mount needs_recovery extN partition with noloa=
+d option
+
+
+Code Diffstat:
+
+ common/config         |   5 +
+ common/rc             |  14 ++
+ common/scsi_debug     |  10 +-
+ ltp/fsx.c             | 415 +++++++++++++++++++++++++++++++++++++---------=
+----
+ tests/btrfs/003       |  10 +-
+ tests/btrfs/029       |  45 +++---
+ tests/btrfs/029.out   |  12 +-
+ tests/btrfs/031       | 102 ++++++-------
+ tests/btrfs/116       |  76 +++++++++
+ tests/btrfs/116.out   |  12 ++
+ tests/btrfs/group     |   1 +
+ tests/f2fs/Makefile   |  21 +++
+ tests/generic/091     |  12 --
+ tests/generic/127.out |  12 +-
+ tests/generic/231.out |  12 +-
+ tests/generic/263     |  12 --
+ tests/shared/003      |  70 +++++++++
+ tests/shared/003.out  |   2 +
+ tests/shared/group    |   1 +
+ tests/xfs/141         |  85 +++++++++++
+ tests/xfs/141.out     |   2 +
+ tests/xfs/group       |   1 +
+ 22 files changed, 698 insertions(+), 234 deletions(-)
+ create mode 100755 tests/btrfs/116
+ create mode 100644 tests/btrfs/116.out
+ create mode 100644 tests/f2fs/Makefile
+ create mode 100755 tests/shared/003
+ create mode 100644 tests/shared/003.out
+ create mode 100755 tests/xfs/141
+ create mode 100644 tests/xfs/141.out
+--=20
 Dave Chinner
 david@fromorbit.com
+
+--AqsLC8rIMeq19msA
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBAgAGBQJWkzB/AAoJEK3oKUf0dfodW+gP/3Q3YEXIAXF/NZWWGFJbA1Xv
+efwhsLcHc+NFDffesQM4agq72l9VFSwg976FK6sQ/7g6anBLgCq/rrkcrOiG/147
+It+Csj2mebWGf9YMnw4vyknttsK/zH83UqpX1GaZJqx82Hn7p2Pp3+EERHnzEn+c
+lMcG8jagU5G/UyYF+PR/yvp4IKs2MbUaDsb7h5rOPQoQsBK1X6vyj8UvNTR9c9Xn
+3WUqKOP+nrc22KkCP1b6Zypsb+LndAMaBy3z/NN/tbBL9jVl69h2/ReRwh/YEXsI
+JaaOv82t97vBai14uFn2GnUJUbWGaFNWJIlx8Sv3VIsuFBVCP96xn9jt+xl+39K7
+BUIA+xw33zlXh9nhn6ZJVyidkfk1xW7fdRCApC/XbJ5f9woRUWGaDgdFtA72dfs/
+l/n08lEqrwqHWjtDOaskSJMgdVvK+Zcz/Qy2tNQiRzMA3vVyPYU0Ia8xw3hZUBeP
+NH2lTpb28HFnZ8oqUcjqpataN2MyL9woI2YM+U/DxxU7GOmJ6NZyOflkugBqp35s
+g+Tl6PQnnQuMwhYDRDVu9IB/a9ZEs0ieFnchKlwSFqlNqZuQkpL7C8uJY2VcNqKY
+OzPFaUQ9s7Q9O20ze4bSXgBE03EOVp0SVLoXsyt2FHcbHexZSU2nOg6y2k978vkv
+nz/m/i4h1pTl0J3AOEbR
+=bTQy
+-----END PGP SIGNATURE-----
+
+--AqsLC8rIMeq19msA--
