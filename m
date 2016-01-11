@@ -1,95 +1,125 @@
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:34522 "EHLO
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:27168 "EHLO
 	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757173AbcAKDl0 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 10 Jan 2016 22:41:26 -0500
-Date: Mon, 11 Jan 2016 14:41:19 +1100
+	by vger.kernel.org with ESMTP id S1758016AbcAKEEi (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sun, 10 Jan 2016 23:04:38 -0500
+Date: Mon, 11 Jan 2016 15:04:35 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 1/4 v2] fstests: fix btrfs test failures after commit
- 27d077ec0bda
-Message-ID: <20160111034119.GG10456@dastard>
-References: <1450845795-18729-1-git-send-email-fdmanana@kernel.org>
+Subject: Re: [PATCH v2] xfs: test XFS torn log write detection
+Message-ID: <20160111040435.GH10456@dastard>
+References: <1451923421-16647-1-git-send-email-bfoster@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1450845795-18729-1-git-send-email-fdmanana@kernel.org>
+In-Reply-To: <1451923421-16647-1-git-send-email-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Dec 23, 2015 at 04:43:12AM +0000, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Mon, Jan 04, 2016 at 11:03:41AM -0500, Brian Foster wrote:
+> XFS torn log write detection includes a mechanism to inject CRC errors
+> into log records at runtime and shutdown the fs accordingly. This
+> ensures that the CRC verification pass on the subsequent mount discovers
+> an invalid record near the head of the log and considers it a torn
+> write.
 > 
-> Commit 27d077ec0bda (common: use mount/umount helpers everywhere) made
-> a few btrfs test fail for 2 different reasons:
+> This test runs a workload with error injection enabled and verifies that
+> the subsequent mount is successful. The test repeats for several
+> iterations using a random frequency factor for the error event each
+> time.
 > 
-> 1) Some tests (btrfs/029 and btrfs/031) use $SCRATCH_MNT as a mount
->    point for some subvolume created in $TEST_DEV, therefore calling
->    _scratch_unmount does not work as it passes $SCRATCH_DEV as the
->    argument to the umount program. This is intentional to test reflinks
->    accross different mountpoints of the same filesystem but for different
->    subvolumes;
-> 
-> 2) For multiple devices filesystems (btrfs/003 and btrfs/011) that test
->    the device replace feature, we need to unmount using the mount path
->    ($SCRATCH_MNT) because unmounting using one of the devices as an
->    argument ($SCRATCH_DEV) does not always work - after replace operations
->    we get in /proc/mounts a device other than $SCRATCH_DEV associated
->    with the mount point $SCRATCH_MNT (this is mentioned in a comment at
->    btrfs/011 for example), so we need to pass that other device to the
->    umount program or pass it the mount point.
-> 
-> Using $SCRATCH_MNT as a mountpoint for a device other than $SCRATCH_DEV is
-> misleading, but that's a different problem that existed long before and
-> this change attempts only to fix the regression from 27d077ec0bda, leaving
-> such cleanups to later.
-> Fix this by making _sctatch_unmmount() pass $SCRATCH_MNT to umount instead
-> of $SCRATCH_DEV.
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> Signed-off-by: Brian Foster <bfoster@redhat.com>
 > ---
 > 
-> V2: Change _sctatch_unmount() to pass $SCRATCH_MNT as the argument to the
->     umount program instead of $SCRATCH_DEV. This makes the btrfs tests
->     pass again.
+> Here's a v2 of the XFS log crc verification test case now that the
+> associated kernel code has been merged. The only change is the bugfix
+> noted in the changelog below.
 > 
->  common/rc | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> Brian
 > 
-> diff --git a/common/rc b/common/rc
-> index d33e3fb..16a47fe 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -319,7 +319,7 @@ _scratch_unmount()
->  	if [ "$FSTYP" == "overlay" ]; then
->  		_overlay_scratch_unmount
->  	else
-> -		$UMOUNT_PROG $SCRATCH_DEV
-> +		$UMOUNT_PROG $SCRATCH_MNT
->  	fi
+> v2:
+> - Update random failure frequency calculation to ensure factor is never
+>   0.
+> v1: http://article.gmane.org/gmane.comp.file-systems.fstests/1406
+> 
+>  tests/xfs/350     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/350.out |  2 ++
+>  tests/xfs/group   |  1 +
+>  3 files changed, 88 insertions(+)
+>  create mode 100755 tests/xfs/350
+>  create mode 100644 tests/xfs/350.out
+> 
+> diff --git a/tests/xfs/350 b/tests/xfs/350
+> new file mode 100755
+> index 0000000..1a1de6f
+> --- /dev/null
+> +++ b/tests/xfs/350
+> @@ -0,0 +1,85 @@
+> +#! /bin/bash
+> +# FS QA Test No. 350
+> +#
+> +# Use the XFS log record CRC error injection mechanism to test torn writes to
+> +# the log. The error injection mechanism writes an invalid CRC and shuts down
+> +# the filesystem. The test verifies that a subsequent remount recovers the log
+> +# and that the filesystem is consistent.
+> +#
+> +# Note that this test requires a DEBUG mode kernel.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2015 Red Hat, Inc. All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +	killall -9 fsstress > /dev/null 2>&1
+> +	wait > /dev/null 2>&1
+> +}
+> +
+> +rm -f $seqres.full
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs xfs
+> +_supported_os Linux
+> +_require_xfs_sysfs $(_short_dev $SCRATCH_DEV)/log/log_badcrc_factor
 
-This causes generic/050 to fail (and there's probably others, too):
-
-@@ -15,7 +15,7 @@
-     mount: SCRATCH_DEV is write-protected, mounting read-only
-     mount: cannot mount SCRATCH_DEV read-only
-     unmounting read-only filesystem
-    -umount: SCRATCH_DEV: not mounted
-    +umount: SCRATCH_MNT: not mounted
-     mounting filesystem with -o norecovery on a read-only device:
-     mount: SCRATCH_DEV is write-protected, mounting read-only
-    ...
-
-And, looking at the change for a second or two, the above code is
-obviously wrong. Have a look at _overlay_scratch_unmount() and have
-a think about what we normally do when multiple fileystem types need
-a non-standard behaviour for a generic operation?
-
-Hint: it starts with 'case "$FSTYP" in'....
+Scratch is not mounted at this point, so I don't think you can test
+the scratch device sysfs attrs here. I changed it to look at the
+test device instead and it works fine.
 
 Cheers,
 
 Dave.
+
 -- 
 Dave Chinner
 david@fromorbit.com
