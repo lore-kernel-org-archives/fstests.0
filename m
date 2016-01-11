@@ -1,50 +1,46 @@
-Received: from mx1.redhat.com ([209.132.183.28]:47715 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:46494 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1759856AbcAKLin (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 11 Jan 2016 06:38:43 -0500
+	id S1759389AbcAKLci (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 11 Jan 2016 06:32:38 -0500
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (Postfix) with ESMTPS id 99036C0BF2A3
+	for <fstests@vger.kernel.org>; Mon, 11 Jan 2016 11:32:38 +0000 (UTC)
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 1/2] common: remove all files in $SCRATCH_DEV for overlayfs in _scratch_cleanup_files()
-Date: Mon, 11 Jan 2016 19:38:20 +0800
-Message-Id: <1452512301-22145-1-git-send-email-eguan@redhat.com>
+Subject: [PATCH 3/3] new: create a default .out file
+Date: Mon, 11 Jan 2016 19:32:04 +0800
+Message-Id: <1452511924-21872-4-git-send-email-eguan@redhat.com>
+In-Reply-To: <1452511924-21872-1-git-send-email-eguan@redhat.com>
+References: <1452511924-21872-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-unionfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-All files in lower/upper dirs should be removed for overlayfs in
-_scratch_cleanup_files(), not only files in merged dir, otherwise files
-from lower dir won't be removed.
+Creating a default .out file in "new" to ease the new test creation
+process.
 
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- common/rc | 14 +++++++++++---
- 1 file changed, 11 insertions(+), 3 deletions(-)
+ new | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-diff --git a/common/rc b/common/rc
-index e5ae1d0..e2a32da 100644
---- a/common/rc
-+++ b/common/rc
-@@ -701,9 +701,17 @@ _mkfs_dev()
- # remove all files in $SCRATCH_MNT, useful when testing on NFS/CIFS
- _scratch_cleanup_files()
- {
--	_scratch_mount
--	rm -rf $SCRATCH_MNT/*
--	_scratch_unmount
-+	case $FSTYP in
-+	overlay)
-+		# $SCRATCH_DEV is a valid directory in overlay case
-+		rm -rf $SCRATCH_DEV/*
-+		;;
-+	*)
-+		_scratch_mount
-+		rm -rf $SCRATCH_MNT/*
-+		_scratch_unmount
-+		;;
-+	esac
- }
+diff --git a/new b/new
+index ab2af69..c21d8db 100755
+--- a/new
++++ b/new
+@@ -228,6 +228,12 @@ echo ""
+ chmod 755 $tdir/$id
+ ${EDITOR-vi} $tdir/$id
  
- _scratch_mkfs()
++# Create default .out file
++cat <<End-of-File >$tdir/$id.out
++QA output created by $id
++Silence is golden
++End-of-File
++
+ if [ $# -eq 0 ]
+ then
+ 
 -- 
-1.8.3.1
+2.5.0
 
