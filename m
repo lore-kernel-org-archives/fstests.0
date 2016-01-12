@@ -1,52 +1,77 @@
-Received: from mx1.redhat.com ([209.132.183.28]:54550 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933756AbcALIb5 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 12 Jan 2016 03:31:57 -0500
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (Postfix) with ESMTPS id CFFEB4C38D
-	for <fstests@vger.kernel.org>; Tue, 12 Jan 2016 08:31:56 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v2] common: no need to parse config file in new
-Date: Tue, 12 Jan 2016 16:31:46 +0800
-Message-Id: <1452587506-26383-1-git-send-email-eguan@redhat.com>
-In-Reply-To: <1452511924-21872-3-git-send-email-eguan@redhat.com>
-References: <1452511924-21872-3-git-send-email-eguan@redhat.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:38358 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934734AbcALJfE (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 12 Jan 2016 04:35:04 -0500
+Date: Tue, 12 Jan 2016 01:34:59 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 2/2] overlay: test copy up files from lower dir
+Message-ID: <20160112093459.GC7832@birch.djwong.org>
+References: <1452512301-22145-1-git-send-email-eguan@redhat.com>
+ <1452512301-22145-2-git-send-email-eguan@redhat.com>
+ <20160111203135.GA6033@dastard>
+ <20160112034633.GO21019@eguan.usersys.redhat.com>
+ <20160112040626.GF6033@dastard>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160112040626.GF6033@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+To: Dave Chinner <david@fromorbit.com>, darrick.wong@oracle.com
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-I saw "new" failed the TEST_DEV/SCRATCH_DEV validation when TEST_DEV or
-SCRATCH_DEV points to directory, which is needed in overlayfs testing.
+On Tue, Jan 12, 2016 at 03:06:27PM +1100, Dave Chinner wrote:
+> On Tue, Jan 12, 2016 at 11:46:33AM +0800, Eryu Guan wrote:
+> > On Tue, Jan 12, 2016 at 07:31:35AM +1100, Dave Chinner wrote:
+> > > On Mon, Jan 11, 2016 at 07:38:21PM +0800, Eryu Guan wrote:
+> > > > Test copy up files from lower dir that are <, =, > 4G in size.
+> > > > 
+> > > > Kernel commit 0480334fa604 ("ovl: use O_LARGEFILE in ovl_copy_up()")
+> > > > fixed bug when copying up large file(>4G) from lower dir.
+> > > > 
+> > > > Signed-off-by: Eryu Guan <eguan@redhat.com>
+> > > > ---
+> > > >  tests/overlay/001      | 76 ++++++++++++++++++++++++++++++++++++++++++++++++++
+> > > >  tests/overlay/001.out  |  2 ++
+> > > >  tests/overlay/Makefile | 20 +++++++++++++
+> > > >  tests/overlay/group    |  6 ++++
+> > > >  4 files changed, 104 insertions(+)
+> > > >  create mode 100755 tests/overlay/001
+> > > >  create mode 100644 tests/overlay/001.out
+> > > >  create mode 100644 tests/overlay/Makefile
+> > > >  create mode 100644 tests/overlay/group
+> > > > 
+> > > > diff --git a/tests/overlay/001 b/tests/overlay/001
+> > > > new file mode 100755
+> > > > index 0000000..5025a69
+> > > > --- /dev/null
+> > > > +++ b/tests/overlay/001
+> > > > @@ -0,0 +1,76 @@
+> > > > +#! /bin/bash
+> > > > +# FS QA Test 002
+> > > 
+> > > 002 != 001 ;)
+> > 
+> > Ah, I missed that after "mv 002 001"..
+> 
+> "tools/mvtest overlay/002 overlay/001" will do all that stuff for
+> you now. When I get an updated sort script from Darrick, it will
+> even update the group files correctly....
 
-"new" only generates test template and doesn't need common/config to
-parse and validate TEST_DEV/SCRATCH_DEV etc., so just returns after
-setting all needed commands.
+tools/mvtest looks for tools/sort-group.py but the cmd is tools/sort-group.
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
-v2:
-- update commit log, s/_DIR/_DEV/
+D'oh!!
 
- common/config | 5 +++++
- 1 file changed, 5 insertions(+)
+--D
 
-diff --git a/common/config b/common/config
-index cb34fd7..9aa06a3 100644
---- a/common/config
-+++ b/common/config
-@@ -270,6 +270,11 @@ fi
- rm -f /tmp/crc_check.img
- export XFS_MKFS_HAS_NO_META_SUPPORT
- 
-+# new doesn't need config file parsed, we can stop here
-+if [ "$iam" == "new" ]; then
-+	return 0
-+fi
-+
- _mount_opts()
- {
- 	case $FSTYP in
--- 
-2.5.0
-
+> 
+> Cheers,
+> 
+> Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
