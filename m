@@ -1,43 +1,50 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:24259 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1757321AbcASIBO (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 19 Jan 2016 03:01:14 -0500
-Received: from G08CNEXCHPEKD01.g08.fujitsu.local (unknown [10.167.33.80])
-	by cn.fujitsu.com (Postfix) with ESMTP id AD73D41896F4
-	for <fstests@vger.kernel.org>; Tue, 19 Jan 2016 16:00:31 +0800 (CST)
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH] fsx.c: Add header file stdbool.h
-Date: Tue, 19 Jan 2016 16:00:28 +0800
-Message-ID: <1453190428-7379-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Received: from userp1050.oracle.com ([156.151.31.82]:45600 "EHLO
+	userp1050.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S935013AbcATD0v (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 19 Jan 2016 22:26:51 -0500
+Received: from userp1040.oracle.com (userp1040.oracle.com [156.151.31.81])
+	by userp1050.oracle.com (Sentrion-MTA-4.3.2/Sentrion-MTA-4.3.2) with ESMTP id u0ILC5hp016725
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
+	for <fstests@vger.kernel.org>; Mon, 18 Jan 2016 21:12:06 GMT
+Date: Mon, 18 Jan 2016 13:09:56 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: [PATCH v2] tools/mvtest: call out to the correct group sort program
+Message-ID: <20160118210956.GB5751@birch.djwong.org>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Compilation failed on RHEL6.7GA because stdbool.h is not included in
-xfs/platform_defs-x86_64.h or xfs/linux.h on RHEL6.7GA, so fix it.
+mvtest should call the actual name of the sort-group program.
+Fix a cut-paste error in finding the destination group file.
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- ltp/fsx.c | 1 +
- 1 file changed, 1 insertion(+)
+ tools/mvtest |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/ltp/fsx.c b/ltp/fsx.c
-index 28f109c..a7b36c1 100644
---- a/ltp/fsx.c
-+++ b/ltp/fsx.c
-@@ -20,6 +20,7 @@
- #include <strings.h>
- #include <sys/file.h>
- #include <sys/mman.h>
-+#include <stdbool.h>
- #ifdef HAVE_ERR_H
- #include <err.h>
- #endif
--- 
-1.8.3.1
-
-
-
+diff --git a/tools/mvtest b/tools/mvtest
+index af601d6..20bc23e 100755
+--- a/tools/mvtest
++++ b/tools/mvtest
+@@ -33,7 +33,7 @@ sgroup="$(basename "$(dirname "tests/${src}")")"
+ dgroup="$(basename "$(dirname "tests/${dest}")")"
+ 
+ sgroupfile="tests/${sgroup}/group"
+-dgroupfile="tests/${sgroup}/group"
++dgroupfile="tests/${dgroup}/group"
+ 
+ git mv "tests/${src}" "tests/${dest}"
+ git mv "tests/${src}.out" "tests/${dest}.out"
+@@ -47,7 +47,7 @@ newgrpline="$(echo "${grpline}" | sed -e "s/^${sid} /${did} /g")"
+ sed -e "/^${sid}.*$/d" -i "${sgroupfile}"
+ cp "${dgroupfile}" "${dgroupfile}.new"
+ append "${dgroupfile}.new" "${newgrpline}"
+-"${dir}/sort-group.py" "${dgroupfile}.new"
++"${dir}/sort-group" "${dgroupfile}.new"
+ mv "${dgroupfile}.new" "${dgroupfile}"
+ 
+ echo "Moved \"${src}\" to \"${dest}\"."
