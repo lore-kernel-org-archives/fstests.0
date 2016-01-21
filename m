@@ -1,216 +1,84 @@
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:33544 "EHLO
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:5433 "EHLO
 	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752562AbcAUBoF (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 20 Jan 2016 20:44:05 -0500
+	by vger.kernel.org with ESMTP id S1752032AbcAUBoG (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 20 Jan 2016 20:44:06 -0500
 Received: from disappointment.disaster.area ([192.168.1.110] helo=disappointment)
 	by dastard with esmtp (Exim 4.80)
 	(envelope-from <dave@fromorbit.com>)
-	id 1aM4HL-0001zv-9K
-	for fstests@vger.kernel.org; Thu, 21 Jan 2016 12:43:15 +1100
+	id 1aM4Hp-00020E-5k
+	for fstests@vger.kernel.org; Thu, 21 Jan 2016 12:43:45 +1100
 Received: from dave by disappointment with local (Exim 4.86)
 	(envelope-from <dave@disappointment.disaster>)
-	id 1aM4HL-0002gn-8W
-	for fstests@vger.kernel.org; Thu, 21 Jan 2016 12:43:15 +1100
+	id 1aM4Hp-0002iW-4h
+	for fstests@vger.kernel.org; Thu, 21 Jan 2016 12:43:45 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH 1/3] xfs: support realtime/log device setup changes in config sections
-Date: Thu, 21 Jan 2016 12:43:11 +1100
-Message-Id: <1453340593-10236-2-git-send-email-david@fromorbit.com>
-In-Reply-To: <1453340593-10236-1-git-send-email-david@fromorbit.com>
-References: <1453340593-10236-1-git-send-email-david@fromorbit.com>
+Subject: [PATCH] fsync-tester: reopen files with correct flags
+Date: Thu, 21 Jan 2016 12:43:45 +1100
+Message-Id: <1453340625-10406-1-git-send-email-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
 From: Dave Chinner <dchinner@redhat.com>
 
-Currently changing the devices used by "USE_EXTERNAL" environmental
-variable is not supported by the config section parsing. Add the
-functionality so that we can use config sections to test external
-device configs successfully.
-
-This required tracking down a bug in _check_xfs_filesystem() which
-was causing a log device to be passed to a test device without an
-external log device. This was caused by an uninitialised variable in
-the function. I also added full output file removals to the first
-couple of generic tests that were failing, because that's where the
-check failure output ends up in this case.
+When "drop caches" tests are run, the test_fd is closed and
+re-opened. It is reopened O_RDWR, so dropping O_DIRECT and any other
+open flag that was set for test_fd. This fixes a random generic/311
+failure due to file data corruption I've been seeing on subtests 11
+and 13 when direct IO was specified.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- common/config     | 63 +++++++++++++++++++++++++++++++++++++++----------------
- common/dmflakey   |  3 ++-
- common/rc         |  1 +
- tests/generic/002 |  2 ++
- tests/generic/004 |  2 ++
- 5 files changed, 52 insertions(+), 19 deletions(-)
+ src/fsync-tester.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/common/config b/common/config
-index cb34fd7..477753e 100644
---- a/common/config
-+++ b/common/config
-@@ -416,6 +416,30 @@ if [ -f "$HOST_OPTIONS" ]; then
- 	fi
- fi
+diff --git a/src/fsync-tester.c b/src/fsync-tester.c
+index 657e00f..4171874 100644
+--- a/src/fsync-tester.c
++++ b/src/fsync-tester.c
+@@ -12,6 +12,7 @@
+ static int test_fd;
+ static char *buf;
+ static char *fname;
++static int openflags = O_RDWR;
  
-+_check_device()
-+{
-+	local name=$1
-+	local dev_needed=$2
-+	local dev=$3
-+
-+	if [ -z "$dev" ]; then
-+		if [ "$dev_needed" == "required" ]; then 
-+			_fatal "common/config: $name is required but not defined!"
-+		fi
-+		return
-+	fi
-+
-+	echo $dev | grep -qE ":|//" > /dev/null 2>&1
-+	network_dev=$?
-+	if [ "$FSTYP" == "overlay" ]; then
-+		if [ ! -d "$dev" ]; then
-+			_fatal "common/config: $name ($dev) is not a directory for overlay"
-+		fi
-+	elif [ ! -b "$dev" -a "$network_dev" != "0" ]; then
-+		_fatal "common/config: $name ($dev) is not a block device or a network filesystem"
-+	fi
-+}
-+
- # Parse config section options. This function will parse all the configuration
- # within a single section which name is passed as an argument. For section
- # name format see comments in get_config_sections().
-@@ -449,10 +473,13 @@ get_next_config() {
- 	local OLD_TEST_FS_MOUNT_OPTS=$TEST_FS_MOUNT_OPTS
- 	local OLD_MKFS_OPTIONS=$MKFS_OPTIONS
- 	local OLD_FSCK_OPTIONS=$FSCK_OPTIONS
-+	local OLD_USE_EXTERNAL=$USE_EXTERNAL
+ /*
+  * Just creates a random file, overwriting the file in a random number of loops
+@@ -139,7 +140,7 @@ static int test_three(int *max_blocks, int prealloc, int rand_fsync,
+ 			if (drop_caches) {
+ 				close(test_fd);
+ 				drop_all_caches();
+-				test_fd = open(fname, O_RDWR);
++				test_fd = open(fname, openflags);
+ 				if (test_fd < 0) {
+ 					test_fd = 0;
+ 					fprintf(stderr, "Error re-opening file: %d\n",
+@@ -381,7 +382,6 @@ int main(int argc, char **argv)
+ 	long int test = 1;
+ 	long int tmp;
+ 	int ret = 0;
+-	int flags = O_RDWR|O_CREAT|O_TRUNC;
  
- 	unset MOUNT_OPTIONS
- 	unset MKFS_OPTIONS
- 	unset FSCK_OPTIONS
-+	unset USE_EXTERNAL
-+
- 	# We might have deduced SCRATCH_DEV from the SCRATCH_DEV_POOL in the previous
- 	# run, so we have to unset it now.
- 	if [ "$SCRATCH_DEV_NOT_SET" == "true" ]; then
-@@ -466,11 +493,20 @@ get_next_config() {
- 		[ -z "$TEST_FS_MOUNT_OPTS" ] && _test_mount_opts
- 		[ -z "$MKFS_OPTIONS" ] && _mkfs_opts
- 		[ -z "$FSCK_OPTIONS" ] && _fsck_opts
-+
-+		# clear the external devices if we are not using them
-+		if [ -z "$USE_EXTERNAL" ]; then
-+			unset TEST_RTDEV
-+			unset TEST_LOGDEV
-+			unset SCRATCH_RTDEV
-+			unset SCRATCH_LOGDEV
-+		fi
- 	else
- 		[ -z "$MOUNT_OPTIONS" ] && export MOUNT_OPTIONS=$OLD_MOUNT_OPTIONS
- 		[ -z "$TEST_FS_MOUNT_OPTS" ] && export TEST_FS_MOUNT_OPTS=$OLD_TEST_FS_MOUNT_OPTS
- 		[ -z "$MKFS_OPTIONS" ] && export MKFS_OPTIONS=$OLD_MKFS_OPTIONS
- 		[ -z "$FSCK_OPTIONS" ] && export FSCK_OPTIONS=$OLD_FSCK_OPTIONS
-+		[ -z "$USE_EXTERNAL" ] && export USE_EXTERNAL=$OLD_USE_EXTERNAL
- 	fi
+ 	if (argc < 2)
+ 		usage();
+@@ -435,7 +435,7 @@ int main(int argc, char **argv)
+ 	srandom(seed);
  
- 	# set default RESULT_BASE
-@@ -491,15 +527,7 @@ get_next_config() {
- 		exit 1
- 	fi
+ 	if (direct_io) {
+-		flags |= O_DIRECT;
++		openflags |= O_DIRECT;
+ 		ret = posix_memalign((void **)&buf, getpagesize(), 4096);
+ 		if (ret) {
+ 			fprintf(stderr, "Error allocating buf: %d\n", ret);
+@@ -449,7 +449,7 @@ int main(int argc, char **argv)
+ 		}
+ 	}
  
--	echo $TEST_DEV | grep -qE ":|//" > /dev/null 2>&1
--	if [ ! -b "$TEST_DEV" -a "$?" != "0" -a "$FSTYP" != "overlay" ]; then
--		echo "common/config: Error: \$TEST_DEV ($TEST_DEV) is not a block device or a network filesystem"
--		exit 1
--	elif [ "$FSTYP" == "overlay" -a ! -d "$TEST_DEV" ]; then
--		echo "common/config: Error: \$TEST_DEV ($TEST_DEV) is not a directory for overlay"
--		exit 1
--	fi
--
-+	_check_device TEST_DEV required $TEST_DEV
- 	if [ ! -d "$TEST_DIR" ]; then
- 		echo "common/config: Error: \$TEST_DIR ($TEST_DIR) is not a directory"
- 		exit 1
-@@ -517,19 +545,18 @@ get_next_config() {
- 		export SCRATCH_DEV_NOT_SET=true
- 	fi
- 
--	echo $SCRATCH_DEV | grep -qE ":|//" > /dev/null 2>&1
--	if [ ! -z "$SCRATCH_DEV" -a ! -b "$SCRATCH_DEV" -a "$?" != "0" -a "$FSTYP" != "overlay" ]; then
--		echo "common/config: Error: \$SCRATCH_DEV ($SCRATCH_DEV) is not a block device or a network filesystem"
--		exit 1
--	elif [ ! -z "$SCRATCH_DEV" -a "$FSTYP" == "overlay" -a ! -d "$SCRATCH_DEV" ]; then
--		echo "common/config: Error: \$SCRATCH_DEV ($SCRATCH_DEV) is not a directory for overlay"
--		exit 1
--	fi
--
-+	_check_device SCRATCH_DEV optional $SCRATCH_DEV
- 	if [ ! -z "$SCRATCH_MNT" -a ! -d "$SCRATCH_MNT" ]; then
- 		echo "common/config: Error: \$SCRATCH_MNT ($SCRATCH_MNT) is not a directory"
- 		exit 1
- 	fi
-+
-+	if [ -n "$USE_EXTERNAL" ]; then
-+		_check_device TEST_RTDEV optional $TEST_RTDEV
-+		_check_device TEST_LOGDEV optional $TEST_LOGDEV
-+		_check_device SCRATCH_RTDEV optional $SCRATCH_RTDEV
-+		_check_device SCRATCH_LOGDEV optional $SCRATCH_LOGDEV
-+	fi
- }
- 
- if [ -z "$CONFIG_INCLUDED" ]; then
-diff --git a/common/dmflakey b/common/dmflakey
-index 5a45d14..3b6521a 100644
---- a/common/dmflakey
-+++ b/common/dmflakey
-@@ -39,7 +39,8 @@ _init_flakey()
- 
- _mount_flakey()
- {
--	mount -t $FSTYP $MOUNT_OPTIONS $FLAKEY_DEV $SCRATCH_MNT
-+	_scratch_options mount
-+	mount -t $FSTYP $SCRATCH_OPTIONS $MOUNT_OPTIONS $FLAKEY_DEV $SCRATCH_MNT
- }
- 
- _unmount_flakey()
-diff --git a/common/rc b/common/rc
-index 5135260..716c215 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2017,6 +2017,7 @@ _check_xfs_filesystem()
-     fi
- 
-     extra_mount_options=""
-+    extra_log_options=""
-     extra_options=""
-     device=$1
-     if [ -f $device ];then
-diff --git a/tests/generic/002 b/tests/generic/002
-index f63b208..0433882 100755
---- a/tests/generic/002
-+++ b/tests/generic/002
-@@ -45,6 +45,8 @@ _supported_fs generic
- _supported_os IRIX Linux
- _require_test
- 
-+rm -f $seqres.full
-+
- echo "Silence is goodness ..."
- 
- # ensure target directory exists
-diff --git a/tests/generic/004 b/tests/generic/004
-index c7aa473..d0926f1 100755
---- a/tests/generic/004
-+++ b/tests/generic/004
-@@ -47,6 +47,8 @@ _supported_os Linux
- _require_test
- _require_xfs_io_command "flink"
- 
-+rm -f $seqres.full
-+
- testfile="${TEST_DIR}/tst-tmpfile-flink"
- 
- # test creating a r/w tmpfile, do I/O and link it into the namespace
+-	test_fd = open(fname, flags, 0644);
++	test_fd = open(fname, openflags | O_CREAT | O_TRUNC, 0644);
+ 	if (test_fd < 0) {
+ 		fprintf(stderr, "Error opening file %d (%s)\n", errno,
+ 			strerror(errno));
 -- 
 2.5.0
 
