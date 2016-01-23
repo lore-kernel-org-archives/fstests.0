@@ -1,123 +1,104 @@
-Received: from mail-lf0-f47.google.com ([209.85.215.47]:33242 "EHLO
-	mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757294AbcAaVZD (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 31 Jan 2016 16:25:03 -0500
-Subject: [PATCH] overlay: check visible whiteouts in pure-upper directory
-From: Konstantin Khlebnikov <koct9i@gmail.com>
-Date: Mon, 01 Feb 2016 00:24:57 +0300
-Message-ID: <145427549775.28346.2363708034750122757.stgit@zurg>
+Return-Path: <fstests-owner@vger.kernel.org>
+Received: from aserp1040.oracle.com ([141.146.126.69]:18849 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752969AbcAWAhM (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 22 Jan 2016 19:37:12 -0500
+Subject: [PATCH 4/5] dedupe: record dedupe errors in golden output
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Fri, 22 Jan 2016 16:37:07 -0800
+Message-ID: <20160123003706.2666.81569.stgit@birch.djwong.org>
+In-Reply-To: <20160123003648.2666.37062.stgit@birch.djwong.org>
+References: <20160123003648.2666.37062.stgit@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, linux-unionfs@vger.kernel.org
+To: david@fromorbit.com, darrick.wong@oracle.com
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-Moving non-pure file into pure-upper directory and removing it here
-leaves visible whiteout.
+The xfs_io dedupe command originally didn't print dedupe errors
+to stderr like you'd expect.  Since that was fixed, the golden
+output should be changed to reflect that.
 
-Signed-off-by: Konstantin Khlebnikov <koct9i@gmail.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/overlay/002     |   71 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/002.out |    2 +
- tests/overlay/group   |    1 +
- 3 files changed, 74 insertions(+)
- create mode 100755 tests/overlay/002
- create mode 100644 tests/overlay/002.out
+ tests/generic/122.out |    1 +
+ tests/generic/136     |    2 ++
+ tests/generic/136.out |    3 +++
+ tests/generic/137     |    2 +-
+ tests/generic/182.out |    2 ++
+ 5 files changed, 9 insertions(+), 1 deletion(-)
 
-diff --git a/tests/overlay/002 b/tests/overlay/002
-new file mode 100755
-index 000000000000..30b2b5561fce
---- /dev/null
-+++ b/tests/overlay/002
-@@ -0,0 +1,71 @@
-+#! /bin/bash
-+# FS QA Test 002
-+#
-+# Visible whiteouts in pure-upper directory
-+#
-+# https://bugzilla.kernel.org/show_bug.cgi?id=109611
-+# https://github.com/docker/docker/issues/9572
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Konstantin Khlebnikov.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	rm -fr $TEST_DEV/upper/$seq.pure
-+	rm -fr $TEST_DEV/upper/$seq.file
-+	rm -fr $TEST_DEV/lower/$seq.file
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs overlay
-+_supported_os Linux
-+_require_test
-+
-+echo "Silence is golden."
-+
-+touch $TEST_DEV/lower/$seq.file
-+
-+cd $TEST_DIR
-+mkdir $seq.pure
-+mv $seq.file $seq.pure
-+rm $seq.pure/$seq.file
-+ls $seq.pure
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/overlay/002.out b/tests/overlay/002.out
-new file mode 100644
-index 000000000000..c1642bfddbae
---- /dev/null
-+++ b/tests/overlay/002.out
-@@ -0,0 +1,2 @@
-+QA output created by 002
-+Silence is golden.
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 51a62cf64b89..877b5d2d6add 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -4,3 +4,4 @@
- # do not start group name with a digit
- #
- 001 perms auto quick
-+002 auto quick metadata
+
+diff --git a/tests/generic/122.out b/tests/generic/122.out
+index c7cfec2..7925e90 100644
+--- a/tests/generic/122.out
++++ b/tests/generic/122.out
+@@ -4,6 +4,7 @@ Create the original files
+ 5e3501f97fd2669babfcbd3e1972e833  TEST_DIR/test-122/file2
+ Files 1-2 do not match (intentional)
+ (Fail to) dedupe the middle blocks together
++dedupe: Extents did not match.
+ Compare sections
+ 35ac8d7917305c385c30f3d82c30a8f6  TEST_DIR/test-122/file1
+ 5e3501f97fd2669babfcbd3e1972e833  TEST_DIR/test-122/file2
+diff --git a/tests/generic/136 b/tests/generic/136
+index 89ee751..5d021f8 100755
+--- a/tests/generic/136
++++ b/tests/generic/136
+@@ -82,7 +82,9 @@ test "${C2}" != "${C4}" || echo "file2 and file4 should not match"
+ test "${C3}" = "${C4}" || echo "file3 and file4 should match"
+ 
+ echo "Dedupe the last blocks together"
++echo "1->2"
+ _dedupe_range "$TESTDIR/file1" $BLKSZ "$TESTDIR/file2" $BLKSZ 37 >> "$seqres.full"
++echo "1->3"
+ _dedupe_range "$TESTDIR/file1" $BLKSZ "$TESTDIR/file3" $BLKSZ 37 >> "$seqres.full"
+ _test_remount
+ 
+diff --git a/tests/generic/136.out b/tests/generic/136.out
+index 99a5465..f76f40a 100644
+--- a/tests/generic/136.out
++++ b/tests/generic/136.out
+@@ -5,6 +5,9 @@ c4fd505be25a0c91bcca9f502b9a8156  TEST_DIR/test-136/file2
+ 07ac67bf7f271195442509e79cde4cee  TEST_DIR/test-136/file3
+ 07ac67bf7f271195442509e79cde4cee  TEST_DIR/test-136/file4
+ Dedupe the last blocks together
++1->2
++1->3
++dedupe: Extents did not match.
+ c4fd505be25a0c91bcca9f502b9a8156  TEST_DIR/test-136/file1
+ c4fd505be25a0c91bcca9f502b9a8156  TEST_DIR/test-136/file2
+ 07ac67bf7f271195442509e79cde4cee  TEST_DIR/test-136/file3
+diff --git a/tests/generic/137 b/tests/generic/137
+index a640f4f..9cc7948 100755
+--- a/tests/generic/137
++++ b/tests/generic/137
+@@ -83,7 +83,7 @@ done
+ echo "Dedupe block two to the sevens"
+ seq 1 $((NR_BLKS / 7)) | while read nr; do
+ 	_dedupe_range "$TESTDIR/file1" $((BLKSZ * 2)) "$TESTDIR/file1" \
+-			$((nr * 7 * BLKSZ)) $BLKSZ >> "$seqres.full"
++			$((nr * 7 * BLKSZ)) $BLKSZ >> "$seqres.full" 2>&1
+ done
+ 
+ _test_remount
+diff --git a/tests/generic/182.out b/tests/generic/182.out
+index 9841b76..049a3ee 100644
+--- a/tests/generic/182.out
++++ b/tests/generic/182.out
+@@ -1,10 +1,12 @@
+ QA output created by 182
+ Create the original files
++dedupe: Extents did not match.
+ f4820540fc0ac02750739896fe028d56  TEST_DIR/test-182/file1
+ 69ad53078a16243d98e21d9f8704a071  TEST_DIR/test-182/file2
+ 69ad53078a16243d98e21d9f8704a071  TEST_DIR/test-182/file2.chk
+ Compare against check files
+ Make the original file almost dedup-able
++dedupe: Extents did not match.
+ f4820540fc0ac02750739896fe028d56  TEST_DIR/test-182/file1
+ 158d4e3578b94b89cbb44493a2110fb9  TEST_DIR/test-182/file2
+ 158d4e3578b94b89cbb44493a2110fb9  TEST_DIR/test-182/file2.chk
 
