@@ -1,145 +1,229 @@
-Received: from mx1.redhat.com ([209.132.183.28]:38846 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:42436 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751705AbcBBEMG (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 1 Feb 2016 23:12:06 -0500
-Date: Tue, 2 Feb 2016 12:12:00 +0800
+	id S1752752AbcBBEgi (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 1 Feb 2016 23:36:38 -0500
+Date: Tue, 2 Feb 2016 12:36:33 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] overlay: check visible whiteouts in pure-upper directory
-Message-ID: <20160202041200.GC11419@eguan.usersys.redhat.com>
-References: <145427549775.28346.2363708034750122757.stgit@zurg>
+Subject: Re: [PATCH 1/3] xfs: support realtime/log device setup changes in
+ config sections
+Message-ID: <20160202043633.GD11419@eguan.usersys.redhat.com>
+References: <1453340593-10236-1-git-send-email-david@fromorbit.com>
+ <1453340593-10236-2-git-send-email-david@fromorbit.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <145427549775.28346.2363708034750122757.stgit@zurg>
+In-Reply-To: <1453340593-10236-2-git-send-email-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
-To: Konstantin Khlebnikov <koct9i@gmail.com>
-Cc: fstests@vger.kernel.org, Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Feb 01, 2016 at 12:24:57AM +0300, Konstantin Khlebnikov wrote:
-> Moving non-pure file into pure-upper directory and removing it here
-> leaves visible whiteout.
+On Thu, Jan 21, 2016 at 12:43:11PM +1100, Dave Chinner wrote:
+> From: Dave Chinner <dchinner@redhat.com>
 > 
-> Signed-off-by: Konstantin Khlebnikov <koct9i@gmail.com>
+> Currently changing the devices used by "USE_EXTERNAL" environmental
+> variable is not supported by the config section parsing. Add the
+> functionality so that we can use config sections to test external
+> device configs successfully.
+> 
+> This required tracking down a bug in _check_xfs_filesystem() which
+> was causing a log device to be passed to a test device without an
+> external log device. This was caused by an uninitialised variable in
+> the function. I also added full output file removals to the first
+> couple of generic tests that were failing, because that's where the
+> check failure output ends up in this case.
+> 
+> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+
+Looks good to me. And I ran some tests on NFS/CIFS/XFS/overlay and the
+new _check_device function worked as expected. Just one white space
+issue below
+
 > ---
->  tests/overlay/002     |   71 +++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/002.out |    2 +
->  tests/overlay/group   |    1 +
->  3 files changed, 74 insertions(+)
->  create mode 100755 tests/overlay/002
->  create mode 100644 tests/overlay/002.out
+>  common/config     | 63 +++++++++++++++++++++++++++++++++++++++----------------
+>  common/dmflakey   |  3 ++-
+>  common/rc         |  1 +
+>  tests/generic/002 |  2 ++
+>  tests/generic/004 |  2 ++
+>  5 files changed, 52 insertions(+), 19 deletions(-)
 > 
-> diff --git a/tests/overlay/002 b/tests/overlay/002
-> new file mode 100755
-> index 000000000000..30b2b5561fce
-> --- /dev/null
-> +++ b/tests/overlay/002
-> @@ -0,0 +1,71 @@
-> +#! /bin/bash
-> +# FS QA Test 002
-> +#
-> +# Visible whiteouts in pure-upper directory
-> +#
-> +# https://bugzilla.kernel.org/show_bug.cgi?id=109611
-> +# https://github.com/docker/docker/issues/9572
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2016 Konstantin Khlebnikov.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
+> diff --git a/common/config b/common/config
+> index cb34fd7..477753e 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -416,6 +416,30 @@ if [ -f "$HOST_OPTIONS" ]; then
+>  	fi
+>  fi
+>  
+> +_check_device()
 > +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	rm -fr $TEST_DEV/upper/$seq.pure
-> +	rm -fr $TEST_DEV/upper/$seq.file
-> +	rm -fr $TEST_DEV/lower/$seq.file
-> +}
+> +	local name=$1
+> +	local dev_needed=$2
+> +	local dev=$3
 > +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs overlay
-> +_supported_os Linux
-> +_require_test
-> +
-> +echo "Silence is golden."
-> +
-> +touch $TEST_DEV/lower/$seq.file
+> +	if [ -z "$dev" ]; then
+> +		if [ "$dev_needed" == "required" ]; then 
 
-Pretty much the same comments as in previous patch, test on SCRATCH_DEV
-and change underlying fs while overlay is not mounted and use exported
-variables not hard-coded "upper" "lower".
-
-> +
-> +cd $TEST_DIR
-> +mkdir $seq.pure
-> +mv $seq.file $seq.pure
-> +rm $seq.pure/$seq.file
-> +ls $seq.pure
-
-I think "ls -l" could show the failure more obvious, by "ls -l" I see
-
-+ls: cannot access 002.pure/002.file: No such file or directory
-+total 0
-+?????????? ? ? ? ?            ? 002.file
-
-and a simple ls only shows
-
-+002.file
+Above line introduced trailing white space.
 
 Thanks,
 Eryu
 
+> +			_fatal "common/config: $name is required but not defined!"
+> +		fi
+> +		return
+> +	fi
 > +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/overlay/002.out b/tests/overlay/002.out
-> new file mode 100644
-> index 000000000000..c1642bfddbae
-> --- /dev/null
-> +++ b/tests/overlay/002.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 002
-> +Silence is golden.
-> diff --git a/tests/overlay/group b/tests/overlay/group
-> index 51a62cf64b89..877b5d2d6add 100644
-> --- a/tests/overlay/group
-> +++ b/tests/overlay/group
-> @@ -4,3 +4,4 @@
->  # do not start group name with a digit
->  #
->  001 perms auto quick
-> +002 auto quick metadata
+> +	echo $dev | grep -qE ":|//" > /dev/null 2>&1
+> +	network_dev=$?
+> +	if [ "$FSTYP" == "overlay" ]; then
+> +		if [ ! -d "$dev" ]; then
+> +			_fatal "common/config: $name ($dev) is not a directory for overlay"
+> +		fi
+> +	elif [ ! -b "$dev" -a "$network_dev" != "0" ]; then
+> +		_fatal "common/config: $name ($dev) is not a block device or a network filesystem"
+> +	fi
+> +}
+> +
+>  # Parse config section options. This function will parse all the configuration
+>  # within a single section which name is passed as an argument. For section
+>  # name format see comments in get_config_sections().
+> @@ -449,10 +473,13 @@ get_next_config() {
+>  	local OLD_TEST_FS_MOUNT_OPTS=$TEST_FS_MOUNT_OPTS
+>  	local OLD_MKFS_OPTIONS=$MKFS_OPTIONS
+>  	local OLD_FSCK_OPTIONS=$FSCK_OPTIONS
+> +	local OLD_USE_EXTERNAL=$USE_EXTERNAL
+>  
+>  	unset MOUNT_OPTIONS
+>  	unset MKFS_OPTIONS
+>  	unset FSCK_OPTIONS
+> +	unset USE_EXTERNAL
+> +
+>  	# We might have deduced SCRATCH_DEV from the SCRATCH_DEV_POOL in the previous
+>  	# run, so we have to unset it now.
+>  	if [ "$SCRATCH_DEV_NOT_SET" == "true" ]; then
+> @@ -466,11 +493,20 @@ get_next_config() {
+>  		[ -z "$TEST_FS_MOUNT_OPTS" ] && _test_mount_opts
+>  		[ -z "$MKFS_OPTIONS" ] && _mkfs_opts
+>  		[ -z "$FSCK_OPTIONS" ] && _fsck_opts
+> +
+> +		# clear the external devices if we are not using them
+> +		if [ -z "$USE_EXTERNAL" ]; then
+> +			unset TEST_RTDEV
+> +			unset TEST_LOGDEV
+> +			unset SCRATCH_RTDEV
+> +			unset SCRATCH_LOGDEV
+> +		fi
+>  	else
+>  		[ -z "$MOUNT_OPTIONS" ] && export MOUNT_OPTIONS=$OLD_MOUNT_OPTIONS
+>  		[ -z "$TEST_FS_MOUNT_OPTS" ] && export TEST_FS_MOUNT_OPTS=$OLD_TEST_FS_MOUNT_OPTS
+>  		[ -z "$MKFS_OPTIONS" ] && export MKFS_OPTIONS=$OLD_MKFS_OPTIONS
+>  		[ -z "$FSCK_OPTIONS" ] && export FSCK_OPTIONS=$OLD_FSCK_OPTIONS
+> +		[ -z "$USE_EXTERNAL" ] && export USE_EXTERNAL=$OLD_USE_EXTERNAL
+>  	fi
+>  
+>  	# set default RESULT_BASE
+> @@ -491,15 +527,7 @@ get_next_config() {
+>  		exit 1
+>  	fi
+>  
+> -	echo $TEST_DEV | grep -qE ":|//" > /dev/null 2>&1
+> -	if [ ! -b "$TEST_DEV" -a "$?" != "0" -a "$FSTYP" != "overlay" ]; then
+> -		echo "common/config: Error: \$TEST_DEV ($TEST_DEV) is not a block device or a network filesystem"
+> -		exit 1
+> -	elif [ "$FSTYP" == "overlay" -a ! -d "$TEST_DEV" ]; then
+> -		echo "common/config: Error: \$TEST_DEV ($TEST_DEV) is not a directory for overlay"
+> -		exit 1
+> -	fi
+> -
+> +	_check_device TEST_DEV required $TEST_DEV
+>  	if [ ! -d "$TEST_DIR" ]; then
+>  		echo "common/config: Error: \$TEST_DIR ($TEST_DIR) is not a directory"
+>  		exit 1
+> @@ -517,19 +545,18 @@ get_next_config() {
+>  		export SCRATCH_DEV_NOT_SET=true
+>  	fi
+>  
+> -	echo $SCRATCH_DEV | grep -qE ":|//" > /dev/null 2>&1
+> -	if [ ! -z "$SCRATCH_DEV" -a ! -b "$SCRATCH_DEV" -a "$?" != "0" -a "$FSTYP" != "overlay" ]; then
+> -		echo "common/config: Error: \$SCRATCH_DEV ($SCRATCH_DEV) is not a block device or a network filesystem"
+> -		exit 1
+> -	elif [ ! -z "$SCRATCH_DEV" -a "$FSTYP" == "overlay" -a ! -d "$SCRATCH_DEV" ]; then
+> -		echo "common/config: Error: \$SCRATCH_DEV ($SCRATCH_DEV) is not a directory for overlay"
+> -		exit 1
+> -	fi
+> -
+> +	_check_device SCRATCH_DEV optional $SCRATCH_DEV
+>  	if [ ! -z "$SCRATCH_MNT" -a ! -d "$SCRATCH_MNT" ]; then
+>  		echo "common/config: Error: \$SCRATCH_MNT ($SCRATCH_MNT) is not a directory"
+>  		exit 1
+>  	fi
+> +
+> +	if [ -n "$USE_EXTERNAL" ]; then
+> +		_check_device TEST_RTDEV optional $TEST_RTDEV
+> +		_check_device TEST_LOGDEV optional $TEST_LOGDEV
+> +		_check_device SCRATCH_RTDEV optional $SCRATCH_RTDEV
+> +		_check_device SCRATCH_LOGDEV optional $SCRATCH_LOGDEV
+> +	fi
+>  }
+>  
+>  if [ -z "$CONFIG_INCLUDED" ]; then
+> diff --git a/common/dmflakey b/common/dmflakey
+> index 5a45d14..3b6521a 100644
+> --- a/common/dmflakey
+> +++ b/common/dmflakey
+> @@ -39,7 +39,8 @@ _init_flakey()
+>  
+>  _mount_flakey()
+>  {
+> -	mount -t $FSTYP $MOUNT_OPTIONS $FLAKEY_DEV $SCRATCH_MNT
+> +	_scratch_options mount
+> +	mount -t $FSTYP $SCRATCH_OPTIONS $MOUNT_OPTIONS $FLAKEY_DEV $SCRATCH_MNT
+>  }
+>  
+>  _unmount_flakey()
+> diff --git a/common/rc b/common/rc
+> index 5135260..716c215 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2017,6 +2017,7 @@ _check_xfs_filesystem()
+>      fi
+>  
+>      extra_mount_options=""
+> +    extra_log_options=""
+>      extra_options=""
+>      device=$1
+>      if [ -f $device ];then
+> diff --git a/tests/generic/002 b/tests/generic/002
+> index f63b208..0433882 100755
+> --- a/tests/generic/002
+> +++ b/tests/generic/002
+> @@ -45,6 +45,8 @@ _supported_fs generic
+>  _supported_os IRIX Linux
+>  _require_test
+>  
+> +rm -f $seqres.full
+> +
+>  echo "Silence is goodness ..."
+>  
+>  # ensure target directory exists
+> diff --git a/tests/generic/004 b/tests/generic/004
+> index c7aa473..d0926f1 100755
+> --- a/tests/generic/004
+> +++ b/tests/generic/004
+> @@ -47,6 +47,8 @@ _supported_os Linux
+>  _require_test
+>  _require_xfs_io_command "flink"
+>  
+> +rm -f $seqres.full
+> +
+>  testfile="${TEST_DIR}/tst-tmpfile-flink"
+>  
+>  # test creating a r/w tmpfile, do I/O and link it into the namespace
+> -- 
+> 2.5.0
 > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
