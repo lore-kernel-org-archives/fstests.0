@@ -1,29 +1,48 @@
-Received: from bombadil.infradead.org ([198.137.202.9]:53416 "EHLO
-	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753274AbcBBSIa (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 2 Feb 2016 13:08:30 -0500
-Date: Tue, 2 Feb 2016 10:08:28 -0800
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: xfsprogs: Add BUILD_CFLAGS for cross compilation
-Message-ID: <20160202180828.GA13880@infradead.org>
-References: <1437913255-7524-4-git-send-email-tytso@mit.edu>
- <1454361909-36538-1-git-send-email-gwendal@chromium.org>
+Received: from userp1040.oracle.com ([156.151.31.81]:47138 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755184AbcBCU5A (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 3 Feb 2016 15:57:00 -0500
+Date: Wed, 3 Feb 2016 12:56:55 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 3/4] xfstests: 912 requires dedup support
+Message-ID: <20160203205655.GH22352@birch.djwong.org>
+References: <1454515328-1586-1-git-send-email-hch@lst.de>
+ <1454515328-1586-4-git-send-email-hch@lst.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1454361909-36538-1-git-send-email-gwendal@chromium.org>
+In-Reply-To: <1454515328-1586-4-git-send-email-hch@lst.de>
 Sender: fstests-owner@vger.kernel.org
-To: Gwendal Grignou <gwendal@chromium.org>
-Cc: hch@infradead.org, tytso@mit.edu, fstests@vger.kernel.org, xfs@oss.sgi.com
+To: Christoph Hellwig <hch@lst.de>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Feb 01, 2016 at 01:25:09PM -0800, Gwendal Grignou wrote:
-> When cross compiling, CFLAGS may contains option for the cros-compiler the
-> host compiler can not handle.
-> Add BUILD_CFLAGS variable that does not include $OPTIMIZER options.
+On Wed, Feb 03, 2016 at 05:02:07PM +0100, Christoph Hellwig wrote:
+> See http://www.infradead.org/rpr.html
 
-I would have expected this to be HOST_CFLAGS, but it seems the
-BUILD_ convention already exists in xfsprogs, so sticking to it
-looks fine to me.
+Applied, thanks.
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+--D
+
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  tests/generic/912 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/tests/generic/912 b/tests/generic/912
+> index 910f1ea..7a629bc 100755
+> --- a/tests/generic/912
+> +++ b/tests/generic/912
+> @@ -43,7 +43,7 @@ _cleanup()
+>  
+>  # real QA test starts here
+>  _supported_os Linux
+> -_require_test_reflink
+> +_require_test_dedupe
+>  _require_cp_reflink
+>  
+>  rm -f "$seqres.full"
+> -- 
+> 2.1.4
+> 
