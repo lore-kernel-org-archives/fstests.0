@@ -1,74 +1,57 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:40391 "EHLO
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:11179 "EHLO
 	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752862AbcBDVG4 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 4 Feb 2016 16:06:56 -0500
-Date: Fri, 5 Feb 2016 08:04:55 +1100
+	by vger.kernel.org with ESMTP id S1753560AbcBDVVh (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 4 Feb 2016 16:21:37 -0500
+Date: Fri, 5 Feb 2016 08:21:34 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 1/3] xfs: support realtime/log device setup changes in
- config sections
-Message-ID: <20160204210455.GC31407@dastard>
-References: <1453340593-10236-1-git-send-email-david@fromorbit.com>
- <1453340593-10236-2-git-send-email-david@fromorbit.com>
- <20160202043633.GD11419@eguan.usersys.redhat.com>
+Subject: Re: [PATCH] fstests: btrfs, test for send with clone operations
+Message-ID: <20160204212134.GE31407@dastard>
+References: <1454544688-18723-1-git-send-email-fdmanana@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160202043633.GD11419@eguan.usersys.redhat.com>
+In-Reply-To: <1454544688-18723-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Feb 02, 2016 at 12:36:33PM +0800, Eryu Guan wrote:
-> On Thu, Jan 21, 2016 at 12:43:11PM +1100, Dave Chinner wrote:
-> > From: Dave Chinner <dchinner@redhat.com>
-> > 
-> > Currently changing the devices used by "USE_EXTERNAL" environmental
-> > variable is not supported by the config section parsing. Add the
-> > functionality so that we can use config sections to test external
-> > device configs successfully.
-> > 
-> > This required tracking down a bug in _check_xfs_filesystem() which
-> > was causing a log device to be passed to a test device without an
-> > external log device. This was caused by an uninitialised variable in
-> > the function. I also added full output file removals to the first
-> > couple of generic tests that were failing, because that's where the
-> > check failure output ends up in this case.
-> > 
-> > Signed-off-by: Dave Chinner <dchinner@redhat.com>
+On Thu, Feb 04, 2016 at 12:11:28AM +0000, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
-> Looks good to me. And I ran some tests on NFS/CIFS/XFS/overlay and the
-> new _check_device function worked as expected. Just one white space
-> issue below
+> Test that an incremental send operation which issues clone operations
+> works for files that have a full path containing more than one parent
+> directory component.
 > 
-> > ---
-> >  common/config     | 63 +++++++++++++++++++++++++++++++++++++++----------------
-> >  common/dmflakey   |  3 ++-
-> >  common/rc         |  1 +
-> >  tests/generic/002 |  2 ++
-> >  tests/generic/004 |  2 ++
-> >  5 files changed, 52 insertions(+), 19 deletions(-)
-> > 
-> > diff --git a/common/config b/common/config
-> > index cb34fd7..477753e 100644
-> > --- a/common/config
-> > +++ b/common/config
-> > @@ -416,6 +416,30 @@ if [ -f "$HOST_OPTIONS" ]; then
-> >  	fi
-> >  fi
-> >  
-> > +_check_device()
-> > +{
-> > +	local name=$1
-> > +	local dev_needed=$2
-> > +	local dev=$3
-> > +
-> > +	if [ -z "$dev" ]; then
-> > +		if [ "$dev_needed" == "required" ]; then 
+> This used to fail before the following patch for the linux kernel:
 > 
-> Above line introduced trailing white space.
+>   "[PATCH] Btrfs: send, fix extent buffer tree lock assertion failure"
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-Fixed, so can I add your reviewed-by?
+Looks ok, I've pulled it in. Something to think about:
+
+> +# Create a bunch of small and empty files, this is just to make sure our
+> +# subvolume's btree gets more than 1 leaf, a condition necessary to trigger a
+> +# past bug (1000 files is enough even for a leaf/node size of 64K, the largest
+> +# possible size).
+> +for ((i = 1; i <= 1000; i++)); do
+> +	echo -n > $SCRATCH_MNT/a/b/c/z_$i
+> +done
+
+We already do have a generic function for doing this called
+_populate_fs(), it's just not optimised for speed with large numbers
+of files being created.
+
+i.e. The above is simple a single directory tree with a single level
+with 1000 files of size 0:
+
+	_populate_fs() -d 1 -n 1 -f 1000 -s 0 -r $SCRATCH_MNT/a/b/
+
+Can you look into optimising _populate_fs() to use multiple threads
+(say up to 4 by default) and "echo -n" to create files, and then
+convert all our open coded "create lots of files" loops in tests to
+use it?
 
 Cheers,
 
