@@ -1,128 +1,40 @@
-Received: from mx1.redhat.com ([209.132.183.28]:53333 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:57587 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751035AbcBEDd6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 4 Feb 2016 22:33:58 -0500
-Date: Fri, 5 Feb 2016 11:33:53 +0800
+	id S1750910AbcBED6t (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 4 Feb 2016 22:58:49 -0500
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (Postfix) with ESMTPS id 7D4C3A1473
+	for <fstests@vger.kernel.org>; Fri,  5 Feb 2016 03:58:49 +0000 (UTC)
+Date: Fri, 5 Feb 2016 11:58:43 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/3] setup: add section support
-Message-ID: <20160205033353.GQ11419@eguan.usersys.redhat.com>
-References: <1453340593-10236-1-git-send-email-david@fromorbit.com>
- <1453340593-10236-3-git-send-email-david@fromorbit.com>
+Subject: Re: [PATCH v2] fstests: dm-thinp demo test
+Message-ID: <20160205035843.GS11419@eguan.usersys.redhat.com>
+References: <5628F457.7020605@redhat.com>
+ <1454580261-29218-1-git-send-email-xzhou@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1453340593-10236-3-git-send-email-david@fromorbit.com>
+In-Reply-To: <1454580261-29218-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: Xiong Zhou <xzhou@redhat.com>
+Cc: sandeen@redhat.com, fstests@vger.kernel.org, snitzer@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 21, 2016 at 12:43:12PM +1100, Dave Chinner wrote:
-> From: Dave Chinner <dchinner@redhat.com>
+On Thu, Feb 04, 2016 at 06:04:21PM +0800, Xiong Zhou wrote:
+> From: Eric Sandeen <sandeen@redhat.com>
 > 
-> Make the setup command section aware so that it is easy to test
-> whether the section config code is generating the correct
-> configurations or not.
+> Fairly trivial test to use the dm-thin infrastructure.
 > 
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> Right now it exhausts space in queue-on-error mode,
+> adds more space, does a bit more IO, then unmounts &
+> checks the fs.
+> 
+> Not sure if that's valid to test, but it works here and
+> demonstrates the common/dmthin helpers.
+> 
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+> Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 
-Looks good to me. To this and the third patch:
+Looks good to me. Thanks!
 
 Reviewed-by: Eryu Guan <eguan@redhat.com>
-
-Just one minor issue inline
-
-> ---
->  setup | 53 +++++++++++++++++++++++++++++++++++++++++++++++------
->  1 file changed, 47 insertions(+), 6 deletions(-)
-> 
-> diff --git a/setup b/setup
-> index eb7bdb3..1a41d81 100755
-> --- a/setup
-> +++ b/setup
-> @@ -15,22 +15,63 @@
->  # along with this program; if not, write the Free Software Foundation,
->  # Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
->  #
-> +usage()
-> +{
-> +
-> +	echo "Usage: $0 [options]"'
-> +
-> +	-s section		run only specified section(s) from config file
-> +'
-> +	exit 0
-> +}
-> +
-> +while [ $# -gt 0 ]; do
-> +	case "$1" in
-> +	-\? | -h | --help) usage ;;
-> +	-s)	RUN_SECTION="$RUN_SECTION $2"; shift ;;
-> +	*)	usage ;;
-> +	esac
-> +	shift
-> +done
-> +
->  if ! . ./common/config
->  then
->      echo "check: failed to source common/config"
->      exit 1
->  fi
->  
-> -[ "$USE_EXTERNAL"    = yes ] || USE_EXTERNAL=no
-> -[ "$USE_LBD_PATCH"   = yes ] || USE_LBD_PATCH=no
-> -[ "$LARGE_SCRATCH_DEV"  = yes ] || LARGE_SCRATCH_DEV=no
-> -[ "$USE_ATTR_SECURE" = yes ] || USE_ATTR_SECURE=no
-> -[ -z "$FSTYP" ] && FSTYP="xfs"
-> +for section in $HOST_OPTIONS_SECTIONS; do
-> +	OLD_FSTYP=$FSTYP
-> +	OLD_MOUNT_OPTIONS=$MOUNT_OPTIONS
-> +	get_next_config $section
-> +
-> +	# Do we need to run only some sections ?
-> +	if [ ! -z "$RUN_SECTION" ]; then
-> +		skip=true
-> +		for s in $RUN_SECTION; do
-> +			if [ $section == $s ]; then
-> +				skip=false
-
-I think the for loop can be break once "skip" is false.
-
-Also in the other two "for loop"s in the third patch, only break the
-loop once "skip" is true there.
-
-Thanks,
-Eryu
-
-> +			fi
-> +		done
-> +		if $skip; then
-> +			continue
-> +		fi
-> +	fi
-> +
-> +	[ "$USE_EXTERNAL"    = yes ] || USE_EXTERNAL=no
-> +	[ "$USE_LBD_PATCH"   = yes ] || USE_LBD_PATCH=no
-> +	[ "$LARGE_SCRATCH_DEV"  = yes ] || LARGE_SCRATCH_DEV=no
-> +	[ "$USE_ATTR_SECURE" = yes ] || USE_ATTR_SECURE=no
-> +	[ -z "$FSTYP" ] && FSTYP="xfs"
-> +
-> +	cat <<EOF
-> +SECTION       -- $section
->  
-> -cat <<EOF
->  TEST: DIR=$TEST_DIR DEV=$TEST_DEV rt=[$TEST_RTDEV] log=[$TEST_LOGDEV]
->  TAPE: dev=[$TAPE_DEV] rmt=[$RMT_TAPE_DEV] rmtirix=[$RMT_TAPE_USER@$RMT_IRIXTAPE_DEV]
->  SCRATCH: MNT=$SCRATCH_MNT DEV=$SCRATCH_DEV rt=[$SCRATCH_RTDEV] log=[$SCRATCH_LOGDEV]
->  VARIABLES: external=$USE_EXTERNAL largeblk=$USE_LBD_PATCH fstyp=$FSTYP
->  	   large_scratch_dev=$LARGE_SCRATCH_DEV attrsecure=$USE_ATTR_SECURE
-> +--------
->  EOF
-> +done
-> -- 
-> 2.5.0
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
