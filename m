@@ -1,115 +1,66 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:30596 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932512AbcBIVv5 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 9 Feb 2016 16:51:57 -0500
-Date: Tue, 9 Feb 2016 13:51:49 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 21/23] xfs: aio cow tests
-Message-ID: <20160209215149.GD6350@birch.djwong.org>
-References: <20160209011145.23099.95354.stgit@birch.djwong.org>
- <20160209011401.23099.38.stgit@birch.djwong.org>
- <20160209083215.GP19486@dastard>
+Received: from mail.kernel.org ([198.145.29.136]:39138 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932948AbcBIWR2 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 9 Feb 2016 17:17:28 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160209083215.GP19486@dastard>
+In-Reply-To: <20160204212134.GE31407@dastard>
+References: <1454544688-18723-1-git-send-email-fdmanana@kernel.org>
+	<20160204212134.GE31407@dastard>
+Date: Tue, 9 Feb 2016 22:17:26 +0000
+Message-ID: <CAL3q7H4g9NdAktgQdVAF4t-5r=9uqTZhLF=EHw2Go4SsC_d+UA@mail.gmail.com>
+Subject: Re: [PATCH] fstests: btrfs, test for send with clone operations
+From: Filipe Manana <fdmanana@kernel.org>
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, xfs@oss.sgi.com
+Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Feb 09, 2016 at 07:32:15PM +1100, Dave Chinner wrote:
-> On Mon, Feb 08, 2016 at 05:14:01PM -0800, Darrick J. Wong wrote:
-> .,,,
-> > +
-> > +echo "Check for damage"
-> > +_dmerror_unmount
-> > +_dmerror_cleanup
-> > +_repair_scratch_fs >> "$seqres.full" 2>&1
-> 
-> Are you testing repair here? If so, why doesn't failure matter.
-> If not, why do it? Or is _require_scratch_nocheck all that is needed
-> here?
+On Thu, Feb 4, 2016 at 9:21 PM, Dave Chinner <david@fromorbit.com> wrote:
+> On Thu, Feb 04, 2016 at 12:11:28AM +0000, fdmanana@kernel.org wrote:
+>> From: Filipe Manana <fdmanana@suse.com>
+>>
+>> Test that an incremental send operation which issues clone operations
+>> works for files that have a full path containing more than one parent
+>> directory component.
+>>
+>> This used to fail before the following patch for the linux kernel:
+>>
+>>   "[PATCH] Btrfs: send, fix extent buffer tree lock assertion failure"
+>>
+>> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+>
+> Looks ok, I've pulled it in. Something to think about:
+>
+>> +# Create a bunch of small and empty files, this is just to make sure our
+>> +# subvolume's btree gets more than 1 leaf, a condition necessary to trigger a
+>> +# past bug (1000 files is enough even for a leaf/node size of 64K, the largest
+>> +# possible size).
+>> +for ((i = 1; i <= 1000; i++)); do
+>> +     echo -n > $SCRATCH_MNT/a/b/c/z_$i
+>> +done
+>
+> We already do have a generic function for doing this called
+> _populate_fs(), it's just not optimised for speed with large numbers
+> of files being created.
+>
+> i.e. The above is simple a single directory tree with a single level
+> with 1000 files of size 0:
+>
+>         _populate_fs() -d 1 -n 1 -f 1000 -s 0 -r $SCRATCH_MNT/a/b/
+>
+> Can you look into optimising _populate_fs() to use multiple threads
+> (say up to 4 by default) and "echo -n" to create files, and then
+> convert all our open coded "create lots of files" loops in tests to
+> use it?
 
-Uggghhh.... so xfs_repair dumps its regular output to stderr, so the "2>&1"
-pushes the output to $seqres.full.
+Sure, I'll take a look at it when I get some spare time.
+Thanks Dave.
 
-The return codes from xfs_repair seem to be:
-0: fs is ok now
-1: fs is probably broken
-2: log needs to be replayed
-
-The return codes from fsck seem to be:
-0: no errors found
-1: errors fixed
-2: errors fixed, reboot required
-(etc)
-
-So I guess the way out is to provide a better wrapper to the repair tools
-so that _repair_scratch_fs always returns 0 for "fs should be ok now" and
-nonzero otherwise:
-
-_repair_scratch_fs()
-{
-    case $FSTYP in
-    xfs)
-        _scratch_xfs_repair "$@" 2>&1
-	res=$?
-	if [ "$res" -eq 2 ]; then
-		echo "xfs_repair returns $res; replay log?"
-		_scratch_mount
-		res=$?
-		if [ "$res" -gt 0 ]; then
-			echo "mount returns $res; zap log?"
-			_scratch_xfs_repair -L 2>&1
-			echo "log zap returns $?"
-		else
-			umount "$SCRATCH_MNT"
-		fi
-		_scratch_xfs_repair "$@" 2>&1
-		res=$?
-	fi
-	test $res -ne 0 && >&2 echo "xfs_repair failed, err=$res"
-	return $res
-        ;;
-    *)
-        # Let's hope fsck -y suffices...
-        fsck -t $FSTYP -y $SCRATCH_DEV 2>&1
-	res=$?
-	case $res in
-	0|1|2)
-		res=0
-		;;
-	*)
-		>&2 echo "fsck.$FSTYP failed, err=$res"
-		;;
-	esac
-	return $res
-        ;;
-    esac
-}
-
-> > +echo "CoW and unmount"
-> > +"$XFS_IO_PROG" -f -c "pwrite -S 0x63 $((blksz * bsz)) 1" "$testdir/file2" >> "$seqres.full"
-> > +"$XFS_IO_PROG" -f -c "pwrite -S 0x63 -b $((blksz * bsz)) 0 $((blksz * nr))" "$TEST_DIR/moo" >> "$seqres.full"
-> 
-> offset = block size times block size?
-> 
-> I think some better names might be needed...
-
-Yes.  Is now "bufnr" and bufsize=$((blksz * bufnr)).
-
---D
-
-> 
+>
 > Cheers,
-> 
+>
 > Dave.
-> -- 
+> --
 > Dave Chinner
 > david@fromorbit.com
-> 
-> _______________________________________________
-> xfs mailing list
-> xfs@oss.sgi.com
-> http://oss.sgi.com/mailman/listinfo/xfs
