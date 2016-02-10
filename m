@@ -1,61 +1,47 @@
-Received: from imap.thunk.org ([74.207.234.97]:57298 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:57338 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751201AbcBJQHe (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 10 Feb 2016 11:07:34 -0500
-Date: Wed, 10 Feb 2016 11:07:32 -0500
+	id S1751534AbcBJQJU (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 10 Feb 2016 11:09:20 -0500
+Date: Wed, 10 Feb 2016 11:09:18 -0500
 From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH 05/12] xfstests: do not unmount tmpfs during remount
-Message-ID: <20160210160732.GE26922@thunk.org>
+Subject: Re: [PATCH 09/12] xfstests: generic/079 requires chattr, not xattrs
+Message-ID: <20160210160918.GF26922@thunk.org>
 References: <1455069001-17846-1-git-send-email-tytso@mit.edu>
- <1455069001-17846-6-git-send-email-tytso@mit.edu>
- <20160210060716.GV19486@dastard>
+ <1455069001-17846-10-git-send-email-tytso@mit.edu>
+ <20160210090909.GW11419@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160210060716.GV19486@dastard>
+In-Reply-To: <20160210090909.GW11419@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, hughd@google.com, Junho Ryu <jayr@google.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, hughd@google.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Feb 10, 2016 at 05:07:16PM +1100, Dave Chinner wrote:
-> >  # Remounting with nodiratime option
-> > -_scratch_unmount
-> > -_scratch_mount "-o nodiratime"
-> > +_scratch_remount "-o nodiratime"
+On Wed, Feb 10, 2016 at 05:09:10PM +0800, Eryu Guan wrote:
+> On Tue, Feb 09, 2016 at 08:49:58PM -0500, Theodore Ts'o wrote:
+> > From: Hugh Dickins <hughd@google.com>
+> > 
+> > Signed-off-by: Hugh Dickins <hughd@google.com>
+> > Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> > ---
+> >  tests/generic/079 | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > 
+> > diff --git a/tests/generic/079 b/tests/generic/079
+> > index 041d9c0..a2c3286 100755
+> > --- a/tests/generic/079
+> > +++ b/tests/generic/079
+> > @@ -48,7 +48,7 @@ _cleanup()
+> >  _supported_fs generic
+> >  _supported_os Linux
+> >  
+> > -_require_attrs
+> > +_require_chattr
 > 
-> This makes me go "no, that can't work, nodiratime is not an option
-> that we allow on remount."
+> I don't see _require_chattr in any of the common files, did I miss
+> anything?
 
-Hmm, yes, we're not consistent here.  xfs doesn't allow nodiratime on
-remounts.  ext4 allows nodiratime on remount, but not diratime, so
-there's no way to clear nodiratime once its set.  tmpfs allows
-diratime and nodiratime on remount.
+Oops, I forgot to pull that into the patch.  Thanks for catching this!
 
-I wonder if it's worth it make things more consistent across the
-various file systems.  What do you think?
-
-> So, at minimum, the name of the helper needs to get changed so that
-> it doesn't imply that a "-o remount" with new options is being
-> done...
-
-Hmm, how about having two helper functions: _scratch_remount that
-doesn't take any arguments, and a _scratch_change_mount_opts which
-does?
-
-> > -_umount_mount
-> > +_scratch_mkfs >/dev/null 2>&1 || _fail "mkfs failed"
-> > +_scratch_mount > /dev/null 2>&1 || _fail "mount failed"
-> 
-> Please don't add _fail to mkfs/mount like this, especially where the
-> test doesn't already have them.
-
-Could you say more about why?  We do have tests that do use _fail if
-the mkfs or mount fails.  Should we be changing them to remove it?
-But if we do that, and the mount fails for some reason, then won't
-things stagger on and perhaps make life harder to debug.
-
-Cheers,
-
-						- Ted
-
+      	       	       	    	     	     	    - Ted
