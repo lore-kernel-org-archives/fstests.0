@@ -1,52 +1,55 @@
-Received: from mail.kernel.org ([198.145.29.136]:52681 "EHLO mail.kernel.org"
+Received: from mx1.redhat.com ([209.132.183.28]:58240 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751029AbcBJNc6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 10 Feb 2016 08:32:58 -0500
-From: fdmanana@kernel.org
-Subject: [PATCH] fstests: btrfs, test directory fsync after deleting snapshots
-Date: Wed, 10 Feb 2016 13:32:51 +0000
-Message-Id: <1455111171-25449-1-git-send-email-fdmanana@kernel.org>
+	id S1751675AbcBJO5W (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 10 Feb 2016 09:57:22 -0500
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] ext4: test partial blocksize defrag integrity issue
+Date: Wed, 10 Feb 2016 22:48:34 +0800
+Message-Id: <1455115714-14657-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Cc: ext4@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+Calling EXT4_IOC_MOVE_EXTENT on file not aligned with block size and
+block size is smaller than page size would cause integrity issue on the
+partial-blocksize part when copying data between orign file and donor
+file.
 
-Test that if we fsync a directory that had a snapshot entry in it that
-was deleted and crash, the next time we mount the filesystem, the log
-replay procedure will not fail and the snapshot is not present anymore.
+This ext4 kernel patch would fix it, titled
+"ext4: don't read blocks from disk after extents being swapped in
+move_extent_per_page())"
 
-This issue is fixed by the following patch for the linux kernel:
+Though this bug only happens in the blocksize smaller than pagesize
+case, there's no harm to test on various block size fs, so no block size
+is specified in the test, it depends on the test configurations.
 
-  "Btrfs: fix unreplayable log after snapshot delete + parent dir fsync"
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- tests/btrfs/118     | 86 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/118.out |  2 ++
- tests/btrfs/group   |  1 +
- 3 files changed, 89 insertions(+)
- create mode 100755 tests/btrfs/118
- create mode 100644 tests/btrfs/118.out
+ tests/ext4/020     | 89 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/020.out |  6 ++++
+ tests/ext4/group   |  1 +
+ 3 files changed, 96 insertions(+)
+ create mode 100755 tests/ext4/020
+ create mode 100644 tests/ext4/020.out
 
-diff --git a/tests/btrfs/118 b/tests/btrfs/118
+diff --git a/tests/ext4/020 b/tests/ext4/020
 new file mode 100755
-index 0000000..3ed1cbe
+index 0000000..6740c7e
 --- /dev/null
-+++ b/tests/btrfs/118
-@@ -0,0 +1,86 @@
++++ b/tests/ext4/020
+@@ -0,0 +1,89 @@
 +#! /bin/bash
-+# FSQA Test No. 118
++# FS QA Test 020
 +#
-+# Test that if we fsync a directory that had a snapshot entry in it that was
-+# deleted and crash, the next time we mount the filesystem, the log replay
-+# procedure will not fail and the snapshot is not present anymore.
++# Test partial blocksize defrag integrity issue.
++#
++# Calling EXT4_IOC_MOVE_EXTENT on file not aligned with block size and block
++# size is smaller than page size would cause integrity issue on the
++# partial-blocksize part when copying data between orign file and donor file.
 +#
 +#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
++# Copyright (c) 2016 Red Hat Inc. All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -66,13 +69,14 @@ index 0000000..3ed1cbe
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
++
++here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+	_cleanup_flakey
 +	cd /
 +	rm -f $tmp.*
 +}
@@ -80,65 +84,74 @@ index 0000000..3ed1cbe
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/dmflakey
++. ./common/defrag
 +
-+# real QA test starts here
-+_need_to_be_root
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_dm_target flakey
-+_require_metadata_journaling $SCRATCH_DEV
-+
++# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
++# real QA test starts here
++_supported_fs ext4
++_supported_os Linux
++_require_scratch
++_require_defrag
++
++e4compact=$here/src/e4compact
++if [ ! -x $d4compact ]; then
++	_notrun "$e4compact executable not found"
++fi
++
++testfile=$SCRATCH_MNT/$seq.orig
++donorfile=$SCRATCH_MNT/$seq.donor
 +_scratch_mkfs >>$seqres.full 2>&1
-+_init_flakey
-+_mount_flakey
++_scratch_mount
 +
-+# Create a snapshot at the root of our filesystem (mount point path), delete it,
-+# fsync the mount point path, crash and mount to replay the log. This should
-+# succeed and after the filesystem is mounted the snapshot should not be visible
-+# anymore.
-+_run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/snap1
-+_run_btrfs_util_prog subvolume delete $SCRATCH_MNT/snap1
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT
-+_flakey_drop_and_remount
-+[ -e $SCRATCH_MNT/snap1 ] && echo "Snapshot snap1 still exists after log replay"
++# reserve space for donor file, written by 0xaa and sync to disk to avoid
++# EBUSY on EXT4_IOC_MOVE_EXT
++$XFS_IO_PROG -fc "pwrite -S 0xaa 0 1m" -c "fsync" $donorfile | _filter_xfs_io
 +
-+# Similar scenario as above, but this time the snapshot is created inside a
-+# directory and not directly under the root (mount point path).
-+mkdir $SCRATCH_MNT/testdir
-+_run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/testdir/snap2
-+_run_btrfs_util_prog subvolume delete $SCRATCH_MNT/testdir/snap2
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/testdir
-+_flakey_drop_and_remount
-+[ -e $SCRATCH_MNT/testdir/snap2 ] && \
-+	echo "Snapshot snap2 still exists after log replay"
++# create test file with 1023 in size, written by 0xbb
++# 1023 is smaller than 1k and works for any block size filesystems
++$XFS_IO_PROG -fc "pwrite -S 0xbb 0 1023" -c "fsync" $testfile | _filter_xfs_io
 +
-+_unmount_flakey
++# compute initial md5sum
++md5sum $testfile > $tmp.md5sum
 +
-+echo "Silence is golden"
++# drop cache, force e4compact to read data from disk
++echo 3 > /proc/sys/vm/drop_caches
 +
++# test defrag
++echo "$testfile" | $e4compact -i -v -f $donorfile >>$seqres.full
++
++# check md5sum
++md5sum -c $tmp.md5sum | _filter_scratch
++
++# success, all done
 +status=0
 +exit
-diff --git a/tests/btrfs/118.out b/tests/btrfs/118.out
+diff --git a/tests/ext4/020.out b/tests/ext4/020.out
 new file mode 100644
-index 0000000..3daed86
+index 0000000..74d0543
 --- /dev/null
-+++ b/tests/btrfs/118.out
-@@ -0,0 +1,2 @@
-+QA output created by 118
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index f74ffbb..a2fa412 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -118,3 +118,4 @@
- 115 auto qgroup
- 116 auto quick metadata
- 117 auto quick send clone
-+118 auto quick snapshot metadata
++++ b/tests/ext4/020.out
+@@ -0,0 +1,6 @@
++QA output created by 020
++wrote 1048576/1048576 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 1023/1023 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++SCRATCH_MNT/020.orig: OK
+diff --git a/tests/ext4/group b/tests/ext4/group
+index 1191441..9e28159 100644
+--- a/tests/ext4/group
++++ b/tests/ext4/group
+@@ -22,6 +22,7 @@
+ 017 fuzzers
+ 018 fuzzers
+ 019 fuzzers
++020 auto quick ioctl rw
+ 271 auto rw quick
+ 301 aio auto ioctl rw stress
+ 302 aio auto ioctl rw stress
 -- 
-2.7.0.rc3
+2.5.0
 
