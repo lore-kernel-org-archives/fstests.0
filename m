@@ -1,166 +1,45 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:49231 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756816AbcBJBHf (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 9 Feb 2016 20:07:35 -0500
-Date: Tue, 9 Feb 2016 17:07:23 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 19/23] xfs: test rmapbt functionality
-Message-ID: <20160210010723.GH6350@birch.djwong.org>
-References: <20160209011145.23099.95354.stgit@birch.djwong.org>
- <20160209011348.23099.30668.stgit@birch.djwong.org>
- <20160209082639.GO19486@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160209082639.GO19486@dastard>
+Received: from imap.thunk.org ([74.207.234.97]:51030 "EHLO imap.thunk.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755406AbcBJBuM (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 9 Feb 2016 20:50:12 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH 11/12] xfstests: add executable permission to tests
+Date: Tue,  9 Feb 2016 20:50:00 -0500
+Message-Id: <1455069001-17846-12-git-send-email-tytso@mit.edu>
+In-Reply-To: <1455069001-17846-1-git-send-email-tytso@mit.edu>
+References: <1455069001-17846-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, xfs@oss.sgi.com
+To: fstests@vger.kernel.org
+Cc: hughd@google.com, Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Feb 09, 2016 at 07:26:40PM +1100, Dave Chinner wrote:
-> On Mon, Feb 08, 2016 at 05:13:48PM -0800, Darrick J. Wong wrote:
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> >  common/xfs        |   44 ++++++++++++++++++++++
-> >  tests/xfs/233     |   78 ++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/233.out |    6 +++
-> >  tests/xfs/234     |   89 ++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/234.out |    6 +++
-> >  tests/xfs/235     |  108 +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/235.out |   14 +++++++
-> >  tests/xfs/236     |   93 ++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/236.out |    8 ++++
-> >  tests/xfs/group   |    4 ++
-> >  10 files changed, 450 insertions(+)
-> >  create mode 100644 common/xfs
-> >  create mode 100755 tests/xfs/233
-> >  create mode 100644 tests/xfs/233.out
-> >  create mode 100755 tests/xfs/234
-> >  create mode 100644 tests/xfs/234.out
-> >  create mode 100755 tests/xfs/235
-> >  create mode 100644 tests/xfs/235.out
-> >  create mode 100755 tests/xfs/236
-> >  create mode 100644 tests/xfs/236.out
-> > 
-> > 
-> > diff --git a/common/xfs b/common/xfs
-> > new file mode 100644
-> > index 0000000..2d1a76f
-> > --- /dev/null
-> > +++ b/common/xfs
-> > @@ -0,0 +1,44 @@
-> > +##/bin/bash
-> > +# Routines for handling XFS
-> > +#-----------------------------------------------------------------------
-> > +#  Copyright (c) 2015 Oracle.  All Rights Reserved.
-> > +#  This program is free software; you can redistribute it and/or modify
-> > +#  it under the terms of the GNU General Public License as published by
-> > +#  the Free Software Foundation; either version 2 of the License, or
-> > +#  (at your option) any later version.
-> > +#
-> > +#  This program is distributed in the hope that it will be useful,
-> > +#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > +#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > +#  GNU General Public License for more details.
-> > +#
-> > +#  You should have received a copy of the GNU General Public License
-> > +#  along with this program; if not, write to the Free Software
-> > +#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
-> > +#  USA
-> > +#
-> > +#  Contact information: Oracle Corporation, 500 Oracle Parkway,
-> > +#  Redwood Shores, CA 94065, USA, or: http://www.oracle.com/
-> > +#-----------------------------------------------------------------------
-> > +
-> > +_require_xfs_test_rmapbt()
-> > +{
-> > +	_require_test
-> > +
-> > +	if [ "$(xfs_info "$TEST_DIR" | grep -c "rmapbt=1")" -ne 1 ]; then
-> > +		_notrun "rmapbt not supported by test filesystem type: $FSTYP"
-> > +	fi
-> > +}
-> > +
-> > +_require_xfs_scratch_rmapbt()
-> > +{
-> > +	_require_scratch
-> > +
-> > +	_scratch_mkfs > /dev/null
-> > +	_scratch_mount
-> > +	if [ "$(xfs_info "$SCRATCH_MNT" | grep -c "rmapbt=1")" -ne 1 ]; then
-> > +		_scratch_unmount
-> > +		_notrun "rmapbt not supported by scratch filesystem type: $FSTYP"
-> > +	fi
-> > +	_scratch_unmount
-> > +}
-> 
-> No, not yet. :)
-> 
-> Wait until I get my "split common/rc" patchset out there, because it
-> does not require:
+From: Hugh Dickins <hughd@google.com>
 
-Ok, I moved all the common/xfs stuff back to common/rc.
+Signed-off-by: Hugh Dickins <hughd@google.com>
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ tests/generic/058 | 0
+ tests/generic/060 | 0
+ tests/generic/061 | 0
+ tests/generic/063 | 0
+ 4 files changed, 0 insertions(+), 0 deletions(-)
+ mode change 100644 => 100755 tests/generic/058
+ mode change 100644 => 100755 tests/generic/060
+ mode change 100644 => 100755 tests/generic/061
+ mode change 100644 => 100755 tests/generic/063
 
-> 
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +. ./common/xfs
-> 
-> This.
-> 
-> And i don't want to have to undo a bunch of stuff in tests yet. Just
-> lump it all in common/rc for the moment.
-> 
-> > +
-> > +# real QA test starts here
-> > +_supported_os Linux
-> > +_supported_fs xfs
-> > +_require_xfs_scratch_rmapbt
-> > +
-> > +echo "Format and mount"
-> > +_scratch_mkfs -d size=$((2 * 4096 * 4096)) -l size=4194304 > "$seqres.full" 2>&1
-> > +_scratch_mount >> "$seqres.full" 2>&1
-> 
-> _scratch_mkfs_sized ?
+diff --git a/tests/generic/058 b/tests/generic/058
+old mode 100644
+new mode 100755
+diff --git a/tests/generic/060 b/tests/generic/060
+old mode 100644
+new mode 100755
+diff --git a/tests/generic/061 b/tests/generic/061
+old mode 100644
+new mode 100755
+diff --git a/tests/generic/063 b/tests/generic/063
+old mode 100644
+new mode 100755
+-- 
+2.5.0
 
-Done.
-> 
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +    cd /
-> > +    #rm -f $tmp.*
-> 
-> More random uncommenting needed.
-> 
-> > +
-> > +echo "Check for damage"
-> > +umount "$SCRATCH_MNT"
-> > +_check_scratch_fs
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> 
-> Cull.
-
-Done
-
---D
-
-> 
-> -Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
-> 
-> _______________________________________________
-> xfs mailing list
-> xfs@oss.sgi.com
-> http://oss.sgi.com/mailman/listinfo/xfs
