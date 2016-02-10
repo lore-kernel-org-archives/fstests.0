@@ -1,118 +1,40 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:26716 "EHLO
-	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750897AbcBJXQR (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 10 Feb 2016 18:16:17 -0500
-Date: Thu, 11 Feb 2016 10:16:14 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] ext4: test partial blocksize defrag integrity issue
-Message-ID: <20160210231614.GC19486@dastard>
-References: <1455117464-15565-1-git-send-email-eguan@redhat.com>
+Received: from imap.thunk.org ([74.207.234.97]:33739 "EHLO imap.thunk.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751772AbcBJXRO (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 10 Feb 2016 18:17:14 -0500
+Date: Wed, 10 Feb 2016 18:17:10 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH 01/12] check: avoid error messages of tests/$FS does not
+ exist
+Message-ID: <20160210231710.GI26922@thunk.org>
+References: <1455069001-17846-1-git-send-email-tytso@mit.edu>
+ <1455069001-17846-2-git-send-email-tytso@mit.edu>
+ <20160210054531.GR19486@dastard>
+ <20160210153455.GB26922@thunk.org>
+ <20160210162840.GA365@infradead.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1455117464-15565-1-git-send-email-eguan@redhat.com>
+In-Reply-To: <20160210162840.GA365@infradead.org>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, hughd@google.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Feb 10, 2016 at 11:17:44PM +0800, Eryu Guan wrote:
-> Calling EXT4_IOC_MOVE_EXTENT on file not aligned with block size and
-> block size is smaller than page size would cause integrity issue on the
-> partial-blocksize part when copying data between orign file and donor
-> file.
+On Wed, Feb 10, 2016 at 08:28:40AM -0800, Christoph Hellwig wrote:
+> On Wed, Feb 10, 2016 at 10:34:55AM -0500, Theodore Ts'o wrote:
+> > It doesn't really cause a problem; it's more of a cosmetic issue, in
+> > that it prints a harmless/annoying error message during the test
+> > startup.  It shows up if you specify a group, e.g. "check -g quick":
 > 
-> This ext4 kernel patch would fix it, titled
-> "ext4: don't read blocks from disk after extents being swapped in
-> move_extent_per_page())"
-> 
-> Though this bug only happens in the blocksize smaller than pagesize
-> case, there's no harm to test on various block size fs, so no block size
-> is specified in the test, it depends on the test configurations.
-> 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> ---
->  tests/ext4/020     | 89 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/ext4/020.out |  6 ++++
->  tests/ext4/group   |  1 +
->  3 files changed, 96 insertions(+)
->  create mode 100755 tests/ext4/020
->  create mode 100644 tests/ext4/020.out
-> 
-> diff --git a/tests/ext4/020 b/tests/ext4/020
-> new file mode 100755
-> index 0000000..6740c7e
-> --- /dev/null
-> +++ b/tests/ext4/020
-> @@ -0,0 +1,89 @@
-> +#! /bin/bash
-> +# FS QA Test 020
-> +#
-> +# Test partial blocksize defrag integrity issue.
-> +#
-> +# Calling EXT4_IOC_MOVE_EXTENT on file not aligned with block size and block
-> +# size is smaller than page size would cause integrity issue on the
-> +# partial-blocksize part when copying data between orign file and donor file.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2016 Red Hat Inc. All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/defrag
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs ext4
-> +_supported_os Linux
-> +_require_scratch
-> +_require_defrag
-> +
-> +e4compact=$here/src/e4compact
-> +if [ ! -x $d4compact ]; then
-              ^^^^^^^^^
-> +	_notrun "$e4compact executable not found"
-> +fi
+> I found this annoying when testing nfs, and it's been on my todo list
+> for a while to fix it.  Never high enough to actually do it, but I'd
+> love to see the fix merged.
 
-And, yes, we really need that _requires_test_command function that
-Darrick was adding to his patchset...
+Yeah, it triggered my inner OCD, but if it weren't for the fact that I
+was making a bunch of other tmpfs changes it probably wouldn't have
+risen to the top of my list either.
 
-Cheers,
+					- Ted
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+
