@@ -1,45 +1,62 @@
-Received: from imap.thunk.org ([74.207.234.97]:51030 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:51037 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755406AbcBJBuM (ORCPT <rfc822;fstests@vger.kernel.org>);
+	id S1755956AbcBJBuM (ORCPT <rfc822;fstests@vger.kernel.org>);
 	Tue, 9 Feb 2016 20:50:12 -0500
 From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH 11/12] xfstests: add executable permission to tests
-Date: Tue,  9 Feb 2016 20:50:00 -0500
-Message-Id: <1455069001-17846-12-git-send-email-tytso@mit.edu>
+Subject: [PATCH 06/12] generic: do not unmount before calling _check_scratch_fs()
+Date: Tue,  9 Feb 2016 20:49:55 -0500
+Message-Id: <1455069001-17846-7-git-send-email-tytso@mit.edu>
 In-Reply-To: <1455069001-17846-1-git-send-email-tytso@mit.edu>
 References: <1455069001-17846-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: hughd@google.com, Theodore Ts'o <tytso@mit.edu>
+Cc: hughd@google.com, Junho Ryu <jayr@google.com>, Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-From: Hugh Dickins <hughd@google.com>
+From: Junho Ryu <jayr@google.com>
 
-Signed-off-by: Hugh Dickins <hughd@google.com>
+Fix generic/053 so it works on tmpfs by relying on _check_scratch_fs
+to unmount before checking the file system and remounting it
+afterwards.  Many other tests rely on this, and since tmpfs does not
+have a file system consistency checker, this allows the test to
+succeed because the files don't disappear when the tmpfs file system
+is unmounted.
+
+Signed-off-by: Junho Ryu <jayr@google.com>
 Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 ---
- tests/generic/058 | 0
- tests/generic/060 | 0
- tests/generic/061 | 0
- tests/generic/063 | 0
- 4 files changed, 0 insertions(+), 0 deletions(-)
- mode change 100644 => 100755 tests/generic/058
- mode change 100644 => 100755 tests/generic/060
- mode change 100644 => 100755 tests/generic/061
- mode change 100644 => 100755 tests/generic/063
+ tests/generic/053     | 2 --
+ tests/generic/053.out | 2 --
+ 2 files changed, 4 deletions(-)
 
-diff --git a/tests/generic/058 b/tests/generic/058
-old mode 100644
-new mode 100755
-diff --git a/tests/generic/060 b/tests/generic/060
-old mode 100644
-new mode 100755
-diff --git a/tests/generic/061 b/tests/generic/061
-old mode 100644
-new mode 100755
-diff --git a/tests/generic/063 b/tests/generic/063
-old mode 100644
-new mode 100755
+diff --git a/tests/generic/053 b/tests/generic/053
+index a0e7280..cf46a93 100755
+--- a/tests/generic/053
++++ b/tests/generic/053
+@@ -81,9 +81,7 @@ list_acls()
+ 
+ echo "acls before repair:"
+ list_acls
+-_do 'unmount $SCRATCH_DEV' '_scratch_unmount'
+ _do 'repair filesystem' '_check_scratch_fs'
+-_do 'mount filesytem' '_scratch_mount'
+ echo "acls after repair: "
+ list_acls
+ 
+diff --git a/tests/generic/053.out b/tests/generic/053.out
+index cd71cbb..d57857a 100644
+--- a/tests/generic/053.out
++++ b/tests/generic/053.out
+@@ -10,9 +10,7 @@ $SCRATCH_MNT/test.4 [u::---,g::r-x,o::rwx]
+ $SCRATCH_MNT/test.5 [u::---,u:id2:r-x,g::---,m::rwx,o::---]
+ $SCRATCH_MNT/test.6 [u::rwx,g::r-x,o::r--]
+ $SCRATCH_MNT/test.7 [u::---,g::---,g:id2:r-x,m::-w-,o::---]
+-unmount $SCRATCH_DEV... done
+ repair filesystem... done
+-mount filesytem... done
+ acls after repair: 
+ $SCRATCH_MNT/test.0 [u::r--,g::rwx,o::rw-]
+ $SCRATCH_MNT/test.1 [u::r-x,g::---,o::---]
 -- 
 2.5.0
 
