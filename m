@@ -1,56 +1,53 @@
-Received: from imap.thunk.org ([74.207.234.97]:57037 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:57143 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752365AbcBJPsP (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 10 Feb 2016 10:48:15 -0500
-Date: Wed, 10 Feb 2016 10:48:10 -0500
+	id S1751546AbcBJP6k (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 10 Feb 2016 10:58:40 -0500
+Date: Wed, 10 Feb 2016 10:58:37 -0500
 From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH 10/12] generic: disable generic/027 for tmpfs
-Message-ID: <20160210154810.GC26922@thunk.org>
+Subject: Re: [PATCH 02/12] common: _scratch_mkfs_sized() for tmpfs
+Message-ID: <20160210155837.GD26922@thunk.org>
 References: <1455069001-17846-1-git-send-email-tytso@mit.edu>
- <1455069001-17846-11-git-send-email-tytso@mit.edu>
- <20160210055838.GT19486@dastard>
+ <1455069001-17846-3-git-send-email-tytso@mit.edu>
+ <20160210060058.GU19486@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160210055838.GT19486@dastard>
+In-Reply-To: <20160210060058.GU19486@dastard>
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, hughd@google.com
+Cc: fstests@vger.kernel.org, hughd@google.com, Junho Ryu <jayr@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Feb 10, 2016 at 04:58:39PM +1100, Dave Chinner wrote:
-> > With tmpfs, we can limit the size of the file system, which limits the
-> > block allocation, but there is no limit to the number of inodes that
-> > can be created until kmalloc() fails --- or the OOM killer kills the
-> > test.  So this causes this test to run for a long, long time, and in
-> > some cases the test or the test runner will get OOM killed instead.
-> > We have other ENOSPC tests, so given that tmpfs is just so different
-> > from all other file systems, it's simpler just to disable this test
-> > for tmpfs than to try to make it work.
+On Wed, Feb 10, 2016 at 05:00:58PM +1100, Dave Chinner wrote:
+> > +    tmpfs)
+> > +	export MOUNT_OPTIONS="-o size=$fssize $TMPFS_MOUNT_OPTIONS"
 > 
-> This sounds like a bug in tmpfs and a potential user level DOS
-> vector, too. Hence I dont think not running the test is the right
-> thing to do here - tmpfs should be handling this gracefully by
-> applying sane resource limits.
+> So what happens when the test asks for 10GB of device space, and you
+> only have 4GB of RAM?
 
-Well, it's not really that interesting of a DOS vector since if the
-goal is to use up all available memory, there are other ways to do it
-that are much more efficient.  If you are using a memory cgroup, the
-kmalloc does eventually fail and so the O_CREAT open(2) call will
-return ENOMEM --- but it can take 20+ hours with a 8G memory
-container.  Without a memory cgroup in general the test runner gets
-OOM killed first, but a much better DOS vector is to open one too many
-tabs in Chrome, at which point your machine thrashes to death and the
-X server goes unresponsive (and this is why many people have started
-running Chrome inside a memory container).
+The largest amount of storage space requested by shared/generic tests
+via _scratch_mkfs_sized is 2G, and that's from generic/27[345].
 
-OTOH, the fact that tmpfs doesn't have a inode limits is a bit weird.
-What about having tmpfs enforce a per-mount "maxinodes" restriction
-which by default is "maxsize / 1k", and which can be overriden using a
-maxinodes mount option?  Does that sound sane to you?
+We currently could run into problems today if the storage device only
+had 3G of space, and some test, such as f2fs/001, called
+_scratch_mkfs_sized requesting 4G of space.  We currently aren't
+checking error returns from the mkfs command; we just assume that it
+will succeed.
 
-Or we could charge a minimum 512 bytes per inode against the size,
-since between the kernel data structures and the file name, it's not
-like a zero-length tmpfs file is free.
+Because of the someone interesting behavior of tmpfs assuming inode
+space is free, we already have problems where even with 8G of memory,
+generic/269 and generic/273 will result in the test getting OOM
+killed, and if you use less than 4G, there are a more tests that end
+up getting OOM killed as a result.
 
-						- Ted
+So I think it would be fair to simply document that if you are testing
+tmpfs, you need a VM or or a memory container with at least 8G of
+memory.  If we start limiting the number of inodes in a tmpfs mount,
+we could probably bring that requirement down to 4G, which is
+certainly fair.  We do document minimum requirements for the size of
+the TEST_DEV and SCRATCH_DEV, don't we?   (Minimum requirements
+certainly do exist in practice, in any case.)
+
+Cheers,
+
+					- Ted
