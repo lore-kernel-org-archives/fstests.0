@@ -1,11 +1,11 @@
-Received: from imap.thunk.org ([74.207.234.97]:51042 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:51039 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756129AbcBJBuN (ORCPT <rfc822;fstests@vger.kernel.org>);
+	id S1756203AbcBJBuN (ORCPT <rfc822;fstests@vger.kernel.org>);
 	Tue, 9 Feb 2016 20:50:13 -0500
 From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH 12/12] xfstests: increase tmpfs memory size
-Date: Tue,  9 Feb 2016 20:50:01 -0500
-Message-Id: <1455069001-17846-13-git-send-email-tytso@mit.edu>
+Subject: [PATCH 03/12] generic: use mount point instead of device name
+Date: Tue,  9 Feb 2016 20:49:52 -0500
+Message-Id: <1455069001-17846-4-git-send-email-tytso@mit.edu>
 In-Reply-To: <1455069001-17846-1-git-send-email-tytso@mit.edu>
 References: <1455069001-17846-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
@@ -15,30 +15,30 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Hugh Dickins <hughd@google.com>
 
-512M is not enough for generic/129.  Raise default tmpfs size to 1G.
+A tmpfs mount does not involve any block device, its $SCRATCH_DEV is
+nothing but a place-holder, so apply 'df' or 'stat' to its mount point
+$SCRATCH_MNT instead of to $SCRATCH_DEV.
 
 Signed-off-by: Hugh Dickins <hughd@google.com>
 Signed-off-by: Junho Ryu <jayr@google.com>
 Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 ---
- common/config | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ tests/generic/273 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/common/config b/common/config
-index c97facf..cacd815 100644
---- a/common/config
-+++ b/common/config
-@@ -316,8 +316,8 @@ _mount_opts()
- 		export MOUNT_OPTIONS="-o acl $GFS2_MOUNT_OPTIONS"
- 		;;
- 	tmpfs)
--		# We need to specify the size at mount, use 512 MB by default
--		export MOUNT_OPTIONS="-o size=512M $TMPFS_MOUNT_OPTIONS"
-+		# We need to specify the size at mount, use 1G by default
-+		export MOUNT_OPTIONS="-o size=1G $TMPFS_MOUNT_OPTIONS"
- 		;;
- 	*)
- 		;;
+diff --git a/tests/generic/273 b/tests/generic/273
+index e5af7f1..0a4a600 100755
+--- a/tests/generic/273
++++ b/tests/generic/273
+@@ -68,7 +68,7 @@ _file_create()
+ 
+ 	cd $SCRATCH_MNT/origin
+ 
+-	_disksize=`$DF_PROG -B 1 $SCRATCH_DEV | tail -1 | $AWK_PROG '{ print $5 }'`
++	_disksize=`$DF_PROG -B 1 $SCRATCH_MNT | tail -1 | $AWK_PROG '{ print $5 }'`
+ 	_disksize=$(($_disksize / 3))
+ 	_num=$(($_disksize / $count / $threads / 4096))
+ 	_count=$count
 -- 
 2.5.0
 
