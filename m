@@ -1,159 +1,95 @@
-Received: from cn.fujitsu.com ([222.73.24.84]:37679 "EHLO song.cn.fujitsu.com"
-	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-	id S1752057AbcB2IQD (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 29 Feb 2016 03:16:03 -0500
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH v3 5/5] fstests: btrfs: Test inband dedup with balance.
-Date: Mon, 29 Feb 2016 16:15:23 +0800
-Message-Id: <1456733723-27432-6-git-send-email-quwenruo@cn.fujitsu.com>
-In-Reply-To: <1456733723-27432-1-git-send-email-quwenruo@cn.fujitsu.com>
-References: <1456733723-27432-1-git-send-email-quwenruo@cn.fujitsu.com>
-MIME-Version: 1.0
+From: LAURENT@srv-zimbra1.globalinformatica.com.br,
+	"EYADEMA <berndmenker"@versanet.de
+Subject: Business Partnership
+Date: Thu, 11 Feb 2016 08:02:08 +0700
+Message-ID: <20160211010554.CC713F8994E@srv-zimbra1.globalinformatica.com.br>
+Reply-To: lau.eya66@gmail.com
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============0920456181=="
+Return-path: <fstests-owner@vger.kernel.org>
+Received: from globalinformatica.com.br ([186.249.1.145]:33343 "EHLO
+	srv-zimbra1.globalinformatica.com.br" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750770AbcBKBmJ (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 10 Feb 2016 20:42:09 -0500
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-List-ID: <fstests@vger.kernel.org>
+List-Id: fstests@vger.kernel.org
+To: Recipients <berndmenker@versanet.de>
 
-Btrfs balance will reloate date extent, but its hash is removed too late
-at run_delayed_ref() time, which will cause extent ref increased
-increased during balance, cause either find_data_references() gives
-WARN_ON() or even run_delayed_refs() fails and cause transaction abort.
+You will not see this in a MIME-aware mail reader.
+--===============0920456181==
+Content-Type: text/plain; charset="iso-8859-1"
+MIME-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
+Content-Description: Mail message body
 
-Add such concurrency test for inband dedup and balance.
+Hello,
 
-Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
----
- tests/btrfs/203     | 99 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/203.out |  3 ++
- tests/btrfs/group   |  1 +
- 3 files changed, 103 insertions(+)
- create mode 100755 tests/btrfs/203
- create mode 100644 tests/btrfs/203.out
-
-diff --git a/tests/btrfs/203 b/tests/btrfs/203
-new file mode 100755
-index 0000000..806b44f
---- /dev/null
-+++ b/tests/btrfs/203
-@@ -0,0 +1,99 @@
-+#! /bin/bash
-+# FS QA Test 203
-+#
-+# Btrfs reflink with balance concurrency test
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	kill $populate_pid &> /dev/null
-+	kill $balance_pid &> /dev/null
-+	wait
-+	# Check later comment for reason
-+	$BTRFS_UTIL_PROG balance cancel $SCRATCH_MNT &> /dev/null
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_cp_reflink
-+_require_btrfs_subcommand dedup
-+_require_btrfs_fs_feature dedup
-+_require_btrfs_mkfs_feature dedup
-+
-+dedup_bs=128k
-+file_size_in_kilo=4096
-+init_file=$SCRATCH_MNT/foo
-+run_time=$((60 * $TIME_FACTOR))
-+
-+_scratch_mkfs "-O dedup" >> $seqres.full 2>&1
-+_scratch_mount
-+
-+_run_btrfs_util_prog dedup enable -b $dedup_bs $SCRATCH_MNT
-+
-+# create the initial file and fill hash pool
-+$XFS_IO_PROG -f -c "pwrite -S 0x0 -b $dedup_bs 0 $dedup_bs" -c "fsync" \
-+	$init_file | _filter_xfs_io
-+
-+_btrfs_stress_balance $SCRATCH_MNT >/dev/null 2>&1 &
-+balance_pid=$!
-+
-+# Populate fs with all 0 data, to trigger enough in-band dedup work
-+# to race with balance
-+_populate_fs -n 5 -f 10000000 -d 1 -r $SCRATCH_MNT -s $file_size_in_kilo \
-+	&> /dev/null &
-+populate_pid=$!
-+
-+sleep $run_time
-+
-+kill $populate_pid
-+kill $balance_pid
-+wait
-+
-+# Sometimes even we killed $balance_pid and wait returned,
-+# balance may still be running, use balance cancel to wait it.
-+# As this is just a workaround, we don't want it pollute seqres
-+# so call $BTRFS_UTIL_PROG directly
-+$BTRFS_UTIL_PROG balance cancel $SCRATCH_MNT &> /dev/null
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/203.out b/tests/btrfs/203.out
-new file mode 100644
-index 0000000..404394c
---- /dev/null
-+++ b/tests/btrfs/203.out
-@@ -0,0 +1,3 @@
-+QA output created by 203
-+wrote 131072/131072 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 0c03cf1..fa90f33 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -122,3 +122,4 @@
- 200 auto dedup
- 201 auto dedup
- 202 auto dedup
-+203 auto dedup balance
--- 
-2.7.2
+I am Mr. LAURENT EYADEMA from Republic of Togo.please read the attached pro=
+posal.
+Thanks in anticipation of your urgent response,
 
 
+LAURENT EYADEMA
+--===============0920456181==
+Content-Type: application/octet-stream
+MIME-Version: 1.0
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="proposal.docx"
 
+UEsDBBQACAAIAFUoS0gAAAAAAAAAAAAAAAALAAAAX3JlbHMvLnJlbHONj7sOwyAMRX8F+QNi2qFD
+BcnSJWuUH0DgkCjhIaCvvy9Dh6bq0NHXR8e+onu4jd0o5SV4CYeGQ9eKgTZVapDnJWZWCZ8lzKXE
+M2LWMzmVmxDJ180UklOljsliVHpVlvDI+QnTpwP2TjaqZKlIuIdk0AR9deRLU3XAeiMhrnboDQc2
+PiP9czlM06Lp8hb9eOCLAGwF7lq2L1BLBwhBmmpvmAAAAAoBAABQSwMEFAAIAAgAVShLSAAAAAAA
+AAAAAAAAABwAAAB3b3JkL19yZWxzL2RvY3VtZW50LnhtbC5yZWxzrZBNCsIwEEavEuYATerChTTt
+xk23pReI6TQNNj8kqdjbGxHEioILlzPz8b3HVM3VzOSCIWpnOZQFg6auOpxFyos4aR9JTtjIYUrJ
+HyiNckIjYuE82nwZXTAi5TEo6oU8C4V0x9iehtcO2HaSXgSFiYNdzAmDtqrIVUDagcPgZNcODEi/
+evyF6sZRSzw6uRi06QOcPilAv3jEtM4Y3yXKf0o8EHcDunlvfQNQSwcIK9lUlKoAAACDAQAAUEsD
+BBQACAAIAFUoS0gAAAAAAAAAAAAAAAARAAAAd29yZC9kb2N1bWVudC54bWztmt1z2zYMwP8VnG97
+8+q0Xbde1rSnJk7qnfNxibNdHikKtthQpI6k7Gp//QBSyte67iXbw44vSUQCIADS+AmM33340mjY
+ovPKmoPJyxd7E0AjbaXM5mByvTr+4e0EfBCmEtoaPJj06Ccf3r/b7VdWdg2aAGTA+P3dwaQOod2f
+zbyssRH+hW3R0NzaukYEenSb2c66qnVWovdkv9GzV3t7P80aocyETZa26vl3G39cOP7lWyFJFmgW
+yRR5QB7u9sU6oDuYkD4/acWuvfr5pwnMWEmZikad2tRhkNe4Hv9cK+fDMmrsDfKfJY1vhT6YsNww
+6JID7tia4HlJL5U6mBROCc126sL4h8/SP3hA4UPhlbgbiial1daNS4ku2GH8Psg4M7rVWq8C7cvT
+cf/HOPJ6jNjXVQxN3xkeJKRG4aLQbAhpdpdb938Oc7cfj2ZclLa6dejRbXHy/hNqbacsF5J0Skk+
+eP/VwcvZzh/zf/9jvgDRwKl7Acvi+nJ+toL5TXE0Py1g7WwDl9h2pVYS7BpWdmNfQJQPNYJHaelg
+efKUJk+MiLAqEea9qIhsUUiLgHBBi6mKGUiCTy1Ok0VvneuBjnRUU4RWs0WjiLFIIyLQD+VBY6CD
+Do3oQYrOI/S2iwbIkYbUBSk7qDDmECuwnaPBRuketFqTJUdb1DmEqnOcerbpUG0MCB8Xbr/lKlCo
+LPTy7ezlHjP5R9ipUMPqsji7gpPl+cdiCVfzw+vLxepmdrw4K84O53B4fnpRnN3AcnVEcUEhpRNw
+UgsjplBiCiM+gko+GNo79AGk7UygpASbUp9LcS7FOds52xl8zwW+R9QgQDAyImdC7ZBp0ZlbKO0X
+pITUStZUkk2gLizV6auuYTJ89/YNEGE0e359BUfny2VxOcjv8AGMIitYUZR2i8BNIenQhLRNK0zP
+dEggYAx6oUMPbedIHf0UCj7pUb1CcphXvvd9AbXY8owkeFVMjIaXiLF8lX8kcapoAhaGzBrBnggN
+QjlorQsUSDGNi1HEnvgYO1gyphIBK9Vqy+0q7IhVUFuGGHtCwYXBsvqGZcq9c2pLrqaAo6O/CtMJ
+1zMV+RPO9nri8i1liv3dYAABF8IFQxGTIz3T/QEkHUpUMWocNo12hHJUYi30mswKz68EKYJDendJ
+p214u/hLqEFsNiQ/hkqvASWNiA1mEGc05GznbGcQPxeId8Ik9MbCzbU84WEkAUnQCtT23WJCsAwE
+rscAiMy0DRJRCb6WgOgJFye2IvY1fP6Y9iuu9VIYqFG3zBVFXaaP5b/hZVslb0EF6Noozi0tzZ5G
+/hClEYiqLi617lwkb9lR14veQ6uFIUyXXaDmMiqsKJw1uzoShiJR7JS2sb1MgCSqeUkNMK937ERX
+dZoBRHpqS7tAFNtY3qOBvDvrdDVNJhW/lvQj/Efok/v0J+WGVU4XxenikcMVaspsIiYLlf0jok8p
+iZB2JE6TVLG1itPXQ2W7MrAzMaFslDY5heJRUksdiN5Hyte0CZ7eXjgm5WijW0ZrqTQJZHrmep6z
+nbOd6fk89LwgUR+rf+tiW9nDw/JLdJLIhXkEyFVXfkaCEtV6OnO/gEfugjHBdC2+RK2W6Ms3txIJ
+uxdsD0zXlAP7aMGecdh0RsnY4I33qak9HQBDXHjaViXmJEq2yXGGTKT7CLFbxJYhFm2Q8jrex9J2
+xLVLm3rfzie6GGr7QufMYNrBrboDNzPs5vwafl8sl/BxDieL3+Zn8PrN93Axvzzku+6rT8XlHM6P
+YfVpDsfXZ0eZTrle5mznbGc6PQ+dOnrzjyXeYatjzxGv+hoq0GITr+rM2N1tuOGLLUd93+UN1BlQ
+MjYp952Nt6kVYj3u66RgkqhmGulQDw2Xe/CPvHThuOFGLjFJtBGc9zd9g9rQsP3TSnGhgMPDnQhf
+ixKK2+G6kjrShp+f3jFaanFHYsaL2ymPoRGlxmhwmPsbkoJqGqwUoVrnxioX05ztnO2MrmdC14pA
+cRv/40V9hJKqTZ0OIST2GZ3bcB0eLrcwf1Eu14Oc7ZztXH2fp/o++TbiV6rrbPwi/Oz+S/bv/wRQ
+SwcIEJgY0A8GAACoLwAAUEsDBBQACAAIAFUoS0gAAAAAAAAAAAAAAAASAAAAd29yZC9udW1iZXJp
+bmcueG1sDYxBDsIwDAS/EvlOXTggFDXtrS+AB4TEtJUau4oDgd+T42pmdpi+aTcfyroJOzh3PRji
+IHHjxcHjPp9uYLR4jn4XJgc/UpjGoVp+pyflppn2wGqrg7WUwyJqWCl57eQgbuwlOfnSZl6wSo5H
+lkCqrUw7Xvr+islvDAbHP1BLBwgsMb9xfAAAAI0AAABQSwMEFAAIAAgAVShLSAAAAAAAAAAAAAAA
+AA8AAAB3b3JkL3N0eWxlcy54bWwNjEEOwiAQAL9C9m5BD8aQ0t58gT6AwNqSwG7DErG/l+NkMjOv
+v5LVF6skJgfXyYBCChwTbQ7er+flAUqap+gzEzo4UWBd5m6lnRlFjZzEdgd7a4fVWsKOxcvEB9Jw
+H67Ft4F1051rPCoHFBn3kvXNmLsuPhEovfwBUEsHCK9TyEF5AAAAigAAAFBLAwQUAAgACABVKEtI
+AAAAAAAAAAAAAAAAEwAAAFtDb250ZW50X1R5cGVzXS54bWytkstOwzAQRX8l8hbVE1iwQEm6ALbA
+gh8wziSx6pc8k9L+PZOGdoGQEFKX9n2cK8vN9hB8tcdCLsVW3epabbvm/ZiRKlEitWpizg8AZCcM
+hnTKGEUZUgmG5VhGyMbuzIhwV9f3YFNkjLzhpUN1zRMOZvZcPR/keqUU9KSqx9W4sFplcvbOGhYd
+9rH/Qdl8E7QkTx6aXKYbMSj4lbAo/wKkYXAW+2TnIBH9mUqfS7JI5OIYvL4owbh4Br/KuxXXY/Vm
+Cr+YIBhYkhDn8IFFkvrqQy7Vf44gPnqk6y9Ye894OP2V7gtQSwcIte3oWOQAAABIAgAAUEsBAi0A
+FAAIAAgAVShLSEGaam+YAAAACgEAAAsAAAAAAAAAAAAAAAAAAAAAAF9yZWxzLy5yZWxzUEsBAi0A
+FAAIAAgAVShLSCvZVJSqAAAAgwEAABwAAAAAAAAAAAAAAAAA0QAAAHdvcmQvX3JlbHMvZG9jdW1l
+bnQueG1sLnJlbHNQSwECLQAUAAgACABVKEtIEJgY0A8GAACoLwAAEQAAAAAAAAAAAAAAAADFAQAA
+d29yZC9kb2N1bWVudC54bWxQSwECLQAUAAgACABVKEtILDG/cXwAAACNAAAAEgAAAAAAAAAAAAAA
+AAATCAAAd29yZC9udW1iZXJpbmcueG1sUEsBAi0AFAAIAAgAVShLSK9TyEF5AAAAigAAAA8AAAAA
+AAAAAAAAAAAAzwgAAHdvcmQvc3R5bGVzLnhtbFBLAQItABQACAAIAFUoS0i17ehY5AAAAEgCAAAT
+AAAAAAAAAAAAAAAAAIUJAABbQ29udGVudF9UeXBlc10ueG1sUEsFBgAAAAAGAAYAgAEAAKoKAAAA
+AA==
+--===============0920456181==--
