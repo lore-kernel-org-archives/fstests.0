@@ -1,11 +1,11 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:18908 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750970AbcBKXkN (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 11 Feb 2016 18:40:13 -0500
-Subject: [PATCH 08/32] common: provide a method to repair the scratch fs
+Received: from userp1040.oracle.com ([156.151.31.81]:19884 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750970AbcBKXkh (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 11 Feb 2016 18:40:37 -0500
+Subject: [PATCH 11/32] reflink: add _require_odirect to the directio tests
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 11 Feb 2016 15:40:08 -0800
-Message-ID: <20160211234008.2202.30511.stgit@birch.djwong.org>
+Date: Thu, 11 Feb 2016 15:40:29 -0800
+Message-ID: <20160211234029.2202.82743.stgit@birch.djwong.org>
 In-Reply-To: <20160211233916.2202.40961.stgit@birch.djwong.org>
 References: <20160211233916.2202.40961.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -16,68 +16,297 @@ To: david@fromorbit.com, darrick.wong@oracle.com
 Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-Create a wrapper function that repairs any damage to the scratch
-filesystem and returns a standard result.  We will use this to clean
-up after IO error testing and other weird corruption tests.
+For the tests that test O_DIRECT, we need to _require_odirect.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- common/rc |   43 +++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 43 insertions(+)
+ tests/generic/139 |    1 +
+ tests/generic/143 |    1 +
+ tests/generic/155 |    1 +
+ tests/generic/165 |    1 +
+ tests/generic/166 |    1 +
+ tests/generic/170 |    1 +
+ tests/generic/174 |    1 +
+ tests/generic/183 |    1 +
+ tests/generic/187 |    1 +
+ tests/generic/188 |    1 +
+ tests/generic/190 |    1 +
+ tests/generic/194 |    1 +
+ tests/generic/196 |    1 +
+ tests/generic/199 |    1 +
+ tests/generic/200 |    1 +
+ tests/generic/203 |    1 +
+ tests/generic/206 |    1 +
+ tests/generic/217 |    1 +
+ tests/generic/220 |    1 +
+ tests/generic/227 |    1 +
+ tests/generic/238 |    1 +
+ tests/generic/243 |    1 +
+ 22 files changed, 22 insertions(+)
 
 
-diff --git a/common/rc b/common/rc
-index 63eb90b..e05df74 100644
---- a/common/rc
-+++ b/common/rc
-@@ -953,6 +953,49 @@ _scratch_xfs_repair()
-     $XFS_REPAIR_PROG $SCRATCH_OPTIONS $* $SCRATCH_DEV
- }
+diff --git a/tests/generic/139 b/tests/generic/139
+index 5e7b631..989b054 100755
+--- a/tests/generic/139
++++ b/tests/generic/139
+@@ -47,6 +47,7 @@ _cleanup()
+ _supported_os Linux
+ _require_test_reflink
+ _require_cp_reflink
++_require_odirect
  
-+# Repair scratch filesystem.  Returns 0 if the FS is good to go (either no
-+# errors found or errors were fixed) and nonzero otherwise; also spits out
-+# a complaint on stderr if fsck didn't tell us that the FS is good to go.
-+_repair_scratch_fs()
-+{
-+    case $FSTYP in
-+    xfs)
-+        _scratch_xfs_repair "$@" 2>&1
-+	res=$?
-+	if [ "$res" -eq 2 ]; then
-+		echo "xfs_repair returns $res; replay log?"
-+		_scratch_mount
-+		res=$?
-+		if [ "$res" -gt 0 ]; then
-+			echo "mount returns $res; zap log?"
-+			_scratch_xfs_repair -L 2>&1
-+			echo "log zap returns $?"
-+		else
-+			umount "$SCRATCH_MNT"
-+		fi
-+		_scratch_xfs_repair "$@" 2>&1
-+		res=$?
-+	fi
-+	test $res -ne 0 && >&2 echo "xfs_repair failed, err=$res"
-+	return $res
-+        ;;
-+    *)
-+        # Let's hope fsck -y suffices...
-+        fsck -t $FSTYP -y $SCRATCH_DEV 2>&1
-+	res=$?
-+	case $res in
-+	0|1|2)
-+		res=0
-+		;;
-+	*)
-+		>&2 echo "fsck.$FSTYP failed, err=$res"
-+		;;
-+	esac
-+	return $res
-+        ;;
-+    esac
-+}
-+
- _get_pids_by_name()
- {
-     if [ $# -ne 1 ]
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/143 b/tests/generic/143
+index 586cf5c..703b585 100755
+--- a/tests/generic/143
++++ b/tests/generic/143
+@@ -49,6 +49,7 @@ _cleanup()
+ _supported_os Linux
+ _require_test_reflink
+ _require_cp_reflink
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/155 b/tests/generic/155
+index c6416a1..e96bda7 100755
+--- a/tests/generic/155
++++ b/tests/generic/155
+@@ -55,6 +55,7 @@ _supported_os Linux
+ _require_test_reflink
+ _require_cp_reflink
+ _require_xfs_io_command "fzero"
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/165 b/tests/generic/165
+index e4c9a9d..1ae08a4 100755
+--- a/tests/generic/165
++++ b/tests/generic/165
+@@ -47,6 +47,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_cp_reflink
++_require_odirect
+ 
+ echo "Format and mount"
+ _scratch_mkfs > $seqres.full 2>&1
+diff --git a/tests/generic/166 b/tests/generic/166
+index 9be753d..9b177be 100755
+--- a/tests/generic/166
++++ b/tests/generic/166
+@@ -47,6 +47,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_cp_reflink
++_require_odirect
+ 
+ echo "Format and mount"
+ _scratch_mkfs > $seqres.full 2>&1
+diff --git a/tests/generic/170 b/tests/generic/170
+index dbf1564..0f29b3a 100755
+--- a/tests/generic/170
++++ b/tests/generic/170
+@@ -46,6 +46,7 @@ _cleanup()
+ # real QA test starts here
+ _supported_os Linux
+ _require_scratch_reflink
++_require_odirect
+ 
+ echo "Format and mount"
+ _scratch_mkfs > $seqres.full 2>&1
+diff --git a/tests/generic/174 b/tests/generic/174
+index cec2f05..edfc2bc 100755
+--- a/tests/generic/174
++++ b/tests/generic/174
+@@ -46,6 +46,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_cp_reflink
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/183 b/tests/generic/183
+index 0f35da2..0ab4afe 100755
+--- a/tests/generic/183
++++ b/tests/generic/183
+@@ -49,6 +49,7 @@ _cleanup()
+ # real QA test starts here
+ _supported_os Linux
+ _require_scratch_reflink
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/187 b/tests/generic/187
+index b8fade2..ac6037d 100755
+--- a/tests/generic/187
++++ b/tests/generic/187
+@@ -55,6 +55,7 @@ _require_cp_reflink
+ _require_xfs_io_command "falloc"
+ _require_xfs_io_command "fpunch"
+ test $FSTYP = "btrfs" && _notrun "Can't fragment free space on btrfs."
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/188 b/tests/generic/188
+index 7be1080..bb293b1 100755
+--- a/tests/generic/188
++++ b/tests/generic/188
+@@ -49,6 +49,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/190 b/tests/generic/190
+index a5c2137..b4de3ed 100755
+--- a/tests/generic/190
++++ b/tests/generic/190
+@@ -49,6 +49,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/194 b/tests/generic/194
+index 69a3e6c..f67e567 100755
+--- a/tests/generic/194
++++ b/tests/generic/194
+@@ -50,6 +50,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/196 b/tests/generic/196
+index 951079c..1505de8 100755
+--- a/tests/generic/196
++++ b/tests/generic/196
+@@ -49,6 +49,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/199 b/tests/generic/199
+index f457245..04380ed 100755
+--- a/tests/generic/199
++++ b/tests/generic/199
+@@ -55,6 +55,7 @@ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
+ _require_xfs_io_command "fpunch"
+ _require_cp_reflink
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/200 b/tests/generic/200
+index ffb5869..2aa0315 100755
+--- a/tests/generic/200
++++ b/tests/generic/200
+@@ -55,6 +55,7 @@ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
+ _require_xfs_io_command "fpunch"
+ _require_cp_reflink
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/203 b/tests/generic/203
+index 5d9bfc4..2ffb311 100755
+--- a/tests/generic/203
++++ b/tests/generic/203
+@@ -44,6 +44,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_cp_reflink
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/206 b/tests/generic/206
+index 4054626..6b3e200 100755
+--- a/tests/generic/206
++++ b/tests/generic/206
+@@ -47,6 +47,7 @@ _cleanup()
+ # real QA test starts here
+ _supported_os Linux
+ _require_scratch_reflink
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/217 b/tests/generic/217
+index b1bd635..ce8e0a1 100755
+--- a/tests/generic/217
++++ b/tests/generic/217
+@@ -48,6 +48,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/220 b/tests/generic/220
+index edb8432..3bce21b 100755
+--- a/tests/generic/220
++++ b/tests/generic/220
+@@ -48,6 +48,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/227 b/tests/generic/227
+index abaf8f7..00985d3 100755
+--- a/tests/generic/227
++++ b/tests/generic/227
+@@ -48,6 +48,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/238 b/tests/generic/238
+index ce7408c..3b46492 100755
+--- a/tests/generic/238
++++ b/tests/generic/238
+@@ -48,6 +48,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/243 b/tests/generic/243
+index 127070e..e1d698b 100755
+--- a/tests/generic/243
++++ b/tests/generic/243
+@@ -47,6 +47,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_cp_reflink
++_require_odirect
+ 
+ rm -f $seqres.full
+ 
 
