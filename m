@@ -1,55 +1,61 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:20304 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751036AbcBKXln (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 11 Feb 2016 18:41:43 -0500
-Subject: [PATCH 20/32] reflink: high offset reflink and dedupe tests
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 11 Feb 2016 15:41:35 -0800
-Message-ID: <20160211234135.2202.25346.stgit@birch.djwong.org>
-In-Reply-To: <20160211233916.2202.40961.stgit@birch.djwong.org>
-References: <20160211233916.2202.40961.stgit@birch.djwong.org>
+Received: from sandeen.net ([63.231.237.45]:55074 "EHLO sandeen.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751928AbcBKXm5 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 11 Feb 2016 18:42:57 -0500
+Received: from Liberator.local (70-90-76-85-BusName-mn.hfc.comcastbusiness.net [70.90.76.85])
+	(using TLSv1.2 with cipher DHE-RSA-AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by sandeen.net (Postfix) with ESMTPSA id 9519263C5B53
+	for <fstests@vger.kernel.org>; Thu, 11 Feb 2016 17:42:56 -0600 (CST)
+From: Eric Sandeen <sandeen@sandeen.net>
+Subject: [PATCH] xfs: test inode32/inode64 options w/ remount & growfs
+Message-ID: <56BD1C80.8090302@sandeen.net>
+Date: Thu, 11 Feb 2016 17:42:56 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: david@fromorbit.com, darrick.wong@oracle.com
-Cc: linux-btrfs@vger.kernel.org, Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org, xfs@oss.sgi.com
+To: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Ensure that we can pass absurdly enormous offsets and lengths to
-reflink/dedupe and it'll survive.
+inode32/inode64 allocator behavior with respect to mount,
+remount and growfs is a little tricky.
 
-v2: Ask for dedupe in the dedupe test.
+The inode32 mount option should only enable the inode32
+allocator heuristics if the filesystem is large enough
+for 64-bit inodes to exist.  Today, it has this behavior
+on the initial mount, but a remount with inode32
+unconditionally changes the allocation heuristics, even
+for a small fs.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-[hch@lst.de: call _require_test_dedupe]
-Signed-off-by: Christoph Hellwig <hch@lst.de>
+Also, an inode32 mounted small filesystem should transition
+to the inode32 allocator if the filesystem is subsequently
+grown to a sufficient size.  Today that does not happen.
+
+This test tests both of these behaviors and demonstrates the
+problem.
+
+Signed-off-by: Eric Sandeen <sandeen@redha.com>
 ---
- tests/generic/303     |   98 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/303.out |   21 ++++++++++
- tests/generic/304     |   99 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/304.out |   22 +++++++++++
- tests/generic/group   |    2 +
- 5 files changed, 242 insertions(+)
- create mode 100755 tests/generic/303
- create mode 100644 tests/generic/303.out
- create mode 100755 tests/generic/304
- create mode 100644 tests/generic/304.out
 
+right now the golden output is the actual AGs for file
+data allocation; I'm not sure if that's too "tight" an
+output or not - the rotor *does* have well-defined
+behavior, so I think it's ok.
 
-diff --git a/tests/generic/303 b/tests/generic/303
+diff --git a/tests/xfs/260 b/tests/xfs/260
 new file mode 100755
-index 0000000..2283b5e
+index 0000000..a5e2324
 --- /dev/null
-+++ b/tests/generic/303
-@@ -0,0 +1,98 @@
++++ b/tests/xfs/260
+@@ -0,0 +1,135 @@
 +#! /bin/bash
-+# FS QA Test No. 303
++# FS QA Test 260
 +#
-+# Check that high-offset reflinks work.
++# Test inode32/inode64 mount/remount options, with growfs
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -64,6 +70,7 @@ index 0000000..2283b5e
 +# along with this program; if not, write the Free Software Foundation,
 +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 +#-----------------------------------------------------------------------
++#
 +
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -71,247 +78,241 @@ index 0000000..2283b5e
 +
 +here=`pwd`
 +tmp=/tmp/$$
-+status=1    # failure is the default!
++status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+    cd /
-+    rm -rf $tmp.* $testdir
++	cd /
++	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/attr
-+. ./common/reflink
 +
-+# real QA test starts here
-+_supported_os Linux
-+_require_test_reflink
-+_require_cp_reflink
-+
++# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
-+echo "Format and mount"
-+testdir=$TEST_DIR/test-$seq
-+mkdir $testdir
++# real QA test starts here
 +
-+echo "Create the original files"
-+bigoff=9223372036854775806
-+len=9223372036854775807
-+bigoff_64k=9223372036854710272	# bigoff rounded down to 64k
-+$XFS_IO_PROG -f -c "truncate $len" $testdir/file0 >> $seqres.full
-+test -s $testdir/file0 || _notrun "High offset ftruncate failed"
-+_pwrite_byte 0x61 $bigoff 1 $testdir/file1 >> $seqres.full
-+_pwrite_byte 0x61 1048575 1 $testdir/file2 >> $seqres.full
++# Modify as appropriate.
++_supported_fs xfs
++_supported_os Linux
++_require_test
++_require_loop
 +
-+echo "Reflink large single byte file"
-+_cp_reflink $testdir/file1 $testdir/file3 >> $seqres.full
++loopfile=$TEST_DIR/testfile
++loopmnt=$TEST_DIR/mnt
 +
-+echo "Reflink large empty file"
-+_cp_reflink $testdir/file0 $testdir/file4 >> $seqres.full
++mkdir -p $loopmnt
 +
-+echo "Reflink past maximum file size in dest file (should fail)"
-+_reflink_range $testdir/file1 0 $testdir/file5 4611686018427322368 $len >> $seqres.full
-+
-+echo "Reflink high offset to low offset"
-+_reflink_range $testdir/file1 $bigoff_64k $testdir/file6 1048576 65535 >> $seqres.full
-+
-+echo "Reflink past source file EOF (should fail)"
-+_reflink_range $testdir/file2 524288 $testdir/file7 0 1048576 >> $seqres.full
-+
-+echo "Reflink max size at nonzero offset (should fail)"
-+_reflink_range $testdir/file2 524288 $testdir/file8 0 $len >> $seqres.full
-+
-+echo "Reflink with huge off/len (should fail)"
-+_reflink_range $testdir/file2 $bigoff_64k $testdir/file9 0 $bigoff_64k >> $seqres.full
-+
-+echo "Check file creation"
-+_test_remount
-+echo "file3"
-+$XFS_IO_PROG -c "pread -v -q $bigoff 1" $testdir/file3
-+echo "file4"
-+$XFS_IO_PROG -c "pread -v -q $bigoff 1" $testdir/file4
-+# file5 should fail above
-+echo "file6"
-+$XFS_IO_PROG -c "pread -v -q 1114110 1" $testdir/file6
-+# file7 should fail above
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/303.out b/tests/generic/303.out
-new file mode 100644
-index 0000000..39a8803
---- /dev/null
-+++ b/tests/generic/303.out
-@@ -0,0 +1,21 @@
-+QA output created by 303
-+Format and mount
-+Create the original files
-+Reflink large single byte file
-+Reflink large empty file
-+Reflink past maximum file size in dest file (should fail)
-+XFS_IOC_CLONE_RANGE: Invalid argument
-+Reflink high offset to low offset
-+Reflink past source file EOF (should fail)
-+XFS_IOC_CLONE_RANGE: Invalid argument
-+Reflink max size at nonzero offset (should fail)
-+XFS_IOC_CLONE_RANGE: Invalid argument
-+Reflink with huge off/len (should fail)
-+XFS_IOC_CLONE_RANGE: Invalid argument
-+Check file creation
-+file3
-+7ffffffffffffffe:  61  a
-+file4
-+7ffffffffffffffe:  00  .
-+file6
-+0010fffe:  61  a
-diff --git a/tests/generic/304 b/tests/generic/304
-new file mode 100755
-index 0000000..e50fc2a
---- /dev/null
-+++ b/tests/generic/304
-@@ -0,0 +1,99 @@
-+#! /bin/bash
-+# FS QA Test No. 304
-+#
-+# Check that high-offset dedupes work.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
++# Takes file path as argument
++create_and_map()
 +{
-+    cd /
-+    rm -rf $tmp.* $testdir
++	echo foo > $1
++	xfs_bmap -v $1 | grep -v "EXT\|file" | awk '{print $4}'
 +}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+. ./common/reflink
++# Test proper inode32/inode64 behavior for initial mount and remount.
++# mount, remount, remount
++#
++# Args: size, initial opt, first remount, 2nd remount
++# i.e.: 512g inode32 inode64 inode32
++#   or:   4t inode64 inode32 inode64
++workout_remount()
++{
++	echo "Remount: $1, $2, $3, $4"
 +
-+# real QA test starts here
-+_supported_os Linux
-+_require_test_dedupe
-+_require_cp_reflink
++	rm -f $loopfile
++	xfs_io -f -c "truncate $1" $loopfile
++	$MKFS_XFS_PROG $loopfile >> $seqres.full 2>&1
 +
-+rm -f $seqres.full
++	echo "mount $2"
++	mount -t xfs -o loop,$2 $loopfile $loopmnt
++	for I in `seq 1 4`; do create_and_map $loopmnt/file$I; done
 +
-+echo "Format and mount"
-+testdir=$TEST_DIR/test-$seq
-+mkdir $testdir
++	echo "remount $3"
++	mount -o remount,$3 $loopmnt
++	for I in `seq 5 8`; do create_and_map $loopmnt/file$I; done
 +
-+echo "Create the original files"
-+bigoff=9223372036854775806
-+len=9223372036854775807
-+bigoff_64k=9223372036854710272	# bigoff rounded down to 64k
-+$XFS_IO_PROG -f -c "truncate $len" $testdir/file0 >> $seqres.full
-+test -s $testdir/file0 || _notrun "High offset ftruncate failed"
-+_pwrite_byte 0x61 $bigoff 1 $testdir/file1 >> $seqres.full
-+_pwrite_byte 0x61 $bigoff 1 $testdir/file3 >> $seqres.full
-+_pwrite_byte 0x61 1048575 1 $testdir/file2 >> $seqres.full
++	echo "remount $4"
++	mount -o remount,$4 $loopmnt
++	for I in `seq 9 12`; do create_and_map $loopmnt/file$I; done
 +
-+echo "Dedupe large single byte file"
-+_dedupe_range $testdir/file1 0 $testdir/file3 0 $len >> $seqres.full
++	umount $loopmnt
++}
 +
-+echo "Dedupe large empty file"
-+_dedupe_range $testdir/file0 0 $testdir/file4 0 $len >> $seqres.full
++# Test proper inode32/inode64 across a growfs
++# Mount, grow, remount
++#
++# Args: size1, size2, mount opt, remount opt
++# i.e.: 512g 1t inode32 inode64
 +
-+echo "Dedupe past maximum file size in dest file (should fail)"
-+_dedupe_range $testdir/file1 0 $testdir/file5 4611686018427322368 $len >> $seqres.full
++workout_growfs()
++{
++	echo "Growfs: $1, $2, $3, $4"
 +
-+echo "Dedupe high offset to low offset"
-+_dedupe_range $testdir/file1 $bigoff_64k $testdir/file6 1048576 65535 >> $seqres.full
++	rm -f $loopfile
++	xfs_io -f -c "truncate $2" $loopfile
++	$MKFS_XFS_PROG -d size=$1 $loopfile >> $seqres.full 2>&1
 +
-+echo "Dedupe past source file EOF (should fail)"
-+_dedupe_range $testdir/file2 524288 $testdir/file7 0 1048576 >> $seqres.full
++	echo "$1, mount $3"
++	mount -t xfs -o loop,$3 $loopfile $loopmnt
++	for I in `seq 1 4`; do create_and_map $loopmnt/file$I; done
 +
-+echo "Dedupe max size at nonzero offset (should fail)"
-+_dedupe_range $testdir/file2 524288 $testdir/file8 0 $len >> $seqres.full
++	echo "growfs $1 to $2"
++	$XFS_GROWFS_PROG $loopmnt >> $seqres.full 2>&1
++	for I in `seq 5 12`; do create_and_map $loopmnt/file$I; done
 +
-+echo "Dedupe with huge off/len (should fail)"
-+_dedupe_range $testdir/file2 $bigoff_64k $testdir/file9 0 $bigoff_64k >> $seqres.full
++	# Do more than 4 files here to try to hit new AGs
++	echo "$2, remount $4"
++	mount -o remount,$4 $loopmnt
++	for I in `seq 13 20`; do create_and_map $loopmnt/file$I; done
 +
-+echo "Check file creation"
-+_test_remount
-+echo "file3"
-+$XFS_IO_PROG -c "pread -v -q $bigoff 1" $testdir/file3
-+echo "file4"
-+$XFS_IO_PROG -c "pread -v -q $bigoff 1" $testdir/file4
-+# file5 should fail above
-+echo "file6"
-+$XFS_IO_PROG -c "pread -v -q 1114110 1" $testdir/file6
-+# file7 should fail above
++	umount $loopmnt
++}
++
++workout_remount 128g inode64 inode32 inode64
++workout_remount 128g inode32 inode64 inode32
++workout_remount   4t inode64 inode32 inode64
++workout_remount   4t inode32 inode64 inode32
++
++workout_growfs 1t 4t inode32 inode64
++workout_growfs 1t 4t inode64 inode32
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/304.out b/tests/generic/304.out
+diff --git a/tests/xfs/260.out b/tests/xfs/260.out
 new file mode 100644
-index 0000000..4af2a39
+index 0000000..4bdf2f0
 --- /dev/null
-+++ b/tests/generic/304.out
-@@ -0,0 +1,22 @@
-+QA output created by 304
-+Format and mount
-+Create the original files
-+Dedupe large single byte file
-+dedupe: Invalid argument
-+Dedupe large empty file
-+dedupe: Invalid argument
-+Dedupe past maximum file size in dest file (should fail)
-+dedupe: Invalid argument
-+Dedupe high offset to low offset
-+dedupe: Extents did not match.
-+Dedupe past source file EOF (should fail)
-+dedupe: Invalid argument
-+Dedupe max size at nonzero offset (should fail)
-+dedupe: Invalid argument
-+Dedupe with huge off/len (should fail)
-+XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-+Check file creation
-+file3
-+7ffffffffffffffe:  61  a
-+file4
-+file6
-diff --git a/tests/generic/group b/tests/generic/group
-index 7edc963..4a1cce4 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -305,6 +305,8 @@
- 300 auto aio enospc preallocrw stress
- 301 auto quick clone
- 302 auto quick clone
-+303 auto quick clone
-+304 auto quick clone
- 306 auto quick rw
- 307 auto quick
- 308 auto quick
++++ b/tests/xfs/260.out
+@@ -0,0 +1,113 @@
++QA output created by 260
++Remount: 128g, inode64, inode32, inode64
++mount inode64
++0
++0
++0
++0
++remount inode32
++0
++0
++0
++0
++remount inode64
++0
++0
++0
++0
++Remount: 128g, inode32, inode64, inode32
++mount inode32
++0
++0
++0
++0
++remount inode64
++0
++0
++0
++0
++remount inode32
++0
++0
++0
++0
++Remount: 4t, inode64, inode32, inode64
++mount inode64
++0
++0
++0
++0
++remount inode32
++1
++2
++3
++1
++remount inode64
++0
++0
++0
++0
++Remount: 4t, inode32, inode64, inode32
++mount inode32
++1
++2
++3
++1
++remount inode64
++0
++0
++0
++0
++remount inode32
++2
++3
++1
++2
++Growfs: 1t, 4t, inode32, inode64
++1t, mount inode32
++0
++0
++0
++0
++growfs 1t to 4t
++1
++2
++3
++4
++5
++6
++7
++8
++4t, remount inode64
++0
++0
++0
++0
++0
++0
++0
++0
++Growfs: 1t, 4t, inode64, inode32
++1t, mount inode64
++0
++0
++0
++0
++growfs 1t to 4t
++0
++0
++0
++0
++0
++0
++0
++0
++4t, remount inode32
++1
++2
++3
++4
++5
++6
++7
++8
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 2db3520..ce0c69d 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -207,6 +207,7 @@
+ 252 auto quick prealloc
+ 253 auto quick
+ 259 auto quick
++260 auto growfs
+ 261 auto quick quota
+ 262 auto quick quota
+ 266 dump ioctl auto quick
 
