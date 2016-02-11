@@ -1,151 +1,135 @@
-Received: from mx1.redhat.com ([209.132.183.28]:35386 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750979AbcBKQhl (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 11 Feb 2016 11:37:41 -0500
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (Postfix) with ESMTPS id 83FC1C0A5279
-	for <fstests@vger.kernel.org>; Thu, 11 Feb 2016 16:37:41 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH] xfs: change return value check to golden image check
-Date: Fri, 12 Feb 2016 00:37:36 +0800
-Message-Id: <1455208656-16637-1-git-send-email-zlang@redhat.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:28147 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750968AbcBKQ4E (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 11 Feb 2016 11:56:04 -0500
+Date: Thu, 11 Feb 2016 08:55:54 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] ext4: test partial blocksize defrag integrity issue
+Message-ID: <20160211165554.GB6338@birch.djwong.org>
+References: <1455117464-15565-1-git-send-email-eguan@redhat.com>
+ <20160210231614.GC19486@dastard>
+ <20160211033628.GZ11419@eguan.usersys.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160211033628.GZ11419@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: eguan@redhat.com, Zorro Lang <zlang@redhat.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-xfs/133 and xfs/138 use too much code to do "return value" check,
-it's not necessary. For the code can be more readable and clear,
-I change "return value" check to golden image check.
+On Thu, Feb 11, 2016 at 11:36:28AM +0800, Eryu Guan wrote:
+> On Thu, Feb 11, 2016 at 10:16:14AM +1100, Dave Chinner wrote:
+> > On Wed, Feb 10, 2016 at 11:17:44PM +0800, Eryu Guan wrote:
+> > > Calling EXT4_IOC_MOVE_EXTENT on file not aligned with block size and
+> > > block size is smaller than page size would cause integrity issue on the
+> > > partial-blocksize part when copying data between orign file and donor
+> > > file.
+> > > 
+> > > This ext4 kernel patch would fix it, titled
+> > > "ext4: don't read blocks from disk after extents being swapped in
+> > > move_extent_per_page())"
+> > > 
+> > > Though this bug only happens in the blocksize smaller than pagesize
+> > > case, there's no harm to test on various block size fs, so no block size
+> > > is specified in the test, it depends on the test configurations.
+> > > 
+> > > Signed-off-by: Eryu Guan <eguan@redhat.com>
+> > > ---
+> > >  tests/ext4/020     | 89 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/ext4/020.out |  6 ++++
+> > >  tests/ext4/group   |  1 +
+> > >  3 files changed, 96 insertions(+)
+> > >  create mode 100755 tests/ext4/020
+> > >  create mode 100644 tests/ext4/020.out
+> > > 
+> > > diff --git a/tests/ext4/020 b/tests/ext4/020
+> > > new file mode 100755
+> > > index 0000000..6740c7e
+> > > --- /dev/null
+> > > +++ b/tests/ext4/020
+> > > @@ -0,0 +1,89 @@
+> > > +#! /bin/bash
+> > > +# FS QA Test 020
+> > > +#
+> > > +# Test partial blocksize defrag integrity issue.
+> > > +#
+> > > +# Calling EXT4_IOC_MOVE_EXTENT on file not aligned with block size and block
+> > > +# size is smaller than page size would cause integrity issue on the
+> > > +# partial-blocksize part when copying data between orign file and donor file.
+> > > +#
+> > > +#-----------------------------------------------------------------------
+> > > +# Copyright (c) 2016 Red Hat Inc. All Rights Reserved.
+> > > +#
+> > > +# This program is free software; you can redistribute it and/or
+> > > +# modify it under the terms of the GNU General Public License as
+> > > +# published by the Free Software Foundation.
+> > > +#
+> > > +# This program is distributed in the hope that it would be useful,
+> > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > > +# GNU General Public License for more details.
+> > > +#
+> > > +# You should have received a copy of the GNU General Public License
+> > > +# along with this program; if not, write the Free Software Foundation,
+> > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > > +#-----------------------------------------------------------------------
+> > > +#
+> > > +
+> > > +seq=`basename $0`
+> > > +seqres=$RESULT_DIR/$seq
+> > > +echo "QA output created by $seq"
+> > > +
+> > > +here=`pwd`
+> > > +tmp=/tmp/$$
+> > > +status=1	# failure is the default!
+> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > +
+> > > +_cleanup()
+> > > +{
+> > > +	cd /
+> > > +	rm -f $tmp.*
+> > > +}
+> > > +
+> > > +# get standard environment, filters and checks
+> > > +. ./common/rc
+> > > +. ./common/filter
+> > > +. ./common/defrag
+> > > +
+> > > +# remove previous $seqres.full before test
+> > > +rm -f $seqres.full
+> > > +
+> > > +# real QA test starts here
+> > > +_supported_fs ext4
+> > > +_supported_os Linux
+> > > +_require_scratch
+> > > +_require_defrag
+> > > +
+> > > +e4compact=$here/src/e4compact
+> > > +if [ ! -x $d4compact ]; then
+> >               ^^^^^^^^^
+> 
+> My test run didn't complain about missing the binary and I found out
+> that I should have added quotes around $d4compact, that way test _notrun
+> as expect and catches the typo. Thanks for the review!
+> 
+> > > +	_notrun "$e4compact executable not found"
+> > > +fi
+> > 
+> > And, yes, we really need that _requires_test_command function that
+> > Darrick was adding to his patchset...
+> 
+> I'll wait for the new patch from Darrick and send v2 then.
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
- tests/xfs/133     | 20 +++++++-------------
- tests/xfs/133.out |  7 +++++++
- tests/xfs/138     | 26 ++++++++++++--------------
- tests/xfs/138.out | 12 ++++++++++++
- 4 files changed, 38 insertions(+), 27 deletions(-)
+I'll have it out later today -- I'm planning to spot-check the patches for
+obvious errors after breakfast.
 
-diff --git a/tests/xfs/133 b/tests/xfs/133
-index 330221f..82c38b1 100755
---- a/tests/xfs/133
-+++ b/tests/xfs/133
-@@ -46,8 +46,6 @@ _cleanup()
- rm -f $seqres.full
- 
- # real QA test starts here
--
--# Modify as appropriate.
- _supported_fs xfs
- _supported_os Linux
- _require_scratch
-@@ -72,22 +70,18 @@ $qa_project:10
- EOF
- 
- 	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
--		-c "project -s $qa_project" $SCRATCH_MNT >>$seqres.full 2>&1
--	[ $? -ne 0 ] && _fail "Initalize project=$qa_project Failed"
-+		-c "project -s $qa_project" $SCRATCH_MNT > /dev/null
- 
- 	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
--		-c "limit -p bsoft=100m bhard=200m $qa_project" $SCRATCH_MNT >>$seqres.full 2>&1
--	[ $? -ne 0 ] && _fail "Create limit for project=$qa_project Failed"
-+		-c "limit -p bsoft=100m bhard=200m $qa_project" $SCRATCH_MNT
- 
--	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
--		-c "quota -p -v $qa_project" $SCRATCH_MNT 2>>$seqres.full | grep -qw $qa_project
--	[ $? -ne 0 ] && _fail "Query project=$qa_project Failed"
-+	echo "=== quota command output ==="
-+	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid \
-+		-c "quota -p -v -b $qa_project" $SCRATCH_MNT | _filter_quota
- 
-+	echo "=== report command output ==="
- 	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
--		-c "report -p" $SCRATCH_MNT 2>>$seqres.full | grep -qw $qa_project
--	[ $? -ne 0 ] && _fail "Report project=$qa_project Failed"
--
--	return 0
-+		-c "report -p -N -b" $SCRATCH_MNT | _filter_quota
- }
- 
- # Test project
-diff --git a/tests/xfs/133.out b/tests/xfs/133.out
-index 189cb69..21cfd0d 100644
---- a/tests/xfs/133.out
-+++ b/tests/xfs/133.out
-@@ -1 +1,8 @@
- QA output created by 133
-+=== quota command output ===
-+Disk quotas for Project 123456-project (10)
-+Filesystem Blocks Quota Limit Warn/Time Mounted on
-+SCRATCH_DEV 0 102400 204800 00 [--------] SCRATCH_MNT
-+=== report command output ===
-+123456-project 0 102400 204800 00 [--------]
-+
-diff --git a/tests/xfs/138 b/tests/xfs/138
-index 6b17608..c6a6f50 100755
---- a/tests/xfs/138
-+++ b/tests/xfs/138
-@@ -47,8 +47,6 @@ _cleanup()
- rm -f $seqres.full
- 
- # real QA test starts here
--
--# Modify as appropriate.
- _supported_fs xfs
- _supported_os Linux
- _require_scratch
-@@ -63,20 +61,20 @@ _qmount_option "uquota,gquota"
- _qmount
- 
- # user test
--xfs_quota -x -c "limit -u bsoft=100m bhard=200m 123456-fsgqa" $SCRATCH_MNT >>$seqres.full 2>&1
--[ $? -ne 0 ] && _fail "Create limit for user 123456-fsgqa Failed"
--xfs_quota -x -c "quota -u -v 123456-fsgqa" $SCRATCH_MNT 2>>$seqres.full | grep -qw 123456-fsgqa
--[ $? -ne 0 ] && _fail "Query user 123456-fsgqa Failed"
--xfs_quota -x -c "report -u" $SCRATCH_MNT 2>>$seqres.full | grep -qw 123456-fsgqa
--[ $? -ne 0 ] && _fail "Report user 123456-fsgqa Failed"
-+echo "== user test =="
-+$XFS_QUOTA_PROG -x -c "limit -u bsoft=100m bhard=200m 123456-fsgqa" $SCRATCH_MNT
-+echo "=== quota command output ==="
-+$XFS_QUOTA_PROG -c "quota -u -b -N -v 123456-fsgqa" $SCRATCH_MNT | _filter_quota
-+echo "=== report command output ==="
-+$XFS_QUOTA_PROG -x -c "report -u -b -N" $SCRATCH_MNT | grep -v "^root " | _filter_quota
- 
- # group test
--xfs_quota -x -c "limit -g bsoft=100m bhard=200m 123456-fsgqa" $SCRATCH_MNT >>$seqres.full 2>&1
--[ $? -ne 0 ] && _fail "Create limit for group 123456-fsgqa Failed"
--xfs_quota -x -c "quota -g -v 123456-fsgqa" $SCRATCH_MNT 2>>$seqres.full | grep -qw 123456-fsgqa
--[ $? -ne 0 ] && _fail "Query group 123456-fsgqa Failed"
--xfs_quota -x -c "report -u" $SCRATCH_MNT 2>>$seqres.full | grep -qw 123456-fsgqa
--[ $? -ne 0 ] && _fail "Report group 123456-fsgqa Failed"
-+echo "== group test =="
-+$XFS_QUOTA_PROG -x -c "limit -g bsoft=100m bhard=200m 123456-fsgqa" $SCRATCH_MNT
-+echo "=== quota command output ==="
-+$XFS_QUOTA_PROG -c "quota -g -b -N -v 123456-fsgqa" $SCRATCH_MNT | _filter_quota
-+echo "=== report command output ==="
-+$XFS_QUOTA_PROG -x -c "report -u -b -N" $SCRATCH_MNT | grep -v "^root " | _filter_quota
- 
- # success, all done
- status=0
-diff --git a/tests/xfs/138.out b/tests/xfs/138.out
-index f3eb411..71929c4 100644
---- a/tests/xfs/138.out
-+++ b/tests/xfs/138.out
-@@ -1 +1,13 @@
- QA output created by 138
-+== user test ==
-+=== quota command output ===
-+SCRATCH_DEV 0 102400 204800 00 [--------] SCRATCH_MNT
-+=== report command output ===
-+123456-fsgqa 0 102400 204800 00 [--------]
-+
-+== group test ==
-+=== quota command output ===
-+SCRATCH_DEV 0 102400 204800 00 [--------] SCRATCH_MNT
-+=== report command output ===
-+123456-fsgqa 0 102400 204800 00 [--------]
-+
--- 
-1.9.3
+--D
 
+> 
+> Thanks,
+> Eryu
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-ext4" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
