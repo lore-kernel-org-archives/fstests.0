@@ -1,11 +1,11 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:19395 "EHLO
+Received: from aserp1040.oracle.com ([141.146.126.69]:19629 "EHLO
 	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751175AbcBKXlR (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 11 Feb 2016 18:41:17 -0500
-Subject: [PATCH 17/32] xfs: more reflink tests
+	with ESMTP id S1751307AbcBKXl4 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 11 Feb 2016 18:41:56 -0500
+Subject: [PATCH 22/32] reflink: test quota accounting
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 11 Feb 2016 15:41:11 -0800
-Message-ID: <20160211234111.2202.97746.stgit@birch.djwong.org>
+Date: Thu, 11 Feb 2016 15:41:48 -0800
+Message-ID: <20160211234148.2202.94396.stgit@birch.djwong.org>
 In-Reply-To: <20160211233916.2202.40961.stgit@birch.djwong.org>
 References: <20160211233916.2202.40961.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -16,139 +16,62 @@ To: david@fromorbit.com, darrick.wong@oracle.com
 Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-Create a couple of XFS-specific tests -- one to check that growing
-and shrinking the refcount btree works and a second one to check
-what happens when we hit maximum refcount.
-
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/xfs/169     |   86 +++++++++++++++++++++++++++++++++++++++
- tests/xfs/169.out |    7 +++
- tests/xfs/179     |  118 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/179.out |   10 ++++
- tests/xfs/group   |    4 +-
- 5 files changed, 224 insertions(+), 1 deletion(-)
- create mode 100755 tests/xfs/169
- create mode 100644 tests/xfs/169.out
- create mode 100755 tests/xfs/179
- create mode 100644 tests/xfs/179.out
+ common/reflink        |    2 -
+ tests/generic/305     |  100 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/305.out |   22 ++++++++++
+ tests/generic/326     |  101 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/326.out |   22 ++++++++++
+ tests/generic/327     |   87 ++++++++++++++++++++++++++++++++++++++++
+ tests/generic/327.out |   12 ++++++
+ tests/generic/328     |  105 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/328.out |   25 ++++++++++++
+ tests/generic/group   |    4 ++
+ tests/xfs/213         |  105 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/213.out     |   22 ++++++++++
+ tests/xfs/214         |  106 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/214.out     |   22 ++++++++++
+ tests/xfs/group       |    2 +
+ 15 files changed, 736 insertions(+), 1 deletion(-)
+ create mode 100755 tests/generic/305
+ create mode 100644 tests/generic/305.out
+ create mode 100755 tests/generic/326
+ create mode 100644 tests/generic/326.out
+ create mode 100755 tests/generic/327
+ create mode 100644 tests/generic/327.out
+ create mode 100755 tests/generic/328
+ create mode 100644 tests/generic/328.out
+ create mode 100755 tests/xfs/213
+ create mode 100644 tests/xfs/213.out
+ create mode 100755 tests/xfs/214
+ create mode 100644 tests/xfs/214.out
 
 
-diff --git a/tests/xfs/169 b/tests/xfs/169
+diff --git a/common/reflink b/common/reflink
+index 5d92a88..4ec390d 100644
+--- a/common/reflink
++++ b/common/reflink
+@@ -153,7 +153,7 @@ _cp_reflink() {
+ 	file1="$1"
+ 	file2="$2"
+ 
+-	cp --reflink=always "$file1" "$file2"
++	cp --reflink=always -p "$file1" "$file2"
+ }
+ 
+ # Reflink some file1 into file2
+diff --git a/tests/generic/305 b/tests/generic/305
 new file mode 100755
-index 0000000..996500e
+index 0000000..9356a86
 --- /dev/null
-+++ b/tests/xfs/169
-@@ -0,0 +1,86 @@
++++ b/tests/generic/305
+@@ -0,0 +1,100 @@
 +#! /bin/bash
-+# FS QA Test No. 169
++# FS QA Test No. 305
 +#
-+# Ensure that we can create enough distinct reflink entries to force creation
-+# of a multi-level refcount btree.  Delete and recreate a few times to
-+# exercise the refcount btree grow/shrink functions.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    umount $SCRATCH_MNT > /dev/null 2>&1
-+    rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs xfs
-+_require_scratch_reflink
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >/dev/null 2>&1
-+_scratch_mount
-+
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
-+
-+echo "Create the original file blocks"
-+blksz="$(stat -f $testdir -c '%S')"
-+nr_blks=$((8 * blksz / 12))
-+
-+for i in 1 2 x; do
-+	_pwrite_byte 0x61 0 $((blksz * nr_blks)) $testdir/file1 >> $seqres.full
-+
-+	echo "$i: Reflink every other block"
-+	seq 1 2 $((nr_blks - 1)) | while read nr; do
-+		_reflink_range  $testdir/file1 $((nr * blksz)) \
-+				$testdir/file2 $((nr * blksz)) $blksz >> $seqres.full
-+	done
-+	umount $SCRATCH_MNT
-+	_check_scratch_fs
-+	_scratch_mount
-+
-+	test $i = "x" && break
-+
-+	echo "$i: Delete both files"
-+	rm -rf $testdir/file1 $testdir/file2
-+	umount $SCRATCH_MNT
-+	_check_scratch_fs
-+	_scratch_mount
-+done
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/169.out b/tests/xfs/169.out
-new file mode 100644
-index 0000000..1159e30
---- /dev/null
-+++ b/tests/xfs/169.out
-@@ -0,0 +1,7 @@
-+QA output created by 169
-+Create the original file blocks
-+1: Reflink every other block
-+1: Delete both files
-+2: Reflink every other block
-+2: Delete both files
-+x: Reflink every other block
-diff --git a/tests/xfs/179 b/tests/xfs/179
-new file mode 100755
-index 0000000..e0b0af8
---- /dev/null
-+++ b/tests/xfs/179
-@@ -0,0 +1,118 @@
-+#! /bin/bash
-+# FS QA Test No. 179
-+#
-+# See how well reflink handles overflowing reflink counts.
++# Ensure that quota charges us for reflinking a file and that we're not
++# charged for buffered copy on write.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
@@ -185,127 +108,790 @@ index 0000000..e0b0af8
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/attr
 +. ./common/reflink
++. ./common/quota
 +
 +# real QA test starts here
 +_supported_os Linux
-+_supported_fs xfs
 +_require_scratch_reflink
-+_require_scratch_nocheck
 +_require_cp_reflink
-+_require_test_program "punch-alternating"
++_require_fiemap
++_require_quota
++_require_nobody
 +
++_repquota() {
++	repquota $SCRATCH_MNT | egrep '^(fsgqa|root|nobody)'
++}
 +rm -f $seqres.full
 +
 +echo "Format and mount"
-+_scratch_mkfs -d agcount=1 > $seqres.full 2>&1
++_scratch_mkfs > $seqres.full 2>&1
++export MOUNT_OPTIONS="-o usrquota,grpquota $MOUNT_OPTIONS"
 +_scratch_mount >> $seqres.full 2>&1
++quotacheck -u -g $SCRATCH_MNT 2> /dev/null
++quotaon $SCRATCH_MNT 2> /dev/null
 +
 +testdir=$SCRATCH_MNT/test-$seq
 +mkdir $testdir
 +
-+blksz=65536
-+
-+echo "Create original files"
-+_pwrite_byte 0x61 0 $blksz $testdir/file1 >> $seqres.full
++sz=1048576
++echo "Create the original files"
++$XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file1 >> $seqres.full
 +_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
-+
-+echo "Change reference count"
-+umount $SCRATCH_MNT
-+echo "set refcount to -4" >> $seqres.full
-+$XFS_DB_PROG -x -c 'agf 0' -c 'addr refcntroot' -c 'write recs[1].refcount 4294967292' $SCRATCH_DEV >> $seqres.full
-+echo "check refcount after setting to -4" >> $seqres.full
-+$XFS_DB_PROG -c 'agf 0' -c 'addr refcntroot' -c 'p recs[1]' $SCRATCH_DEV >> $seqres.full
-+_scratch_mount >> $seqres.full
-+
-+echo "Reflink the overlinked file"
 +_cp_reflink $testdir/file1 $testdir/file3 >> $seqres.full
-+_cp_reflink $testdir/file1 $testdir/file4 >> $seqres.full
-+_cp_reflink $testdir/file1 $testdir/file5 >> $seqres.full
-+_cp_reflink $testdir/file1 $testdir/file6 >> $seqres.full
-+_cp_reflink $testdir/file1 $testdir/file7 >> $seqres.full
++touch $testdir/urk
++chown nobody $testdir/urk
++touch $testdir/erk
++chown fsgqa $testdir/erk
++_repquota
++_scratch_remount
 +
-+echo "Check scratch fs"
-+umount $SCRATCH_MNT
-+echo "check refcount after reflinking 5 more times" >> $seqres.full
-+$XFS_DB_PROG -c 'agf 0' -c 'addr refcntroot' -c 'p recs[1]' $SCRATCH_DEV >> $seqres.full
-+_scratch_mount >> $seqres.full
++echo "Change file ownership"
++chown fsgqa $testdir/file1
++chown fsgqa $testdir/file2
++chown fsgqa $testdir/file3
++_repquota
 +
-+echo "CoW a couple files"
-+_pwrite_byte 0x62 0 $blksz $testdir/file3 >> $seqres.full
-+_pwrite_byte 0x62 0 $blksz $testdir/file5 >> $seqres.full
-+_pwrite_byte 0x62 0 $blksz $testdir/file7 >> $seqres.full
++echo "CoW one of the files"
++$XFS_IO_PROG -f -c "pwrite -S 0x63 -b $((sz/2)) 0 $((sz/2))" -c "fsync" $testdir/file2 >> $seqres.full
++_repquota
 +
-+echo "Check scratch fs"
-+umount $SCRATCH_MNT
-+echo "check refcount after cowing 3 files" >> $seqres.full
-+$XFS_DB_PROG -c 'agf 0' -c 'addr refcntroot' -c 'p recs[1]' $SCRATCH_DEV >> $seqres.full
-+_scratch_mount >> $seqres.full
++echo "Remount the FS to see if accounting changes"
++_scratch_remount
++_repquota
 +
-+echo "Remove reflinked files"
-+rm -rf $testdir/file*
-+
-+echo "Check scratch fs"
-+umount $SCRATCH_MNT
-+echo "check refcount after removing all files" >> $seqres.full
-+$XFS_DB_PROG -c 'agf 0' -c 'addr refcntroot' -c 'p recs[1]' $SCRATCH_DEV >> $seqres.full
-+$XFS_REPAIR_PROG -o force_geometry -n $SCRATCH_DEV >> $seqres.full 2>&1
-+res=$?
-+if [ $res -eq 0 ]; then
-+	# If repair succeeds then format the device so that the post-test
-+	# check doesn't fail due to the single AG.
-+	_scratch_mkfs >> $seqres.full 2>&1
-+else
-+	_fail "xfs_repair fails"
-+fi
++echo "Chown one of the files"
++chown nobody $testdir/file3
++_repquota
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/xfs/179.out b/tests/xfs/179.out
+diff --git a/tests/generic/305.out b/tests/generic/305.out
 new file mode 100644
-index 0000000..4d3e605
+index 0000000..0bfd620
 --- /dev/null
-+++ b/tests/xfs/179.out
-@@ -0,0 +1,10 @@
-+QA output created by 179
++++ b/tests/generic/305.out
+@@ -0,0 +1,22 @@
++QA output created by 305
 +Format and mount
-+Create original files
-+Change reference count
-+Reflink the overlinked file
-+Check scratch fs
-+CoW a couple files
-+Check scratch fs
-+Remove reflinked files
-+Check scratch fs
++Create the original files
++root      --    3072       0       0              7     0     0       
++nobody    --       0       0       0              1     0     0       
++fsgqa     --       0       0       0              1     0     0       
++Change file ownership
++root      --       0       0       0              4     0     0       
++nobody    --       0       0       0              1     0     0       
++fsgqa     --    3072       0       0              4     0     0       
++CoW one of the files
++root      --       0       0       0              4     0     0       
++nobody    --       0       0       0              1     0     0       
++fsgqa     --    3072       0       0              4     0     0       
++Remount the FS to see if accounting changes
++root      --       0       0       0              4     0     0       
++nobody    --       0       0       0              1     0     0       
++fsgqa     --    3072       0       0              4     0     0       
++Chown one of the files
++root      --       0       0       0              4     0     0       
++nobody    --    1024       0       0              2     0     0       
++fsgqa     --    2048       0       0              3     0     0       
+diff --git a/tests/generic/326 b/tests/generic/326
+new file mode 100755
+index 0000000..b6c748c
+--- /dev/null
++++ b/tests/generic/326
+@@ -0,0 +1,101 @@
++#! /bin/bash
++# FS QA Test No. 326
++#
++# Ensure that quota charges us for reflinking a file and that we're not
++# charged for directio copy on write.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++. ./common/quota
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch_reflink
++_require_cp_reflink
++_require_fiemap
++_require_quota
++_require_nobody
++_require_odirect
++
++_repquota() {
++	repquota $SCRATCH_MNT | egrep '^(fsgqa|root|nobody)'
++}
++rm -f $seqres.full
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++export MOUNT_OPTIONS="-o usrquota,grpquota $MOUNT_OPTIONS"
++_scratch_mount >> $seqres.full 2>&1
++quotacheck -u -g $SCRATCH_MNT 2> /dev/null
++quotaon $SCRATCH_MNT 2> /dev/null
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++
++sz=1048576
++echo "Create the original files"
++$XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file1 >> $seqres.full
++_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
++_cp_reflink $testdir/file1 $testdir/file3 >> $seqres.full
++touch $testdir/urk
++chown nobody $testdir/urk
++touch $testdir/erk
++chown fsgqa $testdir/erk
++_repquota
++_scratch_remount
++
++echo "Change file ownership"
++chown fsgqa $testdir/file1
++chown fsgqa $testdir/file2
++chown fsgqa $testdir/file3
++_repquota
++
++echo "CoW one of the files"
++$XFS_IO_PROG -d -f -c "pwrite -S 0x63 -b $((sz/2)) 0 $((sz/2))" -c "fsync" $testdir/file2 >> $seqres.full
++_repquota
++
++echo "Remount the FS to see if accounting changes"
++_scratch_remount
++_repquota
++
++echo "Chown one of the files"
++chown nobody $testdir/file3
++_repquota
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/326.out b/tests/generic/326.out
+new file mode 100644
+index 0000000..e771eb7
+--- /dev/null
++++ b/tests/generic/326.out
+@@ -0,0 +1,22 @@
++QA output created by 326
++Format and mount
++Create the original files
++root      --    3072       0       0              7     0     0       
++nobody    --       0       0       0              1     0     0       
++fsgqa     --       0       0       0              1     0     0       
++Change file ownership
++root      --       0       0       0              4     0     0       
++nobody    --       0       0       0              1     0     0       
++fsgqa     --    3072       0       0              4     0     0       
++CoW one of the files
++root      --       0       0       0              4     0     0       
++nobody    --       0       0       0              1     0     0       
++fsgqa     --    3072       0       0              4     0     0       
++Remount the FS to see if accounting changes
++root      --       0       0       0              4     0     0       
++nobody    --       0       0       0              1     0     0       
++fsgqa     --    3072       0       0              4     0     0       
++Chown one of the files
++root      --       0       0       0              4     0     0       
++nobody    --    1024       0       0              2     0     0       
++fsgqa     --    2048       0       0              3     0     0       
+diff --git a/tests/generic/327 b/tests/generic/327
+new file mode 100755
+index 0000000..90d2aca
+--- /dev/null
++++ b/tests/generic/327
+@@ -0,0 +1,87 @@
++#! /bin/bash
++# FS QA Test No. 327
++#
++# Ensure that we can't go over the hard block limit when reflinking.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++. ./common/quota
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch_reflink
++_require_cp_reflink
++_require_fiemap
++_require_quota
++_require_nobody
++
++_repquota() {
++	repquota $SCRATCH_MNT | egrep '^(fsgqa|root|nobody)'
++}
++rm -f $seqres.full
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++export MOUNT_OPTIONS="-o usrquota,grpquota $MOUNT_OPTIONS"
++_scratch_mount >> $seqres.full 2>&1
++quotacheck -u -g $SCRATCH_MNT 2> /dev/null
++quotaon $SCRATCH_MNT 2> /dev/null
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++
++sz=1048576
++echo "Create the original files"
++$XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file1 >> $seqres.full
++chown fsgqa $testdir/file1
++_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
++_repquota
++_scratch_remount
++
++echo "Set hard quota to prevent third reflink"
++setquota -u fsgqa 0 1024 0 0 $SCRATCH_MNT
++_repquota
++
++echo "Try to reflink again"
++touch $testdir/file3
++chown fsgqa $testdir/file3
++_cp_reflink $testdir/file1 $testdir/file3 2>&1 | _filter_scratch
++_repquota
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/327.out b/tests/generic/327.out
+new file mode 100644
+index 0000000..7160ff2
+--- /dev/null
++++ b/tests/generic/327.out
+@@ -0,0 +1,12 @@
++QA output created by 327
++Format and mount
++Create the original files
++root      --       0       0       0              4     0     0       
++fsgqa     --    2048       0       0              2     0     0       
++Set hard quota to prevent third reflink
++root      --       0       0       0              4     0     0       
++fsgqa     +-    2048       0    1024              2     0     0       
++Try to reflink again
++cp: failed to clone 'SCRATCH_MNT/test-327/file3' from 'SCRATCH_MNT/test-327/file1': Disk quota exceeded
++root      --       0       0       0              4     0     0       
++fsgqa     +-    2048       0    1024              3     0     0       
+diff --git a/tests/generic/328 b/tests/generic/328
+new file mode 100755
+index 0000000..46cfa66
+--- /dev/null
++++ b/tests/generic/328
+@@ -0,0 +1,105 @@
++#! /bin/bash
++# FS QA Test No. 328
++#
++# Ensure that we can't go over the hard block limit when CoWing a file.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++. ./common/quota
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch_reflink
++_require_cp_reflink
++_require_fiemap
++_require_quota
++_require_nobody
++_require_odirect
++
++_repquota() {
++	repquota $SCRATCH_MNT | egrep '^(fsgqa|root|nobody)'
++}
++rm -f $seqres.full
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++export MOUNT_OPTIONS="-o usrquota,grpquota $MOUNT_OPTIONS"
++_scratch_mount >> $seqres.full 2>&1
++quotacheck -u -g $SCRATCH_MNT 2> /dev/null
++quotaon $SCRATCH_MNT 2> /dev/null
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++
++sz=1048576
++echo "Create the original files"
++$XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file1 >> $seqres.full
++chown fsgqa $testdir/file1
++_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
++_cp_reflink $testdir/file1 $testdir/file3 >> $seqres.full
++_repquota
++_scratch_remount
++
++echo "Set hard quota to prevent rewrite"
++setquota -u fsgqa 0 1024 0 0 $SCRATCH_MNT
++_repquota
++
++echo "Try to dio write the whole file"
++_pwrite_byte 0x62 0 $sz $testdir/file1 -d >> $seqres.full
++_repquota
++
++echo "Try to write the whole file"
++_pwrite_byte 0x62 0 $sz $testdir/file1 >> $seqres.full
++_repquota
++
++echo "Set hard quota to allow rewrite"
++setquota -u fsgqa 0 8192 0 0 $SCRATCH_MNT
++_repquota
++
++echo "Try to dio write the whole file"
++_pwrite_byte 0x62 0 $sz $testdir/file1 -d >> $seqres.full
++sync
++_repquota
++
++echo "Try to write the whole file"
++_pwrite_byte 0x62 0 $sz $testdir/file3 >> $seqres.full
++sync
++_repquota
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/328.out b/tests/generic/328.out
+new file mode 100644
+index 0000000..5e99255
+--- /dev/null
++++ b/tests/generic/328.out
+@@ -0,0 +1,25 @@
++QA output created by 328
++Format and mount
++Create the original files
++root      --       0       0       0              4     0     0       
++fsgqa     --    3072       0       0              3     0     0       
++Set hard quota to prevent rewrite
++root      --       0       0       0              4     0     0       
++fsgqa     +-    3072       0    1024              3     0     0       
++Try to dio write the whole file
++pwrite64: Disk quota exceeded
++root      --       0       0       0              4     0     0       
++fsgqa     +-    3072       0    1024              3     0     0       
++Try to write the whole file
++pwrite64: Disk quota exceeded
++root      --       0       0       0              4     0     0       
++fsgqa     +-    3072       0    1024              3     0     0       
++Set hard quota to allow rewrite
++root      --       0       0       0              4     0     0       
++fsgqa     --    3072       0    8192              3     0     0       
++Try to dio write the whole file
++root      --       0       0       0              4     0     0       
++fsgqa     --    3072       0    8192              3     0     0       
++Try to write the whole file
++root      --       0       0       0              4     0     0       
++fsgqa     --    3072       0    8192              3     0     0       
+diff --git a/tests/generic/group b/tests/generic/group
+index 4a1cce4..8b9e0e5 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -307,6 +307,7 @@
+ 302 auto quick clone
+ 303 auto quick clone
+ 304 auto quick clone
++305 auto quick clone
+ 306 auto quick rw
+ 307 auto quick
+ 308 auto quick
+@@ -327,3 +328,6 @@
+ 323 auto aio stress
+ 324 auto fsr quick
+ 325 auto quick data log
++326 auto quick clone
++327 auto quick clone
++328 auto quick clone
+diff --git a/tests/xfs/213 b/tests/xfs/213
+new file mode 100755
+index 0000000..2450097
+--- /dev/null
++++ b/tests/xfs/213
+@@ -0,0 +1,105 @@
++#! /bin/bash
++# FS QA Test No. 213
++#
++# Ensure that quota charges us for reflnking a file and that we're not
++# charged for buffered copy on write.  Same test as g/305, but we get to
++# play with cowextsz.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++. ./common/quota
++
++# real QA test starts here
++_supported_os Linux
++_supported_fs xfs
++_require_scratch_reflink
++_require_cp_reflink
++_require_fiemap
++_require_quota
++_require_nobody
++_require_xfs_io_command "cowextsize"
++
++_repquota() {
++	repquota $SCRATCH_MNT | egrep '^(fsgqa|root|nobody)'
++}
++rm -f $seqres.full
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++export MOUNT_OPTIONS="-o usrquota,grpquota $MOUNT_OPTIONS"
++_scratch_mount >> $seqres.full 2>&1
++quotacheck -u -g $SCRATCH_MNT 2> /dev/null
++quotaon $SCRATCH_MNT 2> /dev/null
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++
++sz=1048576
++blksz=65536
++echo "Create the original files"
++$XFS_IO_PROG -c "cowextsize $((sz/2))" $testdir >> $seqres.full
++$XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file1 >> $seqres.full
++_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
++_cp_reflink $testdir/file1 $testdir/file3 >> $seqres.full
++touch $testdir/urk
++chown nobody $testdir/urk
++touch $testdir/erk
++chown fsgqa $testdir/erk
++_repquota
++_scratch_remount
++
++echo "Change file ownership"
++chown fsgqa $testdir/file1
++chown fsgqa $testdir/file2
++chown fsgqa $testdir/file3
++_repquota
++
++echo "CoW one of the files"
++$XFS_IO_PROG -f -c "pwrite -S 0x63 -b $blksz $((sz - blksz)) $blksz" -c "fsync" $testdir/file2 >> $seqres.full
++_repquota
++
++echo "Remount the FS to see if accounting changes"
++_scratch_remount
++_repquota
++
++echo "Chown one of the files"
++chown nobody $testdir/file3
++_repquota
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/213.out b/tests/xfs/213.out
+new file mode 100644
+index 0000000..be8d56c
+--- /dev/null
++++ b/tests/xfs/213.out
+@@ -0,0 +1,22 @@
++QA output created by 213
++Format and mount
++Create the original files
++root      --    3072       0       0              7     0     0       
++nobody    --       0       0       0              1     0     0       
++fsgqa     --       0       0       0              1     0     0       
++Change file ownership
++root      --       0       0       0              4     0     0       
++nobody    --       0       0       0              1     0     0       
++fsgqa     --    3072       0       0              4     0     0       
++CoW one of the files
++root      --       0       0       0              4     0     0       
++nobody    --       0       0       0              1     0     0       
++fsgqa     --    3520       0       0              4     0     0       
++Remount the FS to see if accounting changes
++root      --       0       0       0              4     0     0       
++nobody    --       0       0       0              1     0     0       
++fsgqa     --    3072       0       0              4     0     0       
++Chown one of the files
++root      --       0       0       0              4     0     0       
++nobody    --    1024       0       0              2     0     0       
++fsgqa     --    2048       0       0              3     0     0       
+diff --git a/tests/xfs/214 b/tests/xfs/214
+new file mode 100755
+index 0000000..847f489
+--- /dev/null
++++ b/tests/xfs/214
+@@ -0,0 +1,106 @@
++#! /bin/bash
++# FS QA Test No. 214
++#
++# Ensure that quota charges us for reflnking a file and that we're not
++# charged for directio copy on write.  Same as g/326, but we get to play
++# with cowextsz.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++. ./common/quota
++
++# real QA test starts here
++_supported_os Linux
++_supported_fs xfs
++_require_scratch_reflink
++_require_cp_reflink
++_require_fiemap
++_require_quota
++_require_nobody
++_require_xfs_io_command "cowextsize"
++_require_odirect
++
++_repquota() {
++	repquota $SCRATCH_MNT | egrep '^(fsgqa|root|nobody)'
++}
++rm -f $seqres.full
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++export MOUNT_OPTIONS="-o usrquota,grpquota $MOUNT_OPTIONS"
++_scratch_mount >> $seqres.full 2>&1
++quotacheck -u -g $SCRATCH_MNT 2> /dev/null
++quotaon $SCRATCH_MNT 2> /dev/null
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++
++sz=1048576
++blksz=65536
++echo "Create the original files"
++$XFS_IO_PROG -c "cowextsize $((sz/2))" $testdir >> $seqres.full
++$XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file1 >> $seqres.full
++_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
++_cp_reflink $testdir/file1 $testdir/file3 >> $seqres.full
++touch $testdir/urk
++chown nobody $testdir/urk
++touch $testdir/erk
++chown fsgqa $testdir/erk
++_repquota
++_scratch_remount
++
++echo "Change file ownership"
++chown fsgqa $testdir/file1
++chown fsgqa $testdir/file2
++chown fsgqa $testdir/file3
++_repquota
++
++echo "CoW one of the files"
++$XFS_IO_PROG -d -f -c "pwrite -S 0x63 -b $blksz $((sz - blksz)) $blksz" -c "fsync" $testdir/file2 >> $seqres.full
++_repquota
++
++echo "Remount the FS to see if accounting changes"
++_scratch_remount
++_repquota
++
++echo "Chown one of the files"
++chown nobody $testdir/file3
++_repquota
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/214.out b/tests/xfs/214.out
+new file mode 100644
+index 0000000..496a503
+--- /dev/null
++++ b/tests/xfs/214.out
+@@ -0,0 +1,22 @@
++QA output created by 214
++Format and mount
++Create the original files
++root      --    3072       0       0              7     0     0       
++nobody    --       0       0       0              1     0     0       
++fsgqa     --       0       0       0              1     0     0       
++Change file ownership
++root      --       0       0       0              4     0     0       
++nobody    --       0       0       0              1     0     0       
++fsgqa     --    3072       0       0              4     0     0       
++CoW one of the files
++root      --       0       0       0              4     0     0       
++nobody    --       0       0       0              1     0     0       
++fsgqa     --    3520       0       0              4     0     0       
++Remount the FS to see if accounting changes
++root      --       0       0       0              4     0     0       
++nobody    --       0       0       0              1     0     0       
++fsgqa     --    3072       0       0              4     0     0       
++Chown one of the files
++root      --       0       0       0              4     0     0       
++nobody    --    1024       0       0              2     0     0       
++fsgqa     --    2048       0       0              3     0     0       
 diff --git a/tests/xfs/group b/tests/xfs/group
-index 2db3520..f0c1c2b 100644
+index d4a0d59..afd960f 100644
 --- a/tests/xfs/group
 +++ b/tests/xfs/group
-@@ -127,7 +127,7 @@
- 127 auto quick clone
- 128 auto quick clone
- 129 auto quick clone
--130 fuzzers
-+130 fuzzers clone
- 131 auto quick clone
- 132 auto quick clone
- 133 auto quick quota
-@@ -166,6 +166,7 @@
- 166 rw metadata auto quick
- 167 rw metadata auto stress
- 168 dmapi
-+169 auto quick clone
- 170 rw filestreams auto quick
- 171 rw filestreams
- 172 rw filestreams
-@@ -175,6 +176,7 @@
- 176 dmapi
- 177 dmapi
- 178 mkfs other auto
-+179 auto quick clone
- 181 log auto quick
- 183 rw other auto quick
- 185 dmapi
+@@ -210,6 +210,8 @@
+ 210 auto quick clone
+ 211 clone_stress
+ 212 auto quick clone
++213 auto quick clone
++214 auto quick clone
+ 216 log metadata auto quick
+ 217 log metadata auto
+ 220 auto quota quick
 
