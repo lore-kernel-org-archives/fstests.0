@@ -1,11 +1,11 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:19522 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750866AbcBKXjh (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 11 Feb 2016 18:39:37 -0500
-Subject: [PATCH 02/32] xfstests: filter whitespace in 128 and 132
+Received: from aserp1040.oracle.com ([141.146.126.69]:19395 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751175AbcBKXlR (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 11 Feb 2016 18:41:17 -0500
+Subject: [PATCH 17/32] xfs: more reflink tests
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 11 Feb 2016 15:39:29 -0800
-Message-ID: <20160211233929.2202.11011.stgit@birch.djwong.org>
+Date: Thu, 11 Feb 2016 15:41:11 -0800
+Message-ID: <20160211234111.2202.97746.stgit@birch.djwong.org>
 In-Reply-To: <20160211233916.2202.40961.stgit@birch.djwong.org>
 References: <20160211233916.2202.40961.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -13,155 +13,299 @@ Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: david@fromorbit.com, darrick.wong@oracle.com
-Cc: linux-btrfs@vger.kernel.org, Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org, xfs@oss.sgi.com
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-Seems either I have a different lsattr version, or different mount points
-cause differences in the golden output.  Send the lsattr output through
-the whitespaces filter so that it works everywhere.
+Create a couple of XFS-specific tests -- one to check that growing
+and shrinking the refcount btree works and a second one to check
+what happens when we hit maximum refcount.
 
-The lsattr output /does/ change depending on mountpoints.  Ick.  I'd
-actually changed it to the long format output because line length in
-the short format changes every time the flags change.
-
-Signed-off-by: Christoph Hellwig <hch@lst.de>
-[darrick.wong@oracle.com: update changelog]
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/xfs/128     |    2 +-
- tests/xfs/128.out |    8 ++++----
- tests/xfs/132     |   10 +++++-----
- tests/xfs/132.out |   40 ++++++++++++++++++++--------------------
- 4 files changed, 30 insertions(+), 30 deletions(-)
+ tests/xfs/169     |   86 +++++++++++++++++++++++++++++++++++++++
+ tests/xfs/169.out |    7 +++
+ tests/xfs/179     |  118 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/179.out |   10 ++++
+ tests/xfs/group   |    4 +-
+ 5 files changed, 224 insertions(+), 1 deletion(-)
+ create mode 100755 tests/xfs/169
+ create mode 100644 tests/xfs/169.out
+ create mode 100755 tests/xfs/179
+ create mode 100644 tests/xfs/179.out
 
 
-diff --git a/tests/xfs/128 b/tests/xfs/128
-index a96291a..c9547fb 100755
---- a/tests/xfs/128
-+++ b/tests/xfs/128
-@@ -97,7 +97,7 @@ c13=$(_md5_checksum "$testdir/file3")
- c14=$(_md5_checksum "$testdir/file4")
- 
- echo "Defragment"
--lsattr -l "$testdir/" | _filter_scratch
-+lsattr -l "$testdir/" | _filter_scratch | _filter_spaces
- xfs_fsr -v -d "$testdir/file1" >> "$seqres.full"
- xfs_fsr -v -d "$testdir/file2" >> "$seqres.full" # fsr probably breaks the link
- xfs_fsr -v -d "$testdir/file3" >> "$seqres.full" # fsr probably breaks the link
-diff --git a/tests/xfs/128.out b/tests/xfs/128.out
-index 7e72dcd..0ac06db 100644
---- a/tests/xfs/128.out
-+++ b/tests/xfs/128.out
-@@ -11,10 +11,10 @@ c650f1cf6c9f07b22e3e21ec7d49ded5  SCRATCH_MNT/test-128/file2
- 56ed2f712c91e035adeeb26ed105a982  SCRATCH_MNT/test-128/file3
- b81534f439aac5c34ce3ed60a03eba70  SCRATCH_MNT/test-128/file4
- Defragment
--SCRATCH_MNT/test-128/file1          ---
--SCRATCH_MNT/test-128/file2          ---
--SCRATCH_MNT/test-128/file3          ---
--SCRATCH_MNT/test-128/file4          ---
-+SCRATCH_MNT/test-128/file1 ---
-+SCRATCH_MNT/test-128/file2 ---
-+SCRATCH_MNT/test-128/file3 ---
-+SCRATCH_MNT/test-128/file4 ---
- b81534f439aac5c34ce3ed60a03eba70  SCRATCH_MNT/test-128/file1
- c650f1cf6c9f07b22e3e21ec7d49ded5  SCRATCH_MNT/test-128/file2
- 56ed2f712c91e035adeeb26ed105a982  SCRATCH_MNT/test-128/file3
-diff --git a/tests/xfs/132 b/tests/xfs/132
-index 79a6d57..9c57c3b 100755
---- a/tests/xfs/132
-+++ b/tests/xfs/132
-@@ -87,32 +87,32 @@ for i in `seq 2 $nr`; do
- done
- _test_remount
- free_blocks1=$(stat -f "$testdir" -c '%f')
--lsattr -l $testdir/ | _filter_test_dir
-+lsattr -l $testdir/ | _filter_test_dir | _filter_spaces
- 
- echo "funshare part of a file"
- "$XFS_IO_PROG" -f -c "falloc 0 $((sz / 2))" "$testdir/file2"
- _test_remount
--lsattr -l $testdir/ | _filter_test_dir
-+lsattr -l $testdir/ | _filter_test_dir | _filter_spaces
- 
- echo "funshare some of the copies"
- "$XFS_IO_PROG" -f -c "falloc 0 $sz" "$testdir/file2"
- "$XFS_IO_PROG" -f -c "falloc 0 $sz" "$testdir/file3"
- _test_remount
- free_blocks2=$(stat -f "$testdir" -c '%f')
--lsattr -l $testdir/ | _filter_test_dir
-+lsattr -l $testdir/ | _filter_test_dir | _filter_spaces
- 
- echo "funshare the rest of the files"
- "$XFS_IO_PROG" -f -c "falloc 0 $sz" "$testdir/file4"
- "$XFS_IO_PROG" -f -c "falloc 0 $sz" "$testdir/file1"
- _test_remount
- free_blocks3=$(stat -f "$testdir" -c '%f')
--lsattr -l $testdir/ | _filter_test_dir
-+lsattr -l $testdir/ | _filter_test_dir | _filter_spaces
- 
- echo "Rewrite the original file"
- _pwrite_byte 0x65 0 $sz "$testdir/file1" >> "$seqres.full"
- _test_remount
- free_blocks4=$(stat -f "$testdir" -c '%f')
--lsattr -l $testdir/ | _filter_test_dir
-+lsattr -l $testdir/ | _filter_test_dir | _filter_spaces
- #echo $free_blocks0 $free_blocks1 $free_blocks2 $free_blocks3 $free_blocks4
- 
- _within_tolerance "free blocks after reflinking" $free_blocks1 $((free_blocks0 - blks)) $margin -v
-diff --git a/tests/xfs/132.out b/tests/xfs/132.out
-index fd2b7bd..f32db7d 100644
---- a/tests/xfs/132.out
-+++ b/tests/xfs/132.out
-@@ -1,30 +1,30 @@
- QA output created by 132
- Create the original file blocks
- Create the reflink copies
--TEST_DIR/test-132/file1          ---
--TEST_DIR/test-132/file2          ---
--TEST_DIR/test-132/file3          ---
--TEST_DIR/test-132/file4          ---
-+TEST_DIR/test-132/file1 ---
-+TEST_DIR/test-132/file2 ---
-+TEST_DIR/test-132/file3 ---
-+TEST_DIR/test-132/file4 ---
- funshare part of a file
--TEST_DIR/test-132/file1          ---
--TEST_DIR/test-132/file2          ---
--TEST_DIR/test-132/file3          ---
--TEST_DIR/test-132/file4          ---
-+TEST_DIR/test-132/file1 ---
-+TEST_DIR/test-132/file2 ---
-+TEST_DIR/test-132/file3 ---
-+TEST_DIR/test-132/file4 ---
- funshare some of the copies
--TEST_DIR/test-132/file1          ---
--TEST_DIR/test-132/file2          No_COW
--TEST_DIR/test-132/file3          No_COW
--TEST_DIR/test-132/file4          ---
-+TEST_DIR/test-132/file1 ---
-+TEST_DIR/test-132/file2 No_COW
-+TEST_DIR/test-132/file3 No_COW
-+TEST_DIR/test-132/file4 ---
- funshare the rest of the files
--TEST_DIR/test-132/file1          No_COW
--TEST_DIR/test-132/file2          No_COW
--TEST_DIR/test-132/file3          No_COW
--TEST_DIR/test-132/file4          No_COW
-+TEST_DIR/test-132/file1 No_COW
-+TEST_DIR/test-132/file2 No_COW
-+TEST_DIR/test-132/file3 No_COW
-+TEST_DIR/test-132/file4 No_COW
- Rewrite the original file
--TEST_DIR/test-132/file1          No_COW
--TEST_DIR/test-132/file2          No_COW
--TEST_DIR/test-132/file3          No_COW
--TEST_DIR/test-132/file4          No_COW
-+TEST_DIR/test-132/file1 No_COW
-+TEST_DIR/test-132/file2 No_COW
-+TEST_DIR/test-132/file3 No_COW
-+TEST_DIR/test-132/file4 No_COW
- free blocks after reflinking is in range
- free blocks after nocow'ing some copies is in range
- free blocks after nocow'ing all copies is in range
+diff --git a/tests/xfs/169 b/tests/xfs/169
+new file mode 100755
+index 0000000..996500e
+--- /dev/null
++++ b/tests/xfs/169
+@@ -0,0 +1,86 @@
++#! /bin/bash
++# FS QA Test No. 169
++#
++# Ensure that we can create enough distinct reflink entries to force creation
++# of a multi-level refcount btree.  Delete and recreate a few times to
++# exercise the refcount btree grow/shrink functions.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    umount $SCRATCH_MNT > /dev/null 2>&1
++    rm -rf $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_supported_fs xfs
++_require_scratch_reflink
++
++rm -f $seqres.full
++
++_scratch_mkfs >/dev/null 2>&1
++_scratch_mount
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++
++echo "Create the original file blocks"
++blksz="$(stat -f $testdir -c '%S')"
++nr_blks=$((8 * blksz / 12))
++
++for i in 1 2 x; do
++	_pwrite_byte 0x61 0 $((blksz * nr_blks)) $testdir/file1 >> $seqres.full
++
++	echo "$i: Reflink every other block"
++	seq 1 2 $((nr_blks - 1)) | while read nr; do
++		_reflink_range  $testdir/file1 $((nr * blksz)) \
++				$testdir/file2 $((nr * blksz)) $blksz >> $seqres.full
++	done
++	umount $SCRATCH_MNT
++	_check_scratch_fs
++	_scratch_mount
++
++	test $i = "x" && break
++
++	echo "$i: Delete both files"
++	rm -rf $testdir/file1 $testdir/file2
++	umount $SCRATCH_MNT
++	_check_scratch_fs
++	_scratch_mount
++done
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/169.out b/tests/xfs/169.out
+new file mode 100644
+index 0000000..1159e30
+--- /dev/null
++++ b/tests/xfs/169.out
+@@ -0,0 +1,7 @@
++QA output created by 169
++Create the original file blocks
++1: Reflink every other block
++1: Delete both files
++2: Reflink every other block
++2: Delete both files
++x: Reflink every other block
+diff --git a/tests/xfs/179 b/tests/xfs/179
+new file mode 100755
+index 0000000..e0b0af8
+--- /dev/null
++++ b/tests/xfs/179
+@@ -0,0 +1,118 @@
++#! /bin/bash
++# FS QA Test No. 179
++#
++# See how well reflink handles overflowing reflink counts.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_supported_fs xfs
++_require_scratch_reflink
++_require_scratch_nocheck
++_require_cp_reflink
++_require_test_program "punch-alternating"
++
++rm -f $seqres.full
++
++echo "Format and mount"
++_scratch_mkfs -d agcount=1 > $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++
++blksz=65536
++
++echo "Create original files"
++_pwrite_byte 0x61 0 $blksz $testdir/file1 >> $seqres.full
++_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
++
++echo "Change reference count"
++umount $SCRATCH_MNT
++echo "set refcount to -4" >> $seqres.full
++$XFS_DB_PROG -x -c 'agf 0' -c 'addr refcntroot' -c 'write recs[1].refcount 4294967292' $SCRATCH_DEV >> $seqres.full
++echo "check refcount after setting to -4" >> $seqres.full
++$XFS_DB_PROG -c 'agf 0' -c 'addr refcntroot' -c 'p recs[1]' $SCRATCH_DEV >> $seqres.full
++_scratch_mount >> $seqres.full
++
++echo "Reflink the overlinked file"
++_cp_reflink $testdir/file1 $testdir/file3 >> $seqres.full
++_cp_reflink $testdir/file1 $testdir/file4 >> $seqres.full
++_cp_reflink $testdir/file1 $testdir/file5 >> $seqres.full
++_cp_reflink $testdir/file1 $testdir/file6 >> $seqres.full
++_cp_reflink $testdir/file1 $testdir/file7 >> $seqres.full
++
++echo "Check scratch fs"
++umount $SCRATCH_MNT
++echo "check refcount after reflinking 5 more times" >> $seqres.full
++$XFS_DB_PROG -c 'agf 0' -c 'addr refcntroot' -c 'p recs[1]' $SCRATCH_DEV >> $seqres.full
++_scratch_mount >> $seqres.full
++
++echo "CoW a couple files"
++_pwrite_byte 0x62 0 $blksz $testdir/file3 >> $seqres.full
++_pwrite_byte 0x62 0 $blksz $testdir/file5 >> $seqres.full
++_pwrite_byte 0x62 0 $blksz $testdir/file7 >> $seqres.full
++
++echo "Check scratch fs"
++umount $SCRATCH_MNT
++echo "check refcount after cowing 3 files" >> $seqres.full
++$XFS_DB_PROG -c 'agf 0' -c 'addr refcntroot' -c 'p recs[1]' $SCRATCH_DEV >> $seqres.full
++_scratch_mount >> $seqres.full
++
++echo "Remove reflinked files"
++rm -rf $testdir/file*
++
++echo "Check scratch fs"
++umount $SCRATCH_MNT
++echo "check refcount after removing all files" >> $seqres.full
++$XFS_DB_PROG -c 'agf 0' -c 'addr refcntroot' -c 'p recs[1]' $SCRATCH_DEV >> $seqres.full
++$XFS_REPAIR_PROG -o force_geometry -n $SCRATCH_DEV >> $seqres.full 2>&1
++res=$?
++if [ $res -eq 0 ]; then
++	# If repair succeeds then format the device so that the post-test
++	# check doesn't fail due to the single AG.
++	_scratch_mkfs >> $seqres.full 2>&1
++else
++	_fail "xfs_repair fails"
++fi
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/179.out b/tests/xfs/179.out
+new file mode 100644
+index 0000000..4d3e605
+--- /dev/null
++++ b/tests/xfs/179.out
+@@ -0,0 +1,10 @@
++QA output created by 179
++Format and mount
++Create original files
++Change reference count
++Reflink the overlinked file
++Check scratch fs
++CoW a couple files
++Check scratch fs
++Remove reflinked files
++Check scratch fs
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 2db3520..f0c1c2b 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -127,7 +127,7 @@
+ 127 auto quick clone
+ 128 auto quick clone
+ 129 auto quick clone
+-130 fuzzers
++130 fuzzers clone
+ 131 auto quick clone
+ 132 auto quick clone
+ 133 auto quick quota
+@@ -166,6 +166,7 @@
+ 166 rw metadata auto quick
+ 167 rw metadata auto stress
+ 168 dmapi
++169 auto quick clone
+ 170 rw filestreams auto quick
+ 171 rw filestreams
+ 172 rw filestreams
+@@ -175,6 +176,7 @@
+ 176 dmapi
+ 177 dmapi
+ 178 mkfs other auto
++179 auto quick clone
+ 181 log auto quick
+ 183 rw other auto quick
+ 185 dmapi
 
