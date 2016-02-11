@@ -1,57 +1,61 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:45177 "EHLO
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:5264 "EHLO
 	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751169AbcBKCxF (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 10 Feb 2016 21:53:05 -0500
-Date: Thu, 11 Feb 2016 13:53:02 +1100
+	by vger.kernel.org with ESMTP id S1752810AbcBKDHy (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 10 Feb 2016 22:07:54 -0500
+Date: Thu, 11 Feb 2016 14:07:51 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 08/12] xfstests: fix generic/312 on tmpfs, ignore
- /proc/partitions
-Message-ID: <20160211025302.GD19486@dastard>
+Subject: Re: [PATCH 05/12] xfstests: do not unmount tmpfs during remount
+Message-ID: <20160211030751.GE19486@dastard>
 References: <1455069001-17846-1-git-send-email-tytso@mit.edu>
- <1455069001-17846-9-git-send-email-tytso@mit.edu>
- <20160210055455.GS19486@dastard>
- <20160210233911.GM26922@thunk.org>
+ <1455069001-17846-6-git-send-email-tytso@mit.edu>
+ <20160210060716.GV19486@dastard>
+ <20160210160732.GE26922@thunk.org>
+ <20160210230700.GA19486@dastard>
+ <20160210232826.GK26922@thunk.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160210233911.GM26922@thunk.org>
+In-Reply-To: <20160210232826.GK26922@thunk.org>
 Sender: fstests-owner@vger.kernel.org
 To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, hughd@google.com
+Cc: fstests@vger.kernel.org, hughd@google.com, Junho Ryu <jayr@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Feb 10, 2016 at 06:39:11PM -0500, Theodore Ts'o wrote:
-> On Wed, Feb 10, 2016 at 04:54:55PM +1100, Dave Chinner wrote:
+On Wed, Feb 10, 2016 at 06:28:26PM -0500, Theodore Ts'o wrote:
+> On Thu, Feb 11, 2016 at 10:07:00AM +1100, Dave Chinner wrote:
+> > No, it's not really the options that are the problem here. The
+> > problem is -o remount vs unmount/mount and what the test is actually
+> > expecting.
 > > 
-> > _scratch_mkfs
-> > _scratch_mount
-> > _require_fs_space $SCRATCH_MNT $((fssize / 1024))
-> > _scratch_unmount
-> > _scratch_mkfs_sized $fssize
+> > I'd say "_scratch_remount" should do "-o remount" unconditionally
+> > (least surprise) and the current _scratch_remount should be changed
+> > to something like _scratch_cycle_mount(). That way both can take
+> > options, but it's clear they do different things. tmpfs can simply
+> > implement them the same way.
 > 
-> This doesn't work because _require_fs_space uses df -klP, and the -l
-> file systems with names such as "test:/scratch" to be filtered out ---
-> and xfstests requires us to use NFS-looking names as a hint that the
-> file system has no block device.
-> 
-> This results in "_require_fs_space" failing on tmpfs file systems with
-> the error messages:
-> 
->     df: no file systems processed
->     ./common/rc: line 1860: [: -lt: unary operator expected
-> 
-> I'm not sure why the -l option is being used at all in the first
-> place.  Any objections if I remove it?  Presumably this is also
-> causing _require_fs_space to blow up on any tests run using NFS....
+> Well, I can do that, but it's going to be a huge patch --- the vast
+> majority of the calls to _scratch_remount in the tree (over 100) would
+> have to be changed to _scratch_cycle_mount, because they are just
+> doing a _scratch_umount / _scratch_mount without taking any arguments
+> to change the mount option.
 
-No idea on why -l is used. If there is a reason to be found, it
-will be in the commit history.
+Yup, but we do this sort of tree-wide cleanup fairly often if it
+makes sense. In this case, it's just an initial patch taht
+does sed -i -e 's/_scratch_remount/_scratch_cycle_mount/' ....
 
-> Alternatively I could just remove if it $FSTYP == tmpfs, but that
-> assumes there was some reason for using the -l option in the first
-> place.
+And, let's put things in context: changing 108 lines of code is a
+pretty damn small patch in the greater scheme of things. Indeed,
+it's smaller than most patches that add a new regression test.
 
-Remove it, see what breaks/who complains.
+A "huge" patch is something like the series Darrick posted earlier
+in the week - something like 20 patches, including somewhere in the
+order of 30 new tests, a couple of new binary test programs, a heap
+of cleanups across all 80-90 existing reflink/dedupe tests, and a
+bunch of bug fixes to go with them.
+
+IOWs, s/_scratch_remount/_scratch_cycle_mount/ is the sort of
+no-brainer change that takes less time to write, test and review
+than it did for me to write this email....
 
 Cheers,
 
