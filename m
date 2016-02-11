@@ -1,11 +1,12 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:19884 "EHLO
+Received: from userp1040.oracle.com ([156.151.31.81]:19684 "EHLO
 	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750970AbcBKXkh (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 11 Feb 2016 18:40:37 -0500
-Subject: [PATCH 11/32] reflink: add _require_odirect to the directio tests
+	with ESMTP id S1750951AbcBKXkH (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 11 Feb 2016 18:40:07 -0500
+Subject: [PATCH 07/32] common: create _require_test_program to look for
+ programs in src/
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 11 Feb 2016 15:40:29 -0800
-Message-ID: <20160211234029.2202.82743.stgit@birch.djwong.org>
+Date: Thu, 11 Feb 2016 15:40:02 -0800
+Message-ID: <20160211234002.2202.899.stgit@birch.djwong.org>
 In-Reply-To: <20160211233916.2202.40961.stgit@birch.djwong.org>
 References: <20160211233916.2202.40961.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -16,297 +17,146 @@ To: david@fromorbit.com, darrick.wong@oracle.com
 Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-For the tests that test O_DIRECT, we need to _require_odirect.
+Create a helper that looks for a test program in src/ and fails the
+test if it doesn't exist.  Refactor the existing testcases to use it.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/generic/139 |    1 +
- tests/generic/143 |    1 +
- tests/generic/155 |    1 +
- tests/generic/165 |    1 +
- tests/generic/166 |    1 +
- tests/generic/170 |    1 +
- tests/generic/174 |    1 +
- tests/generic/183 |    1 +
- tests/generic/187 |    1 +
- tests/generic/188 |    1 +
- tests/generic/190 |    1 +
- tests/generic/194 |    1 +
- tests/generic/196 |    1 +
- tests/generic/199 |    1 +
- tests/generic/200 |    1 +
- tests/generic/203 |    1 +
- tests/generic/206 |    1 +
- tests/generic/217 |    1 +
- tests/generic/220 |    1 +
- tests/generic/227 |    1 +
- tests/generic/238 |    1 +
- tests/generic/243 |    1 +
- 22 files changed, 22 insertions(+)
+ common/rc         |    9 +++++++++
+ tests/generic/010 |    2 +-
+ tests/generic/094 |    2 +-
+ tests/generic/225 |    2 +-
+ tests/generic/285 |    2 +-
+ tests/generic/286 |    2 +-
+ tests/generic/311 |    2 +-
+ tests/xfs/032     |    3 +--
+ tests/xfs/044     |    2 +-
+ 9 files changed, 17 insertions(+), 9 deletions(-)
 
 
-diff --git a/tests/generic/139 b/tests/generic/139
-index 5e7b631..989b054 100755
---- a/tests/generic/139
-+++ b/tests/generic/139
-@@ -47,6 +47,7 @@ _cleanup()
- _supported_os Linux
- _require_test_reflink
- _require_cp_reflink
-+_require_odirect
+diff --git a/common/rc b/common/rc
+index 84f794a..63eb90b 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1684,6 +1684,15 @@ _require_aiodio()
+     _require_odirect
+ }
  
- rm -f $seqres.full
++# this test requires that a test program exists under src/
++# $1 - command (require)
++#
++_require_test_program()
++{
++    SRC_TEST=src/$1
++    [ -x $SRC_TEST ] || _notrun "$SRC_TEST not built"
++}
++
+ # run an aio-dio program
+ # $1 - command
+ _run_aiodio()
+diff --git a/tests/generic/010 b/tests/generic/010
+index ea8ea50..1c9d8f7 100755
+--- a/tests/generic/010
++++ b/tests/generic/010
+@@ -51,7 +51,7 @@ _filter_dbtest()
+ . ./common/rc
+ . ./common/filter
  
-diff --git a/tests/generic/143 b/tests/generic/143
-index 586cf5c..703b585 100755
---- a/tests/generic/143
-+++ b/tests/generic/143
-@@ -49,6 +49,7 @@ _cleanup()
- _supported_os Linux
- _require_test_reflink
- _require_cp_reflink
-+_require_odirect
+-[ -x $here/src/dbtest ] || _notrun "dbtest was not built for this platform"
++_require_test_program "dbtest"
  
- rm -f $seqres.full
- 
-diff --git a/tests/generic/155 b/tests/generic/155
-index c6416a1..e96bda7 100755
---- a/tests/generic/155
-+++ b/tests/generic/155
-@@ -55,6 +55,7 @@ _supported_os Linux
- _require_test_reflink
- _require_cp_reflink
- _require_xfs_io_command "fzero"
-+_require_odirect
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/165 b/tests/generic/165
-index e4c9a9d..1ae08a4 100755
---- a/tests/generic/165
-+++ b/tests/generic/165
-@@ -47,6 +47,7 @@ _cleanup()
- _supported_os Linux
- _require_scratch_reflink
- _require_cp_reflink
-+_require_odirect
- 
- echo "Format and mount"
- _scratch_mkfs > $seqres.full 2>&1
-diff --git a/tests/generic/166 b/tests/generic/166
-index 9be753d..9b177be 100755
---- a/tests/generic/166
-+++ b/tests/generic/166
-@@ -47,6 +47,7 @@ _cleanup()
- _supported_os Linux
- _require_scratch_reflink
- _require_cp_reflink
-+_require_odirect
- 
- echo "Format and mount"
- _scratch_mkfs > $seqres.full 2>&1
-diff --git a/tests/generic/170 b/tests/generic/170
-index dbf1564..0f29b3a 100755
---- a/tests/generic/170
-+++ b/tests/generic/170
-@@ -46,6 +46,7 @@ _cleanup()
  # real QA test starts here
- _supported_os Linux
- _require_scratch_reflink
-+_require_odirect
- 
- echo "Format and mount"
- _scratch_mkfs > $seqres.full 2>&1
-diff --git a/tests/generic/174 b/tests/generic/174
-index cec2f05..edfc2bc 100755
---- a/tests/generic/174
-+++ b/tests/generic/174
-@@ -46,6 +46,7 @@ _cleanup()
- _supported_os Linux
- _require_scratch_reflink
- _require_cp_reflink
-+_require_odirect
- 
+ _supported_fs generic
+diff --git a/tests/generic/094 b/tests/generic/094
+index 4e4b668..a51738a 100644
+--- a/tests/generic/094
++++ b/tests/generic/094
+@@ -53,7 +53,7 @@ _scratch_mount > /dev/null 2>&1
  rm -f $seqres.full
+ fiemapfile=$SCRATCH_MNT/$seq.fiemap
  
-diff --git a/tests/generic/183 b/tests/generic/183
-index 0f35da2..0ab4afe 100755
---- a/tests/generic/183
-+++ b/tests/generic/183
-@@ -49,6 +49,7 @@ _cleanup()
- # real QA test starts here
- _supported_os Linux
- _require_scratch_reflink
-+_require_odirect
+-[ -x $here/src/fiemap-tester ] || _notrun "fiemap-tester not built"
++_require_test_program "fiemap-tester"
  
- rm -f $seqres.full
+ seed=`date +%s`
  
-diff --git a/tests/generic/187 b/tests/generic/187
-index b8fade2..ac6037d 100755
---- a/tests/generic/187
-+++ b/tests/generic/187
-@@ -55,6 +55,7 @@ _require_cp_reflink
+diff --git a/tests/generic/225 b/tests/generic/225
+index 6134c8c..c8e0f64 100755
+--- a/tests/generic/225
++++ b/tests/generic/225
+@@ -53,7 +53,7 @@ rm -f $seqres.full
+ fiemapfile=$SCRATCH_MNT/$seq.fiemap
+ fiemaplog=$SCRATCH_MNT/$seq.log
+ 
+-[ -x $here/src/fiemap-tester ] || _notrun "fiemap-tester not built"
++_require_test_program "fiemap-tester"
+ 
+ seed=`date +%s`
+ 
+diff --git a/tests/generic/285 b/tests/generic/285
+index d6275b5..16e70b1 100755
+--- a/tests/generic/285
++++ b/tests/generic/285
+@@ -45,7 +45,7 @@ _require_seek_data_hole
+ 
+ BASE_TEST_FILE=$TEST_DIR/seek_sanity_testfile
+ 
+-[ -x $here/src/seek_sanity_test ] || _notrun "seek_sanitfy_tester not built"
++_require_test_program "seek_sanity_test"
+ 
+ # Disable extent zeroing for ext4 as that change where holes are created
+ if [ "$FSTYP" = "ext4" ]; then
+diff --git a/tests/generic/286 b/tests/generic/286
+index f6bf356..f88f079 100755
+--- a/tests/generic/286
++++ b/tests/generic/286
+@@ -44,7 +44,7 @@ _require_seek_data_hole
+ src=$TEST_DIR/seek_copy_testfile
+ dest=$TEST_DIR/seek_copy_testfile.dest
+ 
+-[ -x $here/src/seek_copy_test ] || _notrun "seek_copy_test not built"
++_require_test_program "seek_copy_test"
+ 
+ _cleanup()
+ {
+diff --git a/tests/generic/311 b/tests/generic/311
+index f552011..69bc1bf 100755
+--- a/tests/generic/311
++++ b/tests/generic/311
+@@ -62,7 +62,7 @@ _require_metadata_journaling $SCRATCH_DEV
+ # the test system supports fallocate() for allocation
  _require_xfs_io_command "falloc"
- _require_xfs_io_command "fpunch"
- test $FSTYP = "btrfs" && _notrun "Can't fragment free space on btrfs."
-+_require_odirect
+ 
+-[ -x $here/src/fsync-tester ] || _notrun "fsync-tester not built"
++_require_test_program "fsync-tester"
  
  rm -f $seqres.full
+ SEED=1
+diff --git a/tests/xfs/032 b/tests/xfs/032
+index 063f272..6216379 100755
+--- a/tests/xfs/032
++++ b/tests/xfs/032
+@@ -40,8 +40,7 @@ _supported_fs xfs
+ _supported_os IRIX Linux
  
-diff --git a/tests/generic/188 b/tests/generic/188
-index 7be1080..bb293b1 100755
---- a/tests/generic/188
-+++ b/tests/generic/188
-@@ -49,6 +49,7 @@ _cleanup()
- _supported_os Linux
- _require_scratch_reflink
- _require_xfs_io_command "falloc"
-+_require_odirect
+ _require_scratch
+-
+-[ $here/src/feature ] || _notrun "src/feature not built, skipping this test"
++_require_test_program "feature"
  
- rm -f $seqres.full
+ [ "$USE_EXTERNAL" = yes ] && _notrun "Cannot xfs_copy with external devices"
+ [ -n "$XFS_COPY_PROG" ] || _notrun "xfs_copy binary not yet installed"
+diff --git a/tests/xfs/044 b/tests/xfs/044
+index 2ffd74f..ea58c07 100755
+--- a/tests/xfs/044
++++ b/tests/xfs/044
+@@ -124,7 +124,7 @@ _filter_mkfs <$tmp.mkfs0 2>$tmp.mkfs1
+ [ $lversion -ne 1 ] && \
+     _notrun "Cannot run this test yet using MKFS_OPTIONS specified"
  
-diff --git a/tests/generic/190 b/tests/generic/190
-index a5c2137..b4de3ed 100755
---- a/tests/generic/190
-+++ b/tests/generic/190
-@@ -49,6 +49,7 @@ _cleanup()
- _supported_os Linux
- _require_scratch_reflink
- _require_xfs_io_command "falloc"
-+_require_odirect
+-[ $here/src/loggen ] || _notrun "loggen not built, skipping test"
++_require_test_program "loggen"
  
- rm -f $seqres.full
- 
-diff --git a/tests/generic/194 b/tests/generic/194
-index 69a3e6c..f67e567 100755
---- a/tests/generic/194
-+++ b/tests/generic/194
-@@ -50,6 +50,7 @@ _cleanup()
- _supported_os Linux
- _require_scratch_reflink
- _require_xfs_io_command "falloc"
-+_require_odirect
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/196 b/tests/generic/196
-index 951079c..1505de8 100755
---- a/tests/generic/196
-+++ b/tests/generic/196
-@@ -49,6 +49,7 @@ _cleanup()
- _supported_os Linux
- _require_scratch_reflink
- _require_xfs_io_command "falloc"
-+_require_odirect
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/199 b/tests/generic/199
-index f457245..04380ed 100755
---- a/tests/generic/199
-+++ b/tests/generic/199
-@@ -55,6 +55,7 @@ _require_scratch_reflink
- _require_xfs_io_command "falloc"
- _require_xfs_io_command "fpunch"
- _require_cp_reflink
-+_require_odirect
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/200 b/tests/generic/200
-index ffb5869..2aa0315 100755
---- a/tests/generic/200
-+++ b/tests/generic/200
-@@ -55,6 +55,7 @@ _require_scratch_reflink
- _require_xfs_io_command "falloc"
- _require_xfs_io_command "fpunch"
- _require_cp_reflink
-+_require_odirect
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/203 b/tests/generic/203
-index 5d9bfc4..2ffb311 100755
---- a/tests/generic/203
-+++ b/tests/generic/203
-@@ -44,6 +44,7 @@ _cleanup()
- _supported_os Linux
- _require_scratch_reflink
- _require_cp_reflink
-+_require_odirect
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/206 b/tests/generic/206
-index 4054626..6b3e200 100755
---- a/tests/generic/206
-+++ b/tests/generic/206
-@@ -47,6 +47,7 @@ _cleanup()
- # real QA test starts here
- _supported_os Linux
- _require_scratch_reflink
-+_require_odirect
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/217 b/tests/generic/217
-index b1bd635..ce8e0a1 100755
---- a/tests/generic/217
-+++ b/tests/generic/217
-@@ -48,6 +48,7 @@ _cleanup()
- _supported_os Linux
- _require_scratch_reflink
- _require_xfs_io_command "falloc"
-+_require_odirect
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/220 b/tests/generic/220
-index edb8432..3bce21b 100755
---- a/tests/generic/220
-+++ b/tests/generic/220
-@@ -48,6 +48,7 @@ _cleanup()
- _supported_os Linux
- _require_scratch_reflink
- _require_xfs_io_command "falloc"
-+_require_odirect
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/227 b/tests/generic/227
-index abaf8f7..00985d3 100755
---- a/tests/generic/227
-+++ b/tests/generic/227
-@@ -48,6 +48,7 @@ _cleanup()
- _supported_os Linux
- _require_scratch_reflink
- _require_xfs_io_command "falloc"
-+_require_odirect
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/238 b/tests/generic/238
-index ce7408c..3b46492 100755
---- a/tests/generic/238
-+++ b/tests/generic/238
-@@ -48,6 +48,7 @@ _cleanup()
- _supported_os Linux
- _require_scratch_reflink
- _require_xfs_io_command "falloc"
-+_require_odirect
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/243 b/tests/generic/243
-index 127070e..e1d698b 100755
---- a/tests/generic/243
-+++ b/tests/generic/243
-@@ -47,6 +47,7 @@ _cleanup()
- _supported_os Linux
- _require_scratch_reflink
- _require_cp_reflink
-+_require_odirect
- 
- rm -f $seqres.full
- 
+ _check_mount
+ _check_require_logdev
 
