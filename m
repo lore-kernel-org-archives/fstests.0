@@ -1,65 +1,123 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:5264 "EHLO
-	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752810AbcBKDHy (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 10 Feb 2016 22:07:54 -0500
-Date: Thu, 11 Feb 2016 14:07:51 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 05/12] xfstests: do not unmount tmpfs during remount
-Message-ID: <20160211030751.GE19486@dastard>
-References: <1455069001-17846-1-git-send-email-tytso@mit.edu>
- <1455069001-17846-6-git-send-email-tytso@mit.edu>
- <20160210060716.GV19486@dastard>
- <20160210160732.GE26922@thunk.org>
- <20160210230700.GA19486@dastard>
- <20160210232826.GK26922@thunk.org>
+Received: from mx1.redhat.com ([209.132.183.28]:51573 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750748AbcBKDgd (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 10 Feb 2016 22:36:33 -0500
+Date: Thu, 11 Feb 2016 11:36:28 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] ext4: test partial blocksize defrag integrity issue
+Message-ID: <20160211033628.GZ11419@eguan.usersys.redhat.com>
+References: <1455117464-15565-1-git-send-email-eguan@redhat.com>
+ <20160210231614.GC19486@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160210232826.GK26922@thunk.org>
+In-Reply-To: <20160210231614.GC19486@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, hughd@google.com, Junho Ryu <jayr@google.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Feb 10, 2016 at 06:28:26PM -0500, Theodore Ts'o wrote:
-> On Thu, Feb 11, 2016 at 10:07:00AM +1100, Dave Chinner wrote:
-> > No, it's not really the options that are the problem here. The
-> > problem is -o remount vs unmount/mount and what the test is actually
-> > expecting.
+On Thu, Feb 11, 2016 at 10:16:14AM +1100, Dave Chinner wrote:
+> On Wed, Feb 10, 2016 at 11:17:44PM +0800, Eryu Guan wrote:
+> > Calling EXT4_IOC_MOVE_EXTENT on file not aligned with block size and
+> > block size is smaller than page size would cause integrity issue on the
+> > partial-blocksize part when copying data between orign file and donor
+> > file.
 > > 
-> > I'd say "_scratch_remount" should do "-o remount" unconditionally
-> > (least surprise) and the current _scratch_remount should be changed
-> > to something like _scratch_cycle_mount(). That way both can take
-> > options, but it's clear they do different things. tmpfs can simply
-> > implement them the same way.
+> > This ext4 kernel patch would fix it, titled
+> > "ext4: don't read blocks from disk after extents being swapped in
+> > move_extent_per_page())"
+> > 
+> > Though this bug only happens in the blocksize smaller than pagesize
+> > case, there's no harm to test on various block size fs, so no block size
+> > is specified in the test, it depends on the test configurations.
+> > 
+> > Signed-off-by: Eryu Guan <eguan@redhat.com>
+> > ---
+> >  tests/ext4/020     | 89 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/ext4/020.out |  6 ++++
+> >  tests/ext4/group   |  1 +
+> >  3 files changed, 96 insertions(+)
+> >  create mode 100755 tests/ext4/020
+> >  create mode 100644 tests/ext4/020.out
+> > 
+> > diff --git a/tests/ext4/020 b/tests/ext4/020
+> > new file mode 100755
+> > index 0000000..6740c7e
+> > --- /dev/null
+> > +++ b/tests/ext4/020
+> > @@ -0,0 +1,89 @@
+> > +#! /bin/bash
+> > +# FS QA Test 020
+> > +#
+> > +# Test partial blocksize defrag integrity issue.
+> > +#
+> > +# Calling EXT4_IOC_MOVE_EXTENT on file not aligned with block size and block
+> > +# size is smaller than page size would cause integrity issue on the
+> > +# partial-blocksize part when copying data between orign file and donor file.
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2016 Red Hat Inc. All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +#
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +. ./common/defrag
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# real QA test starts here
+> > +_supported_fs ext4
+> > +_supported_os Linux
+> > +_require_scratch
+> > +_require_defrag
+> > +
+> > +e4compact=$here/src/e4compact
+> > +if [ ! -x $d4compact ]; then
+>               ^^^^^^^^^
+
+My test run didn't complain about missing the binary and I found out
+that I should have added quotes around $d4compact, that way test _notrun
+as expect and catches the typo. Thanks for the review!
+
+> > +	_notrun "$e4compact executable not found"
+> > +fi
 > 
-> Well, I can do that, but it's going to be a huge patch --- the vast
-> majority of the calls to _scratch_remount in the tree (over 100) would
-> have to be changed to _scratch_cycle_mount, because they are just
-> doing a _scratch_umount / _scratch_mount without taking any arguments
-> to change the mount option.
+> And, yes, we really need that _requires_test_command function that
+> Darrick was adding to his patchset...
 
-Yup, but we do this sort of tree-wide cleanup fairly often if it
-makes sense. In this case, it's just an initial patch taht
-does sed -i -e 's/_scratch_remount/_scratch_cycle_mount/' ....
+I'll wait for the new patch from Darrick and send v2 then.
 
-And, let's put things in context: changing 108 lines of code is a
-pretty damn small patch in the greater scheme of things. Indeed,
-it's smaller than most patches that add a new regression test.
-
-A "huge" patch is something like the series Darrick posted earlier
-in the week - something like 20 patches, including somewhere in the
-order of 30 new tests, a couple of new binary test programs, a heap
-of cleanups across all 80-90 existing reflink/dedupe tests, and a
-bunch of bug fixes to go with them.
-
-IOWs, s/_scratch_remount/_scratch_cycle_mount/ is the sort of
-no-brainer change that takes less time to write, test and review
-than it did for me to write this email....
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Thanks,
+Eryu
