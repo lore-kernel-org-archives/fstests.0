@@ -1,12 +1,12 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:19699 "EHLO
+Received: from aserp1040.oracle.com ([141.146.126.69]:19200 "EHLO
 	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751316AbcBKXmE (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 11 Feb 2016 18:42:04 -0500
-Subject: [PATCH 23/32] reflink: test CoW across a mixed range of block types
- with cowextsize set
+	with ESMTP id S1750980AbcBKXku (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 11 Feb 2016 18:40:50 -0500
+Subject: [PATCH 13/32] reflink: test intersecting CoW and
+ falloc/fpunch/fzero/fcollapse/finsert/ftrunc
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 11 Feb 2016 15:41:55 -0800
-Message-ID: <20160211234155.2202.25679.stgit@birch.djwong.org>
+Date: Thu, 11 Feb 2016 15:40:44 -0800
+Message-ID: <20160211234044.2202.25667.stgit@birch.djwong.org>
 In-Reply-To: <20160211233916.2202.40961.stgit@birch.djwong.org>
 References: <20160211233916.2202.40961.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -17,68 +17,53 @@ To: david@fromorbit.com, darrick.wong@oracle.com
 Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
+Ensure that we correctly handle a CoW operation immediately followed
+by a truncate, falloc, fpunch, fzero, fcollapse, and finsert operation
+in the middle of the CoW'd region before any flush can occur.
+
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/xfs/215     |  102 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/215.out |   13 ++++++
- tests/xfs/218     |  101 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/218.out |   13 ++++++
- tests/xfs/219     |  102 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/219.out |   13 ++++++
- tests/xfs/221     |  101 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/221.out |   13 ++++++
- tests/xfs/223     |  104 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/223.out |   13 ++++++
- tests/xfs/224     |  103 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/224.out |   13 ++++++
- tests/xfs/225     |  102 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/225.out |   13 ++++++
- tests/xfs/226     |  101 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/226.out |   13 ++++++
- tests/xfs/228     |  110 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/228.out |   13 ++++++
- tests/xfs/230     |  110 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/230.out |   13 ++++++
- tests/xfs/group   |   10 +++++
- 21 files changed, 1176 insertions(+)
- create mode 100755 tests/xfs/215
- create mode 100644 tests/xfs/215.out
- create mode 100755 tests/xfs/218
- create mode 100644 tests/xfs/218.out
- create mode 100755 tests/xfs/219
- create mode 100644 tests/xfs/219.out
- create mode 100755 tests/xfs/221
- create mode 100644 tests/xfs/221.out
- create mode 100755 tests/xfs/223
- create mode 100644 tests/xfs/223.out
- create mode 100755 tests/xfs/224
- create mode 100644 tests/xfs/224.out
- create mode 100755 tests/xfs/225
- create mode 100644 tests/xfs/225.out
- create mode 100755 tests/xfs/226
- create mode 100644 tests/xfs/226.out
- create mode 100755 tests/xfs/228
- create mode 100644 tests/xfs/228.out
- create mode 100755 tests/xfs/230
- create mode 100644 tests/xfs/230.out
+ tests/generic/253     |   90 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/253.out |   12 ++++++
+ tests/generic/254     |   90 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/254.out |   12 ++++++
+ tests/generic/259     |   90 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/259.out |   12 ++++++
+ tests/generic/261     |   90 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/261.out |   12 ++++++
+ tests/generic/262     |   93 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/262.out |   12 ++++++
+ tests/generic/264     |   90 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/264.out |   12 ++++++
+ tests/generic/group   |    6 +++
+ 13 files changed, 621 insertions(+)
+ create mode 100755 tests/generic/253
+ create mode 100644 tests/generic/253.out
+ create mode 100755 tests/generic/254
+ create mode 100644 tests/generic/254.out
+ create mode 100755 tests/generic/259
+ create mode 100644 tests/generic/259.out
+ create mode 100755 tests/generic/261
+ create mode 100644 tests/generic/261.out
+ create mode 100755 tests/generic/262
+ create mode 100644 tests/generic/262.out
+ create mode 100755 tests/generic/264
+ create mode 100644 tests/generic/264.out
 
 
-diff --git a/tests/xfs/215 b/tests/xfs/215
+diff --git a/tests/generic/253 b/tests/generic/253
 new file mode 100755
-index 0000000..9ed842e
+index 0000000..bfb91a3
 --- /dev/null
-+++ b/tests/xfs/215
-@@ -0,0 +1,102 @@
++++ b/tests/generic/253
+@@ -0,0 +1,90 @@
 +#! /bin/bash
-+# FS QA Test No. 215
++# FS QA Test No. 253
 +#
-+# Ensuring that copy on write in direct-io mode works when the CoW
-+# range originally covers multiple extents, some unwritten, some not.
-+#   - Set cowextsize hint.
-+#   - Create a file and fallocate a second file.
-+#   - Reflink the odd blocks of the first file into the second file.
-+#   - directio CoW across the halfway mark, starting with the unwritten extent.
-+#   - Check that the files are now different where we say they're different.
++# Truncate a file at midway through a CoW region.
++#
++# This test is dependent on the system page size, so we cannot use md5 in
++# the golden output; we can only compare to a check file.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
@@ -120,1032 +105,11 @@ index 0000000..9ed842e
 +# real QA test starts here
 +_supported_os Linux
 +_require_scratch_reflink
-+_require_xfs_io_command "falloc"
-+_require_odirect
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
-+
-+echo "Create the original files"
-+blksz=65536
-+nr=64
-+filesize=$((blksz * nr))
-+real_blksz=$(stat -f -c '%S' $testdir)
-+internal_blks=$((filesize / real_blksz))
-+$XFS_IO_PROG -c "cowextsize $((blksz * 16))" $testdir >> $seqres.full
-+_weave_reflink_unwritten $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "directio CoW across the transition"
-+cowoff=$((filesize / 4))
-+cowsz=$((filesize / 2))
-+$XFS_IO_PROG -d -f -c "pwrite -S 0x63 -b $cowsz $cowoff $cowsz" $testdir/file3 >> $seqres.full
-+_pwrite_byte 0x63 $cowoff $cowsz $testdir/file3.chk >> $seqres.full
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "Check extent counts"
-+old_extents=$(_count_extents $testdir/file1)
-+new_extents=$(_count_extents $testdir/file3)
-+
-+echo "old extents: $old_extents" >> $seqres.full
-+echo "new extents: $new_extents" >> $seqres.full
-+echo "maximum extents: $internal_blks" >> $seqres.full
-+test $new_extents -lt $((internal_blks / 20)) || echo "file3 badly fragmented"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/215.out b/tests/xfs/215.out
-new file mode 100644
-index 0000000..ce3a08b
---- /dev/null
-+++ b/tests/xfs/215.out
-@@ -0,0 +1,13 @@
-+QA output created by 215
-+Format and mount
-+Create the original files
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-215/file1
-+fa50dba51826899c372464a153cb2117  SCRATCH_MNT/test-215/file3
-+fa50dba51826899c372464a153cb2117  SCRATCH_MNT/test-215/file3.chk
-+directio CoW across the transition
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-215/file1
-+09101629908f9bdd5d178e7ce20bb1bb  SCRATCH_MNT/test-215/file3
-+09101629908f9bdd5d178e7ce20bb1bb  SCRATCH_MNT/test-215/file3.chk
-+Check extent counts
-diff --git a/tests/xfs/218 b/tests/xfs/218
-new file mode 100755
-index 0000000..e98b14e
---- /dev/null
-+++ b/tests/xfs/218
-@@ -0,0 +1,101 @@
-+#! /bin/bash
-+# FS QA Test No. 218
-+#
-+# Ensuring that copy on write in buffered mode works when the CoW
-+# range originally covers multiple extents, some unwritten, some not.
-+#   - Set cowextsize hint.
-+#   - Create a file and fallocate a second file.
-+#   - Reflink the odd blocks of the first file into the second file.
-+#   - CoW across the halfway mark, starting with the unwritten extent.
-+#   - Check that the files are now different where we say they're different.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scratch_reflink
-+_require_xfs_io_command "falloc"
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
-+
-+echo "Create the original files"
-+blksz=65536
-+nr=64
-+filesize=$((blksz * nr))
-+real_blksz=$(stat -f -c '%S' $testdir)
-+internal_blks=$((filesize / real_blksz))
-+$XFS_IO_PROG -c "cowextsize $((blksz * 16))" $testdir >> $seqres.full
-+_weave_reflink_unwritten $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "CoW across the transition"
-+cowoff=$((filesize / 4))
-+cowsz=$((filesize / 2))
-+$XFS_IO_PROG -f -c "pwrite -S 0x63 -b $cowsz $cowoff $cowsz" $testdir/file3 >> $seqres.full
-+_pwrite_byte 0x63 $cowoff $cowsz $testdir/file3.chk >> $seqres.full
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "Check extent counts"
-+old_extents=$(_count_extents $testdir/file1)
-+new_extents=$(_count_extents $testdir/file3)
-+
-+echo "old extents: $old_extents" >> $seqres.full
-+echo "new extents: $new_extents" >> $seqres.full
-+echo "maximum extents: $internal_blks" >> $seqres.full
-+test $new_extents -lt $((internal_blks / 20)) || echo "file3 badly fragmented"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/218.out b/tests/xfs/218.out
-new file mode 100644
-index 0000000..ad1efda
---- /dev/null
-+++ b/tests/xfs/218.out
-@@ -0,0 +1,13 @@
-+QA output created by 218
-+Format and mount
-+Create the original files
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-218/file1
-+fa50dba51826899c372464a153cb2117  SCRATCH_MNT/test-218/file3
-+fa50dba51826899c372464a153cb2117  SCRATCH_MNT/test-218/file3.chk
-+CoW across the transition
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-218/file1
-+09101629908f9bdd5d178e7ce20bb1bb  SCRATCH_MNT/test-218/file3
-+09101629908f9bdd5d178e7ce20bb1bb  SCRATCH_MNT/test-218/file3.chk
-+Check extent counts
-diff --git a/tests/xfs/219 b/tests/xfs/219
-new file mode 100755
-index 0000000..25c0bb4
---- /dev/null
-+++ b/tests/xfs/219
-@@ -0,0 +1,102 @@
-+#! /bin/bash
-+# FS QA Test No. 219
-+#
-+# Ensuring that copy on write in direct-io mode works when the CoW
-+# range originally covers multiple extents, some holes, some not.
-+#   - Set cowextsize hint.
-+#   - Create a file and truncate a second file.
-+#   - Reflink the odd blocks of the first file into the second file.
-+#   - directio CoW across the halfway mark, starting with the unwritten extent.
-+#   - Check that the files are now different where we say they're different.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scratch_reflink
-+_require_xfs_io_command "falloc"
-+_require_odirect
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
-+
-+echo "Create the original files"
-+blksz=65536
-+nr=64
-+filesize=$((blksz * nr))
-+real_blksz=$(stat -f -c '%S' $testdir)
-+internal_blks=$((filesize / real_blksz))
-+$XFS_IO_PROG -c "cowextsize $((blksz * 16))" $testdir >> $seqres.full
-+_weave_reflink_holes $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "directio CoW across the transition"
-+cowoff=$((filesize / 4))
-+cowsz=$((filesize / 2))
-+$XFS_IO_PROG -d -f -c "pwrite -S 0x63 -b $cowsz $cowoff $cowsz" $testdir/file3 >> $seqres.full
-+_pwrite_byte 0x63 $cowoff $cowsz $testdir/file3.chk >> $seqres.full
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "Check extent counts"
-+old_extents=$(_count_extents $testdir/file1)
-+new_extents=$(_count_extents $testdir/file3)
-+
-+echo "old extents: $old_extents" >> $seqres.full
-+echo "new extents: $new_extents" >> $seqres.full
-+echo "maximum extents: $internal_blks" >> $seqres.full
-+test $new_extents -lt $((internal_blks / 20)) || echo "file3 badly fragmented"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/219.out b/tests/xfs/219.out
-new file mode 100644
-index 0000000..9052f1f
---- /dev/null
-+++ b/tests/xfs/219.out
-@@ -0,0 +1,13 @@
-+QA output created by 219
-+Format and mount
-+Create the original files
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-219/file1
-+fa50dba51826899c372464a153cb2117  SCRATCH_MNT/test-219/file3
-+fa50dba51826899c372464a153cb2117  SCRATCH_MNT/test-219/file3.chk
-+directio CoW across the transition
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-219/file1
-+09101629908f9bdd5d178e7ce20bb1bb  SCRATCH_MNT/test-219/file3
-+09101629908f9bdd5d178e7ce20bb1bb  SCRATCH_MNT/test-219/file3.chk
-+Check extent counts
-diff --git a/tests/xfs/221 b/tests/xfs/221
-new file mode 100755
-index 0000000..dc00331
---- /dev/null
-+++ b/tests/xfs/221
-@@ -0,0 +1,101 @@
-+#! /bin/bash
-+# FS QA Test No. 221
-+#
-+# Ensuring that copy on write in buffered mode works when the CoW
-+# range originally covers multiple extents, some holes, some not.
-+#   - Set cowextsize hint.
-+#   - Create a file and truncate a second file.
-+#   - Reflink the odd blocks of the first file into the second file.
-+#   - CoW across the halfway mark, starting with the unwritten extent.
-+#   - Check that the files are now different where we say they're different.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scratch_reflink
-+_require_xfs_io_command "falloc"
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
-+
-+echo "Create the original files"
-+blksz=65536
-+nr=64
-+filesize=$((blksz * nr))
-+real_blksz=$(stat -f -c '%S' $testdir)
-+internal_blks=$((filesize / real_blksz))
-+$XFS_IO_PROG -c "cowextsize $((blksz * 16))" $testdir >> $seqres.full
-+_weave_reflink_holes $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "CoW across the transition"
-+cowoff=$((filesize / 4))
-+cowsz=$((filesize / 2))
-+$XFS_IO_PROG -f -c "pwrite -S 0x63 -b $cowsz $cowoff $cowsz" $testdir/file3 >> $seqres.full
-+_pwrite_byte 0x63 $cowoff $cowsz $testdir/file3.chk >> $seqres.full
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "Check extent counts"
-+old_extents=$(_count_extents $testdir/file1)
-+new_extents=$(_count_extents $testdir/file3)
-+
-+echo "old extents: $old_extents" >> $seqres.full
-+echo "new extents: $new_extents" >> $seqres.full
-+echo "maximum extents: $internal_blks" >> $seqres.full
-+test $new_extents -lt $((internal_blks / 20)) || echo "file3 badly fragmented"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/221.out b/tests/xfs/221.out
-new file mode 100644
-index 0000000..63963ec
---- /dev/null
-+++ b/tests/xfs/221.out
-@@ -0,0 +1,13 @@
-+QA output created by 221
-+Format and mount
-+Create the original files
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-221/file1
-+fa50dba51826899c372464a153cb2117  SCRATCH_MNT/test-221/file3
-+fa50dba51826899c372464a153cb2117  SCRATCH_MNT/test-221/file3.chk
-+CoW across the transition
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-221/file1
-+09101629908f9bdd5d178e7ce20bb1bb  SCRATCH_MNT/test-221/file3
-+09101629908f9bdd5d178e7ce20bb1bb  SCRATCH_MNT/test-221/file3.chk
-+Check extent counts
-diff --git a/tests/xfs/223 b/tests/xfs/223
-new file mode 100755
-index 0000000..2bb1fcb
---- /dev/null
-+++ b/tests/xfs/223
-@@ -0,0 +1,104 @@
-+#! /bin/bash
-+# FS QA Test No. 223
-+#
-+# Ensuring that copy on write in direct-io mode works when the CoW
-+# range originally covers multiple extents, some delalloc, some not.
-+#   - Set cowextsize hint.
-+#   - Create a file.
-+#   - Reflink the odd blocks of the first file into the second file.
-+#   - Buffered write the even blocks of the second file.
-+#   - directio CoW across the halfway mark, starting with the unwritten extent.
-+#   - Check that the files are now different where we say they're different.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scratch_reflink
-+_require_xfs_io_command "falloc"
-+_require_odirect
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
-+
-+echo "Create the original files"
-+blksz=65536
-+nr=64
-+filesize=$((blksz * nr))
-+real_blksz=$(stat -f -c '%S' $testdir)
-+internal_blks=$((filesize / real_blksz))
-+$XFS_IO_PROG -c "cowextsize $((blksz * 16))" $testdir >> $seqres.full
-+_weave_reflink_holes $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "directio CoW across the transition"
-+cowoff=$((filesize / 4))
-+cowsz=$((filesize / 2))
-+_weave_reflink_holes_delalloc $blksz $nr $testdir/file3 >> $seqres.full
-+$XFS_IO_PROG -d -f -c "pwrite -S 0x63 -b $cowsz $cowoff $cowsz" $testdir/file3 >> $seqres.full
-+_pwrite_byte 0x63 $cowoff $cowsz $testdir/file3.chk >> $seqres.full
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "Check extent counts"
-+old_extents=$(_count_extents $testdir/file1)
-+new_extents=$(_count_extents $testdir/file3)
-+
-+echo "old extents: $old_extents" >> $seqres.full
-+echo "new extents: $new_extents" >> $seqres.full
-+echo "maximum extents: $internal_blks" >> $seqres.full
-+test $new_extents -lt $((internal_blks / 20)) || echo "file3 badly fragmented"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/223.out b/tests/xfs/223.out
-new file mode 100644
-index 0000000..e07b33e
---- /dev/null
-+++ b/tests/xfs/223.out
-@@ -0,0 +1,13 @@
-+QA output created by 223
-+Format and mount
-+Create the original files
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-223/file1
-+fa50dba51826899c372464a153cb2117  SCRATCH_MNT/test-223/file3
-+fa50dba51826899c372464a153cb2117  SCRATCH_MNT/test-223/file3.chk
-+directio CoW across the transition
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-223/file1
-+55968a95dfc0120df4e8485576514320  SCRATCH_MNT/test-223/file3
-+55968a95dfc0120df4e8485576514320  SCRATCH_MNT/test-223/file3.chk
-+Check extent counts
-diff --git a/tests/xfs/224 b/tests/xfs/224
-new file mode 100755
-index 0000000..92d3b05
---- /dev/null
-+++ b/tests/xfs/224
-@@ -0,0 +1,103 @@
-+#! /bin/bash
-+# FS QA Test No. 224
-+#
-+# Ensuring that copy on write in buffered mode works when the CoW
-+# range originally covers multiple extents, some delalloc, some not.
-+#   - Set cowextsize hint.
-+#   - Create a file.
-+#   - Reflink the odd blocks of the first file into the second file.
-+#   - Buffered write the even blocks of the second file.
-+#   - CoW across the halfway mark, starting with the unwritten extent.
-+#   - Check that the files are now different where we say they're different.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scratch_reflink
-+_require_xfs_io_command "falloc"
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
-+
-+echo "Create the original files"
-+blksz=65536
-+nr=64
-+filesize=$((blksz * nr))
-+real_blksz=$(stat -f -c '%S' $testdir)
-+internal_blks=$((filesize / real_blksz))
-+$XFS_IO_PROG -c "cowextsize $((blksz * 16))" $testdir >> $seqres.full
-+_weave_reflink_holes $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "CoW across the transition"
-+cowoff=$((filesize / 4))
-+cowsz=$((filesize / 2))
-+_weave_reflink_holes_delalloc $blksz $nr $testdir/file3 >> $seqres.full
-+$XFS_IO_PROG -f -c "pwrite -S 0x63 -b $cowsz $cowoff $cowsz" $testdir/file3 >> $seqres.full
-+_pwrite_byte 0x63 $cowoff $cowsz $testdir/file3.chk >> $seqres.full
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "Check extent counts"
-+old_extents=$(_count_extents $testdir/file1)
-+new_extents=$(_count_extents $testdir/file3)
-+
-+echo "old extents: $old_extents" >> $seqres.full
-+echo "new extents: $new_extents" >> $seqres.full
-+echo "maximum extents: $internal_blks" >> $seqres.full
-+test $new_extents -lt $((internal_blks / 20)) || echo "file3 badly fragmented"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/224.out b/tests/xfs/224.out
-new file mode 100644
-index 0000000..749b3c9
---- /dev/null
-+++ b/tests/xfs/224.out
-@@ -0,0 +1,13 @@
-+QA output created by 224
-+Format and mount
-+Create the original files
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-224/file1
-+fa50dba51826899c372464a153cb2117  SCRATCH_MNT/test-224/file3
-+fa50dba51826899c372464a153cb2117  SCRATCH_MNT/test-224/file3.chk
-+CoW across the transition
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-224/file1
-+55968a95dfc0120df4e8485576514320  SCRATCH_MNT/test-224/file3
-+55968a95dfc0120df4e8485576514320  SCRATCH_MNT/test-224/file3.chk
-+Check extent counts
-diff --git a/tests/xfs/225 b/tests/xfs/225
-new file mode 100755
-index 0000000..b8e7712
---- /dev/null
-+++ b/tests/xfs/225
-@@ -0,0 +1,102 @@
-+#! /bin/bash
-+# FS QA Test No. 225
-+#
-+# Ensuring that copy on write in direct-io mode works when the CoW
-+# range originally covers multiple extents, some regular, some not.
-+#   - Set cowextsize hint.
-+#   - Create two files.
-+#   - Reflink the odd blocks of the first file into the second file.
-+#   - directio CoW across the halfway mark, starting with the unwritten extent.
-+#   - Check that the files are now different where we say they're different.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scratch_reflink
-+_require_xfs_io_command "falloc"
-+_require_odirect
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
-+
-+echo "Create the original files"
-+blksz=65536
-+nr=64
-+filesize=$((blksz * nr))
-+real_blksz=$(stat -f -c '%S' $testdir)
-+internal_blks=$((filesize / real_blksz))
-+$XFS_IO_PROG -c "cowextsize $((blksz * 16))" $testdir >> $seqres.full
-+_weave_reflink_regular $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "directio CoW across the transition"
-+cowoff=$((filesize / 4))
-+cowsz=$((filesize / 2))
-+$XFS_IO_PROG -d -f -c "pwrite -S 0x63 -b $cowsz $cowoff $cowsz" $testdir/file3 >> $seqres.full
-+_pwrite_byte 0x63 $cowoff $cowsz $testdir/file3.chk >> $seqres.full
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "Check extent counts"
-+old_extents=$(_count_extents $testdir/file1)
-+new_extents=$(_count_extents $testdir/file3)
-+
-+echo "old extents: $old_extents" >> $seqres.full
-+echo "new extents: $new_extents" >> $seqres.full
-+echo "maximum extents: $internal_blks" >> $seqres.full
-+test $new_extents -lt $((internal_blks / 20)) || echo "file3 badly fragmented"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/225.out b/tests/xfs/225.out
-new file mode 100644
-index 0000000..da70fbc
---- /dev/null
-+++ b/tests/xfs/225.out
-@@ -0,0 +1,13 @@
-+QA output created by 225
-+Format and mount
-+Create the original files
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-225/file1
-+d3959a68638c50af07f0258e032cb554  SCRATCH_MNT/test-225/file3
-+d3959a68638c50af07f0258e032cb554  SCRATCH_MNT/test-225/file3.chk
-+directio CoW across the transition
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-225/file1
-+55968a95dfc0120df4e8485576514320  SCRATCH_MNT/test-225/file3
-+55968a95dfc0120df4e8485576514320  SCRATCH_MNT/test-225/file3.chk
-+Check extent counts
-diff --git a/tests/xfs/226 b/tests/xfs/226
-new file mode 100755
-index 0000000..ef4226e
---- /dev/null
-+++ b/tests/xfs/226
-@@ -0,0 +1,101 @@
-+#! /bin/bash
-+# FS QA Test No. 226
-+#
-+# Ensuring that copy on write in buffered mode works when the CoW
-+# range originally covers multiple extents, some regular, some not.
-+#   - Set cowextsize hint.
-+#   - Create two files.
-+#   - Reflink the odd blocks of the first file into the second file.
-+#   - CoW across the halfway mark, starting with the unwritten extent.
-+#   - Check that the files are now different where we say they're different.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scratch_reflink
-+_require_xfs_io_command "falloc"
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
-+
-+echo "Create the original files"
-+blksz=65536
-+nr=64
-+filesize=$((blksz * nr))
-+real_blksz=$(stat -f -c '%S' $testdir)
-+internal_blks=$((filesize / real_blksz))
-+$XFS_IO_PROG -c "cowextsize $((blksz * 16))" $testdir >> $seqres.full
-+_weave_reflink_regular $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "CoW across the transition"
-+cowoff=$((filesize / 4))
-+cowsz=$((filesize / 2))
-+$XFS_IO_PROG -f -c "pwrite -S 0x63 -b $cowsz $cowoff $cowsz" $testdir/file3 >> $seqres.full
-+_pwrite_byte 0x63 $cowoff $cowsz $testdir/file3.chk >> $seqres.full
-+_scratch_remount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "Check extent counts"
-+old_extents=$(_count_extents $testdir/file1)
-+new_extents=$(_count_extents $testdir/file3)
-+
-+echo "old extents: $old_extents" >> $seqres.full
-+echo "new extents: $new_extents" >> $seqres.full
-+echo "maximum extents: $internal_blks" >> $seqres.full
-+test $new_extents -lt $((internal_blks / 20)) || echo "file3 badly fragmented"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/226.out b/tests/xfs/226.out
-new file mode 100644
-index 0000000..d413e8b
---- /dev/null
-+++ b/tests/xfs/226.out
-@@ -0,0 +1,13 @@
-+QA output created by 226
-+Format and mount
-+Create the original files
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-226/file1
-+d3959a68638c50af07f0258e032cb554  SCRATCH_MNT/test-226/file3
-+d3959a68638c50af07f0258e032cb554  SCRATCH_MNT/test-226/file3.chk
-+CoW across the transition
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-226/file1
-+55968a95dfc0120df4e8485576514320  SCRATCH_MNT/test-226/file3
-+55968a95dfc0120df4e8485576514320  SCRATCH_MNT/test-226/file3.chk
-+Check extent counts
-diff --git a/tests/xfs/228 b/tests/xfs/228
-new file mode 100755
-index 0000000..ecbe35f
---- /dev/null
-+++ b/tests/xfs/228
-@@ -0,0 +1,110 @@
-+#! /bin/bash
-+# FS QA Test No. 228
-+#
-+# Ensuring that copy on write in direct-io mode works when the CoW
-+# range originally covers multiple extents, some unwritten, some not.
-+#   - Set cowextsize hint.
-+#   - Create a file with the following repeating sequence of blocks:
-+#     1. reflinked
-+#     2. unwritten
-+#     3. hole
-+#     4. regular block
-+#     5. delalloc
-+#   - directio CoW across the halfway mark, starting with the unwritten extent.
-+#   - Check that the files are now different where we say they're different.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scratch_reflink
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_command "fpunch"
 +_require_cp_reflink
-+_require_odirect
++_require_xfs_io_command "truncate"
 +
 +rm -f $seqres.full
++
 +
 +echo "Format and mount"
 +_scratch_mkfs > $seqres.full 2>&1
@@ -1154,86 +118,66 @@ index 0000000..ecbe35f
 +testdir=$SCRATCH_MNT/test-$seq
 +mkdir $testdir
 +
-+echo "Create the original files"
 +blksz=65536
-+nr=64
++nr=4
 +filesize=$((blksz * nr))
-+real_blksz=$(stat -f -c '%S' $testdir)
-+internal_blks=$((filesize / real_blksz))
-+$XFS_IO_PROG -c "cowextsize $((blksz * 16))" $testdir >> $seqres.full
-+_weave_reflink_rainbow $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
++
++echo "Create the original files"
++_pwrite_byte 0x61 0 $filesize $testdir/file1 >> $seqres.full
++_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
++_pwrite_byte 0x61 0 $filesize $testdir/file2.chk >> $seqres.full
 +_scratch_remount
 +
 +echo "Compare files"
 +md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file2.chk | _filter_scratch
 +
-+echo "directio CoW across the transition"
-+cowoff=$((filesize / 4))
-+cowsz=$((filesize / 2))
-+_weave_reflink_rainbow_delalloc $blksz $nr $testdir/file3 >> $seqres.full
-+# now cow
-+$XFS_IO_PROG -d -f -c "pwrite -S 0x63 -b $cowsz $cowoff $cowsz" $testdir/file3 >> $seqres.full
-+_pwrite_byte 0x63 $cowoff $cowsz $testdir/file3.chk >> $seqres.full
++echo "CoW and unmount"
++$XFS_IO_PROG -f -c "pwrite -S 0x62 -b $((blksz * 2)) $blksz $((blksz * 2))" -c "truncate $((blksz * 2))" $testdir/file2 >> $seqres.full
++_scratch_remount
++$XFS_IO_PROG -f -c "pwrite -S 0x62 -b $((blksz * 2)) $blksz $((blksz * 2))" -c "truncate $((blksz * 2))" $testdir/file2.chk >> $seqres.full
 +_scratch_remount
 +
 +echo "Compare files"
 +md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "Check extent counts"
-+old_extents=$(_count_extents $testdir/file1)
-+new_extents=$(_count_extents $testdir/file3)
-+
-+echo "old extents: $old_extents" >> $seqres.full
-+echo "new extents: $new_extents" >> $seqres.full
-+echo "maximum extents: $internal_blks" >> $seqres.full
-+test $new_extents -lt $((internal_blks / 20)) || echo "file3 badly fragmented"
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file2.chk | _filter_scratch
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/xfs/228.out b/tests/xfs/228.out
+diff --git a/tests/generic/253.out b/tests/generic/253.out
 new file mode 100644
-index 0000000..13b0aee
+index 0000000..3364ba0
 --- /dev/null
-+++ b/tests/xfs/228.out
-@@ -0,0 +1,13 @@
-+QA output created by 228
++++ b/tests/generic/253.out
+@@ -0,0 +1,12 @@
++QA output created by 253
 +Format and mount
 +Create the original files
 +Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-228/file1
-+6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-228/file3
-+6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-228/file3.chk
-+directio CoW across the transition
++c946b71bb69c07daf25470742c967e7c  SCRATCH_MNT/test-253/file1
++c946b71bb69c07daf25470742c967e7c  SCRATCH_MNT/test-253/file2
++c946b71bb69c07daf25470742c967e7c  SCRATCH_MNT/test-253/file2.chk
++CoW and unmount
 +Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-228/file1
-+26aa3a0749b867ec58363c8539ee5471  SCRATCH_MNT/test-228/file3
-+26aa3a0749b867ec58363c8539ee5471  SCRATCH_MNT/test-228/file3.chk
-+Check extent counts
-diff --git a/tests/xfs/230 b/tests/xfs/230
++c946b71bb69c07daf25470742c967e7c  SCRATCH_MNT/test-253/file1
++b5fc98f04b19fa7b2085ec1358c78760  SCRATCH_MNT/test-253/file2
++b5fc98f04b19fa7b2085ec1358c78760  SCRATCH_MNT/test-253/file2.chk
+diff --git a/tests/generic/254 b/tests/generic/254
 new file mode 100755
-index 0000000..e09b52e
+index 0000000..f16cdd3
 --- /dev/null
-+++ b/tests/xfs/230
-@@ -0,0 +1,110 @@
++++ b/tests/generic/254
+@@ -0,0 +1,90 @@
 +#! /bin/bash
-+# FS QA Test No. 230
++# FS QA Test No. 254
 +#
-+# Ensuring that copy on write in buffered mode works when the CoW
-+# range originally covers multiple extents, some unwritten, some not.
-+#   - Set cowextsize hint.
-+#   - Create a file with the following repeating sequence of blocks:
-+#     1. reflinked
-+#     2. unwritten
-+#     3. hole
-+#     4. regular block
-+#     5. delalloc
-+#   - CoW across the halfway mark, starting with the unwritten extent.
-+#   - Check that the files are now different where we say they're different.
++# Punch a file at midway through a CoW region.
++#
++# This test is dependent on the system page size, so we cannot use md5 in
++# the golden output; we can only compare to a check file.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
@@ -1275,12 +219,11 @@ index 0000000..e09b52e
 +# real QA test starts here
 +_supported_os Linux
 +_require_scratch_reflink
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_command "fpunch"
 +_require_cp_reflink
-+_require_odirect
++_require_xfs_io_command "fpunch"
 +
 +rm -f $seqres.full
++
 +
 +echo "Format and mount"
 +_scratch_mkfs > $seqres.full 2>&1
@@ -1289,91 +232,533 @@ index 0000000..e09b52e
 +testdir=$SCRATCH_MNT/test-$seq
 +mkdir $testdir
 +
-+echo "Create the original files"
 +blksz=65536
-+nr=64
++nr=5
 +filesize=$((blksz * nr))
-+real_blksz=$(stat -f -c '%S' $testdir)
-+internal_blks=$((filesize / real_blksz))
-+$XFS_IO_PROG -c "cowextsize $((blksz * 16))" $testdir >> $seqres.full
-+_weave_reflink_rainbow $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
++
++echo "Create the original files"
++_pwrite_byte 0x61 0 $filesize $testdir/file1 >> $seqres.full
++_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
++_pwrite_byte 0x61 0 $filesize $testdir/file2.chk >> $seqres.full
 +_scratch_remount
 +
 +echo "Compare files"
 +md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file2.chk | _filter_scratch
 +
-+echo "directio CoW across the transition"
-+cowoff=$((filesize / 4))
-+cowsz=$((filesize / 2))
-+_weave_reflink_rainbow_delalloc $blksz $nr $testdir/file3 >> $seqres.full
-+# now cow
-+$XFS_IO_PROG -f -c "pwrite -S 0x63 -b $cowsz $cowoff $cowsz" $testdir/file3 >> $seqres.full
-+_pwrite_byte 0x63 $cowoff $cowsz $testdir/file3.chk >> $seqres.full
++echo "CoW and unmount"
++$XFS_IO_PROG -f -c "pwrite -S 0x62 -b $((blksz * 3)) $blksz $((blksz * 3))" -c "fpunch $((blksz * 2)) $blksz" $testdir/file2 >> $seqres.full
++_scratch_remount
++$XFS_IO_PROG -f -c "pwrite -S 0x62 -b $((blksz * 3)) $blksz $((blksz * 3))" -c "pwrite -S 0x00 $((blksz * 2)) $blksz" $testdir/file2.chk >> $seqres.full
 +_scratch_remount
 +
 +echo "Compare files"
 +md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "Check extent counts"
-+old_extents=$(_count_extents $testdir/file1)
-+new_extents=$(_count_extents $testdir/file3)
-+
-+echo "old extents: $old_extents" >> $seqres.full
-+echo "new extents: $new_extents" >> $seqres.full
-+echo "maximum extents: $internal_blks" >> $seqres.full
-+test $new_extents -lt $((internal_blks / 20)) || echo "file3 badly fragmented"
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file2.chk | _filter_scratch
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/xfs/230.out b/tests/xfs/230.out
+diff --git a/tests/generic/254.out b/tests/generic/254.out
 new file mode 100644
-index 0000000..439427c
+index 0000000..97a8b5a
 --- /dev/null
-+++ b/tests/xfs/230.out
-@@ -0,0 +1,13 @@
-+QA output created by 230
++++ b/tests/generic/254.out
+@@ -0,0 +1,12 @@
++QA output created by 254
 +Format and mount
 +Create the original files
 +Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-230/file1
-+6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-230/file3
-+6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-230/file3.chk
-+directio CoW across the transition
++17af09af790a9b4c79cddf72f6b642cb  SCRATCH_MNT/test-254/file1
++17af09af790a9b4c79cddf72f6b642cb  SCRATCH_MNT/test-254/file2
++17af09af790a9b4c79cddf72f6b642cb  SCRATCH_MNT/test-254/file2.chk
++CoW and unmount
 +Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-230/file1
-+26aa3a0749b867ec58363c8539ee5471  SCRATCH_MNT/test-230/file3
-+26aa3a0749b867ec58363c8539ee5471  SCRATCH_MNT/test-230/file3.chk
-+Check extent counts
-diff --git a/tests/xfs/group b/tests/xfs/group
-index afd960f..da83274 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -212,12 +212,22 @@
- 212 auto quick clone
- 213 auto quick clone
- 214 auto quick clone
-+215 auto quick clone
- 216 log metadata auto quick
- 217 log metadata auto
-+218 auto quick clone
-+219 auto quick clone
- 220 auto quota quick
-+221 auto quick clone
- 222 auto fsr ioctl quick
-+223 auto quick clone
-+224 auto quick clone
-+225 auto quick clone
-+226 auto quick clone
- 227 auto fsr
-+228 auto quick clone
- 229 auto rw
-+230 auto quick clone
- 238 auto quick metadata ioctl
- 242 auto quick prealloc
- 244 auto quota quick
++17af09af790a9b4c79cddf72f6b642cb  SCRATCH_MNT/test-254/file1
++b9f7a56c2ab90569cb19d8597583c6a6  SCRATCH_MNT/test-254/file2
++b9f7a56c2ab90569cb19d8597583c6a6  SCRATCH_MNT/test-254/file2.chk
+diff --git a/tests/generic/259 b/tests/generic/259
+new file mode 100755
+index 0000000..6718c50
+--- /dev/null
++++ b/tests/generic/259
+@@ -0,0 +1,90 @@
++#! /bin/bash
++# FS QA Test No. 259
++#
++# fzero a file at midway through a CoW region.
++#
++# This test is dependent on the system page size, so we cannot use md5 in
++# the golden output; we can only compare to a check file.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch_reflink
++_require_cp_reflink
++_require_xfs_io_command "fzero"
++
++rm -f $seqres.full
++
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++
++blksz=65536
++nr=5
++filesize=$((blksz * nr))
++
++echo "Create the original files"
++_pwrite_byte 0x61 0 $filesize $testdir/file1 >> $seqres.full
++_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
++_pwrite_byte 0x61 0 $filesize $testdir/file2.chk >> $seqres.full
++_scratch_remount
++
++echo "Compare files"
++md5sum $testdir/file1 | _filter_scratch
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file2.chk | _filter_scratch
++
++echo "CoW and unmount"
++$XFS_IO_PROG -f -c "pwrite -S 0x62 -b $((blksz * 3)) $blksz $((blksz * 3))" -c "fzero $((blksz * 2)) $blksz" $testdir/file2 >> $seqres.full
++_scratch_remount
++$XFS_IO_PROG -f -c "pwrite -S 0x62 -b $((blksz * 3)) $blksz $((blksz * 3))" -c "pwrite -S 0x00 $((blksz * 2)) $blksz" $testdir/file2.chk >> $seqres.full
++_scratch_remount
++
++echo "Compare files"
++md5sum $testdir/file1 | _filter_scratch
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file2.chk | _filter_scratch
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/259.out b/tests/generic/259.out
+new file mode 100644
+index 0000000..3517fb1
+--- /dev/null
++++ b/tests/generic/259.out
+@@ -0,0 +1,12 @@
++QA output created by 259
++Format and mount
++Create the original files
++Compare files
++17af09af790a9b4c79cddf72f6b642cb  SCRATCH_MNT/test-259/file1
++17af09af790a9b4c79cddf72f6b642cb  SCRATCH_MNT/test-259/file2
++17af09af790a9b4c79cddf72f6b642cb  SCRATCH_MNT/test-259/file2.chk
++CoW and unmount
++Compare files
++17af09af790a9b4c79cddf72f6b642cb  SCRATCH_MNT/test-259/file1
++b9f7a56c2ab90569cb19d8597583c6a6  SCRATCH_MNT/test-259/file2
++b9f7a56c2ab90569cb19d8597583c6a6  SCRATCH_MNT/test-259/file2.chk
+diff --git a/tests/generic/261 b/tests/generic/261
+new file mode 100755
+index 0000000..28d0e0b
+--- /dev/null
++++ b/tests/generic/261
+@@ -0,0 +1,90 @@
++#! /bin/bash
++# FS QA Test No. 261
++#
++# fcollapse a file at midway through a CoW region.
++#
++# This test is dependent on the system page size, so we cannot use md5 in
++# the golden output; we can only compare to a check file.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch_reflink
++_require_cp_reflink
++_require_xfs_io_command "fcollapse"
++
++rm -f $seqres.full
++
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++
++blksz=65536
++nr=5
++filesize=$((blksz * nr))
++
++echo "Create the original files"
++_pwrite_byte 0x61 0 $filesize $testdir/file1 >> $seqres.full
++_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
++_pwrite_byte 0x61 0 $filesize $testdir/file2.chk >> $seqres.full
++_scratch_remount
++
++echo "Compare files"
++md5sum $testdir/file1 | _filter_scratch
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file2.chk | _filter_scratch
++
++echo "CoW and unmount"
++$XFS_IO_PROG -f -c "pwrite -S 0x62 -b $((blksz * 3)) $blksz $((blksz * 3))" -c "fcollapse $((blksz * 2)) $blksz" $testdir/file2 >> $seqres.full
++_scratch_remount
++$XFS_IO_PROG -f -c "pwrite -S 0x62 -b $((blksz * 2)) $blksz $((blksz * 2))" -c "truncate $((blksz * (nr - 1)))" $testdir/file2.chk >> $seqres.full
++_scratch_remount
++
++echo "Compare files"
++md5sum $testdir/file1 | _filter_scratch
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file2.chk | _filter_scratch
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/261.out b/tests/generic/261.out
+new file mode 100644
+index 0000000..43691ad
+--- /dev/null
++++ b/tests/generic/261.out
+@@ -0,0 +1,12 @@
++QA output created by 261
++Format and mount
++Create the original files
++Compare files
++17af09af790a9b4c79cddf72f6b642cb  SCRATCH_MNT/test-261/file1
++17af09af790a9b4c79cddf72f6b642cb  SCRATCH_MNT/test-261/file2
++17af09af790a9b4c79cddf72f6b642cb  SCRATCH_MNT/test-261/file2.chk
++CoW and unmount
++Compare files
++17af09af790a9b4c79cddf72f6b642cb  SCRATCH_MNT/test-261/file1
++91b31bb8bffa8c3d3374445039287226  SCRATCH_MNT/test-261/file2
++91b31bb8bffa8c3d3374445039287226  SCRATCH_MNT/test-261/file2.chk
+diff --git a/tests/generic/262 b/tests/generic/262
+new file mode 100755
+index 0000000..aaf38cf
+--- /dev/null
++++ b/tests/generic/262
+@@ -0,0 +1,93 @@
++#! /bin/bash
++# FS QA Test No. 262
++#
++# finsert a file at midway through a CoW region.
++#
++# This test is dependent on the system page size, so we cannot use md5 in
++# the golden output; we can only compare to a check file.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch_reflink
++_require_cp_reflink
++_require_xfs_io_command "finsert"
++
++rm -f $seqres.full
++
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++
++blksz=65536
++nr=4
++filesize=$((blksz * nr))
++
++echo "Create the original files"
++_pwrite_byte 0x61 0 $filesize $testdir/file1 >> $seqres.full
++_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
++_pwrite_byte 0x61 0 $filesize $testdir/file2.chk >> $seqres.full
++_scratch_remount
++
++echo "Compare files"
++md5sum $testdir/file1 | _filter_scratch
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file2.chk | _filter_scratch
++
++echo "CoW and unmount"
++$XFS_IO_PROG -f -c "pwrite -S 0x62 -b $((blksz * 2)) $blksz $((blksz * 2))" -c "finsert $((blksz * 2)) $blksz" $testdir/file2 >> $seqres.full
++_scratch_remount
++_pwrite_byte 0x62 $blksz $blksz $testdir/file2.chk >> $seqres.full
++_pwrite_byte 0x00 $((blksz * 2)) $blksz $testdir/file2.chk >> $seqres.full
++_pwrite_byte 0x62 $((blksz * 3)) $blksz $testdir/file2.chk >> $seqres.full
++_pwrite_byte 0x61 $((blksz * 4)) $blksz $testdir/file2.chk >> $seqres.full
++_scratch_remount
++
++echo "Compare files"
++md5sum $testdir/file1 | _filter_scratch
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file2.chk | _filter_scratch
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/262.out b/tests/generic/262.out
+new file mode 100644
+index 0000000..32c7503
+--- /dev/null
++++ b/tests/generic/262.out
+@@ -0,0 +1,12 @@
++QA output created by 262
++Format and mount
++Create the original files
++Compare files
++c946b71bb69c07daf25470742c967e7c  SCRATCH_MNT/test-262/file1
++c946b71bb69c07daf25470742c967e7c  SCRATCH_MNT/test-262/file2
++c946b71bb69c07daf25470742c967e7c  SCRATCH_MNT/test-262/file2.chk
++CoW and unmount
++Compare files
++c946b71bb69c07daf25470742c967e7c  SCRATCH_MNT/test-262/file1
++b9f7a56c2ab90569cb19d8597583c6a6  SCRATCH_MNT/test-262/file2
++b9f7a56c2ab90569cb19d8597583c6a6  SCRATCH_MNT/test-262/file2.chk
+diff --git a/tests/generic/264 b/tests/generic/264
+new file mode 100755
+index 0000000..d5bcca6
+--- /dev/null
++++ b/tests/generic/264
+@@ -0,0 +1,90 @@
++#! /bin/bash
++# FS QA Test No. 264
++#
++# fallocate a file at midway through a CoW region.
++#
++# This test is dependent on the system page size, so we cannot use md5 in
++# the golden output; we can only compare to a check file.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch_reflink
++_require_cp_reflink
++_require_xfs_io_command "falloc"
++
++rm -f $seqres.full
++
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++
++blksz=65536
++nr=5
++filesize=$((blksz * nr))
++
++echo "Create the original files"
++_pwrite_byte 0x61 0 $filesize $testdir/file1 >> $seqres.full
++_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
++_pwrite_byte 0x61 0 $filesize $testdir/file2.chk >> $seqres.full
++_scratch_remount
++
++echo "Compare files"
++md5sum $testdir/file1 | _filter_scratch
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file2.chk | _filter_scratch
++
++echo "CoW and unmount"
++$XFS_IO_PROG -f -c "pwrite -S 0x62 -b $((blksz * 3)) $blksz $((blksz * 3))" -c "falloc $((blksz * 2)) $blksz" $testdir/file2 >> $seqres.full
++_scratch_remount
++$XFS_IO_PROG -f -c "pwrite -S 0x62 -b $((blksz * 3)) $blksz $((blksz * 3))" $testdir/file2.chk >> $seqres.full
++_scratch_remount
++
++echo "Compare files"
++md5sum $testdir/file1 | _filter_scratch
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file2.chk | _filter_scratch
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/264.out b/tests/generic/264.out
+new file mode 100644
+index 0000000..cd6904b
+--- /dev/null
++++ b/tests/generic/264.out
+@@ -0,0 +1,12 @@
++QA output created by 264
++Format and mount
++Create the original files
++Compare files
++17af09af790a9b4c79cddf72f6b642cb  SCRATCH_MNT/test-264/file1
++17af09af790a9b4c79cddf72f6b642cb  SCRATCH_MNT/test-264/file2
++17af09af790a9b4c79cddf72f6b642cb  SCRATCH_MNT/test-264/file2.chk
++CoW and unmount
++Compare files
++17af09af790a9b4c79cddf72f6b642cb  SCRATCH_MNT/test-264/file1
++3383b9c17e643acd1a9a249cf041e183  SCRATCH_MNT/test-264/file2
++3383b9c17e643acd1a9a249cf041e183  SCRATCH_MNT/test-264/file2.chk
+diff --git a/tests/generic/group b/tests/generic/group
+index 0e4e7d3..b768882 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -255,12 +255,18 @@
+ 250 auto quick prealloc rw
+ 251 ioctl trim
+ 252 auto quick prealloc rw
++253 auto quick clone
++254 auto quick clone
+ 255 auto quick prealloc
+ 256 auto quick
+ 257 dir auto quick
+ 258 auto quick
++259 auto quick clone
+ 260 auto quick trim
++261 auto quick clone
++262 auto quick clone
+ 263 rw auto quick
++264 auto quick clone
+ 269 auto rw prealloc ioctl enospc stress
+ 270 auto quota rw prealloc ioctl enospc stress
+ 273 auto rw
 
