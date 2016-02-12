@@ -1,85 +1,56 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:46477 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752567AbcBLScT (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 12 Feb 2016 13:32:19 -0500
-Date: Fri, 12 Feb 2016 10:32:11 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH v2] fstests: generic/158, test dedupe with destination offset
- past EOF
-Message-ID: <20160212183211.GH6346@birch.djwong.org>
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:21652 "EHLO
+	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750904AbcBLWtg (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 12 Feb 2016 17:49:36 -0500
+Date: Sat, 13 Feb 2016 09:49:32 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 12/32] dio: unwritten conversion bug tests
+Message-ID: <20160212224932.GZ14668@dastard>
+References: <20160211233916.2202.40961.stgit@birch.djwong.org>
+ <20160211234037.2202.93885.stgit@birch.djwong.org>
+ <20160212035253.GX14668@dastard>
+ <20160212152231.GA7928@thunk.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20160212152231.GA7928@thunk.org>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>, fdmanana@kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Fri, Feb 12, 2016 at 10:22:31AM -0500, Theodore Ts'o wrote:
+> On Fri, Feb 12, 2016 at 02:52:53PM +1100, Dave Chinner wrote:
+> > On Thu, Feb 11, 2016 at 03:40:37PM -0800, Darrick J. Wong wrote:
+> > > Check that we don't expose old disk contents when a directio write to
+> > > an unwritten extent fails due to IO errors.  This primarily affects
+> > > XFS and ext4.
+> > > 
+> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > 
+> > aiocp.c: In function 'main':
+> > aiocp.c:407:1: warning: format '%d' expects argument of type 'int', but argument 3 has type 'off_t' [-Wformat=]
+> >  printf("tocopy=%d len=%d blk=%d\n", tocopy, length, aio_blksize);
+> >  ^
+> > 
+> > Followup patch is fine, I'll commit as is.
+> 
+> Dave, given that Darrick's patches is going to cause more
+> _scratch_mount occurences, how quickly do you plan to commit his
+> patchset?  Should I wait until he makes his change before I do the
+> s/_scratch_mount/_scratch_cycle_mount/ change?  Should I make that
+> change, and let you fix it up the commit?
 
-We were testing when the source file offset starts at EOF or beyond,
-but not when the destination offset is beyond EOF or when the
-destination offset is smaller than EOF but destination offset plus
-dedup length is greater than EOF.
+I had to head out suddenly yestrday afternoon, just after I sent
+above email. Only just got back in front of the computer, so I'll be
+pushing it out once the new pull has run through a sanity check.
 
-This is motivated by a bug in btrfs' extent_same (dedup) ioctl where
-we allowed the destination offset to start at EOF and beyond (and
-destination offset + length beyond EOF) for the case where the source
-and destination files are the same (was not allowed for different
-files used as source and destination). This also made the file's
-metadata inconsistent when the dedup operation succeeded, which
-happened when the source range corresponded to a file hole, prealloc
-extent or a data extent filled with zeroes.
+If you can respin the patch once I've done that, it would be greatly
+appreciated.
 
-The btrfs issue is fixed by the following patch for the linux kernel:
+Cheers,
 
-  "Btrfs: fix extent_same allowing destination offset beyond i_size"
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
-[darrick.wong@oracle.com: fix merge conflicts with latest reflink patchbomb]
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/generic/158     |   10 +++++++++-
- tests/generic/158.out |    6 +++++-
- 2 files changed, 14 insertions(+), 2 deletions(-)
-
-diff --git a/tests/generic/158 b/tests/generic/158
-index 0da5daa..dd64562 100755
---- a/tests/generic/158
-+++ b/tests/generic/158
-@@ -97,9 +97,17 @@ _dedupe_range $testdir1/file1 37 $testdir1/file1 59 23
- echo "Try overlapping dedupe"
- _dedupe_range $testdir1/file1 0 $testdir1/file1 1 $((blksz * 2))
- 
--echo "Try dedupe past EOF"
-+echo "Try dedupe from past EOF"
- _dedupe_range $testdir1/file1 $(( (blks + 10) * blksz)) $testdir1/file1 0 $blksz
- 
-+echo "Try dedupe to past EOF, destination offset beyond EOF"
-+_dedupe_range $testdir1/file1 0 $testdir1/file1 $(( (blks + 10) * blksz)) \
-+	$blksz
-+
-+echo "Try dedupe to past EOF, destination offset behind EOF"
-+_dedupe_range $testdir1/file1 0 $testdir1/file1 $(( (blks - 1) * blksz)) \
-+	$((blksz * 2))
-+
- echo "Try to dedupe a dir"
- _dedupe_range $testdir1/dir1 0 $testdir1/file2 0 $blksz
- 
-diff --git a/tests/generic/158.out b/tests/generic/158.out
-index 7f88403..9b82ddf 100644
---- a/tests/generic/158.out
-+++ b/tests/generic/158.out
-@@ -7,7 +7,11 @@ Try unaligned dedupe
- dedupe: Invalid argument
- Try overlapping dedupe
- dedupe: Invalid argument
--Try dedupe past EOF
-+Try dedupe from past EOF
-+dedupe: Invalid argument
-+Try dedupe to past EOF, destination offset beyond EOF
-+dedupe: Invalid argument
-+Try dedupe to past EOF, destination offset behind EOF
- dedupe: Invalid argument
- Try to dedupe a dir
- XFS_IOC_FILE_EXTENT_SAME: Is a directory
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
