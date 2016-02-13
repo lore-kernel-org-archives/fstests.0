@@ -1,80 +1,381 @@
-Received: from imap.thunk.org ([74.207.234.97]:34549 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:34548 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751013AbcBMRlQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+	id S1751008AbcBMRlQ (ORCPT <rfc822;fstests@vger.kernel.org>);
 	Sat, 13 Feb 2016 12:41:16 -0500
 From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH 14/16] xfstests: add executable permission to tests
-Date: Sat, 13 Feb 2016 12:41:07 -0500
-Message-Id: <1455385269-26319-15-git-send-email-tytso@mit.edu>
+Subject: [PATCH 01/16] ext4/001: add output variant for nodelalloc mounts
+Date: Sat, 13 Feb 2016 12:40:54 -0500
+Message-Id: <1455385269-26319-2-git-send-email-tytso@mit.edu>
 In-Reply-To: <1455385269-26319-1-git-send-email-tytso@mit.edu>
 References: <1455385269-26319-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: hughd@google.com, Theodore Ts'o <tytso@mit.edu>
+Cc: hughd@google.com, Theodore Ts'o <tytso@mit.edu>, Jan Kara <jack@suse.cz>
 List-ID: <fstests@vger.kernel.org>
 
-From: Hugh Dickins <hughd@google.com>
+If the delayed allocation is disabled, we need a slightly different
+output for the delayed allocation portion of the tests.
 
-Signed-off-by: Hugh Dickins <hughd@google.com>
 Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+Cc: Jan Kara <jack@suse.cz>
 ---
- tests/btrfs/026   | 0
- tests/btrfs/104   | 0
- tests/btrfs/114   | 0
- tests/generic/058 | 0
- tests/generic/060 | 0
- tests/generic/061 | 0
- tests/generic/063 | 0
- tests/generic/092 | 0
- tests/generic/094 | 0
- tests/generic/103 | 0
- tests/xfs/140     | 0
- 11 files changed, 0 insertions(+), 0 deletions(-)
- mode change 100644 => 100755 tests/btrfs/026
- mode change 100644 => 100755 tests/btrfs/104
- mode change 100644 => 100755 tests/btrfs/114
- mode change 100644 => 100755 tests/generic/058
- mode change 100644 => 100755 tests/generic/060
- mode change 100644 => 100755 tests/generic/061
- mode change 100644 => 100755 tests/generic/063
- mode change 100644 => 100755 tests/generic/092
- mode change 100644 => 100755 tests/generic/094
- mode change 100644 => 100755 tests/generic/103
- mode change 100644 => 100755 tests/xfs/140
+ tests/ext4/001.cfg            |   2 +
+ tests/ext4/001.out.nodelalloc | 337 ++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 339 insertions(+)
+ create mode 100644 tests/ext4/001.out.nodelalloc
 
-diff --git a/tests/btrfs/026 b/tests/btrfs/026
-old mode 100644
-new mode 100755
-diff --git a/tests/btrfs/104 b/tests/btrfs/104
-old mode 100644
-new mode 100755
-diff --git a/tests/btrfs/114 b/tests/btrfs/114
-old mode 100644
-new mode 100755
-diff --git a/tests/generic/058 b/tests/generic/058
-old mode 100644
-new mode 100755
-diff --git a/tests/generic/060 b/tests/generic/060
-old mode 100644
-new mode 100755
-diff --git a/tests/generic/061 b/tests/generic/061
-old mode 100644
-new mode 100755
-diff --git a/tests/generic/063 b/tests/generic/063
-old mode 100644
-new mode 100755
-diff --git a/tests/generic/092 b/tests/generic/092
-old mode 100644
-new mode 100755
-diff --git a/tests/generic/094 b/tests/generic/094
-old mode 100644
-new mode 100755
-diff --git a/tests/generic/103 b/tests/generic/103
-old mode 100644
-new mode 100755
-diff --git a/tests/xfs/140 b/tests/xfs/140
-old mode 100644
-new mode 100755
+diff --git a/tests/ext4/001.cfg b/tests/ext4/001.cfg
+index 1942203..5f7e262 100644
+--- a/tests/ext4/001.cfg
++++ b/tests/ext4/001.cfg
+@@ -1,2 +1,4 @@
+ dax: nozero
+ dioread_nolock: nozero
++nodelalloc: nodelalloc
++data=journal: nodelalloc
+diff --git a/tests/ext4/001.out.nodelalloc b/tests/ext4/001.out.nodelalloc
+new file mode 100644
+index 0000000..212c247
+--- /dev/null
++++ b/tests/ext4/001.out.nodelalloc
+@@ -0,0 +1,337 @@
++QA output created by 001
++	1. into a hole
++0: [0..7]: hole
++1: [8..23]: unwritten
++2: [24..39]: hole
++daa100df6e6711906b61c9ab5aa16032
++	2. into allocated space
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: data
++cc58a7417c2d7763adc45b6fcd3fa024
++	3. into unwritten space
++0: [0..39]: unwritten
++daa100df6e6711906b61c9ab5aa16032
++	4. hole -> data
++0: [0..7]: hole
++1: [8..23]: unwritten
++2: [24..31]: data
++3: [32..39]: hole
++cc63069677939f69a6e8f68cae6a6dac
++	5. hole -> unwritten
++0: [0..7]: hole
++1: [8..31]: unwritten
++2: [32..39]: hole
++daa100df6e6711906b61c9ab5aa16032
++	6. data -> hole
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: hole
++1b3779878366498b28c702ef88c4a773
++	7. data -> unwritten
++0: [0..7]: data
++1: [8..31]: unwritten
++2: [32..39]: hole
++1b3779878366498b28c702ef88c4a773
++	8. unwritten -> hole
++0: [0..23]: unwritten
++1: [24..39]: hole
++daa100df6e6711906b61c9ab5aa16032
++	9. unwritten -> data
++0: [0..23]: unwritten
++1: [24..31]: data
++2: [32..39]: hole
++cc63069677939f69a6e8f68cae6a6dac
++	10. hole -> data -> hole
++0: [0..7]: hole
++1: [8..31]: unwritten
++2: [32..39]: hole
++daa100df6e6711906b61c9ab5aa16032
++	11. data -> hole -> data
++0: [0..7]: data
++1: [8..31]: unwritten
++2: [32..39]: data
++f6aeca13ec49e5b266cd1c913cd726e3
++	12. unwritten -> data -> unwritten
++0: [0..7]: data
++1: [8..31]: unwritten
++2: [32..39]: data
++daa100df6e6711906b61c9ab5aa16032
++	13. data -> unwritten -> data
++0: [0..7]: data
++1: [8..31]: unwritten
++2: [32..39]: data
++f6aeca13ec49e5b266cd1c913cd726e3
++	14. data -> hole @ EOF
++0: [0..23]: data
++1: [24..39]: unwritten
++e1f024eedd27ea6b1c3e9b841c850404
++	15. data -> hole @ 0
++0: [0..15]: unwritten
++1: [16..39]: data
++eecb7aa303d121835de05028751d301c
++	16. data -> cache cold ->hole
++0: [0..15]: unwritten
++1: [16..39]: data
++eecb7aa303d121835de05028751d301c
++	17. data -> hole in single block file
++0: [0..7]: data
++0000000 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
++*
++0000200 0000 0000 0000 0000 0000 0000 0000 0000
++*
++0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
++*
++	1. into a hole
++0: [0..7]: hole
++1: [8..23]: unwritten
++2: [24..39]: hole
++daa100df6e6711906b61c9ab5aa16032
++	2. into allocated space
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: data
++cc58a7417c2d7763adc45b6fcd3fa024
++	3. into unwritten space
++0: [0..39]: unwritten
++daa100df6e6711906b61c9ab5aa16032
++	4. hole -> data
++0: [0..7]: hole
++1: [8..23]: unwritten
++2: [24..31]: data
++3: [32..39]: hole
++cc63069677939f69a6e8f68cae6a6dac
++	5. hole -> unwritten
++0: [0..7]: hole
++1: [8..31]: unwritten
++2: [32..39]: hole
++daa100df6e6711906b61c9ab5aa16032
++	6. data -> hole
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: hole
++1b3779878366498b28c702ef88c4a773
++	7. data -> unwritten
++0: [0..7]: data
++1: [8..31]: unwritten
++2: [32..39]: hole
++1b3779878366498b28c702ef88c4a773
++	8. unwritten -> hole
++0: [0..23]: unwritten
++1: [24..39]: hole
++daa100df6e6711906b61c9ab5aa16032
++	9. unwritten -> data
++0: [0..23]: unwritten
++1: [24..31]: data
++2: [32..39]: hole
++cc63069677939f69a6e8f68cae6a6dac
++	10. hole -> data -> hole
++0: [0..7]: hole
++1: [8..31]: unwritten
++2: [32..39]: hole
++daa100df6e6711906b61c9ab5aa16032
++	11. data -> hole -> data
++0: [0..7]: data
++1: [8..31]: unwritten
++2: [32..39]: data
++f6aeca13ec49e5b266cd1c913cd726e3
++	12. unwritten -> data -> unwritten
++0: [0..7]: data
++1: [8..31]: unwritten
++2: [32..39]: data
++daa100df6e6711906b61c9ab5aa16032
++	13. data -> unwritten -> data
++0: [0..7]: data
++1: [8..31]: unwritten
++2: [32..39]: data
++f6aeca13ec49e5b266cd1c913cd726e3
++	14. data -> hole @ EOF
++0: [0..23]: data
++1: [24..39]: unwritten
++e1f024eedd27ea6b1c3e9b841c850404
++	15. data -> hole @ 0
++0: [0..15]: unwritten
++1: [16..39]: data
++eecb7aa303d121835de05028751d301c
++	16. data -> cache cold ->hole
++0: [0..15]: unwritten
++1: [16..39]: data
++eecb7aa303d121835de05028751d301c
++	17. data -> hole in single block file
++0: [0..7]: data
++0000000 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
++*
++0000200 0000 0000 0000 0000 0000 0000 0000 0000
++*
++0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
++*
++	1. into a hole
++0: [0..7]: hole
++1: [8..23]: unwritten
++2: [24..39]: hole
++daa100df6e6711906b61c9ab5aa16032
++	2. into allocated space
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: data
++cc58a7417c2d7763adc45b6fcd3fa024
++	3. into unwritten space
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: data
++cc58a7417c2d7763adc45b6fcd3fa024
++	4. hole -> data
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: data
++cc58a7417c2d7763adc45b6fcd3fa024
++	5. hole -> unwritten
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: data
++cc58a7417c2d7763adc45b6fcd3fa024
++	6. data -> hole
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: data
++cc58a7417c2d7763adc45b6fcd3fa024
++	7. data -> unwritten
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: data
++cc58a7417c2d7763adc45b6fcd3fa024
++	8. unwritten -> hole
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: data
++cc58a7417c2d7763adc45b6fcd3fa024
++	9. unwritten -> data
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: data
++cc58a7417c2d7763adc45b6fcd3fa024
++	10. hole -> data -> hole
++0: [0..7]: data
++1: [8..31]: unwritten
++2: [32..39]: data
++f6aeca13ec49e5b266cd1c913cd726e3
++	11. data -> hole -> data
++0: [0..7]: data
++1: [8..31]: unwritten
++2: [32..39]: data
++f6aeca13ec49e5b266cd1c913cd726e3
++	12. unwritten -> data -> unwritten
++0: [0..7]: data
++1: [8..31]: unwritten
++2: [32..39]: data
++f6aeca13ec49e5b266cd1c913cd726e3
++	13. data -> unwritten -> data
++0: [0..7]: data
++1: [8..31]: unwritten
++2: [32..39]: data
++f6aeca13ec49e5b266cd1c913cd726e3
++	14. data -> hole @ EOF
++0: [0..23]: data
++1: [24..39]: unwritten
++e1f024eedd27ea6b1c3e9b841c850404
++	15. data -> hole @ 0
++0: [0..15]: unwritten
++1: [16..39]: data
++eecb7aa303d121835de05028751d301c
++	16. data -> cache cold ->hole
++0: [0..15]: unwritten
++1: [16..39]: data
++eecb7aa303d121835de05028751d301c
++	17. data -> hole in single block file
++0: [0..7]: data
++0000000 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
++*
++0000200 0000 0000 0000 0000 0000 0000 0000 0000
++*
++0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
++*
++	1. into a hole
++0: [0..7]: hole
++1: [8..23]: unwritten
++2: [24..39]: hole
++daa100df6e6711906b61c9ab5aa16032
++	2. into allocated space
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: data
++cc58a7417c2d7763adc45b6fcd3fa024
++	3. into unwritten space
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: data
++cc58a7417c2d7763adc45b6fcd3fa024
++	4. hole -> data
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: data
++cc58a7417c2d7763adc45b6fcd3fa024
++	5. hole -> unwritten
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: data
++cc58a7417c2d7763adc45b6fcd3fa024
++	6. data -> hole
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: data
++cc58a7417c2d7763adc45b6fcd3fa024
++	7. data -> unwritten
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: data
++cc58a7417c2d7763adc45b6fcd3fa024
++	8. unwritten -> hole
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: data
++cc58a7417c2d7763adc45b6fcd3fa024
++	9. unwritten -> data
++0: [0..7]: data
++1: [8..23]: unwritten
++2: [24..39]: data
++cc58a7417c2d7763adc45b6fcd3fa024
++	10. hole -> data -> hole
++0: [0..7]: data
++1: [8..31]: unwritten
++2: [32..39]: data
++f6aeca13ec49e5b266cd1c913cd726e3
++	11. data -> hole -> data
++0: [0..7]: data
++1: [8..31]: unwritten
++2: [32..39]: data
++f6aeca13ec49e5b266cd1c913cd726e3
++	12. unwritten -> data -> unwritten
++0: [0..7]: data
++1: [8..31]: unwritten
++2: [32..39]: data
++f6aeca13ec49e5b266cd1c913cd726e3
++	13. data -> unwritten -> data
++0: [0..7]: data
++1: [8..31]: unwritten
++2: [32..39]: data
++f6aeca13ec49e5b266cd1c913cd726e3
++	14. data -> hole @ EOF
++0: [0..23]: data
++1: [24..39]: unwritten
++e1f024eedd27ea6b1c3e9b841c850404
++	15. data -> hole @ 0
++0: [0..15]: unwritten
++1: [16..39]: data
++eecb7aa303d121835de05028751d301c
++	16. data -> cache cold ->hole
++0: [0..15]: unwritten
++1: [16..39]: data
++eecb7aa303d121835de05028751d301c
++	17. data -> hole in single block file
++0: [0..7]: data
++0000000 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
++*
++0000200 0000 0000 0000 0000 0000 0000 0000 0000
++*
++0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
++*
 -- 
 2.5.0
 
