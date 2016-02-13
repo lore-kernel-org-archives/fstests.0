@@ -1,397 +1,321 @@
-Received: from imap.thunk.org ([74.207.234.97]:34541 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:34545 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750960AbcBMRlQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+	id S1750981AbcBMRlQ (ORCPT <rfc822;fstests@vger.kernel.org>);
 	Sat, 13 Feb 2016 12:41:16 -0500
 From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH-v3 00/16] tmpfs and other misc fixups for xfstests
-Date: Sat, 13 Feb 2016 12:40:53 -0500
-Message-Id: <1455385269-26319-1-git-send-email-tytso@mit.edu>
+Subject: [PATCH 09/16] xfstests: do not unmount tmpfs during remount
+Date: Sat, 13 Feb 2016 12:41:02 -0500
+Message-Id: <1455385269-26319-10-git-send-email-tytso@mit.edu>
+In-Reply-To: <1455385269-26319-1-git-send-email-tytso@mit.edu>
+References: <1455385269-26319-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: hughd@google.com, Theodore Ts'o <tytso@mit.edu>
+Cc: hughd@google.com, Junho Ryu <jayr@google.com>, Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-The first and last patches in these series not related to tmpfs
-support.  The first is a resed of a patch to fix ext4/001 to account
-for different output if delayed allocation is turned off.  The last is
-a cleanup patch to remove _need_to_be_root.
+From: Junho Ryu <jayr@google.com>
 
-Hugh Dickins (7):
-  common: _scratch_mkfs_sized() for tmpfs
-  generic: use mount point instead of device name
-  generic: require fiemap for generic/009
-  xfstests: remove dependency on /proc/partitions for generic/312
-  xfstests: generic/079 and generic/277 requires chattr, not xattrs
-  xfstests: add executable permission to tests
-  xfstests: increase tmpfs memory size
+Several tests unmount then re-mount the scratch filesystem, to check
+that the content is unchanged; but unmounting a tmpfs is designed to
+lose its content, which causes such tests to fail unnecessarily.
 
-Junho Ryu (2):
-  xfstests: do not unmount tmpfs during remount
-  generic: do not unmount before calling _check_scratch_fs()
+Signed-off-by: Hugh Dickins <hughd@google.com>
+Signed-off-by: Junho Ryu <jayr@google.com>
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ common/rc             | 23 ++++++++++++++++++++++-
+ tests/generic/003     | 20 ++++++++------------
+ tests/generic/135     | 17 +++--------------
+ tests/generic/169     | 20 ++++++--------------
+ tests/generic/169.out |  6 ++----
+ tests/generic/192     |  3 +--
+ tests/generic/226     |  3 +--
+ tests/generic/258     |  3 +--
+ tests/generic/306     |  3 +--
+ tests/generic/317     |  3 +--
+ tests/generic/318     |  3 +--
+ 11 files changed, 47 insertions(+), 57 deletions(-)
 
-Theodore Ts'o (7):
-  ext4/001: add output variant for nodelalloc mounts
-  check: avoid spurious complaints that tests/$FSTYP/group does not
-    exist
-  generic: remove the generic/125 test
-  generic: add _require_odirect to generic/113 and generic/214
-  Rename _scratch_mount to _scratch_cycle_mount
-  Rename _test_mount to _test_cycle_mount
-  xfstests: remove _need_to_be_root
-
- README                        |   4 -
- check                         |   6 +
- common/config                 |   4 +-
- common/defrag                 |   2 +-
- common/dump                   |   2 -
- common/rc                     |  69 +++++++--
- tests/btrfs/001               |   6 +-
- tests/btrfs/002               |   1 -
- tests/btrfs/003               |   1 -
- tests/btrfs/004               |   1 -
- tests/btrfs/005               |   2 +-
- tests/btrfs/007               |   1 -
- tests/btrfs/011               |   1 -
- tests/btrfs/017               |   1 -
- tests/btrfs/025               |   1 -
- tests/btrfs/026               |   3 +-
- tests/btrfs/029               |   1 -
- tests/btrfs/030               |   1 -
- tests/btrfs/031               |   1 -
- tests/btrfs/034               |   1 -
- tests/btrfs/037               |   1 -
- tests/btrfs/038               |   1 -
- tests/btrfs/039               |   1 -
- tests/btrfs/040               |   1 -
- tests/btrfs/041               |   1 -
- tests/btrfs/043               |   1 -
- tests/btrfs/044               |   1 -
- tests/btrfs/045               |   1 -
- tests/btrfs/046               |   1 -
- tests/btrfs/047               |   1 -
- tests/btrfs/048               |   1 -
- tests/btrfs/049               |   1 -
- tests/btrfs/050               |   1 -
- tests/btrfs/051               |   1 -
- tests/btrfs/052               |   3 +-
- tests/btrfs/053               |   1 -
- tests/btrfs/054               |   1 -
- tests/btrfs/055               |   1 -
- tests/btrfs/056               |   1 -
- tests/btrfs/057               |   1 -
- tests/btrfs/058               |   1 -
- tests/btrfs/059               |   1 -
- tests/btrfs/076               |   1 -
- tests/btrfs/077               |   1 -
- tests/btrfs/078               |   1 -
- tests/btrfs/079               |   1 -
- tests/btrfs/080               |   1 -
- tests/btrfs/081               |   3 +-
- tests/btrfs/083               |   1 -
- tests/btrfs/084               |   1 -
- tests/btrfs/085               |   1 -
- tests/btrfs/086               |   1 -
- tests/btrfs/087               |   1 -
- tests/btrfs/088               |   3 +-
- tests/btrfs/089               |   1 -
- tests/btrfs/091               |   1 -
- tests/btrfs/092               |   1 -
- tests/btrfs/093               |   1 -
- tests/btrfs/094               |   1 -
- tests/btrfs/095               |   1 -
- tests/btrfs/096               |   1 -
- tests/btrfs/097               |   1 -
- tests/btrfs/098               |   1 -
- tests/btrfs/099               |   1 -
- tests/btrfs/100               |   1 -
- tests/btrfs/101               |   1 -
- tests/btrfs/102               |   3 +-
- tests/btrfs/103               |   3 +-
- tests/btrfs/104               |   3 +-
- tests/btrfs/105               |   3 +-
- tests/btrfs/106               |   3 +-
- tests/btrfs/107               |   1 -
- tests/btrfs/108               |   1 -
- tests/btrfs/109               |   1 -
- tests/btrfs/110               |   1 -
- tests/btrfs/111               |   1 -
- tests/btrfs/112               |   1 -
- tests/btrfs/113               |   1 -
- tests/btrfs/114               |   0
- tests/btrfs/116               |   1 -
- tests/btrfs/117               |   1 -
- tests/ext4/001.cfg            |   2 +
- tests/ext4/001.out.nodelalloc | 337 ++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/271                |   1 -
- tests/ext4/301                |   1 -
- tests/ext4/302                |   1 -
- tests/ext4/303                |   1 -
- tests/ext4/304                |   1 -
- tests/ext4/307                |   1 -
- tests/ext4/308                |   1 -
- tests/f2fs/001                |   2 +-
- tests/generic/003             |  20 +--
- tests/generic/009             |   2 +
- tests/generic/013             |   2 +-
- tests/generic/019             |   1 -
- tests/generic/026             |   1 -
- tests/generic/029             |   6 +-
- tests/generic/030             |   6 +-
- tests/generic/031             |   2 +-
- tests/generic/032             |   2 +-
- tests/generic/033             |   2 +-
- tests/generic/034             |   1 -
- tests/generic/037             |   1 -
- tests/generic/038             |   1 -
- tests/generic/039             |   1 -
- tests/generic/040             |   1 -
- tests/generic/041             |   1 -
- tests/generic/053             |   2 -
- tests/generic/053.out         |   2 -
- tests/generic/056             |   1 -
- tests/generic/057             |   1 -
- tests/generic/058             |   0
- tests/generic/059             |   1 -
- tests/generic/060             |   0
- tests/generic/061             |   0
- tests/generic/063             |   0
- tests/generic/065             |   1 -
- tests/generic/066             |   1 -
- tests/generic/071             |   3 +-
- tests/generic/073             |   1 -
- tests/generic/079             |   2 +-
- tests/generic/090             |   1 -
- tests/generic/092             |   0
- tests/generic/093             |   2 -
- tests/generic/094             |   0
- tests/generic/098             |   3 +-
- tests/generic/101             |   1 -
- tests/generic/102             |   1 -
- tests/generic/103             |   0
- tests/generic/104             |   1 -
- tests/generic/106             |   1 -
- tests/generic/107             |   1 -
- tests/generic/113             |   1 +
- tests/generic/116             |   4 +-
- tests/generic/118             |   4 +-
- tests/generic/119             |   6 +-
- tests/generic/121             |   4 +-
- tests/generic/122             |   4 +-
- tests/generic/125             |  68 ---------
- tests/generic/125.out         |   7 -
- tests/generic/134             |   4 +-
- tests/generic/135             |  17 +--
- tests/generic/136             |   4 +-
- tests/generic/137             |   2 +-
- tests/generic/138             |   4 +-
- tests/generic/139             |   4 +-
- tests/generic/140             |   4 +-
- tests/generic/142             |   6 +-
- tests/generic/143             |   6 +-
- tests/generic/144             |   4 +-
- tests/generic/145             |   4 +-
- tests/generic/146             |   4 +-
- tests/generic/147             |   4 +-
- tests/generic/148             |   4 +-
- tests/generic/149             |   4 +-
- tests/generic/150             |   2 +-
- tests/generic/151             |   6 +-
- tests/generic/152             |   6 +-
- tests/generic/153             |   8 +-
- tests/generic/154             |  10 +-
- tests/generic/155             |  10 +-
- tests/generic/156             |  12 +-
- tests/generic/161             |   2 +-
- tests/generic/162             |   2 +-
- tests/generic/163             |   2 +-
- tests/generic/164             |   2 +-
- tests/generic/165             |   2 +-
- tests/generic/166             |   2 +-
- tests/generic/167             |   2 +-
- tests/generic/168             |   2 +-
- tests/generic/169             |  20 +--
- tests/generic/169.out         |   6 +-
- tests/generic/170             |   2 +-
- tests/generic/171             |   2 +-
- tests/generic/172             |   2 +-
- tests/generic/173             |   2 +-
- tests/generic/174             |   2 +-
- tests/generic/175             |   2 +-
- tests/generic/176             |   2 +-
- tests/generic/177             |   1 -
- tests/generic/178             |   4 +-
- tests/generic/179             |   4 +-
- tests/generic/180             |   4 +-
- tests/generic/181             |   2 +-
- tests/generic/182             |   6 +-
- tests/generic/183             |   4 +-
- tests/generic/185             |   4 +-
- tests/generic/186             |   6 +-
- tests/generic/187             |   6 +-
- tests/generic/188             |   4 +-
- tests/generic/189             |   4 +-
- tests/generic/190             |   4 +-
- tests/generic/191             |   4 +-
- tests/generic/192             |   3 +-
- tests/generic/193             |   1 -
- tests/generic/194             |   4 +-
- tests/generic/195             |   4 +-
- tests/generic/196             |   4 +-
- tests/generic/197             |   4 +-
- tests/generic/199             |   4 +-
- tests/generic/200             |   4 +-
- tests/generic/201             |   2 +-
- tests/generic/202             |   4 +-
- tests/generic/203             |   4 +-
- tests/generic/205             |   4 +-
- tests/generic/206             |   4 +-
- tests/generic/214             |   1 +
- tests/generic/216             |   4 +-
- tests/generic/217             |   4 +-
- tests/generic/218             |   4 +-
- tests/generic/220             |   4 +-
- tests/generic/222             |   4 +-
- tests/generic/226             |   3 +-
- tests/generic/227             |   4 +-
- tests/generic/229             |   4 +-
- tests/generic/230             |   1 -
- tests/generic/231             |   1 -
- tests/generic/232             |   1 -
- tests/generic/233             |   1 -
- tests/generic/234             |   1 -
- tests/generic/235             |   1 -
- tests/generic/237             |   1 -
- tests/generic/238             |   4 +-
- tests/generic/242             |   4 +-
- tests/generic/243             |   4 +-
- tests/generic/253             |   6 +-
- tests/generic/254             |   6 +-
- tests/generic/258             |   3 +-
- tests/generic/259             |   6 +-
- tests/generic/261             |   6 +-
- tests/generic/262             |   6 +-
- tests/generic/264             |   6 +-
- tests/generic/265             |   1 -
- tests/generic/266             |   1 -
- tests/generic/267             |   1 -
- tests/generic/268             |   1 -
- tests/generic/269             |   1 -
- tests/generic/270             |   1 -
- tests/generic/271             |   1 -
- tests/generic/272             |   1 -
- tests/generic/273             |   2 +-
- tests/generic/276             |   1 -
- tests/generic/277             |   6 +-
- tests/generic/278             |   1 -
- tests/generic/279             |   1 -
- tests/generic/281             |   1 -
- tests/generic/282             |   1 -
- tests/generic/283             |   1 -
- tests/generic/284             |   4 +-
- tests/generic/287             |   4 +-
- tests/generic/289             |   4 +-
- tests/generic/290             |   4 +-
- tests/generic/291             |   4 +-
- tests/generic/292             |   4 +-
- tests/generic/293             |   4 +-
- tests/generic/295             |   4 +-
- tests/generic/296             |   4 +-
- tests/generic/299             |   1 -
- tests/generic/300             |   1 -
- tests/generic/301             |   4 +-
- tests/generic/302             |   4 +-
- tests/generic/303             |   2 +-
- tests/generic/304             |   2 +-
- tests/generic/305             |   4 +-
- tests/generic/306             |   3 +-
- tests/generic/307             |   4 +-
- tests/generic/311             |   1 -
- tests/generic/312             |  13 +-
- tests/generic/314             |   1 -
- tests/generic/317             |   4 +-
- tests/generic/318             |   4 +-
- tests/generic/319             |   1 -
- tests/generic/321             |   1 -
- tests/generic/322             |   1 -
- tests/generic/324             |   1 -
- tests/generic/325             |   1 -
- tests/generic/326             |   4 +-
- tests/generic/327             |   2 +-
- tests/generic/328             |   2 +-
- tests/generic/330             |   4 +-
- tests/generic/332             |   4 +-
- tests/generic/333             |   2 +-
- tests/generic/334             |   2 +-
- tests/generic/group           |   1 -
- tests/shared/002              |   1 -
- tests/shared/051              |   1 -
- tests/shared/272              |   1 -
- tests/xfs/003                 |   2 -
- tests/xfs/004                 |   1 -
- tests/xfs/067                 |   1 -
- tests/xfs/114                 |   1 -
- tests/xfs/127                 |   2 +-
- tests/xfs/128                 |   6 +-
- tests/xfs/132                 |  12 +-
- tests/xfs/139                 |   4 +-
- tests/xfs/140                 |   4 +-
- tests/xfs/180                 |   4 +-
- tests/xfs/182                 |   4 +-
- tests/xfs/184                 |   4 +-
- tests/xfs/189                 |   1 -
- tests/xfs/192                 |   4 +-
- tests/xfs/193                 |   4 +-
- tests/xfs/198                 |   4 +-
- tests/xfs/200                 |   4 +-
- tests/xfs/204                 |   4 +-
- tests/xfs/207                 |   8 +-
- tests/xfs/208                 |   4 +-
- tests/xfs/209                 |   2 +-
- tests/xfs/211                 |   4 +-
- tests/xfs/212                 |   4 +-
- tests/xfs/213                 |   4 +-
- tests/xfs/214                 |   4 +-
- tests/xfs/215                 |   4 +-
- tests/xfs/218                 |   4 +-
- tests/xfs/219                 |   4 +-
- tests/xfs/221                 |   4 +-
- tests/xfs/223                 |   4 +-
- tests/xfs/224                 |   4 +-
- tests/xfs/225                 |   4 +-
- tests/xfs/226                 |   4 +-
- tests/xfs/228                 |   4 +-
- tests/xfs/230                 |   4 +-
- tests/xfs/231                 |   2 +-
- tests/xfs/232                 |   2 +-
- tests/xfs/233                 |   2 +-
- tests/xfs/239                 |   4 +-
- tests/xfs/241                 |   4 +-
- tests/xfs/243                 |   2 +-
- tests/xfs/245                 |   2 +-
- tests/xfs/248                 |   4 +-
- tests/xfs/249                 |   4 +-
- tests/xfs/251                 |   4 +-
- tests/xfs/254                 |   4 +-
- tests/xfs/255                 |   4 +-
- tests/xfs/256                 |   4 +-
- tests/xfs/257                 |   4 +-
- tests/xfs/258                 |   4 +-
- 337 files changed, 766 insertions(+), 640 deletions(-)
- mode change 100644 => 100755 tests/btrfs/026
- mode change 100644 => 100755 tests/btrfs/104
- mode change 100644 => 100755 tests/btrfs/114
- create mode 100644 tests/ext4/001.out.nodelalloc
- mode change 100644 => 100755 tests/generic/058
- mode change 100644 => 100755 tests/generic/060
- mode change 100644 => 100755 tests/generic/061
- mode change 100644 => 100755 tests/generic/063
- mode change 100644 => 100755 tests/generic/092
- mode change 100644 => 100755 tests/generic/094
- mode change 100644 => 100755 tests/generic/103
- delete mode 100755 tests/generic/125
- delete mode 100644 tests/generic/125.out
- mode change 100644 => 100755 tests/xfs/140
-
+diff --git a/common/rc b/common/rc
+index 18d1a00..42415a7 100644
+--- a/common/rc
++++ b/common/rc
+@@ -329,10 +329,28 @@ _scratch_unmount()
+ 	esac
+ }
+ 
++_scratch_remount()
++{
++    local opts="$1"
++
++    if test -n "$opts"; then
++	mount -o "remount,$opts" $SCRATCH_MNT
++    fi
++}
++
+ _scratch_cycle_mount()
+ {
++    local opts="$1"
++
++    if [ "$FSTYP" = tmpfs ]; then
++	_scratch_remount "$opts"
++	return
++    fi
++    if test -n "$opts"; then
++	opts="-o $opts"
++    fi
+     _scratch_unmount
+-    _scratch_mount
++    _scratch_mount "$opts"
+ }
+ 
+ _test_mount()
+@@ -356,6 +374,9 @@ _test_unmount()
+ 
+ _test_cycle_mount()
+ {
++    if [ "$FSTYP" = tmpfs ]; then
++	return
++    fi
+     _test_unmount
+     _test_mount
+ }
+diff --git a/tests/generic/003 b/tests/generic/003
+index 7ffd09a..710ffc8 100755
+--- a/tests/generic/003
++++ b/tests/generic/003
+@@ -107,9 +107,8 @@ file1_stat_after_second_access=`_stat $TPATH/dir1/file1`
+ _compare_stat_times NNN "$file1_stat_after_first_access" \
+ 	"$file1_stat_after_second_access" "after accessing file1 second time"
+ 
+-# Remounting with nodiratime option
+-_scratch_unmount
+-_scratch_mount "-o nodiratime"
++# Mounting with nodiratime option
++_scratch_cycle_mount "nodiratime"
+ file1_stat_after_remount=`_stat $TPATH/dir1/file1`
+ _compare_stat_times NNN "$file1_stat_after_second_access" \
+ 	"$file1_stat_after_remount" "for file1 after remount"
+@@ -134,9 +133,8 @@ dir2_stat_after_file_access=`_stat $TPATH/dir2`
+ _compare_stat_times NNN "$dir2_stat_after_file_creation" \
+ 	"$dir2_stat_after_file_access" "for dir2 after file access"
+ 
+-# Remounting with noatime option, creating a file and accessing it
+-_scratch_unmount
+-_scratch_mount "-o noatime"
++# Mounting with noatime option, creating a file and accessing it
++_scratch_cycle_mount "noatime"
+ echo "ccc" > $TPATH/dir2/file3
+ file3_stat_before_first_access=`_stat $TPATH/dir2/file3`
+ sleep 1
+@@ -158,10 +156,9 @@ file1_stat_after_change=`_stat $TPATH/dir1/file1_renamed`
+ _compare_stat_times NNY "$file1_stat_after_modify" \
+ 	"$file1_stat_after_change" "after changing file1"
+ 
+-# Remounting with strictatime option and
++# Mounting with strictatime option and
+ # accessing a previously created file twice
+-_scratch_unmount
+-_scratch_mount "-o strictatime"
++_scratch_cycle_mount "strictatime"
+ cat $TPATH/dir2/file3 > /dev/null
+ file3_stat_after_second_access=`_stat $TPATH/dir2/file3`
+ _compare_stat_times YNN "$file3_stat_after_first_access" \
+@@ -189,13 +186,12 @@ if [ "$FSTYP" = "btrfs" ]; then
+ 		"$file3_stat_readonly_after_access" "for file in readonly subvol"
+ fi
+ 
+-# Remounting read-only. Access time should never be updated, despite the
++# Mounting read-only. Access time should never be updated, despite the
+ # strictatime mount option.
+ sleep 1
+ dir2_stat_before_ro_mount=`_stat $TPATH/dir2`
+ file3_stat_before_ro_mount=`_stat $TPATH/dir2/file3`
+-_scratch_unmount
+-_scratch_mount "-o ro,strictatime"
++_scratch_cycle_mount "ro,strictatime"
+ ls $TPATH/dir2 > /dev/null
+ cat $TPATH/dir2/file3 > /dev/null
+ dir2_stat_after_ro_mount=`_stat $TPATH/dir2`
+diff --git a/tests/generic/135 b/tests/generic/135
+index 4400672..ec5a320 100755
+--- a/tests/generic/135
++++ b/tests/generic/135
+@@ -41,19 +41,8 @@ _supported_os Linux IRIX
+ 
+ _require_odirect
+ _require_scratch
+-_scratch_mkfs >/dev/null 2>&1
+-
+-_umount_mount()
+-{
+-    CWD=`pwd`
+-    cd /
+-    # pipe error into /dev/null, in case not mounted (after _require_scratch)
+-    _scratch_unmount 2>/dev/null
+-    _scratch_mount
+-    cd "$CWD"
+-}
+-
+-_umount_mount
++_scratch_mkfs >/dev/null
++_scratch_mount
+ 
+ cd $SCRATCH_MNT
+ 
+@@ -71,7 +60,7 @@ $XFS_IO_PROG -f -c 'pwrite -b 4k -S 0x78 0 4k' trunc_file > /dev/null
+ $XFS_IO_PROG -f -c 'truncate 2k' trunc_file > /dev/null
+ $XFS_IO_PROG -c 'pwrite 1k 0 1k' trunc_file > /dev/null
+ 
+-_umount_mount
++_scratch_cycle_mount
+ 
+ # check file size and contents
+ od -Ad -x async_file
+diff --git a/tests/generic/169 b/tests/generic/169
+index 839ff9d..f51f4d1 100755
+--- a/tests/generic/169
++++ b/tests/generic/169
+@@ -73,13 +73,9 @@ $XFS_IO_PROG -a -c "pwrite 0 5k" -c "fsync" \
+ 	$SCRATCH_MNT/testfile \
+ 	| _show_wrote_and_stat_only
+ 
+-echo "# unmounting scratch"
+-_scratch_unmount>>$seqres.full 2>&1 \
+-    || _fail "unmount failed"
+-
+-echo "# mounting scratch"
+-_scratch_mount >>$seqres.full 2>&1 \
+-    || _fail "mount failed: $MOUNT_OPTIONS"
++echo "# remounting scratch"
++_scratch_cycle_mount >>$seqres.full 2>&1 \
++    || _fail "remount failed: $MOUNT_OPTIONS"
+ 
+ echo "# stating file to confirm correct size"
+ $XFS_IO_PROG -r -c "stat" $SCRATCH_MNT/testfile \
+@@ -90,13 +86,9 @@ $XFS_IO_PROG -f -c "pwrite 0 5" -c s -c "pwrite 5 5" \
+ 	-c "stat" $SCRATCH_MNT/nextfile \
+ 	| _show_wrote_and_stat_only
+ 
+-echo "# unmounting scratch"
+-_scratch_unmount>>$seqres.full 2>&1 \
+-    || _fail "unmount failed"
+-
+-echo "# mounting scratch"
+-_scratch_mount >>$seqres.full 2>&1 \
+-    || _fail "mount failed: $MOUNT_OPTIONS"
++echo "# remounting scratch"
++_scratch_cycle_mount >>$seqres.full 2>&1 \
++    || _fail "remount failed: $MOUNT_OPTIONS"
+ 
+ echo "# stating file to confirm correct size"
+ $XFS_IO_PROG -r -c "stat" $SCRATCH_MNT/nextfile \
+diff --git a/tests/generic/169.out b/tests/generic/169.out
+index 22a5b77..5f7df39 100644
+--- a/tests/generic/169.out
++++ b/tests/generic/169.out
+@@ -5,15 +5,13 @@ wrote 5120/5120 bytes at offset 0
+ wrote 5120/5120 bytes at offset 5120
+ wrote 5120/5120 bytes at offset 10240
+ stat.size = 15360
+-# unmounting scratch
+-# mounting scratch
++# remounting scratch
+ # stating file to confirm correct size
+ stat.size = 15360
+ # appending 10 bytes to new file, sync at 5 bytes
+ wrote 5/5 bytes at offset 0
+ wrote 5/5 bytes at offset 5
+ stat.size = 10
+-# unmounting scratch
+-# mounting scratch
++# remounting scratch
+ # stating file to confirm correct size
+ stat.size = 10
+diff --git a/tests/generic/192 b/tests/generic/192
+index ebabea2..6bbc87c 100755
+--- a/tests/generic/192
++++ b/tests/generic/192
+@@ -78,8 +78,7 @@ cat $testfile
+ time2=`_access_time $testfile | tee -a $seqres.full`
+ 
+ cd /
+-_test_unmount
+-_test_mount
++_test_cycle_mount
+ time3=`_access_time $testfile | tee -a $seqres.full`
+ 
+ delta1=`expr $time2 - $time1`
+diff --git a/tests/generic/226 b/tests/generic/226
+index b12965a..a099ec6 100755
+--- a/tests/generic/226
++++ b/tests/generic/226
+@@ -61,8 +61,7 @@ for I in `seq 1 $loops`; do
+ done
+ 
+ echo
+-_scratch_unmount
+-_scratch_mount
++_scratch_cycle_mount
+ 
+ echo "--> $loops direct 64m writes in a loop"
+ for I in `seq 1 $loops`; do
+diff --git a/tests/generic/258 b/tests/generic/258
+index 285a422..d28437f 100755
+--- a/tests/generic/258
++++ b/tests/generic/258
+@@ -62,8 +62,7 @@ fi
+ 
+ # unmount, remount, and check the timestamp
+ echo "Remounting to flush cache"
+-_test_unmount
+-_test_mount
++_test_cycle_mount
+ 
+ # Should yield -315593940 (prior to epoch)
+ echo "Testing for negative seconds since epoch"
+diff --git a/tests/generic/306 b/tests/generic/306
+index 64d8cde..86fd829 100755
+--- a/tests/generic/306
++++ b/tests/generic/306
+@@ -67,8 +67,7 @@ touch $BINDFILE || _fail "Could not create bind mount file"
+ touch $TARGET || _fail "Could not create symlink target"
+ ln -s $TARGET $SYMLINK
+ 
+-_scratch_unmount || _fail "Could not unmount scratch device"
+-_scratch_mount -o ro || _fail "Could not mount scratch readonly"
++_scratch_remount ro || _fail "Could not remount scratch readonly"
+ 
+ # We should be able to read & write to/from these devices even on an RO fs
+ echo "== try to create new file"
+diff --git a/tests/generic/317 b/tests/generic/317
+index 68f231c..a5d8804 100755
+--- a/tests/generic/317
++++ b/tests/generic/317
+@@ -96,8 +96,7 @@ echo ""
+ echo "*** Remounting ***"
+ echo ""
+ sync
+-_scratch_unmount >>$seqres.full 2>&1
+-_scratch_mount      >>$seqres.full 2>&1 || _fail "mount failed"
++_scratch_cycle_mount      >>$seqres.full 2>&1 || _fail "remount failed"
+ 
+ _print_numeric_uid
+ 
+diff --git a/tests/generic/318 b/tests/generic/318
+index c730b50..f850a9b 100755
+--- a/tests/generic/318
++++ b/tests/generic/318
+@@ -109,8 +109,7 @@ _print_getfacls
+ echo "*** Remounting ***"
+ echo ""
+ sync
+-_scratch_unmount >>$seqres.full 2>&1
+-_scratch_mount      >>$seqres.full 2>&1 || _fail "mount failed"
++_scratch_cycle_mount      >>$seqres.full 2>&1 || _fail "remount failed"
+ 
+ _print_getfacls
+ 
 -- 
 2.5.0
 
