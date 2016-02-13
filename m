@@ -1,381 +1,53 @@
-Received: from imap.thunk.org ([74.207.234.97]:34548 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:34551 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751008AbcBMRlQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+	id S1751024AbcBMRlQ (ORCPT <rfc822;fstests@vger.kernel.org>);
 	Sat, 13 Feb 2016 12:41:16 -0500
 From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH 01/16] ext4/001: add output variant for nodelalloc mounts
-Date: Sat, 13 Feb 2016 12:40:54 -0500
-Message-Id: <1455385269-26319-2-git-send-email-tytso@mit.edu>
+Subject: [PATCH 12/16] xfstests: remove dependency on /proc/partitions for generic/312
+Date: Sat, 13 Feb 2016 12:41:05 -0500
+Message-Id: <1455385269-26319-13-git-send-email-tytso@mit.edu>
 In-Reply-To: <1455385269-26319-1-git-send-email-tytso@mit.edu>
 References: <1455385269-26319-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: hughd@google.com, Theodore Ts'o <tytso@mit.edu>, Jan Kara <jack@suse.cz>
+Cc: hughd@google.com, Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-If the delayed allocation is disabled, we need a slightly different
-output for the delayed allocation portion of the tests.
+From: Hugh Dickins <hughd@google.com>
+
+This allows this test to work with tmpfs, if the system has at least
+5G of free memory.
 
 Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-Cc: Jan Kara <jack@suse.cz>
 ---
- tests/ext4/001.cfg            |   2 +
- tests/ext4/001.out.nodelalloc | 337 ++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 339 insertions(+)
- create mode 100644 tests/ext4/001.out.nodelalloc
+ tests/generic/312 | 13 ++++++++-----
+ 1 file changed, 8 insertions(+), 5 deletions(-)
 
-diff --git a/tests/ext4/001.cfg b/tests/ext4/001.cfg
-index 1942203..5f7e262 100644
---- a/tests/ext4/001.cfg
-+++ b/tests/ext4/001.cfg
-@@ -1,2 +1,4 @@
- dax: nozero
- dioread_nolock: nozero
-+nodelalloc: nodelalloc
-+data=journal: nodelalloc
-diff --git a/tests/ext4/001.out.nodelalloc b/tests/ext4/001.out.nodelalloc
-new file mode 100644
-index 0000000..212c247
---- /dev/null
-+++ b/tests/ext4/001.out.nodelalloc
-@@ -0,0 +1,337 @@
-+QA output created by 001
-+	1. into a hole
-+0: [0..7]: hole
-+1: [8..23]: unwritten
-+2: [24..39]: hole
-+daa100df6e6711906b61c9ab5aa16032
-+	2. into allocated space
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: data
-+cc58a7417c2d7763adc45b6fcd3fa024
-+	3. into unwritten space
-+0: [0..39]: unwritten
-+daa100df6e6711906b61c9ab5aa16032
-+	4. hole -> data
-+0: [0..7]: hole
-+1: [8..23]: unwritten
-+2: [24..31]: data
-+3: [32..39]: hole
-+cc63069677939f69a6e8f68cae6a6dac
-+	5. hole -> unwritten
-+0: [0..7]: hole
-+1: [8..31]: unwritten
-+2: [32..39]: hole
-+daa100df6e6711906b61c9ab5aa16032
-+	6. data -> hole
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: hole
-+1b3779878366498b28c702ef88c4a773
-+	7. data -> unwritten
-+0: [0..7]: data
-+1: [8..31]: unwritten
-+2: [32..39]: hole
-+1b3779878366498b28c702ef88c4a773
-+	8. unwritten -> hole
-+0: [0..23]: unwritten
-+1: [24..39]: hole
-+daa100df6e6711906b61c9ab5aa16032
-+	9. unwritten -> data
-+0: [0..23]: unwritten
-+1: [24..31]: data
-+2: [32..39]: hole
-+cc63069677939f69a6e8f68cae6a6dac
-+	10. hole -> data -> hole
-+0: [0..7]: hole
-+1: [8..31]: unwritten
-+2: [32..39]: hole
-+daa100df6e6711906b61c9ab5aa16032
-+	11. data -> hole -> data
-+0: [0..7]: data
-+1: [8..31]: unwritten
-+2: [32..39]: data
-+f6aeca13ec49e5b266cd1c913cd726e3
-+	12. unwritten -> data -> unwritten
-+0: [0..7]: data
-+1: [8..31]: unwritten
-+2: [32..39]: data
-+daa100df6e6711906b61c9ab5aa16032
-+	13. data -> unwritten -> data
-+0: [0..7]: data
-+1: [8..31]: unwritten
-+2: [32..39]: data
-+f6aeca13ec49e5b266cd1c913cd726e3
-+	14. data -> hole @ EOF
-+0: [0..23]: data
-+1: [24..39]: unwritten
-+e1f024eedd27ea6b1c3e9b841c850404
-+	15. data -> hole @ 0
-+0: [0..15]: unwritten
-+1: [16..39]: data
-+eecb7aa303d121835de05028751d301c
-+	16. data -> cache cold ->hole
-+0: [0..15]: unwritten
-+1: [16..39]: data
-+eecb7aa303d121835de05028751d301c
-+	17. data -> hole in single block file
-+0: [0..7]: data
-+0000000 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
-+*
-+0000200 0000 0000 0000 0000 0000 0000 0000 0000
-+*
-+0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
-+*
-+	1. into a hole
-+0: [0..7]: hole
-+1: [8..23]: unwritten
-+2: [24..39]: hole
-+daa100df6e6711906b61c9ab5aa16032
-+	2. into allocated space
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: data
-+cc58a7417c2d7763adc45b6fcd3fa024
-+	3. into unwritten space
-+0: [0..39]: unwritten
-+daa100df6e6711906b61c9ab5aa16032
-+	4. hole -> data
-+0: [0..7]: hole
-+1: [8..23]: unwritten
-+2: [24..31]: data
-+3: [32..39]: hole
-+cc63069677939f69a6e8f68cae6a6dac
-+	5. hole -> unwritten
-+0: [0..7]: hole
-+1: [8..31]: unwritten
-+2: [32..39]: hole
-+daa100df6e6711906b61c9ab5aa16032
-+	6. data -> hole
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: hole
-+1b3779878366498b28c702ef88c4a773
-+	7. data -> unwritten
-+0: [0..7]: data
-+1: [8..31]: unwritten
-+2: [32..39]: hole
-+1b3779878366498b28c702ef88c4a773
-+	8. unwritten -> hole
-+0: [0..23]: unwritten
-+1: [24..39]: hole
-+daa100df6e6711906b61c9ab5aa16032
-+	9. unwritten -> data
-+0: [0..23]: unwritten
-+1: [24..31]: data
-+2: [32..39]: hole
-+cc63069677939f69a6e8f68cae6a6dac
-+	10. hole -> data -> hole
-+0: [0..7]: hole
-+1: [8..31]: unwritten
-+2: [32..39]: hole
-+daa100df6e6711906b61c9ab5aa16032
-+	11. data -> hole -> data
-+0: [0..7]: data
-+1: [8..31]: unwritten
-+2: [32..39]: data
-+f6aeca13ec49e5b266cd1c913cd726e3
-+	12. unwritten -> data -> unwritten
-+0: [0..7]: data
-+1: [8..31]: unwritten
-+2: [32..39]: data
-+daa100df6e6711906b61c9ab5aa16032
-+	13. data -> unwritten -> data
-+0: [0..7]: data
-+1: [8..31]: unwritten
-+2: [32..39]: data
-+f6aeca13ec49e5b266cd1c913cd726e3
-+	14. data -> hole @ EOF
-+0: [0..23]: data
-+1: [24..39]: unwritten
-+e1f024eedd27ea6b1c3e9b841c850404
-+	15. data -> hole @ 0
-+0: [0..15]: unwritten
-+1: [16..39]: data
-+eecb7aa303d121835de05028751d301c
-+	16. data -> cache cold ->hole
-+0: [0..15]: unwritten
-+1: [16..39]: data
-+eecb7aa303d121835de05028751d301c
-+	17. data -> hole in single block file
-+0: [0..7]: data
-+0000000 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
-+*
-+0000200 0000 0000 0000 0000 0000 0000 0000 0000
-+*
-+0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
-+*
-+	1. into a hole
-+0: [0..7]: hole
-+1: [8..23]: unwritten
-+2: [24..39]: hole
-+daa100df6e6711906b61c9ab5aa16032
-+	2. into allocated space
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: data
-+cc58a7417c2d7763adc45b6fcd3fa024
-+	3. into unwritten space
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: data
-+cc58a7417c2d7763adc45b6fcd3fa024
-+	4. hole -> data
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: data
-+cc58a7417c2d7763adc45b6fcd3fa024
-+	5. hole -> unwritten
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: data
-+cc58a7417c2d7763adc45b6fcd3fa024
-+	6. data -> hole
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: data
-+cc58a7417c2d7763adc45b6fcd3fa024
-+	7. data -> unwritten
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: data
-+cc58a7417c2d7763adc45b6fcd3fa024
-+	8. unwritten -> hole
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: data
-+cc58a7417c2d7763adc45b6fcd3fa024
-+	9. unwritten -> data
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: data
-+cc58a7417c2d7763adc45b6fcd3fa024
-+	10. hole -> data -> hole
-+0: [0..7]: data
-+1: [8..31]: unwritten
-+2: [32..39]: data
-+f6aeca13ec49e5b266cd1c913cd726e3
-+	11. data -> hole -> data
-+0: [0..7]: data
-+1: [8..31]: unwritten
-+2: [32..39]: data
-+f6aeca13ec49e5b266cd1c913cd726e3
-+	12. unwritten -> data -> unwritten
-+0: [0..7]: data
-+1: [8..31]: unwritten
-+2: [32..39]: data
-+f6aeca13ec49e5b266cd1c913cd726e3
-+	13. data -> unwritten -> data
-+0: [0..7]: data
-+1: [8..31]: unwritten
-+2: [32..39]: data
-+f6aeca13ec49e5b266cd1c913cd726e3
-+	14. data -> hole @ EOF
-+0: [0..23]: data
-+1: [24..39]: unwritten
-+e1f024eedd27ea6b1c3e9b841c850404
-+	15. data -> hole @ 0
-+0: [0..15]: unwritten
-+1: [16..39]: data
-+eecb7aa303d121835de05028751d301c
-+	16. data -> cache cold ->hole
-+0: [0..15]: unwritten
-+1: [16..39]: data
-+eecb7aa303d121835de05028751d301c
-+	17. data -> hole in single block file
-+0: [0..7]: data
-+0000000 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
-+*
-+0000200 0000 0000 0000 0000 0000 0000 0000 0000
-+*
-+0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
-+*
-+	1. into a hole
-+0: [0..7]: hole
-+1: [8..23]: unwritten
-+2: [24..39]: hole
-+daa100df6e6711906b61c9ab5aa16032
-+	2. into allocated space
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: data
-+cc58a7417c2d7763adc45b6fcd3fa024
-+	3. into unwritten space
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: data
-+cc58a7417c2d7763adc45b6fcd3fa024
-+	4. hole -> data
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: data
-+cc58a7417c2d7763adc45b6fcd3fa024
-+	5. hole -> unwritten
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: data
-+cc58a7417c2d7763adc45b6fcd3fa024
-+	6. data -> hole
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: data
-+cc58a7417c2d7763adc45b6fcd3fa024
-+	7. data -> unwritten
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: data
-+cc58a7417c2d7763adc45b6fcd3fa024
-+	8. unwritten -> hole
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: data
-+cc58a7417c2d7763adc45b6fcd3fa024
-+	9. unwritten -> data
-+0: [0..7]: data
-+1: [8..23]: unwritten
-+2: [24..39]: data
-+cc58a7417c2d7763adc45b6fcd3fa024
-+	10. hole -> data -> hole
-+0: [0..7]: data
-+1: [8..31]: unwritten
-+2: [32..39]: data
-+f6aeca13ec49e5b266cd1c913cd726e3
-+	11. data -> hole -> data
-+0: [0..7]: data
-+1: [8..31]: unwritten
-+2: [32..39]: data
-+f6aeca13ec49e5b266cd1c913cd726e3
-+	12. unwritten -> data -> unwritten
-+0: [0..7]: data
-+1: [8..31]: unwritten
-+2: [32..39]: data
-+f6aeca13ec49e5b266cd1c913cd726e3
-+	13. data -> unwritten -> data
-+0: [0..7]: data
-+1: [8..31]: unwritten
-+2: [32..39]: data
-+f6aeca13ec49e5b266cd1c913cd726e3
-+	14. data -> hole @ EOF
-+0: [0..23]: data
-+1: [24..39]: unwritten
-+e1f024eedd27ea6b1c3e9b841c850404
-+	15. data -> hole @ 0
-+0: [0..15]: unwritten
-+1: [16..39]: data
-+eecb7aa303d121835de05028751d301c
-+	16. data -> cache cold ->hole
-+0: [0..15]: unwritten
-+1: [16..39]: data
-+eecb7aa303d121835de05028751d301c
-+	17. data -> hole in single block file
-+0: [0..7]: data
-+0000000 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
-+*
-+0000200 0000 0000 0000 0000 0000 0000 0000 0000
-+*
-+0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
-+*
+diff --git a/tests/generic/312 b/tests/generic/312
+index b570814..639eb57 100755
+--- a/tests/generic/312
++++ b/tests/generic/312
+@@ -51,12 +51,15 @@ _require_scratch
+ 
+ # 5G in byte
+ fssize=$((2**30 * 5))
+-required_blocks=$(($fssize / 1024))
+-dev_blocks=$(grep -w $(_short_dev $SCRATCH_DEV) /proc/partitions | $AWK_PROG '{print $3}')
+-if [ $required_blocks -gt $dev_blocks ];then
+-	_notrun "this test requires \$SCRATCH_DEV has ${fssize}B space"
+-fi
+ 
++# We don't need to do this check for tmpfs because _scratch_mkfs_size
++# will validate the size against the available memory
++if [ "$FSTYP" != "tmpfs" ]; then
++   _scratch_mkfs
++   _scratch_mount
++   _require_fs_space $SCRATCH_MNT $(($fssize / 1024))
++   _scratch_unmount
++fi
+ rm -f $seqres.full
+ _scratch_mkfs_sized $fssize >>$seqres.full 2>&1
+ _scratch_mount >>$seqres.full 2>&1
 -- 
 2.5.0
 
