@@ -1,11 +1,11 @@
-Received: from mail.kernel.org ([198.145.29.136]:34433 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.136]:34416 "EHLO mail.kernel.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750925AbcBOKyk (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 15 Feb 2016 05:54:40 -0500
+	id S1750922AbcBOKy3 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 15 Feb 2016 05:54:29 -0500
 From: fdmanana@kernel.org
-Subject: [PATCH 2/2] fstests: generic test for file fsync after rename operation
-Date: Mon, 15 Feb 2016 10:54:34 +0000
-Message-Id: <1455533674-7753-1-git-send-email-fdmanana@kernel.org>
+Subject: [PATCH 1/2] fstests: generic test for directory fsync after rename operation
+Date: Mon, 15 Feb 2016 10:54:23 +0000
+Message-Id: <1455533663-7704-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
@@ -13,16 +13,14 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Filipe Manana <fdmanana@suse.com>
 
-Test that if we have a file F1 with two links, one in a directory A and
-the other in directory B, if we remove the link in directory B, move some
-other file F2 from directory B into directory C, fsync inode F1, power
-fail and remount the filesystem, file F2 exists and is located only in
-directory C.
+Test that if we move one file between directories, fsync the parent
+directory of the old directory, power fail and remount the filesystem,
+the file is not lost and it's located at the destination directory.
 
 This is motivated by a bug found in btrfs, which is fixed by the patch
 (for the linux kernel) titled:
 
-   "Btrfs: fix file loss on log replay after renaming a file and fsync"
+  "Btrfs: fix file loss on log replay after renaming a file and fsync"
 
 Tested against ext3, ext4, xfs, f2fs and reiserfs.
 
@@ -32,26 +30,25 @@ Signed-off-by: Filipe Manana <fdmanana@suse.com>
 Resend since it was not picked in the last update.
 Rebased against current master branch (changed test number).
 
- tests/generic/336     | 95 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/336.out |  2 ++
+ tests/generic/335     | 96 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/335.out |  2 ++
  tests/generic/group   |  1 +
- 3 files changed, 98 insertions(+)
- create mode 100755 tests/generic/336
- create mode 100644 tests/generic/336.out
+ 3 files changed, 99 insertions(+)
+ create mode 100755 tests/generic/335
+ create mode 100644 tests/generic/335.out
 
-diff --git a/tests/generic/336 b/tests/generic/336
+diff --git a/tests/generic/335 b/tests/generic/335
 new file mode 100755
-index 0000000..f784b98
+index 0000000..544533c
 --- /dev/null
-+++ b/tests/generic/336
-@@ -0,0 +1,95 @@
++++ b/tests/generic/335
+@@ -0,0 +1,96 @@
 +#! /bin/bash
-+# FSQA Test No. 336
++# FSQA Test No. 335
 +#
-+# Test that if we have a file F1 with two links, one in a directory A and the
-+# other in directory B, if we remove the link in directory B, move some other
-+# file F2 from directory B into directory C, fsync inode F1, power fail and
-+# remount the filesystem, file F2 exists and is located only in directory C.
++# Test that if we move one file between directories, fsync the parent directory
++# of the old directory, power fail and remount the filesystem, the file is not
++# lost and it's located at the destination directory.
 +#
 +#-----------------------------------------------------------------------
 +#
@@ -107,56 +104,58 @@ index 0000000..f784b98
 +_mount_flakey
 +
 +# Create our test directories and the file we will later check if it has
-+# disappeared (file bar).
-+mkdir $SCRATCH_MNT/a
-+mkdir $SCRATCH_MNT/b
++# disappeared.
++mkdir -p $SCRATCH_MNT/a/b
 +mkdir $SCRATCH_MNT/c
-+touch $SCRATCH_MNT/a/foo
-+ln $SCRATCH_MNT/a/foo $SCRATCH_MNT/b/foo_link
-+touch $SCRATCH_MNT/b/bar
++touch $SCRATCH_MNT/a/b/foo
 +
 +# Make sure everything is durably persisted.
 +sync
 +
-+# Now delete one of the hard links of file foo and move file bar into c/
-+unlink $SCRATCH_MNT/b/foo_link
-+mv $SCRATCH_MNT/b/bar $SCRATCH_MNT/c/
++# Now move our test file into a new parent directory.
++mv $SCRATCH_MNT/a/b/foo $SCRATCH_MNT/c/
 +
-+# Now fsync file foo.
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/a/foo
++# Create a new file inside the parent directory of the directory where our test
++# file foo was previously at. This is just to ensure the fsync we do next
++# against that parent directory actually does something and it's not a noop.
++touch $SCRATCH_MNT/a/bar
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/a
 +
 +# Simulate a power failure / crash and remount the filesystem, so that the
 +# journal/log is replayed.
 +_flakey_drop_and_remount
 +
-+# We expect that after the journal/log was replayed, we no longer have the link
-+# foo_link and file bar was moved from directory b/ to directory c/.
-+[ -e $SCRATCH_MNT/b/foo_link ] && echo "Link foo_link still exists"
-+[ -e $SCRATCH_MNT/b/bar ] && echo "File bar is still at directory b/"
-+[ -e $SCRATCH_MNT/c/bar ] || echo "File bar is not at directory c/"
++# We expect our file foo to exist, have an entry in the new parent
++# directory (c/) and not have anymore an entry in the old parent directory
++# (a/b/).
++[ -e $SCRATCH_MNT/a/b/foo ] && echo "File foo is still at directory a/b/"
++[ -e $SCRATCH_MNT/c/foo ] || echo "File foo is not at directory c/"
++
++# The new file named bar should also exist.
++[ -e $SCRATCH_MNT/a/bar ] || echo "File bar is missing"
 +
 +_unmount_flakey
 +
 +echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/generic/336.out b/tests/generic/336.out
+diff --git a/tests/generic/335.out b/tests/generic/335.out
 new file mode 100644
-index 0000000..9263628
+index 0000000..353f394
 --- /dev/null
-+++ b/tests/generic/336.out
++++ b/tests/generic/335.out
 @@ -0,0 +1,2 @@
-+QA output created by 336
++QA output created by 335
 +Silence is golden
 diff --git a/tests/generic/group b/tests/generic/group
-index f270edb..a47e23d 100644
+index 5f699ce..f270edb 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -338,3 +338,4 @@
+@@ -337,3 +337,4 @@
+ 332 auto quick clone
  333 auto clone
  334 auto clone
- 335 auto quick metadata
-+336 auto quick metadata
++335 auto quick metadata
 -- 
 2.7.0.rc3
 
