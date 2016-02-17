@@ -1,27 +1,28 @@
-Received: from imap.thunk.org ([74.207.234.97]:41266 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:45332 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753546AbcBPGnw (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 16 Feb 2016 01:43:52 -0500
-Date: Tue, 16 Feb 2016 01:43:48 -0500
+	id S1750812AbcBQDFu (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 16 Feb 2016 22:05:50 -0500
+Date: Tue, 16 Feb 2016 22:05:47 -0500
 From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH-v3a 09/16] xfstests: do not unmount tmpfs during remount
-Message-ID: <20160216064348.GC3426@thunk.org>
+Subject: Re: [PATCH-v3b 09/16] xfstests: do not unmount tmpfs during remount
+Message-ID: <20160217030547.GD3426@thunk.org>
 References: <1455385269-26319-1-git-send-email-tytso@mit.edu>
  <1455385269-26319-10-git-send-email-tytso@mit.edu>
+ <20160216064348.GC3426@thunk.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1455385269-26319-10-git-send-email-tytso@mit.edu>
+In-Reply-To: <20160216064348.GC3426@thunk.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: hughd@google.com, Junho Ryu <jayr@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-I screwed up the test generic/135 in the previous version of the
-commit.  Here is a revised version, which avoids an EBUSY due to CWD
-being in SCRATCH_MNT when we attempted to unmount it.
-
-      	 	     	     	       	  	  - Ted
+Sigh, one more revision.  Previous versions of this patch accidentally
+removed 2>&1 from the _scratch_mkfs line, and this caused failures
+when using a 1k block size and mke2fs would issue a warning that the
+blocksize is smaller than the physical blocksize (which results in
+non-optimal performance).
 
 >From a46e47d549f0d43f6c32f54e89817cc1a602b9bf Mon Sep 17 00:00:00 2001
 From: Junho Ryu <jayr@google.com>
