@@ -1,18 +1,18 @@
-Received: from bombadil.infradead.org ([198.137.202.9]:43641 "EHLO
+Received: from bombadil.infradead.org ([198.137.202.9]:43974 "EHLO
 	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933384AbcBQJ5R (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 17 Feb 2016 04:57:17 -0500
-Date: Wed, 17 Feb 2016 01:57:16 -0800
+	with ESMTP id S933325AbcBQJ6N (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 17 Feb 2016 04:58:13 -0500
+Date: Wed, 17 Feb 2016 01:58:12 -0800
 From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 2/3] punch-alternating: use the block size reported by
- the fs for punching
-Message-ID: <20160217095716.GB21482@infradead.org>
+Subject: Re: [PATCH 3/3] xfs/24[356]: check for -c switch to xfs_io bmap
+ command
+Message-ID: <20160217095812.GC21482@infradead.org>
 References: <20160215204608.7977.2802.stgit@birch.djwong.org>
- <20160215204621.7977.91236.stgit@birch.djwong.org>
+ <20160215204627.7977.93549.stgit@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160215204621.7977.91236.stgit@birch.djwong.org>
+In-Reply-To: <20160215204627.7977.93549.stgit@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
 To: "Darrick J. Wong" <darrick.wong@oracle.com>
 Cc: david@fromorbit.com, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
