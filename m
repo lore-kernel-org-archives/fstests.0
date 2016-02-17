@@ -1,25 +1,29 @@
-Received: from bombadil.infradead.org ([198.137.202.9]:47308 "EHLO
+Received: from bombadil.infradead.org ([198.137.202.9]:48096 "EHLO
 	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933451AbcBQKJY (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 17 Feb 2016 05:09:24 -0500
-Date: Wed, 17 Feb 2016 02:09:23 -0800
+	with ESMTP id S933451AbcBQKKN (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 17 Feb 2016 05:10:13 -0500
+Date: Wed, 17 Feb 2016 02:10:12 -0800
 From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 16/16] xfstests: remove _need_to_be_root
-Message-ID: <20160217100923.GO21482@infradead.org>
-References: <1455385269-26319-1-git-send-email-tytso@mit.edu>
- <1455385269-26319-17-git-send-email-tytso@mit.edu>
+Subject: Re: [PATCH 1/3] generic/304: fix high offset
+Message-ID: <20160217101012.GA15314@infradead.org>
+References: <20160215204608.7977.2802.stgit@birch.djwong.org>
+ <20160215204614.7977.2848.stgit@birch.djwong.org>
+ <20160217095646.GA21482@infradead.org>
+ <CAL3q7H5NRUXvo=mEtGr4-S4yPT7k_yw6LsMAq_V8bPD1T=7r0g@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1455385269-26319-17-git-send-email-tytso@mit.edu>
+In-Reply-To: <CAL3q7H5NRUXvo=mEtGr4-S4yPT7k_yw6LsMAq_V8bPD1T=7r0g@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, hughd@google.com
+To: Filipe Manana <fdmanana@gmail.com>
+Cc: Christoph Hellwig <hch@infradead.org>, "Darrick J. Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org, "xfs@oss.sgi.com" <xfs@oss.sgi.com>
 List-ID: <fstests@vger.kernel.org>
 
-Looks good,
+On Wed, Feb 17, 2016 at 10:04:23AM +0000, Filipe Manana wrote:
+> > What does btrfs return here?
+> 
+> -EINVAL, so this makes the test pass on btrfs.
+
+Ok, looks fine to me then:
 
 Reviewed-by: Christoph Hellwig <hch@lst.de>
-
-While you're at it it would be nice to also remove the odd instruction
-of adding the '123456-fsgqa' test user in README.
