@@ -1,30 +1,25 @@
-Received: from bombadil.infradead.org ([198.137.202.9]:46145 "EHLO
+Received: from bombadil.infradead.org ([198.137.202.9]:47308 "EHLO
 	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933451AbcBQKI1 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 17 Feb 2016 05:08:27 -0500
-Date: Wed, 17 Feb 2016 02:08:26 -0800
+	with ESMTP id S933451AbcBQKJY (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 17 Feb 2016 05:09:24 -0500
+Date: Wed, 17 Feb 2016 02:09:23 -0800
 From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 15/16] xfstests: increase tmpfs memory size
-Message-ID: <20160217100826.GN21482@infradead.org>
+Subject: Re: [PATCH 16/16] xfstests: remove _need_to_be_root
+Message-ID: <20160217100923.GO21482@infradead.org>
 References: <1455385269-26319-1-git-send-email-tytso@mit.edu>
- <1455385269-26319-16-git-send-email-tytso@mit.edu>
+ <1455385269-26319-17-git-send-email-tytso@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1455385269-26319-16-git-send-email-tytso@mit.edu>
+In-Reply-To: <1455385269-26319-17-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
 To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, hughd@google.com, Junho Ryu <jayr@google.com>
+Cc: fstests@vger.kernel.org, hughd@google.com
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Feb 13, 2016 at 12:41:08PM -0500, Theodore Ts'o wrote:
-> From: Hugh Dickins <hughd@google.com>
-> 
-> 512M is not enough for generic/129.  Raise default tmpfs size to 1G.
-
-That also means generic/129 should check for the available space.
-
-Otherwise I'm fine with if if you tmpfs testers think 1G is the proper
-default.
+Looks good,
 
 Reviewed-by: Christoph Hellwig <hch@lst.de>
+
+While you're at it it would be nice to also remove the odd instruction
+of adding the '123456-fsgqa' test user in README.
