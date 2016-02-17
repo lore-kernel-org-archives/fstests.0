@@ -1,29 +1,37 @@
-Received: from bombadil.infradead.org ([198.137.202.9]:48096 "EHLO
+Received: from bombadil.infradead.org ([198.137.202.9]:56672 "EHLO
 	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933451AbcBQKKN (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 17 Feb 2016 05:10:13 -0500
-Date: Wed, 17 Feb 2016 02:10:12 -0800
+	with ESMTP id S964947AbcBQKXX (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 17 Feb 2016 05:23:23 -0500
+Received: from hch by bombadil.infradead.org with local (Exim 4.80.1 #2 (Red Hat Linux))
+	id 1aVzGV-0004Ts-F8
+	for fstests@vger.kernel.org; Wed, 17 Feb 2016 10:23:23 +0000
+Date: Wed, 17 Feb 2016 02:23:23 -0800
 From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 1/3] generic/304: fix high offset
-Message-ID: <20160217101012.GA15314@infradead.org>
-References: <20160215204608.7977.2802.stgit@birch.djwong.org>
- <20160215204614.7977.2848.stgit@birch.djwong.org>
- <20160217095646.GA21482@infradead.org>
- <CAL3q7H5NRUXvo=mEtGr4-S4yPT7k_yw6LsMAq_V8bPD1T=7r0g@mail.gmail.com>
+Subject: [PATCH] fix _require_fs_space on remote file systems
+Message-ID: <20160217102323.GA14703@infradead.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAL3q7H5NRUXvo=mEtGr4-S4yPT7k_yw6LsMAq_V8bPD1T=7r0g@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Filipe Manana <fdmanana@gmail.com>
-Cc: Christoph Hellwig <hch@infradead.org>, "Darrick J. Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org, "xfs@oss.sgi.com" <xfs@oss.sgi.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Feb 17, 2016 at 10:04:23AM +0000, Filipe Manana wrote:
-> > What does btrfs return here?
-> 
-> -EINVAL, so this makes the test pass on btrfs.
+Remove the -l flag to df so that it works properly on NFS and co.
 
-Ok, looks fine to me then:
+This fixes various failures in new COW tests on NFS.
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+
+diff --git a/common/rc b/common/rc
+index 6abd52d..c91a2f0 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1906,7 +1906,7 @@ _require_fs_space()
+ 	BLOCKS=$2	# in units of 1024
+ 	let GB=$BLOCKS/1024/1024
+ 
+-	FREE_BLOCKS=`df -klP $MNT | grep -v Filesystem | awk '{print $4}'`
++	FREE_BLOCKS=`df -kP $MNT | grep -v Filesystem | awk '{print $4}'`
+ 	[ $FREE_BLOCKS -lt $BLOCKS ] && \
+ 		_notrun "This test requires at least ${GB}GB free on $MNT to run"
+ }
