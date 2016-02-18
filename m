@@ -1,74 +1,93 @@
-From: Laison Computech Inc <drogaosuper18@drogacenter.com.br>
-Subject: NEW ARRIVALS, CISCO,CPU's,Memory, LAPTOP AND AVAYA
-Date: Thu, 28 Jan 2016 22:23:08 -0200 (BRST)
-Message-ID: <939900241.15476200.1454026988348.JavaMail.root@drogacenter.com.br>
-Reply-To: Laison Computech Inc <sales@laisoncomputertech.us>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <fstests-owner@vger.kernel.org>
-Received: from mx2.drogacenter.com.br ([200.205.136.67]:10388 "EHLO
-	srvimsva.drogacenter.com.br" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751310AbcA2Abg (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 28 Jan 2016 19:31:36 -0500
-Sender: fstests-owner@vger.kernel.org
-List-Id: fstests@vger.kernel.org
+MIME-Version: 1.0
+In-Reply-To: <20160218164341.GI6346@birch.djwong.org>
+References: <1455533663-7704-1-git-send-email-fdmanana@kernel.org>
+	<20160218013046.GU14668@dastard>
+	<CAL3q7H4oF1adZX+TRC_V0HZEkBmLcC-26kBzJtR9Yj3+8FSBoA@mail.gmail.com>
+	<20160218164341.GI6346@birch.djwong.org>
+Date: Thu, 18 Feb 2016 16:48:05 +0000
+Message-ID: <CAL3q7H5OfRk57Z0hD8cpRAbfie081zE+Vxg3txSSmAhCTdvWtw@mail.gmail.com>
+Subject: Re: [PATCH 1/2] fstests: generic test for directory fsync after
+ rename operation
+From: Filipe Manana <fdmanana@kernel.org>
+Content-Type: text/plain; charset=UTF-8
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+List-ID: <fstests@vger.kernel.org>
 
- Dear Sir/Madam,
+On Thu, Feb 18, 2016 at 4:43 PM, Darrick J. Wong
+<darrick.wong@oracle.com> wrote:
+> On Thu, Feb 18, 2016 at 01:38:41PM +0000, Filipe Manana wrote:
+>> On Thu, Feb 18, 2016 at 1:30 AM, Dave Chinner <david@fromorbit.com> wrote:
+>> > On Mon, Feb 15, 2016 at 10:54:23AM +0000, fdmanana@kernel.org wrote:
+>> >> From: Filipe Manana <fdmanana@suse.com>
+>> >>
+>> >> Test that if we move one file between directories, fsync the parent
+>> >> directory of the old directory, power fail and remount the filesystem,
+>> >> the file is not lost and it's located at the destination directory.
+>> >>
+>> >> This is motivated by a bug found in btrfs, which is fixed by the patch
+>> >> (for the linux kernel) titled:
+>> >>
+>> >>   "Btrfs: fix file loss on log replay after renaming a file and fsync"
+>> >>
+>> >> Tested against ext3, ext4, xfs, f2fs and reiserfs.
+>> >>
+>> >> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+>> > ....
+>> >> +# We expect our file foo to exist, have an entry in the new parent
+>> >> +# directory (c/) and not have anymore an entry in the old parent directory
+>> >> +# (a/b/).
+>> >> +[ -e $SCRATCH_MNT/a/b/foo ] && echo "File foo is still at directory a/b/"
+>> >> +[ -e $SCRATCH_MNT/c/foo ] || echo "File foo is not at directory c/"
+>> >> +
+>> >> +# The new file named bar should also exist.
+>> >> +[ -e $SCRATCH_MNT/a/bar ] || echo "File bar is missing"
+>> >
+>> > This can all be replaced simply by:
+>> >
+>> > ls -R $SCRATCH_MNT | _filter_scratch
+>> >
+>> > Because the golden image match will tell us if files are missing or
+>> > in the wrong place.
+>>
+>> The problem with that is ext3/4 have the lost+found directory that
+>> xfs, btrfs, etc don't have.
+>
+> XFS can have lost+found too, though this seems unlikely on the scratch mount.
+>
+>> Do you mind about something like this:
+>>
+>> # exclude lost+found directory specific to some filesystems (ext3/4)
+>> ls -R $SCRATCH_MNT | grep -v 'lost+found' | tr -s '\n' | _filter_scratch
+>
+> Why not put "a" and "c" under $SCRATCH_MNT/test-335/?
 
- Clean tested working pulls CPUs and QTYs in stock.
+Would work as well. I was thinking earlier of just doing two ls -R
+calls, one for a/ and other for c/.
+Thanks Darrick.
 
- 115 X X5650
- 65 X E5410
- 75 X X5660
- 145 X E5530
- 100 X E5645
- 40 X X5680
- 75 X X5690
-
- Brand new sealed IP phones and QTYs in stock.
-
- 55 x CP-7937G
- 77 x CP-7942G
- 54 x CP-7945G
- 75 x CP-7962G
- ......
- 45 x Avaya 9630
- 65 x Avaya 9641
- 55 x Avaya 9640
-
- All NIB.
-
- Here is our current stock list.
-
- SSD drives and 750 gig 2.5" sata drives
-
- We also have
- 250 x i5 dell
- 133 x HP
- 360 x Lenevo
- all grade A
-
- Here is the qty in stock for laptops
-
- 150 x E6500 Dell Latitude E6500 Core 2 Duo 2.80GHz T9600 4GB 160GB DVD+/-RW Win 7
- 60 x E6510 Dell Ltitude E6510. 15.6" Intel Core i5- M520 @ 2.40GHz. 4GB.  320GB DVD+/-RW Win 7
- 30 X 8530P HP EliteBook 8530p 15.4" Laptop 2.53GHz Core 2 Duo T9400, 4GB RAM, 160GB HDD, Win
- 100 x 8740W HP EliteBook 8740w 17" 2.4Ghz Core i5 6GB 250GB Win 7 Pr
- 45 x 8760W HP EliteBook 8760W 17.3" 2nd Gen Intel Core i7 2.70GHz 8GB 320GB Windows 7 Pro
- 50 x DELL 6520Dell latitude e6520 15.6" i5-2520M 2.5Ghz, 8GB Ram, 500GB HD  Win 7 @ $115
- 120 x DELL 6420 Laptop Dell Latitude E6420 14" Intel Core i5 2.4Ghz 4GB RAM 250GB HDD DVD Win 7
- 150 x T410 Lenovo ThinkPad Laptop T410s 14.1" 2.40GHz Core i5 4GB RAM 160GB Win 7
- 180 x 8440P HP EliteBook 8440p 14" M520 Core i5 2.4GHz 4GB 250GB Win 7
-
-
- Let me know if you're interested. We are very open to offers and willing to work with you to make sure that we have a deal.
-
- Thank You
- Barbara Johnson
- Laison Computech Inc
- 210 N Scoring Ave,
- Rialto California, 92376
- Tel: +1-657-232-7047
- Fax: +1-347-214-047
-sales@laisoncomputertech.us
+>
+> --D
+>
+>>
+>> (since you usually dislike generic tests having any specific logic for
+>> specific filesystems)
+>>
+>> Also do I need to remove _need_to_be_root for the 3 tests I submitted?
+>> I only noticed there was a submitted patch that kills that function
+>> after sending them.
+>>
+>> thanks
+>>
+>>
+>> >
+>> > Cheers,
+>> >
+>> > Dave.
+>> > --
+>> > Dave Chinner
+>> > david@fromorbit.com
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
