@@ -1,91 +1,179 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:42207 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1425196AbcBRQn5 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 18 Feb 2016 11:43:57 -0500
-Date: Thu, 18 Feb 2016 08:43:41 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 1/2] fstests: generic test for directory fsync after
- rename operation
-Message-ID: <20160218164341.GI6346@birch.djwong.org>
-References: <1455533663-7704-1-git-send-email-fdmanana@kernel.org>
- <20160218013046.GU14668@dastard>
- <CAL3q7H4oF1adZX+TRC_V0HZEkBmLcC-26kBzJtR9Yj3+8FSBoA@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAL3q7H4oF1adZX+TRC_V0HZEkBmLcC-26kBzJtR9Yj3+8FSBoA@mail.gmail.com>
+Received: from mail.kernel.org ([198.145.29.136]:35319 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1947316AbcBRXJL (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 18 Feb 2016 18:09:11 -0500
+From: fdmanana@kernel.org
+Subject: [PATCH v2] fstests: btrfs, test directory fsync after deleting snapshots
+Date: Thu, 18 Feb 2016 23:08:59 +0000
+Message-Id: <1455836939-10028-1-git-send-email-fdmanana@kernel.org>
+In-Reply-To: <1455533619-7598-1-git-send-email-fdmanana@kernel.org>
+References: <1455533619-7598-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Feb 18, 2016 at 01:38:41PM +0000, Filipe Manana wrote:
-> On Thu, Feb 18, 2016 at 1:30 AM, Dave Chinner <david@fromorbit.com> wrote:
-> > On Mon, Feb 15, 2016 at 10:54:23AM +0000, fdmanana@kernel.org wrote:
-> >> From: Filipe Manana <fdmanana@suse.com>
-> >>
-> >> Test that if we move one file between directories, fsync the parent
-> >> directory of the old directory, power fail and remount the filesystem,
-> >> the file is not lost and it's located at the destination directory.
-> >>
-> >> This is motivated by a bug found in btrfs, which is fixed by the patch
-> >> (for the linux kernel) titled:
-> >>
-> >>   "Btrfs: fix file loss on log replay after renaming a file and fsync"
-> >>
-> >> Tested against ext3, ext4, xfs, f2fs and reiserfs.
-> >>
-> >> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> > ....
-> >> +# We expect our file foo to exist, have an entry in the new parent
-> >> +# directory (c/) and not have anymore an entry in the old parent directory
-> >> +# (a/b/).
-> >> +[ -e $SCRATCH_MNT/a/b/foo ] && echo "File foo is still at directory a/b/"
-> >> +[ -e $SCRATCH_MNT/c/foo ] || echo "File foo is not at directory c/"
-> >> +
-> >> +# The new file named bar should also exist.
-> >> +[ -e $SCRATCH_MNT/a/bar ] || echo "File bar is missing"
-> >
-> > This can all be replaced simply by:
-> >
-> > ls -R $SCRATCH_MNT | _filter_scratch
-> >
-> > Because the golden image match will tell us if files are missing or
-> > in the wrong place.
-> 
-> The problem with that is ext3/4 have the lost+found directory that
-> xfs, btrfs, etc don't have.
+From: Filipe Manana <fdmanana@suse.com>
 
-XFS can have lost+found too, though this seems unlikely on the scratch mount.
+Test that if we fsync a directory that had a snapshot entry in it that
+was deleted and crash, the next time we mount the filesystem, the log
+replay procedure will not fail and the snapshot is not present anymore.
 
-> Do you mind about something like this:
-> 
-> # exclude lost+found directory specific to some filesystems (ext3/4)
-> ls -R $SCRATCH_MNT | grep -v 'lost+found' | tr -s '\n' | _filter_scratch
+This issue is fixed by the following patch for the linux kernel:
 
-Why not put "a" and "c" under $SCRATCH_MNT/test-335/?
+  "Btrfs: fix unreplayable log after snapshot delete + parent dir fsync"
 
---D
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Tested-by: Liu Bo <bo.li.liu@oracle.com>
+Reviewed-by: Liu Bo <bo.li.liu@oracle.com>
+---
 
-> 
-> (since you usually dislike generic tests having any specific logic for
-> specific filesystems)
-> 
-> Also do I need to remove _need_to_be_root for the 3 tests I submitted?
-> I only noticed there was a submitted patch that kills that function
-> after sending them.
-> 
-> thanks
-> 
-> 
-> >
-> > Cheers,
-> >
-> > Dave.
-> > --
-> > Dave Chinner
-> > david@fromorbit.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+V2: Removed the call to _need_to_be_root since there's a patch around to
+    kill it.
+    Removed explicit snapshot existence tests with bash and replaced
+    with calls to ls -R.
+
+ tests/btrfs/118     | 98 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/118.out | 15 ++++++++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 114 insertions(+)
+ create mode 100755 tests/btrfs/118
+ create mode 100644 tests/btrfs/118.out
+
+diff --git a/tests/btrfs/118 b/tests/btrfs/118
+new file mode 100755
+index 0000000..d0a1f2e
+--- /dev/null
++++ b/tests/btrfs/118
+@@ -0,0 +1,98 @@
++#! /bin/bash
++# FSQA Test No. 118
++#
++# Test that if we fsync a directory that had a snapshot entry in it that was
++# deleted and crash, the next time we mount the filesystem, the log replay
++# procedure will not fail and the snapshot is not present anymore.
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmflakey
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_dm_target flakey
++_require_metadata_journaling $SCRATCH_DEV
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_init_flakey
++_mount_flakey
++
++# Create a snapshot at the root of our filesystem (mount point path), delete it,
++# fsync the mount point path, crash and mount to replay the log. This should
++# succeed and after the filesystem is mounted the snapshot should not be visible
++# anymore.
++_run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/snap1
++_run_btrfs_util_prog subvolume delete $SCRATCH_MNT/snap1
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT
++
++echo "Filesystem content before first power failure:"
++ls -R $SCRATCH_MNT | _filter_scratch
++
++_flakey_drop_and_remount
++
++echo "Filesystem content after first power failure:"
++# Must match what we had before the power failure, we don't expect to see the
++# snapshot anymore.
++ls -R $SCRATCH_MNT | _filter_scratch
++
++# Similar scenario as above, but this time the snapshot is created inside a
++# directory and not directly under the root (mount point path).
++mkdir $SCRATCH_MNT/testdir
++_run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/testdir/snap2
++_run_btrfs_util_prog subvolume delete $SCRATCH_MNT/testdir/snap2
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/testdir
++
++echo "Filesystem content before second power failure:"
++ls -R $SCRATCH_MNT | _filter_scratch
++
++_flakey_drop_and_remount
++
++echo "Filesystem content after second power failure:"
++# Must match what we had before the power failure, we don't expect to see the
++# snapshot anymore.
++ls -R $SCRATCH_MNT | _filter_scratch
++
++_unmount_flakey
++
++status=0
++exit
+diff --git a/tests/btrfs/118.out b/tests/btrfs/118.out
+new file mode 100644
+index 0000000..fee12ad
+--- /dev/null
++++ b/tests/btrfs/118.out
+@@ -0,0 +1,15 @@
++QA output created by 118
++Filesystem content before first power failure:
++SCRATCH_MNT:
++Filesystem content after first power failure:
++SCRATCH_MNT:
++Filesystem content before second power failure:
++SCRATCH_MNT:
++testdir
++
++SCRATCH_MNT/testdir:
++Filesystem content after second power failure:
++SCRATCH_MNT:
++testdir
++
++SCRATCH_MNT/testdir:
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index f74ffbb..a2fa412 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -118,3 +118,4 @@
+ 115 auto qgroup
+ 116 auto quick metadata
+ 117 auto quick send clone
++118 auto quick snapshot metadata
+-- 
+2.7.0.rc3
+
