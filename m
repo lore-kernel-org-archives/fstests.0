@@ -1,33 +1,53 @@
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:62067 "EHLO
-	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1422831AbcBQMWy (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 17 Feb 2016 07:22:54 -0500
-Date: Wed, 17 Feb 2016 23:22:51 +1100
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:38672 "EHLO
+	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1030406AbcBRBbE (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 17 Feb 2016 20:31:04 -0500
+Date: Thu, 18 Feb 2016 12:30:46 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 16/16] xfstests: remove _need_to_be_root
-Message-ID: <20160217122251.GR14668@dastard>
-References: <1455385269-26319-1-git-send-email-tytso@mit.edu>
- <1455385269-26319-17-git-send-email-tytso@mit.edu>
- <20160217100923.GO21482@infradead.org>
+Subject: Re: [PATCH 1/2] fstests: generic test for directory fsync after
+ rename operation
+Message-ID: <20160218013046.GU14668@dastard>
+References: <1455533663-7704-1-git-send-email-fdmanana@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160217100923.GO21482@infradead.org>
+In-Reply-To: <1455533663-7704-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org, hughd@google.com
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Feb 17, 2016 at 02:09:23AM -0800, Christoph Hellwig wrote:
-> Looks good,
+On Mon, Feb 15, 2016 at 10:54:23AM +0000, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
+> Test that if we move one file between directories, fsync the parent
+> directory of the old directory, power fail and remount the filesystem,
+> the file is not lost and it's located at the destination directory.
 > 
-> While you're at it it would be nice to also remove the odd instruction
-> of adding the '123456-fsgqa' test user in README.
+> This is motivated by a bug found in btrfs, which is fixed by the patch
+> (for the linux kernel) titled:
+> 
+>   "Btrfs: fix file loss on log replay after renaming a file and fsync"
+> 
+> Tested against ext3, ext4, xfs, f2fs and reiserfs.
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+....
+> +# We expect our file foo to exist, have an entry in the new parent
+> +# directory (c/) and not have anymore an entry in the old parent directory
+> +# (a/b/).
+> +[ -e $SCRATCH_MNT/a/b/foo ] && echo "File foo is still at directory a/b/"
+> +[ -e $SCRATCH_MNT/c/foo ] || echo "File foo is not at directory c/"
+> +
+> +# The new file named bar should also exist.
+> +[ -e $SCRATCH_MNT/a/bar ] || echo "File bar is missing"
 
-I think that user is actually used for quota testing? Yeah, see
-xfs/138.
+This can all be replaced simply by:
+
+ls -R $SCRATCH_MNT | _filter_scratch
+
+Because the golden image match will tell us if files are missing or
+in the wrong place.
 
 Cheers,
 
