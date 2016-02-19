@@ -1,78 +1,94 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:19388 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1427335AbcBSNZn (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 19 Feb 2016 08:25:43 -0500
-From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH 2/2] fstests: btrfs/011 add debug logs to seqres.full
-Date: Fri, 19 Feb 2016 21:25:29 +0800
-Message-Id: <1455888329-16981-2-git-send-email-anand.jain@oracle.com>
-In-Reply-To: <1455888329-16981-1-git-send-email-anand.jain@oracle.com>
-References: <1455888329-16981-1-git-send-email-anand.jain@oracle.com>
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:38630 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1948016AbcBSPGe convert rfc822-to-8bit (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 19 Feb 2016 10:06:34 -0500
+Date: Fri, 19 Feb 2016 10:06:32 -0500 (EST)
+From: Zirong Lang <zlang@redhat.com>
+Message-ID: <340759829.19718794.1455894392526.JavaMail.zimbra@redhat.com>
+In-Reply-To: <20160219013316.GW14668@dastard>
+References: <1455208656-16637-1-git-send-email-zlang@redhat.com> <20160219013316.GW14668@dastard>
+Subject: Re: [PATCH] xfs: change return value check to golden image check
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Anand Jain <anand.jain@oracle.com>
+Content-Transfer-Encoding: quoted-printable
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, eguan@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
----
- tests/btrfs/011 | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
 
-diff --git a/tests/btrfs/011 b/tests/btrfs/011
-index 3bc7f0af70a3..8cf6ff265aa5 100755
---- a/tests/btrfs/011
-+++ b/tests/btrfs/011
-@@ -80,6 +80,9 @@ workout()
- 	local target_dev="`echo ${SCRATCH_DEV_POOL} | awk '{print $NF}'`"
- 	local fssize
- 
-+	echo >> $seqres.full
-+	echo "---------workout \"$1\" $2 $3 $4-----------" >> $seqres.full
-+
- 	if [ "`echo $SCRATCH_DEV_POOL | wc -w`" -lt `expr $num_devs4raid + 1` ]; then
- 		echo "Skip workout $1 $2 $3 $4" >> $seqres.full
- 		echo "Too few devices in SCRATCH_DEV_POOL $SCRATCH_DEV_POOL, required: " `expr $num_devs4raid + 1` >> $seqres.full
-@@ -114,6 +117,9 @@ workout()
- 
- 	_scratch_mount
- 
-+	echo "$BTRFS_UTIL_PROG filesystem show" >> $seqres.full
-+	$BTRFS_UTIL_PROG filesystem show >> $seqres.full
-+
- 	# Generate metadata and some minimal user data, generate 500 times
- 	# 20K extents in the data chunk and fill up metadata with inline
- 	# extents.
-@@ -220,8 +226,10 @@ btrfs_replace_test()
- 
- 	if [ "${with_cancel}Q" = "cancelQ" ]; then
- 		# background the replace operation (no '-B' option given)
-+		echo "$BTRFS_UTIL_PROG replace start -f $replace_options $source_dev $target_dev $SCRATCH_MNT" >> $seqres.full
- 		$BTRFS_UTIL_PROG replace start -f $replace_options $source_dev $target_dev $SCRATCH_MNT >> $seqres.full 2>&1 || _fail "btrfs replace start failed"
- 		sleep 1
-+		echo "$BTRFS_UTIL_PROG replace cancel $SCRATCH_MNT" >> $seqres.full
- 		$BTRFS_UTIL_PROG replace cancel $SCRATCH_MNT >> $seqres.full 2>&1 || _fail "btrfs replace cancel failed"
- 
- 		# 'replace status' waits for the replace operation to finish
-@@ -236,6 +244,7 @@ btrfs_replace_test()
- 			# a sync in the middle of the replace operation.
- 			(sleep 1; sync) > /dev/null 2>&1 &
- 		fi
-+		echo "$BTRFS_UTIL_PROG replace start -Bf $replace_options $source_dev $target_dev $SCRATCH_MNT" >> $seqres.full
- 		$BTRFS_UTIL_PROG replace start -Bf $replace_options $source_dev $target_dev $SCRATCH_MNT >> $seqres.full 2>&1 || _fail "btrfs replace start failed"
- 
- 		$BTRFS_UTIL_PROG replace status $SCRATCH_MNT > $tmp.tmp 2>&1
-@@ -267,6 +276,11 @@ btrfs_replace_test()
- 	_scratch_unmount > /dev/null 2>&1
- 	if [ "${with_cancel}Q" != "cancelQ" ]; then
- 		# after the replace operation, use the target_dev for everything
-+		echo "$BTRFS_UTIL_PROG filesystem show -d" >> $seqres.full
-+		$BTRFS_UTIL_PROG filesystem show -d >> $seqres.full
-+		echo "$BTRFS_UTIL_PROG filesystem show" >> $seqres.full
-+		$BTRFS_UTIL_PROG filesystem show >> $seqres.full
-+		echo "_check_btrfs_filesystem $target_dev" >> $seqres.full
- 		_check_btrfs_filesystem $target_dev
- 		_mount -t $FSTYP `_scratch_mount_options | sed "s&${SCRATCH_DEV}&${target_dev}&"`
- 	else
--- 
-2.7.0
 
+----- =E5=8E=9F=E5=A7=8B=E9=82=AE=E4=BB=B6 -----
+> =E5=8F=91=E4=BB=B6=E4=BA=BA: "Dave Chinner" <david@fromorbit.com>
+> =E6=94=B6=E4=BB=B6=E4=BA=BA: "Zorro Lang" <zlang@redhat.com>
+> =E6=8A=84=E9=80=81: fstests@vger.kernel.org, eguan@redhat.com
+> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: =E6=98=9F=E6=9C=9F=E4=BA=94, 2016=
+=E5=B9=B4 2 =E6=9C=88 19=E6=97=A5 =E4=B8=8A=E5=8D=88 9:33:16
+> =E4=B8=BB=E9=A2=98: Re: [PATCH] xfs: change return value check to golde=
+n image check
+>=20
+> On Fri, Feb 12, 2016 at 12:37:36AM +0800, Zorro Lang wrote:
+> > xfs/133 and xfs/138 use too much code to do "return value" check,
+> > it's not necessary. For the code can be more readable and clear,
+> > I change "return value" check to golden image check.
+> >=20
+> > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > ---
+> >  tests/xfs/133     | 20 +++++++-------------
+> >  tests/xfs/133.out |  7 +++++++
+> >  tests/xfs/138     | 26 ++++++++++++--------------
+> >  tests/xfs/138.out | 12 ++++++++++++
+> >  4 files changed, 38 insertions(+), 27 deletions(-)
+>=20
+> This cause a xfs/133 failure like this on my systems:
+>=20
+> --- tests/xfs/133.out   2016-02-19 10:40:57.043131919 +1100
+> +++ /home/dave/src/xfstests-dev/results//xfs/xfs/133.out.bad    2016-02=
+-19
+> 12:24:53.173589432 +1100
+> @@ -4,5 +4,6 @@
+>  Filesystem Blocks Quota Limit Warn/Time Mounted on
+>  SCRATCH_DEV 0 102400 204800 00 [--------] SCRATCH_MNT
+>  =3D=3D=3D report command output =3D=3D=3D
+> +(null) 0 0 0 00 [--------]
+>  123456-project 0 102400 204800 00 [--------]
+> =20
+>=20
+> Can you see if you can reproduce it?
+
+Hi Dave,
+
+Thanks for review this patch:)
+
+I can't reproduce that problem. It shows xfs_quota report one more strang=
+e
+line, I can't sure what cause it by read xfs/133.
+
+xfs/133 only set one project quota for 123456-project, I don't think it w=
+ill
+report one more project quota message.
+
+I can add 'grep 123456-project' to make sure it will only report 123456-p=
+roject.
+But I can't do that before I sure that problem you met is not a xfsprogs =
+bug.
+
+So would you please give me more information about your test environment,=
+ especially
+about xfs project quota?
+
+I will do more exception test, try to reproduce it.
+
+Thanks,
+Zorro Lang
+
+
+
+>=20
+> Cheers,
+>=20
+> Dave.
+> --
+> Dave Chinner
+> david@fromorbit.com
+>=20
