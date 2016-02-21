@@ -1,36 +1,62 @@
-Received: from imap.thunk.org ([74.207.234.97]:32824 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:32826 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751747AbcBURmm (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sun, 21 Feb 2016 12:42:42 -0500
+	id S1751810AbcBURmn (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sun, 21 Feb 2016 12:42:43 -0500
+Date: Sun, 21 Feb 2016 00:45:30 -0500
 From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH] gitignore: add src/test-nextquota
-Date: Sun, 21 Feb 2016 00:51:50 -0500
-Message-Id: <1456033910-30307-1-git-send-email-tytso@mit.edu>
+Subject: Re: [PATCH] xfstests-bld: add exclude file for ext3 tests
+Message-ID: <20160221054530.GB15641@thunk.org>
+References: <20160220155157.GA19420@localhost.localdomain>
+ <20160221003411.GZ14668@dastard>
+ <20160221025754.GA15641@thunk.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160221025754.GA15641@thunk.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Eric Whitney <enwlinux@gmail.com>, linux-ext4@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Commit 1dfb50585c09 (quota: test Q_GETNEXTQUOTA) added a new binary
-without updating .gitignore.  Fix this.
+On Sat, Feb 20, 2016 at 09:57:54PM -0500, Theodore Ts'o wrote:
+> 
+> So probably the right answer here is to change _require_defrag so that
+> for EXT4, to also add the assertion:
+> 
+> _require_xfs_io_command "falloc"
+
+So like this...  (BTW what's up with my other pending xfstests
+patches?  Would you like me to resend a whole back with the
+reviewed-by lines merged in?)
+
+						- Ted
+
+>From a1cd89ca74d8e8cd345b88e62a5eabab70aed62e Mon Sep 17 00:00:00 2001
+From: Theodore Ts'o <tytso@mit.edu>
+Date: Sun, 21 Feb 2016 00:12:00 -0500
+Subject: [PATCH] defrag: require falloc support for ext4 defrag
+
+The e4defrag program requires the use of fallocate.  Certain ext4 file
+system configurations which don't enable extents do not support
+fallocate, so we should skip the defrag tests in that case.
 
 Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 ---
- .gitignore | 1 +
+ common/defrag | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/.gitignore b/.gitignore
-index c98c7bf..28fa205 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -95,6 +95,7 @@
- /src/t_mtab
- /src/t_stripealign
- /src/t_truncate_cmtime
-+/src/test-nextquota
- /src/testx
- /src/trunc
- /src/truncfile
+diff --git a/common/defrag b/common/defrag
+index 942593e..f3d9e43 100644
+--- a/common/defrag
++++ b/common/defrag
+@@ -28,6 +28,7 @@ _require_defrag()
+ 	;;
+     ext4|ext4dev)
+         DEFRAG_PROG="$E4DEFRAG_PROG"
++	_require_xfs_io_command "falloc"
+ 	;;
+     btrfs)
+ 	DEFRAG_PROG="$BTRFS_UTIL_PROG filesystem defragment"
 -- 
 2.5.0
 
