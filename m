@@ -1,96 +1,136 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:36164 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751666AbcBVKIo (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 22 Feb 2016 05:08:44 -0500
-Message-ID: <56CADE23.1070702@cn.fujitsu.com>
-Date: Mon, 22 Feb 2016 18:08:35 +0800
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-MIME-Version: 1.0
-Subject: Re: [PATCH] generic/135: fix standard error output from _scratch_mkfs
-References: <1578053095.20705983.1456134019296.JavaMail.zimbra@redhat.com>
-In-Reply-To: <1578053095.20705983.1456134019296.JavaMail.zimbra@redhat.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+Received: from mail.kernel.org ([198.145.29.136]:49319 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752596AbcBVRyh (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 22 Feb 2016 12:54:37 -0500
+From: fdmanana@kernel.org
+Subject: [PATCH] fstests: generic test for listing an inode's xattrs
+Date: Mon, 22 Feb 2016 17:52:38 +0000
+Message-Id: <1456163558-1148-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Zirong Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-=E4=BA=8E 2016/02/22 17:40, Zirong Lang =E5=86=99=E9=81=93:
-> 2016=E5=B9=B42=E6=9C=8822=E6=97=A5 14:12=EF=BC=8C"Xiao Yang"<yangx.jy@c=
-n.fujitsu.com>=E5=86=99=E9=81=93=EF=BC=9A
->>
->>> 2016=E5=B9=B42=E6=9C=8822=E6=97=A5 11:41=EF=BC=8C"Xiao Yang"<yangx.jy=
-@cn.fujitsu.com>  =E5=86=99=E9=81=93=EF=BC=9A
->>>> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
->>>> ---
->>>>   tests/generic/135 |    2 +-
->>>>   1 files changed, 1 insertions(+), 1 deletions(-)
->>>>
->>>> diff --git a/tests/generic/135 b/tests/generic/135
->>>> index 52418f6..5aa880d 100755
->>>> --- a/tests/generic/135
->>>> +++ b/tests/generic/135
->>>> @@ -41,7 +41,7 @@ _supported_os Linux IRIX
->>>>
->>>>   _require_odirect
->>>>   _require_scratch
->>>> -_scratch_mkfs>/dev/null
->>>> +_scratch_mkfs&>/dev/null
->>> Hi,
->>>
->>> Although I'm not the offical reviewer, but I think that stderr output=
- can help us to find mkfs failure from golden image diff. So keep the std=
-err output maybe better.
->>>
->>> If you think your patch is necessary, you'd better give a appropriate=
- reason to explain why we need to ignore that stderr output?
->>>
->>> Thanks,
->>> Zorro
->> mkfs succees with unexpected message when running generic/135, i.e.
->> [root@localhost ~]# mkfs.ext4 /dev/sdb1>/dev/null
->> mke2fs 1.42.9 (28-Dec-2013)
-> Hi xiao,
->
-> Now I understand what you mean, and I can reproduce that problem. This
-> is a regression bug which bring in by commit:
->
-> 4a5cda8 xfstests: do not unmount tmpfs during remount
->
-> That patch remove "2>&1". I think that is a miss, so you can simply bri=
-ng
-> that back. After you explain the reason in your commit message clearly,=
- I
-> think maintainer will glad to check it:)
->
-> Thanks,
-> Zorro
->
-thanks for your suggestion, I will expalin the reason in my commit=20
-message clearly.
-thanks,
-xiao yang
->> thanks,
->> xiao yang
->>
->>>>   _scratch_mount
->>>>
->>>>   cd $SCRATCH_MNT
->>>> --
->>>> 1.7.1
->>>>
->>>>
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe fstests" i=
-n
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
-> .
->
+From: Filipe Manana <fdmanana@suse.com>
 
+Test that the filesystem's implementation of the listxattrs system call
+lists all the xattrs an inode has.
 
+This test is motivated by a bug found in btrfs, which is fixed by the
+following patch for the linux kernel:
+
+  "Btrfs: fix listxattrs not listing all xattrs packed in the same item"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/generic/337     | 72 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/337.out |  8 ++++++
+ tests/generic/group   |  1 +
+ 3 files changed, 81 insertions(+)
+ create mode 100755 tests/generic/337
+ create mode 100644 tests/generic/337.out
+
+diff --git a/tests/generic/337 b/tests/generic/337
+new file mode 100755
+index 0000000..1758871
+--- /dev/null
++++ b/tests/generic/337
+@@ -0,0 +1,72 @@
++#! /bin/bash
++# FSQA Test No. 337
++#
++# Test that the filesystem's implementation of the listxattrs system call lists
++# all the xattrs an inode has.
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_attrs
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++# Create our test file with a few xattrs. The first 3 xattrs have a name that
++# when given as input to a crc32c function result in the same checksum. This
++# made btrfs list only one of the xattrs through listxattrs system call (because
++# it packs xattrs with the same name checksum into the same btree item).
++touch $SCRATCH_MNT/testfile
++$SETFATTR_PROG -n user.foobar -v 123 $SCRATCH_MNT/testfile
++$SETFATTR_PROG -n user.WvG1c1Td -v qwerty $SCRATCH_MNT/testfile
++$SETFATTR_PROG -n user.J3__T_Km3dVsW_ -v hello $SCRATCH_MNT/testfile
++$SETFATTR_PROG -n user.something -v pizza $SCRATCH_MNT/testfile
++$SETFATTR_PROG -n user.ping -v pong $SCRATCH_MNT/testfile
++
++# Now call getfattr with --dump, which calls the listxattrs system call.
++# It should list all the xattrs we have set before.
++$GETFATTR_PROG --absolute-names --dump $SCRATCH_MNT/testfile | _filter_scratch
++
++status=0
++exit
+diff --git a/tests/generic/337.out b/tests/generic/337.out
+new file mode 100644
+index 0000000..1cd92ff
+--- /dev/null
++++ b/tests/generic/337.out
+@@ -0,0 +1,8 @@
++QA output created by 337
++# file: SCRATCH_MNT/testfile
++user.J3__T_Km3dVsW_="hello"
++user.WvG1c1Td="qwerty"
++user.foobar="123"
++user.ping="pong"
++user.something="pizza"
++
+diff --git a/tests/generic/group b/tests/generic/group
+index a47e23d..b6b27f8 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -339,3 +339,4 @@
+ 334 auto clone
+ 335 auto quick metadata
+ 336 auto quick metadata
++337 auto quick metadata
+-- 
+2.7.0.rc3
 
