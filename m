@@ -1,144 +1,96 @@
-Received: from mx1.redhat.com ([209.132.183.28]:54150 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754125AbcBVKQw (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 22 Feb 2016 05:16:52 -0500
-Date: Mon, 22 Feb 2016 18:16:48 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: xfstests configure error with xfsprogs v4.5-rc1
-Message-ID: <20160222101648.GX11419@eguan.usersys.redhat.com>
-References: <20160222030304.GV11419@eguan.usersys.redhat.com>
- <20160222032450.GF14668@dastard>
+Received: from cn.fujitsu.com ([59.151.112.132]:36164 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751666AbcBVKIo (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 22 Feb 2016 05:08:44 -0500
+Message-ID: <56CADE23.1070702@cn.fujitsu.com>
+Date: Mon, 22 Feb 2016 18:08:35 +0800
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="iAL9S67WQOXgEPD9"
-Content-Disposition: inline
-In-Reply-To: <20160222032450.GF14668@dastard>
+Subject: Re: [PATCH] generic/135: fix standard error output from _scratch_mkfs
+References: <1578053095.20705983.1456134019296.JavaMail.zimbra@redhat.com>
+In-Reply-To: <1578053095.20705983.1456134019296.JavaMail.zimbra@redhat.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
+Content-Transfer-Encoding: quoted-printable
+To: Zirong Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+=E4=BA=8E 2016/02/22 17:40, Zirong Lang =E5=86=99=E9=81=93:
+> 2016=E5=B9=B42=E6=9C=8822=E6=97=A5 14:12=EF=BC=8C"Xiao Yang"<yangx.jy@c=
+n.fujitsu.com>=E5=86=99=E9=81=93=EF=BC=9A
+>>
+>>> 2016=E5=B9=B42=E6=9C=8822=E6=97=A5 11:41=EF=BC=8C"Xiao Yang"<yangx.jy=
+@cn.fujitsu.com>  =E5=86=99=E9=81=93=EF=BC=9A
+>>>> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
+>>>> ---
+>>>>   tests/generic/135 |    2 +-
+>>>>   1 files changed, 1 insertions(+), 1 deletions(-)
+>>>>
+>>>> diff --git a/tests/generic/135 b/tests/generic/135
+>>>> index 52418f6..5aa880d 100755
+>>>> --- a/tests/generic/135
+>>>> +++ b/tests/generic/135
+>>>> @@ -41,7 +41,7 @@ _supported_os Linux IRIX
+>>>>
+>>>>   _require_odirect
+>>>>   _require_scratch
+>>>> -_scratch_mkfs>/dev/null
+>>>> +_scratch_mkfs&>/dev/null
+>>> Hi,
+>>>
+>>> Although I'm not the offical reviewer, but I think that stderr output=
+ can help us to find mkfs failure from golden image diff. So keep the std=
+err output maybe better.
+>>>
+>>> If you think your patch is necessary, you'd better give a appropriate=
+ reason to explain why we need to ignore that stderr output?
+>>>
+>>> Thanks,
+>>> Zorro
+>> mkfs succees with unexpected message when running generic/135, i.e.
+>> [root@localhost ~]# mkfs.ext4 /dev/sdb1>/dev/null
+>> mke2fs 1.42.9 (28-Dec-2013)
+> Hi xiao,
+>
+> Now I understand what you mean, and I can reproduce that problem. This
+> is a regression bug which bring in by commit:
+>
+> 4a5cda8 xfstests: do not unmount tmpfs during remount
+>
+> That patch remove "2>&1". I think that is a miss, so you can simply bri=
+ng
+> that back. After you explain the reason in your commit message clearly,=
+ I
+> think maintainer will glad to check it:)
+>
+> Thanks,
+> Zorro
+>
+thanks for your suggestion, I will expalin the reason in my commit=20
+message clearly.
+thanks,
+xiao yang
+>> thanks,
+>> xiao yang
+>>
+>>>>   _scratch_mount
+>>>>
+>>>>   cd $SCRATCH_MNT
+>>>> --
+>>>> 1.7.1
+>>>>
+>>>>
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe fstests" i=
+n
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
+> .
+>
 
---iAL9S67WQOXgEPD9
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
 
-On Mon, Feb 22, 2016 at 02:24:50PM +1100, Dave Chinner wrote:
-> On Mon, Feb 22, 2016 at 11:03:04AM +0800, Eryu Guan wrote:
-> > Hi,
-> > 
-> > After upgrading to xfsprogs v4.5-rc1 version, xfstests failed to built
-> > because of configure error:
-> > 
-> >     checking xfs/xfs.h usability... no
-> >     checking xfs/xfs.h presence... yes
-> >     configure: WARNING: xfs/xfs.h: present but cannot be compiled
-> >     configure: WARNING: xfs/xfs.h:     check for missing prerequisite headers?
-> >     configure: WARNING: xfs/xfs.h: see the Autoconf documentation
-> >     configure: WARNING: xfs/xfs.h:     section "Present But Cannot Be Compiled"
-> >     configure: WARNING: xfs/xfs.h: proceeding with the compiler's result
-> >     checking for xfs/xfs.h... no
-> >     
-> >     FATAL ERROR: cannot find a valid <xfs/xfs.h> header file.
-> >     Run "make install-qa" from the xfsprogs source.
-> > 
-> > and config.log showed:
-> > 
-> >     configure:4543: checking xfs/xfs.h usability
-> >     configure:4543: ccache gcc -c -g -O2  conftest.c >&5
-> >     In file included from /usr/include/xfs/xfs.h:37:0,
-> >     		 from conftest.c:73:
-> >     /usr/include/xfs/linux.h:145:1: error: unknown type name 'off64_t'
-> >      typedef off64_t  xfs_off_t;
-> >      ^
-> >     configure:4543: $? = 1
-> 
-> That would seem like a system library problem in that it doesn't
-> define off64_t through stdio.h. What distro are you compiling on?
-> Also,  if you set _GNU_SOURCE, does it then compile? e.g. see
-> m4/package_libcdev.m4 for how to test whether code compiles under
-> certain defines.
-> 
-> If it does compile with _GNU_SOURCE being set, then all that needs
-> to be is to update the autoconf rule.
 
-Yes, it compiles with _GNU_SOURCE being set. And it turns out that not
-only the check for xfs.h needs _GNU_SOURCE, many other checks need it
-too, like libxfs.h, xfs_log_format.h, xlog_assign_lsn, xqm.h and xfsctl.
-
-Attached file is updates I made to autoconf rules, as I'm not familiar
-with autotools, I'm not sure if it's a proper fix, but it does work for
-me, with both old and new version of xfsprogs.
-
-Thanks,
-Eryu
-
---iAL9S67WQOXgEPD9
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: attachment; filename="off64_t.patch"
-
-diff --git a/configure.ac b/configure.ac
-index d038f95..fa48d2f 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -34,7 +34,9 @@ AC_HEADER_STDC
- 			cifs/ioctl.h		\
-     ])
- 
--AC_CHECK_HEADERS([xfs/xfs_log_format.h],,,[#include <xfs/libxfs.h>])
-+AC_CHECK_HEADERS([xfs/xfs_log_format.h],,,[
-+#define _GNU_SOURCE
-+#include <xfs/libxfs.h>])
- 
- AC_PACKAGE_NEED_UUIDCOMPARE
- 
-diff --git a/m4/package_xfslibs.m4 b/m4/package_xfslibs.m4
-index 78a3dc4..aeb3d7c 100644
---- a/m4/package_xfslibs.m4
-+++ b/m4/package_xfslibs.m4
-@@ -1,5 +1,5 @@
- AC_DEFUN([AC_PACKAGE_NEED_XFS_XFS_H],
--  [ AC_CHECK_HEADERS([xfs/xfs.h])
-+  [ AC_CHECK_HEADERS([xfs/xfs.h],,,[#define _GNU_SOURCE])
-     if test "$ac_cv_header_xfs_xfs_h" != "yes"; then
-         echo
-         echo 'FATAL ERROR: cannot find a valid <xfs/xfs.h> header file.'
-@@ -9,19 +9,21 @@ AC_DEFUN([AC_PACKAGE_NEED_XFS_XFS_H],
-   ])
- 
- AC_DEFUN([AC_PACKAGE_WANT_LIBXFS_H],
--  [ AC_CHECK_HEADERS([xfs/libxfs.h], [ have_libxfs=true ], [ have_libxfs=false ])
-+  [ AC_CHECK_HEADERS([xfs/libxfs.h], [ have_libxfs=true ],
-+    [ have_libxfs=false ], [#define _GNU_SOURCE])
-     AC_SUBST(have_libxfs)
-   ])
- 
- AC_DEFUN([AC_PACKAGE_WANT_XLOG_ASSIGN_LSN],
-   [ AC_CHECK_DECL(xlog_assign_lsn,
--      [ have_xlog_assign_lsn=true ], [ have_xlog_assign_lsn=false ],
--      [[#include <xfs/libxfs.h>]])
-+      [ have_xlog_assign_lsn=true ], [ have_xlog_assign_lsn=false ], [[
-+#define _GNU_SOURCE
-+#include <xfs/libxfs.h>]])
-     AC_SUBST(have_xlog_assign_lsn)
-   ])
- 
- AC_DEFUN([AC_PACKAGE_NEED_XFS_XQM_H],
--  [ AC_CHECK_HEADERS([xfs/xqm.h])
-+  [ AC_CHECK_HEADERS([xfs/xqm.h],,,[#define _GNU_SOURCE])
-     if test "$ac_cv_header_xfs_xqm_h" != "yes"; then
-         echo
-         echo 'FATAL ERROR: cannot find a valid <xfs/xqm.h> header file.'
-@@ -99,7 +101,10 @@ AC_DEFUN([AC_PACKAGE_NEED_IRIX_LIBHANDLE],
- 
- AC_DEFUN([AC_PACKAGE_NEED_XFSCTL_MACRO],
-   [ AC_MSG_CHECKING([xfsctl from xfs/xfs.h])
--    AC_TRY_LINK([#include <xfs/xfs.h>], [ int x = xfsctl(0, 0, 0, 0); ],
-+    AC_TRY_LINK([
-+#define _GNU_SOURCE
-+#include <xfs/xfs.h> ],
-+      [ int x = xfsctl(0, 0, 0, 0); ],
-       [ echo ok ],
-       [ echo
-         echo 'FATAL ERROR: cannot find required macros in the XFS headers.'
-
---iAL9S67WQOXgEPD9--
