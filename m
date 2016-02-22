@@ -1,73 +1,91 @@
-Received: from mx1.redhat.com ([209.132.183.28]:60673 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753737AbcBVIAN (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 22 Feb 2016 03:00:13 -0500
-Date: Mon, 22 Feb 2016 16:00:06 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: xfstests configure error with xfsprogs v4.5-rc1
-Message-ID: <20160222080006.GW11419@eguan.usersys.redhat.com>
-References: <20160222030304.GV11419@eguan.usersys.redhat.com>
- <20160222032450.GF14668@dastard>
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:54603 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751021AbcBVJk1 convert rfc822-to-8bit (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 22 Feb 2016 04:40:27 -0500
+Date: Mon, 22 Feb 2016 04:40:19 -0500 (EST)
+From: Zirong Lang <zlang@redhat.com>
+Message-ID: <1578053095.20705983.1456134019296.JavaMail.zimbra@redhat.com>
+In-Reply-To: <CADVQ27rD6UX7eechDFxke7aE=ty3NJJJKtKGsDR2sCVR5=EP=w@mail.gmail.com>
+Subject: Re: [PATCH] generic/135: fix standard error output from
+ _scratch_mkfs
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160222032450.GF14668@dastard>
+Content-Type: text/plain; charset=utf-8
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: xfs@oss.sgi.com, fstests@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: yangx.jy@cn.fujitsu.com
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Feb 22, 2016 at 02:24:50PM +1100, Dave Chinner wrote:
-> On Mon, Feb 22, 2016 at 11:03:04AM +0800, Eryu Guan wrote:
-> > Hi,
-> > 
-> > After upgrading to xfsprogs v4.5-rc1 version, xfstests failed to built
-> > because of configure error:
-> > 
-> >     checking xfs/xfs.h usability... no
-> >     checking xfs/xfs.h presence... yes
-> >     configure: WARNING: xfs/xfs.h: present but cannot be compiled
-> >     configure: WARNING: xfs/xfs.h:     check for missing prerequisite headers?
-> >     configure: WARNING: xfs/xfs.h: see the Autoconf documentation
-> >     configure: WARNING: xfs/xfs.h:     section "Present But Cannot Be Compiled"
-> >     configure: WARNING: xfs/xfs.h: proceeding with the compiler's result
-> >     checking for xfs/xfs.h... no
-> >     
-> >     FATAL ERROR: cannot find a valid <xfs/xfs.h> header file.
-> >     Run "make install-qa" from the xfsprogs source.
-> > 
-> > and config.log showed:
-> > 
-> >     configure:4543: checking xfs/xfs.h usability
-> >     configure:4543: ccache gcc -c -g -O2  conftest.c >&5
-> >     In file included from /usr/include/xfs/xfs.h:37:0,
-> >     		 from conftest.c:73:
-> >     /usr/include/xfs/linux.h:145:1: error: unknown type name 'off64_t'
-> >      typedef off64_t  xfs_off_t;
-> >      ^
-> >     configure:4543: $? = 1
-> 
-> That would seem like a system library problem in that it doesn't
-> define off64_t through stdio.h. What distro are you compiling on?
 
-It's a RHEL7.2 box.
+2016=E5=B9=B42=E6=9C=8822=E6=97=A5 14:12=EF=BC=8C"Xiao Yang" <yangx.jy@cn=
+.fujitsu.com>=E5=86=99=E9=81=93=EF=BC=9A
+>
+>
+>> 2016=E5=B9=B42=E6=9C=8822=E6=97=A5 11:41=EF=BC=8C"Xiao Yang" <yangx.jy=
+@cn.fujitsu.com> =E5=86=99=E9=81=93=EF=BC=9A
+>> >
+>> > Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+>> > ---
+>> >  tests/generic/135 |    2 +-
+>> >  1 files changed, 1 insertions(+), 1 deletions(-)
+>> >
+>> > diff --git a/tests/generic/135 b/tests/generic/135
+>> > index 52418f6..5aa880d 100755
+>> > --- a/tests/generic/135
+>> > +++ b/tests/generic/135
+>> > @@ -41,7 +41,7 @@ _supported_os Linux IRIX
+>> >
+>> >  _require_odirect
+>> >  _require_scratch
+>> > -_scratch_mkfs >/dev/null
+>> > +_scratch_mkfs &>/dev/null
+>>
+>> Hi,
+>>
+>> Although I'm not the offical reviewer, but I think that stderr output =
+can help us to find mkfs failure from golden image diff. So keep the stde=
+rr output maybe better.
+>>
+>> If you think your patch is necessary, you'd better give a appropriate =
+reason to explain why we need to ignore that stderr output?
+>>
+>> Thanks,
+>> Zorro
+>
+> mkfs succees with unexpected message when running generic/135, i.e.
+> [root@localhost ~]# mkfs.ext4 /dev/sdb1 >/dev/null
+> mke2fs 1.42.9 (28-Dec-2013)
 
-> Also,  if you set _GNU_SOURCE, does it then compile? e.g. see
-> m4/package_libcdev.m4 for how to test whether code compiles under
-> certain defines.
+Hi xiao,
 
-Okay, I'll go through the m4 files and test around.
+Now I understand what you mean, and I can reproduce that problem. This
+is a regression bug which bring in by commit:
+
+4a5cda8 xfstests: do not unmount tmpfs during remount
+
+That patch remove "2>&1". I think that is a miss, so you can simply bring
+that back. After you explain the reason in your commit message clearly, I
+think maintainer will glad to check it:)
 
 Thanks,
-Eryu
+Zorro
 
-> 
-> If it does compile with _GNU_SOURCE being set, then all that needs
-> to be is to update the autoconf rule.
-> 
-> Cheers,
-> 
-> Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
+>
+> thanks,
+> xiao yang
+>
+>> >  _scratch_mount
+>> >
+>> >  cd $SCRATCH_MNT
+>> > --
+>> > 1.7.1
+>> >
+>> >
+>> >
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe fstests" i=
+n
+>> > the body of a message to majordomo@vger.kernel.org
+>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
