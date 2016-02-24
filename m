@@ -1,11 +1,11 @@
-Received: from cn.fujitsu.com ([222.73.24.84]:56098 "EHLO song.cn.fujitsu.com"
+Received: from cn.fujitsu.com ([222.73.24.84]:46499 "EHLO song.cn.fujitsu.com"
 	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-	id S1750888AbcBXGtg (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 24 Feb 2016 01:49:36 -0500
+	id S1752716AbcBXGth (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 24 Feb 2016 01:49:37 -0500
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH 1/5] fstests: Add support to check btrfs sysfs features
-Date: Wed, 24 Feb 2016 14:35:11 +0800
-Message-Id: <1456295716-9589-2-git-send-email-quwenruo@cn.fujitsu.com>
+Subject: [PATCH 1/5] fstests: rename _require_btrfs to _require_btrfs_subcommand
+Date: Wed, 24 Feb 2016 14:35:12 +0800
+Message-Id: <1456295716-9589-3-git-send-email-quwenruo@cn.fujitsu.com>
 In-Reply-To: <1456295716-9589-1-git-send-email-quwenruo@cn.fujitsu.com>
 References: <1456295716-9589-1-git-send-email-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
@@ -13,13 +13,9 @@ Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Btrfs has its sysfs interface showing what features current kernel/btrfs
-module support.
-
-Add _require_btrfs_kernel_feature() to check such interface.
-
-Also rename _require_btrfs() to _require_btrfs_subcommand() to avoid
-confusion.
+Rename _require_btrfs() to _require_btrfs_subcommand() to avoid
+confusion, as all other _require_btrfs_* has a quite clear suffix, like
+_require_btrfs_mkfs_feature() or _require_btrfs_fs_feature().
 
 Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 ---
