@@ -1,183 +1,116 @@
-Received: from cn.fujitsu.com ([222.73.24.84]:25746 "EHLO song.cn.fujitsu.com"
-	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-	id S1754893AbcBXGwS (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 24 Feb 2016 01:52:18 -0500
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH 4/5] fstests: btrfs: Add per inode dedup flag test
-Date: Wed, 24 Feb 2016 14:35:15 +0800
-Message-Id: <1456295716-9589-6-git-send-email-quwenruo@cn.fujitsu.com>
-In-Reply-To: <1456295716-9589-1-git-send-email-quwenruo@cn.fujitsu.com>
-References: <1456295716-9589-1-git-send-email-quwenruo@cn.fujitsu.com>
+Received: from mail-io0-f178.google.com ([209.85.223.178]:36317 "EHLO
+	mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752047AbcBXH1a (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 24 Feb 2016 02:27:30 -0500
 MIME-Version: 1.0
+Reply-To: fdmanana@gmail.com
+In-Reply-To: <1456295716-9589-2-git-send-email-quwenruo@cn.fujitsu.com>
+References: <1456295716-9589-1-git-send-email-quwenruo@cn.fujitsu.com>
+	<1456295716-9589-2-git-send-email-quwenruo@cn.fujitsu.com>
+Date: Wed, 24 Feb 2016 07:27:29 +0000
+Message-ID: <CAL3q7H5Vii4TVT9TMsnGMk1dMzF=Z69e-_0m6yE+n5JSgT8_Rw@mail.gmail.com>
+Subject: Re: [PATCH 1/5] fstests: Add support to check btrfs sysfs features
+From: Filipe Manana <fdmanana@gmail.com>
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-This test will check per inode dedup flag.
+On Wed, Feb 24, 2016 at 6:35 AM, Qu Wenruo <quwenruo@cn.fujitsu.com> wrote:
+> Btrfs has its sysfs interface showing what features current kernel/btrfs
+> module support.
+>
+> Add _require_btrfs_kernel_feature() to check such interface.
 
-Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
----
- tests/btrfs/202     | 116 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/202.out |  15 +++++++
- tests/btrfs/group   |   1 +
- 3 files changed, 132 insertions(+)
- create mode 100755 tests/btrfs/202
- create mode 100644 tests/btrfs/202.out
 
-diff --git a/tests/btrfs/202 b/tests/btrfs/202
-new file mode 100755
-index 0000000..3e5d470
---- /dev/null
-+++ b/tests/btrfs/202
-@@ -0,0 +1,116 @@
-+#! /bin/bash
-+# FS QA Test 202
-+#
-+# Btrfs per inode dedup flag test
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/defrag
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_btrfs_subcommand dedup
-+_require_btrfs_subcommand property
-+_require_btrfs_fs_feature dedup
-+_require_btrfs_mkfs_feature dedup
-+
-+# File size is twice the maximum file extent of btrfs
-+# So even fallbacked to non-dedup, it will have at least 2 extents
-+file_size=$(( 256 * 1024 * 1024 ))
-+dedup_bs=$(( 64 * 1024 ))
-+
-+_scratch_mkfs "-O dedup" >> $seqres.full 2>&1
-+_scratch_mount
-+
-+# Return 0 for not deduped at all , return 1 for part or full deduped
-+test_file_deduped () {
-+	file=$1
-+
-+	nr_uniq_extents=$(_uniq_extent_count $file)
-+	nr_total_extents=$(_extent_count $file)
-+
-+	if [ $nr_uniq_extents -eq $nr_total_extents ]; then
-+		echo "not de-duplicated"
-+	else
-+		echo "de-duplicated"
-+	fi
-+}
-+
-+dedup_write_file () {
-+	file=$1
-+	size=$2
-+
-+	$XFS_IO_PROG -f -c "pwrite -b $dedup_bs 0 $size" $file | _filter_xfs_io
-+}
-+
-+print_result () {
-+	file=$1
-+
-+	echo "$(basename $file): $(test_file_deduped $file)"
-+}
-+_run_btrfs_util_prog dedup enable -b $dedup_bs $SCRATCH_MNT
-+touch $SCRATCH_MNT/dedup_file
-+touch $SCRATCH_MNT/no_dedup_file
-+mkdir $SCRATCH_MNT/dedup_dir
-+mkdir $SCRATCH_MNT/no_dedup_dir
-+
-+_run_btrfs_util_prog property set $SCRATCH_MNT/no_dedup_file dedup disable
-+_run_btrfs_util_prog property set $SCRATCH_MNT/no_dedup_dir dedup disable
-+
-+dedup_write_file $SCRATCH_MNT/tmp $dedup_bs
-+# sync to ensure hash is added to dedup tree
-+sync
-+
-+dedup_write_file $SCRATCH_MNT/dedup_file $file_size
-+dedup_write_file $SCRATCH_MNT/no_dedup_file $file_size
-+dedup_write_file $SCRATCH_MNT/dedup_dir/dedup_dir_default_file $file_size
-+dedup_write_file $SCRATCH_MNT/no_dedup_dir/no_dedup_dir_default_file $file_size
-+
-+print_result $SCRATCH_MNT/dedup_file
-+print_result $SCRATCH_MNT/no_dedup_file
-+print_result $SCRATCH_MNT/dedup_dir/dedup_dir_default_file
-+print_result $SCRATCH_MNT/no_dedup_dir/no_dedup_dir_default_file
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/202.out b/tests/btrfs/202.out
-new file mode 100644
-index 0000000..ced9e88
---- /dev/null
-+++ b/tests/btrfs/202.out
-@@ -0,0 +1,15 @@
-+QA output created by 202
-+wrote 65536/65536 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 268435456/268435456 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 268435456/268435456 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 268435456/268435456 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 268435456/268435456 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+dedup_file: de-duplicated
-+no_dedup_file: not de-duplicated
-+dedup_dir_default_file: de-duplicated
-+no_dedup_dir_default_file: not de-duplicated
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 76ebea7..0c03cf1 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -121,3 +121,4 @@
- 118 auto quick snapshot metadata
- 200 auto dedup
- 201 auto dedup
-+202 auto dedup
+I think you sent the wrong patch. This doesn't add such a function and
+the changes are exactly the same as in:
+
+[PATCH 1/5] fstests: rename _require_btrfs to _require_btrfs_subcommand
+
+>
+> Also rename _require_btrfs() to _require_btrfs_subcommand() to avoid
+> confusion.
+
+So if there's a dedicated patch to do that already (the one I
+mentioned above), why do it here again? (and should be a separate
+patch anyway, since it's unrelated)
+
+>
+> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+> ---
+>  common/rc       | 2 +-
+>  tests/btrfs/004 | 2 +-
+>  tests/btrfs/048 | 1 +
+>  tests/btrfs/059 | 1 +
+>  4 files changed, 4 insertions(+), 2 deletions(-)
+>
+> diff --git a/common/rc b/common/rc
+> index af16c81..ff57862 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2706,7 +2706,7 @@ _require_deletable_scratch_dev_pool()
+>  }
+>
+>  # We check for btrfs and (optionally) features of the btrfs command
+> -_require_btrfs()
+> +_require_btrfs_subcommand()
+>  {
+>         cmd=$1
+>         _require_command "$BTRFS_UTIL_PROG" btrfs
+> diff --git a/tests/btrfs/004 b/tests/btrfs/004
+> index 905770a..2ce628e 100755
+> --- a/tests/btrfs/004
+> +++ b/tests/btrfs/004
+> @@ -51,7 +51,7 @@ _supported_fs btrfs
+>  _supported_os Linux
+>  _require_scratch
+>  _require_no_large_scratch_dev
+> -_require_btrfs inspect-internal
+> +_require_btrfs_subcommand inspect-internal
+>  _require_command "/usr/sbin/filefrag" filefrag
+>
+>  rm -f $seqres.full
+> diff --git a/tests/btrfs/048 b/tests/btrfs/048
+> index c2cb4a6..d15346a 100755
+> --- a/tests/btrfs/048
+> +++ b/tests/btrfs/048
+> @@ -48,6 +48,7 @@ _supported_os Linux
+>  _require_test
+>  _require_scratch
+>  _require_btrfs "property"
+> +_require_btrfs_subcommand "property"
+>
+>  send_files_dir=$TEST_DIR/btrfs-test-$seq
+>
+> diff --git a/tests/btrfs/059 b/tests/btrfs/059
+> index b9a6ef4..6e7f7ee 100755
+> --- a/tests/btrfs/059
+> +++ b/tests/btrfs/059
+> @@ -51,6 +51,7 @@ _supported_os Linux
+>  _require_test
+>  _require_scratch
+>  _require_btrfs "property"
+> +_require_btrfs_subcommand "property"
+>
+>  rm -f $seqres.full
+>
+> --
+> 2.7.1
+>
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
 -- 
-2.7.1
+Filipe David Manana,
 
-
-
+"Reasonable men adapt themselves to the world.
+ Unreasonable men adapt the world to themselves.
+ That's why all progress depends on unreasonable men."
