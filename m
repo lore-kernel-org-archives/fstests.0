@@ -1,116 +1,86 @@
-Received: from mx1.redhat.com ([209.132.183.28]:48152 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756718AbcBWETq (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 22 Feb 2016 23:19:46 -0500
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (Postfix) with ESMTPS id 986CA63151
-	for <fstests@vger.kernel.org>; Tue, 23 Feb 2016 04:19:46 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] fstests: update autoconf rules to define _GNU_SOURCE where needed
-Date: Tue, 23 Feb 2016 12:19:27 +0800
-Message-Id: <1456201167-20541-1-git-send-email-eguan@redhat.com>
+Received: from cn.fujitsu.com ([222.73.24.84]:56098 "EHLO song.cn.fujitsu.com"
+	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+	id S1750888AbcBXGtg (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 24 Feb 2016 01:49:36 -0500
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Subject: [PATCH 1/5] fstests: Add support to check btrfs sysfs features
+Date: Wed, 24 Feb 2016 14:35:11 +0800
+Message-Id: <1456295716-9589-2-git-send-email-quwenruo@cn.fujitsu.com>
+In-Reply-To: <1456295716-9589-1-git-send-email-quwenruo@cn.fujitsu.com>
+References: <1456295716-9589-1-git-send-email-quwenruo@cn.fujitsu.com>
+MIME-Version: 1.0
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Starting from xfsprogs commit cb898f157f84 ("linux.h: Use off64_t
-instead of loff_t") in v4.5-rc1, fstests failed to build because of
-configure error:
+Btrfs has its sysfs interface showing what features current kernel/btrfs
+module support.
 
-    checking xfs/xfs.h usability... no
-    checking xfs/xfs.h presence... yes
-    configure: WARNING: xfs/xfs.h: present but cannot be compiled
-    configure: WARNING: xfs/xfs.h:     check for missing prerequisite headers?
-    configure: WARNING: xfs/xfs.h: see the Autoconf documentation
-    configure: WARNING: xfs/xfs.h:     section "Present But Cannot Be Compiled"
-    configure: WARNING: xfs/xfs.h: proceeding with the compiler's result
-    checking for xfs/xfs.h... no
+Add _require_btrfs_kernel_feature() to check such interface.
 
-    FATAL ERROR: cannot find a valid <xfs/xfs.h> header file.
-    Run "make install-qa" from the xfsprogs source.
+Also rename _require_btrfs() to _require_btrfs_subcommand() to avoid
+confusion.
 
-and that's because off64_t is not defined without _GNU_SOURCE being set.
-
-Fix it by updating the autoconf rules adding _GNU_SOURCE define for the
-following checks:
-
-xfs.h libxfs.h xfs_log_format.h xlog_assign_lsn xqm.h xfsctl
-
-Suggested-by: Dave Chinner <dchinner@redhat.com>
-Signed-off-by: Eryu Guan <eguan@redhat.com>
+Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 ---
- configure.ac          |  4 +++-
- m4/package_xfslibs.m4 | 19 ++++++++++++-------
- 2 files changed, 15 insertions(+), 8 deletions(-)
+ common/rc       | 2 +-
+ tests/btrfs/004 | 2 +-
+ tests/btrfs/048 | 1 +
+ tests/btrfs/059 | 1 +
+ 4 files changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/configure.ac b/configure.ac
-index d038f95..fa48d2f 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -34,7 +34,9 @@ AC_HEADER_STDC
- 			cifs/ioctl.h		\
-     ])
+diff --git a/common/rc b/common/rc
+index af16c81..ff57862 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2706,7 +2706,7 @@ _require_deletable_scratch_dev_pool()
+ }
  
--AC_CHECK_HEADERS([xfs/xfs_log_format.h],,,[#include <xfs/libxfs.h>])
-+AC_CHECK_HEADERS([xfs/xfs_log_format.h],,,[
-+#define _GNU_SOURCE
-+#include <xfs/libxfs.h>])
+ # We check for btrfs and (optionally) features of the btrfs command
+-_require_btrfs()
++_require_btrfs_subcommand()
+ {
+ 	cmd=$1
+ 	_require_command "$BTRFS_UTIL_PROG" btrfs
+diff --git a/tests/btrfs/004 b/tests/btrfs/004
+index 905770a..2ce628e 100755
+--- a/tests/btrfs/004
++++ b/tests/btrfs/004
+@@ -51,7 +51,7 @@ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch
+ _require_no_large_scratch_dev
+-_require_btrfs inspect-internal
++_require_btrfs_subcommand inspect-internal
+ _require_command "/usr/sbin/filefrag" filefrag
  
- AC_PACKAGE_NEED_UUIDCOMPARE
+ rm -f $seqres.full
+diff --git a/tests/btrfs/048 b/tests/btrfs/048
+index c2cb4a6..d15346a 100755
+--- a/tests/btrfs/048
++++ b/tests/btrfs/048
+@@ -48,6 +48,7 @@ _supported_os Linux
+ _require_test
+ _require_scratch
+ _require_btrfs "property"
++_require_btrfs_subcommand "property"
  
-diff --git a/m4/package_xfslibs.m4 b/m4/package_xfslibs.m4
-index 78a3dc4..6bf4704 100644
---- a/m4/package_xfslibs.m4
-+++ b/m4/package_xfslibs.m4
-@@ -1,27 +1,29 @@
- AC_DEFUN([AC_PACKAGE_NEED_XFS_XFS_H],
--  [ AC_CHECK_HEADERS([xfs/xfs.h])
-+  [ AC_CHECK_HEADERS([xfs/xfs.h],,,[#define _GNU_SOURCE])
-     if test "$ac_cv_header_xfs_xfs_h" != "yes"; then
-         echo
-         echo 'FATAL ERROR: cannot find a valid <xfs/xfs.h> header file.'
--        echo 'Run "make install-qa" from the xfsprogs source.'
-+        echo 'Run "make install-dev" from the xfsprogs source.'
-         exit 1
-     fi
-   ])
+ send_files_dir=$TEST_DIR/btrfs-test-$seq
  
- AC_DEFUN([AC_PACKAGE_WANT_LIBXFS_H],
--  [ AC_CHECK_HEADERS([xfs/libxfs.h], [ have_libxfs=true ], [ have_libxfs=false ])
-+  [ AC_CHECK_HEADERS([xfs/libxfs.h], [ have_libxfs=true ],
-+    [ have_libxfs=false ], [#define _GNU_SOURCE])
-     AC_SUBST(have_libxfs)
-   ])
+diff --git a/tests/btrfs/059 b/tests/btrfs/059
+index b9a6ef4..6e7f7ee 100755
+--- a/tests/btrfs/059
++++ b/tests/btrfs/059
+@@ -51,6 +51,7 @@ _supported_os Linux
+ _require_test
+ _require_scratch
+ _require_btrfs "property"
++_require_btrfs_subcommand "property"
  
- AC_DEFUN([AC_PACKAGE_WANT_XLOG_ASSIGN_LSN],
-   [ AC_CHECK_DECL(xlog_assign_lsn,
--      [ have_xlog_assign_lsn=true ], [ have_xlog_assign_lsn=false ],
--      [[#include <xfs/libxfs.h>]])
-+      [ have_xlog_assign_lsn=true ], [ have_xlog_assign_lsn=false ], [[
-+#define _GNU_SOURCE
-+#include <xfs/libxfs.h>]])
-     AC_SUBST(have_xlog_assign_lsn)
-   ])
+ rm -f $seqres.full
  
- AC_DEFUN([AC_PACKAGE_NEED_XFS_XQM_H],
--  [ AC_CHECK_HEADERS([xfs/xqm.h])
-+  [ AC_CHECK_HEADERS([xfs/xqm.h],,,[#define _GNU_SOURCE])
-     if test "$ac_cv_header_xfs_xqm_h" != "yes"; then
-         echo
-         echo 'FATAL ERROR: cannot find a valid <xfs/xqm.h> header file.'
-@@ -99,7 +101,10 @@ AC_DEFUN([AC_PACKAGE_NEED_IRIX_LIBHANDLE],
- 
- AC_DEFUN([AC_PACKAGE_NEED_XFSCTL_MACRO],
-   [ AC_MSG_CHECKING([xfsctl from xfs/xfs.h])
--    AC_TRY_LINK([#include <xfs/xfs.h>], [ int x = xfsctl(0, 0, 0, 0); ],
-+    AC_TRY_LINK([
-+#define _GNU_SOURCE
-+#include <xfs/xfs.h> ],
-+      [ int x = xfsctl(0, 0, 0, 0); ],
-       [ echo ok ],
-       [ echo
-         echo 'FATAL ERROR: cannot find required macros in the XFS headers.'
 -- 
-2.5.0
+2.7.1
+
+
 
