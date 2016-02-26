@@ -1,99 +1,48 @@
-Received: from mx2.suse.de ([195.135.220.15]:59602 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750712AbcBXMmT (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 24 Feb 2016 07:42:19 -0500
-Date: Wed, 24 Feb 2016 13:42:08 +0100
-From: David Sterba <dsterba@suse.cz>
-Subject: Re: [PATCH 1/2] fstests: btrfs/011 use replace_options
-Message-ID: <20160224124208.GD23746@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-References: <1455888329-16981-1-git-send-email-anand.jain@oracle.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1455888329-16981-1-git-send-email-anand.jain@oracle.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:48228 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750751AbcBZFg2 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 26 Feb 2016 00:36:28 -0500
+Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0O3500CHB3KEJG70@mailout3.samsung.com> for
+ fstests@vger.kernel.org; Fri, 26 Feb 2016 14:36:26 +0900 (KST)
+From: Chao Yu <chao2.yu@samsung.com>
+Subject: [PATCH] common/attr: add maximum acl count for f2fs
+Date: Fri, 26 Feb 2016 13:35:42 +0800
+Message-id: <017201d17057$a270c460$e7524d20$@samsung.com>
+MIME-version: 1.0
+Content-type: text/plain; charset=us-ascii
+Content-transfer-encoding: 7bit
+Content-language: zh-cn
 Sender: fstests-owner@vger.kernel.org
-To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, Jaegeuk Kim <jaegeuk@kernel.org>, linux-f2fs-devel@lists.sourceforge.net
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Feb 19, 2016 at 09:25:28PM +0800, Anand Jain wrote:
-> This patch fixes test btrfs/011 which intended to use -r option
-> but was never used since its associated args 'replace_options'
-> didn't make it to the cli.
+Add a max acl count into common/attr for f2fs in order to make
+f2fs passing generic/026 test case.
 
-After this patch the tests fails due to extra output. I've tested
-several kernels (4.5 rcs), HDD and SSD so it's not caused by my testing
-setup.
+Signed-off-by: Chao Yu <chao2.yu@samsung.com>
+---
+ common/attr | 3 +++
+ 1 file changed, 3 insertions(+)
 
---- tests/btrfs/011.out 2013-08-29 11:58:37.000000000 +0200
-+++ /root/xfstests/results//btrfs/011.out.bad   2016-02-24 12:44:45.562234906 +0100
-@@ -1,3 +1,68 @@
- QA output created by 011
- *** test btrfs replace
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+warning devid 2 not found already
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+warning devid 2 not found already
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+warning devid 2 not found already
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
-+bytenr mismatch, want=20987904, have=0
-+Couldn't read chunk root
- *** done
+diff --git a/common/attr b/common/attr
+index 86fe181..0efc26d 100644
+--- a/common/attr
++++ b/common/attr
+@@ -42,6 +42,9 @@ _acl_get_max()
+ 	jfs)
+ 		echo 8191
+ 		;;
++	f2fs)
++		echo 506
++		;;
+ 	*)
+ 		echo 0
+ 		;;
+-- 
+2.7.0
+
+
