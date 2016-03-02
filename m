@@ -1,72 +1,181 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:65259 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750738AbcCBFqS (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 2 Mar 2016 00:46:18 -0500
-Message-ID: <56D67E0C.2080301@cn.fujitsu.com>
-Date: Wed, 2 Mar 2016 13:45:48 +0800
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-MIME-Version: 1.0
-Subject: Re: [PATCH] generic/135: fix standard error output from _scratch_mkfs
-References: <1456191325-1217-1-git-send-email-yangx.jy@cn.fujitsu.com> <20160223032652.GC11419@eguan.usersys.redhat.com>
-In-Reply-To: <20160223032652.GC11419@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+Received: from mail.kernel.org ([198.145.29.136]:60773 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752542AbcCBPuq (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 2 Mar 2016 10:50:46 -0500
+From: fdmanana@kernel.org
+Subject: [PATCH] fstests: btrfs, test log replay with qgroups enabled and orphan roots
+Date: Wed,  2 Mar 2016 15:50:07 +0000
+Message-Id: <1456933807-8009-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-=E4=BA=8E 2016/02/23 11:26, Eryu Guan =E5=86=99=E9=81=93:
-> On Tue, Feb 23, 2016 at 09:35:25AM +0800, Xiao Yang wrote:
->> 'mke2fs 1.42.9 (28-Dec-2013)' produces as standard error when
->> we run generic/135 in ext4 file system. This is a regression
->> bug which bring in by commit:
->> 4a5cda8 xfstests: do not unmount tmpfs during remount
->> That patch remove '2>&1', so i bring that back.
-> Thanks for the revision! But I noticed that Ted's patch fixed it too,
->
-> "common: filter warning messages from mkfs.ext4"
->
-> which filters the warnings in _scratch_mkfs_ext4, so that other mkfs
-> errors can be noticed in the test. So I think it's a better fix :)
->
-> Thanks,
-> Eryu
->
-Hi
-After applying Ted's pacth, 'mke2fs 1.42.9 (28-Dec-2013)' still produces=20
-when we run
-generic/135 in ext4 file system. I think that this is standard error=20
-instead of warning .
->> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
->> ---
->>   tests/generic/135 |    2 +-
->>   1 files changed, 1 insertions(+), 1 deletions(-)
->>
->> diff --git a/tests/generic/135 b/tests/generic/135
->> index 52418f6..5aa880d 100755
->> --- a/tests/generic/135
->> +++ b/tests/generic/135
->> @@ -41,7 +41,7 @@ _supported_os Linux IRIX
->>
->>   _require_odirect
->>   _require_scratch
->> -_scratch_mkfs>/dev/null
->> +_scratch_mkfs&>/dev/null
->>   _scratch_mount
->>
->>   cd $SCRATCH_MNT
->> --=20
->> 1.7.1
->>
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe fstests" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
+From: Filipe Manana <fdmanana@suse.com>
 
+Test that replaying a log tree when qgroups are enabled and orphan roots
+(deleted snapshots) exist, the replay process does not crash.
 
+This is motivated by a bug found in btrfs, introduced in the linux kernel
+4.4 release, and is fixed by the following patch:
+
+  Btrfs: fix loading of orphan roots leading to BUG_ON
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/119     | 116 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/119.out |   9 ++++
+ tests/btrfs/group   |   1 +
+ 3 files changed, 126 insertions(+)
+ create mode 100755 tests/btrfs/119
+ create mode 100644 tests/btrfs/119.out
+
+diff --git a/tests/btrfs/119 b/tests/btrfs/119
+new file mode 100755
+index 0000000..cf07550
+--- /dev/null
++++ b/tests/btrfs/119
+@@ -0,0 +1,116 @@
++#! /bin/bash
++# FSQA Test No. 119
++#
++# Test log tree replay when qgroups are enabled and orphan roots (deleted
++# snapshots) exist.
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmflakey
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_dm_target flakey
++_require_metadata_journaling $SCRATCH_DEV
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_init_flakey
++_mount_flakey
++
++_run_btrfs_util_prog quota enable $SCRATCH_MNT
++
++# Create 2 directories with one file in one of them.
++# We use these just to trigger a transaction commit later, moving the file from
++# directory a to directory b and doing an fsync against directory a.
++mkdir $SCRATCH_MNT/a
++mkdir $SCRATCH_MNT/b
++touch $SCRATCH_MNT/a/f
++sync
++
++# Create our test file with 2 4K extents.
++$XFS_IO_PROG -f -s -c "pwrite -S 0xaa 0 8K" $SCRATCH_MNT/foobar | _filter_xfs_io
++
++# Create a snapshot and delete it. This doesn't really delete the snapshot
++# immediately, just makes it inaccessible and invisible to user space, the
++# snapshot is deleted later by a dedicated kernel thread (cleaner kthread)
++# which is woke up at the next transaction commit.
++# A root orphan item is inserted into the tree of tree roots, so that if a
++# power failure happens before the dedicated kernel thread does the snapshot
++# deletion, the next time the filesystem is mounted it resumes the snapshot
++# deletion.
++_run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/snap
++_run_btrfs_util_prog subvolume delete $SCRATCH_MNT/snap
++
++# Now overwrite half of the extents we wrote before. Because we made a snapshpot
++# before, which isn't really deleted yet (since no transaction commit happened
++# after we did the snapshot delete request), the non overwritten extents get
++# referenced twice, once by the default subvolume and once by the snapshot.
++$XFS_IO_PROG -c "pwrite -S 0xbb 4K 8K" $SCRATCH_MNT/foobar | _filter_xfs_io
++
++# Now move file f from directory a to directory b and fsync directory a.
++# The fsync on the directory a triggers a transaction commit (because a file
++# was moved from it to another directory) and the file fsync leaves a log tree
++# with file extent items to replay.
++mv $SCRATCH_MNT/a/f $SCRATCH_MNT/a/b
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/a
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foobar
++
++echo "File digest before power failure:"
++md5sum $SCRATCH_MNT/foobar | _filter_scratch
++
++# Now simulate a power failure and mount the filesystem to replay the log tree.
++# After the log tree was replayed, we used to hit a BUG_ON() when processing
++# the root orphan item for the deleted snapshot. This is because when processing
++# an orphan root the code expected to be the first code inserting the root into
++# the fs_info->fs_root_radix radix tree, while in reallity it was the second
++# caller attempting to do it - the first caller was the transaction commit that
++# took place after replaying the log tree, when updating the qgroup counters.
++_flakey_drop_and_remount
++
++echo "File digest before after failure:"
++# Must match what he got before the power failure.
++md5sum $SCRATCH_MNT/foobar | _filter_scratch
++
++_unmount_flakey
++
++status=0
++exit
+diff --git a/tests/btrfs/119.out b/tests/btrfs/119.out
+new file mode 100644
+index 0000000..dc48d6c
+--- /dev/null
++++ b/tests/btrfs/119.out
+@@ -0,0 +1,9 @@
++QA output created by 119
++wrote 8192/8192 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 4096
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File digest before power failure:
++6b1ddec97df32c31d595067a4392ae12  SCRATCH_MNT/foobar
++File digest before after failure:
++6b1ddec97df32c31d595067a4392ae12  SCRATCH_MNT/foobar
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index a2fa412..d312874 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -119,3 +119,4 @@
+ 116 auto quick metadata
+ 117 auto quick send clone
+ 118 auto quick snapshot metadata
++119 auto quick snapshot metadata qgroup
+-- 
+2.7.0.rc3
 
