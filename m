@@ -1,55 +1,45 @@
-Received: from mail-io0-f169.google.com ([209.85.223.169]:34978 "EHLO
-	mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932703AbcCCQyD (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 3 Mar 2016 11:54:03 -0500
-MIME-Version: 1.0
-From: Steve French <smfrench@gmail.com>
-Date: Thu, 3 Mar 2016 10:53:41 -0600
-Message-ID: <CAH2r5mtMDzqQZ0fyyHSxmyEcwWF+doXO+fPRtAwCgfPf=2ppMg@mail.gmail.com>
-Subject: xfstest groups for network file systems
-Content-Type: text/plain; charset=UTF-8
+Received: from mail.kernel.org ([198.145.29.136]:52026 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754218AbcCCRag (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 3 Mar 2016 12:30:36 -0500
+From: fdmanana@kernel.org
+Subject: [PATCH] fstests: remove call to _need_to_be_root from btrfs/118
+Date: Thu,  3 Mar 2016 07:32:57 +0000
+Message-Id: <1456990377-2453-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-In experimenting with automating tests better for network file systems
-(NFS and CIFS/SMB3), I noticed that xfstest doesn't have test groups
-that help distinguish a good subset of tests to run over them.  My
-goal was to have an easy way to run:
+From: Filipe Manana <fdmanana@suse.com>
 
-- a quick (under 15 minute) build verification test of SMB3 (and also
-similarly for NFSv4.2)
-- a full regression test of SMB3 (and also NFSv4.2) that runs all valid tests
+The function _need_to_be_root does not exists anymore as of commit
+56ff01f471c9 ("xfstests: remove _need_to_be_root").
 
-The existing test group "quick" has some tests that are quick only for
-a local filesystem and can be quite slow when run over a network.
-And there are few file system specific test groups (there is one for
-udf).
+A v2 of the patch that added test btrfs/118 without calling this
+function was sent but not picked [1], instead v1 was picked.
 
-I have a patch that adds a "cifs-quick" test group (can be changed to
-"smb3-quick" if anyone prefers that name since our goal is to test the
-more important, newer dialects) and a "cifs" (or "cifs-slow" or
-"cifs-full").  Similarly I have one for "nfs-quick"
+So fix this now.
 
-But before I submit there are two obvious questions:
-1) Should these test groups (in particular "cifs-quick" and
-"nfs-quick") include any tests that we know will fail today? (e.g.
-permissions errors that require adding a new feature to the smb3
-implementation in the kernel file system, or silly rename problems
-that are difficult to work around and have not been addressed in the
-kernel clients)
+[1] https://patchwork.kernel.org/patch/8354831/
 
-2) Should we create additional test groups by dialect or target server
-(e.g. smb3-quick vs. cifs-quick vs. cifs-samba-quick vs. nfsv3-quick
-vs. nfsv4.2-quick)?  For example, some testcases will work over CIFS
-protocol but not over SMB3? or are valid (or will fail on only one
-dialect or for one serrver type e.g. for NFSv4.2 but not for NFSv3).
-For example there is one test that fails to Samba server (due to a
-negative time error) but works to Windows server targets, and there
-are tests which require fallocate so will fail to servers or server fs
-that don't implement punch hole, zero range etc.
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/118 | 1 -
+ 1 file changed, 1 deletion(-)
 
+diff --git a/tests/btrfs/118 b/tests/btrfs/118
+index 3ed1cbe..740cb92 100755
+--- a/tests/btrfs/118
++++ b/tests/btrfs/118
+@@ -45,7 +45,6 @@ _cleanup()
+ . ./common/dmflakey
+ 
+ # real QA test starts here
+-_need_to_be_root
+ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch
 -- 
-Thanks,
+2.7.0.rc3
 
-Steve
