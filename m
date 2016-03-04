@@ -1,72 +1,71 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:11856 "EHLO
-	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752065AbcCCVCN (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 3 Mar 2016 16:02:13 -0500
-Date: Fri, 4 Mar 2016 08:01:31 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: xfstest groups for network file systems
-Message-ID: <20160303210131.GS29057@dastard>
-References: <CAH2r5mtMDzqQZ0fyyHSxmyEcwWF+doXO+fPRtAwCgfPf=2ppMg@mail.gmail.com>
+Received: from mail-io0-f193.google.com ([209.85.223.193]:36059 "EHLO
+	mail-io0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759383AbcCDJbe (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 4 Mar 2016 04:31:34 -0500
+Received: by mail-io0-f193.google.com with SMTP id m184so4545864iof.3
+        for <fstests@vger.kernel.org>; Fri, 04 Mar 2016 01:31:33 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAH2r5mtMDzqQZ0fyyHSxmyEcwWF+doXO+fPRtAwCgfPf=2ppMg@mail.gmail.com>
+Reply-To: fdmanana@gmail.com
+In-Reply-To: <6dbf926cd05b145a54044c48c1c2b04ebe6b3e3d.1457028701.git.dsterba@suse.com>
+References: <cover.1457028701.git.dsterba@suse.com>
+	<6dbf926cd05b145a54044c48c1c2b04ebe6b3e3d.1457028701.git.dsterba@suse.com>
+Date: Fri, 4 Mar 2016 09:31:32 +0000
+Message-ID: <CAL3q7H5j4bQx6ZB9XQcNQaZkp29is0qTvcZbj2eMtAK6JtQaQw@mail.gmail.com>
+Subject: Re: [PATCH 2/2] btrfs/048: user filter for property error messages
+From: Filipe Manana <fdmanana@gmail.com>
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Steve French <smfrench@gmail.com>
-Cc: fstests@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>
+To: David Sterba <dsterba@suse.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 03, 2016 at 10:53:41AM -0600, Steve French wrote:
-> In experimenting with automating tests better for network file systems
-> (NFS and CIFS/SMB3), I noticed that xfstest doesn't have test groups
-> that help distinguish a good subset of tests to run over them.  My
-> goal was to have an easy way to run:
-> 
-> - a quick (under 15 minute) build verification test of SMB3 (and also
-> similarly for NFSv4.2)
-> - a full regression test of SMB3 (and also NFSv4.2) that runs all valid tests
-> 
-> The existing test group "quick" has some tests that are quick only for
-> a local filesystem and can be quite slow when run over a network.
-> And there are few file system specific test groups (there is one for
-> udf).
-> 
-> I have a patch that adds a "cifs-quick" test group (can be changed to
-> "smb3-quick" if anyone prefers that name since our goal is to test the
-> more important, newer dialects) and a "cifs" (or "cifs-slow" or
-> "cifs-full").  Similarly I have one for "nfs-quick"
-> 
-> But before I submit there are two obvious questions:
-> 1) Should these test groups (in particular "cifs-quick" and
-> "nfs-quick") include any tests that we know will fail today? (e.g.
+On Thu, Mar 3, 2016 at 6:16 PM, David Sterba <dsterba@suse.com> wrote:
+> Signed-off-by: David Sterba <dsterba@suse.com>
 
-Don't care.
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
 
-> 2) Should we create additional test groups by dialect or target server
-> (e.g. smb3-quick vs. cifs-quick vs. cifs-samba-quick vs. nfsv3-quick
-> vs. nfsv4.2-quick)? 
+(btw it would be better to cc the btrfs list for btrfs specific
+changes to xfstests)
 
-Again, don't care.
+> ---
+>  tests/btrfs/048 | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+>
+> diff --git a/tests/btrfs/048 b/tests/btrfs/048
+> index c2cb4a63b095..4a36303632eb 100755
+> --- a/tests/btrfs/048
+> +++ b/tests/btrfs/048
+> @@ -41,6 +41,7 @@ _cleanup()
+>  # get standard environment, filters and checks
+>  . ./common/rc
+>  . ./common/filter
+> +. ./common/filter.btrfs
+>
+>  # real QA test starts here
+>  _supported_fs btrfs
+> @@ -70,7 +71,8 @@ $BTRFS_UTIL_PROG property set $SCRATCH_MNT label ''
+>  $BTRFS_UTIL_PROG property get $SCRATCH_MNT label
+>  echo "***"
+>  mkdir $SCRATCH_MNT/testdir
+> -$BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir label
+> +$BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir label 2>&1 |
+> +       _filter_btrfs_prop_error label
+>  echo "***"
+>
+>  echo -e "\nTesting subvolume ro property"
+> --
+> 1.8.4.5
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Test groups are simply arbitrary collections of existing tests. If
-you want to maintain a set of tests for this purpose, then simply
-send patches to annotate all the existing group files.
 
-However, it will be up to you in future to add relevant new tests to
-those groups, as you cannot expect other developers to know what is
-a fast/slow test for nfs/cifs when they add new tests.
 
-> and there
-> are tests which require fallocate so will fail to servers or server fs
-> that don't implement punch hole, zero range etc.
-
-They should fail the _require* rules for the given feature and so
-tests that use those features should not run on filesystem/server
-combinations that don't support those features.
-
-Cheers,
-
-Dave.
 -- 
-Dave Chinner
-david@fromorbit.com
+Filipe David Manana,
+
+"Reasonable men adapt themselves to the world.
+ Unreasonable men adapt the world to themselves.
+ That's why all progress depends on unreasonable men."
