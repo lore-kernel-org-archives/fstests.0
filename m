@@ -1,32 +1,34 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43122 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751925AbcCGDEs (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sun, 6 Mar 2016 22:04:48 -0500
-Date: Mon, 7 Mar 2016 11:04:44 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] xfs/259: disable CRC if testing with 512 bytes block size
-Message-ID: <20160307030444.GA11419@eguan.usersys.redhat.com>
-References: <1456937518-20505-1-git-send-email-eguan@redhat.com>
- <20160305204517.GA10065@infradead.org>
+Received: from aserp1040.oracle.com ([141.146.126.69]:33193 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752186AbcCGI0x (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 7 Mar 2016 03:26:53 -0500
+Date: Mon, 7 Mar 2016 00:26:12 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 12/12] block: test fallocate for block devices
+Message-ID: <20160307082612.GE22185@birch.djwong.org>
+References: <20160305003717.28738.98818.stgit@birch.djwong.org>
+ <20160305003837.28738.49794.stgit@birch.djwong.org>
+ <20160305182508.GA25528@infradead.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160305204517.GA10065@infradead.org>
+In-Reply-To: <20160305182508.GA25528@infradead.org>
 Sender: fstests-owner@vger.kernel.org
 To: Christoph Hellwig <hch@infradead.org>
-Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
+Cc: david@fromorbit.com, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Mar 05, 2016 at 12:45:17PM -0800, Christoph Hellwig wrote:
-> This will force crcs off for all the blocksizes.  We should
-> either always skip 512 bytes, or disable crcs only for the 512 byte
-> inode size case.  The first seems either, but the second would give
-> better test coverage.
+On Sat, Mar 05, 2016 at 10:25:08AM -0800, Christoph Hellwig wrote:
+> I'm not sure xfstests is the right fit, as it does not test a file
+> system, but rather block devices.
 
-Thanks for the review! I think the test itself has already disabled crc
-for 512 block size fs, and this patch disables crc only if the TEST_DEV
-has no crc, so it just fixes a corner case in this crc detecting, and
-doesn't reduce the test coverage.
+I asked Dave if he'd take a fallocate-for-bdevs test, and he didn't
+object.  After all, we're testing a semi-standard FS API, just with
+block devices.
 
-Thanks,
-Eryu
+> If people think it should go into xfstests we should at least not
+> add it to the default group, but just to a new bdev group.
+
+Sure, I don't mind changing the group to 'bdev' or something.
+
+--D
