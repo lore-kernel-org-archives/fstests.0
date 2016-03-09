@@ -1,11 +1,11 @@
 Received: from cn.fujitsu.com ([222.73.24.84]:19234 "EHLO song.cn.fujitsu.com"
 	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-	id S1751689AbcCIIgY (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 9 Mar 2016 03:36:24 -0500
+	id S1752473AbcCIIg0 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 9 Mar 2016 03:36:26 -0500
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH v4 5/6] fstests: btrfs: Test inband dedup with balance.
-Date: Wed,  9 Mar 2016 16:33:43 +0800
-Message-Id: <1457512424-9215-6-git-send-email-quwenruo@cn.fujitsu.com>
+Subject: [PATCH v4 6/6] fstests: btrfs: Test for btrfs dedup tree balance bug
+Date: Wed,  9 Mar 2016 16:33:44 +0800
+Message-Id: <1457512424-9215-7-git-send-email-quwenruo@cn.fujitsu.com>
 In-Reply-To: <1457512424-9215-1-git-send-email-quwenruo@cn.fujitsu.com>
 References: <1457512424-9215-1-git-send-email-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
@@ -13,32 +13,72 @@ Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Btrfs balance will reloate date extent, but its hash is removed too late
-at run_delayed_ref() time, which will cause extent ref increased
-increased during balance, cause either find_data_references() gives
-WARN_ON() or even run_delayed_refs() fails and cause transaction abort.
+Btrfs in-band de-duplication has a bug when dedup tree metadata is
+balanced, it will corrupted btrfs delayed ref and cause the following
+kernel warning:
 
-Add such concurrency test for inband dedup and balance.
+BTRFS error (device sdb6): unable to find ref byte nr 29736960 parent 0
+root 11  owner 0 offset 0
+------------[ cut here ]------------
+WARNING: CPU: 1 PID: 19113 at fs/btrfs/extent-tree.c:6636
+__btrfs_free_extent.isra.66+0xb6d/0xd20 [btrfs]()
+BTRFS: Transaction aborted (error -2)
+Modules linked in: btrfs(O) xor zlib_deflate raid6_pq xfs [last
+unloaded: btrfs]
+CPU: 1 PID: 19113 Comm: btrfs Tainted: G        W  O    4.5.0-rc5+ #2
+Hardware name: innotek GmbH VirtualBox/VirtualBox, BIOS VirtualBox
+12/01/2006
+ 0000000000000000 ffff880035b0ba18 ffffffff813771ff ffff880035b0ba60
+ ffffffffa06a810a ffff880035b0ba50 ffffffff810bcb81 ffff88003c45c528
+ 0000000001c5c000 00000000fffffffe ffff88003dc8c520 0000000000000000
+Call Trace:
+ [<ffffffff813771ff>] dump_stack+0x67/0x98
+ [<ffffffff810bcb81>] warn_slowpath_common+0x81/0xc0
+ [<ffffffff810bcc07>] warn_slowpath_fmt+0x47/0x50
+ [<ffffffffa06028fd>] __btrfs_free_extent.isra.66+0xb6d/0xd20 [btrfs]
+ [<ffffffffa0606d4d>] __btrfs_run_delayed_refs.constprop.71+0x96d/0x1560
+[btrfs]
+ [<ffffffff81202ad9>] ? cmpxchg_double_slab.isra.68+0x149/0x160
+ [<ffffffff81106a1d>] ? trace_hardirqs_on+0xd/0x10
+ [<ffffffffa060a5ce>] btrfs_run_delayed_refs+0x8e/0x2d0 [btrfs]
+ [<ffffffffa06209fe>] btrfs_commit_transaction+0x3e/0xb50 [btrfs]
+ [<ffffffffa069f26e>] ? btrfs_dedup_disable+0x28e/0x2c0 [btrfs]
+ [<ffffffff812035c3>] ? kfree+0x223/0x270
+ [<ffffffffa069f27a>] btrfs_dedup_disable+0x29a/0x2c0 [btrfs]
+ [<ffffffffa065e403>] btrfs_ioctl+0x2363/0x2a40 [btrfs]
+ [<ffffffff8116b12a>] ? __audit_syscall_entry+0xaa/0xf0
+ [<ffffffff81137ce6>] ? current_kernel_time64+0x56/0xa0
+ [<ffffffff8122080e>] do_vfs_ioctl+0x8e/0x690
+ [<ffffffff8116b12a>] ? __audit_syscall_entry+0xaa/0xf0
+ [<ffffffff8122c181>] ? __fget_light+0x61/0x90
+ [<ffffffff81220e84>] SyS_ioctl+0x74/0x80
+ [<ffffffff8180ad57>] entry_SYSCALL_64_fastpath+0x12/0x6f
+---[ end trace 618d5a5bc21d6a7c ]---
 
+Add regression test case for it.
+
+Reported-by: Satoru Takeuchi <takeuchi_satoru@jp.fujitsu.com>
 Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 ---
- tests/btrfs/203     | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/203.out |   5 +++
- tests/btrfs/group   |   1 +
- 3 files changed, 115 insertions(+)
- create mode 100755 tests/btrfs/203
- create mode 100644 tests/btrfs/203.out
+ tests/btrfs/204     | 74 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/204.out |  2 ++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 77 insertions(+)
+ create mode 100755 tests/btrfs/204
+ create mode 100644 tests/btrfs/204.out
 
-diff --git a/tests/btrfs/203 b/tests/btrfs/203
+diff --git a/tests/btrfs/204 b/tests/btrfs/204
 new file mode 100755
-index 0000000..ad4a871
+index 0000000..5baecf8
 --- /dev/null
-+++ b/tests/btrfs/203
-@@ -0,0 +1,109 @@
++++ b/tests/btrfs/204
+@@ -0,0 +1,74 @@
 +#! /bin/bash
-+# FS QA Test 203
++# FS QA Test 204
 +#
-+# Btrfs reflink with balance concurrency test
++# Regression test for dedup tree metadata balance
++# If btrfs balanced dedup tree block twice, delayed ref will be corrupted
++# and cause kernel warning with RO fs.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
@@ -70,11 +110,6 @@ index 0000000..ad4a871
 +_cleanup()
 +{
 +	cd /
-+	kill $populate_pid &> /dev/null
-+	kill $balance_pid &> /dev/null
-+	wait
-+	# Check later comment for reason
-+	$BTRFS_UTIL_PROG balance cancel $SCRATCH_MNT &> /dev/null
 +	rm -f $tmp.*
 +}
 +
@@ -91,79 +126,44 @@ index 0000000..ad4a871
 +_supported_fs btrfs
 +_supported_os Linux
 +_require_scratch
-+_require_cp_reflink
 +_require_btrfs_subcommand dedup
 +_require_btrfs_fs_feature dedup
 +_require_btrfs_mkfs_feature dedup
 +
-+dedup_bs=128k
-+file_size_in_kilo=4096
-+init_file=$SCRATCH_MNT/foo
-+run_time=$((60 * $TIME_FACTOR))
-+
 +_scratch_mkfs "-O dedup" >> $seqres.full 2>&1
 +_scratch_mount
 +
-+do_dedup_balance_test()
-+{
-+	backend=$1
-+	_run_btrfs_util_prog dedup enable -b $dedup_bs -s $backend $SCRATCH_MNT
++_run_btrfs_util_prog dedup enable $SCRATCH_MNT
 +
-+	# create the initial file and fill hash pool
-+	$XFS_IO_PROG -f -c "pwrite -S 0x0 -b $dedup_bs 0 $dedup_bs" -c "fsync" \
-+		$init_file | _filter_xfs_io
++# Balance btrfs metadata twice, this will ensure the second balance
++# to drop refence on old dedup root bytenr if kernel has the dedup bug
++_run_btrfs_util_prog balance start -m $SCRATCH_MNT
++_run_btrfs_util_prog balance start -m $SCRATCH_MNT
 +
-+	_btrfs_stress_balance $SCRATCH_MNT >/dev/null 2>&1 &
-+	balance_pid=$!
++# Disable will force a sync_fs() and cause kernel warning
++_run_btrfs_util_prog dedup disable $SCRATCH_MNT
 +
-+	# Populate fs with all 0 data, to trigger enough in-band dedup work
-+	# to race with balance
-+	_populate_fs -n 5 -f 10000000 -d 1 -r $SCRATCH_MNT \
-+		-s $file_size_in_kilo &> /dev/null &
-+	populate_pid=$!
-+
-+	sleep $run_time
-+
-+	kill $populate_pid
-+	kill $balance_pid
-+	wait
-+
-+	# Sometimes even we killed $balance_pid and wait returned,
-+	# balance may still be running, use balance cancel to wait it.
-+	# As this is just a workaround, we don't want it pollute seqres
-+	# so call $BTRFS_UTIL_PROG directly
-+	$BTRFS_UTIL_PROG balance cancel $SCRATCH_MNT &> /dev/null
-+
-+	rm $SCRATCH_MNT/* -rf &> /dev/null
-+	_run_btrfs_util_prog dedup disable $SCRATCH_MNT
-+}
-+
-+do_dedup_balance_test inmemory
-+do_dedup_balance_test ondisk
-+
++echo "Silence is golden"
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/btrfs/203.out b/tests/btrfs/203.out
+diff --git a/tests/btrfs/204.out b/tests/btrfs/204.out
 new file mode 100644
-index 0000000..af036b6
+index 0000000..1035eae
 --- /dev/null
-+++ b/tests/btrfs/203.out
-@@ -0,0 +1,5 @@
-+QA output created by 203
-+wrote 131072/131072 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 131072/131072 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++++ b/tests/btrfs/204.out
+@@ -0,0 +1,2 @@
++QA output created by 204
++Silence is golden
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 0c03cf1..fa90f33 100644
+index fa90f33..089e4a8 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -122,3 +122,4 @@
- 200 auto dedup
+@@ -123,3 +123,4 @@
  201 auto dedup
  202 auto dedup
-+203 auto dedup balance
+ 203 auto dedup balance
++204 auto quick dedup
 -- 
 2.7.2
 
