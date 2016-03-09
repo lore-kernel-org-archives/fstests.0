@@ -1,11 +1,11 @@
-Received: from cn.fujitsu.com ([222.73.24.84]:47714 "EHLO song.cn.fujitsu.com"
+Received: from cn.fujitsu.com ([222.73.24.84]:19234 "EHLO song.cn.fujitsu.com"
 	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-	id S1751773AbcCIIgZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 9 Mar 2016 03:36:25 -0500
+	id S1751689AbcCIIgY (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 9 Mar 2016 03:36:24 -0500
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH v4 4/6] fstests: btrfs: Add per inode dedup flag test
-Date: Wed,  9 Mar 2016 16:33:42 +0800
-Message-Id: <1457512424-9215-5-git-send-email-quwenruo@cn.fujitsu.com>
+Subject: [PATCH v4 5/6] fstests: btrfs: Test inband dedup with balance.
+Date: Wed,  9 Mar 2016 16:33:43 +0800
+Message-Id: <1457512424-9215-6-git-send-email-quwenruo@cn.fujitsu.com>
 In-Reply-To: <1457512424-9215-1-git-send-email-quwenruo@cn.fujitsu.com>
 References: <1457512424-9215-1-git-send-email-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
@@ -13,27 +13,32 @@ Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This test will check per inode dedup flag.
+Btrfs balance will reloate date extent, but its hash is removed too late
+at run_delayed_ref() time, which will cause extent ref increased
+increased during balance, cause either find_data_references() gives
+WARN_ON() or even run_delayed_refs() fails and cause transaction abort.
+
+Add such concurrency test for inband dedup and balance.
 
 Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 ---
- tests/btrfs/202     | 108 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/202.out |  15 ++++++++
+ tests/btrfs/203     | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/203.out |   5 +++
  tests/btrfs/group   |   1 +
- 3 files changed, 124 insertions(+)
- create mode 100755 tests/btrfs/202
- create mode 100644 tests/btrfs/202.out
+ 3 files changed, 115 insertions(+)
+ create mode 100755 tests/btrfs/203
+ create mode 100644 tests/btrfs/203.out
 
-diff --git a/tests/btrfs/202 b/tests/btrfs/202
+diff --git a/tests/btrfs/203 b/tests/btrfs/203
 new file mode 100755
-index 0000000..33ad51d
+index 0000000..ad4a871
 --- /dev/null
-+++ b/tests/btrfs/202
-@@ -0,0 +1,108 @@
++++ b/tests/btrfs/203
+@@ -0,0 +1,109 @@
 +#! /bin/bash
-+# FS QA Test 202
++# FS QA Test 203
 +#
-+# Btrfs per inode dedup flag test
++# Btrfs reflink with balance concurrency test
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
@@ -65,13 +70,18 @@ index 0000000..33ad51d
 +_cleanup()
 +{
 +	cd /
++	kill $populate_pid &> /dev/null
++	kill $balance_pid &> /dev/null
++	wait
++	# Check later comment for reason
++	$BTRFS_UTIL_PROG balance cancel $SCRATCH_MNT &> /dev/null
 +	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/defrag
++. ./common/reflink
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
@@ -81,93 +91,79 @@ index 0000000..33ad51d
 +_supported_fs btrfs
 +_supported_os Linux
 +_require_scratch
++_require_cp_reflink
 +_require_btrfs_subcommand dedup
-+_require_btrfs_subcommand property
 +_require_btrfs_fs_feature dedup
 +_require_btrfs_mkfs_feature dedup
 +
-+# File size is twice the maximum file extent of btrfs
-+# So even fallbacked to non-dedup, it will have at least 2 extents
-+file_size=256m
-+dedup_bs=64k
++dedup_bs=128k
++file_size_in_kilo=4096
++init_file=$SCRATCH_MNT/foo
++run_time=$((60 * $TIME_FACTOR))
 +
 +_scratch_mkfs "-O dedup" >> $seqres.full 2>&1
 +_scratch_mount
 +
-+# Return 0 for not deduped at all , return 1 for part or full deduped
-+test_file_deduped () {
-+	file=$1
++do_dedup_balance_test()
++{
++	backend=$1
++	_run_btrfs_util_prog dedup enable -b $dedup_bs -s $backend $SCRATCH_MNT
 +
-+	nr_uniq_extents=$(_extent_count_uniq $file)
-+	nr_total_extents=$(_extent_count $file)
++	# create the initial file and fill hash pool
++	$XFS_IO_PROG -f -c "pwrite -S 0x0 -b $dedup_bs 0 $dedup_bs" -c "fsync" \
++		$init_file | _filter_xfs_io
 +
-+	if [ $nr_uniq_extents -eq $nr_total_extents ]; then
-+		echo "$file: not de-duplicated"
-+	else
-+		echo "$file: de-duplicated"
-+	fi
++	_btrfs_stress_balance $SCRATCH_MNT >/dev/null 2>&1 &
++	balance_pid=$!
++
++	# Populate fs with all 0 data, to trigger enough in-band dedup work
++	# to race with balance
++	_populate_fs -n 5 -f 10000000 -d 1 -r $SCRATCH_MNT \
++		-s $file_size_in_kilo &> /dev/null &
++	populate_pid=$!
++
++	sleep $run_time
++
++	kill $populate_pid
++	kill $balance_pid
++	wait
++
++	# Sometimes even we killed $balance_pid and wait returned,
++	# balance may still be running, use balance cancel to wait it.
++	# As this is just a workaround, we don't want it pollute seqres
++	# so call $BTRFS_UTIL_PROG directly
++	$BTRFS_UTIL_PROG balance cancel $SCRATCH_MNT &> /dev/null
++
++	rm $SCRATCH_MNT/* -rf &> /dev/null
++	_run_btrfs_util_prog dedup disable $SCRATCH_MNT
 +}
 +
-+_run_btrfs_util_prog dedup enable -b $dedup_bs $SCRATCH_MNT
-+touch $SCRATCH_MNT/dedup_file
-+touch $SCRATCH_MNT/no_dedup_file
-+mkdir $SCRATCH_MNT/dedup_dir
-+mkdir $SCRATCH_MNT/no_dedup_dir
-+
-+_run_btrfs_util_prog property set $SCRATCH_MNT/no_dedup_file dedup disable
-+_run_btrfs_util_prog property set $SCRATCH_MNT/no_dedup_dir dedup disable
-+
-+# use fsync write to ensure hash is added to dedup pool
-+$XFS_IO_PROG -f -c "pwrite -b $dedup_bs 0 $dedup_bs" -c "fsync" \
-+	$SCRATCH_MNT/tmp | _filter_xfs_io
-+
-+$XFS_IO_PROG -f -c "pwrite -b $dedup_bs 0 $file_size" \
-+	$SCRATCH_MNT/dedup_file | _filter_xfs_io
-+$XFS_IO_PROG -f -c "pwrite -b $dedup_bs 0 $file_size" \
-+	$SCRATCH_MNT/no_dedup_file | _filter_xfs_io
-+$XFS_IO_PROG -f -c "pwrite -b $dedup_bs 0 $file_size" \
-+	$SCRATCH_MNT/dedup_dir/default_file | _filter_xfs_io
-+$XFS_IO_PROG -f -c "pwrite -b $dedup_bs 0 $file_size" \
-+	$SCRATCH_MNT/no_dedup_dir/default_file | _filter_xfs_io
-+
-+test_file_deduped $SCRATCH_MNT/dedup_file | _filter_scratch
-+test_file_deduped $SCRATCH_MNT/no_dedup_file | _filter_scratch
-+test_file_deduped $SCRATCH_MNT/dedup_dir/default_file | _filter_scratch
-+test_file_deduped $SCRATCH_MNT/no_dedup_dir/default_file | _filter_scratch
++do_dedup_balance_test inmemory
++do_dedup_balance_test ondisk
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/btrfs/202.out b/tests/btrfs/202.out
+diff --git a/tests/btrfs/203.out b/tests/btrfs/203.out
 new file mode 100644
-index 0000000..6c1b4cb
+index 0000000..af036b6
 --- /dev/null
-+++ b/tests/btrfs/202.out
-@@ -0,0 +1,15 @@
-+QA output created by 202
-+wrote 65536/65536 bytes at offset 0
++++ b/tests/btrfs/203.out
+@@ -0,0 +1,5 @@
++QA output created by 203
++wrote 131072/131072 bytes at offset 0
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 268435456/268435456 bytes at offset 0
++wrote 131072/131072 bytes at offset 0
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 268435456/268435456 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 268435456/268435456 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 268435456/268435456 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+SCRATCH_MNT/dedup_file: de-duplicated
-+SCRATCH_MNT/no_dedup_file: not de-duplicated
-+SCRATCH_MNT/dedup_dir/default_file: de-duplicated
-+SCRATCH_MNT/no_dedup_dir/default_file: not de-duplicated
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 76ebea7..0c03cf1 100644
+index 0c03cf1..fa90f33 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -121,3 +121,4 @@
- 118 auto quick snapshot metadata
+@@ -122,3 +122,4 @@
  200 auto dedup
  201 auto dedup
-+202 auto dedup
+ 202 auto dedup
++203 auto dedup balance
 -- 
 2.7.2
 
