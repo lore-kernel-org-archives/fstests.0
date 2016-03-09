@@ -1,212 +1,109 @@
-Received: from cn.fujitsu.com ([222.73.24.84]:53449 "EHLO song.cn.fujitsu.com"
-	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-	id S1752486AbcCIIg1 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 9 Mar 2016 03:36:27 -0500
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH v4 2/6] fstests: btrfs: Add basic test for btrfs in-band de-duplication
-Date: Wed,  9 Mar 2016 16:33:40 +0800
-Message-Id: <1457512424-9215-3-git-send-email-quwenruo@cn.fujitsu.com>
-In-Reply-To: <1457512424-9215-1-git-send-email-quwenruo@cn.fujitsu.com>
-References: <1457512424-9215-1-git-send-email-quwenruo@cn.fujitsu.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:21646 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752509AbcCIJRU (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 9 Mar 2016 04:17:20 -0500
+Subject: Re: [PATCH 1/2] fstests: btrfs/011 use replace_options
+References: <1455888329-16981-1-git-send-email-anand.jain@oracle.com>
+ <20160224124208.GD23746@twin.jikos.cz>
+From: Anand Jain <anand.jain@oracle.com>
+Message-ID: <56DFEA15.6010103@oracle.com>
+Date: Wed, 9 Mar 2016 17:17:09 +0800
 MIME-Version: 1.0
+In-Reply-To: <20160224124208.GD23746@twin.jikos.cz>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: dsterba@suse.cz
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Add basic test for btrfs in-band de-duplication, including:
-1) Enable
-2) Re-enable
-3) Dedup
-4) File correctness
-5) Disable
 
-Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
----
- common/defrag       |  13 +++++++
- tests/btrfs/200     | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/200.out |  21 ++++++++++
- tests/btrfs/group   |   1 +
- 4 files changed, 144 insertions(+)
- create mode 100755 tests/btrfs/200
- create mode 100644 tests/btrfs/200.out
+Sorry for the late reply. More below..
 
-diff --git a/common/defrag b/common/defrag
-index 6fbf830..756a76d 100644
---- a/common/defrag
-+++ b/common/defrag
-@@ -49,6 +49,19 @@ _extent_count()
- 	$XFS_IO_PROG -c "fiemap" $1 | tail -n +2 | grep -v hole | wc -l| $AWK_PROG '{print $1}'
- }
- 
-+# Get the number of unique file extents
-+# Unique file extents means they have different ondisk bytenr
-+# Some filesystem supports reflinkat() or in-band de-dup can create
-+# a file whose all file extents points to the same ondisk bytenr
-+# this can be used to test if such reflinkat() or in-band de-dup works
-+_extent_count_uniq()
-+{
-+	file=$1
-+	$XFS_IO_PROG -c "fiemap" $file >> $seqres.full 2>&1
-+	$XFS_IO_PROG -c "fiemap" $file | tail -n +2 | grep -v hole |\
-+		$AWK_PROG '{print $3}' | sort | uniq | wc -l
-+}
-+
- _check_extent_count()
- {
- 	min=$1
-diff --git a/tests/btrfs/200 b/tests/btrfs/200
-new file mode 100755
-index 0000000..240b7db
---- /dev/null
-+++ b/tests/btrfs/200
-@@ -0,0 +1,109 @@
-+#! /bin/bash
-+# FS QA Test 200
-+#
-+# Basic btrfs inband dedup test
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/defrag
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_btrfs_subcommand dedup
-+_require_btrfs_fs_feature dedup
-+_require_btrfs_mkfs_feature dedup
-+
-+# File size is twice the maximum file extent of btrfs
-+# So even fallbacked to non-dedup, it will have at least 2 extents
-+file_size=256m
-+
-+_scratch_mkfs "-O dedup" >> $seqres.full 2>&1
-+_scratch_mount
-+
-+do_dedup_test()
-+{
-+	backend=$1
-+	dedup_bs=$2
-+
-+	_run_btrfs_util_prog dedup enable -s $backend -b $dedup_bs $SCRATCH_MNT
-+	# do sync write to ensure dedup hash is added into dedup pool
-+	$XFS_IO_PROG -f -c "pwrite -b $dedup_bs 0 $dedup_bs" -c "fsync"\
-+		$SCRATCH_MNT/initial_block | _filter_xfs_io
-+
-+	# do sync write to ensure we can get stable fiemap later
-+	$XFS_IO_PROG -f -c "pwrite -b $dedup_bs 0 $file_size" -c "fsync"\
-+		$SCRATCH_MNT/real_file | _filter_xfs_io
-+
-+	# Test if real_file is de-duplicated
-+	nr_uniq_extents=$(_extent_count_uniq $SCRATCH_MNT/real_file)
-+	nr_total_extents=$(_extent_count $SCRATCH_MNT/real_file)
-+
-+	echo "uniq/total: $nr_uniq_extents/$nr_total_extents" >> $seqres.full
-+	# Allow a small amount of dedup miss, as commit interval or
-+	# memory pressure may break a dedup_bs block and cause
-+	# small extent which won't go through dedup routine
-+	_within_tolerance "number of uniq extents" $nr_uniq_extents \
-+		$nr_total_extents $(($nr_total_extents - 1)) 5%
-+
-+	# Also check the md5sum to ensure data is not corrupted
-+	md5=$(_md5_checksum $SCRATCH_MNT/real_file)
-+	echo "md5sum: $md5"
-+}
-+
-+# Test inmemory dedup first, use 64K dedup bs to keep compatibility
-+# with 64K page size
-+do_dedup_test inmemory 64K
-+
-+# Test ondisk backend, and re-enable function
-+do_dedup_test ondisk 64K
-+
-+# Test 128K(default) dedup bs
-+do_dedup_test inmemory 128K
-+do_dedup_test ondisk 128K
-+
-+# Check dedup disable
-+_run_btrfs_util_prog dedup disable $SCRATCH_MNT
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/200.out b/tests/btrfs/200.out
-new file mode 100644
-index 0000000..e965f8a
---- /dev/null
-+++ b/tests/btrfs/200.out
-@@ -0,0 +1,21 @@
-+QA output created by 200
-+wrote 65536/65536 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 268435456/268435456 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+md5sum: a30e0f3f1b0884081de11d4357811c2e
-+wrote 65536/65536 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 268435456/268435456 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+md5sum: a30e0f3f1b0884081de11d4357811c2e
-+wrote 131072/131072 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 268435456/268435456 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+md5sum: a30e0f3f1b0884081de11d4357811c2e
-+wrote 131072/131072 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 268435456/268435456 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+md5sum: a30e0f3f1b0884081de11d4357811c2e
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index a2fa412..0b7354b 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -119,3 +119,4 @@
- 116 auto quick metadata
- 117 auto quick send clone
- 118 auto quick snapshot metadata
-+200 auto dedup
--- 
-2.7.2
+On 02/24/2016 08:42 PM, David Sterba wrote:
+> On Fri, Feb 19, 2016 at 09:25:28PM +0800, Anand Jain wrote:
+>> This patch fixes test btrfs/011 which intended to use -r option
+>> but was never used since its associated args 'replace_options'
+>> didn't make it to the cli.
+>
+> After this patch the tests fails due to extra output. I've tested
+> several kernels (4.5 rcs), HDD and SSD so it's not caused by my testing
+> setup.
+>
+> --- tests/btrfs/011.out 2013-08-29 11:58:37.000000000 +0200
+> +++ /root/xfstests/results//btrfs/011.out.bad   2016-02-24 12:44:45.562234906 +0100
+> @@ -1,3 +1,68 @@
+>   QA output created by 011
+>   *** test btrfs replace
+> +bytenr mismatch, want=20987904, have=0
+> +Couldn't read chunk root
+> +bytenr mismatch, want=20987904, have=0
+> +Couldn't read chunk root
+::
+> +bytenr mismatch, want=20987904, have=0
+> +Couldn't read chunk root
+>   *** done
+
+Those are 'btrfs fi show' errors on defunct volumes created by
+previous test case within btrfs/011 or outside.
+
+An example of reproducing the above error is as below..
+---------------------------------------
+(a clean start)
+# wipefs -a /dev/sd[c-i]
+::
+
+(mkfs with 4 devices)
+# mkfs.btrfs -f -draid10 -mraid10 /dev/sdc /dev/sdd /dev/sde /dev/sdf
+::
+
+# btrfs fi show
+Label: none uuid: 55e2335a-6439-43a9-8d42-cb14dd3bb4b5
+Total devices 4 FS bytes used 112.00KiB
+devid 1 size 4.00GiB used 827.12MiB path /dev/sdc
+devid 2 size 4.00GiB used 827.12MiB path /dev/sdd
+devid 3 size 4.00GiB used 827.12MiB path /dev/sde
+devid 4 size 4.00GiB used 827.12MiB path /dev/sdf
 
 
+(mkfs with only 3 devices)
+# mkfs.btrfs -f /dev/sdc /dev/sdd /dev/sde
+::
 
+
+# btrfs fi show
+warning, device 3 is missing
+warning, device 2 is missing
+warning, device 1 is missing
+warning devid 1 not found already
+warning devid 2 not found already
+warning devid 3 not found already
+bytenr mismatch, want=37847040, have=0 <----
+Couldn't setup extent tree
+bytenr mismatch, want=37863424, have=0
+Couldn't setup device tree
+Label: none uuid: d57df874-2603-493c-acfc-d200297c9082
+Total devices 3 FS bytes used 112.00KiB
+devid 1 size 4.00GiB used 1.40GiB path /dev/sdc
+devid 2 size 4.00GiB used 417.56MiB path /dev/sdd
+devid 3 size 4.00GiB used 1.41GiB path /dev/sde
+
+Label: none uuid: 55e2335a-6439-43a9-8d42-cb14dd3bb4b5
+Total devices 4 FS bytes used 112.00KiB
+devid 4 size 4.00GiB used 827.12MiB path /dev/sdf
+*** Some devices missing
+--------------------------------------------
+
+V2 fixes this by starting with a clean set of scratch pool
+devices before each sub test case. So that 011.full is clean
+as well.
+I could reproduce this when I changed the number of scratch
+pool devices from 5 to 4. And then the above errors in
+011.full can be said to be irrelevant because of a device
+which does not belong to scratch pool devices
+
+But, strictly speaking we need to fix 'btrfs fi show' rather.
+However I am not too sure why/how those warnings/errors
+are useful.
+
+Thanks, Anand
