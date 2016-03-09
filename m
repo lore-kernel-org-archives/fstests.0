@@ -1,155 +1,84 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:24377 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933254AbcCHAZo (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 7 Mar 2016 19:25:44 -0500
-From: Liu Bo <bo.li.liu@oracle.com>
-Subject: [PATCH v2] fstest: btrfs: test single 4k extent after subpagesize buffered writes
-Date: Mon,  7 Mar 2016 16:27:59 -0800
-Message-Id: <1457396879-30572-1-git-send-email-bo.li.liu@oracle.com>
-In-Reply-To: <1457394467-1245-1-git-send-email-bo.li.liu@oracle.com>
-References: <1457394467-1245-1-git-send-email-bo.li.liu@oracle.com>
+Received: from cn.fujitsu.com ([222.73.24.84]:47714 "EHLO song.cn.fujitsu.com"
+	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+	id S1751170AbcCIIgT (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 9 Mar 2016 03:36:19 -0500
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Subject: [PATCH v4 1/6] fstests: rename _require_btrfs to _require_btrfs_subcommand
+Date: Wed,  9 Mar 2016 16:33:39 +0800
+Message-Id: <1457512424-9215-2-git-send-email-quwenruo@cn.fujitsu.com>
+In-Reply-To: <1457512424-9215-1-git-send-email-quwenruo@cn.fujitsu.com>
+References: <1457512424-9215-1-git-send-email-quwenruo@cn.fujitsu.com>
+MIME-Version: 1.0
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This is to test if COW enabled btrfs can end up with single 4k extents
-when doing subpagesize buffered writes.
+Rename _require_btrfs() to _require_btrfs_subcommand() to avoid
+confusion, as all other _require_btrfs_* has a quite clear suffix, like
+_require_btrfs_mkfs_feature() or _require_btrfs_fs_feature().
 
-Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 ---
-v2: - Fix 027.out to make sure we don't get single 4k extents.
-    - Add the original mail list discussion as the reference.
+ common/rc       | 2 +-
+ tests/btrfs/004 | 2 +-
+ tests/btrfs/048 | 2 +-
+ tests/btrfs/059 | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
 
- tests/btrfs/027     | 97 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/027.out |  1 +
- tests/btrfs/group   |  1 +
- 3 files changed, 99 insertions(+)
- create mode 100755 tests/btrfs/027
- create mode 100644 tests/btrfs/027.out
-
-diff --git a/tests/btrfs/027 b/tests/btrfs/027
-new file mode 100755
-index 0000000..820973d
---- /dev/null
-+++ b/tests/btrfs/027
-@@ -0,0 +1,97 @@
-+#! /bin/bash
-+# FS QA Test 027
-+#
-+# When btrfs is using cow mode, buffered writes of sub-pagesize can end up with
-+# single 4k extents.
-+# Ref:
-+#     "Stray 4k extents with slow buffered writes" 
-+#     https://www.spinics.net/lists/linux-btrfs/msg52628.html
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Liu Bo.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+
-+	# restore expire
-+	echo $default_expire > /proc/sys/vm/dirty_expire_centisecs
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_xfs_io_command "fiemap"
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+
-+default_expire=`cat /proc/sys/vm/dirty_expire_centisecs`
-+echo 50 > /proc/sys/vm/dirty_expire_centisecs
-+tfile=$SCRATCH_MNT/testfile
-+
-+PAGE_SIZE=$(get_page_size)
-+SUBLEN=$((RANDOM % PAGE_SIZE))
-+
-+$XFS_IO_PROG -f -c "pwrite 0 $PAGE_SIZE" $tfile > /dev/null 2>&1
-+$XFS_IO_PROG -c "pwrite $PAGE_SIZE $SUBLEN" $tfile > /dev/null 2>&1
-+
-+toff=$((PAGE_SIZE + SUBLEN))
-+for ((i=0; i<10000; i++))
-+do
-+	tlen=$PAGE_SIZE
-+	if [ $((i % 2)) = 0 ]; then
-+		tlen=$((PAGE_SIZE * 3))
-+	fi
-+	if [ $((i % 1000)) = 0 ]; then
-+		tlen=$((RANDOM % PAGE_SIZE))
-+	fi
-+
-+	$XFS_IO_PROG -c "pwrite $toff $tlen" $tfile > /dev/null 2>&1
-+	toff=$((toff + tlen))
-+done
-+
-+sync
-+
-+# check for single PAGESIZE extent
-+$XFS_IO_PROG -c "fiemap -v" $tfile >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "fiemap -v" $tfile | awk '{if ($4 == 8) print $4}'
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/027.out b/tests/btrfs/027.out
-new file mode 100644
-index 0000000..e8291ab
---- /dev/null
-+++ b/tests/btrfs/027.out
-@@ -0,0 +1 @@
-+QA output created by 027
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index a2fa412..f06d5fe 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -29,6 +29,7 @@
- 024 auto quick compress
- 025 auto quick send clone
- 026 auto quick compress prealloc
-+027 auto
- 029 auto quick clone
- 030 auto quick send
- 031 auto quick subvol clone
+diff --git a/common/rc b/common/rc
+index 16f5a43..957182f 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2706,7 +2706,7 @@ _require_deletable_scratch_dev_pool()
+ }
+ 
+ # We check for btrfs and (optionally) features of the btrfs command
+-_require_btrfs()
++_require_btrfs_subcommand()
+ {
+ 	cmd=$1
+ 	_require_command "$BTRFS_UTIL_PROG" btrfs
+diff --git a/tests/btrfs/004 b/tests/btrfs/004
+index 905770a..2ce628e 100755
+--- a/tests/btrfs/004
++++ b/tests/btrfs/004
+@@ -51,7 +51,7 @@ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch
+ _require_no_large_scratch_dev
+-_require_btrfs inspect-internal
++_require_btrfs_subcommand inspect-internal
+ _require_command "/usr/sbin/filefrag" filefrag
+ 
+ rm -f $seqres.full
+diff --git a/tests/btrfs/048 b/tests/btrfs/048
+index c2cb4a6..38089f6 100755
+--- a/tests/btrfs/048
++++ b/tests/btrfs/048
+@@ -47,7 +47,7 @@ _supported_fs btrfs
+ _supported_os Linux
+ _require_test
+ _require_scratch
+-_require_btrfs "property"
++_require_btrfs_subcommand "property"
+ 
+ send_files_dir=$TEST_DIR/btrfs-test-$seq
+ 
+diff --git a/tests/btrfs/059 b/tests/btrfs/059
+index b9a6ef4..f6c2e27 100755
+--- a/tests/btrfs/059
++++ b/tests/btrfs/059
+@@ -50,7 +50,7 @@ _supported_fs btrfs
+ _supported_os Linux
+ _require_test
+ _require_scratch
+-_require_btrfs "property"
++_require_btrfs_subcommand "property"
+ 
+ rm -f $seqres.full
+ 
 -- 
-2.5.0
+2.7.2
+
+
 
