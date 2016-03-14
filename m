@@ -1,148 +1,93 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44906 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932721AbcCKPlw (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 11 Mar 2016 10:41:52 -0500
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 2/2] generic: test I/O on dm error device
-Date: Fri, 11 Mar 2016 23:40:22 +0800
-Message-Id: <1457710822-30532-2-git-send-email-eguan@redhat.com>
-In-Reply-To: <1457710822-30532-1-git-send-email-eguan@redhat.com>
-References: <1457710822-30532-1-git-send-email-eguan@redhat.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:47538 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1754813AbcCNH5C (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 14 Mar 2016 03:57:02 -0400
+Subject: Re: [PATCH v4 0/6] Btrfs in-band de-duplication test cases
+References: <1457512424-9215-1-git-send-email-quwenruo@cn.fujitsu.com>
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Message-ID: <56E66EBF.8000105@cn.fujitsu.com>
+Date: Mon, 14 Mar 2016 15:56:47 +0800
+MIME-Version: 1.0
+In-Reply-To: <1457512424-9215-1-git-send-email-quwenruo@cn.fujitsu.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org, Eryu Guan <eguan@redhat.com>
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This is a test that performs simple I/O on dm error device, which
-returns EIO on all I/O request.
+Please don't merge this patchset.
 
-This is motivated by an ext4 bug that crashes kernel on error path when
-trying to update atime. Following kernel patch should fix the issue
+As the there is some naming undecided recently.
 
-  ext4: fix NULL pointer dereference in ext4_mark_inode_dirty()
+The abbreviation 'dedup' may be changed to 'dedupe'.
+I'll update them when all related parts is settled down.
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
- tests/generic/338     | 90 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/338.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 93 insertions(+)
- create mode 100755 tests/generic/338
- create mode 100644 tests/generic/338.out
+Thanks,
+Qu
 
-diff --git a/tests/generic/338 b/tests/generic/338
-new file mode 100755
-index 0000000..cea4d82
---- /dev/null
-+++ b/tests/generic/338
-@@ -0,0 +1,90 @@
-+#! /bin/bash
-+# FS QA Test 338
-+#
-+# Test I/O on dm error device.
-+#
-+# Motivated by an ext4 bug that crashes kernel on error path when trying to
-+# update atime.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Red Hat Inc.,  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	_dmerror_cleanup
-+	_destroy_loop_device $LOOP_DEV
-+	rm -f $LOOP_FILE
-+	rm -rf $LOOP_MNT
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmerror
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+_require_loop
-+_require_dm_target error
-+# If TEST_DEV is not a valid block device, FSTYP cannot be mkfs'ed either
-+_require_block_device $TEST_DEV
-+
-+echo "Silence is golden"
-+
-+# Use loop device as backend of dm error device, because drop_caches drops
-+# caches hold by loop device too and forces reading inode info from disk and
-+# triggers NULL pointer dereference on buggy ext4
-+LOOP_FILE=$TEST_DIR/$seq-$$.img
-+LOOP_MNT=$TEST_DIR/$seq-$$.mnt
-+mkdir -p $LOOP_MNT
-+$XFS_IO_PROG -fc "truncate 512M" $LOOP_FILE >>$seqres.full 2>&1
-+LOOP_DEV=`_create_loop_device $LOOP_FILE`
-+
-+_dmerror_init $LOOP_DEV $LOOP_MNT
-+_mkfs_dev $DMERROR_DEV
-+# Use strictatime mount option here to force atime updates, which could help
-+# trigger the NULL pointer dereference on ext4 more easily
-+_dmerror_mount "-o strictatime"
-+_dmerror_load_error_table
-+
-+# drop all caches, force reading from error device
-+echo 3 > /proc/sys/vm/drop_caches
-+
-+# do some test I/O
-+ls -l $LOOP_MNT >>$seqres.full 2>&1
-+$XFS_IO_PROG -fc "pwrite 0 1M" $LOOP_MNT/testfile >>$seqres.full 2>&1
-+
-+# no panic no hang, success, all done
-+status=0
-+exit
-diff --git a/tests/generic/338.out b/tests/generic/338.out
-new file mode 100644
-index 0000000..3482cf4
---- /dev/null
-+++ b/tests/generic/338.out
-@@ -0,0 +1,2 @@
-+QA output created by 338
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 727648c..8818827 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -340,3 +340,4 @@
- 335 auto quick metadata
- 336 auto quick metadata
- 337 auto quick metadata
-+338 auto quick rw
--- 
-2.5.0
+
+Qu Wenruo wrote on 2016/03/09 16:33 +0800:
+> Since we are push btrfs in-band de-duplication for v4.6, it's better to
+> add test cases for this new feature.
+>
+> Except the first basic function test, the rest are all regression test
+> which we found during the development.
+> We also found some bugs from the generic test, but we need some fstests
+> option allowing us to enable dedup for any test case.
+> (We did it by hack _scratch_mount and _test_mount to enable dedup for
+> any test case)
+>
+> Use the sequence number starts from 200 to avoid any possible conflicts.
+> The './new' script returns some hole number which is not proper for
+> such related test case set.
+> Hopes it's not too hard for maintainer to modify the sequence number.
+>
+> v1:
+>    Btrfs mail list internal use only
+> v2:
+>    Add test case 203 to test balance race
+> v3:
+>    Follow Dave's comment to use more existing fstest infrastructure.
+>    Also fix a small bug in the 1st which forgot to remove old macros
+> v4:
+>    Enhance test 203 to cover both dedup backend
+>    Add new test 204, a specific regression test for balance and dedup.
+>
+> Qu Wenruo (6):
+>    fstests: rename _require_btrfs to _require_btrfs_subcommand
+>    fstests: btrfs: Add basic test for btrfs in-band de-duplication
+>    fstests: btrfs: Add testcase for btrfs dedup enable disable race test
+>    fstests: btrfs: Add per inode dedup flag test
+>    fstests: btrfs: Test inband dedup with balance.
+>    fstests: btrfs: Test for btrfs dedup tree balance bug
+>
+>   common/defrag       |  13 +++++++
+>   common/rc           |   2 +-
+>   tests/btrfs/004     |   2 +-
+>   tests/btrfs/048     |   2 +-
+>   tests/btrfs/059     |   2 +-
+>   tests/btrfs/200     | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>   tests/btrfs/200.out |  21 ++++++++++
+>   tests/btrfs/201     |  98 ++++++++++++++++++++++++++++++++++++++++++++++
+>   tests/btrfs/201.out |   2 +
+>   tests/btrfs/202     | 108 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>   tests/btrfs/202.out |  15 ++++++++
+>   tests/btrfs/203     | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>   tests/btrfs/203.out |   5 +++
+>   tests/btrfs/204     |  74 +++++++++++++++++++++++++++++++++++
+>   tests/btrfs/204.out |   2 +
+>   tests/btrfs/group   |   5 +++
+>   16 files changed, 565 insertions(+), 4 deletions(-)
+>   create mode 100755 tests/btrfs/200
+>   create mode 100644 tests/btrfs/200.out
+>   create mode 100755 tests/btrfs/201
+>   create mode 100644 tests/btrfs/201.out
+>   create mode 100755 tests/btrfs/202
+>   create mode 100644 tests/btrfs/202.out
+>   create mode 100755 tests/btrfs/203
+>   create mode 100644 tests/btrfs/203.out
+>   create mode 100755 tests/btrfs/204
+>   create mode 100644 tests/btrfs/204.out
+>
+
 
