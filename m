@@ -1,114 +1,41 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:17803 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751155AbcCOHzA (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 15 Mar 2016 03:55:00 -0400
-From: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
-Subject: [PATCH] btrfs/059: add a filter for btrfs compression property
-Date: Tue, 15 Mar 2016 15:28:44 +0800
-Message-ID: <1458026924-24194-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
+Received: from mx1.redhat.com ([209.132.183.28]:34794 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753870AbcCOICQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 15 Mar 2016 04:02:16 -0400
+Date: Tue, 15 Mar 2016 16:02:14 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 2/2] generic: test I/O on dm error device
+Message-ID: <20160315080214.GQ11419@eguan.usersys.redhat.com>
+References: <1457710822-30532-1-git-send-email-eguan@redhat.com>
+ <1457710822-30532-2-git-send-email-eguan@redhat.com>
+ <20160315024616.GC30721@dastard>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160315024616.GC30721@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+On Tue, Mar 15, 2016 at 01:46:16PM +1100, Dave Chinner wrote:
+> On Fri, Mar 11, 2016 at 11:40:22PM +0800, Eryu Guan wrote:
+> > This is a test that performs simple I/O on dm error device, which
+> > returns EIO on all I/O request.
+> > 
+> > This is motivated by an ext4 bug that crashes kernel on error path when
+> > trying to update atime. Following kernel patch should fix the issue
+> > 
+> >   ext4: fix NULL pointer dereference in ext4_mark_inode_dirty()
+> 
+> Why does this test require the loop device? Why can't you just
+> unmount the filesystem, run 'blkdev --flushbufs <dev>' to ensure
+> there are no cached buffers/pages on the block device, then mount
+> it again?
 
-btrfs/059.out should not be hardcoded to zlib, if compression method
-is lzo, this case will fail wrongly, so here add a filter.
+Yes, 'blockdev --flushbufs <dev>' works, and I found that I only need to
+add a blockdev call before dropping caches. This makes the code much
+cleaner and easier to read, perhaps the first patch can be dropped as
+well. I'll send out v2 shortly. Thanks for the review!
 
-Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
----
- common/filter.btrfs |  4 ++++
- tests/btrfs/059     | 16 +++++++++++-----
- tests/btrfs/059.out |  6 +++---
- 3 files changed, 18 insertions(+), 8 deletions(-)
-
-diff --git a/common/filter.btrfs b/common/filter.btrfs
-index 9bb6479..56cf4b2 100644
---- a/common/filter.btrfs
-+++ b/common/filter.btrfs
-@@ -65,7 +65,11 @@ _filter_transaction_commit() {
- _filter_btrfs_subvol_delete()
- {
- 	_filter_scratch | _filter_transaction_commit
-+}
- 
-+_filter_btrfs_compress_property()
-+{
-+	sed -e "s/compression=\(lzo\|zlib\)/COMPRESSION=XXX/g"
- }
- 
- # make sure this script returns success
-diff --git a/tests/btrfs/059 b/tests/btrfs/059
-index f6c2e27..d7db1df 100755
---- a/tests/btrfs/059
-+++ b/tests/btrfs/059
-@@ -44,6 +44,7 @@ _cleanup()
- # get standard environment, filters and checks
- . ./common/rc
- . ./common/filter
-+. ./common/filter.btrfs
- 
- # real QA test starts here
- _supported_fs btrfs
-@@ -61,24 +62,29 @@ mkdir $SCRATCH_MNT/testdir
- echo "Setting compression flag in the directory..."
- chattr +c $SCRATCH_MNT/testdir
- echo "Directory compression property value:"
--$BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir compression
-+$BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir compression | \
-+	_filter_btrfs_compress_property
- 
- touch $SCRATCH_MNT/testdir/file1
- echo "file1 compression property value:"
--$BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir/file1 compression
-+$BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir/file1 compression | \
-+	_filter_btrfs_compress_property
- 
- echo "Clearing compression flag from directory..."
- chattr -c $SCRATCH_MNT/testdir
- echo "Directory compression property value:"
--$BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir compression
-+$BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir compression | \
-+	_filter_btrfs_compress_property
- 
- touch $SCRATCH_MNT/testdir/file2
- echo "file2 compression property value:"
--$BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir/file2 compression
-+$BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir/file2 compression | \
-+	_filter_btrfs_compress_property
- 
- touch $SCRATCH_MNT/testdir/file1
- echo "file1 compression property value:"
--$BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir/file1 compression
-+$BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir/file1 compression | \
-+	_filter_btrfs_compress_property
- 
- status=0
- exit
-diff --git a/tests/btrfs/059.out b/tests/btrfs/059.out
-index 9ec9a53..4e7539a 100644
---- a/tests/btrfs/059.out
-+++ b/tests/btrfs/059.out
-@@ -1,11 +1,11 @@
- QA output created by 059
- Setting compression flag in the directory...
- Directory compression property value:
--compression=zlib
-+COMPRESSION=XXX
- file1 compression property value:
--compression=zlib
-+COMPRESSION=XXX
- Clearing compression flag from directory...
- Directory compression property value:
- file2 compression property value:
- file1 compression property value:
--compression=zlib
-+COMPRESSION=XXX
--- 
-1.8.3.1
-
-
-
+Eryu
