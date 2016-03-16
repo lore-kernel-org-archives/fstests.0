@@ -1,83 +1,51 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:41493 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932665AbcCOT0N (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 15 Mar 2016 15:26:13 -0400
-Date: Tue, 15 Mar 2016 12:25:37 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH v2 12/12] block: test fallocate for block devices
-Message-ID: <20160315192537.GB5818@birch.djwong.org>
-References: <20160305003717.28738.98818.stgit@birch.djwong.org>
- <20160305003837.28738.49794.stgit@birch.djwong.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160305003837.28738.49794.stgit@birch.djwong.org>
+Received: from mx1.redhat.com ([209.132.183.28]:50807 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S964779AbcCPJdi (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 16 Mar 2016 05:33:38 -0400
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] fstests: make xfs/006 generic
+Date: Wed, 16 Mar 2016 17:30:54 +0800
+Message-Id: <1458120654-27284-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: david@fromorbit.com
-Cc: linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com, Christoph Hellwig <hch@infradead.org>
+To: fstests@vger.kernel.org
+Cc: xfs@oss.sgi.com, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Now that we're wiring up fallocate's PUNCH_HOLE and ZERO_RANGE
-features for block devices, add some tests to make sure they
-work correctly.
+xfs/006 has no requirements that are specific to XFS, so make it generic
+and other filesystems could get some coverage too.
 
-v2: Update tests to reflect EOD clamping suggested by Linus.
+Along with the movement, I also added a test that removes all created
+dirs, as that's how the original bug was found.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- common/scsi_debug     |    6 ++
- tests/generic/705     |   77 ++++++++++++++++++++++++++++++++
- tests/generic/705.out |   11 +++++
- tests/generic/706     |   74 +++++++++++++++++++++++++++++++
- tests/generic/706.out |   10 ++++
- tests/generic/707     |  118 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/707.out |   32 +++++++++++++
- tests/generic/group   |    3 +
- 8 files changed, 330 insertions(+), 1 deletion(-)
- create mode 100755 tests/generic/705
- create mode 100644 tests/generic/705.out
- create mode 100755 tests/generic/706
- create mode 100644 tests/generic/706.out
- create mode 100755 tests/generic/707
- create mode 100644 tests/generic/707.out
+ tests/generic/339     | 71 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/339.out |  2 ++
+ tests/generic/group   |  1 +
+ tests/xfs/006         | 63 ---------------------------------------------
+ tests/xfs/006.out     | 28 --------------------
+ tests/xfs/group       |  1 -
+ 6 files changed, 74 insertions(+), 92 deletions(-)
+ create mode 100755 tests/generic/339
+ create mode 100644 tests/generic/339.out
+ delete mode 100755 tests/xfs/006
+ delete mode 100644 tests/xfs/006.out
 
-diff --git a/common/scsi_debug b/common/scsi_debug
-index eb08126..74c3802 100644
---- a/common/scsi_debug
-+++ b/common/scsi_debug
-@@ -40,13 +40,17 @@ _get_scsi_debug_dev()
- 	logical=${2-512}
- 	unaligned=${3-0}
- 	size=${4-128}
-+	test -n "$4" && shift
-+	test -n "$3" && shift
-+	test -n "$2" && shift
-+	test -n "$1" && shift
- 
- 	phys_exp=0
- 	while [ $logical -lt $physical ]; do
- 		let physical=physical/2
- 		let phys_exp=phys_exp+1
- 	done
--	opts="sector_size=$logical physblk_exp=$phys_exp lowest_aligned=$unaligned dev_size_mb=$size"
-+	opts="sector_size=$logical physblk_exp=$phys_exp lowest_aligned=$unaligned dev_size_mb=$size $@"
- 	echo "scsi_debug options $opts" >> $seqres.full
- 	modprobe scsi_debug $opts
- 	[ $? -eq 0 ] || _fail "scsi_debug modprobe failed"
-diff --git a/tests/generic/705 b/tests/generic/705
+diff --git a/tests/generic/339 b/tests/generic/339
 new file mode 100755
-index 0000000..4bb8752
+index 0000000..cbcad00
 --- /dev/null
-+++ b/tests/generic/705
-@@ -0,0 +1,77 @@
++++ b/tests/generic/339
+@@ -0,0 +1,71 @@
 +#! /bin/bash
-+# FS QA Test No. 705
++# FS QA Test No. 339
 +#
-+# Test fallocate(ZERO_RANGE) on a block device, which should be able to
-+# WRITE SAME (or equivalent) the range.
++# Test that directory hash entries are place in the correct order.
++# commit f5ea110 ("xfs: add CRCs to dir2/da node blocks") left the
++# directory with incorrect hash ordering.
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Oracle, Inc.  All Rights Reserved.
++# Copyright (c) 2014 Hannes Frederic Sowa.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -101,335 +69,177 @@ index 0000000..4bb8752
 +here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 7 15
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+    cd /
-+    rm -rf $tmp.*
++	cd /
++	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/scsi_debug
 +
 +# real QA test starts here
++_supported_fs generic
 +_supported_os Linux
-+_require_scsi_debug
-+_require_xfs_io_command "fzero"
++_require_scratch
++_require_test_program "dirhash_collide"
 +
-+echo "Create and format"
-+dev=$(_get_scsi_debug_dev 512 512 0 4 "lbpws=1 lbpws10=1")
-+_pwrite_byte 0x62 0 4m $dev >> $seqres.full
++rm -f $seqres.full
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
 +
-+echo "Zero range"
-+$XFS_IO_PROG -c "fzero -k 512k 1m" $dev
++echo "Silence is golden"
 +
-+echo "Zero range without keep_size"
-+$XFS_IO_PROG -c "fzero 384k 64k" $dev
++testdir=$SCRATCH_MNT/$seq.$$
++mkdir -p $testdir
++$here/src/dirhash_collide -d -n 10000 $testdir >>$seqres.full 2>&1
 +
-+echo "Zero range past EOD"
-+$XFS_IO_PROG -c "fzero -k 3m 4m" $dev
++# check the scratch device
++_scratch_unmount
++_check_scratch_fs
 +
-+echo "Check contents"
-+md5sum $dev | sed -e "s|$dev|SCSI_DEBUG_DEV|g"
-+
-+echo "Zero range to EOD"
-+$XFS_IO_PROG -c "fzero -k 0 9223372036854775807" $dev
-+
-+echo "Check contents"
-+md5sum $dev | sed -e "s|$dev|SCSI_DEBUG_DEV|g"
-+
-+echo "Destroy device"
-+_put_scsi_debug_dev
++# remove all test dirs and let test harness check scratch fs again
++_scratch_mount
++rm -rf $testdir
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/705.out b/tests/generic/705.out
+diff --git a/tests/generic/339.out b/tests/generic/339.out
 new file mode 100644
-index 0000000..ccbda23
+index 0000000..293ea80
 --- /dev/null
-+++ b/tests/generic/705.out
-@@ -0,0 +1,11 @@
-+QA output created by 705
-+Create and format
-+Zero range
-+Zero range without keep_size
-+Zero range past EOD
-+Check contents
-+f0cb9070c098aa347f664bead3a219d9  SCSI_DEBUG_DEV
-+Zero range to EOD
-+Check contents
-+b5cfa9d6c8febd618f91ac2843d50a1c  SCSI_DEBUG_DEV
-+Destroy device
-diff --git a/tests/generic/706 b/tests/generic/706
-new file mode 100755
-index 0000000..184dbc2
---- /dev/null
-+++ b/tests/generic/706
-@@ -0,0 +1,74 @@
-+#! /bin/bash
-+# FS QA Test No. 706
-+#
-+# Test fallocate(PUNCH_HOLE) on a block device, which should be able to
-+# zero-TRIM (or equivalent) the range.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Oracle, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 7 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/scsi_debug
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scsi_debug
-+_require_xfs_io_command "fpunch"
-+
-+echo "Create and format"
-+dev=$(_get_scsi_debug_dev 512 512 0 4 "lbpws=1 lbpws10=1")
-+_pwrite_byte 0x62 0 4m $dev >> $seqres.full
-+
-+echo "Zero punch"
-+$XFS_IO_PROG -c "fpunch 512k 1m" $dev
-+
-+echo "Punch range past EOD"
-+$XFS_IO_PROG -c "fpunch 3m 4m" $dev
-+
-+echo "Check contents"
-+md5sum $dev | sed -e "s|$dev|SCSI_DEBUG_DEV|g"
-+
-+echo "Punch to EOD"
-+$XFS_IO_PROG -c "fpunch 0 9223372036854775807" $dev
-+
-+echo "Check contents"
-+md5sum $dev | sed -e "s|$dev|SCSI_DEBUG_DEV|g"
-+
-+echo "Destroy device"
-+_put_scsi_debug_dev
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/706.out b/tests/generic/706.out
-new file mode 100644
-index 0000000..53a09ae
---- /dev/null
-+++ b/tests/generic/706.out
-@@ -0,0 +1,10 @@
-+QA output created by 706
-+Create and format
-+Zero punch
-+Punch range past EOD
-+Check contents
-+8c6a3fd51601141b56eaebbab3746156  SCSI_DEBUG_DEV
-+Punch to EOD
-+Check contents
-+b5cfa9d6c8febd618f91ac2843d50a1c  SCSI_DEBUG_DEV
-+Destroy device
-diff --git a/tests/generic/707 b/tests/generic/707
-new file mode 100755
-index 0000000..fab997f
---- /dev/null
-+++ b/tests/generic/707
-@@ -0,0 +1,118 @@
-+#! /bin/bash
-+# FS QA Test No. 707
-+#
-+# Test the unsupported fallocate flags on a block device.  No collapse
-+# or insert range, no regular fallocate, no forgetting keep-space on
-+# zero range, no punching past EOD, no requests that aren't aligned
-+# with the logicalsector size, and make sure the fallbacks work for
-+# devices that don't support write_same or discard.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Oracle, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 7 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/scsi_debug
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scsi_debug
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_command "finsert"
-+_require_xfs_io_command "fcollapse"
-+_require_xfs_io_command "fzero"
-+_require_xfs_io_command "fpunch"
-+
-+
-+echo "Create and format"
-+dev=$(_get_scsi_debug_dev 4096 4096 0 4 "lbpws=1 lbpws10=1")
-+_pwrite_byte 0x62 0 4m $dev >> $seqres.full
-+$XFS_IO_PROG -c "fsync" $dev
-+
-+echo "Regular fallocate"
-+$XFS_IO_PROG -c "falloc 64k 64k" $dev
-+
-+echo "Insert range"
-+$XFS_IO_PROG -c "finsert 128k 64k" $dev
-+
-+echo "Collapse range"
-+$XFS_IO_PROG -c "fcollapse 256k 64k" $dev
-+
-+echo "Unaligned zero range"
-+$XFS_IO_PROG -c "fzero -k 512 512" $dev
-+
-+echo "Unaligned punch"
-+$XFS_IO_PROG -c "fpunch 512 512" $dev
-+
-+echo "Zero range toobig keep size"
-+$XFS_IO_PROG -c "fzero -k 512k 9223372036854775807" $dev
-+
-+echo "Zero range toobig"
-+$XFS_IO_PROG -c "fzero 512k 9223372036854775807" $dev
-+
-+echo "Zero range to EOD fail w/o keepsize"
-+$XFS_IO_PROG -c "fzero 0 9223372036854775807" $dev
-+
-+echo "Zero range starts past EOD"
-+$XFS_IO_PROG -c "fzero -k 900m 1m" $dev
-+
-+echo "Punch starts past EOD"
-+$XFS_IO_PROG -c "fpunch 900m 1m" $dev
-+
-+echo "Check contents"
-+md5sum $dev | sed -e "s|$dev|SCSI_DEBUG_DEV|g"
-+
-+echo "Destroy device"
-+_put_scsi_debug_dev
-+
-+echo "Create w/o unmap or writesame and format"
-+dev=$(_get_scsi_debug_dev 512 512 0 4 "lbpws=0 lbpws10=0 lbpu=0 write_same_length=0 unmap_max_blocks=0")
-+_pwrite_byte 0x62 0 4m $dev >> $seqres.full
-+$XFS_IO_PROG -c "fsync" $dev
-+
-+echo "Zero punch, no fallback available"
-+$XFS_IO_PROG -c "fpunch 512k 512k" $dev
-+
-+echo "Zero range, write fallback"
-+$XFS_IO_PROG -c "fzero -k 1536k 512k" $dev
-+
-+echo "Check contents"
-+md5sum $dev | sed -e "s|$dev|SCSI_DEBUG_DEV|g"
-+
-+echo "Destroy device"
-+_put_scsi_debug_dev
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/707.out b/tests/generic/707.out
-new file mode 100644
-index 0000000..050c70c
---- /dev/null
-+++ b/tests/generic/707.out
-@@ -0,0 +1,32 @@
-+QA output created by 707
-+Create and format
-+Regular fallocate
-+fallocate: Operation not supported
-+Insert range
-+fallocate: Operation not supported
-+Collapse range
-+fallocate: Operation not supported
-+Unaligned zero range
-+fallocate: Invalid argument
-+Unaligned punch
-+fallocate: Invalid argument
-+Zero range toobig keep size
-+fallocate: File too large
-+Zero range toobig
-+fallocate: File too large
-+Zero range to EOD fail w/o keepsize
-+fallocate: Invalid argument
-+Zero range starts past EOD
-+fallocate: Invalid argument
-+Punch starts past EOD
-+fallocate: Invalid argument
-+Check contents
-+b83f9394092e15bdcda585cd8e776dc6  SCSI_DEBUG_DEV
-+Destroy device
-+Create w/o unmap or writesame and format
-+Zero punch, no fallback available
-+fallocate: Operation not supported
-+Zero range, write fallback
-+Check contents
-+0fc6bc93cd0cd97e3cde5ea39ea1185d  SCSI_DEBUG_DEV
-+Destroy device
++++ b/tests/generic/339.out
+@@ -0,0 +1,2 @@
++QA output created by 339
++Silence is golden
 diff --git a/tests/generic/group b/tests/generic/group
-index 727648c..51a2d63 100644
+index 8818827..cd2a2b7 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -340,3 +340,6 @@
- 335 auto quick metadata
+@@ -341,3 +341,4 @@
  336 auto quick metadata
  337 auto quick metadata
-+705 blockdev quick rw
-+706 blockdev quick rw
-+707 blockdev quick rw
+ 338 auto quick rw
++339 auto dir
+diff --git a/tests/xfs/006 b/tests/xfs/006
+deleted file mode 100755
+index 13631be..0000000
+--- a/tests/xfs/006
++++ /dev/null
+@@ -1,63 +0,0 @@
+-#! /bin/bash
+-# FS QA Test No. 006
+-#
+-# Test that directory hash entries are place in the correct order.
+-# commit f5ea110 ("xfs: add CRCs to dir2/da node blocks") left the
+-# directory with incorrect hash ordering.
+-#
+-#-----------------------------------------------------------------------
+-# Copyright (c) 2014 Hannes Frederic Sowa.  All Rights Reserved.
+-#
+-# This program is free software; you can redistribute it and/or
+-# modify it under the terms of the GNU General Public License as
+-# published by the Free Software Foundation.
+-#
+-# This program is distributed in the hope that it would be useful,
+-# but WITHOUT ANY WARRANTY; without even the implied warranty of
+-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-# GNU General Public License for more details.
+-#
+-# You should have received a copy of the GNU General Public License
+-# along with this program; if not, write the Free Software Foundation,
+-# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+-#-----------------------------------------------------------------------
+-#
+-
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
+-
+-here=`pwd`
+-tmp=/tmp/$$
+-status=1	# failure is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
+-
+-_cleanup()
+-{
+-    cd /
+-    rm -f $tmp.*
+-}
+-
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
+-. ./common/repair
+-
+-# real QA test starts here
+-
+-_supported_fs xfs
+-_supported_os Linux
+-_require_scratch
+-
+-_scratch_mkfs_xfs | _filter_mkfs 2>$tmp.mkfs
+-_scratch_mount | _filter_scratch
+-
+-mkdir $SCRATCH_MNT/x
+-$here/src/dirhash_collide -d -n 10000 $SCRATCH_MNT/x
+-_scratch_unmount 2>&1 | _filter_scratch
+-
+-_scratch_xfs_repair 2>&1 | _filter_repair
+-
+-# success, all done
+-status=0
+-exit
+diff --git a/tests/xfs/006.out b/tests/xfs/006.out
+deleted file mode 100644
+index 9c142ac..0000000
+--- a/tests/xfs/006.out
++++ /dev/null
+@@ -1,28 +0,0 @@
+-QA output created by 006
+-meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
+-data     = bsize=XXX blocks=XXX, imaxpct=PCT
+-         = sunit=XXX swidth=XXX, unwritten=X
+-naming   =VERN bsize=XXX
+-log      =LDEV bsize=XXX blocks=XXX
+-realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+-Phase 1 - find and verify superblock...
+-Phase 2 - using <TYPEOF> log
+-        - zero log...
+-        - scan filesystem freespace and inode maps...
+-        - found root inode chunk
+-Phase 3 - for each AG...
+-        - scan and clear agi unlinked lists...
+-        - process known inodes and perform inode discovery...
+-        - process newly discovered inodes...
+-Phase 4 - check for duplicate blocks...
+-        - setting up duplicate extent list...
+-        - check for inodes claiming duplicate blocks...
+-Phase 5 - rebuild AG headers and trees...
+-        - reset superblock...
+-Phase 6 - check inode connectivity...
+-        - resetting contents of realtime bitmap and summary inodes
+-        - traversing filesystem ...
+-        - traversal finished ...
+-        - moving disconnected inodes to lost+found ...
+-Phase 7 - verify and correct link counts...
+-done
+diff --git a/tests/xfs/group b/tests/xfs/group
+index e0c4553..db495c9 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -3,7 +3,6 @@
+ 003 db auto quick
+ 004 db auto quick
+ 005 auto quick
+-006 auto dir
+ 007 auto quota quick
+ 008 rw ioctl auto quick
+ 009 rw ioctl auto prealloc quick
+-- 
+2.5.0
+
