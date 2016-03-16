@@ -1,72 +1,48 @@
-Received: from mx1.redhat.com ([209.132.183.28]:48953 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S966633AbcCPPFX (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 16 Mar 2016 11:05:23 -0400
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v2] xfs/073: avoid finobt warning from mkfs
-Date: Wed, 16 Mar 2016 23:04:44 +0800
-Message-Id: <1458140684-4723-1-git-send-email-eguan@redhat.com>
-In-Reply-To: <1458129204-31882-1-git-send-email-eguan@redhat.com>
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:48314 "EHLO
+	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S934026AbcCPUAu (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 16 Mar 2016 16:00:50 -0400
+Date: Thu, 17 Mar 2016 07:00:43 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] xfs/073: filter out finobt warning from mkfs.xfs
+Message-ID: <20160316200043.GG11812@dastard>
 References: <1458129204-31882-1-git-send-email-eguan@redhat.com>
+ <20160316120416.GA18030@infradead.org>
+ <20160316145418.GT11419@eguan.usersys.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160316145418.GT11419@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com, Eryu Guan <eguan@redhat.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-When testing xfs/073 with MKFS_OPTIONS="-m crc=1,finobt=1" set, it fails
-due to extra warning about disabling finobt feature:
+On Wed, Mar 16, 2016 at 10:54:18PM +0800, Eryu Guan wrote:
+> On Wed, Mar 16, 2016 at 05:04:16AM -0700, Christoph Hellwig wrote:
+> > On Wed, Mar 16, 2016 at 07:53:24PM +0800, Eryu Guan wrote:
+> > > When testing xfs/073 with MKFS_OPTIONS="-m crc=1,finobt=1" set, it fails
+> > > due to extra warning about disabling finobt feature:
+> > > 
+> > >  +warning: finobt not supported without CRC support, disabled.
+> > > 
+> > > Because xfs/073 disables crc unconditionally and finobt can not be
+> > > enabled either.
+> > 
+> > How about explicitly disabling finobt as well?
+> 
+> I think that's a cleaner way to fix it. Just that some extra work is
+> needed to let the test pass with old mkfs.xfs without metadata suport.
 
- +warning: finobt not supported without CRC support, disabled.
+This is a downhill slope. e.g. if I add "-i sparse=1" to the mkfs
+line, it will warning differently and a new filter is needed. I
+would suggest just ignoring the mkfs output altogether (maybe just
+dumping it all to $seqres.full) as it's not necessary to determine
+whether the test ran correctly or not.
 
-Because xfs/073 disables crc unconditionally and finobt can not be
-enabled either.
+Cheers,
 
-Fix it by explicitly disabling finobt as well.
-
-Also remove all meta related mkfs options in _scratch_mkfs_xfs_opts() if
-mkfs.xfs has no metadata support, not only the crc option. So that test
-still passes on distros with such old binaries.
-
-Suggested-by: Christoph Hellwig <hch@infradead.org>
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
-
-v2:
-- disable finobt explicitly, instead of filtering the warning
-
- common/rc     | 4 ++--
- tests/xfs/073 | 2 +-
- 2 files changed, 3 insertions(+), 3 deletions(-)
-
-diff --git a/common/rc b/common/rc
-index a34c387..73d2ea6 100644
---- a/common/rc
-+++ b/common/rc
-@@ -444,9 +444,9 @@ _scratch_mkfs_xfs_opts()
- {
- 	mkfs_opts=$*
- 
--	# remove crc related mkfs options if mkfs.xfs doesn't support v5 xfs
-+	# remove metadata related mkfs options if mkfs.xfs doesn't them
- 	if [ -n "$XFS_MKFS_HAS_NO_META_SUPPORT" ]; then
--		mkfs_opts=`echo $mkfs_opts | sed "s/-m\s\+crc=.//"`
-+		mkfs_opts=`echo $mkfs_opts | sed "s/-m\s\+\S\+//g"`
- 	fi
- 
- 	_scratch_options mkfs
-diff --git a/tests/xfs/073 b/tests/xfs/073
-index e1335df..e2c1af3 100755
---- a/tests/xfs/073
-+++ b/tests/xfs/073
-@@ -138,7 +138,7 @@ _require_loop
- 
- rm -f $seqres.full
- 
--_scratch_mkfs_xfs -m crc=0 -dsize=41m,agcount=2 | _filter_mkfs 2>/dev/null
-+_scratch_mkfs_xfs -m crc=0,finobt=0 -dsize=41m,agcount=2 | _filter_mkfs 2>/dev/null
- _scratch_mount 2>/dev/null || _fail "initial scratch mount failed"
- 
- echo
+Dave.
 -- 
-2.5.0
-
+Dave Chinner
+david@fromorbit.com
