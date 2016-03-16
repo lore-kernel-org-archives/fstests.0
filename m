@@ -1,245 +1,109 @@
-Received: from mx1.redhat.com ([209.132.183.28]:50807 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:40231 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S964779AbcCPJdi (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 16 Mar 2016 05:33:38 -0400
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] fstests: make xfs/006 generic
-Date: Wed, 16 Mar 2016 17:30:54 +0800
-Message-Id: <1458120654-27284-1-git-send-email-eguan@redhat.com>
+	id S934141AbcCPL0I (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 16 Mar 2016 07:26:08 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (Postfix) with ESMTPS id A1E5880508
+	for <fstests@vger.kernel.org>; Wed, 16 Mar 2016 11:26:07 +0000 (UTC)
+From: Andreas Gruenbacher <agruenba@redhat.com>
+Subject: [PATCH v5 0/3] Richacl tests
+Date: Wed, 16 Mar 2016 12:26:02 +0100
+Message-Id: <1458127565-24149-1-git-send-email-agruenba@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com, Eryu Guan <eguan@redhat.com>
+Cc: Andreas Gruenbacher <agruenba@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-xfs/006 has no requirements that are specific to XFS, so make it generic
-and other filesystems could get some coverage too.
+Here we go with the richacl tests converted into "golden output matching"
+tests.  The tests no longer consistently check the exit statuses of commands
+and it is more difficult to figure out which piece of output belongs to which
+command and to trace back from a failure to the command that has failed.  Still
+better than nothing, though.
 
-Along with the movement, I also added a test that removes all created
-dirs, as that's how the original bug was found.
+Andreas Gruenbacher (3):
+  Rename output file templates to match TEST.out*
+  xfs/191: Remove obsolete nfs4acl tests
+  generic/338-346: Add richacl tests
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
- tests/generic/339     | 71 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/339.out |  2 ++
- tests/generic/group   |  1 +
- tests/xfs/006         | 63 ---------------------------------------------
- tests/xfs/006.out     | 28 --------------------
- tests/xfs/group       |  1 -
- 6 files changed, 74 insertions(+), 92 deletions(-)
+ .gitignore                   |  19 +++
+ common/rc                    |  39 ++++++
+ nfs4acl/Makefile             |  29 ----
+ nfs4acl/apply-mask.test      | 143 -------------------
+ nfs4acl/basic.test           |  70 ----------
+ nfs4acl/chmod.test           |  31 -----
+ nfs4acl/chown.test           |  63 ---------
+ nfs4acl/computed-mode.test   |  62 ---------
+ nfs4acl/create.test          |  35 -----
+ nfs4acl/ctime.test           |  36 -----
+ nfs4acl/delete.test          |  77 ----------
+ nfs4acl/run                  | 298 ---------------------------------------
+ nfs4acl/unrepresentable.test |  20 ---
+ nfs4acl/write-vs-append.test |  46 ------
+ tests/generic/338            | 117 ++++++++++++++++
+ tests/generic/338.out        |  94 +++++++++++++
+ tests/generic/339            | 109 +++++++++++++++
+ tests/generic/339.out        | 140 +++++++++++++++++++
+ tests/generic/340            |  90 ++++++++++++
+ tests/generic/340.out        |  39 ++++++
+ tests/generic/341            |  77 ++++++++++
+ tests/generic/341.out        |   9 ++
+ tests/generic/342            |  76 ++++++++++
+ tests/generic/342.out        |  11 ++
+ tests/generic/343            |  75 ++++++++++
+ tests/generic/343.out        |  11 ++
+ tests/generic/344            |  75 ++++++++++
+ tests/generic/344.out        |   7 +
+ tests/generic/345            | 116 ++++++++++++++++
+ tests/generic/345.out        |  24 ++++
+ tests/generic/346            |  80 +++++++++++
+ tests/generic/346.out        |  19 +++
+ tests/generic/group          |   9 ++
+ tests/xfs/096                |   4 +-
+ tests/xfs/096.external       |  50 -------
+ tests/xfs/096.internal       |  51 -------
+ tests/xfs/096.out.external   |  50 +++++++
+ tests/xfs/096.out.internal   |  51 +++++++
+ tests/xfs/191                |  75 ----------
+ tests/xfs/191.out            | 324 -------------------------------------------
+ tests/xfs/group              |   1 -
+ 41 files changed, 1339 insertions(+), 1413 deletions(-)
+ delete mode 100644 nfs4acl/Makefile
+ delete mode 100644 nfs4acl/apply-mask.test
+ delete mode 100644 nfs4acl/basic.test
+ delete mode 100644 nfs4acl/chmod.test
+ delete mode 100644 nfs4acl/chown.test
+ delete mode 100644 nfs4acl/computed-mode.test
+ delete mode 100644 nfs4acl/create.test
+ delete mode 100644 nfs4acl/ctime.test
+ delete mode 100644 nfs4acl/delete.test
+ delete mode 100755 nfs4acl/run
+ delete mode 100644 nfs4acl/unrepresentable.test
+ delete mode 100644 nfs4acl/write-vs-append.test
+ create mode 100755 tests/generic/338
+ create mode 100644 tests/generic/338.out
  create mode 100755 tests/generic/339
  create mode 100644 tests/generic/339.out
- delete mode 100755 tests/xfs/006
- delete mode 100644 tests/xfs/006.out
+ create mode 100755 tests/generic/340
+ create mode 100644 tests/generic/340.out
+ create mode 100755 tests/generic/341
+ create mode 100644 tests/generic/341.out
+ create mode 100755 tests/generic/342
+ create mode 100644 tests/generic/342.out
+ create mode 100755 tests/generic/343
+ create mode 100644 tests/generic/343.out
+ create mode 100755 tests/generic/344
+ create mode 100644 tests/generic/344.out
+ create mode 100755 tests/generic/345
+ create mode 100644 tests/generic/345.out
+ create mode 100755 tests/generic/346
+ create mode 100644 tests/generic/346.out
+ delete mode 100644 tests/xfs/096.external
+ delete mode 100644 tests/xfs/096.internal
+ create mode 100644 tests/xfs/096.out.external
+ create mode 100644 tests/xfs/096.out.internal
+ delete mode 100755 tests/xfs/191
+ delete mode 100644 tests/xfs/191.out
 
-diff --git a/tests/generic/339 b/tests/generic/339
-new file mode 100755
-index 0000000..cbcad00
---- /dev/null
-+++ b/tests/generic/339
-@@ -0,0 +1,71 @@
-+#! /bin/bash
-+# FS QA Test No. 339
-+#
-+# Test that directory hash entries are place in the correct order.
-+# commit f5ea110 ("xfs: add CRCs to dir2/da node blocks") left the
-+# directory with incorrect hash ordering.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2014 Hannes Frederic Sowa.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_test_program "dirhash_collide"
-+
-+rm -f $seqres.full
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+echo "Silence is golden"
-+
-+testdir=$SCRATCH_MNT/$seq.$$
-+mkdir -p $testdir
-+$here/src/dirhash_collide -d -n 10000 $testdir >>$seqres.full 2>&1
-+
-+# check the scratch device
-+_scratch_unmount
-+_check_scratch_fs
-+
-+# remove all test dirs and let test harness check scratch fs again
-+_scratch_mount
-+rm -rf $testdir
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/339.out b/tests/generic/339.out
-new file mode 100644
-index 0000000..293ea80
---- /dev/null
-+++ b/tests/generic/339.out
-@@ -0,0 +1,2 @@
-+QA output created by 339
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 8818827..cd2a2b7 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -341,3 +341,4 @@
- 336 auto quick metadata
- 337 auto quick metadata
- 338 auto quick rw
-+339 auto dir
-diff --git a/tests/xfs/006 b/tests/xfs/006
-deleted file mode 100755
-index 13631be..0000000
---- a/tests/xfs/006
-+++ /dev/null
-@@ -1,63 +0,0 @@
--#! /bin/bash
--# FS QA Test No. 006
--#
--# Test that directory hash entries are place in the correct order.
--# commit f5ea110 ("xfs: add CRCs to dir2/da node blocks") left the
--# directory with incorrect hash ordering.
--#
--#-----------------------------------------------------------------------
--# Copyright (c) 2014 Hannes Frederic Sowa.  All Rights Reserved.
--#
--# This program is free software; you can redistribute it and/or
--# modify it under the terms of the GNU General Public License as
--# published by the Free Software Foundation.
--#
--# This program is distributed in the hope that it would be useful,
--# but WITHOUT ANY WARRANTY; without even the implied warranty of
--# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
--# GNU General Public License for more details.
--#
--# You should have received a copy of the GNU General Public License
--# along with this program; if not, write the Free Software Foundation,
--# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
--#-----------------------------------------------------------------------
--#
--
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
--
--here=`pwd`
--tmp=/tmp/$$
--status=1	# failure is the default!
--trap "_cleanup; exit \$status" 0 1 2 3 15
--
--_cleanup()
--{
--    cd /
--    rm -f $tmp.*
--}
--
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
--. ./common/repair
--
--# real QA test starts here
--
--_supported_fs xfs
--_supported_os Linux
--_require_scratch
--
--_scratch_mkfs_xfs | _filter_mkfs 2>$tmp.mkfs
--_scratch_mount | _filter_scratch
--
--mkdir $SCRATCH_MNT/x
--$here/src/dirhash_collide -d -n 10000 $SCRATCH_MNT/x
--_scratch_unmount 2>&1 | _filter_scratch
--
--_scratch_xfs_repair 2>&1 | _filter_repair
--
--# success, all done
--status=0
--exit
-diff --git a/tests/xfs/006.out b/tests/xfs/006.out
-deleted file mode 100644
-index 9c142ac..0000000
---- a/tests/xfs/006.out
-+++ /dev/null
-@@ -1,28 +0,0 @@
--QA output created by 006
--meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
--data     = bsize=XXX blocks=XXX, imaxpct=PCT
--         = sunit=XXX swidth=XXX, unwritten=X
--naming   =VERN bsize=XXX
--log      =LDEV bsize=XXX blocks=XXX
--realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
--Phase 1 - find and verify superblock...
--Phase 2 - using <TYPEOF> log
--        - zero log...
--        - scan filesystem freespace and inode maps...
--        - found root inode chunk
--Phase 3 - for each AG...
--        - scan and clear agi unlinked lists...
--        - process known inodes and perform inode discovery...
--        - process newly discovered inodes...
--Phase 4 - check for duplicate blocks...
--        - setting up duplicate extent list...
--        - check for inodes claiming duplicate blocks...
--Phase 5 - rebuild AG headers and trees...
--        - reset superblock...
--Phase 6 - check inode connectivity...
--        - resetting contents of realtime bitmap and summary inodes
--        - traversing filesystem ...
--        - traversal finished ...
--        - moving disconnected inodes to lost+found ...
--Phase 7 - verify and correct link counts...
--done
-diff --git a/tests/xfs/group b/tests/xfs/group
-index e0c4553..db495c9 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -3,7 +3,6 @@
- 003 db auto quick
- 004 db auto quick
- 005 auto quick
--006 auto dir
- 007 auto quota quick
- 008 rw ioctl auto quick
- 009 rw ioctl auto prealloc quick
 -- 
 2.5.0
 
