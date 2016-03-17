@@ -1,53 +1,122 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44684 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752334AbcCQD2E (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 16 Mar 2016 23:28:04 -0400
-Date: Thu, 17 Mar 2016 11:28:02 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] xfs/073: filter out finobt warning from mkfs.xfs
-Message-ID: <20160317032801.GU11419@eguan.usersys.redhat.com>
-References: <1458129204-31882-1-git-send-email-eguan@redhat.com>
- <20160316120416.GA18030@infradead.org>
- <20160316145418.GT11419@eguan.usersys.redhat.com>
- <20160316200043.GG11812@dastard>
+Received: from aserp1040.oracle.com ([141.146.126.69]:21716 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750713AbcCQEOE (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 17 Mar 2016 00:14:04 -0400
+Date: Wed, 16 Mar 2016 21:13:57 -0700
+From: Liu Bo <bo.li.liu@oracle.com>
+Subject: Re: [PATCH v2] fstest: btrfs: test single 4k extent after
+ subpagesize buffered writes
+Message-ID: <20160317041357.GB29904@localhost.localdomain>
+Reply-To: bo.li.liu@oracle.com
+References: <1457394467-1245-1-git-send-email-bo.li.liu@oracle.com>
+ <1457396879-30572-1-git-send-email-bo.li.liu@oracle.com>
+ <20160315033941.GE30721@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160316200043.GG11812@dastard>
+In-Reply-To: <20160315033941.GE30721@dastard>
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>
-Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org, xfs@oss.sgi.com
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 17, 2016 at 07:00:43AM +1100, Dave Chinner wrote:
-> On Wed, Mar 16, 2016 at 10:54:18PM +0800, Eryu Guan wrote:
-> > On Wed, Mar 16, 2016 at 05:04:16AM -0700, Christoph Hellwig wrote:
-> > > On Wed, Mar 16, 2016 at 07:53:24PM +0800, Eryu Guan wrote:
-> > > > When testing xfs/073 with MKFS_OPTIONS="-m crc=1,finobt=1" set, it fails
-> > > > due to extra warning about disabling finobt feature:
-> > > > 
-> > > >  +warning: finobt not supported without CRC support, disabled.
-> > > > 
-> > > > Because xfs/073 disables crc unconditionally and finobt can not be
-> > > > enabled either.
-> > > 
-> > > How about explicitly disabling finobt as well?
+On Tue, Mar 15, 2016 at 02:39:41PM +1100, Dave Chinner wrote:
+> On Mon, Mar 07, 2016 at 04:27:59PM -0800, Liu Bo wrote:
+> > This is to test if COW enabled btrfs can end up with single 4k extents
+> > when doing subpagesize buffered writes.
 > > 
-> > I think that's a cleaner way to fix it. Just that some extra work is
-> > needed to let the test pass with old mkfs.xfs without metadata suport.
+> > Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+> > ---
+> ....
+> > +_scratch_mkfs >> $seqres.full 2>&1
+> > +_scratch_mount
+> > +
+> > +default_expire=`cat /proc/sys/vm/dirty_expire_centisecs`
+> > +echo 50 > /proc/sys/vm/dirty_expire_centisecs
 > 
-> This is a downhill slope. e.g. if I add "-i sparse=1" to the mkfs
-> line, it will warning differently and a new filter is needed. I
-> would suggest just ignoring the mkfs output altogether (maybe just
-> dumping it all to $seqres.full) as it's not necessary to determine
-> whether the test ran correctly or not.
+> why?
 
-Yes, other tests that call _scratch_mkfs_xfs with explicit "-m crc=0"
-all redirect output to null or $seqres.full, so I only see the warning
-in xfs/073. I'd like to do the same for it.
+Setting it to 50 is to flush dirty pages more frequently so that it's
+more likely to reproduce this bug.
 
-I think the update to _scratch_mkfs_xfs_opts() in v2 patch is still
-worth doing, it belongs to a seperate patch though.
+But I just realized that this may not be a good testcase for xfstests as
+there're many factors impacting writeback flushing, which means this may
+work well on my machine but may not trigger the bug on others' machines.
+
+> 
+> > +tfile=$SCRATCH_MNT/testfile
+> > +
+> > +PAGE_SIZE=$(get_page_size)
+> > +SUBLEN=$((RANDOM % PAGE_SIZE))
+> 
+> local variables are lower case.
+
+OK.
+
+> 
+> > +$XFS_IO_PROG -f -c "pwrite 0 $PAGE_SIZE" $tfile > /dev/null 2>&1
+> > +$XFS_IO_PROG -c "pwrite $PAGE_SIZE $SUBLEN" $tfile > /dev/null 2>&1
+> > +
+> > +toff=$((PAGE_SIZE + SUBLEN))
+> > +for ((i=0; i<10000; i++))
+> > +do
+> 
+> # Add comment on what the loop is trying to do to the layout of the
+> # file being written.
+> for ((i = 0; i < 10000; i++)); do
+
+OK.
+
+> 
+> > +	tlen=$PAGE_SIZE
+> > +	if [ $((i % 2)) = 0 ]; then
+> > +		tlen=$((PAGE_SIZE * 3))
+> > +	fi
+> > +	if [ $((i % 1000)) = 0 ]; then
+> > +		tlen=$((RANDOM % PAGE_SIZE))
+> > +	fi
+> > +
+> > +	$XFS_IO_PROG -c "pwrite $toff $tlen" $tfile > /dev/null 2>&1
+> > +	toff=$((toff + tlen))
+> > +done
+> > +
+> > +sync
+> > +
+> > +# check for single PAGESIZE extent
+> > +$XFS_IO_PROG -c "fiemap -v" $tfile >> $seqres.full 2>&1
+> > +$XFS_IO_PROG -c "fiemap -v" $tfile | awk '{if ($4 == 8) print $4}'
+> 
+> Assumes page size is 4k. Also assumes that no individual extent in
+> the file is 4k. Likely broken.
+
+My miss, will try to come up with a way to tell awk PAGE_SIZE, maybe call getpagesize() ?
+(if you already how to do it, please do me a favor :-) )
+
+> 
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/btrfs/027.out b/tests/btrfs/027.out
+> > new file mode 100644
+> > index 0000000..e8291ab
+> > --- /dev/null
+> > +++ b/tests/btrfs/027.out
+> > @@ -0,0 +1 @@
+> > +QA output created by 027
+> 
+> So are we expecting no output or not?
+
+We don't expect any 4k single extent if btrfs is doing correctly, so I leave the output empty.
+
+Thanks for the comments, Dave!
 
 Thanks,
-Eryu
+
+-liubo
+> 
+> Cheers,
+> 
+> Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
