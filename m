@@ -1,67 +1,40 @@
-Received: from mx1.redhat.com ([209.132.183.28]:49514 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49567 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751564AbcCQE1x (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 17 Mar 2016 00:27:53 -0400
+	id S1754004AbcCQE2f (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 17 Mar 2016 00:28:35 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v3] xfs/073: ignore mkfs output
-Date: Thu, 17 Mar 2016 12:27:45 +0800
-Message-Id: <1458188865-14819-1-git-send-email-eguan@redhat.com>
+Subject: [PATCH] common: filter out all metadata related options not only crc
+Date: Thu, 17 Mar 2016 12:28:12 +0800
+Message-Id: <1458188892-14905-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: xfs@oss.sgi.com, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-When testing xfs/073 with MKFS_OPTIONS="-m crc=1,finobt=1" set, it fails
-due to extra warning about disabling finobt feature:
-
- +warning: finobt not supported without CRC support, disabled.
-
-Because xfs/073 disables crc unconditionally and finobt can not be
-enabled either.
-
-Fix it by dumping mkfs output to $seqres.full and updating 073.out
-accordingly.
+Remove all metadata related mkfs options in _scratch_mkfs_xfs_opts() if
+mkfs.xfs has no metadata support, not only the crc option.
 
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
+ common/rc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-v3:
-- just ignore mkfs output
-v2:
-- disable finobt explicitly, instead of filtering the warning
-
- tests/xfs/073     | 2 +-
- tests/xfs/073.out | 6 ------
- 2 files changed, 1 insertion(+), 7 deletions(-)
-
-diff --git a/tests/xfs/073 b/tests/xfs/073
-index e1335df..9e29223 100755
---- a/tests/xfs/073
-+++ b/tests/xfs/073
-@@ -138,7 +138,7 @@ _require_loop
+diff --git a/common/rc b/common/rc
+index a34c387..38d3189 100644
+--- a/common/rc
++++ b/common/rc
+@@ -444,9 +444,9 @@ _scratch_mkfs_xfs_opts()
+ {
+ 	mkfs_opts=$*
  
- rm -f $seqres.full
+-	# remove crc related mkfs options if mkfs.xfs doesn't support v5 xfs
++	# remove metadata related mkfs options if mkfs.xfs doesn't support them
+ 	if [ -n "$XFS_MKFS_HAS_NO_META_SUPPORT" ]; then
+-		mkfs_opts=`echo $mkfs_opts | sed "s/-m\s\+crc=.//"`
++		mkfs_opts=`echo $mkfs_opts | sed "s/-m\s\+\S\+//g"`
+ 	fi
  
--_scratch_mkfs_xfs -m crc=0 -dsize=41m,agcount=2 | _filter_mkfs 2>/dev/null
-+_scratch_mkfs_xfs -m crc=0 -dsize=41m,agcount=2 >>$seqres.full 2>&1
- _scratch_mount 2>/dev/null || _fail "initial scratch mount failed"
- 
- echo
-diff --git a/tests/xfs/073.out b/tests/xfs/073.out
-index 3f27467..5f36ebe 100644
---- a/tests/xfs/073.out
-+++ b/tests/xfs/073.out
-@@ -1,10 +1,4 @@
- QA output created by 073
--meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
--data     = bsize=XXX blocks=XXX, imaxpct=PCT
--         = sunit=XXX swidth=XXX, unwritten=X
--naming   =VERN bsize=XXX
--log      =LDEV bsize=XXX blocks=XXX
--realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- 
- === populating scratch device
- 1000+0 records in
+ 	_scratch_options mkfs
 -- 
 2.5.0
 
