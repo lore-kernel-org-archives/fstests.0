@@ -1,259 +1,140 @@
-Received: from e23smtp01.au.ibm.com ([202.81.31.143]:35031 "EHLO
-	e23smtp01.au.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756107AbcCUQZC (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 21 Mar 2016 12:25:02 -0400
-Received: from localhost
-	by e23smtp01.au.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-	for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-	Tue, 22 Mar 2016 02:24:59 +1000
-From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V3] _btrfs_stress_subvolume: Fix race condition by making 'subvolume stress' task to exit gracefully
-Date: Mon, 21 Mar 2016 21:54:03 +0530
-Message-Id: <1458577443-2334-1-git-send-email-chandan@linux.vnet.ibm.com>
+Received: from mail.kernel.org ([198.145.29.136]:52306 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756906AbcCURkP (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 21 Mar 2016 13:40:15 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] fstests: test fsync on overlayfs merged directory
+Date: Mon, 21 Mar 2016 17:39:12 +0000
+Message-Id: <1458581952-18638-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, linux-btrfs@vger.kernel.org, chandan@mykolab.com, eguan@redhat.com
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-The following scenario can occur when running btrfs/066,
+From: Filipe Manana <fdmanana@suse.com>
 
-  Task A                                Task B                     Task C
+Test that calling fsync against a file using the merged directory does
+not result in a crash nor fails unexpectedly.
 
-  run_test()
-  - Execute _btrfs_stress_subvolume()
-    in a background shell.
-                                        _btrfs_stress_subvolme()
-                                          ...
-                                        - fork & exec "mount"
-                                               	      		   Mount subvolume on directory in $TEST_DIR
-  - Wait for fsstress to finish                                    do_mount()
-  - kill shell process executing                                   - btrfs_mount()
-    _btrfs_stress_subvolume()
-    i.e. Task B.
-  - Init process becomes the parent
-    of "subvolume mount" task
-    i.e. Task C.
-  - In case subvolume is mounted
-    (which is not the case),
-    unmount it.
-                                                                   - Complete mounting subvolume
+This is motivated by a change in overlayfs that resulted in a crash
+(invalid memory access) when the lower or upper directory belonged to
+a btrfs file system. The overlayfs change came in commit 4bacc9c9234
+(overlayfs: Make f_path always point to the overlay and f_inode to the
+underlay). At the moment there are two patches in the linux-fsdevel
+and linux-btrfs mailing lists to fix this problem:
 
-Hence on the completion of one iteration of run_test(), the subvolume
-created inside the filesystem on $SCRATCH_DEV continues to be mounted on
-$TEST_DIR/$seq.mnt. Subsequent invocations of run_test() (called for
-remaining Btrfs profile configs) fail during _scratch_pool_mkfs.
+  * vfs: add file_dentry()
+  * Btrfs: fix crash/invalid memory access on fsync when using overlayfs
 
-Instead of killing the 'subvolume stress' task this commit makes
-_btrfs_stress_subvolume() to break out of the loop when a file exists
-on the filesystem. The commit also makes relevant changes to other
-users of _btrfs_stress_subvolume() i.e. btrfs/060, btrfs/065,
-btrfs/067 & btrfs/068.
-
-Suggested-by: Eryu Guan <eguan@redhat.com>
-Reviewed-by: Eryu Guan <eguan@redhat.com>
-Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
-Changelog:
+ tests/overlay/002     | 76 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/002.out |  3 ++
+ tests/overlay/group   |  1 +
+ 3 files changed, 80 insertions(+)
+ create mode 100755 tests/overlay/002
+ create mode 100644 tests/overlay/002.out
 
-V2->V3: Use the correct argument value as the 'stop file' name in
-_btrfs_stress_subvolume(). I had forgotten to pull the changes from my
-github repo and hence had sent out the incorrect patch.
-
-V1->V2: Instead of named pipes, Use a file to let 'subvolume stress' task know
-that it should break from the while loop.
- common/rc       | 3 ++-
- tests/btrfs/060 | 8 ++++++--
- tests/btrfs/065 | 8 ++++++--
- tests/btrfs/066 | 8 ++++++--
- tests/btrfs/067 | 8 ++++++--
- tests/btrfs/068 | 8 ++++++--
- 6 files changed, 32 insertions(+), 11 deletions(-)
-
-diff --git a/common/rc b/common/rc
-index 16f5a43..886625c 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3280,9 +3280,10 @@ _btrfs_stress_subvolume()
- 	local btrfs_mnt=$2
- 	local subvol_name=$3
- 	local subvol_mnt=$4
-+	local stop_file=$5
- 
- 	mkdir -p $subvol_mnt
--	while true; do
-+	while [ ! -e $stop_file ]; do
- 		$BTRFS_UTIL_PROG subvolume create $btrfs_mnt/$subvol_name
- 		$MOUNT_PROG -o subvol=$subvol_name $btrfs_dev $subvol_mnt
- 		$UMOUNT_PROG $subvol_mnt
-diff --git a/tests/btrfs/060 b/tests/btrfs/060
-index 8ef0e7f..6b6a480 100755
---- a/tests/btrfs/060
-+++ b/tests/btrfs/060
-@@ -56,6 +56,7 @@ run_test()
- {
- 	local mkfs_opts=$1
- 	local subvol_mnt=$TEST_DIR/$seq.mnt
-+	local stop_file=$TEST_DIR/$seq.stop.$$
- 
- 	echo "Test $mkfs_opts" >>$seqres.full
- 
-@@ -77,15 +78,18 @@ run_test()
- 	balance_pid=$!
- 	echo "$balance_pid" >>$seqres.full
- 
-+	# make sure the stop sign is not there
-+	rm -f $stop_file
- 	echo -n "Start subvolume worker: " >>$seqres.full
--	_btrfs_stress_subvolume $SCRATCH_DEV $SCRATCH_MNT subvol_$$ $subvol_mnt >/dev/null 2>&1 &
-+	_btrfs_stress_subvolume $SCRATCH_DEV $SCRATCH_MNT subvol_$$ $subvol_mnt $stop_file >/dev/null 2>&1 &
- 	subvol_pid=$!
- 	echo "$subvol_pid" >>$seqres.full
- 
- 	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
- 	wait $fsstress_pid
- 
--	kill $balance_pid $subvol_pid
-+	touch $stop_file
-+	kill $balance_pid
- 	wait
- 	# wait for the balance operation to finish
- 	while ps aux | grep "balance start" | grep -qv grep; do
-diff --git a/tests/btrfs/065 b/tests/btrfs/065
-index 7d8249b..a4afe73 100755
---- a/tests/btrfs/065
-+++ b/tests/btrfs/065
-@@ -58,6 +58,7 @@ run_test()
- 	local mkfs_opts=$1
- 	local saved_scratch_dev_pool=$SCRATCH_DEV_POOL
- 	local subvol_mnt=$TEST_DIR/$seq.mnt
-+	local stop_file=$TEST_DIR/$seq.stop.$$
- 
- 	echo "Test $mkfs_opts" >>$seqres.full
- 
-@@ -80,8 +81,10 @@ run_test()
- 	$FSSTRESS_PROG $args >/dev/null 2>&1 &
- 	fsstress_pid=$!
- 
-+	# make sure the stop sign is not there
-+	rm -f $stop_file
- 	echo -n "Start subvolume worker: " >>$seqres.full
--	_btrfs_stress_subvolume $SCRATCH_DEV $SCRATCH_MNT subvol_$$ $subvol_mnt >/dev/null 2>&1 &
-+	_btrfs_stress_subvolume $SCRATCH_DEV $SCRATCH_MNT subvol_$$ $subvol_mnt $stop_file >/dev/null 2>&1 &
- 	subvol_pid=$!
- 	echo "$subvol_pid" >>$seqres.full
- 
-@@ -93,7 +96,8 @@ run_test()
- 	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
- 	wait $fsstress_pid
- 
--	kill $subvol_pid $replace_pid
-+	touch $stop_file
-+	kill $replace_pid
- 	wait
- 	# wait for the replace operation to finish
- 	while ps aux | grep "replace start" | grep -qv grep; do
-diff --git a/tests/btrfs/066 b/tests/btrfs/066
-index 2d9a1d2..cf4dd0d 100755
---- a/tests/btrfs/066
-+++ b/tests/btrfs/066
-@@ -56,6 +56,7 @@ run_test()
- {
- 	local mkfs_opts=$1
- 	local subvol_mnt=$TEST_DIR/$seq.mnt
-+	local stop_file=$TEST_DIR/$seq.stop.$$
- 
- 	echo "Test $mkfs_opts" >>$seqres.full
- 
-@@ -72,8 +73,10 @@ run_test()
- 	$FSSTRESS_PROG $args >/dev/null 2>&1 &
- 	fsstress_pid=$!
- 
-+	# make sure the stop sign is not there
-+	rm -f $stop_file
- 	echo -n "Start subvolume worker: " >>$seqres.full
--	_btrfs_stress_subvolume $SCRATCH_DEV $SCRATCH_MNT subvol_$$ $subvol_mnt >/dev/null 2>&1 &
-+	_btrfs_stress_subvolume $SCRATCH_DEV $SCRATCH_MNT subvol_$$ $subvol_mnt $stop_file >/dev/null 2>&1 &
- 	subvol_pid=$!
- 	echo "$subvol_pid" >>$seqres.full
- 
-@@ -85,7 +88,8 @@ run_test()
- 	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
- 	wait $fsstress_pid
- 
--	kill $subvol_pid $scrub_pid
-+	touch $stop_file
-+	kill $scrub_pid
- 	wait
- 	# wait for the scrub operation to finish
- 	while ps aux | grep "scrub start" | grep -qv grep; do
-diff --git a/tests/btrfs/067 b/tests/btrfs/067
-index 2c1e284..b76f5ec 100755
---- a/tests/btrfs/067
-+++ b/tests/btrfs/067
-@@ -57,6 +57,7 @@ run_test()
- 	local mkfs_opts=$1
- 	local with_compress=$2
- 	local subvol_mnt=$TEST_DIR/$seq.mnt
-+	local stop_file=$TEST_DIR/$seq.stop.$$
- 
- 	echo "Test $mkfs_opts with $with_compress" >>$seqres.full
- 
-@@ -73,8 +74,10 @@ run_test()
- 	$FSSTRESS_PROG $args >/dev/null 2>&1 &
- 	fsstress_pid=$!
- 
-+	# make sure the stop sign is not there
-+	rm -f $stop_file
- 	echo -n "Start subvolume worker: " >>$seqres.full
--	_btrfs_stress_subvolume $SCRATCH_DEV $SCRATCH_MNT subvol_$$ $subvol_mnt >/dev/null 2>&1 &
-+	_btrfs_stress_subvolume $SCRATCH_DEV $SCRATCH_MNT subvol_$$ $subvol_mnt $stop_file >/dev/null 2>&1 &
- 	subvol_pid=$!
- 	echo "$subvol_pid" >>$seqres.full
- 
-@@ -86,7 +89,8 @@ run_test()
- 	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
- 	wait $fsstress_pid
- 
--	kill $subvol_pid $defrag_pid
-+	touch $stop_file
-+	kill $defrag_pid
- 	wait
- 	# wait for btrfs defrag process to exit, otherwise it will block umount
- 	while ps aux | grep "btrfs filesystem defrag" | grep -qv grep; do
-diff --git a/tests/btrfs/068 b/tests/btrfs/068
-index 3126ec2..534aee6 100755
---- a/tests/btrfs/068
-+++ b/tests/btrfs/068
-@@ -57,6 +57,7 @@ run_test()
- {
- 	local mkfs_opts=$1
- 	local subvol_mnt=$TEST_DIR/$seq.mnt
-+	local stop_file=$TEST_DIR/$seq.stop.$$
- 
- 	echo "Test $mkfs_opts with $with_compress" >>$seqres.full
- 
-@@ -73,8 +74,10 @@ run_test()
- 	$FSSTRESS_PROG $args >/dev/null 2>&1 &
- 	fsstress_pid=$!
- 
-+	# make sure the stop sign is not there
-+	rm -f $stop_file
- 	echo -n "Start subvolume worker: " >>$seqres.full
--	_btrfs_stress_subvolume $SCRATCH_DEV $SCRATCH_MNT subvol_$$ $subvol_mnt >/dev/null 2>&1 &
-+	_btrfs_stress_subvolume $SCRATCH_DEV $SCRATCH_MNT subvol_$$ $subvol_mnt $stop_file >/dev/null 2>&1 &
- 	subvol_pid=$!
- 	echo "$subvol_pid" >>$seqres.full
- 
-@@ -86,7 +89,8 @@ run_test()
- 	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
- 	wait $fsstress_pid
- 
--	kill $subvol_pid $remount_pid
-+	touch $stop_file
-+	kill $remount_pid
- 	wait
- 	# wait for the remount loop process to finish
- 	while ps aux | grep "mount.*$SCRATCH_MNT" | grep -qv grep; do
+diff --git a/tests/overlay/002 b/tests/overlay/002
+new file mode 100755
+index 0000000..4f82f60
+--- /dev/null
++++ b/tests/overlay/002
+@@ -0,0 +1,76 @@
++#! /bin/bash
++# FS QA Test 002
++#
++# Test that calling fsync against a file using the merged directory does not
++# result in a crash nor fails unexpectedly.
++#
++# This is motivated by a change in overlayfs that resulted in a crash (invalid
++# memory access) when the lower or upper directory belonged to a btrfs file
++# system.
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++
++# Remove all files from previous tests
++_scratch_mkfs
++
++# Create our test file.
++#lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
++lowerdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
++mkdir -p $lowerdir
++touch $lowerdir/foobar
++sync
++
++_scratch_mount
++
++# Write some data to our file and fsync it, using the merged directory path.
++# This should work and not result in a crash.
++$XFS_IO_PROG -c "pwrite 0 64k" -c "fsync" $SCRATCH_MNT/foobar | _filter_xfs_io
++
++# success, all done
++status=0
++exit
+diff --git a/tests/overlay/002.out b/tests/overlay/002.out
+new file mode 100644
+index 0000000..666e61e
+--- /dev/null
++++ b/tests/overlay/002.out
+@@ -0,0 +1,3 @@
++QA output created by 002
++wrote 65536/65536 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+diff --git a/tests/overlay/group b/tests/overlay/group
+index 5056c3b..84d164e 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -4,3 +4,4 @@
+ # - comment line before each group is "new" description
+ #
+ 001 auto quick copyup
++002 auto quick metadata
 -- 
-2.1.0
+2.7.0.rc3
 
