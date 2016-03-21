@@ -1,166 +1,118 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:22166 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1031529AbcCQWyc (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 17 Mar 2016 18:54:32 -0400
-From: Liu Bo <bo.li.liu@oracle.com>
-Subject: [PATCH v2] fstest: btrfs: test single 4k extent after subpagesize buffered writes
-Date: Thu, 17 Mar 2016 15:56:38 -0700
-Message-Id: <1458255398-26833-1-git-send-email-bo.li.liu@oracle.com>
-In-Reply-To: <1457396879-30572-1-git-send-email-bo.li.liu@oracle.com>
-References: <1457396879-30572-1-git-send-email-bo.li.liu@oracle.com>
+Received: from mx1.redhat.com ([209.132.183.28]:47600 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752124AbcCUHYW (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 21 Mar 2016 03:24:22 -0400
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] fstests: _fail the tests if _scratch_mount failed to avoid fully filling root fs
+Date: Mon, 21 Mar 2016 15:23:41 +0800
+Message-Id: <1458545021-23285-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Dave Chinner <david@fromorbit.com>, Eryu Guan <eguan@redhat.com>
+Cc: linux-btrfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-This is to test if COW enabled btrfs can end up with single 4k extents
-when doing subpagesize buffered writes.
+btrfs failed to mount small fs on ppc64 host with error ENOSPC, even
+creating such small fs succeeded, then generic/027 consumed all free
+space on root fs not on SCRATCH_DEV and test harness cannot create tmp
+files and continue other tests.
 
-The patch to fix the problem is
-  https://patchwork.kernel.org/patch/8527991/
+Though I think it's a btrfs bug, it's still worth preventing this
+situation from happening in the harness, as such tests usually aim to
+exercise fs on ENOSPC conditions, there's no point to continue if the
+small fs is not mounted.
 
-Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+So I went through all tests that call _scratch_mkfs_sized && could
+consume all free space on $SCRATCH_MNT, _fail the test if _scratch_mount
+failed.
+
+Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
-v2: - Teach awk to know system's pagesize.
-    - Add "Silence is golden" to output.
-    - Use local variables to lower case.
-    - Add comments to make code clear.
+ tests/generic/027 | 2 +-
+ tests/generic/269 | 2 +-
+ tests/generic/270 | 2 +-
+ tests/generic/274 | 2 +-
+ tests/generic/275 | 2 +-
+ tests/generic/300 | 2 +-
+ 6 files changed, 6 insertions(+), 6 deletions(-)
 
- tests/btrfs/027     | 102 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/027.out |   2 ++
- tests/btrfs/group   |   1 +
- 3 files changed, 105 insertions(+)
- create mode 100755 tests/btrfs/027
- create mode 100644 tests/btrfs/027.out
-
-diff --git a/tests/btrfs/027 b/tests/btrfs/027
-new file mode 100755
-index 0000000..19d324b
---- /dev/null
-+++ b/tests/btrfs/027
-@@ -0,0 +1,102 @@
-+#! /bin/bash
-+# FS QA Test 027
-+#
-+# When btrfs is using cow mode, buffered writes of sub-pagesize can end up with
-+# single 4k extents.
-+# Ref:
-+#     "Stray 4k extents with slow buffered writes"
-+#     https://www.spinics.net/lists/linux-btrfs/msg52628.html
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Liu Bo.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+
-+	# restore expire
-+	echo $default_expire > /proc/sys/vm/dirty_expire_centisecs
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+echo "Silence is golden"
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_xfs_io_command "fiemap"
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+
-+default_expire=`cat /proc/sys/vm/dirty_expire_centisecs`
-+# Make it flush dirty pages more frequently to make sure we reproduce the bug.
-+echo 50 > /proc/sys/vm/dirty_expire_centisecs
-+
-+tfile=$SCRATCH_MNT/testfile
-+pagesize=$(get_page_size)
-+sublen=$((RANDOM % pagesize))
-+
-+$XFS_IO_PROG -f -c "pwrite 0 $pagesize" $tfile > /dev/null 2>&1
-+# write some subpagesize data first.
-+$XFS_IO_PROG -c "pwrite $pagesize $sublen" $tfile > /dev/null 2>&1
-+
-+# Mix up "abnormal" subpagesize writes with normal pagesize based writes
-+toff=$((pagesize + sublen))
-+for ((i = 0; i < 10000; i++))
-+do
-+	tlen=$pagesize
-+	if [ $((i % 2)) = 0 ]; then
-+		tlen=$((pagesize * 3))
-+	fi
-+	if [ $((i % 1000)) = 0 ]; then
-+		tlen=$((RANDOM % pagesize))
-+	fi
-+
-+	$XFS_IO_PROG -c "pwrite $toff $tlen" $tfile > /dev/null 2>&1
-+	toff=$((toff + tlen))
-+done
-+
-+sync
-+
-+# check for single PAGESIZE extent
-+$XFS_IO_PROG -c "fiemap -v" $tfile >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "fiemap -v" $tfile | \
-+awk -v pgsize=$pagesize '{n = pgsize/512; if ($4 == n) print $4}'
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/027.out b/tests/btrfs/027.out
-new file mode 100644
-index 0000000..ef78cda
---- /dev/null
-+++ b/tests/btrfs/027.out
-@@ -0,0 +1,2 @@
-+QA output created by 027
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index a2fa412..f06d5fe 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -29,6 +29,7 @@
- 024 auto quick compress
- 025 auto quick send clone
- 026 auto quick compress prealloc
-+027 auto
- 029 auto quick clone
- 030 auto quick send
- 031 auto quick subvol clone
+diff --git a/tests/generic/027 b/tests/generic/027
+index d2e59d6..e5fdbe9 100755
+--- a/tests/generic/027
++++ b/tests/generic/027
+@@ -66,7 +66,7 @@ rm -f $seqres.full
+ echo "Silence is golden"
+ 
+ _scratch_mkfs_sized $((256 * 1024 * 1024)) >>$seqres.full 2>&1
+-_scratch_mount
++_scratch_mount || _fail "mount failed"
+ 
+ echo "Reserve 2M space" >>$seqres.full
+ $XFS_IO_PROG -f -c "pwrite 0 2m" $SCRATCH_MNT/testfile >>$seqres.full 2>&1
+diff --git a/tests/generic/269 b/tests/generic/269
+index ee353a5..adc766f 100755
+--- a/tests/generic/269
++++ b/tests/generic/269
+@@ -68,7 +68,7 @@ _require_scratch
+ 
+ rm -f $seqres.full
+ _scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
+-_scratch_mount
++_scratch_mount || _fail "mount failed"
+ 
+ if ! _workout; then
+ 	_scratch_unmount 2>/dev/null
+diff --git a/tests/generic/270 b/tests/generic/270
+index e6874c9..b0164be 100755
+--- a/tests/generic/270
++++ b/tests/generic/270
+@@ -82,7 +82,7 @@ _require_scratch
+ 
+ rm -f $seqres.full
+ _scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
+-_scratch_mount "-o usrquota,grpquota"
++_scratch_mount "-o usrquota,grpquota" || _fail "mount failed"
+ chmod 777 $SCRATCH_MNT
+ quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+ quotaon -u -g $SCRATCH_MNT 2>/dev/null
+diff --git a/tests/generic/274 b/tests/generic/274
+index 61ab220..7feca5c 100755
+--- a/tests/generic/274
++++ b/tests/generic/274
+@@ -58,7 +58,7 @@ rm -f $seqres.full
+ 
+ _scratch_unmount 2>/dev/null
+ _scratch_mkfs_sized $((2 * 1024 * 1024 * 1024)) >>$seqres.full 2>&1
+-_scratch_mount
++_scratch_mount || _fail "mount failed"
+ 
+ # Create a 4k file and Allocate 4M past EOF on that file
+ $XFS_IO_PROG -f -c "pwrite 0 4k" -c "falloc -k 4k 4m" $SCRATCH_MNT/test \
+diff --git a/tests/generic/275 b/tests/generic/275
+index 955c4ac..3e5940a 100755
+--- a/tests/generic/275
++++ b/tests/generic/275
+@@ -55,7 +55,7 @@ rm -f $seqres.full
+ 
+ _scratch_unmount 2>/dev/null
+ _scratch_mkfs_sized $((2 * 1024 * 1024 * 1024)) >>$seqres.full 2>&1
+-_scratch_mount
++_scratch_mount || _fail "mount failed"
+ 
+ # this file will get removed to create 256k of free space after ENOSPC
+ # conditions are created.
+diff --git a/tests/generic/300 b/tests/generic/300
+index c187f43..0b2463d 100755
+--- a/tests/generic/300
++++ b/tests/generic/300
+@@ -143,7 +143,7 @@ _workout()
+ _require_fio $fio_config
+ 
+ _scratch_mkfs_sized $FS_SIZE >> $seqres.full 2>&1
+-_scratch_mount
++_scratch_mount || _fail "mount failed"
+ 
+ if ! _workout; then
+ 	_scratch_unmount 2>/dev/null
 -- 
 2.5.0
 
