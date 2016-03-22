@@ -1,145 +1,219 @@
-Received: from mail.kernel.org ([198.145.29.136]:56832 "EHLO mail.kernel.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752221AbcCVMIt (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 22 Mar 2016 08:08:49 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH v3] fstests: test fsync on overlayfs merged directory
-Date: Tue, 22 Mar 2016 12:08:32 +0000
-Message-Id: <1458648512-4398-1-git-send-email-fdmanana@kernel.org>
-In-Reply-To: <1458581952-18638-1-git-send-email-fdmanana@kernel.org>
-References: <1458581952-18638-1-git-send-email-fdmanana@kernel.org>
+Received: from aserp1040.oracle.com ([141.146.126.69]:50544 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751964AbcCVWKS (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 22 Mar 2016 18:10:18 -0400
+Date: Tue, 22 Mar 2016 15:12:25 -0700
+From: Liu Bo <bo.li.liu@oracle.com>
+Subject: Re: [PATCH v2] fstest: btrfs: test single 4k extent after
+ subpagesize buffered writes
+Message-ID: <20160322221225.GA6883@localhost.localdomain>
+Reply-To: bo.li.liu@oracle.com
+References: <1457396879-30572-1-git-send-email-bo.li.liu@oracle.com>
+ <1458255398-26833-1-git-send-email-bo.li.liu@oracle.com>
+ <20160322040013.GH11419@eguan.usersys.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160322040013.GH11419@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Dave Chinner <david@fromorbit.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Tue, Mar 22, 2016 at 12:00:13PM +0800, Eryu Guan wrote:
+> On Thu, Mar 17, 2016 at 03:56:38PM -0700, Liu Bo wrote:
+> > This is to test if COW enabled btrfs can end up with single 4k extents
+> > when doing subpagesize buffered writes.
+> 
+> What happens if btrfs is mounted with "nodatacow" option? Does it need
+> to _notrun if cow is disabled?
 
-Test that calling fsync against a file using the merged directory does
-not result in a crash nor fails unexpectedly.
+In my test, the test passes if mounting with "nodatacow".
+Yes, it makes sense to have a _notrun for nodatacow.
 
-This is motivated by a change in overlayfs that resulted in a crash
-(invalid memory access) when the lower or upper directory belonged to
-a btrfs file system. The overlayfs change came in commit 4bacc9c9234
-(overlayfs: Make f_path always point to the overlay and f_inode to the
-underlay). At the moment there are two patches in the linux-fsdevel
-and linux-btrfs mailing lists to fix this problem:
+> 
+> > 
+> > The patch to fix the problem is
+> >   https://patchwork.kernel.org/patch/8527991/
+> > 
+> > Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+> > ---
+> > v2: - Teach awk to know system's pagesize.
+> >     - Add "Silence is golden" to output.
+> >     - Use local variables to lower case.
+> >     - Add comments to make code clear.
+> 
+> This should be v3, and this patch was buried in the v2 thread :)
 
-  * vfs: add file_dentry()
-  * Btrfs: fix crash/invalid memory access on fsync when using overlayfs
+Oops, thanks for pointing it out.
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
-Reviewed-by: Eryu Guan <eguan@redhat.com>
----
+> 
+> > 
+> >  tests/btrfs/027     | 102 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/btrfs/027.out |   2 ++
+> >  tests/btrfs/group   |   1 +
+> >  3 files changed, 105 insertions(+)
+> >  create mode 100755 tests/btrfs/027
+> >  create mode 100644 tests/btrfs/027.out
+> > 
+> > diff --git a/tests/btrfs/027 b/tests/btrfs/027
+> > new file mode 100755
+> > index 0000000..19d324b
+> > --- /dev/null
+> > +++ b/tests/btrfs/027
+> > @@ -0,0 +1,102 @@
+> > +#! /bin/bash
+> > +# FS QA Test 027
+> > +#
+> > +# When btrfs is using cow mode, buffered writes of sub-pagesize can end up with
+> > +# single 4k extents.
+> > +# Ref:
+> > +#     "Stray 4k extents with slow buffered writes"
+> > +#     https://www.spinics.net/lists/linux-btrfs/msg52628.html
+> 
+> After going through this thread, my understanding is that nodatacow
+> btrfs should pass this test even on unpatched kernel (e.g. v4.5). But
+> my test on v4.5 kernel failed with nodatacow mount option, pagesize
+> extent is still found.
+> 
 
-V2: Removed leftover comment from debugging.
-V3: Change supperted fs type from generic to overlay.
+I verified it again on my kvm box and it passed with a unpatched v4.5 kernel.
 
- tests/overlay/002     | 74 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/002.out |  3 +++
- tests/overlay/group   |  1 +
- 3 files changed, 78 insertions(+)
- create mode 100755 tests/overlay/002
- create mode 100644 tests/overlay/002.out
+Can you please show me the 027.full file?
 
-diff --git a/tests/overlay/002 b/tests/overlay/002
-new file mode 100755
-index 0000000..ec7874e
---- /dev/null
-+++ b/tests/overlay/002
-@@ -0,0 +1,74 @@
-+#! /bin/bash
-+# FS QA Test 002
-+#
-+# Test that calling fsync against a file using the merged directory does not
-+# result in a crash nor fails unexpectedly.
-+#
-+# This is motivated by a change in overlayfs that resulted in a crash (invalid
-+# memory access) when the lower or upper directory belonged to a btrfs file
-+# system.
-+#
-+#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+
-+# Remove all files from previous tests
-+_scratch_mkfs
-+
-+# Create our test file.
-+lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
-+mkdir -p $lowerdir
-+touch $lowerdir/foobar
-+
-+_scratch_mount
-+
-+# Write some data to our file and fsync it, using the merged directory path.
-+# This should work and not result in a crash.
-+$XFS_IO_PROG -c "pwrite 0 64k" -c "fsync" $SCRATCH_MNT/foobar | _filter_xfs_io
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/overlay/002.out b/tests/overlay/002.out
-new file mode 100644
-index 0000000..666e61e
---- /dev/null
-+++ b/tests/overlay/002.out
-@@ -0,0 +1,3 @@
-+QA output created by 002
-+wrote 65536/65536 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 5056c3b..84d164e 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -4,3 +4,4 @@
- # - comment line before each group is "new" description
- #
- 001 auto quick copyup
-+002 auto quick metadata
--- 
-2.7.0.rc3
+I can't think of a reason for this..
 
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2016 Liu Bo.  All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +#
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +
+> > +	# restore expire
+> > +	echo $default_expire > /proc/sys/vm/dirty_expire_centisecs
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +echo "Silence is golden"
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs btrfs
+> > +_supported_os Linux
+> > +_require_scratch
+> > +_require_xfs_io_command "fiemap"
+> > +
+> > +_scratch_mkfs >> $seqres.full 2>&1
+> > +_scratch_mount
+> > +
+> > +default_expire=`cat /proc/sys/vm/dirty_expire_centisecs`
+> > +# Make it flush dirty pages more frequently to make sure we reproduce the bug.
+> > +echo 50 > /proc/sys/vm/dirty_expire_centisecs
+> > +
+> > +tfile=$SCRATCH_MNT/testfile
+> > +pagesize=$(get_page_size)
+> > +sublen=$((RANDOM % pagesize))
+> > +
+> > +$XFS_IO_PROG -f -c "pwrite 0 $pagesize" $tfile > /dev/null 2>&1
+> > +# write some subpagesize data first.
+> > +$XFS_IO_PROG -c "pwrite $pagesize $sublen" $tfile > /dev/null 2>&1
+> > +
+> > +# Mix up "abnormal" subpagesize writes with normal pagesize based writes
+> > +toff=$((pagesize + sublen))
+> > +for ((i = 0; i < 10000; i++))
+> > +do
+> > +	tlen=$pagesize
+> > +	if [ $((i % 2)) = 0 ]; then
+> > +		tlen=$((pagesize * 3))
+> > +	fi
+> > +	if [ $((i % 1000)) = 0 ]; then
+> > +		tlen=$((RANDOM % pagesize))
+> > +	fi
+> > +
+> > +	$XFS_IO_PROG -c "pwrite $toff $tlen" $tfile > /dev/null 2>&1
+> > +	toff=$((toff + tlen))
+> > +done
+> 
+> fstests prefers this format:
+> 
+> for ...; do
+> 	...
+> done
+
+OK, thank you very much, Eryu!
+
+Thanks,
+
+-liubo
+
+> 
+> Thanks,
+> Eryu
+> 
+> > +
+> > +sync
+> > +
+> > +# check for single PAGESIZE extent
+> > +$XFS_IO_PROG -c "fiemap -v" $tfile >> $seqres.full 2>&1
+> > +$XFS_IO_PROG -c "fiemap -v" $tfile | \
+> > +awk -v pgsize=$pagesize '{n = pgsize/512; if ($4 == n) print $4}'
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/btrfs/027.out b/tests/btrfs/027.out
+> > new file mode 100644
+> > index 0000000..ef78cda
+> > --- /dev/null
+> > +++ b/tests/btrfs/027.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 027
+> > +Silence is golden
+> > diff --git a/tests/btrfs/group b/tests/btrfs/group
+> > index a2fa412..f06d5fe 100644
+> > --- a/tests/btrfs/group
+> > +++ b/tests/btrfs/group
+> > @@ -29,6 +29,7 @@
+> >  024 auto quick compress
+> >  025 auto quick send clone
+> >  026 auto quick compress prealloc
+> > +027 auto
+> >  029 auto quick clone
+> >  030 auto quick send
+> >  031 auto quick subvol clone
+> > -- 
+> > 2.5.0
+> > 
