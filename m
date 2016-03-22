@@ -1,115 +1,90 @@
-Received: from mx1.redhat.com ([209.132.183.28]:37419 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:38385 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758198AbcCVDA0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 21 Mar 2016 23:00:26 -0400
-Date: Tue, 22 Mar 2016 11:00:23 +0800
+	id S1751111AbcCVDIz (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 21 Mar 2016 23:08:55 -0400
+Date: Tue, 22 Mar 2016 11:08:53 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2] fstests: test fsync on overlayfs merged directory
-Message-ID: <20160322030023.GF11419@eguan.usersys.redhat.com>
-References: <1458581952-18638-1-git-send-email-fdmanana@kernel.org>
- <1458582625-22039-1-git-send-email-fdmanana@kernel.org>
+Subject: Re: [PATCH] fstests: check for general protection fault traces in
+ _check_dmesg
+Message-ID: <20160322030853.GG11419@eguan.usersys.redhat.com>
+References: <1458588218-30878-1-git-send-email-fdmanana@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1458582625-22039-1-git-send-email-fdmanana@kernel.org>
+In-Reply-To: <1458588218-30878-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fdmanana@kernel.org
 Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Mar 21, 2016 at 05:50:25PM +0000, fdmanana@kernel.org wrote:
+On Mon, Mar 21, 2016 at 07:23:38PM +0000, fdmanana@kernel.org wrote:
 > From: Filipe Manana <fdmanana@suse.com>
 > 
-> Test that calling fsync against a file using the merged directory does
-> not result in a crash nor fails unexpectedly.
+> While writing a test case for overlayfs I noticed that _check_dmesg()
+> did not detect general protection fault traces like the following:
 > 
-> This is motivated by a change in overlayfs that resulted in a crash
-> (invalid memory access) when the lower or upper directory belonged to
-> a btrfs file system. The overlayfs change came in commit 4bacc9c9234
-> (overlayfs: Make f_path always point to the overlay and f_inode to the
-> underlay). At the moment there are two patches in the linux-fsdevel
-> and linux-btrfs mailing lists to fix this problem:
+> [15277.026108] run fstests overlay/002 at 2016-03-21 18:42:27
+> [15277.933179] general protection fault: 0000 [#11] PREEMPT SMP DEBUG_PAGEALLOC
+> [15277.935427] Modules linked in: btrfs overlay ppdev crc32c_generic evdev xor raid6_pq psmouse pcspkr sg serio_raw acpi_cpufreq parport_pc parport tpm_tis i2c_piix4
+> [15277.936011] CPU: 15 PID: 22762 Comm: xfs_io Tainted: G      D         4.5.0-rc6-btrfs-next-26+ #1
+> [15277.936011] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS by qemu-project.org 04/01/2014
+> [15277.936011] task: ffff88001f6f1340 ti: ffff88000a3f8000 task.ti: ffff88000a3f8000
+> [15277.936011] RIP: 0010:[<ffffffffa030b7ab>]  [<ffffffffa030b7ab>] btrfs_sync_file+0x11b/0x3e9 [btrfs]
+> [15277.936011] RSP: 0018:ffff88000a3fbe40  EFLAGS: 00010286
+> [15277.936011] RAX: 0000000080000000 RBX: ffff8800b0152c88 RCX: 0000000000000001
+> [15277.936011] RDX: 0000000000000001 RSI: ffffffff8148fec0 RDI: 00000000ffffffff
+> [15277.936011] RBP: ffff88000a3fbec0 R08: 0000000000000001 R09: 0000000000000000
+> [15277.936011] R10: ffff88000a3fbe40 R11: 0000000000000246 R12: 6e756f635f657269
+> [15277.936011] R13: 0000000000000000 R14: 00000000014655a0 R15: ffff88017dd25e40
+> [15277.936011] FS:  00007f27f0e1f700(0000) GS:ffff88023ede0000(0000) knlGS:0000000000000000
+> [15277.936011] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> [15277.936011] CR2: 00007f27f0e2f000 CR3: 000000013aadf000 CR4: 00000000000006e0
+> [15277.936011] Stack:
+> [15277.936011]  ffffffff8108b5cc ffff88000a3fbec0 0000000000000246 ffff880125abaed0
+> [15277.936011]  ffff8800b0152d60 8000000000000000 7fffffffffffffff 0000000000000246
+> [15277.936011]  0000000000000246 ffffffff81074f9b ffffffff8104357c ffff88017dd25e40
+> [15277.936011] Call Trace:
+> [15277.936011]  [<ffffffff8108b5cc>] ? arch_local_irq_save+0x9/0xc
+> [15277.936011]  [<ffffffff81074f9b>] ? ___might_sleep+0xce/0x217
+> [15277.936011]  [<ffffffff8104357c>] ? __do_page_fault+0x3c0/0x43a
+> [15277.936011]  [<ffffffff811a2351>] vfs_fsync_range+0x8c/0x9e
+> [15277.936011]  [<ffffffff811a237f>] vfs_fsync+0x1c/0x1e
+> [15277.936011]  [<ffffffff811a24d6>] do_fsync+0x31/0x4a
+> [15277.936011]  [<ffffffff811a2700>] SyS_fsync+0x10/0x14
+> [15277.936011]  [<ffffffff81493617>] entry_SYSCALL_64_fastpath+0x12/0x6b
+> [15277.936011] Code: 85 c0 0f 85 e2 02 00 00 48 8b 45 b0 31 f6 4c 29 e8 48 ff c0 48 89 45 a8 48 8d 83 d8 00 00 00 48 89 c7 48 89 45 a0 e8 fc 43 18 e1 <f0> 41 ff 84 24
+> [15277.936011] RIP  [<ffffffffa030b7ab>] btrfs_sync_file+0x11b/0x3e9 [btrfs]
+> [15277.936011]  RSP <ffff88000a3fbe40>
+> [15277.974598] ---[ end trace 721e14960eb939c1 ]---
 > 
->   * vfs: add file_dentry()
->   * Btrfs: fix crash/invalid memory access on fsync when using overlayfs
+> So teach it to look out for such traces.
 > 
 > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> ---
-> 
-> V2: Removed leftover comment from debugging.
-> 
->  tests/overlay/002     | 74 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/002.out |  3 +++
->  tests/overlay/group   |  1 +
->  3 files changed, 78 insertions(+)
->  create mode 100755 tests/overlay/002
->  create mode 100644 tests/overlay/002.out
-> 
-> diff --git a/tests/overlay/002 b/tests/overlay/002
-> new file mode 100755
-> index 0000000..e5aa610
-> --- /dev/null
-> +++ b/tests/overlay/002
-> @@ -0,0 +1,74 @@
-> +#! /bin/bash
-> +# FS QA Test 002
-> +#
-> +# Test that calling fsync against a file using the merged directory does not
-> +# result in a crash nor fails unexpectedly.
-> +#
-> +# This is motivated by a change in overlayfs that resulted in a crash (invalid
-> +# memory access) when the lower or upper directory belonged to a btrfs file
-> +# system.
-> +#
-> +#-----------------------------------------------------------------------
-> +#
-> +# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
-> +# Author: Filipe Manana <fdmanana@suse.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs generic
 
-The supported fs should be "overlay"? overlay/001 has the same issue
-though.
-
-Looks good to me otherwise, test passed with XFS as underlying fs and
-test crashed v4.5 kernel with btrfs as underlying fs, as expected.
+Looks good to me.
 
 Reviewed-by: Eryu Guan <eguan@redhat.com>
+
+> ---
+>  common/rc | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/common/rc b/common/rc
+> index 16f5a43..51d9753 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3420,6 +3420,7 @@ _check_dmesg()
+>  	     -e "Internal error" \
+>  	     -e "INFO: suspicious RCU usage" \
+>  	     -e "INFO: possible circular locking dependency detected" \
+> +	     -e "general protection fault:" \
+>  	     $seqres.dmesg
+>  	if [ $? -eq 0 ]; then
+>  		echo "_check_dmesg: something found in dmesg (see $seqres.dmesg)"
+> -- 
+> 2.7.0.rc3
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
