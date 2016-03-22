@@ -1,39 +1,55 @@
-Received: from mx1.redhat.com ([209.132.183.28]:41946 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:42617 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758892AbcCVMAV (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 22 Mar 2016 08:00:21 -0400
-Date: Tue, 22 Mar 2016 20:00:14 +0800
+	id S1758995AbcCVMQb (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 22 Mar 2016 08:16:31 -0400
+Date: Tue, 22 Mar 2016 20:14:18 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2] fstests: test fsync on overlayfs merged directory
-Message-ID: <20160322120014.GJ11419@eguan.usersys.redhat.com>
-References: <1458581952-18638-1-git-send-email-fdmanana@kernel.org>
- <1458582625-22039-1-git-send-email-fdmanana@kernel.org>
- <20160322030023.GF11419@eguan.usersys.redhat.com>
- <CAL3q7H6z1Ut2MQh5dRv0ALwWnuiw0n1i_OJpbz=MVh=p3GTJXw@mail.gmail.com>
+Subject: Re: [PATCH] fstests: overlay/001, change supported fs from generic
+ to overlay
+Message-ID: <20160322121418.GK11419@eguan.usersys.redhat.com>
+References: <1458648571-4468-1-git-send-email-fdmanana@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAL3q7H6z1Ut2MQh5dRv0ALwWnuiw0n1i_OJpbz=MVh=p3GTJXw@mail.gmail.com>
+In-Reply-To: <1458648571-4468-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Mar 22, 2016 at 11:07:06AM +0000, Filipe Manana wrote:
-> On Tue, Mar 22, 2016 at 3:00 AM, Eryu Guan <eguan@redhat.com> wrote:
-...
-> >> +
-> >> +# real QA test starts here
-> >> +_supported_fs generic
-> >
-> > The supported fs should be "overlay"? overlay/001 has the same issue
-> > though.
+On Tue, Mar 22, 2016 at 12:09:31PM +0000, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
-> Yeah, I copied it from 001. And that's a question I made myself but
-> forgot later to investigate. Since you authored test 001, can you
-> confirm if it's a mistake or is it really supposed to be 'overlay'?
+> The supported fs was set to generic by mistake, so fix it by setting it
+> to the proper type 'overlay'.
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-It's my mistake in overlay/001, it should be overlay.
+Thanks for fixing it!
 
-Thanks,
-Eryu
+Reviewed-by: Eryu Guan <eguan@redhat.com>
+
+> ---
+>  tests/overlay/001 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/tests/overlay/001 b/tests/overlay/001
+> index 6eae737..7be9ae5 100755
+> --- a/tests/overlay/001
+> +++ b/tests/overlay/001
+> @@ -47,7 +47,7 @@ _cleanup()
+>  rm -f $seqres.full
+>  
+>  # real QA test starts here
+> -_supported_fs generic
+> +_supported_fs overlay
+>  _supported_os Linux
+>  _require_scratch
+>  
+> -- 
+> 2.7.0.rc3
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
