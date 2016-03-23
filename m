@@ -1,40 +1,47 @@
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:51473 "EHLO
-	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752819AbcCWAJL (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 22 Mar 2016 20:09:11 -0400
-Date: Wed, 23 Mar 2016 11:08:56 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] fstests: _fail the tests if _scratch_mount failed to
- avoid fully filling root fs
-Message-ID: <20160323000856.GY11812@dastard>
-References: <1458545021-23285-1-git-send-email-eguan@redhat.com>
+Received: from mgwkm01.jp.fujitsu.com ([202.219.69.168]:27821 "EHLO
+	mgwkm01.jp.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751924AbcCWB2M (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 22 Mar 2016 21:28:12 -0400
+Received: from m3050.s.css.fujitsu.com (msm.b.css.fujitsu.com [10.134.21.208])
+	by kw-mxauth.gw.nic.fujitsu.com (Postfix) with ESMTP id E8A90AC009D
+	for <fstests@vger.kernel.org>; Wed, 23 Mar 2016 10:28:06 +0900 (JST)
+From: Satoru Takeuchi <takeuchi_satoru@jp.fujitsu.com>
+Subject: [PATCH] xfstests: lib/tlibio: Fix a build warning
+Message-ID: <56F1F119.4020007@jp.fujitsu.com>
+Date: Wed, 23 Mar 2016 10:27:53 +0900
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1458545021-23285-1-git-send-email-eguan@redhat.com>
+Content-Type: text/plain; charset=iso-2022-jp
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Mar 21, 2016 at 03:23:41PM +0800, Eryu Guan wrote:
-> btrfs failed to mount small fs on ppc64 host with error ENOSPC, even
-> creating such small fs succeeded, then generic/027 consumed all free
-> space on root fs not on SCRATCH_DEV and test harness cannot create tmp
-> files and continue other tests.
-> 
-> Though I think it's a btrfs bug, it's still worth preventing this
-> situation from happening in the harness, as such tests usually aim to
-> exercise fs on ENOSPC conditions, there's no point to continue if the
-> small fs is not mounted.
+Remove the following warning message.
 
-I think the btrfs bug should be fixed. At minimum, the workaround to
-see if the filesytem can be mounted should be in btrfs's
-implementation of scratch_mkfs_sized....
+  ===============================
+  tlibio.c: In function 'lio_set_debug':
+  tlibio.c:212:1: warning: type of 'level' defaults to 'int' [-Wimplicit-int]
+   lio_set_debug(level)
+   ^
+  ==============================
 
-Cheers,
+Signed-off-by: Satoru Takeuchi <takeuchi_satoru@jp.fujitsu.com>
+---
+ lib/tlibio.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Dave.
+diff --git a/lib/tlibio.c b/lib/tlibio.c
+index f2078da..9b1b890 100644
+--- a/lib/tlibio.c
++++ b/lib/tlibio.c
+@@ -209,7 +209,7 @@ int	*max;
+  * This function will allow someone to set the debug level.
+  ***********************************************************************/
+ int
+-lio_set_debug(level)
++lio_set_debug(int level)
+ {
+     int old;
+
 -- 
-Dave Chinner
-david@fromorbit.com
+2.5.0
