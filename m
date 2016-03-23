@@ -1,48 +1,39 @@
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:62727 "EHLO
-	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750921AbcCWCx5 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 22 Mar 2016 22:53:57 -0400
-Date: Wed, 23 Mar 2016 13:53:27 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v2] generic: test I/O on dm error device
-Message-ID: <20160323025327.GZ11812@dastard>
-References: <1457710822-30532-2-git-send-email-eguan@redhat.com>
- <1458029534-17578-1-git-send-email-eguan@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:46587 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751743AbcCWDXc (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 22 Mar 2016 23:23:32 -0400
+Date: Wed, 23 Mar 2016 11:23:29 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] fstests: _fail the tests if _scratch_mount failed to
+ avoid fully filling root fs
+Message-ID: <20160323032329.GM11419@eguan.usersys.redhat.com>
+References: <1458545021-23285-1-git-send-email-eguan@redhat.com>
+ <20160323000856.GY11812@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1458029534-17578-1-git-send-email-eguan@redhat.com>
+In-Reply-To: <20160323000856.GY11812@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Mar 15, 2016 at 04:12:14PM +0800, Eryu Guan wrote:
-> This is a test that performs simple I/O on dm error device, which
-> returns EIO on all I/O request.
+On Wed, Mar 23, 2016 at 11:08:56AM +1100, Dave Chinner wrote:
+> On Mon, Mar 21, 2016 at 03:23:41PM +0800, Eryu Guan wrote:
+> > btrfs failed to mount small fs on ppc64 host with error ENOSPC, even
+> > creating such small fs succeeded, then generic/027 consumed all free
+> > space on root fs not on SCRATCH_DEV and test harness cannot create tmp
+> > files and continue other tests.
+> > 
+> > Though I think it's a btrfs bug, it's still worth preventing this
+> > situation from happening in the harness, as such tests usually aim to
+> > exercise fs on ENOSPC conditions, there's no point to continue if the
+> > small fs is not mounted.
 > 
-> This is motivated by an ext4 bug that crashes kernel on error path when
-> trying to update atime. Following kernel patch should fix the issue
-> 
->   ext4: fix NULL pointer dereference in ext4_mark_inode_dirty()
-> 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> ---
+> I think the btrfs bug should be fixed. At minimum, the workaround to
+> see if the filesytem can be mounted should be in btrfs's
+> implementation of scratch_mkfs_sized....
 
-Fails with:
+OK, I'll add workaround in _scratch_mkfs_sized. Thanks for reviewing!
 
-@@ -1,2 +1,6 @@
- QA output created by 338
-  Silence is golden
-  +specified blocksize 1024 is less than device physical sector size 4096
-  +switching to logical sector size 512
-  +mkfs.xfs: /dev/mapper/error-test appears to contain an existing filesystem (xfs).
-  +mkfs.xfs: Use the -f option to force overwrite.
-
-And then it failed to clean up properly and caused all sorts of
-subsequent problems.
-
--Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Eryu
