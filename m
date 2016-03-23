@@ -1,15 +1,36 @@
-Received: from mx2.suse.de ([195.135.220.15]:51808 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755140AbcCWNmP (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 23 Mar 2016 09:42:15 -0400
-From: Jan Kara <jack@suse.cz>
-Subject: [PATCH] generic/338: Add mmap race test
-Date: Wed, 23 Mar 2016 14:42:35 +0100
-Message-Id: <1458740555-3512-1-git-send-email-jack@suse.cz>
+Received: from mail-bl2on0124.outbound.protection.outlook.com ([65.55.169.124]:6933
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750886AbcCWVrk convert rfc822-to-8bit (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 23 Mar 2016 17:47:40 -0400
+From: "Boylston, Brian" <brian.boylston@hpe.com>
+Subject: RE: [PATCH] generic/338: Add mmap race test
+Date: Wed, 23 Mar 2016 21:33:14 +0000
+Message-ID: <AT5PR84MB002088291386F87A62B2399A8E810@AT5PR84MB0020.NAMPRD84.PROD.OUTLOOK.COM>
+References: <1458740555-3512-1-git-send-email-jack@suse.cz>
+In-Reply-To: <1458740555-3512-1-git-send-email-jack@suse.cz>
+Content-Language: en-US
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+MIME-Version: 1.0
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Toshi Kani <toshi.kani@hpe.com>, Jan Kara <jack@suse.cz>
+To: Jan Kara <jack@suse.cz>, "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+Cc: "Kani, Toshimitsu" <toshi.kani@hpe.com>
 List-ID: <fstests@vger.kernel.org>
+
+It might be good to run with larger file sizes if possible.  In my notes,
+I had recorded that "a file size of 1000 (MB) is enough to see errors almost
+every test run.  A size of 500 will occasionally pass without error".
+
+Otherwise, it looks good.  With that:
+Acked-by: Brian Boylston <brian.boylston@hpe.com>
+
+-----Original Message-----
+From: Jan Kara [mailto:jack@suse.cz] 
+Sent: Wednesday, March 23, 2016 9:43 AM
+To: fstests@vger.kernel.org
+Cc: Kani, Toshimitsu <toshi.kani@hpe.com>; Jan Kara <jack@suse.cz>
+Subject: [PATCH] generic/338: Add mmap race test
 
 Add test which spawns two threads racing to write to file via mmap and
 checks the result. This is mainly interesting to uncover races in DAX
