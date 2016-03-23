@@ -1,17 +1,17 @@
 From: Laison@seymour.toledo.br, Computech@seymour.toledo.br,
 	"Inc <support"@ensuretech.com
 Subject: CISCO IP PHONES AND CPU's
-Date: Thu, 24 Mar 2016 01:45:03 +0700
-Message-ID: <20160323200903.14185A6894@seymour.toledo.br>
+Date: Thu, 24 Mar 2016 02:11:48 +0700
+Message-ID: <20160323203548.0DE0AA7AE6@seymour.toledo.br>
 Reply-To: sales@laisoncomputertech.us
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7BIT
 Return-path: <fstests-owner@vger.kernel.org>
-Received: from seymour.toledo.br ([200.148.142.55]:34463 "EHLO
+Received: from seymour.toledo.br ([200.148.142.55]:46986 "EHLO
 	seymour.toledo.br" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756700AbcCWUjL convert rfc822-to-8bit (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 23 Mar 2016 16:39:11 -0400
+	with ESMTP id S1756171AbcCWVYb convert rfc822-to-8bit (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 23 Mar 2016 17:24:31 -0400
 Content-Description: Mail message body
 Sender: fstests-owner@vger.kernel.org
 List-Id: fstests@vger.kernel.org
