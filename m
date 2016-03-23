@@ -1,45 +1,63 @@
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:21025 "EHLO
-	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753790AbcCWDlG (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 22 Mar 2016 23:41:06 -0400
-Date: Wed, 23 Mar 2016 14:40:40 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 06/12] xfs/030: fix output on newer filesystems
-Message-ID: <20160323034040.GA11812@dastard>
-References: <20160305003717.28738.98818.stgit@birch.djwong.org>
- <20160305003756.28738.26362.stgit@birch.djwong.org>
- <20160305202050.GF10245@infradead.org>
+Received: from mx1.redhat.com ([209.132.183.28]:46950 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750717AbcCWEOr (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 23 Mar 2016 00:14:47 -0400
+Date: Wed, 23 Mar 2016 12:14:42 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2] generic: test I/O on dm error device
+Message-ID: <20160323041442.GO11419@eguan.usersys.redhat.com>
+References: <1457710822-30532-2-git-send-email-eguan@redhat.com>
+ <1458029534-17578-1-git-send-email-eguan@redhat.com>
+ <20160323025327.GZ11812@dastard>
+ <20160323032531.GN11419@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160305202050.GF10245@infradead.org>
+In-Reply-To: <20160323032531.GN11419@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, linux-ext4@vger.kernel.org, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, xfs@oss.sgi.com
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Mar 05, 2016 at 12:20:50PM -0800, Christoph Hellwig wrote:
-> Still fails for me:
+On Wed, Mar 23, 2016 at 11:25:31AM +0800, Eryu Guan wrote:
+> On Wed, Mar 23, 2016 at 01:53:27PM +1100, Dave Chinner wrote:
+> > On Tue, Mar 15, 2016 at 04:12:14PM +0800, Eryu Guan wrote:
+> > > This is a test that performs simple I/O on dm error device, which
+> > > returns EIO on all I/O request.
+> > > 
+> > > This is motivated by an ext4 bug that crashes kernel on error path when
+> > > trying to update atime. Following kernel patch should fix the issue
+> > > 
+> > >   ext4: fix NULL pointer dereference in ext4_mark_inode_dirty()
+> > > 
+> > > Signed-off-by: Eryu Guan <eguan@redhat.com>
+> > > ---
+> > 
+> > Fails with:
+> > 
+> > @@ -1,2 +1,6 @@
+> >  QA output created by 338
+> >   Silence is golden
+> >   +specified blocksize 1024 is less than device physical sector size 4096
+> >   +switching to logical sector size 512
+> >   +mkfs.xfs: /dev/mapper/error-test appears to contain an existing filesystem (xfs).
+> >   +mkfs.xfs: Use the -f option to force overwrite.
+> > 
+> > And then it failed to clean up properly and caused all sorts of
+> > subsequent problems.
 > 
-> --- tests/xfs/030.out	2016-03-03 07:55:58.556427678 +0000
-> +++ /root/xfstests/results//xfs/030.out.bad	2016-03-05 20:20:17.561433837 +0000
-> @@ -231,8 +231,6 @@
->  bad agbno AGBNO in agfl, agno 0
->  bad agbno AGBNO in agfl, agno 0
->  bad agbno AGBNO in agfl, agno 0
-> -bad agbno AGBNO in agfl, agno 0
-> -bad agbno AGBNO in agfl, agno 0
+> Test passed for me, seems it has something to do with the "physical
+> sector size 4096" device. I'll look into it. Thanks for the review!
 
-That's because the free lists are of different lengths on the
-different fs configs. Not sure how best to handle it - maybe just
-filter then entire bad agbno in agfl line out?
+It fails because "_mkfs_dev $DMERROR_DEV" refuses to create new fs
+without "-f" option, has nothing to do with the 4k sector device. It
+passed for me is because I add "-f" mkfs option to my local.config for
+xfs sections, so _mkfs_dev passed. I'll send v3 to fix this.
 
-I'm going to commit the change anyway, as this is a separate issue
-that needs to be solved.
+And the test fails to do cleanups on failure because "dmsetup remove
+error-test" reports device is busy. Adding a "$UDEV_SETTLE_PROG" call 
+before "dmsetup remove error-test" in common/dmerror fixes the issue for
+me. I'll send another patch to fix it.
 
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Thanks,
+Eryu
