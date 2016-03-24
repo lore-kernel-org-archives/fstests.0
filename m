@@ -1,14 +1,14 @@
-Received: from mail-io0-f182.google.com ([209.85.223.182]:34137 "EHLO
-	mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755585AbcCXLI5 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 24 Mar 2016 07:08:57 -0400
+Received: from mail-io0-f174.google.com ([209.85.223.174]:34516 "EHLO
+	mail-io0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755309AbcCXLKz (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 24 Mar 2016 07:10:55 -0400
 MIME-Version: 1.0
 Reply-To: fdmanana@gmail.com
-In-Reply-To: <1458814439-6418-1-git-send-email-anand.jain@oracle.com>
-References: <1458814439-6418-1-git-send-email-anand.jain@oracle.com>
-Date: Thu, 24 Mar 2016 11:08:56 +0000
-Message-ID: <CAL3q7H5APJE6bWpi=kYMuC4sMRvYuEh5ouVTLxfQCRQO4EThew@mail.gmail.com>
-Subject: Re: [PATCH] fstest: btrfs: remove _need_to_be_root fix btrfs/118
+In-Reply-To: <1458814272-5783-1-git-send-email-anand.jain@oracle.com>
+References: <1458814272-5783-1-git-send-email-anand.jain@oracle.com>
+Date: Thu, 24 Mar 2016 11:10:51 +0000
+Message-ID: <CAL3q7H6LPKyNYYXyvmM=cKhhjSxxm4G4N1utoKO5L4tLGGa3_w@mail.gmail.com>
+Subject: Re: [PATCH] fstest: btrfs: update 048.out inline with ui changes
 From: Filipe Manana <fdmanana@gmail.com>
 Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
@@ -16,35 +16,38 @@ To: Anand Jain <anand.jain@oracle.com>
 Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 24, 2016 at 10:13 AM, Anand Jain <anand.jain@oracle.com> wrote:
-> commit 56ff01f471c9b72de0a447b37cdb1051adcede6a
->     xfstests: remove _need_to_be_root
->
-> Removed _need_to_be_root(), and so btrfs/118 needs an update
-
-https://git.kernel.org/cgit/fs/xfs/xfstests-dev.git/commit/?id=3a9242688d64c669ca764ee2c5599abfc885c131
-
-It's always a good idea to check if one is using the latest git branch
-and the mailing list... :)
-
+On Thu, Mar 24, 2016 at 10:11 AM, Anand Jain <anand.jain@oracle.com> wrote:
+> To be inline with progs changes
+>   28831d54895443e5fc795392f23ce3a8b122cb71
+>   btrfs-progs: cmd property: switch to common error message wrapper
+> update 048.out
 >
 > Signed-off-by: Anand Jain <anand.jain@oracle.com>
 > ---
->  tests/btrfs/118 | 1 -
->  1 file changed, 1 deletion(-)
+>  tests/btrfs/048.out | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/tests/btrfs/118 b/tests/btrfs/118
-> index 3ed1cbef1068..740cb92b0669 100755
-> --- a/tests/btrfs/118
-> +++ b/tests/btrfs/118
-> @@ -45,7 +45,6 @@ _cleanup()
->  . ./common/dmflakey
+> diff --git a/tests/btrfs/048.out b/tests/btrfs/048.out
+> index 0b20d0b5976c..1d3ccef8e870 100644
+> --- a/tests/btrfs/048.out
+> +++ b/tests/btrfs/048.out
+> @@ -9,7 +9,7 @@ label=foobar
+>  ***
+>  label=
+>  ***
+> -ERROR: object is not compatible with property
+> +ERROR: object is not compatible with property: label
+
+This now makes the test fail with older versions of btrfs-progs...
+
+Same observation as before, update your git branch and read the mailing list:
+
+https://git.kernel.org/cgit/fs/xfs/xfstests-dev.git/commit/?id=232593dea51c53f3251f9b41cd89e9dba20f0159
+https://git.kernel.org/cgit/fs/xfs/xfstests-dev.git/commit/?id=2dd2cea4b51810bbb4090ebdc20ee799e63e5fd8
+
+>  ***
 >
->  # real QA test starts here
-> -_need_to_be_root
->  _supported_fs btrfs
->  _supported_os Linux
->  _require_scratch
+>  Testing subvolume ro property
 > --
 > 2.7.0
 >
