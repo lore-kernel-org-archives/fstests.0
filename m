@@ -1,54 +1,34 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:34358 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755393AbcCXLQY (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 24 Mar 2016 07:16:24 -0400
-Subject: Re: [PATCH] fstest: btrfs: update 048.out inline with ui changes
-References: <1458814272-5783-1-git-send-email-anand.jain@oracle.com>
- <20160324111331.GT11419@eguan.usersys.redhat.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:24970 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750713AbcCXL1c (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 24 Mar 2016 07:27:32 -0400
+Subject: Re: [PATCH] fstest: btrfs: remove _need_to_be_root fix btrfs/118
+References: <1458814439-6418-1-git-send-email-anand.jain@oracle.com>
+ <CAL3q7H5APJE6bWpi=kYMuC4sMRvYuEh5ouVTLxfQCRQO4EThew@mail.gmail.com>
 From: Anand Jain <anand.jain@oracle.com>
-Message-ID: <56F3CC7E.50702@oracle.com>
-Date: Thu, 24 Mar 2016 19:16:14 +0800
+Message-ID: <56F3CF1B.2040006@oracle.com>
+Date: Thu, 24 Mar 2016 19:27:23 +0800
 MIME-Version: 1.0
-In-Reply-To: <20160324111331.GT11419@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset=windows-1252; format=flowed
+In-Reply-To: <CAL3q7H5APJE6bWpi=kYMuC4sMRvYuEh5ouVTLxfQCRQO4EThew@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fdmanana@gmail.com
+Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
 
 
-
-
-On 03/24/2016 07:13 PM, Eryu Guan wrote:
-> On Thu, Mar 24, 2016 at 06:11:12PM +0800, Anand Jain wrote:
->> To be inline with progs changes
->>    28831d54895443e5fc795392f23ce3a8b122cb71
->>    btrfs-progs: cmd property: switch to common error message wrapper
->> update 048.out
+On 03/24/2016 07:08 PM, Filipe Manana wrote:
+> On Thu, Mar 24, 2016 at 10:13 AM, Anand Jain <anand.jain@oracle.com> wrote:
+>> commit 56ff01f471c9b72de0a447b37cdb1051adcede6a
+>>      xfstests: remove _need_to_be_root
 >>
->> Signed-off-by: Anand Jain <anand.jain@oracle.com>
->> ---
->>   tests/btrfs/048.out | 2 +-
->>   1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/tests/btrfs/048.out b/tests/btrfs/048.out
->> index 0b20d0b5976c..1d3ccef8e870 100644
->> --- a/tests/btrfs/048.out
->> +++ b/tests/btrfs/048.out
->> @@ -9,7 +9,7 @@ label=foobar
->>   ***
->>   label=
->>   ***
->> -ERROR: object is not compatible with property
->> +ERROR: object is not compatible with property: label
+>> Removed _need_to_be_root(), and so btrfs/118 needs an update
 >
-> This fails test with old btrfs-progs. I think a filter can be added to
-> btrfs/048 to filter out the ": label" part, so that test passes with
-> both old and new btrfs-progs.
+> https://git.kernel.org/cgit/fs/xfs/xfstests-dev.git/commit/?id=3a9242688d64c669ca764ee2c5599abfc885c131
+>
+> It's always a good idea to check if one is using the latest git branch
+> and the mailing list... :)
 
-  Thanks.  Yep. I shall do that.
-
-
-
+Err. Yep. Sorry for the noise.
