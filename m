@@ -1,66 +1,99 @@
-Received: from mx1.redhat.com ([209.132.183.28]:8712 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752310AbcCXNZw (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 24 Mar 2016 09:25:52 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (Postfix) with ESMTPS id 7C22B2541
-	for <fstests@vger.kernel.org>; Thu, 24 Mar 2016 13:25:50 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v2] common: make sure dm device is all settled before removing it
-Date: Thu, 24 Mar 2016 21:25:22 +0800
-Message-Id: <1458825922-21165-1-git-send-email-eguan@redhat.com>
-In-Reply-To: <1458821311-18968-1-git-send-email-eguan@redhat.com>
-References: <1458821311-18968-1-git-send-email-eguan@redhat.com>
+Received: from zeniv.linux.org.uk ([195.92.253.2]:56533 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751202AbcCXPUr (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 24 Mar 2016 11:20:47 -0400
+Date: Thu, 24 Mar 2016 15:20:43 +0000
+From: Al Viro <viro@ZenIV.linux.org.uk>
+Subject: Re: kernel BUG when fsync'ing file in a overlayfs merged dir,
+ located on btrfs
+Message-ID: <20160324152043.GA22781@ZenIV.linux.org.uk>
+References: <1443643065-16460-1-git-send-email-lebedev.ri@gmail.com>
+ <563C171F.30702@jeffm.io>
+ <20151106031845.GV22011@ZenIV.linux.org.uk>
+ <563C26AE.1020403@jeffm.io>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <563C26AE.1020403@jeffm.io>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+To: Jeff Mahoney <jeffm@jeffm.io>
+Cc: Roman Lebedev <lebedev.ri@gmail.com>, David Howells <dhowells@redhat.com>, linux-btrfs@vger.kernel.org, linux-unionfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, fstests@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-_dmerror_cleanup()/_cleanup_flakey may fail to remove dm device due to
-EBUSY and cause subsequent tests to fail.
+On Thu, Nov 05, 2015 at 11:03:58PM -0500, Jeff Mahoney wrote:
 
-Fix it by calling $UDEV_SETTLE_PROG before remove dm device to make sure
-no one is using it.
+> I suppose the irony here is that, AFAIK, that code is to ensure a file
+> doesn't get lost between transactions due to rename.
+> 
+> Isn't the file->f_path.dentry relationship stable otherwise, though? The
+> name might change and the parent might change but the dentry that the
+> file points to won't.
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
+Sure, it is stable.  But that doesn't guarantee anything about the
+ancestors.
 
-v2:
-- fix _cleanup_flakey() as well, thanks to Filipe for pointing it out
+btrfs_log_inode_parent() is a mess.  Look at that loop you've got there:
 
- common/dmerror  | 3 +++
- common/dmflakey | 3 +++
- 2 files changed, 6 insertions(+)
+       while (1) {
+                if (!parent || d_really_is_negative(parent) || sb != d_inode(parent)->i_sb)
+                        break;
 
-diff --git a/common/dmerror b/common/dmerror
-index 004530d..5d2c1b6 100644
---- a/common/dmerror
-+++ b/common/dmerror
-@@ -54,6 +54,9 @@ _dmerror_unmount()
- _dmerror_cleanup()
- {
- 	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
-+	# wait for device to be fully settled so that 'dmsetup remove' doesn't
-+	# fail due to EBUSY
-+	$UDEV_SETTLE_PROG >/dev/null 2>&1
- 	$DMSETUP_PROG remove error-test > /dev/null 2>&1
- }
- 
-diff --git a/common/dmflakey b/common/dmflakey
-index 3b6521a..4434307 100644
---- a/common/dmflakey
-+++ b/common/dmflakey
-@@ -54,6 +54,9 @@ _cleanup_flakey()
- 	# otherwise the umount will hang
- 	$DMSETUP_PROG resume flakey-test > /dev/null 2>&1
- 	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
-+	# wait for device to be fully settled so that 'dmsetup remove' doesn't
-+	# fail due to EBUSY
-+	$UDEV_SETTLE_PROG >/dev/null 2>&1
- 	$DMSETUP_PROG remove flakey-test > /dev/null 2>&1
- 	$DMSETUP_PROG mknodes > /dev/null 2>&1
- }
--- 
-2.5.5
+Really?  NULL from dget_parent()?  A negative from dget_parent()?  Sodding
+superblock changing from transition to parent?
 
+                inode = d_inode(parent);
+                if (root != BTRFS_I(inode)->root)
+                        break;
+
+Umm...  Something like crossing a snapshot boundary?
+
+                if (BTRFS_I(inode)->generation > last_committed) {  
+                        ret = btrfs_log_inode(trans, root, inode,
+                                              LOG_INODE_EXISTS,
+                                              0, LLONG_MAX, ctx);
+                        if (ret)
+                                goto end_trans;
+                }
+                if (IS_ROOT(parent))
+                        break;
+
+                parent = dget_parent(parent);
+                dput(old_parent);
+                old_parent = parent;
+        }
+
+Note that there's not a damn thing to guarantee that those directories have
+anything to do with your file - race with rename(2) easily could've sent you
+chasing the wrong chain of ancestors.  Incidentally, what will happen if
+you do that fsync() to an unlinked file?  It still has ->d_parent pointing
+to the what used to be its parent (quite possibly itself already rmdir'ed and
+pinned down by that reference; inode is still busy, as if we'd done open and
+rmdir).  Is that what those checks are attempting to catch?  And what happens
+if rmdir happens between the check and btrfs_log_inode()?
+
+The thing is, playing with ancestors of opened file is very easy to get
+wrong, regardless of overlayfs involvement.  And this code is anything
+but clear.  I don't know btrfs guts enough to be able to tell how much
+can actually break (as opposed to adding wrong inodes to transaction),
+but I would really suggest taking a good look at what's going on there...
+
+> I did find a few other places where that assumption happens without any
+> questionable traversals.  Sure, all three are in file systems unlikely
+> to be used with overlayfs.
+> 
+> ocfs2_prepare_inode_for_write uses file->f_path.dentry for
+> should_remove_suid (due to needing to do it early since cluster locking
+> is unknown in setattr, according to the commit).  Having
+> should_remove_suid operate on an inode would solve that easily.
+
+Can't do - there are filesystems that _need_ dentry for ->setattr().
+
+> cifs_new_fileinfo keeps a reference to the dentry but it seems to be
+> used mostly to access the inode except for the nasty-looking call to
+> build_path_from_dentry in cifs_reopen_file, which I won't be touching.
+> That does look like a questionable traversal, especially with the "we
+> can't take the rename lock here" comment.
+
+cifs uses fs-root-relative pathnames in protocol; nothing to do there.
+Where do you see that comment, BTW?  It uses read_seqbegin/read_seqretry
+on rename_lock there...
