@@ -1,19 +1,62 @@
-Date: Sat, 5 Mar 2016 10:25:08 -0800
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 12/12] block: test fallocate for block devices
-Message-ID: <20160305182508.GA25528@infradead.org>
-References: <20160305003717.28738.98818.stgit@birch.djwong.org>
- <20160305003837.28738.49794.stgit@birch.djwong.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160305003837.28738.49794.stgit@birch.djwong.org>
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: david@fromorbit.com, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] xfs/206: filter out reflink related outputs
+Date: Wed, 30 Mar 2016 15:56:49 +0800
+Message-Id: <1459324609-5531-1-git-send-email-eguan@redhat.com>
+To: fstests@vger.kernel.org
+Cc: xfs@oss.sgi.com, darrick.wong@oracle.com, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-I'm not sure xfstests is the right fit, as it does not test a file
-system, but rather block devices.
+Commit 13717ffc96fe ("xfs/206: fix output when mkfs knows about
+reflink") added extra lines to xfs/206.out to fit the mkfs output with
+reflink support, but broke tests without reflink support.
 
-If people think it should go into xfstests we should at least not
-add it to the default group, but just to a new bdev group.
+Fix it by filtering out reflink related outputs, just like filtering out
+crc related outputs in the test.
+
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+
+Tested with v4.5 xfsprogs as well as Darrick's xfsprogs (for-dave-for-4.6
+branch) with reflink support.
+
+https://github.com/djwong/xfsprogs.git
+
+ tests/xfs/206     | 2 +-
+ tests/xfs/206.out | 2 --
+ 2 files changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/tests/xfs/206 b/tests/xfs/206
+index 24e690a..d549a4c 100755
+--- a/tests/xfs/206
++++ b/tests/xfs/206
+@@ -80,7 +80,7 @@ mkfs_filter()
+ 	    -e "s/\(^log.*blocks=\)\([0-9]*,\)/\1XXXXX,/" \
+ 	    -e "s/, projid32bit=[0-9]//" \
+ 	    -e "s/ ftype=[0-9]//" \
+-	    -e "s/ reflink=[0-9]//" \
++	    -e "/.*reflink=/d" \
+ 	    -e "s/\(sectsz\)\(=[0-9]* *\)/\1=512   /" \
+ 	    -e "s/\(sunit=\)\([0-9]* blks,\)/\10 blks,/" \
+ 	    -e "s/, lazy-count=[0-9]//" \
+diff --git a/tests/xfs/206.out b/tests/xfs/206.out
+index e73a954..2db839d 100644
+--- a/tests/xfs/206.out
++++ b/tests/xfs/206.out
+@@ -12,7 +12,6 @@ realtime =none                   extsz=4096   blocks=0, rtextents=0
+ === xfs_growfs ===
+ meta-data=FILE isize=N    agcount=52, agsize=76288719 blks
+          =                       sectsz=512   attr=2
+-         =                      
+ data     =                       bsize=4096   blocks=3905982455, imaxpct=5
+          =                       sunit=0      swidth=0 blks
+ naming   =version 2              bsize=4096   ascii-ci=0
+@@ -23,7 +22,6 @@ data blocks changed from 3905982455 to 4882478016
+ === xfs_info ===
+ meta-data=FILE isize=N    agcount=64, agsize=76288719 blks
+          =                       sectsz=512   attr=2
+-         =                      
+ data     =                       bsize=4096   blocks=4882478016, imaxpct=5
+          =                       sunit=0      swidth=0 blks
+ naming   =version 2              bsize=4096   ascii-ci=0
+-- 
+2.5.5
