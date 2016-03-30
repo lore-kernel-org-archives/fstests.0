@@ -1,178 +1,396 @@
-Received: from mail.kernel.org ([198.145.29.136]:35836 "EHLO mail.kernel.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753169AbcC3J5T (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 30 Mar 2016 05:57:19 -0400
+Received: from aserp1040.oracle.com ([141.146.126.69]:27938 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752058AbcC3RYw (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 30 Mar 2016 13:24:52 -0400
+Date: Wed, 30 Mar 2016 10:24:43 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] xfs/030: link .out file according to reflink support
+ status
+Message-ID: <20160330172443.GF5822@birch.djwong.org>
+References: <1459331861-15025-1-git-send-email-eguan@redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <1459330750-3284-1-git-send-email-fdmanana@kernel.org>
-References: <1459330750-3284-1-git-send-email-fdmanana@kernel.org>
-Date: Wed, 30 Mar 2016 10:57:15 +0100
-Message-ID: <CAL3q7H5ruPg1ptLvS4w0OqNvZ4ERAXP5gZK_jzykWf-V+PhNJQ@mail.gmail.com>
-Subject: Re: [PATCH 2/2] fstests: generic test for fsync after renaming file
-From: Filipe Manana <fdmanana@kernel.org>
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1459331861-15025-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Mar 30, 2016 at 10:39 AM,  <fdmanana@kernel.org> wrote:
-> From: Filipe Manana <fdmanana@suse.com>
->
-> Test that if we rename a file, create a new file that has the old name
-> of the other file and is a child of the same parent directory, fsync the
-> new inode, power fail and mount the filesystem, we do not lose the first
-> file and that file has the name it was renamed to.
->
-> This test is motivated by an issue found in btrfs which is fixed by the
-> following patch for the linux kernel:
->
->   "Btrfs: fix file loss caused by fsync after rename and new inode"
->
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-
-Forgot to mention, but this time it's not only btrfs failing this test
-(miracle). With a 4.5 kernel f2fs is also failing (but ext3/4, xfs and
-reiserfs pass for example), as the file that was renamed is lost
-(fails the same way as btrfs does).
-
+On Wed, Mar 30, 2016 at 05:57:41PM +0800, Eryu Guan wrote:
+> Commit 31f48569c353 ("xfs/030: fix output on newer filesystems") added
+> more lines to .out file to match the output from XFS with reflink
+> support, but it broke test on older XFS.
+> 
+> Fix it by introducing new .out file 030.out.reflink.linux to match the
+> reflink case, so old XFS still compares .out file against 030.out.linux.
+> 
+> In order to do this, a new helper is introduced, _fs_has_reflink()
+> accepts mount point as argument and returns if the underlying fs
+> supports reflink or not.
+> 
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
 > ---
->  tests/generic/341     | 90 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/341.out | 15 +++++++++
->  tests/generic/group   |  1 +
->  3 files changed, 106 insertions(+)
->  create mode 100755 tests/generic/341
->  create mode 100644 tests/generic/341.out
->
-> diff --git a/tests/generic/341 b/tests/generic/341
-> new file mode 100755
-> index 0000000..b70bd95
-> --- /dev/null
-> +++ b/tests/generic/341
-> @@ -0,0 +1,90 @@
-> +#! /bin/bash
-> +# FSQA Test No. 341
-> +#
-> +# Test that if we rename a file, create a new file that has the old name of the
-> +# other file and is a child of the same parent directory, fsync the new inode,
-> +# power fail and mount the filesystem, we do not lose the first file and that
-> +# file has the name it was renamed to.
-> +#
-> +#-----------------------------------------------------------------------
-> +#
-> +# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
-> +# Author: Filipe Manana <fdmanana@suse.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
+> 
+> I didn't test this patch on newer XFS, but it did pass for me on current
+> 4.6-rc1 kernel.
+> 
+>  common/reflink                  |  18 +++
+>  tests/xfs/030                   |  12 +-
+>  tests/xfs/030.cfg               |   1 +
+>  tests/xfs/030.out.linux         |   2 -
+>  tests/xfs/030.out.reflink.linux | 252 ++++++++++++++++++++++++++++++++++++++++
+>  5 files changed, 280 insertions(+), 5 deletions(-)
+>  create mode 100644 tests/xfs/030.out.reflink.linux
+> 
+> diff --git a/common/reflink b/common/reflink
+> index 4ec390d..bdfc01c 100644
+> --- a/common/reflink
+> +++ b/common/reflink
+> @@ -156,6 +156,24 @@ _cp_reflink() {
+>  	cp --reflink=always -p "$file1" "$file2"
+>  }
+>  
+> +# given a mount point and test the underlying fs supports reflink or not
+> +_fs_has_reflink()
 > +{
-> +       _cleanup_flakey
-> +       cd /
-> +       rm -f $tmp.*
+> +	if [ -z $1 ] || [ ! -d $1 ]; then
+> +		echo "Missing mount point argument for _fs_has_reflink()"
+> +		exit 1
+> +	fi
+> +	local src=$1/_fs_has_reflink_testfile
+> +	local tgt=$src.reflink
+> +	local ret=0
+> +
+> +	echo "reflink test" > $src
+> +	_cp_reflink $src $tgt >/dev/null 2>&1
+> +	ret=$?
+> +	rm -f $src $tgt >/dev/null 2>&1
+> +	return $ret
 > +}
+
+Patch looks ok, though I wonder if _require_*_reflink ought to be
+refactored to use this?
+
+--D
+
 > +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/dmflakey
+>  # Reflink some file1 into file2
+>  _reflink() {
+>  	file1="$1"
+> diff --git a/tests/xfs/030 b/tests/xfs/030
+> index 33c906c..d171a39 100755
+> --- a/tests/xfs/030
+> +++ b/tests/xfs/030
+> @@ -44,9 +44,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+>  . ./common/rc
+>  . ./common/filter
+>  . ./common/repair
+> -
+> -# link correct .out file
+> -_link_out_file
+> +. ./common/reflink
+>  
+>  # nuke the superblock, AGI, AGF, AGFL; then try repair the damage
+>  #
+> @@ -90,6 +88,14 @@ else
+>  		_notrun "GQuota are enabled, test needs controlled sb recovery"
+>  	src/feature -P $SCRATCH_DEV && \
+>  		_notrun "PQuota are enabled, test needs controlled sb recovery"
 > +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch
-> +_require_dm_target flakey
-> +_require_metadata_journaling $SCRATCH_DEV
+> +	# link correct .out file
+> +	features=`_get_os_name`
+> +	if _fs_has_reflink $SCRATCH_MNT; then
+> +		features=$feature,reflink
+> +	fi
+> +	_link_out_file_named $seqfull.out "$features"
 > +
-> +rm -f $seqres.full
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_init_flakey
-> +_mount_flakey
-> +
-> +mkdir $SCRATCH_MNT/a
-> +$XFS_IO_PROG -f -c "pwrite -S 0xf1 0 16K" $SCRATCH_MNT/a/foo | _filter_xfs_io
-> +# Make sure everything done so far is durably persisted.
-> +sync
-> +
-> +# Now rename file foo to bar and create a new file named foo under the same
-> +# directory. After a power failure we must see the two files.
-> +mv $SCRATCH_MNT/a/foo $SCRATCH_MNT/a/bar
-> +$XFS_IO_PROG -f -c "pwrite -S 0xba 0 16K" $SCRATCH_MNT/a/foo | _filter_xfs_io
-> +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/a/foo
-> +
-> +echo "File digests before log replay:"
-> +md5sum $SCRATCH_MNT/a/foo | _filter_scratch
-> +md5sum $SCRATCH_MNT/a/bar | _filter_scratch
-> +
-> +# Simulate a power failure and mount again the filesystem to trigger replay of
-> +# its journal/log.
-> +_flakey_drop_and_remount
-> +
-> +echo "Directory a/ contents after log replay:"
-> +ls -R $SCRATCH_MNT/a | _filter_scratch
-> +
-> +echo "File digests after log replay:"
-> +# Must match what we got before the power failure.
-> +md5sum $SCRATCH_MNT/a/foo | _filter_scratch
-> +md5sum $SCRATCH_MNT/a/bar | _filter_scratch
-> +
-> +_unmount_flakey
-> +status=0
-> +exit
-> diff --git a/tests/generic/341.out b/tests/generic/341.out
+>  	_scratch_unmount
+>  fi
+>  clear=""
+> diff --git a/tests/xfs/030.cfg b/tests/xfs/030.cfg
+> index 7ffdfc0..1eacdc1 100644
+> --- a/tests/xfs/030.cfg
+> +++ b/tests/xfs/030.cfg
+> @@ -1,2 +1,3 @@
+>  irix: irix
+> +linux,reflink: reflink.linux
+>  linux: linux
+> diff --git a/tests/xfs/030.out.linux b/tests/xfs/030.out.linux
+> index 14b9b35..cf3259f 100644
+> --- a/tests/xfs/030.out.linux
+> +++ b/tests/xfs/030.out.linux
+> @@ -231,8 +231,6 @@ bad agbno AGBNO in agfl, agno 0
+>  bad agbno AGBNO in agfl, agno 0
+>  bad agbno AGBNO in agfl, agno 0
+>  bad agbno AGBNO in agfl, agno 0
+> -bad agbno AGBNO in agfl, agno 0
+> -bad agbno AGBNO in agfl, agno 0
+>          - found root inode chunk
+>  Phase 3 - for each AG...
+>          - scan and clear agi unlinked lists...
+> diff --git a/tests/xfs/030.out.reflink.linux b/tests/xfs/030.out.reflink.linux
 > new file mode 100644
-> index 0000000..29c3566
+> index 0000000..14b9b35
 > --- /dev/null
-> +++ b/tests/generic/341.out
-> @@ -0,0 +1,15 @@
-> +QA output created by 341
-> +wrote 16384/16384 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 16384/16384 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +File digests before log replay:
-> +9e5d56a1f9b2c93589f9d55480f971a1  SCRATCH_MNT/a/foo
-> +48c940ba3b8671d3d6ea74e4ccad8ca3  SCRATCH_MNT/a/bar
-> +Directory a/ contents after log replay:
-> +SCRATCH_MNT/a:
-> +bar
-> +foo
-> +File digests after log replay:
-> +9e5d56a1f9b2c93589f9d55480f971a1  SCRATCH_MNT/a/foo
-> +48c940ba3b8671d3d6ea74e4ccad8ca3  SCRATCH_MNT/a/bar
-> diff --git a/tests/generic/group b/tests/generic/group
-> index baaffdf..3ece496 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -343,3 +343,4 @@
->  338 auto quick rw
->  339 auto dir
->  340 auto quick metadata
-> +341 auto quick metadata
-> --
-> 2.7.0.rc3
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> +++ b/tests/xfs/030.out.reflink.linux
+> @@ -0,0 +1,252 @@
+> +QA output created by 030
+> +meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
+> +data     = bsize=XXX blocks=XXX, imaxpct=PCT
+> +         = sunit=XXX swidth=XXX, unwritten=X
+> +naming   =VERN bsize=XXX
+> +log      =LDEV bsize=XXX blocks=XXX
+> +realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+> +Corrupting sb 0 - setting bits to 0
+> +Wrote X.XXKb (value 0x0)
+> +Phase 1 - find and verify superblock...
+> +bad primary superblock - bad magic number !!!
+> +
+> +attempting to find secondary superblock...
+> +found candidate secondary superblock...
+> +verified secondary superblock...
+> +writing modified primary superblock
+> +sb root inode value INO inconsistent with calculated value INO
+> +resetting superblock root inode pointer to INO
+> +sb realtime bitmap inode INO inconsistent with calculated value INO
+> +resetting superblock realtime bitmap ino pointer to INO
+> +sb realtime summary inode INO inconsistent with calculated value INO
+> +resetting superblock realtime summary ino pointer to INO
+> +Phase 2 - using <TYPEOF> log
+> +        - zero log...
+> +        - scan filesystem freespace and inode maps...
+> +        - found root inode chunk
+> +Phase 3 - for each AG...
+> +        - scan and clear agi unlinked lists...
+> +        - process known inodes and perform inode discovery...
+> +        - process newly discovered inodes...
+> +Phase 4 - check for duplicate blocks...
+> +        - setting up duplicate extent list...
+> +        - check for inodes claiming duplicate blocks...
+> +Phase 5 - rebuild AG headers and trees...
+> +        - reset superblock...
+> +Phase 6 - check inode connectivity...
+> +        - resetting contents of realtime bitmap and summary inodes
+> +        - traversing filesystem ...
+> +        - traversal finished ...
+> +        - moving disconnected inodes to lost+found ...
+> +Phase 7 - verify and correct link counts...
+> +Note - stripe unit (0) and width (0) fields have been reset.
+> +Please set with mount -o sunit=<value>,swidth=<value>
+> +done
+> +Corrupting agf 0 - setting bits to 0
+> +Wrote X.XXKb (value 0x0)
+> +Phase 1 - find and verify superblock...
+> +Phase 2 - using <TYPEOF> log
+> +        - zero log...
+> +        - scan filesystem freespace and inode maps...
+> +bad magic # 0x0 for agf 0
+> +bad version # 0 for agf 0
+> +bad length 0 for agf 0, should be LENGTH
+> +reset bad agf for ag 0
+> +bad agbno AGBNO for btbno root, agno 0
+> +bad agbno AGBNO for btbcnt root, agno 0
+> +        - found root inode chunk
+> +Phase 3 - for each AG...
+> +        - scan and clear agi unlinked lists...
+> +        - process known inodes and perform inode discovery...
+> +        - process newly discovered inodes...
+> +Phase 4 - check for duplicate blocks...
+> +        - setting up duplicate extent list...
+> +        - check for inodes claiming duplicate blocks...
+> +Phase 5 - rebuild AG headers and trees...
+> +        - reset superblock...
+> +Phase 6 - check inode connectivity...
+> +        - resetting contents of realtime bitmap and summary inodes
+> +        - traversing filesystem ...
+> +        - traversal finished ...
+> +        - moving disconnected inodes to lost+found ...
+> +Phase 7 - verify and correct link counts...
+> +done
+> +Corrupting agi 0 - setting bits to 0
+> +Wrote X.XXKb (value 0x0)
+> +Phase 1 - find and verify superblock...
+> +Phase 2 - using <TYPEOF> log
+> +        - zero log...
+> +        - scan filesystem freespace and inode maps...
+> +bad magic # 0x0 for agi 0
+> +bad version # 0 for agi 0
+> +bad length # 0 for agi 0, should be LENGTH
+> +reset bad agi for ag 0
+> +bad agbno AGBNO for inobt root, agno 0
+> +root inode chunk not found
+> +Phase 3 - for each AG...
+> +        - scan and clear agi unlinked lists...
+> +        - process known inodes and perform inode discovery...
+> +        - process newly discovered inodes...
+> +Phase 4 - check for duplicate blocks...
+> +        - setting up duplicate extent list...
+> +        - check for inodes claiming duplicate blocks...
+> +Phase 5 - rebuild AG headers and trees...
+> +        - reset superblock...
+> +Phase 6 - check inode connectivity...
+> +        - resetting contents of realtime bitmap and summary inodes
+> +        - traversing filesystem ...
+> +        - traversal finished ...
+> +        - moving disconnected inodes to lost+found ...
+> +Phase 7 - verify and correct link counts...
+> +done
+> +Corrupting agfl 0 - setting bits to 0
+> +Wrote X.XXKb (value 0x0)
+> +Phase 1 - find and verify superblock...
+> +Phase 2 - using <TYPEOF> log
+> +        - zero log...
+> +        - scan filesystem freespace and inode maps...
+> +        - found root inode chunk
+> +Phase 3 - for each AG...
+> +        - scan and clear agi unlinked lists...
+> +        - process known inodes and perform inode discovery...
+> +        - process newly discovered inodes...
+> +Phase 4 - check for duplicate blocks...
+> +        - setting up duplicate extent list...
+> +        - check for inodes claiming duplicate blocks...
+> +Phase 5 - rebuild AG headers and trees...
+> +        - reset superblock...
+> +Phase 6 - check inode connectivity...
+> +        - resetting contents of realtime bitmap and summary inodes
+> +        - traversing filesystem ...
+> +        - traversal finished ...
+> +        - moving disconnected inodes to lost+found ...
+> +Phase 7 - verify and correct link counts...
+> +done
+> +Corrupting sb 0 - setting bits to -1
+> +Wrote X.XXKb (value 0xffffffff)
+> +Phase 1 - find and verify superblock...
+> +bad primary superblock - bad magic number !!!
+> +
+> +attempting to find secondary superblock...
+> +found candidate secondary superblock...
+> +verified secondary superblock...
+> +writing modified primary superblock
+> +sb root inode value INO inconsistent with calculated value INO
+> +resetting superblock root inode pointer to INO
+> +sb realtime bitmap inode INO inconsistent with calculated value INO
+> +resetting superblock realtime bitmap ino pointer to INO
+> +sb realtime summary inode INO inconsistent with calculated value INO
+> +resetting superblock realtime summary ino pointer to INO
+> +Phase 2 - using <TYPEOF> log
+> +        - zero log...
+> +        - scan filesystem freespace and inode maps...
+> +        - found root inode chunk
+> +Phase 3 - for each AG...
+> +        - scan and clear agi unlinked lists...
+> +        - process known inodes and perform inode discovery...
+> +        - process newly discovered inodes...
+> +Phase 4 - check for duplicate blocks...
+> +        - setting up duplicate extent list...
+> +        - check for inodes claiming duplicate blocks...
+> +Phase 5 - rebuild AG headers and trees...
+> +        - reset superblock...
+> +Phase 6 - check inode connectivity...
+> +        - resetting contents of realtime bitmap and summary inodes
+> +        - traversing filesystem ...
+> +        - traversal finished ...
+> +        - moving disconnected inodes to lost+found ...
+> +Phase 7 - verify and correct link counts...
+> +Note - stripe unit (0) and width (0) fields have been reset.
+> +Please set with mount -o sunit=<value>,swidth=<value>
+> +done
+> +Corrupting agf 0 - setting bits to -1
+> +Wrote X.XXKb (value 0xffffffff)
+> +Phase 1 - find and verify superblock...
+> +Phase 2 - using <TYPEOF> log
+> +        - zero log...
+> +        - scan filesystem freespace and inode maps...
+> +bad magic # 0xffffffff for agf 0
+> +bad version # -1 for agf 0
+> +bad sequence # -1 for agf 0
+> +bad length -1 for agf 0, should be LENGTH
+> +flfirst -1 in agf 0 too large (max = MAX)
+> +fllast -1 in agf 0 too large (max = MAX)
+> +reset bad agf for ag 0
+> +freeblk count 1 != flcount -1 in ag 0
+> +bad agbno AGBNO for btbno root, agno 0
+> +bad agbno AGBNO for btbcnt root, agno 0
+> +        - found root inode chunk
+> +Phase 3 - for each AG...
+> +        - scan and clear agi unlinked lists...
+> +        - process known inodes and perform inode discovery...
+> +        - process newly discovered inodes...
+> +Phase 4 - check for duplicate blocks...
+> +        - setting up duplicate extent list...
+> +        - check for inodes claiming duplicate blocks...
+> +Phase 5 - rebuild AG headers and trees...
+> +        - reset superblock...
+> +Phase 6 - check inode connectivity...
+> +        - resetting contents of realtime bitmap and summary inodes
+> +        - traversing filesystem ...
+> +        - traversal finished ...
+> +        - moving disconnected inodes to lost+found ...
+> +Phase 7 - verify and correct link counts...
+> +done
+> +Corrupting agi 0 - setting bits to -1
+> +Wrote X.XXKb (value 0xffffffff)
+> +Phase 1 - find and verify superblock...
+> +Phase 2 - using <TYPEOF> log
+> +        - zero log...
+> +        - scan filesystem freespace and inode maps...
+> +bad magic # 0xffffffff for agi 0
+> +bad version # -1 for agi 0
+> +bad sequence # -1 for agi 0
+> +bad length # -1 for agi 0, should be LENGTH
+> +reset bad agi for ag 0
+> +bad agbno AGBNO for inobt root, agno 0
+> +root inode chunk not found
+> +Phase 3 - for each AG...
+> +        - scan and clear agi unlinked lists...
+> +        - process known inodes and perform inode discovery...
+> +        - process newly discovered inodes...
+> +Phase 4 - check for duplicate blocks...
+> +        - setting up duplicate extent list...
+> +        - check for inodes claiming duplicate blocks...
+> +Phase 5 - rebuild AG headers and trees...
+> +        - reset superblock...
+> +Phase 6 - check inode connectivity...
+> +        - resetting contents of realtime bitmap and summary inodes
+> +        - traversing filesystem ...
+> +        - traversal finished ...
+> +        - moving disconnected inodes to lost+found ...
+> +Phase 7 - verify and correct link counts...
+> +done
+> +Corrupting agfl 0 - setting bits to -1
+> +Wrote X.XXKb (value 0xffffffff)
+> +Phase 1 - find and verify superblock...
+> +Phase 2 - using <TYPEOF> log
+> +        - zero log...
+> +        - scan filesystem freespace and inode maps...
+> +bad agbno AGBNO in agfl, agno 0
+> +bad agbno AGBNO in agfl, agno 0
+> +bad agbno AGBNO in agfl, agno 0
+> +bad agbno AGBNO in agfl, agno 0
+> +bad agbno AGBNO in agfl, agno 0
+> +bad agbno AGBNO in agfl, agno 0
+> +        - found root inode chunk
+> +Phase 3 - for each AG...
+> +        - scan and clear agi unlinked lists...
+> +        - process known inodes and perform inode discovery...
+> +        - process newly discovered inodes...
+> +Phase 4 - check for duplicate blocks...
+> +        - setting up duplicate extent list...
+> +        - check for inodes claiming duplicate blocks...
+> +Phase 5 - rebuild AG headers and trees...
+> +        - reset superblock...
+> +Phase 6 - check inode connectivity...
+> +        - resetting contents of realtime bitmap and summary inodes
+> +        - traversing filesystem ...
+> +        - traversal finished ...
+> +        - moving disconnected inodes to lost+found ...
+> +Phase 7 - verify and correct link counts...
+> +done
+> -- 
+> 2.5.5
+> 
+> _______________________________________________
+> xfs mailing list
+> xfs@oss.sgi.com
+> http://oss.sgi.com/mailman/listinfo/xfs
