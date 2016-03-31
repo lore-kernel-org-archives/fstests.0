@@ -1,45 +1,39 @@
-Received: from mail.kernel.org ([198.145.29.136]:36000 "EHLO mail.kernel.org"
+Received: from mx1.redhat.com ([209.132.183.28]:57288 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751175AbcCaADQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 30 Mar 2016 20:03:16 -0400
-From: Jaegeuk Kim <jaegeuk@kernel.org>
-Subject: [PATCH] attr: adjust acl_max of f2fs if inline_xattr is set
-Date: Wed, 30 Mar 2016 16:58:19 -0700
-Message-Id: <1459382299-71068-1-git-send-email-jaegeuk@kernel.org>
+	id S1750734AbcCaEXu (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 31 Mar 2016 00:23:50 -0400
+Date: Thu, 31 Mar 2016 12:23:48 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 1/2] fstests: generic test for fsync after renaming
+ directory
+Message-ID: <20160331042348.GI19986@eguan.usersys.redhat.com>
+References: <1459330722-3227-1-git-send-email-fdmanana@kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1459330722-3227-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-If f2fs gets inline_xattr, it enlarges the whole xattr space, which also enables
-to cover more acl entries up to 531 from 506.
-This patch detects the mount option, inline_xattr, and changes the result of
-_acl_get_max for generic/026.
+On Wed, Mar 30, 2016 at 10:38:42AM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> Test that if we rename a directory, create a new file or directory that
+> has the old name of our former directory and is a child of the same
+> parent directory, fsync the new inode, power fail and mount the
+> filesystem, we see our first directory with the new name and no files
+> under it were lost.
+> 
+> This test is motivated by an issue found in btrfs which is fixed by the
+> following patch for the linux kernel:
+> 
+>   "Btrfs: fix file loss caused by fsync after rename and new inode"
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-Fixes: 9f7bf79d0c34 ("attr: add maximum acl count for f2fs")
-Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
----
- common/attr | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+Looks good to me, tested on ext4/3 xfs and btrfs, with 4.6-rc1 kernel,
+btrfs failed as expected, ext4/3 and xfs all passed.
 
-diff --git a/common/attr b/common/attr
-index 0efc26d..ce2d76a 100644
---- a/common/attr
-+++ b/common/attr
-@@ -43,7 +43,12 @@ _acl_get_max()
- 		echo 8191
- 		;;
- 	f2fs)
--		echo 506
-+		_fs_options $TEST_DEV | grep "inline_xattr" >/dev/null 2>&1
-+		if [ $? -eq 0 ]; then
-+			echo 531
-+		else
-+			echo 506
-+		fi
- 		;;
- 	*)
- 		echo 0
--- 
-2.6.3
-
+Reviewed-by: Eryu Guan <eguan@redhat.com>
