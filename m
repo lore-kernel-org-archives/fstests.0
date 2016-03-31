@@ -1,37 +1,50 @@
-Received: from mx1.redhat.com ([209.132.183.28]:54393 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751225AbcCaEYr (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 31 Mar 2016 00:24:47 -0400
-Date: Thu, 31 Mar 2016 12:24:45 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/2] fstests: generic test for fsync after renaming file
-Message-ID: <20160331042444.GJ19986@eguan.usersys.redhat.com>
-References: <1459330750-3284-1-git-send-email-fdmanana@kernel.org>
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:39966 "EHLO
+	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751225AbcCaE1B (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 31 Mar 2016 00:27:01 -0400
+Date: Thu, 31 Mar 2016 15:26:44 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] xfs/030: link .out file according to reflink support
+ status
+Message-ID: <20160331042644.GK30721@dastard>
+References: <1459331861-15025-1-git-send-email-eguan@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1459330750-3284-1-git-send-email-fdmanana@kernel.org>
+In-Reply-To: <1459331861-15025-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, darrick.wong@oracle.com, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Mar 30, 2016 at 10:39:10AM +0100, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Wed, Mar 30, 2016 at 05:57:41PM +0800, Eryu Guan wrote:
+> Commit 31f48569c353 ("xfs/030: fix output on newer filesystems") added
+> more lines to .out file to match the output from XFS with reflink
+> support, but it broke test on older XFS.
 > 
-> Test that if we rename a file, create a new file that has the old name
-> of the other file and is a child of the same parent directory, fsync the
-> new inode, power fail and mount the filesystem, we do not lose the first
-> file and that file has the name it was renamed to.
+> Fix it by introducing new .out file 030.out.reflink.linux to match the
+> reflink case, so old XFS still compares .out file against 030.out.linux.
 > 
-> This test is motivated by an issue found in btrfs which is fixed by the
-> following patch for the linux kernel:
-> 
->   "Btrfs: fix file loss caused by fsync after rename and new inode"
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> In order to do this, a new helper is introduced, _fs_has_reflink()
+> accepts mount point as argument and returns if the underlying fs
+> supports reflink or not.
 
-Looks good to me, tested on ext4/3 xfs and btrfs, with 4.6-rc1 kernel,
-btrfs failed as expected, ext4/3 and xfs all passed.
+Let's not go down this path. This is a filtering issue, not a
+problem we solve by playing "let's add a golden image file for every
+different filesystem format we can create".
 
-Reviewed-by: Eryu Guan <eguan@redhat.com>
+The problem here is that reflink triggers a change in the initial
+population of the AGFL - from 4 blocks to 6 blocks, and so repair
+warns 6 times instead of 4. After filtering, that gives 6 indentical
+output lines instead of 4.
+
+Doing something as simple as collapsing repeated identical lines
+(e.g filtering through uniq) will work for all filesystem formats
+and any future changes that modify the initial AGFL population...
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
