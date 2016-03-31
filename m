@@ -1,51 +1,85 @@
-Received: from mx1.redhat.com ([209.132.183.28]:53446 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:43646 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751105AbcCaF5B (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 31 Mar 2016 01:57:01 -0400
-Date: Thu, 31 Mar 2016 13:56:59 +0800
+	id S1750938AbcCaGL4 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 31 Mar 2016 02:11:56 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] xfs/030: link .out file according to reflink support
- status
-Message-ID: <20160331055658.GK19986@eguan.usersys.redhat.com>
+Subject: [PATCH v2] xfs/030: filter out repeated lines from .out files
+Date: Thu, 31 Mar 2016 14:11:22 +0800
+Message-Id: <1459404682-12282-1-git-send-email-eguan@redhat.com>
+In-Reply-To: <1459331861-15025-1-git-send-email-eguan@redhat.com>
 References: <1459331861-15025-1-git-send-email-eguan@redhat.com>
- <20160331042644.GK30721@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160331042644.GK30721@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: xfs@oss.sgi.com, fstests@vger.kernel.org, darrick.wong@oracle.com
+To: fstests@vger.kernel.org
+Cc: xfs@oss.sgi.com, darrick.wong@oracle.com, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 31, 2016 at 03:26:44PM +1100, Dave Chinner wrote:
-> On Wed, Mar 30, 2016 at 05:57:41PM +0800, Eryu Guan wrote:
-> > Commit 31f48569c353 ("xfs/030: fix output on newer filesystems") added
-> > more lines to .out file to match the output from XFS with reflink
-> > support, but it broke test on older XFS.
-> > 
-> > Fix it by introducing new .out file 030.out.reflink.linux to match the
-> > reflink case, so old XFS still compares .out file against 030.out.linux.
-> > 
-> > In order to do this, a new helper is introduced, _fs_has_reflink()
-> > accepts mount point as argument and returns if the underlying fs
-> > supports reflink or not.
-> 
-> Let's not go down this path. This is a filtering issue, not a
-> problem we solve by playing "let's add a golden image file for every
-> different filesystem format we can create".
-> 
-> The problem here is that reflink triggers a change in the initial
-> population of the AGFL - from 4 blocks to 6 blocks, and so repair
-> warns 6 times instead of 4. After filtering, that gives 6 indentical
-> output lines instead of 4.
-> 
-> Doing something as simple as collapsing repeated identical lines
-> (e.g filtering through uniq) will work for all filesystem formats
-> and any future changes that modify the initial AGFL population...
+Commit 31f48569c353 ("xfs/030: fix output on newer filesystems") added
+more lines to .out file to match the output from XFS with reflink
+support, but it broke test on older XFS.
 
-I thought about filtering at first, but didn't find a way to filter out
-the extra two lines easily. Collapsing repeaded lines into one will do.
-I'll send out v2 shortly. Thanks for reviewing!
+Dave explained the reason and pointed out the correct way to fix it, so
+I just quote Dave's mail here:
 
-Eryu
+"The problem here is that reflink triggers a change in the initial
+population of the AGFL - from 4 blocks to 6 blocks, and so repair warns
+6 times instead of 4. After filtering, that gives 6 indentical output
+lines instead of 4.
+
+Doing something as simple as collapsing repeated identical lines (e.g
+filtering through uniq) will work for all filesystem formats and any
+future changes that modify the initial AGFL population."
+
+Suggested-by: Dave Chinner <dchinner@redhat.com>
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+ tests/xfs/030           | 2 +-
+ tests/xfs/030.out.irix  | 3 ---
+ tests/xfs/030.out.linux | 5 -----
+ 3 files changed, 1 insertion(+), 9 deletions(-)
+
+diff --git a/tests/xfs/030 b/tests/xfs/030
+index 33c906c..5c99d9e 100755
+--- a/tests/xfs/030
++++ b/tests/xfs/030
+@@ -55,7 +55,7 @@ _check_ag()
+ 	for structure in 'sb 0' 'agf 0' 'agi 0' 'agfl 0'
+ 	do
+ 		echo "Corrupting $structure - setting bits to $1"
+-		_check_repair $1 "$structure" |
++		_check_repair $1 "$structure" | uniq |
+ 			sed -e '/^error following ag 0 unlinked list$/d' \
+ 			    -e '/^bad agbno AGBNO for finobt/d' \
+ 			    -e '/^bad agbno AGBNO for rmapbt/d' \
+diff --git a/tests/xfs/030.out.irix b/tests/xfs/030.out.irix
+index 6378c73..56adfd0 100644
+--- a/tests/xfs/030.out.irix
++++ b/tests/xfs/030.out.irix
+@@ -263,9 +263,6 @@ Phase 1 - find and verify superblock...
+ Phase 2 - zero log...
+         - scan filesystem freespace and inode maps...
+ bad agbno AGBNO in agfl, agno 0
+-bad agbno AGBNO in agfl, agno 0
+-bad agbno AGBNO in agfl, agno 0
+-bad agbno AGBNO in agfl, agno 0
+         - found root inode chunk
+ Phase 3 - for each AG...
+         - scan and clear agi unlinked lists...
+diff --git a/tests/xfs/030.out.linux b/tests/xfs/030.out.linux
+index 14b9b35..722cabf 100644
+--- a/tests/xfs/030.out.linux
++++ b/tests/xfs/030.out.linux
+@@ -228,11 +228,6 @@ Phase 2 - using <TYPEOF> log
+         - zero log...
+         - scan filesystem freespace and inode maps...
+ bad agbno AGBNO in agfl, agno 0
+-bad agbno AGBNO in agfl, agno 0
+-bad agbno AGBNO in agfl, agno 0
+-bad agbno AGBNO in agfl, agno 0
+-bad agbno AGBNO in agfl, agno 0
+-bad agbno AGBNO in agfl, agno 0
+         - found root inode chunk
+ Phase 3 - for each AG...
+         - scan and clear agi unlinked lists...
+-- 
+2.5.5
+
