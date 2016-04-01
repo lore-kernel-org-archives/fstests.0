@@ -1,145 +1,87 @@
-Received: from imap.thunk.org ([74.207.234.97]:32804 "EHLO imap.thunk.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751334AbcDBQ4V (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sat, 2 Apr 2016 12:56:21 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH 1/2] Mark tests which use direct I/O with _requires_odirect
-Date: Sat,  2 Apr 2016 12:56:13 -0400
-Message-Id: <1459616174-31557-1-git-send-email-tytso@mit.edu>
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:27763 "EHLO
+	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752482AbcDAVuk (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 1 Apr 2016 17:50:40 -0400
+Date: Sat, 2 Apr 2016 08:50:35 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] xfs/133 134 262: limit xfs_quota report to report on
+ specific project quota id
+Message-ID: <20160401215035.GM30721@dastard>
+References: <1459494050-28330-1-git-send-email-eguan@redhat.com>
+ <20160401072856.GA3329@dhcp12-237.nay.redhat.com>
+ <56FEAED8.2050108@sandeen.net>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <56FEAED8.2050108@sandeen.net>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: Zorro Lang <zlang@redhat.com>, Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, xfs@oss.sgi.com, sandeen@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-There were a number of tests that use Direct I/O that weren't testing
-to make sure O_DIRECT is actually supported.  This will be important
-for avoiding false positives when testing ext4 encryption (which does
-not support DIO for obvious reasons).
+On Fri, Apr 01, 2016 at 12:24:40PM -0500, Eric Sandeen wrote:
+> 
+> 
+> On 4/1/16 2:28 AM, Zorro Lang wrote:
+> > On Fri, Apr 01, 2016 at 03:00:50PM +0800, Eryu Guan wrote:
+> >> With GETNEXTQUOTA support, xfs_quota -c "report" now outputs more quota
+> >> info than before, and this breaks xfs/133 xfs/134 and xfs/262, e.g.
+> >> xfs/133 fails as
+> >>
+> >>      Filesystem Blocks Quota Limit Warn/Time Mounted on
+> >>      SCRATCH_DEV 0 102400 204800 00 [--------] SCRATCH_MNT
+> >>      === report command output ===
+> >>     +(null) 0 0 0 00 [--------]
+> >>      123456-project 0 102400 204800 00 [--------]
+> >>
+> >> Fix it by limiting xfs_quota to report on specific project quota number
+> >> using -L & -U option, so only the project quota being tested is
+> >> reported.
+> >>
+> >> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> >> ---
+> >>
+> >> I'm not sure if kernel should be fixed, but limiting the quota report on
+> >> project number being tested seems something worth doing to me anyway. It avoids
+> >> breakage of future changes of quota report output.
+> > 
+> > Hi,
+> > 
+> > FYI:
+> > About "+(null) 0 0 0 00 [--------]"problem, it has been talked in:
+> > http://thread.gmane.org/gmane.comp.file-systems.fstests/1852/focus=1968
+> > 
+> > I think:
+> > 1) If we consider that this's a bug, the original test cases can
+> > be the reproducer of this bug, so we shouldn't change the cases.
+> > 
+> > 2) If we think print "(null) 0 0 0 00 [--------]" is right(or not
+> > wrong), then this patch is good.
+> 
+> yes, I'm sorry I didn't take care of this sooner.
+> 
+> I don't think there's value in printing the "(null)" line; I think maybe my
+> suggestion from that old thread might be best:
+> 
+> > We could explicitly look up id 0 and not show it if it's not in the
+> > projects file.
+> 
+> Or now that I think about it - projid 0 is the default project quota, right?
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
- tests/ext4/301    | 1 +
- tests/ext4/302    | 1 +
- tests/ext4/303    | 1 +
- tests/ext4/304    | 1 +
- tests/generic/095 | 1 +
- tests/generic/250 | 1 +
- tests/generic/252 | 2 +-
- tests/generic/331 | 2 +-
- tests/generic/332 | 2 +-
- 9 files changed, 9 insertions(+), 3 deletions(-)
+"default" as in "project quota not enabled on this inode". i.e. if
+an inode has projid == 0 then it is not tracked by project quotas.
 
-diff --git a/tests/ext4/301 b/tests/ext4/301
-index 4e21acd..8e051f9 100755
---- a/tests/ext4/301
-+++ b/tests/ext4/301
-@@ -42,6 +42,7 @@ _supported_os Linux
- _supported_fs ext4
- _require_scratch
- _require_defrag
-+_require_odirect
- 
- NUM_JOBS=$((4*LOAD_FACTOR))
- BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
-diff --git a/tests/ext4/302 b/tests/ext4/302
-index 6ed8ce0..e45dfb8 100755
---- a/tests/ext4/302
-+++ b/tests/ext4/302
-@@ -43,6 +43,7 @@ _supported_os Linux
- _supported_fs ext4
- _require_scratch
- _require_defrag
-+_require_odirect
- 
- BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
- # We need space for 2 files (test file, and donor one)
-diff --git a/tests/ext4/303 b/tests/ext4/303
-index b925aa3..3519002 100755
---- a/tests/ext4/303
-+++ b/tests/ext4/303
-@@ -43,6 +43,7 @@ _supported_os Linux
- _supported_fs ext4
- _require_scratch
- _require_defrag
-+_require_odirect
- 
- BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
- # We need space for 3 files (one donor file and two test files)
-diff --git a/tests/ext4/304 b/tests/ext4/304
-index ceb82d6..952bbb9 100755
---- a/tests/ext4/304
-+++ b/tests/ext4/304
-@@ -44,6 +44,7 @@ _supported_os Linux
- _supported_fs ext4
- _require_scratch
- _require_defrag
-+_require_odirect
- 
- BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
- # We need space for 2 files (test file, and donor one)
-diff --git a/tests/generic/095 b/tests/generic/095
-index 1123080..c656ef1 100755
---- a/tests/generic/095
-+++ b/tests/generic/095
-@@ -44,6 +44,7 @@ _cleanup()
- _supported_fs generic
- _supported_os Linux
- _require_scratch
-+_require_odirect
- 
- iodepth=$((16 * LOAD_FACTOR))
- iodepth_batch=$((8 * LOAD_FACTOR))
-diff --git a/tests/generic/250 b/tests/generic/250
-index b0b175a..6d15de2 100755
---- a/tests/generic/250
-+++ b/tests/generic/250
-@@ -47,6 +47,7 @@ _supported_os Linux
- _require_scratch
- _require_dm_target error
- _require_xfs_io_command "falloc"
-+_require_odirect
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/252 b/tests/generic/252
-index fc9a723..ffedd56 100755
---- a/tests/generic/252
-+++ b/tests/generic/252
-@@ -47,7 +47,7 @@ _supported_os Linux
- _require_scratch
- _require_dm_target error
- _require_xfs_io_command "falloc"
--_require_test_program "aio-dio-regress/aiocp"
-+_require_aiodio "aiocp"
- AIO_TEST="src/aio-dio-regress/aiocp"
- 
- rm -f $seqres.full
-diff --git a/tests/generic/331 b/tests/generic/331
-index 8d8fd6a..9b91459 100755
---- a/tests/generic/331
-+++ b/tests/generic/331
-@@ -47,7 +47,7 @@ _supported_os Linux
- _require_scratch_reflink
- _require_cp_reflink
- _require_dm_target error
--_require_test_program "aio-dio-regress/aiocp"
-+_require_aiodio "aiocp"
- AIO_TEST="src/aio-dio-regress/aiocp"
- 
- rm -f $seqres.full
-diff --git a/tests/generic/332 b/tests/generic/332
-index b805bbd..1fb5611 100755
---- a/tests/generic/332
-+++ b/tests/generic/332
-@@ -44,7 +44,7 @@ _cleanup()
- _supported_os Linux
- _require_scratch_reflink
- _require_cp_reflink
--_require_test_program "aio-dio-regress/aiocp"
-+_require_aiodio "aiocp"
- AIO_TEST="src/aio-dio-regress/aiocp"
- 
- rm -f $seqres.full
+> Assuming that's correct, perhaps we should conditionally print the line,
+> changing "(null)" to "default", printing it only if a default quota is 
+> set (i.e. not all zeros).
+
+Right, the only thing that the dquot for projid 0 holds is default
+quota limits. We probably shouldn't ever print it out, except when
+the default limits are queried or set directly...
+
+Cheers,
+
+Dave.
 -- 
-2.5.0
-
+Dave Chinner
+david@fromorbit.com
