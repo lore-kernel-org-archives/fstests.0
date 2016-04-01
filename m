@@ -1,80 +1,171 @@
-Received: from e23smtp07.au.ibm.com ([202.81.31.140]:55628 "EHLO
-	e23smtp07.au.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754135AbcDEFy3 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 5 Apr 2016 01:54:29 -0400
-Received: from localhost
-	by e23smtp07.au.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-	for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-	Tue, 5 Apr 2016 15:54:25 +1000
-Received: from d23relay06.au.ibm.com (d23relay06.au.ibm.com [9.185.63.219])
-	by d23dlp03.au.ibm.com (Postfix) with ESMTP id 018F73578057
-	for <fstests@vger.kernel.org>; Tue,  5 Apr 2016 15:54:22 +1000 (EST)
-Received: from d23av01.au.ibm.com (d23av01.au.ibm.com [9.190.234.96])
-	by d23relay06.au.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id u355sCBY9896396
-	for <fstests@vger.kernel.org>; Tue, 5 Apr 2016 15:54:21 +1000
-Received: from d23av01.au.ibm.com (localhost [127.0.0.1])
-	by d23av01.au.ibm.com (8.14.4/8.14.4/NCO v10.0 AVout) with ESMTP id u355rm9I020604
-	for <fstests@vger.kernel.org>; Tue, 5 Apr 2016 15:53:48 +1000
-Received: from localhost.in.ibm.com ([9.124.35.68])
-	by d23av01.au.ibm.com (8.14.4/8.14.4/NCO v10.0 AVin) with ESMTP id u355rl3Z020052
-	for <fstests@vger.kernel.org>; Tue, 5 Apr 2016 15:53:48 +1000
-From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH] generic/273: Remove hard coded block size
-Date: Tue,  5 Apr 2016 11:23:29 +0530
-Message-Id: <1459835609-17892-1-git-send-email-chandan@linux.vnet.ibm.com>
+Received: from mx1.redhat.com ([209.132.183.28]:51771 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751280AbcDAHBR (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 1 Apr 2016 03:01:17 -0400
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] xfs/133 134 262: limit xfs_quota report to report on specific project quota id
+Date: Fri,  1 Apr 2016 15:00:50 +0800
+Message-Id: <1459494050-28330-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: xfs@oss.sgi.com, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-The space occupied by files in the 'origin' directory is calculated with
-the assumption that 4k is the block size of the underlying filesystem.
-This causes the test to fail with ENOSPC errors when running on
-filesystems with larger block sizes. To fix the issue, this commit makes
-use of the the block size obtained from the mounted filesystem.
+With GETNEXTQUOTA support, xfs_quota -c "report" now outputs more quota
+info than before, and this breaks xfs/133 xfs/134 and xfs/262, e.g.
+xfs/133 fails as
 
-Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+     Filesystem Blocks Quota Limit Warn/Time Mounted on
+     SCRATCH_DEV 0 102400 204800 00 [--------] SCRATCH_MNT
+     === report command output ===
+    +(null) 0 0 0 00 [--------]
+     123456-project 0 102400 204800 00 [--------]
+
+Fix it by limiting xfs_quota to report on specific project quota number
+using -L & -U option, so only the project quota being tested is
+reported.
+
+Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- tests/generic/273 | 8 +++++---
- 1 file changed, 5 insertions(+), 3 deletions(-)
 
-diff --git a/tests/generic/273 b/tests/generic/273
-index 0a4a600..d90212e 100755
---- a/tests/generic/273
-+++ b/tests/generic/273
-@@ -57,6 +57,7 @@ _threads_set()
- 
- _file_create()
+I'm not sure if kernel should be fixed, but limiting the quota report on
+project number being tested seems something worth doing to me anyway. It avoids
+breakage of future changes of quota report output.
+
+ tests/xfs/133     |  8 +++++---
+ tests/xfs/133.out |  2 +-
+ tests/xfs/134     | 22 +++++++++++++++-------
+ tests/xfs/262     |  6 ++++--
+ 4 files changed, 25 insertions(+), 13 deletions(-)
+
+diff --git a/tests/xfs/133 b/tests/xfs/133
+index 82c38b1..7a0e55e 100755
+--- a/tests/xfs/133
++++ b/tests/xfs/133
+@@ -57,16 +57,17 @@ do_project_test()
  {
-+	block_size=$1
- 	_i=0
+ 	local qa_project=123456-project
+ 	local dir=$SCRATCH_MNT/project
++	local proj_num=10
  
- 	if ! mkdir $SCRATCH_MNT/origin
-@@ -70,11 +71,11 @@ _file_create()
+ 	mkdir $dir 2>/dev/null
  
- 	_disksize=`$DF_PROG -B 1 $SCRATCH_MNT | tail -1 | $AWK_PROG '{ print $5 }'`
- 	_disksize=$(($_disksize / 3))
--	_num=$(($_disksize / $count / $threads / 4096))
-+	_num=$(($_disksize / $count / $threads / $block_size))
- 	_count=$count
- 	while [ $_i -lt $_num ]
- 	do
--		dd if=/dev/zero of=file_$_i bs=4096 count=$_count >/dev/null 2>&1
-+		dd if=/dev/zero of=file_$_i bs=$block_size count=$_count >/dev/null 2>&1
- 		_i=$(($_i + 1))
- 	done
+ 	#project quota files
+ 	cat >$tmp.projects <<EOF
+-10:$dir
++$proj_num:$dir
+ EOF
  
-@@ -105,9 +106,10 @@ _do_workload()
- {
- 	_pids=""
- 	_pid=1
-+	block_size=$(get_block_size $SCRATCH_MNT)
- 	
- 	_threads_set
--	_file_create
-+	_file_create $block_size
+ 	cat >$tmp.projid <<EOF
+-$qa_project:10
++$qa_project:$proj_num
+ EOF
  
- 	_threads=$threads
+ 	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+@@ -81,7 +82,8 @@ EOF
  
+ 	echo "=== report command output ==="
+ 	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+-		-c "report -p -N -b" $SCRATCH_MNT | _filter_quota
++		-c "report -p -N -b -L $proj_num -U $proj_num" \
++		$SCRATCH_MNT | _filter_quota
+ }
+ 
+ # Test project
+diff --git a/tests/xfs/133.out b/tests/xfs/133.out
+index 21cfd0d..8c747bf 100644
+--- a/tests/xfs/133.out
++++ b/tests/xfs/133.out
+@@ -4,5 +4,5 @@ Disk quotas for Project 123456-project (10)
+ Filesystem Blocks Quota Limit Warn/Time Mounted on
+ SCRATCH_DEV 0 102400 204800 00 [--------] SCRATCH_MNT
+ === report command output ===
+-123456-project 0 102400 204800 00 [--------]
++#10 0 102400 204800 00 [--------]
+ 
+diff --git a/tests/xfs/134 b/tests/xfs/134
+index be18ee8..5ba275c 100755
+--- a/tests/xfs/134
++++ b/tests/xfs/134
+@@ -54,12 +54,13 @@ _require_xfs_quota
+ dir=$SCRATCH_MNT/project
+ 
+ #project quota files
++proj_num=1
+ cat >$tmp.projects <<EOF
+-1:$dir
++$proj_num:$dir
+ EOF
+ 
+ cat >$tmp.projid <<EOF
+-test:1
++test:$proj_num
+ EOF
+ 
+ cp /dev/null $seqres.full
+@@ -87,17 +88,24 @@ fi
+ src/feature -p $SCRATCH_DEV
+ [ $? -ne 0 ] && _notrun "Installed kernel does not support project quotas"
+ 
++report_quota()
++{
++	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
++		-c "repquota -inN -p -L $proj_num -U $proj_num" $SCRATCH_DEV | \
++		tr -s '[:space:]'
++}
++
+ mkdir $dir
+ $XFS_IO_PROG -r -c "chproj -R 1" -c "chattr -R +P" $dir
+ 
+-xfs_quota -D $tmp.projects -P $tmp.projid -x \
++$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+     -c "limit -p bsoft=100m bhard=100m 1" $SCRATCH_DEV
+-xfs_quota -D $tmp.projects -P $tmp.projid -x -c "repquota -inN -p" $SCRATCH_DEV | tr -s '[:space:]'
++report_quota
+ touch $dir/1
+ touch $dir/2
+ cp $dir/2 $dir/3
+ 
+-xfs_quota -D $tmp.projects -P $tmp.projid -x -c "repquota -inN -p" $SCRATCH_DEV | tr -s '[:space:]'
++report_quota
+ 
+ if [ "$HOSTOS" == "IRIX" ] ; then
+     mkfile 1M $TEST_DIR/6
+@@ -107,12 +115,12 @@ fi
+ 
+ #try cp to dir
+ cp $TEST_DIR/6 $dir/6
+-xfs_quota -D $tmp.projects -P $tmp.projid -x -c "repquota -inN -p" $SCRATCH_DEV | tr -s '[:space:]'
++report_quota
+ 
+ #try mv to dir
+ mv $TEST_DIR/6 $dir/7
+ 
+-xfs_quota -D $tmp.projects -P $tmp.projid -x -c "repquota -inN -p" $SCRATCH_DEV | tr -s '[:space:]'
++report_quota
+ 
+ # success, all done
+ status=0
+diff --git a/tests/xfs/262 b/tests/xfs/262
+index 9d8b838..d3a352c 100755
+--- a/tests/xfs/262
++++ b/tests/xfs/262
+@@ -138,11 +138,13 @@ _quota_cmd "limit -p bhard=${qlimit_meg}m bsoft=${qlimit_meg}m ${proj_name}" \
+ 							2>> "$seqres.full" 1>&2
+ 
+ # See what gets reported
+-_quota_cmd "report"		| _filter_quota_rpt	2>> "$seqres.full"
++_quota_cmd "report -U $proj_num -L $proj_num" | _filter_quota_rpt \
++							2>> $seqres.full
+ _quota_cmd "df"			| _filter_quota_rpt	2>> "$seqres.full"
+ 
+ # This time using "human readable" output
+-_quota_cmd "report -h"		| _filter_quota_rpt	2>> "$seqres.full"
++_quota_cmd "report -h $proj_num -L $proj_num" | _filter_quota_rpt \
++							2>> "$seqres.full"
+ _quota_cmd "df -h"		| _filter_quota_rpt	2>> "$seqres.full"
+ 
+ # Clean up
 -- 
-2.1.0
+2.5.5
 
