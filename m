@@ -1,87 +1,38 @@
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:27763 "EHLO
-	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752482AbcDAVuk (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 1 Apr 2016 17:50:40 -0400
-Date: Sat, 2 Apr 2016 08:50:35 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] xfs/133 134 262: limit xfs_quota report to report on
- specific project quota id
-Message-ID: <20160401215035.GM30721@dastard>
-References: <1459494050-28330-1-git-send-email-eguan@redhat.com>
- <20160401072856.GA3329@dhcp12-237.nay.redhat.com>
- <56FEAED8.2050108@sandeen.net>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <56FEAED8.2050108@sandeen.net>
+Received: from imap.thunk.org ([74.207.234.97]:32806 "EHLO imap.thunk.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751340AbcDBQ4V (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sat, 2 Apr 2016 12:56:21 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH 2/2] common: teach _require_odirect that ext4 encryption doesn't support DIO
+Date: Sat,  2 Apr 2016 12:56:14 -0400
+Message-Id: <1459616174-31557-2-git-send-email-tytso@mit.edu>
+In-Reply-To: <1459616174-31557-1-git-send-email-tytso@mit.edu>
+References: <1459616174-31557-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: Zorro Lang <zlang@redhat.com>, Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, xfs@oss.sgi.com, sandeen@redhat.com
+To: fstests@vger.kernel.org
+Cc: Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Apr 01, 2016 at 12:24:40PM -0500, Eric Sandeen wrote:
-> 
-> 
-> On 4/1/16 2:28 AM, Zorro Lang wrote:
-> > On Fri, Apr 01, 2016 at 03:00:50PM +0800, Eryu Guan wrote:
-> >> With GETNEXTQUOTA support, xfs_quota -c "report" now outputs more quota
-> >> info than before, and this breaks xfs/133 xfs/134 and xfs/262, e.g.
-> >> xfs/133 fails as
-> >>
-> >>      Filesystem Blocks Quota Limit Warn/Time Mounted on
-> >>      SCRATCH_DEV 0 102400 204800 00 [--------] SCRATCH_MNT
-> >>      === report command output ===
-> >>     +(null) 0 0 0 00 [--------]
-> >>      123456-project 0 102400 204800 00 [--------]
-> >>
-> >> Fix it by limiting xfs_quota to report on specific project quota number
-> >> using -L & -U option, so only the project quota being tested is
-> >> reported.
-> >>
-> >> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> >> ---
-> >>
-> >> I'm not sure if kernel should be fixed, but limiting the quota report on
-> >> project number being tested seems something worth doing to me anyway. It avoids
-> >> breakage of future changes of quota report output.
-> > 
-> > Hi,
-> > 
-> > FYI:
-> > About "+(null) 0 0 0 00 [--------]"problem, it has been talked in:
-> > http://thread.gmane.org/gmane.comp.file-systems.fstests/1852/focus=1968
-> > 
-> > I think:
-> > 1) If we consider that this's a bug, the original test cases can
-> > be the reproducer of this bug, so we shouldn't change the cases.
-> > 
-> > 2) If we think print "(null) 0 0 0 00 [--------]" is right(or not
-> > wrong), then this patch is good.
-> 
-> yes, I'm sorry I didn't take care of this sooner.
-> 
-> I don't think there's value in printing the "(null)" line; I think maybe my
-> suggestion from that old thread might be best:
-> 
-> > We could explicitly look up id 0 and not show it if it's not in the
-> > projects file.
-> 
-> Or now that I think about it - projid 0 is the default project quota, right?
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ common/rc | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-"default" as in "project quota not enabled on this inode". i.e. if
-an inode has projid == 0 then it is not tracked by project quotas.
-
-> Assuming that's correct, perhaps we should conditionally print the line,
-> changing "(null)" to "default", printing it only if a default quota is 
-> set (i.e. not all zeros).
-
-Right, the only thing that the dquot for projid 0 holds is default
-quota limits. We probably shouldn't ever print it out, except when
-the default limits are queried or set directly...
-
-Cheers,
-
-Dave.
+diff --git a/common/rc b/common/rc
+index 2ccca3b..961601b 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1916,6 +1916,10 @@ _require_xfs_db_command()
+ # check that kernel and filesystem support direct I/O
+ _require_odirect()
+ {
++       if [ $FSTYP = "ext4" ] &&
++	  echo "$MOUNT_OPTIONS" | grep -q "test_dummy_encryption" ; then
++		_notrun "ext4 encryption doesn't support O_DIRECT"
++       fi
+        testfile=$TEST_DIR/$$.direct
+        $XFS_IO_PROG -F -f -d -c "pwrite 0 20k" $testfile > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
 -- 
-Dave Chinner
-david@fromorbit.com
+2.5.0
+
