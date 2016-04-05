@@ -1,192 +1,506 @@
-Received: from mx1.redhat.com ([209.132.183.28]:55659 "EHLO mx1.redhat.com"
+Received: from mx2.suse.de ([195.135.220.15]:54535 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752703AbcDAH26 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 1 Apr 2016 03:28:58 -0400
-Date: Fri, 1 Apr 2016 15:28:56 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH] xfs/133 134 262: limit xfs_quota report to report on
- specific project quota id
-Message-ID: <20160401072856.GA3329@dhcp12-237.nay.redhat.com>
-References: <1459494050-28330-1-git-send-email-eguan@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1459494050-28330-1-git-send-email-eguan@redhat.com>
+	id S1757704AbcDEKPn (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 5 Apr 2016 06:15:43 -0400
+Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
+	by mx2.suse.de (Postfix) with ESMTP id D5F22AB5D
+	for <fstests@vger.kernel.org>; Tue,  5 Apr 2016 10:15:40 +0000 (UTC)
+From: Jan Kara <jack@suse.cz>
+Subject: [PATCH 1/2] generic/340: Add mmap race test
+Date: Tue,  5 Apr 2016 12:16:15 +0200
+Message-Id: <1459851376-16387-1-git-send-email-jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, xfs@oss.sgi.com, sandeen@redhat.com
+To: fstests@vger.kernel.org
+Cc: Jan Kara <jack@suse.cz>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Apr 01, 2016 at 03:00:50PM +0800, Eryu Guan wrote:
-> With GETNEXTQUOTA support, xfs_quota -c "report" now outputs more quota
-> info than before, and this breaks xfs/133 xfs/134 and xfs/262, e.g.
-> xfs/133 fails as
-> 
->      Filesystem Blocks Quota Limit Warn/Time Mounted on
->      SCRATCH_DEV 0 102400 204800 00 [--------] SCRATCH_MNT
->      === report command output ===
->     +(null) 0 0 0 00 [--------]
->      123456-project 0 102400 204800 00 [--------]
-> 
-> Fix it by limiting xfs_quota to report on specific project quota number
-> using -L & -U option, so only the project quota being tested is
-> reported.
-> 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> ---
-> 
-> I'm not sure if kernel should be fixed, but limiting the quota report on
-> project number being tested seems something worth doing to me anyway. It avoids
-> breakage of future changes of quota report output.
+Add test which spawns two threads racing to write to file via mmap and
+checks the result. This is mainly interesting to uncover races in DAX
+fault handling.
 
-Hi,
+Signed-off-by: Jan Kara <jack@suse.cz>
+---
+ src/Makefile          |   5 +-
+ src/holetest.c        | 308 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/340     |  58 ++++++++++
+ tests/generic/340.out |  55 +++++++++
+ tests/generic/group   |   1 +
+ 5 files changed, 425 insertions(+), 2 deletions(-)
+ create mode 100644 src/holetest.c
+ create mode 100755 tests/generic/340
+ create mode 100644 tests/generic/340.out
 
-FYI:
-About "+(null) 0 0 0 00 [--------]"problem, it has been talked in:
-http://thread.gmane.org/gmane.comp.file-systems.fstests/1852/focus=1968
+diff --git a/src/Makefile b/src/Makefile
+index 31102086a5f6..1bf318bd068b 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -11,7 +11,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	devzero feature alloc fault fstest t_access_root \
+ 	godown resvtest writemod makeextents itrash rename \
+ 	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
+-	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite
++	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
++	holetest
+ 
+ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+@@ -23,7 +24,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 
+ SUBDIRS =
+ 
+-LLDLIBS = $(LIBATTR) $(LIBHANDLE) $(LIBACL)
++LLDLIBS = $(LIBATTR) $(LIBHANDLE) $(LIBACL) -lpthread
+ 
+ ifeq ($(HAVE_XLOG_ASSIGN_LSN), true)
+ LINUX_TARGETS += loggen
+diff --git a/src/holetest.c b/src/holetest.c
+new file mode 100644
+index 000000000000..661599954e4f
+--- /dev/null
++++ b/src/holetest.c
+@@ -0,0 +1,308 @@
++/*
++ * holetest -- test simultaneous page faults on hole-backed pages
++ * Copyright (C) 2015  Hewlett Packard Enterprise Development LP
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2
++ * of the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software Foundation,
++ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
++ */
++
++
++/*
++ * holetest
++ *
++ * gcc -Wall -pthread -o holetest holetest.c
++ *
++ * This test tool exercises page faults on hole-y portions of an mmapped
++ * file.  The file is created, sized using various methods, mmapped, and
++ * then two threads race to write a marker to different offsets within
++ * each mapped page.  Once the threads have finished marking each page,
++ * the pages are checked for the presence of the markers.
++ *
++ * The file is sized four different ways: explicitly zero-filled by the
++ * test, posix_fallocate(), fallocate(), and ftruncate().  The explicit
++ * zero-fill does not really test simultaneous page faults on hole-backed
++ * pages, but rather serves as control of sorts.
++ *
++ * Usage:
++ *
++ *   holetest [-f] FILENAME FILESIZEinMB
++ *
++ * Where:
++ *
++ *   FILENAME is the name of a non-existent test file to create
++ *
++ *   FILESIZEinMB is the desired size of the test file in MiB
++ *
++ * If the test is successful, FILENAME will be unlinked.  By default,
++ * if the test detects an error in the page markers, then the test exits
++ * immediately and FILENAME is left.  If -f is given, then the test
++ * continues after a marker error and FILENAME is unlinked, but will
++ * still exit with a non-0 status.
++ */
++
++#include <stdlib.h>
++#include <stdio.h>
++#include <errno.h>
++#include <inttypes.h>
++#include <sys/mman.h>
++#include <fcntl.h>
++#include <unistd.h>
++#include <pthread.h>
++#include <string.h>
++
++#define THREADS 2
++
++long page_size;
++long page_offs[THREADS];
++
++void *pt_page_marker(void *args)
++{
++	void **a = args;
++	char *va = (char *)a[0];
++	long npages = (long)a[1];
++	long pgoff = (long)a[2];
++	uint64_t tid = (uint64_t)pthread_self();
++
++	va += pgoff;
++
++	/* mark pages */
++	for (; npages > 0; va += page_size, npages--)
++		*(uint64_t *)(va) = tid;
++
++	return NULL;
++}  /* pt_page_marker() */
++
++
++int test_this(int fd, loff_t sz)
++{
++	long npages;
++	char *vastart;
++	char *va;
++	void *targs[THREADS][3];
++	pthread_t t[THREADS];
++	uint64_t tid[THREADS];
++	int errcnt;
++	int i;
++
++	npages = sz / page_size;
++	printf("INFO: sz = %llu\n", (unsigned long long)sz);
++
++	/* mmap it */
++	vastart = mmap(NULL, sz, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
++	if (MAP_FAILED == vastart) {
++		perror("mmap()");
++		exit(20);
++	}
++
++	/* prepare the thread args */
++	for (i = 0; i < THREADS; i++) {
++		targs[i][0] = vastart;
++		targs[i][1] = (void *)npages;
++		targs[i][2] = (void *)page_offs[i];
++	}
++
++	for (i = 0; i < THREADS; i++) {
++		/* start two threads */
++		if (pthread_create(&t[i], NULL, pt_page_marker, &targs[i])) {
++			perror("pthread_create");
++			exit(21);
++		}
++		tid[i] = (uint64_t)t[i];
++		printf("INFO: thread %d created\n", i);
++	}
++
++	/* wait for them to finish */
++	for (i = 0; i < THREADS; i++)
++		pthread_join(t[i], NULL);
++
++	/* check markers on each page */
++	errcnt = 0;
++	for (va = vastart; npages > 0; va += page_size, npages--) {
++		for (i = 0; i < THREADS; i++) {
++			if (*(uint64_t*)(va + page_offs[i]) != tid[i]) {
++				printf("ERROR: thread %d, "
++				       "offset %08lx, %08lx != %08lx\n", i,
++				       (va + page_offs[i] - vastart),
++				       *(uint64_t*)(va + page_offs[i]), tid[i]);
++				errcnt += 1;
++			}
++		}
++	}
++
++	printf("INFO: %d error(s) detected\n", errcnt);
++
++	munmap(vastart, sz);
++
++	return errcnt;
++}
++
++int main(int argc, char **argv)
++{
++	int stoponerror = 1;
++	char *path;
++	loff_t sz;
++	int fd;
++	int errcnt;
++	int toterr = 0;
++	int i, step;
++	char *endch;
++
++	page_size = getpagesize();
++	step = page_size / THREADS;
++	page_offs[0] = step / 2;
++	for (i = 1; i < THREADS; i++)
++		page_offs[i] = page_offs[i-1] + step;
++
++	/* process command line */
++	argc--; argv++;
++	/* ignore errors? */
++	if ((argc == 3) && !strcmp(argv[0], "-f")) {
++		stoponerror = 0;
++		argc--;
++		argv++;
++	}
++	/* file name and size */
++	if (argc != 2 || argv[0][0] == '-') {
++		fprintf(stderr, "ERROR: usage: holetest [-f] "
++			"FILENAME FILESIZEinMB\n");
++		exit(1);
++	}
++	path = argv[0];
++	sz = strtol(argv[1], &endch, 10);
++	if (*endch || sz < 1) {
++		fprintf(stderr, "ERROR: bad FILESIZEinMB\n");
++		exit(1);
++	}
++	sz <<= 20;
++
++	/*
++	 * we're going to run our test in several different ways:
++	 *
++	 * 1. explictly zero-filled
++	 * 2. posix_fallocated
++	 * 4. ftruncated
++	 */
++
++
++	/*
++	 * explicitly zero-filled
++	 */
++	printf("\nINFO: zero-filled test...\n");
++
++	/* create the file */
++	fd = open(path, O_RDWR | O_EXCL | O_CREAT, 0644);
++	if (fd < 0) {
++		perror(path);
++		exit(2);
++	}
++
++	/* truncate it to size */
++	if (ftruncate(fd, sz)) {
++		perror("ftruncate()");
++		exit(3);
++	}
++
++	/* explicitly zero-fill */
++	{
++		char*   va = mmap(NULL, sz, PROT_READ | PROT_WRITE,
++				  MAP_SHARED, fd, 0);
++		if (MAP_FAILED == va) {
++			perror("mmap()");
++			exit(4);
++		}
++		memset(va, 0, sz);
++		munmap(va, sz);
++	}
++
++	/* test it */
++	errcnt = test_this(fd, sz);
++	toterr += errcnt;
++	close(fd);
++	if (stoponerror && errcnt > 0)
++		exit(5);
++
++	/* cleanup */
++	if (unlink(path)) {
++		perror("unlink()");
++		exit(6);
++	}
++
++
++	/*
++	 * posix_fallocated
++	 */
++	printf("\nINFO: posix_fallocate test...\n");
++
++	/* create the file */
++	fd = open(path, O_RDWR | O_EXCL | O_CREAT, 0644);
++	if (fd < 0) {
++		perror(path);
++		exit(7);
++	}
++
++	/* fill it to size */
++	if (posix_fallocate(fd, 0, sz)) {
++		perror("posix_fallocate()");
++		exit(8);
++	}
++
++	/* test it */
++	errcnt = test_this(fd, sz);
++	toterr += errcnt;
++	close(fd);
++	if (stoponerror && errcnt > 0)
++		exit(9);
++
++	/* cleanup */
++	if (unlink(path)) {
++		perror("unlink()");
++		exit(10);
++	}
++
++	/*
++	 * ftruncated
++	 */
++	printf("\nINFO: ftruncate test...\n");
++
++	/* create the file */
++	fd = open(path, O_RDWR | O_EXCL | O_CREAT, 0644);
++	if (fd < 0) {
++		perror(path);
++		exit(15);
++	}
++
++	/* truncate it to size */
++	if (ftruncate(fd, sz)) {
++		perror("ftruncate()");
++		exit(16);
++	}
++
++	/* test it */
++	errcnt = test_this(fd, sz);
++	toterr += errcnt;
++	close(fd);
++	if (stoponerror && errcnt > 0)
++		exit(17);
++
++	/* cleanup */
++	if (unlink(path)) {
++		perror("unlink()");
++		exit(18);
++	}
++
++	/* done */
++	if (toterr > 0)
++		exit(19);
++	return 0;
++}
+diff --git a/tests/generic/340 b/tests/generic/340
+new file mode 100755
+index 000000000000..2ba34eb59724
+--- /dev/null
++++ b/tests/generic/340
+@@ -0,0 +1,58 @@
++#! /bin/bash
++# FSQA Test No. 340
++#
++# Test mmap writing races from racing threads
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Jan Kara <jack@suse.cz>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment and checks
++. ./common/rc
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_test_program "holetest"
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++src/holetest -f $SCRATCH_MNT/testfile 1
++src/holetest -f $SCRATCH_MNT/testfile 16
++src/holetest -f $SCRATCH_MNT/testfile 256
++
++status=0
++exit
+diff --git a/tests/generic/340.out b/tests/generic/340.out
+new file mode 100644
+index 000000000000..0eac9ed654dc
+--- /dev/null
++++ b/tests/generic/340.out
+@@ -0,0 +1,55 @@
++QA output created by 340
++
++INFO: zero-filled test...
++INFO: sz = 1048576
++INFO: thread 0 created
++INFO: thread 1 created
++INFO: 0 error(s) detected
++
++INFO: posix_fallocate test...
++INFO: sz = 1048576
++INFO: thread 0 created
++INFO: thread 1 created
++INFO: 0 error(s) detected
++
++INFO: ftruncate test...
++INFO: sz = 1048576
++INFO: thread 0 created
++INFO: thread 1 created
++INFO: 0 error(s) detected
++
++INFO: zero-filled test...
++INFO: sz = 16777216
++INFO: thread 0 created
++INFO: thread 1 created
++INFO: 0 error(s) detected
++
++INFO: posix_fallocate test...
++INFO: sz = 16777216
++INFO: thread 0 created
++INFO: thread 1 created
++INFO: 0 error(s) detected
++
++INFO: ftruncate test...
++INFO: sz = 16777216
++INFO: thread 0 created
++INFO: thread 1 created
++INFO: 0 error(s) detected
++
++INFO: zero-filled test...
++INFO: sz = 268435456
++INFO: thread 0 created
++INFO: thread 1 created
++INFO: 0 error(s) detected
++
++INFO: posix_fallocate test...
++INFO: sz = 268435456
++INFO: thread 0 created
++INFO: thread 1 created
++INFO: 0 error(s) detected
++
++INFO: ftruncate test...
++INFO: sz = 268435456
++INFO: thread 0 created
++INFO: thread 1 created
++INFO: 0 error(s) detected
+diff --git a/tests/generic/group b/tests/generic/group
+index 727648c68785..d0ca807b3695 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -340,3 +340,4 @@
+ 335 auto quick metadata
+ 336 auto quick metadata
+ 337 auto quick metadata
++340 auto
+-- 
+2.6.2
 
-I think:
-1) If we consider that this's a bug, the original test cases can
-be the reproducer of this bug, so we shouldn't change the cases.
-
-2) If we think print "(null) 0 0 0 00 [--------]" is right(or not
-wrong), then this patch is good.
-
-Thanks,
-Zorro
-
-> 
->  tests/xfs/133     |  8 +++++---
->  tests/xfs/133.out |  2 +-
->  tests/xfs/134     | 22 +++++++++++++++-------
->  tests/xfs/262     |  6 ++++--
->  4 files changed, 25 insertions(+), 13 deletions(-)
-> 
-> diff --git a/tests/xfs/133 b/tests/xfs/133
-> index 82c38b1..7a0e55e 100755
-> --- a/tests/xfs/133
-> +++ b/tests/xfs/133
-> @@ -57,16 +57,17 @@ do_project_test()
->  {
->  	local qa_project=123456-project
->  	local dir=$SCRATCH_MNT/project
-> +	local proj_num=10
->  
->  	mkdir $dir 2>/dev/null
->  
->  	#project quota files
->  	cat >$tmp.projects <<EOF
-> -10:$dir
-> +$proj_num:$dir
->  EOF
->  
->  	cat >$tmp.projid <<EOF
-> -$qa_project:10
-> +$qa_project:$proj_num
->  EOF
->  
->  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> @@ -81,7 +82,8 @@ EOF
->  
->  	echo "=== report command output ==="
->  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> -		-c "report -p -N -b" $SCRATCH_MNT | _filter_quota
-> +		-c "report -p -N -b -L $proj_num -U $proj_num" \
-> +		$SCRATCH_MNT | _filter_quota
->  }
->  
->  # Test project
-> diff --git a/tests/xfs/133.out b/tests/xfs/133.out
-> index 21cfd0d..8c747bf 100644
-> --- a/tests/xfs/133.out
-> +++ b/tests/xfs/133.out
-> @@ -4,5 +4,5 @@ Disk quotas for Project 123456-project (10)
->  Filesystem Blocks Quota Limit Warn/Time Mounted on
->  SCRATCH_DEV 0 102400 204800 00 [--------] SCRATCH_MNT
->  === report command output ===
-> -123456-project 0 102400 204800 00 [--------]
-> +#10 0 102400 204800 00 [--------]
->  
-> diff --git a/tests/xfs/134 b/tests/xfs/134
-> index be18ee8..5ba275c 100755
-> --- a/tests/xfs/134
-> +++ b/tests/xfs/134
-> @@ -54,12 +54,13 @@ _require_xfs_quota
->  dir=$SCRATCH_MNT/project
->  
->  #project quota files
-> +proj_num=1
->  cat >$tmp.projects <<EOF
-> -1:$dir
-> +$proj_num:$dir
->  EOF
->  
->  cat >$tmp.projid <<EOF
-> -test:1
-> +test:$proj_num
->  EOF
->  
->  cp /dev/null $seqres.full
-> @@ -87,17 +88,24 @@ fi
->  src/feature -p $SCRATCH_DEV
->  [ $? -ne 0 ] && _notrun "Installed kernel does not support project quotas"
->  
-> +report_quota()
-> +{
-> +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> +		-c "repquota -inN -p -L $proj_num -U $proj_num" $SCRATCH_DEV | \
-> +		tr -s '[:space:]'
-> +}
-> +
->  mkdir $dir
->  $XFS_IO_PROG -r -c "chproj -R 1" -c "chattr -R +P" $dir
->  
-> -xfs_quota -D $tmp.projects -P $tmp.projid -x \
-> +$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
->      -c "limit -p bsoft=100m bhard=100m 1" $SCRATCH_DEV
-> -xfs_quota -D $tmp.projects -P $tmp.projid -x -c "repquota -inN -p" $SCRATCH_DEV | tr -s '[:space:]'
-> +report_quota
->  touch $dir/1
->  touch $dir/2
->  cp $dir/2 $dir/3
->  
-> -xfs_quota -D $tmp.projects -P $tmp.projid -x -c "repquota -inN -p" $SCRATCH_DEV | tr -s '[:space:]'
-> +report_quota
->  
->  if [ "$HOSTOS" == "IRIX" ] ; then
->      mkfile 1M $TEST_DIR/6
-> @@ -107,12 +115,12 @@ fi
->  
->  #try cp to dir
->  cp $TEST_DIR/6 $dir/6
-> -xfs_quota -D $tmp.projects -P $tmp.projid -x -c "repquota -inN -p" $SCRATCH_DEV | tr -s '[:space:]'
-> +report_quota
->  
->  #try mv to dir
->  mv $TEST_DIR/6 $dir/7
->  
-> -xfs_quota -D $tmp.projects -P $tmp.projid -x -c "repquota -inN -p" $SCRATCH_DEV | tr -s '[:space:]'
-> +report_quota
->  
->  # success, all done
->  status=0
-> diff --git a/tests/xfs/262 b/tests/xfs/262
-> index 9d8b838..d3a352c 100755
-> --- a/tests/xfs/262
-> +++ b/tests/xfs/262
-> @@ -138,11 +138,13 @@ _quota_cmd "limit -p bhard=${qlimit_meg}m bsoft=${qlimit_meg}m ${proj_name}" \
->  							2>> "$seqres.full" 1>&2
->  
->  # See what gets reported
-> -_quota_cmd "report"		| _filter_quota_rpt	2>> "$seqres.full"
-> +_quota_cmd "report -U $proj_num -L $proj_num" | _filter_quota_rpt \
-> +							2>> $seqres.full
->  _quota_cmd "df"			| _filter_quota_rpt	2>> "$seqres.full"
->  
->  # This time using "human readable" output
-> -_quota_cmd "report -h"		| _filter_quota_rpt	2>> "$seqres.full"
-> +_quota_cmd "report -h $proj_num -L $proj_num" | _filter_quota_rpt \
-> +							2>> "$seqres.full"
->  _quota_cmd "df -h"		| _filter_quota_rpt	2>> "$seqres.full"
->  
->  # Clean up
