@@ -1,172 +1,158 @@
-Received: from mail-ig0-f182.google.com ([209.85.213.182]:38325 "EHLO
-	mail-ig0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753818AbcDFVkI (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 6 Apr 2016 17:40:08 -0400
-MIME-Version: 1.0
-Reply-To: fdmanana@gmail.com
-In-Reply-To: <20160406213034.GF2187@wotan.suse.de>
-References: <20160406213034.GF2187@wotan.suse.de>
-Date: Wed, 6 Apr 2016 22:40:02 +0100
-Message-ID: <CAL3q7H7XdZbOkzfE=Q2B2wAN5UDEm+bzrEkPu--SKaeCo=0huQ@mail.gmail.com>
-Subject: Re: [PATCH] btrfs: test snapshot create with invalid parent qgroup
-From: Filipe Manana <fdmanana@gmail.com>
-Content-Type: text/plain; charset=UTF-8
+Received: from mail.kernel.org ([198.145.29.136]:50259 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752024AbcDFWME (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 6 Apr 2016 18:12:04 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] fstests: generic test for fsync after adding a link and moving other inode
+Date: Wed,  6 Apr 2016 23:11:56 +0100
+Message-Id: <1459980716-4705-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Mark Fasheh <mfasheh@suse.de>
-Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 6, 2016 at 10:30 PM, Mark Fasheh <mfasheh@suse.de> wrote:
-> Test that an invalid parent qgroup does not cause snapshot create to
-> force the FS readonly.
->
-> In btrfs, create_pending_snapshot() will go readonly on _any_ error return from
-> btrfs_qgroup_inherit(). If qgroups are enabled, a user can crash their fs by
-> just making a snapshot and asking it to inherit from an invalid qgroup.
->
-> This patch does exactly that test. If the FS goes readonly that will be
-> reported and we will know that a regression was introduced.
->
-> The btrfs fix this patch relates to can be found at the following url:
-> http://thread.gmane.org/gmane.comp.file-systems.btrfs/54755
->
-> Thanks,
->         --Mark
->
-> Signed-off-by: Mark Fasheh <mfasheh@suse.de>
+From: Filipe Manana <fdmanana@suse.com>
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Test that if we create a hard link for a file F in some directory A,
+then move some directory or file B from its parent directory C into
+directory A, fsync file F, power fail and mount the filesystem, the
+directory/file B is located only at directory A and both links for
+file F exist.
 
-Looks good, just a few minor notes below.
-Thanks.
+This test is motivated by an issue found in btrfs which is fixed by the
+following patch for the linux kernel:
 
-> ---
->  tests/btrfs/119     | 70 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/119.out |  2 ++
+  Btrfs: fix for incorrect directory entries after fsync log replay
 
-Should be 121 (and should match the comment in the test file).
+Tested against ext3/4, xfs, reiserfs and f2fs.
 
->  tests/btrfs/group   |  1 +
->  3 files changed, 73 insertions(+)
->  create mode 100755 tests/btrfs/119
->  create mode 100644 tests/btrfs/119.out
->
-> diff --git a/tests/btrfs/119 b/tests/btrfs/119
-> new file mode 100755
-> index 0000000..1692160
-> --- /dev/null
-> +++ b/tests/btrfs/119
-> @@ -0,0 +1,70 @@
-> +#! /bin/bash
-> +# FS QA Test No. btrfs/120
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/generic/343     | 86 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/343.out | 11 +++++++
+ tests/generic/group   |  1 +
+ 3 files changed, 98 insertions(+)
+ create mode 100755 tests/generic/343
+ create mode 100644 tests/generic/343.out
 
-Doesn't match the tests' file name.
-
-> +#
-> +# Test that an invalid parent qgroup does not cause snapshot create to
-> +# force the FS readonly.
-> +#
-> +# This issue is fixed by the following btrfs patch:
-> +#  [PATCH] btrfs: handle non-fatal errors in btrfs_qgroup_inherit()
-> +#  http://thread.gmane.org/gmane.comp.file-systems.btrfs/54755
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +
-> +rm -f $seqres.full
-> +
-> +_scratch_mkfs
-> +_scratch_mount
-> +_run_btrfs_util_prog quota enable $SCRATCH_MNT
-> +# The qgroup '1/10' does not exist and should be silently ignored
-> +_run_btrfs_util_prog subvolume snapshot -i 1/10 $SCRATCH_MNT $SCRATCH_MNT/snap1
-> +
-> +_scratch_unmount
-
-No need to call unmount here. The fstests framework does it
-automatically for us.
-
-> +
-> +echo "Silence is golden"
-> +
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/119.out b/tests/btrfs/119.out
-> new file mode 100644
-> index 0000000..8e2ee9e
-> --- /dev/null
-> +++ b/tests/btrfs/119.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 120
-> +Silence is golden
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index a2fa412..19f4910 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -119,3 +119,4 @@
->  116 auto quick metadata
->  117 auto quick send clone
->  118 auto quick snapshot metadata
-> +119 auto quick qgroup
-
-Plus the "snapshot" group.
-
-> --
-> 2.1.4
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
+diff --git a/tests/generic/343 b/tests/generic/343
+new file mode 100755
+index 0000000..bc7980c
+--- /dev/null
++++ b/tests/generic/343
+@@ -0,0 +1,86 @@
++#! /bin/bash
++# FSQA Test No. 343
++#
++# Test that if we create a hard link for a file F in some directory A, then move
++# some directory or file B from its parent directory C into directory A, fsync
++# file F, power fail and mount the filesystem, the directory/file B is located
++# only at directory A and both links for file F exist.
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmflakey
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_dm_target flakey
++_require_metadata_journaling $SCRATCH_DEV
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_init_flakey
++_mount_flakey
++
++# Create our test directories and files.
++mkdir $SCRATCH_MNT/x
++mkdir $SCRATCH_MNT/y
++touch $SCRATCH_MNT/x/foo
++mkdir $SCRATCH_MNT/y/z
++touch $SCRATCH_MNT/y/foo2
++
++# Make sure everything is durably persisted.
++sync
++
++# Now add a link to foo at directory x, move directory z and file foo2 from
++# directory y to directory x and fsync foo's inode. We expect that after a
++# log replay we see the new link for foo's inode and that z and foo2 are only
++# located at directory x.
++ln $SCRATCH_MNT/x/foo $SCRATCH_MNT/x/bar
++mv $SCRATCH_MNT/y/z $SCRATCH_MNT/x/z
++mv $SCRATCH_MNT/y/foo2 $SCRATCH_MNT/x/foo2
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/x/bar
++_flakey_drop_and_remount
++
++echo "Filesystem contents after log replay:"
++ls -R $SCRATCH_MNT/x $SCRATCH_MNT/y | _filter_scratch
++
++_unmount_flakey
++status=0
++exit
+diff --git a/tests/generic/343.out b/tests/generic/343.out
+new file mode 100644
+index 0000000..4c85f1f
+--- /dev/null
++++ b/tests/generic/343.out
+@@ -0,0 +1,11 @@
++QA output created by 343
++Filesystem contents after log replay:
++SCRATCH_MNT/x:
++bar
++foo
++foo2
++z
++
++SCRATCH_MNT/x/z:
++
++SCRATCH_MNT/y:
+diff --git a/tests/generic/group b/tests/generic/group
+index ef1a423..0e5a82e 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -345,3 +345,4 @@
+ 340 auto
+ 341 auto quick metadata
+ 342 auto quick metadata
++343 auto quick metadata
 -- 
-Filipe David Manana,
+2.7.0.rc3
 
-"Reasonable men adapt themselves to the world.
- Unreasonable men adapt the world to themselves.
- That's why all progress depends on unreasonable men."
