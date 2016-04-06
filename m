@@ -1,58 +1,86 @@
-Received: from mail.kernel.org ([198.145.29.136]:50259 "EHLO mail.kernel.org"
+Received: from mx2.suse.de ([195.135.220.15]:34751 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752024AbcDFWME (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 6 Apr 2016 18:12:04 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH] fstests: generic test for fsync after adding a link and moving other inode
-Date: Wed,  6 Apr 2016 23:11:56 +0100
-Message-Id: <1459980716-4705-1-git-send-email-fdmanana@kernel.org>
+	id S1752352AbcDFXWW (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 6 Apr 2016 19:22:22 -0400
+Date: Wed, 6 Apr 2016 16:22:19 -0700
+From: Mark Fasheh <mfasheh@suse.de>
+Subject: Re: [PATCH] btrfs: test snapshot create with invalid parent qgroup
+Message-ID: <20160406232219.GH2187@wotan.suse.de>
+Reply-To: Mark Fasheh <mfasheh@suse.de>
+References: <20160406213034.GF2187@wotan.suse.de>
+ <CAL3q7H7XdZbOkzfE=Q2B2wAN5UDEm+bzrEkPu--SKaeCo=0huQ@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAL3q7H7XdZbOkzfE=Q2B2wAN5UDEm+bzrEkPu--SKaeCo=0huQ@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Filipe Manana <fdmanana@gmail.com>
+Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Wed, Apr 06, 2016 at 10:40:02PM +0100, Filipe Manana wrote:
+> On Wed, Apr 6, 2016 at 10:30 PM, Mark Fasheh <mfasheh@suse.de> wrote:
+> > Test that an invalid parent qgroup does not cause snapshot create to
+> > force the FS readonly.
+> >
+> > In btrfs, create_pending_snapshot() will go readonly on _any_ error return from
+> > btrfs_qgroup_inherit(). If qgroups are enabled, a user can crash their fs by
+> > just making a snapshot and asking it to inherit from an invalid qgroup.
+> >
+> > This patch does exactly that test. If the FS goes readonly that will be
+> > reported and we will know that a regression was introduced.
+> >
+> > The btrfs fix this patch relates to can be found at the following url:
+> > http://thread.gmane.org/gmane.comp.file-systems.btrfs/54755
+> >
+> > Thanks,
+> >         --Mark
+> >
+> > Signed-off-by: Mark Fasheh <mfasheh@suse.de>
+> 
+> Reviewed-by: Filipe Manana <fdmanana@suse.com>
+> 
+> Looks good, just a few minor notes below.
 
-Test that if we create a hard link for a file F in some directory A,
-then move some directory or file B from its parent directory C into
-directory A, fsync file F, power fail and mount the filesystem, the
-directory/file B is located only at directory A and both links for
-file F exist.
+Thanks for the review Filipe. How's this look?
+	--Mark
 
-This test is motivated by an issue found in btrfs which is fixed by the
-following patch for the linux kernel:
+--
+Mark Fasheh
 
-  Btrfs: fix for incorrect directory entries after fsync log replay
 
-Tested against ext3/4, xfs, reiserfs and f2fs.
+From: Mark Fasheh <mfasheh@suse.de>
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+[PATCH] btrfs: test snapshot create with invalid parent qgroup
+
+Signed-off-by: Mark Fasheh <mfasheh@suse.de>
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
 ---
- tests/generic/343     | 86 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/343.out | 11 +++++++
- tests/generic/group   |  1 +
- 3 files changed, 98 insertions(+)
- create mode 100755 tests/generic/343
- create mode 100644 tests/generic/343.out
+ tests/btrfs/121     | 68 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/121.out |  2 ++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 71 insertions(+)
+ create mode 100755 tests/btrfs/121
+ create mode 100644 tests/btrfs/121.out
 
-diff --git a/tests/generic/343 b/tests/generic/343
+diff --git a/tests/btrfs/121 b/tests/btrfs/121
 new file mode 100755
-index 0000000..bc7980c
+index 0000000..011c5a8
 --- /dev/null
-+++ b/tests/generic/343
-@@ -0,0 +1,86 @@
++++ b/tests/btrfs/121
+@@ -0,0 +1,68 @@
 +#! /bin/bash
-+# FSQA Test No. 343
++# FS QA Test No. btrfs/121
 +#
-+# Test that if we create a hard link for a file F in some directory A, then move
-+# some directory or file B from its parent directory C into directory A, fsync
-+# file F, power fail and mount the filesystem, the directory/file B is located
-+# only at directory A and both links for file F exist.
++# Test that an invalid parent qgroup does not cause snapshot create to
++# force the FS readonly.
++#
++# This issue is fixed by the following btrfs patch:
++#  [PATCH] btrfs: handle non-fatal errors in btrfs_qgroup_inherit()
++#  http://thread.gmane.org/gmane.comp.file-systems.btrfs/54755
 +#
 +#-----------------------------------------------------------------------
-+#
 +# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -66,19 +94,21 @@ index 0000000..bc7980c
 +# You should have received a copy of the GNU General Public License
 +# along with this program; if not, write the Free Software Foundation,
 +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#
 +#-----------------------------------------------------------------------
 +#
 +
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
++
++here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+	_cleanup_flakey
 +	cd /
 +	rm -f $tmp.*
 +}
@@ -86,73 +116,44 @@ index 0000000..bc7980c
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/dmflakey
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
 +
 +# real QA test starts here
-+_supported_fs generic
++_supported_fs btrfs
 +_supported_os Linux
 +_require_scratch
-+_require_dm_target flakey
-+_require_metadata_journaling $SCRATCH_DEV
 +
 +rm -f $seqres.full
 +
-+_scratch_mkfs >>$seqres.full 2>&1
-+_init_flakey
-+_mount_flakey
++_scratch_mkfs
++_scratch_mount
++_run_btrfs_util_prog quota enable $SCRATCH_MNT
++# The qgroup '1/10' does not exist and should be silently ignored
++_run_btrfs_util_prog subvolume snapshot -i 1/10 $SCRATCH_MNT $SCRATCH_MNT/snap1
 +
-+# Create our test directories and files.
-+mkdir $SCRATCH_MNT/x
-+mkdir $SCRATCH_MNT/y
-+touch $SCRATCH_MNT/x/foo
-+mkdir $SCRATCH_MNT/y/z
-+touch $SCRATCH_MNT/y/foo2
++echo "Silence is golden"
 +
-+# Make sure everything is durably persisted.
-+sync
-+
-+# Now add a link to foo at directory x, move directory z and file foo2 from
-+# directory y to directory x and fsync foo's inode. We expect that after a
-+# log replay we see the new link for foo's inode and that z and foo2 are only
-+# located at directory x.
-+ln $SCRATCH_MNT/x/foo $SCRATCH_MNT/x/bar
-+mv $SCRATCH_MNT/y/z $SCRATCH_MNT/x/z
-+mv $SCRATCH_MNT/y/foo2 $SCRATCH_MNT/x/foo2
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/x/bar
-+_flakey_drop_and_remount
-+
-+echo "Filesystem contents after log replay:"
-+ls -R $SCRATCH_MNT/x $SCRATCH_MNT/y | _filter_scratch
-+
-+_unmount_flakey
 +status=0
 +exit
-diff --git a/tests/generic/343.out b/tests/generic/343.out
+diff --git a/tests/btrfs/121.out b/tests/btrfs/121.out
 new file mode 100644
-index 0000000..4c85f1f
+index 0000000..b71250d
 --- /dev/null
-+++ b/tests/generic/343.out
-@@ -0,0 +1,11 @@
-+QA output created by 343
-+Filesystem contents after log replay:
-+SCRATCH_MNT/x:
-+bar
-+foo
-+foo2
-+z
-+
-+SCRATCH_MNT/x/z:
-+
-+SCRATCH_MNT/y:
-diff --git a/tests/generic/group b/tests/generic/group
-index ef1a423..0e5a82e 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -345,3 +345,4 @@
- 340 auto
- 341 auto quick metadata
- 342 auto quick metadata
-+343 auto quick metadata
++++ b/tests/btrfs/121.out
+@@ -0,0 +1,2 @@
++QA output created by 121
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 13aa1e5..ef6c260 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -121,3 +121,4 @@
+ 118 auto quick snapshot metadata
+ 119 auto quick snapshot metadata qgroup
+ 120 auto quick snapshot metadata
++121 auto quick snapshot qgroup
 -- 
-2.7.0.rc3
+2.1.4
 
