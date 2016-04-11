@@ -1,71 +1,49 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43170 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:47568 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754594AbcDKLiO (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 11 Apr 2016 07:38:14 -0400
-Date: Mon, 11 Apr 2016 19:38:11 +0800
+	id S1753763AbcDKLj6 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 11 Apr 2016 07:39:58 -0400
+Date: Mon, 11 Apr 2016 19:39:56 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] xfs/259: handle minimum block size more precisely
-Message-ID: <20160411113811.GH10345@eguan.usersys.redhat.com>
-References: <1460027155-4222-1-git-send-email-eguan@redhat.com>
- <20160407213231.GD761@dastard>
- <20160407234837.GA1439@infradead.org>
- <20160411000238.GB9088@dastard>
+Subject: Re: [PATCH] gitignore: add src/holetest
+Message-ID: <20160411113956.GI10345@eguan.usersys.redhat.com>
+References: <1460361906-7054-1-git-send-email-omzg@plexistor.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160411000238.GB9088@dastard>
+In-Reply-To: <1460361906-7054-1-git-send-email-omzg@plexistor.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org, xfs@oss.sgi.com
+To: Omer Zilberberg <omzg@plexistor.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Apr 11, 2016 at 10:02:38AM +1000, Dave Chinner wrote:
-> On Thu, Apr 07, 2016 at 04:48:37PM -0700, Christoph Hellwig wrote:
-> > On Fri, Apr 08, 2016 at 07:32:31AM +1000, Dave Chinner wrote:
-> > > > diff --git a/tests/xfs/259 b/tests/xfs/259
-> > > > index 16c1935..3150ff3 100755
-> > > > --- a/tests/xfs/259
-> > > > +++ b/tests/xfs/259
-> > > > @@ -51,9 +51,7 @@ testfile=$TEST_DIR/259.image
-> > > >  # Test various sizes slightly less than 4 TB. Need to handle different
-> > > >  # minimum block sizes for CRC enabled filesystems, but use a small log so we
-> > > >  # don't write lots of zeros unnecessarily.
-> > > > -xfs_info $TEST_DIR | _filter_mkfs 2> $tmp.mkfs > /dev/null
-> > > > -. $tmp.mkfs
-> > > 
-> > > This tests the configuration of the test device, which is not
-> > > controlled by the test harness, so can be different to the
-> > > configuration being used for the scratch device.
-> > > 
-> > > > -if [ $_fs_has_crcs -eq 1 ]; then
-> > > > +if [ $XFS_MKFS_CRC_DEFAULT -eq 1 ]; then
-> > > 
-> > > IOWs, this is not an not equivalent test.
-> > 
-> > And I think that's the whole point of this change :)
-> > 
-> > Previously it tested what the TEST_DIR did, which was wrong for this
-> > test.  Now it tests what mkfs does by default (including for the scratch
-> > dev), which is what we really want here.
+On Mon, Apr 11, 2016 at 11:05:06AM +0300, Omer Zilberberg wrote:
+> Recently added 450d833 (generic/338: Add mmap race test) added a new
+> binary, it should be added to .gitignore as well.
 > 
-> Which is not at all clear from the patch description.
+> Signed-off-by: Omer Zilberberg <omzg@plexistor.com>
+
+Reviewed-by: Eryu Guan <eguan@redhat.com>
+
+> ---
+>  .gitignore | 1 +
+>  1 file changed, 1 insertion(+)
 > 
-> Seriously, though, this does not belong in common/config. We already
-> have a helper function to check what mkfs supports (i.e.
->  _scratch_mkfs_xfs_supported()), and if we just want a bare check
-> then factor this into a _mkfs_xfs_supported() and supply the
-> parameters specific to the test.
+> diff --git a/.gitignore b/.gitignore
+> index f9ea1fa..552d2a8 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -60,6 +60,7 @@
+>  /src/getpagesize
+>  /src/godown
+>  /src/holes
+> +/src/holetest
+>  /src/itrash
+>  /src/locktest
+>  /src/loggen
+> -- 
+> 2.5.5
 > 
-> Indeed, this is basically what we do with _require_xfs_mkfs_crc();
-> the same thing should be done, but without the "notrun" if -m crc
-> s not supported...
-
-Looking into _require_xfs_mkfs_crc() and _scratch_mkfs_xfs_supported(),
-I noticed that they are not the helpers I want. They are testing whether
-mkfs.xfs supports CRC (or other mkfs options), what I want is what's the
-default behavior of mkfs.xfs (CRC enabled or not).
-
-Maybe I can just move the detection code to common/rc?
-
-Thanks,
-Eryu
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
