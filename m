@@ -1,49 +1,44 @@
-Received: from mx1.redhat.com ([209.132.183.28]:47568 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753763AbcDKLj6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 11 Apr 2016 07:39:58 -0400
-Date: Mon, 11 Apr 2016 19:39:56 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] gitignore: add src/holetest
-Message-ID: <20160411113956.GI10345@eguan.usersys.redhat.com>
-References: <1460361906-7054-1-git-send-email-omzg@plexistor.com>
+Received: from cn.fujitsu.com ([222.73.24.84]:22836 "EHLO song.cn.fujitsu.com"
+	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+	id S932270AbcDLIAH (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 12 Apr 2016 04:00:07 -0400
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Subject: [PATCH] fstests: btrfs/091: Disable compress to avoid output dismatch
+Date: Tue, 12 Apr 2016 15:59:58 +0800
+Message-Id: <1460447998-6899-1-git-send-email-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1460361906-7054-1-git-send-email-omzg@plexistor.com>
 Sender: fstests-owner@vger.kernel.org
-To: Omer Zilberberg <omzg@plexistor.com>
-Cc: fstests@vger.kernel.org
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Apr 11, 2016 at 11:05:06AM +0300, Omer Zilberberg wrote:
-> Recently added 450d833 (generic/338: Add mmap race test) added a new
-> binary, it should be added to .gitignore as well.
-> 
-> Signed-off-by: Omer Zilberberg <omzg@plexistor.com>
+If run btrfs/091 with "-o compress=lzo" mount option, test case will
+fail, as compress makes extent much smaller on disk, making output
+different from golden output.
 
-Reviewed-by: Eryu Guan <eguan@redhat.com>
+As this test case is only testing qgroup, not compression, disable
+compression manually in test case.
 
-> ---
->  .gitignore | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/.gitignore b/.gitignore
-> index f9ea1fa..552d2a8 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -60,6 +60,7 @@
->  /src/getpagesize
->  /src/godown
->  /src/holes
-> +/src/holetest
->  /src/itrash
->  /src/locktest
->  /src/loggen
-> -- 
-> 2.5.5
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+---
+ tests/btrfs/091 | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/tests/btrfs/091 b/tests/btrfs/091
+index 16b5c16..ad9f71c 100755
+--- a/tests/btrfs/091
++++ b/tests/btrfs/091
+@@ -60,7 +60,8 @@ run_check _scratch_mkfs "--nodesize $NODESIZE"
+ # inode cache will also take space in fs tree, disable them to get consistent
+ # result.
+ # discard error output since we will check return value manually.
+-_scratch_mount "-o noinode_cache" 2> /dev/null
++# also disable all compression, or output will mismatch with golden output
++_scratch_mount "-o noinode_cache,compress=no,compress-force=no" 2> /dev/null
+ 
+ # Check for old kernel which doesn't support 'noinode_cache' mount option
+ if [ $? -ne 0 ]; then
+-- 
+1.8.3.1
+
+
+
