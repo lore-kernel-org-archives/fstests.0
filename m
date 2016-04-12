@@ -1,44 +1,65 @@
-Received: from cn.fujitsu.com ([222.73.24.84]:22836 "EHLO song.cn.fujitsu.com"
-	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-	id S932270AbcDLIAH (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 12 Apr 2016 04:00:07 -0400
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH] fstests: btrfs/091: Disable compress to avoid output dismatch
-Date: Tue, 12 Apr 2016 15:59:58 +0800
-Message-Id: <1460447998-6899-1-git-send-email-quwenruo@cn.fujitsu.com>
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:31210 "EHLO
+	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1030574AbcDLVBH (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 12 Apr 2016 17:01:07 -0400
+Date: Wed, 13 Apr 2016 07:01:01 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] xfs/259: handle minimum block size more precisely
+Message-ID: <20160412210101.GA10643@dastard>
+References: <1460027155-4222-1-git-send-email-eguan@redhat.com>
+ <20160407213231.GD761@dastard>
+ <20160407234837.GA1439@infradead.org>
+ <20160411000238.GB9088@dastard>
+ <20160411113811.GH10345@eguan.usersys.redhat.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160411113811.GH10345@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-If run btrfs/091 with "-o compress=lzo" mount option, test case will
-fail, as compress makes extent much smaller on disk, making output
-different from golden output.
+On Mon, Apr 11, 2016 at 07:38:11PM +0800, Eryu Guan wrote:
+> On Mon, Apr 11, 2016 at 10:02:38AM +1000, Dave Chinner wrote:
+> > Which is not at all clear from the patch description.
+> > 
+> > Seriously, though, this does not belong in common/config. We already
+> > have a helper function to check what mkfs supports (i.e.
+> >  _scratch_mkfs_xfs_supported()), and if we just want a bare check
+> > then factor this into a _mkfs_xfs_supported() and supply the
+> > parameters specific to the test.
+> > 
+> > Indeed, this is basically what we do with _require_xfs_mkfs_crc();
+> > the same thing should be done, but without the "notrun" if -m crc
+> > s not supported...
+> 
+> Looking into _require_xfs_mkfs_crc() and _scratch_mkfs_xfs_supported(),
+> I noticed that they are not the helpers I want. They are testing whether
+> mkfs.xfs supports CRC (or other mkfs options), what I want is what's the
+> default behavior of mkfs.xfs (CRC enabled or not).
 
-As this test case is only testing qgroup, not compression, disable
-compression manually in test case.
+All this, just to avoid testing on an invalid block size when CRCs
+are enabled. I really don't see why this needs changes to generic
+infrastructure - it's a test specific problem.
 
-Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
----
- tests/btrfs/091 | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+How about you simply reverse the block size order that is tested,
+and capture the output of the actual mkfs command that is being
+tested, and determine if 512 byte block sizes should be tested
+based on that output? i.e.
 
-diff --git a/tests/btrfs/091 b/tests/btrfs/091
-index 16b5c16..ad9f71c 100755
---- a/tests/btrfs/091
-+++ b/tests/btrfs/091
-@@ -60,7 +60,8 @@ run_check _scratch_mkfs "--nodesize $NODESIZE"
- # inode cache will also take space in fs tree, disable them to get consistent
- # result.
- # discard error output since we will check return value manually.
--_scratch_mount "-o noinode_cache" 2> /dev/null
-+# also disable all compression, or output will mismatch with golden output
-+_scratch_mount "-o noinode_cache,compress=no,compress-force=no" 2> /dev/null
- 
- # Check for old kernel which doesn't support 'noinode_cache' mount option
- if [ $? -ne 0 ]; then
+for b in 4096 2038 1024 512; do
+	if [ $b -eq 512 -a $_fs_has_crcs -ne 1 ]; then
+		break;
+	fi
+....
+	mkfs -b $b ....
+	. $tmp.mkfs
+done
+
+Cheers,
+
+Dave.
 -- 
-1.8.3.1
-
-
-
+Dave Chinner
+david@fromorbit.com
