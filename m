@@ -1,101 +1,90 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:53185 "EHLO
-	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750966AbcDOFCr (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 15 Apr 2016 01:02:47 -0400
-Date: Fri, 15 Apr 2016 15:02:39 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] Create test groups for cifs in xfstests
-Message-ID: <20160415050239.GB567@dastard>
-References: <CAH2r5muHTHXikTCqiiU7AFx8Z-Ra_7CYK4f6PCZ_4KfVbO3-PA@mail.gmail.com>
+Received: from mail-io0-f170.google.com ([209.85.223.170]:36005 "EHLO
+	mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751902AbcDOLEz (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 15 Apr 2016 07:04:55 -0400
+Received: by mail-io0-f170.google.com with SMTP id u185so131011636iod.3
+        for <fstests@vger.kernel.org>; Fri, 15 Apr 2016 04:04:54 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAH2r5muHTHXikTCqiiU7AFx8Z-Ra_7CYK4f6PCZ_4KfVbO3-PA@mail.gmail.com>
+Reply-To: fdmanana@gmail.com
+In-Reply-To: <20160414230409.GO2187@wotan.suse.de>
+References: <20160414230409.GO2187@wotan.suse.de>
+Date: Fri, 15 Apr 2016 12:04:53 +0100
+Message-ID: <CAL3q7H6+bW60tS4Z5ptM9Sbbk7Hd92vZNcA4n2PWtPZ1vBfvkg@mail.gmail.com>
+Subject: Re: [PATCH] btrfs/104: remove ugly sleep
+From: Filipe Manana <fdmanana@gmail.com>
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Steve French <smfrench@gmail.com>
-Cc: fstests@vger.kernel.org, "linux-cifs@vger.kernel.org" <linux-cifs@vger.kernel.org>
+To: Mark Fasheh <mfasheh@suse.de>
+Cc: fstests@vger.kernel.org, Dave Chinner <david@fromorbit.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Apr 14, 2016 at 10:53:15PM -0500, Steve French wrote:
-> Attached is a trivial patch to create two xfstest groups for cifs
-> 
-> Since some of the tests in xfstests are only appropriate for local filesystems
-> and some of the "quick" tests are only quick on local, not network
-> filesystems, create two test groups for testing cifs to make
-> use of xfstests easier. (I will add a similar follow on patch for
-> nfs after this). The first new test group "cifs-quick"
-> includes a set of tests that execute fairly quickly (under a few minutes
-> each), and second "cifs" which includes the tests which can take
-> much longer or are not as appropriate for quick verification of
-> a cifs build.
+On Fri, Apr 15, 2016 at 12:04 AM, Mark Fasheh <mfasheh@suse.de> wrote:
+> Latest btrfsprogs can now do 'subvolume sync' to wait on snapshots to be
+> dropped. Replace the sleep call in btrfs/104 with this. We can also add this
+> test to the 'quick' group now.
+>
+> Signed-off-by: Mark Fasheh <mfasheh@suse.de>
+> ---
+>  tests/btrfs/104   | 8 +++-----
+>  tests/btrfs/group | 2 +-
+>  2 files changed, 4 insertions(+), 6 deletions(-)
+>
+> diff --git a/tests/btrfs/104 b/tests/btrfs/104
+> index 6afaa02..627e77b 100755
+> --- a/tests/btrfs/104
+> +++ b/tests/btrfs/104
+> @@ -145,11 +145,9 @@ _scratch_cycle_mount
+>  # referenced above.
+>  _run_btrfs_util_prog subvolume delete $SCRATCH_MNT/snap1
+>
+> -# There is no way from userspace to force btrfs_drop_snapshot to run
+> -# at a given time (even via mount/unmount). We must wait for it to
+> -# start and complete. This is the shortest time on my tests systems I
+> -# have found which always allows drop_snapshot to run to completion.
+> -sleep 45
+> +# Removing snapshots on btrfs is a delayed operation, so we must wait for
+> +# btrfs_drop_snapshot to complete.
+> +_run_btrfs_util_prog subvolume sync $SCRATCH_MNT
 
-I'm not sure this is the best way to use test grouping. Yes, it
-serves your immediate purpose, but I'd prefer to find a way of
-grouping tests that is less protocol specific and hence easier to
-maintain.
+Looks good, except that this will cause a test failure when running
+with older versions of btrfs-progs that don't have this command.
 
-A couple of things stand out about your classifications that will
-catch people unaware:
+We should skip the test with such old versions (it's usually what we
+do everywhere) or make it fallback to the sleep.
+We have "_require_btrfs <command>" to check if btrfs-progs supports a
+specific command, so we could extend it to check for a subcommand too
+as an optional argument so we could call
+"_require_btrfs subvolume sync" in the test.
 
-	- quick is a subset of auto, so when you run the auto group,
-	  you also get the quick tests run. "cifs" and "cifs-quick"
-	  are exclusive groups, so when you run the "cifs" group, it
-	  doesn't run all the regression tests it could.
+>
+>  _scratch_unmount
+>
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index ef6c260..9403daa 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -104,7 +104,7 @@
+>  101 auto quick replace
+>  102 auto quick metadata enospc
+>  103 auto quick clone compress
+> -104 auto qgroup
+> +104 auto quick qgroup
+>  105 auto quick send
+>  106 auto quick clone compress
+>  107 auto quick prealloc
+> --
+> 2.1.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-	- new tests are not going to add cifs or nfs
-	  classifications, so they are not going to be run if you
-	  are using cifs/cifs-quick rather than auto/quick as the
-	  test groups that you run.
 
-	- "quick" means runs in under 15-20s on typical test
-	  systems. auto is generally limited to tests that run in
-	  under 5 minutes. You're definition of "cifs-quick" is
-	  roughly the same as "auto", which means nobody is going to
-	  be able to classify them correctly without a CIFS setup.
 
-	- similarly, there is no consistency between quick and
-	  cifs-quick, or auto and cifs. Some are auto + cifs-quick,
-	  others are quick + cifs. Often tests that are not marked
-	  as quick will run really fast on SSD/RAID w/ bbwc, but are
-	  horrifically slow on a spinning SATA drive. Hence we don't
-	  classify them as quick, and I can't see how adding CIFS on
-	  a slow SATA drive is going to make them any faster....
-
-What I think would be a better solution is to define groups for
-exclusion of certain tests, rather than trying define a compelte new
-set of tests specific to a certain filesystem.
-
-That is, define a "remotefs-slow" group, so that you can run:
-
-./check -g quick -x remotefs-slow
-
-ad it runs all the tests in the quick group except for those that
-are known to be slow on remote filesystems. This way you'll
-automatically run new tests that are added to the quick/auto groups,
-rather than periodically having to make passes to add all the new
-tests into your cifs/nfs groups. I suspect that the "slow" tests is
-a much smaller set than cifs/nfs sets currently are...
-
-This will preserve the expected behaviour across different types of
-physical storage, but also encodes the fact that a remotefs layer
-makes this test much slower. This might even extend to, say, iscsi
-as well as there are a couple of tests (generic/127) that run in
-~50s on local storage but take >1200s on my iscsi based test VMs
-because of the latency all the sync writes introduce across the
-network. i.e:
-
-./check -g auto -x iscsi-slow
-
-would knock 15 minutes of runtime from a test cycle on a couple of
-my test VMs...
-
-Such classifications would also be useful documentation when someone
-asks "how long should we expect this test to run". Just looking at
-the group files will tell use roughly what we should expect.....
-
-Cheers,
-
-Dave.
 -- 
-Dave Chinner
-david@fromorbit.com
+Filipe David Manana,
+
+"Reasonable men adapt themselves to the world.
+ Unreasonable men adapt the world to themselves.
+ That's why all progress depends on unreasonable men."
