@@ -1,79 +1,135 @@
-Received: from mx2.suse.de ([195.135.220.15]:54921 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:55103 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751781AbcDRTcq (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 18 Apr 2016 15:32:46 -0400
-Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
-	by mx2.suse.de (Postfix) with ESMTP id 8B175AB5D
-	for <fstests@vger.kernel.org>; Mon, 18 Apr 2016 19:32:43 +0000 (UTC)
-From: Jan Kara <jack@suse.cz>
-Subject: [PATCH 5/5] generic/038: Avoid EBUSY errors on umount
-Date: Mon, 18 Apr 2016 21:32:35 +0200
-Message-Id: <1461007955-7921-6-git-send-email-jack@suse.cz>
-In-Reply-To: <1461007955-7921-1-git-send-email-jack@suse.cz>
-References: <1461007955-7921-1-git-send-email-jack@suse.cz>
+	id S1752407AbcDSWZg (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 19 Apr 2016 18:25:36 -0400
+Date: Tue, 19 Apr 2016 15:25:30 -0700
+From: Mark Fasheh <mfasheh@suse.de>
+Subject: [PATCH] btrfs: Test that qgroup counts are valid after snapshot
+ creation
+Message-ID: <20160419222530.GU2187@wotan.suse.de>
+Reply-To: Mark Fasheh <mfasheh@suse.de>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Jan Kara <jack@suse.cz>
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Cc: Qu Wenruo <quwenruo@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-Although the test waits for running subshells after sending SIGTERM
-signal to them, it does not wait for subprocesses of those subshells
-properly. Thus we can hit EBUSY errors when umount is called. Make
-subshells wait for executed subprocesses when receiving SIGTERM to avoid
-the problem.
+This has been broken since Linux v4.1. We may have worked out a solution on
+the btrfs list but in the meantime sending a test to expose the issue seems
+like a good idea.
 
-Signed-off-by: Jan Kara <jack@suse.cz>
+Signed-off-by: Mark Fasheh <mfasheh@suse.de>
 ---
- tests/generic/038 | 15 +++++++++++----
- 1 file changed, 11 insertions(+), 4 deletions(-)
+ tests/btrfs/122   | 88 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/group |  1 +
+ 2 files changed, 89 insertions(+)
+ create mode 100755 tests/btrfs/122
 
-diff --git a/tests/generic/038 b/tests/generic/038
-index 59aed67ab2ff..025e1b0fe7a6 100755
---- a/tests/generic/038
-+++ b/tests/generic/038
-@@ -77,6 +77,10 @@ rm -f $seqres.full
- # fstrim loop below.
- fallocate_loop()
- {
-+	# Wait for running subcommand before exitting so that
-+	# mountpoint is not busy when we try to unmount it
-+	trap "wait; exit" SIGTERM
+diff --git a/tests/btrfs/122 b/tests/btrfs/122
+new file mode 100755
+index 0000000..b7e9e4b
+--- /dev/null
++++ b/tests/btrfs/122
+@@ -0,0 +1,88 @@
++#! /bin/bash
++# FS QA Test No. btrfs/122
++#
++# Test that qgroup counts are valid after snapshot creation. This has
++# been broken in btrfs since Linux v4.1
++#
++#-----------------------------------------------------------------------
++# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#
++#-----------------------------------------------------------------------
++#
 +
- 	local name=$1
- 	while true; do
- 		$XFS_IO_PROG -f -c "falloc -k 0 1G" \
-@@ -90,6 +94,10 @@ fallocate_loop()
- 
- trim_loop()
- {
-+	# Wait for running subcommand before exitting so that
-+	# mountpoint is not busy when we try to unmount it
-+	trap "wait; exit" SIGTERM
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
 +
- 	while true; do
- 		$FSTRIM_PROG $SCRATCH_MNT
- 	done
-@@ -115,7 +123,9 @@ create_files()
- 	for ((n = 0; n < 4; n++)); do
- 		mkdir $SCRATCH_MNT/$n
- 		(
--               for ((i = 1; i <= $nr_files; i++)); do
-+		trap "wait; exit" SIGTERM
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
-+		for ((i = 1; i <= $nr_files; i++)); do
- 			$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 3900" \
- 				$SCRATCH_MNT/$n/"${prefix}_$i" &> /dev/null
- 			if [ $? -ne 0 ]; then
-@@ -152,9 +162,6 @@ kill ${fallocate_pids[@]}
- kill ${trim_pids[@]}
- wait
- 
--# Sleep a bit, otherwise umount fails often with EBUSY (TODO: investigate why).
--sleep 3
--
- # The fstests framework will now check for fs consistency with fsck.
- # The trimming was racy and caused some btree nodes to get full of zeroes on
- # disk, which obviously caused fs metadata corruption. The race often lead
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++
++rm -f $seqres.full
++
++# Force a small leaf size to make it easier to blow out our root
++# subvolume tree
++_scratch_mkfs "--nodesize 16384"
++_scratch_mount
++_run_btrfs_util_prog quota enable $SCRATCH_MNT
++
++mkdir "$SCRATCH_MNT/snaps"
++
++# First make some simple snapshots - the bug was initially reproduced like this
++_run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT "$SCRATCH_MNT/snaps/empty1"
++_run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT "$SCRATCH_MNT/snaps/empty2"
++
++# This forces the fs tree out past level 0, adding at least one tree
++# block which must be properly accounted for when we make our next
++# snapshots.
++mkdir "$SCRATCH_MNT/data"
++for i in `seq 0 640`; do
++    $XFS_IO_PROG -f -c "pwrite 0 1M" "$SCRATCH_MNT/data/file$i" > /dev/null 2>&1
++done;
++
++# Snapshot twice.
++_run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT "$SCRATCH_MNT/snaps/snap1"
++_run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT "$SCRATCH_MNT/snaps/snap2"
++
++_scratch_unmount
++
++# generate a qgroup report and look for inconsistent groups
++$BTRFS_UTIL_PROG check --qgroup-report $SCRATCH_DEV 2>&1 | \
++			grep -q -E "Counts for qgroup.*are different"
++if [ $? -ne 0 ]; then
++	status=0
++fi
++
++exit
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 9403daa..f7e8cff 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -122,3 +122,4 @@
+ 119 auto quick snapshot metadata qgroup
+ 120 auto quick snapshot metadata
+ 121 auto quick snapshot qgroup
++122 auto quick snapshot qgroup
 -- 
-2.6.6
+2.1.4
 
