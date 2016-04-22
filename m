@@ -1,137 +1,159 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:59375 "EHLO
-	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751657AbcD2B7b (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 28 Apr 2016 21:59:31 -0400
-Date: Fri, 29 Apr 2016 11:59:27 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [RFC PATCH] xfstests: Add mkfs input validation tests
-Message-ID: <20160429015927.GN18496@dastard>
-References: <1461231593-31294-1-git-send-email-jtulak@redhat.com>
- <1461832149-18276-1-git-send-email-jtulak@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1461832149-18276-1-git-send-email-jtulak@redhat.com>
+Return-Path: <fstests-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:45213 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751594AbcDVIMd (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 22 Apr 2016 04:12:33 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 8CBFEC074100
+	for <fstests@vger.kernel.org>; Fri, 22 Apr 2016 08:12:32 +0000 (UTC)
+From: Xiong Zhou <xzhou@redhat.com>
+Subject: [PATCH 1/2] overlay: test basic whiteout
+Date: Fri, 22 Apr 2016 16:11:54 +0800
+Message-Id: <1461312715-14197-1-git-send-email-xzhou@redhat.com>
+In-Reply-To: <20160421125732.GF4675@eguan.usersys.redhat.com>
+References: <20160421125732.GF4675@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jan Tulak <jtulak@redhat.com>
-Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
+To: eguan@redhat.com
+Cc: fstests@vger.kernel.org, Xiong Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Apr 28, 2016 at 10:29:09AM +0200, Jan Tulak wrote:
-> Test inputs for my mkfs-cleaning patchset. This test will fail with the old sphageti code mkfs, among others because the old code accepts incorrect values.
-> 
-> 
-> 
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> Signed-off-by: Jan Tulak <jtulak@redhat.com>
+Once a while, overlayfs whiteout can be visible if upper fs
+does not support d_type(ftype/filetype). Test as a sanity
+check on whiteout of regular files, links, dirs, devices
+and pipes.
 
-Please don't strip the commit messages from patches you've picked up
-from other people - it loses valuable information, as well as the
-original author of the code. i.e. The original commit message was:
+Signed-off-by: Xiong Zhou <xzhou@redhat.com>
+---
+ tests/overlay/003     | 98 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/003.out |  2 ++
+ tests/overlay/group   |  1 +
+ 3 files changed, 101 insertions(+)
+ create mode 100755 tests/overlay/003
+ create mode 100644 tests/overlay/003.out
 
-
-From: Dave Chinner <dchinner@redhat.com>
-
-mkfs.xfs does not do a very good job of input validation. This test
-is designed to exercise the input validation and test good/bad
-combinations of options being set. It will not pass on a current
-mkfs.xfs binary - it is designed to be the test case for a input
-validation cleanup.
-
-Signed-off-by: Dave Chinner <dchinner@redhat.com>
-
-> ---
-> 
-> Hi guys,
-> 
-> I'm sending this patch although the mentioned patchset is not yet merged.
-> It might help you a bit with checking if there are any issues with
-> the patchset, as here it is clear, what options works and what not.
-
-in which case, a "_require_xfs_mkfs_validation" rule should be
-written to determine the version of mkfs being. e.g. by testing one
-of the failure cases that the unfixed binary says is ok.
-....
-> +# basic "should fail" options
-> +# logarithm based options are no longer valid
-> +# NOTE: umm, when it got invalid? It seems to be still supported...
-> +#do_mkfs_fail -s log=10 $SCRATCH_DEV
-> +#do_mkfs_fail -b log=10 $SCRATCH_DEV
-> +#do_mkfs_fail -n log=10 $SCRATCH_DEV
-> +#do_mkfs_fail -i log=10 $SCRATCH_DEV
-> +#do_mkfs_fail -d sectlog=10 $SCRATCH_DEV
-> +#do_mkfs_fail -l sectlog=10 $SCRATCH_DEV
-
-They were expected to fail because I was going to remove the log
-options from mkfs as part of the cleanup series because they are
-redundant and nobody uses them. i.e this test was written with what
-I wanted as the end result of the mkfs input validation cleanup, not
-an iteration of the current behaviour.
-
-After all the data section tests, the new tests you've added all
-seem to be pretty ad-hoc.  What I was fleshing out in this test was
-a relatively complete set exercising each the different options mkfs
-supports.
-
-I'd only iterated data section options so far in this test. I'd just
-started on the naming section tests, and had not added any but a
-basic test. That needs to be iterated, as do the inode, log (both
-internal and external), metadata and realtime options....
-
-
-> +# invalid file section tests
-> +rm -f $fsimg
-> +$XFS_IO_PROG -f -c "truncate $fssize" $fsimg
-> +do_mkfs_fail -d file $fsimg
-> +do_mkfs_fail -d file,name=$fsimg
-
-Why should these fail - size should not be required if the image
-file already exists and is of sufficient size....
-
-> +
-> +# naming section tests
-> +do_mkfs_pass -n size=65536 $SCRATCH_DEV
-> +
-> +# boolean options
-> +$XFS_IO_PROG -f -c "truncate $fssize" $fsimg
-> +do_mkfs_pass -d file=1,size=$fssize $fsimg
-> +do_mkfs_pass -d file=0 $SCRATCH_DEV
-> +do_mkfs_fail -d file=1 $SCRATCH_DEV
-
-More image file tests, belong in the data section with the other
-image file tests.
-
-> +# Specific flag combinations where some bug appeared during development,
-> +# to catch the same issue if it re-appears. If there are multiple similar
-> +# checks, move them to a standalone block.
-> +
-> +
-> +do_mkfs_pass -m crc=1,finobt=1 $SCRATCH_DEV
-
-What about all the other invalid cases?
-
-> +do_mkfs_pass -m crc=1 -n ftype=1 $SCRATCH_DEV
-> +do_mkfs_pass -m crc=0 -n ftype=1 $SCRATCH_DEV
-> +do_mkfs_fail -m crc=1 -n ftype=0 $SCRATCH_DEV
-> +do_mkfs_pass -m crc=0 -n ftype=0 $SCRATCH_DEV
-> +do_mkfs_pass -n ftype=1 -m crc=0 $SCRATCH_DEV
-
-One of the cleanup requirements was that option parsing would not
-be order sensitive, so I don't think you need to iterate parameters
-in different orders. That would just blow out the test matrix
-unnecessarily. Also, if you really need to repeat the same test but
-with different orders, please place those tests sequentially in the
-file so it's clear that they are duplicate/order swapped tests....
-
-> +# if user states crc=0,finobt=1, fail instead of warning
-> +do_mkfs_fail -m crc=0,finobt=1 $SCRATCH_DEV
-
-Why is this separate to the other crc,finobt test? Please try to
-keep the parameter checks in logical groupings....
-
-Cheers,
-
-Dave.
+diff --git a/tests/overlay/003 b/tests/overlay/003
+new file mode 100755
+index 0000000..fbc242a
+--- /dev/null
++++ b/tests/overlay/003
+@@ -0,0 +1,98 @@
++#! /bin/bash
++# FS QA Test 003
++#
++# Test overlayfs basic whiteout.
++#
++# Overlayfs whiteout can be visible if underlying upper fs does not
++# support d_type. Kernel commit
++#	45aebea (ovl: Ensure upper filesystem supports d_type)
++# prevents mounting overlayfs like this since v4.6-rc1.
++# No harm to keep this test as a sanity check.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Red Hat Inc. All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs overlay
++_supported_os Linux
++_require_scratch
++
++# Remove all files from previous tests
++_scratch_mkfs
++
++# Create test files dirs in lower dir
++lowerdir=${SCRATCH_DEV}/${OVERLAY_LOWER_DIR}
++mkdir -p $lowerdir
++
++touch ${lowerdir}/test_file
++ln -s ${lowerdir}/test_file ${lowerdir}/test_softlink_file
++ln ${lowerdir}/test_file ${lowerdir}/test_hardlink_file
++
++mkdir -p ${lowerdir}/test_dir
++ln -s ${lowerdir}/test_dir ${lowerdir}/test_softlink_dir
++
++mknod ${lowerdir}/test_cdev c 2 3
++ln -s ${lowerdir}/test_cdev ${lowerdir}/test_softlink_cdev
++ln ${lowerdir}/test_cdev ${lowerdir}/test_hardlink_cdev
++
++mknod ${lowerdir}/test_bdev b 2 4
++ln -s ${lowerdir}/test_bdev ${lowerdir}/test_softlink_bdev
++ln ${lowerdir}/test_bdev ${lowerdir}/test_hardlink_bdev
++
++mknod ${lowerdir}/test_pipe p
++ln -s ${lowerdir}/test_pipe ${lowerdir}/test_softlink_pipe
++ln ${lowerdir}/test_pipe ${lowerdir}/test_hardlink_pipe
++
++_scratch_mount
++
++# whiteout all files in overlay mountpoint
++rm -rf ${SCRATCH_MNT}/*
++# nothing should be listed
++ls ${SCRATCH_MNT}/
++
++_scratch_unmount
++
++rm -rf $lowerdir
++echo "Silence is golden"
++# success, all done
++status=0
++exit
+diff --git a/tests/overlay/003.out b/tests/overlay/003.out
+new file mode 100644
+index 0000000..6895fc8
+--- /dev/null
++++ b/tests/overlay/003.out
+@@ -0,0 +1,2 @@
++QA output created by 003
++Silence is golden
+diff --git a/tests/overlay/group b/tests/overlay/group
+index 84d164e..9735f40 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -5,3 +5,4 @@
+ #
+ 001 auto quick copyup
+ 002 auto quick metadata
++003 auto quick whiteout
 -- 
-Dave Chinner
-david@fromorbit.com
+2.5.5
+
