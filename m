@@ -1,66 +1,60 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:54972 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751711AbcDVA0k (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 21 Apr 2016 20:26:40 -0400
-Subject: Re: [PATCH] btrfs: Test that qgroup counts are valid after snapshot
+Received: from userp1040.oracle.com ([156.151.31.81]:44975 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964889AbcDYUxF (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 25 Apr 2016 16:53:05 -0400
+Date: Mon, 25 Apr 2016 13:50:36 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] common/populate: remove unnecessary devices directory
  creation
-References: <20160419222530.GU2187@wotan.suse.de>
- <5716D1F6.6010507@jp.fujitsu.com> <20160421235348.GW2187@wotan.suse.de>
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Message-ID: <dd1ae558-9214-022f-10e2-5efd68857e2e@cn.fujitsu.com>
-Date: Fri, 22 Apr 2016 08:26:33 +0800
+Message-ID: <20160425205036.GB19708@birch.djwong.org>
+References: <1460942807-19296-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-In-Reply-To: <20160421235348.GW2187@wotan.suse.de>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1460942807-19296-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Mark Fasheh <mfasheh@suse.de>, Satoru Takeuchi <takeuchi_satoru@jp.fujitsu.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+On Mon, Apr 18, 2016 at 09:26:47AM +0800, Xiaoguang Wang wrote:
+> _scratch_ext4_populate and _scratch_xfs_populate try to create
+> devices directory in xfstests/, so if we run xfs/083 or ext4/006
+> twice, it'll fail, fix this issue.
 
+Looks ok,
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-Mark Fasheh wrote on 2016/04/21 16:53 -0700:
-> Thank you for the review, comments are below.
->
-> On Wed, Apr 20, 2016 at 09:48:54AM +0900, Satoru Takeuchi wrote:
->> On 2016/04/20 7:25, Mark Fasheh wrote:
->>> +# Force a small leaf size to make it easier to blow out our root
->>> +# subvolume tree
->>> +_scratch_mkfs "--nodesize 16384"
->>
->> nodesize 16384 is the default value. Do you
->> intend other value, for example 4096?
->
-> "future proofing" I suppose - if we up the default, the for loop below may
-> not create a level 1 tree.
->
-> If we force it smaller than 16K I believe that may mean we can't run this
-> test on some kernels with page size larger than the typical 4k.
-> 	--Mark
->
->
-> --
-> Mark Fasheh
->
->
+--D
 
-Sorry for the late reply.
-
-Unfortunately, for system with 64K page size, it will fail(mount and 
-mkfs) if we use 16K nodesize.
-
-IIRC, like some other btrfs qgroup test case, we use 64K nodesize as the 
-safest nodesize.
-
-And for level 1 tree create, the idea is to use inline file extents to 
-rapidly create level 1 tree.
-
-16 4K files should create a level 1 tree.
-Although in this case, max_inline=4096 would be added to mount option 
-though.
-
-Thanks,
-Qu
-
-
+> 
+> Signed-off-by: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
+> ---
+>  common/populate | 2 --
+>  1 file changed, 2 deletions(-)
+> 
+> diff --git a/common/populate b/common/populate
+> index d166c24..aa6ed79 100644
+> --- a/common/populate
+> +++ b/common/populate
+> @@ -141,7 +141,6 @@ _scratch_xfs_populate() {
+>  
+>  	# Char & block
+>  	echo "+ special"
+> -	mkdir devices
+>  	mknod "${SCRATCH_MNT}/S_IFCHR" c 1 1
+>  	mknod "${SCRATCH_MNT}/S_IFBLK" c 1 1
+>  
+> @@ -241,7 +240,6 @@ _scratch_ext4_populate() {
+>  
+>  	# Char & block
+>  	echo "+ special"
+> -	mkdir devices
+>  	mknod "${SCRATCH_MNT}/S_IFCHR" c 1 1
+>  	mknod "${SCRATCH_MNT}/S_IFBLK" c 1 1
+>  
+> -- 
+> 1.8.3.1
+> 
+> 
+> 
