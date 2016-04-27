@@ -1,152 +1,48 @@
-Received: from mail.kernel.org ([198.145.29.136]:41332 "EHLO mail.kernel.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751363AbcDZOEQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 26 Apr 2016 10:04:16 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH] fstests: test creating a symlink and then fsync its parent directory
-Date: Mon, 25 Apr 2016 05:26:23 +0100
-Message-Id: <1461558383-32254-1-git-send-email-fdmanana@kernel.org>
+Received: from cn.fujitsu.com ([59.151.112.132]:8231 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751920AbcD0FQU (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 27 Apr 2016 01:16:20 -0400
+Message-ID: <5720462B.4050900@cn.fujitsu.com>
+Date: Wed, 27 Apr 2016 12:55:07 +0800
+From: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
+MIME-Version: 1.0
+Subject: Re: [PATCH] fstests: xfs: add necessary version check for xfs/122
+References: <1458549088-468-1-git-send-email-wangxg.fnst@cn.fujitsu.com> <20160322225614.GW11812@dastard>
+In-Reply-To: <20160322225614.GW11812@dastard>
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+hello,
 
-Test creating a symlink, fsync its parent directory, power fail and mount
-again the filesystem. After these steps the symlink should exist and its
-content must match what we specified when we created it (must not be
-empty or point to something else).
+On 03/23/2016 06:56 AM, Dave Chinner wrote:
+> On Mon, Mar 21, 2016 at 04:31:28PM +0800, Xiaoguang Wang wrote:
+>> From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+>>
+>> Since commit c0cfa5651f2d ("xfs/122: update against xfsprogs 4.3"), xfs/122
+>> has been updated against xfsprogs 4.3, so add necessary version check.
+>>
+>> Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+> 
+> This sort of version test belongs in autoconf, not the tests
+> themselves.
+Would you please give me some hints about how to add version test
+in autoconf, also in xfs/188, I see similar usage:
+    if [ $XFSPROGS_VERSION -lt 21000 ]; then
+        _notrun "this test requires case-insensitive support"
+    fi
 
-This is motivated by an issue in btrfs where after the log replay happens
-we get empty symlinks, which not only does not make much sense from a
-user's point of view, it's also not valid to have empty links in linux
-(wgich is explicitly forbidden by the symlink(2) system call).
+Regards,
+Xiaoguang Wang
 
-The issue in btrfs is fixed by the following patch for the linux kernel:
+> 
+> Cheers,
+> 
+> Dave.
+> 
 
-  "Btrfs: fix empty symlink after creating symlink and fsync parent dir"
 
-Tested against ext3, ext4, xfs, f2fs, reiserfs and nilfs2.
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/generic/344     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/344.out |  4 +++
- tests/generic/group   |  1 +
- 3 files changed, 89 insertions(+)
- create mode 100755 tests/generic/344
- create mode 100644 tests/generic/344.out
-
-diff --git a/tests/generic/344 b/tests/generic/344
-new file mode 100755
-index 0000000..5dcf130
---- /dev/null
-+++ b/tests/generic/344
-@@ -0,0 +1,84 @@
-+#! /bin/bash
-+# FSQA Test No. 344
-+#
-+# Test creating a symlink, fsync its parent directory, power fail and mount
-+# again the filesystem. After these steps the symlink should exist and its
-+# content must match what we specified when we created it (must not be empty
-+# or point to something else).
-+#
-+#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	_cleanup_flakey
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmflakey
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_dm_target flakey
-+_require_metadata_journaling $SCRATCH_DEV
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_init_flakey
-+_mount_flakey
-+
-+mkdir $SCRATCH_MNT/testdir1
-+# Make sure it's durably persisted.
-+sync
-+
-+# Create our symlinks and fsync their parent directories.
-+# We test both the case where the parent directory is new (not yet durably
-+# persisted) and where the parent existed long time before.
-+ln -s $SCRATCH_MNT/foo1 $SCRATCH_MNT/testdir1/bar1
-+$XFS_IO_PROG -c fsync $SCRATCH_MNT/testdir1
-+mkdir $SCRATCH_MNT/testdir2
-+ln -s $SCRATCH_MNT/foo2 $SCRATCH_MNT/testdir2/bar2
-+$XFS_IO_PROG -c fsync $SCRATCH_MNT/testdir2
-+
-+# After a power failure and mounting again the filesystem, we expect to see the
-+# symlinks and we expect them to point to foo1 and foo2.
-+_flakey_drop_and_remount
-+
-+echo "Symlink contents after log replay:"
-+readlink $SCRATCH_MNT/testdir1/bar1 | _filter_scratch
-+readlink $SCRATCH_MNT/testdir2/bar2 | _filter_scratch
-+
-+_unmount_flakey
-+status=0
-+exit
-diff --git a/tests/generic/344.out b/tests/generic/344.out
-new file mode 100644
-index 0000000..0468b9c
---- /dev/null
-+++ b/tests/generic/344.out
-@@ -0,0 +1,4 @@
-+QA output created by 344
-+Symlink contents after log replay:
-+SCRATCH_MNT/foo1
-+SCRATCH_MNT/foo2
-diff --git a/tests/generic/group b/tests/generic/group
-index 0e5a82e..7ec82db 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -346,3 +346,4 @@
- 341 auto quick metadata
- 342 auto quick metadata
- 343 auto quick metadata
-+344 auto quick metadata
--- 
-2.7.0.rc3
 
