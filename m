@@ -1,98 +1,51 @@
-Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:52141 "EHLO
-	mx0b-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750809AbcD1N7R (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 28 Apr 2016 09:59:17 -0400
-Subject: Re: [PATCH 2/2] btrfs: add test for replacing a missing device
-References: <cover.1461817486.git.osandov@fb.com>
- <dcf5aed04d3a85f33ec99e37fa0a17031c370ece.1461817486.git.osandov@fb.com>
-From: Josef Bacik <jbacik@fb.com>
-Message-ID: <bfdaaebf-c026-8563-e247-784ee6253308@fb.com>
-Date: Thu, 28 Apr 2016 09:59:09 -0400
-MIME-Version: 1.0
-In-Reply-To: <dcf5aed04d3a85f33ec99e37fa0a17031c370ece.1461817486.git.osandov@fb.com>
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
+Received: from mail-pa0-f44.google.com ([209.85.220.44]:35512 "EHLO
+	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753325AbcD1Rds (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 28 Apr 2016 13:33:48 -0400
+Received: by mail-pa0-f44.google.com with SMTP id iv1so34699989pac.2
+        for <fstests@vger.kernel.org>; Thu, 28 Apr 2016 10:33:48 -0700 (PDT)
+From: Omar Sandoval <osandov@osandov.com>
+Subject: [PATCH v2 0/2] fstests: btrfs: the lost levels
+Date: Thu, 28 Apr 2016 10:33:35 -0700
+Message-Id: <cover.1461864695.git.osandov@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: Omar Sandoval <osandov@osandov.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 Cc: kernel-team@fb.com, Omar Sandoval <osandov@fb.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 04/28/2016 12:31 AM, Omar Sandoval wrote:
-> From: Omar Sandoval <osandov@fb.com>
->
-> Now that _btrfs_get_profile_configs supports replace missing and the
-> kernel doesn't crash when replacing a missing RAID 5/6 device, test it.
-> Based on an earlier test from Wang Yanfeng.
->
-> Signed-off-by: Omar Sandoval <osandov@fb.com>
-> ---
->  tests/btrfs/027     | 119 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/027.out |   2 +
->  tests/btrfs/group   |   1 +
->  3 files changed, 122 insertions(+)
->  create mode 100755 tests/btrfs/027
->  create mode 100644 tests/btrfs/027.out
->
-> diff --git a/tests/btrfs/027 b/tests/btrfs/027
-> new file mode 100755
-> index 000000000000..f0844a14f8e6
-> --- /dev/null
-> +++ b/tests/btrfs/027
-> @@ -0,0 +1,119 @@
-> +#! /bin/bash
-> +# FS QA Test 027
-> +#
-> +# Test replace of a missing device on various data and metadata profiles.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2016 Facebook.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +_supported_fs generic
-> +_supported_os IRIX Linux
+From: Omar Sandoval <osandov@fb.com>
 
-Pretty sure we don't support btrfs on IRIX.  Fix that up and you can add
+Changes since v1:
 
-Reviewed-by: Josef Bacik <jbacik@fb.com>
+- Fixed _supported_fs and _supported_os in patch 2
+- Added Josef's Reviewed-by
 
-Thanks,
+Original cover letter below:
 
-Josef
+Inspired by a conversation a few of us had at LSF about forgotten
+fstests, I went back and checked if I had let any tests disappear into
+the ether. Turns out that I did, so here are the tests for Btrfs replace
+missing that I never got merged, updated with everyone's comments from
+last time around ([1], [2]). Patch 1/3 in that original series did get
+merged but the last two didn't fare so well.
+
+Thanks!
+
+1: https://patchwork.kernel.org/patch/6856101/
+2: https://patchwork.kernel.org/patch/6856051/
+
+Omar Sandoval (2):
+  btrfs: add replace missing and replace RAID 5/6 to profile configs
+  btrfs: add test for replacing a missing device
+
+ common/rc           |  95 ++++++++++++++++++++---------------------
+ tests/btrfs/027     | 119 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/027.out |   2 +
+ tests/btrfs/group   |   1 +
+ 4 files changed, 170 insertions(+), 47 deletions(-)
+ create mode 100755 tests/btrfs/027
+ create mode 100644 tests/btrfs/027.out
+
+-- 
+2.8.0
+
