@@ -1,50 +1,60 @@
-Received: from mail-pa0-f54.google.com ([209.85.220.54]:34824 "EHLO
-	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750847AbcD1EcS (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 28 Apr 2016 00:32:18 -0400
-Received: by mail-pa0-f54.google.com with SMTP id iv1so27571121pac.2
-        for <fstests@vger.kernel.org>; Wed, 27 Apr 2016 21:32:18 -0700 (PDT)
-From: Omar Sandoval <osandov@osandov.com>
-Subject: [PATCH 2/2] btrfs: add test for replacing a missing device
-Date: Wed, 27 Apr 2016 21:31:52 -0700
-Message-Id: <dcf5aed04d3a85f33ec99e37fa0a17031c370ece.1461817486.git.osandov@fb.com>
-In-Reply-To: <cover.1461817486.git.osandov@fb.com>
-References: <cover.1461817486.git.osandov@fb.com>
-In-Reply-To: <cover.1461817486.git.osandov@fb.com>
-References: <cover.1461817486.git.osandov@fb.com>
+Received: from mx1.redhat.com ([209.132.183.28]:37315 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752230AbcD1I3M (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 28 Apr 2016 04:29:12 -0400
+From: Jan Tulak <jtulak@redhat.com>
+Subject: [RFC PATCH] xfstests: Add mkfs input validation tests
+Date: Thu, 28 Apr 2016 10:29:09 +0200
+Message-Id: <1461832149-18276-1-git-send-email-jtulak@redhat.com>
+In-Reply-To: <1461231593-31294-1-git-send-email-jtulak@redhat.com>
+References: <1461231593-31294-1-git-send-email-jtulak@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Cc: kernel-team@fb.com, Omar Sandoval <osandov@fb.com>
+To: fstests@vger.kernel.org
+Cc: xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Omar Sandoval <osandov@fb.com>
+Test inputs for my mkfs-cleaning patchset. This test will fail with the old sphageti code mkfs, among others because the old code accepts incorrect values.
 
-Now that _btrfs_get_profile_configs supports replace missing and the
-kernel doesn't crash when replacing a missing RAID 5/6 device, test it.
-Based on an earlier test from Wang Yanfeng.
 
-Signed-off-by: Omar Sandoval <osandov@fb.com>
+
+Signed-off-by: Dave Chinner <dchinner@redhat.com>
+Signed-off-by: Jan Tulak <jtulak@redhat.com>
 ---
- tests/btrfs/027     | 119 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/027.out |   2 +
- tests/btrfs/group   |   1 +
- 3 files changed, 122 insertions(+)
- create mode 100755 tests/btrfs/027
- create mode 100644 tests/btrfs/027.out
 
-diff --git a/tests/btrfs/027 b/tests/btrfs/027
+Hi guys,
+
+I'm sending this patch although the mentioned patchset is not yet merged.
+It might help you a bit with checking if there are any issues with
+the patchset, as here it is clear, what options works and what not.
+
+But because this test fails with how mkfs currently validates values
+(and some other things), maybe the merging of this patch should wait
+for the patchset.
+
+Cheers,
+Jan
+
+ tests/xfs/400-input-validation     | 226 +++++++++++++++++++++++++++++++++++++
+ tests/xfs/400-input-validation.out |   2 +
+ tests/xfs/group                    |   1 +
+ 3 files changed, 229 insertions(+)
+ create mode 100755 tests/xfs/400-input-validation
+ create mode 100644 tests/xfs/400-input-validation.out
+
+diff --git a/tests/xfs/400-input-validation b/tests/xfs/400-input-validation
 new file mode 100755
-index 000000000000..f0844a14f8e6
+index 0000000..4ded2ef
 --- /dev/null
-+++ b/tests/btrfs/027
-@@ -0,0 +1,119 @@
++++ b/tests/xfs/400-input-validation
+@@ -0,0 +1,226 @@
 +#! /bin/bash
-+# FS QA Test 027
++# FS QA Test No. xfs/401
 +#
-+# Test replace of a missing device on various data and metadata profiles.
++# mkfs.xfs input validation test. Designed to break mkfs.xfs if it doesn't
++# filter garbage input or invalid option combinations correctly.
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Facebook.  All Rights Reserved.
++# Copyright (c) 2014 Red Hat, Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -67,116 +77,219 @@ index 000000000000..f0844a14f8e6
 +
 +here=`pwd`
 +tmp=/tmp/$$
-+status=1	# failure is the default!
++status=1        # failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+	cd /
-+	rm -f $tmp.*
++    cd /
++    rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
 +
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
 +# real QA test starts here
 +
-+_supported_fs generic
-+_supported_os IRIX Linux
-+# we check scratch dev after each loop
-+_require_scratch_nocheck
-+_require_scratch_dev_pool 5
-+_require_scratch_dev_pool_equal_size
-+_btrfs_get_profile_configs replace-missing
-+_require_command "$WIPEFS_PROG" wipefs
++# Modify as appropriate.
++_supported_fs xfs
++_supported_os Linux
++_require_scratch
 +
-+run_test()
++echo silence is golden
++
++# clear out any options to mkfs first. We want to test realtime and external log
++# devices if we can, but we also want to control them ourselves.
++logdev=$SCRATCH_LOGDEV
++rtdev=$SCRATCH_RTDEV
++
++MKFS_OPTIONS=
++SCRATCH_LOGDEV=
++SCRATCH_RTDEV=
++
++# limit the image size of the filesystem being created to something small
++fssize=$((4 * 1024 * 1024 * 1024))
++fsimg=$TEST_DIR/$seq.img
++
++do_mkfs_pass()
 +{
-+	local mkfs_opts=$1
-+	local saved_scratch_dev_pool=$SCRATCH_DEV_POOL
-+	local replace_dev=`echo $SCRATCH_DEV_POOL | awk '{print $NF}'`
-+
-+	echo "Test $mkfs_opts" >>$seqres.full
-+
-+	SCRATCH_DEV_POOL=`echo $SCRATCH_DEV_POOL | sed -e "s# *$replace_dev *##"`
-+	_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
-+	# make sure we created btrfs with desired options
-+	if [ $? -ne 0 ]; then
-+		echo "mkfs $mkfs_opts failed"
-+		SCRATCH_DEV_POOL=$saved_scratch_dev_pool
-+		return
-+	fi
-+	_scratch_mount >>$seqres.full 2>&1
-+
-+	local missing_dev=`echo $SCRATCH_DEV_POOL | awk '{print $2}'`
-+	local missing_dev_id=`$BTRFS_UTIL_PROG fi show $SCRATCH_MNT | grep $missing_dev | awk '{print $2}'`
-+
-+	# get some data on the filesystem so there's something to replace
-+	dd if=/dev/urandom of="$SCRATCH_MNT"/file1 bs=1M count=1 \
-+		>>$seqres.full 2>&1
-+	dd if=/dev/urandom of="$SCRATCH_MNT"/file2 bs=1M count=2 \
-+		>>$seqres.full 2>&1
-+	dd if=/dev/urandom of="$SCRATCH_MNT"/file3 bs=1M count=4 \
-+		>>$seqres.full 2>&1
-+
-+	# nuke a device and remount in degraded mode
-+	_scratch_unmount
-+	$WIPEFS_PROG -a "$missing_dev" >>$seqres.full 2>&1
-+	_scratch_mount -o degraded >>$seqres.full 2>&1
-+
-+	# replace $missing_dev with $replace_dev and scrub it to double-check
-+	$BTRFS_UTIL_PROG replace start -B -r $missing_dev_id $replace_dev \
-+		$SCRATCH_MNT -f >>$seqres.full 2>&1
-+	if [ $? -ne 0 ]; then
-+		echo "btrfs replace failed"
-+		SCRATCH_DEV_POOL=$saved_scratch_dev_pool
-+		return
-+	fi
-+	$BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >>$seqres.full 2>&1
-+	if [ $? -ne 0 ]; then
-+		echo "btrfs scrub failed"
-+		SCRATCH_DEV_POOL=$saved_scratch_dev_pool
-+		return
-+	fi
-+
-+	_scratch_unmount
-+	# we called _require_scratch_nocheck instead of _require_scratch
-+	# do check after test for each profile config
-+	_check_scratch_fs
-+	SCRATCH_DEV_POOL=$saved_scratch_dev_pool
++        echo >> $seqres.full
++        echo "pass expected $*" >> $seqres.full
++        $MKFS_XFS_PROG -f -N $* >> $seqres.full 2>&1
++        [ $? -ne 0 ] && echo "fail $*"
 +}
 +
-+echo "Silence is golden"
-+for t in "${_btrfs_profile_configs[@]}"; do
-+	run_test "$t"
-+done
++do_mkfs_fail()
++{
++        echo >> $seqres.full
++        echo "fail expected $*" >> $seqres.full
++        $MKFS_XFS_PROG -f -N $* >> $seqres.full 2>&1
++        [ $? -eq 0 ] && echo "pass $*"
++}
++
++do_mkfs_pass $SCRATCH_DEV
++
++# basic "should fail" options
++# logarithm based options are no longer valid
++# NOTE: umm, when it got invalid? It seems to be still supported...
++#do_mkfs_fail -s log=10 $SCRATCH_DEV
++#do_mkfs_fail -b log=10 $SCRATCH_DEV
++#do_mkfs_fail -n log=10 $SCRATCH_DEV
++#do_mkfs_fail -i log=10 $SCRATCH_DEV
++#do_mkfs_fail -d sectlog=10 $SCRATCH_DEV
++#do_mkfs_fail -l sectlog=10 $SCRATCH_DEV
++
++# specifying sector sizes in sectors or blocks or garbage
++do_mkfs_fail -s size=2s $SCRATCH_DEV
++do_mkfs_fail -d sectsize=2s $SCRATCH_DEV
++do_mkfs_fail -l sectsize=2s $SCRATCH_DEV
++do_mkfs_fail -s size=2b $SCRATCH_DEV
++do_mkfs_fail -d sectsize=2b $SCRATCH_DEV
++do_mkfs_fail -l sectsize=2b $SCRATCH_DEV
++
++do_mkfs_fail -s size=grot $SCRATCH_DEV
++do_mkfs_fail -s size=2yerk $SCRATCH_DEV
++do_mkfs_fail -d sectsize=blah $SCRATCH_DEV
++do_mkfs_fail -d sectsize=2foo $SCRATCH_DEV
++do_mkfs_fail -l sectsize=nggh $SCRATCH_DEV
++do_mkfs_fail -l sectsize=2nggh $SCRATCH_DEV
++
++# conflicting sector/block sizes
++do_mkfs_fail -s size=512 -d sectsize=1024 $SCRATCH_DEV
++do_mkfs_fail -s size=512 -l sectsize=1024 $SCRATCH_DEV
++do_mkfs_fail -d sectsize=2048 -l sectsize=1024 $SCRATCH_DEV
++
++do_mkfs_fail -b size=512 -s size=1024 $SCRATCH_DEV
++do_mkfs_fail -b size=512 -d sectsize=1024 $SCRATCH_DEV
++do_mkfs_fail -b size=512 -l sectsize=1024 $SCRATCH_DEV
++
++# specifying block sizes in sectors without specifying sector size
++# or in blocks or garbage
++do_mkfs_fail -b size=2s $SCRATCH_DEV
++do_mkfs_fail -b size=2b $SCRATCH_DEV
++do_mkfs_fail -b size=nfi $SCRATCH_DEV
++do_mkfs_fail -b size=4096nfi $SCRATCH_DEV
++do_mkfs_fail -n size=2s $SCRATCH_DEV
++do_mkfs_fail -n size=2b $SCRATCH_DEV
++do_mkfs_fail -n size=nfi $SCRATCH_DEV
++do_mkfs_fail -n size=4096nfi $SCRATCH_DEV
++
++# bad label length
++do_mkfs_fail -L thisiswaytoolong $SCRATCH_DEV
++
++# basic "should pass" data section tests
++do_mkfs_pass $SCRATCH_DEV
++do_mkfs_pass -d name=$SCRATCH_DEV
++do_mkfs_pass -d size=$fssize $SCRATCH_DEV
++do_mkfs_pass -d agcount=32 $SCRATCH_DEV
++do_mkfs_pass -d agsize=32m $SCRATCH_DEV
++do_mkfs_pass -d agsize=32M $SCRATCH_DEV
++do_mkfs_pass -d agsize=1g $SCRATCH_DEV
++do_mkfs_pass -d agsize=$((32 * 1024 * 1024)) $SCRATCH_DEV
++do_mkfs_pass -b size=4096 -d agsize=8192b $SCRATCH_DEV
++do_mkfs_pass -d sectsize=512,agsize=65536s $SCRATCH_DEV
++do_mkfs_pass -s size=512 -d agsize=65536s $SCRATCH_DEV
++do_mkfs_pass -d noalign $SCRATCH_DEV
++do_mkfs_pass -d sunit=0,swidth=0 $SCRATCH_DEV
++do_mkfs_pass -d sunit=8,swidth=8 $SCRATCH_DEV
++do_mkfs_pass -d sunit=8,swidth=64 $SCRATCH_DEV
++do_mkfs_pass -d su=0,sw=0 $SCRATCH_DEV
++do_mkfs_pass -d su=4096,sw=1 $SCRATCH_DEV
++do_mkfs_pass -d su=4k,sw=1 $SCRATCH_DEV
++do_mkfs_pass -d su=4K,sw=8 $SCRATCH_DEV
++do_mkfs_pass -b size=4096 -d su=1b,sw=8 $SCRATCH_DEV
++do_mkfs_pass -d sectsize=512,su=8s,sw=8 $SCRATCH_DEV
++do_mkfs_pass -s size=512 -d su=8s,sw=8 $SCRATCH_DEV
++
++# invalid data section tests
++do_mkfs_fail -d size=${fssize}b $SCRATCH_DEV
++do_mkfs_fail -d size=${fssize}s $SCRATCH_DEV
++do_mkfs_fail -d size=${fssize}yerk $SCRATCH_DEV
++do_mkfs_fail -d agsize=8192b $SCRATCH_DEV
++do_mkfs_fail -d agsize=65536s $SCRATCH_DEV
++do_mkfs_fail -d agsize=32Mbsdfsdo $SCRATCH_DEV
++do_mkfs_fail -d agsize=1GB $SCRATCH_DEV
++do_mkfs_fail -d agcount=1k $SCRATCH_DEV
++do_mkfs_fail -d agcount=6b $SCRATCH_DEV
++do_mkfs_fail -d agcount=32,agsize=32m $SCRATCH_DEV
++do_mkfs_fail -d sunit=0,swidth=64 $SCRATCH_DEV
++do_mkfs_fail -d sunit=64,swidth=0 $SCRATCH_DEV
++do_mkfs_fail -d sunit=64,swidth=64,noalign $SCRATCH_DEV
++do_mkfs_fail -d sunit=64k,swidth=64 $SCRATCH_DEV
++do_mkfs_fail -d sunit=64,swidth=64m $SCRATCH_DEV
++do_mkfs_fail -d su=0,sw=64 $SCRATCH_DEV
++do_mkfs_fail -d su=4096,sw=0 $SCRATCH_DEV
++do_mkfs_fail -d su=4096,sw=64,noalign $SCRATCH_DEV
++do_mkfs_fail -d su=4096,sw=64s $SCRATCH_DEV
++do_mkfs_fail -d su=4096s,sw=64 $SCRATCH_DEV
++do_mkfs_fail -d su=4096b,sw=64 $SCRATCH_DEV
++do_mkfs_fail -d su=4096garabge,sw=64 $SCRATCH_DEV
++do_mkfs_fail -d su=4096,sw=64,sunit=64,swidth=64 $SCRATCH_DEV
++
++# file section, should pass
++rm -f $fsimg
++$XFS_IO_PROG -f -c "truncate $fssize" $fsimg
++do_mkfs_pass -d size=$fssize,file,name=$fsimg
++do_mkfs_pass -d size=$fssize,file $fsimg
++do_mkfs_pass $fsimg
++do_mkfs_pass -d size=$((fssize)) $fsimg
++do_mkfs_pass -d size=$((fssize)),name=$fsimg
++do_mkfs_pass -d size=$((fssize/2)) $fsimg
++# again this one, to check that we didn't truncated the file
++do_mkfs_pass -d size=$((fssize)) $fsimg
++
++# invalid file section tests
++rm -f $fsimg
++$XFS_IO_PROG -f -c "truncate $fssize" $fsimg
++do_mkfs_fail -d file $fsimg
++do_mkfs_fail -d file,name=$fsimg
++
++# naming section tests
++do_mkfs_pass -n size=65536 $SCRATCH_DEV
++
++# boolean options
++$XFS_IO_PROG -f -c "truncate $fssize" $fsimg
++do_mkfs_pass -d file=1,size=$fssize $fsimg
++do_mkfs_pass -d file=0 $SCRATCH_DEV
++do_mkfs_fail -d file=1 $SCRATCH_DEV
++
++# Specific flag combinations where some bug appeared during development,
++# to catch the same issue if it re-appears. If there are multiple similar
++# checks, move them to a standalone block.
++
++
++do_mkfs_pass -m crc=1,finobt=1 $SCRATCH_DEV
++
++do_mkfs_pass -m crc=1 -n ftype=1 $SCRATCH_DEV
++do_mkfs_pass -m crc=0 -n ftype=1 $SCRATCH_DEV
++do_mkfs_fail -m crc=1 -n ftype=0 $SCRATCH_DEV
++do_mkfs_pass -m crc=0 -n ftype=0 $SCRATCH_DEV
++do_mkfs_pass -n ftype=1 -m crc=0 $SCRATCH_DEV
++
++
++# if user states crc=0,finobt=1, fail instead of warning
++do_mkfs_fail -m crc=0,finobt=1 $SCRATCH_DEV
 +
 +status=0
 +exit
-diff --git a/tests/btrfs/027.out b/tests/btrfs/027.out
+diff --git a/tests/xfs/400-input-validation.out b/tests/xfs/400-input-validation.out
 new file mode 100644
-index 000000000000..ef78cdae50e8
+index 0000000..7080553
 --- /dev/null
-+++ b/tests/btrfs/027.out
++++ b/tests/xfs/400-input-validation.out
 @@ -0,0 +1,2 @@
-+QA output created by 027
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 13aa1e57d61e..90af8fc2d106 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -29,6 +29,7 @@
- 024 auto quick compress
- 025 auto quick send clone
- 026 auto quick compress prealloc
-+027 auto replace
- 029 auto quick clone
- 030 auto quick send
- 031 auto quick subvol clone
++QA output created by 400-input-validation
++silence is golden
+diff --git a/tests/xfs/group b/tests/xfs/group
+index f4c6816..b51ef2e 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -285,3 +285,4 @@
+ 303 auto quick quota
+ 304 auto quick quota
+ 305 auto quota
++400-input-validation auto quick mkfs
 -- 
-2.8.0
+2.5.0
 
