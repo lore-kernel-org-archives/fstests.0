@@ -1,147 +1,74 @@
-Received: from mail-pa0-f52.google.com ([209.85.220.52]:33970 "EHLO
-	mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753336AbcD1Rdu (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 28 Apr 2016 13:33:50 -0400
-Received: by mail-pa0-f52.google.com with SMTP id r5so34903597pag.1
-        for <fstests@vger.kernel.org>; Thu, 28 Apr 2016 10:33:50 -0700 (PDT)
-From: Omar Sandoval <osandov@osandov.com>
-Subject: [PATCH v2 1/2] btrfs: add replace missing and replace RAID 5/6 to profile configs
-Date: Thu, 28 Apr 2016 10:33:36 -0700
-Message-Id: <776782f53c3639730a9813a91babb6da57530ab0.1461864695.git.osandov@fb.com>
-In-Reply-To: <cover.1461864695.git.osandov@fb.com>
-References: <cover.1461864695.git.osandov@fb.com>
-In-Reply-To: <cover.1461864695.git.osandov@fb.com>
-References: <cover.1461864695.git.osandov@fb.com>
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:37202 "EHLO
+	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752571AbcD2BGO (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 28 Apr 2016 21:06:14 -0400
+Date: Fri, 29 Apr 2016 11:05:31 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] fstests: xfs: add necessary version check for xfs/122
+Message-ID: <20160429010531.GM18496@dastard>
+References: <1458549088-468-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
+ <20160322225614.GW11812@dastard>
+ <5720462B.4050900@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <5720462B.4050900@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Cc: kernel-team@fb.com, Omar Sandoval <osandov@fb.com>
+To: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Omar Sandoval <osandov@fb.com>
+On Wed, Apr 27, 2016 at 12:55:07PM +0800, Xiaoguang Wang wrote:
+> hello,
+> 
+> On 03/23/2016 06:56 AM, Dave Chinner wrote:
+> > On Mon, Mar 21, 2016 at 04:31:28PM +0800, Xiaoguang Wang wrote:
+> >> From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+> >>
+> >> Since commit c0cfa5651f2d ("xfs/122: update against xfsprogs 4.3"), xfs/122
+> >> has been updated against xfsprogs 4.3, so add necessary version check.
+> >>
+> >> Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+> > 
+> > This sort of version test belongs in autoconf, not the tests
+> > themselves.
+> Would you please give me some hints about how to add version test
+> in autoconf,
 
-Replacing and scrubbing RAID 5/6 is now supported on Btrfs. Enable it in
-_btrfs_get_profile_configs while making it more generic to also support
-replace missing.
+Well, first it helps to see what the problem is that your are trying
+ot work around. In general, if it's a compilation problem of a test
+program, then we use autoconf to set conditional defines to
+determine what gets compiled, and then write code that works for
+all the different versions we need to support.
 
-Reviewed-by: Eryu Guan <eguan@redhat.com>
-Signed-off-by: Omar Sandoval <osandov@fb.com>
----
- common/rc | 95 ++++++++++++++++++++++++++++++++-------------------------------
- 1 file changed, 48 insertions(+), 47 deletions(-)
+In this case, it's the test that is building source code to be
+compiled, so the problem is likely the test itself and the way it
+assmebles the header files for inclusion. That's what would need to
+be fixed....
 
-diff --git a/common/rc b/common/rc
-index 8bec836805c6..91e8f1c8e693 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3207,60 +3207,61 @@ _btrfs_get_profile_configs()
- 		return
- 	fi
- 
--	# no user specified btrfs profile configs, export the default configs
- 	if [ -z "$BTRFS_PROFILE_CONFIGS" ]; then
--		# default configs
--		_btrfs_profile_configs=(
--			"-m single -d single"
--			"-m dup -d single"
--			"-m raid0 -d raid0"
--			"-m raid1 -d raid0"
--			"-m raid1 -d raid1"
--			"-m raid10 -d raid10"
--			"-m raid5 -d raid5"
--			"-m raid6 -d raid6"
-+		# Default configurations to test.
-+		local configs=(
-+			"single:single"
-+			"dup:single"
-+			"raid0:raid0"
-+			"raid1:raid0"
-+			"raid1:raid1"
-+			"raid10:raid10"
-+			"raid5:raid5"
-+			"raid6:raid6"
- 		)
-+	else
-+		# User-provided configurations.
-+		local configs=(${BTRFS_PROFILE_CONFIGS[@]})
-+	fi
- 
--		# remove dup/raid5/raid6 profiles if we're doing device replace
--		# dup profile indicates only one device being used (SCRATCH_DEV),
--		# but we don't want to replace SCRATCH_DEV, which will be used in
--		# _scratch_mount/_check_scratch_fs etc.
--		# and raid5/raid6 doesn't support replace yet
-+	_btrfs_profile_configs=()
-+	for cfg in "${configs[@]}"; do
-+		local supported=true
-+		local profiles=(${cfg/:/ })
- 		if [ "$1" == "replace" ]; then
--			_btrfs_profile_configs=(
--				"-m single -d single"
--				"-m raid0 -d raid0"
--				"-m raid1 -d raid0"
--				"-m raid1 -d raid1"
--				"-m raid10 -d raid10"
--				# add these back when raid5/6 is working with replace
--				#"-m raid5 -d raid5"
--				#"-m raid6 -d raid6"
-+			# We can't do replace with these profiles because they
-+			# imply only one device ($SCRATCH_DEV), and we need to
-+			# keep $SCRATCH_DEV around for _scratch_mount
-+			# and _check_scratch_fs.
-+			local unsupported=(
-+				"dup"
- 			)
-+		elif [ "$1" == "replace-missing" ]; then
-+			# We can't replace missing devices with these profiles
-+			# because there isn't enough redundancy.
-+			local unsupported=(
-+				"single"
-+				"dup"
-+				"raid0"
-+			)
-+		else
-+			local unsupported=()
- 		fi
--		export _btrfs_profile_configs
--		return
--	fi
--
--	# parse user specified btrfs profile configs
--	local i=0
--	local cfg=""
--	for cfg in $BTRFS_PROFILE_CONFIGS; do
--		# turn "metadata:data" format to "-m metadata -d data"
--		# and assign it to _btrfs_profile_configs array
--		cfg=`echo "$cfg" | sed -e 's/^/-m /' -e 's/:/ -d /'`
--		_btrfs_profile_configs[$i]="$cfg"
--		let i=i+1
--	done
--
--	if [ "$1" == "replace" ]; then
--		if echo ${_btrfs_profile_configs[*]} | grep -q raid[56]; then
--			_notrun "RAID5/6 doesn't support btrfs device replace yet"
--		fi
--		if echo ${_btrfs_profile_configs[*]} | grep -q dup; then
--			_notrun "Do not set dup profile in btrfs device replace test"
-+		for unsupp in "${unsupported[@]}"; do
-+			if [ "${profiles[0]}" == "$unsupp" -o "${profiles[1]}" == "$unsupp" ]; then
-+			     if [ -z "$BTRFS_PROFILE_CONFIGS" ]; then
-+				     # For the default config, just omit it.
-+				     supported=false
-+			     else
-+				     # For user-provided config, don't run the test.
-+				     _notrun "Profile $unsupp not supported for $1"
-+			     fi
-+			fi
-+		done
-+		if "$supported"; then
-+			_btrfs_profile_configs+=("-m ${profiles[0]} -d ${profiles[1]}")
- 		fi
--	fi
-+	done
- 	export _btrfs_profile_configs
- }
- 
+> also in xfs/188,
+> I see similar usage:
+>     if [ $XFSPROGS_VERSION -lt 21000 ]; then
+>         _notrun "this test requires case-insensitive support"
+>     fi
+
+That's really old and was done before we settled on the _require*
+rules patterns for explicitly checking for support in tools.
+
+Indeed, this should simply check whether mkfs supports the "-n
+version=ci" parameter, as we do for things like CRC support...
+
+i.e.
+
+_requires_xfs_case_insensitive()
+{
+	_scratch_mkfs_xfs_supported -n version=ci >/dev/null 2>&1 \
+	           || _notrun "mkfs.xfs doesn't have case-insensitive feature"
+}
+
+Cheers,
+
+Dave.
 -- 
-2.8.0
-
+Dave Chinner
+david@fromorbit.com
