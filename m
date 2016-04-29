@@ -1,70 +1,133 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:37202 "EHLO
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:59375 "EHLO
 	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752571AbcD2BGO (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 28 Apr 2016 21:06:14 -0400
-Date: Fri, 29 Apr 2016 11:05:31 +1000
+	by vger.kernel.org with ESMTP id S1751657AbcD2B7b (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 28 Apr 2016 21:59:31 -0400
+Date: Fri, 29 Apr 2016 11:59:27 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] fstests: xfs: add necessary version check for xfs/122
-Message-ID: <20160429010531.GM18496@dastard>
-References: <1458549088-468-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
- <20160322225614.GW11812@dastard>
- <5720462B.4050900@cn.fujitsu.com>
+Subject: Re: [RFC PATCH] xfstests: Add mkfs input validation tests
+Message-ID: <20160429015927.GN18496@dastard>
+References: <1461231593-31294-1-git-send-email-jtulak@redhat.com>
+ <1461832149-18276-1-git-send-email-jtulak@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <5720462B.4050900@cn.fujitsu.com>
+In-Reply-To: <1461832149-18276-1-git-send-email-jtulak@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Xiaoguang Wang <wangxg.fnst@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org
+To: Jan Tulak <jtulak@redhat.com>
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 27, 2016 at 12:55:07PM +0800, Xiaoguang Wang wrote:
-> hello,
+On Thu, Apr 28, 2016 at 10:29:09AM +0200, Jan Tulak wrote:
+> Test inputs for my mkfs-cleaning patchset. This test will fail with the old sphageti code mkfs, among others because the old code accepts incorrect values.
 > 
-> On 03/23/2016 06:56 AM, Dave Chinner wrote:
-> > On Mon, Mar 21, 2016 at 04:31:28PM +0800, Xiaoguang Wang wrote:
-> >> From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
-> >>
-> >> Since commit c0cfa5651f2d ("xfs/122: update against xfsprogs 4.3"), xfs/122
-> >> has been updated against xfsprogs 4.3, so add necessary version check.
-> >>
-> >> Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
-> > 
-> > This sort of version test belongs in autoconf, not the tests
-> > themselves.
-> Would you please give me some hints about how to add version test
-> in autoconf,
+> 
+> 
+> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> Signed-off-by: Jan Tulak <jtulak@redhat.com>
 
-Well, first it helps to see what the problem is that your are trying
-ot work around. In general, if it's a compilation problem of a test
-program, then we use autoconf to set conditional defines to
-determine what gets compiled, and then write code that works for
-all the different versions we need to support.
+Please don't strip the commit messages from patches you've picked up
+from other people - it loses valuable information, as well as the
+original author of the code. i.e. The original commit message was:
 
-In this case, it's the test that is building source code to be
-compiled, so the problem is likely the test itself and the way it
-assmebles the header files for inclusion. That's what would need to
-be fixed....
 
-> also in xfs/188,
-> I see similar usage:
->     if [ $XFSPROGS_VERSION -lt 21000 ]; then
->         _notrun "this test requires case-insensitive support"
->     fi
+From: Dave Chinner <dchinner@redhat.com>
 
-That's really old and was done before we settled on the _require*
-rules patterns for explicitly checking for support in tools.
+mkfs.xfs does not do a very good job of input validation. This test
+is designed to exercise the input validation and test good/bad
+combinations of options being set. It will not pass on a current
+mkfs.xfs binary - it is designed to be the test case for a input
+validation cleanup.
 
-Indeed, this should simply check whether mkfs supports the "-n
-version=ci" parameter, as we do for things like CRC support...
+Signed-off-by: Dave Chinner <dchinner@redhat.com>
 
-i.e.
+> ---
+> 
+> Hi guys,
+> 
+> I'm sending this patch although the mentioned patchset is not yet merged.
+> It might help you a bit with checking if there are any issues with
+> the patchset, as here it is clear, what options works and what not.
 
-_requires_xfs_case_insensitive()
-{
-	_scratch_mkfs_xfs_supported -n version=ci >/dev/null 2>&1 \
-	           || _notrun "mkfs.xfs doesn't have case-insensitive feature"
-}
+in which case, a "_require_xfs_mkfs_validation" rule should be
+written to determine the version of mkfs being. e.g. by testing one
+of the failure cases that the unfixed binary says is ok.
+....
+> +# basic "should fail" options
+> +# logarithm based options are no longer valid
+> +# NOTE: umm, when it got invalid? It seems to be still supported...
+> +#do_mkfs_fail -s log=10 $SCRATCH_DEV
+> +#do_mkfs_fail -b log=10 $SCRATCH_DEV
+> +#do_mkfs_fail -n log=10 $SCRATCH_DEV
+> +#do_mkfs_fail -i log=10 $SCRATCH_DEV
+> +#do_mkfs_fail -d sectlog=10 $SCRATCH_DEV
+> +#do_mkfs_fail -l sectlog=10 $SCRATCH_DEV
+
+They were expected to fail because I was going to remove the log
+options from mkfs as part of the cleanup series because they are
+redundant and nobody uses them. i.e this test was written with what
+I wanted as the end result of the mkfs input validation cleanup, not
+an iteration of the current behaviour.
+
+After all the data section tests, the new tests you've added all
+seem to be pretty ad-hoc.  What I was fleshing out in this test was
+a relatively complete set exercising each the different options mkfs
+supports.
+
+I'd only iterated data section options so far in this test. I'd just
+started on the naming section tests, and had not added any but a
+basic test. That needs to be iterated, as do the inode, log (both
+internal and external), metadata and realtime options....
+
+
+> +# invalid file section tests
+> +rm -f $fsimg
+> +$XFS_IO_PROG -f -c "truncate $fssize" $fsimg
+> +do_mkfs_fail -d file $fsimg
+> +do_mkfs_fail -d file,name=$fsimg
+
+Why should these fail - size should not be required if the image
+file already exists and is of sufficient size....
+
+> +
+> +# naming section tests
+> +do_mkfs_pass -n size=65536 $SCRATCH_DEV
+> +
+> +# boolean options
+> +$XFS_IO_PROG -f -c "truncate $fssize" $fsimg
+> +do_mkfs_pass -d file=1,size=$fssize $fsimg
+> +do_mkfs_pass -d file=0 $SCRATCH_DEV
+> +do_mkfs_fail -d file=1 $SCRATCH_DEV
+
+More image file tests, belong in the data section with the other
+image file tests.
+
+> +# Specific flag combinations where some bug appeared during development,
+> +# to catch the same issue if it re-appears. If there are multiple similar
+> +# checks, move them to a standalone block.
+> +
+> +
+> +do_mkfs_pass -m crc=1,finobt=1 $SCRATCH_DEV
+
+What about all the other invalid cases?
+
+> +do_mkfs_pass -m crc=1 -n ftype=1 $SCRATCH_DEV
+> +do_mkfs_pass -m crc=0 -n ftype=1 $SCRATCH_DEV
+> +do_mkfs_fail -m crc=1 -n ftype=0 $SCRATCH_DEV
+> +do_mkfs_pass -m crc=0 -n ftype=0 $SCRATCH_DEV
+> +do_mkfs_pass -n ftype=1 -m crc=0 $SCRATCH_DEV
+
+One of the cleanup requirements was that option parsing would not
+be order sensitive, so I don't think you need to iterate parameters
+in different orders. That would just blow out the test matrix
+unnecessarily. Also, if you really need to repeat the same test but
+with different orders, please place those tests sequentially in the
+file so it's clear that they are duplicate/order swapped tests....
+
+> +# if user states crc=0,finobt=1, fail instead of warning
+> +do_mkfs_fail -m crc=0,finobt=1 $SCRATCH_DEV
+
+Why is this separate to the other crc,finobt test? Please try to
+keep the parameter checks in logical groupings....
 
 Cheers,
 
