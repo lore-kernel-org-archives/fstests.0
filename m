@@ -1,59 +1,50 @@
-Received: from mx1.redhat.com ([209.132.183.28]:42771 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753211AbcEJCc5 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 9 May 2016 22:32:57 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id AB74D8F516
-	for <fstests@vger.kernel.org>; Tue, 10 May 2016 02:32:56 +0000 (UTC)
-From: Xiong Zhou <xzhou@redhat.com>
-Subject: [PATCH v2] overlay: test memleak in copy-up error handling path
-Date: Tue, 10 May 2016 10:32:45 +0800
-Message-Id: <1462847565-12108-1-git-send-email-xzhou@redhat.com>
-In-Reply-To: <1462767157-26966-1-git-send-email-xzhou@redhat.com>
-References: <1462767157-26966-1-git-send-email-xzhou@redhat.com>
+Received: from cn.fujitsu.com ([222.73.24.84]:29565 "EHLO song.cn.fujitsu.com"
+	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+	id S1751049AbcEJIkF (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 10 May 2016 04:40:05 -0400
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Subject: [PATCH] fstests: btrfs: Test fiemap ioctl on completely deduped file
+Date: Tue, 10 May 2016 16:39:41 +0800
+Message-Id: <1462869581-19227-1-git-send-email-quwenruo@cn.fujitsu.com>
+MIME-Version: 1.0
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: eguan@redhat.com, Xiong Zhou <xzhou@redhat.com>
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This memleak leads to panic when unmount the underlying fs.
-Kernel commit ab79efab0 fixed this issue.
+For a completely deduped file, which means all its file extent are
+pointing to one bytenr, if calling fiemap on it, btrfs will cause soft
+hang up or just takes years long.
 
-Signed-off-by: Xiong Zhou <xzhou@redhat.com>
+This bug can be reproduced even without any in-band or out-of-band
+dedupe, normal clone_file_range() call can create such situation.
+
+This test case will detect it.
+
+Reported-by: Tsutomu Itoh <t-itoh@jp.fujitsu.com>
+Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 ---
+ tests/btrfs/028     | 78 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/028.out |  3 +++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 82 insertions(+)
+ create mode 100755 tests/btrfs/028
+ create mode 100644 tests/btrfs/028.out
 
-Diff to v1:
-	set up underlying fs in $SCRATCH_DEV instead of $SCRATCH_MNT
-	xfs_io open test_file instead of src/writemod
-	use little upper dir to trigger ENOSP failure instead of kill
-	clean up in cleanup
-
-Thanks Eryu for reviewing!
-
- tests/overlay/005     | 112 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/005.out |   2 +
- tests/overlay/group   |   1 +
- 3 files changed, 115 insertions(+)
- create mode 100755 tests/overlay/005
- create mode 100644 tests/overlay/005.out
-
-diff --git a/tests/overlay/005 b/tests/overlay/005
+diff --git a/tests/btrfs/028 b/tests/btrfs/028
 new file mode 100755
-index 0000000..3816bf1
+index 0000000..62bcc9d
 --- /dev/null
-+++ b/tests/overlay/005
-@@ -0,0 +1,112 @@
++++ b/tests/btrfs/028
+@@ -0,0 +1,78 @@
 +#! /bin/bash
-+# FS QA Test 005
++# FS QA Test 028
 +#
-+# Memleak in overlayfs copy-up error handling path leads to panic
-+# when unmount the underlying fs.
-+# Kernel commit ab79efab0 fixed this issue.
++# Test fiemap ioctl on heavily deduped file.
++#
++# This test will cause btrfs to soft hang up or takes years long to finish
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Red Hat Inc. All Rights Reserved.
++# Copyright (c) 2016 Fujitsu. All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -83,15 +74,12 @@ index 0000000..3816bf1
 +{
 +	cd /
 +	rm -f $tmp.*
-+	_destroy_loop_device $fs_loop_dev
-+	_destroy_loop_device $upper_loop_dev
-+	rm -f $fs_img
-+	rm -f $upper_img
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
++. ./common/reflink
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
@@ -99,81 +87,56 @@ index 0000000..3816bf1
 +# real QA test starts here
 +
 +# Modify as appropriate.
-+_supported_fs overlay
++_supported_fs btrfs
 +_supported_os Linux
-+_require_scratch
-+_require_loop
++_require_scratch_reflink
 +
-+# setup loop images fs for overlayfs
-+fs_img=${SCRATCH_DEV}/${seq}.$$.img
-+$XFS_IO_PROG -f -c "truncate 120m" $fs_img >>$seqres.full 2>&1
-+fs_loop_dev=`_create_loop_device $fs_img`
-+$MKFS_XFS_PROG -f -n ftype=1 $fs_loop_dev >>$seqres.full 2>&1
++blocksize=$(( 128 * 1024 ))
++nr=4096
++file="$SCRATCH_MNT/tmp"
 +
-+# only 20m for upper dir
-+upper_img=${SCRATCH_DEV}/$$.${seq}.img
-+$XFS_IO_PROG -f -c "truncate 20m" $upper_img >>$seqres.full 2>&1
-+upper_loop_dev=`_create_loop_device $upper_img`
-+$MKFS_XFS_PROG -f -n ftype=1 $upper_loop_dev >>$seqres.full 2>&1
++_scratch_mkfs
++_scratch_mount
 +
-+# mount underlying xfs
-+mkdir -p ${SCRATCH_DEV}/xfsmnt
-+mkdir -p ${SCRATCH_DEV}/uppermnt
-+$MOUNT_PROG $fs_loop_dev ${SCRATCH_DEV}/xfsmnt
-+$MOUNT_PROG $upper_loop_dev ${SCRATCH_DEV}/uppermnt
++# write the initial block for later reflink
++$XFS_IO_PROG -f -c "pwrite 0 $blocksize" -c "fsync" $file | _filter_xfs_io
 +
-+# prepare dirs
-+mkdir -p ${SCRATCH_DEV}/xfsmnt/lower
-+mkdir -p ${SCRATCH_DEV}/uppermnt/upper
-+mkdir -p ${SCRATCH_DEV}/uppermnt/work
++# use reflink to create the rest of the file, whose all extents are all
++# pointing to the first extent
++for i in $(seq 1 $nr); do
++	$XFS_IO_PROG -c "reflink $file 0 $(( $i * $blocksize )) $blocksize" \
++		$SCRATCH_MNT/tmp > /dev/null || _fail "reflink failed"
++done
 +
-+lowerd=${SCRATCH_DEV}/xfsmnt/lower
-+upperd=${SCRATCH_DEV}/uppermnt/upper
-+workd=${SCRATCH_DEV}/uppermnt/work
-+
-+# Create test file in lower dir, with too big a size for
-+# upper dir to copy up.
-+$XFS_IO_PROG -f -c "truncate 48m" ${lowerd}/test_file \
-+	>>$seqres.full 2>&1
-+
-+# mount new overlayfs
-+$MOUNT_PROG -t overlay $SELINUX_MOUNT_OPTIONS \
-+	    -o lowerdir=$lowerd -o upperdir=$upperd \
-+	    -o workdir=$workd \
-+	    $SCRATCH_DEV $SCRATCH_MNT
-+
-+# the open call triggers copy-up and it will fail ENOSP
-+$XFS_IO_PROG -f -c "o" ${SCRATCH_MNT}/test_file \
-+	>>$seqres.full 2>&1
-+
-+# unmount overlayfs
-+$UMOUNT_PROG $SCRATCH_MNT
-+
-+# unmount undelying xfs, this tiggers panic if memleak happens
-+$UMOUNT_PROG ${SCRATCH_DEV}/uppermnt
-+$UMOUNT_PROG ${SCRATCH_DEV}/xfsmnt
++# then call fiemap on that file, which shouldn't hang the fs by all means
++$XFS_IO_PROG -c "fiemap" $file >> $seqres.full
 +
 +# success, all done
-+echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/overlay/005.out b/tests/overlay/005.out
+diff --git a/tests/btrfs/028.out b/tests/btrfs/028.out
 new file mode 100644
-index 0000000..a5027f1
+index 0000000..2b5a9a5
 --- /dev/null
-+++ b/tests/overlay/005.out
-@@ -0,0 +1,2 @@
-+QA output created by 005
-+Silence is golden
-diff --git a/tests/overlay/group b/tests/overlay/group
-index fcf6d63..bc2474e 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -7,3 +7,4 @@
- 002 auto quick metadata
- 003 auto quick whiteout
- 004 attr auto copyup quick
-+005 auto copyup dangerous quick
++++ b/tests/btrfs/028.out
+@@ -0,0 +1,3 @@
++QA output created by 028
++wrote 131072/131072 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index da0e27f..8f6f877 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -30,6 +30,7 @@
+ 025 auto quick send clone
+ 026 auto quick compress prealloc
+ 027 auto replace
++028 auto clone
+ 029 auto quick clone
+ 030 auto quick send
+ 031 auto quick subvol clone
 -- 
 2.5.5
+
+
 
