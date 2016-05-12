@@ -1,273 +1,414 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:42299 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750725AbcELF43 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 12 May 2016 01:56:29 -0400
-Date: Wed, 11 May 2016 22:55:45 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] fstests: generic: Test reserved extent map search
- routine on deduped file
-Message-ID: <20160512055545.GD6648@birch.djwong.org>
-References: <1463028695-7806-1-git-send-email-quwenruo@cn.fujitsu.com>
- <20160512050118.GC6648@birch.djwong.org>
- <bc0a6bba-b39e-b1f4-2aab-d3a10c6d36d7@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <bc0a6bba-b39e-b1f4-2aab-d3a10c6d36d7@cn.fujitsu.com>
+Received: from mx2.suse.de ([195.135.220.15]:38814 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750774AbcELJai (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 12 May 2016 05:30:38 -0400
+Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
+	by mx2.suse.de (Postfix) with ESMTP id 2D013AD8D
+	for <fstests@vger.kernel.org>; Thu, 12 May 2016 09:30:36 +0000 (UTC)
+From: Jan Kara <jack@suse.cz>
+Subject: [PATCH] generic: Test handling of private file mappings
+Date: Thu, 12 May 2016 11:30:27 +0200
+Message-Id: <1463045427-13633-1-git-send-email-jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, david@fromorbit.com, hch@infradead.org
+To: fstests@vger.kernel.org
+Cc: Jan Kara <jack@suse.cz>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 12, 2016 at 01:44:01PM +0800, Qu Wenruo wrote:
-> 
-> 
-> Darrick J. Wong wrote on 2016/05/11 22:01 -0700:
-> >On Thu, May 12, 2016 at 12:51:35PM +0800, Qu Wenruo wrote:
-> >>For fully dedupe file, which means all its file exntents are pointing to
-> >>the same bytenr, btrfs can cause soft lockup when calling fiemap ioctl
-> >>on that file, like the following output:
-> >>------
-> >>CPU: 1 PID: 7500 Comm: xfs_io Not tainted 4.5.0-rc6+ #2
-> >>Hardware name: XXXXXXXXXXXXXXXXXXXXXXXXXXX
-> >>task: ffff880027681b40 ti: ffff8800276e0000 task.ti: ffff8800276e0000
-> >>RIP: 0010:[<ffffffffa02583e4>]  [<ffffffffa02583e4>]
-> >>__merge_refs+0x34/0x120 [btrfs]
-> >>RSP: 0018:ffff8800276e3c08  EFLAGS: 00000202
-> >>RAX: ffff8800269cc330 RBX: ffff8800269cdb18 RCX: 0000000000000007
-> >>RDX: 00000000000061b0 RSI: ffff8800269cc4c8 RDI: ffff8800276e3c88
-> >>RBP: ffff8800276e3c20 R08: 0000000000000000 R09: 0000000000000001
-> >>R10: 0000000000000000 R11: 0000000000000000 R12: ffff880026ea3cb0
-> >>R13: ffff8800276e3c88 R14: ffff880027132a50 R15: ffff880027430000
-> >>FS:  00007f10201df700(0000) GS:ffff88003fa00000(0000)
-> >>knlGS:0000000000000000
-> >>CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> >>CR2: 00007f10201ec000 CR3: 0000000027603000 CR4: 00000000000406e0
-> >>Stack:
-> >> 0000000000000000 0000000000000000 0000000000000000 ffff8800276e3ce8
-> >> ffffffffa0259f38 0000000000000005 ffff8800274c6870 ffff8800274c7d88
-> >> 0000000000c10000 0000000000000000 0000000000000001 0000000027431190
-> >>Call Trace:
-> >> [<ffffffffa0259f38>] find_parent_nodes+0x448/0x740 [btrfs]
-> >> [<ffffffffa025a4f2>] btrfs_check_shared+0x102/0x1b0 [btrfs]
-> >> [<ffffffff811fdcad>] ? __might_fault+0x4d/0xa0
-> >> [<ffffffffa021899c>] extent_fiemap+0x2ac/0x550 [btrfs]
-> >> [<ffffffff811ce156>] ? __filemap_fdatawait_range+0x96/0x160
-> >> [<ffffffffa01f8ee0>] ? btrfs_get_extent+0xb30/0xb30 [btrfs]
-> >> [<ffffffffa01f5da5>] btrfs_fiemap+0x45/0x50 [btrfs]
-> >> [<ffffffff81246bb8>] do_vfs_ioctl+0x498/0x670
-> >> [<ffffffff81246e09>] SyS_ioctl+0x79/0x90
-> >> [<ffffffff8184e997>] entry_SYSCALL_64_fastpath+0x12/0x6f
-> >>Code: 41 55 41 54 53 4c 8b 27 4c 39 e7 0f 84 e9 00 00 00 49 89 fd 49 8b
-> >>34 24 49 39 f5 48 8b 1e 75 17 e9 d5 00 00 00 49 39 dd 48 8b 03 <48> 89
-> >>de 0f 84 b9 00 00 00 48 89 c3 8b 46 2c 41 39 44 24 2c 75
-> >>------
-> >>
-> >>Also btrfs will return wrong flag for all these extents, they should
-> >>have SHARED(0x2000) flag, while btrfs still consider them as exclusive
-> >>extents.
-> >>
-> >>On the other hand, with unmerged xfs reflink patches, xfs can handle it
-> >>without problem, and for patched btrfs, it can also handle it well.
-> >>
-> >>This test case will create a large fully deduped file to check if the fs
-> >>can handle the fiemap ioctl and return correct SHARED flag for any fs
-> >>which support reflink.
-> >>
-> >>Reported-by: Tsutomu Itoh <t-itoh@jp.fujitsu.com>
-> >>Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
-> >>---
-> >> common/punch          | 17 +++++++++++
-> >> tests/generic/352     | 82 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> >> tests/generic/352.out |  5 ++++
-> >> tests/generic/group   |  1 +
-> >> 4 files changed, 105 insertions(+)
-> >> create mode 100755 tests/generic/352
-> >> create mode 100644 tests/generic/352.out
-> >>
-> >>diff --git a/common/punch b/common/punch
-> >>index 43f04c2..44c6e1c 100644
-> >>--- a/common/punch
-> >>+++ b/common/punch
-> >>@@ -218,6 +218,23 @@ _filter_fiemap()
-> >> 	_coalesce_extents
-> >> }
-> >>
-> >>+_filter_fiemap_flags()
-> >>+{
-> >>+	$AWK_PROG '
-> >>+		$3 ~ /hole/ {
-> >>+			print $1, $2, $3;
-> >>+			next;
-> >>+		}
-> >>+		$5 ~ /0x[[:xdigit:]]*8[[:xdigit:]][[:xdigit:]]/ {
-> >>+			print $1, $2, "unwritten";
-> >>+			next;
-> >>+		}
-> >>+		$5 ~ /0x[[:xdigit:]]+/ {
-> >>+			print $1, $2, $5;
-> >>+		}' |
-> >>+	_coalesce_extents
-> >>+}
-> >>+
-> >> # Filters fiemap output to only print the
-> >> # file offset column and whether or not
-> >> # it is an extent or a hole
-> >>diff --git a/tests/generic/352 b/tests/generic/352
-> >>new file mode 100755
-> >>index 0000000..83f24ec
-> >>--- /dev/null
-> >>+++ b/tests/generic/352
-> >>@@ -0,0 +1,82 @@
-> >>+#! /bin/bash
-> >>+# FS QA Test 352
-> >>+#
-> >>+# Test fiemap ioctl on heavily deduped file
-> >>+#
-> >>+# This test case will check if extent backref search goes
-> >>+# without problem and return correct SHARED flag.
-> >>+# Which btrfs will soft lock up and return wrong shared flag.
-> >>+#
-> >>+#-----------------------------------------------------------------------
-> >>+# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
-> >>+#
-> >>+# This program is free software; you can redistribute it and/or
-> >>+# modify it under the terms of the GNU General Public License as
-> >>+# published by the Free Software Foundation.
-> >>+#
-> >>+# This program is distributed in the hope that it would be useful,
-> >>+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> >>+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> >>+# GNU General Public License for more details.
-> >>+#
-> >>+# You should have received a copy of the GNU General Public License
-> >>+# along with this program; if not, write the Free Software Foundation,
-> >>+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> >>+#-----------------------------------------------------------------------
-> >>+#
-> >>+
-> >>+seq=`basename $0`
-> >>+seqres=$RESULT_DIR/$seq
-> >>+echo "QA output created by $seq"
-> >>+
-> >>+here=`pwd`
-> >>+tmp=/tmp/$$
-> >>+status=1	# failure is the default!
-> >>+trap "_cleanup; exit \$status" 0 1 2 3 15
-> >>+
-> >>+_cleanup()
-> >>+{
-> >>+	cd /
-> >>+	rm -f $tmp.*
-> >>+}
-> >>+
-> >>+# get standard environment, filters and checks
-> >>+. ./common/rc
-> >>+. ./common/filter
-> >>+. ./common/reflink
-> >>+. ./common/punch
-> >>+
-> >>+# remove previous $seqres.full before test
-> >>+rm -f $seqres.full
-> >>+
-> >>+# real QA test starts here
-> >>+
-> >>+# Modify as appropriate.
-> >>+_supported_fs generic
-> >>+_supported_os Linux
-> >>+_require_scratch_reflink
-> >>+
-> >>+_scratch_mkfs > /dev/null 2>&1
-> >>+_scratch_mount
-> >>+
-> >>+nr=$((8192 * $LOAD_FACTOR))
-> >>+blocksize=$((128 * 1024))
-> >>+file="$SCRATCH_MNT/tmp"
-> >>+
-> >>+# write the initial block for later reflink
-> >>+$XFS_IO_PROG -f -c "pwrite 0 $blocksize" -c "fsync" $file | _filter_xfs_io
-> >>+
-> >>+# use reflink to create the rest of the file, whose all extents are all
-> >>+# pointing to the first extent
-> >>+for i in $(seq 1 $nr); do
-> >>+	$XFS_IO_PROG -c "reflink $file 0 $(($i * $blocksize)) $blocksize" \
-> >>+		$file > /dev/null
-> >
-> >FYI, there's a _reflink_range helper for this now.
-> >
-> >(There's also a _pwrite_byte helper.)
-> 
-> Thanks, I'll use the new helper in next version.
-> 
-> >
-> >>+done
-> >>+
-> >>+# then call fiemap on that file to test both the shared flag and if
-> >>+# reserved extent mapping search will cause soft lockup
-> >>+$XFS_IO_PROG -c "fiemap -v" $file | _filter_fiemap_flags
-> >
-> >I think this test needs _require_fiemap or else it'll fail on things
-> >that don't support fiemap, like NFS.
-> >
-> >PS: How well does btrfs handle generic/17[56]?
-> 
-> Handles well, but very slow. (I bet it's slower than xfs)
-> 175 takes me about 10min(579s) to finish the test case, and even more time
-> to umount and run btrfsck.
+Test handling of private file mappings in the kernel. Check that writes
+of only one thread / process are seen in each page and that none of
+these make it into the original file.
 
-Yeah.  I don't know if your recent patches make that better? <shrug>
+Signed-off-by: Jan Kara <jack@suse.cz>
+---
+ src/holetest.c        | 121 +++++++++++++++++++++++++++++++++++++-------------
+ tests/generic/352     |  60 +++++++++++++++++++++++++
+ tests/generic/352.out |  73 ++++++++++++++++++++++++++++++
+ tests/generic/group   |   1 +
+ 4 files changed, 223 insertions(+), 32 deletions(-)
+ create mode 100644 tests/generic/352
+ create mode 100644 tests/generic/352.out
 
-> As long as the test cases only involve reflink operation, btrfs won't cause
-> too many problems except the slow metadata operation speed.
-> 
-> BTW, during that test, even I'm testing btrfs only, xfs reports lockdep
-> problem (the test machine is running xfs as root).
-> The kernel is for-dave-4.6 branch, and I'll report it in another mail.
+diff --git a/src/holetest.c b/src/holetest.c
+index 03c03604ab18..edd85fe7b170 100644
+--- a/src/holetest.c
++++ b/src/holetest.c
+@@ -70,6 +70,7 @@ long page_offs[THREADS];
+ int use_wr[THREADS];
+ int prefault = 0;
+ int use_fork = 0;
++int use_private = 0;
+ 
+ uint64_t get_id(void)
+ {
+@@ -90,24 +91,52 @@ void prefault_mapping(char *addr, long npages)
+ 	}
+ }
+ 
++int verify_mapping(char *vastart, long npages, uint64_t *expect)
++{
++	int errcnt = 0;
++	int i;
++	char *va;
++
++	for (va = vastart; npages > 0; va += page_size, npages--) {
++		for (i = 0; i < THREADS; i++) {
++			if (*(uint64_t*)(va + page_offs[i]) != expect[i]) {
++				printf("ERROR: thread %d, "
++				       "offset %08lx, %08lx != %08lx\n", i,
++				       (va + page_offs[i] - vastart),
++				       *(uint64_t*)(va + page_offs[i]),
++				       expect[i]);
++				errcnt++;
++			}
++		}
++	}
++	return errcnt;
++}
++
+ void *pt_page_marker(void *args)
+ {
+ 	void **a = args;
+ 	char *va = (char *)a[1];
+ 	long npages = (long)a[2];
+-	long pgoff = (long)a[3];
++	long i;
++	long pgoff = page_offs[(long)a[3]];
+ 	uint64_t tid = get_id();
++	long errors = 0;
+ 
+ 	if (prefault && use_fork)
+ 		prefault_mapping(va, npages);
+ 
+-	va += pgoff;
+-
+ 	/* mark pages */
+-	for (; npages > 0; va += page_size, npages--)
+-		*(uint64_t *)(va) = tid;
++	for (i = 0; i < npages; i++)
++		*(uint64_t *)(va + pgoff + i * page_size) = tid;
+ 
+-	return NULL;
++	if (use_private && use_fork) {
++		uint64_t expect[THREADS] = {};
++
++		expect[(long)a[3]] = tid;
++		errors = verify_mapping(va, npages, expect);
++	}
++
++	return (void *)errors;
+ }  /* pt_page_marker() */
+ 
+ void *pt_write_marker(void *args)
+@@ -115,7 +144,7 @@ void *pt_write_marker(void *args)
+ 	void **a = args;
+ 	int fd = (long)a[0];
+ 	long npages = (long)a[2];
+-	long pgoff = (long)a[3];
++	long pgoff = page_offs[(long)a[3]];
+ 	uint64_t tid = get_id();
+ 	long i;
+ 
+@@ -130,18 +159,18 @@ int test_this(int fd, loff_t sz)
+ {
+ 	long npages;
+ 	char *vastart;
+-	char *va;
+ 	void *targs[THREADS][4];
+ 	pthread_t t[THREADS];
+ 	uint64_t tid[THREADS];
+-	int errcnt;
++	int errcnt = 0;
+ 	int i;
+ 
+ 	npages = sz / page_size;
+ 	printf("INFO: sz = %llu\n", (unsigned long long)sz);
+ 
+ 	/* mmap it */
+-	vastart = mmap(NULL, sz, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
++	vastart = mmap(NULL, sz, PROT_READ | PROT_WRITE,
++		       use_private ? MAP_PRIVATE : MAP_SHARED, fd, 0);
+ 	if (MAP_FAILED == vastart) {
+ 		perror("mmap()");
+ 		exit(20);
+@@ -155,7 +184,7 @@ int test_this(int fd, loff_t sz)
+ 		targs[i][0] = (void *)(long)fd;
+ 		targs[i][1] = vastart;
+ 		targs[i][2] = (void *)npages;
+-		targs[i][3] = (void *)page_offs[i];
++		targs[i][3] = (void *)(long)i;
+ 	}
+ 
+ 	for (i = 0; i < THREADS; i++) {
+@@ -186,40 +215,58 @@ int test_this(int fd, loff_t sz)
+ 			}
+ 			/* Child? */
+ 			if (!tid[i]) {
++				void *ret;
++
+ 				if (use_wr[i])
+-					pt_write_marker(&targs[i]);
++					ret = pt_write_marker(&targs[i]);
+ 				else
+-					pt_page_marker(&targs[i]);
+-				exit(0);
++					ret = pt_page_marker(&targs[i]);
++				exit(ret ? 1 : 0);
+ 			}
+ 			printf("INFO: process %d created\n", i);
+ 		}
+ 	}
+ 
+ 	/* wait for them to finish */
+-	for (i = 0; i < THREADS; i++)
+-		if (!use_fork)
+-			pthread_join(t[i], NULL);
+-		else
+-			waitpid(tid[i], NULL, 0);
++	for (i = 0; i < THREADS; i++) {
++		if (!use_fork) {
++			void *status;
++
++			pthread_join(t[i], &status);
++			if (status)
++				errcnt++;
++		} else {
++			int status;
++
++			waitpid(tid[i], &status, 0);
++			if (!WIFEXITED(status) || WEXITSTATUS(status) > 0)
++				errcnt++;
++		}
++	}
+ 
+ 	/* check markers on each page */
+-	errcnt = 0;
+-	for (va = vastart; npages > 0; va += page_size, npages--) {
+-		for (i = 0; i < THREADS; i++) {
+-			if (*(uint64_t*)(va + page_offs[i]) != tid[i]) {
+-				printf("ERROR: thread %d, "
+-				       "offset %08lx, %08lx != %08lx\n", i,
+-				       (va + page_offs[i] - vastart),
+-				       *(uint64_t*)(va + page_offs[i]), tid[i]);
+-				errcnt += 1;
+-			}
++	/* For private mappings & fork we should see no writes happen */
++	if (use_private && use_fork)
++		for (i = 0; i < THREADS; i++)
++			tid[i] = 0;
++	errcnt = verify_mapping(vastart, npages, tid);
++	munmap(vastart, sz);
++
++	if (use_private) {
++		/* Check that no writes propagated into original file */
++		for (i = 0; i < THREADS; i++)
++			tid[i] = 0;
++		vastart = mmap(NULL, sz, PROT_READ, MAP_PRIVATE, fd, 0);
++		if (vastart == MAP_FAILED) {
++			perror("mmap()");
++			exit(20);
+ 		}
++		errcnt += verify_mapping(vastart, npages, tid);
++		munmap(vastart, sz);
+ 	}
+ 
+ 	printf("INFO: %d error(s) detected\n", errcnt);
+ 
+-	munmap(vastart, sz);
+ 
+ 	return errcnt;
+ }
+@@ -242,7 +289,7 @@ int main(int argc, char **argv)
+ 	for (i = 1; i < THREADS; i++)
+ 		page_offs[i] = page_offs[i-1] + step;
+ 
+-	while ((opt = getopt(argc, argv, "fwrF")) > 0) {
++	while ((opt = getopt(argc, argv, "fwrFp")) > 0) {
+ 		switch (opt) {
+ 		case 'f':
+ 			/* ignore errors */
+@@ -260,6 +307,10 @@ int main(int argc, char **argv)
+ 			/* create processes instead of threads */
+ 			use_fork = 1;
+ 			break;
++		case 'p':
++			/* Use private mappings for testing */
++			use_private = 1;
++			break;
+ 		default:
+ 			fprintf(stderr, "ERROR: Unknown option character.\n");
+ 			exit(1);
+@@ -267,10 +318,16 @@ int main(int argc, char **argv)
+ 	}
+ 
+ 	if (optind != argc - 2) {
+-		fprintf(stderr, "ERROR: usage: holetest [-fwrF] "
++		fprintf(stderr, "ERROR: usage: holetest [-fwrFp] "
+ 			"FILENAME FILESIZEinMB\n");
+ 		exit(1);
+ 	}
++	if (use_private && use_wr[0]) {
++		fprintf(stderr, "ERROR: Combinations of writes and private"
++			"mappings not supported.\n");
++		exit(1);
++	}
++
+ 	path = argv[optind];
+ 	sz = strtol(argv[optind + 1], &endch, 10);
+ 	if (*endch || sz < 1) {
+diff --git a/tests/generic/352 b/tests/generic/352
+new file mode 100644
+index 000000000000..fb4be9848f4c
+--- /dev/null
++++ b/tests/generic/352
+@@ -0,0 +1,60 @@
++#! /bin/bash
++# FSQA Test No. 352
++#
++# Test races between private file mapping faults from racing processes or
++# threads
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Jan Kara <jack@suse.cz>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment and checks
++. ./common/rc
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_test_program "holetest"
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++src/holetest -f -p $SCRATCH_MNT/testfile 16
++src/holetest -f -p $SCRATCH_MNT/testfile 256
++src/holetest -f -p -F $SCRATCH_MNT/testfile 16
++src/holetest -f -p -F $SCRATCH_MNT/testfile 256
++
++status=0
++exit
+diff --git a/tests/generic/352.out b/tests/generic/352.out
+new file mode 100644
+index 000000000000..35324cc32725
+--- /dev/null
++++ b/tests/generic/352.out
+@@ -0,0 +1,73 @@
++QA output created by 352
++
++INFO: zero-filled test...
++INFO: sz = 16777216
++INFO: thread 0 created
++INFO: thread 1 created
++INFO: 0 error(s) detected
++
++INFO: posix_fallocate test...
++INFO: sz = 16777216
++INFO: thread 0 created
++INFO: thread 1 created
++INFO: 0 error(s) detected
++
++INFO: ftruncate test...
++INFO: sz = 16777216
++INFO: thread 0 created
++INFO: thread 1 created
++INFO: 0 error(s) detected
++
++INFO: zero-filled test...
++INFO: sz = 268435456
++INFO: thread 0 created
++INFO: thread 1 created
++INFO: 0 error(s) detected
++
++INFO: posix_fallocate test...
++INFO: sz = 268435456
++INFO: thread 0 created
++INFO: thread 1 created
++INFO: 0 error(s) detected
++
++INFO: ftruncate test...
++INFO: sz = 268435456
++INFO: thread 0 created
++INFO: thread 1 created
++INFO: 0 error(s) detected
++
++INFO: zero-filled test...
++INFO: sz = 16777216
++INFO: process 0 created
++INFO: process 1 created
++INFO: 0 error(s) detected
++
++INFO: posix_fallocate test...
++INFO: sz = 16777216
++INFO: process 0 created
++INFO: process 1 created
++INFO: 0 error(s) detected
++
++INFO: ftruncate test...
++INFO: sz = 16777216
++INFO: process 0 created
++INFO: process 1 created
++INFO: 0 error(s) detected
++
++INFO: zero-filled test...
++INFO: sz = 268435456
++INFO: process 0 created
++INFO: process 1 created
++INFO: 0 error(s) detected
++
++INFO: posix_fallocate test...
++INFO: sz = 268435456
++INFO: process 0 created
++INFO: process 1 created
++INFO: 0 error(s) detected
++
++INFO: ftruncate test...
++INFO: sz = 268435456
++INFO: process 0 created
++INFO: process 1 created
++INFO: 0 error(s) detected
+diff --git a/tests/generic/group b/tests/generic/group
+index 36fb75933a13..effe6aac2d47 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -354,3 +354,4 @@
+ 349 blockdev quick rw
+ 350 blockdev quick rw
+ 351 blockdev quick rw
++352 auto
+-- 
+2.6.6
 
-FWIW for-dave-for-4.6 is ancient.  You might try #djwong-devel for newer
-(and hopefully more stable?) code.
-
-Wait, *lockdep*?  Yeah, XFS and lockdep have problems.
-
---D
-
-> 
-> Thanks,
-> Qu
-> 
-> >
-> >--D
-> >
-> >>+
-> >>+# success, all done
-> >>+status=0
-> >>+exit
-> >>diff --git a/tests/generic/352.out b/tests/generic/352.out
-> >>new file mode 100644
-> >>index 0000000..a87c507
-> >>--- /dev/null
-> >>+++ b/tests/generic/352.out
-> >>@@ -0,0 +1,5 @@
-> >>+QA output created by 352
-> >>+wrote 131072/131072 bytes at offset 0
-> >>+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> >>+0: [0..2097151]: 0x2000
-> >>+1: [2097152..2097407]: 0x2001
-> >>diff --git a/tests/generic/group b/tests/generic/group
-> >>index 36fb759..3f00386 100644
-> >>--- a/tests/generic/group
-> >>+++ b/tests/generic/group
-> >>@@ -354,3 +354,4 @@
-> >> 349 blockdev quick rw
-> >> 350 blockdev quick rw
-> >> 351 blockdev quick rw
-> >>+352 auto clone
-> >>--
-> >>2.8.2
-> >>
-> >>
-> >>
-> >
-> >
-> 
-> 
