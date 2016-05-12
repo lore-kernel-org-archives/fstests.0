@@ -1,19 +1,18 @@
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH v2] fstests: generic: Test reserved extent map search routine on deduped file
-Date: Thu, 12 May 2016 15:37:39 +0800
-Message-Id: <1463038659-21976-1-git-send-email-quwenruo@cn.fujitsu.com>
+Subject: [PATCH] fstests: generic: Test reserved extent map search routine on deduped file
+Date: Thu, 12 May 2016 12:51:35 +0800
+Message-Id: <1463028695-7806-1-git-send-email-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
 To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 Cc: darrick.wong@oracle.com, david@fromorbit.com, hch@infradead.org
 List-ID: <fstests@vger.kernel.org>
 
-For fully deduped file, which means all its file exntents are pointing to
+For fully dedupe file, which means all its file exntents are pointing to
 the same bytenr, btrfs can cause soft lockup when calling fiemap ioctl
 on that file, like the following output:
 ------
 CPU: 1 PID: 7500 Comm: xfs_io Not tainted 4.5.0-rc6+ #2
-Hardware name: innotek GmbH VirtualBox/VirtualBox, BIOS VirtualBox
-12/01/2006
+Hardware name: XXXXXXXXXXXXXXXXXXXXXXXXXXX
 task: ffff880027681b40 ti: ffff8800276e0000 task.ti: ffff8800276e0000
 RIP: 0010:[<ffffffffa02583e4>]  [<ffffffffa02583e4>]
 __merge_refs+0x34/0x120 [btrfs]
@@ -48,11 +47,11 @@ de 0f 84 b9 00 00 00 48 89 c3 8b 46 2c 41 39 44 24 2c 75
 ------
 
 Also btrfs will return wrong flag for all these extents, they should
-have SHARED(0x2000) flags, while btrfs still consider them as exclusive
+have SHARED(0x2000) flag, while btrfs still consider them as exclusive
 extents.
 
 On the other hand, with unmerged xfs reflink patches, xfs can handle it
-without problem, and for patched btrfs, it can also handle it.
+without problem, and for patched btrfs, it can also handle it well.
 
 This test case will create a large fully deduped file to check if the fs
 can handle the fiemap ioctl and return correct SHARED flag for any fs
@@ -61,16 +60,11 @@ which support reflink.
 Reported-by: Tsutomu Itoh <t-itoh@jp.fujitsu.com>
 Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 ---
-v2:
-  Use more xfs_io wrapper instead of calling $XFS_IO_PROGS
-  Add fiemap requirement
-  Refactor output to match golden output if LOAD_FACTOR is not 1
----
- common/punch          | 17 +++++++++
- tests/generic/352     | 98 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/352.out |  5 +++
+ common/punch          | 17 +++++++++++
+ tests/generic/352     | 82 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/352.out |  5 ++++
  tests/generic/group   |  1 +
- 4 files changed, 121 insertions(+)
+ 4 files changed, 105 insertions(+)
  create mode 100755 tests/generic/352
  create mode 100644 tests/generic/352.out
 
@@ -104,16 +98,16 @@ index 43f04c2..44c6e1c 100644
  # it is an extent or a hole
 diff --git a/tests/generic/352 b/tests/generic/352
 new file mode 100755
-index 0000000..3537074
+index 0000000..83f24ec
 --- /dev/null
 +++ b/tests/generic/352
-@@ -0,0 +1,98 @@
+@@ -0,0 +1,82 @@
 +#! /bin/bash
 +# FS QA Test 352
 +#
 +# Test fiemap ioctl on heavily deduped file
 +#
-+# This test case will check if reserved extent map searching go
++# This test case will check if extent backref search goes
 +# without problem and return correct SHARED flag.
 +# Which btrfs will soft lock up and return wrong shared flag.
 +#
@@ -165,43 +159,27 @@ index 0000000..3537074
 +_supported_fs generic
 +_supported_os Linux
 +_require_scratch_reflink
-+_require_fiemap
 +
 +_scratch_mkfs > /dev/null 2>&1
 +_scratch_mount
 +
++nr=$((8192 * $LOAD_FACTOR))
 +blocksize=$((128 * 1024))
 +file="$SCRATCH_MNT/tmp"
 +
-+# Golden output is for $LOAD_FACTOR == 1 case
-+orig_nr=8192
-+orig_last_extent=$(($orig_nr * $blocksize / 512))
-+orig_end=$(($orig_last_extent + $blocksize / 512 - 1))
-+
-+# Real output
-+nr=$(($orig_nr * $LOAD_FACTOR))
-+last_extent=$(($nr * $blocksize / 512))
-+end=$(($last_extent + $blocksize / 512 - 1))
-+
 +# write the initial block for later reflink
-+_pwrite_byte 0xcdcdcdcd 0 $blocksize $file | _filter_xfs_io
++$XFS_IO_PROG -f -c "pwrite 0 $blocksize" -c "fsync" $file | _filter_xfs_io
 +
 +# use reflink to create the rest of the file, whose all extents are all
 +# pointing to the first extent
 +for i in $(seq 1 $nr); do
-+	_reflink_range $file 0 $file $(($i * $blocksize)) $blocksize > /dev/null
++	$XFS_IO_PROG -c "reflink $file 0 $(($i * $blocksize)) $blocksize" \
++		$file > /dev/null
 +done
 +
 +# then call fiemap on that file to test both the shared flag and if
 +# reserved extent mapping search will cause soft lockup
-+$XFS_IO_PROG -c "fiemap -v" $file | _filter_fiemap_flags > $tmp
-+cat $tmp >> $seqres.full
-+
-+# refact the $LOAD_FACTOR to 1 to match the golden output
-+sed -i -e "s/$(($last_extent - 1))/$(($orig_last_extent - 1))/" \
-+	-e "s/$last_extent/$orig_last_extent/" \
-+	-e "s/$end/$orig_end/" $tmp
-+cat $tmp
++$XFS_IO_PROG -c "fiemap -v" $file | _filter_fiemap_flags
 +
 +# success, all done
 +status=0
@@ -227,4 +205,4 @@ index 36fb759..3f00386 100644
  351 blockdev quick rw
 +352 auto clone
 -- 
-2.5.5
+2.8.2
