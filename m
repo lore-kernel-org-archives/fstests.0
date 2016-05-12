@@ -1,417 +1,278 @@
-From: Jan Tulak <jtulak@redhat.com>
-Subject: Re: [RFC PATCH] xfstests: Add mkfs input validation tests
-Date: Fri, 29 Apr 2016 16:42:46 +0200
-Message-ID: <CACj3i72T-zQbM+c+EhY6ys4pcccsXq=-kNOEWSQXO-E2=qXNOQ@mail.gmail.com>
-References: <1461231593-31294-1-git-send-email-jtulak@redhat.com>
-	<1461832149-18276-1-git-send-email-jtulak@redhat.com>
-	<20160429015927.GN18496@dastard>
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============8541394956913147908=="
-Return-path: <xfs-bounces@oss.sgi.com>
-In-Reply-To: <20160429015927.GN18496@dastard>
-List-Unsubscribe: <http://oss.sgi.com/mailman/options/xfs>,
-	<mailto:xfs-request@oss.sgi.com?subject=unsubscribe>
-List-Archive: <http://oss.sgi.com/pipermail/xfs>
-List-Post: <mailto:xfs@oss.sgi.com>
-List-Help: <mailto:xfs-request@oss.sgi.com?subject=help>
-List-Subscribe: <http://oss.sgi.com/mailman/listinfo/xfs>,
-	<mailto:xfs-request@oss.sgi.com?subject=subscribe>
-Errors-To: xfs-bounces@oss.sgi.com
-Sender: xfs-bounces@oss.sgi.com
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, xfs-oss <xfs@oss.sgi.com>
-List-Id: fstests@vger.kernel.org
-
---===============8541394956913147908==
-Content-Type: multipart/alternative; boundary=001a114079ae2c88430531a0a9ff
-
---001a114079ae2c88430531a0a9ff
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-On Fri, Apr 29, 2016 at 3:59 AM, Dave Chinner <david@fromorbit.com> wrote:
-
-> On Thu, Apr 28, 2016 at 10:29:09AM +0200, Jan Tulak wrote:
-> > Test inputs for my mkfs-cleaning patchset. This test will fail with the
-> old sphageti code mkfs, among others because the old code accepts incorre=
-ct
-> values.
-> >
-> >
-> >
-> > Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> > Signed-off-by: Jan Tulak <jtulak@redhat.com>
->
-> Please don't strip the commit messages from patches you've picked up
-> from other people - it loses valuable information, as well as the
-> original author of the code. i.e. The original commit message was:
->
-> =E2=80=8BSorry about that. I removed it mistakenly long time ago, and now=
-, I
-didn't realised I should copy yours instead of making my own.
-
-
-
->
-> From: Dave Chinner <dchinner@redhat.com>
->
-> mkfs.xfs does not do a very good job of input validation. This test
-> is designed to exercise the input validation and test good/bad
-> combinations of options being set. It will not pass on a current
-> mkfs.xfs binary - it is designed to be the test case for a input
-> validation cleanup.
->
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
->
-> > ---
-> >
-> > Hi guys,
-> >
-> > I'm sending this patch although the mentioned patchset is not yet merge=
-d.
-> > It might help you a bit with checking if there are any issues with
-> > the patchset, as here it is clear, what options works and what not.
->
-> in which case, a "_require_xfs_mkfs_validation" rule should be
-> written to determine the version of mkfs being. e.g. by testing one
-> of the failure cases that the unfixed binary says is ok.
-> ....
-> > +# basic "should fail" options
-> > +# logarithm based options are no longer valid
-> > +# NOTE: umm, when it got invalid? It seems to be still supported...
-> > +#do_mkfs_fail -s log=3D10 $SCRATCH_DEV
-> > +#do_mkfs_fail -b log=3D10 $SCRATCH_DEV
-> > +#do_mkfs_fail -n log=3D10 $SCRATCH_DEV
-> > +#do_mkfs_fail -i log=3D10 $SCRATCH_DEV
-> > +#do_mkfs_fail -d sectlog=3D10 $SCRATCH_DEV
-> > +#do_mkfs_fail -l sectlog=3D10 $SCRATCH_DEV
->
-> They were expected to fail because I was going to remove the log
-> options from mkfs as part of the cleanup series because they are
-> redundant and nobody uses them. i.e this test was written with what
-> I wanted as the end result of the mkfs input validation cleanup, not
-> an iteration of the current behaviour.
->
-> After all the data section tests, the new tests you've added all
-> seem to be pretty ad-hoc.  What I was fleshing out in this test was
-> a relatively complete set exercising each the different options mkfs
-> supports.
->
-> I'd only iterated data section options so far in this test. I'd just
-> started on the naming section tests, and had not added any but a
-> basic test. That needs to be iterated, as do the inode, log (both
-> internal and external), metadata and realtime options....
->
-> =E2=80=8BI added many of the new lines when I found some issue, to preven=
-t
-regressions. But yeah, I will put it into an orderly fashion and iterate
-through other things
-
-
->
-> > +# invalid file section tests
-> > +rm -f $fsimg
-> > +$XFS_IO_PROG -f -c "truncate $fssize" $fsimg
-> > +do_mkfs_fail -d file $fsimg
-> > +do_mkfs_fail -d file,name=3D$fsimg
->
-> Why should these fail - size should not be required if the image
-> file already exists and is of sufficient size....
->
-
-=E2=80=8BWell, they should pass. I'm sending an updated patch to the set as=
- well.
-
-
-> > +
-> > +# naming section tests
-> > +do_mkfs_pass -n size=3D65536 $SCRATCH_DEV
-> > +
-> > +# boolean options
-> > +$XFS_IO_PROG -f -c "truncate $fssize" $fsimg
-> > +do_mkfs_pass -d file=3D1,size=3D$fssize $fsimg
-> > +do_mkfs_pass -d file=3D0 $SCRATCH_DEV
-> > +do_mkfs_fail -d file=3D1 $SCRATCH_DEV
->
-> More image file tests, belong in the data section with the other
-> image file tests.
-> =E2=80=8B=E2=80=8B
->
-
-> > +# Specific flag combinations where some bug appeared during developmen=
-t,
-> > +# to catch the same issue if it re-appears. If there are multiple
-> similar
-> > +# checks, move them to a standalone block.
-> > +
-> > +
-> > +do_mkfs_pass -m crc=3D1,finobt=3D1 $SCRATCH_DEV
->
-> What about all the other invalid cases?
->
-> > +do_mkfs_pass -m crc=3D1 -n ftype=3D1 $SCRATCH_DEV
-> > +do_mkfs_pass -m crc=3D0 -n ftype=3D1 $SCRATCH_DEV
-> > +do_mkfs_fail -m crc=3D1 -n ftype=3D0 $SCRATCH_DEV
-> > +do_mkfs_pass -m crc=3D0 -n ftype=3D0 $SCRATCH_DEV
-> > +do_mkfs_pass -n ftype=3D1 -m crc=3D0 $SCRATCH_DEV
->
-> One of the cleanup requirements was that option parsing would not
-> be order sensitive, so I don't think you need to iterate parameters
-> in different orders. That would just blow out the test matrix
-> unnecessarily. Also, if you really need to repeat the same test but
-> with different orders, please place those tests sequentially in the
-> file so it's clear that they are duplicate/order swapped tests....
-> =E2=80=8B
->
-
-=E2=80=8BI added it as a test that the order independency really works. Thi=
-s is one
-case, where the original code was order-dependent... But maybe such test is
-not necessary, as it should be so by design and there is no way to screw it
-up for all options at once. =E2=80=8B
-
-
-
-=E2=80=8BSo to sum all the email, I will make an updated version with more =
-test
-data. However, it will take me some time, because in few days, exams on my
-university are starting, so I need to focus there and start learning.=E2=80=
-=8B :-)
-
-Thanks and cheers,
-Jan
-
-
-=E2=80=8B
->
->
-> > +# if user states crc=3D0,finobt=3D1, fail instead of warning
-> > +do_mkfs_fail -m crc=3D0,finobt=3D1 $SCRATCH_DEV
->
-> Why is this separate to the other crc,finobt test? Please try to
-> keep the parameter checks in logical groupings....
->
-> Cheers,
->
-> Dave.
-> --
-> Dave Chinner
-> david@fromorbit.com
->
-=E2=80=8B
-
---=20
-Jan Tulak
-jtulak@redhat.com / jan@tulak.me
-
---001a114079ae2c88430531a0a9ff
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><div class=3D"gmail_default" style=3D"font-family:arial,he=
-lvetica,sans-serif"><span style=3D"font-family:arial,sans-serif">On Fri, Ap=
-r 29, 2016 at 3:59 AM, Dave Chinner </span><span dir=3D"ltr" style=3D"font-=
-family:arial,sans-serif">&lt;<a href=3D"mailto:david@fromorbit.com" target=
-=3D"_blank">david@fromorbit.com</a>&gt;</span><span style=3D"font-family:ar=
-ial,sans-serif"> wrote:</span><br></div><div class=3D"gmail_extra"><div cla=
-ss=3D"gmail_quote"><blockquote class=3D"gmail_quote" style=3D"margin:0px 0p=
-x 0px 0.8ex;border-left-width:1px;border-left-color:rgb(204,204,204);border=
--left-style:solid;padding-left:1ex"><span>On Thu, Apr 28, 2016 at 10:29:09A=
-M +0200, Jan Tulak wrote:<br>
-&gt; Test inputs for my mkfs-cleaning patchset. This test will fail with th=
-e old sphageti code mkfs, among others because the old code accepts incorre=
-ct values.<br>
-&gt;<br>
-&gt;<br>
-&gt;<br>
-&gt; Signed-off-by: Dave Chinner &lt;<a href=3D"mailto:dchinner@redhat.com"=
- target=3D"_blank">dchinner@redhat.com</a>&gt;<br>
-&gt; Signed-off-by: Jan Tulak &lt;<a href=3D"mailto:jtulak@redhat.com" targ=
-et=3D"_blank">jtulak@redhat.com</a>&gt;<br>
-<br>
-</span>Please don&#39;t strip the commit messages from patches you&#39;ve p=
-icked up<br>
-from other people - it loses valuable information, as well as the<br>
-original author of the code. i.e. The original commit message was:<br>
-<br></blockquote><div><div class=3D"gmail_default" style=3D"font-family:ari=
-al,helvetica,sans-serif">=E2=80=8BSorry about that. I removed it mistakenly=
- long time ago, and now, I didn&#39;t realised I should copy yours instead =
-of making my own.</div><br></div><div>=C2=A0</div><blockquote class=3D"gmai=
-l_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left-width:1px;border-lef=
-t-color:rgb(204,204,204);border-left-style:solid;padding-left:1ex">
-<br>
-From: Dave Chinner &lt;<a href=3D"mailto:dchinner@redhat.com" target=3D"_bl=
-ank">dchinner@redhat.com</a>&gt;<br>
-<br>
-mkfs.xfs does not do a very good job of input validation. This test<br>
-is designed to exercise the input validation and test good/bad<br>
-combinations of options being set. It will not pass on a current<br>
-mkfs.xfs binary - it is designed to be the test case for a input<br>
-validation cleanup.<br>
-<br>
-Signed-off-by: Dave Chinner &lt;<a href=3D"mailto:dchinner@redhat.com" targ=
-et=3D"_blank">dchinner@redhat.com</a>&gt;<br>
-<span><br>
-&gt; ---<br>
-&gt;<br>
-&gt; Hi guys,<br>
-&gt;<br>
-&gt; I&#39;m sending this patch although the mentioned patchset is not yet =
-merged.<br>
-&gt; It might help you a bit with checking if there are any issues with<br>
-&gt; the patchset, as here it is clear, what options works and what not.<br=
->
-<br>
-</span>in which case, a &quot;_require_xfs_mkfs_validation&quot; rule shoul=
-d be<br>
-written to determine the version of mkfs being. e.g. by testing one<br>
-of the failure cases that the unfixed binary says is ok.<br>
-....<br>
-<span>&gt; +# basic &quot;should fail&quot; options<br>
-&gt; +# logarithm based options are no longer valid<br>
-&gt; +# NOTE: umm, when it got invalid? It seems to be still supported...<b=
-r>
-&gt; +#do_mkfs_fail -s log=3D10 $SCRATCH_DEV<br>
-&gt; +#do_mkfs_fail -b log=3D10 $SCRATCH_DEV<br>
-&gt; +#do_mkfs_fail -n log=3D10 $SCRATCH_DEV<br>
-&gt; +#do_mkfs_fail -i log=3D10 $SCRATCH_DEV<br>
-&gt; +#do_mkfs_fail -d sectlog=3D10 $SCRATCH_DEV<br>
-&gt; +#do_mkfs_fail -l sectlog=3D10 $SCRATCH_DEV<br>
-<br>
-</span>They were expected to fail because I was going to remove the log<br>
-options from mkfs as part of the cleanup series because they are<br>
-redundant and nobody uses them. i.e this test was written with what<br>
-I wanted as the end result of the mkfs input validation cleanup, not<br>
-an iteration of the current behaviour.<br>
-<br>
-After all the data section tests, the new tests you&#39;ve added all<br>
-seem to be pretty ad-hoc.=C2=A0 What I was fleshing out in this test was<br=
->
-a relatively complete set exercising each the different options mkfs<br>
-supports.<br>
-<br>
-I&#39;d only iterated data section options so far in this test. I&#39;d jus=
-t<br>
-started on the naming section tests, and had not added any but a<br>
-basic test. That needs to be iterated, as do the inode, log (both<br>
-internal and external), metadata and realtime options....<br>
-<span><br></span></blockquote><div class=3D"gmail_default" style=3D"font-fa=
-mily:arial,helvetica,sans-serif">=E2=80=8BI added many of the new lines whe=
-n I found some issue, to prevent regressions. But yeah, I will put it into =
-an orderly fashion and iterate through other things</div><div>=C2=A0</div><=
-blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-l=
-eft-width:1px;border-left-color:rgb(204,204,204);border-left-style:solid;pa=
-dding-left:1ex"><span>
-<br>
-&gt; +# invalid file section tests<br>
-&gt; +rm -f $fsimg<br>
-&gt; +$XFS_IO_PROG -f -c &quot;truncate $fssize&quot; $fsimg<br>
-&gt; +do_mkfs_fail -d file $fsimg<br>
-&gt; +do_mkfs_fail -d file,name=3D$fsimg<br>
-<br>
-</span>Why should these fail - size should not be required if the image<br>
-file already exists and is of sufficient size....<br></blockquote><div><br>=
-</div><div><div class=3D"gmail_default" style=3D"font-family:arial,helvetic=
-a,sans-serif">=E2=80=8BWell, they should pass. I&#39;m sending an updated p=
-atch to the set as well.</div></div><div>=C2=A0</div><blockquote class=3D"g=
-mail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left-width:1px;border-=
-left-color:rgb(204,204,204);border-left-style:solid;padding-left:1ex"><span=
->
-&gt; +<br>
-&gt; +# naming section tests<br>
-&gt; +do_mkfs_pass -n size=3D65536 $SCRATCH_DEV<br>
-&gt; +<br>
-&gt; +# boolean options<br>
-&gt; +$XFS_IO_PROG -f -c &quot;truncate $fssize&quot; $fsimg<br>
-&gt; +do_mkfs_pass -d file=3D1,size=3D$fssize $fsimg<br>
-&gt; +do_mkfs_pass -d file=3D0 $SCRATCH_DEV<br>
-&gt; +do_mkfs_fail -d file=3D1 $SCRATCH_DEV<br>
-<br>
-</span>More image file tests, belong in the data section with the other<br>
-image file tests.<div class=3D"gmail_default" style=3D"font-family:arial,he=
-lvetica,sans-serif;display:inline">=E2=80=8B=E2=80=8B</div></blockquote><bl=
-ockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-lef=
-t-width:1px;border-left-color:rgb(204,204,204);border-left-style:solid;padd=
-ing-left:1ex">
-<span><br>
-&gt; +# Specific flag combinations where some bug appeared during developme=
-nt,<br>
-&gt; +# to catch the same issue if it re-appears. If there are multiple sim=
-ilar<br>
-&gt; +# checks, move them to a standalone block.<br>
-&gt; +<br>
-&gt; +<br>
-&gt; +do_mkfs_pass -m crc=3D1,finobt=3D1 $SCRATCH_DEV<br>
-<br>
-</span>What about all the other invalid cases?<br>
-<span><br>
-&gt; +do_mkfs_pass -m crc=3D1 -n ftype=3D1 $SCRATCH_DEV<br>
-&gt; +do_mkfs_pass -m crc=3D0 -n ftype=3D1 $SCRATCH_DEV<br>
-&gt; +do_mkfs_fail -m crc=3D1 -n ftype=3D0 $SCRATCH_DEV<br>
-&gt; +do_mkfs_pass -m crc=3D0 -n ftype=3D0 $SCRATCH_DEV<br>
-&gt; +do_mkfs_pass -n ftype=3D1 -m crc=3D0 $SCRATCH_DEV<br>
-<br>
-</span>One of the cleanup requirements was that option parsing would not<br=
->
-be order sensitive, so I don&#39;t think you need to iterate parameters<br>
-in different orders. That would just blow out the test matrix<br>
-unnecessarily. Also, if you really need to repeat the same test but<br>
-with different orders, please place those tests sequentially in the<br>
-file so it&#39;s clear that they are duplicate/order swapped tests....<div =
-class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif;dis=
-play:inline">=E2=80=8B</div></blockquote><div><br></div><div><div class=3D"=
-gmail_default" style=3D"font-family:arial,helvetica,sans-serif">=E2=80=8BI =
-added it as a test that the order independency really works. This is one ca=
-se, where the original code was order-dependent... But maybe such test is n=
-ot necessary, as it should be so by design and there is no way to screw it =
-up for all options at once. =E2=80=8B</div><br></div><div><br></div><div><b=
-r></div><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,s=
-ans-serif">=E2=80=8BSo to sum all the email, I will make an updated version=
- with more test data. However, it will take me some time, because in few da=
-ys, exams on my university are starting, so I need to focus there and start=
- learning.=E2=80=8B :-)</div><div class=3D"gmail_default" style=3D"font-fam=
-ily:arial,helvetica,sans-serif"><br></div><div class=3D"gmail_default" styl=
-e=3D"font-family:arial,helvetica,sans-serif">Thanks and cheers,</div><div c=
-lass=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">Jan=
-</div><div><br></div><div><br></div><blockquote class=3D"gmail_quote" style=
-=3D"margin:0px 0px 0px 0.8ex;border-left-width:1px;border-left-color:rgb(20=
-4,204,204);border-left-style:solid;padding-left:1ex"><div class=3D"gmail_de=
-fault" style=3D"font-family:arial,helvetica,sans-serif;display:inline">=E2=
-=80=8B</div><br>
-<span><br>
-&gt; +# if user states crc=3D0,finobt=3D1, fail instead of warning<br>
-&gt; +do_mkfs_fail -m crc=3D0,finobt=3D1 $SCRATCH_DEV<br>
-<br>
-</span>Why is this separate to the other crc,finobt test? Please try to<br>
-keep the parameter checks in logical groupings....<br>
-<br>
-Cheers,<br>
-<br>
-Dave.<br>
-<span><font color=3D"#888888">--<br>
-Dave Chinner<br>
-<a href=3D"mailto:david@fromorbit.com" target=3D"_blank">david@fromorbit.co=
-m</a><br>
-</font></span></blockquote></div><div class=3D"gmail_default" style=3D"font=
--family:arial,helvetica,sans-serif">=E2=80=8B</div><div><br></div>-- <br><d=
-iv><div dir=3D"ltr"><div><div dir=3D"ltr"><div>Jan Tulak<br></div><a href=
-=3D"mailto:jtulak@redhat.com" target=3D"_blank">jtulak@redhat.com</a>=C2=A0=
-/ <a href=3D"mailto:jan@tulak.me" target=3D"_blank">jan@tulak.me</a></div><=
-/div></div></div>
-</div></div>
-
---001a114079ae2c88430531a0a9ff--
-
-
---===============8541394956913147908==
-Content-Type: text/plain; charset="us-ascii"
+Subject: Re: [PATCH] fstests: btrfs: Test fiemap ioctl on completely deduped
+ file
+References: <1462869581-19227-1-git-send-email-quwenruo@cn.fujitsu.com>
+ <CAL3q7H5Mn2561cxK49vis3+XW1eTzx_j9h-iQpUJQ6qEGMczvQ@mail.gmail.com>
+ <55ce1c42-fda3-520f-ebb1-11048df8799f@cn.fujitsu.com>
+ <20160512002318.GA6621@birch.djwong.org>
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Message-ID: <622d94a3-307f-0a3d-a38f-a2127c3bc8cb@cn.fujitsu.com>
+Date: Thu, 12 May 2016 08:46:41 +0800
 MIME-Version: 1.0
+In-Reply-To: <20160512002318.GA6621@birch.djwong.org>
+Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: fdmanana@gmail.com, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org
+List-ID: <fstests@vger.kernel.org>
 
-_______________________________________________
-xfs mailing list
-xfs@oss.sgi.com
-http://oss.sgi.com/mailman/listinfo/xfs
 
---===============8541394956913147908==--
+
+Darrick J. Wong wrote on 2016/05/11 17:23 -0700:
+> On Wed, May 11, 2016 at 10:14:42AM +0800, Qu Wenruo wrote:
+>>
+>>
+>> Filipe Manana wrote on 2016/05/10 11:01 +0100:
+>>> On Tue, May 10, 2016 at 9:39 AM, Qu Wenruo <quwenruo@cn.fujitsu.com> wrote:
+>>>> For a completely deduped file, which means all its file extent are
+>>>> pointing to one bytenr, if calling fiemap on it, btrfs will cause soft
+>>>> hang up or just takes years long.
+>>>>
+>>>> This bug can be reproduced even without any in-band or out-of-band
+>>>> dedupe, normal clone_file_range() call can create such situation.
+>>>>
+>>>> This test case will detect it.
+>>>
+>>> Why isn't this a generic test?
+>>> There's nothing btrfs specific anymore...
+>>>
+>>> Thanks.
+>>
+>> I'm OK to move it to generic, just as original planned.
+>
+> Thank you!
+>
+>> BTW, does other fs support reflink file range?
+>
+> As Christoph said, future-XFS and NFS.
+>
+>> I found a lot xfs test cases using reflink, but I still can't reflink a file
+>> range inside the same inode
+>> ---
+>> $ xfs_io -c "reflink test.file 0 128k 128k" test.file
+>> XFS_IOC_CLONE_RANGE: Operation not supported
+>
+> <shrug> It should work...
+>
+> ...and currently works for me (4.6-rc7) on both btrfs and xfs:
+
+Oh, I'm using 4.5-rc6, which is current btrfs for-linus branch.
+
+Thanks for your kind info!
+I'll try mainline kernel.
+
+>
+> # rm -rf a ; dd if=/dev/zero of=a bs=131072 count=1 ; xfs_io -c 'reflink a 0 128k 128k' a ; filefrag -v a ; grep $PWD /proc/mounts
+> 1+0 records in
+> 1+0 records out
+> 131072 bytes (131 kB, 128 KiB) copied, 0.000539818 s, 243 MB/s
+> linked 131072/131072 bytes at offset 131072
+> 128 KiB, 1 ops; 0.0000 sec (120.077 MiB/sec and 960.6148 ops/sec)
+> Filesystem type is: 9123683e
+> File size of a is 262144 (64 blocks of 4096 bytes)
+>  ext:     logical_offset:        physical_offset: length:   expected: flags:
+>    0:        0..      31:       3088..      3119:     32:
+>    1:       32..      63:       3088..      3119:     32:       3120: last,eof
+> a: 2 extents found
+> /dev/sda /mnt btrfs rw,relatime,space_cache,subvolid=5,subvol=/ 0 0
+> # cd /opt
+> # rm -rf a ; dd if=/dev/zero of=a bs=131072 count=1 ; xfs_io -c 'reflink a 0 128k 128k' a ; filefrag -v a ; grep $PWD /proc/mounts
+> 1+0 records in
+> 1+0 records out
+> 131072 bytes (131 kB, 128 KiB) copied, 0.00237377 s, 55.2 MB/s
+> linked 131072/131072 bytes at offset 131072
+> 128 KiB, 1 ops; 0.0000 sec (87.047 MiB/sec and 696.3788 ops/sec)
+> Filesystem type is: 58465342
+> File size of a is 262144 (64 blocks of 4096 bytes)
+>  ext:     logical_offset:        physical_offset: length:   expected: flags:
+>    0:        0..      31:         24..        55:     32:             shared
+>    1:       32..      63:         24..        55:     32:         56: last,shared,eof
+
+Also the "shared" flag is different from btrfs, where btrfs is wrong, 
+and the btrfs routine to check shared extent caused the soft lockup.
+
+I originally planned to check "shared" flag, but the soft lockup is more 
+important, and 8000+ output seems not suitable as golden output.
+
+Thanks,
+Qu
+
+> a: 2 extents found
+> /dev/sdb /opt xfs rw,relatime,attr2,inode64,noquota 0 0
+>
+> That said, I haven't checked with latest xfsprogs master.
+>
+> --D
+>
+>> ---
+>>
+>>>
+>>>>
+>>>> Reported-by: Tsutomu Itoh <t-itoh@jp.fujitsu.com>
+>>>> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+>>>> ---
+>>>> tests/btrfs/028     | 78 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>>>> tests/btrfs/028.out |  3 +++
+>>>> tests/btrfs/group   |  1 +
+>>>> 3 files changed, 82 insertions(+)
+>>>> create mode 100755 tests/btrfs/028
+>>>> create mode 100644 tests/btrfs/028.out
+>>>>
+>>>> diff --git a/tests/btrfs/028 b/tests/btrfs/028
+>>>> new file mode 100755
+>>>> index 0000000..62bcc9d
+>>>> --- /dev/null
+>>>> +++ b/tests/btrfs/028
+>>>> @@ -0,0 +1,78 @@
+>>>> +#! /bin/bash
+>>>> +# FS QA Test 028
+>>>> +#
+>>>> +# Test fiemap ioctl on heavily deduped file.
+>>>> +#
+>>>> +# This test will cause btrfs to soft hang up or takes years long to finish
+>>>
+>>> Haven't tried it, but I doubt it will take years...
+>>> Are you sure that the soft lookup, which is what makes the test fail
+>>> due to the dmesg warning, is triggered on very fast machines as well?
+>>> I.e. this may not be reliable on better hardware.
+>>
+>> On a fast test server too, using the same test case, but your concern is
+>> valid.
+>>
+>> The reporter initially triggered the bug on a even faster server with
+>> similar file layout with 100% possibility, but with nr set to 8192.
+>>
+>> I reduced the nr from 8192 (which is always reproducible) to 4096 to save
+>> some time creating file, but considering the scale of loops, considering the
+>> loop scale (at least n^3), the halved nr seems to hugely reduce the time.
+>>
+>> The know loop scale is n^3 ~ n^4:
+>> 1. Loop all file extents (* 4096)
+>> 2. Loop all backrefs of one extent (* 4096)
+>> 3. Loop each backref in __merge_refs(list_for_each_entry_safe_continue) (*
+>> 4096)
+>> 4. Loop to the list end in "while(eie & eie->next) {eie=eie->next}" (*4096)
+>>
+>> What about change nr to (8192 * $LOAD_FACTOR)?
+>>
+>> Thanks,
+>> Qu
+>>
+>>
+>> Thanks,
+>> Qu
+>>
+>>>
+>>>
+>>>> +#
+>>>> +#-----------------------------------------------------------------------
+>>>> +# Copyright (c) 2016 Fujitsu. All Rights Reserved.
+>>>> +#
+>>>> +# This program is free software; you can redistribute it and/or
+>>>> +# modify it under the terms of the GNU General Public License as
+>>>> +# published by the Free Software Foundation.
+>>>> +#
+>>>> +# This program is distributed in the hope that it would be useful,
+>>>> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+>>>> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>>>> +# GNU General Public License for more details.
+>>>> +#
+>>>> +# You should have received a copy of the GNU General Public License
+>>>> +# along with this program; if not, write the Free Software Foundation,
+>>>> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+>>>> +#-----------------------------------------------------------------------
+>>>> +#
+>>>> +
+>>>> +seq=`basename $0`
+>>>> +seqres=$RESULT_DIR/$seq
+>>>> +echo "QA output created by $seq"
+>>>> +
+>>>> +here=`pwd`
+>>>> +tmp=/tmp/$$
+>>>> +status=1       # failure is the default!
+>>>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>>>> +
+>>>> +_cleanup()
+>>>> +{
+>>>> +       cd /
+>>>> +       rm -f $tmp.*
+>>>> +}
+>>>> +
+>>>> +# get standard environment, filters and checks
+>>>> +. ./common/rc
+>>>> +. ./common/filter
+>>>> +. ./common/reflink
+>>>> +
+>>>> +# remove previous $seqres.full before test
+>>>> +rm -f $seqres.full
+>>>> +
+>>>> +# real QA test starts here
+>>>> +
+>>>> +# Modify as appropriate.
+>>>> +_supported_fs btrfs
+>>>> +_supported_os Linux
+>>>> +_require_scratch_reflink
+>>>> +
+>>>> +blocksize=$(( 128 * 1024 ))
+>>>> +nr=4096
+>>>> +file="$SCRATCH_MNT/tmp"
+>>>> +
+>>>> +_scratch_mkfs
+>>>> +_scratch_mount
+>>>> +
+>>>> +# write the initial block for later reflink
+>>>> +$XFS_IO_PROG -f -c "pwrite 0 $blocksize" -c "fsync" $file | _filter_xfs_io
+>>>> +
+>>>> +# use reflink to create the rest of the file, whose all extents are all
+>>>> +# pointing to the first extent
+>>>> +for i in $(seq 1 $nr); do
+>>>> +       $XFS_IO_PROG -c "reflink $file 0 $(( $i * $blocksize )) $blocksize" \
+>>>> +               $SCRATCH_MNT/tmp > /dev/null || _fail "reflink failed"
+>>>> +done
+>>>> +
+>>>> +# then call fiemap on that file, which shouldn't hang the fs by all means
+>>>> +$XFS_IO_PROG -c "fiemap" $file >> $seqres.full
+>>>> +
+>>>> +# success, all done
+>>>> +status=0
+>>>> +exit
+>>>> diff --git a/tests/btrfs/028.out b/tests/btrfs/028.out
+>>>> new file mode 100644
+>>>> index 0000000..2b5a9a5
+>>>> --- /dev/null
+>>>> +++ b/tests/btrfs/028.out
+>>>> @@ -0,0 +1,3 @@
+>>>> +QA output created by 028
+>>>> +wrote 131072/131072 bytes at offset 0
+>>>> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>>>> diff --git a/tests/btrfs/group b/tests/btrfs/group
+>>>> index da0e27f..8f6f877 100644
+>>>> --- a/tests/btrfs/group
+>>>> +++ b/tests/btrfs/group
+>>>> @@ -30,6 +30,7 @@
+>>>> 025 auto quick send clone
+>>>> 026 auto quick compress prealloc
+>>>> 027 auto replace
+>>>> +028 auto clone
+>>>> 029 auto quick clone
+>>>> 030 auto quick send
+>>>> 031 auto quick subvol clone
+>>>> --
+>>>> 2.5.5
+>>>>
+>>>>
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>>>
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
