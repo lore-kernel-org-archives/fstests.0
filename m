@@ -1,152 +1,426 @@
-Received: from mx144.netapp.com ([216.240.21.25]:20975 "EHLO mx144.netapp.com"
+Received: from mx1.redhat.com ([209.132.183.28]:51883 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753557AbcEMUu7 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 13 May 2016 16:50:59 -0400
-From: Anna Schumaker <Anna.Schumaker@netapp.com>
-Subject: [PATCH 3/5] generic/344: Add small copies to new file test
-Date: Fri, 13 May 2016 16:50:50 -0400
-Message-ID: <1463172652-22361-4-git-send-email-Anna.Schumaker@Netapp.com>
-In-Reply-To: <1463172652-22361-1-git-send-email-Anna.Schumaker@Netapp.com>
-References: <1463172652-22361-1-git-send-email-Anna.Schumaker@Netapp.com>
+	id S1750785AbcEPM0K (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 16 May 2016 08:26:10 -0400
+Date: Mon, 16 May 2016 08:26:07 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: Re: [PATCH] generic: Test handling of private file mappings
+Message-ID: <20160516122607.GA30098@bfoster.bfoster>
+References: <1463045427-13633-1-git-send-email-jack@suse.cz>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1463045427-13633-1-git-send-email-jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Anna.Schumaker@netapp.com, linux-nfs@vger.kernel.org, hch@infradead.org
+To: Jan Kara <jack@suse.cz>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This test copies single bytes from a source file into various new files
-just to make sure that we can handle very small copies.
+On Thu, May 12, 2016 at 11:30:27AM +0200, Jan Kara wrote:
+> Test handling of private file mappings in the kernel. Check that writes
+> of only one thread / process are seen in each page and that none of
+> these make it into the original file.
+> 
+> Signed-off-by: Jan Kara <jack@suse.cz>
+> ---
 
-Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
----
- tests/generic/344     | 86 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/344.out | 13 ++++++++
- tests/generic/group   |  1 +
- 3 files changed, 100 insertions(+)
- create mode 100644 tests/generic/344
- create mode 100644 tests/generic/344.out
+Looks good to me:
 
-diff --git a/tests/generic/344 b/tests/generic/344
-new file mode 100644
-index 0000000..4220293
---- /dev/null
-+++ b/tests/generic/344
-@@ -0,0 +1,86 @@
-+#!/bin/bash
-+# FS QA Test No. 344
-+#
-+# Tests vfs_copy_file_range():
-+#   - Copy a small file
-+#   - Small copies from various points in the original file
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Netapp, Inc. All rights reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -rf $tmp.*
-+}
-+
-+# get standard environment
-+. common/rc
-+. common/filter
-+
-+# real QA test starts here
-+_supported_os Linux
-+
-+_require_copy_file_range
-+_require_test
-+
-+testdir=$TEST_DIR/test-$seq
-+rm -rf $testdir
-+mkdir $testdir
-+
-+_checksum_files()
-+{
-+	for f in $*; do
-+		md5sum $testdir/$f | _filter_test_dir
-+	done
-+}
-+
-+rm -f $seqres.full
-+
-+echo "Create the original file and then copy"
-+echo -n "abcde" > $testdir/file
-+$COPY_FILE_RANGE_PROG $testdir/file $testdir/copy
-+echo -n "abcde" | cmp $testdir/copy
-+echo "Original md5sums:"
-+_checksum_files file copy
-+
-+echo "Small copies from various points in the original file"
-+$COPY_FILE_RANGE_PROG -s 0 -l 1 $testdir/file $testdir/a
-+$COPY_FILE_RANGE_PROG -s 1 -l 1 $testdir/file $testdir/b
-+$COPY_FILE_RANGE_PROG -s 2 -l 1 $testdir/file $testdir/c
-+$COPY_FILE_RANGE_PROG -s 3 -l 1 $testdir/file $testdir/d
-+$COPY_FILE_RANGE_PROG -s 4 -l 1 $testdir/file $testdir/e
-+echo -n "a" | cmp $testdir/a
-+echo -n "b" | cmp $testdir/b
-+echo -n "c" | cmp $testdir/c
-+echo -n "d" | cmp $testdir/d
-+echo -n "e" | cmp $testdir/e
-+echo "md5sums after small copies"
-+_checksum_files file a b c d e
-+
-+#success, all done
-+status=0
-+exit
-diff --git a/tests/generic/344.out b/tests/generic/344.out
-new file mode 100644
-index 0000000..152fb2c
---- /dev/null
-+++ b/tests/generic/344.out
-@@ -0,0 +1,13 @@
-+QA output created by 344
-+Create the original file and then copy
-+Original md5sums:
-+ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-344/file
-+ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-344/copy
-+Small copies from various points in the original file
-+md5sums after small copies
-+ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-344/file
-+0cc175b9c0f1b6a831c399e269772661  TEST_DIR/test-344/a
-+92eb5ffee6ae2fec3ad71c777531578f  TEST_DIR/test-344/b
-+4a8a08f09d37b73795649038408b5f33  TEST_DIR/test-344/c
-+8277e0910d750195b448797616e091ad  TEST_DIR/test-344/d
-+e1671797c52e15f763380b45e841ec32  TEST_DIR/test-344/e
-diff --git a/tests/generic/group b/tests/generic/group
-index d5e5242..323e42b 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -346,3 +346,4 @@
- 341 auto quick metadata
- 342 auto quick metadata
- 343 auto quick copy
-+344 auto quick copy
--- 
-2.8.2
+Reviewed-by: Brian Foster <bfoster@redhat.com>
 
+>  src/holetest.c        | 121 +++++++++++++++++++++++++++++++++++++-------------
+>  tests/generic/352     |  60 +++++++++++++++++++++++++
+>  tests/generic/352.out |  73 ++++++++++++++++++++++++++++++
+>  tests/generic/group   |   1 +
+>  4 files changed, 223 insertions(+), 32 deletions(-)
+>  create mode 100644 tests/generic/352
+>  create mode 100644 tests/generic/352.out
+> 
+> diff --git a/src/holetest.c b/src/holetest.c
+> index 03c03604ab18..edd85fe7b170 100644
+> --- a/src/holetest.c
+> +++ b/src/holetest.c
+> @@ -70,6 +70,7 @@ long page_offs[THREADS];
+>  int use_wr[THREADS];
+>  int prefault = 0;
+>  int use_fork = 0;
+> +int use_private = 0;
+>  
+>  uint64_t get_id(void)
+>  {
+> @@ -90,24 +91,52 @@ void prefault_mapping(char *addr, long npages)
+>  	}
+>  }
+>  
+> +int verify_mapping(char *vastart, long npages, uint64_t *expect)
+> +{
+> +	int errcnt = 0;
+> +	int i;
+> +	char *va;
+> +
+> +	for (va = vastart; npages > 0; va += page_size, npages--) {
+> +		for (i = 0; i < THREADS; i++) {
+> +			if (*(uint64_t*)(va + page_offs[i]) != expect[i]) {
+> +				printf("ERROR: thread %d, "
+> +				       "offset %08lx, %08lx != %08lx\n", i,
+> +				       (va + page_offs[i] - vastart),
+> +				       *(uint64_t*)(va + page_offs[i]),
+> +				       expect[i]);
+> +				errcnt++;
+> +			}
+> +		}
+> +	}
+> +	return errcnt;
+> +}
+> +
+>  void *pt_page_marker(void *args)
+>  {
+>  	void **a = args;
+>  	char *va = (char *)a[1];
+>  	long npages = (long)a[2];
+> -	long pgoff = (long)a[3];
+> +	long i;
+> +	long pgoff = page_offs[(long)a[3]];
+>  	uint64_t tid = get_id();
+> +	long errors = 0;
+>  
+>  	if (prefault && use_fork)
+>  		prefault_mapping(va, npages);
+>  
+> -	va += pgoff;
+> -
+>  	/* mark pages */
+> -	for (; npages > 0; va += page_size, npages--)
+> -		*(uint64_t *)(va) = tid;
+> +	for (i = 0; i < npages; i++)
+> +		*(uint64_t *)(va + pgoff + i * page_size) = tid;
+>  
+> -	return NULL;
+> +	if (use_private && use_fork) {
+> +		uint64_t expect[THREADS] = {};
+> +
+> +		expect[(long)a[3]] = tid;
+> +		errors = verify_mapping(va, npages, expect);
+> +	}
+> +
+> +	return (void *)errors;
+>  }  /* pt_page_marker() */
+>  
+>  void *pt_write_marker(void *args)
+> @@ -115,7 +144,7 @@ void *pt_write_marker(void *args)
+>  	void **a = args;
+>  	int fd = (long)a[0];
+>  	long npages = (long)a[2];
+> -	long pgoff = (long)a[3];
+> +	long pgoff = page_offs[(long)a[3]];
+>  	uint64_t tid = get_id();
+>  	long i;
+>  
+> @@ -130,18 +159,18 @@ int test_this(int fd, loff_t sz)
+>  {
+>  	long npages;
+>  	char *vastart;
+> -	char *va;
+>  	void *targs[THREADS][4];
+>  	pthread_t t[THREADS];
+>  	uint64_t tid[THREADS];
+> -	int errcnt;
+> +	int errcnt = 0;
+>  	int i;
+>  
+>  	npages = sz / page_size;
+>  	printf("INFO: sz = %llu\n", (unsigned long long)sz);
+>  
+>  	/* mmap it */
+> -	vastart = mmap(NULL, sz, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+> +	vastart = mmap(NULL, sz, PROT_READ | PROT_WRITE,
+> +		       use_private ? MAP_PRIVATE : MAP_SHARED, fd, 0);
+>  	if (MAP_FAILED == vastart) {
+>  		perror("mmap()");
+>  		exit(20);
+> @@ -155,7 +184,7 @@ int test_this(int fd, loff_t sz)
+>  		targs[i][0] = (void *)(long)fd;
+>  		targs[i][1] = vastart;
+>  		targs[i][2] = (void *)npages;
+> -		targs[i][3] = (void *)page_offs[i];
+> +		targs[i][3] = (void *)(long)i;
+>  	}
+>  
+>  	for (i = 0; i < THREADS; i++) {
+> @@ -186,40 +215,58 @@ int test_this(int fd, loff_t sz)
+>  			}
+>  			/* Child? */
+>  			if (!tid[i]) {
+> +				void *ret;
+> +
+>  				if (use_wr[i])
+> -					pt_write_marker(&targs[i]);
+> +					ret = pt_write_marker(&targs[i]);
+>  				else
+> -					pt_page_marker(&targs[i]);
+> -				exit(0);
+> +					ret = pt_page_marker(&targs[i]);
+> +				exit(ret ? 1 : 0);
+>  			}
+>  			printf("INFO: process %d created\n", i);
+>  		}
+>  	}
+>  
+>  	/* wait for them to finish */
+> -	for (i = 0; i < THREADS; i++)
+> -		if (!use_fork)
+> -			pthread_join(t[i], NULL);
+> -		else
+> -			waitpid(tid[i], NULL, 0);
+> +	for (i = 0; i < THREADS; i++) {
+> +		if (!use_fork) {
+> +			void *status;
+> +
+> +			pthread_join(t[i], &status);
+> +			if (status)
+> +				errcnt++;
+> +		} else {
+> +			int status;
+> +
+> +			waitpid(tid[i], &status, 0);
+> +			if (!WIFEXITED(status) || WEXITSTATUS(status) > 0)
+> +				errcnt++;
+> +		}
+> +	}
+>  
+>  	/* check markers on each page */
+> -	errcnt = 0;
+> -	for (va = vastart; npages > 0; va += page_size, npages--) {
+> -		for (i = 0; i < THREADS; i++) {
+> -			if (*(uint64_t*)(va + page_offs[i]) != tid[i]) {
+> -				printf("ERROR: thread %d, "
+> -				       "offset %08lx, %08lx != %08lx\n", i,
+> -				       (va + page_offs[i] - vastart),
+> -				       *(uint64_t*)(va + page_offs[i]), tid[i]);
+> -				errcnt += 1;
+> -			}
+> +	/* For private mappings & fork we should see no writes happen */
+> +	if (use_private && use_fork)
+> +		for (i = 0; i < THREADS; i++)
+> +			tid[i] = 0;
+> +	errcnt = verify_mapping(vastart, npages, tid);
+> +	munmap(vastart, sz);
+> +
+> +	if (use_private) {
+> +		/* Check that no writes propagated into original file */
+> +		for (i = 0; i < THREADS; i++)
+> +			tid[i] = 0;
+> +		vastart = mmap(NULL, sz, PROT_READ, MAP_PRIVATE, fd, 0);
+> +		if (vastart == MAP_FAILED) {
+> +			perror("mmap()");
+> +			exit(20);
+>  		}
+> +		errcnt += verify_mapping(vastart, npages, tid);
+> +		munmap(vastart, sz);
+>  	}
+>  
+>  	printf("INFO: %d error(s) detected\n", errcnt);
+>  
+> -	munmap(vastart, sz);
+>  
+>  	return errcnt;
+>  }
+> @@ -242,7 +289,7 @@ int main(int argc, char **argv)
+>  	for (i = 1; i < THREADS; i++)
+>  		page_offs[i] = page_offs[i-1] + step;
+>  
+> -	while ((opt = getopt(argc, argv, "fwrF")) > 0) {
+> +	while ((opt = getopt(argc, argv, "fwrFp")) > 0) {
+>  		switch (opt) {
+>  		case 'f':
+>  			/* ignore errors */
+> @@ -260,6 +307,10 @@ int main(int argc, char **argv)
+>  			/* create processes instead of threads */
+>  			use_fork = 1;
+>  			break;
+> +		case 'p':
+> +			/* Use private mappings for testing */
+> +			use_private = 1;
+> +			break;
+>  		default:
+>  			fprintf(stderr, "ERROR: Unknown option character.\n");
+>  			exit(1);
+> @@ -267,10 +318,16 @@ int main(int argc, char **argv)
+>  	}
+>  
+>  	if (optind != argc - 2) {
+> -		fprintf(stderr, "ERROR: usage: holetest [-fwrF] "
+> +		fprintf(stderr, "ERROR: usage: holetest [-fwrFp] "
+>  			"FILENAME FILESIZEinMB\n");
+>  		exit(1);
+>  	}
+> +	if (use_private && use_wr[0]) {
+> +		fprintf(stderr, "ERROR: Combinations of writes and private"
+> +			"mappings not supported.\n");
+> +		exit(1);
+> +	}
+> +
+>  	path = argv[optind];
+>  	sz = strtol(argv[optind + 1], &endch, 10);
+>  	if (*endch || sz < 1) {
+> diff --git a/tests/generic/352 b/tests/generic/352
+> new file mode 100644
+> index 000000000000..fb4be9848f4c
+> --- /dev/null
+> +++ b/tests/generic/352
+> @@ -0,0 +1,60 @@
+> +#! /bin/bash
+> +# FSQA Test No. 352
+> +#
+> +# Test races between private file mapping faults from racing processes or
+> +# threads
+> +#
+> +#-----------------------------------------------------------------------
+> +#
+> +# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
+> +# Author: Jan Kara <jack@suse.cz>
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment and checks
+> +. ./common/rc
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch
+> +_require_test_program "holetest"
+> +
+> +rm -f $seqres.full
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_scratch_mount
+> +
+> +src/holetest -f -p $SCRATCH_MNT/testfile 16
+> +src/holetest -f -p $SCRATCH_MNT/testfile 256
+> +src/holetest -f -p -F $SCRATCH_MNT/testfile 16
+> +src/holetest -f -p -F $SCRATCH_MNT/testfile 256
+> +
+> +status=0
+> +exit
+> diff --git a/tests/generic/352.out b/tests/generic/352.out
+> new file mode 100644
+> index 000000000000..35324cc32725
+> --- /dev/null
+> +++ b/tests/generic/352.out
+> @@ -0,0 +1,73 @@
+> +QA output created by 352
+> +
+> +INFO: zero-filled test...
+> +INFO: sz = 16777216
+> +INFO: thread 0 created
+> +INFO: thread 1 created
+> +INFO: 0 error(s) detected
+> +
+> +INFO: posix_fallocate test...
+> +INFO: sz = 16777216
+> +INFO: thread 0 created
+> +INFO: thread 1 created
+> +INFO: 0 error(s) detected
+> +
+> +INFO: ftruncate test...
+> +INFO: sz = 16777216
+> +INFO: thread 0 created
+> +INFO: thread 1 created
+> +INFO: 0 error(s) detected
+> +
+> +INFO: zero-filled test...
+> +INFO: sz = 268435456
+> +INFO: thread 0 created
+> +INFO: thread 1 created
+> +INFO: 0 error(s) detected
+> +
+> +INFO: posix_fallocate test...
+> +INFO: sz = 268435456
+> +INFO: thread 0 created
+> +INFO: thread 1 created
+> +INFO: 0 error(s) detected
+> +
+> +INFO: ftruncate test...
+> +INFO: sz = 268435456
+> +INFO: thread 0 created
+> +INFO: thread 1 created
+> +INFO: 0 error(s) detected
+> +
+> +INFO: zero-filled test...
+> +INFO: sz = 16777216
+> +INFO: process 0 created
+> +INFO: process 1 created
+> +INFO: 0 error(s) detected
+> +
+> +INFO: posix_fallocate test...
+> +INFO: sz = 16777216
+> +INFO: process 0 created
+> +INFO: process 1 created
+> +INFO: 0 error(s) detected
+> +
+> +INFO: ftruncate test...
+> +INFO: sz = 16777216
+> +INFO: process 0 created
+> +INFO: process 1 created
+> +INFO: 0 error(s) detected
+> +
+> +INFO: zero-filled test...
+> +INFO: sz = 268435456
+> +INFO: process 0 created
+> +INFO: process 1 created
+> +INFO: 0 error(s) detected
+> +
+> +INFO: posix_fallocate test...
+> +INFO: sz = 268435456
+> +INFO: process 0 created
+> +INFO: process 1 created
+> +INFO: 0 error(s) detected
+> +
+> +INFO: ftruncate test...
+> +INFO: sz = 268435456
+> +INFO: process 0 created
+> +INFO: process 1 created
+> +INFO: 0 error(s) detected
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 36fb75933a13..effe6aac2d47 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -354,3 +354,4 @@
+>  349 blockdev quick rw
+>  350 blockdev quick rw
+>  351 blockdev quick rw
+> +352 auto
+> -- 
+> 2.6.6
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
