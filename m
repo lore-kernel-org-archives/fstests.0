@@ -1,170 +1,69 @@
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH v2] fstests: generic: Test SHARED flag about fiemap ioctl before and after sync
-Date: Mon, 16 May 2016 09:14:15 +0800
-Message-Id: <1463361255-8149-1-git-send-email-quwenruo@cn.fujitsu.com>
+Subject: Re: [PATCH 1/5] src/copy_file_range: Add a program for testing
+ vfs_copy_file_range()
+References: <1463172652-22361-1-git-send-email-Anna.Schumaker@Netapp.com>
+ <1463172652-22361-2-git-send-email-Anna.Schumaker@Netapp.com>
+ <20160516232036.GT26977@dastard>
+ <4fbb6f1b-5c7f-7afe-b414-0f213870a328@Netapp.com>
+ <20160517174830.GA4507@birch.djwong.org>
+From: Anna Schumaker <Anna.Schumaker@netapp.com>
+Message-ID: <0a21c0ef-626c-821b-e30c-5b05edb87a02@Netapp.com>
+Date: Tue, 17 May 2016 13:52:11 -0400
 MIME-Version: 1.0
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Cc: darrick.wong@oracle.com
+In-Reply-To: <20160517174830.GA4507@birch.djwong.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+To: "Darrick J. Wong" <darrick.wong@oracle.com>, Anna Schumaker <Anna.Schumaker@netapp.com>
+Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, linux-nfs@vger.kernel.org, hch@infradead.org
 List-ID: <fstests@vger.kernel.org>
 
-The test case will check SHARED flag returned by fiemap ioctl on
-reflinked files before and after sync.
+On 05/17/2016 01:48 PM, Darrick J. Wong wrote:
+> On Tue, May 17, 2016 at 10:47:42AM -0400, Anna Schumaker wrote:
+>> On 05/16/2016 07:20 PM, Dave Chinner wrote:
+>>> On Fri, May 13, 2016 at 04:50:48PM -0400, Anna Schumaker wrote:
+>>>> This will be used by the various copy tests to call the Linux
+>>>> copy_file_range() system call.  I used src/cloner.c as a reference while
+>>>> writing this tool.
+>>>
+>>> Hmmm - I'd much prefer to see this added to xfs_io as it's a kernel
+>>> syscall that lots of filesystems will eventually implement. A
+>>> one-off binary for xfstests is fine for non-standard or deeply
+>>> filesysetm specific stuff, but if it's generic we try to put it into
+>>> xfs_io so that it's available to everyone writing scripts, not just
+>>> xfstests....
+>>
+>> Ah, that makes sense.  Thanks for explaining the convention!  I'll look into
+>> adding it to the xfs_io program instead.  Should I send that patch to a
+>> different mailing list than fstests@vger.kernel.org?
+> 
+> xfs@oss.sgi.com.  I recommend looking at io/reflink.c as a template.
+> 
+> FWIW I'd also appreciate c_f_r being wired up in xfs_io.
 
-Normally SHARED flag won't change just due to a normal sync operation.
+I'm working on it right now!  I just finished fighting autotolls to get it to recognize a new file defining the "copy_range" command.  Hopefully porting everything over won't be too difficult from here.
 
-But btrfs doesn't handle SHARED flag well, and this time it won't check
-any delayed extent tree(reverse extent searching tree) modification, but
-only metadata already committed to disk.
+Thanks for the suggestion to look at reflink!
 
-So btrfs will not return correct SHARED flag on reflinked files if there
-is no sync to commit all metadata.
+Anna
 
-This testcase will just check it.
-
-Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
----
-And of course, xfs handles it quite well. Nice work Darrick.
-Also the test case needs the new infrastructure introduced in previous
-generic/352 test case.
-
-changelog:
-v2:
-  Add more human readable output to golden output
----
- tests/generic/353     | 92 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/353.out | 15 +++++++++
- tests/generic/group   |  1 +
- 3 files changed, 108 insertions(+)
- create mode 100755 tests/generic/353
- create mode 100644 tests/generic/353.out
-
-diff --git a/tests/generic/353 b/tests/generic/353
-new file mode 100755
-index 0000000..ca665cf
---- /dev/null
-+++ b/tests/generic/353
-@@ -0,0 +1,92 @@
-+#! /bin/bash
-+# FS QA Test 353
-+#
-+# Check if fiemap ioctl returns correct SHARED flag on reflinked file
-+# before and after sync the fs
-+#
-+# Btrfs has a bug in checking shared extent, which can only handle metadata
-+# already committed to disk, but not delayed extent tree modification.
-+# This caused SHARED flag only occurs after sync.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Fujitsu. All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+. ./common/punch
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch_reflink
-+_require_fiemap
-+
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount
-+
-+blocksize=64k
-+file1="$SCRATCH_MNT/file1"
-+file2="$SCRATCH_MNT/file2"
-+
-+# write the initial file
-+_pwrite_byte 0xcdcdcdcd 0 $blocksize $file1 | _filter_xfs_io
-+
-+# reflink initial file
-+_reflink_range $file1 0 $file2 0 $blocksize | _filter_xfs_io
-+
-+# check their fiemap to make sure it's correct
-+echo "before sync:"
-+echo "$file1" | _filter_scratch
-+$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags
-+echo "$file2" | _filter_scratch
-+$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags
-+
-+# sync and recheck, to make sure the fiemap doesn't change just
-+# due to sync
-+sync
-+echo "after sync:"
-+echo "$file1" | _filter_scratch
-+$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags
-+echo "$file2" | _filter_scratch
-+$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/353.out b/tests/generic/353.out
-new file mode 100644
-index 0000000..b7184a6
---- /dev/null
-+++ b/tests/generic/353.out
-@@ -0,0 +1,15 @@
-+QA output created by 353
-+wrote 65536/65536 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+linked 65536/65536 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+before sync:
-+SCRATCH_MNT/file1
-+0: [0..127]: 0x2001
-+SCRATCH_MNT/file2
-+0: [0..127]: 0x2001
-+after sync:
-+SCRATCH_MNT/file1
-+0: [0..127]: 0x2001
-+SCRATCH_MNT/file2
-+0: [0..127]: 0x2001
-diff --git a/tests/generic/group b/tests/generic/group
-index 3f00386..0392d4d 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -355,3 +355,4 @@
- 350 blockdev quick rw
- 351 blockdev quick rw
- 352 auto clone
-+353 auto quick clone
--- 
-2.5.5
+> 
+> --D
+> 
+>>
+>> Thanks,
+>> Anna
+>>
+>>>
+>>> Cheers,
+>>>
+>>> Dave.
+>>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
