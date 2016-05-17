@@ -1,45 +1,63 @@
-Received: from mx143.netapp.com ([216.240.21.24]:57763 "EHLO mx143.netapp.com"
+Received: from mx1.redhat.com ([209.132.183.28]:44174 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752569AbcEQOrq (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 17 May 2016 10:47:46 -0400
-Subject: Re: [PATCH 1/5] src/copy_file_range: Add a program for testing
- vfs_copy_file_range()
-References: <1463172652-22361-1-git-send-email-Anna.Schumaker@Netapp.com>
- <1463172652-22361-2-git-send-email-Anna.Schumaker@Netapp.com>
- <20160516232036.GT26977@dastard>
-From: Anna Schumaker <Anna.Schumaker@netapp.com>
-Message-ID: <4fbb6f1b-5c7f-7afe-b414-0f213870a328@Netapp.com>
-Date: Tue, 17 May 2016 10:47:42 -0400
-MIME-Version: 1.0
-In-Reply-To: <20160516232036.GT26977@dastard>
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+	id S1755838AbcEQQg1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 17 May 2016 12:36:27 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id A4B0DC05B1E6
+	for <fstests@vger.kernel.org>; Tue, 17 May 2016 16:36:26 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH 1/2] common/rc: modify _require_xfs_io_command function
+Date: Wed, 18 May 2016 00:36:20 +0800
+Message-Id: <1463502981-15593-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, linux-nfs@vger.kernel.org, hch@infradead.org
+To: fstests@vger.kernel.org
+Cc: Zorro Lang <zlang@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 05/16/2016 07:20 PM, Dave Chinner wrote:
-> On Fri, May 13, 2016 at 04:50:48PM -0400, Anna Schumaker wrote:
->> This will be used by the various copy tests to call the Linux
->> copy_file_range() system call.  I used src/cloner.c as a reference while
->> writing this tool.
-> 
-> Hmmm - I'd much prefer to see this added to xfs_io as it's a kernel
-> syscall that lots of filesystems will eventually implement. A
-> one-off binary for xfstests is fine for non-standard or deeply
-> filesysetm specific stuff, but if it's generic we try to put it into
-> xfs_io so that it's available to everyone writing scripts, not just
-> xfstests....
+1. This function try to run $XFS_IO_PROG -c "$command help", that's
+wrong. It should be "help $command".
 
-Ah, that makes sense.  Thanks for explaining the convention!  I'll look into adding it to the xfs_io program instead.  Should I send that patch to a different mailing list than fstests@vger.kernel.org?
+2. The $param can't be used for all command's options, for example
+"help pwrite" include:
 
-Thanks,
-Anna
+ -Z N -- zeed the random number generator (used when writing randomly)
+         (heh, zorry, the -s/-S arguments were already in use in pwrite)
 
-> 
-> Cheers,
-> 
-> Dave.
-> 
+We should make param="-Z N", not only "-Z". After this patch, we can
+run this function as:
+
+  _require_xfs_io_command pwrite -Z N
+
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
+ common/rc | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/common/rc b/common/rc
+index 51092a0..3b87d7e 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1874,7 +1874,8 @@ _require_xfs_io_command()
+ 		exit 1
+ 	fi
+ 	command=$1
+-	param=$2
++	shift
++	param="$*"
+ 
+ 	testfile=$TEST_DIR/$$.xfs_io
+ 	case $command in
+@@ -1896,7 +1897,7 @@ _require_xfs_io_command()
+ 			_notrun "xfs_io $command support is missing"
+ 		;;
+ 	*)
+-		testio=`$XFS_IO_PROG -c "$command help" 2>&1`
++		testio=`$XFS_IO_PROG -c "help $command" 2>&1`
+ 	esac
+ 
+ 	rm -f $testfile 2>&1 > /dev/null
+-- 
+2.5.5
 
