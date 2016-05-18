@@ -1,43 +1,62 @@
-Received: from mx1.redhat.com ([209.132.183.28]:39978 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750752AbcERWSY (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 18 May 2016 18:18:24 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id C7362C01FBB1
-	for <fstests@vger.kernel.org>; Wed, 18 May 2016 22:18:22 +0000 (UTC)
-Received: from tarantula.localdomain (ovpn-116-102.phx2.redhat.com [10.3.116.102])
-	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u4IMILqm017406
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO)
-	for <fstests@vger.kernel.org>; Wed, 18 May 2016 18:18:22 -0400
-Date: Wed, 18 May 2016 17:18:20 -0500
-From: Jeffrey Bastian <jbastian@redhat.com>
-Subject: Re: [PATCH] avoid struct fsxattr redefinition
-Message-ID: <20160518221820.GD23173@tarantula.localdomain>
-References: <20160518174054.GA27634@tarantula.localdomain>
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:49614 "EHLO
+	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750736AbcERXzh (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 18 May 2016 19:55:37 -0400
+Date: Thu, 19 May 2016 09:55:31 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 1/2] common/rc: modify _require_xfs_io_command function
+Message-ID: <20160518235531.GB26977@dastard>
+References: <1463502981-15593-1-git-send-email-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160518174054.GA27634@tarantula.localdomain>
+In-Reply-To: <1463502981-15593-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, May 18, 2016 at 12:40:54PM -0500, Jeffrey Bastian wrote:
-> Linux kernel v4.5 defines 'struct fsxattr' in linux/fs.h [0] but it's
-> still defined in xfs/linux.h as a backup [1].  If the files are included
-> in the wrong order, the compiler will complain with a redefinition
-> error.  This patch moves linux/fs.h (and linux/magic.h) before the xfs
-> headers for the t_immutable.c and fsstress.c tests.
+On Wed, May 18, 2016 at 12:36:20AM +0800, Zorro Lang wrote:
+> 1. This function try to run $XFS_IO_PROG -c "$command help", that's
+> wrong. It should be "help $command".
 
-This patch _may_ not be necessary; this is also being discussed on the
-xfs list and including linux/fs.h in xfsprogs' include/linux.h solves
-the problem, i.e., the include order won't matter.  On the other hand,
-it seems to be best-practice (if not a hard-and-fast rule) to include
-fs.h first, so maybe the patch should be applied to xfstests anyway?
+I think there was more to it that than:
 
-http://oss.sgi.com/archives/xfs/2016-05/msg00347.html
+$ sudo xfs_io -c "pwrite help"
+$ sudo xfs_io -c "help pwrite"
+pwrite [-i infile [-d] [-s skip]] [-b bs] [-S seed] [-wW] [-FBR [-Z N]] [-V N] off len -- writes a number of bytes at a specified offset
 
+ writes a range of bytes (in block size increments) from the given offset
+[....]
+$ sudo xfs_io -c "foo help"
+command "foo" not found
+
+i.e. that check simply tells us whether the command exists or not
+with an error message that is captured and then tested. If we
+actually run the help command, we got lots of output for commands
+that exist and that may confuse the error string checking we then
+do.
+
+Yes, it's a bit of a hack, and we may not even need the "help"
+parameter anymore, but ISTR older versions of xfs_io needed it to
+parse the CLI successfully for all the different commands....
+
+> 2. The $param can't be used for all command's options, for example
+> "help pwrite" include:
+> 
+>  -Z N -- zeed the random number generator (used when writing randomly)
+>          (heh, zorry, the -s/-S arguments were already in use in pwrite)
+
+This bit is fine.
+
+In general, you should put separate changes into separate patches.
+If you find yourself iterating a list of things a patch fixes in the
+description, then that's a good sign it should be split into
+multiple patches.
+
+Cheers,
+
+Dave.
 -- 
-Jeff Bastian
+Dave Chinner
+david@fromorbit.com
