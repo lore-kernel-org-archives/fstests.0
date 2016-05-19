@@ -1,93 +1,65 @@
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:33695 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750752AbcESDgT convert rfc822-to-8bit (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 18 May 2016 23:36:19 -0400
-Date: Wed, 18 May 2016 23:36:17 -0400 (EDT)
-From: Zirong Lang <zlang@redhat.com>
-Message-ID: <450668405.52826142.1463628977521.JavaMail.zimbra@redhat.com>
-In-Reply-To: <20160518235531.GB26977@dastard>
-References: <1463502981-15593-1-git-send-email-zlang@redhat.com> <20160518235531.GB26977@dastard>
-Subject: Re: [PATCH 1/2] common/rc: modify _require_xfs_io_command function
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Received: from mx1.redhat.com ([209.132.183.28]:39710 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751467AbcESEbE (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 19 May 2016 00:31:04 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 2A3506F670
+	for <fstests@vger.kernel.org>; Thu, 19 May 2016 04:31:03 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH v2] common/rc: _require_xfs_io_command can't analyze multi-parameters
+Date: Thu, 19 May 2016 12:30:59 +0800
+Message-Id: <1463632259-19948-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Zorro Lang <zlang@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
+The $param can't be used for all command's options, for example
+"help pwrite" include:
 
+ -Z N -- zeed the random number generator (used when writing randomly)
+         (heh, zorry, the -s/-S arguments were already in use in pwrite)
 
------ =E5=8E=9F=E5=A7=8B=E9=82=AE=E4=BB=B6 -----
-> =E5=8F=91=E4=BB=B6=E4=BA=BA: "Dave Chinner" <david@fromorbit.com>
-> =E6=94=B6=E4=BB=B6=E4=BA=BA: "Zorro Lang" <zlang@redhat.com>
-> =E6=8A=84=E9=80=81: fstests@vger.kernel.org
-> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: =E6=98=9F=E6=9C=9F=E5=9B=9B, 2016=
-=E5=B9=B4 5 =E6=9C=88 19=E6=97=A5 =E4=B8=8A=E5=8D=88 7:55:31
-> =E4=B8=BB=E9=A2=98: Re: [PATCH 1/2] common/rc: modify _require_xfs_io_c=
-ommand function
->=20
-> On Wed, May 18, 2016 at 12:36:20AM +0800, Zorro Lang wrote:
-> > 1. This function try to run $XFS_IO_PROG -c "$command help", that's
-> > wrong. It should be "help $command".
->=20
-> I think there was more to it that than:
->=20
-> $ sudo xfs_io -c "pwrite help"
-> $ sudo xfs_io -c "help pwrite"
-> pwrite [-i infile [-d] [-s skip]] [-b bs] [-S seed] [-wW] [-FBR [-Z N]]=
- [-V
-> N] off len -- writes a number of bytes at a specified offset
->=20
->  writes a range of bytes (in block size increments) from the given offs=
-et
-> [....]
-> $ sudo xfs_io -c "foo help"
-> command "foo" not found
->=20
-> i.e. that check simply tells us whether the command exists or not
-> with an error message that is captured and then tested. If we
-> actually run the help command, we got lots of output for commands
-> that exist and that may confuse the error string checking we then
-> do.
->=20
-> Yes, it's a bit of a hack, and we may not even need the "help"
-> parameter anymore, but ISTR older versions of xfs_io needed it to
-> parse the CLI successfully for all the different commands....
+We should make param="-Z N", not only "-Z". After this patch, we can
+run this function as:
 
-Hmm, that's a smart way. So I don't need to change that before someone
-new xfsprogs break this "hack rule":)
+  _require_xfs_io_command pwrite -Z N
 
->=20
-> > 2. The $param can't be used for all command's options, for example
-> > "help pwrite" include:
-> >=20
-> >  -Z N -- zeed the random number generator (used when writing randomly=
-)
-> >          (heh, zorry, the -s/-S arguments were already in use in pwri=
-te)
->=20
-> This bit is fine.
->=20
-> In general, you should put separate changes into separate patches.
-> If you find yourself iterating a list of things a patch fixes in the
-> description, then that's a good sign it should be split into
-> multiple patches.
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
 
-Thanks for point that, I'll send a V2 patch only contain this change.
+Hi,
+
+I did 2 changes in "[PATCH 1/2] common/rc: modify _require_xfs_io_command
+function":
+1. change "$command help" to "help $command"
+2. change "param=$2" to "shift; param=\"$*\""
+
+V2 patch give up the 1st change (Dave explained why we don't change that),
+remain the 2nd change as below.
 
 Thanks,
 Zorro
 
->=20
-> Cheers,
->=20
-> Dave.
-> --
-> Dave Chinner
-> david@fromorbit.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
+ common/rc | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/common/rc b/common/rc
+index 51092a0..9c532cc 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1874,7 +1874,8 @@ _require_xfs_io_command()
+ 		exit 1
+ 	fi
+ 	command=$1
+-	param=$2
++	shift
++	param="$*"
+ 
+ 	testfile=$TEST_DIR/$$.xfs_io
+ 	case $command in
+-- 
+2.5.5
+
