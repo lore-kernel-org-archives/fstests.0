@@ -1,57 +1,31 @@
-Received: from mx1.redhat.com ([209.132.183.28]:35758 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755066AbcETOlz (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 20 May 2016 10:41:55 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 4FB617DCFA
-	for <fstests@vger.kernel.org>; Fri, 20 May 2016 14:41:54 +0000 (UTC)
-From: Jeff Moyer <jmoyer@redhat.com>
-Subject: Re: [PATCH] exclude dmerror tests with mount -o dax
-References: <b8729f80-6d09-6c57-1fb7-4303558fc9a3@redhat.com>
-Date: Fri, 20 May 2016 10:41:53 -0400
-In-Reply-To: <b8729f80-6d09-6c57-1fb7-4303558fc9a3@redhat.com> (Eric Sandeen's
-	message of "Thu, 19 May 2016 16:12:22 -0500")
-Message-ID: <x49mvnkzt8u.fsf@segfault.boston.devel.redhat.com>
+Received: from mail-ig0-f169.google.com ([209.85.213.169]:35196 "EHLO
+	mail-ig0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755542AbcETRA3 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 20 May 2016 13:00:29 -0400
+Received: by mail-ig0-f169.google.com with SMTP id bi2so140995644igb.0
+        for <fstests@vger.kernel.org>; Fri, 20 May 2016 10:00:29 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <x49r3cwztb9.fsf@segfault.boston.devel.redhat.com>
+References: <1463696380-20169-1-git-send-email-tahsin@google.com> <x49r3cwztb9.fsf@segfault.boston.devel.redhat.com>
+From: Tahsin Erdogan <tahsin@google.com>
+Date: Fri, 20 May 2016 10:00:26 -0700
+Message-ID: <CAAeU0aPk-gdP3hTPXi7_KuEYH4DUvn7OSpMo-76t1m2WsJfkDg@mail.gmail.com>
+Subject: Re: [PATCH] generic/208: do not leave pending async ios behind during
+ process exit
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: Jeff Moyer <jmoyer@redhat.com>
+Cc: fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-Eric Sandeen <sandeen@redhat.com> writes:
+On Fri, May 20, 2016 at 7:40 AM, Jeff Moyer <jmoyer@redhat.com> wrote:
+> exit_aio will wait for all outstanding I/O before it returns, so you
+> shouldn't run into this.
 
-> Same as we do for dm flakey.  dm can't do dax.
->
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+Thanks Jeff.
 
-We'll add support eventually, but for now this makes sense.
+I was seeing this when running generic/208 on an older kernel. I see
+that it got fixed in more recent kernels:
 
-Acked-by: Jeff Moyer <jmoyer@redhat.com>
-
--Jeff
-
-> ---
->
-> diff --git a/common/dmerror b/common/dmerror
-> index 004530d..42c075e 100644
-> --- a/common/dmerror
-> +++ b/common/dmerror
-> @@ -18,6 +18,11 @@
->  #
->  # common functions for setting up and tearing down a dmerror device
->  
-> +echo $MOUNT_OPTIONS | grep -q dax
-> +if [ $? -eq 0 ]; then
-> +	_notrun "Cannot run tests with DAX on dmerror devices"
-> +fi
-> +
->  _dmerror_init()
->  {
->  	local dm_backing_dev=$SCRATCH_DEV
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+commit 6098b45b32e6baeacc04790773ced9340601d511("aio: block exit_aio()
+until all context requests are completed")
