@@ -1,180 +1,109 @@
-Received: from mail-pa0-f52.google.com ([209.85.220.52]:34736 "EHLO
-	mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754172AbcESWUs (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 19 May 2016 18:20:48 -0400
-Received: by mail-pa0-f52.google.com with SMTP id qo8so33211161pab.1
-        for <fstests@vger.kernel.org>; Thu, 19 May 2016 15:20:48 -0700 (PDT)
-From: Tahsin Erdogan <tahsin@google.com>
-Subject: [PATCH] generic/208: do not leave pending async ios behind during process exit
-Date: Thu, 19 May 2016 15:19:40 -0700
-Message-Id: <1463696380-20169-1-git-send-email-tahsin@google.com>
+Received: from mx1.redhat.com ([209.132.183.28]:57117 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755126AbcETOAU (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 20 May 2016 10:00:20 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 5D7B03C88EE
+	for <fstests@vger.kernel.org>; Fri, 20 May 2016 14:00:19 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH 1/4] common/rc: new functions for multi-level mount/umount operations
+Date: Fri, 20 May 2016 22:00:11 +0800
+Message-Id: <1463752814-3049-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>, Tahsin Erdogan <tahsin@google.com>
+Cc: Zorro Lang <zlang@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-An inflight async io could keep the filesystem busy and cause umount
--EBUSY errors after process exit. When the async io process is killed
-forcibly with SIGKILL, it doesn't get a chance to wait for ios to
-complete.
+When I try to write cases about mount shared subtrees test, I find
+I always need to do many mount operations, then then umount those
+mount point one by one.
 
-With this patch, instead of killing the children processes, we let them
-exit on their own after the timeout expires.
+For make the code clear, I use a stack to save mounted points
+sequentially, then I write 3 common functions to operate this
+stack.
 
-Signed-off-by: Tahsin Erdogan <tahsin@google.com>
+1. The global stack named MOUNTED_POINT_STACK
+2. _get_mount() accept mount parameters likes _mount(), but the
+   mountpoint parameter must be the last one. It will run the
+   mount operation and push the mountpoint name into stack.
+3. _put_mount() don't need any parameters. It will pull the newest
+   mountpoint name from the stack, and umount it.
+4. _clear_mount_stack() don't need any parameters either. It will
+   umount all mountpoints in the stack sequentially, and set
+   MOUNTED_POINT_STACK=""
+
+Generally, the _clear_mount_stack() function also can be used as
+_init_mount_stack() at the beginning of a case. Because it will
+prepare an empty stack.
+
+Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
- src/aio-dio-regress/aio-dio-invalidate-failure.c | 89 ++++++++++++++----------
- 1 file changed, 54 insertions(+), 35 deletions(-)
 
-diff --git a/src/aio-dio-regress/aio-dio-invalidate-failure.c b/src/aio-dio-regress/aio-dio-invalidate-failure.c
-index 24f3e3c..474a83c 100644
---- a/src/aio-dio-regress/aio-dio-invalidate-failure.c
-+++ b/src/aio-dio-regress/aio-dio-invalidate-failure.c
-@@ -62,6 +62,26 @@ static unsigned char buf[GINORMOUS] __attribute((aligned (4096)));
- 	exit(1);		\
- } while (0)
- 
-+
-+volatile int timeout_reached = 0;
-+
-+static void alarm_handler(int signum)
-+{
-+	timeout_reached = 1;
-+}
-+
-+void set_timeout(unsigned int seconds)
-+{
-+	struct sigaction sa;
-+	memset(&sa, 0, sizeof(sa));
-+	sa.sa_handler = alarm_handler;
-+	sigemptyset(&sa.sa_mask);
-+	if (sigaction(SIGALRM, &sa, NULL) == -1)
-+		fail("sigaction: %d\n", errno);
-+
-+	alarm(seconds);
-+}
-+
- void spin_dio(int fd)
- {
- 	io_context_t ctx;
-@@ -70,18 +90,28 @@ void spin_dio(int fd)
- 	struct io_event event;
- 	int ret;
- 
-+	set_timeout(SECONDS);
-+
-         io_prep_pwrite(&iocb, fd, buf, GINORMOUS, 0);
- 
- 	ret = io_queue_init(1, &ctx);
- 	if (ret)
- 		fail("io_queue_init returned %d", ret);
- 
--	while (1) {
-+	while (!timeout_reached) {
- 		ret = io_submit(ctx, 1, iocbs);
- 		if (ret != 1)
- 			fail("io_submit returned %d instead of 1", ret);
- 
--		ret = io_getevents(ctx, 1, 1, &event, NULL);
-+		/*
-+		 * Retry io_getevents() if it gets interrupted by alarm signal.
-+		 * We don't want to leave behind uncompleted async io requests
-+		 * that could cause umount -EBUSY errors.
-+		 */
-+		do {
-+			ret = io_getevents(ctx, 1, 1, &event, NULL);
-+		} while (ret == -EINTR && timeout_reached);
-+
- 		if (ret != 1)
- 			fail("io_getevents returned %d instead of 1", ret);
- 
-@@ -99,17 +129,15 @@ void spin_buffered(int fd)
- {
- 	int ret;
- 
--	while (1) {
-+	set_timeout(SECONDS);
-+
-+	while (!timeout_reached) {
- 		ret = pwrite(fd, buf, GINORMOUS, 0);
- 		if (ret != GINORMOUS)
- 			fail("buffered write returned %d", ret);
- 	}
+Hi,
+
+I just wrote 4 patches for cover mount shared subtree test:
+
+0001-common-rc-new-functions-for-multi-level-mount-umount.patch
+0002-generic-353-new-case-for-test-mount-bind-operation.patch
+0003-generic-354-new-case-for-test-mount-shared-subtrees-.patch
+0004-generic-355-new-case-test-two-vfsmount-no-peers.patch
+
+Due to I have sent two patches which taken generic/352(not reviewed),
+so above new cases named from generic/353 to 355.
+
+I will write more cases about mount shared subtrees feature, after
+above 4 patches can be review and merged.
+
+Thanks,
+Zorro
+
+ common/rc | 31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
+
+diff --git a/common/rc b/common/rc
+index 9c532cc..c0fec02 100644
+--- a/common/rc
++++ b/common/rc
+@@ -162,6 +162,37 @@ _mount()
+     $MOUNT_PROG `_mount_ops_filter $*`
  }
  
--static void alarm_handler(int signum)
--{
--}
--
- int main(int argc, char **argv)
++# the mount point must be the last parameter
++_get_mount()
++{
++    local mnt_point=${!#}
++
++    _mount $*
++    if [ $? -eq 0 ];then
++	MOUNTED_POINT_STACK=`echo "$mnt_point $MOUNTED_POINT_STACK"`
++    else
++	return 1
++    fi
++}
++
++_put_mount()
++{
++    local last_mnt=`echo $MOUNTED_POINT_STACK | awk '{print $1}'`
++
++    if [ -n "$last_mnt" ];then
++	umount $last_mnt
++    fi
++    MOUNTED_POINT_STACK=`echo $MOUNTED_POINT_STACK | cut -d\  -f2-`
++}
++
++_clear_mount_stack()
++{
++    if [ -n "$MOUNTED_POINT_STACK" ];then
++	umount $MOUNTED_POINT_STACK
++    fi
++    MOUNTED_POINT_STACK=""
++}
++
+ _scratch_options()
  {
- 	pid_t buffered_pid;
-@@ -118,7 +146,8 @@ int main(int argc, char **argv)
- 	int fd;
- 	int fd2;
- 	int status;
--	struct sigaction sa;
-+	int dio_exit;
-+	int buffered_exit;
- 
- 	if (argc != 2)
- 		fail("only arg should be file name");
-@@ -152,38 +181,28 @@ int main(int argc, char **argv)
- 		exit(0);
- 	}
- 
--	memset(&sa, 0, sizeof(sa));
--	sa.sa_handler = alarm_handler;
--	sigemptyset(&sa.sa_mask);
--	if (sigaction(SIGALRM, &sa, NULL) == -1)
--		fail("sigaction: %d\n", errno);
- 
--	alarm(SECONDS);
-+	/* Child processes will exit on their own when timeout expires. */
-+	pid = waitpid(dio_pid, &status, 0);
-+	printf("dio_pid %d, pid %d, status %#x\n", dio_pid, pid, status);
- 
--	pid = wait(&status);
--	if (pid < 0 && errno == EINTR) {
--		/* if we timed out then we're done */
--		kill(buffered_pid, SIGKILL);
--		kill(dio_pid, SIGKILL);
-+	dio_exit = (pid == dio_pid && WIFEXITED(status)) ?
-+			WEXITSTATUS(status) : 1;
- 
--		waitpid(buffered_pid, NULL, 0);
--		waitpid(dio_pid, NULL, 0);
-+	pid = waitpid(buffered_pid, &status, 0);
-+	printf("buffered_pid %d, pid %d, status %#x\n", buffered_pid, pid, status);
- 
--		printf("ran for %d seconds without error, passing\n", SECONDS);
--		exit(0);
--	}
-+	buffered_exit = (pid == buffered_pid && WIFEXITED(status)) ?
-+			WEXITSTATUS(status) : 1;
- 
--	if (pid == dio_pid) {
--		kill(buffered_pid, SIGKILL);
--		waitpid(buffered_pid, NULL, 0);
--	} else {
--		kill(dio_pid, SIGKILL);
--		waitpid(dio_pid, NULL, 0);
-+	if (dio_exit || buffered_exit) {
-+		/*
-+		 * pass on the child's pass/fail return code or fail if the
-+		 * child didn't exit cleanly.
-+		 */
-+		exit(dio_exit || buffered_exit);
- 	}
- 
--	/* 
--	 * pass on the child's pass/fail return code or fail if the child 
--	 * didn't exit cleanly.
--	 */
--	exit(WIFEXITED(status) ? WEXITSTATUS(status) : 1);
-+	printf("ran for %d seconds without error, passing\n", SECONDS);
-+	exit(0);
- }
+     type=$1
 -- 
-2.8.0.rc3.226.g39d4020
+2.5.5
 
