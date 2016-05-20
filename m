@@ -1,16 +1,16 @@
-Received: from mx1.redhat.com ([209.132.183.28]:52287 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:50063 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932281AbcETOA3 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 20 May 2016 10:00:29 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	id S932281AbcETOAc (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 20 May 2016 10:00:32 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 6B632B0423
-	for <fstests@vger.kernel.org>; Fri, 20 May 2016 14:00:28 +0000 (UTC)
+	by mx1.redhat.com (Postfix) with ESMTPS id E3B48C04D2FA
+	for <fstests@vger.kernel.org>; Fri, 20 May 2016 14:00:31 +0000 (UTC)
 From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH 3/4] generic/354: new case for test mount shared subtrees state transition
-Date: Fri, 20 May 2016 22:00:13 +0800
-Message-Id: <1463752814-3049-3-git-send-email-zlang@redhat.com>
+Subject: [PATCH 4/4] generic/355: new case test two vfsmount no peers
+Date: Fri, 20 May 2016 22:00:14 +0800
+Message-Id: <1463752814-3049-4-git-send-email-zlang@redhat.com>
 In-Reply-To: <1463752814-3049-1-git-send-email-zlang@redhat.com>
 References: <1463752814-3049-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -18,69 +18,43 @@ To: fstests@vger.kernel.org
 Cc: Zorro Lang <zlang@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-This case will do function test for mount --make-* operations, it will
-verify below state transition:
+This test cover linux commit 7ae8fd0, when mnt_group_id=0, it means
+this mount no peers. But this bug treat two zero mnt_group_id as
+peers. And it cause a crash by dereference a NULL address.
 
-------------------------------------------------------------------------
-|             |make-shared |  make-slave  | make-private |make-unbindab|
---------------|------------|--------------|--------------|-------------|
-|shared       |shared      |*slave/private|   private    | unbindable  |
-|             |            |              |              |             |
-|-------------|------------|--------------|--------------|-------------|
-|slave        |shared      |    **slave   |    private   | unbindable  |
-|             |and slave   |              |              |             |
-|-------------|------------|--------------|--------------|-------------|
-|shared       |shared      |    slave     |    private   | unbindable  |
-|and slave    |and slave   |              |              |             |
-|-------------|------------|--------------|--------------|-------------|
-|private      |shared      |  **private   |    private   | unbindable  |
-|-------------|------------|--------------|--------------|-------------|
-|unbindable   |shared      |**unbindable  |    private   | unbindable  |
-------------------------------------------------------------------------
+As below, the crash will happen when mount fs on "B/mnt1/mnt2":
 
-This case use fsstress to produce a little rand load, to sure basic
-operations on the mountpoints won't cause hang or panic etc.
+           shared            New FS           shared
+     -----------------------[A/mnt1]----------------------
+    |                           |                         |
+    |                bind       |    bind                 |
+[C/mnt1]--[slave C]<------[shared A]------>[slave B]--[B/mnt1]
+                                                          |
+                                                          |
+                                                    [B/mnt1/mnt2]
+                                                       (New FS)
 
 Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
- tests/generic/354     | 214 +++++++++++++
- tests/generic/354.out | 813 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/355     | 146 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/355.out |  12 +++++
  tests/generic/group   |   1 +
- 3 files changed, 1028 insertions(+)
- create mode 100755 tests/generic/354
- create mode 100644 tests/generic/354.out
+ 3 files changed, 159 insertions(+)
+ create mode 100755 tests/generic/355
+ create mode 100644 tests/generic/355.out
 
-diff --git a/tests/generic/354 b/tests/generic/354
+diff --git a/tests/generic/355 b/tests/generic/355
 new file mode 100755
-index 0000000..077ff22
+index 0000000..7317d04
 --- /dev/null
-+++ b/tests/generic/354
-@@ -0,0 +1,214 @@
++++ b/tests/generic/355
+@@ -0,0 +1,146 @@
 +#! /bin/bash
-+# FS QA Test 354
++# FS QA Test 355
 +#
-+# Test mount shared subtrees, verify the state transition when use:
-+#   --make-shared
-+#   --make-slave
-+#   --make-private
-+#   --make-unbindable
-+#
-+# ------------------------------------------------------------------------
-+# |             |make-shared |  make-slave  | make-private |make-unbindab|
-+# --------------|------------|--------------|--------------|-------------|
-+# |shared       |shared      |*slave/private|   private    | unbindable  |
-+# |             |            |              |              |             |
-+# |-------------|------------|--------------|--------------|-------------|
-+# |slave        |shared      |    **slave   |    private   | unbindable  |
-+# |             |and slave   |              |              |             |
-+# |-------------|------------|--------------|--------------|-------------|
-+# |shared       |shared      |    slave     |    private   | unbindable  |
-+# |and slave    |and slave   |              |              |             |
-+# |-------------|------------|--------------|--------------|-------------|
-+# |private      |shared      |  **private   |    private   | unbindable  |
-+# |-------------|------------|--------------|--------------|-------------|
-+# |unbindable   |shared      |**unbindable  |    private   | unbindable  |
-+# ------------------------------------------------------------------------
++# This test cover linux commit 7ae8fd0, kernel two mnt_group_id == 0
++# (no peer)vfsmount as peers. It case kernel dereference a NULL
++# address.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2016 Red Hat Inc.  All Rights Reserved.
@@ -133,9 +107,11 @@ index 0000000..077ff22
 +{
 +	local target=$1
 +
-+	$FSSTRESS_PROG -z -n 50 -p 3 \
++	$FSSTRESS_PROG -z -n 500 -p 5 \
 +		       -f creat=5 \
 +		       -f mkdir=5 \
++		       -f dwrite=1 \
++		       -f dread=1 \
 +		       -f link=2 \
 +		       -f rename=1 \
 +		       -f rmdir=2 \
@@ -185,919 +161,67 @@ index 0000000..077ff22
 +	_clear_mount_stack
 +}
 +
-+run()
++#
++#            shared            New FS           shared
++#      -----------------------[A/mnt1]----------------------
++#     |                           |                         |
++#     |                bind       |    bind                 |       New FS
++# [C/mnt1]--[slave C]<------[shared A]------>[slave B]--[B/mnt1]--[B/mnt1/mnt2]
++#
++crash_test()
 +{
-+	# command include make-shared/slave/private/unbindable
-+	local cmd=$1
-+	# orginal status include shared/slave/shared&slave/private/unbindable
-+	local orgs="$2"
++    start_test shared
 +
-+	# bind anything on un-shared dest will keep the source type
-+	# So use un-shared dest at here
-+	start_test private
++    _get_mount $SCRATCH_DEV $mpA
++    mkdir $mpA/mnt1
++    mount --make-shared $mpA
++    _get_mount --bind $mpA $mpB
++    _get_mount --bind $mpA $mpC
++    mount --make-slave $mpB
++    mount --make-slave $mpC
++    _get_mount $SCRATCH_DEV $mpA/mnt1
++    mkdir $mpA/mnt1/mnt2
 +
-+	echo "make-$cmd a $orgs mount"
-+	_get_mount $SCRATCH_DEV $mpA
-+	mkdir -p $mpA/dir 2>/dev/null
-+	mount --make-shared $mpA
++    _get_mount $SCRATCH_DEV $mpB/mnt1/mnt2
++    find_mnt
++    fs_stress $mpB/mnt1/mnt2
 +
-+	# prepare the original status on mpB
-+	_get_mount --bind $mpA $mpB
-+	# shared&slave status need to do make-slave then make-shared
-+	# two operations.
-+	for t in $orgs
-+	do
-+		mount --make-"$t" $mpB
-+	done
-+
-+	# "before" for prepare and check original status
-+	# "after" for check the impact of make-$cmd command
-+	for i in before after
-+	do
-+		echo "$i make-$cmd run on $orgs"
-+		# maybe unbindable at here
-+		_get_mount --bind $mpB $mpC 2>/dev/null
-+		if [ $? -ne 0 ];then
-+			find_mnt
-+		else
-+			for m in $mpA $mpB $mpC
-+			do
-+				_get_mount $SCRATCH_DEV $m/dir
-+				fs_stress $m/dir
-+				find_mnt
-+				_put_mount
-+			done
-+			_put_mount # umount C
-+		fi
-+		if [ "$i" = "before" ];then
-+			mount --make-"${cmd}" $mpB
-+		fi
-+	done
-+
-+	end_test
++    end_test
++    echo "crash test passed"
 +}
 +
-+do_test()
-+{
-+    #   operation  original_status
-+    run shared     shared
-+    run shared     slave
-+    run shared     "slave shared"
-+    run shared     private
-+    run shared     unbindable
-+
-+    run slave      shared
-+    run slave      slave
-+    run slave      "slave shared"
-+    run slave      private
-+    run slave      unbindable
-+
-+    run private    shared
-+    run private    slave
-+    run private    "slave shared"
-+    run private    private
-+    run private    unbindable
-+
-+    run unbindable shared
-+    run unbindable slave
-+    run unbindable "slave shared"
-+    run unbindable private
-+    run unbindable unbindable
-+}
-+
-+do_test
++crash_test
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/354.out b/tests/generic/354.out
+diff --git a/tests/generic/355.out b/tests/generic/355.out
 new file mode 100644
-index 0000000..47d0edd
+index 0000000..af781f3
 --- /dev/null
-+++ b/tests/generic/354.out
-@@ -0,0 +1,813 @@
-+QA output created by 354
-+make-shared a shared mount
-+before make-shared run on shared
++++ b/tests/generic/355.out
+@@ -0,0 +1,12 @@
++QA output created by 355
 +------
-+TEST_DIR/354 SCRATCH_DEV
++TEST_DIR/355 SCRATCH_DEV
 +mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
++mpA/mnt1 SCRATCH_DEV
 +mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
++mpB/mnt1 SCRATCH_DEV
++mpB/mnt1/mnt2 SCRATCH_DEV
 +mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
++mpC/mnt1 SCRATCH_DEV
 +======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+after make-shared run on shared
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+make-shared a slave mount
-+before make-shared run on slave
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+after make-shared run on slave
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+make-shared a slave shared mount
-+before make-shared run on slave shared
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+after make-shared run on slave shared
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+make-shared a private mount
-+before make-shared run on private
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+after make-shared run on private
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+make-shared a unbindable mount
-+before make-shared run on unbindable
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+======
-+after make-shared run on unbindable
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+make-slave a shared mount
-+before make-slave run on shared
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+after make-slave run on shared
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+make-slave a slave mount
-+before make-slave run on slave
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+after make-slave run on slave
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+make-slave a slave shared mount
-+before make-slave run on slave shared
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+after make-slave run on slave shared
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+make-slave a private mount
-+before make-slave run on private
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+after make-slave run on private
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+make-slave a unbindable mount
-+before make-slave run on unbindable
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+======
-+after make-slave run on unbindable
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+======
-+make-private a shared mount
-+before make-private run on shared
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+after make-private run on shared
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+make-private a slave mount
-+before make-private run on slave
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+after make-private run on slave
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+make-private a slave shared mount
-+before make-private run on slave shared
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+after make-private run on slave shared
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+make-private a private mount
-+before make-private run on private
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+after make-private run on private
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+make-private a unbindable mount
-+before make-private run on unbindable
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+======
-+after make-private run on unbindable
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+make-unbindable a shared mount
-+before make-unbindable run on shared
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+after make-unbindable run on shared
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+======
-+make-unbindable a slave mount
-+before make-unbindable run on slave
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+after make-unbindable run on slave
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+======
-+make-unbindable a slave shared mount
-+before make-unbindable run on slave shared
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+after make-unbindable run on slave shared
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+======
-+make-unbindable a private mount
-+before make-unbindable run on private
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpB/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+after make-unbindable run on private
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+======
-+make-unbindable a unbindable mount
-+before make-unbindable run on unbindable
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+======
-+after make-unbindable run on unbindable
-+------
-+TEST_DIR/354 SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+======
++crash test passed
 diff --git a/tests/generic/group b/tests/generic/group
-index dc6022c..245cb84 100644
+index 245cb84..a67f7fb 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -356,3 +356,4 @@
- 351 blockdev quick rw
+@@ -357,3 +357,4 @@
  352 auto quick
  353 auto quick mount
-+354 auto quick mount
+ 354 auto quick mount
++355 auto quick mount
 -- 
 2.5.5
 
