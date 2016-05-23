@@ -1,242 +1,262 @@
-Received: from mx1.redhat.com ([209.132.183.28]:57211 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49263 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753111AbcEWHq4 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 23 May 2016 03:46:56 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	id S932267AbcEWJHw (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 23 May 2016 05:07:52 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 42228C03BD56
-	for <fstests@vger.kernel.org>; Mon, 23 May 2016 07:46:56 +0000 (UTC)
-Date: Mon, 23 May 2016 15:46:54 +0800
+	by mx1.redhat.com (Postfix) with ESMTPS id 1141F6406A
+	for <fstests@vger.kernel.org>; Mon, 23 May 2016 09:07:52 +0000 (UTC)
+Date: Mon, 23 May 2016 17:07:50 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2] xfs/106: rewrite this case for run it as auto test
- again
-Message-ID: <20160523074654.GF5140@eguan.usersys.redhat.com>
-References: <1463460110-15297-1-git-send-email-zlang@redhat.com>
+Subject: Re: [PATCH 2/2] generic/352: new case test mmaped data when
+ blocksize less than pagesize
+Message-ID: <20160523090750.GI5140@eguan.usersys.redhat.com>
+References: <1463502981-15593-1-git-send-email-zlang@redhat.com>
+ <1463502981-15593-2-git-send-email-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1463460110-15297-1-git-send-email-zlang@redhat.com>
+In-Reply-To: <1463502981-15593-2-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, sandeen@redhat.com
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, May 17, 2016 at 12:41:50PM +0800, Zorro Lang wrote:
-> xfs/106 try to do some basic xfs_quota functionality test. I think
-> basic function test is important, especially there're only few
-> cases about xfs_quota now. But due to it's too old, there're 3
-> problems cause no one run it again:
->    1. Some quota commands can't be used, but this case try to use it.
->       e.g. "warn" command.
->    2. Some quota commands can be used now, but this case doesn't test
->       them, because they can't work previously. e.g. "disable, enable,
->       off and remove" comands
->    3. Some expected output in 106.out file become incorrect now.
+On Wed, May 18, 2016 at 12:36:21AM +0800, Zorro Lang wrote:
+> This case is a regression test for linux commit 90a80202:
 > 
-> I rewrite this case for above 3 reasons. This case nearly test all
-> xfs_quota commands and options now, except:
->    1. some "-v" options
->    2. all "-a" options. I can't control the golden file if print all
->       filesystem's quota info in it.
->    3. default quota. I think it can be tested in another case.
->    4. project command options. I will write another case to test it.
->    5. report command -l option. It's a new option, will cause failure
->       if someone test on a release with xfsprogs-3.1.
->    6. quot command -c option. It maybe output different histogram in
->       different system or machine.
->    7. warn command. This feature is not currently implemented.
->    8. print, df, free, help, quit and path commands.
+>   vfs: fix data corruption when blocksize < pagesize for mmaped data
+> 
+>   ->page_mkwrite() is used by filesystems to allocate blocks under a page
+>   which is becoming writeably mmapped in some process' address space. This
+>   allows a filesystem to return a page fault if there is not enough space
+>   available, user exceeds quota or similar problem happens, rather than
+>   silently discarding data later when writepage is called.
+> 
+>   However VFS fails to call ->page_mkwrite() in all the cases where
+>   filesystems need it when blocksize < pagesize. For example when
+>   blocksize = 1024, pagesize = 4096 the following is problematic:
+>     ftruncate(fd, 0);
+>     pwrite(fd, buf, 1024, 0);
+>     map = mmap(NULL, 1024, PROT_WRITE, MAP_SHARED, fd, 0);
+>     map[0] = 'a';       ----> page_mkwrite() for index 0 is called
+>     ftruncate(fd, 10000); /* or even pwrite(fd, buf, 1, 10000) */
+>     mremap(map, 1024, 10000, 0);
+>     map[4095] = 'a';    ----> no page_mkwrite() called
+> 
+>   At the moment ->page_mkwrite() is called, filesystem can allocate only
+>   one block for the page because i_size == 1024. Otherwise it would create
+>   blocks beyond i_size which is generally undesirable. But later at
+>   ->writepage() time, we also need to store data at offset 4095 but we
+>   don't have block allocated for it.
+> 
+>   This patch introduces a helper function filesystems can use to have
+>   ->page_mkwrite() called at all the necessary moments.
 > 
 > Signed-off-by: Zorro Lang <zlang@redhat.com>
 > ---
-
-I'm not so familiar with xfs quota, so I just ran the test and review it
-from a more general perspective.
-
-The test works well on v5 xfs, but it fails when test on v4 xfs, e.g.
-
-[root@dhcp-66-86-11 xfstests]# diff -u tests/xfs/106.out /root/workspace/xfstests/results//xfs_512/xfs/106.out.bad
---- tests/xfs/106.out   2016-05-23 15:07:41.439000000 +0800
-+++ /root/workspace/xfstests/results//xfs_512/xfs/106.out.bad   2016-05-23 15:15:16.558000000 +0800
-@@ -349,10 +349,12 @@
- Project ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace
- ---------- -------------------------------------------------- --------------------------------------------------
- fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-+#ID 0 512 2048 00 [--------] 0 10 20 00 [--------]
-...
-
-Maybe the test needs more filters?
-
-Also, it fails fsck on v4 xfs, but this is not xfs/106 specific, I saw
-many other quota related tests failed the same way with v4 xfs. (I
-reported this issue to xfs list along other issues back in Mar., see
-http://oss.sgi.com/archives/xfs/2016-03/msg00063.html).
-
-*** xfs_repair -n output ***
-Phase 1 - find and verify superblock...
-Phase 2 - using internal log
-        - zero log...
-        - scan filesystem freespace and inode maps...
-        - found root inode chunk
-Phase 3 - for each AG...
-        - scan (but don't clear) agi unlinked lists...
-        - process known inodes and perform inode discovery...
-        - agno = 0
-        - agno = 1
-        - agno = 2
-        - agno = 3
-        - process newly discovered inodes...
-Phase 4 - check for duplicate blocks...
-        - setting up duplicate extent list...
-        - check for inodes claiming duplicate blocks...
-        - agno = 0
-        - agno = 2
-        - agno = 1
-        - agno = 3
-No modify flag set, skipping phase 5
-Phase 6 - check inode connectivity...
-        - traversing filesystem ...
-        - traversal finished ...
-        - moving disconnected inodes to lost+found ...
-disconnected inode 36, would move to lost+found
-Phase 7 - verify link counts...
-No modify flag set, skipping filesystem flush and exiting.
-*** end xfs_repair output
-
-
-And some minor (coding style) comments inline.
-
 > 
 > Hi,
 > 
-> V2 changed below:
-[snip]
-> diff --git a/tests/xfs/106 b/tests/xfs/106
-> index 74658a6..f8593d0 100755
-> --- a/tests/xfs/106
-> +++ b/tests/xfs/106
-> @@ -31,208 +31,289 @@ echo "QA output created by $seq"
->  here=`pwd`
->  tmp=/tmp/$$
->  status=1	# failure is the default!
-> -trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
+> After xfsprogs merged commit:
+>   e0a8808 xfs_io: allow mmap command to reserve some free space
+> 
+> We can reserve(not 100% sure, but pretty high rate) some memory for mremap
+> extend the map space. Due to it, I can use xfs_io to implement this
+> case.
+> 
+> There're 2 problems when I write this case:
+> 1. The reserved memory space can't be kept 100%, especially when
+> system run heavy memory load. But I think it hard to resolve.
+> 
+> 2. When xfs_io process be killed by SIGBUS, I can't catch the "Bus error"
+> output(it not on stdout/stderr). But it will printed into .out file. So
+> I use a pipe stop it(Generally, that _filter_xfs_io after the pipe is
+> useless. I just need a pipe.). But I'm not sure if it's a good idea.
+> Anyone have better idea?
+> 
+> (BTW, this case rely on my last patch about _require_xfs_io_command.)
+> 
+> Thanks,
+> Zorro
+> 
+>  tests/generic/352     | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/352.out |   3 ++
+>  tests/generic/group   |   1 +
+>  3 files changed, 113 insertions(+)
+>  create mode 100755 tests/generic/352
+>  create mode 100644 tests/generic/352.out
+> 
+> diff --git a/tests/generic/352 b/tests/generic/352
+> new file mode 100755
+> index 0000000..5e69127
+> --- /dev/null
+> +++ b/tests/generic/352
+> @@ -0,0 +1,109 @@
+> +#! /bin/bash
+> +# FS QA Test 352
+> +#
+> +# Regression test for linux commit 90a80202, data corruption when
+> +# blocksize < pagesize for mmaped data.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016 Red Hat Inc.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
 > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
 > +_cleanup()
 > +{
-> +    cd /
-> +    rm -f $tmp.*
-
-Seems you use 4 spaces for indention, please use tab instead (8 spaces
-width). Some old tests are using 4 spaces for indention, but we're in
-the progress to convert all these tests to use tab (very slowly), mainly
-by the chance of updating old tests like this :)
-
+> +	cd /
+> +	rm -f $tmp.*
 > +}
->  
->  # get standard environment, filters and checks
->  . ./common/rc
->  . ./common/filter
->  . ./common/quota
->  
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
 > +# remove previous $seqres.full before test
 > +rm -f $seqres.full
 > +
-> +# real QA test starts here
->  _supported_fs xfs
-> -_supported_os Linux #IRIX
+> +# support fs which can make block size < page size
+> +_supported_fs xfs ext2 ext3 ext4 ext4dev udf
+
+No need to filter out other fs, at least we can get some extra test
+coverage on other filesystems, even if they cannot reproduce this bug
+
+And all tests in generic dir should have "_supported_fs generic",
+otherwise you should put it to "shared" dir or fs-specific dir.
+
 > +_supported_os Linux
->  _require_scratch
->  _require_xfs_quota
-> +_require_user
-> +_require_group
->  
-> -# real QA test starts here
-> -_scratch_mkfs_xfs | _filter_mkfs 2>$tmp.mkfs
-> -cat $tmp.mkfs >$seqres.full
-> -. $tmp.mkfs
-> +_scratch_mkfs_xfs >$seqres.full 2>&1
->  
-> -# setup a default run
-> -if [ -z "$MOUNT_OPTIONS" ]; then
-> -	export MOUNT_OPTIONS="-o pquota,sync"
-> -else
-> -	export MOUNT_OPTIONS="$MOUNT_OPTIONS -o sync"
-> -fi
-> +uqid=`id -u fsgqa`
-> +gqid=`id -g fsgqa`
-> +pqid=10
-> +cat >$tmp.projects <<EOF
-> +$pqid:$SCRATCH_MNT
-> +EOF
->  
-> -_qmount
-> -_require_prjquota $SCRATCH_DEV
-> +cat >$tmp.projid <<EOF
-> +root:0
-> +fsgqa:$pqid
-> +EOF
->  
-> -# initial populate
-> -target=$SCRATCH_MNT/target
-> -$FSSTRESS_PROG -z -s 57069 -m 8 -n 1000 -p 4 \
-> --f allocsp=1 \
-> --f chown=3 \
-> --f creat=4 \
-> --f dwrite=4 \
-> --f fallocate=1 \
-> --f fdatasync=1 \
-> --f fiemap=1 \
-> --f freesp=1 \
-> --f fsync=1 \
-> --f link=1 \
-> --f mkdir=2 \
-> --f mknod=2 \
-> --f punch=1 \
-> --f rename=2 \
-> --f resvsp=1 \
-> --f rmdir=1 \
-> --f setxattr=1 \
-> --f symlink=2 \
-> --f sync=1 \
-> --f truncate=2 \
-> --f unlink=1 \
-> --f unresvsp=1 \
-> --f write=4 \
-> --d $target
-> -
-> -$FSSTRESS_PROG -z -s 57069 -m 8 -n 1000 -p 4 \
-> --f chown=500 \
-> --f setxattr=500 \
-> --d $target
-> -
-> -# also use space, to be able to go over/under limits easily
-> -uid=255
-> -gid=254
-> -prid=253
-> -rm -f $SCRATCH_MNT/resv
-> -$XFS_IO_PROG -fc "resvsp 0 200m" -c "chproj $prid" $SCRATCH_MNT/resv
-> -chown $uid $SCRATCH_MNT/resv
-> -chgrp $gid $SCRATCH_MNT/resv
-> +create_files()
-> +{
-> +    local bs=$1
-> +    local inum=$2
->  
-> -_qmount
-> +    echo "Using type=$type id=$id" >> $seqres.full
+> +_require_scratch
+> +_require_xfs_io_command mmap "-s <size>"
+> +_require_xfs_io_command mremap
+> +_require_xfs_io_command truncate
+> +_require_xfs_io_command pwrite
+> +_require_xfs_io_command mwrite
 > +
-> +    for ((i=0; i<$((inum-1)); i++))
-> +    do
-> +	_file_as_id $SCRATCH_MNT/inode$i $id $type 1024 0
-> +    done
+> +sector_size=`blockdev --getss $SCRATCH_DEV`
+> +page_size=$(get_page_size)
+> +block_size=$((page_size/2))
+> +
+> +if [ $sector_size -gt $block_size ];then
+> +    _notrun "need sector size < page size"
+> +fi
+> +
+> +unset MKFS_OPTIONS
+> +# For save time, 512MiB is enough to reproduce bug
+> +_scratch_mkfs_sized 536870912 $block_size >$seqres.full 2>&1
+> +
+> +# avoid the interference of XFS preallocation
+> +if [ "$FSTYP" = xfs ];then
+> +    MOUNT_OPTIONS="$MOUNT_OPTIONS -o allocsize=$page_size"
+> +fi
 
-Please use this for format
+All these blocksize vs pagesize checks, mkfs with specific pagesize,
+adding allocsize mount option are not necessary. We want more test
+coverage even if the original bug can not be reproduced in such
+configurations, it's up to the test runner to specify the blocksize,
+mount options etc.
 
-	for ...; do
-		...
-	done
+> +_scratch_mount
+> +
+> +# take one block size space
+> +dd if=/dev/zero of=$SCRATCH_MNT/testfile bs=$block_size count=1 >$seqres.full 2>&1
+> +# fill all free space
+> +dd if=/dev/zero of=$SCRATCH_MNT/full bs=$block_size >$seqres.full 2>&1
+
+We prefer $XFS_IO_PROG over dd in fstests. And please append (>>) the log to
+$seqres.full not overwrite (>) the log.
+
+I'd recommend add an explicit "rm -f $seqres.full" and use ">>" to
+append the logs, so you don't have to worry when to use ">" and when to
+use ">>".
+
+> +sync
+> +
+> +# truncate 0
+> +# pwrite -S 0x61 0 $block_size
+> +# mmap -rw -s $((page_size * 2)) 0 $block_size
+> +# mwrite -S 0x61 0 1  --> page_mkwrite() for index 0 is called
+> +# truncate $((page_size * 2))
+> +# mremap $((page_size * 2))
+> +# mwrite -S 0x61 $((page_size - 1)) 1  --> [bug] no page_mkwrite() called
+> +#
+> +# If there's a bug, the last step will be killed by SIGBUS, and it won't
+> +# write a "0x61" on the disk.
+
+Please write a different char for the test, e.g. 0x62, so we can easily
+know that it's the test char.
+
+> +#
+> +# Note: mremap maybe failed when memory load is heavy. 
+> +$XFS_IO_PROG -f \
+> +	     -c "truncate 0" \
+> +	     -c "pwrite -S 0x61 0 $block_size" \
+> +	     -c "mmap -rw -s $((page_size * 2)) 0 $block_size" \
+> +	     -c "mwrite -S 0x61 0 1" \
+> +	     -c "truncate $((page_size * 2))" \
+> +	     -c "mremap $((page_size * 2))" \
+> +	     -c "mwrite -S 0x61 $((page_size - 1)) 1" \
+> +	     $SCRATCH_MNT/testfile | _filter_xfs_io
+> +
+> +# we will see 0x61 written by "mwrite -S 0x61 0 1"
+> +# we shouldn't see one more 0x61 by the last mwrite.
+> +hexdump -e '1/1 "%02x "' $SCRATCH_MNT/testfile
+
+I personally perfer od here :)
 
 Thanks,
 Eryu
+
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/352.out b/tests/generic/352.out
+> new file mode 100644
+> index 0000000..8be005d
+> --- /dev/null
+> +++ b/tests/generic/352.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 352
+> +61 *
+> +00 *
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 36fb759..7a72f6b 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -354,3 +354,4 @@
+>  349 blockdev quick rw
+>  350 blockdev quick rw
+>  351 blockdev quick rw
+> +352 auto quick
+> -- 
+> 2.5.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
