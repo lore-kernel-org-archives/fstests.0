@@ -1,69 +1,75 @@
-Subject: Re: [PATCH 1/5] src/copy_file_range: Add a program for testing
- vfs_copy_file_range()
-References: <1463172652-22361-1-git-send-email-Anna.Schumaker@Netapp.com>
- <1463172652-22361-2-git-send-email-Anna.Schumaker@Netapp.com>
- <20160516232036.GT26977@dastard>
- <4fbb6f1b-5c7f-7afe-b414-0f213870a328@Netapp.com>
- <20160517174830.GA4507@birch.djwong.org>
-From: Anna Schumaker <Anna.Schumaker@netapp.com>
-Message-ID: <0a21c0ef-626c-821b-e30c-5b05edb87a02@Netapp.com>
-Date: Tue, 17 May 2016 13:52:11 -0400
+Date: Mon, 23 May 2016 16:16:29 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2] fstests: generic: Test reserved extent map search
+ routine on deduped file
+Message-ID: <20160523081629.GH5140@eguan.usersys.redhat.com>
+References: <1463038659-21976-1-git-send-email-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
-In-Reply-To: <20160517174830.GA4507@birch.djwong.org>
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-To: "Darrick J. Wong" <darrick.wong@oracle.com>, Anna Schumaker <Anna.Schumaker@netapp.com>
-Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, linux-nfs@vger.kernel.org, hch@infradead.org
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1463038659-21976-1-git-send-email-quwenruo@cn.fujitsu.com>
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, darrick.wong@oracle.com, david@fromorbit.com, hch@infradead.org
 List-ID: <fstests@vger.kernel.org>
 
-On 05/17/2016 01:48 PM, Darrick J. Wong wrote:
-> On Tue, May 17, 2016 at 10:47:42AM -0400, Anna Schumaker wrote:
->> On 05/16/2016 07:20 PM, Dave Chinner wrote:
->>> On Fri, May 13, 2016 at 04:50:48PM -0400, Anna Schumaker wrote:
->>>> This will be used by the various copy tests to call the Linux
->>>> copy_file_range() system call.  I used src/cloner.c as a reference while
->>>> writing this tool.
->>>
->>> Hmmm - I'd much prefer to see this added to xfs_io as it's a kernel
->>> syscall that lots of filesystems will eventually implement. A
->>> one-off binary for xfstests is fine for non-standard or deeply
->>> filesysetm specific stuff, but if it's generic we try to put it into
->>> xfs_io so that it's available to everyone writing scripts, not just
->>> xfstests....
->>
->> Ah, that makes sense.  Thanks for explaining the convention!  I'll look into
->> adding it to the xfs_io program instead.  Should I send that patch to a
->> different mailing list than fstests@vger.kernel.org?
-> 
-> xfs@oss.sgi.com.  I recommend looking at io/reflink.c as a template.
-> 
-> FWIW I'd also appreciate c_f_r being wired up in xfs_io.
+On Thu, May 12, 2016 at 03:37:39PM +0800, Qu Wenruo wrote:
+> For fully deduped file, which means all its file exntents are pointing to
+> the same bytenr, btrfs can cause soft lockup when calling fiemap ioctl
+> on that file, like the following output:
+[snip]
+> +
+> +# then call fiemap on that file to test both the shared flag and if
+> +# reserved extent mapping search will cause soft lockup
+> +$XFS_IO_PROG -c "fiemap -v" $file | _filter_fiemap_flags > $tmp
+> +cat $tmp >> $seqres.full
 
-I'm working on it right now!  I just finished fighting autotolls to get it to recognize a new file defining the "copy_range" command.  Hopefully porting everything over won't be too difficult from here.
+$tmp won't be removed after test, in _cleanup() it's removing $tmp.*
+$tmp.out is better.
 
-Thanks for the suggestion to look at reflink!
+> +
+> +# refact the $LOAD_FACTOR to 1 to match the golden output
+> +sed -i -e "s/$(($last_extent - 1))/$(($orig_last_extent - 1))/" \
+> +	-e "s/$last_extent/$orig_last_extent/" \
+> +	-e "s/$end/$orig_end/" $tmp
+> +cat $tmp
 
-Anna
+Same here.
 
+Otherwise looks good to me.
+
+Thanks,
+Eryu
+
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/352.out b/tests/generic/352.out
+> new file mode 100644
+> index 0000000..a87c507
+> --- /dev/null
+> +++ b/tests/generic/352.out
+> @@ -0,0 +1,5 @@
+> +QA output created by 352
+> +wrote 131072/131072 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +0: [0..2097151]: 0x2000
+> +1: [2097152..2097407]: 0x2001
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 36fb759..3f00386 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -354,3 +354,4 @@
+>  349 blockdev quick rw
+>  350 blockdev quick rw
+>  351 blockdev quick rw
+> +352 auto clone
+> -- 
+> 2.5.5
 > 
-> --D
 > 
->>
->> Thanks,
->> Anna
->>
->>>
->>> Cheers,
->>>
->>> Dave.
->>>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe fstests" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
