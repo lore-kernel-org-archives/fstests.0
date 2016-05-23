@@ -1,132 +1,120 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:54529 "EHLO
-	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750802AbcEWExz (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 23 May 2016 00:53:55 -0400
-Received: from dave by dastard with local (Exim 4.80)
-	(envelope-from <david@fromorbit.com>)
-	id 1b4hsE-0001CK-Fy
-	for fstests@vger.kernel.org; Mon, 23 May 2016 14:53:50 +1000
-Date: Mon, 23 May 2016 14:53:50 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: [RFD] fstests needs a new maintainer
-Message-ID: <20160523045350.GF26977@dastard>
+Received: from mx1.redhat.com ([209.132.183.28]:53287 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753076AbcEWGlk (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 23 May 2016 02:41:40 -0400
+Date: Mon, 23 May 2016 14:41:38 +0800
+From: Zorro Lang <zlang@redhat.com>
+Subject: Re: [RFD] fstests needs a new maintainer
+Message-ID: <20160523064138.GA5051@zlang.usersys.redhat.com>
+References: <20160523045350.GF26977@dastard>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="C1iGAkRnbeBonpVg"
-Content-Disposition: inline
-Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-List-ID: <fstests@vger.kernel.org>
-
-
---C1iGAkRnbeBonpVg
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20160523045350.GF26977@dastard>
+Sender: fstests-owner@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
+List-ID: <fstests@vger.kernel.org>
 
-Hi folks,
+On Mon, May 23, 2016 at 02:53:50PM +1000, Dave Chinner wrote:
+> Hi folks,
+> 
+> For some time now I've been somewhat neglecting xfstests. I've been
+> slow to review changes, slow to test and commit changes, and
+> generally been dragging my heels on getting general maintainer stuff
+> done.
+> 
+> My problem has several different aspects. The main issue I have is
+> that that I don't context switch between tasks at all well. I work
+> best when I have a problem I can focus on in depth until it is
+> solved. Getting interrupted by something means I start thrash
+> between different contexts and then don't get stuff done. I then get
+> frustrated because I'm not making progress on anything, and then I
+> turn into a nasty, evil, beligerant nay-sayer.
+> 
+> I don't like wearing cranky-pants all the time, but it's been
+> building for some time. To reduce the negative effect of context
+> switching, I've been ignoring things I need to pay regular attention
+> to (e.g. fstests patches). Then the backlog builds up and when I
+> finally get around to doing the merging work, I get annoyed by the
+> amount of patch futzing I have to do because of conflicts caused by
+> ignoring it for so long.
+> 
+> And so my care factor while doing this work has decreased, and I
+> miss things I should notice, and when I do see things I have
+> entirely the wrong attitude to be constructive.  Recently I've even
+> found myself getting unreasonably annoyed by little things in this
+> process (like git am breaking in an unresolvable way on a patch) and
+> have ended up just walking away....
+> 
+> Rather than go on like this and let it continue into a downward
+> spiral that ends in a crash and an alcohol fueled rage-quitting burn
+> out, I think it's time to hand fstests on to someone else. I'd much
+> prefer to do a clean handover of fstests to someone who is keen and
+> eager to do the job. Then I will have less things I need to care
+> about and context switch over, and so will make me happier and more
+> productive. IMO, that will benefit fstests more than me trying to
+> hold on and just thrash harder.
+> 
+> So, now you know why I want to hand over fstests to someone else,
+> it's worth noting why I'm struggling to keep up - that's a better
+> story to focus on right now.  In the past 2 and half years since I
+> became maintainer (in Nov 2013), there have been:
+> 
+> 	- 70+ contributors
+> 	- 800+ commits, which make up ~1/3rd of the total commits to
+> 	  xfstests since 2001
+> 	- more than 450 new tests have been added (more than
+> 	  doubled!)
+> 	- added support for CIFS, f2fs, overlay, tmpfs, and reiser4
+> 
+> IOWs, fstests development speed has increased signficantly while
+> I've been maintainer and the size of the project has more than
+> doubled. It's this growth and increase in community and development
+> pace that I can't keep up with - fstests is a healthy, growing
+> project.  Hence I see this as a positive step for fstests - it has
+> grown to the point where it now needs a dedicated maintainer rather
+> than one who splits their time across multiple projects.
+> 
+> I am definitely not saying "I'm leaving, you're on your own!". I
+> don't plan on going anywhere - fstests is still going to be a
+> primary workflow tool for me. I'm expecting that there will be some
+> period of handover - I'll the spend the time to ensure the new
+> maintainer knows all they need to know to keep the tree in good
+> shape, and then I'll step back and let them ride the roller
+> coaster in their own way...
+> 
+> So it now comes down to finding a new maintainer. Rather than repeat
+> past mistakes of others when it comes to selecting a new maintainer,
+> I'm simply going to open the floor to discussion, nominations, etc.
+> The maintainer is your choice as fstests users and developers, not
+> mine as the outgoing maintainer. I have opinions (as always!) but
+> I'm going to remain quiet and let the discussion take it's course.
+> Which, I should note, is exactly how I became maintainer in the
+> first place. :P
 
-For some time now I've been somewhat neglecting xfstests. I've been
-slow to review changes, slow to test and commit changes, and
-generally been dragging my heels on getting general maintainer stuff
-done.
+Hi Dave,
 
-My problem has several different aspects. The main issue I have is
-that that I don't context switch between tasks at all well. I work
-best when I have a problem I can focus on in depth until it is
-solved. Getting interrupted by something means I start thrash
-between different contexts and then don't get stuff done. I then get
-frustrated because I'm not making progress on anything, and then I
-turn into a nasty, evil, beligerant nay-sayer.
+Excuse me for my abrupt reply.
 
-I don't like wearing cranky-pants all the time, but it's been
-building for some time. To reduce the negative effect of context
-switching, I've been ignoring things I need to pay regular attention
-to (e.g. fstests patches). Then the backlog builds up and when I
-finally get around to doing the merging work, I get annoyed by the
-amount of patch futzing I have to do because of conflicts caused by
-ignoring it for so long.
+Thanks for what you did for us. I'm just thinking maybe you can
+separate fstests maintenance jobs to several different maintainers?
+Due to fstests project become bigger and bigger, it maybe hard for
+someone review & merge & verify all kinds of patches.
 
-And so my care factor while doing this work has decreased, and I
-miss things I should notice, and when I do see things I have
-entirely the wrong attitude to be constructive.  Recently I've even
-found myself getting unreasonably annoyed by little things in this
-process (like git am breaking in an unresolvable way on a patch) and
-have ended up just walking away....
+As I know LTP have "not only one" maintainers. I think we still
+need someone like you can make important decision for fstests.
+But for some daily jobs, you can distribute them to others.
 
-Rather than go on like this and let it continue into a downward
-spiral that ends in a crash and an alcohol fueled rage-quitting burn
-out, I think it's time to hand fstests on to someone else. I'd much
-prefer to do a clean handover of fstests to someone who is keen and
-eager to do the job. Then I will have less things I need to care
-about and context switch over, and so will make me happier and more
-productive. IMO, that will benefit fstests more than me trying to
-hold on and just thrash harder.
+Thanks,
+Zorro
 
-So, now you know why I want to hand over fstests to someone else,
-it's worth noting why I'm struggling to keep up - that's a better
-story to focus on right now.  In the past 2 and half years since I
-became maintainer (in Nov 2013), there have been:
+> 
+> Cheers,
+> 
+> Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
 
-	- 70+ contributors
-	- 800+ commits, which make up ~1/3rd of the total commits to
-	  xfstests since 2001
-	- more than 450 new tests have been added (more than
-	  doubled!)
-	- added support for CIFS, f2fs, overlay, tmpfs, and reiser4
 
-IOWs, fstests development speed has increased signficantly while
-I've been maintainer and the size of the project has more than
-doubled. It's this growth and increase in community and development
-pace that I can't keep up with - fstests is a healthy, growing
-project.  Hence I see this as a positive step for fstests - it has
-grown to the point where it now needs a dedicated maintainer rather
-than one who splits their time across multiple projects.
-
-I am definitely not saying "I'm leaving, you're on your own!". I
-don't plan on going anywhere - fstests is still going to be a
-primary workflow tool for me. I'm expecting that there will be some
-period of handover - I'll the spend the time to ensure the new
-maintainer knows all they need to know to keep the tree in good
-shape, and then I'll step back and let them ride the roller
-coaster in their own way...
-
-So it now comes down to finding a new maintainer. Rather than repeat
-past mistakes of others when it comes to selecting a new maintainer,
-I'm simply going to open the floor to discussion, nominations, etc.
-The maintainer is your choice as fstests users and developers, not
-mine as the outgoing maintainer. I have opinions (as always!) but
-I'm going to remain quiet and let the discussion take it's course.
-Which, I should note, is exactly how I became maintainer in the
-first place. :P
-
-Cheers,
-
-Dave.
---=20
-Dave Chinner
-david@fromorbit.com
-
---C1iGAkRnbeBonpVg
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJXQozdAAoJEK3oKUf0dfodXaIP/jV25Leht2+plH98OQejPWdm
-dhDkSemQYFWsGEKhZyk0DUMxwKKGWASuul+ADECMtpOFyChoolIAseVOPJTWyODg
-8rKafeumXtSW+QT14CM62pMdtg5MQmlmjzgOEScUJjcctYfk5xYOf8m31nNpkPDt
-IEHQApy2A8nf48sdvmPAe6Qg7ii3RAv0gNTCBfJVua7rMoiw3Q+PuH1jLRlEPLUL
-HnFZCF3wxg8OFGOFnDUHeqhxmU33tfmRs8apk0muxEpwnIZCJXSX/slWIWbjDmL7
-X+UiDf3UtgUc0G2SlsoPUp2mXcdym63VxDoj3Oy7yEkFxDI6p1jmMNmtP1xxdq35
-IWOCNPbFNPU/75lsZXCTbHdVvjRoh16hdFZ4Z1MUVN5GthqH4T+39fwpm0uFU0SR
-ZEgHj87n3OmS4v8o4lhUIkI/ZZsH5rmLNIdA7HF2R/fVKMf762JcJSnLdx21g3zY
-PWVQatHR3EsybeLJRgmhk0+ws1Tv5pT1A+EsqnYerAdUq0dgF/AwksiEeHghwmWW
-0BAFfqUB51sFDvmIv23lAqYT2fRpvbzA3EHjjEUVX0EkqUD4MQuObhfTGqbKO1A4
-OZQWnTDrLkD03dwH/xNsJmaijSiDLRCUFD/eUa9KhDrq/p869N46Z0oTkiWb38cU
-wa+YXsI0oztIVMuQF3wE
-=r0/Z
------END PGP SIGNATURE-----
-
---C1iGAkRnbeBonpVg--
