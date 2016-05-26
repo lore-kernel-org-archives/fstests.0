@@ -1,87 +1,173 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:34336 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750981AbcEZGAw (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 26 May 2016 02:00:52 -0400
-Date: Wed, 25 May 2016 23:00:44 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v2] generic/250: ignore xfs_io IO errors when writing to
- dmerror device
-Message-ID: <20160526060044.GB4586@birch.djwong.org>
-References: <1464096276-28407-1-git-send-email-eguan@redhat.com>
- <1464233184-24013-1-git-send-email-eguan@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1464233184-24013-1-git-send-email-eguan@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:37329 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752858AbcEZGnn (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 26 May 2016 02:43:43 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 96A2064099
+	for <fstests@vger.kernel.org>; Thu, 26 May 2016 06:43:42 +0000 (UTC)
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] generic: test clear of suid/sgid on direct write
+Date: Thu, 26 May 2016 14:41:36 +0800
+Message-Id: <1464244896-6275-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 26, 2016 at 11:26:24AM +0800, Eryu Guan wrote:
-> When testing with data=journal ext4, direct write to dmerror device
-> doesn't return EIO, because ext4 turns direct write to buffered write in
-> data=journal mode and all data is written to journal buffer. The write
-> only fails later when commiting journal and error messages can be seen
-> in dmesg.
-> 
-> As the test is checking on the md5 checksum of the test file, it's ok to
-> ignore the IO error returned by xfs_io, as long as the checksums match
-> the golden image.
+Check that suid/sgid bits are cleared on direct write. XFS triggered
+WARN_ON_ONCE in this case. Patchset from Jan Kara fixed the warning:
 
-Looks fine to me,
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+http://oss.sgi.com/archives/xfs/2014-12/msg00071.html
 
---D
+This test is inspired by a test case from Eric Sandeen, and follows the
+test steps in generic/193. This test requires direct I/O, it's not added
+to generic/193 but to a new test, so that generic/193 still runs on
+filesystems don't have direct I/O support.
 
-> 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> ---
-> 
-> v2:
-> - Replace "CoW" with "Write" and update .out accordingly
-> 
->  tests/generic/250     | 5 +++--
->  tests/generic/250.out | 3 +--
->  2 files changed, 4 insertions(+), 4 deletions(-)
-> 
-> diff --git a/tests/generic/250 b/tests/generic/250
-> index 6d15de2..3c4fe6d 100755
-> --- a/tests/generic/250
-> +++ b/tests/generic/250
-> @@ -79,11 +79,12 @@ _dmerror_mount
->  echo "Compare files"
->  md5sum $testdir/file2 | _filter_scratch
->  
-> -echo "CoW and unmount"
-> +echo "Write and unmount"
->  $XFS_IO_PROG -f -c "pwrite -S 0x63 $bufsize 1" $testdir/file2 >> $seqres.full
->  sync
->  _dmerror_load_error_table
-> -$XFS_IO_PROG -d -f -c "pwrite -S 0x63 -b $bufsize 0 $filesize" $testdir/file2 >> $seqres.full
-> +$XFS_IO_PROG -d -f -c "pwrite -S 0x63 -b $bufsize 0 $filesize" $testdir/file2 \
-> +	>> $seqres.full 2>&1
->  _dmerror_load_working_table
->  _dmerror_unmount
->  _dmerror_mount
-> diff --git a/tests/generic/250.out b/tests/generic/250.out
-> index 710c80e..67b006b 100644
-> --- a/tests/generic/250.out
-> +++ b/tests/generic/250.out
-> @@ -3,8 +3,7 @@ Format and mount
->  Create the original files
->  Compare files
->  ec8bb3b24d5b0f1b5bdf8c8f0f541ee6  SCRATCH_MNT/test-250/file2
-> -CoW and unmount
-> -pwrite64: Input/output error
-> +Write and unmount
->  Compare files
->  3ed86318f4ff8da26c1c2a6e3041f9be  SCRATCH_MNT/test-250/file2
->  Check for damage
-> -- 
-> 2.5.5
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-ext4" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+ tests/generic/352     | 98 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/352.out | 14 ++++++++
+ tests/generic/group   |  1 +
+ 3 files changed, 113 insertions(+)
+ create mode 100755 tests/generic/352
+ create mode 100644 tests/generic/352.out
+
+diff --git a/tests/generic/352 b/tests/generic/352
+new file mode 100755
+index 0000000..f15920e
+--- /dev/null
++++ b/tests/generic/352
+@@ -0,0 +1,98 @@
++#! /bin/bash
++# FS QA Test 352
++#
++# Test clear of suid/sgid on direct write.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Red Hat Inc.,  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_test
++_require_user
++_require_odirect
++
++testfile=$TEST_DIR/$seq.test
++rm -f $testfile
++
++do_io()
++{
++	su $qa_user -c "$XFS_IO_PROG -d -c 'pwrite 0 4k' $testfile" \
++		>>$seqres.full
++}
++
++echo "Check that suid/sgid bits are cleared after direct write"
++
++# create testfile and set base ownership & permission
++echo "this is a test" >> $testfile
++chmod 644 $testfile
++chown $qa_user:$qa_user $testfile
++
++echo "== with no exec perm"
++chmod ug+s $testfile
++echo -n "before: "; stat -c '%A' $testfile
++do_io
++echo -n "after:  "; stat -c '%A' $testfile
++
++echo "== with user exec perm"
++chmod ug+s $testfile
++chmod u+x $testfile
++echo -n "before: "; stat -c '%A' $testfile
++do_io
++echo -n "after:  "; stat -c '%A' $testfile
++
++echo "== with group exec perm"
++chmod ug+s $testfile
++chmod g+x $testfile
++chmod u-x $testfile
++echo -n "before: "; stat -c '%A' $testfile
++do_io
++echo -n "after:  "; stat -c '%A' $testfile
++
++echo "== with user+group exec perm"
++chmod ug+s $testfile
++chmod u+x $testfile
++echo -n "before: "; stat -c '%A' $testfile
++do_io
++echo -n "after:  "; stat -c '%A' $testfile
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/352.out b/tests/generic/352.out
+new file mode 100644
+index 0000000..b8ad619
+--- /dev/null
++++ b/tests/generic/352.out
+@@ -0,0 +1,14 @@
++QA output created by 352
++Check that suid/sgid bits are cleared after direct write
++== with no exec perm
++before: -rwSr-Sr--
++after:  -rw-r-Sr--
++== with user exec perm
++before: -rwsr-Sr--
++after:  -rwxr-Sr--
++== with group exec perm
++before: -rwSr-sr--
++after:  -rw-r-xr--
++== with user+group exec perm
++before: -rwsr-sr--
++after:  -rwxr-xr--
+diff --git a/tests/generic/group b/tests/generic/group
+index 36fb759..7a72f6b 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -354,3 +354,4 @@
+ 349 blockdev quick rw
+ 350 blockdev quick rw
+ 351 blockdev quick rw
++352 auto quick
+-- 
+2.5.5
+
