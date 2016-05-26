@@ -1,23 +1,28 @@
-Received: from bombadil.infradead.org ([198.137.202.9]:43419 "EHLO
-	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751134AbcEZIYu (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 26 May 2016 04:24:50 -0400
-Date: Thu, 26 May 2016 01:24:49 -0700
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 7/7] reflink: test changing sharers of a block while
- keeping refcount the same
-Message-ID: <20160526082449.GD10683@infradead.org>
+Received: from userp1040.oracle.com ([156.151.31.81]:23960 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754467AbcEZQHl (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 26 May 2016 12:07:41 -0400
+Date: Thu, 26 May 2016 09:07:01 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 2/7] tests: don't put loop control files on the scratch
+ mount
+Message-ID: <20160526160701.GA16512@birch.djwong.org>
 References: <146424222237.6278.4174636124436241002.stgit@birch.djwong.org>
- <146424226985.6278.9226931712470818344.stgit@birch.djwong.org>
+ <146424223512.6278.15231849939938178494.stgit@birch.djwong.org>
+ <20160526080948.GC20307@infradead.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <146424226985.6278.9226931712470818344.stgit@birch.djwong.org>
+In-Reply-To: <20160526080948.GC20307@infradead.org>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: david@fromorbit.com, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, xfs@oss.sgi.com
+To: Christoph Hellwig <hch@infradead.org>
+Cc: david@fromorbit.com, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-Looks fine,
+On Thu, May 26, 2016 at 01:09:48AM -0700, Christoph Hellwig wrote:
+> Shouldn't these tests also add a _require_test now?  But we probably
+> should just move them to /tmp instead?
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+Yes.  I'll move 'em to /tmp.
+
+--D
