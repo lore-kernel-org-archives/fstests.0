@@ -1,34 +1,33 @@
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:34953 "EHLO
-	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751089AbcEaQTk (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 31 May 2016 12:19:40 -0400
-Received: by mail-wm0-f50.google.com with SMTP id a136so140923863wme.0
-        for <fstests@vger.kernel.org>; Tue, 31 May 2016 09:19:39 -0700 (PDT)
+Received: from aserp1040.oracle.com ([141.146.126.69]:41093 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750730AbcEaQmo (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 31 May 2016 12:42:44 -0400
+Date: Tue, 31 May 2016 09:41:38 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 8/7] xfs/122: don't break on old xfsprogs
+Message-ID: <20160531164138.GB5053@birch.djwong.org>
+References: <146424222237.6278.4174636124436241002.stgit@birch.djwong.org>
+ <20160527180231.GB5050@birch.djwong.org>
+ <20160531125109.GA17018@infradead.org>
 MIME-Version: 1.0
-In-Reply-To: <20160531125157.GB17018@infradead.org>
-References: <1437913255-7524-4-git-send-email-tytso@mit.edu>
- <1454361909-36538-1-git-send-email-gwendal@chromium.org> <20160202180828.GA13880@infradead.org>
- <CAMHSBOUQ5eUL+Y+voDCwC9U7gmTsUZu2Oympn+c0=DxaU4egjA@mail.gmail.com> <20160531125157.GB17018@infradead.org>
-From: Gwendal Grignou <gwendal@chromium.org>
-Date: Tue, 31 May 2016 09:19:19 -0700
-Message-ID: <CAMHSBOU5+XsM503_3khtVBWa+Ymz9BrezGzpxpJEr3axCMuR1Q@mail.gmail.com>
-Subject: Re: xfsprogs: Add BUILD_CFLAGS for cross compilation
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160531125109.GA17018@infradead.org>
 Sender: fstests-owner@vger.kernel.org
 To: Christoph Hellwig <hch@infradead.org>
-Cc: Gwendal Grignou <gwendal@chromium.org>, Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org, xfs@oss.sgi.com, vapier@gentoo.org
+Cc: linux-btrfs@vger.kernel.org, Xiao Yang <yangx.jy@cn.fujitsu.com>, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-[+Mike]
-Sure. Mike suggested improvements (ability to specify the host
-compiler), and found I did not properly regenerate ./configure. I will
-resubmit a better patch.
-Gwendal.
+On Tue, May 31, 2016 at 05:51:09AM -0700, Christoph Hellwig wrote:
+> Looks fine, but can't we also remove the workaround at the end of the
+> the test as well?
 
-On Tue, May 31, 2016 at 5:51 AM, Christoph Hellwig <hch@infradead.org> wrote:
-> On Fri, May 27, 2016 at 09:34:50AM -0700, Gwendal Grignou wrote:
->> Looking at xfsprogs-4.5.0, that patch has not been applied. Did it not work?
->> It still applies cleanly on 4.5.
->
-> It probably just got missed by Dave between all the patches on the list.
-> Can you just resend it with my Reviewed-by tag added?
+Oh, heh, yes, those can go.  The whitespace is wrong on them anyway.
+
+--D
+
+> 
+> _______________________________________________
+> xfs mailing list
+> xfs@oss.sgi.com
+> http://oss.sgi.com/mailman/listinfo/xfs
