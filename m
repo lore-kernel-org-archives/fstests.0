@@ -1,63 +1,59 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43640 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750898AbcE2E2v (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sun, 29 May 2016 00:28:51 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id C10FED7A67
-	for <fstests@vger.kernel.org>; Sun, 29 May 2016 04:28:50 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v3 2/2] xfs/006: new case to test xfs fail_at_unmount error handling
-Date: Sun, 29 May 2016 12:28:41 +0800
-Message-Id: <1464496121-6380-2-git-send-email-zlang@redhat.com>
-In-Reply-To: <1464496121-6380-1-git-send-email-zlang@redhat.com>
-References: <1464496121-6380-1-git-send-email-zlang@redhat.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:4842 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1161746AbcEaCEe (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 30 May 2016 22:04:34 -0400
+From: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
+Subject: [PATCH] fstests: btrfs: add test for qgroup handle de-refer
+Date: Tue, 31 May 2016 10:03:54 +0800
+Message-ID: <1464660234-14562-1-git-send-email-lufq.fnst@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: sandeen@redhat.com, Zorro Lang <zlang@redhat.com>
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-XFS bring in a new configuration under /sys/fs/xfs/error, named
-fail_at_unmount. It's used to stop unmount retrying forever when
-it hit IO error.
+Test if qgroup can handle de-reference reallocation. Although current
+qgroup can handle it, we still need to prevent any regression which may
+break current qgroup.
 
-This case try to unmount an faulty dm device, and to sure unmount
-won't retry forever if fail_at_unmount=1.
-
-Signed-off-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
 ---
+ common/rc           |  4 +--
+ tests/btrfs/028     | 91 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/028.out |  2 ++
+ tests/btrfs/group   |  1 +
+ 4 files changed, 96 insertions(+), 2 deletions(-)
+ create mode 100755 tests/btrfs/028
+ create mode 100644 tests/btrfs/028.out
 
-Hi,
-
-Nothing changed in this V3. Due to I modify [PATCH v3 1/2], so I think
-if I send this 2/2 patch with 1/2 together, maybe easy to review and
-merge? :)
-
-Thanks,
-Zorro
-
- tests/xfs/006     | 81 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/006.out |  2 ++
- tests/xfs/group   |  1 +
- 3 files changed, 84 insertions(+)
- create mode 100755 tests/xfs/006
- create mode 100644 tests/xfs/006.out
-
-diff --git a/tests/xfs/006 b/tests/xfs/006
+diff --git a/common/rc b/common/rc
+index 51092a0..650d198 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3284,9 +3284,9 @@ _btrfs_get_profile_configs()
+ # stress btrfs by running balance operation in a loop
+ _btrfs_stress_balance()
+ {
+-	local btrfs_mnt=$1
++	local options=$@
+ 	while true; do
+-		$BTRFS_UTIL_PROG balance start $btrfs_mnt
++		$BTRFS_UTIL_PROG balance start $options
+ 	done
+ }
+ 
+diff --git a/tests/btrfs/028 b/tests/btrfs/028
 new file mode 100755
-index 0000000..c134b1c
+index 0000000..6e0ad36
 --- /dev/null
-+++ b/tests/xfs/006
-@@ -0,0 +1,81 @@
++++ b/tests/btrfs/028
+@@ -0,0 +1,91 @@
 +#! /bin/bash
-+# FS QA Test 006
-+#
-+# Test xfs' "fail at unmount" error handling configuration. Stop
-+# XFS retrying to writeback forever when unmount.
++# FS QA Test 028
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2016 YOUR NAME HERE.  All Rights Reserved.
++# Copyright (c) 2016 Fujitsu. All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -87,70 +83,85 @@ index 0000000..c134b1c
 +{
 +	cd /
 +	rm -f $tmp.*
-+	_dmerror_cleanup
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/dmerror
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
 +# real QA test starts here
-+_supported_fs xfs
++_supported_fs btrfs
 +_supported_os Linux
-+_require_dm_target error
 +_require_scratch
 +
-+_scratch_mkfs > $seqres.full 2>&1
-+_require_fs_sys_fs $SCRATCH_DEV error/fail_at_unmount
++# Currently in btrfs the node/leaf size can not be smaller than the page
++# size (but it can be greater than the page size). So use the largest
++# supported node/leaf size (64Kb) so that the test can run on any platform
++# that Linux supports.
++_scratch_mkfs "--nodesize 64k"
++_scratch_mount
 +
-+# The device is still a linear device at here
-+_dmerror_init
-+_dmerror_mount
++_run_btrfs_util_prog quota enable $SCRATCH_MNT
++_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
 +
-+# Enable fail_at_unmount
-+_set_fs_sys_fs_param $DMERROR_DEV error/fail_at_unmount 1
++# Increase the probability of generating de-refer extent, and decrease
++# other.
++args=`_scale_fsstress_args -z \
++	-f write=10 -f unlink=10 \
++	-f creat=10 -f fsync=10 \
++	-f fsync=10 -n 100000 -p 2 \
++	-d $SCRATCH_MNT/stress_dir`
++echo "Run fsstress $args" >>$seqres.full
++$FSSTRESS_PROG $args >/dev/null 2>&1 &
++fsstress_pid=$!
 +
-+# make some IO at here. If these data still not writeback from
-+# journal to data, it will hit writeback error after load error
-+# tabel in next step.
-+_pwrite_byte 0x61 0 100M $SCRATCH_MNT/file >/dev/null
-+_dmerror_load_error_table
++echo "Start balance" >>$seqres.full
++_btrfs_stress_balance -d $SCRATCH_MNT >/dev/null 2>&1 &
++balance_pid=$!
 +
-+# Even above data already all writeback, umount will cause XFS
-+# try to writeback something to root inode. It still can trigger
-+# umount fail.
-+_dmerror_unmount
++# 30s is enough to trigger bug
++sleep $((30*$TIME_FACTOR))
++kill $fsstress_pid $balance_pid
++wait
 +
-+echo "Silence is golden"
-+_dmerror_cleanup
++# kill _btrfs_stress_balance can't end balance, so call btrfs balance cancel
++# to cancel running or paused balance.
++$BTRFS_UTIL_PROG balance cancel $SCRATCH_MNT &> /dev/null
++
++rm -rf $SCRATCH_MNT/*
++_run_btrfs_util_prog filesystem sync $SCRATCH_MNT
++units=`_btrfs_qgroup_units`
++$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | $SED_PROG -n '/[0-9]/p' | \
++	$AWK_PROG '{print $2" "$3}'
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/xfs/006.out b/tests/xfs/006.out
+diff --git a/tests/btrfs/028.out b/tests/btrfs/028.out
 new file mode 100644
-index 0000000..675c1b7
+index 0000000..69b68bf
 --- /dev/null
-+++ b/tests/xfs/006.out
++++ b/tests/btrfs/028.out
 @@ -0,0 +1,2 @@
-+QA output created by 006
-+Silence is golden
-diff --git a/tests/xfs/group b/tests/xfs/group
-index f4c6816..39169ea 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -4,6 +4,7 @@
- 004 db auto quick
- 005 auto quick
- 007 auto quota quick
-+006 auto quick unmount
- 008 rw ioctl auto quick
- 009 rw ioctl auto prealloc quick
- 010 auto quick repair
++QA output created by 028
++65536 65536
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index da0e27f..35ecf59 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -30,6 +30,7 @@
+ 025 auto quick send clone
+ 026 auto quick compress prealloc
+ 027 auto replace
++028 auto qgroup balance
+ 029 auto quick clone
+ 030 auto quick send
+ 031 auto quick subvol clone
 -- 
 2.5.5
+
+
 
