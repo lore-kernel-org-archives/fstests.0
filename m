@@ -1,66 +1,69 @@
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:36330 "EHLO
-	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752488AbcEaVMx (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 31 May 2016 17:12:53 -0400
-Date: Wed, 1 Jun 2016 07:12:49 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [RFD] fstests needs a new maintainer
-Message-ID: <20160531211249.GE12670@dastard>
-References: <20160523045350.GF26977@dastard>
- <20160523064138.GA5051@zlang.usersys.redhat.com>
- <20160523145503.GA32314@infradead.org>
- <20160524140301.GU5140@eguan.usersys.redhat.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:48844 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1755805AbcFADaX (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 31 May 2016 23:30:23 -0400
+Subject: Re: [PATCH] fstests: btrfs: add test for qgroup handle de-refer
+References: <1464660234-14562-1-git-send-email-lufq.fnst@cn.fujitsu.com>
+ <20160531195142.GA7633@wotan.suse.de>
+From: luke <lufq.fnst@cn.fujitsu.com>
+Message-ID: <cd4858fc-3b41-d23d-ff1d-0cc9ed1a4bc7@cn.fujitsu.com>
+Date: Wed, 1 Jun 2016 11:30:08 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160524140301.GU5140@eguan.usersys.redhat.com>
+In-Reply-To: <20160531195142.GA7633@wotan.suse.de>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: Mark Fasheh <mfasheh@suse.de>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, May 24, 2016 at 10:03:01PM +0800, Eryu Guan wrote:
-> On Mon, May 23, 2016 at 07:55:03AM -0700, Christoph Hellwig wrote:
-> > On Mon, May 23, 2016 at 02:41:38PM +0800, Zorro Lang wrote:
-> > > Thanks for what you did for us. I'm just thinking maybe you can
-> > > separate fstests maintenance jobs to several different maintainers?
-> > > Due to fstests project become bigger and bigger, it maybe hard for
-> > > someone review & merge & verify all kinds of patches.
-> > > 
-> > > As I know LTP have "not only one" maintainers. I think we still
-> > > need someone like you can make important decision for fstests.
-> > > But for some daily jobs, you can distribute them to others.
-> > 
-> > FYI, back when we team-maintained the xfstests-dev repo together with
-> > all the other xfs -dev repos it worked out fine.  But even with that
-> > we need someone to volunteer for doing the day to day grunt work.
-> > 
-> > While I'd be happy to help out I fear I don't have time to do the
-> > majority of the work at the moment either.
-> 
-> I'd like to help out to do the day to day dirty work as well, though I
-> don't have such experience before.
 
-Thank you for putting your hand up, Eryu. I don't think ayone else
-is going to nominate themselves (or anyone else) at this point, so
-I'll happily accept your offer. If anyone objects, then please speak
-up now...
 
-Eryu, I don't think a lack of experience will be a problem - there
-isn't a whole lot of things you need to learn to manage git trees in
-a consistent manner.
+At 06/01/2016 03:51 AM, Mark Fasheh wrote:
+> Thanks for this test.
+>
+> On Tue, May 31, 2016 at 10:03:54AM +0800, Lu Fengqi wrote:
+>> +echo "Start balance" >>$seqres.full
+>> +_btrfs_stress_balance -d $SCRATCH_MNT >/dev/null 2>&1 &
+>> +balance_pid=$!
+>> +
+>> +# 30s is enough to trigger bug
+>> +sleep $((30*$TIME_FACTOR))
+>> +kill $fsstress_pid $balance_pid
+>> +wait
+>> +
+>> +# kill _btrfs_stress_balance can't end balance, so call btrfs balance cancel
+>> +# to cancel running or paused balance.
+>> +$BTRFS_UTIL_PROG balance cancel $SCRATCH_MNT &> /dev/null
+>> +
+>> +rm -rf $SCRATCH_MNT/*
+>> +_run_btrfs_util_prog filesystem sync $SCRATCH_MNT
+>> +units=`_btrfs_qgroup_units`
+>> +$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | $SED_PROG -n '/[0-9]/p' | \
+>> +	$AWK_PROG '{print $2" "$3}'
+> Wouldn't it be better here to just have btrfsck check for inconsistencies?
+> If you look at tests/btrfs/122 this is what I mean:
+>
+> +# generate a qgroup report and look for inconsistent groups
+> +$BTRFS_UTIL_PROG check --qgroup-report $SCRATCH_DEV 2>&1 | \
+> +                       grep -q -E "Counts for qgroup.*are different"
+> +if [ $? -ne 0 ]; then
+> +       status=0
+> +fi
+>
+> That way we're not keying on some specific value showing up but instead that
+> qgroup validation passes (which is really what we want to test).
+>
+> Thanks,
+> 	--Mark
+>
+> --
+> Mark Fasheh
+>
+>
+OK, I will try this and update this patch.
 
-I'm not sure what the best way to start you off is - we can probably
-talk a bit off-list and work out how best to get you up to speed and
-so not overload and drown you instantly. Once we work that out we
-can let everyone know how we'll manage everything and what the
-longer term plan is.
+Thanks,
+Lu
 
-Sound reasonable?
 
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
