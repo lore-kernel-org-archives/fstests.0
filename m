@@ -1,217 +1,104 @@
-Received: from mx1.redhat.com ([209.132.183.28]:45388 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:52923 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751125AbcFBF5M (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 2 Jun 2016 01:57:12 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	id S1751317AbcFBJLK (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 2 Jun 2016 05:11:10 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 5D64C7F6A5
-	for <fstests@vger.kernel.org>; Thu,  2 Jun 2016 05:57:11 +0000 (UTC)
-Date: Thu, 2 Jun 2016 13:57:09 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] xfstests: xfs discontiguous multi-block buffer logging
- test
-Message-ID: <20160602055709.GZ5140@eguan.usersys.redhat.com>
-References: <1464806140-22255-1-git-send-email-bfoster@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1464806140-22255-1-git-send-email-bfoster@redhat.com>
+	by mx1.redhat.com (Postfix) with ESMTPS id 5C5EB85364
+	for <fstests@vger.kernel.org>; Thu,  2 Jun 2016 09:11:10 +0000 (UTC)
+From: Jan Tulak <jtulak@redhat.com>
+Subject: [PATCH] xfstests: update xfs/096 for new behaviour
+Date: Thu,  2 Jun 2016 11:10:59 +0200
+Message-Id: <1464858659-610-1-git-send-email-jtulak@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Jan Tulak <jtulak@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jun 01, 2016 at 02:35:40PM -0400, Brian Foster wrote:
-> XFS had a bug in the multi-block buffer logging code that caused a NULL
-> lv panic at log push time due to invalid regions being set in the buffer
-> log format bitmap. This was demonstrated by modifying a multi-block
-> directory buffer in a manner that only logs regions beyond the first
-> FSB-sized mapping of the buffer.
-> 
-> To recreate these conditions, this test fragments free space and
-> populates several directories with enough entries to require
-> discontiguous multi-block buffers. To recreate the problem, we remove
-> entries from the tail end of the directory and fsync to flush the log.
-> 
-> Note that this test causes a panic on kernels affected by the bug. As
-> such, it is included in the 'dangerous' group. The bug is resolved by
-> kernel commit a3916e528b91 ("xfs: fix broken multi-fsb buffer logging").
-> 
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
+Because we recently changed how mkfs behaves when it gets incorrect/invalid
+values, update the expected output to reflect the change.
 
-Thanks Brian for writing the test! It crashed my 4.7-rc1 test vm as
-expected. Looks good to me overall, some minor issues inline.
+Signed-off-by: Jan Tulak <jtulak@redhat.com>
+---
+ tests/xfs/096.out.internal | 60 +++++++++++++++++++++++++++++++++++++++-------
+ 1 file changed, 52 insertions(+), 8 deletions(-)
 
-> ---
->  tests/xfs/399     | 116 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/399.out |   1 +
->  tests/xfs/group   |   1 +
->  3 files changed, 118 insertions(+)
->  create mode 100755 tests/xfs/399
->  create mode 100644 tests/xfs/399.out
-> 
-> diff --git a/tests/xfs/399 b/tests/xfs/399
-> new file mode 100755
-> index 0000000..e652643
-> --- /dev/null
-> +++ b/tests/xfs/399
-> @@ -0,0 +1,116 @@
-> +#! /bin/bash
-> +# FS QA Test No. 399
-> +#
-> +# Regression test for an XFS multi-block buffer logging bug.
-> +#
-> +# The XFS bug results in a panic when a non-contiguous multi-block buffer is
-> +# mapped and logged in a particular manner, such that only regions beyond the
-> +# first fsb-sized mapping are logged. The crash occurs asynchronous to
-> +# transaction submission, when the associated buffer log item is pushed from the
-> +# CIL (i.e., when the log is subsequently flushed).
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +    cd /
-> +    rm -f $tmp.*
+diff --git a/tests/xfs/096.out.internal b/tests/xfs/096.out.internal
+index 80201d2..82c2043 100644
+--- a/tests/xfs/096.out.internal
++++ b/tests/xfs/096.out.internal
+@@ -2,18 +2,62 @@ QA output created by 096
+ 
+ # su too big but must be a multiple of fs block size too
+ --- mkfs=-l version=2,su=262656 ---
+-log stripe unit (262656) must be a multiple of the block size (4096)
++Illegal value 262656 for -l su option. value is too large
++Usage: mkfs.xfs
++/* blocksize */		[-b log=n|size=num]
++/* data subvol */	[-d agcount=n,agsize=n,file,name=xxx,size=num,
++			    (sunit=value,swidth=value|su=num,sw=num|noalign),
++			    sectlog=n|sectsize=num
++/* force overwrite */	[-f]
++/* inode size */	[-i log=n|perblock=n|size=num,maxpct=n,attr=0|1|2,
++			    projid32bit=0|1,sparse=0|1]
++/* no discard */	[-K]
++/* log subvol */	[-l agnum=n,internal,size=num,logdev=xxx,version=n
++			    sunit=value|su=num,sectlog=n|sectsize=num,
++			    lazy-count=0|1]
++/* label */		[-L label (maximum 12 characters)]
++/* naming */		[-n log=n|size=num,version=N|ci,ftype=0|1]
++/* no-op info only */	[-N]
++/* prototype file */	[-p fname]
++/* quiet */		[-q]
++/* realtime subvol */	[-r extsize=num,size=num,rtdev=xxx]
++/* sectorsize */	[-s log=n|size=num]
++/* version */		[-V]
++			devicename
++<devicename> is required unless -d name=xxx is given.
++<num> is xxx (bytes), xxxs (sectors), xxxb (fs blocks), xxxk (xxx KiB),
++      xxxm (xxx MiB), xxxg (xxx GiB), xxxt (xxx TiB) or xxxp (xxx PiB).
++<value> is xxx (512 byte blocks).
+ 
+ 
+ # test log stripe greater than LR size
+ --- mkfs=-l version=2,su=266240 ---
+-meta-data=DEV isize=N    agcount=N, agsize=N blks
+-data     =                       bsize=4096   blocks=N, imaxpct=N
+-         =                       sunit=0      swidth=0 blks, unwritten=1
+-naming   =version 2              bsize=4096
+-log      =LOG                    bsize=4096   blocks=N, version=N
+-         =                       sunit=N blks
+-realtime =REALTIME               extsz=N, blocks=N, rtextents=N
++Illegal value 266240 for -l su option. value is too large
++Usage: mkfs.xfs
++/* blocksize */		[-b log=n|size=num]
++/* data subvol */	[-d agcount=n,agsize=n,file,name=xxx,size=num,
++			    (sunit=value,swidth=value|su=num,sw=num|noalign),
++			    sectlog=n|sectsize=num
++/* force overwrite */	[-f]
++/* inode size */	[-i log=n|perblock=n|size=num,maxpct=n,attr=0|1|2,
++			    projid32bit=0|1,sparse=0|1]
++/* no discard */	[-K]
++/* log subvol */	[-l agnum=n,internal,size=num,logdev=xxx,version=n
++			    sunit=value|su=num,sectlog=n|sectsize=num,
++			    lazy-count=0|1]
++/* label */		[-L label (maximum 12 characters)]
++/* naming */		[-n log=n|size=num,version=N|ci,ftype=0|1]
++/* no-op info only */	[-N]
++/* prototype file */	[-p fname]
++/* quiet */		[-q]
++/* realtime subvol */	[-r extsize=num,size=num,rtdev=xxx]
++/* sectorsize */	[-s log=n|size=num]
++/* version */		[-V]
++			devicename
++<devicename> is required unless -d name=xxx is given.
++<num> is xxx (bytes), xxxs (sectors), xxxb (fs blocks), xxxk (xxx KiB),
++      xxxm (xxx MiB), xxxg (xxx GiB), xxxt (xxx TiB) or xxxp (xxx PiB).
++<value> is xxx (512 byte blocks).
+ 
+ 
+ # same test but get log stripe from data stripe
+-- 
+2.5.5
 
-Please use tab for indention.
-
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +
-> +# Modify as appropriate.
-> +_supported_fs xfs
-> +_supported_os Linux
-> +
-> +_require_scratch_nocheck	# check complains about single AG fs
-> +
-> +rm -f $seqres.full
-> +_scratch_mkfs_xfs -d size=20m -n size=64k >> $seqres.full 2>&1
-
-Some comments about why 64k dir block size is needed would be better.
-
-> +
-> +_scratch_mount
-> +
-> +# Fill a source directory with many largish-named files. 1k uuid-named entries
-> +# sufficiently populates a 64k directory block.
-> +mkdir $SCRATCH_MNT/src
-> +for i in $(seq 0 1023); do
-> +	touch $SCRATCH_MNT/src/`uuidgen`
-
-Add an entry in common/config for something like UUIDGEN_PROG, and
-'_require_command "$UUIDGEN_PROG" uuidgen' in the beginning of the test?
-
-> +done
-> +
-> +# precreate target dirs while we still have free space for inodes
-> +for i in $(seq 0 3); do
-> +	mkdir $SCRATCH_MNT/$i
-> +done
-> +
-> +# consume and fragment free space
-> +$XFS_IO_PROG -xc "resblks 16" $SCRATCH_MNT >> $seqres.full 2>&1
-> +dd if=/dev/zero of=$SCRATCH_MNT/file bs=4k >> $seqres.full 2>&1
-> +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/file >> $seqres.full 2>&1
-> +size=`stat -c %s $SCRATCH_MNT/file`
-> +for i in $(seq 0 8192 $size); do
-> +	$XFS_IO_PROG -c "fpunch $i 4k" $SCRATCH_MNT/file >> $seqres.full 2>&1
-
-Good to have a '_require_xfs_io_command "fpunch"'.
-
-> +done
-> +
-> +# Replicate the src dir several times into fragmented free space. After one or
-> +# two dirs, we should have nothing but non-contiguous directory blocks.
-> +for d in $(seq 0 3); do
-> +	for f in `ls -1 $SCRATCH_MNT/src`; do
-> +		ln $SCRATCH_MNT/src/$f $SCRATCH_MNT/$d/$f
-> +	done
-> +done
-> +
-> +# Fragment the target dirs a bit. Remove a handful of entries from each to
-> +# populate the best free space regions in the directory block headers. We want
-> +# to populate these now so the subsequent unlinks have no reason to log the
-> +# first block of the directory.
-> +for d in $(seq 0 3); do
-> +	i=0
-> +	for f in `ls -U $SCRATCH_MNT/$d`; do
-> +		if [ $i == 0 ]; then
-> +			unlink $SCRATCH_MNT/$d/$f
-> +		fi
-> +		i=$(((i + 1) % 128))
-> +	done
-> +done
-> +
-> +_scratch_unmount
-> +_scratch_mount
-
-We have a new helper to do this now, _scratch_cycle_mount.
-And it's good to see some comments about the unmount/mount cycle.
-
-> +
-> +# Unlink an entry towards the end of each dir and fsync. The unlink should only
-> +# need to log the latter mappings of the 64k directory block. If the logging bug
-> +# is present, this will crash!
-> +for d in $(seq 0 3); do
-> +	f=`ls -U $SCRATCH_MNT/$d | tail -10 | head -n 1`
-> +	unlink $SCRATCH_MNT/$d/$f
-> +	$XFS_IO_PROG -c fsync $SCRATCH_MNT/$d
-> +done
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/399.out b/tests/xfs/399.out
-> new file mode 100644
-> index 0000000..955261f
-> --- /dev/null
-> +++ b/tests/xfs/399.out
-> @@ -0,0 +1 @@
-> +QA output created by 399
-
-Need "Silence is golden" to indicate no other outputs are expected.
-
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index f4c6816..960cc3b 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -285,3 +285,4 @@
->  303 auto quick quota
->  304 auto quick quota
->  305 auto quota
-> +399 auto dangerous
-
-It crashed my kernel very quickly, I guess 'quick' group makes sense
-here (but I didn't test it). As well as 'rw' group.
-
-Thanks,
-Eryu
