@@ -1,46 +1,197 @@
-Received: from mx1.redhat.com ([209.132.183.28]:50964 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751019AbcFCDcB (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 2 Jun 2016 23:32:01 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 1B90A7F6A6
-	for <fstests@vger.kernel.org>; Fri,  3 Jun 2016 03:32:00 +0000 (UTC)
-Date: Fri, 3 Jun 2016 11:31:58 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2] xfstests: xfs discontiguous multi-block buffer
- logging test
-Message-ID: <20160603033158.GD5140@eguan.usersys.redhat.com>
-References: <1464873001-17508-1-git-send-email-bfoster@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1464873001-17508-1-git-send-email-bfoster@redhat.com>
+Received: from mail-pa0-f50.google.com ([209.85.220.50]:33548 "EHLO
+	mail-pa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750726AbcFDAb2 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Fri, 3 Jun 2016 20:31:28 -0400
+Received: by mail-pa0-f50.google.com with SMTP id ec8so12730849pac.0
+        for <fstests@vger.kernel.org>; Fri, 03 Jun 2016 17:31:28 -0700 (PDT)
+From: Gwendal Grignou <gwendal@chromium.org>
+Subject: [PATCH] Allow compiling xfsprogs in a cross compile environment.
+Date: Fri,  3 Jun 2016 17:31:16 -0700
+Message-Id: <1465000276-16554-1-git-send-email-gwendal@chromium.org>
+In-Reply-To: <AMHSBOU5+XsM503_3khtVBWa+Ymz9BrezGzpxpJEr3axCMuR1Q@mail.gmail.com>
+References: <AMHSBOU5+XsM503_3khtVBWa+Ymz9BrezGzpxpJEr3axCMuR1Q@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: fstests@vger.kernel.org
+To: hch@infradead.org
+Cc: tytso@mit.edu, fstests@vger.kernel.org, xfs@oss.sgi.com, vapier@gentoo.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 02, 2016 at 09:10:01AM -0400, Brian Foster wrote:
-> XFS had a bug in the multi-block buffer logging code that caused a NULL
-> lv panic at log push time due to invalid regions being set in the buffer
-> log format bitmap. This was demonstrated by modifying a multi-block
-> directory buffer in a manner that only logs regions beyond the first
-> FSB-sized mapping of the buffer.
-> 
-> To recreate these conditions, this test fragments free space and
-> populates several directories with enough entries to require
-> discontiguous multi-block buffers. To recreate the problem, we remove
-> entries from the tail end of the directory and fsync to flush the log.
-> 
-> Note that this test causes a panic on kernels affected by the bug. As
-> such, it is included in the 'dangerous' group. The bug is resolved by
-> kernel commit a3916e528b91 ("xfs: fix broken multi-fsb buffer logging").
-> 
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
+Without this patch, we are using the same compiler and options for the host
+compiler (BUILD_CC) and the target compiler (CC), and we would get error
+messages at compilation:
+x86_64-pc-linux-gnu-gcc -O2 -O2 -pipe -march=armv7-a -mtune=cortex-a15 ...
+x86_64-pc-linux-gnu-gcc.real: error: unrecognized command line option
+'-mfpu=neon'
+'-mfloat-abi=hard'
+'-clang-syntax'
+'-mfpu=neon'
+'-mfloat-abi=hard'
+'-clang-syntax'
 
-Looks good to me. Also tested on patched kernel with different block
-size XFS, test passed within 20s for me.
+Add BUILD_CC and BUILD_CFLAGS as precious variables to allow setting it up
+from the ebuild.
 
-Reviewed-by: Eryu Guan <eguan@redhat.com>
+Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
+---
+ This patch issue has been pushed into gentoo as well:
+ https://gitweb.gentoo.org/repo/gentoo.git/commit/?id=8806f22bf65d99348770bbb6207d199c74fd96c5
+
+ configure            | 26 +++++++++++++++++++++-----
+ configure.ac         | 20 +++++++++++++++-----
+ include/builddefs.in |  6 ++++--
+ libxfs/Makefile      |  4 ++--
+ 4 files changed, 42 insertions(+), 14 deletions(-)
+
+diff --git a/configure b/configure
+index 325081f..863a447 100755
+--- a/configure
++++ b/configure
+@@ -700,6 +700,7 @@ libreadline
+ enable_blkid
+ enable_gettext
+ enable_shared
++BUILD_CFLAGS
+ BUILD_CC
+ CPP
+ LT_SYS_LIBRARY_PATH
+@@ -806,7 +807,9 @@ LDFLAGS
+ LIBS
+ CPPFLAGS
+ LT_SYS_LIBRARY_PATH
+-CPP'
++CPP
++BUILD_CC
++BUILD_CFLAGS'
+ 
+ 
+ # Initialize some variables set by options.
+@@ -1456,6 +1459,9 @@ Some influential environment variables:
+   LT_SYS_LIBRARY_PATH
+               User-defined run-time library search path.
+   CPP         C preprocessor
++  BUILD_CC    C compiler for build tools
++  BUILD_CFLAGS
++              C compiler flags for build tools
+ 
+ Use these variables to override the choices made by `configure' or to help
+ it to find libraries and programs with nonstandard names/locations.
+@@ -11957,11 +11963,12 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ ac_compiler_gnu=$ac_cv_c_compiler_gnu
+ 
+-if test $cross_compiling = no; then
+-  BUILD_CC="$CC"
+ 
+-else
+-  for ac_prog in gcc cc
++if test "${BUILD_CC+set}" != "set"; then
++  if test $cross_compiling = no; then
++    BUILD_CC="$CC"
++  else
++    for ac_prog in gcc cc
+ do
+   # Extract the first word of "$ac_prog", so it can be a program name with args.
+ set dummy $ac_prog; ac_word=$2
+@@ -12003,6 +12010,15 @@ fi
+   test -n "$BUILD_CC" && break
+ done
+ 
++  fi
++fi
++
++if test "${BUILD_CFLAGS+set}" != "set"; then
++  if test $cross_compiling = no; then
++    BUILD_CFLAGS="$CFLAGS"
++  else
++    BUILD_CFLAGS="-g -O2"
++  fi
+ fi
+ 
+ # Check whether --enable-shared was given.
+diff --git a/configure.ac b/configure.ac
+index d44438f..fc286b3 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -9,11 +9,21 @@ AC_PREFIX_DEFAULT(/usr)
+ AC_PROG_LIBTOOL
+ 
+ AC_PROG_CC
+-if test $cross_compiling = no; then
+-  BUILD_CC="$CC"
+-  AC_SUBST(BUILD_CC)
+-else
+-  AC_CHECK_PROGS(BUILD_CC, gcc cc)
++AC_ARG_VAR(BUILD_CC, [C compiler for build tools])
++if test "${BUILD_CC+set}" != "set"; then
++  if test $cross_compiling = no; then
++    BUILD_CC="$CC"
++  else
++    AC_CHECK_PROGS(BUILD_CC, gcc cc)
++  fi
++fi
++AC_ARG_VAR(BUILD_CFLAGS, [C compiler flags for build tools])
++if test "${BUILD_CFLAGS+set}" != "set"; then
++  if test $cross_compiling = no; then
++    BUILD_CFLAGS="$CFLAGS"
++  else
++    BUILD_CFLAGS="-g -O2"
++  fi
+ fi
+ 
+ AC_ARG_ENABLE(shared,
+diff --git a/include/builddefs.in b/include/builddefs.in
+index c2ca4cb..9ca57a6 100644
+--- a/include/builddefs.in
++++ b/include/builddefs.in
+@@ -27,6 +27,7 @@ MALLOCLIB = @malloc_lib@
+ LOADERFLAGS = @LDFLAGS@
+ LTLDFLAGS = @LDFLAGS@
+ CFLAGS = @CFLAGS@
++BUILD_CFLAGS = @BUILD_CFLAGS@
+ 
+ LIBRT = @librt@
+ LIBUUID = @libuuid@
+@@ -150,7 +151,7 @@ PCFLAGS+= -DENABLE_BLKID
+ endif
+ 
+ 
+-GCFLAGS = $(OPTIMIZER) $(DEBUG) \
++GCFLAGS = $(DEBUG) \
+ 	  -DVERSION=\"$(PKG_VERSION)\" -DLOCALEDIR=\"$(PKG_LOCALE_DIR)\"  \
+ 	  -DPACKAGE=\"$(PKG_NAME)\" -I$(TOPDIR)/include -I$(TOPDIR)/libxfs
+ 
+@@ -158,8 +159,9 @@ ifeq ($(ENABLE_GETTEXT),yes)
+ GCFLAGS += -DENABLE_GETTEXT
+ endif
+ 
++BUILD_CFLAGS += $(GCFLAGS) $(PCFLAGS)
+ # First, Global, Platform, Local CFLAGS
+-CFLAGS += $(FCFLAGS) $(GCFLAGS) $(PCFLAGS) $(LCFLAGS)
++CFLAGS += $(FCFLAGS) $(OPTIMIZER) $(GCFLAGS) $(PCFLAGS) $(LCFLAGS)
+ 
+ include $(TOPDIR)/include/buildmacros
+ 
+diff --git a/libxfs/Makefile b/libxfs/Makefile
+index 873d4ec..8d728c0 100644
+--- a/libxfs/Makefile
++++ b/libxfs/Makefile
+@@ -111,7 +111,7 @@ default: crc32selftest ltdepend $(LTLIBRARY)
+ 
+ crc32table.h: gen_crc32table.c
+ 	@echo "    [CC]     gen_crc32table"
+-	$(Q) $(BUILD_CC) $(CFLAGS) -o gen_crc32table $<
++	$(Q) $(BUILD_CC) $(BUILD_CFLAGS) -o gen_crc32table $<
+ 	@echo "    [GENERATE] $@"
+ 	$(Q) ./gen_crc32table > crc32table.h
+ 
+@@ -122,7 +122,7 @@ crc32table.h: gen_crc32table.c
+ # disk.
+ crc32selftest: gen_crc32table.c crc32table.h crc32.c
+ 	@echo "    [TEST]    CRC32"
+-	$(Q) $(BUILD_CC) $(CFLAGS) -D CRC32_SELFTEST=1 crc32.c -o $@
++	$(Q) $(BUILD_CC) $(BUILD_CFLAGS) -D CRC32_SELFTEST=1 crc32.c -o $@
+ 	$(Q) ./$@
+ 
+ # set up include/xfs header directory
+-- 
+2.8.0.rc3.226.g39d4020
+
