@@ -1,51 +1,52 @@
-Received: from smtp.gentoo.org ([140.211.166.183]:58678 "EHLO smtp.gentoo.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750726AbcFDAn1 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 3 Jun 2016 20:43:27 -0400
-Date: Fri, 3 Jun 2016 20:43:25 -0400
-From: Mike Frysinger <vapier@gentoo.org>
-Subject: Re: [PATCH] Allow compiling xfsprogs in a cross compile environment.
-Message-ID: <20160604004325.GZ7717@vapier.lan>
-References: <AMHSBOU5+XsM503_3khtVBWa+Ymz9BrezGzpxpJEr3axCMuR1Q@mail.gmail.com>
- <1465000276-16554-1-git-send-email-gwendal@chromium.org>
+Received: from cn.fujitsu.com ([222.73.24.84]:56220 "EHLO song.cn.fujitsu.com"
+	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+	id S1750764AbcFFKjm (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 6 Jun 2016 06:39:42 -0400
+Received: from localhost.localdomain (unknown [10.167.226.107])
+	by cn.fujitsu.com (Postfix) with ESMTP id DD7C94056404
+	for <fstests@vger.kernel.org>; Mon,  6 Jun 2016 18:26:32 +0800 (CST)
+From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Subject: [PATCH] generic/015, generic/274: add to the 'enospc' group
+Date: Mon,  6 Jun 2016 18:25:30 +0800
+Message-Id: <1465208730-3994-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="9+ohdFDUqiMJzwPo"
-Content-Disposition: inline
-In-Reply-To: <1465000276-16554-1-git-send-email-gwendal@chromium.org>
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Gwendal Grignou <gwendal@chromium.org>
-Cc: hch@infradead.org, tytso@mit.edu, fstests@vger.kernel.org, xfs@oss.sgi.com
+Content-Transfer-Encoding: quoted-printable
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+>From test purpose=EF=BC=8C both two test cases belong to 'enospc' group.
 
---9+ohdFDUqiMJzwPo
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
+Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+---
+ tests/generic/group | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-Reviewed-by: Mike Frysinger <vapier@gentoo.org>
--mike
+diff --git a/tests/generic/group b/tests/generic/group
+index 36fb759..c79cacf 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -17,7 +17,7 @@
+ 012 auto quick prealloc
+ 013 other ioctl udf auto quick
+ 014 rw udf auto quick
+-015 other auto quick
++015 other auto quick enospc
+ 016 auto quick prealloc
+ 017 auto prealloc
+ 018 auto fsr quick
+@@ -276,7 +276,7 @@
+ 271 auto quick clone
+ 272 auto quick clone
+ 273 auto rw
+-274 auto rw prealloc
++274 auto rw prealloc enospc
+ 275 auto rw enospc
+ 276 auto quick clone
+ 277 auto ioctl quick metadata
+--=20
+1.8.3.1
 
---9+ohdFDUqiMJzwPo
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
 
-iQIcBAEBCAAGBQJXUiQsAAoJEEFjO5/oN/WBv2IP/Az8W7bMSzhiVcH/yT6UC98J
-dGZrsP7meey44BCojV1TVfgaKEF2nzYAv9396wchEkKqOD4hb93dd4IZ2Ir75kX/
-2ob4DQoBv/PmVRhvHvLfUVhTWUm7ax4L8dwmqQ5XEhHc0GApnSlZjFpVFuvUied/
-GyorBn3CvQ9v7NhIoF0esDc+4k2YeflHhyVNZ8YSMbTqW7Sj70Dk5qXEx/IKn2fU
-gHys/cdQKq15vD9v5JNXwalap+UAtwJAEAmj3K1OnJVL9/nAUxtOUQkwe7+JEj8C
-/Kd4TwXZC6Kj7YXqqBWkfW9DTTOUY1ovkeYx6B+xw6Tcfnu+HsBCNrDc8enFweeN
-+bwYQFnNGumtojGRSwckiqPZvHR4zaFSH2v8Xx7K4GWEWNQqbFD4y5pL8DSQHd6r
-6mGomYv6yPxoJRI8LqF+eBGQTfduno0ZV5tgneCOpeoET1uSJZdpzMA8gy/0731X
-mr2tmZgdjX1ri11Et+eopv6RdhoWB6jADDjbYUbQ9aS+F7AC1klZ0OuexbO4zxUI
-b/AYkRu396a+wtMlXbM+/sd6LV7NR9/4HgtkeZ1dwJ/1TwDOrJekuAaRTOjidih5
-OW1ONx+DojASxKizPZGNj9DrvS+p21+hcnGMDiGuI9vYddS2cnzswxF0PO/NGGXW
-GF5mrtgCjhqi+hGa3p+M
-=bRrJ
------END PGP SIGNATURE-----
-
---9+ohdFDUqiMJzwPo--
