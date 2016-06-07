@@ -1,62 +1,35 @@
-Received: from mx1.redhat.com ([209.132.183.28]:38113 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:39530 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751208AbcFGCpt (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 6 Jun 2016 22:45:49 -0400
-Date: Tue, 7 Jun 2016 10:45:41 +0800
+	id S1750974AbcFGDp6 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 6 Jun 2016 23:45:58 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id E90F164389
+	for <fstests@vger.kernel.org>; Tue,  7 Jun 2016 03:45:56 +0000 (UTC)
+Date: Tue, 7 Jun 2016 11:45:55 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic/015, generic/274: add to the 'enospc' group
-Message-ID: <20160607024541.GJ5140@eguan.usersys.redhat.com>
-References: <1465208730-3994-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
+Subject: Re: [PATCH] xfstests: update xfs/096 for new behaviour
+Message-ID: <20160607034555.GK5140@eguan.usersys.redhat.com>
+References: <1464858659-610-1-git-send-email-jtulak@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1465208730-3994-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
+In-Reply-To: <1464858659-610-1-git-send-email-jtulak@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+To: Jan Tulak <jtulak@redhat.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jun 06, 2016 at 06:25:30PM +0800, Wang Xiaoguang wrote:
-> From test purpose=EF=BC=8C both two test cases belong to 'enospc' group.
->=20
-> Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+On Thu, Jun 02, 2016 at 11:10:59AM +0200, Jan Tulak wrote:
+> Because we recently changed how mkfs behaves when it gets incorrect/invalid
+> values, update the expected output to reflect the change.
 
-Makes sense to me.
+This will break test with old-behavior xfsprogs. But I'm not sure what
+the best solution is..
 
-Reviewed-by: Eryu Guan <eguan@redhat.com>
-> ---
->  tests/generic/group | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->=20
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 36fb759..c79cacf 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -17,7 +17,7 @@
->  012 auto quick prealloc
->  013 other ioctl udf auto quick
->  014 rw udf auto quick
-> -015 other auto quick
-> +015 other auto quick enospc
->  016 auto quick prealloc
->  017 auto prealloc
->  018 auto fsr quick
-> @@ -276,7 +276,7 @@
->  271 auto quick clone
->  272 auto quick clone
->  273 auto rw
-> -274 auto rw prealloc
-> +274 auto rw prealloc enospc
->  275 auto rw enospc
->  276 auto quick clone
->  277 auto ioctl quick metadata
-> --=20
-> 1.8.3.1
->=20
->=20
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+And it seems that generic/054 and generic/055 are failing because of the
+same reason, if so, fix them together?
+
+Thanks,
+Eryu
