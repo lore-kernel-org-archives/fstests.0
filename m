@@ -1,63 +1,42 @@
-Received: from imap.thunk.org ([74.207.234.97]:33778 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:33786 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751212AbcFISmL (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 9 Jun 2016 14:42:11 -0400
+	id S1751536AbcFISmd (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 9 Jun 2016 14:42:33 -0400
 From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH] generic: mark tests that require O_DIRECT
-Date: Thu,  9 Jun 2016 14:42:08 -0400
-Message-Id: <1465497728-3221-1-git-send-email-tytso@mit.edu>
+Subject: [PATCH] shared: don't try to use O_DIRECT in shared/277
+Date: Thu,  9 Jun 2016 14:42:31 -0400
+Message-Id: <1465497751-3280-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-generic/094 and generic/225 use fiemap-tester, which requires O_DIRECT.
-
-generic/311 requests fsync-tester to use  O_DIRECT
+A comment in shared/277 claims that ext4 supports O_DIRECT in
+data=journalling mode.  Actually, it doesn't, it was just silently
+ignoring O_DIRECT, let's not try to test O_DIRECT for either ext3 or
+ext4 in this test.
 
 Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 ---
- tests/generic/094 | 1 +
- tests/generic/225 | 1 +
- tests/generic/311 | 1 +
- 3 files changed, 3 insertions(+)
+ tests/shared/272 | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
 
-diff --git a/tests/generic/094 b/tests/generic/094
-index a51738a..005de1d 100755
---- a/tests/generic/094
-+++ b/tests/generic/094
-@@ -44,6 +44,7 @@ _cleanup()
- _supported_fs generic
- _supported_os Linux
- _require_scratch
-+_require_odirect
- _require_xfs_io_command "fiemap"
- _require_xfs_io_command "falloc"
+diff --git a/tests/shared/272 b/tests/shared/272
+index e5adf38..df1366a 100755
+--- a/tests/shared/272
++++ b/tests/shared/272
+@@ -31,10 +31,8 @@ tmp=/tmp/$$
+ status=1	# failure is the default!
+ trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
  
-diff --git a/tests/generic/225 b/tests/generic/225
-index c8e0f64..5285e68 100755
---- a/tests/generic/225
-+++ b/tests/generic/225
-@@ -44,6 +44,7 @@ _cleanup()
- _supported_fs generic
- _supported_os Linux
- _require_scratch
-+_require_odirect
- _require_xfs_io_command "fiemap"
+-# ext3 doesn't support direct IO in journalling mode
++# ext3 and ext4 doesn't support direct IO in journalling mode
+ write_opt_list="iflag=noatime conv=notrunc conv=fsync"
+-# For filesystems that can handle it, add also direct IO test
+-[ $FSTYP = "ext4" ] && write_opt_list="$write_opt_list oflag=direct"
  
- _scratch_mkfs > /dev/null 2>&1
-diff --git a/tests/generic/311 b/tests/generic/311
-index 2d4413b..d510204 100755
---- a/tests/generic/311
-+++ b/tests/generic/311
-@@ -54,6 +54,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
- _supported_fs generic
- _supported_os Linux
- _require_scratch_nocheck
-+_require_odirect
- _require_dm_target flakey
- _require_metadata_journaling $SCRATCH_DEV
- 
+ # get standard environment, filters and checks
+ . ./common/rc
 -- 
 2.5.0
 
