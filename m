@@ -1,95 +1,67 @@
-Received: from mail-pa0-f42.google.com ([209.85.220.42]:36556 "EHLO
-	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1423712AbcFHSxZ (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 8 Jun 2016 14:53:25 -0400
-Received: by mail-pa0-f42.google.com with SMTP id b5so4886650pas.3
-        for <fstests@vger.kernel.org>; Wed, 08 Jun 2016 11:53:25 -0700 (PDT)
-From: Tahsin Erdogan <tahsin@google.com>
-Subject: [PATCH] generic/131: dynamically allocate tcp listen port to avoid port clashes
-Date: Wed,  8 Jun 2016 11:52:41 -0700
-Message-Id: <1465411961-12707-1-git-send-email-tahsin@google.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:48891 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752191AbcFIRlM (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 9 Jun 2016 13:41:12 -0400
+Date: Thu, 9 Jun 2016 10:41:04 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] xfstests: fix unreferenced variables in generic/186 and
+ generic/187
+Message-ID: <20160609174104.GC10371@birch.djwong.org>
+References: <1465409851-27969-1-git-send-email-hch@lst.de>
+ <1465409851-27969-2-git-send-email-hch@lst.de>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1465409851-27969-2-git-send-email-hch@lst.de>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>, Tahsin Erdogan <tahsin@google.com>
+To: Christoph Hellwig <hch@lst.de>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Current port selection algorithm is bound to have port clashes. To
-eliminate clashes, let server pick an unused port and report it on
-stdout.
+On Wed, Jun 08, 2016 at 08:17:31PM +0200, Christoph Hellwig wrote:
+> There is not i variable in scope, and the comments suggest the operation
+> is to be done on ${file}.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-Signed-off-by: Tahsin Erdogan <tahsin@google.com>
----
- src/locktest.c    | 16 +++++++++++++++-
- tests/generic/131 | 17 +++++++----------
- 2 files changed, 22 insertions(+), 11 deletions(-)
+Oops.  Thanks for the fix. :/
 
-diff --git a/src/locktest.c b/src/locktest.c
-index adf8ce0..eab48e2 100644
---- a/src/locktest.c
-+++ b/src/locktest.c
-@@ -95,7 +95,7 @@ static char	*filename = 0;
- static int	debug = 0;
- static int	server = 1;
- static int	maxio = 8192;
--static int	port = 7890;
-+static int	port = 0;
- static int 	testnumber = -1;
- static int	saved_errno = 0;
- 
-@@ -899,6 +899,20 @@ main(int argc, char *argv[])
- 	    /*NOTREACHED*/
- 	}
- 
-+	if (port == 0) {
-+	        socklen_t addr_len = sizeof(myAddr);
-+
-+		if (getsockname(s_fd, &myAddr, &addr_len)) {
-+		    perror("getsockname");
-+		    exit(1);
-+		}
-+
-+		port = ntohs(myAddr.sin_port);
-+	}
-+
-+	printf("server port: %d\n", port);
-+	fflush(stdout);
-+
- 	c_fd = accept(s_fd, NULL, NULL);
- 	if (c_fd == INVALID_SOCKET) {
- 	    perror("accept");
-diff --git a/tests/generic/131 b/tests/generic/131
-index 3bcb0d1..d64ba55 100755
---- a/tests/generic/131
-+++ b/tests/generic/131
-@@ -49,21 +49,18 @@ _require_test_fcntl_advisory_locks
- 
- TESTFILE=$TEST_DIR/lock_file
- 
--# Grab a port which is hopefully unused
--if [ $$ -gt 1024 -a $$ -lt 32000 ]; then
--    PORT=$$
--elif [ $$ -lt 1024 ]; then
--    PORT=$(($$+1024))
--elif [ $$ -gt 32000 ]; then
--    PORT=$(($$%30000+1024))
--fi
--
- # Start the server
--src/locktest -p $PORT $TESTFILE 2>&1 > $TEST_DIR/server.out &
-+src/locktest $TESTFILE 2>&1 > $TEST_DIR/server.out &
- locktest_pid1=$!
- 
- sleep 1
- 
-+PORT=$(cat $TEST_DIR/server.out | grep "^server port: " | awk '{print $3}')
-+if [ -z $PORT ]; then
-+	echo "Could not get server port"
-+	exit 1
-+fi
-+
- # Start the client
- src/locktest -p $PORT -h localhost $TESTFILE 2>&1 > $TEST_DIR/client.out
- locktest_pid2=$!
--- 
-2.8.0.rc3.226.g39d4020
+Looks good,
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
+--D
+
+> ---
+>  tests/generic/186 | 2 +-
+>  tests/generic/187 | 2 +-
+>  2 files changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/tests/generic/186 b/tests/generic/186
+> index 70a0280..5de120a 100755
+> --- a/tests/generic/186
+> +++ b/tests/generic/186
+> @@ -87,7 +87,7 @@ _fragment_freesp()
+>  
+>  	# Try again anyway
+>  	avail=`_get_available_space $SCRATCH_MNT`
+> -	$XFS_IO_PROG -fc "pwrite -S 0x65 0 $avail" ${file}.${i}
+> +	$XFS_IO_PROG -fc "pwrite -S 0x65 0 $avail" ${file}
+>  
+>  	# Punch out whatever we need
+>  	seq 1 $((nr * 4)) | while read f; do
+> diff --git a/tests/generic/187 b/tests/generic/187
+> index 25cbcd9..3f534c8 100755
+> --- a/tests/generic/187
+> +++ b/tests/generic/187
+> @@ -88,7 +88,7 @@ _fragment_freesp()
+>  
+>  	# Try again anyway
+>  	avail=`_get_available_space $SCRATCH_MNT`
+> -	$XFS_IO_PROG -fc "pwrite -S 0x65 0 $avail" ${file}.${i}
+> +	$XFS_IO_PROG -fc "pwrite -S 0x65 0 $avail" ${file}
+>  
+>  	# Punch out whatever we need
+>  	seq 1 $((nr * 4)) | while read f; do
+> -- 
+> 2.1.4
+> 
