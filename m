@@ -1,67 +1,46 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:48891 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752191AbcFIRlM (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 9 Jun 2016 13:41:12 -0400
-Date: Thu, 9 Jun 2016 10:41:04 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] xfstests: fix unreferenced variables in generic/186 and
- generic/187
-Message-ID: <20160609174104.GC10371@birch.djwong.org>
-References: <1465409851-27969-1-git-send-email-hch@lst.de>
- <1465409851-27969-2-git-send-email-hch@lst.de>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1465409851-27969-2-git-send-email-hch@lst.de>
+Received: from imap.thunk.org ([74.207.234.97]:33770 "EHLO imap.thunk.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751212AbcFISls (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 9 Jun 2016 14:41:48 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH] defrag: test $TEST_DEV for extents for ext4 defrag
+Date: Thu,  9 Jun 2016 14:41:09 -0400
+Message-Id: <1465497669-3137-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jun 08, 2016 at 08:17:31PM +0200, Christoph Hellwig wrote:
-> There is not i variable in scope, and the comments suggest the operation
-> is to be done on ${file}.
-> 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
+Commit 902223bdbbf2: "defrag: require extents support for ext4 defrag"
+added a test to make sure the ext4 file system has extents enabled by
+testing the scratch device.  Unfortunately at the time when
+_require_defrag is run, the scratch file system hasn't been
+initialized yet by the test, so its contents are undefined.
 
-Oops.  Thanks for the fix. :/
+If the previous test explicitly creates a file system with extents
+disabled on $SCRATCH_DEV (such as ext4/306), then subsequent tests
+(e.g., ext4/307 and ext4/306) will refuse to run.
 
-Looks good,
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Fix this by testing $TEST_DEV instead of $SCRATCH_DEV.
 
---D
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ common/defrag | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> ---
->  tests/generic/186 | 2 +-
->  tests/generic/187 | 2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/tests/generic/186 b/tests/generic/186
-> index 70a0280..5de120a 100755
-> --- a/tests/generic/186
-> +++ b/tests/generic/186
-> @@ -87,7 +87,7 @@ _fragment_freesp()
->  
->  	# Try again anyway
->  	avail=`_get_available_space $SCRATCH_MNT`
-> -	$XFS_IO_PROG -fc "pwrite -S 0x65 0 $avail" ${file}.${i}
-> +	$XFS_IO_PROG -fc "pwrite -S 0x65 0 $avail" ${file}
->  
->  	# Punch out whatever we need
->  	seq 1 $((nr * 4)) | while read f; do
-> diff --git a/tests/generic/187 b/tests/generic/187
-> index 25cbcd9..3f534c8 100755
-> --- a/tests/generic/187
-> +++ b/tests/generic/187
-> @@ -88,7 +88,7 @@ _fragment_freesp()
->  
->  	# Try again anyway
->  	avail=`_get_available_space $SCRATCH_MNT`
-> -	$XFS_IO_PROG -fc "pwrite -S 0x65 0 $avail" ${file}.${i}
-> +	$XFS_IO_PROG -fc "pwrite -S 0x65 0 $avail" ${file}
->  
->  	# Punch out whatever we need
->  	seq 1 $((nr * 4)) | while read f; do
-> -- 
-> 2.1.4
-> 
+diff --git a/common/defrag b/common/defrag
+index 44fc536..7db0cb4 100644
+--- a/common/defrag
++++ b/common/defrag
+@@ -33,7 +33,7 @@ _require_defrag()
+ 	else
+ 		DEFRAG_PROG="$E4DEFRAG_PROG"
+ 	fi
+-	dumpe2fs -h $SCRATCH_DEV 2> /dev/null | grep -wq extent || \
++	dumpe2fs -h $TEST_DEV 2> /dev/null | grep -wq extent || \
+ 		_notrun "file system does not have extents, needed for defrag"
+ 	;;
+     btrfs)
+-- 
+2.5.0
+
