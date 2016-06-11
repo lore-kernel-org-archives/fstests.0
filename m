@@ -1,182 +1,80 @@
-Received: from mx1.redhat.com ([209.132.183.28]:33341 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:40273 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751076AbcFKOjM (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sat, 11 Jun 2016 10:39:12 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 1F20683F45
-	for <fstests@vger.kernel.org>; Sat, 11 Jun 2016 14:39:12 +0000 (UTC)
-Date: Sat, 11 Jun 2016 22:39:09 +0800
+	id S1751180AbcFKP2j (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sat, 11 Jun 2016 11:28:39 -0400
+Date: Sat, 11 Jun 2016 23:28:36 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v3 2/2] xfs/006: new case to test xfs fail_at_unmount
- error handling
-Message-ID: <20160611143909.GV5140@eguan.usersys.redhat.com>
-References: <1464496121-6380-1-git-send-email-zlang@redhat.com>
- <1464496121-6380-2-git-send-email-zlang@redhat.com>
+Subject: Re: [PATCH] generic/208: do not leave pending async ios behind
+ during process exit
+Message-ID: <20160611152836.GW5140@eguan.usersys.redhat.com>
+References: <1463696380-20169-1-git-send-email-tahsin@google.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1464496121-6380-2-git-send-email-zlang@redhat.com>
+In-Reply-To: <1463696380-20169-1-git-send-email-tahsin@google.com>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, sandeen@redhat.com
+To: Tahsin Erdogan <tahsin@google.com>
+Cc: fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, May 29, 2016 at 12:28:41PM +0800, Zorro Lang wrote:
-> XFS bring in a new configuration under /sys/fs/xfs/error, named
-> fail_at_unmount. It's used to stop unmount retrying forever when
-> it hit IO error.
-
-Refering to the kernel commit IDs in commit log would be good for future
-reference.
-
+On Thu, May 19, 2016 at 03:19:40PM -0700, Tahsin Erdogan wrote:
+> An inflight async io could keep the filesystem busy and cause umount
+> -EBUSY errors after process exit. When the async io process is killed
+> forcibly with SIGKILL, it doesn't get a chance to wait for ios to
+> complete.
 > 
-> This case try to unmount an faulty dm device, and to sure unmount
-> won't retry forever if fail_at_unmount=1.
+> With this patch, instead of killing the children processes, we let them
+> exit on their own after the timeout expires.
 > 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> Signed-off-by: Tahsin Erdogan <tahsin@google.com>
 > ---
+>  src/aio-dio-regress/aio-dio-invalidate-failure.c | 89 ++++++++++++++----------
+>  1 file changed, 54 insertions(+), 35 deletions(-)
 > 
-> Hi,
-> 
-> Nothing changed in this V3. Due to I modify [PATCH v3 1/2], so I think
-> if I send this 2/2 patch with 1/2 together, maybe easy to review and
-> merge? :)
-> 
-> Thanks,
-> Zorro
-> 
->  tests/xfs/006     | 81 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/006.out |  2 ++
->  tests/xfs/group   |  1 +
->  3 files changed, 84 insertions(+)
->  create mode 100755 tests/xfs/006
->  create mode 100644 tests/xfs/006.out
-> 
-> diff --git a/tests/xfs/006 b/tests/xfs/006
-> new file mode 100755
-> index 0000000..c134b1c
-> --- /dev/null
-> +++ b/tests/xfs/006
-> @@ -0,0 +1,81 @@
-> +#! /bin/bash
-> +# FS QA Test 006
-> +#
-> +# Test xfs' "fail at unmount" error handling configuration. Stop
-> +# XFS retrying to writeback forever when unmount.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2016 YOUR NAME HERE.  All Rights Reserved.
-                        ^^^^^^^^^^^^^^ Red Hat Inc. :)
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	_dmerror_cleanup
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/dmerror
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_supported_os Linux
-> +_require_dm_target error
-> +_require_scratch
-> +
-> +_scratch_mkfs > $seqres.full 2>&1
-> +_require_fs_sys_fs $SCRATCH_DEV error/fail_at_unmount
-> +
-> +# The device is still a linear device at here
-> +_dmerror_init
-> +_dmerror_mount
-> +
-> +# Enable fail_at_unmount
-> +_set_fs_sys_fs_param $DMERROR_DEV error/fail_at_unmount 1
+> diff --git a/src/aio-dio-regress/aio-dio-invalidate-failure.c b/src/aio-dio-regress/aio-dio-invalidate-failure.c
+> index 24f3e3c..474a83c 100644
+> --- a/src/aio-dio-regress/aio-dio-invalidate-failure.c
+> +++ b/src/aio-dio-regress/aio-dio-invalidate-failure.c
 
-I tested this by setting "fail_at_unmount 0" on 4.7-rc1 kernel, I think
-test should hang at umount time in this case, but test still passed.
-Seems the case didn't test what it supposed to test.
+[snip]
 
-> +
-> +# make some IO at here. If these data still not writeback from
-> +# journal to data, it will hit writeback error after load error
-> +# tabel in next step.
-> +_pwrite_byte 0x61 0 100M $SCRATCH_MNT/file >/dev/null
-> +_dmerror_load_error_table
-> +
-> +# Even above data already all writeback, umount will cause XFS
-> +# try to writeback something to root inode. It still can trigger
-> +# umount fail.
-> +_dmerror_unmount
-> +
-> +echo "Silence is golden"
-> +_dmerror_cleanup
+> @@ -152,38 +181,28 @@ int main(int argc, char **argv)
+>  		exit(0);
+>  	}
+>  
+> -	memset(&sa, 0, sizeof(sa));
+> -	sa.sa_handler = alarm_handler;
+> -	sigemptyset(&sa.sa_mask);
+> -	if (sigaction(SIGALRM, &sa, NULL) == -1)
+> -		fail("sigaction: %d\n", errno);
+>  
+> -	alarm(SECONDS);
+> +	/* Child processes will exit on their own when timeout expires. */
+> +	pid = waitpid(dio_pid, &status, 0);
+> +	printf("dio_pid %d, pid %d, status %#x\n", dio_pid, pid, status);
+>  
+> -	pid = wait(&status);
+> -	if (pid < 0 && errno == EINTR) {
+> -		/* if we timed out then we're done */
+> -		kill(buffered_pid, SIGKILL);
+> -		kill(dio_pid, SIGKILL);
+> +	dio_exit = (pid == dio_pid && WIFEXITED(status)) ?
+> +			WEXITSTATUS(status) : 1;
+>  
+> -		waitpid(buffered_pid, NULL, 0);
+> -		waitpid(dio_pid, NULL, 0);
+> +	pid = waitpid(buffered_pid, &status, 0);
+> +	printf("buffered_pid %d, pid %d, status %#x\n", buffered_pid, pid, status);
 
-It's called in _cleanup, not needed here.
+These two "printf" breaks generic/208
+
+--- tests/generic/208.out       2016-06-02 12:38:40.111000000 +0800
++++ /root/workspace/xfstests/results//ext3_2k/generic/208.out.bad 2016-06-11 23:10:01.578000000 +0800
+@@ -1,2 +1,4 @@
+ QA output created by 208
+ +dio_pid 17541, pid 17541, status 0
+ +buffered_pid 17540, pid 17540, status 0
+  ran for 200 seconds without error, passing
 
 Thanks,
 Eryu
-
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/006.out b/tests/xfs/006.out
-> new file mode 100644
-> index 0000000..675c1b7
-> --- /dev/null
-> +++ b/tests/xfs/006.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 006
-> +Silence is golden
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index f4c6816..39169ea 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -4,6 +4,7 @@
->  004 db auto quick
->  005 auto quick
->  007 auto quota quick
-> +006 auto quick unmount
->  008 rw ioctl auto quick
->  009 rw ioctl auto prealloc quick
->  010 auto quick repair
-> -- 
-> 2.5.5
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
