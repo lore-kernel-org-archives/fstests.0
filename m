@@ -1,331 +1,217 @@
-Received: from mgwym01.jp.fujitsu.com ([211.128.242.40]:28905 "EHLO
-	mgwym01.jp.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933130AbcFMC7d (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 12 Jun 2016 22:59:33 -0400
-Received: from g01jpfmpwkw01.exch.g01.fujitsu.local (g01jpfmpwkw01.exch.g01.fujitsu.local [10.0.193.38])
-	by yt-mxq.gw.nic.fujitsu.com (Postfix) with ESMTP id 95563AC0132
-	for <fstests@vger.kernel.org>; Mon, 13 Jun 2016 11:59:28 +0900 (JST)
-Received: from G01JPEXCHKW18.g01.fujitsu.local (G01JPEXCHKW18.g01.fujitsu.local [10.0.194.57])
-	by g01jpfmpwkw01.exch.g01.fujitsu.local (Postfix) with ESMTP id D7D8A692590
-	for <fstests@vger.kernel.org>; Mon, 13 Jun 2016 11:58:01 +0900 (JST)
-Message-ID: <575E2139.4020808@jp.fujitsu.com>
-Date: Mon, 13 Jun 2016 11:58:01 +0900
-From: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
+Received: from mx1.redhat.com ([209.132.183.28]:42327 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933130AbcFMDEw (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sun, 12 Jun 2016 23:04:52 -0400
+Date: Mon, 13 Jun 2016 11:04:49 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v3] fstests: btrfs: add test for qgroup handle extent
+ de-reference
+Message-ID: <20160613030449.GI5140@eguan.usersys.redhat.com>
+References: <1465783850-13501-1-git-send-email-lufq.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Subject: [PATCH] fstests: add require_command check to killall
-Content-Type: text/plain; charset="iso-2022-jp"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1465783850-13501-1-git-send-email-lufq.fnst@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Some tests use killall command, but killall may not exist.
-We should check whether killall exists or not.
+On Mon, Jun 13, 2016 at 10:10:50AM +0800, Lu Fengqi wrote:
+> Test if qgroup can handle extent de-reference during reallocation.
+> "extent de-reference" means that reducing an extent's reference count
+> or freeing an extent.
+> Although current qgroup can handle it, we still need to prevent any
+> regression which may break current qgroup.
+> 
+> Signed-off-by: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
+> ---
+>  common/rc           |  4 +--
+>  tests/btrfs/028     | 98 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/028.out |  2 ++
+>  tests/btrfs/group   |  1 +
+>  4 files changed, 103 insertions(+), 2 deletions(-)
+>  create mode 100755 tests/btrfs/028
+>  create mode 100644 tests/btrfs/028.out
+> 
+> diff --git a/common/rc b/common/rc
+> index 51092a0..650d198 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3284,9 +3284,9 @@ _btrfs_get_profile_configs()
+>  # stress btrfs by running balance operation in a loop
+>  _btrfs_stress_balance()
+>  {
+> -	local btrfs_mnt=$1
+> +	local options=$@
+>  	while true; do
+> -		$BTRFS_UTIL_PROG balance start $btrfs_mnt
+> +		$BTRFS_UTIL_PROG balance start $options
+>  	done
+>  }
+>  
+> diff --git a/tests/btrfs/028 b/tests/btrfs/028
+> new file mode 100755
+> index 0000000..8cea49a
+> --- /dev/null
+> +++ b/tests/btrfs/028
+> @@ -0,0 +1,98 @@
+> +#! /bin/bash
+> +# FS QA Test 028
+> +#
+> +# Test if qgroup can handle extent de-reference during reallocation.
+> +# "extent de-reference" means that reducing an extent's reference count
+> +# or freeing an extent.
+> +# Although current qgroup can handle it, we still need to prevent any
+> +# regression which may break current qgroup.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016 Fujitsu. All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
+> +
+> +_scratch_mkfs
+> +_scratch_mount
+> +
+> +_run_btrfs_util_prog quota enable $SCRATCH_MNT
+> +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
+> +
+> +# Increase the probability of generating de-refer extent, and decrease
+> +# other.
+> +args=`_scale_fsstress_args -z \
+> +	-f write=10 -f unlink=10 \
+> +	-f creat=10 -f fsync=10 \
+> +	-f fsync=10 -n 100000 -p 2 \
+> +	-d $SCRATCH_MNT/stress_dir`
+> +echo "Run fsstress $args" >>$seqres.full
+> +$FSSTRESS_PROG $args >/dev/null 2>&1 &
+> +fsstress_pid=$!
+> +
+> +echo "Start balance" >>$seqres.full
+> +_btrfs_stress_balance -d $SCRATCH_MNT >/dev/null 2>&1 &
+> +balance_pid=$!
+> +
+> +# 30s is enough to trigger bug
+> +sleep $((30*$TIME_FACTOR))
+> +kill $fsstress_pid $balance_pid
+> +wait
+> +
+> +# kill _btrfs_stress_balance can't end balance, so call btrfs balance cancel
+> +# to cancel running or paused balance.
+> +$BTRFS_UTIL_PROG balance cancel $SCRATCH_MNT &> /dev/null
+> +
+> +_run_btrfs_util_prog filesystem sync $SCRATCH_MNT
+> +
+> +_scratch_unmount
+> +
+> +# generate a qgroup report and look for inconsistent groups
+> +$BTRFS_UTIL_PROG check --qgroup-report $SCRATCH_DEV 2>&1 | \
+> +			grep -q -E "Counts for qgroup.*are different"
+> +if [ $? -ne 0 ]; then
+> +	echo "Silence is golden"
+> +	# success, all done
+> +	status=0
+> +fi
 
-Signed-off-by: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
----
- tests/generic/051 |    5 +++--
- tests/generic/270 |    3 ++-
- tests/generic/310 |    5 +++--
- tests/xfs/011     |    5 +++--
- tests/xfs/013     |    5 +++--
- tests/xfs/051     |    5 +++--
- tests/xfs/070     |    3 ++-
- tests/xfs/079     |    3 ++-
- tests/xfs/141     |    3 ++-
- tests/xfs/167     |    2 +-
- tests/xfs/297     |    3 ++-
- tests/xfs/305     |    3 ++-
- 12 files changed, 28 insertions(+), 17 deletions(-)
+I'm testing with 4.7-rc1 kernel and btrfs-progs v4.4, this test fails,
+which means btrfs check finds inconsistent groups. But according to your
+commit log, current kernel should pass the test. So is the failure
+expected?
 
-diff --git a/tests/generic/051 b/tests/generic/051
-index d620807..b0c3782 100755
---- a/tests/generic/051
-+++ b/tests/generic/051
-@@ -50,6 +50,7 @@ _supported_os Linux
- 
- _require_scratch
- _require_scratch_shutdown
-+_require_command "$KILLALL_PROG" killall
- 
- rm -f $seqres.full
- 
-@@ -64,7 +65,7 @@ load_dir=$SCRATCH_MNT/test
- # let this run for a while
- $FSSTRESS_PROG -n10000000 -p $PROCS -d $load_dir >> $seqres.full 2>&1 &
- sleep $SLEEP_TIME
--killall -q $FSSTRESS_PROG
-+$KILLALL_PROG -q $FSSTRESS_PROG
- wait
- sync
- _scratch_unmount
-@@ -79,7 +80,7 @@ sync
- # now shutdown and unmount
- sleep 5
- $here/src/godown $load_dir
--killall -q $FSSTRESS_PROG
-+$KILLALL_PROG -q $FSSTRESS_PROG
- wait
- 
- # for some reason fsstress processes manage to live on beyond the wait?
-diff --git a/tests/generic/270 b/tests/generic/270
-index e6874c9..f5026ba 100755
---- a/tests/generic/270
-+++ b/tests/generic/270
-@@ -69,7 +69,7 @@ _workout()
- 		sleep $enospc_time
- 	done
- 
--	killall $tmp.fsstress.bin
-+	$KILLALL_PROG $tmp.fsstress.bin
- 	wait $pid
- }
- 
-@@ -79,6 +79,7 @@ _supported_os Linux
- _require_quota
- _require_user
- _require_scratch
-+_require_command "$KILLALL_PROG" killall
- 
- rm -f $seqres.full
- _scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
-diff --git a/tests/generic/310 b/tests/generic/310
-index c0a8645..895481c 100755
---- a/tests/generic/310
-+++ b/tests/generic/310
-@@ -58,6 +58,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
- _supported_fs generic
- _supported_os Linux
- _require_test
-+_require_command "$KILLALL_PROG" killall
- 
- dmesg -c > /dev/null
- 
-@@ -103,7 +104,7 @@ _test_read()
- {
- 	src/t_readdir_1 $SEQ_DIR &
- 	sleep $RUN_TIME
--	killall t_readdir_1
-+	$KILLALL_PROG t_readdir_1
- 	check_kernel_bug
- 	if [ $? -ne 0 ]; then
- 		_fatal "kernel bug detected, check dmesg for more infomation."
-@@ -114,7 +115,7 @@ _test_lseek()
- {
- 	src/t_readdir_2 $SEQ_DIR &
- 	sleep $RUN_TIME
--	killall t_readdir_2
-+	$KILLALL_PROG t_readdir_2
- 	check_kernel_bug
- 	if [ $? -ne 0 ]; then
- 		_fatal "kernel bug detected, check dmesg for more infomation."
-diff --git a/tests/xfs/011 b/tests/xfs/011
-index e84faa5..dde06d7 100755
---- a/tests/xfs/011
-+++ b/tests/xfs/011
-@@ -37,7 +37,7 @@ status=1	# failure is the default!
- 
- _cleanup()
- {
--	killall -9 fsstress 2>/dev/null
-+	$KILLALL_PROG -9 fsstress 2>/dev/null
- 	wait
- 	cd /
- 	_scratch_unmount 2>/dev/null
-@@ -86,6 +86,7 @@ _supported_os Linux
- _require_scratch
- _require_freeze
- _require_xfs_sysfs $(_short_dev $TEST_DEV)/log
-+_require_command "$KILLALL_PROG" killall
- 
- rm -f $seqres.full
- 
-@@ -106,7 +107,7 @@ while [ $iters -gt 0 ]; do
- 	iters=$((iters - 1))
- done
- 
--killall $FSSTRESS_PROG
-+$KILLALL_PROG $FSSTRESS_PROG
- wait
- 
- _scratch_unmount
-diff --git a/tests/xfs/013 b/tests/xfs/013
-index 3a96fea..817558f 100755
---- a/tests/xfs/013
-+++ b/tests/xfs/013
-@@ -40,7 +40,7 @@ status=1	# failure is the default!
- 
- _cleanup()
- {
--	killall -9 fsstress 2>/dev/null
-+	$KILLALL_PROG -9 fsstress 2>/dev/null
- 	wait
- 	cd /
- 	_scratch_unmount 2>/dev/null
-@@ -101,6 +101,7 @@ _supported_os Linux
- _require_scratch
- _require_xfs_mkfs_finobt
- _require_xfs_finobt
-+_require_command "$KILLALL_PROG" killall
- 
- rm -f $seqres.full
- 
-@@ -142,7 +143,7 @@ do
- 	_rand_replace $SCRATCH_MNT/dir$((i+1)) $COUNT
- done
- 
--killall fsstress
-+$KILLALL_PROG fsstress
- wait
- 
- # clean out the competing fsstress allocations, then everything else
-diff --git a/tests/xfs/051 b/tests/xfs/051
-index 3f33635..f38743c 100755
---- a/tests/xfs/051
-+++ b/tests/xfs/051
-@@ -36,7 +36,7 @@ _cleanup()
- {
- 	cd /
- 	rm -f $tmp.*
--	killall -9 $FSSTRESS_PROG > /dev/null 2>&1
-+	$KILLALL_PROG -9 $FSSTRESS_PROG > /dev/null 2>&1
- 	_scratch_unmount > /dev/null 2>&1
- }
- 
-@@ -51,6 +51,7 @@ _supported_os Linux
- _require_scratch
- _require_dm_target flakey
- _require_xfs_sysfs debug/log_recovery_delay
-+_require_command "$KILLALL_PROG" killall
- 
- echo "Silence is golden."
- 
-@@ -62,7 +63,7 @@ _scratch_mount
- $FSSTRESS_PROG -n 9999 -p 2 -w -d $SCRATCH_MNT > /dev/null 2>&1 &
- sleep 5
- src/godown -f $SCRATCH_MNT
--killall -q $FSSTRESS_PROG
-+$KILLALL_PROG -q $FSSTRESS_PROG
- wait
- _scratch_unmount
- 
-diff --git a/tests/xfs/070 b/tests/xfs/070
-index 772e2c1..e3a48b3 100755
---- a/tests/xfs/070
-+++ b/tests/xfs/070
-@@ -46,7 +46,7 @@ _cleanup()
- {
- 	cd /
- 	rm -f $tmp.*
--	killall -9 $XFS_REPAIR_PROG > /dev/null 2>&1
-+	$KILLALL_PROG -9 $XFS_REPAIR_PROG > /dev/null 2>&1
- 	wait > /dev/null 2>&1
- }
- 
-@@ -93,6 +93,7 @@ rm -f $seqres.full
- _supported_fs xfs
- _supported_os Linux
- _require_scratch_nocheck
-+_require_command "$KILLALL_PROG" killall
- 
- _scratch_mkfs | _filter_mkfs > /dev/null 2> $tmp.mkfs || _fail "mkfs failed"
- 
-diff --git a/tests/xfs/079 b/tests/xfs/079
-index 8f06e3a..8ac9d58 100755
---- a/tests/xfs/079
-+++ b/tests/xfs/079
-@@ -42,7 +42,7 @@ _cleanup()
- {
- 	cd /
- 	rm -f $tmp.*
--	killall -9 fsstress > /dev/null 2>&1
-+	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
- 	wait > /dev/null 2>&1
- }
- 
-@@ -59,6 +59,7 @@ _supported_fs xfs
- _supported_os Linux
- _require_scratch
- _require_v2log
-+_require_command "$KILLALL_PROG" killall
- 
- echo "Silence is golden."
- 
-diff --git a/tests/xfs/141 b/tests/xfs/141
-index a70c986..56ff14e 100755
---- a/tests/xfs/141
-+++ b/tests/xfs/141
-@@ -39,7 +39,7 @@ _cleanup()
- {
- 	cd /
- 	rm -f $tmp.*
--	killall -9 fsstress > /dev/null 2>&1
-+	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
- 	wait > /dev/null 2>&1
- }
- 
-@@ -55,6 +55,7 @@ _supported_fs xfs
- _supported_os Linux
- _require_xfs_sysfs $(_short_dev $TEST_DEV)/log/log_badcrc_factor
- _require_scratch
-+_require_command "$KILLALL_PROG" killall
- 
- echo "Silence is golden."
- 
-diff --git a/tests/xfs/167 b/tests/xfs/167
-index e6c65d2..a9f0e61 100755
---- a/tests/xfs/167
-+++ b/tests/xfs/167
-@@ -56,7 +56,7 @@ workout()
- _supported_fs xfs
- _supported_os Linux
- 
--[ -n "$KILLALL_PROG" ] || _notrun "killall executable not found"
-+_require_command "$KILLALL_PROG" killall
- 
- _require_scratch
- _scratch_mkfs_xfs >/dev/null 2>&1
-diff --git a/tests/xfs/297 b/tests/xfs/297
-index 25b597e..fe92441 100755
---- a/tests/xfs/297
-+++ b/tests/xfs/297
-@@ -48,6 +48,7 @@ _supported_os IRIX Linux
- 
- _require_scratch
- _require_freeze
-+_require_command "$KILLALL_PROG" killall
- 
- rm -f $seqres.full
- _scratch_mkfs_xfs -d agcount=16,su=256k,sw=12 -l su=256k,size=5120b >/dev/null 2>&1
-@@ -79,7 +80,7 @@ while [ $LOOP -gt 0 ];do
- 	let LOOP=$LOOP-1
- done
- echo "Test done" | tee -a $seqres.full
--killall -q $FSSTRESS_PROG
-+$KILLALL_PROG -q $FSSTRESS_PROG
- wait
- 
- status=0
-diff --git a/tests/xfs/305 b/tests/xfs/305
-index 15fb1ad..692e990 100755
---- a/tests/xfs/305
-+++ b/tests/xfs/305
-@@ -50,6 +50,7 @@ _require_scratch
- _require_xfs_quota
- _require_xfs_mkfs_crc
- _require_xfs_crc
-+_require_command "$KILLALL_PROG" killall
- 
- rm -f $seqres.full
- _scratch_mkfs_xfs -m crc=1 >/dev/null 2>&1
-@@ -69,7 +70,7 @@ _exercise()
- 	sleep 10
- 	xfs_quota -x -c "off -$type" $SCRATCH_DEV
- 	sleep 5
--	killall -q $FSSTRESS_PROG
-+	$KILLALL_PROG -q $FSSTRESS_PROG
- 	wait
- }
- 
--- 
-1.7.1
+Also, just grep for different qgroup counts and print the message out if
+grep finds the message, so it breaks golden image on error and we know
+something really goes wrong. Right now test fails just because of
+missing "Silence is golden", which is unclear why it fails:
+
+ @@ -1,2 +1 @@
+  QA output created by 028
+ -Silence is golden
+
+Do the following instead:
+
+	$BTRFS_UTIL_PROG check ... | grep -E "..."
+	echo "Silence is golden"
+	status=0
+	exit
+
+And we see this on failure:
+
+ @@ -1,2 +1,3 @@
+  QA output created by 028
+ +Counts for qgroup id: 5 are different
+  Silence is golden
+
+Thanks,
+Eryu
+
+> +
+> +exit
+> diff --git a/tests/btrfs/028.out b/tests/btrfs/028.out
+> new file mode 100644
+> index 0000000..2615f73
+> --- /dev/null
+> +++ b/tests/btrfs/028.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 028
+> +Silence is golden
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index da0e27f..35ecf59 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -30,6 +30,7 @@
+>  025 auto quick send clone
+>  026 auto quick compress prealloc
+>  027 auto replace
+> +028 auto qgroup balance
+>  029 auto quick clone
+>  030 auto quick send
+>  031 auto quick subvol clone
+> -- 
+> 2.5.5
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
