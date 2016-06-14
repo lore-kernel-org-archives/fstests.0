@@ -1,48 +1,53 @@
-Received: from mx1.redhat.com ([209.132.183.28]:45680 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:44605 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751752AbcFNH5V (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 14 Jun 2016 03:57:21 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	id S1751752AbcFNH5X (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 14 Jun 2016 03:57:23 -0400
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id EC6E71174C
-	for <fstests@vger.kernel.org>; Tue, 14 Jun 2016 07:57:20 +0000 (UTC)
+	by mx1.redhat.com (Postfix) with ESMTPS id 0D9583B717
+	for <fstests@vger.kernel.org>; Tue, 14 Jun 2016 07:57:23 +0000 (UTC)
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 1/3] generic: test symlink to very long path
-Date: Tue, 14 Jun 2016 15:53:39 +0800
-Message-Id: <1465890821-4388-1-git-send-email-eguan@redhat.com>
+Subject: [PATCH 2/3] generic: test error handling on filesystem shutdown
+Date: Tue, 14 Jun 2016 15:53:40 +0800
+Message-Id: <1465890821-4388-2-git-send-email-eguan@redhat.com>
+In-Reply-To: <1465890821-4388-1-git-send-email-eguan@redhat.com>
+References: <1465890821-4388-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Test symlink to very long path, so that path could not be hold in inode,
-then check symlink file contains correct path.
+Test XFS EFI/EFD error handling. Though it's an XFS bug, it can ran on
+any filesystem supports shutdown.
 
-There was a bug in CRC XFS, that the path in remote symlink was not
-correct, this issue is fixed by this kernel commit
+This kernel commit fixed a hang on umount in XFS
+8d99fe9 xfs: fix efi/efd error handling to avoid fs shutdown hangs
 
-2ac56d3 xfs: fix remote symlinks on V5/CRC filesystems
+Though this bug is hard to hit, it's still good to have some coverage.
 
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- tests/generic/352     | 63 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/352.out |  2 ++
+ tests/generic/353     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/353.out |  2 ++
  tests/generic/group   |  1 +
- 3 files changed, 66 insertions(+)
- create mode 100755 tests/generic/352
- create mode 100644 tests/generic/352.out
+ 3 files changed, 76 insertions(+)
+ create mode 100755 tests/generic/353
+ create mode 100644 tests/generic/353.out
 
-diff --git a/tests/generic/352 b/tests/generic/352
+diff --git a/tests/generic/353 b/tests/generic/353
 new file mode 100755
-index 0000000..253f09d
+index 0000000..0516d8a
 --- /dev/null
-+++ b/tests/generic/352
-@@ -0,0 +1,63 @@
++++ b/tests/generic/353
+@@ -0,0 +1,73 @@
 +#! /bin/bash
-+# FS QA Test 352
++# FS QA Test 353
 +#
-+# Test symlink to very long path, check symlink file contains correct path.
++# Test XFS EFI/EFD error handling.
++#
++# This kernel commit fixed a hang on umount in XFS
++# 8d99fe9 xfs: fix efi/efd error handling to avoid fs shutdown hangs
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2016 Red Hat Inc.  All Rights Reserved.
@@ -86,39 +91,46 @@ index 0000000..253f09d
 +# real QA test starts here
 +_supported_fs generic
 +_supported_os Linux
-+_require_test
++_require_scratch
++_require_scratch_shutdown
 +
-+linkfile=$TEST_DIR/$seq.symlink
-+rm -f $linkfile
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
 +
-+# Create a symlink points to a very long path, so that the path could not be
-+# hold in inode
-+ln -s `perl -e 'print "a"x1023'` $linkfile
++# fsstress load to generate EFI(extent free intention/EFD(extent free done)
++$FSSTRESS_PROG  -d $SCRATCH_MNT/testdir -n 99999 -p 16 -z -f fallocate=1 \
++		-f punch=1 -f creat=1 -f unlink=1 >>$seqres.full 2>&1 &
++sleep 5
++kill $!
++wait
 +
-+# Check symlink contains the correct path.
-+# 1023 chars are a bit long for golden image output, compute the md5 checksum
-+readlink $linkfile | md5sum
++# shutdown filesystem, handle EFI/EFD in error path
++src/godown -f $SCRATCH_MNT
++
++# don't expect umount to hang. mount it again to do log replay and pass fs check
++_scratch_cycle_mount
 +
 +# success, all done
++echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/generic/352.out b/tests/generic/352.out
+diff --git a/tests/generic/353.out b/tests/generic/353.out
 new file mode 100644
-index 0000000..01c7e87
+index 0000000..16ba4f1
 --- /dev/null
-+++ b/tests/generic/352.out
++++ b/tests/generic/353.out
 @@ -0,0 +1,2 @@
-+QA output created by 352
-+cd3b0a56bc304075e28a20a4edd57068  -
++QA output created by 353
++Silence is golden
 diff --git a/tests/generic/group b/tests/generic/group
-index 36fb759..4b65dcb 100644
+index 4b65dcb..0203afa 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -354,3 +354,4 @@
- 349 blockdev quick rw
+@@ -355,3 +355,4 @@
  350 blockdev quick rw
  351 blockdev quick rw
-+352 auto quick metadata
+ 352 auto quick metadata
++353 auto quick metadata
 -- 
 1.8.3.1
 
