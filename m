@@ -1,59 +1,67 @@
-Received: from mx1.redhat.com ([209.132.183.28]:38962 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:37488 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752287AbcFNLnV (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 14 Jun 2016 07:43:21 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	id S1752083AbcFNLn2 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 14 Jun 2016 07:43:28 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 799447F6B0
-	for <fstests@vger.kernel.org>; Tue, 14 Jun 2016 11:43:21 +0000 (UTC)
-Date: Tue, 14 Jun 2016 07:43:19 -0400
+	by mx1.redhat.com (Postfix) with ESMTPS id 2A66B3F722
+	for <fstests@vger.kernel.org>; Tue, 14 Jun 2016 11:43:28 +0000 (UTC)
+Date: Tue, 14 Jun 2016 07:43:26 -0400
 From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH 1/3] generic: test symlink to very long path
-Message-ID: <20160614114318.GA32443@bfoster.bfoster>
+Subject: Re: [PATCH 2/3] generic: test error handling on filesystem shutdown
+Message-ID: <20160614114326.GB32443@bfoster.bfoster>
 References: <1465890821-4388-1-git-send-email-eguan@redhat.com>
+ <1465890821-4388-2-git-send-email-eguan@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1465890821-4388-1-git-send-email-eguan@redhat.com>
+In-Reply-To: <1465890821-4388-2-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jun 14, 2016 at 03:53:39PM +0800, Eryu Guan wrote:
-> Test symlink to very long path, so that path could not be hold in inode,
-> then check symlink file contains correct path.
+On Tue, Jun 14, 2016 at 03:53:40PM +0800, Eryu Guan wrote:
+> Test XFS EFI/EFD error handling. Though it's an XFS bug, it can ran on
+> any filesystem supports shutdown.
 > 
-> There was a bug in CRC XFS, that the path in remote symlink was not
-> correct, this issue is fixed by this kernel commit
+> This kernel commit fixed a hang on umount in XFS
+> 8d99fe9 xfs: fix efi/efd error handling to avoid fs shutdown hangs
 > 
-> 2ac56d3 xfs: fix remote symlinks on V5/CRC filesystems
+> Though this bug is hard to hit, it's still good to have some coverage.
 > 
 > Signed-off-by: Eryu Guan <eguan@redhat.com>
 > ---
 
-Looks fine to me:
+The test looks fine, though I wonder if we already have other tests that
+might reproduce this problem. On a quick look, generic/051, xfs/079 and
+perhaps one or two others look similar to this test.
 
-Reviewed-by: Brian Foster <bfoster@redhat.com>
+Have you verified that 1.) this test reproduces the original problem and
+2.) that some of these other fsstress+godown tests do not (or are not as
+effective)?
 
->  tests/generic/352     | 63 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/352.out |  2 ++
+>  tests/generic/353     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/353.out |  2 ++
 >  tests/generic/group   |  1 +
->  3 files changed, 66 insertions(+)
->  create mode 100755 tests/generic/352
->  create mode 100644 tests/generic/352.out
+>  3 files changed, 76 insertions(+)
+>  create mode 100755 tests/generic/353
+>  create mode 100644 tests/generic/353.out
 > 
-> diff --git a/tests/generic/352 b/tests/generic/352
+> diff --git a/tests/generic/353 b/tests/generic/353
 > new file mode 100755
-> index 0000000..253f09d
+> index 0000000..0516d8a
 > --- /dev/null
-> +++ b/tests/generic/352
-> @@ -0,0 +1,63 @@
+> +++ b/tests/generic/353
+> @@ -0,0 +1,73 @@
 > +#! /bin/bash
-> +# FS QA Test 352
+> +# FS QA Test 353
 > +#
-> +# Test symlink to very long path, check symlink file contains correct path.
+> +# Test XFS EFI/EFD error handling.
+> +#
+> +# This kernel commit fixed a hang on umount in XFS
+> +# 8d99fe9 xfs: fix efi/efd error handling to avoid fs shutdown hangs
 > +#
 > +#-----------------------------------------------------------------------
 > +# Copyright (c) 2016 Red Hat Inc.  All Rights Reserved.
@@ -97,39 +105,51 @@ Reviewed-by: Brian Foster <bfoster@redhat.com>
 > +# real QA test starts here
 > +_supported_fs generic
 > +_supported_os Linux
-> +_require_test
+> +_require_scratch
+> +_require_scratch_shutdown
 > +
-> +linkfile=$TEST_DIR/$seq.symlink
-> +rm -f $linkfile
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_scratch_mount
 > +
-> +# Create a symlink points to a very long path, so that the path could not be
-> +# hold in inode
-> +ln -s `perl -e 'print "a"x1023'` $linkfile
+> +# fsstress load to generate EFI(extent free intention/EFD(extent free done)
+> +$FSSTRESS_PROG  -d $SCRATCH_MNT/testdir -n 99999 -p 16 -z -f fallocate=1 \
+> +		-f punch=1 -f creat=1 -f unlink=1 >>$seqres.full 2>&1 &
+> +sleep 5
+> +kill $!
+> +wait
 > +
-> +# Check symlink contains the correct path.
-> +# 1023 chars are a bit long for golden image output, compute the md5 checksum
-> +readlink $linkfile | md5sum
+> +# shutdown filesystem, handle EFI/EFD in error path
+> +src/godown -f $SCRATCH_MNT
+> +
+> +# don't expect umount to hang. mount it again to do log replay and pass fs check
+> +_scratch_cycle_mount
 > +
 > +# success, all done
+> +echo "Silence is golden"
 > +status=0
 > +exit
-> diff --git a/tests/generic/352.out b/tests/generic/352.out
+> diff --git a/tests/generic/353.out b/tests/generic/353.out
 > new file mode 100644
-> index 0000000..01c7e87
+> index 0000000..16ba4f1
 > --- /dev/null
-> +++ b/tests/generic/352.out
+> +++ b/tests/generic/353.out
 > @@ -0,0 +1,2 @@
-> +QA output created by 352
-> +cd3b0a56bc304075e28a20a4edd57068  -
+> +QA output created by 353
+> +Silence is golden
 > diff --git a/tests/generic/group b/tests/generic/group
-> index 36fb759..4b65dcb 100644
+> index 4b65dcb..0203afa 100644
 > --- a/tests/generic/group
 > +++ b/tests/generic/group
-> @@ -354,3 +354,4 @@
->  349 blockdev quick rw
+> @@ -355,3 +355,4 @@
 >  350 blockdev quick rw
 >  351 blockdev quick rw
-> +352 auto quick metadata
+>  352 auto quick metadata
+> +353 auto quick metadata
+
+We might want the (v2)log group as well.
+
+Brian
+
 > -- 
 > 1.8.3.1
 > 
