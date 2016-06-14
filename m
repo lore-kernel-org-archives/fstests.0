@@ -1,54 +1,73 @@
-Received: from mx1.redhat.com ([209.132.183.28]:60652 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:39025 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751752AbcFNH5Z (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 14 Jun 2016 03:57:25 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	id S1750820AbcFNIbN (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 14 Jun 2016 04:31:13 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id DF4DE7F097
-	for <fstests@vger.kernel.org>; Tue, 14 Jun 2016 07:57:24 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 3/3] generic: test remount on I/O errors
-Date: Tue, 14 Jun 2016 15:53:41 +0800
-Message-Id: <1465890821-4388-3-git-send-email-eguan@redhat.com>
-In-Reply-To: <1465890821-4388-1-git-send-email-eguan@redhat.com>
-References: <1465890821-4388-1-git-send-email-eguan@redhat.com>
+	by mx1.redhat.com (Postfix) with ESMTPS id 682FF8553B
+	for <fstests@vger.kernel.org>; Tue, 14 Jun 2016 08:31:13 +0000 (UTC)
+From: Jan Tulak <jtulak@redhat.com>
+Subject: [PATCH] xfstests: Add mkfs input validation tests
+Date: Tue, 14 Jun 2016 10:31:08 +0200
+Message-Id: <1465893068-1615-1-git-send-email-jtulak@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+Cc: Jan Tulak <jtulak@redhat.com>, Dave Chinner <dchinner@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-XFS had a bug to hang on remount in this case, this kernel commit fix
-the issue.
+mkfs.xfs does not do a very good job of input validation. This test
+is designed to exercise the input validation and test good/bad
+combinations of options being set. It will not pass on an old
+mkfs.xfs binary - it is designed to be the test case for an input
+validation cleanup (merged in spring/summer 2016).
 
-5cb13dc cancel the setfilesize transation when io error happen
+Signed-off-by: Dave Chinner <dchinner@redhat.com>
+Signed-off-by: Jan Tulak <jtulak@redhat.com>
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- tests/generic/354     | 78 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/354.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 81 insertions(+)
- create mode 100755 tests/generic/354
- create mode 100644 tests/generic/354.out
 
-diff --git a/tests/generic/354 b/tests/generic/354
+CHANGES:
+  * Edited commit message to reflect that the cleanup was already merged.
+  * I added other sections - now it should go through all options and check
+conflicting/mandatory combinations when appropriate. I'm not feeding a garbage
+into every option, because now the parsing should be done consistently and the
+same for all options of the same type. However, it is possible I forgot
+something what should be there - in such case, hit me. :-)
+
+Also, at the moment of submitting this, there are some patches for xfsprogs
+fixing some issues in the mailing list - so expect this to fail with the
+current for-next branch (c5d584c)
+
+Regarding of the number of this test: I used the number as this test was some
+time half baked and I wanted to avoid conflicts with other new tests. So if it
+is an issue, I can submit it with another number, somewhere in the main
+sequence.
+
+Cheers,
+Jan
+---
+ tests/xfs/400-input-validation     | 335 +++++++++++++++++++++++++++++++++++++
+ tests/xfs/400-input-validation.out |   2 +
+ tests/xfs/group                    |   1 +
+ 3 files changed, 338 insertions(+)
+ create mode 100755 tests/xfs/400-input-validation
+ create mode 100644 tests/xfs/400-input-validation.out
+
+diff --git a/tests/xfs/400-input-validation b/tests/xfs/400-input-validation
 new file mode 100755
-index 0000000..4791613
+index 0000000..c52a4b6
 --- /dev/null
-+++ b/tests/generic/354
-@@ -0,0 +1,78 @@
++++ b/tests/xfs/400-input-validation
+@@ -0,0 +1,335 @@
 +#! /bin/bash
-+# FS QA Test 354
++# FS QA Test No. xfs/400
 +#
-+# Test remount on I/O errors.
-+#
-+# XFS had a bug to hang on remount in this case, this kernel commit fix
-+# the issue.
-+# 5cb13dc cancel the setfilesize transation when io error happen
++# mkfs.xfs input validation test. Designed to break mkfs.xfs if it doesn't
++# filter garbage input or invalid option combinations correctly.
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Red Hat Inc.  All Rights Reserved.
++# Copyright (c) 2014 Red Hat, Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -65,74 +84,334 @@ index 0000000..4791613
 +#-----------------------------------------------------------------------
 +#
 +
++
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
 +here=`pwd`
 +tmp=/tmp/$$
-+status=1	# failure is the default!
++status=1        # failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+	$UMOUNT_PROG $fs_mnt
-+	_destroy_loop_device $loop_dev
-+	cd /
-+	rm -f $tmp.*
++    cd /
++    rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
 +
-+rm -f $seqres.full
-+
 +# real QA test starts here
-+_supported_fs generic
++
++# Modify as appropriate.
++_supported_fs xfs
 +_supported_os Linux
 +_require_scratch
 +
-+# create a small filesystem to hold another filesystem image
-+_scratch_mkfs_sized $((512 * 1024 * 1024)) >>$seqres.full 2>&1
-+_scratch_mount
++rm $seqres.full || true
++echo silence is golden
 +
-+# create the sparse fs image and mount point
-+fs_img=$SCRATCH_MNT/fs.img
-+fs_mnt=$SCRATCH_MNT/mnt
-+$XFS_IO_PROG -fc "truncate 1g" $fs_img >>$seqres.full 2>&1
-+mkdir -p $fs_mnt
++# clear out any options to mkfs first. We want to test realtime and external log
++# devices if we can, but we also want to control them ourselves.
++logdev=$SCRATCH_LOGDEV
++rtdev=$SCRATCH_RTDEV
 +
-+# mount loop device and create a larger file to hit I/O errors on loop device
-+loop_dev=$(_create_loop_device $fs_img)
-+_mkfs_dev $loop_dev
-+_mount $loop_dev $fs_mnt
-+$XFS_IO_PROG -fc "pwrite 0 520m" $fs_mnt/testfile >>$seqres.full 2>&1
++MKFS_OPTIONS=
++SCRATCH_LOGDEV=
++SCRATCH_RTDEV=
 +
-+# remount should not hang
-+$MOUNT_PROG -o remount,ro $fs_mnt
++# limit the image size of the filesystem being created to something small
++fssize=$((4 * 1024 * 1024 * 1024))
++logsize=$((4 * 1024 * 1024 * 100))
++fsimg=$TEST_DIR/$seq.img
 +
-+# success, all done
-+echo "Silence is golden"
++do_mkfs_pass()
++{
++        echo >> $seqres.full
++        echo "pass expected $*" >> $seqres.full
++        $MKFS_XFS_PROG -f -N $* >> $seqres.full 2>&1
++        [ $? -ne 0 ] && echo "fail $*"
++}
++
++do_mkfs_fail()
++{
++        echo >> $seqres.full
++        echo "fail expected $*" >> $seqres.full
++        $MKFS_XFS_PROG -f -N $* >> $seqres.full 2>&1
++        [ $? -eq 0 ] && echo "pass $*"
++}
++
++reset_fsimg()
++{
++        rm -f $fsimg
++        $XFS_IO_PROG -f -c "truncate $fssize" $fsimg
++}
++
++reset_fsimg
++
++do_mkfs_pass $SCRATCH_DEV
++
++# basic "should fail" options
++
++# specifying sector sizes in sectors or blocks or garbage
++do_mkfs_fail -s size=2s $SCRATCH_DEV
++do_mkfs_fail -d sectsize=2s $SCRATCH_DEV
++do_mkfs_fail -l sectsize=2s $SCRATCH_DEV
++do_mkfs_fail -s size=2b $SCRATCH_DEV
++do_mkfs_fail -d sectsize=2b $SCRATCH_DEV
++do_mkfs_fail -l sectsize=2b $SCRATCH_DEV
++
++do_mkfs_fail -s size=grot $SCRATCH_DEV
++do_mkfs_fail -s size=2yerk $SCRATCH_DEV
++do_mkfs_fail -d sectsize=blah $SCRATCH_DEV
++do_mkfs_fail -d sectsize=2foo $SCRATCH_DEV
++do_mkfs_fail -l sectsize=nggh $SCRATCH_DEV
++do_mkfs_fail -l sectsize=2nggh $SCRATCH_DEV
++
++# conflicting sector/block sizes
++do_mkfs_fail -s size=512 -d sectsize=1024 $SCRATCH_DEV
++do_mkfs_fail -s size=512 -l sectsize=1024 $SCRATCH_DEV
++do_mkfs_fail -d sectsize=2048 -l sectsize=1024 $SCRATCH_DEV
++
++do_mkfs_fail -b size=512 -s size=1024 $SCRATCH_DEV
++do_mkfs_fail -b size=512 -d sectsize=1024 $SCRATCH_DEV
++do_mkfs_fail -b size=512 -l sectsize=1024 $SCRATCH_DEV
++
++# specifying block sizes in sectors without specifying sector size
++# or in blocks or garbage
++do_mkfs_fail -b size=2s $SCRATCH_DEV
++do_mkfs_fail -b size=2b $SCRATCH_DEV
++do_mkfs_fail -b size=nfi $SCRATCH_DEV
++do_mkfs_fail -b size=4096nfi $SCRATCH_DEV
++do_mkfs_fail -n size=2s $SCRATCH_DEV
++do_mkfs_fail -n size=2b $SCRATCH_DEV
++do_mkfs_fail -n size=nfi $SCRATCH_DEV
++do_mkfs_fail -n size=4096nfi $SCRATCH_DEV
++
++# bad label length
++do_mkfs_fail -L thisiswaytoolong $SCRATCH_DEV
++
++# basic "should pass" data section tests
++do_mkfs_pass $SCRATCH_DEV
++do_mkfs_pass -d name=$SCRATCH_DEV
++do_mkfs_pass -d size=$fssize $SCRATCH_DEV
++do_mkfs_pass -d agcount=32 $SCRATCH_DEV
++do_mkfs_pass -d agsize=32m $SCRATCH_DEV
++do_mkfs_pass -d agsize=32M $SCRATCH_DEV
++do_mkfs_pass -d agsize=1g $SCRATCH_DEV
++do_mkfs_pass -d agsize=$((32 * 1024 * 1024)) $SCRATCH_DEV
++do_mkfs_pass -b size=4096 -d agsize=8192b $SCRATCH_DEV
++do_mkfs_pass -d sectsize=512,agsize=65536s $SCRATCH_DEV
++do_mkfs_pass -s size=512 -d agsize=65536s $SCRATCH_DEV
++do_mkfs_pass -d noalign $SCRATCH_DEV
++do_mkfs_pass -d sunit=0,swidth=0 $SCRATCH_DEV
++do_mkfs_pass -d sunit=8,swidth=8 $SCRATCH_DEV
++do_mkfs_pass -d sunit=8,swidth=64 $SCRATCH_DEV
++do_mkfs_pass -d su=0,sw=0 $SCRATCH_DEV
++do_mkfs_pass -d su=4096,sw=1 $SCRATCH_DEV
++do_mkfs_pass -d su=4k,sw=1 $SCRATCH_DEV
++do_mkfs_pass -d su=4K,sw=8 $SCRATCH_DEV
++do_mkfs_pass -b size=4096 -d su=1b,sw=8 $SCRATCH_DEV
++do_mkfs_pass -d sectsize=512,su=8s,sw=8 $SCRATCH_DEV
++do_mkfs_pass -s size=512 -d su=8s,sw=8 $SCRATCH_DEV
++
++# invalid data section tests
++do_mkfs_fail -d size=${fssize}b $SCRATCH_DEV
++do_mkfs_fail -d size=${fssize}s $SCRATCH_DEV
++do_mkfs_fail -d size=${fssize}yerk $SCRATCH_DEV
++do_mkfs_fail -d agsize=8192b $SCRATCH_DEV
++do_mkfs_fail -d agsize=65536s $SCRATCH_DEV
++do_mkfs_fail -d agsize=32Mbsdfsdo $SCRATCH_DEV
++do_mkfs_fail -d agsize=1GB $SCRATCH_DEV
++do_mkfs_fail -d agcount=1k $SCRATCH_DEV
++do_mkfs_fail -d agcount=6b $SCRATCH_DEV
++do_mkfs_fail -d agcount=32,agsize=32m $SCRATCH_DEV
++do_mkfs_fail -d sunit=0,swidth=64 $SCRATCH_DEV
++do_mkfs_fail -d sunit=64,swidth=0 $SCRATCH_DEV
++do_mkfs_fail -d sunit=64,swidth=64,noalign $SCRATCH_DEV
++do_mkfs_fail -d sunit=64k,swidth=64 $SCRATCH_DEV
++do_mkfs_fail -d sunit=64,swidth=64m $SCRATCH_DEV
++do_mkfs_fail -d su=0,sw=64 $SCRATCH_DEV
++do_mkfs_fail -d su=4096,sw=0 $SCRATCH_DEV
++do_mkfs_fail -d su=4097,sw=1 $SCRATCH_DEV
++do_mkfs_fail -d su=4096,sw=64,noalign $SCRATCH_DEV
++do_mkfs_fail -d su=4096,sw=64s $SCRATCH_DEV
++do_mkfs_fail -d su=4096s,sw=64 $SCRATCH_DEV
++do_mkfs_fail -d su=4096b,sw=64 $SCRATCH_DEV
++do_mkfs_fail -d su=4096garabge,sw=64 $SCRATCH_DEV
++do_mkfs_fail -d su=4096,sw=64,sunit=64,swidth=64 $SCRATCH_DEV
++do_mkfs_fail -d sectsize=10,agsize=65536s $SCRATCH_DEV
++do_mkfs_fail -d sectsize=512s,agsize=65536s $SCRATCH_DEV
++
++reset_fsimg
++
++# file section, should pass
++do_mkfs_pass $fsimg
++do_mkfs_pass -d file=0 $SCRATCH_DEV
++do_mkfs_pass -d size=$fssize,file=1,name=$fsimg
++do_mkfs_pass -d size=$fssize,file $fsimg
++do_mkfs_pass -d size=$fssize $fsimg
++do_mkfs_pass -d size=$fssize,name=$fsimg
++do_mkfs_pass -d size=$((fssize/2)) $fsimg
++# again this one, to check that we didn't truncated the file
++do_mkfs_pass -d size=$fssize $fsimg
++rm -f $fsimg
++do_mkfs_pass -d file,size=$fssize $fsimg
++
++reset_fsimg
++
++# file section, should fail
++do_mkfs_fail -d file=1 $SCRATCH_DEV
++do_mkfs_fail -d file $fsimg # no size given
++rm -f $fsimg
++do_mkfs_fail $fsimg
++do_mkfs_fail -d size=$fssize $fsimg
++
++reset_fsimg
++
++# log section, should pass
++do_mkfs_pass -l size=$logsize -d size=$fssize $SCRATCH_DEV
++do_mkfs_pass -l agnum=2 $SCRATCH_DEV
++do_mkfs_pass -l size=4096b $SCRATCH_DEV
++do_mkfs_pass -l sectsize=512 $SCRATCH_DEV
++do_mkfs_pass -l sunit=64 $SCRATCH_DEV
++do_mkfs_pass -l sunit=64 -d sunit=8,swidth=8 $SCRATCH_DEV
++do_mkfs_pass -l sunit=8 $SCRATCH_DEV
++do_mkfs_pass -l su=$((4096*10)) $SCRATCH_DEV
++do_mkfs_pass -b size=4096 -l su=10b $SCRATCH_DEV
++do_mkfs_pass -l sectsize=512,su=$((4096*10)) $SCRATCH_DEV
++do_mkfs_pass -l internal $SCRATCH_DEV
++$XFS_IO_PROG -f -c "truncate $logsize" $fsimg
++do_mkfs_pass -l logdev=$fsimg $SCRATCH_DEV
++do_mkfs_pass -l name=$fsimg $SCRATCH_DEV
++do_mkfs_pass -l lazy-count=0 -m crc=0 $SCRATCH_DEV
++do_mkfs_pass -l lazy-count=1 -m crc=0 $SCRATCH_DEV
++do_mkfs_pass -l version=1 -m crc=0 $SCRATCH_DEV
++do_mkfs_pass -l version=2 -m crc=0 $SCRATCH_DEV
++do_mkfs_pass -l version=2 $SCRATCH_DEV
++
++# log section, should fail
++do_mkfs_fail -l size=${fssize}b $SCRATCH_DEV
++do_mkfs_fail -l size=${fssize}s $SCRATCH_DEV
++do_mkfs_fail -l size=${fssize}yerk $SCRATCH_DEV
++do_mkfs_fail -l agnum=1k $SCRATCH_DEV
++do_mkfs_fail -l agnum=6b $SCRATCH_DEV
++do_mkfs_fail -l agnum=32 $SCRATCH_DEV
++do_mkfs_fail -l sunit=0  $SCRATCH_DEV
++do_mkfs_fail -l sunit=63 $SCRATCH_DEV
++do_mkfs_fail -l su=1 $SCRATCH_DEV
++do_mkfs_fail -l su=10b $SCRATCH_DEV
++do_mkfs_fail -l su=10s $SCRATCH_DEV
++do_mkfs_fail -l su=$((4096*10+1)) $SCRATCH_DEV
++do_mkfs_fail -l sectsize=10,agsize=65536s $SCRATCH_DEV
++do_mkfs_fail -l sectsize=512s,agsize=65536s $SCRATCH_DEV
++do_mkfs_fail -l internal=0 $SCRATCH_DEV
++reset_fsimg
++do_mkfs_fail -l internal=1,logdev=$fsimg $SCRATCH_DEV
++do_mkfs_fail -l lazy-count=1garbage $SCRATCH_DEV
++do_mkfs_fail -l lazy-count=2 $SCRATCH_DEV
++do_mkfs_fail -l lazy-count=0 -m crc=1 $SCRATCH_DEV
++do_mkfs_fail -l version=1 -m crc=1 $SCRATCH_DEV
++do_mkfs_fail -l version=0  $SCRATCH_DEV
++
++
++
++# naming section, should pass
++do_mkfs_pass -n size=65536 $SCRATCH_DEV
++do_mkfs_pass -n log=15 $SCRATCH_DEV
++do_mkfs_pass -n version=2 $SCRATCH_DEV
++do_mkfs_pass -n version=ci $SCRATCH_DEV
++do_mkfs_pass -n ftype=0 -m crc=0 $SCRATCH_DEV
++do_mkfs_pass -n ftype=1 $SCRATCH_DEV
++
++# naming section, should fail
++do_mkfs_fail -n version=1 $SCRATCH_DEV
++do_mkfs_fail -n version=cid $SCRATCH_DEV
++do_mkfs_fail -n ftype=4 $SCRATCH_DEV
++do_mkfs_fail -n ftype=0 $SCRATCH_DEV
++
++reset_fsimg
++
++# metadata section, should pass
++do_mkfs_pass -m crc=1,finobt=1 $SCRATCH_DEV
++do_mkfs_pass -m crc=1,finobt=0 $SCRATCH_DEV
++do_mkfs_pass -m crc=0,finobt=0 $SCRATCH_DEV
++do_mkfs_pass -m crc=1 -n ftype=1 $SCRATCH_DEV
++do_mkfs_pass -m crc=0 -n ftype=1 $SCRATCH_DEV
++do_mkfs_pass -m crc=0 -n ftype=0 $SCRATCH_DEV
++
++# metadata section, should fail
++do_mkfs_fail -m crc=0,finobt=1 $SCRATCH_DEV
++do_mkfs_fail -m crc=1 -n ftype=0 $SCRATCH_DEV
++
++
++# realtime section, should pass
++do_mkfs_pass -r rtdev=$fsimg $SCRATCH_DEV
++do_mkfs_pass -r extsize=4k $SCRATCH_DEV
++do_mkfs_pass -r extsize=1G $SCRATCH_DEV
++do_mkfs_pass -r size=65536,rtdev=$fsimg $SCRATCH_DEV
++do_mkfs_pass -r noalign $SCRATCH_DEV
++
++
++# realtime section, should fail
++do_mkfs_fail -r rtdev=$SCRATCH_DEV
++do_mkfs_fail -r extsize=256 $SCRATCH_DEV
++do_mkfs_fail -r extsize=2G $SCRATCH_DEV
++do_mkfs_fail -r size=65536 $SCRATCH_DEV
++
++
++
++# inode section, should pass
++do_mkfs_pass -i size=256 -m crc=0 $SCRATCH_DEV
++do_mkfs_pass -i size=512 $SCRATCH_DEV
++do_mkfs_pass -i size=2048 $SCRATCH_DEV
++do_mkfs_pass -i log=10 $SCRATCH_DEV
++do_mkfs_pass -i perblock=2 $SCRATCH_DEV
++do_mkfs_pass -i maxpct=10 $SCRATCH_DEV
++do_mkfs_pass -i maxpct=100 $SCRATCH_DEV
++do_mkfs_pass -i maxpct=0 $SCRATCH_DEV
++do_mkfs_pass -i align=0 -m crc=0 $SCRATCH_DEV
++do_mkfs_pass -i align=1 -m crc=1 $SCRATCH_DEV
++do_mkfs_pass -i attr=1 -m crc=0 $SCRATCH_DEV
++do_mkfs_pass -i attr=2 $SCRATCH_DEV
++do_mkfs_pass -i projid32bit $SCRATCH_DEV
++do_mkfs_pass -i sparse=0 $SCRATCH_DEV
++do_mkfs_pass -i sparse -m crc $SCRATCH_DEV
++
++
++# inode section, should fail
++do_mkfs_fail -i size=256 -m crc $SCRATCH_DEV
++do_mkfs_fail -i size=128 $SCRATCH_DEV
++do_mkfs_fail -i size=513 $SCRATCH_DEV
++do_mkfs_fail -i size=4096 $SCRATCH_DEV
++do_mkfs_fail -i maxpct=110 $SCRATCH_DEV
++do_mkfs_fail -i align=2 $SCRATCH_DEV
++do_mkfs_fail -i sparse -m crc=0 $SCRATCH_DEV
++do_mkfs_fail -i align=0 -m crc=1 $SCRATCH_DEV
++do_mkfs_fail -i attr=1 -m crc=1 $SCRATCH_DEV
++
 +status=0
 +exit
-diff --git a/tests/generic/354.out b/tests/generic/354.out
+diff --git a/tests/xfs/400-input-validation.out b/tests/xfs/400-input-validation.out
 new file mode 100644
-index 0000000..8bc7ecf
+index 0000000..7080553
 --- /dev/null
-+++ b/tests/generic/354.out
++++ b/tests/xfs/400-input-validation.out
 @@ -0,0 +1,2 @@
-+QA output created by 354
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 0203afa..d33dd69 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -356,3 +356,4 @@
- 351 blockdev quick rw
- 352 auto quick metadata
- 353 auto quick metadata
-+354 auto quick
++QA output created by 400-input-validation
++silence is golden
+diff --git a/tests/xfs/group b/tests/xfs/group
+index f4c6816..b51ef2e 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -285,3 +285,4 @@
+ 303 auto quick quota
+ 304 auto quick quota
+ 305 auto quota
++400-input-validation auto quick mkfs
 -- 
-1.8.3.1
+2.5.5
 
