@@ -1,16 +1,16 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44605 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:60652 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751752AbcFNH5X (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 14 Jun 2016 03:57:23 -0400
+	id S1751752AbcFNH5Z (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 14 Jun 2016 03:57:25 -0400
 Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 0D9583B717
-	for <fstests@vger.kernel.org>; Tue, 14 Jun 2016 07:57:23 +0000 (UTC)
+	by mx1.redhat.com (Postfix) with ESMTPS id DF4DE7F097
+	for <fstests@vger.kernel.org>; Tue, 14 Jun 2016 07:57:24 +0000 (UTC)
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 2/3] generic: test error handling on filesystem shutdown
-Date: Tue, 14 Jun 2016 15:53:40 +0800
-Message-Id: <1465890821-4388-2-git-send-email-eguan@redhat.com>
+Subject: [PATCH 3/3] generic: test remount on I/O errors
+Date: Tue, 14 Jun 2016 15:53:41 +0800
+Message-Id: <1465890821-4388-3-git-send-email-eguan@redhat.com>
 In-Reply-To: <1465890821-4388-1-git-send-email-eguan@redhat.com>
 References: <1465890821-4388-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -18,36 +18,34 @@ To: fstests@vger.kernel.org
 Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Test XFS EFI/EFD error handling. Though it's an XFS bug, it can ran on
-any filesystem supports shutdown.
+XFS had a bug to hang on remount in this case, this kernel commit fix
+the issue.
 
-This kernel commit fixed a hang on umount in XFS
-8d99fe9 xfs: fix efi/efd error handling to avoid fs shutdown hangs
-
-Though this bug is hard to hit, it's still good to have some coverage.
+5cb13dc cancel the setfilesize transation when io error happen
 
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- tests/generic/353     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/353.out |  2 ++
+ tests/generic/354     | 78 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/354.out |  2 ++
  tests/generic/group   |  1 +
- 3 files changed, 76 insertions(+)
- create mode 100755 tests/generic/353
- create mode 100644 tests/generic/353.out
+ 3 files changed, 81 insertions(+)
+ create mode 100755 tests/generic/354
+ create mode 100644 tests/generic/354.out
 
-diff --git a/tests/generic/353 b/tests/generic/353
+diff --git a/tests/generic/354 b/tests/generic/354
 new file mode 100755
-index 0000000..0516d8a
+index 0000000..4791613
 --- /dev/null
-+++ b/tests/generic/353
-@@ -0,0 +1,73 @@
++++ b/tests/generic/354
+@@ -0,0 +1,78 @@
 +#! /bin/bash
-+# FS QA Test 353
++# FS QA Test 354
 +#
-+# Test XFS EFI/EFD error handling.
++# Test remount on I/O errors.
 +#
-+# This kernel commit fixed a hang on umount in XFS
-+# 8d99fe9 xfs: fix efi/efd error handling to avoid fs shutdown hangs
++# XFS had a bug to hang on remount in this case, this kernel commit fix
++# the issue.
++# 5cb13dc cancel the setfilesize transation when io error happen
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2016 Red Hat Inc.  All Rights Reserved.
@@ -78,6 +76,8 @@ index 0000000..0516d8a
 +
 +_cleanup()
 +{
++	$UMOUNT_PROG $fs_mnt
++	_destroy_loop_device $loop_dev
 +	cd /
 +	rm -f $tmp.*
 +}
@@ -92,45 +92,47 @@ index 0000000..0516d8a
 +_supported_fs generic
 +_supported_os Linux
 +_require_scratch
-+_require_scratch_shutdown
 +
-+_scratch_mkfs >>$seqres.full 2>&1
++# create a small filesystem to hold another filesystem image
++_scratch_mkfs_sized $((512 * 1024 * 1024)) >>$seqres.full 2>&1
 +_scratch_mount
 +
-+# fsstress load to generate EFI(extent free intention/EFD(extent free done)
-+$FSSTRESS_PROG  -d $SCRATCH_MNT/testdir -n 99999 -p 16 -z -f fallocate=1 \
-+		-f punch=1 -f creat=1 -f unlink=1 >>$seqres.full 2>&1 &
-+sleep 5
-+kill $!
-+wait
++# create the sparse fs image and mount point
++fs_img=$SCRATCH_MNT/fs.img
++fs_mnt=$SCRATCH_MNT/mnt
++$XFS_IO_PROG -fc "truncate 1g" $fs_img >>$seqres.full 2>&1
++mkdir -p $fs_mnt
 +
-+# shutdown filesystem, handle EFI/EFD in error path
-+src/godown -f $SCRATCH_MNT
++# mount loop device and create a larger file to hit I/O errors on loop device
++loop_dev=$(_create_loop_device $fs_img)
++_mkfs_dev $loop_dev
++_mount $loop_dev $fs_mnt
++$XFS_IO_PROG -fc "pwrite 0 520m" $fs_mnt/testfile >>$seqres.full 2>&1
 +
-+# don't expect umount to hang. mount it again to do log replay and pass fs check
-+_scratch_cycle_mount
++# remount should not hang
++$MOUNT_PROG -o remount,ro $fs_mnt
 +
 +# success, all done
 +echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/generic/353.out b/tests/generic/353.out
+diff --git a/tests/generic/354.out b/tests/generic/354.out
 new file mode 100644
-index 0000000..16ba4f1
+index 0000000..8bc7ecf
 --- /dev/null
-+++ b/tests/generic/353.out
++++ b/tests/generic/354.out
 @@ -0,0 +1,2 @@
-+QA output created by 353
++QA output created by 354
 +Silence is golden
 diff --git a/tests/generic/group b/tests/generic/group
-index 4b65dcb..0203afa 100644
+index 0203afa..d33dd69 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -355,3 +355,4 @@
- 350 blockdev quick rw
+@@ -356,3 +356,4 @@
  351 blockdev quick rw
  352 auto quick metadata
-+353 auto quick metadata
+ 353 auto quick metadata
++354 auto quick
 -- 
 1.8.3.1
 
