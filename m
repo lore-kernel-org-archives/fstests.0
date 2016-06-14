@@ -1,417 +1,382 @@
-Received: from mx1.redhat.com ([209.132.183.28]:39025 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750820AbcFNIbN (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 14 Jun 2016 04:31:13 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 682FF8553B
-	for <fstests@vger.kernel.org>; Tue, 14 Jun 2016 08:31:13 +0000 (UTC)
-From: Jan Tulak <jtulak@redhat.com>
-Subject: [PATCH] xfstests: Add mkfs input validation tests
-Date: Tue, 14 Jun 2016 10:31:08 +0200
-Message-Id: <1465893068-1615-1-git-send-email-jtulak@redhat.com>
+Received: from mail-io0-f182.google.com ([209.85.223.182]:32983 "EHLO
+	mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750985AbcFNIlh (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 14 Jun 2016 04:41:37 -0400
+MIME-Version: 1.0
+Reply-To: fdmanana@gmail.com
+In-Reply-To: <b27737d1-fe46-a33c-c7e7-433dd5ad2cdb@cn.fujitsu.com>
+References: <1465783850-13501-1-git-send-email-lufq.fnst@cn.fujitsu.com>
+ <20160613030449.GI5140@eguan.usersys.redhat.com> <196ba573-3f1b-753b-42ad-988054283fe6@cn.fujitsu.com>
+ <57a95603-0abf-583b-9c73-43fe4f3f97a7@cn.fujitsu.com> <CAL3q7H4THn_ErZUxzSo+nSjcxbMBmcA4c45bsmjKHH_Bj4rOxQ@mail.gmail.com>
+ <b27737d1-fe46-a33c-c7e7-433dd5ad2cdb@cn.fujitsu.com>
+From: Filipe Manana <fdmanana@gmail.com>
+Date: Tue, 14 Jun 2016 09:41:35 +0100
+Message-ID: <CAL3q7H5BL5pt9k9J088D0_5gH6rNRVNU1oOaKruaWnuKvJOWAg@mail.gmail.com>
+Subject: Re: [PATCH v3] fstests: btrfs: add test for qgroup handle extent de-reference
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Jan Tulak <jtulak@redhat.com>, Dave Chinner <dchinner@redhat.com>
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: Lu Fengqi <lufq.fnst@cn.fujitsu.com>, Eryu Guan <eguan@redhat.com>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org, Mark Fasheh <mfasheh@suse.de>
 List-ID: <fstests@vger.kernel.org>
 
-mkfs.xfs does not do a very good job of input validation. This test
-is designed to exercise the input validation and test good/bad
-combinations of options being set. It will not pass on an old
-mkfs.xfs binary - it is designed to be the test case for an input
-validation cleanup (merged in spring/summer 2016).
+On Tue, Jun 14, 2016 at 1:58 AM, Qu Wenruo <quwenruo@cn.fujitsu.com> wrote:
+>
+>
+> At 06/13/2016 05:49 PM, Filipe Manana wrote:
+>>
+>> On Mon, Jun 13, 2016 at 9:06 AM, Lu Fengqi <lufq.fnst@cn.fujitsu.com>
+>> wrote:
+>>>
+>>> At 06/13/2016 03:29 PM, Lu Fengqi wrote:
+>>>>
+>>>>
+>>>> At 06/13/2016 11:04 AM, Eryu Guan wrote:
+>>>>>
+>>>>>
+>>>>> On Mon, Jun 13, 2016 at 10:10:50AM +0800, Lu Fengqi wrote:
+>>>>>>
+>>>>>>
+>>>>>> Test if qgroup can handle extent de-reference during reallocation.
+>>>>>> "extent de-reference" means that reducing an extent's reference count
+>>>>>> or freeing an extent.
+>>>>>> Although current qgroup can handle it, we still need to prevent any
+>>>>>> regression which may break current qgroup.
+>>>>>>
+>>>>>> Signed-off-by: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
+>>>>>> ---
+>>>>>>  common/rc           |  4 +--
+>>>>>>  tests/btrfs/028     | 98
+>>>>>> +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>>>>>>  tests/btrfs/028.out |  2 ++
+>>>>>>  tests/btrfs/group   |  1 +
+>>>>>>  4 files changed, 103 insertions(+), 2 deletions(-)
+>>>>>>  create mode 100755 tests/btrfs/028
+>>>>>>  create mode 100644 tests/btrfs/028.out
+>>>>>>
+>>>>>> diff --git a/common/rc b/common/rc
+>>>>>> index 51092a0..650d198 100644
+>>>>>> --- a/common/rc
+>>>>>> +++ b/common/rc
+>>>>>> @@ -3284,9 +3284,9 @@ _btrfs_get_profile_configs()
+>>>>>>  # stress btrfs by running balance operation in a loop
+>>>>>>  _btrfs_stress_balance()
+>>>>>>  {
+>>>>>> -    local btrfs_mnt=$1
+>>>>>> +    local options=$@
+>>>>>>      while true; do
+>>>>>> -        $BTRFS_UTIL_PROG balance start $btrfs_mnt
+>>>>>> +        $BTRFS_UTIL_PROG balance start $options
+>>>>>>      done
+>>>>>>  }
+>>>>>>
+>>>>>> diff --git a/tests/btrfs/028 b/tests/btrfs/028
+>>>>>> new file mode 100755
+>>>>>> index 0000000..8cea49a
+>>>>>> --- /dev/null
+>>>>>> +++ b/tests/btrfs/028
+>>>>>> @@ -0,0 +1,98 @@
+>>>>>> +#! /bin/bash
+>>>>>> +# FS QA Test 028
+>>>>>> +#
+>>>>>> +# Test if qgroup can handle extent de-reference during reallocation.
+>>>>>> +# "extent de-reference" means that reducing an extent's reference
+>>>>>> count
+>>>>>> +# or freeing an extent.
+>>>>>> +# Although current qgroup can handle it, we still need to prevent any
+>>>>>> +# regression which may break current qgroup.
+>>>>>> +#
+>>>>>>
+>>>>>>
+>>>>>> +#-----------------------------------------------------------------------
+>>>>>>
+>>>>>> +# Copyright (c) 2016 Fujitsu. All Rights Reserved.
+>>>>>> +#
+>>>>>> +# This program is free software; you can redistribute it and/or
+>>>>>> +# modify it under the terms of the GNU General Public License as
+>>>>>> +# published by the Free Software Foundation.
+>>>>>> +#
+>>>>>> +# This program is distributed in the hope that it would be useful,
+>>>>>> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+>>>>>> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>>>>>> +# GNU General Public License for more details.
+>>>>>> +#
+>>>>>> +# You should have received a copy of the GNU General Public License
+>>>>>> +# along with this program; if not, write the Free Software
+>>>>>> Foundation,
+>>>>>> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+>>>>>>
+>>>>>>
+>>>>>> +#-----------------------------------------------------------------------
+>>>>>>
+>>>>>> +#
+>>>>>> +
+>>>>>> +seq=`basename $0`
+>>>>>> +seqres=$RESULT_DIR/$seq
+>>>>>> +echo "QA output created by $seq"
+>>>>>> +
+>>>>>> +here=`pwd`
+>>>>>> +tmp=/tmp/$$
+>>>>>> +status=1    # failure is the default!
+>>>>>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>>>>>> +
+>>>>>> +_cleanup()
+>>>>>> +{
+>>>>>> +    cd /
+>>>>>> +    rm -f $tmp.*
+>>>>>> +}
+>>>>>> +
+>>>>>> +# get standard environment, filters and checks
+>>>>>> +. ./common/rc
+>>>>>> +. ./common/filter
+>>>>>> +
+>>>>>> +# remove previous $seqres.full before test
+>>>>>> +rm -f $seqres.full
+>>>>>> +
+>>>>>> +# real QA test starts here
+>>>>>> +_supported_fs btrfs
+>>>>>> +_supported_os Linux
+>>>>>> +_require_scratch
+>>>>>> +
+>>>>>> +_scratch_mkfs
+>>>>>> +_scratch_mount
+>>>>>> +
+>>>>>> +_run_btrfs_util_prog quota enable $SCRATCH_MNT
+>>>>>> +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
+>>>>>> +
+>>>>>> +# Increase the probability of generating de-refer extent, and
+>>>>>> decrease
+>>>>>> +# other.
+>>>>>> +args=`_scale_fsstress_args -z \
+>>>>>> +    -f write=10 -f unlink=10 \
+>>>>>> +    -f creat=10 -f fsync=10 \
+>>>>>> +    -f fsync=10 -n 100000 -p 2 \
+>>>>>> +    -d $SCRATCH_MNT/stress_dir`
+>>>>>> +echo "Run fsstress $args" >>$seqres.full
+>>>>>> +$FSSTRESS_PROG $args >/dev/null 2>&1 &
+>>>>>> +fsstress_pid=$!
+>>>>>> +
+>>>>>> +echo "Start balance" >>$seqres.full
+>>>>>> +_btrfs_stress_balance -d $SCRATCH_MNT >/dev/null 2>&1 &
+>>>>>> +balance_pid=$!
+>>>>>> +
+>>>>>> +# 30s is enough to trigger bug
+>>>>>> +sleep $((30*$TIME_FACTOR))
+>>>>>> +kill $fsstress_pid $balance_pid
+>>>>>> +wait
+>>>>>> +
+>>>>>> +# kill _btrfs_stress_balance can't end balance, so call btrfs
+>>>>>> balance cancel
+>>>>>> +# to cancel running or paused balance.
+>>>>>> +$BTRFS_UTIL_PROG balance cancel $SCRATCH_MNT &> /dev/null
+>>>>>> +
+>>>>>> +_run_btrfs_util_prog filesystem sync $SCRATCH_MNT
+>>>>>> +
+>>>>>> +_scratch_unmount
+>>>>>> +
+>>>>>> +# generate a qgroup report and look for inconsistent groups
+>>>>>> +$BTRFS_UTIL_PROG check --qgroup-report $SCRATCH_DEV 2>&1 | \
+>>>>>> +            grep -q -E "Counts for qgroup.*are different"
+>>>>>> +if [ $? -ne 0 ]; then
+>>>>>> +    echo "Silence is golden"
+>>>>>> +    # success, all done
+>>>>>> +    status=0
+>>>>>> +fi
+>>>>>
+>>>>>
+>>>>>
+>>>>> I'm testing with 4.7-rc1 kernel and btrfs-progs v4.4, this test fails,
+>>>>> which means btrfs check finds inconsistent groups. But according to
+>>>>> your
+>>>>> commit log, current kernel should pass the test. So is the failure
+>>>>> expected?
+>>>>>
+>>>>> Also, just grep for different qgroup counts and print the message out
+>>>>> if
+>>>>> grep finds the message, so it breaks golden image on error and we know
+>>>>> something really goes wrong. Right now test fails just because of
+>>>>> missing "Silence is golden", which is unclear why it fails:
+>>>>>
+>>>>>  @@ -1,2 +1 @@
+>>>>>   QA output created by 028
+>>>>>  -Silence is golden
+>>>>>
+>>>>> Do the following instead:
+>>>>>
+>>>>>     $BTRFS_UTIL_PROG check ... | grep -E "..."
+>>>>>     echo "Silence is golden"
+>>>>>     status=0
+>>>>>     exit
+>>>>>
+>>>>> And we see this on failure:
+>>>>>
+>>>>>  @@ -1,2 +1,3 @@
+>>>>>   QA output created by 028
+>>>>>  +Counts for qgroup id: 5 are different
+>>>>>   Silence is golden
+>>>>>
+>>>>> Thanks,
+>>>>> Eryu
+>>>>>
+>>>>>> +
+>>>>>> +exit
+>>>>>> diff --git a/tests/btrfs/028.out b/tests/btrfs/028.out
+>>>>>> new file mode 100644
+>>>>>> index 0000000..2615f73
+>>>>>> --- /dev/null
+>>>>>> +++ b/tests/btrfs/028.out
+>>>>>> @@ -0,0 +1,2 @@
+>>>>>> +QA output created by 028
+>>>>>> +Silence is golden
+>>>>>> diff --git a/tests/btrfs/group b/tests/btrfs/group
+>>>>>> index da0e27f..35ecf59 100644
+>>>>>> --- a/tests/btrfs/group
+>>>>>> +++ b/tests/btrfs/group
+>>>>>> @@ -30,6 +30,7 @@
+>>>>>>  025 auto quick send clone
+>>>>>>  026 auto quick compress prealloc
+>>>>>>  027 auto replace
+>>>>>> +028 auto qgroup balance
+>>>>>>  029 auto quick clone
+>>>>>>  030 auto quick send
+>>>>>>  031 auto quick subvol clone
+>>>>>> --
+>>>>>> 2.5.5
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>> --
+>>>>>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>
+>>>>>
+>>>>>
+>>>>>
+>>>>
+>>>> Excuse me, I tried several versions of the kernel (4.6-rc7+ / 4.7-rc1 /
+>>>> 4.7-rc3), the test didn't fail. Can you provide me with more information
+>>>> about your test environment?
+>>>>
+>>>>
+>>> Sorry, this test fails after I perform it more times. It seems to be a
+>>> bug
+>>> of btrfs qgroup. We will continue to track this bug.
+>>
+>>
+>> Which is already known and reported some time ago:
+>>
+>> http://thread.gmane.org/gmane.comp.file-systems.btrfs/56687/focus=56824
+>>
+>> It's another regression introduced in kernel 4.2 with the large
+>> qgroups rewrite (data extents are not accounted anymore after
+>> balance).
+>> It's trivial to reproduce with:
+>>
+>>
+>> #!/bin/bash -x
+>>
+>> MNT="/mnt/sdi"
+>> DEV="/dev/sdi"
+>>
+>> mkfs.btrfs --nodesize=4096 -f $DEV
+>> mount -t btrfs $DEV $MNT
+>>
+>> # fill metadata space, create a tree with 1 node and 2 leaves
+>> for ((i = 1; i <= 10; i++)); do
+>>         mkdir $MNT/d$i
+>> done
+>> for ((i = 1; i <= 1; i++)); do
+>>         xfs_io -f -c "pwrite -S 0xaa 0 8K" $MNT/f$i
+>> done
+>>
+>> btrfs fi sync $MNT
+>> btrfs quota enable $MNT
+>> btrfs quota rescan -w $MNT
+>> btrfs qg show $MNT
+>>
+>> umount $MNT
+>> btrfsck $DEV
+>>
+>> mount -t btrfs $DEV $MNT
+>>
+>> time btrfs balance start -d $MNT
+>>
+>> umount $MNT
+>> btrfsck $DEV
+>
+> Yes, we also found this internally.
+>
+> And the direct cause is already located.
+>
+> The direct cause is, we're increasing new data extents' reference even the
+> referencer(fs tree) is still referring to old extents.
+>
+> If using ftrace to trace add/run_delayed_data_ref() and
+> qgroup_account_extent(), one should find that, new data extents' reference
+> is increased with both data reloc tree and final referencer.(fs tree in the
+> test script).
+>
+> In that timing, backref walk can't find any root referring the new data
+> extents.
+> The data reloc tree is the current referencer, but qgroup won't account data
+> reloc tree.
+> While new data extents have fs tree backref, fs tree still refers to the old
+> extent. So backref walk won't count it either.
+>
+> And the commit_trans before we really merges reloc roots makes the
+> accounting wrong.
+>
+> So it seems to be an existing problem before the qgroup rework.
 
-Signed-off-by: Dave Chinner <dchinner@redhat.com>
-Signed-off-by: Jan Tulak <jtulak@redhat.com>
+How can it be an existing problem before the qgroup rework if this
+example (and others more complex involving snapshots and a large
+number of data extents) worked on 4.1 and previous kernels?
 
----
 
-CHANGES:
-  * Edited commit message to reflect that the cleanup was already merged.
-  * I added other sections - now it should go through all options and check
-conflicting/mandatory combinations when appropriate. I'm not feeding a garbage
-into every option, because now the parsing should be done consistently and the
-same for all options of the same type. However, it is possible I forgot
-something what should be there - in such case, hit me. :-)
 
-Also, at the moment of submitting this, there are some patches for xfsprogs
-fixing some issues in the mailing list - so expect this to fail with the
-current for-next branch (c5d584c)
+>
+> The quick fix won't be hard, just re-dirty the new data extent at
+> merge_reloc_roots() time.
+>
+> But I'm still investigating if we can fix it in a better method, to increase
+> the new data extents' reference at correct time.
+>
+> Thanks,
+> Qu
+>
+>
+>>
+>>
+>> Also, please, when you send a new version of a patch, add a changelog
+>> describing what changed between versions. See [1] for an example.
+>> I noticed you do this for all patches you send.
+>>
+>> [1]
+>> https://btrfs.wiki.kernel.org/index.php/Developer%27s_FAQ#Repeated_submissions
+>>
+>>>
+>>>
+>>> --
+>>> Thanks,
+>>> Lu
+>>>
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>>
+>>
+>
+>
 
-Regarding of the number of this test: I used the number as this test was some
-time half baked and I wanted to avoid conflicts with other new tests. So if it
-is an issue, I can submit it with another number, somewhere in the main
-sequence.
 
-Cheers,
-Jan
----
- tests/xfs/400-input-validation     | 335 +++++++++++++++++++++++++++++++++++++
- tests/xfs/400-input-validation.out |   2 +
- tests/xfs/group                    |   1 +
- 3 files changed, 338 insertions(+)
- create mode 100755 tests/xfs/400-input-validation
- create mode 100644 tests/xfs/400-input-validation.out
 
-diff --git a/tests/xfs/400-input-validation b/tests/xfs/400-input-validation
-new file mode 100755
-index 0000000..c52a4b6
---- /dev/null
-+++ b/tests/xfs/400-input-validation
-@@ -0,0 +1,335 @@
-+#! /bin/bash
-+# FS QA Test No. xfs/400
-+#
-+# mkfs.xfs input validation test. Designed to break mkfs.xfs if it doesn't
-+# filter garbage input or invalid option combinations correctly.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2014 Red Hat, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1        # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs xfs
-+_supported_os Linux
-+_require_scratch
-+
-+rm $seqres.full || true
-+echo silence is golden
-+
-+# clear out any options to mkfs first. We want to test realtime and external log
-+# devices if we can, but we also want to control them ourselves.
-+logdev=$SCRATCH_LOGDEV
-+rtdev=$SCRATCH_RTDEV
-+
-+MKFS_OPTIONS=
-+SCRATCH_LOGDEV=
-+SCRATCH_RTDEV=
-+
-+# limit the image size of the filesystem being created to something small
-+fssize=$((4 * 1024 * 1024 * 1024))
-+logsize=$((4 * 1024 * 1024 * 100))
-+fsimg=$TEST_DIR/$seq.img
-+
-+do_mkfs_pass()
-+{
-+        echo >> $seqres.full
-+        echo "pass expected $*" >> $seqres.full
-+        $MKFS_XFS_PROG -f -N $* >> $seqres.full 2>&1
-+        [ $? -ne 0 ] && echo "fail $*"
-+}
-+
-+do_mkfs_fail()
-+{
-+        echo >> $seqres.full
-+        echo "fail expected $*" >> $seqres.full
-+        $MKFS_XFS_PROG -f -N $* >> $seqres.full 2>&1
-+        [ $? -eq 0 ] && echo "pass $*"
-+}
-+
-+reset_fsimg()
-+{
-+        rm -f $fsimg
-+        $XFS_IO_PROG -f -c "truncate $fssize" $fsimg
-+}
-+
-+reset_fsimg
-+
-+do_mkfs_pass $SCRATCH_DEV
-+
-+# basic "should fail" options
-+
-+# specifying sector sizes in sectors or blocks or garbage
-+do_mkfs_fail -s size=2s $SCRATCH_DEV
-+do_mkfs_fail -d sectsize=2s $SCRATCH_DEV
-+do_mkfs_fail -l sectsize=2s $SCRATCH_DEV
-+do_mkfs_fail -s size=2b $SCRATCH_DEV
-+do_mkfs_fail -d sectsize=2b $SCRATCH_DEV
-+do_mkfs_fail -l sectsize=2b $SCRATCH_DEV
-+
-+do_mkfs_fail -s size=grot $SCRATCH_DEV
-+do_mkfs_fail -s size=2yerk $SCRATCH_DEV
-+do_mkfs_fail -d sectsize=blah $SCRATCH_DEV
-+do_mkfs_fail -d sectsize=2foo $SCRATCH_DEV
-+do_mkfs_fail -l sectsize=nggh $SCRATCH_DEV
-+do_mkfs_fail -l sectsize=2nggh $SCRATCH_DEV
-+
-+# conflicting sector/block sizes
-+do_mkfs_fail -s size=512 -d sectsize=1024 $SCRATCH_DEV
-+do_mkfs_fail -s size=512 -l sectsize=1024 $SCRATCH_DEV
-+do_mkfs_fail -d sectsize=2048 -l sectsize=1024 $SCRATCH_DEV
-+
-+do_mkfs_fail -b size=512 -s size=1024 $SCRATCH_DEV
-+do_mkfs_fail -b size=512 -d sectsize=1024 $SCRATCH_DEV
-+do_mkfs_fail -b size=512 -l sectsize=1024 $SCRATCH_DEV
-+
-+# specifying block sizes in sectors without specifying sector size
-+# or in blocks or garbage
-+do_mkfs_fail -b size=2s $SCRATCH_DEV
-+do_mkfs_fail -b size=2b $SCRATCH_DEV
-+do_mkfs_fail -b size=nfi $SCRATCH_DEV
-+do_mkfs_fail -b size=4096nfi $SCRATCH_DEV
-+do_mkfs_fail -n size=2s $SCRATCH_DEV
-+do_mkfs_fail -n size=2b $SCRATCH_DEV
-+do_mkfs_fail -n size=nfi $SCRATCH_DEV
-+do_mkfs_fail -n size=4096nfi $SCRATCH_DEV
-+
-+# bad label length
-+do_mkfs_fail -L thisiswaytoolong $SCRATCH_DEV
-+
-+# basic "should pass" data section tests
-+do_mkfs_pass $SCRATCH_DEV
-+do_mkfs_pass -d name=$SCRATCH_DEV
-+do_mkfs_pass -d size=$fssize $SCRATCH_DEV
-+do_mkfs_pass -d agcount=32 $SCRATCH_DEV
-+do_mkfs_pass -d agsize=32m $SCRATCH_DEV
-+do_mkfs_pass -d agsize=32M $SCRATCH_DEV
-+do_mkfs_pass -d agsize=1g $SCRATCH_DEV
-+do_mkfs_pass -d agsize=$((32 * 1024 * 1024)) $SCRATCH_DEV
-+do_mkfs_pass -b size=4096 -d agsize=8192b $SCRATCH_DEV
-+do_mkfs_pass -d sectsize=512,agsize=65536s $SCRATCH_DEV
-+do_mkfs_pass -s size=512 -d agsize=65536s $SCRATCH_DEV
-+do_mkfs_pass -d noalign $SCRATCH_DEV
-+do_mkfs_pass -d sunit=0,swidth=0 $SCRATCH_DEV
-+do_mkfs_pass -d sunit=8,swidth=8 $SCRATCH_DEV
-+do_mkfs_pass -d sunit=8,swidth=64 $SCRATCH_DEV
-+do_mkfs_pass -d su=0,sw=0 $SCRATCH_DEV
-+do_mkfs_pass -d su=4096,sw=1 $SCRATCH_DEV
-+do_mkfs_pass -d su=4k,sw=1 $SCRATCH_DEV
-+do_mkfs_pass -d su=4K,sw=8 $SCRATCH_DEV
-+do_mkfs_pass -b size=4096 -d su=1b,sw=8 $SCRATCH_DEV
-+do_mkfs_pass -d sectsize=512,su=8s,sw=8 $SCRATCH_DEV
-+do_mkfs_pass -s size=512 -d su=8s,sw=8 $SCRATCH_DEV
-+
-+# invalid data section tests
-+do_mkfs_fail -d size=${fssize}b $SCRATCH_DEV
-+do_mkfs_fail -d size=${fssize}s $SCRATCH_DEV
-+do_mkfs_fail -d size=${fssize}yerk $SCRATCH_DEV
-+do_mkfs_fail -d agsize=8192b $SCRATCH_DEV
-+do_mkfs_fail -d agsize=65536s $SCRATCH_DEV
-+do_mkfs_fail -d agsize=32Mbsdfsdo $SCRATCH_DEV
-+do_mkfs_fail -d agsize=1GB $SCRATCH_DEV
-+do_mkfs_fail -d agcount=1k $SCRATCH_DEV
-+do_mkfs_fail -d agcount=6b $SCRATCH_DEV
-+do_mkfs_fail -d agcount=32,agsize=32m $SCRATCH_DEV
-+do_mkfs_fail -d sunit=0,swidth=64 $SCRATCH_DEV
-+do_mkfs_fail -d sunit=64,swidth=0 $SCRATCH_DEV
-+do_mkfs_fail -d sunit=64,swidth=64,noalign $SCRATCH_DEV
-+do_mkfs_fail -d sunit=64k,swidth=64 $SCRATCH_DEV
-+do_mkfs_fail -d sunit=64,swidth=64m $SCRATCH_DEV
-+do_mkfs_fail -d su=0,sw=64 $SCRATCH_DEV
-+do_mkfs_fail -d su=4096,sw=0 $SCRATCH_DEV
-+do_mkfs_fail -d su=4097,sw=1 $SCRATCH_DEV
-+do_mkfs_fail -d su=4096,sw=64,noalign $SCRATCH_DEV
-+do_mkfs_fail -d su=4096,sw=64s $SCRATCH_DEV
-+do_mkfs_fail -d su=4096s,sw=64 $SCRATCH_DEV
-+do_mkfs_fail -d su=4096b,sw=64 $SCRATCH_DEV
-+do_mkfs_fail -d su=4096garabge,sw=64 $SCRATCH_DEV
-+do_mkfs_fail -d su=4096,sw=64,sunit=64,swidth=64 $SCRATCH_DEV
-+do_mkfs_fail -d sectsize=10,agsize=65536s $SCRATCH_DEV
-+do_mkfs_fail -d sectsize=512s,agsize=65536s $SCRATCH_DEV
-+
-+reset_fsimg
-+
-+# file section, should pass
-+do_mkfs_pass $fsimg
-+do_mkfs_pass -d file=0 $SCRATCH_DEV
-+do_mkfs_pass -d size=$fssize,file=1,name=$fsimg
-+do_mkfs_pass -d size=$fssize,file $fsimg
-+do_mkfs_pass -d size=$fssize $fsimg
-+do_mkfs_pass -d size=$fssize,name=$fsimg
-+do_mkfs_pass -d size=$((fssize/2)) $fsimg
-+# again this one, to check that we didn't truncated the file
-+do_mkfs_pass -d size=$fssize $fsimg
-+rm -f $fsimg
-+do_mkfs_pass -d file,size=$fssize $fsimg
-+
-+reset_fsimg
-+
-+# file section, should fail
-+do_mkfs_fail -d file=1 $SCRATCH_DEV
-+do_mkfs_fail -d file $fsimg # no size given
-+rm -f $fsimg
-+do_mkfs_fail $fsimg
-+do_mkfs_fail -d size=$fssize $fsimg
-+
-+reset_fsimg
-+
-+# log section, should pass
-+do_mkfs_pass -l size=$logsize -d size=$fssize $SCRATCH_DEV
-+do_mkfs_pass -l agnum=2 $SCRATCH_DEV
-+do_mkfs_pass -l size=4096b $SCRATCH_DEV
-+do_mkfs_pass -l sectsize=512 $SCRATCH_DEV
-+do_mkfs_pass -l sunit=64 $SCRATCH_DEV
-+do_mkfs_pass -l sunit=64 -d sunit=8,swidth=8 $SCRATCH_DEV
-+do_mkfs_pass -l sunit=8 $SCRATCH_DEV
-+do_mkfs_pass -l su=$((4096*10)) $SCRATCH_DEV
-+do_mkfs_pass -b size=4096 -l su=10b $SCRATCH_DEV
-+do_mkfs_pass -l sectsize=512,su=$((4096*10)) $SCRATCH_DEV
-+do_mkfs_pass -l internal $SCRATCH_DEV
-+$XFS_IO_PROG -f -c "truncate $logsize" $fsimg
-+do_mkfs_pass -l logdev=$fsimg $SCRATCH_DEV
-+do_mkfs_pass -l name=$fsimg $SCRATCH_DEV
-+do_mkfs_pass -l lazy-count=0 -m crc=0 $SCRATCH_DEV
-+do_mkfs_pass -l lazy-count=1 -m crc=0 $SCRATCH_DEV
-+do_mkfs_pass -l version=1 -m crc=0 $SCRATCH_DEV
-+do_mkfs_pass -l version=2 -m crc=0 $SCRATCH_DEV
-+do_mkfs_pass -l version=2 $SCRATCH_DEV
-+
-+# log section, should fail
-+do_mkfs_fail -l size=${fssize}b $SCRATCH_DEV
-+do_mkfs_fail -l size=${fssize}s $SCRATCH_DEV
-+do_mkfs_fail -l size=${fssize}yerk $SCRATCH_DEV
-+do_mkfs_fail -l agnum=1k $SCRATCH_DEV
-+do_mkfs_fail -l agnum=6b $SCRATCH_DEV
-+do_mkfs_fail -l agnum=32 $SCRATCH_DEV
-+do_mkfs_fail -l sunit=0  $SCRATCH_DEV
-+do_mkfs_fail -l sunit=63 $SCRATCH_DEV
-+do_mkfs_fail -l su=1 $SCRATCH_DEV
-+do_mkfs_fail -l su=10b $SCRATCH_DEV
-+do_mkfs_fail -l su=10s $SCRATCH_DEV
-+do_mkfs_fail -l su=$((4096*10+1)) $SCRATCH_DEV
-+do_mkfs_fail -l sectsize=10,agsize=65536s $SCRATCH_DEV
-+do_mkfs_fail -l sectsize=512s,agsize=65536s $SCRATCH_DEV
-+do_mkfs_fail -l internal=0 $SCRATCH_DEV
-+reset_fsimg
-+do_mkfs_fail -l internal=1,logdev=$fsimg $SCRATCH_DEV
-+do_mkfs_fail -l lazy-count=1garbage $SCRATCH_DEV
-+do_mkfs_fail -l lazy-count=2 $SCRATCH_DEV
-+do_mkfs_fail -l lazy-count=0 -m crc=1 $SCRATCH_DEV
-+do_mkfs_fail -l version=1 -m crc=1 $SCRATCH_DEV
-+do_mkfs_fail -l version=0  $SCRATCH_DEV
-+
-+
-+
-+# naming section, should pass
-+do_mkfs_pass -n size=65536 $SCRATCH_DEV
-+do_mkfs_pass -n log=15 $SCRATCH_DEV
-+do_mkfs_pass -n version=2 $SCRATCH_DEV
-+do_mkfs_pass -n version=ci $SCRATCH_DEV
-+do_mkfs_pass -n ftype=0 -m crc=0 $SCRATCH_DEV
-+do_mkfs_pass -n ftype=1 $SCRATCH_DEV
-+
-+# naming section, should fail
-+do_mkfs_fail -n version=1 $SCRATCH_DEV
-+do_mkfs_fail -n version=cid $SCRATCH_DEV
-+do_mkfs_fail -n ftype=4 $SCRATCH_DEV
-+do_mkfs_fail -n ftype=0 $SCRATCH_DEV
-+
-+reset_fsimg
-+
-+# metadata section, should pass
-+do_mkfs_pass -m crc=1,finobt=1 $SCRATCH_DEV
-+do_mkfs_pass -m crc=1,finobt=0 $SCRATCH_DEV
-+do_mkfs_pass -m crc=0,finobt=0 $SCRATCH_DEV
-+do_mkfs_pass -m crc=1 -n ftype=1 $SCRATCH_DEV
-+do_mkfs_pass -m crc=0 -n ftype=1 $SCRATCH_DEV
-+do_mkfs_pass -m crc=0 -n ftype=0 $SCRATCH_DEV
-+
-+# metadata section, should fail
-+do_mkfs_fail -m crc=0,finobt=1 $SCRATCH_DEV
-+do_mkfs_fail -m crc=1 -n ftype=0 $SCRATCH_DEV
-+
-+
-+# realtime section, should pass
-+do_mkfs_pass -r rtdev=$fsimg $SCRATCH_DEV
-+do_mkfs_pass -r extsize=4k $SCRATCH_DEV
-+do_mkfs_pass -r extsize=1G $SCRATCH_DEV
-+do_mkfs_pass -r size=65536,rtdev=$fsimg $SCRATCH_DEV
-+do_mkfs_pass -r noalign $SCRATCH_DEV
-+
-+
-+# realtime section, should fail
-+do_mkfs_fail -r rtdev=$SCRATCH_DEV
-+do_mkfs_fail -r extsize=256 $SCRATCH_DEV
-+do_mkfs_fail -r extsize=2G $SCRATCH_DEV
-+do_mkfs_fail -r size=65536 $SCRATCH_DEV
-+
-+
-+
-+# inode section, should pass
-+do_mkfs_pass -i size=256 -m crc=0 $SCRATCH_DEV
-+do_mkfs_pass -i size=512 $SCRATCH_DEV
-+do_mkfs_pass -i size=2048 $SCRATCH_DEV
-+do_mkfs_pass -i log=10 $SCRATCH_DEV
-+do_mkfs_pass -i perblock=2 $SCRATCH_DEV
-+do_mkfs_pass -i maxpct=10 $SCRATCH_DEV
-+do_mkfs_pass -i maxpct=100 $SCRATCH_DEV
-+do_mkfs_pass -i maxpct=0 $SCRATCH_DEV
-+do_mkfs_pass -i align=0 -m crc=0 $SCRATCH_DEV
-+do_mkfs_pass -i align=1 -m crc=1 $SCRATCH_DEV
-+do_mkfs_pass -i attr=1 -m crc=0 $SCRATCH_DEV
-+do_mkfs_pass -i attr=2 $SCRATCH_DEV
-+do_mkfs_pass -i projid32bit $SCRATCH_DEV
-+do_mkfs_pass -i sparse=0 $SCRATCH_DEV
-+do_mkfs_pass -i sparse -m crc $SCRATCH_DEV
-+
-+
-+# inode section, should fail
-+do_mkfs_fail -i size=256 -m crc $SCRATCH_DEV
-+do_mkfs_fail -i size=128 $SCRATCH_DEV
-+do_mkfs_fail -i size=513 $SCRATCH_DEV
-+do_mkfs_fail -i size=4096 $SCRATCH_DEV
-+do_mkfs_fail -i maxpct=110 $SCRATCH_DEV
-+do_mkfs_fail -i align=2 $SCRATCH_DEV
-+do_mkfs_fail -i sparse -m crc=0 $SCRATCH_DEV
-+do_mkfs_fail -i align=0 -m crc=1 $SCRATCH_DEV
-+do_mkfs_fail -i attr=1 -m crc=1 $SCRATCH_DEV
-+
-+status=0
-+exit
-diff --git a/tests/xfs/400-input-validation.out b/tests/xfs/400-input-validation.out
-new file mode 100644
-index 0000000..7080553
---- /dev/null
-+++ b/tests/xfs/400-input-validation.out
-@@ -0,0 +1,2 @@
-+QA output created by 400-input-validation
-+silence is golden
-diff --git a/tests/xfs/group b/tests/xfs/group
-index f4c6816..b51ef2e 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -285,3 +285,4 @@
- 303 auto quick quota
- 304 auto quick quota
- 305 auto quota
-+400-input-validation auto quick mkfs
 -- 
-2.5.5
+Filipe David Manana,
 
+"Reasonable men adapt themselves to the world.
+ Unreasonable men adapt the world to themselves.
+ That's why all progress depends on unreasonable men."
