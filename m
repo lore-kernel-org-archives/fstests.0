@@ -1,61 +1,140 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:25831 "EHLO
+Received: from cn.fujitsu.com ([59.151.112.132]:6943 "EHLO
 	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S932860AbcFODku (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 14 Jun 2016 23:40:50 -0400
+	with ESMTP id S1750717AbcFOFTd (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 15 Jun 2016 01:19:33 -0400
 Received: from G08CNEXCHPEKD01.g08.fujitsu.local (unknown [10.167.33.80])
-	by cn.fujitsu.com (Postfix) with ESMTP id 32BD8409257A
-	for <fstests@vger.kernel.org>; Wed, 15 Jun 2016 11:40:40 +0800 (CST)
-Message-ID: <5760CEDC.20202@cn.fujitsu.com>
-Date: Wed, 15 Jun 2016 11:43:24 +0800
+	by cn.fujitsu.com (Postfix) with ESMTP id 2CC50409257A
+	for <fstests@vger.kernel.org>; Wed, 15 Jun 2016 13:19:23 +0800 (CST)
 From: Guangwen Feng <fenggw-fnst@cn.fujitsu.com>
+Subject: [PATCH v3] shared: regression test for hang when processing corrupted orphaned inode list
+Date: Wed, 15 Jun 2016 13:21:31 +0800
+Message-ID: <1465968091-8912-1-git-send-email-fenggw-fnst@cn.fujitsu.com>
+In-Reply-To: <20160614043942.GN5140@eguan.usersys.redhat.com>
+References: <20160614043942.GN5140@eguan.usersys.redhat.com>
 MIME-Version: 1.0
-Subject: Re: [PATCH v2] shared: regression test for hang when processing corrupted
- orphaned inode list
-References: <20160613093350.GJ5140@eguan.usersys.redhat.com> <1465873139-8724-1-git-send-email-fenggw-fnst@cn.fujitsu.com> <20160614043942.GN5140@eguan.usersys.redhat.com> <20160615033537.GV5140@eguan.usersys.redhat.com>
-In-Reply-To: <20160615033537.GV5140@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Guangwen Feng <fenggw-fnst@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-Hi, Eryu.
-Thanks for your review and kindly reply!
+Commit c9eb13a fixed this bug:
+	ext4: fix hang when processing corrupted orphaned inode list
 
-On 06/15/2016 11:35 AM, Eryu Guan wrote:
-> On Tue, Jun 14, 2016 at 12:39:42PM +0800, Eryu Guan wrote:
->> On Tue, Jun 14, 2016 at 10:58:59AM +0800, Guangwen Feng wrote:
->>> Commit c9eb13a fixed this bug:
->>> 	ext4: fix hang when processing corrupted orphaned inode list
->>>
->>> Signed-off-by: Guangwen Feng <fenggw-fnst@cn.fujitsu.com>
->>
->> Looks good to me overall. Some minor issues inline below
->>
-> [snip]
->>
->>> +	debugfs -w -R "ssv last_orphan $i" $SCRATCH_DEV >>$seqres.full 2>&1
->>
->> You defined $DEBUGFS_PROG, use it here :)
->>
->>> +	_scratch_mount
->>> +	_scratch_unmount
->>
->> There's a new helper to do this now, _scratch_cycle_mount
-> 
-> Sorry, the helper doesn't help here, it umount first then mount.  You're
-> doing mount then umount.
+Signed-off-by: Guangwen Feng <fenggw-fnst@cn.fujitsu.com>
+---
+ common/config        |  1 +
+ tests/shared/004     | 64 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/shared/004.out |  2 ++
+ tests/shared/group   |  1 +
+ 4 files changed, 68 insertions(+)
+ create mode 100755 tests/shared/004
+ create mode 100644 tests/shared/004.out
 
-Got it.
-I was just writing to explain this actually. :)
-Thanks again.
+diff --git a/common/config b/common/config
+index cacd815..c25b1ec 100644
+--- a/common/config
++++ b/common/config
+@@ -195,6 +195,7 @@ export DUMP_PROG="`set_prog_path dump`"
+ export RESTORE_PROG="`set_prog_path restore`"
+ export LVM_PROG="`set_prog_path lvm`"
+ export CHATTR_PROG="`set_prog_path chattr`"
++export DEBUGFS_PROG="`set_prog_path debugfs`"
+ 
+ # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+ # newer systems have udevadm command but older systems like RHEL5 don't.
+diff --git a/tests/shared/004 b/tests/shared/004
+new file mode 100755
+index 0000000..f108910
+--- /dev/null
++++ b/tests/shared/004
+@@ -0,0 +1,64 @@
++#! /bin/bash
++# FS QA Test 004
++#
++# Regression test for commit:
++# c9eb13a ext4: fix hang when processing corrupted orphaned inode list
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++
++# real QA test starts here
++_supported_fs ext2 ext3 ext4
++_supported_os Linux
++_require_scratch
++_require_command "$DEBUGFS_PROG" debugfs
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++echo "Silence is golden"
++
++# although The bug only happens when last_orphan is set to 5
++# it is better to test all reserved inode numbers 1-10 here
++for i in {1..10}; do
++	# create smaller filesystems to save test time
++	_scratch_mkfs_sized $((16 * 1024 * 1024)) >>$seqres.full 2>&1
++	$DEBUGFS_PROG -w -R "ssv last_orphan $i" $SCRATCH_DEV >>$seqres.full 2>&1
++	_scratch_mount
++	_scratch_unmount
++done
++
++# success, all done
++status=0
++exit
+diff --git a/tests/shared/004.out b/tests/shared/004.out
+new file mode 100644
+index 0000000..af8614a
+--- /dev/null
++++ b/tests/shared/004.out
+@@ -0,0 +1,2 @@
++QA output created by 004
++Silence is golden
+diff --git a/tests/shared/group b/tests/shared/group
+index ba8a3f0..55bb594 100644
+--- a/tests/shared/group
++++ b/tests/shared/group
+@@ -6,6 +6,7 @@
+ 001 auto quick
+ 002 auto metadata quick
+ 003 auto quick
++004 auto quick
+ 006 auto enospc
+ 032 mkfs auto quick
+ 051 acl udf auto quick
+-- 
+1.8.4.2
 
-> 
-> Thanks,
-> Eryu
-> 
-> 
-> 
 
 
