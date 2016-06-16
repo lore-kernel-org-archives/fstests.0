@@ -1,40 +1,60 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:16319 "EHLO
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:22960 "EHLO
 	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932235AbcFOW4E (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 15 Jun 2016 18:56:04 -0400
-Date: Thu, 16 Jun 2016 08:55:59 +1000
+	by vger.kernel.org with ESMTP id S932084AbcFPBOp (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 15 Jun 2016 21:14:45 -0400
+Date: Thu, 16 Jun 2016 11:13:49 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v3] shared: regression test for hang when processing
- corrupted orphaned inode list
-Message-ID: <20160615225559.GH12670@dastard>
-References: <20160614043942.GN5140@eguan.usersys.redhat.com>
- <1465968091-8912-1-git-send-email-fenggw-fnst@cn.fujitsu.com>
+Subject: Re: [PATCH v2] xfstests: xfs discontiguous multi-block buffer
+ logging test
+Message-ID: <20160616011349.GM12670@dastard>
+References: <1464873001-17508-1-git-send-email-bfoster@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1465968091-8912-1-git-send-email-fenggw-fnst@cn.fujitsu.com>
+In-Reply-To: <1464873001-17508-1-git-send-email-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Guangwen Feng <fenggw-fnst@cn.fujitsu.com>
+To: Brian Foster <bfoster@redhat.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jun 15, 2016 at 01:21:31PM +0800, Guangwen Feng wrote:
-> Commit c9eb13a fixed this bug:
-> 	ext4: fix hang when processing corrupted orphaned inode list
+On Thu, Jun 02, 2016 at 09:10:01AM -0400, Brian Foster wrote:
+> XFS had a bug in the multi-block buffer logging code that caused a NULL
+> lv panic at log push time due to invalid regions being set in the buffer
+> log format bitmap. This was demonstrated by modifying a multi-block
+> directory buffer in a manner that only logs regions beyond the first
+> FSB-sized mapping of the buffer.
+> 
+> To recreate these conditions, this test fragments free space and
+> populates several directories with enough entries to require
+> discontiguous multi-block buffers. To recreate the problem, we remove
+> entries from the tail end of the directory and fsync to flush the log.
+> 
+> Note that this test causes a panic on kernels affected by the bug. As
+> such, it is included in the 'dangerous' group. The bug is resolved by
+> kernel commit a3916e528b91 ("xfs: fix broken multi-fsb buffer logging").
+> 
+> Signed-off-by: Brian Foster <bfoster@redhat.com>
+.....
+> +# Create a small fs with a large directory block size. We want to fill up the fs
+> +# quickly and then create multi-fsb dirblocks over fragmented free space.
+> +_scratch_mkfs_xfs -d size=20m -n size=64k >> $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +# Fill a source directory with many largish-named files. 1k uuid-named entries
+> +# sufficiently populates a 64k directory block.
+> +mkdir $SCRATCH_MNT/src
+> +for i in $(seq 0 1023); do
+> +	touch $SCRATCH_MNT/src/`uuidgen`
+> +done
 
-Unfortunately, I don't know what this bug is, or what the test is
-actually doing from this description or from reading the actual
-test.  Please assume that not just the reviewer but someone reading
-this description 5 yers from now knows *nothing* about the problem
-the test addresses. Hence the patch description needs to explain
-more fully what the problem is that the test is exercising....
+What's 'uuidgen'? Not installed on my test systems, so this needs
+a requires check, I think....
 
-It's also unfortunate that kernel tree commits are being referenced
-without saying what tree they belong to. i.e. this should read
-"kernel commit ab1234cd" so we know that commit is not something
-from the fstests tree, or e2fsprogs, or some other unknown tree.
-Again - think about someone reading this in 5 years time and trying
-to work out what it means...
+Hmmm - looks like a separate package is needed on debian systems:
+uuid-runtime. Can you send a followup patch that adds the necesary
+checks to this test and added the above package to the iniitial list
+in the README file (for ubunutu, I know, but the package name will
+be the same).
 
 Cheers,
 
