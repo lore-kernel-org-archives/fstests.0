@@ -1,64 +1,149 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:22960 "EHLO
-	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932084AbcFPBOp (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 15 Jun 2016 21:14:45 -0400
-Date: Thu, 16 Jun 2016 11:13:49 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v2] xfstests: xfs discontiguous multi-block buffer
- logging test
-Message-ID: <20160616011349.GM12670@dastard>
-References: <1464873001-17508-1-git-send-email-bfoster@redhat.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:58804 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753270AbcFPDkT (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 15 Jun 2016 23:40:19 -0400
+From: Guangwen Feng <fenggw-fnst@cn.fujitsu.com>
+Subject: [PATCH v4] shared: regression test for hang when processing corrupted orphaned inode list
+Date: Thu, 16 Jun 2016 11:41:45 +0800
+Message-ID: <1466048505-13938-1-git-send-email-fenggw-fnst@cn.fujitsu.com>
+In-Reply-To: <20160615225559.GH12670@dastard>
+References: <20160615225559.GH12670@dastard>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1464873001-17508-1-git-send-email-bfoster@redhat.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: fstests@vger.kernel.org
+To: david@fromorbit.com
+Cc: fstests@vger.kernel.org, Guangwen Feng <fenggw-fnst@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 02, 2016 at 09:10:01AM -0400, Brian Foster wrote:
-> XFS had a bug in the multi-block buffer logging code that caused a NULL
-> lv panic at log push time due to invalid regions being set in the buffer
-> log format bitmap. This was demonstrated by modifying a multi-block
-> directory buffer in a manner that only logs regions beyond the first
-> FSB-sized mapping of the buffer.
-> 
-> To recreate these conditions, this test fragments free space and
-> populates several directories with enough entries to require
-> discontiguous multi-block buffers. To recreate the problem, we remove
-> entries from the tail end of the directory and fsync to flush the log.
-> 
-> Note that this test causes a panic on kernels affected by the bug. As
-> such, it is included in the 'dangerous' group. The bug is resolved by
-> kernel commit a3916e528b91 ("xfs: fix broken multi-fsb buffer logging").
-> 
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
-.....
-> +# Create a small fs with a large directory block size. We want to fill up the fs
-> +# quickly and then create multi-fsb dirblocks over fragmented free space.
-> +_scratch_mkfs_xfs -d size=20m -n size=64k >> $seqres.full 2>&1
-> +_scratch_mount
-> +
-> +# Fill a source directory with many largish-named files. 1k uuid-named entries
-> +# sufficiently populates a 64k directory block.
-> +mkdir $SCRATCH_MNT/src
-> +for i in $(seq 0 1023); do
-> +	touch $SCRATCH_MNT/src/`uuidgen`
-> +done
+Kernel commit c9eb13a fixed this bug:
+	ext4: fix hang when processing corrupted orphaned inode list
 
-What's 'uuidgen'? Not installed on my test systems, so this needs
-a requires check, I think....
+Bug description:
+	If the orphaned inode list contains inode #5, ext4_iget()
+	returns a bad inode (since the bootloader inode should never
+	be referenced directly). Because of the bad inode, we end up
+	processing the inode repeatedly and this hangs the machine.
 
-Hmmm - looks like a separate package is needed on debian systems:
-uuid-runtime. Can you send a followup patch that adds the necesary
-checks to this test and added the above package to the iniitial list
-in the README file (for ubunutu, I know, but the package name will
-be the same).
+Test description:
+	We manually set the superblock field last_orphan to 1~10
+	(although the bug only happens when last_orphan is set to 5
+	it is better to test all reserved inode numbers 1~10 here)
+	and mount the fs in a loop to trigger the bug.
 
-Cheers,
+Signed-off-by: Guangwen Feng <fenggw-fnst@cn.fujitsu.com>
+---
+ common/config        |  1 +
+ tests/shared/004     | 64 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/shared/004.out |  2 ++
+ tests/shared/group   |  1 +
+ 4 files changed, 68 insertions(+)
+ create mode 100755 tests/shared/004
+ create mode 100644 tests/shared/004.out
 
-Dave.
+diff --git a/common/config b/common/config
+index cacd815..c25b1ec 100644
+--- a/common/config
++++ b/common/config
+@@ -195,6 +195,7 @@ export DUMP_PROG="`set_prog_path dump`"
+ export RESTORE_PROG="`set_prog_path restore`"
+ export LVM_PROG="`set_prog_path lvm`"
+ export CHATTR_PROG="`set_prog_path chattr`"
++export DEBUGFS_PROG="`set_prog_path debugfs`"
+ 
+ # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+ # newer systems have udevadm command but older systems like RHEL5 don't.
+diff --git a/tests/shared/004 b/tests/shared/004
+new file mode 100755
+index 0000000..b9eaa15
+--- /dev/null
++++ b/tests/shared/004
+@@ -0,0 +1,64 @@
++#! /bin/bash
++# FS QA Test 004
++#
++# Regression test for commit:
++# c9eb13a ext4: fix hang when processing corrupted orphaned inode list
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++
++# real QA test starts here
++_supported_fs ext2 ext3 ext4
++_supported_os Linux
++_require_scratch
++_require_command "$DEBUGFS_PROG" debugfs
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++echo "Silence is golden"
++
++# although the bug only happens when last_orphan is set to 5
++# it is better to test all reserved inode numbers 1-10 here
++for i in {1..10}; do
++	# create smaller filesystems to save test time
++	_scratch_mkfs_sized $((16 * 1024 * 1024)) >>$seqres.full 2>&1
++	$DEBUGFS_PROG -w -R "ssv last_orphan $i" $SCRATCH_DEV >>$seqres.full 2>&1
++	_scratch_mount
++	_scratch_unmount
++done
++
++# success, all done
++status=0
++exit
+diff --git a/tests/shared/004.out b/tests/shared/004.out
+new file mode 100644
+index 0000000..af8614a
+--- /dev/null
++++ b/tests/shared/004.out
+@@ -0,0 +1,2 @@
++QA output created by 004
++Silence is golden
+diff --git a/tests/shared/group b/tests/shared/group
+index ba8a3f0..55bb594 100644
+--- a/tests/shared/group
++++ b/tests/shared/group
+@@ -6,6 +6,7 @@
+ 001 auto quick
+ 002 auto metadata quick
+ 003 auto quick
++004 auto quick
+ 006 auto enospc
+ 032 mkfs auto quick
+ 051 acl udf auto quick
 -- 
-Dave Chinner
-david@fromorbit.com
+1.8.4.2
+
+
+
