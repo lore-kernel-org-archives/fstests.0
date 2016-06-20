@@ -1,160 +1,85 @@
-Received: from mx1.redhat.com ([209.132.183.28]:60661 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752941AbcFTNdy (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 20 Jun 2016 09:33:54 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 58A3063326
-	for <fstests@vger.kernel.org>; Mon, 20 Jun 2016 13:24:39 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v4 2/2] xfs/006: new case to test xfs fail_at_unmount error handling
-Date: Mon, 20 Jun 2016 21:24:33 +0800
-Message-Id: <1466429073-10124-2-git-send-email-zlang@redhat.com>
-In-Reply-To: <1466429073-10124-1-git-send-email-zlang@redhat.com>
-References: <1466429073-10124-1-git-send-email-zlang@redhat.com>
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:57686 "EHLO
+	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752939AbcFTWsp (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 20 Jun 2016 18:48:45 -0400
+Date: Tue, 21 Jun 2016 08:48:39 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH v2] xfstests: xfs discontiguous multi-block buffer
+ logging test
+Message-ID: <20160620224839.GO12670@dastard>
+References: <1464873001-17508-1-git-send-email-bfoster@redhat.com>
+ <20160616011349.GM12670@dastard>
+ <20160616114525.GA8342@bfoster.bfoster>
+ <5f0d9c6d-3950-7e01-35f8-525cb1b6280f@sandeen.net>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <5f0d9c6d-3950-7e01-35f8-525cb1b6280f@sandeen.net>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: sandeen@redhat.com, eguan@redhat.com, cem@redhat.com, Zorro Lang <zlang@redhat.com>
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: Brian Foster <bfoster@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-XFS bring in a new configuration under /sys/fs/xfs/error, named
-fail_at_unmount from below commit:
+On Thu, Jun 16, 2016 at 10:10:09AM -0500, Eric Sandeen wrote:
+> On 6/16/16 6:45 AM, Brian Foster wrote:
+> > On Thu, Jun 16, 2016 at 11:13:49AM +1000, Dave Chinner wrote:
+> >> On Thu, Jun 02, 2016 at 09:10:01AM -0400, Brian Foster wrote:
+> >>> XFS had a bug in the multi-block buffer logging code that caused a NULL
+> >>> lv panic at log push time due to invalid regions being set in the buffer
+> >>> log format bitmap. This was demonstrated by modifying a multi-block
+> >>> directory buffer in a manner that only logs regions beyond the first
+> >>> FSB-sized mapping of the buffer.
+> >>>
+> >>> To recreate these conditions, this test fragments free space and
+> >>> populates several directories with enough entries to require
+> >>> discontiguous multi-block buffers. To recreate the problem, we remove
+> >>> entries from the tail end of the directory and fsync to flush the log.
+> >>>
+> >>> Note that this test causes a panic on kernels affected by the bug. As
+> >>> such, it is included in the 'dangerous' group. The bug is resolved by
+> >>> kernel commit a3916e528b91 ("xfs: fix broken multi-fsb buffer logging").
+> >>>
+> >>> Signed-off-by: Brian Foster <bfoster@redhat.com>
+> >> .....
+> >>> +# Create a small fs with a large directory block size. We want to fill up the fs
+> >>> +# quickly and then create multi-fsb dirblocks over fragmented free space.
+> >>> +_scratch_mkfs_xfs -d size=20m -n size=64k >> $seqres.full 2>&1
+> >>> +_scratch_mount
+> >>> +
+> >>> +# Fill a source directory with many largish-named files. 1k uuid-named entries
+> >>> +# sufficiently populates a 64k directory block.
+> >>> +mkdir $SCRATCH_MNT/src
+> >>> +for i in $(seq 0 1023); do
+> >>> +	touch $SCRATCH_MNT/src/`uuidgen`
+> >>> +done
+> >>
+> >> What's 'uuidgen'? Not installed on my test systems, so this needs
+> >> a requires check, I think....
+> >>
+> >> Hmmm - looks like a separate package is needed on debian systems:
+> >> uuid-runtime. Can you send a followup patch that adds the necesary
+> >> checks to this test and added the above package to the iniitial list
+> >> in the README file (for ubunutu, I know, but the package name will
+> >> be the same).
+> >>
+> > 
+> > Eryu pointed this on on v1 of the test but I didn't think it necessary
+> > as it's part of a standard package on fedora. I guess that's not true
+> > for other distros. I'll post something to fix it up...
+> 
+> Yeah, that's surprising, it's been part of util-linux[-ng] on my RHEL &
+> Fedora distros since 2009.
 
-  a5ea70d xfs: add configuration of error failure speed
+It's to do with dependencies against systemd and ensuring core
+packages don't have systemd dependencies.  i.e. uuid-runtime has a
+dependency on libsystemd because of the uuidd daemon that is used to
+generate uuids. Hence it has to be packaged it separately so that
+linux-util/libuuid packages do not require systemd to be installed
+on the system.
 
-It's used to stop unmount retrying forever when it hit IO error.
-This case try to unmount an faulty dm device, and to sure unmount
-won't retry forever if fail_at_unmount=1.
+Cheers,
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
-
-Hi,
-
-V4 did below changes:
-1) Due to common/rc changed, so change this case to use new function name.
-2) Remove _pwrite_byte operation
-3) After umount error device test, load working table back, and make sure
-   fs consistent.
-
-Thanks,
-Zorro
-
- tests/xfs/006     | 81 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/006.out |  2 ++
- tests/xfs/group   |  1 +
- 3 files changed, 84 insertions(+)
- create mode 100755 tests/xfs/006
- create mode 100644 tests/xfs/006.out
-
-diff --git a/tests/xfs/006 b/tests/xfs/006
-new file mode 100755
-index 0000000..be736f9
---- /dev/null
-+++ b/tests/xfs/006
-@@ -0,0 +1,81 @@
-+#! /bin/bash
-+# FS QA Test 006
-+#
-+# Test xfs' "fail at unmount" error handling configuration. Stop
-+# XFS retrying to writeback forever when unmount.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 YOUR NAME HERE.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	_dmerror_cleanup
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmerror
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_supported_os Linux
-+_require_dm_target error
-+_require_scratch
-+
-+_scratch_mkfs > $seqres.full 2>&1
-+_require_fs_sysfs $SCRATCH_DEV error/fail_at_unmount
-+
-+# The device is still a linear device at here
-+_dmerror_init
-+_dmerror_mount
-+
-+# Enable fail_at_unmount
-+_set_fs_sysfs_param $DMERROR_DEV error/fail_at_unmount 1
-+
-+
-+# umount will cause XFS try to writeback something to root inode.
-+# So after load error table, it can trigger umount fail.
-+_dmerror_load_error_table
-+_dmerror_unmount
-+
-+# Due to above operations cause fs inconsistent, that's expected.
-+# But we need fs be consistent before this case end.
-+_dmerror_load_working_table
-+_dmerror_mount
-+_dmerror_unmount
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/006.out b/tests/xfs/006.out
-new file mode 100644
-index 0000000..675c1b7
---- /dev/null
-+++ b/tests/xfs/006.out
-@@ -0,0 +1,2 @@
-+QA output created by 006
-+Silence is golden
-diff --git a/tests/xfs/group b/tests/xfs/group
-index f4c6816..39169ea 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -4,6 +4,7 @@
- 004 db auto quick
- 005 auto quick
- 007 auto quota quick
-+006 auto quick unmount
- 008 rw ioctl auto quick
- 009 rw ioctl auto prealloc quick
- 010 auto quick repair
+Dave.
 -- 
-2.5.5
-
+Dave Chinner
+david@fromorbit.com
