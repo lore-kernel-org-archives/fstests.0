@@ -1,87 +1,99 @@
-Received: from mx2.suse.de ([195.135.220.15]:58236 "EHLO mx2.suse.de"
+Received: from mx1.redhat.com ([209.132.183.28]:46754 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752686AbcFTKtO (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 20 Jun 2016 06:49:14 -0400
-Date: Mon, 20 Jun 2016 12:48:30 +0200
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH] ext4/271: Fix test failure with data=<foo> mount option
-Message-ID: <20160620104830.GC6882@quack2.suse.cz>
-References: <1466071511-30069-1-git-send-email-jack@suse.cz>
- <20160620092541.GO5140@eguan.usersys.redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160620092541.GO5140@eguan.usersys.redhat.com>
+	id S1752931AbcFTNdy (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 20 Jun 2016 09:33:54 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 3011AC05B1C5
+	for <fstests@vger.kernel.org>; Mon, 20 Jun 2016 13:24:36 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH v4 1/2] common/rc: add functions to check or write objects under /sys/fs/$FSTYP
+Date: Mon, 20 Jun 2016 21:24:32 +0800
+Message-Id: <1466429073-10124-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Jan Kara <jack@suse.cz>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: sandeen@redhat.com, eguan@redhat.com, cem@redhat.com, Zorro Lang <zlang@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Hi Eryu,
+XFS add more configurations in /sys/fs/xfs recently. For use
+them, this patch add some common functions for:
+  1. "require" a file/dir in /sys/fs/${FSTYP}.
+  2. write a file in /sys/fs/${FSTYP}.
 
-On Mon 20-06-16 17:25:41, Eryu Guan wrote:
-> On Thu, Jun 16, 2016 at 12:05:11PM +0200, Jan Kara wrote:
-> > The test is failing when MOUNT_OPTIONS contain 'data=<foo>' mount option
-> > as it does not combine with 'noload' mount option the test uses. Fix it
-> > by removing the data=<foo> mount option. Arguably we could also fix the
-> > problem by just skipping the test when such option is set but e.g. using
-> > 'data=writeback' is common to excercise somewhat different behavior and
-> 
-> When MOUNT_OPTIONS contains 'data=writeback' ext4/271 also fails
-> 
-> [275528.681541] EXT4-fs (sda6): can't mount with data=, fs mounted w/o journal
-> 
-> Seems kernel commit 1e381f60dad9 ("ext4: do not allow journal_opts for
-> fs w/o journal") refuses all mounts with "data=" mount option.
-> 
-> > it is undesirable to skip the test just because of this.
-> 
-> So skipping ext4/271 in this case makes more sense to me.
+For common use, these functions can be used by other filesystems.
 
-OK, I didn't think of other journal options. Yes, so skipping the test
-probably makes more sense then.
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
 
-> > Signed-off-by: Jan Kara <jack@suse.cz>
-> > ---
-> >  tests/ext4/271 | 4 ++++
-> >  1 file changed, 4 insertions(+)
-> > 
-> > diff --git a/tests/ext4/271 b/tests/ext4/271
-> > index d68c2719024e..417a796ffac9 100755
-> > --- a/tests/ext4/271
-> > +++ b/tests/ext4/271
-> > @@ -45,6 +45,10 @@ _scratch_mkfs_sized $((128 * 1024 * 1024)) >> $seqres.full 2>&1
-> >  
-> >  # -onoload and EXT4_SYNC_FL on file is important becase result in
-> >  # metadata sync writes inside ext4_handle_dirty_metadata()
-> > +#
-> > +# We have to be careful and remove data=<foo> mount options as they don't
-> > +# combine with 'noload'.
-> > +MOUNT_OPTIONS=$(echo $MOUNT_OPTIONS | sed -e 's/\([ ,]\)data=[a-zA-Z]*[,$]/\1/')
-> 
-> This doesn't remove 'data=<foo>' mount option for me
-> 
->   $ MKFS_OPTIONS="-o data=journal"
->   $ echo $MKFS_OPTIONS | sed -e 's/\([ ,]\)data=[a-zA-Z]*[,$]/\1/'
->   -o data=journal
-> 
-> Even with that works, the 'sed' filter only removes the 'data=<foo>'
-> part and leaves the '-o' part, which results in MOUNT_OPTIONS="-o" and
-> still causes mount to fail.
-> 
-> And perhaps other journal related mount options should be removed too?
-> e.g. journal_checksum, journal_async_commit, commit=<n>
-> 
-> I sent two patches back in Jan. to fix ext4/271 (skip ext4/271 when
-> MOUNT_OPTIONS contain journal related options), what do you think?
-> 
-> https://patchwork.kernel.org/patch/8052251/
-> https://patchwork.kernel.org/patch/8052261/
+Hi,
 
-OK, those two patches are fine with me. Why didn't they get merged? Care to
-resend?
+V4 did below changes:
+1) function name from *_fs_sys_fs to *_fs_sysfs
+2) use $UMOUNT_PROG to instead of umount
+3) use _short_dev
+4) add comments for new functions
+5) other little changes
 
-								Honza
+Thanks,
+Zorro
+
+ common/rc | 42 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 42 insertions(+)
+
+diff --git a/common/rc b/common/rc
+index 51092a0..88c3777 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3556,6 +3556,48 @@ run_fsx()
+ 	fi
+ }
+ 
++# Test for the existence of a sysfs entry at /sys/fs/$FSTYP/$DEV/$ENTRY
++_require_fs_sysfs()
++{
++	local dev=$1
++	local entry=$2
++	local tmp_mnt=`mktemp -d`
++
++	if [ ! -b "$dev" -o -z "$entry" ];then
++		_fail "Usage: _require_fs_sysfs <device> <sysfs_path>"
++        fi
++
++	local dname=$(_short_dev $dev)
++	_mount -t $FSTYP `_common_dev_mount_options` $dev $tmp_mnt
++	if [ $? -ne 0 ];then
++		rm -f $tmp_mnt
++		_fail "_require_fs_sysfs: could not mount, mkfs first in your test?"
++	elif [ ! -e /sys/fs/${FSTYP}/${dname}/${entry} ];then
++		$UMOUNT_PROG $tmp_mnt
++		rm -f $tmp_mnt
++		_notrun "/sys/fs/${FSTYP}/${dname}/${entry}: No such file or directory"
++	fi
++	$UMOUNT_PROG $tmp_mnt
++	rm -rf $tmp_mnt
++}
++
++# Write "content" into /sys/fs/$FSTYP/$DEV/$ENTRY
++_set_fs_sysfs_param()
++{
++	local dev=$1
++	shift
++	local entry=$1
++	shift
++	local content="$*"
++
++	if [ ! -b "$dev" -o -z "$entry" -o -z "$content" ];then
++		_fail "Usage: _set_fs_sysfs_param <mounted_device> <entry> <content>"
++	fi
++
++	local dname=$(_short_dev $dev)
++	echo "$content" > /sys/fs/${FSTYP}/${dname}/${entry}
++}
++
+ init_rc
+ 
+ ################################################################################
 -- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+2.5.5
+
