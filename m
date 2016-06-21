@@ -1,67 +1,108 @@
-Received: from mx1.redhat.com ([209.132.183.28]:42030 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:42078 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751599AbcFUIX2 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 21 Jun 2016 04:23:28 -0400
-Date: Tue, 21 Jun 2016 16:12:42 +0800
+	id S1751874AbcFUKlI (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 21 Jun 2016 06:41:08 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/2] generic/042: add to auto group
-Message-ID: <20160621081242.GU5140@eguan.usersys.redhat.com>
-References: <1465916890-28135-1-git-send-email-hch@lst.de>
- <1465916890-28135-3-git-send-email-hch@lst.de>
- <3280bc48-96f8-6653-933b-0154f0fa4a3e@plexistor.com>
- <20160614165125.GA32577@lst.de>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160614165125.GA32577@lst.de>
+Subject: [PATCH v2 1/2] fstests: introduce _require_no_mount_opts helper
+Date: Tue, 21 Jun 2016 18:40:28 +0800
+Message-Id: <1466505629-9402-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: Omer Zilberberg <omzg@plexistor.com>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: jack@suse.cz, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jun 14, 2016 at 06:51:25PM +0200, Christoph Hellwig wrote:
-> On Tue, Jun 14, 2016 at 06:44:40PM +0300, Omer Zilberberg wrote:
-> > 
-> > 
-> > On 06/14/2016 06:08 PM, Christoph Hellwig wrote:
-> > > This is an odd one as it's in the quick group but not the auto one.
-> > > And it actually fails on XFS for me..
-> > Please note that this was removed from 'auto' in commit:
-> > 7721b85 generic/042: remove from the 'auto' group
-> > I don't know whether the original reasons for this are still relevant...
-> > just FYI
-> 
-> I tend to disagree with the rationale, but even if we believe it it
-> should have been removed from the quick group as well.
+Some tests require that there's no certain mount option, so
+introduce a new helper _require_no_mount_opts() to do the check on
+$MOUNT_OPTIONS.
 
-So the question is how do we define auto group, 7721b85 removed auto
-group because "the auto group is for tests that *are* expected to
-succeed".
+Also convert generic/192 and xfs/134 to use this helper.
 
-I searched for Dave's explainations on 'auto' group in his reviews, and
-got the following definitions:
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+v2:
+- rebase on top of current master
 
-- it should be a valid & reliable test (it's finished and have
-  deterministic output) [1]
-- it passes on current upstream kernels, if it fails, it's likely to be
-  resolved in forseeable future [2]
-- it should take no longer than 5 minutes to finish [3]
+ common/rc         |  8 ++++++++
+ tests/generic/192 | 11 -----------
+ tests/xfs/134     |  8 +++-----
+ 3 files changed, 11 insertions(+), 16 deletions(-)
 
-generic/042 is a valid & reliable regression test, and it finishes
-within 5 seconds for me, but it fails on current upstream kernels, and I
-don't see when it could be fixed (the test was added in Oct. 2014, it's
-not fixed in almost two years).
+diff --git a/common/rc b/common/rc
+index 3a9c4d1..680ea2b 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2926,8 +2926,16 @@ _require_cloner()
+ 		_notrun "cloner binary not present at $CLONER_PROG"
+ }
+ 
++_require_no_mount_opts()
++{
++	if echo $MOUNT_OPTIONS | grep -q "$1"; then
++		_notrun "mount option \"$1\" not allowed in this test"
++	fi
++}
++
+ _require_atime()
+ {
++	_require_no_mount_opts "noatime"
+ 	if [ "$FSTYP" == "nfs" ]; then
+ 		_notrun "atime related mount options have no effect on NFS"
+ 	fi
+diff --git a/tests/generic/192 b/tests/generic/192
+index 6bbc87c..d3ed0ec 100755
+--- a/tests/generic/192
++++ b/tests/generic/192
+@@ -38,13 +38,6 @@ _access_time()
+ 	stat -c %X $1
+ }
+ 
+-is_noatime_set() {
+-	case "$MOUNT_OPTIONS" in
+-		*noatime*) return 0;;
+-	esac
+-	return 1
+-}
+-
+ # get standard environment, filters and checks
+ . ./common/rc
+ . ./common/filter
+@@ -61,10 +54,6 @@ _require_atime
+ #delay=45
+ delay=40
+ 
+-if is_noatime_set; then
+-	_notrun "this test makes no sense with noatime"
+-fi
+-
+ testfile=$TEST_DIR/testfile
+ rm -f $testfile
+ rm -f $seqres.full
+diff --git a/tests/xfs/134 b/tests/xfs/134
+index cd47069..a7df9fe 100755
+--- a/tests/xfs/134
++++ b/tests/xfs/134
+@@ -50,6 +50,9 @@ _supported_os Linux IRIX
+ 
+ _require_test
+ _require_xfs_quota
++# we can't run with group quotas
++_require_no_mount_opts "gquota"
++_require_no_mount_opts "grpquota"
+ 
+ dir=$SCRATCH_MNT/project
+ 
+@@ -70,11 +73,6 @@ _scratch_mkfs_xfs >/dev/null 2>&1
+ 
+ #if pquota's already in mount options then we dont need to enable
+ 
+-# we can't run with group quotas
+-if ( `echo $MOUNT_OPTIONS | grep -q gquota` || `echo $MOUNT_OPTIONS | grep -q grpquota` )
+-then
+-    _notrun "Can't run with group quotas enabled"
+-fi
+ EXTRA_MOUNT_OPTIONS="-o pquota"
+ 
+ if ! _scratch_mount "$EXTRA_MOUNT_OPTIONS" >$tmp.out 2>&1
+-- 
+2.5.5
 
-So removing it from 'auto' group seems fine to me, but I'm not sure
-about the 'quick' group. Is it related to auto?
-
-Thanks,
-Eryu
-
-[1] http://www.spinics.net/lists/fstests/msg00938.html
-[2] http://www.spinics.net/lists/fstests/msg01548.html
-[3] http://www.spinics.net/lists/fstests/msg01719.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
