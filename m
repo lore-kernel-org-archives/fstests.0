@@ -1,66 +1,134 @@
-Received: from mx1.redhat.com ([209.132.183.28]:41779 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:52770 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751547AbcFUMCz (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 21 Jun 2016 08:02:55 -0400
+	id S1750948AbcFUNVI (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 21 Jun 2016 09:21:08 -0400
+Date: Tue, 21 Jun 2016 21:20:30 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] xfs/186: run test on expected XFS configuration
-Date: Tue, 21 Jun 2016 20:01:47 +0800
-Message-Id: <1466510507-17548-1-git-send-email-eguan@redhat.com>
+Subject: Re: [PATCH v2 1/6] fstests: btrfs: add functions to set and reset
+ required number of SCRATCH_DEV_POOL
+Message-ID: <20160621132030.GX5140@eguan.usersys.redhat.com>
+References: <1463495530-425-1-git-send-email-anand.jain@oracle.com>
+ <1465980363-18906-1-git-send-email-anand.jain@oracle.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1465980363-18906-1-git-send-email-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com, Eryu Guan <eguan@redhat.com>
+To: Anand Jain <anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Usually xfs/186 _notrun on crc enabled XFS because of
-_require_attr_v1, since v2 attr format is always enabled on v5 XFS.
+On Wed, Jun 15, 2016 at 04:46:03PM +0800, Anand Jain wrote:
+> From: Anand Jain <Anand.Jain@oracle.com>
+> 
+> This patch provides functions
+>  _scratch_dev_pool_get()
+>  _scratch_dev_pool_put()
+> 
+> Which will help to set/reset SCRATCH_DEV_POOL with the required
+> number of devices. SCRATCH_DEV_POOL_SAVED will hold all the devices.
+> 
+> Usage:
+>   _scratch_dev_pool_get() <ndevs>
+>   :: do stuff
+> 
+>   _scratch_dev_pool_put()
+> 
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
 
-But when testing on 512B block size XFS, i.e. MKFS_OPTIONS="-m crc=0
--b size=512", test fails. This is because crc enalbed XFS was
-created in the end, not 512B block size XFS with crc disabled, and
-that's not what we want to test.
+I think the helpers should be introduced when they are first used, so
+that we know why they're introduced, and know how they're used with
+clear examples.
 
-The reason why _scratch_mkfs_xfs creates a different XFS than
-expected is that, it may ignore $MKFS_OPTIONS if mkfs fails due to
-conflicts between $MKFS_OPTIONS and the provided mkfs options.
+So patch 1, 2 and 4 can be merged as one patch, patch 3 updates
+btrfs/027, patch 4 and patch 5 can be merged as one patch, then comes
+patch 6.
 
-In the case of xfs/186, "-b size=512" conflicts with "-i size=512",
-and the first mkfs fails, then it ends up with a 4k block size XFS
-with crc enabled (the default config).
+What do you think?
 
-Fix it by checking crc enablement status and attr version in the
-test, to make sure it's testing on expected XFS.
+> ---
+>  v2: Error message and comment section updates.
+> 
+>  common/rc | 55 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 55 insertions(+)
+> 
+> diff --git a/common/rc b/common/rc
+> index 51092a0644f0..31c46ba1226e 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -802,6 +802,61 @@ _scratch_mkfs()
+>      esac
+>  }
+>  
+> +#
+> +# Generally test cases will have..
+> +#   _require_scratch_dev_pool X
+> +# to make sure it has the enough scratch devices including
+> +# replace-target and spare device. Now arg1 here is the
+> +# required number of scratch devices by a-test-case excluding
+> +# the replace-target and spare device. So this function will
+> +# set SCRATCH_DEV_POOL to the specified number of devices.
+> +#
+> +# Usage:
+> +#  _scratch_dev_pool_get() <ndevs>
+> +#     :: do stuff
+> +#
+> +#  _scratch_dev_pool_put()
+> +#
+> +_scratch_dev_pool_get()
+> +{
+> +	if [ $# != 1 ]; then
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
- tests/xfs/186 | 15 ++++++++++++++-
- 1 file changed, 14 insertions(+), 1 deletion(-)
+"-ne" "-eq" etc. are used for comparing integers, "=!" "==" are for
+strings. And I think $#, $? are integers here, "-ne" would be better.
 
-diff --git a/tests/xfs/186 b/tests/xfs/186
-index 9b64d6c..192a8c8 100755
---- a/tests/xfs/186
-+++ b/tests/xfs/186
-@@ -156,7 +156,20 @@ _require_attr_v1
- 
- rm -f $seqres.full
- 
--_scratch_mkfs -i attr=2,size=512 -l lazy-count=1 >/dev/null 2>&1
-+_scratch_mkfs -i attr=2,size=512 -l lazy-count=1 | _filter_mkfs \
-+	>>$seqres.full 2>$tmp.mkfs
-+# import crc status and attr version
-+. $tmp.mkfs
-+
-+# _scratch_mkfs may ignore $MKFS_OPTIONS if mkfs fails due to conflicts between
-+# $MKFS_OPTIONS and the provided mkfs options, which could result in creating
-+# an XFS we don't want. Check crc status and attr version to be sure.
-+if [ $_fs_has_crcs -eq 1 ]; then
-+	_notrun "attr v1 not supported on $SCRATCH_DEV"
-+fi
-+if [ $attr -ne 2 ]; then
-+	_notrun "need attr v2 on $SCRATCH_DEV"
-+fi
- 
- # set inum to root dir ino
- # we'll add in dirents and EAs into the root directory
--- 
-2.5.5
+Thanks,
+Eryu
 
+> +		_fail "Usage: _scratch_dev_pool_get ndevs"
+> +	fi
+> +
+> +	local test_ndevs=$1
+> +	local config_ndevs=`echo $SCRATCH_DEV_POOL| wc -w`
+> +	local devs[]="( $SCRATCH_DEV_POOL )"
+> +
+> +	typeset -p config_ndevs >/dev/null 2>&1
+> +	if [ $? != 0 ]; then
+> +		_fail "Bug: cant find SCRATCH_DEV_POOL ndevs"
+> +	fi
+> +
+> +	if [ $config_ndevs -lt $test_ndevs ]; then
+> +		_notrun "Need at least test requested number of ndevs $test_ndevs"
+> +	fi
+> +
+> +	SCRATCH_DEV_POOL_SAVED=${SCRATCH_DEV_POOL}
+> +	export SCRATCH_DEV_POOL_SAVED
+> +	SCRATCH_DEV_POOL=${devs[@]:0:$test_ndevs}
+> +	export SCRATCH_DEV_POOL
+> +}
+> +
+> +_scratch_dev_pool_put()
+> +{
+> +	typeset -p SCRATCH_DEV_POOL_SAVED >/dev/null 2>&1
+> +	if [ $? != 0 ]; then
+> +		_fail "Bug: unset val, must call _scratch_dev_pool_get before _scratch_dev_pool_put"
+> +	fi
+> +
+> +	if [ -z "$SCRATCH_DEV_POOL_SAVED" ]; then
+> +		_fail "Bug: str empty, must call _scratch_dev_pool_get before _scratch_dev_pool_put"
+> +	fi
+> +
+> +	export SCRATCH_DEV_POOL=$SCRATCH_DEV_POOL_SAVED
+> +	export SCRATCH_DEV_POOL_SAVED=""
+> +}
+> +
+>  _scratch_pool_mkfs()
+>  {
+>      case $FSTYP in
+> -- 
+> 2.7.0
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
