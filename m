@@ -1,108 +1,50 @@
-Received: from mx1.redhat.com ([209.132.183.28]:42078 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:37654 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751874AbcFUKlI (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 21 Jun 2016 06:41:08 -0400
+	id S1751984AbcFUKlK (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 21 Jun 2016 06:41:10 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v2 1/2] fstests: introduce _require_no_mount_opts helper
-Date: Tue, 21 Jun 2016 18:40:28 +0800
-Message-Id: <1466505629-9402-1-git-send-email-eguan@redhat.com>
+Subject: [PATCH v2 2/2] ext4/271: _notrun if there are journal related mount options
+Date: Tue, 21 Jun 2016 18:40:29 +0800
+Message-Id: <1466505629-9402-2-git-send-email-eguan@redhat.com>
+In-Reply-To: <1466505629-9402-1-git-send-email-eguan@redhat.com>
+References: <1466505629-9402-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: jack@suse.cz, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Some tests require that there's no certain mount option, so
-introduce a new helper _require_no_mount_opts() to do the check on
-$MOUNT_OPTIONS.
-
-Also convert generic/192 and xfs/134 to use this helper.
+ext4/271 runs in no journal mode (-onoload), so running test with
+journal related mount options makes no sense, and test fails after
+kernel commit 1e381f60dad9 ("ext4: do not allow journal_opts for fs
+w/o journal"), journal related mount options are not allowed in no
+journal mode. So _notrun if there're journal related mount options.
 
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
 v2:
+- update comments in the code
 - rebase on top of current master
 
- common/rc         |  8 ++++++++
- tests/generic/192 | 11 -----------
- tests/xfs/134     |  8 +++-----
- 3 files changed, 11 insertions(+), 16 deletions(-)
+ tests/ext4/271 | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-diff --git a/common/rc b/common/rc
-index 3a9c4d1..680ea2b 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2926,8 +2926,16 @@ _require_cloner()
- 		_notrun "cloner binary not present at $CLONER_PROG"
- }
+diff --git a/tests/ext4/271 b/tests/ext4/271
+index d68c271..ca344d9 100755
+--- a/tests/ext4/271
++++ b/tests/ext4/271
+@@ -39,6 +39,12 @@ trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
+ _supported_fs ext4
+ _supported_os Linux
+ _require_scratch
++# this test needs no journal to be loaded, skip on journal related mount
++# options, otherwise mount would fail with "-o noload" mount option
++_require_no_mount_opts "data="
++_require_no_mount_opts "commit="
++_require_no_mount_opts "journal_checksum"
++_require_no_mount_opts "journal_async_commit"
  
-+_require_no_mount_opts()
-+{
-+	if echo $MOUNT_OPTIONS | grep -q "$1"; then
-+		_notrun "mount option \"$1\" not allowed in this test"
-+	fi
-+}
-+
- _require_atime()
- {
-+	_require_no_mount_opts "noatime"
- 	if [ "$FSTYP" == "nfs" ]; then
- 		_notrun "atime related mount options have no effect on NFS"
- 	fi
-diff --git a/tests/generic/192 b/tests/generic/192
-index 6bbc87c..d3ed0ec 100755
---- a/tests/generic/192
-+++ b/tests/generic/192
-@@ -38,13 +38,6 @@ _access_time()
- 	stat -c %X $1
- }
- 
--is_noatime_set() {
--	case "$MOUNT_OPTIONS" in
--		*noatime*) return 0;;
--	esac
--	return 1
--}
--
- # get standard environment, filters and checks
- . ./common/rc
- . ./common/filter
-@@ -61,10 +54,6 @@ _require_atime
- #delay=45
- delay=40
- 
--if is_noatime_set; then
--	_notrun "this test makes no sense with noatime"
--fi
--
- testfile=$TEST_DIR/testfile
- rm -f $testfile
  rm -f $seqres.full
-diff --git a/tests/xfs/134 b/tests/xfs/134
-index cd47069..a7df9fe 100755
---- a/tests/xfs/134
-+++ b/tests/xfs/134
-@@ -50,6 +50,9 @@ _supported_os Linux IRIX
- 
- _require_test
- _require_xfs_quota
-+# we can't run with group quotas
-+_require_no_mount_opts "gquota"
-+_require_no_mount_opts "grpquota"
- 
- dir=$SCRATCH_MNT/project
- 
-@@ -70,11 +73,6 @@ _scratch_mkfs_xfs >/dev/null 2>&1
- 
- #if pquota's already in mount options then we dont need to enable
- 
--# we can't run with group quotas
--if ( `echo $MOUNT_OPTIONS | grep -q gquota` || `echo $MOUNT_OPTIONS | grep -q grpquota` )
--then
--    _notrun "Can't run with group quotas enabled"
--fi
- EXTRA_MOUNT_OPTIONS="-o pquota"
- 
- if ! _scratch_mount "$EXTRA_MOUNT_OPTIONS" >$tmp.out 2>&1
+ _scratch_mkfs_sized $((128 * 1024 * 1024)) >> $seqres.full 2>&1
 -- 
 2.5.5
 
