@@ -1,77 +1,66 @@
-Received: from mx1.redhat.com ([209.132.183.28]:41162 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:41779 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751501AbcFUMBc (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 21 Jun 2016 08:01:32 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 86AB763E12
-	for <fstests@vger.kernel.org>; Tue, 21 Jun 2016 12:01:31 +0000 (UTC)
-Date: Tue, 21 Jun 2016 20:01:29 +0800
+	id S1751547AbcFUMCz (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 21 Jun 2016 08:02:55 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] xfs/186: fix test for crc=0, ftype=1
-Message-ID: <20160621120129.GW5140@eguan.usersys.redhat.com>
-References: <cf27c5c1-65ea-ef8b-c06c-cf4af1520d39@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <cf27c5c1-65ea-ef8b-c06c-cf4af1520d39@redhat.com>
+Subject: [PATCH] xfs/186: run test on expected XFS configuration
+Date: Tue, 21 Jun 2016 20:01:47 +0800
+Message-Id: <1466510507-17548-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: xfs@oss.sgi.com, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jun 17, 2016 at 12:54:43PM -0500, Eric Sandeen wrote:
-> Test 186 won't run when crcs are enabled, because
-> attrv1 is not allowed with crc=1.
-> 
-> However, ftype is still allowed with crc=0, so
-> this creates v3 directories, and xfs_db prints
-> them as such (along with the filetype), which
-> breaks the test output.
-> 
-> We can filter & replace to fix up the test in
-> this case.
-> 
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+Usually xfs/186 _notrun on crc enabled XFS because of
+_require_attr_v1, since v2 attr format is always enabled on v5 XFS.
 
-This fixes the problems I hit, and it looks fine to me.
+But when testing on 512B block size XFS, i.e. MKFS_OPTIONS="-m crc=0
+-b size=512", test fails. This is because crc enalbed XFS was
+created in the end, not 512B block size XFS with crc disabled, and
+that's not what we want to test.
 
-But xfs/186 still fails with MKFS_OPTIONS="-m crc=1 -b size=512", but
-that's a different issue, I'll send another patch to fix it.
+The reason why _scratch_mkfs_xfs creates a different XFS than
+expected is that, it may ignore $MKFS_OPTIONS if mkfs fails due to
+conflicts between $MKFS_OPTIONS and the provided mkfs options.
 
-Thanks,
-Eryu
+In the case of xfs/186, "-b size=512" conflicts with "-i size=512",
+and the first mkfs fails, then it ends up with a 4k block size XFS
+with crc enabled (the default config).
 
-> ---
-> 
-> diff --git a/tests/xfs/186 b/tests/xfs/186
-> index 8e18975..cf66623 100755
-> --- a/tests/xfs/186
-> +++ b/tests/xfs/186
-> @@ -76,12 +76,17 @@ _rmv_eas()
->  	done
->  }
->  
-> +# If filetype is available (-n ftype=1) will get v3 dirs;
-> +# just filter/replace to make this look teh same as if we
-> +# had v2 dirs, as we are not interested in this info.
->  _filter_inode()
->  {
->  	tee -a $seqres.full | \
->  		sed -e "s/core.forkoff/forkoff/g" | \
-> -		egrep '^u.sfdir2|^a.sfattr|forkoff' | \
-> -		egrep -v 'inumber|parent'
-> +		egrep '^u.sfdir2|^u.sfdir3|^a.sfattr|forkoff' | \
-> +		egrep -v 'inumber|parent' | \
-> +		sed -e s/sfdir3/sfdir2/g | \
-> +		grep -v filetype
->  }
->  
->  _filter_version()
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Fix it by checking crc enablement status and attr version in the
+test, to make sure it's testing on expected XFS.
+
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+ tests/xfs/186 | 15 ++++++++++++++-
+ 1 file changed, 14 insertions(+), 1 deletion(-)
+
+diff --git a/tests/xfs/186 b/tests/xfs/186
+index 9b64d6c..192a8c8 100755
+--- a/tests/xfs/186
++++ b/tests/xfs/186
+@@ -156,7 +156,20 @@ _require_attr_v1
+ 
+ rm -f $seqres.full
+ 
+-_scratch_mkfs -i attr=2,size=512 -l lazy-count=1 >/dev/null 2>&1
++_scratch_mkfs -i attr=2,size=512 -l lazy-count=1 | _filter_mkfs \
++	>>$seqres.full 2>$tmp.mkfs
++# import crc status and attr version
++. $tmp.mkfs
++
++# _scratch_mkfs may ignore $MKFS_OPTIONS if mkfs fails due to conflicts between
++# $MKFS_OPTIONS and the provided mkfs options, which could result in creating
++# an XFS we don't want. Check crc status and attr version to be sure.
++if [ $_fs_has_crcs -eq 1 ]; then
++	_notrun "attr v1 not supported on $SCRATCH_DEV"
++fi
++if [ $attr -ne 2 ]; then
++	_notrun "need attr v2 on $SCRATCH_DEV"
++fi
+ 
+ # set inum to root dir ino
+ # we'll add in dirents and EAs into the root directory
+-- 
+2.5.5
+
