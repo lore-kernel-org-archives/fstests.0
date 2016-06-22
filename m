@@ -1,48 +1,49 @@
-Received: from mx1.redhat.com ([209.132.183.28]:33582 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:48685 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752103AbcFVLrm (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 22 Jun 2016 07:47:42 -0400
+	id S1752457AbcFVMEN (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 22 Jun 2016 08:04:13 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 1/3] overlay: test visible whiteout issue after rename
-Date: Wed, 22 Jun 2016 19:38:56 +0800
-Message-Id: <1466595538-23719-1-git-send-email-eguan@redhat.com>
+Subject: [PATCH 2/3] overlay: getcwd() after a failed rmdir
+Date: Wed, 22 Jun 2016 19:38:57 +0800
+Message-Id: <1466595538-23719-2-git-send-email-eguan@redhat.com>
+In-Reply-To: <1466595538-23719-1-git-send-email-eguan@redhat.com>
+References: <1466595538-23719-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-unionfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Test visible whiteout issue after renaming file from lowerdir to a
-dir in upperdir.
+Test getcwd() failure after unsuccessful rmdir, the getcwd() call
+should return the correct path.
 
-Upstream commit 45d117389696 ("ovl: ignore lower entries when
-checking purity of non-directory entries") fixed the issue
+Upstream commit ce9113bbcbf4 ("ovl: fix getcwd() failure after
+unsuccessful rmdir") fixed this issue.
 
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- tests/overlay/006     | 77 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/006.out |  2 ++
+ tests/overlay/007     | 65 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/007.out |  2 ++
  tests/overlay/group   |  1 +
- 3 files changed, 80 insertions(+)
- create mode 100755 tests/overlay/006
- create mode 100644 tests/overlay/006.out
+ 3 files changed, 68 insertions(+)
+ create mode 100755 tests/overlay/007
+ create mode 100644 tests/overlay/007.out
 
-diff --git a/tests/overlay/006 b/tests/overlay/006
+diff --git a/tests/overlay/007 b/tests/overlay/007
 new file mode 100755
-index 0000000..31f11ef
+index 0000000..ccf2b75
 --- /dev/null
-+++ b/tests/overlay/006
-@@ -0,0 +1,77 @@
++++ b/tests/overlay/007
+@@ -0,0 +1,65 @@
 +#! /bin/bash
-+# FS QA Test 006
++# FS QA Test 007
 +#
-+# Test visible whiteout issue after renaming file from lowerdir to a dir in
-+# upperdir.
++# Test getcwd() failure after unsuccessful rmdir
 +#
-+# Upstream commit 45d117389696 ("ovl: ignore lower entries when checking purity
-+# of non-directory entries") fixed the issue
++# Upstream commit ce9113bbcbf4 ("ovl: fix getcwd() failure after unsuccessful
++# rmdir") fixed this issue
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Red Hat Inc.,  All Rights Reserved.
++# Copyright (c) 2016 Red Hat Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -83,49 +84,38 @@ index 0000000..31f11ef
 +# real QA test starts here
 +_supported_fs overlay
 +_supported_os Linux
-+_require_scratch
++_require_test
 +
-+echo "Silence is golden"
++rm -rf $TEST_DIR/$seq
 +
-+# Remove all files from previous tests
-+_scratch_mkfs
-+
-+# Create test file/dir before mount
-+mkdir $SCRATCH_DEV/$OVERLAY_LOWER_DIR
-+mkdir $SCRATCH_DEV/$OVERLAY_UPPER_DIR
-+touch $SCRATCH_DEV/$OVERLAY_LOWER_DIR/lowertestfile
-+mkdir $SCRATCH_DEV/$OVERLAY_UPPER_DIR/uppertestdir
-+
-+_scratch_mount
-+
-+# rename lowertestfile to uppertestdir, this triggers copyup and creates
-+# whiteout in $OVERLAY_UPPER_DIR
-+mv $SCRATCH_MNT/lowertestfile $SCRATCH_MNT/uppertestdir
-+# the lowertestfile can be removed
-+rm $SCRATCH_MNT/uppertestdir/lowertestfile
-+# no file no whiteout file in upptestdir
-+ls $SCRATCH_MNT/uppertestdir
++# make a non-empty dir $seq
++mkdir -p $TEST_DIR/$seq/$seq.sub
++# cd to it and call rmdir on it, rmdir should fail
++cd $TEST_DIR/$seq
++rmdir ../$seq >>$seqres.full 2>&1
++# getcwd should return the correct current dir
++pwd | _filter_test_dir
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/overlay/006.out b/tests/overlay/006.out
+diff --git a/tests/overlay/007.out b/tests/overlay/007.out
 new file mode 100644
-index 0000000..675c1b7
+index 0000000..86aabe4
 --- /dev/null
-+++ b/tests/overlay/006.out
++++ b/tests/overlay/007.out
 @@ -0,0 +1,2 @@
-+QA output created by 006
-+Silence is golden
++QA output created by 007
++TEST_DIR/007
 diff --git a/tests/overlay/group b/tests/overlay/group
-index d8fc597..78a67bf 100644
+index 78a67bf..e29e540 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -8,3 +8,4 @@
- 003 auto quick whiteout
+@@ -9,3 +9,4 @@
  004 attr auto copyup quick
  005 auto copyup quick
-+006 auto quick copyup whiteout
+ 006 auto quick copyup whiteout
++007 auto quick
 -- 
 2.7.4
 
