@@ -1,58 +1,142 @@
-Received: from mx1.redhat.com ([209.132.183.28]:60803 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:33584 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752505AbcFVLno (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 22 Jun 2016 07:43:44 -0400
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id 3E69078225
-	for <fstests@vger.kernel.org>; Wed, 22 Jun 2016 11:43:39 +0000 (UTC)
+	id S1751623AbcFVLrm (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 22 Jun 2016 07:47:42 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v3 2/2] ext4/271: _notrun if there are journal related mount options
-Date: Wed, 22 Jun 2016 19:43:31 +0800
-Message-Id: <1466595811-23822-2-git-send-email-eguan@redhat.com>
-In-Reply-To: <1466595811-23822-1-git-send-email-eguan@redhat.com>
-References: <1466595811-23822-1-git-send-email-eguan@redhat.com>
+Subject: [PATCH 3/3] overlay: create new file over whiteout
+Date: Wed, 22 Jun 2016 19:38:58 +0800
+Message-Id: <1466595538-23719-3-git-send-email-eguan@redhat.com>
+In-Reply-To: <1466595538-23719-1-git-send-email-eguan@redhat.com>
+References: <1466595538-23719-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+Cc: linux-unionfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-ext4/271 runs in no journal mode (-onoload), so running test with
-journal related mount options makes no sense, and test fails after
-kernel commit 1e381f60dad9 ("ext4: do not allow journal_opts for fs
-w/o journal"), journal related mount options are not allowed in no
-journal mode. So _notrun if there're journal related mount options.
+Create file/dir over whiteout by another user, uid/gid of the
+file/dir should be current fsuid/fsgid, not the mounter's.
+
+This upstream kernel patch fixed the issue
+d0e13f5 ovl: fix uid/gid when creating over whiteout
 
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
-v3:
-- rename _require_no_mount_opts to _exclude_mount_option
+ tests/overlay/008     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/008.out |  3 ++
+ tests/overlay/group   |  1 +
+ 3 files changed, 89 insertions(+)
+ create mode 100755 tests/overlay/008
+ create mode 100644 tests/overlay/008.out
 
-v2:
-- update comments in the code
-- rebase on top of current master
-
- tests/ext4/271 | 6 ++++++
- 1 file changed, 6 insertions(+)
-
-diff --git a/tests/ext4/271 b/tests/ext4/271
-index d68c271..c04fd4a 100755
---- a/tests/ext4/271
-+++ b/tests/ext4/271
-@@ -39,6 +39,12 @@ trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
- _supported_fs ext4
- _supported_os Linux
- _require_scratch
-+# this test needs no journal to be loaded, skip on journal related mount
-+# options, otherwise mount would fail with "-o noload" mount option
-+_exclude_mount_option "data="
-+_exclude_mount_option "commit="
-+_exclude_mount_option "journal_checksum"
-+_exclude_mount_option "journal_async_commit"
- 
- rm -f $seqres.full
- _scratch_mkfs_sized $((128 * 1024 * 1024)) >> $seqres.full 2>&1
+diff --git a/tests/overlay/008 b/tests/overlay/008
+new file mode 100755
+index 0000000..cb8667c
+--- /dev/null
++++ b/tests/overlay/008
+@@ -0,0 +1,85 @@
++#! /bin/bash
++# FS QA Test 008
++#
++# Create file/dir over whiteout by another user, uid/gid of the file/dir should
++# be current fsuid/fsgid, not the mounter's.
++#
++# This upstream kernel patch fixed the issue
++# d0e13f5 ovl: fix uid/gid when creating over whiteout
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Red Hat Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++_require_scratch
++_require_user
++
++# Remove all files from previous tests
++_scratch_mkfs
++
++# Create test file on lower dir, and chown to fsgqa user
++lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
++mkdir $lowerdir
++touch $lowerdir/testfile
++chown fsgqa:fsgqa $lowerdir/testfile
++
++# chown upperdir to fsgqa user, so new file/dir can be created by the user
++upperdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
++mkdir $upperdir
++chown fsgqa:fsgqa $upperdir
++
++_scratch_mount
++
++# Remove testfile, whiteout created in lowerdir
++rm -f $SCRATCH_MNT/testfile
++
++# Create new file over whiteout and check the file ownership
++_user_do "touch $SCRATCH_MNT/testfile"
++stat -c %U:%G-%F $SCRATCH_MNT/testfile
++
++# Create new dir over whiteout and check ownership again
++rm -f $SCRATCH_MNT/testfile
++_user_do "mkdir $SCRATCH_MNT/testfile"
++stat -c %U:%G-%F $SCRATCH_MNT/testfile
++
++# success, all done
++status=0
++exit
+diff --git a/tests/overlay/008.out b/tests/overlay/008.out
+new file mode 100644
+index 0000000..6e17968
+--- /dev/null
++++ b/tests/overlay/008.out
+@@ -0,0 +1,3 @@
++QA output created by 008
++fsgqa:fsgqa-regular empty file
++fsgqa:fsgqa-directory
+diff --git a/tests/overlay/group b/tests/overlay/group
+index e29e540..874bfdd 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -10,3 +10,4 @@
+ 005 auto copyup quick
+ 006 auto quick copyup whiteout
+ 007 auto quick
++008 auto quick whiteout
 -- 
 2.7.4
 
