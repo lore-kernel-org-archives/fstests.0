@@ -1,95 +1,120 @@
-Received: from mail-io0-f175.google.com ([209.85.223.175]:35328 "EHLO
-	mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752299AbcFWLly (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 23 Jun 2016 07:41:54 -0400
-Received: by mail-io0-f175.google.com with SMTP id f30so68935027ioj.2
-        for <fstests@vger.kernel.org>; Thu, 23 Jun 2016 04:41:53 -0700 (PDT)
+Received: from mail-io0-f195.google.com ([209.85.223.195]:35556 "EHLO
+	mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750874AbcFWLyX (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 23 Jun 2016 07:54:23 -0400
 MIME-Version: 1.0
-In-Reply-To: <CACj3i73+Hey_jv8Y1ky_2JPdeauqEhFUWVF89tyFFH6s04ZcrQ@mail.gmail.com>
-References: <1464858659-610-1-git-send-email-jtulak@redhat.com>
- <20160607034555.GK5140@eguan.usersys.redhat.com> <CACj3i733G7oz_tg4NANfz_=X5nYMp31k-FskEPXxHsaSxKtTEw@mail.gmail.com>
- <CACj3i73+Hey_jv8Y1ky_2JPdeauqEhFUWVF89tyFFH6s04ZcrQ@mail.gmail.com>
-From: Jan Tulak <jtulak@redhat.com>
-Date: Thu, 23 Jun 2016 13:41:33 +0200
-Message-ID: <CACj3i71iCFJ16p-=2VBy6v7ZCa9=oGPiW=hfpG-_uNEuKNM89g@mail.gmail.com>
-Subject: Re: [PATCH] xfstests: update xfs/096 for new behaviour
+Reply-To: fdmanana@gmail.com
+In-Reply-To: <98fc270c-cd74-23cb-7bd6-b02ff75a7b91@oracle.com>
+References: <1466678252-4058-1-git-send-email-anand.jain@oracle.com>
+ <20160623105302.GJ3226@eguan.usersys.redhat.com> <24a2491d-91d7-0e45-5008-e784b7a699fd@oracle.com>
+ <20160623111843.GL3226@eguan.usersys.redhat.com> <98fc270c-cd74-23cb-7bd6-b02ff75a7b91@oracle.com>
+From: Filipe Manana <fdmanana@gmail.com>
+Date: Thu, 23 Jun 2016 12:54:22 +0100
+Message-ID: <CAL3q7H7A061KGcjByrLTqMrA=fexMajjeZuzSjDUO2M7LToJXQ@mail.gmail.com>
+Subject: Re: [PATCH v2] fstests: btrfs: fix 006 adds _runnt_btrfs_util_prog()
 Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: Anand Jain <anand.jain@oracle.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 23, 2016 at 1:22 PM, Jan Tulak <jtulak@redhat.com> wrote:
-> On Tue, Jun 7, 2016 at 10:18 AM, Jan Tulak <jtulak@redhat.com> wrote:
+On Thu, Jun 23, 2016 at 12:34 PM, Anand Jain <anand.jain@oracle.com> wrote:
+>
+>
+> On 06/23/2016 07:18 PM, Eryu Guan wrote:
 >>
->>
->>
->> On Tue, Jun 7, 2016 at 5:45 AM, Eryu Guan <eguan@redhat.com> wrote:
->>>
->>> On Thu, Jun 02, 2016 at 11:10:59AM +0200, Jan Tulak wrote:
->>> > Because we recently changed how mkfs behaves when it gets
->>> > incorrect/invalid
->>> > values, update the expected output to reflect the change.
->>>
->>> This will break test with old-behavior xfsprogs. But I'm not sure what
->>> the best solution is..
->>
->>
->> Hmm, well, an "if version > something" could work, together with testing the
->> changed text directly in the test and making the correct output quiet.
->>
->> I can add something like that to xfstests and make it a function
->> (has_mkfs_old_input_format) for easier use in the tests, but... It seems
->> that only this single test is broken by the change, and I don't know if we
->> want this backward compatibility in future tests.
->>
->> The only case when I see a usage would be finding a bug and then using the
->> test to bisect the commit, while going over the change boundary. And will
->> the persons doing this remember that there is a check for this? Or will they
->> vaguely remember that there was some change and just look for the version
->> and make their own "if version"?
->>
->> I would like a centralised solution, but I'm really afraid that it would be
->> of no use. And moving the output text into the test is the only way I can
->> think of for this specific test.
->>
->>
+>> On Thu, Jun 23, 2016 at 07:03:59PM +0800, Anand Jain wrote:
 >>>
 >>>
->>> And it seems that generic/054 and generic/055 are failing because of the
->>> same reason, if so, fix them together?
+>>>
+>>> On 06/23/2016 06:53 PM, Eryu Guan wrote:
+>>
+>> [snip]
+>>>>>
+>>>>> diff --git a/common/rc b/common/rc
+>>>>> index a44fb8750220..2a10fbb2d341 100644
+>>>>> --- a/common/rc
+>>>>> +++ b/common/rc
+>>>>> @@ -3114,6 +3114,17 @@ _min_dio_alignment()
+>>>>>      fi
+>>>>>  }
+>>>>>
+>>>>> +run_check_dontfail()
+>>>>> +{
+>>>>> +       echo "# $@" >> $seqres.full 2>&1
+>>>>> +       "$@" >> $seqres.full 2>&1 || echo "failed: '$@'"
+>>>>> +}
+>>>>> +
+>>>>> +_runnt_btrfs_util_prog()
+>>>>> +{
+>>>>> +       run_check_dontfail $BTRFS_UTIL_PROG $*
+>>>>> +}
+>>>>> +
+>>>>>  run_check()
+>>>>>  {
+>>>>>         echo "# $@" >> $seqres.full 2>&1
+>>>>> diff --git a/tests/btrfs/006 b/tests/btrfs/006
+>>>>> index 715fd80fb6fc..9d1fe09e07de 100755
+>>>>> --- a/tests/btrfs/006
+>>>>> +++ b/tests/btrfs/006
+>>>>> @@ -79,7 +79,7 @@ echo "== Show filesystem by UUID"
+>>>>>  $BTRFS_UTIL_PROG filesystem show $UUID | _filter_btrfs_filesystem_show
+>>>>> $TOTAL_DEVS $UUID
+>>>>>
+>>>>>  echo "== Sync filesystem"
+>>>>> -$BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT | _filter_scratch
+>>>>> +_runnt_btrfs_util_prog filesystem sync $SCRATCH_MNT
+>>>>
+>>>>
+>>>> Still, I don't think this helper is necessary.
+>>>>
+>>>> $BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT >/dev/null
+>>>>
+>>>> doesn't _fail on failure, output error messages breaks golden image, and
+>>>> is much simpler. Do I miss anything?
+>>>
+>>>
+>>>  runnt_btrfs_util_prog() checks the return status of the command,
+>>>  if failed (!0) it will echo so to break the golden image.
 >>
 >>
->> These two tests should be fixed by the -l su minval patch, so it is just
->> this one.
->>
+>> So it fails silently now? (return non-zero value and print no error
+>> message) That seems a btrfs-progs bug to me.. It should print error
+>> messages to stderr on failure, so we don't have to check the return
+>> value explicitly.
 >
-> Mmm, I spent some time on this but did not figure out any nice
-> solution. Or... I found one, but I'm not sure how you will like it.
 >
-> Making the test to comply both versions is difficult because it is not
-> just the error message that differs, but also that this run is now
-> invalid:
->
-> # test log stripe greater than LR size
->  --- mkfs=-l version=2,su=266240 ---
->
-> It differs also in what should fail. So rather than making some
-> complicated logic, I got the idea to make a duplicity of this test.
-> One will run with old version and skipped on the new, the other vice
-> versa. Naming can utilize the text suffixes, so we would have xfs/096
-> and xfs/096-old-mkfs-inputs.
->
-> It is not ideal, but looks better than some in-test filtering... What
-> do you think?
->
+>  For programming interfaces I would rather depend more on the return
+>  value, than the UI/error strings.
 
-Just a correction, the new test name would be something like
-XXX-old-mkfs-inputs-096, the sequential number has to be unique.
+That's precisely why both error messages to stderr *and* return values are used.
+For scripts you always have the option to ignore stderr through
+redirection to /dev/null and check only the return value.
 
-Thanks,
-Jan
+Also _runnt_btrfs_util_prog filesystem is, in my opinion, a terrible
+name. What does "runnt" means?
+
+>
+> Thanks, Anand
+>
+>
+>> Thanks,
+>> Eryu
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
 
 -- 
-Jan Tulak
-jtulak@redhat.com / jan@tulak.me
+Filipe David Manana,
+
+"Reasonable men adapt themselves to the world.
+ Unreasonable men adapt the world to themselves.
+ That's why all progress depends on unreasonable men."
