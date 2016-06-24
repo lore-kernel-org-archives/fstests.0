@@ -1,62 +1,101 @@
-Received: from mx1.redhat.com ([209.132.183.28]:36837 "EHLO mx1.redhat.com"
+Received: from mx2.suse.de ([195.135.220.15]:58741 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750831AbcFXEuW (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 24 Jun 2016 00:50:22 -0400
-Date: Fri, 24 Jun 2016 12:50:19 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2 1/2] fstests: introduce _require_no_mount_opts helper
-Message-ID: <20160624045019.GC23649@eguan.usersys.redhat.com>
-References: <1466505629-9402-1-git-send-email-eguan@redhat.com>
- <20160621234202.GB27480@dastard>
- <20160622032351.GZ5140@eguan.usersys.redhat.com>
- <20160622230650.GL27480@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160622230650.GL27480@dastard>
+	id S1750988AbcFXPIh (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 24 Jun 2016 11:08:37 -0400
+From: jeffm@suse.com
+Subject: [PATCH 1/4] fstests: btrfs/048: extend _filter_btrfs_prop_error to handle additional errors
+Date: Fri, 24 Jun 2016 11:08:31 -0400
+Message-Id: <1466780914-23884-1-git-send-email-jeffm@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, jack@suse.cz
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 23, 2016 at 09:06:50AM +1000, Dave Chinner wrote:
-> On Wed, Jun 22, 2016 at 11:23:51AM +0800, Eryu Guan wrote:
-> > On Wed, Jun 22, 2016 at 09:42:02AM +1000, Dave Chinner wrote:
-> > > On Tue, Jun 21, 2016 at 06:40:28PM +0800, Eryu Guan wrote:
-> > > > Some tests require that there's no certain mount option, so
-> > > > introduce a new helper _require_no_mount_opts() to do the check on
-> > > > $MOUNT_OPTIONS.
-> > > 
-> > > I think this is fine, except for the name. It's more of an exclude
-> > > rule rather than a "require" rule. i.e.  _exclude_mount_option() is
-> > > closer to it's purpose.
-> > 
-> > This does look better to me, thanks!
-> > 
-> > > 
-> > > The only other question I have is that mount options can be
-> > > different between test and scratch devices - the test device mount
-> > > options can be set via TEST_FS_MOUNT_OPTS, as well as via
-> > > MOUNT_OPTIONS. Does this rule need to handle that?
-> > 
-> > I didn't think about TEST_FS_MOUNT_OPTS. Currently there's no need to
-> > handle it, MOUNT_OPTIONS is sufficient I think.
-> > 
-> > How about I rename it to _exclude_scratch_mount_option()? And we can
-> > always add another _exclude_test_mount_option() if needed in future.
-> 
-> Sounds good.
+From: Jeff Mahoney <jeffm@suse.com>
 
-Hi Dave,
+btrfsprogs v4.5.3 changed the formatting of some error messages.  This
+patch extends the filter for btrfs prop to handle those.
 
-My v4 patches simply rename the helper to this
-"_exclude_scratch_mount_option", no function change. Then I take your
-reviews as a "Reviewed-by" tag based on "I think this is fine, except for
-the name." and the above "Sounds good.". So I can queue them for next
-pull request and start release testing, and don't have to bother you
-providing an explicit reviewed-by.
+Signed-off-by: Jeff Mahoney <jeffm@suse.com>
+---
+ common/filter.btrfs | 10 +++++++---
+ tests/btrfs/048     |  6 ++++--
+ tests/btrfs/048.out |  4 ++--
+ 3 files changed, 13 insertions(+), 7 deletions(-)
 
-Please let me know if you have different thoughts.
+diff --git a/common/filter.btrfs b/common/filter.btrfs
+index 9970f4d..54361d4 100644
+--- a/common/filter.btrfs
++++ b/common/filter.btrfs
+@@ -72,15 +72,19 @@ _filter_btrfs_compress_property()
+ 	sed -e "s/compression=\(lzo\|zlib\)/COMPRESSION=XXX/g"
+ }
+ 
+-# filter name of the property from the output, optionally verify against $1
++# filter error messages from btrfs prop, optionally verify against $1
+ # recognized message(s):
+ #  "object is not compatible with property: label"
++#  "invalid value for property:{, value}"
++#  "failed to {get,set} compression for $PATH[.:]: Invalid argument"
+ _filter_btrfs_prop_error()
+ {
+ 	if ! [ -z "$1" ]; then
+-		sed -e "s/\(compatible with property\): $1/\1/"
++		sed -e "s#\(compatible with property\): $1#\1#" \
++		    -e "s#^\(.*failed to [sg]et compression for $1\)[:.] \(.*\)#\1: \2#"
+ 	else
+-		sed -e "s/^\(.*compatible with property\).*/\1/"
++		sed -e "s#^\(.*compatible with property\).*#\1#" \
++		    -e "s#^\(.*invalid value for property\):.*#\1#"
+ 	fi
+ }
+ 
+diff --git a/tests/btrfs/048 b/tests/btrfs/048
+index 4a36303..0b907b0 100755
+--- a/tests/btrfs/048
++++ b/tests/btrfs/048
+@@ -79,7 +79,8 @@ echo -e "\nTesting subvolume ro property"
+ _run_btrfs_util_prog subvolume create $SCRATCH_MNT/sv1
+ $BTRFS_UTIL_PROG property get $SCRATCH_MNT/sv1 ro
+ echo "***"
+-$BTRFS_UTIL_PROG property set $SCRATCH_MNT/sv1 ro foo
++$BTRFS_UTIL_PROG property set $SCRATCH_MNT/sv1 ro foo 2>&1 |
++	_filter_btrfs_prop_error
+ echo "***"
+ $BTRFS_UTIL_PROG property set $SCRATCH_MNT/sv1 ro true
+ echo "***"
+@@ -99,7 +100,8 @@ $BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir/file1 compression
+ $BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir/subdir1 compression
+ echo "***"
+ $BTRFS_UTIL_PROG property set $SCRATCH_MNT/testdir/file1 compression \
+-	foo 2>&1 | _filter_scratch
++	foo 2>&1 | _filter_scratch |
++	_filter_btrfs_prop_error SCRATCH_MNT/testdir/file1
+ echo "***"
+ $BTRFS_UTIL_PROG property set $SCRATCH_MNT/testdir/file1 compression lzo
+ $BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir/file1 compression
+diff --git a/tests/btrfs/048.out b/tests/btrfs/048.out
+index 0b20d0b..3e4e3d2 100644
+--- a/tests/btrfs/048.out
++++ b/tests/btrfs/048.out
+@@ -15,7 +15,7 @@ ERROR: object is not compatible with property
+ Testing subvolume ro property
+ ro=false
+ ***
+-ERROR: invalid value for property.
++ERROR: invalid value for property
+ ***
+ ***
+ ro=true
+@@ -27,7 +27,7 @@ ro=false
+ 
+ Testing compression property
+ ***
+-ERROR: failed to set compression for SCRATCH_MNT/testdir/file1. Invalid argument
++ERROR: failed to set compression for SCRATCH_MNT/testdir/file1: Invalid argument
+ ***
+ compression=lzo
+ compression=lzo
+-- 
+1.8.5.6
 
-Thanks,
-Eryu
