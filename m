@@ -1,11 +1,11 @@
-Received: from mx2.suse.de ([195.135.220.15]:58747 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:58748 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750999AbcFXPIh (ORCPT <rfc822;fstests@vger.kernel.org>);
+	id S1750997AbcFXPIh (ORCPT <rfc822;fstests@vger.kernel.org>);
 	Fri, 24 Jun 2016 11:08:37 -0400
 From: jeffm@suse.com
-Subject: [PATCH 3/4] fstests: btrfs/125: test sysfs exports of allocation and device membership info
-Date: Fri, 24 Jun 2016 11:08:33 -0400
-Message-Id: <1466780914-23884-3-git-send-email-jeffm@suse.com>
+Subject: [PATCH 2/4] fstests: btrfs/124: test global metadata reservation reporting
+Date: Fri, 24 Jun 2016 11:08:32 -0400
+Message-Id: <1466780914-23884-2-git-send-email-jeffm@suse.com>
 In-Reply-To: <1466780914-23884-1-git-send-email-jeffm@suse.com>
 References: <1466780914-23884-1-git-send-email-jeffm@suse.com>
 Sender: fstests-owner@vger.kernel.org
@@ -15,78 +15,302 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Jeff Mahoney <jeffm@suse.com>
 
-This tests the sysfs publishing for btrfs allocation and device
-membership info under a number of different layouts, similar to the
-btrfs replace test. We test the allocation files only for existence and
-that they contain numerical values. We test the device membership
-by mapping the devices used to create the file system to sysfs paths
-and matching them against the paths used for the device membership
-symlinks.
+Btrfs can now report the size of the global metadata reservation
+via ioctl and sysfs.
 
-It passes on kernels without a /sys/fs/btrfs/<fsid> directory.
+This test confirms that we get sane results on an empty file system.
+
+ENOTTY and missing /sys/fs/btrfs/<fsid>/allocation are not considered
+failures.
 
 Signed-off-by: Jeff Mahoney <jeffm@suse.com>
 ---
- common/config       |   4 +-
- common/rc           |   7 ++
- tests/btrfs/125     | 193 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/125.out |   2 +
- tests/btrfs/group   |   1 +
- 5 files changed, 205 insertions(+), 2 deletions(-)
- create mode 100755 tests/btrfs/125
- create mode 100644 tests/btrfs/125.out
+ common/rc                |   6 ++
+ src/Makefile             |   3 +-
+ src/btrfs_ioctl_helper.c | 220 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/124          |  90 +++++++++++++++++++
+ tests/btrfs/124.out      |   2 +
+ tests/btrfs/group        |   1 +
+ 6 files changed, 321 insertions(+), 1 deletion(-)
+ create mode 100644 src/btrfs_ioctl_helper.c
+ create mode 100755 tests/btrfs/124
+ create mode 100644 tests/btrfs/124.out
 
-diff --git a/common/config b/common/config
-index c25b1ec..c5e65f7 100644
---- a/common/config
-+++ b/common/config
-@@ -201,13 +201,13 @@ export DEBUGFS_PROG="`set_prog_path debugfs`"
- # newer systems have udevadm command but older systems like RHEL5 don't.
- # But if neither one is available, just set it to "sleep 1" to wait for lv to
- # be settled
--UDEV_SETTLE_PROG="`set_prog_path udevadm`"
-+UDEVADM_PROG="`set_prog_path udevadm`"
- if [ "$UDEV_SETTLE_PROG" == "" ]; then
- 	# try udevsettle command
- 	UDEV_SETTLE_PROG="`set_prog_path udevsettle`"
- else
- 	# udevadm is available, add 'settle' as subcommand
--	UDEV_SETTLE_PROG="$UDEV_SETTLE_PROG settle"
-+	UDEV_SETTLE_PROG="$UDEVADM_PROG settle"
- fi
- # neither command is available, use sleep 1
- if [ "$UDEV_SETTLE_PROG" == "" ]; then
 diff --git a/common/rc b/common/rc
-index 4b05fcf..f4c4312 100644
+index 3a9c4d1..4b05fcf 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -76,6 +76,13 @@ _btrfs_get_subvolid()
+@@ -76,6 +76,12 @@ _btrfs_get_subvolid()
  	$BTRFS_UTIL_PROG sub list $mnt | grep $name | awk '{ print $2 }'
  }
  
-+_btrfs_get_feature_flags()
++_btrfs_get_fsid()
 +{
 +	local dev=$1
-+	local class=$2
-+	$BTRFS_SHOW_SUPER_PROG $dev | grep ^${class}_flags | awk '{print $NF}'
++	$BTRFS_UTIL_PROG filesystem show $dev|awk '/uuid:/ {print $NF}'
 +}
 +
- _btrfs_get_fsid()
+ # Prints the md5 checksum of a given file
+ _md5_checksum()
  {
- 	local dev=$1
-diff --git a/tests/btrfs/125 b/tests/btrfs/125
-new file mode 100755
-index 0000000..83f1921
+diff --git a/src/Makefile b/src/Makefile
+index 1bf318b..c467475 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -20,7 +20,8 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	bulkstat_unlink_test_modified t_dir_offset t_futimens t_immutable \
+ 	stale_handle pwrite_mmap_blocked t_dir_offset2 seek_sanity_test \
+ 	seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
+-	renameat2 t_getcwd e4compact test-nextquota punch-alternating
++	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
++	btrfs_ioctl_helper
+ 
+ SUBDIRS =
+ 
+diff --git a/src/btrfs_ioctl_helper.c b/src/btrfs_ioctl_helper.c
+new file mode 100644
+index 0000000..4344bdc
 --- /dev/null
-+++ b/tests/btrfs/125
-@@ -0,0 +1,193 @@
-+#! /bin/bash
-+# FS QA Test No. 125
++++ b/src/btrfs_ioctl_helper.c
+@@ -0,0 +1,220 @@
++#include <sys/ioctl.h>
++#include <stdio.h>
++#include <sys/fcntl.h>
++#include <errno.h>
++#include <string.h>
++#include <stdint.h>
++#include <unistd.h>
++#include <stdlib.h>
++
++#ifndef BTRFS_IOCTL_MAGIC
++#define BTRFS_IOCTL_MAGIC 0x94
++#endif
++
++#ifndef BTRFS_IOC_SPACE_INFO
++struct btrfs_ioctl_space_info {
++        uint64_t flags;
++        uint64_t total_bytes;
++        uint64_t used_bytes;
++};
++
++struct btrfs_ioctl_space_args {
++        uint64_t space_slots;
++        uint64_t total_spaces;
++        struct btrfs_ioctl_space_info spaces[0];
++};
++#define BTRFS_IOC_SPACE_INFO _IOWR(BTRFS_IOCTL_MAGIC, 20, \
++                                    struct btrfs_ioctl_space_args)
++#endif
++#ifndef BTRFS_SPACE_INFO_GLOBAL_RSV
++#define BTRFS_SPACE_INFO_GLOBAL_RSV    (1ULL << 49)
++#endif
++
++#ifndef BTRFS_IOC_GET_FEATURES
++struct btrfs_ioctl_feature_flags {
++	uint64_t compat_flags;
++	uint64_t compat_ro_flags;
++	uint64_t incompat_flags;
++};
++
++#define BTRFS_IOC_GET_FEATURES _IOR(BTRFS_IOCTL_MAGIC, 57, \
++                                   struct btrfs_ioctl_feature_flags)
++#define BTRFS_IOC_SET_FEATURES _IOW(BTRFS_IOCTL_MAGIC, 57, \
++                                   struct btrfs_ioctl_feature_flags[2])
++#define BTRFS_IOC_GET_SUPPORTED_FEATURES _IOR(BTRFS_IOCTL_MAGIC, 57, \
++                                   struct btrfs_ioctl_feature_flags[3])
++#endif
++
++static int global_rsv_ioctl(int fd, int argc, char *argv[])
++{
++	struct btrfs_ioctl_space_args arg;
++	struct btrfs_ioctl_space_args *args;
++	int ret;
++	int i;
++	size_t size;
++
++	arg.space_slots = 0;
++
++	ret = ioctl(fd, BTRFS_IOC_SPACE_INFO, &arg);
++	if (ret)
++		return -errno;
++
++	size = sizeof(*args) + sizeof(args->spaces[0]) * arg.total_spaces;
++	args = malloc(size);
++	if (!args)
++		return -ENOMEM;
++
++	args->space_slots = arg.total_spaces;
++
++	ret = ioctl(fd, BTRFS_IOC_SPACE_INFO, args);
++	if (ret)
++		return -errno;
++
++	for (i = 0; i < args->total_spaces; i++) {
++		if (args->spaces[i].flags & BTRFS_SPACE_INFO_GLOBAL_RSV) {
++			unsigned long long reserved;
++			reserved = args->spaces[i].total_bytes;
++			printf("%llu\n", reserved);
++			return 0;
++		}
++	}
++
++	return -ENOENT;
++}
++
++static int get_features_ioctl(int fd, int argc, char *argv[])
++{
++	struct btrfs_ioctl_feature_flags flags;
++	int ret = ioctl(fd, BTRFS_IOC_GET_FEATURES, &flags);
++	if (ret)
++		return -errno;
++
++	printf("0x%llx 0x%llx 0x%llx\n",
++	       (unsigned long long)flags.compat_flags,
++	       (unsigned long long)flags.compat_ro_flags,
++	       (unsigned long long)flags.incompat_flags);
++	return 0;
++}
++
++static int set_features_ioctl(int fd, int argc, char *argv[])
++{
++	struct btrfs_ioctl_feature_flags flags[2];
++	uint64_t bit, *bits, *mask;
++	if (argc != 3)
++		goto usage;
++
++	memset(flags, 0, sizeof(flags));
++
++	errno = 0;
++	bit = strtoull(argv[2], NULL, 10);
++	if (errno)
++		goto usage;
++
++	if (strcmp(argv[1], "compat") == 0) {
++		mask = &flags[0].compat_flags;
++		bits = &flags[1].compat_flags;
++	} else if (strcmp(argv[1], "compat_ro") == 0) {
++		mask = &flags[0].compat_ro_flags;
++		bits = &flags[1].compat_ro_flags;
++	} else if (strcmp(argv[1], "incompat") == 0) {
++		mask = &flags[0].incompat_flags;
++		bits = &flags[1].incompat_flags;
++	} else
++		goto usage;
++
++	*mask |= bit;
++
++	if (strcmp(argv[0], "set") == 0)
++		*bits |= bit;
++
++	return ioctl(fd, BTRFS_IOC_SET_FEATURES, &flags);
++usage:
++	fprintf(stderr, "usage: SET_FEATURES <set|clear> <compat|compat_ro|incompat> <base-10 bitmask>\n");
++	return -EINVAL;
++}
++
++static int get_supported_features_ioctl(int fd, int argc, char *argv[])
++{
++	struct btrfs_ioctl_feature_flags flags[3];
++	int ret;
++	int i;
++
++	ret = ioctl(fd, BTRFS_IOC_GET_SUPPORTED_FEATURES, &flags);
++	if (ret)
++		return -errno;
++
++	for (i = 0; i < 3; i++)
++		printf("0x%llx 0x%llx 0x%llx ",
++		       (unsigned long long)flags[i].compat_flags,
++		       (unsigned long long)flags[i].compat_ro_flags,
++		       (unsigned long long)flags[i].incompat_flags);
++
++	printf("\n");
++	return 0;
++}
++#define IOCTL_TABLE_ENTRY(_ioctl_name, _handler) \
++	{ .name = #_ioctl_name, .ioctl_cmd = BTRFS_IOC_##_ioctl_name, \
++	  .handler = _handler, }
++
++struct ioctl_table_entry {
++	const char *name;
++	unsigned ioctl_cmd;
++	int (*handler)(int fd, int argc, char *argv[]);
++};
++
++static struct ioctl_table_entry ioctls[] = {
++	IOCTL_TABLE_ENTRY(SPACE_INFO, global_rsv_ioctl),
++	IOCTL_TABLE_ENTRY(GET_FEATURES, get_features_ioctl),
++	IOCTL_TABLE_ENTRY(SET_FEATURES, set_features_ioctl),
++	IOCTL_TABLE_ENTRY(GET_SUPPORTED_FEATURES, get_supported_features_ioctl),
++};
++
++int
++main(int argc, char *argv[])
++{
++	int fd;
++	int ret;
++	struct ioctl_table_entry *entry = NULL;
++	int i;
++
++	if (argc < 3) {
++		fprintf(stderr,
++			"usage: %s <fs mount point> <ioctl name> [args..]\n",
++			argv[0]);
++		return 1;
++	}
++
++	fd = open(argv[1], O_RDONLY|O_DIRECTORY);
++	if (fd < 0) {
++		perror(argv[1]);
++		return 1;
++	}
++
++	for (i = 0; i < (sizeof(ioctls)/sizeof(ioctls[0])); i++) {
++		if (strcmp(argv[2], ioctls[i].name) == 0) {
++			entry = &ioctls[i];
++			break;
++		}
++	}
++
++	if (!entry) {
++		fprintf(stderr, "ERROR: unknown ioctl %s\n", argv[2]);
++		close(fd);
++		return 1;
++	}
++
++	ret = entry->handler(fd, argc - 3, argv + 3);
++	if (ret == -ENOTTY) {
++		printf("Not implemented.\n");
++		close(fd);
++		return 0;
++	} else if (ret) {
++		fprintf(stderr, "ERROR: %s failed: %s\n",
++			entry->name, strerror(-ret));
++		close(fd);
++		return 1;
++	}
++
++	close(fd);
++	return 0;
++}
+diff --git a/tests/btrfs/124 b/tests/btrfs/124
+new file mode 100755
+index 0000000..4e6e6eb
+--- /dev/null
++++ b/tests/btrfs/124
+@@ -0,0 +1,90 @@
++#!/bin/bash
++# FA QA Test No. 124
 +#
-+# Test of the btrfs sysfs publishing
++# Test global metadata reservation reporting
++#
++# 1) Create empty file system
++# 2) Call the BTRFS_IOC_GLOBAL_RSV ioctl and confirm it is 0 < x < 32MB
++# 3) Read the /sys/fs/btrfs/<fsid>/allocation/global_rsv_reserved file
++#    and confirm the value is 0 < x < 32 MB
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (C) 2013-2016 SUSE.  All rights reserved.
++# Copyright (c) 2013 SUSE, All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -99,197 +323,89 @@ index 0000000..83f1921
 +#
 +# You should have received a copy of the GNU General Public License
 +# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  12110-1301  USA
 +#-----------------------------------------------------------------------
-+#
 +
-+seq=`basename $0`
++seq=$(basename $0)
 +seqres=$RESULT_DIR/$seq
 +echo "== QA output created by $seq"
 +
-+here=`pwd`
++here=$(pwd)
 +tmp=/tmp/$$
 +status=1
 +
 +# get standard environment, filters and checks
 +. ./common/rc
-+. ./common/filter
++. ./common/filter.btrfs
 +
-+# real QA test starts here
 +_supported_fs btrfs
++_supported_os Linux
 +_require_scratch
-+_require_scratch_dev_pool
-+_require_command "$UDEVADM_PROG"
 +
-+rm -f $seqres.full
-+rm -f $tmp.tmp
++_scratch_mkfs > /dev/null 2>&1
++_scratch_mount
 +
-+check_file() {
-+	local file=$1
-+	base="$(echo "$file" | sed -e 's#/sys/fs/btrfs/[0-9a-f-][0-9a-f-]*/##')"
-+	if [ ! -f "$file" ]; then
-+		echo "$base missing."
-+		return 0
-+	else
-+		value="$(cat $file)"
-+		if [ -n "$(echo $value | tr -d 0-9)" ]; then
-+			echo "ERROR: $base: numerical value expected" \
-+			     "(got $value)"
-+			return 0
-+		fi
-+	fi
-+	return 1
-+}
-+
-+check_chunk() {
-+	path=$1
-+	mkfs_options=$2
-+	error=false
-+
-+	chunktype=$(basename $path)
-+	if [ ! -d "$path" ]; then
-+		echo "No $chunktype directory."
++# Check to see if the reservation is 0 < x <= 32MB
++check_reserved() {
++	reserved="$2"
++	method="$3"
++	if [ "$1" != 0 ]; then
++		echo "$method: failed: $reserved"
 +		exit 1
 +	fi
-+
-+	for file in bytes_may_use bytes_pinned bytes_reserved bytes_used \
-+		    disk_total disk_used flags total_bytes \
-+		    total_bytes_pinned; do
-+		if check_file "$path/$file"; then
-+			error=true
-+		fi
-+	done
-+
-+	if [ "$chunktype" = "data" -o "$chunktype" = "mixed" ]; then
-+		opt="-d"
-+	elif [ "$chunktype" = "metadata" -o "$chunktype" = "system" ]; then
-+		opt="-m"
-+	fi
-+
-+	profile=$(echo $mkfs_options | sed -e "s/.*$opt \([[:alnum:]]*\).*/\1/")
-+	if [ ! -d "$path/$profile" ]; then
-+		echo "No $profile dir for $chunktype"
-+		exit 1
-+	fi
-+
-+	for file in total_bytes used_bytes; do
-+		if check_file $path/$profile/$file; then
-+			error=true
-+		fi
-+	done
-+
-+	$error && exit 1
-+}
-+
-+check_dev_link() {
-+	local dev=$1
-+	DEV="/sys/$($UDEVADM_PROG info --query=path $dev)"
-+	DEV="$(readlink -f $DEV)"
-+	found=false
-+	for link in $sysfs_base/devices/*; do
-+		LINK="$(readlink -f $link)"
-+		if [ "$LINK" = "$DEV" ]; then
-+			found=true
-+			break
-+		fi
-+	done
-+	if ! $found; then
-+		echo "Symlink for $dev missing in $sysfs_base/devices"
-+		return 1
-+	fi
-+	return 0
-+}
-+
-+workout()
-+{
-+	local mkfs_options="$1"
-+	local num_devs4raid="$2"
-+	local fssize
-+	local used_devs=""
-+
-+	if [ "`echo $SCRATCH_DEV_POOL | wc -w`" -lt $num_devs4raid ]; then
-+		echo "Skip workout $1 $2 $3 $4"
-+		echo "Too few devices in SCRATCH_DEV_POOL $SCRATCH_DEV_POOL," \
-+		     "required: $num_devs4raid"
-+		echo "Skip workout $1 $2 $3 $4" >> $seqres.full
-+		echo "Too few devices in SCRATCH_DEV_POOL $SCRATCH_DEV_POOL," \
-+		     "required: $num_devs4raid" >> $seqres.full
-+		return 0
-+	fi
-+
-+	if [ "$num_devs4raid" -gt 1 ]; then
-+		used_devs=$(echo $SCRATCH_DEV_POOL|tr '\t' ' '| \
-+			    cut -d ' ' -f 2-$num_devs4raid)
-+	fi
-+
-+	_scratch_mkfs $mkfs_options $used_devs >> $seqres.full 2>&1 || \
-+	_fail "mkfs failed"
-+
-+	_scratch_mount
-+
-+	# Check allocation
-+	sysfs_base="/sys/fs/btrfs/$(_btrfs_get_fsid $SCRATCH_DEV)"
-+
-+	# Feature isn't present for testing
-+	if [ ! -d "$sysfs_base" ]; then
-+		echo "Skipping sysfs test: $sysfs_base not found." \
-+		     >> $seqres.full
++	if [ "$reserved" = "Not implemented." ]; then
++		echo "Skipping ioctl test. Not implemented." >> $seqres.full
 +		return
 +	fi
-+
-+	mixed=false
-+	case "$mkfs_options" in
-+	*-M*)
-+		mixed=true;
-+		;;
-+	esac
-+
-+	check_chunk "$sysfs_base/allocation/system" "$mkfs_options"
-+	if $mixed; then
-+		check_chunk "$sysfs_base/allocation/mixed" "$mkfs_options"
-+	else
-+		check_chunk "$sysfs_base/allocation/data" "$mkfs_options"
-+		check_chunk "$sysfs_base/allocation/metadata" "$mkfs_options"
++	if [ -n "$(echo $reserved | tr -d 0-9)" ]; then
++		echo "ERROR: numerical value expected (got $reserved)"
++		exit 1
 +	fi
-+
-+	for dev in $used_devs; do
-+		check_dev_link $dev || exit 1
-+	done
-+
-+	umount $SCRATCH_MNT > /dev/null 2>&1
++	if [ "$reserved" -le 0 -o \
++	       "$reserved" -gt "$(( 32 * 1024 * 1024 ))" ]; then
++		echo "$method: out of range: $reserved."
++		exit 1
++	fi
 +}
 +
-+workout "-m single -d single" 1
-+workout "-m single -d single -M" 1
-+workout "-m dup -d single" 1
-+workout "-m dup -d dup -M" 1
-+workout "-m raid0 -d raid0" 2
-+workout "-m raid1 -d raid1" 2
-+workout "-m raid5 -d raid5" 2
-+workout "-m raid6 -d raid6" 3
-+workout "-m raid10 -d raid10" 4
++# ioctl
++ioctl_reserved="$(src/btrfs_ioctl_helper $SCRATCH_MNT SPACE_INFO 2>&1)"
++check_reserved $? "$ioctl_reserved" "ioctl"
++
++# sysfs
++# If this directory is here, the files must be here as well
++SYSFS_PREFIX="/sys/fs/btrfs/$(_btrfs_get_fsid $SCRATCH_DEV)/allocation"
++if [ -d "$SYSFS_PREFIX" ]; then
++	reserved="$(cat $SYSFS_PREFIX/global_rsv_reserved 2>&1)"
++	check_reserved $? "$reserved" "sysfs:reserved"
++	if [ "$reserved" != "$ioctl_reserved" ]; then
++		echo "ioctl ($ioctl_reserved) != sysfs ($reserved)"
++		exit 1
++	fi
++	size="$(cat $SYSFS_PREFIX/global_rsv_size 2>&1)"
++	check_reserved $? "$size" "sysfs:size"
++fi
 +
 +echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/btrfs/125.out b/tests/btrfs/125.out
+diff --git a/tests/btrfs/124.out b/tests/btrfs/124.out
 new file mode 100644
-index 0000000..91f76e8
+index 0000000..aeeb0e9
 --- /dev/null
-+++ b/tests/btrfs/125.out
++++ b/tests/btrfs/124.out
 @@ -0,0 +1,2 @@
-+== QA output created by 125
++== QA output created by 124
 +Silence is golden
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 8b5050e..3535f02 100644
+index 5a26ed7..8b5050e 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -127,3 +127,4 @@
+@@ -126,3 +126,4 @@
+ 121 auto quick snapshot qgroup
  122 auto quick snapshot qgroup
  123 auto quick qgroup
- 124 auto quick metadata
-+125 auto quick metadata
++124 auto quick metadata
 -- 
 1.8.5.6
 
