@@ -1,124 +1,62 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:42929 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751080AbcFWN13 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 23 Jun 2016 09:27:29 -0400
-From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH v3 2/6] fstests: btrfs: add functions to get and put a device for replace target
-Date: Thu, 23 Jun 2016 21:28:13 +0800
-Message-Id: <1466688493-8041-1-git-send-email-anand.jain@oracle.com>
-In-Reply-To: <1465980527-19031-1-git-send-email-anand.jain@oracle.com>
-References: <1465980527-19031-1-git-send-email-anand.jain@oracle.com>
+Received: from mx1.redhat.com ([209.132.183.28]:36837 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750831AbcFXEuW (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 24 Jun 2016 00:50:22 -0400
+Date: Fri, 24 Jun 2016 12:50:19 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2 1/2] fstests: introduce _require_no_mount_opts helper
+Message-ID: <20160624045019.GC23649@eguan.usersys.redhat.com>
+References: <1466505629-9402-1-git-send-email-eguan@redhat.com>
+ <20160621234202.GB27480@dastard>
+ <20160622032351.GZ5140@eguan.usersys.redhat.com>
+ <20160622230650.GL27480@dastard>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160622230650.GL27480@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, eguan@redhat.com, Anand Jain <Anand.Jain@oracle.com>, Anand Jain <anand.jain@oracle.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, jack@suse.cz
 List-ID: <fstests@vger.kernel.org>
 
-From: Anand Jain <Anand.Jain@oracle.com>
+On Thu, Jun 23, 2016 at 09:06:50AM +1000, Dave Chinner wrote:
+> On Wed, Jun 22, 2016 at 11:23:51AM +0800, Eryu Guan wrote:
+> > On Wed, Jun 22, 2016 at 09:42:02AM +1000, Dave Chinner wrote:
+> > > On Tue, Jun 21, 2016 at 06:40:28PM +0800, Eryu Guan wrote:
+> > > > Some tests require that there's no certain mount option, so
+> > > > introduce a new helper _require_no_mount_opts() to do the check on
+> > > > $MOUNT_OPTIONS.
+> > > 
+> > > I think this is fine, except for the name. It's more of an exclude
+> > > rule rather than a "require" rule. i.e.  _exclude_mount_option() is
+> > > closer to it's purpose.
+> > 
+> > This does look better to me, thanks!
+> > 
+> > > 
+> > > The only other question I have is that mount options can be
+> > > different between test and scratch devices - the test device mount
+> > > options can be set via TEST_FS_MOUNT_OPTS, as well as via
+> > > MOUNT_OPTIONS. Does this rule need to handle that?
+> > 
+> > I didn't think about TEST_FS_MOUNT_OPTS. Currently there's no need to
+> > handle it, MOUNT_OPTIONS is sufficient I think.
+> > 
+> > How about I rename it to _exclude_scratch_mount_option()? And we can
+> > always add another _exclude_test_mount_option() if needed in future.
+> 
+> Sounds good.
 
-For the replace tests we need a device as a spare device,
-here functions _spare_dev_get() and _spare_dev_put()
-will get it from the SCRATCH_DEV_POOL_SAVED, which is set
-when _scratch_dev_pool_get() is called, and is based on how
-many has already been assigned to SCRATCH_DEV_POOL.
+Hi Dave,
 
- usage:
-   _scratch_dev_pool_get 3
-   _spare_dev_get
+My v4 patches simply rename the helper to this
+"_exclude_scratch_mount_option", no function change. Then I take your
+reviews as a "Reviewed-by" tag based on "I think this is fine, except for
+the name." and the above "Sounds good.". So I can queue them for next
+pull request and start release testing, and don't have to bother you
+providing an explicit reviewed-by.
 
-      SPARE_DEV will have a device set which can be
-      used as the replace target device.
+Please let me know if you have different thoughts.
 
-   _spare_dev_put
-   _scratch_dev_pool_put
-
-_spare_dev_get() will pick the next device after SCRATCH_DEV_POOL
-devices, from the SCRATCH_DEV_POOL_SAVED, and assigns it to
-SPARE_DEV. _spare_dev_put() will set to SPARE_DEV to null.
-
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
----
-v2:
-  add tmp= and its rm
-  add comments to why _reload_btrfs_ko is used
-  add missing put and test_mount at notrun exit
-  use echo instead of _fail when checkpoints are checked
-  .out updated to remove Silence..
-v3:
-  fix to -ne for integer check
-
- common/rc | 59 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 59 insertions(+)
-
-diff --git a/common/rc b/common/rc
-index 2c3891e4b2c9..2a2079a90e6a 100644
---- a/common/rc
-+++ b/common/rc
-@@ -802,6 +802,65 @@ _scratch_mkfs()
-     esac
- }
- 
-+# Helper function to get a spare or replace-target device from
-+# configured SCRATCH_DEV_POLL, must call _scratch_dev_pool_get()
-+# before _spare_dev_get(). Replace-target-device/Spare-device will
-+# be assigned to SPARE_DEV.
-+# As of now only one replace-target-device/spare-device can be
-+# assigned.
-+#
-+# Usage:
-+#  _scratch_dev_pool_get() <ndevs>
-+#     _spare_dev_get()
-+#     :: do stuff
-+#     _spare_dev_put()
-+#  _scratch_dev_pool_put()
-+#
-+_spare_dev_get()
-+{
-+	typeset -p SCRATCH_DEV_POOL_SAVED >/dev/null 2>&1
-+	if [ $? -ne 0 ]; then
-+		_fail "Bug: unset val, must call _scratch_dev_pool_get before _spare_dev_get"
-+	fi
-+
-+	if [ -z "$SCRATCH_DEV_POOL_SAVED" ]; then
-+		_fail "Bug: str empty, must call _scratch_dev_pool_get before _spare_dev_get"
-+	fi
-+
-+	# Check if the spare is already assigned
-+	typeset -p SPARE_DEV >/dev/null 2>&1
-+	if [ $? -eq 0 ]; then
-+		if [ ! -z "$SPARE_DEV" ]; then
-+			_fail "Bug: SPARE_DEV = $SPARE_DEV already assigned"
-+		fi
-+	fi
-+
-+	local ndevs=`echo $SCRATCH_DEV_POOL| wc -w`
-+	local config_ndevs=`echo $SCRATCH_DEV_POOL_SAVED| wc -w`
-+
-+	if [ $ndevs -eq $config_ndevs ]; then
-+		_notrun "All devs used no spare"
-+	fi
-+	# Get a dev that is not used
-+	local devs[]="( $SCRATCH_DEV_POOL_SAVED )"
-+	SPARE_DEV=${devs[@]:$ndevs:1}
-+	export SPARE_DEV
-+}
-+
-+_spare_dev_put()
-+{
-+	typeset -p SPARE_DEV >/dev/null 2>&1
-+	if [ $? -ne 0 ]; then
-+		_fail "Bug: unset val, must call _spare_dev_get before its put"
-+	fi
-+
-+	if [ -z "$SPARE_DEV" ]; then
-+		_fail "Bug: str empty, must call _spare_dev_get before its put"
-+	fi
-+
-+	export SPARE_DEV=""
-+}
-+
- #
- # Generally test cases will have..
- #   _require_scratch_dev_pool X
--- 
-2.7.0
-
+Thanks,
+Eryu
