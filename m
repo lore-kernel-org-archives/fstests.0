@@ -1,89 +1,72 @@
-Received: from mx1.redhat.com ([209.132.183.28]:39828 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751185AbcFYJ6K (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sat, 25 Jun 2016 05:58:10 -0400
-Message-Id: <201606250958.u5P9w8Bn001094@int-mx13.intmail.prod.int.phx2.redhat.com>
-Date: Sat, 25 Jun 2016 17:58:08 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: [GIT PULL] fstests: updates on 2016-06-25
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:34101 "EHLO
+	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752053AbcFZKre (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sun, 26 Jun 2016 06:47:34 -0400
+Received: by mail-wm0-f46.google.com with SMTP id 187so16091737wmz.1
+        for <fstests@vger.kernel.org>; Sun, 26 Jun 2016 03:47:34 -0700 (PDT)
+From: Omer Zilberberg <omzg@plexistor.com>
+Subject: [PATCH] generic/294: filter quotes from mknod
+Date: Sun, 26 Jun 2016 13:47:24 +0300
+Message-Id: <1466938044-23916-1-git-send-email-omzg@plexistor.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
+To: fstests@vger.kernel.org
+Cc: Omer Zilberberg <omzg@plexistor.com>
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave,
+Since coreutils v8.25, mknod errors omit quotes around filenames, and
+this breaks generic/294's golden image.
 
-Can you please pull the fstests update from the location below? This is
-a relatively small update, it contains three regression tests for
-overlayfs, a new helper to exclude certain mount option in
-$MOUNT_OPTIONS, and various small fixes.
+Checked on Ubuntu 16.04.
 
-Thanks,
-Eryu
+See coreutils: 08e8fd7 all: avoid quoting file names when possible
+https://github.com/coreutils/coreutils/commit/08e8fd7e38f2dae7c69c54eb22d508b6517e66e5
 
-The following changes since commit 5f02db6f02e4e0f8d4ddd53e7f5e0c3d5e32d347:
+Signed-off-by: Omer Zilberberg <omzg@plexistor.com>
+---
+ common/filter         | 5 +++++
+ tests/generic/294     | 2 +-
+ tests/generic/294.out | 2 +-
+ 3 files changed, 7 insertions(+), 2 deletions(-)
 
-  btrfs: qgroup handling on data extents balance (2016-06-15 16:46:12 +0800)
+diff --git a/common/filter b/common/filter
+index 244621a..a16ef70 100644
+--- a/common/filter
++++ b/common/filter
+@@ -385,5 +385,10 @@ _filter_od()
+ 	'
+ }
+ 
++_filter_mknod()
++{
++	sed -e "s/mknod: '\(.*\)': File exists/mknod: \1: File exists/"
++}
++
+ # make sure this script returns success
+ /bin/true
+diff --git a/tests/generic/294 b/tests/generic/294
+index 3fa6ba2..fb5d9aa 100755
+--- a/tests/generic/294
++++ b/tests/generic/294
+@@ -55,7 +55,7 @@ THIS_TEST_DIR=$SCRATCH_MNT/$seq.test
+ 
+ _create_files()
+ {
+-	mknod $THIS_TEST_DIR/testnode c 1 3
++	mknod $THIS_TEST_DIR/testnode c 1 3 2>&1 | _filter_mknod
+ 	mkdir $THIS_TEST_DIR/testdir
+ 	touch $THIS_TEST_DIR/testtarget
+ 	ln -s $THIS_TEST_DIR/testtarget $THIS_TEST_DIR/testlink 2>&1 | _filter_ln
+diff --git a/tests/generic/294.out b/tests/generic/294.out
+index 1ac1c67..7802472 100644
+--- a/tests/generic/294.out
++++ b/tests/generic/294.out
+@@ -1,5 +1,5 @@
+ QA output created by 294
+-mknod: 'SCRATCH_MNT/294.test/testnode': File exists
++mknod: SCRATCH_MNT/294.test/testnode: File exists
+ mkdir: cannot create directory 'SCRATCH_MNT/294.test/testdir': File exists
+ touch: cannot touch 'SCRATCH_MNT/294.test/testtarget': Read-only file system
+ ln: creating symbolic link 'SCRATCH_MNT/294.test/testlink': File exists
+-- 
+2.5.5
 
-are available in the git repository at:
-
-  https://github.com/guaneryu/xfstests.git for-dave
-
-for you to fetch changes up to 54774d4bb5f8b5756913034cf9fdd28ba5bee03c:
-
-  ext4/271: _notrun if there are journal related mount options (2016-06-24 12:54:04 +0800)
-
-----------------------------------------------------------------
-
-fstests: update on 2016-06-24
-
-This update contains:
-o New regression tests for overlayfs
-o New helper _exclude_scratch_mount_option
-o Various small fixes
-
-----------------------------------------------------------------
-Anand Jain (1):
-      btrfs/006: ignore btrfs filesystem sync stdout output
-
-Andreas Gruenbacher (1):
-      generic/026: This test doesn't require runas
-
-Brian Foster (1):
-      fstests: support check for uuidgen utility
-
-Eric Sandeen (1):
-      xfs/186: fix test for crc=0, ftype=1
-
-Eryu Guan (7):
-      xfs/186: run test on expected XFS configuration
-      dmthin: express low_water in cluster_size not sector size
-      overlay: test visible whiteout issue after rename
-      overlay: getcwd() after a failed rmdir
-      overlay: create new file over whiteout
-      fstests: introduce _exclude_scratch_mount_option helper
-      ext4/271: _notrun if there are journal related mount options
-
- README                |  3 +-
- common/config         |  1 +
- common/dmthin         |  2 ++
- common/rc             |  9 ++++++
- tests/btrfs/006       |  2 +-
- tests/btrfs/006.out   |  1 -
- tests/ext4/271        |  6 ++++
- tests/generic/026     |  3 --
- tests/generic/192     | 11 -------
- tests/overlay/006     | 77 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/006.out |  2 ++
- tests/overlay/007     | 65 +++++++++++++++++++++++++++++++++++++++
- tests/overlay/007.out |  2 ++
- tests/overlay/008     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/008.out |  3 ++
- tests/overlay/group   |  3 ++
- tests/xfs/134         |  8 ++---
- tests/xfs/186         | 24 +++++++++++++--
- tests/xfs/306         |  3 +-
- 19 files changed, 284 insertions(+), 26 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
