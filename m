@@ -1,72 +1,106 @@
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:34101 "EHLO
-	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752053AbcFZKre (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 26 Jun 2016 06:47:34 -0400
-Received: by mail-wm0-f46.google.com with SMTP id 187so16091737wmz.1
-        for <fstests@vger.kernel.org>; Sun, 26 Jun 2016 03:47:34 -0700 (PDT)
-From: Omer Zilberberg <omzg@plexistor.com>
-Subject: [PATCH] generic/294: filter quotes from mknod
-Date: Sun, 26 Jun 2016 13:47:24 +0300
-Message-Id: <1466938044-23916-1-git-send-email-omzg@plexistor.com>
+Received: from mail-io0-f172.google.com ([209.85.223.172]:35944 "EHLO
+	mail-io0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752069AbcFZMVb (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sun, 26 Jun 2016 08:21:31 -0400
+Received: by mail-io0-f172.google.com with SMTP id s63so128817524ioi.3
+        for <fstests@vger.kernel.org>; Sun, 26 Jun 2016 05:21:31 -0700 (PDT)
+MIME-Version: 1.0
+In-Reply-To: <CAAeU0aOtUyuZc8mD8QPbWfRF0dkm8Nw80jKpFPEnT6RRg4=STw@mail.gmail.com>
+References: <1465411961-12707-1-git-send-email-tahsin@google.com> <CAAeU0aOtUyuZc8mD8QPbWfRF0dkm8Nw80jKpFPEnT6RRg4=STw@mail.gmail.com>
+From: Tahsin Erdogan <tahsin@google.com>
+Date: Sun, 26 Jun 2016 05:21:30 -0700
+Message-ID: <CAAeU0aNZ=BC56u3_AdYY+sNhg9-bFpUiACeKWUCvxRKFZGAGAg@mail.gmail.com>
+Subject: Re: [PATCH] generic/131: dynamically allocate tcp listen port to
+ avoid port clashes
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Omer Zilberberg <omzg@plexistor.com>
+Cc: Theodore Ts'o <tytso@mit.edu>, Tahsin Erdogan <tahsin@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-Since coreutils v8.25, mknod errors omit quotes around filenames, and
-this breaks generic/294's golden image.
+Ping again.
 
-Checked on Ubuntu 16.04.
-
-See coreutils: 08e8fd7 all: avoid quoting file names when possible
-https://github.com/coreutils/coreutils/commit/08e8fd7e38f2dae7c69c54eb22d508b6517e66e5
-
-Signed-off-by: Omer Zilberberg <omzg@plexistor.com>
----
- common/filter         | 5 +++++
- tests/generic/294     | 2 +-
- tests/generic/294.out | 2 +-
- 3 files changed, 7 insertions(+), 2 deletions(-)
-
-diff --git a/common/filter b/common/filter
-index 244621a..a16ef70 100644
---- a/common/filter
-+++ b/common/filter
-@@ -385,5 +385,10 @@ _filter_od()
- 	'
- }
- 
-+_filter_mknod()
-+{
-+	sed -e "s/mknod: '\(.*\)': File exists/mknod: \1: File exists/"
-+}
-+
- # make sure this script returns success
- /bin/true
-diff --git a/tests/generic/294 b/tests/generic/294
-index 3fa6ba2..fb5d9aa 100755
---- a/tests/generic/294
-+++ b/tests/generic/294
-@@ -55,7 +55,7 @@ THIS_TEST_DIR=$SCRATCH_MNT/$seq.test
- 
- _create_files()
- {
--	mknod $THIS_TEST_DIR/testnode c 1 3
-+	mknod $THIS_TEST_DIR/testnode c 1 3 2>&1 | _filter_mknod
- 	mkdir $THIS_TEST_DIR/testdir
- 	touch $THIS_TEST_DIR/testtarget
- 	ln -s $THIS_TEST_DIR/testtarget $THIS_TEST_DIR/testlink 2>&1 | _filter_ln
-diff --git a/tests/generic/294.out b/tests/generic/294.out
-index 1ac1c67..7802472 100644
---- a/tests/generic/294.out
-+++ b/tests/generic/294.out
-@@ -1,5 +1,5 @@
- QA output created by 294
--mknod: 'SCRATCH_MNT/294.test/testnode': File exists
-+mknod: SCRATCH_MNT/294.test/testnode: File exists
- mkdir: cannot create directory 'SCRATCH_MNT/294.test/testdir': File exists
- touch: cannot touch 'SCRATCH_MNT/294.test/testtarget': Read-only file system
- ln: creating symbolic link 'SCRATCH_MNT/294.test/testlink': File exists
--- 
-2.5.5
-
+On Fri, Jun 10, 2016 at 12:48 PM, Tahsin Erdogan <tahsin@google.com> wrote:
+> Ping...
+>
+> On Wed, Jun 8, 2016 at 11:52 AM, Tahsin Erdogan <tahsin@google.com> wrote:
+>> Current port selection algorithm is bound to have port clashes. To
+>> eliminate clashes, let server pick an unused port and report it on
+>> stdout.
+>>
+>> Signed-off-by: Tahsin Erdogan <tahsin@google.com>
+>> ---
+>>  src/locktest.c    | 16 +++++++++++++++-
+>>  tests/generic/131 | 17 +++++++----------
+>>  2 files changed, 22 insertions(+), 11 deletions(-)
+>>
+>> diff --git a/src/locktest.c b/src/locktest.c
+>> index adf8ce0..eab48e2 100644
+>> --- a/src/locktest.c
+>> +++ b/src/locktest.c
+>> @@ -95,7 +95,7 @@ static char   *filename = 0;
+>>  static int     debug = 0;
+>>  static int     server = 1;
+>>  static int     maxio = 8192;
+>> -static int     port = 7890;
+>> +static int     port = 0;
+>>  static int     testnumber = -1;
+>>  static int     saved_errno = 0;
+>>
+>> @@ -899,6 +899,20 @@ main(int argc, char *argv[])
+>>             /*NOTREACHED*/
+>>         }
+>>
+>> +       if (port == 0) {
+>> +               socklen_t addr_len = sizeof(myAddr);
+>> +
+>> +               if (getsockname(s_fd, &myAddr, &addr_len)) {
+>> +                   perror("getsockname");
+>> +                   exit(1);
+>> +               }
+>> +
+>> +               port = ntohs(myAddr.sin_port);
+>> +       }
+>> +
+>> +       printf("server port: %d\n", port);
+>> +       fflush(stdout);
+>> +
+>>         c_fd = accept(s_fd, NULL, NULL);
+>>         if (c_fd == INVALID_SOCKET) {
+>>             perror("accept");
+>> diff --git a/tests/generic/131 b/tests/generic/131
+>> index 3bcb0d1..d64ba55 100755
+>> --- a/tests/generic/131
+>> +++ b/tests/generic/131
+>> @@ -49,21 +49,18 @@ _require_test_fcntl_advisory_locks
+>>
+>>  TESTFILE=$TEST_DIR/lock_file
+>>
+>> -# Grab a port which is hopefully unused
+>> -if [ $$ -gt 1024 -a $$ -lt 32000 ]; then
+>> -    PORT=$$
+>> -elif [ $$ -lt 1024 ]; then
+>> -    PORT=$(($$+1024))
+>> -elif [ $$ -gt 32000 ]; then
+>> -    PORT=$(($$%30000+1024))
+>> -fi
+>> -
+>>  # Start the server
+>> -src/locktest -p $PORT $TESTFILE 2>&1 > $TEST_DIR/server.out &
+>> +src/locktest $TESTFILE 2>&1 > $TEST_DIR/server.out &
+>>  locktest_pid1=$!
+>>
+>>  sleep 1
+>>
+>> +PORT=$(cat $TEST_DIR/server.out | grep "^server port: " | awk '{print $3}')
+>> +if [ -z $PORT ]; then
+>> +       echo "Could not get server port"
+>> +       exit 1
+>> +fi
+>> +
+>>  # Start the client
+>>  src/locktest -p $PORT -h localhost $TESTFILE 2>&1 > $TEST_DIR/client.out
+>>  locktest_pid2=$!
+>> --
+>> 2.8.0.rc3.226.g39d4020
+>>
