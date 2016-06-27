@@ -1,76 +1,103 @@
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:35013 "EHLO
-	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751673AbcF0Mxv (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 27 Jun 2016 08:53:51 -0400
-Received: by mail-wm0-f50.google.com with SMTP id v199so99019069wmv.0
-        for <fstests@vger.kernel.org>; Mon, 27 Jun 2016 05:53:51 -0700 (PDT)
-From: Omer Zilberberg <omzg@plexistor.com>
-Subject: [PATCH v2] generic/294: filter quotes from mknod
-Date: Mon, 27 Jun 2016 15:53:28 +0300
-Message-Id: <1467032008-16374-1-git-send-email-omzg@plexistor.com>
+Received: from mx2.suse.de ([195.135.220.15]:32825 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751857AbcF0UOR (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 27 Jun 2016 16:14:17 -0400
+From: jeffm@suse.com
+Subject: [PATCH v2 1/4] btrfs/048: extend _filter_btrfs_prop_error to handle additional errors
+Date: Mon, 27 Jun 2016 16:14:11 -0400
+Message-Id: <1467058454-25907-2-git-send-email-jeffm@suse.com>
+In-Reply-To: <1467058454-25907-1-git-send-email-jeffm@suse.com>
+References: <1467058454-25907-1-git-send-email-jeffm@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Omer Zilberberg <omzg@plexistor.com>
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Since coreutils v8.25, mknod errors omit quotes around filenames, and
-this breaks generic/294's golden image.
+From: Jeff Mahoney <jeffm@suse.com>
 
-Checked on Ubuntu 16.04.
+btrfsprogs v4.5.3 changed the formatting of some error messages.  This
+patch extends the filter for btrfs prop to handle those.
 
-See coreutils: 08e8fd7 all: avoid quoting file names when possible
-https://github.com/coreutils/coreutils/commit/08e8fd7e38f2dae7c69c54eb22d508b6517e66e5
-
-Signed-off-by: Omer Zilberberg <omzg@plexistor.com>
-
-v2: added comment to _filter_mknod.
+Signed-off-by: Jeff Mahoney <jeffm@suse.com>
 ---
- common/filter         | 7 +++++++
- tests/generic/294     | 2 +-
- tests/generic/294.out | 2 +-
- 3 files changed, 9 insertions(+), 2 deletions(-)
+ common/filter.btrfs | 10 +++++++---
+ tests/btrfs/048     |  6 ++++--
+ tests/btrfs/048.out |  4 ++--
+ 3 files changed, 13 insertions(+), 7 deletions(-)
 
-diff --git a/common/filter b/common/filter
-index 244621a..8d9f489 100644
---- a/common/filter
-+++ b/common/filter
-@@ -385,5 +385,12 @@ _filter_od()
- 	'
+diff --git a/common/filter.btrfs b/common/filter.btrfs
+index 9970f4d..0cf7f0d 100644
+--- a/common/filter.btrfs
++++ b/common/filter.btrfs
+@@ -72,15 +72,19 @@ _filter_btrfs_compress_property()
+ 	sed -e "s/compression=\(lzo\|zlib\)/COMPRESSION=XXX/g"
  }
  
-+# Remove quotes from failed mknod calls. Starting with Coreutils v8.25,
-+# mknod errors print unquoted filenames
-+_filter_mknod()
-+{
-+	sed -e "s/mknod: '\(.*\)': File exists/mknod: \1: File exists/"
-+}
-+
- # make sure this script returns success
- /bin/true
-diff --git a/tests/generic/294 b/tests/generic/294
-index 3fa6ba2..fb5d9aa 100755
---- a/tests/generic/294
-+++ b/tests/generic/294
-@@ -55,7 +55,7 @@ THIS_TEST_DIR=$SCRATCH_MNT/$seq.test
- 
- _create_files()
+-# filter name of the property from the output, optionally verify against $1
++# filter error messages from btrfs prop, optionally verify against $1
+ # recognized message(s):
+ #  "object is not compatible with property: label"
++#  "invalid value for property:{, value}"
++#  "failed to {get,set} compression for $PATH[.:]: Invalid argument"
+ _filter_btrfs_prop_error()
  {
--	mknod $THIS_TEST_DIR/testnode c 1 3
-+	mknod $THIS_TEST_DIR/testnode c 1 3 2>&1 | _filter_mknod
- 	mkdir $THIS_TEST_DIR/testdir
- 	touch $THIS_TEST_DIR/testtarget
- 	ln -s $THIS_TEST_DIR/testtarget $THIS_TEST_DIR/testlink 2>&1 | _filter_ln
-diff --git a/tests/generic/294.out b/tests/generic/294.out
-index 1ac1c67..7802472 100644
---- a/tests/generic/294.out
-+++ b/tests/generic/294.out
-@@ -1,5 +1,5 @@
- QA output created by 294
--mknod: 'SCRATCH_MNT/294.test/testnode': File exists
-+mknod: SCRATCH_MNT/294.test/testnode: File exists
- mkdir: cannot create directory 'SCRATCH_MNT/294.test/testdir': File exists
- touch: cannot touch 'SCRATCH_MNT/294.test/testtarget': Read-only file system
- ln: creating symbolic link 'SCRATCH_MNT/294.test/testlink': File exists
+ 	if ! [ -z "$1" ]; then
+-		sed -e "s/\(compatible with property\): $1/\1/"
++		sed -e "s#\(compatible with property\): $1#\1#" \
++		    -e "s#^\(.*failed to [sg]et compression for $1\)[:.] \(.*\)#\1: \2#"
+ 	else
+-		sed -e "s/^\(.*compatible with property\).*/\1/"
++		sed -e "s#^\(.*compatible with property\).*#\1#" \
++		    -e "s#^\(.*invalid value for property\)[:.].*#\1#"
+ 	fi
+ }
+ 
+diff --git a/tests/btrfs/048 b/tests/btrfs/048
+index 4a36303..0b907b0 100755
+--- a/tests/btrfs/048
++++ b/tests/btrfs/048
+@@ -79,7 +79,8 @@ echo -e "\nTesting subvolume ro property"
+ _run_btrfs_util_prog subvolume create $SCRATCH_MNT/sv1
+ $BTRFS_UTIL_PROG property get $SCRATCH_MNT/sv1 ro
+ echo "***"
+-$BTRFS_UTIL_PROG property set $SCRATCH_MNT/sv1 ro foo
++$BTRFS_UTIL_PROG property set $SCRATCH_MNT/sv1 ro foo 2>&1 |
++	_filter_btrfs_prop_error
+ echo "***"
+ $BTRFS_UTIL_PROG property set $SCRATCH_MNT/sv1 ro true
+ echo "***"
+@@ -99,7 +100,8 @@ $BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir/file1 compression
+ $BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir/subdir1 compression
+ echo "***"
+ $BTRFS_UTIL_PROG property set $SCRATCH_MNT/testdir/file1 compression \
+-	foo 2>&1 | _filter_scratch
++	foo 2>&1 | _filter_scratch |
++	_filter_btrfs_prop_error SCRATCH_MNT/testdir/file1
+ echo "***"
+ $BTRFS_UTIL_PROG property set $SCRATCH_MNT/testdir/file1 compression lzo
+ $BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir/file1 compression
+diff --git a/tests/btrfs/048.out b/tests/btrfs/048.out
+index 0b20d0b..3e4e3d2 100644
+--- a/tests/btrfs/048.out
++++ b/tests/btrfs/048.out
+@@ -15,7 +15,7 @@ ERROR: object is not compatible with property
+ Testing subvolume ro property
+ ro=false
+ ***
+-ERROR: invalid value for property.
++ERROR: invalid value for property
+ ***
+ ***
+ ro=true
+@@ -27,7 +27,7 @@ ro=false
+ 
+ Testing compression property
+ ***
+-ERROR: failed to set compression for SCRATCH_MNT/testdir/file1. Invalid argument
++ERROR: failed to set compression for SCRATCH_MNT/testdir/file1: Invalid argument
+ ***
+ compression=lzo
+ compression=lzo
 -- 
-2.5.5
+1.8.5.6
 
