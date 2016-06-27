@@ -1,28 +1,97 @@
-Received: from mx1.redhat.com ([209.132.183.28]:60800 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:37332 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751740AbcF0ClF (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sun, 26 Jun 2016 22:41:05 -0400
-Date: Mon, 27 Jun 2016 10:41:03 +0800
+	id S1751638AbcF0DP0 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sun, 26 Jun 2016 23:15:26 -0400
+Date: Mon, 27 Jun 2016 11:15:24 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic/131: dynamically allocate tcp listen port to
- avoid port clashes
-Message-ID: <20160627024103.GG23649@eguan.usersys.redhat.com>
-References: <1465411961-12707-1-git-send-email-tahsin@google.com>
- <CAAeU0aOtUyuZc8mD8QPbWfRF0dkm8Nw80jKpFPEnT6RRg4=STw@mail.gmail.com>
- <CAAeU0aNZ=BC56u3_AdYY+sNhg9-bFpUiACeKWUCvxRKFZGAGAg@mail.gmail.com>
+Subject: Re: [PATCH] generic/294: filter quotes from mknod
+Message-ID: <20160627031524.GI23649@eguan.usersys.redhat.com>
+References: <1466938044-23916-1-git-send-email-omzg@plexistor.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAAeU0aNZ=BC56u3_AdYY+sNhg9-bFpUiACeKWUCvxRKFZGAGAg@mail.gmail.com>
+In-Reply-To: <1466938044-23916-1-git-send-email-omzg@plexistor.com>
 Sender: fstests-owner@vger.kernel.org
-To: Tahsin Erdogan <tahsin@google.com>
-Cc: fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>
+To: Omer Zilberberg <omzg@plexistor.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Jun 26, 2016 at 05:21:30AM -0700, Tahsin Erdogan wrote:
-> Ping again.
+On Sun, Jun 26, 2016 at 01:47:24PM +0300, Omer Zilberberg wrote:
+> Since coreutils v8.25, mknod errors omit quotes around filenames, and
+> this breaks generic/294's golden image.
+> 
+> Checked on Ubuntu 16.04.
+> 
+> See coreutils: 08e8fd7 all: avoid quoting file names when possible
+> https://github.com/coreutils/coreutils/commit/08e8fd7e38f2dae7c69c54eb22d508b6517e66e5
+> 
+> Signed-off-by: Omer Zilberberg <omzg@plexistor.com>
 
-It's already merged, see commit b936f63
+It looks good to me. But I took a look at the above coreutils commit and
+noticed that many other commands are affected as well, like touch, cp,
+mv etc.
+
+Did you see other failures caused by other commands? If so, I'm
+thinking about a more generic way to fix it, rather than adding filters
+to each command. Something like fstests commit 774f4dd77534 ("xfstests:
+unify apostrophes in output files").
+
+> ---
+>  common/filter         | 5 +++++
+>  tests/generic/294     | 2 +-
+>  tests/generic/294.out | 2 +-
+>  3 files changed, 7 insertions(+), 2 deletions(-)
+> 
+> diff --git a/common/filter b/common/filter
+> index 244621a..a16ef70 100644
+> --- a/common/filter
+> +++ b/common/filter
+> @@ -385,5 +385,10 @@ _filter_od()
+>  	'
+>  }
+>  
+
+Comment on why this filter is needed, like most other filters do, e.g.
+_filter_fstrim, _filter_ro_mount
 
 Thanks,
 Eryu
+
+> +_filter_mknod()
+> +{
+> +	sed -e "s/mknod: '\(.*\)': File exists/mknod: \1: File exists/"
+> +}
+> +
+>  # make sure this script returns success
+>  /bin/true
+> diff --git a/tests/generic/294 b/tests/generic/294
+> index 3fa6ba2..fb5d9aa 100755
+> --- a/tests/generic/294
+> +++ b/tests/generic/294
+> @@ -55,7 +55,7 @@ THIS_TEST_DIR=$SCRATCH_MNT/$seq.test
+>  
+>  _create_files()
+>  {
+> -	mknod $THIS_TEST_DIR/testnode c 1 3
+> +	mknod $THIS_TEST_DIR/testnode c 1 3 2>&1 | _filter_mknod
+>  	mkdir $THIS_TEST_DIR/testdir
+>  	touch $THIS_TEST_DIR/testtarget
+>  	ln -s $THIS_TEST_DIR/testtarget $THIS_TEST_DIR/testlink 2>&1 | _filter_ln
+> diff --git a/tests/generic/294.out b/tests/generic/294.out
+> index 1ac1c67..7802472 100644
+> --- a/tests/generic/294.out
+> +++ b/tests/generic/294.out
+> @@ -1,5 +1,5 @@
+>  QA output created by 294
+> -mknod: 'SCRATCH_MNT/294.test/testnode': File exists
+> +mknod: SCRATCH_MNT/294.test/testnode: File exists
+>  mkdir: cannot create directory 'SCRATCH_MNT/294.test/testdir': File exists
+>  touch: cannot touch 'SCRATCH_MNT/294.test/testtarget': Read-only file system
+>  ln: creating symbolic link 'SCRATCH_MNT/294.test/testlink': File exists
+> -- 
+> 2.5.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
