@@ -1,13 +1,11 @@
-Received: from mx2.suse.de ([195.135.220.15]:32825 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:32824 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751857AbcF0UOR (ORCPT <rfc822;fstests@vger.kernel.org>);
+	id S1751862AbcF0UOR (ORCPT <rfc822;fstests@vger.kernel.org>);
 	Mon, 27 Jun 2016 16:14:17 -0400
 From: jeffm@suse.com
-Subject: [PATCH v2 1/4] btrfs/048: extend _filter_btrfs_prop_error to handle additional errors
-Date: Mon, 27 Jun 2016 16:14:11 -0400
-Message-Id: <1467058454-25907-2-git-send-email-jeffm@suse.com>
-In-Reply-To: <1467058454-25907-1-git-send-email-jeffm@suse.com>
-References: <1467058454-25907-1-git-send-email-jeffm@suse.com>
+Subject: [PATCH v2 0/4] btrfs feature testing + props fix
+Date: Mon, 27 Jun 2016 16:14:10 -0400
+Message-Id: <1467058454-25907-1-git-send-email-jeffm@suse.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 Cc: Eryu Guan <eguan@redhat.com>
@@ -15,89 +13,66 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Jeff Mahoney <jeffm@suse.com>
 
-btrfsprogs v4.5.3 changed the formatting of some error messages.  This
-patch extends the filter for btrfs prop to handle those.
+Hi all -
 
-Signed-off-by: Jeff Mahoney <jeffm@suse.com>
+Thanks, Eryu, for the review.  The btrfs feature testing changes were a
+patchet I wrote three years ago, and it looks like significant cleanup
+has happened in the xfstests since then.  I'm sorry for the level of the
+review you had to do for them, but do appreciate that you did.
+
+This version should fix the outstanding issues, including some issues
+with the tests themselves, where e.g. the 32MB reserved size was file
+system-size (and implementation) dependent.  Most notably, since these
+tests share some common functionality that ultimately hit ~250 lines, I
+chose to create a new common/btrfs library.  Other than that, I tried to
+meet the level of consistency you were looking for with just printing
+errors instead of failing, not depending on error codes, etc.
+
+Thanks,
+
+-Jeff
+
 ---
- common/filter.btrfs | 10 +++++++---
- tests/btrfs/048     |  6 ++++--
- tests/btrfs/048.out |  4 ++--
- 3 files changed, 13 insertions(+), 7 deletions(-)
 
-diff --git a/common/filter.btrfs b/common/filter.btrfs
-index 9970f4d..0cf7f0d 100644
---- a/common/filter.btrfs
-+++ b/common/filter.btrfs
-@@ -72,15 +72,19 @@ _filter_btrfs_compress_property()
- 	sed -e "s/compression=\(lzo\|zlib\)/COMPRESSION=XXX/g"
- }
- 
--# filter name of the property from the output, optionally verify against $1
-+# filter error messages from btrfs prop, optionally verify against $1
- # recognized message(s):
- #  "object is not compatible with property: label"
-+#  "invalid value for property:{, value}"
-+#  "failed to {get,set} compression for $PATH[.:]: Invalid argument"
- _filter_btrfs_prop_error()
- {
- 	if ! [ -z "$1" ]; then
--		sed -e "s/\(compatible with property\): $1/\1/"
-+		sed -e "s#\(compatible with property\): $1#\1#" \
-+		    -e "s#^\(.*failed to [sg]et compression for $1\)[:.] \(.*\)#\1: \2#"
- 	else
--		sed -e "s/^\(.*compatible with property\).*/\1/"
-+		sed -e "s#^\(.*compatible with property\).*#\1#" \
-+		    -e "s#^\(.*invalid value for property\)[:.].*#\1#"
- 	fi
- }
- 
-diff --git a/tests/btrfs/048 b/tests/btrfs/048
-index 4a36303..0b907b0 100755
---- a/tests/btrfs/048
-+++ b/tests/btrfs/048
-@@ -79,7 +79,8 @@ echo -e "\nTesting subvolume ro property"
- _run_btrfs_util_prog subvolume create $SCRATCH_MNT/sv1
- $BTRFS_UTIL_PROG property get $SCRATCH_MNT/sv1 ro
- echo "***"
--$BTRFS_UTIL_PROG property set $SCRATCH_MNT/sv1 ro foo
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT/sv1 ro foo 2>&1 |
-+	_filter_btrfs_prop_error
- echo "***"
- $BTRFS_UTIL_PROG property set $SCRATCH_MNT/sv1 ro true
- echo "***"
-@@ -99,7 +100,8 @@ $BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir/file1 compression
- $BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir/subdir1 compression
- echo "***"
- $BTRFS_UTIL_PROG property set $SCRATCH_MNT/testdir/file1 compression \
--	foo 2>&1 | _filter_scratch
-+	foo 2>&1 | _filter_scratch |
-+	_filter_btrfs_prop_error SCRATCH_MNT/testdir/file1
- echo "***"
- $BTRFS_UTIL_PROG property set $SCRATCH_MNT/testdir/file1 compression lzo
- $BTRFS_UTIL_PROG property get $SCRATCH_MNT/testdir/file1 compression
-diff --git a/tests/btrfs/048.out b/tests/btrfs/048.out
-index 0b20d0b..3e4e3d2 100644
---- a/tests/btrfs/048.out
-+++ b/tests/btrfs/048.out
-@@ -15,7 +15,7 @@ ERROR: object is not compatible with property
- Testing subvolume ro property
- ro=false
- ***
--ERROR: invalid value for property.
-+ERROR: invalid value for property
- ***
- ***
- ro=true
-@@ -27,7 +27,7 @@ ro=false
- 
- Testing compression property
- ***
--ERROR: failed to set compression for SCRATCH_MNT/testdir/file1. Invalid argument
-+ERROR: failed to set compression for SCRATCH_MNT/testdir/file1: Invalid argument
- ***
- compression=lzo
- compression=lzo
+Jeff Mahoney (4):
+  btrfs/048: extend _filter_btrfs_prop_error to handle additional errors
+  btrfs/124: test global metadata reservation reporting
+  btrfs/125: test sysfs exports of allocation and device membership info
+  btrfs/126,127,128: test feature ioctl and sysfs interfaces
+
+ .gitignore               |   1 +
+ common/btrfs             | 253 +++++++++++++++++++++++++++++++++++++++++++++++
+ common/config            |   7 +-
+ common/filter.btrfs      |  10 +-
+ src/Makefile             |   3 +-
+ src/btrfs_ioctl_helper.c | 220 +++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/048          |   6 +-
+ tests/btrfs/048.out      |   4 +-
+ tests/btrfs/124          |  84 ++++++++++++++++
+ tests/btrfs/124.out      |   1 +
+ tests/btrfs/125          | 177 +++++++++++++++++++++++++++++++++
+ tests/btrfs/125.out      |   1 +
+ tests/btrfs/126          | 244 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/126.out      |   1 +
+ tests/btrfs/127          | 166 +++++++++++++++++++++++++++++++
+ tests/btrfs/127.out      |   1 +
+ tests/btrfs/128          | 128 ++++++++++++++++++++++++
+ tests/btrfs/128.out      |   1 +
+ tests/btrfs/group        |   5 +
+ 19 files changed, 1302 insertions(+), 11 deletions(-)
+ create mode 100644 common/btrfs
+ create mode 100644 src/btrfs_ioctl_helper.c
+ create mode 100755 tests/btrfs/124
+ create mode 100644 tests/btrfs/124.out
+ create mode 100755 tests/btrfs/125
+ create mode 100644 tests/btrfs/125.out
+ create mode 100755 tests/btrfs/126
+ create mode 100644 tests/btrfs/126.out
+ create mode 100755 tests/btrfs/127
+ create mode 100644 tests/btrfs/127.out
+ create mode 100755 tests/btrfs/128
+ create mode 100644 tests/btrfs/128.out
+
 -- 
 1.8.5.6
 
