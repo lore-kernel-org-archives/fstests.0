@@ -1,56 +1,181 @@
-Received: from imap.thunk.org ([74.207.234.97]:56242 "EHLO imap.thunk.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752440AbcF2BdC (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 28 Jun 2016 21:33:02 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH] common: ext4 doesn't support O_DIRECT with encryption
-Date: Tue, 28 Jun 2016 21:32:55 -0400
-Message-Id: <1467163975-11183-1-git-send-email-tytso@mit.edu>
+Received: from cn.fujitsu.com ([59.151.112.132]:51376 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752449AbcF2DYk (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 28 Jun 2016 23:24:40 -0400
+Received: from G08CNEXCHPEKD01.g08.fujitsu.local (unknown [10.167.33.80])
+	by cn.fujitsu.com (Postfix) with ESMTP id D69D541C0BB7
+	for <fstests@vger.kernel.org>; Wed, 29 Jun 2016 11:24:23 +0800 (CST)
+Subject: Re: [PATCH] btrfs: check truncate can update file size correctly when
+ truncate fails
+References: <1466667400-21639-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
+ <20160623082718.GF3226@eguan.usersys.redhat.com>
+From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Message-ID: <57733F06.9000103@cn.fujitsu.com>
+Date: Wed, 29 Jun 2016 11:22:46 +0800
+MIME-Version: 1.0
+In-Reply-To: <20160623082718.GF3226@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-Teach _require_odirect to skip the O_DIRECT tests if the ext4 mount
-option "test_dummy_encryption" is enabled, since O_DIRECT doesen't
-make sense when file system level encryption is enabled, and several
-tests which use O_DIRECT --- ext4/301, ext4/304, generic/250 and
-generic/252 --- fail when encryption is enabled.
+hello,
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
- common/rc | 18 ++++++++++++------
- 1 file changed, 12 insertions(+), 6 deletions(-)
+Thanks for your comments.
+I will update the patch according to your comments and make it to 
+generic tests.
 
-diff --git a/common/rc b/common/rc
-index adda940..003400d 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1933,12 +1933,18 @@ _require_xfs_db_command()
- # check that kernel and filesystem support direct I/O
- _require_odirect()
- {
--       testfile=$TEST_DIR/$$.direct
--       $XFS_IO_PROG -F -f -d -c "pwrite 0 20k" $testfile > /dev/null 2>&1
--       if [ $? -ne 0 ]; then
--               _notrun "O_DIRECT is not supported"
--       fi
--       rm -f $testfile 2>&1 > /dev/null
-+	if [ $FSTYP = "ext4" ] ; then
-+		if echo "$MOUNT_OPTIONS" | grep -q "test_dummy_encryption"
-+		then
-+			_notrun "ext4 encryption doesn't support O_DIRECT"
-+		fi
-+	fi
-+	testfile=$TEST_DIR/$$.direct
-+	$XFS_IO_PROG -F -f -d -c "pwrite 0 20k" $testfile > /dev/null 2>&1
-+	if [ $? -ne 0 ]; then
-+		_notrun "O_DIRECT is not supported"
-+	fi
-+	rm -f $testfile 2>&1 > /dev/null
- }
- 
- # Check that a fs has enough free space (in 1024b blocks)
--- 
-2.5.0
+Regards,
+Xiaoguang Wang
+
+On 06/23/2016 04:27 PM, Eryu Guan wrote:
+> On Thu, Jun 23, 2016 at 03:36:40PM +0800, Wang Xiaoguang wrote:
+>> In btrfs, when truncate operation fails for enospc reason, file may still
+>> have some disk blocks, but it will fail to update filesize accordingly.
+>>
+>> Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+>> ---
+>>   tests/btrfs/124     | 86 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>>   tests/btrfs/124.out |  2 ++
+>>   tests/btrfs/group   |  1 +
+>>   3 files changed, 89 insertions(+)
+>>   create mode 100755 tests/btrfs/124
+>>   create mode 100644 tests/btrfs/124.out
+>>
+>> diff --git a/tests/btrfs/124 b/tests/btrfs/124
+>> new file mode 100755
+>> index 0000000..1a13ddf
+>> --- /dev/null
+>> +++ b/tests/btrfs/124
+>> @@ -0,0 +1,86 @@
+>> +#! /bin/bash
+>> +# FS QA Test 124
+>> +#
+>> +# Test whether truncate can update file size correctly when truncate fails
+>> +#
+>> +# When truncate operation fails for enospc reason, file will still
+>> +# have some disk blocks, but it will fail to update filesize accordingly.
+>> +#
+>> +#-----------------------------------------------------------------------
+>> +# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
+>> +#
+>> +# This program is free software; you can redistribute it and/or
+>> +# modify it under the terms of the GNU General Public License as
+>> +# published by the Free Software Foundation.
+>> +#
+>> +# This program is distributed in the hope that it would be useful,
+>> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+>> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>> +# GNU General Public License for more details.
+>> +#
+>> +# You should have received a copy of the GNU General Public License
+>> +# along with this program; if not, write the Free Software Foundation,
+>> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+>> +#-----------------------------------------------------------------------
+>> +#
+>> +
+>> +seq=`basename $0`
+>> +seqres=$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +
+>> +here=`pwd`
+>> +tmp=/tmp/$$
+>> +status=1	# failure is the default!
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +	cd /
+>> +	rm -f $tmp.*
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +. ./common/reflink
+>> +
+>> +# remove previous $seqres.full before test
+>> +rm -f $seqres.full
+>> +
+>> +# Modify as appropriate.
+>> +_supported_fs generic
+>> +_supported_os Linux
+>> +_supported_fs btrfs
+> Two "_supported_fs" here.
+>
+> And I don't see any other btrfs-specific configs except MKFS_OPTIONS, is
+> it possible to make it a generic test?
+>
+>> +_require_scratch_reflink
+>> +
+>> +MKFS_OPTIONS="-O ^mixed-bg"
+> Need comments on why testing with this MKFS_OPTIONS.
+>
+>> +_scratch_mkfs_sized $((101 * 1024 * 1024)) >> $seqres.full 2>&1
+> 101M is too small to make btrfs on ppc64 host for me.
+>
+>> +_scratch_mount
+>> +
+>> +blocksize=$((128 * 1024))
+>> +file="$SCRATCH_MNT/testfile"
+>> +filesize=$((12 * 1024 * 1024 * 1024))
+> Comments on these numbers picked would be good, i.e. why 128k blocksize,
+> why 12M filesize. Any special reason or just good enough for the test?
+>
+>> +nr=$((filesize / blocksize))
+>> +
+>> +# write the initial block for later reflink
+>> +_pwrite_byte 0xcdcdcdcd 0 $blocksize $file > /dev/null
+>> +
+>> +# use reflink to create the rest of the file, whose all extents are all
+>> +# pointing to the first extent
+>> +for ((i = 1; i < $nr; i++)); do
+>> +	_reflink_range $file 0 $file $(($i * $blocksize)) $blocksize > /dev/null
+>> +done
+> It's not clear to me in test description that why reflink is needed in
+> this test. Perhaps test description and comments above can be updated to
+> reflect the purpose of reflink?
+>
+>> +
+>> +$XFS_IO_PROG -f -c "truncate 0" $file > /dev/null 2>&1
+>> +disk_usage=`du $file | $AWK_PROG '{print $1}'`
+>> +new_filesize=`ls -l $file | $AWK_PROG '{print $5}'`
+> I think "stat -c %s $file" is much easier :)
+>
+>> +if [ $disk_usage -gt 0 ] && [ $new_filesize -eq 0 ]; then
+>> +	echo "after truncate, file size is 0, but file still owns disk blocks"
+>> +	status=1
+>> +	exit
+>> +fi
+>> +
+>> +echo "Silence is golden"
+>> +# success, all done
+>> +status=0
+>> +exit
+>> diff --git a/tests/btrfs/124.out b/tests/btrfs/124.out
+>> new file mode 100644
+>> index 0000000..d7339e6
+>> --- /dev/null
+>> +++ b/tests/btrfs/124.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 124
+>> +Silence is golden
+>> diff --git a/tests/btrfs/group b/tests/btrfs/group
+>> index 5a26ed7..8b5050e 100644
+>> --- a/tests/btrfs/group
+>> +++ b/tests/btrfs/group
+>> @@ -126,3 +126,4 @@
+>>   121 auto quick snapshot qgroup
+>>   122 auto quick snapshot qgroup
+>>   123 auto quick qgroup
+>> +124 auto quick metadata
+> Add it to 'clone' group as well?
+>
+> Thanks,
+> Eryu
+>
+>
+
+
 
