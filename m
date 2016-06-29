@@ -1,62 +1,56 @@
-Received: from aserp1050.oracle.com ([141.146.126.70]:43972 "EHLO
-	aserp1050.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751137AbcF2EAZ (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 29 Jun 2016 00:00:25 -0400
-Date: Tue, 28 Jun 2016 20:36:48 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH 21/20] xfs/128: cycle_mount the scratch device, not the test
- device
-Message-ID: <20160629033648.GA7108@birch.djwong.org>
-References: <146612796204.25024.18254357523133394284.stgit@birch.djwong.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <146612796204.25024.18254357523133394284.stgit@birch.djwong.org>
+Received: from imap.thunk.org ([74.207.234.97]:56242 "EHLO imap.thunk.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752440AbcF2BdC (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 28 Jun 2016 21:33:02 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH] common: ext4 doesn't support O_DIRECT with encryption
+Date: Tue, 28 Jun 2016 21:32:55 -0400
+Message-Id: <1467163975-11183-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: david@fromorbit.com
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
+To: fstests@vger.kernel.org
+Cc: Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-This test uses the scratch device, so cycle that, not the test dev.
+Teach _require_odirect to skip the O_DIRECT tests if the ext4 mount
+option "test_dummy_encryption" is enabled, since O_DIRECT doesen't
+make sense when file system level encryption is enabled, and several
+tests which use O_DIRECT --- ext4/301, ext4/304, generic/250 and
+generic/252 --- fail when encryption is enabled.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 ---
- tests/xfs/128 |    7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
+ common/rc | 18 ++++++++++++------
+ 1 file changed, 12 insertions(+), 6 deletions(-)
 
-diff --git a/tests/xfs/128 b/tests/xfs/128
-index 8758d7e..2e756d5 100755
---- a/tests/xfs/128
-+++ b/tests/xfs/128
-@@ -66,7 +66,7 @@ _pwrite_byte 0x61 0 $((blks * blksz)) $testdir/file1 >> $seqres.full
- _cp_reflink $testdir/file1 $testdir/file2
- _cp_reflink $testdir/file2 $testdir/file3
- _cp_reflink $testdir/file3 $testdir/file4
--_test_cycle_mount
-+_scratch_cycle_mount
- free_blocks1=$(stat -f $testdir -c '%f')
+diff --git a/common/rc b/common/rc
+index adda940..003400d 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1933,12 +1933,18 @@ _require_xfs_db_command()
+ # check that kernel and filesystem support direct I/O
+ _require_odirect()
+ {
+-       testfile=$TEST_DIR/$$.direct
+-       $XFS_IO_PROG -F -f -d -c "pwrite 0 20k" $testfile > /dev/null 2>&1
+-       if [ $? -ne 0 ]; then
+-               _notrun "O_DIRECT is not supported"
+-       fi
+-       rm -f $testfile 2>&1 > /dev/null
++	if [ $FSTYP = "ext4" ] ; then
++		if echo "$MOUNT_OPTIONS" | grep -q "test_dummy_encryption"
++		then
++			_notrun "ext4 encryption doesn't support O_DIRECT"
++		fi
++	fi
++	testfile=$TEST_DIR/$$.direct
++	$XFS_IO_PROG -F -f -d -c "pwrite 0 20k" $testfile > /dev/null 2>&1
++	if [ $? -ne 0 ]; then
++		_notrun "O_DIRECT is not supported"
++	fi
++	rm -f $testfile 2>&1 > /dev/null
+ }
  
- md5sum $testdir/file1 | _filter_scratch
-@@ -82,7 +82,7 @@ c04=$(_md5_checksum $testdir/file4)
- echo "CoW the reflink copies"
- _pwrite_byte 0x62 $blksz $blksz $testdir/file2 >> $seqres.full
- _pwrite_byte 0x63 $(( blksz * (blks - 1) )) $blksz $testdir/file3 >> $seqres.full
--_test_cycle_mount
-+_scratch_cycle_mount
- free_blocks2=$(stat -f $testdir -c '%f')
- 
- md5sum $testdir/file1 | _filter_scratch
-@@ -97,11 +97,12 @@ c14=$(_md5_checksum $testdir/file4)
- 
- echo "Defragment"
- lsattr -l $testdir/ | _filter_scratch | _filter_spaces
-+filefrag -v $testdir/file* >> $seqres.full
- $XFS_FSR_PROG -v -d $testdir/file1 >> $seqres.full
- $XFS_FSR_PROG -v -d $testdir/file2 >> $seqres.full # fsr probably breaks the link
- $XFS_FSR_PROG -v -d $testdir/file3 >> $seqres.full # fsr probably breaks the link
- $XFS_FSR_PROG -v -d $testdir/file4 >> $seqres.full # fsr probably ignores this file
--_test_cycle_mount
-+_scratch_cycle_mount
- free_blocks3=$(stat -f $testdir -c '%f')
- 
- md5sum $testdir/file1 | _filter_scratch
+ # Check that a fs has enough free space (in 1024b blocks)
+-- 
+2.5.0
+
