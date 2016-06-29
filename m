@@ -1,65 +1,134 @@
-Received: from mx1.redhat.com ([209.132.183.28]:38629 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:36212 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752191AbcF2N3z (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 29 Jun 2016 09:29:55 -0400
-Date: Wed, 29 Jun 2016 21:29:52 +0800
+	id S1752719AbcF2Nlv (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 29 Jun 2016 09:41:51 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH -v2] generic/082: rename _filter_project_quota to a avoid
- function name conflict
-Message-ID: <20160629132952.GN23649@eguan.usersys.redhat.com>
-References: <1467206458-2277-1-git-send-email-tytso@mit.edu>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1467206458-2277-1-git-send-email-tytso@mit.edu>
+Subject: [PATCH 2/2] overlay: remove dir which contains whiteout from lower dir
+Date: Wed, 29 Jun 2016 21:39:34 +0800
+Message-Id: <1467207574-11082-2-git-send-email-eguan@redhat.com>
+In-Reply-To: <1467207574-11082-1-git-send-email-eguan@redhat.com>
+References: <1467207574-11082-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-unionfs@vger.kernel.org, xzhou@redhat.com, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jun 29, 2016 at 09:20:58AM -0400, Theodore Ts'o wrote:
-> Commit 8469a8c1: "xfs/133-4: filter redundant projid 0 quota report
-> info out" added _filter_project_quota to common/filter, and this
-> conflicted with a _filter_project_quota function in generic/082.  So
-> rename the function in generic/082 to avoid the conflict.
-> 
-> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+Test the removal of a dir which contains whiteout from lower dir,
+which could crash the kernel.
 
-Reviewed-by: Eryu Guan <eguan@redhat.com>
+The following kernel commit fixed this issue
+84889d4 ovl: check dentry positiveness in ovl_cleanup_whiteouts()
 
-> ---
->  tests/generic/082 | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
-> 
-> diff --git a/tests/generic/082 b/tests/generic/082
-> index a727c10..a41afe6 100755
-> --- a/tests/generic/082
-> +++ b/tests/generic/082
-> @@ -36,9 +36,9 @@ _cleanup()
->  	rm -f $tmp.*
->  }
->  
-> -_filter_project_quota()
-> +filter_project_quota_line()
->  {
-> -    grep -v "^project quota on"
-> +	grep -v "^project quota on"
->  }
->  
->  # get standard environment, filters and checks
-> @@ -69,7 +69,7 @@ quotaon $SCRATCH_MNT >>$seqres.full 2>&1
->  # just ignored, but quota is still on. This may change in future, let's
->  # re-consider the case then.
->  _scratch_mount "-o remount,ro,nosuchopt" >>$seqres.full 2>&1
-> -quotaon -p $SCRATCH_MNT | _filter_scratch | _filter_project_quota
-> +quotaon -p $SCRATCH_MNT | _filter_scratch | filter_project_quota_line
->  # second remount should succeed, no oops or hang expected
->  _scratch_mount "-o remount,ro" || _fail "second remount,ro failed"
->  
-> -- 
-> 2.5.0
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+ tests/overlay/010     | 78 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/010.out |  2 ++
+ tests/overlay/group   |  1 +
+ 3 files changed, 81 insertions(+)
+ create mode 100755 tests/overlay/010
+ create mode 100644 tests/overlay/010.out
+
+diff --git a/tests/overlay/010 b/tests/overlay/010
+new file mode 100755
+index 0000000..5d1c2bd
+--- /dev/null
++++ b/tests/overlay/010
+@@ -0,0 +1,78 @@
++#! /bin/bash
++# FS QA Test 010
++#
++# Remove dir which contains whiteout from lower dir.
++#
++# The following kernel commit fixed the kernel crash on the removal
++# 84889d4 ovl: check dentry positiveness in ovl_cleanup_whiteouts()
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Red Hat Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++_require_scratch
++
++# Remove all files from previous tests
++_scratch_mkfs
++
++# Need two lower dirs in this test, and we mount overlay ourselves,
++# create upper and workdir as well
++lowerdir1=$SCRATCH_DEV/$OVERLAY_LOWER_DIR.1
++lowerdir2=$SCRATCH_DEV/$OVERLAY_LOWER_DIR.2
++upperdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
++workdir=$SCRATCH_DEV/$OVERLAY_WORK_DIR
++mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
++
++# One lowerdir contains test dir and test files, the other contains whiteout
++mkdir -p $lowerdir1/testdir $lowerdir2/testdir
++touch $lowerdir1/testdir/a $lowerdir1/testdir/b
++mknod $lowerdir2/testdir/a c 0 0
++
++# Mount overlayfs and remove testdir, which led to kernel crash
++$MOUNT_PROG -t overlay -o lowerdir=$lowerdir2:$lowerdir1 \
++	    -o upperdir=$upperdir,workdir=$workdir \
++	    $SCRATCH_DEV $SCRATCH_MNT
++rm -rf $SCRATCH_MNT/testdir
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/overlay/010.out b/tests/overlay/010.out
+new file mode 100644
+index 0000000..1d83a8d
+--- /dev/null
++++ b/tests/overlay/010.out
+@@ -0,0 +1,2 @@
++QA output created by 010
++Silence is golden
+diff --git a/tests/overlay/group b/tests/overlay/group
+index 3f08cd3..06cdb7e 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -12,3 +12,4 @@
+ 007 auto quick
+ 008 auto quick whiteout
+ 009 auto quick
++010 auto quick whiteout
+-- 
+2.7.4
+
