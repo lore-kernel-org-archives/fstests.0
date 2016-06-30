@@ -1,40 +1,31 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46609 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751810AbcF3N1J (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 30 Jun 2016 09:27:09 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id AC6EFBBB5A
-	for <fstests@vger.kernel.org>; Thu, 30 Jun 2016 13:20:40 +0000 (UTC)
-Date: Thu, 30 Jun 2016 21:20:38 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/2] tests/xfs: test for post umount readahead completion
- panic
-Message-ID: <20160630132038.GD23649@eguan.usersys.redhat.com>
-References: <1467290974-13203-1-git-send-email-bfoster@redhat.com>
- <1467290974-13203-3-git-send-email-bfoster@redhat.com>
+Received: from mail-vk0-f44.google.com ([209.85.213.44]:36639 "EHLO
+	mail-vk0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751951AbcF3N3j (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 30 Jun 2016 09:29:39 -0400
+Received: by mail-vk0-f44.google.com with SMTP id m127so49817133vkb.3
+        for <fstests@vger.kernel.org>; Thu, 30 Jun 2016 06:29:28 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1467290974-13203-3-git-send-email-bfoster@redhat.com>
+In-Reply-To: <20160630120038.GA23649@eguan.usersys.redhat.com>
+References: <1467118046-27030-1-git-send-email-agruenba@redhat.com>
+ <1467118046-27030-2-git-send-email-agruenba@redhat.com> <20160630120038.GA23649@eguan.usersys.redhat.com>
+From: Andreas Gruenbacher <agruenba@redhat.com>
+Date: Thu, 30 Jun 2016 15:29:27 +0200
+Message-ID: <CAHc6FU6rRbPFYNjw9+yjCGCGOBux3fS9cXTEYex3XuNyMeNe7Q@mail.gmail.com>
+Subject: Re: [PATCH v8] generic/362-370: Add richacl tests
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
+To: Eryu Guan <eguan@redhat.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 30, 2016 at 08:49:34AM -0400, Brian Foster wrote:
-> XFS has a bug where directory readahead completions can occur after
-> unmount. This can lead to a crash or panic because metadata read
-> verification attempts to access core XFS data structures (e.g., the log)
-> after they have been freed and certain pointers have been reset.
-> 
-> Add a test that triggers directory readahead, delays the readahead I/O
-> and immediately unmounts the filesystem. This test is part of the
-> dangerous group as it will cause kernels affected by the bug to crash.
-> 
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
+On Thu, Jun 30, 2016 at 2:00 PM, Eryu Guan <eguan@redhat.com> wrote:
+> On Tue, Jun 28, 2016 at 02:47:26PM +0200, Andreas Gruenbacher wrote:
+>> Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
+>
+> The tests look fine to me. I compiled your richacl kernel & richacl
+> tools & xfsprogs and tested them on XFS on ppc64 host, and they all
+> passed. I've queued them up for next pull request. Thanks!
 
-It crashed my 4.7-rc5 kernel quickly.
+Thanks for putting in the effort!
 
-Reviewed-by: Eryu Guan <eguan@redhat.com>
+Andreas
