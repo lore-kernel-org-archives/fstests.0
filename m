@@ -1,66 +1,48 @@
-Received: from mx1.redhat.com ([209.132.183.28]:60858 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932404AbcF3O7G (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 30 Jun 2016 10:59:06 -0400
-Date: Thu, 30 Jun 2016 22:58:53 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2 5/6] fstests: btrfs: test RAID1 device reappear and
- balanced
-Message-ID: <20160630145853.GH23649@eguan.usersys.redhat.com>
-References: <1463495530-425-5-git-send-email-anand.jain@oracle.com>
- <1465980527-19031-1-git-send-email-anand.jain@oracle.com>
- <20160621133137.GY5140@eguan.usersys.redhat.com>
- <e4fb70f9-2e96-1c32-fbe7-0c1fa4cf8b95@oracle.com>
- <20160627092916.GU23649@eguan.usersys.redhat.com>
- <a845e059-4717-dd9f-ec34-37a66390fb50@oracle.com>
+Received: from mail-io0-f170.google.com ([209.85.223.170]:34744 "EHLO
+	mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752069AbcF3P0W (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 30 Jun 2016 11:26:22 -0400
+Received: by mail-io0-f170.google.com with SMTP id g13so74193011ioj.1
+        for <fstests@vger.kernel.org>; Thu, 30 Jun 2016 08:25:25 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <a845e059-4717-dd9f-ec34-37a66390fb50@oracle.com>
+In-Reply-To: <20160630133346.GE23649@eguan.usersys.redhat.com>
+References: <1467212275-14344-1-git-send-email-jtulak@redhat.com>
+ <1467275710-403-1-git-send-email-jtulak@redhat.com> <20160630133346.GE23649@eguan.usersys.redhat.com>
+From: Jan Tulak <jtulak@redhat.com>
+Date: Thu, 30 Jun 2016 17:19:53 +0200
+Message-ID: <CACj3i70ZOVyMiw9z0RJSDAgpWHgLGFSbBFD=xL9OZrV6XAca9w@mail.gmail.com>
+Subject: Re: [PATCH v2] xfstests: Fix installation for extended names
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 30, 2016 at 07:04:06PM +0800, Anand Jain wrote:
-> 
-> 
-> Thanks for review comments.
-> more below..
-> 
-> On 06/27/2016 05:29 PM, Eryu Guan wrote:
-> > On Wed, Jun 22, 2016 at 07:01:54PM +0800, Anand Jain wrote:
-> > > 
-> > > 
-> > > On 06/21/2016 09:31 PM, Eryu Guan wrote:
-> > > > On Wed, Jun 15, 2016 at 04:48:47PM +0800, Anand Jain wrote:
-> > > > > From: Anand Jain <Anand.Jain@oracle.com>
-> > > > > 
-> > > > > The test does the following:
-> > > > >   Initialize a RAID1 with some data
-> > > > > 
-> > > > >   Re-mount RAID1 degraded with _dev1_ and write up to
-> > > > >   half of the FS capacity
-> > > > 
-> > > > If test devices are big enough, this test consumes much longer test
-> > > > time. I tested with 15G scratch dev pool and this test ran ~200s on my
-> > > > 4vcpu 8G memory test vm.
-> > > 
-> > >  Right. Isn't that a good design? So that it gets tested differently
-> > >  on different HW config. ?
-> > 
-> > Not in fstests. We should limit the run time of tests to an acceptable
-> > amount, for auto group it's within 5 minutes.
-> 
-> > >  However the test time can be reduced by using smaller vdisk.
-> > 
-> > I think either limit the write size or _notrun if the $max_fs_size is
-> > too big (say 30G).
-> 
-> Fixed in v3 to have a fixed scratch data.
+On Thu, Jun 30, 2016 at 3:33 PM, Eryu Guan <eguan@redhat.com> wrote:
+> On Thu, Jun 30, 2016 at 10:35:10AM +0200, Jan Tulak wrote:
+>> xfstests supports extended test names like 314-foo-bar, but installation of
+>> these tests was skipped (not matching a regexp). So this patch fixes the
+>> makefiles in tests directories.
+>>
+>> Signed-off-by: Jan Tulak <jtulak@redhat.com>
+>> ---
+>> UPDATE:
+>>   * install failed when no extended name was present, so suppress errors for
+>>     extended names
+>
+> Hmm, this looks ugly to me :) I was thinking about it too, but didn't
+> work out a better idea. Now I tend to add this installation support to
+> tests/xfs/Makefile only, and we can add the support to other tests when
+> needed. What do you think?
+>
 
-Thanks! I've queued this patchset up, will let them go through some
-testings.
+Yeah. I thought about better regexp, but unfortunately, whatever sh
+Make uses, it has just limited support for that, unlike bash. So, yes,
+add it for xfs tests only... Should I send another patch for that?
 
 Thanks,
-Eryu
+Jan
+
+-- 
+Jan Tulak
+jtulak@redhat.com / jan@tulak.me
