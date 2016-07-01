@@ -1,72 +1,86 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:23791 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751900AbcGACao (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 30 Jun 2016 22:30:44 -0400
-Received: from G08CNEXCHPEKD01.g08.fujitsu.local (unknown [10.167.33.80])
-	by cn.fujitsu.com (Postfix) with ESMTP id 4E7A1498F58F
-	for <fstests@vger.kernel.org>; Fri,  1 Jul 2016 10:30:07 +0800 (CST)
-Subject: Re: [PATCH v2] geceric/362: check truncate can update file size
- correctly when truncate fails
-References: <20160623082718.GF3226@eguan.usersys.redhat.com>
- <20160630082549.27201-1-wangxg.fnst@cn.fujitsu.com>
- <20160630135237.GG23649@eguan.usersys.redhat.com>
-From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
-Message-ID: <5775D54C.6070001@cn.fujitsu.com>
-Date: Fri, 1 Jul 2016 10:28:28 +0800
+Received: from mx1.redhat.com ([209.132.183.28]:38790 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751948AbcGADFk (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 30 Jun 2016 23:05:40 -0400
+Date: Fri, 1 Jul 2016 11:05:37 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2] xfstests: update xfs/096 for new behaviour
+Message-ID: <20160701030537.GO23649@eguan.usersys.redhat.com>
+References: <1464858659-610-1-git-send-email-jtulak@redhat.com>
+ <1467195535-32147-1-git-send-email-jtulak@redhat.com>
+ <20160630065459.GW23649@eguan.usersys.redhat.com>
+ <20160701003700.GU27480@dastard>
 MIME-Version: 1.0
-In-Reply-To: <20160630135237.GG23649@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160701003700.GU27480@dastard>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>, Jan Tulak <jtulak@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-hello,
+On Fri, Jul 01, 2016 at 10:37:00AM +1000, Dave Chinner wrote:
+> On Thu, Jun 30, 2016 at 02:54:59PM +0800, Eryu Guan wrote:
+> > On Wed, Jun 29, 2016 at 12:18:55PM +0200, Jan Tulak wrote:
+> > > Because we recently changed how mkfs behaves when it gets incorrect/invalid
+> > > values, update the expected output to reflect the current status.
+> > > However, keep also compatibility with the old version.
+> > > 
+> > > Signed-off-by: Jan Tulak <jtulak@redhat.com>
+> > > ---
+> > > CHANGE: added compatibility for the old xfsprogs.
+> > 
+> > Sorry for the late response, because I was lost on this :)
+> > 
+> > Hi Dave - what's the rule/policy of maintaining the backword
+> > compatibility in fstests?
+> 
+> We try to ensure that tests that work/pass on old versions of
+> utilities continue to do so, even as the newer code changes. If the
+> new code changes too much, then we can either stop running the test
+> on older code, or we fork the test for the new code....
 
-On 06/30/2016 09:52 PM, Eryu Guan wrote:
-> On Thu, Jun 30, 2016 at 04:25:49PM +0800, Wang Xiaoguang wrote:
->> In btrfs, when truncate operation fails for enospc reason, file may st=
-ill
->> have some disk blocks, but it will fail to update filesize accordingly.
->>
->> Kernel commit c0d2f61 has fixed this bug for btrfs:
->>      btrfs: fix disk_i_size update bug when ftruncate() fails
->>
->> Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
->> ---
->> v2: move this test to generic test and add comments why testcase
->> use reflink.
-> Thanks for the updated version. Did it fail for you when testing on
-> unpatched kernel? I ran the test more than 10 times on 4.6 kernel (whic=
-h
-> doesn't have the fix) and all passed, as well as RHEL7 kernel.
->
-> Can you please confirm?
-I tested this case in v4.6-rc7-162-g415b35a and it failed as expected,
-but I used the newest version btrfs-progs.
-In RHEL7.2ga, its btrfs-progs version is btrfs-progs-3.19.1-1.el7.x86_64,
-which is somewhat old. For small fs, it'll enable mixed mode for data and
-metadata default, so the reflink operation in this test case does not=20
-consume
-enough metadata, truncate operation can still succeed, then test will alw=
-ays
-pass. I can create a big fs to have test, but then this fs will have more
-metadata, which then need more reflink operations to consume metadata and
-increase the test time greatly.
+Thanks Dave for the clarification!
 
-In mkfs.btrfs manpage, there is such description=EF=BC=9A
-      versions up to 4.2.x forced the mixed mode for devices smaller
-      than 1GiB. This has been removed in 4.3+ as it caused some
-      usability issues.
+> 
+> > I know that efforts have been made to make
+> > sure new changes don't break old binaries, but is that a must or a
+> > best-to-have? And what do you think about the xfsprogs version
+> > comparing? (I'm OK with it :-))
+> 
+> We've tried to avoid using version numbers for comparisons, because
+> that becomes a downward spiral into a mess. Instead, we have
+> gone down the path of testing for supported features in binaries and
+> filesystems, not checking version numbers. i.e. we don't care about
+> the version number - we care about the feature that the binary
+> provides. Those checks are self documenting - the test tells use
+> what it requires which something that version number checks do not
+> explain at all.
 
-Regards,
-Xiaoguang Wang
+Makes sense.
 
->
-> Thanks,
-> Eryu
->
->
+> 
+> In this case, we have a change in a binary that turns warnings into
+> errors or issues errors rather than silently ignores what the user
+> asked for and uses defaults. We already filter out anything relevant
+> from the result to support all the changes in binary output since
+> the test was introduced, so we really can't tell if the value
+> substitution behaviour has changed anymore. IOWs, this test really
+> isn't serving much purpose as a regression test anymore.
+> 
+> From that perspective, I'd say we either remove it or we stop trying
+> to update it further by adding a new requires check for an old mkfs
+> binary that silently accepts invalid log stripe unit sizes. i.e.
+> don't add version number checks, add a feature check so that it only
+> runs on old mkfs binaries but not new ones. e.g.
+> _require_mkfs_accept_invalid_log_sunit()
 
+This looks good to me.
 
+Hi Jan - Can you please send an updated version as Dave suggested above?
+And I think the input-validation test could be updated as well to make
+it only run on newer mkfs.
 
+Thanks a lot!
+
+Eryu
