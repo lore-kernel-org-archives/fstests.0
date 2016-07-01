@@ -1,36 +1,72 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:30217 "EHLO
-	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751830AbcGABpU (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 30 Jun 2016 21:45:20 -0400
-Date: Fri, 1 Jul 2016 11:45:17 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] common: ext4 doesn't support O_DIRECT with encryption
-Message-ID: <20160701014517.GZ27480@dastard>
-References: <1467163975-11183-1-git-send-email-tytso@mit.edu>
+Received: from cn.fujitsu.com ([59.151.112.132]:23791 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751900AbcGACao (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 30 Jun 2016 22:30:44 -0400
+Received: from G08CNEXCHPEKD01.g08.fujitsu.local (unknown [10.167.33.80])
+	by cn.fujitsu.com (Postfix) with ESMTP id 4E7A1498F58F
+	for <fstests@vger.kernel.org>; Fri,  1 Jul 2016 10:30:07 +0800 (CST)
+Subject: Re: [PATCH v2] geceric/362: check truncate can update file size
+ correctly when truncate fails
+References: <20160623082718.GF3226@eguan.usersys.redhat.com>
+ <20160630082549.27201-1-wangxg.fnst@cn.fujitsu.com>
+ <20160630135237.GG23649@eguan.usersys.redhat.com>
+From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Message-ID: <5775D54C.6070001@cn.fujitsu.com>
+Date: Fri, 1 Jul 2016 10:28:28 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1467163975-11183-1-git-send-email-tytso@mit.edu>
+In-Reply-To: <20160630135237.GG23649@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jun 28, 2016 at 09:32:55PM -0400, Theodore Ts'o wrote:
-> Teach _require_odirect to skip the O_DIRECT tests if the ext4 mount
-> option "test_dummy_encryption" is enabled, since O_DIRECT doesen't
-> make sense when file system level encryption is enabled, and several
-> tests which use O_DIRECT --- ext4/301, ext4/304, generic/250 and
-> generic/252 --- fail when encryption is enabled.
+hello,
 
-Stupid question: why isn't ext4 simply falling back to buffered IO
-when encryption is enabled on a file? This seems kind of strange to
-have direct IO conditionally supported based on mkfs/mount
-parameters (or perhaps even per-file configurations)....
+On 06/30/2016 09:52 PM, Eryu Guan wrote:
+> On Thu, Jun 30, 2016 at 04:25:49PM +0800, Wang Xiaoguang wrote:
+>> In btrfs, when truncate operation fails for enospc reason, file may st=
+ill
+>> have some disk blocks, but it will fail to update filesize accordingly.
+>>
+>> Kernel commit c0d2f61 has fixed this bug for btrfs:
+>>      btrfs: fix disk_i_size update bug when ftruncate() fails
+>>
+>> Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+>> ---
+>> v2: move this test to generic test and add comments why testcase
+>> use reflink.
+> Thanks for the updated version. Did it fail for you when testing on
+> unpatched kernel? I ran the test more than 10 times on 4.6 kernel (whic=
+h
+> doesn't have the fix) and all passed, as well as RHEL7 kernel.
+>
+> Can you please confirm?
+I tested this case in v4.6-rc7-162-g415b35a and it failed as expected,
+but I used the newest version btrfs-progs.
+In RHEL7.2ga, its btrfs-progs version is btrfs-progs-3.19.1-1.el7.x86_64,
+which is somewhat old. For small fs, it'll enable mixed mode for data and
+metadata default, so the reflink operation in this test case does not=20
+consume
+enough metadata, truncate operation can still succeed, then test will alw=
+ays
+pass. I can create a big fs to have test, but then this fs will have more
+metadata, which then need more reflink operations to consume metadata and
+increase the test time greatly.
 
-Cheers,
+In mkfs.btrfs manpage, there is such description=EF=BC=9A
+      versions up to 4.2.x forced the mixed mode for devices smaller
+      than 1GiB. This has been removed in 4.3+ as it caused some
+      usability issues.
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Regards,
+Xiaoguang Wang
+
+>
+> Thanks,
+> Eryu
+>
+>
+
+
+
