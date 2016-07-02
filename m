@@ -1,133 +1,321 @@
-Received: from mail-it0-f50.google.com ([209.85.214.50]:33593 "EHLO
-	mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752968AbcGKJaC (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 11 Jul 2016 05:30:02 -0400
-Received: by mail-it0-f50.google.com with SMTP id f6so8360837ith.0
-        for <fstests@vger.kernel.org>; Mon, 11 Jul 2016 02:30:02 -0700 (PDT)
-MIME-Version: 1.0
-In-Reply-To: <20160704014040.GA27480@dastard>
-References: <1467389347-2055-1-git-send-email-jtulak@redhat.com>
- <1467389347-2055-2-git-send-email-jtulak@redhat.com> <20160704014040.GA27480@dastard>
-From: Jan Tulak <jtulak@redhat.com>
-Date: Mon, 11 Jul 2016 11:29:42 +0200
-Message-ID: <CACj3i71NDjsyTKc8vt9X-VZzRjZpbM=HYp5mx2MFVLrTB-GGYw@mail.gmail.com>
-Subject: Re: [PATCH 1/2] xfstests: Fix installation for extended names
-Content-Type: text/plain; charset=UTF-8
+Received: from mail.kernel.org ([198.145.29.136]:35498 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753536AbcGKLRp (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 11 Jul 2016 07:17:45 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH 1/3] btrfs: add test for an incremental send after moving directories around
+Date: Sat,  2 Jul 2016 13:32:08 +0100
+Message-Id: <1467462728-14495-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Hi,
+From: Filipe Manana <fdmanana@suse.com>
 
-On Mon, Jul 4, 2016 at 3:40 AM, Dave Chinner <david@fromorbit.com> wrote:
-> On Fri, Jul 01, 2016 at 06:09:06PM +0200, Jan Tulak wrote:
->> xfstests supports extended test names like 314-foo-bar, but installation of
->> these tests was skipped (not matching a regexp). So this patch fixes the
->> makefiles in tests/*/
->>
->> Signed-off-by: Jan Tulak <jtulak@redhat.com>
->> ---
->> UPDATE:
->> Rewritten, now it doesn't fail without the extended name, and doesn't
->> suppress anything. Thanks Dave.
->> ---
->>  tests/btrfs/Makefile   | 21 +++++++++++++++++----
->>  tests/cifs/Makefile    | 21 +++++++++++++++++----
->>  tests/ext4/Makefile    | 21 +++++++++++++++++----
->>  tests/f2fs/Makefile    | 24 ++++++++++++++++++------
->>  tests/generic/Makefile | 21 +++++++++++++++++----
->>  tests/overlay/Makefile | 23 ++++++++++++++++++-----
->>  tests/shared/Makefile  | 21 +++++++++++++++++----
->>  tests/udf/Makefile     | 21 +++++++++++++++++----
->>  tests/xfs/Makefile     | 21 +++++++++++++++++----
->>  9 files changed, 155 insertions(+), 39 deletions(-)
->>
->> diff --git a/tests/btrfs/Makefile b/tests/btrfs/Makefile
->> index e1a5be1..0301d78 100644
->> --- a/tests/btrfs/Makefile
->> +++ b/tests/btrfs/Makefile
->> @@ -5,16 +5,29 @@
->>  TOPDIR = ../..
->>  include $(TOPDIR)/include/builddefs
->>
->> -BTRFS_DIR = btrfs
->> -TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(BTRFS_DIR)
->> +GROUP_DIR = btrfs
->> +TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(GROUP_DIR)
->
-> What's this change for?
->
-> Please don't make random undocumented changes when updating a
-> patchset. It is best not to change anything unrelated to the problem
-> being solved.
->
->
->>  include $(BUILDRULES)
->>
->> +# note: the second TESTS wildcard gets also .out files, but these will be
->> +# overwritten with correct permissions a moment later, as they are also in
->> +# OUTPUTS. Regexps here are really limited, so I didn't find a better
->> +# solution...
->> +TESTS = $(wildcard [0-9][0-9][0-9])
->> +TESTS += $(wildcard [0-9][0-9][0-9]-*)
->
-> Ugh. The hacks need to be constrained to the makefile and not do
-> nasty things with installed files.
->
-> What I think should be done here is to turn the selection around the
-> other way because we can select the output files directly and
-> correctly. We can then use that to build the test list via stripping
-> and filtering as all tests must have an output file associated with
-> them.
->
-> So:
->
-> # Start with all test related files:
-> ALLFILES = $(wildcard [0-9]??*)
->
-> # Now build a list of known output files.  Unfortunately, the
-> # multiple output test files are poorly handled as makefiles don't
-> # handle wildcarded multi-suffix matching. Hence we separate the
-> # processing of these right now.
-> EXTENDED_OUTFILES = $(wildcard [0-9]??*.out.*)
-> BASIC_OUTFILES = $(wildcard [0-9]??*.out)
-> OUTFILES = $(EXTENDED_OUTFILES) $(BASIC_OUTFILES)
->
-> # Strip suffix to get matching tests. We want to strip from the
-> # first "." to the end, but makefiles don't have a built in
-> # operative for that. So:
-> #
-> # Hack: strip the multiple segments after .out with repeated basename calls.
-> EXTFILTER1 = $(basename $(EXTENDED_OUTFILES))
-> EXTFILTER2 = $(basename $(EXTFILTER1))
-> EXTFILTER3 = $(basename $(EXTFILTER2))
-> EXTFILTER4 = $(basename $(EXTFILTER3))
->
-> # final filter list
-> FILTER = $(basename $(EXTFILTER4) $(BASIC_OUTFILES))
->
-> # finally, select the test files by filtering against against the
-> # stripped output files and sort them to remove duplicates.
-> TESTS = $(sort $(filter $(ALLFILES), $(FILTER)))
->
-> That will give you two lists - "OUTFILES" which are all the output
-> files that need to be installed, and "TESTS" which are all the tests
-> that should be installed. There will be no overlap between these two
-> lists.
->
-> I'd also suggest that this can probably be put in the BUILDRULES
-> file, as it will be common to all makefiles and doesn't need to be
-> repeated in every makefile.
->
+Test that an incremental send operation works after doing radical changes
+in the directory hierarchy that involve switching the inode that directory
+entries point to.
 
-Thanks for your code. I submitted a modified patch, though I have a question...
-Should I put you into Signed-of-by in this case, as you wrote most of
-the new version of this patch?
+This test exercises scenarios used to fail in btrfs and are fixed by the
+following patches for the linux kernel:
 
-Thanks,
-Jan
+ "Btrfs: send, fix failure to move directories with the same name around"
+ "Btrfs: incremental send, fix invalid paths for rename operations"
 
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/124     | 261 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/124.out |   2 +
+ tests/btrfs/group   |   1 +
+ 3 files changed, 264 insertions(+)
+ create mode 100755 tests/btrfs/124
+ create mode 100644 tests/btrfs/124.out
+
+diff --git a/tests/btrfs/124 b/tests/btrfs/124
+new file mode 100755
+index 0000000..38635a3
+--- /dev/null
++++ b/tests/btrfs/124
+@@ -0,0 +1,261 @@
++#! /bin/bash
++# FS QA Test No. btrfs/124
++#
++# Test that an incremental send operation works after doing radical changes
++# in the directory hierarchy that involve switching the inode that directory
++# entries point to.
++#
++#-----------------------------------------------------------------------
++# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	rm -fr $send_files_dir
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_fssum
++
++send_files_dir=$TEST_DIR/btrfs-test-$seq
++
++rm -f $seqres.full
++rm -fr $send_files_dir
++mkdir $send_files_dir
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++# case 1
++mkdir -p $SCRATCH_MNT/case_1/d/p1
++mkdir $SCRATCH_MNT/case_1/p1
++
++# case 2
++mkdir -p $SCRATCH_MNT/case_2/a
++mkdir $SCRATCH_MNT/case_2/d
++mkdir $SCRATCH_MNT/case_2/e
++mkdir $SCRATCH_MNT/case_2/f
++mkdir $SCRATCH_MNT/case_2/ance
++mkdir $SCRATCH_MNT/case_2/d/ance
++mkdir $SCRATCH_MNT/case_2/a/c
++mv $SCRATCH_MNT/case_2/e $SCRATCH_MNT/case_2/d/ance
++mv $SCRATCH_MNT/case_2/f $SCRATCH_MNT/case_2/d/ance
++mv $SCRATCH_MNT/case_2/ance $SCRATCH_MNT/case_2/d/ance
++
++# case 3
++mkdir -p $SCRATCH_MNT/case_3/d
++mkdir $SCRATCH_MNT/case_3/a
++mkdir $SCRATCH_MNT/case_3/waiting_dir
++mkdir -p $SCRATCH_MNT/case_3/pre/ance
++mkdir $SCRATCH_MNT/case_3/d/ance
++mkdir $SCRATCH_MNT/case_3/a/c
++mv $SCRATCH_MNT/case_3/waiting_dir $SCRATCH_MNT/case_3/d/ance
++
++# case 4
++mkdir -p $SCRATCH_MNT/case_4/tmp
++mkdir $SCRATCH_MNT/case_4/below_ance
++mkdir -p $SCRATCH_MNT/case_4/pre/wait_dir
++mkdir $SCRATCH_MNT/case_4/desc
++mkdir $SCRATCH_MNT/case_4/ance
++mv $SCRATCH_MNT/case_4/below_ance $SCRATCH_MNT/case_4/ance
++mkdir $SCRATCH_MNT/case_4/other_dir
++
++# Filesystem looks like:
++#
++# .                                                                  (ino 256)
++# |--- case_1/                                                       (ino 257)
++# |       |---- d/                                                   (ino 258)
++# |       |     |--- p1/                                             (ino 259)
++# |       |
++# |       |---- p1/                                                  (ino 260)
++# |
++# |--- case_2/                                                       (ino 261)
++# |       |---- a/                                                   (ino 262)
++# |       |     |---- c/                                             (ino 268)
++# |       |
++# |       |---- d/                                                   (ino 263)
++# |             |---- ance/                                          (ino 267)
++# |                     |---- e/                                     (ino 264)
++# |                     |---- f/                                     (ino 265)
++# |                     |---- ance/                                  (ino 266)
++# |
++# |--- case_3/                                                       (ino 269)
++# |       |---- a/                                                   (ino 271)
++# |       |     |---- c/                                             (ino 276)
++# |       |
++# |       |---- d/                                                   (ino 270)
++# |       |     |---- ance/                                          (ino 275)
++# |       |             |---- waiting_dir/                           (ino 272)
++# |       |
++# |       |---- pre/                                                 (ino 273)
++# |              |---- ance/                                         (ino 274)
++# |
++# |--- case_4/                                                       (ino 277)
++#         |---- tmp/                                                 (ino 278)
++#         |---- pre/                                                 (ino 280)
++#         |      |---- wait_dir/                                     (ino 281)
++#         |
++#         |---- desc/                                                (ino 282)
++#         |---- ance/                                                (ino 283)
++#         |       |---- below_ance/                                  (ino 279)
++#         |
++#         |---- other_dir/                                           (ino 284)
++#
++_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap1
++
++# case 1
++#
++# The directory named "d" (inode 257) has in both snapshots an entry with the
++# name "p1" but it refers to different inodes in both snapshots (inode 258 in
++# the parent snapshot and inode 259 in the send snapshot). When attempting to
++# move inode 258, the operation is delayed because its new parent, inode 259,
++# was not yet moved/renamed (as the stream is currently processing inode 258).
++# Later on when processing inode 259, btrfs' send also ended up delaying the
++# move/rename operation for this inode, so that it would happen after inode 258
++# was processed, creating a circular dependency that resulted in the send stream
++# terminating without issuing a rename operations for the inodes 258 and 259.
++#
++mv $SCRATCH_MNT/case_1/d/p1 $SCRATCH_MNT/case_1/p1
++mv $SCRATCH_MNT/case_1/p1 $SCRATCH_MNT/case_1/d
++
++# case 2
++#
++# When the inode 265 is processed, the path for inode 267 is computed, which at
++# that time corresponds to "case_2/d/ance", and it was stored in the name cache
++# (to avoid recomputing it again later when needed).
++# Later on when processing inode 266, btrfs' send end up orphanizing (renaming
++# to a name matching the pattern o<ino>-<gen>-<seq>) inode 267 because it has
++# the same name as inode 266 and at that time it's a child of the new parent
++# directory (inode 263) for inode 266. After the orphanization and while still
++# processing inode 266, a rename operation for inode 266 was generated. However
++# the source path for that rename operation was incorrect because it ended up
++# using the old, pre-orphanization, name of inode 267.
++#
++mv $SCRATCH_MNT/case_2/a/c $SCRATCH_MNT/case_2
++mv $SCRATCH_MNT/case_2/d/ance $SCRATCH_MNT/case_2/c
++mv $SCRATCH_MNT/case_2/c/ance/ance $SCRATCH_MNT/case_2/d
++mv $SCRATCH_MNT/case_2/c/ance/f $SCRATCH_MNT/case_2
++mv $SCRATCH_MNT/case_2/c/ance/e $SCRATCH_MNT/case_2/f
++
++# case 3
++#
++# This is similar to cases 1 and 2, but adding more complexity just to exercise
++# btrfs' incremental send correctness.
++#
++mv $SCRATCH_MNT/case_3/d/ance $SCRATCH_MNT/case_3/a
++mv $SCRATCH_MNT/case_3/a/c $SCRATCH_MNT/case_3
++mv $SCRATCH_MNT/case_3/a/ance/waiting_dir $SCRATCH_MNT/case_3/c
++mv $SCRATCH_MNT/case_3/pre/ance $SCRATCH_MNT/case_3/d
++mv $SCRATCH_MNT/case_3/pre $SCRATCH_MNT/case_3/c/waiting_dir
++
++# case 4
++#
++# When attempting to rename inode 283, the incremental send stream included an
++# invalid destination path for the rename command. This was due to a missing
++# path loop detection in the send code that made the rename of inode 283 happen
++# without waiting for the rename of inode 284 to happen first (since it's an
++# ancestor in the send snapshot that is beyond the current progress and it was
++# also renamed/moved).
++#
++mv $SCRATCH_MNT/case_4/other_dir $SCRATCH_MNT/case_4/tmp
++mv $SCRATCH_MNT/case_4/ance/below_ance $SCRATCH_MNT/case_4/tmp/other_dir
++mv $SCRATCH_MNT/case_4/pre/wait_dir $SCRATCH_MNT/case_4/tmp/other_dir
++mv $SCRATCH_MNT/case_4/pre $SCRATCH_MNT/case_4/tmp/other_dir/below_ance
++mv $SCRATCH_MNT/case_4/desc $SCRATCH_MNT/case_4/tmp/other_dir/wait_dir
++mv $SCRATCH_MNT/case_4/ance $SCRATCH_MNT/case_4/tmp/other_dir/wait_dir/desc
++
++# Filesystem now looks like:
++#
++# .                                                                  (ino 256)
++# |--- case_1/                                                       (ino 257)
++# |        |--- d/                                                   (ino 258)
++# |             |--- p1/                                             (ino 260)
++# |                   |--- p1/                                       (ino 259)
++# |
++# |--- case_2/                                                       (ino 261)
++# |       |---- a/                                                   (ino 262)
++# |       |---- c/                                                   (ino 268)
++# |       |     |---- ance/                                          (ino 267)
++# |       |
++# |       |---- d/                                                   (ino 263)
++# |       |     |---- ance/                                          (ino 266)
++# |       |
++# |       |---- f/                                                   (ino 265)
++# |             |---- e/                                             (ino 264)
++# |
++# |--- case_3/                                                       (ino 269)
++# |       |---- a/                                                   (ino 271)
++# |       |     |---- ance/                                          (ino 275)
++# |       |
++# |       |---- c/                                                   (ino 276)
++# |       |     |---- waiting_dir/                                   (ino 272)
++# |       |                   |---- pre/                             (ino 273)
++# |       |
++# |       |---- d/                                                   (ino 270)
++# |             |---- ance/                                          (ino 274)
++# |
++# |--- case_4/                                                       (ino 277)
++#         |---- tmp/                                                 (ino 278)
++#                |---- other_dir/                                    (ino 284)
++#                            |---- below_ance/                       (ino 279)
++#                            |            |---- pre/                 (ino 280)
++#                            |
++#                            |---- wait_dir/                         (ino 281)
++#                                       |---- desc/                  (ino 282)
++#                                               |---- ance/          (ino 283)
++#
++_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap2
++
++run_check $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
++run_check $FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
++	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
++
++_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
++_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
++	-f $send_files_dir/2.snap
++
++# Now recreate the filesystem by receiving both send streams and verify we get
++# the same content that the original filesystem had.
++_scratch_unmount
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
++run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
++_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
++run_check $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/btrfs/124.out b/tests/btrfs/124.out
+new file mode 100644
+index 0000000..d7339e6
+--- /dev/null
++++ b/tests/btrfs/124.out
+@@ -0,0 +1,2 @@
++QA output created by 124
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 5a26ed7..19f4688 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -126,3 +126,4 @@
+ 121 auto quick snapshot qgroup
+ 122 auto quick snapshot qgroup
+ 123 auto quick qgroup
++124 auto quick send
 -- 
-Jan Tulak
-jtulak@redhat.com / jan@tulak.me
+2.7.0.rc3
+
