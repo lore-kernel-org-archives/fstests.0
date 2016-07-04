@@ -1,72 +1,78 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:1573 "EHLO
-	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932319AbcGDBqU (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Sun, 3 Jul 2016 21:46:20 -0400
-Date: Mon, 4 Jul 2016 11:46:17 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 2/2] xfstests: filename handling for extended names in
- ./check was on a wrong place
-Message-ID: <20160704014617.GB27480@dastard>
-References: <1467389347-2055-1-git-send-email-jtulak@redhat.com>
- <1467389347-2055-3-git-send-email-jtulak@redhat.com>
+Received: from sandeen.net ([63.231.237.45]:44944 "EHLO sandeen.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752888AbcGDF0q (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 4 Jul 2016 01:26:46 -0400
+Subject: Re: [PATCH] quota: fix generic/244 on 32-bit platforms
+References: <1467591116-16880-1-git-send-email-tytso@mit.edu>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <b6738cc5-8814-4896-d91a-f2c6e786b6ec@sandeen.net>
+Date: Mon, 4 Jul 2016 00:26:44 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1467389347-2055-3-git-send-email-jtulak@redhat.com>
+In-Reply-To: <1467591116-16880-1-git-send-email-tytso@mit.edu>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Jan Tulak <jtulak@redhat.com>
-Cc: fstests@vger.kernel.org, eguan@redhat.com
+To: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org
+Cc: Ext4 Developers List <linux-ext4@vger.kernel.org>, Eric Sandeen <sandeen@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jul 01, 2016 at 06:09:07PM +0200, Jan Tulak wrote:
-> The code handling "./check foo/123", when the real test is "foo/123-bar-baz"
-> was moved at the earliest position, so everything working with the test
-> name/path will know the full name, and no 123/123-bar-baz mix is possible.
+
+
+On 7/3/16 7:11 PM, Theodore Ts'o wrote:
+> The test program src/test-nextquota.c relies on atoi() to convert a
+> string to an *unsigned* int.  If the string represents an integer
+> which is greater than INT_MAX, it is undefined how atoi(3) works, and
+> it turns out that:
 > 
-> When moving the code, put qutation marks around a wildcard name to prevent
-> early expansion
+>        uint id = atoi("2147483649");
+> 
+> results in id == 2147483649 on x86_64, and id == 2147483647 on a
+> 32-bit x86 platform.
+> 
+> So use strtoul(3) instead, which is portable and technically correct.
+> 
+> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> Cc: Eric Sandeen <sandeen@redhat.com>
 
-Can you put this in a separate patch so it's easy to see and review?
-i.e. move the code in one patch, change the code in a second?
+Yup, thanks.  I bet that wasn't fun to track down, sorry.  :(
 
-> Signed-off-by: Jan Tulak <jtulak@redhat.com>
+Though wouldn't it be more correct to cast it to a (uint) ?
+
+But with or without that change this should work with the
+test script, so
+
+Reviewed-by: Eric Sandeen <sandeen@redhat.com>
+
+Thanks,
+-Eric
+
 > ---
->  check | 27 ++++++++++++++-------------
->  1 file changed, 14 insertions(+), 13 deletions(-)
+>  src/test-nextquota.c | 7 ++++++-
+>  1 file changed, 6 insertions(+), 1 deletion(-)
 > 
-> diff --git a/check b/check
-> index 5be183f..10ae375 100755
-> --- a/check
-> +++ b/check
-> @@ -543,6 +543,20 @@ for section in $HOST_OPTIONS_SECTIONS; do
->  	for seq in $list
->  	do
->  	    err=false
-> +		if [ ! -f $seq ]; then
-> +			# Try to get full name in case the user supplied only seq id
-> +			# and the test has a name. A bit of hassle to find really
-> +			# the test and not its sample output or helping files.
-> +			bname=$(basename $seq)
-> +
-> +			full_seq=$(find $(dirname $seq) -name "$bname*" -executable |
-> +				awk '(NR == 1 || length < length(shortest)) { shortest = $0 }\
-> +					END { print shortest }')
-> +			if [ -f $full_seq ] \
-> +				&& [ x$(echo $bname | grep -o "^$VALID_TEST_ID") != x ]; then
-> +				seq=$full_seq
-> +			fi
-> +		fi
+> diff --git a/src/test-nextquota.c b/src/test-nextquota.c
+> index a2bbad9..6eec1f9 100644
+> --- a/src/test-nextquota.c
+> +++ b/src/test-nextquota.c
+> @@ -74,6 +74,7 @@ int main(int argc, char *argv[])
+>  	int verbose = 0;
+>  	uint id = 0, idflag = 0;
+>  	char *device = NULL;
+> +	char *tmp;
+>  	struct nextdqblk dqb;
+>  	struct fs_disk_quota xqb;
 >  
->  	    # the filename for the test and the name output are different.
->  	    # we don't include the tests/ directory in the name output.
-
-This now has whitespace issues - the indentation does not match the
-surrounding context.
-
-Cheers,
-
-Dave.
-
--- 
-Dave Chinner
-david@fromorbit.com
+> @@ -92,7 +93,11 @@ int main(int argc, char *argv[])
+>  			typeflag++;
+>  			break;
+>  		case 'i':
+> -			id = atoi(optarg);
+> +			id = (int) strtoul(optarg, &tmp, 0);
+> +			if (*tmp) {
+> +				fprintf(stderr, "Bad id: %s\n", optarg);
+> +				exit(1);
+> +			}
+>  			idflag++;
+>  			break;
+>  		case 'd':
+> 
