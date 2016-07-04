@@ -1,134 +1,59 @@
-Received: from mx1.redhat.com ([209.132.183.28]:41466 "EHLO mx1.redhat.com"
+Received: from imap.thunk.org ([74.207.234.97]:60728 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750703AbcGBGMi (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sat, 2 Jul 2016 02:12:38 -0400
-Message-Id: <201607020612.u626CZLD006482@int-mx09.intmail.prod.int.phx2.redhat.com>
-Date: Sat, 02 Jul 2016 14:12:35 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: [GIT PULL] fstests: updates on 2016-07-02
+	id S932236AbcGDAMW (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sun, 3 Jul 2016 20:12:22 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH] quota: fix generic/244 on 32-bit platforms
+Date: Sun,  3 Jul 2016 20:11:56 -0400
+Message-Id: <1467591116-16880-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
+To: fstests@vger.kernel.org
+Cc: Ext4 Developers List <linux-ext4@vger.kernel.org>, Theodore Ts'o <tytso@mit.edu>, Eric Sandeen <sandeen@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave,
+The test program src/test-nextquota.c relies on atoi() to convert a
+string to an *unsigned* int.  If the string represents an integer
+which is greater than INT_MAX, it is undefined how atoi(3) works, and
+it turns out that:
 
-Can you please pull the fstests update from the location below? Notably, it
-contains the richacl tests from Andreas, but the tests won't run for now
-without kernel & userspace tools support.
+       uint id = atoi("2147483649");
 
-Thanks,
-Eryu
+results in id == 2147483649 on x86_64, and id == 2147483647 on a
+32-bit x86 platform.
 
-The following changes since commit 54774d4bb5f8b5756913034cf9fdd28ba5bee03c:
+So use strtoul(3) instead, which is portable and technically correct.
 
-  ext4/271: _notrun if there are journal related mount options (2016-06-24 12:54:04 +0800)
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+Cc: Eric Sandeen <sandeen@redhat.com>
+---
+ src/test-nextquota.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
-are available in the git repository at:
+diff --git a/src/test-nextquota.c b/src/test-nextquota.c
+index a2bbad9..6eec1f9 100644
+--- a/src/test-nextquota.c
++++ b/src/test-nextquota.c
+@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
+ 	int verbose = 0;
+ 	uint id = 0, idflag = 0;
+ 	char *device = NULL;
++	char *tmp;
+ 	struct nextdqblk dqb;
+ 	struct fs_disk_quota xqb;
+ 
+@@ -92,7 +93,11 @@ int main(int argc, char *argv[])
+ 			typeflag++;
+ 			break;
+ 		case 'i':
+-			id = atoi(optarg);
++			id = (int) strtoul(optarg, &tmp, 0);
++			if (*tmp) {
++				fprintf(stderr, "Bad id: %s\n", optarg);
++				exit(1);
++			}
+ 			idflag++;
+ 			break;
+ 		case 'd':
+-- 
+2.5.0
 
-  https://github.com/guaneryu/xfstests.git for-dave
-
-for you to fetch changes up to 5bde2583c38ce401b4cff81c182dcd49985dbe22:
-
-  btrfs: EDQUOTA leaks reserved data space (2016-07-01 23:12:50 +0800)
-
-----------------------------------------------------------------
-
-fstests: update on 2016-07-02
-
-This update contains:
-o New richacl tests
-o dm-delay support
-o New tests for xfs, btrfs and overlay
-o Various bug fixes and enhancements
-
-----------------------------------------------------------------
-Anand Jain (6):
-      btrfs: add functions to set and reset required number of SCRATCH_DEV_POOL
-      btrfs: add functions to get and put a device for replace target
-      btrfs/027: make use of new device get and put helper functions
-      btrfs: add helper function to check if btrfs is module
-      btrfs: test RAID1 device reappear and balance
-      btrfs: test RAID5 device reappear and balance
-
-Andreas Gruenbacher (2):
-      fstests: Add / use _require_runas and _runas
-      generic: Add richacl tests
-
-Brian Foster (2):
-      common: support dm-delay to introduce I/O delays
-      xfs: test for post umount readahead completion panic
-
-Christoph Hellwig (1):
-      generic/042: remove from quick group
-
-Eryu Guan (2):
-      overlay: dentry leak for default_permissions mount option
-      overlay: remove dir which contains whiteout from lower dir
-
-Jeff Mahoney (1):
-      btrfs/048: extend _filter_btrfs_prop_error to handle additional errors
-
-Omer Zilberberg (1):
-      generic/294: filter quotes from mknod
-
-Qu Wenruo (1):
-      btrfs: EDQUOTA leaks reserved data space
-
-Theodore Ts'o (2):
-      common/rc: ext4 doesn't support O_DIRECT with encryption
-      generic/082: rename _filter_project_quota to a avoid function name conflict
-
- common/config         |   2 +
- common/dmdelay        |  90 +++++++++++++++++++++
- common/filter         |   7 ++
- common/filter.btrfs   |  10 ++-
- common/rc             | 214 ++++++++++++++++++++++++++++++++++++++++++++++++--
- tests/btrfs/027       |  24 ++++--
- tests/btrfs/048       |   6 +-
- tests/btrfs/048.out   |   4 +-
- tests/btrfs/124       | 166 +++++++++++++++++++++++++++++++++++++++
- tests/btrfs/124.out   |   7 ++
- tests/btrfs/125       | 182 ++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/125.out   |   7 ++
- tests/btrfs/126       |  73 +++++++++++++++++
- tests/btrfs/126.out   |   2 +
- tests/btrfs/group     |   3 +
- tests/generic/082     |   6 +-
- tests/generic/093     |  14 ++--
- tests/generic/099     |  45 +++++------
- tests/generic/237     |   6 +-
- tests/generic/294     |   2 +-
- tests/generic/294.out |   2 +-
- tests/generic/362     | 125 +++++++++++++++++++++++++++++
- tests/generic/362.out |  94 ++++++++++++++++++++++
- tests/generic/363     | 118 ++++++++++++++++++++++++++++
- tests/generic/363.out | 139 ++++++++++++++++++++++++++++++++
- tests/generic/364     |  98 +++++++++++++++++++++++
- tests/generic/364.out |  39 +++++++++
- tests/generic/365     |  93 ++++++++++++++++++++++
- tests/generic/365.out |   9 +++
- tests/generic/366     |  86 ++++++++++++++++++++
- tests/generic/366.out |  11 +++
- tests/generic/367     |  85 ++++++++++++++++++++
- tests/generic/367.out |  11 +++
- tests/generic/368     |  85 ++++++++++++++++++++
- tests/generic/368.out |   7 ++
- tests/generic/369     | 126 +++++++++++++++++++++++++++++
- tests/generic/369.out |  24 ++++++
- tests/generic/370     |  90 +++++++++++++++++++++
- tests/generic/370.out |  19 +++++
- tests/generic/group   |  11 ++-
- tests/overlay/009     |  68 ++++++++++++++++
- tests/overlay/009.out |   2 +
- tests/overlay/010     |  78 ++++++++++++++++++
- tests/overlay/010.out |   2 +
- tests/overlay/group   |   2 +
- tests/shared/051      |  48 ++++++-----
- tests/xfs/311         |  91 +++++++++++++++++++++
- tests/xfs/311.out     |   2 +
- tests/xfs/group       |   1 +
- 49 files changed, 2348 insertions(+), 88 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
