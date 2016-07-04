@@ -1,78 +1,57 @@
-Received: from sandeen.net ([63.231.237.45]:44944 "EHLO sandeen.net"
+Received: from mx1.redhat.com ([209.132.183.28]:48316 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752888AbcGDF0q (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 4 Jul 2016 01:26:46 -0400
-Subject: Re: [PATCH] quota: fix generic/244 on 32-bit platforms
-References: <1467591116-16880-1-git-send-email-tytso@mit.edu>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <b6738cc5-8814-4896-d91a-f2c6e786b6ec@sandeen.net>
-Date: Mon, 4 Jul 2016 00:26:44 -0500
+	id S932239AbcGDGvk (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 4 Jul 2016 02:51:40 -0400
+Date: Mon, 4 Jul 2016 14:51:37 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 16/20] reflink: test cross-mountpoint reflink and dedupe
+Message-ID: <20160704065137.GW23649@eguan.usersys.redhat.com>
+References: <146612796204.25024.18254357523133394284.stgit@birch.djwong.org>
+ <146612806287.25024.6626531953151914169.stgit@birch.djwong.org>
 MIME-Version: 1.0
-In-Reply-To: <1467591116-16880-1-git-send-email-tytso@mit.edu>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <146612806287.25024.6626531953151914169.stgit@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org
-Cc: Ext4 Developers List <linux-ext4@vger.kernel.org>, Eric Sandeen <sandeen@redhat.com>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: david@fromorbit.com, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-
-
-On 7/3/16 7:11 PM, Theodore Ts'o wrote:
-> The test program src/test-nextquota.c relies on atoi() to convert a
-> string to an *unsigned* int.  If the string represents an integer
-> which is greater than INT_MAX, it is undefined how atoi(3) works, and
-> it turns out that:
+On Thu, Jun 16, 2016 at 06:47:42PM -0700, Darrick J. Wong wrote:
+> Test sharing blocks via reflink and dedupe between two different
+> mountpoints of the same filesystem.  This shouldn't work, since
+> we don't allow cross-mountpoint functions.
 > 
->        uint id = atoi("2147483649");
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  common/reflink        |    2 +
+>  tests/generic/927     |   88 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/927.out |    9 +++++
+>  tests/generic/928     |   86 ++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/928.out |   10 ++++++
+>  tests/generic/group   |    2 +
+>  6 files changed, 196 insertions(+), 1 deletion(-)
+>  create mode 100755 tests/generic/927
+>  create mode 100644 tests/generic/927.out
+>  create mode 100755 tests/generic/928
+>  create mode 100644 tests/generic/928.out
 > 
-> results in id == 2147483649 on x86_64, and id == 2147483647 on a
-> 32-bit x86 platform.
 > 
-> So use strtoul(3) instead, which is portable and technically correct.
-> 
-> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> Cc: Eric Sandeen <sandeen@redhat.com>
+> diff --git a/common/reflink b/common/reflink
+> index 4ec390d..1363971 100644
+> --- a/common/reflink
+> +++ b/common/reflink
+> @@ -107,7 +107,7 @@ _require_scratch_dedupe()
+>  	_scratch_mount
+>  	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file1" > /dev/null
+>  	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file2" > /dev/null
+> -	testio="$("$XFS_IO_PROG" -f -c "dedupe $TEST_DIR/file1 0 0 65536" "$TEST_DIR/file2" 2>&1)"
+> +	testio="$("$XFS_IO_PROG" -f -c "dedupe $SCRATCH_MNT/file1 0 0 65536" "$SCRATCH_MNT/file2" 2>&1)"
+>  	echo $testio | grep -q "Operation not supported" && \
+>  		_notrun "Dedupe not supported by test filesystem type: $FSTYP"
+>  	echo $testio | grep -q "Inappropriate ioctl for device" && \
 
-Yup, thanks.  I bet that wasn't fun to track down, sorry.  :(
-
-Though wouldn't it be more correct to cast it to a (uint) ?
-
-But with or without that change this should work with the
-test script, so
-
-Reviewed-by: Eric Sandeen <sandeen@redhat.com>
+I think this hunk belongs to a seperate patch.
 
 Thanks,
--Eric
-
-> ---
->  src/test-nextquota.c | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
-> 
-> diff --git a/src/test-nextquota.c b/src/test-nextquota.c
-> index a2bbad9..6eec1f9 100644
-> --- a/src/test-nextquota.c
-> +++ b/src/test-nextquota.c
-> @@ -74,6 +74,7 @@ int main(int argc, char *argv[])
->  	int verbose = 0;
->  	uint id = 0, idflag = 0;
->  	char *device = NULL;
-> +	char *tmp;
->  	struct nextdqblk dqb;
->  	struct fs_disk_quota xqb;
->  
-> @@ -92,7 +93,11 @@ int main(int argc, char *argv[])
->  			typeflag++;
->  			break;
->  		case 'i':
-> -			id = atoi(optarg);
-> +			id = (int) strtoul(optarg, &tmp, 0);
-> +			if (*tmp) {
-> +				fprintf(stderr, "Bad id: %s\n", optarg);
-> +				exit(1);
-> +			}
->  			idflag++;
->  			break;
->  		case 'd':
-> 
+Eryu
