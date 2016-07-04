@@ -1,57 +1,62 @@
-Received: from mx1.redhat.com ([209.132.183.28]:48316 "EHLO mx1.redhat.com"
+Received: from imap.thunk.org ([74.207.234.97]:43806 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932239AbcGDGvk (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 4 Jul 2016 02:51:40 -0400
-Date: Mon, 4 Jul 2016 14:51:37 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 16/20] reflink: test cross-mountpoint reflink and dedupe
-Message-ID: <20160704065137.GW23649@eguan.usersys.redhat.com>
-References: <146612796204.25024.18254357523133394284.stgit@birch.djwong.org>
- <146612806287.25024.6626531953151914169.stgit@birch.djwong.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <146612806287.25024.6626531953151914169.stgit@birch.djwong.org>
+	id S1753564AbcGDOJy (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 4 Jul 2016 10:09:54 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH -v2] quota: fix generic/244 on 32-bit platforms
+Date: Mon,  4 Jul 2016 10:09:48 -0400
+Message-Id: <1467641388-26577-1-git-send-email-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: david@fromorbit.com, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
+To: fstests@vger.kernel.org
+Cc: sandeen@redhat.com, Ext4 Developers List <linux-ext4@vger.kernel.org>, Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 16, 2016 at 06:47:42PM -0700, Darrick J. Wong wrote:
-> Test sharing blocks via reflink and dedupe between two different
-> mountpoints of the same filesystem.  This shouldn't work, since
-> we don't allow cross-mountpoint functions.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  common/reflink        |    2 +
->  tests/generic/927     |   88 +++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/927.out |    9 +++++
->  tests/generic/928     |   86 ++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/928.out |   10 ++++++
->  tests/generic/group   |    2 +
->  6 files changed, 196 insertions(+), 1 deletion(-)
->  create mode 100755 tests/generic/927
->  create mode 100644 tests/generic/927.out
->  create mode 100755 tests/generic/928
->  create mode 100644 tests/generic/928.out
-> 
-> 
-> diff --git a/common/reflink b/common/reflink
-> index 4ec390d..1363971 100644
-> --- a/common/reflink
-> +++ b/common/reflink
-> @@ -107,7 +107,7 @@ _require_scratch_dedupe()
->  	_scratch_mount
->  	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file1" > /dev/null
->  	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file2" > /dev/null
-> -	testio="$("$XFS_IO_PROG" -f -c "dedupe $TEST_DIR/file1 0 0 65536" "$TEST_DIR/file2" 2>&1)"
-> +	testio="$("$XFS_IO_PROG" -f -c "dedupe $SCRATCH_MNT/file1 0 0 65536" "$SCRATCH_MNT/file2" 2>&1)"
->  	echo $testio | grep -q "Operation not supported" && \
->  		_notrun "Dedupe not supported by test filesystem type: $FSTYP"
->  	echo $testio | grep -q "Inappropriate ioctl for device" && \
+The test program src/test-nextquota.c relies on atoi() to convert a
+string to an *unsigned* int.  If the string represents an integer
+which is greater than INT_MAX, it is undefined how atoi(3) works, and
+it turns out that:
 
-I think this hunk belongs to a seperate patch.
+       uint id = atoi("2147483649");
 
-Thanks,
-Eryu
+results in id == 2147483649 on x86_64, and id == 2147483647 on a
+32-bit x86 platform.
+
+So use strtoul(3) instead, which is portable and technically correct.
+
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+Reviewed-by: Eric Sandeen <sandeen@redhat.com>
+---
+
+v2: cast to uint instead of int
+
+ src/test-nextquota.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/src/test-nextquota.c b/src/test-nextquota.c
+index a2bbad9..3baa296 100644
+--- a/src/test-nextquota.c
++++ b/src/test-nextquota.c
+@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
+ 	int verbose = 0;
+ 	uint id = 0, idflag = 0;
+ 	char *device = NULL;
++	char *tmp;
+ 	struct nextdqblk dqb;
+ 	struct fs_disk_quota xqb;
+ 
+@@ -92,7 +93,11 @@ int main(int argc, char *argv[])
+ 			typeflag++;
+ 			break;
+ 		case 'i':
+-			id = atoi(optarg);
++			id = (uint) strtoul(optarg, &tmp, 0);
++			if (*tmp) {
++				fprintf(stderr, "Bad id: %s\n", optarg);
++				exit(1);
++			}
+ 			idflag++;
+ 			break;
+ 		case 'd':
+-- 
+2.5.0
+
