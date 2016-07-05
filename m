@@ -1,79 +1,61 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46900 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:56487 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750774AbcGEEbc (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 5 Jul 2016 00:31:32 -0400
-Date: Tue, 5 Jul 2016 12:31:30 +0800
+	id S1750860AbcGEFjg (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 5 Jul 2016 01:39:36 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v6 00/20] xfstests: minor fixes for the reflink/dedupe
- tests
-Message-ID: <20160705043130.GF23649@eguan.usersys.redhat.com>
-References: <146612796204.25024.18254357523133394284.stgit@birch.djwong.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <146612796204.25024.18254357523133394284.stgit@birch.djwong.org>
+Subject: [PATCH] common/rc: avoid mkfs option conflicts in _scratch_mkfs_xfs_supported
+Date: Tue,  5 Jul 2016 13:39:13 +0800
+Message-Id: <1467697153-23189-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: david@fromorbit.com, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
+To: fstests@vger.kernel.org
+Cc: xfs@oss.sgi.com, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Hi Darrick,
+In recent mkfs.xfs updates in xfsprogs, commit 9090e187bc3e ("mkfs:
+add respecification detection to generic parsing") added
+re-specification detection to "-m" option, it causes several tests
+_notrun if MKFS_OPTIONS has the same options as those being tested
+in _scratch_mkfs_xfs_supported(), because they're specified multiple
+times.
 
-On Thu, Jun 16, 2016 at 06:46:02PM -0700, Darrick J. Wong wrote:
-> Hi all,
-> 
-> This is the sixth revision of a patchset that adds to xfstests
-> support for testing reverse-mappings of physical blocks to file and
-> metadata (rmap); support for testing multiple file logical blocks to
-> the same physical block (reflink); and implements the beginnings of
-> online metadata scrubbing.
-> 
-> The first eight patches are in Eryu Guan's pull request on 2016-06-15.
-> Those patches haven't changed, but they're not yet in the upstream
-> repo.
-> 
-> If you're going to start using this mess, you probably ought to just
-> pull from my github trees for kernel[1], xfsprogs[2], and xfstests[3].
-> There are also updates for xfs-docs[4].  The kernel patches should
-> apply to dchinner's for-next; xfsprogs patches to for-next; and
-> xfstest to master.  The kernel git tree already has for-next included.
-> 
-> The patches have been xfstested with x64, i386, and armv7l--arm64,
-> ppc64, and ppc64le no longer boot in qemu.  All three architectures
-> pass all 'clone' group tests except xfs/128 (which is the swapext
-> test), and AFAICT don't cause any new failures for the 'auto' group.
-> 
-> This is an extraordinary way to eat your data.  Enjoy! 
-> Comments and questions are, as always, welcome.
+	MKFS_OPTIONS="-m crc=0" ./check xfs/001
+	xfs/001 3s ... [not run] mkfs.xfs doesn't have crc feature
 
-I tested your xfstests patches with your kernel(HEAD f0b34b6 xfs: add
-btree scrub tracepoints) and xfsprogs(HEAD 34bd754 xfs_scrub: create
-online filesystem scrub program), with x86_64 host & 4k block size XFS.
+Fix it by creating XFS again without MKFS_OPTIONS in
+_scratch_mkfs_xfs_supported(), in case there's conflict between
+MKFS_OPTIONS and mkfs_opts, like what we do in _scratch_mkfs_xfs().
 
-A './check -g auto' run looked fine overall. Besides the comments I
-replied to some patches, other common minor issues are:
-- space indention in _cleanup not tab
-- bare 'umount $SCRATCH_MNT' not _scratch_unmount
-- whitespace issues in _test|scratch_inject_error
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+ common/rc | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
 
-(I can fix all these minor issues at commit time, if you don't have
-other major updates to these patches).
+diff --git a/common/rc b/common/rc
+index 883bd7b..ad81461 100644
+--- a/common/rc
++++ b/common/rc
+@@ -473,11 +473,20 @@ _scratch_mkfs_xfs_opts()
+ 
+ _scratch_mkfs_xfs_supported()
+ {
+-	mkfs_opts=$*
++	local mkfs_opts=$*
+ 
+ 	_scratch_options mkfs
+ 
+ 	$MKFS_XFS_PROG -N $MKFS_OPTIONS $SCRATCH_OPTIONS $mkfs_opts $SCRATCH_DEV
++	local mkfs_status=$?
++
++	# if $mkfs_opts conflits with $MKFS_OPTIONS,
++	# try again without $MKFS_OPTIONS
++	if [ $mkfs_status -ne 0 -a -n "$MKFS_OPTIONS" ]; then
++		$MKFS_XFS_PROG -N $SCRATCH_OPTIONS $mkfs_opts $SCRATCH_DEV
++		mkfs_status=$?
++	fi
++	return $mkfs_status
+ }
+ 
+ _scratch_mkfs_xfs()
+-- 
+2.7.4
 
-And the review of changes to xfs/122 needs help from other XFS
-developers :) (09/20 and 10/20)
-
-And besides the first 8 patches, 15/20 has been in upstream as well.
-
-Thanks,
-Eryu
-
-P.S.
-The failed tests I saw when testing with reflink-enabled kernel &
-xfsprogs:
-
-Failures: generic/054 generic/055 generic/108 generic/204 generic/356 generic/357 xfs/004 xfs/096 xfs/122 xfs/293
-
-generic/108 generic/204 and xfs/004 are new failures compared to stock
-kernel and xfsprogs (kernel 4.7-rc5, xfsprogs 4.7-rc1).
-
-Just FYI.
