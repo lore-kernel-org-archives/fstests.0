@@ -1,61 +1,181 @@
-Received: from mx1.redhat.com ([209.132.183.28]:56487 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750860AbcGEFjg (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 5 Jul 2016 01:39:36 -0400
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] common/rc: avoid mkfs option conflicts in _scratch_mkfs_xfs_supported
-Date: Tue,  5 Jul 2016 13:39:13 +0800
-Message-Id: <1467697153-23189-1-git-send-email-eguan@redhat.com>
+Received: from mail-pf0-f193.google.com ([209.85.192.193]:36272 "EHLO
+	mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750941AbcGEHzh (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 5 Jul 2016 03:55:37 -0400
+From: Wang Shilong <wangshilong1991@gmail.com>
+Subject: [PATCH] xfstests, ext4: add project quota attribute tests
+Date: Tue,  5 Jul 2016 15:56:31 +0900
+Message-Id: <1467701791-14626-1-git-send-email-wangshilong1991@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com, Eryu Guan <eguan@redhat.com>
+Cc: linux-ext4@vger.kernel.org, tytso@mit.edu, sihara@ddn.com, lixi@ddn.com, wshilong@ddn.com
 List-ID: <fstests@vger.kernel.org>
 
-In recent mkfs.xfs updates in xfsprogs, commit 9090e187bc3e ("mkfs:
-add respecification detection to generic parsing") added
-re-specification detection to "-m" option, it causes several tests
-_notrun if MKFS_OPTIONS has the same options as those being tested
-in _scratch_mkfs_xfs_supported(), because they're specified multiple
-times.
+From: Wang Shilong <wshilong@ddn.com>
 
-	MKFS_OPTIONS="-m crc=0" ./check xfs/001
-	xfs/001 3s ... [not run] mkfs.xfs doesn't have crc feature
+Some basic project quota inferface tests.
 
-Fix it by creating XFS again without MKFS_OPTIONS in
-_scratch_mkfs_xfs_supported(), in case there's conflict between
-MKFS_OPTIONS and mkfs_opts, like what we do in _scratch_mkfs_xfs().
+1. ioctl with/without project.
+2. project inherit attribute.
+3. Link accross project should fail
+4. change project ignores quota
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
+Signed-off-by: Wang Shilong <wshilong@ddn.com>
 ---
- common/rc | 11 ++++++++++-
- 1 file changed, 10 insertions(+), 1 deletion(-)
+ tests/ext4/030     | 112 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/030.out |  11 ++++++
+ tests/ext4/group   |   1 +
+ 3 files changed, 124 insertions(+)
+ create mode 100755 tests/ext4/030
+ create mode 100644 tests/ext4/030.out
 
-diff --git a/common/rc b/common/rc
-index 883bd7b..ad81461 100644
---- a/common/rc
-+++ b/common/rc
-@@ -473,11 +473,20 @@ _scratch_mkfs_xfs_opts()
- 
- _scratch_mkfs_xfs_supported()
- {
--	mkfs_opts=$*
-+	local mkfs_opts=$*
- 
- 	_scratch_options mkfs
- 
- 	$MKFS_XFS_PROG -N $MKFS_OPTIONS $SCRATCH_OPTIONS $mkfs_opts $SCRATCH_DEV
-+	local mkfs_status=$?
+diff --git a/tests/ext4/030 b/tests/ext4/030
+new file mode 100755
+index 0000000..06b3de8
+--- /dev/null
++++ b/tests/ext4/030
+@@ -0,0 +1,112 @@
++#! /bin/bash
++# FS QA Test No. 030
++#
++# Test Project quota attr function
++#
++#-----------------------------------------------------------------------
++# Copyright 2016 (C) Wang Shilong<wshilong@ddn.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#
++#-----------------------------------------------------------------------
++#
 +
-+	# if $mkfs_opts conflits with $MKFS_OPTIONS,
-+	# try again without $MKFS_OPTIONS
-+	if [ $mkfs_status -ne 0 -a -n "$MKFS_OPTIONS" ]; then
-+		$MKFS_XFS_PROG -N $SCRATCH_OPTIONS $mkfs_opts $SCRATCH_DEV
-+		mkfs_status=$?
-+	fi
-+	return $mkfs_status
- }
- 
- _scratch_mkfs_xfs()
++seqfull=$0
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++
++_cleanup()
++{
++    rm -f $tmp.*
++}
++
++trap "_cleanup ; exit \$status" 0 1 2 3 15
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++
++# real QA test starts here
++_supported_fs ext4
++_supported_os Linux
++
++_require_scratch
++_require_chattr
++_require_attrs
++
++rm -f $seqres.full
++
++echo "+ create scratch fs"
++_scratch_mkfs_ext4 > /dev/null 2>&1
++
++echo "+ mount fs image"
++_scratch_mount
++
++function attr_test()
++{
++	#basic test with/without project
++	touch $SCRATCH_MNT/foo
++	lsattr -p $SCRATCH_MNT/foo | _filter_scratch | _filter_spaces
++	chattr -p 1 $SCRATCH_MNT/foo 2>&1 \
++				| _filter_scratch | _filter_spaces
++	mkdir $SCRATCH_MNT/dir
++	chattr +P $SCRATCH_MNT/dir | _filter_scratch | _filter_spaces
++	chattr -P $SCRATCH_MNT/dir | _filter_scratch | _filter_spaces
++
++	[ $1 -eq 0 ] && return
++
++	#default project without inherit
++	chattr -p 123456 $SCRATCH_MNT/dir | _filter_scratch | _filter_spaces
++	lsattr -p $SCRATCH_MNT/dir | _filter_scratch | _filter_spaces
++	touch $SCRATCH_MNT/dir/foo
++	lsattr -p $SCRATCH_MNT/dir/foo | _filter_scratch | _filter_spaces
++
++	#test project inherit with inherit attribute
++	chattr +P $SCRATCH_MNT/dir
++	touch $SCRATCH_MNT/dir/foo1
++	lsattr -p $SCRATCH_MNT/dir/foo1 | _filter_scratch | _filter_spaces
++
++	#Link accross project should fail
++	mkdir $SCRATCH_MNT/dir1
++	chattr +P $SCRATCH_MNT/dir1
++	chattr -p 654321 $SCRATCH_MNT/dir1 | _filter_scratch | _filter_spaces
++	ln $SCRATCH_MNT/dir/foo1 $SCRATCH_MNT/dir1/foo1 2>&1 \
++		| _filter_scratch | _filter_spaces
++
++	#mv accross different projects should work
++	mv $SCRATCH_MNT/dir/foo1 $SCRATCH_MNT/dir1/foo1
++	lsattr -p $SCRATCH_MNT/dir1/foo1 | _filter_scratch | _filter_spaces
++
++	#change project ignores quota
++	quotaon $SCRATCH_MNT
++	setquota -P 654321 0 0 0 1 $SCRATCH_MNT/
++	chattr -p 123456 $SCRATCH_MNT/dir1/foo1 | _filter_scratch | _filter_spaces
++	lsattr -p $SCRATCH_MNT/dir1/foo1 | _filter_scratch | _filter_spaces
++}
++#init without project quota enabled
++attr_test 0
++
++#enable project quota feature
++_scratch_unmount >/dev/null 2>&1
++tune2fs -O quota,project $SCRATCH_DEV >/dev/null 2>&1
++_scratch_mount
++
++rm -rf $SCRATCH_MNT/dir
++attr_test 1
+diff --git a/tests/ext4/030.out b/tests/ext4/030.out
+new file mode 100644
+index 0000000..035d3c1
+--- /dev/null
++++ b/tests/ext4/030.out
+@@ -0,0 +1,11 @@
++QA output created by 030
+++ create scratch fs
+++ mount fs image
++ 0 --------------e---- SCRATCH_MNT/foo
++chattr: Operation not supported while setting project on SCRATCH_MNT/foo
++ 0 --------------e---- SCRATCH_MNT/foo
++ 0 --------------e---- SCRATCH_MNT/dir/foo
++123456 --------------e---P SCRATCH_MNT/dir/foo1
++ln: failed to create hard link 'SCRATCH_MNT/dir1/foo1' => 'SCRATCH_MNT/dir/foo1': Invalid cross-device link
++654321 --------------e---P SCRATCH_MNT/dir1/foo1
++123456 --------------e---P SCRATCH_MNT/dir1/foo1
+diff --git a/tests/ext4/group b/tests/ext4/group
+index bbdbe1d..f9c9ec3 100644
+--- a/tests/ext4/group
++++ b/tests/ext4/group
+@@ -24,6 +24,7 @@
+ 019 fuzzers
+ 020 auto quick ioctl rw
+ 021 auto quick
++030 auto quick
+ 271 auto rw quick
+ 301 aio auto ioctl rw stress
+ 302 aio auto ioctl rw stress
 -- 
 2.7.4
 
