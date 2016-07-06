@@ -1,73 +1,194 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:6576 "EHLO
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:1480 "EHLO
 	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932423AbcGFXNx (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 6 Jul 2016 19:13:53 -0400
-Date: Thu, 7 Jul 2016 09:13:40 +1000
+	by vger.kernel.org with ESMTP id S1755651AbcGFXfi (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 6 Jul 2016 19:35:38 -0400
+Date: Thu, 7 Jul 2016 09:35:33 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 19/20] xfs: run xfs_repair at the end of each test
-Message-ID: <20160706231340.GJ27480@dastard>
-References: <146612796204.25024.18254357523133394284.stgit@birch.djwong.org>
- <146612808160.25024.5986137574652014794.stgit@birch.djwong.org>
- <20160705035617.GD23649@eguan.usersys.redhat.com>
- <20160705041134.GB18951@birch.djwong.org>
+Subject: Re: [PATCH v2] xfstests, generic: add project quota attribute tests
+Message-ID: <20160706233533.GK27480@dastard>
+References: <1467786171-21127-1-git-send-email-wangshilong1991@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160705041134.GB18951@birch.djwong.org>
+In-Reply-To: <1467786171-21127-1-git-send-email-wangshilong1991@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Eryu Guan <eguan@redhat.com>, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
+To: Wang Shilong <wangshilong1991@gmail.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, tytso@mit.edu, sihara@ddn.com, lixi@ddn.com, Wang Shilong <wshilong@ddn.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jul 04, 2016 at 09:11:34PM -0700, Darrick J. Wong wrote:
-> On Tue, Jul 05, 2016 at 11:56:17AM +0800, Eryu Guan wrote:
-> > On Thu, Jun 16, 2016 at 06:48:01PM -0700, Darrick J. Wong wrote:
-> > > Run xfs_repair twice at the end of each test -- once to rebuild
-> > > the btree indices, and again with -n to check the rebuild work.
-> > > 
-> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > > ---
-> > >  common/rc |    3 +++
-> > >  1 file changed, 3 insertions(+)
-> > > 
-> > > 
-> > > diff --git a/common/rc b/common/rc
-> > > index 1225047..847191e 100644
-> > > --- a/common/rc
-> > > +++ b/common/rc
-> > > @@ -2225,6 +2225,9 @@ _check_xfs_filesystem()
-> > >          ok=0
-> > >      fi
-> > >  
-> > > +    $XFS_REPAIR_PROG $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
-> > > +    cat $tmp.repair | _fix_malloc		>>$seqres.full
-> > > +
-> > 
-> > Won't this hide fs corruptions? Did I miss anything?
+On Wed, Jul 06, 2016 at 03:22:51PM +0900, Wang Shilong wrote:
+> From: Wang Shilong <wshilong@ddn.com>
 > 
-> I could've sworn it did:
+> lsattr/chattr support both of ext4 and xfs, add
+> a test to cover both of them.
 > 
-> xfs_repair -n
-> (complain if corrupt)
+>  1. ioctl with project quota.
+>  2. project inherit attribute.
+>  3. Link accross project should fail
+>  4. change project ignores quota
 > 
-> xfs_repair
-> 
-> xfs_repair -n
-> (complain if still corrupt)
-> 
-> But that first xfs_repair -n hunk disappeared. :(
-> 
-> Ok, will fix and resend.
+> Signed-off-by: Wang Shilong <wshilong@ddn.com>
 
-Not sure this is the best idea - when repair on an aged test device
-takes 10s, this means the test harness overhead increases by a
-factor of 3. i.e. test takes 1s to run, checking the filesystem
-between tests now takes 30s. i.e. this will badly blow out the run
-time of the test suite on aged test devices....
+FWIW, this test already points out a few problems with the ext4
+project quota implementation....
 
-What does this overhead actually gain us that we couldn't encode
-explicitly into a single test or two? e.g the test itself runs
-repair on the aged test device....
+> +#
+> +# Test Project quota attr function
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright 2016 (C) Wang Shilong <wshilong@ddn.com>
+
+Ambiguous copyright statement. Is it your personal copyright, or
+should it be DDN, the company you work for? If it's a personal
+copyright, please use your personal email address, not the email
+address supllied by the company you work for. If it's DDN that
+owns the copyright, then please put DDN's name here along with your
+DDN email address.
+
+
+> +# real QA test starts here
+> +_supported_fs ext4 xfs
+> +_supported_os Linux
+
+Generic tests shouldn't need a _supported_fs line - the filesystems
+it runs on should be selected by the _requires*  functions below.
+
+> +_require_scratch
+> +_require_chattr
+> +_require_test_lsattr
+> +_require_quota
+
+needs  _require_prjquota, and that function needs to be modified to
+detect for both XFS and ext4 support.
+
+> +
+> +rm -f $seqres.full
+> +MKFSOPTIONS=""
+> +MOUNTOPTIONS=""
+
+This doesn't seem appropriate. We really want to test project quotas
+under all the configurations that come in from the environment. e.g.
+for different block sizes.
+
+> +function setup_quota_options()
+> +{
+> +    case $FSTYP in
+> +    xfs)
+> +	#quotaon rely on this.
+> +	MOUNTOPTIONS="-o pquota"
+> +	;;
+> +    ext4)
+> +	#project quota is disabled in default.
+> +	MKFSOPTIONS="-O quota,project"
+> +	;;
+> +    *)
+> +        ;;
+> +    esac
+> +
+> +}
+
+Oh, I see now. Really, ext4 needs to support the pquota mount
+option, just like all the other filesystem quotas are configured.
+Please fix that ext4 kernel bug, not hack around it in the test
+harnesses.
+
+> +function set_inherit_attribute()
+> +{
+> +    case $FSTYP in
+> +    xfs)
+> +	$XFS_IO_PROG -r -c 'chattr +P' $*
+> +	;;
+> +    ext4)
+> +	chattr +P $*
+> +	;;
+> +    *)
+> +        ;;
+> +    esac
+> +}
+
+Don't the two programs use exactly the same ioctl interface to set
+the project attribute?  If not, then that's a deficiency in the ext4
+project quota implementation that needs fixing. If there's some
+other reason for xfs_io not working on ext4, then that needs fixing.
+Again, don't work around implementation problems in the test harness.
+
+> +setup_quota_options
+> +
+> +echo "+ create scratch fs"
+> +_scratch_mkfs $MKFSOPTIONS > /dev/null 2>&1
+> +
+> +echo "+ mount fs image"
+> +_scratch_mount $MOUNTOPTIONS
+
+Once everything is done via mount option, then we can use the
+standard _qmount_option function for setting the quota type, and
+_qmount for mounting with quotas enabled according to
+_qmount_option.
+
+
+> +function attr_test()
+> +{
+> +	#default project without inherit
+> +	mkdir $SCRATCH_MNT/dir
+> +	chattr -p 123456 $SCRATCH_MNT/dir | _filter_scratch | _filter_spaces
+> +	lsattr -p $SCRATCH_MNT/dir | _filter_scratch | $AWK_PROG '{print $1" "$3}'
+> +	touch $SCRATCH_MNT/dir/foo
+> +	lsattr -p $SCRATCH_MNT/dir/foo | _filter_scratch | $AWK_PROG '{print $1" "$3}'
+> +
+> +	#test project inherit with inherit attribute
+> +	set_inherit_attribute $SCRATCH_MNT/dir
+> +	touch $SCRATCH_MNT/dir/foo1
+> +	lsattr -p $SCRATCH_MNT/dir/foo1 | _filter_scratch | $AWK_PROG '{print $1" "$3}'
+> +
+> +	#Link accross project should fail
+> +	mkdir $SCRATCH_MNT/dir1
+> +	set_inherit_attribute $SCRATCH_MNT/dir1
+> +	chattr -p 654321 $SCRATCH_MNT/dir1 | _filter_scratch | _filter_spaces
+> +	ln $SCRATCH_MNT/dir/foo1 $SCRATCH_MNT/dir1/foo1 2>&1 \
+> +		| _filter_scratch | _filter_spaces
+> +
+> +	#mv accross different projects should work
+> +	mv $SCRATCH_MNT/dir/foo1 $SCRATCH_MNT/dir1/foo1
+> +	lsattr -p $SCRATCH_MNT/dir1/foo1 | _filter_scratch | $AWK_PROG '{print $1" "$3}'
+> +
+> +	#change project ignores quota
+> +	quotaon $SCRATCH_MNT >/dev/null 2>&1
+> +	setquota -P 654321 0 0 0 1 $SCRATCH_MNT/
+> +	chattr -p 123456 $SCRATCH_MNT/dir1/foo1 | _filter_scratch | _filter_spaces
+> +	lsattr -p $SCRATCH_MNT/dir1/foo1 | _filter_scratch | $AWK_PROG '{print $1" "$3}'
+> +}
+> +attr_test
+
+We don't need this encapsulated in a function.
+
+Also, there is nothing to set status=0 before exit, so this test
+will always fail due to the exit code being 1.
+
+> diff --git a/tests/generic/362.out b/tests/generic/362.out
+> new file mode 100644
+> index 0000000..31db991
+> --- /dev/null
+> +++ b/tests/generic/362.out
+> @@ -0,0 +1,8 @@
+> +QA output created by 362
+> ++ create scratch fs
+> ++ mount fs image
+> +0 SCRATCH_MNT/dir/foo
+> +123456 SCRATCH_MNT/dir/foo1
+> +ln: failed to create hard link 'SCRATCH_MNT/dir1/foo1' => 'SCRATCH_MNT/dir/foo1': Invalid cross-device link
+> +654321 SCRATCH_MNT/dir1/foo1
+> +123456 SCRATCH_MNT/dir1/foo1
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 7491282..e834762 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -364,3 +364,4 @@
+>  359 auto quick clone
+>  360 auto quick metadata
+>  361 auto quick
+> +362 auto quick
+
+and quota.
 
 Cheers,
 
