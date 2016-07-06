@@ -1,273 +1,112 @@
-Received: from sandeen.net ([63.231.237.45]:34678 "EHLO sandeen.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751757AbcGFQKI (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 6 Jul 2016 12:10:08 -0400
-Subject: Re: [PATCH v2] xfstests, generic: add project quota attribute tests
-References: <1467786171-21127-1-git-send-email-wangshilong1991@gmail.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <31720d30-0829-75a1-b21e-17b4fba1a66a@sandeen.net>
-Date: Wed, 6 Jul 2016 11:10:05 -0500
+Received: from userp1050.oracle.com ([156.151.31.82]:23601 "EHLO
+	userp1050.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752634AbcGFWqH (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 6 Jul 2016 18:46:07 -0400
+Date: Wed, 6 Jul 2016 15:44:16 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH v6 00/20] xfstests: minor fixes for the reflink/dedupe
+ tests
+Message-ID: <20160706224416.GA26279@birch.djwong.org>
+References: <146612796204.25024.18254357523133394284.stgit@birch.djwong.org>
+ <20160705043130.GF23649@eguan.usersys.redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <1467786171-21127-1-git-send-email-wangshilong1991@gmail.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160705043130.GF23649@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Wang Shilong <wangshilong1991@gmail.com>, fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org, tytso@mit.edu, sihara@ddn.com, lixi@ddn.com, Wang Shilong <wshilong@ddn.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On 7/6/16 1:22 AM, Wang Shilong wrote:
-> From: Wang Shilong <wshilong@ddn.com>
+On Tue, Jul 05, 2016 at 12:31:30PM +0800, Eryu Guan wrote:
+> Hi Darrick,
 > 
-> lsattr/chattr support both of ext4 and xfs, add
-> a test to cover both of them.
-
-Thanks for making this generic; some comments below.
- 
->  1. ioctl with project quota.
->  2. project inherit attribute.
->  3. Link accross project should fail
-
-s/accross/across/ FWIW :)
-
->  4. change project ignores quota
+> On Thu, Jun 16, 2016 at 06:46:02PM -0700, Darrick J. Wong wrote:
+> > Hi all,
+> > 
+> > This is the sixth revision of a patchset that adds to xfstests
+> > support for testing reverse-mappings of physical blocks to file and
+> > metadata (rmap); support for testing multiple file logical blocks to
+> > the same physical block (reflink); and implements the beginnings of
+> > online metadata scrubbing.
+> > 
+> > The first eight patches are in Eryu Guan's pull request on 2016-06-15.
+> > Those patches haven't changed, but they're not yet in the upstream
+> > repo.
+> > 
+> > If you're going to start using this mess, you probably ought to just
+> > pull from my github trees for kernel[1], xfsprogs[2], and xfstests[3].
+> > There are also updates for xfs-docs[4].  The kernel patches should
+> > apply to dchinner's for-next; xfsprogs patches to for-next; and
+> > xfstest to master.  The kernel git tree already has for-next included.
+> > 
+> > The patches have been xfstested with x64, i386, and armv7l--arm64,
+> > ppc64, and ppc64le no longer boot in qemu.  All three architectures
+> > pass all 'clone' group tests except xfs/128 (which is the swapext
+> > test), and AFAICT don't cause any new failures for the 'auto' group.
+> > 
+> > This is an extraordinary way to eat your data.  Enjoy! 
+> > Comments and questions are, as always, welcome.
 > 
-> Signed-off-by: Wang Shilong <wshilong@ddn.com>
-> ---
->  tests/generic/362     | 130 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/362.out |   8 ++++
->  tests/generic/group   |   1 +
->  3 files changed, 139 insertions(+)
->  create mode 100755 tests/generic/362
->  create mode 100644 tests/generic/362.out
+> I tested your xfstests patches with your kernel(HEAD f0b34b6 xfs: add
+> btree scrub tracepoints) and xfsprogs(HEAD 34bd754 xfs_scrub: create
+> online filesystem scrub program), with x86_64 host & 4k block size XFS.
 > 
-> diff --git a/tests/generic/362 b/tests/generic/362
-> new file mode 100755
-> index 0000000..f763bc5
-> --- /dev/null
-> +++ b/tests/generic/362
-> @@ -0,0 +1,130 @@
-> +#! /bin/bash
-> +# FS QA Test No. 030
-> +#
-> +# Test Project quota attr function
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright 2016 (C) Wang Shilong <wshilong@ddn.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seqfull=$0
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +
-> +_cleanup()
-> +{
-> +    rm -f $tmp.*
-> +}
-> +
-> +trap "_cleanup ; exit \$status" 0 1 2 3 15
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/attr
-> +. ./common/quota
-> +
-> +# real QA test starts here
-> +_supported_fs ext4 xfs
-> +_supported_os Linux
-> +
-> +_require_scratch
-> +_require_chattr
-> +_require_test_lsattr
-> +_require_quota
-
-We need a _require test to see if the generic quota tools
-support project quota, or this will fail due to lack of
-userspace support:
-
-+setquota: invalid option -- 'P'
-+setquota: Usage:
-+  setquota [-u|-g] [-rm] [-F quotaformat] <user|group>
-...
-
-same for chattr & lsattr:
-
-+Usage: chattr [-RVf] [-+=AacDdeijsSu] [-v version] files...
-...
-+lsattr: invalid option -- 'p'
-
-If any of these don't work, the test should _notrun with
-a short explanation about the requirement; see more below.
-
-> +
-> +rm -f $seqres.full
-> +MKFSOPTIONS=""
-> +MOUNTOPTIONS=""
-> +
-> +function setup_quota_options()
-> +{
-> +    case $FSTYP in
-> +    xfs)
-> +	#quotaon rely on this.
-> +	MOUNTOPTIONS="-o pquota"
-> +	;;
-> +    ext4)
-> +	#project quota is disabled in default.
-> +	MKFSOPTIONS="-O quota,project"
-> +	;;
-
-Ok, that explains that mystery, I wasn't sure how to enable
-project quota on ext4.
-
-(but I'm curious, why doesn't ext4 have a pquota mount option to
-match its grpquota and usrquota mount options?  Seems like strange
-asymmetry)
-
-But this will also _require a check to be sure mke2fs understands
-the "-O project" option, and _notrun if it doesn't.
-
-I think this could all be wrapped up in a "_require_vfs_project_quota"
-test, which tests:
-
-1) linux-quota userspace support
-2) e2fsprogs userspace support
-3) kernel support for the filesystem being tested.
-
-(if the filesystem doesn't support it in kernelspace, we get stuff like
-+mount: wrong fs type, bad option, bad superblock on /dev/sdb2,
-+       missing codepage or helper program, or other error
-+       In some cases useful info is found in syslog - try
-+       dmesg | tail  or so
-+
-+chattr: Inappropriate ioctl for device while setting project on /mnt/scratch/dir
-+lsattr: Inappropriate ioctl for device While reading project on /mnt/scratch/dir/foo)
-
-> +    *)
-> +        ;;
-> +    esac
-> +
-> +}
-> +
-> +function set_inherit_attribute()
-
-I don't think this is really needed, either xfs_io or chattr
-should work, assuming it's new enough.
-
-Just using chattr should suffice for all filesystems; the test
-uses lsattr directly later, so using chattr directly as well makes
-more sense to me.
-
-> +{
-> +    case $FSTYP in
-> +    xfs)
-> +	$XFS_IO_PROG -r -c 'chattr +P' $*
-
-(why "-r" ?)
-
-> +	;;
-> +    ext4)
-> +	chattr +P $*
-> +	;;
-> +    *)
-> +        ;;
-> +    esac
-> +}
-> +
-> +setup_quota_options
-> +
-> +echo "+ create scratch fs"
-> +_scratch_mkfs $MKFSOPTIONS > /dev/null 2>&1
-> +
-> +echo "+ mount fs image"
-> +_scratch_mount $MOUNTOPTIONS
-> +
-> +function attr_test()
-> +{
-> +	#default project without inherit
-> +	mkdir $SCRATCH_MNT/dir
-> +	chattr -p 123456 $SCRATCH_MNT/dir | _filter_scratch | _filter_spaces
-> +	lsattr -p $SCRATCH_MNT/dir | _filter_scratch | $AWK_PROG '{print $1" "$3}'
-> +	touch $SCRATCH_MNT/dir/foo
-> +	lsattr -p $SCRATCH_MNT/dir/foo | _filter_scratch | $AWK_PROG '{print $1" "$3}'
-> +
-> +	#test project inherit with inherit attribute
-> +	set_inherit_attribute $SCRATCH_MNT/dir
-> +	touch $SCRATCH_MNT/dir/foo1
-> +	lsattr -p $SCRATCH_MNT/dir/foo1 | _filter_scratch | $AWK_PROG '{print $1" "$3}'
-> +
-> +	#Link accross project should fail
-
-s/accross/across :)
-
-> +	mkdir $SCRATCH_MNT/dir1
-> +	set_inherit_attribute $SCRATCH_MNT/dir1
-> +	chattr -p 654321 $SCRATCH_MNT/dir1 | _filter_scratch | _filter_spaces
-> +	ln $SCRATCH_MNT/dir/foo1 $SCRATCH_MNT/dir1/foo1 2>&1 \
-> +		| _filter_scratch | _filter_spaces
-
-ln output seems to have changed at some point, so there needs to be some filtering
-or replacement on the ln error:
-
-    -ln: failed to create hard link 'SCRATCH_MNT/dir1/foo1' => 'SCRATCH_MNT/dir/foo1': Invalid cross-device link
-    +ln: creating hard link 'SCRATCH_MNT/dir1/foo1' => 'SCRATCH_MNT/dir/foo1': Invalid cross-device link
-
-> +
-> +	#mv accross different projects should work
-
-s/accross/across :)
-
-> +	mv $SCRATCH_MNT/dir/foo1 $SCRATCH_MNT/dir1/foo1
-> +	lsattr -p $SCRATCH_MNT/dir1/foo1 | _filter_scratch | $AWK_PROG '{print $1" "$3}'
-> +
-> +	#change project ignores quota
-> +	quotaon $SCRATCH_MNT >/dev/null 2>&1
-> +	setquota -P 654321 0 0 0 1 $SCRATCH_MNT/
-> +	chattr -p 123456 $SCRATCH_MNT/dir1/foo1 | _filter_scratch | _filter_spaces
-> +	lsattr -p $SCRATCH_MNT/dir1/foo1 | _filter_scratch | $AWK_PROG '{print $1" "$3}'
-> +}
-> +attr_test
-> diff --git a/tests/generic/362.out b/tests/generic/362.out
-> new file mode 100644
-> index 0000000..31db991
-> --- /dev/null
-> +++ b/tests/generic/362.out
-> @@ -0,0 +1,8 @@
-> +QA output created by 362
-> ++ create scratch fs
-> ++ mount fs image
-> +0 SCRATCH_MNT/dir/foo
-> +123456 SCRATCH_MNT/dir/foo1
-> +ln: failed to create hard link 'SCRATCH_MNT/dir1/foo1' => 'SCRATCH_MNT/dir/foo1': Invalid cross-device link
-> +654321 SCRATCH_MNT/dir1/foo1
-> +123456 SCRATCH_MNT/dir1/foo1
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 7491282..e834762 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -364,3 +364,4 @@
->  359 auto quick clone
->  360 auto quick metadata
->  361 auto quick
-> +362 auto quick
+> A './check -g auto' run looked fine overall. Besides the comments I
+> replied to some patches, other common minor issues are:
+> - space indention in _cleanup not tab
+> - bare 'umount $SCRATCH_MNT' not _scratch_unmount
+> - whitespace issues in _test|scratch_inject_error
 > 
+> (I can fix all these minor issues at commit time, if you don't have
+> other major updates to these patches).
+
+I don't have any major updates to any of those patches; go ahead.
+
+FWIW I usually have unposted patches at all points in time, so if you want to
+fix minor nits in things I've already posted for review and commit them to
+upstream, that's fine.  I pull down the latest xfstest git and rebase prior to
+sending a new patch series, so I'll absorb whatever you change. :)
+
+When I'm getting ready to do another big release, I inquire with the
+maintainers if they're about to push commits upstream to avoid the race
+post patches -> upstream push -> rebase patches -> repost patches.
+
+> And the review of changes to xfs/122 needs help from other XFS
+> developers :) (09/20 and 10/20)
+
+09/20 (remove rmapx cruft) should be pretty straightforward, since I withdrew
+'rmapx' and related changes from xfs.
+
+10/20 (new log items) will probably remain outstanding for a while since
+those changes haven't really made it upstream yet.
+
+> And besides the first 8 patches, 15/20 has been in upstream as well.
+
+Oh, ok.
+
+> Thanks,
+> Eryu
+> 
+> P.S.
+> The failed tests I saw when testing with reflink-enabled kernel &
+> xfsprogs:
+> 
+> Failures: generic/054 generic/055 generic/108 generic/204 generic/356 generic/357 xfs/004 xfs/096 xfs/122 xfs/293
+> 
+> generic/108 generic/204 and xfs/004 are new failures compared to stock
+> kernel and xfsprogs (kernel 4.7-rc5, xfsprogs 4.7-rc1).
+
+I think I have fixes for some of those that will go out during the next
+patchbomb.  But thanks for the heads up, I'll have a look at a -g auto
+run before I submit again.
+
+--D
+
+> 
+> Just FYI.
+> 
+> _______________________________________________
+> xfs mailing list
+> xfs@oss.sgi.com
+> http://oss.sgi.com/mailman/listinfo/xfs
