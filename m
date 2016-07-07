@@ -1,41 +1,41 @@
-Received: from sandeen.net ([63.231.237.45]:59921 "EHLO sandeen.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752720AbcGGCra (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 6 Jul 2016 22:47:30 -0400
-Subject: Re: [PATCH v2] xfstests, generic: add project quota attribute tests
-References: <1467786171-21127-1-git-send-email-wangshilong1991@gmail.com>
- <20160706233533.GK27480@dastard>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <d0018d66-cb32-16df-b46e-5c418cc4bfae@sandeen.net>
-Date: Wed, 6 Jul 2016 21:47:28 -0500
+Received: from mail-qt0-f194.google.com ([209.85.216.194]:32887 "EHLO
+	mail-qt0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751193AbcGGUJL (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 7 Jul 2016 16:09:11 -0400
+Received: by mail-qt0-f194.google.com with SMTP id f89so1860610qtd.0
+        for <fstests@vger.kernel.org>; Thu, 07 Jul 2016 13:09:11 -0700 (PDT)
+Date: Thu, 7 Jul 2016 16:12:02 -0400
+From: Eric Whitney <enwlinux@gmail.com>
+Subject: [PATCH] ext4/021: add _require_metadata_journaling
+Message-ID: <20160707201202.GA3195@localhost.localdomain>
 MIME-Version: 1.0
-In-Reply-To: <20160706233533.GK27480@dastard>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>, Wang Shilong <wangshilong1991@gmail.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, tytso@mit.edu, sihara@ddn.com, lixi@ddn.com, Wang Shilong <wshilong@ddn.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 7/6/16 6:35 PM, Dave Chinner wrote:
+An ext4 file system can be created without a journal, but ext4/021
+presumes it will contain one.  Make that requirement explicit to avoid
+unnecessary failures when testing "nojournal" file systems.
 
-...
+Signed-off-by: Eric Whitney <enwlinux@gmail.com>
+---
+ tests/ext4/021 | 1 +
+ 1 file changed, 1 insertion(+)
 
->> +_require_scratch
->> +_require_chattr
->> +_require_test_lsattr
->> +_require_quota
-> 
-> needs  _require_prjquota, and that function needs to be modified to
-> detect for both XFS and ext4 support.
+diff --git a/tests/ext4/021 b/tests/ext4/021
+index 9dfd191..d758818 100755
+--- a/tests/ext4/021
++++ b/tests/ext4/021
+@@ -48,6 +48,7 @@ _supported_fs ext4
+ _supported_os Linux
+ _require_scratch
+ _require_dumpe2fs
++_require_metadata_journaling $SCRATCH_DEV
+ 
+ # 8M in bytes
+ fssize=$((8 * 1024 * 1024))
+-- 
+2.1.4
 
-I think that if there is desire to test both xfs and non-xfs userspace
-with project quota, then we need to differentiate between "e2fsprogs
-and linux-quota and the kernel all support it" and "xfsprogs and
-the kernel both support it" don't we?
-
-IOWs if the test uses setquota/repquota, chattr, mkfs, and fsck to
-work with project quota, then that's a different set of requirements
-from a test using xfs_io, xfs_quota, etc.
-
--Eric
