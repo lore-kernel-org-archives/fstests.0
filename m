@@ -1,59 +1,73 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:2494 "EHLO
-	ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753136AbcGHAvb (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 7 Jul 2016 20:51:31 -0400
-Date: Fri, 8 Jul 2016 10:51:27 +1000
-From: Dave Chinner <david@fromorbit.com>
+Received: from imap.thunk.org ([74.207.234.97]:40332 "EHLO imap.thunk.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932118AbcGHCq6 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 7 Jul 2016 22:46:58 -0400
+Date: Thu, 7 Jul 2016 22:46:54 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
 Subject: Re: [PATCH v2] xfstests, generic: add project quota attribute tests
-Message-ID: <20160708005127.GK12670@dastard>
+Message-ID: <20160708024654.GE19871@thunk.org>
 References: <1467786171-21127-1-git-send-email-wangshilong1991@gmail.com>
  <20160706233533.GK27480@dastard>
  <d0018d66-cb32-16df-b46e-5c418cc4bfae@sandeen.net>
+ <20160708005127.GK12670@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <d0018d66-cb32-16df-b46e-5c418cc4bfae@sandeen.net>
+In-Reply-To: <20160708005127.GK12670@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: Wang Shilong <wangshilong1991@gmail.com>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, tytso@mit.edu, sihara@ddn.com, lixi@ddn.com, Wang Shilong <wshilong@ddn.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Eric Sandeen <sandeen@sandeen.net>, Wang Shilong <wangshilong1991@gmail.com>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, sihara@ddn.com, lixi@ddn.com, Wang Shilong <wshilong@ddn.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jul 06, 2016 at 09:47:28PM -0500, Eric Sandeen wrote:
-> On 7/6/16 6:35 PM, Dave Chinner wrote:
-> 
-> ...
-> 
-> >> +_require_scratch
-> >> +_require_chattr
-> >> +_require_test_lsattr
-> >> +_require_quota
+On Fri, Jul 08, 2016 at 10:51:27AM +1000, Dave Chinner wrote:
+> On Wed, Jul 06, 2016 at 09:47:28PM -0500, Eric Sandeen wrote:
+> > On 7/6/16 6:35 PM, Dave Chinner wrote:
 > > 
-> > needs  _require_prjquota, and that function needs to be modified to
-> > detect for both XFS and ext4 support.
+> > ...
+> > 
+> > >> +_require_scratch
+> > >> +_require_chattr
+> > >> +_require_test_lsattr
+> > >> +_require_quota
+> > > 
+> > > needs  _require_prjquota, and that function needs to be modified to
+> > > detect for both XFS and ext4 support.
+> > 
+> > I think that if there is desire to test both xfs and non-xfs userspace
+> > with project quota, then we need to differentiate between "e2fsprogs
+> > and linux-quota and the kernel all support it" and "xfsprogs and
+> > the kernel both support it" don't we?
 > 
-> I think that if there is desire to test both xfs and non-xfs userspace
-> with project quota, then we need to differentiate between "e2fsprogs
-> and linux-quota and the kernel all support it" and "xfsprogs and
-> the kernel both support it" don't we?
+> Well, it should be just "linux-quota and kernel". ext4 needs to
+> have the same mount option behaviour for project quota as it does
+> for all other types of quota, not be dependent on mkfs....
 
-Well, it should be just "linux-quota and kernel". ext4 needs to
-have the same mount option behaviour for project quota as it does
-for all other types of quota, not be dependent on mkfs....
+Project quota for ext4 is an optional thing, and if nothing else, we
+need to have a separate feature flag for legacy file systems that were
+created before we started supporting project quota.  So if you want to
+support project quota you *will* need to have a version of e2fsck that
+understands project quota, and a version of mke2fs that knows how to
+request that project quota be enabled, etc., etc.
 
-> IOWs if the test uses setquota/repquota, chattr, mkfs, and fsck to
-> work with project quota, then that's a different set of requirements
-> from a test using xfs_io, xfs_quota, etc.
+So while it might be *nice* if ext4 could support project quota
+without being dependent on having a specific version of mke2fs and
+e2fsck installed, it's just simply not possible....
 
-_require_linux_prjquota
-_require_xfs_prjquota
+> > IOWs if the test uses setquota/repquota, chattr, mkfs, and fsck to
+> > work with project quota, then that's a different set of requirements
+> > from a test using xfs_io, xfs_quota, etc.
+> 
+> _require_linux_prjquota
+> _require_xfs_prjquota
+> 
+> But that said, both ext4 and xfs need to work for both
+> configurations, and they should all be using the common xfstests
+> quota infrastructure....
 
-But that said, both ext4 and xfs need to work for both
-configurations, and they should all be using the common xfstests
-quota infrastructure....
+Agreed, but we want xfstests to be able to support systems where
+linux-quota (aka quotatools) and/or e2fsprogs and/or the kernel
+haven't been upgraded to support project quota, don't we?  If for no
+other reason than to be kind to the poor souls who have to support
+RHEL 6.  :-)
 
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+						- Ted
