@@ -1,81 +1,200 @@
-Received: from imap.thunk.org ([74.207.234.97]:41642 "EHLO imap.thunk.org"
+Received: from mx1.redhat.com ([209.132.183.28]:42342 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751220AbcGHFCh (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 8 Jul 2016 01:02:37 -0400
-Date: Fri, 8 Jul 2016 01:02:28 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH v2] xfstests, generic: add project quota attribute tests
-Message-ID: <20160708050228.GH19871@thunk.org>
-References: <1467786171-21127-1-git-send-email-wangshilong1991@gmail.com>
- <20160706233533.GK27480@dastard>
- <d0018d66-cb32-16df-b46e-5c418cc4bfae@sandeen.net>
- <20160708005127.GK12670@dastard>
- <20160708024654.GE19871@thunk.org>
- <77863b4a-95e6-4100-79c2-5cbcaf0872e7@sandeen.net>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <77863b4a-95e6-4100-79c2-5cbcaf0872e7@sandeen.net>
+	id S1750905AbcGIG7o (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sat, 9 Jul 2016 02:59:44 -0400
+Message-Id: <201607090659.u696xgKq027545@int-mx11.intmail.prod.int.phx2.redhat.com>
+Date: Sat, 09 Jul 2016 14:59:41 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: [GIT PULL] fstests: updates on 2016-07-09
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: Dave Chinner <david@fromorbit.com>, Wang Shilong <wangshilong1991@gmail.com>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, sihara@ddn.com, lixi@ddn.com, Wang Shilong <wshilong@ddn.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 07, 2016 at 10:19:27PM -0500, Eric Sandeen wrote:
-> 
-> But the point I keep trying to make - and failing, apparently - 
-> is that we will / should have two sets of tests for userspace
-> functionality at least; one using standard quota tools, and one
-> using xfs_quota.  Both should test the same kernel paths, but
-> if we want to know that userspace is working we need to test both.
+Hi Dave,
 
-I agree completely that we should test both userspace stacks.  Where I
-disagree is whether this has anything to do with using the usrquota
-and grpquota mount options, and which ext4 mkfs options are used to
-set up quota or project quota support.  That's a completely orthogonal
-issue.
+Can you please pull the fstests update from the location below? Notably, it
+contains the richacl tests from Andreas Gruenbacher, and new reflink tests &
+fixes from Darrick J. Wong.
 
-> I don't know how we got to the point where we have 2 parallel
-> quota infrastructures, it's an unfortunate mess IMHO.  :(
+This pull request contains updates in last two weeks, since my last pull
+request (on 2016-07-02) was not pushed to upstream.
 
-Actually, I've been staring at the quotatools source code and it's
-even more complicated than that.  There are newer quotactl
-subcommands, such as Q_XGETQSTAT and Q_XGETQSTATV, which currently
-quotatools only tries using if it thinks the quota format (which in
-this sense seems to be system API, not the actual quota file format
---- these two concepts seem to have been overloaded at some point) is
-"xfs".
+Thanks,
+Eryu
 
-Currently quotatools only assumes the "xfs" quota format should be
-used for "xfs" and "gfs" --- but it works for other file systems,
-including ext4 as well.  As a result, there's certain information,
-such as whether ext4 is doing limits enforcement as well as quota
-tracking, which is *not* being exposed to the user.  I suspect one of
-the reasons for this is the tests in quotatools for which kernel
-interfaces are present are fairly primitive, and in fact there are
-some comments in quotasys.c which makes references to behaviours of
-certain specific Red Hat kernel versions to decide which interfaces
-are available.  :-(
+The following changes since commit 54774d4bb5f8b5756913034cf9fdd28ba5bee03c:
 
-And if we just did the simple thing to enable use of the "new" (aka
-"xfs", although this is ***massive*** misnomer) quota format in
-quotatools, it would break if the latest quota tools were ever
-compiled on older Enterprise Linux systems.
+  ext4/271: _notrun if there are journal related mount options (2016-06-24 12:54:04 +0800)
 
-Ugh.  I suspect one of the reasons why things have gotten into such a
-mess is that quota is mostly an enterprise feature, and most community
-distros and community users/kernel developers don't really use it.  As
-a result, no one has bothered to put in clean ways of doing interface
-versioning, as I suspect a lot of work happens right before the
-Enterprise Linux cutoff date, and there isn't much incentive to clean
-things up afterwards.
+are available in the git repository at:
 
-> But if we want to test xfs_quota tests on ext4, we still
-> need to know that e2fsprogs is pquota-capable.
-> 
-> If we want to test standard quota tools on ext4, we need to know
-> that *those* binaries are capable, as well as e2fsprogs.  etc...
+  https://github.com/guaneryu/xfstests.git for-dave
 
-Completely agree.
+for you to fetch changes up to 024bdaea1c5741d37bf62b0fcb5a581ede5a5682:
 
-						- Ted
+  ext4/021: add _require_metadata_journaling (2016-07-08 10:51:54 +0800)
+
+----------------------------------------------------------------
+
+fstests: update on 2016-07-09
+
+This update contains:
+o New richacl tests
+o New reflink tests and fixes
+o dm-delay support
+o New tests for xfs, btrfs and overlay
+o Other bug fixes and enhancements
+
+----------------------------------------------------------------
+Anand Jain (6):
+      btrfs: add functions to set and reset required number of SCRATCH_DEV_POOL
+      btrfs: add functions to get and put a device for replace target
+      btrfs/027: make use of new device get and put helper functions
+      btrfs: add helper function to check if btrfs is module
+      btrfs: test RAID1 device reappear and balance
+      btrfs: test RAID5 device reappear and balance
+
+Andreas Gruenbacher (2):
+      fstests: Add / use _require_runas and _runas
+      generic: Add richacl tests
+
+Brian Foster (2):
+      common: support dm-delay to introduce I/O delays
+      xfs: test for post umount readahead completion panic
+
+Christoph Hellwig (1):
+      generic/042: remove from quick group
+
+Darrick J. Wong (7):
+      xfs/122: fix test output to reflect latest xfsprogs
+      xfs/235: fix logic errors when checking rmap usage after failures
+      xfs/229: require 3GB of space
+      generic/204: increase log size for rmap/reflink
+      xfs/128: use $XFS_FSR_PROG instead of xfs_fsr directly
+      xfs: inject errors at various parts of the deferred op completion
+      xfs: test clearing reflink inode flag
+
+Eric Whitney (1):
+      ext4/021: add _require_metadata_journaling
+
+Eryu Guan (2):
+      overlay: dentry leak for default_permissions mount option
+      overlay: remove dir which contains whiteout from lower dir
+
+Jeff Mahoney (1):
+      btrfs/048: extend _filter_btrfs_prop_error to handle additional errors
+
+Omer Zilberberg (1):
+      generic/294: filter quotes from mknod
+
+Qu Wenruo (1):
+      btrfs: EDQUOTA leaks reserved data space
+
+Theodore Ts'o (3):
+      common/rc: ext4 doesn't support O_DIRECT with encryption
+      generic/082: rename _filter_project_quota to a avoid function name conflict
+      quota: fix generic/244 on 32-bit platforms
+
+Zorro Lang (2):
+      common/dmerror: fix nonsensical arguments handling
+      xfs: configurable behavior on errors at unmount time
+
+ common/config         |   2 +
+ common/dmdelay        |  90 ++++++++++++++++
+ common/dmerror        |  14 ++-
+ common/filter         |   7 ++
+ common/filter.btrfs   |  10 +-
+ common/inject         |  93 ++++++++++++++++
+ common/log            |  28 +++++
+ common/rc             | 289 ++++++++++++++++++++++++++++++++++++++++++++++++--
+ src/test-nextquota.c  |   7 +-
+ tests/btrfs/027       |  24 +++--
+ tests/btrfs/048       |   6 +-
+ tests/btrfs/048.out   |   4 +-
+ tests/btrfs/124       | 166 +++++++++++++++++++++++++++++
+ tests/btrfs/124.out   |   7 ++
+ tests/btrfs/125       | 182 +++++++++++++++++++++++++++++++
+ tests/btrfs/125.out   |   7 ++
+ tests/btrfs/126       |  73 +++++++++++++
+ tests/btrfs/126.out   |   2 +
+ tests/btrfs/group     |   3 +
+ tests/ext4/021        |   1 +
+ tests/generic/082     |   6 +-
+ tests/generic/093     |  14 ++-
+ tests/generic/099     |  45 ++++----
+ tests/generic/204     |   6 +-
+ tests/generic/237     |   6 +-
+ tests/generic/294     |   2 +-
+ tests/generic/294.out |   2 +-
+ tests/generic/362     | 125 ++++++++++++++++++++++
+ tests/generic/362.out |  94 ++++++++++++++++
+ tests/generic/363     | 118 +++++++++++++++++++++
+ tests/generic/363.out | 139 ++++++++++++++++++++++++
+ tests/generic/364     |  98 +++++++++++++++++
+ tests/generic/364.out |  39 +++++++
+ tests/generic/365     |  93 ++++++++++++++++
+ tests/generic/365.out |   9 ++
+ tests/generic/366     |  86 +++++++++++++++
+ tests/generic/366.out |  11 ++
+ tests/generic/367     |  85 +++++++++++++++
+ tests/generic/367.out |  11 ++
+ tests/generic/368     |  85 +++++++++++++++
+ tests/generic/368.out |   7 ++
+ tests/generic/369     | 126 ++++++++++++++++++++++
+ tests/generic/369.out |  24 +++++
+ tests/generic/370     |  90 ++++++++++++++++
+ tests/generic/370.out |  19 ++++
+ tests/generic/group   |  11 +-
+ tests/overlay/009     |  68 ++++++++++++
+ tests/overlay/009.out |   2 +
+ tests/overlay/010     |  78 ++++++++++++++
+ tests/overlay/010.out |   2 +
+ tests/overlay/group   |   2 +
+ tests/shared/051      |  48 ++++-----
+ tests/xfs/006         | 116 ++++++++++++++++++++
+ tests/xfs/006.out     |   7 ++
+ tests/xfs/122.out     |   4 +-
+ tests/xfs/128         |   8 +-
+ tests/xfs/229         |   1 +
+ tests/xfs/235         |   4 +-
+ tests/xfs/235.out     |   1 -
+ tests/xfs/311         |  91 ++++++++++++++++
+ tests/xfs/311.out     |   2 +
+ tests/xfs/312         | 102 ++++++++++++++++++
+ tests/xfs/312.out     |  18 ++++
+ tests/xfs/313         | 102 ++++++++++++++++++
+ tests/xfs/313.out     |  18 ++++
+ tests/xfs/314         | 106 ++++++++++++++++++
+ tests/xfs/314.out     |  18 ++++
+ tests/xfs/315         |  99 +++++++++++++++++
+ tests/xfs/315.out     |  16 +++
+ tests/xfs/316         | 100 +++++++++++++++++
+ tests/xfs/316.out     |  16 +++
+ tests/xfs/317         |  95 +++++++++++++++++
+ tests/xfs/317.out     |  16 +++
+ tests/xfs/318         |  93 ++++++++++++++++
+ tests/xfs/318.out     |  15 +++
+ tests/xfs/319         |  97 +++++++++++++++++
+ tests/xfs/319.out     |  19 ++++
+ tests/xfs/320         |  95 +++++++++++++++++
+ tests/xfs/320.out     |  18 ++++
+ tests/xfs/321         |  94 ++++++++++++++++
+ tests/xfs/321.out     |  17 +++
+ tests/xfs/322         |  97 +++++++++++++++++
+ tests/xfs/322.out     |  17 +++
+ tests/xfs/323         |  94 ++++++++++++++++
+ tests/xfs/323.out     |  17 +++
+ tests/xfs/324         | 101 ++++++++++++++++++
+ tests/xfs/324.out     |  17 +++
+ tests/xfs/325         |  95 +++++++++++++++++
+ tests/xfs/325.out     |  15 +++
+ tests/xfs/326         | 109 +++++++++++++++++++
+ tests/xfs/326.out     |  18 ++++
+ tests/xfs/327         |  93 ++++++++++++++++
+ tests/xfs/327.out     |  20 ++++
+ tests/xfs/group       |  18 ++++
+ 94 files changed, 4562 insertions(+), 103 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
