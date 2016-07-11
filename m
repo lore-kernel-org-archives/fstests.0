@@ -1,11 +1,11 @@
-Received: from mx1.redhat.com ([209.132.183.28]:47378 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:47386 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752968AbcGKJ0R (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 11 Jul 2016 05:26:17 -0400
+	id S1752968AbcGKJ0S (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 11 Jul 2016 05:26:18 -0400
 From: Jan Tulak <jtulak@redhat.com>
-Subject: [PATCH 1/4] xfstests: Fix installation for extended names
-Date: Mon, 11 Jul 2016 11:26:06 +0200
-Message-Id: <1468229169-24045-2-git-send-email-jtulak@redhat.com>
+Subject: [PATCH 2/4] fstests: filename handling for extended names in ./check was on a wrong place
+Date: Mon, 11 Jul 2016 11:26:07 +0200
+Message-Id: <1468229169-24045-3-git-send-email-jtulak@redhat.com>
 In-Reply-To: <1468229169-24045-1-git-send-email-jtulak@redhat.com>
 References: <1468229169-24045-1-git-send-email-jtulak@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,214 +13,60 @@ To: fstests@vger.kernel.org
 Cc: david@fromorbit.com, eguan@redhat.com, Jan Tulak <jtulak@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-xfstests supports extended test names like 314-foo-bar, but installation of
-these tests was skipped (not matching a regexp). So this patch fixes the
-makefiles in tests/*/
-
-The include/buildrules change was written by Dave Chinner.
+The code handling "./check foo/123", when the real test is "foo/123-bar-baz"
+was moved at the earliest position, so everything working with the test name or
+path will know the full name. Thus, no "123" and "123-bar-baz" mix is possible.
 
 Signed-off-by: Jan Tulak <jtulak@redhat.com>
 ---
-UPDATE:
-Use Dave's code to at first select all files and then separate output and test
-files. BTW, in this version, when most of this version is written by Dave,
-should I add Signed-off-by, or is better to keep it mentioned only in the text?
----
- include/buildrules     | 31 +++++++++++++++++++++++++++++++
- tests/btrfs/Makefile   |  4 ++--
- tests/cifs/Makefile    |  4 ++--
- tests/ext4/Makefile    |  4 ++--
- tests/f2fs/Makefile    |  4 ++--
- tests/generic/Makefile |  4 ++--
- tests/overlay/Makefile |  4 ++--
- tests/shared/Makefile  |  4 ++--
- tests/udf/Makefile     |  4 ++--
- tests/xfs/Makefile     |  4 ++--
- 10 files changed, 49 insertions(+), 18 deletions(-)
+ check | 27 ++++++++++++++-------------
+ 1 file changed, 14 insertions(+), 13 deletions(-)
 
-diff --git a/include/buildrules b/include/buildrules
-index c8a7c47..1269c8c 100644
---- a/include/buildrules
-+++ b/include/buildrules
-@@ -100,3 +100,34 @@ MAKEDEP := $(MAKEDEPEND) $(CFLAGS)
- 	    cp /dev/null .dep; \
- 	fi
+diff --git a/check b/check
+index 5be183f..ef6bd47 100755
+--- a/check
++++ b/check
+@@ -543,6 +543,20 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 	for seq in $list
+ 	do
+ 	    err=false
++	    if [ ! -f $seq ]; then
++	        # Try to get full name in case the user supplied only seq id
++	        # and the test has a name. A bit of hassle to find really
++	        # the test and not its sample output or helping files.
++	        bname=$(basename $seq)
++	        full_seq=$(find $(dirname $seq) -name $bname* -executable |
++	            awk '(NR == 1 || length < length(shortest)) { shortest = $0 }\
++	            	END { print shortest }')
++	        if [ -f $full_seq ] \
++	            && [ x$(echo $bname | grep -o "^$VALID_TEST_ID") != x ]; then
++	            seq=$full_seq
++	            seqnum=${full_seq#*/}
++	        fi
++	    fi
  
-+# Gather files for installing into two lists:
-+# TESTS with executable scripts and OUTFILES with all the test outputs.
-+# Makefile has a very small matching, so we have to go this long way.
-+
-+# Start with all test related files:
-+ALLFILES = $(wildcard [0-9]??*)
-+
-+# Now build a list of known output files.  Unfortunately, the
-+# multiple output test files are poorly handled as makefiles don't
-+# handle wildcarded multi-suffix matching. Hence we separate the
-+# processing of these right now.
-+EXTENDED_OUTFILES = $(wildcard [0-9]??*.out.*)
-+BASIC_OUTFILES = $(wildcard [0-9]??*.out)
-+OUTFILES = $(EXTENDED_OUTFILES) $(BASIC_OUTFILES)
-+
-+# Strip suffix to get matching tests. We want to strip from the
-+# first "." to the end, but makefiles don't have a built in
-+# operative for that. So:
-+#
-+# Hack: strip the multiple segments after .out with repeated basename calls.
-+EXTFILTER1 = $(basename $(EXTENDED_OUTFILES))
-+EXTFILTER2 = $(basename $(EXTFILTER1))
-+EXTFILTER3 = $(basename $(EXTFILTER2))
-+EXTFILTER4 = $(basename $(EXTFILTER3))
-+
-+# final filter list
-+FILTER = $(basename $(EXTFILTER4) $(BASIC_OUTFILES))
-+
-+# finally, select the test files by filtering against against the
-+# stripped output files and sort them to remove duplicates.
-+TESTS = $(sort $(filter $(ALLFILES), $(FILTER)))
-diff --git a/tests/btrfs/Makefile b/tests/btrfs/Makefile
-index e1a5be1..2d93642 100644
---- a/tests/btrfs/Makefile
-+++ b/tests/btrfs/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
+ 	    # the filename for the test and the name output are different.
+ 	    # we don't include the tests/ directory in the name output.
+@@ -566,19 +580,6 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 		if $showme; then
+ 			echo
+ 			continue
+-		elif [ ! -f $seq ]; then
+-			# Try to get full name in case the user supplied only seq id
+-			# and the test has a name. A bit of hassle to find really
+-			# the test and not its sample output or helping files.
+-			bname=$(basename $seq)
+-			full_seq=$(find $(dirname $seq) -name $bname* -executable |
+-				awk '(NR == 1 || length < length(shortest)) { shortest = $0 }\
+-					END { print shortest }')
+-			if [ -f $full_seq ] \
+-				&& [ x$(echo $bname | grep -o "^$VALID_TEST_ID") != x ]; then
+-				seq=$full_seq
+-				seqnum=${full_seq#*/}
+-			fi
+ 		fi
  
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/cifs/Makefile b/tests/cifs/Makefile
-index 9176e5c..0c5cf3b 100644
---- a/tests/cifs/Makefile
-+++ b/tests/cifs/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/ext4/Makefile b/tests/ext4/Makefile
-index 7a3c8e1..beb1541 100644
---- a/tests/ext4/Makefile
-+++ b/tests/ext4/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/f2fs/Makefile b/tests/f2fs/Makefile
-index 4d00e9e..d13bca3 100644
---- a/tests/f2fs/Makefile
-+++ b/tests/f2fs/Makefile
-@@ -13,9 +13,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/generic/Makefile b/tests/generic/Makefile
-index 9529fb8..3878d05 100644
---- a/tests/generic/Makefile
-+++ b/tests/generic/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/overlay/Makefile b/tests/overlay/Makefile
-index 63c9878..b07f892 100644
---- a/tests/overlay/Makefile
-+++ b/tests/overlay/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/shared/Makefile b/tests/shared/Makefile
-index cbd87f9..8a83278 100644
---- a/tests/shared/Makefile
-+++ b/tests/shared/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/udf/Makefile b/tests/udf/Makefile
-index 1d96658..c9c9f1b 100644
---- a/tests/udf/Makefile
-+++ b/tests/udf/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/xfs/Makefile b/tests/xfs/Makefile
-index db94be0..d64800e 100644
---- a/tests/xfs/Makefile
-+++ b/tests/xfs/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
+ 		if [ ! -f $seq ]; then
 -- 
 2.5.5
 
