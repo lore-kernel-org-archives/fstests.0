@@ -1,59 +1,46 @@
-Received: from imap.thunk.org ([74.207.234.97]:46890 "EHLO imap.thunk.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932315AbcGKRMs (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 11 Jul 2016 13:12:48 -0400
-Date: Mon, 11 Jul 2016 13:12:42 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH v2] xfstests, generic: add project quota attribute tests
-Message-ID: <20160711171242.GA21285@thunk.org>
-References: <1467786171-21127-1-git-send-email-wangshilong1991@gmail.com>
- <20160706233533.GK27480@dastard>
- <d0018d66-cb32-16df-b46e-5c418cc4bfae@sandeen.net>
- <20160708005127.GK12670@dastard>
- <20160708024654.GE19871@thunk.org>
- <77863b4a-95e6-4100-79c2-5cbcaf0872e7@sandeen.net>
- <20160708050228.GH19871@thunk.org>
- <20160711161556.GB9334@quack2.suse.cz>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160711161556.GB9334@quack2.suse.cz>
+Received: from mail-pf0-f173.google.com ([209.85.192.173]:33678 "EHLO
+	mail-pf0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750787AbcGKW1v (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 11 Jul 2016 18:27:51 -0400
+Received: by mail-pf0-f173.google.com with SMTP id i123so39919934pfg.0
+        for <fstests@vger.kernel.org>; Mon, 11 Jul 2016 15:27:50 -0700 (PDT)
+From: Omar Sandoval <osandov@osandov.com>
+Subject: [PATCH RESEND v2] fstests: btrfs/079: Fix wrong value passed to available space check.
+Date: Mon, 11 Jul 2016 15:27:17 -0700
+Message-Id: <54913a3d3aca9142fe5ebf3ee06ff6e7a7736678.1468275843.git.osandov@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jan Kara <jack@suse.cz>
-Cc: Eric Sandeen <sandeen@sandeen.net>, Dave Chinner <david@fromorbit.com>, Wang Shilong <wangshilong1991@gmail.com>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, sihara@ddn.com, lixi@ddn.com, Wang Shilong <wshilong@ddn.com>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, kernel-team@fb.com, Qu Wenruo <quwenruo@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jul 11, 2016 at 06:15:56PM +0200, Jan Kara wrote:
-> 
-> What would you like to achieve with this? There is 'QF_META' format which
-> is different from 'QF_XFS' format basically only in the set of quotactls
-> used. As I said above it might be nice to separate kernel-api from the
-> underlying-quota-format but in reality these two were bound together in
-> older kernels so they are not really independent.
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
 
-The main reason why I noticed is with the new (err, "latest") ext4
-quota (enabled via mke2fs -t ext4 -O quota) implementation, we enable
-quota tracking at mount time.  (This may be true with journalled quota
-as well, actually).  But we don't actually enable quota *enforcement*
-until quotaon is given.
+Wrong value is passed to _require_fs_space, which should be in unit of
+kilobyte(1024), but passed in unit of gigabyte(1024^3).
 
-The problem is that quotaon -p prints the status of whether or not
-quota *tracking* is enabled, and with the new ext4 quota, quota
-tracking is *always* enabled.  So quota -p doesn't report anything
-useful for new ext4 quota systems, and when I started to look at how
-to change things, that's when I noticed that we weren't using the new
-quotactl commands with ext4 even though they worked, and that the new
-quotactl implementation had more functionality than the older ones.
+Fix it.
 
-BTW, I've seriously been thinking about changing the default so that
-if you use mke2fs -O quota, quota enforcement is also enabled by
-default at mount time, and we use a mount option to disable quota
-enforcement.  If we then added a way of selectively enabling and
-disabling quota enforcement via quota-tools, then we would be bringing
-behaivour of how ext4 quota works to like how xfs treats quota.  The
-question I have is how to do this in a way that isn't surprising for
-people who are used to the old behaviour --- but mke2fs -O quota is
-still relatively new, so maybe we could get away with it without
-having to add more superblock flags.
+Reviewed-by: David Sterba <dsterba@suse.cz>
+Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+---
+This is from January of last year, looks like it fell through the cracks.
 
-							- Ted
+ tests/btrfs/079 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/btrfs/079 b/tests/btrfs/079
+index 6aee3a373f91..ed4eb727ee2b 100755
+--- a/tests/btrfs/079
++++ b/tests/btrfs/079
+@@ -72,7 +72,7 @@ rm -f $seqres.full
+ 
+ _scratch_mkfs >>$seqres.full 2>&1
+ _scratch_mount
+-_require_fs_space $SCRATCH_MNT $(($filesize / 1024 / 1024 / 1024))
++_require_fs_space $SCRATCH_MNT $(($filesize / 1024))
+ $XFS_IO_PROG -f -c "falloc 0 $filesize" $testfile
+ 
+ dd_work() {
+-- 
+2.9.0
+
