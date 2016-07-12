@@ -1,144 +1,210 @@
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:20403 "EHLO
-	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932423AbcGLCiD (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 11 Jul 2016 22:38:03 -0400
-Date: Tue, 12 Jul 2016 12:32:53 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 1/2] xfstests: Fix installation for extended names
-Message-ID: <20160712023253.GQ12670@dastard>
-References: <1467389347-2055-1-git-send-email-jtulak@redhat.com>
- <1467389347-2055-2-git-send-email-jtulak@redhat.com>
- <20160704014040.GA27480@dastard>
- <CACj3i71NDjsyTKc8vt9X-VZzRjZpbM=HYp5mx2MFVLrTB-GGYw@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:47503 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932161AbcGLD7A (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 11 Jul 2016 23:59:00 -0400
+Date: Tue, 12 Jul 2016 11:58:57 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 1/3] btrfs: add test for an incremental send after moving
+ directories around
+Message-ID: <20160712035857.GK2432@eguan.usersys.redhat.com>
+References: <1467462728-14495-1-git-send-email-fdmanana@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CACj3i71NDjsyTKc8vt9X-VZzRjZpbM=HYp5mx2MFVLrTB-GGYw@mail.gmail.com>
+In-Reply-To: <1467462728-14495-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Jan Tulak <jtulak@redhat.com>
-Cc: fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jul 11, 2016 at 11:29:42AM +0200, Jan Tulak wrote:
-> Hi,
+On Sat, Jul 02, 2016 at 01:32:08PM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
-> On Mon, Jul 4, 2016 at 3:40 AM, Dave Chinner <david@fromorbit.com> wrote:
-> > On Fri, Jul 01, 2016 at 06:09:06PM +0200, Jan Tulak wrote:
-> >> xfstests supports extended test names like 314-foo-bar, but installation of
-> >> these tests was skipped (not matching a regexp). So this patch fixes the
-> >> makefiles in tests/*/
-> >>
-> >> Signed-off-by: Jan Tulak <jtulak@redhat.com>
-> >> ---
-> >> UPDATE:
-> >> Rewritten, now it doesn't fail without the extended name, and doesn't
-> >> suppress anything. Thanks Dave.
-> >> ---
-> >>  tests/btrfs/Makefile   | 21 +++++++++++++++++----
-> >>  tests/cifs/Makefile    | 21 +++++++++++++++++----
-> >>  tests/ext4/Makefile    | 21 +++++++++++++++++----
-> >>  tests/f2fs/Makefile    | 24 ++++++++++++++++++------
-> >>  tests/generic/Makefile | 21 +++++++++++++++++----
-> >>  tests/overlay/Makefile | 23 ++++++++++++++++++-----
-> >>  tests/shared/Makefile  | 21 +++++++++++++++++----
-> >>  tests/udf/Makefile     | 21 +++++++++++++++++----
-> >>  tests/xfs/Makefile     | 21 +++++++++++++++++----
-> >>  9 files changed, 155 insertions(+), 39 deletions(-)
-> >>
-> >> diff --git a/tests/btrfs/Makefile b/tests/btrfs/Makefile
-> >> index e1a5be1..0301d78 100644
-> >> --- a/tests/btrfs/Makefile
-> >> +++ b/tests/btrfs/Makefile
-> >> @@ -5,16 +5,29 @@
-> >>  TOPDIR = ../..
-> >>  include $(TOPDIR)/include/builddefs
-> >>
-> >> -BTRFS_DIR = btrfs
-> >> -TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(BTRFS_DIR)
-> >> +GROUP_DIR = btrfs
-> >> +TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(GROUP_DIR)
-> >
-> > What's this change for?
-> >
-> > Please don't make random undocumented changes when updating a
-> > patchset. It is best not to change anything unrelated to the problem
-> > being solved.
-> >
-> >
-> >>  include $(BUILDRULES)
-> >>
-> >> +# note: the second TESTS wildcard gets also .out files, but these will be
-> >> +# overwritten with correct permissions a moment later, as they are also in
-> >> +# OUTPUTS. Regexps here are really limited, so I didn't find a better
-> >> +# solution...
-> >> +TESTS = $(wildcard [0-9][0-9][0-9])
-> >> +TESTS += $(wildcard [0-9][0-9][0-9]-*)
-> >
-> > Ugh. The hacks need to be constrained to the makefile and not do
-> > nasty things with installed files.
-> >
-> > What I think should be done here is to turn the selection around the
-> > other way because we can select the output files directly and
-> > correctly. We can then use that to build the test list via stripping
-> > and filtering as all tests must have an output file associated with
-> > them.
-> >
-> > So:
-> >
-> > # Start with all test related files:
-> > ALLFILES = $(wildcard [0-9]??*)
-> >
-> > # Now build a list of known output files.  Unfortunately, the
-> > # multiple output test files are poorly handled as makefiles don't
-> > # handle wildcarded multi-suffix matching. Hence we separate the
-> > # processing of these right now.
-> > EXTENDED_OUTFILES = $(wildcard [0-9]??*.out.*)
-> > BASIC_OUTFILES = $(wildcard [0-9]??*.out)
-> > OUTFILES = $(EXTENDED_OUTFILES) $(BASIC_OUTFILES)
-> >
-> > # Strip suffix to get matching tests. We want to strip from the
-> > # first "." to the end, but makefiles don't have a built in
-> > # operative for that. So:
-> > #
-> > # Hack: strip the multiple segments after .out with repeated basename calls.
-> > EXTFILTER1 = $(basename $(EXTENDED_OUTFILES))
-> > EXTFILTER2 = $(basename $(EXTFILTER1))
-> > EXTFILTER3 = $(basename $(EXTFILTER2))
-> > EXTFILTER4 = $(basename $(EXTFILTER3))
-> >
-> > # final filter list
-> > FILTER = $(basename $(EXTFILTER4) $(BASIC_OUTFILES))
-> >
-> > # finally, select the test files by filtering against against the
-> > # stripped output files and sort them to remove duplicates.
-> > TESTS = $(sort $(filter $(ALLFILES), $(FILTER)))
-> >
-> > That will give you two lists - "OUTFILES" which are all the output
-> > files that need to be installed, and "TESTS" which are all the tests
-> > that should be installed. There will be no overlap between these two
-> > lists.
-> >
-> > I'd also suggest that this can probably be put in the BUILDRULES
-> > file, as it will be common to all makefiles and doesn't need to be
-> > repeated in every makefile.
-> >
+> Test that an incremental send operation works after doing radical changes
+> in the directory hierarchy that involve switching the inode that directory
+> entries point to.
 > 
-> Thanks for your code. I submitted a modified patch, though I have a question...
-> Should I put you into Signed-of-by in this case, as you wrote most of
-> the new version of this patch?
+> This test exercises scenarios used to fail in btrfs and are fixed by the
+> following patches for the linux kernel:
+> 
+>  "Btrfs: send, fix failure to move directories with the same name around"
+>  "Btrfs: incremental send, fix invalid paths for rename operations"
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> ---
+>  tests/btrfs/124     | 261 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/124.out |   2 +
+>  tests/btrfs/group   |   1 +
+>  3 files changed, 264 insertions(+)
+>  create mode 100755 tests/btrfs/124
+>  create mode 100644 tests/btrfs/124.out
+> 
+> diff --git a/tests/btrfs/124 b/tests/btrfs/124
+> new file mode 100755
+> index 0000000..38635a3
+> --- /dev/null
+> +++ b/tests/btrfs/124
+> @@ -0,0 +1,261 @@
+> +#! /bin/bash
+> +# FS QA Test No. btrfs/124
+> +#
+> +# Test that an incremental send operation works after doing radical changes
+> +# in the directory hierarchy that involve switching the inode that directory
+> +# entries point to.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
+> +# Author: Filipe Manana <fdmanana@suse.com>
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+	cd /
+to make it consistent with other _cleanup :)
 
-No. You wrote the patch, so it needs your SOB. The usual thing to do
-here is add a line to the commit message saying something like:
+> +	rm -fr $send_files_dir
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
+> +_require_fssum
+> +
+> +send_files_dir=$TEST_DIR/btrfs-test-$seq
 
-	"Based on work/idea/prototype/code from ..."
+These three tests all take use of $TEST_DIR, but don't _require_test, I
+think we need it in these tests.
 
-that way it's clear where it originally came from. If the maintainer
-requires further verification of the source of the code, I can ack
-the patch you sent to the list.
+> +
+> +rm -f $seqres.full
+> +rm -fr $send_files_dir
+> +mkdir $send_files_dir
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_scratch_mount
+> +
+> +# case 1
+> +mkdir -p $SCRATCH_MNT/case_1/d/p1
+> +mkdir $SCRATCH_MNT/case_1/p1
+> +
+> +# case 2
+> +mkdir -p $SCRATCH_MNT/case_2/a
+> +mkdir $SCRATCH_MNT/case_2/d
+> +mkdir $SCRATCH_MNT/case_2/e
+> +mkdir $SCRATCH_MNT/case_2/f
+> +mkdir $SCRATCH_MNT/case_2/ance
+> +mkdir $SCRATCH_MNT/case_2/d/ance
+> +mkdir $SCRATCH_MNT/case_2/a/c
+> +mv $SCRATCH_MNT/case_2/e $SCRATCH_MNT/case_2/d/ance
+> +mv $SCRATCH_MNT/case_2/f $SCRATCH_MNT/case_2/d/ance
+> +mv $SCRATCH_MNT/case_2/ance $SCRATCH_MNT/case_2/d/ance
+> +
+> +# case 3
+> +mkdir -p $SCRATCH_MNT/case_3/d
+> +mkdir $SCRATCH_MNT/case_3/a
+> +mkdir $SCRATCH_MNT/case_3/waiting_dir
+> +mkdir -p $SCRATCH_MNT/case_3/pre/ance
+> +mkdir $SCRATCH_MNT/case_3/d/ance
+> +mkdir $SCRATCH_MNT/case_3/a/c
+> +mv $SCRATCH_MNT/case_3/waiting_dir $SCRATCH_MNT/case_3/d/ance
+> +
+> +# case 4
+> +mkdir -p $SCRATCH_MNT/case_4/tmp
+> +mkdir $SCRATCH_MNT/case_4/below_ance
+> +mkdir -p $SCRATCH_MNT/case_4/pre/wait_dir
+> +mkdir $SCRATCH_MNT/case_4/desc
+> +mkdir $SCRATCH_MNT/case_4/ance
+> +mv $SCRATCH_MNT/case_4/below_ance $SCRATCH_MNT/case_4/ance
+> +mkdir $SCRATCH_MNT/case_4/other_dir
+> +
+> +# Filesystem looks like:
+> +#
+> +# .                                                                  (ino 256)
+> +# |--- case_1/                                                       (ino 257)
+> +# |       |---- d/                                                   (ino 258)
+> +# |       |     |--- p1/                                             (ino 259)
+> +# |       |
+> +# |       |---- p1/                                                  (ino 260)
+> +# |
+> +# |--- case_2/                                                       (ino 261)
+> +# |       |---- a/                                                   (ino 262)
+> +# |       |     |---- c/                                             (ino 268)
+> +# |       |
+> +# |       |---- d/                                                   (ino 263)
+> +# |             |---- ance/                                          (ino 267)
+> +# |                     |---- e/                                     (ino 264)
+> +# |                     |---- f/                                     (ino 265)
+> +# |                     |---- ance/                                  (ino 266)
+> +# |
+> +# |--- case_3/                                                       (ino 269)
+> +# |       |---- a/                                                   (ino 271)
+> +# |       |     |---- c/                                             (ino 276)
+> +# |       |
+> +# |       |---- d/                                                   (ino 270)
+> +# |       |     |---- ance/                                          (ino 275)
+> +# |       |             |---- waiting_dir/                           (ino 272)
+> +# |       |
+> +# |       |---- pre/                                                 (ino 273)
+> +# |              |---- ance/                                         (ino 274)
+> +# |
+> +# |--- case_4/                                                       (ino 277)
+> +#         |---- tmp/                                                 (ino 278)
+> +#         |---- pre/                                                 (ino 280)
+> +#         |      |---- wait_dir/                                     (ino 281)
+> +#         |
+> +#         |---- desc/                                                (ino 282)
+> +#         |---- ance/                                                (ino 283)
+> +#         |       |---- below_ance/                                  (ino 279)
+> +#         |
+> +#         |---- other_dir/                                           (ino 284)
+> +#
+> +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap1
 
-Cheers,
+Please avoid using _run_btrfs_util_prog and run_check, as Dave explained
+before (and I summarized them in this email
+http://www.spinics.net/lists/fstests/msg03311.html :-)
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+So just dump the output and do necessary filters to match golden image.
+I think this also makes it easier to know what's failing, the diff
+output shows it directly, there's no need to check $seqres.full again.
+
+And this test failed due to memory allocation, is this expected?
+
+At subvol /mnt/testarea/scratch/mysnap2
+ERROR: send ioctl failed with -12: Cannot allocate memory
+failed: '/usr/bin/btrfs send -p /mnt/testarea/scratch/mysnap1 /mnt/testarea/scratch/mysnap2 -f /mnt/testarea/test/btrfs-test-127/2.snap'
+
+I'm using btrfs-progs v4.6
+
+Otherwise these three tests look good to me.
+
+Thanks,
+Eryu
