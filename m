@@ -1,226 +1,412 @@
-Received: from mx1.redhat.com ([209.132.183.28]:42633 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49184 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751426AbcGNMnq (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 14 Jul 2016 08:43:46 -0400
+	id S1751139AbcGNMnv (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 14 Jul 2016 08:43:51 -0400
 Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id B0B74883C5
-	for <fstests@vger.kernel.org>; Thu, 14 Jul 2016 12:43:40 +0000 (UTC)
+	by mx1.redhat.com (Postfix) with ESMTPS id BACB66408A
+	for <fstests@vger.kernel.org>; Thu, 14 Jul 2016 12:43:45 +0000 (UTC)
 From: Jan Tulak <jtulak@redhat.com>
-Subject: [PATCH 1/6] xfstests: Fix installation for extended names
-Date: Thu, 14 Jul 2016 14:43:29 +0200
-Message-Id: <1468500214-6237-2-git-send-email-jtulak@redhat.com>
+Subject: [PATCH 6/6] xfstests: Add mkfs input validation tests
+Date: Thu, 14 Jul 2016 14:43:34 +0200
+Message-Id: <1468500214-6237-7-git-send-email-jtulak@redhat.com>
 In-Reply-To: <1468500214-6237-1-git-send-email-jtulak@redhat.com>
 References: <1468500214-6237-1-git-send-email-jtulak@redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Jan Tulak <jtulak@redhat.com>
+Cc: Jan Tulak <jtulak@redhat.com>, Dave Chinner <dchinner@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-xfstests supports extended test names like 314-foo-bar, but installation of
-these tests was skipped (not matching a regexp). So this patch fixes the
-makefiles in tests/*/
+mkfs.xfs does not do a very good job of input validation. This test
+is designed to exercise the input validation and test good/bad
+combinations of options being set. It will not pass on an old
+mkfs.xfs binary - it is designed to be the test case for an input
+validation cleanup (merged in spring/summer 2016).
 
-The include/buildrules change was written by Dave Chinner.
+Signed-off-by: Dave Chinner <dchinner@redhat.com>
+Signed-off-by: Jan Tulak <jtulak@redhat.com>
+
+---
+CHANGES:
+Use common/rc feature check for mkfs version testing.
+
+Cheers,
+Jan
 
 Signed-off-by: Jan Tulak <jtulak@redhat.com>
 ---
- include/buildrules     | 31 +++++++++++++++++++++++++++++++
- tests/btrfs/Makefile   |  4 ++--
- tests/cifs/Makefile    |  4 ++--
- tests/ext4/Makefile    |  4 ++--
- tests/f2fs/Makefile    |  4 ++--
- tests/generic/Makefile |  4 ++--
- tests/overlay/Makefile |  4 ++--
- tests/shared/Makefile  |  4 ++--
- tests/udf/Makefile     |  4 ++--
- tests/xfs/Makefile     |  4 ++--
- 10 files changed, 49 insertions(+), 18 deletions(-)
+ tests/xfs/400-input-validation     | 338 +++++++++++++++++++++++++++++++++++++
+ tests/xfs/400-input-validation.out |   2 +
+ tests/xfs/group                    |   1 +
+ 3 files changed, 341 insertions(+)
+ create mode 100755 tests/xfs/400-input-validation
+ create mode 100644 tests/xfs/400-input-validation.out
 
-diff --git a/include/buildrules b/include/buildrules
-index c8a7c47..1269c8c 100644
---- a/include/buildrules
-+++ b/include/buildrules
-@@ -100,3 +100,34 @@ MAKEDEP := $(MAKEDEPEND) $(CFLAGS)
- 	    cp /dev/null .dep; \
- 	fi
- 
-+# Gather files for installing into two lists:
-+# TESTS with executable scripts and OUTFILES with all the test outputs.
-+# Makefile has a very small matching, so we have to go this long way.
-+
-+# Start with all test related files:
-+ALLFILES = $(wildcard [0-9]??*)
-+
-+# Now build a list of known output files.  Unfortunately, the
-+# multiple output test files are poorly handled as makefiles don't
-+# handle wildcarded multi-suffix matching. Hence we separate the
-+# processing of these right now.
-+EXTENDED_OUTFILES = $(wildcard [0-9]??*.out.*)
-+BASIC_OUTFILES = $(wildcard [0-9]??*.out)
-+OUTFILES = $(EXTENDED_OUTFILES) $(BASIC_OUTFILES)
-+
-+# Strip suffix to get matching tests. We want to strip from the
-+# first "." to the end, but makefiles don't have a built in
-+# operative for that. So:
+diff --git a/tests/xfs/400-input-validation b/tests/xfs/400-input-validation
+new file mode 100755
+index 0000000..83a4ff9
+--- /dev/null
++++ b/tests/xfs/400-input-validation
+@@ -0,0 +1,338 @@
++#! /bin/bash
++# FS QA Test No. xfs/400
 +#
-+# Hack: strip the multiple segments after .out with repeated basename calls.
-+EXTFILTER1 = $(basename $(EXTENDED_OUTFILES))
-+EXTFILTER2 = $(basename $(EXTFILTER1))
-+EXTFILTER3 = $(basename $(EXTFILTER2))
-+EXTFILTER4 = $(basename $(EXTFILTER3))
++# mkfs.xfs input validation test. Designed to break mkfs.xfs if it doesn't
++# filter garbage input or invalid option combinations correctly.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
 +
-+# final filter list
-+FILTER = $(basename $(EXTFILTER4) $(BASIC_OUTFILES))
 +
-+# finally, select the test files by filtering against against the
-+# stripped output files and sort them to remove duplicates.
-+TESTS = $(sort $(filter $(ALLFILES), $(FILTER)))
-diff --git a/tests/btrfs/Makefile b/tests/btrfs/Makefile
-index e1a5be1..2d93642 100644
---- a/tests/btrfs/Makefile
-+++ b/tests/btrfs/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/cifs/Makefile b/tests/cifs/Makefile
-index 9176e5c..0c5cf3b 100644
---- a/tests/cifs/Makefile
-+++ b/tests/cifs/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/ext4/Makefile b/tests/ext4/Makefile
-index 7a3c8e1..beb1541 100644
---- a/tests/ext4/Makefile
-+++ b/tests/ext4/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/f2fs/Makefile b/tests/f2fs/Makefile
-index 4d00e9e..d13bca3 100644
---- a/tests/f2fs/Makefile
-+++ b/tests/f2fs/Makefile
-@@ -13,9 +13,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/generic/Makefile b/tests/generic/Makefile
-index 9529fb8..3878d05 100644
---- a/tests/generic/Makefile
-+++ b/tests/generic/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/overlay/Makefile b/tests/overlay/Makefile
-index 63c9878..b07f892 100644
---- a/tests/overlay/Makefile
-+++ b/tests/overlay/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/shared/Makefile b/tests/shared/Makefile
-index cbd87f9..8a83278 100644
---- a/tests/shared/Makefile
-+++ b/tests/shared/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/udf/Makefile b/tests/udf/Makefile
-index 1d96658..c9c9f1b 100644
---- a/tests/udf/Makefile
-+++ b/tests/udf/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/xfs/Makefile b/tests/xfs/Makefile
-index db94be0..d64800e 100644
---- a/tests/xfs/Makefile
-+++ b/tests/xfs/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs xfs
++_supported_os Linux
++_require_scratch
++_require_xfs_mkfs_validation
++
++
++
++rm -f $seqres.full
++echo silence is golden
++
++# clear out any options to mkfs first. We want to test realtime and external log
++# devices if we can, but we also want to control them ourselves.
++logdev=$SCRATCH_LOGDEV
++rtdev=$SCRATCH_RTDEV
++
++MKFS_OPTIONS=
++SCRATCH_LOGDEV=
++SCRATCH_RTDEV=
++
++# limit the image size of the filesystem being created to something small
++fssize=$((4 * 1024 * 1024 * 1024))
++logsize=$((4 * 1024 * 1024 * 100))
++fsimg=$TEST_DIR/$seq.img
++
++do_mkfs_pass()
++{
++	echo >> $seqres.full
++	echo "pass expected $*" >> $seqres.full
++	$MKFS_XFS_PROG -f -N $* >> $seqres.full 2>&1
++	[ $? -ne 0 ] && echo "fail $*"
++}
++
++do_mkfs_fail()
++{
++	echo >> $seqres.full
++	echo "fail expected $*" >> $seqres.full
++	$MKFS_XFS_PROG -f -N $* >> $seqres.full 2>&1
++	[ $? -eq 0 ] && echo "pass $*"
++}
++
++reset_fsimg()
++{
++	rm -f $fsimg
++	$XFS_IO_PROG -f -c "truncate $fssize" $fsimg
++}
++
++reset_fsimg
++
++do_mkfs_pass $SCRATCH_DEV
++
++# basic "should fail" options
++
++# specifying sector sizes in sectors or blocks or garbage
++do_mkfs_fail -s size=2s $SCRATCH_DEV
++do_mkfs_fail -d sectsize=2s $SCRATCH_DEV
++do_mkfs_fail -l sectsize=2s $SCRATCH_DEV
++do_mkfs_fail -s size=2b $SCRATCH_DEV
++do_mkfs_fail -d sectsize=2b $SCRATCH_DEV
++do_mkfs_fail -l sectsize=2b $SCRATCH_DEV
++
++do_mkfs_fail -s size=grot $SCRATCH_DEV
++do_mkfs_fail -s size=2yerk $SCRATCH_DEV
++do_mkfs_fail -d sectsize=blah $SCRATCH_DEV
++do_mkfs_fail -d sectsize=2foo $SCRATCH_DEV
++do_mkfs_fail -l sectsize=nggh $SCRATCH_DEV
++do_mkfs_fail -l sectsize=2nggh $SCRATCH_DEV
++
++# conflicting sector/block sizes
++do_mkfs_fail -s size=512 -d sectsize=1024 $SCRATCH_DEV
++do_mkfs_fail -s size=512 -l sectsize=1024 $SCRATCH_DEV
++do_mkfs_fail -d sectsize=2048 -l sectsize=1024 $SCRATCH_DEV
++
++do_mkfs_fail -b size=512 -s size=1024 $SCRATCH_DEV
++do_mkfs_fail -b size=512 -d sectsize=1024 $SCRATCH_DEV
++do_mkfs_fail -b size=512 -l sectsize=1024 $SCRATCH_DEV
++
++# specifying block sizes in sectors without specifying sector size
++# or in blocks or garbage
++do_mkfs_fail -b size=2s $SCRATCH_DEV
++do_mkfs_fail -b size=2b $SCRATCH_DEV
++do_mkfs_fail -b size=nfi $SCRATCH_DEV
++do_mkfs_fail -b size=4096nfi $SCRATCH_DEV
++do_mkfs_fail -n size=2s $SCRATCH_DEV
++do_mkfs_fail -n size=2b $SCRATCH_DEV
++do_mkfs_fail -n size=nfi $SCRATCH_DEV
++do_mkfs_fail -n size=4096nfi $SCRATCH_DEV
++
++# bad label length
++do_mkfs_fail -L thisiswaytoolong $SCRATCH_DEV
++
++# basic "should pass" data section tests
++do_mkfs_pass $SCRATCH_DEV
++do_mkfs_pass -d name=$SCRATCH_DEV
++do_mkfs_pass -d size=$fssize $SCRATCH_DEV
++do_mkfs_pass -d agcount=32 $SCRATCH_DEV
++do_mkfs_pass -d agsize=32m $SCRATCH_DEV
++do_mkfs_pass -d agsize=32M $SCRATCH_DEV
++do_mkfs_pass -d agsize=1g $SCRATCH_DEV
++do_mkfs_pass -d agsize=$((32 * 1024 * 1024)) $SCRATCH_DEV
++do_mkfs_pass -b size=4096 -d agsize=8192b $SCRATCH_DEV
++do_mkfs_pass -d sectsize=512,agsize=65536s $SCRATCH_DEV
++do_mkfs_pass -s size=512 -d agsize=65536s $SCRATCH_DEV
++do_mkfs_pass -d noalign $SCRATCH_DEV
++do_mkfs_pass -d sunit=0,swidth=0 $SCRATCH_DEV
++do_mkfs_pass -d sunit=8,swidth=8 $SCRATCH_DEV
++do_mkfs_pass -d sunit=8,swidth=64 $SCRATCH_DEV
++do_mkfs_pass -d su=0,sw=0 $SCRATCH_DEV
++do_mkfs_pass -d su=4096,sw=1 $SCRATCH_DEV
++do_mkfs_pass -d su=4k,sw=1 $SCRATCH_DEV
++do_mkfs_pass -d su=4K,sw=8 $SCRATCH_DEV
++do_mkfs_pass -b size=4096 -d su=1b,sw=8 $SCRATCH_DEV
++do_mkfs_pass -d sectsize=512,su=8s,sw=8 $SCRATCH_DEV
++do_mkfs_pass -s size=512 -d su=8s,sw=8 $SCRATCH_DEV
++
++# invalid data section tests
++do_mkfs_fail -d size=${fssize}b $SCRATCH_DEV
++do_mkfs_fail -d size=${fssize}s $SCRATCH_DEV
++do_mkfs_fail -d size=${fssize}yerk $SCRATCH_DEV
++do_mkfs_fail -d agsize=8192b $SCRATCH_DEV
++do_mkfs_fail -d agsize=65536s $SCRATCH_DEV
++do_mkfs_fail -d agsize=32Mbsdfsdo $SCRATCH_DEV
++do_mkfs_fail -d agsize=1GB $SCRATCH_DEV
++do_mkfs_fail -d agcount=1k $SCRATCH_DEV
++do_mkfs_fail -d agcount=6b $SCRATCH_DEV
++do_mkfs_fail -d agcount=32,agsize=32m $SCRATCH_DEV
++do_mkfs_fail -d sunit=0,swidth=64 $SCRATCH_DEV
++do_mkfs_fail -d sunit=64,swidth=0 $SCRATCH_DEV
++do_mkfs_fail -d sunit=64,swidth=64,noalign $SCRATCH_DEV
++do_mkfs_fail -d sunit=64k,swidth=64 $SCRATCH_DEV
++do_mkfs_fail -d sunit=64,swidth=64m $SCRATCH_DEV
++do_mkfs_fail -d su=0,sw=64 $SCRATCH_DEV
++do_mkfs_fail -d su=4096,sw=0 $SCRATCH_DEV
++do_mkfs_fail -d su=4097,sw=1 $SCRATCH_DEV
++do_mkfs_fail -d su=4096,sw=64,noalign $SCRATCH_DEV
++do_mkfs_fail -d su=4096,sw=64s $SCRATCH_DEV
++do_mkfs_fail -d su=4096s,sw=64 $SCRATCH_DEV
++do_mkfs_fail -d su=4096b,sw=64 $SCRATCH_DEV
++do_mkfs_fail -d su=4096garabge,sw=64 $SCRATCH_DEV
++do_mkfs_fail -d su=4096,sw=64,sunit=64,swidth=64 $SCRATCH_DEV
++do_mkfs_fail -d sectsize=10,agsize=65536s $SCRATCH_DEV
++do_mkfs_fail -d sectsize=512s,agsize=65536s $SCRATCH_DEV
++
++reset_fsimg
++
++# file section, should pass
++do_mkfs_pass $fsimg
++do_mkfs_pass -d file=0 $SCRATCH_DEV
++do_mkfs_pass -d size=$fssize,file=1,name=$fsimg
++do_mkfs_pass -d size=$fssize,file $fsimg
++do_mkfs_pass -d size=$fssize $fsimg
++do_mkfs_pass -d size=$fssize,name=$fsimg
++do_mkfs_pass -d size=$((fssize/2)) $fsimg
++# again this one, to check that we didn't truncated the file
++do_mkfs_pass -d size=$fssize $fsimg
++rm -f $fsimg
++do_mkfs_pass -d file,size=$fssize $fsimg
++
++reset_fsimg
++
++# file section, should fail
++do_mkfs_fail -d file=1 $SCRATCH_DEV
++do_mkfs_fail -d file $fsimg # no size given
++rm -f $fsimg
++do_mkfs_fail $fsimg
++do_mkfs_fail -d size=$fssize $fsimg
++
++reset_fsimg
++
++# log section, should pass
++do_mkfs_pass -l size=$logsize -d size=$fssize $SCRATCH_DEV
++do_mkfs_pass -l agnum=2 $SCRATCH_DEV
++do_mkfs_pass -l size=4096b $SCRATCH_DEV
++do_mkfs_pass -l sectsize=512 $SCRATCH_DEV
++do_mkfs_pass -l sunit=64 $SCRATCH_DEV
++do_mkfs_pass -l sunit=64 -d sunit=8,swidth=8 $SCRATCH_DEV
++do_mkfs_pass -l sunit=8 $SCRATCH_DEV
++do_mkfs_pass -l su=$((4096*10)) $SCRATCH_DEV
++do_mkfs_pass -b size=4096 -l su=10b $SCRATCH_DEV
++do_mkfs_pass -l sectsize=512,su=$((4096*10)) $SCRATCH_DEV
++do_mkfs_pass -l internal $SCRATCH_DEV
++$XFS_IO_PROG -f -c "truncate $logsize" $fsimg
++do_mkfs_pass -l logdev=$fsimg $SCRATCH_DEV
++do_mkfs_pass -l name=$fsimg $SCRATCH_DEV
++do_mkfs_pass -l lazy-count=0 -m crc=0 $SCRATCH_DEV
++do_mkfs_pass -l lazy-count=1 -m crc=0 $SCRATCH_DEV
++do_mkfs_pass -l version=1 -m crc=0 $SCRATCH_DEV
++do_mkfs_pass -l version=2 -m crc=0 $SCRATCH_DEV
++do_mkfs_pass -l version=2 $SCRATCH_DEV
++
++# log section, should fail
++do_mkfs_fail -l size=${fssize}b $SCRATCH_DEV
++do_mkfs_fail -l size=${fssize}s $SCRATCH_DEV
++do_mkfs_fail -l size=${fssize}yerk $SCRATCH_DEV
++do_mkfs_fail -l agnum=1k $SCRATCH_DEV
++do_mkfs_fail -l agnum=6b $SCRATCH_DEV
++do_mkfs_fail -l agnum=32 $SCRATCH_DEV
++do_mkfs_fail -l sunit=0  $SCRATCH_DEV
++do_mkfs_fail -l sunit=63 $SCRATCH_DEV
++do_mkfs_fail -l su=1 $SCRATCH_DEV
++do_mkfs_fail -l su=10b $SCRATCH_DEV
++do_mkfs_fail -l su=10s $SCRATCH_DEV
++do_mkfs_fail -l su=$((4096*10+1)) $SCRATCH_DEV
++do_mkfs_fail -l sectsize=10,agsize=65536s $SCRATCH_DEV
++do_mkfs_fail -l sectsize=512s,agsize=65536s $SCRATCH_DEV
++do_mkfs_fail -l internal=0 $SCRATCH_DEV
++reset_fsimg
++do_mkfs_fail -l internal=1,logdev=$fsimg $SCRATCH_DEV
++do_mkfs_fail -l lazy-count=1garbage $SCRATCH_DEV
++do_mkfs_fail -l lazy-count=2 $SCRATCH_DEV
++do_mkfs_fail -l lazy-count=0 -m crc=1 $SCRATCH_DEV
++do_mkfs_fail -l version=1 -m crc=1 $SCRATCH_DEV
++do_mkfs_fail -l version=0  $SCRATCH_DEV
++
++
++
++# naming section, should pass
++do_mkfs_pass -n size=65536 $SCRATCH_DEV
++do_mkfs_pass -n log=15 $SCRATCH_DEV
++do_mkfs_pass -n version=2 $SCRATCH_DEV
++do_mkfs_pass -n version=ci $SCRATCH_DEV
++do_mkfs_pass -n ftype=0 -m crc=0 $SCRATCH_DEV
++do_mkfs_pass -n ftype=1 $SCRATCH_DEV
++
++# naming section, should fail
++do_mkfs_fail -n version=1 $SCRATCH_DEV
++do_mkfs_fail -n version=cid $SCRATCH_DEV
++do_mkfs_fail -n ftype=4 $SCRATCH_DEV
++do_mkfs_fail -n ftype=0 $SCRATCH_DEV
++
++reset_fsimg
++
++# metadata section, should pass
++do_mkfs_pass -m crc=1,finobt=1 $SCRATCH_DEV
++do_mkfs_pass -m crc=1,finobt=0 $SCRATCH_DEV
++do_mkfs_pass -m crc=0,finobt=0 $SCRATCH_DEV
++do_mkfs_pass -m crc=1 -n ftype=1 $SCRATCH_DEV
++do_mkfs_pass -m crc=0 -n ftype=1 $SCRATCH_DEV
++do_mkfs_pass -m crc=0 -n ftype=0 $SCRATCH_DEV
++
++# metadata section, should fail
++do_mkfs_fail -m crc=0,finobt=1 $SCRATCH_DEV
++do_mkfs_fail -m crc=1 -n ftype=0 $SCRATCH_DEV
++
++
++# realtime section, should pass
++do_mkfs_pass -r rtdev=$fsimg $SCRATCH_DEV
++do_mkfs_pass -r extsize=4k $SCRATCH_DEV
++do_mkfs_pass -r extsize=1G $SCRATCH_DEV
++do_mkfs_pass -r size=65536,rtdev=$fsimg $SCRATCH_DEV
++do_mkfs_pass -r noalign $SCRATCH_DEV
++
++
++# realtime section, should fail
++do_mkfs_fail -r rtdev=$SCRATCH_DEV
++do_mkfs_fail -r extsize=256 $SCRATCH_DEV
++do_mkfs_fail -r extsize=2G $SCRATCH_DEV
++do_mkfs_fail -r size=65536 $SCRATCH_DEV
++
++
++
++# inode section, should pass
++do_mkfs_pass -i size=256 -m crc=0 $SCRATCH_DEV
++do_mkfs_pass -i size=512 $SCRATCH_DEV
++do_mkfs_pass -i size=2048 $SCRATCH_DEV
++do_mkfs_pass -i log=10 $SCRATCH_DEV
++do_mkfs_pass -i perblock=2 $SCRATCH_DEV
++do_mkfs_pass -i maxpct=10 $SCRATCH_DEV
++do_mkfs_pass -i maxpct=100 $SCRATCH_DEV
++do_mkfs_pass -i maxpct=0 $SCRATCH_DEV
++do_mkfs_pass -i align=0 -m crc=0 $SCRATCH_DEV
++do_mkfs_pass -i align=1 -m crc=1 $SCRATCH_DEV
++do_mkfs_pass -i attr=1 -m crc=0 $SCRATCH_DEV
++do_mkfs_pass -i attr=2 $SCRATCH_DEV
++do_mkfs_pass -i projid32bit $SCRATCH_DEV
++do_mkfs_pass -i sparse=0 $SCRATCH_DEV
++do_mkfs_pass -i sparse -m crc $SCRATCH_DEV
++
++
++# inode section, should fail
++do_mkfs_fail -i size=256 -m crc $SCRATCH_DEV
++do_mkfs_fail -i size=128 $SCRATCH_DEV
++do_mkfs_fail -i size=513 $SCRATCH_DEV
++do_mkfs_fail -i size=4096 $SCRATCH_DEV
++do_mkfs_fail -i maxpct=110 $SCRATCH_DEV
++do_mkfs_fail -i align=2 $SCRATCH_DEV
++do_mkfs_fail -i sparse -m crc=0 $SCRATCH_DEV
++do_mkfs_fail -i align=0 -m crc=1 $SCRATCH_DEV
++do_mkfs_fail -i attr=1 -m crc=1 $SCRATCH_DEV
++
++status=0
++exit
+diff --git a/tests/xfs/400-input-validation.out b/tests/xfs/400-input-validation.out
+new file mode 100644
+index 0000000..7080553
+--- /dev/null
++++ b/tests/xfs/400-input-validation.out
+@@ -0,0 +1,2 @@
++QA output created by 400-input-validation
++silence is golden
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 9f8ca0f..dd2aa5b 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -308,3 +308,4 @@
+ 325 auto quick clone
+ 326 auto quick clone
+ 327 auto quick clone
++400-input-validation auto quick mkfs
 -- 
 2.5.5
 
