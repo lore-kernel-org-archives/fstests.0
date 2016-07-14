@@ -1,71 +1,86 @@
-Received: from mx1.redhat.com ([209.132.183.28]:49540 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751251AbcGNMno (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 14 Jul 2016 08:43:44 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id E4184315D25
-	for <fstests@vger.kernel.org>; Thu, 14 Jul 2016 12:43:43 +0000 (UTC)
+Received: from mail-io0-f181.google.com ([209.85.223.181]:34726 "EHLO
+	mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750960AbcGNMsE (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 14 Jul 2016 08:48:04 -0400
+Received: by mail-io0-f181.google.com with SMTP id q83so74521602iod.1
+        for <fstests@vger.kernel.org>; Thu, 14 Jul 2016 05:48:04 -0700 (PDT)
+MIME-Version: 1.0
+In-Reply-To: <20160714121838.GD2432@eguan.usersys.redhat.com>
+References: <1468229169-24045-1-git-send-email-jtulak@redhat.com>
+ <1468229169-24045-3-git-send-email-jtulak@redhat.com> <20160713123454.GW2432@eguan.usersys.redhat.com>
+ <CACj3i71hZQ6U=s-EwP-jRs3TJwwCQ7KKB6=Bv7gK-ug8V_Tb9Q@mail.gmail.com> <20160714121838.GD2432@eguan.usersys.redhat.com>
 From: Jan Tulak <jtulak@redhat.com>
-Subject: [PATCH 4/6] xfstests: add _require_xfs_mkfs_validation to common/rc
-Date: Thu, 14 Jul 2016 14:43:32 +0200
-Message-Id: <1468500214-6237-5-git-send-email-jtulak@redhat.com>
-In-Reply-To: <1468500214-6237-1-git-send-email-jtulak@redhat.com>
-References: <1468500214-6237-1-git-send-email-jtulak@redhat.com>
+Date: Thu, 14 Jul 2016 14:47:44 +0200
+Message-ID: <CACj3i70YwbAgwQSW9F_i-+X9xF+VH0AZzGMjNW9t8BA7D_tPHw@mail.gmail.com>
+Subject: Re: [PATCH 2/4] fstests: filename handling for extended names in
+ ./check was on a wrong place
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Jan Tulak <jtulak@redhat.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, "Chinner, Dave" <david@fromorbit.com>
 List-ID: <fstests@vger.kernel.org>
 
-Add a simple way to skip a test if it is (or is not) run on mkfs correctly
-validating inputs.
+On Thu, Jul 14, 2016 at 2:18 PM, Eryu Guan <eguan@redhat.com> wrote:
+> On Thu, Jul 14, 2016 at 11:11:17AM +0200, Jan Tulak wrote:
+>> On Wed, Jul 13, 2016 at 2:34 PM, Eryu Guan <eguan@redhat.com> wrote:
+>> > On Mon, Jul 11, 2016 at 11:26:07AM +0200, Jan Tulak wrote:
+>> >> The code handling "./check foo/123", when the real test is "foo/123-bar-baz"
+>> >> was moved at the earliest position, so everything working with the test name or
+>> >> path will know the full name. Thus, no "123" and "123-bar-baz" mix is possible.
+>> >>
+>> >> Signed-off-by: Jan Tulak <jtulak@redhat.com>
+>> >
+>> > Can you please include more details in the description? It seems not so
+>> > clear to me what the problem is from the description.
+>> >
+>> > If I understand it correctly (after playing around), prior to the patch:
+>> > [root@dhcp-66-86-11 xfstests]# ./check xfs/999
+>> > ...
+>> > xfs/999 0s ... 0s
+>> > Ran: xfs/999-test-case
+>> > Passed all 1 tests
+>> >
+>> > After applying the patch:
+>> > [root@dhcp-66-86-11 xfstests]# ./check xfs/999
+>> > ...
+>> > xfs/999-test-case 0s ... 0s
+>> > Ran: xfs/999-test-case
+>> > Passed all 1 tests
+>> >
+>> > So the test name is always correct, right?
+>> >
+>>
+>> Yes. Most importantly, this fixes issues around other name-based
+>> operations, see the new message:
+>> ---
+>> The code handling "./check foo/123", when the real test is "foo/123-bar-baz"
+>> was moved to the earliest position, so everything working with the test name or
+>> path will know the full name. Thus, no "123" and "123-bar-baz" mix is possible.
+>>
+>> An example of this issue is $testname.notrun file. When _notrun "foo" was run
+>> during ./check foo/$name command, it created $name.notrun. But few lines later,
+>> it wanted $fullname.notrun. So if you did ./check foo/999, but the file was
+>> 999-bar-baz, then you got comparing outputs (and most likely a fail)
+>> instead of a skip.
+>>
+>> Another example of this mix is in xfstests output:
+>> ./check xfs/999
+>> [...]
+>> xfs/999 0s ... 0s
+>> Ran: xfs/999-test-case
+>> ---
+>>
+>> Do you like it now? And do want it as a new version of the patch? :-)
+>
+> This does read better to me, thanks! And seems you're going to send a
+> new patchset, then please send a new version with updated description.
+>
 
-Signed-off-by: Jan Tulak <jtulak@redhat.com>
----
- common/rc | 29 +++++++++++++++++++++++++++++
- 1 file changed, 29 insertions(+)
+New version submitted with updated description.
 
-diff --git a/common/rc b/common/rc
-index 0c68e4f..72f9901 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3843,6 +3843,35 @@ _get_fs_sysfs_attr()
- 	cat /sys/fs/${FSTYP}/${dname}/${attr}
- }
- 
-+# Skip if we are running an older binary without the stricter input checks.
-+# Make multiple checks to be sure that there is no regression on the one
-+# selected feature check, which would skew the result.
-+_require_xfs_mkfs_validation()
-+{
-+	_require_scratch
-+	$MKFS_XFS_PROG -f -N -s size=2s $SCRATCH_DEV >/dev/null 2>&1
-+	sum=$?
-+	$MKFS_XFS_PROG -f -N -l version=2,su=$((256 * 1024 + 4096)) $SCRATCH_DEV >/dev/null 2>&1
-+	sum=`expr $sum + $?`
-+
-+	if [ "$sum" -eq 0 ]; then
-+		_notrun "Requires newer mkfs with stricter input checks."
-+	fi
-+}
-+
-+# The oposite of _require_xfs_mkfs_validation.
-+_require_xfs_mkfs_without_validation()
-+{
-+	_require_scratch
-+	$MKFS_XFS_PROG -f -N -s size=2s $SCRATCH_DEV >/dev/null 2>&1
-+	sum=$?
-+	$MKFS_XFS_PROG -f -N -l version=2,su=$((256 * 1024 + 4096)) $SCRATCH_DEV >/dev/null 2>&1
-+	sum=`expr $sum + $?`
-+
-+	if [ "$sum" -eq 2 ]; then
-+		_notrun "Requires older mkfs without stricter input checks."
-+	fi
-+}
- init_rc
- 
- ################################################################################
+Thanks,
+Jan
+
 -- 
-2.5.5
-
+Jan Tulak
+jtulak@redhat.com / jan@tulak.me
