@@ -1,88 +1,53 @@
-Received: from mail-io0-f170.google.com ([209.85.223.170]:36533 "EHLO
-	mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750980AbcGNKZq (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 14 Jul 2016 06:25:46 -0400
-Received: by mail-io0-f170.google.com with SMTP id b62so71319094iod.3
-        for <fstests@vger.kernel.org>; Thu, 14 Jul 2016 03:25:46 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:60885 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751145AbcGNMNW (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 14 Jul 2016 08:13:22 -0400
+Date: Thu, 14 Jul 2016 20:13:19 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 4/4] xfstests: filename handling - fix early wildcard
+ expansion
+Message-ID: <20160714121319.GC2432@eguan.usersys.redhat.com>
+References: <1468229169-24045-1-git-send-email-jtulak@redhat.com>
+ <1468229169-24045-5-git-send-email-jtulak@redhat.com>
+ <20160713122859.GV2432@eguan.usersys.redhat.com>
+ <CACj3i70SBt=4pF3EFdTFnhYE6JPtS78dpBNqk0PntTpnX8z1aQ@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20160713103805.GS2432@eguan.usersys.redhat.com>
-References: <1464858659-610-1-git-send-email-jtulak@redhat.com>
- <1467389674-5341-1-git-send-email-jtulak@redhat.com> <20160713103805.GS2432@eguan.usersys.redhat.com>
-From: Jan Tulak <jtulak@redhat.com>
-Date: Thu, 14 Jul 2016 12:25:25 +0200
-Message-ID: <CACj3i73kS31MReyxmjjb=jrND6__WAGxZz7LaOOex35F1sgwRw@mail.gmail.com>
-Subject: Re: [PATCH v3] xfstests: update xfs/096 for new behaviour
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CACj3i70SBt=4pF3EFdTFnhYE6JPtS78dpBNqk0PntTpnX8z1aQ@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
+To: Jan Tulak <jtulak@redhat.com>
 Cc: fstests@vger.kernel.org, "Chinner, Dave" <david@fromorbit.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jul 13, 2016 at 12:38 PM, Eryu Guan <eguan@redhat.com> wrote:
-> On Fri, Jul 01, 2016 at 06:14:34PM +0200, Jan Tulak wrote:
->> Because we recently changed how mkfs behaves when it gets incorrect/invalid
->> values, add a feature check to run this test only on older binaries, which
->> accepts invalid sunit values.
->>
->> Signed-off-by: Jan Tulak <jtulak@redhat.com>
->> ---
->> UPDATE:
->> Change it to _notrun on newer binaries. Commit message updated respectivvely.
->> ---
->>  tests/xfs/096 | 22 ++++++++++++++++++----
->>  1 file changed, 18 insertions(+), 4 deletions(-)
->>
->> diff --git a/tests/xfs/096 b/tests/xfs/096
->> index f949e83..803b49d 100755
->> --- a/tests/xfs/096
->> +++ b/tests/xfs/096
->> @@ -39,6 +39,20 @@ _cleanup()
->>      rm -f $tmp.*
->>  }
->>
->> +# maximum log record size
->> +max_lr_size=`expr 256 \* 1024`
->> +big_su=`expr $max_lr_size + 4096`
->> +
->> +requires_mkfs_accept_invalid_log_sunit()
->> +{
->> +     accepts=`mkfs.xfs -N -l version=2,su=$big_su 2>&1 | \
->> +             grep -ci "No device name"`
->> +     if [ "$accepts" -eq 0 ];then
->> +             _notrun "Runs only on older xfsprogs accepting invalid log sunit"
->> +     fi
->
-> You're counting the number of "No device name" string, which doesn't
-> seem reliable to me. I'd prefer to rely on whether mkfs.xfs really
-> accepts invalid log sunit, so how about:
->
-> require_mkfs_accept_invalid_log_sunit()
-> {
->         local fsimg=$tmp.img
->         touch $fsimg
->
->         $MKFS_XFS_PROG -N -l version=2,su=$big_su -d name=$fsimg,size=1g >/dev/null 2>&1
->         if [ $? -ne 0 ]; then
->                 _notrun "This test requires v4.5 or older xfsprogs"
->         fi
-> }
+On Thu, Jul 14, 2016 at 10:56:51AM +0200, Jan Tulak wrote:
+> On Wed, Jul 13, 2016 at 2:28 PM, Eryu Guan <eguan@redhat.com> wrote:
+> > On Mon, Jul 11, 2016 at 11:26:09AM +0200, Jan Tulak wrote:
+> >> Add quotation marks around the wildcarded name.
+> >
+> > This makes no difference for me, the original code is working well. Did
+> > I miss anything?
+> >
+> > [root@dhcp-66-86-11 xfstests]# bname=999
+> > [root@dhcp-66-86-11 xfstests]# find tests/xfs -name "$bname*"
+> > tests/xfs/999-test-case
+> > tests/xfs/999-test-case.out
+> > [root@dhcp-66-86-11 xfstests]# find tests/xfs -name $bname*
+> > tests/xfs/999-test-case
+> > tests/xfs/999-test-case.out
+> >
+> 
+> Hmmm. The move of the code alone was not enough to fix an issue I had,
+> but now I can't remember when it happened, no matter what. :( I'm
+> beginning to think I might forget to save the file after moving the
+> code. In which case...
+> 
+> So either drop it and if it appears again, then I will resubmit, or
+> keep it there "just to be sure". I'm OK with both these options, so
+> whatever is more in line with your idea of a clean repo. :-)
 
-This looks better, but I'm ditching this detection entirely. I will go
-for the common/rc solution and use the code from xfs/400, only
-inverted. That seems to me like a better way in long term, and it
-makes the new common/rc _requires a bit more useful.
-
->
-> (These mkfs argument checks went to v4.7-rc1, and v4.5 is the latest
-> "older" xfsprogs, right?)
-
-Yes, according to VERSION file and tags in the repo.
-
+I'd prefer to drop it for now, and fix it when we know what the exact
+issue is :)
 
 Thanks,
-Jan
-
-
--- 
-Jan Tulak
-jtulak@redhat.com / jan@tulak.me
+Eryu
