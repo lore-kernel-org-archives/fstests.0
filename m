@@ -1,79 +1,62 @@
-Received: from mx1.redhat.com ([209.132.183.28]:41133 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:34844 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751298AbcGNMSk (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 14 Jul 2016 08:18:40 -0400
-Date: Thu, 14 Jul 2016 20:18:38 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/4] fstests: filename handling for extended names in
- ./check was on a wrong place
-Message-ID: <20160714121838.GD2432@eguan.usersys.redhat.com>
-References: <1468229169-24045-1-git-send-email-jtulak@redhat.com>
- <1468229169-24045-3-git-send-email-jtulak@redhat.com>
- <20160713123454.GW2432@eguan.usersys.redhat.com>
- <CACj3i71hZQ6U=s-EwP-jRs3TJwwCQ7KKB6=Bv7gK-ug8V_Tb9Q@mail.gmail.com>
+	id S1751251AbcGNMnk (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 14 Jul 2016 08:43:40 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id ACC1B7EA90
+	for <fstests@vger.kernel.org>; Thu, 14 Jul 2016 12:43:39 +0000 (UTC)
+From: Jan Tulak <jtulak@redhat.com>
+Subject: [PATCH 0/6 v3] xfstests: some small fixes and mkfs validation test
+Date: Thu, 14 Jul 2016 14:43:28 +0200
+Message-Id: <1468500214-6237-1-git-send-email-jtulak@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CACj3i71hZQ6U=s-EwP-jRs3TJwwCQ7KKB6=Bv7gK-ug8V_Tb9Q@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Jan Tulak <jtulak@redhat.com>
-Cc: fstests@vger.kernel.org, "Chinner, Dave" <david@fromorbit.com>
+To: fstests@vger.kernel.org
+Cc: Jan Tulak <jtulak@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 14, 2016 at 11:11:17AM +0200, Jan Tulak wrote:
-> On Wed, Jul 13, 2016 at 2:34 PM, Eryu Guan <eguan@redhat.com> wrote:
-> > On Mon, Jul 11, 2016 at 11:26:07AM +0200, Jan Tulak wrote:
-> >> The code handling "./check foo/123", when the real test is "foo/123-bar-baz"
-> >> was moved at the earliest position, so everything working with the test name or
-> >> path will know the full name. Thus, no "123" and "123-bar-baz" mix is possible.
-> >>
-> >> Signed-off-by: Jan Tulak <jtulak@redhat.com>
-> >
-> > Can you please include more details in the description? It seems not so
-> > clear to me what the problem is from the description.
-> >
-> > If I understand it correctly (after playing around), prior to the patch:
-> > [root@dhcp-66-86-11 xfstests]# ./check xfs/999
-> > ...
-> > xfs/999 0s ... 0s
-> > Ran: xfs/999-test-case
-> > Passed all 1 tests
-> >
-> > After applying the patch:
-> > [root@dhcp-66-86-11 xfstests]# ./check xfs/999
-> > ...
-> > xfs/999-test-case 0s ... 0s
-> > Ran: xfs/999-test-case
-> > Passed all 1 tests
-> >
-> > So the test name is always correct, right?
-> >
-> 
-> Yes. Most importantly, this fixes issues around other name-based
-> operations, see the new message:
-> ---
-> The code handling "./check foo/123", when the real test is "foo/123-bar-baz"
-> was moved to the earliest position, so everything working with the test name or
-> path will know the full name. Thus, no "123" and "123-bar-baz" mix is possible.
-> 
-> An example of this issue is $testname.notrun file. When _notrun "foo" was run
-> during ./check foo/$name command, it created $name.notrun. But few lines later,
-> it wanted $fullname.notrun. So if you did ./check foo/999, but the file was
-> 999-bar-baz, then you got comparing outputs (and most likely a fail)
-> instead of a skip.
-> 
-> Another example of this mix is in xfstests output:
-> ./check xfs/999
-> [...]
-> xfs/999 0s ... 0s
-> Ran: xfs/999-test-case
-> ---
-> 
-> Do you like it now? And do want it as a new version of the patch? :-)
+This set is a merge of all my recent patches. The reason for the merge is that
+the patches are sequentially dependent and making a set is the safest way of
+ensuring their correct order after a merge.
 
-This does read better to me, thanks! And seems you're going to send a
-new patchset, then please send a new version with updated description.
+One patch, "filename handling - fix early wildcard expansion", was
+dropped for now. Patch "add _require_xfs_mkfs_validation to common/rc" is new,
+and update of xfs/096 and input validation tests were changed.
 
-Thanks!
 
-Eryu
+Jan Tulak (6):
+  xfstests: Fix installation for extended names
+  fstests: filename handling for extended names in ./check was on a
+    wrong place
+  xfstests: remove unused variable
+  xfstests: add _require_xfs_mkfs_validation to common/rc
+  xfstests: update xfs/096 for new behaviour
+  xfstests: Add mkfs input validation tests
+
+ check                              |  26 +--
+ common/rc                          |  29 ++++
+ include/buildrules                 |  31 ++++
+ tests/btrfs/Makefile               |   4 +-
+ tests/cifs/Makefile                |   4 +-
+ tests/ext4/Makefile                |   4 +-
+ tests/f2fs/Makefile                |   4 +-
+ tests/generic/Makefile             |   4 +-
+ tests/overlay/Makefile             |   4 +-
+ tests/shared/Makefile              |   4 +-
+ tests/udf/Makefile                 |   4 +-
+ tests/xfs/096                      |   1 +
+ tests/xfs/400-input-validation     | 338 +++++++++++++++++++++++++++++++++++++
+ tests/xfs/400-input-validation.out |   2 +
+ tests/xfs/Makefile                 |   4 +-
+ tests/xfs/group                    |   1 +
+ 16 files changed, 433 insertions(+), 31 deletions(-)
+ create mode 100755 tests/xfs/400-input-validation
+ create mode 100644 tests/xfs/400-input-validation.out
+
+-- 
+2.5.5
+
