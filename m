@@ -1,100 +1,70 @@
-Received: from mx1.redhat.com ([209.132.183.28]:35856 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:37909 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750869AbcGOEGw (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Fri, 15 Jul 2016 00:06:52 -0400
-Date: Fri, 15 Jul 2016 12:06:50 +0800
+	id S1750705AbcGOEVI (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 15 Jul 2016 00:21:08 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 840AFC00F08A
+	for <fstests@vger.kernel.org>; Fri, 15 Jul 2016 04:21:07 +0000 (UTC)
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] common/rc: avoid mkfs option conflicts in
- _scratch_mkfs_xfs_supported
-Message-ID: <20160715040650.GI2432@eguan.usersys.redhat.com>
-References: <1467697153-23189-1-git-send-email-eguan@redhat.com>
- <20160715000129.GT12670@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160715000129.GT12670@dastard>
+Subject: [PATCH v2] common/rc: avoid mkfs option conflicts in _scratch_mkfs_xfs_supported
+Date: Fri, 15 Jul 2016 12:20:51 +0800
+Message-Id: <1468556451-19817-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jul 15, 2016 at 10:01:29AM +1000, Dave Chinner wrote:
-> On Tue, Jul 05, 2016 at 01:39:13PM +0800, Eryu Guan wrote:
-> > In recent mkfs.xfs updates in xfsprogs, commit 9090e187bc3e ("mkfs:
-> > add respecification detection to generic parsing") added
-> > re-specification detection to "-m" option, it causes several tests
-> > _notrun if MKFS_OPTIONS has the same options as those being tested
-> > in _scratch_mkfs_xfs_supported(), because they're specified multiple
-> > times.
-> > 
-> > 	MKFS_OPTIONS="-m crc=0" ./check xfs/001
-> > 	xfs/001 3s ... [not run] mkfs.xfs doesn't have crc feature
-> > 
-> > Fix it by creating XFS again without MKFS_OPTIONS in
-> > _scratch_mkfs_xfs_supported(), in case there's conflict between
-> > MKFS_OPTIONS and mkfs_opts, like what we do in _scratch_mkfs_xfs().
-> > 
-> > Signed-off-by: Eryu Guan <eguan@redhat.com>
-> > ---
-> >  common/rc | 11 ++++++++++-
-> >  1 file changed, 10 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/common/rc b/common/rc
-> > index 883bd7b..ad81461 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -473,11 +473,20 @@ _scratch_mkfs_xfs_opts()
-> >  
-> >  _scratch_mkfs_xfs_supported()
-> >  {
-> > -	mkfs_opts=$*
-> > +	local mkfs_opts=$*
-> >  
-> >  	_scratch_options mkfs
-> >  
-> >  	$MKFS_XFS_PROG -N $MKFS_OPTIONS $SCRATCH_OPTIONS $mkfs_opts $SCRATCH_DEV
-> > +	local mkfs_status=$?
-> > +
-> > +	# if $mkfs_opts conflits with $MKFS_OPTIONS,
-> > +	# try again without $MKFS_OPTIONS
-> > +	if [ $mkfs_status -ne 0 -a -n "$MKFS_OPTIONS" ]; then
-> > +		$MKFS_XFS_PROG -N $SCRATCH_OPTIONS $mkfs_opts $SCRATCH_DEV
-> > +		mkfs_status=$?
-> > +	fi
-> > +	return $mkfs_status
-> >  }
-> 
-> 
-> This should match what _scratch_mkfs_xfs does. i.e:
-> 
->         # a mkfs failure may be caused by conflicts between
->         # $MKFS_OPTIONS and $extra_mkfs_options
->         if [ $mkfs_status -ne 0 -a ! -z "$extra_mkfs_options" ]; then
->                 (
->                 echo -n "** mkfs failed with extra mkfs options "
->                 echo "added to \"$MKFS_OPTIONS\" by test $seq **"
->                 echo -n "** attempting to mkfs using only test $seq "
->                 echo "options: $extra_mkfs_options **"
->                 ) >> $seqres.full
-> 
->                 # running mkfs again. overwrite previous mkfs output files
->                 _scratch_mkfs_xfs_opts $extra_mkfs_options \
->                         2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
->                 local mkfs_status=$?
->         fi
-> 
-> i.e. it checks if $extra_mkfs_options is not empty, rather than
-> $MKFS_OPTIONS
+In recent mkfs.xfs updates in xfsprogs, commit 9090e187bc3e ("mkfs:
+add respecification detection to generic parsing") added
+re-specification detection to "-m" option, it causes several tests
+_notrun if MKFS_OPTIONS has the same options as those being tested
+in _scratch_mkfs_xfs_supported(), because they're specified multiple
+times.
 
-Thanks for the review!
+	MKFS_OPTIONS="-m crc=0" ./check xfs/001
+	xfs/001 3s ... [not run] mkfs.xfs doesn't have crc feature
 
-I thought about it too, but I realized that _scratch_mkfs_supported() is
-supposed to have "$extra_mkfs_options" (always non-empty), because what
-it tests is to check whether mkfs.xfs works well with these
-"$extra_mkfs_options".
+Fix it by creating XFS again without MKFS_OPTIONS in
+_scratch_mkfs_xfs_supported(), in case there's conflict between
+MKFS_OPTIONS and mkfs_opts, like what we do in _scratch_mkfs_xfs().
 
-But making sure $mkfs_opts is not empty before using it makes more
-sense, and it matches _scratch_mkfs_xfs(). I'll send v2 patch.
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+v2:
+- check if $mkfs_opts is empty, not MKFS_OPTIONS
+- update the comments a bit to match _scratch_mkfs_xfs() more
 
-Thanks,
-Eryu
+ common/rc | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/common/rc b/common/rc
+index 0c68e4f..07a218d 100644
+--- a/common/rc
++++ b/common/rc
+@@ -473,11 +473,20 @@ _scratch_mkfs_xfs_opts()
+ 
+ _scratch_mkfs_xfs_supported()
+ {
+-	mkfs_opts=$*
++	local mkfs_opts=$*
+ 
+ 	_scratch_options mkfs
+ 
+ 	$MKFS_XFS_PROG -N $MKFS_OPTIONS $SCRATCH_OPTIONS $mkfs_opts $SCRATCH_DEV
++	local mkfs_status=$?
++
++	# a mkfs failure may be caused by conflicts between $MKFS_OPTIONS and
++	# $mkfs_opts, try again without $MKFS_OPTIONS
++	if [ $mkfs_status -ne 0 -a -n "$mkfs_opts" ]; then
++		$MKFS_XFS_PROG -N $SCRATCH_OPTIONS $mkfs_opts $SCRATCH_DEV
++		mkfs_status=$?
++	fi
++	return $mkfs_status
+ }
+ 
+ _scratch_mkfs_xfs()
+-- 
+2.7.4
+
