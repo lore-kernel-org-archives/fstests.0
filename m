@@ -1,75 +1,56 @@
-Received: from mx1.redhat.com ([209.132.183.28]:39016 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751430AbcGPK23 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sat, 16 Jul 2016 06:28:29 -0400
-Message-Id: <201607161028.u6GASRfh013586@int-mx13.intmail.prod.int.phx2.redhat.com>
-Date: Sat, 16 Jul 2016 18:28:26 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: [GIT PULL] fstests: updates on 2016-07-16
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:49707 "EHLO
+	ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751295AbcGQXaK (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Sun, 17 Jul 2016 19:30:10 -0400
+Date: Mon, 18 Jul 2016 09:30:03 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 6/6] xfstests: Add mkfs input validation tests
+Message-ID: <20160717233003.GX1922@dastard>
+References: <1468500214-6237-1-git-send-email-jtulak@redhat.com>
+ <1468500214-6237-7-git-send-email-jtulak@redhat.com>
+ <20160716093358.GL2432@eguan.usersys.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160716093358.GL2432@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Jan Tulak <jtulak@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave,
+On Sat, Jul 16, 2016 at 05:33:58PM +0800, Eryu Guan wrote:
+> On Thu, Jul 14, 2016 at 02:43:34PM +0200, Jan Tulak wrote:
+> > +do_mkfs_fail -l lazy-count=1garbage $SCRATCH_DEV
+> > +do_mkfs_fail -l lazy-count=2 $SCRATCH_DEV
+> > +do_mkfs_fail -l lazy-count=0 -m crc=1 $SCRATCH_DEV
+> > +do_mkfs_fail -l version=1 -m crc=1 $SCRATCH_DEV
+> 
+> This test fails in my DAX testing, where SCRATCH_DEV is ramdisk. The
+> mkfs itself should fail, but it passed. Log version 2 was used
+> automatically, instead of prompting "V2 logs always enabled for CRC
+> enabled filesytems"
+> 
+> [root@dhcp-66-86-11 xfstests]# mkfs -t xfs -f -l version=1 -m crc=1 /dev/ram0
+> meta-data=/dev/ram0              isize=512    agcount=1, agsize=4096 blks
+>          =                       sectsz=4096  attr=2, projid32bit=1
+>          =                       crc=1        finobt=1, sparse=0
+> data     =                       bsize=4096   blocks=4096, imaxpct=25
+>          =                       sunit=0      swidth=0 blks
+> naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
+> log      =internal log           bsize=4096   blocks=1605, version=2
+>          =                       sectsz=4096  sunit=1 blks, lazy-count=1
+> realtime =none                   extsz=4096   blocks=0, rtextents=0
+> 
+> Is it a mkfs.xfs bug or the test case should handle the special case?
 
-Can you please pull the fstests update from the location below? This is a
-relatively small update compared to previous updates.
+Looks like it might be a side effect of using a 4k sector size. v1
+logs only supported 512 byte sectors, so it's entirely possible that
+the sector size is silently overriding the log version
+specification. Probably should be fixed in mkfs.
 
-Thanks,
-Eryu
+Cheers,
 
-The following changes since commit 024bdaea1c5741d37bf62b0fcb5a581ede5a5682:
-
-  ext4/021: add _require_metadata_journaling (2016-07-08 10:51:54 +0800)
-
-are available in the git repository at:
-
-  https://github.com/guaneryu/xfstests.git for-dave
-
-for you to fetch changes up to 2caf9a321867662dc195bef5fa214a03ba8fd070:
-
-  generic: add _require_block_device to more tests (2016-07-16 17:34:57 +0800)
-
-----------------------------------------------------------------
-
-fstests: update on 2016-07-16
-
-This update contains:
-o New btrfs tests
-o Skip xfs/096 if mkfs.xfs doesn't accept invalid inputs
-o Other small fixes
-
-----------------------------------------------------------------
-Eryu Guan (1):
-      generic: add _require_block_device to more tests
-
-Filipe Manana (3):
-      btrfs: incremental send after moving directories around
-      btrfs: incremental send after removing a directory
-      btrfs: invalid rmdir issued by send operation
-
-Jan Tulak (2):
-      common/rc: add _require_xfs_mkfs_validation
-      xfs/096: run test only if mkfs.xfs accepts invalid inputs
-
-Qu Wenruo (1):
-      btrfs/079: Fix wrong value passed to available space check
-
- common/rc           |  35 +++++++
- tests/btrfs/079     |   2 +-
- tests/btrfs/127     | 263 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/127.out |   2 +
- tests/btrfs/128     | 129 ++++++++++++++++++++++++++
- tests/btrfs/128.out |   2 +
- tests/btrfs/129     | 125 +++++++++++++++++++++++++
- tests/btrfs/129.out |   2 +
- tests/btrfs/group   |   3 +
- tests/generic/067   |   1 +
- tests/generic/299   |   1 +
- tests/generic/300   |   1 +
- tests/xfs/096       |   1 +
- 13 files changed, 566 insertions(+), 1 deletion(-)
---
-Eryu Guan
-eguan@redhat.com
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
