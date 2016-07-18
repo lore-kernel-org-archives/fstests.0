@@ -1,230 +1,54 @@
-Received: from mx1.redhat.com ([209.132.183.28]:34265 "EHLO mx1.redhat.com"
+Received: from mx2.suse.de ([195.135.220.15]:37286 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751326AbcGRIsB (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 18 Jul 2016 04:48:01 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id C602D11BB57
-	for <fstests@vger.kernel.org>; Mon, 18 Jul 2016 08:48:00 +0000 (UTC)
-From: Jan Tulak <jtulak@redhat.com>
-Subject: [PATCH v2] xfstests: Fix installation for extended names
-Date: Mon, 18 Jul 2016 10:47:50 +0200
-Message-Id: <1468831670-3464-1-git-send-email-jtulak@redhat.com>
-In-Reply-To: <1468500214-6237-1-git-send-email-jtulak@redhat.com>
-References: <1468500214-6237-1-git-send-email-jtulak@redhat.com>
+	id S1751441AbcGRKaT (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 18 Jul 2016 06:30:19 -0400
+Date: Mon, 18 Jul 2016 12:20:56 +0200
+From: Jan Kara <jack@suse.cz>
+Subject: Re: [PATCH v2] xfstests, generic: add project quota attribute tests
+Message-ID: <20160718102056.GA6782@quack2.suse.cz>
+References: <20160708005127.GK12670@dastard>
+ <20160708024654.GE19871@thunk.org>
+ <77863b4a-95e6-4100-79c2-5cbcaf0872e7@sandeen.net>
+ <20160708050228.GH19871@thunk.org>
+ <20160711161556.GB9334@quack2.suse.cz>
+ <20160711171242.GA21285@thunk.org>
+ <20160712105908.GE16460@quack2.suse.cz>
+ <20160712161547.GB11020@thunk.org>
+ <20160714131331.GB13151@quack2.suse.cz>
+ <CAP9B-Qn0R1geR41BH-Eg6sqYUid734ar6Nq4sYyjK5PCrWFzAg@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAP9B-Qn0R1geR41BH-Eg6sqYUid734ar6Nq4sYyjK5PCrWFzAg@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: eguan@redhat.com, Jan Tulak <jtulak@redhat.com>
+To: Wang Shilong <wangshilong1991@gmail.com>
+Cc: Jan Kara <jack@suse.cz>, Theodore Ts'o <tytso@mit.edu>, Eric Sandeen <sandeen@sandeen.net>, Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, Ext4 Developers List <linux-ext4@vger.kernel.org>, Shuichi Ihara <sihara@ddn.com>, Li Xi <lixi@ddn.com>, Wang Shilong <wshilong@ddn.com>
 List-ID: <fstests@vger.kernel.org>
 
-xfstests supports extended test names like 314-foo-bar, but installation of
-these tests was skipped (not matching a regexp). So this patch fixes the
-makefiles in tests/*/
+On Fri 15-07-16 10:15:31, Wang Shilong wrote:
+> On Thu, Jul 14, 2016 at 10:13 PM, Jan Kara <jack@suse.cz> wrote:
+> > On Tue 12-07-16 12:15:47, Ted Tso wrote:
+> 
+> >> Does that sound like a plan?
+> >
+> > Yes. quotaoff will already disable only enforcement for ext4 with hidden
+> > quota files so there's no need to change anything there. We just need to
+> > add kernel support for enabling quota enforcement based on mount option.
+> > Attached patch should do that - I still need to test whether it doesn't
+> > break anything so don't apply it yet, just have a look whether it looks
+> > sane to you.
+> 
+> I sent a similar patch weeks ago.
+> http://marc.info/?l=linux-ext4&m=146787897927183&w=2
 
-The include/buildrules change was written by Dave Chinner.
+Your patch was actually quite different. It did implement prjquota option
+but the option did something else than in my patch... In your patch you
+implemented prjquota option to match the behavior of original quota in
+normal files. In my patch I've implemented behavior of prjquota option to
+behave similarly as in XFS - i.e. enable enforcement of project quotas when
+project quota feature is enabled.
 
-Signed-off-by: Jan Tulak <jtulak@redhat.com>
----
-UPDATE:
-Add .cfg support
----
- include/buildrules     | 32 ++++++++++++++++++++++++++++++++
- tests/btrfs/Makefile   |  4 ++--
- tests/cifs/Makefile    |  4 ++--
- tests/ext4/Makefile    |  4 ++--
- tests/f2fs/Makefile    |  4 ++--
- tests/generic/Makefile |  4 ++--
- tests/overlay/Makefile |  4 ++--
- tests/shared/Makefile  |  4 ++--
- tests/udf/Makefile     |  4 ++--
- tests/xfs/Makefile     |  4 ++--
- 10 files changed, 50 insertions(+), 18 deletions(-)
-
-diff --git a/include/buildrules b/include/buildrules
-index c8a7c47..76b755e 100644
---- a/include/buildrules
-+++ b/include/buildrules
-@@ -100,3 +100,35 @@ MAKEDEP := $(MAKEDEPEND) $(CFLAGS)
- 	    cp /dev/null .dep; \
- 	fi
- 
-+# Gather files for installing into two lists:
-+# TESTS with executable scripts and OUTFILES with all the test outputs.
-+# Makefile has a very small matching, so we have to go this long way.
-+
-+# Start with all test related files:
-+ALLFILES = $(wildcard [0-9]??*)
-+
-+# Now build a list of known output files.  Unfortunately, the
-+# multiple output test files are poorly handled as makefiles don't
-+# handle wildcarded multi-suffix matching. Hence we separate the
-+# processing of these right now.
-+EXTENDED_OUTFILES = $(wildcard [0-9]??*.out.*)
-+EXTENDED_OUTFILE_CFGS = $(wildcard [0-9]??.cfg)
-+BASIC_OUTFILES = $(wildcard [0-9]??*.out)
-+OUTFILES = $(EXTENDED_OUTFILES) $(EXTENDED_OUTFILE_CFGS) $(BASIC_OUTFILES)
-+
-+# Strip suffix to get matching tests. We want to strip from the
-+# first "." to the end, but makefiles don't have a built in
-+# operative for that. So:
-+#
-+# Hack: strip the multiple segments after .out with repeated basename calls.
-+EXTFILTER1 = $(basename $(EXTENDED_OUTFILES))
-+EXTFILTER2 = $(basename $(EXTFILTER1))
-+EXTFILTER3 = $(basename $(EXTFILTER2))
-+EXTFILTER4 = $(basename $(EXTFILTER3))
-+
-+# final filter list
-+FILTER = $(basename $(EXTFILTER4) $(BASIC_OUTFILES))
-+
-+# finally, select the test files by filtering against against the
-+# stripped output files and sort them to remove duplicates.
-+TESTS = $(sort $(filter $(ALLFILES), $(FILTER)))
-diff --git a/tests/btrfs/Makefile b/tests/btrfs/Makefile
-index e1a5be1..2d93642 100644
---- a/tests/btrfs/Makefile
-+++ b/tests/btrfs/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/cifs/Makefile b/tests/cifs/Makefile
-index 9176e5c..0c5cf3b 100644
---- a/tests/cifs/Makefile
-+++ b/tests/cifs/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/ext4/Makefile b/tests/ext4/Makefile
-index 7a3c8e1..beb1541 100644
---- a/tests/ext4/Makefile
-+++ b/tests/ext4/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/f2fs/Makefile b/tests/f2fs/Makefile
-index 4d00e9e..d13bca3 100644
---- a/tests/f2fs/Makefile
-+++ b/tests/f2fs/Makefile
-@@ -13,9 +13,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/generic/Makefile b/tests/generic/Makefile
-index 9529fb8..3878d05 100644
---- a/tests/generic/Makefile
-+++ b/tests/generic/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/overlay/Makefile b/tests/overlay/Makefile
-index 63c9878..b07f892 100644
---- a/tests/overlay/Makefile
-+++ b/tests/overlay/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/shared/Makefile b/tests/shared/Makefile
-index cbd87f9..8a83278 100644
---- a/tests/shared/Makefile
-+++ b/tests/shared/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/udf/Makefile b/tests/udf/Makefile
-index 1d96658..c9c9f1b 100644
---- a/tests/udf/Makefile
-+++ b/tests/udf/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
-diff --git a/tests/xfs/Makefile b/tests/xfs/Makefile
-index db94be0..d64800e 100644
---- a/tests/xfs/Makefile
-+++ b/tests/xfs/Makefile
-@@ -12,9 +12,9 @@ include $(BUILDRULES)
- 
- install:
- 	$(INSTALL) -m 755 -d $(TARGET_DIR)
--	$(INSTALL) -m 755 [0-9]?? $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
- 	$(INSTALL) -m 644 group $(TARGET_DIR)
--	$(INSTALL) -m 644 [0-9]??.* $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
- 
- # Nothing.
- install-dev install-lib:
+								Honza
 -- 
-2.5.5
-
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
