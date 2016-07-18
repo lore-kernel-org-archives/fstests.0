@@ -1,54 +1,77 @@
-Received: from mx2.suse.de ([195.135.220.15]:37286 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751441AbcGRKaT (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 18 Jul 2016 06:30:19 -0400
-Date: Mon, 18 Jul 2016 12:20:56 +0200
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH v2] xfstests, generic: add project quota attribute tests
-Message-ID: <20160718102056.GA6782@quack2.suse.cz>
-References: <20160708005127.GK12670@dastard>
- <20160708024654.GE19871@thunk.org>
- <77863b4a-95e6-4100-79c2-5cbcaf0872e7@sandeen.net>
- <20160708050228.GH19871@thunk.org>
- <20160711161556.GB9334@quack2.suse.cz>
- <20160711171242.GA21285@thunk.org>
- <20160712105908.GE16460@quack2.suse.cz>
- <20160712161547.GB11020@thunk.org>
- <20160714131331.GB13151@quack2.suse.cz>
- <CAP9B-Qn0R1geR41BH-Eg6sqYUid734ar6Nq4sYyjK5PCrWFzAg@mail.gmail.com>
+Received: from mail-it0-f54.google.com ([209.85.214.54]:36164 "EHLO
+	mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751516AbcGRLaH (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Mon, 18 Jul 2016 07:30:07 -0400
+Received: by mail-it0-f54.google.com with SMTP id f6so65276168ith.1
+        for <fstests@vger.kernel.org>; Mon, 18 Jul 2016 04:30:07 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAP9B-Qn0R1geR41BH-Eg6sqYUid734ar6Nq4sYyjK5PCrWFzAg@mail.gmail.com>
+In-Reply-To: <20160717233003.GX1922@dastard>
+References: <1468500214-6237-1-git-send-email-jtulak@redhat.com>
+ <1468500214-6237-7-git-send-email-jtulak@redhat.com> <20160716093358.GL2432@eguan.usersys.redhat.com>
+ <20160717233003.GX1922@dastard>
+From: Jan Tulak <jtulak@redhat.com>
+Date: Mon, 18 Jul 2016 13:29:47 +0200
+Message-ID: <CACj3i73TdnUcDT0J2QEBKQhoMsyYFVz6hBb_=bC99rL2ZbkCYQ@mail.gmail.com>
+Subject: Re: [PATCH 6/6] xfstests: Add mkfs input validation tests
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Wang Shilong <wangshilong1991@gmail.com>
-Cc: Jan Kara <jack@suse.cz>, Theodore Ts'o <tytso@mit.edu>, Eric Sandeen <sandeen@sandeen.net>, Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, Ext4 Developers List <linux-ext4@vger.kernel.org>, Shuichi Ihara <sihara@ddn.com>, Li Xi <lixi@ddn.com>, Wang Shilong <wshilong@ddn.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, xfs-oss <xfs@oss.sgi.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri 15-07-16 10:15:31, Wang Shilong wrote:
-> On Thu, Jul 14, 2016 at 10:13 PM, Jan Kara <jack@suse.cz> wrote:
-> > On Tue 12-07-16 12:15:47, Ted Tso wrote:
-> 
-> >> Does that sound like a plan?
-> >
-> > Yes. quotaoff will already disable only enforcement for ext4 with hidden
-> > quota files so there's no need to change anything there. We just need to
-> > add kernel support for enabling quota enforcement based on mount option.
-> > Attached patch should do that - I still need to test whether it doesn't
-> > break anything so don't apply it yet, just have a look whether it looks
-> > sane to you.
-> 
-> I sent a similar patch weeks ago.
-> http://marc.info/?l=linux-ext4&m=146787897927183&w=2
+On Mon, Jul 18, 2016 at 1:30 AM, Dave Chinner <david@fromorbit.com> wrote:
+> On Sat, Jul 16, 2016 at 05:33:58PM +0800, Eryu Guan wrote:
+>> On Thu, Jul 14, 2016 at 02:43:34PM +0200, Jan Tulak wrote:
+>> > +do_mkfs_fail -l lazy-count=1garbage $SCRATCH_DEV
+>> > +do_mkfs_fail -l lazy-count=2 $SCRATCH_DEV
+>> > +do_mkfs_fail -l lazy-count=0 -m crc=1 $SCRATCH_DEV
+>> > +do_mkfs_fail -l version=1 -m crc=1 $SCRATCH_DEV
+>>
+>> This test fails in my DAX testing, where SCRATCH_DEV is ramdisk. The
+>> mkfs itself should fail, but it passed. Log version 2 was used
+>> automatically, instead of prompting "V2 logs always enabled for CRC
+>> enabled filesytems"
+>>
+>> [root@dhcp-66-86-11 xfstests]# mkfs -t xfs -f -l version=1 -m crc=1 /dev/ram0
+>> meta-data=/dev/ram0              isize=512    agcount=1, agsize=4096 blks
+>>          =                       sectsz=4096  attr=2, projid32bit=1
+>>          =                       crc=1        finobt=1, sparse=0
+>> data     =                       bsize=4096   blocks=4096, imaxpct=25
+>>          =                       sunit=0      swidth=0 blks
+>> naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
+>> log      =internal log           bsize=4096   blocks=1605, version=2
+>>          =                       sectsz=4096  sunit=1 blks, lazy-count=1
+>> realtime =none                   extsz=4096   blocks=0, rtextents=0
+>>
+>> Is it a mkfs.xfs bug or the test case should handle the special case?
+>
+> Looks like it might be a side effect of using a 4k sector size. v1
+> logs only supported 512 byte sectors, so it's entirely possible that
+> the sector size is silently overriding the log version
+> specification. Probably should be fixed in mkfs.
+>
+>
 
-Your patch was actually quite different. It did implement prjquota option
-but the option did something else than in my patch... In your patch you
-implemented prjquota option to match the behavior of original quota in
-normal files. In my patch I've implemented behavior of prjquota option to
-behave similarly as in XFS - i.e. enable enforcement of project quotas when
-project quota feature is enabled.
+I tried to duplicate this, but in my config it didn't failed - how did
+you create the ramdisk?
 
-								Honza
+# modprobe brd rd_nr=1 rd_size=$((200*1024))
+# blockdev --getbsz /dev/ram0
+4096
+# blockdev --getpbsz /dev/ram0
+512
+# blockdev --getss /dev/ram0
+512
+
+# mkfs -t xfs -f -l version=1 -m crc=1 /dev/ram0
+V2 logs always enabled for CRC enabled filesytems
+Usage: mkfs.xfs
+[snip]
+
+Thanks, Jan
+
+PS: cc-ing XFS list - if it is mkfs bug, it is better there than in fstests.
+
 -- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+Jan Tulak
+jtulak@redhat.com / jan@tulak.me
