@@ -1,66 +1,35 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:42747 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752256AbcGSCph (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 18 Jul 2016 22:45:37 -0400
-Date: Mon, 18 Jul 2016 19:45:25 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] xfs/083: disable dmesg check
-Message-ID: <20160719024525.GD5215@birch.djwong.org>
-References: <1468302104-15288-1-git-send-email-yangx.jy@cn.fujitsu.com>
- <20160713042555.GN2432@eguan.usersys.redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:58328 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750825AbcGSEHk (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 19 Jul 2016 00:07:40 -0400
+Date: Tue, 19 Jul 2016 12:07:38 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] generic/235: Use CSV format for repquota output
+Message-ID: <20160719040738.GK27776@eguan.usersys.redhat.com>
+References: <1468843224-8940-1-git-send-email-jack@suse.cz>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160713042555.GN2432@eguan.usersys.redhat.com>
+In-Reply-To: <1468843224-8940-1-git-send-email-jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>, fstests@vger.kernel.org
+To: Jan Kara <jack@suse.cz>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jul 13, 2016 at 12:25:55PM +0800, Eryu Guan wrote:
-> On Tue, Jul 12, 2016 at 01:41:44PM +0800, Xiao Yang wrote:
-> > xfs/083 will corrupt the fs intentionally, there will be WARNINGs
-> > in dmesg as expected, so here disable dmesg check.
-> > 
-> > Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
-> > ---
-> >  tests/xfs/083 | 4 ++++
-> >  1 file changed, 4 insertions(+)
-> > 
-> > diff --git a/tests/xfs/083 b/tests/xfs/083
-> > index d897754..040f3b6 100755
-> > --- a/tests/xfs/083
-> > +++ b/tests/xfs/083
-> > @@ -102,6 +102,10 @@ scratch_repair() {
-> >  }
-> >  
-> >  rm -f $seqres.full
-> > +# This test will corrupt fs intentionally, so there will be WARNINGs
-> > +# in dmesg as expected
-> > +_disable_dmesg_check
-> > +
+On Mon, Jul 18, 2016 at 02:00:24PM +0200, Jan Kara wrote:
+> Different quota format may print additional information in repquota(8)
+> output after standard quota information is printed and this information
+> is separated by two empty lines. For quota formats that don't support
+> printing any additional information these lines are not present in the
+> output which causes false failures of the test. Switch the test to use
+> repquota(8) CSV output format which does not have these formatting
+> issues and in general should be more stable.
 > 
-> This looks fine to me, but I'd like Darrick to review it as well :)
+> Signed-off-by: Jan Kara <jack@suse.cz>
 
-I'm convinced, so
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+This breaks tests on distributions with older version of repquota (e.g.
+RHEL6 and RHEL7) where there's no "-O" support, and test failed because
+of "invalid option -- 'O'".
 
---D
-
-
-> 
-> Thanks,
-> Eryu
-> 
-> >  echo "See interesting results in $seqres.full" | sed -e "s,$RESULT_DIR,RESULT_DIR,g"
-> >  SRCDIR=`pwd`
-> >  test -z "${FUZZ_ARGS}" && FUZZ_ARGS="-3 -n 32"
-> > -- 
-> > 1.8.3.1
-> > 
-> > 
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks,
+Eryu
