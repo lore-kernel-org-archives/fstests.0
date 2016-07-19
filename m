@@ -1,107 +1,30 @@
-Received: from mail-vk0-f67.google.com ([209.85.213.67]:34867 "EHLO
-	mail-vk0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752260AbcGSKYz (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 19 Jul 2016 06:24:55 -0400
-Received: by mail-vk0-f67.google.com with SMTP id x130so1102868vkc.2
-        for <fstests@vger.kernel.org>; Tue, 19 Jul 2016 03:24:54 -0700 (PDT)
-MIME-Version: 1.0
-In-Reply-To: <CADxRZqxz7XJ43i_Mn8kdnP7KPR2sK1wK5T2B-QAYj9_jCqUbCg@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:56031 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752348AbcGSKb5 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 19 Jul 2016 06:31:57 -0400
+Date: Tue, 19 Jul 2016 18:31:54 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: Fwd: xfstests: error: redefinition of 'struct fsxattr'
+Message-ID: <20160719103154.GQ27776@eguan.usersys.redhat.com>
 References: <CADxRZqxz7XJ43i_Mn8kdnP7KPR2sK1wK5T2B-QAYj9_jCqUbCg@mail.gmail.com>
-From: Anatoly Pugachev <matorola@gmail.com>
-Date: Tue, 19 Jul 2016 13:24:53 +0300
-Message-ID: <CADxRZqym3LQa0czmO0Ni5+qQ6R=U7s_7A7H9YWDeVcz8UtGqrg@mail.gmail.com>
-Subject: Fwd: xfstests: error: redefinition of 'struct fsxattr'
-Content-Type: text/plain; charset=UTF-8
+ <CADxRZqym3LQa0czmO0Ni5+qQ6R=U7s_7A7H9YWDeVcz8UtGqrg@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CADxRZqym3LQa0czmO0Ni5+qQ6R=U7s_7A7H9YWDeVcz8UtGqrg@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Anatoly Pugachev <matorola@gmail.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hello!
+On Tue, Jul 19, 2016 at 01:24:53PM +0300, Anatoly Pugachev wrote:
+> Hello!
+> 
+> Can someone help me to compile xfstests taken from
+> git://oss.sgi.com/xfs/cmds/xfstests
 
-Can someone help me to compile xfstests taken from
-git://oss.sgi.com/xfs/cmds/xfstests
+This should have been fixed in latest xfstests. Does your tree contain
+commit ca7c8bcbe851 ("build: avoid struct fsxattr redefinition")?
 
-Thanks.
-
----------- Forwarded message ----------
-From: Anatoly Pugachev <matorola@gmail.com>
-Date: Mon, Jul 18, 2016 at 10:51 AM
-Subject: xfstests: error: redefinition of 'struct fsxattr'
-To: Btrfs BTRFS <linux-btrfs@vger.kernel.org>
-
-
-Hello!
-
-I can't compile xfstests on 4.6.3 kernel (headers installed) on debian
-sid (unstable).
-
-mator@windrunner:~/xfstests$ dpkg -l linux-image-4.6.0-1-amd64 linux-libc-dev
-Desired=Unknown/Install/Remove/Purge/Hold
-| Status=Not/Inst/Conf-files/Unpacked/halF-conf/Half-inst/trig-aWait/Trig-pend
-|/ Err?=(none)/Reinst-required (Status,Err: uppercase=bad)
-||/ Name                                    Version
-Architecture             Description
-+++-=======================================-========================-========================
-ii  linux-image-4.6.0-1-amd64               4.6.3-1
-amd64                    Linux 4.6 for 64-bit PCs
-ii  linux-libc-dev:amd64                    4.6.3-1
-amd64                    Linux support headers for userspace
-development
-
-mator@windrunner:~/xfstests$ uname -a
-Linux windrunner 4.6.0-1-amd64 #1 SMP Debian 4.6.3-1 (2016-07-04)
-x86_64 GNU/Linux
-
-mator@windrunner:~/xfstests$ git describe
-linux-v3.8-1104-g024bdae
-
-mator@windrunner:~/xfstests$ make
-Building include
-Building lib
-    [LTDEP]
-    [CC] dataascii.lo
-    [CC] databin.lo
-    [CC] datapid.lo
-    [CC] file_lock.lo
-    [CC] forker.lo
-    [CC] pattern.lo
-    [CC] open_flags.lo
-    [CC] random_range.lo
-    [CC] string_to_tokens.lo
-    [CC] str_to_bytes.lo
-    [CC] tlibio.lo
-    [CC] write_log.lo
-    [CC] random.lo
-    [LD]
-ar: `u' modifier ignored since `D' is the default (see `U')
-Building ltp
-    [DEP]
-    [CC]    doio
-    [CC]    fsstress
-In file included from /usr/include/xfs/xfs.h:58:0,
-                 from ../src/global.h:25,
-                 from fsstress.c:20:
-/usr/include/xfs/xfs_fs.h:42:8: error: redefinition of 'struct fsxattr'
- struct fsxattr {
-        ^
-In file included from fsstress.c:19:0:
-/usr/include/linux/fs.h:155:8: note: originally defined here
- struct fsxattr {
-        ^
-Makefile:42: recipe for target 'fsstress' failed
-make[2]: *** [fsstress] Error 1
-include/buildrules:30: recipe for target 'ltp' failed
-make[1]: *** [ltp] Error 2
-Makefile:66: recipe for target 'default' failed
-make: *** [default] Error 2
-mator@windrunner:~/xfstests$
-
-
-So far, I've found
-https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=822369 where it is
-told that there's uapi change in 4.5+ kernel.
-How to fix xfstests on compile on 4.5+ kernels?
-
-Thanks.
-
-PS: and maybe a new git tag (since there's over 1000 commits already) ?
+Thanks,
+Eryu
