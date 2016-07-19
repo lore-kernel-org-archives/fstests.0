@@ -1,34 +1,107 @@
-Received: from verein.lst.de ([213.95.11.211]:54104 "EHLO newverein.lst.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752532AbcGSIay (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 19 Jul 2016 04:30:54 -0400
-Date: Tue, 19 Jul 2016 10:30:47 +0200
-From: Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH] generic/071: require falloc -k
-Message-ID: <20160719083047.GA21083@lst.de>
-References: <1468829204-24593-1-git-send-email-hch@lst.de> <20160718084714.GD27776@eguan.usersys.redhat.com> <20160719041718.GA17223@lst.de> <7bd28494-84e9-1458-5e28-893d02dd5c06@sandeen.net>
+Received: from mail-vk0-f67.google.com ([209.85.213.67]:34867 "EHLO
+	mail-vk0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752260AbcGSKYz (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 19 Jul 2016 06:24:55 -0400
+Received: by mail-vk0-f67.google.com with SMTP id x130so1102868vkc.2
+        for <fstests@vger.kernel.org>; Tue, 19 Jul 2016 03:24:54 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <7bd28494-84e9-1458-5e28-893d02dd5c06@sandeen.net>
+In-Reply-To: <CADxRZqxz7XJ43i_Mn8kdnP7KPR2sK1wK5T2B-QAYj9_jCqUbCg@mail.gmail.com>
+References: <CADxRZqxz7XJ43i_Mn8kdnP7KPR2sK1wK5T2B-QAYj9_jCqUbCg@mail.gmail.com>
+From: Anatoly Pugachev <matorola@gmail.com>
+Date: Tue, 19 Jul 2016 13:24:53 +0300
+Message-ID: <CADxRZqym3LQa0czmO0Ni5+qQ6R=U7s_7A7H9YWDeVcz8UtGqrg@mail.gmail.com>
+Subject: Fwd: xfstests: error: redefinition of 'struct fsxattr'
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: Christoph Hellwig <hch@lst.de>, Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jul 18, 2016 at 11:49:57PM -0700, Eric Sandeen wrote:
-> Some tests actually do run xfs_io on a real file, but we probably
-> don't want to go that way.
-> 
-> The test for finding it in help output seems way too specific,
-> 
-> _require_xfs_io_command "pwrite" "-Z"
-> 
-> fails as well because it doesn't hit the specific format in
-> the grep.
-> 
-> What if we loosen up the test; is this too loose? (look for param
-> preceded by whitespace or square bracket)
+Hello!
 
-Seems like it's not loose enough as it still tries to run the test
-on NFS.
+Can someone help me to compile xfstests taken from
+git://oss.sgi.com/xfs/cmds/xfstests
+
+Thanks.
+
+---------- Forwarded message ----------
+From: Anatoly Pugachev <matorola@gmail.com>
+Date: Mon, Jul 18, 2016 at 10:51 AM
+Subject: xfstests: error: redefinition of 'struct fsxattr'
+To: Btrfs BTRFS <linux-btrfs@vger.kernel.org>
+
+
+Hello!
+
+I can't compile xfstests on 4.6.3 kernel (headers installed) on debian
+sid (unstable).
+
+mator@windrunner:~/xfstests$ dpkg -l linux-image-4.6.0-1-amd64 linux-libc-dev
+Desired=Unknown/Install/Remove/Purge/Hold
+| Status=Not/Inst/Conf-files/Unpacked/halF-conf/Half-inst/trig-aWait/Trig-pend
+|/ Err?=(none)/Reinst-required (Status,Err: uppercase=bad)
+||/ Name                                    Version
+Architecture             Description
++++-=======================================-========================-========================
+ii  linux-image-4.6.0-1-amd64               4.6.3-1
+amd64                    Linux 4.6 for 64-bit PCs
+ii  linux-libc-dev:amd64                    4.6.3-1
+amd64                    Linux support headers for userspace
+development
+
+mator@windrunner:~/xfstests$ uname -a
+Linux windrunner 4.6.0-1-amd64 #1 SMP Debian 4.6.3-1 (2016-07-04)
+x86_64 GNU/Linux
+
+mator@windrunner:~/xfstests$ git describe
+linux-v3.8-1104-g024bdae
+
+mator@windrunner:~/xfstests$ make
+Building include
+Building lib
+    [LTDEP]
+    [CC] dataascii.lo
+    [CC] databin.lo
+    [CC] datapid.lo
+    [CC] file_lock.lo
+    [CC] forker.lo
+    [CC] pattern.lo
+    [CC] open_flags.lo
+    [CC] random_range.lo
+    [CC] string_to_tokens.lo
+    [CC] str_to_bytes.lo
+    [CC] tlibio.lo
+    [CC] write_log.lo
+    [CC] random.lo
+    [LD]
+ar: `u' modifier ignored since `D' is the default (see `U')
+Building ltp
+    [DEP]
+    [CC]    doio
+    [CC]    fsstress
+In file included from /usr/include/xfs/xfs.h:58:0,
+                 from ../src/global.h:25,
+                 from fsstress.c:20:
+/usr/include/xfs/xfs_fs.h:42:8: error: redefinition of 'struct fsxattr'
+ struct fsxattr {
+        ^
+In file included from fsstress.c:19:0:
+/usr/include/linux/fs.h:155:8: note: originally defined here
+ struct fsxattr {
+        ^
+Makefile:42: recipe for target 'fsstress' failed
+make[2]: *** [fsstress] Error 1
+include/buildrules:30: recipe for target 'ltp' failed
+make[1]: *** [ltp] Error 2
+Makefile:66: recipe for target 'default' failed
+make: *** [default] Error 2
+mator@windrunner:~/xfstests$
+
+
+So far, I've found
+https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=822369 where it is
+told that there's uapi change in 4.5+ kernel.
+How to fix xfstests on compile on 4.5+ kernels?
+
+Thanks.
+
+PS: and maybe a new git tag (since there's over 1000 commits already) ?
