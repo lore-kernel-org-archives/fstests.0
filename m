@@ -1,34 +1,38 @@
-Received: from mx1.redhat.com ([209.132.183.28]:45108 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750924AbcGSEf1 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 19 Jul 2016 00:35:27 -0400
-Date: Tue, 19 Jul 2016 12:35:24 +0800
-From: Eryu Guan <eguan@redhat.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:4750 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751505AbcGSFGo (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 19 Jul 2016 01:06:44 -0400
 Subject: Re: [PATCH] fstests: btrfs: Test send on heavily deduped file
-Message-ID: <20160719043524.GL27776@eguan.usersys.redhat.com>
 References: <20160719024402.19324-1-quwenruo@cn.fujitsu.com>
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Message-ID: <2245ccaf-643f-ef25-2ef7-84ffbf97e927@cn.fujitsu.com>
+Date: Tue, 19 Jul 2016 13:06:35 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
 In-Reply-To: <20160719024402.19324-1-quwenruo@cn.fujitsu.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, Filipe Manana <fdmanana@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jul 19, 2016 at 10:44:02AM +0800, Qu Wenruo wrote:
+Add Filipe to the reception, as "To:" doesn't add him automatically.
+
+Thanks,
+Qu
+
+At 07/19/2016 10:44 AM, Qu Wenruo wrote:
 > For fully deduped file, whose file extents are all pointing to the same
 > extent, btrfs backref walk can be very time consuming, long enough to
 > trigger softlock.
-> 
+>
 > Unfortunately, btrfs send is one of the caller of such backref walk
 > under an O(n) loop, making the total time complexity to O(n^3) or more.
-> 
+>
 > And even worse, btrfs send will allocate memory in such loop, to trigger
 > OOM on system with small memory(<4G).
-> 
+>
 > This test case will check if btrfs send will cause these problems.
-> 
+>
 > Reporeted-by: Tsutomu Itoh <t-itoh@jp.fujitsu.com>
 > To: Filipe Manana <fdmanana@gmail.com>
 > Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
@@ -36,15 +40,15 @@ On Tue, Jul 19, 2016 at 10:44:02AM +0800, Qu Wenruo wrote:
 > To Filipe:
 >   For the soft lockup, I will try my best to figure out some method to
 >   avoid such lockup (but it will still be very time consuming though).
-> 
+>
 >   But for the OOM problem, would you mind disabling clone/reflink
 >   detection in btrfs send?
-> 
+>
 >   In fact we should really avoid doing full backref walk inside an O(n)
 >   loop (just like previous fiemap ioctl test case), and avoid any full
 >   backref walk if possible.
 >   So I'm afraid that's the only solution yet.
-> 
+>
 > Thanks,
 > Qu
 > ---
@@ -54,7 +58,7 @@ On Tue, Jul 19, 2016 at 10:44:02AM +0800, Qu Wenruo wrote:
 >  3 files changed, 93 insertions(+)
 >  create mode 100755 tests/btrfs/127
 >  create mode 100644 tests/btrfs/127.out
-> 
+>
 > diff --git a/tests/btrfs/127 b/tests/btrfs/127
 > new file mode 100755
 > index 0000000..a31a653
@@ -168,14 +172,6 @@ On Tue, Jul 19, 2016 at 10:44:02AM +0800, Qu Wenruo wrote:
 >  125 auto replace
 >  126 auto quick qgroup
 > +127 auto clone send
+>
 
-This test uses $LOAD_FACTOR, so it should be in 'stress' group. And it
-hangs the latest kernel, stop other tests from running, I think we can
-add it to 'dangerous' group as well.
 
-I can fix them at merge time, if there's no other major updates to be
-done. (I'll let the patch sitting in the list for more time, in case
-others have more review comments).
-
-Thanks,
-Eryu
