@@ -1,69 +1,73 @@
-Received: from sandeen.net ([63.231.237.45]:59411 "EHLO sandeen.net"
+Received: from mx1.redhat.com ([209.132.183.28]:56927 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752394AbcGTFer (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 20 Jul 2016 01:34:47 -0400
-Subject: Re: [PATCH] generic/071: require falloc -k
-References: <1468829204-24593-1-git-send-email-hch@lst.de>
- <20160718084714.GD27776@eguan.usersys.redhat.com>
- <20160719041718.GA17223@lst.de>
- <7bd28494-84e9-1458-5e28-893d02dd5c06@sandeen.net>
- <20160719083047.GA21083@lst.de>
- <20160720045217.GT27776@eguan.usersys.redhat.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <07f34424-ed2c-4f5f-991b-91981367c1a5@sandeen.net>
-Date: Tue, 19 Jul 2016 22:34:43 -0700
+	id S1751975AbcGTHBD (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 20 Jul 2016 03:01:03 -0400
+Date: Wed, 20 Jul 2016 15:01:00 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] fstests: btrfs: Test send on heavily deduped file
+Message-ID: <20160720070100.GU27776@eguan.usersys.redhat.com>
+References: <20160719024402.19324-1-quwenruo@cn.fujitsu.com>
+ <20160719043524.GL27776@eguan.usersys.redhat.com>
+ <fb7acb1e-3835-1511-d66e-7d186c94e35e@cn.fujitsu.com>
 MIME-Version: 1.0
-In-Reply-To: <20160720045217.GT27776@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <fb7acb1e-3835-1511-d66e-7d186c94e35e@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>, Christoph Hellwig <hch@lst.de>
-Cc: fstests@vger.kernel.org
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-
-
-On 7/19/16 9:52 PM, Eryu Guan wrote:
-> On Tue, Jul 19, 2016 at 10:30:47AM +0200, Christoph Hellwig wrote:
->> On Mon, Jul 18, 2016 at 11:49:57PM -0700, Eric Sandeen wrote:
->>> Some tests actually do run xfs_io on a real file, but we probably
->>> don't want to go that way.
->>>
->>> The test for finding it in help output seems way too specific,
->>>
->>> _require_xfs_io_command "pwrite" "-Z"
->>>
->>> fails as well because it doesn't hit the specific format in
->>> the grep.
->>>
->>> What if we loosen up the test; is this too loose? (look for param
->>> preceded by whitespace or square bracket)
->>
->> Seems like it's not loose enough as it still tries to run the test
->> on NFS.
+On Tue, Jul 19, 2016 at 01:42:03PM +0800, Qu Wenruo wrote:
+> > 
+> > This test uses $LOAD_FACTOR, so it should be in 'stress' group. And it
+> > hangs the latest kernel, stop other tests from running, I think we can
+> > add it to 'dangerous' group as well.
+> > 
 > 
-> For this NFSv4.2 case, I think we have to actually run "falloc -k" to
-> check whether the underlying fs supports (FALLOC_FL_KEEP_SIZE) or not.
+> Thanks for this info.
+> I'm completely OK to add this group to 'stress' and 'dangerous'.
 > 
-> Current check in _require_xfs_io_command only checks whether xfs_io
-> knows the given option, not the underlying fs. And in this NFSv4.2 case,
-> NFSv4.2 supports fallocate(2), and xfs_io falloc command knows "-k"
-> option, so test runs on NFS.
+> 
+> However I'm a little curious about the meaning/standard of these groups.
+> 
+> Does 'dangerous' conflicts with 'auto'?
+> Since under most case, tester would just execute './check -g auto' and the
+> system hangs at the test case.
+> So I'm a little confused with the 'auto' group.
 
-Oh right, sorry.  So, this?
+I quote my previous email here to explain the 'auto' group
+http://www.spinics.net/lists/fstests/msg03262.html
 
-diff --git a/common/rc b/common/rc
-index 6add69e..f087813 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1880,7 +1880,7 @@ _require_xfs_io_command()
- 	testfile=$TEST_DIR/$$.xfs_io
- 	case $command in
- 	"falloc" )
--		testio=`$XFS_IO_PROG -F -f -c "falloc 0 1m" $testfile 2>&1`
-+		testio=`$XFS_IO_PROG -F -f -c "falloc $param 0 1m" $testfile 2>&1`
- 		;;
- 	"fpunch" | "fcollapse" | "zero" | "fzero" | "finsert" )
- 		testio=`$XFS_IO_PROG -F -f -c "pwrite 0 20k" -c "fsync" \
+"
+I searched for Dave's explainations on 'auto' group in his reviews, and
+got the following definitions:
 
--Eric
+- it should be a valid & reliable test (it's finished and have
+  deterministic output) [1]
+- it passes on current upstream kernels, if it fails, it's likely to be
+  resolved in forseeable future [2]
+- it should take no longer than 5 minutes to finish [3]
+"
+
+And "The only difference between quick and auto group criteria is the
+test runtime." Usually 'quick' tests finish within 30s.
+
+For the 'dangerous' group, it was added in commit 3f28d55c3954 ("add
+freeze and dangerous groups"), and seems that it didn't have a very
+clear definition[*]. But I think any test that could hang/crash recent
+kernels is considered as dangerous.
+
+* http://oss.sgi.com/archives/xfs/2012-03/msg00073.html
+
+For this test, it triggers soft lockup on latest 4.7-rc7 kernel and
+prevents further tests from running, so it's part of dangerous. And this
+bug will be fixed in forseeable future, right? So it's OK to add 'auto'
+group. And we can always remove 'dangerous' group from tests when we
+find they're only crashing old kernels, e.g. commit 8c94797 ext4: move
+30[1234] from the dangerous to the auto group
+
+For running tests, "./check -g auto -x dangerous" might fit your need.
+
+Thanks,
+Eryu
