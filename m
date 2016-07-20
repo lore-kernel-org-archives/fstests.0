@@ -1,62 +1,76 @@
-Received: from mx1.redhat.com ([209.132.183.28]:35594 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:34675 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751421AbcGSTx0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 19 Jul 2016 15:53:26 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by mx1.redhat.com (Postfix) with ESMTPS id EAB6731A340
-	for <fstests@vger.kernel.org>; Tue, 19 Jul 2016 19:53:25 +0000 (UTC)
-Received: from Liberator.local (ovpn03.gateway.prod.ext.phx2.redhat.com [10.5.9.3])
-	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u6JJrPYY000926
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <fstests@vger.kernel.org>; Tue, 19 Jul 2016 15:53:25 -0400
-From: Eric Sandeen <sandeen@redhat.com>
-Subject: [PATCH] fix up fsx error handling in generic 075 and 112
-Message-ID: <77036f23-97c3-2d62-e3f5-0c3571e71a5a@redhat.com>
-Date: Tue, 19 Jul 2016 12:53:25 -0700
+	id S1751041AbcGTEis (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 20 Jul 2016 00:38:48 -0400
+Date: Wed, 20 Jul 2016 12:38:46 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] generic/071: require falloc -k
+Message-ID: <20160720043846.GS27776@eguan.usersys.redhat.com>
+References: <1468829204-24593-1-git-send-email-hch@lst.de>
+ <20160718084714.GD27776@eguan.usersys.redhat.com>
+ <20160719041718.GA17223@lst.de>
+ <7bd28494-84e9-1458-5e28-893d02dd5c06@sandeen.net>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <7bd28494-84e9-1458-5e28-893d02dd5c06@sandeen.net>
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-When fsx fails we try to copy failure state to the results/
-dir, but in some cases we are using $seqres instead of
-$seq or $seq instead of $here/$seq; fix this up so the
-failure state is accurately captured in the results/ dir.
+On Mon, Jul 18, 2016 at 11:49:57PM -0700, Eric Sandeen wrote:
+> 
+> 
+> On 7/18/16 9:17 PM, Christoph Hellwig wrote:
+> > On Mon, Jul 18, 2016 at 04:47:14PM +0800, Eryu Guan wrote:
+> >> This stops generic/071 from running no matter what filesystem it's
+> >> testing, this is because _require_xfs_io_command only checks whether
+> >> xfs_io knows the option (-k) by searching it in help message, not really
+> >> running it, i.e.
+> > 
+> > Well, we can at least add the documentation as that would be useful
+> > on it's own.  I'll look into a patch.
+> > 
+> >> Perhaps we should update _require_xfs_io_command to actually run the
+> >> command with the provided additional option?
+> > 
+> > I'll have to look at the archives, but I remember we had a reason for
+> > this way of probing for feature support.
+> 
+> Some tests actually do run xfs_io on a real file, but we probably
+> don't want to go that way.
+> 
+> The test for finding it in help output seems way too specific,
+> 
+> _require_xfs_io_command "pwrite" "-Z"
+> 
+> fails as well because it doesn't hit the specific format in
+> the grep.
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
----
+Zorro's commit a6f6e594f74a ("common/rc: teach _require_xfs_io_command
+accept multi-parameters") addressed this issue, but it requires
+something like "_require_xfs_io_command pwrite -Z N" to match the help
+message.
 
-diff --git a/tests/generic/075 b/tests/generic/075
-index a2411c6..6a214bc 100755
---- a/tests/generic/075
-+++ b/tests/generic/075
-@@ -79,8 +79,10 @@ _do_test()
-     then
- 	echo "    fsx ($_param) failed, $? - compare $seqres.$_n.{good,bad,fsxlog}"
- 	mv $out/$seq.$_n $seqres.$_n.full
-+	mv $here/$seq.$_n.fsxlog $seqres.$_n.fsxlog
- 	od -xAx $seqres.$_n.full > $seqres.$_n.bad
--	od -xAx $seqres.$_n.fsxgood > $seqres.$_n.good
-+	od -xAx $here/$seq.$_n.fsxgood > $seqres.$_n.good
-+	rm -f $here/$seq.$_n.fsxgood
- 	status=1
- 	exit
-     fi
-diff --git a/tests/generic/112 b/tests/generic/112
-index b59cbfa..55be394 100755
---- a/tests/generic/112
-+++ b/tests/generic/112
-@@ -78,7 +78,7 @@ _do_test()
-     if ! $here/ltp/fsx $_param -P $here $FSX_AVOID $seq.$_n &>/dev/null
-     then
- 	echo "    fsx ($_param) returned $? - see $seq.$_n.full"
--	mv $seq.$_n.fsxlog $seqres.$_n.full
-+	mv $here/$seq.$_n.fsxlog $seqres.$_n.full
- 	status=1
- 	exit
-     fi
+> 
+> What if we loosen up the test; is this too loose? (look for param
+> preceded by whitespace or square bracket)
+> 
+> diff --git a/common/rc b/common/rc
+> index 6add69e..0eef3d5 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1907,7 +1907,7 @@ _require_xfs_io_command()
+>  		_notrun "xfs_io $command failed (old kernel/wrong fs?)"
+>  
+>  	test -z "$param" && return
+> -	$XFS_IO_PROG -c "help $command" | grep -q "^ $param --" || \
+> +	$XFS_IO_PROG -c "help $command" | egrep -qw "[ \[]$param" || \
+>  		_notrun "xfs_io $command doesn't support $param"
+>  }
 
+This looks better to me, at least better than current code :)
+
+Thanks,
+Eryu
