@@ -1,31 +1,51 @@
-Received: from bombadil.infradead.org ([198.137.202.9]:37030 "EHLO
-	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753542AbcGTTAK (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 20 Jul 2016 15:00:10 -0400
-Date: Wed, 20 Jul 2016 12:00:09 -0700
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH] btrfs: test whether fallocate(2) can preallocate half of
- the whole fs space
-Message-ID: <20160720190009.GA13348@infradead.org>
-References: <20160720073450.8952-1-wangxg.fnst@cn.fujitsu.com>
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:60197 "EHLO
+	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932332AbcGTXCg (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 20 Jul 2016 19:02:36 -0400
+Date: Thu, 21 Jul 2016 09:02:31 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] generic/235: Use CSV format for repquota output
+Message-ID: <20160720230230.GW12670@dastard>
+References: <1468843224-8940-1-git-send-email-jack@suse.cz>
+ <20160719040738.GK27776@eguan.usersys.redhat.com>
+ <20160720051324.GB3918@quack2.suse.cz>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160720073450.8952-1-wangxg.fnst@cn.fujitsu.com>
+In-Reply-To: <20160720051324.GB3918@quack2.suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Jan Kara <jack@suse.cz>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, dchinner@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jul 20, 2016 at 03:34:50PM +0800, Wang Xiaoguang wrote:
-> Currently in btrfs, there is something wrong with data space reservation.
-> For example, if we try to preallocate more than haf of whole fs space,
-> ENOSPC will occur, but indeed fs still has free space to satisfy this
-> request.
+On Wed, Jul 20, 2016 at 07:13:24AM +0200, Jan Kara wrote:
+> On Tue 19-07-16 12:07:38, Eryu Guan wrote:
+> > On Mon, Jul 18, 2016 at 02:00:24PM +0200, Jan Kara wrote:
+> > > Different quota format may print additional information in repquota(8)
+> > > output after standard quota information is printed and this information
+> > > is separated by two empty lines. For quota formats that don't support
+> > > printing any additional information these lines are not present in the
+> > > output which causes false failures of the test. Switch the test to use
+> > > repquota(8) CSV output format which does not have these formatting
+> > > issues and in general should be more stable.
+> > > 
+> > > Signed-off-by: Jan Kara <jack@suse.cz>
+> > 
+> > This breaks tests on distributions with older version of repquota (e.g.
+> > RHEL6 and RHEL7) where there's no "-O" support, and test failed because
+> > of "invalid option -- 'O'".
 > 
-> To easily reproduce this bug, this test case needs fs is mixed mode(btrfs
-> specific), so put this test case in btrfs group, not generic group.
+> Hum, support for -O option is in repquota for three years. That isn't much
+> for enterprise distros, I agree. I can fix the problem with output
+> filtering. That will be less future-proof but it will work for old
+> repquota. I'm not sure what's more desirable. Dave?
 
-But the actual test isn't btrfs specific, and other file systems might
-have issues in this area as well.  Please add it to the generic group
-instead.
+What are the extra lines? Why can't an output filter be added to
+strip the extra lines if they are emitted?
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
