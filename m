@@ -1,47 +1,74 @@
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:60197 "EHLO
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:18681 "EHLO
 	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932332AbcGTXCg (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 20 Jul 2016 19:02:36 -0400
-Date: Thu, 21 Jul 2016 09:02:31 +1000
+	by vger.kernel.org with ESMTP id S1753744AbcGTXSe (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 20 Jul 2016 19:18:34 -0400
+Date: Thu, 21 Jul 2016 09:18:05 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] generic/235: Use CSV format for repquota output
-Message-ID: <20160720230230.GW12670@dastard>
-References: <1468843224-8940-1-git-send-email-jack@suse.cz>
- <20160719040738.GK27776@eguan.usersys.redhat.com>
- <20160720051324.GB3918@quack2.suse.cz>
+Subject: Re: [4.7-rc6 snapshot] xfstests::generic/081 unable to tear down
+ snapshot VG
+Message-ID: <20160720231805.GX12670@dastard>
+References: <20160719002202.GE16044@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160720051324.GB3918@quack2.suse.cz>
+In-Reply-To: <20160719002202.GE16044@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Jan Kara <jack@suse.cz>
-Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, dchinner@redhat.com
+To: dm-devel@redhat.com
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jul 20, 2016 at 07:13:24AM +0200, Jan Kara wrote:
-> On Tue 19-07-16 12:07:38, Eryu Guan wrote:
-> > On Mon, Jul 18, 2016 at 02:00:24PM +0200, Jan Kara wrote:
-> > > Different quota format may print additional information in repquota(8)
-> > > output after standard quota information is printed and this information
-> > > is separated by two empty lines. For quota formats that don't support
-> > > printing any additional information these lines are not present in the
-> > > output which causes false failures of the test. Switch the test to use
-> > > repquota(8) CSV output format which does not have these formatting
-> > > issues and in general should be more stable.
-> > > 
-> > > Signed-off-by: Jan Kara <jack@suse.cz>
-> > 
-> > This breaks tests on distributions with older version of repquota (e.g.
-> > RHEL6 and RHEL7) where there's no "-O" support, and test failed because
-> > of "invalid option -- 'O'".
+On Tue, Jul 19, 2016 at 10:22:02AM +1000, Dave Chinner wrote:
+> Hi folks,
 > 
-> Hum, support for -O option is in repquota for three years. That isn't much
-> for enterprise distros, I agree. I can fix the problem with output
-> filtering. That will be less future-proof but it will work for old
-> repquota. I'm not sure what's more desirable. Dave?
+> I'm currently running the latest set of XFS patches through QA, and
+> I'm getting generic/081 failing and leaving a block device in an
+> unrecoverable EBUSY state. I'm running xfstests on a pair of 8GB
+> fake pmem devices:
+> 
+> $ sudo ./run_check.sh " -i sparse=1" "" " -s xfs generic/081"
+....
 
-What are the extra lines? Why can't an output filter be added to
-strip the extra lines if they are emitted?
+More problems after this failure, while trying to sort out a
+workaround I can use. Reboot the machine after triggering it, and on
+next boot I've ended up with:
+
+$ sudo lvs
+  LV       VG     Attr       LSize   Pool Origin   Data%  Meta%  Move Log Cpy%Sync Convert
+  base_081 vg_081 owi---s--- 256.00m                                                      
+  snap_081 vg_081 swi---s---   4.00m      base_081  
+$ sudo vgs
+  VG     #PV #LV #SN Attr   VSize VFree
+  vg_081   1   2   1 wz--n- 8.00g 7.74g
+$ sudo pvs
+  PV         VG     Fmt  Attr PSize PFree
+  /dev/pmem1 vg_081 lvm2 a--  8.00g 7.74g
+$ sudo lvremove -f vg_081/snap_081
+  Incorrect metadata area header checksum on /dev/pmem1 at offset 4096
+  WARNING: Failed to write an MDA of VG vg_081.
+  Failed to write VG vg_081.
+  Incorrect metadata area header checksum on /dev/pmem1 at offset 4096
+$ sudo vgremove -f vg_081
+  Incorrect metadata area header checksum on /dev/pmem1 at offset 4096
+  WARNING: Failed to write an MDA of VG vg_081.
+  Failed to write VG vg_081.
+  Incorrect metadata area header checksum on /dev/pmem1 at offset 4096
+$ sudo pvremove -f /dev/pmem1
+  PV /dev/pmem1 belongs to Volume Group vg_081 so please use vgreduce first.
+  (If you are certain you need pvremove, then confirm by using --force twice.)
+$
+
+So whatever is going wrong is also resulting in corrupted LVM
+headers on disk.
+
+Ok, so it appears that the only workaround I've found that is
+reliable is to add a "sleep 5" between the unmount and the vgremove
+command. Adding udev settle commands does nothing, and there's
+nothing else i can think of that would affect the unmounted
+filesystem or block device once the unmount has returned to
+userspace.
+
+I've only ever seen this occur on pmem devices, so maybe it's
+something perculiar to them....
 
 Cheers,
 
