@@ -1,74 +1,30 @@
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:18681 "EHLO
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:17890 "EHLO
 	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753744AbcGTXSe (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 20 Jul 2016 19:18:34 -0400
-Date: Thu, 21 Jul 2016 09:18:05 +1000
+	by vger.kernel.org with ESMTP id S1752568AbcGTXaD (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 20 Jul 2016 19:30:03 -0400
+Date: Thu, 21 Jul 2016 09:30:00 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [4.7-rc6 snapshot] xfstests::generic/081 unable to tear down
- snapshot VG
-Message-ID: <20160720231805.GX12670@dastard>
-References: <20160719002202.GE16044@dastard>
+Subject: Re: [PATCH] fstests: btrfs: Test send on heavily deduped file
+Message-ID: <20160720233000.GY12670@dastard>
+References: <20160719024402.19324-1-quwenruo@cn.fujitsu.com>
+ <20160719043524.GL27776@eguan.usersys.redhat.com>
+ <fb7acb1e-3835-1511-d66e-7d186c94e35e@cn.fujitsu.com>
+ <20160720070100.GU27776@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160719002202.GE16044@dastard>
+In-Reply-To: <20160720070100.GU27776@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: dm-devel@redhat.com
-Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
+To: Eryu Guan <eguan@redhat.com>
+Cc: Qu Wenruo <quwenruo@cn.fujitsu.com>, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jul 19, 2016 at 10:22:02AM +1000, Dave Chinner wrote:
-> Hi folks,
-> 
-> I'm currently running the latest set of XFS patches through QA, and
-> I'm getting generic/081 failing and leaving a block device in an
-> unrecoverable EBUSY state. I'm running xfstests on a pair of 8GB
-> fake pmem devices:
-> 
-> $ sudo ./run_check.sh " -i sparse=1" "" " -s xfs generic/081"
-....
+On Wed, Jul 20, 2016 at 03:01:00PM +0800, Eryu Guan wrote:
+> For running tests, "./check -g auto -x dangerous" might fit your need.
 
-More problems after this failure, while trying to sort out a
-workaround I can use. Reboot the machine after triggering it, and on
-next boot I've ended up with:
-
-$ sudo lvs
-  LV       VG     Attr       LSize   Pool Origin   Data%  Meta%  Move Log Cpy%Sync Convert
-  base_081 vg_081 owi---s--- 256.00m                                                      
-  snap_081 vg_081 swi---s---   4.00m      base_081  
-$ sudo vgs
-  VG     #PV #LV #SN Attr   VSize VFree
-  vg_081   1   2   1 wz--n- 8.00g 7.74g
-$ sudo pvs
-  PV         VG     Fmt  Attr PSize PFree
-  /dev/pmem1 vg_081 lvm2 a--  8.00g 7.74g
-$ sudo lvremove -f vg_081/snap_081
-  Incorrect metadata area header checksum on /dev/pmem1 at offset 4096
-  WARNING: Failed to write an MDA of VG vg_081.
-  Failed to write VG vg_081.
-  Incorrect metadata area header checksum on /dev/pmem1 at offset 4096
-$ sudo vgremove -f vg_081
-  Incorrect metadata area header checksum on /dev/pmem1 at offset 4096
-  WARNING: Failed to write an MDA of VG vg_081.
-  Failed to write VG vg_081.
-  Incorrect metadata area header checksum on /dev/pmem1 at offset 4096
-$ sudo pvremove -f /dev/pmem1
-  PV /dev/pmem1 belongs to Volume Group vg_081 so please use vgreduce first.
-  (If you are certain you need pvremove, then confirm by using --force twice.)
-$
-
-So whatever is going wrong is also resulting in corrupted LVM
-headers on disk.
-
-Ok, so it appears that the only workaround I've found that is
-reliable is to add a "sleep 5" between the unmount and the vgremove
-command. Adding udev settle commands does nothing, and there's
-nothing else i can think of that would affect the unmounted
-filesystem or block device once the unmount has returned to
-userspace.
-
-I've only ever seen this occur on pmem devices, so maybe it's
-something perculiar to them....
+Yes, that's precisely the way the dangerous group is intended to be
+used: as a exclusion filter that gets applied to other test group
+definitions.
 
 Cheers,
 
