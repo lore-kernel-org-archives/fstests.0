@@ -1,12 +1,12 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:29948 "EHLO
+Received: from userp1040.oracle.com ([156.151.31.81]:29979 "EHLO
 	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751512AbcGUXsC (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2016 19:48:02 -0400
-Subject: [PATCH 15/17] xfs: scrub fs (if still mounted) at the end of the
- test
+	with ESMTP id S1751512AbcGUXsI (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2016 19:48:08 -0400
+Subject: [PATCH 16/17] xfs/122: add the realtime rmapbt inode and btree
+ fields
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 21 Jul 2016 16:47:51 -0700
-Message-ID: <146914487167.11762.17599617419019795848.stgit@birch.djwong.org>
+Date: Thu, 21 Jul 2016 16:48:00 -0700
+Message-ID: <146914488084.11762.2546324713817812928.stgit@birch.djwong.org>
 In-Reply-To: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
 References: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -17,60 +17,43 @@ To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
 Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-Teach _check_xfs_filesystem to scrub mounted filesystems before
-unmounting and fscking them.  This is mostly to test the online
-scrub tool...
+Add the on-disk structures added by the realtime rmapbt.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- README        |    3 +++
- common/config |    1 +
- common/rc     |    7 +++++++
- 3 files changed, 11 insertions(+)
+ tests/xfs/122.out |    6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
 
-diff --git a/README b/README
-index 4509cc1..c19fcb1 100644
---- a/README
-+++ b/README
-@@ -84,6 +84,9 @@ Preparing system for tests (IRIX and Linux):
-                run xfs_repair -n to check the filesystem; xfs_repair to rebuild
-                metadata indexes; and xfs_repair -n (a third time) to check the
-                results of the rebuilding.
-+	     - set TEST_XFS_SCRUB=1 to have _check_xfs_filesystem run
-+	       xfs_scrub -vd to scrub the filesystem metadata online before
-+               unmounting to run the offline check.
- 
-         - or add a case to the switch in common/config assigning
-           these variables based on the hostname of your test
-diff --git a/common/config b/common/config
-index 08d5d80..168f46c 100644
---- a/common/config
-+++ b/common/config
-@@ -163,6 +163,7 @@ export XFS_REPAIR_PROG="`set_prog_path xfs_repair`"
- export XFS_DB_PROG="`set_prog_path xfs_db`"
- export XFS_GROWFS_PROG=`set_prog_path xfs_growfs`
- export XFS_IO_PROG="`set_prog_path xfs_io`"
-+export XFS_SCRUB_PROG="`set_prog_path xfs_scrub`"
- export XFS_PARALLEL_REPAIR_PROG="`set_prog_path xfs_prepair`"
- export XFS_PARALLEL_REPAIR64_PROG="`set_prog_path xfs_prepair64`"
- export __XFSDUMP_PROG="`set_prog_path xfsdump`"
-diff --git a/common/rc b/common/rc
-index 3b45578..861a721 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2391,6 +2391,13 @@ _check_xfs_filesystem()
- 
-     if [ "$type" = "xfs" ]
-     then
-+        if [ -n "$TEST_XFS_SCRUB" ] && [ -x "$XFS_SCRUB_PROG" ]; then
-+            "$XFS_SCRUB_PROG" $scrubflag -vd $device >>$seqres.full
-+            if [ $? -ne 0 ]; then
-+                echo "filesystem on $device failed scrub (see $seqres.full)"
-+                ok=0
-+            fi
-+        fi
-         # mounted ...
-         mountpoint=`_umount_or_remount_ro $device`
-     fi
+diff --git a/tests/xfs/122.out b/tests/xfs/122.out
+index c4ed725..b20011e 100644
+--- a/tests/xfs/122.out
++++ b/tests/xfs/122.out
+@@ -44,6 +44,7 @@ offsetof(xfs_sb_t, sb_rextents) = 24
+ offsetof(xfs_sb_t, sb_rextsize) = 80
+ offsetof(xfs_sb_t, sb_rextslog) = 125
+ offsetof(xfs_sb_t, sb_rootino) = 56
++offsetof(xfs_sb_t, sb_rrmapino) = 264
+ offsetof(xfs_sb_t, sb_rsumino) = 72
+ offsetof(xfs_sb_t, sb_sectlog) = 121
+ offsetof(xfs_sb_t, sb_sectsize) = 102
+@@ -86,6 +87,9 @@ sizeof(struct xfs_refcount_key) = 4
+ sizeof(struct xfs_refcount_rec) = 12
+ sizeof(struct xfs_rmap_key) = 20
+ sizeof(struct xfs_rmap_rec) = 24
++sizeof(struct xfs_rtrmap_key) = 24
++sizeof(struct xfs_rtrmap_rec) = 32
++sizeof(struct xfs_rtrmap_root) = 4
+ sizeof(struct xfs_rud_log_format) = 48
+ sizeof(struct xfs_rui_log_format) = 48
+ sizeof(xfs_agf_t) = 224
+@@ -130,7 +134,7 @@ sizeof(xfs_dir2_sf_off_t) = 2
+ sizeof(xfs_disk_dquot_t) = 104
+ sizeof(xfs_dq_logformat_t) = 24
+ sizeof(xfs_dqblk_t) = 136
+-sizeof(xfs_dsb_t) = 264
++sizeof(xfs_dsb_t) = 272
+ sizeof(xfs_efd_log_format_32_t) = 28
+ sizeof(xfs_efd_log_format_64_t) = 32
+ sizeof(xfs_efi_log_format_32_t) = 28
 
