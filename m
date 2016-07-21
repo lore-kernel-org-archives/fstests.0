@@ -1,55 +1,70 @@
-Received: from mx2.suse.de ([195.135.220.15]:40892 "EHLO mx2.suse.de"
+Received: from mx1.redhat.com ([209.132.183.28]:40721 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751126AbcGUHfN (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 21 Jul 2016 03:35:13 -0400
-Date: Thu, 21 Jul 2016 09:35:07 +0200
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH 2/2] generic/130: Improve xfs_io filter
-Message-ID: <20160721073507.GB7220@quack2.suse.cz>
-References: <1469081856-6424-1-git-send-email-jack@suse.cz>
- <1469081856-6424-2-git-send-email-jack@suse.cz>
- <20160721065526.GB27776@eguan.usersys.redhat.com>
+	id S1752023AbcGUHrb (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 21 Jul 2016 03:47:31 -0400
+Date: Thu, 21 Jul 2016 15:47:24 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] btrfs: Update quick and auto tag for btrfs group
+Message-ID: <20160721074724.GC27776@eguan.usersys.redhat.com>
+References: <20160721020607.28258-1-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160721065526.GB27776@eguan.usersys.redhat.com>
+In-Reply-To: <20160721020607.28258-1-quwenruo@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Jan Kara <jack@suse.cz>, fstests@vger.kernel.org
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu 21-07-16 14:55:26, Eryu Guan wrote:
-> On Thu, Jul 21, 2016 at 08:17:36AM +0200, Jan Kara wrote:
-> > On my test setup xfs_io reports 'nan' in bytes/s and ops/s fields when
-> > the operation takes zero time. Account for that in _filter_xfs_io.
-> > 
-> > Signed-off-by: Jan Kara <jack@suse.cz>
-> > ---
-> >  common/filter | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > 
-> > diff --git a/common/filter b/common/filter
-> > index b229a97dfa0e..37f07c8ca1ac 100644
-> > --- a/common/filter
-> > +++ b/common/filter
-> > @@ -221,7 +221,7 @@ common_line_filter()
-> >  
-> >  _filter_xfs_io()
-> >  {
-> > -    sed -e "s/[0-9/.]* [GMKiBbytes]*, [0-9]* ops\; [0-9/:. sec]* ([inf0-9/.]* [EPGMKiBbytes]*\/sec and [inf0-9/.]* ops\/sec)/XXX Bytes, X ops\; XX:XX:XX.X (XXX YYY\/sec and XXX ops\/sec)/"
-> > +    sed -e "s/[0-9/.]* [GMKiBbytes]*, [0-9]* ops\; [0-9/:. sec]* ([infnan0-9/.]* [EPGMKiBbytes]*\/sec and [infnan0-9/.]* ops\/sec)/XXX Bytes, X ops\; XX:XX:XX.X (XXX YYY\/sec and XXX ops\/sec)/"
+On Thu, Jul 21, 2016 at 10:06:07AM +0800, Qu Wenruo wrote:
+> Update the following quick/auto tag based on their execution time
+> 007
+> 011
+> 050
+> 100
+> 101
 > 
-> Seems adding only 'a' to the char set is sufficient, 'n' is already in
-> the set, i.e.
+> Two systems are used to determine their execution time.
+> One is backed by an SATA spinning rust, whose maximum R/W speed is
+> about 100MB/s, modern desktop performance. (VM1)
 > 
-> - ...([inf0-9/.]* ...
-> + ...([infa0-9/.]* ...
+> Another one is a VM inside a openstack pool, with stronger CPU and
+> memory performance along with high latency storage.
+> Maximum R/W speed is around 150MB/s, latency is much higher than normal
+> HDD though. (VM2)
+> 
+> The 'quick' standard is a little more restrict, only when both systems
+> pass the test within 30s(+/- 10%), while 'auto' is less restrict, any
+> system can pass within 5min(+/- 10%) will still stay in 'auto' group.
+> 
+> Other test cases don't fit both standards on both systems will not be
+> modified.
+> 
+> Execution time result: (Unit: seconds)
+> ------------------------------------------------------
+> Test case No. | VM1        | VM2      | Modification |
+> ------------------------------------------------------
+> 007           | 4          | 2        | +quick       |
+> 011           | 669        | 1748     | -auto        |
+> 050           | 4          | 13       | +quick       |
+> 100           | 57         | 151      | -quick       |
+> 101           | 45         | 59       | -quick       |
+> ------------------------------------------------------
 
-Yeah. I've added 'nan' to document what the letters are there for. But
-probably I should have added just 'a' and added a comment. I'll respin the
-patch.
+Hmm, I'm a bit hesitated to take this. We usually try to make new tests
+run quick enough to fit auto/quick group, or reduce the run time of
+existing tests if they're taking too long time (e.g. 86c1b55 xfs/042:
+reduce runtime of the test).
 
-								Honza
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+But we usually don't remove 'auto' group from a test just because of
+test time, so we don't lose test coverage, especially when the test is
+potent. (I think btrfs/011 is one of these potent tests, it finds
+hang/crash/failure from time to time. BTW, btrfs/011 took 210s on my
+test vm, which has 4vcpu and 8G memory.)
+
+I think the "<30s <5m" rule is more like a guidance, not a hard rule.
+
+But 007 and 050 clearly belong to 'quick' group.
+
+Thanks,
+Eryu
