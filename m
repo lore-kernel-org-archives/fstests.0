@@ -1,53 +1,53 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:53129 "EHLO
-	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750791AbcGUXFW (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2016 19:05:22 -0400
-Date: Fri, 22 Jul 2016 09:05:19 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] generic/371: run write(2) and fallocate(2) in parallel
-Message-ID: <20160721230519.GF12670@dastard>
-References: <20160721073025.25557-1-wangxg.fnst@cn.fujitsu.com>
- <20160721104100.GD27776@eguan.usersys.redhat.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:29439 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752144AbcGUXq1 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2016 19:46:27 -0400
+Subject: [PATCH v7 00/17] xfstests: fixes and new tests for rmap/reflink/etc
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Thu, 21 Jul 2016 16:46:15 -0700
+Message-ID: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160721104100.GD27776@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 21, 2016 at 06:41:00PM +0800, Eryu Guan wrote:
-> On Thu, Jul 21, 2016 at 03:30:25PM +0800, Wang Xiaoguang wrote:
-> > +
-> > +run_time=$((180 * $TIME_FACTOR))
-> 
-> 180s is too long time, I can reproduce it in around 10s on my test vm,
-> just loop for 100 times for each operation (pwrite and falloc)
+Hi all,
 
-Or simply do:
+This is the seventh revision of a patchset that adds to xfstests
+support for testing reverse-mappings of physical blocks to file and
+metadata (rmap); support for testing multiple file logical blocks to
+the same physical block (reflink); and implements the beginnings of
+online metadata scrubbing.
 
-run_time=$((20 * $TIME_FACTOR * $TIME_FACTOR))
+The first eleven tests fix various bugs in existing reflink and rmap
+tests, most of which were a result of not using helpers when I should
+have.
 
-So that the time factor scales up quickly when you want to run long
-running tests.
+After that, there are new tests to make sure that we can't clone_range
+across mountpoints; test to make sure that swapext works with many
+extents on a rmap filesystem; and tests for realtime reverse-mapping.
+There are also revised patches for testing xfs_repair's ability to
+rebuild filesystem indices correctly, and to run xfs_scrub during each
+test.
 
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -373,3 +373,4 @@
-> >  368 auto quick richacl
-> >  369 auto quick richacl
-> >  370 auto quick richacl
-> > +371 auto enospc prealloc stress
-> 
-> So we can add 'quick' group and remove 'stress'.
+If you're going to start using this mess, you probably ought to just
+pull from my github trees for kernel[1], xfsprogs[2], and xfstests[3].
+There are also updates for xfs-docs[4].  The kernel patches should
+apply to dchinner's for-next; xfsprogs patches to for-next; and
+xfstest to master.  The kernel git tree already has for-next included.
 
-I'd leave the test in stress if we can run it based on time as per
-my above suggestion.
+The patches have been xfstested with x64, i386, armv7l, and ppc64.
+AFAICT these don't cause any new failures for the 'auto' group.
 
-Cheers,
+This is an extraordinary way to eat your data.  Enjoy! 
+Comments and questions are, as always, welcome.
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+--D
+
+[1] https://github.com/djwong/linux/tree/djwong-experimental
+[2] https://github.com/djwong/xfsprogs/tree/djwong-experimental
+[3] https://github.com/djwong/xfstests/tree/djwong-devel
+[4] https://github.com/djwong/xfs-documentation/tree/djwong-devel
