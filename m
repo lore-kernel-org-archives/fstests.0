@@ -1,118 +1,194 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:2030 "EHLO
-	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751518AbcGUCFg (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 20 Jul 2016 22:05:36 -0400
-Subject: Re: [PATCH] fstests: btrfs: Test send on heavily deduped file
-References: <20160719024402.19324-1-quwenruo@cn.fujitsu.com>
- <20160719043524.GL27776@eguan.usersys.redhat.com>
- <fb7acb1e-3835-1511-d66e-7d186c94e35e@cn.fujitsu.com>
- <20160720070100.GU27776@eguan.usersys.redhat.com>
- <01fb32c1-4662-ba9e-6bab-5b01790bd1d3@cn.fujitsu.com>
- <20160720233742.GZ12670@dastard>
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Message-ID: <409140dc-6c77-7e20-33ff-c533d0054bf6@cn.fujitsu.com>
-Date: Thu, 21 Jul 2016 10:05:25 +0800
+Received: from mx1.redhat.com ([209.132.183.28]:50170 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752015AbcGUDV3 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 20 Jul 2016 23:21:29 -0400
+Date: Thu, 21 Jul 2016 11:21:26 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] ext4/022: add regression test for ext4lazyinit_task
+ deadlock
+Message-ID: <20160721032126.GA27776@eguan.usersys.redhat.com>
+References: <1468931005-774-1-git-send-email-dmonakhov@openvz.org>
 MIME-Version: 1.0
-In-Reply-To: <20160720233742.GZ12670@dastard>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1468931005-774-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Eryu Guan <eguan@redhat.com>, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: Dmitry Monakhov <dmonakhov@openvz.org>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+On Tue, Jul 19, 2016 at 04:23:25PM +0400, Dmitry Monakhov wrote:
+> global ext4lazyinit task may deadlock on frozen under li_list_mtx lock.
+> Once that happen all mount/umount tasks also blocked.
+> Patch pended.
+> 
+> Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
+> ---
+>  tests/ext4/022     | 83 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/022.out |  2 ++
+>  tests/ext4/group   |  1 +
+>  3 files changed, 86 insertions(+)
+>  create mode 100755 tests/ext4/022
+>  create mode 100644 tests/ext4/022.out
+> 
+> diff --git a/tests/ext4/022 b/tests/ext4/022
+> new file mode 100755
+> index 0000000..1b9a33c
+> --- /dev/null
+> +++ b/tests/ext4/022
+> @@ -0,0 +1,83 @@
+> +#! /bin/bash
+> +# FS QA Test No. ext4/022
+> +#
+> +# Regression test for:
+> +# [TODO:ADD_COMMIT] ext4: improve ext4lazyinit scalability
+> +# Check ext4lazyinit deadlock
 
+Not sure if it's a valid test for ext4 yet, just add some comments from
+fstests perspective of view.
 
-At 07/21/2016 07:37 AM, Dave Chinner wrote:
-> On Wed, Jul 20, 2016 at 03:40:29PM +0800, Qu Wenruo wrote:
->> At 07/20/2016 03:01 PM, Eryu Guan wrote:
->>> On Tue, Jul 19, 2016 at 01:42:03PM +0800, Qu Wenruo wrote:
->>>>>
->>>>> This test uses $LOAD_FACTOR, so it should be in 'stress' group. And it
->>>>> hangs the latest kernel, stop other tests from running, I think we can
->>>>> add it to 'dangerous' group as well.
->>>>>
->>>>
->>>> Thanks for this info.
->>>> I'm completely OK to add this group to 'stress' and 'dangerous'.
->>>>
->>>>
->>>> However I'm a little curious about the meaning/standard of these groups.
->>>>
->>>> Does 'dangerous' conflicts with 'auto'?
->>>> Since under most case, tester would just execute './check -g auto' and the
->>>> system hangs at the test case.
->>>> So I'm a little confused with the 'auto' group.
->>>
->>> I quote my previous email here to explain the 'auto' group
->>> http://www.spinics.net/lists/fstests/msg03262.html
->>>
->>> "
->>> I searched for Dave's explainations on 'auto' group in his reviews, and
->>> got the following definitions:
->>>
->>> - it should be a valid & reliable test (it's finished and have
->>>  deterministic output) [1]
->>> - it passes on current upstream kernels, if it fails, it's likely to be
->>>  resolved in forseeable future [2]
->>> - it should take no longer than 5 minutes to finish [3]
->>> "
->>>
->>> And "The only difference between quick and auto group criteria is the
->>> test runtime." Usually 'quick' tests finish within 30s.
->>>
->>> For the 'dangerous' group, it was added in commit 3f28d55c3954 ("add
->>> freeze and dangerous groups"), and seems that it didn't have a very
->>> clear definition[*]. But I think any test that could hang/crash recent
->>> kernels is considered as dangerous.
->>>
->>> * http://oss.sgi.com/archives/xfs/2012-03/msg00073.html
->>
->> Thanks for all the info, really helps a lot.
->>
->> Especially for quick and auto difference.
->>
->> Would you mind me applying this standard to current btrfs test cases?
->
-> It shoul dbe applied to all test cases, regardless of the filesystem
-> type.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2014 Fujitsu.  All Rights Reserved.
 
-It's straightforward for specific fs test cases.
+Wrong copyright?
 
-But for generic, I'm a little concerned of the quick/auto standard.
-Should we use result of one single fs(and which fs? I assume xfs though) 
-or all fs, to determine quick/auto group?
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +status=1
+> +_cleanup()
+> +{
+> +    umount $loop_mnt/1
 
-For example, generic/127 involves quite a lot metadata operation, while 
-for some fs (OK, btrfs again) metadata operation is quite slow compared 
-to other stable fs like ext4 or xfs.
+$UMOUNT_PROG
 
-So it makes quick/auto tag quite hard to determine.
+> +    _destroy_loop_device $loop_dev1
+> +    _destroy_loop_device $loop_dev2
+> +    if [ $status -eq 0 ]; then
+
+I don't think this is needed, removing them unconditionally is ok to me.
+
+> +	rm -rf $img_dir $loop_mnt
+> +    fi
+> +    _scratch_unmount
+
+should remove $tmp.* in _cleanup: "rm -f $tmp.*"
+
+And please use tab for indention, not spaces, nor mixed tab and spaces.
+
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs ext4
+> +_supported_os Linux
+> +_require_scratch
+> +_require_loop
+> +_require_freeze
+> +
+> +rm -f $seqres.full
+> +echo "Silence is golden"
+> +
+> +img_dir=$SCRATCH_MNT/$seq.fs
+> +loop_mnt=$SCRATCH_MNT/$seq.mnt
+> +_scratch_mkfs_xfs >> $seqres.full 2>&1
+
+_scratch_mkfs ?
+
+> +_scratch_mount
+> +mkdir -p $img_dir
+> +mkdir -p $loop_mnt/{1,2}
+> +truncate -s 5G $img_dir/1.img
+> +truncate -s 5G $img_dir/2.img
+
+Use xfs_io to do truncate, old distributions like RHEL5 don't have
+truncate binary, not a big issue at this moment, but we have better
+choice, so why not :)
+
+$XFS_IO_PROG -fc "truncate 5G" $img_dir/1.img
+
+> +
+> +loop_dev1=$(_create_loop_device $img_dir/1.img)
+> +loop_dev2=$(_create_loop_device $img_dir/2.img)
+
+Better to explain in comments why two loop devices are needed.
+
+> +
+> +# Use nodiscard mode in order to force lazy init mode
+> +$MKFS_EXT4_PROG -F -E nodiscard,lazy_itable_init=1 $loop_dev1 \
+> +    >> $seqres.full 2>&1
+> +$MKFS_EXT4_PROG -F -E nodiscard,lazy_itable_init=1 $loop_dev2 \
+> +    >> $seqres.full 2>&1
+> +
+> +_mount $loop_dev1 $loop_mnt/1
+> +xfs_freeze -f $loop_mnt/1
+> +#If bug is not fixed any mount/umount will be blocked
+> +for i in $(seq 0 5)
+> +do
+
+fstests prefers this "for" format:
+
+for i in $(seq 0 5); do
+...
+done
+
+> +    _mount $loop_dev2 $loop_mnt/2
+> +    sleep 1
+> +    umount $loop_mnt/2
+> +    sleep 1
+> +done
+> +xfs_freeze -u $loop_mnt/1
+> +status=0
+> +exit
+> diff --git a/tests/ext4/022.out b/tests/ext4/022.out
+> new file mode 100644
+> index 0000000..394c6a7
+> --- /dev/null
+> +++ b/tests/ext4/022.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 022
+> +Silence is golden
+> diff --git a/tests/ext4/group b/tests/ext4/group
+> index bbdbe1d..f9d00b1 100644
+> --- a/tests/ext4/group
+> +++ b/tests/ext4/group
+> @@ -24,6 +24,7 @@
+>  019 fuzzers
+>  020 auto quick ioctl rw
+>  021 auto quick
+> +022 auto quick
+
+This test hangs latest 4.7-rc7 kernel, we can add it to 'dangerous'
+group as well.
 
 Thanks,
-Qu
+Eryu
 
->
->> BTW, does the standard apply to *ALL* possible mount options or just
->> *deafult* mount option?
->
-> Generally it applies to the default case.
->
->> For example, btrfs/011 can finish in about 5min with default mount
->> option, but for 'nodatasum' it can take up to 2 hours.
->> So should it belong to 'auto'?
->
-> Yes. Also, keep in mind that runtime is dependent on the type of
-> storage you are testing on. The general idea is that the
-> "< 30s quick, < 5m auto" rule is based on how long the test takes to
-> run on a local single spindle SATA drive, as that is the basic
-> hardware we'd expect people to be testing against. This means that a
-> test that takes 20s on your SSD might not be a "quick" test because
-> it takes 5 minutes on spinning rust....
->
-> Cheers,
->
-> Dave.
->
-
-
+>  271 auto rw quick
+>  301 aio auto ioctl rw stress
+>  302 aio auto ioctl rw stress
+> -- 
+> 1.8.3.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
