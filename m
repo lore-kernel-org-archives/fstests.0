@@ -1,12 +1,12 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([222.73.24.84]:37138 "EHLO song.cn.fujitsu.com"
+Received: from cn.fujitsu.com ([222.73.24.84]:7216 "EHLO song.cn.fujitsu.com"
 	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-	id S1753133AbcGUCGq (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 20 Jul 2016 22:06:46 -0400
+	id S1751810AbcGUIOj (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 21 Jul 2016 04:14:39 -0400
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH] btrfs: Update quick and auto tag for btrfs group
-Date: Thu, 21 Jul 2016 10:06:07 +0800
-Message-Id: <20160721020607.28258-1-quwenruo@cn.fujitsu.com>
+Subject: [PATCH v2] btrfs: Update quick and auto tag for btrfs group
+Date: Thu, 21 Jul 2016 16:13:15 +0800
+Message-Id: <20160721081315.29865-1-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
 Sender: fstests-owner@vger.kernel.org
 To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
@@ -14,7 +14,6 @@ List-ID: <fstests@vger.kernel.org>
 
 Update the following quick/auto tag based on their execution time
 007
-011
 050
 100
 101
@@ -40,7 +39,6 @@ Execution time result: (Unit: seconds)
 Test case No. | VM1        | VM2      | Modification |
 ------------------------------------------------------
 007           | 4          | 2        | +quick       |
-011           | 669        | 1748     | -auto        |
 050           | 4          | 13       | +quick       |
 100           | 57         | 151      | -quick       |
 101           | 45         | 59       | -quick       |
@@ -48,14 +46,17 @@ Test case No. | VM1        | VM2      | Modification |
 
 Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 ---
- tests/btrfs/group | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+v2:
+  Keep btrfs/011 into 'auto' group, to keep the coverage.
+---
+ tests/btrfs/group | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index a21a80a..b4f1334 100644
+index a21a80a..f2e8ab2 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -9,11 +9,11 @@
+@@ -9,7 +9,7 @@
  004 auto rw metadata
  005 auto defrag
  006 auto quick
@@ -64,11 +65,6 @@ index a21a80a..b4f1334 100644
  008 auto quick send
  009 auto quick subvol
  010 auto quick defrag
--011 auto replace
-+011 replace
- 012 auto convert
- 013 auto quick balance
- 014 auto balance
 @@ -52,7 +52,7 @@
  047 auto quick send
  048 auto quick
