@@ -1,105 +1,222 @@
-Received: from mx2.suse.de ([195.135.220.15]:49115 "EHLO mx2.suse.de"
+Received: from mx1.redhat.com ([209.132.183.28]:56203 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751058AbcGUIzL (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 21 Jul 2016 04:55:11 -0400
-Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
-	by mx2.suse.de (Postfix) with ESMTP id 24F33AAB7
-	for <fstests@vger.kernel.org>; Thu, 21 Jul 2016 08:55:10 +0000 (UTC)
-From: Jan Kara <jack@suse.cz>
-Subject: [PATCH v2] generic/235: Fix false failures for some quota formats
-Date: Thu, 21 Jul 2016 10:55:06 +0200
-Message-Id: <1469091306-8559-1-git-send-email-jack@suse.cz>
+	id S1751718AbcGUKlC (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 21 Jul 2016 06:41:02 -0400
+Date: Thu, 21 Jul 2016 18:41:00 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] generic/371: run write(2) and fallocate(2) in parallel
+Message-ID: <20160721104100.GD27776@eguan.usersys.redhat.com>
+References: <20160721073025.25557-1-wangxg.fnst@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160721073025.25557-1-wangxg.fnst@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Jan Kara <jack@suse.cz>
+To: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Different quota format may print additional information in repquota(8)
-output after standard quota information is printed. If format does
-support this additional printouts, repquota(8) will separate possible
-output by two empty lines even if format handler doesn't actually
-printout anything (which is currently always the case for queries test
-generic/235 does). If format doesn't support additional printouts, these
-two empty lines are not present in the output. This inconsistency causes
-false failures for some quota formats.
+On Thu, Jul 21, 2016 at 03:30:25PM +0800, Wang Xiaoguang wrote:
+> Currently in btrfs, there is something wrong with fallocate(2)'s data
+> space reservation, it'll temporarily occupy more data space thant it
+> really needs, which in turn will impact other operations' data request.
+> 
+> In this test case, it runs write(2) and fallocate(2) in parallel and the
+> total needed data space for these two operations don't exceed whole fs
+> free data space, to see whether we will get any unexpected ENOSPC error.
+> 
+> Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+> ---
+>  tests/generic/371     | 119 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/371.out |   2 +
+>  tests/generic/group   |   1 +
+>  3 files changed, 122 insertions(+)
+>  create mode 100755 tests/generic/371
+>  create mode 100644 tests/generic/371.out
+> 
+> diff --git a/tests/generic/371 b/tests/generic/371
+> new file mode 100755
+> index 0000000..b85327a
+> --- /dev/null
+> +++ b/tests/generic/371
+> @@ -0,0 +1,119 @@
+> +#! /bin/bash
+> +# FS QA Test 371
+> +#
+> +# Run write(2) and fallocate(2) in parallel and the total needed data space
+> +# for these operations don't exceed whole fs free data space, to see whether
+> +# we will get any unexpected ENOSPC error.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch
 
-Fix the problem by filtering out empty lines out of repquota(8) output.
+Need '_require_xfs_io_command "falloc"', otherwise test fails on ext3/2,
+because they don't support fallocate(2).
 
-Signed-off-by: Jan Kara <jack@suse.cz>
----
- tests/generic/235     | 9 +++++++--
- tests/generic/235.out | 8 --------
- 2 files changed, 7 insertions(+), 10 deletions(-)
+> +
+> +_scratch_mkfs_sized $((256 * 1024 * 1024)) >> $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +testfile1=$SCRATCH_MNT/testfile1
+> +testfile2=$SCRATCH_MNT/testfile2
+> +
+> +write_work()
+> +{
+> +	rm -f $testfile1
+> +	while [ 1 ]; do
+> +		$XFS_IO_PROG -f -c "pwrite 0 80M" $testfile1 >>$seqres.full 2>&1
+> +		grep "No space left on device" $seqres.full >/dev/null
+> +		if [ $? -eq 0 ]; then
+> +			echo "unexpected ENOSPC error occurs"
+> +			exit 1
+> +		fi
 
-diff --git a/tests/generic/235 b/tests/generic/235
-index 59456b67c092..d42054efee91 100755
---- a/tests/generic/235
-+++ b/tests/generic/235
-@@ -46,6 +46,11 @@ _require_scratch
- _require_quota
- _require_user
- 
-+_repquota()
-+{
-+	repquota -u -g $SCRATCH_MNT  | grep -v -E '^root|^$' | _filter_scratch
-+}
-+
- # real QA test starts here
- rm -f $seqres.full
- 
-@@ -57,7 +62,7 @@ quotaon $SCRATCH_MNT 2>/dev/null
- touch $SCRATCH_MNT/testfile
- chown $qa_user:$qa_user $SCRATCH_MNT/testfile
- 
--repquota -u -g $SCRATCH_MNT  | grep -v "^root" | _filter_scratch
-+_repquota
- 
- # If remount fails with this problem:
- #
-@@ -70,7 +75,7 @@ _scratch_mount "-o remount,rw" 2>&1 | tee -a $seqres.full | _filter_scratch
- 
- $XFS_IO_PROG -c 'pwrite 0 8k' -c 'fsync' \
- 			$SCRATCH_MNT/testfile >>$seqres.full 2>&1
--repquota -u -g $SCRATCH_MNT  | grep -v "^root" | _filter_scratch
-+_repquota
- 
- _scratch_unmount 2>/dev/null
- 
-diff --git a/tests/generic/235.out b/tests/generic/235.out
-index 95c10058d1cb..601fa2fa3de8 100644
---- a/tests/generic/235.out
-+++ b/tests/generic/235.out
-@@ -5,16 +5,12 @@ Block grace time: 7days; Inode grace time: 7days
- User            used    soft    hard  grace    used  soft  hard  grace
- ----------------------------------------------------------------------
- fsgqa     --       0       0       0              1     0     0       
--
--
- *** Report for group quotas on device SCRATCH_DEV
- Block grace time: 7days; Inode grace time: 7days
-                         Block limits                File limits
- Group           used    soft    hard  grace    used  soft  hard  grace
- ----------------------------------------------------------------------
- fsgqa     --       0       0       0              1     0     0       
--
--
- touch: cannot touch 'SCRATCH_MNT/failed': Read-only file system
- *** Report for user quotas on device SCRATCH_DEV
- Block grace time: 7days; Inode grace time: 7days
-@@ -22,13 +18,9 @@ Block grace time: 7days; Inode grace time: 7days
- User            used    soft    hard  grace    used  soft  hard  grace
- ----------------------------------------------------------------------
- fsgqa     --       8       0       0              1     0     0       
--
--
- *** Report for group quotas on device SCRATCH_DEV
- Block grace time: 7days; Inode grace time: 7days
-                         Block limits                File limits
- Group           used    soft    hard  grace    used  soft  hard  grace
- ----------------------------------------------------------------------
- fsgqa     --       8       0       0              1     0     0       
--
--
--- 
-2.6.6
+No need to grep for error message, just redirect stdout to /dev/null and
+any error will appear in stderr, which will break golden image.
 
+And $seqres.full is where we dump logs for debug purpose, tests should
+dump output they need to somewhere like $tmp.<suffix>
+
+> +		rm -f $testfile1
+> +	done
+> +}
+> +
+> +fallocate_work()
+> +{
+> +	rm -f  $testfile2
+> +	while [ 1 ]; do
+> +		$XFS_IO_PROG -f -c "falloc 0 80M" $testfile2 >>$seqres.full 2>&1
+> +		grep "No space left on device" $seqres.full >/dev/null
+> +		if [ $? -eq 0 ]; then
+> +			echo "unexpected ENOSPC error occurs"
+> +			exit 1
+> +		fi
+> +	rm -f $testfile2
+> +	done
+> +}
+> +
+> +run_time=$((180 * $TIME_FACTOR))
+
+180s is too long time, I can reproduce it in around 10s on my test vm,
+just loop for 100 times for each operation (pwrite and falloc)
+
+> +write_work &
+> +write_work_pid=$!
+> +fallocate_work &
+> +fallocate_work_pid=$!
+> +
+> +for ((elapsed_time = 0; elapsed_time < run_time; elapsed_time += 5)); do
+> +	kill -0 $write_work_pid >/dev/null 2>&1
+> +	if [ $? -ne 0 ]; then
+> +		kill $fallocate_work_pid >/dev/null 2>&1
+> +		break
+> +	fi
+> +
+> +	kill -0 $fallocate_work_pid >/dev/null 2>&1
+> +	if [ $? -ne 0 ]; then
+> +		kill $write_work_pid >/dev/null 2>&1
+> +		break
+> +	fi
+> +	sleep 5
+> +done
+> +
+> +kill $fallocate_work_pid >/dev/null 2>&1
+> +kill $write_work_pid >/dev/null 2>&1
+> +wait
+> +
+> +# wait un-finished xfs_io
+> +while ps aux | grep "xfs_io" | grep -qv grep; do
+> +	sleep 1
+> +done
+
+And this seems unnecessarily complicated
+
+So I'd write it as:
+
+echo "Silence is golden"
+for ((i=0; i<100; i++)); do
+        $XFS_IO_PROG -fc "pwrite 0 80M" $testfile1 >/dev/null
+        rm -f $testfile1
+done &
+pids=$!
+for ((i=0; i<100; i++)); do
+        $XFS_IO_PROG -fc "falloc 0 80M" $testfile2 >/dev/null
+        rm -f $testfile2
+done &
+pids="$pids $!"
+
+wait $pids
+status=0
+exit
+
+btrfs failed due to extra "pwrite64: No space left on device" output from
+xfs_io, and ext4 and xfs passed the test within 15s for me.
+
+> +
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/generic/371.out b/tests/generic/371.out
+> new file mode 100644
+> index 0000000..22ec8a2
+> --- /dev/null
+> +++ b/tests/generic/371.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 371
+> +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 97ecb65..3d4a802 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -373,3 +373,4 @@
+>  368 auto quick richacl
+>  369 auto quick richacl
+>  370 auto quick richacl
+> +371 auto enospc prealloc stress
+
+So we can add 'quick' group and remove 'stress'.
+
+Thanks,
+Eryu
