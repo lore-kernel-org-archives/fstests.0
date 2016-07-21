@@ -1,55 +1,178 @@
-Received: from mx2.suse.de ([195.135.220.15]:40463 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750970AbcGUH1Q (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 21 Jul 2016 03:27:16 -0400
-Date: Thu, 21 Jul 2016 09:27:10 +0200
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH] generic/235: Use CSV format for repquota output
-Message-ID: <20160721072710.GA7220@quack2.suse.cz>
-References: <1468843224-8940-1-git-send-email-jack@suse.cz>
- <20160719040738.GK27776@eguan.usersys.redhat.com>
- <20160720051324.GB3918@quack2.suse.cz>
- <20160720230230.GW12670@dastard>
+Received: from cn.fujitsu.com ([222.73.24.84]:54302 "EHLO song.cn.fujitsu.com"
+	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+	id S1751201AbcGUHdU (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 21 Jul 2016 03:33:20 -0400
+From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Subject: [PATCH] generic/371: run write(2) and fallocate(2) in parallel
+Date: Thu, 21 Jul 2016 15:30:25 +0800
+Message-Id: <20160721073025.25557-1-wangxg.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160720230230.GW12670@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Jan Kara <jack@suse.cz>, Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, dchinner@redhat.com
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu 21-07-16 09:02:31, Dave Chinner wrote:
-> On Wed, Jul 20, 2016 at 07:13:24AM +0200, Jan Kara wrote:
-> > On Tue 19-07-16 12:07:38, Eryu Guan wrote:
-> > > On Mon, Jul 18, 2016 at 02:00:24PM +0200, Jan Kara wrote:
-> > > > Different quota format may print additional information in repquota(8)
-> > > > output after standard quota information is printed and this information
-> > > > is separated by two empty lines. For quota formats that don't support
-> > > > printing any additional information these lines are not present in the
-> > > > output which causes false failures of the test. Switch the test to use
-> > > > repquota(8) CSV output format which does not have these formatting
-> > > > issues and in general should be more stable.
-> > > > 
-> > > > Signed-off-by: Jan Kara <jack@suse.cz>
-> > > 
-> > > This breaks tests on distributions with older version of repquota (e.g.
-> > > RHEL6 and RHEL7) where there's no "-O" support, and test failed because
-> > > of "invalid option -- 'O'".
-> > 
-> > Hum, support for -O option is in repquota for three years. That isn't much
-> > for enterprise distros, I agree. I can fix the problem with output
-> > filtering. That will be less future-proof but it will work for old
-> > repquota. I'm not sure what's more desirable. Dave?
-> 
-> What are the extra lines? Why can't an output filter be added to
-> strip the extra lines if they are emitted?
+Currently in btrfs, there is something wrong with fallocate(2)'s data
+space reservation, it'll temporarily occupy more data space thant it
+really needs, which in turn will impact other operations' data request.
 
-Those extra lines can be stripped. If that's preferable I'll send a patch
-doing that. I just thought using CSV output format of repquota may be less
-prone to formatting changes in the future.
+In this test case, it runs write(2) and fallocate(2) in parallel and the
+total needed data space for these two operations don't exceed whole fs
+free data space, to see whether we will get any unexpected ENOSPC error.
 
-								Honza
+Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+---
+ tests/generic/371     | 119 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/371.out |   2 +
+ tests/generic/group   |   1 +
+ 3 files changed, 122 insertions(+)
+ create mode 100755 tests/generic/371
+ create mode 100644 tests/generic/371.out
+
+diff --git a/tests/generic/371 b/tests/generic/371
+new file mode 100755
+index 0000000..b85327a
+--- /dev/null
++++ b/tests/generic/371
+@@ -0,0 +1,119 @@
++#! /bin/bash
++# FS QA Test 371
++#
++# Run write(2) and fallocate(2) in parallel and the total needed data space
++# for these operations don't exceed whole fs free data space, to see whether
++# we will get any unexpected ENOSPC error.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++
++_scratch_mkfs_sized $((256 * 1024 * 1024)) >> $seqres.full 2>&1
++_scratch_mount
++
++testfile1=$SCRATCH_MNT/testfile1
++testfile2=$SCRATCH_MNT/testfile2
++
++write_work()
++{
++	rm -f $testfile1
++	while [ 1 ]; do
++		$XFS_IO_PROG -f -c "pwrite 0 80M" $testfile1 >>$seqres.full 2>&1
++		grep "No space left on device" $seqres.full >/dev/null
++		if [ $? -eq 0 ]; then
++			echo "unexpected ENOSPC error occurs"
++			exit 1
++		fi
++		rm -f $testfile1
++	done
++}
++
++fallocate_work()
++{
++	rm -f  $testfile2
++	while [ 1 ]; do
++		$XFS_IO_PROG -f -c "falloc 0 80M" $testfile2 >>$seqres.full 2>&1
++		grep "No space left on device" $seqres.full >/dev/null
++		if [ $? -eq 0 ]; then
++			echo "unexpected ENOSPC error occurs"
++			exit 1
++		fi
++	rm -f $testfile2
++	done
++}
++
++run_time=$((180 * $TIME_FACTOR))
++write_work &
++write_work_pid=$!
++fallocate_work &
++fallocate_work_pid=$!
++
++for ((elapsed_time = 0; elapsed_time < run_time; elapsed_time += 5)); do
++	kill -0 $write_work_pid >/dev/null 2>&1
++	if [ $? -ne 0 ]; then
++		kill $fallocate_work_pid >/dev/null 2>&1
++		break
++	fi
++
++	kill -0 $fallocate_work_pid >/dev/null 2>&1
++	if [ $? -ne 0 ]; then
++		kill $write_work_pid >/dev/null 2>&1
++		break
++	fi
++	sleep 5
++done
++
++kill $fallocate_work_pid >/dev/null 2>&1
++kill $write_work_pid >/dev/null 2>&1
++wait
++
++# wait un-finished xfs_io
++while ps aux | grep "xfs_io" | grep -qv grep; do
++	sleep 1
++done
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/generic/371.out b/tests/generic/371.out
+new file mode 100644
+index 0000000..22ec8a2
+--- /dev/null
++++ b/tests/generic/371.out
+@@ -0,0 +1,2 @@
++QA output created by 371
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 97ecb65..3d4a802 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -373,3 +373,4 @@
+ 368 auto quick richacl
+ 369 auto quick richacl
+ 370 auto quick richacl
++371 auto enospc prealloc stress
 -- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+2.9.0
+
+
+
