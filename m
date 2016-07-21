@@ -1,11 +1,11 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:29753 "EHLO
+Received: from userp1040.oracle.com ([156.151.31.81]:29794 "EHLO
 	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752259AbcGUXr1 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2016 19:47:27 -0400
-Subject: [PATCH 10/17] xfs/179: use scratch device helpers
+	with ESMTP id S1752598AbcGUXrd (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2016 19:47:33 -0400
+Subject: [PATCH 11/17] xfs/234: use scratch device helpers
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 21 Jul 2016 16:47:19 -0700
-Message-ID: <146914483981.11762.15707981777571396710.stgit@birch.djwong.org>
+Date: Thu, 21 Jul 2016 16:47:26 -0700
+Message-ID: <146914484608.11762.11733588115406137276.stgit@birch.djwong.org>
 In-Reply-To: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
 References: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -17,56 +17,36 @@ Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
 Use the helper functions for scratch devices.  This fixes a problem
-where xfs/179 fails when there's a realtime device.
+where xfs/234 fails when there's a realtime device.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/xfs/179 |   10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+ tests/xfs/234 |    6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
 
-diff --git a/tests/xfs/179 b/tests/xfs/179
-index e0b0af8..18459cb 100755
---- a/tests/xfs/179
-+++ b/tests/xfs/179
-@@ -65,7 +65,7 @@ _pwrite_byte 0x61 0 $blksz $testdir/file1 >> $seqres.full
- _cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
+diff --git a/tests/xfs/234 b/tests/xfs/234
+index 2bbf295..8dadc34 100755
+--- a/tests/xfs/234
++++ b/tests/xfs/234
+@@ -34,7 +34,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _cleanup()
+ {
+     cd /
+-    umount $SCRATCH_MNT > /dev/null 2>&1
++    _scratch_unmount > /dev/null 2>&1
+     rm -rf $tmp.* $metadump_file $TEST_DIR/image
+ }
  
- echo "Change reference count"
+@@ -76,8 +76,8 @@ _scratch_metadump $metadump_file
+ # Now restore the obfuscated one back and take a look around
+ echo "Restore metadump"
+ xfs_mdrestore $metadump_file $TEST_DIR/image
+-_mount -t $FSTYP $TEST_DIR/image $SCRATCH_MNT
 -umount $SCRATCH_MNT
-+_scratch_unmount
- echo "set refcount to -4" >> $seqres.full
- $XFS_DB_PROG -x -c 'agf 0' -c 'addr refcntroot' -c 'write recs[1].refcount 4294967292' $SCRATCH_DEV >> $seqres.full
- echo "check refcount after setting to -4" >> $seqres.full
-@@ -80,7 +80,7 @@ _cp_reflink $testdir/file1 $testdir/file6 >> $seqres.full
- _cp_reflink $testdir/file1 $testdir/file7 >> $seqres.full
++SCRATCH_DEV=$TEST_DIR/image _scratch_mount
++SCRATCH_DEV=$TEST_DIR/image _scratch_unmount
  
- echo "Check scratch fs"
--umount $SCRATCH_MNT
-+_scratch_unmount
- echo "check refcount after reflinking 5 more times" >> $seqres.full
- $XFS_DB_PROG -c 'agf 0' -c 'addr refcntroot' -c 'p recs[1]' $SCRATCH_DEV >> $seqres.full
- _scratch_mount >> $seqres.full
-@@ -91,7 +91,7 @@ _pwrite_byte 0x62 0 $blksz $testdir/file5 >> $seqres.full
- _pwrite_byte 0x62 0 $blksz $testdir/file7 >> $seqres.full
- 
- echo "Check scratch fs"
--umount $SCRATCH_MNT
-+_scratch_unmount
- echo "check refcount after cowing 3 files" >> $seqres.full
- $XFS_DB_PROG -c 'agf 0' -c 'addr refcntroot' -c 'p recs[1]' $SCRATCH_DEV >> $seqres.full
- _scratch_mount >> $seqres.full
-@@ -100,10 +100,10 @@ echo "Remove reflinked files"
- rm -rf $testdir/file*
- 
- echo "Check scratch fs"
--umount $SCRATCH_MNT
-+_scratch_unmount
- echo "check refcount after removing all files" >> $seqres.full
- $XFS_DB_PROG -c 'agf 0' -c 'addr refcntroot' -c 'p recs[1]' $SCRATCH_DEV >> $seqres.full
--$XFS_REPAIR_PROG -o force_geometry -n $SCRATCH_DEV >> $seqres.full 2>&1
-+_scratch_xfs_repair -o force_geometry -n >> $seqres.full 2>&1
- res=$?
- if [ $res -eq 0 ]; then
- 	# If repair succeeds then format the device so that the post-test
+ echo "Check restored fs"
+ _check_generic_filesystem $metadump_file
 
