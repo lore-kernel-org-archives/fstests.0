@@ -1,170 +1,96 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([222.73.24.84]:61603 "EHLO song.cn.fujitsu.com"
+Received: from cn.fujitsu.com ([222.73.24.84]:37138 "EHLO song.cn.fujitsu.com"
 	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-	id S1752496AbcGSCoS (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 18 Jul 2016 22:44:18 -0400
+	id S1753133AbcGUCGq (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 20 Jul 2016 22:06:46 -0400
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH] fstests: btrfs: Test send on heavily deduped file
-Date: Tue, 19 Jul 2016 10:44:02 +0800
-Message-Id: <20160719024402.19324-1-quwenruo@cn.fujitsu.com>
+Subject: [PATCH] btrfs: Update quick and auto tag for btrfs group
+Date: Thu, 21 Jul 2016 10:06:07 +0800
+Message-Id: <20160721020607.28258-1-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
 Sender: fstests-owner@vger.kernel.org
 To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-For fully deduped file, whose file extents are all pointing to the same
-extent, btrfs backref walk can be very time consuming, long enough to
-trigger softlock.
+Update the following quick/auto tag based on their execution time
+007
+011
+050
+100
+101
 
-Unfortunately, btrfs send is one of the caller of such backref walk
-under an O(n) loop, making the total time complexity to O(n^3) or more.
+Two systems are used to determine their execution time.
+One is backed by an SATA spinning rust, whose maximum R/W speed is
+about 100MB/s, modern desktop performance. (VM1)
 
-And even worse, btrfs send will allocate memory in such loop, to trigger
-OOM on system with small memory(<4G).
+Another one is a VM inside a openstack pool, with stronger CPU and
+memory performance along with high latency storage.
+Maximum R/W speed is around 150MB/s, latency is much higher than normal
+HDD though. (VM2)
 
-This test case will check if btrfs send will cause these problems.
+The 'quick' standard is a little more restrict, only when both systems
+pass the test within 30s(+/- 10%), while 'auto' is less restrict, any
+system can pass within 5min(+/- 10%) will still stay in 'auto' group.
 
-Reporeted-by: Tsutomu Itoh <t-itoh@jp.fujitsu.com>
-To: Filipe Manana <fdmanana@gmail.com>
+Other test cases don't fit both standards on both systems will not be
+modified.
+
+Execution time result: (Unit: seconds)
+------------------------------------------------------
+Test case No. | VM1        | VM2      | Modification |
+------------------------------------------------------
+007           | 4          | 2        | +quick       |
+011           | 669        | 1748     | -auto        |
+050           | 4          | 13       | +quick       |
+100           | 57         | 151      | -quick       |
+101           | 45         | 59       | -quick       |
+------------------------------------------------------
+
 Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 ---
-To Filipe:
-  For the soft lockup, I will try my best to figure out some method to
-  avoid such lockup (but it will still be very time consuming though).
+ tests/btrfs/group | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
-  But for the OOM problem, would you mind disabling clone/reflink
-  detection in btrfs send?
-
-  In fact we should really avoid doing full backref walk inside an O(n)
-  loop (just like previous fiemap ioctl test case), and avoid any full
-  backref walk if possible.
-  So I'm afraid that's the only solution yet.
-
-Thanks,
-Qu
----
- tests/btrfs/127     | 89 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/127.out |  3 ++
- tests/btrfs/group   |  1 +
- 3 files changed, 93 insertions(+)
- create mode 100755 tests/btrfs/127
- create mode 100644 tests/btrfs/127.out
-
-diff --git a/tests/btrfs/127 b/tests/btrfs/127
-new file mode 100755
-index 0000000..a31a653
---- /dev/null
-+++ b/tests/btrfs/127
-@@ -0,0 +1,89 @@
-+#! /bin/bash
-+# FS QA Test 127
-+#
-+# Check if btrfs send can handle large deduped file, whose file extents
-+# are all pointing to one extent.
-+# Such file structure will cause quite large pressure to any operation which
-+# iterates all backref of one extent.
-+# And unfortunately, btrfs send is one of these operations, and will cause
-+# softlock or OOM on systems with small memory(<4G).
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Fujitsu. All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_scratch_reflink
-+
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount
-+
-+nr_extents=$((4096 * $LOAD_FACTOR))
-+
-+# Use 128K blocksize, the default value of both deduperemove or
-+# inband dedupe
-+blocksize=$((128 * 1024))
-+file=$SCRATCH_MNT/foobar
-+
-+# create the initial file, whose file extents are all point to one extent
-+_pwrite_byte 0xcdcdcdcd 0 $blocksize  $file | _filter_xfs_io
-+
-+for i in $(seq 1 $(($nr_extents - 1))); do
-+	_reflink_range $file 0 $file $(($i * $blocksize)) $blocksize \
-+		> /dev/null 2>&1
-+done
-+
-+# create a RO snapshot, so we can send out the snapshot
-+_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/ro_snap
-+
-+# send out the subvolume, and it will either:
-+# 1) OOM since memory is allocated inside a O(n^3) loop
-+# 2) Softlock since time consuming backref walk is called without scheduling.
-+# the send destination is not important, just send will cause the problem
-+_run_btrfs_util_prog send $SCRATCH_MNT/ro_snap > /dev/null 2>&1
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/127.out b/tests/btrfs/127.out
-new file mode 100644
-index 0000000..8b08bf8
---- /dev/null
-+++ b/tests/btrfs/127.out
-@@ -0,0 +1,3 @@
-+QA output created by 127
-+wrote 131072/131072 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index a21a80a..d9174b5 100644
+index a21a80a..b4f1334 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -129,3 +129,4 @@
- 124 auto replace
- 125 auto replace
- 126 auto quick qgroup
-+127 auto clone send
+@@ -9,11 +9,11 @@
+ 004 auto rw metadata
+ 005 auto defrag
+ 006 auto quick
+-007 auto rw metadata send
++007 auto quick rw metadata send
+ 008 auto quick send
+ 009 auto quick subvol
+ 010 auto quick defrag
+-011 auto replace
++011 replace
+ 012 auto convert
+ 013 auto quick balance
+ 014 auto balance
+@@ -52,7 +52,7 @@
+ 047 auto quick send
+ 048 auto quick
+ 049 auto quick
+-050 auto send
++050 auto quick send
+ 051 auto quick send
+ 052 auto quick clone
+ 053 auto quick send
+@@ -102,8 +102,8 @@
+ 097 auto quick send clone
+ 098 auto quick metadata clone
+ 099 auto quick qgroup
+-100 auto quick replace
+-101 auto quick replace
++100 auto replace
++101 auto replace
+ 102 auto quick metadata enospc
+ 103 auto quick clone compress
+ 104 auto qgroup
 -- 
-2.5.5
+2.9.0
 
 
 
