@@ -1,102 +1,105 @@
-Received: from mx2.suse.de ([195.135.220.15]:44200 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:49115 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751719AbcGUIOZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Thu, 21 Jul 2016 04:14:25 -0400
-Date: Thu, 21 Jul 2016 10:14:22 +0200
+	id S1751058AbcGUIzL (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Thu, 21 Jul 2016 04:55:11 -0400
+Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
+	by mx2.suse.de (Postfix) with ESMTP id 24F33AAB7
+	for <fstests@vger.kernel.org>; Thu, 21 Jul 2016 08:55:10 +0000 (UTC)
 From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH 2/2] generic/130: Improve xfs_io filter
-Message-ID: <20160721081422.GA7901@quack2.suse.cz>
-References: <1469081856-6424-1-git-send-email-jack@suse.cz>
- <1469081856-6424-2-git-send-email-jack@suse.cz>
- <20160721065526.GB27776@eguan.usersys.redhat.com>
- <20160721073507.GB7220@quack2.suse.cz>
-MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="LZvS9be/3tNcYl/X"
-Content-Disposition: inline
-In-Reply-To: <20160721073507.GB7220@quack2.suse.cz>
+Subject: [PATCH v2] generic/235: Fix false failures for some quota formats
+Date: Thu, 21 Jul 2016 10:55:06 +0200
+Message-Id: <1469091306-8559-1-git-send-email-jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Jan Kara <jack@suse.cz>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Jan Kara <jack@suse.cz>
 List-ID: <fstests@vger.kernel.org>
 
+Different quota format may print additional information in repquota(8)
+output after standard quota information is printed. If format does
+support this additional printouts, repquota(8) will separate possible
+output by two empty lines even if format handler doesn't actually
+printout anything (which is currently always the case for queries test
+generic/235 does). If format doesn't support additional printouts, these
+two empty lines are not present in the output. This inconsistency causes
+false failures for some quota formats.
 
---LZvS9be/3tNcYl/X
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-
-On Thu 21-07-16 09:35:07, Jan Kara wrote:
-> On Thu 21-07-16 14:55:26, Eryu Guan wrote:
-> > On Thu, Jul 21, 2016 at 08:17:36AM +0200, Jan Kara wrote:
-> > > On my test setup xfs_io reports 'nan' in bytes/s and ops/s fields when
-> > > the operation takes zero time. Account for that in _filter_xfs_io.
-> > > 
-> > > Signed-off-by: Jan Kara <jack@suse.cz>
-> > > ---
-> > >  common/filter | 2 +-
-> > >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > > 
-> > > diff --git a/common/filter b/common/filter
-> > > index b229a97dfa0e..37f07c8ca1ac 100644
-> > > --- a/common/filter
-> > > +++ b/common/filter
-> > > @@ -221,7 +221,7 @@ common_line_filter()
-> > >  
-> > >  _filter_xfs_io()
-> > >  {
-> > > -    sed -e "s/[0-9/.]* [GMKiBbytes]*, [0-9]* ops\; [0-9/:. sec]* ([inf0-9/.]* [EPGMKiBbytes]*\/sec and [inf0-9/.]* ops\/sec)/XXX Bytes, X ops\; XX:XX:XX.X (XXX YYY\/sec and XXX ops\/sec)/"
-> > > +    sed -e "s/[0-9/.]* [GMKiBbytes]*, [0-9]* ops\; [0-9/:. sec]* ([infnan0-9/.]* [EPGMKiBbytes]*\/sec and [infnan0-9/.]* ops\/sec)/XXX Bytes, X ops\; XX:XX:XX.X (XXX YYY\/sec and XXX ops\/sec)/"
-> > 
-> > Seems adding only 'a' to the char set is sufficient, 'n' is already in
-> > the set, i.e.
-> > 
-> > - ...([inf0-9/.]* ...
-> > + ...([infa0-9/.]* ...
-> 
-> Yeah. I've added 'nan' to document what the letters are there for. But
-> probably I should have added just 'a' and added a comment. I'll respin the
-> patch.
-
-Attached is a revised patch.
-
-								Honza
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
-
---LZvS9be/3tNcYl/X
-Content-Type: text/x-patch; charset=us-ascii
-Content-Disposition: attachment; filename="0001-generic-130-Improve-xfs_io-filter.patch"
-
->From 8d86c6fe36040e21db3475292a2dd05a280f158f Mon Sep 17 00:00:00 2001
-From: Jan Kara <jack@suse.cz>
-Date: Thu, 21 Jul 2016 08:15:19 +0200
-Subject: [PATCH] generic/130: Improve xfs_io filter
-
-On my test setup xfs_io reports 'nan' in bytes/s and ops/s fields when
-the operation takes zero time. Account for that in _filter_xfs_io.
+Fix the problem by filtering out empty lines out of repquota(8) output.
 
 Signed-off-by: Jan Kara <jack@suse.cz>
 ---
- common/filter | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ tests/generic/235     | 9 +++++++--
+ tests/generic/235.out | 8 --------
+ 2 files changed, 7 insertions(+), 10 deletions(-)
 
-diff --git a/common/filter b/common/filter
-index b229a97dfa0e..f80cd562af71 100644
---- a/common/filter
-+++ b/common/filter
-@@ -221,7 +221,9 @@ common_line_filter()
+diff --git a/tests/generic/235 b/tests/generic/235
+index 59456b67c092..d42054efee91 100755
+--- a/tests/generic/235
++++ b/tests/generic/235
+@@ -46,6 +46,11 @@ _require_scratch
+ _require_quota
+ _require_user
  
- _filter_xfs_io()
- {
--    sed -e "s/[0-9/.]* [GMKiBbytes]*, [0-9]* ops\; [0-9/:. sec]* ([inf0-9/.]* [EPGMKiBbytes]*\/sec and [inf0-9/.]* ops\/sec)/XXX Bytes, X ops\; XX:XX:XX.X (XXX YYY\/sec and XXX ops\/sec)/"
-+    # Apart from standard numeric values, we also filter out 'inf' and 'nan'
-+    # which can result from division in some cases
-+    sed -e "s/[0-9/.]* [GMKiBbytes]*, [0-9]* ops\; [0-9/:. sec]* ([infa0-9/.]* [EPGMKiBbytes]*\/sec and [infa0-9/.]* ops\/sec)/XXX Bytes, X ops\; XX:XX:XX.X (XXX YYY\/sec and XXX ops\/sec)/"
- }
++_repquota()
++{
++	repquota -u -g $SCRATCH_MNT  | grep -v -E '^root|^$' | _filter_scratch
++}
++
+ # real QA test starts here
+ rm -f $seqres.full
  
- _filter_xfs_io_unique()
+@@ -57,7 +62,7 @@ quotaon $SCRATCH_MNT 2>/dev/null
+ touch $SCRATCH_MNT/testfile
+ chown $qa_user:$qa_user $SCRATCH_MNT/testfile
+ 
+-repquota -u -g $SCRATCH_MNT  | grep -v "^root" | _filter_scratch
++_repquota
+ 
+ # If remount fails with this problem:
+ #
+@@ -70,7 +75,7 @@ _scratch_mount "-o remount,rw" 2>&1 | tee -a $seqres.full | _filter_scratch
+ 
+ $XFS_IO_PROG -c 'pwrite 0 8k' -c 'fsync' \
+ 			$SCRATCH_MNT/testfile >>$seqres.full 2>&1
+-repquota -u -g $SCRATCH_MNT  | grep -v "^root" | _filter_scratch
++_repquota
+ 
+ _scratch_unmount 2>/dev/null
+ 
+diff --git a/tests/generic/235.out b/tests/generic/235.out
+index 95c10058d1cb..601fa2fa3de8 100644
+--- a/tests/generic/235.out
++++ b/tests/generic/235.out
+@@ -5,16 +5,12 @@ Block grace time: 7days; Inode grace time: 7days
+ User            used    soft    hard  grace    used  soft  hard  grace
+ ----------------------------------------------------------------------
+ fsgqa     --       0       0       0              1     0     0       
+-
+-
+ *** Report for group quotas on device SCRATCH_DEV
+ Block grace time: 7days; Inode grace time: 7days
+                         Block limits                File limits
+ Group           used    soft    hard  grace    used  soft  hard  grace
+ ----------------------------------------------------------------------
+ fsgqa     --       0       0       0              1     0     0       
+-
+-
+ touch: cannot touch 'SCRATCH_MNT/failed': Read-only file system
+ *** Report for user quotas on device SCRATCH_DEV
+ Block grace time: 7days; Inode grace time: 7days
+@@ -22,13 +18,9 @@ Block grace time: 7days; Inode grace time: 7days
+ User            used    soft    hard  grace    used  soft  hard  grace
+ ----------------------------------------------------------------------
+ fsgqa     --       8       0       0              1     0     0       
+-
+-
+ *** Report for group quotas on device SCRATCH_DEV
+ Block grace time: 7days; Inode grace time: 7days
+                         Block limits                File limits
+ Group           used    soft    hard  grace    used  soft  hard  grace
+ ----------------------------------------------------------------------
+ fsgqa     --       8       0       0              1     0     0       
+-
+-
 -- 
 2.6.6
 
-
---LZvS9be/3tNcYl/X--
