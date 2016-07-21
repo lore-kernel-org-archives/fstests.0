@@ -1,11 +1,11 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:29794 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752598AbcGUXrd (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2016 19:47:33 -0400
-Subject: [PATCH 11/17] xfs/234: use scratch device helpers
+Received: from aserp1040.oracle.com ([141.146.126.69]:29474 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752598AbcGUXrm (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2016 19:47:42 -0400
+Subject: [PATCH 12/17] reflink: test cross-mountpoint reflink and dedupe
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 21 Jul 2016 16:47:26 -0700
-Message-ID: <146914484608.11762.11733588115406137276.stgit@birch.djwong.org>
+Date: Thu, 21 Jul 2016 16:47:32 -0700
+Message-ID: <146914485237.11762.2526971565060691741.stgit@birch.djwong.org>
 In-Reply-To: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
 References: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -16,37 +16,249 @@ To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
 Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-Use the helper functions for scratch devices.  This fixes a problem
-where xfs/234 fails when there's a realtime device.
+Test sharing blocks via reflink and dedupe between two different
+mountpoints of the same filesystem.  This shouldn't work, since
+we don't allow cross-mountpoint functions.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/xfs/234 |    6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ tests/generic/927     |   88 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/927.out |    9 +++++
+ tests/generic/928     |   86 ++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/928.out |   10 ++++++
+ tests/generic/group   |    2 +
+ 5 files changed, 195 insertions(+)
+ create mode 100755 tests/generic/927
+ create mode 100644 tests/generic/927.out
+ create mode 100755 tests/generic/928
+ create mode 100644 tests/generic/928.out
 
 
-diff --git a/tests/xfs/234 b/tests/xfs/234
-index 2bbf295..8dadc34 100755
---- a/tests/xfs/234
-+++ b/tests/xfs/234
-@@ -34,7 +34,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
- _cleanup()
- {
-     cd /
--    umount $SCRATCH_MNT > /dev/null 2>&1
-+    _scratch_unmount > /dev/null 2>&1
-     rm -rf $tmp.* $metadump_file $TEST_DIR/image
- }
- 
-@@ -76,8 +76,8 @@ _scratch_metadump $metadump_file
- # Now restore the obfuscated one back and take a look around
- echo "Restore metadump"
- xfs_mdrestore $metadump_file $TEST_DIR/image
--_mount -t $FSTYP $TEST_DIR/image $SCRATCH_MNT
--umount $SCRATCH_MNT
-+SCRATCH_DEV=$TEST_DIR/image _scratch_mount
-+SCRATCH_DEV=$TEST_DIR/image _scratch_unmount
- 
- echo "Check restored fs"
- _check_generic_filesystem $metadump_file
+diff --git a/tests/generic/927 b/tests/generic/927
+new file mode 100755
+index 0000000..c7d82b7
+--- /dev/null
++++ b/tests/generic/927
+@@ -0,0 +1,88 @@
++#! /bin/bash
++# FS QA Test No. 927
++#
++# Check that cross-mountpoint reflink doesn't work.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Oracle, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 7 15
++
++_cleanup()
++{
++	cd /
++	rm -rf $tmp.*
++	wait
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch_reflink
++_require_cp_reflink
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++otherdir=/tmp/m.$seq
++othertestdir=$otherdir/test-$seq
++rm -rf $otherdir
++mkdir $otherdir
++
++blocks=1
++blksz=65536
++sz=$((blksz * blocks))
++
++echo "Mount otherdir"
++SCRATCH_MNT=$otherdir _scratch_mount
++
++echo "Create file"
++_pwrite_byte 0x61 0 $sz $testdir/file >> $seqres.full
++
++filter_md5() {
++	_filter_scratch | sed -e "s,$otherdir,OTHER_DIR,g"
++}
++
++echo "Reflink one file to another"
++_cp_reflink $testdir/file $othertestdir/otherfiles 2>&1 | filter_md5
++
++echo "Check output"
++md5sum $testdir/file | _filter_scratch
++test -e $othertestdir/otherfile && echo "otherfile should not exist"
++
++echo "Unmount otherdir"
++SCRATCH_MNT=$otherdir _scratch_unmount
++rm -rf $otherdir
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/927.out b/tests/generic/927.out
+new file mode 100644
+index 0000000..3ef3057
+--- /dev/null
++++ b/tests/generic/927.out
+@@ -0,0 +1,9 @@
++QA output created by 927
++Format and mount
++Mount otherdir
++Create file
++Reflink one file to another
++cp: failed to clone 'OTHER_DIR/test-927/otherfiles' from 'SCRATCH_MNT/test-927/file': Invalid cross-device link
++Check output
++2d61aa54b58c2e94403fb092c3dbc027  SCRATCH_MNT/test-927/file
++Unmount otherdir
+diff --git a/tests/generic/928 b/tests/generic/928
+new file mode 100755
+index 0000000..86268e7
+--- /dev/null
++++ b/tests/generic/928
+@@ -0,0 +1,86 @@
++#! /bin/bash
++# FS QA Test No. 928
++#
++# Check that cross-mountpoint dedupe doesn't work.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Oracle, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 7 15
++
++_cleanup()
++{
++	cd /
++	rm -rf $tmp.*
++	wait
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch_dedupe
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++otherdir=/tmp/m.$seq
++othertestdir=$otherdir/test-$seq
++rm -rf $otherdir
++mkdir $otherdir
++
++blocks=1
++blksz=65536
++sz=$((blocks * blksz))
++
++echo "Mount otherdir"
++SCRATCH_MNT=$otherdir _scratch_mount
++
++echo "Create file"
++_pwrite_byte 0x61 0 $sz $testdir/file >> $seqres.full
++_pwrite_byte 0x61 0 $sz $testdir/otherfile >> $seqres.full
++
++echo "Dedupe one file to another"
++_dedupe_range $testdir/file 0 $othertestdir/otherfile 0 $sz >> $seqres.full
++
++filter_md5() {
++	_filter_scratch | sed -e "s,$otherdir,OTHER_DIR,g"
++}
++echo "Check output"
++md5sum $testdir/file $othertestdir/otherfile | filter_md5
++
++echo "Unmount otherdir"
++SCRATCH_MNT=$otherdir _scratch_unmount
++rm -rf $otherdir
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/928.out b/tests/generic/928.out
+new file mode 100644
+index 0000000..ef35c5b
+--- /dev/null
++++ b/tests/generic/928.out
+@@ -0,0 +1,10 @@
++QA output created by 928
++Format and mount
++Mount otherdir
++Create file
++Dedupe one file to another
++dedupe: Invalid cross-device link
++Check output
++2d61aa54b58c2e94403fb092c3dbc027  SCRATCH_MNT/test-928/file
++2d61aa54b58c2e94403fb092c3dbc027  OTHER_DIR/test-928/otherfile
++Unmount otherdir
+diff --git a/tests/generic/group b/tests/generic/group
+index 97ecb65..18b9775 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -373,3 +373,5 @@
+ 368 auto quick richacl
+ 369 auto quick richacl
+ 370 auto quick richacl
++927 auto quick clone
++928 auto quick clone dedupe
 
