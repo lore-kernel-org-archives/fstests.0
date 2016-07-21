@@ -1,12 +1,11 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:29313 "EHLO
+Received: from aserp1040.oracle.com ([141.146.126.69]:29364 "EHLO
 	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752490AbcGUXrM (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2016 19:47:12 -0400
-Subject: [PATCH 07/17] xfs/128: cycle_mount the scratch device,
- not the test device
+	with ESMTP id S1752259AbcGUXrV (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2016 19:47:21 -0400
+Subject: [PATCH 09/17] common/dmerror: fix mount option issues
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 21 Jul 2016 16:47:01 -0700
-Message-ID: <146914482100.11762.3197784490090678443.stgit@birch.djwong.org>
+Date: Thu, 21 Jul 2016 16:47:13 -0700
+Message-ID: <146914483353.11762.14647880235199676753.stgit@birch.djwong.org>
 In-Reply-To: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
 References: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -17,63 +16,35 @@ To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
 Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-This test uses the scratch device, so cycle that, not the test dev.
-This is also a xfs_fsr test, so put it in the fsr group.
+Calling _mount doesn't work when we want to add mount options
+such as realtime devices.  Since it's just a normal scratch device
+mount except for the source device, just call _scratch_mount with
+SCRATCH_DEV set to the dmerror device.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/xfs/128   |    7 ++++---
- tests/xfs/group |    2 +-
- 2 files changed, 5 insertions(+), 4 deletions(-)
+ common/dmerror |    7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
 
 
-diff --git a/tests/xfs/128 b/tests/xfs/128
-index 8758d7e..2e756d5 100755
---- a/tests/xfs/128
-+++ b/tests/xfs/128
-@@ -66,7 +66,7 @@ _pwrite_byte 0x61 0 $((blks * blksz)) $testdir/file1 >> $seqres.full
- _cp_reflink $testdir/file1 $testdir/file2
- _cp_reflink $testdir/file2 $testdir/file3
- _cp_reflink $testdir/file3 $testdir/file4
--_test_cycle_mount
-+_scratch_cycle_mount
- free_blocks1=$(stat -f $testdir -c '%f')
+diff --git a/common/dmerror b/common/dmerror
+index 5ad9994..22b9ea9 100644
+--- a/common/dmerror
++++ b/common/dmerror
+@@ -41,14 +41,9 @@ _dmerror_init()
+ 	DMERROR_TABLE="0 $blk_dev_size error $dm_backing_dev 0"
+ }
  
- md5sum $testdir/file1 | _filter_scratch
-@@ -82,7 +82,7 @@ c04=$(_md5_checksum $testdir/file4)
- echo "CoW the reflink copies"
- _pwrite_byte 0x62 $blksz $blksz $testdir/file2 >> $seqres.full
- _pwrite_byte 0x63 $(( blksz * (blks - 1) )) $blksz $testdir/file3 >> $seqres.full
--_test_cycle_mount
-+_scratch_cycle_mount
- free_blocks2=$(stat -f $testdir -c '%f')
+-_dmerror_mount_options()
+-{
+-	echo `_common_dev_mount_options $*` $DMERROR_DEV $SCRATCH_MNT
+-}
+-
+ _dmerror_mount()
+ {
+-	_mount -t $FSTYP `_dmerror_mount_options $*`
++	SCRATCH_DEV=$DMERROR_DEV _scratch_mount $*
+ }
  
- md5sum $testdir/file1 | _filter_scratch
-@@ -97,11 +97,12 @@ c14=$(_md5_checksum $testdir/file4)
- 
- echo "Defragment"
- lsattr -l $testdir/ | _filter_scratch | _filter_spaces
-+filefrag -v $testdir/file* >> $seqres.full
- $XFS_FSR_PROG -v -d $testdir/file1 >> $seqres.full
- $XFS_FSR_PROG -v -d $testdir/file2 >> $seqres.full # fsr probably breaks the link
- $XFS_FSR_PROG -v -d $testdir/file3 >> $seqres.full # fsr probably breaks the link
- $XFS_FSR_PROG -v -d $testdir/file4 >> $seqres.full # fsr probably ignores this file
--_test_cycle_mount
-+_scratch_cycle_mount
- free_blocks3=$(stat -f $testdir -c '%f')
- 
- md5sum $testdir/file1 | _filter_scratch
-diff --git a/tests/xfs/group b/tests/xfs/group
-index aa3b3ec..5ccf3d6 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -125,7 +125,7 @@
- 125 fuzzers
- 126 fuzzers
- 127 auto quick clone
--128 auto quick clone
-+128 auto quick clone fsr
- 129 auto quick clone
- 130 fuzzers clone
- 131 auto quick clone
+ _dmerror_unmount()
 
