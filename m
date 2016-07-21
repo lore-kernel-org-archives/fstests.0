@@ -1,11 +1,12 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:29911 "EHLO
+Received: from userp1040.oracle.com ([156.151.31.81]:29948 "EHLO
 	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751512AbcGUXry (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2016 19:47:54 -0400
-Subject: [PATCH 14/17] xfs: more rmapbt tests
+	with ESMTP id S1751512AbcGUXsC (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2016 19:48:02 -0400
+Subject: [PATCH 15/17] xfs: scrub fs (if still mounted) at the end of the
+ test
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 21 Jul 2016 16:47:45 -0700
-Message-ID: <146914486527.11762.1173224384905616811.stgit@birch.djwong.org>
+Date: Thu, 21 Jul 2016 16:47:51 -0700
+Message-ID: <146914487167.11762.17599617419019795848.stgit@birch.djwong.org>
 In-Reply-To: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
 References: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -16,239 +17,60 @@ To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
 Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-More tests for the reverse mapping functionality.
+Teach _check_xfs_filesystem to scrub mounted filesystems before
+unmounting and fscking them.  This is mostly to test the online
+scrub tool...
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/xfs/876     |   76 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/876.out |    4 ++
- tests/xfs/877     |   85 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/877.out |   10 ++++++
- tests/xfs/group   |    4 ++
- 5 files changed, 178 insertions(+), 1 deletion(-)
- create mode 100755 tests/xfs/876
- create mode 100644 tests/xfs/876.out
- create mode 100755 tests/xfs/877
- create mode 100644 tests/xfs/877.out
+ README        |    3 +++
+ common/config |    1 +
+ common/rc     |    7 +++++++
+ 3 files changed, 11 insertions(+)
 
 
-diff --git a/tests/xfs/876 b/tests/xfs/876
-new file mode 100755
-index 0000000..cf73d40
---- /dev/null
-+++ b/tests/xfs/876
-@@ -0,0 +1,76 @@
-+#! /bin/bash
-+# FS QA Test No. 876
-+#
-+# Create a big enough rmapbt that we tickle a fdblocks accounting bug.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename "$0"`
-+seqres="$RESULT_DIR/$seq"
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -rf "$tmp".*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scratch
-+_require_xfs_scratch_rmapbt
-+_require_scratch_reflink
-+_require_test_program "punch-alternating"
-+
-+rm -f "$seqres.full"
-+
-+echo "+ create scratch fs"
-+_scratch_mkfs > "$seqres.full" 2>&1
-+
-+echo "+ mount fs image"
-+_scratch_mount
-+blksz="$(stat -f $SCRATCH_MNT -c '%S')"
-+isize=$(xfs_info $SCRATCH_MNT | grep isize | sed -e 's/^.*isize=\([0-9]*\).*$/\1/g')
-+
-+bt_ptrs=$(( (blksz - 56) / 44 ))
-+bt_recs=$(( (blksz - 56) / 24 ))
-+
-+blocks=$((bt_ptrs * bt_recs + 1))
-+_require_fs_space $SCRATCH_MNT $(( (2 * blocks * blksz) * 5 / 4096 ))
-+len=$((blocks * blksz))
-+
-+echo "+ make some files"
-+$XFS_IO_PROG -f -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f1 >> $seqres.full
-+$XFS_IO_PROG -f -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f2 >> $seqres.full
-+./src/punch-alternating $SCRATCH_MNT/f1 >> "$seqres.full"
-+./src/punch-alternating $SCRATCH_MNT/f2 >> "$seqres.full"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/876.out b/tests/xfs/876.out
-new file mode 100644
-index 0000000..96c1970
---- /dev/null
-+++ b/tests/xfs/876.out
-@@ -0,0 +1,4 @@
-+QA output created by 876
-++ create scratch fs
-++ mount fs image
-++ make some files
-diff --git a/tests/xfs/877 b/tests/xfs/877
-new file mode 100755
-index 0000000..9700263
---- /dev/null
-+++ b/tests/xfs/877
-@@ -0,0 +1,85 @@
-+#! /bin/bash
-+# FS QA Test No. 877
-+#
-+# Make sure query_range returns -EINVAL if lowkey > highkey.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename "$0"`
-+seqres="$RESULT_DIR/$seq"
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -rf "$tmp".* $metadump_file
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_xfs_scratch_rmapbt
-+
-+rm -f "$seqres.full"
-+
-+echo "Format and mount"
-+_scratch_mkfs > "$seqres.full" 2>&1
-+_scratch_mount
-+blksz=65536
-+blocks=16
-+len=$((blocks * blksz))
-+
-+echo "Create some files"
-+$XFS_IO_PROG -f -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f1 >> $seqres.full
-+
-+echo "Manipulate file"
-+$XFS_IO_PROG -c "fpunch $blksz $blksz" \
-+	-c "fzero $((3 * blksz)) $blksz" \
-+	-c "pwrite -S 0x69 $((5 * blksz)) $blksz" \
-+	-c "fpunch $((7 * blksz)) $blksz" \
-+	-c "fsync" \
-+	-c "pwrite -S 0x70 $((7 * blksz)) $blksz" \
-+	-c "fcollapse $((9 * blksz)) $blksz" \
-+	-c "finsert $((10 * blksz)) $blksz" $SCRATCH_MNT/f1 >> $seqres.full
-+
-+echo "Check file"
-+md5sum $SCRATCH_MNT/f1 | _filter_scratch
-+od -tx1 -Ad -c $SCRATCH_MNT/f1 >> $seqres.full
-+
-+echo "Unmount"
-+_scratch_unmount
-+
-+echo "Try a regular fsmap"
-+$XFS_DB_PROG -c 'fsmap' $SCRATCH_DEV >> $seqres.full
-+$XFS_DB_PROG -c 'fsmap 0 5' $SCRATCH_DEV >> $seqres.full
-+
-+echo "Try a bad fsmap"
-+$XFS_DB_PROG -c 'fsmap 5 4' $SCRATCH_DEV
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/877.out b/tests/xfs/877.out
-new file mode 100644
-index 0000000..4a2242f
---- /dev/null
-+++ b/tests/xfs/877.out
-@@ -0,0 +1,10 @@
-+QA output created by 877
-+Format and mount
-+Create some files
-+Manipulate file
-+Check file
-+e45c5707fcf6817e914ffb6ce37a0ac7  SCRATCH_MNT/f1
-+Unmount
-+Try a regular fsmap
-+Try a bad fsmap
-+Error 22 while querying fsmap btree.
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 16f7947..f81f899 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -3,8 +3,8 @@
- 003 db auto quick
- 004 db auto quick
- 005 auto quick
--007 auto quota quick
- 006 auto quick mount
-+007 auto quota quick
- 008 rw ioctl auto quick
- 009 rw ioctl auto prealloc quick
- 010 auto quick repair
-@@ -309,3 +309,5 @@
- 873 auto quick clone fsr
- 874 auto quick clone fsr
- 875 auto quick clone fsr quota
-+876 auto quick rmap clone
-+877 auto quick rmap clone
+diff --git a/README b/README
+index 4509cc1..c19fcb1 100644
+--- a/README
++++ b/README
+@@ -84,6 +84,9 @@ Preparing system for tests (IRIX and Linux):
+                run xfs_repair -n to check the filesystem; xfs_repair to rebuild
+                metadata indexes; and xfs_repair -n (a third time) to check the
+                results of the rebuilding.
++	     - set TEST_XFS_SCRUB=1 to have _check_xfs_filesystem run
++	       xfs_scrub -vd to scrub the filesystem metadata online before
++               unmounting to run the offline check.
+ 
+         - or add a case to the switch in common/config assigning
+           these variables based on the hostname of your test
+diff --git a/common/config b/common/config
+index 08d5d80..168f46c 100644
+--- a/common/config
++++ b/common/config
+@@ -163,6 +163,7 @@ export XFS_REPAIR_PROG="`set_prog_path xfs_repair`"
+ export XFS_DB_PROG="`set_prog_path xfs_db`"
+ export XFS_GROWFS_PROG=`set_prog_path xfs_growfs`
+ export XFS_IO_PROG="`set_prog_path xfs_io`"
++export XFS_SCRUB_PROG="`set_prog_path xfs_scrub`"
+ export XFS_PARALLEL_REPAIR_PROG="`set_prog_path xfs_prepair`"
+ export XFS_PARALLEL_REPAIR64_PROG="`set_prog_path xfs_prepair64`"
+ export __XFSDUMP_PROG="`set_prog_path xfsdump`"
+diff --git a/common/rc b/common/rc
+index 3b45578..861a721 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2391,6 +2391,13 @@ _check_xfs_filesystem()
+ 
+     if [ "$type" = "xfs" ]
+     then
++        if [ -n "$TEST_XFS_SCRUB" ] && [ -x "$XFS_SCRUB_PROG" ]; then
++            "$XFS_SCRUB_PROG" $scrubflag -vd $device >>$seqres.full
++            if [ $? -ne 0 ]; then
++                echo "filesystem on $device failed scrub (see $seqres.full)"
++                ok=0
++            fi
++        fi
+         # mounted ...
+         mountpoint=`_umount_or_remount_ro $device`
+     fi
 
