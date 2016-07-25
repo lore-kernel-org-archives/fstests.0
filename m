@@ -1,51 +1,52 @@
-Received: from cn.fujitsu.com ([222.73.24.84]:50899 "EHLO song.cn.fujitsu.com"
-	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-	id S1751127AbcGYHq0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 25 Jul 2016 03:46:26 -0400
-From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
-Subject: [PATCH v2] generic/371: run write(2) and fallocate(2) in parallel
-Date: Mon, 25 Jul 2016 15:43:30 +0800
-Message-Id: <20160725074330.30081-1-wangxg.fnst@cn.fujitsu.com>
-MIME-Version: 1.0
+Received: from mx1.redhat.com ([209.132.183.28]:38980 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753261AbcGYR2S (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 25 Jul 2016 13:28:18 -0400
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH 2/3] overlay: remove stale file from upperdir
+Date: Tue, 26 Jul 2016 01:27:49 +0800
+Message-Id: <1469467670-22287-2-git-send-email-eguan@redhat.com>
+In-Reply-To: <1469467670-22287-1-git-send-email-eguan@redhat.com>
+References: <1469467670-22287-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+Cc: linux-unionfs@vger.kernel.org, xzhou@redhat.com, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Currently in btrfs, there is something wrong with fallocate(2)'s data
-space reservation, it'll temporarily occupy more data space thant it
-really needs, which in turn will impact other operations' data request.
+The upper dentry may become stale before we remove it from overlay,
+e.g. file was removed from upperdir directly, which triggered
+warning/oops in ovl_remove_and_whiteout().
 
-In this test case, it runs write(2) and fallocate(2) in parallel and the
-total needed data space for these two operations don't exceed whole fs
-free data space, to see whether we will get any unexpected ENOSPC error.
+Commit cfc9fde0b07c ("ovl: verify upper dentry in
+ovl_remove_and_whiteout()") fixed this issue.
 
-Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
-v2: adopt Eryu Guan's suggestions to make this reproducer cleaner, thanks
----
- tests/generic/371     | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/371.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 78 insertions(+)
- create mode 100755 tests/generic/371
- create mode 100644 tests/generic/371.out
+ tests/overlay/012     | 77 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/012.out |  2 ++
+ tests/overlay/group   |  1 +
+ 3 files changed, 80 insertions(+)
+ create mode 100755 tests/overlay/012
+ create mode 100644 tests/overlay/012.out
 
-diff --git a/tests/generic/371 b/tests/generic/371
+diff --git a/tests/overlay/012 b/tests/overlay/012
 new file mode 100755
-index 0000000..7955856
+index 0000000..cfe16f2
 --- /dev/null
-+++ b/tests/generic/371
-@@ -0,0 +1,75 @@
++++ b/tests/overlay/012
+@@ -0,0 +1,77 @@
 +#! /bin/bash
-+# FS QA Test 371
++# FS QA Test 012
 +#
-+# Run write(2) and fallocate(2) in parallel and the total needed data space
-+# for these operations don't exceed whole fs free data space, to see whether
-+# we will get any unexpected ENOSPC error.
++# The upper dentry may become stale before we remove it from
++# overlay, e.g. file was removed from upperdir directly, which
++# triggered warning/oops in ovl_remove_and_whiteout().
++#
++# Commit cfc9fde0b07c ("ovl: verify upper dentry in
++# ovl_remove_and_whiteout()") fixed this issue.
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
++# Copyright (c) 2016 Red Hat Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -81,56 +82,53 @@ index 0000000..7955856
 +. ./common/rc
 +. ./common/filter
 +
-+# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
-+# Modify as appropriate.
-+_supported_fs generic
++# real QA test starts here
++_supported_fs overlay
 +_supported_os Linux
 +_require_scratch
-+_require_xfs_io_command "falloc"
 +
-+_scratch_mkfs_sized $((256 * 1024 * 1024)) >> $seqres.full 2>&1
++# remove all files from previous runs
++_scratch_mkfs
++
++lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
++upperdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
++mkdir -p $lowerdir/test
++
 +_scratch_mount
 +
-+testfile1=$SCRATCH_MNT/testfile1
-+testfile2=$SCRATCH_MNT/testfile2
++# remove test file to create a whiteout
++rmdir $SCRATCH_MNT/test
 +
-+echo "Silence is golden"
-+for ((i=0; i<100; i++)); do
-+	$XFS_IO_PROG -fc "pwrite 0 80M" $testfile1 >/dev/null
-+	rm -f $testfile1
-+done &
-+pids=$!
++# create the test file again and remove it from upperdir directly, make the
++# upper dentry become stale
++touch $SCRATCH_MNT/test
++rm $upperdir/test
++# try to remove test file from overlay dir, trigger ovl_remove_and_whiteout, it
++# should see stale file handle error, and no warnings/oops are expected.
++rm $SCRATCH_MNT/test 2>&1 | _filter_scratch
 +
-+for ((i=0; i<100; i++)); do
-+	$XFS_IO_PROG -fc "falloc 0 80M" $testfile2 >/dev/null
-+	rm -f $testfile2
-+done &
-+pids="$pids $!"
-+
-+wait $pids
++# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/371.out b/tests/generic/371.out
+diff --git a/tests/overlay/012.out b/tests/overlay/012.out
 new file mode 100644
-index 0000000..22ec8a2
+index 0000000..1bfa147
 --- /dev/null
-+++ b/tests/generic/371.out
++++ b/tests/overlay/012.out
 @@ -0,0 +1,2 @@
-+QA output created by 371
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 97ecb65..1236281 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -373,3 +373,4 @@
- 368 auto quick richacl
- 369 auto quick richacl
- 370 auto quick richacl
-+371 auto quick enospc prealloc
++QA output created by 012
++rm: cannot remove 'SCRATCH_MNT/test': Stale file handle
+diff --git a/tests/overlay/group b/tests/overlay/group
+index acd8ac4..103e2e1 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -14,3 +14,4 @@
+ 009 auto quick
+ 010 auto quick whiteout
+ 011 auto quick
++012 auto quick
 -- 
-2.9.0
-
-
+2.7.4
 
