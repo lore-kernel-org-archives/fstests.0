@@ -1,197 +1,147 @@
-Received: from mx1.redhat.com ([209.132.183.28]:55729 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751646AbcGZDrR (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 25 Jul 2016 23:47:17 -0400
-Date: Tue, 26 Jul 2016 11:47:15 +0800
-From: Xiong Zhou <xzhou@redhat.com>
-Subject: Re: [PATCH 3/3] overlay: truncate running binaries from lower and
- upper dirs
-Message-ID: <20160726034715.GA2998@xzhoul.usersys.redhat.com>
-References: <1469467670-22287-1-git-send-email-eguan@redhat.com>
- <1469467670-22287-3-git-send-email-eguan@redhat.com>
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:55020 "EHLO
+	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752229AbcG0EUN (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 27 Jul 2016 00:20:13 -0400
+Received: from dave by dastard with local (Exim 4.80)
+	(envelope-from <david@fromorbit.com>)
+	id 1bSGKF-0008Ip-BB
+	for fstests@vger.kernel.org; Wed, 27 Jul 2016 14:20:07 +1000
+Date: Wed, 27 Jul 2016 14:20:07 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: [ANNOUNCE] xfstests: master branch updated to 6721ab0
+Message-ID: <20160727042007.GI12670@dastard>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="AYsPlKobQGgtCvjI"
 Content-Disposition: inline
-In-Reply-To: <1469467670-22287-3-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org, xzhou@redhat.com
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jul 26, 2016 at 01:27:50AM +0800, Eryu Guan wrote:
-> Test truncate running executable binaries from lower and upper dirs.
-> truncate(2) should return ETXTBSY, not other errno nor segfault
 
-Tested and ack, for the series.
+--AYsPlKobQGgtCvjI
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Thanks,
-Xiong
+Hi folks,
 
-> 
-> Commit 03bea6040932 ("ovl: get_write_access() in truncate") fixed
-> this issue.
-> 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> ---
->  .gitignore            |  1 +
->  src/Makefile          |  2 +-
->  src/t_truncate_self.c | 20 ++++++++++++++
->  tests/overlay/013     | 74 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/013.out |  2 ++
->  tests/overlay/group   |  1 +
->  6 files changed, 99 insertions(+), 1 deletion(-)
->  create mode 100644 src/t_truncate_self.c
->  create mode 100755 tests/overlay/013
->  create mode 100644 tests/overlay/013.out
-> 
-> diff --git a/.gitignore b/.gitignore
-> index 28bd180..07f81e8 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -99,6 +99,7 @@
->  /src/t_mtab
->  /src/t_stripealign
->  /src/t_truncate_cmtime
-> +/src/t_truncate_self
->  /src/test-nextquota
->  /src/testx
->  /src/trunc
-> diff --git a/src/Makefile b/src/Makefile
-> index 1bf318b..39362d9 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -12,7 +12,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
->  	godown resvtest writemod makeextents itrash rename \
->  	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
->  	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
-> -	holetest
-> +	holetest t_truncate_self
->  
->  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-> diff --git a/src/t_truncate_self.c b/src/t_truncate_self.c
-> new file mode 100644
-> index 0000000..d14dec3
-> --- /dev/null
-> +++ b/src/t_truncate_self.c
-> @@ -0,0 +1,20 @@
-> +#include <stdio.h>
-> +#include <errno.h>
-> +#include <unistd.h>
-> +
-> +int main(int argc, char *argv[])
-> +{
-> +	int ret;
-> +
-> +	ret = truncate(argv[0], 4096);
-> +	if (ret != -1) {
-> +		fprintf(stderr, "truncate(argv[0]) should have failed\n");
-> +		return 1;
-> +	}
-> +	if (errno != ETXTBSY) {
-> +		perror("truncate(argv[0])");
-> +		return 1;
-> +	}
-> +
-> +	return 0;
-> +}
-> diff --git a/tests/overlay/013 b/tests/overlay/013
-> new file mode 100755
-> index 0000000..09f3eb1
-> --- /dev/null
-> +++ b/tests/overlay/013
-> @@ -0,0 +1,74 @@
-> +#! /bin/bash
-> +# FS QA Test 013
-> +#
-> +# Test truncate running executable binaries from lower and upper dirs.
-> +# truncate(2) should return ETXTBSY, not other errno nor segfault
-> +#
-> +# Commit 03bea6040932 ("ovl: get_write_access() in truncate") fixed this issue.
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2016 Red Hat Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs overlay
-> +_supported_os Linux
-> +_require_scratch
-> +_require_test_program "t_truncate_self"
-> +
-> +# remove all files from previous runs
-> +_scratch_mkfs
-> +
-> +# copy test program to lower and upper dir
-> +lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
-> +upperdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
-> +mkdir -p $lowerdir
-> +mkdir -p $upperdir
-> +cp $here/src/t_truncate_self $lowerdir/test_lower
-> +cp $here/src/t_truncate_self $lowerdir/test_upper
-> +
-> +_scratch_mount
-> +
-> +# run test program from lower and upper dir
-> +# test programs truncate themselfs, all should fail with ETXTBSY
-> +$SCRATCH_MNT/test_lower
-> +$SCRATCH_MNT/test_upper
-> +
-> +# success, all done
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/overlay/013.out b/tests/overlay/013.out
-> new file mode 100644
-> index 0000000..3e66423
-> --- /dev/null
-> +++ b/tests/overlay/013.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 013
-> +Silence is golden
-> diff --git a/tests/overlay/group b/tests/overlay/group
-> index 103e2e1..5c80566 100644
-> --- a/tests/overlay/group
-> +++ b/tests/overlay/group
-> @@ -15,3 +15,4 @@
->  010 auto quick whiteout
->  011 auto quick
->  012 auto quick
-> +013 auto quick
-> -- 
-> 2.7.4
-> 
+The xfstests repositories at:
+
+	git://oss.sgi.com/xfs/cmds/xfstests
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. The change summary from Eryu's pull request:
+
+	This update contains:
+
+	o Improvements in extended test names handling
+	o The first test with an extended name (xfs/191-input-validation)
+	o New test cases for xfs and btrfs
+	o Other bug fixes and improvements
+
+The full list of changes merged is below.
+
+-Dave.
+
+Patches often get missed, so please check if your outstanding
+patches were in this update. If they have not been in this update,
+please resubmit them to fstests@vger.kernel.org so they can be
+picked up in the next update.
+
+The new head of the master branch is commit:
+
+6721ab0 generic/235: Fix false failures for some quota formats
+
+New Commits:
+
+Christoph Hellwig (1):
+      [b62a0b3] generic/120: requires working *atime mount options
+
+Eric Sandeen (1):
+      [cf94bc8] generic/075,112: fix up fsx error handling
+
+Eryu Guan (2):
+      [58bff72] common/rc: avoid mkfs option conflicts in _scratch_mkfs_xfs=
+_supported
+      [a4cafa0] xfs: fix wrong seq order in group file
+
+Jan Kara (3):
+      [9b06a9f] generic/294: Filter backquotes from mknod error output
+      [e1f9441] common/filter: Improve xfs_io filter
+      [6721ab0] generic/235: Fix false failures for some quota formats
+
+Jan Tulak (4):
+      [cb15a45] build: Fix installation for extended names
+      [1fd02fd] check: fix extended names handling
+      [27daf0c] check: remove unused variable
+      [9a8bdd8] xfs: Add mkfs input validation tests
+
+Qu Wenruo (2):
+      [a4f0a9b] btrfs: send on fully deduped file
+      [fc2b488] btrfs: Update quick and auto tag for btrfs group
+
+Xiao Yang (1):
+      [b659460] xfs/083: disable dmesg check
+
+
+Code Diffstat:
+
+ check                              |  26 ++--
+ common/filter                      |   6 +-
+ common/rc                          |  11 +-
+ include/buildrules                 |  32 ++++
+ tests/btrfs/130                    |  89 +++++++++++
+ tests/btrfs/130.out                |   3 +
+ tests/btrfs/Makefile               |   4 +-
+ tests/btrfs/group                  |   9 +-
+ tests/cifs/Makefile                |   4 +-
+ tests/ext4/Makefile                |   4 +-
+ tests/f2fs/Makefile                |   4 +-
+ tests/generic/075                  |   4 +-
+ tests/generic/112                  |   2 +-
+ tests/generic/120                  |   2 +
+ tests/generic/235                  |   9 +-
+ tests/generic/235.out              |   8 -
+ tests/generic/Makefile             |   4 +-
+ tests/overlay/Makefile             |   4 +-
+ tests/shared/Makefile              |   4 +-
+ tests/udf/Makefile                 |   4 +-
+ tests/xfs/083                      |   4 +
+ tests/xfs/191-input-validation     | 338 +++++++++++++++++++++++++++++++++=
++++++++
+ tests/xfs/191-input-validation.out |   2 +
+ tests/xfs/Makefile                 |   4 +-
+ tests/xfs/group                    |   3 +-
+ 25 files changed, 533 insertions(+), 51 deletions(-)
+ create mode 100755 tests/btrfs/130
+ create mode 100644 tests/btrfs/130.out
+ create mode 100755 tests/xfs/191-input-validation
+ create mode 100644 tests/xfs/191-input-validation.out
+--=20
+Dave Chinner
+david@fromorbit.com
+
+--AYsPlKobQGgtCvjI
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJXmDZ2AAoJEK3oKUf0dfod4+gQAITx4lZiqc/1eyHxc7PgiJCn
+DaHraf2tczZU0oht10mJHOMb4LZhDrOdFf6MHe6AZjf9MJ4f/leSYocwKUELG1nz
+KJVbj7GGRG2FM4FPKBIoj4nDEO1lu+KxRHkvuvrp2vMX35mzne05eVprakjZZY3b
+LUu/lh6rpioiwMIRqnUl4ORTtjlzv7X6WT7KhVsiVeRSV0Bt0kyHKSQt8OyI+FJg
+0fd9+nLWMUs0wpRr/W3KWbDeziC6Xa9ugsWdhMhioI0R7DmzvChmzgz/jbN/gbkx
+NhSc9H92M8x1/YjxU2Yjd3e+ODJBW7A+m5yYvZSlohVoLgUk8KFPIxdfa46f8yqo
+qpXWCOwVHgNxdOuRTofwOAwV12MxV558poCBgR2yHry8XTLtQhvL/tx1OWF82187
+rMlztM8kq3M2IVRtG2pWvEmnea+Jqx8SPdQmwnh1T8vq0STzuzah7tIlqKGZGXxM
+FdXUjxgzSczodTu2oRsiLhFvNAKR56SouGnV2MU4q7HrFmIwf9XRLO209gSDcnxv
+mZ/3qjxi6/a+/IaL5vACUbCO4SS0iaBchS+jA/YrVR+hG+CLzGLAcl66uNwWChQf
+LTg19L7E6Z2U7FTrFkHdIlRHWrPoOj1clI/WEM+k4020ZxV8HCAwjnOXiegznukp
+XTfGlAlp2cfDmrWQByjI
+=MIKN
+-----END PGP SIGNATURE-----
+
+--AYsPlKobQGgtCvjI--
