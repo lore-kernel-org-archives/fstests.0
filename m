@@ -1,26 +1,26 @@
-From: James Audu <age.haga@aol.de>
-Subject: Hello,
-Date: Mon, 25 Jul 2016 04:12:13 -0400
-Message-ID: <156211c88c2-80e-89a1@webprd-a15.mail.aol.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <fstests-owner@vger.kernel.org>
-Received: from oms-m018e.mx.aol.com ([204.29.186.114]:45515 "EHLO
-	oms-m018e.mx.aol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751007AbcGYIMU (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 25 Jul 2016 04:12:20 -0400
-Received: from omr-a010e.mx.aol.com (omr-a010.mx.aol.com [10.72.114.238])
-	(using TLSv1 with cipher ADH-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by oms-m018e.mx.aol.com (AOL Outbound OMS Interface) with ESMTPS id A8494380008B
-	for <fstests@vger.kernel.org>; Mon, 25 Jul 2016 04:12:17 -0400 (EDT)
-Sender: fstests-owner@vger.kernel.org
-List-Id: fstests@vger.kernel.org
+Date: Tue, 2 Aug 2016 05:24:01 -0700
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH 06/17] xfs: run xfs_repair at the end of each test
+Message-ID: <20160802122401.GA31492@infradead.org>
+References: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
+ <146914481474.11762.2741429828012981240.stgit@birch.djwong.org>
+ <20160801062719.GH596@infradead.org>
+ <20160801170814.GA8590@birch.djwong.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160801170814.GA8590@birch.djwong.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Christoph Hellwig <hch@infradead.org>, linux-btrfs@vger.kernel.org, eguan@redhat.com, fstests@vger.kernel.org, xfs@oss.sgi.com
+List-ID: <fstests@vger.kernel.org>
 
-Hello,
+> We do have specific tests that examine the outputs of rebuilding the
+> indices (all the fuzzer group tests do this too); this patch enables a
+> test runner to expand that coverage to all tests.  Running a
+> rebuilding xfs_repair for all the tests shook out some bugs in the
+> xfs_repair rmap handling code that only triggered under some of the
+> non-rmap non-reflink stressor tests.
 
-I'm sending this brief letter to request your partnership for transfer of US 10.5million dollars. I will send you more information and procedures when I receive a positive response from you immediately VIA my private email (jamesaaudu@gmail.com )
+Ok, looks fine then:
 
-Regards
-James Audu 
+Reviewed-by: Christoph Hellwig <hch@lst.de>
