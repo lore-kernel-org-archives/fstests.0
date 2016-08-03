@@ -1,108 +1,55 @@
-Date: Wed, 3 Aug 2016 17:15:42 +0800
+Date: Wed, 3 Aug 2016 18:38:00 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 06/17] xfs: run xfs_repair at the end of each test
-Message-ID: <20160803091542.GM27776@eguan.usersys.redhat.com>
+Subject: Re: [PATCH 09/17] common/dmerror: fix mount option issues
+Message-ID: <20160803103800.GO27776@eguan.usersys.redhat.com>
 References: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
- <146914481474.11762.2741429828012981240.stgit@birch.djwong.org>
+ <146914483353.11762.14647880235199676753.stgit@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <146914481474.11762.2741429828012981240.stgit@birch.djwong.org>
+In-Reply-To: <146914483353.11762.14647880235199676753.stgit@birch.djwong.org>
 To: "Darrick J. Wong" <darrick.wong@oracle.com>
 Cc: david@fromorbit.com, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 21, 2016 at 04:46:54PM -0700, Darrick J. Wong wrote:
-> Run xfs_repair twice at the end of each test -- once to rebuild
-> the btree indices, and again with -n to check the rebuild work.
-
-Seems like it's two more xfs_repair, three in total :)
-
+On Thu, Jul 21, 2016 at 04:47:13PM -0700, Darrick J. Wong wrote:
+> Calling _mount doesn't work when we want to add mount options
+> such as realtime devices.  Since it's just a normal scratch device
+> mount except for the source device, just call _scratch_mount with
+> SCRATCH_DEV set to the dmerror device.
 > 
 > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
->  README    |    4 ++++
->  common/rc |   30 ++++++++++++++++++++++++++++++
->  2 files changed, 34 insertions(+)
+>  common/dmerror |    7 +------
+>  1 file changed, 1 insertion(+), 6 deletions(-)
 > 
 > 
-> diff --git a/README b/README
-> index 2647e12..4509cc1 100644
-> --- a/README
-> +++ b/README
-> @@ -80,6 +80,10 @@ Preparing system for tests (IRIX and Linux):
->                 added to the end of fsstresss and fsx invocations, respectively,
->                 in case you wish to exclude certain operational modes from these
->                 tests.
-> +             - set TEST_XFS_REPAIR_REBUILD=1 to have _check_xfs_filesystem
-> +               run xfs_repair -n to check the filesystem; xfs_repair to rebuild
-> +               metadata indexes; and xfs_repair -n (a third time) to check the
-> +               results of the rebuilding.
+> diff --git a/common/dmerror b/common/dmerror
+> index 5ad9994..22b9ea9 100644
+> --- a/common/dmerror
+> +++ b/common/dmerror
+> @@ -41,14 +41,9 @@ _dmerror_init()
+>  	DMERROR_TABLE="0 $blk_dev_size error $dm_backing_dev 0"
+>  }
 >  
->          - or add a case to the switch in common/config assigning
->            these variables based on the hostname of your test
-> diff --git a/common/rc b/common/rc
-> index 7c79bf8..3b45578 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2428,6 +2428,36 @@ _check_xfs_filesystem()
->          ok=0
->      fi
->  
-> +    if [ -n "$TEST_XFS_REPAIR_REBUILD" ]; then
-> +        $XFS_REPAIR_PROG -n $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
-> +        if [ $? -ne 0 ]
-> +        then
-> +            echo "_check_xfs_filesystem: filesystem on $device is inconsistent (r) (see $seqres.full)"
-> +
-> +            echo "_check_xfs_filesystem: filesystem on $device is inconsistent" >>$seqres.full
-> +            echo "*** xfs_repair -n output ***"	>>$seqres.full
-> +            cat $tmp.repair | _fix_malloc		>>$seqres.full
-> +            echo "*** end xfs_repair output"	>>$seqres.full
-> +
-> +            ok=0
-> +        fi
-> +        rm -f $tmp.fs_check $tmp.logprint $tmp.repair
-> +
-> +        $XFS_REPAIR_PROG $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
-> +        if [ $? -ne 0 ]
-> +        then
-> +            echo "_check_xfs_filesystem: filesystem on $device is inconsistent (r) (see $seqres.full)"
-> +
-> +            echo "_check_xfs_filesystem: filesystem on $device is inconsistent" >>$seqres.full
-> +            echo "*** xfs_repair -n output ***"	>>$seqres.full
-> +            cat $tmp.repair | _fix_malloc		>>$seqres.full
-> +            echo "*** end xfs_repair output"	>>$seqres.full
-> +
-> +            ok=0
-> +        fi
-> +        rm -f $tmp.fs_check $tmp.logprint $tmp.repair
-> +    fi
-> +
+> -_dmerror_mount_options()
+> -{
+> -	echo `_common_dev_mount_options $*` $DMERROR_DEV $SCRATCH_MNT
+> -}
+> -
+>  _dmerror_mount()
+>  {
+> -	_mount -t $FSTYP `_dmerror_mount_options $*`
+> +	SCRATCH_DEV=$DMERROR_DEV _scratch_mount $*
 
-I think we can move this hunk after the original xfs_repair and swap the
-xfs_repair order, i.e.
-
-xfs_repair -n # this is the original repair check
-if <check_rebuild>; then
-	xfs_repair # do rebuild without -n
-	xfs_repair -n # check rebuild result
-fi
-
-This seems more clear to me and we can mark which repair is failing more
-easily (right now the three xfs_repairs are all marked as "(r)", it's
-hard to say which one is failing), e.g.
-
-xfs_repair -n # marked as "(r)", means "repair"
-if <check_rebuild>; then
-	xfs_repair # mark as "(rb)", means "rebuild"?
-	xfs_repair -n # mark as "(rr)", means "repair rebuild"?
-fi
+Perhaps you can add "_scratch_options mount" to _dmerror_mount then
+mount with $SCRATCH_OPTIONS? Like what _mount_delay does in
+common/dmdelay.
 
 Thanks,
 Eryu
 
->      $XFS_REPAIR_PROG -n $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
->      if [ $? -ne 0 ]
->      then
+>  }
+>  
+>  _dmerror_unmount()
 > 
