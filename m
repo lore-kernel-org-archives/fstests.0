@@ -1,36 +1,67 @@
-Received: from mx1.redhat.com ([209.132.183.28]:45916 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753558AbcHCD6E (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 2 Aug 2016 23:58:04 -0400
-Date: Wed, 3 Aug 2016 11:20:22 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [GIT PULL] fstests: updates on 2016-07-31
-Message-ID: <20160803032022.GC27776@eguan.usersys.redhat.com>
-References: <201607310256.u6V2uPFQ014241@int-mx11.intmail.prod.int.phx2.redhat.com>
- <20160802230350.GN12670@dastard>
+Received: from aserp1040.oracle.com ([141.146.126.69]:27269 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758459AbcHCWPj (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 3 Aug 2016 18:15:39 -0400
+Date: Wed, 3 Aug 2016 15:14:01 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 09/17] common/dmerror: fix mount option issues
+Message-ID: <20160803221401.GT8590@birch.djwong.org>
+References: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
+ <146914483353.11762.14647880235199676753.stgit@birch.djwong.org>
+ <20160803103800.GO27776@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160802230350.GN12670@dastard>
+In-Reply-To: <20160803103800.GO27776@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: david@fromorbit.com, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 03, 2016 at 09:03:50AM +1000, Dave Chinner wrote:
-> On Sun, Jul 31, 2016 at 10:56:24AM +0800, Eryu Guan wrote:
-> > Hi Dave,
+On Wed, Aug 03, 2016 at 06:38:00PM +0800, Eryu Guan wrote:
+> On Thu, Jul 21, 2016 at 04:47:13PM -0700, Darrick J. Wong wrote:
+> > Calling _mount doesn't work when we want to add mount options
+> > such as realtime devices.  Since it's just a normal scratch device
+> > mount except for the source device, just call _scratch_mount with
+> > SCRATCH_DEV set to the dmerror device.
 > > 
-> > Can you please pull the fstests update from the location below? This is a small
-> > update that only contains some new tests.
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> >  common/dmerror |    7 +------
+> >  1 file changed, 1 insertion(+), 6 deletions(-)
+> > 
+> > 
+> > diff --git a/common/dmerror b/common/dmerror
+> > index 5ad9994..22b9ea9 100644
+> > --- a/common/dmerror
+> > +++ b/common/dmerror
+> > @@ -41,14 +41,9 @@ _dmerror_init()
+> >  	DMERROR_TABLE="0 $blk_dev_size error $dm_backing_dev 0"
+> >  }
+> >  
+> > -_dmerror_mount_options()
+> > -{
+> > -	echo `_common_dev_mount_options $*` $DMERROR_DEV $SCRATCH_MNT
+> > -}
+> > -
+> >  _dmerror_mount()
+> >  {
+> > -	_mount -t $FSTYP `_dmerror_mount_options $*`
+> > +	SCRATCH_DEV=$DMERROR_DEV _scratch_mount $*
 > 
-> Hi Eryu,
+> Perhaps you can add "_scratch_options mount" to _dmerror_mount then
+> mount with $SCRATCH_OPTIONS? Like what _mount_delay does in
+> common/dmdelay.
+
+Oh, yeah, that makes sense.
+
+--D
+
 > 
-> I probably won't get to this before friday (merge window stuff
-> taking all my time) so if you could update as usual on friday I'll
-> pull it all early next week.
-
-Sure. Thanks for the heads up.
-
-Thanks,
-Eryu
+> Thanks,
+> Eryu
+> 
+> >  }
+> >  
+> >  _dmerror_unmount()
+> > 
