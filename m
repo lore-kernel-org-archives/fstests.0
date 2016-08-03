@@ -1,43 +1,89 @@
-Received: from bombadil.infradead.org ([198.137.202.9]:57275 "EHLO
-	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752065AbcHAJDA (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 1 Aug 2016 05:03:00 -0400
-From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH] generic/095: update warning whitelist
-Date: Mon,  1 Aug 2016 11:02:56 +0200
-Message-Id: <1470042176-31447-1-git-send-email-hch@lst.de>
+Received: from userp1050.oracle.com ([156.151.31.82]:48469 "EHLO
+	userp1050.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756754AbcHCWrD (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 3 Aug 2016 18:47:03 -0400
+Date: Wed, 3 Aug 2016 15:45:36 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: [PATCH v2 06/17] xfs: optionally test xfs_repair index rebuilding at
+ the end of each test
+Message-ID: <20160803224536.GC8586@birch.djwong.org>
+References: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
+ <146914481474.11762.2741429828012981240.stgit@birch.djwong.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <146914481474.11762.2741429828012981240.stgit@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com
+To: david@fromorbit.com, eguan@redhat.com
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-The recent direct I/O path refactor changed the function name in the
-racing read case.  Update the test case to handle the new name in
-addition to the old one.
+Run xfs_repair twice more at the end of each test -- once to rebuild
+the btree indices, and again with -n to check the rebuild work.  This
+is in addition to the regular dry-run spot check.
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
+v2: Reorder the repair invocations and label them better in the output.
+
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/generic/095 | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ README    |    4 ++++
+ common/rc |   31 +++++++++++++++++++++++++++++++
+ 2 files changed, 35 insertions(+)
 
-diff --git a/tests/generic/095 b/tests/generic/095
-index c656ef1..4754992 100755
---- a/tests/generic/095
-+++ b/tests/generic/095
-@@ -125,9 +125,11 @@ $FIO_PROG $fio_config >>$seqres.full 2>&1
- filter_xfs_dmesg()
- {
- 	local warn1="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_dio_aio_write.*"
--	local warn2="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_read_iter.*"
-+	local warn2="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_dio_aio_read.*"
-+	local warn3="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_read_iter.*"
- 	sed -e "s#$warn1#Intentional warnings in xfs_file_dio_aio_write#" \
--	    -e "s#$warn2#Intentional warnings in xfs_file_read_iter#"
-+	    -e "s#$warn2#Intentional warnings in xfs_file_dio_aio_read#" \
-+	    -e "s#$warn3#Intentional warnings in xfs_file_read_iter#"
- }
+diff --git a/README b/README
+index 2647e12..4509cc1 100644
+--- a/README
++++ b/README
+@@ -80,6 +80,10 @@ Preparing system for tests (IRIX and Linux):
+                added to the end of fsstresss and fsx invocations, respectively,
+                in case you wish to exclude certain operational modes from these
+                tests.
++             - set TEST_XFS_REPAIR_REBUILD=1 to have _check_xfs_filesystem
++               run xfs_repair -n to check the filesystem; xfs_repair to rebuild
++               metadata indexes; and xfs_repair -n (a third time) to check the
++               results of the rebuilding.
  
- # umount before checking dmesg in case umount triggers any WARNING or Oops
--- 
-2.1.4
-
+         - or add a case to the switch in common/config assigning
+           these variables based on the hostname of your test
+diff --git a/common/rc b/common/rc
+index 0ff72f2..eca9b9d 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2452,6 +2452,37 @@ _check_xfs_filesystem()
+     fi
+     rm -f $tmp.fs_check $tmp.logprint $tmp.repair
+ 
++    # Optionally test the index rebuilding behavior.
++    if [ -n "$TEST_XFS_REPAIR_REBUILD" ]; then
++        $XFS_REPAIR_PROG $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
++        if [ $? -ne 0 ]
++        then
++            echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild) (see $seqres.full)"
++
++            echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild)" >>$seqres.full
++            echo "*** xfs_repair output ***"	>>$seqres.full
++            cat $tmp.repair | _fix_malloc		>>$seqres.full
++            echo "*** end xfs_repair output"	>>$seqres.full
++
++            ok=0
++        fi
++        rm -f $tmp.fs_check $tmp.logprint $tmp.repair
++
++        $XFS_REPAIR_PROG -n $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
++        if [ $? -ne 0 ]
++        then
++            echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild-reverify) (see $seqres.full)"
++
++            echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild-reverify)" >>$seqres.full
++            echo "*** xfs_repair -n output ***"	>>$seqres.full
++            cat $tmp.repair | _fix_malloc		>>$seqres.full
++            echo "*** end xfs_repair output"	>>$seqres.full
++
++            ok=0
++        fi
++        rm -f $tmp.fs_check $tmp.logprint $tmp.repair
++    fi
++
+     if [ $ok -eq 0 ]
+     then
+         echo "*** mount output ***"		>>$seqres.full
