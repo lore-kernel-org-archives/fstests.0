@@ -1,97 +1,36 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:25399 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758410AbcHCWJs (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 3 Aug 2016 18:09:48 -0400
-Date: Wed, 3 Aug 2016 15:09:40 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 07/17] xfs/128: cycle_mount the scratch device, not the
- test device
-Message-ID: <20160803220940.GS8590@birch.djwong.org>
-References: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
- <146914482100.11762.3197784490090678443.stgit@birch.djwong.org>
- <20160803093755.GN27776@eguan.usersys.redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:45916 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753558AbcHCD6E (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 2 Aug 2016 23:58:04 -0400
+Date: Wed, 3 Aug 2016 11:20:22 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [GIT PULL] fstests: updates on 2016-07-31
+Message-ID: <20160803032022.GC27776@eguan.usersys.redhat.com>
+References: <201607310256.u6V2uPFQ014241@int-mx11.intmail.prod.int.phx2.redhat.com>
+ <20160802230350.GN12670@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160803093755.GN27776@eguan.usersys.redhat.com>
+In-Reply-To: <20160802230350.GN12670@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: david@fromorbit.com, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 03, 2016 at 05:37:55PM +0800, Eryu Guan wrote:
-> On Thu, Jul 21, 2016 at 04:47:01PM -0700, Darrick J. Wong wrote:
-> > This test uses the scratch device, so cycle that, not the test dev.
-> > This is also a xfs_fsr test, so put it in the fsr group.
+On Wed, Aug 03, 2016 at 09:03:50AM +1000, Dave Chinner wrote:
+> On Sun, Jul 31, 2016 at 10:56:24AM +0800, Eryu Guan wrote:
+> > Hi Dave,
 > > 
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> >  tests/xfs/128   |    7 ++++---
-> >  tests/xfs/group |    2 +-
-> >  2 files changed, 5 insertions(+), 4 deletions(-)
-> > 
-> > 
-> > diff --git a/tests/xfs/128 b/tests/xfs/128
-> > index 8758d7e..2e756d5 100755
-> > --- a/tests/xfs/128
-> > +++ b/tests/xfs/128
-> > @@ -66,7 +66,7 @@ _pwrite_byte 0x61 0 $((blks * blksz)) $testdir/file1 >> $seqres.full
-> >  _cp_reflink $testdir/file1 $testdir/file2
-> >  _cp_reflink $testdir/file2 $testdir/file3
-> >  _cp_reflink $testdir/file3 $testdir/file4
-> > -_test_cycle_mount
-> > +_scratch_cycle_mount
-> >  free_blocks1=$(stat -f $testdir -c '%f')
-> >  
-> >  md5sum $testdir/file1 | _filter_scratch
-> > @@ -82,7 +82,7 @@ c04=$(_md5_checksum $testdir/file4)
-> >  echo "CoW the reflink copies"
-> >  _pwrite_byte 0x62 $blksz $blksz $testdir/file2 >> $seqres.full
-> >  _pwrite_byte 0x63 $(( blksz * (blks - 1) )) $blksz $testdir/file3 >> $seqres.full
-> > -_test_cycle_mount
-> > +_scratch_cycle_mount
-> >  free_blocks2=$(stat -f $testdir -c '%f')
-> >  
-> >  md5sum $testdir/file1 | _filter_scratch
-> > @@ -97,11 +97,12 @@ c14=$(_md5_checksum $testdir/file4)
-> >  
-> >  echo "Defragment"
-> >  lsattr -l $testdir/ | _filter_scratch | _filter_spaces
-> > +filefrag -v $testdir/file* >> $seqres.full
+> > Can you please pull the fstests update from the location below? This is a small
+> > update that only contains some new tests.
 > 
-> Is this intentional? Use $FILEFRAG_PROG instead and add
+> Hi Eryu,
 > 
-> _require_command "$FILEFRAG_PROG" "filefrag"
-> 
-> at the beginning of the test?
+> I probably won't get to this before friday (merge window stuff
+> taking all my time) so if you could update as usual on friday I'll
+> pull it all early next week.
 
-Oops, that was a mistake.  Good catch!
+Sure. Thanks for the heads up.
 
---D
-> 
-> Thanks,
-> Eryu
-> 
-> >  $XFS_FSR_PROG -v -d $testdir/file1 >> $seqres.full
-> >  $XFS_FSR_PROG -v -d $testdir/file2 >> $seqres.full # fsr probably breaks the link
-> >  $XFS_FSR_PROG -v -d $testdir/file3 >> $seqres.full # fsr probably breaks the link
-> >  $XFS_FSR_PROG -v -d $testdir/file4 >> $seqres.full # fsr probably ignores this file
-> > -_test_cycle_mount
-> > +_scratch_cycle_mount
-> >  free_blocks3=$(stat -f $testdir -c '%f')
-> >  
-> >  md5sum $testdir/file1 | _filter_scratch
-> > diff --git a/tests/xfs/group b/tests/xfs/group
-> > index aa3b3ec..5ccf3d6 100644
-> > --- a/tests/xfs/group
-> > +++ b/tests/xfs/group
-> > @@ -125,7 +125,7 @@
-> >  125 fuzzers
-> >  126 fuzzers
-> >  127 auto quick clone
-> > -128 auto quick clone
-> > +128 auto quick clone fsr
-> >  129 auto quick clone
-> >  130 fuzzers clone
-> >  131 auto quick clone
-> > 
+Thanks,
+Eryu
