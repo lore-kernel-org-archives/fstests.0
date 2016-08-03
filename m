@@ -1,35 +1,73 @@
-Date: Fri, 5 Aug 2016 16:14:21 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic: test accurate shared extent reporting
-Message-ID: <20160805081421.GX27776@eguan.usersys.redhat.com>
-References: <20160805072147.GG25565@birch.djwong.org>
- <20160805074607.GW27776@eguan.usersys.redhat.com>
- <20160805080212.GH25565@birch.djwong.org>
+Received: from userp1040.oracle.com ([156.151.31.81]:50039 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932168AbcHCWtG (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 3 Aug 2016 18:49:06 -0400
+Date: Wed, 3 Aug 2016 15:48:55 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: [PATCH v2 07/17] xfs/128: cycle_mount the scratch device, not the
+ test device
+Message-ID: <20160803224855.GA25565@birch.djwong.org>
+References: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
+ <146914482100.11762.3197784490090678443.stgit@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160805080212.GH25565@birch.djwong.org>
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: dedekind1@gmail.com, mfasheh@suse.de, fstests@vger.kernel.org, xfs@oss.sgi.com, linux-btrfs@vger.kernel.org
+In-Reply-To: <146914482100.11762.3197784490090678443.stgit@birch.djwong.org>
+Sender: fstests-owner@vger.kernel.org
+To: david@fromorbit.com, eguan@redhat.com
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Aug 05, 2016 at 01:02:12AM -0700, Darrick J. Wong wrote:
-> On Fri, Aug 05, 2016 at 03:46:07PM +0800, Eryu Guan wrote:
-> > On Fri, Aug 05, 2016 at 12:21:47AM -0700, Darrick J. Wong wrote:
+This test uses the scratch device, so cycle that, not the test dev.
+This is also a xfs_fsr test, so put it in the fsr group.
 
-> > > +_count_holes $testdir/file2
-> > > +echo "file1 shared extents"
-> > > +$XFS_IO_PROG -c 'fiemap -v' $testdir/file1 | awk '{print $5}' | grep '0x.*[2367aAbBfF]...$' -c
-> > 
-> > Missing a command at the end?
-> 
-> Nope, it echoes the number of shared extents (that's what that awk and grep
-> globule does), which /should/ be exactly 2.
-> 
-> (Unless I'm missing something?)
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ tests/xfs/128   |    6 +++---
+ tests/xfs/group |    2 +-
+ 2 files changed, 4 insertions(+), 4 deletions(-)
 
-Ah, thanks! I saw "-c" at the end and thought it was part of xfs_io
-command without looking at it carefully.
-
-Thanks,
-Eryu
+diff --git a/tests/xfs/128 b/tests/xfs/128
+index 8758d7e..04633a1 100755
+--- a/tests/xfs/128
++++ b/tests/xfs/128
+@@ -66,7 +66,7 @@ _pwrite_byte 0x61 0 $((blks * blksz)) $testdir/file1 >> $seqres.full
+ _cp_reflink $testdir/file1 $testdir/file2
+ _cp_reflink $testdir/file2 $testdir/file3
+ _cp_reflink $testdir/file3 $testdir/file4
+-_test_cycle_mount
++_scratch_cycle_mount
+ free_blocks1=$(stat -f $testdir -c '%f')
+ 
+ md5sum $testdir/file1 | _filter_scratch
+@@ -82,7 +82,7 @@ c04=$(_md5_checksum $testdir/file4)
+ echo "CoW the reflink copies"
+ _pwrite_byte 0x62 $blksz $blksz $testdir/file2 >> $seqres.full
+ _pwrite_byte 0x63 $(( blksz * (blks - 1) )) $blksz $testdir/file3 >> $seqres.full
+-_test_cycle_mount
++_scratch_cycle_mount
+ free_blocks2=$(stat -f $testdir -c '%f')
+ 
+ md5sum $testdir/file1 | _filter_scratch
+@@ -101,7 +101,7 @@ $XFS_FSR_PROG -v -d $testdir/file1 >> $seqres.full
+ $XFS_FSR_PROG -v -d $testdir/file2 >> $seqres.full # fsr probably breaks the link
+ $XFS_FSR_PROG -v -d $testdir/file3 >> $seqres.full # fsr probably breaks the link
+ $XFS_FSR_PROG -v -d $testdir/file4 >> $seqres.full # fsr probably ignores this file
+-_test_cycle_mount
++_scratch_cycle_mount
+ free_blocks3=$(stat -f $testdir -c '%f')
+ 
+ md5sum $testdir/file1 | _filter_scratch
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 05571e4..ff0efa5 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -125,7 +125,7 @@
+ 125 fuzzers
+ 126 fuzzers
+ 127 auto quick clone
+-128 auto quick clone
++128 auto quick clone fsr
+ 129 auto quick clone
+ 130 fuzzers clone
+ 131 auto quick clone
