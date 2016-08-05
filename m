@@ -1,61 +1,74 @@
-Received: from smtp.nue.novell.com ([195.135.221.5]:49399 "EHLO
-	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934069AbcHEJrM (ORCPT
-	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
-	Fri, 5 Aug 2016 05:47:12 -0400
-Date: Fri, 5 Aug 2016 11:46:40 +0200
-From: =?UTF-8?B?QXVyw6lsaWVu?= Aptel <aaptel@suse.com>
-Subject: Re: [PATCH] Create test groups for cifs in xfstests
-Message-ID: <20160805114640.1051cf07@aaptelpc>
-In-Reply-To: <CAH2r5muHTHXikTCqiiU7AFx8Z-Ra_7CYK4f6PCZ_4KfVbO3-PA@mail.gmail.com>
-References: <CAH2r5muHTHXikTCqiiU7AFx8Z-Ra_7CYK4f6PCZ_4KfVbO3-PA@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:44262 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1161437AbcHEPq2 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Fri, 5 Aug 2016 11:46:28 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 3EF2F749
+	for <fstests@vger.kernel.org>; Fri,  5 Aug 2016 15:46:28 +0000 (UTC)
+Received: from [IPv6:::1] (ovpn03.gateway.prod.ext.phx2.redhat.com [10.5.9.3])
+	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u75FkRQV015365
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <fstests@vger.kernel.org>; Fri, 5 Aug 2016 11:46:28 -0400
+From: Eric Sandeen <sandeen@redhat.com>
+Subject: [PATCH] document Fedora, RHEL, and CentOS dependencies
+Message-ID: <fa952893-01ab-596d-13e9-ed4171be7f4a@redhat.com>
+Date: Fri, 5 Aug 2016 10:46:27 -0500
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- boundary="Sig_/6gEaQZS=AmHMKs9wIOko5Q1"; protocol="application/pgp-signature"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Steve French <smfrench@gmail.com>
-Cc: fstests@vger.kernel.org, "linux-cifs@vger.kernel.org" <linux-cifs@vger.kernel.org>
+To: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
---Sig_/6gEaQZS=AmHMKs9wIOko5Q1
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Document all build and runtime requirements for xfstests
+on Fedora/RHEL/CentOS boxes, as was done earlier for Ubuntu.
 
-On Thu, 14 Apr 2016 22:53:15 -0500 Steve French <smfrench@gmail.com>
-wrote:
-> Attached is a trivial patch to create two xfstest groups for cifs
+Minor other README edits as well.
 
-This is great! I remember trying it unsucessfully on cifs last year
-where I had test that would just run forever and never return. I
-will try again soon with your patch.
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
 
---=20
-Aur=C3=A9lien Aptel / SUSE Labs Samba Team
-GPG: 1839 CB5F 9F5B FB9B AA97  8C99 03C8 A49B 521B D5D3
-SUSE Linux GmbH, Maxfeldstra=C3=9Fe 5, 90409 N=C3=BCrnberg, Germany
-GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Norton, HRB 21284 (AG
-N=C3=BCrnberg)
+(I wonder if it would be worth adding an install-deps script...)
 
---Sig_/6gEaQZS=AmHMKs9wIOko5Q1
-Content-Type: application/pgp-signature
-Content-Description: OpenPGP digital signature
+diff --git a/README b/README
+index 2647e12..5aaad01 100644
+--- a/README
++++ b/README
+@@ -10,6 +10,13 @@ Building Linux:
+ 		 automake gcc libuuid1 quota attr libattr1-dev make
+ 		 libacl1-dev libaio-dev xfsprogs libgdbm-dev gawk fio dbench
+ 		 uuid-runtime"
++	  For Fedora, RHEL, or CentOS:
++		"yum install acl attr awk bc dbench dump e2fsprogs fio gawk
++		 indent lvm2 psmisc quota sed xfsdump xfsprogs
++		 libacl-devel libattr-devel libaio-devel libuuid-devel
++		 openssl-devel xfsprogs-devel btrfs-progs-devel"
++		(Older distributions may require xfsprogs-qa-devel as well.)
++		(Note that for RHEL and CentOS, you may need the EPEL repo.)
+ 	- run make
+ 	- run make install
+ 	- create fsgqa test user ("sudo useradd fsgqa")
+@@ -27,8 +34,8 @@ ______________________
+ Preparing system for tests (IRIX and Linux):
+ 
+     - compile XFS into your kernel or load XFS modules
+-    - install user tools including mkfs.xfs, xfs_db & xfs_bmap
+-    - If you wish to run the udf components of the suite install 
++    - install administrative tools specific to the filesystem you wish to test
++    - If you wish to run the udf components of the suite install
+       mkfs_udf and udf_db for IRIX and mkudffs for Linux. Also download and 
+       build the Philips UDF Verification Software from 
+       http://www.extra.research.philips.com/udf/, then copy the udf_test 
+@@ -54,6 +61,9 @@ Preparing system for tests (IRIX and Linux):
+               SCRATCH_DEV_POOL by xfstests script.
+               
+     - setup your environment
++	Quick start:
++	- copy config.local.example to config.local and edit as needed
++	Or:
+         - setenv TEST_DEV "device containing TEST PARTITION"
+         - setenv TEST_DIR "mount point of TEST PARTITION"   
+        	- optionally:
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQIcBAEBAgAGBQJXpGCCAAoJEDIGO5Hchq/8kOQP/0yGduVOs/tf3/uv8yJeEr6s
-ImVDLDtuTomfdL30ZZzL56bJiqQtIyhEnFqzbG9Z4OFnjLzcjYerPXbMJ0TVSDq8
-wyc8vWRKQT8m+TZHXOS8r74gl0rq0oh/+s0+uNOoGtynAU9fh11UmeibSGfii/zz
-apEr819KlpH1rHDVGjKce5VsxoO3EPxZYIvzCEopBmfvNqTlaFwXrWHjcQgMbWU5
-GsW9bVPHVsjY7fn5Vp+kFk0u7pNQyBpz5/A3yja06zAt7f0sPOEqpFzHxPP9xBJT
-fDBxIKD2EPjT0FZKeh4ZmyB8x4nZQnyauEk1cpuqgQj060me12m+BEeHIDDLG86L
-AoTfCPO7SSFa8GZcuVXJvu1izPvEshIdqE2F2C/DAKN8fBv89MepCPDnSQdzfUcf
-8g62GAY+a96I3xJ+es33BPk2mqqUtWHrBPkTFUxJokVKjWKnEYChcgWD/wKA8jZQ
-xtx0WqWVz+673mTGZcfWIwgfvHgi7xaIQI8J5vzlMKVRtSVzsCd9X5J6yIt4jvzd
-PZeqllSwrOTQk3Eb/UuXv+v02qNmlNjUWh1CyVNb0njAzo0/eTeeaQhK0UB7X5c2
-aUdQSBr8ZCEgk6vciyTniZ3j19dVjjDDLadrsNMasEMihD+NQmvfOIWJf4eh/uIs
-T7n09iey7BNMP0MlZju+
-=FrU2
------END PGP SIGNATURE-----
-
---Sig_/6gEaQZS=AmHMKs9wIOko5Q1--
