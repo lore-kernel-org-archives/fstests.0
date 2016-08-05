@@ -1,67 +1,164 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:27269 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758459AbcHCWPj (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Wed, 3 Aug 2016 18:15:39 -0400
-Date: Wed, 3 Aug 2016 15:14:01 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 09/17] common/dmerror: fix mount option issues
-Message-ID: <20160803221401.GT8590@birch.djwong.org>
-References: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
- <146914483353.11762.14647880235199676753.stgit@birch.djwong.org>
- <20160803103800.GO27776@eguan.usersys.redhat.com>
+Date: Fri, 5 Aug 2016 15:46:07 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] generic: test accurate shared extent reporting
+Message-ID: <20160805074607.GW27776@eguan.usersys.redhat.com>
+References: <20160805072147.GG25565@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160803103800.GO27776@eguan.usersys.redhat.com>
-Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: david@fromorbit.com, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
+In-Reply-To: <20160805072147.GG25565@birch.djwong.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: david@fromorbit.com, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com, dedekind1@gmail.com, mfasheh@suse.de
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 03, 2016 at 06:38:00PM +0800, Eryu Guan wrote:
-> On Thu, Jul 21, 2016 at 04:47:13PM -0700, Darrick J. Wong wrote:
-> > Calling _mount doesn't work when we want to add mount options
-> > such as realtime devices.  Since it's just a normal scratch device
-> > mount except for the source device, just call _scratch_mount with
-> > SCRATCH_DEV set to the dmerror device.
-> > 
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> >  common/dmerror |    7 +------
-> >  1 file changed, 1 insertion(+), 6 deletions(-)
-> > 
-> > 
-> > diff --git a/common/dmerror b/common/dmerror
-> > index 5ad9994..22b9ea9 100644
-> > --- a/common/dmerror
-> > +++ b/common/dmerror
-> > @@ -41,14 +41,9 @@ _dmerror_init()
-> >  	DMERROR_TABLE="0 $blk_dev_size error $dm_backing_dev 0"
-> >  }
-> >  
-> > -_dmerror_mount_options()
-> > -{
-> > -	echo `_common_dev_mount_options $*` $DMERROR_DEV $SCRATCH_MNT
-> > -}
-> > -
-> >  _dmerror_mount()
-> >  {
-> > -	_mount -t $FSTYP `_dmerror_mount_options $*`
-> > +	SCRATCH_DEV=$DMERROR_DEV _scratch_mount $*
+On Fri, Aug 05, 2016 at 12:21:47AM -0700, Darrick J. Wong wrote:
+> Ensure that we can create a file with a single extent, reflink two
+> blocks out of the middle of that extent, and the resulting fiemap
+> reports two shared extents, instead of lazily reporting the entire
+> huge extent as shared.
 > 
-> Perhaps you can add "_scratch_options mount" to _dmerror_mount then
-> mount with $SCRATCH_OPTIONS? Like what _mount_delay does in
-> common/dmdelay.
-
-Oh, yeah, that makes sense.
-
---D
-
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  tests/generic/929     |   89 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/929.out |   17 +++++++++
+>  tests/generic/group   |    1 +
+>  3 files changed, 107 insertions(+)
+>  create mode 100755 tests/generic/929
+>  create mode 100644 tests/generic/929.out
 > 
-> Thanks,
-> Eryu
-> 
-> >  }
-> >  
-> >  _dmerror_unmount()
-> > 
+> diff --git a/tests/generic/929 b/tests/generic/929
+> new file mode 100755
+> index 0000000..9793be0
+> --- /dev/null
+> +++ b/tests/generic/929
+> @@ -0,0 +1,89 @@
+> +#! /bin/bash
+> +# FS QA Test No. 929
+> +#
+> +# Check that bmap/fiemap accurately report shared extents.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016 Oracle, Inc.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 7 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -rf $tmp.*
+> +	wait
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/reflink
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+
+Need "_supported_fs generic"
+
+> +_require_scratch_reflink
+> +_require_fiemap
+> +
+> +echo "Format and mount"
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount >> $seqres.full 2>&1
+> +
+> +testdir=$SCRATCH_MNT/test-$seq
+> +mkdir $testdir
+> +
+> +blocks=5
+> +blksz=65536
+> +sz=$((blocks * blksz))
+> +
+> +echo "Create the original files"
+> +$XFS_IO_PROG -f -c "falloc 0 $sz" $testdir/file1 >> $seqres.full
+> +_pwrite_byte 0x61 0 $sz $testdir/file1 >> $seqres.full
+> +_scratch_cycle_mount
+> +
+> +echo "file1 extents and holes"
+> +_count_extents $testdir/file1
+> +_count_holes $testdir/file1
+> +
+> +_reflink_range $testdir/file1 $blksz $testdir/file2 $((blksz * 3)) $blksz >> $seqres.full
+> +_reflink_range $testdir/file1 $((blksz * 3)) $testdir/file2 $blksz $blksz >> $seqres.full
+> +_scratch_cycle_mount
+> +
+> +echo "Compare files"
+> +md5sum $testdir/file1 | _filter_scratch
+> +md5sum $testdir/file2 | _filter_scratch
+> +
+> +echo "file1 extents and holes"
+> +_count_extents $testdir/file1
+> +_count_holes $testdir/file1
+> +echo "file2 extents and holes"
+> +_count_extents $testdir/file2
+> +_count_holes $testdir/file2
+> +echo "file1 shared extents"
+> +$XFS_IO_PROG -c 'fiemap -v' $testdir/file1 | awk '{print $5}' | grep '0x.*[2367aAbBfF]...$' -c
+
+Missing a command at the end?
+
+Thanks,
+Eryu
+
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/929.out b/tests/generic/929.out
+> new file mode 100644
+> index 0000000..e290f4c
+> --- /dev/null
+> +++ b/tests/generic/929.out
+> @@ -0,0 +1,17 @@
+> +QA output created by 929
+> +Format and mount
+> +Create the original files
+> +file1 extents and holes
+> +1
+> +0
+> +Compare files
+> +17af09af790a9b4c79cddf72f6b642cb  SCRATCH_MNT/test-929/file1
+> +79418df9c55ab7f58781cb7b9e7d5d91  SCRATCH_MNT/test-929/file2
+> +file1 extents and holes
+> +5
+> +0
+> +file2 extents and holes
+> +2
+> +2
+> +file1 shared extents
+> +2
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 18b9775..732f6f6 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -375,3 +375,4 @@
+>  370 auto quick richacl
+>  927 auto quick clone
+>  928 auto quick clone dedupe
+> +929 auto quick clone
