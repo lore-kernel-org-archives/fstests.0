@@ -1,68 +1,283 @@
-Received: from mail-qk0-f193.google.com ([209.85.220.193]:35174 "EHLO
-	mail-qk0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934070AbcHDT74 (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Thu, 4 Aug 2016 15:59:56 -0400
-Date: Thu, 4 Aug 2016 16:02:46 -0400
-From: Eric Whitney <enwlinux@gmail.com>
-Subject: [PATCH] common/defrag: rework _require_defrag for ext4
-Message-ID: <20160804200246.GA2208@localhost.localdomain>
+Received: from userp1050.oracle.com ([156.151.31.82]:47197 "EHLO
+	userp1050.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759402AbcHECHs (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Thu, 4 Aug 2016 22:07:48 -0400
+Received: from userp1040.oracle.com (userp1040.oracle.com [156.151.31.81])
+	by userp1050.oracle.com (Sentrion-MTA-4.3.2/Sentrion-MTA-4.3.2) with ESMTP id u7527lSQ009933
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
+	for <fstests@vger.kernel.org>; Fri, 5 Aug 2016 02:07:47 GMT
+Date: Thu, 4 Aug 2016 19:03:51 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: [PATCH v3] xfs: test attr_list_by_handle cursor iteration
+Message-ID: <20160805020351.GF25565@birch.djwong.org>
+References: <20160802235251.GB8586@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20160802235251.GB8586@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org, tytso@mit.edu
+To: david@fromorbit.com, eguan@redhat.com
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com, Christoph Hellwig <hch@infradead.org>
 List-ID: <fstests@vger.kernel.org>
 
-The existing _require_defrag function rejects ext4 file systems
-mounted with the dax option or constructed without extents.  However,
-there are also a number of other ext4 file system configuration cases
-that do not currently support online defrag, including encryption, data
-journaling, and bigalloc.  In the future, online defrag functionality
-may be implemented for some of these, and new configuration cases
-could be added that don't support it.
+Apparently the XFS attr_list_by_handle ioctl has never actually copied
+the cursor contents back to user space, which means that iteration has
+never worked.  Add a test case for this and see
+"xfs: in _attrlist_by_handle, copy the cursor back to userspace".
 
-Rather than add a laundry list of mount and file system configuration
-options to the existing _require_defrag function that will need ongoing
-maintenance, use the available src/e4compact program to directly
-determine whether the kernel supports ext4's move extent ioctl on the
-test file system.
+v2: Use BULKSTAT_SINGLE for less confusion, fix build errors on RHEL6.
+v3: Use path_to_handle instead of bulkstat.
 
-Signed-off-by: Eric Whitney <enwlinux@gmail.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- common/defrag | 17 +++++++++++------
- 1 file changed, 11 insertions(+), 6 deletions(-)
+ .gitignore                            |    1 
+ src/Makefile                          |    3 +
+ src/attr-list-by-handle-cursor-test.c |  118 +++++++++++++++++++++++++++++++++
+ tests/xfs/700                         |   64 ++++++++++++++++++
+ tests/xfs/700.out                     |    5 +
+ tests/xfs/group                       |    1 
+ 6 files changed, 191 insertions(+), 1 deletion(-)
+ create mode 100644 src/attr-list-by-handle-cursor-test.c
+ create mode 100755 tests/xfs/700
+ create mode 100644 tests/xfs/700.out
 
-diff --git a/common/defrag b/common/defrag
-index 7db0cb4..986b4bf 100644
---- a/common/defrag
-+++ b/common/defrag
-@@ -27,14 +27,19 @@ _require_defrag()
-         DEFRAG_PROG="$XFS_FSR_PROG"
- 	;;
-     ext4|ext4dev)
--	echo $MOUNT_OPTIONS | grep -q dax
-+	testfile="$TEST_DIR/$$-test.defrag"
-+	donorfile="$TEST_DIR/$$-donor.defrag"
-+	bsize=`get_block_size $TEST_DIR`
-+	$XFS_IO_PROG -f -c "pwrite -b $bsize 0 $bsize" $testfile > /dev/null
-+	cp $testfile $donorfile
-+	echo $testfile | $here/src/e4compact -v -f $donorfile | \
-+		grep -q "err:95"
- 	if [ $? -eq 0 ]; then
--		_notrun "$FSTYP defragmentation not supported with DAX"
--	else
--		DEFRAG_PROG="$E4DEFRAG_PROG"
-+		rm -f $testfile $donorfile 2>&1 > /dev/null
-+		_notrun "$FSTYP test filesystem doesn't support online defrag"
- 	fi
--	dumpe2fs -h $TEST_DEV 2> /dev/null | grep -wq extent || \
--		_notrun "file system does not have extents, needed for defrag"
-+	rm -f $testfile $donorfile 2>&1 > /dev/null
-+	DEFRAG_PROG="$E4DEFRAG_PROG"
- 	;;
-     btrfs)
- 	DEFRAG_PROG="$BTRFS_UTIL_PROG filesystem defragment"
--- 
-2.1.4
-
+diff --git a/.gitignore b/.gitignore
+index 28bd180..e184a6f 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -38,6 +38,7 @@
+ /src/alloc
+ /src/append_reader
+ /src/append_writer
++/src/attr-list-by-handle-cursor-test
+ /src/bstat
+ /src/bulkstat_unlink_test
+ /src/bulkstat_unlink_test_modified
+diff --git a/src/Makefile b/src/Makefile
+index 1bf318b..ae06d50 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -20,7 +20,8 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	bulkstat_unlink_test_modified t_dir_offset t_futimens t_immutable \
+ 	stale_handle pwrite_mmap_blocked t_dir_offset2 seek_sanity_test \
+ 	seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
+-	renameat2 t_getcwd e4compact test-nextquota punch-alternating
++	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
++	attr-list-by-handle-cursor-test
+ 
+ SUBDIRS =
+ 
+diff --git a/src/attr-list-by-handle-cursor-test.c b/src/attr-list-by-handle-cursor-test.c
+new file mode 100644
+index 0000000..4269d1e
+--- /dev/null
++++ b/src/attr-list-by-handle-cursor-test.c
+@@ -0,0 +1,118 @@
++/*
++ * Copyright (C) 2016 Oracle.  All Rights Reserved.
++ *
++ * Author: Darrick J. Wong <darrick.wong@oracle.com>
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2
++ * of the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it would be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write the Free Software Foundation,
++ * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301, USA.
++ */
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <attr/attributes.h>
++#include <unistd.h>
++#include <fcntl.h>
++#include <string.h>
++#include <stdio.h>
++#include <asm/types.h>
++#include <xfs/xfs.h>
++#include <xfs/handle.h>
++
++#define ATTRBUFSZ		1024
++#define BSTATBUF_NR		32
++
++/* Read all the extended attributes of a file handle. */
++void
++read_handle_xattrs(
++	struct xfs_handle	*handle)
++{
++	struct attrlist_cursor	cur;
++	char			attrbuf[ATTRBUFSZ];
++	char			*firstname = NULL;
++	struct attrlist		*attrlist = (struct attrlist *)attrbuf;
++	struct attrlist_ent	*ent;
++	int			i;
++	int			flags = 0;
++	int			error;
++
++	memset(&cur, 0, sizeof(cur));
++	while ((error = attr_list_by_handle(handle, sizeof(*handle),
++					    attrbuf, ATTRBUFSZ, flags,
++					    &cur)) == 0) {
++		for (i = 0; i < attrlist->al_count; i++) {
++			ent = ATTR_ENTRY(attrlist, i);
++
++			if (i != 0)
++				continue;
++
++			if (firstname == NULL) {
++				firstname = malloc(ent->a_valuelen);
++				memcpy(firstname, ent->a_name, ent->a_valuelen);
++			} else {
++				if (memcmp(firstname, ent->a_name,
++					   ent->a_valuelen) == 0)
++					fprintf(stderr,
++						"Saw duplicate xattr \"%s\", buggy XFS?\n",
++						ent->a_name);
++				else
++					fprintf(stderr,
++						"Test passes.\n");
++				goto out;
++			}
++		}
++
++		if (!attrlist->al_more)
++			break;
++	}
++
++out:
++	if (firstname)
++		free(firstname);
++	if (error)
++		perror("attr_list_by_handle");
++	return;
++}
++
++int main(
++	int			argc,
++	char			*argv[])
++{
++	struct xfs_handle	*fshandle;
++	size_t			fshandle_len;
++	struct xfs_handle	*handle;
++	size_t			handle_len;
++	int			error;
++
++	if (argc != 2) {
++		fprintf(stderr, "Usage: %s filename\n", argv[0]);
++		return 1;
++	}
++
++	error = path_to_fshandle(argv[1], (void **)&fshandle, &fshandle_len);
++	if (error) {
++		perror("getting fshandle");
++		return 2;
++	}
++
++	error = path_to_handle(argv[1], (void **)&handle, &handle_len);
++	if (error) {
++		perror("getting handle");
++		return 3;
++	}
++
++	read_handle_xattrs(handle);
++
++	free_handle(handle, handle_len);
++	free_handle(fshandle, fshandle_len);
++	return 0;
++}
+diff --git a/tests/xfs/700 b/tests/xfs/700
+new file mode 100755
+index 0000000..4a5680d
+--- /dev/null
++++ b/tests/xfs/700
+@@ -0,0 +1,64 @@
++#! /bin/bash
++# FS QA Test No. 700
++#
++# Check that attr_list_by_handle copies the cursor back to userspace.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename "$0"`
++seqres="$RESULT_DIR/$seq"
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -rf "$tmp".* $TEST_DIR/fsmap $TEST_DIR/testout
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++. ./common/populate
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch
++_require_test_program "attr-list-by-handle-cursor-test"
++
++rm -f "$seqres.full"
++
++echo "Format and mount"
++_scratch_mkfs > "$seqres.full" 2>&1
++_scratch_mount
++
++echo "Stuff file with xattrs"
++mkdir $SCRATCH_MNT/foo
++__populate_create_attr $SCRATCH_MNT/foo 100
++
++echo "Run test program"
++./src/attr-list-by-handle-cursor-test $SCRATCH_MNT/foo
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/700.out b/tests/xfs/700.out
+new file mode 100644
+index 0000000..493a68a
+--- /dev/null
++++ b/tests/xfs/700.out
+@@ -0,0 +1,5 @@
++QA output created by 700
++Format and mount
++Stuff file with xattrs
++Run test program
++Test passes.
+diff --git a/tests/xfs/group b/tests/xfs/group
+index ff0efa5..b42153d 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -307,3 +307,4 @@
+ 325 auto quick clone
+ 326 auto quick clone
+ 327 auto quick clone
++700 auto quick ioctl
