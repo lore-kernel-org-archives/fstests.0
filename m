@@ -1,162 +1,61 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:23374 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752114AbcHEIDI (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Fri, 5 Aug 2016 04:03:08 -0400
-Date: Fri, 5 Aug 2016 01:02:51 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH v2] generic: test accurate shared extent reporting
-Message-ID: <20160805080251.GI25565@birch.djwong.org>
-References: <20160805072147.GG25565@birch.djwong.org>
+Received: from smtp.nue.novell.com ([195.135.221.5]:49399 "EHLO
+	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934069AbcHEJrM (ORCPT
+	<rfc822;groupwise-fstests@vger.kernel.org:0:0>);
+	Fri, 5 Aug 2016 05:47:12 -0400
+Date: Fri, 5 Aug 2016 11:46:40 +0200
+From: =?UTF-8?B?QXVyw6lsaWVu?= Aptel <aaptel@suse.com>
+Subject: Re: [PATCH] Create test groups for cifs in xfstests
+Message-ID: <20160805114640.1051cf07@aaptelpc>
+In-Reply-To: <CAH2r5muHTHXikTCqiiU7AFx8Z-Ra_7CYK4f6PCZ_4KfVbO3-PA@mail.gmail.com>
+References: <CAH2r5muHTHXikTCqiiU7AFx8Z-Ra_7CYK4f6PCZ_4KfVbO3-PA@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160805072147.GG25565@birch.djwong.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ boundary="Sig_/6gEaQZS=AmHMKs9wIOko5Q1"; protocol="application/pgp-signature"
 Sender: fstests-owner@vger.kernel.org
-To: david@fromorbit.com, eguan@redhat.com
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com, dedekind1@gmail.com, mfasheh@suse.de
+To: Steve French <smfrench@gmail.com>
+Cc: fstests@vger.kernel.org, "linux-cifs@vger.kernel.org" <linux-cifs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Ensure that we can create a file with a single extent, reflink two
-blocks out of the middle of that extent, and the resulting fiemap
-reports two shared extents, instead of lazily reporting the entire
-huge extent as shared.
+--Sig_/6gEaQZS=AmHMKs9wIOko5Q1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-v2: add _supported_fs
+On Thu, 14 Apr 2016 22:53:15 -0500 Steve French <smfrench@gmail.com>
+wrote:
+> Attached is a trivial patch to create two xfstest groups for cifs
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/generic/929     |   90 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/929.out |   17 +++++++++
- tests/generic/group   |    1 +
- 3 files changed, 108 insertions(+)
- create mode 100755 tests/generic/929
- create mode 100644 tests/generic/929.out
+This is great! I remember trying it unsucessfully on cifs last year
+where I had test that would just run forever and never return. I
+will try again soon with your patch.
 
-diff --git a/tests/generic/929 b/tests/generic/929
-new file mode 100755
-index 0000000..1871789
---- /dev/null
-+++ b/tests/generic/929
-@@ -0,0 +1,90 @@
-+#! /bin/bash
-+# FS QA Test No. 929
-+#
-+# Check that bmap/fiemap accurately report shared extents.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Oracle, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 7 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -rf $tmp.*
-+	wait
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs generic
-+_require_scratch_reflink
-+_require_fiemap
-+
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
-+
-+blocks=5
-+blksz=65536
-+sz=$((blocks * blksz))
-+
-+echo "Create the original files"
-+$XFS_IO_PROG -f -c "falloc 0 $sz" $testdir/file1 >> $seqres.full
-+_pwrite_byte 0x61 0 $sz $testdir/file1 >> $seqres.full
-+_scratch_cycle_mount
-+
-+echo "file1 extents and holes"
-+_count_extents $testdir/file1
-+_count_holes $testdir/file1
-+
-+_reflink_range $testdir/file1 $blksz $testdir/file2 $((blksz * 3)) $blksz >> $seqres.full
-+_reflink_range $testdir/file1 $((blksz * 3)) $testdir/file2 $blksz $blksz >> $seqres.full
-+_scratch_cycle_mount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
-+
-+echo "file1 extents and holes"
-+_count_extents $testdir/file1
-+_count_holes $testdir/file1
-+echo "file2 extents and holes"
-+_count_extents $testdir/file2
-+_count_holes $testdir/file2
-+echo "file1 shared extents"
-+$XFS_IO_PROG -c 'fiemap -v' $testdir/file1 | awk '{print $5}' | grep -c '0x.*[2367aAbBfF]...$'
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/929.out b/tests/generic/929.out
-new file mode 100644
-index 0000000..e290f4c
---- /dev/null
-+++ b/tests/generic/929.out
-@@ -0,0 +1,17 @@
-+QA output created by 929
-+Format and mount
-+Create the original files
-+file1 extents and holes
-+1
-+0
-+Compare files
-+17af09af790a9b4c79cddf72f6b642cb  SCRATCH_MNT/test-929/file1
-+79418df9c55ab7f58781cb7b9e7d5d91  SCRATCH_MNT/test-929/file2
-+file1 extents and holes
-+5
-+0
-+file2 extents and holes
-+2
-+2
-+file1 shared extents
-+2
-diff --git a/tests/generic/group b/tests/generic/group
-index 18b9775..732f6f6 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -375,3 +375,4 @@
- 370 auto quick richacl
- 927 auto quick clone
- 928 auto quick clone dedupe
-+929 auto quick clone
+--=20
+Aur=C3=A9lien Aptel / SUSE Labs Samba Team
+GPG: 1839 CB5F 9F5B FB9B AA97  8C99 03C8 A49B 521B D5D3
+SUSE Linux GmbH, Maxfeldstra=C3=9Fe 5, 90409 N=C3=BCrnberg, Germany
+GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Norton, HRB 21284 (AG
+N=C3=BCrnberg)
+
+--Sig_/6gEaQZS=AmHMKs9wIOko5Q1
+Content-Type: application/pgp-signature
+Content-Description: OpenPGP digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQIcBAEBAgAGBQJXpGCCAAoJEDIGO5Hchq/8kOQP/0yGduVOs/tf3/uv8yJeEr6s
+ImVDLDtuTomfdL30ZZzL56bJiqQtIyhEnFqzbG9Z4OFnjLzcjYerPXbMJ0TVSDq8
+wyc8vWRKQT8m+TZHXOS8r74gl0rq0oh/+s0+uNOoGtynAU9fh11UmeibSGfii/zz
+apEr819KlpH1rHDVGjKce5VsxoO3EPxZYIvzCEopBmfvNqTlaFwXrWHjcQgMbWU5
+GsW9bVPHVsjY7fn5Vp+kFk0u7pNQyBpz5/A3yja06zAt7f0sPOEqpFzHxPP9xBJT
+fDBxIKD2EPjT0FZKeh4ZmyB8x4nZQnyauEk1cpuqgQj060me12m+BEeHIDDLG86L
+AoTfCPO7SSFa8GZcuVXJvu1izPvEshIdqE2F2C/DAKN8fBv89MepCPDnSQdzfUcf
+8g62GAY+a96I3xJ+es33BPk2mqqUtWHrBPkTFUxJokVKjWKnEYChcgWD/wKA8jZQ
+xtx0WqWVz+673mTGZcfWIwgfvHgi7xaIQI8J5vzlMKVRtSVzsCd9X5J6yIt4jvzd
+PZeqllSwrOTQk3Eb/UuXv+v02qNmlNjUWh1CyVNb0njAzo0/eTeeaQhK0UB7X5c2
+aUdQSBr8ZCEgk6vciyTniZ3j19dVjjDDLadrsNMasEMihD+NQmvfOIWJf4eh/uIs
+T7n09iey7BNMP0MlZju+
+=FrU2
+-----END PGP SIGNATURE-----
+
+--Sig_/6gEaQZS=AmHMKs9wIOko5Q1--
