@@ -1,330 +1,134 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:32878 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752167AbcHHR7u (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Mon, 8 Aug 2016 13:59:50 -0400
-Date: Mon, 8 Aug 2016 10:59:28 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 14/17] xfs: more rmapbt tests
-Message-ID: <20160808175928.GD11291@birch.djwong.org>
-References: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
- <146914486527.11762.1173224384905616811.stgit@birch.djwong.org>
- <20160808084814.GC27776@eguan.usersys.redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160808084814.GC27776@eguan.usersys.redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:49388 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751708AbcHFUvd (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Sat, 6 Aug 2016 16:51:33 -0400
+Message-Id: <201608061013.u76ADGJr016961@int-mx09.intmail.prod.int.phx2.redhat.com>
+Date: Sat, 06 Aug 2016 18:13:16 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: [GIT PULL] fstests: updates on 2016-08-06
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: david@fromorbit.com, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Aug 08, 2016 at 04:48:14PM +0800, Eryu Guan wrote:
-> On Thu, Jul 21, 2016 at 04:47:45PM -0700, Darrick J. Wong wrote:
-> > More tests for the reverse mapping functionality.
-> > 
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> >  tests/xfs/876     |   76 +++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/876.out |    4 ++
-> >  tests/xfs/877     |   85 +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/877.out |   10 ++++++
-> >  tests/xfs/group   |    4 ++
-> >  5 files changed, 178 insertions(+), 1 deletion(-)
-> >  create mode 100755 tests/xfs/876
-> >  create mode 100644 tests/xfs/876.out
-> >  create mode 100755 tests/xfs/877
-> >  create mode 100644 tests/xfs/877.out
-> > 
-> > 
-> > diff --git a/tests/xfs/876 b/tests/xfs/876
-> > new file mode 100755
-> > index 0000000..cf73d40
-> > --- /dev/null
-> > +++ b/tests/xfs/876
-> > @@ -0,0 +1,76 @@
-> > +#! /bin/bash
-> > +# FS QA Test No. 876
-> > +#
-> > +# Create a big enough rmapbt that we tickle a fdblocks accounting bug.
-> 
-> This test failed post-test fs check as well
-> 
-> "sb_fdblocks 3912360, counted 3912522"
-> 
-> Seems like it's a known bug?
+Hi Dave,
 
-(Yes, it should be fixed in the -wtf branch, as noted in a previous reply.)
+Can you please pull the fstests update from the location below? It mainly
+contains fixes for reflink & rmap tests from Darrick J. Wong (first 11 patches
+in the patchset, I'll go through the rest new tests next week).
 
-> > +#
-> > +#-----------------------------------------------------------------------
-> > +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
-> > +#
-> > +# This program is free software; you can redistribute it and/or
-> > +# modify it under the terms of the GNU General Public License as
-> > +# published by the Free Software Foundation.
-> > +#
-> > +# This program is distributed in the hope that it would be useful,
-> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > +# GNU General Public License for more details.
-> > +#
-> > +# You should have received a copy of the GNU General Public License
-> > +# along with this program; if not, write the Free Software Foundation,
-> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > +#-----------------------------------------------------------------------
-> > +
-> > +seq=`basename "$0"`
-> > +seqres="$RESULT_DIR/$seq"
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1    # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -rf "$tmp".*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +. ./common/attr
-> 
-> Seems this is not needed.
-> 
-> > +. ./common/reflink
-> > +
-> > +# real QA test starts here
-> > +_supported_os Linux
-> > +_require_scratch
-> > +_require_xfs_scratch_rmapbt
-> > +_require_scratch_reflink
-> > +_require_test_program "punch-alternating"
-> > +
-> > +rm -f "$seqres.full"
-> > +
-> > +echo "+ create scratch fs"
-> > +_scratch_mkfs > "$seqres.full" 2>&1
-> > +
-> > +echo "+ mount fs image"
-> > +_scratch_mount
-> > +blksz="$(stat -f $SCRATCH_MNT -c '%S')"
-> > +isize=$(xfs_info $SCRATCH_MNT | grep isize | sed -e 's/^.*isize=\([0-9]*\).*$/\1/g')
-> 
-> We usually get isize from the output of _filter_mkfs, e.g.
-> 
-> _scratch_mkfs | _filter_mkfs 2>$tmp.mkfs >/dev/null
-> . $tmp.mkfs
-> 
-> Then all mkfs info is set accordingly, including $isize
-> 
-> But in this test, isize is got but not used. Remove the line?
+Thanks,
+Eryu
 
-Ok.
+The following changes since commit 6721ab08bd2772da9f3aa1ae7b46b7cb5c0e8308:
 
-> > +
-> > +bt_ptrs=$(( (blksz - 56) / 44 ))
-> > +bt_recs=$(( (blksz - 56) / 24 ))
-> > +
-> > +blocks=$((bt_ptrs * bt_recs + 1))
-> > +_require_fs_space $SCRATCH_MNT $(( (2 * blocks * blksz) * 5 / 4096 ))
-> > +len=$((blocks * blksz))
-> > +
-> > +echo "+ make some files"
-> > +$XFS_IO_PROG -f -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f1 >> $seqres.full
-> > +$XFS_IO_PROG -f -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f2 >> $seqres.full
-> > +./src/punch-alternating $SCRATCH_MNT/f1 >> "$seqres.full"
-> > +./src/punch-alternating $SCRATCH_MNT/f2 >> "$seqres.full"
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/xfs/876.out b/tests/xfs/876.out
-> > new file mode 100644
-> > index 0000000..96c1970
-> > --- /dev/null
-> > +++ b/tests/xfs/876.out
-> > @@ -0,0 +1,4 @@
-> > +QA output created by 876
-> > ++ create scratch fs
-> > ++ mount fs image
-> > ++ make some files
-> > diff --git a/tests/xfs/877 b/tests/xfs/877
-> > new file mode 100755
-> > index 0000000..9700263
-> > --- /dev/null
-> > +++ b/tests/xfs/877
-> > @@ -0,0 +1,85 @@
-> > +#! /bin/bash
-> > +# FS QA Test No. 877
-> > +#
-> > +# Make sure query_range returns -EINVAL if lowkey > highkey.
-> 
-> This test failed too, is this expected (again, tested with your
-> djwong-experimental branck kernel and xfsprogs)?
-> 
-> [root@dhcp-66-86-11 xfstests]# diff -u tests/xfs/877.out /root/workspace/xfstests/results//xfs_reflink/xfs/877.out.bad
-> --- tests/xfs/877.out   2016-08-08 16:22:35.151000000 +0800
-> +++ /root/workspace/xfstests/results//xfs_reflink/xfs/877.out.bad       2016-08-08 16:23:12.405000000 +0800
-> @@ -7,4 +7,3 @@
->  Unmount
->  Try a regular fsmap
->  Try a bad fsmap
-> -Error 22 while querying fsmap btree.
+  generic/235: Fix false failures for some quota formats (2016-07-21 17:44:30 +0800)
 
-During the code review of the XFS function that underlies GETFSMAP
-(query_range), someone suggested that it should return -EINVAL if someone
-queries start > end rather than simply returning no results, so this is
-the xfstest to ensure that happens.
+are available in the git repository at:
 
-(It's in the -wtf branch.)
+  https://github.com/guaneryu/xfstests.git for-dave
 
-> > +#
-> > +#-----------------------------------------------------------------------
-> > +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
-> > +#
-> > +# This program is free software; you can redistribute it and/or
-> > +# modify it under the terms of the GNU General Public License as
-> > +# published by the Free Software Foundation.
-> > +#
-> > +# This program is distributed in the hope that it would be useful,
-> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > +# GNU General Public License for more details.
-> > +#
-> > +# You should have received a copy of the GNU General Public License
-> > +# along with this program; if not, write the Free Software Foundation,
-> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > +#-----------------------------------------------------------------------
-> > +
-> > +seq=`basename "$0"`
-> > +seqres="$RESULT_DIR/$seq"
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1    # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -rf "$tmp".* $metadump_file
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +. ./common/attr
-> 
-> Seems this is not needed.
-> 
-> > +
-> > +# real QA test starts here
-> > +_supported_os Linux
-> 
-> _supported_fs xfs
-> 
-> > +_require_xfs_scratch_rmapbt
-> 
-> _require_xfs_io_command commands used in this test? e.g. falloc, fpunch, fcollapse and finsert
+for you to fetch changes up to b7d908a0e8eb3bc069275dedfe981f9ea3aeeec2:
 
-Ok.
+  README: document Fedora, RHEL, and CentOS dependencies (2016-08-06 00:01:10 +0800)
 
-> And '_require_command "$XFS_DB_PROG" "xfs_db"'
+----------------------------------------------------------------
 
-I'm assuming this is a new requirement to declare explicitly that we're
-going to use xfs_db?  All of the existing tests/xfs/ tests assume
-that XFS_DB_PROG is always set.
+fstests: update on 2016-08-06
 
-> 
-> > +
-> > +rm -f "$seqres.full"
-> > +
-> > +echo "Format and mount"
-> > +_scratch_mkfs > "$seqres.full" 2>&1
-> > +_scratch_mount
-> > +blksz=65536
-> > +blocks=16
-> > +len=$((blocks * blksz))
-> > +
-> > +echo "Create some files"
-> > +$XFS_IO_PROG -f -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f1 >> $seqres.full
-> > +
-> > +echo "Manipulate file"
-> > +$XFS_IO_PROG -c "fpunch $blksz $blksz" \
-> > +	-c "fzero $((3 * blksz)) $blksz" \
-> > +	-c "pwrite -S 0x69 $((5 * blksz)) $blksz" \
-> > +	-c "fpunch $((7 * blksz)) $blksz" \
-> > +	-c "fsync" \
-> > +	-c "pwrite -S 0x70 $((7 * blksz)) $blksz" \
-> > +	-c "fcollapse $((9 * blksz)) $blksz" \
-> > +	-c "finsert $((10 * blksz)) $blksz" $SCRATCH_MNT/f1 >> $seqres.full
-> > +
-> > +echo "Check file"
-> > +md5sum $SCRATCH_MNT/f1 | _filter_scratch
-> > +od -tx1 -Ad -c $SCRATCH_MNT/f1 >> $seqres.full
-> > +
-> > +echo "Unmount"
-> > +_scratch_unmount
-> > +
-> > +echo "Try a regular fsmap"
-> > +$XFS_DB_PROG -c 'fsmap' $SCRATCH_DEV >> $seqres.full
-> > +$XFS_DB_PROG -c 'fsmap 0 5' $SCRATCH_DEV >> $seqres.full
-> > +
-> > +echo "Try a bad fsmap"
-> > +$XFS_DB_PROG -c 'fsmap 5 4' $SCRATCH_DEV
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/xfs/877.out b/tests/xfs/877.out
-> > new file mode 100644
-> > index 0000000..4a2242f
-> > --- /dev/null
-> > +++ b/tests/xfs/877.out
-> > @@ -0,0 +1,10 @@
-> > +QA output created by 877
-> > +Format and mount
-> > +Create some files
-> > +Manipulate file
-> > +Check file
-> > +e45c5707fcf6817e914ffb6ce37a0ac7  SCRATCH_MNT/f1
-> > +Unmount
-> > +Try a regular fsmap
-> > +Try a bad fsmap
-> > +Error 22 while querying fsmap btree.
-> > diff --git a/tests/xfs/group b/tests/xfs/group
-> > index 16f7947..f81f899 100644
-> > --- a/tests/xfs/group
-> > +++ b/tests/xfs/group
-> > @@ -3,8 +3,8 @@
-> >  003 db auto quick
-> >  004 db auto quick
-> >  005 auto quick
-> > -007 auto quota quick
-> >  006 auto quick mount
-> > +007 auto quota quick
-> 
-> This is already fixed in upstream, not needed.
+This update contains:
+o Fixes for reflink & rmap tests
+o New generic tests and tests for xfs, ext4 and overlayfs
+o Rewrite of xfs/106
+o Other fixes and improvements in README, _require_defrag and check
 
-Ok.  It'll probably fix itself when I rebase.
+----------------------------------------------------------------
+Christoph Hellwig (1):
+      generic/095: update warning whitelist
 
---D
-> 
-> Thanks,
-> Eryu
-> 
-> >  008 rw ioctl auto quick
-> >  009 rw ioctl auto prealloc quick
-> >  010 auto quick repair
-> > @@ -309,3 +309,5 @@
-> >  873 auto quick clone fsr
-> >  874 auto quick clone fsr
-> >  875 auto quick clone fsr quota
-> > +876 auto quick rmap clone
-> > +877 auto quick rmap clone
-> > 
+Darrick J. Wong (13):
+      xfs/26[34]: remove duplicate tests
+      xfs: use rmapbt-checking helper
+      xfs/310: fix the size calculation for the huge device
+      xfs/122: list the new log redo items
+      common/reflink: actually test dedupe on scratch device
+      xfs/129: fix post-metadump remounting idiocy
+      xfs/179: use scratch device helpers
+      xfs/234: use scratch device helpers
+      common/rc: optionally test xfs_repair index rebuilding
+      xfs/128: cycle_mount the scratch device
+      common/dmerror: fix mount option issues
+      xfs: test attr_list_by_handle cursor iteration
+      generic: test accurate shared extent reporting
+
+Eric Sandeen (1):
+      README: document Fedora, RHEL, and CentOS dependencies
+
+Eric Whitney (1):
+      common/defrag: rework _require_defrag for ext4
+
+Eryu Guan (3):
+      overlay: dump overlay private xattr
+      overlay: remove stale file from upperdir
+      overlay: truncate running binaries from lower and upper dirs
+
+Jan Kara (1):
+      ext4: Test expansion of inode size
+
+Omar Sandoval (1):
+      check: allow comments in exclude files
+
+Wang Xiaoguang (1):
+      generic: run write(2) and fallocate(2) in parallel
+
+Zorro Lang (1):
+      xfs/106: rewrite to make it a reliable regression test
+
+ .gitignore                            |   2 +
+ README                                |  18 +-
+ check                                 |   4 +-
+ common/defrag                         |  17 +-
+ common/dmerror                        |   9 +-
+ common/rc                             |  29 ++
+ common/reflink                        |   2 +-
+ src/Makefile                          |   5 +-
+ src/attr-list-by-handle-cursor-test.c | 118 +++++
+ src/t_truncate_self.c                 |  20 +
+ tests/ext4/022                        | 183 ++++++++
+ tests/ext4/022.out                    | 432 +++++++++++++++++++
+ tests/ext4/group                      |   1 +
+ tests/generic/095                     |   6 +-
+ tests/generic/371                     |  75 ++++
+ tests/generic/371.out                 |   2 +
+ tests/generic/372                     |  90 ++++
+ tests/generic/372.out                 |  17 +
+ tests/generic/group                   |   2 +
+ tests/overlay/011                     |  79 ++++
+ tests/overlay/011.out                 |   2 +
+ tests/overlay/012                     |  77 ++++
+ tests/overlay/012.out                 |   2 +
+ tests/overlay/013                     |  74 ++++
+ tests/overlay/013.out                 |   2 +
+ tests/overlay/group                   |   3 +
+ tests/xfs/106                         | 361 ++++++++++------
+ tests/xfs/106.out                     | 790 +++++++++++++++++++---------------
+ tests/xfs/122.out                     |   8 +
+ tests/xfs/128                         |   6 +-
+ tests/xfs/129                         |   6 +-
+ tests/xfs/179                         |  10 +-
+ tests/xfs/234                         |   6 +-
+ tests/xfs/263                         | 179 --------
+ tests/xfs/263.out                     |  13 -
+ tests/xfs/264                         | 180 --------
+ tests/xfs/264.out                     |  13 -
+ tests/xfs/269                         |  64 +++
+ tests/xfs/269.out                     |   5 +
+ tests/xfs/310                         |   9 +-
+ tests/xfs/314                         |   4 +-
+ tests/xfs/317                         |   4 +-
+ tests/xfs/322                         |   4 +-
+ tests/xfs/group                       |   7 +-
+ 44 files changed, 2025 insertions(+), 915 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
