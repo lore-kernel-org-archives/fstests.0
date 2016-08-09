@@ -1,134 +1,141 @@
-Received: from mx1.redhat.com ([209.132.183.28]:49388 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:44320 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751708AbcHFUvd (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Sat, 6 Aug 2016 16:51:33 -0400
-Message-Id: <201608061013.u76ADGJr016961@int-mx09.intmail.prod.int.phx2.redhat.com>
-Date: Sat, 06 Aug 2016 18:13:16 +0800
+	id S1752156AbcHIGza (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Tue, 9 Aug 2016 02:55:30 -0400
+Date: Tue, 9 Aug 2016 14:55:28 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: [GIT PULL] fstests: updates on 2016-08-06
+Subject: Re: [PATCH] overlay: copy-up lowerdir which has opaque xattr set
+Message-ID: <20160809065528.GI27776@eguan.usersys.redhat.com>
+References: <1470677033-7035-1-git-send-email-eguan@redhat.com>
+ <20160809063730.GG19025@dastard>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160809063730.GG19025@dastard>
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
+Cc: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org, xzhou@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave,
+On Tue, Aug 09, 2016 at 04:37:30PM +1000, Dave Chinner wrote:
+> On Tue, Aug 09, 2016 at 01:23:53AM +0800, Eryu Guan wrote:
+> > When copying up a directory with opaque xattr set, the xattr was
+> > copied up as well, after a remount the opaque flag is honored so the
+> > copied-up directory is treated as opaque, which causes files created
+> > in the lowerdir to be hidden when using multiple lower directories.
+> > 
+> > This is fixed by "ovl: don't copy up opaqueness".
+> > 
+> > Signed-off-by: Eryu Guan <eguan@redhat.com>
+> > ---
+> >  tests/overlay/014     | 96 +++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/overlay/014.out |  3 ++
+> >  tests/overlay/group   |  1 +
+> >  3 files changed, 100 insertions(+)
+> >  create mode 100755 tests/overlay/014
+> >  create mode 100644 tests/overlay/014.out
+> > 
+> > diff --git a/tests/overlay/014 b/tests/overlay/014
+> > new file mode 100755
+> > index 0000000..d9d8b5d
+> > --- /dev/null
+> > +++ b/tests/overlay/014
+> > @@ -0,0 +1,96 @@
+> > +#! /bin/bash
+> > +# FS QA Test 014
+> > +#
+> > +# Test copy-up of lowerdir with opaque xattr set.
+> > +#
+> > +# When copying up a directory with opaque xattr set, the xattr was copied up as
+> > +# well, after a remount the opaque flag is honored so the copied-up directory
+> > +# is treated as opaque, which causes files created in the lowerdir to be hidden
+> > +# when using multiple lower directories.
+> > +#
+> > +# This is fixed by "ovl: don't copy up opaqueness".
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2016 Red Hat Inc. All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +#
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +. ./common/attr
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# real QA test starts here
+> > +_supported_fs overlay
+> > +_supported_os Linux
+> > +_require_test
+> > +_require_scratch
+> > +_require_attrs
+> > +
+> > +# Remove all files from previous tests
+> > +_scratch_mkfs
+> > +
+> > +# Create multiple lowerdirs and upperdir, workdir, and testdir on lowerdir
+> > +lowerdir1=$SCRATCH_DEV/lower1
+> > +lowerdir2=$SCRATCH_DEV/lower2
+> > +upperdir=$SCRATCH_DEV/upper
+> > +workdir=$SCRATCH_DEV/workdir
+> > +mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
+> > +mkdir -p $lowerdir1/testdir/d
+> > +
+> > +# mount overlay with $lowerdir2 as upperdir, and remove & recreate testdir,
+> > +# make testdir on $lowerdir2 opaque
+> > +$MOUNT_PROG -t overlay -o lowerdir=$lowerdir1,upperdir=$lowerdir2 \
+> > +	-o workdir=$workdir none $SCRATCH_MNT
+> 
+> We really need a _overlay_scratch_mount_dirs() function here. i.e.
+> 
+> _overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
+> 
+> and factor the _overlay_scratch_mount/_overlay_mount code to
+> use a single implemention of _overlay_mount_dirs()....
 
-Can you please pull the fstests update from the location below? It mainly
-contains fixes for reflink & rmap tests from Darrick J. Wong (first 11 patches
-in the patchset, I'll go through the rest new tests next week).
+Sounds good to me. I'll see if I can write a new helper and convert
+existing code to use this helper in a separate patch.
 
-Thanks,
+> 
+> > +rm -rf $SCRATCH_MNT/testdir
+> > +mkdir -p $SCRATCH_MNT/testdir/visibledir
+> > +$UMOUNT_PROG $SCRATCH_MNT
+> 
+> _overlay_scratch_unmount
+
+Okay.
+
+Thanks for the review!
+
 Eryu
-
-The following changes since commit 6721ab08bd2772da9f3aa1ae7b46b7cb5c0e8308:
-
-  generic/235: Fix false failures for some quota formats (2016-07-21 17:44:30 +0800)
-
-are available in the git repository at:
-
-  https://github.com/guaneryu/xfstests.git for-dave
-
-for you to fetch changes up to b7d908a0e8eb3bc069275dedfe981f9ea3aeeec2:
-
-  README: document Fedora, RHEL, and CentOS dependencies (2016-08-06 00:01:10 +0800)
-
-----------------------------------------------------------------
-
-fstests: update on 2016-08-06
-
-This update contains:
-o Fixes for reflink & rmap tests
-o New generic tests and tests for xfs, ext4 and overlayfs
-o Rewrite of xfs/106
-o Other fixes and improvements in README, _require_defrag and check
-
-----------------------------------------------------------------
-Christoph Hellwig (1):
-      generic/095: update warning whitelist
-
-Darrick J. Wong (13):
-      xfs/26[34]: remove duplicate tests
-      xfs: use rmapbt-checking helper
-      xfs/310: fix the size calculation for the huge device
-      xfs/122: list the new log redo items
-      common/reflink: actually test dedupe on scratch device
-      xfs/129: fix post-metadump remounting idiocy
-      xfs/179: use scratch device helpers
-      xfs/234: use scratch device helpers
-      common/rc: optionally test xfs_repair index rebuilding
-      xfs/128: cycle_mount the scratch device
-      common/dmerror: fix mount option issues
-      xfs: test attr_list_by_handle cursor iteration
-      generic: test accurate shared extent reporting
-
-Eric Sandeen (1):
-      README: document Fedora, RHEL, and CentOS dependencies
-
-Eric Whitney (1):
-      common/defrag: rework _require_defrag for ext4
-
-Eryu Guan (3):
-      overlay: dump overlay private xattr
-      overlay: remove stale file from upperdir
-      overlay: truncate running binaries from lower and upper dirs
-
-Jan Kara (1):
-      ext4: Test expansion of inode size
-
-Omar Sandoval (1):
-      check: allow comments in exclude files
-
-Wang Xiaoguang (1):
-      generic: run write(2) and fallocate(2) in parallel
-
-Zorro Lang (1):
-      xfs/106: rewrite to make it a reliable regression test
-
- .gitignore                            |   2 +
- README                                |  18 +-
- check                                 |   4 +-
- common/defrag                         |  17 +-
- common/dmerror                        |   9 +-
- common/rc                             |  29 ++
- common/reflink                        |   2 +-
- src/Makefile                          |   5 +-
- src/attr-list-by-handle-cursor-test.c | 118 +++++
- src/t_truncate_self.c                 |  20 +
- tests/ext4/022                        | 183 ++++++++
- tests/ext4/022.out                    | 432 +++++++++++++++++++
- tests/ext4/group                      |   1 +
- tests/generic/095                     |   6 +-
- tests/generic/371                     |  75 ++++
- tests/generic/371.out                 |   2 +
- tests/generic/372                     |  90 ++++
- tests/generic/372.out                 |  17 +
- tests/generic/group                   |   2 +
- tests/overlay/011                     |  79 ++++
- tests/overlay/011.out                 |   2 +
- tests/overlay/012                     |  77 ++++
- tests/overlay/012.out                 |   2 +
- tests/overlay/013                     |  74 ++++
- tests/overlay/013.out                 |   2 +
- tests/overlay/group                   |   3 +
- tests/xfs/106                         | 361 ++++++++++------
- tests/xfs/106.out                     | 790 +++++++++++++++++++---------------
- tests/xfs/122.out                     |   8 +
- tests/xfs/128                         |   6 +-
- tests/xfs/129                         |   6 +-
- tests/xfs/179                         |  10 +-
- tests/xfs/234                         |   6 +-
- tests/xfs/263                         | 179 --------
- tests/xfs/263.out                     |  13 -
- tests/xfs/264                         | 180 --------
- tests/xfs/264.out                     |  13 -
- tests/xfs/269                         |  64 +++
- tests/xfs/269.out                     |   5 +
- tests/xfs/310                         |   9 +-
- tests/xfs/314                         |   4 +-
- tests/xfs/317                         |   4 +-
- tests/xfs/322                         |   4 +-
- tests/xfs/group                       |   7 +-
- 44 files changed, 2025 insertions(+), 915 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
