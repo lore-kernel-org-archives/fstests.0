@@ -1,48 +1,45 @@
-Received: from imap.thunk.org ([74.207.234.97]:34076 "EHLO imap.thunk.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751088AbcHIE2d (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 9 Aug 2016 00:28:33 -0400
-Date: Tue, 9 Aug 2016 00:28:28 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Refreshed test appliance image kvm-xfstests and gce-xfstests
-Message-ID: <20160809042828.GF9515@thunk.org>
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:18395 "EHLO
+	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751774AbcHIG3s (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 9 Aug 2016 02:29:48 -0400
+Date: Tue, 9 Aug 2016 16:29:43 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 13/17] xfs: test swapext with reflink
+Message-ID: <20160809062943.GF19025@dastard>
+References: <146914477514.11762.3144320628851923350.stgit@birch.djwong.org>
+ <146914485888.11762.1688573359701830686.stgit@birch.djwong.org>
+ <20160808081359.GB27776@eguan.usersys.redhat.com>
+ <20160808174132.GC11291@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20160808174132.GC11291@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: linux-ext4@vger.kernel.org, fstests@vger.kernel.org, gce-xfstests@googlegroups.com
-Cc: Luis de Bethencourt <luisbg@osg.samsung.com>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Eryu Guan <eguan@redhat.com>, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-There are updated rootfs.img files available at:
+On Mon, Aug 08, 2016 at 10:41:32AM -0700, Darrick J. Wong wrote:
+> On Mon, Aug 08, 2016 at 04:13:59PM +0800, Eryu Guan wrote:
+> > On Thu, Jul 21, 2016 at 04:47:38PM -0700, Darrick J. Wong wrote:
+> > > Add a few tests to stress the new swapext code for reflink and rmap.
+> > > +_reflink_range "$testdir/file1" 0 "$testdir/file2" 0 $bytes >> "$seqres.full"
+> > > +
+> > > +echo "Defrag the big file"
+> > > +old_nextents=$(xfs_io -c 'stat -v' $testdir/file1 | grep 'nextents' | cut -d ' ' -f 3)
+> > 
+> > There's a "_count_extents" helper, does that work for this case?
+> 
+> It can, though stat -v reports GETFSXATTR results, which should be faster than
+> _count_extents because the latter FIEMAPs the entire file and counts lines.
+> Seeing as XFS records the extent count in the inode, we might as well use it.
 
-    https://www.kernel.org/pub/linux/kernel/people/tytso/kvm-xfstests
-
-It includes the latest updates from the xfstests-dev upstream.  (For
-ext4 developers, note that this includes a test for expanding the
-i_extra_isize space that will cause non-patched kernels to hang unless
-you have Jan Kara's patches to fix bugs in that code.  So you may want
-to add -X ext4/022 to your gce-xfstests or kvm-xfstests command line.)
-For information on how to use this images, please see:
-
-https://github.com/tytso/xfstests-bld/blob/master/Documentation/kvm-quickstart.md
-
-Also new in this release is support for btrfs.  Internally, I've
-removed most of the ext4 dependencies so that people interested in
-using kvm-xfstests and gce-xfstests for testing other file systems
-will have a much easier time to add new test configs.  Feel free to
-send me patches or the fs configs you would most like to see for your
-file system (basically, I need the mkfs and mount options that are
-most interesting).  We currently have basic support for btrfs, ext2,
-tmpfs, and xfs in this release, in addition to ext4.
-
-Finally, I have started making public GCE images so you don't have to
-build your own copy of xfstests and then create your own GCE image.
-This should hopefully make life much easier for people who want to try
-out gce-xfstests.  For more information, please see:
-
-https://github.com/tytso/xfstests-bld/blob/master/Documentation/gce-xfstests.md
+perhaps put a special xfs case in _count_extents() that does this
+rather than FIEMAP?
 
 Cheers,
 
-						- Ted
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
