@@ -1,89 +1,51 @@
-Received: from mx1.redhat.com ([209.132.183.28]:59626 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752325AbcHQCLv (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 16 Aug 2016 22:11:51 -0400
-Subject: Re: [PATCH] test-nextquota: fix build failure with glibc 2.24
-References: <89c2bd786fc4be75edb99132a1e404bc3923079a.1471392905.git.osandov@fb.com>
-From: Eric Sandeen <sandeen@redhat.com>
-Message-ID: <fcfc2569-5fc8-b6af-077b-9fc23da1db3c@redhat.com>
-Date: Tue, 16 Aug 2016 21:11:48 -0500
+Received: from cn.fujitsu.com ([59.151.112.132]:27838 "EHLO
+	heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752152AbcHQDE1 (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Tue, 16 Aug 2016 23:04:27 -0400
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH] xfs/191: skip tests on older xfsprogs
+Date: Sun, 14 Aug 2016 21:35:01 +0800
+Message-ID: <1471181701-23877-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-In-Reply-To: <89c2bd786fc4be75edb99132a1e404bc3923079a.1471392905.git.osandov@fb.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Omar Sandoval <osandov@osandov.com>, fstests@vger.kernel.org
-Cc: kernel-team@fb.com
+To: fstests@vger.kernel.org
+Cc: eguan@redhat.com, jtulak@redhat.com, root <root@localhost.localdomain>
 List-ID: <fstests@vger.kernel.org>
 
-On 8/16/16 7:18 PM, Omar Sandoval wrote:
-> From: Omar Sandoval <osandov@fb.com>
-> 
-> glibc 2.24 defines Q_GETNEXTQUOTA but not `struct nextdqblk`. We need to
-> define it ourselves, but let's give it a hacky name that won't cause
-> another build error when the definition is added to glibc.
+From: root <root@localhost.localdomain>
 
-Hm, yeah.
+If we don't have /tmp/foo file on xfsprogs 3.2.2, _require_xfs_mkfs_validation
+will fail because mkfs.xfs can't create this file.  We need to skip tests
+before xfsprogs 4.7.0, so fix it.  the feature has been introduced since
+xfsprogs 4.2.0:
+commit 20cec860e16b267ea0c71a2f648fa2b26aad2e65
+Author: Eric Sandeen <sandeen@sandeen.net>
+Date: Fri Jul 31 09:04:11 2015 +1000
 
-I tried to ping RH glibc people:
+  mkfs.xfs: always use underlying fs sector size when mkfs'ing a file
 
-https://bugzilla.redhat.com/show_bug.cgi?id=1360480
+Signed-off-by: root <root@localhost.localdomain>
+---
+ common/rc | 3 +++
+ 1 file changed, 3 insertions(+)
 
-but no love so far.
+diff --git a/common/rc b/common/rc
+index b19b698..db99794 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3889,6 +3889,9 @@ _get_fs_sysfs_attr()
+ # number of failed cases.
+ _mkfs_validation_check()
+ {
++	if [ ! -f /tmp/foo ]; then
++		touch /tmp/foo
++	fi
+ 	local cmd="$MKFS_XFS_PROG -f -N -d file,name=/tmp/foo,size=$((1024 * 1024 * 1024))"
+ 	$cmd -s size=2s >/dev/null 2>&1
+ 	local sum=$?
+-- 
+1.8.3.1
 
-This approach seems like a good workaround, thanks.
 
-Reviewed-by: Eric Sandeen <sandeen@redhat.com>
-
-> Signed-off-by: Omar Sandoval <osandov@fb.com>
-> ---
-> This is kind of ugly, but it's future-proof. The definition should
-> probably be added to glibc, I'm guessing that was an oversight.
-> 
->  src/test-nextquota.c | 9 +++++----
->  1 file changed, 5 insertions(+), 4 deletions(-)
-> 
-> diff --git a/src/test-nextquota.c b/src/test-nextquota.c
-> index 3baa296..ba4de27 100644
-> --- a/src/test-nextquota.c
-> +++ b/src/test-nextquota.c
-> @@ -40,8 +40,10 @@
->  
->  #ifndef Q_GETNEXTQUOTA
->  #define Q_GETNEXTQUOTA 0x800009        /* get disk limits and usage >= ID */
-> +#endif
->  
-> -struct nextdqblk
-> +/* glibc 2.24 defines Q_GETNEXTQUOTA but not struct nextdqblk. */
-> +struct test_nextdqblk
->    {
->      u_int64_t dqb_bhardlimit;	/* absolute limit on disk quota blocks alloc */
->      u_int64_t dqb_bsoftlimit;	/* preferred limit on disk quota blocks */
-> @@ -54,7 +56,6 @@ struct nextdqblk
->      u_int32_t dqb_valid;	/* bitmask of QIF_* constants */
->      u_int32_t dqb_id;		/* id for this quota info*/
->    };
-> -#endif
->  
->  #ifndef Q_XGETNEXTQUOTA
->  #define Q_XGETNEXTQUOTA XQM_CMD(9)
-> @@ -75,7 +76,7 @@ int main(int argc, char *argv[])
->  	uint id = 0, idflag = 0;
->  	char *device = NULL;
->  	char *tmp;
-> -	struct nextdqblk dqb;
-> +	struct test_nextdqblk dqb;
->  	struct fs_disk_quota xqb;
->  
->  	while ((c = getopt(argc,argv,"ugpi:d:v")) != EOF) {
-> @@ -131,7 +132,7 @@ int main(int argc, char *argv[])
->  	if (verbose)
->  		printf("asking for quota type %d for id %u on %s\n", type, id, device);
->  
-> -	memset(&dqb, 0, sizeof(struct nextdqblk));
-> +	memset(&dqb, 0, sizeof(struct test_nextdqblk));
->  	memset(&xqb, 0, sizeof(struct fs_disk_quota));
->  
->  	if (verbose)
-> 
 
