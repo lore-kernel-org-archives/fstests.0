@@ -1,155 +1,178 @@
-Received: from mailhub.sw.ru ([195.214.232.25]:47541 "EHLO relay.sw.ru"
+Received: from mx1.redhat.com ([209.132.183.28]:59014 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752923AbcHOMWY (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 15 Aug 2016 08:22:24 -0400
-From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: [PATCH] ext4/023: add regression test for ext4lazyinit_task deadlock V2
-Date: Mon, 15 Aug 2016 16:22:07 +0400
-Message-Id: <1471263727-25943-1-git-send-email-dmonakhov@openvz.org>
+	id S932205AbcHOM3j (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 15 Aug 2016 08:29:39 -0400
+Date: Mon, 15 Aug 2016 20:29:37 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2] tests/generic: test xfs log recovery metadata LSN
+ ordering
+Message-ID: <20160815122937.GJ27776@eguan.usersys.redhat.com>
+References: <1471262744-19668-1-git-send-email-bfoster@redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1471262744-19668-1-git-send-email-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: eguan@redhat.com, Dmitry Monakhov <dmonakhov@openvz.org>
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-global ext4lazyinit task may deadlock on frozen under li_list_mtx lock.
-Once that happen all mount/umount tasks also blocked.
-Patch proposed: http://marc.info/?l=linux-ext4&m=146893382329138
+On Mon, Aug 15, 2016 at 08:05:44AM -0400, Brian Foster wrote:
+> XFS had a bug that lead to a possible out-of-order log recovery
+> situation (e.g., replay a stale modification from the log over more
+> recent metadata in destination buffer). This resulted in false
+> corruption reports during log recovery and thus mount failure.
+> 
+> This condition is caused by system crash or filesystem shutdown shortly
+> after a successful log recovery. Add a test to run a combined workload,
+> fs shutdown and log recovery loop known to reproduce the problem on
+> affected kernels.
+> 
+> Signed-off-by: Brian Foster <bfoster@redhat.com>
+> ---
+> 
+> v2:
+> - Use $KILLALL_PROG for killall command.
+> - Convert to generic test.
+> v1: http://marc.info/?l=linux-xfs&m=147100402211629&w=2
+> 
+>  tests/generic/999     | 88 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/999.out |  2 ++
+>  tests/generic/group   |  1 +
+>  3 files changed, 91 insertions(+)
+>  create mode 100755 tests/generic/999
+>  create mode 100644 tests/generic/999.out
+> 
+> diff --git a/tests/generic/999 b/tests/generic/999
+> new file mode 100755
+> index 0000000..f3257e4
+> --- /dev/null
+> +++ b/tests/generic/999
+> @@ -0,0 +1,88 @@
+> +#! /bin/bash
+> +# FS QA Test No. 999
+> +#
+> +# Test XFS log recovery ordering on v5 superblock filesystems. XFS had a problem
+> +# where it would incorrectly replay older modifications from the log over more
+> +# recent versions of metadata due to failure to update metadata LSNs during log
+> +# recovery. This could result in false positive reports of corruption during log
+> +# recovery and permanent mount failure.
+> +#
+> +# To test this situation, run frequent shutdowns immediately after log recovery.
+> +# Ensure that log recovery does not recover stale modifications and cause
+> +# spurious corruption reports and/or mount failures.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
+> +	_scratch_unmount > /dev/null 2>&1
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +
+> +# Modify as appropriate.
+> +_supported_fs xfs
 
-changes since V1:
- - Fix coding style according to eguan's comments
- - Add deadlock timout, so test failure will not block other tests.
+"xfs" should be "generic"?
 
+> +_supported_os Linux
+> +
+> +_require_scratch
 
-Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
----
- tests/ext4/023     | 95 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/023.out |  2 ++
- tests/ext4/group   |  1 +
- 3 files changed, 98 insertions(+)
- create mode 100755 tests/ext4/023
- create mode 100644 tests/ext4/023.out
+Missed a "_require_scratch_shutdown"?
 
-diff --git a/tests/ext4/023 b/tests/ext4/023
-new file mode 100755
-index 0000000..0f60490
---- /dev/null
-+++ b/tests/ext4/023
-@@ -0,0 +1,95 @@
-+#! /bin/bash
-+# FS QA Test No. ext4/023
-+#
-+# Regression test for deadlock in ext4lazyinit thread
-+# Patch proposed: http://marc.info/?l=linux-ext4&m=146893382329138
-+# TODO: Add commit ID
-+#
-+#
-+#-----------------------------------------------------------------------
-+# (c) Dmitry Monakhov
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+status=1
-+_cleanup()
-+{
-+    # Failure cleanup
-+    if [ $status -ne 0 ]; then
-+	xfs_freeze -u $loop_mnt/1
-+	$UMOUNT_PROG $loop_mnt/2
-+    fi
-+    
-+    # Normal cleanup
-+    $UMOUNT_PROG $loop_mnt/1
-+    _destroy_loop_device $loop_dev1
-+    _destroy_loop_device $loop_dev2
-+    rm -rf $img_dir $loop_mnt
-+    _scratch_unmount
-+    cd /
-+    #rm -f $tmp.*
-+
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs ext4
-+_supported_os Linux
-+_require_scratch
-+_require_loop
-+_require_freeze
-+_require_xfs_io_command "falloc"
-+
-+rm -f $seqres.full
-+echo "Silence is golden"
-+
-+img_dir=$SCRATCH_MNT/$seq.fs
-+loop_mnt=$SCRATCH_MNT/$seq.mnt
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+mkdir -p $img_dir
-+mkdir -p $loop_mnt/{1,2}
-+
-+$XFS_IO_PROG -fc "truncate 1G" $img_dir/1.img
-+$XFS_IO_PROG -fc "truncate 1G" $img_dir/2.img
-+loop_dev1=$(_create_loop_device $img_dir/1.img)
-+loop_dev2=$(_create_loop_device $img_dir/2.img)
-+
-+# Use nodiscard mode in order to force lazy init mode
-+$MKFS_EXT4_PROG -F -E nodiscard,lazy_itable_init=1 $loop_dev1 \
-+    >> $seqres.full 2>&1
-+$MKFS_EXT4_PROG -F -E nodiscard,lazy_itable_init=1 $loop_dev2 \
-+    >> $seqres.full 2>&1
-+
-+# Freeze first fs and check that we may mount/umount second one.
-+# If bug is not fixed mount/umount may deadlock
-+_mount $loop_dev1 $loop_mnt/1
-+xfs_freeze -f $loop_mnt/1
-+for i in $(seq 0 5); do
-+    timeout -s SIGKILL 10 $MOUNT_PROG $loop_dev2 $loop_mnt/2 || \
-+	_fail "mount: deadlock detected. Fail"
-+    sleep 1
-+    timeout -s SIGKILL 10 $UMOUNT_PROG $loop_mnt/2 || \
-+	_fail "umount: deadlock detected. Fail"
-+    sleep 1
-+done
-+xfs_freeze -u $loop_mnt/1
-+status=0
-+exit
-diff --git a/tests/ext4/023.out b/tests/ext4/023.out
-new file mode 100644
-index 0000000..5c4197b
---- /dev/null
-+++ b/tests/ext4/023.out
-@@ -0,0 +1,2 @@
-+QA output created by 023
-+Silence is golden
-diff --git a/tests/ext4/group b/tests/ext4/group
-index e0772ab..6ccc5e8 100644
---- a/tests/ext4/group
-+++ b/tests/ext4/group
-@@ -25,6 +25,7 @@
- 020 auto quick ioctl rw
- 021 auto quick
- 022 auto quick attr dangerous
-+023 auto quick
- 271 auto rw quick
- 301 aio auto ioctl rw stress
- 302 aio auto ioctl rw stress
--- 
-2.7.4
+> +_require_command "$KILLALL_PROG"
+> +
+> +rm -f $seqres.full
+> +
+> +echo "Silence is golden."
+> +
+> +_scratch_mkfs_xfs >> $seqres.full 2>&1
 
+If this is a generic test, _scratch_mkfs should be used here.
+
+> +_scratch_mount || _fail "mount failed"
+> +
+> +for i in $(seq 1 50); do
+> +	($FSSTRESS_PROG -d $SCRATCH_MNT -n 999999 -p 4 >> $seqres.full &) \
+> +		> /dev/null 2>&1
+> +
+> +	# purposely include 0 second sleeps to test shutdown immediately after
+> +	# recovery
+> +	sleep $((RANDOM % 3))
+> +	$XFS_IO_PROG -xc shutdown $SCRATCH_MNT
+> +
+> +	ps -e | grep fsstress > /dev/null 2>&1
+> +	while [ $? == 0 ]; do
+
+Better to use "-eq" for integers.
+
+Thanks,
+Eryu
+
+> +		$KILLALL_PROG -9 fsstress > /dev/null 2>&1
+> +		wait > /dev/null 2>&1
+> +		ps -e | grep fsstress > /dev/null 2>&1
+> +	done
+> +
+> +	# quit if mount fails so we don't shutdown the host fs
+> +	_scratch_cycle_mount || _fail "cycle mount failed"
+> +done
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/999.out b/tests/generic/999.out
+> new file mode 100644
+> index 0000000..d254382
+> --- /dev/null
+> +++ b/tests/generic/999.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 999
+> +Silence is golden.
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 4acae99..605a244 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -375,3 +375,4 @@
+>  370 auto quick richacl
+>  371 auto quick enospc prealloc
+>  372 auto quick clone
+> +999 auto log metadata
+> -- 
+> 2.5.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
