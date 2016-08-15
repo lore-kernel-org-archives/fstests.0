@@ -1,155 +1,51 @@
-Received: from mx1.redhat.com ([209.132.183.28]:42170 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:37920 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752759AbcHOM42 (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Mon, 15 Aug 2016 08:56:28 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: [PATCH v3] tests/generic: test xfs log recovery metadata LSN ordering
-Date: Mon, 15 Aug 2016 08:56:26 -0400
-Message-Id: <1471265786-24970-1-git-send-email-bfoster@redhat.com>
+	id S1752713AbcHONw7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Mon, 15 Aug 2016 09:52:59 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx1.redhat.com (Postfix) with ESMTPS id 509227F0B4
+	for <fstests@vger.kernel.org>; Mon, 15 Aug 2016 13:52:59 +0000 (UTC)
+Date: Mon, 15 Aug 2016 08:52:56 -0500
+From: "Bill O'Donnell" <billodo@redhat.com>
+Subject: Re: [PATCH] add prjquota to _qmount_option() filter
+Message-ID: <20160815135256.GA26458@redhat.com>
+References: <b8fc0176-e023-42d0-717c-925999aa2ed0@redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <b8fc0176-e023-42d0-717c-925999aa2ed0@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com
+To: Eric Sandeen <sandeen@redhat.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-XFS had a bug that lead to a possible out-of-order log recovery
-situation (e.g., replay a stale modification from the log over more
-recent metadata in destination buffer). This resulted in false
-corruption reports during log recovery and thus mount failure.
+On Fri, Aug 12, 2016 at 05:46:54PM -0500, Eric Sandeen wrote:
+> _qmount_option() did not properly filter the
+> "prjquota" mount option along with the "pquota"
+> variant, as it does for the other types.
+> 
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 
-This condition is caused by system crash or filesystem shutdown shortly
-after a successful log recovery. Add a test to run a combined workload,
-fs shutdown and log recovery loop known to reproduce the problem on
-affected kernels.
+Reviewed-by: Bill O'Donnell <billodo@redhat.com>
 
-Signed-off-by: Brian Foster <bfoster@redhat.com>
----
-
-v3:
-- More generic test fixups.
-v2: http://marc.info/?l=linux-xfs&m=147126275528704&w=2
-- Use $KILLALL_PROG for killall command.
-- Convert to generic test.
-v1: http://marc.info/?l=linux-xfs&m=147100402211629&w=2
-
- tests/generic/999     | 89 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/999.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 92 insertions(+)
- create mode 100755 tests/generic/999
- create mode 100644 tests/generic/999.out
-
-diff --git a/tests/generic/999 b/tests/generic/999
-new file mode 100755
-index 0000000..57bb39c
---- /dev/null
-+++ b/tests/generic/999
-@@ -0,0 +1,89 @@
-+#! /bin/bash
-+# FS QA Test No. 999
-+#
-+# Test XFS log recovery ordering on v5 superblock filesystems. XFS had a problem
-+# where it would incorrectly replay older modifications from the log over more
-+# recent versions of metadata due to failure to update metadata LSNs during log
-+# recovery. This could result in false positive reports of corruption during log
-+# recovery and permanent mount failure.
-+#
-+# To test this situation, run frequent shutdowns immediately after log recovery.
-+# Ensure that log recovery does not recover stale modifications and cause
-+# spurious corruption reports and/or mount failures.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
-+	_scratch_unmount > /dev/null 2>&1
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+
-+_require_scratch
-+_require_scratch_shutdown
-+_require_command "$KILLALL_PROG"
-+
-+rm -f $seqres.full
-+
-+echo "Silence is golden."
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount || _fail "mount failed"
-+
-+for i in $(seq 1 50); do
-+	($FSSTRESS_PROG -d $SCRATCH_MNT -n 999999 -p 4 >> $seqres.full &) \
-+		> /dev/null 2>&1
-+
-+	# purposely include 0 second sleeps to test shutdown immediately after
-+	# recovery
-+	sleep $((RANDOM % 3))
-+	$XFS_IO_PROG -xc shutdown $SCRATCH_MNT
-+
-+	ps -e | grep fsstress > /dev/null 2>&1
-+	while [ $? -eq 0 ]; do
-+		$KILLALL_PROG -9 fsstress > /dev/null 2>&1
-+		wait > /dev/null 2>&1
-+		ps -e | grep fsstress > /dev/null 2>&1
-+	done
-+
-+	# quit if mount fails so we don't shutdown the host fs
-+	_scratch_cycle_mount || _fail "cycle mount failed"
-+done
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/999.out b/tests/generic/999.out
-new file mode 100644
-index 0000000..d254382
---- /dev/null
-+++ b/tests/generic/999.out
-@@ -0,0 +1,2 @@
-+QA output created by 999
-+Silence is golden.
-diff --git a/tests/generic/group b/tests/generic/group
-index 4acae99..605a244 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -375,3 +375,4 @@
- 370 auto quick richacl
- 371 auto quick enospc prealloc
- 372 auto quick clone
-+999 auto log metadata
--- 
-2.5.5
-
+> ---
+> 
+> diff --git a/common/quota b/common/quota
+> index 32777a9..d91062a 100644
+> --- a/common/quota
+> +++ b/common/quota
+> @@ -190,6 +190,7 @@ _qmount_option()
+>  		-e 's/gquota/QUOTA/g'      \
+>  		-e 's/grpquota/QUOTA/g'    \
+>  		-e 's/pquota/QUOTA/g'      \
+> +		-e 's/prjquota/QUOTA/g'      \
+>  		-e 's/quota/QUOTA/g'       \
+>  		-e 's/uqnoenforce/QUOTA/g' \
+>  		-e 's/gqnoenforce/QUOTA/g' \
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
