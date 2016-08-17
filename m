@@ -1,143 +1,190 @@
-Received: from mail.kernel.org ([198.145.29.136]:41230 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754911AbcHXI6C (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 24 Aug 2016 04:58:02 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH] fstests: generic test for fsync after file rename
-Date: Tue, 23 Aug 2016 21:14:23 +0100
-Message-Id: <1471983263-3013-1-git-send-email-fdmanana@kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:46490 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751539AbcHQIpl (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 17 Aug 2016 04:45:41 -0400
+Date: Wed, 17 Aug 2016 16:45:39 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 1/2] btrfs/131: test for umount of read-only fs when
+ quota rescan is paused
+Message-ID: <20160817084539.GS27776@eguan.usersys.redhat.com>
+References: <2f102cc7-a6b2-e23d-9c56-de6c6bc5110d@suse.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <2f102cc7-a6b2-e23d-9c56-de6c6bc5110d@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Jeff Mahoney <jeffm@suse.com>
+Cc: linux-btrfs <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org, Qu Wenruo <quwenruo@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Tue, Aug 16, 2016 at 02:30:21PM -0400, Jeff Mahoney wrote:
+> Ensure that we can unmount a read-only file system when quota rescan
+> is paused from a previous read-write mount.
+> 
+> If the kernel has a separate bug where we are returning early while
+> waiting for the rescan worker, we can use that to un-hang the test,
+> and report both errors.
+> 
+> This issue is resolved by the following patch for the Linux kernel:
+> "btrfs: properly track when rescan worker is running"
+> 
+> Signed-off-by: Jeff Mahoney <jeffm@suse.com>
+> ---
+>  tests/btrfs/131     | 100 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/131.out |   3 ++
+>  tests/btrfs/group   |   1 +
+>  3 files changed, 104 insertions(+)
+>  create mode 100755 tests/btrfs/131
+>  create mode 100644 tests/btrfs/131.out
+> 
+> diff --git a/tests/btrfs/131 b/tests/btrfs/131
+> new file mode 100755
+> index 0000000..56c38a2
+> --- /dev/null
+> +++ b/tests/btrfs/131
+> @@ -0,0 +1,100 @@
+> +#! /bin/bash
+> +# FS QA Test 131
+> +#
+> +# Test for bug where read-only mounts will hang on umount when
+> +# a qgroup rescan was paused.  This also tests whether that hung
+> +# umount can be unhung by trying to make use of a separate bug that
+> +# means we can interrupt the wait for the rescan worker.  If that
+> +# happens, we report both errors.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016 SUSE.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +
+> +# We'll exit with a quota rescan paused
+> +_require_scratch_nocheck
+> +
+> +_require_btrfs
+> +BTRFS_DEBUG_TREE_PROG="`set_prog_path btrfs-debug-tree`"
+> +_require_command "$BTRFS_DEBUG_TREE_PROG" btrfs-debug-tree
+> +TIMEOUT_PROG="`set_prog_path timeout`"
+> +_require_command "$TIMEOUT_PROG" timeout
 
-Test that if we rename a file, without changing its parent directory,
-create a new file that has the old name of the file we renamed, doing an
-fsync against the file we renamed works correctly and after a power
-failure both files exists.
+The "set_prog_path" calls belong to common/config, we only need
+"_require_command" calls in test.
 
-This is motivated by an issue found in btrfs, introduced in the linux
-kernel 4.8-rc2, that caused lockdep to report a deadlock scenario. The
-btrfs issue is fixed by the patch titled:
+> +
+> +rm -f $seqres.full
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +
+> +_scratch_mount
+> +cp -aR /lib/modules/$(uname -r) $SCRATCH_MNT
 
-  "Btrfs: fix lockdep warning on deadlock against an inode's log mutex"
+Consider populating the filesystem using _populate_fs or fsstress?
 
-Tested against ext3/4, xfs, f2fs and reiserfs as well.
+> +
+> +# A qgroup rescan on an empty or small file system completes nearly
+> +# immediately.  We need to ensure that it runs long enough that it will
+> +# be paused on umount.  Snapshots slow down the rescan so we should see
+> +# the race without a lot of data.  This is an arbitrary number that
+> +# works on a ramdisk so it should be sufficient for any storage.
+> +for n in $(seq 1 100); do
+> +  _run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/$n
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/generic/375     | 77 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/375.out |  5 ++++
- tests/generic/group   |  1 +
- 3 files changed, 83 insertions(+)
- create mode 100755 tests/generic/375
- create mode 100644 tests/generic/375.out
+Use tab for indention.
 
-diff --git a/tests/generic/375 b/tests/generic/375
-new file mode 100755
-index 0000000..4c33655
---- /dev/null
-+++ b/tests/generic/375
-@@ -0,0 +1,77 @@
-+#! /bin/bash
-+# FSQA Test No. 375
-+#
-+# Test that if we rename a file, without changing its parent directory, create
-+# a new file that has the old name of the file we renamed, doing an fsync
-+# against the file we renamed works correctly and after a power failure both
-+# files exists.
-+#
-+#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	_cleanup_flakey
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmflakey
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_dm_target flakey
-+_require_metadata_journaling $SCRATCH_DEV
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_init_flakey
-+_mount_flakey
-+
-+# Create our test directories and files.
-+mkdir $SCRATCH_MNT/dir
-+touch $SCRATCH_MNT/dir/foo
-+# Make sure everything is durably persisted.
-+sync
-+mv $SCRATCH_MNT/dir/foo $SCRATCH_MNT/dir/bar
-+touch $SCRATCH_MNT/dir/foo
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir/bar
-+
-+_flakey_drop_and_remount
-+
-+echo "Filesystem contents after log replay:"
-+ls -R $SCRATCH_MNT/dir | _filter_scratch
-+
-+_unmount_flakey
-+status=0
-+exit
-diff --git a/tests/generic/375.out b/tests/generic/375.out
-new file mode 100644
-index 0000000..dee14f3
---- /dev/null
-+++ b/tests/generic/375.out
-@@ -0,0 +1,5 @@
-+QA output created by 375
-+Filesystem contents after log replay:
-+SCRATCH_MNT/dir:
-+bar
-+foo
-diff --git a/tests/generic/group b/tests/generic/group
-index ef38c35..3068510 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -377,3 +377,4 @@
- 372 auto quick clone
- 373 auto quick clone
- 374 auto quick clone dedupe
-+375 auto quick metadata
--- 
-2.7.0.rc3
+> +done
+> +_run_btrfs_util_prog quota enable $SCRATCH_MNT
+> +_scratch_unmount
+> +
+> +echo "read-write umount completed"
+> +
+> +# Confirm that the rescan is paused
+> +if ! $BTRFS_DEBUG_TREE_PROG $SCRATCH_DEV | \
+> +	egrep -q 'flags ON|SCANNING|INCONSISTENT scan'; then
+> +	echo "qgroup rescan not paused."
+> +fi
+> +_scratch_mount -r
+> +
+> +# If the bug exists, this will hang.  If we can kill it, that's another bug.
+> +$TIMEOUT_PROG 10 umount $SCRATCH_MNT
+> +if test $? -eq 124 ; then
+> +    echo "umount hung but was killed"
 
+I see this log with 4.8-rc1 kernel, is that expected?
+
+Thanks,
+Eryu
+
+> +fi
+> +echo "read-only umount completed"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/131.out b/tests/btrfs/131.out
+> new file mode 100644
+> index 0000000..845a501
+> --- /dev/null
+> +++ b/tests/btrfs/131.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 131
+> +read-write umount completed
+> +read-only umount completed
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 6b29c05..929fa21 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -133,3 +133,4 @@
+>  128 auto quick send
+>  129 auto quick send
+>  130 auto clone send
+> +131 auto quick qgroup
+> -- 
+> 1.8.5.6
+> 
+> 
+> -- 
+> Jeff Mahoney
+> SUSE Labs
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
