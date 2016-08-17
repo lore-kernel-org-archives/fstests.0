@@ -1,90 +1,104 @@
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:13733 "EHLO
-	ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751284AbcHQDYm (ORCPT
-	<rfc822;fstests@vger.kernel.org>); Tue, 16 Aug 2016 23:24:42 -0400
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:51198 "EHLO
+	ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751268AbcHQGYb (ORCPT
+	<rfc822;fstests@vger.kernel.org>); Wed, 17 Aug 2016 02:24:31 -0400
 Received: from dave by dastard with local (Exim 4.80)
 	(envelope-from <david@fromorbit.com>)
-	id 1bZr4i-0006Iy-QG
-	for fstests@vger.kernel.org; Wed, 17 Aug 2016 12:59:28 +1000
-Date: Wed, 17 Aug 2016 12:59:28 +1000
+	id 1bZuGy-0006ao-1H
+	for fstests@vger.kernel.org; Wed, 17 Aug 2016 16:24:20 +1000
+Date: Wed, 17 Aug 2016 16:24:20 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: [ANNOUNCE, IMPORTANT] oss.sgi.com git repository shutdown
-Message-ID: <20160817025928.GH19025@dastard>
+Subject: [ANNOUNCE] fstests: master branch updated to c760a54
+Message-ID: <20160817062419.GA22388@dastard>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="gE7i1rD7pdK0Ng3j"
+	protocol="application/pgp-signature"; boundary="yrj/dFKFPuw6o+aM"
 Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
 
---gE7i1rD7pdK0Ng3j
+--yrj/dFKFPuw6o+aM
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
 Hi folks,
 
-Sorry for the shouty title, but if you don't read this then things
-might break unexpectedly for you. We've been given the heads up that
-the future of the oss.sgi.com infrastructure is in doubt, so we're
-taking steps to make sure everyone using xfstests moves off it
-before it disappears into a bit bucket somewhere and we get lots of
-questions about it.
-
-As a result, I will no longer be pushing new commits to this
-repository. Instead, I've just pushed a commit to the oss.sgi.com
-xfstests repository that will not appear in the repository on
-kernel.org.  This commit essentially breaks xfstests in several
-different ways - any attempt to run check, make, install, etc will
-result in a message such as:
-
-$ ./check
-The repository at oss.sgi.com is no longer used.
-Please change your sources to point at:
+The master branch of the xfstests repository at:
 
 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-and refetch the your master branch.
-$
+have just been updated. Don't forget that the repository on
+oss.sgi.com is no longer being updated, so you'll need to redirect
+your repository source to the above kernel.org repo if you end up
+with a non-working source tree after your next update.
 
-If you see this message, the action you need to take should be
-pretty obvious. That is, update the origin of your repositories to
-point to:
+-Dave.
 
-git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Patches often get missed, so please check if your outstanding
+patches were in this update. If they have not been in this update,
+please resubmit them to fstests@vger.kernel.org so they can be
+picked up in the next update.
 
-and force update your master branch to get rid of the "break it all"
-commit that was pulled from oss.sgi.com.
+The new head of the master branch is commit:
 
-Cheers,
+c760a54 src/t_immutable: allow EPERM on immutable inode
 
-Dave.
+New Commits:
+
+Darrick J. Wong (3):
+      [72cdba7] reflink: test cross-mountpoint reflink and dedupe
+      [7f6f53a] xfs: scrub fs at the end of the test
+      [908ce96] xfs/122: add the realtime rmapbt inode and btree fields
+
+Eryu Guan (1):
+      [c760a54] src/t_immutable: allow EPERM on immutable inode
+
+
+Code Diffstat:
+
+ README                |   3 ++
+ common/config         |   1 +
+ common/rc             |   7 ++++
+ src/t_immutable.c     | 108 ++++++++++++++++++++++++++--------------------=
+-------
+ tests/generic/373     |  90 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/373.out |   9 +++++
+ tests/generic/374     |  88 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/374.out |  10 +++++
+ tests/generic/group   |   2 +
+ tests/xfs/122.out     |   6 ++-
+ 10 files changed, 269 insertions(+), 55 deletions(-)
+ create mode 100755 tests/generic/373
+ create mode 100644 tests/generic/373.out
+ create mode 100755 tests/generic/374
+ create mode 100644 tests/generic/374.out
 --=20
 Dave Chinner
 david@fromorbit.com
 
---gE7i1rD7pdK0Ng3j
+--yrj/dFKFPuw6o+aM
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1
 
-iQIcBAEBAgAGBQJXs9MQAAoJEK3oKUf0dfodnlYP/jDRuz7v8PlJ6irOZpqJ/o3j
-pak5p6PV0Gvc4ZI/a9Zlb4QrNyaKKK+B3QICp8ElNMBWAE2B/BDAdptYDPZG0XDn
-uYU554PBwaNsNqw4wqRb0VputmZL+qfNS0947U/TAzmmod3c2icjnPXQ17G7si3t
-RQPjH82n7XCYvnLM0aTUZ3+R35yxMs8w4UU4IamDczyso5NuUY8qYEYoWtCxpO/I
-PjX4syXWulqQnSpQ8lkD9de1agGXfc6dm+WbKWsg6zAl1Xp1qd86QpDcY7WuEMZ7
-nNjfJ7OlAUINBZgG90qFaLb8sJpXlfjMi8q8rn3lg8OMHOAgPI3CxaU57zQMyfT3
-o+YqriJyQzS3CetfS41SqtmIHKlpwTs26tLZvh5hMQNCETQCWzAK6vrstrZ8aP0o
-MF+Ntmn6rK6vdtF/Qm9+MezsSVPaSKw2D5RWmkfdpGrkTUeoL9NlUcOlwFHavEut
-c5495CJMFGSiTzhSRWnRCp2DJPakFQ95H4BfqulgIbaGm/8iv1HPlFXyVY9yW1+P
-nYda4vLT/mL8qv2ZIAt42GpNie5Q3betceKm7efFsiREG31uvVpwMqa/QLUxhYi0
-VCgjZskPzZBla73XZ/qLHhqS0kCb+hRjtEyd5Tuag7t89rFS+kAEg8YG3tXckunl
-ojFN5zKHfNSGgQfKj+qV
-=ECuG
+iQIcBAEBAgAGBQJXtAMTAAoJEK3oKUf0dfodtXYP/2iuTVu0vDdXPYtV6j05r/D2
+9q3gRpjE0LacaFDEhJ+nItTsqIWV4Mw6/nnOY2Zpk7oP5YkB6ohDEEdkk6ENOgTR
+z9okMmWdNey4zEnW5yn4IucWMlmwYxc/vdiNDpBdkRtdlbum5RnMavxF/j4r2ZN/
+pISauGsY66VjIAW4Gh0Bul5QDqGPjFZ9GlRmXrhwx3nzosNb0fTW9swOIa0Zsp+c
+mbcMeDyEH7mvFrDGiJkIzK/jC+EUUkfIaqRHWrRW58nS+UrHMXMzddl+4h68G8hO
+4UFv0k2gZsjiFcYfWuju2Nd5mX2kY/+Udhtw1TeKeQgwBp7PaOMNRCaMUVALJTPM
+4ITPy/NV4Iip2WBZIiNFPI/b9ydblxo3D5ZC+qXP3boxo+k7/VZqsJfUBgBVfAbq
+aJI/VvHPjWhy8Oeq9+qauHd7nh+ZF2nlhzdivSB/rtN0vK6lEOET1SbvdJWEA+gT
+VvPY2BPrnif8M9av765yOzYczeqNaeKL/7aXlZ1bJTz+R7nHwdizaPWqCicqQgyl
+CHM4jtZ4ZTXlDiQhLyUyQWJ7ewThgqVr7bdJA+jGdwqV0JATgzKjbSIjvDFTrZCJ
+3se0cXfCoepWkrPkSV21Iq3sepKAF0UCOiJzIAYxAwETpmwWKZ9lVqdn70Bv4Bm9
+2PYD9F0g47zQS45N89Zu
+=bTcZ
 -----END PGP SIGNATURE-----
 
---gE7i1rD7pdK0Ng3j--
+--yrj/dFKFPuw6o+aM--
