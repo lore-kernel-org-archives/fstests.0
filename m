@@ -1,56 +1,55 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46490 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49876 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751539AbcHQIpl (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Wed, 17 Aug 2016 04:45:41 -0400
-Date: Wed, 17 Aug 2016 16:45:39 +0800
+	id S1751396AbcHQIzC (ORCPT <rfc822;fstests@vger.kernel.org>);
+	Wed, 17 Aug 2016 04:55:02 -0400
+Date: Wed, 17 Aug 2016 16:54:59 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 1/2] btrfs/131: test for umount of read-only fs when
- quota rescan is paused
-Message-ID: <20160817084539.GS27776@eguan.usersys.redhat.com>
-References: <2f102cc7-a6b2-e23d-9c56-de6c6bc5110d@suse.com>
+Subject: Re: [PATCH 2/2] btrfs/132: test for crash if btrfs quota disable is
+ killed while waiting on rescan
+Message-ID: <20160817085459.GT27776@eguan.usersys.redhat.com>
+References: <86c01c58-09df-178b-10de-dc4fc822bb55@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <2f102cc7-a6b2-e23d-9c56-de6c6bc5110d@suse.com>
+In-Reply-To: <86c01c58-09df-178b-10de-dc4fc822bb55@suse.com>
 Sender: fstests-owner@vger.kernel.org
 To: Jeff Mahoney <jeffm@suse.com>
 Cc: linux-btrfs <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org, Qu Wenruo <quwenruo@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Aug 16, 2016 at 02:30:21PM -0400, Jeff Mahoney wrote:
-> Ensure that we can unmount a read-only file system when quota rescan
-> is paused from a previous read-write mount.
+On Tue, Aug 16, 2016 at 02:30:22PM -0400, Jeff Mahoney wrote:
+> There was a bug in btrfs where the wait for completion of the qgroup
+> rescan worker could be interrupted, resulting in a crash in the rescan
+> worker when the quota root goes away.
 > 
-> If the kernel has a separate bug where we are returning early while
-> waiting for the rescan worker, we can use that to un-hang the test,
-> and report both errors.
+> It is possible to interrupt the wait during file system umount as well,
+> but effectively impossible to test.  The umount generally succeeds safely
+> anyway due to other synchronization points.
 > 
 > This issue is resolved by the following patch for the Linux kernel:
-> "btrfs: properly track when rescan worker is running"
+> "btrfs: waiting on qgroup rescan should not always be interruptible"
 > 
 > Signed-off-by: Jeff Mahoney <jeffm@suse.com>
 > ---
->  tests/btrfs/131     | 100 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/131.out |   3 ++
+>  tests/btrfs/132     | 101 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/132.out |   1 +
 >  tests/btrfs/group   |   1 +
->  3 files changed, 104 insertions(+)
->  create mode 100755 tests/btrfs/131
->  create mode 100644 tests/btrfs/131.out
+>  3 files changed, 103 insertions(+)
+>  create mode 100755 tests/btrfs/132
+>  create mode 100644 tests/btrfs/132.out
 > 
-> diff --git a/tests/btrfs/131 b/tests/btrfs/131
+> diff --git a/tests/btrfs/132 b/tests/btrfs/132
 > new file mode 100755
-> index 0000000..56c38a2
+> index 0000000..3929afa
 > --- /dev/null
-> +++ b/tests/btrfs/131
-> @@ -0,0 +1,100 @@
+> +++ b/tests/btrfs/132
+> @@ -0,0 +1,101 @@
 > +#! /bin/bash
-> +# FS QA Test 131
+> +# FS QA Test 132
 > +#
-> +# Test for bug where read-only mounts will hang on umount when
-> +# a qgroup rescan was paused.  This also tests whether that hung
-> +# umount can be unhung by trying to make use of a separate bug that
-> +# means we can interrupt the wait for the rescan worker.  If that
-> +# happens, we report both errors.
+> +# Test for race with signal being received in btrfs_qgroup_disable and
+> +# the qgroup rescan worker.  The failure case is a crash due to the quota
+> +# root being released prematurely.
 > +#
 > +#-----------------------------------------------------------------------
 > +# Copyright (c) 2016 SUSE.  All Rights Reserved.
@@ -103,80 +102,89 @@ On Tue, Aug 16, 2016 at 02:30:21PM -0400, Jeff Mahoney wrote:
 > +
 > +_require_btrfs
 > +BTRFS_DEBUG_TREE_PROG="`set_prog_path btrfs-debug-tree`"
+
+This belongs to common/config
+
 > +_require_command "$BTRFS_DEBUG_TREE_PROG" btrfs-debug-tree
-> +TIMEOUT_PROG="`set_prog_path timeout`"
-> +_require_command "$TIMEOUT_PROG" timeout
-
-The "set_prog_path" calls belong to common/config, we only need
-"_require_command" calls in test.
-
 > +
 > +rm -f $seqres.full
-> +_scratch_mkfs >>$seqres.full 2>&1
 > +
+> +_scratch_mkfs >>$seqres.full 2>&1
 > +_scratch_mount
 > +cp -aR /lib/modules/$(uname -r) $SCRATCH_MNT
 
-Consider populating the filesystem using _populate_fs or fsstress?
+_populate_fs or fsstress to populate the filesystem?
 
 > +
 > +# A qgroup rescan on an empty or small file system completes nearly
 > +# immediately.  We need to ensure that it runs long enough that it will
-> +# be paused on umount.  Snapshots slow down the rescan so we should see
-> +# the race without a lot of data.  This is an arbitrary number that
-> +# works on a ramdisk so it should be sufficient for any storage.
+> +# be running when the disable ioctl executes.  Snapshots slow down the
+> +# rescan so we should see the race without a lot of data.  This is an
+> +# arbitrary number that works on a ramdisk so it should be sufficient
+> +# for any storage.
 > +for n in $(seq 1 100); do
-> +  _run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/$n
+> +    _run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/$n
 
 Use tab for indention.
 
 > +done
+> +
+> +sync
 > +_run_btrfs_util_prog quota enable $SCRATCH_MNT
+> +
+> +# _run_btrfs_util_prog runs the command in a subshell
+> +# so jobs -p and $! don't work
+
+Can you run "$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT" directly
+without _run_btrfs_util_prog? This helper is not recommended, I think
+it's only useful when the output of btrfs command is changing over time,
+which makes it harder to filter out a stable output as golden image. But
+I notice that "btrfs quota enable /mnt" doesn't print any message on
+success.
+
+> +$BTRFS_UTIL_PROG quota disable $SCRATCH_MNT &
+> +
+> +# This is arbitrary as well but worked for me.  The goal is to let the
+> +# command get into the umount syscall before calling kill but not so far
+> +# into it that we've already waited for the rescan worker to complete.
+> +usleep 10000
+> +jobs=$(jobs -p)
+> +if kill -0 $jobs 2> /dev/null; then
+> +	kill -KILL $jobs
+> +else
+> +	echo "quota disable command exited too quickly"
+> +fi
+> +
+> +# wait will output the Killed message, so silence that
+> +wait 2> /dev/null
 > +_scratch_unmount
-> +
-> +echo "read-write umount completed"
-> +
-> +# Confirm that the rescan is paused
-> +if ! $BTRFS_DEBUG_TREE_PROG $SCRATCH_DEV | \
-> +	egrep -q 'flags ON|SCANNING|INCONSISTENT scan'; then
-> +	echo "qgroup rescan not paused."
-> +fi
-> +_scratch_mount -r
-> +
-> +# If the bug exists, this will hang.  If we can kill it, that's another bug.
-> +$TIMEOUT_PROG 10 umount $SCRATCH_MNT
-> +if test $? -eq 124 ; then
-> +    echo "umount hung but was killed"
-
-I see this log with 4.8-rc1 kernel, is that expected?
-
-Thanks,
-Eryu
-
-> +fi
-> +echo "read-only umount completed"
 > +
 > +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/btrfs/131.out b/tests/btrfs/131.out
+> diff --git a/tests/btrfs/132.out b/tests/btrfs/132.out
 > new file mode 100644
-> index 0000000..845a501
+> index 0000000..06c1d19
 > --- /dev/null
-> +++ b/tests/btrfs/131.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 131
-> +read-write umount completed
-> +read-only umount completed
+> +++ b/tests/btrfs/132.out
+> @@ -0,0 +1 @@
+> +QA output created by 132
+
+Need a line like "Silence is golden" to indicate we expect nothing
+from the test.
+
+Thanks,
+Eryu
+
 > diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 6b29c05..929fa21 100644
+> index 929fa21..c4e880a 100644
 > --- a/tests/btrfs/group
 > +++ b/tests/btrfs/group
-> @@ -133,3 +133,4 @@
->  128 auto quick send
+> @@ -134,3 +134,4 @@
 >  129 auto quick send
 >  130 auto clone send
-> +131 auto quick qgroup
+>  131 auto quick qgroup
+> +132 auto quick qgroup
 > -- 
 > 1.8.5.6
 > 
