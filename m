@@ -1,43 +1,45 @@
-Received: from mx1.redhat.com ([209.132.183.28]:59480 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750757AbcHSDGx (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 18 Aug 2016 23:06:53 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 490453F725
-        for <fstests@vger.kernel.org>; Fri, 19 Aug 2016 03:05:19 +0000 (UTC)
-Received: from localhost (dhcp-13-153.nay.redhat.com [10.66.13.153])
-        by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u7J35HL3015497
-        for <fstests@vger.kernel.org>; Thu, 18 Aug 2016 23:05:18 -0400
-Date: Fri, 19 Aug 2016 11:05:17 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 1/2] common/rc: introduce _overlay_mount_dirs helper
-Message-ID: <20160819030517.GE27776@eguan.usersys.redhat.com>
-References: <1470741381-32610-1-git-send-email-eguan@redhat.com>
- <20160812033342.GS27776@eguan.usersys.redhat.com>
+Received: from mail-qk0-f193.google.com ([209.85.220.193]:34812 "EHLO
+        mail-qk0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750721AbcHSEEn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 19 Aug 2016 00:04:43 -0400
+Date: Thu, 18 Aug 2016 11:04:56 -0400
+From: Eric Whitney <enwlinux@gmail.com>
+Subject: [PATCH] generic/135: redirect stderr from _scratch_mkfs
+Message-ID: <20160818150456.GB14069@localhost.localdomain>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160812033342.GS27776@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org, tytso@mit.edu
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Aug 12, 2016 at 11:33:42AM +0800, Eryu Guan wrote:
-> On Tue, Aug 09, 2016 at 07:16:20PM +0800, Eryu Guan wrote:
-> > Introduce a new _overlay_mount_dirs() helper to do the actual
-> > overlay mount operation and factor _overlay_scratch_mount and
-> > _overlay_mount code to use a single implemention of
-> > _overlay_mount_dirs(). Also convert all bare mount of overlay in
-> > tests to use it.
-> > 
-> > Suggested-by: Dave Chinner <dchinner@redhat.com>
-> > Signed-off-by: Eryu Guan <eguan@redhat.com>
-> 
-> Ping on this one, hope I can push this out this week.
+In generic/135, benign warning message output from _scratch_mkfs on
+stderr can cause a golden output mismatch, as can occur when testing
+an ext4 bigalloc file system.  It's the only generic test that does not
+also redirect stderr when directing _scratch_mkfs' stdout to /dev/null.
+Since error output from _scratch_mkfs doesn't seem important to the
+overall intent of the test, there should be no harm in making its
+stderr handling consistent.
 
-Ping again.
+Signed-off-by: Eric Whitney <enwlinux@gmail.com>
+---
+ tests/generic/135 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Thanks,
-Eryu
+diff --git a/tests/generic/135 b/tests/generic/135
+index 52418f6..14b8132 100755
+--- a/tests/generic/135
++++ b/tests/generic/135
+@@ -41,7 +41,7 @@ _supported_os Linux IRIX
+ 
+ _require_odirect
+ _require_scratch
+-_scratch_mkfs >/dev/null
++_scratch_mkfs >/dev/null 2>&1
+ _scratch_mount
+ 
+ cd $SCRATCH_MNT
+-- 
+2.1.4
+
