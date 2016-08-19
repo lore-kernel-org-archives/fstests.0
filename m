@@ -1,60 +1,43 @@
-Received: from mx1.redhat.com ([209.132.183.28]:59632 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:59480 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753780AbcHSAwg (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 18 Aug 2016 20:52:36 -0400
-Date: Thu, 18 Aug 2016 23:26:20 +0800
+        id S1750757AbcHSDGx (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 18 Aug 2016 23:06:53 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 490453F725
+        for <fstests@vger.kernel.org>; Fri, 19 Aug 2016 03:05:19 +0000 (UTC)
+Received: from localhost (dhcp-13-153.nay.redhat.com [10.66.13.153])
+        by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u7J35HL3015497
+        for <fstests@vger.kernel.org>; Thu, 18 Aug 2016 23:05:18 -0400
+Date: Fri, 19 Aug 2016 11:05:17 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] common/rc: improve _require_metadata_journaling() for
- ext4
-Message-ID: <20160818152620.GC27776@eguan.usersys.redhat.com>
-References: <20160818144253.GA14069@localhost.localdomain>
+Subject: Re: [PATCH 1/2] common/rc: introduce _overlay_mount_dirs helper
+Message-ID: <20160819030517.GE27776@eguan.usersys.redhat.com>
+References: <1470741381-32610-1-git-send-email-eguan@redhat.com>
+ <20160812033342.GS27776@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160818144253.GA14069@localhost.localdomain>
+In-Reply-To: <20160812033342.GS27776@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Whitney <enwlinux@gmail.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, tytso@mit.edu
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Aug 18, 2016 at 10:42:53AM -0400, Eric Whitney wrote:
-> The code in _require_metadata_journaling() currently rejects ext4 file
-> systems that have been created without a journal.  However, an ext4
-> file system with a journal should also be rejected if the journal is
-> not loaded and made available for use at mount time.
+On Fri, Aug 12, 2016 at 11:33:42AM +0800, Eryu Guan wrote:
+> On Tue, Aug 09, 2016 at 07:16:20PM +0800, Eryu Guan wrote:
+> > Introduce a new _overlay_mount_dirs() helper to do the actual
+> > overlay mount operation and factor _overlay_scratch_mount and
+> > _overlay_mount code to use a single implemention of
+> > _overlay_mount_dirs(). Also convert all bare mount of overlay in
+> > tests to use it.
+> > 
+> > Suggested-by: Dave Chinner <dchinner@redhat.com>
+> > Signed-off-by: Eryu Guan <eguan@redhat.com>
 > 
-> Signed-off-by: Eric Whitney <enwlinux@gmail.com>
-> ---
->  common/rc | 3 +++
->  1 file changed, 3 insertions(+)
-> 
-> diff --git a/common/rc b/common/rc
-> index 3fb0600..9a3c9bd 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3057,6 +3057,9 @@ _require_metadata_journaling()
->  		_require_dumpe2fs
->  		$DUMPE2FS_PROG -h $DEV 2>&1 | grep -q has_journal || \
->  			_notrun "$FSTYP on $DEV not configured with metadata journaling"
-> +		# ext4 may not have loaded a journal
-> +		echo $MOUNT_OPTIONS | grep -q noload && \
-> +			_notrun "$FSTYP on $DEV not mounted with metadata journaling"
+> Ping on this one, hope I can push this out this week.
 
-I think this can be done by the new helper _exclude_scratch_mount_option
-which was introduced recently, e.g.
-
-_exclude_scratch_mount_option "noload"
+Ping again.
 
 Thanks,
 Eryu
-
->  		;;
->  	*)
->  		# by default we pass; if you need to, add your fs above!
-> -- 
-> 2.1.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
