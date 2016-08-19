@@ -1,214 +1,81 @@
-Received: from mx1.redhat.com ([209.132.183.28]:55832 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:34006 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754781AbcHSRwE (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1754617AbcHSRwE (ORCPT <rfc822;fstests@vger.kernel.org>);
         Fri, 19 Aug 2016 13:52:04 -0400
 From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH 2/2] fstests: xfs EIO error handling test
-Date: Sat, 20 Aug 2016 01:51:45 +0800
-Message-Id: <1471629105-13359-2-git-send-email-zlang@redhat.com>
-In-Reply-To: <1471629105-13359-1-git-send-email-zlang@redhat.com>
-References: <1471629105-13359-1-git-send-email-zlang@redhat.com>
+Subject: [PATCH 1/2] common/rc: add functions to check or write objects under /sys/fs/$FSTYP
+Date: Sat, 20 Aug 2016 01:51:44 +0800
+Message-Id: <1471629105-13359-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: xfs@oss.sgi.com, Zorro Lang <zlang@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Besides fail_at_unmount, all EIO error handling can stop umount
-hanging on IO error too.
+XFS add more configurations in /sys/fs/xfs recently. For use
+them, this patch add some common functions for:
+  1. "require" a file/dir in /sys/fs/${FSTYP}.
+  2. write a file in /sys/fs/${FSTYP}.
 
-This case test EIO/max_retries and EIO/retry_timeout_seconds as
-below:
-
-1) fail_at_unmount=0 && \
-   EIO/max_retries=1 && \
-   EIO/retry_timeout_seconds=0
-
-2) fail_at_unmount=0 && \
-   EIO/max_retries=-1 && \
-   EIO/retry_timeout_seconds=1
-
-Make sure when fail_at_unmount=0, umount won't hang there.
+For common use, these functions can be used by other filesystems.
 
 Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
- tests/xfs/263     | 126 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/263.out |  21 +++++++++
- tests/xfs/group   |   1 +
- 3 files changed, 148 insertions(+)
- create mode 100755 tests/xfs/263
- create mode 100644 tests/xfs/263.out
+ common/rc | 42 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 42 insertions(+)
 
-diff --git a/tests/xfs/263 b/tests/xfs/263
-new file mode 100755
-index 0000000..2df139c
---- /dev/null
-+++ b/tests/xfs/263
-@@ -0,0 +1,126 @@
-+#! /bin/bash
-+# FS QA Test 263
-+#
-+# Test XFS EIO error handling configuration. Stop XFS from retrying
-+# to writeback forever when hit EIO.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
+diff --git a/common/rc b/common/rc
+index 51092a0..d5edfef 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3556,6 +3556,48 @@ run_fsx()
+ 	fi
+ }
+ 
++# Test for the existence of a sysfs entry at /sys/fs/$FSTYP/$DEV/$ENTRY
++_require_fs_sysfs()
 +{
-+	cd /
-+	rm -f $tmp.*
-+	_dmerror_cleanup
++	local dev=$1
++	local entry=$2
++	local tmp_mnt=`mktemp -d`
++
++	if [ ! -b "$dev" -o -z "$entry" ];then
++		_fail "Usage: _require_fs_sysfs <device> <sysfs_path>"
++        fi
++
++	local dname=$(_short_dev $dev)
++	_mount -t $FSTYP `_common_dev_mount_options` $dev $tmp_mnt
++	if [ $? -ne 0 ];then
++		rm -f $tmp_mnt
++		_fail "_require_fs_sysfs: could not mount, mkfs first in your test?"
++	elif [ ! -e /sys/fs/${FSTYP}/${dname}/${entry} ];then
++		$UMOUNT_PROG $tmp_mnt
++		rm -f $tmp_mnt
++		_notrun "/sys/fs/${FSTYP}/${dname}/${entry}: No such file or directory"
++	fi
++	$UMOUNT_PROG $tmp_mnt
++	rm -rf $tmp_mnt
 +}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmerror
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_supported_os Linux
-+_require_dm_target error
-+_require_scratch
-+_require_fs_sysfs error/fail_at_unmount
-+_require_fs_sysfs error/metadata/EIO/max_retries
-+_require_fs_sysfs error/metadata/EIO/retry_timeout_seconds
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_dmerror_init
-+
-+do_test()
++# Write "content" into /sys/fs/$FSTYP/$DEV/$ENTRY
++_set_fs_sysfs_param()
 +{
-+	local attr="$1"
-+	local num=0
++	local dev=$1
++	shift
++	local entry=$1
++	shift
++	local content="$*"
 +
-+	_dmerror_mount
-+	reset_xfs_sysfs_error_handling $DMERROR_DEV
-+	# Disable fail_at_unmount before test EIO error handling
-+	_set_fs_sysfs_attr $DMERROR_DEV error/fail_at_unmount 0
-+	echo -n "error/fail_at_unmount="
-+	_get_fs_sysfs_attr $DMERROR_DEV error/fail_at_unmount
-+
-+	_set_fs_sysfs_attr $DMERROR_DEV $attr 1
-+	num=`_get_fs_sysfs_attr $DMERROR_DEV $attr`
-+	echo "$attr=$num"
-+	# _fail the test if we fail to set $attr to 1, because the test
-+	# probably will hang in such case and block subsequent tests.
-+	if [ "$num" != "1" ]; then
-+		_fail "Failed to set $attr: 1"
++	if [ ! -b "$dev" -o -z "$entry" -o -z "$content" ];then
++		_fail "Usage: _set_sys_fs_param <mounted_device> <entry> <content>"
 +	fi
 +
-+	# start a metadata-intensive workload, but no data allocation operation.
-+	# Because uncompleted new space allocation I/Os may cause XFS to shutdown
-+	# after loading error table.
-+	$FSSTRESS_PROG -z -n 5000 -p 10 \
-+		       -f creat=10 \
-+		       -f resvsp=1 \
-+		       -f truncate=1 \
-+		       -f punch=1 \
-+		       -f chown=5 \
-+		       -f mkdir=5 \
-+		       -f rmdir=1 \
-+		       -f mknod=1 \
-+		       -f unlink=1 \
-+		       -f symlink=1 \
-+		       -f rename=1 \
-+		       -d $SCRATCH_MNT/fsstress >> $seqres.full 2>&1
-+
-+	# Loading error table without "--nolockfs" option. Because "--nolockfs"
-+	# won't freeze fs, then some running I/Os may cause XFS to shutdown
-+	# prematurely. That's not what we want to test.
-+	_dmerror_load_error_table lockfs
-+	_dmerror_unmount
-+
-+	# Mount again to replay log after loading working table, so we have a
-+	# consistent XFS after test.
-+	_dmerror_load_working_table
-+	_dmerror_mount
-+	_dmerror_unmount
++	local dname=$(_short_dev $dev)
++	echo "$content" > /sys/fs/${FSTYP}/${dname}/${entry}
 +}
 +
-+#### Test EIO/max_retries ####
-+# Set EIO/max_retries a limited number(>-1), then even if fail_at_unmount=0,
-+# the test won't hang.
-+echo "=== Test EIO/max_retries ==="
-+do_test error/metadata/EIO/max_retries
-+
-+#### Test EIO/retry_timeout_seconds ####
-+# Set EIO/retry_timeout_seconds to a limited number(>0), then even if
-+# fail_at_unmount=0, the test won't hang.
-+echo "=== Test EIO/retry_timeout_seconds ==="
-+do_test error/metadata/EIO/retry_timeout_seconds
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/263.out b/tests/xfs/263.out
-new file mode 100644
-index 0000000..714350f
---- /dev/null
-+++ b/tests/xfs/263.out
-@@ -0,0 +1,21 @@
-+QA output created by 263
-+=== Test EIO/max_retries ===
-+error/fail_at_unmount=1
-+error/metadata/default/max_retries=-1
-+error/metadata/default/retry_timeout_seconds=0
-+error/metadata/EIO/max_retries=-1
-+error/metadata/EIO/retry_timeout_seconds=0
-+error/metadata/ENOSPC/max_retries=-1
-+error/metadata/ENOSPC/retry_timeout_seconds=0
-+error/fail_at_unmount=0
-+error/metadata/EIO/max_retries=1
-+=== Test EIO/retry_timeout_seconds ===
-+error/fail_at_unmount=1
-+error/metadata/default/max_retries=-1
-+error/metadata/default/retry_timeout_seconds=0
-+error/metadata/EIO/max_retries=-1
-+error/metadata/EIO/retry_timeout_seconds=0
-+error/metadata/ENOSPC/max_retries=-1
-+error/metadata/ENOSPC/retry_timeout_seconds=0
-+error/fail_at_unmount=0
-+error/metadata/EIO/retry_timeout_seconds=1
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 6905a62..ec3c022 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -260,6 +260,7 @@
- 260 auto quick quota
- 261 auto quick quota
- 262 auto quick quota
-+263 auto quick mount
- 265 auto clone
- 266 dump ioctl auto quick
- 267 dump ioctl tape
+ init_rc
+ 
+ ################################################################################
 -- 
-2.7.4
+2.5.5
 
