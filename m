@@ -1,110 +1,128 @@
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:45633 "EHLO
-        mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753671AbcHSRzV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 19 Aug 2016 13:55:21 -0400
-Date: Fri, 19 Aug 2016 13:55:12 -0400 (EDT)
-From: Zirong Lang <zlang@redhat.com>
-Message-ID: <618760559.2359845.1471629312793.JavaMail.zimbra@redhat.com>
-In-Reply-To: <1471629105-13359-1-git-send-email-zlang@redhat.com>
-References: <1471629105-13359-1-git-send-email-zlang@redhat.com>
-Subject: Re: [PATCH 1/2] common/rc: add functions to check or write objects
- under /sys/fs/$FSTYP
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Received: from mx1.redhat.com ([209.132.183.28]:57402 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754510AbcHSR4f (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 19 Aug 2016 13:56:35 -0400
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH 1/2] xfs/006: move code about resetting error handling to common/rc
+Date: Sat, 20 Aug 2016 01:56:31 +0800
+Message-Id: <1471629392-13661-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
 To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com
+Cc: xfs@oss.sgi.com, Zorro Lang <zlang@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Sorry, I sent wrong patch. Please ignore this patch.
-This's not the real [PATCH 1/2].  I'll resend both patches later.
+Nearly 1/3 code is used to reset the xfs error handling attributes,
+This part can be picked up, and used for other cases. So move them
+to a new function reset_xfs_sysfs_error_handling() in common/rc.
 
-Thanks,
-Zorro
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
+ common/rc         | 37 +++++++++++++++++++++++++++++++++++++
+ tests/xfs/006     | 27 +++++++--------------------
+ tests/xfs/006.out |  1 +
+ 3 files changed, 45 insertions(+), 20 deletions(-)
 
------ =E5=8E=9F=E5=A7=8B=E9=82=AE=E4=BB=B6 -----
-> =E5=8F=91=E4=BB=B6=E4=BA=BA: "Zorro Lang" <zlang@redhat.com>
-> =E6=94=B6=E4=BB=B6=E4=BA=BA: fstests@vger.kernel.org
-> =E6=8A=84=E9=80=81: xfs@oss.sgi.com, "Zorro Lang" <zlang@redhat.com>
-> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: =E6=98=9F=E6=9C=9F=E5=85=AD, 2016=
-=E5=B9=B4 8 =E6=9C=88 20=E6=97=A5 =E4=B8=8A=E5=8D=88 1:51:44
-> =E4=B8=BB=E9=A2=98: [PATCH 1/2] common/rc: add functions to check or wr=
-ite objects under /sys/fs/$FSTYP
->=20
-> XFS add more configurations in /sys/fs/xfs recently. For use
-> them, this patch add some common functions for:
->   1. "require" a file/dir in /sys/fs/${FSTYP}.
->   2. write a file in /sys/fs/${FSTYP}.
->=20
-> For common use, these functions can be used by other filesystems.
->=20
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
->  common/rc | 42 ++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 42 insertions(+)
->=20
-> diff --git a/common/rc b/common/rc
-> index 51092a0..d5edfef 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3556,6 +3556,48 @@ run_fsx()
->  	fi
->  }
-> =20
-> +# Test for the existence of a sysfs entry at /sys/fs/$FSTYP/$DEV/$ENTR=
-Y
-> +_require_fs_sysfs()
-> +{
-> +	local dev=3D$1
-> +	local entry=3D$2
-> +	local tmp_mnt=3D`mktemp -d`
-> +
-> +	if [ ! -b "$dev" -o -z "$entry" ];then
-> +		_fail "Usage: _require_fs_sysfs <device> <sysfs_path>"
-> +        fi
-> +
-> +	local dname=3D$(_short_dev $dev)
-> +	_mount -t $FSTYP `_common_dev_mount_options` $dev $tmp_mnt
-> +	if [ $? -ne 0 ];then
-> +		rm -f $tmp_mnt
-> +		_fail "_require_fs_sysfs: could not mount, mkfs first in your test?"
-> +	elif [ ! -e /sys/fs/${FSTYP}/${dname}/${entry} ];then
-> +		$UMOUNT_PROG $tmp_mnt
-> +		rm -f $tmp_mnt
-> +		_notrun "/sys/fs/${FSTYP}/${dname}/${entry}: No such file or directo=
-ry"
-> +	fi
-> +	$UMOUNT_PROG $tmp_mnt
-> +	rm -rf $tmp_mnt
-> +}
-> +
-> +# Write "content" into /sys/fs/$FSTYP/$DEV/$ENTRY
-> +_set_fs_sysfs_param()
-> +{
-> +	local dev=3D$1
-> +	shift
-> +	local entry=3D$1
-> +	shift
-> +	local content=3D"$*"
-> +
-> +	if [ ! -b "$dev" -o -z "$entry" -o -z "$content" ];then
-> +		_fail "Usage: _set_sys_fs_param <mounted_device> <entry> <content>"
-> +	fi
-> +
-> +	local dname=3D$(_short_dev $dev)
-> +	echo "$content" > /sys/fs/${FSTYP}/${dname}/${entry}
-> +}
-> +
->  init_rc
-> =20
->  ######################################################################=
-##########
-> --
-> 2.5.5
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
+diff --git a/common/rc b/common/rc
+index 3fb0600..b038d8e 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3888,6 +3888,43 @@ _get_fs_sysfs_attr()
+ 	cat /sys/fs/${FSTYP}/${dname}/${attr}
+ }
+ 
++
++# Reset all xfs error handling attributes, set them to original
++# status.
++#
++# Only one argument, and it's necessary:
++#  - dev: device name, e.g. $SCRATCH_DEV
++#
++# Note: this function only works for XFS
++reset_xfs_sysfs_error_handling()
++{
++	local dev=$1
++
++	if [ ! -b "$dev" -o "$FSTYP" != "xfs" ];then
++		_fail "Usage: reset_xfs_sysfs_error_handling <device>"
++	fi
++
++	_set_fs_sysfs_attr $dev error/fail_at_unmount 1
++	echo -n "error/fail_at_unmount="
++	_get_fs_sysfs_attr $dev error/fail_at_unmount
++
++	# Make sure all will be configured to retry forever by default, except
++	# for ENODEV, which is an unrecoverable error, so it will be configured
++	# to not retry on error by default.
++	for e in default EIO ENOSPC; do
++		_set_fs_sysfs_attr $dev \
++				   error/metadata/${e}/max_retries -1
++		echo -n "error/metadata/${e}/max_retries="
++		_get_fs_sysfs_attr $dev error/metadata/${e}/max_retries
++
++		_set_fs_sysfs_attr $dev \
++				   error/metadata/${e}/retry_timeout_seconds 0
++		echo -n "error/metadata/${e}/retry_timeout_seconds="
++		_get_fs_sysfs_attr $dev \
++				   error/metadata/${e}/retry_timeout_seconds
++	done
++}
++
+ # Skip if we are running an older binary without the stricter input checks.
+ # Make multiple checks to be sure that there is no regression on the one
+ # selected feature check, which would skew the result.
+diff --git a/tests/xfs/006 b/tests/xfs/006
+index 8910026..58f9348 100755
+--- a/tests/xfs/006
++++ b/tests/xfs/006
+@@ -57,31 +57,18 @@ _scratch_mkfs > $seqres.full 2>&1
+ _dmerror_init
+ _dmerror_mount
+ 
+-# Enable fail_at_unmount, so XFS stops retrying on errors at unmount
+-# time. _fail the test if we fail to set it to 1, because the test
+-# probably will hang in such case and block subsequent tests.
+-_set_fs_sysfs_attr $DMERROR_DEV error/fail_at_unmount 1
++# Make sure all error handling attributes are original status
++reset_xfs_sysfs_error_handling $DMERROR_DEV
++
++# Make sure fail_at_unmount is enabled, so XFS stops retrying on
++# errors at unmount time. _fail the test if we fail to set it to 1,
++# because the test probably will hang in such case and block
++# subsequent tests.
+ attr=`_get_fs_sysfs_attr $DMERROR_DEV error/fail_at_unmount`
+ if [ "$attr" != "1" ]; then
+ 	_fail "Failed to set error/fail_at_unmount: $attr"
+ fi
+ 
+-# Make sure all will be configured to retry forever by default, except
+-# for ENODEV, which is an unrecoverable error, so it will be configured
+-# to not retry on error by default.
+-for e in default EIO ENOSPC; do
+-	_set_fs_sysfs_attr $DMERROR_DEV \
+-			   error/metadata/${e}/max_retries -1
+-	echo -n "error/metadata/${e}/max_retries="
+-	_get_fs_sysfs_attr $DMERROR_DEV error/metadata/${e}/max_retries
+-
+-	_set_fs_sysfs_attr $DMERROR_DEV \
+-			   error/metadata/${e}/retry_timeout_seconds 0
+-	echo -n "error/metadata/${e}/retry_timeout_seconds="
+-	_get_fs_sysfs_attr $DMERROR_DEV \
+-			   error/metadata/${e}/retry_timeout_seconds
+-done
+-
+ # start a metadata-intensive workload, but no data allocation operation.
+ # Because uncompleted new space allocation I/Os may cause XFS to shutdown
+ # after loading error table.
+diff --git a/tests/xfs/006.out b/tests/xfs/006.out
+index 393f411..3260b3a 100644
+--- a/tests/xfs/006.out
++++ b/tests/xfs/006.out
+@@ -1,4 +1,5 @@
+ QA output created by 006
++error/fail_at_unmount=1
+ error/metadata/default/max_retries=-1
+ error/metadata/default/retry_timeout_seconds=0
+ error/metadata/EIO/max_retries=-1
+-- 
+2.7.4
+
