@@ -1,11 +1,11 @@
-Received: from mail-qk0-f193.google.com ([209.85.220.193]:34812 "EHLO
-        mail-qk0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750721AbcHSEEn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 19 Aug 2016 00:04:43 -0400
-Date: Thu, 18 Aug 2016 11:04:56 -0400
+Received: from mail-qt0-f194.google.com ([209.85.216.194]:35641 "EHLO
+        mail-qt0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751599AbcHSQoD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 19 Aug 2016 12:44:03 -0400
+Date: Fri, 19 Aug 2016 12:47:38 -0400
 From: Eric Whitney <enwlinux@gmail.com>
-Subject: [PATCH] generic/135: redirect stderr from _scratch_mkfs
-Message-ID: <20160818150456.GB14069@localhost.localdomain>
+Subject: [PATCH V2] common/rc: improve _require_metadata_journaling() for ext4
+Message-ID: <20160819164738.GA1903@localhost.localdomain>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
@@ -14,32 +14,32 @@ To: fstests@vger.kernel.org
 Cc: linux-ext4@vger.kernel.org, tytso@mit.edu
 List-ID: <fstests@vger.kernel.org>
 
-In generic/135, benign warning message output from _scratch_mkfs on
-stderr can cause a golden output mismatch, as can occur when testing
-an ext4 bigalloc file system.  It's the only generic test that does not
-also redirect stderr when directing _scratch_mkfs' stdout to /dev/null.
-Since error output from _scratch_mkfs doesn't seem important to the
-overall intent of the test, there should be no harm in making its
-stderr handling consistent.
+The code in _require_metadata_journaling() currently rejects ext4 file
+systems that have been created without a journal.  However, an ext4
+file system with a journal should also be rejected if the journal is
+not loaded and made available for use at mount time.
+
+V2:  Replaced code with call to _exclude_scratch_mount_option() per
+review comment.
 
 Signed-off-by: Eric Whitney <enwlinux@gmail.com>
 ---
- tests/generic/135 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ common/rc | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/tests/generic/135 b/tests/generic/135
-index 52418f6..14b8132 100755
---- a/tests/generic/135
-+++ b/tests/generic/135
-@@ -41,7 +41,7 @@ _supported_os Linux IRIX
- 
- _require_odirect
- _require_scratch
--_scratch_mkfs >/dev/null
-+_scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
- cd $SCRATCH_MNT
+diff --git a/common/rc b/common/rc
+index 3fb0600..9d1fc07 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3057,6 +3057,8 @@ _require_metadata_journaling()
+ 		_require_dumpe2fs
+ 		$DUMPE2FS_PROG -h $DEV 2>&1 | grep -q has_journal || \
+ 			_notrun "$FSTYP on $DEV not configured with metadata journaling"
++		# ext4 might not load a journal
++		_exclude_scratch_mount_option "noload"
+ 		;;
+ 	*)
+ 		# by default we pass; if you need to, add your fs above!
 -- 
 2.1.4
 
