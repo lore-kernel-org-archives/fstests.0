@@ -1,117 +1,154 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:24210 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750862AbcHWPK5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 23 Aug 2016 11:10:57 -0400
-Date: Tue, 23 Aug 2016 08:10:43 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [GIT PULL] fstests: updates on 2016-08-20
-Message-ID: <20160823151042.GC8265@birch.djwong.org>
-References: <201608201444.u7KEi22g015351@int-mx14.intmail.prod.int.phx2.redhat.com>
- <20160823065447.GY19025@dastard>
- <20160823071608.GL27776@eguan.usersys.redhat.com>
+Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:60107 "EHLO
+        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1753934AbcHWRwR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 23 Aug 2016 13:52:17 -0400
+Received: from pps.filterd (m0044010.ppops.net [127.0.0.1])
+        by mx0a-00082601.pphosted.com (8.16.0.17/8.16.0.17) with SMTP id u7NHjErb006991
+        for <fstests@vger.kernel.org>; Tue, 23 Aug 2016 10:52:17 -0700
+Received: from maileast.thefacebook.com ([199.201.65.23])
+        by mx0a-00082601.pphosted.com with ESMTP id 250tnw0f3t-1
+        (version=TLSv1 cipher=ECDHE-RSA-AES256-SHA bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Tue, 23 Aug 2016 10:52:17 -0700
+From: Josef Bacik <jbacik@fb.com>
+Subject: [PATCH] btrfs/131: send test for rename+recycled ino
+Date: Tue, 23 Aug 2016 13:51:58 -0400
+Message-ID: <1471974718-1430-1-git-send-email-jbacik@fb.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160823071608.GL27776@eguan.usersys.redhat.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Aug 23, 2016 at 03:16:08PM +0800, Eryu Guan wrote:
-> On Tue, Aug 23, 2016 at 04:54:47PM +1000, Dave Chinner wrote:
-> > On Sat, Aug 20, 2016 at 10:44:01PM +0800, Eryu Guan wrote:
-> > > Hi Dave,
-> > > 
-> > > Can you please pull the fstests update from the location below? This is a
-> > > normal update, which contains new generic and XFS tests and other fixes.
-> > > 
-> > > Thanks,
-> > > Eryu
-> > > 
-> > > The following changes since commit c760a54061d26890be3929e4c6659bf3dc9e0c6a:
-> > > 
-> > >   src/t_immutable: allow EPERM on immutable inode (2016-08-12 11:17:34 +0800)
-> > > 
-> > > are available in the git repository at:
-> > > 
-> > >   https://github.com/guaneryu/xfstests.git for-dave
-> > > 
-> > > for you to fetch changes up to 3c75489a57518745598e239ffeec2af64400f185:
-> > > 
-> > >   common/rc: improve _require_metadata_journaling() for ext4 (2016-08-20 00:54:28 +0800)
-> > > 
-> > > ----------------------------------------------------------------
-> > > 
-> > > fstests: update on 2016-08-20
-> > > 
-> > > This update contains:
-> > > o New tests for generic and XFS
-> > > o Miscellaneous small fixes
-> > > 
-> > > ----------------------------------------------------------------
-> > > Brian Foster (1):
-> > >       generic: shutdown fs after log recovery
-> > 
-> > Hi Eryu,
-> > 
-> > I just pulled this all in and got an unexpected surprise - this new
-> > test killed all of my test machines. From your description ("normal
-> > update") I didn't expect to see something like this occur - I pulled
-> > it, confirmed commits match, then pushed it to my test machines
-> > and started a test cycle. I expected to see it complete without any
-> > significant problems.
-> 
-> I saw only mount failures from this case in my testings (4.8-rc2
-> kernel), I didn't expect any crash either.
+This is a test for a problem I hit with send/receive.  If you mount with -o
+inode_cache it is possible to recycle inode numbers, and btrfs assumes that when
+you have a recycled inode number that it's parent directory won't be needing a
+rename, but this is not the case.  Without the patch to fix this problem this
+test will panic the box if ASSERT() is turned on, otherwise it'll simply fail
+the fssum.
 
-Is this in reference generic/323?  For whatever reason I get a flood
-of overlapping kernel stack smeared all over ttyS0.
+Signed-off-by: Josef Bacik <jbacik@fb.com>
+---
+ tests/btrfs/131     | 91 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/131.out |  2 ++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 94 insertions(+)
+ create mode 100644 tests/btrfs/131
+ create mode 100644 tests/btrfs/131.out
 
---D
+diff --git a/tests/btrfs/131 b/tests/btrfs/131
+new file mode 100644
+index 0000000..596adc1
+--- /dev/null
++++ b/tests/btrfs/131
+@@ -0,0 +1,91 @@
++#! /bin/bash
++# FS QA Test 131
++#
++# Make sure btrfs handles send/receive of a file that has been destroyed and
++# recreated with a recycled inode number and a renamed parent directory.  This
++# is a test for a fix based on the patch
++# 
++# Btrfs: handle pending renames with recycled inodes properly
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Facebook. All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=`mktemp -d`
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	rm -fr $tmp
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_fssum
++
++_scratch_mkfs > /dev/null 2>&1
++_scratch_mount "-o inode_cache"
++
++_run_btrfs_util_prog subvolume create $SCRATCH_MNT/base
++mkdir $SCRATCH_MNT/base/b
++mkdir $SCRATCH_MNT/base/a
++mv $SCRATCH_MNT/base/b $SCRATCH_MNT/base/a
++
++_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/base \
++	$SCRATCH_MNT/snap1
++_run_btrfs_util_prog send $SCRATCH_MNT/snap1 -f $tmp/1.snap
++
++mv $SCRATCH_MNT/base/a $SCRATCH_MNT/base/c
++rmdir $SCRATCH_MNT/base/c/b
++
++# We need to sync to make sure the inode number is recycled
++sync
++mkdir $SCRATCH_MNT/base/c/b
++
++_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/base $SCRATCH_MNT/snap2
++run_check $FSSUM_PROG -A -f -w $tmp/fssum $SCRATCH_MNT/snap2
++
++_run_btrfs_util_prog send -p $SCRATCH_MNT/snap1 $SCRATCH_MNT/snap2 -f $tmp/2.snap
++
++_scratch_unmount
++_scratch_mkfs > /dev/null 2>&1
++_scratch_mount
++
++_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/1.snap
++_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/2.snap
++run_check $FSSUM_PROG -r $tmp/fssum $SCRATCH_MNT/snap2
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/btrfs/131.out b/tests/btrfs/131.out
+new file mode 100644
+index 0000000..d118ca9
+--- /dev/null
++++ b/tests/btrfs/131.out
+@@ -0,0 +1,2 @@
++QA output created by 131
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 6b29c05..933fe10 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -133,3 +133,4 @@
+ 128 auto quick send
+ 129 auto quick send
+ 130 auto clone send
++131 auto quick send
+-- 
+1.8.3.1
 
-> 
-> > 
-> > The issue here is that this new test exercises a crash case and does
-> > not have fixes that are upstream yet - we have review backlog that
-> > has piled up while 4.8-rc1 regressions are being dealt with and
-> > getting the xfsprogs rmap support reviewed and merged. Upstream can
-> > only move as fast as review bandwidth will allow, and so sometimes
-> > things don't get merged as quickly as we'd all like.
-> 
-> Understand.
-> 
-> > 
-> > As such, can you try to hold off merging new tests that crash or
-> > hang systems until the bug fixes have been committed in the upstream
-> > repositories? This won't affect reviewers or testers (they grab
-> > the test in themselves to exercise the problem), but for everyone
-> > else merging it will just be a nuisance because there's nothing they
-> > can do to make the test pass (excluding it is the only solution).
-> 
-> Sure, no problem. (ext4/022 has the same problem, it hangs kernel but
-> the fixes are not in upstream yet, it has 'dangerous' group though.)
-> 
-> > 
-> > In future, maybe it would be a good idea to ask the patch submitter
-> > to tell you when the fix for a dangerous test like this has been
-> > merged? That way you can and use that to determine when you push it
-> > out for everyone? If it's just a pass/fail test it really doesn't
-> > matter, but dangerous tests need to be handled a bit more
-> > carefully.
-> 
-> That sounds good, I'll pay some attentions to the patch status too.
-> 
-> > 
-> > For now, I'm going to hold off pushing this update out so other
-> > people don't have to work around this issue whilst we clear out the
-> > upstream patch backlog. Hopefully that won't take too long.
-> 
-> OKay. Thanks for all the information!
-> 
-> Thanks,
-> Eryu
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
