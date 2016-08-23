@@ -1,57 +1,48 @@
-Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:60107 "EHLO
-        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1753934AbcHWRwR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 23 Aug 2016 13:52:17 -0400
-Received: from pps.filterd (m0044010.ppops.net [127.0.0.1])
-        by mx0a-00082601.pphosted.com (8.16.0.17/8.16.0.17) with SMTP id u7NHjErb006991
-        for <fstests@vger.kernel.org>; Tue, 23 Aug 2016 10:52:17 -0700
-Received: from maileast.thefacebook.com ([199.201.65.23])
-        by mx0a-00082601.pphosted.com with ESMTP id 250tnw0f3t-1
-        (version=TLSv1 cipher=ECDHE-RSA-AES256-SHA bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Tue, 23 Aug 2016 10:52:17 -0700
-From: Josef Bacik <jbacik@fb.com>
-Subject: [PATCH] btrfs/131: send test for rename+recycled ino
-Date: Tue, 23 Aug 2016 13:51:58 -0400
-Message-ID: <1471974718-1430-1-git-send-email-jbacik@fb.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from mx1.redhat.com ([209.132.183.28]:42136 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755008AbcHWVwL (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 23 Aug 2016 17:52:11 -0400
+From: Andreas Gruenbacher <agruenba@redhat.com>
+Subject: [PATCH] generic/375: Check clearing of SGID in chmod and acl_set_file
+Date: Tue, 23 Aug 2016 23:51:39 +0200
+Message-Id: <1471989099-19099-1-git-send-email-agruenba@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: Andreas Gruenbacher <agruenba@redhat.com>, Jan Kara <jack@suse.cz>
 List-ID: <fstests@vger.kernel.org>
 
-This is a test for a problem I hit with send/receive.  If you mount with -o
-inode_cache it is possible to recycle inode numbers, and btrfs assumes that when
-you have a recycled inode number that it's parent directory won't be needing a
-rename, but this is not the case.  Without the patch to fix this problem this
-test will panic the box if ASSERT() is turned on, otherwise it'll simply fail
-the fssum.
+Check if SGID is cleared upon chmod / setfacl when the owner is not in
+the owning group.  As of today, the kernel fails to clear SGID in
+setxattr (which is what acl_set_file is implemented on top of) in that
+case; see this patch:
+  https://patchwork.kernel.org/patch/9290507/
 
-Signed-off-by: Josef Bacik <jbacik@fb.com>
+Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
+Cc: Jan Kara <jack@suse.cz>
 ---
- tests/btrfs/131     | 91 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/131.out |  2 ++
- tests/btrfs/group   |  1 +
- 3 files changed, 94 insertions(+)
- create mode 100644 tests/btrfs/131
- create mode 100644 tests/btrfs/131.out
+ tests/generic/375     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/375.out |  9 ++++++
+ tests/generic/group   |  1 +
+ 3 files changed, 90 insertions(+)
+ create mode 100755 tests/generic/375
+ create mode 100644 tests/generic/375.out
 
-diff --git a/tests/btrfs/131 b/tests/btrfs/131
-new file mode 100644
-index 0000000..596adc1
+diff --git a/tests/generic/375 b/tests/generic/375
+new file mode 100755
+index 0000000..9976c3d
 --- /dev/null
-+++ b/tests/btrfs/131
-@@ -0,0 +1,91 @@
++++ b/tests/generic/375
+@@ -0,0 +1,80 @@
 +#! /bin/bash
-+# FS QA Test 131
++# FS QA Test 375
 +#
-+# Make sure btrfs handles send/receive of a file that has been destroyed and
-+# recreated with a recycled inode number and a renamed parent directory.  This
-+# is a test for a fix based on the patch
-+# 
-+# Btrfs: handle pending renames with recycled inodes properly
++# Check if SGID is cleared upon chmod / setfacl when the owner is not in the
++# owning group.
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Facebook. All Rights Reserved.
++# Copyright (c) 2016 Red Hat.  All Rights Reserved.
++#
++# Author: Andreas gruenbacher <agruenba@redhat.com>
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -73,82 +64,79 @@ index 0000000..596adc1
 +echo "QA output created by $seq"
 +
 +here=`pwd`
-+tmp=`mktemp -d`
++tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+	rm -fr $tmp
++	cd /
++	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
 +
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
 +# real QA test starts here
 +
 +# Modify as appropriate.
-+_supported_fs btrfs
++_supported_fs generic
 +_supported_os Linux
-+_require_scratch
-+_require_fssum
++_require_test
++_require_runas
 +
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount "-o inode_cache"
++cd $TEST_DIR
++rm -f testfile
 +
-+_run_btrfs_util_prog subvolume create $SCRATCH_MNT/base
-+mkdir $SCRATCH_MNT/base/b
-+mkdir $SCRATCH_MNT/base/a
-+mv $SCRATCH_MNT/base/b $SCRATCH_MNT/base/a
++touch testfile
++chown 100:100 testfile
 +
-+_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/base \
-+	$SCRATCH_MNT/snap1
-+_run_btrfs_util_prog send $SCRATCH_MNT/snap1 -f $tmp/1.snap
++echo '*** SGID should remain set (twice)'
++chmod 2755 testfile
++_runas -u 100 -g 100 -- chmod 2777 testfile
++stat -c %A testfile
++chmod 2755 testfile
++_runas -u 100 -g 100 -- setfacl -m u::rwx,g::rwx,o::rwx testfile
++stat -c %A testfile
 +
-+mv $SCRATCH_MNT/base/a $SCRATCH_MNT/base/c
-+rmdir $SCRATCH_MNT/base/c/b
++echo '*** SGID should be cleared (twice)'
++chmod 2755 testfile
++_runas -u 100 -g 101 -- chmod 2777 testfile
++stat -c %A testfile
++chmod 2755 testfile
++_runas -u 100 -g 101 -- setfacl -m u::rwx,g::rwx,o::rwx testfile
++stat -c %A testfile
 +
-+# We need to sync to make sure the inode number is recycled
-+sync
-+mkdir $SCRATCH_MNT/base/c/b
++echo '*** Expected failure'
++_runas -u 101 -g 101 -- chmod 2777 testfile
 +
-+_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/base $SCRATCH_MNT/snap2
-+run_check $FSSUM_PROG -A -f -w $tmp/fssum $SCRATCH_MNT/snap2
-+
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/snap1 $SCRATCH_MNT/snap2 -f $tmp/2.snap
-+
-+_scratch_unmount
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount
-+
-+_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/1.snap
-+_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/2.snap
-+run_check $FSSUM_PROG -r $tmp/fssum $SCRATCH_MNT/snap2
-+
-+echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/btrfs/131.out b/tests/btrfs/131.out
+diff --git a/tests/generic/375.out b/tests/generic/375.out
 new file mode 100644
-index 0000000..d118ca9
+index 0000000..fe812f3
 --- /dev/null
-+++ b/tests/btrfs/131.out
-@@ -0,0 +1,2 @@
-+QA output created by 131
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 6b29c05..933fe10 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -133,3 +133,4 @@
- 128 auto quick send
- 129 auto quick send
- 130 auto clone send
-+131 auto quick send
++++ b/tests/generic/375.out
+@@ -0,0 +1,9 @@
++QA output created by 375
++*** SGID should remain set (twice)
++-rwxrwsrwx
++-rwxrwsrwx
++*** SGID should be cleared (twice)
++-rwxrwxrwx
++-rwxrwxrwx
++*** Expected failure
++chmod: changing permissions of 'f': Operation not permitted
+diff --git a/tests/generic/group b/tests/generic/group
+index ef38c35..2d833a2 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -377,3 +377,4 @@
+ 372 auto quick clone
+ 373 auto quick clone
+ 374 auto quick clone dedupe
++375 auto quick acl
 -- 
-1.8.3.1
+2.7.4
 
