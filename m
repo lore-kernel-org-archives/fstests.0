@@ -1,79 +1,143 @@
-Date: Wed, 24 Aug 2016 08:18:15 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [GIT PULL] fstests: updates on 2016-08-20
-Message-ID: <20160823221815.GM22388@dastard>
-References: <201608201444.u7KEi22g015351@int-mx14.intmail.prod.int.phx2.redhat.com>
- <20160823065447.GY19025@dastard>
- <20160823071608.GL27776@eguan.usersys.redhat.com>
- <20160823151042.GC8265@birch.djwong.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160823151042.GC8265@birch.djwong.org>
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
+Received: from mail.kernel.org ([198.145.29.136]:41230 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754911AbcHXI6C (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 24 Aug 2016 04:58:02 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] fstests: generic test for fsync after file rename
+Date: Tue, 23 Aug 2016 21:14:23 +0100
+Message-Id: <1471983263-3013-1-git-send-email-fdmanana@kernel.org>
+Sender: fstests-owner@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Aug 23, 2016 at 08:10:43AM -0700, Darrick J. Wong wrote:
-> On Tue, Aug 23, 2016 at 03:16:08PM +0800, Eryu Guan wrote:
-> > On Tue, Aug 23, 2016 at 04:54:47PM +1000, Dave Chinner wrote:
-> > > On Sat, Aug 20, 2016 at 10:44:01PM +0800, Eryu Guan wrote:
-> > > > Hi Dave,
-> > > > 
-> > > > Can you please pull the fstests update from the location below? This is a
-> > > > normal update, which contains new generic and XFS tests and other fixes.
-> > > > 
-> > > > Thanks,
-> > > > Eryu
-> > > > 
-> > > > The following changes since commit c760a54061d26890be3929e4c6659bf3dc9e0c6a:
-> > > > 
-> > > >   src/t_immutable: allow EPERM on immutable inode (2016-08-12 11:17:34 +0800)
-> > > > 
-> > > > are available in the git repository at:
-> > > > 
-> > > >   https://github.com/guaneryu/xfstests.git for-dave
-> > > > 
-> > > > for you to fetch changes up to 3c75489a57518745598e239ffeec2af64400f185:
-> > > > 
-> > > >   common/rc: improve _require_metadata_journaling() for ext4 (2016-08-20 00:54:28 +0800)
-> > > > 
-> > > > ----------------------------------------------------------------
-> > > > 
-> > > > fstests: update on 2016-08-20
-> > > > 
-> > > > This update contains:
-> > > > o New tests for generic and XFS
-> > > > o Miscellaneous small fixes
-> > > > 
-> > > > ----------------------------------------------------------------
-> > > > Brian Foster (1):
-> > > >       generic: shutdown fs after log recovery
-> > > 
-> > > Hi Eryu,
-> > > 
-> > > I just pulled this all in and got an unexpected surprise - this new
-> > > test killed all of my test machines. From your description ("normal
-> > > update") I didn't expect to see something like this occur - I pulled
-> > > it, confirmed commits match, then pushed it to my test machines
-> > > and started a test cycle. I expected to see it complete without any
-> > > significant problems.
-> > 
-> > I saw only mount failures from this case in my testings (4.8-rc2
-> > kernel), I didn't expect any crash either.
-> 
-> Is this in reference generic/323?  For whatever reason I get a flood
-> of overlapping kernel stack smeared all over ttyS0.
+From: Filipe Manana <fdmanana@suse.com>
 
-generic/375 is the new test that triggers unending recursive faults
-across my machines. generic/323 has been modified since late 2014,
-so if it's causing you problems, then it's probably a kernel
-regression...
+Test that if we rename a file, without changing its parent directory,
+create a new file that has the old name of the file we renamed, doing an
+fsync against the file we renamed works correctly and after a power
+failure both files exists.
 
-Cheers,
+This is motivated by an issue found in btrfs, introduced in the linux
+kernel 4.8-rc2, that caused lockdep to report a deadlock scenario. The
+btrfs issue is fixed by the patch titled:
 
-Dave.
+  "Btrfs: fix lockdep warning on deadlock against an inode's log mutex"
 
+Tested against ext3/4, xfs, f2fs and reiserfs as well.
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/generic/375     | 77 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/375.out |  5 ++++
+ tests/generic/group   |  1 +
+ 3 files changed, 83 insertions(+)
+ create mode 100755 tests/generic/375
+ create mode 100644 tests/generic/375.out
+
+diff --git a/tests/generic/375 b/tests/generic/375
+new file mode 100755
+index 0000000..4c33655
+--- /dev/null
++++ b/tests/generic/375
+@@ -0,0 +1,77 @@
++#! /bin/bash
++# FSQA Test No. 375
++#
++# Test that if we rename a file, without changing its parent directory, create
++# a new file that has the old name of the file we renamed, doing an fsync
++# against the file we renamed works correctly and after a power failure both
++# files exists.
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmflakey
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_dm_target flakey
++_require_metadata_journaling $SCRATCH_DEV
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_init_flakey
++_mount_flakey
++
++# Create our test directories and files.
++mkdir $SCRATCH_MNT/dir
++touch $SCRATCH_MNT/dir/foo
++# Make sure everything is durably persisted.
++sync
++mv $SCRATCH_MNT/dir/foo $SCRATCH_MNT/dir/bar
++touch $SCRATCH_MNT/dir/foo
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir/bar
++
++_flakey_drop_and_remount
++
++echo "Filesystem contents after log replay:"
++ls -R $SCRATCH_MNT/dir | _filter_scratch
++
++_unmount_flakey
++status=0
++exit
+diff --git a/tests/generic/375.out b/tests/generic/375.out
+new file mode 100644
+index 0000000..dee14f3
+--- /dev/null
++++ b/tests/generic/375.out
+@@ -0,0 +1,5 @@
++QA output created by 375
++Filesystem contents after log replay:
++SCRATCH_MNT/dir:
++bar
++foo
+diff --git a/tests/generic/group b/tests/generic/group
+index ef38c35..3068510 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -377,3 +377,4 @@
+ 372 auto quick clone
+ 373 auto quick clone
+ 374 auto quick clone dedupe
++375 auto quick metadata
 -- 
-Dave Chinner
-david@fromorbit.com
+2.7.0.rc3
+
