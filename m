@@ -1,63 +1,79 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46254 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751499AbcHQDgm (ORCPT <rfc822;fstests@vger.kernel.org>);
-	Tue, 16 Aug 2016 23:36:42 -0400
-Date: Wed, 17 Aug 2016 11:36:40 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] xfs/191: skip tests on older xfsprogs
-Message-ID: <20160817033640.GP27776@eguan.usersys.redhat.com>
-References: <1471403935-24222-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Date: Wed, 24 Aug 2016 08:18:15 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [GIT PULL] fstests: updates on 2016-08-20
+Message-ID: <20160823221815.GM22388@dastard>
+References: <201608201444.u7KEi22g015351@int-mx14.intmail.prod.int.phx2.redhat.com>
+ <20160823065447.GY19025@dastard>
+ <20160823071608.GL27776@eguan.usersys.redhat.com>
+ <20160823151042.GC8265@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1471403935-24222-1-git-send-email-yangx.jy@cn.fujitsu.com>
-Sender: fstests-owner@vger.kernel.org
-To: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, jtulak@redhat.com
+In-Reply-To: <20160823151042.GC8265@birch.djwong.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 17, 2016 at 11:18:55AM +0800, Xiao Yang wrote:
-> If we don't have /tmp/foo file on xfsprogs 3.2.2, _require_xfs_mkfs_validation
-> will fail because mkfs.xfs can't create this file.  We need to skip tests
-> before xfsprogs 4.7.0, so fix it.  the feature has been introduced since
-> xfsprogs 4.2.0:
-> commit 20cec860e16b267ea0c71a2f648fa2b26aad2e65
-> Author: Eric Sandeen <sandeen@sandeen.net>
-> Date: Fri Jul 31 09:04:11 2015 +1000
+On Tue, Aug 23, 2016 at 08:10:43AM -0700, Darrick J. Wong wrote:
+> On Tue, Aug 23, 2016 at 03:16:08PM +0800, Eryu Guan wrote:
+> > On Tue, Aug 23, 2016 at 04:54:47PM +1000, Dave Chinner wrote:
+> > > On Sat, Aug 20, 2016 at 10:44:01PM +0800, Eryu Guan wrote:
+> > > > Hi Dave,
+> > > > 
+> > > > Can you please pull the fstests update from the location below? This is a
+> > > > normal update, which contains new generic and XFS tests and other fixes.
+> > > > 
+> > > > Thanks,
+> > > > Eryu
+> > > > 
+> > > > The following changes since commit c760a54061d26890be3929e4c6659bf3dc9e0c6a:
+> > > > 
+> > > >   src/t_immutable: allow EPERM on immutable inode (2016-08-12 11:17:34 +0800)
+> > > > 
+> > > > are available in the git repository at:
+> > > > 
+> > > >   https://github.com/guaneryu/xfstests.git for-dave
+> > > > 
+> > > > for you to fetch changes up to 3c75489a57518745598e239ffeec2af64400f185:
+> > > > 
+> > > >   common/rc: improve _require_metadata_journaling() for ext4 (2016-08-20 00:54:28 +0800)
+> > > > 
+> > > > ----------------------------------------------------------------
+> > > > 
+> > > > fstests: update on 2016-08-20
+> > > > 
+> > > > This update contains:
+> > > > o New tests for generic and XFS
+> > > > o Miscellaneous small fixes
+> > > > 
+> > > > ----------------------------------------------------------------
+> > > > Brian Foster (1):
+> > > >       generic: shutdown fs after log recovery
+> > > 
+> > > Hi Eryu,
+> > > 
+> > > I just pulled this all in and got an unexpected surprise - this new
+> > > test killed all of my test machines. From your description ("normal
+> > > update") I didn't expect to see something like this occur - I pulled
+> > > it, confirmed commits match, then pushed it to my test machines
+> > > and started a test cycle. I expected to see it complete without any
+> > > significant problems.
+> > 
+> > I saw only mount failures from this case in my testings (4.8-rc2
+> > kernel), I didn't expect any crash either.
 > 
->   mkfs.xfs: always use underlying fs sector size when mkfs'ing a file
-> 
-> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
-> ---
->  common/rc | 3 +++
->  1 file changed, 3 insertions(+)
-> 
-> diff --git a/common/rc b/common/rc
-> index b19b698..db99794 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3889,6 +3889,9 @@ _get_fs_sysfs_attr()
->  # number of failed cases.
->  _mkfs_validation_check()
->  {
-> +	if [ ! -f /tmp/foo ]; then
-> +		touch /tmp/foo
-> +	fi
+> Is this in reference generic/323?  For whatever reason I get a flood
+> of overlapping kernel stack smeared all over ttyS0.
 
-I think the file can be touched unconditionally.
+generic/375 is the new test that triggers unending recursive faults
+across my machines. generic/323 has been modified since late 2014,
+so if it's causing you problems, then it's probably a kernel
+regression...
 
-Thanks,
-Eryu
+Cheers,
 
->  	local cmd="$MKFS_XFS_PROG -f -N -d file,name=/tmp/foo,size=$((1024 * 1024 * 1024))"
->  	$cmd -s size=2s >/dev/null 2>&1
->  	local sum=$?
-> -- 
-> 1.8.3.1
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Dave.
+
+-- 
+Dave Chinner
+david@fromorbit.com
