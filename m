@@ -1,20 +1,16 @@
-Received: from aserp1050.oracle.com ([141.146.126.70]:46639 "EHLO
-        aserp1050.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754375AbcHXXGG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 24 Aug 2016 19:06:06 -0400
-Received: from aserp1040.oracle.com (aserp1040.oracle.com [141.146.126.69])
-        by aserp1050.oracle.com (Sentrion-MTA-4.3.2/Sentrion-MTA-4.3.2) with ESMTP id u7ON5Ubl021438
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
-        for <fstests@vger.kernel.org>; Wed, 24 Aug 2016 23:05:31 GMT
-Date: Wed, 24 Aug 2016 16:03:13 -0700
+Received: from userp1040.oracle.com ([156.151.31.81]:28130 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753057AbcHXXHm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 24 Aug 2016 19:07:42 -0400
+Date: Wed, 24 Aug 2016 16:06:20 -0700
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: question about xfs/122
-Message-ID: <20160824230313.GD8265@birch.djwong.org>
-References: <57BD53DC.30605@cn.fujitsu.com>
+Subject: Re: question about xfs/098
+Message-ID: <20160824230620.GE8265@birch.djwong.org>
+References: <57BD507C.6050204@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <57BD53DC.30605@cn.fujitsu.com>
+In-Reply-To: <57BD507C.6050204@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
 To: Xiao Yang <yangx.jy@cn.fujitsu.com>
 Cc: fstests@vger.kernel.org
@@ -22,21 +18,34 @@ List-ID: <fstests@vger.kernel.org>
 
 [cc list]
 
-On Wed, Aug 24, 2016 at 03:59:24PM +0800, Xiao Yang wrote:
+On Wed, Aug 24, 2016 at 03:45:00PM +0800, Xiao Yang wrote:
 > Hi Darrick
 > 
-> When i run xfstests test case xfs/122 on RHEL7.3Alpha with xfsprog-dev(4.7.0),
+> When i run xfstests test case xfs/098 on RHEL7.3Alpha with xfsprog-dev(4.5.0),
 > I always get following error:
 > ------------------------------------------------------------------
-> -sizeof(xfs_dsb_t) = 272
-> +sizeof(xfs_dsb_t) = 264
+> + repair fs
+> Phase 1 - find and verify superblock...
+> Phase 2 - using internal log
+>         - zero log...
+> Log inconsistent (didn't find previous header)
+> failed to find log head
+> zero_log: cannot find log head/tail (xlog_find_tail=5)
+> 
+> fatal error -- ERROR: The log head and/or tail cannot be discovered. Attempt to mount the
+> filesystem to replay the log or use the -L option to destroy the log and
 > ------------------------------------------------------------------
 > 
-> I find that the size of xfs_dsb structure is still 264 on xfsprog-dev(4.7.0).
-> I'm wondering if the releated patch hasn't been pushed into xfsprog-dev?
+> When metadata is changed by corrupting the journal, xfs_repair fails
+> to repair corrupt xfs filesystem.  I'd like to know this is expected
+> behavior for xfs_repair?  Can we use -L option to repair corrupt xfs
+> filesystem successfully.
 
-The XFS superblock will be expanding to 272 bytes to record the
-realtime rmap btree inode.
+xfs_repair is not capable of replaying the journal at all.  The only
+option is to try to mount the fs, and if that fails, xfs_repair -L
+will zero the log and check the filesystem.
+
+So yes, that is the expected behavior.
 
 --D
 
@@ -45,6 +54,7 @@ realtime rmap btree inode.
 > 
 > Regards,
 > Xiao Yang
+> 
 > 
 > 
 > 
