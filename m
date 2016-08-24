@@ -1,158 +1,138 @@
-Received: from mail-ua0-f174.google.com ([209.85.217.174]:34787 "EHLO
-        mail-ua0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1758098AbcHWWFF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 23 Aug 2016 18:05:05 -0400
-Received: by mail-ua0-f174.google.com with SMTP id k90so268985225uak.1
-        for <fstests@vger.kernel.org>; Tue, 23 Aug 2016 15:05:04 -0700 (PDT)
-MIME-Version: 1.0
-In-Reply-To: <1471989099-19099-1-git-send-email-agruenba@redhat.com>
-References: <1471989099-19099-1-git-send-email-agruenba@redhat.com>
-From: Andreas Gruenbacher <agruenba@redhat.com>
-Date: Wed, 24 Aug 2016 00:05:03 +0200
-Message-ID: <CAHc6FU4QmR+VLrX3arCdk=Kp-Wya6N+w7PaQayPS2SJo1WYfLw@mail.gmail.com>
-Subject: Re: [PATCH] generic/375: Check clearing of SGID in chmod and acl_set_file
-Content-Type: text/plain; charset=UTF-8
+Received: from mx1.redhat.com ([209.132.183.28]:39654 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932790AbcHXLz5 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 24 Aug 2016 07:55:57 -0400
+From: Artem Savkov <asavkov@redhat.com>
+Subject: [PATCH] generic/337: add checks for listxattr call fails.
+Date: Wed, 24 Aug 2016 13:55:53 +0200
+Message-Id: <1472039753-29982-1-git-send-email-asavkov@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Andreas Gruenbacher <agruenba@redhat.com>, Jan Kara <jack@suse.cz>
+Cc: Filipe Manana <fdmanana@suse.com>, Dave Chinner <david@fromorbit.com>, Artem Savkov <asavkov@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Aug 23, 2016 at 11:51 PM, Andreas Gruenbacher
-<agruenba@redhat.com> wrote:
-> Check if SGID is cleared upon chmod / setfacl when the owner is not in
-> the owning group.  As of today, the kernel fails to clear SGID in
-> setxattr (which is what acl_set_file is implemented on top of) in that
-> case; see this patch:
->   https://patchwork.kernel.org/patch/9290507/
->
-> Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
-> Cc: Jan Kara <jack@suse.cz>
-> ---
->  tests/generic/375     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/375.out |  9 ++++++
->  tests/generic/group   |  1 +
->  3 files changed, 90 insertions(+)
->  create mode 100755 tests/generic/375
->  create mode 100644 tests/generic/375.out
->
-> diff --git a/tests/generic/375 b/tests/generic/375
-> new file mode 100755
-> index 0000000..9976c3d
-> --- /dev/null
-> +++ b/tests/generic/375
-> @@ -0,0 +1,80 @@
-> +#! /bin/bash
-> +# FS QA Test 375
-> +#
-> +# Check if SGID is cleared upon chmod / setfacl when the owner is not in the
-> +# owning group.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2016 Red Hat.  All Rights Reserved.
-> +#
-> +# Author: Andreas gruenbacher <agruenba@redhat.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_test
-> +_require_runas
-> +
-> +cd $TEST_DIR
-> +rm -f testfile
-> +
-> +touch testfile
-> +chown 100:100 testfile
-> +
-> +echo '*** SGID should remain set (twice)'
-> +chmod 2755 testfile
-> +_runas -u 100 -g 100 -- chmod 2777 testfile
-> +stat -c %A testfile
-> +chmod 2755 testfile
-> +_runas -u 100 -g 100 -- setfacl -m u::rwx,g::rwx,o::rwx testfile
-> +stat -c %A testfile
-> +
-> +echo '*** SGID should be cleared (twice)'
-> +chmod 2755 testfile
-> +_runas -u 100 -g 101 -- chmod 2777 testfile
-> +stat -c %A testfile
-> +chmod 2755 testfile
-> +_runas -u 100 -g 101 -- setfacl -m u::rwx,g::rwx,o::rwx testfile
-> +stat -c %A testfile
-> +
-> +echo '*** Expected failure'
-> +_runas -u 101 -g 101 -- chmod 2777 testfile
-> +
-> +status=0
-> +exit
-> diff --git a/tests/generic/375.out b/tests/generic/375.out
-> new file mode 100644
-> index 0000000..fe812f3
-> --- /dev/null
-> +++ b/tests/generic/375.out
-> @@ -0,0 +1,9 @@
-> +QA output created by 375
-> +*** SGID should remain set (twice)
-> +-rwxrwsrwx
-> +-rwxrwsrwx
-> +*** SGID should be cleared (twice)
-> +-rwxrwxrwx
-> +-rwxrwxrwx
-> +*** Expected failure
-> +chmod: changing permissions of 'f': Operation not permitted
+Add simple checks for failed calls to listxattr syscall. So far ERANGE, ENOENT
+and EFAULT are checked.
 
-Argh, the above should have been:
+Test is based on llistxattr02 test from LTP.
 
-chmod: changing permissions of 'testfile': Operation not permitted
+Signed-off-by: Artem Savkov <asavkov@redhat.com>
+---
+ .gitignore            |  1 +
+ src/Makefile          |  2 +-
+ src/listxattr_fails.c | 51 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/337     |  4 ++++
+ tests/generic/337.out |  3 +++
+ 5 files changed, 60 insertions(+), 1 deletion(-)
+ create mode 100644 src/listxattr_fails.c
 
-> diff --git a/tests/generic/group b/tests/generic/group
-> index ef38c35..2d833a2 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -377,3 +377,4 @@
->  372 auto quick clone
->  373 auto quick clone
->  374 auto quick clone dedupe
-> +375 auto quick acl
-> --
-> 2.7.4
->
+diff --git a/.gitignore b/.gitignore
+index d84f385..613d245 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -66,6 +66,7 @@
+ /src/holes
+ /src/holetest
+ /src/itrash
++/src/listxattr_fails
+ /src/locktest
+ /src/loggen
+ /src/looptest
+diff --git a/src/Makefile b/src/Makefile
+index 57b0df1..0fee55f 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -21,7 +21,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	stale_handle pwrite_mmap_blocked t_dir_offset2 seek_sanity_test \
+ 	seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
+ 	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
+-	attr-list-by-handle-cursor-test
++	attr-list-by-handle-cursor-test listxattr_fails
+ 
+ SUBDIRS =
+ 
+diff --git a/src/listxattr_fails.c b/src/listxattr_fails.c
+new file mode 100644
+index 0000000..ddc4f7e
+--- /dev/null
++++ b/src/listxattr_fails.c
+@@ -0,0 +1,51 @@
++#include <errno.h>
++#include <fcntl.h>
++#include <stdio.h>
++#include <sys/types.h>
++#include <sys/xattr.h>
++
++int main(int argc, char **argv)
++{
++  int ret;
++  char buf;
++
++  if (argc < 2) {
++    fprintf(stderr, "usage: %s <testfile>\n", argv[0]);
++    return 1;
++  };
++
++  ret = listxattr(argv[1], &buf, 1);
++  if (ret == -1) {
++    if (errno == ERANGE) {
++      printf("expected error: ERANGE\n");
++    } else {
++      perror("unexpected error");
++    }
++  } else {
++    fprintf(stderr, "unexpected success\n");
++  }
++
++  ret = listxattr("", &buf, 1);
++  if (ret == -1) {
++    if (errno == ENOENT) {
++      printf("expected error: ENOENT\n");
++    } else {
++      perror("unexpected error");
++    }
++  } else {
++    fprintf(stderr, "unexpected success\n");
++  }
++
++  ret = listxattr((char *)-1, &buf, 1);
++  if (ret == -1) {
++    if (errno == EFAULT) {
++      printf("expected error: EFAULT\n");
++    } else {
++      perror("unexpected error");
++    }
++  } else {
++    fprintf(stderr, "unexpected success\n");
++  }
++
++  return 0;
++}
+diff --git a/tests/generic/337 b/tests/generic/337
+index 1758871..88b1e33 100755
+--- a/tests/generic/337
++++ b/tests/generic/337
+@@ -68,5 +68,9 @@ $SETFATTR_PROG -n user.ping -v pong $SCRATCH_MNT/testfile
+ # It should list all the xattrs we have set before.
+ $GETFATTR_PROG --absolute-names --dump $SCRATCH_MNT/testfile | _filter_scratch
+ 
++# Call listattr_fails to check if we get expected errors on errorneus listxattr
++# calls.
++$here/src/listxattr_fails $SCRATCH_MNT/testfile
++
+ status=0
+ exit
+diff --git a/tests/generic/337.out b/tests/generic/337.out
+index 1cd92ff..8ff8374 100644
+--- a/tests/generic/337.out
++++ b/tests/generic/337.out
+@@ -6,3 +6,6 @@ user.foobar="123"
+ user.ping="pong"
+ user.something="pizza"
+ 
++expected error: ERANGE
++expected error: ENOENT
++expected error: EFAULT
+-- 
+1.8.3.1
 
-Thanks,
-Andreas
