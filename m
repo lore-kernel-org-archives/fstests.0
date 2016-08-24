@@ -1,184 +1,183 @@
-Received: from mx1.redhat.com ([209.132.183.28]:41316 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932557AbcHXJ2D (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 24 Aug 2016 05:28:03 -0400
-Date: Wed, 24 Aug 2016 17:28:01 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic/375: Check clearing of SGID in chmod and
- acl_set_file
-Message-ID: <20160824092801.GR27776@eguan.usersys.redhat.com>
-References: <1471989099-19099-1-git-send-email-agruenba@redhat.com>
+Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:56370 "EHLO
+        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S932407AbcHXSUe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 24 Aug 2016 14:20:34 -0400
+Subject: Re: [PATCH] btrfs/131: send test for rename+recycled ino
+References: <1471974718-1430-1-git-send-email-jbacik@fb.com>
+ <20160824095345.GS27776@eguan.usersys.redhat.com>
+From: Josef Bacik <jbacik@fb.com>
+Message-ID: <f76d7747-a653-98d3-f2d8-1bfd68cc0c58@fb.com>
+Date: Wed, 24 Aug 2016 14:18:41 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1471989099-19099-1-git-send-email-agruenba@redhat.com>
+In-Reply-To: <20160824095345.GS27776@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Andreas Gruenbacher <agruenba@redhat.com>
-Cc: fstests@vger.kernel.org, Jan Kara <jack@suse.cz>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Aug 23, 2016 at 11:51:39PM +0200, Andreas Gruenbacher wrote:
-> Check if SGID is cleared upon chmod / setfacl when the owner is not in
-> the owning group.  As of today, the kernel fails to clear SGID in
-> setxattr (which is what acl_set_file is implemented on top of) in that
-> case; see this patch:
->   https://patchwork.kernel.org/patch/9290507/
-> 
-> Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
-> Cc: Jan Kara <jack@suse.cz>
-> ---
->  tests/generic/375     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/375.out |  9 ++++++
->  tests/generic/group   |  1 +
->  3 files changed, 90 insertions(+)
->  create mode 100755 tests/generic/375
->  create mode 100644 tests/generic/375.out
-> 
-> diff --git a/tests/generic/375 b/tests/generic/375
-> new file mode 100755
-> index 0000000..9976c3d
-> --- /dev/null
-> +++ b/tests/generic/375
-> @@ -0,0 +1,80 @@
-> +#! /bin/bash
-> +# FS QA Test 375
-> +#
-> +# Check if SGID is cleared upon chmod / setfacl when the owner is not in the
-> +# owning group.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2016 Red Hat.  All Rights Reserved.
-> +#
-> +# Author: Andreas gruenbacher <agruenba@redhat.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_test
-> +_require_runas
+On 08/24/2016 05:53 AM, Eryu Guan wrote:
+> On Tue, Aug 23, 2016 at 01:51:58PM -0400, Josef Bacik wrote:
+>> This is a test for a problem I hit with send/receive.  If you mount with -o
+>> inode_cache it is possible to recycle inode numbers, and btrfs assumes that when
+>> you have a recycled inode number that it's parent directory won't be needing a
+>> rename, but this is not the case.  Without the patch to fix this problem this
+>> test will panic the box if ASSERT() is turned on, otherwise it'll simply fail
+>> the fssum.
+>>
+>> Signed-off-by: Josef Bacik <jbacik@fb.com>
+>> ---
+>>  tests/btrfs/131     | 91 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/btrfs/131.out |  2 ++
+>>  tests/btrfs/group   |  1 +
+>>  3 files changed, 94 insertions(+)
+>>  create mode 100644 tests/btrfs/131
+>>  create mode 100644 tests/btrfs/131.out
+>>
+>> diff --git a/tests/btrfs/131 b/tests/btrfs/131
+>> new file mode 100644
+>> index 0000000..596adc1
+>> --- /dev/null
+>> +++ b/tests/btrfs/131
+>> @@ -0,0 +1,91 @@
+>> +#! /bin/bash
+>> +# FS QA Test 131
+>> +#
+>> +# Make sure btrfs handles send/receive of a file that has been destroyed and
+>> +# recreated with a recycled inode number and a renamed parent directory.  This
+>> +# is a test for a fix based on the patch
+>> +#
+>
+> A trailing whitespace in above line :)
+>
+>> +# Btrfs: handle pending renames with recycled inodes properly
+>> +#
+>> +#-----------------------------------------------------------------------
+>> +# Copyright (c) 2016 Facebook. All Rights Reserved.
+>> +#
+>> +# This program is free software; you can redistribute it and/or
+>> +# modify it under the terms of the GNU General Public License as
+>> +# published by the Free Software Foundation.
+>> +#
+>> +# This program is distributed in the hope that it would be useful,
+>> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+>> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>> +# GNU General Public License for more details.
+>> +#
+>> +# You should have received a copy of the GNU General Public License
+>> +# along with this program; if not, write the Free Software Foundation,
+>> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+>> +#-----------------------------------------------------------------------
+>> +#
+>> +
+>> +seq=`basename $0`
+>> +seqres=$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +
+>> +here=`pwd`
+>> +tmp=`mktemp -d`
+>
+> Usually we define "tmp=/tmp/$$", and tests and some common helpers use
+> $tmp.xxx for tmp files. I think we should keep the consistency across
+> tests.
+>
+> $tmp is used as a tmp dir to store the btrfs send data, I think we can
+> send the data to some dir in $TEST_DIR, e.g.
+>
+> send_dir=$TEST_DIR/btrfs_send_$seq
+>
+>> +status=1	# failure is the default!
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +	rm -fr $tmp
+>
+> Then clean the send dir here, as well as $tmp.*
+>
+> 	cd /
+> 	rm -rf $send_dir
+> 	rm -f $tmp.*
+>
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +
+>> +# remove previous $seqres.full before test
+>> +rm -f $seqres.full
+>> +
+>> +# real QA test starts here
+>> +
+>> +# Modify as appropriate.
+>> +_supported_fs btrfs
+>> +_supported_os Linux
+>> +_require_scratch
+>> +_require_fssum
+>> +
+>> +_scratch_mkfs > /dev/null 2>&1
+>> +_scratch_mount "-o inode_cache"
+>
+> Need some comments to explain why mount with "-o inode_cache" option.
+>
+>> +
+>> +_run_btrfs_util_prog subvolume create $SCRATCH_MNT/base
+>> +mkdir $SCRATCH_MNT/base/b
+>> +mkdir $SCRATCH_MNT/base/a
+>> +mv $SCRATCH_MNT/base/b $SCRATCH_MNT/base/a
+>> +
+>> +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/base \
+>> +	$SCRATCH_MNT/snap1
+>> +_run_btrfs_util_prog send $SCRATCH_MNT/snap1 -f $tmp/1.snap
+>> +
+>> +mv $SCRATCH_MNT/base/a $SCRATCH_MNT/base/c
+>> +rmdir $SCRATCH_MNT/base/c/b
+>> +
+>> +# We need to sync to make sure the inode number is recycled
+>> +sync
+>> +mkdir $SCRATCH_MNT/base/c/b
+>> +
+>> +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/base $SCRATCH_MNT/snap2
+>> +run_check $FSSUM_PROG -A -f -w $tmp/fssum $SCRATCH_MNT/snap2
+>> +
+>> +_run_btrfs_util_prog send -p $SCRATCH_MNT/snap1 $SCRATCH_MNT/snap2 -f $tmp/2.snap
+>> +
+>> +_scratch_unmount
+>> +_scratch_mkfs > /dev/null 2>&1
+>> +_scratch_mount
+>> +
+>> +_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/1.snap
+>> +_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/2.snap
+>> +run_check $FSSUM_PROG -r $tmp/fssum $SCRATCH_MNT/snap2
+>
+> I did see assert failure (and kernel crash) on kernel with ASSERT turned
+> on, but I didn't see fssum reporting failures on kernel with ASSERT
+> turned off. Did I miss anything?
+>
+> [root@dhcp-66-86-11 xfstests]# ./check -s btrfs  btrfs/131
+> SECTION       -- btrfs
+> RECREATING    -- btrfs on /dev/sda5
+> FSTYP         -- btrfs
+> PLATFORM      -- Linux/x86_64 dhcp-66-86-11 4.8.0-rc2
+> MKFS_OPTIONS  -- /dev/sda6
+> MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 /dev/sda6 /mnt/testarea/scratch
+>
+> btrfs/131 1s ... 1s
+> Ran: btrfs/131
+> Passed all 1 tests
+>
+> SECTION       -- btrfs
+> =========================
+> Ran: btrfs/131
+> Passed all 1 tests
+>
 
-Need a "_require_acls", and need to source common/attr first to use
-_require_acls.
+Huh I must have run when I had debugging stuff still in my script, you are right 
+this does work fine with ASSERT()'s turned off.  That's fine, I still want to 
+have this test here since it did trigger that ASSERT().  I'll go through and fix 
+up the things you pointed out, thanks!
 
-> +
-> +cd $TEST_DIR
-> +rm -f testfile
+Josef
 
-I'd be better to name "testfile" with a test-specific prefix or suffix,
-e.g. testfile.$seq, so we can know it's from test $seq.
-
-I can fix these two nitpicks at commit time, if there's no new review
-comments from others.
-
-> +
-> +touch testfile
-> +chown 100:100 testfile
-> +
-> +echo '*** SGID should remain set (twice)'
-> +chmod 2755 testfile
-> +_runas -u 100 -g 100 -- chmod 2777 testfile
-> +stat -c %A testfile
-> +chmod 2755 testfile
-> +_runas -u 100 -g 100 -- setfacl -m u::rwx,g::rwx,o::rwx testfile
-> +stat -c %A testfile
-
-I noticed that NFSv4 cleared sgid bit on setfacl above, where the sgid
-bit should stay, maybe an NFS bug?
-
-[root@bootp-73-5-205 xfstests]# diff -u tests/generic/376.out /root/xfstests/results//generic/376.out.bad
---- tests/generic/376.out       2016-08-24 16:56:42.522000000 +0800
-+++ /root/xfstests/results//generic/376.out.bad 2016-08-24 16:58:15.771000000 +0800
-@@ -1,7 +1,7 @@
- QA output created by 376
- *** SGID should remain set (twice)
- -rwxrwsrwx
---rwxrwsrwx
-+-rwxrwxrwx
- *** SGID should be cleared (twice)
- -rwxrwxrwx
- -rwxrwxrwx
-
-Thanks,
-Eryu
-
-> +
-> +echo '*** SGID should be cleared (twice)'
-> +chmod 2755 testfile
-> +_runas -u 100 -g 101 -- chmod 2777 testfile
-> +stat -c %A testfile
-> +chmod 2755 testfile
-> +_runas -u 100 -g 101 -- setfacl -m u::rwx,g::rwx,o::rwx testfile
-> +stat -c %A testfile
-> +
-> +echo '*** Expected failure'
-> +_runas -u 101 -g 101 -- chmod 2777 testfile
-> +
-> +status=0
-> +exit
-> diff --git a/tests/generic/375.out b/tests/generic/375.out
-> new file mode 100644
-> index 0000000..fe812f3
-> --- /dev/null
-> +++ b/tests/generic/375.out
-> @@ -0,0 +1,9 @@
-> +QA output created by 375
-> +*** SGID should remain set (twice)
-> +-rwxrwsrwx
-> +-rwxrwsrwx
-> +*** SGID should be cleared (twice)
-> +-rwxrwxrwx
-> +-rwxrwxrwx
-> +*** Expected failure
-> +chmod: changing permissions of 'f': Operation not permitted
-> diff --git a/tests/generic/group b/tests/generic/group
-> index ef38c35..2d833a2 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -377,3 +377,4 @@
->  372 auto quick clone
->  373 auto quick clone
->  374 auto quick clone dedupe
-> +375 auto quick acl
-> -- 
-> 2.7.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
