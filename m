@@ -1,138 +1,101 @@
-Received: from mx1.redhat.com ([209.132.183.28]:39654 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932790AbcHXLz5 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 24 Aug 2016 07:55:57 -0400
-From: Artem Savkov <asavkov@redhat.com>
-Subject: [PATCH] generic/337: add checks for listxattr call fails.
-Date: Wed, 24 Aug 2016 13:55:53 +0200
-Message-Id: <1472039753-29982-1-git-send-email-asavkov@redhat.com>
+Received: from mail-ua0-f174.google.com ([209.85.217.174]:36312 "EHLO
+        mail-ua0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752929AbcHXIQP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 24 Aug 2016 04:16:15 -0400
+MIME-Version: 1.0
+From: Anatoly Pugachev <matorola@gmail.com>
+Date: Wed, 24 Aug 2016 11:13:25 +0300
+Message-ID: <CADxRZqyE2HjaXzbv-9ovJM=G18C28tr7pEL8RsUx+9o870jqBg@mail.gmail.com>
+Subject: [sparc64] ext4 TPC and call trace (process blocked/stuck) on git
+ kernel 4.8.0-rc3+
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Filipe Manana <fdmanana@suse.com>, Dave Chinner <david@fromorbit.com>, Artem Savkov <asavkov@redhat.com>
+To: linux-ext4@vger.kernel.org
+Cc: sparclinux@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Add simple checks for failed calls to listxattr syscall. So far ERANGE, ENOENT
-and EFAULT are checked.
+Hello!
 
-Test is based on llistxattr02 test from LTP.
+Running fstests (xfstests) suite on sparc64 debian sid/unstable with
+linux kernel 4.8.0-rc3+ , I'm getting the following call trace and TPC
+on server console and system logs:
 
-Signed-off-by: Artem Savkov <asavkov@redhat.com>
----
- .gitignore            |  1 +
- src/Makefile          |  2 +-
- src/listxattr_fails.c | 51 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/337     |  4 ++++
- tests/generic/337.out |  3 +++
- 5 files changed, 60 insertions(+), 1 deletion(-)
- create mode 100644 src/listxattr_fails.c
+mator@nvg5120:~/xfstests-dev$ ./check ext4/022
 
-diff --git a/.gitignore b/.gitignore
-index d84f385..613d245 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -66,6 +66,7 @@
- /src/holes
- /src/holetest
- /src/itrash
-+/src/listxattr_fails
- /src/locktest
- /src/loggen
- /src/looptest
-diff --git a/src/Makefile b/src/Makefile
-index 57b0df1..0fee55f 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -21,7 +21,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	stale_handle pwrite_mmap_blocked t_dir_offset2 seek_sanity_test \
- 	seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
- 	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
--	attr-list-by-handle-cursor-test
-+	attr-list-by-handle-cursor-test listxattr_fails
- 
- SUBDIRS =
- 
-diff --git a/src/listxattr_fails.c b/src/listxattr_fails.c
-new file mode 100644
-index 0000000..ddc4f7e
---- /dev/null
-+++ b/src/listxattr_fails.c
-@@ -0,0 +1,51 @@
-+#include <errno.h>
-+#include <fcntl.h>
-+#include <stdio.h>
-+#include <sys/types.h>
-+#include <sys/xattr.h>
-+
-+int main(int argc, char **argv)
-+{
-+  int ret;
-+  char buf;
-+
-+  if (argc < 2) {
-+    fprintf(stderr, "usage: %s <testfile>\n", argv[0]);
-+    return 1;
-+  };
-+
-+  ret = listxattr(argv[1], &buf, 1);
-+  if (ret == -1) {
-+    if (errno == ERANGE) {
-+      printf("expected error: ERANGE\n");
-+    } else {
-+      perror("unexpected error");
-+    }
-+  } else {
-+    fprintf(stderr, "unexpected success\n");
-+  }
-+
-+  ret = listxattr("", &buf, 1);
-+  if (ret == -1) {
-+    if (errno == ENOENT) {
-+      printf("expected error: ENOENT\n");
-+    } else {
-+      perror("unexpected error");
-+    }
-+  } else {
-+    fprintf(stderr, "unexpected success\n");
-+  }
-+
-+  ret = listxattr((char *)-1, &buf, 1);
-+  if (ret == -1) {
-+    if (errno == EFAULT) {
-+      printf("expected error: EFAULT\n");
-+    } else {
-+      perror("unexpected error");
-+    }
-+  } else {
-+    fprintf(stderr, "unexpected success\n");
-+  }
-+
-+  return 0;
-+}
-diff --git a/tests/generic/337 b/tests/generic/337
-index 1758871..88b1e33 100755
---- a/tests/generic/337
-+++ b/tests/generic/337
-@@ -68,5 +68,9 @@ $SETFATTR_PROG -n user.ping -v pong $SCRATCH_MNT/testfile
- # It should list all the xattrs we have set before.
- $GETFATTR_PROG --absolute-names --dump $SCRATCH_MNT/testfile | _filter_scratch
- 
-+# Call listattr_fails to check if we get expected errors on errorneus listxattr
-+# calls.
-+$here/src/listxattr_fails $SCRATCH_MNT/testfile
-+
- status=0
- exit
-diff --git a/tests/generic/337.out b/tests/generic/337.out
-index 1cd92ff..8ff8374 100644
---- a/tests/generic/337.out
-+++ b/tests/generic/337.out
-@@ -6,3 +6,6 @@ user.foobar="123"
- user.ping="pong"
- user.something="pizza"
- 
-+expected error: ERANGE
-+expected error: ENOENT
-+expected error: EFAULT
--- 
-1.8.3.1
+[1968295.582734] run fstests ext4/022 at 2016-08-23 18:19:00
+[1968298.917006] EXT4-fs (loop1): mounted filesystem with ordered data
+mode. Opts: acl,user_xattr
+[1968303.922338] EXT4-fs (loop1): mounted filesystem with ordered data
+mode. Opts: acl,user_xattr
+[1968304.032985] Kernel unaligned access at TPC[101c59d4]
+ext4_mark_inode_dirty+0xf4/0x200 [ext4]
+[1968493.042138] INFO: task 022:18119 blocked for more than 120 seconds.
+[1968493.122028]       Not tainted 4.8.0-rc3+ #76
+[1968493.176979] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs"
+disables this message.
+[1968493.276108] 022             D 00000000008e1edc     0 18119   2687
+0x308000107000000
+[1968493.373659] Call Trace:
+[1968493.406193]  [00000000008dfa28] schedule+0x68/0xa0
+[1968493.467933]  [00000000008e1edc] rwsem_down_write_failed+0x13c/0x1e0
+[1968493.547804]  [00000000008e16e4] down_write+0x24/0x40
+[1968493.611787]  [00000000102027f4]
+ext4_expand_extra_isize_ea+0x54/0x760 [ext4]
+[1968493.701731]  [00000000101c5a04] ext4_mark_inode_dirty+0x124/0x200 [ext4]
+[1968493.786655]  [00000000101c945c] ext4_dirty_inode+0x3c/0x60 [ext4]
+[1968493.864366]  [00000000005b4dc4] __mark_inode_dirty+0x24/0x260
+[1968493.937888]  [00000000101f7518] ext4_mb_new_blocks+0x118/0xa00 [ext4]
+[1968494.019896]  [00000000101b8a74] ext4_new_meta_blocks+0xb4/0xe0 [ext4]
+[1968494.101994]  [000000001020147c] ext4_xattr_block_set+0x7dc/0xa80 [ext4]
+[1968494.185871]  [0000000010202d44]
+ext4_expand_extra_isize_ea+0x5a4/0x760 [ext4]
+[1968494.276431]  [00000000101c5a04] ext4_mark_inode_dirty+0x124/0x200 [ext4]
+[1968494.361345]  [00000000101ec074] ext4_ext_truncate+0x14/0xe0 [ext4]
+[1968494.440200]  [00000000101c6d34] ext4_truncate+0x254/0x3a0 [ext4]
+[1968494.516622]  [00000000101c90c0] ext4_setattr+0x5c0/0x920 [ext4]
+[1968494.591953]  [00000000005a7358] notify_change+0x2f8/0x4a0
+[1968494.660866] INFO: task jbd2/loop1-8:19633 blocked for more than
+120 seconds.
+[1968494.750050]       Not tainted 4.8.0-rc3+ #76
+[1968494.805325] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs"
+disables this message.
+[1968494.904421] jbd2/loop1-8    D 0000000010199684     0 19633      2
+0x06000000
+[1968494.994475] Call Trace:
+[1968495.026968]  [00000000008dfa28] schedule+0x68/0xa0
+[1968495.088380]  [0000000010199684]
+jbd2_journal_commit_transaction+0x224/0x1580 [jbd2]
+[1968495.185728]  [000000001019dec0] kjournald2+0xa0/0x240 [jbd2]
+[1968495.258797]  [0000000000480b70] kthread+0xb0/0xe0
+[1968495.319106]  [0000000000406044] ret_from_fork+0x1c/0x2c
+[1968495.386182]  [0000000000000000]           (null)
 
+I'll try to bisect it, but not earlier than 4.4 kernel (not sure i'll
+able to boot 4.3).
+
+xfstests setup is following:
+
+mator@nvg5120:~/xfstests-dev$ git remote -v
+origin  git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git (fetch)
+origin  git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git (push)
+
+mator@nvg5120:~/xfstests-dev$ cat local.config
+export TEST_DEV=/dev/loop0
+export TEST_DIR=/fst
+export SCRATCH_DEV=/dev/loop1
+export SCRATCH_MNT=/mnt/scratch
+
+root@nvg5120:/home/mator/xfstests-dev# mkfs.ext4 /dev/loop0
+
+/dev/loop0 and /dev/loop1 , each one is 6Gb file on tmpfs/ramdisk made
+with fallocate.
+
+mator@nvg5120:~/xfstests-dev$ findmnt /ramdisk/
+TARGET   SOURCE FSTYPE OPTIONS
+/ramdisk tmpfs  tmpfs  rw,relatime,size=13631488k
+mator@nvg5120:~/xfstests-dev$ sudo losetup
+NAME       SIZELIMIT OFFSET AUTOCLEAR RO BACK-FILE            DIO
+/dev/loop1         0      0         0  0 /ramdisk/scratchvol1   0
+/dev/loop0         0      0         0  0 /ramdisk/testvol1      0
+
+Thanks.
