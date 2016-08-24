@@ -1,80 +1,203 @@
-Date: Fri, 26 Aug 2016 00:32:48 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH] xfs/098: fix xfs_repair on newer xfsprogs
-Message-ID: <20160825163248.GG10350@dhcp12-143.nay.redhat.com>
-References: <1472116951-3317-1-git-send-email-yangx.jy@cn.fujitsu.com>
- <20160825120903.GF10350@dhcp12-143.nay.redhat.com>
- <20160825154052.GD20705@birch.djwong.org>
+Received: from mx1.redhat.com ([209.132.183.28]:15784 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753083AbcHXJxr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 24 Aug 2016 05:53:47 -0400
+Date: Wed, 24 Aug 2016 17:53:45 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] btrfs/131: send test for rename+recycled ino
+Message-ID: <20160824095345.GS27776@eguan.usersys.redhat.com>
+References: <1471974718-1430-1-git-send-email-jbacik@fb.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160825154052.GD20705@birch.djwong.org>
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>, fstests@vger.kernel.org
+In-Reply-To: <1471974718-1430-1-git-send-email-jbacik@fb.com>
+Sender: fstests-owner@vger.kernel.org
+To: Josef Bacik <jbacik@fb.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Aug 25, 2016 at 08:40:52AM -0700, Darrick J. Wong wrote:
-> On Thu, Aug 25, 2016 at 08:09:03PM +0800, Zorro Lang wrote:
-> > On Thu, Aug 25, 2016 at 05:22:31PM +0800, Xiao Yang wrote:
-> > > Make sure xfs_repair can't clear the log by default when it is corrupted.
-> > > xfs_repair always and only clear the log when the -L parameter is specified.
-> > > This has updated by:
-> > > Commit f2053bc ("xfs_repair: don't clear the log by default")
-> > > 
-> > > Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
-> > > ---
-> > >  tests/xfs/098 | 4 +++-
-> > >  1 file changed, 3 insertions(+), 1 deletion(-)
-> > > 
-> > > diff --git a/tests/xfs/098 b/tests/xfs/098
-> > > index d91d617..0fe8d93 100755
-> > > --- a/tests/xfs/098
-> > > +++ b/tests/xfs/098
-> > > @@ -93,7 +93,9 @@ echo "+ mount image"
-> > >  _scratch_mount 2>/dev/null && _fail "mount should not succeed"
-> > >  
-> > >  echo "+ repair fs"
-> > > -_scratch_xfs_repair >> $seqres.full 2>&1
-> > > +_scratch_xfs_repair >> $seqres.full 2>&1 && _fail "xfs_repair should not succeed without -L option"
-> > 
-> > Hi,
-> > 
-> > If you make it fail at here, this case can't run for old xfsprogs(without
-> > commit f2053bc).
-> > 
-> > > +
-> > > +_scratch_xfs_repair -L >> $seqres.full 2>&1
-> > 
-> > For compatibility, maybe you can use "-L" directly. Or use -L
-> > after _scratch_xfs_repair return error.
+On Tue, Aug 23, 2016 at 01:51:58PM -0400, Josef Bacik wrote:
+> This is a test for a problem I hit with send/receive.  If you mount with -o
+> inode_cache it is possible to recycle inode numbers, and btrfs assumes that when
+> you have a recycled inode number that it's parent directory won't be needing a
+> rename, but this is not the case.  Without the patch to fix this problem this
+> test will panic the box if ASSERT() is turned on, otherwise it'll simply fail
+> the fssum.
 > 
-> I suggest _repair_scratch_fs.
+> Signed-off-by: Josef Bacik <jbacik@fb.com>
+> ---
+>  tests/btrfs/131     | 91 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/131.out |  2 ++
+>  tests/btrfs/group   |  1 +
+>  3 files changed, 94 insertions(+)
+>  create mode 100644 tests/btrfs/131
+>  create mode 100644 tests/btrfs/131.out
+> 
+> diff --git a/tests/btrfs/131 b/tests/btrfs/131
+> new file mode 100644
+> index 0000000..596adc1
+> --- /dev/null
+> +++ b/tests/btrfs/131
+> @@ -0,0 +1,91 @@
+> +#! /bin/bash
+> +# FS QA Test 131
+> +#
+> +# Make sure btrfs handles send/receive of a file that has been destroyed and
+> +# recreated with a recycled inode number and a renamed parent directory.  This
+> +# is a test for a fix based on the patch
+> +# 
 
-Oh, you're right. You already wrote a common function to do that...
-Thanks for remind me:)
+A trailing whitespace in above line :)
+
+> +# Btrfs: handle pending renames with recycled inodes properly
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016 Facebook. All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=`mktemp -d`
+
+Usually we define "tmp=/tmp/$$", and tests and some common helpers use
+$tmp.xxx for tmp files. I think we should keep the consistency across
+tests.
+
+$tmp is used as a tmp dir to store the btrfs send data, I think we can
+send the data to some dir in $TEST_DIR, e.g.
+
+send_dir=$TEST_DIR/btrfs_send_$seq
+
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	rm -fr $tmp
+
+Then clean the send dir here, as well as $tmp.*
+
+	cd /
+	rm -rf $send_dir
+	rm -f $tmp.*
+
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
+> +_require_fssum
+> +
+> +_scratch_mkfs > /dev/null 2>&1
+> +_scratch_mount "-o inode_cache"
+
+Need some comments to explain why mount with "-o inode_cache" option.
+
+> +
+> +_run_btrfs_util_prog subvolume create $SCRATCH_MNT/base
+> +mkdir $SCRATCH_MNT/base/b
+> +mkdir $SCRATCH_MNT/base/a
+> +mv $SCRATCH_MNT/base/b $SCRATCH_MNT/base/a
+> +
+> +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/base \
+> +	$SCRATCH_MNT/snap1
+> +_run_btrfs_util_prog send $SCRATCH_MNT/snap1 -f $tmp/1.snap
+> +
+> +mv $SCRATCH_MNT/base/a $SCRATCH_MNT/base/c
+> +rmdir $SCRATCH_MNT/base/c/b
+> +
+> +# We need to sync to make sure the inode number is recycled
+> +sync
+> +mkdir $SCRATCH_MNT/base/c/b
+> +
+> +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/base $SCRATCH_MNT/snap2
+> +run_check $FSSUM_PROG -A -f -w $tmp/fssum $SCRATCH_MNT/snap2
+> +
+> +_run_btrfs_util_prog send -p $SCRATCH_MNT/snap1 $SCRATCH_MNT/snap2 -f $tmp/2.snap
+> +
+> +_scratch_unmount
+> +_scratch_mkfs > /dev/null 2>&1
+> +_scratch_mount
+> +
+> +_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/1.snap
+> +_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/2.snap
+> +run_check $FSSUM_PROG -r $tmp/fssum $SCRATCH_MNT/snap2
+
+I did see assert failure (and kernel crash) on kernel with ASSERT turned
+on, but I didn't see fssum reporting failures on kernel with ASSERT
+turned off. Did I miss anything?
+
+[root@dhcp-66-86-11 xfstests]# ./check -s btrfs  btrfs/131
+SECTION       -- btrfs
+RECREATING    -- btrfs on /dev/sda5
+FSTYP         -- btrfs
+PLATFORM      -- Linux/x86_64 dhcp-66-86-11 4.8.0-rc2
+MKFS_OPTIONS  -- /dev/sda6
+MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 /dev/sda6 /mnt/testarea/scratch
+
+btrfs/131 1s ... 1s
+Ran: btrfs/131
+Passed all 1 tests
+
+SECTION       -- btrfs
+=========================
+Ran: btrfs/131
+Passed all 1 tests
 
 Thanks,
-Zorro
+Eryu
 
+> +
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/131.out b/tests/btrfs/131.out
+> new file mode 100644
+> index 0000000..d118ca9
+> --- /dev/null
+> +++ b/tests/btrfs/131.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 131
+> +Silence is golden
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 6b29c05..933fe10 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -133,3 +133,4 @@
+>  128 auto quick send
+>  129 auto quick send
+>  130 auto clone send
+> +131 auto quick send
+> -- 
+> 1.8.3.1
 > 
-> --D
-> 
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > >  
-> > >  echo "+ mount image (2)"
-> > >  _scratch_mount
-> > > -- 
-> > > 1.8.3.1
-> > > 
-> > > 
-> > > 
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
 > the body of a message to majordomo@vger.kernel.org
