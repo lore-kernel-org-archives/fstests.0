@@ -1,111 +1,37 @@
-Received: from mx1.redhat.com ([209.132.183.28]:34026 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750746AbcH0K2G (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 27 Aug 2016 06:28:06 -0400
-Message-Id: <201608271028.u7RAS346020335@int-mx09.intmail.prod.int.phx2.redhat.com>
-Date: Sat, 27 Aug 2016 18:28:03 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: [GIT PULL] fstests: updates on 2016-08-27
+Received: from aserp1040.oracle.com ([141.146.126.69]:47951 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755753AbcHYXas (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 25 Aug 2016 19:30:48 -0400
+Subject: [PATCH 13/13] xfs/122: check the ag reservation counter ioctl
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Thu, 25 Aug 2016 16:29:43 -0700
+Message-ID: <147216778333.32641.6694229942234239492.stgit@birch.djwong.org>
+In-Reply-To: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
+References: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
+To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave,
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ tests/xfs/122.out |    1 +
+ 1 file changed, 1 insertion(+)
 
-Can you please pull the fstests update from the location below? This update
-contains patches from last two weeks, and I replaced generic/375 with another
-test (which doesn't crash latest upstream kernel) and dropped the original
-generic/375 for now. And I kept the "xfs_quota state command" test from Eric,
-because the failure looks expected to me (due to a missing kernel patch).
 
-I'd like to mention new failures I noticed in this update (and I'd like to
-continue do this in future pull requests):
-- generic/375 fails on extN, XFS, btrfs and overlayfs due to sgid not cleard on
-  setfacl. NFSv3 fails differently because of a setfacl bug.
-- generic/376 fails dmesg check on btrfs if lockdep is turned on.
-- xfs/263 fails on XFS.
+diff --git a/tests/xfs/122.out b/tests/xfs/122.out
+index cd909e6..ae84283 100644
+--- a/tests/xfs/122.out
++++ b/tests/xfs/122.out
+@@ -81,6 +81,7 @@ sizeof(struct xfs_dsymlink_hdr) = 56
+ sizeof(struct xfs_extent_data) = 24
+ sizeof(struct xfs_extent_data_info) = 32
+ sizeof(struct xfs_fs_eofblocks) = 128
++sizeof(struct xfs_fsop_ag_resblks) = 32
+ sizeof(struct xfs_icreate_log) = 28
+ sizeof(struct xfs_log_dinode) = 176
+ sizeof(struct xfs_map_extent) = 32
 
-If there's anything you want me to do in pull requests differently please let
-me know.
-
-Thanks,
-Eryu
-
-The following changes since commit c760a54061d26890be3929e4c6659bf3dc9e0c6a:
-
-  src/t_immutable: allow EPERM on immutable inode (2016-08-12 11:17:34 +0800)
-
-are available in the git repository at:
-
-  https://github.com/guaneryu/xfstests.git for-dave
-
-for you to fetch changes up to 21eb9d303cff056753a3104602ff674d468af52e:
-
-  fstests: add punch, collapse, insert, zero test groups (2016-08-26 15:45:03 +0800)
-
-----------------------------------------------------------------
-
-fstests: update on 2016-08-27
-
-This update contains:
-o New tests for generic and XFS
-o New punch, collapse, insert, zero groups
-o Bug fixes of generic and XFS cases
-o Bug fixes and improvements in common filters and helpers
-
-----------------------------------------------------------------
-Andreas Gruenbacher (1):
-      generic: Check clearing of SGID in chmod and acl_set_file
-
-Eric Sandeen (2):
-      common/quota: add prjquota to _qmount_option() filter
-      xfs: test xfs_quota "state" command
-
-Eric Whitney (2):
-      generic/135: redirect stderr from _scratch_mkfs
-      common/rc: improve _require_metadata_journaling() for ext4
-
-Filipe Manana (1):
-      generic: fsync after file rename
-
-Omar Sandoval (1):
-      src/test-nextquota: fix build failure with glibc 2.24
-
-Theodore Ts'o (1):
-      fstests: add punch, collapse, insert, zero test groups
-
-Xiao Yang (1):
-      xfs/191: skip tests on older xfsprogs
-
-Zorro Lang (3):
-      xfs/033: source mkfs output again if isize less than 512
-      xfs/006: refactor reset error handling code to common/rc
-      xfs: EIO error handling test
-
- common/quota                |   1 +
- common/rc                   |  55 ++++++++++--
- src/test-nextquota.c        |   9 +-
- tests/btrfs/group           |   2 +-
- tests/ext4/group            |   4 +-
- tests/generic/135           |   2 +-
- tests/generic/375           |  81 ++++++++++++++++++
- tests/generic/375.out       |   9 ++
- tests/generic/376           |  77 +++++++++++++++++
- tests/generic/376.out       |   5 ++
- tests/generic/group         |  90 ++++++++++----------
- tests/xfs/006               |  27 ++----
- tests/xfs/006.out           |   1 +
- tests/xfs/033               |   8 +-
- tests/xfs/033.out.crc.linux |   6 --
- tests/xfs/033.out.irix      |   6 --
- tests/xfs/033.out.linux     |   6 --
- tests/xfs/263               |  97 +++++++++++++++++++++
- tests/xfs/263.out           | 199 ++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/264               | 126 ++++++++++++++++++++++++++++
- tests/xfs/264.out           |  21 +++++
- tests/xfs/group             |  24 +++---
- 22 files changed, 746 insertions(+), 110 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
