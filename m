@@ -1,257 +1,326 @@
-Received: from mx1.redhat.com ([209.132.183.28]:48928 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752985AbcHZLb0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 26 Aug 2016 07:31:26 -0400
-From: Artem Savkov <asavkov@redhat.com>
-Subject: [PATCH v3] Add a test for listxattr syscall with different buffer sizes.
-Date: Fri, 26 Aug 2016 13:31:14 +0200
-Message-Id: <1472211074-26464-1-git-send-email-asavkov@redhat.com>
-In-Reply-To: <20160826051819.GQ22388@dastard>
-References: <20160826051819.GQ22388@dastard>
+Received: from aserp1040.oracle.com ([141.146.126.69]:47560 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752945AbcHYXas (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 25 Aug 2016 19:30:48 -0400
+Subject: [PATCH 01/13] tests/xfs: don't run tests if cowextsize isn't present
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Thu, 25 Aug 2016 16:28:25 -0700
+Message-ID: <147216770565.32641.5996523789425289351.stgit@birch.djwong.org>
+In-Reply-To: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
+References: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Dave Chinner <david@fromorbit.com>, Eryu Guan <eguan@redhat.com>, Filipe Manana <fdmanana@suse.com>, Artem Savkov <asavkov@redhat.com>
+To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-Add generic/375 test that calls listxattr syscall with different buffer size
-arguments checking if it fails properly.
+Some of the tests forgot to check that xfs_io has a cowextsize command,
+so fix that here.
 
-Signed-off-by: Artem Savkov <asavkov@redhat.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- .gitignore            |  1 +
- src/Makefile          |  2 +-
- src/listxattr.c       | 73 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/375     | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/375.out | 11 +++++++
- tests/generic/group   |  1 +
- 6 files changed, 174 insertions(+), 1 deletion(-)
- create mode 100644 src/listxattr.c
- create mode 100755 tests/generic/375
- create mode 100644 tests/generic/375.out
+ tests/xfs/215 |    1 +
+ tests/xfs/218 |    1 +
+ tests/xfs/219 |    1 +
+ tests/xfs/221 |    1 +
+ tests/xfs/223 |    1 +
+ tests/xfs/224 |    1 +
+ tests/xfs/225 |    1 +
+ tests/xfs/226 |    1 +
+ tests/xfs/228 |    1 +
+ tests/xfs/230 |    1 +
+ tests/xfs/231 |    1 +
+ tests/xfs/232 |    1 +
+ tests/xfs/243 |    1 +
+ tests/xfs/248 |    1 +
+ tests/xfs/249 |    1 +
+ tests/xfs/251 |    1 +
+ tests/xfs/254 |    1 +
+ tests/xfs/255 |    1 +
+ tests/xfs/256 |    1 +
+ tests/xfs/257 |    1 +
+ tests/xfs/258 |    1 +
+ tests/xfs/315 |    1 +
+ tests/xfs/326 |    1 +
+ 23 files changed, 23 insertions(+)
 
-diff --git a/.gitignore b/.gitignore
-index d84f385..915d2d8 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -66,6 +66,7 @@
- /src/holes
- /src/holetest
- /src/itrash
-+/src/listxattr
- /src/locktest
- /src/loggen
- /src/looptest
-diff --git a/src/Makefile b/src/Makefile
-index 57b0df1..dd51216 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -21,7 +21,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	stale_handle pwrite_mmap_blocked t_dir_offset2 seek_sanity_test \
- 	seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
- 	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
--	attr-list-by-handle-cursor-test
-+	attr-list-by-handle-cursor-test listxattr
+
+diff --git a/tests/xfs/215 b/tests/xfs/215
+index 7a517d7..b9c9ab4 100755
+--- a/tests/xfs/215
++++ b/tests/xfs/215
+@@ -50,6 +50,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_xfs_io_command "cowextsize"
+ _require_odirect
  
- SUBDIRS =
+ rm -f $seqres.full
+diff --git a/tests/xfs/218 b/tests/xfs/218
+index 0ab4102..887a135 100755
+--- a/tests/xfs/218
++++ b/tests/xfs/218
+@@ -50,6 +50,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_xfs_io_command "cowextsize"
  
-diff --git a/src/listxattr.c b/src/listxattr.c
-new file mode 100644
-index 0000000..da9d163
---- /dev/null
-+++ b/src/listxattr.c
-@@ -0,0 +1,73 @@
-+/*
-+ * Copyright (c) 2016 Artem Savkov <asavkov@redhat.com>
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License as
-+ * published by the Free Software Foundation, either version 2 of
-+ * the License, or (at your option) any later version.
-+ *
-+ * This program is distributed in the hope that it would be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
-+ */
-+
-+#include <errno.h>
-+#include <fcntl.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <string.h>
-+#include <sys/types.h>
-+#include <sys/xattr.h>
-+
-+int main(int argc, char **argv)
-+{
-+        int ret;
-+        size_t bufsize = 0;
-+        char *buf = NULL;
-+
-+        if (argc < 2) {
-+                fprintf(stderr, "usage: %s <testfile> [bufsize]\n", argv[0]);
-+                return 1;
-+        };
-+
-+        if (argc > 2) {
-+                bufsize = strtoul(argv[2], NULL, 10);
-+                if (bufsize == -1) {
-+                        perror("buffsize");
-+                        return 1;
-+                }
-+        }
-+
-+        if (bufsize == 0) {
-+                bufsize = listxattr(argv[1], NULL, 0);
-+                if (bufsize == -1) {
-+                        perror("listxattr");
-+                        return 1;
-+                }
-+        }
-+
-+        buf = malloc(bufsize);
-+        if (buf == NULL) {
-+                perror("buf alloc");
-+                return 1;
-+        }
-+
-+        ret = listxattr(argv[1], buf, bufsize);
-+        if (ret < 0) {
-+                perror("listxattr");
-+        } else {
-+                char *l;
-+                for (l = buf; l != (buf + bufsize) && *l != '\0';
-+                                l = strchr(l, '\0') + 1) {
-+                        printf("xattr: %s\n", l);
-+                }
-+        }
-+
-+        free(buf);
-+
-+        return 0;
-+}
-diff --git a/tests/generic/375 b/tests/generic/375
-new file mode 100755
-index 0000000..8651c7d
---- /dev/null
-+++ b/tests/generic/375
-@@ -0,0 +1,87 @@
-+#! /bin/bash
-+# FSQA Test No. 375
-+#
-+# Test listxattr syscall behaviour with different buffer sizes.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Artem Savkov <asavkov@redhat.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation, either version 2 of
-+# the License, or (at your option) any later version.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, see <http://www.gnu.org/licenses/>.
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_attrs
-+_require_test_program "listxattr"
-+
-+listxattr="$here/src/listxattr"
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+# Create a testfile with three xattrs such that the sum of namelengths of the
-+# first two is bigger than the namelength of the third. This is needed for
-+# the 5th testcase that tests one of the cornercases.
-+testfile=${SCRATCH_MNT}/testfile
-+touch $testfile
-+$SETFATTR_PROG -n user.foo -v bar $testfile
-+$SETFATTR_PROG -n user.ping -v pong $testfile
-+$SETFATTR_PROG -n user.hello -v there $testfile
-+
-+# 1. Call listxattr without buffer length argument. This should succeed.
-+$listxattr $testfile
-+
-+# 2. Calling listxattr on nonexistant file should fail with -ENOENT.
-+$listxattr ""
-+
-+# 3. Calling listxattr with buffersize not suffecient for even one xattr
-+# should fail with -ERANGE.
-+$listxattr $testfile 1
-+
-+# 4. Calling listxattr with buffersize suffecient for one xattr, but not
-+# sufficient for the whole list should still fail with -ERANGE.
-+$listxattr $testfile 9
-+
-+# 5. Calling listxattr with buffersize suffecient for the last xattr, but not
-+# sufficient for the sum of first two. Should fail with -ERANGE.
-+$listxattr $testfile 11
-+
-+# 6. Calling listxattr with buffersize bigger than needed should succeed.
-+$listxattr $testfile 500
-+
-+status=0
-+exit
-diff --git a/tests/generic/375.out b/tests/generic/375.out
-new file mode 100644
-index 0000000..0d45622
---- /dev/null
-+++ b/tests/generic/375.out
-@@ -0,0 +1,11 @@
-+QA output created by 375
-+xattr: user.foo
-+xattr: user.ping
-+xattr: user.hello
-+listxattr: No such file or directory
-+listxattr: Numerical result out of range
-+listxattr: Numerical result out of range
-+listxattr: Numerical result out of range
-+xattr: user.foo
-+xattr: user.ping
-+xattr: user.hello
-diff --git a/tests/generic/group b/tests/generic/group
-index ef38c35..3068510 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -377,3 +377,4 @@
- 372 auto quick clone
- 373 auto quick clone
- 374 auto quick clone dedupe
-+375 auto quick metadata
--- 
-1.8.3.1
+ rm -f $seqres.full
+ 
+diff --git a/tests/xfs/219 b/tests/xfs/219
+index df57e07..5ae0714 100755
+--- a/tests/xfs/219
++++ b/tests/xfs/219
+@@ -50,6 +50,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_xfs_io_command "cowextsize"
+ _require_odirect
+ 
+ rm -f $seqres.full
+diff --git a/tests/xfs/221 b/tests/xfs/221
+index 03d81ac..3afc75f 100755
+--- a/tests/xfs/221
++++ b/tests/xfs/221
+@@ -50,6 +50,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_xfs_io_command "cowextsize"
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/xfs/223 b/tests/xfs/223
+index 7c990a2..3f34bcf 100755
+--- a/tests/xfs/223
++++ b/tests/xfs/223
+@@ -51,6 +51,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_xfs_io_command "cowextsize"
+ _require_odirect
+ 
+ rm -f $seqres.full
+diff --git a/tests/xfs/224 b/tests/xfs/224
+index bf33d1f..91033fa 100755
+--- a/tests/xfs/224
++++ b/tests/xfs/224
+@@ -51,6 +51,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_xfs_io_command "cowextsize"
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/xfs/225 b/tests/xfs/225
+index 749816f..2260441 100755
+--- a/tests/xfs/225
++++ b/tests/xfs/225
+@@ -50,6 +50,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_xfs_io_command "cowextsize"
+ _require_odirect
+ 
+ rm -f $seqres.full
+diff --git a/tests/xfs/226 b/tests/xfs/226
+index bb94d24..ac70239 100755
+--- a/tests/xfs/226
++++ b/tests/xfs/226
+@@ -50,6 +50,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_xfs_io_command "cowextsize"
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/xfs/228 b/tests/xfs/228
+index df1fd7a..65d7f51 100755
+--- a/tests/xfs/228
++++ b/tests/xfs/228
+@@ -54,6 +54,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_xfs_io_command "cowextsize"
+ _require_xfs_io_command "fpunch"
+ _require_cp_reflink
+ _require_odirect
+diff --git a/tests/xfs/230 b/tests/xfs/230
+index 73f599a..73c6267 100755
+--- a/tests/xfs/230
++++ b/tests/xfs/230
+@@ -54,6 +54,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_xfs_io_command "cowextsize"
+ _require_xfs_io_command "fpunch"
+ _require_cp_reflink
+ _require_odirect
+diff --git a/tests/xfs/231 b/tests/xfs/231
+index 166f6b0..d89139a 100755
+--- a/tests/xfs/231
++++ b/tests/xfs/231
+@@ -51,6 +51,7 @@ _supported_os Linux
+ _supported_fs xfs
+ _require_scratch_reflink
+ _require_cp_reflink
++_require_xfs_io_command "cowextsize"
+ _require_fiemap
+ 
+ old_cow_lifetime=$(cat /proc/sys/fs/xfs/speculative_cow_prealloc_lifetime)
+diff --git a/tests/xfs/232 b/tests/xfs/232
+index 0008dbf..2438f1f 100755
+--- a/tests/xfs/232
++++ b/tests/xfs/232
+@@ -50,6 +50,7 @@ _cleanup()
+ # real QA test starts here
+ _supported_os Linux
+ _supported_fs xfs
++_require_xfs_io_command "cowextsize"
+ _require_scratch_reflink
+ _require_cp_reflink
+ _require_fiemap
+diff --git a/tests/xfs/243 b/tests/xfs/243
+index f6a8692..0bb69c4 100755
+--- a/tests/xfs/243
++++ b/tests/xfs/243
+@@ -55,6 +55,7 @@ _supported_os Linux
+ _supported_fs xfs
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_xfs_io_command "cowextsize"
+ _require_xfs_io_command "fpunch"
+ _require_xfs_io_command "bmap" "-c"
+ _require_cp_reflink
+diff --git a/tests/xfs/248 b/tests/xfs/248
+index 7e25258..471205c 100755
+--- a/tests/xfs/248
++++ b/tests/xfs/248
+@@ -51,6 +51,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_xfs_io_command "cowextsize"
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/xfs/249 b/tests/xfs/249
+index b82d89c..0a7fbf1 100755
+--- a/tests/xfs/249
++++ b/tests/xfs/249
+@@ -51,6 +51,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_xfs_io_command "cowextsize"
+ _require_odirect
+ 
+ rm -f $seqres.full
+diff --git a/tests/xfs/251 b/tests/xfs/251
+index 4f74772..48a027c 100755
+--- a/tests/xfs/251
++++ b/tests/xfs/251
+@@ -53,6 +53,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_xfs_io_command "cowextsize"
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/xfs/254 b/tests/xfs/254
+index c8ac412..ac87e49 100755
+--- a/tests/xfs/254
++++ b/tests/xfs/254
+@@ -53,6 +53,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_xfs_io_command "cowextsize"
+ _require_odirect
+ 
+ rm -f $seqres.full
+diff --git a/tests/xfs/255 b/tests/xfs/255
+index 93ad13e..97cbb77 100755
+--- a/tests/xfs/255
++++ b/tests/xfs/255
+@@ -53,6 +53,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_xfs_io_command "cowextsize"
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/xfs/256 b/tests/xfs/256
+index d5cf71b..a182953 100755
+--- a/tests/xfs/256
++++ b/tests/xfs/256
+@@ -53,6 +53,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_xfs_io_command "cowextsize"
+ _require_odirect
+ 
+ rm -f $seqres.full
+diff --git a/tests/xfs/257 b/tests/xfs/257
+index 624f5e3..1fc401b 100755
+--- a/tests/xfs/257
++++ b/tests/xfs/257
+@@ -54,6 +54,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_xfs_io_command "cowextsize"
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/xfs/258 b/tests/xfs/258
+index 243e853..a3ffc89 100755
+--- a/tests/xfs/258
++++ b/tests/xfs/258
+@@ -54,6 +54,7 @@ _cleanup()
+ _supported_os Linux
+ _require_scratch_reflink
+ _require_xfs_io_command "falloc"
++_require_xfs_io_command "cowextsize"
+ _require_odirect
+ 
+ rm -f $seqres.full
+diff --git a/tests/xfs/315 b/tests/xfs/315
+index 62d7fcf..6170540 100755
+--- a/tests/xfs/315
++++ b/tests/xfs/315
+@@ -49,6 +49,7 @@ _supported_fs xfs
+ _require_cp_reflink
+ _require_scratch_reflink
+ _require_error_injection
++_require_xfs_io_command "cowextsize"
+ _require_xfs_io_error_injection "free_extent"
+ 
+ rm -f $seqres.full
+diff --git a/tests/xfs/326 b/tests/xfs/326
+index 2cd6eda..36bdcf4 100755
+--- a/tests/xfs/326
++++ b/tests/xfs/326
+@@ -50,6 +50,7 @@ _supported_os Linux
+ _supported_fs xfs
+ _require_cp_reflink
+ _require_scratch_reflink
++_require_xfs_io_command "cowextsize"
+ _require_xfs_io_error_injection "refcount_finish_one"
+ 
+ rm -f $seqres.full
 
