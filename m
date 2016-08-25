@@ -1,153 +1,45 @@
-Received: from mx1.redhat.com ([209.132.183.28]:45514 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755634AbcHYIQe (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 25 Aug 2016 04:16:34 -0400
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] overlay: sgid inheritance over whiteout
-Date: Thu, 25 Aug 2016 16:16:12 +0800
-Message-Id: <1472112972-11919-1-git-send-email-eguan@redhat.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:12822 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1752142AbcHYJWm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 25 Aug 2016 05:22:42 -0400
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH] xfs/098: fix xfs_repair on newer xfsprogs
+Date: Thu, 25 Aug 2016 17:22:31 +0800
+Message-ID: <1472116951-3317-1-git-send-email-yangx.jy@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-unionfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
+Cc: darrick.wong@oracle.com, Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-Newly created files and dirs should inherit sgit bit from parent
-dir, no matter the new files & dirs are created over whiteout or
-not.
+Make sure xfs_repair can't clear the log by default when it is corrupted.
+xfs_repair always and only clear the log when the -L parameter is specified.
+This has updated by:
+Commit f2053bc ("xfs_repair: don't clear the log by default")
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 ---
- tests/overlay/015     | 97 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/015.out |  6 ++++
- tests/overlay/group   |  1 +
- 3 files changed, 104 insertions(+)
- create mode 100755 tests/overlay/015
- create mode 100644 tests/overlay/015.out
+ tests/xfs/098 | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/tests/overlay/015 b/tests/overlay/015
-new file mode 100755
-index 0000000..c39caed
---- /dev/null
-+++ b/tests/overlay/015
-@@ -0,0 +1,97 @@
-+#! /bin/bash
-+# FS QA Test 015
-+#
-+# SGID bit inheritance over whiteout.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Red Hat Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
+diff --git a/tests/xfs/098 b/tests/xfs/098
+index d91d617..0fe8d93 100755
+--- a/tests/xfs/098
++++ b/tests/xfs/098
+@@ -93,7 +93,9 @@ echo "+ mount image"
+ _scratch_mount 2>/dev/null && _fail "mount should not succeed"
+ 
+ echo "+ repair fs"
+-_scratch_xfs_repair >> $seqres.full 2>&1
++_scratch_xfs_repair >> $seqres.full 2>&1 && _fail "xfs_repair should not succeed without -L option"
 +
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+_require_user
-+_require_group
-+
-+# Remove all files from previous tests
-+_scratch_mkfs
-+
-+# set umask to make output deterministic
-+umask 022
-+
-+# Create test dir in lower dir and set sgid bit
-+lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
-+mkdir -p $lowerdir/dir
-+chown $qa_user:$qa_group $lowerdir/dir
-+chmod 2775 $lowerdir/dir
-+touch $lowerdir/dir/testdir
-+touch $lowerdir/dir/testfile
-+touch $lowerdir/dir/hardlink
-+
-+# mount overlayfs, create new file and dir in parent dir with sgid bit set, new
-+# files and dirs all should inherit the sgid bit and the group
-+_scratch_mount
-+
-+# new dir
-+mkdir $SCRATCH_MNT/dir/newdir
-+stat -c "%A %G" $SCRATCH_MNT/dir/newdir
-+
-+# new file
-+touch $SCRATCH_MNT/dir/newfile
-+stat -c "%A %G" $SCRATCH_MNT/dir/newfile
-+
-+# new dir over whiteout
-+rm -f $SCRATCH_MNT/dir/testdir
-+mkdir $SCRATCH_MNT/dir/testdir
-+stat -c "%A %G" $SCRATCH_MNT/dir/testdir
-+
-+# new file over whiteout
-+rm -f $SCRATCH_MNT/dir/testfile
-+touch $SCRATCH_MNT/dir/testfile
-+stat -c "%A %G" $SCRATCH_MNT/dir/testfile
-+
-+# new hardlink over whiteout
-+rm -f $SCRATCH_MNT/dir/hardlink
-+ln $SCRATCH_MNT/dir/testfile $SCRATCH_MNT/dir/hardlink
-+stat -c "%A %G" $SCRATCH_MNT/dir/hardlink
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/overlay/015.out b/tests/overlay/015.out
-new file mode 100644
-index 0000000..263509d
---- /dev/null
-+++ b/tests/overlay/015.out
-@@ -0,0 +1,6 @@
-+QA output created by 015
-+drwxr-sr-x fsgqa
-+-rw-r--r-- fsgqa
-+drwxr-sr-x fsgqa
-+-rw-r--r-- fsgqa
-+-rw-r--r-- fsgqa
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 71eaadb..84850b1 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -17,3 +17,4 @@
- 012 auto quick
- 013 auto quick
- 014 auto quick copyup
-+015 auto quick whiteout
++_scratch_xfs_repair -L >> $seqres.full 2>&1
+ 
+ echo "+ mount image (2)"
+ _scratch_mount
 -- 
-2.7.4
+1.8.3.1
+
+
 
