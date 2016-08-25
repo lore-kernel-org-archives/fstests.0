@@ -1,82 +1,250 @@
-Received: from mx1.redhat.com ([209.132.183.28]:37702 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751547AbcHZEuJ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 26 Aug 2016 00:50:09 -0400
-Date: Fri, 26 Aug 2016 12:42:25 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2] xfs/098: fix xfs_repair on newer xfsprogs
-Message-ID: <20160826044225.GY27776@eguan.usersys.redhat.com>
-References: <20160825154052.GD20705@birch.djwong.org>
- <1472182612-10218-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Received: from aserp1050.oracle.com ([141.146.126.70]:25396 "EHLO
+        aserp1050.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756258AbcHYXas (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 25 Aug 2016 19:30:48 -0400
+Subject: [PATCH 08/13] xfs: more rmapbt tests
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Thu, 25 Aug 2016 16:29:11 -0700
+Message-ID: <147216775128.32641.13355812513622220212.stgit@birch.djwong.org>
+In-Reply-To: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
+References: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1472182612-10218-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc: darrick.wong@oracle.com, fstests@vger.kernel.org, zlang@redhat.com
+To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Aug 26, 2016 at 11:36:52AM +0800, Xiao Yang wrote:
-> Make sure xfs_repair can't clear the log by default when it is corrupted.
-> xfs_repair always and only clear the log when the -L parameter is specified.
-> This has updated by:
-> Commit f2053bc ("xfs_repair: don't clear the log by default")
+More tests for the reverse mapping functionality.
 
-Can you please put more details in commit log? e.g. what's the problem
-you want to fix, what's the symptom, etc. I had a hard time
-understanding the problems without running the test.
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ tests/xfs/876     |   75 +++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/876.out |    4 ++
+ tests/xfs/877     |   92 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/877.out |   10 ++++++
+ tests/xfs/group   |    2 +
+ 5 files changed, 183 insertions(+)
+ create mode 100755 tests/xfs/876
+ create mode 100644 tests/xfs/876.out
+ create mode 100755 tests/xfs/877
+ create mode 100644 tests/xfs/877.out
 
-> 
-> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
-> ---
->  common/rc     | 4 ++--
->  tests/xfs/098 | 2 +-
->  2 files changed, 3 insertions(+), 3 deletions(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 3fb0600..c693a31 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1143,9 +1143,9 @@ _repair_scratch_fs()
->      xfs)
->          _scratch_xfs_repair "$@" 2>&1
->  	res=$?
-> -	if [ "$res" -eq 2 ]; then
-> +	if [ "$res" -ne 0 ]; then
->  		echo "xfs_repair returns $res; replay log?"
-> -		_scratch_mount
-> +		_scratch_mount 2>&1
->  		res=$?
->  		if [ "$res" -gt 0 ]; then
->  			echo "mount returns $res; zap log?"
-> diff --git a/tests/xfs/098 b/tests/xfs/098
-> index d91d617..eb33bb1 100755
-> --- a/tests/xfs/098
-> +++ b/tests/xfs/098
-> @@ -93,7 +93,7 @@ echo "+ mount image"
->  _scratch_mount 2>/dev/null && _fail "mount should not succeed"
->  
->  echo "+ repair fs"
-> -_scratch_xfs_repair >> $seqres.full 2>&1
-> +_repair_scratch_fs >> $seqres.full
 
-The above two redirection updates seem not necessary to me, mount
-failure message got redirected to $seqres.full in both cases. Any reason
-doing so?
+diff --git a/tests/xfs/876 b/tests/xfs/876
+new file mode 100755
+index 0000000..7f447c9
+--- /dev/null
++++ b/tests/xfs/876
+@@ -0,0 +1,75 @@
++#! /bin/bash
++# FS QA Test No. 876
++#
++# Create a big enough rmapbt that we tickle a fdblocks accounting bug.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename "$0"`
++seqres="$RESULT_DIR/$seq"
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -rf "$tmp".*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_supported_fs xfs
++_require_scratch
++_require_xfs_scratch_rmapbt
++_require_scratch_reflink
++_require_test_program "punch-alternating"
++
++rm -f "$seqres.full"
++
++echo "+ create scratch fs"
++_scratch_mkfs > "$seqres.full" 2>&1
++
++echo "+ mount fs image"
++_scratch_mount
++blksz="$(stat -f $SCRATCH_MNT -c '%S')"
++
++bt_ptrs=$(( (blksz - 56) / 44 ))
++bt_recs=$(( (blksz - 56) / 24 ))
++
++blocks=$((bt_ptrs * bt_recs + 1))
++_require_fs_space $SCRATCH_MNT $(( (2 * blocks * blksz) * 5 / 4096 ))
++len=$((blocks * blksz))
++
++echo "+ make some files"
++$XFS_IO_PROG -f -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f1 >> $seqres.full
++$XFS_IO_PROG -f -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f2 >> $seqres.full
++./src/punch-alternating $SCRATCH_MNT/f1 >> "$seqres.full"
++./src/punch-alternating $SCRATCH_MNT/f2 >> "$seqres.full"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/876.out b/tests/xfs/876.out
+new file mode 100644
+index 0000000..96c1970
+--- /dev/null
++++ b/tests/xfs/876.out
+@@ -0,0 +1,4 @@
++QA output created by 876
+++ create scratch fs
+++ mount fs image
+++ make some files
+diff --git a/tests/xfs/877 b/tests/xfs/877
+new file mode 100755
+index 0000000..2ad7d30
+--- /dev/null
++++ b/tests/xfs/877
+@@ -0,0 +1,92 @@
++#! /bin/bash
++# FS QA Test No. 877
++#
++# Make sure query_range returns -EINVAL if lowkey > highkey.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename "$0"`
++seqres="$RESULT_DIR/$seq"
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -rf "$tmp".* $metadump_file
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++
++# real QA test starts here
++_supported_os Linux
++_supported_fs xfs
++_require_xfs_scratch_rmapbt
++_require_command "$XFS_DB_PROG" "xfs_db"
++_require_xfs_io_command "falloc"
++_require_xfs_io_command "fpunch"
++_require_xfs_io_command "fzero"
++_require_xfs_io_command "fcollapse"
++_require_xfs_io_command "finsert"
++
++rm -f "$seqres.full"
++
++echo "Format and mount"
++_scratch_mkfs > "$seqres.full" 2>&1
++_scratch_mount
++blksz=65536
++blocks=16
++len=$((blocks * blksz))
++
++echo "Create some files"
++$XFS_IO_PROG -f -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f1 >> $seqres.full
++
++echo "Manipulate file"
++$XFS_IO_PROG -c "fpunch $blksz $blksz" \
++	-c "fzero $((3 * blksz)) $blksz" \
++	-c "pwrite -S 0x69 $((5 * blksz)) $blksz" \
++	-c "fpunch $((7 * blksz)) $blksz" \
++	-c "fsync" \
++	-c "pwrite -S 0x70 $((7 * blksz)) $blksz" \
++	-c "fcollapse $((9 * blksz)) $blksz" \
++	-c "finsert $((10 * blksz)) $blksz" $SCRATCH_MNT/f1 >> $seqres.full
++
++echo "Check file"
++md5sum $SCRATCH_MNT/f1 | _filter_scratch
++od -tx1 -Ad -c $SCRATCH_MNT/f1 >> $seqres.full
++
++echo "Unmount"
++_scratch_unmount
++
++echo "Try a regular fsmap"
++$XFS_DB_PROG -c 'fsmap' `_scratch_xfs_db_options` >> $seqres.full
++$XFS_DB_PROG -c 'fsmap 0 5' `_scratch_xfs_db_options` >> $seqres.full
++
++echo "Try a bad fsmap"
++$XFS_DB_PROG -c 'fsmap 5 4' `_scratch_xfs_db_options`
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/877.out b/tests/xfs/877.out
+new file mode 100644
+index 0000000..4a2242f
+--- /dev/null
++++ b/tests/xfs/877.out
+@@ -0,0 +1,10 @@
++QA output created by 877
++Format and mount
++Create some files
++Manipulate file
++Check file
++e45c5707fcf6817e914ffb6ce37a0ac7  SCRATCH_MNT/f1
++Unmount
++Try a regular fsmap
++Try a bad fsmap
++Error 22 while querying fsmap btree.
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 8565204..72580e9 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -311,3 +311,5 @@
+ 873 auto quick clone fsr
+ 874 auto quick clone fsr
+ 875 auto quick clone fsr quota
++876 auto quick rmap clone
++877 auto quick rmap clone
 
-Thanks,
-Eryu
-
->  
->  echo "+ mount image (2)"
->  _scratch_mount
-> -- 
-> 1.8.3.1
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
