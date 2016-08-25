@@ -1,180 +1,421 @@
-Received: from mx1.redhat.com ([209.132.183.28]:47582 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753958AbcH0PY3 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 27 Aug 2016 11:24:29 -0400
-Date: Sat, 27 Aug 2016 23:24:27 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH] fstests: test xfs rw remount with unknown ro-compat
- features
-Message-ID: <20160827152427.GK10350@dhcp12-143.nay.redhat.com>
-References: <1472309497-11351-1-git-send-email-zlang@redhat.com>
+Received: from userp1050.oracle.com ([156.151.31.82]:29238 "EHLO
+        userp1050.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756040AbcHYXas (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 25 Aug 2016 19:30:48 -0400
+Subject: [PATCH 07/13] xfs: test swapext with reflink
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Thu, 25 Aug 2016 16:29:03 -0700
+Message-ID: <147216774386.32641.14276663608220751384.stgit@birch.djwong.org>
+In-Reply-To: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
+References: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1472309497-11351-1-git-send-email-zlang@redhat.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com
+To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Aug 27, 2016 at 10:51:37PM +0800, Zorro Lang wrote:
-> Although ro-compat features cannot be mounted rw, a bug allows
-> an ro->rw remount transition, and this will corrupt the filesystem
-> if it contains ro-compat features unknown to the running kernel.
-> 
-> This bug has been fix on linux kernel (d0a58e8 xfs: disallow rw
-> remount on fs with unknown ro-compat features), this case is
-> the regression testcase of that bug.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
->  tests/xfs/263     | 99 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/263.out |  6 ++++
->  tests/xfs/group   |  1 +
->  3 files changed, 106 insertions(+)
->  create mode 100755 tests/xfs/263
->  create mode 100644 tests/xfs/263.out
-> 
-> diff --git a/tests/xfs/263 b/tests/xfs/263
-> new file mode 100755
-> index 0000000..b934e9f
-> --- /dev/null
-> +++ b/tests/xfs/263
-> @@ -0,0 +1,99 @@
-> +#! /bin/bash
-> +# FS QA Test 263
-> +#
-> +# Test upstream d0a58e8:
-> +#   xfs: disallow rw remount on fs with unknown ro-compat features
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	# Due to we've broken the superblock of SCRATCH_DEV by
-> +	# xfs_db, so clean bad superblock at the end
-> +	_scratch_unmount
-> +	_scratch_mkfs >/dev/null 2>&1
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_supported_os Linux
-> +_require_scratch
-> +_require_xfs_crc
-> +
-> +# Only V5 XFS disallow rw mount/remount with unknown ro-compat
-> +# features
-> +MKFS_OPTIONS="-m crc=1"
-> +_scratch_mkfs_xfs >>$seqres.full 2>&1
-> +
-> +# set the highest bit of features_ro_compat, use it as an unknown
-> +# feature bit. If one day this bit become known feature, please
-> +# change this case.
-> +$XFS_DB_PROG -x -c "sb 0" \
-> +                -c "write features_ro_compat $((2**31))" \
-> +		$SCRATCH_DEV
-> +
-> +echo "rw mount test"
-> +# Generally this mount failed as bad superblock
-> +# But still keep testing this
-> +MOUNT_OPTIONS="-o rw"
-> +_scratch_mount 2>>$seqres.full
-> +if [ $? -eq 0 ]; then
-> +	_fail "rw mount test failed"
-> +fi
-> +
-> +echo "ro mount test"
-> +MOUNT_OPTIONS="-o ro"
-> +_scratch_mount
-> +if [ $? -ne 0 ]; then
-> +	_fail "ro mount test failed"
-> +else
-> +	# no hang/panic is fine
-> +	$FSSTRESS_PROG -d $SCRATCH_MNT -p 4 -n 400 >>$seqres.full 2>&1
-> +fi
-> +
-> +dmesg -c >/dev/null
-> +echo "rw remount test"
-> +MOUNT_OPTIONS="-o rw,remount"
-> +_scratch_mount 2>>$seqres.full
-> +if [ $? -eq 0 ]; then
-> +	_fail "rw,remount test failed"
-> +fi
-> +dmesg -c | sed -n -e "s/.*XFS.*: \(ro->rw transition prohibited.*\)/\1/p"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/263.out b/tests/xfs/263.out
-> new file mode 100644
-> index 0000000..974e02f
-> --- /dev/null
-> +++ b/tests/xfs/263.out
-> @@ -0,0 +1,6 @@
-> +QA output created by 263
-> +features_ro_compat = 0x80000000
-> +rw mount test
-> +ro mount test
-> +rw remount test
-> +mount: cannot remount LOOP_IMG read-write, is write-protected
+Add a few tests to stress the new swapext code for reflink and rmap.
 
-Sorry, please ignore this patch. I forgot to update the .out file.
-I'll send a V2 to fix this problem.
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ tests/xfs/873     |  108 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/873.out |    6 +++
+ tests/xfs/874     |   97 ++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/874.out |   10 +++++
+ tests/xfs/875     |  102 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/875.out |   12 ++++++
+ tests/xfs/group   |    3 +
+ 7 files changed, 338 insertions(+)
+ create mode 100755 tests/xfs/873
+ create mode 100644 tests/xfs/873.out
+ create mode 100755 tests/xfs/874
+ create mode 100644 tests/xfs/874.out
+ create mode 100755 tests/xfs/875
+ create mode 100644 tests/xfs/875.out
 
-Thanks,
-Zorro
 
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 6905a62..ec3c022 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -260,6 +260,7 @@
->  260 auto quick quota
->  261 auto quick quota
->  262 auto quick quota
-> +263 auto quick mount
->  265 auto clone
->  266 dump ioctl auto quick
->  267 dump ioctl tape
-> -- 
-> 2.7.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/tests/xfs/873 b/tests/xfs/873
+new file mode 100755
+index 0000000..75334c6
+--- /dev/null
++++ b/tests/xfs/873
+@@ -0,0 +1,108 @@
++#! /bin/bash
++# FS QA Test No. 873
++#
++# See how well xfs_fsr handles "defragging" a file with a hojillion extents.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename "$0"`
++seqres="$RESULT_DIR/$seq"
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -rf "$tmp".*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_supported_fs xfs
++_require_scratch_reflink
++_require_cp_reflink
++_require_test_program "punch-alternating"
++_require_command "$XFS_FSR_PROG" "xfs_fsr"
++
++rm -f "$seqres.full"
++
++echo "Format and mount"
++_scratch_mkfs > "$seqres.full" 2>&1
++_scratch_mount >> "$seqres.full" 2>&1
++
++testdir="$SCRATCH_MNT/test-$seq"
++mkdir "$testdir"
++
++# Setup for 16000 blocks, but we'll accept stress testing down to
++# 2^10 blocks... that should be plenty for anyone.
++fnr=$((12 + LOAD_FACTOR))
++free_blocks=$(stat -f -c '%a' "$testdir")
++blksz=$(stat -f -c '%S' "$testdir")
++space_avail=$((free_blocks * blksz))
++calc_space() {
++	blocks_needed=$(( 2 ** (fnr + 1) ))
++	space_needed=$((blocks_needed * blksz * 5 / 4))
++}
++calc_space
++while test $space_needed -gt $space_avail; do
++	fnr=$((fnr - 1))
++	calc_space
++done
++test $fnr -lt 10 && _notrun "Insufficient space for stress test; would only create $blocks_needed extents."
++bytes=$((blocks_needed * blksz))
++
++echo "Create a many-block file"
++echo "creating $blocks_needed blocks..." >> "$seqres.full"
++_pwrite_byte 0x62 0 $blksz $testdir/file0 >> $seqres.full
++"$XFS_IO_PROG" -f -c "pwrite -S 0x61 -b 4194304 0 $bytes" "$testdir/file1" >> "$seqres.full"
++echo "punching..." >> "$seqres.full"
++"$here/src/punch-alternating" "$testdir/file1" >> "$seqres.full"
++seq 0 2 $((2 ** (fnr + 1) )) | while read lblk; do
++	_reflink_range $testdir/file0 0 $testdir/file1 $((lblk * blksz)) $blksz >> $seqres.full
++done
++echo "...done" >> "$seqres.full"
++_scratch_cycle_mount
++
++echo "Reflink the big file"
++echo "reflinking $((blocks_needed / 2)) blocks, $((bytes / 2)) bytes" >> "$seqres.full"
++_reflink_range "$testdir/file1" 0 "$testdir/file2" 0 $bytes >> "$seqres.full"
++
++echo "Defrag the big file"
++old_nextents=$(_count_extents $testdir/file1)
++$XFS_FSR_PROG -v -d $testdir/file1 >> $seqres.full
++new_nextents=$(_count_extents $testdir/file1)
++
++echo "Check extent count"
++$XFS_IO_PROG -c 'stat -v' $testdir/file1 >> $seqres.full
++$XFS_IO_PROG -c 'stat -v' $testdir/file2 >> $seqres.full
++echo "extents: $old_nextents -> $new_nextents" >> $seqres.full
++test $old_nextents -gt $new_nextents || echo "FAIL: $old_nextents -> $new_nextents"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/873.out b/tests/xfs/873.out
+new file mode 100644
+index 0000000..9dddf55
+--- /dev/null
++++ b/tests/xfs/873.out
+@@ -0,0 +1,6 @@
++QA output created by 873
++Format and mount
++Create a many-block file
++Reflink the big file
++Defrag the big file
++Check extent count
+diff --git a/tests/xfs/874 b/tests/xfs/874
+new file mode 100755
+index 0000000..2e799ce
+--- /dev/null
++++ b/tests/xfs/874
+@@ -0,0 +1,97 @@
++#! /bin/bash
++# FS QA Test No. 874
++#
++# Ensure that xfs_fsr handles errors correctly while defragging files.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename "$0"`
++seqres="$RESULT_DIR/$seq"
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -rf "$tmp".*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++. ./common/reflink
++. ./common/inject
++
++# real QA test starts here
++_supported_os Linux
++_supported_fs xfs
++_require_scratch_reflink
++_require_cp_reflink
++_require_command "$XFS_FSR_PROG" "xfs_fsr"
++_require_xfs_io_error_injection "bmap_finish_one"
++_require_xfs_scratch_rmapbt
++
++rm -f "$seqres.full"
++
++echo "Format and mount"
++_scratch_mkfs > "$seqres.full" 2>&1
++_scratch_mount >> "$seqres.full" 2>&1
++
++testdir="$SCRATCH_MNT/test-$seq"
++blksz=65536
++blks=3
++mkdir "$testdir"
++
++echo "Create a many-block file"
++_pwrite_byte 0x62 0 $((blksz * blks)) $testdir/file1 >> $seqres.full
++_pwrite_byte 0x63 0 $blksz $testdir/file2 >> $seqres.full
++_reflink_range $testdir/file2 0 $testdir/file1 $blksz $blksz >> $seqres.full
++_scratch_cycle_mount
++$XFS_IO_PROG -c 'bmap -v' $testdir/file1 >> $seqres.full
++
++echo "Inject error"
++_scratch_inject_error "bmap_finish_one"
++
++echo "Defrag the file"
++old_nextents=$(_count_extents $testdir/file1)
++$XFS_FSR_PROG -v -d $testdir/file1 >> $seqres.full 2>&1
++
++echo "FS should be shut down, touch will fail"
++touch $SCRATCH_MNT/badfs 2>&1 | _filter_scratch
++
++echo "Remount to replay log" | tee /dev/ttyprintk
++_scratch_inject_logprint >> $seqres.full
++new_nextents=$(_count_extents $testdir/file1)
++
++echo "Check extent count" | tee /dev/ttyprintk
++$XFS_IO_PROG -c 'stat -v' $testdir/file1 >> $seqres.full
++$XFS_IO_PROG -c 'stat -v' $testdir/file2 >> $seqres.full
++echo "extents: $old_nextents -> $new_nextents" >> $seqres.full
++
++echo "FS should be online, touch should succeed"
++touch $SCRATCH_MNT/goodfs
++$XFS_IO_PROG -c 'bmap -v' $testdir/file1 >> $seqres.full
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/874.out b/tests/xfs/874.out
+new file mode 100644
+index 0000000..dbc0f49
+--- /dev/null
++++ b/tests/xfs/874.out
+@@ -0,0 +1,10 @@
++QA output created by 874
++Format and mount
++Create a many-block file
++Inject error
++Defrag the file
++FS should be shut down, touch will fail
++touch: cannot touch 'SCRATCH_MNT/badfs': Input/output error
++Remount to replay log
++Check extent count
++FS should be online, touch should succeed
+diff --git a/tests/xfs/875 b/tests/xfs/875
+new file mode 100755
+index 0000000..d579ba1
+--- /dev/null
++++ b/tests/xfs/875
+@@ -0,0 +1,102 @@
++#! /bin/bash
++# FS QA Test No. 875
++#
++# Ensure that xfs_fsr handles quota correctly while defragging files.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename "$0"`
++seqres="$RESULT_DIR/$seq"
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -rf "$tmp".*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++. ./common/reflink
++. ./common/quota
++
++# real QA test starts here
++_supported_os Linux
++_supported_fs xfs
++_require_scratch_reflink
++_require_cp_reflink
++_require_command "$XFS_FSR_PROG" "xfs_fsr"
++_require_quota
++_require_nobody
++
++do_repquota()
++{
++	repquota $SCRATCH_MNT | egrep '^(fsgqa|root|nobody)'
++}
++
++rm -f "$seqres.full"
++
++echo "Format and mount"
++_scratch_mkfs > "$seqres.full" 2>&1
++export MOUNT_OPTIONS="-o usrquota,grpquota $MOUNT_OPTIONS"
++_scratch_mount >> "$seqres.full" 2>&1
++quotacheck -u -g $SCRATCH_MNT 2> /dev/null
++quotaon $SCRATCH_MNT 2> /dev/null
++
++testdir="$SCRATCH_MNT/test-$seq"
++blksz=65536
++blks=3
++mkdir "$testdir"
++
++echo "Create a many-block file"
++touch $testdir/file1
++chown nobody $testdir/file1
++touch $testdir/file2
++chown nobody $testdir/file2
++_pwrite_byte 0x62 0 $((blksz * blks)) $testdir/file1 >> $seqres.full
++_pwrite_byte 0x63 0 $blksz $testdir/file2 >> $seqres.full
++_reflink_range $testdir/file2 0 $testdir/file1 $blksz $blksz >> $seqres.full
++do_repquota
++_scratch_cycle_mount
++
++echo "Defrag the file"
++old_nextents=$(_count_extents $testdir/file1)
++$XFS_FSR_PROG -v -d $testdir/file1 >> $seqres.full
++new_nextents=$(_count_extents $testdir/file1)
++do_repquota
++
++echo "Remount the FS to see if accounting changes"
++_scratch_cycle_mount
++do_repquota
++
++echo "Check extent count"
++$XFS_IO_PROG -c 'stat -v' $testdir/file1 >> $seqres.full
++$XFS_IO_PROG -c 'stat -v' $testdir/file2 >> $seqres.full
++echo "extents: $old_nextents -> $new_nextents" >> $seqres.full
++test $old_nextents -gt $new_nextents || echo "FAIL: $old_nextents -> $new_nextents"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/875.out b/tests/xfs/875.out
+new file mode 100644
+index 0000000..57653e9
+--- /dev/null
++++ b/tests/xfs/875.out
+@@ -0,0 +1,12 @@
++QA output created by 875
++Format and mount
++Create a many-block file
++root      --       0       0       0              4     0     0       
++nobody    --     256       0       0              2     0     0       
++Defrag the file
++root      --       0       0       0              4     0     0       
++nobody    --     256       0       0              2     0     0       
++Remount the FS to see if accounting changes
++root      --       0       0       0              4     0     0       
++nobody    --     256       0       0              2     0     0       
++Check extent count
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 6905a62..8565204 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -308,3 +308,6 @@
+ 325 auto quick clone
+ 326 auto quick clone
+ 327 auto quick clone
++873 auto quick clone fsr
++874 auto quick clone fsr
++875 auto quick clone fsr quota
+
