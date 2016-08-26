@@ -1,69 +1,110 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:32460 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755545AbcHYXar (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 25 Aug 2016 19:30:47 -0400
-Subject: [PATCH 04/13] generic/159,
- 160: deal with EACCESS -> EPERM transition
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 25 Aug 2016 16:28:44 -0700
-Message-ID: <147216772479.32641.3592660842211217853.stgit@birch.djwong.org>
-In-Reply-To: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
-References: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
+Received: from cn.fujitsu.com ([59.151.112.132]:48521 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1755979AbcHZGKN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 26 Aug 2016 02:10:13 -0400
+Message-ID: <57BFDD38.7080101@cn.fujitsu.com>
+Date: Fri, 26 Aug 2016 14:10:00 +0800
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Subject: Re: [PATCH v2] xfs/098: fix xfs_repair on newer xfsprogs
+References: <20160825154052.GD20705@birch.djwong.org> <1472182612-10218-1-git-send-email-yangx.jy@cn.fujitsu.com> <20160826044818.GH10350@dhcp12-143.nay.redhat.com>
+In-Reply-To: <20160826044818.GH10350@dhcp12-143.nay.redhat.com>
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
+To: Zorro Lang <zlang@redhat.com>
+Cc: darrick.wong@oracle.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-As of 4.8 we can receive EPERM (instead of EACCESS) for attempts to
-reflink/dedupe to an immutable file.  Fix this up so that we accept
-either answer.
+On 2016/08/26 12:48, Zorro Lang wrote:
+> On Fri, Aug 26, 2016 at 11:36:52AM +0800, Xiao Yang wrote:
+>> Make sure xfs_repair can't clear the log by default when it is corrupted.
+>> xfs_repair always and only clear the log when the -L parameter is specified.
+>> This has updated by:
+>> Commit f2053bc ("xfs_repair: don't clear the log by default")
+>>
+>> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
+>> ---
+>>   common/rc     | 4 ++--
+>>   tests/xfs/098 | 2 +-
+>>   2 files changed, 3 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/common/rc b/common/rc
+>> index 3fb0600..c693a31 100644
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -1143,9 +1143,9 @@ _repair_scratch_fs()
+> Hi Xiao
+>
+> You should explain why you changed this function in commit log. Or
+> the reviewer can't understand why you change it.
+>
+>>       xfs)
+>>           _scratch_xfs_repair "$@" 2>&1
+>>   	res=$?
+>> -	if [ "$res" -eq 2 ]; then
+>> +	if [ "$res" -ne 0 ]; then
+> Hi Darrick,
+>
+> The xfs_repair manpage said:
+> xfs_repair run without the -n option will always return a status code of 0.
+>
+> I don't understand why you think it return 2 here? (Please check below)
+>
+Hi Zorro
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/generic/159 |    6 +++++-
- tests/generic/160 |    6 +++++-
- 2 files changed, 10 insertions(+), 2 deletions(-)
+I don't understand why it return 2 here too.  I want to change this 
+function because xfs_repair
+without -L option return 1 when log is corrupted on newer xfsprogs-dev.
+>>   		echo "xfs_repair returns $res; replay log?"
+>> -		_scratch_mount
+>> +		_scratch_mount 2>&1
+>>   		res=$?
+>>   		if [ "$res" -gt 0 ]; then
+>>   			echo "mount returns $res; zap log?"
+>> diff --git a/tests/xfs/098 b/tests/xfs/098
+>> index d91d617..eb33bb1 100755
+>> --- a/tests/xfs/098
+>> +++ b/tests/xfs/098
+>> @@ -93,7 +93,7 @@ echo "+ mount image"
+>>   _scratch_mount 2>/dev/null&&  _fail "mount should not succeed"
+>>
+>>   echo "+ repair fs"
+>> -_scratch_xfs_repair>>  $seqres.full 2>&1
+>> +_repair_scratch_fs>>  $seqres.full
+> If just call xfs_repair without any options, the _repair_scratch_fs won't
+> help to call xfs_repair -L I think.
+>
+> So I think this patch won't fix the problem.
+>
+> Feel free to correct me, if I misunderstand something:)
+>
+> Thanks,
+> Zorro
+>
+If xfs_repair without any option succeed to repair filesystem when log 
+is corrupted,
+_repair_scratch_fs don't need  to call  xfs_repair -L.  If it failed to 
+repair filesystem,
+_repair_scratch_fs needs  to call  xfs_repair -L.
+
+Thanks
+Xiao Yang.
+>>
+>>   echo "+ mount image (2)"
+>>   _scratch_mount
+>> -- 
+>> 1.8.3.1
+>>
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> .
+>
 
 
-diff --git a/tests/generic/159 b/tests/generic/159
-index 8898d58..726333a 100755
---- a/tests/generic/159
-+++ b/tests/generic/159
-@@ -65,9 +65,13 @@ _pwrite_byte 0x61 0 $sz $testdir1/file1 >> $seqres.full
- _pwrite_byte 0x61 0 $sz $testdir1/file2 >> $seqres.full
- sync
- 
-+do_filter_output() {
-+	_filter_test_dir | sed -e 's/Operation not permitted/Permission denied/g'
-+}
-+
- echo "Try reflink on immutable files"
- $CHATTR_PROG +i $testdir1/file1 $testdir1/file2
--_reflink_range $testdir1/file1 0 $testdir1/file2 0 $blksz 2>&1 | _filter_test_dir
-+_reflink_range $testdir1/file1 0 $testdir1/file2 0 $blksz 2>&1 | do_filter_output
- $CHATTR_PROG -i $testdir1/file1 $testdir1/file2
- 
- # success, all done
-diff --git a/tests/generic/160 b/tests/generic/160
-index 3a91dc8..4946bfc 100755
---- a/tests/generic/160
-+++ b/tests/generic/160
-@@ -65,9 +65,13 @@ _pwrite_byte 0x61 0 $sz $testdir1/file1 >> $seqres.full
- _pwrite_byte 0x61 0 $sz $testdir1/file2 >> $seqres.full
- sync
- 
-+do_filter_output() {
-+	_filter_test_dir | sed -e 's/Operation not permitted/Permission denied/g'
-+}
-+
- echo "Try dedupe on immutable files"
- $CHATTR_PROG +i $testdir1/file1 $testdir1/file2
--_dedupe_range $testdir1/file1 0 $testdir1/file2 0 $blksz 2>&1 | _filter_test_dir
-+_dedupe_range $testdir1/file1 0 $testdir1/file2 0 $blksz 2>&1 | do_filter_output
- $CHATTR_PROG -i $testdir1/file1 $testdir1/file2
- 
- # success, all done
 
