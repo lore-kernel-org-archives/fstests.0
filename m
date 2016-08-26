@@ -1,70 +1,87 @@
-Subject: Re: [PATCH] generic/159: record error value correctly
-References: <20160830035114.13876-1-wangxg.fnst@cn.fujitsu.com>
- <20160830035940.GJ27776@eguan.usersys.redhat.com>
- <57C504EC.5070303@cn.fujitsu.com> <20160830044507.GG8265@birch.djwong.org>
-From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
-Message-ID: <57C51A41.8030806@cn.fujitsu.com>
-Date: Tue, 30 Aug 2016 13:31:45 +0800
+Received: from cn.fujitsu.com ([59.151.112.132]:61995 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1752970AbcHZDd1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 25 Aug 2016 23:33:27 -0400
+Message-ID: <57BFB868.7030806@cn.fujitsu.com>
+Date: Fri, 26 Aug 2016 11:32:56 +0800
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-In-Reply-To: <20160830044507.GG8265@birch.djwong.org>
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH] xfs/098: fix xfs_repair on newer xfsprogs
+References: <1472116951-3317-1-git-send-email-yangx.jy@cn.fujitsu.com> <20160825120903.GF10350@dhcp12-143.nay.redhat.com> <20160825154052.GD20705@birch.djwong.org>
+In-Reply-To: <20160825154052.GD20705@birch.djwong.org>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Sender: fstests-owner@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
 To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-hello,
-
-On 08/30/2016 12:45 PM, Darrick J. Wong wrote:
-> On Tue, Aug 30, 2016 at 12:00:44PM +0800, Wang Xiaoguang wrote:
+=E4=BA=8E 2016/08/25 23:40, Darrick J. Wong =E5=86=99=E9=81=93:
+> On Thu, Aug 25, 2016 at 08:09:03PM +0800, Zorro Lang wrote:
+>> On Thu, Aug 25, 2016 at 05:22:31PM +0800, Xiao Yang wrote:
+>>> Make sure xfs_repair can't clear the log by default when it is corrup=
+ted.
+>>> xfs_repair always and only clear the log when the -L parameter is spe=
+cified.
+>>> This has updated by:
+>>> Commit f2053bc ("xfs_repair: don't clear the log by default")
+>>>
+>>> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
+>>> ---
+>>>   tests/xfs/098 | 4 +++-
+>>>   1 file changed, 3 insertions(+), 1 deletion(-)
+>>>
+>>> diff --git a/tests/xfs/098 b/tests/xfs/098
+>>> index d91d617..0fe8d93 100755
+>>> --- a/tests/xfs/098
+>>> +++ b/tests/xfs/098
+>>> @@ -93,7 +93,9 @@ echo "+ mount image"
+>>>   _scratch_mount 2>/dev/null&&  _fail "mount should not succeed"
+>>>
+>>>   echo "+ repair fs"
+>>> -_scratch_xfs_repair>>  $seqres.full 2>&1
+>>> +_scratch_xfs_repair>>  $seqres.full 2>&1&&  _fail "xfs_repair should=
+ not succeed without -L option"
 >> Hi,
 >>
->> On 08/30/2016 11:59 AM, Eryu Guan wrote:
->>> On Tue, Aug 30, 2016 at 11:51:14AM +0800, Wang Xiaoguang wrote:
->>>> This case failed in btrfs, it's because when trying to open an immutable
->>>> file, vfs returns EPERM, not EACCESS, fix this.
->>>>
->>>> Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
->>>> ---
->>>>   tests/generic/159.out | 2 +-
->>>>   1 file changed, 1 insertion(+), 1 deletion(-)
->>>>
->>>> diff --git a/tests/generic/159.out b/tests/generic/159.out
->>>> index 92fe33a..3e5e47f 100755
->>>> --- a/tests/generic/159.out
->>>> +++ b/tests/generic/159.out
->>>> @@ -2,4 +2,4 @@ QA output created by 159
->>>>   Format and mount
->>>>   Create the original files
->>>>   Try reflink on immutable files
->>>> -TEST_DIR/test-159/file2: Permission denied
->>>> +TEST_DIR/test-159/file2: Operation not permitted
->>> I think you need to do a filter in the test not change the golden image,
->>> so older kernels won't fail because they still return EACCES on
->>> immutable inodes.
->> I just checked the upstream kernel, found that it retuns EPERM.
->> OK, I'll send a new version.
-> I'm pretty sure "generic/159, 160: deal with EACCESS -> EPERM transition"
-> already covers this.
-Yes, it works, thanks.
-
-Regards,
-Xiaoguang Wang
-
+>> If you make it fail at here, this case can't run for old xfsprogs(with=
+out
+>> commit f2053bc).
+>>
+>>> +
+>>> +_scratch_xfs_repair -L>>  $seqres.full 2>&1
+>> For compatibility, maybe you can use "-L" directly. Or use -L
+>> after _scratch_xfs_repair return error.
+> I suggest _repair_scratch_fs.
 >
 > --D
 >
->> Regards,
->> Xiaoguang Wang
+Hi Darrick
+I changed _repair_scratch_fs because xfs_repair return 1 when log is=20
+corrupted.
+
+Thanks for your review.
+
+Regards,
+Xiao Yang
+
+>> Thanks,
+>> Zorro
 >>
->>> Thanks,
->>> Eryu
+>>>
+>>>   echo "+ mount image (2)"
+>>>   _scratch_mount
+>>> --=20
+>>> 1.8.3.1
 >>>
 >>>
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe fstests" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
+>
+
+
+
