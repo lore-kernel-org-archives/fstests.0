@@ -1,54 +1,153 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:32417 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754375AbcHYXar (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 25 Aug 2016 19:30:47 -0400
-Subject: [PATCH 02/13] xfs/122: decrease the log update done item sizes
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 25 Aug 2016 16:28:32 -0700
-Message-ID: <147216771202.32641.9018236822745566504.stgit@birch.djwong.org>
-In-Reply-To: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
-References: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
+Received: from mx1.redhat.com ([209.132.183.28]:59100 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752031AbcHZJFk (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 26 Aug 2016 05:05:40 -0400
+Date: Fri, 26 Aug 2016 17:05:03 +0800
+From: Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH v2] xfs/098: fix xfs_repair on newer xfsprogs
+Message-ID: <20160826090503.GI10350@dhcp12-143.nay.redhat.com>
+References: <20160825154052.GD20705@birch.djwong.org>
+ <1472182612-10218-1-git-send-email-yangx.jy@cn.fujitsu.com>
+ <20160826044818.GH10350@dhcp12-143.nay.redhat.com>
+ <57BFDD38.7080101@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <57BFDD38.7080101@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: darrick.wong@oracle.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Redundant fields were removed from the rmap/refcount/bmap update done
-log items, so fix the size tests.
+On Fri, Aug 26, 2016 at 02:10:00PM +0800, Xiao Yang wrote:
+> On 2016/08/26 12:48, Zorro Lang wrote:
+> >On Fri, Aug 26, 2016 at 11:36:52AM +0800, Xiao Yang wrote:
+> >>Make sure xfs_repair can't clear the log by default when it is corrupted.
+> >>xfs_repair always and only clear the log when the -L parameter is specified.
+> >>This has updated by:
+> >>Commit f2053bc ("xfs_repair: don't clear the log by default")
+> >>
+> >>Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
+> >>---
+> >>  common/rc     | 4 ++--
+> >>  tests/xfs/098 | 2 +-
+> >>  2 files changed, 3 insertions(+), 3 deletions(-)
+> >>
+> >>diff --git a/common/rc b/common/rc
+> >>index 3fb0600..c693a31 100644
+> >>--- a/common/rc
+> >>+++ b/common/rc
+> >>@@ -1143,9 +1143,9 @@ _repair_scratch_fs()
+> >Hi Xiao
+> >
+> >You should explain why you changed this function in commit log. Or
+> >the reviewer can't understand why you change it.
+> >
+> >>      xfs)
+> >>          _scratch_xfs_repair "$@" 2>&1
+> >>  	res=$?
+> >>-	if [ "$res" -eq 2 ]; then
+> >>+	if [ "$res" -ne 0 ]; then
+> >Hi Darrick,
+> >
+> >The xfs_repair manpage said:
+> >xfs_repair run without the -n option will always return a status code of 0.
+> >
+> >I don't understand why you think it return 2 here? (Please check below)
+> >
+> Hi Zorro
+> 
+> I don't understand why it return 2 here too.  I want to change this
+> function because xfs_repair
+> without -L option return 1 when log is corrupted on newer xfsprogs-dev.
+> >>  		echo "xfs_repair returns $res; replay log?"
+> >>-		_scratch_mount
+> >>+		_scratch_mount 2>&1
+> >>  		res=$?
+> >>  		if [ "$res" -gt 0 ]; then
+> >>  			echo "mount returns $res; zap log?"
+> >>diff --git a/tests/xfs/098 b/tests/xfs/098
+> >>index d91d617..eb33bb1 100755
+> >>--- a/tests/xfs/098
+> >>+++ b/tests/xfs/098
+> >>@@ -93,7 +93,7 @@ echo "+ mount image"
+> >>  _scratch_mount 2>/dev/null&&  _fail "mount should not succeed"
+> >>
+> >>  echo "+ repair fs"
+> >>-_scratch_xfs_repair>>  $seqres.full 2>&1
+> >>+_repair_scratch_fs>>  $seqres.full
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/xfs/122.out |    6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+You should print the stderr to $seqres.full too. Because in
+"_repair_scratch_fs", its code likes below:
+
+    xfs)
+        _scratch_xfs_repair "$@" 2>&1
+>>> This repair won't clear the corrupted log anymore.
+
+        res=$?
+        if [ "$res" -eq 2 ]; then
+                echo "xfs_repair returns $res; replay log?"
+                _scratch_mount
+>>> So this mount maybe failed if it can't deal with the corrupted log.
+>>> If it print some error messages, it'll break the golden image of xfs/098
+
+                res=$?
+                if [ "$res" -gt 0 ]; then
+                        echo "mount returns $res; zap log?"
+                        _scratch_xfs_repair -L 2>&1
 
 
-diff --git a/tests/xfs/122.out b/tests/xfs/122.out
-index b20011e..06d1432 100644
---- a/tests/xfs/122.out
-+++ b/tests/xfs/122.out
-@@ -61,10 +61,10 @@ sizeof(struct xfs_attr3_leaf_hdr) = 80
- sizeof(struct xfs_attr3_leafblock) = 88
- sizeof(struct xfs_attr3_rmt_hdr) = 56
- sizeof(struct xfs_btree_block) = 72
--sizeof(struct xfs_bud_log_format) = 48
-+sizeof(struct xfs_bud_log_format) = 16
- sizeof(struct xfs_bui_log_format) = 48
- sizeof(struct xfs_clone_args) = 32
--sizeof(struct xfs_cud_log_format) = 32
-+sizeof(struct xfs_cud_log_format) = 16
- sizeof(struct xfs_cui_log_format) = 32
- sizeof(struct xfs_da3_blkinfo) = 56
- sizeof(struct xfs_da3_intnode) = 64
-@@ -90,7 +90,7 @@ sizeof(struct xfs_rmap_rec) = 24
- sizeof(struct xfs_rtrmap_key) = 24
- sizeof(struct xfs_rtrmap_rec) = 32
- sizeof(struct xfs_rtrmap_root) = 4
--sizeof(struct xfs_rud_log_format) = 48
-+sizeof(struct xfs_rud_log_format) = 16
- sizeof(struct xfs_rui_log_format) = 48
- sizeof(xfs_agf_t) = 224
- sizeof(xfs_agfl_t) = 36
+> >If just call xfs_repair without any options, the _repair_scratch_fs won't
+> >help to call xfs_repair -L I think.
+> >
+> >So I think this patch won't fix the problem.
+> >
+> >Feel free to correct me, if I misunderstand something:)
+> >
+> >Thanks,
+> >Zorro
+> >
+> If xfs_repair without any option succeed to repair filesystem when
+> log is corrupted,
+> _repair_scratch_fs don't need  to call  xfs_repair -L.  If it failed
+> to repair filesystem,
+> _repair_scratch_fs needs  to call  xfs_repair -L.
 
+Oh, sorry, I just tried to run ths case. The "_scratch_xfs_repair" really return
+non-zero when it try to repair a corrupted xfs...
+
+But the manpage(man xfs_repair) really said:
+xfs_repair run without the -n option will always return a status code of 0.
+
+Maybe we should update the manpage? I'll check it later.
+
+Any way, there's still a problem in your patch, please see above:
+
+Thanks,
+Zorro
+
+> 
+> Thanks
+> Xiao Yang.
+> >>
+> >>  echo "+ mount image (2)"
+> >>  _scratch_mount
+> >>-- 
+> >>1.8.3.1
+> >>
+> >>
+> >>
+> >>--
+> >>To unsubscribe from this list: send the line "unsubscribe fstests" in
+> >>the body of a message to majordomo@vger.kernel.org
+> >>More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
+> >.
+> >
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
