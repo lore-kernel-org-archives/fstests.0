@@ -1,37 +1,162 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:47951 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755753AbcHYXas (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 25 Aug 2016 19:30:48 -0400
-Subject: [PATCH 13/13] xfs/122: check the ag reservation counter ioctl
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 25 Aug 2016 16:29:43 -0700
-Message-ID: <147216778333.32641.6694229942234239492.stgit@birch.djwong.org>
-In-Reply-To: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
-References: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Received: from mx1.redhat.com ([209.132.183.28]:34504 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932214AbcH0Ovv (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 27 Aug 2016 10:51:51 -0400
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] fstests: test xfs rw remount with unknown ro-compat features
+Date: Sat, 27 Aug 2016 22:51:37 +0800
+Message-Id: <1472309497-11351-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
+To: fstests@vger.kernel.org
+Cc: xfs@oss.sgi.com, Zorro Lang <zlang@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Although ro-compat features cannot be mounted rw, a bug allows
+an ro->rw remount transition, and this will corrupt the filesystem
+if it contains ro-compat features unknown to the running kernel.
+
+This bug has been fix on linux kernel (d0a58e8 xfs: disallow rw
+remount on fs with unknown ro-compat features), this case is
+the regression testcase of that bug.
+
+Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
- tests/xfs/122.out |    1 +
- 1 file changed, 1 insertion(+)
+ tests/xfs/263     | 99 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/263.out |  6 ++++
+ tests/xfs/group   |  1 +
+ 3 files changed, 106 insertions(+)
+ create mode 100755 tests/xfs/263
+ create mode 100644 tests/xfs/263.out
 
-
-diff --git a/tests/xfs/122.out b/tests/xfs/122.out
-index cd909e6..ae84283 100644
---- a/tests/xfs/122.out
-+++ b/tests/xfs/122.out
-@@ -81,6 +81,7 @@ sizeof(struct xfs_dsymlink_hdr) = 56
- sizeof(struct xfs_extent_data) = 24
- sizeof(struct xfs_extent_data_info) = 32
- sizeof(struct xfs_fs_eofblocks) = 128
-+sizeof(struct xfs_fsop_ag_resblks) = 32
- sizeof(struct xfs_icreate_log) = 28
- sizeof(struct xfs_log_dinode) = 176
- sizeof(struct xfs_map_extent) = 32
+diff --git a/tests/xfs/263 b/tests/xfs/263
+new file mode 100755
+index 0000000..b934e9f
+--- /dev/null
++++ b/tests/xfs/263
+@@ -0,0 +1,99 @@
++#! /bin/bash
++# FS QA Test 263
++#
++# Test upstream d0a58e8:
++#   xfs: disallow rw remount on fs with unknown ro-compat features
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	# Due to we've broken the superblock of SCRATCH_DEV by
++	# xfs_db, so clean bad superblock at the end
++	_scratch_unmount
++	_scratch_mkfs >/dev/null 2>&1
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs xfs
++_supported_os Linux
++_require_scratch
++_require_xfs_crc
++
++# Only V5 XFS disallow rw mount/remount with unknown ro-compat
++# features
++MKFS_OPTIONS="-m crc=1"
++_scratch_mkfs_xfs >>$seqres.full 2>&1
++
++# set the highest bit of features_ro_compat, use it as an unknown
++# feature bit. If one day this bit become known feature, please
++# change this case.
++$XFS_DB_PROG -x -c "sb 0" \
++                -c "write features_ro_compat $((2**31))" \
++		$SCRATCH_DEV
++
++echo "rw mount test"
++# Generally this mount failed as bad superblock
++# But still keep testing this
++MOUNT_OPTIONS="-o rw"
++_scratch_mount 2>>$seqres.full
++if [ $? -eq 0 ]; then
++	_fail "rw mount test failed"
++fi
++
++echo "ro mount test"
++MOUNT_OPTIONS="-o ro"
++_scratch_mount
++if [ $? -ne 0 ]; then
++	_fail "ro mount test failed"
++else
++	# no hang/panic is fine
++	$FSSTRESS_PROG -d $SCRATCH_MNT -p 4 -n 400 >>$seqres.full 2>&1
++fi
++
++dmesg -c >/dev/null
++echo "rw remount test"
++MOUNT_OPTIONS="-o rw,remount"
++_scratch_mount 2>>$seqres.full
++if [ $? -eq 0 ]; then
++	_fail "rw,remount test failed"
++fi
++dmesg -c | sed -n -e "s/.*XFS.*: \(ro->rw transition prohibited.*\)/\1/p"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/263.out b/tests/xfs/263.out
+new file mode 100644
+index 0000000..974e02f
+--- /dev/null
++++ b/tests/xfs/263.out
+@@ -0,0 +1,6 @@
++QA output created by 263
++features_ro_compat = 0x80000000
++rw mount test
++ro mount test
++rw remount test
++mount: cannot remount LOOP_IMG read-write, is write-protected
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 6905a62..ec3c022 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -260,6 +260,7 @@
+ 260 auto quick quota
+ 261 auto quick quota
+ 262 auto quick quota
++263 auto quick mount
+ 265 auto clone
+ 266 dump ioctl auto quick
+ 267 dump ioctl tape
+-- 
+2.7.4
 
