@@ -1,162 +1,180 @@
-Received: from aserp1050.oracle.com ([141.146.126.70]:25432 "EHLO
-        aserp1050.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756485AbcHYXas (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 25 Aug 2016 19:30:48 -0400
-Subject: [PATCH 11/13] xfs: test getbmapx shared extent reporting
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 25 Aug 2016 16:29:30 -0700
-Message-ID: <147216777074.32641.10368196568223720351.stgit@birch.djwong.org>
-In-Reply-To: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
-References: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
+Received: from mx1.redhat.com ([209.132.183.28]:47582 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753958AbcH0PY3 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 27 Aug 2016 11:24:29 -0400
+Date: Sat, 27 Aug 2016 23:24:27 +0800
+From: Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH] fstests: test xfs rw remount with unknown ro-compat
+ features
+Message-ID: <20160827152427.GK10350@dhcp12-143.nay.redhat.com>
+References: <1472309497-11351-1-git-send-email-zlang@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1472309497-11351-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
+To: fstests@vger.kernel.org
+Cc: xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-Test that getbmapx returns exact shared extents.
+On Sat, Aug 27, 2016 at 10:51:37PM +0800, Zorro Lang wrote:
+> Although ro-compat features cannot be mounted rw, a bug allows
+> an ro->rw remount transition, and this will corrupt the filesystem
+> if it contains ro-compat features unknown to the running kernel.
+> 
+> This bug has been fix on linux kernel (d0a58e8 xfs: disallow rw
+> remount on fs with unknown ro-compat features), this case is
+> the regression testcase of that bug.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> ---
+>  tests/xfs/263     | 99 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/263.out |  6 ++++
+>  tests/xfs/group   |  1 +
+>  3 files changed, 106 insertions(+)
+>  create mode 100755 tests/xfs/263
+>  create mode 100644 tests/xfs/263.out
+> 
+> diff --git a/tests/xfs/263 b/tests/xfs/263
+> new file mode 100755
+> index 0000000..b934e9f
+> --- /dev/null
+> +++ b/tests/xfs/263
+> @@ -0,0 +1,99 @@
+> +#! /bin/bash
+> +# FS QA Test 263
+> +#
+> +# Test upstream d0a58e8:
+> +#   xfs: disallow rw remount on fs with unknown ro-compat features
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +	# Due to we've broken the superblock of SCRATCH_DEV by
+> +	# xfs_db, so clean bad superblock at the end
+> +	_scratch_unmount
+> +	_scratch_mkfs >/dev/null 2>&1
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs xfs
+> +_supported_os Linux
+> +_require_scratch
+> +_require_xfs_crc
+> +
+> +# Only V5 XFS disallow rw mount/remount with unknown ro-compat
+> +# features
+> +MKFS_OPTIONS="-m crc=1"
+> +_scratch_mkfs_xfs >>$seqres.full 2>&1
+> +
+> +# set the highest bit of features_ro_compat, use it as an unknown
+> +# feature bit. If one day this bit become known feature, please
+> +# change this case.
+> +$XFS_DB_PROG -x -c "sb 0" \
+> +                -c "write features_ro_compat $((2**31))" \
+> +		$SCRATCH_DEV
+> +
+> +echo "rw mount test"
+> +# Generally this mount failed as bad superblock
+> +# But still keep testing this
+> +MOUNT_OPTIONS="-o rw"
+> +_scratch_mount 2>>$seqres.full
+> +if [ $? -eq 0 ]; then
+> +	_fail "rw mount test failed"
+> +fi
+> +
+> +echo "ro mount test"
+> +MOUNT_OPTIONS="-o ro"
+> +_scratch_mount
+> +if [ $? -ne 0 ]; then
+> +	_fail "ro mount test failed"
+> +else
+> +	# no hang/panic is fine
+> +	$FSSTRESS_PROG -d $SCRATCH_MNT -p 4 -n 400 >>$seqres.full 2>&1
+> +fi
+> +
+> +dmesg -c >/dev/null
+> +echo "rw remount test"
+> +MOUNT_OPTIONS="-o rw,remount"
+> +_scratch_mount 2>>$seqres.full
+> +if [ $? -eq 0 ]; then
+> +	_fail "rw,remount test failed"
+> +fi
+> +dmesg -c | sed -n -e "s/.*XFS.*: \(ro->rw transition prohibited.*\)/\1/p"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/263.out b/tests/xfs/263.out
+> new file mode 100644
+> index 0000000..974e02f
+> --- /dev/null
+> +++ b/tests/xfs/263.out
+> @@ -0,0 +1,6 @@
+> +QA output created by 263
+> +features_ro_compat = 0x80000000
+> +rw mount test
+> +ro mount test
+> +rw remount test
+> +mount: cannot remount LOOP_IMG read-write, is write-protected
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/xfs/896     |   93 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/896.out |   17 ++++++++++
- tests/xfs/group   |    1 +
- 3 files changed, 111 insertions(+)
- create mode 100755 tests/xfs/896
- create mode 100644 tests/xfs/896.out
+Sorry, please ignore this patch. I forgot to update the .out file.
+I'll send a V2 to fix this problem.
 
+Thanks,
+Zorro
 
-diff --git a/tests/xfs/896 b/tests/xfs/896
-new file mode 100755
-index 0000000..a0281bd
---- /dev/null
-+++ b/tests/xfs/896
-@@ -0,0 +1,93 @@
-+#! /bin/bash
-+# FS QA Test No. 896
-+#
-+# Check that GETBMAPX accurately report shared extents.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Oracle, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 7 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs xfs
-+_require_scratch_reflink
-+_require_xfs_io_command "bmap"
-+
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
-+
-+blocks=5
-+blksz=65536
-+sz=$((blocks * blksz))
-+
-+echo "Create the original files"
-+$XFS_IO_PROG -f -c "falloc 0 $sz" $testdir/file1 >> $seqres.full
-+_pwrite_byte 0x61 0 $sz $testdir/file1 >> $seqres.full
-+_scratch_cycle_mount
-+
-+bmap() {
-+	$XFS_IO_PROG -c 'bmap -v' $1 | grep '^[[:space:]]*[0-9]*:'
-+}
-+
-+echo "file1 extents and holes"
-+bmap $testdir/file1 | grep -v -c hole
-+bmap $testdir/file1 | grep -c hole
-+
-+_reflink_range $testdir/file1 $blksz $testdir/file2 $((blksz * 3)) $blksz >> $seqres.full
-+_reflink_range $testdir/file1 $((blksz * 3)) $testdir/file2 $blksz $blksz >> $seqres.full
-+_scratch_cycle_mount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
-+
-+echo "file1 extents and holes"
-+bmap $testdir/file1 | grep -v -c hole
-+bmap $testdir/file1 | grep -c hole
-+echo "file2 extents and holes"
-+bmap $testdir/file2 | grep -v -c hole
-+bmap $testdir/file2 | grep -c hole
-+echo "file1 shared extents"
-+bmap $testdir/file1 | grep -c '1.....$'
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/896.out b/tests/xfs/896.out
-new file mode 100644
-index 0000000..63b3a11
---- /dev/null
-+++ b/tests/xfs/896.out
-@@ -0,0 +1,17 @@
-+QA output created by 896
-+Format and mount
-+Create the original files
-+file1 extents and holes
-+1
-+0
-+Compare files
-+17af09af790a9b4c79cddf72f6b642cb  SCRATCH_MNT/test-896/file1
-+79418df9c55ab7f58781cb7b9e7d5d91  SCRATCH_MNT/test-896/file2
-+file1 extents and holes
-+5
-+0
-+file2 extents and holes
-+2
-+2
-+file1 shared extents
-+2
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 6d349dc..5ff35cb 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -331,3 +331,4 @@
- 893 auto quick rmap fsmap
- 894 auto quick rmap fsmap
- 895 auto quick rmap fsmap
-+896 auto quick clone
-
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index 6905a62..ec3c022 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -260,6 +260,7 @@
+>  260 auto quick quota
+>  261 auto quick quota
+>  262 auto quick quota
+> +263 auto quick mount
+>  265 auto clone
+>  266 dump ioctl auto quick
+>  267 dump ioctl tape
+> -- 
+> 2.7.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
