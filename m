@@ -1,156 +1,257 @@
-Received: from mx1.redhat.com ([209.132.183.28]:49140 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:41228 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755125AbcH3Hff (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 30 Aug 2016 03:35:35 -0400
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH] xfs/187: fix new sb_features2 ftype stop case running
-Date: Tue, 30 Aug 2016 15:35:32 +0800
-Message-Id: <1472542532-16497-1-git-send-email-zlang@redhat.com>
+        id S1752756AbcH3HjL (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 30 Aug 2016 03:39:11 -0400
+From: Artem Savkov <asavkov@redhat.com>
+Subject: [PATCH v4] Add a test for listxattr syscall with different buffer sizes.
+Date: Tue, 30 Aug 2016 09:39:07 +0200
+Message-Id: <1472542747-28307-1-git-send-email-asavkov@redhat.com>
+In-Reply-To: <20160830043516.GK27776@eguan.usersys.redhat.com>
+References: <20160830043516.GK27776@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com, Zorro Lang <zlang@redhat.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, Dave Chinner <david@fromorbit.com>, Artem Savkov <asavkov@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-This case is too old, at that time there's no "ftype" feature for
-XFS. Due to this case need to clear features2 bits when mkfs.xfs,
-so ftype bit stop case running for long time.
+Add generic/375 test that calls listxattr syscall with different buffer size
+arguments checking if it fails properly.
 
-We care 6 features2 bits in this case:
-
-  "ATTR2, LAZYSBCOUNT, PROJID32BIT, CRC, FTYPE, FINOBT"
-
-ATTR2 and LAZYSBCOUNT bits will be tested in case. FINBOT will be
-disabled if CRC=0. So this patch only check and disable PROJID32BIT,
-CRC and FTYPE features when mkfs.xfs.
-
-Signed-off-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Artem Savkov <asavkov@redhat.com>
 ---
+ .gitignore            |  1 +
+ src/Makefile          |  2 +-
+ src/listxattr.c       | 73 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/375     | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/375.out | 11 +++++++
+ tests/generic/group   |  1 +
+ 6 files changed, 174 insertions(+), 1 deletion(-)
+ create mode 100644 src/listxattr.c
+ create mode 100755 tests/generic/375
+ create mode 100644 tests/generic/375.out
 
-Hi,
-
-I think we shouldn't skip this case if user doesn't specify suitable
-MKFS_OPTIONS and MOUNT_OPTIONS. Because this case need complex options,
-nearly no one will specify these all options for xfstests at same time.
-
-Thanks,
-Zorro
-
- tests/xfs/187 | 51 ++++++++++++++++++++++++++++-----------------------
- 1 file changed, 28 insertions(+), 23 deletions(-)
-
-diff --git a/tests/xfs/187 b/tests/xfs/187
-index 836b924..5e7c677 100755
---- a/tests/xfs/187
-+++ b/tests/xfs/187
-@@ -31,7 +31,6 @@ seq=`basename $0`
- seqres=$RESULT_DIR/$seq
- echo "QA output created by $seq"
+diff --git a/.gitignore b/.gitignore
+index d84f385..915d2d8 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -66,6 +66,7 @@
+ /src/holes
+ /src/holetest
+ /src/itrash
++/src/listxattr
+ /src/locktest
+ /src/loggen
+ /src/looptest
+diff --git a/src/Makefile b/src/Makefile
+index 57b0df1..dd51216 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -21,7 +21,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	stale_handle pwrite_mmap_blocked t_dir_offset2 seek_sanity_test \
+ 	seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
+ 	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
+-	attr-list-by-handle-cursor-test
++	attr-list-by-handle-cursor-test listxattr
  
--here=`pwd`
- tmp=/tmp/$$
- status=1	# failure is the default!
- trap "_cleanup; exit \$status" 0 1 2 3 15
-@@ -58,24 +57,32 @@ _supported_os Linux
+ SUBDIRS =
  
- _require_scratch
- _require_attrs
--_require_attr_v1
--_require_projid16bit
- 
- rm -f $seqres.full
--
-+_scratch_mkfs >/dev/null 2>&1
- # Reset the options so that we can control what is going on here
--export MKFS_OPTIONS=""
--export MOUNT_OPTIONS=""
--
--# lazysb, attr2 and other feature bits are held in features2 and will require
--# morebitsbit on So test with lazysb and without it to see if the morebitsbit is
--# okay etc. If the mkfs defaults change, these need to change as well.
--export MKFS_NO_LAZY="-m crc=0 -l lazy-count=0 -i projid32bit=0"
--export MKFS_LAZY="-m crc=0 -l lazy-count=1 -i projid32bit=0"
-+MKFS_OPTIONS=""
-+MOUNT_OPTIONS=""
-+ver2=`$XFS_DB_PROG -c version $SCRATCH_DEV | sed -n -e "s/,/ /g" \
-+						   -e "s/.*MOREBITS\(.*\)/\1/p"`
-+# clear features2 bits which we won't test
-+for b in $ver2; do
-+	case $b in
-+	CRC)
-+		MKFS_OPTIONS="$MKFS_OPTIONS -m crc=0"
-+		;;
-+	PROJID32BIT)
-+		MKFS_OPTIONS="$MKFS_OPTIONS -i projid32bit=0"
-+		;;
-+	FTYPE)
-+		MKFS_OPTIONS="$MKFS_OPTIONS -n ftype=0"
-+		;;
-+	esac
-+done
- 
- # Make sure that when we think we are testing with morebits off
- # that we really are.
--_scratch_mkfs -i attr=1 $MKFS_NO_LAZY  >/dev/null 2>&1
-+_scratch_mkfs -i attr=1 -l lazy-count=0 >/dev/null 2>&1
- $XFS_DB_PROG -c version $SCRATCH_DEV 2>&1 >$tmp.db
- if grep -i morebits $tmp.db
- then
-@@ -90,13 +97,13 @@ echo "*** 1. test attr2 mkfs and then noattr2 mount ***"
- echo ""
- echo "attr2 fs"
- echo ""
--_scratch_mkfs -i attr=2 $MKFS_NO_LAZY >/dev/null 2>&1
-+_scratch_mkfs -i attr=2 -l lazy-count=0 >/dev/null 2>&1
- $XFS_DB_PROG -r -c version $SCRATCH_DEV 2>&1 | _filter_version
- echo ""
- echo "noattr2 fs"
- echo ""
- _scratch_mount -o noattr2
--$UMOUNT_PROG $SCRATCH_MNT
-+_scratch_unmount
- $XFS_DB_PROG -r -c version $SCRATCH_DEV 2>&1 | _filter_version
- 
- # adding an EA will ensure the ATTR1 flag is turned on
-@@ -105,7 +112,7 @@ echo "*** 2. test attr2 mkfs and then noattr2 mount with 1 EA ***"
- echo ""
- echo "attr2 fs"
- echo ""
--_scratch_mkfs -i attr=2 $MKFS_NO_LAZY >/dev/null 2>&1
-+_scratch_mkfs -i attr=2 -l lazy-count=0 >/dev/null 2>&1
- $XFS_DB_PROG -r -c version $SCRATCH_DEV 2>&1 | _filter_version
- echo ""
- echo "noattr2 fs"
-@@ -115,8 +122,8 @@ cd $SCRATCH_MNT
- touch testfile
- $SETFATTR_PROG -n user.test -v 0xbabe testfile
- $GETFATTR_PROG testfile
--cd $here
--$UMOUNT_PROG $SCRATCH_MNT
-+cd - >/dev/null
-+_scratch_unmount
- $XFS_DB_PROG -r -c version $SCRATCH_DEV 2>&1 | _filter_version
- 
- echo ""
-@@ -125,16 +132,14 @@ echo ""
- echo ""
- echo "attr2 fs"
- echo ""
--_scratch_mkfs -i attr=2 $MKFS_LAZY >/dev/null 2>&1
-+_scratch_mkfs -i attr=2 -l lazy-count=1 >/dev/null 2>&1
- $XFS_DB_PROG -r -c version $SCRATCH_DEV 2>&1 | _filter_version
- echo ""
- echo "noattr2 fs"
- echo ""
- _scratch_mount -o noattr2
--cd $SCRATCH_MNT
--touch testfile
--cd $here
--$UMOUNT_PROG $SCRATCH_MNT
-+touch $SCRATCH_MNT/testfile
-+_scratch_unmount
- $XFS_DB_PROG -r -c version $SCRATCH_DEV 2>&1 | _filter_version
- 
- # success, all done
+diff --git a/src/listxattr.c b/src/listxattr.c
+new file mode 100644
+index 0000000..cd46637
+--- /dev/null
++++ b/src/listxattr.c
+@@ -0,0 +1,73 @@
++/*
++ * Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation, either version 2 of
++ * the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it would be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include <errno.h>
++#include <fcntl.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/types.h>
++#include <sys/xattr.h>
++
++int main(int argc, char **argv)
++{
++        int ret;
++        size_t bufsize = 0;
++        char *buf = NULL;
++
++        if (argc < 2) {
++                fprintf(stderr, "usage: %s <testfile> [bufsize]\n", argv[0]);
++                return 1;
++        };
++
++        if (argc > 2) {
++                bufsize = strtoul(argv[2], NULL, 10);
++                if (bufsize == -1) {
++                        perror("buffsize");
++                        return 1;
++                }
++        }
++
++        if (bufsize == 0) {
++                bufsize = listxattr(argv[1], NULL, 0);
++                if (bufsize == -1) {
++                        perror("listxattr");
++                        return 1;
++                }
++        }
++
++        buf = malloc(bufsize);
++        if (buf == NULL) {
++                perror("buf alloc");
++                return 1;
++        }
++
++        ret = listxattr(argv[1], buf, bufsize);
++        if (ret < 0) {
++                perror("listxattr");
++        } else {
++                char *l;
++                for (l = buf; l != (buf + bufsize) && *l != '\0';
++                                l = strchr(l, '\0') + 1) {
++                        printf("xattr: %s\n", l);
++                }
++        }
++
++        free(buf);
++
++        return 0;
++}
+diff --git a/tests/generic/375 b/tests/generic/375
+new file mode 100755
+index 0000000..6e85f46
+--- /dev/null
++++ b/tests/generic/375
+@@ -0,0 +1,87 @@
++#! /bin/bash
++# FSQA Test No. 375
++#
++# Test listxattr syscall behaviour with different buffer sizes.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation, either version 2 of
++# the License, or (at your option) any later version.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, see <http://www.gnu.org/licenses/>.
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_attrs
++_require_test_program "listxattr"
++
++listxattr="$here/src/listxattr"
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++# Create a testfile with three xattrs such that the sum of namelengths of the
++# first two is bigger than the namelength of the third. This is needed for
++# the 5th testcase that tests one of the cornercases.
++testfile=${SCRATCH_MNT}/testfile
++touch $testfile
++$SETFATTR_PROG -n user.foo -v bar $testfile
++$SETFATTR_PROG -n user.ping -v pong $testfile
++$SETFATTR_PROG -n user.hello -v there $testfile
++
++# 1. Call listxattr without buffer length argument. This should succeed.
++$listxattr $testfile | sort
++
++# 2. Calling listxattr on nonexistant file should fail with -ENOENT.
++$listxattr ""
++
++# 3. Calling listxattr with buffersize not suffecient for even one xattr
++# should fail with -ERANGE.
++$listxattr $testfile 1
++
++# 4. Calling listxattr with buffersize suffecient for one xattr, but not
++# sufficient for the whole list should still fail with -ERANGE.
++$listxattr $testfile 9
++
++# 5. Calling listxattr with buffersize suffecient for the last xattr, but not
++# sufficient for the sum of first two. Should fail with -ERANGE.
++$listxattr $testfile 11
++
++# 6. Calling listxattr with buffersize bigger than needed should succeed.
++$listxattr $testfile 500 | sort
++
++status=0
++exit
+diff --git a/tests/generic/375.out b/tests/generic/375.out
+new file mode 100644
+index 0000000..820f40c
+--- /dev/null
++++ b/tests/generic/375.out
+@@ -0,0 +1,11 @@
++QA output created by 375
++xattr: user.foo
++xattr: user.hello
++xattr: user.ping
++listxattr: No such file or directory
++listxattr: Numerical result out of range
++listxattr: Numerical result out of range
++listxattr: Numerical result out of range
++xattr: user.foo
++xattr: user.hello
++xattr: user.ping
+diff --git a/tests/generic/group b/tests/generic/group
+index ef38c35..f5aea8d 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -377,3 +377,4 @@
+ 372 auto quick clone
+ 373 auto quick clone
+ 374 auto quick clone dedupe
++375 attr auto quick metadata
 -- 
-2.7.4
+1.8.3.1
 
