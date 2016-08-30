@@ -1,170 +1,37 @@
-Received: from mx1.redhat.com ([209.132.183.28]:55250 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755271AbcH1Mu3 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 28 Aug 2016 08:50:29 -0400
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v3] fstests: test xfs rw remount with unknown ro-compat features
-Date: Sun, 28 Aug 2016 20:50:25 +0800
-Message-Id: <1472388625-28049-1-git-send-email-zlang@redhat.com>
+Received: from cn.fujitsu.com ([222.73.24.84]:30484 "EHLO song.cn.fujitsu.com"
+        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+        id S932295AbcH3DzY (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 29 Aug 2016 23:55:24 -0400
+From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Subject: [PATCH] generic/159: record error value correctly
+Date: Tue, 30 Aug 2016 11:51:14 +0800
+Message-Id: <20160830035114.13876-1-wangxg.fnst@cn.fujitsu.com>
+MIME-Version: 1.0
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com, Zorro Lang <zlang@redhat.com>
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Although ro-compat features cannot be mounted rw, a bug allows
-an ro->rw remount transition, and this will corrupt the filesystem
-if it contains ro-compat features unknown to the running kernel.
+This case failed in btrfs, it's because when trying to open an immutable
+file, vfs returns EPERM, not EACCESS, fix this.
 
-This bug has been fixed on linux kernel (d0a58e8 xfs: disallow rw
-remount on fs with unknown ro-compat features), this case is
-the regression testcase of that bug.
-
-Signed-off-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
 ---
+ tests/generic/159.out | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Hi,
-
-V2 fix some mistakes of golden image(.out) file.
-V3 did below things:
-  - Write more case description
-  - Change _require_scratch to _require_scratch_nocheck
-  - Change _require_xfs_crc to _require_scratch_xfs_crc
-  - Abandon overwriting MKFS_OPTIONS
-  - Give up dmesg output
-  - Change .out file, due to case is changed
-
-Thanks,
-Zorro
-
- tests/xfs/263     | 93 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/263.out |  5 +++
- tests/xfs/group   |  1 +
- 3 files changed, 99 insertions(+)
- create mode 100755 tests/xfs/263
- create mode 100644 tests/xfs/263.out
-
-diff --git a/tests/xfs/263 b/tests/xfs/263
-new file mode 100755
-index 0000000..bcad627
---- /dev/null
-+++ b/tests/xfs/263
-@@ -0,0 +1,93 @@
-+#! /bin/bash
-+# FS QA Test 263
-+#
-+# Today ro-compat features can't be mounted rw, but a bug allows
-+# an ro->rw remount transition. This bug has been fixed on linux
-+# kernel (d0a58e8 xfs: disallow rw remount on fs with unknown
-+# ro-compat features), and this case is the regression testcase.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_supported_os Linux
-+_require_scratch_nocheck
-+# Only V5 XFS disallow rw mount/remount with unknown ro-compat features
-+_require_scratch_xfs_crc
-+
-+_scratch_mkfs_xfs >>$seqres.full 2>&1
-+
-+# set the highest bit of features_ro_compat, use it as an unknown
-+# feature bit. If one day this bit become known feature, please
-+# change this case.
-+$XFS_DB_PROG -x -c "sb 0" \
-+                -c "write features_ro_compat $((2**31))" \
-+		$SCRATCH_DEV
-+
-+echo "rw mount test"
-+# Maybe this mount will failed on bad superblock
-+# But keep testing this anyway
-+_scratch_mount 2>>$seqres.full
-+if [ $? -eq 0 ]; then
-+	_fail "rw mount test failed"
-+fi
-+
-+echo "ro mount test"
-+_scratch_mount -o ro
-+if [ $? -ne 0 ]; then
-+	_fail "ro mount test failed"
-+else
-+	# no hang/panic is fine
-+	$FSSTRESS_PROG -d $SCRATCH_MNT -p 4 -n 400 >>$seqres.full 2>&1
-+fi
-+
-+echo "rw remount test"
-+_scratch_remount rw 2>>$seqres.full
-+if [ $? -eq 0 ]; then
-+	dmesg | tail -n 15 >> $seqres.full
-+	_fail "rw remount test failed"
-+fi
-+
-+_scratch_unmount
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/263.out b/tests/xfs/263.out
-new file mode 100644
-index 0000000..15364d9
---- /dev/null
-+++ b/tests/xfs/263.out
-@@ -0,0 +1,5 @@
-+QA output created by 263
-+features_ro_compat = 0x80000000
-+rw mount test
-+ro mount test
-+rw remount test
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 6905a62..ec3c022 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -260,6 +260,7 @@
- 260 auto quick quota
- 261 auto quick quota
- 262 auto quick quota
-+263 auto quick mount
- 265 auto clone
- 266 dump ioctl auto quick
- 267 dump ioctl tape
+diff --git a/tests/generic/159.out b/tests/generic/159.out
+index 92fe33a..3e5e47f 100755
+--- a/tests/generic/159.out
++++ b/tests/generic/159.out
+@@ -2,4 +2,4 @@ QA output created by 159
+ Format and mount
+ Create the original files
+ Try reflink on immutable files
+-TEST_DIR/test-159/file2: Permission denied
++TEST_DIR/test-159/file2: Operation not permitted
 -- 
-2.7.4
+2.9.0
+
+
 
