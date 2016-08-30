@@ -1,99 +1,156 @@
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:32913 "EHLO
-        ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751804AbcH3GG7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 30 Aug 2016 02:06:59 -0400
-Date: Tue, 30 Aug 2016 16:06:29 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v3] Add a test for listxattr syscall with different
- buffer sizes.
-Message-ID: <20160830060629.GU22388@dastard>
-References: <20160826051819.GQ22388@dastard>
- <1472211074-26464-1-git-send-email-asavkov@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1472211074-26464-1-git-send-email-asavkov@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:49140 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755125AbcH3Hff (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 30 Aug 2016 03:35:35 -0400
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] xfs/187: fix new sb_features2 ftype stop case running
+Date: Tue, 30 Aug 2016 15:35:32 +0800
+Message-Id: <1472542532-16497-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Artem Savkov <asavkov@redhat.com>
-Cc: fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>, Filipe Manana <fdmanana@suse.com>
+To: fstests@vger.kernel.org
+Cc: xfs@oss.sgi.com, Zorro Lang <zlang@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Aug 26, 2016 at 01:31:14PM +0200, Artem Savkov wrote:
-> Add generic/375 test that calls listxattr syscall with different buffer size
-> arguments checking if it fails properly.
-> 
-> Signed-off-by: Artem Savkov <asavkov@redhat.com>
-> ---
->  .gitignore            |  1 +
->  src/Makefile          |  2 +-
->  src/listxattr.c       | 73 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/375     | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/375.out | 11 +++++++
->  tests/generic/group   |  1 +
->  6 files changed, 174 insertions(+), 1 deletion(-)
->  create mode 100644 src/listxattr.c
->  create mode 100755 tests/generic/375
->  create mode 100644 tests/generic/375.out
-> 
-> diff --git a/.gitignore b/.gitignore
-> index d84f385..915d2d8 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -66,6 +66,7 @@
->  /src/holes
->  /src/holetest
->  /src/itrash
-> +/src/listxattr
->  /src/locktest
->  /src/loggen
->  /src/looptest
-> diff --git a/src/Makefile b/src/Makefile
-> index 57b0df1..dd51216 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -21,7 +21,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->  	stale_handle pwrite_mmap_blocked t_dir_offset2 seek_sanity_test \
->  	seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
->  	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
-> -	attr-list-by-handle-cursor-test
-> +	attr-list-by-handle-cursor-test listxattr
->  
->  SUBDIRS =
->  
-> diff --git a/src/listxattr.c b/src/listxattr.c
-> new file mode 100644
-> index 0000000..da9d163
-> --- /dev/null
-> +++ b/src/listxattr.c
-> @@ -0,0 +1,73 @@
-> +/*
-> + * Copyright (c) 2016 Artem Savkov <asavkov@redhat.com>
+This case is too old, at that time there's no "ftype" feature for
+XFS. Due to this case need to clear features2 bits when mkfs.xfs,
+so ftype bit stop case running for long time.
 
-This is somewhat contradictory  and quite ambiguous - a personal
-copyright assertion from with your employer's email contact and a
-s-o-b from the same address. If it's your own personal copyright,
-then please use a private email address. i.e
+We care 6 features2 bits in this case:
 
-Copyright (c) 2016 Artem Savkov <personal email address>
+  "ATTR2, LAZYSBCOUNT, PROJID32BIT, CRC, FTYPE, FINOBT"
 
-And the patch needs to have a S-o-B that matches the copyright
-statement.
+ATTR2 and LAZYSBCOUNT bits will be tested in case. FINBOT will be
+disabled if CRC=0. So this patch only check and disable PROJID32BIT,
+CRC and FTYPE features when mkfs.xfs.
 
-However, you're doing all this work under a @redhat.com email
-address, it tends to mean the work is not owned directly by you
-but your employer, and hence the copywrite statement needs to be:
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
 
-Copyright (c) 2016 Red Hat, Inc. All rights reserved.
+Hi,
 
-I know, I'm being a pendant, but copyright is a legal construct and
-we need to be certain that it is correct and unambigious. If you
-have any doubt about whether you or your company owns the copyright
-for work you do on their behalf, please refer to your company legal
-counsel for advice...
+I think we shouldn't skip this case if user doesn't specify suitable
+MKFS_OPTIONS and MOUNT_OPTIONS. Because this case need complex options,
+nearly no one will specify these all options for xfstests at same time.
 
-Cheers,
+Thanks,
+Zorro
 
-Dave.
+ tests/xfs/187 | 51 ++++++++++++++++++++++++++++-----------------------
+ 1 file changed, 28 insertions(+), 23 deletions(-)
+
+diff --git a/tests/xfs/187 b/tests/xfs/187
+index 836b924..5e7c677 100755
+--- a/tests/xfs/187
++++ b/tests/xfs/187
+@@ -31,7 +31,6 @@ seq=`basename $0`
+ seqres=$RESULT_DIR/$seq
+ echo "QA output created by $seq"
+ 
+-here=`pwd`
+ tmp=/tmp/$$
+ status=1	# failure is the default!
+ trap "_cleanup; exit \$status" 0 1 2 3 15
+@@ -58,24 +57,32 @@ _supported_os Linux
+ 
+ _require_scratch
+ _require_attrs
+-_require_attr_v1
+-_require_projid16bit
+ 
+ rm -f $seqres.full
+-
++_scratch_mkfs >/dev/null 2>&1
+ # Reset the options so that we can control what is going on here
+-export MKFS_OPTIONS=""
+-export MOUNT_OPTIONS=""
+-
+-# lazysb, attr2 and other feature bits are held in features2 and will require
+-# morebitsbit on So test with lazysb and without it to see if the morebitsbit is
+-# okay etc. If the mkfs defaults change, these need to change as well.
+-export MKFS_NO_LAZY="-m crc=0 -l lazy-count=0 -i projid32bit=0"
+-export MKFS_LAZY="-m crc=0 -l lazy-count=1 -i projid32bit=0"
++MKFS_OPTIONS=""
++MOUNT_OPTIONS=""
++ver2=`$XFS_DB_PROG -c version $SCRATCH_DEV | sed -n -e "s/,/ /g" \
++						   -e "s/.*MOREBITS\(.*\)/\1/p"`
++# clear features2 bits which we won't test
++for b in $ver2; do
++	case $b in
++	CRC)
++		MKFS_OPTIONS="$MKFS_OPTIONS -m crc=0"
++		;;
++	PROJID32BIT)
++		MKFS_OPTIONS="$MKFS_OPTIONS -i projid32bit=0"
++		;;
++	FTYPE)
++		MKFS_OPTIONS="$MKFS_OPTIONS -n ftype=0"
++		;;
++	esac
++done
+ 
+ # Make sure that when we think we are testing with morebits off
+ # that we really are.
+-_scratch_mkfs -i attr=1 $MKFS_NO_LAZY  >/dev/null 2>&1
++_scratch_mkfs -i attr=1 -l lazy-count=0 >/dev/null 2>&1
+ $XFS_DB_PROG -c version $SCRATCH_DEV 2>&1 >$tmp.db
+ if grep -i morebits $tmp.db
+ then
+@@ -90,13 +97,13 @@ echo "*** 1. test attr2 mkfs and then noattr2 mount ***"
+ echo ""
+ echo "attr2 fs"
+ echo ""
+-_scratch_mkfs -i attr=2 $MKFS_NO_LAZY >/dev/null 2>&1
++_scratch_mkfs -i attr=2 -l lazy-count=0 >/dev/null 2>&1
+ $XFS_DB_PROG -r -c version $SCRATCH_DEV 2>&1 | _filter_version
+ echo ""
+ echo "noattr2 fs"
+ echo ""
+ _scratch_mount -o noattr2
+-$UMOUNT_PROG $SCRATCH_MNT
++_scratch_unmount
+ $XFS_DB_PROG -r -c version $SCRATCH_DEV 2>&1 | _filter_version
+ 
+ # adding an EA will ensure the ATTR1 flag is turned on
+@@ -105,7 +112,7 @@ echo "*** 2. test attr2 mkfs and then noattr2 mount with 1 EA ***"
+ echo ""
+ echo "attr2 fs"
+ echo ""
+-_scratch_mkfs -i attr=2 $MKFS_NO_LAZY >/dev/null 2>&1
++_scratch_mkfs -i attr=2 -l lazy-count=0 >/dev/null 2>&1
+ $XFS_DB_PROG -r -c version $SCRATCH_DEV 2>&1 | _filter_version
+ echo ""
+ echo "noattr2 fs"
+@@ -115,8 +122,8 @@ cd $SCRATCH_MNT
+ touch testfile
+ $SETFATTR_PROG -n user.test -v 0xbabe testfile
+ $GETFATTR_PROG testfile
+-cd $here
+-$UMOUNT_PROG $SCRATCH_MNT
++cd - >/dev/null
++_scratch_unmount
+ $XFS_DB_PROG -r -c version $SCRATCH_DEV 2>&1 | _filter_version
+ 
+ echo ""
+@@ -125,16 +132,14 @@ echo ""
+ echo ""
+ echo "attr2 fs"
+ echo ""
+-_scratch_mkfs -i attr=2 $MKFS_LAZY >/dev/null 2>&1
++_scratch_mkfs -i attr=2 -l lazy-count=1 >/dev/null 2>&1
+ $XFS_DB_PROG -r -c version $SCRATCH_DEV 2>&1 | _filter_version
+ echo ""
+ echo "noattr2 fs"
+ echo ""
+ _scratch_mount -o noattr2
+-cd $SCRATCH_MNT
+-touch testfile
+-cd $here
+-$UMOUNT_PROG $SCRATCH_MNT
++touch $SCRATCH_MNT/testfile
++_scratch_unmount
+ $XFS_DB_PROG -r -c version $SCRATCH_DEV 2>&1 | _filter_version
+ 
+ # success, all done
 -- 
-Dave Chinner
-david@fromorbit.com
+2.7.4
+
