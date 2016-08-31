@@ -1,239 +1,85 @@
-Received: from mx1.redhat.com ([209.132.183.28]:31736 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932885AbcHaLTD (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 31 Aug 2016 07:19:03 -0400
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v2] xfs/187: fix new sb_features2 stop case running
-Date: Wed, 31 Aug 2016 19:18:56 +0800
-Message-Id: <1472642336-28112-1-git-send-email-zlang@redhat.com>
+Received: from cn.fujitsu.com ([222.73.24.84]:50016 "EHLO song.cn.fujitsu.com"
+        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+        id S933428AbcHaLzC (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 31 Aug 2016 07:55:02 -0400
+From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Subject: [PATCH] generic/172: raise fs size
+Date: Wed, 31 Aug 2016 19:50:55 +0800
+Message-Id: <20160831115055.2294-1-wangxg.fnst@cn.fujitsu.com>
+MIME-Version: 1.0
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: xfs@oss.sgi.com, Zorro Lang <zlang@redhat.com>
+Cc: darrick.wong@oracle.com
 List-ID: <fstests@vger.kernel.org>
 
-This case is too old, at that time there's no "ftype" feature for
-XFS. Due to this case need to clear features2 bits when mkfs.xfs,
-so ftype bit stop case running for long time.
+In original codes, if block size is 4096, fs size will be limited
+to 60MB. In such small fs, btrfs is not able to write 40MB data,
+because some space has been reserved internally, so the first
+_pwrite_byte in this test case will fail for enospc error.
 
-New common function _require_old_xfs_format() will help to fix
-this problem. Call it as:
+Also from this test case's test purpose, it tries to reflink a file
+that uses more than half of the fs space, so here we can just define
+fs size to be 256MB, the file to be reflinked to be 168MB.
 
-  _require_old_xfs_format ATTR2 LAZYSBCOUNT
-
-Then it'll help to clear all features2 bits, besides ATTR2 and
-LAZYSBCOUNT which will be tested in case.
-
-Signed-off-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
 ---
+ tests/generic/172 | 20 ++++++++------------
+ 1 file changed, 8 insertions(+), 12 deletions(-)
 
-Hi,
-
-V2 add a new common function _require_old_xfs_format(), which help to
-to make sure no features2 xfs bits will be set.
-
-But mostly we still want to test some features2 bits, so I make
-this function won't deal with those features which are specified by
-arguments.
-
-For clear CRC feature, we can set MKFS_OPTIONS="$MKFS_OPTIONS -m crc=0"
-simply. But if the user specify crc=1/0 in local.config file, the test
-can't continue running. So I check if it has been set in the function.
-
-Please tell me if you have better way to implement this function:)
-
-By the way, did I miss some features2?
-
-Thanks,
-Zorro
-
- common/rc     | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/187 | 36 ++++++++++------------------
- 2 files changed, 87 insertions(+), 24 deletions(-)
-
-diff --git a/common/rc b/common/rc
-index 3fb0600..29e2987 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3923,6 +3923,81 @@ _require_xfs_mkfs_without_validation()
- 	fi
- }
+diff --git a/tests/generic/172 b/tests/generic/172
+index 26fb305..8192290 100755
+--- a/tests/generic/172
++++ b/tests/generic/172
+@@ -57,31 +57,27 @@ testdir=$SCRATCH_MNT/test-$seq
+ mkdir $testdir
  
-+# Make sure no features2 bits in XFS, besides those features are
-+# specified by arguments. All current features2 names as below:
-+#   "CRC FINOBT PROJID32BIT ATTR2 LAZYSBCOUNT FTYPE"
-+_require_old_xfs_format()
-+{
-+	local skiplist="$*"
-+	local ftr2=""
-+	local b
-+	local opts
+ echo "Reformat with appropriate size"
+-blksz="$(stat -f $testdir -c '%S')"
+-nr_blks=10240
+ umount $SCRATCH_MNT
+-sz_bytes=$((nr_blks * 3 / 2 * blksz))
+-if [ $sz_bytes -lt $((32 * 1048576)) ]; then
+-	sz_bytes=$((32 * 1048576))
+-fi
+-_scratch_mkfs_sized $sz_bytes >> $seqres.full 2>&1
 +
-+	_scratch_mkfs >/dev/null 2>&1
-+	ftr2=`$XFS_DB_PROG -c version $SCRATCH_DEV | tr 'a-z' 'A-Z' |\
-+		sed -n -e "s/,/ /g" -e "s/.*MOREBITS\(.*\)/\1/p"`
-+
-+	for b in `echo $skiplist | tr 'a-z' 'A-Z'`; do
-+		i=`echo $ftr2 | sed -n -e "s/\(.*\)$b\(.*\)/\1\2/p"`
-+		if [ -n "$b" ]; then
-+			ftr2="$i"
-+		fi
-+	done
-+
-+	for b in $ftr2; do
-+		case $b in
-+		CRC)
-+			if echo $MKFS_OPTIONS | grep -q "crc=1"; then
-+				MKFS_OPTIONS=`echo $MKFS_OPTIONS | \
-+					sed -e "s/crc=1/crc=0/g"`
-+			else
-+				MKFS_OPTIONS="$MKFS_OPTIONS -m crc=0"
-+			fi
-+			;;
-+		FINOBT)
-+			if echo $MKFS_OPTIONS | grep -q "finobt=1"; then
-+				MKFS_OPTIONS=`echo $MKFS_OPTIONS | \
-+					sed -e "s/finobt=1/finobt=0/g"`
-+			else
-+				MKFS_OPTIONS="$MKFS_OPTIONS -m finobt=0"
-+			fi
-+			;;
-+		PROJID32BIT)
-+			if echo $MKFS_OPTIONS | grep -q "projid32bit=1"; then
-+				MKFS_OPTIONS=`echo $MKFS_OPTIONS | \
-+					sed -e "s/projid32bit=1/projid32bit=0/g"`
-+			else
-+				MKFS_OPTIONS="$MKFS_OPTIONS -i projid32bit=0"
-+			fi
-+			;;
-+		ATTR2)
-+			if echo $MKFS_OPTIONS | grep -q "attr="; then
-+				MKFS_OPTIONS=`echo $MKFS_OPTIONS | \
-+					sed -e "s/attr=[0-9]/attr=1/g"`
-+			else
-+				MKFS_OPTIONS="$MKFS_OPTIONS -i attr=1"
-+			fi
-+			;;
-+		LAZYSBCOUNT)
-+			if echo $MKFS_OPTIONS | grep -q "lazy-count=1"; then
-+				MKFS_OPTIONS=`echo $MKFS_OPTIONS | \
-+					sed -e "s/lazy-count=1/lazy-count=0/g"`
-+			else
-+				MKFS_OPTIONS="$MKFS_OPTIONS -l lazy-count=0"
-+			fi
-+			;;
-+		FTYPE)
-+			if echo $MKFS_OPTIONS | grep -q "ftype=1"; then
-+				MKFS_OPTIONS=`echo $MKFS_OPTIONS | \
-+					sed -e "s/ftype=1/ftype=0/g"`
-+			else
-+				MKFS_OPTIONS="$MKFS_OPTIONS -n ftype=0"
-+			fi
-+			;;
-+		esac
-+	done
-+}
-+
- init_rc
++file_size=$((168 * 1024 * 1024))
++fs_size=$((256 * 1024 * 1024))
++_scratch_mkfs_sized $fs_size >> $seqres.full 2>&1
+ _scratch_mount >> $seqres.full 2>&1
+ rm -rf $testdir
+ mkdir $testdir
  
- ################################################################################
-diff --git a/tests/xfs/187 b/tests/xfs/187
-index 836b924..ffc851c 100755
---- a/tests/xfs/187
-+++ b/tests/xfs/187
-@@ -31,7 +31,6 @@ seq=`basename $0`
- seqres=$RESULT_DIR/$seq
- echo "QA output created by $seq"
+ echo "Create a big file and reflink it"
+-_pwrite_byte 0x61 0 $((blksz * nr_blks)) $testdir/bigfile >> $seqres.full 2>&1
++_pwrite_byte 0x61 0 $file_size $testdir/bigfile >> $seqres.full 2>&1
+ _cp_reflink $testdir/bigfile $testdir/clonefile
+ sync
  
--here=`pwd`
- tmp=/tmp/$$
- status=1	# failure is the default!
- trap "_cleanup; exit \$status" 0 1 2 3 15
-@@ -57,25 +56,16 @@ _supported_fs xfs
- _supported_os Linux
+ echo "Allocate the rest of the space"
+-nr_free=$(stat -f -c '%f' $testdir)
+ touch $testdir/file0 $testdir/file1
+-_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
++_pwrite_byte 0x61 0 $fs_size $testdir/eat_my_space >> $seqres.full 2>&1
+ sync
  
- _require_scratch
-+# clear features2 bits which we won't test
-+_require_old_xfs_format ATTR2 LAZYSBCOUNT
- _require_attrs
--_require_attr_v1
--_require_projid16bit
+ echo "CoW the big file"
+-out="$(_pwrite_byte 0x62 0 $((blksz * nr_blks)) $testdir/bigfile 2>&1)"
++out="$(_pwrite_byte 0x62 0 $file_size $testdir/bigfile 2>&1)"
+ echo ${out} | grep -q "No space left on device" || echo "CoW should have failed with ENOSPC"
+ echo ${out} >> $seqres.full 2>&1
+ echo ${out}
+@@ -89,7 +85,7 @@ echo ${out}
+ echo "Remount and try CoW again"
+ _scratch_cycle_mount
  
- rm -f $seqres.full
--
--# Reset the options so that we can control what is going on here
--export MKFS_OPTIONS=""
--export MOUNT_OPTIONS=""
--
--# lazysb, attr2 and other feature bits are held in features2 and will require
--# morebitsbit on So test with lazysb and without it to see if the morebitsbit is
--# okay etc. If the mkfs defaults change, these need to change as well.
--export MKFS_NO_LAZY="-m crc=0 -l lazy-count=0 -i projid32bit=0"
--export MKFS_LAZY="-m crc=0 -l lazy-count=1 -i projid32bit=0"
-+_scratch_mkfs >/dev/null 2>&1
- 
- # Make sure that when we think we are testing with morebits off
- # that we really are.
--_scratch_mkfs -i attr=1 $MKFS_NO_LAZY  >/dev/null 2>&1
-+_scratch_mkfs -i attr=1 -l lazy-count=0 >/dev/null 2>&1
- $XFS_DB_PROG -c version $SCRATCH_DEV 2>&1 >$tmp.db
- if grep -i morebits $tmp.db
- then
-@@ -90,13 +80,13 @@ echo "*** 1. test attr2 mkfs and then noattr2 mount ***"
- echo ""
- echo "attr2 fs"
- echo ""
--_scratch_mkfs -i attr=2 $MKFS_NO_LAZY >/dev/null 2>&1
-+_scratch_mkfs -i attr=2 -l lazy-count=0 >/dev/null 2>&1
- $XFS_DB_PROG -r -c version $SCRATCH_DEV 2>&1 | _filter_version
- echo ""
- echo "noattr2 fs"
- echo ""
- _scratch_mount -o noattr2
--$UMOUNT_PROG $SCRATCH_MNT
-+_scratch_unmount
- $XFS_DB_PROG -r -c version $SCRATCH_DEV 2>&1 | _filter_version
- 
- # adding an EA will ensure the ATTR1 flag is turned on
-@@ -105,7 +95,7 @@ echo "*** 2. test attr2 mkfs and then noattr2 mount with 1 EA ***"
- echo ""
- echo "attr2 fs"
- echo ""
--_scratch_mkfs -i attr=2 $MKFS_NO_LAZY >/dev/null 2>&1
-+_scratch_mkfs -i attr=2 -l lazy-count=0 >/dev/null 2>&1
- $XFS_DB_PROG -r -c version $SCRATCH_DEV 2>&1 | _filter_version
- echo ""
- echo "noattr2 fs"
-@@ -115,8 +105,8 @@ cd $SCRATCH_MNT
- touch testfile
- $SETFATTR_PROG -n user.test -v 0xbabe testfile
- $GETFATTR_PROG testfile
--cd $here
--$UMOUNT_PROG $SCRATCH_MNT
-+cd - >/dev/null
-+_scratch_unmount
- $XFS_DB_PROG -r -c version $SCRATCH_DEV 2>&1 | _filter_version
- 
- echo ""
-@@ -125,16 +115,14 @@ echo ""
- echo ""
- echo "attr2 fs"
- echo ""
--_scratch_mkfs -i attr=2 $MKFS_LAZY >/dev/null 2>&1
-+_scratch_mkfs -i attr=2 -l lazy-count=1 >/dev/null 2>&1
- $XFS_DB_PROG -r -c version $SCRATCH_DEV 2>&1 | _filter_version
- echo ""
- echo "noattr2 fs"
- echo ""
- _scratch_mount -o noattr2
--cd $SCRATCH_MNT
--touch testfile
--cd $here
--$UMOUNT_PROG $SCRATCH_MNT
-+touch $SCRATCH_MNT/testfile
-+_scratch_unmount
- $XFS_DB_PROG -r -c version $SCRATCH_DEV 2>&1 | _filter_version
- 
- # success, all done
+-out="$(_pwrite_byte 0x62 0 $((blksz * nr_blks)) $testdir/bigfile 2>&1)"
++out="$(_pwrite_byte 0x62 0 $file_size $testdir/bigfile 2>&1)"
+ echo ${out} | grep -q "No space left on device" || echo "CoW should have failed with ENOSPC"
+ echo ${out} >> $seqres.full 2>&1
+ echo ${out}
 -- 
-2.7.4
+2.9.0
+
+
 
