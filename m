@@ -1,127 +1,53 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:51836 "EHLO
-        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750849AbcHaAB3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 30 Aug 2016 20:01:29 -0400
-Date: Wed, 31 Aug 2016 10:00:51 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] xfs/187: fix new sb_features2 ftype stop case running
-Message-ID: <20160831000051.GV22388@dastard>
-References: <1472542532-16497-1-git-send-email-zlang@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:38542 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752600AbcHaJo6 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 31 Aug 2016 05:44:58 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 83232635D5
+        for <fstests@vger.kernel.org>; Wed, 31 Aug 2016 09:44:57 +0000 (UTC)
+Received: from localhost (dhcp-13-153.nay.redhat.com [10.66.13.153])
+        by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u7V9iuVi029032
+        for <fstests@vger.kernel.org>; Wed, 31 Aug 2016 05:44:57 -0400
+Date: Wed, 31 Aug 2016 17:44:55 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 1/2] common/rc: introduce _overlay_mount_dirs helper
+Message-ID: <20160831094455.GU27776@eguan.usersys.redhat.com>
+References: <1470741381-32610-1-git-send-email-eguan@redhat.com>
+ <20160812033342.GS27776@eguan.usersys.redhat.com>
+ <20160819030517.GE27776@eguan.usersys.redhat.com>
+ <20160825041111.GW27776@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1472542532-16497-1-git-send-email-zlang@redhat.com>
+In-Reply-To: <20160825041111.GW27776@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Aug 30, 2016 at 03:35:32PM +0800, Zorro Lang wrote:
-> This case is too old, at that time there's no "ftype" feature for
-> XFS. Due to this case need to clear features2 bits when mkfs.xfs,
-> so ftype bit stop case running for long time.
-> 
-> We care 6 features2 bits in this case:
-> 
->   "ATTR2, LAZYSBCOUNT, PROJID32BIT, CRC, FTYPE, FINOBT"
-> 
-> ATTR2 and LAZYSBCOUNT bits will be tested in case. FINBOT will be
-> disabled if CRC=0. So this patch only check and disable PROJID32BIT,
-> CRC and FTYPE features when mkfs.xfs.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
-> 
-> Hi,
-> 
-> I think we shouldn't skip this case if user doesn't specify suitable
-> MKFS_OPTIONS and MOUNT_OPTIONS. Because this case need complex options,
-> nearly no one will specify these all options for xfstests at same time.
-> 
-> Thanks,
-> Zorro
-> 
->  tests/xfs/187 | 51 ++++++++++++++++++++++++++++-----------------------
->  1 file changed, 28 insertions(+), 23 deletions(-)
-> 
-> diff --git a/tests/xfs/187 b/tests/xfs/187
-> index 836b924..5e7c677 100755
-> --- a/tests/xfs/187
-> +++ b/tests/xfs/187
-> @@ -31,7 +31,6 @@ seq=`basename $0`
->  seqres=$RESULT_DIR/$seq
->  echo "QA output created by $seq"
->  
-> -here=`pwd`
->  tmp=/tmp/$$
->  status=1	# failure is the default!
->  trap "_cleanup; exit \$status" 0 1 2 3 15
-> @@ -58,24 +57,32 @@ _supported_os Linux
->  
->  _require_scratch
->  _require_attrs
-> -_require_attr_v1
-> -_require_projid16bit
->  
->  rm -f $seqres.full
-> -
-> +_scratch_mkfs >/dev/null 2>&1
->  # Reset the options so that we can control what is going on here
-> -export MKFS_OPTIONS=""
-> -export MOUNT_OPTIONS=""
-> -
-> -# lazysb, attr2 and other feature bits are held in features2 and will require
-> -# morebitsbit on So test with lazysb and without it to see if the morebitsbit is
-> -# okay etc. If the mkfs defaults change, these need to change as well.
-> -export MKFS_NO_LAZY="-m crc=0 -l lazy-count=0 -i projid32bit=0"
-> -export MKFS_LAZY="-m crc=0 -l lazy-count=1 -i projid32bit=0"
-> +MKFS_OPTIONS=""
-> +MOUNT_OPTIONS=""
-> +ver2=`$XFS_DB_PROG -c version $SCRATCH_DEV | sed -n -e "s/,/ /g" \
-> +						   -e "s/.*MOREBITS\(.*\)/\1/p"`
-> +# clear features2 bits which we won't test
-> +for b in $ver2; do
-> +	case $b in
-> +	CRC)
-> +		MKFS_OPTIONS="$MKFS_OPTIONS -m crc=0"
-> +		;;
-> +	PROJID32BIT)
-> +		MKFS_OPTIONS="$MKFS_OPTIONS -i projid32bit=0"
-> +		;;
-> +	FTYPE)
-> +		MKFS_OPTIONS="$MKFS_OPTIONS -n ftype=0"
-> +		;;
-> +	esac
-> +done
+Hi all,
 
-We're doing stuff like this in way too many places to keep old tests
-working with new xfsprogs as the defaults change and new options are
-added. This is not maintainable in the long run.
+On Thu, Aug 25, 2016 at 12:11:11PM +0800, Eryu Guan wrote:
+> On Fri, Aug 19, 2016 at 11:05:17AM +0800, Eryu Guan wrote:
+> > On Fri, Aug 12, 2016 at 11:33:42AM +0800, Eryu Guan wrote:
+> > > On Tue, Aug 09, 2016 at 07:16:20PM +0800, Eryu Guan wrote:
+> > > > Introduce a new _overlay_mount_dirs() helper to do the actual
+> > > > overlay mount operation and factor _overlay_scratch_mount and
+> > > > _overlay_mount code to use a single implemention of
+> > > > _overlay_mount_dirs(). Also convert all bare mount of overlay in
+> > > > tests to use it.
+> > > > 
+> > > > Suggested-by: Dave Chinner <dchinner@redhat.com>
+> > > > Signed-off-by: Eryu Guan <eguan@redhat.com>
+> > > 
+> > > Ping on this one, hope I can push this out this week.
+> > 
+> > Ping again.
+> 
+> Ping for the third time :)
 
-I think we need to start marking test as requiring "old" filesystem
-formats, and we configure the mkfs options required to create such a
-filesystem in one place.
+I have trouble getting my patches reviewed. Could someone help review
+this patchset? Thanks a lot!
 
-i.e. add a rule:
-
-_require_old_xfs_format()
-{
-	# calculate necessary additional options to ensure
-	# 16 bit project id, no CRCs, and no ftype.
-	BASIC_MKFS_OPTIONS=.....
-
-	# add "old" option to default mkfs option set
-	export MKFS_OPTION=S"$MKFS_OPTIONS $BASIC_MKFS_OPTIONS"
-}
-
-And now any specific test that relies on a format not having CRCs,
-ftype, etc, can simply _require_old_xfs_format(), and so we can
-get rid of all the per-test magic we have to futz mkfs options into
-the "old" format the test requires.
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Eryu
