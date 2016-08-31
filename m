@@ -1,58 +1,127 @@
-Received: from sandeen.net ([63.231.237.45]:60725 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1757686AbcH3TM3 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 30 Aug 2016 15:12:29 -0400
-Received: from [10.0.0.4] (liberator [10.0.0.4])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by sandeen.net (Postfix) with ESMTPSA id 3191A170B5B
-        for <fstests@vger.kernel.org>; Tue, 30 Aug 2016 14:12:28 -0500 (CDT)
-From: Eric Sandeen <sandeen@sandeen.net>
-Subject: [PATCH] README: fix up dependency lists
-Message-ID: <065a8b84-6d8c-f9c8-8b67-0084a3bfd2e7@sandeen.net>
-Date: Tue, 30 Aug 2016 14:12:27 -0500
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:51836 "EHLO
+        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1750849AbcHaAB3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 30 Aug 2016 20:01:29 -0400
+Date: Wed, 31 Aug 2016 10:00:51 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] xfs/187: fix new sb_features2 ftype stop case running
+Message-ID: <20160831000051.GV22388@dastard>
+References: <1472542532-16497-1-git-send-email-zlang@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1472542532-16497-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-2 things: Make the dependency lines cut-and-paste-able with
-line continuations, and fix up the Fedora deps a bit
-(remove "awk" - should be "gawk" - and add a couple other
-missing dependencies)
+On Tue, Aug 30, 2016 at 03:35:32PM +0800, Zorro Lang wrote:
+> This case is too old, at that time there's no "ftype" feature for
+> XFS. Due to this case need to clear features2 bits when mkfs.xfs,
+> so ftype bit stop case running for long time.
+> 
+> We care 6 features2 bits in this case:
+> 
+>   "ATTR2, LAZYSBCOUNT, PROJID32BIT, CRC, FTYPE, FINOBT"
+> 
+> ATTR2 and LAZYSBCOUNT bits will be tested in case. FINBOT will be
+> disabled if CRC=0. So this patch only check and disable PROJID32BIT,
+> CRC and FTYPE features when mkfs.xfs.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> ---
+> 
+> Hi,
+> 
+> I think we shouldn't skip this case if user doesn't specify suitable
+> MKFS_OPTIONS and MOUNT_OPTIONS. Because this case need complex options,
+> nearly no one will specify these all options for xfstests at same time.
+> 
+> Thanks,
+> Zorro
+> 
+>  tests/xfs/187 | 51 ++++++++++++++++++++++++++++-----------------------
+>  1 file changed, 28 insertions(+), 23 deletions(-)
+> 
+> diff --git a/tests/xfs/187 b/tests/xfs/187
+> index 836b924..5e7c677 100755
+> --- a/tests/xfs/187
+> +++ b/tests/xfs/187
+> @@ -31,7 +31,6 @@ seq=`basename $0`
+>  seqres=$RESULT_DIR/$seq
+>  echo "QA output created by $seq"
+>  
+> -here=`pwd`
+>  tmp=/tmp/$$
+>  status=1	# failure is the default!
+>  trap "_cleanup; exit \$status" 0 1 2 3 15
+> @@ -58,24 +57,32 @@ _supported_os Linux
+>  
+>  _require_scratch
+>  _require_attrs
+> -_require_attr_v1
+> -_require_projid16bit
+>  
+>  rm -f $seqres.full
+> -
+> +_scratch_mkfs >/dev/null 2>&1
+>  # Reset the options so that we can control what is going on here
+> -export MKFS_OPTIONS=""
+> -export MOUNT_OPTIONS=""
+> -
+> -# lazysb, attr2 and other feature bits are held in features2 and will require
+> -# morebitsbit on So test with lazysb and without it to see if the morebitsbit is
+> -# okay etc. If the mkfs defaults change, these need to change as well.
+> -export MKFS_NO_LAZY="-m crc=0 -l lazy-count=0 -i projid32bit=0"
+> -export MKFS_LAZY="-m crc=0 -l lazy-count=1 -i projid32bit=0"
+> +MKFS_OPTIONS=""
+> +MOUNT_OPTIONS=""
+> +ver2=`$XFS_DB_PROG -c version $SCRATCH_DEV | sed -n -e "s/,/ /g" \
+> +						   -e "s/.*MOREBITS\(.*\)/\1/p"`
+> +# clear features2 bits which we won't test
+> +for b in $ver2; do
+> +	case $b in
+> +	CRC)
+> +		MKFS_OPTIONS="$MKFS_OPTIONS -m crc=0"
+> +		;;
+> +	PROJID32BIT)
+> +		MKFS_OPTIONS="$MKFS_OPTIONS -i projid32bit=0"
+> +		;;
+> +	FTYPE)
+> +		MKFS_OPTIONS="$MKFS_OPTIONS -n ftype=0"
+> +		;;
+> +	esac
+> +done
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
----
+We're doing stuff like this in way too many places to keep old tests
+working with new xfsprogs as the defaults change and new options are
+added. This is not maintainable in the long run.
 
-diff --git a/README b/README
-index 3cac4b3..300bd28 100644
---- a/README
-+++ b/README
-@@ -6,15 +6,16 @@ Building Linux:
- 	- cd into the xfstests directory
- 	- install prerequisite packages
- 	  For example, for Ubuntu:
--		"sudo apt-get install xfslibs-dev uuid-dev libtool-bin e2fsprogs
--		 automake gcc libuuid1 quota attr libattr1-dev make
--		 libacl1-dev libaio-dev xfsprogs libgdbm-dev gawk fio dbench
--		 uuid-runtime"
-+		sudo apt-get install xfslibs-dev uuid-dev libtool-bin \ 
-+		e2fsprogs automake gcc libuuid1 quota attr libattr1-dev make \
-+		libacl1-dev libaio-dev xfsprogs libgdbm-dev gawk fio dbench \
-+		uuid-runtime
- 	  For Fedora, RHEL, or CentOS:
--		"yum install acl attr awk bc dbench dump e2fsprogs fio gawk
--		 indent lvm2 psmisc quota sed xfsdump xfsprogs
--		 libacl-devel libattr-devel libaio-devel libuuid-devel
--		 openssl-devel xfsprogs-devel btrfs-progs-devel"
-+		yum install acl attr automake bc dbench dump e2fsprogs fio \
-+		gawk gcc indent libtool lvm2 make psmisc quota sed \
-+		xfsdump xfsprogs \
-+		libacl-devel libattr-devel libaio-devel libuuid-devel \
-+		openssl-devel xfsprogs-devel btrfs-progs-devel
- 		(Older distributions may require xfsprogs-qa-devel as well.)
- 		(Note that for RHEL and CentOS, you may need the EPEL repo.)
- 	- run make
+I think we need to start marking test as requiring "old" filesystem
+formats, and we configure the mkfs options required to create such a
+filesystem in one place.
 
+i.e. add a rule:
+
+_require_old_xfs_format()
+{
+	# calculate necessary additional options to ensure
+	# 16 bit project id, no CRCs, and no ftype.
+	BASIC_MKFS_OPTIONS=.....
+
+	# add "old" option to default mkfs option set
+	export MKFS_OPTION=S"$MKFS_OPTIONS $BASIC_MKFS_OPTIONS"
+}
+
+And now any specific test that relies on a format not having CRCs,
+ftype, etc, can simply _require_old_xfs_format(), and so we can
+get rid of all the per-test magic we have to futz mkfs options into
+the "old" format the test requires.
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
