@@ -1,57 +1,268 @@
-Received: from mx1.redhat.com ([209.132.183.28]:58770 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754179AbcIAD4Z (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 31 Aug 2016 23:56:25 -0400
-Date: Thu, 1 Sep 2016 11:56:22 +0800
+Date: Thu, 1 Sep 2016 16:33:32 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2 2/2] overlay: copy-up lowerdir which has opaque xattr
- set
-Message-ID: <20160901035622.GZ27776@eguan.usersys.redhat.com>
-References: <1470741381-32610-1-git-send-email-eguan@redhat.com>
- <1470741381-32610-2-git-send-email-eguan@redhat.com>
- <20160901002241.GB30056@dastard>
+Subject: Re: [PATCH 08/13] xfs: more rmapbt tests
+Message-ID: <20160901083332.GB27776@eguan.usersys.redhat.com>
+References: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
+ <147216775128.32641.13355812513622220212.stgit@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160901002241.GB30056@dastard>
-Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
+In-Reply-To: <147216775128.32641.13355812513622220212.stgit@birch.djwong.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: david@fromorbit.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Sep 01, 2016 at 10:22:41AM +1000, Dave Chinner wrote:
-> On Tue, Aug 09, 2016 at 07:16:21PM +0800, Eryu Guan wrote:
-> > When copying up a directory with opaque xattr set, the xattr was
-> > copied up as well, after a remount the opaque flag is honored so the
-> > copied-up directory is treated as opaque, which causes files created
-> > in the lowerdir to be hidden when using multiple lower directories.
-> > 
-> > This is fixed by "ovl: don't copy up opaqueness".
-> ....
-> > +_scratch_mkfs
-> > +
-> > +# Create multiple lowerdirs and upperdir, workdir, and testdir on lowerdir
-> > +lowerdir1=$SCRATCH_DEV/lower1
-> > +lowerdir2=$SCRATCH_DEV/lower2
-> > +upperdir=$SCRATCH_DEV/upper
-> > +workdir=$SCRATCH_DEV/workdir
-> > +mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
-> > +mkdir -p $lowerdir1/testdir/d
-> > +
-> > +# mount overlay with $lowerdir2 as upperdir, and remove & recreate testdir,
-> > +# make testdir on $lowerdir2 opaque
-> > +_overlay_mount_dirs $lowerdir1 $lowerdir2 $workdir none $SCRATCH_MNT
+On Thu, Aug 25, 2016 at 04:29:11PM -0700, Darrick J. Wong wrote:
+> More tests for the reverse mapping functionality.
 > 
-> What is the "none" here? If _overlay_mount_dirs() doesn't require
-> this parameter to have a specifically valid value, then why are
-> we passing it in at all?
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  tests/xfs/876     |   75 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/876.out |    4 ++
+>  tests/xfs/877     |   92 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/877.out |   10 ++++++
+>  tests/xfs/group   |    2 +
+>  5 files changed, 183 insertions(+)
+>  create mode 100755 tests/xfs/876
+>  create mode 100644 tests/xfs/876.out
+>  create mode 100755 tests/xfs/877
+>  create mode 100644 tests/xfs/877.out
+> 
+> 
+> diff --git a/tests/xfs/876 b/tests/xfs/876
+> new file mode 100755
+> index 0000000..7f447c9
+> --- /dev/null
+> +++ b/tests/xfs/876
+> @@ -0,0 +1,75 @@
+> +#! /bin/bash
+> +# FS QA Test No. 876
+> +#
+> +# Create a big enough rmapbt that we tickle a fdblocks accounting bug.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename "$0"`
+> +seqres="$RESULT_DIR/$seq"
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -rf "$tmp".*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/reflink
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs xfs
+> +_require_scratch
+> +_require_xfs_scratch_rmapbt
+> +_require_scratch_reflink
+> +_require_test_program "punch-alternating"
+> +
+> +rm -f "$seqres.full"
+> +
+> +echo "+ create scratch fs"
+> +_scratch_mkfs > "$seqres.full" 2>&1
+> +
+> +echo "+ mount fs image"
+> +_scratch_mount
+> +blksz="$(stat -f $SCRATCH_MNT -c '%S')"
 
-It's place-holder for device to be mounted, for overlayfs this can be
-any string but cannot be omitted. I probably should use $SCRATCH_DEV
-instead, like what _scratch_mount does on overlayfs, so helpers like
-_fs_type and _df_device that look for mounted device could work
-correctly.
+There's "get_block_size" helper to do this.
 
-Thanks for the review!
+> +
+> +bt_ptrs=$(( (blksz - 56) / 44 ))
+> +bt_recs=$(( (blksz - 56) / 24 ))
 
+It's unclear to me where do these magic numbers come from. Add some
+comments?
+
+> +
+> +blocks=$((bt_ptrs * bt_recs + 1))
+> +_require_fs_space $SCRATCH_MNT $(( (2 * blocks * blksz) * 5 / 4096 ))
+
+_require_fs_space requires the last argument is represented in 1k block
+size, so it should be " / 1024" here?
+
+> +len=$((blocks * blksz))
+> +
+> +echo "+ make some files"
+> +$XFS_IO_PROG -f -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f1 >> $seqres.full
+> +$XFS_IO_PROG -f -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f2 >> $seqres.full
+> +./src/punch-alternating $SCRATCH_MNT/f1 >> "$seqres.full"
+> +./src/punch-alternating $SCRATCH_MNT/f2 >> "$seqres.full"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/876.out b/tests/xfs/876.out
+> new file mode 100644
+> index 0000000..96c1970
+> --- /dev/null
+> +++ b/tests/xfs/876.out
+> @@ -0,0 +1,4 @@
+> +QA output created by 876
+> ++ create scratch fs
+> ++ mount fs image
+> ++ make some files
+> diff --git a/tests/xfs/877 b/tests/xfs/877
+> new file mode 100755
+> index 0000000..2ad7d30
+> --- /dev/null
+> +++ b/tests/xfs/877
+> @@ -0,0 +1,92 @@
+> +#! /bin/bash
+> +# FS QA Test No. 877
+> +#
+> +# Make sure query_range returns -EINVAL if lowkey > highkey.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename "$0"`
+> +seqres="$RESULT_DIR/$seq"
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -rf "$tmp".* $metadump_file
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/attr
+
+Seems this is not needed.
+
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs xfs
+> +_require_xfs_scratch_rmapbt
+> +_require_command "$XFS_DB_PROG" "xfs_db"
+> +_require_xfs_io_command "falloc"
+> +_require_xfs_io_command "fpunch"
+> +_require_xfs_io_command "fzero"
+> +_require_xfs_io_command "fcollapse"
+> +_require_xfs_io_command "finsert"
+> +
+> +rm -f "$seqres.full"
+> +
+> +echo "Format and mount"
+> +_scratch_mkfs > "$seqres.full" 2>&1
+> +_scratch_mount
+> +blksz=65536
+> +blocks=16
+> +len=$((blocks * blksz))
+> +
+> +echo "Create some files"
+> +$XFS_IO_PROG -f -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f1 >> $seqres.full
+> +
+> +echo "Manipulate file"
+> +$XFS_IO_PROG -c "fpunch $blksz $blksz" \
+> +	-c "fzero $((3 * blksz)) $blksz" \
+> +	-c "pwrite -S 0x69 $((5 * blksz)) $blksz" \
+> +	-c "fpunch $((7 * blksz)) $blksz" \
+> +	-c "fsync" \
+> +	-c "pwrite -S 0x70 $((7 * blksz)) $blksz" \
+> +	-c "fcollapse $((9 * blksz)) $blksz" \
+> +	-c "finsert $((10 * blksz)) $blksz" $SCRATCH_MNT/f1 >> $seqres.full
+> +
+> +echo "Check file"
+> +md5sum $SCRATCH_MNT/f1 | _filter_scratch
+
+I'm a bit confused by the md5sum, f1 is not checked again for
+comparison, what's the purpose of this checksum?
+
+Thanks,
 Eryu
+
+> +od -tx1 -Ad -c $SCRATCH_MNT/f1 >> $seqres.full
+> +
+> +echo "Unmount"
+> +_scratch_unmount
+> +
+> +echo "Try a regular fsmap"
+> +$XFS_DB_PROG -c 'fsmap' `_scratch_xfs_db_options` >> $seqres.full
+> +$XFS_DB_PROG -c 'fsmap 0 5' `_scratch_xfs_db_options` >> $seqres.full
+> +
+> +echo "Try a bad fsmap"
+> +$XFS_DB_PROG -c 'fsmap 5 4' `_scratch_xfs_db_options`
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/877.out b/tests/xfs/877.out
+> new file mode 100644
+> index 0000000..4a2242f
+> --- /dev/null
+> +++ b/tests/xfs/877.out
+> @@ -0,0 +1,10 @@
+> +QA output created by 877
+> +Format and mount
+> +Create some files
+> +Manipulate file
+> +Check file
+> +e45c5707fcf6817e914ffb6ce37a0ac7  SCRATCH_MNT/f1
+> +Unmount
+> +Try a regular fsmap
+> +Try a bad fsmap
+> +Error 22 while querying fsmap btree.
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index 8565204..72580e9 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -311,3 +311,5 @@
+>  873 auto quick clone fsr
+>  874 auto quick clone fsr
+>  875 auto quick clone fsr quota
+> +876 auto quick rmap clone
+> +877 auto quick rmap clone
+> 
