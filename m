@@ -1,165 +1,85 @@
-Received: from mx1.redhat.com ([209.132.183.28]:53096 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:58574 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750750AbcIAFIA (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 1 Sep 2016 01:08:00 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 96AFB635C3
-        for <fstests@vger.kernel.org>; Thu,  1 Sep 2016 05:07:52 +0000 (UTC)
+        id S1752644AbcIAHhe (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 1 Sep 2016 03:37:34 -0400
+Date: Thu, 1 Sep 2016 15:37:31 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v3 2/2] overlay: copy-up lowerdir which has opaque xattr set
-Date: Thu,  1 Sep 2016 13:06:24 +0800
-Message-Id: <1472706384-12262-2-git-send-email-eguan@redhat.com>
-In-Reply-To: <1472706384-12262-1-git-send-email-eguan@redhat.com>
-References: <1472706384-12262-1-git-send-email-eguan@redhat.com>
+Subject: Re: [PATCH 06/13] xfs: fix $XFS_DB_PROG usage
+Message-ID: <20160901073731.GA27776@eguan.usersys.redhat.com>
+References: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
+ <147216773738.32641.691363173215857168.stgit@birch.djwong.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <147216773738.32641.691363173215857168.stgit@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: david@fromorbit.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-When copying up a directory with opaque xattr set, the xattr was
-copied up as well, after a remount the opaque flag is honored so the
-copied-up directory is treated as opaque, which causes files created
-in the lowerdir to be hidden when using multiple lower directories.
+On Thu, Aug 25, 2016 at 04:28:57PM -0700, Darrick J. Wong wrote:
+> xfs_db requires us to pass in the log device, if any; this can be
+> accomplished via _scratch_xfs_db_options (if we're operating on the
+> scratch device, anyway).  However, many of the tests/xfs/ scripts
+> pass only $SCRATCH_DEV directly, so they'll fail if we test with an
+> external log.  So, fix that.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+[snip]
+> diff --git a/tests/xfs/111 b/tests/xfs/111
+> index f6a41a8..4899020 100755
+> --- a/tests/xfs/111
+> +++ b/tests/xfs/111
+> @@ -64,7 +64,7 @@ INO=`ls -i $SCRATCH_MNT/512 | awk '{print $1}'`
+>  _scratch_unmount
+>  
+>  # Figure out where that middle inode starts
+> -BYTE=`$XFS_DB_PROG -c "convert inode $INO byte" $SCRATCH_DEV \
+> +BYTE=`$XFS_DB_PROG -c "convert inode $INO byte" `_scratch_xfs_db_options` \
 
-This is fixed by "ovl: don't copy up opaqueness".
+This has syntax error because of the nested ``, $SCRATCH_DEV is already
+within a ``. Replace `` with $() could fix it.
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
-v3:
-- replace mounted device "none" by $SCRATCH_DEV
+-BYTE=`$XFS_DB_PROG -c "convert inode $INO byte" `_scratch_xfs_db_options` \
++BYTE=`$XFS_DB_PROG -c "convert inode $INO byte" $(_scratch_xfs_db_options) \
 
-v2:
-- use _overlay_mount_dirs helper to do the overlay mount
-- use _scratch_unmount instead of raw $UMOUNT_PROG
-- remove unused _require_attrs
+[snip]
 
- tests/overlay/014     | 94 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/014.out |  3 ++
- tests/overlay/group   |  1 +
- 3 files changed, 98 insertions(+)
- create mode 100755 tests/overlay/014
- create mode 100644 tests/overlay/014.out
+> diff --git a/tests/xfs/186 b/tests/xfs/186
+> index 192a8c8..347db0d 100755
+> --- a/tests/xfs/186
+> +++ b/tests/xfs/186
+> @@ -98,8 +98,8 @@ _print_inode()
+>  {
+>  	echo ""
+>  	echo "================================="
+> -	$XFS_DB_PROG -c "version" $SCRATCH_DEV 2>&1 | _filter_version
+> -	$XFS_DB_PROG -c "inode $inum" -c p $SCRATCH_DEV 2>&1 | _filter_inode
+> +	$XFS_DB_PROG -c "version" `_scratch_xfs_db_options` 2>&1 | _filter_version
+> +	$XFS_DB_PROG -c "inode $inum" -c p `_scratch_xfs_db_options` 2>&1 | _filter_inode
+>  	echo "================================="
+>  }
+>  
+> @@ -136,7 +136,7 @@ _changeto_attr1()
+>  	echo ""
+>  	echo "Try setting attr1 by db"
+>  	echo ""
+> -	$XFS_DB_PROG -x -c "version attr1" $SCRATCH_DEV | _filter_version
+> +	$XFS_DB_PROG -x -c "version attr1" `_scratch_xfs_db_options` | _filter_version
+>  }
+>  
+>  # get standard environment, filters and checks
+> @@ -173,7 +173,7 @@ fi
+>  
+>  # set inum to root dir ino
+>  # we'll add in dirents and EAs into the root directory
+> -eval `$XFS_DB_PROG -r -c 'sb 0' -c 'p rootino' $SCRATCH_DEV | $SED_PROG 's/ //g'`
+> +eval `$XFS_DB_PROG -r -c 'sb 0' -c 'p rootino' `_scratch_xfs_db_options` | $SED_PROG 's/ //g'`
 
-diff --git a/tests/overlay/014 b/tests/overlay/014
-new file mode 100755
-index 0000000..36d7077
---- /dev/null
-+++ b/tests/overlay/014
-@@ -0,0 +1,94 @@
-+#! /bin/bash
-+# FS QA Test 014
-+#
-+# Test copy-up of lowerdir with opaque xattr set.
-+#
-+# When copying up a directory with opaque xattr set, the xattr was copied up as
-+# well, after a remount the opaque flag is honored so the copied-up directory
-+# is treated as opaque, which causes files created in the lowerdir to be hidden
-+# when using multiple lower directories.
-+#
-+# This is fixed by "ovl: don't copy up opaqueness".
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Red Hat Inc. All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+
-+# Remove all files from previous tests
-+_scratch_mkfs
-+
-+# Create multiple lowerdirs and upperdir, workdir, and testdir on lowerdir
-+lowerdir1=$SCRATCH_DEV/lower1
-+lowerdir2=$SCRATCH_DEV/lower2
-+upperdir=$SCRATCH_DEV/upper
-+workdir=$SCRATCH_DEV/workdir
-+mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
-+mkdir -p $lowerdir1/testdir/d
-+
-+# mount overlay with $lowerdir2 as upperdir, and remove & recreate testdir,
-+# make testdir on $lowerdir2 opaque
-+_overlay_mount_dirs $lowerdir1 $lowerdir2 $workdir $SCRATCH_DEV $SCRATCH_MNT
-+rm -rf $SCRATCH_MNT/testdir
-+mkdir -p $SCRATCH_MNT/testdir/visibledir
-+_scratch_unmount
-+
-+# mount overlay again, with lowerdir1 and lowerdir2 as multiple lowerdirs,
-+# and create a new file in testdir, triggers copyup from lowerdir,
-+# copyup should not copy overlayfs private xattr
-+_overlay_mount_dirs "$lowerdir2:$lowerdir1" $upperdir $workdir \
-+		    $SCRATCH_DEV $SCRATCH_MNT
-+touch $SCRATCH_MNT/testdir/visiblefile
-+
-+# umount and mount overlay again, buggy kernel treats the copied-up dir as
-+# opaque, visibledir is not seen in merged dir.
-+_scratch_unmount
-+_overlay_mount_dirs "$lowerdir2:$lowerdir1" $upperdir $workdir \
-+		    $SCRATCH_DEV $SCRATCH_MNT
-+ls $SCRATCH_MNT/testdir
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/overlay/014.out b/tests/overlay/014.out
-new file mode 100644
-index 0000000..ec09c4d
---- /dev/null
-+++ b/tests/overlay/014.out
-@@ -0,0 +1,3 @@
-+QA output created by 014
-+visibledir
-+visiblefile
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 5c80566..71eaadb 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -16,3 +16,4 @@
- 011 auto quick
- 012 auto quick
- 013 auto quick
-+014 auto quick copyup
--- 
-2.7.4
+And here.
 
+I can fix them at commit time.
+
+Thanks,
+Eryu
