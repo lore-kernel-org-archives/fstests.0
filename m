@@ -1,121 +1,298 @@
-Received: from mx1.redhat.com ([209.132.183.28]:48958 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753524AbcICQIM (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 3 Sep 2016 12:08:12 -0400
-Message-Id: <201609031557.u83Fvi3d029636@int-mx10.intmail.prod.int.phx2.redhat.com>
-Date: Sat, 03 Sep 2016 23:57:44 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: [GIT PULL] fstests: updates on 2016-09-03
+Received: from userp1040.oracle.com ([156.151.31.81]:42941 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751539AbcIDRlw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 4 Sep 2016 13:41:52 -0400
+Date: Sun, 4 Sep 2016 10:40:15 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 08/13] xfs: more rmapbt tests
+Message-ID: <20160904174015.GB15309@birch.djwong.org>
+References: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
+ <147216775128.32641.13355812513622220212.stgit@birch.djwong.org>
+ <20160901083332.GB27776@eguan.usersys.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160901083332.GB27776@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: david@fromorbit.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave,
+On Thu, Sep 01, 2016 at 04:33:32PM +0800, Eryu Guan wrote:
+> On Thu, Aug 25, 2016 at 04:29:11PM -0700, Darrick J. Wong wrote:
+> > More tests for the reverse mapping functionality.
+> > 
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> >  tests/xfs/876     |   75 +++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/876.out |    4 ++
+> >  tests/xfs/877     |   92 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/877.out |   10 ++++++
+> >  tests/xfs/group   |    2 +
+> >  5 files changed, 183 insertions(+)
+> >  create mode 100755 tests/xfs/876
+> >  create mode 100644 tests/xfs/876.out
+> >  create mode 100755 tests/xfs/877
+> >  create mode 100644 tests/xfs/877.out
+> > 
+> > 
+> > diff --git a/tests/xfs/876 b/tests/xfs/876
+> > new file mode 100755
+> > index 0000000..7f447c9
+> > --- /dev/null
+> > +++ b/tests/xfs/876
+> > @@ -0,0 +1,75 @@
+> > +#! /bin/bash
+> > +# FS QA Test No. 876
+> > +#
+> > +# Create a big enough rmapbt that we tickle a fdblocks accounting bug.
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +
+> > +seq=`basename "$0"`
+> > +seqres="$RESULT_DIR/$seq"
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1    # failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -rf "$tmp".*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +. ./common/reflink
+> > +
+> > +# real QA test starts here
+> > +_supported_os Linux
+> > +_supported_fs xfs
+> > +_require_scratch
+> > +_require_xfs_scratch_rmapbt
+> > +_require_scratch_reflink
+> > +_require_test_program "punch-alternating"
+> > +
+> > +rm -f "$seqres.full"
+> > +
+> > +echo "+ create scratch fs"
+> > +_scratch_mkfs > "$seqres.full" 2>&1
+> > +
+> > +echo "+ mount fs image"
+> > +_scratch_mount
+> > +blksz="$(stat -f $SCRATCH_MNT -c '%S')"
+> 
+> There's "get_block_size" helper to do this.
 
-Can you please pull the fstests update from the location below? This update
-mainly contains reflink tests fixes from Darrick, and I'll go through the
-remaining patches for new reflink/rmap tests next week.
+D'oh.  Ok, noted.
 
-New failures I noticed in this update:
-- generic/377 fails on XFS. XFS doesn't return ERANGE as expected when the
-  buffer isn't big enough.
+> > +
+> > +bt_ptrs=$(( (blksz - 56) / 44 ))
+> > +bt_recs=$(( (blksz - 56) / 24 ))
+> 
+> It's unclear to me where do these magic numbers come from. Add some
+> comments?
 
-Thanks,
-Eryu
+56 bytes is the size of the rmap btree block header.  44 bytes is the size of
+rmapbt key+pointer size, and rmapbt records are 24 bytes each.
 
-The following changes since commit 21eb9d303cff056753a3104602ff674d468af52e:
+> > +
+> > +blocks=$((bt_ptrs * bt_recs + 1))
+> > +_require_fs_space $SCRATCH_MNT $(( (2 * blocks * blksz) * 5 / 4096 ))
+> 
+> _require_fs_space requires the last argument is represented in 1k block
+> size, so it should be " / 1024" here?
 
-  fstests: add punch, collapse, insert, zero test groups (2016-08-26 15:45:03 +0800)
+4096 is fine, because we're baking a (4 * 1024) into it:
 
-are available in the git repository at:
+I need a big enough FS to store two (blocks * blksz) files, and then
+an extra 25% (5 / 4) space to cover (hopefully) the log and metadata.
+So the size calculation is really:
 
-  https://github.com/guaneryu/xfstests.git for-dave
+fs_sz_in_kb = 2 * (blocks * blksz) * (5/4) / 1024
 
-for you to fetch changes up to 2db29c7d6fedb8325acab74afbb2e49e35be54fb:
+> > +len=$((blocks * blksz))
+> > +
+> > +echo "+ make some files"
+> > +$XFS_IO_PROG -f -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f1 >> $seqres.full
+> > +$XFS_IO_PROG -f -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f2 >> $seqres.full
+> > +./src/punch-alternating $SCRATCH_MNT/f1 >> "$seqres.full"
+> > +./src/punch-alternating $SCRATCH_MNT/f2 >> "$seqres.full"
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/xfs/876.out b/tests/xfs/876.out
+> > new file mode 100644
+> > index 0000000..96c1970
+> > --- /dev/null
+> > +++ b/tests/xfs/876.out
+> > @@ -0,0 +1,4 @@
+> > +QA output created by 876
+> > ++ create scratch fs
+> > ++ mount fs image
+> > ++ make some files
+> > diff --git a/tests/xfs/877 b/tests/xfs/877
+> > new file mode 100755
+> > index 0000000..2ad7d30
+> > --- /dev/null
+> > +++ b/tests/xfs/877
+> > @@ -0,0 +1,92 @@
+> > +#! /bin/bash
+> > +# FS QA Test No. 877
+> > +#
+> > +# Make sure query_range returns -EINVAL if lowkey > highkey.
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +
+> > +seq=`basename "$0"`
+> > +seqres="$RESULT_DIR/$seq"
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1    # failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -rf "$tmp".* $metadump_file
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +. ./common/attr
+> 
+> Seems this is not needed.
 
-  xfs/122: check the ag reservation counter ioctl (2016-09-02 16:40:34 +0800)
+Right.
 
-----------------------------------------------------------------
+> > +
+> > +# real QA test starts here
+> > +_supported_os Linux
+> > +_supported_fs xfs
+> > +_require_xfs_scratch_rmapbt
+> > +_require_command "$XFS_DB_PROG" "xfs_db"
+> > +_require_xfs_io_command "falloc"
+> > +_require_xfs_io_command "fpunch"
+> > +_require_xfs_io_command "fzero"
+> > +_require_xfs_io_command "fcollapse"
+> > +_require_xfs_io_command "finsert"
+> > +
+> > +rm -f "$seqres.full"
+> > +
+> > +echo "Format and mount"
+> > +_scratch_mkfs > "$seqres.full" 2>&1
+> > +_scratch_mount
+> > +blksz=65536
+> > +blocks=16
+> > +len=$((blocks * blksz))
+> > +
+> > +echo "Create some files"
+> > +$XFS_IO_PROG -f -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f1 >> $seqres.full
+> > +
+> > +echo "Manipulate file"
+> > +$XFS_IO_PROG -c "fpunch $blksz $blksz" \
+> > +	-c "fzero $((3 * blksz)) $blksz" \
+> > +	-c "pwrite -S 0x69 $((5 * blksz)) $blksz" \
+> > +	-c "fpunch $((7 * blksz)) $blksz" \
+> > +	-c "fsync" \
+> > +	-c "pwrite -S 0x70 $((7 * blksz)) $blksz" \
+> > +	-c "fcollapse $((9 * blksz)) $blksz" \
+> > +	-c "finsert $((10 * blksz)) $blksz" $SCRATCH_MNT/f1 >> $seqres.full
+> > +
+> > +echo "Check file"
+> > +md5sum $SCRATCH_MNT/f1 | _filter_scratch
+> 
+> I'm a bit confused by the md5sum, f1 is not checked again for
+> comparison, what's the purpose of this checksum?
 
-fstests: update on 2016-09-03
+This test checks that xfs_io can send properly formatted GETFSMAP ioctls to the
+kernel to query the filesystem mappings.  Hence we spit out the md5 to make
+sure that the file contents match what we just wrote to the file, so that we
+actually /have/ some mappings to report.
 
-This update contains:
-o New generic and xfs tests
-o Fixes of reflink/rmap tests
-o Other misc fixes for tests and README
+--D
 
-----------------------------------------------------------------
-Artem Savkov (1):
-      generic: listxattr syscall with different buffer sizes
-
-Darrick J. Wong (8):
-      tests/xfs: don't run tests if cowextsize isn't present
-      xfs/122: decrease the log update done item sizes
-      xfs/130,235: deal with an unreplayable dirty log
-      generic/159, 160: deal with EACCES -> EPERM transition
-      xfs/122: test btree header block sizes
-      xfs: test swapext with reflink
-      xfs/122: track xfs_scrub_metadata
-      xfs/122: check the ag reservation counter ioctl
-
-Eric Sandeen (1):
-      README: fix up dependency lists
-
-Wang Xiaoguang (1):
-      generic/172: raise fs size
-
-Zorro Lang (2):
-      generic/095: add xfs_file_aio_read into warning whitelist
-      xfs: rw remount with unknown ro-compat features
-
- .gitignore            |   1 +
- README                |  17 ++++----
- src/Makefile          |   2 +-
- src/listxattr.c       |  73 +++++++++++++++++++++++++++++++++
- tests/generic/095     |   4 +-
- tests/generic/159     |   7 +++-
- tests/generic/160     |   7 +++-
- tests/generic/172     |  20 ++++-----
- tests/generic/377     |  87 ++++++++++++++++++++++++++++++++++++++++
- tests/generic/377.out |  11 +++++
- tests/generic/group   |   1 +
- tests/xfs/122.out     |  10 +++--
- tests/xfs/130         |   3 +-
- tests/xfs/215         |   1 +
- tests/xfs/218         |   1 +
- tests/xfs/219         |   1 +
- tests/xfs/221         |   1 +
- tests/xfs/223         |   1 +
- tests/xfs/224         |   1 +
- tests/xfs/225         |   1 +
- tests/xfs/226         |   1 +
- tests/xfs/228         |   1 +
- tests/xfs/230         |   1 +
- tests/xfs/231         |   1 +
- tests/xfs/232         |   1 +
- tests/xfs/235         |   3 +-
- tests/xfs/243         |   1 +
- tests/xfs/248         |   1 +
- tests/xfs/249         |   1 +
- tests/xfs/251         |   1 +
- tests/xfs/254         |   1 +
- tests/xfs/255         |   1 +
- tests/xfs/256         |   1 +
- tests/xfs/257         |   1 +
- tests/xfs/258         |   1 +
- tests/xfs/270         |  93 ++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/270.out     |   5 +++
- tests/xfs/315         |   1 +
- tests/xfs/326         |   1 +
- tests/xfs/328         | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/328.out     |   6 +++
- tests/xfs/329         |  97 ++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/329.out     |  10 +++++
- tests/xfs/330         | 102 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/330.out     |  12 ++++++
- tests/xfs/group       |   4 ++
- 46 files changed, 678 insertions(+), 29 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
+> 
+> Thanks,
+> Eryu
+> 
+> > +od -tx1 -Ad -c $SCRATCH_MNT/f1 >> $seqres.full
+> > +
+> > +echo "Unmount"
+> > +_scratch_unmount
+> > +
+> > +echo "Try a regular fsmap"
+> > +$XFS_DB_PROG -c 'fsmap' `_scratch_xfs_db_options` >> $seqres.full
+> > +$XFS_DB_PROG -c 'fsmap 0 5' `_scratch_xfs_db_options` >> $seqres.full
+> > +
+> > +echo "Try a bad fsmap"
+> > +$XFS_DB_PROG -c 'fsmap 5 4' `_scratch_xfs_db_options`
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/xfs/877.out b/tests/xfs/877.out
+> > new file mode 100644
+> > index 0000000..4a2242f
+> > --- /dev/null
+> > +++ b/tests/xfs/877.out
+> > @@ -0,0 +1,10 @@
+> > +QA output created by 877
+> > +Format and mount
+> > +Create some files
+> > +Manipulate file
+> > +Check file
+> > +e45c5707fcf6817e914ffb6ce37a0ac7  SCRATCH_MNT/f1
+> > +Unmount
+> > +Try a regular fsmap
+> > +Try a bad fsmap
+> > +Error 22 while querying fsmap btree.
+> > diff --git a/tests/xfs/group b/tests/xfs/group
+> > index 8565204..72580e9 100644
+> > --- a/tests/xfs/group
+> > +++ b/tests/xfs/group
+> > @@ -311,3 +311,5 @@
+> >  873 auto quick clone fsr
+> >  874 auto quick clone fsr
+> >  875 auto quick clone fsr quota
+> > +876 auto quick rmap clone
+> > +877 auto quick rmap clone
+> > 
