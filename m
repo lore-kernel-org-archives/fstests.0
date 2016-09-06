@@ -1,164 +1,173 @@
-Received: from mx1.redhat.com ([209.132.183.28]:37886 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:46734 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752188AbcIKFwR (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 11 Sep 2016 01:52:17 -0400
-Message-Id: <201609110552.u8B5qE2o029525@int-mx09.intmail.prod.int.phx2.redhat.com>
-Date: Sun, 11 Sep 2016 13:52:14 +0800
+        id S1751096AbcIFEVk (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 6 Sep 2016 00:21:40 -0400
+Date: Tue, 6 Sep 2016 12:20:39 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: [GIT PULL] fstests: updates on 2016-09-10
+Subject: Re: [PATCH] fstests: common: Enhance _exclude_scratch_mount_option
+ to handle multiply options and generic fs type
+Message-ID: <20160906042039.GN27776@eguan.usersys.redhat.com>
+References: <20160905071333.24688-1-quwenruo@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160905071333.24688-1-quwenruo@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave,
+On Mon, Sep 05, 2016 at 03:13:33PM +0800, Qu Wenruo wrote:
+> Enhance _exclude_scratch_mount_option() function to get real mount
+> options from $MOUNT_OPTIONS.
 
-Can you please pull the fstests update from the location below? This update
-contains patches from last two weeks, they're mainly new reflink/rmap tests and
-fixes from Darrick, along with other new generic, XFS and overlay tests.
+This seems unnecessarily complex to me.
 
-New failures I noticed in this update:
-- generic/377 fails on XFS. XFS doesn't return ERANGE as expected when the
-  buffer isn't big enough.
-- generic/378 fails on CIFS v2.0/v2.1/v3.0 (passes on CIFS v1.0).
+> 
+> Now it can understand and extract real mount option from string like
+> "-o opt1,opt2 -oopt3".
+> Furthermore, it doesn't use grep method, which can lead to false alert
+> for options like inode_cache and noinode_cache.
+> It now do compare with the first n characters of the prohibited list,
+> so it can handle "data=" and above "no" prefix well.
+
+I think we can fix it by adding "-w" option to grep, and replacing
+"data=" with "data", "=" seems not necessary.
+
+> 
+> And add a new parameter, 'fstype' for _exclude_scratch_mount_option().
+> So for generic test cases, it can still prohibit mount options for given
+> fs(mainly for btrfs though)
+
+This requires every caller of this helper provides an additional fstype
+argument, and in most cases this argument is not useful (generic or
+current FSTYP). If btrfs needs to be handled differently, how about
+checking the fstype in the test and adding additional mount option rules
+if fstype is btrfs?
+
+> 
+> Finally, allow it to accept multiple options at the same time.
+> No need for multiple _exclude_scratch_mount_option lines now
+
+So _exclude_scratch_mount_option is simply:
+
+# skip test if MOUNT_OPTIONS contains the given mount options
+_exclude_scratch_mount_option()
+{
+        for opt in $*; do
+                if echo $MOUNT_OPTIONS | grep -qw "$opt"; then
+                        _notrun "mount option \"$opt\" not allowed in this test"
+                fi
+        done
+}
+
+(Note that the comment in current code is wrong, MKFS_OPTIONS should be
+MOUNT_OPTIONS)
+
+What do you and/or other people think?
 
 Thanks,
 Eryu
 
-The following changes since commit 21eb9d303cff056753a3104602ff674d468af52e:
-
-  fstests: add punch, collapse, insert, zero test groups (2016-08-26 15:45:03 +0800)
-
-are available in the git repository at:
-
-  https://github.com/guaneryu/xfstests.git for-dave
-
-for you to fetch changes up to 06d400134e1148461402f640036b8ccc2f6e4c93:
-
-  xfs: test getbmapx shared extent reporting (2016-09-08 19:36:13 +0800)
-
-----------------------------------------------------------------
-
-fstests: update on 2016-09-10
-
-This update contains:
-o New generic, XFS and overlay tests
-o New tests and fixes of reflink/rmap tests
-o Other misc fixes for tests, common helpers and README file
-
-----------------------------------------------------------------
-Artem Savkov (1):
-      generic: listxattr syscall with different buffer sizes
-
-Darrick J. Wong (10):
-      tests/xfs: don't run tests if cowextsize isn't present
-      xfs/122: decrease the log update done item sizes
-      xfs/130,235: deal with an unreplayable dirty log
-      generic/159, 160: deal with EACCES -> EPERM transition
-      xfs/122: test btree header block sizes
-      xfs: test swapext with reflink
-      xfs/122: track xfs_scrub_metadata
-      xfs/122: check the ag reservation counter ioctl
-      xfs: test getfsmap ioctl
-      xfs: test getbmapx shared extent reporting
-
-Eric Sandeen (1):
-      README: fix up dependency lists
-
-Eryu Guan (4):
-      common/rc: introduce _overlay_mount_dirs helper
-      overlay: copy-up lowerdir which has opaque xattr set
-      xfs/279: filter scsi debug device correctly
-      generic: simple permission check on hard links
-
-Qu Wenruo (1):
-      common/rc: Enhance _exclude_scratch_mount_option to handle multiple options
-
-Wang Xiaoguang (1):
-      generic/172: raise fs size
-
-Xiao Yang (1):
-      ext4/021: use $XFS_IO_PROG instead of xfs_io
-
-Zorro Lang (2):
-      generic/095: add xfs_file_aio_read into warning whitelist
-      xfs: rw remount with unknown ro-compat features
-
- .gitignore            |   1 +
- README                |  17 ++++----
- common/rc             |  48 +++++++++++++++++-----
- src/Makefile          |   2 +-
- src/listxattr.c       |  73 +++++++++++++++++++++++++++++++++
- tests/ext4/021        |   2 +-
- tests/ext4/271        |   6 +--
- tests/generic/095     |   4 +-
- tests/generic/159     |   7 +++-
- tests/generic/160     |   7 +++-
- tests/generic/172     |  20 ++++-----
- tests/generic/377     |  87 ++++++++++++++++++++++++++++++++++++++++
- tests/generic/377.out |  11 +++++
- tests/generic/378     |  73 +++++++++++++++++++++++++++++++++
- tests/generic/378.out |   3 ++
- tests/generic/group   |   2 +
- tests/overlay/005     |   5 +--
- tests/overlay/010     |   5 +--
- tests/overlay/014     |  94 +++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/014.out |   3 ++
- tests/overlay/group   |   1 +
- tests/xfs/122.out     |  10 +++--
- tests/xfs/130         |   3 +-
- tests/xfs/134         |   3 +-
- tests/xfs/215         |   1 +
- tests/xfs/218         |   1 +
- tests/xfs/219         |   1 +
- tests/xfs/221         |   1 +
- tests/xfs/223         |   1 +
- tests/xfs/224         |   1 +
- tests/xfs/225         |   1 +
- tests/xfs/226         |   1 +
- tests/xfs/228         |   1 +
- tests/xfs/230         |   1 +
- tests/xfs/231         |   1 +
- tests/xfs/232         |   1 +
- tests/xfs/235         |   3 +-
- tests/xfs/243         |   1 +
- tests/xfs/248         |   1 +
- tests/xfs/249         |   1 +
- tests/xfs/251         |   1 +
- tests/xfs/254         |   1 +
- tests/xfs/255         |   1 +
- tests/xfs/256         |   1 +
- tests/xfs/257         |   1 +
- tests/xfs/258         |   1 +
- tests/xfs/270         |  93 ++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/270.out     |   5 +++
- tests/xfs/271         |  82 +++++++++++++++++++++++++++++++++++++
- tests/xfs/271.out     |  13 ++++++
- tests/xfs/272         |  84 ++++++++++++++++++++++++++++++++++++++
- tests/xfs/272.out     |   6 +++
- tests/xfs/273         |  65 ++++++++++++++++++++++++++++++
- tests/xfs/273.out     |   3 ++
- tests/xfs/274         |  95 +++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/274.out     |   7 ++++
- tests/xfs/275         |  68 +++++++++++++++++++++++++++++++
- tests/xfs/275.out     |   4 ++
- tests/xfs/276         |  85 +++++++++++++++++++++++++++++++++++++++
- tests/xfs/276.out     |   6 +++
- tests/xfs/277         |  68 +++++++++++++++++++++++++++++++
- tests/xfs/277.out     |   4 ++
- tests/xfs/279         |   2 +-
- tests/xfs/280         |  93 ++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/280.out     |  17 ++++++++
- tests/xfs/315         |   1 +
- tests/xfs/326         |   1 +
- tests/xfs/328         | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/328.out     |   6 +++
- tests/xfs/329         |  97 ++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/329.out     |  10 +++++
- tests/xfs/330         | 102 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/330.out     |  12 ++++++
- tests/xfs/group       |  12 ++++++
- 74 files changed, 1607 insertions(+), 54 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
+> 
+> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+> ---
+>  common/rc      | 41 ++++++++++++++++++++++++++++++++++++++---
+>  tests/ext4/271 |  6 ++----
+>  tests/xfs/134  |  3 +--
+>  3 files changed, 41 insertions(+), 9 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 04039a4..8fca637 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3183,11 +3183,46 @@ _require_cloner()
+>  		_notrun "cloner binary not present at $CLONER_PROG"
+>  }
+>  
+> -# skip test if MKFS_OPTIONS contains the given string
+> +# Normalize mount options from global $MOUNT_OPTIONS
+> +# Will convert "-o options1,options2 -ooptions3" into
+> +# "options1 options2 options3" for easy access
+> +_normalize_mount_options()
+> +{
+> +	echo $MOUNT_OPTIONS | sed -n 's/-o\s*\(\S*\)/\1/gp' |\
+> +		sed 's/,/ /g'
+> +}
+> +
+> +# Helper for _exclude_scratch_mount_option , check if exclusive mount option $1
+> +# is in the custom mount options
+> +_check_one_exclusive_option()
+> +{
+> +	excl_opt=$1
+> +	shift
+> +	mnt_opts=$*
+> +	excl_len=${#excl_opt}
+> +
+> +	for n in $mnt_opts; do
+> +		# Handle mount option like "data="
+> +		sub_str=$(expr substr $n 1 ${excl_len})
+> +		if [ $sub_str == $excl_opt ]; then
+> +			_notrun "mount option \"$n\" not allowed in this test"
+> +		fi
+> +	done
+> +}
+> +
+> +# skip test if custom MOUNT_OPTIONS contains prohibited mount
+> +# options
+>  _exclude_scratch_mount_option()
+>  {
+> -	if echo $MOUNT_OPTIONS | grep -q "$1"; then
+> -		_notrun "mount option \"$1\" not allowed in this test"
+> +	fstype=$1
+> +	shift
+> +
+> +	normalized=$(_normalize_mount_options)
+> +	if [ $fstype == "generic" -o $fstype = $FSTYP ]; then
+> +		while [ $# -gt 1 ]; do
+> +			_check_one_exclusive_option $1 $normalized
+> +			shift
+> +		done
+>  	fi
+>  }
+>  
+> diff --git a/tests/ext4/271 b/tests/ext4/271
+> index 8674090..f3a99b7 100755
+> --- a/tests/ext4/271
+> +++ b/tests/ext4/271
+> @@ -41,10 +41,8 @@ _supported_os Linux
+>  _require_scratch
+>  # this test needs no journal to be loaded, skip on journal related mount
+>  # options, otherwise mount would fail with "-o noload" mount option
+> -_exclude_scratch_mount_option "data="
+> -_exclude_scratch_mount_option "commit="
+> -_exclude_scratch_mount_option "journal_checksum"
+> -_exclude_scratch_mount_option "journal_async_commit"
+> +_exclude_scratch_mount_option ext4 "data=" "commit=" "journal_checksum" \
+> +				   "journal_async_commit"
+>  
+>  rm -f $seqres.full
+>  _scratch_mkfs_sized $((128 * 1024 * 1024)) >> $seqres.full 2>&1
+> diff --git a/tests/xfs/134 b/tests/xfs/134
+> index b3a1107..ca4a73d 100755
+> --- a/tests/xfs/134
+> +++ b/tests/xfs/134
+> @@ -51,8 +51,7 @@ _supported_os Linux IRIX
+>  _require_test
+>  _require_xfs_quota
+>  # we can't run with group quotas
+> -_exclude_scratch_mount_option "gquota"
+> -_exclude_scratch_mount_option "grpquota"
+> +_exclude_scratch_mount_option xfs "gquota" "grpquota"
+>  
+>  dir=$SCRATCH_MNT/project
+>  
+> -- 
+> 2.7.4
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
