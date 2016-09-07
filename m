@@ -1,38 +1,132 @@
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:54463 "EHLO
-        ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750792AbcIGFhf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 7 Sep 2016 01:37:35 -0400
-Date: Wed, 7 Sep 2016 15:37:32 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] fstests: common: Enhance _exclude_scratch_mount_option
- to handle multiply options and generic fs type
-Message-ID: <20160907053732.GD22388@dastard>
-References: <20160905071333.24688-1-quwenruo@cn.fujitsu.com>
- <20160906042039.GN27776@eguan.usersys.redhat.com>
- <1bdfe67d-17ca-c95b-a10d-f9ac072b1aca@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1bdfe67d-17ca-c95b-a10d-f9ac072b1aca@cn.fujitsu.com>
+Received: from mx1.redhat.com ([209.132.183.28]:43024 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1757001AbcIGK0Z (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 7 Sep 2016 06:26:25 -0400
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] generic: simple permission check on hard links
+Date: Wed,  7 Sep 2016 18:26:09 +0800
+Message-Id: <1473243969-12326-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: Eryu Guan <eguan@redhat.com>, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-unionfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 06, 2016 at 01:06:39PM +0800, Qu Wenruo wrote:
-> Considering not every contributor will add comment about excluded
-> mount options, and in case generic test cases needs to exclude one
-> mount option for given fstype, it will be quite hard to find the
-> reason.
+Overlayfs had a bug that hardlinks don't share inode, if
+chmod/chown/etc. is performed on one of the links then the inode
+belonging to the other one won't be updated. The following patch
+fixed this issue:
 
-That is why we review changes. If it's not obvious to the reviewer
-why the mount option is excluded, or it's not documented in the
-commit message, then the reviewer should be asking for it to be
-added.
+51f7e52 ovl: share inode for hard link
 
-Cheers,
+This is a simple test that has nothing overlayfs specific, so make
+it a generic test.
 
-Dave.
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+ tests/generic/377     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/377.out |  3 +++
+ tests/generic/group   |  1 +
+ 3 files changed, 77 insertions(+)
+ create mode 100755 tests/generic/377
+ create mode 100644 tests/generic/377.out
+
+diff --git a/tests/generic/377 b/tests/generic/377
+new file mode 100755
+index 0000000..2e0b1fd
+--- /dev/null
++++ b/tests/generic/377
+@@ -0,0 +1,73 @@
++#! /bin/bash
++# FS QA Test 377
++#
++# Simple permission check on hard links.
++#
++# Overlayfs had a bug that hardlinks don't share inode, if chmod/chown/etc.
++# is performed on one of the links then the inode belonging to the other
++# one won't be updated. The following patch fixed this issue
++#
++# 51f7e52 ovl: share inode for hard link
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Red Hat Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os IRIX Linux
++_require_test
++_require_user
++
++# Setup testfile and its hardlink
++testfile=$TEST_DIR/testfile.$seq
++testlink=$testfile.hardlink
++rm -f $testfile $testlink
++echo "You should not see this" >$testfile
++ln $testfile $testlink
++
++# remove read permission from testfile and unprivileged user should have no
++# permission to read testfile and hardlink
++chmod -r $testfile
++_user_do "cat $testfile"
++_user_do "cat $testlink"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/377.out b/tests/generic/377.out
+new file mode 100644
+index 0000000..8833788
+--- /dev/null
++++ b/tests/generic/377.out
+@@ -0,0 +1,3 @@
++QA output created by 377
++Permission denied
++Permission denied
+diff --git a/tests/generic/group b/tests/generic/group
+index a81d126..4209300 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -380,3 +380,4 @@
+ 374 auto quick clone dedupe
+ 375 auto quick acl
+ 376 auto quick metadata
++377 auto quick metadata
 -- 
-Dave Chinner
-david@fromorbit.com
+2.7.4
+
