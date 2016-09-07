@@ -1,39 +1,36 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:47217 "EHLO
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:36977 "EHLO
         ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750977AbcIGWpx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 7 Sep 2016 18:45:53 -0400
-Date: Thu, 8 Sep 2016 08:45:36 +1000
+        by vger.kernel.org with ESMTP id S1751099AbcIGWru (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 7 Sep 2016 18:47:50 -0400
+Date: Thu, 8 Sep 2016 08:47:47 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] generic: simple permission check on hard links
-Message-ID: <20160907224536.GG22388@dastard>
-References: <1473243969-12326-1-git-send-email-eguan@redhat.com>
+Subject: Re: [PATCH] xfs/279: filter scsi debug device correctly
+Message-ID: <20160907224747.GH22388@dastard>
+References: <1473053427-15498-1-git-send-email-eguan@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1473243969-12326-1-git-send-email-eguan@redhat.com>
+In-Reply-To: <1473053427-15498-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
+Cc: fstests@vger.kernel.org, xfs@oss.sgi.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 07, 2016 at 06:26:09PM +0800, Eryu Guan wrote:
-> Overlayfs had a bug that hardlinks don't share inode, if
-> chmod/chown/etc. is performed on one of the links then the inode
-> belonging to the other one won't be updated. The following patch
-> fixed this issue:
+On Mon, Sep 05, 2016 at 01:30:27PM +0800, Eryu Guan wrote:
+> This test assumes scsi debug device is "/dev/sd." when doing the
+> filter, but that isn't always true, I've seen failure like
 > 
-> 51f7e52 ovl: share inode for hard link
-> 
-> This is a simple test that has nothing overlayfs specific, so make
-> it a generic test.
+>   -mkfs with opts: DEVICE
+>   +mkfs with opts: DEVICEl
+
+Yeah, I can see how that would occur when you have enough scsi
+devices to go to multiple device characters (e.g. /dev/sdal).
+
+> So use $SCSI_DEBUG_DEV to match the correct scsi debug device name.
 > 
 > Signed-off-by: Eryu Guan <eguan@redhat.com>
 
-Looks ok to me.
-
 Reviewed-by: Dave Chinner <dchinner@redhat.com>
-
-
 -- 
 Dave Chinner
 david@fromorbit.com
