@@ -1,11 +1,11 @@
 Received: from mx142.netapp.com ([216.240.21.19]:27109 "EHLO mx142.netapp.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1756470AbcIGT40 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 7 Sep 2016 15:56:26 -0400
+        id S1756354AbcIGT4Y (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 7 Sep 2016 15:56:24 -0400
 From: Anna Schumaker <Anna.Schumaker@netapp.com>
-Subject: [PATCH v2 4/4] generic/380: Add a copy test for overwriting small amounts of data
-Date: Wed, 7 Sep 2016 15:56:19 -0400
-Message-ID: <20160907195619.25914-5-Anna.Schumaker@Netapp.com>
+Subject: [PATCH v2 2/4] generic/378: Add small copies to new file test
+Date: Wed, 7 Sep 2016 15:56:17 -0400
+Message-ID: <20160907195619.25914-3-Anna.Schumaker@Netapp.com>
 In-Reply-To: <20160907195619.25914-1-Anna.Schumaker@Netapp.com>
 References: <20160907195619.25914-1-Anna.Schumaker@Netapp.com>
 MIME-Version: 1.0
@@ -15,32 +15,30 @@ To: fstests@vger.kernel.org
 Cc: Anna.Schumaker@netapp.com, linux-nfs@vger.kernel.org, hch@infradead.org
 List-ID: <fstests@vger.kernel.org>
 
-This test is similar to 345, except that it copies one byte at a time to
-make sure that this case works as expected.
+This test copies single bytes from a source file into various new files
+just to make sure that we can handle very small copies.
 
 Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
 ---
- tests/generic/380     | 94 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/380.out | 17 ++++++++++
+ tests/generic/378     | 88 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/378.out | 14 ++++++++
  tests/generic/group   |  1 +
- 3 files changed, 112 insertions(+)
- create mode 100644 tests/generic/380
- create mode 100644 tests/generic/380.out
+ 3 files changed, 103 insertions(+)
+ create mode 100644 tests/generic/378
+ create mode 100644 tests/generic/378.out
 
-diff --git a/tests/generic/380 b/tests/generic/380
+diff --git a/tests/generic/378 b/tests/generic/378
 new file mode 100644
-index 0000000..8ca51e4
+index 0000000..0b3ad50
 --- /dev/null
-+++ b/tests/generic/380
-@@ -0,0 +1,94 @@
++++ b/tests/generic/378
+@@ -0,0 +1,88 @@
 +#!/bin/bash
-+# FS QA Test No. 380
++# FS QA Test No. 378
 +#
 +# Tests vfs_copy_file_range():
 +#   - Copy a small file
-+#   - Use copy to swap data at beginning and end
-+#   - Use copy to swap data in the middle
-+#   - Use copy to swap data in a small file
++#   - Small copies from various points in the original file
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2016 Netapp, Inc. All rights reserved.
 +#
@@ -90,7 +88,7 @@ index 0000000..8ca51e4
 +
 +_checksum_files()
 +{
-+	for f in file copy; do
++	for f in $*; do
 +		md5sum $testdir/$f | _filter_test_dir
 +	done
 +}
@@ -100,65 +98,58 @@ index 0000000..8ca51e4
 +echo "Create the original file and then copy"
 +echo -n "abcde" > $testdir/file
 +$XFS_IO_PROG -f -c "copy_range $testdir/file" "$testdir/copy"
-+cmp $testdir/file $testdir/copy
++echo -n "abcde" | cmp $testdir/copy
 +echo "Original md5sums:"
-+_checksum_files
++_checksum_files file copy
 +
-+echo "Swap beginning and end of original file"
-+$XFS_IO_PROG -f -c "copy_range -s 0 -d 4 -l 1 $testdir/file" "$testdir/copy"
-+$XFS_IO_PROG -f -c "copy_range -s 4 -d 0 -l 1 $testdir/file" "$testdir/copy"
-+echo -n "ebcda" | cmp $testdir/copy
-+echo "md5sums after swapping beginning and end:"
-+_checksum_files
-+
-+echo "Swap middle parts of original file"
-+$XFS_IO_PROG -f -c "copy_range -s 1 -d 3 -l 1 $testdir/file" "$testdir/copy"
-+$XFS_IO_PROG -f -c "copy_range -s 3 -d 1 -l 1 $testdir/file" "$testdir/copy"
-+echo -n "edcba" | cmp $testdir/copy
-+echo "md5sums after swapping middle:"
-+_checksum_files
-+
-+echo "Copy tail of original file onto copy"
-+$XFS_IO_PROG -f -c "copy_range -s 1 -d 3 -l 4 $testdir/file" "$testdir/copy"
-+echo -n "edcbcde" | cmp $testdir/copy
-+echo "md5sums after copying tail:"
-+_checksum_files
++echo "Small copies from various points in the original file"
++$XFS_IO_PROG -f -c "copy_range -s 0 -l 1 $testdir/file" "$testdir/a"
++$XFS_IO_PROG -f -c "copy_range -s 1 -l 1 $testdir/file" "$testdir/b"
++$XFS_IO_PROG -f -c "copy_range -s 2 -l 1 $testdir/file" "$testdir/c"
++$XFS_IO_PROG -f -c "copy_range -s 3 -l 1 $testdir/file" "$testdir/d"
++$XFS_IO_PROG -f -c "copy_range -s 4 -l 1 $testdir/file" "$testdir/e"
++$XFS_IO_PROG -f -c "copy_range -s 5 -l 1 $testdir/file" "$testdir/f"
++echo -n "a" | cmp $testdir/a
++echo -n "b" | cmp $testdir/b
++echo -n "c" | cmp $testdir/c
++echo -n "d" | cmp $testdir/d
++echo -n "e" | cmp $testdir/e
++echo -n ""  | cmp $testdir/f
++echo "md5sums after small copies"
++_checksum_files file a b c d e f
 +
 +#success, all done
 +status=0
 +exit
-diff --git a/tests/generic/380.out b/tests/generic/380.out
+diff --git a/tests/generic/378.out b/tests/generic/378.out
 new file mode 100644
-index 0000000..4159613
+index 0000000..5d63a71
 --- /dev/null
-+++ b/tests/generic/380.out
-@@ -0,0 +1,17 @@
-+QA output created by 380
++++ b/tests/generic/378.out
+@@ -0,0 +1,14 @@
++QA output created by 378
 +Create the original file and then copy
 +Original md5sums:
-+ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-380/file
-+ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-380/copy
-+Swap beginning and end of original file
-+md5sums after swapping beginning and end:
-+ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-380/file
-+32db1f6d06d15f7e38e1ab1c69da498a  TEST_DIR/test-380/copy
-+Swap middle parts of original file
-+md5sums after swapping middle:
-+ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-380/file
-+295228f3d82d344bbcf2f0030519c2ea  TEST_DIR/test-380/copy
-+Copy tail of original file onto copy
-+md5sums after copying tail:
-+ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-380/file
-+0c4aac952f72fa078e2f8419aca70b28  TEST_DIR/test-380/copy
++ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-378/file
++ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-378/copy
++Small copies from various points in the original file
++md5sums after small copies
++ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-378/file
++0cc175b9c0f1b6a831c399e269772661  TEST_DIR/test-378/a
++92eb5ffee6ae2fec3ad71c777531578f  TEST_DIR/test-378/b
++4a8a08f09d37b73795649038408b5f33  TEST_DIR/test-378/c
++8277e0910d750195b448797616e091ad  TEST_DIR/test-378/d
++e1671797c52e15f763380b45e841ec32  TEST_DIR/test-378/e
++d41d8cd98f00b204e9800998ecf8427e  TEST_DIR/test-378/f
 diff --git a/tests/generic/group b/tests/generic/group
-index 8accae0..2b3e4e0 100644
+index dec0d64..2147238 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -382,3 +382,4 @@
+@@ -380,3 +380,4 @@
+ 375 auto quick acl
+ 376 auto quick metadata
  377 auto quick copy
- 378 auto quick copy
- 379 auto quick copy
-+380 auto quick copy
++378 auto quick copy
 -- 
 2.9.3
 
