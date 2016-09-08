@@ -1,44 +1,200 @@
-Date: Thu, 1 Sep 2016 16:33:32 +0800
+Date: Thu, 8 Sep 2016 18:19:20 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 08/13] xfs: more rmapbt tests
-Message-ID: <20160901083332.GB27776@eguan.usersys.redhat.com>
+Subject: Re: [PATCH 09/13] xfs: test realtime rmapbt code
+Message-ID: <20160908101920.GW27776@eguan.usersys.redhat.com>
 References: <147216769914.32641.55434969009554013.stgit@birch.djwong.org>
- <147216775128.32641.13355812513622220212.stgit@birch.djwong.org>
+ <147216775764.32641.4754646041045321851.stgit@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <147216775128.32641.13355812513622220212.stgit@birch.djwong.org>
+In-Reply-To: <147216775764.32641.4754646041045321851.stgit@birch.djwong.org>
 To: "Darrick J. Wong" <darrick.wong@oracle.com>
 Cc: david@fromorbit.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Aug 25, 2016 at 04:29:11PM -0700, Darrick J. Wong wrote:
-> More tests for the reverse mapping functionality.
+On Thu, Aug 25, 2016 at 04:29:17PM -0700, Darrick J. Wong wrote:
+> Test the realtime rmap btree code by exercising various IO patterns
+> on realtime files.
 > 
 > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
->  tests/xfs/876     |   75 +++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/876.out |    4 ++
->  tests/xfs/877     |   92 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/877.out |   10 ++++++
->  tests/xfs/group   |    2 +
->  5 files changed, 183 insertions(+)
->  create mode 100755 tests/xfs/876
->  create mode 100644 tests/xfs/876.out
->  create mode 100755 tests/xfs/877
->  create mode 100644 tests/xfs/877.out
+>  tests/xfs/878     |   91 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/878.out |    9 ++++
+>  tests/xfs/879     |   67 ++++++++++++++++++++++++++++++++
+>  tests/xfs/879.out |    7 +++
+>  tests/xfs/880     |   86 +++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/880.out |    7 +++
+>  tests/xfs/881     |   95 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/881.out |    8 ++++
+>  tests/xfs/882     |  111 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/882.out |   11 +++++
+>  tests/xfs/883     |   90 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/883.out |   10 +++++
+>  tests/xfs/884     |   91 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/884.out |    9 ++++
+>  tests/xfs/885     |   95 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/885.out |   10 +++++
+>  tests/xfs/886     |  104 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/886.out |    7 +++
+>  tests/xfs/887     |  108 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/887.out |    7 +++
+>  tests/xfs/888     |   81 +++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/888.out |    6 +++
+>  tests/xfs/group   |   11 +++++
+>  23 files changed, 1121 insertions(+)
+>  create mode 100755 tests/xfs/878
+>  create mode 100644 tests/xfs/878.out
+>  create mode 100755 tests/xfs/879
+>  create mode 100644 tests/xfs/879.out
+>  create mode 100755 tests/xfs/880
+>  create mode 100644 tests/xfs/880.out
+>  create mode 100755 tests/xfs/881
+>  create mode 100644 tests/xfs/881.out
+>  create mode 100755 tests/xfs/882
+>  create mode 100644 tests/xfs/882.out
+>  create mode 100755 tests/xfs/883
+>  create mode 100644 tests/xfs/883.out
+>  create mode 100755 tests/xfs/884
+>  create mode 100644 tests/xfs/884.out
+>  create mode 100755 tests/xfs/885
+>  create mode 100644 tests/xfs/885.out
+>  create mode 100755 tests/xfs/886
+>  create mode 100644 tests/xfs/886.out
+>  create mode 100755 tests/xfs/887
+>  create mode 100644 tests/xfs/887.out
+>  create mode 100755 tests/xfs/888
+>  create mode 100644 tests/xfs/888.out
 > 
 > 
-> diff --git a/tests/xfs/876 b/tests/xfs/876
+> diff --git a/tests/xfs/878 b/tests/xfs/878
 > new file mode 100755
-> index 0000000..7f447c9
+> index 0000000..557e4ae
 > --- /dev/null
-> +++ b/tests/xfs/876
-> @@ -0,0 +1,75 @@
+> +++ b/tests/xfs/878
+> @@ -0,0 +1,91 @@
 > +#! /bin/bash
-> +# FS QA Test No. 876
+> +# FS QA Test No. 878
 > +#
-> +# Create a big enough rmapbt that we tickle a fdblocks accounting bug.
+> +# Set rrmapino to another inode on an non-rt rmap fs and see if repair fixes it.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename "$0"`
+> +seqres="$RESULT_DIR/$seq"
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -rf "$tmp".* $metadump_file
+
+$metadump_file is not used in this test.
+
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs xfs
+> +_require_xfs_scratch_rmapbt
+> +
+> +rm -f "$seqres.full"
+> +
+> +unset SCRATCH_RTDEV
+> +
+> +echo "Format and mount"
+> +_scratch_mkfs > "$seqres.full" 2>&1
+> +_scratch_mount
+> +
+> +echo "Create some files"
+> +$XFS_IO_PROG -f -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f1 >> $seqres.full
+> +$XFS_IO_PROG -f -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f2 >> $seqres.full
+> +echo garbage > $SCRATCH_MNT/f3
+> +ino=$(stat -c '%i' $SCRATCH_MNT/f3)
+> +_scratch_unmount
+> +
+> +echo "Corrupt fs"
+> +$XFS_DB_PROG -x -c 'sb 0' \
+> +	-c "write rrmapino $ino" `_scratch_xfs_db_options` >> $seqres.full
+> +_scratch_mount
+> +
+> +echo "Check files"
+> +md5sum $SCRATCH_MNT/f1 2>&1 | _filter_scratch
+> +
+> +echo "Try to create more files"
+> +$XFS_IO_PROG -f -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f3 >> $seqres.full 2>&1
+> +
+> +echo "Repair fs"
+> +_scratch_unmount 2>&1 | _filter_scratch
+> +$XFS_LOGPRINT_PROG -t $extra_log_options $device 2>&1 \
+
+Seems above line is copied & pasted from _check_xfs_filesystem(), but
+there's no $extra_log_options defined in this test.
+
+> +		| tee $tmp.logprint | grep -q "<CLEAN>"
+> +if [ $? -ne 0 ]; then
+> +	echo "Dirty log, zeroing..." >> $seqres.full
+> +	_scratch_xfs_repair -L >> $seqres.full 2>&1
+> +else
+> +	_scratch_xfs_repair >> $seqres.full 2>&1
+> +fi
+> +_scratch_xfs_repair >> $seqres.full 2>&1
+> +
+> +echo "Try to create more files (again)"
+> +_scratch_mount
+> +$XFS_IO_PROG -f -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f4 >> $seqres.full
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/878.out b/tests/xfs/878.out
+> new file mode 100644
+> index 0000000..e134506
+> --- /dev/null
+> +++ b/tests/xfs/878.out
+> @@ -0,0 +1,9 @@
+> +QA output created by 878
+> +Format and mount
+> +Create some files
+> +Corrupt fs
+> +Check files
+> +8f27047948255cb84872e2dd7c0bc56d  SCRATCH_MNT/f1
+> +Try to create more files
+> +Repair fs
+> +Try to create more files (again)
+> diff --git a/tests/xfs/879 b/tests/xfs/879
+> new file mode 100755
+> index 0000000..247b3af
+> --- /dev/null
+> +++ b/tests/xfs/879
+> @@ -0,0 +1,67 @@
+> +#! /bin/bash
+> +# FS QA Test No. 879
+> +#
+> +# Ensure that we can create a few realtime files on a rmapbt filesystem.
 > +#
 > +#-----------------------------------------------------------------------
 > +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
@@ -75,72 +231,168 @@ On Thu, Aug 25, 2016 at 04:29:11PM -0700, Darrick J. Wong wrote:
 > +# get standard environment, filters and checks
 > +. ./common/rc
 > +. ./common/filter
-> +. ./common/reflink
 > +
 > +# real QA test starts here
 > +_supported_os Linux
 > +_supported_fs xfs
-> +_require_scratch
+> +_require_realtime
 > +_require_xfs_scratch_rmapbt
-> +_require_scratch_reflink
-> +_require_test_program "punch-alternating"
 > +
 > +rm -f "$seqres.full"
 > +
-> +echo "+ create scratch fs"
+> +echo "Format and mount"
 > +_scratch_mkfs > "$seqres.full" 2>&1
-> +
-> +echo "+ mount fs image"
 > +_scratch_mount
-> +blksz="$(stat -f $SCRATCH_MNT -c '%S')"
-
-There's "get_block_size" helper to do this.
-
 > +
-> +bt_ptrs=$(( (blksz - 56) / 44 ))
-> +bt_recs=$(( (blksz - 56) / 24 ))
-
-It's unclear to me where do these magic numbers come from. Add some
-comments?
-
+> +echo "Create a few files"
+> +$XFS_IO_PROG -f -R -c 'pwrite -S 0x67 0 50000' -c fsync $SCRATCH_MNT/f1 >> $seqres.full
+> +$XFS_IO_PROG -f -R -c 'pwrite -S 0x67 0 50000' -c fsync $SCRATCH_MNT/f2 >> $seqres.full
+> +_scratch_cycle_mount
 > +
-> +blocks=$((bt_ptrs * bt_recs + 1))
-> +_require_fs_space $SCRATCH_MNT $(( (2 * blocks * blksz) * 5 / 4096 ))
-
-_require_fs_space requires the last argument is represented in 1k block
-size, so it should be " / 1024" here?
-
-> +len=$((blocks * blksz))
+> +echo "Grab contents"
+> +md5sum $SCRATCH_MNT/f1 $SCRATCH_MNT/f2 | _filter_scratch
 > +
-> +echo "+ make some files"
-> +$XFS_IO_PROG -f -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f1 >> $seqres.full
-> +$XFS_IO_PROG -f -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f2 >> $seqres.full
-> +./src/punch-alternating $SCRATCH_MNT/f1 >> "$seqres.full"
-> +./src/punch-alternating $SCRATCH_MNT/f2 >> "$seqres.full"
+> +echo "Remove one file"
+> +rm -rf $SCRATCH_MNT/f2
 > +
 > +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/xfs/876.out b/tests/xfs/876.out
+> diff --git a/tests/xfs/879.out b/tests/xfs/879.out
 > new file mode 100644
-> index 0000000..96c1970
+> index 0000000..9dfe48b
 > --- /dev/null
-> +++ b/tests/xfs/876.out
-> @@ -0,0 +1,4 @@
-> +QA output created by 876
-> ++ create scratch fs
-> ++ mount fs image
-> ++ make some files
-> diff --git a/tests/xfs/877 b/tests/xfs/877
+> +++ b/tests/xfs/879.out
+> @@ -0,0 +1,7 @@
+> +QA output created by 879
+> +Format and mount
+> +Create a few files
+> +Grab contents
+> +10abe2628d19eb1c2ebe18aad7b14820  SCRATCH_MNT/f1
+> +10abe2628d19eb1c2ebe18aad7b14820  SCRATCH_MNT/f2
+> +Remove one file
+> diff --git a/tests/xfs/880 b/tests/xfs/880
 > new file mode 100755
-> index 0000000..2ad7d30
+> index 0000000..8cd509f
 > --- /dev/null
-> +++ b/tests/xfs/877
-> @@ -0,0 +1,92 @@
+> +++ b/tests/xfs/880
+> @@ -0,0 +1,86 @@
 > +#! /bin/bash
-> +# FS QA Test No. 877
+> +# FS QA Test No. 880
 > +#
-> +# Make sure query_range returns -EINVAL if lowkey > highkey.
+> +# Exercise expanding and shrinking the realtime rmap btree.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename "$0"`
+> +seqres="$RESULT_DIR/$seq"
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -rf "$tmp".*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs xfs
+> +_require_realtime
+> +_require_xfs_scratch_rmapbt
+> +_require_test_program "punch-alternating"
+> +_require_xfs_io_command "falloc"
+> +
+> +rm -f "$seqres.full"
+> +
+> +echo "Format and mount"
+> +_scratch_mkfs | _filter_mkfs 2>$tmp.mkfs >/dev/null
+> +. $tmp.mkfs
+> +cat $tmp.mkfs > "$seqres.full" 2>&1
+> +_scratch_mount
+> +blksz="$(stat -f $SCRATCH_MNT -c '%S')"
+
+You can use get_block_size() helper, and I know I've mentioned it before :)
+
+> +
+> +echo "Create a three-level rtrmapbt"
+> +i_ptrs=$(( (isize - 176) / 56 ))
+> +bt_ptrs=$(( (blksz - 56) / 56 ))
+> +bt_recs=$(( (blksz - 56) / 32 ))
+> +
+> +blocks=$((i_ptrs * bt_ptrs * bt_recs))
+> +_require_fs_space $SCRATCH_MNT $(( (2 * blocks * blksz) * 5 / 4096 ))
+
+Better to have some comments on the numbers and why require such a fs
+space, as you did in your last reply.
+
+> +len=$((blocks * rtextsz))
+> +
+> +echo "Create big file"
+> +$XFS_IO_PROG -f -R -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f1 >> $seqres.full
+> +$XFS_IO_PROG -f -R -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f2 >> $seqres.full
+> +
+> +echo "Explode the rtrmapbt"
+> +./src/punch-alternating $SCRATCH_MNT/f1 >> "$seqres.full"
+> +./src/punch-alternating $SCRATCH_MNT/f2 >> "$seqres.full"
+> +_scratch_cycle_mount
+> +
+> +echo "Remove half the records"
+> +rm -rf $SCRATCH_MNT/f1
+> +_scratch_cycle_mount
+> +
+> +echo "Remove the rest of the records"
+> +rm -rf $SCRATCH_MNT/f2
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/880.out b/tests/xfs/880.out
+> new file mode 100644
+> index 0000000..b87665b
+> --- /dev/null
+> +++ b/tests/xfs/880.out
+> @@ -0,0 +1,7 @@
+> +QA output created by 880
+> +Format and mount
+> +Create a three-level rtrmapbt
+> +Create big file
+> +Explode the rtrmapbt
+> +Remove half the records
+> +Remove the rest of the records
+> diff --git a/tests/xfs/881 b/tests/xfs/881
+> new file mode 100755
+> index 0000000..750a92a
+> --- /dev/null
+> +++ b/tests/xfs/881
+> @@ -0,0 +1,95 @@
+> +#! /bin/bash
+> +# FS QA Test No. 881
+> +#
+> +# Exercise metadump on realtime rmapbt preservation.
 > +#
 > +#-----------------------------------------------------------------------
 > +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
@@ -177,16 +429,903 @@ size, so it should be " / 1024" here?
 > +# get standard environment, filters and checks
 > +. ./common/rc
 > +. ./common/filter
-> +. ./common/attr
-
-Seems this is not needed.
-
 > +
 > +# real QA test starts here
 > +_supported_os Linux
 > +_supported_fs xfs
+> +_require_realtime
 > +_require_xfs_scratch_rmapbt
-> +_require_command "$XFS_DB_PROG" "xfs_db"
+> +_require_test_program "punch-alternating"
+> +_require_xfs_io_command "falloc"
+> +
+> +rm -f "$seqres.full"
+> +
+> +echo "Format and mount"
+> +_scratch_mkfs | _filter_mkfs 2>$tmp.mkfs >/dev/null
+> +. $tmp.mkfs
+> +cat $tmp.mkfs > "$seqres.full" 2>&1
+> +_scratch_mount
+> +blksz="$(stat -f $SCRATCH_MNT -c '%S')"
+> +
+> +metadump_file=$TEST_DIR/${seq}_metadump
+> +rm -rf $metadump_file
+> +
+> +echo "Create a three-level rtrmapbt"
+> +i_ptrs=$(( (isize - 176) / 56 ))
+> +bt_ptrs=$(( (blksz - 56) / 56 ))
+> +bt_recs=$(( (blksz - 56) / 32 ))
+> +
+> +blocks=$((i_ptrs * bt_ptrs * bt_recs))
+> +_require_fs_space $SCRATCH_MNT $(( (2 * blocks * blksz) * 5 / 4096 ))
+> +len=$((blocks * rtextsz))
+> +
+> +echo "Create big file"
+> +$XFS_IO_PROG -f -R -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f1 >> $seqres.full
+> +$XFS_IO_PROG -f -R -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f2 >> $seqres.full
+> +
+> +echo "Explode the rtrmapbt"
+> +./src/punch-alternating $SCRATCH_MNT/f1 >> "$seqres.full"
+> +./src/punch-alternating $SCRATCH_MNT/f2 >> "$seqres.full"
+> +_scratch_cycle_mount
+> +
+> +echo "Create metadump file"
+> +_scratch_unmount
+> +_scratch_metadump $metadump_file
+> +
+> +# Now restore the obfuscated one back and take a look around
+> +echo "Restore metadump"
+> +xfs_mdrestore $metadump_file $TEST_DIR/image
+> +SCRATCH_DEV=$TEST_DIR/image _scratch_mount
+> +SCRATCH_DEV=$TEST_DIR/image _scratch_unmount
+> +
+> +echo "Check restored fs"
+> +_check_generic_filesystem $metadump_file
+
+_check_generic_filesystem runs "fsck -t $FSTYP $dev" but "fsck -t xfs"
+is a no-op, and $metadump_file is a metadump, not a fs image. Perhaps
+what you want to do is "_check_scratch_fs $TEST_DIR/image"?
+
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/881.out b/tests/xfs/881.out
+> new file mode 100644
+> index 0000000..6ad156c
+> --- /dev/null
+> +++ b/tests/xfs/881.out
+> @@ -0,0 +1,8 @@
+> +QA output created by 881
+> +Format and mount
+> +Create a three-level rtrmapbt
+> +Create big file
+> +Explode the rtrmapbt
+> +Create metadump file
+> +Restore metadump
+> +Check restored fs
+> diff --git a/tests/xfs/882 b/tests/xfs/882
+> new file mode 100755
+> index 0000000..3c44540
+> --- /dev/null
+> +++ b/tests/xfs/882
+> @@ -0,0 +1,111 @@
+> +#! /bin/bash
+> +# FS QA Test No. 882
+> +#
+> +# Corrupt the realtime rmapbt and see how the kernel and xfs_repair deal.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename "$0"`
+> +seqres="$RESULT_DIR/$seq"
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -rf "$tmp".*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs xfs
+> +_require_realtime
+> +_require_xfs_scratch_rmapbt
+> +_require_test_program "punch-alternating"
+> +_require_xfs_io_command "falloc"
+> +
+> +rm -f "$seqres.full"
+> +
+> +echo "+ create scratch fs"
+> +_scratch_mkfs | _filter_mkfs 2>$tmp.mkfs >/dev/null
+> +. $tmp.mkfs
+> +cat $tmp.mkfs > "$seqres.full" 2>&1
+> +
+> +echo "+ mount fs image"
+> +_scratch_mount
+> +blksz="$(stat -f $SCRATCH_MNT -c '%S')"
+> +
+> +i_ptrs=$(( (isize - 176) / 56 ))
+> +bt_ptrs=$(( (blksz - 56) / 56 ))
+> +bt_recs=$(( (blksz - 56) / 32 ))
+> +
+> +blocks=$((i_ptrs * bt_ptrs * bt_recs + 1))
+> +_require_fs_space $SCRATCH_MNT $(( (2 * blocks * blksz) * 5 / 4096 ))
+> +len=$((blocks * blksz))
+> +
+> +echo "+ make some files"
+> +$XFS_IO_PROG -f -R -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f1 >> $seqres.full
+> +$XFS_IO_PROG -f -R -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f2 >> $seqres.full
+> +./src/punch-alternating $SCRATCH_MNT/f1 >> "$seqres.full"
+> +./src/punch-alternating $SCRATCH_MNT/f2 >> "$seqres.full"
+> +_scratch_unmount
+> +
+> +echo "+ check fs"
+> +_scratch_xfs_repair -n >> $seqres.full 2>&1 || echo "xfs_repair should not fail"
+> +
+> +echo "+ corrupt image"
+> +$XFS_DB_PROG -x -c "sb" -c "addr rrmapino" -c "addr u3.rtrmapbt.ptrs[1]" \
+> +	-c "stack" -c "blocktrash -x 4096 -y 4096 -n 8 -3 -z" \
+> +	`_scratch_xfs_db_options` >> $seqres.full 2>&1
+> +
+> +echo "+ mount image"
+> +_scratch_mount
+> +
+> +echo "+ copy more"
+> +$XFS_IO_PROG -f -R -c "pwrite -S 0x68 0 1" $SCRATCH_MNT/e3 >> $seqres.full 2>&1
+> +test -s ${SCRATCH_MNT}/f3 && echo "should not be able to copy with busted rtrmap btree"
+> +_scratch_unmount
+> +
+> +echo "+ repair fs"
+> +$XFS_LOGPRINT_PROG -t $extra_log_options $device 2>&1 \
+
+No $extra_log_options defined.
+
+> +		| tee $tmp.logprint | grep -q "<CLEAN>"
+> +if [ $? -ne 0 ]; then
+> +	echo "Dirty log, zeroing..." >> $seqres.full
+> +	_scratch_xfs_repair -L >> $seqres.full 2>&1
+> +else
+> +	_scratch_xfs_repair >> $seqres.full 2>&1
+> +fi
+> +_scratch_xfs_repair >> $seqres.full 2>&1
+> +
+> +echo "+ mount image (2)"
+> +_scratch_mount
+> +
+> +echo "+ copy more (2)"
+> +$XFS_IO_PROG -f -R -c "pwrite -S 0x68 0 1" $SCRATCH_MNT/e4 >> $seqres.full
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/882.out b/tests/xfs/882.out
+> new file mode 100644
+> index 0000000..5ebe620
+> --- /dev/null
+> +++ b/tests/xfs/882.out
+> @@ -0,0 +1,11 @@
+> +QA output created by 882
+> ++ create scratch fs
+> ++ mount fs image
+> ++ make some files
+> ++ check fs
+> ++ corrupt image
+> ++ mount image
+> ++ copy more
+> ++ repair fs
+> ++ mount image (2)
+> ++ copy more (2)
+> diff --git a/tests/xfs/883 b/tests/xfs/883
+> new file mode 100755
+> index 0000000..86dd047
+> --- /dev/null
+> +++ b/tests/xfs/883
+> @@ -0,0 +1,90 @@
+> +#! /bin/bash
+> +# FS QA Test No. 883
+> +#
+> +# Set rrmapino to zero on an rtrmap fs and see if repair fixes it.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename "$0"`
+> +seqres="$RESULT_DIR/$seq"
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -rf "$tmp".* $metadump_file
+
+$metadump_file is not used.
+
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs xfs
+> +_require_realtime
+> +_require_xfs_scratch_rmapbt
+> +
+> +rm -f "$seqres.full"
+> +
+> +echo "Format and mount"
+> +_scratch_mkfs > "$seqres.full" 2>&1
+> +_scratch_mount
+> +
+> +echo "Create some files"
+> +$XFS_IO_PROG -f -R -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f1 >> $seqres.full
+> +$XFS_IO_PROG -f -R -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f2 >> $seqres.full
+> +_scratch_unmount
+> +
+> +echo "Corrupt fs"
+> +$XFS_DB_PROG -x -c 'sb 0' -c 'addr rrmapino' \
+> +	-c 'write core.nlinkv2 0' -c 'write core.mode 0' -c 'sb 0' \
+> +	-c 'write rrmapino 0' `_scratch_xfs_db_options` >> $seqres.full
+> +_scratch_mount >> $seqres.full 2>&1 && echo "mount should have failed"
+> +
+> +echo "Check files"
+> +md5sum $SCRATCH_MNT/f1 2>&1 | _filter_scratch
+
+$SCRATCH_MNT should not be mounted at this point, so there's no point
+checksuming $SCRATCH_MNT/f1 here.
+
+> +
+> +echo "Try to create more files"
+> +$XFS_IO_PROG -f -R -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f3 >> $seqres.full 2>&1
+
+And no point creating new file under $SCRATCH_MNT
+
+> +test -e $SCRATCH_MNT/f3 && echo "should not have been able to write f3"
+> +
+> +echo "Repair fs"
+> +_scratch_unmount 2>&1 | _filter_scratch
+> +$XFS_LOGPRINT_PROG -t $extra_log_options $device 2>&1 \
+> +		| tee $tmp.logprint | grep -q "<CLEAN>"
+> +if [ $? -ne 0 ]; then
+> +	echo "Dirty log, zeroing..." >> $seqres.full
+> +	_scratch_xfs_repair -L >> $seqres.full 2>&1
+> +else
+> +	_scratch_xfs_repair >> $seqres.full 2>&1
+> +fi
+> +_scratch_xfs_repair >> $seqres.full 2>&1
+> +
+> +echo "Try to create more files (again)"
+> +_scratch_mount
+> +$XFS_IO_PROG -f -R -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f4 >> $seqres.full
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/883.out b/tests/xfs/883.out
+> new file mode 100644
+> index 0000000..6e75ac1
+> --- /dev/null
+> +++ b/tests/xfs/883.out
+> @@ -0,0 +1,10 @@
+> +QA output created by 883
+> +Format and mount
+> +Create some files
+> +Corrupt fs
+> +Check files
+> +md5sum: SCRATCH_MNT/f1: No such file or directory
+
+Yes, f1 is not accessible. Seems the .out file should be updated too.
+
+> +Try to create more files
+> +Repair fs
+> +umount: SCRATCH_DEV: not mounted
+> +Try to create more files (again)
+> diff --git a/tests/xfs/884 b/tests/xfs/884
+> new file mode 100755
+> index 0000000..51071e0
+> --- /dev/null
+> +++ b/tests/xfs/884
+> @@ -0,0 +1,91 @@
+> +#! /bin/bash
+> +# FS QA Test No. 884
+> +#
+> +# Link rrmapino into the rootdir on an rtrmap fs and see if repair fixes it.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename "$0"`
+> +seqres="$RESULT_DIR/$seq"
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -rf "$tmp".* $metadump_file
+
+metadump_file not used.
+
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs xfs
+> +_require_realtime
+> +_require_xfs_scratch_rmapbt
+> +
+> +rm -f "$seqres.full"
+> +
+> +echo "Format and mount"
+> +_scratch_mkfs > "$seqres.full" 2>&1
+> +_scratch_mount
+> +
+> +echo "Create some files"
+> +$XFS_IO_PROG -f -R -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f1 >> $seqres.full
+> +$XFS_IO_PROG -f -R -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f2 >> $seqres.full
+> +echo garbage > $SCRATCH_MNT/f3
+> +ln $SCRATCH_MNT/f3 $SCRATCH_MNT/f4
+> +_scratch_unmount
+> +
+> +echo "Corrupt fs"
+> +rrmapino=$($XFS_DB_PROG -c 'sb 0' -c 'p rrmapino' `_scratch_xfs_db_options` | awk '{print $3}')
+> +$XFS_DB_PROG -x -c 'sb 0' -c 'addr rootino' \
+> +	-c "write u3.sfdir3.list[3].inumber.i4 $rrmapino" `_scratch_xfs_db_options` >> $seqres.full
+> +_scratch_mount
+> +
+> +echo "Check files"
+> +md5sum $SCRATCH_MNT/f1 2>&1 | _filter_scratch
+> +
+> +echo "Try to create more files"
+> +$XFS_IO_PROG -f -R -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f5 >> $seqres.full 2>&1
+> +
+> +echo "Repair fs"
+> +_scratch_unmount 2>&1 | _filter_scratch
+> +$XFS_LOGPRINT_PROG -t $extra_log_options $device 2>&1 \
+
+No extra_log_options defined.
+
+> +		| tee $tmp.logprint | grep -q "<CLEAN>"
+> +if [ $? -ne 0 ]; then
+> +	echo "Dirty log, zeroing..." >> $seqres.full
+> +	_scratch_xfs_repair -L >> $seqres.full 2>&1
+> +else
+> +	_scratch_xfs_repair >> $seqres.full 2>&1
+> +fi
+> +_scratch_xfs_repair >> $seqres.full 2>&1
+> +
+> +echo "Try to create more files (again)"
+> +_scratch_mount
+> +$XFS_IO_PROG -f -R -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f4 >> $seqres.full
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/884.out b/tests/xfs/884.out
+> new file mode 100644
+> index 0000000..17a73ef
+> --- /dev/null
+> +++ b/tests/xfs/884.out
+> @@ -0,0 +1,9 @@
+> +QA output created by 884
+> +Format and mount
+> +Create some files
+> +Corrupt fs
+> +Check files
+> +8f27047948255cb84872e2dd7c0bc56d  SCRATCH_MNT/f1
+> +Try to create more files
+> +Repair fs
+> +Try to create more files (again)
+> diff --git a/tests/xfs/885 b/tests/xfs/885
+> new file mode 100755
+> index 0000000..1839c11
+> --- /dev/null
+> +++ b/tests/xfs/885
+> @@ -0,0 +1,95 @@
+> +#! /bin/bash
+> +# FS QA Test No. 885
+> +#
+> +# Set rrmapino to another inode on an rtrmap fs and see if repair fixes it.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename "$0"`
+> +seqres="$RESULT_DIR/$seq"
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -rf "$tmp".* $metadump_file
+
+metadump_file not used.
+
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs xfs
+> +_require_realtime
+> +_require_xfs_scratch_rmapbt
+> +
+> +rm -f "$seqres.full"
+> +
+> +echo "Format and mount"
+> +_scratch_mkfs > "$seqres.full" 2>&1
+> +_scratch_mount
+> +
+> +echo "Create some files"
+> +$XFS_IO_PROG -f -R -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f1 >> $seqres.full
+> +$XFS_IO_PROG -f -R -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f2 >> $seqres.full
+> +echo garbage > $SCRATCH_MNT/f3
+> +ino=$(stat -c '%i' $SCRATCH_MNT/f3)
+> +_scratch_unmount
+> +
+> +echo "Corrupt fs"
+> +rrmapino=$($XFS_DB_PROG -c 'sb 0' -c 'p rrmapino' `_scratch_xfs_db_options` | awk '{print $3}')
+> +$XFS_DB_PROG -x -c "inode $rrmapino" \
+> +	-c 'write core.format 2' -c 'write core.size 0' \
+> +	-c 'write core.nblocks 0' -c 'sb 0' -c 'addr rootino' \
+> +	-c "write u3.sfdir3.list[2].inumber.i4 $rrmapino" \
+> +	-c 'sb 0' -c "write rrmapino $ino" `_scratch_xfs_db_options` >> $seqres.full
+> +_scratch_mount >> $seqres.full 2>&1 && echo "mount should have failed"
+> +
+> +echo "Check files"
+> +md5sum $SCRATCH_MNT/f1 2>&1 | _filter_scratch
+
+Previous mount should have failed, so f1 is not accessible now.
+
+> +
+> +echo "Try to create more files"
+> +$XFS_IO_PROG -f -R -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f3 >> $seqres.full 2>&1
+> +test -e $SCRATCH_MNT/f3 && echo "should not have been able to write f3"
+> +
+> +echo "Repair fs"
+> +_scratch_unmount 2>&1 | _filter_scratch
+> +$XFS_LOGPRINT_PROG -t $extra_log_options $device 2>&1 \
+
+No extra_log_options defined.
+
+> +		| tee $tmp.logprint | grep -q "<CLEAN>"
+> +if [ $? -ne 0 ]; then
+> +	echo "Dirty log, zeroing..." >> $seqres.full
+> +	_scratch_xfs_repair -L >> $seqres.full 2>&1
+> +else
+> +	_scratch_xfs_repair >> $seqres.full 2>&1
+> +fi
+> +_scratch_xfs_repair >> $seqres.full 2>&1
+> +
+> +echo "Try to create more files (again)"
+> +_scratch_mount
+> +$XFS_IO_PROG -f -R -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f4 >> $seqres.full
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/885.out b/tests/xfs/885.out
+> new file mode 100644
+> index 0000000..df04f79
+> --- /dev/null
+> +++ b/tests/xfs/885.out
+> @@ -0,0 +1,10 @@
+> +QA output created by 885
+> +Format and mount
+> +Create some files
+> +Corrupt fs
+> +Check files
+> +md5sum: SCRATCH_MNT/f1: No such file or directory
+> +Try to create more files
+> +Repair fs
+> +umount: SCRATCH_DEV: not mounted
+> +Try to create more files (again)
+> diff --git a/tests/xfs/886 b/tests/xfs/886
+> new file mode 100755
+> index 0000000..81e7e64
+> --- /dev/null
+> +++ b/tests/xfs/886
+> @@ -0,0 +1,104 @@
+> +#! /bin/bash
+> +# FS QA Test No. 886
+> +#
+> +# Cross-link rrmapino to another inode on an rtrmap fs and see if repair fixes it.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename "$0"`
+> +seqres="$RESULT_DIR/$seq"
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -rf "$tmp".* $metadump_file
+
+metadump_file not used.
+
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs xfs
+> +_require_realtime
+> +_require_xfs_scratch_rmapbt
+> +_require_test_program "punch-alternating"
+> +
+> +rm -f "$seqres.full"
+> +
+> +echo "Format and mount"
+> +_scratch_mkfs | _filter_mkfs 2>$tmp.mkfs >/dev/null
+> +. $tmp.mkfs
+> +cat $tmp.mkfs > "$seqres.full" 2>&1
+> +_scratch_mkfs > "$seqres.full" 2>&1
+> +_scratch_mount
+> +blksz="$(stat -f $SCRATCH_MNT -c '%S')"
+> +
+> +i_ptrs=$(( (isize - 176) / 56 ))
+> +bt_recs=$(( (blksz - 56) / 32 ))
+> +
+> +blocks=$((i_ptrs * bt_recs + 1))
+> +len=$((blocks * rtextsz))
+> +
+> +echo "Create some files"
+> +$XFS_IO_PROG -f -R -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f1 >> $seqres.full
+> +$XFS_IO_PROG -f -R -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f2 >> $seqres.full
+> +./src/punch-alternating $SCRATCH_MNT/f1 >> "$seqres.full"
+> +./src/punch-alternating $SCRATCH_MNT/f2 >> "$seqres.full"
+> +echo garbage > $SCRATCH_MNT/f3
+> +ino=$(stat -c '%i' $SCRATCH_MNT/f3)
+> +_scratch_unmount
+> +
+> +echo "Corrupt fs"
+> +fsbno=$($XFS_DB_PROG -c "inode $ino" -c 'bmap' `_scratch_xfs_db_options` | \
+> +	sed -e 's/^.*startblock \([0-9]*\) .*$/\1/g')
+> +
+> +$XFS_DB_PROG -x -c 'sb 0' -c 'addr rrmapino' \
+> +	-c "write u3.rtrmapbt.ptrs[1] $fsbno" -c 'p' `_scratch_xfs_db_options` >> $seqres.full
+> +_scratch_mount
+> +
+> +echo "Try to create more files"
+> +$XFS_IO_PROG -f -R -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f5 >> $seqres.full 2>&1
+> +test -e $SCRATCH_MNT/f5 && echo "should not have been able to write f5"
+> +
+> +echo "Repair fs"
+> +_scratch_unmount 2>&1 | _filter_scratch
+> +$XFS_LOGPRINT_PROG -t $extra_log_options $device 2>&1 \
+
+extra_log_options :)
+
+And the following "repair" tests have the same issue.
+
+> +		| tee $tmp.logprint | grep -q "<CLEAN>"
+> +if [ $? -ne 0 ]; then
+> +	echo "Dirty log, zeroing..." >> $seqres.full
+> +	_scratch_xfs_repair -L >> $seqres.full 2>&1
+> +else
+> +	_scratch_xfs_repair >> $seqres.full 2>&1
+> +fi
+> +_scratch_xfs_repair >> $seqres.full 2>&1
+> +
+> +echo "Try to create more files (again)"
+> +_scratch_mount
+> +$XFS_IO_PROG -f -R -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f4 >> $seqres.full
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/886.out b/tests/xfs/886.out
+> new file mode 100644
+> index 0000000..7f00c5d
+> --- /dev/null
+> +++ b/tests/xfs/886.out
+> @@ -0,0 +1,7 @@
+> +QA output created by 886
+> +Format and mount
+> +Create some files
+> +Corrupt fs
+> +Try to create more files
+> +Repair fs
+> +Try to create more files (again)
+> diff --git a/tests/xfs/887 b/tests/xfs/887
+> new file mode 100755
+> index 0000000..05d0b50
+> --- /dev/null
+> +++ b/tests/xfs/887
+> @@ -0,0 +1,108 @@
+> +#! /bin/bash
+> +# FS QA Test No. 887
+> +#
+> +# Cross-link rrmapino to another inode on an rtrmap fs and see if repair fixes it.
+
+This description is the same as xfs/886, needs update?
+
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename "$0"`
+> +seqres="$RESULT_DIR/$seq"
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -rf "$tmp".* $metadump_file
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs xfs
+> +_require_realtime
+> +_require_xfs_scratch_rmapbt
+> +_require_test_program "punch-alternating"
+> +
+> +rm -f "$seqres.full"
+> +
+> +echo "Format and mount"
+> +_scratch_mkfs | _filter_mkfs 2>$tmp.mkfs >/dev/null
+> +. $tmp.mkfs
+> +cat $tmp.mkfs > "$seqres.full" 2>&1
+> +_scratch_mkfs > "$seqres.full" 2>&1
+> +_scratch_mount
+> +blksz="$(stat -f $SCRATCH_MNT -c '%S')"
+> +
+> +i_ptrs=$(( (isize - 176) / 56 ))
+> +bt_recs=$(( (blksz - 56) / 32 ))
+> +
+> +blocks=$((i_ptrs * bt_recs + 1))
+> +len=$((blocks * rtextsz))
+> +
+> +echo "Create some files"
+> +$XFS_IO_PROG -f -R -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f1 >> $seqres.full
+> +$XFS_IO_PROG -f -R -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f2 >> $seqres.full
+> +./src/punch-alternating $SCRATCH_MNT/f1 >> "$seqres.full"
+> +./src/punch-alternating $SCRATCH_MNT/f2 >> "$seqres.full"
+> +echo garbage > $SCRATCH_MNT/f3
+> +ino=$(stat -c '%i' $SCRATCH_MNT/f3)
+> +_scratch_unmount
+> +
+> +echo "Corrupt fs"
+> +$XFS_DB_PROG -c 'sb 0' -c 'addr rrmapino' \
+> +	-c 'p u3.rtrmapbt.ptrs[1]' `_scratch_xfs_db_options` >> $seqres.full
+> +
+> +fsbno=$($XFS_DB_PROG -c 'sb 0' -c 'addr rrmapino' \
+> +	-c 'p u3.rtrmapbt.ptrs[1]' `_scratch_xfs_db_options` | sed -e 's/^.*://g')
+> +$XFS_DB_PROG -x -c "inode $ino" \
+> +	-c "write u3.bmx[0].startblock $fsbno" `_scratch_xfs_db_options` >> $seqres.full
+> +_scratch_mount
+> +
+> +od -tx1 -Ad -c $SCRATCH_MNT/f3 >> $seqres.full
+> +
+> +echo "Try to create more files"
+> +$XFS_IO_PROG -f -R -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f5 >> $seqres.full 2>&1
+> +test ! -e $SCRATCH_MNT/f5 && echo "should have been able to write f5"
+> +
+> +echo "Repair fs"
+> +_scratch_unmount 2>&1 | _filter_scratch
+> +$XFS_LOGPRINT_PROG -t $extra_log_options $device 2>&1 \
+> +		| tee $tmp.logprint | grep -q "<CLEAN>"
+> +if [ $? -ne 0 ]; then
+> +	echo "Dirty log, zeroing..." >> $seqres.full
+> +	_scratch_xfs_repair -L >> $seqres.full 2>&1
+> +else
+> +	_scratch_xfs_repair >> $seqres.full 2>&1
+> +fi
+> +_scratch_xfs_repair >> $seqres.full 2>&1
+
+I see this xfs_logprint & repair hunk repeated many times, make it a
+helper?
+
+> +
+> +echo "Try to create more files (again)"
+> +_scratch_mount
+> +$XFS_IO_PROG -f -R -c "pwrite -S 0x68 0 9999" $SCRATCH_MNT/f4 >> $seqres.full
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/887.out b/tests/xfs/887.out
+> new file mode 100644
+> index 0000000..30cf032
+> --- /dev/null
+> +++ b/tests/xfs/887.out
+> @@ -0,0 +1,7 @@
+> +QA output created by 887
+> +Format and mount
+> +Create some files
+> +Corrupt fs
+> +Try to create more files
+> +Repair fs
+> +Try to create more files (again)
+> diff --git a/tests/xfs/888 b/tests/xfs/888
+> new file mode 100755
+> index 0000000..dcc9fd8
+> --- /dev/null
+> +++ b/tests/xfs/888
+> @@ -0,0 +1,81 @@
+> +#! /bin/bash
+> +# FS QA Test No. 888
+> +#
+> +# Basic rmap manipulation tests for realtime files.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename "$0"`
+> +seqres="$RESULT_DIR/$seq"
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -rf "$tmp".* $metadump_file
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs xfs
+> +_require_realtime
+> +_require_xfs_scratch_rmapbt
 > +_require_xfs_io_command "falloc"
 > +_require_xfs_io_command "fpunch"
 > +_require_xfs_io_command "fzero"
@@ -203,7 +1342,7 @@ Seems this is not needed.
 > +len=$((blocks * blksz))
 > +
 > +echo "Create some files"
-> +$XFS_IO_PROG -f -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f1 >> $seqres.full
+> +$XFS_IO_PROG -f -R -c "falloc 0 $len" -c "pwrite -S 0x68 -b 1048576 0 $len" $SCRATCH_MNT/f1 >> $seqres.full
 > +
 > +echo "Manipulate file"
 > +$XFS_IO_PROG -c "fpunch $blksz $blksz" \
@@ -217,52 +1356,50 @@ Seems this is not needed.
 > +
 > +echo "Check file"
 > +md5sum $SCRATCH_MNT/f1 | _filter_scratch
-
-I'm a bit confused by the md5sum, f1 is not checked again for
-comparison, what's the purpose of this checksum?
-
-Thanks,
-Eryu
-
 > +od -tx1 -Ad -c $SCRATCH_MNT/f1 >> $seqres.full
-> +
-> +echo "Unmount"
-> +_scratch_unmount
-> +
-> +echo "Try a regular fsmap"
-> +$XFS_DB_PROG -c 'fsmap' `_scratch_xfs_db_options` >> $seqres.full
-> +$XFS_DB_PROG -c 'fsmap 0 5' `_scratch_xfs_db_options` >> $seqres.full
-> +
-> +echo "Try a bad fsmap"
-> +$XFS_DB_PROG -c 'fsmap 5 4' `_scratch_xfs_db_options`
 > +
 > +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/xfs/877.out b/tests/xfs/877.out
+> diff --git a/tests/xfs/888.out b/tests/xfs/888.out
 > new file mode 100644
-> index 0000000..4a2242f
+> index 0000000..2587697
 > --- /dev/null
-> +++ b/tests/xfs/877.out
-> @@ -0,0 +1,10 @@
-> +QA output created by 877
+> +++ b/tests/xfs/888.out
+> @@ -0,0 +1,6 @@
+> +QA output created by 888
 > +Format and mount
 > +Create some files
 > +Manipulate file
 > +Check file
 > +e45c5707fcf6817e914ffb6ce37a0ac7  SCRATCH_MNT/f1
-> +Unmount
-> +Try a regular fsmap
-> +Try a bad fsmap
-> +Error 22 while querying fsmap btree.
 > diff --git a/tests/xfs/group b/tests/xfs/group
-> index 8565204..72580e9 100644
+> index 72580e9..1b0e22a 100644
 > --- a/tests/xfs/group
 > +++ b/tests/xfs/group
-> @@ -311,3 +311,5 @@
->  873 auto quick clone fsr
->  874 auto quick clone fsr
+> @@ -313,3 +313,14 @@
 >  875 auto quick clone fsr quota
-> +876 auto quick rmap clone
-> +877 auto quick rmap clone
+>  876 auto quick rmap clone
+>  877 auto quick rmap clone
+> +878 auto quick rmap
+> +879 auto quick rmap
+> +880 auto quick rmap
+> +881 auto quick rmap
+
+I ran these tests on a test vm with 4 vcpus and 8G mem, seems 880 and
+881 are not quick enough :)
+
+xfs/880 39s ... 43s
+xfs/881 40s ... 36s
+
+Thansk,
+Eryu
+
+> +882 fuzzers rmap
+> +883 auto quick rmap
+> +884 auto quick rmap
+> +885 auto quick rmap
+> +886 auto quick rmap
+> +887 auto quick rmap
+> +888 auto quick rmap
 > 
