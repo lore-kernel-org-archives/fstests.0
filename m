@@ -1,36 +1,81 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:36977 "EHLO
-        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751099AbcIGWru (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 7 Sep 2016 18:47:50 -0400
-Date: Thu, 8 Sep 2016 08:47:47 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] xfs/279: filter scsi debug device correctly
-Message-ID: <20160907224747.GH22388@dastard>
-References: <1473053427-15498-1-git-send-email-eguan@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:53154 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753220AbcIHG0y (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 8 Sep 2016 02:26:54 -0400
+Date: Thu, 8 Sep 2016 14:17:56 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2] fstests: common: Enhance
+ _exclude_scratch_mount_option to handle multiple options
+Message-ID: <20160908061756.GV27776@eguan.usersys.redhat.com>
+References: <20160908025221.11618-1-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1473053427-15498-1-git-send-email-eguan@redhat.com>
+In-Reply-To: <20160908025221.11618-1-quwenruo@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, xfs@oss.sgi.com, linux-xfs@vger.kernel.org
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Sep 05, 2016 at 01:30:27PM +0800, Eryu Guan wrote:
-> This test assumes scsi debug device is "/dev/sd." when doing the
-> filter, but that isn't always true, I've seen failure like
+On Thu, Sep 08, 2016 at 10:52:21AM +0800, Qu Wenruo wrote:
+> Enhance _exclude_scratch_mount_option() function to normalize mount
+> options.
+> Now it can understand and extract real mount option from string like
+> "-o opt1,opt2 -oopt3".
 > 
->   -mkfs with opts: DEVICE
->   +mkfs with opts: DEVICEl
-
-Yeah, I can see how that would occur when you have enough scsi
-devices to go to multiple device characters (e.g. /dev/sdal).
-
-> So use $SCSI_DEBUG_DEV to match the correct scsi debug device name.
+> And now we do word grep to handle mount options like noinode_cache and
+> inode_cache.
 > 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> Finally, allow it to accept multiple options at the same time.
+> No need for multiple _exclude_scratch_mount_option lines now
+> 
+> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+> ---
+> changelog:
+> v2:
+>    Don't introduce new 'fstype' parameter, suggested by Dave and Eryu.
+>    Use easier grep -w method, suggested by Dave and Eryu.
+> ---
+>  common/rc      | 22 ++++++++++++++++++----
+>  tests/ext4/271 |  6 ++----
+>  tests/xfs/134  |  3 +--
+>  3 files changed, 21 insertions(+), 10 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 04039a4..23c007a 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3183,12 +3183,26 @@ _require_cloner()
+>  		_notrun "cloner binary not present at $CLONER_PROG"
+>  }
+>  
+> -# skip test if MKFS_OPTIONS contains the given string
+> +# Normalize mount options from global $MOUNT_OPTIONS
+> +# Convert options like "-o opt1,opt2 -oopt3" to
+> +# "opt1 opt2 opt3"
+> +_normalize_mount_options()
+> +{
+> +	echo $MOUNT_OPTIONS | sed -n 's/-o\s*\(\S*\)/\1/gp' |\
+> +		sed 's/,/ /g'
+> +}
+> +
+> +# skip test if MOUNT_OPTIONS contains the given string
 
-Reviewed-by: Dave Chinner <dchinner@redhat.com>
--- 
-Dave Chinner
-david@fromorbit.com
+Make "string" plural? Because it accepts multiple arguments now :)
+
+>  _exclude_scratch_mount_option()
+>  {
+> -	if echo $MOUNT_OPTIONS | grep -q "$1"; then
+> -		_notrun "mount option \"$1\" not allowed in this test"
+> -	fi
+> +	mnt_opts=$(_normalize_mount_options)
+> +
+> +	while [ $# -gt 1 ]; do
+
+"-gt" should be "-ge" or "-gt 0", otherwise the last mount option in
+arguments is not checked (no check is done if there's only one option).
+
+I can fix them at commit time if there's no other review comments.
+
+Thanks,
+Eryu
