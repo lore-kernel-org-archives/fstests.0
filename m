@@ -1,42 +1,38 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:52374 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1750720AbcIEF5l (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 5 Sep 2016 01:57:41 -0400
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v2] ext4/021: use $XFS_IO_PROG instead of xfs_io
-Date: Mon, 5 Sep 2016 13:56:47 +0800
-Message-ID: <1473055007-26359-1-git-send-email-yangx.jy@cn.fujitsu.com>
-In-Reply-To: <20160905053356.GL27776@eguan.usersys.redhat.com>
-References: <20160905053356.GL27776@eguan.usersys.redhat.com>
+Date: Fri, 9 Sep 2016 15:01:46 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2 1/4] generic/377: Add copy to new file test
+Message-ID: <20160909070146.GZ27776@eguan.usersys.redhat.com>
+References: <20160907195619.25914-1-Anna.Schumaker@Netapp.com>
+ <20160907195619.25914-2-Anna.Schumaker@Netapp.com>
+ <20160909062136.GY27776@eguan.usersys.redhat.com>
+ <20160909062925.GC9312@birch.djwong.org>
 MIME-Version: 1.0
-Content-Type: text/plain
-Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com
-Cc: fstests@vger.kernel.org, Xiao Yang <yangx.jy@cn.fujitsu.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160909062925.GC9312@birch.djwong.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Anna Schumaker <Anna.Schumaker@netapp.com>, fstests@vger.kernel.org, linux-nfs@vger.kernel.org, hch@infradead.org
 List-ID: <fstests@vger.kernel.org>
 
-We should use $XFS_IO_PROG to add "-F" option when we need it.
+On Thu, Sep 08, 2016 at 11:29:25PM -0700, Darrick J. Wong wrote:
+> > > +
+> > > +_require_xfs_io_command "copy_range"
+> > 
+> > Do we need to test the support status on kernel side? e.g. what happens
+> > if filesystems have no "copy_file_range" implemented? Seems
+> > copy_file_range falls back to splice in this case, but I'm not sure. If
+> > so I think it's OK to have no kernel side detection.
+> 
+> But... it's a totally new syscall, so _require_io_command should actually try
+> calling it so that we can _notrun on old kernels.
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
- tests/ext4/021 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+The only reason that I think it's OK to check xfs_io support only is
+that the "copy_range" subcommand won't be even compiled in xfs_io if
+kernel has no copy_file_range syscall support.
 
-diff --git a/tests/ext4/021 b/tests/ext4/021
-index d758818..d5fad7c 100755
---- a/tests/ext4/021
-+++ b/tests/ext4/021
-@@ -80,7 +80,7 @@ fi
- # disk, the s_squence offset to the beginning of journal superblock is 24
- # we do this to let jbd2 start to run with a initial big transaction id,
- # which will reduce the time taken to trigger this bug.
--xfs_io  -c "pwrite -S 0x81 $((offset+24)) 1" \
-+$XFS_IO_PROG -c "pwrite -S 0x81 $((offset+24)) 1" \
- 	-c "pwrite -S 0xd1 $((offset+25)) 1" \
- 	-c "pwrite -S 0xa4 $((offset+26)) 1" \
- 	-c "pwrite -S 0x80 $((offset+27)) 1" $SCRATCH_DEV >> $seqres.full 2>&1
--- 
-1.8.3.1
+But yeah, I agree that calling it and see how kernel handles it would be
+the best option, like how we handle falloc, fpunch in
+_require_xfs_io_command.
 
-
-
+Thanks,
+Eryu
