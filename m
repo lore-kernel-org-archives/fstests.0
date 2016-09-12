@@ -1,223 +1,301 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:56592 "EHLO
-        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750747AbcILXvC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 12 Sep 2016 19:51:02 -0400
-Received: from dave by dastard with local (Exim 4.80)
-        (envelope-from <david@fromorbit.com>)
-        id 1bjb06-0002YM-J5
-        for fstests@vger.kernel.org; Tue, 13 Sep 2016 09:50:58 +1000
-Date: Tue, 13 Sep 2016 09:50:58 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: [ANNOUNCE] xfstests: master branch updated to 06d4001
-Message-ID: <20160912235058.GE30497@dastard>
+Received: from cn.fujitsu.com ([59.151.112.132]:17455 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751602AbcILBHE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 11 Sep 2016 21:07:04 -0400
+Message-ID: <57D5FFB7.2070807@cn.fujitsu.com>
+Date: Mon, 12 Sep 2016 09:07:03 +0800
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="jRHKVT23PllUwdXP"
-Content-Disposition: inline
+Subject: Re: [PATCH v2] xfs/098: fix xfs_repair on newer xfsprogs
+References: <20160825154052.GD20705@birch.djwong.org> <1472182612-10218-1-git-send-email-yangx.jy@cn.fujitsu.com> <20160826044818.GH10350@dhcp12-143.nay.redhat.com> <57BFDD38.7080101@cn.fujitsu.com> <20160826090503.GI10350@dhcp12-143.nay.redhat.com> <57D28101.6000902@cn.fujitsu.com> <20160909122831.GD12847@dhcp12-143.nay.redhat.com>
+In-Reply-To: <20160909122831.GD12847@dhcp12-143.nay.redhat.com>
+Content-Type: text/plain; charset="GB2312"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, xfs@oss.sgi.com
 List-ID: <fstests@vger.kernel.org>
 
+=D3=DA 2016/09/09 20:28, Zorro Lang =D0=B4=B5=C0:
+> On Fri, Sep 09, 2016 at 05:29:37PM +0800, Xiao Yang wrote:
+>> =D3=DA 2016/08/26 17:05, Zorro Lang =D0=B4=B5=C0:
+>>> On Fri, Aug 26, 2016 at 02:10:00PM +0800, Xiao Yang wrote:
+>>>> On 2016/08/26 12:48, Zorro Lang wrote:
+>>>>> On Fri, Aug 26, 2016 at 11:36:52AM +0800, Xiao Yang wrote:
+>>>>>> Make sure xfs_repair can't clear the log by default when it is cor=
+rupted.
+>>>>>> xfs_repair always and only clear the log when the -L parameter is =
+specified.
+>>>>>> This has updated by:
+>>>>>> Commit f2053bc ("xfs_repair: don't clear the log by default")
+>>>>>>
+>>>>>> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
+>>>>>> ---
+>>>>>>  common/rc     | 4 ++--
+>>>>>>  tests/xfs/098 | 2 +-
+>>>>>>  2 files changed, 3 insertions(+), 3 deletions(-)
+>>>>>>
+>>>>>> diff --git a/common/rc b/common/rc
+>>>>>> index 3fb0600..c693a31 100644
+>>>>>> --- a/common/rc
+>>>>>> +++ b/common/rc
+>>>>>> @@ -1143,9 +1143,9 @@ _repair_scratch_fs()
+>>>>> Hi Xiao
+>>>>>
+>>>>> You should explain why you changed this function in commit log. Or
+>>>>> the reviewer can't understand why you change it.
+>>>>>
+>>>>>>      xfs)
+>>>>>>          _scratch_xfs_repair "$@" 2>&1
+>>>>>>  	res=3D$?
+>>>>>> -	if [ "$res" -eq 2 ]; then
+>>>>>> +	if [ "$res" -ne 0 ]; then
+>>>>> Hi Darrick,
+>>>>>
+>>>>> The xfs_repair manpage said:
+>>>>> xfs_repair run without the -n option will always return a status co=
+de of 0.
+>>>>>
+>>>>> I don't understand why you think it return 2 here? (Please check be=
+low)
+>>>>>
+>>>> Hi Zorro
+>>>>
+>>>> I don't understand why it return 2 here too.  I want to change this
+>>>> function because xfs_repair
+>>>> without -L option return 1 when log is corrupted on newer xfsprogs-d=
+ev.
+>>>>>>  		echo "xfs_repair returns $res; replay log?"
+>>>>>> -		_scratch_mount
+>>>>>> +		_scratch_mount 2>&1
+>>>>>>  		res=3D$?
+>>>>>>  		if [ "$res" -gt 0 ]; then
+>>>>>>  			echo "mount returns $res; zap log?"
+>>>>>> diff --git a/tests/xfs/098 b/tests/xfs/098
+>>>>>> index d91d617..eb33bb1 100755
+>>>>>> --- a/tests/xfs/098
+>>>>>> +++ b/tests/xfs/098
+>>>>>> @@ -93,7 +93,7 @@ echo "+ mount image"
+>>>>>>  _scratch_mount 2>/dev/null&&   _fail "mount should not succeed"
+>>>>>>
+>>>>>>  echo "+ repair fs"
+>>>>>> -_scratch_xfs_repair>>   $seqres.full 2>&1
+>>>>>> +_repair_scratch_fs>>   $seqres.full
+>>> You should print the stderr to $seqres.full too. Because in
+>>> "_repair_scratch_fs", its code likes below:
+>>>
+>>>     xfs)
+>>>         _scratch_xfs_repair "$@" 2>&1
+>>>>>> This repair won't clear the corrupted log anymore.
+>>>         res=3D$?
+>>>         if [ "$res" -eq 2 ]; then
+>>>                 echo "xfs_repair returns $res; replay log?"
+>>>                 _scratch_mount
+>>>>>> So this mount maybe failed if it can't deal with the corrupted log.
+>>>>>> If it print some error messages, it'll break the golden image of x=
+fs/098
+>>>                 res=3D$?
+>>>                 if [ "$res" -gt 0 ]; then
+>>>                         echo "mount returns $res; zap log?"
+>>>                         _scratch_xfs_repair -L 2>&1
+>>>
+>>>
+>>>>> If just call xfs_repair without any options, the _repair_scratch_fs=
+ won't
+>>>>> help to call xfs_repair -L I think.
+>>>>>
+>>>>> So I think this patch won't fix the problem.
+>>>>>
+>>>>> Feel free to correct me, if I misunderstand something:)
+>>>>>
+>>>>> Thanks,
+>>>>> Zorro
+>>>>>
+>>>> If xfs_repair without any option succeed to repair filesystem when
+>>>> log is corrupted,
+>>>> _repair_scratch_fs don't need  to call  xfs_repair -L.  If it failed
+>>>> to repair filesystem,
+>>>> _repair_scratch_fs needs  to call  xfs_repair -L.
+>>> Oh, sorry, I just tried to run ths case. The "_scratch_xfs_repair" re=
+ally return
+>>> non-zero when it try to repair a corrupted xfs...
+>>>
+>>> But the manpage(man xfs_repair) really said:
+>>> xfs_repair run without the -n option will always return a status code=
+ of 0.
+>>>
+>>> Maybe we should update the manpage? I'll check it later.
+>>>
+>>> Any way, there's still a problem in your patch, please see above:
+>>>
+>>> Thanks,
+>>> Zorro
+>> Hi Zorro
+>> Do you know why it returns 2 instead of 1 when we use xfs_repair
+>> without any options.
+>> I can't understand it, because it always return 1 on my machine.
+> Hi Xiao,
+>
+> Please CC the mail list, there's no secret. And the most important
+> thing is if I said something wrong, others great developers maybe
+> glad to correct me:-P
+>
+> I've asked DJ Wong about the return value of xfs_repair, and he
+> already replied:
+>
+> "xfs_repair returns 2 when the log is corrupted, 1 when there's corrupt=
+ion left
+> to be fixed *or* some kind of operation error happened, and 0 if either=
+ it
+> found nothing wrong or all the corruptions were fixed."
+>
+> I'm sure that email has been sent to you too.
+>
+> If you can't understand why it return 1, you can check your xfs/098.ful=
+l file,
+> you'll find:
+>
+> "Phase 1 - find and verify superblock...
+> Phase 2 - using internal log
+>         - zero log...
+> Log inconsistent (didn't find previous header)
+> failed to find log head
+> zero_log: cannot find log head/tail (xlog_find_tail=3D5)
+>
+> fatal error -- ERROR: The log head and/or tail cannot be discovered. At=
+tempt to mount the
+> filesystem to replay the log or use the -L option to destroy the log an=
+d
+> attempt a repair.
+> xfs_repair failed, err=3D1"
+>
+> This output from below xfsprogs code:
+>
+>         error =3D xlog_find_tail(log, &head_blk, &tail_blk);
+>         if (error) {
+>                 do_warn(
+>                 _("zero_log: cannot find log head/tail (xlog_find_tail=3D=
+%d)\n"),
+>                         error);
+>                 if (!no_modify && !zap_log)
+>>>> [exit from here] >>>    do_error(_(
+> "ERROR: The log head and/or tail cannot be discovered. Attempt to mount=
+ the\n"
+> "filesystem to replay the log or use the -L option to destroy the log a=
+nd\n"
+> "attempt a repair.\n"));
+>         } else {
+>                 if (verbose) {
+>                         do_warn(
+>         _("zero_log: head block %" PRId64 " tail block %" PRId64 "\n"),
+>                                 head_blk, tail_blk);
+>                 }
+>                 if (!no_modify && head_blk !=3D tail_blk) {
+>                         if (zap_log) {
+>                                 do_warn(_(
+> "ALERT: The filesystem has valuable metadata changes in a log which is =
+being\n"
+> "destroyed because the -L option was used.\n"));
+>                         } else {
+>                                 do_warn(_(
+> "ERROR: The filesystem has valuable metadata changes in a log which nee=
+ds to\n"
+> "be replayed.  Mount the filesystem to replay the log, and unmount it b=
+efore\n"
+> "re-running xfs_repair.  If you are unable to mount the filesystem, the=
+n use\n"
+> "the -L option to destroy the log and attempt a repair.\n"
+> "Note that destroying the log may cause corruption -- please attempt a =
+mount\n"
+> "of the filesystem before doing this.\n"));
+>                                 exit(2);
+>                         }
+>                 }
+>         }
+>
+> I've marked [exit from here] for you. do_error will call exit(1). And t=
+he output
+> message already tell you the reason about why it fail.
+>
+> You can keep reading, there's a "exit(2)" at the end of above code. I c=
+an't find
+> more exit(2) from xfsprogs/repair/ . So maybe this's the only one place=
+ which
+> can return 2. From the information above that exit(2), you can see that
+> xfs_repair will return 2 when it find there're some valuable metadata c=
+hanges in
+> a log. It think a mount operation maybe can replay this log, so it retu=
+rn 2 and
+> suggest the user try to mount the filesystem. If mount can't replay the=
+ log, -L
+> is the next choice.
+>
+> So I think the _repair_scratch_fs function in xfstests/common/rc doesn'=
+t think
+> about above situation. xfs_repair doesn't always return 2 if log corrup=
+ted.
+> Only xfs_repair feel log can be replay, it'll return 2, or it'll return=
+ 1. So
+> maybe we should change "if [ $res -eq 2 ]" to "if [ $res -ne 0 ]". Or w=
+e need
+> to change xfs_repair to make it return 2:-P
+>
+> For xfs/098's problem, you can change the line#96:
+> from
+> _scratch_xfs_repair >> $seqres.full 2>&1
+> to
+> _repair_scratch_fs >> $seqres.full 2>&1
+>
+> And _repair_scratch_fs need to be modified as I said above. I think I s=
+hould write
+> a patch to describe the return value of xfs_repair(without -n). The cur=
+rent
+> xfs_repair manpage said:
+> "xfs_repair run without the -n option will always return a status code =
+of 0."
+> it's wrong.
+>
+> OK, I've talked too much. If anyone feel anything wrong, please corrent=
+ me:)
+>
+> Thanks,
+> Zorro
+>
+Thanks for your comment, so i will rewrite this patch.
 
---jRHKVT23PllUwdXP
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-Hi folks,
-
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. Eryu has put together quite a large update,
-and there are a couple of new tests that might cause failures on XFS
-as the fixes aren't upstream yet. Overall there are lots of XFS test
-changes, some overlay and generic test changes and a couple of ext4
-test fixes make up the update. Thanks to everyone who has submitted
-new tests, and even more thanks to everyone who has reviewed them!
-
--Dave.
-
-The new head of the master branch is commit:
-
-06d4001 xfs: test getbmapx shared extent reporting
-
-New Commits:
-
-Artem Savkov (1):
-      [0dea6dc] generic: listxattr syscall with different buffer sizes
-
-Darrick J. Wong (10):
-      [5ca088b] tests/xfs: don't run tests if cowextsize isn't present
-      [5bcb0b7] xfs/122: decrease the log update done item sizes
-      [acede20] xfs/130,235: deal with an unreplayable dirty log
-      [297985b] generic/159, 160: deal with EACCES -> EPERM transition
-      [a381fcb] xfs/122: test btree header block sizes
-      [bb5bd55] xfs: test swapext with reflink
-      [5324dcb] xfs/122: track xfs_scrub_metadata
-      [2db29c7] xfs/122: check the ag reservation counter ioctl
-      [c49136e] xfs: test getfsmap ioctl
-      [06d4001] xfs: test getbmapx shared extent reporting
-
-Eric Sandeen (1):
-      [2c40339] README: fix up dependency lists
-
-Eryu Guan (4):
-      [3e3b49c] common/rc: introduce _overlay_mount_dirs helper
-      [628d9db] overlay: copy-up lowerdir which has opaque xattr set
-      [14a7fdf] xfs/279: filter scsi debug device correctly
-      [0cc2716] generic: simple permission check on hard links
-
-Qu Wenruo (1):
-      [d67700c] common/rc: Enhance _exclude_scratch_mount_option to handle =
-multiple options
-
-Wang Xiaoguang (1):
-      [a54bed2] generic/172: raise fs size
-
-Xiao Yang (1):
-      [115563d] ext4/021: use $XFS_IO_PROG instead of xfs_io
-
-Zorro Lang (2):
-      [643d623] generic/095: add xfs_file_aio_read into warning whitelist
-      [1083413] xfs: rw remount with unknown ro-compat features
+Thanks,
+Xiao Yang
+>> Thanks,
+>> yang
+>>>> Thanks
+>>>> Xiao Yang.
+>>>>>>  echo "+ mount image (2)"
+>>>>>>  _scratch_mount
+>>>>>> --=20
+>>>>>> 1.8.3.1
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>> --
+>>>>>> To unsubscribe from this list: send the line "unsubscribe fstests"=
+ in
+>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>> .
+>>>>>
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe fstests" i=
+n
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> .
+>>>
+>>
+>>
+>
+> .
+>
 
 
-Code Diffstat:
 
- .gitignore            |   1 +
- README                |  17 +++++----
- common/rc             |  48 ++++++++++++++++++-----
- src/Makefile          |   2 +-
- src/listxattr.c       |  73 +++++++++++++++++++++++++++++++++++
- tests/ext4/021        |   2 +-
- tests/ext4/271        |   6 +--
- tests/generic/095     |   4 +-
- tests/generic/159     |   7 +++-
- tests/generic/160     |   7 +++-
- tests/generic/172     |  20 ++++------
- tests/generic/377     |  87 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/377.out |  11 ++++++
- tests/generic/378     |  73 +++++++++++++++++++++++++++++++++++
- tests/generic/378.out |   3 ++
- tests/generic/group   |   2 +
- tests/overlay/005     |   5 +--
- tests/overlay/010     |   5 +--
- tests/overlay/014     |  94 +++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/014.out |   3 ++
- tests/overlay/group   |   1 +
- tests/xfs/122.out     |  10 +++--
- tests/xfs/130         |   3 +-
- tests/xfs/134         |   3 +-
- tests/xfs/215         |   1 +
- tests/xfs/218         |   1 +
- tests/xfs/219         |   1 +
- tests/xfs/221         |   1 +
- tests/xfs/223         |   1 +
- tests/xfs/224         |   1 +
- tests/xfs/225         |   1 +
- tests/xfs/226         |   1 +
- tests/xfs/228         |   1 +
- tests/xfs/230         |   1 +
- tests/xfs/231         |   1 +
- tests/xfs/232         |   1 +
- tests/xfs/235         |   3 +-
- tests/xfs/243         |   1 +
- tests/xfs/248         |   1 +
- tests/xfs/249         |   1 +
- tests/xfs/251         |   1 +
- tests/xfs/254         |   1 +
- tests/xfs/255         |   1 +
- tests/xfs/256         |   1 +
- tests/xfs/257         |   1 +
- tests/xfs/258         |   1 +
- tests/xfs/270         |  93 +++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/270.out     |   5 +++
- tests/xfs/271         |  82 ++++++++++++++++++++++++++++++++++++++++
- tests/xfs/271.out     |  13 +++++++
- tests/xfs/272         |  84 +++++++++++++++++++++++++++++++++++++++++
- tests/xfs/272.out     |   6 +++
- tests/xfs/273         |  65 ++++++++++++++++++++++++++++++++
- tests/xfs/273.out     |   3 ++
- tests/xfs/274         |  95 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/274.out     |   7 ++++
- tests/xfs/275         |  68 +++++++++++++++++++++++++++++++++
- tests/xfs/275.out     |   4 ++
- tests/xfs/276         |  85 +++++++++++++++++++++++++++++++++++++++++
- tests/xfs/276.out     |   6 +++
- tests/xfs/277         |  68 +++++++++++++++++++++++++++++++++
- tests/xfs/277.out     |   4 ++
- tests/xfs/279         |   2 +-
- tests/xfs/280         |  93 +++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/280.out     |  17 +++++++++
- tests/xfs/315         |   1 +
- tests/xfs/326         |   1 +
- tests/xfs/328         | 109 ++++++++++++++++++++++++++++++++++++++++++++++=
-+++++++
- tests/xfs/328.out     |   6 +++
- tests/xfs/329         |  97 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/329.out     |  10 +++++
- tests/xfs/330         | 102 ++++++++++++++++++++++++++++++++++++++++++++++=
-+++
- tests/xfs/330.out     |  12 ++++++
- tests/xfs/group       |  12 ++++++
- 74 files changed, 1607 insertions(+), 54 deletions(-)
- create mode 100644 src/listxattr.c
- create mode 100755 tests/generic/377
- create mode 100644 tests/generic/377.out
- create mode 100755 tests/generic/378
- create mode 100644 tests/generic/378.out
- create mode 100755 tests/overlay/014
- create mode 100644 tests/overlay/014.out
- create mode 100755 tests/xfs/270
- create mode 100644 tests/xfs/270.out
- create mode 100755 tests/xfs/271
- create mode 100644 tests/xfs/271.out
- create mode 100755 tests/xfs/272
- create mode 100644 tests/xfs/272.out
- create mode 100755 tests/xfs/273
- create mode 100644 tests/xfs/273.out
- create mode 100755 tests/xfs/274
- create mode 100644 tests/xfs/274.out
- create mode 100755 tests/xfs/275
- create mode 100644 tests/xfs/275.out
- create mode 100755 tests/xfs/276
- create mode 100644 tests/xfs/276.out
- create mode 100755 tests/xfs/277
- create mode 100644 tests/xfs/277.out
- create mode 100755 tests/xfs/280
- create mode 100644 tests/xfs/280.out
- create mode 100755 tests/xfs/328
- create mode 100644 tests/xfs/328.out
- create mode 100755 tests/xfs/329
- create mode 100644 tests/xfs/329.out
- create mode 100755 tests/xfs/330
- create mode 100644 tests/xfs/330.out
---=20
-Dave Chinner
-david@fromorbit.com
-
---jRHKVT23PllUwdXP
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJX1z9iAAoJEK3oKUf0dfod32cQAJpRxlBcs5LKltBtV//WqWbE
-8E2JDhi9zbHiMaw9gjJABI9U1VAE+HhRLmHJOiKI9W/qFicgA7e7QnN4vPvRgm54
-7UhlU8o5lmFm11OI2Txga3e/ygiImTorytlpTnmViCx7wqz5ek7lcEffMK5hYlNw
-ODVenkZmFsnhsFenBYMuhHgKSFAI2U+iyYsYaNu8kWE/a+XBO/hHCUm2pJvtZMiS
-EeX7Yya+2UA5kVHJ12iHkXnp32H7MkT4HyihisyMz1HWo42i34oYwWa+/c+G2/5s
-J4JcU4ha7hXXxzMxhTkjatj4nL7LHH57YRKwurz9iTPBmBRthpmfhjYpVwYm5EvK
-l4mnX0vRN15mZcgOIOoS5LT38ZbZCkXa6VKrAoONXqbwnZt8wshNPsjqH1OFQYzB
-9DiIgJemW+C2KX2EjRuI2SUWWtHPADw1q1/ltv4Qe0BG3Emla5pbjZA7wCrc6hLC
-mqo+zso0/+7j9k/ny2XbccOZ5vpIaAbPYdBqqKicbFA9oySDLn4fzSf3R5j+fs/O
-uF3AQcBmGIi5E4iMW1zYFLIGJicXODSsBu8Q3aAV3mYGeC/XJB2YZ9MVEJTTvhMy
-xs/yWKnGSM6YTxsuRjqeG+cpRGFjXbKgRmRK/kZm+ysvcLWrhCUabsIekksP9BGW
-Z0GLIuA/jXHhWyyP2yf8
-=aZMY
------END PGP SIGNATURE-----
-
---jRHKVT23PllUwdXP--
