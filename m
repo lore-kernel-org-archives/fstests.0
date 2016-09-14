@@ -1,12 +1,12 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([222.73.24.84]:34937 "EHLO song.cn.fujitsu.com"
+Received: from cn.fujitsu.com ([222.73.24.84]:49885 "EHLO song.cn.fujitsu.com"
         rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-        id S1755214AbcINBzp (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 13 Sep 2016 21:55:45 -0400
+        id S1751091AbcINBzq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 13 Sep 2016 21:55:46 -0400
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH v6 5/6] fstests: btrfs: Add testcase for btrfs dedupe and metadata balance race test
-Date: Wed, 14 Sep 2016 09:55:26 +0800
-Message-Id: <20160914015527.10274-6-quwenruo@cn.fujitsu.com>
+Subject: [PATCH v6 3/6] fstests: Add btrfs dedupe post mount hook
+Date: Wed, 14 Sep 2016 09:55:24 +0800
+Message-Id: <20160914015527.10274-4-quwenruo@cn.fujitsu.com>
 In-Reply-To: <20160914015527.10274-1-quwenruo@cn.fujitsu.com>
 References: <20160914015527.10274-1-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
@@ -15,158 +15,46 @@ To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 Cc: fdmanana@gmail.com, mfasheh@suse.de
 List-ID: <fstests@vger.kernel.org>
 
-Btrfs balance with inband dedupe enable/disable will expose a lot of
-hidden dedupe bug:
+Now fstests can run any test cases with btrfs inband-dedupe enabled.
 
-1) Enable/disable race bug
-2) Btrfs dedupe tree balance corrupted delayed_ref
-3) Btrfs disable and balance will cause balance BUG_ON
-
-Reported-by: Satoru Takeuchi <takeuchi_satoru@jp.fujitsu.com>
 Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 ---
- tests/btrfs/201     | 112 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/201.out |   2 +
- tests/btrfs/group   |   1 +
- 3 files changed, 115 insertions(+)
- create mode 100755 tests/btrfs/201
- create mode 100644 tests/btrfs/201.out
+ common/rc | 20 ++++++++++++++++++--
+ 1 file changed, 18 insertions(+), 2 deletions(-)
 
-diff --git a/tests/btrfs/201 b/tests/btrfs/201
-new file mode 100755
-index 0000000..152e9f7
---- /dev/null
-+++ b/tests/btrfs/201
-@@ -0,0 +1,112 @@
-+#! /bin/bash
-+# FS QA Test 201
-+#
-+# Btrfs inband dedup enable/disable race with metadata balance
-+#
-+# This tests will test the following bugs exposed in development:
-+# 1) enable/disable race
-+# 2) tree balance cause delayed ref corruption
-+# 3) disable and balance cause BUG_ON
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
+diff --git a/common/rc b/common/rc
+index 636cba6..e0da69b 100644
+--- a/common/rc
++++ b/common/rc
+@@ -326,10 +326,26 @@ _run_btrfs_post_mount_hook()
+ 	mnt_point=$1
+ 	for n in $ALWAYS_ENABLE_BTRFS_FEATURE; do
+ 		if [ $n == "quota" -o $n == "qgroup" ]; then
+-			# Quota can be enabled for several times
+-			# and won't cause bug
++			# Re-enable quota won't cause anything wrong
+ 			_run_btrfs_util_prog quota enable $mnt_point
+ 		fi
++		if [ $n == "dedupe" -o $n == "inband-dedupe" -o $n == "dedupe-inband" ]; then
++			# Need to check if kernel/progs support dedupe
++			_require_btrfs_fs_feature dedupe
++			_require_btrfs_subcommand dedupe
 +
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
++			# Check if dedupe is already enabled, or we will
++			# overwrite previous on-disk backend config
++			$BTRFS_UTIL_PROG dedupe status $mnt_point | grep -q "Enabled"
++			if [ $1 -eq 0 ]; then
++				continue
++			fi
 +
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	killall $FSSTRESS_PROG &> /dev/null
-+	kill $trigger_pid &> /dev/null
-+	kill $balance_pid &> /dev/null
-+	wait
-+
-+	# See comment later
-+	$BTRFS_UTIL_PROG balance cancel $SCRATCH_MNT &> /dev/null
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_btrfs_subcommand dedupe
-+_require_btrfs_fs_feature dedupe
-+
-+# Use 64K dedupe size to keep compatibility for 64K page size
-+dedupe_bs=64K
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+
-+mkdir -p $SCRATCH_MNT/stressdir
-+
-+runtime=$((60 * $TIME_FACTOR))
-+
-+trigger_work()
-+{
-+	while true; do
-+		_run_btrfs_util_prog dedupe enable -f -s inmemory \
-+			-b $dedupe_bs $SCRATCH_MNT
-+		sleep 1
-+		_run_btrfs_util_prog dedupe disable $SCRATCH_MNT
-+		sleep 1
-+	done
-+}
-+
-+# redirect all output, as error output like 'balance cancelled by user'
-+# will populuate the golden output.
-+_btrfs_stress_balance -m $SCRATCH_MNT &> /dev/null &
-+balance_pid=$!
-+
-+$FSSTRESS_PROG $(_scale_fsstress_args -p 1 -n 10000000) $FSSTRESS_AVOID \
-+	-d $SCRATCH_MNT/stressdir > /dev/null 2>&1 &
-+
-+trigger_work &
-+trigger_pid=$!
-+
-+sleep $runtime
-+killall $FSSTRESS_PROG &> /dev/null
-+kill $trigger_pid &> /dev/null
-+kill $balance_pid &> /dev/null
-+wait
-+
-+# Manually stop balance as it's possible balance is still running for a short
-+# time. And we don't want to populate $seqres.full, so call $BTRFS_UTIL_PROG
-+# directly
-+$BTRFS_UTIL_PROG balance cancel $SCRATCH_MNT &> /dev/null
-+
-+echo "Silence is golden"
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/201.out b/tests/btrfs/201.out
-new file mode 100644
-index 0000000..5ac973f
---- /dev/null
-+++ b/tests/btrfs/201.out
-@@ -0,0 +1,2 @@
-+QA output created by 201
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index ea9c36b..2e539d0 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -134,3 +134,4 @@
- 129 auto quick send
- 130 auto clone send
- 200 auto ib-dedupe
-+201 auto ib-dedupe
++			# This will enable dedupe with default options, so
++			# btrfs dedupe test cases needs to use '-f' option to
++			# override default config.
++			_run_btrfs_util_prog dedupe enable $mnt_point
++		fi
+ 	done
+ }
+ 
 -- 
 2.7.4
 
