@@ -1,12 +1,12 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([222.73.24.84]:49885 "EHLO song.cn.fujitsu.com"
+Received: from cn.fujitsu.com ([222.73.24.84]:34937 "EHLO song.cn.fujitsu.com"
         rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-        id S1755218AbcINBzo (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 13 Sep 2016 21:55:44 -0400
+        id S1755214AbcINBzp (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 13 Sep 2016 21:55:45 -0400
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH v6 2/6] fstests: common: rename _require_btrfs to _require_btrfs_subcommand
-Date: Wed, 14 Sep 2016 09:55:23 +0800
-Message-Id: <20160914015527.10274-3-quwenruo@cn.fujitsu.com>
+Subject: [PATCH v6 5/6] fstests: btrfs: Add testcase for btrfs dedupe and metadata balance race test
+Date: Wed, 14 Sep 2016 09:55:26 +0800
+Message-Id: <20160914015527.10274-6-quwenruo@cn.fujitsu.com>
 In-Reply-To: <20160914015527.10274-1-quwenruo@cn.fujitsu.com>
 References: <20160914015527.10274-1-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
@@ -15,70 +15,158 @@ To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 Cc: fdmanana@gmail.com, mfasheh@suse.de
 List-ID: <fstests@vger.kernel.org>
 
-Rename _require_btrfs() to _require_btrfs_subcommand() to avoid
-confusion, as all other _require_btrfs_* has a quite clear suffix, like
-_require_btrfs_mkfs_feature() or _require_btrfs_fs_feature().
+Btrfs balance with inband dedupe enable/disable will expose a lot of
+hidden dedupe bug:
 
+1) Enable/disable race bug
+2) Btrfs dedupe tree balance corrupted delayed_ref
+3) Btrfs disable and balance will cause balance BUG_ON
+
+Reported-by: Satoru Takeuchi <takeuchi_satoru@jp.fujitsu.com>
 Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 ---
- common/rc       | 2 +-
- tests/btrfs/004 | 2 +-
- tests/btrfs/048 | 2 +-
- tests/btrfs/059 | 2 +-
- 4 files changed, 4 insertions(+), 4 deletions(-)
+ tests/btrfs/201     | 112 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/201.out |   2 +
+ tests/btrfs/group   |   1 +
+ 3 files changed, 115 insertions(+)
+ create mode 100755 tests/btrfs/201
+ create mode 100644 tests/btrfs/201.out
 
-diff --git a/common/rc b/common/rc
-index 631397f..636cba6 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3001,7 +3001,7 @@ _require_deletable_scratch_dev_pool()
- }
- 
- # We check for btrfs and (optionally) features of the btrfs command
--_require_btrfs()
-+_require_btrfs_subcommand()
- {
- 	cmd=$1
- 	_require_command "$BTRFS_UTIL_PROG" btrfs
-diff --git a/tests/btrfs/004 b/tests/btrfs/004
-index 905770a..2ce628e 100755
---- a/tests/btrfs/004
-+++ b/tests/btrfs/004
-@@ -51,7 +51,7 @@ _supported_fs btrfs
- _supported_os Linux
- _require_scratch
- _require_no_large_scratch_dev
--_require_btrfs inspect-internal
-+_require_btrfs_subcommand inspect-internal
- _require_command "/usr/sbin/filefrag" filefrag
- 
- rm -f $seqres.full
-diff --git a/tests/btrfs/048 b/tests/btrfs/048
-index 0b907b0..ac731d1 100755
---- a/tests/btrfs/048
-+++ b/tests/btrfs/048
-@@ -48,7 +48,7 @@ _supported_fs btrfs
- _supported_os Linux
- _require_test
- _require_scratch
--_require_btrfs "property"
-+_require_btrfs_subcommand "property"
- 
- send_files_dir=$TEST_DIR/btrfs-test-$seq
- 
-diff --git a/tests/btrfs/059 b/tests/btrfs/059
-index 8f106d2..fd67ebb 100755
---- a/tests/btrfs/059
-+++ b/tests/btrfs/059
-@@ -51,7 +51,7 @@ _supported_fs btrfs
- _supported_os Linux
- _require_test
- _require_scratch
--_require_btrfs "property"
-+_require_btrfs_subcommand "property"
- 
- rm -f $seqres.full
- 
+diff --git a/tests/btrfs/201 b/tests/btrfs/201
+new file mode 100755
+index 0000000..152e9f7
+--- /dev/null
++++ b/tests/btrfs/201
+@@ -0,0 +1,112 @@
++#! /bin/bash
++# FS QA Test 201
++#
++# Btrfs inband dedup enable/disable race with metadata balance
++#
++# This tests will test the following bugs exposed in development:
++# 1) enable/disable race
++# 2) tree balance cause delayed ref corruption
++# 3) disable and balance cause BUG_ON
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	killall $FSSTRESS_PROG &> /dev/null
++	kill $trigger_pid &> /dev/null
++	kill $balance_pid &> /dev/null
++	wait
++
++	# See comment later
++	$BTRFS_UTIL_PROG balance cancel $SCRATCH_MNT &> /dev/null
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_btrfs_subcommand dedupe
++_require_btrfs_fs_feature dedupe
++
++# Use 64K dedupe size to keep compatibility for 64K page size
++dedupe_bs=64K
++
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount
++
++mkdir -p $SCRATCH_MNT/stressdir
++
++runtime=$((60 * $TIME_FACTOR))
++
++trigger_work()
++{
++	while true; do
++		_run_btrfs_util_prog dedupe enable -f -s inmemory \
++			-b $dedupe_bs $SCRATCH_MNT
++		sleep 1
++		_run_btrfs_util_prog dedupe disable $SCRATCH_MNT
++		sleep 1
++	done
++}
++
++# redirect all output, as error output like 'balance cancelled by user'
++# will populuate the golden output.
++_btrfs_stress_balance -m $SCRATCH_MNT &> /dev/null &
++balance_pid=$!
++
++$FSSTRESS_PROG $(_scale_fsstress_args -p 1 -n 10000000) $FSSTRESS_AVOID \
++	-d $SCRATCH_MNT/stressdir > /dev/null 2>&1 &
++
++trigger_work &
++trigger_pid=$!
++
++sleep $runtime
++killall $FSSTRESS_PROG &> /dev/null
++kill $trigger_pid &> /dev/null
++kill $balance_pid &> /dev/null
++wait
++
++# Manually stop balance as it's possible balance is still running for a short
++# time. And we don't want to populate $seqres.full, so call $BTRFS_UTIL_PROG
++# directly
++$BTRFS_UTIL_PROG balance cancel $SCRATCH_MNT &> /dev/null
++
++echo "Silence is golden"
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/201.out b/tests/btrfs/201.out
+new file mode 100644
+index 0000000..5ac973f
+--- /dev/null
++++ b/tests/btrfs/201.out
+@@ -0,0 +1,2 @@
++QA output created by 201
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index ea9c36b..2e539d0 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -134,3 +134,4 @@
+ 129 auto quick send
+ 130 auto clone send
+ 200 auto ib-dedupe
++201 auto ib-dedupe
 -- 
 2.7.4
 
