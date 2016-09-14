@@ -1,155 +1,85 @@
-Received: from mx1.redhat.com ([209.132.183.28]:39282 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1757235AbcILJSj (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 12 Sep 2016 05:18:39 -0400
-Date: Mon, 12 Sep 2016 17:18:32 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic: check whether we can truncate heavily reflinked
- file
-Message-ID: <20160912091832.GL27776@eguan.usersys.redhat.com>
-References: <20160912063659.4112-1-wangxg.fnst@cn.fujitsu.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:59897 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1752439AbcINCyx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 13 Sep 2016 22:54:53 -0400
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH v4] xfs/098: fix xfs_repair on newer xfsprogs
+Date: Wed, 14 Sep 2016 10:49:11 +0800
+Message-ID: <1473821351-27820-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160912063659.4112-1-wangxg.fnst@cn.fujitsu.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: --in-reply-to=20160913070804.GF12847@dhcp12-143.nay.redhat.com, fstests@vger.kernel.org
+Cc: zlang@redhat.com, sandeen@redhat.com, darrick.wong@oracle.com, Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Sep 12, 2016 at 02:36:59PM +0800, Wang Xiaoguang wrote:
-> Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+1) use _repair_scratch_fs instead of xfs_repair
+   The obsolete xfs_repair always cleared the log regardless of whether
+   it is corrupted and current xfs_repair only cleared the log when -L
+   option is specified.  xfs_repair -L option should be used to clear it
+   if xfs_repair failed to clear log.
+2) catch non-zero return value instead of 2
+   It can be applied to both the old return value 1 and the new return
+   value 2
+3) add filter_xfs_dmesg to ignore mount related warnings
+   If we corrupt log and mount on a CONFIG_XFS_WARN build, there will be
+   mount related warnings in dmesg as expected.
 
-It's better to describe the test a bit in the commit log, e.g. why this
-test is needed etc., which at least could give us some historical
-information when we look at this case again some time later. I guess
-there's a btrfs bug that truncate would fail due to ENOSPC.
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+---
+ common/rc     |  2 +-
+ tests/xfs/098 | 16 +++++++++++++++-
+ 2 files changed, 16 insertions(+), 2 deletions(-)
 
-> ---
->  tests/generic/377     | 74 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/377.out |  2 ++
->  tests/generic/group   |  1 +
->  3 files changed, 77 insertions(+)
->  create mode 100755 tests/generic/377
->  create mode 100644 tests/generic/377.out
-> 
-> diff --git a/tests/generic/377 b/tests/generic/377
-> new file mode 100755
-> index 0000000..3a0c27e
-> --- /dev/null
-> +++ b/tests/generic/377
-> @@ -0,0 +1,74 @@
-> +#! /bin/bash
-> +# FS QA Test 377
-> +#
-> +# Create a heavily reflinked file, then check whether we can truncate
-> +# it correctly.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/reflink
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch
-> +_require_scratch_reflink
-> +_require_cp_reflink
+diff --git a/common/rc b/common/rc
+index 13afc6a..655ae28 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1152,7 +1152,7 @@ _repair_scratch_fs()
+     xfs)
+         _scratch_xfs_repair "$@" 2>&1
+ 	res=$?
+-	if [ "$res" -eq 2 ]; then
++	if [ "$res" -ne 0 ]; then
+ 		echo "xfs_repair returns $res; replay log?"
+ 		_scratch_mount
+ 		res=$?
+diff --git a/tests/xfs/098 b/tests/xfs/098
+index d91d617..86ec62c 100755
+--- a/tests/xfs/098
++++ b/tests/xfs/098
+@@ -54,6 +54,17 @@ _require_xfs_db_blocktrash_z_command
+ test -z "${FUZZ_ARGS}" && FUZZ_ARGS="-n 8 -3"
+ 
+ rm -f $seqres.full
++
++# If we corrupt log on a CONFIG_XFS_WARN build, there will be mount related
++# WARNINGs in dmesg as expected.  We don't want to simply _disable_dmesg_check
++# which could miss other potential bugs, so filter out the intentional WARNINGs,
++# make sure test doesn't fail because of this warning and fails on other WARNINGs.
++filter_xfs_dmesg()
++{
++	local warn="WARNING:.*fs/xfs/xfs_message\.c:.*asswarn.*"
++	sed -e "s#$warn#Intentional warnings in asswarn#"
++}
++
+ TESTDIR="${SCRATCH_MNT}/scratchdir"
+ TESTFILE="${TESTDIR}/testfile"
+ 
+@@ -93,7 +104,10 @@ echo "+ mount image"
+ _scratch_mount 2>/dev/null && _fail "mount should not succeed"
+ 
+ echo "+ repair fs"
+-_scratch_xfs_repair >> $seqres.full 2>&1
++_repair_scratch_fs >> $seqres.full 2>&1
++
++# mount may trigger related WARNINGs, so filter them.
++_check_dmesg filter_xfs_dmesg
+ 
+ echo "+ mount image (2)"
+ _scratch_mount
+-- 
+1.8.3.1
 
-cp is not used, so this "require" is not needed.
 
-> +
-> +_scratch_mkfs_sized $((128 * 1024 * 1024)) >> $seqres.full 2>&1
-> +_scratch_mount
-> +
-> +file=$SCRATCH_MNT/testfile
-> +blocksize=$((128 * 1024))
-> +
-> +# create the initial file.
-> +_pwrite_byte 0xcdcdcdcd 0 $blocksize  $file > /dev/null
-> +
-> +echo "Silence is golden"
-> +# filesize is 20GB, and here 20GB is choosen deliberately, so it
-> +# can consume enough fs free space.
-> +for ((i=1; i<163840; i++)); do
-> +	_reflink_range $file 0 $file $(($i * $blocksize)) $blocksize \
-> +		>> $seqres.full 2>&1
-> +done
-> +$XFS_IO_PROG -f -c 'truncate 0' $file
 
-This took me more than 10 minutes to finish on my test vm (4vcpu and 8G
-memory), 980s for XFS and 700s for btrfs(truncate failed due to ENOSPC).
-That's too long for an 'auto' test.
-
-Can the runtime be reduced? I'm not sure how long time it took for you,
-but it would be good to have it finish around 5 minutes.
-
-Thanks,
-Eryu
-
-> +
-> +status=0
-> +exit
-> diff --git a/tests/generic/377.out b/tests/generic/377.out
-> new file mode 100644
-> index 0000000..d14a512
-> --- /dev/null
-> +++ b/tests/generic/377.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 377
-> +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index bad71bc..ea98752 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -379,3 +379,4 @@
->  374 auto quick clone dedupe
->  375 auto quick acl
->  376 auto quick metadata
-> +377 auto clone
-> -- 
-> 2.9.0
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
