@@ -1,11 +1,11 @@
-Received: from mx1.redhat.com ([209.132.183.28]:57006 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:36714 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1763086AbcINP4C (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 14 Sep 2016 11:56:02 -0400
+        id S1762100AbcINRQk (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 14 Sep 2016 13:16:40 -0400
 From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v2] fstests: test platform_check_ismounted do its work
-Date: Wed, 14 Sep 2016 23:55:58 +0800
-Message-Id: <1473868558-14169-1-git-send-email-zlang@redhat.com>
+Subject: [PATCH v3] fstests: test platform_check_ismounted do its work
+Date: Thu, 15 Sep 2016 01:16:37 +0800
+Message-Id: <1473873397-18178-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-xfs@vger.kernel.org, Zorro Lang <zlang@redhat.com>
@@ -22,32 +22,24 @@ will cause corruption.
 Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
 
-Hi,
-
-Thanks Eryu and Eric helped to review V1 patch, this V2 patch did below things:
-1. Add more comments for every sub-tests
-2. change the xfs/group file, remove "mount" group, and add some other groups
-3. modify some typo errors
-
-Please feel free to correct me, if you find anything wrong. I've tested this
-case on (x86_64) RHEL-7.2, RHEL-6.8 and upstream kernel+xfsprogs, all passed.
+V3 removed all return status check.
 
 Thanks,
 Zorro
 
- tests/xfs/284     | 118 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/284     | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
  tests/xfs/284.out |   8 ++++
  tests/xfs/group   |   1 +
- 3 files changed, 127 insertions(+)
+ 3 files changed, 118 insertions(+)
  create mode 100755 tests/xfs/284
  create mode 100644 tests/xfs/284.out
 
 diff --git a/tests/xfs/284 b/tests/xfs/284
 new file mode 100755
-index 0000000..c62ffd3
+index 0000000..a680a6a
 --- /dev/null
 +++ b/tests/xfs/284
-@@ -0,0 +1,118 @@
+@@ -0,0 +1,109 @@
 +#! /bin/bash
 +# FS QA Test 284
 +#
@@ -116,7 +108,6 @@ index 0000000..c62ffd3
 +# xfs_metadump should refuse to dump a mounted device
 +_scratch_mount
 +_scratch_metadump $METADUMP_FILE 2>&1 | filter_mounted
-+[ ${PIPESTATUS[0]} -eq 0 ] && echo "Test dump a mounted device [Failed]"
 +_scratch_unmount
 +
 +# Test restore to a mounted device
@@ -124,7 +115,6 @@ index 0000000..c62ffd3
 +_scratch_metadump $METADUMP_FILE
 +_scratch_mount
 +xfs_mdrestore $METADUMP_FILE $SCRATCH_DEV 2>&1 | filter_mounted
-+[ ${PIPESTATUS[0]} -eq 0 ] && echo "Test restore to a mounted device [Failed]"
 +_scratch_unmount
 +
 +# Test xfs_copy to a mounted device
@@ -133,15 +123,12 @@ index 0000000..c62ffd3
 +$XFS_COPY_PROG $SCRATCH_DEV $COPY_FILE >/dev/null
 +_scratch_mount
 +$XFS_COPY_PROG $COPY_FILE $SCRATCH_DEV 2>&1 | filter_mounted
-+[ ${PIPESTATUS[0]} -eq 0 ] && echo "Test xfs_copy to a mounted device [Failed]"
 +_scratch_unmount
 +
 +# Test xfs_db a mounted device
 +# xfs_db a mounted device without readonly (-r) option should fail
 +_scratch_mount
 +$XFS_DB_PROG -c sb $SCRATCH_DEV 2>&1 | filter_mounted
-+[ ${PIPESTATUS[0]} -eq 0 ] &&
-+	echo "Test xfs_db a mounted device(without -r option) [Failed]"
 +_scratch_unmount
 +
 +# Test mkfs.xfs a mounted device
@@ -149,7 +136,6 @@ index 0000000..c62ffd3
 +# device is mounted, it'll report device busy.
 +_scratch_mount
 +_scratch_mkfs 2>&1 | filter_mounted
-+[ ${PIPESTATUS[0]} -eq 0 ] && echo "Test mkfs.xfs a mounted device [Failed]"
 +_scratch_unmount
 +
 +# Test xfs_repair (with/without modify flag) a mounted device
@@ -157,10 +143,7 @@ index 0000000..c62ffd3
 +# test -d option at here)
 +_scratch_mount
 +_scratch_xfs_repair -n 2>&1 | filter_mounted
-+[ ${PIPESTATUS[0]} -eq 0 ] &&
-+	echo "Test xfs_repair -n a mounted device [Failed]"
 +_scratch_xfs_repair 2>&1 | filter_mounted
-+[ ${PIPESTATUS[0]} -eq 0 ] && echo "Test xfs_repair a mounted device [Failed]"
 +_scratch_unmount
 +
 +# success, all done
