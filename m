@@ -1,106 +1,85 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([222.73.24.84]:53246 "EHLO song.cn.fujitsu.com"
+Received: from cn.fujitsu.com ([222.73.24.84]:59608 "EHLO song.cn.fujitsu.com"
         rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-        id S1754448AbcIHDDp (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 7 Sep 2016 23:03:45 -0400
+        id S1751091AbcINBzi (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 13 Sep 2016 21:55:38 -0400
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH v2] fstests: common: Enhance _exclude_scratch_mount_option to handle multiple options
-Date: Thu,  8 Sep 2016 10:52:21 +0800
-Message-Id: <20160908025221.11618-1-quwenruo@cn.fujitsu.com>
+Subject: [PATCH v6 1/6] fstests: common: Introduce _post_mount_hook for btrfs
+Date: Wed, 14 Sep 2016 09:55:22 +0800
+Message-Id: <20160914015527.10274-2-quwenruo@cn.fujitsu.com>
+In-Reply-To: <20160914015527.10274-1-quwenruo@cn.fujitsu.com>
+References: <20160914015527.10274-1-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
 Sender: fstests-owner@vger.kernel.org
 To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: fdmanana@gmail.com, mfasheh@suse.de
 List-ID: <fstests@vger.kernel.org>
 
-Enhance _exclude_scratch_mount_option() function to normalize mount
-options.
-Now it can understand and extract real mount option from string like
-"-o opt1,opt2 -oopt3".
+Introduce _post_mount_hook(), which will be executed after mounting
+scratch/test.
 
-And now we do word grep to handle mount options like noinode_cache and
-inode_cache.
+It's quite useful for fs(OK, only btrfs yet, again) which needs to
+use ioctl other than mount option to enable some of its feature.
 
-Finally, allow it to accept multiple options at the same time.
-No need for multiple _exclude_scratch_mount_option lines now
+Now only btrfs quota needs this hook to allow enabling quota to be
+enabled for *ALL* existing test cases.
+
+This should dramatically improve the test coverage to expose quota
+related bugs.
 
 Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 ---
-changelog:
-v2:
-   Don't introduce new 'fstype' parameter, suggested by Dave and Eryu.
-   Use easier grep -w method, suggested by Dave and Eryu.
----
- common/rc      | 22 ++++++++++++++++++----
- tests/ext4/271 |  6 ++----
- tests/xfs/134  |  3 +--
- 3 files changed, 21 insertions(+), 10 deletions(-)
+ common/rc | 23 +++++++++++++++++++++++
+ 1 file changed, 23 insertions(+)
 
 diff --git a/common/rc b/common/rc
-index 04039a4..23c007a 100644
+index 23c007a..631397f 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -3183,12 +3183,26 @@ _require_cloner()
- 		_notrun "cloner binary not present at $CLONER_PROG"
+@@ -321,6 +321,27 @@ _overlay_scratch_unmount()
+ 	$UMOUNT_PROG $SCRATCH_MNT
  }
  
--# skip test if MKFS_OPTIONS contains the given string
-+# Normalize mount options from global $MOUNT_OPTIONS
-+# Convert options like "-o opt1,opt2 -oopt3" to
-+# "opt1 opt2 opt3"
-+_normalize_mount_options()
++_run_btrfs_post_mount_hook()
 +{
-+	echo $MOUNT_OPTIONS | sed -n 's/-o\s*\(\S*\)/\1/gp' |\
-+		sed 's/,/ /g'
++	mnt_point=$1
++	for n in $ALWAYS_ENABLE_BTRFS_FEATURE; do
++		if [ $n == "quota" -o $n == "qgroup" ]; then
++			# Quota can be enabled for several times
++			# and won't cause bug
++			_run_btrfs_util_prog quota enable $mnt_point
++		fi
++	done
 +}
 +
-+# skip test if MOUNT_OPTIONS contains the given string
- _exclude_scratch_mount_option()
- {
--	if echo $MOUNT_OPTIONS | grep -q "$1"; then
--		_notrun "mount option \"$1\" not allowed in this test"
--	fi
-+	mnt_opts=$(_normalize_mount_options)
++_post_mount_hook()
++{
++	mnt_point=$1
 +
-+	while [ $# -gt 1 ]; do
-+		if echo $mnt_opts | grep -qw "$1"; then
-+			_notrun "mount option \"$1\" not allowed in this test"
-+		fi
-+		shift
-+	done
++	if [ $FSTYP == "btrfs" -a -v ALWAYS_ENABLE_BTRFS_FEATURE ]; then
++		_run_btrfs_post_mount_hook $mnt_point
++	fi
++}
++
+ _scratch_mount()
+ {
+     if [ "$FSTYP" == "overlay" ]; then
+@@ -328,6 +349,7 @@ _scratch_mount()
+         return $?
+     fi
+     _mount -t $FSTYP `_scratch_mount_options $*`
++    _post_mount_hook $SCRATCH_MNT
  }
  
- _require_atime()
-diff --git a/tests/ext4/271 b/tests/ext4/271
-index 8674090..6f61e51 100755
---- a/tests/ext4/271
-+++ b/tests/ext4/271
-@@ -41,10 +41,8 @@ _supported_os Linux
- _require_scratch
- # this test needs no journal to be loaded, skip on journal related mount
- # options, otherwise mount would fail with "-o noload" mount option
--_exclude_scratch_mount_option "data="
--_exclude_scratch_mount_option "commit="
--_exclude_scratch_mount_option "journal_checksum"
--_exclude_scratch_mount_option "journal_async_commit"
-+_exclude_scratch_mount_option "data" "commit" "journal_checksum" \
-+			      "journal_async_commit"
+ _scratch_unmount()
+@@ -377,6 +399,7 @@ _test_mount()
+     fi
+     _test_options mount
+     _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
++    _post_mount_hook $TEST_DIR
+ }
  
- rm -f $seqres.full
- _scratch_mkfs_sized $((128 * 1024 * 1024)) >> $seqres.full 2>&1
-diff --git a/tests/xfs/134 b/tests/xfs/134
-index b3a1107..21fe1ed 100755
---- a/tests/xfs/134
-+++ b/tests/xfs/134
-@@ -51,8 +51,7 @@ _supported_os Linux IRIX
- _require_test
- _require_xfs_quota
- # we can't run with group quotas
--_exclude_scratch_mount_option "gquota"
--_exclude_scratch_mount_option "grpquota"
-+_exclude_scratch_mount_option "gquota" "grpquota"
- 
- dir=$SCRATCH_MNT/project
- 
+ _test_unmount()
 -- 
 2.7.4
 
