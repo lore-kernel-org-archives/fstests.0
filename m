@@ -1,180 +1,99 @@
-Received: from mx1.redhat.com ([209.132.183.28]:36714 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49870 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1762100AbcINRQk (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 14 Sep 2016 13:16:40 -0400
+        id S1762000AbcINRdX (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 14 Sep 2016 13:33:23 -0400
+Date: Thu, 15 Sep 2016 01:33:20 +0800
 From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v3] fstests: test platform_check_ismounted do its work
-Date: Thu, 15 Sep 2016 01:16:37 +0800
-Message-Id: <1473873397-18178-1-git-send-email-zlang@redhat.com>
+Subject: Re: [PATCH v4] xfs/098: fix xfs_repair on newer xfsprogs
+Message-ID: <20160914173155.GL12847@dhcp12-143.nay.redhat.com>
+References: <1473821351-27820-1-git-send-email-yangx.jy@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1473821351-27820-1-git-send-email-yangx.jy@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org, Zorro Lang <zlang@redhat.com>
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-There's a bug, the ustat() sysetm call is not implemented on someone
-arch, but xfsprogs uses this to detect whether a filesystem is
-mounted in platform_check_ismounted() function.
+On Wed, Sep 14, 2016 at 10:49:11AM +0800, Xiao Yang wrote:
+> 1) use _repair_scratch_fs instead of xfs_repair
+>    The obsolete xfs_repair always cleared the log regardless of whether
+>    it is corrupted and current xfs_repair only cleared the log when -L
+>    option is specified.  xfs_repair -L option should be used to clear it
+>    if xfs_repair failed to clear log.
+> 2) catch non-zero return value instead of 2
+>    It can be applied to both the old return value 1 and the new return
+>    value 2
+> 3) add filter_xfs_dmesg to ignore mount related warnings
+>    If we corrupt log and mount on a CONFIG_XFS_WARN build, there will be
+>    mount related warnings in dmesg as expected.
+> 
+> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+> ---
+>  common/rc     |  2 +-
+>  tests/xfs/098 | 16 +++++++++++++++-
+>  2 files changed, 16 insertions(+), 2 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 13afc6a..655ae28 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1152,7 +1152,7 @@ _repair_scratch_fs()
+>      xfs)
+>          _scratch_xfs_repair "$@" 2>&1
+>  	res=$?
+> -	if [ "$res" -eq 2 ]; then
+> +	if [ "$res" -ne 0 ]; then
+>  		echo "xfs_repair returns $res; replay log?"
+>  		_scratch_mount
+>  		res=$?
+> diff --git a/tests/xfs/098 b/tests/xfs/098
+> index d91d617..86ec62c 100755
+> --- a/tests/xfs/098
+> +++ b/tests/xfs/098
+> @@ -54,6 +54,17 @@ _require_xfs_db_blocktrash_z_command
+>  test -z "${FUZZ_ARGS}" && FUZZ_ARGS="-n 8 -3"
+>  
+>  rm -f $seqres.full
+> +
+> +# If we corrupt log on a CONFIG_XFS_WARN build, there will be mount related
+> +# WARNINGs in dmesg as expected.  We don't want to simply _disable_dmesg_check
+> +# which could miss other potential bugs, so filter out the intentional WARNINGs,
+> +# make sure test doesn't fail because of this warning and fails on other WARNINGs.
+> +filter_xfs_dmesg()
+> +{
+> +	local warn="WARNING:.*fs/xfs/xfs_message\.c:.*asswarn.*"
+> +	sed -e "s#$warn#Intentional warnings in asswarn#"
+> +}
+> +
+>  TESTDIR="${SCRATCH_MNT}/scratchdir"
+>  TESTFILE="${TESTDIR}/testfile"
+>  
+> @@ -93,7 +104,10 @@ echo "+ mount image"
+>  _scratch_mount 2>/dev/null && _fail "mount should not succeed"
+>  
+>  echo "+ repair fs"
+> -_scratch_xfs_repair >> $seqres.full 2>&1
+> +_repair_scratch_fs >> $seqres.full 2>&1
+> +
+> +# mount may trigger related WARNINGs, so filter them.
+> +_check_dmesg filter_xfs_dmesg
 
-If ustat() is not implemented, platform_check_ismounted() return
-"isn't mounted" if a filesystem is mounted, that's a big problem, it
-will cause corruption.
+This version looks good to me. Test pased on upstream kernel with
+CONFIG_XFS_WARN and xfsprogs.
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-V3 removed all return status check.
-
-Thanks,
-Zorro
-
- tests/xfs/284     | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/284.out |   8 ++++
- tests/xfs/group   |   1 +
- 3 files changed, 118 insertions(+)
- create mode 100755 tests/xfs/284
- create mode 100644 tests/xfs/284.out
-
-diff --git a/tests/xfs/284 b/tests/xfs/284
-new file mode 100755
-index 0000000..a680a6a
---- /dev/null
-+++ b/tests/xfs/284
-@@ -0,0 +1,109 @@
-+#! /bin/bash
-+# FS QA Test 284
-+#
-+# Make sure platform_check_ismounted() do its work. A bug cause
-+# platform_check_ismounted return "isn't mounted" status, even if
-+# the filesystem is mounted. That maybe cause corruption, so must
-+# make sure this function always do its work.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Red Hat.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	rm -f $METADUMP_FILE 2>/dev/null
-+	rm -f $COPY_FILE 2>/dev/null
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+
-+function filter_mounted()
-+{
-+	grep "mounted" | _filter_scratch | head -1
-+}
-+
-+METADUMP_FILE="${TEST_DIR}/${seq}_metadump"
-+COPY_FILE="${TEST_DIR}/${seq}_copyfile"
-+
-+# Test dump a mounted device
-+# xfs_metadump should refuse to dump a mounted device
-+_scratch_mount
-+_scratch_metadump $METADUMP_FILE 2>&1 | filter_mounted
-+_scratch_unmount
-+
-+# Test restore to a mounted device
-+# xfs_mdrestore should refuse to restore to a mounted device
-+_scratch_metadump $METADUMP_FILE
-+_scratch_mount
-+xfs_mdrestore $METADUMP_FILE $SCRATCH_DEV 2>&1 | filter_mounted
-+_scratch_unmount
-+
-+# Test xfs_copy to a mounted device
-+# If source is mounted, xfs_copy will print a warning, but still
-+# keep on copying. If target is mounted, xfs_copy should fail.
-+$XFS_COPY_PROG $SCRATCH_DEV $COPY_FILE >/dev/null
-+_scratch_mount
-+$XFS_COPY_PROG $COPY_FILE $SCRATCH_DEV 2>&1 | filter_mounted
-+_scratch_unmount
-+
-+# Test xfs_db a mounted device
-+# xfs_db a mounted device without readonly (-r) option should fail
-+_scratch_mount
-+$XFS_DB_PROG -c sb $SCRATCH_DEV 2>&1 | filter_mounted
-+_scratch_unmount
-+
-+# Test mkfs.xfs a mounted device
-+# Generally mkfs will report device is mounted, but if it can't find
-+# device is mounted, it'll report device busy.
-+_scratch_mount
-+_scratch_mkfs 2>&1 | filter_mounted
-+_scratch_unmount
-+
-+# Test xfs_repair (with/without modify flag) a mounted device
-+# xfs_repair (with/without modify flag) a mounted device should fail(don't
-+# test -d option at here)
-+_scratch_mount
-+_scratch_xfs_repair -n 2>&1 | filter_mounted
-+_scratch_xfs_repair 2>&1 | filter_mounted
-+_scratch_unmount
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/284.out b/tests/xfs/284.out
-new file mode 100644
-index 0000000..302d75e
---- /dev/null
-+++ b/tests/xfs/284.out
-@@ -0,0 +1,8 @@
-+QA output created by 284
-+xfs_metadump: SCRATCH_DEV contains a mounted and writable filesystem
-+xfs_mdrestore: a filesystem is mounted on target device "SCRATCH_DEV", cannot restore to a mounted filesystem.
-+xfs_copy:  a filesystem is mounted on target device "SCRATCH_DEV".
-+xfs_db: SCRATCH_DEV contains a mounted filesystem
-+mkfs.xfs: SCRATCH_DEV contains a mounted filesystem
-+xfs_repair: SCRATCH_DEV contains a mounted and writable filesystem
-+xfs_repair: SCRATCH_DEV contains a mounted filesystem
-diff --git a/tests/xfs/group b/tests/xfs/group
-index baa0ff6..0156960 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -281,6 +281,7 @@
- 281 dump ioctl auto quick
- 282 dump ioctl auto quick
- 283 dump ioctl auto quick
-+284 auto quick dump copy db mkfs repair
- 287 auto dump quota quick
- 290 auto rw prealloc quick ioctl zero
- 291 auto repair
--- 
-2.7.4
-
+>  
+>  echo "+ mount image (2)"
+>  _scratch_mount
+> -- 
+> 1.8.3.1
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
