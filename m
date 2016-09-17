@@ -1,55 +1,63 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:39233 "EHLO
-        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750982AbcIOEYK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 15 Sep 2016 00:24:10 -0400
-Date: Thu, 15 Sep 2016 14:24:04 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v6 1/6] fstests: common: Introduce _post_mount_hook for
- btrfs
-Message-ID: <20160915042404.GS22388@dastard>
-References: <20160914015527.10274-1-quwenruo@cn.fujitsu.com>
- <20160914015527.10274-2-quwenruo@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160914015527.10274-2-quwenruo@cn.fujitsu.com>
+Received: from mx1.redhat.com ([209.132.183.28]:56128 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755250AbcIQIpQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 17 Sep 2016 04:45:16 -0400
+Message-Id: <201609170845.u8H8jDeE007426@int-mx09.intmail.prod.int.phx2.redhat.com>
+Date: Sat, 17 Sep 2016 16:45:13 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: [GIT PULL] fstests: updates on 2016-09-17
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, fdmanana@gmail.com, mfasheh@suse.de
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 14, 2016 at 09:55:22AM +0800, Qu Wenruo wrote:
-> Introduce _post_mount_hook(), which will be executed after mounting
-> scratch/test.
-> 
-> It's quite useful for fs(OK, only btrfs yet, again) which needs to
-> use ioctl other than mount option to enable some of its feature.
+Hi Dave,
 
-Just implement a _btrfs_mount() function (similar to
-_overlay_mount()) to do btrfs specific things at mount time.
-> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
-> ---
->  common/rc | 23 +++++++++++++++++++++++
->  1 file changed, 23 insertions(+)
-> 
-> diff --git a/common/rc b/common/rc
-> index 23c007a..631397f 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -321,6 +321,27 @@ _overlay_scratch_unmount()
->  	$UMOUNT_PROG $SCRATCH_MNT
->  }
->  
-> +_run_btrfs_post_mount_hook()
-> +{
-> +	mnt_point=$1
-> +	for n in $ALWAYS_ENABLE_BTRFS_FEATURE; do
+Can you please pull the fstests update from the location below? This is a small
+update that only contains two new tests and a fix to xfs/098.
 
-What's this magic, undefined, undocumented variable?
+Thanks,
+Eryu
 
-Cheers,
+The following changes since commit 06d400134e1148461402f640036b8ccc2f6e4c93:
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+  xfs: test getbmapx shared extent reporting (2016-09-08 19:36:13 +0800)
+
+are available in the git repository at:
+
+  https://github.com/guaneryu/xfstests.git for-dave
+
+for you to fetch changes up to 81dc4bc7280ca01f8048f7db85492c3282ed070a:
+
+  xfs: various operations on mounted fs (2016-09-15 12:26:58 +0800)
+
+----------------------------------------------------------------
+
+fstests: update on 2016-09-17
+
+This update contains:
+o New tests for xfs and overlayfs
+o Fix to xfs/098
+
+----------------------------------------------------------------
+Eryu Guan (1):
+      overlay: sgid inheritance over whiteout
+
+Xiao Yang (1):
+      xfs/098: fix xfs_repair on newer xfsprogs
+
+Zorro Lang (1):
+      xfs: various operations on mounted fs
+
+ common/rc             |   2 +-
+ tests/overlay/015     |  97 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/015.out |   6 +++
+ tests/overlay/group   |   1 +
+ tests/xfs/098         |  16 +++++++-
+ tests/xfs/284         | 107 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/284.out     |   8 ++++
+ tests/xfs/group       |   1 +
+ 8 files changed, 236 insertions(+), 2 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
