@@ -1,36 +1,42 @@
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v3] common/rc: fix fsmap check
-Date: Tue, 20 Sep 2016 13:23:12 +0800
-Message-ID: <1474348992-27909-1-git-send-email-yangx.jy@cn.fujitsu.com>
-In-Reply-To: <20160920044809.GB3059@birch.djwong.org>
-References: <20160920044809.GB3059@birch.djwong.org>
+Date: Tue, 20 Sep 2016 08:31:53 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] common/rc: fix fsmap check
+Message-ID: <20160919223153.GY22388@dastard>
+References: <1474273575-9321-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain
-To: darrick.wong@oracle.com
-Cc: eguan@redhat.com, fstests@vger.kernel.org, Xiao Yang <yangx.jy@cn.fujitsu.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1474273575-9321-1-git-send-email-yangx.jy@cn.fujitsu.com>
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, darrick.wong@oracle.com, sandeen@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-We don't need -T to detect GETFSMAP and the flag doesn't exist
-on really old versions of xfs_io, so just get rid of it.
+On Mon, Sep 19, 2016 at 04:26:15PM +0800, Xiao Yang wrote:
+> I got an error about $TEST_DIR being a directory when xfs/273 ran, because
+> xfs_io tried to open the directory first before it parsed the -T options.
+> So fix it by checking this error.
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
- common/rc | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+Can I suggest that you read the man page and understand how the
+command is supposed to work before posting patches to change the
+test? i.e the -T option /requires/ a directory to be supplied to it:
 
-diff --git a/common/rc b/common/rc
-index 13afc6a..52a75c5 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2049,8 +2049,7 @@ _require_xfs_io_command()
- 			_notrun "xfs_io $command support is missing"
- 		;;
- 	"fsmap" )
--		testio=`$XFS_IO_PROG -T -F -c "fsmap" \
--			$TEST_DIR 2>&1`
-+		testio=`$XFS_IO_PROG -f -c "fsmap" $testfile 2>&1`
- 		echo $testio | egrep -q "Inappropriate ioctl" && \
- 			_notrun "xfs_io $command support is missing"
- 		;;
+    -T  create a temporary file not linked into the filesystem
+	namespace (O_TMPFILE).  The pathname passed must refer to a
+	directory which is  treated as virtual parent for the newly
+	created invisible file.  Can not be used together with the
+	-r option.
+
+IOWs, there is nothing wrong with the test code - if you if
+you are getting an EISDIR error here then something is broken with
+the xfs_io binary you are using.
+
+And, because I haven't merged fsmap support into xfs_io yet, it's
+very likely there is a problem in the prototype patchset you are
+running. Perhaps that's worth reporting to the patchset author....
+
+Cheers,
+
+Dave.
 -- 
-1.8.3.1
+Dave Chinner
+david@fromorbit.com
