@@ -1,65 +1,71 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:29424 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752569AbcIQRET (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 17 Sep 2016 13:04:19 -0400
-Date: Sat, 17 Sep 2016 10:03:41 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v2 0/4] Add copy_file_range() tests
-Message-ID: <20160917170341.GA3059@birch.djwong.org>
-References: <20160907195619.25914-1-Anna.Schumaker@Netapp.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:31721 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1750708AbcISEJB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 19 Sep 2016 00:09:01 -0400
+Subject: Re: [PATCH v6 1/6] fstests: common: Introduce _post_mount_hook for
+ btrfs
+References: <20160914015527.10274-1-quwenruo@cn.fujitsu.com>
+ <20160914015527.10274-2-quwenruo@cn.fujitsu.com>
+ <20160915042404.GS22388@dastard>
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Message-ID: <ceac87a2-b089-db7f-ee29-5916c8bdf10a@cn.fujitsu.com>
+Date: Mon, 19 Sep 2016 12:08:49 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160907195619.25914-1-Anna.Schumaker@Netapp.com>
+In-Reply-To: <20160915042404.GS22388@dastard>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Anna Schumaker <Anna.Schumaker@netapp.com>
-Cc: fstests@vger.kernel.org, linux-nfs@vger.kernel.org, hch@infradead.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, fdmanana@gmail.com, mfasheh@suse.de
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 07, 2016 at 03:56:15PM -0400, Anna Schumaker wrote:
-> These tests exercise the copy_file_range() system call, and check copying
-> data to both a new file and overwriting data inside an existing file.  I use
-> the xfs_io "copy_range" command for the actual copies, so running these
-> tests requires an up-to-date version of xfsprogs.
-> 
-> Thanks,
-> Anna
-> 
-> Anna Schumaker (4):
->   generic/377: Add copy to new file test
->   generic/378: Add small copies to new file test
->   generic/379: Add copy test that overwrites data
->   generic/380: Add a copy test for overwriting small amounts of data
 
-By the way, do you have a test to check that invalid inputs produce
-the error codes listed in the manpage?
 
---D
+At 09/15/2016 12:24 PM, Dave Chinner wrote:
+> On Wed, Sep 14, 2016 at 09:55:22AM +0800, Qu Wenruo wrote:
+>> Introduce _post_mount_hook(), which will be executed after mounting
+>> scratch/test.
+>>
+>> It's quite useful for fs(OK, only btrfs yet, again) which needs to
+>> use ioctl other than mount option to enable some of its feature.
+>
+> Just implement a _btrfs_mount() function (similar to
+> _overlay_mount()) to do btrfs specific things at mount time.
+>> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+>> ---
+>>  common/rc | 23 +++++++++++++++++++++++
+>>  1 file changed, 23 insertions(+)
+>>
+>> diff --git a/common/rc b/common/rc
+>> index 23c007a..631397f 100644
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -321,6 +321,27 @@ _overlay_scratch_unmount()
+>>  	$UMOUNT_PROG $SCRATCH_MNT
+>>  }
+>>
+>> +_run_btrfs_post_mount_hook()
+>> +{
+>> +	mnt_point=$1
+>> +	for n in $ALWAYS_ENABLE_BTRFS_FEATURE; do
+>
+> What's this magic, undefined, undocumented variable?
 
-> 
->  tests/generic/377     | 102 +++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/377.out |  21 ++++++++++
->  tests/generic/378     |  88 +++++++++++++++++++++++++++++++++++++++++
->  tests/generic/378.out |  14 +++++++
->  tests/generic/379     | 107 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/379.out |  17 ++++++++
->  tests/generic/380     |  94 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/380.out |  17 ++++++++
->  tests/generic/group   |   4 ++
->  9 files changed, 464 insertions(+)
->  create mode 100644 tests/generic/377
->  create mode 100644 tests/generic/377.out
->  create mode 100644 tests/generic/378
->  create mode 100644 tests/generic/378.out
->  create mode 100644 tests/generic/379
->  create mode 100644 tests/generic/379.out
->  create mode 100644 tests/generic/380
->  create mode 100644 tests/generic/380.out
-> 
-> -- 
-> 2.9.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Yes this reminds me.
+
+The biggest problem is, where is the document of all these variables?
+
+common/config and config/examples all lacks variables like 
+TIME_FACTOR/LOAD_FACTOR.
+
+Or it's the time to doc them all?
+
+Thanks,
+Qu
+>
+> Cheers,
+>
+> Dave.
+>
+
+
