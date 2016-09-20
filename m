@@ -1,361 +1,291 @@
-Received: from mx2.suse.de ([195.135.220.15]:56851 "EHLO mx2.suse.de"
+Received: from sandeen.net ([63.231.237.45]:51824 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753663AbcIUMch (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 21 Sep 2016 08:32:37 -0400
-From: jeffm@suse.com
-Subject: [PATCH] tests/btrfs: test snapshot/subvol create/destroy ioctls with a regular file
-Date: Wed, 21 Sep 2016 08:32:33 -0400
-Message-Id: <1474461153-16373-1-git-send-email-jeffm@suse.com>
+        id S1754897AbcITWVy (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 20 Sep 2016 18:21:54 -0400
+Subject: [PATCH 2/3] modify xfs/ quota tests to work on generic filesystems
+References: <65c03ebd-ee9c-7439-2642-0362a177ec6d@redhat.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <ef6b5c28-9579-c13e-0547-17d05f150714@sandeen.net>
+Date: Tue, 20 Sep 2016 17:21:46 -0500
+MIME-Version: 1.0
+In-Reply-To: <65c03ebd-ee9c-7439-2642-0362a177ec6d@redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Jeff Mahoney <jeffm@suse.com>
+To: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-From: Jeff Mahoney <jeffm@suse.com>
+Fix several xfs quota tests to work on non-xfs filesystems.
 
-There was a bug where the btrfs snapshot/subvol creation ioctls
-would accept a regular file and then Oops when it tried to use
-the file inode operations to do a lookup.
+New _require function to be sure that the xfs_quota tool can operate
+on foreign filesystems; if it can, and if it needs to, it adds "-f"
+to the XFS_QUOTA_PROG variable.
 
-This also adds an ioctl-helper that can be easily extended to provide
-direct ioctl access for any file system's ioctls.
+Modify _qmount to do quotacheck/quotaon to mount and /enable/
+quota.  On xfs this isn't needed and/or fails; it's ignored.
 
-Signed-off-by: Jeff Mahoney <jeffm@suse.com>
+All quota-related options used as arguments to _qmount are changed
+from i.e. uquota to i.e. usrquota; the latter is standard across
+almost all linux filesytems, including xfs.
+
+xfs/260 filters out the root/default quota line, because ext4
+consumes a different amount of space than xfs, and it's not what
+we're testing for, so just ignore it.
+
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 ---
- src/Makefile        |   2 +-
- src/ioctl-helper.c  | 201 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/131     |  77 ++++++++++++++++++++
- tests/btrfs/131.out |   6 ++
- tests/btrfs/group   |   1 +
- 5 files changed, 286 insertions(+), 1 deletion(-)
- create mode 100644 src/ioctl-helper.c
- create mode 100755 tests/btrfs/131
- create mode 100644 tests/btrfs/131.out
 
-diff --git a/src/Makefile b/src/Makefile
-index dd51216..6c6eb32 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -21,7 +21,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	stale_handle pwrite_mmap_blocked t_dir_offset2 seek_sanity_test \
- 	seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
- 	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
--	attr-list-by-handle-cursor-test listxattr
-+	attr-list-by-handle-cursor-test listxattr ioctl-helper
+diff --git a/common/quota b/common/quota
+index d91062a..2ec56a5 100644
+--- a/common/quota
++++ b/common/quota
+@@ -78,6 +78,19 @@ _require_xfs_quota()
+ }
  
- SUBDIRS =
+ #
++# checks that xfs_quota can operate on foreign (non-xfs) filesystems
++# Skips check on xfs filesystems, old xfs_quota is fine there.
++# Appends "-f" to enable foreign behavior on non-xfs filesystems if available.
++#
++_require_xfs_quota_foreign()
++{
++    if [ "$FSTYP" != "xfs" ]; then
++	$XFS_QUOTA_PROG -f -V &>/dev/null || \
++		_notrun "xfs_quota binary does not support foreign filesystems"
++	XFS_QUOTA_PROG="$XFS_QUOTA_PROG -f"
++    fi
++}
++#
+ # checks that the XFS project quota support in the kernel is enabled.
+ #
+ _require_prjquota()
+@@ -169,6 +182,10 @@ _qmount()
+ {
+     _scratch_unmount >/dev/null 2>&1
+     _scratch_mount || _fail "qmount failed"
++    # xfs doesn't need these setups and quotacheck even fails on xfs, so just
++    # redirect the output to $seqres.full for debug purpose and ignore the results
++    quotacheck -ug $SCRATCH_MNT >>$seqres.full 2>&1
++    quotaon -u -g $SCRATCH_MNT >>$seqres.full 2>&1
+     chmod ugo+rwx $SCRATCH_MNT
+ }
  
-diff --git a/src/ioctl-helper.c b/src/ioctl-helper.c
-new file mode 100644
-index 0000000..4a2acb4
---- /dev/null
-+++ b/src/ioctl-helper.c
-@@ -0,0 +1,201 @@
-+/*
-+ * Copyright (c) 2016 SUSE Linux Products GmbH.  All Rights Reserved.
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License as
-+ * published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it would be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write the Free Software Foundation,
-+ * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+ */
-+
-+/*
-+ * This program calls an ioctl with the specified arguments transformed
-+ * appropriately.
-+ */
-+
-+#include <libgen.h>
-+#include <stdio.h>
-+#include <stdint.h>
-+#include <string.h>
-+#include <unistd.h>
-+#include <sys/fcntl.h>
-+#include <sys/ioctl.h>
-+
-+static const char *program;
-+#define ARRAY_SIZE(x)	(sizeof(x) / sizeof(x[0]))
-+#define BAD_ARGS ((void *)-1UL)
-+
-+struct ioctl_entry {
-+	const char *name;
-+	unsigned int cmd;
-+	int nargs;
-+	void *(*get_args)(unsigned, int, char **);
-+};
-+
-+/* start btrfs ioctls */
-+#define BTRFS_IOCTL_MAGIC 0x94
-+
-+/* this should be 4k */
-+#define BTRFS_PATH_NAME_MAX 4087
-+struct btrfs_ioctl_vol_args {
-+	int64_t fd;
-+	char name[BTRFS_PATH_NAME_MAX + 1];
-+};
-+
-+#define BTRFS_IOC_SNAP_CREATE _IOW(BTRFS_IOCTL_MAGIC, 1,		\
-+                                   struct btrfs_ioctl_vol_args)
-+#define BTRFS_IOC_SUBVOL_CREATE _IOW(BTRFS_IOCTL_MAGIC, 14,		\
-+                                   struct btrfs_ioctl_vol_args)
-+#define BTRFS_IOC_SNAP_DESTROY _IOW(BTRFS_IOCTL_MAGIC, 15,		\
-+                                struct btrfs_ioctl_vol_args)
-+
-+static void *
-+get_vol_args(unsigned cmd, int argc, char *argv[])
-+{
-+	static struct btrfs_ioctl_vol_args args;
-+	const char *target = argv[0];
-+	const char *snap_src = argv[1];
-+
-+	memset(&args, 0, sizeof(args));
-+
-+	if (cmd == BTRFS_IOC_SNAP_CREATE) {
-+		args.fd = open(snap_src, O_RDONLY);
-+		if (args.fd < 0) {
-+			perror(snap_src);
-+			return BAD_ARGS;
-+		}
-+	}
-+
-+	strcpy(args.name, target);
-+	return &args;
-+}
-+
-+#define BTRFS_SUBVOL_NAME_MAX 4039
-+struct btrfs_ioctl_vol_args_v2 {
-+        int64_t fd;
-+        uint64_t transid;
-+        uint64_t flags;
-+        union {
-+                struct {
-+                        uint64_t size;
-+                };
-+                uint64_t unused[4];
-+        };
-+        union {
-+                char name[BTRFS_SUBVOL_NAME_MAX + 1];
-+                uint64_t devid;
-+        };
-+};
-+
-+#define BTRFS_IOC_SNAP_CREATE_V2 _IOW(BTRFS_IOCTL_MAGIC, 23,		\
-+                                   struct btrfs_ioctl_vol_args_v2)
-+#define BTRFS_IOC_SUBVOL_CREATE_V2 _IOW(BTRFS_IOCTL_MAGIC, 24,		\
-+                                   struct btrfs_ioctl_vol_args_v2)
-+
-+static void *
-+get_vol_args_v2(unsigned cmd, int argc, char *argv[])
-+{
-+	static struct btrfs_ioctl_vol_args_v2 args;
-+	const char *target = argv[0];
-+	const char *snap_src = argv[1];
-+
-+	memset(&args, 0, sizeof(args));
-+
-+	if (cmd == BTRFS_IOC_SNAP_CREATE_V2) {
-+		args.fd = open(snap_src, O_RDONLY);
-+		if (args.fd < 0) {
-+			perror(snap_src);
-+			return BAD_ARGS;
-+		}
-+	}
-+
-+	strcpy(args.name, target);
-+	return &args;
-+}
-+
-+/* end btrfs ioctls */
-+
-+#define IOCTL_TBL(ioctl, _nargs, fn)					\
-+	{ .name = #ioctl, .cmd = ioctl, .nargs = _nargs, .get_args = fn, }
-+
-+static struct ioctl_entry ioctl_table[] = {
-+	IOCTL_TBL(BTRFS_IOC_SNAP_CREATE, 2, get_vol_args),
-+	IOCTL_TBL(BTRFS_IOC_SNAP_CREATE_V2, 2, get_vol_args_v2),
-+	IOCTL_TBL(BTRFS_IOC_SUBVOL_CREATE, 1, get_vol_args),
-+	IOCTL_TBL(BTRFS_IOC_SUBVOL_CREATE_V2, 1, get_vol_args_v2),
-+	IOCTL_TBL(BTRFS_IOC_SNAP_DESTROY, 1, get_vol_args),
-+};
-+
-+static struct ioctl_entry *get_ioctl(const char *name)
-+{
-+	struct ioctl_entry *ioc = NULL;
-+	int i;
-+
-+	for (i = 0; i < ARRAY_SIZE(ioctl_table); i++) {
-+		if (!strcmp(ioctl_table[i].name, name)) {
-+			ioc = &ioctl_table[i];
-+			break;
-+		}
-+	}
-+
-+	return ioc;
-+}
-+	
-+int
-+main(int argc, char *argv[])
-+{
-+	struct ioctl_entry *ioc = NULL;
-+	const char *filename;
-+	void *args = NULL;
-+	int ret;
-+	int fd;
-+
-+	program = basename(argv[0]);
-+
-+	if (argc < 3) {
-+		fprintf(stderr,
-+			"usage: %s <filename> <ioctl> [args]\n", program);
-+		return 1;
-+	}
-+
-+	ioc = get_ioctl(argv[2]);
-+
-+	if (!ioc) {
-+		fprintf(stderr, "%s: unknown ioctl `%s'\n", program, argv[2]);
-+		return 1;
-+	}
-+
-+	if (argc - 3 < ioc->nargs) {
-+		fprintf(stderr, "%s: %s requires %d args\n", program,
-+			ioc->name, ioc->nargs);
-+		return 1;
-+	}
-+
-+	if (ioc->get_args) {
-+		args = ioc->get_args(ioc->cmd, argc - 3, argv + 3);
-+		if (args == BAD_ARGS)
-+			return 1;
-+	}
-+
-+	filename = argv[1];
-+	fd = open(filename, O_RDONLY);
-+	if (fd < 0) {
-+		perror(filename);
-+		return 1;
-+	}
-+
-+	ret = ioctl(fd, ioc->cmd, args);
-+	if (ret)
-+		perror(ioc->name);
-+
-+	close(fd);
-+
-+	return 0;
-+}
-diff --git a/tests/btrfs/131 b/tests/btrfs/131
-new file mode 100755
-index 0000000..d7541b1
---- /dev/null
-+++ b/tests/btrfs/131
-@@ -0,0 +1,77 @@
-+#! /bin/bash
-+# FS QA Test 131
-+#
-+# Check if btrfs subvol/snapshot create/destroy ioctls can handle
-+# being called on a regular file.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 SUSE Linux Products GmbH.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_test_program ioctl-helper
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+
-+touch $SCRATCH_MNT/testfile
-+
-+# The file must be writeable and executable to pass btrfs_may_create()
-+chmod u+wx $SCRATCH_MNT/testfile
-+
-+# Create a valid subvolume for the snapshot create to use
-+_run_btrfs_util_prog subvolume create $SCRATCH_MNT/test-sub
-+
-+# None of these should succeed.  A failure is an Oops.
-+./src/ioctl-helper $SCRATCH_MNT/testfile BTRFS_IOC_SUBVOL_CREATE test1
-+./src/ioctl-helper $SCRATCH_MNT/testfile BTRFS_IOC_SUBVOL_CREATE_V2 test2
-+./src/ioctl-helper $SCRATCH_MNT/testfile BTRFS_IOC_SNAP_DESTROY test2
-+./src/ioctl-helper $SCRATCH_MNT/testfile BTRFS_IOC_SNAP_CREATE_V2 test3 \
-+		   $SCRATCH_MNT/test-sub
-+./src/ioctl-helper $SCRATCH_MNT/testfile BTRFS_IOC_SNAP_CREATE_V2 test4 \
-+		   $SCRATCH_MNT/test-sub
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/131.out b/tests/btrfs/131.out
-new file mode 100644
-index 0000000..ae184a2
---- /dev/null
-+++ b/tests/btrfs/131.out
-@@ -0,0 +1,6 @@
-+QA output created by 131
-+BTRFS_IOC_SUBVOL_CREATE: Not a directory
-+BTRFS_IOC_SUBVOL_CREATE_V2: Not a directory
-+BTRFS_IOC_SNAP_DESTROY: Not a directory
-+BTRFS_IOC_SNAP_CREATE_V2: Not a directory
-+BTRFS_IOC_SNAP_CREATE_V2: Not a directory
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index f3a7a4f..c090604 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -133,3 +133,4 @@
- 128 auto quick send
- 129 auto quick send
- 130 auto clone send
-+131 auto quick
--- 
-1.8.5.6
+diff --git a/tests/xfs/054 b/tests/xfs/054
+index ea0f9f8..b4e5dd1 100755
+--- a/tests/xfs/054
++++ b/tests/xfs/054
+@@ -44,14 +44,15 @@ _cleanup()
+ trap "_cleanup; exit \$status" 0 1 2 3 15
+ 
+ # real QA test starts here
+-_supported_fs xfs
++_supported_fs generic
+ _supported_os Linux IRIX
+ 
+ cp /dev/null $seqres.full
+ chmod ugo+rwx $seqres.full
+ 
+ _require_scratch
+-_require_xfs_quota
++_require_quota
++_require_xfs_quota_foreign
+ 
+ _filter_stat()
+ {
+@@ -67,7 +68,7 @@ _filter_stat()
+ 
+ _exercise()
+ {
+-	_scratch_mkfs_xfs >/dev/null 2>&1
++	_scratch_mkfs >/dev/null 2>&1
+ 	_qmount
+ 
+ 	umask 022
+@@ -99,9 +100,9 @@ _exercise()
+ 	_scratch_unmount 2>/dev/null
+ }
+ 
+-_scratch_mkfs_xfs >> $seqres.full 2>&1 || _fail "mkfs failed!"
++_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed!"
+ 
+-_qmount_option "uquota,gquota"
++_qmount_option "usrquota,grpquota"
+ _qmount
+ if src/feature -G $SCRATCH_DEV ; then
+ 	:
+@@ -114,16 +115,15 @@ _qmount_option "rw" # no quota options
+ echo "*** Default mount options"
+ _exercise
+ 
+-_qmount_option "uquota"
++_qmount_option "usrquota"
+ echo "*** User quota mount option"
+ _exercise
+ 
+-export MOUNT_OPTIONS="-o gquota"
+-_qmount_option "gquota"
++_qmount_option "grpquota"
+ echo "*** Group quota mount option"
+ _exercise
+ 
+-_qmount_option "uquota,gquota"
++_qmount_option "usrquota,grpquota"
+ echo "*** User and Group quota mount options"
+ _exercise
+ 
+diff --git a/tests/xfs/118 b/tests/xfs/118
+index 8414594..da18a32 100755
+--- a/tests/xfs/118
++++ b/tests/xfs/118
+@@ -47,11 +47,12 @@ _cleanup()
+ # real QA test starts here
+ 
+ # Modify as appropriate.
+-_supported_fs xfs
++_supported_fs generic
+ _supported_os IRIX Linux
+ 
+ _require_scratch
+-_require_xfs_quota
++_require_quota
++_require_xfs_quota_foreign
+ 
+ _chowning_file()
+ {
+@@ -72,10 +73,10 @@ _chowning_file()
+ }
+ 
+ echo "mkfs on scratch"
+-_scratch_mkfs_xfs >$seqres.full
++_scratch_mkfs >$seqres.full
+ 
+ echo "mount with quotas"
+-export MOUNT_OPTIONS="-o uquota"
++export MOUNT_OPTIONS="-o usrquota"
+ _scratch_mount
+ 
+ echo "creating quota file with holes"
+diff --git a/tests/xfs/138 b/tests/xfs/138
+index c6a6f50..6b6a12f 100755
+--- a/tests/xfs/138
++++ b/tests/xfs/138
+@@ -47,17 +47,18 @@ _cleanup()
+ rm -f $seqres.full
+ 
+ # real QA test starts here
+-_supported_fs xfs
++_supported_fs generic
+ _supported_os Linux
+ _require_scratch
+ _require_quota
++_require_xfs_quota_foreign
+ 
+ # need user and group named 123456-fsgqa
+ _require_user 123456-fsgqa
+ _require_group 123456-fsgqa
+ 
+-_scratch_mkfs_xfs >/dev/null 2>&1
+-_qmount_option "uquota,gquota"
++_scratch_mkfs >/dev/null 2>&1
++_qmount_option "usrquota,grpquota"
+ _qmount
+ 
+ # user test
+diff --git a/tests/xfs/260 b/tests/xfs/260
+index 9c6162b..a2bc3ce 100755
+--- a/tests/xfs/260
++++ b/tests/xfs/260
+@@ -52,10 +52,11 @@ _cleanup()
+ rm -f $seqres.full
+ 
+ # real QA test starts here
+-_supported_fs xfs
++_supported_fs generic
+ _supported_os Linux
+ _require_scratch
+ _require_quota
++_require_xfs_quota_foreign
+ _require_user
+ _require_group
+ 
+@@ -78,12 +79,12 @@ do_test()
+ 	$XFS_QUOTA_PROG -x -c "limit bsoft=20M bhard=20M isoft=20 ihard=20 $type -d" $SCRATCH_MNT
+ 	$XFS_QUOTA_PROG -x -c "limit bsoft=40M bhard=40M isoft=40 ihard=40 $type fsgqa" $SCRATCH_MNT
+ 	echo "$qname blocks and inode limit"
+-	$XFS_QUOTA_PROG -x -c "report $type -N -bi" $SCRATCH_MNT | _filter_spaces
++	$XFS_QUOTA_PROG -x -c "report $type -N -bi" $SCRATCH_MNT | grep -v ^root | _filter_spaces
+ 
+ 	## blocks default quota test ##
+ 	_user_do "$XFS_IO_PROG -f -c \"pwrite 0 30M\" -c \"fsync\" $SCRATCH_MNT/data" | _filter_xfs_io
+ 	echo "$qname blocks quota after write 30M data"
+-	$XFS_QUOTA_PROG -x -c "report $type -N -b" $SCRATCH_MNT | _filter_spaces
++	$XFS_QUOTA_PROG -x -c "report $type -N -b" $SCRATCH_MNT | grep -v ^root | _filter_spaces
+ 
+ 	rm -f ${SCRATCH_MNT}/* >/dev/null 2>&1
+ 
+@@ -94,22 +95,22 @@ do_test()
+ 	sync
+ 
+ 	echo "$qname inode quota after creating 30 inodes"
+-	$XFS_QUOTA_PROG -x -c "report $type -N -i" $SCRATCH_MNT | _filter_spaces
++	$XFS_QUOTA_PROG -x -c "report $type -N -i" $SCRATCH_MNT | grep -v ^root | _filter_spaces
+ 
+ 	rm -f ${SCRATCH_MNT}/* >/dev/null 2>&1
+ }
+ 
+ ### user default quota test ###
+-_scratch_mkfs_xfs >/dev/null 2>&1
+-_qmount_option "uquota,gquota"
++_scratch_mkfs >/dev/null 2>&1
++_qmount_option "usrquota,grpquota"
+ _qmount
+ 
+ do_test user
+ 
+ ### group default quota test ###
+ _scratch_unmount
+-_scratch_mkfs_xfs >/dev/null 2>&1
+-_qmount_option "gquota,uquota"
++_scratch_mkfs >/dev/null 2>&1
++_qmount_option "grpquota,usrquota"
+ _qmount
+ 
+ do_test group
+diff --git a/tests/xfs/260.out b/tests/xfs/260.out
+index 0b198bf..5eb1070 100644
+--- a/tests/xfs/260.out
++++ b/tests/xfs/260.out
+@@ -1,31 +1,25 @@
+ QA output created by 260
+ === user quota test ===
+ user blocks and inode limit
+-root 0 20480 20480 00 [--------] 3 20 20 00 [--------]
+ fsgqa 0 40960 40960 00 [--------] 0 40 40 00 [--------]
+ 
+ wrote 31457280/31457280 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ user blocks quota after write 30M data
+-root 0 20480 20480 00 [--------]
+ fsgqa 30720 40960 40960 00 [--------]
+ 
+ user inode quota after creating 30 inodes
+-root 3 20 20 00 [--------]
+ fsgqa 30 40 40 00 [--------]
+ 
+ === group quota test ===
+ group blocks and inode limit
+-root 0 20480 20480 00 [--------] 3 20 20 00 [--------]
+ fsgqa 0 40960 40960 00 [--------] 0 40 40 00 [--------]
+ 
+ wrote 31457280/31457280 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ group blocks quota after write 30M data
+-root 0 20480 20480 00 [--------]
+ fsgqa 30720 40960 40960 00 [--------]
+ 
+ group inode quota after creating 30 inodes
+-root 3 20 20 00 [--------]
+ fsgqa 30 40 40 00 [--------]
+ 
+
 
