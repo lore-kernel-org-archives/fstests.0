@@ -1,64 +1,55 @@
-Received: from sandeen.net ([63.231.237.45]:37066 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753810AbcIUBlM (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 20 Sep 2016 21:41:12 -0400
-Subject: Re: [PATCH 3/3] move now-generic quota tests to generic
-References: <65c03ebd-ee9c-7439-2642-0362a177ec6d@redhat.com>
- <06d804f2-646e-a586-bed1-416ffde8e0e9@sandeen.net>
- <20160920234048.GB10454@dastard>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <99a7554f-9d52-510b-0631-aba25ec52b97@sandeen.net>
-Date: Tue, 20 Sep 2016 20:41:09 -0500
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:17014 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S932947AbcITVmq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 20 Sep 2016 17:42:46 -0400
+Date: Wed, 21 Sep 2016 07:42:43 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] dm flakey: add DAX support
+Message-ID: <20160920214243.GA10454@dastard>
+References: <147440445480.62486.9559239844115396323.stgit@djiang5-desk3.ch.intel.com>
 MIME-Version: 1.0
-In-Reply-To: <20160920234048.GB10454@dastard>
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <147440445480.62486.9559239844115396323.stgit@djiang5-desk3.ch.intel.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Dave Chinner <david@fromorbit.com>
-Cc: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>
+To: Dave Jiang <dave.jiang@intel.com>
+Cc: snitzer@redhat.com, agk@redhat.com, dm-devel@redhat.com, ross.zwisler@linux.intel.com, dan.j.williams@intel.com, fstests@vger.kernel.org, linux-nvdimm@ml01.01.org
 List-ID: <fstests@vger.kernel.org>
 
-On 9/20/16 6:40 PM, Dave Chinner wrote:
-> On Tue, Sep 20, 2016 at 05:24:59PM -0500, Eric Sandeen wrote:
->> Now that these tests have been made generic, move them into
->> the generic/ dir and update group files.
->>
->> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
->=20
-> I wonder if this would be better done simply as a tools/mvtest
-> script for the maintainer to run. e.g.
->=20
-> #!/bin/sh
->=20
-> tools/mvtest xfs/054 generic/380
-> tools/mvtest xfs/118 generic/381
-> tools/mvtest xfs/138 generic/382
-> tools/mvtest xfs/260 generic/383
->=20
-> #EOF
->=20
-> Rather than ending up with patch that won't apply because we've
-> already applied another patch that added a new test that conflicts?
-> Reviewing the change is also heaps easier :)
+On Tue, Sep 20, 2016 at 01:47:34PM -0700, Dave Jiang wrote:
+> Change dm-flakey to implement direct_access function,
+> flakey_direct_access(), which maps sector and calls direct_access
+> function of its physical target device. This pretty much is a copy
+> from DM Linear.
+> 
+> This allows fs with DAX to pass in xfstests.
 
-Oh, yeah.  I didn't know that script existed.
+They don't fail. They simply don't run like this:
 
-...
+generic/321 1s ... [not run] Cannot run tests with DAX on dmflakey devices
+generic/322 0s ... [not run] Cannot run tests with DAX on dmflakey devices
 
->>
->> N?????r??y????b?X??=C7=A7v?^?)=DE=BA{.n?+????=D7=AC?=C8=A7?=17??=DC=A8=
-}???=C6=A0z?&j:+v???=07????zZ+??+zf???h???~????i???z?=1E?w?????????&?)=DF=
-=A2=1Bf
->=20
-> Ummm, what? That looks like some kind of corruption occurred in
-> transit. There's no mailing list footer, and it's not at my end as
-> it's in the archive copies, too....
+> It does not actually introduce
+> data corruption and dropping writes unlike the non-DAX path. The main
+> reason is due to the I/O path being out of dmflakey's control once
+> direct_access() has been called. The the existing implementation cannot
+> be adapted to DAX I/O path. The error injection will be introduced at a
+> later date with more thought.
 
-Huh, strange - not sure what to make of that.  But I guess the mvtest bit
-can make it not matter.  ;)
+Then introduce dmflakey DAX support at that time. Running tests that
+are supposed to exercise failure paths when those failure paths
+cannot be triggered is fundamentally useless. It leads a false
+indication that we are actually testing failures, when in fact we
+are doing nothing of the sort.
 
-Honestly I don't care where they land, and I don't know what else is in f=
-light;
-maybe patch 3 should be "please move these to generic as you see fit?" :)
+Right now the test harness execution clearly documents that there is
+no failure testing being run on DAX devices, and that's the way it
+should remain until dmflakey, dmerror, etc can inject the required
+errors into the DAX paths....
 
--Eric
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
