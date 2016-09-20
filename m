@@ -1,74 +1,75 @@
-Received: from mx1.redhat.com ([209.132.183.28]:54352 "EHLO mx1.redhat.com"
+Received: from mga07.intel.com ([134.134.136.100]:21669 "EHLO mga07.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753389AbcIUGoo (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 21 Sep 2016 02:44:44 -0400
-Date: Wed, 21 Sep 2016 14:44:41 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 3/3] move now-generic quota tests to generic
-Message-ID: <20160921064441.GJ27776@eguan.usersys.redhat.com>
-References: <65c03ebd-ee9c-7439-2642-0362a177ec6d@redhat.com>
- <06d804f2-646e-a586-bed1-416ffde8e0e9@sandeen.net>
- <20160920234048.GB10454@dastard>
+        id S1751124AbcITUrk (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 20 Sep 2016 16:47:40 -0400
+Subject: [PATCH] dm flakey: add DAX support
+From: Dave Jiang <dave.jiang@intel.com>
+Date: Tue, 20 Sep 2016 13:47:34 -0700
+Message-ID: <147440445480.62486.9559239844115396323.stgit@djiang5-desk3.ch.intel.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160920234048.GB10454@dastard>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Eric Sandeen <sandeen@sandeen.net>, Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>
+To: snitzer@redhat.com, agk@redhat.com
+Cc: dm-devel@redhat.com, ross.zwisler@linux.intel.com, dan.j.williams@intel.com, fstests@vger.kernel.org, linux-nvdimm@ml01.01.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 21, 2016 at 09:40:48AM +1000, Dave Chinner wrote:
-> On Tue, Sep 20, 2016 at 05:24:59PM -0500, Eric Sandeen wrote:
-> > Now that these tests have been made generic, move them into
-> > the generic/ dir and update group files.
-> > 
-> > Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> 
-> I wonder if this would be better done simply as a tools/mvtest
-> script for the maintainer to run. e.g.
-> 
-> #!/bin/sh
-> 
-> tools/mvtest xfs/054 generic/380
-> tools/mvtest xfs/118 generic/381
-> tools/mvtest xfs/138 generic/382
-> tools/mvtest xfs/260 generic/383
-> 
-> #EOF
-> 
-> Rather than ending up with patch that won't apply because we've
-> already applied another patch that added a new test that conflicts?
-> Reviewing the change is also heaps easier :)
+Change dm-flakey to implement direct_access function,
+flakey_direct_access(), which maps sector and calls direct_access
+function of its physical target device. This pretty much is a copy
+from DM Linear.
 
-Either way is OK for me. Usually it's not a big problem, I always have
-to renumber tests and resolve the conflicts. And as this patch doesn't
-apply due to the patch corruption at the end, I re-did the patch by
-running mvtest script.
+This allows fs with DAX to pass in xfstests. It does not actually introduce
+data corruption and dropping writes unlike the non-DAX path. The main
+reason is due to the I/O path being out of dmflakey's control once
+direct_access() has been called. The the existing implementation cannot
+be adapted to DAX I/O path. The error injection will be introduced at a
+later date with more thought.
 
-> 
-> > ---
-> > 
-> > diff --git a/tests/generic/group b/tests/generic/group
-> > index a602b01..f5ebbb1 100644
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -381,3 +381,8 @@
-> >  376 auto quick metadata
-> >  377 attr auto quick metadata
-> >  378 auto quick metadata
-> > +380 quota auto quick
+Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+---
+ drivers/md/dm-flakey.c |   21 ++++++++++++++++++++-
+ 1 file changed, 20 insertions(+), 1 deletion(-)
 
-I re-numbered them starting from 379.
+diff --git a/drivers/md/dm-flakey.c b/drivers/md/dm-flakey.c
+index 6a2e8dd..cf182a7 100644
+--- a/drivers/md/dm-flakey.c
++++ b/drivers/md/dm-flakey.c
+@@ -408,9 +408,27 @@ static int flakey_iterate_devices(struct dm_target *ti, iterate_devices_callout_
+ 	return fn(ti, fc->dev, fc->start, ti->len, data);
+ }
+ 
++static long flakey_direct_access(struct dm_target *ti, sector_t sector,
++				 void **kaddr, pfn_t *pfn, long size)
++{
++	struct flakey_c *fc = ti->private;
++	struct block_device *bdev = fc->dev->bdev;
++	struct blk_dax_ctl dax = {
++		.sector = flakey_map_sector(ti, sector),
++		.size = size,
++	};
++	long ret;
++
++	ret = bdev_direct_access(bdev, &dax);
++	*kaddr = dax.addr;
++	*pfn = dax.pfn;
++
++	return ret;
++}
++
+ static struct target_type flakey_target = {
+ 	.name   = "flakey",
+-	.version = {1, 3, 1},
++	.version = {1, 4, 0},
+ 	.module = THIS_MODULE,
+ 	.ctr    = flakey_ctr,
+ 	.dtr    = flakey_dtr,
+@@ -419,6 +437,7 @@ static struct target_type flakey_target = {
+ 	.status = flakey_status,
+ 	.prepare_ioctl = flakey_prepare_ioctl,
+ 	.iterate_devices = flakey_iterate_devices,
++	.direct_access = flakey_direct_access,
+ };
+ 
+ static int __init dm_flakey_init(void)
 
-> > +381 quota auto quick
-> > +382 auto quick quota
-> > +383 auto quick quota
-> > +
-> 
-> No trailing blank line....
-
-Fixed at commit time. And start testing them now.
-
-Thanks,
-Eryu
