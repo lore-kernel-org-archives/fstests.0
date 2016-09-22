@@ -1,85 +1,143 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:44054 "EHLO
-        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S932640AbcIUXj5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Sep 2016 19:39:57 -0400
-Date: Thu, 22 Sep 2016 09:39:53 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] fstests: test xfs_copy V5 XFS without -d option
-Message-ID: <20160921233952.GO340@dastard>
-References: <1474455620-25982-1-git-send-email-zlang@redhat.com>
- <20160921213729.GN340@dastard>
- <4b37d061-43b5-74f6-b544-0f97693270c5@sandeen.net>
+Received: from cn.fujitsu.com ([222.73.24.84]:37744 "EHLO song.cn.fujitsu.com"
+        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+        id S932763AbcIVCSZ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 21 Sep 2016 22:18:25 -0400
+From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Subject: [PATCH v2] generic: check whether we can truncate heavily reflinked file
+Date: Thu, 22 Sep 2016 10:13:08 +0800
+Message-Id: <20160922021308.4594-1-wangxg.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <4b37d061-43b5-74f6-b544-0f97693270c5@sandeen.net>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 21, 2016 at 05:07:15PM -0500, Eric Sandeen wrote:
-> On 9/21/16 4:37 PM, Dave Chinner wrote:
-> > On Wed, Sep 21, 2016 at 07:00:20PM +0800, Zorro Lang wrote:
-> > As I said above, xfs_copy on v5 filesystems do not require the
-> > "-d" option if xfs_admin can change the UUID on v5 filesystems.
-> > i.e. if this works:
-> > 
-> > # xfs_admin -U generate /dev/pmem1
-> > Clearing log and setting UUID
-> > writing all SBs
-> > new UUID = b4e22c8b-1bfb-4307-a3f2-4f55b5c9d61d
-> > # echo $?
-> > 0
-> > #
-> 
-> "works," meaning "doesn't corrupt" I guess, right?
+In btrfs, there is a bug about btrfs' truncate codes, it'll leak
+some fs space as the truncate operation proceeds. If this truncate
+operation is very large, later metadata request in this truncate
+operation may fail for enospc error. I also have sent a kernel
+patch fot btrfs to fix this issue.
 
-I meant "works" as in "fully supported". The requirement for "-d"
-with xfs_copy was present in the first release that supported CRCs
-(i.e. 3.2.0). That was added in commit a872b62 ("xfs_copy: band-aids
-for CRC filesystems") for in 3.2.0-rc1.
+Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+---
+ tests/generic/379     | 86 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/379.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 89 insertions(+)
+ create mode 100755 tests/generic/379
+ create mode 100644 tests/generic/379.out
 
-> 3.2.2 actually
-> allowed it to proceed, but corrupted the filesystem.
-
-Sure, it had bugs. Which have since been fixed. :P
-
-> Then later it,
-> too, was restricted on v5 filesystems, and later those restrictions
-> were lifted.
-
-It was restricted from the first release, which is why I suggested
-just testing whether the UUID can be changed, because that covers
-all xfsprogs releases supporting CRCs up to the point where "-d" is
-no longer necessary...
-
-> Honestly, (and Dave helped push me in this direction as well), I think
-> the addition of "-d" should just be removed; we now have a binary that
-> /works/ and there's no reason to avoid running broken binaries - the
-> whole point of testing is to find out whether what you're testing works,
-> or if it's broken.  Skipping tests because they might fail leaves you with
-> missing information about the environment you're testing.
-
-Yes, though my point was wider than that, and about _requires rules
-in general - they are simply checks for infrastructure an support
-being present on the system the test is being run on. They do not,
-and should not, try to determine if the functionality works or
-whether the version being used has a specific bug in it or not -
-the tests themselves will tell us that when they fail.
-
-A reminder to people running xfstests in QE environments for older
-distros: if there are tests that are known to fail because of a lack
-of support or known, WONTFIX bugs, you are supposed to avoid running
-them via the use of custom expunge files, not _requires rules.  Keep
-distro release specific expunge files to list what tests should not
-be run (you can add comments to those files to document the reasons)
-in your QE configuration management environment and deploy them
-appropriately to your test targets....
-
-Cheers,
-
-Dave.
+diff --git a/tests/generic/379 b/tests/generic/379
+new file mode 100755
+index 0000000..3d2918a
+--- /dev/null
++++ b/tests/generic/379
+@@ -0,0 +1,86 @@
++#! /bin/bash
++# FS QA Test 379
++#
++# Create a heavily reflinked file, then check whether we can truncate
++# it correctly.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_scratch_reflink
++
++_scratch_mkfs_sized $((32 * 1024 * 1024)) >> $seqres.full 2>&1
++_scratch_mount
++
++testfile=$SCRATCH_MNT/testfile
++dummyfile1=$SCRATCH_MNT/dummyfile1
++dummyfile2=$SCRATCH_MNT/dummyfile2
++blocksize=$((128 * 1024))
++
++# create two dummy files, which is used to occupy some fs space first.
++_pwrite_byte 0xcdcdcdcd 0 $((8 * 1024 * 1024)) $dummyfile1 > /dev/null
++_pwrite_byte 0xcdcdcdcd 0 $((1 * 1024 * 1024)) $dummyfile2 > /dev/null
++_pwrite_byte 0xcdcdcdcd 0 $blocksize  $testfile > /dev/null
++
++echo "Silence is golden"
++# try to do reflink unless we get enospc error.
++i=1
++while true; do
++	_reflink_range $testfile 0 $testfile $(($i * $blocksize)) $blocksize \
++		2>&1 | grep -q "No space left on device"
++	if [ $? -eq 0 ]; then
++		break
++	fi
++	i=$((i + 1))
++done
++
++# fs is almost full now and fs internal operations may need some free space,
++# for example, in btrfs, transaction will need to reserve space first, so here
++# free 1MB space.
++rm -rf $dummyfile2
++$XFS_IO_PROG -f -c "truncate 0" $testfile
++
++status=0
++exit
+diff --git a/tests/generic/379.out b/tests/generic/379.out
+new file mode 100644
+index 0000000..ec12148
+--- /dev/null
++++ b/tests/generic/379.out
+@@ -0,0 +1,2 @@
++QA output created by 379
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index a602b01..73fce91 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -381,3 +381,4 @@
+ 376 auto quick metadata
+ 377 attr auto quick metadata
+ 378 auto quick metadata
++379 auto clone
 -- 
-Dave Chinner
-david@fromorbit.com
+2.9.0
+
+
+
