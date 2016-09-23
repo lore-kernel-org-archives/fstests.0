@@ -1,60 +1,253 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46408 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:33256 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750726AbcIXLzu (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 24 Sep 2016 07:55:50 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 0A3D8C04B30A
-        for <fstests@vger.kernel.org>; Sat, 24 Sep 2016 11:55:50 +0000 (UTC)
-Received: from localhost (dhcp-12-196.nay.redhat.com [10.66.12.196])
-        by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u8OBtmoJ031744
-        for <fstests@vger.kernel.org>; Sat, 24 Sep 2016 07:55:49 -0400
-Date: Sat, 24 Sep 2016 19:55:48 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH] generic/317: use id to get user id
-Message-ID: <20160924115548.GC12847@dhcp12-143.nay.redhat.com>
-References: <1474649676-31602-1-git-send-email-eguan@redhat.com>
+        id S1753531AbcIWGAK (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 23 Sep 2016 02:00:10 -0400
+Date: Fri, 23 Sep 2016 14:00:06 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] btrfs: test free space tree mount options
+Message-ID: <20160923060006.GZ27776@eguan.usersys.redhat.com>
+References: <a39fb886ccb917969e34355367fcdd46920bb2b6.1474572744.git.osandov@fb.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1474649676-31602-1-git-send-email-eguan@redhat.com>
+In-Reply-To: <a39fb886ccb917969e34355367fcdd46920bb2b6.1474572744.git.osandov@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Omar Sandoval <osandov@osandov.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, kernel-team@fb.com
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Sep 24, 2016 at 12:54:36AM +0800, Eryu Guan wrote:
-> Greping username "fsgqa" in passwd file to get user id doesn't
-> always work, because the given username could match multiple
-> entries, e.g. when we have user "123456-fsgqa" (used by other tests)
-> in passwd file.
+On Thu, Sep 22, 2016 at 12:37:53PM -0700, Omar Sandoval wrote:
+> From: Omar Sandoval <osandov@fb.com>
 > 
-> Fix it by using "id -u $qa_user" to get the user id directly.
+> The behavior of different combinations of space_cache mount options
+> wasn't well defined, which led to a regression between my initial
+> patches adding the free space tree and the 4.5 release. Add a test to
+> exercise all of the meaningful permutations of clear_cache,
+> nospace_cache, and space_cache.
 > 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> This is a regression test for Linux kernel commit "Btrfs: fix mount -o
+> clear_cache,space_cache=v2".
+> 
+> Signed-off-by: Omar Sandoval <osandov@fb.com>
+
+Looks good to me, just one nitpick below.
+
 > ---
->  tests/generic/317 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> Sorry, resending to the right fstests list...
 > 
-> diff --git a/tests/generic/317 b/tests/generic/317
-> index 9d9499b..7e40b1f 100755
-> --- a/tests/generic/317
-> +++ b/tests/generic/317
-> @@ -61,7 +61,7 @@ _require_scratch
->  _require_user
->  _require_ugid_map
->  _require_userns
-> -qa_user_id=`grep $qa_user /etc/passwd |awk -F: '{print $3}'`
-> +qa_user_id=`id -u $qa_user`
+> The patch to fix this is coming out soon as part of my free space tree
+> fixes.
+> 
+>  tests/btrfs/131     | 150 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/131.out |  20 +++++++
+>  tests/btrfs/group   |   1 +
+>  3 files changed, 171 insertions(+)
+>  create mode 100755 tests/btrfs/131
+>  create mode 100644 tests/btrfs/131.out
+> 
+> diff --git a/tests/btrfs/131 b/tests/btrfs/131
+> new file mode 100755
+> index 0000000..cc75153
+> --- /dev/null
+> +++ b/tests/btrfs/131
+> @@ -0,0 +1,150 @@
+> +#! /bin/bash
+> +# FS QA Test 131
+> +#
+> +# Test free space tree mount options.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016 Facebook.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
+> +_require_btrfs inspect-internal
+> +
+> +_mkfs_v1() {
 
-Looks good to me.
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+We usually name local functions without the leading "_", it's used for
+common helpers. And placing "{" in a separate line is preferred for
+functions.
 
->  
->  _filter_output()
->  {
+I can fix them at commit time if there're no more comments from others.
+
+Thanks,
+Eryu
+
+> +	_scratch_mkfs >/dev/null 2>&1
+> +	# Future proof against btrfs-progs making space_cache=v2 filesystems by
+> +	# default.
+> +	_scratch_mount -o clear_cache,space_cache=v1
+> +	_scratch_unmount
+> +}
+> +
+> +_mkfs_v2() {
+> +	_scratch_mkfs >/dev/null 2>&1
+> +	_scratch_mount -o space_cache=v2
+> +	_scratch_unmount
+> +}
+> +
+> +_check_fst_compat() {
+> +	compat_ro="$($BTRFS_UTIL_PROG inspect-internal dump-super "$SCRATCH_DEV" | \
+> +		     sed -rn 's/^compat_ro_flags\s+(.*)$/\1/p')"
+> +	if ((compat_ro & 0x1)); then
+> +		echo "free space tree is enabled"
+> +	else
+> +		echo "free space tree is disabled"
+> +	fi
+> +}
+> +
+> +# Mount options might interfere.
+> +export MOUNT_OPTIONS=""
+> +
+> +# When the free space tree is not enabled:
+> +# -o space_cache=v1: keep using the old free space cache
+> +# -o space_cache=v2: enable the free space tree
+> +# -o clear_cache,space_cache=v2: clear the free space cache and enable the free space tree
+> +# We don't check the no options case or plain space_cache as that will change
+> +# in the future to turn on space_cache=v2.
+> +
+> +_mkfs_v1
+> +echo "Using free space cache"
+> +_scratch_mount -o space_cache=v1
+> +_check_fst_compat
+> +_scratch_unmount
+> +
+> +_mkfs_v1
+> +echo "Enabling free space tree"
+> +_scratch_mount -o space_cache=v2
+> +_check_fst_compat
+> +_scratch_unmount
+> +
+> +_mkfs_v1
+> +echo "Disabling free space cache and enabling free space tree"
+> +_scratch_mount -o clear_cache,space_cache=v2
+> +_check_fst_compat
+> +_scratch_unmount
+> +
+> +# When the free space tree is enabled:
+> +# -o nospace_cache, -o space_cache=v1: error
+> +# no options, -o space_cache=v2: keep using the free space tree
+> +# -o clear_cache, -o clear_cache,space_cache=v2: clear and recreate the free space tree
+> +# -o clear_cache,nospace_cache: clear the free space tree
+> +# -o clear_cache,space_cache=v1: clear the free space tree, enable the free space cache
+> +
+> +_mkfs_v2
+> +echo "Trying to mount without free space tree"
+> +_scratch_mount -o nospace_cache >/dev/null 2>&1 || echo "mount failed"
+> +_scratch_mount -o space_cache=v1 >/dev/null 2>&1 || echo "mount failed"
+> +
+> +_mkfs_v2
+> +echo "Mounting existing free space tree"
+> +_scratch_mount
+> +_check_fst_compat
+> +_scratch_unmount
+> +_scratch_mount -o space_cache=v2
+> +_check_fst_compat
+> +_scratch_unmount
+> +
+> +_mkfs_v2
+> +echo "Recreating free space tree"
+> +_scratch_mount -o clear_cache,space_cache=v2
+> +_check_fst_compat
+> +_scratch_unmount
+> +_mkfs_v2
+> +_scratch_mount -o clear_cache
+> +_check_fst_compat
+> +_scratch_unmount
+> +
+> +_mkfs_v2
+> +echo "Disabling free space tree"
+> +_scratch_mount -o clear_cache,nospace_cache
+> +_check_fst_compat
+> +_scratch_unmount
+> +
+> +_mkfs_v2
+> +echo "Reverting to free space cache"
+> +_scratch_mount -o clear_cache,space_cache=v1
+> +_check_fst_compat
+> +_scratch_unmount
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/131.out b/tests/btrfs/131.out
+> new file mode 100644
+> index 0000000..aaa4a70
+> --- /dev/null
+> +++ b/tests/btrfs/131.out
+> @@ -0,0 +1,20 @@
+> +QA output created by 131
+> +Using free space cache
+> +free space tree is disabled
+> +Enabling free space tree
+> +free space tree is enabled
+> +Disabling free space cache and enabling free space tree
+> +free space tree is enabled
+> +Trying to mount without free space tree
+> +mount failed
+> +mount failed
+> +Mounting existing free space tree
+> +free space tree is enabled
+> +free space tree is enabled
+> +Recreating free space tree
+> +free space tree is enabled
+> +free space tree is enabled
+> +Disabling free space tree
+> +free space tree is disabled
+> +Reverting to free space cache
+> +free space tree is disabled
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index f3a7a4f..c090604 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -133,3 +133,4 @@
+>  128 auto quick send
+>  129 auto quick send
+>  130 auto clone send
+> +131 auto quick
 > -- 
-> 2.7.4
+> 2.10.0
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
