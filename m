@@ -1,55 +1,47 @@
-Received: from sandeen.net ([63.231.237.45]:47246 "EHLO sandeen.net"
+Received: from mx1.redhat.com ([209.132.183.28]:41068 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1757328AbcIWMUm (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 23 Sep 2016 08:20:42 -0400
-Subject: Re: [PATCH] fstests: make some xfs project quota tests generic
-References: <ffeed0c4-7e77-a7a0-1426-0890bf38a52f@redhat.com>
- <20160923042500.GV27776@eguan.usersys.redhat.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <a834fc9c-c406-022f-8304-2ed54c65bc9b@sandeen.net>
-Date: Fri, 23 Sep 2016 07:20:40 -0500
-MIME-Version: 1.0
-In-Reply-To: <20160923042500.GV27776@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+        id S1034537AbcIZMqo (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 26 Sep 2016 08:46:44 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 32C3AA14FA
+        for <fstests@vger.kernel.org>; Mon, 26 Sep 2016 12:46:44 +0000 (UTC)
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] generic/349,350,351: remove from quick group
+Date: Mon, 26 Sep 2016 20:46:32 +0800
+Message-Id: <1474893992-32630-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>, Eric Sandeen <sandeen@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 9/22/16 11:25 PM, Eryu Guan wrote:
->> @@ -210,16 +226,23 @@ _qmount_option()
->> >  		-e 's/gquota/QUOTA/g'      \
->> >  		-e 's/grpquota/QUOTA/g'    \
->> >  		-e 's/pquota/QUOTA/g'      \
->> > -		-e 's/prjquota/QUOTA/g'      \
->> > +		-e 's/prjquota/QUOTA/g'    \
->> >  		-e 's/quota/QUOTA/g'       \
->> >  		-e 's/uqnoenforce/QUOTA/g' \
->> >  		-e 's/gqnoenforce/QUOTA/g' \
->> >  		-e 's/pqnoenforce/QUOTA/g' \
->> >  		-e 's/qnoenforce/QUOTA/g'  \
->> > -		-e "s/QUOTA/$1/g"`
->> > +		-e "s/QUOTA/$OPTS/g"`
->> >  
->> > +	# ext4 doesn't _do_ "-o pquota/prjquota" because reasons
->> > +	# Switch it to "quota" to enable mkfs-time pquota
->> > +	if [ "$FSTYP" == "ext4" ]; then
->> > +		OPTS=`echo $OPTS \
->> > +		| sed	-e 's/pquota/quota/g'	\
->> > +			-e 's/prjquota/quota/g'`
->> > +	fi
-> This replaces "grpquota" to "grquota" and mount failed because of
-> unknown mount option "grquota". The following change works for me:
-> 
-> -             | sed   -e 's/pquota/quota/g'   \
-> +             | sed   -e 's/\bpquota/quota/g' \
-> 
-> If you can give me an ack (or another fix), I can fold it into the
-> original patch.
+These tests are meant to test block devices, so they're not in auto
+group. And quick group is a subset of auto group, so remove quick as
+well.
 
-Eek .. yes, feel free to change that (and the other, unless you want
-to make it a separate commit) - sorry, not sure how I missed that.
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+ tests/generic/group | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-Thanks,
--Eric
+diff --git a/tests/generic/group b/tests/generic/group
+index 879b1ef..dc8e70d 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -352,9 +352,9 @@
+ 346 auto quick rw
+ 347 auto quick rw thin
+ 348 auto quick metadata
+-349 blockdev quick rw zero
+-350 blockdev quick rw punch
+-351 blockdev quick rw punch collapse insert zero
++349 blockdev rw zero
++350 blockdev rw punch
++351 blockdev rw punch collapse insert zero
+ 352 auto clone
+ 353 auto quick clone
+ 354 auto
+-- 
+2.7.4
+
