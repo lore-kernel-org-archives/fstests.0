@@ -1,51 +1,34 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:47804 "EHLO
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:13458 "EHLO
         ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1753281AbcI0XoV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 27 Sep 2016 19:44:21 -0400
-Date: Wed, 28 Sep 2016 09:44:15 +1000
+        by vger.kernel.org with ESMTP id S1756465AbcI0XzH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 27 Sep 2016 19:55:07 -0400
+Date: Wed, 28 Sep 2016 09:55:03 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v3] tests/generic: test xfs log recovery metadata LSN
- ordering
-Message-ID: <20160927234415.GB9806@dastard>
-References: <1471265786-24970-1-git-send-email-bfoster@redhat.com>
- <20160927131249.GA38187@bfoster.bfoster>
- <20160927133730.GP27776@eguan.usersys.redhat.com>
+Subject: Re: [PATCH] xfs/032: avoid making a 512b block size V5 xfs
+Message-ID: <20160927235503.GC9806@dastard>
+References: <1474989815-8202-1-git-send-email-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160927133730.GP27776@eguan.usersys.redhat.com>
+In-Reply-To: <1474989815-8202-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Brian Foster <bfoster@redhat.com>, fstests@vger.kernel.org, xfs@oss.sgi.com, linux-xfs@vger.kernel.org
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 27, 2016 at 09:37:30PM +0800, Eryu Guan wrote:
-> On Tue, Sep 27, 2016 at 09:12:49AM -0400, Brian Foster wrote:
-> > On Mon, Aug 15, 2016 at 08:56:26AM -0400, Brian Foster wrote:
-> > > XFS had a bug that lead to a possible out-of-order log recovery
-> > > situation (e.g., replay a stale modification from the log over more
-> > > recent metadata in destination buffer). This resulted in false
-> > > corruption reports during log recovery and thus mount failure.
-> > > 
-> > > This condition is caused by system crash or filesystem shutdown shortly
-> > > after a successful log recovery. Add a test to run a combined workload,
-> > > fs shutdown and log recovery loop known to reproduce the problem on
-> > > affected kernels.
-> > > 
-> > > Signed-off-by: Brian Foster <bfoster@redhat.com>
-> > > ---
-> > > 
-> > 
-> > ping
+On Tue, Sep 27, 2016 at 11:23:35PM +0800, Zorro Lang wrote:
+> If test on a 512b sector size device, xfs/032 will try to do:
 > 
-> It's pending in my stage tree, because it crashes current upstream
-> kernel, and Dave wants the fixes go upstream first, so the test won't
-> crash the test machine and interrupt the test.
+>   mkfs.xfs -s size=512 -b size=512 ...
 > 
-> I noticed the fixes are in xfs tree for-next branch, I think we're ready
-> to include this test in next fstests update.
+> The 512b block size is not acceptable for V5 XFS. So I change the
+> minimum block size to 1024 if (crc = 1 && sector size < 1024).
 
-Yup, it's good to go.
+Why so complex?
+
+The output of the test is empty, so if mkfs.xfs fails with the given
+configuration then just skip the loop iteration and run the next
+size.
 
 Cheers,
 
