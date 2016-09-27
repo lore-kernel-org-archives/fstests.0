@@ -1,69 +1,55 @@
-Received: from mx1.redhat.com ([209.132.183.28]:45666 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933854AbcI0PXj (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 27 Sep 2016 11:23:39 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 8344785547
-        for <fstests@vger.kernel.org>; Tue, 27 Sep 2016 15:23:38 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH] xfs/032: avoid making a 512b block size V5 xfs
-Date: Tue, 27 Sep 2016 23:23:35 +0800
-Message-Id: <1474989815-8202-1-git-send-email-zlang@redhat.com>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:47804 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1753281AbcI0XoV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 27 Sep 2016 19:44:21 -0400
+Date: Wed, 28 Sep 2016 09:44:15 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH v3] tests/generic: test xfs log recovery metadata LSN
+ ordering
+Message-ID: <20160927234415.GB9806@dastard>
+References: <1471265786-24970-1-git-send-email-bfoster@redhat.com>
+ <20160927131249.GA38187@bfoster.bfoster>
+ <20160927133730.GP27776@eguan.usersys.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160927133730.GP27776@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Zorro Lang <zlang@redhat.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Brian Foster <bfoster@redhat.com>, fstests@vger.kernel.org, xfs@oss.sgi.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-If test on a 512b sector size device, xfs/032 will try to do:
+On Tue, Sep 27, 2016 at 09:37:30PM +0800, Eryu Guan wrote:
+> On Tue, Sep 27, 2016 at 09:12:49AM -0400, Brian Foster wrote:
+> > On Mon, Aug 15, 2016 at 08:56:26AM -0400, Brian Foster wrote:
+> > > XFS had a bug that lead to a possible out-of-order log recovery
+> > > situation (e.g., replay a stale modification from the log over more
+> > > recent metadata in destination buffer). This resulted in false
+> > > corruption reports during log recovery and thus mount failure.
+> > > 
+> > > This condition is caused by system crash or filesystem shutdown shortly
+> > > after a successful log recovery. Add a test to run a combined workload,
+> > > fs shutdown and log recovery loop known to reproduce the problem on
+> > > affected kernels.
+> > > 
+> > > Signed-off-by: Brian Foster <bfoster@redhat.com>
+> > > ---
+> > > 
+> > 
+> > ping
+> 
+> It's pending in my stage tree, because it crashes current upstream
+> kernel, and Dave wants the fixes go upstream first, so the test won't
+> crash the test machine and interrupt the test.
+> 
+> I noticed the fixes are in xfs tree for-next branch, I think we're ready
+> to include this test in next fstests update.
 
-  mkfs.xfs -s size=512 -b size=512 ...
+Yup, it's good to go.
 
-The 512b block size is not acceptable for V5 XFS. So I change the
-minimum block size to 1024 if (crc = 1 && sector size < 1024).
+Cheers,
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
- tests/xfs/032 | 14 +++++++++++++-
- 1 file changed, 13 insertions(+), 1 deletion(-)
-
-diff --git a/tests/xfs/032 b/tests/xfs/032
-index 6216379..487dbd9 100755
---- a/tests/xfs/032
-+++ b/tests/xfs/032
-@@ -34,6 +34,7 @@ trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
- 
- # get standard environment, filters and checks
- . ./common/rc
-+. ./common/filter
- 
- # real QA test starts here
- _supported_fs xfs
-@@ -50,11 +51,22 @@ rm -f $seqres.full
- SECTORSIZE=`blockdev --getss $SCRATCH_DEV`
- PAGESIZE=`src/feature -s`
- IMGFILE=$TEST_DIR/${seq}_copy.img
-+MIN_BLKSIZE=$SECTORSIZE
-+
-+if [ $MIN_BLKSIZE -lt 1024 ]; then
-+	_scratch_mkfs_sized $((512 * 1024 * 1024)) | _filter_mkfs \
-+						2>$tmp.mkfs >/dev/null
-+	. $tmp.mkfs
-+	if [ $_fs_has_crcs -eq 1 ]; then
-+		MIN_BLKSIZE=1024
-+	fi
-+	rm -f $tmp.mkfs
-+fi
- 
- echo "Silence is golden."
- 
- while [ $SECTORSIZE -le $PAGESIZE ]; do
--	BLOCKSIZE=$SECTORSIZE;
-+	BLOCKSIZE=$MIN_BLKSIZE;
- 
- 	while [ $BLOCKSIZE -le $PAGESIZE ]; do
- 
+Dave.
 -- 
-2.7.4
-
+Dave Chinner
+david@fromorbit.com
