@@ -1,121 +1,163 @@
-Received: from mx1.redhat.com ([209.132.183.28]:51796 "EHLO mx1.redhat.com"
+Received: from mx2.suse.de ([195.135.220.15]:52001 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932274AbcI0OqP (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 27 Sep 2016 10:46:15 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id BDE643D972
-        for <fstests@vger.kernel.org>; Tue, 27 Sep 2016 14:46:14 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v2] fstests: test xfs_copy V5 XFS without -d option
-Date: Tue, 27 Sep 2016 22:46:10 +0800
-Message-Id: <1474987570-6158-1-git-send-email-zlang@redhat.com>
+        id S933362AbcI0Osk (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 27 Sep 2016 10:48:40 -0400
+Subject: Re: [PATCH] check: check SCRATCH_MNT before calling _scratch_mkfs
+References: <81e70e43-b337-acca-1c29-69db4f3a3cfa@jeffm.io>
+ <20160926044443.GA2532@dastard>
+ <20fd4981-a27f-ebba-705f-f479e79b6143@suse.com>
+ <20160926221058.GB2532@dastard>
+From: Jeff Mahoney <jeffm@suse.com>
+Message-ID: <aa470df3-4768-0dc7-644c-2039376b4827@suse.com>
+Date: Tue, 27 Sep 2016 10:48:34 -0400
+MIME-Version: 1.0
+In-Reply-To: <20160926221058.GB2532@dastard>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="bvSJMQ9c4t8nFoeba8bFMwDX66KI39uJN"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Zorro Lang <zlang@redhat.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Before xfsprogs commit a872b62 (xfs_copy: band-aids for CRC
-filesystems), xfs_copy requires the "-d" option to copy a V5 XFS,
-because it can't rewrite the UUID of V5 XFS properly.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--bvSJMQ9c4t8nFoeba8bFMwDX66KI39uJN
+Content-Type: multipart/mixed; boundary="Wj2GSki9tsl2lPSplTv7795knGW3rXs20";
+ protected-headers="v1"
+From: Jeff Mahoney <jeffm@suse.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
+Message-ID: <aa470df3-4768-0dc7-644c-2039376b4827@suse.com>
+Subject: Re: [PATCH] check: check SCRATCH_MNT before calling _scratch_mkfs
+References: <81e70e43-b337-acca-1c29-69db4f3a3cfa@jeffm.io>
+ <20160926044443.GA2532@dastard>
+ <20fd4981-a27f-ebba-705f-f479e79b6143@suse.com>
+ <20160926221058.GB2532@dastard>
+In-Reply-To: <20160926221058.GB2532@dastard>
 
-Now xfs_copy already full support to copy a V5 XFS. But for above
-old problem, xfstests use below patch to make sure xfs_copy always
-use "-d" option to copy a V5 XFS:
+--Wj2GSki9tsl2lPSplTv7795knGW3rXs20
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: quoted-printable
 
-  8346e53 common: append -d option to XFS_COPY_PROG when testing v5 xfs
+On 9/26/16 6:10 PM, Dave Chinner wrote:
+> On Mon, Sep 26, 2016 at 09:13:37AM -0400, Jeff Mahoney wrote:
+>> On 9/26/16 12:44 AM, Dave Chinner wrote:
+>>> On Sun, Sep 25, 2016 at 09:44:13PM -0400, Jeff Mahoney wrote:
+>>>> On NFS or Overlayfs, "mkfs" turns into rm -rf $SCRATCH_MNT/*
+>>>>
+>>>> There is no warning/error in check if SCRATCH_MNT is unset.
+>>>>
+>>>> Also add the checks to _scratch_cleanup_files.
+>>>>
+>>>> Signed-off-by: Jeff Mahoney <jeffm@suse.com>
+>>>> ---
+>>>>  check     | 12 ++++++++++++
+>>>>  common/rc |  8 ++++++++
+>>>>  2 files changed, 20 insertions(+)
+>>>>
+>>>> diff --git a/check b/check
+>>>> index 69341d8..b22d2df 100755
+>>>> --- a/check
+>>>> +++ b/check
+>>>> @@ -512,6 +512,18 @@ for section in $HOST_OPTIONS_SECTIONS; do
+>>>>  	needwrap=3Dtrue
+>>>> =20
+>>>>  	if [ ! -z "$SCRATCH_DEV" ]; then
+>>>> +	   if [ -z "$SCRATCH_MNT" ]
+>>>> +	    then
+>>>> +		echo "\$SCRATCH_MNT is unset"
+>>>> +		status=3D1
+>>>> +		exit
+>>>> +	    fi
+>>>> +	   if [ ! -d "$SCRATCH_MNT" ]
+>>>> +	    then
+>>>> +		echo "\$SCRATCH_MNT is not a dir"
+>>>> +		status=3D1
+>>>> +		exit
+>>>> +	    fi
+>>>
+>>> That is supposed to be checked in get_next_config() at the start of
+>>> the loop. It runs these checks on the scratch config:
+>>>
+>>> 	_check_device SCRATCH_DEV optional $SCRATCH_DEV
+>>> 	if [ ! -z "$SCRATCH_MNT" -a ! -d "$SCRATCH_MNT" ]; then
+>>> 		echo "common/config: Error: \$SCRATCH_MNT ($SCRATCH_MNT) is not a d=
+irectory"
+>>> 		exit 1
+>>> 	fi
+>>
+>> But that only presents an error if SCRATCH_MNT isn't empty.  If it is,=
 
-That cause xfstests miss the coverage of copying a V5 XFS without
-"-d". For test this feature I did below things:
+>> we skip happily past.
+>>
+>>> If SCRATCH_DEV/SCRATCH_MNT is not set - which is a valid config -
+>>
+>> SCRATCH_DEV without SCRATCH_MNT isn't a valid config, though.  That
+>> ./check assumes that SCRATCH_DEV being valid means SCRATCH_MNT is too =
+is
+>> the source of the problem.  The test in get_next_config would prevent
+>> the problem if we replaced the ! -z "$SCRATCH_MNT" with ! -z "$SCRATCH=
+_DEV"
+>=20
+> Because SCRATCH_DEV is optional, the check for SCRATCH_MNT in
+> get_next_config() needs to take that into account. i.e. if
+> SCRATCH_DEV is set, then SCRATCH_MNT must be set, too.
 
-  1. Change init_rc(), add "-d" to $XFS_COPY_PROG if xfs_copy can't
-     copy a V5 XFS properly.
-  2. xfs/073 test V4 xfs forcibly by specify "-m crc=0" in case. I
-     think it's useless now, so remove it.
-  3. remove the xfs_copy "-d" option from xfs/032
+Yep.  I'll post an updated patch that does that.
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
+>>> the all that is supposed to happen is that tests which call
+>>> _require_scratch() should not run. This, in turn should prevent
+>>
+>> ... but _require_scratch doesn't run in ./check.  The individual test
+>> cases are safe because _require_scratch runs there and does check.
+>> ./check just checks to see if $SCRATCH_DEV is set and then calls
+>> _scratch_mkfs without checking $SCRATCH_MNT.  Since _scratch_mkfs
+>> doesn't check either, boom.
+>=20
+> Yes, I know. That's why it should be checked in get_next_config() -
+> it is supposed to catch any config errors before they get used
+> anywhere.
+>=20
+> It makes no sense to sprinkle random "is the config valid" checks
+> throughout the code. We should validate the config once - and once
+> only - before we run anything. Then we can assume (correctly) the
+> config is valid everywhere else.
 
-Hi,
+In general, I agree.  But when the end result for a missing value is rm
+-rf /*, I don't think it's overkill.  A mkfs with a missing value isn't
+going to accidentally mkfs everything.
 
-V2 did below things:
-1. remove require_xfs_copy() function
-2. change the code logic of init_rc function about how to add "-d" to
-   $XFS_COPY_PROG
-3. remove xfs_copy "-d" option of xfs/032
+-Jeff
 
-Thanks,
-Zorro
+--=20
+Jeff Mahoney
+SUSE Labs
 
- common/rc     | 12 +++++++++---
- tests/xfs/032 |  2 +-
- tests/xfs/073 |  8 ++------
- 3 files changed, 12 insertions(+), 10 deletions(-)
 
-diff --git a/common/rc b/common/rc
-index 13afc6a..fce9ce6 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3790,9 +3790,15 @@ init_rc()
- 	xfs_io -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \
- 	export XFS_IO_PROG="$XFS_IO_PROG -F"
- 
--	# xfs_copy doesn't work on v5 xfs yet without -d option
--	if [ "$FSTYP" == "xfs" ] && [[ $MKFS_OPTIONS =~ crc=1 ]]; then
--		export XFS_COPY_PROG="$XFS_COPY_PROG -d"
-+
-+	if [ "$FSTYP" == "xfs" ]; then
-+		touch $tmp.img
-+		$MKFS_XFS_PROG $MKFS_OPTIONS -d file,name=$tmp.img,size=512m \
-+							>/dev/null 2>/dev/null
-+		$XFS_DB_PROG -x -c "uuid generate" $tmp.img \
-+			| grep -q "invalid UUID\|supported on V5 fs" \
-+			&& export XFS_COPY_PROG="$XFS_COPY_PROG -d"
-+		rm -f $tmp.img
- 	fi
- }
- 
-diff --git a/tests/xfs/032 b/tests/xfs/032
-index 6216379..0e41db8 100755
---- a/tests/xfs/032
-+++ b/tests/xfs/032
-@@ -65,7 +65,7 @@ while [ $SECTORSIZE -le $PAGESIZE ]; do
- 		$FSSTRESS_PROG -n 100 -d $SCRATCH_MNT >> $seqres.full 2>&1
- 		_scratch_unmount
- 
--		$XFS_COPY_PROG -d $SCRATCH_DEV $IMGFILE >> $seqres.full 2>&1 || \
-+		$XFS_COPY_PROG $SCRATCH_DEV $IMGFILE >> $seqres.full 2>&1 || \
- 			_fail "Copy failed for Sector size $SECTORSIZE Block size $BLOCKSIZE"
- 		# Must use "-n" to get exit code; without it xfs_repair always returns 0
- 		$XFS_REPAIR_PROG -n -f $IMGFILE >> $seqres.full 2>&1 || \
-diff --git a/tests/xfs/073 b/tests/xfs/073
-index 9e29223..7228dd9 100755
---- a/tests/xfs/073
-+++ b/tests/xfs/073
-@@ -138,7 +138,7 @@ _require_loop
- 
- rm -f $seqres.full
- 
--_scratch_mkfs_xfs -m crc=0 -dsize=41m,agcount=2 >>$seqres.full 2>&1
-+_scratch_mkfs_xfs -dsize=41m,agcount=2 >>$seqres.full 2>&1
- _scratch_mount 2>/dev/null || _fail "initial scratch mount failed"
- 
- echo
-@@ -158,11 +158,7 @@ _verify_copy $imgs.image $SCRATCH_DEV $SCRATCH_MNT
- 
- echo 
- echo === copying scratch device to single target, large ro device
--mkfs_crc_opts="-m crc=0"
--if [ -n "$XFS_MKFS_HAS_NO_META_SUPPORT" ]; then
--	mkfs_crc_opts=""
--fi
--${MKFS_XFS_PROG} $mkfs_crc_opts -dfile,name=$imgs.source,size=100g \
-+${MKFS_XFS_PROG} -dfile,name=$imgs.source,size=100g \
- 	| _filter_mkfs 2>/dev/null
- rmdir $imgs.source_dir 2>/dev/null
- mkdir $imgs.source_dir
--- 
-2.7.4
+--Wj2GSki9tsl2lPSplTv7795knGW3rXs20--
 
+--bvSJMQ9c4t8nFoeba8bFMwDX66KI39uJN
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG/MacGPG2 v2.0.19 (Darwin)
+Comment: GPGTools - http://gpgtools.org
+
+iQIcBAEBAgAGBQJX6obCAAoJEB57S2MheeWy6ngP/07OzkOH4wyJAEXiXbA6eLR7
+/KhvOgUOsKBhBEcNl9/cRn7BlSeVxEDgpwW3LQKv26rxJEYAACqgsLrSs3ESibXp
+MwvKociyjEZpyTbnl4JD8FEwfCrMQmQIRgceFRVxunfHwP6bd+jd4QnYnw+JtYnb
+OuudelfX6oVtn+dLkycVWMTW9jLS7/e2nM9LBBeYYyYoVPR+sJoS3aoKH7fJIaub
+GnXvjyzNNeAzMF9iVzhDFHM8F3Dk72ngykhF7x+nQrjDTP9indiBy8CLXv2LS/hw
+tt0NZGQpDr2nt2DlOTLxaswAYJjM2rkG/lCaFOV6IWBStMtA51o8n8nIccwkTL4v
+pYJst7dAtNHWL2Z0xscf+rURPJ6hRY77GZhpWru2F+t2MwmJExBjQ7DJIzQR7eh/
+bBav9l4W8w8mm1aaemADkj4BNiHrP45XC/6Rd3l+ZABH5riuQvNrCtDb7NcucV9s
+X6mm7QXm39ze0kCjsxZoyn62xVU6yU+4uRMVJGpR6BTxZMDB18yPjv/LYiAG33PZ
+ig8B/sX5Wxm//fqWYYNzu8/SK+TZ5Iqlgf91bPuJfbxdToM9HZmgxiGl/1xSC7E+
+iNJjquQJaq+NzeqKUMmN8VluYzCqwoVjTq3jvc+KwsvBPQpripIwgtQ4MHM2+hg+
+MHmAmKVlJWCxdZz0NpJC
+=Q4tP
+-----END PGP SIGNATURE-----
+
+--bvSJMQ9c4t8nFoeba8bFMwDX66KI39uJN--
