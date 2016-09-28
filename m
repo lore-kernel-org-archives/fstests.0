@@ -1,44 +1,57 @@
-Received: from imap.thunk.org ([74.207.234.97]:42790 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:42796 "EHLO imap.thunk.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752844AbcI2BRp (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 28 Sep 2016 21:17:45 -0400
-Date: Wed, 28 Sep 2016 20:01:30 -0400
+        id S1754637AbcI2BRt (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 28 Sep 2016 21:17:49 -0400
+Date: Wed, 28 Sep 2016 19:57:13 -0400
 From: "Theodore Ts'o" <tytso@mit.edu>
 Subject: Re: [PATCH] common: add support for the "local" file system type
-Message-ID: <20160929000130.ixuytsr5euxef6vk@thunk.org>
+Message-ID: <20160928235713.tt76og3lxuvozrpi@thunk.org>
 References: <20160923200526.29674-1-tytso@mit.edu>
- <20160926132503.GJ27776@eguan.usersys.redhat.com>
- <20160926151431.uhtny5tx3b436j4i@thunk.org>
- <20160927095529.GO27776@eguan.usersys.redhat.com>
+ <20160926221814.GC2532@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20160927095529.GO27776@eguan.usersys.redhat.com>
+In-Reply-To: <20160926221814.GC2532@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
+To: Dave Chinner <david@fromorbit.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 27, 2016 at 05:55:29PM +0800, Eryu Guan wrote:
+On Tue, Sep 27, 2016 at 08:18:14AM +1000, Dave Chinner wrote:
 > 
-> It has nothing to do with mount & umount, it's about adding a new
-> "-local" option to "check", like "-nfs" and "-overlay". And do
-> TEST_DEV/TEST_DIR and SCRATCH_DEV/SCRATCH_MNT validations in
-> _require_test and _require_scratch_nocheck, as how we do the check for
-> NFS and overlayfs. So we don't have to work around the validation by
-> specifying TEST_DEV/SCRATCH_DEV in a non-block device format (e.g.
-> local:/test to mimic an NFS export).
+> Ignoring the code changes for the moment - what's the reason/use
+> case for running /kernel/ test suites inside a user container with
+> such restricted access to filesystems and devices? Especially
+> considering test failures can take the kernel down, which will kill
+> /everything/ on the machine, not just the container.
+> 
+> This doesn't make a whole lot of sense to me - who is going to use
+> this and what extra test coverage does it bring to the table
+> compared to just running inside a guest VM with full privileges?
 
-I'd have to dig and check, but as I recall, there were assumptions
-that foo:/bar means "no block device" scattered around, and it's why
-we have to use a similar naming scheme for tmpfs.  Is that really a
-problem?  I had thought it was a standard convention for xfstests.
+So I'm doing this work on behalf of a team who is working on an
+to-be-announced project, so the details aren't mine to give.  However,
+I can say that obviously, if they could do that they would.
 
-If we want to avoid forcing testers to use a foo:/bar naming scheme
-for TEST_DEV and SCRATCH_DEV, instead of a new command-line variable,
-I'd much rather have a function in rc/common that could be keyed off
-the file system type.  You have to specify whether you are using tmpfs
-or nfs or local in FSTYP anyway, so why not just use that?
+Let me give an other example where this might be useful.  Suppose you
+are using the Windows Subsystem for Linux which emulates system calls
+for Linux, so you can run most Linux binaries, but for which certain
+system calls simply aren't implemented, either for security reasons or
+because they just don't make sense (e.g., reboot, kexec, mount,
+unmount, etc.).  To the extent that such a subsystem purports to offer
+Linux compatibility, and has a Linux VFS emulation, it would be useful
+to have a "local" file system type which doesn't try to do any mounts
+and unmounts, but which could otherwise stress test the file system
+layer and find bugs in the system call emulation for file systems,
+that would be a good and useful thing to do.
+
+As I recall, AIX also had a Linux system emulator (the better to run
+the huge numbers of commercial third-party Linux binaries :-), and if
+I recall correctly, it didn't support mount and unmount either.
+NetBSD also has a Linux emulation layer (and in the past, an Irix
+emulation layer), and again, it's not clear that it would extend to
+things like mount/unmount --- nor would it really need to in order to
+be useful for most of their desired use cases.
 
 Cheers,
 
