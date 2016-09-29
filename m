@@ -1,44 +1,61 @@
-Received: from mx2.suse.de ([195.135.220.15]:33632 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932600AbcI2O3s (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 29 Sep 2016 10:29:48 -0400
-Date: Thu, 29 Sep 2016 16:29:45 +0200
-From: David Sterba <dsterba@suse.cz>
-Subject: Re: [PATCH v2 0/6] Btrfs: free space tree and sanity test fixes
-Message-ID: <20160929142945.GC5531@suse.cz>
-Reply-To: dsterba@suse.cz
-References: <cover.1474580472.git.osandov@fb.com>
- <20160925075524.GA3870@yogzotot>
- <20160926175000.GF16983@twin.jikos.cz>
- <20160929122148.GA22109@yogzotot>
- <57ED0EAA.7070206@applied-asynchrony.com>
- <CADxRZqwp4DPy8xcz7W=NOvvx0QnZ1jCvWRSMo1OMrxhiDrSorA@mail.gmail.com>
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:31809 "EHLO
+        ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S934691AbcI2WtS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Sep 2016 18:49:18 -0400
+Date: Fri, 30 Sep 2016 08:49:13 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] common: add support for the "local" file system type
+Message-ID: <20160929224913.GP9806@dastard>
+References: <20160923200526.29674-1-tytso@mit.edu>
+ <20160926221814.GC2532@dastard>
+ <20160928235713.tt76og3lxuvozrpi@thunk.org>
+ <20160929021628.GI9806@dastard>
+ <20160929035636.g2776ggv2cundlrh@thunk.org>
+ <20160929053752.GJ9806@dastard>
+ <20160929130501.k7hz2qcp6tgiyji6@thunk.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CADxRZqwp4DPy8xcz7W=NOvvx0QnZ1jCvWRSMo1OMrxhiDrSorA@mail.gmail.com>
+In-Reply-To: <20160929130501.k7hz2qcp6tgiyji6@thunk.org>
 Sender: fstests-owner@vger.kernel.org
-To: Anatoly Pugachev <matorola@gmail.com>
-Cc: Holger =?iso-8859-1?Q?Hoffst=E4tte?= <holger@applied-asynchrony.com>, Omar Sandoval <osandov@osandov.com>, Btrfs BTRFS <linux-btrfs@vger.kernel.org>, kernel-team@fb.com, Chandan Rajendra <chandan@linux.vnet.ibm.com>, bo.li.liu@oracle.com, fstests@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Sep 29, 2016 at 04:02:35PM +0300, Anatoly Pugachev wrote:
-> > Try to add https://patchwork.kernel.org/patch/9332707/ aka
-> > "Btrfs: improve check_node to avoid reading corrupted nodes" which should return
-> > -EIO and prevent the BUG().
+On Thu, Sep 29, 2016 at 09:05:01AM -0400, Theodore Ts'o wrote:
+> On Thu, Sep 29, 2016 at 03:37:52PM +1000, Dave Chinner wrote:
+> > Nobody outside the google echo chamber can say, Ted, because you
+> > haven't told anyone what it is you want this for. binary emulation
+> > layers (your example, not mine) don't implement persistent
+> > filesystems - they translate syscalls.
 > 
-> Guys,
-> 
-> I was wrong with "Btrfs: remove unnecessary btrfs_mark_buffer_dirty in
-> split_leaf" , because I've used patch from email
-> https://marc.info/?l=linux-btrfs&m=147319873029152&w=2 which patches
-> fs/btrfs/ctree.c , but forgot to apply kdave git kernel commit
-> 1ba98d086fe3a14d6a31f2f66dbab70c45d00f63 "Btrfs: detect corruption
-> when non-root leaf has zero item"
-> 
-> :-/
-> 
-> Should I remake all the tests?
+> Is your only objection that you don't get to can't see what it's going
+> to test?
 
-It would be much appreciated, as we probably won't get any other sparc64
-testing. Thanks.
+No, it isn't. But it's the most important one on my list right now
+because it affects fundamental architecture assumptions the test
+harness is based upon. I haven't looked at the implementation,
+because if we can't validate the basic architecture there's no point
+even looking at the code.
+
+As it is, Eryu and Eric have already outlined a number of serious
+issues with the implementation (and your testing process). They've
+highlighted a number of magic snowflake conditions we'd have to
+sprinkle throughout random tests and maintain forever more. What's
+missing from your patch request is the information that allows us to
+determine if the benefits of this patchset outweigh the obvious,
+significant, ongoing cost of having to maintain these snowflakes.
+
+Ted, as a kernel subsystem maintainer, you should know that
+understanding the full picture is a neccessary aspect of reviewing
+new proposals. Do you really merge code into ext4 that you think is
+going to be a significant future burden on the maintainer without
+knowing why it is needed, how it will be used, or even how you'll
+maintain it in a working condition over the long term?
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
