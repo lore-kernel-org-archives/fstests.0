@@ -1,40 +1,52 @@
-Received: from imap.thunk.org ([74.207.234.97]:44546 "EHLO imap.thunk.org"
+Received: from sandeen.net ([63.231.237.45]:48832 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752479AbcI2NFM (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 29 Sep 2016 09:05:12 -0400
-Date: Thu, 29 Sep 2016 09:05:01 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
+        id S1752029AbcI2Nhe (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 29 Sep 2016 09:37:34 -0400
 Subject: Re: [PATCH] common: add support for the "local" file system type
-Message-ID: <20160929130501.k7hz2qcp6tgiyji6@thunk.org>
 References: <20160923200526.29674-1-tytso@mit.edu>
- <20160926221814.GC2532@dastard>
- <20160928235713.tt76og3lxuvozrpi@thunk.org>
- <20160929021628.GI9806@dastard>
- <20160929035636.g2776ggv2cundlrh@thunk.org>
- <20160929053752.GJ9806@dastard>
+ <20160926221814.GC2532@dastard> <20160928235713.tt76og3lxuvozrpi@thunk.org>
+ <20160929021628.GI9806@dastard> <20160929035636.g2776ggv2cundlrh@thunk.org>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <97c94e4e-c76c-b93f-022c-57f625e20f5d@sandeen.net>
+Date: Thu, 29 Sep 2016 08:37:31 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160929053752.GJ9806@dastard>
+In-Reply-To: <20160929035636.g2776ggv2cundlrh@thunk.org>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
+To: Theodore Ts'o <tytso@mit.edu>, Dave Chinner <david@fromorbit.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Sep 29, 2016 at 03:37:52PM +1000, Dave Chinner wrote:
-> Nobody outside the google echo chamber can say, Ted, because you
-> haven't told anyone what it is you want this for. binary emulation
-> layers (your example, not mine) don't implement persistent
-> filesystems - they translate syscalls.
+On 9/28/16 10:56 PM, Theodore Ts'o wrote:
+>> xfstests is not designed for validating system call API compliance -
+>> > it's for exercising /filesystem implementations/.  xfstests assumes
+>> > the syscall API is valid and working, and tries to break the
+>> > underlying storage implementation.
 
-Is your only objection that you don't get to can't see what it's going
-to test?
+To play devil's advocate, I think there are a few tests that find problems
+pretty high up the callchain, possibly in the vfs or syscall layer...
 
-That's generally not a reason to object to patches in various open
-source projects --- there are plenty of closed source programs for
-which we accept kernel patches, for example.
+>>  As such, your example really
+>> > isn't something you should be using xfstests for - it doesn't test
+>> > anything like what is needed to verify that the "VFS emulation" is
+>> > valid and complete and working exactly as documented in the linux
+>> > man pages.
+> Who says there isn't an underlying file system implementation which we
+> want to test?  In fact we *are* using the right tool for the job.
+> (I'm quite aware of the other testing tools that might be available
+> including LTP and others, such as the LSB tests.)
 
-But sure, if that's the way you want to roll, as I said, I'll carry it
-as an out of tree patch.
+So you want to test a filesystem without being able to mount/unmount...
+Is this because you want to test how things behave in a restricted
+privs environment of some sort, or because the system under test has
+absolutely no way to mount & unmount a filesystem for any user?
 
-						- Ted
+So many of the current tests expect to check fs consistency, check
+data integrity after a shutdown or remount, test recovery, examine
+on-disk structures of a quiesced, consistent block device, test mount
+options, etc, I fear that there will be so many special snowflakes scattered
+around individual tests that this might be very hard to maintain.
+
+-Eric
+
