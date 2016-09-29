@@ -1,83 +1,60 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:44288 "EHLO
-        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1752187AbcITXkw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 20 Sep 2016 19:40:52 -0400
-Date: Wed, 21 Sep 2016 09:40:48 +1000
+Date: Thu, 29 Sep 2016 16:26:16 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 3/3] move now-generic quota tests to generic
-Message-ID: <20160920234048.GB10454@dastard>
-References: <65c03ebd-ee9c-7439-2642-0362a177ec6d@redhat.com>
- <06d804f2-646e-a586-bed1-416ffde8e0e9@sandeen.net>
+Subject: Re: [PATCH 1/3] xfs/122: decrease the log update done item sizes
+Message-ID: <20160929062616.GK9806@dastard>
+References: <147511610789.12284.10323409415801065382.stgit@birch.djwong.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <06d804f2-646e-a586-bed1-416ffde8e0e9@sandeen.net>
-Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>
+In-Reply-To: <147511610789.12284.10323409415801065382.stgit@birch.djwong.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: eguan@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 20, 2016 at 05:24:59PM -0500, Eric Sandeen wrote:
-> Now that these tests have been made generic, move them into
-> the generic/ dir and update group files.
->=20
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+On Wed, Sep 28, 2016 at 07:28:27PM -0700, Darrick J. Wong wrote:
+> Redundant fields were removed from the rmap/refcount/bmap update done
+> log items, so fix the size tests.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-I wonder if this would be better done simply as a tools/mvtest
-script for the maintainer to run. e.g.
+works for me.
 
-#!/bin/sh
-
-tools/mvtest xfs/054 generic/380
-tools/mvtest xfs/118 generic/381
-tools/mvtest xfs/138 generic/382
-tools/mvtest xfs/260 generic/383
-
-#EOF
-
-Rather than ending up with patch that won't apply because we've
-already applied another patch that added a new test that conflicts?
-Reviewing the change is also heaps easier :)
+Reviewed-by: Dave Chinner <dchinner@redhat.com>
 
 > ---
->=20
-> diff --git a/tests/generic/group b/tests/generic/group
-> index a602b01..f5ebbb1 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -381,3 +381,8 @@
->  376 auto quick metadata
->  377 attr auto quick metadata
->  378 auto quick metadata
-> +380 quota auto quick
-> +381 quota auto quick
-> +382 auto quick quota
-> +383 auto quick quota
-> +
+>  tests/xfs/122.out |    6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+> 
+> 
+> diff --git a/tests/xfs/122.out b/tests/xfs/122.out
+> index ae84283..67f7698 100644
+> --- a/tests/xfs/122.out
+> +++ b/tests/xfs/122.out
+> @@ -64,10 +64,10 @@ sizeof(struct xfs_btree_block) = 72
+>  sizeof(struct xfs_btree_block_lhdr) = 64
+>  sizeof(struct xfs_btree_block_shdr) = 48
+>  sizeof(struct xfs_bud_log_format) = 16
+> -sizeof(struct xfs_bui_log_format) = 48
+> +sizeof(struct xfs_bui_log_format) = 16
+>  sizeof(struct xfs_clone_args) = 32
+>  sizeof(struct xfs_cud_log_format) = 16
+> -sizeof(struct xfs_cui_log_format) = 32
+> +sizeof(struct xfs_cui_log_format) = 16
+>  sizeof(struct xfs_da3_blkinfo) = 56
+>  sizeof(struct xfs_da3_intnode) = 64
+>  sizeof(struct xfs_da3_node_hdr) = 64
+> @@ -94,7 +94,7 @@ sizeof(struct xfs_rtrmap_key) = 24
+>  sizeof(struct xfs_rtrmap_rec) = 32
+>  sizeof(struct xfs_rtrmap_root) = 4
+>  sizeof(struct xfs_rud_log_format) = 16
+> -sizeof(struct xfs_rui_log_format) = 48
+> +sizeof(struct xfs_rui_log_format) = 16
+>  sizeof(struct xfs_scrub_metadata) = 64
+>  sizeof(xfs_agf_t) = 224
+>  sizeof(xfs_agfl_t) = 36
+> 
+> 
 
-No trailing blank line....
-
-> @@ -257,7 +254,6 @@
->  257 auto quick clone
->  258 auto quick clone
->  259 auto quick
-> -260 auto quick quota
->  261 auto quick quota
->  262 auto quick quota
->  263 auto quick quota
->=20
-> N?????r??y????b?X??=C7=A7v?^?)=DE=BA{.n?+????=D7=AC?=C8=A7?=17??=DC=A8}=
-???=C6=A0z?&j:+v???=07????zZ+??+zf???h???~????i???z?=1E?w?????????&?)=DF=A2=
-=1Bf
-
-Ummm, what? That looks like some kind of corruption occurred in
-transit. There's no mailing list footer, and it's not at my end as
-it's in the archive copies, too....
-
-Cheers,
-
-Dave.
---=20
+-- 
 Dave Chinner
 david@fromorbit.com
