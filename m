@@ -1,20 +1,19 @@
-Received: from bombadil.infradead.org ([198.137.202.9]:58313 "EHLO
+Received: from bombadil.infradead.org ([198.137.202.9]:58830 "EHLO
         bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932252AbcI3L4i (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 30 Sep 2016 07:56:38 -0400
-Date: Fri, 30 Sep 2016 04:56:36 -0700
+        with ESMTP id S932252AbcI3L5R (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 30 Sep 2016 07:57:17 -0400
+Date: Fri, 30 Sep 2016 04:57:16 -0700
 From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 6/9] xfs: fix $XFS_DB_PROG usage
-Message-ID: <20160930115636.GC29955@infradead.org>
-References: <147520218309.26891.10856487889060965097.stgit@birch.djwong.org>
- <147520222110.26891.18259521392775976412.stgit@birch.djwong.org>
+Subject: Re: [PATCH v2] xfs/032: test the next block size if mkfs fails
+Message-ID: <20160930115716.GD29955@infradead.org>
+References: <1475218726-22265-1-git-send-email-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <147520222110.26891.18259521392775976412.stgit@birch.djwong.org>
+In-Reply-To: <1475218726-22265-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: david@fromorbit.com, eguan@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
 Looks fine,
