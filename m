@@ -1,173 +1,69 @@
-Received: from sandeen.net ([63.231.237.45]:47752 "EHLO sandeen.net"
+Received: from imap.thunk.org ([74.207.234.97]:47364 "EHLO imap.thunk.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750803AbcI3Cc1 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 29 Sep 2016 22:32:27 -0400
-Received: from [10.0.0.4] (liberator [10.0.0.4])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by sandeen.net (Postfix) with ESMTPSA id 5D60C2B51
-        for <fstests@vger.kernel.org>; Thu, 29 Sep 2016 21:31:55 -0500 (CDT)
-From: Eric Sandeen <sandeen@sandeen.net>
-Subject: [PATCH] exercise and validate the xfs_io inode command
-Message-ID: <ce19a4ec-ee15-17a8-67e0-b8418534f3c7@sandeen.net>
-Date: Thu, 29 Sep 2016 21:32:25 -0500
+        id S932656AbcI3DnK (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 29 Sep 2016 23:43:10 -0400
+Date: Thu, 29 Sep 2016 23:43:04 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH] common: add support for the "local" file system type
+Message-ID: <20160930034304.bzauyu3otrgmeahe@thunk.org>
+References: <20160923200526.29674-1-tytso@mit.edu>
+ <20160926221814.GC2532@dastard>
+ <20160928235713.tt76og3lxuvozrpi@thunk.org>
+ <20160929021628.GI9806@dastard>
+ <20160929035636.g2776ggv2cundlrh@thunk.org>
+ <20160929053752.GJ9806@dastard>
+ <20160929130501.k7hz2qcp6tgiyji6@thunk.org>
+ <20160929224913.GP9806@dastard>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160929224913.GP9806@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Run various modes of the xfs_io "inode" command.
+On Fri, Sep 30, 2016 at 08:49:13AM +1000, Dave Chinner wrote:
+> As it is, Eryu and Eric have already outlined a number of serious
+> issues with the implementation (and your testing process). They've
+> highlighted a number of magic snowflake conditions we'd have to
+> sprinkle throughout random tests and maintain forever more. What's
+> missing from your patch request is the information that allows us to
+> determine if the benefits of this patchset outweigh the obvious,
+> significant, ongoing cost of having to maintain these snowflakes.
 
-This fails today, I have some patches to fix it up.
-The "grep -q" for failures strings are fairly loose
-because I'm changing them, and don't want to depend
-on the exact error or usage message ...
+The issues Eryu and Eric pointed out (and many thanks for their
+review) were ones that are easily fixed, and I can restrict the
+changes to common/* (right now only common/rc), and I no longer need
+any changes in the tests/* hierarchy.
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
----
+My first patch had only a single "snowflake" to generic/027 (and it
+was one that already had a snowflake exemption for btrfs).  It was
+done to work around the fact that _scratch_mkfs_sized wouldn't
+restrict the size of the file system.  I now will _notrun any test
+which uses _scratch_mkfs_sized, so I don't need that change any
+longer.  This leaves only a single enospc test which will be run,
+which is a bit unfortunate, but it solves the "I could fill the root
+file system if TEST_DEV or SCRATCH_DEV is pointed on my root fs"
+problem".
 
-diff --git a/tests/xfs/054 b/tests/xfs/054
-new file mode 100755
-index 0000000..7d08f8a
---- /dev/null
-+++ b/tests/xfs/054
-@@ -0,0 +1,104 @@
-+#! /bin/bash
-+# FS QA Test 054
-+#
-+# Exercise the xfs_io inode command
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs xfs
-+_supported_os Linux
-+_require_test
-+_require_xfs_io_command "inode"
-+
-+# We know the root inode is there
-+ROOT_INO=`ls -id $SCRATCH_MNT | awk '{print $1}'`
-+
-+touch $TEST_DIR/file
-+
-+$XFS_IO_PROG -c "inode"       $TEST_DIR/file
-+$XFS_IO_PROG -c "inode -v"    $TEST_DIR/file | \
-+		grep -vw $ROOT_INO | sed -e s/.*:/LAST:/g
-+
-+#  These should fail, -n requires an inode
-+$XFS_IO_PROG -c "inode -n"    $TEST_DIR/file 2>&1 | grep -q Query \
-+		|| echo "bare -n succeeded"
-+$XFS_IO_PROG -c "inode -nv"   $TEST_DIR/file 2>&1 | grep -q Query \
-+		|| echo "bare -nv succeeded"
-+$XFS_IO_PROG -c "inode -n -v" $TEST_DIR/file 2>&1 | grep -q Query \
-+		|| echo "bare -n -v succeeded"
-+
-+# These fail too, requires a valid inode number
-+$XFS_IO_PROG -c "inode       badnumber" $TEST_DIR/file | grep -q numeric \
-+		|| echo "Bad inode number succeeded"
-+$XFS_IO_PROG -c "inode -v    badnumber" $TEST_DIR/file | grep -q numeric \
-+		|| echo "Bad inode number succeeded"
-+$XFS_IO_PROG -c "inode -n    badnumber" $TEST_DIR/file | grep -q numeric \
-+		|| echo "Bad inode number succeeded"
-+$XFS_IO_PROG -c "inode -nv   badnumber" $TEST_DIR/file | grep -q numeric \
-+		|| echo "Bad inode number succeeded"
-+$XFS_IO_PROG -c "inode -n -v badnumber" $TEST_DIR/file | grep -q numeric \
-+		|| echo "Bad inode number succeeded"
-+
-+# These should all work, and return $ROOT_INO or the next inode...
-+# grep out ROOT_INO (which is incorrect) when we should be getting next inode
-+$XFS_IO_PROG -c "inode       $ROOT_INO" $TEST_DIR/file | \
-+		sed -e s/$ROOT_INO/ROOT_INO/g
-+$XFS_IO_PROG -c "inode -v    $ROOT_INO" $TEST_DIR/file | \
-+		sed -e s/$ROOT_INO/ROOT_INO/g
-+$XFS_IO_PROG -c "inode -n    $ROOT_INO" $TEST_DIR/file | \
-+		grep -vw $ROOT_INO | sed -e s/.*/NEXT/g
-+$XFS_IO_PROG -c "inode -nv   $ROOT_INO" $TEST_DIR/file | \
-+		grep -vw $ROOT_INO | sed -e s/.*:/NEXT:/g
-+$XFS_IO_PROG -c "inode -n -v $ROOT_INO" $TEST_DIR/file | \
-+		grep -vw $ROOT_INO | sed -e s/.*:/NEXT:/g
-+
-+# Try one that doesn't exist, 2^64-2?  Should get 0
-+$XFS_IO_PROG -c "inode       18446744073709551614" $TEST_DIR/file
-+$XFS_IO_PROG -c "inode -v    18446744073709551614" $TEST_DIR/file
-+$XFS_IO_PROG -c "inode -n    18446744073709551614" $TEST_DIR/file
-+$XFS_IO_PROG -c "inode -nv   18446744073709551614" $TEST_DIR/file
-+$XFS_IO_PROG -c "inode -n -v 18446744073709551614" $TEST_DIR/file
-+
-+status=0
-+exit
-diff --git a/tests/xfs/054.out b/tests/xfs/054.out
-new file mode 100644
-index 0000000..ef725b4
---- /dev/null
-+++ b/tests/xfs/054.out
-@@ -0,0 +1,13 @@
-+QA output created by 054
-+0
-+LAST:32
-+ROOT_INO
-+ROOT_INO:32
-+NEXT
-+NEXT:32
-+NEXT:32
-+0
-+0
-+0
-+0
-+0
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 798bf99..60e65de 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -51,6 +51,7 @@
- 051 auto log metadata
- 052 quota db auto quick
- 053 attr acl repair quick auto
-+054 auto quick
- 055 dump ioctl remote tape
- 056 dump ioctl auto quick
- 057 acl auto
+So I believe the maintainance issue is something that can be be
+mitigated.
 
+Testing is something that can be done using a standard Linux systems.
+(Indeed I did most of my testing using my existing gce-xfstests and
+kvm-xfstests frameworks, just because it was easier.)  It's a fair
+point that I should make sure it doesn't cause problems when other
+file systems are used as the base file system, and if it is used on a
+root file system.  Again, these are issues which I can fix in the
+patch.  Indeed, all of the the specific issues pointed out by Eric and
+Eryu are already fixed in my tree.
 
+In any case, since the commit are only adding some tests in common/rc
+(where we have lots of per-file system conditionals anyway), I can
+easily maintain this patch out-of-tree, since you seem to have
+fundamental philosophical problems with it.
+
+Regards,
+
+						- Ted
