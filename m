@@ -1,89 +1,68 @@
-Subject: Re: [PATCH] generic: make 17[1-4] work well when btrfs compression is
- enabled
-References: <20161007070042.12258-1-wangxg.fnst@cn.fujitsu.com>
- <20161007143610.GX27872@dastard> <20161009042333.GA5609@birch.djwong.org>
-From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
-Message-ID: <57FB0FAF.4080200@cn.fujitsu.com>
-Date: Mon, 10 Oct 2016 11:49:03 +0800
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:34275 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751463AbcJAJ0h (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 1 Oct 2016 05:26:37 -0400
 MIME-Version: 1.0
-In-Reply-To: <20161009042333.GA5609@birch.djwong.org>
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
-To: "Darrick J. Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+In-Reply-To: <20160929142945.GC5531@suse.cz>
+References: <cover.1474580472.git.osandov@fb.com> <20160925075524.GA3870@yogzotot>
+ <20160926175000.GF16983@twin.jikos.cz> <20160929122148.GA22109@yogzotot>
+ <57ED0EAA.7070206@applied-asynchrony.com> <CADxRZqwp4DPy8xcz7W=NOvvx0QnZ1jCvWRSMo1OMrxhiDrSorA@mail.gmail.com>
+ <20160929142945.GC5531@suse.cz>
+From: Anatoly Pugachev <matorola@gmail.com>
+Date: Sat, 1 Oct 2016 12:26:35 +0300
+Message-ID: <CADxRZqwZ6ymxL4x9455HFH95px=bjuqKKfBrO9BO7y1VBkvrYw@mail.gmail.com>
+Subject: Re: [PATCH v2 0/6] Btrfs: free space tree and sanity test fixes
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Sender: fstests-owner@vger.kernel.org
+To: dsterba@suse.cz, Anatoly Pugachev <matorola@gmail.com>, =?UTF-8?Q?Holger_Hoffst=C3=A4tte?= <holger@applied-asynchrony.com>, Omar Sandoval <osandov@osandov.com>, Btrfs BTRFS <linux-btrfs@vger.kernel.org>, kernel-team@fb.com, Chandan Rajendra <chandan@linux.vnet.ibm.com>, bo.li.liu@oracle.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-hi,
-
-On 10/10/2016 05:04 AM, Darrick J. Wong wrote:
-> On Sat, Oct 08, 2016 at 01:36:10AM +1100, Dave Chinner wrote:
->> On Fri, Oct 07, 2016 at 03:00:42PM +0800, Wang Xiaoguang wrote:
->>> When enabling btrfs compression, original codes can not fill fs
->>> correctly, fix this.
->>>
->>> Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
->>> ---
->>>   tests/generic/171 | 4 +---
->>>   tests/generic/172 | 2 +-
->>>   tests/generic/173 | 4 +---
->>>   tests/generic/174 | 4 +---
->>>   4 files changed, 4 insertions(+), 10 deletions(-)
->>>
->>> diff --git a/tests/generic/171 b/tests/generic/171
->>> index f391685..d2ae8e4 100755
->>> --- a/tests/generic/171
->>> +++ b/tests/generic/171
->>> @@ -75,9 +75,7 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
->>>   sync
->>>   
->>>   echo "Allocate the rest of the space"
->>> -nr_free=$(stat -f -c '%f' $testdir)
->>> -touch $testdir/file0 $testdir/file1
-> Why remove this line which ensures that the inode we're going to use (file1)
-> later in the test has been allocated /before/ we try to eat all the space?
-Sorry, I don't understand :)
-In generic/171, generic/172, generic/173, generic/174, you created file0 and
-file1, but I don't see test cases use them and they are empty.
-
->
->>> -_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
->>> +dd if=/dev/zero of=$testdir/eat_my_space >> $seqres.full 2>&1
-> Uh... isn't a bunch of zeroes just as compressible as 0x61?
-0x61 is also compressible.
-> I suppose
-> the point here is to write until write returns ENOSPC, since in btrfs
-> land we can't assume that writing $nr blocks will use up at least that
-> much space.
-Yes.
-
->
-> Does XFS reflink still pass this test with this patch?
-Could you please give a stable xfs repotory that supports xfs reflink, 
-thanks.
-
->
->> Please don't replace xfs_io writes using a specific data pattern
->> with dd calls that write zeros. Indeed, we don't use dd for new
->> tests anymore - xfs_io should be used.
+On Thu, Sep 29, 2016 at 5:29 PM, David Sterba <dsterba@suse.cz> wrote:
+> On Thu, Sep 29, 2016 at 04:02:35PM +0300, Anatoly Pugachev wrote:
+>> > Try to add https://patchwork.kernel.org/patch/9332707/ aka
+>> > "Btrfs: improve check_node to avoid reading corrupted nodes" which sho=
+uld return
+>> > -EIO and prevent the BUG().
 >>
->> Write a function that fills all the remaining free space (one may
->> already exist) and call it in all these places.
-> Yeah, there already are a few of these...
-OK, I'll use it, thanks.
-
-Regards,
-Xiaoguang Wang
->
-> --D
->
->> Cheers,
+>> Guys,
 >>
->> Dave.
->> -- 
->> Dave Chinner
->> david@fromorbit.com
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> I was wrong with "Btrfs: remove unnecessary btrfs_mark_buffer_dirty in
+>> split_leaf" , because I've used patch from email
+>> https://marc.info/?l=3Dlinux-btrfs&m=3D147319873029152&w=3D2 which patch=
+es
+>> fs/btrfs/ctree.c , but forgot to apply kdave git kernel commit
+>> 1ba98d086fe3a14d6a31f2f66dbab70c45d00f63 "Btrfs: detect corruption
+>> when non-root leaf has zero item"
+>>
+>> :-/
+>>
+>> Should I remake all the tests?
 >
+> It would be much appreciated, as we probably won't get any other sparc64
+> testing. Thanks.
+
+David,
+
+just tried to apply 1ba98d086fe3a14d6a31f2f66dbab70c45d00f63 "Btrfs:
+detect corruption when non-root leaf has zero item"
+from your btrfs development kernel tree, and patch command said that
+it already applied...
+
+mator@ttip:~/linux-2.6$ git remote -v
+origin  git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux-2.6.gi=
+t
+(fetch)
+origin  git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux-2.6.gi=
+t
+(push)
+mator@ttip:~/linux-2.6$ git show -s --oneline
+1ba98d086fe3a14d6a31f2f66dbab70c45d00f63
+1ba98d0 Btrfs: detect corruption when non-root leaf has zero item
+
+So my tests was correct and included all the needed patches?!
+
+Sorry for the mess. :-/
+
+I'm going to check patch suggested by Holger Hoffst=C3=A4tte ,
+https://patchwork.kernel.org/patch/9332707/ ...
