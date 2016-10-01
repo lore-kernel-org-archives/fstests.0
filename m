@@ -1,85 +1,164 @@
-Received: from mx1.redhat.com ([209.132.183.28]:58642 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:55624 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750771AbcJAL4J (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 1 Oct 2016 07:56:09 -0400
-Message-Id: <201610011156.u91Bu7KV026670@int-mx09.intmail.prod.int.phx2.redhat.com>
-Date: Sat, 01 Oct 2016 19:56:06 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: [GIT PULL] fstests: updates on 2016-10-01
+        id S1750820AbcJAPtE (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 1 Oct 2016 11:49:04 -0400
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] fstests: fix failures caused by striped device
+Date: Sat,  1 Oct 2016 23:48:54 +0800
+Message-Id: <1475336934-19105-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave,
+There're some failures if scratch_dev is a  striped device:
+  1. generic/094 and generic/225 fiemap_tester fails.
+  2. generic/347 need -f to force usage of a misaligned device
+  3. xfs/010, xfs/013, xfs/042 and xfs/109 print "Warning: AG size
+     is a multiple of stripe width", break the golden image
+  4. xfs/029 print more "extended-header"
 
-Can you please pull the fstests update from the location below? This update
-mainly contains a new generic test to test log recovery, and fixes to
-rmap/reflink tests.
+Only XFS can reproduce these failures, so this patch:
+  1. use "-d sunit=0,swidth=0,noalign" options for generic/094,
+     generic/225 and xfs/029.
+  2. print the error output of mkfs.xfs to /dev/null forr xfs/010,
+     xfs/013, xfs/042 and xfs/109
+  3. add -f option for generic/347
 
-New failures I noticed in this update:
-- generic/388 fails on XFS or even crashes the kernel with Linus tree, the bug
-  has been fixed in linux-xfs tree for-next branch
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
 
-Please note that it's public holiday next week in China, I'll try to
-review/test/merge patches and send out pull request as usual, but please don't
-be surprised if I didn't :)
+Hi,
+
+This problem has been bothering me for a long time. Everytime when I
+test on a machine with striped RAID device, I'll hit these problems.
+Generally I'll ignore these failures, and run xfstests again on another
+machine.
+
+I know this patch is not the best way to deal with this problem, so I
+just try to throw away a poor example in order to get some great ideas:)
 
 Thanks,
-Eryu
+Zorro
 
-The following changes since commit 0bbd20b104765c75faaf8e28a54c32df505ce7fd:
+ tests/generic/094 | 3 +++
+ tests/generic/225 | 3 +++
+ tests/generic/347 | 2 +-
+ tests/xfs/010     | 3 ++-
+ tests/xfs/013     | 2 +-
+ tests/xfs/029     | 2 +-
+ tests/xfs/042     | 2 +-
+ tests/xfs/109     | 3 ++-
+ 8 files changed, 14 insertions(+), 6 deletions(-)
 
-  btrfs: test free space tree mount options (2016-09-24 00:39:13 +0800)
+diff --git a/tests/generic/094 b/tests/generic/094
+index 005de1d..e83b062 100755
+--- a/tests/generic/094
++++ b/tests/generic/094
+@@ -48,6 +48,9 @@ _require_odirect
+ _require_xfs_io_command "fiemap"
+ _require_xfs_io_command "falloc"
+ 
++if [ "$FSTYP" = "xfs" ]; then
++	MKFS_OPTIONS="$MKFS_OPTIONS -d sunit=0,swidth=0,noalign"
++fi
+ _scratch_mkfs > /dev/null 2>&1
+ _scratch_mount > /dev/null 2>&1
+ 
+diff --git a/tests/generic/225 b/tests/generic/225
+index 5285e68..fec1a7a 100755
+--- a/tests/generic/225
++++ b/tests/generic/225
+@@ -47,6 +47,9 @@ _require_scratch
+ _require_odirect
+ _require_xfs_io_command "fiemap"
+ 
++if [ "$FSTYP" = "xfs" ]; then
++	MKFS_OPTIONS="$MKFS_OPTIONS -d sunit=0,swidth=0,noalign"
++fi
+ _scratch_mkfs > /dev/null 2>&1
+ _scratch_mount > /dev/null 2>&1
+ 
+diff --git a/tests/generic/347 b/tests/generic/347
+index 3adc674..054c778 100755
+--- a/tests/generic/347
++++ b/tests/generic/347
+@@ -43,7 +43,7 @@ _setup_thin()
+ {
+ 	_dmthin_init $BACKING_SIZE $VIRTUAL_SIZE
+ 	_dmthin_set_queue
+-	_mkfs_dev $DMTHIN_VOL_DEV
++	_mkfs_dev -f $DMTHIN_VOL_DEV
+ 	_dmthin_mount
+ }
+ 
+diff --git a/tests/xfs/010 b/tests/xfs/010
+index d350d64..d49a923 100755
+--- a/tests/xfs/010
++++ b/tests/xfs/010
+@@ -109,7 +109,8 @@ _require_xfs_finobt
+ 
+ rm -f $seqres.full
+ 
+-_scratch_mkfs_xfs "-m crc=1,finobt=1 -d agcount=2" | _filter_mkfs 2>$seqres.full
++_scratch_mkfs_xfs "-m crc=1,finobt=1 -d agcount=2" 2>/dev/null \
++				| _filter_mkfs 2>$seqres.full
+ 
+ # sparsely populate the fs such that we create records with free inodes
+ _scratch_mount
+diff --git a/tests/xfs/013 b/tests/xfs/013
+index 817558f..a00ebd6 100755
+--- a/tests/xfs/013
++++ b/tests/xfs/013
+@@ -105,7 +105,7 @@ _require_command "$KILLALL_PROG" killall
+ 
+ rm -f $seqres.full
+ 
+-_scratch_mkfs_xfs "-m crc=1,finobt=1 -d agcount=2" | \
++_scratch_mkfs_xfs "-m crc=1,finobt=1 -d agcount=2" 2>/dev/null | \
+ 	_filter_mkfs 2>> $seqres.full
+ _scratch_mount
+ 
+diff --git a/tests/xfs/029 b/tests/xfs/029
+index 0709fce..01f4144 100755
+--- a/tests/xfs/029
++++ b/tests/xfs/029
+@@ -58,7 +58,7 @@ _supported_os Linux
+ _require_scratch
+ 
+ echo
+-_scratch_mkfs_xfs | _filter_mkfs 2>/dev/null
++_scratch_mkfs_xfs -d sunit=0,swidth=0,noalign | _filter_mkfs 2>/dev/null
+ 
+ echo
+ _scratch_xfs_logprint | _filter_logprint
+diff --git a/tests/xfs/042 b/tests/xfs/042
+index ba5eed3..66bcc35 100755
+--- a/tests/xfs/042
++++ b/tests/xfs/042
+@@ -74,7 +74,7 @@ rm -f $seqres.full
+ _do_die_on_error=message_only
+ 
+ echo -n "Make a 48 megabyte filesystem on SCRATCH_DEV and mount... "
+-_scratch_mkfs_xfs -dsize=48m,agcount=3 2>&1 >/dev/null || _fail "mkfs failed"
++_scratch_mkfs_xfs -dsize=48m,agcount=3 >/dev/null 2>&1 || _fail "mkfs failed"
+ _scratch_mount || _fail "mount failed" 
+ 
+ echo "done"
+diff --git a/tests/xfs/109 b/tests/xfs/109
+index ac20619..dd60492 100755
+--- a/tests/xfs/109
++++ b/tests/xfs/109
+@@ -103,7 +103,8 @@ if [ -n "$FASTSTART" -a -f $SCRATCH_MNT/f0 ]; then
+ fi
+ _scratch_unmount
+ 
+-_scratch_mkfs_xfs -dsize=160m,agcount=4 $faststart | _filter_mkfs 2>$tmp.mkfs
++_scratch_mkfs_xfs -dsize=160m,agcount=4 $faststart 2>/dev/null \
++				| _filter_mkfs 2>$tmp.mkfs
+ cat $tmp.mkfs >>$seqres.full
+ _scratch_mount
+ 
+-- 
+2.7.4
 
-are available in the git repository at:
-
-  https://github.com/guaneryu/xfstests.git for-dave
-
-for you to fetch changes up to 4053326a0c5f73488fb4f54bd084ba821545a6cd:
-
-  generic/349,350,351: remove from quick group (2016-09-29 16:27:47 +0800)
-
-----------------------------------------------------------------
-
-fstests: update on 2016-10-01
-
-This update contains:
-o A new generic test to test log recovery
-o Fixes for rmap/reflink tests
-o Other minor fixes all around the tree
-
-----------------------------------------------------------------
-Brian Foster (1):
-      generic: shutdown fs after log recovery
-
-Darrick J. Wong (3):
-      xfs/122: decrease the log update done item sizes
-      xfs/130: don't modify files after failed mount
-      xfs/207,327: fsxattr no longer has the reflink flag
-
-Eryu Guan (4):
-      generic/317: use id to get user id
-      generic/052: use _check_scratch_fs not _xfs_check
-      xfs/287: fix wrong seq number in test
-      generic/349,350,351: remove from quick group
-
-Theodore Ts'o (1):
-      generic/361: require that file system uses a real block device
-
- tests/generic/052     |  2 +-
- tests/generic/317     |  2 +-
- tests/generic/361     |  1 +
- tests/generic/388     | 89 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/388.out |  2 ++
- tests/generic/group   |  7 ++--
- tests/xfs/122.out     |  6 ++--
- tests/xfs/130         |  9 ++----
- tests/xfs/130.out     |  1 -
- tests/xfs/207.out     |  4 +--
- tests/xfs/287         |  2 +-
- tests/xfs/327.out     |  6 ++--
- 12 files changed, 110 insertions(+), 21 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
