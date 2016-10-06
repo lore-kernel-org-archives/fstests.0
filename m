@@ -1,59 +1,37 @@
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:54631 "EHLO
-        ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751448AbcJFV7Y (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Oct 2016 17:59:24 -0400
-Date: Fri, 7 Oct 2016 08:59:20 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH V2 2/2] fs/super.c: don't fool lockdep in freeze_super()
- and thaw_super() paths
-Message-ID: <20161006215920.GE9806@dastard>
-References: <20160926165525.GA9338@redhat.com>
- <20160927065135.GA1139@quack2.suse.cz>
- <20160927172901.GA11879@redhat.com>
- <20160930171434.GA2373@redhat.com>
- <20161002214225.GS9806@dastard>
- <20161003164435.GB6634@redhat.com>
- <20161004114341.GA8572@redhat.com>
- <20161004194435.GW9806@dastard>
- <20161005164432.GB15121@redhat.com>
- <20161006171758.GA21707@redhat.com>
+Received: from imap.thunk.org ([74.207.234.97]:38258 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S936519AbcJGBn7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 6 Oct 2016 21:43:59 -0400
+Date: Thu, 6 Oct 2016 15:24:52 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: Is is possible to submit binary image as fstest test case?
+Message-ID: <20161006192452.qj3stqmhhz5cq3wj@thunk.org>
+References: <53250876-4992-971e-ed37-054f03ef555f@cn.fujitsu.com>
+ <20161006122927.GB16893@bfoster.bfoster>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161006171758.GA21707@redhat.com>
+In-Reply-To: <20161006122927.GB16893@bfoster.bfoster>
 Sender: fstests-owner@vger.kernel.org
-To: Oleg Nesterov <oleg@redhat.com>
-Cc: Jan Kara <jack@suse.cz>, Al Viro <viro@zeniv.linux.org.uk>, Nikolay Borisov <kernel@kyup.com>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, fstests@vger.kernel.org
+To: Brian Foster <bfoster@redhat.com>
+Cc: Qu Wenruo <quwenruo@cn.fujitsu.com>, fstests@vger.kernel.org, btrfs <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Oct 06, 2016 at 07:17:58PM +0200, Oleg Nesterov wrote:
-> Probably false positive? Although when I look at the comment above xfs_sync_sb()
-> I think that may be sometging like below makes sense, but I know absolutely nothing
-> about fs/ and XFS in particular.
-> 
-> Oleg.
-> 
-> 
-> --- x/fs/xfs/xfs_trans.c
-> +++ x/fs/xfs/xfs_trans.c
-> @@ -245,7 +245,8 @@ xfs_trans_alloc(
->  	atomic_inc(&mp->m_active_trans);
->  
->  	tp = kmem_zone_zalloc(xfs_trans_zone,
-> -		(flags & XFS_TRANS_NOFS) ? KM_NOFS : KM_SLEEP);
-> +		(flags & (XFS_TRANS_NOFS | XFS_TRANS_NO_WRITECOUNT))
-> +			? KM_NOFS : KM_SLEEP);
->  	tp->t_magic = XFS_TRANS_HEADER_MAGIC;
->  	tp->t_flags = flags;
->  	tp->t_mountp = mp;
+On Thu, Oct 06, 2016 at 08:29:28AM -0400, Brian Foster wrote:
+> Doesn't necessarily bother me one way or the other, but something we've
+> done with XFS in such situations is introduce a DEBUG mode only sysfs
+> tunable that delays certain infrastructure (log recovery in our case) to
+> coordinate with test cases that try to reproduce such timing/racing
+> problems.
 
-Brief examination says caller should set XFS_TRANS_NOFS, not change
-the implementation to make XFS_TRANS_NO_WRITECOUNT flag to also mean
-XFS_TRANS_NOFS.
+The other approach the btrfs folks might consider is to have a
+sufficiently powerful "debugfs" or "xfs_db" program that can generate
+test images with the desired property.
+
+I've found that the time I've invested in creating debugfs has repaid
+itself a hundred times over, especially when maintaining a regression
+test suite for e2fsck.
 
 Cheers,
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+					- Ted
