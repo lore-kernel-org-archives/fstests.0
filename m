@@ -1,57 +1,52 @@
-Received: from mx1.redhat.com ([209.132.183.28]:45512 "EHLO mx1.redhat.com"
+Received: from gum.cmpxchg.org ([85.214.110.215]:57856 "EHLO gum.cmpxchg.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750970AbcJFM33 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 6 Oct 2016 08:29:29 -0400
-Date: Thu, 6 Oct 2016 08:29:28 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: Is is possible to submit binary image as fstest test case?
-Message-ID: <20161006122927.GB16893@bfoster.bfoster>
-References: <53250876-4992-971e-ed37-054f03ef555f@cn.fujitsu.com>
+        id S941813AbcJFNpI (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 6 Oct 2016 09:45:08 -0400
+Date: Thu, 6 Oct 2016 15:44:49 +0200
+From: Johannes Weiner <hannes@cmpxchg.org>
+Subject: Re: [PATCH V2 2/2] fs/super.c: don't fool lockdep in freeze_super()
+ and thaw_super() paths
+Message-ID: <20161006134449.GB13177@cmpxchg.org>
+References: <20160926160806.GB6748@redhat.com>
+ <20160926161856.GB32458@quack2.suse.cz>
+ <20160926165525.GA9338@redhat.com>
+ <20160927065135.GA1139@quack2.suse.cz>
+ <20160927172901.GA11879@redhat.com>
+ <20160930171434.GA2373@redhat.com>
+ <20161002214225.GS9806@dastard>
+ <20161003164435.GB6634@redhat.com>
+ <20161004114341.GA8572@redhat.com>
+ <20161004114800.GB32214@dhcp22.suse.cz>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <53250876-4992-971e-ed37-054f03ef555f@cn.fujitsu.com>
+In-Reply-To: <20161004114800.GB32214@dhcp22.suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, btrfs <linux-btrfs@vger.kernel.org>
+To: Michal Hocko <mhocko@kernel.org>
+Cc: Oleg Nesterov <oleg@redhat.com>, Dave Chinner <david@fromorbit.com>, Jan Kara <jack@suse.cz>, Al Viro <viro@zeniv.linux.org.uk>, Nikolay Borisov <kernel@kyup.com>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Oct 06, 2016 at 04:12:56PM +0800, Qu Wenruo wrote:
-> Hi,
+On Tue, Oct 04, 2016 at 01:48:00PM +0200, Michal Hocko wrote:
+> Johannes is already looking into this
+> http://lkml.kernel.org/r/20161004093216.GA21170@cmpxchg.org
 > 
-> Just as the title says, for some case(OK, btrfs again) we need to catch a
-> file system in special timing.
-> 
-> In this specific case, we need to grab a btrfs image undergoing balancing,
-> just before the balance finished.
-> 
-> Although we can use flakey to drop all write, we still don't have method to
-> catch the timing of the that transaction.
-> 
-> 
-> On the other hand, we can tweak our local kernel, adding msleep()/message
-> and dump the disk during the sleep.
-> And the image I dumped can easily trigger btrfs kernel and user-space bug.
-> 
-> So I'm wondering if I can just upload a zipped raw image as part of the test
-> case?
-> 
+> On Tue 04-10-16 13:43:43, Oleg Nesterov wrote:
+> > because of kernel bug:
+> > 
+> > 	[ 2730.242537] run fstests generic/274 at 2016-10-04 05:17:34
+> > 	[ 2730.738352] XFS (loop1): Mounting V5 Filesystem
+> > 	[ 2730.741451] XFS (loop1): Ending clean mount
+> > 	[ 2744.508698] ------------[ cut here ]------------
+> > 	[ 2744.509190] kernel BUG at ./include/linux/swap.h:276!
+> > 
+> > static inline void workingset_node_shadows_dec(struct radix_tree_node *node)
+> > {
+> > 	VM_BUG_ON(!workingset_node_shadows(node));
+> > 	node->count -= 1U << RADIX_TREE_COUNT_SHIFT;
 
-Doesn't necessarily bother me one way or the other, but something we've
-done with XFS in such situations is introduce a DEBUG mode only sysfs
-tunable that delays certain infrastructure (log recovery in our case) to
-coordinate with test cases that try to reproduce such timing/racing
-problems.
+We tracked this one down and Linus merged a fix for this issue:
 
-See test xfs/051 for an example..
+https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=d3798ae8c6f3767c726403c2ca6ecc317752c9dd
 
-Brian
-
-> Thanks,
-> Qu
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Let me know if this still fires on kernels with that commit.
+Thanks!
