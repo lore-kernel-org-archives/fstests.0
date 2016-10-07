@@ -1,45 +1,57 @@
-Received: from mx1.redhat.com ([209.132.183.28]:32996 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751100AbcJGMaY (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 7 Oct 2016 08:30:24 -0400
-Date: Fri, 7 Oct 2016 20:29:49 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] fstests: fix failures caused by striped device
-Message-ID: <20161007122949.GK27776@eguan.usersys.redhat.com>
-References: <1475336934-19105-1-git-send-email-zlang@redhat.com>
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:61649 "EHLO
+        ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1756715AbcJGOgR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 7 Oct 2016 10:36:17 -0400
+Date: Sat, 8 Oct 2016 01:36:10 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] generic: make 17[1-4] work well when btrfs compression
+ is enabled
+Message-ID: <20161007143610.GX27872@dastard>
+References: <20161007070042.12258-1-wangxg.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1475336934-19105-1-git-send-email-zlang@redhat.com>
+In-Reply-To: <20161007070042.12258-1-wangxg.fnst@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Oct 01, 2016 at 11:48:54PM +0800, Zorro Lang wrote:
-> There're some failures if scratch_dev is a  striped device:
->   1. generic/094 and generic/225 fiemap_tester fails.
->   2. generic/347 need -f to force usage of a misaligned device
->   3. xfs/010, xfs/013, xfs/042 and xfs/109 print "Warning: AG size
->      is a multiple of stripe width", break the golden image
->   4. xfs/029 print more "extended-header"
+On Fri, Oct 07, 2016 at 03:00:42PM +0800, Wang Xiaoguang wrote:
+> When enabling btrfs compression, original codes can not fill fs
+> correctly, fix this.
 > 
-> Only XFS can reproduce these failures, so this patch:
->   1. use "-d sunit=0,swidth=0,noalign" options for generic/094,
->      generic/225 and xfs/029.
+> Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+> ---
+>  tests/generic/171 | 4 +---
+>  tests/generic/172 | 2 +-
+>  tests/generic/173 | 4 +---
+>  tests/generic/174 | 4 +---
+>  4 files changed, 4 insertions(+), 10 deletions(-)
+> 
+> diff --git a/tests/generic/171 b/tests/generic/171
+> index f391685..d2ae8e4 100755
+> --- a/tests/generic/171
+> +++ b/tests/generic/171
+> @@ -75,9 +75,7 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
+>  sync
+>  
+>  echo "Allocate the rest of the space"
+> -nr_free=$(stat -f -c '%f' $testdir)
+> -touch $testdir/file0 $testdir/file1
+> -_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
+> +dd if=/dev/zero of=$testdir/eat_my_space >> $seqres.full 2>&1
 
-I'm not sure about this, is it possible to update fiemap_tester.c to
-deal with stripes or just _notrun in such cases? I'm waiting for great
-ideas too :)
+Please don't replace xfs_io writes using a specific data pattern
+with dd calls that write zeros. Indeed, we don't use dd for new
+tests anymore - xfs_io should be used.
 
->   2. print the error output of mkfs.xfs to /dev/null forr xfs/010,
->      xfs/013, xfs/042 and xfs/109
+Write a function that fills all the remaining free space (one may
+already exist) and call it in all these places.
 
-This looks good to me.
+Cheers,
 
->   3. add -f option for generic/347
-
-And this breaks test on ext4, not all mkfs.<fstype> support -f option.
-
-Thanks,
-Eryu
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
