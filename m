@@ -1,51 +1,49 @@
-Received: from mx2.suse.de ([195.135.220.15]:44300 "EHLO mx2.suse.de"
+Received: from mx1.redhat.com ([209.132.183.28]:43868 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933121AbcJGQQr (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 7 Oct 2016 12:16:47 -0400
-Date: Fri, 7 Oct 2016 18:16:45 +0200
-From: David Sterba <dsterba@suse.cz>
-Subject: Re: Is is possible to submit binary image as fstest test case?
-Message-ID: <20161007161645.GE11398@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-References: <53250876-4992-971e-ed37-054f03ef555f@cn.fujitsu.com>
- <20161007091838.GG9806@dastard>
- <f5f273e4-6d78-9ccd-64bf-480be7f05fbc@cn.fujitsu.com>
+        id S935076AbcJGQyG (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 7 Oct 2016 12:54:06 -0400
+Date: Fri, 7 Oct 2016 18:52:51 +0200
+From: Oleg Nesterov <oleg@redhat.com>
+Subject: Re: [PATCH V2 2/2] fs/super.c: don't fool lockdep in
+        freeze_super() and thaw_super() paths
+Message-ID: <20161007165250.GA1906@redhat.com>
+References: <20160926161856.GB32458@quack2.suse.cz> <20160926165525.GA9338@redhat.com> <20160927065135.GA1139@quack2.suse.cz> <20160927172901.GA11879@redhat.com> <20160930171434.GA2373@redhat.com> <20161002214225.GS9806@dastard> <20161003164435.GB6634@redhat.com> <20161004114341.GA8572@redhat.com> <20161004114800.GB32214@dhcp22.suse.cz> <20161006134449.GB13177@cmpxchg.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <f5f273e4-6d78-9ccd-64bf-480be7f05fbc@cn.fujitsu.com>
+In-Reply-To: <20161006134449.GB13177@cmpxchg.org>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, btrfs <linux-btrfs@vger.kernel.org>
+To: Johannes Weiner <hannes@cmpxchg.org>
+Cc: Michal Hocko <mhocko@kernel.org>, Dave Chinner <david@fromorbit.com>, Jan Kara <jack@suse.cz>, Al Viro <viro@zeniv.linux.org.uk>, Nikolay Borisov <kernel@kyup.com>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Oct 07, 2016 at 05:26:27PM +0800, Qu Wenruo wrote:
-> > Preferably not. We've managed to avoid pre-built images in xfstests
-> > for 15 years, so there'd have to be a really good reason to start
-> > doing this, especially as once we open that floodgate we'll end up
-> > with everyone wanting to do this and it will blow out the size of
-> > the repository in now time.
-> 
-> Makes sense.
-> For btrfs-progs, which includes test images, it already takes about 77M, 
-> even we have tried our best to reduce image size.
+On 10/06, Johannes Weiner wrote:
+>
+> On Tue, Oct 04, 2016 at 01:48:00PM +0200, Michal Hocko wrote:
+> > Johannes is already looking into this
+> > http://lkml.kernel.org/r/20161004093216.GA21170@cmpxchg.org
+> >
+> > On Tue 04-10-16 13:43:43, Oleg Nesterov wrote:
+> > > because of kernel bug:
+> > >
+> > > 	[ 2730.242537] run fstests generic/274 at 2016-10-04 05:17:34
+> > > 	[ 2730.738352] XFS (loop1): Mounting V5 Filesystem
+> > > 	[ 2730.741451] XFS (loop1): Ending clean mount
+> > > 	[ 2744.508698] ------------[ cut here ]------------
+> > > 	[ 2744.509190] kernel BUG at ./include/linux/swap.h:276!
+> > >
+> > > static inline void workingset_node_shadows_dec(struct radix_tree_node *node)
+> > > {
+> > > 	VM_BUG_ON(!workingset_node_shadows(node));
+> > > 	node->count -= 1U << RADIX_TREE_COUNT_SHIFT;
+>
+> We tracked this one down and Linus merged a fix for this issue:
+>
+> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=d3798ae8c6f3767c726403c2ca6ecc317752c9dd
 
-The number 77M is bogus. Clean checkout of the kernel.org repository is
-15M in total, the .git directory is 5M and all the images are 7.3MB in
-total. We're not close to any scary numbers yet. Should we need large
-images, I'll create a separate repository for that.
+Confirm, generic/274 no longer crashes the kernel.
 
-> > If the issue is just timing or being unable to trigger an error
-> > at the right time, this is what error injection frameworks or
-> > debug-only sysfs hooks are for. The XFS kernel code has both,
-> > xfstests use both, and they pretty much do away with the need for
-> > custom binary filesystem images for such testing...
-> 
-> So again, btrfs is lacking infrastructure for debug.
+Thanks.
 
-Depends what exactly you need. IIRC Filipe once submitted a patch for
-transaction failure injection but then realzied that he could achieve
-the same using the flaky device. You can try to take a snapshot of the
-block device after using the freeze syscall. More specific tasks would
-need code support. You definetelly know about the btrfs-corrupt-block
-utility so you can use it to creatively damage the filesystem structures.
+Oleg.
+
