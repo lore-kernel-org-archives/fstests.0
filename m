@@ -1,88 +1,56 @@
-Received: from cn.fujitsu.com ([222.73.24.84]:36649 "EHLO song.cn.fujitsu.com"
-        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-        id S1750974AbcJGHGg (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 7 Oct 2016 03:06:36 -0400
-From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
-Subject: [PATCH] generic: make 17[1-4] work well when btrfs compression is enabled
-Date: Fri,  7 Oct 2016 15:00:42 +0800
-Message-Id: <20161007070042.12258-1-wangxg.fnst@cn.fujitsu.com>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:2744 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751681AbcJGJS6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 7 Oct 2016 05:18:58 -0400
+Date: Fri, 7 Oct 2016 20:18:38 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: Is is possible to submit binary image as fstest test case?
+Message-ID: <20161007091838.GG9806@dastard>
+References: <53250876-4992-971e-ed37-054f03ef555f@cn.fujitsu.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <53250876-4992-971e-ed37-054f03ef555f@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, btrfs <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-When enabling btrfs compression, original codes can not fill fs
-correctly, fix this.
+On Thu, Oct 06, 2016 at 04:12:56PM +0800, Qu Wenruo wrote:
+> Hi,
+> 
+> Just as the title says, for some case(OK, btrfs again) we need to
+> catch a file system in special timing.
+> 
+> In this specific case, we need to grab a btrfs image undergoing
+> balancing, just before the balance finished.
+> 
+> Although we can use flakey to drop all write, we still don't have
+> method to catch the timing of the that transaction.
+> 
+> 
+> On the other hand, we can tweak our local kernel, adding
+> msleep()/message and dump the disk during the sleep.
+> And the image I dumped can easily trigger btrfs kernel and user-space bug.
+> 
+> So I'm wondering if I can just upload a zipped raw image as part of
+> the test case?
 
-Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
----
- tests/generic/171 | 4 +---
- tests/generic/172 | 2 +-
- tests/generic/173 | 4 +---
- tests/generic/174 | 4 +---
- 4 files changed, 4 insertions(+), 10 deletions(-)
+Preferably not. We've managed to avoid pre-built images in xfstests
+for 15 years, so there'd have to be a really good reason to start
+doing this, especially as once we open that floodgate we'll end up
+with everyone wanting to do this and it will blow out the size of
+the repository in now time.
 
-diff --git a/tests/generic/171 b/tests/generic/171
-index f391685..d2ae8e4 100755
---- a/tests/generic/171
-+++ b/tests/generic/171
-@@ -75,9 +75,7 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
- sync
- 
- echo "Allocate the rest of the space"
--nr_free=$(stat -f -c '%f' $testdir)
--touch $testdir/file0 $testdir/file1
--_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
-+dd if=/dev/zero of=$testdir/eat_my_space >> $seqres.full 2>&1
- sync
- 
- echo "CoW the big file"
-diff --git a/tests/generic/172 b/tests/generic/172
-index 8192290..3bb8687 100755
---- a/tests/generic/172
-+++ b/tests/generic/172
-@@ -73,7 +73,7 @@ sync
- 
- echo "Allocate the rest of the space"
- touch $testdir/file0 $testdir/file1
--_pwrite_byte 0x61 0 $fs_size $testdir/eat_my_space >> $seqres.full 2>&1
-+dd if=/dev/zero of=$testdir/eat_my_space >> $seqres.full 2>&1
- sync
- 
- echo "CoW the big file"
-diff --git a/tests/generic/173 b/tests/generic/173
-index c5fac9e..38bc951 100755
---- a/tests/generic/173
-+++ b/tests/generic/173
-@@ -75,9 +75,7 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
- sync
- 
- echo "Allocate the rest of the space"
--nr_free=$(stat -f -c '%f' $testdir)
--touch $testdir/file0 $testdir/file1
--_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
-+dd if=/dev/zero of=$testdir/eat_my_space >> $seqres.full 2>&1
- sync
- 
- echo "mmap CoW the big file"
-diff --git a/tests/generic/174 b/tests/generic/174
-index 8077d76..a55be38 100755
---- a/tests/generic/174
-+++ b/tests/generic/174
-@@ -76,9 +76,7 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
- sync
- 
- echo "Allocate the rest of the space"
--nr_free=$(stat -f -c '%f' $testdir)
--touch $testdir/file0 $testdir/file1
--_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
-+dd if=/dev/zero of=$testdir/eat_my_space >> $seqres.full 2>&1
- sync
- 
- echo "CoW the big file"
+If the issue is just timing or being unable to trigger an error
+at the right time, this is what error injection frameworks or
+debug-only sysfs hooks are for. The XFS kernel code has both,
+xfstests use both, and they pretty much do away with the need for
+custom binary filesystem images for such testing...
+
+Cheers,
+
+Dave.
 -- 
-2.9.0
-
-
-
+Dave Chinner
+david@fromorbit.com
