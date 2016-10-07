@@ -1,37 +1,88 @@
-Received: from imap.thunk.org ([74.207.234.97]:38258 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S936519AbcJGBn7 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 6 Oct 2016 21:43:59 -0400
-Date: Thu, 6 Oct 2016 15:24:52 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: Is is possible to submit binary image as fstest test case?
-Message-ID: <20161006192452.qj3stqmhhz5cq3wj@thunk.org>
-References: <53250876-4992-971e-ed37-054f03ef555f@cn.fujitsu.com>
- <20161006122927.GB16893@bfoster.bfoster>
+Received: from cn.fujitsu.com ([222.73.24.84]:36649 "EHLO song.cn.fujitsu.com"
+        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+        id S1750974AbcJGHGg (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 7 Oct 2016 03:06:36 -0400
+From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Subject: [PATCH] generic: make 17[1-4] work well when btrfs compression is enabled
+Date: Fri,  7 Oct 2016 15:00:42 +0800
+Message-Id: <20161007070042.12258-1-wangxg.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20161006122927.GB16893@bfoster.bfoster>
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: Qu Wenruo <quwenruo@cn.fujitsu.com>, fstests@vger.kernel.org, btrfs <linux-btrfs@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Oct 06, 2016 at 08:29:28AM -0400, Brian Foster wrote:
-> Doesn't necessarily bother me one way or the other, but something we've
-> done with XFS in such situations is introduce a DEBUG mode only sysfs
-> tunable that delays certain infrastructure (log recovery in our case) to
-> coordinate with test cases that try to reproduce such timing/racing
-> problems.
+When enabling btrfs compression, original codes can not fill fs
+correctly, fix this.
 
-The other approach the btrfs folks might consider is to have a
-sufficiently powerful "debugfs" or "xfs_db" program that can generate
-test images with the desired property.
+Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+---
+ tests/generic/171 | 4 +---
+ tests/generic/172 | 2 +-
+ tests/generic/173 | 4 +---
+ tests/generic/174 | 4 +---
+ 4 files changed, 4 insertions(+), 10 deletions(-)
 
-I've found that the time I've invested in creating debugfs has repaid
-itself a hundred times over, especially when maintaining a regression
-test suite for e2fsck.
+diff --git a/tests/generic/171 b/tests/generic/171
+index f391685..d2ae8e4 100755
+--- a/tests/generic/171
++++ b/tests/generic/171
+@@ -75,9 +75,7 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
+ sync
+ 
+ echo "Allocate the rest of the space"
+-nr_free=$(stat -f -c '%f' $testdir)
+-touch $testdir/file0 $testdir/file1
+-_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
++dd if=/dev/zero of=$testdir/eat_my_space >> $seqres.full 2>&1
+ sync
+ 
+ echo "CoW the big file"
+diff --git a/tests/generic/172 b/tests/generic/172
+index 8192290..3bb8687 100755
+--- a/tests/generic/172
++++ b/tests/generic/172
+@@ -73,7 +73,7 @@ sync
+ 
+ echo "Allocate the rest of the space"
+ touch $testdir/file0 $testdir/file1
+-_pwrite_byte 0x61 0 $fs_size $testdir/eat_my_space >> $seqres.full 2>&1
++dd if=/dev/zero of=$testdir/eat_my_space >> $seqres.full 2>&1
+ sync
+ 
+ echo "CoW the big file"
+diff --git a/tests/generic/173 b/tests/generic/173
+index c5fac9e..38bc951 100755
+--- a/tests/generic/173
++++ b/tests/generic/173
+@@ -75,9 +75,7 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
+ sync
+ 
+ echo "Allocate the rest of the space"
+-nr_free=$(stat -f -c '%f' $testdir)
+-touch $testdir/file0 $testdir/file1
+-_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
++dd if=/dev/zero of=$testdir/eat_my_space >> $seqres.full 2>&1
+ sync
+ 
+ echo "mmap CoW the big file"
+diff --git a/tests/generic/174 b/tests/generic/174
+index 8077d76..a55be38 100755
+--- a/tests/generic/174
++++ b/tests/generic/174
+@@ -76,9 +76,7 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
+ sync
+ 
+ echo "Allocate the rest of the space"
+-nr_free=$(stat -f -c '%f' $testdir)
+-touch $testdir/file0 $testdir/file1
+-_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
++dd if=/dev/zero of=$testdir/eat_my_space >> $seqres.full 2>&1
+ sync
+ 
+ echo "CoW the big file"
+-- 
+2.9.0
 
-Cheers,
 
-					- Ted
+
