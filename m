@@ -1,110 +1,89 @@
-Date: Fri, 7 Oct 2016 19:41:45 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 8/9] xfs: test realtime rmapbt code
-Message-ID: <20161007114145.GI27776@eguan.usersys.redhat.com>
-References: <147520218309.26891.10856487889060965097.stgit@birch.djwong.org>
- <147520223583.26891.8504154002804973181.stgit@birch.djwong.org>
+Subject: Re: [PATCH] generic: make 17[1-4] work well when btrfs compression is
+ enabled
+References: <20161007070042.12258-1-wangxg.fnst@cn.fujitsu.com>
+ <20161007143610.GX27872@dastard> <20161009042333.GA5609@birch.djwong.org>
+From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Message-ID: <57FB0FAF.4080200@cn.fujitsu.com>
+Date: Mon, 10 Oct 2016 11:49:03 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <147520223583.26891.8504154002804973181.stgit@birch.djwong.org>
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: david@fromorbit.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+In-Reply-To: <20161009042333.GA5609@birch.djwong.org>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
+To: "Darrick J. Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Sep 29, 2016 at 07:23:55PM -0700, Darrick J. Wong wrote:
-> Test the realtime rmap btree code by exercising various IO patterns
-> on realtime files.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
+hi,
 
-[snip]
+On 10/10/2016 05:04 AM, Darrick J. Wong wrote:
+> On Sat, Oct 08, 2016 at 01:36:10AM +1100, Dave Chinner wrote:
+>> On Fri, Oct 07, 2016 at 03:00:42PM +0800, Wang Xiaoguang wrote:
+>>> When enabling btrfs compression, original codes can not fill fs
+>>> correctly, fix this.
+>>>
+>>> Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+>>> ---
+>>>   tests/generic/171 | 4 +---
+>>>   tests/generic/172 | 2 +-
+>>>   tests/generic/173 | 4 +---
+>>>   tests/generic/174 | 4 +---
+>>>   4 files changed, 4 insertions(+), 10 deletions(-)
+>>>
+>>> diff --git a/tests/generic/171 b/tests/generic/171
+>>> index f391685..d2ae8e4 100755
+>>> --- a/tests/generic/171
+>>> +++ b/tests/generic/171
+>>> @@ -75,9 +75,7 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
+>>>   sync
+>>>   
+>>>   echo "Allocate the rest of the space"
+>>> -nr_free=$(stat -f -c '%f' $testdir)
+>>> -touch $testdir/file0 $testdir/file1
+> Why remove this line which ensures that the inode we're going to use (file1)
+> later in the test has been allocated /before/ we try to eat all the space?
+Sorry, I don't understand :)
+In generic/171, generic/172, generic/173, generic/174, you created file0 and
+file1, but I don't see test cases use them and they are empty.
 
-> 
-> 
-> diff --git a/tests/xfs/877 b/tests/xfs/877
-> index 194b3be..04fdb4c 100755
-> --- a/tests/xfs/877
-> +++ b/tests/xfs/877
-> @@ -32,7 +32,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
->  _cleanup()
->  {
->  	cd /
-> -	rm -rf "$tmp".* $metadump_file
-> +	rm -rf "$tmp".*
->  }
+>
+>>> -_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
+>>> +dd if=/dev/zero of=$testdir/eat_my_space >> $seqres.full 2>&1
+> Uh... isn't a bunch of zeroes just as compressible as 0x61?
+0x61 is also compressible.
+> I suppose
+> the point here is to write until write returns ENOSPC, since in btrfs
+> land we can't assume that writing $nr blocks will use up at least that
+> much space.
+Yes.
 
-I fold this hunk into patch 7/9.
+>
+> Does XFS reflink still pass this test with this patch?
+Could you please give a stable xfs repotory that supports xfs reflink, 
+thanks.
 
-[snip]
+>
+>> Please don't replace xfs_io writes using a specific data pattern
+>> with dd calls that write zeros. Indeed, we don't use dd for new
+>> tests anymore - xfs_io should be used.
+>>
+>> Write a function that fills all the remaining free space (one may
+>> already exist) and call it in all these places.
+> Yeah, there already are a few of these...
+OK, I'll use it, thanks.
 
-> diff --git a/tests/xfs/886 b/tests/xfs/886
-> new file mode 100755
-> index 0000000..f0c3997
-> --- /dev/null
-> +++ b/tests/xfs/886
-> @@ -0,0 +1,99 @@
-> +#! /bin/bash
-> +# FS QA Test No. 886
-> +#
-> +# Cross-link file block into rtrmapbt and see if repair fixes it.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +
-> +seq=`basename "$0"`
-> +seqres="$RESULT_DIR/$seq"
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -rf "$tmp".*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_supported_fs xfs
-> +_require_realtime
-> +_require_xfs_scratch_rmapbt
-> +_require_test_program "punch-alternating"
-> +_disable_dmesg_check
-> +
-> +rm -f "$seqres.full"
-> +
-> +echo "Format and mount"
-> +_scratch_mkfs | _filter_mkfs 2>$tmp.mkfs >/dev/null
-> +. $tmp.mkfs
-> +cat $tmp.mkfs > "$seqres.full" 2>&1
-> +_scratch_mkfs > "$seqres.full" 2>&1
-
-This second _scratch_mkfs doesn't seem necessary, and it overwrites
-$seqres.full. xfs/887 has the same issue. I can fix them at commit time
-if you think they're safe to remove too.
-
-Thanks,
-Eryu
+Regards,
+Xiaoguang Wang
+>
+> --D
+>
+>> Cheers,
+>>
+>> Dave.
+>> -- 
+>> Dave Chinner
+>> david@fromorbit.com
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
