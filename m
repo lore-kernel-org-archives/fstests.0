@@ -1,47 +1,43 @@
-Received: from cn.fujitsu.com ([222.73.24.84]:36998 "EHLO song.cn.fujitsu.com"
-        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-        id S1751644AbcJJFMk (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 10 Oct 2016 01:12:40 -0400
-From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
-Subject: [PATCH] generic/175: disable inline data feature for btrfs
-Date: Mon, 10 Oct 2016 13:06:47 +0800
-Message-Id: <20161010050647.30262-1-wangxg.fnst@cn.fujitsu.com>
-MIME-Version: 1.0
+Received: from mx1.redhat.com ([209.132.183.28]:47518 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751027AbcJKK2E (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 11 Oct 2016 06:28:04 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 2F27A12B8
+        for <fstests@vger.kernel.org>; Tue, 11 Oct 2016 10:26:40 +0000 (UTC)
+Received: from bcodding.csb (vpn-60-205.rdu2.redhat.com [10.10.60.205])
+        by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u9BAQdXe012190
+        for <fstests@vger.kernel.org>; Tue, 11 Oct 2016 06:26:40 -0400
+From: Benjamin Coddington <bcodding@redhat.com>
+Subject: [PATCH] generic/317: fixup grep for qa_user_id
+Date: Tue, 11 Oct 2016 06:26:38 -0400
+Message-Id: <fb1905dab09a7e9d9d8952da56d90aaba2403a57.1476181339.git.bcodding@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-For btrfs, if compression is enabled, it may generate inline data for a
-blocksize data range, this inline data is stored in fs tree, will not have
-a individual extent, try to reflink this data range at a not-zero offset
-will return EOPNOTSUPP, so here we disable inline data feature for btrfs.
+The grep for $qa_user_id can return more than one entry.
 
-Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Signed-off-by: Benjamin Coddington <bcodding@redhat.com>
 ---
- tests/generic/175 | 7 +++++++
- 1 file changed, 7 insertions(+)
+ tests/generic/317 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/tests/generic/175 b/tests/generic/175
-index 964580c..b3f90dc 100755
---- a/tests/generic/175
-+++ b/tests/generic/175
-@@ -50,6 +50,13 @@ rm -f "$seqres.full"
+diff --git a/tests/generic/317 b/tests/generic/317
+index 9d9499ba04dd..ddaa6b59afc5 100755
+--- a/tests/generic/317
++++ b/tests/generic/317
+@@ -61,7 +61,7 @@ _require_scratch
+ _require_user
+ _require_ugid_map
+ _require_userns
+-qa_user_id=`grep $qa_user /etc/passwd |awk -F: '{print $3}'`
++qa_user_id=`grep ^${qa_user}: /etc/passwd |awk -F: '{print $3}'`
  
- echo "Format and mount"
- _scratch_mkfs > "$seqres.full" 2>&1
-+# For btrfs, if compression is enabled, it may generate inline data for a
-+# blocksize data range, this inline data is stored in fs tree, will not have
-+# a individual extent, try to reflink this data range at a not-zero offset
-+# will return EOPNOTSUPP, so here we disable inline data feature for btrfs.
-+if [ "$FSTYP" = "btrfs" ]; then
-+	export MOUNT_OPTIONS="-o max_inline=0 $MOUNT_OPTIONS"
-+fi
- _scratch_mount >> "$seqres.full" 2>&1
- 
- testdir="$SCRATCH_MNT/test-$seq"
+ _filter_output()
+ {
 -- 
-2.9.0
-
-
+2.5.5
 
