@@ -1,90 +1,71 @@
-Received: from mail-pa0-f45.google.com ([209.85.220.45]:35189 "EHLO
-        mail-pa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752511AbcJLRoK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Oct 2016 13:44:10 -0400
-Received: by mail-pa0-f45.google.com with SMTP id qn10so30097576pac.2
-        for <fstests@vger.kernel.org>; Wed, 12 Oct 2016 10:43:31 -0700 (PDT)
-Date: Wed, 12 Oct 2016 10:35:49 -0700
-From: Eric Biggers <ebiggers@google.com>
-Subject: Re: [PATCH v2 RESEND] posix_acl: Clear SGID bit when setting file
- permissions
-Message-ID: <20161012173549.GA120419@google.com>
-References: <1474299768-15150-1-git-send-email-jack@suse.cz>
- <20161011231101.GB126173@google.com>
- <20161012071651.GB13896@quack2.suse.cz>
+Received: from cn.fujitsu.com ([59.151.112.132]:9374 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1752861AbcJKFfx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 11 Oct 2016 01:35:53 -0400
+Subject: Re: [PATCH] generic/175: disable inline data feature for btrfs
+References: <20161010050647.30262-1-wangxg.fnst@cn.fujitsu.com>
+ <20161010230938.GG23194@dastard>
+From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Message-ID: <57FC78D9.8030209@cn.fujitsu.com>
+Date: Tue, 11 Oct 2016 13:30:01 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20161012071651.GB13896@quack2.suse.cz>
+In-Reply-To: <20161010230938.GG23194@dastard>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Jan Kara <jack@suse.cz>
-Cc: Al Viro <viro@ZenIV.linux.org.uk>, Andrew Morton <akpm@linux-foundation.org>, linux-fsdevel@vger.kernel.org, Andreas Gruenbacher <agruenba@redhat.com>, fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Cc +fstests@vger.kernel.org
+hi,
 
-On Wed, Oct 12, 2016 at 09:16:51AM +0200, Jan Kara wrote:
-> Hi,
-> 
-> On Tue 11-10-16 16:11:01, Eric Biggers wrote:
-> > On Mon, Sep 19, 2016 at 05:42:48PM +0200, Jan Kara wrote:
-> > > When file permissions are modified via chmod(2) and the user is not in
-> > > the owning group or capable of CAP_FSETID, the setgid bit is cleared in
-> > > inode_change_ok().  Setting a POSIX ACL via setxattr(2) sets the file
-> > > permissions as well as the new ACL, but doesn't clear the setgid bit in
-> > > a similar way; this allows to bypass the check in chmod(2).  Fix that.
-> > > 
-> > 
-> > This patch is causing xfstests generic/314 to fail.  This test is supposed to
-> > test "SGID inheritance on subdirectories", and the failure is because subdir2
-> > unexpectedly ends up without a SGID bit.  This happens because the following
-> > commands now result in the SGID bit on the parent directory "$TEST_DIR/$seq-dir"
-> > being cleared rather than set:
-> > 
-> > 	mkdir $TEST_DIR/$seq-dir
-> > 	chown $qa_user:12345 $TEST_DIR/$seq-dir
-> > 	chmod 2775 $TEST_DIR/$seq-dir
-> > 	su $qa_user -c "setfacl -m u:$qa_user:rwx,d:u:$qa_user:rwx $TEST_DIR/$seq-dir"
-> > 
-> > Is this the expected behavior now?
-> 
-> Yes, this is expected behavior - $qa_user is not in group 12345 and thus he
-> could not set sgid bit himself. So once mode is modified by the user (and
-> the setfacl command you presented will touch file mode) sgid bit is expected
-> to be cleared - this is to be consistent with the behavior when:
-> 
->   chmod 2755 $TEST_DIR/$seq-dir
-> 
-> done by $qa_user would clear the sgid bit as well.
-> 
-> 								Honza
-> -- 
-> Jan Kara <jack@suse.com>
-> SUSE Labs, CR
+On 10/11/2016 07:09 AM, Dave Chinner wrote:
+> On Mon, Oct 10, 2016 at 01:06:47PM +0800, Wang Xiaoguang wrote:
+>> For btrfs, if compression is enabled, it may generate inline data for a
+>> blocksize data range, this inline data is stored in fs tree, will not have
+>> a individual extent, try to reflink this data range at a not-zero offset
+>> will return EOPNOTSUPP, so here we disable inline data feature for btrfs.
+>>
+>> Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+>> ---
+>>   tests/generic/175 | 7 +++++++
+>>   1 file changed, 7 insertions(+)
+>>
+>> diff --git a/tests/generic/175 b/tests/generic/175
+>> index 964580c..b3f90dc 100755
+>> --- a/tests/generic/175
+>> +++ b/tests/generic/175
+>> @@ -50,6 +50,13 @@ rm -f "$seqres.full"
+>>   
+>>   echo "Format and mount"
+>>   _scratch_mkfs > "$seqres.full" 2>&1
+>> +# For btrfs, if compression is enabled, it may generate inline data for a
+>> +# blocksize data range, this inline data is stored in fs tree, will not have
+>> +# a individual extent, try to reflink this data range at a not-zero offset
+>> +# will return EOPNOTSUPP, so here we disable inline data feature for btrfs.
+>> +if [ "$FSTYP" = "btrfs" ]; then
+>> +	export MOUNT_OPTIONS="-o max_inline=0 $MOUNT_OPTIONS"
+>> +fi
+> Can we /please stop/ putting special case code like this in tests?
+>
+> This is an unsustainable and unmaintainable practice - it's making a
+> mess of the test code. If there are specific mount options that
+> needs to be avoided, then add an option to filter them out. e.g.
+> something like this:
+>
+> _scratch_options_filter btrfs compress
+>
+> so that it removes any compression option from the btrfs mount/mkfs
+> that is run for that test.
+OK, I see, thanks.
 
-Is this true even though we're talking about a directory, not a regular file?
+Regards,
+Xiaoguang Wang
 
->From the POSIX man page for chmod (man 3 chmod):
+>
+> Cheers,
+>
+> Dave.
 
-       If the calling process does not have appropriate privileges, and if the
-       group ID of the file does not match the effective group ID or  one  of
-       the  supplementary  group  IDs  and  if the file is a regular file, bit
-       S_ISGID (set-group-ID on execution) in the file's mode shall be cleared
-       upon successful return from chmod().
 
-Note the "is a regular file".  Granted, Linux already cleared the SGID bit on
-directories too, so your patch is consistent with that existing behavior.  But
-if "directories too" is really the "correct" behavior, it looks like there need
-to be xfstests updates:
 
-	* generic/314, which is supposed to test SGID inheritance, should be
-	  updated to not depend on any specific SGID clearing behavior.  As-is
-	  this test is failing.
-
-	* generic/375, which is a new test that is supposed to test
-	  SGID clearing, possibly should test both a regular file and a
-	  directory.  Right now it only tests a regular file.
-
-Thoughts on this?
-
-Eric
