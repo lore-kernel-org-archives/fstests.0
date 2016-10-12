@@ -1,73 +1,90 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:17012 "EHLO
-        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1752344AbcJJX57 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 10 Oct 2016 19:57:59 -0400
-Date: Tue, 11 Oct 2016 10:31:49 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v2] generic: make 17[1-4] work well when btrfs
- compression is enabled
-Message-ID: <20161010233149.GH23194@dastard>
-References: <20161010080617.10139-1-wangxg.fnst@cn.fujitsu.com>
+Received: from mail-pa0-f45.google.com ([209.85.220.45]:35189 "EHLO
+        mail-pa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752511AbcJLRoK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 12 Oct 2016 13:44:10 -0400
+Received: by mail-pa0-f45.google.com with SMTP id qn10so30097576pac.2
+        for <fstests@vger.kernel.org>; Wed, 12 Oct 2016 10:43:31 -0700 (PDT)
+Date: Wed, 12 Oct 2016 10:35:49 -0700
+From: Eric Biggers <ebiggers@google.com>
+Subject: Re: [PATCH v2 RESEND] posix_acl: Clear SGID bit when setting file
+ permissions
+Message-ID: <20161012173549.GA120419@google.com>
+References: <1474299768-15150-1-git-send-email-jack@suse.cz>
+ <20161011231101.GB126173@google.com>
+ <20161012071651.GB13896@quack2.suse.cz>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161010080617.10139-1-wangxg.fnst@cn.fujitsu.com>
+In-Reply-To: <20161012071651.GB13896@quack2.suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Jan Kara <jack@suse.cz>
+Cc: Al Viro <viro@ZenIV.linux.org.uk>, Andrew Morton <akpm@linux-foundation.org>, linux-fsdevel@vger.kernel.org, Andreas Gruenbacher <agruenba@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Oct 10, 2016 at 04:06:17PM +0800, Wang Xiaoguang wrote:
-> When enabling btrfs compression, original codes can not fill fs
-> correctly, fix this.
+Cc +fstests@vger.kernel.org
+
+On Wed, Oct 12, 2016 at 09:16:51AM +0200, Jan Kara wrote:
+> Hi,
 > 
-> Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
-> ---
-> V2: In common/, I did't find an existing function suitable for
->     these 4 test cases to fill fs, so I still use _pwrite_byte() with
->     a big enough file length fo fill fs. Note, for btrfs, metadata space
->     still is not full, only data space is full, but it's OK for these
->     4 test cases.
+> On Tue 11-10-16 16:11:01, Eric Biggers wrote:
+> > On Mon, Sep 19, 2016 at 05:42:48PM +0200, Jan Kara wrote:
+> > > When file permissions are modified via chmod(2) and the user is not in
+> > > the owning group or capable of CAP_FSETID, the setgid bit is cleared in
+> > > inode_change_ok().  Setting a POSIX ACL via setxattr(2) sets the file
+> > > permissions as well as the new ACL, but doesn't clear the setgid bit in
+> > > a similar way; this allows to bypass the check in chmod(2).  Fix that.
+> > > 
+> > 
+> > This patch is causing xfstests generic/314 to fail.  This test is supposed to
+> > test "SGID inheritance on subdirectories", and the failure is because subdir2
+> > unexpectedly ends up without a SGID bit.  This happens because the following
+> > commands now result in the SGID bit on the parent directory "$TEST_DIR/$seq-dir"
+> > being cleared rather than set:
+> > 
+> > 	mkdir $TEST_DIR/$seq-dir
+> > 	chown $qa_user:12345 $TEST_DIR/$seq-dir
+> > 	chmod 2775 $TEST_DIR/$seq-dir
+> > 	su $qa_user -c "setfacl -m u:$qa_user:rwx,d:u:$qa_user:rwx $TEST_DIR/$seq-dir"
+> > 
+> > Is this the expected behavior now?
 > 
->     All these 4 cases pass in xfs and btrfs(without compression), if
->     btrfs has compression enabled, these 4 cases will fail for false
->     enospc error, I have sent kernel patches to fix this bug.
-> ---
->  tests/generic/171 | 7 ++++---
->  tests/generic/172 | 6 ++++--
->  tests/generic/173 | 7 ++++---
->  tests/generic/174 | 7 ++++---
->  4 files changed, 16 insertions(+), 11 deletions(-)
+> Yes, this is expected behavior - $qa_user is not in group 12345 and thus he
+> could not set sgid bit himself. So once mode is modified by the user (and
+> the setfacl command you presented will touch file mode) sgid bit is expected
+> to be cleared - this is to be consistent with the behavior when:
 > 
-> diff --git a/tests/generic/171 b/tests/generic/171
-> index f391685..2d7f683 100755
-> --- a/tests/generic/171
-> +++ b/tests/generic/171
-> @@ -75,9 +75,10 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
->  sync
->  
->  echo "Allocate the rest of the space"
-> -nr_free=$(stat -f -c '%f' $testdir)
-> -touch $testdir/file0 $testdir/file1
-> -_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
-> +# here we try to write big enough data in case some fs support
-> +# compression, such as btrfs.
-> +len=$((2 ** 36))
-> +_pwrite_byte 0x61 0 $len $testdir/eat_my_space >> $seqres.full 2>&1
+>   chmod 2755 $TEST_DIR/$seq-dir
+> 
+> done by $qa_user would clear the sgid bit as well.
+> 
+> 								Honza
+> -- 
+> Jan Kara <jack@suse.com>
+> SUSE Labs, CR
 
-NACK. This is no better than the last proposal. 2^36 = 64GB, which
-will not fill filesystems of any significant size, especially as the
-data will compress down to nearly nothing.
+Is this true even though we're talking about a directory, not a regular file?
 
-Trying to hack around compression artifacts by inflating the size of
-the file just doesn't work reliably.  The way to fix this is to
-either use one of the "fill filesystem" functions that isn't
-affected by compression, or to add the ability to xfs_io to write
-incompressible data patterns and otherwise leave the test alone.
+>From the POSIX man page for chmod (man 3 chmod):
 
-Cheers,
+       If the calling process does not have appropriate privileges, and if the
+       group ID of the file does not match the effective group ID or  one  of
+       the  supplementary  group  IDs  and  if the file is a regular file, bit
+       S_ISGID (set-group-ID on execution) in the file's mode shall be cleared
+       upon successful return from chmod().
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Note the "is a regular file".  Granted, Linux already cleared the SGID bit on
+directories too, so your patch is consistent with that existing behavior.  But
+if "directories too" is really the "correct" behavior, it looks like there need
+to be xfstests updates:
+
+	* generic/314, which is supposed to test SGID inheritance, should be
+	  updated to not depend on any specific SGID clearing behavior.  As-is
+	  this test is failing.
+
+	* generic/375, which is a new test that is supposed to test
+	  SGID clearing, possibly should test both a regular file and a
+	  directory.  Right now it only tests a regular file.
+
+Thoughts on this?
+
+Eric
