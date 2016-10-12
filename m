@@ -1,72 +1,77 @@
-Received: from mail-pf0-f172.google.com ([209.85.192.172]:33488 "EHLO
-        mail-pf0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752053AbcJLWDj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Oct 2016 18:03:39 -0400
-Received: by mail-pf0-f172.google.com with SMTP id 128so24734089pfz.0
-        for <fstests@vger.kernel.org>; Wed, 12 Oct 2016 15:03:39 -0700 (PDT)
-From: Eric Biggers <ebiggers@google.com>
-Subject: [PATCH] generic/314: don't test SGID behavior after setfacl
-Date: Wed, 12 Oct 2016 15:03:08 -0700
-Message-Id: <1476309788-101401-2-git-send-email-ebiggers@google.com>
-In-Reply-To: <1476309788-101401-1-git-send-email-ebiggers@google.com>
-References: <1476309788-101401-1-git-send-email-ebiggers@google.com>
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:61901 "EHLO
+        ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1753088AbcJLWWH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 12 Oct 2016 18:22:07 -0400
+Date: Thu, 13 Oct 2016 08:14:07 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: Test generic/299 stalling forever
+Message-ID: <20161012211407.GL23194@dastard>
+References: <20150618155337.GA10439@thunk.org>
+ <20150618233430.GK20262@dastard>
+ <20160929043722.ypf3tnxsl6ovt653@thunk.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20160929043722.ypf3tnxsl6ovt653@thunk.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: jack@suse.cz, agruenba@redhat.com, Eric Biggers <ebiggers@google.com>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: linux-ext4@vger.kernel.org, fstests@vger.kernel.org, tarasov@vasily.name, axboe@fb.com
 List-ID: <fstests@vger.kernel.org>
 
-Linux 4.9 (since commit 073931017b49: "posix_acl: Clear SGID bit when
-setting file permissions") now may clear the SGID bit when setting a
-POSIX ACL, to match chmod() behavior.  This was making generic/314 fail.
-Since SGID bit clearing is already tested by generic/375, just remove
-the problematic portion of generic/314.
+On Thu, Sep 29, 2016 at 12:37:22AM -0400, Theodore Ts'o wrote:
+> On Fri, Jun 19, 2015 at 09:34:30AM +1000, Dave Chinner wrote:
+> > On Thu, Jun 18, 2015 at 11:53:37AM -0400, Theodore Ts'o wrote:
+> > > I've been trying to figure out why generic/299 has occasionally been
+> > > stalling forever.  After taking a closer look, it appears the problem
+> > > is that the fio process is stalling in userspace.  Looking at the ps
+> > > listing, the fio process hasn't run in over six hours, and using
+> > > attaching strace to the fio process, it's stalled in a FUTUEX_WAIT.
+> > > 
+> > > Has anyone else seen this?  I'm using fio 2.2.6, and I have a feeling
+> > > that I started seeing this when I started using a newer version of
+> > > fio.  So I'm going to try roll back to an older version of fio and see
+> > > if that causes the problem to go away.
+> > 
+> > I'm running on fio 2.1.3 at the moment and I havne't seen any
+> > problems like this for months. Keep in mind that fio does tend to
+> > break in strange ways fairly regularly, so I'd suggest an
+> > upgrade/downgrade of fio as your first move.
+> 
+> Out of curiosity, Dave, are you still using fio 2.1.3?  I had upgraded
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- tests/generic/314     | 8 ++------
- tests/generic/314.out | 1 -
- 2 files changed, 2 insertions(+), 7 deletions(-)
+No.
 
-diff --git a/tests/generic/314 b/tests/generic/314
-index 65d3513..49b03e4 100755
---- a/tests/generic/314
-+++ b/tests/generic/314
-@@ -39,12 +39,10 @@ _cleanup()
- # get standard environment, filters and checks
- . ./common/rc
- . ./common/filter
--. ./common/attr
- 
- # real QA test starts here
- _supported_fs generic
- _require_test
--_require_acls
- _require_user
- 
- rm -rf $TEST_DIR/$seq-dir
-@@ -56,12 +54,10 @@ chown $qa_user:12345 $TEST_DIR/$seq-dir
- # Make parent dir sgid
- chmod 2775 $TEST_DIR/$seq-dir
- 
--# Make subdirs before & after acl set
-+# Make subdir
- su $qa_user -c "umask 022; mkdir $TEST_DIR/$seq-dir/subdir"
--su $qa_user -c "setfacl -m u:$qa_user:rwx,d:u:$qa_user:rwx $TEST_DIR/$seq-dir"
--su $qa_user -c "mkdir $TEST_DIR/$seq-dir/subdir2"
- 
--# Both subdirs should have inherited sgid
-+# Subdir should have inherited sgid
- _ls_l $TEST_DIR/$seq-dir/ | grep -v total | _filter_test_dir | awk '{print $1,$NF}'
- 
- status=0
-diff --git a/tests/generic/314.out b/tests/generic/314.out
-index b2db82b..bcd14f5 100644
---- a/tests/generic/314.out
-+++ b/tests/generic/314.out
-@@ -1,3 +1,2 @@
- QA output created by 314
- drwxr-sr-x subdir
--drwxrwsr-x+ subdir2
+$ fio -v
+fio-2.1.11
+$
+
+> to the latest fio to fix other test breaks, and I'm stil seeing the
+> occasional generic/299 test failure.  In fact, it's been happening
+> often enough on one of my test platforms[1] that I decided to really
+> dig down and investigate it, and all of the threads were blocking on
+> td->verify_cond in fio's verify.c.
+> 
+> It bisected down to this commit:
+> 
+> commit e5437a073e658e8154b9e87bab5c7b3b06ed4255
+> Author: Vasily Tarasov <tarasov@vasily.name>
+> Date:   Sun Nov 9 20:22:24 2014 -0700
+> 
+>     Fix for a race when fio prints I/O statistics periodically
+> 
+>     Below is the demonstration for the latest code in git:
+>     ...
+> 
+> So generic/299 passes reliably with this commits parent, and it fails
+> on this commit within a dozen tries or so.  The commit first landed in
+> fio 2.1.14, so it's consistent with Dave's report a year ago he was
+> still using fio 2.1.3.
+
+But I'm still not using a fio recent enough to hit this.
+
+Cheers,
+
+Dave.
 -- 
-2.8.0.rc3.226.g39d4020
-
+Dave Chinner
+david@fromorbit.com
