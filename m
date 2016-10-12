@@ -1,113 +1,72 @@
-Received: from mail-pf0-f169.google.com ([209.85.192.169]:35735 "EHLO
-        mail-pf0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752053AbcJLWDe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Oct 2016 18:03:34 -0400
-Received: by mail-pf0-f169.google.com with SMTP id s8so24421093pfj.2
-        for <fstests@vger.kernel.org>; Wed, 12 Oct 2016 15:03:33 -0700 (PDT)
+Received: from mail-pf0-f172.google.com ([209.85.192.172]:33488 "EHLO
+        mail-pf0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752053AbcJLWDj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 12 Oct 2016 18:03:39 -0400
+Received: by mail-pf0-f172.google.com with SMTP id 128so24734089pfz.0
+        for <fstests@vger.kernel.org>; Wed, 12 Oct 2016 15:03:39 -0700 (PDT)
 From: Eric Biggers <ebiggers@google.com>
-Subject: [PATCH] generic/375: test both regular file and directory
-Date: Wed, 12 Oct 2016 15:03:07 -0700
-Message-Id: <1476309788-101401-1-git-send-email-ebiggers@google.com>
+Subject: [PATCH] generic/314: don't test SGID behavior after setfacl
+Date: Wed, 12 Oct 2016 15:03:08 -0700
+Message-Id: <1476309788-101401-2-git-send-email-ebiggers@google.com>
+In-Reply-To: <1476309788-101401-1-git-send-email-ebiggers@google.com>
+References: <1476309788-101401-1-git-send-email-ebiggers@google.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: jack@suse.cz, agruenba@redhat.com, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-generic/375 previously only tested SGID being cleared on a regular file.
-It should test SGID being cleared on a directory too.  Though this is
-not required by POSIX, it is the Linux behavior.
+Linux 4.9 (since commit 073931017b49: "posix_acl: Clear SGID bit when
+setting file permissions") now may clear the SGID bit when setting a
+POSIX ACL, to match chmod() behavior.  This was making generic/314 fail.
+Since SGID bit clearing is already tested by generic/375, just remove
+the problematic portion of generic/314.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- tests/generic/375     | 54 ++++++++++++++++++++++++++++++++-------------------
- tests/generic/375.out |  8 ++++++++
- 2 files changed, 42 insertions(+), 20 deletions(-)
+ tests/generic/314     | 8 ++------
+ tests/generic/314.out | 1 -
+ 2 files changed, 2 insertions(+), 7 deletions(-)
 
-diff --git a/tests/generic/375 b/tests/generic/375
-index f8c3260..1d523e5 100755
---- a/tests/generic/375
-+++ b/tests/generic/375
-@@ -52,30 +52,44 @@ _require_runas
- _require_acls
+diff --git a/tests/generic/314 b/tests/generic/314
+index 65d3513..49b03e4 100755
+--- a/tests/generic/314
++++ b/tests/generic/314
+@@ -39,12 +39,10 @@ _cleanup()
+ # get standard environment, filters and checks
+ . ./common/rc
+ . ./common/filter
+-. ./common/attr
  
- cd $TEST_DIR
--testfile=testfile.$seq
--rm -f $testfile
+ # real QA test starts here
+ _supported_fs generic
+ _require_test
+-_require_acls
+ _require_user
  
--touch $testfile
--chown 100:100 $testfile
-+# try with both regular file and directory
-+for filetype in regular dir; do
+ rm -rf $TEST_DIR/$seq-dir
+@@ -56,12 +54,10 @@ chown $qa_user:12345 $TEST_DIR/$seq-dir
+ # Make parent dir sgid
+ chmod 2775 $TEST_DIR/$seq-dir
  
--echo '*** SGID should remain set (twice)'
--chmod 2755 $testfile
--_runas -u 100 -g 100 -- chmod 2777 $testfile
--stat -c %A $testfile
--chmod 2755 $testfile
--_runas -u 100 -g 100 -- setfacl -m u::rwx,g::rwx,o::rwx $testfile
--stat -c %A $testfile
-+	case $filetype in
-+	regular)
-+		testfile=testfile.$seq
-+		rm -f $testfile
-+		touch $testfile
-+		;;
-+	*)
-+		testfile=testdir.$seq
-+		rm -rf $testfile
-+		mkdir $testfile
-+		;;
-+	esac
+-# Make subdirs before & after acl set
++# Make subdir
+ su $qa_user -c "umask 022; mkdir $TEST_DIR/$seq-dir/subdir"
+-su $qa_user -c "setfacl -m u:$qa_user:rwx,d:u:$qa_user:rwx $TEST_DIR/$seq-dir"
+-su $qa_user -c "mkdir $TEST_DIR/$seq-dir/subdir2"
  
--echo '*** SGID should be cleared (twice)'
--chmod 2755 $testfile
--_runas -u 100 -g 101 -- chmod 2777 $testfile
--stat -c %A $testfile
--chmod 2755 $testfile
--_runas -u 100 -g 101 -- setfacl -m u::rwx,g::rwx,o::rwx $testfile
--stat -c %A $testfile
-+	chown 100:100 $testfile
- 
--echo '*** Expected failure'
--_runas -u 101 -g 101 -- chmod 2777 $testfile
-+	echo '*** SGID should remain set (twice)'
-+	chmod 2755 $testfile
-+	_runas -u 100 -g 100 -- chmod 2777 $testfile
-+	stat -c %A $testfile
-+	chmod 2755 $testfile
-+	_runas -u 100 -g 100 -- setfacl -m u::rwx,g::rwx,o::rwx $testfile
-+	stat -c %A $testfile
-+
-+	echo '*** SGID should be cleared (twice)'
-+	chmod 2755 $testfile
-+	_runas -u 100 -g 101 -- chmod 2777 $testfile
-+	stat -c %A $testfile
-+	chmod 2755 $testfile
-+	_runas -u 100 -g 101 -- setfacl -m u::rwx,g::rwx,o::rwx $testfile
-+	stat -c %A $testfile
-+
-+	echo '*** Expected failure'
-+	_runas -u 101 -g 101 -- chmod 2777 $testfile
-+done
+-# Both subdirs should have inherited sgid
++# Subdir should have inherited sgid
+ _ls_l $TEST_DIR/$seq-dir/ | grep -v total | _filter_test_dir | awk '{print $1,$NF}'
  
  status=0
- exit
-diff --git a/tests/generic/375.out b/tests/generic/375.out
-index 478d078..bb9bc72 100644
---- a/tests/generic/375.out
-+++ b/tests/generic/375.out
-@@ -7,3 +7,11 @@ QA output created by 375
- -rwxrwxrwx
- *** Expected failure
- chmod: changing permissions of 'testfile.375': Operation not permitted
-+*** SGID should remain set (twice)
-+drwxrwsrwx
-+drwxrwsrwx
-+*** SGID should be cleared (twice)
-+drwxrwxrwx
-+drwxrwxrwx
-+*** Expected failure
-+chmod: changing permissions of 'testdir.375': Operation not permitted
+diff --git a/tests/generic/314.out b/tests/generic/314.out
+index b2db82b..bcd14f5 100644
+--- a/tests/generic/314.out
++++ b/tests/generic/314.out
+@@ -1,3 +1,2 @@
+ QA output created by 314
+ drwxr-sr-x subdir
+-drwxrwsr-x+ subdir2
 -- 
 2.8.0.rc3.226.g39d4020
 
