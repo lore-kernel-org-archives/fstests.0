@@ -1,45 +1,42 @@
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:34946 "EHLO
-        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751596AbcJPIwA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 16 Oct 2016 04:52:00 -0400
-Received: by mail-wm0-f44.google.com with SMTP id c78so56963428wme.0
-        for <fstests@vger.kernel.org>; Sun, 16 Oct 2016 01:51:59 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:43078 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S933740AbcJMQ73 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 13 Oct 2016 12:59:29 -0400
+Date: Thu, 13 Oct 2016 18:58:08 +0200
+From: Oleg Nesterov <oleg@redhat.com>
+Subject: Re: [PATCH V2 2/2] fs/super.c: don't fool lockdep in
+        freeze_super() and thaw_super() paths
+Message-ID: <20161013165807.GA21138@redhat.com>
+References: <20161003164435.GB6634@redhat.com> <20161004114341.GA8572@redhat.com> <20161004194435.GW9806@dastard> <20161005164432.GB15121@redhat.com> <20161006171758.GA21707@redhat.com> <20161006215920.GE9806@dastard> <20161007171517.GA23721@redhat.com> <20161007225231.GY27872@dastard> <20161009161456.GA11737@redhat.com> <20161010010250.GO9806@dastard>
 MIME-Version: 1.0
-In-Reply-To: <20161016071458.GA17675@infradead.org>
-References: <1476477810-17478-1-git-send-email-amir73il@gmail.com>
- <1476477810-17478-2-git-send-email-amir73il@gmail.com> <20161015091126.GA9631@infradead.org>
- <CAOQ4uxhunx5QtWYoSwWrq_FR3hso-GPekKRjCTC_Epc8g3Ld0A@mail.gmail.com>
- <20161015170441.GA23090@infradead.org> <CAOQ4uxjumg_VO3LV7rgtHbO=yTmxUp6KdpmrCh8ASEjG6tG3XA@mail.gmail.com>
- <20161016071458.GA17675@infradead.org>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Sun, 16 Oct 2016 11:51:58 +0300
-Message-ID: <CAOQ4uxgU_Z2W8w8HJ5Y9BMT=3bOZnfpphwi7gzjhWZUJGqSHzw@mail.gmail.com>
-Subject: Re: [PATCH 2/2] fstests: run xfs_io as multi threaded process
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20161010010250.GO9806@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Dave Chinner <david@fromorbit.com>, Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Jan Kara <jack@suse.cz>, Al Viro <viro@zeniv.linux.org.uk>, Nikolay Borisov <kernel@kyup.com>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Oct 16, 2016 at 10:14 AM, Christoph Hellwig <hch@infradead.org> wrote:
-> On Sat, Oct 15, 2016 at 11:59:22PM +0300, Amir Goldstein wrote:
->> So far so good, but then I looked closer at its sister test
->> generic/132, which is
->> an even more CPU intensive test, also of many small reads and writes
->> from few xfs_io runs.
->> This is not a 'quick' group test.
->> Here the runtime difference was significant 17sec without -M and 20sec
->> with -M flag.
->>
->> So without looking much closer into other non quick tests, I think
->> that perhaps the
->> best value option is to turn on -M flag for all the quick tests.
->>
->> What do you think?
+Dave, I am sorry for delay.
+
+On 10/10, Dave Chinner wrote:
 >
-> Sounds like a good idea, now how do we find out in the xfs_io
-> helper if it's a quick test?
+> So, it's time to waste more time explaining why lockdep is telling
+> us about something that *isn't a bug*.
+> [... snip ...]
 
-See answer in posted v2
+OK, thanks. I am not surprised although I have to admit I wasn't sure.
 
-Thanks for review!
+> Basically, what we are seeing here is yet another case of "lockdep
+> is just smart enough to be really dumb" because we cannot fully
+> express or cleanly annotate the contexts in which it is being asked
+> to validate.
+
+Yes... perhaps we can add the new lockdep helpers to avoid the false-
+positives like this one, but so far it is not clear to me what we can do.
+Somehow we need to tell it to to avoid check_prev_add() because we know
+that the work function won't take sb_internal, but at the same time we
+should complain if it actually does this. Lets ignore this patch for now.
+
+Oleg.
+
