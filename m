@@ -1,82 +1,81 @@
-Received: from mail-wm0-f43.google.com ([74.125.82.43]:38017 "EHLO
-        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753061AbcJOU7o (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 15 Oct 2016 16:59:44 -0400
-Received: by mail-wm0-f43.google.com with SMTP id d128so41374338wmf.1
-        for <fstests@vger.kernel.org>; Sat, 15 Oct 2016 13:59:43 -0700 (PDT)
+Received: from mail-lf0-f68.google.com ([209.85.215.68]:33802 "EHLO
+        mail-lf0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753334AbcJNKLF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 14 Oct 2016 06:11:05 -0400
 MIME-Version: 1.0
-In-Reply-To: <20161015170441.GA23090@infradead.org>
-References: <1476477810-17478-1-git-send-email-amir73il@gmail.com>
- <1476477810-17478-2-git-send-email-amir73il@gmail.com> <20161015091126.GA9631@infradead.org>
- <CAOQ4uxhunx5QtWYoSwWrq_FR3hso-GPekKRjCTC_Epc8g3Ld0A@mail.gmail.com> <20161015170441.GA23090@infradead.org>
+In-Reply-To: <CAOQ4uxiSMVfUG7mVT6WC2eBtF-XOSM1WrSBnxo0Dkr1fy=ZJeg@mail.gmail.com>
+References: <20161013143751.GE31239@veci.piliscsaba.szeredi.hu>
+ <CA+55aFyEtF-t5rbbOtAz1+Rdxcbbt+CTrWJWPg1+TViq+DoLCQ@mail.gmail.com> <CAOQ4uxiSMVfUG7mVT6WC2eBtF-XOSM1WrSBnxo0Dkr1fy=ZJeg@mail.gmail.com>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Sat, 15 Oct 2016 23:59:22 +0300
-Message-ID: <CAOQ4uxjumg_VO3LV7rgtHbO=yTmxUp6KdpmrCh8ASEjG6tG3XA@mail.gmail.com>
-Subject: Re: [PATCH 2/2] fstests: run xfs_io as multi threaded process
+Date: Fri, 14 Oct 2016 13:10:52 +0300
+Message-ID: <CAOQ4uxivR5O2iORjhW008=eGmuSZQekOi1H+bmiM0NCnEw2o6Q@mail.gmail.com>
+Subject: Re: [GIT PULL] overlayfs update for 4.9
 Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Dave Chinner <david@fromorbit.com>, eguan@redhat.com, fstests <fstests@vger.kernel.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Al Viro <viro@zeniv.linux.org.uk>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-unionfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Oct 15, 2016 at 8:04 PM, Christoph Hellwig <hch@infradead.org> wrote:
-> On Sat, Oct 15, 2016 at 06:13:29PM +0300, Amir Goldstein wrote:
->> I can't say that I have made a statistics analysis of the affect of the flag
->> on xfstests runtime, but for the -g quick group on small SSD partition,
->> I did not observe any noticable difference in runtime.
+On Fri, Oct 14, 2016 at 9:48 AM, Amir Goldstein <amir73il@gmail.com> wrote:
+> On Fri, Oct 14, 2016 at 7:03 AM, Linus Torvalds
+> <torvalds@linux-foundation.org> wrote:
+>> On Thu, Oct 13, 2016 at 7:37 AM, Miklos Szeredi <miklos@szeredi.hu> wrote:
+>>>
+>>> Please pull from:
 >>
->> I will try to run some micro benchmarks or look for specific tests that
->> do many file opens and little io, to get more performance numbers.
+>> No.
+>>
+>> Or rather, I pulled and then immediately unpulled. When I look at the
+>> diff, I saw an obvious bug in the very first chunk. I'm not going to
+>> pull something that is this obviously buggy and untested.
+>>
+>> Your change to fs/ioctl.c to add a -EXDEV error case very clearly
+>> leaks a reference to 'src_file'.
 >
-
-Here goes.
-I ran a simple micro benchmark of running 'xfs_io -c quit' 1000 times
-with and without -M flag and the -M flags adds 0.1sec (pthread_ctreate
-I suppose)
-
-Looked for a test that runs a lot of xfs_io. found generic/032, which runs
-xfs_io 1700 times, mostly for pwrite. This is not a CPU intensive
-test, but there is
-an avg. runtime difference of +0.2sec for -M flag (out of 8sec).
-
-Taking a look at the runtime difference of entire -g quick did not yield any
-obvious changes, all reported runtimes were within the +/-1sec margin,
-some were clearly noise as the tests where not running xfs_io at all.
-
-Still I looked closer for tests that do a lot of small read/writes and I found
-generic/130, which does many small preads, but from few xfs_io runs.
-This is a more CPU intensive test.
-There is an avg. runtime difference of +0.3sec for -M flag (out of 4sec).
-
-So far so good, but then I looked closer at its sister test
-generic/132, which is
-an even more CPU intensive test, also of many small reads and writes
-from few xfs_io runs.
-This is not a 'quick' group test.
-Here the runtime difference was significant 17sec without -M and 20sec
-with -M flag.
-
-So without looking much closer into other non quick tests, I think
-that perhaps the
-best value option is to turn on -M flag for all the quick tests.
-
-What do you think?
+> On the charge of writing obviously buggy code I plead guilty :-/
+> On the charge of not testing my code I plead not guilty.
+> I exercised the FICLONERANGE intensively with the xfstests clone test group
+> and never experienced any problem and any warning running with all
+> relevant kernel debugging enabled.
+>
+> So how come this leak went unnoticed?
+> Because fdget (__fget_light) does not take a reference if the fd is not shared.
+>
+> So what can we do to catch silly mistakes like this one earlier and
+> without relying
+> on Linus's spidy senses?
+> Writing xfstests to test all fd interfaces with cloned fds? Is this a
+> scalable solution?
 
 
-> Yes, if there is no effect at least that's not a problem.  I'd just want
-> confirmation for that.  In the end we probably don't use xfs_io heavily
-> parallel on the same fd a lot.
+Well, I added an idle loop thread to xfs_io and sure enough it catches the leak
+in test generic/157 (Try cross-device reflink).
+I will post patches to fstests.
 
-So there is an effect on specific tests that end up calling fdget() a
-lot compared
-to the amount of io they generate, but I don't think that we have to
-use xfs_io in
-parallel on the same fd to see the regression.
-The fast path optimization for single threaded process avoids the
-rcu_read_lock()
-in __fget() altogether and with multi threaded process we take the
-rcu_read_lock()
-and other stuff even though we are the only process using this fd.
+Sorry...
 
-This is just my speculation as I did not run perf analysis on those
-fdget intensive tests.
+> Or maybe it's best to add a trivial CONFIG_DEBUG_FDGET that will always
+> skip the no refcount optimization?
+>
+> To me the second option seems preferred from engineering pov
+> I can post this simple patch if you guys agree to this solution.
+>
+>>
+>> It's too late in the merge window for this to be fixed up any more.
+>> This has been a painful enough merge window for me that I'm not going
+>> to play around with obviously buggy pull requests.
+>>
+>
+> It has been a rocky merge window and I apologize for adding this last straw
+> and pooping the party for the entire overlay pull request.
+> In the hope that this may help to sweeten your verdict -
+> I just got my hands on a brand new testing machine, which is dedicated
+> to stress testing file systems on the latest rc.
+>
+> Amir.
+>
+>>                   Linus
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-unionfs" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
