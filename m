@@ -1,55 +1,123 @@
-Received: from bombadil.infradead.org ([198.137.202.9]:41902 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751496AbcJPGSk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 16 Oct 2016 02:18:40 -0400
-Date: Sat, 15 Oct 2016 23:18:37 -0700
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 2/3] misc: fix fallocate commands that need the unshare
- switch
-Message-ID: <20161016061837.GA12614@infradead.org>
-References: <147646876990.19627.5046740854955682441.stgit@birch.djwong.org>
- <147646878237.19627.11366131824882808123.stgit@birch.djwong.org>
- <20161015170303.GB11829@infradead.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20161015170303.GB11829@infradead.org>
+Received: from mx1.redhat.com ([209.132.183.28]:37414 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753405AbcJNKja (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 14 Oct 2016 06:39:30 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id E98856647
+        for <fstests@vger.kernel.org>; Fri, 14 Oct 2016 10:28:38 +0000 (UTC)
+Received: from bcodding.csb (vpn-60-9.rdu2.redhat.com [10.10.60.9])
+        by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u9EAScXL026400
+        for <fstests@vger.kernel.org>; Fri, 14 Oct 2016 06:28:38 -0400
+From: Benjamin Coddington <bcodding@redhat.com>
+Subject: [PATCH] generic/285: discover allocation size for NFS
+Date: Fri, 14 Oct 2016 06:28:37 -0400
+Message-Id: <883bff7d2f3123aeb461df1072f9930c3d0f063b.1476440892.git.bcodding@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: david@fromorbit.com, eguan@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Oct 15, 2016 at 10:03:03AM -0700, Christoph Hellwig wrote:
-> The poster child would be btrfs, and I would have added some output
-> here if btrfs support in xfstests wasn't completely broken at this
-> point.
-> 
-> Well, added Ccs and some output anyway in this case..
+On NFS, try to discover the allocation size for the exported filesystem.
+NFS st_blksize is optimized for the network, and will usually be much
+larger than the allocation size of the exported filesystem, which may
+trigger preallocation strategies in the exported filesystem causing the
+seek tests here to fail.
 
-Turns out the btrfs failure was my stupidity, sorry.
+Signed-off-by: Benjamin Coddington <bcodding@redhat.com>
+---
+ src/seek_sanity_test.c | 57 ++++++++++++++++++++++++++++++++++++++++----------
+ 1 file changed, 46 insertions(+), 11 deletions(-)
 
-I can reproduce the issue I was going to originally show (which was
-actually pointed out by Eric for a different fallocate flag check
-I wanted to add), here is the diff of the output files when running
-generic/156 on btrfs with your patch:
+diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
+index 18262c2b0493..5455cdb0824e 100644
+--- a/src/seek_sanity_test.c
++++ b/src/seek_sanity_test.c
+@@ -39,21 +39,54 @@ static blksize_t alloc_size;
+ int default_behavior = 0;
+ char *base_file_path;
+ 
+-static void get_file_system(int fd)
++/*
++ * NFS' st_blksize is typically set to maximize network
++ * efficiency, and will not be indicative of the allocation
++ * size of the exported filesystem.  Try to determine the size
++ * using SEEK_DATA.
++ */
++static void get_nfs_alloc_size(int fd)
+ {
+-	struct statfs buf;
+-
+-	if (!fstatfs(fd, &buf)) {
+-		fprintf(stdout, "File system magic#: 0x%lx\n",
+-				(unsigned long int)buf.f_type);
+-	}
++       int shift;
++       off_t pos = 0, offset = 1;
++
++       /* walk up */
++       while (pos == 0 && offset < alloc_size) {
++              offset <<= 1;
++              ftruncate(fd, 0);
++              pwrite(fd, "a", 1, offset);
++              pos = lseek(fd, 0, SEEK_DATA);
++       }
++
++       /* bisect */
++       shift = offset >> 2;
++       while (shift && offset < alloc_size) {
++              ftruncate(fd, 0);
++              pwrite(fd, "a", 1, offset);
++              pos = lseek(fd, 0, SEEK_DATA);
++              offset += pos ? -shift : shift;
++              shift >>= 1;
++       }
++       if (!shift)
++	      offset += pos ? 0 : 1;
++       alloc_size = offset;
+ }
+ 
+-static int get_io_sizes(int fd)
++#define NFS_SUPER_MAGIC 0x6969
++
++static int get_fs_info(int fd)
+ {
+        struct stat buf;
++       struct statfs fsbuf;
+        int ret;
+ 
++       ret = fstatfs(fd, &fsbuf);
++       if (ret)
++               fprintf(stderr, "  ERROR %d: Failed to get fs info\n",
++                     errno);
++       fprintf(stdout, "File system magic#: 0x%lx\n",
++                     (unsigned long int)fsbuf.f_type);
++
+        ret = fstat(fd, &buf);
+        if (ret)
+                fprintf(stderr, "  ERROR %d: Failed to find io blocksize\n",
+@@ -61,6 +94,10 @@ static int get_io_sizes(int fd)
+ 
+        /* st_blksize is typically also the allocation size */
+        alloc_size = buf.st_blksize;
++
++       if (fsbuf.f_type == NFS_SUPER_MAGIC)
++              get_nfs_alloc_size(fd);
++
+        fprintf(stdout, "Allocation size: %ld\n", alloc_size);
+ 
+        return ret;
+@@ -709,9 +746,7 @@ static int test_basic_support(void)
+ 	if (fd == -1)
+ 		goto out;
+ 
+-	get_file_system(fd);
+-
+-	ret = get_io_sizes(fd);
++	ret = get_fs_info(fd);
+ 	if (ret)
+ 		goto out;
+ 
+-- 
+2.5.5
 
---- tests/generic/156.out	2016-03-29 13:59:30.411720622 +0000
-+++ /root/xfstests/results//generic/156.out.bad	2016-10-16 06:15:27.118776421 +0000
-@@ -2,8 +2,13 @@
- Create the original file blocks
- Create the reflink copies
- funshare part of a file
-+fallocate: Operation not supported
- funshare some of the copies
-+fallocate: Operation not supported
-+fallocate: Operation not supported
- funshare the rest of the files
-+fallocate: Operation not supported
-+fallocate: Operation not supported
- Rewrite the original file
- free blocks after reflinking is in range
- free blocks after nocow'ing some copies is in range
-
-So what we really need an enhanced falloc tester that checks that
-the tested subcommand is actually implemented on the given file system.
-(And we already need something like that for -k on NFS)
