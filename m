@@ -1,106 +1,55 @@
-Received: from bombadil.infradead.org ([198.137.202.9]:42678 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753871AbcJPHRA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 16 Oct 2016 03:17:00 -0400
-Date: Sun, 16 Oct 2016 00:16:59 -0700
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH] xfs_io: add command line option -M to run as multi
- threaded process
-Message-ID: <20161016071659.GB17675@infradead.org>
-References: <1476477878-17588-1-git-send-email-amir73il@gmail.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:40016 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752753AbcJNSNE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 14 Oct 2016 14:13:04 -0400
+Subject: [PATCH 1/3] xfs: set the refcount btree cowflag when setting up cow
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Fri, 14 Oct 2016 11:12:56 -0700
+Message-ID: <147646877615.19627.12845265308407861169.stgit@birch.djwong.org>
+In-Reply-To: <147646876990.19627.5046740854955682441.stgit@birch.djwong.org>
+References: <147646876990.19627.5046740854955682441.stgit@birch.djwong.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1476477878-17588-1-git-send-email-amir73il@gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Dave Chinner <david@fromorbit.com>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Oct 14, 2016 at 11:44:38PM +0300, Amir Goldstein wrote:
-> xfs_io -M will start by spawning an idle thread.
-> The purpose of this idle thread is to test io from a multi threaded
-> process. With single threaded process, the file table is not shared
-> and file structs are not reference counted.
-> 
-> So in order to detect file struct reference leaks, spawning an idle
-> thread will do the trick.
-> 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
->  io/Makefile |  2 +-
->  io/init.c   | 32 +++++++++++++++++++++++++++++++-
->  2 files changed, 32 insertions(+), 2 deletions(-)
-> 
-> diff --git a/io/Makefile b/io/Makefile
-> index 1997ca9..032a8c7 100644
-> --- a/io/Makefile
-> +++ b/io/Makefile
-> @@ -13,7 +13,7 @@ CFILES = init.c \
->  	mmap.c open.c parent.c pread.c prealloc.c pwrite.c seek.c shutdown.c \
->  	sync.c truncate.c reflink.c
->  
-> -LLDLIBS = $(LIBXCMD) $(LIBHANDLE)
-> +LLDLIBS = $(LIBXCMD) $(LIBHANDLE) $(LIBPTHREAD)
->  LTDEPENDENCIES = $(LIBXCMD) $(LIBHANDLE)
->  LLDFLAGS = -static-libtool-libs
->  
-> diff --git a/io/init.c b/io/init.c
-> index 6b88cc6..1d1b97f 100644
-> --- a/io/init.c
-> +++ b/io/init.c
-> @@ -16,6 +16,7 @@
->   * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
->   */
->  
-> +#include <pthread.h>
->  #include "platform_defs.h"
->  #include "command.h"
->  #include "input.h"
-> @@ -25,6 +26,7 @@
->  char	*progname;
->  int	exitcode;
->  int	expert;
-> +int	multithreaded;
->  size_t	pagesize;
->  struct timeval stopwatch;
->  
-> @@ -141,7 +143,7 @@ init(
->  	pagesize = getpagesize();
->  	gettimeofday(&stopwatch, NULL);
->  
-> -	while ((c = getopt(argc, argv, "ac:dFfmp:nrRstTVx")) != EOF) {
-> +	while ((c = getopt(argc, argv, "ac:dFfmMp:nrRstTVx")) != EOF) {
->  		switch (c) {
->  		case 'a':
->  			flags |= IO_APPEND;
-> @@ -166,6 +168,9 @@ init(
->  				exit(1);
->  			}
->  			break;
-> +		case 'M':
-> +			multithreaded = 1;
-> +			break;
->  		case 'n':
->  			flags |= IO_NONBLOCK;
->  			break;
-> @@ -213,12 +218,37 @@ init(
->  	add_check_command(init_check_command);
->  }
->  
-> +/*
-> + * The purpose of this idle thread is to test io from a multi threaded process.
-> + * With single threaded process, the file table is not shared and file structs
-> + * are not reference counted. So in order to detect file struct reference
-> + * leaks, spawning an idle thread will do the trick.
-> + */
-> +void *
-> +idle_loop(void *arg)
-> +{
-> +	for (;;) pause();
+When we're setting up a fake cow extent in the refcountbt to test
+cleanup of fake cow extents, set the cowflag in the record field
+to reflect our new disk format of storing the staging extents in
+the right side of the tree.
 
-Indentation issue: the pause should on a line of its own.
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ tests/xfs/307 |    1 +
+ tests/xfs/308 |    1 +
+ 2 files changed, 2 insertions(+)
 
-Otherwise this looks fine to me:
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+diff --git a/tests/xfs/307 b/tests/xfs/307
+index 869f5cc..2a99459 100755
+--- a/tests/xfs/307
++++ b/tests/xfs/307
+@@ -145,6 +145,7 @@ _set_agf_data numrecs 1 -c 'addr refcntroot'
+ _set_agf_data "recs[1].startblock" $debris_bno -c 'addr refcntroot'
+ _set_agf_data "recs[1].blockcount" $debris_len -c 'addr refcntroot'
+ _set_agf_data "recs[1].refcount" 1 -c 'addr refcntroot'
++_set_agf_data "recs[1].cowflag" 1 -c 'addr refcntroot'
+ 
+ if [ $is_rmap -gt 0 ]; then
+ 	rmap_nr=$((rmap_nr + 1))
+diff --git a/tests/xfs/308 b/tests/xfs/308
+index 8f8f380..5bfa432 100755
+--- a/tests/xfs/308
++++ b/tests/xfs/308
+@@ -145,6 +145,7 @@ _set_agf_data numrecs 1 -c 'addr refcntroot'
+ _set_agf_data "recs[1].startblock" $debris_bno -c 'addr refcntroot'
+ _set_agf_data "recs[1].blockcount" $debris_len -c 'addr refcntroot'
+ _set_agf_data "recs[1].refcount" 1 -c 'addr refcntroot'
++_set_agf_data "recs[1].cowflag" 1 -c 'addr refcntroot'
+ 
+ if [ $is_rmap -gt 0 ]; then
+ 	rmap_nr=$((rmap_nr + 1))
+
