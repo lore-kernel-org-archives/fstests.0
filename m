@@ -1,33 +1,120 @@
-Received: from mx1.redhat.com ([209.132.183.28]:50184 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755045AbcJPKSy (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 16 Oct 2016 06:18:54 -0400
-From: "Benjamin Coddington" <bcodding@redhat.com>
-Subject: Re: [PATCH] generic/285: discover allocation size for NFS
-Date: Sun, 16 Oct 2016 06:18:13 -0400
-Message-ID: <0A92328A-9E9C-4D8D-AADF-F995369A3E40@redhat.com>
-In-Reply-To: <20161016071752.GC17675@infradead.org>
-References: <883bff7d2f3123aeb461df1072f9930c3d0f063b.1476440892.git.bcodding@redhat.com>
- <20161016071752.GC17675@infradead.org>
-MIME-Version: 1.0
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:34046 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754265AbcJNUpk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 14 Oct 2016 16:45:40 -0400
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH] xfs_io: add command line option -M to run as multi threaded process
+Date: Fri, 14 Oct 2016 23:44:38 +0300
+Message-Id: <1476477878-17588-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 16 Oct 2016, at 3:17, Christoph Hellwig wrote:
+xfs_io -M will start by spawning an idle thread.
+The purpose of this idle thread is to test io from a multi threaded
+process. With single threaded process, the file table is not shared
+and file structs are not reference counted.
 
-> On Fri, Oct 14, 2016 at 06:28:37AM -0400, Benjamin Coddington wrote:
->> On NFS, try to discover the allocation size for the exported filesystem.
->> NFS st_blksize is optimized for the network, and will usually be much
->> larger than the allocation size of the exported filesystem, which may
->> trigger preallocation strategies in the exported filesystem causing the
->> seek tests here to fail.
->
-> Is there a reason not to use your new evidence-based check for all
-> file systems?
+So in order to detect file struct reference leaks, spawning an idle
+thread will do the trick.
 
-Only that on the filesystems I've checked (ext4, xfs, btrfs, tmpfs)
-st_blksize is correct, so trying to discover it is unnecessary.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ io/Makefile |  2 +-
+ io/init.c   | 32 +++++++++++++++++++++++++++++++-
+ 2 files changed, 32 insertions(+), 2 deletions(-)
 
-Ben
+diff --git a/io/Makefile b/io/Makefile
+index 1997ca9..032a8c7 100644
+--- a/io/Makefile
++++ b/io/Makefile
+@@ -13,7 +13,7 @@ CFILES = init.c \
+ 	mmap.c open.c parent.c pread.c prealloc.c pwrite.c seek.c shutdown.c \
+ 	sync.c truncate.c reflink.c
+ 
+-LLDLIBS = $(LIBXCMD) $(LIBHANDLE)
++LLDLIBS = $(LIBXCMD) $(LIBHANDLE) $(LIBPTHREAD)
+ LTDEPENDENCIES = $(LIBXCMD) $(LIBHANDLE)
+ LLDFLAGS = -static-libtool-libs
+ 
+diff --git a/io/init.c b/io/init.c
+index 6b88cc6..1d1b97f 100644
+--- a/io/init.c
++++ b/io/init.c
+@@ -16,6 +16,7 @@
+  * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  */
+ 
++#include <pthread.h>
+ #include "platform_defs.h"
+ #include "command.h"
+ #include "input.h"
+@@ -25,6 +26,7 @@
+ char	*progname;
+ int	exitcode;
+ int	expert;
++int	multithreaded;
+ size_t	pagesize;
+ struct timeval stopwatch;
+ 
+@@ -141,7 +143,7 @@ init(
+ 	pagesize = getpagesize();
+ 	gettimeofday(&stopwatch, NULL);
+ 
+-	while ((c = getopt(argc, argv, "ac:dFfmp:nrRstTVx")) != EOF) {
++	while ((c = getopt(argc, argv, "ac:dFfmMp:nrRstTVx")) != EOF) {
+ 		switch (c) {
+ 		case 'a':
+ 			flags |= IO_APPEND;
+@@ -166,6 +168,9 @@ init(
+ 				exit(1);
+ 			}
+ 			break;
++		case 'M':
++			multithreaded = 1;
++			break;
+ 		case 'n':
+ 			flags |= IO_NONBLOCK;
+ 			break;
+@@ -213,12 +218,37 @@ init(
+ 	add_check_command(init_check_command);
+ }
+ 
++/*
++ * The purpose of this idle thread is to test io from a multi threaded process.
++ * With single threaded process, the file table is not shared and file structs
++ * are not reference counted. So in order to detect file struct reference
++ * leaks, spawning an idle thread will do the trick.
++ */
++void *
++idle_loop(void *arg)
++{
++	for (;;) pause();
++}
++
++void
++start_idle_thread()
++{
++	pthread_t t;
++
++	if (pthread_create(&t, NULL, idle_loop, NULL)) {
++		fprintf(stderr, "Error creating idle thread\n");
++		exit(1);
++	}
++}
++
+ int
+ main(
+ 	int	argc,
+ 	char	**argv)
+ {
+ 	init(argc, argv);
++	if (multithreaded)
++		start_idle_thread();
+ 	command_loop();
+ 	return exitcode;
+ }
+-- 
+2.7.4
+
