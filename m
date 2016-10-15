@@ -1,120 +1,34 @@
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:34046 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754265AbcJNUpk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 14 Oct 2016 16:45:40 -0400
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH] xfs_io: add command line option -M to run as multi threaded process
-Date: Fri, 14 Oct 2016 23:44:38 +0300
-Message-Id: <1476477878-17588-1-git-send-email-amir73il@gmail.com>
+Received: from bombadil.infradead.org ([198.137.202.9]:52244 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751148AbcJOJLa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 15 Oct 2016 05:11:30 -0400
+Date: Sat, 15 Oct 2016 02:11:26 -0700
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH 2/2] fstests: run xfs_io as multi threaded process
+Message-ID: <20161015091126.GA9631@infradead.org>
+References: <1476477810-17478-1-git-send-email-amir73il@gmail.com>
+ <1476477810-17478-2-git-send-email-amir73il@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1476477810-17478-2-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Dave Chinner <david@fromorbit.com>, eguan@redhat.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-xfs_io -M will start by spawning an idle thread.
-The purpose of this idle thread is to test io from a multi threaded
-process. With single threaded process, the file table is not shared
-and file structs are not reference counted.
+On Fri, Oct 14, 2016 at 11:43:30PM +0300, Amir Goldstein wrote:
+> Try to run xfs_io in all tests with command line option -M
+> which starts an idle thread before performing any io.
+> 
+> The purpose of this idle thread is to test io from a multi threaded
+> process. With single threaded process, the file table is not shared
+> and file structs are not reference counted.
+> 
+> So in order to improve the change of detecting file struct reference
+> leaks, all xfs_io commands in tests will try to run with this option.
 
-So in order to detect file struct reference leaks, spawning an idle
-thread will do the trick.
-
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- io/Makefile |  2 +-
- io/init.c   | 32 +++++++++++++++++++++++++++++++-
- 2 files changed, 32 insertions(+), 2 deletions(-)
-
-diff --git a/io/Makefile b/io/Makefile
-index 1997ca9..032a8c7 100644
---- a/io/Makefile
-+++ b/io/Makefile
-@@ -13,7 +13,7 @@ CFILES = init.c \
- 	mmap.c open.c parent.c pread.c prealloc.c pwrite.c seek.c shutdown.c \
- 	sync.c truncate.c reflink.c
- 
--LLDLIBS = $(LIBXCMD) $(LIBHANDLE)
-+LLDLIBS = $(LIBXCMD) $(LIBHANDLE) $(LIBPTHREAD)
- LTDEPENDENCIES = $(LIBXCMD) $(LIBHANDLE)
- LLDFLAGS = -static-libtool-libs
- 
-diff --git a/io/init.c b/io/init.c
-index 6b88cc6..1d1b97f 100644
---- a/io/init.c
-+++ b/io/init.c
-@@ -16,6 +16,7 @@
-  * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
- 
-+#include <pthread.h>
- #include "platform_defs.h"
- #include "command.h"
- #include "input.h"
-@@ -25,6 +26,7 @@
- char	*progname;
- int	exitcode;
- int	expert;
-+int	multithreaded;
- size_t	pagesize;
- struct timeval stopwatch;
- 
-@@ -141,7 +143,7 @@ init(
- 	pagesize = getpagesize();
- 	gettimeofday(&stopwatch, NULL);
- 
--	while ((c = getopt(argc, argv, "ac:dFfmp:nrRstTVx")) != EOF) {
-+	while ((c = getopt(argc, argv, "ac:dFfmMp:nrRstTVx")) != EOF) {
- 		switch (c) {
- 		case 'a':
- 			flags |= IO_APPEND;
-@@ -166,6 +168,9 @@ init(
- 				exit(1);
- 			}
- 			break;
-+		case 'M':
-+			multithreaded = 1;
-+			break;
- 		case 'n':
- 			flags |= IO_NONBLOCK;
- 			break;
-@@ -213,12 +218,37 @@ init(
- 	add_check_command(init_check_command);
- }
- 
-+/*
-+ * The purpose of this idle thread is to test io from a multi threaded process.
-+ * With single threaded process, the file table is not shared and file structs
-+ * are not reference counted. So in order to detect file struct reference
-+ * leaks, spawning an idle thread will do the trick.
-+ */
-+void *
-+idle_loop(void *arg)
-+{
-+	for (;;) pause();
-+}
-+
-+void
-+start_idle_thread()
-+{
-+	pthread_t t;
-+
-+	if (pthread_create(&t, NULL, idle_loop, NULL)) {
-+		fprintf(stderr, "Error creating idle thread\n");
-+		exit(1);
-+	}
-+}
-+
- int
- main(
- 	int	argc,
- 	char	**argv)
- {
- 	init(argc, argv);
-+	if (multithreaded)
-+		start_idle_thread();
- 	command_loop();
- 	return exitcode;
- }
--- 
-2.7.4
-
+I like the idea behing the -M command, but I'm not sure if we should
+always use it.  For one this means we won't test the fget fastpath
+any more, and second I'd like to know what the impact on xfstests
+runtime is.
