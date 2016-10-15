@@ -1,42 +1,59 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43078 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933740AbcJMQ73 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 13 Oct 2016 12:59:29 -0400
-Date: Thu, 13 Oct 2016 18:58:08 +0200
-From: Oleg Nesterov <oleg@redhat.com>
-Subject: Re: [PATCH V2 2/2] fs/super.c: don't fool lockdep in
-        freeze_super() and thaw_super() paths
-Message-ID: <20161013165807.GA21138@redhat.com>
-References: <20161003164435.GB6634@redhat.com> <20161004114341.GA8572@redhat.com> <20161004194435.GW9806@dastard> <20161005164432.GB15121@redhat.com> <20161006171758.GA21707@redhat.com> <20161006215920.GE9806@dastard> <20161007171517.GA23721@redhat.com> <20161007225231.GY27872@dastard> <20161009161456.GA11737@redhat.com> <20161010010250.GO9806@dastard>
+Received: from bombadil.infradead.org ([198.137.202.9]:35478 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752492AbcJORFH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 15 Oct 2016 13:05:07 -0400
+Date: Sat, 15 Oct 2016 10:03:03 -0700
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH 2/3] misc: fix fallocate commands that need the unshare
+ switch
+Message-ID: <20161015170303.GB11829@infradead.org>
+References: <147646876990.19627.5046740854955682441.stgit@birch.djwong.org>
+ <147646878237.19627.11366131824882808123.stgit@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161010010250.GO9806@dastard>
+In-Reply-To: <147646878237.19627.11366131824882808123.stgit@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Jan Kara <jack@suse.cz>, Al Viro <viro@zeniv.linux.org.uk>, Nikolay Borisov <kernel@kyup.com>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: david@fromorbit.com, eguan@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Dave, I am sorry for delay.
+On Fri, Oct 14, 2016 at 11:13:02AM -0700, Darrick J. Wong wrote:
+> We re-added the UNSHARE flag to fallocate, so go make sure that all
+> the unshare tests actually check that the xfs_io falloc command
+> supports that flag.
 
-On 10/10, Dave Chinner wrote:
->
-> So, it's time to waste more time explaining why lockdep is telling
-> us about something that *isn't a bug*.
-> [... snip ...]
+We'll need to improve _require_xfs_io_command to actually run the
+command for this to work, otherwise this will fail if the fs supports
+reflink but not unshared once xfs_io supports -u.
 
-OK, thanks. I am not surprised although I have to admit I wasn't sure.
+The poster child would be btrfs, and I would have added some output
+here if btrfs support in xfstests wasn't completely broken at this
+point.
 
-> Basically, what we are seeing here is yet another case of "lockdep
-> is just smart enough to be really dumb" because we cannot fully
-> express or cleanly annotate the contexts in which it is being asked
-> to validate.
+Well, added Ccs and some output anyway in this case..
 
-Yes... perhaps we can add the new lockdep helpers to avoid the false-
-positives like this one, but so far it is not clear to me what we can do.
-Somehow we need to tell it to to avoid check_prev_add() because we know
-that the work function won't take sb_internal, but at the same time we
-should complain if it actually does this. Lets ignore this patch for now.
+root@testvm:~/xfstests# mkfs.btrfs -f /dev/vdb
+Btrfs v3.17
+See http://btrfs.wiki.kernel.org for more information.
 
-Oleg.
+Turning ON incompat feature 'extref': increased hardlink limit per file
+to 65536
+[  243.592803] BTRFS: device fsid 364c6d95-eaae-43c9-b6bd-139e86206519
+devid 1 transid 3 /dev/vdb
+fs created label (null) on /dev/vdb
+	nodesize 16384 leafsize 16384 sectorsize 4096 size 10.00GiB
+root@testvm:~/xfstests# ./check -g quick
+[  246.101606] BTRFS info (device vdb): disk space caching is enabled
+[  246.102260] BTRFS info (device vdb): flagging fs with big metadata
+feature
+[  246.106123] BTRFS info (device vdb): creating UUID tree
+FSTYP         -- btrfs
+PLATFORM      -- Linux/x86_64 testvm 4.8.0+
+MKFS_OPTIONS  -- /dev/vdb
+MOUNT_OPTIONS -- /dev/vdb /mnt/scratch
 
+our local _scratch_mkfs routine ...
+Error: /dev/vdb is mounted
+check: failed to mkfs $SCRATCH_DEV using specified options
+Passed all 0 tests
