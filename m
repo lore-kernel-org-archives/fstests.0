@@ -1,42 +1,42 @@
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:9239 "EHLO
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:17683 "EHLO
         ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751756AbcJPVse (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 16 Oct 2016 17:48:34 -0400
-Date: Mon, 17 Oct 2016 08:15:45 +1100
+        by vger.kernel.org with ESMTP id S1755948AbcJPV7E (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 16 Oct 2016 17:59:04 -0400
+Date: Mon, 17 Oct 2016 08:28:39 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] generic/285: discover allocation size for NFS
-Message-ID: <20161016211545.GA14023@dastard>
-References: <883bff7d2f3123aeb461df1072f9930c3d0f063b.1476440892.git.bcodding@redhat.com>
- <20161016071752.GC17675@infradead.org>
- <0A92328A-9E9C-4D8D-AADF-F995369A3E40@redhat.com>
+Subject: Re: [PATCH v2] xfs_io: add command line option -M to run as multi
+ threaded process
+Message-ID: <20161016212839.GB14023@dastard>
+References: <1476608111-28948-1-git-send-email-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <0A92328A-9E9C-4D8D-AADF-F995369A3E40@redhat.com>
+In-Reply-To: <1476608111-28948-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Benjamin Coddington <bcodding@redhat.com>
-Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Christoph Hellwig <hch@lst.de>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Oct 16, 2016 at 06:18:13AM -0400, Benjamin Coddington wrote:
-> On 16 Oct 2016, at 3:17, Christoph Hellwig wrote:
-> 
-> > On Fri, Oct 14, 2016 at 06:28:37AM -0400, Benjamin Coddington wrote:
-> >> On NFS, try to discover the allocation size for the exported filesystem.
-> >> NFS st_blksize is optimized for the network, and will usually be much
-> >> larger than the allocation size of the exported filesystem, which may
-> >> trigger preallocation strategies in the exported filesystem causing the
-> >> seek tests here to fail.
-> >
-> > Is there a reason not to use your new evidence-based check for all
-> > file systems?
-> 
-> Only that on the filesystems I've checked (ext4, xfs, btrfs, tmpfs)
-> st_blksize is correct, so trying to discover it is unnecessary.
+On Sun, Oct 16, 2016 at 11:55:11AM +0300, Amir Goldstein wrote:
+> xfs_io -M will start by spawning an idle thread.
+> The purpose of this idle thread is to test io from a multi threaded
+> process. With single threaded process, the file table is not shared
+> and file structs are not reference counted.
 
-As I've said previously, mount options (e.g. -o largeio) can change
-what XFS reports in st_blksize such that it behaves like the NFS
-client...
+I can see this option being confusing to those who do not understand
+what is actually be done here. i.e. we'll get complaints along the
+lines of "-M say xfs_io does multithreaded IO, but I only see IO
+from one thread!". Can we name this "-i" to mean "run an idle-loop",
+which will stop people trying to use it for something it doesn't do?
+
+> --- a/io/Makefile
+> +++ b/io/Makefile
+....
+> --- a/io/init.c
+> +++ b/io/init.c
+....
+
+Missing a man page update to document this new option.
 
 Cheers,
 
