@@ -1,76 +1,46 @@
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2 3/3] fstests: run xfs_io as multi threaded for 'quick' tests
-Date: Sun, 16 Oct 2016 13:53:42 +0300
-Message-Id: <1476615222-7804-3-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1476615222-7804-1-git-send-email-amir73il@gmail.com>
-References: <1476615222-7804-1-git-send-email-amir73il@gmail.com>
-To: Dave Chinner <david@fromorbit.com>, Eryu Guan <eguan@redhat.com>, Christoph Hellwig <hch@lst.de>
-Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:9239 "EHLO
+        ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751756AbcJPVse (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 16 Oct 2016 17:48:34 -0400
+Date: Mon, 17 Oct 2016 08:15:45 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] generic/285: discover allocation size for NFS
+Message-ID: <20161016211545.GA14023@dastard>
+References: <883bff7d2f3123aeb461df1072f9930c3d0f063b.1476440892.git.bcodding@redhat.com>
+ <20161016071752.GC17675@infradead.org>
+ <0A92328A-9E9C-4D8D-AADF-F995369A3E40@redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <0A92328A-9E9C-4D8D-AADF-F995369A3E40@redhat.com>
+Sender: fstests-owner@vger.kernel.org
+To: Benjamin Coddington <bcodding@redhat.com>
+Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Try to run xfs_io for tests in group quick with command line
-option -M which starts an idle thread before performing any io.
+On Sun, Oct 16, 2016 at 06:18:13AM -0400, Benjamin Coddington wrote:
+> On 16 Oct 2016, at 3:17, Christoph Hellwig wrote:
+> 
+> > On Fri, Oct 14, 2016 at 06:28:37AM -0400, Benjamin Coddington wrote:
+> >> On NFS, try to discover the allocation size for the exported filesystem.
+> >> NFS st_blksize is optimized for the network, and will usually be much
+> >> larger than the allocation size of the exported filesystem, which may
+> >> trigger preallocation strategies in the exported filesystem causing the
+> >> seek tests here to fail.
+> >
+> > Is there a reason not to use your new evidence-based check for all
+> > file systems?
+> 
+> Only that on the filesystems I've checked (ext4, xfs, btrfs, tmpfs)
+> st_blksize is correct, so trying to discover it is unnecessary.
 
-The purpose of this idle thread is to test io from a multi threaded
-process. With single threaded process, the file table is not shared
-and file structs are not reference counted.
+As I've said previously, mount options (e.g. -o largeio) can change
+what XFS reports in st_blksize such that it behaves like the NFS
+client...
 
-In order to improve the chance of detecting file struct reference
-leaks, we should run xfs_io commands with this option as much as
-possible.
+Cheers,
 
-Analysis of the effect of xfs_io -M on tests runtime showed that
-it may lead to slightly longer run times in extreme cases (e.g +3s
-for generic/132), but has a negligable effect on runtime of tests
-among the 'quick' group (worst case +0.3s for generic/130).
-
-Therefore, we automatically add the -M flags only to tests in the
-'quick' group.
-
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- check     |  2 ++
- common/rc | 15 +++++++++++++++
- 2 files changed, 17 insertions(+)
-
-diff --git a/check b/check
-index 69341d8..e568598 100755
---- a/check
-+++ b/check
-@@ -574,6 +574,8 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 
- 	    mkdir -p $RESULT_DIR
- 
-+	    export TEST_GROUPS=`grep $(basename $seqnum) "$SRC_DIR/$(dirname $seqnum)/group"`
-+
- 	    echo -n "$seqnum"
- 
- 		if $showme; then
-diff --git a/common/rc b/common/rc
-index a838750..7c478cf 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3799,6 +3799,21 @@ init_rc()
- 	$XFS_IO_PROG -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \
- 		export XFS_IO_PROG="$XFS_IO_PROG -F"
- 
-+	if echo $TEST_GROUPS | grep -q quick; then
-+		# xfs_io -M flag runs xfs_io as multi threaded process
-+		# in order to catch fdget/fdset reference leaks, because
-+		# file structs are not reference counted in a single threaded
-+		# process.
-+		# Because reference counted fdget/fdset may lead to slightly
-+		# longer run times in extreme cases (such as generic/132),
-+		# we limit the use of -M flags to tests with short runtime,
-+		# where the effect of the flag is negligable.
-+		#
-+		# Figure out if xfs_io supports the -M option
-+		$XFS_IO_PROG -M -c quit 2>/dev/null && \
-+			export XFS_IO_PROG="$XFS_IO_PROG -M"
-+	fi
-+
- 	# xfs_copy doesn't work on v5 xfs yet without -d option
- 	if [ "$FSTYP" == "xfs" ] && [[ $MKFS_OPTIONS =~ crc=1 ]]; then
- 		export XFS_COPY_PROG="$XFS_COPY_PROG -d"
+Dave.
 -- 
-2.7.4
+Dave Chinner
+david@fromorbit.com
