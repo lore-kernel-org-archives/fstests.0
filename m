@@ -1,50 +1,33 @@
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:34533 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753378AbcJNUoE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 14 Oct 2016 16:44:04 -0400
-Received: by mail-wm0-f68.google.com with SMTP id z189so171574wmb.1
-        for <fstests@vger.kernel.org>; Fri, 14 Oct 2016 13:44:03 -0700 (PDT)
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 2/2] fstests: run xfs_io as multi threaded process
-Date: Fri, 14 Oct 2016 23:43:30 +0300
-Message-Id: <1476477810-17478-2-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1476477810-17478-1-git-send-email-amir73il@gmail.com>
-References: <1476477810-17478-1-git-send-email-amir73il@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:50184 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755045AbcJPKSy (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 16 Oct 2016 06:18:54 -0400
+From: "Benjamin Coddington" <bcodding@redhat.com>
+Subject: Re: [PATCH] generic/285: discover allocation size for NFS
+Date: Sun, 16 Oct 2016 06:18:13 -0400
+Message-ID: <0A92328A-9E9C-4D8D-AADF-F995369A3E40@redhat.com>
+In-Reply-To: <20161016071752.GC17675@infradead.org>
+References: <883bff7d2f3123aeb461df1072f9930c3d0f063b.1476440892.git.bcodding@redhat.com>
+ <20161016071752.GC17675@infradead.org>
+MIME-Version: 1.0
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>, eguan@redhat.com
+To: Christoph Hellwig <hch@infradead.org>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Try to run xfs_io in all tests with command line option -M
-which starts an idle thread before performing any io.
+On 16 Oct 2016, at 3:17, Christoph Hellwig wrote:
 
-The purpose of this idle thread is to test io from a multi threaded
-process. With single threaded process, the file table is not shared
-and file structs are not reference counted.
+> On Fri, Oct 14, 2016 at 06:28:37AM -0400, Benjamin Coddington wrote:
+>> On NFS, try to discover the allocation size for the exported filesystem.
+>> NFS st_blksize is optimized for the network, and will usually be much
+>> larger than the allocation size of the exported filesystem, which may
+>> trigger preallocation strategies in the exported filesystem causing the
+>> seek tests here to fail.
+>
+> Is there a reason not to use your new evidence-based check for all
+> file systems?
 
-So in order to improve the change of detecting file struct reference
-leaks, all xfs_io commands in tests will try to run with this option.
+Only that on the filesystems I've checked (ext4, xfs, btrfs, tmpfs)
+st_blksize is correct, so trying to discover it is unnecessary.
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- common/rc | 4 ++++
- 1 file changed, 4 insertions(+)
-
-diff --git a/common/rc b/common/rc
-index c3da064..64bf341 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3799,6 +3799,10 @@ init_rc()
- 	xfs_io -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \
- 	export XFS_IO_PROG="$XFS_IO_PROG -F"
- 
-+	# Figure out if we can add -M (run as multi threaded) option to xfs_io
-+	$XFS_IO_PROG -M -c quit 2>&1 | grep -q "invalid option" || \
-+	export XFS_IO_PROG="$XFS_IO_PROG -M"
-+
- 	# xfs_copy doesn't work on v5 xfs yet without -d option
- 	if [ "$FSTYP" == "xfs" ] && [[ $MKFS_OPTIONS =~ crc=1 ]]; then
- 		export XFS_COPY_PROG="$XFS_COPY_PROG -d"
--- 
-2.7.4
-
+Ben
