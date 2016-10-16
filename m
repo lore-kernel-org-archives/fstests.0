@@ -1,368 +1,162 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:40123 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754769AbcJNSNQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 14 Oct 2016 14:13:16 -0400
-Subject: [PATCH 3/3] misc: fix more xfs_db usage
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Fri, 14 Oct 2016 11:13:08 -0700
-Message-ID: <147646878869.19627.4760911876287258529.stgit@birch.djwong.org>
-In-Reply-To: <147646876990.19627.5046740854955682441.stgit@birch.djwong.org>
-References: <147646876990.19627.5046740854955682441.stgit@birch.djwong.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Sender: fstests-owner@vger.kernel.org
-To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH v2 2/3] fstests: strip quotes from "$XFS_IO_PROG" call sites
+Date: Sun, 16 Oct 2016 13:53:41 +0300
+Message-Id: <1476615222-7804-2-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1476615222-7804-1-git-send-email-amir73il@gmail.com>
+References: <1476615222-7804-1-git-send-email-amir73il@gmail.com>
+To: Dave Chinner <david@fromorbit.com>, Eryu Guan <eguan@redhat.com>, Christoph Hellwig <hch@lst.de>
+Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+The value of "$XFS_IO_PROG" may contain extra flags after the
+binary path (e.g. -F), so it is wrong to use the variable inside
+quotes in xfs_io execution call sites.
+
+This bug surfaced while testing the new xfs_io -M flag.
+
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- tests/xfs/004 |    2 +-
- tests/xfs/007 |    8 ++++----
- tests/xfs/021 |    4 ++--
- tests/xfs/044 |    2 +-
- tests/xfs/052 |    2 +-
- tests/xfs/116 |    4 ++--
- tests/xfs/136 |    6 +++---
- tests/xfs/199 |    6 +++---
- tests/xfs/278 |   16 ++++++++--------
- tests/xfs/291 |    2 +-
- tests/xfs/307 |   20 ++++++++++----------
- tests/xfs/308 |   20 ++++++++++----------
- 12 files changed, 46 insertions(+), 46 deletions(-)
+ common/rc         |  6 +++---
+ common/reflink    | 26 +++++++++++++-------------
+ tests/generic/176 |  2 +-
+ tests/xfs/328     |  2 +-
+ 4 files changed, 18 insertions(+), 18 deletions(-)
 
-
-diff --git a/tests/xfs/004 b/tests/xfs/004
-index 59b8997..09da2fe 100755
---- a/tests/xfs/004
-+++ b/tests/xfs/004
-@@ -74,7 +74,7 @@ eval `$DF_PROG $SCRATCH_MNT 2>&1 \
- echo "df gave: blocks=$blocks used=$used avail=$avail" >>$seqres.full
- echo "blocksize from mkfs is '$dbsize'" >>$seqres.full
+diff --git a/common/rc b/common/rc
+index 565ba67..a838750 100644
+--- a/common/rc
++++ b/common/rc
+@@ -90,7 +90,7 @@ _pwrite_byte() {
+ 	file="$4"
+ 	xfs_io_args="$5"
  
--xfs_db -r -c "freesp -s" $SCRATCH_DEV >$tmp.xfs_db
-+_scratch_xfs_db -r -c "freesp -s"  >$tmp.xfs_db
- echo "xfs_db for $SCRATCH_DEV" >>$seqres.full
- cat $tmp.xfs_db >>$seqres.full
- 
-diff --git a/tests/xfs/007 b/tests/xfs/007
-index f2e3584..eb2c9b3 100755
---- a/tests/xfs/007
-+++ b/tests/xfs/007
-@@ -68,8 +68,8 @@ do_test()
- 			grep $qino_2 | awk '{print $NF}'`
- 
- 	echo "*** Usage before quotarm ***"
--	xfs_db -c "inode $QINO_1" -c "p core.nblocks" $SCRATCH_DEV
--	xfs_db -c "inode $QINO_2" -c "p core.nblocks" $SCRATCH_DEV
-+	_scratch_xfs_db -c "inode $QINO_1" -c "p core.nblocks" 
-+	_scratch_xfs_db -c "inode $QINO_2" -c "p core.nblocks" 
- 
- 	_qmount
- 	echo "*** turn off $off_opts quotas"
-@@ -79,8 +79,8 @@ do_test()
- 	_scratch_unmount
- 
- 	echo "*** Usage after quotarm ***"
--	xfs_db -c "inode $QINO_1" -c "p core.nblocks" $SCRATCH_DEV
--	xfs_db -c "inode $QINO_2" -c "p core.nblocks" $SCRATCH_DEV
-+	_scratch_xfs_db -c "inode $QINO_1" -c "p core.nblocks" 
-+	_scratch_xfs_db -c "inode $QINO_2" -c "p core.nblocks" 
+-	"$XFS_IO_PROG" $xfs_io_args -f -c "pwrite -S $pattern $offset $len" "$file"
++	$XFS_IO_PROG $xfs_io_args -f -c "pwrite -S $pattern $offset $len" "$file"
  }
  
+ # mmap-write a byte into a range of a file
+@@ -101,7 +101,7 @@ _mwrite_byte() {
+ 	mmap_len="$4"
+ 	file="$5"
  
-diff --git a/tests/xfs/021 b/tests/xfs/021
-index 795b71c..67a4346 100755
---- a/tests/xfs/021
-+++ b/tests/xfs/021
-@@ -130,14 +130,14 @@ _scratch_unmount >>$seqres.full 2>&1 \
- 
- echo "*** dump attributes (1)"
- 
--xfs_db -r -c "inode $inum_1" -c "print a.sfattr" $SCRATCH_DEV | \
-+_scratch_xfs_db -r -c "inode $inum_1" -c "print a.sfattr"  | \
- 	sed -e '/secure = /d' | sed -e '/parent = /d'
- 
- echo "*** dump attributes (2)"
- 
- # There is a fair bit of filtering here to convert v5 filesystem output
- # into the v4 format that holds the meaningful information for the test.
--xfs_db -r -c "inode $inum_2" -c "a a.bmx[0].startblock" -c print $SCRATCH_DEV \
-+_scratch_xfs_db -r -c "inode $inum_2" -c "a a.bmx[0].startblock" -c print  \
- 	| perl -ne '
- s/,secure//;
- s/,parent//;
-diff --git a/tests/xfs/044 b/tests/xfs/044
-index ea58c07..fc5dae0 100755
---- a/tests/xfs/044
-+++ b/tests/xfs/044
-@@ -130,7 +130,7 @@ _check_mount
- _check_require_logdev
- 
- echo "*** set uuid"
--xfs_db -x $SCRATCH_DEV -l $SCRATCH_LOGDEV -c "uuid 02020202-0202-0202-0202-020202020202"
-+_scratch_xfs_db -x  -l $SCRATCH_LOGDEV -c "uuid 02020202-0202-0202-0202-020202020202"
- [ $? -ne 0 ] && _unexpected
- _check_mount
- 
-diff --git a/tests/xfs/052 b/tests/xfs/052
-index 18cf037..56231f3 100755
---- a/tests/xfs/052
-+++ b/tests/xfs/052
-@@ -110,7 +110,7 @@ cat $tmp.quota >> $seqres.full
- _scratch_unmount
- 
- # note - does (insitu) conversion from fs blocks to 1K blocks
--xfs_db -rc "dquot -$type $id" -c p $SCRATCH_DEV | tee -a $seqres.full | perl -ne '
-+_scratch_xfs_db -rc "dquot -$type $id" -c p  | tee -a $seqres.full | perl -ne '
- 	if (/^diskdq.bcount = (\d+)$/) {
- 		 print "used_blocks=", $1 * '$dbsize' / 1024, "\n";
- 	}
-diff --git a/tests/xfs/116 b/tests/xfs/116
-index 2dabde9..1d13d15 100755
---- a/tests/xfs/116
-+++ b/tests/xfs/116
-@@ -55,10 +55,10 @@ _require_xfs_quota
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount "-o uquota"
- _scratch_unmount
--xfs_db -r -c sb -c print $SCRATCH_DEV | grep qflags
-+_scratch_xfs_db -r -c sb -c print  | grep qflags
- _scratch_mount
- _scratch_unmount
--xfs_db -r -c sb -c print $SCRATCH_DEV | grep qflags
-+_scratch_xfs_db -r -c sb -c print  | grep qflags
- 
- # success, all done
- status=0
-diff --git a/tests/xfs/136 b/tests/xfs/136
-index 679fa9f..6256215 100755
---- a/tests/xfs/136
-+++ b/tests/xfs/136
-@@ -103,7 +103,7 @@ do_extents()
- _print_inode()
- {
-     _scratch_unmount
--    xfs_db -r -c "inode $inum" -c "print" $SCRATCH_DEV |\
-+    _scratch_xfs_db -r -c "inode $inum" -c "print"  |\
-     awk '
- 	/nextents/ { print; next }
- 	/naextents/ { print; next }
-@@ -119,14 +119,14 @@ _print_inode()
- _print_inode_u()
- {
-     _scratch_unmount
--    xfs_db -r -c "inode $inum" -c "print u" $SCRATCH_DEV
-+    _scratch_xfs_db -r -c "inode $inum" -c "print u" 
-     _scratch_mount
+-	"$XFS_IO_PROG" -f -c "mmap -rw 0 $mmap_len" -c "mwrite -S $pattern $offset $len" "$file"
++	$XFS_IO_PROG -f -c "mmap -rw 0 $mmap_len" -c "mwrite -S $pattern $offset $len" "$file"
  }
  
- _print_inode_a()
- {
-     _scratch_unmount
--    xfs_db -r -c "inode $inum" -c "print a" $SCRATCH_DEV
-+    _scratch_xfs_db -r -c "inode $inum" -c "print a" 
-     _scratch_mount
- }
- 
-diff --git a/tests/xfs/199 b/tests/xfs/199
-index 3133893..ee26439 100755
---- a/tests/xfs/199
-+++ b/tests/xfs/199
-@@ -51,7 +51,7 @@ _require_scratch
- 
- get_features()
- {
--	xfs_db -x $SCRATCH_DEV -c "sb" -c "print $1" | awk '// {print $3}'
-+	_scratch_xfs_db -x  -c "sb" -c "print $1" | awk '// {print $3}'
- }
- 
- # clear any mkfs options so that we can directly specify the options we need to
-@@ -70,7 +70,7 @@ bf2=`get_features bad_features2`
- # Now clear the normal flags
- #
- echo "Clearing features2:"
--xfs_db -x $SCRATCH_DEV -c 'sb' -c 'write features2 0'
-+_scratch_xfs_db -x  -c 'sb' -c 'write features2 0'
- 
- _scratch_mount
- _scratch_unmount
-@@ -80,7 +80,7 @@ rwf2=`get_features features2`
- # Clear the normal flags again for the second rount.
- #
- echo "Clearing features2:"
--xfs_db -x $SCRATCH_DEV -c 'sb' -c 'write features2 0'
-+_scratch_xfs_db -x  -c 'sb' -c 'write features2 0'
- 
- #
- # And print the flags after a mount ro and remount rw
-diff --git a/tests/xfs/278 b/tests/xfs/278
-index caf2622..b94ee9c 100755
---- a/tests/xfs/278
-+++ b/tests/xfs/278
-@@ -62,16 +62,16 @@ _scratch_unmount
- echo "Silence is goodness..."
- 
- # Corrupt DIR
--xfs_db -x -c "inode $DIR_INO" -c "write u.sfdir2.list[0].inumber.i4 0" $SCRATCH_DEV >> $seqres.full
--xfs_db -x -c "inode $DIR_INO" -c "write u.sfdir2.list[0].name 0" $SCRATCH_DEV >> $seqres.full
--xfs_db -x -c "inode $DIR_INO" -c "write u.sfdir2.list[0].offset 0" $SCRATCH_DEV >> $seqres.full
--xfs_db -x -c "inode $DIR_INO" -c "write u.sfdir2.list[0].namelen 0" $SCRATCH_DEV >> $seqres.full
--xfs_db -x -c "inode $DIR_INO" -c "write u.sfdir2.hdr.parent.i4 0" $SCRATCH_DEV >> $seqres.full
--xfs_db -x -c "inode $DIR_INO" -c "write core.nlinkv2 0" $SCRATCH_DEV >> $seqres.full
-+_scratch_xfs_db -x -c "inode $DIR_INO" -c "write u.sfdir2.list[0].inumber.i4 0"  >> $seqres.full
-+_scratch_xfs_db -x -c "inode $DIR_INO" -c "write u.sfdir2.list[0].name 0"  >> $seqres.full
-+_scratch_xfs_db -x -c "inode $DIR_INO" -c "write u.sfdir2.list[0].offset 0"  >> $seqres.full
-+_scratch_xfs_db -x -c "inode $DIR_INO" -c "write u.sfdir2.list[0].namelen 0"  >> $seqres.full
-+_scratch_xfs_db -x -c "inode $DIR_INO" -c "write u.sfdir2.hdr.parent.i4 0"  >> $seqres.full
-+_scratch_xfs_db -x -c "inode $DIR_INO" -c "write core.nlinkv2 0"  >> $seqres.full
- 
- # Corrupt SUBDIR
--xfs_db -x -c "inode $SUBDIR_INO" -c "write u.sfdir2.hdr.parent.i4 0" $SCRATCH_DEV >> $seqres.full
--xfs_db -x -c "inode $SUBDIR_INO" -c "write core.nlinkv2 0" $SCRATCH_DEV >> $seqres.full
-+_scratch_xfs_db -x -c "inode $SUBDIR_INO" -c "write u.sfdir2.hdr.parent.i4 0"  >> $seqres.full
-+_scratch_xfs_db -x -c "inode $SUBDIR_INO" -c "write core.nlinkv2 0"  >> $seqres.full
- 
- echo "===== BEGIN of xfs_repair =====" >> $seqres.full
- echo "" >>$seqres.full
-diff --git a/tests/xfs/291 b/tests/xfs/291
-index c226e65..808f333 100755
---- a/tests/xfs/291
-+++ b/tests/xfs/291
-@@ -73,7 +73,7 @@ xfs_io -f -c "pwrite 0 16m" -c "fsync" $SCRATCH_MNT/space_file.large >> $seqres.
- 
- # Take a look at freespace for any post-mortem on the test
- _scratch_unmount
--xfs_db -r -c freesp $SCRATCH_DEV >> $seqres.full 2>&1
-+_scratch_xfs_db -r -c freesp  >> $seqres.full 2>&1
- _scratch_mount
- 
- # Step 2: Make a bunch of (hopefully fragmented) multiblock
-diff --git a/tests/xfs/307 b/tests/xfs/307
-index 2a99459..427d2fe 100755
---- a/tests/xfs/307
-+++ b/tests/xfs/307
-@@ -59,7 +59,7 @@ _get_agf_data() {
- 	field="$1"
+ # ls -l w/ selinux sometimes puts a dot at the end:
+@@ -3437,7 +3437,7 @@ _xfs_bmapx_find() {
+ 	file="$1"
  	shift
  
--	xfs_db -c 'agf 1' "$@" -c "p $field" $SCRATCH_DEV | awk '{print $3}'
-+	_scratch_xfs_db -c 'agf 1' "$@" -c "p $field"  | awk '{print $3}'
+-	"$XFS_IO_PROG" -c "bmap -${param}lpv" "$file" | grep -c "$@"
++	$XFS_IO_PROG -c "bmap -${param}lpv" "$file" | grep -c "$@"
  }
  
- _set_agf_data() {
-@@ -67,14 +67,14 @@ _set_agf_data() {
- 	value="$2"
- 	shift; shift
+ _require_chattr()
+diff --git a/common/reflink b/common/reflink
+index 1363971..8b34046 100644
+--- a/common/reflink
++++ b/common/reflink
+@@ -52,8 +52,8 @@ _require_test_reflink()
+ 	_require_xfs_io_command "reflink"
  
--	xfs_db -x -c 'agf 1' "$@" -c "write $field -- $value" $SCRATCH_DEV >> $seqres.full
-+	_scratch_xfs_db -x -c 'agf 1' "$@" -c "write $field -- $value"  >> $seqres.full
+ 	rm -rf "$TEST_DIR/file1" "$TEST_DIR/file2"
+-	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$TEST_DIR/file1" > /dev/null
+-	"$XFS_IO_PROG" -f -c "reflink $TEST_DIR/file1 0 0 65536" "$TEST_DIR/file2" > /dev/null
++	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 65536" "$TEST_DIR/file1" > /dev/null
++	$XFS_IO_PROG -f -c "reflink $TEST_DIR/file1 0 0 65536" "$TEST_DIR/file2" > /dev/null
+ 	if [ ! -s "$TEST_DIR/file2" ]; then
+ 		rm -rf "$TEST_DIR/file1" "$TEST_DIR/file2"
+ 		_notrun "Reflink not supported by test filesystem type: $FSTYP"
+@@ -69,8 +69,8 @@ _require_scratch_reflink()
+ 
+ 	_scratch_mkfs > /dev/null
+ 	_scratch_mount
+-	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file1" > /dev/null
+-	"$XFS_IO_PROG" -f -c "reflink $SCRATCH_MNT/file1 0 0 65536" "$SCRATCH_MNT/file2" > /dev/null
++	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file1" > /dev/null
++	$XFS_IO_PROG -f -c "reflink $SCRATCH_MNT/file1 0 0 65536" "$SCRATCH_MNT/file2" > /dev/null
+ 	if [ ! -s "$SCRATCH_MNT/file2" ]; then
+ 		_scratch_unmount
+ 		_notrun "Reflink not supported by scratch filesystem type: $FSTYP"
+@@ -85,9 +85,9 @@ _require_test_dedupe()
+ 	_require_xfs_io_command "dedupe"
+ 
+ 	rm -rf "$TEST_DIR/file1" "$TEST_DIR/file2"
+-	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$TEST_DIR/file1" > /dev/null
+-	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$TEST_DIR/file2" > /dev/null
+-	testio="$("$XFS_IO_PROG" -f -c "dedupe $TEST_DIR/file1 0 0 65536" "$TEST_DIR/file2" 2>&1)"
++	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 65536" "$TEST_DIR/file1" > /dev/null
++	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 65536" "$TEST_DIR/file2" > /dev/null
++	testio="$($XFS_IO_PROG -f -c "dedupe $TEST_DIR/file1 0 0 65536" "$TEST_DIR/file2" 2>&1)"
+ 	echo $testio | grep -q "Operation not supported" && \
+ 		_notrun "Dedupe not supported by test filesystem type: $FSTYP"
+ 	echo $testio | grep -q "Inappropriate ioctl for device" && \
+@@ -105,9 +105,9 @@ _require_scratch_dedupe()
+ 
+ 	_scratch_mkfs > /dev/null
+ 	_scratch_mount
+-	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file1" > /dev/null
+-	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file2" > /dev/null
+-	testio="$("$XFS_IO_PROG" -f -c "dedupe $SCRATCH_MNT/file1 0 0 65536" "$SCRATCH_MNT/file2" 2>&1)"
++	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file1" > /dev/null
++	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file2" > /dev/null
++	testio="$($XFS_IO_PROG -f -c "dedupe $SCRATCH_MNT/file1 0 0 65536" "$SCRATCH_MNT/file2" 2>&1)"
+ 	echo $testio | grep -q "Operation not supported" && \
+ 		_notrun "Dedupe not supported by test filesystem type: $FSTYP"
+ 	echo $testio | grep -q "Inappropriate ioctl for device" && \
+@@ -161,7 +161,7 @@ _reflink() {
+ 	file1="$1"
+ 	file2="$2"
+ 
+-	"$XFS_IO_PROG" -f -c "reflink $file1" "$file2"
++	$XFS_IO_PROG -f -c "reflink $file1" "$file2"
  }
  
- _get_sb_data() {
- 	field="$1"
- 	shift
+ # Reflink some part of file1 into another part of file2
+@@ -173,7 +173,7 @@ _reflink_range() {
+ 	len="$5"
+ 	xfs_io_args="$6"
  
--	xfs_db -c 'sb 0' "$@" -c "p $field" $SCRATCH_DEV | awk '{print $3}'
-+	_scratch_xfs_db -c 'sb 0' "$@" -c "p $field"  | awk '{print $3}'
+-	"$XFS_IO_PROG" $xfs_io_args -f -c "reflink $file1 $offset1 $offset2 $len" "$file2"
++	$XFS_IO_PROG $xfs_io_args -f -c "reflink $file1 $offset1 $offset2 $len" "$file2"
  }
  
- _set_sb_data() {
-@@ -82,7 +82,7 @@ _set_sb_data() {
- 	value="$2"
- 	shift; shift
+ # Dedupe some part of file1 into another part of file2
+@@ -185,7 +185,7 @@ _dedupe_range() {
+ 	len="$5"
+ 	xfs_io_args="$6"
  
--	xfs_db -x -c 'sb 0' "$@" -c "write $field -- $value" $SCRATCH_DEV >> $seqres.full
-+	_scratch_xfs_db -x -c 'sb 0' "$@" -c "write $field -- $value"  >> $seqres.full
+-	"$XFS_IO_PROG" $xfs_io_args -f -c "dedupe $file1 $offset1 $offset2 $len" "$file2"
++	$XFS_IO_PROG $xfs_io_args -f -c "dedupe $file1 $offset1 $offset2 $len" "$file2"
  }
  
- _filter_leftover() {
-@@ -91,17 +91,17 @@ _filter_leftover() {
+ # Create a file of interleaved unwritten and reflinked blocks
+diff --git a/tests/generic/176 b/tests/generic/176
+index b14255b..76e923a 100755
+--- a/tests/generic/176
++++ b/tests/generic/176
+@@ -75,7 +75,7 @@ test $fnr -lt 17 && _notrun "Insufficient space for stress test; would only crea
  
- _dump_status() {
- 	echo "** " "$@"
--	xfs_db -c 'sb 0' -c p $SCRATCH_DEV
-+	_scratch_xfs_db -c 'sb 0' -c p 
- 	echo "** agf header"
--	xfs_db -c 'agf 1' -c p $SCRATCH_DEV
-+	_scratch_xfs_db -c 'agf 1' -c p 
- 	echo "** refcntbt"
--	xfs_db -c 'agf 1' -c 'addr refcntroot' -c p $SCRATCH_DEV
-+	_scratch_xfs_db -c 'agf 1' -c 'addr refcntroot' -c p 
- 	echo "** rmapbt"
--	test $is_rmap -gt 0 && xfs_db -c 'agf 1' -c 'addr rmaproot' -c p $SCRATCH_DEV
-+	test $is_rmap -gt 0 && _scratch_xfs_db -c 'agf 1' -c 'addr rmaproot' -c p 
- 	echo "** bnobt"
--	xfs_db -c 'agf 1' -c 'addr bnoroot' -c p $SCRATCH_DEV
-+	_scratch_xfs_db -c 'agf 1' -c 'addr bnoroot' -c p 
- 	echo "** cntbt"
--	xfs_db -c 'agf 1' -c 'addr cntroot' -c p $SCRATCH_DEV
-+	_scratch_xfs_db -c 'agf 1' -c 'addr cntroot' -c p 
- }
- 
- echo "We need AG1 to have a single free extent"
-diff --git a/tests/xfs/308 b/tests/xfs/308
-index 5bfa432..e14586d 100755
---- a/tests/xfs/308
-+++ b/tests/xfs/308
-@@ -59,7 +59,7 @@ _get_agf_data() {
- 	field="$1"
- 	shift
- 
--	xfs_db -c 'agf 1' "$@" -c "p $field" $SCRATCH_DEV | awk '{print $3}'
-+	_scratch_xfs_db -c 'agf 1' "$@" -c "p $field"  | awk '{print $3}'
- }
- 
- _set_agf_data() {
-@@ -67,14 +67,14 @@ _set_agf_data() {
- 	value="$2"
- 	shift; shift
- 
--	xfs_db -x -c 'agf 1' "$@" -c "write $field -- $value" $SCRATCH_DEV >> $seqres.full
-+	_scratch_xfs_db -x -c 'agf 1' "$@" -c "write $field -- $value"  >> $seqres.full
- }
- 
- _get_sb_data() {
- 	field="$1"
- 	shift
- 
--	xfs_db -c 'sb 0' "$@" -c "p $field" $SCRATCH_DEV | awk '{print $3}'
-+	_scratch_xfs_db -c 'sb 0' "$@" -c "p $field"  | awk '{print $3}'
- }
- 
- _set_sb_data() {
-@@ -82,7 +82,7 @@ _set_sb_data() {
- 	value="$2"
- 	shift; shift
- 
--	xfs_db -x -c 'sb 0' "$@" -c "write $field -- $value" $SCRATCH_DEV >> $seqres.full
-+	_scratch_xfs_db -x -c 'sb 0' "$@" -c "write $field -- $value"  >> $seqres.full
- }
- 
- _filter_leftover() {
-@@ -91,17 +91,17 @@ _filter_leftover() {
- 
- _dump_status() {
- 	echo "** " "$@"
--	xfs_db -c 'sb 0' -c p $SCRATCH_DEV
-+	_scratch_xfs_db -c 'sb 0' -c p 
- 	echo "** agf header"
--	xfs_db -c 'agf 1' -c p $SCRATCH_DEV
-+	_scratch_xfs_db -c 'agf 1' -c p 
- 	echo "** refcntbt"
--	xfs_db -c 'agf 1' -c 'addr refcntroot' -c p $SCRATCH_DEV
-+	_scratch_xfs_db -c 'agf 1' -c 'addr refcntroot' -c p 
- 	echo "** rmapbt"
--	test $is_rmap -gt 0 && xfs_db -c 'agf 1' -c 'addr rmaproot' -c p $SCRATCH_DEV
-+	test $is_rmap -gt 0 && _scratch_xfs_db -c 'agf 1' -c 'addr rmaproot' -c p 
- 	echo "** bnobt"
--	xfs_db -c 'agf 1' -c 'addr bnoroot' -c p $SCRATCH_DEV
-+	_scratch_xfs_db -c 'agf 1' -c 'addr bnoroot' -c p 
- 	echo "** cntbt"
--	xfs_db -c 'agf 1' -c 'addr cntroot' -c p $SCRATCH_DEV
-+	_scratch_xfs_db -c 'agf 1' -c 'addr cntroot' -c p 
- }
- 
- echo "We need AG1 to have a single free extent"
-
+ echo "Create a many-block file"
+ echo "creating $blocks_needed blocks..." >> "$seqres.full"
+-"$XFS_IO_PROG" -f -c "pwrite -S 0x61 -b 4194304 0 $((2 ** (fnr + 1) * blksz))" "$testdir/file1" >> "$seqres.full"
++$XFS_IO_PROG -f -c "pwrite -S 0x61 -b 4194304 0 $((2 ** (fnr + 1) * blksz))" "$testdir/file1" >> "$seqres.full"
+ echo "punching..." >> "$seqres.full"
+ "$here/src/punch-alternating" "$testdir/file1" >> "$seqres.full"
+ echo "...done" >> "$seqres.full"
+diff --git a/tests/xfs/328 b/tests/xfs/328
+index 33a0bef..8518456 100755
+--- a/tests/xfs/328
++++ b/tests/xfs/328
+@@ -80,7 +80,7 @@ bytes=$((blocks_needed * blksz))
+ echo "Create a many-block file"
+ echo "creating $blocks_needed blocks..." >> "$seqres.full"
+ _pwrite_byte 0x62 0 $blksz $testdir/file0 >> $seqres.full
+-"$XFS_IO_PROG" -f -c "pwrite -S 0x61 -b 4194304 0 $bytes" "$testdir/file1" >> "$seqres.full"
++$XFS_IO_PROG -f -c "pwrite -S 0x61 -b 4194304 0 $bytes" "$testdir/file1" >> "$seqres.full"
+ echo "punching..." >> "$seqres.full"
+ "$here/src/punch-alternating" "$testdir/file1" >> "$seqres.full"
+ seq 0 2 $((2 ** (fnr + 1) )) | while read lblk; do
+-- 
+2.7.4
