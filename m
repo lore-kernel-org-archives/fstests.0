@@ -1,162 +1,102 @@
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2 2/3] fstests: strip quotes from "$XFS_IO_PROG" call sites
-Date: Sun, 16 Oct 2016 13:53:41 +0300
-Message-Id: <1476615222-7804-2-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1476615222-7804-1-git-send-email-amir73il@gmail.com>
+Date: Mon, 17 Oct 2016 08:46:08 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH v2 3/3] fstests: run xfs_io as multi threaded for 'quick'
+ tests
+Message-ID: <20161016214608.GC14023@dastard>
 References: <1476615222-7804-1-git-send-email-amir73il@gmail.com>
-To: Dave Chinner <david@fromorbit.com>, Eryu Guan <eguan@redhat.com>, Christoph Hellwig <hch@lst.de>
-Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org
+ <1476615222-7804-3-git-send-email-amir73il@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1476615222-7804-3-git-send-email-amir73il@gmail.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Eryu Guan <eguan@redhat.com>, Christoph Hellwig <hch@lst.de>, "Darrick J . Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-The value of "$XFS_IO_PROG" may contain extra flags after the
-binary path (e.g. -F), so it is wrong to use the variable inside
-quotes in xfs_io execution call sites.
+On Sun, Oct 16, 2016 at 01:53:42PM +0300, Amir Goldstein wrote:
+> Try to run xfs_io for tests in group quick with command line
+> option -M which starts an idle thread before performing any io.
+> 
+> The purpose of this idle thread is to test io from a multi threaded
+> process. With single threaded process, the file table is not shared
+> and file structs are not reference counted.
+> 
+> In order to improve the chance of detecting file struct reference
+> leaks, we should run xfs_io commands with this option as much as
+> possible.
+> 
+> Analysis of the effect of xfs_io -M on tests runtime showed that
+> it may lead to slightly longer run times in extreme cases (e.g +3s
+> for generic/132), but has a negligable effect on runtime of tests
+> among the 'quick' group (worst case +0.3s for generic/130).
+> 
+> Therefore, we automatically add the -M flags only to tests in the
+> 'quick' group.
+> 
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+>  check     |  2 ++
+>  common/rc | 15 +++++++++++++++
+>  2 files changed, 17 insertions(+)
+> 
+> diff --git a/check b/check
+> index 69341d8..e568598 100755
+> --- a/check
+> +++ b/check
+> @@ -574,6 +574,8 @@ for section in $HOST_OPTIONS_SECTIONS; do
+>  
+>  	    mkdir -p $RESULT_DIR
+>  
+> +	    export TEST_GROUPS=`grep $(basename $seqnum) "$SRC_DIR/$(dirname $seqnum)/group"`
+> +
 
-This bug surfaced while testing the new xfs_io -M flag.
+Do we really want to go down this path of changing behaviours
+of utilities based on what group  they belong to? It means we can no
+longer look at the test code and recreate the command line without
+having to work out what group context the test is running under. And
+how do we tell that it's correct and we don't inadvertantly break
+it? I ask this because.....
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- common/rc         |  6 +++---
- common/reflink    | 26 +++++++++++++-------------
- tests/generic/176 |  2 +-
- tests/xfs/328     |  2 +-
- 4 files changed, 18 insertions(+), 18 deletions(-)
+>  	    echo -n "$seqnum"
+>  
+>  		if $showme; then
+> diff --git a/common/rc b/common/rc
+> index a838750..7c478cf 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3799,6 +3799,21 @@ init_rc()
+>  	$XFS_IO_PROG -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \
+>  		export XFS_IO_PROG="$XFS_IO_PROG -F"
+>  
+> +	if echo $TEST_GROUPS | grep -q quick; then
+> +		# xfs_io -M flag runs xfs_io as multi threaded process
+> +		# in order to catch fdget/fdset reference leaks, because
+> +		# file structs are not reference counted in a single threaded
+> +		# process.
+> +		# Because reference counted fdget/fdset may lead to slightly
+> +		# longer run times in extreme cases (such as generic/132),
+> +		# we limit the use of -M flags to tests with short runtime,
+> +		# where the effect of the flag is negligable.
+> +		#
+> +		# Figure out if xfs_io supports the -M option
+> +		$XFS_IO_PROG -M -c quit 2>/dev/null && \
+> +			export XFS_IO_PROG="$XFS_IO_PROG -M"
+> +	fi
+> +
 
-diff --git a/common/rc b/common/rc
-index 565ba67..a838750 100644
---- a/common/rc
-+++ b/common/rc
-@@ -90,7 +90,7 @@ _pwrite_byte() {
- 	file="$4"
- 	xfs_io_args="$5"
- 
--	"$XFS_IO_PROG" $xfs_io_args -f -c "pwrite -S $pattern $offset $len" "$file"
-+	$XFS_IO_PROG $xfs_io_args -f -c "pwrite -S $pattern $offset $len" "$file"
- }
- 
- # mmap-write a byte into a range of a file
-@@ -101,7 +101,7 @@ _mwrite_byte() {
- 	mmap_len="$4"
- 	file="$5"
- 
--	"$XFS_IO_PROG" -f -c "mmap -rw 0 $mmap_len" -c "mwrite -S $pattern $offset $len" "$file"
-+	$XFS_IO_PROG -f -c "mmap -rw 0 $mmap_len" -c "mwrite -S $pattern $offset $len" "$file"
- }
- 
- # ls -l w/ selinux sometimes puts a dot at the end:
-@@ -3437,7 +3437,7 @@ _xfs_bmapx_find() {
- 	file="$1"
- 	shift
- 
--	"$XFS_IO_PROG" -c "bmap -${param}lpv" "$file" | grep -c "$@"
-+	$XFS_IO_PROG -c "bmap -${param}lpv" "$file" | grep -c "$@"
- }
- 
- _require_chattr()
-diff --git a/common/reflink b/common/reflink
-index 1363971..8b34046 100644
---- a/common/reflink
-+++ b/common/reflink
-@@ -52,8 +52,8 @@ _require_test_reflink()
- 	_require_xfs_io_command "reflink"
- 
- 	rm -rf "$TEST_DIR/file1" "$TEST_DIR/file2"
--	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$TEST_DIR/file1" > /dev/null
--	"$XFS_IO_PROG" -f -c "reflink $TEST_DIR/file1 0 0 65536" "$TEST_DIR/file2" > /dev/null
-+	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 65536" "$TEST_DIR/file1" > /dev/null
-+	$XFS_IO_PROG -f -c "reflink $TEST_DIR/file1 0 0 65536" "$TEST_DIR/file2" > /dev/null
- 	if [ ! -s "$TEST_DIR/file2" ]; then
- 		rm -rf "$TEST_DIR/file1" "$TEST_DIR/file2"
- 		_notrun "Reflink not supported by test filesystem type: $FSTYP"
-@@ -69,8 +69,8 @@ _require_scratch_reflink()
- 
- 	_scratch_mkfs > /dev/null
- 	_scratch_mount
--	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file1" > /dev/null
--	"$XFS_IO_PROG" -f -c "reflink $SCRATCH_MNT/file1 0 0 65536" "$SCRATCH_MNT/file2" > /dev/null
-+	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file1" > /dev/null
-+	$XFS_IO_PROG -f -c "reflink $SCRATCH_MNT/file1 0 0 65536" "$SCRATCH_MNT/file2" > /dev/null
- 	if [ ! -s "$SCRATCH_MNT/file2" ]; then
- 		_scratch_unmount
- 		_notrun "Reflink not supported by scratch filesystem type: $FSTYP"
-@@ -85,9 +85,9 @@ _require_test_dedupe()
- 	_require_xfs_io_command "dedupe"
- 
- 	rm -rf "$TEST_DIR/file1" "$TEST_DIR/file2"
--	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$TEST_DIR/file1" > /dev/null
--	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$TEST_DIR/file2" > /dev/null
--	testio="$("$XFS_IO_PROG" -f -c "dedupe $TEST_DIR/file1 0 0 65536" "$TEST_DIR/file2" 2>&1)"
-+	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 65536" "$TEST_DIR/file1" > /dev/null
-+	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 65536" "$TEST_DIR/file2" > /dev/null
-+	testio="$($XFS_IO_PROG -f -c "dedupe $TEST_DIR/file1 0 0 65536" "$TEST_DIR/file2" 2>&1)"
- 	echo $testio | grep -q "Operation not supported" && \
- 		_notrun "Dedupe not supported by test filesystem type: $FSTYP"
- 	echo $testio | grep -q "Inappropriate ioctl for device" && \
-@@ -105,9 +105,9 @@ _require_scratch_dedupe()
- 
- 	_scratch_mkfs > /dev/null
- 	_scratch_mount
--	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file1" > /dev/null
--	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file2" > /dev/null
--	testio="$("$XFS_IO_PROG" -f -c "dedupe $SCRATCH_MNT/file1 0 0 65536" "$SCRATCH_MNT/file2" 2>&1)"
-+	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file1" > /dev/null
-+	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file2" > /dev/null
-+	testio="$($XFS_IO_PROG -f -c "dedupe $SCRATCH_MNT/file1 0 0 65536" "$SCRATCH_MNT/file2" 2>&1)"
- 	echo $testio | grep -q "Operation not supported" && \
- 		_notrun "Dedupe not supported by test filesystem type: $FSTYP"
- 	echo $testio | grep -q "Inappropriate ioctl for device" && \
-@@ -161,7 +161,7 @@ _reflink() {
- 	file1="$1"
- 	file2="$2"
- 
--	"$XFS_IO_PROG" -f -c "reflink $file1" "$file2"
-+	$XFS_IO_PROG -f -c "reflink $file1" "$file2"
- }
- 
- # Reflink some part of file1 into another part of file2
-@@ -173,7 +173,7 @@ _reflink_range() {
- 	len="$5"
- 	xfs_io_args="$6"
- 
--	"$XFS_IO_PROG" $xfs_io_args -f -c "reflink $file1 $offset1 $offset2 $len" "$file2"
-+	$XFS_IO_PROG $xfs_io_args -f -c "reflink $file1 $offset1 $offset2 $len" "$file2"
- }
- 
- # Dedupe some part of file1 into another part of file2
-@@ -185,7 +185,7 @@ _dedupe_range() {
- 	len="$5"
- 	xfs_io_args="$6"
- 
--	"$XFS_IO_PROG" $xfs_io_args -f -c "dedupe $file1 $offset1 $offset2 $len" "$file2"
-+	$XFS_IO_PROG $xfs_io_args -f -c "dedupe $file1 $offset1 $offset2 $len" "$file2"
- }
- 
- # Create a file of interleaved unwritten and reflinked blocks
-diff --git a/tests/generic/176 b/tests/generic/176
-index b14255b..76e923a 100755
---- a/tests/generic/176
-+++ b/tests/generic/176
-@@ -75,7 +75,7 @@ test $fnr -lt 17 && _notrun "Insufficient space for stress test; would only crea
- 
- echo "Create a many-block file"
- echo "creating $blocks_needed blocks..." >> "$seqres.full"
--"$XFS_IO_PROG" -f -c "pwrite -S 0x61 -b 4194304 0 $((2 ** (fnr + 1) * blksz))" "$testdir/file1" >> "$seqres.full"
-+$XFS_IO_PROG -f -c "pwrite -S 0x61 -b 4194304 0 $((2 ** (fnr + 1) * blksz))" "$testdir/file1" >> "$seqres.full"
- echo "punching..." >> "$seqres.full"
- "$here/src/punch-alternating" "$testdir/file1" >> "$seqres.full"
- echo "...done" >> "$seqres.full"
-diff --git a/tests/xfs/328 b/tests/xfs/328
-index 33a0bef..8518456 100755
---- a/tests/xfs/328
-+++ b/tests/xfs/328
-@@ -80,7 +80,7 @@ bytes=$((blocks_needed * blksz))
- echo "Create a many-block file"
- echo "creating $blocks_needed blocks..." >> "$seqres.full"
- _pwrite_byte 0x62 0 $blksz $testdir/file0 >> $seqres.full
--"$XFS_IO_PROG" -f -c "pwrite -S 0x61 -b 4194304 0 $bytes" "$testdir/file1" >> "$seqres.full"
-+$XFS_IO_PROG -f -c "pwrite -S 0x61 -b 4194304 0 $bytes" "$testdir/file1" >> "$seqres.full"
- echo "punching..." >> "$seqres.full"
- "$here/src/punch-alternating" "$testdir/file1" >> "$seqres.full"
- seq 0 2 $((2 ** (fnr + 1) )) | while read lblk; do
+.... I can't see how this works - init_rc is
+called and sets $XFS_IO_PROG long before TEST_GROUPS is set and
+exported. How did you verify that the correct xfs_io command lines
+were being issued?
+
+IMO, either turn it on for everything if it is supported, or make it
+an explicit command line option to enable. A couple of seconds of
+extra runtime here and there means nothing for a typical auto test
+run which can take hours to run....
+
+Cheers,
+
+Dave.
 -- 
-2.7.4
+Dave Chinner
+david@fromorbit.com
