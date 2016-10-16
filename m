@@ -1,55 +1,27 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:40016 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752753AbcJNSNE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 14 Oct 2016 14:13:04 -0400
-Subject: [PATCH 1/3] xfs: set the refcount btree cowflag when setting up cow
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Fri, 14 Oct 2016 11:12:56 -0700
-Message-ID: <147646877615.19627.12845265308407861169.stgit@birch.djwong.org>
-In-Reply-To: <147646876990.19627.5046740854955682441.stgit@birch.djwong.org>
-References: <147646876990.19627.5046740854955682441.stgit@birch.djwong.org>
+Received: from bombadil.infradead.org ([198.137.202.9]:42684 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752668AbcJPHRw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 16 Oct 2016 03:17:52 -0400
+Date: Sun, 16 Oct 2016 00:17:52 -0700
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH] generic/285: discover allocation size for NFS
+Message-ID: <20161016071752.GC17675@infradead.org>
+References: <883bff7d2f3123aeb461df1072f9930c3d0f063b.1476440892.git.bcodding@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <883bff7d2f3123aeb461df1072f9930c3d0f063b.1476440892.git.bcodding@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Benjamin Coddington <bcodding@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-When we're setting up a fake cow extent in the refcountbt to test
-cleanup of fake cow extents, set the cowflag in the record field
-to reflect our new disk format of storing the staging extents in
-the right side of the tree.
+On Fri, Oct 14, 2016 at 06:28:37AM -0400, Benjamin Coddington wrote:
+> On NFS, try to discover the allocation size for the exported filesystem.
+> NFS st_blksize is optimized for the network, and will usually be much
+> larger than the allocation size of the exported filesystem, which may
+> trigger preallocation strategies in the exported filesystem causing the
+> seek tests here to fail.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/xfs/307 |    1 +
- tests/xfs/308 |    1 +
- 2 files changed, 2 insertions(+)
-
-
-diff --git a/tests/xfs/307 b/tests/xfs/307
-index 869f5cc..2a99459 100755
---- a/tests/xfs/307
-+++ b/tests/xfs/307
-@@ -145,6 +145,7 @@ _set_agf_data numrecs 1 -c 'addr refcntroot'
- _set_agf_data "recs[1].startblock" $debris_bno -c 'addr refcntroot'
- _set_agf_data "recs[1].blockcount" $debris_len -c 'addr refcntroot'
- _set_agf_data "recs[1].refcount" 1 -c 'addr refcntroot'
-+_set_agf_data "recs[1].cowflag" 1 -c 'addr refcntroot'
- 
- if [ $is_rmap -gt 0 ]; then
- 	rmap_nr=$((rmap_nr + 1))
-diff --git a/tests/xfs/308 b/tests/xfs/308
-index 8f8f380..5bfa432 100755
---- a/tests/xfs/308
-+++ b/tests/xfs/308
-@@ -145,6 +145,7 @@ _set_agf_data numrecs 1 -c 'addr refcntroot'
- _set_agf_data "recs[1].startblock" $debris_bno -c 'addr refcntroot'
- _set_agf_data "recs[1].blockcount" $debris_len -c 'addr refcntroot'
- _set_agf_data "recs[1].refcount" 1 -c 'addr refcntroot'
-+_set_agf_data "recs[1].cowflag" 1 -c 'addr refcntroot'
- 
- if [ $is_rmap -gt 0 ]; then
- 	rmap_nr=$((rmap_nr + 1))
-
+Is there a reason not to use your new evidence-based check for all
+file systems?
