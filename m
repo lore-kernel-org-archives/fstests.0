@@ -1,107 +1,122 @@
-Received: from mx2.suse.de ([195.135.220.15]:43704 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754451AbcJNSLP (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 14 Oct 2016 14:11:15 -0400
-Date: Fri, 14 Oct 2016 20:11:11 +0200
-From: David Sterba <dsterba@suse.cz>
-Subject: Re: Is is possible to submit binary image as fstest test case?
-Message-ID: <20161014181111.GE11398@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-References: <53250876-4992-971e-ed37-054f03ef555f@cn.fujitsu.com>
- <20161007091838.GG9806@dastard>
- <20161007160551.GD11398@twin.jikos.cz>
- <20161009235612.GN9806@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20161009235612.GN9806@dastard>
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:33952 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752018AbcJPIzn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 16 Oct 2016 04:55:43 -0400
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH v2] xfs_io: add command line option -M to run as multi threaded process
+Date: Sun, 16 Oct 2016 11:55:11 +0300
+Message-Id: <1476608111-28948-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>
-Cc: dsterba@suse.cz, Qu Wenruo <quwenruo@cn.fujitsu.com>, fstests@vger.kernel.org, btrfs <linux-btrfs@vger.kernel.org>
+Cc: Christoph Hellwig <hch@lst.de>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Oct 10, 2016 at 10:56:12AM +1100, Dave Chinner wrote:
-> On Fri, Oct 07, 2016 at 06:05:51PM +0200, David Sterba wrote:
-> > On Fri, Oct 07, 2016 at 08:18:38PM +1100, Dave Chinner wrote:
-> > > On Thu, Oct 06, 2016 at 04:12:56PM +0800, Qu Wenruo wrote:
-> > > > So I'm wondering if I can just upload a zipped raw image as part of
-> > > > the test case?
-> > > 
-> > > Preferably not. We've managed to avoid pre-built images in xfstests
-> > > for 15 years, so there'd have to be a really good reason to start
-> > > doing this, especially as once we open that floodgate we'll end up
-> > > with everyone wanting to do this and it will blow out the size of
-> > > the repository in now time.
-> > > 
-> > > If the issue is just timing or being unable to trigger an error
-> > > at the right time, this is what error injection frameworks or
-> > > debug-only sysfs hooks are for. The XFS kernel code has both,
-> > > xfstests use both, and they pretty much do away with the need for
-> > > custom binary filesystem images for such testing...
-> > 
-> > Error injection framework may not be alwasy available, eg. in kernels
-> > built for production. Yet I'd like to make the test possible.
-> 
-> Why would you ever enable error injection on a production kernel?
+xfs_io -M will start by spawning an idle thread.
+The purpose of this idle thread is to test io from a multi threaded
+process. With single threaded process, the file table is not shared
+and file structs are not reference counted.
 
-That's not what I mean. Let me rephrase. If the test needs the injection
-infrastructue it can't be run with production build. A crafted image can
-reproduce that.
+So in order to detect file struct reference leaks, spawning an idle
+thread will do the trick.
 
-> We simply don't run the error injection tests when the
-> infrastructure is not there, jsut like we do with all other tests
-> that are depenent on optional kernel/fs features....
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+Reviewed-by: Christoph Hellwig <hch@lst.de>
+---
+ io/Makefile |  2 +-
+ io/init.c   | 33 ++++++++++++++++++++++++++++++++-
+ 2 files changed, 33 insertions(+), 2 deletions(-)
 
-I think this depends on the test and the bug class it's supposed to hit.
-The images need some determinism, eg. a traversal of structures, or
-existence (or not) of some state, or error handling.
+diff --git a/io/Makefile b/io/Makefile
+index 1997ca9..032a8c7 100644
+--- a/io/Makefile
++++ b/io/Makefile
+@@ -13,7 +13,7 @@ CFILES = init.c \
+ 	mmap.c open.c parent.c pread.c prealloc.c pwrite.c seek.c shutdown.c \
+ 	sync.c truncate.c reflink.c
+ 
+-LLDLIBS = $(LIBXCMD) $(LIBHANDLE)
++LLDLIBS = $(LIBXCMD) $(LIBHANDLE) $(LIBPTHREAD)
+ LTDEPENDENCIES = $(LIBXCMD) $(LIBHANDLE)
+ LLDFLAGS = -static-libtool-libs
+ 
+diff --git a/io/init.c b/io/init.c
+index 6b88cc6..8a34ceb 100644
+--- a/io/init.c
++++ b/io/init.c
+@@ -16,6 +16,7 @@
+  * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  */
+ 
++#include <pthread.h>
+ #include "platform_defs.h"
+ #include "command.h"
+ #include "input.h"
+@@ -25,6 +26,7 @@
+ char	*progname;
+ int	exitcode;
+ int	expert;
++int	multithreaded;
+ size_t	pagesize;
+ struct timeval stopwatch;
+ 
+@@ -141,7 +143,7 @@ init(
+ 	pagesize = getpagesize();
+ 	gettimeofday(&stopwatch, NULL);
+ 
+-	while ((c = getopt(argc, argv, "ac:dFfmp:nrRstTVx")) != EOF) {
++	while ((c = getopt(argc, argv, "ac:dFfmMp:nrRstTVx")) != EOF) {
+ 		switch (c) {
+ 		case 'a':
+ 			flags |= IO_APPEND;
+@@ -166,6 +168,9 @@ init(
+ 				exit(1);
+ 			}
+ 			break;
++		case 'M':
++			multithreaded = 1;
++			break;
+ 		case 'n':
+ 			flags |= IO_NONBLOCK;
+ 			break;
+@@ -213,12 +218,38 @@ init(
+ 	add_check_command(init_check_command);
+ }
+ 
++/*
++ * The purpose of this idle thread is to test io from a multi threaded process.
++ * With single threaded process, the file table is not shared and file structs
++ * are not reference counted. So in order to detect file struct reference
++ * leaks, spawning an idle thread will do the trick.
++ */
++void *
++idle_loop(void *arg)
++{
++	for (;;)
++		pause();
++}
++
++void
++start_idle_thread()
++{
++	pthread_t t;
++
++	if (pthread_create(&t, NULL, idle_loop, NULL)) {
++		fprintf(stderr, "Error creating idle thread\n");
++		exit(1);
++	}
++}
++
+ int
+ main(
+ 	int	argc,
+ 	char	**argv)
+ {
+ 	init(argc, argv);
++	if (multithreaded)
++		start_idle_thread();
+ 	command_loop();
+ 	return exitcode;
+ }
+-- 
+2.7.4
 
-> > Also, I find it useful to keep the exact images that are attached to a
-> > report and not necessarily try to recreate it to trigger a bug. If the
-> > images are small, hosting them with the sources makes testing easy.
-> > Big images would probably go to own repository and be linked.
-> > 
-> > I don't really expect fstests to store crafted images and would advise
-> > Qu to not even try to propose that, because the answer was quite
-> > predictable.
-> 
-> You say that like it's a bad thing?
-
->From the POV of fstests, it won't work, possibly in some very limited
-number of tests. As it's a multi-filesystem project, this won't scale.
-You said that earlier and I consider this obvious.
-
-What we can do for fstests, configure an external path with filesystem
-images and let tests use it for any purpose. In btrfs-progs we eg. don't
-have mount tests of the fuzzed images, but I would like to make it more
-accessible for wider testing. In a way that's acceptable for fstests.
-
-> What's the guarantee that a
-> specific corrupt image will always be sufficient to trigger the
-> problem the test is supposed to check? i.e. we could change a
-> different part of the FS code and that could mask the bug the image
-> used to trigger. The test then passes, but we haven't actually fix
-> the bug that the test used to exercise. i.e. we've got a false "we
-> fixed the problem" report, when all we did is prevent a specific
-> vector from tripping over it.
-
-Again, I think this depends. I can't be sure the image will always
-trigger the bug that was there originally. I've seen that some fuzzed
-images required to add early checks that in some cases did not reach the
-original point of failure in other images. As long as the test
-assumptions are met, the test will not give false sense of fixing. In
-case of the fuzzed images, one may not cover all the assumptions, but I
-take them more like statistical proof that we don't have new bugs. And
-it's convenient to have the images at hand.
-
-> Error injection and sysfs hooks into debug code are much more
-> reliable ways of testing that the root cause of a problem is fixed
-> and stays fixed.  The reproducing trigger cannot be masked by
-> changes in other code layers, so we know that if the error
-> injection/sysfs hook test handles the problem correctly, we have
-> actually fixed the underlying bug and not just masked it...
-
-Agreed. This applies to the example that Qu asked about, as balance
-modifies a global filesystem state, a single image won't cover many
-variants of structures (with snapshots, optional mkfs features). The
-injection framework will give better testing coverage.
