@@ -1,323 +1,170 @@
-Received: from mail-lf0-f68.google.com ([209.85.215.68]:36368 "EHLO
-        mail-lf0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757530AbcJQHYH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 17 Oct 2016 03:24:07 -0400
-Received: by mail-lf0-f68.google.com with SMTP id b75so24958166lfg.3
-        for <fstests@vger.kernel.org>; Mon, 17 Oct 2016 00:24:06 -0700 (PDT)
+Received: from mail-lf0-f67.google.com ([209.85.215.67]:34598 "EHLO
+        mail-lf0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757530AbcJQHYL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 17 Oct 2016 03:24:11 -0400
+Received: by mail-lf0-f67.google.com with SMTP id x23so19380309lfi.1
+        for <fstests@vger.kernel.org>; Mon, 17 Oct 2016 00:24:11 -0700 (PDT)
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v3 1/3] fstests: fix call sites that used xfs_io directly
-Date: Mon, 17 Oct 2016 10:23:32 +0300
-Message-Id: <1476689014-384-1-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v3 2/3] fstests: strip quotes from "$XFS_IO_PROG" call sites
+Date: Mon, 17 Oct 2016 10:23:33 +0300
+Message-Id: <1476689014-384-2-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1476689014-384-1-git-send-email-amir73il@gmail.com>
+References: <1476689014-384-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>, Eryu Guan <eguan@redhat.com>, Christoph Hellwig <hch@lst.de>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Convert those few remaining call sites to use the XFS_IO_PROG env var.
+The value of "$XFS_IO_PROG" may contain extra flags after the
+binary path (e.g. -F), so it is wrong to use the variable inside
+quotes in xfs_io execution call sites.
+
+This bug surfaced while testing the new xfs_io -M flag.
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- common/quota      | 4 ++--
- common/rc         | 4 ++--
- tests/generic/043 | 2 +-
- tests/generic/044 | 4 ++--
- tests/generic/045 | 4 ++--
- tests/generic/046 | 4 ++--
- tests/generic/047 | 2 +-
- tests/generic/048 | 2 +-
- tests/generic/049 | 2 +-
- tests/generic/224 | 4 ++--
- tests/xfs/109     | 4 ++--
- tests/xfs/114     | 4 ++--
- tests/xfs/190     | 4 ++--
- tests/xfs/201     | 2 +-
- tests/xfs/229     | 2 +-
- tests/xfs/250     | 2 +-
- tests/xfs/291     | 2 +-
- 17 files changed, 26 insertions(+), 26 deletions(-)
+ common/rc         |  6 +++---
+ common/reflink    | 26 +++++++++++++-------------
+ tests/generic/176 |  2 +-
+ tests/xfs/328     |  2 +-
+ 4 files changed, 18 insertions(+), 18 deletions(-)
 
-diff --git a/common/quota b/common/quota
-index fb2b2a0..678bc43 100644
---- a/common/quota
-+++ b/common/quota
-@@ -139,7 +139,7 @@ _file_as_id()
- 
-     parent=`dirname $1`
-     if [ $3 = p ]; then
--	echo PARENT: xfs_io -r -c "chproj $2" -c "chattr +P" $parent >>$seqres.full
-+	echo PARENT: $XFS_IO_PROG -r -c "chproj $2" -c "chattr +P" $parent >>$seqres.full
- 	$XFS_IO_PROG -r -c "chproj $2" -c "chattr +P" $parent >>$seqres.full 2>&1
- 	magik='$>'	# (irrelevent, above set projid-inherit-on-parent)
-     elif [ $3 = u ]; then
-@@ -165,7 +165,7 @@ EOF
- #	exec "dd if=/dev/zero of=$1 bs=$4 count=$5 >>$seqres.full 2>&1";
- 
-     if [ $3 = p ]; then
--	echo PARENT: xfs_io -r -c "chproj 0" -c "chattr -P" $parent >>$seqres.full
-+	echo PARENT: $XFS_IO_PROG -r -c "chproj 0" -c "chattr -P" $parent >>$seqres.full
- 	$XFS_IO_PROG -r -c "chproj 0" -c "chattr -P" $parent >>$seqres.full 2>&1
-     fi
- }
 diff --git a/common/rc b/common/rc
-index c3da064..565ba67 100644
+index 565ba67..a838750 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -3796,8 +3796,8 @@ init_rc()
- 		exit 1
- 	fi
- 	# Figure out if we need to add -F ("foreign", deprecated) option to xfs_io
--	xfs_io -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \
--	export XFS_IO_PROG="$XFS_IO_PROG -F"
-+	$XFS_IO_PROG -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \
-+		export XFS_IO_PROG="$XFS_IO_PROG -F"
+@@ -90,7 +90,7 @@ _pwrite_byte() {
+ 	file="$4"
+ 	xfs_io_args="$5"
  
- 	# xfs_copy doesn't work on v5 xfs yet without -d option
- 	if [ "$FSTYP" == "xfs" ] && [[ $MKFS_OPTIONS =~ crc=1 ]]; then
-diff --git a/tests/generic/043 b/tests/generic/043
-index bd8eef8..b76a5aa 100755
---- a/tests/generic/043
-+++ b/tests/generic/043
-@@ -50,7 +50,7 @@ i=1;
- while [ $i -lt 1000 ]
- do
- 	file=$SCRATCH_MNT/$i
--	xfs_io -f -c "pwrite -b 64k -S 0xff 0 64k" $file > /dev/null
-+	$XFS_IO_PROG -f -c "pwrite -b 64k -S 0xff 0 64k" $file > /dev/null
- 	if [ $? -ne 0 ]
- 	then
- 		echo error creating/writing file $file
-diff --git a/tests/generic/044 b/tests/generic/044
-index f46e828..0331baa 100755
---- a/tests/generic/044
-+++ b/tests/generic/044
-@@ -50,13 +50,13 @@ i=1;
- while [ $i -lt 1000 ]
- do
- 	file=$SCRATCH_MNT/$i
--	xfs_io -f -c "pwrite -b 64k -S 0xff 0 64k" $file > /dev/null
-+	$XFS_IO_PROG -f -c "pwrite -b 64k -S 0xff 0 64k" $file > /dev/null
- 	if [ $? -ne 0 ]
- 	then
- 		echo error creating/writing file $file
- 		exit
- 	fi
--	xfs_io -c "truncate 64k" $file > /dev/null
-+	$XFS_IO_PROG -c "truncate 64k" $file > /dev/null
- 	if [ $? -ne 0 ]
- 	then
- 		echo error truncating file $file
-diff --git a/tests/generic/045 b/tests/generic/045
-index 4ec7650..874c955 100755
---- a/tests/generic/045
-+++ b/tests/generic/045
-@@ -50,13 +50,13 @@ i=1;
- while [ $i -lt 1000 ]
- do
- 	file=$SCRATCH_MNT/$i
--	xfs_io -f -c "pwrite -b 64k -S 0xff 0 64k" $file > /dev/null
-+	$XFS_IO_PROG -f -c "pwrite -b 64k -S 0xff 0 64k" $file > /dev/null
- 	if [ $? -ne 0 ]
- 	then
- 		echo error creating/writing file $file
- 		exit
- 	fi
--	xfs_io -c "truncate 32k" $file > /dev/null
-+	$XFS_IO_PROG -c "truncate 32k" $file > /dev/null
- 	if [ $? -ne 0 ]
- 	then
- 		echo error truncating file $file
-diff --git a/tests/generic/046 b/tests/generic/046
-index 08f1137..5a894b8 100755
---- a/tests/generic/046
-+++ b/tests/generic/046
-@@ -50,13 +50,13 @@ i=1;
- while [ $i -lt 1000 ]
- do
- 	file=$SCRATCH_MNT/$i
--	xfs_io -f -c "pwrite -b 32k -S 0xff 0 32k" $file > /dev/null
-+	$XFS_IO_PROG -f -c "pwrite -b 32k -S 0xff 0 32k" $file > /dev/null
- 	if [ $? -ne 0 ]
- 	then
- 		echo error creating/writing file $file
- 		exit
- 	fi
--	xfs_io -c "truncate 64k" $file > /dev/null
-+	$XFS_IO_PROG -c "truncate 64k" $file > /dev/null
- 	if [ $? -ne 0 ]
- 	then
- 		echo error truncating file $file
-diff --git a/tests/generic/047 b/tests/generic/047
-index b894ee6..631dc1e 100755
---- a/tests/generic/047
-+++ b/tests/generic/047
-@@ -81,7 +81,7 @@ i=1;
- while [ $i -lt 1000 ]
- do
- 	file=$SCRATCH_MNT/$i
--	xfs_io -f -c "pwrite -b 32k -S 0xff 0 32k" -c "fsync" $file > /dev/null
-+	$XFS_IO_PROG -f -c "pwrite -b 32k -S 0xff 0 32k" -c "fsync" $file > /dev/null
- 	if [ $? -ne 0 ]
- 	then
- 		echo error creating/writing file $file
-diff --git a/tests/generic/048 b/tests/generic/048
-index 6f5f444..51d7efd 100755
---- a/tests/generic/048
-+++ b/tests/generic/048
-@@ -84,7 +84,7 @@ i=1;
- while [ $i -lt 1000 ]
- do
- 	file=$SCRATCH_MNT/$i
--	xfs_io -f -c "pwrite -b 64k -S 0xff 0 10m" $file > /dev/null
-+	$XFS_IO_PROG -f -c "pwrite -b 64k -S 0xff 0 10m" $file > /dev/null
- 	if [ $? -ne 0 ]
- 	then
- 		echo error creating/writing file $file
-diff --git a/tests/generic/049 b/tests/generic/049
-index 320318e..1299242 100755
---- a/tests/generic/049
-+++ b/tests/generic/049
-@@ -81,7 +81,7 @@ i=1;
- while [ $i -lt 1000 ]
- do
- 	file=$SCRATCH_MNT/$i
--	xfs_io -f -c "pwrite -b 32k -S 0xff 0 32k" $file > /dev/null
-+	$XFS_IO_PROG -f -c "pwrite -b 32k -S 0xff 0 32k" $file > /dev/null
- 	if [ $? -ne 0 ]
- 	then
- 		echo error creating/writing file $file
-diff --git a/tests/generic/224 b/tests/generic/224
-index 391d877..2c30a75 100755
---- a/tests/generic/224
-+++ b/tests/generic/224
-@@ -59,7 +59,7 @@ _scratch_mount >> $seqres.full 2>&1
- 
- # set the reserved block pool to almost empty for XFS
- if [ "$FSTYP" = "xfs" ]; then
--	xfs_io -x -c "resblks 4" $SCRATCH_MNT >> $seqres.full 2>&1
-+	$XFS_IO_PROG -x -c "resblks 4" $SCRATCH_MNT >> $seqres.full 2>&1
- fi
- 
- FILES=1000
-@@ -71,7 +71,7 @@ for i in `seq 0 1 $FILES`; do
- 	# tripped over.
-         (
- 		sleep 5
--		xfs_io -f -c "truncate 10485760" $SCRATCH_MNT/testfile.$i
-+		$XFS_IO_PROG -f -c "truncate 10485760" $SCRATCH_MNT/testfile.$i
- 		dd if=/dev/zero of=$SCRATCH_MNT/testfile.$i bs=4k conv=notrunc
- 	) > /dev/null 2>&1 &
- done
-diff --git a/tests/xfs/109 b/tests/xfs/109
-index ac20619..e0fdec3 100755
---- a/tests/xfs/109
-+++ b/tests/xfs/109
-@@ -50,7 +50,7 @@ populate()
- 	i=0
- 	while [ $i -le $files -a "X$faststart" = "X" ]; do
- 		file=$SCRATCH_MNT/f$i
--		xfs_io -f -d -c 'pwrite -b 64k 0 64k' $file >/dev/null
-+		$XFS_IO_PROG -f -d -c 'pwrite -b 64k 0 64k' $file >/dev/null
- 		let i=$i+1
- 	done
- 
-@@ -77,7 +77,7 @@ allocate()
- 		{
- 			j=0
- 			while [ $j -lt 100 ]; do
--				xfs_io -f -c 'pwrite -b 64k 0 16m' $file \
-+				$XFS_IO_PROG -f -c 'pwrite -b 64k 0 16m' $file \
- 					>/dev/null 2>&1
- 				rm $file
- 				let j=$j+1
-diff --git a/tests/xfs/114 b/tests/xfs/114
-index 50cc71b..24474f7 100755
---- a/tests/xfs/114
-+++ b/tests/xfs/114
-@@ -44,7 +44,7 @@ _check_paths()
- 	sync; sleep 1
- 	echo ""
- 	echo "Check parent"
--	if ! xfs_io -x -c 'parent -c' $SCRATCH_MNT | _filter_num; then
-+	if ! $XFS_IO_PROG -x -c 'parent -c' $SCRATCH_MNT | _filter_num; then
- 		exit 1
- 	fi
- }
-@@ -55,7 +55,7 @@ _print_names()
- 	echo "Print out hardlink names for given path, $1"
- 	echo ""
- 
--	xfs_io -x -c parent $1 | awk '/p_ino.*=/ {$3 = "inodeXXX"; print; next} {print}' 
-+	$XFS_IO_PROG -x -c parent $1 | awk '/p_ino.*=/ {$3 = "inodeXXX"; print; next} {print}'
+-	"$XFS_IO_PROG" $xfs_io_args -f -c "pwrite -S $pattern $offset $len" "$file"
++	$XFS_IO_PROG $xfs_io_args -f -c "pwrite -S $pattern $offset $len" "$file"
  }
  
- _test_create()
-diff --git a/tests/xfs/190 b/tests/xfs/190
-index 614a80c..d688216 100755
---- a/tests/xfs/190
-+++ b/tests/xfs/190
-@@ -62,8 +62,8 @@ dd if=/dev/zero of=$SCRATCH_MNT/$filename bs=1024k count=10 >> $seqres.full 2>&1
- echo Punching holes in file
- echo Punching holes in file >> $seqres.full
- for i in $holes ; do
--	echo xfs_io -c "unresvsp `echo $i |$SED_PROG 's/:/ /g'`" $SCRATCH_MNT/$filename >> $seqres.full
--	xfs_io -c "unresvsp `echo $i |$SED_PROG 's/:/ /g'`" $SCRATCH_MNT/$filename ;
-+	echo $XFS_IO_PROG -c "unresvsp `echo $i |$SED_PROG 's/:/ /g'`" $SCRATCH_MNT/$filename >> $seqres.full
-+	$XFS_IO_PROG -c "unresvsp `echo $i |$SED_PROG 's/:/ /g'`" $SCRATCH_MNT/$filename ;
- done
+ # mmap-write a byte into a range of a file
+@@ -101,7 +101,7 @@ _mwrite_byte() {
+ 	mmap_len="$4"
+ 	file="$5"
  
- echo Verifying holes are in the correct spots:
-diff --git a/tests/xfs/201 b/tests/xfs/201
-index ac8abf4..45dc42f 100755
---- a/tests/xfs/201
-+++ b/tests/xfs/201
-@@ -56,7 +56,7 @@ do_pwrite()
- 	end=`expr $2 \* $min_align`
- 	length=`expr $end - $offset`
- 
--	xfs_io -d -f $file -c "pwrite $offset $length" >/dev/null
-+	$XFS_IO_PROG -d -f $file -c "pwrite $offset $length" >/dev/null
+-	"$XFS_IO_PROG" -f -c "mmap -rw 0 $mmap_len" -c "mwrite -S $pattern $offset $len" "$file"
++	$XFS_IO_PROG -f -c "mmap -rw 0 $mmap_len" -c "mwrite -S $pattern $offset $len" "$file"
  }
  
- _require_scratch
-diff --git a/tests/xfs/229 b/tests/xfs/229
-index b8fd914..0a42bcf 100755
---- a/tests/xfs/229
-+++ b/tests/xfs/229
-@@ -60,7 +60,7 @@ EXTSIZE="256k"
- mkdir ${TDIR}
+ # ls -l w/ selinux sometimes puts a dot at the end:
+@@ -3437,7 +3437,7 @@ _xfs_bmapx_find() {
+ 	file="$1"
+ 	shift
  
- # Set the test directory extsize
--xfs_io -c "extsize ${EXTSIZE}" ${TDIR}
-+$XFS_IO_PROG -c "extsize ${EXTSIZE}" ${TDIR}
+-	"$XFS_IO_PROG" -c "bmap -${param}lpv" "$file" | grep -c "$@"
++	$XFS_IO_PROG -c "bmap -${param}lpv" "$file" | grep -c "$@"
+ }
  
- # Create a set of holey files
- echo "generating ${NFILES} files"
-diff --git a/tests/xfs/250 b/tests/xfs/250
-index 0cdc382..f807c5a 100755
---- a/tests/xfs/250
-+++ b/tests/xfs/250
-@@ -81,7 +81,7 @@ _test_loop()
- 	mount -t xfs -o loop $LOOP_DEV $LOOP_MNT
+ _require_chattr()
+diff --git a/common/reflink b/common/reflink
+index 1363971..8b34046 100644
+--- a/common/reflink
++++ b/common/reflink
+@@ -52,8 +52,8 @@ _require_test_reflink()
+ 	_require_xfs_io_command "reflink"
  
- 	echo "*** preallocate large file"
--	xfs_io -f -c "resvsp 0 $fsize" $LOOP_MNT/foo | _filter_io
-+	$XFS_IO_PROG -f -c "resvsp 0 $fsize" $LOOP_MNT/foo | _filter_io
+ 	rm -rf "$TEST_DIR/file1" "$TEST_DIR/file2"
+-	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$TEST_DIR/file1" > /dev/null
+-	"$XFS_IO_PROG" -f -c "reflink $TEST_DIR/file1 0 0 65536" "$TEST_DIR/file2" > /dev/null
++	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 65536" "$TEST_DIR/file1" > /dev/null
++	$XFS_IO_PROG -f -c "reflink $TEST_DIR/file1 0 0 65536" "$TEST_DIR/file2" > /dev/null
+ 	if [ ! -s "$TEST_DIR/file2" ]; then
+ 		rm -rf "$TEST_DIR/file1" "$TEST_DIR/file2"
+ 		_notrun "Reflink not supported by test filesystem type: $FSTYP"
+@@ -69,8 +69,8 @@ _require_scratch_reflink()
  
- 	echo "*** unmount loop filesystem"
- 	umount $LOOP_MNT > /dev/null 2>&1
-diff --git a/tests/xfs/291 b/tests/xfs/291
-index 808f333..c1cbe32 100755
---- a/tests/xfs/291
-+++ b/tests/xfs/291
-@@ -69,7 +69,7 @@ done
- sync
+ 	_scratch_mkfs > /dev/null
+ 	_scratch_mount
+-	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file1" > /dev/null
+-	"$XFS_IO_PROG" -f -c "reflink $SCRATCH_MNT/file1 0 0 65536" "$SCRATCH_MNT/file2" > /dev/null
++	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file1" > /dev/null
++	$XFS_IO_PROG -f -c "reflink $SCRATCH_MNT/file1 0 0 65536" "$SCRATCH_MNT/file2" > /dev/null
+ 	if [ ! -s "$SCRATCH_MNT/file2" ]; then
+ 		_scratch_unmount
+ 		_notrun "Reflink not supported by scratch filesystem type: $FSTYP"
+@@ -85,9 +85,9 @@ _require_test_dedupe()
+ 	_require_xfs_io_command "dedupe"
  
- # Soak up any remaining freespace
--xfs_io -f -c "pwrite 0 16m" -c "fsync" $SCRATCH_MNT/space_file.large >> $seqres.full 2>&1
-+$XFS_IO_PROG -f -c "pwrite 0 16m" -c "fsync" $SCRATCH_MNT/space_file.large >> $seqres.full 2>&1
+ 	rm -rf "$TEST_DIR/file1" "$TEST_DIR/file2"
+-	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$TEST_DIR/file1" > /dev/null
+-	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$TEST_DIR/file2" > /dev/null
+-	testio="$("$XFS_IO_PROG" -f -c "dedupe $TEST_DIR/file1 0 0 65536" "$TEST_DIR/file2" 2>&1)"
++	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 65536" "$TEST_DIR/file1" > /dev/null
++	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 65536" "$TEST_DIR/file2" > /dev/null
++	testio="$($XFS_IO_PROG -f -c "dedupe $TEST_DIR/file1 0 0 65536" "$TEST_DIR/file2" 2>&1)"
+ 	echo $testio | grep -q "Operation not supported" && \
+ 		_notrun "Dedupe not supported by test filesystem type: $FSTYP"
+ 	echo $testio | grep -q "Inappropriate ioctl for device" && \
+@@ -105,9 +105,9 @@ _require_scratch_dedupe()
  
- # Take a look at freespace for any post-mortem on the test
- _scratch_unmount
+ 	_scratch_mkfs > /dev/null
+ 	_scratch_mount
+-	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file1" > /dev/null
+-	"$XFS_IO_PROG" -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file2" > /dev/null
+-	testio="$("$XFS_IO_PROG" -f -c "dedupe $SCRATCH_MNT/file1 0 0 65536" "$SCRATCH_MNT/file2" 2>&1)"
++	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file1" > /dev/null
++	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file2" > /dev/null
++	testio="$($XFS_IO_PROG -f -c "dedupe $SCRATCH_MNT/file1 0 0 65536" "$SCRATCH_MNT/file2" 2>&1)"
+ 	echo $testio | grep -q "Operation not supported" && \
+ 		_notrun "Dedupe not supported by test filesystem type: $FSTYP"
+ 	echo $testio | grep -q "Inappropriate ioctl for device" && \
+@@ -161,7 +161,7 @@ _reflink() {
+ 	file1="$1"
+ 	file2="$2"
+ 
+-	"$XFS_IO_PROG" -f -c "reflink $file1" "$file2"
++	$XFS_IO_PROG -f -c "reflink $file1" "$file2"
+ }
+ 
+ # Reflink some part of file1 into another part of file2
+@@ -173,7 +173,7 @@ _reflink_range() {
+ 	len="$5"
+ 	xfs_io_args="$6"
+ 
+-	"$XFS_IO_PROG" $xfs_io_args -f -c "reflink $file1 $offset1 $offset2 $len" "$file2"
++	$XFS_IO_PROG $xfs_io_args -f -c "reflink $file1 $offset1 $offset2 $len" "$file2"
+ }
+ 
+ # Dedupe some part of file1 into another part of file2
+@@ -185,7 +185,7 @@ _dedupe_range() {
+ 	len="$5"
+ 	xfs_io_args="$6"
+ 
+-	"$XFS_IO_PROG" $xfs_io_args -f -c "dedupe $file1 $offset1 $offset2 $len" "$file2"
++	$XFS_IO_PROG $xfs_io_args -f -c "dedupe $file1 $offset1 $offset2 $len" "$file2"
+ }
+ 
+ # Create a file of interleaved unwritten and reflinked blocks
+diff --git a/tests/generic/176 b/tests/generic/176
+index b14255b..76e923a 100755
+--- a/tests/generic/176
++++ b/tests/generic/176
+@@ -75,7 +75,7 @@ test $fnr -lt 17 && _notrun "Insufficient space for stress test; would only crea
+ 
+ echo "Create a many-block file"
+ echo "creating $blocks_needed blocks..." >> "$seqres.full"
+-"$XFS_IO_PROG" -f -c "pwrite -S 0x61 -b 4194304 0 $((2 ** (fnr + 1) * blksz))" "$testdir/file1" >> "$seqres.full"
++$XFS_IO_PROG -f -c "pwrite -S 0x61 -b 4194304 0 $((2 ** (fnr + 1) * blksz))" "$testdir/file1" >> "$seqres.full"
+ echo "punching..." >> "$seqres.full"
+ "$here/src/punch-alternating" "$testdir/file1" >> "$seqres.full"
+ echo "...done" >> "$seqres.full"
+diff --git a/tests/xfs/328 b/tests/xfs/328
+index 33a0bef..8518456 100755
+--- a/tests/xfs/328
++++ b/tests/xfs/328
+@@ -80,7 +80,7 @@ bytes=$((blocks_needed * blksz))
+ echo "Create a many-block file"
+ echo "creating $blocks_needed blocks..." >> "$seqres.full"
+ _pwrite_byte 0x62 0 $blksz $testdir/file0 >> $seqres.full
+-"$XFS_IO_PROG" -f -c "pwrite -S 0x61 -b 4194304 0 $bytes" "$testdir/file1" >> "$seqres.full"
++$XFS_IO_PROG -f -c "pwrite -S 0x61 -b 4194304 0 $bytes" "$testdir/file1" >> "$seqres.full"
+ echo "punching..." >> "$seqres.full"
+ "$here/src/punch-alternating" "$testdir/file1" >> "$seqres.full"
+ seq 0 2 $((2 ** (fnr + 1) )) | while read lblk; do
 -- 
 2.7.4
 
