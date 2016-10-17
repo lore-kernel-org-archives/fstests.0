@@ -1,128 +1,61 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:32523 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1755666AbcJSFrv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Oct 2016 01:47:51 -0400
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v2] xfs: remove the device parameter from __populate_check_xfs_dir
-Date: Wed, 19 Oct 2016 13:33:07 +0800
-Message-ID: <1476855187-7122-1-git-send-email-yangx.jy@cn.fujitsu.com>
-In-Reply-To: <20161019044241.GJ14023@dastard>
-References: <20161019044241.GJ14023@dastard>
+Received: from mail-lf0-f66.google.com ([209.85.215.66]:34662 "EHLO
+        mail-lf0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934899AbcJQVt6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 17 Oct 2016 17:49:58 -0400
+Received: by mail-lf0-f66.google.com with SMTP id x23so23178625lfi.1
+        for <fstests@vger.kernel.org>; Mon, 17 Oct 2016 14:49:57 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <CAOQ4uxiMKMB2HqKOjJ7b296oX+MvV_OvCDY5h6gz-A9C5a5DBA@mail.gmail.com>
+References: <1476615222-7804-1-git-send-email-amir73il@gmail.com>
+ <1476615222-7804-3-git-send-email-amir73il@gmail.com> <20161016214608.GC14023@dastard>
+ <CAOQ4uxiMKMB2HqKOjJ7b296oX+MvV_OvCDY5h6gz-A9C5a5DBA@mail.gmail.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Tue, 18 Oct 2016 00:49:56 +0300
+Message-ID: <CAOQ4uxiGUeJUWYg=_j6cww9Y+Z7aMX9aRi3+AbivGFSiAe2LWw@mail.gmail.com>
+Subject: Re: [PATCH v2 3/3] fstests: run xfs_io as multi threaded for 'quick' tests
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: david@fromorbit.com
-Cc: fstests@vger.kernel.org, darrick.wong@oracle.com, Xiao Yang <yangx.jy@cn.fujitsu.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Eryu Guan <eguan@redhat.com>, Christoph Hellwig <hch@lst.de>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-In commit c08ebd092("xfs: fix $XFS_DB_PROG usage"), the need for callers
-to pass the device to populate into __populate_check_xfs_dir() was removed.
-So we can now clean up all the callers by removing the device parameter.
+On Mon, Oct 17, 2016 at 10:01 AM, Amir Goldstein <amir73il@gmail.com> wrote:
+> On Mon, Oct 17, 2016 at 12:46 AM, Dave Chinner <david@fromorbit.com> wrote:
+>> On Sun, Oct 16, 2016 at 01:53:42PM +0300, Amir Goldstein wrote:
+>>> Try to run xfs_io for tests in group quick with command line
+>>> option -M which starts an idle thread before performing any io.
+>>>
+>>> The purpose of this idle thread is to test io from a multi threaded
+>>> process. With single threaded process, the file table is not shared
+>>> and file structs are not reference counted.
+>>>
+>>> In order to improve the chance of detecting file struct reference
+>>> leaks, we should run xfs_io commands with this option as much as
+>>> possible.
+>>>
+>>> Analysis of the effect of xfs_io -M on tests runtime showed that
+>>> it may lead to slightly longer run times in extreme cases (e.g +3s
+>>> for generic/132), but has a negligable effect on runtime of tests
+>>> among the 'quick' group (worst case +0.3s for generic/130).
+>>>
+>>> Therefore, we automatically add the -M flags only to tests in the
+>>> 'quick' group.
+>>>
+>>> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+>>> ---
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
- tests/xfs/099 | 2 +-
- tests/xfs/100 | 2 +-
- tests/xfs/101 | 2 +-
- tests/xfs/102 | 2 +-
- tests/xfs/105 | 2 +-
- tests/xfs/112 | 2 +-
- tests/xfs/113 | 2 +-
- 7 files changed, 7 insertions(+), 7 deletions(-)
+...
 
-diff --git a/tests/xfs/099 b/tests/xfs/099
-index ebc02dd..85193ab 100755
---- a/tests/xfs/099
-+++ b/tests/xfs/099
-@@ -75,7 +75,7 @@ echo "+ check fs"
- _scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
- 
- echo "+ check dir"
--__populate_check_xfs_dir "${SCRATCH_DEV}" "${inode}" block
-+__populate_check_xfs_dir "${inode}" block
- 
- echo "+ corrupt dir"
- _scratch_xfs_db -x -c "inode ${inode}" -c 'dblock 0' -c "stack" -c "blocktrash -x 32 -y $((blksz * 8)) -z ${FUZZ_ARGS}" >> $seqres.full
-diff --git a/tests/xfs/100 b/tests/xfs/100
-index 2412c81..3bfafce 100755
---- a/tests/xfs/100
-+++ b/tests/xfs/100
-@@ -75,7 +75,7 @@ echo "+ check fs"
- _scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
- 
- echo "+ check dir"
--__populate_check_xfs_dir "${SCRATCH_DEV}" "${inode}" leaf
-+__populate_check_xfs_dir "${inode}" leaf
- 
- echo "+ corrupt dir"
- loff=0
-diff --git a/tests/xfs/101 b/tests/xfs/101
-index 679940f..d3abd19 100755
---- a/tests/xfs/101
-+++ b/tests/xfs/101
-@@ -75,7 +75,7 @@ echo "+ check fs"
- _scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
- 
- echo "+ check dir"
--__populate_check_xfs_dir "${SCRATCH_DEV}" "${inode}" leaf
-+__populate_check_xfs_dir "${inode}" leaf
- 
- echo "+ corrupt dir"
- _scratch_xfs_db -x -c "inode ${inode}" -c "dblock ${leaf_lblk}" -c "stack" -c "blocktrash -x 32 -y $((blksz * 8)) -z ${FUZZ_ARGS}" >> $seqres.full
-diff --git a/tests/xfs/102 b/tests/xfs/102
-index 8018a9e..cf0d7a6 100755
---- a/tests/xfs/102
-+++ b/tests/xfs/102
-@@ -75,7 +75,7 @@ echo "+ check fs"
- _scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
- 
- echo "+ check dir"
--__populate_check_xfs_dir "${SCRATCH_DEV}" "${inode}" node
-+__populate_check_xfs_dir "${inode}" node
- 
- echo "+ corrupt dir"
- loff=0
-diff --git a/tests/xfs/105 b/tests/xfs/105
-index 27ee4b3..07ccf00 100755
---- a/tests/xfs/105
-+++ b/tests/xfs/105
-@@ -75,7 +75,7 @@ echo "+ check fs"
- _scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
- 
- echo "+ check dir"
--__populate_check_xfs_dir "${SCRATCH_DEV}" "${inode}" node
-+__populate_check_xfs_dir "${inode}" node
- 
- echo "+ corrupt dir"
- loff="${leaf_lblk}"
-diff --git a/tests/xfs/112 b/tests/xfs/112
-index c237f03..84f1f1d 100755
---- a/tests/xfs/112
-+++ b/tests/xfs/112
-@@ -75,7 +75,7 @@ echo "+ check fs"
- _scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
- 
- echo "+ check dir"
--__populate_check_xfs_dir "${SCRATCH_DEV}" "${inode}" node
-+__populate_check_xfs_dir "${inode}" node
- 
- echo "+ corrupt dir"
- loff="${node_lblk}"
-diff --git a/tests/xfs/113 b/tests/xfs/113
-index 6d6e6fd..ec328bc 100755
---- a/tests/xfs/113
-+++ b/tests/xfs/113
-@@ -75,7 +75,7 @@ echo "+ check fs"
- _scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
- 
- echo "+ check dir"
--__populate_check_xfs_dir "${SCRATCH_DEV}" "${inode}" btree
-+__populate_check_xfs_dir "${inode}" btree
- 
- echo "+ corrupt dir"
- loff=0
--- 
-1.8.3.1
+>> A couple of seconds of
+>> extra runtime here and there means nothing for a typical auto test
+>> run which can take hours to run....
+>>
+>
 
+Just to follow up on the extra runtime.
+I did one auto test run at 1h42m without -i flag
+and then auto test run at 1h45m with -i flag
+I did not repeat several runs to reduce noise.
+If anyone thinks that difference is too expensive please shout.
 
-
+Amir.
