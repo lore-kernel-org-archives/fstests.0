@@ -1,157 +1,323 @@
-Received: from mail-lf0-f67.google.com ([209.85.215.67]:34667 "EHLO
-        mail-lf0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756546AbcJQHV6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 17 Oct 2016 03:21:58 -0400
+Received: from mail-lf0-f68.google.com ([209.85.215.68]:36368 "EHLO
+        mail-lf0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757530AbcJQHYH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 17 Oct 2016 03:24:07 -0400
+Received: by mail-lf0-f68.google.com with SMTP id b75so24958166lfg.3
+        for <fstests@vger.kernel.org>; Mon, 17 Oct 2016 00:24:06 -0700 (PDT)
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v3] xfs_io: add command line option -i to start an idle thread
-Date: Mon, 17 Oct 2016 10:20:51 +0300
-Message-Id: <1476688851-32647-1-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v3 1/3] fstests: fix call sites that used xfs_io directly
+Date: Mon, 17 Oct 2016 10:23:32 +0300
+Message-Id: <1476689014-384-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Christoph Hellwig <hch@lst.de>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>, Eryu Guan <eguan@redhat.com>, Christoph Hellwig <hch@lst.de>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-xfs_io -i will start by spawning an idle thread.
-
-The purpose of this idle thread is to test io from a multi threaded
-process. With single threaded process, the file table is not shared
-and file structs are not reference counted. Spawning an idle thread
-can help detecting file struct reference leaks.
+Convert those few remaining call sites to use the XFS_IO_PROG env var.
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-Reviewed-by: Christoph Hellwig <hch@lst.de>
 ---
- io/Makefile       |  2 +-
- io/init.c         | 35 +++++++++++++++++++++++++++++++++--
- man/man8/xfs_io.8 |  8 +++++++-
- 3 files changed, 41 insertions(+), 4 deletions(-)
+ common/quota      | 4 ++--
+ common/rc         | 4 ++--
+ tests/generic/043 | 2 +-
+ tests/generic/044 | 4 ++--
+ tests/generic/045 | 4 ++--
+ tests/generic/046 | 4 ++--
+ tests/generic/047 | 2 +-
+ tests/generic/048 | 2 +-
+ tests/generic/049 | 2 +-
+ tests/generic/224 | 4 ++--
+ tests/xfs/109     | 4 ++--
+ tests/xfs/114     | 4 ++--
+ tests/xfs/190     | 4 ++--
+ tests/xfs/201     | 2 +-
+ tests/xfs/229     | 2 +-
+ tests/xfs/250     | 2 +-
+ tests/xfs/291     | 2 +-
+ 17 files changed, 26 insertions(+), 26 deletions(-)
 
-diff --git a/io/Makefile b/io/Makefile
-index 1997ca9..032a8c7 100644
---- a/io/Makefile
-+++ b/io/Makefile
-@@ -13,7 +13,7 @@ CFILES = init.c \
- 	mmap.c open.c parent.c pread.c prealloc.c pwrite.c seek.c shutdown.c \
- 	sync.c truncate.c reflink.c
+diff --git a/common/quota b/common/quota
+index fb2b2a0..678bc43 100644
+--- a/common/quota
++++ b/common/quota
+@@ -139,7 +139,7 @@ _file_as_id()
  
--LLDLIBS = $(LIBXCMD) $(LIBHANDLE)
-+LLDLIBS = $(LIBXCMD) $(LIBHANDLE) $(LIBPTHREAD)
- LTDEPENDENCIES = $(LIBXCMD) $(LIBHANDLE)
- LLDFLAGS = -static-libtool-libs
+     parent=`dirname $1`
+     if [ $3 = p ]; then
+-	echo PARENT: xfs_io -r -c "chproj $2" -c "chattr +P" $parent >>$seqres.full
++	echo PARENT: $XFS_IO_PROG -r -c "chproj $2" -c "chattr +P" $parent >>$seqres.full
+ 	$XFS_IO_PROG -r -c "chproj $2" -c "chattr +P" $parent >>$seqres.full 2>&1
+ 	magik='$>'	# (irrelevent, above set projid-inherit-on-parent)
+     elif [ $3 = u ]; then
+@@ -165,7 +165,7 @@ EOF
+ #	exec "dd if=/dev/zero of=$1 bs=$4 count=$5 >>$seqres.full 2>&1";
  
-diff --git a/io/init.c b/io/init.c
-index 6b88cc6..2db48a2 100644
---- a/io/init.c
-+++ b/io/init.c
-@@ -16,6 +16,7 @@
-  * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
- 
-+#include <pthread.h>
- #include "platform_defs.h"
- #include "command.h"
- #include "input.h"
-@@ -25,6 +26,7 @@
- char	*progname;
- int	exitcode;
- int	expert;
-+int	idlethread;
- size_t	pagesize;
- struct timeval stopwatch;
- 
-@@ -32,7 +34,7 @@ void
- usage(void)
- {
- 	fprintf(stderr,
--		_("Usage: %s [-adfmnrRstVx] [-p prog] [-c cmd]... file\n"),
-+		_("Usage: %s [-adfimnrRstTVx] [-p prog] [-c cmd]... file\n"),
- 		progname);
- 	exit(1);
+     if [ $3 = p ]; then
+-	echo PARENT: xfs_io -r -c "chproj 0" -c "chattr -P" $parent >>$seqres.full
++	echo PARENT: $XFS_IO_PROG -r -c "chproj 0" -c "chattr -P" $parent >>$seqres.full
+ 	$XFS_IO_PROG -r -c "chproj 0" -c "chattr -P" $parent >>$seqres.full 2>&1
+     fi
  }
-@@ -141,7 +143,7 @@ init(
- 	pagesize = getpagesize();
- 	gettimeofday(&stopwatch, NULL);
+diff --git a/common/rc b/common/rc
+index c3da064..565ba67 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3796,8 +3796,8 @@ init_rc()
+ 		exit 1
+ 	fi
+ 	# Figure out if we need to add -F ("foreign", deprecated) option to xfs_io
+-	xfs_io -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \
+-	export XFS_IO_PROG="$XFS_IO_PROG -F"
++	$XFS_IO_PROG -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \
++		export XFS_IO_PROG="$XFS_IO_PROG -F"
  
--	while ((c = getopt(argc, argv, "ac:dFfmp:nrRstTVx")) != EOF) {
-+	while ((c = getopt(argc, argv, "ac:dFfimp:nrRstTVx")) != EOF) {
- 		switch (c) {
- 		case 'a':
- 			flags |= IO_APPEND;
-@@ -158,6 +160,9 @@ init(
- 		case 'f':
- 			flags |= IO_CREAT;
- 			break;
-+		case 'i':
-+			idlethread = 1;
-+			break;
- 		case 'm':
- 			mode = strtoul(optarg, &sp, 0);
- 			if (!sp || sp == optarg) {
-@@ -213,12 +218,38 @@ init(
- 	add_check_command(init_check_command);
+ 	# xfs_copy doesn't work on v5 xfs yet without -d option
+ 	if [ "$FSTYP" == "xfs" ] && [[ $MKFS_OPTIONS =~ crc=1 ]]; then
+diff --git a/tests/generic/043 b/tests/generic/043
+index bd8eef8..b76a5aa 100755
+--- a/tests/generic/043
++++ b/tests/generic/043
+@@ -50,7 +50,7 @@ i=1;
+ while [ $i -lt 1000 ]
+ do
+ 	file=$SCRATCH_MNT/$i
+-	xfs_io -f -c "pwrite -b 64k -S 0xff 0 64k" $file > /dev/null
++	$XFS_IO_PROG -f -c "pwrite -b 64k -S 0xff 0 64k" $file > /dev/null
+ 	if [ $? -ne 0 ]
+ 	then
+ 		echo error creating/writing file $file
+diff --git a/tests/generic/044 b/tests/generic/044
+index f46e828..0331baa 100755
+--- a/tests/generic/044
++++ b/tests/generic/044
+@@ -50,13 +50,13 @@ i=1;
+ while [ $i -lt 1000 ]
+ do
+ 	file=$SCRATCH_MNT/$i
+-	xfs_io -f -c "pwrite -b 64k -S 0xff 0 64k" $file > /dev/null
++	$XFS_IO_PROG -f -c "pwrite -b 64k -S 0xff 0 64k" $file > /dev/null
+ 	if [ $? -ne 0 ]
+ 	then
+ 		echo error creating/writing file $file
+ 		exit
+ 	fi
+-	xfs_io -c "truncate 64k" $file > /dev/null
++	$XFS_IO_PROG -c "truncate 64k" $file > /dev/null
+ 	if [ $? -ne 0 ]
+ 	then
+ 		echo error truncating file $file
+diff --git a/tests/generic/045 b/tests/generic/045
+index 4ec7650..874c955 100755
+--- a/tests/generic/045
++++ b/tests/generic/045
+@@ -50,13 +50,13 @@ i=1;
+ while [ $i -lt 1000 ]
+ do
+ 	file=$SCRATCH_MNT/$i
+-	xfs_io -f -c "pwrite -b 64k -S 0xff 0 64k" $file > /dev/null
++	$XFS_IO_PROG -f -c "pwrite -b 64k -S 0xff 0 64k" $file > /dev/null
+ 	if [ $? -ne 0 ]
+ 	then
+ 		echo error creating/writing file $file
+ 		exit
+ 	fi
+-	xfs_io -c "truncate 32k" $file > /dev/null
++	$XFS_IO_PROG -c "truncate 32k" $file > /dev/null
+ 	if [ $? -ne 0 ]
+ 	then
+ 		echo error truncating file $file
+diff --git a/tests/generic/046 b/tests/generic/046
+index 08f1137..5a894b8 100755
+--- a/tests/generic/046
++++ b/tests/generic/046
+@@ -50,13 +50,13 @@ i=1;
+ while [ $i -lt 1000 ]
+ do
+ 	file=$SCRATCH_MNT/$i
+-	xfs_io -f -c "pwrite -b 32k -S 0xff 0 32k" $file > /dev/null
++	$XFS_IO_PROG -f -c "pwrite -b 32k -S 0xff 0 32k" $file > /dev/null
+ 	if [ $? -ne 0 ]
+ 	then
+ 		echo error creating/writing file $file
+ 		exit
+ 	fi
+-	xfs_io -c "truncate 64k" $file > /dev/null
++	$XFS_IO_PROG -c "truncate 64k" $file > /dev/null
+ 	if [ $? -ne 0 ]
+ 	then
+ 		echo error truncating file $file
+diff --git a/tests/generic/047 b/tests/generic/047
+index b894ee6..631dc1e 100755
+--- a/tests/generic/047
++++ b/tests/generic/047
+@@ -81,7 +81,7 @@ i=1;
+ while [ $i -lt 1000 ]
+ do
+ 	file=$SCRATCH_MNT/$i
+-	xfs_io -f -c "pwrite -b 32k -S 0xff 0 32k" -c "fsync" $file > /dev/null
++	$XFS_IO_PROG -f -c "pwrite -b 32k -S 0xff 0 32k" -c "fsync" $file > /dev/null
+ 	if [ $? -ne 0 ]
+ 	then
+ 		echo error creating/writing file $file
+diff --git a/tests/generic/048 b/tests/generic/048
+index 6f5f444..51d7efd 100755
+--- a/tests/generic/048
++++ b/tests/generic/048
+@@ -84,7 +84,7 @@ i=1;
+ while [ $i -lt 1000 ]
+ do
+ 	file=$SCRATCH_MNT/$i
+-	xfs_io -f -c "pwrite -b 64k -S 0xff 0 10m" $file > /dev/null
++	$XFS_IO_PROG -f -c "pwrite -b 64k -S 0xff 0 10m" $file > /dev/null
+ 	if [ $? -ne 0 ]
+ 	then
+ 		echo error creating/writing file $file
+diff --git a/tests/generic/049 b/tests/generic/049
+index 320318e..1299242 100755
+--- a/tests/generic/049
++++ b/tests/generic/049
+@@ -81,7 +81,7 @@ i=1;
+ while [ $i -lt 1000 ]
+ do
+ 	file=$SCRATCH_MNT/$i
+-	xfs_io -f -c "pwrite -b 32k -S 0xff 0 32k" $file > /dev/null
++	$XFS_IO_PROG -f -c "pwrite -b 32k -S 0xff 0 32k" $file > /dev/null
+ 	if [ $? -ne 0 ]
+ 	then
+ 		echo error creating/writing file $file
+diff --git a/tests/generic/224 b/tests/generic/224
+index 391d877..2c30a75 100755
+--- a/tests/generic/224
++++ b/tests/generic/224
+@@ -59,7 +59,7 @@ _scratch_mount >> $seqres.full 2>&1
+ 
+ # set the reserved block pool to almost empty for XFS
+ if [ "$FSTYP" = "xfs" ]; then
+-	xfs_io -x -c "resblks 4" $SCRATCH_MNT >> $seqres.full 2>&1
++	$XFS_IO_PROG -x -c "resblks 4" $SCRATCH_MNT >> $seqres.full 2>&1
+ fi
+ 
+ FILES=1000
+@@ -71,7 +71,7 @@ for i in `seq 0 1 $FILES`; do
+ 	# tripped over.
+         (
+ 		sleep 5
+-		xfs_io -f -c "truncate 10485760" $SCRATCH_MNT/testfile.$i
++		$XFS_IO_PROG -f -c "truncate 10485760" $SCRATCH_MNT/testfile.$i
+ 		dd if=/dev/zero of=$SCRATCH_MNT/testfile.$i bs=4k conv=notrunc
+ 	) > /dev/null 2>&1 &
+ done
+diff --git a/tests/xfs/109 b/tests/xfs/109
+index ac20619..e0fdec3 100755
+--- a/tests/xfs/109
++++ b/tests/xfs/109
+@@ -50,7 +50,7 @@ populate()
+ 	i=0
+ 	while [ $i -le $files -a "X$faststart" = "X" ]; do
+ 		file=$SCRATCH_MNT/f$i
+-		xfs_io -f -d -c 'pwrite -b 64k 0 64k' $file >/dev/null
++		$XFS_IO_PROG -f -d -c 'pwrite -b 64k 0 64k' $file >/dev/null
+ 		let i=$i+1
+ 	done
+ 
+@@ -77,7 +77,7 @@ allocate()
+ 		{
+ 			j=0
+ 			while [ $j -lt 100 ]; do
+-				xfs_io -f -c 'pwrite -b 64k 0 16m' $file \
++				$XFS_IO_PROG -f -c 'pwrite -b 64k 0 16m' $file \
+ 					>/dev/null 2>&1
+ 				rm $file
+ 				let j=$j+1
+diff --git a/tests/xfs/114 b/tests/xfs/114
+index 50cc71b..24474f7 100755
+--- a/tests/xfs/114
++++ b/tests/xfs/114
+@@ -44,7 +44,7 @@ _check_paths()
+ 	sync; sleep 1
+ 	echo ""
+ 	echo "Check parent"
+-	if ! xfs_io -x -c 'parent -c' $SCRATCH_MNT | _filter_num; then
++	if ! $XFS_IO_PROG -x -c 'parent -c' $SCRATCH_MNT | _filter_num; then
+ 		exit 1
+ 	fi
+ }
+@@ -55,7 +55,7 @@ _print_names()
+ 	echo "Print out hardlink names for given path, $1"
+ 	echo ""
+ 
+-	xfs_io -x -c parent $1 | awk '/p_ino.*=/ {$3 = "inodeXXX"; print; next} {print}' 
++	$XFS_IO_PROG -x -c parent $1 | awk '/p_ino.*=/ {$3 = "inodeXXX"; print; next} {print}'
  }
  
-+/*
-+ * The purpose of this idle thread is to test io from a multi threaded process.
-+ * With single threaded process, the file table is not shared and file structs
-+ * are not reference counted. Spawning an idle thread can help detecting file
-+ * struct reference leaks.
-+ */
-+void *
-+idle_loop(void *arg)
-+{
-+	for (;;)
-+		pause();
-+}
-+
-+void
-+start_idle_thread()
-+{
-+	pthread_t t;
-+
-+	if (pthread_create(&t, NULL, idle_loop, NULL)) {
-+		fprintf(stderr, "Error creating idle thread\n");
-+		exit(1);
-+	}
-+}
-+
- int
- main(
- 	int	argc,
- 	char	**argv)
- {
- 	init(argc, argv);
-+	if (idlethread)
-+		start_idle_thread();
- 	command_loop();
- 	return exitcode;
+ _test_create()
+diff --git a/tests/xfs/190 b/tests/xfs/190
+index 614a80c..d688216 100755
+--- a/tests/xfs/190
++++ b/tests/xfs/190
+@@ -62,8 +62,8 @@ dd if=/dev/zero of=$SCRATCH_MNT/$filename bs=1024k count=10 >> $seqres.full 2>&1
+ echo Punching holes in file
+ echo Punching holes in file >> $seqres.full
+ for i in $holes ; do
+-	echo xfs_io -c "unresvsp `echo $i |$SED_PROG 's/:/ /g'`" $SCRATCH_MNT/$filename >> $seqres.full
+-	xfs_io -c "unresvsp `echo $i |$SED_PROG 's/:/ /g'`" $SCRATCH_MNT/$filename ;
++	echo $XFS_IO_PROG -c "unresvsp `echo $i |$SED_PROG 's/:/ /g'`" $SCRATCH_MNT/$filename >> $seqres.full
++	$XFS_IO_PROG -c "unresvsp `echo $i |$SED_PROG 's/:/ /g'`" $SCRATCH_MNT/$filename ;
+ done
+ 
+ echo Verifying holes are in the correct spots:
+diff --git a/tests/xfs/201 b/tests/xfs/201
+index ac8abf4..45dc42f 100755
+--- a/tests/xfs/201
++++ b/tests/xfs/201
+@@ -56,7 +56,7 @@ do_pwrite()
+ 	end=`expr $2 \* $min_align`
+ 	length=`expr $end - $offset`
+ 
+-	xfs_io -d -f $file -c "pwrite $offset $length" >/dev/null
++	$XFS_IO_PROG -d -f $file -c "pwrite $offset $length" >/dev/null
  }
-diff --git a/man/man8/xfs_io.8 b/man/man8/xfs_io.8
-index eb7b878..885df7f 100644
---- a/man/man8/xfs_io.8
-+++ b/man/man8/xfs_io.8
-@@ -4,7 +4,7 @@ xfs_io \- debug the I/O path of an XFS filesystem
- .SH SYNOPSIS
- .B xfs_io
- [
--.B \-adfmrRstxT
-+.B \-adfimrRstxT
- ] [
- .B \-c
- .I cmd
-@@ -51,6 +51,12 @@ read-only, initially. This is required if
- .I file
- is immutable or append-only.
- .TP
-+.B \-i
-+Start an idle thread. The purpose of this idle thread is to test io
-+from a multi threaded process. With single threaded process,
-+the file table is not shared and file structs are not reference counted.
-+Spawning an idle thread can help detecting file struct reference leaks.
-+.TP
- .B \-x
- Expert mode. Dangerous commands are only available in this mode.
- These commands also tend to require additional privileges.
+ 
+ _require_scratch
+diff --git a/tests/xfs/229 b/tests/xfs/229
+index b8fd914..0a42bcf 100755
+--- a/tests/xfs/229
++++ b/tests/xfs/229
+@@ -60,7 +60,7 @@ EXTSIZE="256k"
+ mkdir ${TDIR}
+ 
+ # Set the test directory extsize
+-xfs_io -c "extsize ${EXTSIZE}" ${TDIR}
++$XFS_IO_PROG -c "extsize ${EXTSIZE}" ${TDIR}
+ 
+ # Create a set of holey files
+ echo "generating ${NFILES} files"
+diff --git a/tests/xfs/250 b/tests/xfs/250
+index 0cdc382..f807c5a 100755
+--- a/tests/xfs/250
++++ b/tests/xfs/250
+@@ -81,7 +81,7 @@ _test_loop()
+ 	mount -t xfs -o loop $LOOP_DEV $LOOP_MNT
+ 
+ 	echo "*** preallocate large file"
+-	xfs_io -f -c "resvsp 0 $fsize" $LOOP_MNT/foo | _filter_io
++	$XFS_IO_PROG -f -c "resvsp 0 $fsize" $LOOP_MNT/foo | _filter_io
+ 
+ 	echo "*** unmount loop filesystem"
+ 	umount $LOOP_MNT > /dev/null 2>&1
+diff --git a/tests/xfs/291 b/tests/xfs/291
+index 808f333..c1cbe32 100755
+--- a/tests/xfs/291
++++ b/tests/xfs/291
+@@ -69,7 +69,7 @@ done
+ sync
+ 
+ # Soak up any remaining freespace
+-xfs_io -f -c "pwrite 0 16m" -c "fsync" $SCRATCH_MNT/space_file.large >> $seqres.full 2>&1
++$XFS_IO_PROG -f -c "pwrite 0 16m" -c "fsync" $SCRATCH_MNT/space_file.large >> $seqres.full 2>&1
+ 
+ # Take a look at freespace for any post-mortem on the test
+ _scratch_unmount
 -- 
 2.7.4
 
