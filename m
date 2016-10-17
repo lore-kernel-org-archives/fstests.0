@@ -1,15 +1,15 @@
-Received: from mail-lf0-f68.google.com ([209.85.215.68]:34617 "EHLO
-        mail-lf0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757530AbcJQHYN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 17 Oct 2016 03:24:13 -0400
-Received: by mail-lf0-f68.google.com with SMTP id x23so19380429lfi.1
-        for <fstests@vger.kernel.org>; Mon, 17 Oct 2016 00:24:13 -0700 (PDT)
+Received: from mail-lf0-f66.google.com ([209.85.215.66]:34430 "EHLO
+        mail-lf0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757465AbcJQHcQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 17 Oct 2016 03:32:16 -0400
+Received: by mail-lf0-f66.google.com with SMTP id x23so19415236lfi.1
+        for <fstests@vger.kernel.org>; Mon, 17 Oct 2016 00:32:15 -0700 (PDT)
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v3 3/3] fstests: run xfs_io with -i option is supported
-Date: Mon, 17 Oct 2016 10:23:34 +0300
-Message-Id: <1476689014-384-3-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1476689014-384-1-git-send-email-amir73il@gmail.com>
-References: <1476689014-384-1-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v3 3/3] fstests: run xfs_io with -i option if supported
+Date: Mon, 17 Oct 2016 10:31:41 +0300
+Message-Id: <1476689501-735-1-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1476689014-384-3-git-send-email-amir73il@gmail.com>
+References: <1476689014-384-3-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>, Eryu Guan <eguan@redhat.com>, Christoph Hellwig <hch@lst.de>
 Cc: fstests@vger.kernel.org
@@ -28,7 +28,7 @@ possible.
 
 Analysis of the effect of xfs_io -i on tests runtime showed that
 it may lead to slightly longer run times in extreme cases (e.g +3s
-for generic/132), but has a negligable effect on runtime of tests
+for generic/132), but has a negligible effect on runtime of tests
 among the 'quick' group (worst case +0.3s for generic/130).
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
