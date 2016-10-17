@@ -1,67 +1,71 @@
-Date: Thu, 20 Oct 2016 22:44:59 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 3/3] misc: fix more xfs_db open-coding instances
-Message-ID: <20161020144459.GL27776@eguan.usersys.redhat.com>
-References: <147674215521.23842.13841682595738466897.stgit@birch.djwong.org>
- <147674217475.23842.9304657231302422666.stgit@birch.djwong.org>
+Received: from userp1040.oracle.com ([156.151.31.81]:47295 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752634AbcJQV5w (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 17 Oct 2016 17:57:52 -0400
+Date: Mon, 17 Oct 2016 14:57:16 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 2/3] misc: fix fallocate commands that need the unshare
+ switch
+Message-ID: <20161017215716.GA20337@birch.djwong.org>
+References: <147646876990.19627.5046740854955682441.stgit@birch.djwong.org>
+ <147646878237.19627.11366131824882808123.stgit@birch.djwong.org>
+ <20161015170303.GB11829@infradead.org>
+ <20161016061837.GA12614@infradead.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <147674217475.23842.9304657231302422666.stgit@birch.djwong.org>
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: david@fromorbit.com, linux-xfs@vger.kernel.org, hch@infradead.org, Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org
+In-Reply-To: <20161016061837.GA12614@infradead.org>
+Sender: fstests-owner@vger.kernel.org
+To: Christoph Hellwig <hch@infradead.org>
+Cc: david@fromorbit.com, eguan@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Oct 17, 2016 at 03:09:34PM -0700, Darrick J. Wong wrote:
-> Convert some more cases of 'xfs_db $SCRATCH_DEV' to _scratch_xfs_db
-> that were left out of the initial cleanup patch.
+On Sat, Oct 15, 2016 at 11:18:37PM -0700, Christoph Hellwig wrote:
+> On Sat, Oct 15, 2016 at 10:03:03AM -0700, Christoph Hellwig wrote:
+> > The poster child would be btrfs, and I would have added some output
+> > here if btrfs support in xfstests wasn't completely broken at this
+> > point.
+> > 
+> > Well, added Ccs and some output anyway in this case..
 > 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
-> ---
->  tests/xfs/004 |    2 +-
->  tests/xfs/007 |    8 ++++----
->  tests/xfs/021 |    4 ++--
->  tests/xfs/044 |    2 +-
->  tests/xfs/052 |    2 +-
->  tests/xfs/116 |    4 ++--
->  tests/xfs/136 |    6 +++---
->  tests/xfs/199 |    6 +++---
->  tests/xfs/278 |   16 ++++++++--------
->  tests/xfs/291 |    2 +-
->  tests/xfs/307 |   20 ++++++++++----------
->  tests/xfs/308 |   20 ++++++++++----------
->  12 files changed, 46 insertions(+), 46 deletions(-)
+> Turns out the btrfs failure was my stupidity, sorry.
 > 
-> 
-> diff --git a/tests/xfs/004 b/tests/xfs/004
-> index 59b8997..09da2fe 100755
-> --- a/tests/xfs/004
-> +++ b/tests/xfs/004
-> @@ -74,7 +74,7 @@ eval `$DF_PROG $SCRATCH_MNT 2>&1 \
->  echo "df gave: blocks=$blocks used=$used avail=$avail" >>$seqres.full
->  echo "blocksize from mkfs is '$dbsize'" >>$seqres.full
->  
-> -xfs_db -r -c "freesp -s" $SCRATCH_DEV >$tmp.xfs_db
-> +_scratch_xfs_db -r -c "freesp -s"  >$tmp.xfs_db
->  echo "xfs_db for $SCRATCH_DEV" >>$seqres.full
->  cat $tmp.xfs_db >>$seqres.full
->  
-> diff --git a/tests/xfs/007 b/tests/xfs/007
-> index f2e3584..eb2c9b3 100755
-> --- a/tests/xfs/007
-> +++ b/tests/xfs/007
-> @@ -68,8 +68,8 @@ do_test()
->  			grep $qino_2 | awk '{print $NF}'`
->  
->  	echo "*** Usage before quotarm ***"
-> -	xfs_db -c "inode $QINO_1" -c "p core.nblocks" $SCRATCH_DEV
-> -	xfs_db -c "inode $QINO_2" -c "p core.nblocks" $SCRATCH_DEV
-> +	_scratch_xfs_db -c "inode $QINO_1" -c "p core.nblocks" 
-> +	_scratch_xfs_db -c "inode $QINO_2" -c "p core.nblocks" 
+> I can reproduce the issue I was going to originally show (which was
+> actually pointed out by Eric for a different fallocate flag check
+> I wanted to add), here is the diff of the output files when running
+> generic/156 on btrfs with your patch:
 
-I removed the trailing whitespace at commit time added by above lines
-and some other lines in this patch.
+Somehow it totally escaped my notice that I could just do:
 
-Thanks,
-Eryu
+_require_xfs_io_command "funshare"
+
+and that would suffice for excluding things like btrfs.  Will
+rework.
+
+--D
+
+> 
+> --- tests/generic/156.out	2016-03-29 13:59:30.411720622 +0000
+> +++ /root/xfstests/results//generic/156.out.bad	2016-10-16 06:15:27.118776421 +0000
+> @@ -2,8 +2,13 @@
+>  Create the original file blocks
+>  Create the reflink copies
+>  funshare part of a file
+> +fallocate: Operation not supported
+>  funshare some of the copies
+> +fallocate: Operation not supported
+> +fallocate: Operation not supported
+>  funshare the rest of the files
+> +fallocate: Operation not supported
+> +fallocate: Operation not supported
+>  Rewrite the original file
+>  free blocks after reflinking is in range
+>  free blocks after nocow'ing some copies is in range
+> 
+> So what we really need an enhanced falloc tester that checks that
+> the tested subcommand is actually implemented on the given file system.
+> (And we already need something like that for -k on NFS)
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
