@@ -1,54 +1,32 @@
-Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:57488 "EHLO
-        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S940580AbcJSRtX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Oct 2016 13:49:23 -0400
-Subject: Re: Test generic/299 stalling forever
-References: <20150618155337.GA10439@thunk.org>
- <20150618233430.GK20262@dastard> <20160929043722.ypf3tnxsl6ovt653@thunk.org>
- <20161012211407.GL23194@dastard>
- <f1c80b32-9593-48e0-05e9-4c8b97380b49@fb.com>
- <20161013021552.l6afs2k5tjcsfp2k@thunk.org>
- <ffc283a7-58ef-66b9-3c5b-75703d24ea0d@fb.com>
- <20161013231923.j2fidfbtzdp66x3t@thunk.org>
- <20161018180107.fscbfm66yidwhey4@thunk.org>
- <7856791a-0795-9183-6057-6ce8fd0e3d58@fb.com>
-From: Jens Axboe <axboe@fb.com>
-Message-ID: <30fef8cd-67cc-da49-77d9-9d1a833f8a48@fb.com>
-Date: Wed, 19 Oct 2016 11:49:12 -0600
+Received: from bombadil.infradead.org ([198.137.202.9]:54323 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932836AbcJRFTj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 18 Oct 2016 01:19:39 -0400
+Date: Mon, 17 Oct 2016 22:19:37 -0700
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH 2/3] misc: fix fallocate commands that need the unshare
+ switch
+Message-ID: <20161018051937.GB31237@infradead.org>
+References: <147674215521.23842.13841682595738466897.stgit@birch.djwong.org>
+ <147674216832.23842.4457619951534662629.stgit@birch.djwong.org>
 MIME-Version: 1.0
-In-Reply-To: <7856791a-0795-9183-6057-6ce8fd0e3d58@fb.com>
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <147674216832.23842.4457619951534662629.stgit@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Dave Chinner <david@fromorbit.com>, linux-ext4@vger.kernel.org, fstests@vger.kernel.org, tarasov@vasily.name
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: david@fromorbit.com, eguan@redhat.com, linux-xfs@vger.kernel.org, hch@infradead.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 10/19/2016 08:06 AM, Jens Axboe wrote:
-> On 10/18/2016 12:01 PM, Theodore Ts'o wrote:
->> Jens, ping?
->>
->> Have you had a chance to take a look at the stack traces?  Is there
->> any other debugging information I can get for you?
->
-> I'll take a look today. I agree, this definitely looks like a fio
-> bug. But not related to the mutex issue for the stat part, all verifier
-> threads are waiting to be woken up, but the main thread is done.
->
-> I'll see if I can reproduce. If not, I may ask you to dump more info
-> from the hung processes.
+On Mon, Oct 17, 2016 at 03:09:28PM -0700, Darrick J. Wong wrote:
+> We re-added the UNSHARE flag to fallocate, so go make sure that all
+> the unshare tests actually check that the installed copy of xfs_io
+> supports the 'funshare' command and that the underlying filesystem
+> understands the flag, and change the tests themselves to use
+> funshare.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-Been running for 4 hours now, in a loop, with bs=1k. I haven't been able
-to reproduce. Before I go through the hassle of doing the google compute
-engine thing, can you give me some details of the hardware?
+Looks fine, and tests fine on XFS, btrfs and ext4:
 
-Number of cores/nodes?
-Memory size?
-Rough speed and size of the device?
-Any special mkfs options?
-
-And whatever else might be relevant.
-
--- 
-Jens Axboe
-
+Reviewed-by: Christoph Hellwig <hch@lst.de>
