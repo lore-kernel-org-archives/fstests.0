@@ -1,44 +1,39 @@
-Received: from mx1.redhat.com ([209.132.183.28]:37430 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755028AbcJRMkQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 18 Oct 2016 08:40:16 -0400
-From: "Benjamin Coddington" <bcodding@redhat.com>
-Subject: Re: [PATCH] generic/285: discover allocation size for NFS
-Date: Tue, 18 Oct 2016 08:40:14 -0400
-Message-ID: <7258C6C9-3819-43D9-A294-26C53CD45AAD@redhat.com>
-In-Reply-To: <20161016211545.GA14023@dastard>
-References: <883bff7d2f3123aeb461df1072f9930c3d0f063b.1476440892.git.bcodding@redhat.com>
- <20161016071752.GC17675@infradead.org>
- <0A92328A-9E9C-4D8D-AADF-F995369A3E40@redhat.com>
- <20161016211545.GA14023@dastard>
-MIME-Version: 1.0
+Received: from mail-lf0-f68.google.com ([209.85.215.68]:34077 "EHLO
+        mail-lf0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S938859AbcJSPKa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 19 Oct 2016 11:10:30 -0400
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH 2/3] overlay/013: fix bug in test_upper creation
+Date: Wed, 19 Oct 2016 11:52:32 +0300
+Message-Id: <1476867153-17368-2-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1476867153-17368-1-git-send-email-amir73il@gmail.com>
+References: <1476867153-17368-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org
+To: Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, Xiong Zhou <xzhou@redhat.com>
+Cc: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 16 Oct 2016, at 17:15, Dave Chinner wrote:
+test_upper file was supposed to be in upper layer,
+but it was wrongly created in lower layer.
 
-> On Sun, Oct 16, 2016 at 06:18:13AM -0400, Benjamin Coddington wrote:
->> On 16 Oct 2016, at 3:17, Christoph Hellwig wrote:
->>
->>> On Fri, Oct 14, 2016 at 06:28:37AM -0400, Benjamin Coddington wrote:
->>>> On NFS, try to discover the allocation size for the exported filesystem.
->>>> NFS st_blksize is optimized for the network, and will usually be much
->>>> larger than the allocation size of the exported filesystem, which may
->>>> trigger preallocation strategies in the exported filesystem causing the
->>>> seek tests here to fail.
->>>
->>> Is there a reason not to use your new evidence-based check for all
->>> file systems?
->>
->> Only that on the filesystems I've checked (ext4, xfs, btrfs, tmpfs)
->> st_blksize is correct, so trying to discover it is unnecessary.
->
-> As I've said previously, mount options (e.g. -o largeio) can change
-> what XFS reports in st_blksize such that it behaves like the NFS
-> client...
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/overlay/013 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Ok, I'll send a v2.
+diff --git a/tests/overlay/013 b/tests/overlay/013
+index 09f3eb1..e92eeec 100755
+--- a/tests/overlay/013
++++ b/tests/overlay/013
+@@ -59,7 +59,7 @@ upperdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
+ mkdir -p $lowerdir
+ mkdir -p $upperdir
+ cp $here/src/t_truncate_self $lowerdir/test_lower
+-cp $here/src/t_truncate_self $lowerdir/test_upper
++cp $here/src/t_truncate_self $upperdir/test_upper
+ 
+ _scratch_mount
+ 
+-- 
+2.7.4
 
-Ben
