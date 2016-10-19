@@ -1,41 +1,43 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:39304 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751194AbcJTHrC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 20 Oct 2016 03:47:02 -0400
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: About reflink len = 0 behavior
-Message-ID: <bedcb76a-4deb-bc0e-7a50-350a8a8db86f@cn.fujitsu.com>
-Date: Thu, 20 Oct 2016 15:46:50 +0800
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:5395 "EHLO
+        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1750714AbcJSEns (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 19 Oct 2016 00:43:48 -0400
+Date: Wed, 19 Oct 2016 15:42:41 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] xfs: fix __populate_check_xfs_dir
+Message-ID: <20161019044241.GJ14023@dastard>
+References: <1476759584-4150-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1476759584-4150-1-git-send-email-yangx.jy@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests@vger.kernel.org, btrfs <linux-btrfs@vger.kernel.org>, xfs@oss.sgi.com
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, darrick.wong@oracle.com
 List-ID: <fstests@vger.kernel.org>
 
-Hi Darrick, xfs guys and btrfs guys.
+On Tue, Oct 18, 2016 at 10:59:44AM +0800, Xiao Yang wrote:
+> We need to remove unused ${SCRATCH_DEV} when calling __populate_check_xfs_dir
+> because __populate_check_xfs_dir function has been rewritten by Darrick.
 
-Although such question is quite late as reflink generic tests are in 
-fstests for a long time, I'm still not sure what's the correct behavior 
-for reflink len = 0.
+Can you reference the commit that the relevant change was contained
+in, please? Darrick has made lots of changes - saying "fix
+something after Darrick changed something else" isn't very
+meaningful, especially when someone looks at the commit in a few
+years time. Instead, try something like this:
 
-Test case generic/182 is causing different output between btrfs and xfs.
+----
+[PATCH] xfstests: remove the device parameter from __populate_check_xfs_dir
 
-For btrfs, dedupe will just return 0 and check nothing, while for xfs 
-len == 0 means to check the whole file length.
+In commit abcdef1234 ("rewrite the frobnozzle"), the need for
+callers to pass the device to populate into
+__populate_check_xfs_dir() was removed. We can now clean up all the
+callers by removing the device parameter."
+----
 
-Both makes sense for me, for btrfs len = 0 behavior, it just follows 
-read/write functions.
-And I assume xfs follows reflink behavior, when len is not specified, 
-then reflink the length of src file.
+Cheers,
 
-But since it's a generic test, we need to unify the behavior.
-
-So, which one is the standard and which document should we follow for 
-such behavior definition?
-
-Thanks,
-Qu
-
-
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
