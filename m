@@ -1,140 +1,54 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:44035 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753416AbcJRD6n (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 17 Oct 2016 23:58:43 -0400
-Date: Mon, 17 Oct 2016 20:58:38 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] xfs: fix __populate_check_xfs_dir
-Message-ID: <20161018035838.GB20730@birch.djwong.org>
-References: <1476759584-4150-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:57488 "EHLO
+        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S940580AbcJSRtX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 19 Oct 2016 13:49:23 -0400
+Subject: Re: Test generic/299 stalling forever
+References: <20150618155337.GA10439@thunk.org>
+ <20150618233430.GK20262@dastard> <20160929043722.ypf3tnxsl6ovt653@thunk.org>
+ <20161012211407.GL23194@dastard>
+ <f1c80b32-9593-48e0-05e9-4c8b97380b49@fb.com>
+ <20161013021552.l6afs2k5tjcsfp2k@thunk.org>
+ <ffc283a7-58ef-66b9-3c5b-75703d24ea0d@fb.com>
+ <20161013231923.j2fidfbtzdp66x3t@thunk.org>
+ <20161018180107.fscbfm66yidwhey4@thunk.org>
+ <7856791a-0795-9183-6057-6ce8fd0e3d58@fb.com>
+From: Jens Axboe <axboe@fb.com>
+Message-ID: <30fef8cd-67cc-da49-77d9-9d1a833f8a48@fb.com>
+Date: Wed, 19 Oct 2016 11:49:12 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1476759584-4150-1-git-send-email-yangx.jy@cn.fujitsu.com>
+In-Reply-To: <7856791a-0795-9183-6057-6ce8fd0e3d58@fb.com>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Dave Chinner <david@fromorbit.com>, linux-ext4@vger.kernel.org, fstests@vger.kernel.org, tarasov@vasily.name
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Oct 18, 2016 at 10:59:44AM +0800, Xiao Yang wrote:
-> We need to remove unused ${SCRATCH_DEV} when calling __populate_check_xfs_dir
-> because __populate_check_xfs_dir function has been rewritten by Darrick.
+On 10/19/2016 08:06 AM, Jens Axboe wrote:
+> On 10/18/2016 12:01 PM, Theodore Ts'o wrote:
+>> Jens, ping?
+>>
+>> Have you had a chance to take a look at the stack traces?  Is there
+>> any other debugging information I can get for you?
+>
+> I'll take a look today. I agree, this definitely looks like a fio
+> bug. But not related to the mutex issue for the stat part, all verifier
+> threads are waiting to be woken up, but the main thread is done.
+>
+> I'll see if I can reproduce. If not, I may ask you to dump more info
+> from the hung processes.
 
-What a jerk, that guy. ;)
+Been running for 4 hours now, in a loop, with bs=1k. I haven't been able
+to reproduce. Before I go through the hassle of doing the google compute
+engine thing, can you give me some details of the hardware?
 
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Number of cores/nodes?
+Memory size?
+Rough speed and size of the device?
+Any special mkfs options?
 
-(There'll be a lot more going on soon with common/populate once I get
-going on the "fuzz every field" tests again.)
+And whatever else might be relevant.
 
-> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
-> ---
->  tests/xfs/099 | 2 +-
->  tests/xfs/100 | 2 +-
->  tests/xfs/101 | 2 +-
->  tests/xfs/102 | 2 +-
->  tests/xfs/105 | 2 +-
->  tests/xfs/112 | 2 +-
->  tests/xfs/113 | 2 +-
->  7 files changed, 7 insertions(+), 7 deletions(-)
-> 
-> diff --git a/tests/xfs/099 b/tests/xfs/099
-> index ebc02dd..85193ab 100755
-> --- a/tests/xfs/099
-> +++ b/tests/xfs/099
-> @@ -75,7 +75,7 @@ echo "+ check fs"
->  _scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
->  
->  echo "+ check dir"
-> -__populate_check_xfs_dir "${SCRATCH_DEV}" "${inode}" block
-> +__populate_check_xfs_dir "${inode}" block
->  
->  echo "+ corrupt dir"
->  _scratch_xfs_db -x -c "inode ${inode}" -c 'dblock 0' -c "stack" -c "blocktrash -x 32 -y $((blksz * 8)) -z ${FUZZ_ARGS}" >> $seqres.full
-> diff --git a/tests/xfs/100 b/tests/xfs/100
-> index 2412c81..3bfafce 100755
-> --- a/tests/xfs/100
-> +++ b/tests/xfs/100
-> @@ -75,7 +75,7 @@ echo "+ check fs"
->  _scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
->  
->  echo "+ check dir"
-> -__populate_check_xfs_dir "${SCRATCH_DEV}" "${inode}" leaf
-> +__populate_check_xfs_dir "${inode}" leaf
->  
->  echo "+ corrupt dir"
->  loff=0
-> diff --git a/tests/xfs/101 b/tests/xfs/101
-> index 679940f..d3abd19 100755
-> --- a/tests/xfs/101
-> +++ b/tests/xfs/101
-> @@ -75,7 +75,7 @@ echo "+ check fs"
->  _scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
->  
->  echo "+ check dir"
-> -__populate_check_xfs_dir "${SCRATCH_DEV}" "${inode}" leaf
-> +__populate_check_xfs_dir "${inode}" leaf
->  
->  echo "+ corrupt dir"
->  _scratch_xfs_db -x -c "inode ${inode}" -c "dblock ${leaf_lblk}" -c "stack" -c "blocktrash -x 32 -y $((blksz * 8)) -z ${FUZZ_ARGS}" >> $seqres.full
-> diff --git a/tests/xfs/102 b/tests/xfs/102
-> index 8018a9e..cf0d7a6 100755
-> --- a/tests/xfs/102
-> +++ b/tests/xfs/102
-> @@ -75,7 +75,7 @@ echo "+ check fs"
->  _scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
->  
->  echo "+ check dir"
-> -__populate_check_xfs_dir "${SCRATCH_DEV}" "${inode}" node
-> +__populate_check_xfs_dir "${inode}" node
->  
->  echo "+ corrupt dir"
->  loff=0
-> diff --git a/tests/xfs/105 b/tests/xfs/105
-> index 27ee4b3..07ccf00 100755
-> --- a/tests/xfs/105
-> +++ b/tests/xfs/105
-> @@ -75,7 +75,7 @@ echo "+ check fs"
->  _scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
->  
->  echo "+ check dir"
-> -__populate_check_xfs_dir "${SCRATCH_DEV}" "${inode}" node
-> +__populate_check_xfs_dir "${inode}" node
->  
->  echo "+ corrupt dir"
->  loff="${leaf_lblk}"
-> diff --git a/tests/xfs/112 b/tests/xfs/112
-> index c237f03..84f1f1d 100755
-> --- a/tests/xfs/112
-> +++ b/tests/xfs/112
-> @@ -75,7 +75,7 @@ echo "+ check fs"
->  _scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
->  
->  echo "+ check dir"
-> -__populate_check_xfs_dir "${SCRATCH_DEV}" "${inode}" node
-> +__populate_check_xfs_dir "${inode}" node
->  
->  echo "+ corrupt dir"
->  loff="${node_lblk}"
-> diff --git a/tests/xfs/113 b/tests/xfs/113
-> index 6d6e6fd..ec328bc 100755
-> --- a/tests/xfs/113
-> +++ b/tests/xfs/113
-> @@ -75,7 +75,7 @@ echo "+ check fs"
->  _scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
->  
->  echo "+ check dir"
-> -__populate_check_xfs_dir "${SCRATCH_DEV}" "${inode}" btree
-> +__populate_check_xfs_dir "${inode}" btree
->  
->  echo "+ corrupt dir"
->  loff=0
-> -- 
-> 1.8.3.1
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Jens Axboe
+
