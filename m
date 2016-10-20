@@ -1,28 +1,37 @@
-Received: from bombadil.infradead.org ([198.137.202.9]:38841 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752344AbcJZI0l (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 26 Oct 2016 04:26:41 -0400
-Date: Wed, 26 Oct 2016 01:26:38 -0700
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH v2 0/4] Add copy_file_range() tests
-Message-ID: <20161026082638.GA19419@infradead.org>
-References: <20160907195619.25914-1-Anna.Schumaker@Netapp.com>
+Received: from mail-lf0-f68.google.com ([209.85.215.68]:34925 "EHLO
+        mail-lf0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753561AbcJTRg4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 20 Oct 2016 13:36:56 -0400
+Received: by mail-lf0-f68.google.com with SMTP id x79so1203992lff.2
+        for <fstests@vger.kernel.org>; Thu, 20 Oct 2016 10:36:55 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160907195619.25914-1-Anna.Schumaker@Netapp.com>
+In-Reply-To: <20161020143559.GK27776@eguan.usersys.redhat.com>
+References: <1476689014-384-1-git-send-email-amir73il@gmail.com>
+ <1476689014-384-2-git-send-email-amir73il@gmail.com> <20161020143559.GK27776@eguan.usersys.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 20 Oct 2016 20:36:54 +0300
+Message-ID: <CAOQ4uxg6OJeHqdm7d+N38r3-ZtXCC5SAQMaTWy2EivAUEMMeOw@mail.gmail.com>
+Subject: Re: [PATCH v3 2/3] fstests: strip quotes from "$XFS_IO_PROG" call sites
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Anna Schumaker <Anna.Schumaker@netapp.com>
-Cc: fstests@vger.kernel.org, linux-nfs@vger.kernel.org, hch@infradead.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: Dave Chinner <david@fromorbit.com>, Christoph Hellwig <hch@lst.de>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 07, 2016 at 03:56:15PM -0400, Anna Schumaker wrote:
-> These tests exercise the copy_file_range() system call, and check copying
-> data to both a new file and overwriting data inside an existing file.  I use
-> the xfs_io "copy_range" command for the actual copies, so running these
-> tests requires an up-to-date version of xfsprogs.
+On Thu, Oct 20, 2016 at 5:35 PM, Eryu Guan <eguan@redhat.com> wrote:
+> On Mon, Oct 17, 2016 at 10:23:33AM +0300, Amir Goldstein wrote:
+>> The value of "$XFS_IO_PROG" may contain extra flags after the
+>> binary path (e.g. -F), so it is wrong to use the variable inside
+>> quotes in xfs_io execution call sites.
+>>
+>> This bug surfaced while testing the new xfs_io -M flag.
+>                                                 ^^^ should be -i now? :)
 
-Hi Anna,
+indeed
+Thanks.
 
-what's the status of these tests?  Did you get a chance to look
-into xfs_io copyfile support?
+>
+> I can fix it at commit time.
+>
+> Thanks,
+> Eryu
