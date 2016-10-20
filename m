@@ -1,75 +1,136 @@
-Received: from imap.thunk.org ([74.207.234.97]:33708 "EHLO imap.thunk.org"
+Received: from mx1.redhat.com ([209.132.183.28]:55530 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1756705AbcJWTd0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 23 Oct 2016 15:33:26 -0400
-Date: Sun, 23 Oct 2016 15:33:20 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: Test generic/299 stalling forever
-Message-ID: <20161023193320.rlzlaxdi4vbyu7of@thunk.org>
-References: <20161013021552.l6afs2k5tjcsfp2k@thunk.org>
- <ffc283a7-58ef-66b9-3c5b-75703d24ea0d@fb.com>
- <20161013231923.j2fidfbtzdp66x3t@thunk.org>
- <20161018180107.fscbfm66yidwhey4@thunk.org>
- <7856791a-0795-9183-6057-6ce8fd0e3d58@fb.com>
- <30fef8cd-67cc-da49-77d9-9d1a833f8a48@fb.com>
- <20161019203233.mbbmskpn5ekgl7og@thunk.org>
- <1fb60e7c-a558-80df-09da-d3c36863a461@fb.com>
- <20161021221551.sdv4hgw33zjxnkvu@thunk.org>
- <53fe5a98-6ff9-4fa1-e84c-8a3e16cc0f50@fb.com>
+        id S964843AbcJTOZK (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 20 Oct 2016 10:25:10 -0400
+Date: Thu, 20 Oct 2016 22:25:08 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2 3/3] fstests: run xfs_io as multi threaded for 'quick'
+ tests
+Message-ID: <20161020142508.GJ27776@eguan.usersys.redhat.com>
+References: <1476615222-7804-1-git-send-email-amir73il@gmail.com>
+ <1476615222-7804-3-git-send-email-amir73il@gmail.com>
+ <20161016214608.GC14023@dastard>
+ <CAOQ4uxiMKMB2HqKOjJ7b296oX+MvV_OvCDY5h6gz-A9C5a5DBA@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <53fe5a98-6ff9-4fa1-e84c-8a3e16cc0f50@fb.com>
+In-Reply-To: <CAOQ4uxiMKMB2HqKOjJ7b296oX+MvV_OvCDY5h6gz-A9C5a5DBA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jens Axboe <axboe@fb.com>
-Cc: Dave Chinner <david@fromorbit.com>, linux-ext4@vger.kernel.org, fstests@vger.kernel.org, tarasov@vasily.name
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Dave Chinner <david@fromorbit.com>, Christoph Hellwig <hch@lst.de>, "Darrick J . Wong" <darrick.wong@oracle.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Oct 23, 2016 at 08:32:49AM -0600, Jens Axboe wrote:
+On Mon, Oct 17, 2016 at 10:01:19AM +0300, Amir Goldstein wrote:
+> On Mon, Oct 17, 2016 at 12:46 AM, Dave Chinner <david@fromorbit.com> wrote:
+> > On Sun, Oct 16, 2016 at 01:53:42PM +0300, Amir Goldstein wrote:
+> >> Try to run xfs_io for tests in group quick with command line
+> >> option -M which starts an idle thread before performing any io.
+> >>
+> >> The purpose of this idle thread is to test io from a multi threaded
+> >> process. With single threaded process, the file table is not shared
+> >> and file structs are not reference counted.
+> >>
+> >> In order to improve the chance of detecting file struct reference
+> >> leaks, we should run xfs_io commands with this option as much as
+> >> possible.
+> >>
+> >> Analysis of the effect of xfs_io -M on tests runtime showed that
+> >> it may lead to slightly longer run times in extreme cases (e.g +3s
+> >> for generic/132), but has a negligable effect on runtime of tests
+> >> among the 'quick' group (worst case +0.3s for generic/130).
+> >>
+> >> Therefore, we automatically add the -M flags only to tests in the
+> >> 'quick' group.
+> >>
+> >> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> >> ---
+> >>  check     |  2 ++
+> >>  common/rc | 15 +++++++++++++++
+> >>  2 files changed, 17 insertions(+)
+> >>
+> >> diff --git a/check b/check
+> >> index 69341d8..e568598 100755
+> >> --- a/check
+> >> +++ b/check
+> >> @@ -574,6 +574,8 @@ for section in $HOST_OPTIONS_SECTIONS; do
+> >>
+> >>           mkdir -p $RESULT_DIR
+> >>
+> >> +         export TEST_GROUPS=`grep $(basename $seqnum) "$SRC_DIR/$(dirname $seqnum)/group"`
+> >> +
+> >
+> > Do we really want to go down this path of changing behaviours
+> > of utilities based on what group  they belong to? It means we can no
+> > longer look at the test code and recreate the command line without
+> > having to work out what group context the test is running under. And
+> > how do we tell that it's correct and we don't inadvertantly break
+> > it? I ask this because.....
+> >
+> >>           echo -n "$seqnum"
+> >>
+> >>               if $showme; then
+> >> diff --git a/common/rc b/common/rc
+> >> index a838750..7c478cf 100644
+> >> --- a/common/rc
+> >> +++ b/common/rc
+> >> @@ -3799,6 +3799,21 @@ init_rc()
+> >>       $XFS_IO_PROG -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \
+> >>               export XFS_IO_PROG="$XFS_IO_PROG -F"
+> >>
+> >> +     if echo $TEST_GROUPS | grep -q quick; then
+> >> +             # xfs_io -M flag runs xfs_io as multi threaded process
+> >> +             # in order to catch fdget/fdset reference leaks, because
+> >> +             # file structs are not reference counted in a single threaded
+> >> +             # process.
+> >> +             # Because reference counted fdget/fdset may lead to slightly
+> >> +             # longer run times in extreme cases (such as generic/132),
+> >> +             # we limit the use of -M flags to tests with short runtime,
+> >> +             # where the effect of the flag is negligable.
+> >> +             #
+> >> +             # Figure out if xfs_io supports the -M option
+> >> +             $XFS_IO_PROG -M -c quit 2>/dev/null && \
+> >> +                     export XFS_IO_PROG="$XFS_IO_PROG -M"
+> >> +     fi
+> >> +
+> >
+> > .... I can't see how this works - init_rc is
+> > called and sets $XFS_IO_PROG long before TEST_GROUPS is set and
+> > exported.
 > 
-> Very strange. Can you see who the owner is of stat_mutex->lock, that's
-> the pthread_mutex_t they are sleeping on.
+> Correct, but common/rc is then included again from every single test,
+> so XFS_IO_PROG is adjusted to add the -M/i flag per test after
+> TEST_GROUPS is set for a specific test in ./check.
+> I saw the -F flag code and figured that's a good place to add -M/i as well.
+> With a hunch, I would say that if -F where to be added, it where to be
+> added twice.
 > 
-> For now, I'll apply the work-around you sent. I haven't been able to
-> reproduce this, but knowing that it's the stat_mutex will allow me to
-> better make up a test case to hit it.
+> > How did you verify that the correct xfs_io command lines
+> > were being issued?
+> >
+> 
+> Both by adding debug print and by monitoring ps
+> 
+> > IMO, either turn it on for everything if it is supported, or make it
+> > an explicit command line option to enable.
+> 
+> If I make the default off, then not enough people will test for reference leaks.
+> Since leaks may be hard to find, because they may only be on rare error path,
+> the motivation for a test suit IMO is to enforce this option as much
+> as possible.
+> 
+> OTOH, if everyone, always run with -i, then the fast path fdget is
+> never tested with
+> xfs_io. fast path will get tested with other tools used by tests
+> though, so maybe
+> that is not such a big concern.
 
-Well, that's the wierd thing.  I can't see anything that could be
-holding the stat_mutex.  This is from a somewhat older version of fio
-(fio-2.14-27-gafd2cef) but there when things wedged, there were four
-threads hanging here (with the exact same stack trace):
+[Sorry for the late response, I'm travelling this week and the network
+connection is not as good as I expected.]
 
-Thread 5 (Thread 0x7fb3ddfed700 (LWP 19800)):
-#0  pthread_cond_wait@@GLIBC_2.3.2 () at ../nptl/sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S:185
-#1  0x000000000043987b in verify_async_thread (data=0x7fb3c7590610) at verify.c:1241
-#2  0x00007fb3dd85d0a4 in start_thread (arg=0x7fb3ddfed700) at pthread_create.c:309
-#3  0x00007fb3dd38e62d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:111
+I'm still having concerns about losing test coverage by enabling "-i" by
+default. How about adding an command line option to disable it? So at
+least we could have a way to turn it off. Or is it completely impossible
+to lose any test coverage?
 
-... and the main thread was hanging here:
-
-Thread 1 (Thread 0x7fb3de190740 (LWP 19781)):
-#0  0x00007fb3dd35ff2d in nanosleep () at ../sysdeps/unix/syscall-template.S:81
-#1  0x00007fb3dd387fb4 in usleep (useconds=<optimized out>) at ../sysdeps/unix/sysv/linux/usleep.c:32
-#2  0x000000000045b541 in thread_main (data=0x18fca000) at backend.c:1738
-#3  0x000000000045d4d3 in run_threads (sk_out=sk_out@entry=0x0) at backend.c:2268
-#4  0x000000000045d80d in fio_backend (sk_out=sk_out@entry=0x0) at backend.c:2400
-#5  0x000000000040cbc8 in main (argc=2, argv=0x7ffd24b952e8, envp=<optimized out>) at fio.c:65
-
-
-The verify threads were waiting td->verify_cond, which it looks like
-the main thread was supposed to wakeup in its shutdown sequence when
-it calls verify_async_exit(), or if there was work to be done via the
-verify_io_u_async() end_io callback.  But the verify threads don't
-take the stat_mutex, and the only places that take the stat_mutex in
-stat.c and backend.c don't hold it for long, and I can't see any
-longjumps or other progam flow discontinuities that could have left
-stat_mutex locked.
-
-I'm not an expert on pthreads debugging; is there some way to figure
-out ala CONFIG_PROVE_LOCKiNG, which thread took the mutex, and at what
-line number?  Or would we need to to try hacking in some kind of mutex
-debugging code into fio_mutex_down(), et. al.?
-
-Cheers,
-
-					- Ted
+Thanks,
+Eryu
