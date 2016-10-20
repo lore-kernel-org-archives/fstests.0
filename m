@@ -1,12 +1,11 @@
-Received: from imap.thunk.org ([74.207.234.97]:60968 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1756217AbcJWCCd (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 22 Oct 2016 22:02:33 -0400
-Date: Sat, 22 Oct 2016 22:02:28 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
+Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:50947 "EHLO
+        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S932526AbcJTOW1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 20 Oct 2016 10:22:27 -0400
 Subject: Re: Test generic/299 stalling forever
-Message-ID: <20161023020228.gf6lzfw2phca3ykp@thunk.org>
-References: <f1c80b32-9593-48e0-05e9-4c8b97380b49@fb.com>
+References: <20150618233430.GK20262@dastard>
+ <20160929043722.ypf3tnxsl6ovt653@thunk.org> <20161012211407.GL23194@dastard>
+ <f1c80b32-9593-48e0-05e9-4c8b97380b49@fb.com>
  <20161013021552.l6afs2k5tjcsfp2k@thunk.org>
  <ffc283a7-58ef-66b9-3c5b-75703d24ea0d@fb.com>
  <20161013231923.j2fidfbtzdp66x3t@thunk.org>
@@ -14,95 +13,104 @@ References: <f1c80b32-9593-48e0-05e9-4c8b97380b49@fb.com>
  <7856791a-0795-9183-6057-6ce8fd0e3d58@fb.com>
  <30fef8cd-67cc-da49-77d9-9d1a833f8a48@fb.com>
  <20161019203233.mbbmskpn5ekgl7og@thunk.org>
- <1fb60e7c-a558-80df-09da-d3c36863a461@fb.com>
- <20161021221551.sdv4hgw33zjxnkvu@thunk.org>
+From: Jens Axboe <axboe@fb.com>
+Message-ID: <1fb60e7c-a558-80df-09da-d3c36863a461@fb.com>
+Date: Thu, 20 Oct 2016 08:22:00 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20161021221551.sdv4hgw33zjxnkvu@thunk.org>
+In-Reply-To: <20161019203233.mbbmskpn5ekgl7og@thunk.org>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Jens Axboe <axboe@fb.com>
+To: Theodore Ts'o <tytso@mit.edu>
 Cc: Dave Chinner <david@fromorbit.com>, linux-ext4@vger.kernel.org, fstests@vger.kernel.org, tarasov@vasily.name
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Oct 21, 2016 at 06:15:51PM -0400, Theodore Ts'o wrote:
-> I was taking a closer look at this, and it does look ike it's related
-> to the stat_mutex.  The main thread (according to gdb) seems to be
-> stuck in this loop in backend.c line 1738 (in thread_main):
-> 
-> 		do {
-> 			check_update_rusage(td);
-> 			if (!fio_mutex_down_trylock(stat_mutex))
-> 				break;
-> 			usleep(1000);   <----- line 1738
-> 		} while (1);
+On 10/19/2016 02:32 PM, Theodore Ts'o wrote:
+> On Wed, Oct 19, 2016 at 11:49:12AM -0600, Jens Axboe wrote:
+>>
+>> Number of cores/nodes?
+>> Memory size?
+>
+> I'm using a gce n1-standard-2 VM.  So that's two CPU's and 7680M.
+>
+> Each CPU is a virtual CPU is implemented as a single hardware
+> hyper-thread on a 2.3 GHz Intel Xeon E5 v3 (Haswell).  (I was using a
+> GCE zone that has Haswell processors; different GCE zones may have
+> different processors.  See [1] and [2] for more details.)
+>
+> [1] https://urldefense.proofpoint.com/v2/url?u=https-3A__cloud.google.com_compute_docs_machine-2Dtypes&d=DQIBAg&c=5VD0RTtNlTh3ycd41b3MUw&r=cK1a7KivzZRh1fKQMjSm2A&m=itmAtbDNAiup3d6EW5J8mxTc5VKZZo4z-TaIkfeBJ8o&s=JGVEfRvtOlOiYH_c8NLKuy3FFH8Ap3EGLrhsLV_UdiM&e=
+> [2] https://urldefense.proofpoint.com/v2/url?u=https-3A__cloud.google.com_compute_docs_regions-2Dzones_regions-2Dzones&d=DQIBAg&c=5VD0RTtNlTh3ycd41b3MUw&r=cK1a7KivzZRh1fKQMjSm2A&m=itmAtbDNAiup3d6EW5J8mxTc5VKZZo4z-TaIkfeBJ8o&s=nMlkYsjMNWYhpWmDmQmSFH_bQ6am_PeCfQzhWwFbbag&e=
+>
+>> Rough speed and size of the device?
+>
+> I'm using a GCE PD backed by a SSD.  To a first approximation, you can
+> think of it as a KVM qcow file stored on a fast flash device.  I'm
+> running LVM on the disk, and the fio is running on a 5 gig LVM volume.
+>
+>> Any special mkfs options?
+>
+> No.  This particular error will trigger on 4k block file systems, 1k
+> block file systems, 4k file system swith journals disabled, etc.  It's
+> fairly insensitive to the file system configuration.
+>
+>> And whatever else might be relevant.
+>
+> Note that the generic/299 test is running fio in an an ENOSPC hitter
+> configuration, where there is an antangonist thread which is
+> constantly allocating all of the disk space available and then freeing
+> it all:
+>
+> # FSQA Test No. 299
+> #
+> # AIO/DIO stress test
+> # Run random AIO/DIO activity and fallocate/truncate simultaneously
+> # Test will operate on huge sparsed files so ENOSPC is expected.
+>
+>
+> So some of the AIO/DIO operations will be failing with an error, and
+> and I suspect that's very likely relevant to reproducing the failure.
+>
+> The actual guts of the test from generic/299[1]:
+>
+> [1] https://git.kernel.org/cgit/fs/xfs/xfstests-dev.git/tree/tests/generic/299
+>
+> _workout()
+> {
+> 	echo ""
+> 	echo "Run fio with random aio-dio pattern"
+> 	echo ""
+> 	cat $fio_config >>  $seqres.full
+> 	run_check $FIO_PROG $fio_config &
+> 	pid=$!
+> 	echo "Start fallocate/truncate loop"
+>
+> 	for ((i=0; ; i++))
+> 	do
+> 	    for ((k=1; k <= NUM_JOBS; k++))
+> 	    do
+> 		$XFS_IO_PROG -f -c "falloc 0 $FILE_SIZE" \
+> 			$SCRATCH_MNT/direct_aio.$k.0 >> $seqres.full 2>&1
+> 	    done
+> 	    for ((k=1; k <= NUM_JOBS; k++))
+> 	    do
+> 		$XFS_IO_PROG -c "truncate  0" \
+> 			$SCRATCH_MNT/direct_aio.$k.0 >> $seqres.full 2>&1
+> 	    done
+> 	    # Following like will check that pid is still run.
+> 	    # Once fio exit we can stop fallocate/truncate loop
+> 	    pgrep -f "$FIO_PROG" > /dev/null 2>&1 || break
+> 	done
+> 	wait $pid
+> }
+>
+> So what's happening is that generic/299 is looping in the
+> fallocate/truncate loop until fio exits, but since fio never exits, so
+> it ends up looping forever.
 
-So I have something very strange to report.  I sync'ed up to the
-latest fio repo, at commit e291cff14e97feb3cf.  The problem still
-manifests with that commit.  Given what I've observed with a thread
-spinning in this do loop, I added this commit:
+I'm setting up the GCE now, I've had the tests running for about 24h now
+on another test box and haven't been able to trigger any hangs. I'll
+match your setup as closely as I can, hopefully that'll work.
 
-commit 0f2f71f51595f6b708b801f7ae1dc86c5b2f3705
-Author: Theodore Ts'o <tytso@mit.edu>
-Date:   Sat Oct 22 10:32:41 2016 -0400
+-- 
+Jens Axboe
 
-    backend: if we can't grab stat_mutex, report a deadlock error and exit
-    
-    Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-
-diff --git a/backend.c b/backend.c
-index fb2a855..093b6a3 100644
---- a/backend.c
-+++ b/backend.c
-@@ -1471,6 +1471,7 @@ static void *thread_main(void *data)
- 	struct thread_data *td = fd->td;
- 	struct thread_options *o = &td->o;
- 	struct sk_out *sk_out = fd->sk_out;
-+	int deadlock_loop_cnt;
- 	int clear_state;
- 	int ret;
- 
-@@ -1731,11 +1732,17 @@ static void *thread_main(void *data)
- 		 * the rusage_sem, which would never get upped because
- 		 * this thread is waiting for the stat mutex.
- 		 */
-+		deadlock_loop_cnt = 0;
- 		do {
- 			check_update_rusage(td);
- 			if (!fio_mutex_down_trylock(stat_mutex))
- 				break;
- 			usleep(1000);
-+			if (deadlock_loop_cnt++ > 5000) {
-+				log_err("fio seems to be stuck grabbing stat_mutex, forcibly exiting\n");
-+				td->error = EDEADLOCK;
-+				goto err;
-+			}
- 		} while (1);
- 
- 		if (td_read(td) && td->io_bytes[DDIR_READ])
-
-With this commit, the fioe in the generic/299 test no longer hangs.
-I've tried running a very large time, and it no longer reproduces at
-all.  Specifically, the log_err() and the EDEADLOCK error added by the
-patch isn't triggering, and fio is no longer hanging.  So merely
-adding loop counter seems to make the problem go away.  Which makes me
-wonder if there is either some kind of compiler or code generation
-artifact we're seeing.  So I should mention which compiler I'm
-currently using:
-
-% schroot -c jessie64 -- gcc --version
-gcc (Debian 4.9.2-10) 4.9.2
-
-Anyway, I have a work around that seems to work for me, and which even
-if the deadlock_loop counter fires, will at least stop the test run
-from hanging.
-
-You may or may not want to include this in the fio upstream repo,
-given that I can't explain merely trying to check for the deadlock (or
-inability to grab the stat_mute, anyway) makes the deadlock go away.
-At least for the purposes of running the test, though, it does seem to
-be a valid workaround, though.
-
-Cheers,
-
-						- Ted
