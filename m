@@ -1,41 +1,67 @@
-Message-ID: <580703A1.9050402@cn.fujitsu.com>
-Date: Wed, 19 Oct 2016 13:24:49 +0800
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Date: Thu, 20 Oct 2016 22:44:59 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 3/3] misc: fix more xfs_db open-coding instances
+Message-ID: <20161020144459.GL27776@eguan.usersys.redhat.com>
+References: <147674215521.23842.13841682595738466897.stgit@birch.djwong.org>
+ <147674217475.23842.9304657231302422666.stgit@birch.djwong.org>
 MIME-Version: 1.0
-Subject: Re: [PATCH] xfs: fix __populate_check_xfs_dir
-References: <1476759584-4150-1-git-send-email-yangx.jy@cn.fujitsu.com> <20161019044241.GJ14023@dastard>
-In-Reply-To: <20161019044241.GJ14023@dastard>
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, darrick.wong@oracle.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <147674217475.23842.9304657231302422666.stgit@birch.djwong.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: david@fromorbit.com, linux-xfs@vger.kernel.org, hch@infradead.org, Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 2016/10/19 12:42, Dave Chinner wrote:
-> On Tue, Oct 18, 2016 at 10:59:44AM +0800, Xiao Yang wrote:
->> We need to remove unused ${SCRATCH_DEV} when calling __populate_check_xfs_dir
->> because __populate_check_xfs_dir function has been rewritten by Darrick.
-> Can you reference the commit that the relevant change was contained
-> in, please? Darrick has made lots of changes - saying "fix
-> something after Darrick changed something else" isn't very
-> meaningful, especially when someone looks at the commit in a few
-> years time. Instead, try something like this:
->
-> ----
-> [PATCH] xfstests: remove the device parameter from __populate_check_xfs_dir
->
-> In commit abcdef1234 ("rewrite the frobnozzle"), the need for
-> callers to pass the device to populate into
-> __populate_check_xfs_dir() was removed. We can now clean up all the
-> callers by removing the device parameter."
-> ----
->
-> Cheers,
->
-> Dave.
-Hi Darrick, Dave
+On Mon, Oct 17, 2016 at 03:09:34PM -0700, Darrick J. Wong wrote:
+> Convert some more cases of 'xfs_db $SCRATCH_DEV' to _scratch_xfs_db
+> that were left out of the initial cleanup patch.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> Reviewed-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  tests/xfs/004 |    2 +-
+>  tests/xfs/007 |    8 ++++----
+>  tests/xfs/021 |    4 ++--
+>  tests/xfs/044 |    2 +-
+>  tests/xfs/052 |    2 +-
+>  tests/xfs/116 |    4 ++--
+>  tests/xfs/136 |    6 +++---
+>  tests/xfs/199 |    6 +++---
+>  tests/xfs/278 |   16 ++++++++--------
+>  tests/xfs/291 |    2 +-
+>  tests/xfs/307 |   20 ++++++++++----------
+>  tests/xfs/308 |   20 ++++++++++----------
+>  12 files changed, 46 insertions(+), 46 deletions(-)
+> 
+> 
+> diff --git a/tests/xfs/004 b/tests/xfs/004
+> index 59b8997..09da2fe 100755
+> --- a/tests/xfs/004
+> +++ b/tests/xfs/004
+> @@ -74,7 +74,7 @@ eval `$DF_PROG $SCRATCH_MNT 2>&1 \
+>  echo "df gave: blocks=$blocks used=$used avail=$avail" >>$seqres.full
+>  echo "blocksize from mkfs is '$dbsize'" >>$seqres.full
+>  
+> -xfs_db -r -c "freesp -s" $SCRATCH_DEV >$tmp.xfs_db
+> +_scratch_xfs_db -r -c "freesp -s"  >$tmp.xfs_db
+>  echo "xfs_db for $SCRATCH_DEV" >>$seqres.full
+>  cat $tmp.xfs_db >>$seqres.full
+>  
+> diff --git a/tests/xfs/007 b/tests/xfs/007
+> index f2e3584..eb2c9b3 100755
+> --- a/tests/xfs/007
+> +++ b/tests/xfs/007
+> @@ -68,8 +68,8 @@ do_test()
+>  			grep $qino_2 | awk '{print $NF}'`
+>  
+>  	echo "*** Usage before quotarm ***"
+> -	xfs_db -c "inode $QINO_1" -c "p core.nblocks" $SCRATCH_DEV
+> -	xfs_db -c "inode $QINO_2" -c "p core.nblocks" $SCRATCH_DEV
+> +	_scratch_xfs_db -c "inode $QINO_1" -c "p core.nblocks" 
+> +	_scratch_xfs_db -c "inode $QINO_2" -c "p core.nblocks" 
 
-Sorry, it's my fault, I will rewrite this  commit.
+I removed the trailing whitespace at commit time added by above lines
+and some other lines in this patch.
 
 Thanks,
-Xiao Yang
+Eryu
