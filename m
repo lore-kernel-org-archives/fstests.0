@@ -1,112 +1,88 @@
-Received: from imap.thunk.org ([74.207.234.97]:50154 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S941378AbcJSUdZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 19 Oct 2016 16:33:25 -0400
-Date: Wed, 19 Oct 2016 16:32:33 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: Test generic/299 stalling forever
-Message-ID: <20161019203233.mbbmskpn5ekgl7og@thunk.org>
-References: <20150618233430.GK20262@dastard>
- <20160929043722.ypf3tnxsl6ovt653@thunk.org>
- <20161012211407.GL23194@dastard>
- <f1c80b32-9593-48e0-05e9-4c8b97380b49@fb.com>
- <20161013021552.l6afs2k5tjcsfp2k@thunk.org>
- <ffc283a7-58ef-66b9-3c5b-75703d24ea0d@fb.com>
- <20161013231923.j2fidfbtzdp66x3t@thunk.org>
- <20161018180107.fscbfm66yidwhey4@thunk.org>
- <7856791a-0795-9183-6057-6ce8fd0e3d58@fb.com>
- <30fef8cd-67cc-da49-77d9-9d1a833f8a48@fb.com>
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:55115 "EHLO
+        ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1754894AbcJTI1j (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 20 Oct 2016 04:27:39 -0400
+Received: from dave by dastard with local (Exim 4.80)
+        (envelope-from <david@fromorbit.com>)
+        id 1bx8hM-0005zx-3b
+        for fstests@vger.kernel.org; Thu, 20 Oct 2016 19:27:36 +1100
+Date: Thu, 20 Oct 2016 19:27:36 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: [ANNOUNCE] xfstests: master branch updated to 16ef0843f212
+Message-ID: <20161020082736.GK23194@dastard>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="jKBxcB1XkHIR0Eqt"
 Content-Disposition: inline
-In-Reply-To: <30fef8cd-67cc-da49-77d9-9d1a833f8a48@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jens Axboe <axboe@fb.com>
-Cc: Dave Chinner <david@fromorbit.com>, linux-ext4@vger.kernel.org, fstests@vger.kernel.org, tarasov@vasily.name
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Oct 19, 2016 at 11:49:12AM -0600, Jens Axboe wrote:
-> 
-> Number of cores/nodes?
-> Memory size?
 
-I'm using a gce n1-standard-2 VM.  So that's two CPU's and 7680M.
+--jKBxcB1XkHIR0Eqt
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Each CPU is a virtual CPU is implemented as a single hardware
-hyper-thread on a 2.3 GHz Intel Xeon E5 v3 (Haswell).  (I was using a
-GCE zone that has Haswell processors; different GCE zones may have
-different processors.  See [1] and [2] for more details.)
+Hi folks,
 
-[1] https://cloud.google.com/compute/docs/machine-types
-[2] https://cloud.google.com/compute/docs/regions-zones/regions-zones
+The master branch of the xfstests repository at:
 
-> Rough speed and size of the device?
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-I'm using a GCE PD backed by a SSD.  To a first approximation, you can
-think of it as a KVM qcow file stored on a fast flash device.  I'm
-running LVM on the disk, and the fio is running on a 5 gig LVM volume.
+have just been updated.
 
-> Any special mkfs options?
+The new head of the master branch is commit:
 
-No.  This particular error will trigger on 4k block file systems, 1k
-block file systems, 4k file system swith journals disabled, etc.  It's
-fairly insensitive to the file system configuration.
+16ef0843f212 xfs/122: remove dead code
 
-> And whatever else might be relevant.
+New Commits:
 
-Note that the generic/299 test is running fio in an an ENOSPC hitter
-configuration, where there is an antangonist thread which is
-constantly allocating all of the disk space available and then freeing
-it all:
+Eric Biggers (2):
+      [92846328baee] generic/375: test both regular file and directory
+      [8cfd58a5dbb9] generic/314: don't test SGID behavior after setfacl
 
-# FSQA Test No. 299
-#
-# AIO/DIO stress test
-# Run random AIO/DIO activity and fallocate/truncate simultaneously
-# Test will operate on huge sparsed files so ENOSPC is expected.
+Eryu Guan (1):
+      [16ef0843f212] xfs/122: remove dead code
+
+Zorro Lang (1):
+      [8425118bff45] common/rc: use real device name in _sysfs_dev function
 
 
-So some of the AIO/DIO operations will be failing with an error, and
-and I suspect that's very likely relevant to reproducing the failure.
+Code Diffstat:
 
-The actual guts of the test from generic/299[1]:
+ common/rc             |  2 +-
+ tests/generic/314     |  8 ++------
+ tests/generic/314.out |  1 -
+ tests/generic/375     | 54 ++++++++++++++++++++++++++++++++++-------------=
+-------
+ tests/generic/375.out |  8 ++++++++
+ tests/xfs/122         |  4 ----
+ 6 files changed, 45 insertions(+), 32 deletions(-)
+--=20
+Dave Chinner
+david@fromorbit.com
 
-[1] https://git.kernel.org/cgit/fs/xfs/xfstests-dev.git/tree/tests/generic/299
+--jKBxcB1XkHIR0Eqt
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
-_workout()
-{
-	echo ""
-	echo "Run fio with random aio-dio pattern"
-	echo ""
-	cat $fio_config >>  $seqres.full
-	run_check $FIO_PROG $fio_config &
-	pid=$!
-	echo "Start fallocate/truncate loop"
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
 
-	for ((i=0; ; i++))
-	do
-	    for ((k=1; k <= NUM_JOBS; k++))
-	    do
-		$XFS_IO_PROG -f -c "falloc 0 $FILE_SIZE" \
-			$SCRATCH_MNT/direct_aio.$k.0 >> $seqres.full 2>&1
-	    done
-	    for ((k=1; k <= NUM_JOBS; k++))
-	    do
-		$XFS_IO_PROG -c "truncate  0" \
-			$SCRATCH_MNT/direct_aio.$k.0 >> $seqres.full 2>&1
-	    done
-	    # Following like will check that pid is still run.
-	    # Once fio exit we can stop fallocate/truncate loop
-	    pgrep -f "$FIO_PROG" > /dev/null 2>&1 || break
-	done
-	wait $pid
-}
+iQIcBAEBAgAGBQJYCH/3AAoJEK3oKUf0dfodyy8QAJqskxom1OhqLjYbUPJQ6LV6
+8K0Vx/l8HVYaJNKkJYJQSorQoj5w9mdvqd/0OhvsdeJg6lOcl3elOqudvr3rlZEv
+4DjoOLfc/ko+QUri/lL7kCUoxkmtmgsVZOrB6US7cKehu3NuchPbHMSwEcy8INDb
+2G6NyM3l6/cH7nkNHArQl4GFrP40O8ZjfNdiYsENRtZa1RaXtg0aJPMqJrVFHNAa
+ba5WQDJijdpN9AuieD7CjByXBFBTV9oGJDvlLQVwIBZfN5TmE8iUhX1BAk/EZIai
+ryRaRxcp37Zu8R4+b0ZLsuLYBHy8M+ipRTExNp1BNrndatumvPvjjjCeenyZCsPm
+gyOOMhTjQiBYnsEXDCoQ09UCqOnWdfanm9Ja4OsuTiAPkRTHEGK1nj+9yrArubBW
+zMYGVUJgwo5STnOd8Yw6dOFNPIBWAm4h1Jf7+y5dLgnscPw1xQDu+3vx4gXfTRFh
+0zgEQn/zc4QOMgAz6fDXuraAQ3VghnDB6oDtPADKZW0+0ayQgn+3eVJeqtU47kXL
+CMd/5STrmmLLhNWYM9SsyhS48rA5UfTB62jByks9Fk4AbVO+rzXPk/CyZuW41Nbg
+CwhZfMnJ/5q+NA+s5DzDNHRuASdhHWg0EJnYXtO7lNOvGh+M6uclxeig77Ne6z/t
+avS0xxDadOBT68pRO7NG
+=5ctY
+-----END PGP SIGNATURE-----
 
-So what's happening is that generic/299 is looping in the
-fallocate/truncate loop until fio exits, but since fio never exits, so
-it ends up looping forever.
-
-Cheers,
-
-					- Ted
-
+--jKBxcB1XkHIR0Eqt--
