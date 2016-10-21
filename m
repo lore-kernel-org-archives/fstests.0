@@ -1,54 +1,97 @@
-Received: from imap.thunk.org ([74.207.234.97]:39360 "EHLO imap.thunk.org"
+Received: from mout.gmx.net ([212.227.15.19]:59697 "EHLO mout.gmx.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750800AbcJYCy7 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 24 Oct 2016 22:54:59 -0400
-Date: Mon, 24 Oct 2016 22:54:56 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: Test generic/299 stalling forever
-Message-ID: <20161025025456.bbruxu4lg25773sl@thunk.org>
-References: <7856791a-0795-9183-6057-6ce8fd0e3d58@fb.com>
- <30fef8cd-67cc-da49-77d9-9d1a833f8a48@fb.com>
- <20161019203233.mbbmskpn5ekgl7og@thunk.org>
- <1fb60e7c-a558-80df-09da-d3c36863a461@fb.com>
- <20161021221551.sdv4hgw33zjxnkvu@thunk.org>
- <53fe5a98-6ff9-4fa1-e84c-8a3e16cc0f50@fb.com>
- <20161023193320.rlzlaxdi4vbyu7of@thunk.org>
- <20161023212408.cjqmnzw3547ujzil@thunk.org>
- <20161024033852.quinlee4a24mb2e2@thunk.org>
- <773e0780-6641-ec85-5e78-d04e5a82d6b1@fb.com>
+        id S1754181AbcJUFyp (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 21 Oct 2016 01:54:45 -0400
+Subject: Re: About reflink len = 0 behavior
+References: <bedcb76a-4deb-bc0e-7a50-350a8a8db86f@cn.fujitsu.com>
+ <94d643cc-fa49-4b20-b265-55d50af15e47@cn.fujitsu.com>
+ <20161020154733.GA5436@vader> <20161021030005.GB5257@birch.djwong.org>
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Message-ID: <5c16132f-46ca-ddbc-c55d-18ec46c9eb7d@gmx.com>
+Date: Fri, 21 Oct 2016 13:54:16 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <773e0780-6641-ec85-5e78-d04e5a82d6b1@fb.com>
+In-Reply-To: <20161021030005.GB5257@birch.djwong.org>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Jens Axboe <axboe@fb.com>
-Cc: Dave Chinner <david@fromorbit.com>, linux-ext4@vger.kernel.org, fstests@vger.kernel.org, tarasov@vasily.name
+To: "Darrick J. Wong" <darrick.wong@oracle.com>, Omar Sandoval <osandov@osandov.com>
+Cc: Qu Wenruo <quwenruo@cn.fujitsu.com>, fstests@vger.kernel.org, btrfs <linux-btrfs@vger.kernel.org>, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Oct 24, 2016 at 10:28:14AM -0600, Jens Axboe wrote:
 
-> How about the below? Bump the timeout to 5 min, 1 min is a little on the
-> short side, we want normal error handling to be out of the way before
-> that happens. And additionally, break out if we have been marked as
-> reaped/exited, so we avoid grabbing the stat mutex again.
 
-Yep, that works.  I tried a test with just the second change:
+On 10/21/2016 11:00 AM, Darrick J. Wong wrote:
+> On Thu, Oct 20, 2016 at 08:47:33AM -0700, Omar Sandoval wrote:
+>> On Thu, Oct 20, 2016 at 03:50:46PM +0800, Qu Wenruo wrote:
+>>> Add cc to new xfs mail list.
+>>>
+>>>
+>>> At 10/20/2016 03:46 PM, Qu Wenruo wrote:
+>>>> Hi Darrick, xfs guys and btrfs guys.
+>>>>
+>>>> Although such question is quite late as reflink generic tests are in
+>>>> fstests for a long time, I'm still not sure what's the correct behavior
+>>>> for reflink len = 0.
+>
+> "reflink to the end of the source file" is the current behavior for both.
+>
+>>>> Test case generic/182 is causing different output between btrfs and xfs.
+>>>>
+>>>> For btrfs, dedupe will just return 0 and check nothing, while for xfs
+>>>> len == 0 means to check the whole file length.
+>>>>
+>>>> Both makes sense for me, for btrfs len = 0 behavior, it just follows
+>>>> read/write functions.
+>>>> And I assume xfs follows reflink behavior, when len is not specified,
+>>>> then reflink the length of src file.
+>
+> Yes.
+>
+>>>> But since it's a generic test, we need to unify the behavior.
+>>>>
+>>>> So, which one is the standard and which document should we follow for
+>>>> such behavior definition?
+>
+> <shrug> I suppose since it'll stop deduping at the first non-matching range,
+> there's not a lot of point in having "dedupe to wherever is the end of the
+> file" feature.
+>
+> (Also, if he hasn't already, I'm sure Christoph will point out that we
+> shouldn't really go changing the interface after the fact, even if the
+> interface was mostly undocumented and afaict not tested by anything like
+> xfstests for years...)
 
-> +		/*
-> +		 * If we took too long to shut down, the main thread could
-> +		 * already consider us reaped/exited. If that happens, break
-> +		 * out and clean up.
-> +		 */
-> +		if (td->runstate >= TD_EXITED)
-> +			break;
-> +
+Thanks for all the info.
 
-And that's sufficient to solve the problem.
+I think we should change btrfs behavior to follow the standard.
 
-Increasing the timeout to 5 minute also would be a good idea, so we
-can let the worker threads exit cleanly so the reported stats will be
-completely accurate.
+>
+>>>> Thanks,
+>>>> Qu
+>>
+>> Hey, Qu,
+>>
+>> I brought this up a few months back here [1], and I think the conclusion
+>> was that consistency with clone (so the XFS behavior) was probably what
+>> we wanted. I just forgot to follow up and figure out if it would break
+>> any userspace programs in a way that mattered (I doubt it).
+>
+> duperemove doesn't seem to send zero-byte dedupe requests.
 
-Thanks for your help in figuring out this long-standing problem!
+Then no problem to modify btrfs behavior then.
 
-       	   	     		     	  		- Ted
+Thanks,
+Qu
+>
+> --D
+>
+>>
+>> 1: http://marc.info/?l=linux-btrfs&m=146828374631829&w=2
+>>
+>> --
+>> Omar
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
