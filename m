@@ -1,67 +1,44 @@
-Received: from mx1.redhat.com ([209.132.183.28]:52848 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754076AbcJYHMY (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 25 Oct 2016 03:12:24 -0400
-Date: Tue, 25 Oct 2016 15:11:53 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] xfs/054: only filter ROOT_INO at the beginning
-Message-ID: <20161025071153.GS27776@eguan.usersys.redhat.com>
-References: <1477114796-19019-1-git-send-email-eguan@redhat.com>
- <20161025055016.GB14023@dastard>
+Received: from mail-pf0-f176.google.com ([209.85.192.176]:33304 "EHLO
+        mail-pf0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932372AbcJUUzV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 21 Oct 2016 16:55:21 -0400
+Received: by mail-pf0-f176.google.com with SMTP id 128so63042813pfz.0
+        for <fstests@vger.kernel.org>; Fri, 21 Oct 2016 13:55:21 -0700 (PDT)
+Date: Fri, 21 Oct 2016 13:55:18 -0700
+From: Eric Biggers <ebiggers@google.com>
+Subject: Re: [PATCH] [xfstests-bld] kvm-xfstests: forbid conflicting
+ specifications of FSTESTCFG
+Message-ID: <20161021205518.GC137744@google.com>
+References: <1474664172-84173-1-git-send-email-ebiggers@google.com>
+ <1474664172-84173-3-git-send-email-ebiggers@google.com>
+ <20160930222158.hlqvupjhdibjhiht@thunk.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161025055016.GB14023@dastard>
+In-Reply-To: <20160930222158.hlqvupjhdibjhiht@thunk.org>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
+To: Theodore Ts'o <tytso@mit.edu>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Oct 25, 2016 at 04:50:16PM +1100, Dave Chinner wrote:
-> On Sat, Oct 22, 2016 at 01:39:56PM +0800, Eryu Guan wrote:
-> > In the test ROOT_INO is filtered out or replaced, but if ROOT_INO is
-> > also 32, more "32"s are filtered or replaced than expected. This
-> > happens to me when testing 512B block size XFS and 1k block size CRC
-> > enabled XFS.
+On Fri, Sep 30, 2016 at 06:21:58PM -0400, Theodore Ts'o wrote:
+> On Fri, Sep 23, 2016 at 01:56:12PM -0700, Eric Biggers wrote:
+> > It was possible to run kvm-xfstests with arguments like '-c encrypt
+> > smoke', in which case FSTESTCFG ended up set to "4k" because 'smoke'
+> > implies '-c 4k' and the second config specification overrode the first.
+> > If the user tries something like this, fail with a helpful error message
+> > rather than proceeding with a configuration that likely wasn't intended.
 > > 
-> > Also the ROOT_INO should be the inode number of TEST_DIR not
-> > SCRATCH_MNT.
-> > 
-> > Signed-off-by: Eryu Guan <eguan@redhat.com>
-> > ---
-> >  tests/xfs/054 | 14 +++++++-------
-> >  1 file changed, 7 insertions(+), 7 deletions(-)
-> > 
-> > diff --git a/tests/xfs/054 b/tests/xfs/054
-> > index 7d08f8a..578b752 100755
-> > --- a/tests/xfs/054
-> > +++ b/tests/xfs/054
-> > @@ -52,13 +52,13 @@ _require_test
-> >  _require_xfs_io_command "inode"
-> >  
-> >  # We know the root inode is there
-> > -ROOT_INO=`ls -id $SCRATCH_MNT | awk '{print $1}'`
-> > +ROOT_INO=`ls -id $TEST_DIR | awk '{print $1}'`
-> >  
-> >  touch $TEST_DIR/file
-> >  
-> >  $XFS_IO_PROG -c "inode"       $TEST_DIR/file
-> >  $XFS_IO_PROG -c "inode -v"    $TEST_DIR/file | \
-> > -		grep -vw $ROOT_INO | sed -e s/.*:/LAST:/g
-> > +		grep -vw "^$ROOT_INO" | sed -e s/.*:/LAST:/g
+> > Signed-off-by: Eric Biggers <ebiggers@google.com>
 > 
-> So all of these sed expressions have the modifier "/g" on
-> them, which means "replace every matching occurrence on the line".
-> If all we want to do is replace the first match, then we should be
-> dropping the "g" modifier from the sed expressions...
+> Applie,d thanks.
+> 
+> 					- Ted
 
-I thought about this too, but it only works for "replace" in sed, not
-for the "grep -vw" part. One of the problems here is that "grep -vw" is
-filtering out more lines, so adding "^" is still needed for grep.
+Hi Ted,
 
-OTOH, all the "g" modifiers in this test seem not necessary to me, I'll
-remove all "g"s in v2.
+Are you planning to push out new commits to the public xfstests-bld repository?
 
-Thanks for the review!
+Thanks,
 
-Eryu
+Eric
