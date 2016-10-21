@@ -1,80 +1,79 @@
-Received: from mx1.redhat.com ([209.132.183.28]:53110 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752060AbcJZJr1 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 26 Oct 2016 05:47:27 -0400
-Date: Wed, 26 Oct 2016 17:47:24 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: xfstests mount options?
-Message-ID: <20161026094724.GT27776@eguan.usersys.redhat.com>
-References: <20161024184611.GA83082@google.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:48861 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750715AbcJUDAS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 20 Oct 2016 23:00:18 -0400
+Date: Thu, 20 Oct 2016 20:00:05 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: About reflink len = 0 behavior
+Message-ID: <20161021030005.GB5257@birch.djwong.org>
+References: <bedcb76a-4deb-bc0e-7a50-350a8a8db86f@cn.fujitsu.com>
+ <94d643cc-fa49-4b20-b265-55d50af15e47@cn.fujitsu.com>
+ <20161020154733.GA5436@vader>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161024184611.GA83082@google.com>
+In-Reply-To: <20161020154733.GA5436@vader>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers@google.com>
-Cc: fstests@vger.kernel.org
+To: Omar Sandoval <osandov@osandov.com>
+Cc: Qu Wenruo <quwenruo@cn.fujitsu.com>, fstests@vger.kernel.org, btrfs <linux-btrfs@vger.kernel.org>, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Oct 24, 2016 at 11:46:11AM -0700, Eric Biggers wrote:
-> Hi,
+On Thu, Oct 20, 2016 at 08:47:33AM -0700, Omar Sandoval wrote:
+> On Thu, Oct 20, 2016 at 03:50:46PM +0800, Qu Wenruo wrote:
+> > Add cc to new xfs mail list.
+> > 
+> > 
+> > At 10/20/2016 03:46 PM, Qu Wenruo wrote:
+> > > Hi Darrick, xfs guys and btrfs guys.
+> > > 
+> > > Although such question is quite late as reflink generic tests are in
+> > > fstests for a long time, I'm still not sure what's the correct behavior
+> > > for reflink len = 0.
+
+"reflink to the end of the source file" is the current behavior for both.
+
+> > > Test case generic/182 is causing different output between btrfs and xfs.
+> > > 
+> > > For btrfs, dedupe will just return 0 and check nothing, while for xfs
+> > > len == 0 means to check the whole file length.
+> > > 
+> > > Both makes sense for me, for btrfs len = 0 behavior, it just follows
+> > > read/write functions.
+> > > And I assume xfs follows reflink behavior, when len is not specified,
+> > > then reflink the length of src file.
+
+Yes.
+
+> > > But since it's a generic test, we need to unify the behavior.
+> > > 
+> > > So, which one is the standard and which document should we follow for
+> > > such behavior definition?
+
+<shrug> I suppose since it'll stop deduping at the first non-matching range,
+there's not a lot of point in having "dedupe to wherever is the end of the
+file" feature.
+
+(Also, if he hasn't already, I'm sure Christoph will point out that we
+shouldn't really go changing the interface after the fact, even if the
+interface was mostly undocumented and afaict not tested by anything like
+xfstests for years...)
+
+> > > Thanks,
+> > > Qu
 > 
-> When starting xfstests without $TEST_DEV mounted, it mounts it using this
-> command in _test_mount, called from init_rc:
+> Hey, Qu,
 > 
->     _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
+> I brought this up a few months back here [1], and I think the conclusion
+> was that consistency with clone (so the XFS behavior) was probably what
+> we wanted. I just forgot to follow up and figure out if it would break
+> any userspace programs in a way that mattered (I doubt it).
 
-In my understanding, TEST_FS_MOUNT_OPTS is used for TEST_DEV, as
-MOUNT_OPTIONS is used for SCRATCH_DEV.
+duperemove doesn't seem to send zero-byte dedupe requests.
 
-Looking through the git history, TEST_FS_MOUNT_OPTS was introduced by
-commit ab526a6 in 2006 without any documents. It replaced MOUNT_OPTIONS
-in _test_mount(). So I think its intention is used as mount options for
-TEST_DEV.
+--D
 
 > 
-> This is also used by _test_cycle_mount, which some tests use.
+> 1: http://marc.info/?l=linux-btrfs&m=146828374631829&w=2
 > 
-> This is inconsistent with the later code in _check_generic_filesystem, called
-> after each test, which remounts $TEST_DEV:
-> 
->     _mount_or_remount_rw "$MOUNT_OPTIONS" $device $mountpoint
-
-_check_generic_filesystem is used in both _check_test_fs() and
-_check_scratch_fs(), I think it should use different mount options based
-on which device it's checking, not use MOUNT_OPTIONS always.
-
-And there's another inconsistency in _require_test()
-
-	out=`_mount_or_remount_rw "$MOUNT_OPTIONS" $TEST_DEV $TEST_DIR`
-
-We should use TEST_FS_MOUNT_OPTS here, because we know we're working on
-TEST_DEV in this function.
-
-> 
-> It is possible to have mount options in $MOUNT_OPTIONS which then are *not*
-> included in the options that _test_mount uses.
-> 
-> $TEST_FS_MOUNT_OPTS is also very strange in that it only appears to ever be set
-> when testing CIFS.
-
-Only CIFS set both TEST_FS_MOUNT_OPTS and MOUNT_OPTIONS to
-CIFS_MOUNT_OPTIONS, that means for cifs it's not possible to use
-different mount options for TEST_DEV and SCRATCH_DEV if you have
-CIFS_MOUNT_OPTIONS set.
-
-Thanks,
-Eryu
-
-> 
-> Which version of the test device mount options is correct?  Is it documented
-> anywhere what is the correct way to configure the mount options used by
-> xfstests?
-> 
-> Thanks,
-> 
-> Eric
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> -- 
+> Omar
