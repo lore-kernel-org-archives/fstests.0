@@ -1,264 +1,128 @@
-Received: from cn.fujitsu.com ([222.73.24.84]:14216 "EHLO song.cn.fujitsu.com"
-        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-        id S1750720AbcJZJ6r (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 26 Oct 2016 05:58:47 -0400
-From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
-Subject: [PATCH v3] generic: make 17[1-4] work well when btrfs compression is enabled
-Date: Wed, 26 Oct 2016 17:52:11 +0800
-Message-Id: <20161026095211.30091-1-wangxg.fnst@cn.fujitsu.com>
-MIME-Version: 1.0
+Received: from mx1.redhat.com ([209.132.183.28]:49920 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S934425AbcJVQl6 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 22 Oct 2016 12:41:58 -0400
+Message-Id: <201610221641.u9MGfuwW021272@int-mx13.intmail.prod.int.phx2.redhat.com>
+Date: Sun, 23 Oct 2016 00:41:55 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: [GIT PULL] fstests: updates on 2016-10-22
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-When enabling btrfs compression, original codes can not fill fs
-correctly, here we introduce _fill_fs() in common/rc, which'll keep
-creating and writing files until enospc error occurs. Note _fill_fs
-is copied from tests/generic/256, but with some minor modifications.
+Hi Dave,
 
-Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
----
-V2: In common/, I did't find an existing function suitable for
-    these 4 test cases to fill fs, so I still use _pwrite_byte() with
-    a big enough file length fo fill fs. Note, for btrfs, metadata space
-    still is not full, only data space is full, but it's OK for these
-    4 test cases.
+Can you please pull the fstests update from the location below? After this
+update, xfs_io is run with -i option if supported. There're also more fixes for
+rmap/reflink tests and a generic test.
 
-    All these 4 cases pass in xfs and btrfs(without compression), if
-    btrfs has compression enabled, these 4 cases will fail for false
-    enospc error, I have sent kernel patches to fix this bug.
+New failure I noticed in this update:
+- generic/389 fails due to xfs_io bug when handling -m option
 
-V3: Introduce  _fill_fs in common/rc to fill fs.
----
- common/rc         | 50 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/171 |  4 +---
- tests/generic/172 |  4 ++--
- tests/generic/173 |  4 +---
- tests/generic/174 |  4 +---
- tests/generic/256 | 65 +++++--------------------------------------------------
- 6 files changed, 60 insertions(+), 71 deletions(-)
+Thanks,
+Eryu
 
-diff --git a/common/rc b/common/rc
-index 7a9fc90..0e1ac5d 100644
---- a/common/rc
-+++ b/common/rc
-@@ -4003,6 +4003,56 @@ _require_xfs_mkfs_without_validation()
- 	fi
- }
- 
-+# Fill a file system by repeatedly creating files in the given folder
-+# starting with the given file size.  Files are reduced in size when
-+# they can no longer fit until no more files can be created.
-+_fill_fs()
-+{
-+	local file_size=$1
-+	local dir=$2
-+	local block_size=$3
-+	local switch_user=$4
-+	local file_count=1
-+	local bytes_written=0
-+
-+	if [ $# -ne 4 ]; then
-+		echo "Usage: _fill_fs filesize dir blocksize"
-+		exit 1
-+	fi
-+
-+	if [ $switch_user -eq 0 ]; then
-+		mkdir -p $dir
-+	else
-+		_user_do "mkdir -p $dir"
-+	fi
-+
-+	if [ $file_size -lt $block_size ]; then
-+		$file_size = $block_size
-+	fi
-+
-+	while [ $file_size -ge $block_size ]; do
-+		bytes_written=0
-+		if [ $switch_user -eq 0 ]; then
-+			$XFS_IO_PROG -f -c "pwrite 0 $file_size" \
-+				$dir/$file_count > /dev/null
-+		else
-+			_user_do "$XFS_IO_PROG -f -c \"pwrite 0 $file_size\" \
-+				$dir/$file_count > /dev/null"
-+		fi
-+
-+		if [ -f $dir/$file_count ]; then
-+			bytes_written=$(stat -c '%s' $dir/$file_count)
-+		fi
-+
-+		# If there was no room to make the file, then divide it in
-+		# half, and keep going
-+		if [ $bytes_written -lt $file_size ]; then
-+			file_size=$((file_size / 2))
-+		fi
-+		file_count=$((file_count + 1))
-+	done
-+}
-+
- init_rc
- 
- ################################################################################
-diff --git a/tests/generic/171 b/tests/generic/171
-index a69f798..fde8ef2 100755
---- a/tests/generic/171
-+++ b/tests/generic/171
-@@ -75,9 +75,7 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
- sync
- 
- echo "Allocate the rest of the space"
--nr_free=$(stat -f -c '%f' $testdir)
--touch $testdir/file0 $testdir/file1
--_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
-+_fill_fs $((32 * 1024 * 1024)) $testdir/space $blksz 0 >> $seqres.full 2>&1
- sync
- 
- echo "CoW the big file"
-diff --git a/tests/generic/172 b/tests/generic/172
-index 8192290..3625546 100755
---- a/tests/generic/172
-+++ b/tests/generic/172
-@@ -57,6 +57,7 @@ testdir=$SCRATCH_MNT/test-$seq
- mkdir $testdir
- 
- echo "Reformat with appropriate size"
-+blksz="$(get_block_size $testdir)"
- umount $SCRATCH_MNT
- 
- file_size=$((168 * 1024 * 1024))
-@@ -72,8 +73,7 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
- sync
- 
- echo "Allocate the rest of the space"
--touch $testdir/file0 $testdir/file1
--_pwrite_byte 0x61 0 $fs_size $testdir/eat_my_space >> $seqres.full 2>&1
-+_fill_fs $((32 * 1024 * 1024)) $testdir/space $blksz 0 >> $seqres.full 2>&1
- sync
- 
- echo "CoW the big file"
-diff --git a/tests/generic/173 b/tests/generic/173
-index e35597f..3d583b1 100755
---- a/tests/generic/173
-+++ b/tests/generic/173
-@@ -75,9 +75,7 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
- sync
- 
- echo "Allocate the rest of the space"
--nr_free=$(stat -f -c '%f' $testdir)
--touch $testdir/file0 $testdir/file1
--_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
-+_fill_fs $((32 * 1024 * 1024)) $testdir/space $blksz 0 >> $seqres.full 2>&1
- sync
- 
- echo "mmap CoW the big file"
-diff --git a/tests/generic/174 b/tests/generic/174
-index e58d64b..bd7fc11 100755
---- a/tests/generic/174
-+++ b/tests/generic/174
-@@ -76,9 +76,7 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
- sync
- 
- echo "Allocate the rest of the space"
--nr_free=$(stat -f -c '%f' $testdir)
--touch $testdir/file0 $testdir/file1
--_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
-+_fill_fs $((32 * 1024 * 1024)) $testdir/space $blksz 0 >> $seqres.full 2>&1
- sync
- 
- echo "CoW the big file"
-diff --git a/tests/generic/256 b/tests/generic/256
-index cfbf790..9488648 100755
---- a/tests/generic/256
-+++ b/tests/generic/256
-@@ -53,64 +53,6 @@ _require_test
- 
- testfile=$TEST_DIR/256.$$
- 
--# _fill_fs()
--#
--# Fills a file system by repeatedly creating files in the given folder
--# starting with the given file size.  Files are reduced in size when
--# they can no longer fit untill no more files can be created.
--#
--# This routine is used by _test_full_fs_punch to test that a hole may
--# still be punched when the disk is full by borrowing reserved blocks.
--# All files are created as a non root user to prevent reserved blocks
--# from being consumed.
--#
--_fill_fs() {
--	local file_size=$1
--	local dir=$2
--	local block_size=$3
--	local file_count=1
--	local bytes_written=0
--
--	if [ $# -ne 3 ]
--	then
--		echo "USAGE: _fill_fs filesize dir block size"
--		exit 1
--	fi
--
--	# Creation of files or folders
--	# must not be done as root or
--	# reserved blocks will be consumed
--	_user_do "mkdir -p $dir &> /dev/null"
--	if [ $? -ne 0 ] ; then
--		return 0
--	fi
--
--	if [ $file_size -lt $block_size ]
--	then
--		$file_size = $block_size
--	fi
--
--	while [ $file_size -ge $block_size ]
--	do
--		bytes_written=0
--		_user_do "$XFS_IO_PROG -f -c \"pwrite 0 $file_size\" $dir/$file_count.bin &> /dev/null"
--
--		if [ -f $dir/$file_count.bin ]
--		then
--			bytes_written=`$XFS_IO_PROG -c "stat"  $dir/$file_count.bin | grep stat.size | cut -d ' ' -f3`
--		fi
--
--		# If there was no room to make the file,
--		# then divide it in half, and keep going
--		if [ $bytes_written -lt $file_size ]
--		then
--			file_size=$(( $file_size / 2 ))
--		fi
--		file_count=$(( $file_count + 1 ))
--
--	done
--}
--
- # _test_full_fs_punch()
- #
- # This function will test that a hole may be punched
-@@ -144,7 +86,10 @@ _test_full_fs_punch()
- 		-c "fsync" $file_name &> /dev/null
- 	chmod 666 $file_name
- 
--	_fill_fs $(( 1024 * 1024 * 1024 )) $path/fill $block_size
-+	# All files are created as a non root user to prevent reserved blocks
-+	# from being consumed.
-+	_fill_fs $(( 1024 * 1024 * 1024 )) $path/fill $block_size 1 \
-+		> /dev/null 2>&1
- 
- 	for (( i=0; i<$iterations; i++ ))
- 	do
-@@ -159,7 +104,7 @@ _test_full_fs_punch()
- 
- 		hole_offset=$(( $hole_offset + $hole_len + $hole_interval ))
- 
--		_fill_fs $hole_len $path/fill.$i $block_size
-+		_fill_fs $hole_len $path/fill.$i $block_size 1 > /dev/null 2>&1
- 
- 	done
- }
--- 
-2.9.0
+The following changes since commit 16ef0843f2122deaf9845833ae73f60c67862aa4:
 
+  xfs/122: remove dead code (2016-10-14 10:05:34 +0800)
 
+are available in the git repository at:
 
+  https://github.com/guaneryu/xfstests.git for-dave
+
+for you to fetch changes up to 31db182a1c107e2e5e230ea715908a3b693e17c8:
+
+  generic/314: remove from acl group (2016-10-22 10:56:12 +0800)
+
+----------------------------------------------------------------
+
+fstests: update on 2016-10-22
+
+This update contains:
+o Add -i option to xfs_io command if supported
+o New generic test
+o More fixes to reflink tests and xfs_db usage
+
+----------------------------------------------------------------
+Amir Goldstein (6):
+      fstests: fix call sites that used xfs_io directly
+      fstests: strip quotes from "$XFS_IO_PROG" call sites
+      fstests: run xfs_io with -i option if supported
+      t_truncate_self: describe self better in error message
+      overlay/013: fix bug in test_upper creation
+      overlay/013: adjust test expectation to kernel v4.8
+
+Andreas Gruenbacher (1):
+      generic: Check linking O_TMPFILE into namespace with POSIX ACLs
+
+Darrick J. Wong (3):
+      xfs: set the refcount btree cowflag when setting up cow
+      fstests: fix fallocate commands that need the unshare switch
+      xfs: fix more xfs_db open-coding instances
+
+Eric Biggers (1):
+      generic/314: remove from acl group
+
+Xiao Yang (1):
+      xfs: remove the device parameter from __populate_check_xfs_dir
+
+ common/quota          |  4 +--
+ common/rc             | 21 ++++++++++-----
+ common/reflink        | 26 +++++++++----------
+ src/t_truncate_self.c |  7 +++--
+ tests/generic/043     |  2 +-
+ tests/generic/044     |  4 +--
+ tests/generic/045     |  4 +--
+ tests/generic/046     |  4 +--
+ tests/generic/047     |  2 +-
+ tests/generic/048     |  2 +-
+ tests/generic/049     |  2 +-
+ tests/generic/156     | 16 +++++-------
+ tests/generic/176     |  2 +-
+ tests/generic/224     |  4 +--
+ tests/generic/264     |  4 +--
+ tests/generic/389     | 72 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/389.out |  6 +++++
+ tests/generic/group   |  3 ++-
+ tests/overlay/013     |  3 +--
+ tests/overlay/013.out |  2 +-
+ tests/xfs/004         |  2 +-
+ tests/xfs/007         |  8 +++---
+ tests/xfs/021         |  4 +--
+ tests/xfs/044         |  2 +-
+ tests/xfs/052         |  2 +-
+ tests/xfs/099         |  2 +-
+ tests/xfs/100         |  2 +-
+ tests/xfs/101         |  2 +-
+ tests/xfs/102         |  2 +-
+ tests/xfs/105         |  2 +-
+ tests/xfs/109         |  4 +--
+ tests/xfs/112         |  2 +-
+ tests/xfs/113         |  2 +-
+ tests/xfs/114         |  4 +--
+ tests/xfs/116         |  4 +--
+ tests/xfs/132         | 12 ++++-----
+ tests/xfs/136         |  6 ++---
+ tests/xfs/184         |  3 ++-
+ tests/xfs/190         |  4 +--
+ tests/xfs/192         |  3 ++-
+ tests/xfs/199         |  6 ++---
+ tests/xfs/200         |  3 ++-
+ tests/xfs/201         |  2 +-
+ tests/xfs/204         |  3 ++-
+ tests/xfs/229         |  2 +-
+ tests/xfs/250         |  2 +-
+ tests/xfs/278         | 16 ++++++------
+ tests/xfs/291         |  4 +--
+ tests/xfs/307         | 21 ++++++++-------
+ tests/xfs/308         | 21 ++++++++-------
+ tests/xfs/328         |  2 +-
+ tests/xfs/344         |  3 ++-
+ tests/xfs/345         |  3 ++-
+ tests/xfs/346         |  3 ++-
+ tests/xfs/347         |  3 ++-
+ 55 files changed, 226 insertions(+), 130 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
