@@ -1,88 +1,81 @@
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:55115 "EHLO
-        ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1754894AbcJTI1j (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 20 Oct 2016 04:27:39 -0400
-Received: from dave by dastard with local (Exim 4.80)
-        (envelope-from <david@fromorbit.com>)
-        id 1bx8hM-0005zx-3b
-        for fstests@vger.kernel.org; Thu, 20 Oct 2016 19:27:36 +1100
-Date: Thu, 20 Oct 2016 19:27:36 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: [ANNOUNCE] xfstests: master branch updated to 16ef0843f212
-Message-ID: <20161020082736.GK23194@dastard>
+Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:41834 "EHLO
+        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1754677AbcJWOdR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 23 Oct 2016 10:33:17 -0400
+Subject: Re: Test generic/299 stalling forever
+References: <20161012211407.GL23194@dastard>
+ <f1c80b32-9593-48e0-05e9-4c8b97380b49@fb.com>
+ <20161013021552.l6afs2k5tjcsfp2k@thunk.org>
+ <ffc283a7-58ef-66b9-3c5b-75703d24ea0d@fb.com>
+ <20161013231923.j2fidfbtzdp66x3t@thunk.org>
+ <20161018180107.fscbfm66yidwhey4@thunk.org>
+ <7856791a-0795-9183-6057-6ce8fd0e3d58@fb.com>
+ <30fef8cd-67cc-da49-77d9-9d1a833f8a48@fb.com>
+ <20161019203233.mbbmskpn5ekgl7og@thunk.org>
+ <1fb60e7c-a558-80df-09da-d3c36863a461@fb.com>
+ <20161021221551.sdv4hgw33zjxnkvu@thunk.org>
+From: Jens Axboe <axboe@fb.com>
+Message-ID: <53fe5a98-6ff9-4fa1-e84c-8a3e16cc0f50@fb.com>
+Date: Sun, 23 Oct 2016 08:32:49 -0600
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="jKBxcB1XkHIR0Eqt"
-Content-Disposition: inline
+In-Reply-To: <20161021221551.sdv4hgw33zjxnkvu@thunk.org>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Dave Chinner <david@fromorbit.com>, linux-ext4@vger.kernel.org, fstests@vger.kernel.org, tarasov@vasily.name
 List-ID: <fstests@vger.kernel.org>
 
+On 10/21/2016 04:15 PM, Theodore Ts'o wrote:
+> On Thu, Oct 20, 2016 at 08:22:00AM -0600, Jens Axboe wrote:
+>>> So what's happening is that generic/299 is looping in the
+>>> fallocate/truncate loop until fio exits, but since fio never exits, so
+>>> it ends up looping forever.
+>>
+>> I'm setting up the GCE now, I've had the tests running for about 24h now
+>> on another test box and haven't been able to trigger any hangs. I'll
+>> match your setup as closely as I can, hopefully that'll work.
+>
+> Any luck reproducing the problem?
+>
+> On Wed, Oct 19, 2016 at 08:06:44AM -0600, Jens Axboe wrote:
+>>
+>> I'll take a look today. I agree, this definitely looks like a fio
+>> bug. But not related to the mutex issue for the stat part, all verifier
+>> threads are waiting to be woken up, but the main thread is done.
+>>
+>
+> I was taking a closer look at this, and it does look ike it's related
+> to the stat_mutex.  The main thread (according to gdb) seems to be
+> stuck in this loop in backend.c line 1738 (in thread_main):
+>
+> 		do {
+> 			check_update_rusage(td);
+> 			if (!fio_mutex_down_trylock(stat_mutex))
+> 				break;
+> 			usleep(1000);   <----- line 1738
+> 		} while (1);
+>
+> So it looks like it's not able to grab the stat_mutex.  But I can't
+> figure out how the stat_mutex could be down.  None of the strack
+> traces seem to show that, and I've looked at all of the places where
+> stat_mutex is taken, and it doesn't look like stat_mutex should ever
+> be down for more than, say, a second?
+>
+> So as a temporary workaround, I'm considering adding a check to see if
+> we stay stuck in this loop for than a thousand times, and if so, print
+> an error to stderr and then call _exit(1), or maybe just break out two
+> levels by jumping to line 1778 at "td_set_runstate(td, TD_FINISHING)"
+> and just give up on the usage statistics (since for xfstests we really
+> don't care about the usage stats).
 
---jKBxcB1XkHIR0Eqt
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Very strange. Can you see who the owner is of stat_mutex->lock, that's
+the pthread_mutex_t they are sleeping on.
 
-Hi folks,
+For now, I'll apply the work-around you sent. I haven't been able to
+reproduce this, but knowing that it's the stat_mutex will allow me to
+better make up a test case to hit it.
 
-The master branch of the xfstests repository at:
+-- 
+Jens Axboe
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated.
-
-The new head of the master branch is commit:
-
-16ef0843f212 xfs/122: remove dead code
-
-New Commits:
-
-Eric Biggers (2):
-      [92846328baee] generic/375: test both regular file and directory
-      [8cfd58a5dbb9] generic/314: don't test SGID behavior after setfacl
-
-Eryu Guan (1):
-      [16ef0843f212] xfs/122: remove dead code
-
-Zorro Lang (1):
-      [8425118bff45] common/rc: use real device name in _sysfs_dev function
-
-
-Code Diffstat:
-
- common/rc             |  2 +-
- tests/generic/314     |  8 ++------
- tests/generic/314.out |  1 -
- tests/generic/375     | 54 ++++++++++++++++++++++++++++++++++-------------=
--------
- tests/generic/375.out |  8 ++++++++
- tests/xfs/122         |  4 ----
- 6 files changed, 45 insertions(+), 32 deletions(-)
---=20
-Dave Chinner
-david@fromorbit.com
-
---jKBxcB1XkHIR0Eqt
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJYCH/3AAoJEK3oKUf0dfodyy8QAJqskxom1OhqLjYbUPJQ6LV6
-8K0Vx/l8HVYaJNKkJYJQSorQoj5w9mdvqd/0OhvsdeJg6lOcl3elOqudvr3rlZEv
-4DjoOLfc/ko+QUri/lL7kCUoxkmtmgsVZOrB6US7cKehu3NuchPbHMSwEcy8INDb
-2G6NyM3l6/cH7nkNHArQl4GFrP40O8ZjfNdiYsENRtZa1RaXtg0aJPMqJrVFHNAa
-ba5WQDJijdpN9AuieD7CjByXBFBTV9oGJDvlLQVwIBZfN5TmE8iUhX1BAk/EZIai
-ryRaRxcp37Zu8R4+b0ZLsuLYBHy8M+ipRTExNp1BNrndatumvPvjjjCeenyZCsPm
-gyOOMhTjQiBYnsEXDCoQ09UCqOnWdfanm9Ja4OsuTiAPkRTHEGK1nj+9yrArubBW
-zMYGVUJgwo5STnOd8Yw6dOFNPIBWAm4h1Jf7+y5dLgnscPw1xQDu+3vx4gXfTRFh
-0zgEQn/zc4QOMgAz6fDXuraAQ3VghnDB6oDtPADKZW0+0ayQgn+3eVJeqtU47kXL
-CMd/5STrmmLLhNWYM9SsyhS48rA5UfTB62jByks9Fk4AbVO+rzXPk/CyZuW41Nbg
-CwhZfMnJ/5q+NA+s5DzDNHRuASdhHWg0EJnYXtO7lNOvGh+M6uclxeig77Ne6z/t
-avS0xxDadOBT68pRO7NG
-=5ctY
------END PGP SIGNATURE-----
-
---jKBxcB1XkHIR0Eqt--
