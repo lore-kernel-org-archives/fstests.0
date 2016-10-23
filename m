@@ -1,53 +1,108 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:17915 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1754246AbcJTHu6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 20 Oct 2016 03:50:58 -0400
-Subject: Re: About reflink len = 0 behavior
-References: <bedcb76a-4deb-bc0e-7a50-350a8a8db86f@cn.fujitsu.com>
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Message-ID: <94d643cc-fa49-4b20-b265-55d50af15e47@cn.fujitsu.com>
-Date: Thu, 20 Oct 2016 15:50:46 +0800
+Received: from imap.thunk.org ([74.207.234.97]:60968 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1756217AbcJWCCd (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 22 Oct 2016 22:02:33 -0400
+Date: Sat, 22 Oct 2016 22:02:28 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: Test generic/299 stalling forever
+Message-ID: <20161023020228.gf6lzfw2phca3ykp@thunk.org>
+References: <f1c80b32-9593-48e0-05e9-4c8b97380b49@fb.com>
+ <20161013021552.l6afs2k5tjcsfp2k@thunk.org>
+ <ffc283a7-58ef-66b9-3c5b-75703d24ea0d@fb.com>
+ <20161013231923.j2fidfbtzdp66x3t@thunk.org>
+ <20161018180107.fscbfm66yidwhey4@thunk.org>
+ <7856791a-0795-9183-6057-6ce8fd0e3d58@fb.com>
+ <30fef8cd-67cc-da49-77d9-9d1a833f8a48@fb.com>
+ <20161019203233.mbbmskpn5ekgl7og@thunk.org>
+ <1fb60e7c-a558-80df-09da-d3c36863a461@fb.com>
+ <20161021221551.sdv4hgw33zjxnkvu@thunk.org>
 MIME-Version: 1.0
-In-Reply-To: <bedcb76a-4deb-bc0e-7a50-350a8a8db86f@cn.fujitsu.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20161021221551.sdv4hgw33zjxnkvu@thunk.org>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests@vger.kernel.org, btrfs <linux-btrfs@vger.kernel.org>, linux-xfs@vger.kernel.org
+To: Jens Axboe <axboe@fb.com>
+Cc: Dave Chinner <david@fromorbit.com>, linux-ext4@vger.kernel.org, fstests@vger.kernel.org, tarasov@vasily.name
 List-ID: <fstests@vger.kernel.org>
 
-Add cc to new xfs mail list.
+On Fri, Oct 21, 2016 at 06:15:51PM -0400, Theodore Ts'o wrote:
+> I was taking a closer look at this, and it does look ike it's related
+> to the stat_mutex.  The main thread (according to gdb) seems to be
+> stuck in this loop in backend.c line 1738 (in thread_main):
+> 
+> 		do {
+> 			check_update_rusage(td);
+> 			if (!fio_mutex_down_trylock(stat_mutex))
+> 				break;
+> 			usleep(1000);   <----- line 1738
+> 		} while (1);
 
+So I have something very strange to report.  I sync'ed up to the
+latest fio repo, at commit e291cff14e97feb3cf.  The problem still
+manifests with that commit.  Given what I've observed with a thread
+spinning in this do loop, I added this commit:
 
-At 10/20/2016 03:46 PM, Qu Wenruo wrote:
-> Hi Darrick, xfs guys and btrfs guys.
->
-> Although such question is quite late as reflink generic tests are in
-> fstests for a long time, I'm still not sure what's the correct behavior
-> for reflink len = 0.
->
-> Test case generic/182 is causing different output between btrfs and xfs.
->
-> For btrfs, dedupe will just return 0 and check nothing, while for xfs
-> len == 0 means to check the whole file length.
->
-> Both makes sense for me, for btrfs len = 0 behavior, it just follows
-> read/write functions.
-> And I assume xfs follows reflink behavior, when len is not specified,
-> then reflink the length of src file.
->
-> But since it's a generic test, we need to unify the behavior.
->
-> So, which one is the standard and which document should we follow for
-> such behavior definition?
->
-> Thanks,
-> Qu
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+commit 0f2f71f51595f6b708b801f7ae1dc86c5b2f3705
+Author: Theodore Ts'o <tytso@mit.edu>
+Date:   Sat Oct 22 10:32:41 2016 -0400
 
+    backend: if we can't grab stat_mutex, report a deadlock error and exit
+    
+    Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 
+diff --git a/backend.c b/backend.c
+index fb2a855..093b6a3 100644
+--- a/backend.c
++++ b/backend.c
+@@ -1471,6 +1471,7 @@ static void *thread_main(void *data)
+ 	struct thread_data *td = fd->td;
+ 	struct thread_options *o = &td->o;
+ 	struct sk_out *sk_out = fd->sk_out;
++	int deadlock_loop_cnt;
+ 	int clear_state;
+ 	int ret;
+ 
+@@ -1731,11 +1732,17 @@ static void *thread_main(void *data)
+ 		 * the rusage_sem, which would never get upped because
+ 		 * this thread is waiting for the stat mutex.
+ 		 */
++		deadlock_loop_cnt = 0;
+ 		do {
+ 			check_update_rusage(td);
+ 			if (!fio_mutex_down_trylock(stat_mutex))
+ 				break;
+ 			usleep(1000);
++			if (deadlock_loop_cnt++ > 5000) {
++				log_err("fio seems to be stuck grabbing stat_mutex, forcibly exiting\n");
++				td->error = EDEADLOCK;
++				goto err;
++			}
+ 		} while (1);
+ 
+ 		if (td_read(td) && td->io_bytes[DDIR_READ])
+
+With this commit, the fioe in the generic/299 test no longer hangs.
+I've tried running a very large time, and it no longer reproduces at
+all.  Specifically, the log_err() and the EDEADLOCK error added by the
+patch isn't triggering, and fio is no longer hanging.  So merely
+adding loop counter seems to make the problem go away.  Which makes me
+wonder if there is either some kind of compiler or code generation
+artifact we're seeing.  So I should mention which compiler I'm
+currently using:
+
+% schroot -c jessie64 -- gcc --version
+gcc (Debian 4.9.2-10) 4.9.2
+
+Anyway, I have a work around that seems to work for me, and which even
+if the deadlock_loop counter fires, will at least stop the test run
+from hanging.
+
+You may or may not want to include this in the fio upstream repo,
+given that I can't explain merely trying to check for the deadlock (or
+inability to grab the stat_mute, anyway) makes the deadlock go away.
+At least for the purposes of running the test, though, it does seem to
+be a valid workaround, though.
+
+Cheers,
+
+						- Ted
