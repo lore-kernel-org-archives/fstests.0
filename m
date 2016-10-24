@@ -1,32 +1,70 @@
-Received: from mx1.redhat.com ([209.132.183.28]:51810 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S965113AbcJTOgC (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 20 Oct 2016 10:36:02 -0400
-Date: Thu, 20 Oct 2016 22:35:59 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v3 2/3] fstests: strip quotes from "$XFS_IO_PROG" call
- sites
-Message-ID: <20161020143559.GK27776@eguan.usersys.redhat.com>
-References: <1476689014-384-1-git-send-email-amir73il@gmail.com>
- <1476689014-384-2-git-send-email-amir73il@gmail.com>
+Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:37710 "EHLO
+        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1752089AbcJXBlr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 23 Oct 2016 21:41:47 -0400
+Subject: Re: Test generic/299 stalling forever
+References: <ffc283a7-58ef-66b9-3c5b-75703d24ea0d@fb.com>
+ <20161013231923.j2fidfbtzdp66x3t@thunk.org>
+ <20161018180107.fscbfm66yidwhey4@thunk.org>
+ <7856791a-0795-9183-6057-6ce8fd0e3d58@fb.com>
+ <30fef8cd-67cc-da49-77d9-9d1a833f8a48@fb.com>
+ <20161019203233.mbbmskpn5ekgl7og@thunk.org>
+ <1fb60e7c-a558-80df-09da-d3c36863a461@fb.com>
+ <20161021221551.sdv4hgw33zjxnkvu@thunk.org>
+ <53fe5a98-6ff9-4fa1-e84c-8a3e16cc0f50@fb.com>
+ <20161023193320.rlzlaxdi4vbyu7of@thunk.org>
+ <20161023212408.cjqmnzw3547ujzil@thunk.org>
+From: Jens Axboe <axboe@fb.com>
+Message-ID: <a0243502-fafe-66f3-9ca1-41cc3048bece@fb.com>
+Date: Sun, 23 Oct 2016 19:41:19 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1476689014-384-2-git-send-email-amir73il@gmail.com>
+In-Reply-To: <20161023212408.cjqmnzw3547ujzil@thunk.org>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Dave Chinner <david@fromorbit.com>, Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Dave Chinner <david@fromorbit.com>, linux-ext4@vger.kernel.org, fstests@vger.kernel.org, tarasov@vasily.name
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Oct 17, 2016 at 10:23:33AM +0300, Amir Goldstein wrote:
-> The value of "$XFS_IO_PROG" may contain extra flags after the
-> binary path (e.g. -F), so it is wrong to use the variable inside
-> quotes in xfs_io execution call sites.
-> 
-> This bug surfaced while testing the new xfs_io -M flag.
-                                                ^^^ should be -i now? :)
+On 10/23/2016 03:24 PM, Theodore Ts'o wrote:
+> OK, perhaps this is helpful.  I reverted my last patch (so I could
+> repro the problem), and then added the following patch to fio/mutex.c
+> (see below).
+>
+> When it hung, I got the following stack trace on the main thread:
+>
+> (gdb) where
+> #0  0x00007ff8c018cf2d in nanosleep () at ../sysdeps/unix/syscall-template.S:81
+> #1  0x00007ff8c01b4fb4 in usleep (useconds=<optimized out>)
+>     at ../sysdeps/unix/sysv/linux/usleep.c:32
+>     #2  0x000000000045b691 in thread_main (data=0x1bc64000) at backend.c:1738
+>     #3  0x000000000045d623 in run_threads (sk_out=sk_out@entry=0x0) at backend.c:2268
+>     #4  0x000000000045d95d in fio_backend (sk_out=sk_out@entry=0x0) at backend.c:2400
+>     #5  0x000000000040cc18 in main (argc=2, argv=0x7fff8446f0d8, envp=<optimized out>) at fio.c:65
+>
+> .... and it looks like the reason why we can't take the mutex is that
+> somehow some thread managed to call stat_exit(), which calls
+> fio_mutex_down() followed by fio_mutex_remove():
+>
+> (gdb) p (void *) stat_mutex->owner
+> $4 = (void *) 0x42fd60 <stat_exit+16>
+>
+> How this could have happened, I have no idea.  The only call to
+> stat_exit() appears to be at the end of fio_backend(), and the main
+> thread is still in the middle of calling thread_main() which is called
+> by run_threads().
+>
+> Do you have any thoughts?  Let me know if there's something I can try.
 
-I can fix it at commit time.
+Wow, that is very odd. That should only be possible if the main thread
+exits too early, and calls stat_exit() while we still have jobs running.
+That should trigger other funkiness too. I have no idea how that is
+happening, but it obviously is since your debugging patch showed that
+stat_exit() owns the mutex.
 
-Thanks,
-Eryu
+But this gives me more to work from, very useul, thanks Ted! I'll pound
+on this tomorrow.
+
+-- 
+Jens Axboe
+
