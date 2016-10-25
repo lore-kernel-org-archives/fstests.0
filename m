@@ -1,44 +1,76 @@
-Received: from mail-pf0-f176.google.com ([209.85.192.176]:33304 "EHLO
-        mail-pf0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932372AbcJUUzV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 21 Oct 2016 16:55:21 -0400
-Received: by mail-pf0-f176.google.com with SMTP id 128so63042813pfz.0
-        for <fstests@vger.kernel.org>; Fri, 21 Oct 2016 13:55:21 -0700 (PDT)
-Date: Fri, 21 Oct 2016 13:55:18 -0700
-From: Eric Biggers <ebiggers@google.com>
-Subject: Re: [PATCH] [xfstests-bld] kvm-xfstests: forbid conflicting
- specifications of FSTESTCFG
-Message-ID: <20161021205518.GC137744@google.com>
-References: <1474664172-84173-1-git-send-email-ebiggers@google.com>
- <1474664172-84173-3-git-send-email-ebiggers@google.com>
- <20160930222158.hlqvupjhdibjhiht@thunk.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20160930222158.hlqvupjhdibjhiht@thunk.org>
+Received: from mx1.redhat.com ([209.132.183.28]:33288 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932522AbcJYNjP (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 25 Oct 2016 09:39:15 -0400
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH v2] xfs/054: only filter ROOT_INO at the beginning
+Date: Tue, 25 Oct 2016 21:38:49 +0800
+Message-Id: <1477402729-13934-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Sep 30, 2016 at 06:21:58PM -0400, Theodore Ts'o wrote:
-> On Fri, Sep 23, 2016 at 01:56:12PM -0700, Eric Biggers wrote:
-> > It was possible to run kvm-xfstests with arguments like '-c encrypt
-> > smoke', in which case FSTESTCFG ended up set to "4k" because 'smoke'
-> > implies '-c 4k' and the second config specification overrode the first.
-> > If the user tries something like this, fail with a helpful error message
-> > rather than proceeding with a configuration that likely wasn't intended.
-> > 
-> > Signed-off-by: Eric Biggers <ebiggers@google.com>
-> 
-> Applie,d thanks.
-> 
-> 					- Ted
+In the test ROOT_INO is filtered out and/or replaced, but if
+ROOT_INO is also 32, more "32"s are filtered and replaced than
+expected. This happens to me when testing 512B block size XFS and 1k
+block size CRC enabled XFS.
 
-Hi Ted,
+Fix it by filtering out only ROOT_INO at the beginning of a line,
+and removing all "g" modifiers in sed expressions.
 
-Are you planning to push out new commits to the public xfstests-bld repository?
+Also the ROOT_INO should be the root inode number of TEST_DIR not
+SCRATCH_MNT.
 
-Thanks,
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+v2:
+- remove all "g" modifiers in sed expressions
 
-Eric
+ tests/xfs/054 | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/tests/xfs/054 b/tests/xfs/054
+index 7d08f8a..57b49e7 100755
+--- a/tests/xfs/054
++++ b/tests/xfs/054
+@@ -52,13 +52,13 @@ _require_test
+ _require_xfs_io_command "inode"
+ 
+ # We know the root inode is there
+-ROOT_INO=`ls -id $SCRATCH_MNT | awk '{print $1}'`
++ROOT_INO=`ls -id $TEST_DIR | awk '{print $1}'`
+ 
+ touch $TEST_DIR/file
+ 
+ $XFS_IO_PROG -c "inode"       $TEST_DIR/file
+ $XFS_IO_PROG -c "inode -v"    $TEST_DIR/file | \
+-		grep -vw $ROOT_INO | sed -e s/.*:/LAST:/g
++		grep -vw "^$ROOT_INO" | sed -e s/.*:/LAST:/
+ 
+ #  These should fail, -n requires an inode
+ $XFS_IO_PROG -c "inode -n"    $TEST_DIR/file 2>&1 | grep -q Query \
+@@ -83,15 +83,15 @@ $XFS_IO_PROG -c "inode -n -v badnumber" $TEST_DIR/file | grep -q numeric \
+ # These should all work, and return $ROOT_INO or the next inode...
+ # grep out ROOT_INO (which is incorrect) when we should be getting next inode
+ $XFS_IO_PROG -c "inode       $ROOT_INO" $TEST_DIR/file | \
+-		sed -e s/$ROOT_INO/ROOT_INO/g
++		sed -e s/$ROOT_INO/ROOT_INO/
+ $XFS_IO_PROG -c "inode -v    $ROOT_INO" $TEST_DIR/file | \
+-		sed -e s/$ROOT_INO/ROOT_INO/g
++		sed -e s/$ROOT_INO/ROOT_INO/
+ $XFS_IO_PROG -c "inode -n    $ROOT_INO" $TEST_DIR/file | \
+-		grep -vw $ROOT_INO | sed -e s/.*/NEXT/g
++		grep -vw "^$ROOT_INO" | sed -e s/.*/NEXT/
+ $XFS_IO_PROG -c "inode -nv   $ROOT_INO" $TEST_DIR/file | \
+-		grep -vw $ROOT_INO | sed -e s/.*:/NEXT:/g
++		grep -vw "^$ROOT_INO" | sed -e s/.*:/NEXT:/
+ $XFS_IO_PROG -c "inode -n -v $ROOT_INO" $TEST_DIR/file | \
+-		grep -vw $ROOT_INO | sed -e s/.*:/NEXT:/g
++		grep -vw "^$ROOT_INO" | sed -e s/.*:/NEXT:/
+ 
+ # Try one that doesn't exist, 2^64-2?  Should get 0
+ $XFS_IO_PROG -c "inode       18446744073709551614" $TEST_DIR/file
+-- 
+2.7.4
+
