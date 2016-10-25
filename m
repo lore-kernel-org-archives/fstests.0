@@ -1,53 +1,61 @@
-Received: from bombadil.infradead.org ([198.137.202.9]:43059 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750884AbcJUKJO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 21 Oct 2016 06:09:14 -0400
-Date: Fri, 21 Oct 2016 03:09:11 -0700
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: About reflink len = 0 behavior
-Message-ID: <20161021100911.GA22612@infradead.org>
-References: <bedcb76a-4deb-bc0e-7a50-350a8a8db86f@cn.fujitsu.com>
- <94d643cc-fa49-4b20-b265-55d50af15e47@cn.fujitsu.com>
- <20161020154733.GA5436@vader>
- <20161021030005.GB5257@birch.djwong.org>
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:36977 "EHLO
+        ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S932696AbcJYFuU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 25 Oct 2016 01:50:20 -0400
+Date: Tue, 25 Oct 2016 16:50:16 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] xfs/054: only filter ROOT_INO at the beginning
+Message-ID: <20161025055016.GB14023@dastard>
+References: <1477114796-19019-1-git-send-email-eguan@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161021030005.GB5257@birch.djwong.org>
+In-Reply-To: <1477114796-19019-1-git-send-email-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Omar Sandoval <osandov@osandov.com>, Qu Wenruo <quwenruo@cn.fujitsu.com>, fstests@vger.kernel.org, btrfs <linux-btrfs@vger.kernel.org>, linux-xfs@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Oct 20, 2016 at 08:00:05PM -0700, Darrick J. Wong wrote:
-> > > > For btrfs, dedupe will just return 0 and check nothing, while for xfs
-> > > > len == 0 means to check the whole file length.
-> > > > 
-> > > > Both makes sense for me, for btrfs len = 0 behavior, it just follows
-> > > > read/write functions.
-> > > > And I assume xfs follows reflink behavior, when len is not specified,
-> > > > then reflink the length of src file.
+On Sat, Oct 22, 2016 at 01:39:56PM +0800, Eryu Guan wrote:
+> In the test ROOT_INO is filtered out or replaced, but if ROOT_INO is
+> also 32, more "32"s are filtered or replaced than expected. This
+> happens to me when testing 512B block size XFS and 1k block size CRC
+> enabled XFS.
 > 
-> Yes.
+> Also the ROOT_INO should be the inode number of TEST_DIR not
+> SCRATCH_MNT.
 > 
-> > > > But since it's a generic test, we need to unify the behavior.
-> > > > 
-> > > > So, which one is the standard and which document should we follow for
-> > > > such behavior definition?
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> ---
+>  tests/xfs/054 | 14 +++++++-------
+>  1 file changed, 7 insertions(+), 7 deletions(-)
 > 
-> <shrug> I suppose since it'll stop deduping at the first non-matching range,
-> there's not a lot of point in having "dedupe to wherever is the end of the
-> file" feature.
-> 
-> (Also, if he hasn't already, I'm sure Christoph will point out that we
-> shouldn't really go changing the interface after the fact, even if the
-> interface was mostly undocumented and afaict not tested by anything like
-> xfstests for years...)
+> diff --git a/tests/xfs/054 b/tests/xfs/054
+> index 7d08f8a..578b752 100755
+> --- a/tests/xfs/054
+> +++ b/tests/xfs/054
+> @@ -52,13 +52,13 @@ _require_test
+>  _require_xfs_io_command "inode"
+>  
+>  # We know the root inode is there
+> -ROOT_INO=`ls -id $SCRATCH_MNT | awk '{print $1}'`
+> +ROOT_INO=`ls -id $TEST_DIR | awk '{print $1}'`
+>  
+>  touch $TEST_DIR/file
+>  
+>  $XFS_IO_PROG -c "inode"       $TEST_DIR/file
+>  $XFS_IO_PROG -c "inode -v"    $TEST_DIR/file | \
+> -		grep -vw $ROOT_INO | sed -e s/.*:/LAST:/g
+> +		grep -vw "^$ROOT_INO" | sed -e s/.*:/LAST:/g
 
-Yes, I'd prefer to stick to the btrfs behavior when XFS follow their
-existing interface, unlesss said interface is clearly acknodged to be
-broken by the original developers.
+So all of these sed expressions have the modifier "/g" on
+them, which means "replace every matching occurrence on the line".
+If all we want to do is replace the first match, then we should be
+dropping the "g" modifier from the sed expressions...
 
-Now a 0 len as whole file sounds very useful, but I would prefer to get
-an explicit buying from the btrfs crowd, and have btrfs implement it
-properly first.
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
