@@ -1,75 +1,264 @@
-Received: from mx1.redhat.com ([209.132.183.28]:45774 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751678AbcJVFkO (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 22 Oct 2016 01:40:14 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 9816B624B4
-        for <fstests@vger.kernel.org>; Sat, 22 Oct 2016 05:40:13 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] xfs/054: only filter ROOT_INO at the beginning
-Date: Sat, 22 Oct 2016 13:39:56 +0800
-Message-Id: <1477114796-19019-1-git-send-email-eguan@redhat.com>
+Received: from cn.fujitsu.com ([222.73.24.84]:14216 "EHLO song.cn.fujitsu.com"
+        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+        id S1750720AbcJZJ6r (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 26 Oct 2016 05:58:47 -0400
+From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Subject: [PATCH v3] generic: make 17[1-4] work well when btrfs compression is enabled
+Date: Wed, 26 Oct 2016 17:52:11 +0800
+Message-Id: <20161026095211.30091-1-wangxg.fnst@cn.fujitsu.com>
+MIME-Version: 1.0
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-In the test ROOT_INO is filtered out or replaced, but if ROOT_INO is
-also 32, more "32"s are filtered or replaced than expected. This
-happens to me when testing 512B block size XFS and 1k block size CRC
-enabled XFS.
+When enabling btrfs compression, original codes can not fill fs
+correctly, here we introduce _fill_fs() in common/rc, which'll keep
+creating and writing files until enospc error occurs. Note _fill_fs
+is copied from tests/generic/256, but with some minor modifications.
 
-Also the ROOT_INO should be the inode number of TEST_DIR not
-SCRATCH_MNT.
-
-Signed-off-by: Eryu Guan <eguan@redhat.com>
+Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
 ---
- tests/xfs/054 | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
+V2: In common/, I did't find an existing function suitable for
+    these 4 test cases to fill fs, so I still use _pwrite_byte() with
+    a big enough file length fo fill fs. Note, for btrfs, metadata space
+    still is not full, only data space is full, but it's OK for these
+    4 test cases.
 
-diff --git a/tests/xfs/054 b/tests/xfs/054
-index 7d08f8a..578b752 100755
---- a/tests/xfs/054
-+++ b/tests/xfs/054
-@@ -52,13 +52,13 @@ _require_test
- _require_xfs_io_command "inode"
+    All these 4 cases pass in xfs and btrfs(without compression), if
+    btrfs has compression enabled, these 4 cases will fail for false
+    enospc error, I have sent kernel patches to fix this bug.
+
+V3: Introduce  _fill_fs in common/rc to fill fs.
+---
+ common/rc         | 50 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/171 |  4 +---
+ tests/generic/172 |  4 ++--
+ tests/generic/173 |  4 +---
+ tests/generic/174 |  4 +---
+ tests/generic/256 | 65 +++++--------------------------------------------------
+ 6 files changed, 60 insertions(+), 71 deletions(-)
+
+diff --git a/common/rc b/common/rc
+index 7a9fc90..0e1ac5d 100644
+--- a/common/rc
++++ b/common/rc
+@@ -4003,6 +4003,56 @@ _require_xfs_mkfs_without_validation()
+ 	fi
+ }
  
- # We know the root inode is there
--ROOT_INO=`ls -id $SCRATCH_MNT | awk '{print $1}'`
-+ROOT_INO=`ls -id $TEST_DIR | awk '{print $1}'`
++# Fill a file system by repeatedly creating files in the given folder
++# starting with the given file size.  Files are reduced in size when
++# they can no longer fit until no more files can be created.
++_fill_fs()
++{
++	local file_size=$1
++	local dir=$2
++	local block_size=$3
++	local switch_user=$4
++	local file_count=1
++	local bytes_written=0
++
++	if [ $# -ne 4 ]; then
++		echo "Usage: _fill_fs filesize dir blocksize"
++		exit 1
++	fi
++
++	if [ $switch_user -eq 0 ]; then
++		mkdir -p $dir
++	else
++		_user_do "mkdir -p $dir"
++	fi
++
++	if [ $file_size -lt $block_size ]; then
++		$file_size = $block_size
++	fi
++
++	while [ $file_size -ge $block_size ]; do
++		bytes_written=0
++		if [ $switch_user -eq 0 ]; then
++			$XFS_IO_PROG -f -c "pwrite 0 $file_size" \
++				$dir/$file_count > /dev/null
++		else
++			_user_do "$XFS_IO_PROG -f -c \"pwrite 0 $file_size\" \
++				$dir/$file_count > /dev/null"
++		fi
++
++		if [ -f $dir/$file_count ]; then
++			bytes_written=$(stat -c '%s' $dir/$file_count)
++		fi
++
++		# If there was no room to make the file, then divide it in
++		# half, and keep going
++		if [ $bytes_written -lt $file_size ]; then
++			file_size=$((file_size / 2))
++		fi
++		file_count=$((file_count + 1))
++	done
++}
++
+ init_rc
  
- touch $TEST_DIR/file
+ ################################################################################
+diff --git a/tests/generic/171 b/tests/generic/171
+index a69f798..fde8ef2 100755
+--- a/tests/generic/171
++++ b/tests/generic/171
+@@ -75,9 +75,7 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
+ sync
  
- $XFS_IO_PROG -c "inode"       $TEST_DIR/file
- $XFS_IO_PROG -c "inode -v"    $TEST_DIR/file | \
--		grep -vw $ROOT_INO | sed -e s/.*:/LAST:/g
-+		grep -vw "^$ROOT_INO" | sed -e s/.*:/LAST:/g
+ echo "Allocate the rest of the space"
+-nr_free=$(stat -f -c '%f' $testdir)
+-touch $testdir/file0 $testdir/file1
+-_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
++_fill_fs $((32 * 1024 * 1024)) $testdir/space $blksz 0 >> $seqres.full 2>&1
+ sync
  
- #  These should fail, -n requires an inode
- $XFS_IO_PROG -c "inode -n"    $TEST_DIR/file 2>&1 | grep -q Query \
-@@ -83,15 +83,15 @@ $XFS_IO_PROG -c "inode -n -v badnumber" $TEST_DIR/file | grep -q numeric \
- # These should all work, and return $ROOT_INO or the next inode...
- # grep out ROOT_INO (which is incorrect) when we should be getting next inode
- $XFS_IO_PROG -c "inode       $ROOT_INO" $TEST_DIR/file | \
--		sed -e s/$ROOT_INO/ROOT_INO/g
-+		sed -e s/^$ROOT_INO/ROOT_INO/g
- $XFS_IO_PROG -c "inode -v    $ROOT_INO" $TEST_DIR/file | \
--		sed -e s/$ROOT_INO/ROOT_INO/g
-+		sed -e s/^$ROOT_INO/ROOT_INO/g
- $XFS_IO_PROG -c "inode -n    $ROOT_INO" $TEST_DIR/file | \
--		grep -vw $ROOT_INO | sed -e s/.*/NEXT/g
-+		grep -vw "^$ROOT_INO" | sed -e s/.*/NEXT/g
- $XFS_IO_PROG -c "inode -nv   $ROOT_INO" $TEST_DIR/file | \
--		grep -vw $ROOT_INO | sed -e s/.*:/NEXT:/g
-+		grep -vw "^$ROOT_INO" | sed -e s/.*:/NEXT:/g
- $XFS_IO_PROG -c "inode -n -v $ROOT_INO" $TEST_DIR/file | \
--		grep -vw $ROOT_INO | sed -e s/.*:/NEXT:/g
-+		grep -vw "^$ROOT_INO" | sed -e s/.*:/NEXT:/g
+ echo "CoW the big file"
+diff --git a/tests/generic/172 b/tests/generic/172
+index 8192290..3625546 100755
+--- a/tests/generic/172
++++ b/tests/generic/172
+@@ -57,6 +57,7 @@ testdir=$SCRATCH_MNT/test-$seq
+ mkdir $testdir
  
- # Try one that doesn't exist, 2^64-2?  Should get 0
- $XFS_IO_PROG -c "inode       18446744073709551614" $TEST_DIR/file
+ echo "Reformat with appropriate size"
++blksz="$(get_block_size $testdir)"
+ umount $SCRATCH_MNT
+ 
+ file_size=$((168 * 1024 * 1024))
+@@ -72,8 +73,7 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
+ sync
+ 
+ echo "Allocate the rest of the space"
+-touch $testdir/file0 $testdir/file1
+-_pwrite_byte 0x61 0 $fs_size $testdir/eat_my_space >> $seqres.full 2>&1
++_fill_fs $((32 * 1024 * 1024)) $testdir/space $blksz 0 >> $seqres.full 2>&1
+ sync
+ 
+ echo "CoW the big file"
+diff --git a/tests/generic/173 b/tests/generic/173
+index e35597f..3d583b1 100755
+--- a/tests/generic/173
++++ b/tests/generic/173
+@@ -75,9 +75,7 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
+ sync
+ 
+ echo "Allocate the rest of the space"
+-nr_free=$(stat -f -c '%f' $testdir)
+-touch $testdir/file0 $testdir/file1
+-_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
++_fill_fs $((32 * 1024 * 1024)) $testdir/space $blksz 0 >> $seqres.full 2>&1
+ sync
+ 
+ echo "mmap CoW the big file"
+diff --git a/tests/generic/174 b/tests/generic/174
+index e58d64b..bd7fc11 100755
+--- a/tests/generic/174
++++ b/tests/generic/174
+@@ -76,9 +76,7 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
+ sync
+ 
+ echo "Allocate the rest of the space"
+-nr_free=$(stat -f -c '%f' $testdir)
+-touch $testdir/file0 $testdir/file1
+-_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
++_fill_fs $((32 * 1024 * 1024)) $testdir/space $blksz 0 >> $seqres.full 2>&1
+ sync
+ 
+ echo "CoW the big file"
+diff --git a/tests/generic/256 b/tests/generic/256
+index cfbf790..9488648 100755
+--- a/tests/generic/256
++++ b/tests/generic/256
+@@ -53,64 +53,6 @@ _require_test
+ 
+ testfile=$TEST_DIR/256.$$
+ 
+-# _fill_fs()
+-#
+-# Fills a file system by repeatedly creating files in the given folder
+-# starting with the given file size.  Files are reduced in size when
+-# they can no longer fit untill no more files can be created.
+-#
+-# This routine is used by _test_full_fs_punch to test that a hole may
+-# still be punched when the disk is full by borrowing reserved blocks.
+-# All files are created as a non root user to prevent reserved blocks
+-# from being consumed.
+-#
+-_fill_fs() {
+-	local file_size=$1
+-	local dir=$2
+-	local block_size=$3
+-	local file_count=1
+-	local bytes_written=0
+-
+-	if [ $# -ne 3 ]
+-	then
+-		echo "USAGE: _fill_fs filesize dir block size"
+-		exit 1
+-	fi
+-
+-	# Creation of files or folders
+-	# must not be done as root or
+-	# reserved blocks will be consumed
+-	_user_do "mkdir -p $dir &> /dev/null"
+-	if [ $? -ne 0 ] ; then
+-		return 0
+-	fi
+-
+-	if [ $file_size -lt $block_size ]
+-	then
+-		$file_size = $block_size
+-	fi
+-
+-	while [ $file_size -ge $block_size ]
+-	do
+-		bytes_written=0
+-		_user_do "$XFS_IO_PROG -f -c \"pwrite 0 $file_size\" $dir/$file_count.bin &> /dev/null"
+-
+-		if [ -f $dir/$file_count.bin ]
+-		then
+-			bytes_written=`$XFS_IO_PROG -c "stat"  $dir/$file_count.bin | grep stat.size | cut -d ' ' -f3`
+-		fi
+-
+-		# If there was no room to make the file,
+-		# then divide it in half, and keep going
+-		if [ $bytes_written -lt $file_size ]
+-		then
+-			file_size=$(( $file_size / 2 ))
+-		fi
+-		file_count=$(( $file_count + 1 ))
+-
+-	done
+-}
+-
+ # _test_full_fs_punch()
+ #
+ # This function will test that a hole may be punched
+@@ -144,7 +86,10 @@ _test_full_fs_punch()
+ 		-c "fsync" $file_name &> /dev/null
+ 	chmod 666 $file_name
+ 
+-	_fill_fs $(( 1024 * 1024 * 1024 )) $path/fill $block_size
++	# All files are created as a non root user to prevent reserved blocks
++	# from being consumed.
++	_fill_fs $(( 1024 * 1024 * 1024 )) $path/fill $block_size 1 \
++		> /dev/null 2>&1
+ 
+ 	for (( i=0; i<$iterations; i++ ))
+ 	do
+@@ -159,7 +104,7 @@ _test_full_fs_punch()
+ 
+ 		hole_offset=$(( $hole_offset + $hole_len + $hole_interval ))
+ 
+-		_fill_fs $hole_len $path/fill.$i $block_size
++		_fill_fs $hole_len $path/fill.$i $block_size 1 > /dev/null 2>&1
+ 
+ 	done
+ }
 -- 
-2.7.4
+2.9.0
+
+
 
