@@ -1,11 +1,11 @@
-Received: from synology.com ([59.124.61.242]:38196 "EHLO synology.com"
+Received: from synology.com ([59.124.61.242]:38195 "EHLO synology.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S965646AbcJ1BuD (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S964894AbcJ1BuD (ORCPT <rfc822;fstests@vger.kernel.org>);
         Thu, 27 Oct 2016 21:50:03 -0400
 From: robbieko <robbieko@synology.com>
-Subject: [PATCH v2 3/4] xfstests: btrfs/133: add test for incremental send with rmdir applied on wrong name
-Date: Fri, 28 Oct 2016 09:44:05 +0800
-Message-Id: <1477619046-16375-4-git-send-email-robbieko@synology.com>
+Subject: [PATCH v2 4/4] xfstests: btrfs/134: add test for incremental send which renames a directory already being deleted
+Date: Fri, 28 Oct 2016 09:44:06 +0800
+Message-Id: <1477619046-16375-5-git-send-email-robbieko@synology.com>
 In-Reply-To: <1477619046-16375-1-git-send-email-robbieko@synology.com>
 References: <1477619046-16375-1-git-send-email-robbieko@synology.com>
 Sender: fstests-owner@vger.kernel.org
@@ -15,34 +15,34 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Robbie Ko <robbieko@synology.com>
 
-Test that an incremental send operation doesn't work for rmdir
-because it uses the wrong name to delete.
+Test that an incremental send operation dosen't work because
+it tries to rename a directory which is already deleted.
 
 This test exercises scenarios used to fail in btrfs and are fixed by
 the following patch for the linux kernel:
 
-"Btrfs: incremental send, skip check overwritten if parents' generation are different"
+"Btrfs: incremental send, add generation check for inode is waiting for move."
 
 Signed-off-by: Robbie Ko <robbieko@synology.com>
 ---
- tests/btrfs/133     | 119 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/133.out |   2 +
+ tests/btrfs/134     | 120 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/134.out |   2 +
  tests/btrfs/group   |   1 +
- 3 files changed, 122 insertions(+)
- create mode 100755 tests/btrfs/133
- create mode 100644 tests/btrfs/133.out
+ 3 files changed, 123 insertions(+)
+ create mode 100755 tests/btrfs/134
+ create mode 100644 tests/btrfs/134.out
 
-diff --git a/tests/btrfs/133 b/tests/btrfs/133
+diff --git a/tests/btrfs/134 b/tests/btrfs/134
 new file mode 100755
-index 0000000..e516483
+index 0000000..64974a5
 --- /dev/null
-+++ b/tests/btrfs/133
-@@ -0,0 +1,119 @@
++++ b/tests/btrfs/134
+@@ -0,0 +1,120 @@
 +#! /bin/bash
-+# FS QA Test No. btrfs/133
++# FS QA Test No. btrfs/134
 +#
-+# Test that an incremental send operation doesn't work for rmdir
-+# because it uses the wrong name to delete.
++# Test that an incremental send operation dosen't work because
++# it tries to rename a directory which is already deleted.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (C) 2016 Synology Inc. All Rights Reserved.
@@ -98,18 +98,16 @@ index 0000000..e516483
 +_scratch_mkfs >>$seqres.full 2>&1
 +_scratch_mount
 +
-+touch $SCRATCH_MNT/f
 +mkdir $SCRATCH_MNT/d1
-+mkdir $SCRATCH_MNT/d259_old
-+mv $SCRATCH_MNT/d1 $SCRATCH_MNT/d259_old/d1
++mkdir $SCRATCH_MNT/d4
++mkdir $SCRATCH_MNT/d3
 +
 +# Filesystem looks like:
 +#
 +# .                                                             (ino 256)
-+# |--- f                                                        (ino 257)
-+# |
-+# |--- d259_old/                                                (ino 259)
-+# |    |--- d1/                                                 (ino 258)
++# |--- d1                                                       (ino 257)
++# |--- d4                                                       (ino 258)
++# |--- d3                                                       (ino 259)
 +#
 +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap1
 +
@@ -119,17 +117,20 @@ index 0000000..e516483
 +_scratch_mkfs >>$seqres.full 2>&1
 +_scratch_mount
 +mkdir $SCRATCH_MNT/d1
-+mkdir $SCRATCH_MNT/dir258
-+mkdir $SCRATCH_MNT/dir259
-+mv $SCRATCH_MNT/d1 $SCRATCH_MNT/dir259/d1
++mkdir $SCRATCH_MNT/d2
++mkdir $SCRATCH_MNT/d3
++mkdir $SCRATCH_MNT/d4
++mv $SCRATCH_MNT/d1 $SCRATCH_MNT/d3/d1
++mv $SCRATCH_MNT/d3 $SCRATCH_MNT/d4/d3
++mv $SCRATCH_MNT/d2 $SCRATCH_MNT/d1
 +
 +# Filesystem now looks like:
 +#
 +# .                                                             (ino 256)
-+# |--- dir258                                                   (ino 258)
-+# |
-+# |--- dir259/                                                  (ino 259)
-+# |    |--- d1/                                                 (ino 257)
++# |--- d1                                                       (ino 258)
++# |--- d4                                                       (ino 260)
++# |    |--- d3/                                                 (ino 259)
++# |    |    |--- d1/                                            (ino 257)
 +#
 +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap2
 +
@@ -157,23 +158,23 @@ index 0000000..e516483
 +echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/btrfs/133.out b/tests/btrfs/133.out
+diff --git a/tests/btrfs/134.out b/tests/btrfs/134.out
 new file mode 100644
-index 0000000..e914d62
+index 0000000..829c30e
 --- /dev/null
-+++ b/tests/btrfs/133.out
++++ b/tests/btrfs/134.out
 @@ -0,0 +1,2 @@
-+QA output created by 133
++QA output created by 134
 +Silence is golden
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 1b12382..779caec 100644
+index 779caec..831283e 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -135,3 +135,4 @@
- 130 auto clone send
+@@ -136,3 +136,4 @@
  131 auto quick send
  132 auto quick send
-+133 auto quick send
+ 133 auto quick send
++134 auto quick send
 -- 
 1.9.1
 
