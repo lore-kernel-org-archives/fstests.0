@@ -1,185 +1,93 @@
-Received: from synology.com ([59.124.61.242]:38198 "EHLO synology.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S965681AbcJ1BuD (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 27 Oct 2016 21:50:03 -0400
-From: robbieko <robbieko@synology.com>
-Subject: [PATCH v2 2/4] xfstests: btrfs/132: add test for invaild update time by an incremental send
-Date: Fri, 28 Oct 2016 09:44:04 +0800
-Message-Id: <1477619046-16375-3-git-send-email-robbieko@synology.com>
-In-Reply-To: <1477619046-16375-1-git-send-email-robbieko@synology.com>
-References: <1477619046-16375-1-git-send-email-robbieko@synology.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:63399 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S934542AbcJ1HMh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 28 Oct 2016 03:12:37 -0400
+Subject: Re: [PATCH v3] generic: make 17[1-4] work well when btrfs compression
+ is enabled
+References: <20161026095211.30091-1-wangxg.fnst@cn.fujitsu.com>
+ <20161027112527.GE27776@eguan.usersys.redhat.com>
+From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Message-ID: <5812F8D3.80109@cn.fujitsu.com>
+Date: Fri, 28 Oct 2016 15:05:55 +0800
+MIME-Version: 1.0
+In-Reply-To: <20161027112527.GE27776@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Robbie Ko <robbieko@synology.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Robbie Ko <robbieko@synology.com>
+hi,
 
-Test that an incremental send operation dosen't' work because
-it tries to update the time to a deleted directory after it finishes
-a move operation.
+On 10/27/2016 07:25 PM, Eryu Guan wrote:
+> On Wed, Oct 26, 2016 at 05:52:11PM +0800, Wang Xiaoguang wrote:
+>> When enabling btrfs compression, original codes can not fill fs
+>> correctly, here we introduce _fill_fs() in common/rc, which'll keep
+>> creating and writing files until enospc error occurs. Note _fill_fs
+>> is copied from tests/generic/256, but with some minor modifications.
+>>
+>> Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+> Looks fine to me overall, generic/17[1-4] and generic/256 passed on xfs,
+> btrfs and btrfs with compress. But I'd like Darrick to review it as well :)
+Could you please give me your btrfs's kernel version?
+When enabling btrfs compression run these 4 test cases, I often got
+enospc error, it seems that you didn't run into enospc errors.
 
-The other one is that an operation is applied to a file using the old
-name not the new name.
+>
+>> ---
+>> V2: In common/, I did't find an existing function suitable for
+>>      these 4 test cases to fill fs, so I still use _pwrite_byte() with
+>>      a big enough file length fo fill fs. Note, for btrfs, metadata space
+>>      still is not full, only data space is full, but it's OK for these
+>>      4 test cases.
+>>
+>>      All these 4 cases pass in xfs and btrfs(without compression), if
+>>      btrfs has compression enabled, these 4 cases will fail for false
+>>      enospc error, I have sent kernel patches to fix this bug.
+>>
+>> V3: Introduce  _fill_fs in common/rc to fill fs.
+>> ---
+>>   common/rc         | 50 ++++++++++++++++++++++++++++++++++++++++++
+>>   tests/generic/171 |  4 +---
+>>   tests/generic/172 |  4 ++--
+>>   tests/generic/173 |  4 +---
+>>   tests/generic/174 |  4 +---
+>>   tests/generic/256 | 65 +++++--------------------------------------------------
+>>   6 files changed, 60 insertions(+), 71 deletions(-)
+>>
+>> diff --git a/common/rc b/common/rc
+>> index 7a9fc90..0e1ac5d 100644
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -4003,6 +4003,56 @@ _require_xfs_mkfs_without_validation()
+>>   	fi
+>>   }
+>>   
+>> +# Fill a file system by repeatedly creating files in the given folder
+>> +# starting with the given file size.  Files are reduced in size when
+>> +# they can no longer fit until no more files can be created.
+>> +_fill_fs()
+>> +{
+>> +	local file_size=$1
+>> +	local dir=$2
+>> +	local block_size=$3
+>> +	local switch_user=$4
+>> +	local file_count=1
+>> +	local bytes_written=0
+>> +
+>> +	if [ $# -ne 4 ]; then
+>> +		echo "Usage: _fill_fs filesize dir blocksize"
+> The usage info here is wrong, missing the "switch user" argument.
+Thanks for review, I'll fix it in v4.
 
-This test exercises scenarios used to fail in btrfs and are fixed by
-the following patches for the linux kernel:
+Regards,
+Xiaoguang Wang
+>
+> Thanks,
+> Eryu
+>
+>
 
-"Btrfs: incremental send, add generation check for the inode waiting for rmdir operation."
-"Btrfs: incremental send, add generation check in existence demtermination for the parent directory"
 
-Signed-off-by: Robbie Ko <robbieko@synology.com>
----
- tests/btrfs/132     | 120 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/132.out |   2 +
- tests/btrfs/group   |   1 +
- 3 files changed, 123 insertions(+)
- create mode 100755 tests/btrfs/132
- create mode 100644 tests/btrfs/132.out
-
-diff --git a/tests/btrfs/132 b/tests/btrfs/132
-new file mode 100755
-index 0000000..08687ec
---- /dev/null
-+++ b/tests/btrfs/132
-@@ -0,0 +1,120 @@
-+#! /bin/bash
-+# FS QA Test No. btrfs/132
-+#
-+# Test that an incremental send operation dosen't' work because
-+# it tries to update the time to a deleted directory after it finishes
-+# a move operation.
-+# 
-+# The other one is that an operation is applied to a file using the old
-+# name not the new name.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2016 Synology Inc. All Rights Reserved.
-+# Author: Robbie Ko <robbieko@synology.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -fr $send_files_dir
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+_require_fssum
-+
-+send_files_dir=$TEST_DIR/btrfs-test-$seq
-+
-+rm -f $seqres.full
-+rm -fr $send_files_dir
-+mkdir $send_files_dir
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+mkdir $SCRATCH_MNT/dir257
-+mkdir $SCRATCH_MNT/dir258
-+mkdir $SCRATCH_MNT/dir259
-+mv $SCRATCH_MNT/dir257 $SCRATCH_MNT/dir258/dir257
-+
-+# Filesystem looks like:
-+#
-+# .                                                             (ino 256)
-+# |--- dir258/                                                  (ino 258)
-+# |    |--- dir257/                                             (ino 257)
-+# |
-+# |--- dir259/                                                  (ino 259)
-+#
-+_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap1
-+
-+mv $SCRATCH_MNT/dir258/dir257 $SCRATCH_MNT/dir257
-+rmdir $SCRATCH_MNT/dir258
-+rmdir $SCRATCH_MNT/dir259
-+_scratch_unmount
-+_scratch_mount
-+touch $SCRATCH_MNT/file258
-+mkdir $SCRATCH_MNT/new_dir259
-+mv $SCRATCH_MNT/dir257 $SCRATCH_MNT/new_dir259/dir257
-+
-+# Filesystem now looks like:
-+#
-+# .                                                             (ino 256)
-+# |--- file258                                                  (ino 258)
-+# |
-+# |--- new_dir259/                                              (ino 259)
-+# |    |--- dir257/                                             (ino 257)
-+#
-+_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap2
-+
-+run_check $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-+run_check $FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
-+        -x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
-+
-+_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
-+	-f $send_files_dir/2.snap
-+
-+# Now recreate the filesystem by receiving both send streams and verify we get
-+# the same content that the original filesystem had.
-+_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
-+run_check $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/btrfs/132.out b/tests/btrfs/132.out
-new file mode 100644
-index 0000000..b096312
---- /dev/null
-+++ b/tests/btrfs/132.out
-@@ -0,0 +1,2 @@
-+QA output created by 132
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index a7a070a..1b12382 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -134,3 +134,4 @@
- 129 auto quick send
- 130 auto clone send
- 131 auto quick send
-+132 auto quick send
--- 
-1.9.1
 
