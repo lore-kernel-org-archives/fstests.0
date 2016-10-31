@@ -1,85 +1,90 @@
-Received: from mx1.redhat.com ([209.132.183.28]:35648 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932249AbcJ2QLm (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 29 Oct 2016 12:11:42 -0400
-Message-Id: <201610291604.u9TG4euC023650@int-mx11.intmail.prod.int.phx2.redhat.com>
-Date: Sun, 30 Oct 2016 00:04:40 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: [GIT PULL] fstests: updates on 2016-10-29
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:7367 "EHLO
+        ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1758669AbcJaFTZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 31 Oct 2016 01:19:25 -0400
+Received: from dave by dastard with local (Exim 4.80)
+        (envelope-from <david@fromorbit.com>)
+        id 1c150B-0006rn-QQ
+        for fstests@vger.kernel.org; Mon, 31 Oct 2016 16:19:19 +1100
+Date: Mon, 31 Oct 2016 16:19:19 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: [ANNOUNCE] xfstests: master branch updated to efef020df5b2
+Message-ID: <20161031051919.GR14023@dastard>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="0lnxQi9hkpPO77W3"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave,
 
-Can you please pull the fstests update from the location below? There're
-updates from last two weeks in this pull request. After this update, xfs_io is
-run with -i option if supported. There're also more fixes for rmap/reflink
-tests, one new generic test and more small fixes.
+--0lnxQi9hkpPO77W3
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-New failure I noticed in this update:
-- generic/389 fails due to xfs_io bug when handling -m option
+Hi folks,
 
-Thanks,
-Eryu
+The master branch of the xfstests repository at:
 
-The following changes since commit 16ef0843f2122deaf9845833ae73f60c67862aa4:
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-  xfs/122: remove dead code (2016-10-14 10:05:34 +0800)
+have just been updated. Thatnks to everyone who added tests, fixed
+problems and reviewed changed. And Thanks to Eryu for getting it all
+together in a nice neat pile.
 
-are available in the git repository at:
+Note that there are a couple of outstanding fixes that are needed to
+xfs_io to make use of a couple of changes made (generic/389 and use
+of the "-i" option). That should happpen soon...
 
-  https://github.com/guaneryu/xfstests.git for-dave
+-Dave.
 
-for you to fetch changes up to efef020df5b257085831106847d318c93d46531c:
+The new head of the master branch is commit:
 
-  src/seek_sanity_test: discover allocation size (2016-10-26 19:15:44 +0800)
+efef020df5b2 src/seek_sanity_test: discover allocation size
 
-----------------------------------------------------------------
+New Commits:
 
-fstests: update on 2016-10-29
-
-This update contains:
-o Add -i option to xfs_io command if supported
-o New generic test
-o More fixes to reflink tests and xfs_db usage
-o Fixes to overlay tests, xfs and generic tests
-
-----------------------------------------------------------------
 Amir Goldstein (6):
-      fstests: fix call sites that used xfs_io directly
-      fstests: strip quotes from "$XFS_IO_PROG" call sites
-      fstests: run xfs_io with -i option if supported
-      t_truncate_self: describe self better in error message
-      overlay/013: fix bug in test_upper creation
-      overlay/013: adjust test expectation to kernel v4.8
+      [3fcfdba403c1] fstests: fix call sites that used xfs_io directly
+      [f182653c6bff] fstests: strip quotes from "$XFS_IO_PROG" call sites
+      [54659ecdb575] fstests: run xfs_io with -i option if supported
+      [93d72ed7f662] t_truncate_self: describe self better in error message
+      [044af9dd6632] overlay/013: fix bug in test_upper creation
+      [aa96e42b8dd7] overlay/013: adjust test expectation to kernel v4.8
 
 Andreas Gruenbacher (1):
-      generic: Check linking O_TMPFILE into namespace with POSIX ACLs
+      [f1edd77ebc28] generic: Check linking O_TMPFILE into namespace with P=
+OSIX ACLs
 
 Benjamin Coddington (1):
-      src/seek_sanity_test: discover allocation size
+      [efef020df5b2] src/seek_sanity_test: discover allocation size
 
 Darrick J. Wong (3):
-      xfs: set the refcount btree cowflag when setting up cow
-      fstests: fix fallocate commands that need the unshare switch
-      xfs: fix more xfs_db open-coding instances
+      [bf5a5da57247] xfs: set the refcount btree cowflag when setting up cow
+      [ed6e4664eeca] fstests: fix fallocate commands that need the unshare =
+switch
+      [da41142607c2] xfs: fix more xfs_db open-coding instances
 
 Eric Biggers (1):
-      generic/314: remove from acl group
+      [31db182a1c10] generic/314: remove from acl group
 
 Eryu Guan (1):
-      xfs/054: only filter ROOT_INO at the beginning
+      [4c99b91d0ad9] xfs/054: only filter ROOT_INO at the beginning
 
 Xiao Yang (1):
-      xfs: remove the device parameter from __populate_check_xfs_dir
+      [dc46bab289da] xfs: remove the device parameter from __populate_check=
+_xfs_dir
+
+
+Code Diffstat:
 
  common/quota           |  4 +--
- common/rc              | 21 ++++++++++-----
- common/reflink         | 26 +++++++++---------
- src/seek_sanity_test.c | 41 +++++++++++++++++++++++-----
- src/t_truncate_self.c  |  7 +++--
+ common/rc              | 21 +++++++++++-----
+ common/reflink         | 26 +++++++++----------
+ src/seek_sanity_test.c | 41 ++++++++++++++++++++++++------
+ src/t_truncate_self.c  |  7 ++++--
  tests/generic/043      |  2 +-
  tests/generic/044      |  4 +--
  tests/generic/045      |  4 +--
@@ -87,11 +92,12 @@ Xiao Yang (1):
  tests/generic/047      |  2 +-
  tests/generic/048      |  2 +-
  tests/generic/049      |  2 +-
- tests/generic/156      | 16 +++++------
+ tests/generic/156      | 16 +++++-------
  tests/generic/176      |  2 +-
  tests/generic/224      |  4 +--
  tests/generic/264      |  4 +--
- tests/generic/389      | 72 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/389      | 72 ++++++++++++++++++++++++++++++++++++++++++++++=
++++++++
  tests/generic/389.out  |  6 +++++
  tests/generic/group    |  3 ++-
  tests/overlay/013      |  3 +--
@@ -101,7 +107,7 @@ Xiao Yang (1):
  tests/xfs/021          |  4 +--
  tests/xfs/044          |  2 +-
  tests/xfs/052          |  2 +-
- tests/xfs/054          | 14 +++++-----
+ tests/xfs/054          | 14 +++++------
  tests/xfs/099          |  2 +-
  tests/xfs/100          |  2 +-
  tests/xfs/101          |  2 +-
@@ -123,16 +129,42 @@ Xiao Yang (1):
  tests/xfs/204          |  3 ++-
  tests/xfs/229          |  2 +-
  tests/xfs/250          |  2 +-
- tests/xfs/278          | 16 +++++------
+ tests/xfs/278          | 16 ++++++------
  tests/xfs/291          |  4 +--
- tests/xfs/307          | 21 ++++++++-------
- tests/xfs/308          | 21 ++++++++-------
+ tests/xfs/307          | 21 ++++++++--------
+ tests/xfs/308          | 21 ++++++++--------
  tests/xfs/328          |  2 +-
  tests/xfs/344          |  3 ++-
  tests/xfs/345          |  3 ++-
  tests/xfs/346          |  3 ++-
  tests/xfs/347          |  3 ++-
  57 files changed, 267 insertions(+), 144 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
+ create mode 100755 tests/generic/389
+ create mode 100644 tests/generic/389.out
+--=20
+Dave Chinner
+david@fromorbit.com
+
+--0lnxQi9hkpPO77W3
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJYFtRXAAoJEK3oKUf0dfod/wcP/14hJg8CiLLh2fJWw9ZZMEz/
+HUNzvGZAmEQtozPxNqnXa8sOT7KduXOW2LHXKzzAIN30ByqQqEtjtGB19ZeUrtvm
+Tj+D54z0wxiXsN55q9D2kdecjCqQYf5/kifJBC00AQ54y97xi4qrFt8MDO3xUZ1x
+gbJJ2eBwH+4UuAmEEWBAbzN6vkWggWyVrtK9wWEux0ys2lX1Wm59k3tbY57e3mg/
+r1zgdbQOSySknMAceR3EODNZMbJ+TtBf9CAlrf1gumpS7L9NnZobyj4Sa4MKLH1x
+AmKzNi3sUB92degbJN17IyWfnL7IohETm/+xfBI49/lnUZOUbM5rw0roKnbGmeTC
+4HyOW+5Y5JbmaQS04TrbclaJF4lcp9o1uwFVtT25pPwK14Q0WZBhVHNWSmTjV+X0
+2S5Olr0SOc6fsZLmAkZ/1lSP6yiJHTOjPAwM5JQP7+jGegbRlsVKcGvyFGlnZcql
+8vU+nQ64cjRR1lf2m/JhSV67em4o3P6wABuLfYeVdzyrQ4jsl37QjAYehvh+9PHt
+Forrc/lClNBlsMCKxytecdiPHSKZvXfMOwEiIZ20lESh3m20zVqyGtryLTbpANYE
+npXpdV/vnfaOjzK2ET5AQ7X4kmRCnzqMkCRz5FhYndyp6TOy7ztw06+UxjKwsSg/
+A2/qpIMnaAPx0Bn1kgcC
+=ehXd
+-----END PGP SIGNATURE-----
+
+--0lnxQi9hkpPO77W3--
