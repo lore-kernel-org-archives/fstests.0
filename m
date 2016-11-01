@@ -1,34 +1,37 @@
-Received: from mx1.redhat.com ([209.132.183.28]:37656 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:50832 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752656AbcKBKg6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 2 Nov 2016 06:36:58 -0400
-Date: Wed, 2 Nov 2016 18:36:56 +0800
+        id S1033727AbcKAHU5 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 1 Nov 2016 03:20:57 -0400
+Date: Tue, 1 Nov 2016 15:20:55 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic: create and delete files repeatedly to exercise
- ENOSPC behaviour
-Message-ID: <20161102103655.GW27776@eguan.usersys.redhat.com>
-References: <1477999170-20026-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
- <20161101122613.GR27776@eguan.usersys.redhat.com>
- <5819BE82.10205@cn.fujitsu.com>
+Subject: Re: [PATCH v2 4/4] xfstests: btrfs/134: add test for incremental
+ send which renames a directory already being deleted
+Message-ID: <20161101072055.GQ27776@eguan.usersys.redhat.com>
+References: <1477619046-16375-1-git-send-email-robbieko@synology.com>
+ <1477619046-16375-5-git-send-email-robbieko@synology.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <5819BE82.10205@cn.fujitsu.com>
+In-Reply-To: <1477619046-16375-5-git-send-email-robbieko@synology.com>
 Sender: fstests-owner@vger.kernel.org
-To: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+To: robbieko <robbieko@synology.com>
 Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Nov 02, 2016 at 06:22:58PM +0800, Wang Xiaoguang wrote:
-> hi Eryu,
+On Fri, Oct 28, 2016 at 09:44:06AM +0800, robbieko wrote:
+> From: Robbie Ko <robbieko@synology.com>
 > 
-> There has already be a generic/102 doing this test...
-> Thanks for you kindly review and sorry for wasting your time.
+> Test that an incremental send operation dosen't work because
+> it tries to rename a directory which is already deleted.
+> 
+> This test exercises scenarios used to fail in btrfs and are fixed by
+> the following patch for the linux kernel:
+> 
+> "Btrfs: incremental send, add generation check for inode is waiting for move."
 
-I had impression yesterday that we have a case that does exactly the
-same test, and I searched but didn't find it.. It turns out that we do
-have it already :)
+I was testing with v4.9-rc1+ kernel and btrfs-progs v4.6. Seems above
+patch is not merged in 4.9-rc1 kernel, but test passed for me, is that
+expected?
 
-Thanks for writing new test cases!
-
+Thanks,
 Eryu
