@@ -1,319 +1,209 @@
-Received: from cn.fujitsu.com ([222.73.24.84]:51022 "EHLO song.cn.fujitsu.com"
-        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-        id S1750698AbcKBEOU (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 2 Nov 2016 00:14:20 -0400
-From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
-Subject: [PATCH v5 2/2] generic: make 17[1-4] work well when btrfs compression is enabled
-Date: Wed,  2 Nov 2016 12:07:27 +0800
-Message-Id: <20161102040727.5765-2-wangxg.fnst@cn.fujitsu.com>
-In-Reply-To: <20161102040727.5765-1-wangxg.fnst@cn.fujitsu.com>
-References: <20161102040727.5765-1-wangxg.fnst@cn.fujitsu.com>
+Received: from mx1.redhat.com ([209.132.183.28]:38984 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S947125AbcKAHSG (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 1 Nov 2016 03:18:06 -0400
+Date: Tue, 1 Nov 2016 15:17:58 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2 1/4] xfstests: btrfs/131: add test for an incremental
+ send with name collision
+Message-ID: <20161101071758.GP27776@eguan.usersys.redhat.com>
+References: <1477619046-16375-1-git-send-email-robbieko@synology.com>
+ <1477619046-16375-2-git-send-email-robbieko@synology.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1477619046-16375-2-git-send-email-robbieko@synology.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, eguan@redhat.com, darrick.wong@oracle.com
+To: robbieko <robbieko@synology.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-When enabling btrfs compression, original codes can not fill fs
-correctly, here we introduce _fill_fs() in common/rc, which'll keep
-creating and writing files until enospc error occurs. Note _fill_fs
-is copied from tests/generic/256, but with some minor modifications.
+On Fri, Oct 28, 2016 at 09:44:03AM +0800, robbieko wrote:
+> From: Robbie Ko <robbieko@synology.com>
+> 
+> Test that an incremental send operation doesn't work because
+> there's a name collision in the destination and it's not checked
+> corretly before the rename operation applies.
+> 
+> This test exercises scenarios used to fail in btrfs and are fixed by
+> the following patch for the linux kernel:
+> 
+> "Btrfs: incremental send, do not skip generation inconsistency check for inode 256."
+> 
+> Signed-off-by: Robbie Ko <robbieko@synology.com>
 
-Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
----
-V2: In common/, I did't find an existing function suitable for
-    these 4 test cases to fill fs, so I still use _pwrite_byte() with
-    a big enough file length fo fill fs. Note, for btrfs, metadata space
-    still is not full, only data space is full, but it's OK for these
-    4 test cases.
+Sorry for the late review!
 
-    All these 4 cases pass in xfs and btrfs(without compression), if
-    btrfs has compression enabled, these 4 cases will fail for false
-    enospc error, I have sent kernel patches to fix this bug.
+> ---
+>  tests/btrfs/131     | 111 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/131.out |   2 +
+>  tests/btrfs/group   |   1 +
+>  3 files changed, 114 insertions(+)
+>  create mode 100755 tests/btrfs/131
+>  create mode 100644 tests/btrfs/131.out
+> 
+> diff --git a/tests/btrfs/131 b/tests/btrfs/131
+> new file mode 100755
+> index 0000000..2e2e0bc
+> --- /dev/null
+> +++ b/tests/btrfs/131
+> @@ -0,0 +1,111 @@
+> +#! /bin/bash
+> +# FS QA Test No. btrfs/131
+> +#
+> +# Test that an incremental send operation doesn't work because
+> +# there's a name collision in the destination and it's not checked
+> +# corretly before the rename operation applies.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (C) 2016 Synology Inc. All Rights Reserved.
+> +# Author: Robbie Ko <robbieko@synology.com>
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -fr $send_files_dir
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_test
+> +_require_scratch
+> +_require_fssum
+> +
+> +send_files_dir=$TEST_DIR/btrfs-test-$seq
+> +
+> +rm -f $seqres.full
+> +rm -fr $send_files_dir
+> +mkdir $send_files_dir
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_scratch_mount
+> +
+> +mkdir $SCRATCH_MNT/a1
+> +mkdir $SCRATCH_MNT/a2
+> +
+> +# Filesystem looks like:
+> +#
+> +# .                                                             (ino 256)
+> +# |--- a1/                                                      (ino 257)
+> +# |
+> +# |--- a2/                                                      (ino 258)
+> +#
+> +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap1
+> +
+> +_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
 
-V3: Introduce  _fill_fs in common/rc to fill fs.
-V4: Fix some issues suggested by Eryu and Darrick.
-V5: Put _fill_fs() in common/populate.
----
- common/populate   | 67 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/171 |  4 ++--
- tests/generic/172 |  5 +++--
- tests/generic/173 |  4 ++--
- tests/generic/174 |  4 ++--
- tests/generic/256 | 66 +++++-------------------------------------------------
- 6 files changed, 82 insertions(+), 68 deletions(-)
+I found these "run_check" based helpers make the result harder to read
+when test failed, I can't see immediate error messages from the diff
+output but have to open $seqres.full file to see the details.
 
-diff --git a/common/populate b/common/populate
-index 3b9b531..78e9809 100644
---- a/common/populate
-+++ b/common/populate
-@@ -539,3 +539,70 @@ _scratch_fuzz_test() {
- 	(find "${SCRATCH_MNT}/test.1/" -type f -size -1048576k -print0 | xargs -0 cat) >/dev/null 2>&1
- }
- 
-+# Fill a file system by repeatedly creating files in the given folder
-+# starting with the given file size.  Files are reduced in size when
-+# they can no longer fit until no more files can be created.
-+_fill_fs()
-+{
-+	local file_size=$1
-+	local dir=$2
-+	local block_size=$3
-+	local switch_user=$4
-+	local file_count=1
-+	local bytes_written=0
-+	local use_falloc=1;
-+
-+	if [ $# -ne 4 ]; then
-+		echo "Usage: _fill_fs filesize dir blocksize switch_user"
-+		exit 1
-+	fi
-+
-+	if [ $switch_user -eq 0 ]; then
-+		mkdir -p $dir
-+	else
-+		_user_do "mkdir -p $dir"
-+	fi
-+	if [ ! -d $dir ]; then
-+		return 0;
-+	fi
-+
-+	testio=`$XFS_IO_PROG -F -fc "falloc 0 $block_size" $dir/$$.xfs_io 2>&1`
-+	echo $testio | grep -q "not found" && use_falloc=0
-+	echo $testio | grep -q "Operation not supported" && use_falloc=0
-+
-+	if [ $file_size -lt $block_size ]; then
-+		$file_size = $block_size
-+	fi
-+
-+	while [ $file_size -ge $block_size ]; do
-+		bytes_written=0
-+		if [ $switch_user -eq 0 ]; then
-+			if [ $use_falloc -eq 0 ]; then
-+				$XFS_IO_PROG -fc "pwrite -b 8388608 0 $file_size" \
-+					$dir/$file_count
-+			else
-+				$XFS_IO_PROG -fc "falloc 0 $file_size" \
-+					$dir/$file_count
-+			fi
-+		else
-+			if [ $use_falloc -eq 0 ]; then
-+				_user_do "$XFS_IO_PROG -f -c \"pwrite -b 8388608 0 \
-+					$file_size\" $dir/$file_count"
-+			else
-+				_user_do "$XFS_IO_PROG -f -c \"falloc 0 \
-+					$file_size\" $dir/$file_count"
-+			fi
-+		fi
-+
-+		if [ -f $dir/$file_count ]; then
-+			bytes_written=$(stat -c '%s' $dir/$file_count)
-+		fi
-+
-+		# If there was no room to make the file, then divide it in
-+		# half, and keep going
-+		if [ $bytes_written -lt $file_size ]; then
-+			file_size=$((file_size / 2))
-+		fi
-+		file_count=$((file_count + 1))
-+	done
-+}
-diff --git a/tests/generic/171 b/tests/generic/171
-index a69f798..d0cd192 100755
---- a/tests/generic/171
-+++ b/tests/generic/171
-@@ -38,6 +38,7 @@ _cleanup()
- 
- # get standard environment, filters and checks
- . ./common/rc
-+. ./common/populate
- . ./common/filter
- . ./common/attr
- . ./common/reflink
-@@ -76,8 +77,7 @@ sync
- 
- echo "Allocate the rest of the space"
- nr_free=$(stat -f -c '%f' $testdir)
--touch $testdir/file0 $testdir/file1
--_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
-+_fill_fs $((nr_free * blksz)) $testdir/space $blksz 0 >> $seqres.full 2>&1
- sync
- 
- echo "CoW the big file"
-diff --git a/tests/generic/172 b/tests/generic/172
-index 8192290..d943e64 100755
---- a/tests/generic/172
-+++ b/tests/generic/172
-@@ -38,6 +38,7 @@ _cleanup()
- 
- # get standard environment, filters and checks
- . ./common/rc
-+. ./common/populate
- . ./common/filter
- . ./common/attr
- . ./common/reflink
-@@ -57,6 +58,7 @@ testdir=$SCRATCH_MNT/test-$seq
- mkdir $testdir
- 
- echo "Reformat with appropriate size"
-+blksz="$(get_block_size $testdir)"
- umount $SCRATCH_MNT
- 
- file_size=$((168 * 1024 * 1024))
-@@ -72,8 +74,7 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
- sync
- 
- echo "Allocate the rest of the space"
--touch $testdir/file0 $testdir/file1
--_pwrite_byte 0x61 0 $fs_size $testdir/eat_my_space >> $seqres.full 2>&1
-+_fill_fs $fs_size  $testdir/space $blksz 0 >> $seqres.full 2>&1
- sync
- 
- echo "CoW the big file"
-diff --git a/tests/generic/173 b/tests/generic/173
-index e35597f..a414c8e 100755
---- a/tests/generic/173
-+++ b/tests/generic/173
-@@ -38,6 +38,7 @@ _cleanup()
- 
- # get standard environment, filters and checks
- . ./common/rc
-+. ./common/populate
- . ./common/filter
- . ./common/attr
- . ./common/reflink
-@@ -76,8 +77,7 @@ sync
- 
- echo "Allocate the rest of the space"
- nr_free=$(stat -f -c '%f' $testdir)
--touch $testdir/file0 $testdir/file1
--_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
-+_fill_fs $((blksz * nr_free)) $testdir/space $blksz 0 >> $seqres.full 2>&1
- sync
- 
- echo "mmap CoW the big file"
-diff --git a/tests/generic/174 b/tests/generic/174
-index e58d64b..b55cb72 100755
---- a/tests/generic/174
-+++ b/tests/generic/174
-@@ -38,6 +38,7 @@ _cleanup()
- 
- # get standard environment, filters and checks
- . ./common/rc
-+. ./common/populate
- . ./common/filter
- . ./common/attr
- . ./common/reflink
-@@ -77,8 +78,7 @@ sync
- 
- echo "Allocate the rest of the space"
- nr_free=$(stat -f -c '%f' $testdir)
--touch $testdir/file0 $testdir/file1
--_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
-+_fill_fs $((blksz * nr_free)) $testdir/space $blksz 0 >> $seqres.full 2>&1
- sync
- 
- echo "CoW the big file"
-diff --git a/tests/generic/256 b/tests/generic/256
-index cfbf790..63f2d4f 100755
---- a/tests/generic/256
-+++ b/tests/generic/256
-@@ -39,6 +39,7 @@ trap "_cleanup ; exit \$status" 0 1 2 3 15
- 
- # get standard environment, filters and checks
- . ./common/rc
-+. ./common/populate
- . ./common/filter
- . ./common/punch
- 
-@@ -53,64 +54,6 @@ _require_test
- 
- testfile=$TEST_DIR/256.$$
- 
--# _fill_fs()
--#
--# Fills a file system by repeatedly creating files in the given folder
--# starting with the given file size.  Files are reduced in size when
--# they can no longer fit untill no more files can be created.
--#
--# This routine is used by _test_full_fs_punch to test that a hole may
--# still be punched when the disk is full by borrowing reserved blocks.
--# All files are created as a non root user to prevent reserved blocks
--# from being consumed.
--#
--_fill_fs() {
--	local file_size=$1
--	local dir=$2
--	local block_size=$3
--	local file_count=1
--	local bytes_written=0
--
--	if [ $# -ne 3 ]
--	then
--		echo "USAGE: _fill_fs filesize dir block size"
--		exit 1
--	fi
--
--	# Creation of files or folders
--	# must not be done as root or
--	# reserved blocks will be consumed
--	_user_do "mkdir -p $dir &> /dev/null"
--	if [ $? -ne 0 ] ; then
--		return 0
--	fi
--
--	if [ $file_size -lt $block_size ]
--	then
--		$file_size = $block_size
--	fi
--
--	while [ $file_size -ge $block_size ]
--	do
--		bytes_written=0
--		_user_do "$XFS_IO_PROG -f -c \"pwrite 0 $file_size\" $dir/$file_count.bin &> /dev/null"
--
--		if [ -f $dir/$file_count.bin ]
--		then
--			bytes_written=`$XFS_IO_PROG -c "stat"  $dir/$file_count.bin | grep stat.size | cut -d ' ' -f3`
--		fi
--
--		# If there was no room to make the file,
--		# then divide it in half, and keep going
--		if [ $bytes_written -lt $file_size ]
--		then
--			file_size=$(( $file_size / 2 ))
--		fi
--		file_count=$(( $file_count + 1 ))
--
--	done
--}
--
- # _test_full_fs_punch()
- #
- # This function will test that a hole may be punched
-@@ -144,7 +87,10 @@ _test_full_fs_punch()
- 		-c "fsync" $file_name &> /dev/null
- 	chmod 666 $file_name
- 
--	_fill_fs $(( 1024 * 1024 * 1024 )) $path/fill $block_size
-+	# All files are created as a non root user to prevent reserved blocks
-+	# from being consumed.
-+	_fill_fs $(( 1024 * 1024 * 1024 )) $path/fill $block_size 1 \
-+		> /dev/null 2>&1
- 
- 	for (( i=0; i<$iterations; i++ ))
- 	do
-@@ -159,7 +105,7 @@ _test_full_fs_punch()
- 
- 		hole_offset=$(( $hole_offset + $hole_len + $hole_interval ))
- 
--		_fill_fs $hole_len $path/fill.$i $block_size
-+		_fill_fs $hole_len $path/fill.$i $block_size 1 > /dev/null 2>&1
- 
- 	done
- }
--- 
-2.9.0
+Can you please use $BTRFS_UTIL_PROG directly, in all these four tests?
+One concern about using bare $BTRFS_UTIL_PROG is that output messages of
+btrfs command are always changed. But I think, at least, we can ignore
+the stdout and capture the stderr only. e.g.
 
+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
+	$SCRATCH_MNT/mysnap1 >/dev/null
 
+So if everything works fine no output can be seen, but if snapshot
+creation is failed, we can see error messages from stderr, which could
+fail the test.
 
+> +
+> +_scratch_unmount
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_scratch_mount
+> +touch $SCRATCH_MNT/a2
+> +
+> +# Filesystem now looks like:
+> +#
+> +# .                                                             (ino 256)
+> +# |--- a2                                                       (ino 257)
+> +#
+> +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap2
+> +
+> +_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
+> +rm $send_files_dir/1.snap
+> +
+> +run_check $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
+> +run_check $FSSUM_PROG -A -f -w $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
+
+And this "run_check" is not necessary either. Just run $FSSUM_PROG
+directly and let it print "OK", and match it in .out file.
+
+Thanks,
+Eryu
+
+> +
+> +_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
+> +_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
+> +	-f $send_files_dir/2.snap
+> +
+> +# Now recreate the filesystem by receiving both send streams and verify we get
+> +# the same content that the original filesystem had.
+> +_scratch_unmount
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_scratch_mount
+> +
+> +_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
+> +run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
+> +_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
+> +run_check $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
+> +
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/131.out b/tests/btrfs/131.out
+> new file mode 100644
+> index 0000000..d118ca9
+> --- /dev/null
+> +++ b/tests/btrfs/131.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 131
+> +Silence is golden
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index f3a7a4f..a7a070a 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -133,3 +133,4 @@
+>  128 auto quick send
+>  129 auto quick send
+>  130 auto clone send
+> +131 auto quick send
+> -- 
+> 1.9.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
