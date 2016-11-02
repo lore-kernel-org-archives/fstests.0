@@ -1,66 +1,319 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:63546 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1752046AbcKBKbN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Nov 2016 06:31:13 -0400
-Subject: Re: [PATCH] generic: create and delete files repeatedly to exercise
- ENOSPC behaviour
-References: <1477999170-20026-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
- <20161102012713.GE9920@dastard>
+Received: from cn.fujitsu.com ([222.73.24.84]:51022 "EHLO song.cn.fujitsu.com"
+        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+        id S1750698AbcKBEOU (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 2 Nov 2016 00:14:20 -0400
 From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
-Message-ID: <5819BEE2.6040201@cn.fujitsu.com>
-Date: Wed, 2 Nov 2016 18:24:34 +0800
+Subject: [PATCH v5 2/2] generic: make 17[1-4] work well when btrfs compression is enabled
+Date: Wed,  2 Nov 2016 12:07:27 +0800
+Message-Id: <20161102040727.5765-2-wangxg.fnst@cn.fujitsu.com>
+In-Reply-To: <20161102040727.5765-1-wangxg.fnst@cn.fujitsu.com>
+References: <20161102040727.5765-1-wangxg.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-In-Reply-To: <20161102012713.GE9920@dastard>
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, eguan@redhat.com, darrick.wong@oracle.com
 List-ID: <fstests@vger.kernel.org>
 
-hi,
+When enabling btrfs compression, original codes can not fill fs
+correctly, here we introduce _fill_fs() in common/rc, which'll keep
+creating and writing files until enospc error occurs. Note _fill_fs
+is copied from tests/generic/256, but with some minor modifications.
 
-On 11/02/2016 09:27 AM, Dave Chinner wrote:
-> On Tue, Nov 01, 2016 at 07:19:30PM +0800, Wang Xiaoguang wrote:
->> In btrfs, sometimes though the number of created files' consumed disk space
->> are not larger than fs's free space, we can still get some ENOSPC error, it
->> may be that btrfs does not try hard to reclaim disk space(I have sent kernel
->> patch to resolve this kind of enospc error. Note, this false enospc error
->> will not always happen even in kernel without my fixing patch).
->>
->> Currently only in btrfs, I get this ENOSPC error, xfs and ext4 work well.
-> .....
->> +RUN_TIME=$((600 * $TIME_FACTOR))
->> +fs_size=$((15 * 1024 * 1024 * 1024))
->> +_scratch_mkfs_sized $fs_size > $seqres.full 2>&1
->> +_scratch_mount > $seqres.full 2>&1
->> +
->> +testfile1=$SCRATCH_MNT/testfile1
->> +testfile2=$SCRATCH_MNT/testfile2
->> +filesize1=$(((fs_size * 80) / 100))
->> +filesize2=$(((fs_size * 5) / 100))
->> +
->> +do_test()
->> +{
->> +	while [ -f $SCRATCH_MNT/run ]; do
->> +		$XFS_IO_PROG -fc "pwrite 0 $filesize1" $testfile1 > /dev/null
->> +		$XFS_IO_PROG -fc "pwrite 0 $filesize2" $testfile2 > /dev/null
->> +		rm -f $testfile1 $testfile2
->> +	done
->> +}
-> What are you trying to test here that other ENOSPC tests
-> don't exercise? Why cant you just use preallocation to trigger
-> ENOSPC repeatedly instead of writing data? That would allow multiple
-> iterations per second, not one every few minutes...
-Yes, generic/102 just does this job, sorry.
+Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+---
+V2: In common/, I did't find an existing function suitable for
+    these 4 test cases to fill fs, so I still use _pwrite_byte() with
+    a big enough file length fo fill fs. Note, for btrfs, metadata space
+    still is not full, only data space is full, but it's OK for these
+    4 test cases.
 
-Regards,
-Xiaoguang Wang
+    All these 4 cases pass in xfs and btrfs(without compression), if
+    btrfs has compression enabled, these 4 cases will fail for false
+    enospc error, I have sent kernel patches to fix this bug.
 
->
-> Cheers,
->
-> Dave.
+V3: Introduce  _fill_fs in common/rc to fill fs.
+V4: Fix some issues suggested by Eryu and Darrick.
+V5: Put _fill_fs() in common/populate.
+---
+ common/populate   | 67 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/171 |  4 ++--
+ tests/generic/172 |  5 +++--
+ tests/generic/173 |  4 ++--
+ tests/generic/174 |  4 ++--
+ tests/generic/256 | 66 +++++-------------------------------------------------
+ 6 files changed, 82 insertions(+), 68 deletions(-)
+
+diff --git a/common/populate b/common/populate
+index 3b9b531..78e9809 100644
+--- a/common/populate
++++ b/common/populate
+@@ -539,3 +539,70 @@ _scratch_fuzz_test() {
+ 	(find "${SCRATCH_MNT}/test.1/" -type f -size -1048576k -print0 | xargs -0 cat) >/dev/null 2>&1
+ }
+ 
++# Fill a file system by repeatedly creating files in the given folder
++# starting with the given file size.  Files are reduced in size when
++# they can no longer fit until no more files can be created.
++_fill_fs()
++{
++	local file_size=$1
++	local dir=$2
++	local block_size=$3
++	local switch_user=$4
++	local file_count=1
++	local bytes_written=0
++	local use_falloc=1;
++
++	if [ $# -ne 4 ]; then
++		echo "Usage: _fill_fs filesize dir blocksize switch_user"
++		exit 1
++	fi
++
++	if [ $switch_user -eq 0 ]; then
++		mkdir -p $dir
++	else
++		_user_do "mkdir -p $dir"
++	fi
++	if [ ! -d $dir ]; then
++		return 0;
++	fi
++
++	testio=`$XFS_IO_PROG -F -fc "falloc 0 $block_size" $dir/$$.xfs_io 2>&1`
++	echo $testio | grep -q "not found" && use_falloc=0
++	echo $testio | grep -q "Operation not supported" && use_falloc=0
++
++	if [ $file_size -lt $block_size ]; then
++		$file_size = $block_size
++	fi
++
++	while [ $file_size -ge $block_size ]; do
++		bytes_written=0
++		if [ $switch_user -eq 0 ]; then
++			if [ $use_falloc -eq 0 ]; then
++				$XFS_IO_PROG -fc "pwrite -b 8388608 0 $file_size" \
++					$dir/$file_count
++			else
++				$XFS_IO_PROG -fc "falloc 0 $file_size" \
++					$dir/$file_count
++			fi
++		else
++			if [ $use_falloc -eq 0 ]; then
++				_user_do "$XFS_IO_PROG -f -c \"pwrite -b 8388608 0 \
++					$file_size\" $dir/$file_count"
++			else
++				_user_do "$XFS_IO_PROG -f -c \"falloc 0 \
++					$file_size\" $dir/$file_count"
++			fi
++		fi
++
++		if [ -f $dir/$file_count ]; then
++			bytes_written=$(stat -c '%s' $dir/$file_count)
++		fi
++
++		# If there was no room to make the file, then divide it in
++		# half, and keep going
++		if [ $bytes_written -lt $file_size ]; then
++			file_size=$((file_size / 2))
++		fi
++		file_count=$((file_count + 1))
++	done
++}
+diff --git a/tests/generic/171 b/tests/generic/171
+index a69f798..d0cd192 100755
+--- a/tests/generic/171
++++ b/tests/generic/171
+@@ -38,6 +38,7 @@ _cleanup()
+ 
+ # get standard environment, filters and checks
+ . ./common/rc
++. ./common/populate
+ . ./common/filter
+ . ./common/attr
+ . ./common/reflink
+@@ -76,8 +77,7 @@ sync
+ 
+ echo "Allocate the rest of the space"
+ nr_free=$(stat -f -c '%f' $testdir)
+-touch $testdir/file0 $testdir/file1
+-_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
++_fill_fs $((nr_free * blksz)) $testdir/space $blksz 0 >> $seqres.full 2>&1
+ sync
+ 
+ echo "CoW the big file"
+diff --git a/tests/generic/172 b/tests/generic/172
+index 8192290..d943e64 100755
+--- a/tests/generic/172
++++ b/tests/generic/172
+@@ -38,6 +38,7 @@ _cleanup()
+ 
+ # get standard environment, filters and checks
+ . ./common/rc
++. ./common/populate
+ . ./common/filter
+ . ./common/attr
+ . ./common/reflink
+@@ -57,6 +58,7 @@ testdir=$SCRATCH_MNT/test-$seq
+ mkdir $testdir
+ 
+ echo "Reformat with appropriate size"
++blksz="$(get_block_size $testdir)"
+ umount $SCRATCH_MNT
+ 
+ file_size=$((168 * 1024 * 1024))
+@@ -72,8 +74,7 @@ _cp_reflink $testdir/bigfile $testdir/clonefile
+ sync
+ 
+ echo "Allocate the rest of the space"
+-touch $testdir/file0 $testdir/file1
+-_pwrite_byte 0x61 0 $fs_size $testdir/eat_my_space >> $seqres.full 2>&1
++_fill_fs $fs_size  $testdir/space $blksz 0 >> $seqres.full 2>&1
+ sync
+ 
+ echo "CoW the big file"
+diff --git a/tests/generic/173 b/tests/generic/173
+index e35597f..a414c8e 100755
+--- a/tests/generic/173
++++ b/tests/generic/173
+@@ -38,6 +38,7 @@ _cleanup()
+ 
+ # get standard environment, filters and checks
+ . ./common/rc
++. ./common/populate
+ . ./common/filter
+ . ./common/attr
+ . ./common/reflink
+@@ -76,8 +77,7 @@ sync
+ 
+ echo "Allocate the rest of the space"
+ nr_free=$(stat -f -c '%f' $testdir)
+-touch $testdir/file0 $testdir/file1
+-_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
++_fill_fs $((blksz * nr_free)) $testdir/space $blksz 0 >> $seqres.full 2>&1
+ sync
+ 
+ echo "mmap CoW the big file"
+diff --git a/tests/generic/174 b/tests/generic/174
+index e58d64b..b55cb72 100755
+--- a/tests/generic/174
++++ b/tests/generic/174
+@@ -38,6 +38,7 @@ _cleanup()
+ 
+ # get standard environment, filters and checks
+ . ./common/rc
++. ./common/populate
+ . ./common/filter
+ . ./common/attr
+ . ./common/reflink
+@@ -77,8 +78,7 @@ sync
+ 
+ echo "Allocate the rest of the space"
+ nr_free=$(stat -f -c '%f' $testdir)
+-touch $testdir/file0 $testdir/file1
+-_pwrite_byte 0x61 0 $((blksz * nr_free)) $testdir/eat_my_space >> $seqres.full 2>&1
++_fill_fs $((blksz * nr_free)) $testdir/space $blksz 0 >> $seqres.full 2>&1
+ sync
+ 
+ echo "CoW the big file"
+diff --git a/tests/generic/256 b/tests/generic/256
+index cfbf790..63f2d4f 100755
+--- a/tests/generic/256
++++ b/tests/generic/256
+@@ -39,6 +39,7 @@ trap "_cleanup ; exit \$status" 0 1 2 3 15
+ 
+ # get standard environment, filters and checks
+ . ./common/rc
++. ./common/populate
+ . ./common/filter
+ . ./common/punch
+ 
+@@ -53,64 +54,6 @@ _require_test
+ 
+ testfile=$TEST_DIR/256.$$
+ 
+-# _fill_fs()
+-#
+-# Fills a file system by repeatedly creating files in the given folder
+-# starting with the given file size.  Files are reduced in size when
+-# they can no longer fit untill no more files can be created.
+-#
+-# This routine is used by _test_full_fs_punch to test that a hole may
+-# still be punched when the disk is full by borrowing reserved blocks.
+-# All files are created as a non root user to prevent reserved blocks
+-# from being consumed.
+-#
+-_fill_fs() {
+-	local file_size=$1
+-	local dir=$2
+-	local block_size=$3
+-	local file_count=1
+-	local bytes_written=0
+-
+-	if [ $# -ne 3 ]
+-	then
+-		echo "USAGE: _fill_fs filesize dir block size"
+-		exit 1
+-	fi
+-
+-	# Creation of files or folders
+-	# must not be done as root or
+-	# reserved blocks will be consumed
+-	_user_do "mkdir -p $dir &> /dev/null"
+-	if [ $? -ne 0 ] ; then
+-		return 0
+-	fi
+-
+-	if [ $file_size -lt $block_size ]
+-	then
+-		$file_size = $block_size
+-	fi
+-
+-	while [ $file_size -ge $block_size ]
+-	do
+-		bytes_written=0
+-		_user_do "$XFS_IO_PROG -f -c \"pwrite 0 $file_size\" $dir/$file_count.bin &> /dev/null"
+-
+-		if [ -f $dir/$file_count.bin ]
+-		then
+-			bytes_written=`$XFS_IO_PROG -c "stat"  $dir/$file_count.bin | grep stat.size | cut -d ' ' -f3`
+-		fi
+-
+-		# If there was no room to make the file,
+-		# then divide it in half, and keep going
+-		if [ $bytes_written -lt $file_size ]
+-		then
+-			file_size=$(( $file_size / 2 ))
+-		fi
+-		file_count=$(( $file_count + 1 ))
+-
+-	done
+-}
+-
+ # _test_full_fs_punch()
+ #
+ # This function will test that a hole may be punched
+@@ -144,7 +87,10 @@ _test_full_fs_punch()
+ 		-c "fsync" $file_name &> /dev/null
+ 	chmod 666 $file_name
+ 
+-	_fill_fs $(( 1024 * 1024 * 1024 )) $path/fill $block_size
++	# All files are created as a non root user to prevent reserved blocks
++	# from being consumed.
++	_fill_fs $(( 1024 * 1024 * 1024 )) $path/fill $block_size 1 \
++		> /dev/null 2>&1
+ 
+ 	for (( i=0; i<$iterations; i++ ))
+ 	do
+@@ -159,7 +105,7 @@ _test_full_fs_punch()
+ 
+ 		hole_offset=$(( $hole_offset + $hole_len + $hole_interval ))
+ 
+-		_fill_fs $hole_len $path/fill.$i $block_size
++		_fill_fs $hole_len $path/fill.$i $block_size 1 > /dev/null 2>&1
+ 
+ 	done
+ }
+-- 
+2.9.0
 
 
 
