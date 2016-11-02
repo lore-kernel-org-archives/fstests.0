@@ -1,66 +1,54 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:44993 "EHLO
-        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S932778AbcKBWR7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Nov 2016 18:17:59 -0400
-Date: Thu, 3 Nov 2016 09:17:55 +1100
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:51163 "EHLO
+        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751563AbcKBB1Q (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 1 Nov 2016 21:27:16 -0400
+Date: Wed, 2 Nov 2016 12:27:13 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] common: add CephFS support
-Message-ID: <20161102221755.GH14023@dastard>
-References: <20161102090054.6394-1-ddiss@suse.de>
+Subject: Re: [PATCH] generic: create and delete files repeatedly to exercise
+ ENOSPC behaviour
+Message-ID: <20161102012713.GE9920@dastard>
+References: <1477999170-20026-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161102090054.6394-1-ddiss@suse.de>
+In-Reply-To: <1477999170-20026-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: David Disseldorp <ddiss@suse.de>
-Cc: fstests@vger.kernel.org, Joao Eduardo Luis <joao@suse.de>
+To: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Nov 02, 2016 at 10:00:54AM +0100, David Disseldorp wrote:
-> From: Joao Eduardo Luis <joao@suse.de>
+On Tue, Nov 01, 2016 at 07:19:30PM +0800, Wang Xiaoguang wrote:
+> In btrfs, sometimes though the number of created files' consumed disk space
+> are not larger than fs's free space, we can still get some ENOSPC error, it
+> may be that btrfs does not try hard to reclaim disk space(I have sent kernel
+> patch to resolve this kind of enospc error. Note, this false enospc error
+> will not always happen even in kernel without my fixing patch).
 > 
-> Add basic CephFS support. No new CephFS specific tests are included,
-> just basic enablement, with ./check now accepting a -ceph parameter.
+> Currently only in btrfs, I get this ENOSPC error, xfs and ext4 work well.
+.....
+> +RUN_TIME=$((600 * $TIME_FACTOR))
+> +fs_size=$((15 * 1024 * 1024 * 1024))
+> +_scratch_mkfs_sized $fs_size > $seqres.full 2>&1
+> +_scratch_mount > $seqres.full 2>&1
+> +
+> +testfile1=$SCRATCH_MNT/testfile1
+> +testfile2=$SCRATCH_MNT/testfile2
+> +filesize1=$(((fs_size * 80) / 100))
+> +filesize2=$(((fs_size * 5) / 100))
+> +
+> +do_test()
+> +{
+> +	while [ -f $SCRATCH_MNT/run ]; do
+> +		$XFS_IO_PROG -fc "pwrite 0 $filesize1" $testfile1 > /dev/null
+> +		$XFS_IO_PROG -fc "pwrite 0 $filesize2" $testfile2 > /dev/null
+> +		rm -f $testfile1 $testfile2 
+> +	done
+> +}
 
-We don't add command line parameters to specify the filesystem
-anymore if we can avoid it (they are legacy options, really).
-Specifying FSTYP=ceph in the environment or config file should be
-sufficient to do they right thing - does this work for ceph?
-
-> @@ -1499,6 +1508,15 @@ _require_scratch_nocheck()
->  			_notrun "this test requires a valid \$SCRATCH_MNT"
->  		fi
->  		;;
-> +        ceph)
-> +		echo $SCRATCH_DEV | grep -q ":/" > /dev/null 2>&1
-> +		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
-> +			_notrun "this test requires a valid \$SCRATCH_DEV"
-> +		fi
-> +		if [ ! -d "$SCRATCH_MNT" ]; then
-> +			_notrun "this test requires a valid \$SCRATCH_MNT"
-> +		fi
-> +		;;
-
-This is the same check as for nfs*). Can you make those common?
-
->  	cifs)
->  		echo $SCRATCH_DEV | grep -q "//" > /dev/null 2>&1
->  		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
-> @@ -1584,6 +1602,15 @@ _require_test()
->  			_notrun "this test requires a valid \$TEST_DIR"
->  		fi
->  		;;
-> +	ceph)
-> +		echo $TEST_DEV | grep -q ":/" > /dev/null 2>&1
-> +		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
-> +			_notrun "this test requires a valid \$TEST_DEV"
-> +		fi
-> +		if [ ! -d "$TEST_DIR" ]; then
-> +		     _notrun "this test requires a valid \$TEST_DIR"
-> +		fi
-> +		;;
-
-Same.
+What are you trying to test here that other ENOSPC tests
+don't exercise? Why cant you just use preallocation to trigger
+ENOSPC repeatedly instead of writing data? That would allow multiple
+iterations per second, not one every few minutes...
 
 Cheers,
 
