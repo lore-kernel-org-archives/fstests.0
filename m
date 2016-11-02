@@ -1,65 +1,76 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:56365 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1753137AbcKBK3i (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Nov 2016 06:29:38 -0400
-Subject: Re: [PATCH] generic: create and delete files repeatedly to exercise
- ENOSPC behaviour
-References: <1477999170-20026-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
- <20161101122613.GR27776@eguan.usersys.redhat.com>
-From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
-Message-ID: <5819BE82.10205@cn.fujitsu.com>
-Date: Wed, 2 Nov 2016 18:22:58 +0800
+Received: from synology.com ([59.124.61.242]:50489 "EHLO synology.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751063AbcKBDlJ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 1 Nov 2016 23:41:09 -0400
 MIME-Version: 1.0
-In-Reply-To: <20161101122613.GR27776@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Date: Wed, 02 Nov 2016 11:40:55 +0800
+From: robbieko <robbieko@synology.com>
+Subject: Re: [PATCH v2 1/4] xfstests: btrfs/131: add test for an incremental
+ send with name collision
+In-Reply-To: <20161101071758.GP27776@eguan.usersys.redhat.com>
+References: <1477619046-16375-1-git-send-email-robbieko@synology.com>
+ <1477619046-16375-2-git-send-email-robbieko@synology.com>
+ <20161101071758.GP27776@eguan.usersys.redhat.com>
+Message-ID: <41b2f096d9ef1424263b0a2a063baf4f@synology.com>
 Sender: fstests-owner@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
 To: Eryu Guan <eguan@redhat.com>
 Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-hi Eryu,
+Hi Eryu Guan,
 
-There has already be a generic/102 doing this test...
-Thanks for you kindly review and sorry for wasting your time.
+OK, I will modify it.
 
-Regards,
-Xiaoguang Wang
+Thanks.
+Robbie Ko
 
-On 11/01/2016 08:26 PM, Eryu Guan wrote:
-> On Tue, Nov 01, 2016 at 07:19:30PM +0800, Wang Xiaoguang wrote:
->> In btrfs, sometimes though the number of created files' consumed disk space
->> are not larger than fs's free space, we can still get some ENOSPC error, it
->> may be that btrfs does not try hard to reclaim disk space(I have sent kernel
->> patch to resolve this kind of enospc error. Note, this false enospc error
->> will not always happen even in kernel without my fixing patch).
->>
->> Currently only in btrfs, I get this ENOSPC error, xfs and ext4 work well.
->>
->> Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Eryu Guan =E6=96=BC 2016-11-01 15:17 =E5=AF=AB=E5=88=B0:
+> On Fri, Oct 28, 2016 at 09:44:03AM +0800, robbieko wrote:
+>> From: Robbie Ko <robbieko@synology.com>
+>>=20
+>> Test that an incremental send operation doesn't work because
+>> there's a name collision in the destination and it's not checked
+>> corretly before the rename operation applies.
+>>=20
+>> This test exercises scenarios used to fail in btrfs and are fixed by
+>> the following patch for the linux kernel:
+>>=20
+>> "Btrfs: incremental send, do not skip generation inconsistency check=20
+>> for inode 256."
+>>=20
+>> Signed-off-by: Robbie Ko <robbieko@synology.com>
+>=20
+> Sorry for the late review!
+>=20
 >> ---
->>   tests/generic/389     | 78 +++++++++++++++++++++++++++++++++++++++++++++++++++
->>   tests/generic/389.out |  2 ++
->>   tests/generic/group   |  1 +
->>   3 files changed, 81 insertions(+)
->>   create mode 100755 tests/generic/389
->>   create mode 100644 tests/generic/389.out
->>
->> diff --git a/tests/generic/389 b/tests/generic/389
+>>  tests/btrfs/131     | 111=20
+>> ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/btrfs/131.out |   2 +
+>>  tests/btrfs/group   |   1 +
+>>  3 files changed, 114 insertions(+)
+>>  create mode 100755 tests/btrfs/131
+>>  create mode 100644 tests/btrfs/131.out
+>>=20
+>> diff --git a/tests/btrfs/131 b/tests/btrfs/131
 >> new file mode 100755
->> index 0000000..96bc12e
+>> index 0000000..2e2e0bc
 >> --- /dev/null
->> +++ b/tests/generic/389
->> @@ -0,0 +1,78 @@
+>> +++ b/tests/btrfs/131
+>> @@ -0,0 +1,111 @@
 >> +#! /bin/bash
->> +# FS QA Test 389
+>> +# FS QA Test No. btrfs/131
 >> +#
->> +# Create and delete files repeatedly to exercise ENOSPC behaviour.
-> Trailing whitespace in this line.
->
+>> +# Test that an incremental send operation doesn't work because
+>> +# there's a name collision in the destination and it's not checked
+>> +# corretly before the rename operation applies.
 >> +#
->> +#-----------------------------------------------------------------------
->> +# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
+>> +#--------------------------------------------------------------------=
+---
+>> +# Copyright (C) 2016 Synology Inc. All Rights Reserved.
+>> +# Author: Robbie Ko <robbieko@synology.com>
 >> +#
 >> +# This program is free software; you can redistribute it and/or
 >> +# modify it under the terms of the GNU General Public License as
@@ -71,23 +82,25 @@ On 11/01/2016 08:26 PM, Eryu Guan wrote:
 >> +# GNU General Public License for more details.
 >> +#
 >> +# You should have received a copy of the GNU General Public License
->> +# along with this program; if not, write the Free Software Foundation,
+>> +# along with this program; if not, write the Free Software=20
+>> Foundation,
 >> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
->> +#-----------------------------------------------------------------------
+>> +#--------------------------------------------------------------------=
+---
 >> +#
 >> +
->> +seq=`basename $0`
->> +seqres=$RESULT_DIR/$seq
+>> +seq=3D`basename $0`
+>> +seqres=3D$RESULT_DIR/$seq
 >> +echo "QA output created by $seq"
 >> +
->> +here=`pwd`
->> +tmp=/tmp/$$
->> +status=1	# failure is the default!
+>> +tmp=3D/tmp/$$
+>> +status=3D1	# failure is the default!
 >> +trap "_cleanup; exit \$status" 0 1 2 3 15
 >> +
 >> +_cleanup()
 >> +{
 >> +	cd /
+>> +	rm -fr $send_files_dir
 >> +	rm -f $tmp.*
 >> +}
 >> +
@@ -95,86 +108,134 @@ On 11/01/2016 08:26 PM, Eryu Guan wrote:
 >> +. ./common/rc
 >> +. ./common/filter
 >> +
->> +# remove previous $seqres.full before test
->> +rm -f $seqres.full
->> +
->> +# Modify as appropriate.
->> +_supported_fs generic
+>> +# real QA test starts here
+>> +_supported_fs btrfs
 >> +_supported_os Linux
+>> +_require_test
 >> +_require_scratch
+>> +_require_fssum
 >> +
->> +RUN_TIME=$((600 * $TIME_FACTOR))
-> Hmm, does it really need 600s to run? I think it's better to limit the
-> runtime within 300s and make it an 'auto' test. I, personally, prefer a
-> "loop count" based test, I'd find out a minimum loop count that could
-> reproduce the ENOSPC problem more reliably on btrfs (for example, say
-> 75%) and make the count scale with LOAD_FACTOR.
->
->> +fs_size=$((15 * 1024 * 1024 * 1024))
-> And does it really need 15G on SCRATCH_DEV? A smaller fs size makes test
-> run faster, and gives the test more chance to be run, because not
-> everyone has a 15G SCRATCH_DEV.
->
->> +_scratch_mkfs_sized $fs_size > $seqres.full 2>&1
->> +_scratch_mount > $seqres.full 2>&1
-> Append to $seqres.full not overwrite.
->
+>> +send_files_dir=3D$TEST_DIR/btrfs-test-$seq
 >> +
->> +testfile1=$SCRATCH_MNT/testfile1
->> +testfile2=$SCRATCH_MNT/testfile2
->> +filesize1=$(((fs_size * 80) / 100))
->> +filesize2=$(((fs_size * 5) / 100))
-> Better to have some comments on the filesizes chosen here. e.g. someone
-> may wonder that why it's testing ENOSPC condition with 85% full, not 99%
-> or 100%.
->
+>> +rm -f $seqres.full
+>> +rm -fr $send_files_dir
+>> +mkdir $send_files_dir
 >> +
->> +do_test()
->> +{
->> +	while [ -f $SCRATCH_MNT/run ]; do
->> +		$XFS_IO_PROG -fc "pwrite 0 $filesize1" $testfile1 > /dev/null
->> +		$XFS_IO_PROG -fc "pwrite 0 $filesize2" $testfile2 > /dev/null
->> +		rm -f $testfile1 $testfile2
-> Trailing whitespace here.
->
->> +	done
->> +}
+>> +_scratch_mkfs >>$seqres.full 2>&1
+>> +_scratch_mount
 >> +
->> +echo "Silence is golden"
->> +touch $SCRATCH_MNT/run
->> +do_test &
->> +sleep $RUN_TIME
->> +rm -f $SCRATCH_MNT/run
->> +wait
+>> +mkdir $SCRATCH_MNT/a1
+>> +mkdir $SCRATCH_MNT/a2
 >> +
->> +status=0
->> +exit
->> diff --git a/tests/generic/389.out b/tests/generic/389.out
->> new file mode 100644
->> index 0000000..e8c24bb
->> --- /dev/null
->> +++ b/tests/generic/389.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 389
->> +Silence is golden
-> Can you please rebase on top of current master? generic/389 is already
-> taken, and it makes applying & testing the patch a litter harder :)
->
->> diff --git a/tests/generic/group b/tests/generic/group
->> index fc32cfd..b6d4013 100644
->> --- a/tests/generic/group
->> +++ b/tests/generic/group
->> @@ -391,3 +391,4 @@
->>   386 auto quick quota
->>   387 auto clone
->>   388 auto log metadata
->> +389 enospc
-> Perhaps we can add it to 'rw' group too.
->
+>> +# Filesystem looks like:
+>> +#
+>> +# .                                                             (ino=20
+>> 256)
+>> +# |--- a1/                                                      (ino=20
+>> 257)
+>> +# |
+>> +# |--- a2/                                                      (ino=20
+>> 258)
+>> +#
+>> +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT=20
+>> $SCRATCH_MNT/mysnap1
+>> +
+>> +_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f=20
+>> $send_files_dir/1.snap
+>=20
+> I found these "run_check" based helpers make the result harder to read
+> when test failed, I can't see immediate error messages from the diff
+> output but have to open $seqres.full file to see the details.
+>=20
+> Can you please use $BTRFS_UTIL_PROG directly, in all these four tests?
+> One concern about using bare $BTRFS_UTIL_PROG is that output messages=20
+> of
+> btrfs command are always changed. But I think, at least, we can ignore
+> the stdout and capture the stderr only. e.g.
+>=20
+> $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
+> 	$SCRATCH_MNT/mysnap1 >/dev/null
+>=20
+> So if everything works fine no output can be seen, but if snapshot
+> creation is failed, we can see error messages from stderr, which could
+> fail the test.
+>=20
+>> +
+>> +_scratch_unmount
+>> +_scratch_mkfs >>$seqres.full 2>&1
+>> +_scratch_mount
+>> +touch $SCRATCH_MNT/a2
+>> +
+>> +# Filesystem now looks like:
+>> +#
+>> +# .                                                             (ino=20
+>> 256)
+>> +# |--- a2                                                       (ino=20
+>> 257)
+>> +#
+>> +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT=20
+>> $SCRATCH_MNT/mysnap2
+>> +
+>> +_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
+>> +rm $send_files_dir/1.snap
+>> +
+>> +run_check $FSSUM_PROG -A -f -w $send_files_dir/1.fssum=20
+>> $SCRATCH_MNT/mysnap1
+>> +run_check $FSSUM_PROG -A -f -w $send_files_dir/2.fssum=20
+>> $SCRATCH_MNT/mysnap2
+>=20
+> And this "run_check" is not necessary either. Just run $FSSUM_PROG
+> directly and let it print "OK", and match it in .out file.
+>=20
 > Thanks,
 > Eryu
->
->
+>=20
+>> +
+>> +_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f=20
+>> $send_files_dir/1.snap
+>> +_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1=20
+>> $SCRATCH_MNT/mysnap2 \
+>> +	-f $send_files_dir/2.snap
+>> +
+>> +# Now recreate the filesystem by receiving both send streams and=20
+>> verify we get
+>> +# the same content that the original filesystem had.
+>> +_scratch_unmount
+>> +_scratch_mkfs >>$seqres.full 2>&1
+>> +_scratch_mount
+>> +
+>> +_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
+>> +run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
+>> +_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
+>> +run_check $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
+>> +
+>> +echo "Silence is golden"
+>> +status=3D0
+>> +exit
+>> diff --git a/tests/btrfs/131.out b/tests/btrfs/131.out
+>> new file mode 100644
+>> index 0000000..d118ca9
+>> --- /dev/null
+>> +++ b/tests/btrfs/131.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 131
+>> +Silence is golden
+>> diff --git a/tests/btrfs/group b/tests/btrfs/group
+>> index f3a7a4f..a7a070a 100644
+>> --- a/tests/btrfs/group
+>> +++ b/tests/btrfs/group
+>> @@ -133,3 +133,4 @@
+>>  128 auto quick send
+>>  129 auto quick send
+>>  130 auto clone send
+>> +131 auto quick send
+>> --
+>> 1.9.1
+>>=20
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
 
