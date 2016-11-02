@@ -1,209 +1,34 @@
-Received: from mx1.redhat.com ([209.132.183.28]:38984 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:37656 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S947125AbcKAHSG (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 1 Nov 2016 03:18:06 -0400
-Date: Tue, 1 Nov 2016 15:17:58 +0800
+        id S1752656AbcKBKg6 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 2 Nov 2016 06:36:58 -0400
+Date: Wed, 2 Nov 2016 18:36:56 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2 1/4] xfstests: btrfs/131: add test for an incremental
- send with name collision
-Message-ID: <20161101071758.GP27776@eguan.usersys.redhat.com>
-References: <1477619046-16375-1-git-send-email-robbieko@synology.com>
- <1477619046-16375-2-git-send-email-robbieko@synology.com>
+Subject: Re: [PATCH] generic: create and delete files repeatedly to exercise
+ ENOSPC behaviour
+Message-ID: <20161102103655.GW27776@eguan.usersys.redhat.com>
+References: <1477999170-20026-1-git-send-email-wangxg.fnst@cn.fujitsu.com>
+ <20161101122613.GR27776@eguan.usersys.redhat.com>
+ <5819BE82.10205@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1477619046-16375-2-git-send-email-robbieko@synology.com>
+In-Reply-To: <5819BE82.10205@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: robbieko <robbieko@synology.com>
+To: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
 Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Oct 28, 2016 at 09:44:03AM +0800, robbieko wrote:
-> From: Robbie Ko <robbieko@synology.com>
+On Wed, Nov 02, 2016 at 06:22:58PM +0800, Wang Xiaoguang wrote:
+> hi Eryu,
 > 
-> Test that an incremental send operation doesn't work because
-> there's a name collision in the destination and it's not checked
-> corretly before the rename operation applies.
-> 
-> This test exercises scenarios used to fail in btrfs and are fixed by
-> the following patch for the linux kernel:
-> 
-> "Btrfs: incremental send, do not skip generation inconsistency check for inode 256."
-> 
-> Signed-off-by: Robbie Ko <robbieko@synology.com>
+> There has already be a generic/102 doing this test...
+> Thanks for you kindly review and sorry for wasting your time.
 
-Sorry for the late review!
+I had impression yesterday that we have a case that does exactly the
+same test, and I searched but didn't find it.. It turns out that we do
+have it already :)
 
-> ---
->  tests/btrfs/131     | 111 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/131.out |   2 +
->  tests/btrfs/group   |   1 +
->  3 files changed, 114 insertions(+)
->  create mode 100755 tests/btrfs/131
->  create mode 100644 tests/btrfs/131.out
-> 
-> diff --git a/tests/btrfs/131 b/tests/btrfs/131
-> new file mode 100755
-> index 0000000..2e2e0bc
-> --- /dev/null
-> +++ b/tests/btrfs/131
-> @@ -0,0 +1,111 @@
-> +#! /bin/bash
-> +# FS QA Test No. btrfs/131
-> +#
-> +# Test that an incremental send operation doesn't work because
-> +# there's a name collision in the destination and it's not checked
-> +# corretly before the rename operation applies.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (C) 2016 Synology Inc. All Rights Reserved.
-> +# Author: Robbie Ko <robbieko@synology.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -fr $send_files_dir
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_test
-> +_require_scratch
-> +_require_fssum
-> +
-> +send_files_dir=$TEST_DIR/btrfs-test-$seq
-> +
-> +rm -f $seqres.full
-> +rm -fr $send_files_dir
-> +mkdir $send_files_dir
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount
-> +
-> +mkdir $SCRATCH_MNT/a1
-> +mkdir $SCRATCH_MNT/a2
-> +
-> +# Filesystem looks like:
-> +#
-> +# .                                                             (ino 256)
-> +# |--- a1/                                                      (ino 257)
-> +# |
-> +# |--- a2/                                                      (ino 258)
-> +#
-> +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap1
-> +
-> +_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
+Thanks for writing new test cases!
 
-I found these "run_check" based helpers make the result harder to read
-when test failed, I can't see immediate error messages from the diff
-output but have to open $seqres.full file to see the details.
-
-Can you please use $BTRFS_UTIL_PROG directly, in all these four tests?
-One concern about using bare $BTRFS_UTIL_PROG is that output messages of
-btrfs command are always changed. But I think, at least, we can ignore
-the stdout and capture the stderr only. e.g.
-
-$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-	$SCRATCH_MNT/mysnap1 >/dev/null
-
-So if everything works fine no output can be seen, but if snapshot
-creation is failed, we can see error messages from stderr, which could
-fail the test.
-
-> +
-> +_scratch_unmount
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount
-> +touch $SCRATCH_MNT/a2
-> +
-> +# Filesystem now looks like:
-> +#
-> +# .                                                             (ino 256)
-> +# |--- a2                                                       (ino 257)
-> +#
-> +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap2
-> +
-> +_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-> +rm $send_files_dir/1.snap
-> +
-> +run_check $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-> +run_check $FSSUM_PROG -A -f -w $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
-
-And this "run_check" is not necessary either. Just run $FSSUM_PROG
-directly and let it print "OK", and match it in .out file.
-
-Thanks,
 Eryu
-
-> +
-> +_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
-> +_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
-> +	-f $send_files_dir/2.snap
-> +
-> +# Now recreate the filesystem by receiving both send streams and verify we get
-> +# the same content that the original filesystem had.
-> +_scratch_unmount
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount
-> +
-> +_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-> +run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-> +_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
-> +run_check $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
-> +
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/131.out b/tests/btrfs/131.out
-> new file mode 100644
-> index 0000000..d118ca9
-> --- /dev/null
-> +++ b/tests/btrfs/131.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 131
-> +Silence is golden
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index f3a7a4f..a7a070a 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -133,3 +133,4 @@
->  128 auto quick send
->  129 auto quick send
->  130 auto clone send
-> +131 auto quick send
-> -- 
-> 1.9.1
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
