@@ -1,55 +1,78 @@
-Received: from synology.com ([59.124.61.242]:55280 "EHLO synology.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751063AbcKBDwI (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 1 Nov 2016 23:52:08 -0400
+Received: from cn.fujitsu.com ([222.73.24.84]:51022 "EHLO song.cn.fujitsu.com"
+        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+        id S1750698AbcKBEOQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 2 Nov 2016 00:14:16 -0400
+From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Subject: [PATCH v5 1/2] common/populate: use _require_xfs_io_command() in right place
+Date: Wed,  2 Nov 2016 12:07:26 +0800
+Message-Id: <20161102040727.5765-1-wangxg.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
-Date: Wed, 02 Nov 2016 11:52:00 +0800
-From: robbieko <robbieko@synology.com>
-Subject: Re: [PATCH v2 4/4] xfstests: btrfs/134: add test for incremental send
- which renames a directory already being deleted
-In-Reply-To: <20161101072055.GQ27776@eguan.usersys.redhat.com>
-References: <1477619046-16375-1-git-send-email-robbieko@synology.com>
- <1477619046-16375-5-git-send-email-robbieko@synology.com>
- <20161101072055.GQ27776@eguan.usersys.redhat.com>
-Message-ID: <5a436c110e0b823a9b6babedfe450734@synology.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, eguan@redhat.com, darrick.wong@oracle.com
 List-ID: <fstests@vger.kernel.org>
 
-Hi Eryu Guan,
+In original common/populate codes, we put _require_xfs_io_command "falloc" and
+_require_xfs_io_command "fpunch" in the begin of common/populate, but it's
+not appropriate, for fs, which does not support falloc and punch, will not
+be able to use other helper functions in common/populate, so here I choose
+to put _require_xfs_io_command "falloc" or "punch" in helper function which
+really use falloc and fpunch.
 
-Yes, it need apply
-[PATCH] "Btrfs: incremental send, do not skip generation inconsistency=20
-check for inode 256."
-and test again, it will failed.
+And xfs/120 uses fpunch, add _require_xfs_io_command "fpunch".
 
-because current code there is a problem, but just will not happen.
+Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+---
+ common/populate | 7 ++++---
+ tests/xfs/120   | 1 +
+ 2 files changed, 5 insertions(+), 3 deletions(-)
 
-Thansk
-Robbie Ko
+diff --git a/common/populate b/common/populate
+index d0003c5..3b9b531 100644
+--- a/common/populate
++++ b/common/populate
+@@ -22,9 +22,6 @@
+ #  Mountain View, CA 94043, USA, or: http://www.sgi.com
+ #-----------------------------------------------------------------------
+ 
+-_require_xfs_io_command "falloc"
+-_require_xfs_io_command "fpunch"
+-
+ _require_xfs_db_blocktrash_z_command() {
+ 	test "${FSTYP}" = "xfs" || _notrun "cannot run xfs_db on ${FSTYP}"
+ 	$XFS_DB_PROG -x -f -c 'blocktrash -z' "${TEST_DEV}" | grep -q 'nothing on stack' || _notrun "blocktrash -z not supported"
+@@ -90,6 +87,8 @@ __populate_fill_fs() {
+ # types of metadata block
+ _scratch_xfs_populate() {
+ 	_scratch_mount
++	_require_xfs_io_command "fpunch"
++
+ 	blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
+ 	dblksz="$(xfs_info "${SCRATCH_MNT}" | grep naming.*bsize | sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g')"
+ 	leaf_lblk="$((32 * 1073741824 / blksz))"
+@@ -192,6 +191,8 @@ _scratch_xfs_populate() {
+ # types of metadata block
+ _scratch_ext4_populate() {
+ 	_scratch_mount
++	_require_xfs_io_command "fpunch"
++
+ 	blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
+ 	dblksz="${blksz}"
+ 	leaf_lblk="$((32 * 1073741824 / blksz))"
+diff --git a/tests/xfs/120 b/tests/xfs/120
+index 3deece6..631e2f2 100755
+--- a/tests/xfs/120
++++ b/tests/xfs/120
+@@ -47,6 +47,7 @@ _cleanup()
+ _supported_fs xfs
+ _supported_os Linux
+ 
++_require_xfs_io_command "fpunch"
+ _require_scratch
+ test -n "${FORCE_FUZZ}" || _require_scratch_xfs_crc
+ _require_attrs
+-- 
+2.9.0
 
-Eryu Guan =E6=96=BC 2016-11-01 15:20 =E5=AF=AB=E5=88=B0:
-> On Fri, Oct 28, 2016 at 09:44:06AM +0800, robbieko wrote:
->> From: Robbie Ko <robbieko@synology.com>
->>=20
->> Test that an incremental send operation dosen't work because
->> it tries to rename a directory which is already deleted.
->>=20
->> This test exercises scenarios used to fail in btrfs and are fixed by
->> the following patch for the linux kernel:
->>=20
->> "Btrfs: incremental send, add generation check for inode is waiting=20
->> for move."
->=20
-> I was testing with v4.9-rc1+ kernel and btrfs-progs v4.6. Seems above
-> patch is not merged in 4.9-rc1 kernel, but test passed for me, is that
-> expected?
->=20
-> Thanks,
-> Eryu
 
 
