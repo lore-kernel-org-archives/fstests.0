@@ -1,123 +1,54 @@
-Received: from mx1.redhat.com ([209.132.183.28]:34082 "EHLO mx1.redhat.com"
+Received: from mx2.suse.de ([195.135.220.15]:44030 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754788AbcKCJwP (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 3 Nov 2016 05:52:15 -0400
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] xfs: mount with corrupted inopblock in superblock
-Date: Thu,  3 Nov 2016 17:52:00 +0800
-Message-Id: <1478166720-14354-1-git-send-email-eguan@redhat.com>
+        id S1750889AbcKCLtr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 3 Nov 2016 07:49:47 -0400
+Date: Thu, 3 Nov 2016 12:49:45 +0100
+From: David Disseldorp <ddiss@suse.de>
+Subject: Re: [PATCH] common: add CephFS support
+Message-ID: <20161103124945.04536a62@suse.de>
+In-Reply-To: <20161102221755.GH14023@dastard>
+References: <20161102090054.6394-1-ddiss@suse.de>
+        <20161102221755.GH14023@dastard>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, Joao Eduardo Luis <joao@suse.de>
 List-ID: <fstests@vger.kernel.org>
 
-When sb_inopblock is corrupted (out of boundary in this case), XFS
-should not crash and refuse to mount.
+On Thu, 3 Nov 2016 09:17:55 +1100, Dave Chinner wrote:
 
-Kernel commit 392c6de98af1 ("xfs: sanitize sb_inopblock in
-xfs_mount_validate_sb") addresses this issue.
+> On Wed, Nov 02, 2016 at 10:00:54AM +0100, David Disseldorp wrote:
+> > From: Joao Eduardo Luis <joao@suse.de>
+> > 
+> > Add basic CephFS support. No new CephFS specific tests are included,
+> > just basic enablement, with ./check now accepting a -ceph parameter.  
+> 
+> We don't add command line parameters to specify the filesystem
+> anymore if we can avoid it (they are legacy options, really).
+> Specifying FSTYP=ceph in the environment or config file should be
+> sufficient to do they right thing - does this work for ceph?
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
- tests/xfs/118     | 66 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/118.out |  2 ++
- tests/xfs/group   |  1 +
- 3 files changed, 69 insertions(+)
- create mode 100755 tests/xfs/118
- create mode 100644 tests/xfs/118.out
+Yes, seems to work okay for me.
 
-diff --git a/tests/xfs/118 b/tests/xfs/118
-new file mode 100755
-index 0000000..680add8
---- /dev/null
-+++ b/tests/xfs/118
-@@ -0,0 +1,66 @@
-+#! /bin/bash
-+# FS QA Test 118
-+#
-+# Mount an XFS with out of bounds inopblock
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Red Hat Inc.,  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_supported_os IRIX Linux
-+# we corrupt scratch dev on purpose
-+_require_scratch_nocheck
-+
-+_scratch_mkfs >>$seqres.full
-+
-+# corrupt sb_inopblock
-+_scratch_xfs_db -x -c "sb 0" -c "write -c inopblock 512" >>$seqres.full
-+
-+# mount corrupted fs
-+_scratch_mount >>$seqres.full 2>&1
-+
-+# no crash, and SCRATCH_DEV should not be mounted either
-+_is_mounted $SCRATCH_DEV
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/xfs/118.out b/tests/xfs/118.out
-new file mode 100644
-index 0000000..3daed86
---- /dev/null
-+++ b/tests/xfs/118.out
-@@ -0,0 +1,2 @@
-+QA output created by 118
-+Silence is golden
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 3296eb9..3bfcb80 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -115,6 +115,7 @@
- 115 parent attr
- 116 quota auto quick
- 117 fuzzers
-+118 auto quick metadata
- 119 log v2log auto freeze dangerous
- 120 fuzzers
- 121 log auto quick
--- 
-2.7.4
+> 
+> > @@ -1499,6 +1508,15 @@ _require_scratch_nocheck()
+> >  			_notrun "this test requires a valid \$SCRATCH_MNT"
+> >  		fi
+> >  		;;
+> > +        ceph)
+> > +		echo $SCRATCH_DEV | grep -q ":/" > /dev/null 2>&1
+> > +		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
+> > +			_notrun "this test requires a valid \$SCRATCH_DEV"
+> > +		fi
+> > +		if [ ! -d "$SCRATCH_MNT" ]; then
+> > +			_notrun "this test requires a valid \$SCRATCH_MNT"
+> > +		fi
+> > +		;;  
+> 
+> This is the same check as for nfs*). Can you make those common?
 
+Sure, will fix and resend. Thanks for the feedback Dave.
+
+Cheers, David
