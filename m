@@ -1,69 +1,160 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:31877 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932486AbcKDDOx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 3 Nov 2016 23:14:53 -0400
-Date: Thu, 3 Nov 2016 20:14:45 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] xfs: mount with corrupted inopblock in superblock
-Message-ID: <20161104031445.GD32036@birch.djwong.org>
-References: <1478166720-14354-1-git-send-email-eguan@redhat.com>
- <20161104005433.GF28177@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20161104005433.GF28177@dastard>
+Received: from mx2.suse.de ([195.135.220.15]:51393 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1759924AbcKDKEv (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 4 Nov 2016 06:04:51 -0400
+Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 9C43DABE7
+        for <fstests@vger.kernel.org>; Fri,  4 Nov 2016 10:04:49 +0000 (UTC)
+From: David Disseldorp <ddiss@suse.de>
+Subject: [PATCH v3] common: add CephFS support
+Date: Fri,  4 Nov 2016 11:04:39 +0100
+Message-Id: <20161104100439.23292-1-ddiss@suse.de>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Joao Eduardo Luis <joao@suse.de>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Nov 04, 2016 at 11:54:34AM +1100, Dave Chinner wrote:
-> On Thu, Nov 03, 2016 at 05:52:00PM +0800, Eryu Guan wrote:
-> > When sb_inopblock is corrupted (out of boundary in this case), XFS
-> > should not crash and refuse to mount.
-> > 
-> > Kernel commit 392c6de98af1 ("xfs: sanitize sb_inopblock in
-> > xfs_mount_validate_sb") addresses this issue.
-> 
-> Ok, seems like something addressed by the fuzzing tests, but we can
-> ignore that for now.
-> 
-> > +_scratch_mkfs >>$seqres.full
-> > +
-> > +# corrupt sb_inopblock
-> > +_scratch_xfs_db -x -c "sb 0" -c "write -c inopblock 512" >>$seqres.full
-> > +
-> > +# mount corrupted fs
-> > +_scratch_mount >>$seqres.full 2>&1
-> > +
-> > +# no crash, and SCRATCH_DEV should not be mounted either
-> > +_is_mounted $SCRATCH_DEV
-> 
-> Rather than test that we caught /one/ corrupt field, why not
-> loop here corrupting each superblock field in turn and checking
-> that the corruption is caught properly?
-> 
-> i.e. shouldn't we be proactively testing that we're catching all the
-> obvious corruptions, rather than just testing the out-of-bounds
-> issues that we've already found and fixed?
+From: Joao Eduardo Luis <joao@suse.de>
 
-I've been working on xfstests that do exactly that for a while now and
-am getting ready to do a big patch dump of online scrub/repair + more
-dangerous_fuzzers tests to see how well the recovery tools work.
+Add basic CephFS support. No new CephFS specific tests are included,
+just FSTYP="ceph" enablement.
 
-In the meantime I doubt it hurts to have this regression test while I
-get my act together. :)
+Signed-off-by: Joao Eduardo Luis <joao@suse.de>
+Reviewed-by: David Disseldorp <ddiss@suse.de>
+Reviewed-by: Dave Chinner <dchinner@redhat.com>
+---
+Changes since v2:
+- remove reference to ./check -ceph from commit msg.
 
---D
+ README.config-sections |  6 ++++++
+ common/config          |  9 +++++++++
+ common/rc              | 21 ++++++++++++++++++---
+ 3 files changed, 33 insertions(+), 3 deletions(-)
 
-> 
-> Cheers,
-> 
-> Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/README.config-sections b/README.config-sections
+index 865ca93..df7c929 100644
+--- a/README.config-sections
++++ b/README.config-sections
+@@ -115,3 +115,9 @@ FSTYP=xfs
+ [ext3_filesystem]
+ FSTYP=ext3
+ MOUNT_OPTIONS="-o noatime"
++
++[cephfs]
++TEST_DIR=/mnt/test
++TEST_DEV=192.168.14.1:6789:/
++TEST_FS_MOUNT_OPTS="-o name=admin,secret=AQDuEBtYKEYRINGSECRETriSC8YJGDZsQHcr7g=="
++FSTYP="ceph"
+diff --git a/common/config b/common/config
+index 168f46c..59638d6 100644
+--- a/common/config
++++ b/common/config
+@@ -298,6 +298,9 @@ _mount_opts()
+ 	cifs)
+ 		export MOUNT_OPTIONS=$CIFS_MOUNT_OPTIONS
+ 		;;
++	ceph)
++		export MOUNT_OPTIONS=$CEPHFS_MOUNT_OPTIONS
++		;;
+ 	overlay)
+ 		export MOUNT_OPTIONS=$OVERLAY_MOUNT_OPTIONS
+ 		;;
+@@ -335,6 +338,9 @@ _test_mount_opts()
+ 	cifs)
+ 		export TEST_FS_MOUNT_OPTS=$CIFS_MOUNT_OPTIONS
+ 		;;
++	ceph)
++		export TEST_FS_MOUNT_OPTS=$CEPHFS_MOUNT_OPTIONS
++		;;
+ 	*)
+ 		;;
+ 	esac
+@@ -357,6 +363,9 @@ _mkfs_opts()
+ 	cifs)
+ 		export MKFS_OPTIONS=$CIFS_MKFS_OPTIONS
+ 		;;
++	ceph)
++		export MKFS_OPTIONS=$CEPHFS_MKFS_OPTIONS
++		;;
+ 	reiserfs)
+ 		export MKFS_OPTIONS="$REISERFS_MKFS_OPTIONS -q"
+ 		;;
+diff --git a/common/rc b/common/rc
+index a84efe4..e3b54ec 100644
+--- a/common/rc
++++ b/common/rc
+@@ -147,6 +147,8 @@ case "$FSTYP" in
+ 	 ;;
+     cifs)
+ 	 ;;
++    ceph)
++	 ;;
+     overlay)
+ 	 ;;
+     reiser4)
+@@ -705,6 +707,9 @@ _test_mkfs()
+     cifs)
+ 	# do nothing for cifs
+ 	;;
++    ceph)
++	# do nothing for ceph
++	;;
+     overlay)
+ 	# do nothing for overlay
+ 	;;
+@@ -791,6 +796,10 @@ _scratch_mkfs()
+ 	# avoid EEXIST caused by the leftover files created in previous runs
+         _scratch_cleanup_files
+ 	;;
++    ceph)
++	# Don't re-create CephFS, just remove all files
++	_scratch_cleanup_files
++	;;
+     overlay)
+ 	# unable to re-create overlay, remove all files in $SCRATCH_MNT to
+ 	# avoid EEXIST caused by the leftover files created in previous runs
+@@ -1490,7 +1499,7 @@ _reload_btrfs_ko()
+ _require_scratch_nocheck()
+ {
+     case "$FSTYP" in
+-	nfs*)
++	nfs*|ceph)
+ 		echo $SCRATCH_DEV | grep -q ":/" > /dev/null 2>&1
+ 		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
+ 			_notrun "this test requires a valid \$SCRATCH_DEV"
+@@ -1575,10 +1584,10 @@ _require_scratch()
+ _require_test()
+ {
+     case "$FSTYP" in
+-	nfs*)
++	nfs*|ceph)
+ 		echo $TEST_DEV | grep -q ":/" > /dev/null 2>&1
+ 		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
+-			_notrun "this test requires a valid \$TEST_DIR"
++			_notrun "this test requires a valid \$TEST_DEV"
+ 		fi
+ 		if [ ! -d "$TEST_DIR" ]; then
+ 			_notrun "this test requires a valid \$TEST_DIR"
+@@ -2658,6 +2667,9 @@ _check_test_fs()
+     cifs)
+ 	# no way to check consistency for cifs
+ 	;;
++    ceph)
++	# no way to check consistency for CephFS
++	;;
+     overlay)
+ 	# no way to check consistency for overlay
+ 	;;
+@@ -2702,6 +2714,9 @@ _check_scratch_fs()
+     cifs)
+ 	# Don't know how to check a CIFS filesystem, yet.
+ 	;;
++    ceph)
++	# no way to check consistency for CephFS
++	;;
+     overlay)
+ 	# no way to check consistency for overlay
+ 	;;
+-- 
+2.10.0
+
