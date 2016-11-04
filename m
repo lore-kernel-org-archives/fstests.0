@@ -1,11 +1,11 @@
-Received: from mx1.redhat.com ([209.132.183.28]:52752 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:47396 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932299AbcKDQHy (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 4 Nov 2016 12:07:54 -0400
+        id S935415AbcKDQJQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 4 Nov 2016 12:09:16 -0400
 From: Zorro Lang <zlang@redhat.com>
 Subject: [PATCH v4] fstests: test xfs_copy V5 XFS without -d option
-Date: Sat,  5 Nov 2016 00:07:46 +0800
-Message-Id: <1478275666-7908-1-git-send-email-zlang@redhat.com>
+Date: Sat,  5 Nov 2016 00:09:05 +0800
+Message-Id: <1478275745-8008-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-xfs@vger.kernel.org
