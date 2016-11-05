@@ -1,12 +1,11 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:38141 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750935AbcKEARm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 4 Nov 2016 20:17:42 -0400
-Subject: [PATCH 4/9] populate: fix some silly errors when modifying a fs
- while fuzzing
+Received: from userp1040.oracle.com ([156.151.31.81]:17329 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750935AbcKEARs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 4 Nov 2016 20:17:48 -0400
+Subject: [PATCH 5/9] common/fuzzy: move fuzzing helper functions here
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Fri, 04 Nov 2016 17:17:35 -0700
-Message-ID: <147830505553.1919.3040999600042003549.stgit@birch.djwong.org>
+Date: Fri, 04 Nov 2016 17:17:41 -0700
+Message-ID: <147830506170.1919.4771681083616395313.stgit@birch.djwong.org>
 In-Reply-To: <147830503054.1919.4998804611100937975.stgit@birch.djwong.org>
 References: <147830503054.1919.4998804611100937975.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -17,55 +16,174 @@ To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-There were some silly errors in _scratch_fuzz_modify such that it
-wasn't really doing much of anything because of undefined variables.
-(Sloppy refactoring when converting xfsfuzz.sh into xfstests.)
+Move some fuzzing helper functions into a new common/fuzzy file.
+We'll add a lot more fuzzing helpers in subsequent patches.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- common/populate |   10 ++++++----
- 1 file changed, 6 insertions(+), 4 deletions(-)
+ common/fuzzy    |   83 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ common/populate |   36 ------------------------
+ tests/ext4/006  |    1 +
+ tests/xfs/083   |    1 +
+ 4 files changed, 85 insertions(+), 36 deletions(-)
+ create mode 100644 common/fuzzy
 
 
-diff --git a/common/populate b/common/populate
-index 5d451e3..d2df121 100644
---- a/common/populate
-+++ b/common/populate
-@@ -590,7 +590,7 @@ _scratch_populate() {
- 		_scratch_xfs_populate
- 		_scratch_xfs_populate_check
- 		;;
--	"ext4")
-+	"ext2"|"ext3"|"ext4")
- 		_scratch_ext4_populate
- 		_scratch_ext4_populate_check
- 		;;
-@@ -606,22 +606,24 @@ _scratch_fuzz_modify() {
- 
- 	test -z "${nr}" && nr=50000
- 	echo "+++ touch ${nr} files"
--	$XFS_IO_PROG -f -c "pwrite -S 0x63 0 ${BLK_SZ}" "/tmp/afile" > /dev/null
+diff --git a/common/fuzzy b/common/fuzzy
+new file mode 100644
+index 0000000..20f1d29
+--- /dev/null
++++ b/common/fuzzy
+@@ -0,0 +1,83 @@
++##/bin/bash
++
++# Routines for fuzzing and scrubbing a filesystem.
++#
++#-----------------------------------------------------------------------
++#  Copyright (c) 2016 Oracle.  All Rights Reserved.
++#  This program is free software; you can redistribute it and/or modify
++#  it under the terms of the GNU General Public License as published by
++#  the Free Software Foundation; either version 2 of the License, or
++#  (at your option) any later version.
++#
++#  This program is distributed in the hope that it will be useful,
++#  but WITHOUT ANY WARRANTY; without even the implied warranty of
++#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#  GNU General Public License for more details.
++#
++#  You should have received a copy of the GNU General Public License
++#  along with this program; if not, write to the Free Software
++#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
++#  USA
++#
++#  Contact information: Silicon Graphics, Inc., 1500 Crittenden Lane,
++#  Mountain View, CA 94043, USA, or: http://www.sgi.com
++#-----------------------------------------------------------------------
++
++# Modify various files after a fuzzing operation
++_scratch_fuzz_modify() {
++	nr="$1"
++
++	test -z "${nr}" && nr=50000
++	echo "+++ touch ${nr} files"
 +	blk_sz=$(stat -f -c '%s' ${SCRATCH_MNT})
 +	$XFS_IO_PROG -f -c "pwrite -S 0x63 0 ${blk_sz}" "/tmp/afile" > /dev/null
- 	date="$(date)"
- 	find "${SCRATCH_MNT}/" -type f 2> /dev/null | head -n "${nr}" | while read f; do
- 		setfattr -n "user.date" -v "${date}" "$f"
- 		cat "/tmp/afile" >> "$f"
- 		mv "$f" "$f.longer"
- 	done
++	date="$(date)"
++	find "${SCRATCH_MNT}/" -type f 2> /dev/null | head -n "${nr}" | while read f; do
++		setfattr -n "user.date" -v "${date}" "$f"
++		cat "/tmp/afile" >> "$f"
++		mv "$f" "$f.longer"
++	done
 +	sync
- 	rm -rf "/tmp/afile"
- 
- 	echo "+++ create files"
--	cp -pRdu "${SRCDIR}" "${SCRATCH_MNT}/test.moo"
++	rm -rf "/tmp/afile"
++
++	echo "+++ create files"
 +	mkdir -p "${SCRATCH_MNT}/test.moo"
 +	$XFS_IO_PROG -f -c 'pwrite -S 0x80 0 65536' "${SCRATCH_MNT}/test.moo/urk"
- 	sync
- 
- 	echo "+++ remove files"
- 	rm -rf "${SCRATCH_MNT}/test.moo"
--	rm -rf "${SCRATCH_MNT}/test.1"
++	sync
++
++	echo "+++ remove files"
++	rm -rf "${SCRATCH_MNT}/test.moo"
++}
++
++# Try to access files after fuzzing
++_scratch_fuzz_test() {
++	echo "+++ ls -laR" >> $seqres.full
++	ls -laR "${SCRATCH_MNT}/test.1/" >/dev/null 2>&1
++
++	echo "+++ cat files" >> $seqres.full
++	(find "${SCRATCH_MNT}/test.1/" -type f -size -1048576k -print0 | xargs -0 cat) >/dev/null 2>&1
++}
++
++# Do we have an online scrub program?
++_require_scrub() {
++	case "${FSTYP}" in
++	"xfs"|"ext4")
++		test -x $XFS_SCRUB_PROG || _notrun "xfs_scrub not found"
++		;;
++	*)
++		_notrun "No online scrub program for ${FSTYP}."
++		;;
++	esac
++}
++
++# Scrub the scratch filesystem (online)
++_scratch_scrub() {
++	case "${FSTYP}" in
++	"xfs"|"ext4")
++		$XFS_SCRUB_PROG -d -T -v "$@" $SCRATCH_MNT
++		;;
++	*)
++		_fail "No online scrub program for ${FSTYP}."
++		;;
++	esac
++}
+diff --git a/common/populate b/common/populate
+index d2df121..947d74f 100644
+--- a/common/populate
++++ b/common/populate
+@@ -599,39 +599,3 @@ _scratch_populate() {
+ 		;;
+ 	esac
  }
+-
+-# Modify various files after a fuzzing operation
+-_scratch_fuzz_modify() {
+-	nr="$1"
+-
+-	test -z "${nr}" && nr=50000
+-	echo "+++ touch ${nr} files"
+-	blk_sz=$(stat -f -c '%s' ${SCRATCH_MNT})
+-	$XFS_IO_PROG -f -c "pwrite -S 0x63 0 ${blk_sz}" "/tmp/afile" > /dev/null
+-	date="$(date)"
+-	find "${SCRATCH_MNT}/" -type f 2> /dev/null | head -n "${nr}" | while read f; do
+-		setfattr -n "user.date" -v "${date}" "$f"
+-		cat "/tmp/afile" >> "$f"
+-		mv "$f" "$f.longer"
+-	done
+-	sync
+-	rm -rf "/tmp/afile"
+-
+-	echo "+++ create files"
+-	mkdir -p "${SCRATCH_MNT}/test.moo"
+-	$XFS_IO_PROG -f -c 'pwrite -S 0x80 0 65536' "${SCRATCH_MNT}/test.moo/urk"
+-	sync
+-
+-	echo "+++ remove files"
+-	rm -rf "${SCRATCH_MNT}/test.moo"
+-}
+-
+-# Try to access files after fuzzing
+-_scratch_fuzz_test() {
+-	echo "+++ ls -laR" >> $seqres.full
+-	ls -laR "${SCRATCH_MNT}/test.1/" >/dev/null 2>&1
+-
+-	echo "+++ cat files" >> $seqres.full
+-	(find "${SCRATCH_MNT}/test.1/" -type f -size -1048576k -print0 | xargs -0 cat) >/dev/null 2>&1
+-}
+-
+diff --git a/tests/ext4/006 b/tests/ext4/006
+index 9662f50..bb9b7e5 100755
+--- a/tests/ext4/006
++++ b/tests/ext4/006
+@@ -43,6 +43,7 @@ _cleanup()
+ . ./common/filter
+ . ./common/attr
+ . ./common/populate
++. ./common/fuzzy
  
- # Try to access files after fuzzing
+ if [ ! -x "$(which e2fuzz)" ]; then
+ 	_notrun "Couldn't find e2fuzz"
+diff --git a/tests/xfs/083 b/tests/xfs/083
+index 39bd75f..e2b5f82 100755
+--- a/tests/xfs/083
++++ b/tests/xfs/083
+@@ -43,6 +43,7 @@ _cleanup()
+ . ./common/filter
+ . ./common/attr
+ . ./common/populate
++. ./common/fuzzy
+ 
+ # real QA test starts here
+ _supported_fs xfs
 
