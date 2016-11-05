@@ -1,12 +1,12 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:38121 "EHLO
+Received: from aserp1040.oracle.com ([141.146.126.69]:38141 "EHLO
         aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750935AbcKEARf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 4 Nov 2016 20:17:35 -0400
-Subject: [PATCH 3/9] populate: optionally fill the filesystem when
- populating fs
+        with ESMTP id S1750935AbcKEARm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 4 Nov 2016 20:17:42 -0400
+Subject: [PATCH 4/9] populate: fix some silly errors when modifying a fs
+ while fuzzing
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Fri, 04 Nov 2016 17:17:29 -0700
-Message-ID: <147830504936.1919.13567740350388016487.stgit@birch.djwong.org>
+Date: Fri, 04 Nov 2016 17:17:35 -0700
+Message-ID: <147830505553.1919.3040999600042003549.stgit@birch.djwong.org>
 In-Reply-To: <147830503054.1919.4998804611100937975.stgit@birch.djwong.org>
 References: <147830503054.1919.4998804611100937975.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -17,89 +17,55 @@ To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Be a little more flexible in how much we fill up a pre-populated
-filesystem.  For the field fuzzing tests, we don't need the extra
-space/inode usage and therefore won't want much at all.
+There were some silly errors in _scratch_fuzz_modify such that it
+wasn't really doing much of anything because of undefined variables.
+(Sloppy refactoring when converting xfsfuzz.sh into xfstests.)
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- common/populate |   35 ++++++++++++++++++++++++++++-------
- 1 file changed, 28 insertions(+), 7 deletions(-)
+ common/populate |   10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
 
 
 diff --git a/common/populate b/common/populate
-index 2ac2c22..5d451e3 100644
+index 5d451e3..d2df121 100644
 --- a/common/populate
 +++ b/common/populate
-@@ -73,26 +73,39 @@ __populate_create_attr() {
+@@ -590,7 +590,7 @@ _scratch_populate() {
+ 		_scratch_xfs_populate
+ 		_scratch_xfs_populate_check
+ 		;;
+-	"ext4")
++	"ext2"|"ext3"|"ext4")
+ 		_scratch_ext4_populate
+ 		_scratch_ext4_populate_check
+ 		;;
+@@ -606,22 +606,24 @@ _scratch_fuzz_modify() {
+ 
+ 	test -z "${nr}" && nr=50000
+ 	echo "+++ touch ${nr} files"
+-	$XFS_IO_PROG -f -c "pwrite -S 0x63 0 ${BLK_SZ}" "/tmp/afile" > /dev/null
++	blk_sz=$(stat -f -c '%s' ${SCRATCH_MNT})
++	$XFS_IO_PROG -f -c "pwrite -S 0x63 0 ${blk_sz}" "/tmp/afile" > /dev/null
+ 	date="$(date)"
+ 	find "${SCRATCH_MNT}/" -type f 2> /dev/null | head -n "${nr}" | while read f; do
+ 		setfattr -n "user.date" -v "${date}" "$f"
+ 		cat "/tmp/afile" >> "$f"
+ 		mv "$f" "$f.longer"
  	done
++	sync
+ 	rm -rf "/tmp/afile"
+ 
+ 	echo "+++ create files"
+-	cp -pRdu "${SRCDIR}" "${SCRATCH_MNT}/test.moo"
++	mkdir -p "${SCRATCH_MNT}/test.moo"
++	$XFS_IO_PROG -f -c 'pwrite -S 0x80 0 65536' "${SCRATCH_MNT}/test.moo/urk"
+ 	sync
+ 
+ 	echo "+++ remove files"
+ 	rm -rf "${SCRATCH_MNT}/test.moo"
+-	rm -rf "${SCRATCH_MNT}/test.1"
  }
  
--# Fill up 60% of the remaining free space
-+# Fill up some percentage of the remaining free space
- __populate_fill_fs() {
- 	dir="$1"
- 	pct="$2"
- 	test -z "${pct}" && pct=60
- 
--	SRC_SZ="$(du -ks "${SRCDIR}" | cut -f 1)"
-+	mkdir -p "${dir}/test/1"
-+	cp -pRdu "${dir}"/S_IFREG* "${dir}/test/1/"
-+
-+	SRC_SZ="$(du -ks "${dir}/test/1" | cut -f 1)"
- 	FS_SZ="$(( $(stat -f "${dir}" -c '%a * %S') / 1024 ))"
- 
- 	NR="$(( (FS_SZ * ${pct} / 100) / SRC_SZ ))"
--	test "${NR}" -lt 1 && NR=1
- 
--	seq 1 "${NR}" | while read nr; do
--		cp -pRdu "${SRCDIR}" "${dir}/test.${nr}" >> $seqres.full 2>&1
-+	echo "FILL FS"
-+	echo "src_sz $SRC_SZ fs_sz $FS_SZ nr $NR"
-+	seq 2 "${NR}" | while read nr; do
-+		cp -pRdu "${dir}/test/1" "${dir}/test/${nr}"
- 	done
- }
- 
- # Populate an XFS on the scratch device with (we hope) all known
- # types of metadata block
- _scratch_xfs_populate() {
-+	fill=1
-+
-+	for arg in $@; do
-+		case "${arg}" in
-+		"nofill")
-+			fill=0;;
-+		esac
-+	done
-+
- 	_scratch_mount
- 	blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
- 	dblksz="$(xfs_info "${SCRATCH_MNT}" | grep naming.*bsize | sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g')"
-@@ -227,6 +240,15 @@ _scratch_xfs_populate() {
- # Populate an ext4 on the scratch device with (we hope) all known
- # types of metadata block
- _scratch_ext4_populate() {
-+	fill=1
-+
-+	for arg in $@; do
-+		case "${arg}" in
-+		"nofill")
-+			fill=0;;
-+		esac
-+	done
-+
- 	_scratch_mount
- 	blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
- 	dblksz="${blksz}"
-@@ -294,8 +316,7 @@ _scratch_ext4_populate() {
- 
- 	# Copy some real files (xfs tests, I guess...)
- 	echo "+ real files"
--	__populate_fill_fs "${SCRATCH_MNT}"
--	cp -pRdu --reflink=always "${SCRATCH_MNT}/S_IFREG.FMT_ETREE" "${SCRATCH_MNT}/S_IREG.FMT_ETREE.REFLINK" 2> /dev/null
-+	test $fill -ne 0 && __populate_fill_fs "${SCRATCH_MNT}" 5
- 
- 	umount "${SCRATCH_MNT}"
- }
+ # Try to access files after fuzzing
 
