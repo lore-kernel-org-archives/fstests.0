@@ -1,89 +1,120 @@
-Received: from mx1.redhat.com ([209.132.183.28]:47338 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750947AbcKFFJl (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 6 Nov 2016 01:09:41 -0400
-Message-Id: <201611060509.uA659dRZ008618@int-mx09.intmail.prod.int.phx2.redhat.com>
-Date: Sun, 06 Nov 2016 13:09:39 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: [GIT PULL] fstests: updates on 2016-11-06
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:33196 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751530AbcKFKXu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 6 Nov 2016 05:23:50 -0500
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH 2/2] test-appliance: add support for overlayfs over xfs
+Date: Sun,  6 Nov 2016 12:23:17 +0200
+Message-Id: <1478427797-8969-3-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1478427797-8969-1-git-send-email-amir73il@gmail.com>
+References: <1478427797-8969-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, "Darrick J . Wong" <darrick.wong@oracle.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave,
+When PRIMARY_FSTYPE is set to xfs, format overlayfs
+underlying device as xfs with reflink support, because
+clone-up is so much nicer then copy-up.
 
-Can you please pull the fstests update from the location below? There're only
-two patches in this update, one is to add support to cephfs and one to filter
-out all "64" from xfs_io error messages.
+This requires using the for-next (for 4.9) branch of
+xfsprogs.
 
-New failure I noticed in this update:
-- xfs/021 fails due to extra lines outputed by latest xfs_db, a patch to fix
-  xfs/021 is in the list for review.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ .../test-appliance/files/root/fs/overlay/config    | 44 ++++++++++++++++++----
+ kvm-xfstests/util/parse_cli                        |  2 +-
+ 2 files changed, 37 insertions(+), 9 deletions(-)
 
-Thanks,
-Eryu
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/overlay/config b/kvm-xfstests/test-appliance/files/root/fs/overlay/config
+index 4420cfe..63ae06f 100644
+--- a/kvm-xfstests/test-appliance/files/root/fs/overlay/config
++++ b/kvm-xfstests/test-appliance/files/root/fs/overlay/config
+@@ -4,18 +4,32 @@
+ 
+ DEFAULT_MKFS_OPTIONS=""
+ 
++function __fsck()
++{
++	local dev="$1"
++
++	case "$FSTESTTYP" in
++	    ext4)
++		/sbin/e2fsck -fy "$dev"
++		;;
++	    xfs)
++		xfs_repair "$dev"
++		;;
++	esac
++}
++
+ function check_filesystem()
+ {
+ 	umount $SM_TST_DEV >& /dev/null
+-	/sbin/e2fsck -fy "$SM_TST_DEV"
++	__fsck "$SM_TST_DEV"
+ 	ret="$?"
+-	mount -t ext4 $SM_TST_DEV $SM_TST_MNT
++	mount -t $FSTESTTYP $SM_TST_DEV $SM_TST_MNT
+ 	echo e2fsck exited with status "$ret"
+ 
+ 	umount $SM_SCR_DEV >& /dev/null
+-	/sbin/e2fsck -fy "$SM_SCR_DEV"
++	__fsck "$SM_SCR_DEV"
+ 	ret2="$?"
+-	mount -t ext4 $SM_SCR_DEV $SM_SCR_MNT
++	mount -t $FSTESTTYP $SM_SCR_DEV $SM_SCR_MNT
+ 	echo e2fsck exited with status "$ret2"
+ 
+ 	if test "$ret" -eq 0 ; then
+@@ -24,16 +38,30 @@ function check_filesystem()
+ 	return "$ret"
+ }
+ 
++function __mkfs()
++{
++	local dev="$1"
++
++	case "$FSTESTTYP" in
++	    ext4)
++		/sbin/mke2fs -F -q -t ext4 "$dev"
++		;;
++	    xfs)
++		mkfs.xfs -f -m rmapbt=1,reflink=1 "$dev"
++		;;
++	esac
++}
++
+ function format_filesystem()
+ {
+ 	umount $SM_TST_DEV >& /dev/null
+-	/sbin/mke2fs -F -q -t ext4 $SM_TST_DEV
+-	mount -t ext4 $SM_TST_DEV $SM_TST_MNT
++	__mkfs $SM_TST_DEV
++	mount -t $FSTESTTYP $SM_TST_DEV $SM_TST_MNT
+ 	mkdir -p $SM_TST_MNT/ovl $SM_TST_MNT/testarea
+ 	      
+ 	umount $SM_SCR_DEV >& /dev/null
+-	/sbin/mke2fs -F -q -t ext4 $SM_SCR_DEV
+-	mount -t ext4 $SM_SCR_DEV $SM_SCR_MNT
++	__mkfs $SM_SCR_DEV
++	mount -t $FSTESTTYP $SM_SCR_DEV $SM_SCR_MNT
+ 	mkdir -p $SM_SCR_MNT/ovl $SM_SCR_MNT/testarea
+ 
+ 	return 0
+diff --git a/kvm-xfstests/util/parse_cli b/kvm-xfstests/util/parse_cli
+index a170931..ea747be 100644
+--- a/kvm-xfstests/util/parse_cli
++++ b/kvm-xfstests/util/parse_cli
+@@ -59,7 +59,7 @@ print_help ()
+ validate_test_name()
+ {
+     case "$1" in
+-	btrfs*|cifs*|ext4*|generic*|shared*|udf*|xfs*) ;;
++	btrfs*|cifs*|ext4*|generic*|shared*|udf*|xfs*|overlay*) ;;
+ 	*)
+ 	    echo -e "Invalid test name: $1\n"
+ 	    print_help
+-- 
+2.7.4
 
-The following changes since commit efef020df5b257085831106847d318c93d46531c:
-
-  src/seek_sanity_test: discover allocation size (2016-10-26 19:15:44 +0800)
-
-are available in the git repository at:
-
-  https://github.com/guaneryu/xfstests.git for-dave
-
-for you to fetch changes up to e604301e2605a152d8438f60d893ff29ed65d637:
-
-  common: add CephFS support (2016-11-05 17:30:14 +0800)
-
-----------------------------------------------------------------
-
-fstests: update on 2016-11-06
-
-This update contains:
-o Add cephfs support
-o Filter out all "64" suffix from xfs_io error messages
-
-----------------------------------------------------------------
-Dave Chinner (1):
-      filter: xfs_io output has dropped "64" from error messages
-
-Joao Eduardo Luis (1):
-      common: add CephFS support
-
- README.config-sections |  6 ++++++
- common/config          |  9 +++++++++
- common/filter          |  7 +++++++
- common/rc              | 21 ++++++++++++++++++---
- tests/btrfs/126        |  4 ++--
- tests/btrfs/126.out    |  2 +-
- tests/ext4/306         |  3 ++-
- tests/ext4/306.out     |  2 +-
- tests/f2fs/001         |  6 ++----
- tests/f2fs/001.out     |  2 +-
- tests/generic/171      |  6 ++++--
- tests/generic/171.out  |  4 ++--
- tests/generic/172      |  6 ++++--
- tests/generic/172.out  |  4 ++--
- tests/generic/174      |  6 ++++--
- tests/generic/174.out  |  4 ++--
- tests/generic/230      | 12 ++++++++----
- tests/generic/230.out  |  8 ++++----
- tests/generic/271      |  3 ++-
- tests/generic/271.out  |  2 +-
- tests/generic/272      |  3 ++-
- tests/generic/272.out  |  2 +-
- tests/generic/276      |  3 ++-
- tests/generic/276.out  |  2 +-
- tests/generic/278      |  3 ++-
- tests/generic/278.out  |  2 +-
- tests/generic/328      |  6 ++++--
- tests/generic/328.out  |  4 ++--
- tests/xfs/071          |  4 ++--
- tests/xfs/071.out.64   | 20 ++++++++++----------
- tests/xfs/182          |  6 ++++--
- tests/xfs/182.out      |  2 +-
- 32 files changed, 114 insertions(+), 60 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
