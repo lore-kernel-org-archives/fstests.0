@@ -1,46 +1,89 @@
-Received: from mx1.redhat.com ([209.132.183.28]:37058 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:47338 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751256AbcKFE6o (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 6 Nov 2016 00:58:44 -0400
-Date: Sun, 6 Nov 2016 12:58:41 +0800
+        id S1750947AbcKFFJl (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 6 Nov 2016 01:09:41 -0400
+Message-Id: <201611060509.uA659dRZ008618@int-mx09.intmail.prod.int.phx2.redhat.com>
+Date: Sun, 06 Nov 2016 13:09:39 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v5 1/2] common/populate: use _require_xfs_io_command() in
- right place
-Message-ID: <20161106045841.GE27776@eguan.usersys.redhat.com>
-References: <20161102040727.5765-1-wangxg.fnst@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20161102040727.5765-1-wangxg.fnst@cn.fujitsu.com>
+Subject: [GIT PULL] fstests: updates on 2016-11-06
 Sender: fstests-owner@vger.kernel.org
-To: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, darrick.wong@oracle.com
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Nov 02, 2016 at 12:07:26PM +0800, Wang Xiaoguang wrote:
-> In original common/populate codes, we put _require_xfs_io_command "falloc" and
-> _require_xfs_io_command "fpunch" in the begin of common/populate, but it's
-> not appropriate, for fs, which does not support falloc and punch, will not
-> be able to use other helper functions in common/populate, so here I choose
-> to put _require_xfs_io_command "falloc" or "punch" in helper function which
-> really use falloc and fpunch.
-> 
-> And xfs/120 uses fpunch, add _require_xfs_io_command "fpunch".
-> 
-> Signed-off-by: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+Hi Dave,
 
-Thanks for the patch! But I noticed that the new patchset posted by
-Darrick recently removed "_require"s from common/populate too ([PATCH
-2/9] populate: add _require_populate_commands to check for tools), and
-his subsequent patches depend on this update. So I think it's better to
-take Darrick's patch, rather than taking this one and forcing Darrick to
-rebase his whole patchset again.
+Can you please pull the fstests update from the location below? There're only
+two patches in this update, one is to add support to cephfs and one to filter
+out all "64" from xfs_io error messages.
 
-And patch 2 requires the movement of the "_require"s in common/populate,
-so I'm going to merge it after reviewing & applying Darrick's patchset
-(otherwise generic/256 won't run on filesystems that don't support
-fallocate(2), e.g. ext2/3). That means patch 2 won't be in the pull
-request this week either. Hopefully we can see it in next pr.
+New failure I noticed in this update:
+- xfs/021 fails due to extra lines outputed by latest xfs_db, a patch to fix
+  xfs/021 is in the list for review.
 
 Thanks,
 Eryu
+
+The following changes since commit efef020df5b257085831106847d318c93d46531c:
+
+  src/seek_sanity_test: discover allocation size (2016-10-26 19:15:44 +0800)
+
+are available in the git repository at:
+
+  https://github.com/guaneryu/xfstests.git for-dave
+
+for you to fetch changes up to e604301e2605a152d8438f60d893ff29ed65d637:
+
+  common: add CephFS support (2016-11-05 17:30:14 +0800)
+
+----------------------------------------------------------------
+
+fstests: update on 2016-11-06
+
+This update contains:
+o Add cephfs support
+o Filter out all "64" suffix from xfs_io error messages
+
+----------------------------------------------------------------
+Dave Chinner (1):
+      filter: xfs_io output has dropped "64" from error messages
+
+Joao Eduardo Luis (1):
+      common: add CephFS support
+
+ README.config-sections |  6 ++++++
+ common/config          |  9 +++++++++
+ common/filter          |  7 +++++++
+ common/rc              | 21 ++++++++++++++++++---
+ tests/btrfs/126        |  4 ++--
+ tests/btrfs/126.out    |  2 +-
+ tests/ext4/306         |  3 ++-
+ tests/ext4/306.out     |  2 +-
+ tests/f2fs/001         |  6 ++----
+ tests/f2fs/001.out     |  2 +-
+ tests/generic/171      |  6 ++++--
+ tests/generic/171.out  |  4 ++--
+ tests/generic/172      |  6 ++++--
+ tests/generic/172.out  |  4 ++--
+ tests/generic/174      |  6 ++++--
+ tests/generic/174.out  |  4 ++--
+ tests/generic/230      | 12 ++++++++----
+ tests/generic/230.out  |  8 ++++----
+ tests/generic/271      |  3 ++-
+ tests/generic/271.out  |  2 +-
+ tests/generic/272      |  3 ++-
+ tests/generic/272.out  |  2 +-
+ tests/generic/276      |  3 ++-
+ tests/generic/276.out  |  2 +-
+ tests/generic/278      |  3 ++-
+ tests/generic/278.out  |  2 +-
+ tests/generic/328      |  6 ++++--
+ tests/generic/328.out  |  4 ++--
+ tests/xfs/071          |  4 ++--
+ tests/xfs/071.out.64   | 20 ++++++++++----------
+ tests/xfs/182          |  6 ++++--
+ tests/xfs/182.out      |  2 +-
+ 32 files changed, 114 insertions(+), 60 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
