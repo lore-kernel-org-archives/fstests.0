@@ -1,164 +1,190 @@
-Received: from mx1.redhat.com ([209.132.183.28]:49548 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:55114 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750946AbcKGGaU (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 7 Nov 2016 01:30:20 -0500
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v2] fstests: multi-threads freeze/unfreeze test under fsstress stress
-Date: Mon,  7 Nov 2016 14:30:12 +0800
-Message-Id: <1478500212-11648-1-git-send-email-zlang@redhat.com>
+        id S1752312AbcKGPeQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 7 Nov 2016 10:34:16 -0500
+Date: Mon, 7 Nov 2016 23:34:13 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 1/9] populate: create all types of XFS metadata
+Message-ID: <20161107153413.GL27776@eguan.usersys.redhat.com>
+References: <147830503054.1919.4998804611100937975.stgit@birch.djwong.org>
+ <147830503682.1919.1673201723512253812.stgit@birch.djwong.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <147830503682.1919.1673201723512253812.stgit@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: david@fromorbit.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Multi-threads freeze/unfreeze maybe trigger some bugs, e.g: panic,
-hang or data corruption etc. It does't check the return value of
-freeze/unfreeze, but it tries to make sure fsstress won't run fails,
-and no any other bugs happen.
+On Fri, Nov 04, 2016 at 05:17:16PM -0700, Darrick J. Wong wrote:
+> We have three new metadata types -- rmapbt, rtrmapbt, and refcountbt.
+> Ensure that we populate the scratch fs with all three.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  common/populate |   87 ++++++++++++++++++++++++++++++++++++++++++++++++++-----
+>  1 file changed, 79 insertions(+), 8 deletions(-)
+> 
+> 
+> diff --git a/common/populate b/common/populate
+> index d0003c5..6ada902 100644
+> --- a/common/populate
+> +++ b/common/populate
+> @@ -24,6 +24,7 @@
+>  
+>  _require_xfs_io_command "falloc"
+>  _require_xfs_io_command "fpunch"
+> +_require_test_program "punch-alternating"
+>  
+>  _require_xfs_db_blocktrash_z_command() {
+>  	test "${FSTYP}" = "xfs" || _notrun "cannot run xfs_db on ${FSTYP}"
+> @@ -106,9 +107,7 @@ _scratch_xfs_populate() {
+>  	echo "+ btree extents file"
+>  	nr="$((blksz * 2 / 16))"
+>  	$XFS_IO_PROG -f -c "pwrite -S 0x62 0 $((blksz * nr))" "${SCRATCH_MNT}/S_IFREG.FMT_BTREE"
+> -	for i in $(seq 1 2 ${nr}); do
+> -		$XFS_IO_PROG -f -c "fpunch $((i * blksz)) ${blksz}" "${SCRATCH_MNT}/S_IFREG.FMT_BTREE"
+> -	done
+> +	./src/punch-alternating "${SCRATCH_MNT}/S_IFREG.FMT_BTREE"
+>  
+>  	# Directories
+>  	# - INLINE
+> @@ -128,6 +127,7 @@ _scratch_xfs_populate() {
+>  	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_NODE" "$((16 * dblksz / 40))" true
+>  
+>  	# - BTREE
+> +	echo "+ btree dir"
+>  	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_BTREE" "$((128 * dblksz / 40))" true
+>  
+>  	# Symlinks
+> @@ -180,10 +180,43 @@ _scratch_xfs_populate() {
+>  	$XFS_IO_PROG -f -c 'fsync' "${SCRATCH_MNT}/unused"
+>  	rm -rf "${SCRATCH_MNT}/unused"
+>  
+> +	# Free space btree
+> +	echo "+ freesp btree"
+> +	nr="$((blksz * 2 / 8))"
+> +	$XFS_IO_PROG -f -c "pwrite -S 0x62 0 $((blksz * nr))" "${SCRATCH_MNT}/BNOBT"
+> +	./src/punch-alternating "${SCRATCH_MNT}/BNOBT"
+> +
+> +	# Reverse-mapping btree
+> +	is_rmapbt="$(xfs_info "${SCRATCH_MNT}" | grep -c 'rmapbt=1')"
+> +	if [ $is_rmapbt -gt 0 ]; then
+> +		echo "+ rmapbt btree"
+> +		nr="$((blksz * 2 / 24))"
+> +		$XFS_IO_PROG -f -c "pwrite -S 0x62 0 $((blksz * nr))" "${SCRATCH_MNT}/RMAPBT"
+> +		./src/punch-alternating "${SCRATCH_MNT}/RMAPBT"
+> +	fi
+> +
+> +	# Realtime Reverse-mapping btree
+> +	is_rt="$(xfs_info "${SCRATCH_MNT}" | grep -c 'rtextents=[1-9]')"
+> +	if [ $is_rmapbt -gt 0 ] && [ $is_rt -gt 0 ]; then
+> +		echo "+ rtrmapbt btree"
+> +		nr="$((blksz * 2 / 32))"
+> +		$XFS_IO_PROG -f -R -c "pwrite -S 0x62 0 $((blksz * nr))" "${SCRATCH_MNT}/RTRMAPBT"
+> +		./src/punch-alternating "${SCRATCH_MNT}/RTRMAPBT"
+> +	fi
+> +
+> +	# Reference-count btree
+> +	is_reflink="$(xfs_info "${SCRATCH_MNT}" | grep -c 'reflink=1')"
+> +	if [ $is_reflink -gt 0 ]; then
+> +		echo "+ reflink btree"
+> +		nr="$((blksz * 2 / 12))"
+> +		$XFS_IO_PROG -f -c "pwrite -S 0x62 0 $((blksz * nr))" "${SCRATCH_MNT}/REFCOUNTBT"
+> +		cp --reflink=always "${SCRATCH_MNT}/REFCOUNTBT" "${SCRATCH_MNT}/REFCOUNTBT2"
+> +		./src/punch-alternating "${SCRATCH_MNT}/REFCOUNTBT"
+> +	fi
+> +
+>  	# Copy some real files (xfs tests, I guess...)
+>  	echo "+ real files"
+> -	#__populate_fill_fs "${SCRATCH_MNT}" 40
+> -	cp -pRdu --reflink=always "${SCRATCH_MNT}/S_IFREG.FMT_BTREE" "${SCRATCH_MNT}/S_IFREG.FMT_BTREE.REFLINK" 2> /dev/null
+> +	test $fill -ne 0 && __populate_fill_fs "${SCRATCH_MNT}" 5
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
+Seems this hunk belongs to patch 3/9? There's no "fill" in this context.
 
-Hi,
+>  
+>  	umount "${SCRATCH_MNT}"
+>  }
+> @@ -212,9 +245,7 @@ _scratch_ext4_populate() {
+>  	echo "+ extent tree file"
+>  	nr="$((blksz * 2 / 12))"
+>  	$XFS_IO_PROG -f -c "pwrite -S 0x62 0 $((blksz * nr))" "${SCRATCH_MNT}/S_IFREG.FMT_ETREE"
+> -	for i in $(seq 1 2 ${nr}); do
+> -		$XFS_IO_PROG -f -c "fpunch $((i * blksz)) ${blksz}" "${SCRATCH_MNT}/S_IFREG.FMT_ETREE"
+> -	done
+> +	./src/punch-alternating "${SCRATCH_MNT}/S_IFREG.FMT_ETREE"
+>  
+>  	# Directories
+>  	# - INLINE
+> @@ -349,6 +380,39 @@ __populate_check_xfs_attr() {
+>  	esac
+>  }
+>  
+> +# Check that there's at least one per-AG btree with multiple levels
+> +__populate_check_xfs_agbtree_height() {
+> +	bt_type="$1"
+> +	nr_ags=$(_scratch_xfs_db -c 'sb 0' -c 'p agcount' | awk '{print $3}')
+> +
+> +	case "${bt_type}" in
+> +	"bno"|"cnt"|"rmap"|"refcnt")
+> +		hdr="agf"
+> +		bt_prefix="${bt_type}"
+> +		;;
+> +	"ino")
+> +		hdr="agi"
+> +		bt_prefix=""
+> +		;;
+> +	"fino")
+> +		hdr="agi"
+> +		bt_prefix="free_"
+> +		;;
+> +	*)
+> +		_fail "Don't know about AG btree ${bt_type}"
+> +		;;
+> +	esac
+> +
+> +	seq 0 $((nr_ags - 1)) | while read ag; do
+> +		bt_level=$(_scratch_xfs_db -c "${hdr} ${ag}" -c "p ${bt_prefix}level" | awk '{print $3}')
+> +		if [ "${bt_level}" -gt 1 ]; then
+> +			return 100
+> +		fi
+> +	done
+> +	test $? -eq 100 || _fail "Failed to create ${bt_type} of sufficient height!"
 
-V2 did below changes:
- - "_fail" if scratch_mkfs/mount run fails
- - add _require_test_program "feature"
- - some code style change
- - "kill -0 $fsstress_pid 2>/dev/null" instead of
-   "[ $(ps -ef | grep "fsstress" | grep -v -c grep) -gt 0 ]"
- - move the last unfreeze operation to _cleanup
- - increase fsstress' nops from 600 to 1000
-
-Until now, it ran about 97s in my test x86_64 machine which has 8
-cpus, 64G memory.
+I'm a bit confused here, why test against 100? Because of the
+"return 100" above? That should exit the function and return to caller
+already.
 
 Thanks,
-Zorro
+Eryu
 
- tests/generic/999     | 93 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/999.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 96 insertions(+)
- create mode 100755 tests/generic/999
- create mode 100644 tests/generic/999.out
-
-diff --git a/tests/generic/999 b/tests/generic/999
-new file mode 100755
-index 0000000..46b95c7
---- /dev/null
-+++ b/tests/generic/999
-@@ -0,0 +1,93 @@
-+#! /bin/bash
-+# FS QA Test 999
-+#
-+# Multi-threads freeze/unfreeze testing. This's a stress test case,
-+# it won't do functional check.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	# Make sure $SCRATCH_MNT is unfreezed
-+	xfs_freeze -u $SCRATCH_MNT 2>/dev/null
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+echo "Silence is golden"
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_freeze
-+_require_test_program "feature"
-+
-+_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
-+_scratch_mount >>$seqres.full 2>&1 || _fail "mount failed"
-+
-+num_cpus=`$here/src/feature -o`
-+
-+# Start fsstress in background
-+procs=$num_cpus
-+if [ $procs -gt 20 ]; then
-+	procs=20
-+elif [ $procs -le 1 ]; then
-+	procs=2
-+fi
-+nops=1000
-+stress_dir="$SCRATCH_MNT/fsstress_test_dir"
-+mkdir "$stress_dir"
-+fsstress_args=`_scale_fsstress_args -d $stress_dir -p $procs -n $nops $FSSTRESS_AVOID`
-+$FSSTRESS_PROG $fsstress_args >>$seqres.full 2>&1 &
-+fsstress_pid=$!
-+
-+# Start multi-threads freeze/unfreeze
-+for ((i=0; i<$procs; i++)); do
-+	while kill -0 $fsstress_pid 2>/dev/null; do
-+		xfs_freeze -f $SCRATCH_MNT 2>/dev/null
-+		xfs_freeze -u $SCRATCH_MNT 2>/dev/null
-+	done &
-+	freeze_pids="$! $freeze_pids"
-+done
-+
-+wait $fsstress_pid
-+result=$?
-+wait $freeze_pids
-+
-+# Exit with fsstress return value
-+status=$result
-+exit
-diff --git a/tests/generic/999.out b/tests/generic/999.out
-new file mode 100644
-index 0000000..3b276ca
---- /dev/null
-+++ b/tests/generic/999.out
-@@ -0,0 +1,2 @@
-+QA output created by 999
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 08007d7..76abf71 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -392,3 +392,4 @@
- 387 auto clone
- 388 auto log metadata
- 389 auto quick acl
-+999 auto freeze stress dangerous
--- 
-2.7.4
-
+> +	return 1
+> +}
+> +
+>  # Check that populate created all the types of files we wanted
+>  _scratch_xfs_populate_check() {
+>  	_scratch_mount
+> @@ -367,6 +431,9 @@ _scratch_xfs_populate_check() {
+>  	leaf_attr="$(__populate_find_inode "${SCRATCH_MNT}/ATTR.FMT_LEAF")"
+>  	node_attr="$(__populate_find_inode "${SCRATCH_MNT}/ATTR.FMT_NODE")"
+>  	btree_attr="$(__populate_find_inode "${SCRATCH_MNT}/ATTR.FMT_BTREE")"
+> +	is_finobt=$(xfs_info "${SCRATCH_MNT}" | grep -c 'finobt=1')
+> +	is_rmapbt=$(xfs_info "${SCRATCH_MNT}" | grep -c 'rmapbt=1')
+> +	is_reflink=$(xfs_info "${SCRATCH_MNT}" | grep -c 'reflink=1')
+>  
+>  	blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
+>  	dblksz="$(xfs_info "${SCRATCH_MNT}" | grep naming.*bsize | sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g')"
+> @@ -389,6 +456,10 @@ _scratch_xfs_populate_check() {
+>  	__populate_check_xfs_attr "${node_attr}" "node"
+>  	__populate_check_xfs_attr "${btree_attr}" "btree"
+>  	__populate_check_xfs_aformat "${btree_attr}" "btree"
+> +	__populate_check_xfs_agbtree_height "bno"
+> +	__populate_check_xfs_agbtree_height "cnt"
+> +	test -n $is_rmapbt && __populate_check_xfs_agbtree_height "rmap"
+> +	test -n $is_reflink && __populate_check_xfs_agbtree_height "refcnt"
+>  }
+>  
+>  # Check data fork format of ext4 file
+> 
