@@ -1,184 +1,39 @@
-Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([222.73.24.84]:23086 "EHLO song.cn.fujitsu.com"
-        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-        id S1751564AbcKJDTQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 9 Nov 2016 22:19:16 -0500
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH v3] fstests: btrfs: Check false ENOSPC bug caused by incorrect metadata reserve
-Date: Thu, 10 Nov 2016 11:18:48 +0800
-Message-Id: <20161110031848.21127-1-quwenruo@cn.fujitsu.com>
-MIME-Version: 1.0
+From: BALMA Adab Elisa <cxw5@aabbaabb.club>
+Subject: greetings to you.
+Date: Mon, 7 Nov 2016 19:38:25 +0100
+Message-ID: <AM4PR02MB14251CCD9EF4385FBCC7E60A95A70@AM4PR02MB1425.eurprd02.prod.outlook.com>
+Reply-To: <gl15686@yahoo.fr>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <fstests-owner@vger.kernel.org>
+Received: from mail-am5eur02hn0229.outbound.protection.outlook.com ([104.47.4.229]:40567
+        "EHLO EUR02-AM5-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752196AbcKGUmY (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 7 Nov 2016 15:42:24 -0500
+Content-Description: Mail message body
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-List-ID: <fstests@vger.kernel.org>
+List-Id: fstests@vger.kernel.org
+To: Recipients <cxw5@aabbaabb.club>
 
-Due to the fact that btrfs uses different max extent size for
-compressed and non-compressed write, it calculates metadata reservation
-incorrectly.
+Hi Dear,
 
-This can leads to false ENOSPC alert for compressed write.
+I'm BALMA Adab Elisa; =
 
-This test case will check it by using small fs and do parallel write to
-trigger it.
+I=E2=80=99m contacting because I want to be your friend and confide in you =
+because I have in my possession now 186.13 Kilograms of Gold Bars, Quality:=
+ 23 carat, purity 92% that I inherited from my late mother which I want to =
+ship to your country and sell for investment in your country because I want=
+ to leave Cote d'Ivoire and relocate to your country to continue my educati=
+on in your country.
+I want you to stand by me as my tutor and ship this Gold Bars to your count=
+ry and sell for investment in your country.
+Note that I am writing you this email purely on the ground of trust because=
+ I don=E2=80=99t know you and we have not met before. I found you here and =
+my mind convinced me that I can trust you.
 
-It's highly recommened to use MOUNT_OPTIONS="-o compress" and
-MKFS_OPTIONS="-n 64k" to trigger it.
-Without compression, it won't be triggered.
+Waiting to hear from you.
 
-The fix is not merged and may change in the future, but the function is
-good enough:
-btrfs: improve inode's outstanding_extents computation
-btrfs: fix false enospc for compression
-
-Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
----
-v2:
-  Use $XFS_IO_PROGS to replace hard coded xfs_io.
-  Fix "kill 0" which will also kill the script itself.
-  Add missing "Silence is golden" output.
-  Add workaround for EBUSY while umount for compression
-v3:
-  Remove mount and mkfs option override to increase coverity
-  Increase test time to 30 * TIME_FACTOR to increase the possibility
-  for other MKFS_OPTIONS
----
- tests/btrfs/132     | 105 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/132.out |   2 +
- tests/btrfs/group   |   1 +
- 3 files changed, 108 insertions(+)
- create mode 100755 tests/btrfs/132
- create mode 100644 tests/btrfs/132.out
-
-diff --git a/tests/btrfs/132 b/tests/btrfs/132
-new file mode 100755
-index 0000000..239707b
---- /dev/null
-+++ b/tests/btrfs/132
-@@ -0,0 +1,105 @@
-+#! /bin/bash
-+# FS QA Test 132
-+#
-+# Check if false ENOSPC will happen when parallel buffer write happens
-+# The problem is caused by incorrect metadata reservation for any buffered
-+# write whose max extent size is not 128M (including compression and in-band
-+# dedupe).
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	kill $pids &> /dev/null
-+	wait
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+
-+# Use small filesystem to trigger the bug more easily
-+# It's highly recommened to run this test case with MKFS_OPTIONS="-n 64k"
-+# to further increase the possibility
-+# Since the false ENOSPC happens due to incorrect metadata reservation,
-+# larger nodesize and small fs will make it much easier to reproduce
-+_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
-+
-+# Recommended to use MOUNT_OPTIONS="-o compress" to trigger the bug
-+_scratch_mount
-+
-+sleep_time=$(($TIME_FACTOR * 30))
-+loop_writer()
-+{
-+	offset=$1
-+	len=$2
-+	file=$3
-+
-+	while true;
-+	do
-+		# Only need stderr, and we need to specify small block size
-+		# but still large enough trigger compression
-+		$XFS_IO_PROG -c "pwrite -b 8K $offset $len" $file 2>&1 \
-+			> /dev/null
-+	done
-+}
-+
-+touch $SCRATCH_MNT/testfile
-+
-+# Start 2 writter writting into the same file
-+# The file is 142M, which is smaller than 1/2 of the filesystem,
-+# so no other cause can lead to ENOSPC.
-+loop_writer 0 128M $SCRATCH_MNT/testfile &
-+pids=$!
-+loop_writer 128M 16M $SCRATCH_MNT/testfile &
-+pids="$pids $!"
-+
-+sleep $sleep_time
-+
-+kill $pids
-+wait
-+
-+# Sync the fs to avoid EBUSY while umount, which is quite common for btrfs
-+# compression
-+sync
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/btrfs/132.out b/tests/btrfs/132.out
-new file mode 100644
-index 0000000..b096312
---- /dev/null
-+++ b/tests/btrfs/132.out
-@@ -0,0 +1,2 @@
-+QA output created by 132
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index c090604..ec8ad80 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -134,3 +134,4 @@
- 129 auto quick send
- 130 auto clone send
- 131 auto quick
-+132 auto compress
--- 
-2.7.4
-
-
-
+Yours Truly,
+Balma Adab Elisa.
