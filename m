@@ -1,159 +1,194 @@
-Received: from mx1.redhat.com ([209.132.183.28]:45596 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:41780 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751976AbcKHFgU (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 8 Nov 2016 00:36:20 -0500
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v5] fstests: test xfs_copy V5 XFS without -d option
-Date: Tue,  8 Nov 2016 13:33:50 +0800
-Message-Id: <1478583230-11076-1-git-send-email-zlang@redhat.com>
+        id S1752315AbcKHK62 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 8 Nov 2016 05:58:28 -0500
+Date: Tue, 8 Nov 2016 18:58:26 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] fstests: btrfs: Check false ENOSPC bug caused by
+ incorrect metadata reserve
+Message-ID: <20161108105826.GN27776@eguan.usersys.redhat.com>
+References: <20161108091515.20867-1-quwenruo@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20161108091515.20867-1-quwenruo@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org, eguan@redhat.com
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Before xfsprogs commit a872b62 (xfs_copy: band-aids for CRC
-filesystems), xfs_copy requires the "-d" option to copy a V5 XFS,
-because it can't rewrite the UUID of V5 XFS properly.
+On Tue, Nov 08, 2016 at 05:15:15PM +0800, Qu Wenruo wrote:
+> Due to the fact that btrfs uses different max extent size for
+> compressed and non-compressed write, it calculates metadata reservation
+> incorrectly.
+> 
+> This can leads to false ENOSPC alert for compressed write.
+> 
+> This test case will check it by using small fs and large nodesize, and
+> do parallel compressed write to trigger it.
+> 
+> The fix is not merged and may change in the future, but the function is
+> good enough:
+> btrfs: improve inode's outstanding_extents computation
+> btrfs: fix false enospc for compression
+> 
+> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+> ---
+>  tests/btrfs/132     | 89 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/132.out |  2 ++
+>  tests/btrfs/group   |  1 +
+>  3 files changed, 92 insertions(+)
+>  create mode 100755 tests/btrfs/132
+>  create mode 100644 tests/btrfs/132.out
+> 
+> diff --git a/tests/btrfs/132 b/tests/btrfs/132
+> new file mode 100755
+> index 0000000..95c21ea
+> --- /dev/null
+> +++ b/tests/btrfs/132
+> @@ -0,0 +1,89 @@
+> +#! /bin/bash
+> +# FS QA Test 132
+> +#
+> +# Check if false ENOSPC will happen when parallel buffer write happens
+> +# The problem is caused by incorrect metadata reservation.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
+> +
+> +# Use small filesystem with maximum nodesize.
+> +# Since the false ENOSPC happens due to incorrect metadata reservation,
+> +# larger nodesize and small fs will make it much easier to reproduce
+> +_scratch_mkfs -b 512M -n 64k >> $seqres.full 2>&1
 
-Now xfs_copy already full support to copy a V5 XFS. But for above
-old problem, xfstests use below patch to make sure xfs_copy always
-use "-d" option to copy a V5 XFS:
+How about override MKFS_OPTIONS and call _scratch_mkfs_sized? e.g.
 
-  8346e53 common: append -d option to XFS_COPY_PROG when testing v5 xfs
+export MKFS_OPTIONS="-n 64k"
+_scratch_mkfs_sized $((512 * 1024 * 1024))
 
-That cause xfstests miss the coverage of copying a V5 XFS without
-"-d". For test this feature I did below things:
+> +_scratch_mount "-o compress"
+> +
+> +sleep_time=$(($TIME_FACTOR * 15))
+> +loop_writer()
+> +{
+> +	offset=$1
+> +	len=$2
+> +	file=$3
+> +
+> +	while true;
+> +	do
+> +		# Only need stderr, and we need to specify small block size
+> +		# but still trigger compression
+> +		xfs_io -c "pwrite -b 8K $offset $len" $file 2>&1 > /dev/null
 
-  1. Changed init_rc(), add "-d" to $XFS_COPY_PROG if xfs_copy can't
-     copy a V5 XFS properly.
-  2. xfs/073 test V4 xfs forcibly by specify "-m crc=0" in case. I
-     think it's useless now, so remove it.
-  3. Changed xfs/032. If xfs_copy full support to copy a V5 XFS, test
-     with and without "-d" option, or only test with "-d" option.
+Use $XFS_IO_PROG here.
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
+> +	done
+> +}
+> +
+> +touch $SCRATCH_MNT/testfile
+> +
+> +# Start 2 writter writting into the same file
+> +# The file is 142M, which is smaller than 1/2 of the filesystem,
+> +# so no other cause can lead to ENOSPC.
+> +loop_writer 0 128M $SCRATCH_MNT/testfile &
+> +loop_writer 128M 16M $SCRATCH_MNT/testfile &
+> +
+> +sleep $sleep_time
+> +
+> +kill 0
+> +sleep
 
-Hi,
+This is not working for me, even I removed the suspicious "sleep", seems
+"132" itself was killed too.
 
-V2:
-1. remove require_xfs_copy() function
-2. change the code logic of init_rc function about how to add "-d" to
-   $XFS_COPY_PROG
-3. remove xfs_copy "-d" option of xfs/032
+I'd save pids of background jobs and kill the pids and call wait to make
+sure all child processes exit running. e.g.
 
-V3:
-add comments to explain the change in init_rc()
+loop_writer ... &
+pids=$!
+loop_writer ... &
+pids="$pids $!"
 
-V4:
-Due to xfs/032 test "xfs_copy -d" by default, I don't want to
-change the original test coverage. So if xfs_copy full support to
-copy a V5 XFS, then test with and without "-d" option twice.
+sleep $sleep_time
+kill $pids
+wait
 
-V5:
-Pick up "xfs_copy and xfs_repair" part into a function named do_copy.
-
+And you're missing 'echo "Silence is golden"' in the test.
 
 Thanks,
-Zorro
+Eryu
 
-
- common/rc     | 15 ++++++++++++---
- tests/xfs/032 | 21 ++++++++++++++++-----
- tests/xfs/073 |  8 ++------
- 3 files changed, 30 insertions(+), 14 deletions(-)
-
-diff --git a/common/rc b/common/rc
-index a84efe4..7ff4f5d 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3808,9 +3808,18 @@ init_rc()
- 	$XFS_IO_PROG -i -c quit 2>/dev/null && \
- 		export XFS_IO_PROG="$XFS_IO_PROG -i"
- 
--	# xfs_copy doesn't work on v5 xfs yet without -d option
--	if [ "$FSTYP" == "xfs" ] && [[ $MKFS_OPTIONS =~ crc=1 ]]; then
--		export XFS_COPY_PROG="$XFS_COPY_PROG -d"
-+	# xfs_copy on v5 filesystems do not require the "-d" option if xfs_db
-+	# can change the UUID on v5 filesystems
-+	if [ "$FSTYP" == "xfs" ]; then
-+		touch $tmp.img
-+		$MKFS_XFS_PROG $MKFS_OPTIONS -d file,name=$tmp.img,size=512m \
-+							>/dev/null 2>&1
-+		# xfs_db will return 0 even if it can't generate a new uuid, so
-+		# check the output to make sure if it can change UUID of V5 xfs
-+		$XFS_DB_PROG -x -c "uuid generate" $tmp.img \
-+			| grep -q "invalid UUID\|supported on V5 fs" \
-+			&& export XFS_COPY_PROG="$XFS_COPY_PROG -d"
-+		rm -f $tmp.img
- 	fi
- }
- 
-diff --git a/tests/xfs/032 b/tests/xfs/032
-index 4b675ee..6d644ad 100755
---- a/tests/xfs/032
-+++ b/tests/xfs/032
-@@ -53,6 +53,17 @@ IMGFILE=$TEST_DIR/${seq}_copy.img
- 
- echo "Silence is golden."
- 
-+do_copy()
-+{
-+	local opts="$*"
-+
-+	$XFS_COPY_PROG $opts $SCRATCH_DEV $IMGFILE >> $seqres.full 2>&1 || \
-+		_fail "xfs_copy $opts failed for Sector size $SECTORSIZE Block size $BLOCKSIZE"
-+	# Must use "-n" to get exit code; without it xfs_repair always returns 0
-+	$XFS_REPAIR_PROG -n -f $IMGFILE >> $seqres.full 2>&1 || \
-+		_fail "xfs_copy $opts corrupted for Sector size $SECTORSIZE Block size $BLOCKSIZE"
-+}
-+
- while [ $SECTORSIZE -le $PAGESIZE ]; do
- 	BLOCKSIZE=$SECTORSIZE;
- 
-@@ -70,11 +81,11 @@ while [ $SECTORSIZE -le $PAGESIZE ]; do
- 		$FSSTRESS_PROG -n 100 -d $SCRATCH_MNT >> $seqres.full 2>&1
- 		_scratch_unmount
- 
--		$XFS_COPY_PROG -d $SCRATCH_DEV $IMGFILE >> $seqres.full 2>&1 || \
--			_fail "Copy failed for Sector size $SECTORSIZE Block size $BLOCKSIZE"
--		# Must use "-n" to get exit code; without it xfs_repair always returns 0
--		$XFS_REPAIR_PROG -n -f $IMGFILE >> $seqres.full 2>&1 || \
--			_fail "Copy corrupted for Sector size $SECTORSIZE Block size $BLOCKSIZE"
-+		# Test "duplicate" copy at first, if $XFS_COPY_PROG won't do it.
-+		if [[ ! "$XFS_COPY_PROG" =~ -d ]]; then
-+			do_copy -d
-+		fi
-+		do_copy
- 
- 		BLOCKSIZE=$(($BLOCKSIZE * 2));
- 	done
-diff --git a/tests/xfs/073 b/tests/xfs/073
-index 9e29223..7228dd9 100755
---- a/tests/xfs/073
-+++ b/tests/xfs/073
-@@ -138,7 +138,7 @@ _require_loop
- 
- rm -f $seqres.full
- 
--_scratch_mkfs_xfs -m crc=0 -dsize=41m,agcount=2 >>$seqres.full 2>&1
-+_scratch_mkfs_xfs -dsize=41m,agcount=2 >>$seqres.full 2>&1
- _scratch_mount 2>/dev/null || _fail "initial scratch mount failed"
- 
- echo
-@@ -158,11 +158,7 @@ _verify_copy $imgs.image $SCRATCH_DEV $SCRATCH_MNT
- 
- echo 
- echo === copying scratch device to single target, large ro device
--mkfs_crc_opts="-m crc=0"
--if [ -n "$XFS_MKFS_HAS_NO_META_SUPPORT" ]; then
--	mkfs_crc_opts=""
--fi
--${MKFS_XFS_PROG} $mkfs_crc_opts -dfile,name=$imgs.source,size=100g \
-+${MKFS_XFS_PROG} -dfile,name=$imgs.source,size=100g \
- 	| _filter_mkfs 2>/dev/null
- rmdir $imgs.source_dir 2>/dev/null
- mkdir $imgs.source_dir
--- 
-2.7.4
-
+> +
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/132.out b/tests/btrfs/132.out
+> new file mode 100644
+> index 0000000..b096312
+> --- /dev/null
+> +++ b/tests/btrfs/132.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 132
+> +Silence is golden
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index c090604..ec8ad80 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -134,3 +134,4 @@
+>  129 auto quick send
+>  130 auto clone send
+>  131 auto quick
+> +132 auto compress
+> -- 
+> 2.7.4
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
