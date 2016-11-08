@@ -1,194 +1,113 @@
-Received: from mx1.redhat.com ([209.132.183.28]:41780 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752315AbcKHK62 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 8 Nov 2016 05:58:28 -0500
-Date: Tue, 8 Nov 2016 18:58:26 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] fstests: btrfs: Check false ENOSPC bug caused by
- incorrect metadata reserve
-Message-ID: <20161108105826.GN27776@eguan.usersys.redhat.com>
-References: <20161108091515.20867-1-quwenruo@cn.fujitsu.com>
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:22573 "EHLO
+        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751696AbcKHW66 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 8 Nov 2016 17:58:58 -0500
+Received: from dave by dastard with local (Exim 4.80)
+        (envelope-from <david@fromorbit.com>)
+        id 1c4FLz-00022h-7m
+        for fstests@vger.kernel.org; Wed, 09 Nov 2016 09:58:55 +1100
+Date: Wed, 9 Nov 2016 09:58:55 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: [ANNOUNCE] fstests: master branch updated to e604301e2605
+Message-ID: <20161108225855.GP28177@dastard>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="7JfCtLOvnd9MIVvH"
 Content-Disposition: inline
-In-Reply-To: <20161108091515.20867-1-quwenruo@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Nov 08, 2016 at 05:15:15PM +0800, Qu Wenruo wrote:
-> Due to the fact that btrfs uses different max extent size for
-> compressed and non-compressed write, it calculates metadata reservation
-> incorrectly.
-> 
-> This can leads to false ENOSPC alert for compressed write.
-> 
-> This test case will check it by using small fs and large nodesize, and
-> do parallel compressed write to trigger it.
-> 
-> The fix is not merged and may change in the future, but the function is
-> good enough:
-> btrfs: improve inode's outstanding_extents computation
-> btrfs: fix false enospc for compression
-> 
-> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
-> ---
->  tests/btrfs/132     | 89 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/132.out |  2 ++
->  tests/btrfs/group   |  1 +
->  3 files changed, 92 insertions(+)
->  create mode 100755 tests/btrfs/132
->  create mode 100644 tests/btrfs/132.out
-> 
-> diff --git a/tests/btrfs/132 b/tests/btrfs/132
-> new file mode 100755
-> index 0000000..95c21ea
-> --- /dev/null
-> +++ b/tests/btrfs/132
-> @@ -0,0 +1,89 @@
-> +#! /bin/bash
-> +# FS QA Test 132
-> +#
-> +# Check if false ENOSPC will happen when parallel buffer write happens
-> +# The problem is caused by incorrect metadata reservation.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +
-> +# Use small filesystem with maximum nodesize.
-> +# Since the false ENOSPC happens due to incorrect metadata reservation,
-> +# larger nodesize and small fs will make it much easier to reproduce
-> +_scratch_mkfs -b 512M -n 64k >> $seqres.full 2>&1
 
-How about override MKFS_OPTIONS and call _scratch_mkfs_sized? e.g.
+--7JfCtLOvnd9MIVvH
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-export MKFS_OPTIONS="-n 64k"
-_scratch_mkfs_sized $((512 * 1024 * 1024))
+Hi folks,
 
-> +_scratch_mount "-o compress"
-> +
-> +sleep_time=$(($TIME_FACTOR * 15))
-> +loop_writer()
-> +{
-> +	offset=$1
-> +	len=$2
-> +	file=$3
-> +
-> +	while true;
-> +	do
-> +		# Only need stderr, and we need to specify small block size
-> +		# but still trigger compression
-> +		xfs_io -c "pwrite -b 8K $offset $len" $file 2>&1 > /dev/null
+The master branch of the xfstests repository at:
 
-Use $XFS_IO_PROG here.
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-> +	done
-> +}
-> +
-> +touch $SCRATCH_MNT/testfile
-> +
-> +# Start 2 writter writting into the same file
-> +# The file is 142M, which is smaller than 1/2 of the filesystem,
-> +# so no other cause can lead to ENOSPC.
-> +loop_writer 0 128M $SCRATCH_MNT/testfile &
-> +loop_writer 128M 16M $SCRATCH_MNT/testfile &
-> +
-> +sleep $sleep_time
-> +
-> +kill 0
-> +sleep
+have just been updated. This update from Eryu fixes the "pwrite64"
+errors with a current TOT xfs_io and adds Ceph support.
 
-This is not working for me, even I removed the suspicious "sleep", seems
-"132" itself was killed too.
+-Dave.
 
-I'd save pids of background jobs and kill the pids and call wait to make
-sure all child processes exit running. e.g.
+The new head of the master branch is commit:
 
-loop_writer ... &
-pids=$!
-loop_writer ... &
-pids="$pids $!"
+e604301e2605 common: add CephFS support
 
-sleep $sleep_time
-kill $pids
-wait
+New Commits:
 
-And you're missing 'echo "Silence is golden"' in the test.
+Dave Chinner (1):
+      [c52086226bc6] filter: xfs_io output has dropped "64" from error mess=
+ages
 
-Thanks,
-Eryu
+Joao Eduardo Luis (1):
+      [e604301e2605] common: add CephFS support
 
-> +
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/132.out b/tests/btrfs/132.out
-> new file mode 100644
-> index 0000000..b096312
-> --- /dev/null
-> +++ b/tests/btrfs/132.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 132
-> +Silence is golden
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index c090604..ec8ad80 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -134,3 +134,4 @@
->  129 auto quick send
->  130 auto clone send
->  131 auto quick
-> +132 auto compress
-> -- 
-> 2.7.4
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+Code Diffstat:
+
+ README.config-sections |  6 ++++++
+ common/config          |  9 +++++++++
+ common/filter          |  7 +++++++
+ common/rc              | 21 ++++++++++++++++++---
+ tests/btrfs/126        |  4 ++--
+ tests/btrfs/126.out    |  2 +-
+ tests/ext4/306         |  3 ++-
+ tests/ext4/306.out     |  2 +-
+ tests/f2fs/001         |  6 ++----
+ tests/f2fs/001.out     |  2 +-
+ tests/generic/171      |  6 ++++--
+ tests/generic/171.out  |  4 ++--
+ tests/generic/172      |  6 ++++--
+ tests/generic/172.out  |  4 ++--
+ tests/generic/174      |  6 ++++--
+ tests/generic/174.out  |  4 ++--
+ tests/generic/230      | 12 ++++++++----
+ tests/generic/230.out  |  8 ++++----
+ tests/generic/271      |  3 ++-
+ tests/generic/271.out  |  2 +-
+ tests/generic/272      |  3 ++-
+ tests/generic/272.out  |  2 +-
+ tests/generic/276      |  3 ++-
+ tests/generic/276.out  |  2 +-
+ tests/generic/278      |  3 ++-
+ tests/generic/278.out  |  2 +-
+ tests/generic/328      |  6 ++++--
+ tests/generic/328.out  |  4 ++--
+ tests/xfs/071          |  4 ++--
+ tests/xfs/071.out.64   | 20 ++++++++++----------
+ tests/xfs/182          |  6 ++++--
+ tests/xfs/182.out      |  2 +-
+ 32 files changed, 114 insertions(+), 60 deletions(-)
+--=20
+Dave Chinner
+david@fromorbit.com
+
+--7JfCtLOvnd9MIVvH
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJYIliuAAoJEK3oKUf0dfodhq4P/0NwILlDNRq8+pJ6kGhyockK
+/RDxbEKheMhE3K7smTOYpWAre/zSNcM34htGRXNeu5brnXxaDELXUMYbLk7BzRrM
+RBZP1B2x1VOO7TQqEQ/kXBwGwyyvzqfxX5x9WCZ6oM3gNkAHltFTn6JlT/ZVgJfu
+q2H1VyWTTutZ6ZLoC4bp/lLRrph+9sOE+BIE6cEYRbouhw9U9/1P3zS/Ki5dxx87
+qh2V3tbLBvUAtvrkmhAR2MW5AFX0XUD845WBMCE8QtBZSOKX6m6hVTEFxrjj31AE
+RPGt16Ia/Qkk54ZG66JYAOjNK3J7BXAOkTZnKs5bsnSyqI7WD15+Y8IAWUbnP0dF
+dn2FNOYP7Oe7yM3fUIb6mqktlo2Tq6yiVuPmqjjHLA2KiIG0v6LZNim5tBhGw/1p
+qb5neFYAWvGR4z07dqWKc+LgKrEtSQrgMsufo5YLL7W6uLXAr1j8RDC+EYox7L7v
+VWeYRMhb1OZL2vuoqwmXpLy8pX+L0BnwJbWIJlOn0b37+R2d3TwBQ3Dtc01odNv8
+NoqBDiqavYR9YeqpDSv+dU+8VztIYiueRBvhnINoxvsI043x35WHBGsSRgsCRfXo
+iJRozP3w8GxA5O5SSfyDZLGGj4wrQUMJu/RSsnnsOHr8LZmaFv7SiKYbyCBCaujA
+SS1T3qTYr6fGsTKM8mQH
+=7lHw
+-----END PGP SIGNATURE-----
+
+--7JfCtLOvnd9MIVvH--
