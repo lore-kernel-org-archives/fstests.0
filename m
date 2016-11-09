@@ -1,113 +1,238 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:22573 "EHLO
-        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751696AbcKHW66 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 8 Nov 2016 17:58:58 -0500
-Received: from dave by dastard with local (Exim 4.80)
-        (envelope-from <david@fromorbit.com>)
-        id 1c4FLz-00022h-7m
-        for fstests@vger.kernel.org; Wed, 09 Nov 2016 09:58:55 +1100
-Date: Wed, 9 Nov 2016 09:58:55 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: [ANNOUNCE] fstests: master branch updated to e604301e2605
-Message-ID: <20161108225855.GP28177@dastard>
+Date: Wed, 9 Nov 2016 11:32:02 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 7/9] populate: discover XFS structure fields and fuzz
+ verbs, and use them to fuzz fields
+Message-ID: <20161109033202.GP27776@eguan.usersys.redhat.com>
+References: <147830503054.1919.4998804611100937975.stgit@birch.djwong.org>
+ <147830507411.1919.17534443838350465519.stgit@birch.djwong.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="7JfCtLOvnd9MIVvH"
-Content-Disposition: inline
-Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-List-ID: <fstests@vger.kernel.org>
-
-
---7JfCtLOvnd9MIVvH
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <147830507411.1919.17534443838350465519.stgit@birch.djwong.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: david@fromorbit.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+List-ID: <fstests@vger.kernel.org>
 
-Hi folks,
+On Fri, Nov 04, 2016 at 05:17:54PM -0700, Darrick J. Wong wrote:
+> Create some routines to help us perform targeted fuzzing of individual
+> fields in various XFS structures.  Specifically, we want the caller to
+> drop the xfs_db iocursor on the victim field; from there, the scripts
+> should discover all available fields and fuzzing verbs, and try each
+> fuzz verb on every available field.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  common/fuzzy |  191 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 191 insertions(+)
+> 
+> 
+> diff --git a/common/fuzzy b/common/fuzzy
+> index 20f1d29..6af47f1 100644
+> --- a/common/fuzzy
+> +++ b/common/fuzzy
+> @@ -81,3 +81,194 @@ _scratch_scrub() {
+>  		;;
+>  	esac
+>  }
+> +
+> +# Filter the xfs_db print command's field debug information
+> +# into field name and type.
+> +__filter_xfs_db_print_fields() {
+> +	grep ' = ' | while read key equals value; do
+> +		fuzzkey="$(echo "${key}" | sed -e 's/\([a-zA-Z0-9_]*\)\[\([0-9]*\)-[0-9]*\]/\1[\2]/g')"
+> +		if [[ "${value}" == "["* ]]; then
+> +			echo "${value}" | sed -e 's/^.//g' -e 's/.$//g' -e 's/,/\n/g' | while read subfield; do
+> +				echo "${fuzzkey}.${subfield}"
+> +			done
+> +		else
+> +			echo "${fuzzkey}"
+> +		fi
+> +	done
+> +}
+> +
+> +# Navigate to some part of the filesystem and print the field info.
+> +_scratch_xfs_list_metadata_fields() {
+> +	if [ -n "${SCRATCH_XFS_LIST_METADATA_FIELDS}" ]; then
+> +		echo "${SCRATCH_XFS_LIST_METADATA_FIELDS}" | sed -e 's/ /\n/g'
+> +		return;
+> +	fi
+> +
+> +	(for arg in "$@"; do
+> +		echo "${arg}"
+> +	done
+> +	echo "print") | _scratch_xfs_db | __filter_xfs_db_print_fields
+> +}
+> +
+> +# Get a metadata field
+> +_scratch_xfs_get_metadata_field() {
+> +	key="$1"
+> +	shift
+> +
+> +	grep_key="$(echo "${key}" | tr '[]()' '....')"
+> +	(for arg in "$@"; do
+> +		echo "${arg}"
+> +	done
+> +	echo "print ${key}") | _scratch_xfs_db | grep "^${grep_key}" | \
+> +		sed -e 's/^.* = //g'
+> +}
+> +
+> +# Set a metadata field
+> +_scratch_xfs_set_metadata_field() {
+> +	key="$1"
+> +	value="$2"
+> +	shift; shift
+> +	(for arg in "$@"; do
+> +		echo "${arg}"
+> +	done
+> +	echo "write -d ${key} ${value}") | _scratch_xfs_db -x
+> +	echo
+> +}
+> +
+> +# Fuzz a metadata field
+> +_scratch_xfs_fuzz_metadata_field() {
+> +	key="$1"
+> +	value="$2"
+> +	shift; shift
+> +
+> +	if [ "${key}" = "crc" ]; then
+> +		fuzz_arg="-c"
+> +	else
+> +		fuzz_arg="-d"
+> +	fi
+> +	oldval="$(_scratch_xfs_get_metadata_field "${key}" "$@")"
+> +	(for arg in "$@"; do
+> +		echo "${arg}"
+> +	done
+> +	echo "fuzz ${fuzz_arg} ${key} ${value}") | _scratch_xfs_db -x
+> +	echo
+> +	newval="$(_scratch_xfs_get_metadata_field "${key}" "$@" 2> /dev/null)"
+> +	if [ "${oldval}" = "${newval}" ]; then
+> +		echo "Field ${key} already set to ${oldval}, skipping test."
+> +		return 1
+> +	fi
+> +	return 0
+> +}
+> +
+> +# Try to forcibly unmount the scratch fs
+> +__scratch_xfs_fuzz_unmount()
+> +{
+> +	while _scratch_unmount 2>/dev/null; do sleep 0.2; done
 
-The master branch of the xfstests repository at:
+Shouldn't this be
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+while ! _scratch_unmount 2>/dev/null; do sleep 0.2; done
 
-have just been updated. This update from Eryu fixes the "pwrite64"
-errors with a current TOT xfs_io and adds Ceph support.
+so it only sleeps and try again if umount failed?
 
--Dave.
+Thanks,
+Eryu
 
-The new head of the master branch is commit:
-
-e604301e2605 common: add CephFS support
-
-New Commits:
-
-Dave Chinner (1):
-      [c52086226bc6] filter: xfs_io output has dropped "64" from error mess=
-ages
-
-Joao Eduardo Luis (1):
-      [e604301e2605] common: add CephFS support
-
-
-Code Diffstat:
-
- README.config-sections |  6 ++++++
- common/config          |  9 +++++++++
- common/filter          |  7 +++++++
- common/rc              | 21 ++++++++++++++++++---
- tests/btrfs/126        |  4 ++--
- tests/btrfs/126.out    |  2 +-
- tests/ext4/306         |  3 ++-
- tests/ext4/306.out     |  2 +-
- tests/f2fs/001         |  6 ++----
- tests/f2fs/001.out     |  2 +-
- tests/generic/171      |  6 ++++--
- tests/generic/171.out  |  4 ++--
- tests/generic/172      |  6 ++++--
- tests/generic/172.out  |  4 ++--
- tests/generic/174      |  6 ++++--
- tests/generic/174.out  |  4 ++--
- tests/generic/230      | 12 ++++++++----
- tests/generic/230.out  |  8 ++++----
- tests/generic/271      |  3 ++-
- tests/generic/271.out  |  2 +-
- tests/generic/272      |  3 ++-
- tests/generic/272.out  |  2 +-
- tests/generic/276      |  3 ++-
- tests/generic/276.out  |  2 +-
- tests/generic/278      |  3 ++-
- tests/generic/278.out  |  2 +-
- tests/generic/328      |  6 ++++--
- tests/generic/328.out  |  4 ++--
- tests/xfs/071          |  4 ++--
- tests/xfs/071.out.64   | 20 ++++++++++----------
- tests/xfs/182          |  6 ++++--
- tests/xfs/182.out      |  2 +-
- 32 files changed, 114 insertions(+), 60 deletions(-)
---=20
-Dave Chinner
-david@fromorbit.com
-
---7JfCtLOvnd9MIVvH
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJYIliuAAoJEK3oKUf0dfodhq4P/0NwILlDNRq8+pJ6kGhyockK
-/RDxbEKheMhE3K7smTOYpWAre/zSNcM34htGRXNeu5brnXxaDELXUMYbLk7BzRrM
-RBZP1B2x1VOO7TQqEQ/kXBwGwyyvzqfxX5x9WCZ6oM3gNkAHltFTn6JlT/ZVgJfu
-q2H1VyWTTutZ6ZLoC4bp/lLRrph+9sOE+BIE6cEYRbouhw9U9/1P3zS/Ki5dxx87
-qh2V3tbLBvUAtvrkmhAR2MW5AFX0XUD845WBMCE8QtBZSOKX6m6hVTEFxrjj31AE
-RPGt16Ia/Qkk54ZG66JYAOjNK3J7BXAOkTZnKs5bsnSyqI7WD15+Y8IAWUbnP0dF
-dn2FNOYP7Oe7yM3fUIb6mqktlo2Tq6yiVuPmqjjHLA2KiIG0v6LZNim5tBhGw/1p
-qb5neFYAWvGR4z07dqWKc+LgKrEtSQrgMsufo5YLL7W6uLXAr1j8RDC+EYox7L7v
-VWeYRMhb1OZL2vuoqwmXpLy8pX+L0BnwJbWIJlOn0b37+R2d3TwBQ3Dtc01odNv8
-NoqBDiqavYR9YeqpDSv+dU+8VztIYiueRBvhnINoxvsI043x35WHBGsSRgsCRfXo
-iJRozP3w8GxA5O5SSfyDZLGGj4wrQUMJu/RSsnnsOHr8LZmaFv7SiKYbyCBCaujA
-SS1T3qTYr6fGsTKM8mQH
-=7lHw
------END PGP SIGNATURE-----
-
---7JfCtLOvnd9MIVvH--
+> +}
+> +
+> +# Restore metadata to scratch device prior to field-fuzzing.
+> +__scratch_xfs_fuzz_mdrestore()
+> +{
+> +	test -e "${POPULATE_METADUMP}" || _fail "Need to set POPULATE_METADUMP"
+> +
+> +	__scratch_xfs_fuzz_unmount
+> +	xfs_mdrestore "${POPULATE_METADUMP}" "${SCRATCH_DEV}"
+> +}
+> +
+> +__fuzz_notify() {
+> +	echo "$@"
+> +	test -w /dev/ttyprintk && echo "$@" >> /dev/ttyprintk
+> +}
+> +
+> +# Fuzz one field of some piece of metadata
+> +__scratch_xfs_fuzz_field_test() {
+> +	field="$1"
+> +	fuzzverb="$2"
+> +	shift; shift
+> +
+> +	# Set the new field value
+> +	__fuzz_notify "+ Fuzz ${field} = ${fuzzverb}"
+> +	echo "========================"
+> +	_scratch_xfs_fuzz_metadata_field "${field}" ${fuzzverb} "$@"
+> +	res=$?
+> +	test $res -ne 0 && return
+> +
+> +	# Try to catch the error with scrub
+> +	echo "+ Try to catch the error"
+> +	_scratch_mount 2>&1
+> +	res=$?
+> +	if [ $res -eq 0 ]; then
+> +		_scratch_scrub -a 1 -e continue 2>&1
+> +		res=$?
+> +		test $res -eq 0 && \
+> +			(>&2 echo "scrub didn't fail with ${field} = ${fuzzverb}.")
+> +
+> +		# Try modifying the filesystem!
+> +		__fuzz_notify "++ Try to write filesystem"
+> +		#_scratch_fuzz_modify 100 2>&1
+> +		__scratch_xfs_fuzz_unmount
+> +	fi
+> +
+> +	# Repair the filesystem
+> +	echo "+ Fix the error"
+> +	_repair_scratch_fs 2>&1
+> +	res=$?
+> +	test $res -ne 0 && \
+> +		(>&2 echo "repair failed ($res) with ${field} = ${fuzzverb}.")
+> +
+> +	# See if scrub finds a clean fs
+> +	echo "+ Make sure error is gone"
+> +	_scratch_mount 2>&1
+> +	res=$?
+> +	if [ $res -eq 0 ]; then
+> +		_scratch_scrub -e continue 2>&1
+> +		res=$?
+> +		test $res -ne 0 && \
+> +			(>&2 echo "re-scrub ($res) with ${field} = ${fuzzverb}.")
+> +
+> +		# Try modifying the filesystem again!
+> +		__fuzz_notify "++ Try to write filesystem again"
+> +		_scratch_fuzz_modify 100 2>&1
+> +		__scratch_xfs_fuzz_unmount
+> +	else
+> +		(>&2 echo "re-mount failed ($res) with ${field} = ${fuzzverb}.")
+> +	fi
+> +
+> +	# See if repair finds a clean fs
+> +	_scratch_xfs_repair -n 2>&1
+> +	res=$?
+> +	test $res -ne 0 && \
+> +		(>&2 echo "re-repair failed ($res) with ${field} = ${fuzzverb}.")
+> +}
+> +
+> +# Make sure we have all the pieces we need for field fuzzing
+> +_require_scratch_xfs_fuzz_fields()
+> +{
+> +	_require_scratch
+> +	_require_scrub
+> +	_require_populate_commands
+> +	_require_command "$XFS_DB_PROG" "xfs_db"
+> +	_scratch_mkfs_xfs >/dev/null 2>&1
+> +	_scratch_xfs_db -x -c 'fuzz' 2>&1 | grep -q 'not found' && \
+> +		_notrun "xfs_db does not have fuzz command"
+> +}
+> +
+> +# Grab the list of available fuzzing verbs
+> +_scratch_xfs_list_fuzz_verbs() {
+> +	if [ -n "${SCRATCH_XFS_LIST_FUZZ_VERBS}" ]; then
+> +		echo "${SCRATCH_XFS_LIST_FUZZ_VERBS}" | sed -e 's/ /\n/g'
+> +		return;
+> +	fi
+> +	_scratch_xfs_db -x -c 'sb 0' -c 'fuzz' | grep '^Verbs:' | \
+> +		sed -e 's/[,.]//g' -e 's/Verbs: //g' -e 's/ /\n/g'
+> +}
+> +
+> +# Fuzz the fields of some piece of metadata
+> +_scratch_xfs_fuzz_fields() {
+> +	_scratch_xfs_list_metadata_fields "$@" | while read field; do
+> +		_scratch_xfs_list_fuzz_verbs | while read fuzzverb; do
+> +			__scratch_xfs_fuzz_mdrestore
+> +			__scratch_xfs_fuzz_field_test "${field}" "${fuzzverb}" "$@"
+> +		done
+> +	done
+> +}
+> 
