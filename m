@@ -1,12 +1,12 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([222.73.24.84]:44919 "EHLO song.cn.fujitsu.com"
+Received: from cn.fujitsu.com ([222.73.24.84]:18815 "EHLO song.cn.fujitsu.com"
         rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-        id S932538AbcKHJaZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 8 Nov 2016 04:30:25 -0500
+        id S1752043AbcKICWK (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 8 Nov 2016 21:22:10 -0500
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH] fstests: btrfs: Check false ENOSPC bug caused by incorrect metadata reserve
-Date: Tue,  8 Nov 2016 17:15:15 +0800
-Message-Id: <20161108091515.20867-1-quwenruo@cn.fujitsu.com>
+Subject: [PATCH v2] fstests: btrfs: Check false ENOSPC bug caused by incorrect metadata reserve
+Date: Wed,  9 Nov 2016 10:21:35 +0800
+Message-Id: <20161109022135.28255-1-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
 Sender: fstests-owner@vger.kernel.org
 To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
@@ -28,19 +28,25 @@ btrfs: fix false enospc for compression
 
 Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 ---
- tests/btrfs/132     | 89 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+v2:
+  Use $XFS_IO_PROGS to replace hard coded xfs_io.
+  Fix "kill 0" which will also kill the script itself.
+  Add missing "Silence is golden" output.
+  Add workaround for EBUSY while umount for compression
+---
+ tests/btrfs/132     | 98 +++++++++++++++++++++++++++++++++++++++++++++++++++++
  tests/btrfs/132.out |  2 ++
  tests/btrfs/group   |  1 +
- 3 files changed, 92 insertions(+)
+ 3 files changed, 101 insertions(+)
  create mode 100755 tests/btrfs/132
  create mode 100644 tests/btrfs/132.out
 
 diff --git a/tests/btrfs/132 b/tests/btrfs/132
 new file mode 100755
-index 0000000..95c21ea
+index 0000000..530a128
 --- /dev/null
 +++ b/tests/btrfs/132
-@@ -0,0 +1,89 @@
+@@ -0,0 +1,98 @@
 +#! /bin/bash
 +# FS QA Test 132
 +#
@@ -78,6 +84,7 @@ index 0000000..95c21ea
 +{
 +	cd /
 +	rm -f $tmp.*
++	kill $pids &> /dev/null
 +}
 +
 +# get standard environment, filters and checks
@@ -97,7 +104,7 @@ index 0000000..95c21ea
 +# Use small filesystem with maximum nodesize.
 +# Since the false ENOSPC happens due to incorrect metadata reservation,
 +# larger nodesize and small fs will make it much easier to reproduce
-+_scratch_mkfs -b 512M -n 64k >> $seqres.full 2>&1
++_scratch_mkfs -b 512M -n 64K >> $seqres.full 2>&1
 +_scratch_mount "-o compress"
 +
 +sleep_time=$(($TIME_FACTOR * 15))
@@ -110,8 +117,9 @@ index 0000000..95c21ea
 +	while true;
 +	do
 +		# Only need stderr, and we need to specify small block size
-+		# but still trigger compression
-+		xfs_io -c "pwrite -b 8K $offset $len" $file 2>&1 > /dev/null
++		# but still large enough trigger compression
++		$XFS_IO_PROG -c "pwrite -b 8K $offset $len" $file 2>&1 \
++			> /dev/null
 +	done
 +}
 +
@@ -121,13 +129,20 @@ index 0000000..95c21ea
 +# The file is 142M, which is smaller than 1/2 of the filesystem,
 +# so no other cause can lead to ENOSPC.
 +loop_writer 0 128M $SCRATCH_MNT/testfile &
++pids=$!
 +loop_writer 128M 16M $SCRATCH_MNT/testfile &
++pids="$pids $!"
 +
 +sleep $sleep_time
 +
-+kill 0
-+sleep
++kill $pids
++wait
 +
++# Sync the fs to avoid EBUSY while umount, which is quite common for btrfs
++# compression
++sync
++
++echo "Silence is golden"
 +status=0
 +exit
 diff --git a/tests/btrfs/132.out b/tests/btrfs/132.out
