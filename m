@@ -1,63 +1,221 @@
-Received: from mx1.redhat.com ([209.132.183.28]:47032 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752933AbcKJEdi (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 9 Nov 2016 23:33:38 -0500
-Date: Thu, 10 Nov 2016 12:33:36 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH v2] xfs/021: filter out detailed array element info from
- xfs_db
-Message-ID: <20161110043336.GE3327@dhcp12-143.nay.redhat.com>
-References: <1478752183-27499-1-git-send-email-eguan@redhat.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:20358 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1753324AbcKIAYt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 8 Nov 2016 19:24:49 -0500
+Subject: Re: [PATCH] fstests: btrfs: Check false ENOSPC bug caused by
+ incorrect metadata reserve
+References: <20161108091515.20867-1-quwenruo@cn.fujitsu.com>
+ <20161108105826.GN27776@eguan.usersys.redhat.com>
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Message-ID: <d9a9d224-2f21-5b77-a3e9-de271cd4e755@cn.fujitsu.com>
+Date: Wed, 9 Nov 2016 08:24:38 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1478752183-27499-1-git-send-email-eguan@redhat.com>
+In-Reply-To: <20161108105826.GN27776@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Nov 10, 2016 at 12:29:43PM +0800, Eryu Guan wrote:
-> Starting from xfsprogs commit 384283555871 ("xfs_db: print one array
-> element per line"), xfs_db prints one array element per line. This
-> breaks the filter in xfs/021, which now fails as:
-> 
->   hdr.freemap[0-2] = [base,size] [FREEMAP..]
->  +0:[104,1892]
->  +1:[0,0]
->  +2:[0,0]
->   entries[0-2] = [hashval,nameidx,incomplete,root,local] [ENTRIES..]
-> 
-> So we have extra lines that need to be filtered out,
-> 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> ---
 
-V2 looks better to me,
-Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-> - be more precise on matching the array output, address Zorro's comment
-> 
->  tests/xfs/021 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/tests/xfs/021 b/tests/xfs/021
-> index 67a4346..0471b95 100755
-> --- a/tests/xfs/021
-> +++ b/tests/xfs/021
-> @@ -151,7 +151,7 @@ s/^(hdr.info.magic =) 0x3bee/\1 0xfbee/;
->  s/^(hdr.firstused =) (\d+)/\1 FIRSTUSED/;
->  s/^(hdr.freemap\[0-2] = \[base,size]).*/\1 [FREEMAP..]/;
->  s/^(entries\[0-2] = \[hashval,nameidx,incomplete,root,local]).*/\1 [ENTRIES..]/;
-> -	print;'
-> +	print unless /^\d+:\[.*/;'
->  
->  echo "*** done"
->  exit
-> -- 
-> 2.7.4
-> 
+At 11/08/2016 06:58 PM, Eryu Guan wrote:
+> On Tue, Nov 08, 2016 at 05:15:15PM +0800, Qu Wenruo wrote:
+>> Due to the fact that btrfs uses different max extent size for
+>> compressed and non-compressed write, it calculates metadata reservation
+>> incorrectly.
+>>
+>> This can leads to false ENOSPC alert for compressed write.
+>>
+>> This test case will check it by using small fs and large nodesize, and
+>> do parallel compressed write to trigger it.
+>>
+>> The fix is not merged and may change in the future, but the function is
+>> good enough:
+>> btrfs: improve inode's outstanding_extents computation
+>> btrfs: fix false enospc for compression
+>>
+>> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+>> ---
+>>  tests/btrfs/132     | 89 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/btrfs/132.out |  2 ++
+>>  tests/btrfs/group   |  1 +
+>>  3 files changed, 92 insertions(+)
+>>  create mode 100755 tests/btrfs/132
+>>  create mode 100644 tests/btrfs/132.out
+>>
+>> diff --git a/tests/btrfs/132 b/tests/btrfs/132
+>> new file mode 100755
+>> index 0000000..95c21ea
+>> --- /dev/null
+>> +++ b/tests/btrfs/132
+>> @@ -0,0 +1,89 @@
+>> +#! /bin/bash
+>> +# FS QA Test 132
+>> +#
+>> +# Check if false ENOSPC will happen when parallel buffer write happens
+>> +# The problem is caused by incorrect metadata reservation.
+>> +#
+>> +#-----------------------------------------------------------------------
+>> +# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
+>> +#
+>> +# This program is free software; you can redistribute it and/or
+>> +# modify it under the terms of the GNU General Public License as
+>> +# published by the Free Software Foundation.
+>> +#
+>> +# This program is distributed in the hope that it would be useful,
+>> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+>> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>> +# GNU General Public License for more details.
+>> +#
+>> +# You should have received a copy of the GNU General Public License
+>> +# along with this program; if not, write the Free Software Foundation,
+>> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+>> +#-----------------------------------------------------------------------
+>> +#
+>> +
+>> +seq=`basename $0`
+>> +seqres=$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +
+>> +here=`pwd`
+>> +tmp=/tmp/$$
+>> +status=1	# failure is the default!
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +	cd /
+>> +	rm -f $tmp.*
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +
+>> +# remove previous $seqres.full before test
+>> +rm -f $seqres.full
+>> +
+>> +# real QA test starts here
+>> +
+>> +# Modify as appropriate.
+>> +_supported_fs btrfs
+>> +_supported_os Linux
+>> +_require_scratch
+>> +
+>> +# Use small filesystem with maximum nodesize.
+>> +# Since the false ENOSPC happens due to incorrect metadata reservation,
+>> +# larger nodesize and small fs will make it much easier to reproduce
+>> +_scratch_mkfs -b 512M -n 64k >> $seqres.full 2>&1
+>
+> How about override MKFS_OPTIONS and call _scratch_mkfs_sized? e.g.
+>
+> export MKFS_OPTIONS="-n 64k"
+> _scratch_mkfs_sized $((512 * 1024 * 1024))
+
+Overriding MKFS_OPTIONS makes us unable to parse more mkfs options, for 
+example to test some incompatible features.
+
+So I'd just parse this mkfs options as extra options.
+>
+>> +_scratch_mount "-o compress"
+>> +
+>> +sleep_time=$(($TIME_FACTOR * 15))
+>> +loop_writer()
+>> +{
+>> +	offset=$1
+>> +	len=$2
+>> +	file=$3
+>> +
+>> +	while true;
+>> +	do
+>> +		# Only need stderr, and we need to specify small block size
+>> +		# but still trigger compression
+>> +		xfs_io -c "pwrite -b 8K $offset $len" $file 2>&1 > /dev/null
+>
+> Use $XFS_IO_PROG here.
+
+Oh, I forgot it again...
+>
+>> +	done
+>> +}
+>> +
+>> +touch $SCRATCH_MNT/testfile
+>> +
+>> +# Start 2 writter writting into the same file
+>> +# The file is 142M, which is smaller than 1/2 of the filesystem,
+>> +# so no other cause can lead to ENOSPC.
+>> +loop_writer 0 128M $SCRATCH_MNT/testfile &
+>> +loop_writer 128M 16M $SCRATCH_MNT/testfile &
+>> +
+>> +sleep $sleep_time
+>> +
+>> +kill 0
+>> +sleep
+
+Oh, I thought I typed "wait" not "sleep".
+
+>
+> This is not working for me, even I removed the suspicious "sleep", seems
+> "132" itself was killed too.
+>
+> I'd save pids of background jobs and kill the pids and call wait to make
+> sure all child processes exit running. e.g.
+>
+> loop_writer ... &
+> pids=$!
+> loop_writer ... &
+> pids="$pids $!"
+>
+> sleep $sleep_time
+> kill $pids
+> wait
+>
+> And you're missing 'echo "Silence is golden"' in the test.
+
+I'll update them soon.
+
+Thanks,
+Qu
+>
+> Thanks,
+> Eryu
+>
+>> +
+>> +status=0
+>> +exit
+>> diff --git a/tests/btrfs/132.out b/tests/btrfs/132.out
+>> new file mode 100644
+>> index 0000000..b096312
+>> --- /dev/null
+>> +++ b/tests/btrfs/132.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 132
+>> +Silence is golden
+>> diff --git a/tests/btrfs/group b/tests/btrfs/group
+>> index c090604..ec8ad80 100644
+>> --- a/tests/btrfs/group
+>> +++ b/tests/btrfs/group
+>> @@ -134,3 +134,4 @@
+>>  129 auto quick send
+>>  130 auto clone send
+>>  131 auto quick
+>> +132 auto compress
+>> --
+>> 2.7.4
+>>
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+
+
