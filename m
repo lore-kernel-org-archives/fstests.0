@@ -1,74 +1,93 @@
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:19593 "EHLO
-        ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S938629AbcKKW2d (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 11 Nov 2016 17:28:33 -0500
-Date: Sat, 12 Nov 2016 09:28:24 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] shared/006: improve the speed of case running
-Message-ID: <20161111222824.GJ28922@dastard>
-References: <1478795242-14022-1-git-send-email-zlang@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:54890 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752730AbcKIJNr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 9 Nov 2016 04:13:47 -0500
+Date: Wed, 9 Nov 2016 17:13:44 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 8/9] xfs: fuzz every field of every structure
+Message-ID: <20161109091344.GX27776@eguan.usersys.redhat.com>
+References: <147830503054.1919.4998804611100937975.stgit@birch.djwong.org>
+ <147830508036.1919.9626426021774095650.stgit@birch.djwong.org>
+ <20161109080924.GT27776@eguan.usersys.redhat.com>
+ <20161109085236.GE16813@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1478795242-14022-1-git-send-email-zlang@redhat.com>
+In-Reply-To: <20161109085236.GE16813@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: david@fromorbit.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Nov 11, 2016 at 12:27:22AM +0800, Zorro Lang wrote:
-> There're three problems of this case:
-> 1. Thousands of threads will be created to create lots of files, then
->    kernel need to waste lots of system resource to schedule these
->    threads. Some poor performance machines will take long long time
->    on that.
-> 2. Per thread try to create 1000 files by run 1000 times "echo >file".
+On Wed, Nov 09, 2016 at 12:52:36AM -0800, Darrick J. Wong wrote:
+> On Wed, Nov 09, 2016 at 04:09:24PM +0800, Eryu Guan wrote:
+> > On Fri, Nov 04, 2016 at 05:18:00PM -0700, Darrick J. Wong wrote:
+> > > Previously, our XFS fuzzing efforts were limited to using the xfs_db
+> > > blocktrash command to scribble garbage all over a block.  This is
+> > > pretty easy to discover; it would be far more interesting if we could
+> > > fuzz individual fields looking for unhandled corner cases.  Since we
+> > > now have an online scrub tool, use it to check for our targeted
+> > > corruptions prior to the usual steps of writing to the FS, taking it
+> > > offline, repairing, and re-checking.
+> > > 
+> > > These tests use the new xfs_db 'fuzz' command to test corner case
+> > > handling of every field.  The 'print' command tells us which fields
+> > > are available, and the fuzz command can write zeroes or ones to the
+> > > field; set the high, middle, or low bit; add or subtract numbers; or
+> > > randomize the field.  We loop through all fields and all fuzz verbs to
+> > > see if we can trip up the kernel.
+> > > 
+> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > 
+> > The first test gave me a kernel crash :) xfs/1300 crashed your kernel
+> > djwong-devel branch. I appended the console log at the end of this mail
+> > if you have interest to see it.
+> > 
+> > And another xfs/1300 run gave me this failure message:
+> > 
+> >     +/mnt/testarea/scratch: Kernel lacks GETFSMAP; scrub will be less efficient. (xfs.c line 661)
+> >     +/mnt/testarea/scratch: Kernel cannot help scrub metadata; scrub will be incomplete. (xfs.c line 661)
+> >     +/mnt/testarea/scratch: Kernel cannot help scrub inodes; scrub will be incomplete. (xfs.c line 661)
+> >     +/mnt/testarea/scratch: Kernel cannot help scrub extent map; scrub will be less efficient. (xfs.c line 661)
+> > 
+> > Is this known issue or something should be filtered out in the test?
 > 
-> For the 1st problem, I limit 2 threads per cpu, and the maximum is 20.
-> For the 2nd problem, use "sed 1 1000 | xargs touch" to instead of
-> the old way.
+> That's strange, the djwong-devel branch should have getfsmap & scrub in it...
 > 
-> With this change, this case can run over in 2 mins on my x86_64
-> virtual machine with 1 cpu and 1G memory. Before that, it was still
-> running even a quarter passed.
+> ...are you running the djwong-devel kernel and xfsprogs code?  The scrub
+> ioctl structure has shifted some over the past few months, though GETFSMAP
+> hasn't changed in ages.
 > 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
-> 
-> Hi,
-> 
-> The performance of this case affect the test time of xfstests,
-> especially on poor performance VM. I always doubt it hangs there,
-> because it has run too long time.
-> 
-> After this improvement:
-> It ran 105s on my virtual machine with 1 cpu and 1G memory.
-> It ran 60s on my real machine with 8 cpu and 64G memory.
-> 
-> The difference of "for ((i=0;i<1000;i++)); echo -n > file$i;done"
-> and "touch file{1..1000}" is:
-> The 1st one will run 1000 times execve, open, close and so on. The
-> execve() will take much time, especially on VM.
-> But the 2nd one will run once execve, 1000 times open and once close.
-> open() take much less time than execve().
-> 
-> Too many threads really waste too much time. For example, on my VM,
-> when I use $((ncpus * 2)) threads to run this case, it ran 100s. But
-> if I use $((ncpus * 4)) threads, the time increase to 130s. So too
-> many threads is not helpful, in contrast it wastes more time.
+> Wait, "another xfs/1300 run" ... so after the first crash, did you go
+> back to a vanilla kernel without all my crazypatches? :)
 
-If the only aim is to create inodes faster, then going above 4
-threads making inodes concurrently isn't going to increase speed.
-Most small filesystems don't have the configuration necessary to
-scale much past this (e.g. journal size, AG/BG count, etc all will
-limit concurrency on typical test filesystems.
+Ahh, you're right! It booted into 4.9-rc4 vanilla kernel, sorry about
+that.. But xfs/1300 crashed djwong-devel for the second time in my
+second try, seems the crash is reliable reproduced, with reflink
+enabled.
 
-There's a reason that the tests that create hundreds of thousands of
-inodes are quite limited in the amount of concurrency they support...
+> 
+> > And ext4/1300 generated large .out.bad file (51M), containing something
+> > like:
+> > 
+> > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101381632/2469888/4096) ends past end of filesystem at 31457280. (generic.c line 272)
+> > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101389824/2478080/4096) starts past end of filesystem at 31457280. (generic.c line 264)
+> > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101389824/2478080/4096) ends past end of filesystem at 31457280. (generic.c line 272)
+> > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101398016/2486272/4096) starts past end of filesystem at 31457280. (generic.c line 264)
+> > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101398016/2486272/4096) ends past end of filesystem at 31457280. (generic.c line 272)
+> > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101406208/2494464/4096) starts past end of filesystem at 31457280. (generic.c line 264)
+> > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101406208/2494464/4096) ends past end of filesystem at 31457280. (generic.c line 272)
+> > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101414400/2502656/4096) starts past end of filesystem at 31457280. (generic.c line 264)
+> > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101414400/2502656/4096) ends past end of filesystem at 31457280. (generic.c line 272)
+> > 
+> > Seems like scrub found something wrong (real problems) and became very
+> > noisy?
+> 
+> Hmm that's even stranger.  I'll try to reproduce tomorrow.
 
-Cheers,
+So this ext4 noise came from the vanilla kernel too, retested with
+djwong-devel kernel & userspace ext4/1300 passed without problems. Sorry
+for my noise..
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Thanks,
+Eryu
