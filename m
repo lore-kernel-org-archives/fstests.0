@@ -1,88 +1,77 @@
-Received: from mx1.redhat.com ([209.132.183.28]:48020 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751143AbcKMG17 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 13 Nov 2016 01:27:59 -0500
-Message-Id: <201611130627.uAD6Ru5S010234@int-mx11.intmail.prod.int.phx2.redhat.com>
-Date: Sun, 13 Nov 2016 14:27:56 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: [GIT PULL] fstests: updates on 2016-11-13
+Received: from aserp1040.oracle.com ([141.146.126.69]:19416 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754049AbcKIXAv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 9 Nov 2016 18:00:51 -0500
+Date: Wed, 9 Nov 2016 15:00:17 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: [PATCH 7/6] xfstests: fix some minor problems testing ocfs2
+Message-ID: <20161109230017.GB21519@birch.djwong.org>
+References: <147873186646.2820.17513529102740292215.stgit@birch.djwong.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <147873186646.2820.17513529102740292215.stgit@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
+To: mfasheh@versity.com, jlbec@evilplan.org, eguan@redhat.com
+Cc: linux-fsdevel@vger.kernel.org, ocfs2-devel@oss.oracle.com, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave,
+There are a a few things about ocfs2 tools that need special-casing in
+xfstests, so fix them so that we can start testing ocfs2.
 
-Can you please pull the fstests update from the location below? In this update
-we have new xfs, btrfs and generic tests added, and require xfs_io binary to be
-mandatory for fstests run. There're also updates to make xfs_copy tests without
-"-d" option on v5 XFS possible and to fix bugs in ocfs2 testing.
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ common/quota |    2 +-
+ common/rc    |   10 ++++++++--
+ 2 files changed, 9 insertions(+), 3 deletions(-)
 
-New failure I noticed in this update:
-- xfs/118 is a new test that may crash your kernel if you're not using latest
-  kernel from linux-xfs tree (for-next branch)
-
-Thanks,
-Eryu
-
-The following changes since commit e604301e2605a152d8438f60d893ff29ed65d637:
-
-  common: add CephFS support (2016-11-05 17:30:14 +0800)
-
-are available in the git repository at:
-
-  https://github.com/guaneryu/xfstests.git for-dave
-
-for you to fetch changes up to 052b0777d7cc61679226e1526a5a4bd727d5be27:
-
-  xfs: testcase for kernelspace xfs_fsr extent handling flaw (2016-11-13 14:01:07 +0800)
-
-----------------------------------------------------------------
-
-fstests: update on 2016-11-13
-
-This update contains:
-o New tests for xfs and btrfs, and new generic test
-o xfs_io is made mandatory
-o Test xfs_copy v5 XFS without -d option
-o Bug fixes for ocfs2 testing
-
-----------------------------------------------------------------
-Darrick J. Wong (1):
-      fstests: fix some minor problems testing ocfs2
-
-Eric Sandeen (1):
-      xfs: testcase for kernelspace xfs_fsr extent handling flaw
-
-Eryu Guan (2):
-      fstests: make xfs_io mandatory
-      xfs/021: filter out detailed array element info from xfs_db
-
-Qu Wenruo (1):
-      btrfs: Check false ENOSPC bug caused by incorrect metadata reserve
-
-Zorro Lang (2):
-      generic: multi-thread freeze/unfreeze test under fsstress
-      fstests: test xfs_copy V5 XFS without -d option
-
- common/config         |   4 +-
- common/quota          |   2 +-
- common/rc             |  48 +++++++++++++----------
- tests/btrfs/132       | 103 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/132.out   |   2 +
- tests/btrfs/group     |   1 +
- tests/generic/390     |  94 +++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/390.out |   2 +
- tests/generic/group   |   1 +
- tests/xfs/021         |   2 +-
- tests/xfs/032         |  21 +++++++---
- tests/xfs/073         |   8 +---
- tests/xfs/094         |   1 -
- tests/xfs/103         |   1 -
- tests/xfs/118         |  99 ++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/118.out     |   2 +
- tests/xfs/group       |   1 +
- 17 files changed, 357 insertions(+), 35 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
+diff --git a/common/quota b/common/quota
+index 678bc43..d9bb8d9 100644
+--- a/common/quota
++++ b/common/quota
+@@ -34,7 +34,7 @@ _require_quota()
+ 	    _notrun "Installed kernel does not support quotas"
+ 	fi
+ 	;;
+-    gfs2)
++    gfs2|ocfs2)
+ 	;;
+     xfs)
+ 	if [ ! -f /proc/fs/xfs/xqmstat ]; then
+diff --git a/common/rc b/common/rc
+index 8e078da..c75b614 100644
+--- a/common/rc
++++ b/common/rc
+@@ -978,7 +978,7 @@ _scratch_mkfs_sized()
+     xfs)
+ 	def_blksz=`echo $MKFS_OPTIONS|sed -rn 's/.*-b ?size= ?+([0-9]+).*/\1/p'`
+ 	;;
+-    ext2|ext3|ext4|ext4dev|udf|btrfs|reiser4)
++    ext2|ext3|ext4|ext4dev|udf|btrfs|reiser4|ocfs2)
+ 	def_blksz=`echo $MKFS_OPTIONS| sed -rn 's/.*-b ?+([0-9]+).*/\1/p'`
+ 	;;
+     esac
+@@ -1015,6 +1015,9 @@ _scratch_mkfs_sized()
+     ext2|ext3|ext4|ext4dev)
+ 	${MKFS_PROG}.$FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
+ 	;;
++    ocfs2)
++	yes | ${MKFS_PROG}.$FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
++	;;
+     udf)
+ 	$MKFS_UDF_PROG $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
+ 	;;
+@@ -1087,9 +1090,12 @@ _scratch_mkfs_blocksized()
+     xfs)
+ 	_scratch_mkfs_xfs $MKFS_OPTIONS -b size=$blocksize
+ 	;;
+-    ext2|ext3|ext4|ocfs2)
++    ext2|ext3|ext4)
+ 	${MKFS_PROG}.$FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV
+ 	;;
++    ocfs2)
++	yes | ${MKFS_PROG}.$FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV
++	;;
+     *)
+ 	_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_blocksized"
+ 	;;
