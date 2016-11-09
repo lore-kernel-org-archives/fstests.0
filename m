@@ -1,73 +1,108 @@
-Received: from bombadil.infradead.org ([198.137.202.9]:41237 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S966513AbcKLQsu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 12 Nov 2016 11:48:50 -0500
-Received: from hch by bombadil.infradead.org with local (Exim 4.85_2 #1 (Red Hat Linux))
-        id 1c5bU1-0004oS-NR
-        for fstests@vger.kernel.org; Sat, 12 Nov 2016 16:48:49 +0000
-Date: Sat, 12 Nov 2016 08:48:49 -0800
-From: Christoph Hellwig <hch@infradead.org>
-Subject: fstests: fix fsx fallocate error messages
-Message-ID: <20161112164849.GB18127@infradead.org>
+Received: from mx1.redhat.com ([209.132.183.28]:53532 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751591AbcKIKEH (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 9 Nov 2016 05:04:07 -0500
+Date: Wed, 9 Nov 2016 18:04:05 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 8/9] xfs: fuzz every field of every structure
+Message-ID: <20161109100405.GZ27776@eguan.usersys.redhat.com>
+References: <147830503054.1919.4998804611100937975.stgit@birch.djwong.org>
+ <147830508036.1919.9626426021774095650.stgit@birch.djwong.org>
+ <20161109080924.GT27776@eguan.usersys.redhat.com>
+ <20161109085236.GE16813@birch.djwong.org>
+ <20161109091344.GX27776@eguan.usersys.redhat.com>
+ <20161109092523.GF20710@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20161109092523.GF20710@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: david@fromorbit.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Many of the commands using fallocate had an extra % at the beggining
-of the error messages, missed the 0x prefix for hex output and printed
-the length where it should print the end of the region.
+On Wed, Nov 09, 2016 at 01:25:23AM -0800, Darrick J. Wong wrote:
+> On Wed, Nov 09, 2016 at 05:13:44PM +0800, Eryu Guan wrote:
+> > On Wed, Nov 09, 2016 at 12:52:36AM -0800, Darrick J. Wong wrote:
+> > > On Wed, Nov 09, 2016 at 04:09:24PM +0800, Eryu Guan wrote:
+> > > > On Fri, Nov 04, 2016 at 05:18:00PM -0700, Darrick J. Wong wrote:
+> > > > > Previously, our XFS fuzzing efforts were limited to using the xfs_db
+> > > > > blocktrash command to scribble garbage all over a block.  This is
+> > > > > pretty easy to discover; it would be far more interesting if we could
+> > > > > fuzz individual fields looking for unhandled corner cases.  Since we
+> > > > > now have an online scrub tool, use it to check for our targeted
+> > > > > corruptions prior to the usual steps of writing to the FS, taking it
+> > > > > offline, repairing, and re-checking.
+> > > > > 
+> > > > > These tests use the new xfs_db 'fuzz' command to test corner case
+> > > > > handling of every field.  The 'print' command tells us which fields
+> > > > > are available, and the fuzz command can write zeroes or ones to the
+> > > > > field; set the high, middle, or low bit; add or subtract numbers; or
+> > > > > randomize the field.  We loop through all fields and all fuzz verbs to
+> > > > > see if we can trip up the kernel.
+> > > > > 
+> > > > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > > > 
+> > > > The first test gave me a kernel crash :) xfs/1300 crashed your kernel
+> > > > djwong-devel branch. I appended the console log at the end of this mail
+> > > > if you have interest to see it.
+> > > > 
+> > > > And another xfs/1300 run gave me this failure message:
+> > > > 
+> > > >     +/mnt/testarea/scratch: Kernel lacks GETFSMAP; scrub will be less efficient. (xfs.c line 661)
+> > > >     +/mnt/testarea/scratch: Kernel cannot help scrub metadata; scrub will be incomplete. (xfs.c line 661)
+> > > >     +/mnt/testarea/scratch: Kernel cannot help scrub inodes; scrub will be incomplete. (xfs.c line 661)
+> > > >     +/mnt/testarea/scratch: Kernel cannot help scrub extent map; scrub will be less efficient. (xfs.c line 661)
+> > > > 
+> > > > Is this known issue or something should be filtered out in the test?
+> > > 
+> > > That's strange, the djwong-devel branch should have getfsmap & scrub in it...
+> > > 
+> > > ...are you running the djwong-devel kernel and xfsprogs code?  The scrub
+> > > ioctl structure has shifted some over the past few months, though GETFSMAP
+> > > hasn't changed in ages.
+> > > 
+> > > Wait, "another xfs/1300 run" ... so after the first crash, did you go
+> > > back to a vanilla kernel without all my crazypatches? :)
+> > 
+> > Ahh, you're right! It booted into 4.9-rc4 vanilla kernel, sorry about
+> > that.. But xfs/1300 crashed djwong-devel for the second time in my
+> > second try, seems the crash is reliable reproduced, with reflink
+> > enabled.
+> 
+> I think if you change the XFS_SCRUB_OP_ERROR_GOTO at line 2237 of
+> xfs_scrub_get_inode() to "if (error) goto out_err;" that ought to clear it up.
+> 
+> > > > And ext4/1300 generated large .out.bad file (51M), containing something
+> > > > like:
+> > > > 
+> > > > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101381632/2469888/4096) ends past end of filesystem at 31457280. (generic.c line 272)
+> > > > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101389824/2478080/4096) starts past end of filesystem at 31457280. (generic.c line 264)
+> > > > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101389824/2478080/4096) ends past end of filesystem at 31457280. (generic.c line 272)
+> > > > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101398016/2486272/4096) starts past end of filesystem at 31457280. (generic.c line 264)
+> > > > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101398016/2486272/4096) ends past end of filesystem at 31457280. (generic.c line 272)
+> > > > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101406208/2494464/4096) starts past end of filesystem at 31457280. (generic.c line 264)
+> > > > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101406208/2494464/4096) ends past end of filesystem at 31457280. (generic.c line 272)
+> > > > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101414400/2502656/4096) starts past end of filesystem at 31457280. (generic.c line 264)
+> > > > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101414400/2502656/4096) ends past end of filesystem at 31457280. (generic.c line 272)
+> > > > 
+> > > > Seems like scrub found something wrong (real problems) and became very
+> > > > noisy?
+> > > 
+> > > Hmm that's even stranger.  I'll try to reproduce tomorrow.
+> > 
+> > So this ext4 noise came from the vanilla kernel too, retested with
+> > djwong-devel kernel & userspace ext4/1300 passed without problems. Sorry
+> > for my noise..
+> 
+> But that's even more weird; there haven't been any changes to ext4 that
+> would explain why this breaks on a vanilla 4.9-rc4 kernel...
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
+Puzzle resolved, I somehow switched back to mainline xfsprogs or some
+other wrong xfsprogs version after booted into 4.9-rc4 vanilla kernel.
+After updating xfsprogs to djwong-devel, ext4/1300 showed no problem on
+4.9-rc4 kernel too.
 
-diff --git a/ltp/fsx.c b/ltp/fsx.c
-index ebe8ecf..74a3b74 100644
---- a/ltp/fsx.c
-+++ b/ltp/fsx.c
-@@ -964,7 +964,7 @@ do_punch_hole(unsigned offset, unsigned length)
- 			offset, offset+length, length);
- 	}
- 	if (fallocate(fd, mode, (loff_t)offset, (loff_t)length) == -1) {
--		prt("%punch hole: %x to %x\n", offset, length);
-+		prt("punch hole: 0x%x to 0x%x\n", offset, offset + length);
- 		prterr("do_punch_hole: fallocate");
- 		report_failure(161);
- 	}
-@@ -1026,7 +1026,7 @@ do_zero_range(unsigned offset, unsigned length, int keep_size)
- 			offset, offset+length, length);
- 	}
- 	if (fallocate(fd, mode, (loff_t)offset, (loff_t)length) == -1) {
--		prt("%pzero range: %x to %x\n", offset, length);
-+		prt("zero range: 0x%x to 0x%x\n", offset, offset + length);
- 		prterr("do_zero_range: fallocate");
- 		report_failure(161);
- 	}
-@@ -1076,7 +1076,7 @@ do_collapse_range(unsigned offset, unsigned length)
- 			offset, offset+length, length);
- 	}
- 	if (fallocate(fd, mode, (loff_t)offset, (loff_t)length) == -1) {
--		prt("collapse range: %x to %x\n", offset, length);
-+		prt("collapse range: 0x%x to 0x%x\n", offset, offset + length);
- 		prterr("do_collapse_range: fallocate");
- 		report_failure(161);
- 	}
-@@ -1128,7 +1128,7 @@ do_insert_range(unsigned offset, unsigned length)
- 			offset, offset+length, length);
- 	}
- 	if (fallocate(fd, mode, (loff_t)offset, (loff_t)length) == -1) {
--		prt("insert range: %x to %x\n", offset, length);
-+		prt("insert range: 0x%x to 0x%x\n", offset, offset + length);
- 		prterr("do_insert_range: fallocate");
- 		report_failure(161);
- 	}
-@@ -1193,7 +1193,7 @@ do_preallocate(unsigned offset, unsigned length, int keep_size)
- 		prt("%lu falloc\tfrom 0x%x to 0x%x (0x%x bytes)\n", testcalls,
- 				offset, offset + length, length);
- 	if (fallocate(fd, keep_size ? FALLOC_FL_KEEP_SIZE : 0, (loff_t)offset, (loff_t)length) == -1) {
--	        prt("fallocate: %x to %x\n", offset, length);
-+	        prt("fallocate: 0x%x to 0x%x\n", offset, offset + length);
- 		prterr("do_preallocate: fallocate");
- 		report_failure(161);
- 	}
+Sorry again for the mess!
+
+Eryu
