@@ -1,12 +1,12 @@
 Return-Path: <fstests-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([222.73.24.84]:18815 "EHLO song.cn.fujitsu.com"
+Received: from cn.fujitsu.com ([222.73.24.84]:23086 "EHLO song.cn.fujitsu.com"
         rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-        id S1752043AbcKICWK (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 8 Nov 2016 21:22:10 -0500
+        id S1751564AbcKJDTQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 9 Nov 2016 22:19:16 -0500
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH v2] fstests: btrfs: Check false ENOSPC bug caused by incorrect metadata reserve
-Date: Wed,  9 Nov 2016 10:21:35 +0800
-Message-Id: <20161109022135.28255-1-quwenruo@cn.fujitsu.com>
+Subject: [PATCH v3] fstests: btrfs: Check false ENOSPC bug caused by incorrect metadata reserve
+Date: Thu, 10 Nov 2016 11:18:48 +0800
+Message-Id: <20161110031848.21127-1-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
 Sender: fstests-owner@vger.kernel.org
 To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
@@ -18,8 +18,12 @@ incorrectly.
 
 This can leads to false ENOSPC alert for compressed write.
 
-This test case will check it by using small fs and large nodesize, and
-do parallel compressed write to trigger it.
+This test case will check it by using small fs and do parallel write to
+trigger it.
+
+It's highly recommened to use MOUNT_OPTIONS="-o compress" and
+MKFS_OPTIONS="-n 64k" to trigger it.
+Without compression, it won't be triggered.
 
 The fix is not merged and may change in the future, but the function is
 good enough:
@@ -33,25 +37,31 @@ v2:
   Fix "kill 0" which will also kill the script itself.
   Add missing "Silence is golden" output.
   Add workaround for EBUSY while umount for compression
+v3:
+  Remove mount and mkfs option override to increase coverity
+  Increase test time to 30 * TIME_FACTOR to increase the possibility
+  for other MKFS_OPTIONS
 ---
- tests/btrfs/132     | 98 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/132.out |  2 ++
- tests/btrfs/group   |  1 +
- 3 files changed, 101 insertions(+)
+ tests/btrfs/132     | 105 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/132.out |   2 +
+ tests/btrfs/group   |   1 +
+ 3 files changed, 108 insertions(+)
  create mode 100755 tests/btrfs/132
  create mode 100644 tests/btrfs/132.out
 
 diff --git a/tests/btrfs/132 b/tests/btrfs/132
 new file mode 100755
-index 0000000..530a128
+index 0000000..239707b
 --- /dev/null
 +++ b/tests/btrfs/132
-@@ -0,0 +1,98 @@
+@@ -0,0 +1,105 @@
 +#! /bin/bash
 +# FS QA Test 132
 +#
 +# Check if false ENOSPC will happen when parallel buffer write happens
-+# The problem is caused by incorrect metadata reservation.
++# The problem is caused by incorrect metadata reservation for any buffered
++# write whose max extent size is not 128M (including compression and in-band
++# dedupe).
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
@@ -85,6 +95,7 @@ index 0000000..530a128
 +	cd /
 +	rm -f $tmp.*
 +	kill $pids &> /dev/null
++	wait
 +}
 +
 +# get standard environment, filters and checks
@@ -101,13 +112,17 @@ index 0000000..530a128
 +_supported_os Linux
 +_require_scratch
 +
-+# Use small filesystem with maximum nodesize.
++# Use small filesystem to trigger the bug more easily
++# It's highly recommened to run this test case with MKFS_OPTIONS="-n 64k"
++# to further increase the possibility
 +# Since the false ENOSPC happens due to incorrect metadata reservation,
 +# larger nodesize and small fs will make it much easier to reproduce
-+_scratch_mkfs -b 512M -n 64K >> $seqres.full 2>&1
-+_scratch_mount "-o compress"
++_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
 +
-+sleep_time=$(($TIME_FACTOR * 15))
++# Recommended to use MOUNT_OPTIONS="-o compress" to trigger the bug
++_scratch_mount
++
++sleep_time=$(($TIME_FACTOR * 30))
 +loop_writer()
 +{
 +	offset=$1
