@@ -1,79 +1,73 @@
-Received: from mx1.redhat.com ([209.132.183.28]:59804 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751572AbcKIJno (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 9 Nov 2016 04:43:44 -0500
-Date: Wed, 9 Nov 2016 17:43:41 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] fstests: btrfs: Check false ENOSPC bug caused by
- incorrect metadata reserve
-Message-ID: <20161109094341.GY27776@eguan.usersys.redhat.com>
-References: <20161108091515.20867-1-quwenruo@cn.fujitsu.com>
- <20161108105826.GN27776@eguan.usersys.redhat.com>
- <d9a9d224-2f21-5b77-a3e9-de271cd4e755@cn.fujitsu.com>
+Received: from bombadil.infradead.org ([198.137.202.9]:41237 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S966513AbcKLQsu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 12 Nov 2016 11:48:50 -0500
+Received: from hch by bombadil.infradead.org with local (Exim 4.85_2 #1 (Red Hat Linux))
+        id 1c5bU1-0004oS-NR
+        for fstests@vger.kernel.org; Sat, 12 Nov 2016 16:48:49 +0000
+Date: Sat, 12 Nov 2016 08:48:49 -0800
+From: Christoph Hellwig <hch@infradead.org>
+Subject: fstests: fix fsx fallocate error messages
+Message-ID: <20161112164849.GB18127@infradead.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <d9a9d224-2f21-5b77-a3e9-de271cd4e755@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Nov 09, 2016 at 08:24:38AM +0800, Qu Wenruo wrote:
-> 
-> 
-> At 11/08/2016 06:58 PM, Eryu Guan wrote:
-> > On Tue, Nov 08, 2016 at 05:15:15PM +0800, Qu Wenruo wrote:
-> > > Due to the fact that btrfs uses different max extent size for
-> > > compressed and non-compressed write, it calculates metadata reservation
-> > > incorrectly.
-> > > 
-> > > This can leads to false ENOSPC alert for compressed write.
-> > > 
-> > > This test case will check it by using small fs and large nodesize, and
-> > > do parallel compressed write to trigger it.
-> > > 
-> > > The fix is not merged and may change in the future, but the function is
-> > > good enough:
-> > > btrfs: improve inode's outstanding_extents computation
-> > > btrfs: fix false enospc for compression
-> > > 
-> > > Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
-> > > ---
-[snip]
-> > > +
-> > > +# Use small filesystem with maximum nodesize.
-> > > +# Since the false ENOSPC happens due to incorrect metadata reservation,
-> > > +# larger nodesize and small fs will make it much easier to reproduce
-> > > +_scratch_mkfs -b 512M -n 64k >> $seqres.full 2>&1
-> > 
-> > How about override MKFS_OPTIONS and call _scratch_mkfs_sized? e.g.
-> > 
-> > export MKFS_OPTIONS="-n 64k"
-> > _scratch_mkfs_sized $((512 * 1024 * 1024))
-> 
-> Overriding MKFS_OPTIONS makes us unable to parse more mkfs options, for
-> example to test some incompatible features.
-> 
-> So I'd just parse this mkfs options as extra options.
+Many of the commands using fallocate had an extra % at the beggining
+of the error messages, missed the 0x prefix for hex output and printed
+the length where it should print the end of the region.
 
-We should use helpers and not open-code when helpers are available. So
-we should really use _scratch_mkfs_sized here.
+Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-And "-n 64k" is only to make bug easier to reproduce, but I don't think
-it's necessary. In my testings, 50%-75% runs hit the ENOSPC failure on
-my x86_64 test vm, even I removed the "-n 64k" mkfs option from the
-test.
-
-So I'd say remove "-n 64k" and test whatever mkfs options user
-specified.
-
-> > 
-> > > +_scratch_mount "-o compress"
-
-And compress mount option is not necessary to me either. btrfs compress
-is a commonly tested configuration, there's no need to force the
-compress option in the test. So we can test other configurations too.
-
-Thanks,
-Eryu
+diff --git a/ltp/fsx.c b/ltp/fsx.c
+index ebe8ecf..74a3b74 100644
+--- a/ltp/fsx.c
++++ b/ltp/fsx.c
+@@ -964,7 +964,7 @@ do_punch_hole(unsigned offset, unsigned length)
+ 			offset, offset+length, length);
+ 	}
+ 	if (fallocate(fd, mode, (loff_t)offset, (loff_t)length) == -1) {
+-		prt("%punch hole: %x to %x\n", offset, length);
++		prt("punch hole: 0x%x to 0x%x\n", offset, offset + length);
+ 		prterr("do_punch_hole: fallocate");
+ 		report_failure(161);
+ 	}
+@@ -1026,7 +1026,7 @@ do_zero_range(unsigned offset, unsigned length, int keep_size)
+ 			offset, offset+length, length);
+ 	}
+ 	if (fallocate(fd, mode, (loff_t)offset, (loff_t)length) == -1) {
+-		prt("%pzero range: %x to %x\n", offset, length);
++		prt("zero range: 0x%x to 0x%x\n", offset, offset + length);
+ 		prterr("do_zero_range: fallocate");
+ 		report_failure(161);
+ 	}
+@@ -1076,7 +1076,7 @@ do_collapse_range(unsigned offset, unsigned length)
+ 			offset, offset+length, length);
+ 	}
+ 	if (fallocate(fd, mode, (loff_t)offset, (loff_t)length) == -1) {
+-		prt("collapse range: %x to %x\n", offset, length);
++		prt("collapse range: 0x%x to 0x%x\n", offset, offset + length);
+ 		prterr("do_collapse_range: fallocate");
+ 		report_failure(161);
+ 	}
+@@ -1128,7 +1128,7 @@ do_insert_range(unsigned offset, unsigned length)
+ 			offset, offset+length, length);
+ 	}
+ 	if (fallocate(fd, mode, (loff_t)offset, (loff_t)length) == -1) {
+-		prt("insert range: %x to %x\n", offset, length);
++		prt("insert range: 0x%x to 0x%x\n", offset, offset + length);
+ 		prterr("do_insert_range: fallocate");
+ 		report_failure(161);
+ 	}
+@@ -1193,7 +1193,7 @@ do_preallocate(unsigned offset, unsigned length, int keep_size)
+ 		prt("%lu falloc\tfrom 0x%x to 0x%x (0x%x bytes)\n", testcalls,
+ 				offset, offset + length, length);
+ 	if (fallocate(fd, keep_size ? FALLOC_FL_KEEP_SIZE : 0, (loff_t)offset, (loff_t)length) == -1) {
+-	        prt("fallocate: %x to %x\n", offset, length);
++	        prt("fallocate: 0x%x to 0x%x\n", offset, offset + length);
+ 		prterr("do_preallocate: fallocate");
+ 		report_failure(161);
+ 	}
