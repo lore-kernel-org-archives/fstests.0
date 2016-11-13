@@ -1,108 +1,88 @@
-Received: from mx1.redhat.com ([209.132.183.28]:53532 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:48020 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751591AbcKIKEH (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 9 Nov 2016 05:04:07 -0500
-Date: Wed, 9 Nov 2016 18:04:05 +0800
+        id S1751143AbcKMG17 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 13 Nov 2016 01:27:59 -0500
+Message-Id: <201611130627.uAD6Ru5S010234@int-mx11.intmail.prod.int.phx2.redhat.com>
+Date: Sun, 13 Nov 2016 14:27:56 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 8/9] xfs: fuzz every field of every structure
-Message-ID: <20161109100405.GZ27776@eguan.usersys.redhat.com>
-References: <147830503054.1919.4998804611100937975.stgit@birch.djwong.org>
- <147830508036.1919.9626426021774095650.stgit@birch.djwong.org>
- <20161109080924.GT27776@eguan.usersys.redhat.com>
- <20161109085236.GE16813@birch.djwong.org>
- <20161109091344.GX27776@eguan.usersys.redhat.com>
- <20161109092523.GF20710@birch.djwong.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20161109092523.GF20710@birch.djwong.org>
+Subject: [GIT PULL] fstests: updates on 2016-11-13
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: david@fromorbit.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Nov 09, 2016 at 01:25:23AM -0800, Darrick J. Wong wrote:
-> On Wed, Nov 09, 2016 at 05:13:44PM +0800, Eryu Guan wrote:
-> > On Wed, Nov 09, 2016 at 12:52:36AM -0800, Darrick J. Wong wrote:
-> > > On Wed, Nov 09, 2016 at 04:09:24PM +0800, Eryu Guan wrote:
-> > > > On Fri, Nov 04, 2016 at 05:18:00PM -0700, Darrick J. Wong wrote:
-> > > > > Previously, our XFS fuzzing efforts were limited to using the xfs_db
-> > > > > blocktrash command to scribble garbage all over a block.  This is
-> > > > > pretty easy to discover; it would be far more interesting if we could
-> > > > > fuzz individual fields looking for unhandled corner cases.  Since we
-> > > > > now have an online scrub tool, use it to check for our targeted
-> > > > > corruptions prior to the usual steps of writing to the FS, taking it
-> > > > > offline, repairing, and re-checking.
-> > > > > 
-> > > > > These tests use the new xfs_db 'fuzz' command to test corner case
-> > > > > handling of every field.  The 'print' command tells us which fields
-> > > > > are available, and the fuzz command can write zeroes or ones to the
-> > > > > field; set the high, middle, or low bit; add or subtract numbers; or
-> > > > > randomize the field.  We loop through all fields and all fuzz verbs to
-> > > > > see if we can trip up the kernel.
-> > > > > 
-> > > > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > > > 
-> > > > The first test gave me a kernel crash :) xfs/1300 crashed your kernel
-> > > > djwong-devel branch. I appended the console log at the end of this mail
-> > > > if you have interest to see it.
-> > > > 
-> > > > And another xfs/1300 run gave me this failure message:
-> > > > 
-> > > >     +/mnt/testarea/scratch: Kernel lacks GETFSMAP; scrub will be less efficient. (xfs.c line 661)
-> > > >     +/mnt/testarea/scratch: Kernel cannot help scrub metadata; scrub will be incomplete. (xfs.c line 661)
-> > > >     +/mnt/testarea/scratch: Kernel cannot help scrub inodes; scrub will be incomplete. (xfs.c line 661)
-> > > >     +/mnt/testarea/scratch: Kernel cannot help scrub extent map; scrub will be less efficient. (xfs.c line 661)
-> > > > 
-> > > > Is this known issue or something should be filtered out in the test?
-> > > 
-> > > That's strange, the djwong-devel branch should have getfsmap & scrub in it...
-> > > 
-> > > ...are you running the djwong-devel kernel and xfsprogs code?  The scrub
-> > > ioctl structure has shifted some over the past few months, though GETFSMAP
-> > > hasn't changed in ages.
-> > > 
-> > > Wait, "another xfs/1300 run" ... so after the first crash, did you go
-> > > back to a vanilla kernel without all my crazypatches? :)
-> > 
-> > Ahh, you're right! It booted into 4.9-rc4 vanilla kernel, sorry about
-> > that.. But xfs/1300 crashed djwong-devel for the second time in my
-> > second try, seems the crash is reliable reproduced, with reflink
-> > enabled.
-> 
-> I think if you change the XFS_SCRUB_OP_ERROR_GOTO at line 2237 of
-> xfs_scrub_get_inode() to "if (error) goto out_err;" that ought to clear it up.
-> 
-> > > > And ext4/1300 generated large .out.bad file (51M), containing something
-> > > > like:
-> > > > 
-> > > > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101381632/2469888/4096) ends past end of filesystem at 31457280. (generic.c line 272)
-> > > > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101389824/2478080/4096) starts past end of filesystem at 31457280. (generic.c line 264)
-> > > > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101389824/2478080/4096) ends past end of filesystem at 31457280. (generic.c line 272)
-> > > > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101398016/2486272/4096) starts past end of filesystem at 31457280. (generic.c line 264)
-> > > > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101398016/2486272/4096) ends past end of filesystem at 31457280. (generic.c line 272)
-> > > > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101406208/2494464/4096) starts past end of filesystem at 31457280. (generic.c line 264)
-> > > > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101406208/2494464/4096) ends past end of filesystem at 31457280. (generic.c line 272)
-> > > > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101414400/2502656/4096) starts past end of filesystem at 31457280. (generic.c line 264)
-> > > > +/mnt/testarea/scratch/test/68/S_IFREG.FMT_ETREE: extent (1101414400/2502656/4096) ends past end of filesystem at 31457280. (generic.c line 272)
-> > > > 
-> > > > Seems like scrub found something wrong (real problems) and became very
-> > > > noisy?
-> > > 
-> > > Hmm that's even stranger.  I'll try to reproduce tomorrow.
-> > 
-> > So this ext4 noise came from the vanilla kernel too, retested with
-> > djwong-devel kernel & userspace ext4/1300 passed without problems. Sorry
-> > for my noise..
-> 
-> But that's even more weird; there haven't been any changes to ext4 that
-> would explain why this breaks on a vanilla 4.9-rc4 kernel...
+Hi Dave,
 
-Puzzle resolved, I somehow switched back to mainline xfsprogs or some
-other wrong xfsprogs version after booted into 4.9-rc4 vanilla kernel.
-After updating xfsprogs to djwong-devel, ext4/1300 showed no problem on
-4.9-rc4 kernel too.
+Can you please pull the fstests update from the location below? In this update
+we have new xfs, btrfs and generic tests added, and require xfs_io binary to be
+mandatory for fstests run. There're also updates to make xfs_copy tests without
+"-d" option on v5 XFS possible and to fix bugs in ocfs2 testing.
 
-Sorry again for the mess!
+New failure I noticed in this update:
+- xfs/118 is a new test that may crash your kernel if you're not using latest
+  kernel from linux-xfs tree (for-next branch)
 
+Thanks,
 Eryu
+
+The following changes since commit e604301e2605a152d8438f60d893ff29ed65d637:
+
+  common: add CephFS support (2016-11-05 17:30:14 +0800)
+
+are available in the git repository at:
+
+  https://github.com/guaneryu/xfstests.git for-dave
+
+for you to fetch changes up to 052b0777d7cc61679226e1526a5a4bd727d5be27:
+
+  xfs: testcase for kernelspace xfs_fsr extent handling flaw (2016-11-13 14:01:07 +0800)
+
+----------------------------------------------------------------
+
+fstests: update on 2016-11-13
+
+This update contains:
+o New tests for xfs and btrfs, and new generic test
+o xfs_io is made mandatory
+o Test xfs_copy v5 XFS without -d option
+o Bug fixes for ocfs2 testing
+
+----------------------------------------------------------------
+Darrick J. Wong (1):
+      fstests: fix some minor problems testing ocfs2
+
+Eric Sandeen (1):
+      xfs: testcase for kernelspace xfs_fsr extent handling flaw
+
+Eryu Guan (2):
+      fstests: make xfs_io mandatory
+      xfs/021: filter out detailed array element info from xfs_db
+
+Qu Wenruo (1):
+      btrfs: Check false ENOSPC bug caused by incorrect metadata reserve
+
+Zorro Lang (2):
+      generic: multi-thread freeze/unfreeze test under fsstress
+      fstests: test xfs_copy V5 XFS without -d option
+
+ common/config         |   4 +-
+ common/quota          |   2 +-
+ common/rc             |  48 +++++++++++++----------
+ tests/btrfs/132       | 103 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/132.out   |   2 +
+ tests/btrfs/group     |   1 +
+ tests/generic/390     |  94 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/390.out |   2 +
+ tests/generic/group   |   1 +
+ tests/xfs/021         |   2 +-
+ tests/xfs/032         |  21 +++++++---
+ tests/xfs/073         |   8 +---
+ tests/xfs/094         |   1 -
+ tests/xfs/103         |   1 -
+ tests/xfs/118         |  99 ++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/118.out     |   2 +
+ tests/xfs/group       |   1 +
+ 17 files changed, 357 insertions(+), 35 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
