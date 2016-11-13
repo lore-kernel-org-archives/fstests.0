@@ -1,90 +1,72 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:47417 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1753297AbcKJCmq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 9 Nov 2016 21:42:46 -0500
-Subject: Re: [PATCH] fstests: btrfs: Check false ENOSPC bug caused by
- incorrect metadata reserve
-References: <20161108091515.20867-1-quwenruo@cn.fujitsu.com>
- <20161108105826.GN27776@eguan.usersys.redhat.com>
- <d9a9d224-2f21-5b77-a3e9-de271cd4e755@cn.fujitsu.com>
- <20161109094341.GY27776@eguan.usersys.redhat.com>
- <6ae5fc6d-afbb-c284-190e-a0d2625cff25@cn.fujitsu.com>
- <20161110021944.GW28177@dastard>
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Message-ID: <c2e2eb35-e87a-90f7-9746-946a0995549a@cn.fujitsu.com>
-Date: Thu, 10 Nov 2016 10:42:36 +0800
-MIME-Version: 1.0
-In-Reply-To: <20161110021944.GW28177@dastard>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Eryu Guan <eguan@redhat.com>, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH] generic: use bind mount instead of 2nd _scratch_mount
+Date: Sun, 13 Nov 2016 15:49:37 +0200
+Message-Id: <1479044977-28972-1-git-send-email-amir73il@gmail.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, Miklos Szeredi <miklos@szeredi.hu>, Xiong Zhou <xzhou@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+generic/373 and generic/374 test that cross-mountpoint reflink/dedupe
+fail with EXDEV.
 
+For this test, _scratch_mount is called a 2nd time with same mount
+arguments, but a different value of SCRATCH_MNT.
 
-At 11/10/2016 10:19 AM, Dave Chinner wrote:
-> On Thu, Nov 10, 2016 at 08:34:20AM +0800, Qu Wenruo wrote:
->> At 11/09/2016 05:43 PM, Eryu Guan wrote:
->>> On Wed, Nov 09, 2016 at 08:24:38AM +0800, Qu Wenruo wrote:
->>>> At 11/08/2016 06:58 PM, Eryu Guan wrote:
->>>>> On Tue, Nov 08, 2016 at 05:15:15PM +0800, Qu Wenruo wrote:
->>> We should use helpers and not open-code when helpers are available. So
->>> we should really use _scratch_mkfs_sized here.
->>>
->>> And "-n 64k" is only to make bug easier to reproduce, but I don't think
->>> it's necessary. In my testings, 50%-75% runs hit the ENOSPC failure on
->>> my x86_64 test vm, even I removed the "-n 64k" mkfs option from the
->>> test.
->>>
->>> So I'd say remove "-n 64k" and test whatever mkfs options user
->>> specified.
->>
->> I really don't like the idea to allow user to override any mount
->> option to reduce the possibility.
->
-> That's not the point. Overriding mount options reduces test coverage
-> because it limits the test to only the exact configuration that
-> reproduced the bug that was seen. If a user is testing a specific
-> configuration, then we really want to run the test on that config.
->
->> And further more, this testcase is not a generic test, but a
->> regression/pinpoint test to expose one specific bug.
->
-> If you want to make sure that the bug doesn't return, then you need
-> to run the /entire test suite/ with the configuration that exposes
-> the problem. You wouldn't be suggesting this specific set of mount
-> options if users weren't using that configuration. Hence you really
-> need to run the entire test suite with that configuration to make
-> sure you haven't broken those user's systems....
->
-> And, yes, I test lots of different XFS configurations in their
-> entirity every day on every change I make or review, so I'm not
-> suggesting that you should do anything I don't already do.
+This practice is incorrect for overlayfs, which should not be using
+the same upper/work dirs on two different overlay super blocks.
 
-OK, most of your points makes sense.
-I'll update the case.
+Change the test to use bind mount instead, which results in the
+expected setup for both block device mount and overlay mount.
 
-And I want to make it clear, doesn it mean, newly submitted test case 
-shouldn't specify any mkfs/mount option?
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/generic/373 | 4 ++--
+ tests/generic/374 | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
 
-Another concern is, I'm not sure if there is anyone really runs all 
-btrfs mount and mkfs options on the entire test suite.
-(The same is for developers who submits generic test cases)
-
-Or there won't be so many generic or even btrfs specific test cases 
-causing false alert or exposing new bugs of btrfs.
-
-Although this is problem of btrfs. :(
-
-Thanks,
-Qu
-
->
-> Cheers,
->
-> Dave.
->
-
-
+diff --git a/tests/generic/373 b/tests/generic/373
+index cf585ba..d74324e 100755
+--- a/tests/generic/373
++++ b/tests/generic/373
+@@ -64,7 +64,7 @@ blksz=65536
+ sz=$((blksz * blocks))
+ 
+ echo "Mount otherdir"
+-SCRATCH_MNT=$otherdir _scratch_mount
++mount --bind $SCRATCH_MNT $otherdir
+ 
+ echo "Create file"
+ _pwrite_byte 0x61 0 $sz $testdir/file >> $seqres.full
+@@ -82,7 +82,7 @@ md5sum $testdir/file | _filter_scratch
+ test -e $othertestdir/otherfile && echo "otherfile should not exist"
+ 
+ echo "Unmount otherdir"
+-SCRATCH_MNT=$otherdir _scratch_unmount
++umount $otherdir
+ rm -rf $otherdir
+ 
+ # success, all done
+diff --git a/tests/generic/374 b/tests/generic/374
+index 0173c13..4546cc5 100755
+--- a/tests/generic/374
++++ b/tests/generic/374
+@@ -63,7 +63,7 @@ blksz=65536
+ sz=$((blocks * blksz))
+ 
+ echo "Mount otherdir"
+-SCRATCH_MNT=$otherdir _scratch_mount
++mount --bind $SCRATCH_MNT $otherdir
+ 
+ echo "Create file"
+ _pwrite_byte 0x61 0 $sz $testdir/file >> $seqres.full
+@@ -80,7 +80,7 @@ echo "Check output"
+ md5sum $testdir/file $othertestdir/otherfile | filter_md5
+ 
+ echo "Unmount otherdir"
+-SCRATCH_MNT=$otherdir _scratch_unmount
++umount $otherdir
+ rm -rf $otherdir
+ 
+ # success, all done
+-- 
+2.7.4
