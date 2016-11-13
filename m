@@ -1,35 +1,90 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:26585 "EHLO
-        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S935184AbcKMXP2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 13 Nov 2016 18:15:28 -0500
-Date: Mon, 14 Nov 2016 10:15:20 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] generic/38[3-6]: require project quota to be enabled on
- SCRATCH_DEV
-Message-ID: <20161113231520.GM28922@dastard>
-References: <1478976065-2060-1-git-send-email-eguan@redhat.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:41294 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935184AbcKMXaG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 13 Nov 2016 18:30:06 -0500
+Date: Sun, 13 Nov 2016 15:29:57 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] generic: use bind mount instead of 2nd _scratch_mount
+Message-ID: <20161113232957.GF21519@birch.djwong.org>
+References: <1479044977-28972-1-git-send-email-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1478976065-2060-1-git-send-email-eguan@redhat.com>
+In-Reply-To: <1479044977-28972-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Eryu Guan <eguan@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, Xiong Zhou <xzhou@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Nov 13, 2016 at 02:41:05AM +0800, Eryu Guan wrote:
-> generic/38[3-6] are made generic from xfs tests to test project
-> quota on other filesystems, e.g. ext4. But we should make sure
-> project quota is enabled in between of _scratch_enable_pquota and
-> _qmount. Otherwise mount will fail if there's no project quota
-> support on SCRATCH_DEV, e.g. ext2 and ext3.
+On Sun, Nov 13, 2016 at 03:49:37PM +0200, Amir Goldstein wrote:
+> generic/373 and generic/374 test that cross-mountpoint reflink/dedupe
+> fail with EXDEV.
 > 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> For this test, _scratch_mount is called a 2nd time with same mount
+> arguments, but a different value of SCRATCH_MNT.
+> 
+> This practice is incorrect for overlayfs, which should not be using
+> the same upper/work dirs on two different overlay super blocks.
+> 
+> Change the test to use bind mount instead, which results in the
+> expected setup for both block device mount and overlay mount.
 
-looks fine.
+Looks ok,
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-Reviewed-by: Dave Chinner <dchinner@redhat.com>
+--D
 
--- 
-Dave Chinner
-david@fromorbit.com
+> 
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+>  tests/generic/373 | 4 ++--
+>  tests/generic/374 | 4 ++--
+>  2 files changed, 4 insertions(+), 4 deletions(-)
+> 
+> diff --git a/tests/generic/373 b/tests/generic/373
+> index cf585ba..d74324e 100755
+> --- a/tests/generic/373
+> +++ b/tests/generic/373
+> @@ -64,7 +64,7 @@ blksz=65536
+>  sz=$((blksz * blocks))
+>  
+>  echo "Mount otherdir"
+> -SCRATCH_MNT=$otherdir _scratch_mount
+> +mount --bind $SCRATCH_MNT $otherdir
+>  
+>  echo "Create file"
+>  _pwrite_byte 0x61 0 $sz $testdir/file >> $seqres.full
+> @@ -82,7 +82,7 @@ md5sum $testdir/file | _filter_scratch
+>  test -e $othertestdir/otherfile && echo "otherfile should not exist"
+>  
+>  echo "Unmount otherdir"
+> -SCRATCH_MNT=$otherdir _scratch_unmount
+> +umount $otherdir
+>  rm -rf $otherdir
+>  
+>  # success, all done
+> diff --git a/tests/generic/374 b/tests/generic/374
+> index 0173c13..4546cc5 100755
+> --- a/tests/generic/374
+> +++ b/tests/generic/374
+> @@ -63,7 +63,7 @@ blksz=65536
+>  sz=$((blocks * blksz))
+>  
+>  echo "Mount otherdir"
+> -SCRATCH_MNT=$otherdir _scratch_mount
+> +mount --bind $SCRATCH_MNT $otherdir
+>  
+>  echo "Create file"
+>  _pwrite_byte 0x61 0 $sz $testdir/file >> $seqres.full
+> @@ -80,7 +80,7 @@ echo "Check output"
+>  md5sum $testdir/file $othertestdir/otherfile | filter_md5
+>  
+>  echo "Unmount otherdir"
+> -SCRATCH_MNT=$otherdir _scratch_unmount
+> +umount $otherdir
+>  rm -rf $otherdir
+>  
+>  # success, all done
+> -- 
+> 2.7.4
+> 
