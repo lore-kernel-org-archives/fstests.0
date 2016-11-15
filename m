@@ -1,121 +1,81 @@
-Received: from cn.fujitsu.com ([222.73.24.84]:18724 "EHLO song.cn.fujitsu.com"
-        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-        id S1754320AbcKQCHV (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 16 Nov 2016 21:07:21 -0500
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH] fstests: Introduce check for explicit SHARED extent flag reporting
-Date: Thu, 17 Nov 2016 10:06:48 +0800
-Message-Id: <20161117020648.19685-1-quwenruo@cn.fujitsu.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:44657 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755484AbcKOHr3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 15 Nov 2016 02:47:29 -0500
+Date: Mon, 14 Nov 2016 23:47:15 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: About difference in extent sharing in btrfs and xfs
+Message-ID: <20161115074715.GA23680@birch.djwong.org>
+References: <1de48152-0ec5-1bf0-1ea9-b5ccbe4a3867@cn.fujitsu.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1de48152-0ec5-1bf0-1ea9-b5ccbe4a3867@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, btrfs <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-For fs support reflink, some of them (OK, btrfs again) doesn't split
-SHARED flag for extent fiemap reporting.
+On Tue, Nov 15, 2016 at 02:33:31PM +0800, Qu Wenruo wrote:
+> Hi, xfs guys and btrfs guys.
+> 
+> Although the test case generic/372 exists for some time, I noticed that
+> btrfs always fails the test case, due to the difference in how btrfs
+> and xfs handle shared extents.
+> 
+> The difference is, btrfs can handle shared extents which points to a subset
+> of a larger extent, so it doesn't need to split reflink source.
+> 
+> In case of the test case.
+> 
+> On Disk Extent A:
+> Bytenr X
+> |<-----------Data=0x61, Length=320K---------------------------|
+> 
+> 
+> File1: File Extent 0 -> Extent A, offset=0, referred len=320K
+> 
+> File2: File Extent 0 -> Hole
+>        File Extent 64K -> Extent A, offset=192k, refferred len=64k
+>        File Extent 128K -> Hole
+>        File Extent 192K -> Extent A, offset=64k, refferred len=64k
+> 
+> Unlike Xfs, Btrfs don't split the source extent, as its file extent has more
+> fields which can handle offset/length inside the large extent.
 
-For example:
-  0         4K         8K
-   / File1: Extent 0  \
-  /                    \
-  |<- On disk Extent-->|
-  |        /
-  | File2 /
-    Extent: 0
+XFS doesn't split the extent either, internally.  The FIEMAP
+implementation cross-references extent data with the refcount records,
+using extra struct fiemap_extent to report precisely which blocks are
+shared and which aren't.  ocfs2 exhibits the same behavior.
 
-Fs supports explicit SHARED extent reporting should report fiemap like:
-File1: 2 extents
-Extent 0-4K: SHARED
-Extent 4-8K:
-File2: 1 extents
-Extent 0-4K: SHARED
+It's only btrfs that reports file1 as having one big shared extent when
+only parts of that extent are actually shared.  I'd rather btrfs only
+report blocks that are actually shared as shared, but since fiemap
+results can be obsolete as soon as the ioctl returns I don't consider it
+a huge priority.
 
-Fs doesn't support explicit reporting will report fiemap like:
-File1: 1 extent
-Extent 0-8K: SHARED
-File2: 1 extent
-Extent 0-4K: SHARED
+> The btrfs way to handle shared extent has its pros and cons.
+> For example, it's very flex, but it wastes more space for COW since the
+> whole extent can only be freed after all referencer is freed.
 
-Test case like generic/372 require explicit reporting will cause false
-alert on btrfs.
+Wait, what?  So if I reflinked a single block of file1 into file3 and
+then deleted file1 and file2, btrfs would hold on to all 320K?
 
-Add such runtime check for that requirememt.
+> But since the test case is generic test case, I think it doesn't take such
+> btrfs behavior into consideration.
+> So it always fails on btrfs.
+> 
+> How about moving it to xfs specific tests?
 
-Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
----
- common/reflink    | 44 ++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/372 |  1 +
- 2 files changed, 45 insertions(+)
+I'd prefer the testcase be left in generic/ and _notrun'd on btrfs since
+two of the three reflink fses have this behavior.
 
-diff --git a/common/reflink b/common/reflink
-index 8b34046..9ada2e8 100644
---- a/common/reflink
-+++ b/common/reflink
-@@ -78,6 +78,50 @@ _require_scratch_reflink()
- 	_scratch_unmount
- }
- 
-+# this test requires scratch fs to report explicit SHARED flag
-+# e.g.
-+#   0         4K         8K
-+#    / File1: Extent 0  \
-+#   /                    \
-+#   |<- On disk Extent-->|
-+#   |        /
-+#   | File2 /
-+#     Extent: 0
-+# Fs supports explicit SHARED extent reporting should report fiemap like:
-+# File1: 2 extents
-+# Extent 0-4K: SHARED
-+# Extent 4-8K:
-+# File2: 1 extents
-+# Extent 0-4K: SHARED
-+#
-+# Fs doesn't support explicit reporting will report fiemap like:
-+# File1: 1 extent
-+# Extent 0-8K: SHARED
-+# File2: 1 extent
-+# Extent 0-4K: SHARED
-+_require_scratch_explicit_shared_extents()
-+{
-+	_require_scratch
-+	_require_fiemap
-+	_require_scratch_reflink
-+	_require_xfs_io_command "reflink"
-+	local nr_extents
-+
-+	_scratch_mkfs > /dev/null
-+	_scratch_mount
-+
-+	_pwrite_byte 0x61 0 128k $SCRATCH_MNT/file1
-+	_reflink_range $SCRATCH_MNT/file1 0 $SCRATCH_MNT/file2 0 64k
-+
-+	_scratch_cycle_mount
-+
-+	nr_extents=$(_count_extents $SCRATCH_MNT/file1)
-+	if [ $nr_extents -eq 1 ]; then
-+		_notrun "Explicit SHARED flag reporting not support by filesystem type: $FSTYP"
-+	fi
-+	_scratch_unmount
-+}
-+
- # this test requires the test fs support dedupe...
- _require_test_dedupe()
- {
-diff --git a/tests/generic/372 b/tests/generic/372
-index 31dff20..51a3eca 100755
---- a/tests/generic/372
-+++ b/tests/generic/372
-@@ -47,6 +47,7 @@ _supported_os Linux
- _supported_fs generic
- _require_scratch_reflink
- _require_fiemap
-+_require_scratch_explicit_shared_extents
- 
- echo "Format and mount"
- _scratch_mkfs > $seqres.full 2>&1
--- 
-2.7.4
+(Assuming the btrfs behavior doesn't get changed.)
 
+--D
 
-
+> 
+> Thanks,
+> Qu
+> 
+> 
