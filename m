@@ -1,124 +1,140 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:50955 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751652AbcKQBNN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Nov 2016 20:13:13 -0500
-Subject: Re: [PATCH] fstests: Block btrfs from test case generic/372
-References: <20161115081332.6432-1-quwenruo@cn.fujitsu.com>
- <20161116211241.GC28177@dastard>
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Message-ID: <7b38e56a-65e7-682f-de00-cd94acc6c860@cn.fujitsu.com>
-Date: Thu, 17 Nov 2016 09:13:03 +0800
+Received: from mx1.redhat.com ([209.132.183.28]:51458 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751803AbcKOGxP (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 15 Nov 2016 01:53:15 -0500
+Date: Tue, 15 Nov 2016 14:53:12 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] fstests: generic/098 update test for truncating a file
+ into the middle of a hole
+Message-ID: <20161115065312.GN27776@eguan.usersys.redhat.com>
+References: <1478903404-25619-1-git-send-email-bo.li.liu@oracle.com>
 MIME-Version: 1.0
-In-Reply-To: <20161116211241.GC28177@dastard>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1478903404-25619-1-git-send-email-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: Liu Bo <bo.li.liu@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
+On Fri, Nov 11, 2016 at 02:30:04PM -0800, Liu Bo wrote:
+> This updates generic/098 by adding a sync option, i.e. 'sync' after the second
+> write, and with btrfs's NO_HOLES, we could still get wrong isize after remount.
+> 
+> This gets fixed by the patch
+> 
+> 'Btrfs: fix truncate down when no_holes feature is enabled'
+> 
+> Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
 
+Looks good to me, just some nitpicks inline :)
 
-At 11/17/2016 05:12 AM, Dave Chinner wrote:
-> (Did you forget to cc fstests@vger.kernel.org?)
->
-> On Tue, Nov 15, 2016 at 04:13:32PM +0800, Qu Wenruo wrote:
->> Since btrfs always return the whole extent even part of it is shared
->> with other files, so the hole/extent counts differs for "file1" in this
->> test case.
->>
->> For example:
->>
->>  /------ File 1 Extent 0-------------\
->> /                                     \
->> |<----------Extent A------------------>|
->> \         /                  \         /
->>  \ File 2/                    \ File 2/
->>    Ext 0~4K                    Ext 64k~68K
->>
->> In that case, fiemap on File 1 will only return 1 large extent A with
->> SHARED flag.
->> While XFS will split it into 3 extents,  first and last 4K with SHARED
->> flag while the rest without SHARED flag.
->
-> fiemap should behave the same across all filesystems if at all
-> possible. This test failure indicates btrfs doesn't report an
-> accurate representation of shared extents which, IMO, is a btrfs
-> issue that needs fixing, not a test problem....
->
-> Regardless of this....
+> ---
+>  tests/generic/098     | 57 ++++++++++++++++++++++++++++++++-------------------
+>  tests/generic/098.out | 10 +++++++++
+>  2 files changed, 46 insertions(+), 21 deletions(-)
+> 
+> diff --git a/tests/generic/098 b/tests/generic/098
+> index 838bb5d..3b89939 100755
+> --- a/tests/generic/098
+> +++ b/tests/generic/098
+> @@ -64,27 +64,42 @@ rm -f $seqres.full
+>  _scratch_mkfs >>$seqres.full 2>&1
+>  _scratch_mount
+>  
+> -# Create our test file with some data and durably persist it.
+> -$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 128K" $SCRATCH_MNT/foo | _filter_xfs_io
+> -sync
+> -
+> -# Append some data to the file, increasing its size, and leave a hole between
+> -# the old size and the start offset if the following write. So our file gets
+> -# a hole in the range [128Kb, 256Kb[.
+> -$XFS_IO_PROG -c "pwrite -S 0xbb 256K 32K" $SCRATCH_MNT/foo | _filter_xfs_io
+> -
+> -# Now truncate our file to a smaller size that is in the middle of the hole we
+> -# previously created. On most truncate implementations the data we appended
+> -# before gets discarded from memory (with truncate_setsize()) and never ends
+> -# up being written to disk.
+> -$XFS_IO_PROG -c "truncate 160K" $SCRATCH_MNT/foo
+> -
+> -_scratch_cycle_mount
+> -
+> -# We expect to see a file with a size of 160Kb, with the first 128Kb of data all
+> -# having the value 0xaa and the remaining 32Kb of data all having the value 0x00
+> -echo "File content after remount:"
+> -od -t x1 $SCRATCH_MNT/foo
+> +workout()
+> +{
+> +	NEED_SYNC=$1
 
-Considering only btrfs implements CoW using extent booking mechanism(*),
-it does affect a lot of behavior, from such SHARED flag representing to
-hole punching behavior.
+Use "local" to declare this var, and in lower case. Usually we use upper
+case for global variables.
 
-I hope there is a well documented standard on what ever flag means and
-how it should be represented.
+> +
+> +	# Create our test file with some data and durably persist it.
+> +	$XFS_IO_PROG -t -f -c "pwrite -S 0xaa 0 128K" $SCRATCH_MNT/foo | _filter_xfs_io
+> +	sync
+> +
+> +	# Append some data to the file, increasing its size, and leave a hole between
+> +	# the old size and the start offset if the following write. So our file gets
+> +	# a hole in the range [128Kb, 256Kb[.
+> +	$XFS_IO_PROG -c "pwrite -S 0xbb 256K 32K" $SCRATCH_MNT/foo | _filter_xfs_io
+> +
+> +	if [ $NEED_SYNC -eq 1 ]; then
+> +		sync
+> +	fi
 
-While I'm not quite sure if it's worthy for btrfs to modify the
-represent.
-Even btrfs can report it as "SHARED" "NON-SHARED" "SHARED" for File 1,
-hole punching the "NON_SHARED" range won't free any space.
-(Which I assume it differs from xfs, and that's making things confusing)
-
->
->> This makes the test case meaningless as btrfs doesn't follow such
->> assumption.
->> So black list btrfs for this test case to avoid false alert.
->
-> ...  we are not going to add ad-hoc filesystem blacklists for
-> random tests.
->
-> Adding "blacklists" without any explanation of why something has
-> been blacklisted is simply a bad practice. We use _require rules
-> to specifically document what functionality is required for the
-> test and check that it provided.  i.e. this:
->
-> _require_explicit_shared_extents()
-> {
-> 	if [ $FSTYP == "btrfs" ]; then
-> 		_not_run "btrfs can't report accurate shared extent ranges in fiemap"
-> 	fi
-> }
-
-Right, this is much more helpful than the blabla I wrote in commit message.
-
-Although I'd prefer to detect it at runtime other than just checking
-the fs type.
-
-Maybe one day btrfs will support it.
-(Although we should solve the above mentioned behavior difference first)
-
->
-> documents /exactly/ why this test is not run on btrfs.
->
-> And, quite frankly, while this is /better/ it still ignores the
-> fact we have functions like _within_tolerance for allowing a range
-> of result values to be considered valid rather than just a fixed
-> value. IOWs, changing the check of the extent count of file 1 post
-> reflink to use a _within_tolerance range would mean the test would
-> validate file1 on all reflink supporting filesystems and we don't
-> need to exclude btrfs at all...
-
-I really agree on this idea, although for me the difference is too big.
-
-For file 1, xfs reports 5 extents, while btrfs only reports 1.
-If using _within_tolerance to cover the range, and one day some
-mysterious xfs bug(OK, I don't really believe it will happen, since
-it's xfs, not btrfs) makes it report 4 extents.
-
-Or one btrfs bug(on the other hand, quite possible) makes btrfs report
-2 extents, then we can't detect the bug either.
-
-So I'd prefer the _require_explicit_shared_extents() method.
+Good to see some comments to explain why we need this to test
+with/without sync case.
 
 Thanks,
-Qu
+Eryu
 
->
-> Cheers,
->
-> Dave.
->
-
-
+> +
+> +	# Now truncate our file to a smaller size that is in the middle of the hole we
+> +	# previously created.
+> +	# If we don't flush dirty page cache above, on most truncate
+> +	# implementations the data we appended before gets discarded from
+> +	# memory (with truncate_setsize()) and never ends up being written to
+> +	# disk.
+> +	$XFS_IO_PROG -c "truncate 160K" $SCRATCH_MNT/foo
+> +
+> +	_scratch_cycle_mount
+> +
+> +	# We expect to see a file with a size of 160Kb, with the first 128Kb of data all
+> +	# having the value 0xaa and the remaining 32Kb of data all having the value 0x00
+> +	echo "File content after remount:"
+> +	od -t x1 $SCRATCH_MNT/foo
+> +}
+> +
+> +workout 0
+> +# flush after each write
+> +workout 1
+>  
+>  status=0
+>  exit
+> diff --git a/tests/generic/098.out b/tests/generic/098.out
+> index 37415ee..f87f046 100644
+> --- a/tests/generic/098.out
+> +++ b/tests/generic/098.out
+> @@ -9,3 +9,13 @@ File content after remount:
+>  0400000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+>  *
+>  0500000
+> +wrote 131072/131072 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +wrote 32768/32768 bytes at offset 262144
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +File content after remount:
+> +0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+> +*
+> +0400000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+> +*
+> +0500000
+> -- 
+> 2.5.0
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
