@@ -1,226 +1,28 @@
-Received: from mail.kernel.org ([198.145.29.136]:59820 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753617AbcKQDrX (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 16 Nov 2016 22:47:23 -0500
-From: Jaegeuk Kim <jaegeuk@kernel.org>
-Subject: [PATCH] generic/392: add a testcase to check some inline truncation behaviors
-Date: Wed, 16 Nov 2016 19:47:15 -0800
-Message-Id: <20161117034715.71966-1-jaegeuk@kernel.org>
+Received: from bombadil.infradead.org ([198.137.202.9]:56312 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755456AbcKOIz3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 15 Nov 2016 03:55:29 -0500
+Date: Tue, 15 Nov 2016 00:55:26 -0800
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: About difference in extent sharing in btrfs and xfs
+Message-ID: <20161115085526.GA18347@infradead.org>
+References: <1de48152-0ec5-1bf0-1ea9-b5ccbe4a3867@cn.fujitsu.com>
+ <20161115074715.GA23680@birch.djwong.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20161115074715.GA23680@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Qu Wenruo <quwenruo@cn.fujitsu.com>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org, btrfs <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-This patch introduces a new testcase to test some small truncations to check
-inline_data and its cached data are truncated correctly at the same time.
+On Mon, Nov 14, 2016 at 11:47:15PM -0800, Darrick J. Wong wrote:
+> XFS doesn't split the extent either, internally.  The FIEMAP
+> implementation cross-references extent data with the refcount records,
+> using extra struct fiemap_extent to report precisely which blocks are
+> shared and which aren't.  ocfs2 exhibits the same behavior.
 
-The inline_data feature was introduced in ext4 and f2fs as follows.
- ext4 : http://lwn.net/Articles/468678/
- f2fs : http://lwn.net/Articles/573408/
-
-The basic idea is embedding small-sized file's data into relatively large
-inode space.
-In ext4, up to 132 bytes of data can be stored in 256 bytes-sized inode.
-In f2fs, up to 3.4KB of data can be embedded into 4KB-sized inode block.
-
-Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
----
- tests/generic/392     | 127 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/392.out |  41 ++++++++++++++++
- tests/generic/group   |   1 +
- 3 files changed, 169 insertions(+)
- create mode 100644 tests/generic/392
- create mode 100644 tests/generic/392.out
-
-diff --git a/tests/generic/392 b/tests/generic/392
-new file mode 100644
-index 0000000..7282053
---- /dev/null
-+++ b/tests/generic/392
-@@ -0,0 +1,127 @@
-+#! /bin/bash
-+# FS QA Test No. generic/392
-+#
-+# Test some small truncations to check inline_data and its cached data are
-+# truncated correctly at the same time.
-+#
-+# The inline_data feature was introduced in ext4 and f2fs as follows.
-+#  ext4 : http://lwn.net/Articles/468678/
-+#  f2fs : http://lwn.net/Articles/573408/
-+#
-+# The basic idea is embedding small-sized file's data into relatively large
-+# inode space.
-+# In ext4, up to 132 bytes of data can be stored in 256 bytes-sized inode.
-+# In f2fs, up to 3.4KB of data can be embedded into 4KB-sized inode block.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2014 Jaegeuk Kim.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+
-+testfile=$SCRATCH_MNT/testfile
-+
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount
-+
-+# 1. make a file containing inline_data.
-+# 2. "truncated 0"  is to check cached page #0 was truncated entirely.
-+# 3. "truncated 50" is to check inline_data was truncated within its inode.
-+$XFS_IO_PROG -t -f \
-+	-c "pwrite -S 0x58 0 40" `# write    |XXXXXXXXXXXXXXXXXXXXXXXX|` \
-+	-c "fsync"							 \
-+	-c "truncate 0"          `# truncate |                        |` \
-+	-c "truncate 50"         `# truncate |                        |` \
-+$testfile | _filter_xfs_io
-+
-+echo "= truncate inline_data after #0 page was truncated entirely ="
-+hexdump -C $testfile
-+_scratch_remount
-+hexdump -C $testfile
-+rm $testfile
-+
-+# 1. make a file containing inline_data.
-+# 2. "truncated 0"     is to check cached page #0 was truncated entirely.
-+# 3. "truncated 4096"  is to check inline_data was dismissed and truncated.
-+$XFS_IO_PROG -t -f \
-+	-c "pwrite -S 0x58 0 40" `# write    |XXXXXXXXXXXXXXXXXXXXXXXX|` \
-+	-c "fsync"							 \
-+	-c "truncate 0"          `# truncate |                        |` \
-+	-c "truncate 4096"       `# truncate |                        |` \
-+$testfile | _filter_xfs_io
-+
-+echo "= truncate dismissed inline_data after #0 page was truncated entirely ="
-+hexdump -C $testfile
-+_scratch_remount
-+hexdump -C $testfile
-+rm $testfile
-+
-+# 1. make a file containing inline_data.
-+# 2. "truncated 4"   is to check cached page #0 was truncated partially.
-+# 3. "truncated 50"  is to check inline_data was truncated within its inode.
-+$XFS_IO_PROG -t -f \
-+	-c "pwrite -S 0x58 0 40" `# write    |XXXXXXXXXXXXXXXXXXXXXXXX|` \
-+	-c "fsync"							 \
-+	-c "truncate 4"          `# truncate |XXXX                    |` \
-+	-c "truncate 50"         `# truncate |XXXX                    |` \
-+$testfile | _filter_xfs_io
-+
-+echo "= truncate inline_data after #0 page was truncated partially ="
-+hexdump -C $testfile
-+_scratch_remount
-+hexdump -C $testfile
-+rm $testfile
-+
-+# 1. make a file containing inline_data.
-+# 2. "truncated 4"     is to check cached page #0 was truncated partially.
-+# 3. "truncated 4096"  is to check inline_data was dismissed and truncated.
-+$XFS_IO_PROG -t -f \
-+	-c "pwrite -S 0x58 0 40" `# write    |XXXXXXXXXXXXXXXXXXXXXXXX|` \
-+	-c "fsync"							 \
-+	-c "truncate 4"          `# truncate |XXXX                    |` \
-+	-c "truncate 4096"       `# truncate |XXXX                    |` \
-+$testfile | _filter_xfs_io
-+
-+echo "= truncate dismissed inline_data after #0 page was truncated partially ="
-+hexdump -C $testfile
-+_scratch_remount
-+hexdump -C $testfile
-+rm $testfile
-+
-+status=0
-+exit
-diff --git a/tests/generic/392.out b/tests/generic/392.out
-new file mode 100644
-index 0000000..a041628
---- /dev/null
-+++ b/tests/generic/392.out
-@@ -0,0 +1,41 @@
-+QA output created by 392
-+wrote 40/40 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+= truncate inline_data after #0 page was truncated entirely =
-+00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-+*
-+00000032
-+00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-+*
-+00000032
-+wrote 40/40 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+= truncate dismissed inline_data after #0 page was truncated entirely =
-+00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-+*
-+00001000
-+00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-+*
-+00001000
-+wrote 40/40 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+= truncate inline_data after #0 page was truncated partially =
-+00000000  58 58 58 58 00 00 00 00  00 00 00 00 00 00 00 00  |XXXX............|
-+00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-+*
-+00000032
-+00000000  58 58 58 58 00 00 00 00  00 00 00 00 00 00 00 00  |XXXX............|
-+00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-+*
-+00000032
-+wrote 40/40 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+= truncate dismissed inline_data after #0 page was truncated partially =
-+00000000  58 58 58 58 00 00 00 00  00 00 00 00 00 00 00 00  |XXXX............|
-+00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-+*
-+00001000
-+00000000  58 58 58 58 00 00 00 00  00 00 00 00 00 00 00 00  |XXXX............|
-+00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-+*
-+00001000
-diff --git a/tests/generic/group b/tests/generic/group
-index 9de3415..1b19010 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -393,3 +393,4 @@
- 388 auto log metadata
- 389 auto quick acl
- 391 auto quick metadata
-+392 auto quick rw
--- 
-2.8.3
-
+And I think exact reporting of already shared extents in FIEMAP is
+extremely important - independent of the internal implementation btrfs
+should report the extents correctly.
