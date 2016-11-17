@@ -1,181 +1,202 @@
-Date: Thu, 24 Nov 2016 00:34:48 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 3/3] ocfs2: test reflinking to inline data files
-Message-ID: <20161123163448.GH12442@eguan.usersys.redhat.com>
-References: <147986705412.27133.3961713804630246198.stgit@birch.djwong.org>
- <147986706651.27133.4210661621329152871.stgit@birch.djwong.org>
+Received: from mail.kernel.org ([198.145.29.136]:34032 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751161AbcKQTRK (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 17 Nov 2016 14:17:10 -0500
+Date: Thu, 17 Nov 2016 11:17:05 -0800
+From: Jaegeuk Kim <jaegeuk@kernel.org>
+Subject: Re: [PATCH] generic/391: check inode metadata on f{data}sync after
+ power-cut
+Message-ID: <20161117191705.GD74211@jaegeuk>
+References: <20161117032753.69315-1-jaegeuk@kernel.org>
+ <20161117083527.GY27776@eguan.usersys.redhat.com>
+ <20161117125658.GA49658@bfoster.bfoster>
+ <20161117140019.GA27776@eguan.usersys.redhat.com>
+ <20161117163203.GB49658@bfoster.bfoster>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <147986706651.27133.4210661621329152871.stgit@birch.djwong.org>
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: david@fromorbit.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+In-Reply-To: <20161117163203.GB49658@bfoster.bfoster>
+Sender: fstests-owner@vger.kernel.org
+To: Brian Foster <bfoster@redhat.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Nov 22, 2016 at 06:11:06PM -0800, Darrick J. Wong wrote:
-> Make sure that we can handle reflinking from and to inline-data files.
+Hello,
+
+On Thu, Nov 17, 2016 at 11:32:03AM -0500, Brian Foster wrote:
+> On Thu, Nov 17, 2016 at 10:00:19PM +0800, Eryu Guan wrote:
+> > On Thu, Nov 17, 2016 at 07:56:58AM -0500, Brian Foster wrote:
+> > > On Thu, Nov 17, 2016 at 04:35:27PM +0800, Eryu Guan wrote:
+> > > > [cc'ed linux-xfs for inputs on a flush log issue]
+> > > > 
+> > > > On Wed, Nov 16, 2016 at 07:27:53PM -0800, Jaegeuk Kim wrote:
+> > > > > This patch adds tests/generic/391 to test fsync and fdatasync with power-cuts.
+> > > > > 
+> > > > > The rule to check is:
+> > > > > 1) fsync should guarantee all the inode metadata after power-cut,
+> > > > > 2) fdatasync should guarantee i_size and i_blocks at least after power-cut.
+> > > > > 
+> > > > > Suggested-by: Chao Yu <yuchao0@huawei.com>
+> > > > > Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
+> > > > > ---
+> > > > >  tests/generic/391     | 125 ++++++++++++++++++++++++++++++++++++++++++++++++++
+> > > > >  tests/generic/391.out |  11 +++++
+> > > > >  tests/generic/group   |   1 +
+> > > > >  3 files changed, 137 insertions(+)
+> > > > >  create mode 100644 tests/generic/391
+> > > > >  create mode 100644 tests/generic/391.out
+> > > > > 
+...
+> > > > > +
+> > > > > +seq=`basename $0`
+> > > > > +seqres=$RESULT_DIR/$seq
+> > > > > +echo "QA output created by $seq"
+> > > > > +
+> > > > > +here=`pwd`
+> > > > > +tmp=/tmp/$$
+> > > > > +status=1	# failure is the default!
+> > > > > +trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
+> > > > 
+> > > > Better to follow the template and other tests on how to do cleanup, i.e.
+> > > > trap _cleanup on exit and do real cleanups in it. e.g.
+> > > > 
+> > > > trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > > 
+> > > > _cleanup()
+> > > > {
+> > > > 	cd /
+> > > > 	rm -f $tmp.*
+> > > > }
+> > > > 
+> > > > Not a big deal, but it's better to maintain consistency :)
+> > > > 
+> > > > > +
+> > > > > +# get standard environment, filters and checks
+> > > > > +. ./common/rc
+> > > > > +. ./common/filter
+> > > > > +. ./common/punch
+> > > > > +
+> > > > > +# real QA test starts here
+> > > > > +_supported_fs generic
+> > > > > +_supported_os Linux
+> > > > > +
+> > > > > +rm -f $seqres.full
+> > > > > +_require_scratch
+> > > > > +_require_scratch_shutdown
+> > > > > +_require_xfs_io_command "fpunch"
+> > > > > +
+> > > > > +_scratch_mkfs >/dev/null 2>&1
+> > > > > +_scratch_mount
+> > > > > +
+> > > > > +testfile=$SCRATCH_MNT/testfile
+> > > > > +
+> > > > > +# check inode metadata after shutdown
+> > > > > +_check_inode_metadata()
+> > > > 
+> > > > No need to name local functions with the leading "_", that's for global
+> > > > helper functions.
+> > > > 
+> > > > > +{
+> > > > > +	src/godown $SCRATCH_MNT >> $seqres.full
+> > > > > +	$XFS_IO_PROG -r -c "stat -v" $1 >$tmp.before
+> > > > 
+> > > > Shouldn't we call godown *after* xfs_io -c stat? I saw EIO on this
+> > > > xfs_io command and all sub-tests reported stat diff.
+> > > > 
+> > > 
+> > > Yeah.. I haven't run the test, but I would expect pretty much anything
+> > > to return an error after an fs shutdown.
+> > > 
+> > > > And perhaps we need to flush the log on godown for XFS? i.e.
+> > > > 
+> > > > src/godown -f $SCRATCH_MNT >> $seqres.full
+> > > > 
+> > > 
+> > > I don't think this is necessary. The semantics of fsync() dictate that
+> > > the fs do what is necessary to make the file persistent on disk. This
+> > > means it is the fs responsibility to ensure the changes are logged on
+> > > disk. Indeed, xfs_file_fsync() calls _xfs_log_force_lsn() to flush the
+> > > log up to the most recent LSN that covered the inode in question.
+> > > 
+> > > > Otherwise XFS fails all the "1024" & fsync tests (after I fixed the
+> > > > godown & xfs_io order locally), fdatasync tests are fine.
+> > > > 
+> > > > @@ -1,8 +1,16 @@
+> > > >  QA output created by 391
+> > > >  ==== i_size 1024 test with fsync ====
+> > > > +6c6
+> > > > +< stat.blocks = 8200
+> > > > +---
+> > > > +> stat.blocks = 16256
+> > > >  ==== i_size 4096 test with fsync ====
+> > > >  ==== i_time test with fsync ====
+> > > >  ==== fpunch 1024 test with fsync ====
+> > > > +6c6
+> > > > +< stat.blocks = 8208
+> > > > +---
+> > > > +> stat.blocks = 24576
+> > > >  ==== fpunch 4096 test with fsync ====
+> > > > 
+> > > > Not sure if this is the expected behavior on XFS. cc'ed xfs list for
+> > > > some inputs.
+> > > > 
+> > > 
+> > > Am I reading this correctly that you're seeing more blocks than
+> > > expected? If so, preallocation perhaps?
+> > 
+> > Yes, you're correct, I see more blocks after godown than before godown.
+> > 
+> > I tried adding "-o allocsize=4k" to MOUNT_OPTIONS, it works but not
+> > always. e.g. on a host with sunit/swidth reported from underlying block
+> > device, test still fails.
+> > 
 > 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  tests/ocfs2/001     |   88 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/ocfs2/001.out |   14 ++++++++
->  tests/ocfs2/group   |    1 +
->  3 files changed, 103 insertions(+)
->  create mode 100755 tests/ocfs2/001
->  create mode 100644 tests/ocfs2/001.out
->  create mode 100644 tests/ocfs2/group
+> I'm not quite sure where the preallocation is coming from in that case.
+> It looks like it should honor allocsize, so that might be worth looking
+> into.
 > 
+> > # xfs_info /mnt/xfs
+> > meta-data=/dev/mapper/systemvg-testlv2 isize=512    agcount=16, agsize=245696 blks
+> >          =                       sectsz=512   attr=2, projid32bit=1
+> >          =                       crc=1        finobt=1 spinodes=0 rmapbt=0
+> >          =                       reflink=0
+> > data     =                       bsize=4096   blocks=3931136, imaxpct=25
+> >          =                       sunit=64     swidth=192 blks
+> > naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
+> > log      =internal               bsize=4096   blocks=2560, version=2
+> >          =                       sectsz=512   sunit=64 blks, lazy-count=1
+> > realtime =none                   extsz=4096   blocks=0, rtextents=0
+> > 
+> > Part of the test diff:
+> >  ==== i_size 1024 test with fsync ====
+> > +6c6
+> > +< stat.blocks = 8200
+> > +---
+> > +> stat.blocks = 8704
+> > 
+> > On the other hand, adding "-f" to godown always works for me.
+> >
 > 
-> diff --git a/tests/ocfs2/001 b/tests/ocfs2/001
-> new file mode 100755
-> index 0000000..973682d
-> --- /dev/null
-> +++ b/tests/ocfs2/001
-> @@ -0,0 +1,88 @@
-> +#! /bin/bash
-> +# FS QA Test No. 001
-> +#
-> +# Ensure that reflink works correctly with inline-data files.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +    cd /
-> +    rm -rf $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/reflink
-> +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_supported_fs ocfs2
-> +_require_scratch_reflink
+> I'm guessing the difference here is that fsync flushes the inode with
+> preallocation, but preallocation is typically cleaned up on file close
+> (when xfs_io exits). So a subsequent log flush at shutdown may flush
+> the transaction that clears out post-eof blocks. Note that it may also
+> hit the disk without the log forcing shutdown, it's just not guaranteed
+> in that case.
+> 
+> The right thing to do is probably deal with preallocation explicitly in
+> the test. E.g., a truncate of the file to the current size after a
+> potentially preallocated write, but before the fsync, should always
+> result in an equivalent blocks count post-recovery.
+> 
+> (Another angle here might be to consider whether the block count is the
+> right metric for this test, as opposed to a hexdump that validates the
+> written data actually made it to disk.).
 
-I'm a bit confused on this. I noticed that xfs_io reflink uses
-clone_range ioctl to do the actual work, but seems that ocfs2 doesn't
-have that method defined. So I got _notrun when running ocfs2/001
+So, it seems it'd be better to avoid checking i_blocks of XFS because of such
+the preallocation, but for F2FS, I'd prefer to check i_blocks mismatch to detect
+any regression.
 
-bootp-73-5-234:~/xfstests # ./check -s ocfs2_reflink ocfs2/001
-SECTION       -- ocfs2_reflink
-RECREATING    -- ocfs2 on /dev/sda3
-FSTYP         -- ocfs2
-PLATFORM      -- Linux/x86_64 bootp-73-5-234 4.8.9-1-default
-MKFS_OPTIONS  -- --fs-features=local,refcount /dev/sda5
-MOUNT_OPTIONS -- /dev/sda5 /mnt/testarea/scratch
-
-ocfs2/001        [not run] Reflink not supported by scratch filesystem type: ocfs2
-
-I also tried the djwong-devel branch of your xfsprogs tree and got the
-same result. Did I miss anything?
-
-> +_require_cp_reflink
-> +
-> +rm -f $seqres.full
-> +
-> +echo "Format and mount"
-> +_scratch_mkfs > $seqres.full 2>&1
-> +tunefs.ocfs2 --query '%H' $SCRATCH_DEV | grep -q 'inline-data' || \
-> +	_notrun "Inline data is not supported."
-
-Test still passes even if ocfs2 has no inline-data feature enabled,
-right? Then I think we can skip this check, just let the user specify
-the test configuration and decide what features are tested.
-
-And further, if we skip this check, then this test has nothing ocfs2
-specific, it could be a generic test.
-
-> +_scratch_mount >> $seqres.full 2>&1
-> +
-> +testdir=$SCRATCH_MNT/test-$seq
-> +mkdir $testdir
-> +
-> +sz=65536
-> +echo "Create the original files"
-> +$XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file1 >> $seqres.full
-> +echo x > $testdir/file2
-> +echo x > $testdir/file3
-> +echo y > $testdir/file4
-> +$XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file5 >> $seqres.full
-> +echo a > $testdir/file6
-> +_scratch_cycle_mount
-> +
-> +echo "reflink into the start of file2"
-> +_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
-> +
-> +echo "reflink past the stuff in file3"
-> +_reflink_range $testdir/file1 0 $testdir/file3 $sz $sz >> $seqres.full
-> +
-> +echo "reflink an inline-data file to a regular one"
-> +_cp_reflink $testdir/file4 $testdir/file5 >> $seqres.full
-> +
-> +echo "reflink an inline-data file to another inline-data file"
-> +_cp_reflink $testdir/file4 $testdir/file6 >> $seqres.full
-> +
-> +echo "Verify the whole mess"
-> +_scratch_cycle_mount
-> +md5sum $testdir/file* | _filter_scratch
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/ocfs2/001.out b/tests/ocfs2/001.out
-> new file mode 100644
-> index 0000000..99fa43a
-> --- /dev/null
-> +++ b/tests/ocfs2/001.out
-> @@ -0,0 +1,14 @@
-> +QA output created by 001
-> +Format and mount
-> +Create the original files
-> +reflink into the start of file2
-> +reflink past the stuff in file3
-> +reflink an inline-data file to a regular one
-> +reflink an inline-data file to another inline-data file
-> +Verify the whole mess
-> +2d61aa54b58c2e94403fb092c3dbc027  SCRATCH_MNT/test-001/file1
-> +2d61aa54b58c2e94403fb092c3dbc027  SCRATCH_MNT/test-001/file2
-> +4e68a2e24b6b0f386ab39d01d902293d  SCRATCH_MNT/test-001/file3
-> +009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file4
-> +009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file5
-> +009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file6
-> diff --git a/tests/ocfs2/group b/tests/ocfs2/group
-> new file mode 100644
-> index 0000000..28e6807
-> --- /dev/null
-> +++ b/tests/ocfs2/group
-> @@ -0,0 +1 @@
-> +001 auto quick clone
-
-A tests/ocfs2/Makefile is needed to do the tests installation work, if
-we decide to add new ocfs2 specific tests.
+Let me submit v2.
 
 Thanks,
-Eryu
