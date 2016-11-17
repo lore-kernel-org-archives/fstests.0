@@ -1,59 +1,98 @@
-Received: from mail-pf0-f179.google.com ([209.85.192.179]:36837 "EHLO
-        mail-pf0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752445AbcKPBlm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 15 Nov 2016 20:41:42 -0500
-Received: by mail-pf0-f179.google.com with SMTP id 189so39354507pfz.3
-        for <fstests@vger.kernel.org>; Tue, 15 Nov 2016 17:41:42 -0800 (PST)
-From: Eric Biggers <ebiggers@google.com>
-Subject: [PATCH] kvm-xfstests, gce-xfstests: correct file permissions with --update-files
-Date: Tue, 15 Nov 2016 17:40:56 -0800
-Message-Id: <1479260456-6723-1-git-send-email-ebiggers@google.com>
+Received: from mail-it0-f51.google.com ([209.85.214.51]:38452 "EHLO
+        mail-it0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932243AbcKQSOP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 17 Nov 2016 13:14:15 -0500
+Received: by mail-it0-f51.google.com with SMTP id j191so67652298ita.1
+        for <fstests@vger.kernel.org>; Thu, 17 Nov 2016 10:14:15 -0800 (PST)
+Date: Thu, 17 Nov 2016 10:14:12 -0800
+From: Omar Sandoval <osandov@osandov.com>
+Subject: Re: [PATCH] generic: test concurrent non-overlapping direct I/O on
+ the same extents
+Message-ID: <20161117181412.GA21816@vader.DHCP.thefacebook.com>
+References: <1edb45d8895de8fe347e800a5fd22b0f6eafb181.1479342541.git.osandov@fb.com>
+ <20161117052611.GX27776@eguan.usersys.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20161117052611.GX27776@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, kernel-team@fb.com
 List-ID: <fstests@vger.kernel.org>
 
-The xfstests-bld repository may have been cloned with a umask that
-masked out the other bits.  When using --update-files in this situation,
-the VM ended up in a state where non-root users were unable to execute
-anything, which made all tests using the fsgqa user get skipped.  Fix
-this by copying the r and x group bits to the other bits when creating
-files.tar.gz.  Also set the owner and group to root while we're at it.
+On Thu, Nov 17, 2016 at 01:26:11PM +0800, Eryu Guan wrote:
+> On Wed, Nov 16, 2016 at 04:29:34PM -0800, Omar Sandoval wrote:
+> > From: Omar Sandoval <osandov@fb.com>
+> > 
+> > There have been a couple of logic bugs in `btrfs_get_extent()` which
+> > could lead to spurious -EEXIST errors from read or write. This test
+> > exercises those conditions by having two threads race to add an extent
+> > to the extent map.
+> > 
+> > This is fixed by Linux commit 8dff9c853410 ("Btrfs: deal with duplciates
+> > during extent_map insertion in btrfs_get_extent") and the patch "Btrfs:
+> > deal with existing encompassing extent map in btrfs_get_extent()"
+> > (http://marc.info/?l=linux-btrfs&m=147873402311143&w=2).
+> > 
+> > Although the bug is Btrfs-specific, nothing about the test is.
+> > 
+> > Signed-off-by: Omar Sandoval <osandov@fb.com>
+> > ---
+> [snip]
+> > +# real QA test starts here
+> > +
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +_require_test
+> > +_require_xfs_io_command "falloc"
+> > +_require_test_program "dio-interleaved"
+> > +
+> > +extent_size="$(($(stat -f -c '%S' "$TEST_DIR") * 2))"
+> 
+> There's a helper to get fs block size: "get_block_size".
+> 
+> > +num_extents=1024
+> > +testfile="$TEST_DIR/$$-testfile"
+> > +
+> > +truncate -s 0 "$testfile"
+> 
+> I prefer using xfs_io to do the truncate, 
+> 
+> $XFS_IO_PROG -fc "truncate 0" "$testfile"
+> 
+> Because in rare cases truncate(1) may be unavailable, e.g. RHEL5,
+> usually it's not a big issue, but xfs_io works all the time, we have a
+> better way, so why not :)
+> 
+> > +for ((off = 0; off < num_extents * extent_size; off += extent_size)); do
+> > +	xfs_io -c "falloc $off $extent_size" "$testfile"
+> 
+> Use $XFS_IO_PROG not bare xfs_io.
+> 
+> I can fix all the tiny issues at commit time.
+> 
+> Thanks,
+> Eryu
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- kvm-xfstests/gce-xfstests | 3 ++-
- kvm-xfstests/kvm-xfstests | 3 ++-
- 2 files changed, 4 insertions(+), 2 deletions(-)
+Thank you, Eryu, that's all okay with me. I also had a typo here:
 
-diff --git a/kvm-xfstests/gce-xfstests b/kvm-xfstests/gce-xfstests
-index 04eee78..8839ea2 100755
---- a/kvm-xfstests/gce-xfstests
-+++ b/kvm-xfstests/gce-xfstests
-@@ -471,7 +471,8 @@ then
- 	exit 1
-     fi
-     (cd "$DIR/test-appliance"; \
--     tar -X gce-exclude-files --exclude=etc -C files -cf - . | \
-+     tar -X gce-exclude-files --exclude=etc -C files \
-+		--owner=root --group=root --mode=o+g-w -cf - . | \
- 	 gzip -9n > $LOCAL_FILES)
-     get_local_hash "$LOCAL_FILES"
-     get_remote_hash "$GS_FILES"
-diff --git a/kvm-xfstests/kvm-xfstests b/kvm-xfstests/kvm-xfstests
-index fbdae7a..bcada9e 100755
---- a/kvm-xfstests/kvm-xfstests
-+++ b/kvm-xfstests/kvm-xfstests
-@@ -75,7 +75,8 @@ then
- 	exit 1
-     fi
-     (cd "$DIR/test-appliance"; \
--     tar -X kvm-exclude-files -C files -cf - . | \
-+     tar -X kvm-exclude-files -C files \
-+		--owner=root --group=root --mode=o+g-w -cf - . | \
- 	 gzip -9n > "$TDIR/files.tar.gz")
-     tar -r -f $VDH -C "$TDIR" files.tar.gz
-     rm -rf "$TDIR"
+diff --git a/src/dio-interleaved.c b/src/dio-interleaved.c
+index 831a191..6b04c99 100644
+--- a/src/dio-interleaved.c
++++ b/src/dio-interleaved.c
+@@ -58,7 +58,7 @@ int main(int argc, char **argv)
+ 	int fd;
+ 
+ 	if (argc != 4) {
+-		fprintf(stderr, "usage: %s SECTORSIZE NUM_EXTENTS PATH\n",
++		fprintf(stderr, "usage: %s EXTENT_SIZE NUM_EXTENTS PATH\n",
+ 			argv[0]);
+ 		return EXIT_FAILURE;
+ 	}
+
+
+Feel free to fix this at commit time, too, or I can send a v2 if you
+prefer.
+
 -- 
-2.8.0.rc3.226.g39d4020
-
+Omar
