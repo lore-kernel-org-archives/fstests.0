@@ -1,140 +1,121 @@
-Received: from mx1.redhat.com ([209.132.183.28]:51458 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751803AbcKOGxP (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 15 Nov 2016 01:53:15 -0500
-Date: Tue, 15 Nov 2016 14:53:12 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] fstests: generic/098 update test for truncating a file
- into the middle of a hole
-Message-ID: <20161115065312.GN27776@eguan.usersys.redhat.com>
-References: <1478903404-25619-1-git-send-email-bo.li.liu@oracle.com>
+Received: from cn.fujitsu.com ([222.73.24.84]:18724 "EHLO song.cn.fujitsu.com"
+        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+        id S1754320AbcKQCHV (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 16 Nov 2016 21:07:21 -0500
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Subject: [PATCH] fstests: Introduce check for explicit SHARED extent flag reporting
+Date: Thu, 17 Nov 2016 10:06:48 +0800
+Message-Id: <20161117020648.19685-1-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1478903404-25619-1-git-send-email-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: Liu Bo <bo.li.liu@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Nov 11, 2016 at 02:30:04PM -0800, Liu Bo wrote:
-> This updates generic/098 by adding a sync option, i.e. 'sync' after the second
-> write, and with btrfs's NO_HOLES, we could still get wrong isize after remount.
-> 
-> This gets fixed by the patch
-> 
-> 'Btrfs: fix truncate down when no_holes feature is enabled'
-> 
-> Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+For fs support reflink, some of them (OK, btrfs again) doesn't split
+SHARED flag for extent fiemap reporting.
 
-Looks good to me, just some nitpicks inline :)
+For example:
+  0         4K         8K
+   / File1: Extent 0  \
+  /                    \
+  |<- On disk Extent-->|
+  |        /
+  | File2 /
+    Extent: 0
 
-> ---
->  tests/generic/098     | 57 ++++++++++++++++++++++++++++++++-------------------
->  tests/generic/098.out | 10 +++++++++
->  2 files changed, 46 insertions(+), 21 deletions(-)
-> 
-> diff --git a/tests/generic/098 b/tests/generic/098
-> index 838bb5d..3b89939 100755
-> --- a/tests/generic/098
-> +++ b/tests/generic/098
-> @@ -64,27 +64,42 @@ rm -f $seqres.full
->  _scratch_mkfs >>$seqres.full 2>&1
->  _scratch_mount
->  
-> -# Create our test file with some data and durably persist it.
-> -$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 128K" $SCRATCH_MNT/foo | _filter_xfs_io
-> -sync
-> -
-> -# Append some data to the file, increasing its size, and leave a hole between
-> -# the old size and the start offset if the following write. So our file gets
-> -# a hole in the range [128Kb, 256Kb[.
-> -$XFS_IO_PROG -c "pwrite -S 0xbb 256K 32K" $SCRATCH_MNT/foo | _filter_xfs_io
-> -
-> -# Now truncate our file to a smaller size that is in the middle of the hole we
-> -# previously created. On most truncate implementations the data we appended
-> -# before gets discarded from memory (with truncate_setsize()) and never ends
-> -# up being written to disk.
-> -$XFS_IO_PROG -c "truncate 160K" $SCRATCH_MNT/foo
-> -
-> -_scratch_cycle_mount
-> -
-> -# We expect to see a file with a size of 160Kb, with the first 128Kb of data all
-> -# having the value 0xaa and the remaining 32Kb of data all having the value 0x00
-> -echo "File content after remount:"
-> -od -t x1 $SCRATCH_MNT/foo
-> +workout()
-> +{
-> +	NEED_SYNC=$1
+Fs supports explicit SHARED extent reporting should report fiemap like:
+File1: 2 extents
+Extent 0-4K: SHARED
+Extent 4-8K:
+File2: 1 extents
+Extent 0-4K: SHARED
 
-Use "local" to declare this var, and in lower case. Usually we use upper
-case for global variables.
+Fs doesn't support explicit reporting will report fiemap like:
+File1: 1 extent
+Extent 0-8K: SHARED
+File2: 1 extent
+Extent 0-4K: SHARED
 
-> +
-> +	# Create our test file with some data and durably persist it.
-> +	$XFS_IO_PROG -t -f -c "pwrite -S 0xaa 0 128K" $SCRATCH_MNT/foo | _filter_xfs_io
-> +	sync
-> +
-> +	# Append some data to the file, increasing its size, and leave a hole between
-> +	# the old size and the start offset if the following write. So our file gets
-> +	# a hole in the range [128Kb, 256Kb[.
-> +	$XFS_IO_PROG -c "pwrite -S 0xbb 256K 32K" $SCRATCH_MNT/foo | _filter_xfs_io
-> +
-> +	if [ $NEED_SYNC -eq 1 ]; then
-> +		sync
-> +	fi
+Test case like generic/372 require explicit reporting will cause false
+alert on btrfs.
 
-Good to see some comments to explain why we need this to test
-with/without sync case.
+Add such runtime check for that requirememt.
 
-Thanks,
-Eryu
+Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+---
+ common/reflink    | 44 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/372 |  1 +
+ 2 files changed, 45 insertions(+)
 
-> +
-> +	# Now truncate our file to a smaller size that is in the middle of the hole we
-> +	# previously created.
-> +	# If we don't flush dirty page cache above, on most truncate
-> +	# implementations the data we appended before gets discarded from
-> +	# memory (with truncate_setsize()) and never ends up being written to
-> +	# disk.
-> +	$XFS_IO_PROG -c "truncate 160K" $SCRATCH_MNT/foo
-> +
-> +	_scratch_cycle_mount
-> +
-> +	# We expect to see a file with a size of 160Kb, with the first 128Kb of data all
-> +	# having the value 0xaa and the remaining 32Kb of data all having the value 0x00
-> +	echo "File content after remount:"
-> +	od -t x1 $SCRATCH_MNT/foo
-> +}
-> +
-> +workout 0
-> +# flush after each write
-> +workout 1
->  
->  status=0
->  exit
-> diff --git a/tests/generic/098.out b/tests/generic/098.out
-> index 37415ee..f87f046 100644
-> --- a/tests/generic/098.out
-> +++ b/tests/generic/098.out
-> @@ -9,3 +9,13 @@ File content after remount:
->  0400000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->  *
->  0500000
-> +wrote 131072/131072 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 32768/32768 bytes at offset 262144
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +File content after remount:
-> +0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> +*
-> +0400000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-> +*
-> +0500000
-> -- 
-> 2.5.0
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/common/reflink b/common/reflink
+index 8b34046..9ada2e8 100644
+--- a/common/reflink
++++ b/common/reflink
+@@ -78,6 +78,50 @@ _require_scratch_reflink()
+ 	_scratch_unmount
+ }
+ 
++# this test requires scratch fs to report explicit SHARED flag
++# e.g.
++#   0         4K         8K
++#    / File1: Extent 0  \
++#   /                    \
++#   |<- On disk Extent-->|
++#   |        /
++#   | File2 /
++#     Extent: 0
++# Fs supports explicit SHARED extent reporting should report fiemap like:
++# File1: 2 extents
++# Extent 0-4K: SHARED
++# Extent 4-8K:
++# File2: 1 extents
++# Extent 0-4K: SHARED
++#
++# Fs doesn't support explicit reporting will report fiemap like:
++# File1: 1 extent
++# Extent 0-8K: SHARED
++# File2: 1 extent
++# Extent 0-4K: SHARED
++_require_scratch_explicit_shared_extents()
++{
++	_require_scratch
++	_require_fiemap
++	_require_scratch_reflink
++	_require_xfs_io_command "reflink"
++	local nr_extents
++
++	_scratch_mkfs > /dev/null
++	_scratch_mount
++
++	_pwrite_byte 0x61 0 128k $SCRATCH_MNT/file1
++	_reflink_range $SCRATCH_MNT/file1 0 $SCRATCH_MNT/file2 0 64k
++
++	_scratch_cycle_mount
++
++	nr_extents=$(_count_extents $SCRATCH_MNT/file1)
++	if [ $nr_extents -eq 1 ]; then
++		_notrun "Explicit SHARED flag reporting not support by filesystem type: $FSTYP"
++	fi
++	_scratch_unmount
++}
++
+ # this test requires the test fs support dedupe...
+ _require_test_dedupe()
+ {
+diff --git a/tests/generic/372 b/tests/generic/372
+index 31dff20..51a3eca 100755
+--- a/tests/generic/372
++++ b/tests/generic/372
+@@ -47,6 +47,7 @@ _supported_os Linux
+ _supported_fs generic
+ _require_scratch_reflink
+ _require_fiemap
++_require_scratch_explicit_shared_extents
+ 
+ echo "Format and mount"
+ _scratch_mkfs > $seqres.full 2>&1
+-- 
+2.7.4
+
+
+
