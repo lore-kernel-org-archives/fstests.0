@@ -1,206 +1,194 @@
-Received: from mail.kernel.org ([198.145.29.136]:34390 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933255AbcKQTUz (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 17 Nov 2016 14:20:55 -0500
-Date: Thu, 17 Nov 2016 11:20:51 -0800
-From: Jaegeuk Kim <jaegeuk@kernel.org>
-Subject: Re: [PATCH v2] generic/391: check inode metadata on f{data}sync
- after power-cut
-Message-ID: <20161117192051.GE74211@jaegeuk>
-References: <20161117032753.69315-1-jaegeuk@kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20161117032753.69315-1-jaegeuk@kernel.org>
+Received: from mail-pg0-f45.google.com ([74.125.83.45]:33617 "EHLO
+        mail-pg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753600AbcKQTsd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 17 Nov 2016 14:48:33 -0500
+Received: by mail-pg0-f45.google.com with SMTP id 3so94547832pgd.0
+        for <fstests@vger.kernel.org>; Thu, 17 Nov 2016 11:48:33 -0800 (PST)
+From: Eric Biggers <ebiggers@google.com>
+Subject: [PATCH 3/4] generic: test encrypted file access
+Date: Thu, 17 Nov 2016 11:47:06 -0800
+Message-Id: <1479412027-34416-4-git-send-email-ebiggers@google.com>
+In-Reply-To: <1479412027-34416-1-git-send-email-ebiggers@google.com>
+References: <1479412027-34416-1-git-send-email-ebiggers@google.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Cc: linux-xfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org, linux-f2fs@vger.kernel.org, "Theodore Y . Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-This patch adds tests/generic/391 to test fsync and fdatasync with power-cuts.
+Test accessing encrypted files with and without the encryption key.
+Access with the key is more of a sanity check, whereas access without
+the key should result in some particular behaviors.
 
-The rule to check is:
-1) fsync should guarantee all the inode metadata after power-cut,
-2) fdatasync should guarantee i_size and i_blocks at least after power-cut.
+As noted in the comment, as currently written this test is expected to
+fail on ext4 pre-4.8 and f2fs pre-4.6.  This could be avoided by using
+the filesystem-specific key prefix instead of the generic one, but I'd
+prefer to have the tests use the generic prefix.
 
-Suggested-by: Chao Yu <yuchao0@huawei.com>
-Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
+Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- tests/generic/391     | 136 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/391.out |  11 ++++
+ tests/generic/401     | 133 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/401.out |   2 +
  tests/generic/group   |   1 +
- 3 files changed, 148 insertions(+)
- create mode 100644 tests/generic/391
- create mode 100644 tests/generic/391.out
+ 3 files changed, 136 insertions(+)
+ create mode 100755 tests/generic/401
+ create mode 100644 tests/generic/401.out
 
-diff --git a/tests/generic/391 b/tests/generic/391
-new file mode 100644
-index 0000000..2b95151
+diff --git a/tests/generic/401 b/tests/generic/401
+new file mode 100755
+index 0000000..f224852
 --- /dev/null
-+++ b/tests/generic/391
-@@ -0,0 +1,136 @@
-+#! /bin/bash
-+# FS QA Test 391
++++ b/tests/generic/401
+@@ -0,0 +1,133 @@
++#!/bin/bash
++# FS QA Test generic/401
 +#
-+# Test inode's metadata after fsync or fdatasync calls.
-+# In the case of fsync, filesystem should recover all the inode metadata, while
-+# recovering i_blocks and i_size at least for fdatasync.
++# Test accessing encrypted files and directories, both with and without the
++# encryption key.
++#
++# This is *not* intended to fully test all the encrypted I/O paths.  To do that
++# you'd need to run all the xfstests with encryption enabled.
++#
++# Also, this is expected to fail on ext4 pre-4.8 and f2fs pre-4.6 because it
++# assumes the common key naming convention ("fscrypt:" instead of "ext4:" or
++# "f2fs:"), which wasn't added until those versions.
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Jaegeuk Kim.  All Rights Reserved.
++# Copyright (C) 2016 Google, Inc.
 +#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
++# Author: Eric Biggers <ebiggers@google.com>
 +#
-+# This program is distributed in the hope that it would be useful,
++# This program is free software; you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 2 of the License, or
++# (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
 +# but WITHOUT ANY WARRANTY; without even the implied warranty of
 +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 +# GNU General Public License for more details.
 +#
 +# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++# along with this program; if not, see <http://www.gnu.org/licenses/>.
 +#-----------------------------------------------------------------------
-+#
 +
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
++here=`pwd`
 +echo "QA output created by $seq"
 +
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
++. ./common/encrypt
 +
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
++_begin_encryption_test
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/punch
++cd $SCRATCH_MNT
 +
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+
-+rm -f $seqres.full
-+_require_scratch
-+_require_scratch_shutdown
-+_require_xfs_io_command "fpunch"
-+
-+_scratch_mkfs >/dev/null 2>&1
-+_scratch_mount
-+
-+testfile=$SCRATCH_MNT/testfile
-+
-+# check inode metadata after shutdown
-+check_inode_metadata()
-+{
-+	$XFS_IO_PROG -r -c "stat -v" $1 >$tmp.before
-+	src/godown $SCRATCH_MNT >> $seqres.full
-+	_scratch_cycle_mount
-+	$XFS_IO_PROG -r -c "stat -v" $1 >$tmp.after
-+
-+	if [ $FSTYP = xfs ]; then
-+		sed -i '/stat.blocks/d' $tmp.before
-+		sed -i '/stat.blocks/d' $tmp.after
-+	fi
-+	diff $tmp.before $tmp.after >$tmp.diff
-+
-+	if [ "$2" = "fdatasync" ]; then
-+		cat $tmp.diff | grep stat.size
-+		cat $tmp.diff | grep stat.blocks
-+	else
-+		cat $tmp.diff $dont_care
-+	fi
-+	cat $tmp.before >> $seqres.full
-+	cat $tmp.after >> $seqres.full
-+}
-+
-+# append XX KB with f{data}sync, followed by power-cut
-+test_i_size()
-+{
-+	echo "==== i_size $2 test with $1 ====" | tee -a $seqres.full
-+	$XFS_IO_PROG -f -c "pwrite 0 4M"	\
-+			-c "fsync"		\
-+			-c "pwrite 4M $2"	\
-+			-c "$1"			\
-+			$testfile >/dev/null
-+	check_inode_metadata $testfile $1
-+}
-+
-+# update times with f{data}sync, followed by power-cut
-+test_i_time()
-+{
-+	echo "==== i_time test with $1 ====" | tee -a $seqres.full
-+	$XFS_IO_PROG -f -c "pwrite 0 4M"	\
-+			-c "fsync"		\
-+			$testfile >/dev/null
-+	sleep 1
-+	touch $testfile
-+	$XFS_IO_PROG -c "$1"			\
-+			$testfile >/dev/null
-+	check_inode_metadata $testfile $1
-+}
-+
-+# punch XX KB with f{data}sync, followed by power-cut
-+test_punch()
-+{
-+	echo "==== fpunch $2 test with $1 ====" | tee -a $seqres.full
-+	$XFS_IO_PROG -f -c "pwrite 0 4202496"	\
-+			-c "fsync"		\
-+			-c "fpunch 4194304 $2"\
-+			-c "$1"			\
-+			$testfile >/dev/null
-+
-+	check_inode_metadata $testfile $1
-+}
-+
-+for i in fsync fdatasync
-+do
-+	test_i_size $i 1024
-+	test_i_size $i 4096
-+	test_i_time $i
-+	test_punch $i 1024
-+	test_punch $i 4096
++mkdir edir ref_dir
++keydesc=$($FSCRYPT_UTIL gen_key)
++$FSCRYPT_UTIL set_policy $keydesc edir > /dev/null
++for dir in edir ref_dir; do
++	touch $dir/empty > /dev/null
++	$XFS_IO_PROG -t -f -c "pwrite 0 4k" $dir/a > /dev/null
++	$XFS_IO_PROG -t -f -c "pwrite 0 33k" $dir/abcdefghijklmnopqrstuvwxyz > /dev/null
++	maxname=$(yes | head -255 | tr -d '\n') # 255 character filename
++	$XFS_IO_PROG -t -f -c "pwrite 0 1k" $dir/$maxname > /dev/null
++	ln -s a $dir/symlink
++	ln -s abcdefghijklmnopqrstuvwxyz $dir/symlink2
++	ln -s $maxname $dir/symlink3
++	mkdir $dir/subdir
++	mkdir $dir/subdir/subsubdir
 +done
++# Diff encrypted directory with unencrypted reference directory
++diff -r edir ref_dir
++# Cycle mount and diff again
++cd $here
++_scratch_cycle_mount
++cd $SCRATCH_MNT
++diff -r edir ref_dir
 +
-+rm -f $tmp.*
++# Now try accessing the files without the encryption key.
++# It should still be possible to list the directory and remove files.
++# But filenames should be encrypted, and it should not be possible to read
++# regular files or to create new files or subdirectories.
++cd $here
++_scratch_unmount
++$FSCRYPT_UTIL rm_key $keydesc
++_scratch_mount
++cd $SCRATCH_MNT
++if [ $(ls edir | wc -l) -ne 8 ]; then
++	echo "Wrong number of files"
++	exit 1
++fi
++if [ -e edir/empty -o -e edir/symlink ]; then
++	echo "Filenames were not encrypted!"
++	exit 1
++fi
++if [ $(find edir -mindepth 2 -maxdepth 2 -type d | wc -l) -ne 1 ]; then
++	echo "Wrong number of subdirs"
++	exit 1
++fi
++cat $(find edir -maxdepth 1 -type f | head -1) 2>tmp
++if ! egrep -q 'Required key not available' tmp; then
++	echo "Reading encrypted file w/o key didn't fail with ENOKEY"
++	cat tmp
++	exit 1
++fi
++ls -l edir > /dev/null # should succeed
 +
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/391.out b/tests/generic/391.out
++# There are some inconsistencies in which error codes are returned on different
++# kernel versions and filesystems when trying to create a file or subdirectory
++# without access to the parent directory's encryption key.  Furthermore, on some
++# kernels correctly encoded filenames cause a different error (EACCES instead of
++# ENOENT) because these names make it though ->lookup() and fail in ->create()
++# or ->mkdir() instead.  For now we just accept multiple error codes.
++
++$XFS_IO_PROG -f edir/newfile &> tmp
++if ! egrep -q 'Permission denied|No such file or directory' tmp; then
++	echo "Creating file w/o key (unencoded) didn't fail with EACCES or ENOENT"
++	cat tmp
++	exit 1
++fi
++mkdir edir/newdir &> tmp
++if ! egrep -q 'Permission denied|No such file or directory' tmp; then
++	echo "Creating dir w/o key (unencoded) didn't fail with EACCES or ENOENT"
++	cat tmp
++	exit 1
++fi
++$XFS_IO_PROG -f edir/0123456789abcdef &> tmp
++if ! egrep -q 'Permission denied|Operation not permitted' tmp; then
++	echo "Creating file w/o key (encoded) didn't fail with EACCES or EPERM"
++	cat tmp
++	exit 1
++fi
++mkdir edir/0123456789abcdef &> tmp
++if ! egrep -q 'Permission denied|Operation not permitted' tmp; then
++	echo "Creating dir w/o key (encoded) didn't fail with EACCES or EPERM"
++	cat tmp
++	exit 1
++fi
++
++rm -r edir # should succeed
++[ -e edir ] && echo "Directory wasn't deleted!"
++
++echo "Silence is golden."
++
++exit 0
+diff --git a/tests/generic/401.out b/tests/generic/401.out
 new file mode 100644
-index 0000000..7c66776
+index 0000000..3625570
 --- /dev/null
-+++ b/tests/generic/391.out
-@@ -0,0 +1,11 @@
-+QA output created by 391
-+==== i_size 1024 test with fsync ====
-+==== i_size 4096 test with fsync ====
-+==== i_time test with fsync ====
-+==== fpunch 1024 test with fsync ====
-+==== fpunch 4096 test with fsync ====
-+==== i_size 1024 test with fdatasync ====
-+==== i_size 4096 test with fdatasync ====
-+==== i_time test with fdatasync ====
-+==== fpunch 1024 test with fdatasync ====
-+==== fpunch 4096 test with fdatasync ====
++++ b/tests/generic/401.out
+@@ -0,0 +1,2 @@
++QA output created by 401
++Silence is golden.
 diff --git a/tests/generic/group b/tests/generic/group
-index 08007d7..9de3415 100644
+index cf89f06..ab4edae 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -392,3 +392,4 @@
- 387 auto clone
+@@ -393,3 +393,4 @@
  388 auto log metadata
  389 auto quick acl
-+391 auto quick metadata
+ 400 auto quick encrypt
++401 auto quick encrypt
 -- 
-2.8.3
+2.8.0.rc3.226.g39d4020
 
