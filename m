@@ -1,318 +1,273 @@
-Received: from mx1.redhat.com ([209.132.183.28]:37592 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S941350AbcKQRjU (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 17 Nov 2016 12:39:20 -0500
-Date: Thu, 17 Nov 2016 22:00:19 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic/391: check inode metadata on f{data}sync after
- power-cut
-Message-ID: <20161117140019.GA27776@eguan.usersys.redhat.com>
-References: <20161117032753.69315-1-jaegeuk@kernel.org>
- <20161117083527.GY27776@eguan.usersys.redhat.com>
- <20161117125658.GA49658@bfoster.bfoster>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20161117125658.GA49658@bfoster.bfoster>
+Received: from mail-pg0-f52.google.com ([74.125.83.52]:36535 "EHLO
+        mail-pg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754296AbcKQA3n (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Nov 2016 19:29:43 -0500
+Received: by mail-pg0-f52.google.com with SMTP id f188so84458663pgc.3
+        for <fstests@vger.kernel.org>; Wed, 16 Nov 2016 16:29:43 -0800 (PST)
+From: Omar Sandoval <osandov@osandov.com>
+Subject: [PATCH] generic: test concurrent non-overlapping direct I/O on the same extents
+Date: Wed, 16 Nov 2016 16:29:34 -0800
+Message-Id: <1edb45d8895de8fe347e800a5fd22b0f6eafb181.1479342541.git.osandov@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: Jaegeuk Kim <jaegeuk@kernel.org>, fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-xfs@vger.kernel.org
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Cc: kernel-team@fb.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Nov 17, 2016 at 07:56:58AM -0500, Brian Foster wrote:
-> On Thu, Nov 17, 2016 at 04:35:27PM +0800, Eryu Guan wrote:
-> > [cc'ed linux-xfs for inputs on a flush log issue]
-> > 
-> > On Wed, Nov 16, 2016 at 07:27:53PM -0800, Jaegeuk Kim wrote:
-> > > This patch adds tests/generic/391 to test fsync and fdatasync with power-cuts.
-> > > 
-> > > The rule to check is:
-> > > 1) fsync should guarantee all the inode metadata after power-cut,
-> > > 2) fdatasync should guarantee i_size and i_blocks at least after power-cut.
-> > > 
-> > > Suggested-by: Chao Yu <yuchao0@huawei.com>
-> > > Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
-> > > ---
-> > >  tests/generic/391     | 125 ++++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/generic/391.out |  11 +++++
-> > >  tests/generic/group   |   1 +
-> > >  3 files changed, 137 insertions(+)
-> > >  create mode 100644 tests/generic/391
-> > >  create mode 100644 tests/generic/391.out
-> > > 
-> > > diff --git a/tests/generic/391 b/tests/generic/391
-> > > new file mode 100644
-> > > index 0000000..17c3fd3
-> > > --- /dev/null
-> > > +++ b/tests/generic/391
-> > > @@ -0,0 +1,125 @@
-> > > +#! /bin/bash
-> > > +# FS QA Test 391
-> > > +#
-> > > +# Test inode's metadata after fsync or fdatasync calls.
-> > > +# In the case of fsync, filesystem should recover all the inode metadata, while
-> > > +# recovering i_blocks and i_size at least for fdatasync.
-> > > +#
-> > > +#-----------------------------------------------------------------------
-> > > +# Copyright (c) 2016 Jaegeuk Kim.  All Rights Reserved.
-> > > +#
-> > > +# This program is free software; you can redistribute it and/or
-> > > +# modify it under the terms of the GNU General Public License as
-> > > +# published by the Free Software Foundation.
-> > > +#
-> > > +# This program is distributed in the hope that it would be useful,
-> > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > > +# GNU General Public License for more details.
-> > > +#
-> > > +# You should have received a copy of the GNU General Public License
-> > > +# along with this program; if not, write the Free Software Foundation,
-> > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > > +#-----------------------------------------------------------------------
-> > > +#
-> > > +
-> > > +seq=`basename $0`
-> > > +seqres=$RESULT_DIR/$seq
-> > > +echo "QA output created by $seq"
-> > > +
-> > > +here=`pwd`
-> > > +tmp=/tmp/$$
-> > > +status=1	# failure is the default!
-> > > +trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
-> > 
-> > Better to follow the template and other tests on how to do cleanup, i.e.
-> > trap _cleanup on exit and do real cleanups in it. e.g.
-> > 
-> > trap "_cleanup; exit \$status" 0 1 2 3 15
-> > 
-> > _cleanup()
-> > {
-> > 	cd /
-> > 	rm -f $tmp.*
-> > }
-> > 
-> > Not a big deal, but it's better to maintain consistency :)
-> > 
-> > > +
-> > > +# get standard environment, filters and checks
-> > > +. ./common/rc
-> > > +. ./common/filter
-> > > +. ./common/punch
-> > > +
-> > > +# real QA test starts here
-> > > +_supported_fs generic
-> > > +_supported_os Linux
-> > > +
-> > > +rm -f $seqres.full
-> > > +_require_scratch
-> > > +_require_scratch_shutdown
-> > > +_require_xfs_io_command "fpunch"
-> > > +
-> > > +_scratch_mkfs >/dev/null 2>&1
-> > > +_scratch_mount
-> > > +
-> > > +testfile=$SCRATCH_MNT/testfile
-> > > +
-> > > +# check inode metadata after shutdown
-> > > +_check_inode_metadata()
-> > 
-> > No need to name local functions with the leading "_", that's for global
-> > helper functions.
-> > 
-> > > +{
-> > > +	src/godown $SCRATCH_MNT >> $seqres.full
-> > > +	$XFS_IO_PROG -r -c "stat -v" $1 >$tmp.before
-> > 
-> > Shouldn't we call godown *after* xfs_io -c stat? I saw EIO on this
-> > xfs_io command and all sub-tests reported stat diff.
-> > 
-> 
-> Yeah.. I haven't run the test, but I would expect pretty much anything
-> to return an error after an fs shutdown.
-> 
-> > And perhaps we need to flush the log on godown for XFS? i.e.
-> > 
-> > src/godown -f $SCRATCH_MNT >> $seqres.full
-> > 
-> 
-> I don't think this is necessary. The semantics of fsync() dictate that
-> the fs do what is necessary to make the file persistent on disk. This
-> means it is the fs responsibility to ensure the changes are logged on
-> disk. Indeed, xfs_file_fsync() calls _xfs_log_force_lsn() to flush the
-> log up to the most recent LSN that covered the inode in question.
-> 
-> > Otherwise XFS fails all the "1024" & fsync tests (after I fixed the
-> > godown & xfs_io order locally), fdatasync tests are fine.
-> > 
-> > @@ -1,8 +1,16 @@
-> >  QA output created by 391
-> >  ==== i_size 1024 test with fsync ====
-> > +6c6
-> > +< stat.blocks = 8200
-> > +---
-> > +> stat.blocks = 16256
-> >  ==== i_size 4096 test with fsync ====
-> >  ==== i_time test with fsync ====
-> >  ==== fpunch 1024 test with fsync ====
-> > +6c6
-> > +< stat.blocks = 8208
-> > +---
-> > +> stat.blocks = 24576
-> >  ==== fpunch 4096 test with fsync ====
-> > 
-> > Not sure if this is the expected behavior on XFS. cc'ed xfs list for
-> > some inputs.
-> > 
-> 
-> Am I reading this correctly that you're seeing more blocks than
-> expected? If so, preallocation perhaps?
+From: Omar Sandoval <osandov@fb.com>
 
-Yes, you're correct, I see more blocks after godown than before godown.
+There have been a couple of logic bugs in `btrfs_get_extent()` which
+could lead to spurious -EEXIST errors from read or write. This test
+exercises those conditions by having two threads race to add an extent
+to the extent map.
 
-I tried adding "-o allocsize=4k" to MOUNT_OPTIONS, it works but not
-always. e.g. on a host with sunit/swidth reported from underlying block
-device, test still fails.
+This is fixed by Linux commit 8dff9c853410 ("Btrfs: deal with duplciates
+during extent_map insertion in btrfs_get_extent") and the patch "Btrfs:
+deal with existing encompassing extent map in btrfs_get_extent()"
+(http://marc.info/?l=linux-btrfs&m=147873402311143&w=2).
 
-# xfs_info /mnt/xfs
-meta-data=/dev/mapper/systemvg-testlv2 isize=512    agcount=16, agsize=245696 blks
-         =                       sectsz=512   attr=2, projid32bit=1
-         =                       crc=1        finobt=1 spinodes=0 rmapbt=0
-         =                       reflink=0
-data     =                       bsize=4096   blocks=3931136, imaxpct=25
-         =                       sunit=64     swidth=192 blks
-naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
-log      =internal               bsize=4096   blocks=2560, version=2
-         =                       sectsz=512   sunit=64 blks, lazy-count=1
-realtime =none                   extsz=4096   blocks=0, rtextents=0
+Although the bug is Btrfs-specific, nothing about the test is.
 
-Part of the test diff:
- ==== i_size 1024 test with fsync ====
-+6c6
-+< stat.blocks = 8200
-+---
-+> stat.blocks = 8704
+Signed-off-by: Omar Sandoval <osandov@fb.com>
+---
+ .gitignore            |  1 +
+ src/Makefile          |  2 +-
+ src/dio-interleaved.c | 98 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/390     | 76 +++++++++++++++++++++++++++++++++++++++
+ tests/generic/390.out |  2 ++
+ tests/generic/group   |  1 +
+ 6 files changed, 179 insertions(+), 1 deletion(-)
+ create mode 100644 src/dio-interleaved.c
+ create mode 100755 tests/generic/390
+ create mode 100644 tests/generic/390.out
 
-On the other hand, adding "-f" to godown always works for me.
+diff --git a/.gitignore b/.gitignore
+index 915d2d8..b8d13a0 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -44,6 +44,7 @@
+ /src/bulkstat_unlink_test_modified
+ /src/dbtest
+ /src/devzero
++/src/dio-interleaved
+ /src/dirperf
+ /src/dirstress
+ /src/dmiperf
+diff --git a/src/Makefile b/src/Makefile
+index dd51216..4056496 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -21,7 +21,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	stale_handle pwrite_mmap_blocked t_dir_offset2 seek_sanity_test \
+ 	seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
+ 	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
+-	attr-list-by-handle-cursor-test listxattr
++	attr-list-by-handle-cursor-test listxattr dio-interleaved
+ 
+ SUBDIRS =
+ 
+diff --git a/src/dio-interleaved.c b/src/dio-interleaved.c
+new file mode 100644
+index 0000000..831a191
+--- /dev/null
++++ b/src/dio-interleaved.c
+@@ -0,0 +1,98 @@
++#ifndef _GNU_SOURCE
++#define _GNU_SOURCE
++#endif
++#include <errno.h>
++#include <fcntl.h>
++#include <pthread.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <unistd.h>
++#include <sys/stat.h>
++#include <sys/types.h>
++
++static pthread_barrier_t barrier;
++
++static unsigned long extent_size;
++static unsigned long num_extents;
++
++struct dio_thread_data {
++	int fd;
++	int thread_id;
++};
++
++static void *dio_thread(void *arg)
++{
++	struct dio_thread_data *data = arg;
++	off_t off;
++	ssize_t ret;
++	void *buf;
++
++	if ((errno = posix_memalign(&buf, extent_size / 2, extent_size / 2))) {
++		perror("malloc");
++		return NULL;
++	}
++	memset(buf, 0, extent_size / 2);
++
++	off = (num_extents - 1) * extent_size;
++	if (data->thread_id)
++		off += extent_size / 2;
++	while (off >= 0) {
++		pthread_barrier_wait(&barrier);
++
++		ret = pread(data->fd, buf, extent_size / 2, off);
++		if (ret == -1)
++			perror("pread");
++
++		off -= extent_size;
++	}
++
++	free(buf);
++	return NULL;
++}
++
++int main(int argc, char **argv)
++{
++	struct dio_thread_data data[2];
++	pthread_t thread;
++	int fd;
++
++	if (argc != 4) {
++		fprintf(stderr, "usage: %s SECTORSIZE NUM_EXTENTS PATH\n",
++			argv[0]);
++		return EXIT_FAILURE;
++	}
++
++	extent_size = strtoul(argv[1], NULL, 0);
++	num_extents = strtoul(argv[2], NULL, 0);
++
++	errno = pthread_barrier_init(&barrier, NULL, 2);
++	if (errno) {
++		perror("pthread_barrier_init");
++		return EXIT_FAILURE;
++	}
++
++	fd = open(argv[3], O_RDONLY | O_DIRECT);
++	if (fd == -1) {
++		perror("open");
++		return EXIT_FAILURE;
++	}
++
++	data[0].fd = fd;
++	data[0].thread_id = 0;
++	errno = pthread_create(&thread, NULL, dio_thread, &data[0]);
++	if (errno) {
++		perror("pthread_create");
++		close(fd);
++		return EXIT_FAILURE;
++	}
++
++	data[1].fd = fd;
++	data[1].thread_id = 1;
++	dio_thread(&data[1]);
++
++	pthread_join(thread, NULL);
++
++	close(fd);
++	return EXIT_SUCCESS;
++}
+diff --git a/tests/generic/390 b/tests/generic/390
+new file mode 100755
+index 0000000..0ef6537
+--- /dev/null
++++ b/tests/generic/390
+@@ -0,0 +1,76 @@
++#! /bin/bash
++# FS QA Test 390
++#
++# Test two threads doing non-overlapping direct I/O in the same extents.
++# Motivated by a bug in Btrfs' direct I/O get_block function which would lead
++# to spurious -EEXIST failures from direct I/O reads.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Facebook.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	rm -f "$testfile"
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++_supported_fs generic
++_supported_os Linux
++_require_test
++_require_xfs_io_command "falloc"
++_require_test_program "dio-interleaved"
++
++extent_size="$(($(stat -f -c '%S' "$TEST_DIR") * 2))"
++num_extents=1024
++testfile="$TEST_DIR/$$-testfile"
++
++truncate -s 0 "$testfile"
++for ((off = 0; off < num_extents * extent_size; off += extent_size)); do
++	xfs_io -c "falloc $off $extent_size" "$testfile"
++done
++
++# To reproduce the Btrfs bug, the extent map must not be cached in memory.
++sync
++echo 3 > /proc/sys/vm/drop_caches
++
++"$here/src/dio-interleaved" "$extent_size" "$num_extents" "$testfile"
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/390.out b/tests/generic/390.out
+new file mode 100644
+index 0000000..3c7b405
+--- /dev/null
++++ b/tests/generic/390.out
+@@ -0,0 +1,2 @@
++QA output created by 390
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 08007d7..d137d01 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -392,3 +392,4 @@
+ 387 auto clone
+ 388 auto log metadata
+ 389 auto quick acl
++390 auto quick rw
+-- 
+2.10.2
 
-Thanks,
-Eryu
-
-> 
-> Brian
-> 
-> > > +	_scratch_cycle_mount
-> > > +	$XFS_IO_PROG -r -c "stat -v" $1 >$tmp.after
-> > > +	diff $tmp.before $tmp.after >>$tmp.diff
-> > 
-> > I think $tmp.diff should be overwritten on each sub-test.
-> > 
-> > > +
-> > > +	if [ "$2" = "fdatasync" ]; then
-> > > +		cat $tmp.diff | grep stat.size
-> > > +		cat $tmp.diff | grep stat.blocks
-> > > +	else
-> > > +		cat $tmp.diff
-> > > +	fi
-> > > +	cat $tmp.before >> $seqres.full
-> > > +	cat $tmp.after >> $seqres.full
-> > > +}
-> > > +
-> > > +# append XX KB with f{data}sync, followed by power-cut
-> > > +_test_i_size()
-> > > +{
-> > > +	echo "==== i_size $2 test with $1 ===="
-> > 
-> > I find it's much easier to read the $seqres.full log if we append these
-> > kind of logs to $seqres.full too, e.g.
-> > 
-> > 	echo "==== i_size $2 test with $1 ====" | tee -a $seqres.full
-> > 
-> > Thanks,
-> > Eryu
-> > 
-> > > +	$XFS_IO_PROG -f -c "pwrite 0 4M"	\
-> > > +			-c "fsync"		\
-> > > +			-c "pwrite 4M $2"	\
-> > > +			-c "$1"			\
-> > > +			$testfile >/dev/null
-> > > +	_check_inode_metadata $testfile $1
-> > > +}
-> > > +
-> > > +# update times with f{data}sync, followed by power-cut
-> > > +_test_i_time()
-> > > +{
-> > > +	echo "==== i_time test with $1 ===="
-> > > +	$XFS_IO_PROG -f -c "pwrite 0 4M"	\
-> > > +			-c "fsync"		\
-> > > +			$testfile >/dev/null
-> > > +	sleep 1
-> > > +	touch $testfile
-> > > +	$XFS_IO_PROG -c "$1"			\
-> > > +			$testfile >/dev/null
-> > > +	_check_inode_metadata $testfile $1
-> > > +}
-> > > +
-> > > +# punch XX KB with f{data}sync, followed by power-cut
-> > > +_test_punch()
-> > > +{
-> > > +	echo "==== fpunch $2 test with $1 ===="
-> > > +	$XFS_IO_PROG -f -c "pwrite 0 4202496"	\
-> > > +			-c "fsync"		\
-> > > +			-c "fpunch 4194304 $2"\
-> > > +			-c "$1"			\
-> > > +			$testfile >/dev/null
-> > > +
-> > > +	_check_inode_metadata $testfile $1
-> > > +}
-> > > +
-> > > +for i in fsync fdatasync
-> > > +do
-> > > +	_test_i_size $i 1024
-> > > +	_test_i_size $i 4096
-> > > +	_test_i_time $i
-> > > +	_test_punch $i 1024
-> > > +	_test_punch $i 4096
-> > > +done
-> > > +
-> > > +rm -f $tmp.*
-> > > +
-> > > +# success, all done
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/generic/391.out b/tests/generic/391.out
-> > > new file mode 100644
-> > > index 0000000..7c66776
-> > > --- /dev/null
-> > > +++ b/tests/generic/391.out
-> > > @@ -0,0 +1,11 @@
-> > > +QA output created by 391
-> > > +==== i_size 1024 test with fsync ====
-> > > +==== i_size 4096 test with fsync ====
-> > > +==== i_time test with fsync ====
-> > > +==== fpunch 1024 test with fsync ====
-> > > +==== fpunch 4096 test with fsync ====
-> > > +==== i_size 1024 test with fdatasync ====
-> > > +==== i_size 4096 test with fdatasync ====
-> > > +==== i_time test with fdatasync ====
-> > > +==== fpunch 1024 test with fdatasync ====
-> > > +==== fpunch 4096 test with fdatasync ====
-> > > diff --git a/tests/generic/group b/tests/generic/group
-> > > index 08007d7..9de3415 100644
-> > > --- a/tests/generic/group
-> > > +++ b/tests/generic/group
-> > > @@ -392,3 +392,4 @@
-> > >  387 auto clone
-> > >  388 auto log metadata
-> > >  389 auto quick acl
-> > > +391 auto quick metadata
-> > > -- 
-> > > 2.8.3
-> > > 
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
