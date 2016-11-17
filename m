@@ -1,13 +1,13 @@
-Received: from mail-pg0-f45.google.com ([74.125.83.45]:33617 "EHLO
-        mail-pg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753600AbcKQTsd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 17 Nov 2016 14:48:33 -0500
-Received: by mail-pg0-f45.google.com with SMTP id 3so94547832pgd.0
-        for <fstests@vger.kernel.org>; Thu, 17 Nov 2016 11:48:33 -0800 (PST)
+Received: from mail-pg0-f49.google.com ([74.125.83.49]:34556 "EHLO
+        mail-pg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750794AbcKQTsb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 17 Nov 2016 14:48:31 -0500
+Received: by mail-pg0-f49.google.com with SMTP id x23so91675664pgx.1
+        for <fstests@vger.kernel.org>; Thu, 17 Nov 2016 11:48:31 -0800 (PST)
 From: Eric Biggers <ebiggers@google.com>
-Subject: [PATCH 3/4] generic: test encrypted file access
-Date: Thu, 17 Nov 2016 11:47:06 -0800
-Message-Id: <1479412027-34416-4-git-send-email-ebiggers@google.com>
+Subject: [PATCH 2/4] generic: test setting and getting encryption policies
+Date: Thu, 17 Nov 2016 11:47:05 -0800
+Message-Id: <1479412027-34416-3-git-send-email-ebiggers@google.com>
 In-Reply-To: <1479412027-34416-1-git-send-email-ebiggers@google.com>
 References: <1479412027-34416-1-git-send-email-ebiggers@google.com>
 Sender: fstests-owner@vger.kernel.org
@@ -15,42 +15,138 @@ To: fstests@vger.kernel.org
 Cc: linux-ext4@vger.kernel.org, linux-f2fs@vger.kernel.org, "Theodore Y . Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-Test accessing encrypted files with and without the encryption key.
-Access with the key is more of a sanity check, whereas access without
-the key should result in some particular behaviors.
-
-As noted in the comment, as currently written this test is expected to
-fail on ext4 pre-4.8 and f2fs pre-4.6.  This could be avoided by using
-the filesystem-specific key prefix instead of the generic one, but I'd
-prefer to have the tests use the generic prefix.
+Several kernel bugs were recently fixed regarding the constraints for
+setting encryption policies.  Add tests for these cases and a few more.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- tests/generic/401     | 133 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/401.out |   2 +
- tests/generic/group   |   1 +
- 3 files changed, 136 insertions(+)
- create mode 100755 tests/generic/401
- create mode 100644 tests/generic/401.out
+ src/fscrypt_util.c    | 82 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/400     | 88 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/400.out | 24 ++++++++++++++
+ tests/generic/group   |  1 +
+ 4 files changed, 195 insertions(+)
+ create mode 100755 tests/generic/400
+ create mode 100644 tests/generic/400.out
 
-diff --git a/tests/generic/401 b/tests/generic/401
+diff --git a/src/fscrypt_util.c b/src/fscrypt_util.c
+index de63667..9428cb4 100644
+--- a/src/fscrypt_util.c
++++ b/src/fscrypt_util.c
+@@ -96,6 +96,7 @@ usage(void)
+ "    fscrypt_util gen_key\n"
+ "    fscrypt_util rm_key KEYDESC\n"
+ "    fscrypt_util set_policy KEYDESC DIR\n"
++"    fscrypt_util test_ioctl_validation DIR\n"
+ );
+ 	exit(2);
+ }
+@@ -276,6 +277,86 @@ static int set_policy(int argc, char **argv)
+ 	return 0;
+ }
+ 
++/*
++ * Test that the kernel does basic validation of the arguments to
++ * FS_IOC_SET_ENCRYPTION_POLICY and FS_IOC_GET_ENCRYPTION_POLICY.
++ */
++static int test_ioctl_validation(int argc, char **argv)
++{
++	const char *dir;
++	int fd;
++	struct fscrypt_policy policy;
++
++	if (argc != 1)
++		usage();
++	dir = argv[0];
++
++	fd = open(dir, O_RDONLY);
++	if (fd < 0)
++		die_errno("%s: Unable to open", dir);
++
++	/* trying to get encryption policy for unencrypted file */
++	if (ioctl(fd, FS_IOC_GET_ENCRYPTION_POLICY, NULL) != -1 ||
++	    (errno != ENODATA && errno != ENOENT)) {
++		die("expected FS_IOC_GET_ENCRYPTION_POLICY to fail with "
++		    "ENODATA or ENOENT when unencrypted file specified");
++	}
++
++	/* invalid pointer */
++	if (ioctl(fd, FS_IOC_SET_ENCRYPTION_POLICY, NULL) != -1 ||
++	    errno != EFAULT) {
++		die("expected FS_IOC_SET_ENCRYPTION_POLICY to fail with "
++		    "EFAULT when invalid pointer specified");
++	}
++
++	/* invalid flags */
++	init_policy_default(&policy);
++	policy.flags = 0xFF;
++	if (ioctl(fd, FS_IOC_SET_ENCRYPTION_POLICY, &policy) != -1 ||
++	    errno != EINVAL) {
++		die("expected FS_IOC_SET_ENCRYPTION_POLICY to fail with "
++		    "EINVAL when invalid flags specified");
++	}
++
++	/* invalid encryption modes */
++	init_policy_default(&policy);
++	policy.contents_encryption_mode = 0xFF;
++	policy.filenames_encryption_mode = 0xFF;
++	if (ioctl(fd, FS_IOC_SET_ENCRYPTION_POLICY, &policy) != -1 ||
++	    errno != EINVAL) {
++		die("expected FS_IOC_SET_ENCRYPTION_POLICY to fail with "
++		    "EINVAL when invalid encryption modes specified");
++	}
++
++	/* invalid policy version */
++	init_policy_default(&policy);
++	policy.version = 0xFF;
++	if (ioctl(fd, FS_IOC_SET_ENCRYPTION_POLICY, &policy) != -1 ||
++	    errno != EINVAL) {
++		die("expected FS_IOC_SET_ENCRYPTION_POLICY to fail with "
++		    "EINVAL when invalid policy version specified");
++	}
++
++	/* success case */
++	init_policy_default(&policy);
++	if (ioctl(fd, FS_IOC_SET_ENCRYPTION_POLICY, &policy) != 0)
++		die_errno("expected FS_IOC_SET_ENCRYPTION_POLICY to succeed");
++
++	verify_policy(dir, fd, &policy);
++
++	/* invalid pointer (get) */
++	if (ioctl(fd, FS_IOC_GET_ENCRYPTION_POLICY, NULL) != -1 ||
++	    errno != EFAULT) {
++		die("expected FS_IOC_GET_ENCRYPTION_POLICY to fail with "
++		    "EFAULT when invalid pointer specified");
++	}
++
++	close(fd);
++
++	printf("%s: test_ioctl_validation passed\n", dir);
++	return 0;
++}
++
+ static const struct command {
+ 	const char *name;
+ 	int (*func)(int, char **);
+@@ -283,6 +364,7 @@ static const struct command {
+ 	{"gen_key", gen_key},
+ 	{"rm_key", rm_key},
+ 	{"set_policy", set_policy},
++	{"test_ioctl_validation", test_ioctl_validation},
+ 	{NULL, NULL}
+ };
+ 
+diff --git a/tests/generic/400 b/tests/generic/400
 new file mode 100755
-index 0000000..f224852
+index 0000000..b077612
 --- /dev/null
-+++ b/tests/generic/401
-@@ -0,0 +1,133 @@
++++ b/tests/generic/400
+@@ -0,0 +1,88 @@
 +#!/bin/bash
-+# FS QA Test generic/401
++# FS QA Test generic/400
 +#
-+# Test accessing encrypted files and directories, both with and without the
-+# encryption key.
++# Test setting and getting encryption policies.
 +#
-+# This is *not* intended to fully test all the encrypted I/O paths.  To do that
-+# you'd need to run all the xfstests with encryption enabled.
-+#
-+# Also, this is expected to fail on ext4 pre-4.8 and f2fs pre-4.6 because it
-+# assumes the common key naming convention ("fscrypt:" instead of "ext4:" or
-+# "f2fs:"), which wasn't added until those versions.
++# This test only exercises the ioctls; it does not set up encryption keys.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (C) 2016 Google, Inc.
@@ -78,117 +174,100 @@ index 0000000..f224852
 +
 +. ./common/encrypt
 +
++_require_user
 +_begin_encryption_test
 +
 +cd $SCRATCH_MNT
 +
-+mkdir edir ref_dir
-+keydesc=$($FSCRYPT_UTIL gen_key)
-+$FSCRYPT_UTIL set_policy $keydesc edir > /dev/null
-+for dir in edir ref_dir; do
-+	touch $dir/empty > /dev/null
-+	$XFS_IO_PROG -t -f -c "pwrite 0 4k" $dir/a > /dev/null
-+	$XFS_IO_PROG -t -f -c "pwrite 0 33k" $dir/abcdefghijklmnopqrstuvwxyz > /dev/null
-+	maxname=$(yes | head -255 | tr -d '\n') # 255 character filename
-+	$XFS_IO_PROG -t -f -c "pwrite 0 1k" $dir/$maxname > /dev/null
-+	ln -s a $dir/symlink
-+	ln -s abcdefghijklmnopqrstuvwxyz $dir/symlink2
-+	ln -s $maxname $dir/symlink3
-+	mkdir $dir/subdir
-+	mkdir $dir/subdir/subsubdir
-+done
-+# Diff encrypted directory with unencrypted reference directory
-+diff -r edir ref_dir
-+# Cycle mount and diff again
-+cd $here
-+_scratch_cycle_mount
-+cd $SCRATCH_MNT
-+diff -r edir ref_dir
++# Should be able to set an encryption policy on an empty directory
++echo -e "\n*** Setting encryption policy on empty directory ***"
++mkdir empty_dir
++$FSCRYPT_UTIL set_policy 0000111122223333 empty_dir
 +
-+# Now try accessing the files without the encryption key.
-+# It should still be possible to list the directory and remove files.
-+# But filenames should be encrypted, and it should not be possible to read
-+# regular files or to create new files or subdirectories.
-+cd $here
-+_scratch_unmount
-+$FSCRYPT_UTIL rm_key $keydesc
-+_scratch_mount
-+cd $SCRATCH_MNT
-+if [ $(ls edir | wc -l) -ne 8 ]; then
-+	echo "Wrong number of files"
-+	exit 1
-+fi
-+if [ -e edir/empty -o -e edir/symlink ]; then
-+	echo "Filenames were not encrypted!"
-+	exit 1
-+fi
-+if [ $(find edir -mindepth 2 -maxdepth 2 -type d | wc -l) -ne 1 ]; then
-+	echo "Wrong number of subdirs"
-+	exit 1
-+fi
-+cat $(find edir -maxdepth 1 -type f | head -1) 2>tmp
-+if ! egrep -q 'Required key not available' tmp; then
-+	echo "Reading encrypted file w/o key didn't fail with ENOKEY"
-+	cat tmp
-+	exit 1
-+fi
-+ls -l edir > /dev/null # should succeed
++# Should be able to set the same policy again, but not a different one
++echo -e "\n*** Setting same encryption policy again ***"
++$FSCRYPT_UTIL set_policy 0000111122223333 empty_dir
++$FSCRYPT_UTIL set_policy 4444555566667777 empty_dir
 +
-+# There are some inconsistencies in which error codes are returned on different
-+# kernel versions and filesystems when trying to create a file or subdirectory
-+# without access to the parent directory's encryption key.  Furthermore, on some
-+# kernels correctly encoded filenames cause a different error (EACCES instead of
-+# ENOENT) because these names make it though ->lookup() and fail in ->create()
-+# or ->mkdir() instead.  For now we just accept multiple error codes.
++# Should *not* be able to set an encryption policy on a nonempty directory
++echo -e "\n*** Setting encryption policy on nonempty directory ***"
++mkdir nonempty_dir
++touch nonempty_dir/file
++$FSCRYPT_UTIL set_policy 0000111122223333 nonempty_dir
 +
-+$XFS_IO_PROG -f edir/newfile &> tmp
-+if ! egrep -q 'Permission denied|No such file or directory' tmp; then
-+	echo "Creating file w/o key (unencoded) didn't fail with EACCES or ENOENT"
-+	cat tmp
-+	exit 1
-+fi
-+mkdir edir/newdir &> tmp
-+if ! egrep -q 'Permission denied|No such file or directory' tmp; then
-+	echo "Creating dir w/o key (unencoded) didn't fail with EACCES or ENOENT"
-+	cat tmp
-+	exit 1
-+fi
-+$XFS_IO_PROG -f edir/0123456789abcdef &> tmp
-+if ! egrep -q 'Permission denied|Operation not permitted' tmp; then
-+	echo "Creating file w/o key (encoded) didn't fail with EACCES or EPERM"
-+	cat tmp
-+	exit 1
-+fi
-+mkdir edir/0123456789abcdef &> tmp
-+if ! egrep -q 'Permission denied|Operation not permitted' tmp; then
-+	echo "Creating dir w/o key (encoded) didn't fail with EACCES or EPERM"
-+	cat tmp
-+	exit 1
-+fi
++# Should *not* be able to set an encryption policy on a nondirectory file, even
++# an empty one.  Regression test for 002ced4be642: "fscrypto: only allow setting
++# encryption policy on directories".
++echo -e "\n*** Setting encryption policy on nondirectory ***"
++touch nondirectory
++$FSCRYPT_UTIL set_policy 0000111122223333 nondirectory
 +
-+rm -r edir # should succeed
-+[ -e edir ] && echo "Directory wasn't deleted!"
++# Should *not* be able to set an encryption policy on another user's directory.
++# Regression test for 163ae1c6ad62: "fscrypto: add authorization check for
++# setting encryption policy".
++echo -e "\n*** Setting encryption policy on another user's directory ***"
++mkdir unauthorized_dir
++su $qa_user -c "$FSCRYPT_UTIL set_policy 0000111122223333 unauthorized_dir"
 +
-+echo "Silence is golden."
++# Should *not* be able to set an encryption policy on a directory on a
++# filesystem mounted readonly.  Regression test for ba63f23d69a3: "fscrypto:
++# require write access to mount to set encryption policy".  Test both a regular
++# readonly filesystem and a read-write filesystem remounted with "ro,bind",
++# which creates a readonly mount for a read-write filesystem.
++echo -e "\n*** Setting encryption policy on readonly filesystem ***"
++mkdir readonly_mnt_dir
++_scratch_mount -o ro,remount
++$FSCRYPT_UTIL set_policy 0000111122223333 readonly_mnt_dir
++_scratch_mount -o rw,remount
++_scratch_mount -o remount,ro,bind
++$FSCRYPT_UTIL set_policy 0000111122223333 readonly_mnt_dir
++_scratch_mount -o rw,remount
++
++# Test basic validation of set_policy / get_policy ioctl arguments
++echo -e "\n*** ioctl validation ***"
++mkdir validation_dir
++$FSCRYPT_UTIL test_ioctl_validation validation_dir
 +
 +exit 0
-diff --git a/tests/generic/401.out b/tests/generic/401.out
+diff --git a/tests/generic/400.out b/tests/generic/400.out
 new file mode 100644
-index 0000000..3625570
+index 0000000..dbae79d
 --- /dev/null
-+++ b/tests/generic/401.out
-@@ -0,0 +1,2 @@
-+QA output created by 401
-+Silence is golden.
++++ b/tests/generic/400.out
+@@ -0,0 +1,24 @@
++QA output created by 400
++
++*** Setting encryption policy on empty directory ***
++empty_dir: Successfully assigned encryption key 0000111122223333
++
++*** Setting same encryption policy again ***
++empty_dir: Successfully assigned encryption key 0000111122223333
++empty_dir: Unable to set encryption policy: Invalid argument
++
++*** Setting encryption policy on nonempty directory ***
++nonempty_dir: Unable to set encryption policy: Directory not empty
++
++*** Setting encryption policy on nondirectory ***
++nondirectory: Unable to set encryption policy: Invalid argument
++
++*** Setting encryption policy on another user's directory ***
++unauthorized_dir: Unable to set encryption policy: Permission denied
++
++*** Setting encryption policy on readonly filesystem ***
++readonly_mnt_dir: Unable to set encryption policy: Read-only file system
++readonly_mnt_dir: Unable to set encryption policy: Read-only file system
++
++*** ioctl validation ***
++validation_dir: test_ioctl_validation passed
 diff --git a/tests/generic/group b/tests/generic/group
-index cf89f06..ab4edae 100644
+index 08007d7..cf89f06 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -393,3 +393,4 @@
+@@ -392,3 +392,4 @@
+ 387 auto clone
  388 auto log metadata
  389 auto quick acl
- 400 auto quick encrypt
-+401 auto quick encrypt
++400 auto quick encrypt
 -- 
 2.8.0.rc3.226.g39d4020
 
