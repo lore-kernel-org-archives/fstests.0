@@ -1,79 +1,226 @@
-Received: from cn.fujitsu.com ([222.73.24.84]:25836 "EHLO song.cn.fujitsu.com"
-        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-        id S1755441AbcKOIOQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 15 Nov 2016 03:14:16 -0500
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH] fstests: Block btrfs from test case generic/372
-Date: Tue, 15 Nov 2016 16:14:10 +0800
-Message-Id: <20161115081410.6779-1-quwenruo@cn.fujitsu.com>
-MIME-Version: 1.0
+Received: from mail.kernel.org ([198.145.29.136]:59820 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753617AbcKQDrX (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 16 Nov 2016 22:47:23 -0500
+From: Jaegeuk Kim <jaegeuk@kernel.org>
+Subject: [PATCH] generic/392: add a testcase to check some inline truncation behaviors
+Date: Wed, 16 Nov 2016 19:47:15 -0800
+Message-Id: <20161117034715.71966-1-jaegeuk@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
+Cc: Jaegeuk Kim <jaegeuk@kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Since btrfs always return the whole extent even part of it is shared
-with other files, so the hole/extent counts differs for "file1" in this
-test case.
+This patch introduces a new testcase to test some small truncations to check
+inline_data and its cached data are truncated correctly at the same time.
 
-For example:
+The inline_data feature was introduced in ext4 and f2fs as follows.
+ ext4 : http://lwn.net/Articles/468678/
+ f2fs : http://lwn.net/Articles/573408/
 
- /------ File 1 Extent 0-------------\
-/                                     \
-|<----------Extent A------------------>|
-\         /                  \         /
- \ File 2/                    \ File 2/
-   Ext 0~4K                    Ext 64k~68K
+The basic idea is embedding small-sized file's data into relatively large
+inode space.
+In ext4, up to 132 bytes of data can be stored in 256 bytes-sized inode.
+In f2fs, up to 3.4KB of data can be embedded into 4KB-sized inode block.
 
-In that case, fiemap on File 1 will only return 1 large extent A with
-SHARED flag.
-While XFS will split it into 3 extents,  first and last 4K with SHARED
-flag while the rest without SHARED flag.
-
-This makes the test case meaningless as btrfs doesn't follow such
-assumption.
-So black list btrfs for this test case to avoid false alert.
-
-Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
 ---
- common/rc         | 10 ++++++++++
- tests/generic/372 |  1 +
- 2 files changed, 11 insertions(+)
+ tests/generic/392     | 127 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/392.out |  41 ++++++++++++++++
+ tests/generic/group   |   1 +
+ 3 files changed, 169 insertions(+)
+ create mode 100644 tests/generic/392
+ create mode 100644 tests/generic/392.out
 
-diff --git a/common/rc b/common/rc
-index e3b54ec..6c3de22 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3230,6 +3230,16 @@ _normalize_mount_options()
- 	echo $MOUNT_OPTIONS | sed -n 's/-o\s*\(\S*\)/\1/gp'| sed 's/,/ /g'
- }
- 
-+# skip test if FSTYP is in the black list
-+_exclude_fs_type()
+diff --git a/tests/generic/392 b/tests/generic/392
+new file mode 100644
+index 0000000..7282053
+--- /dev/null
++++ b/tests/generic/392
+@@ -0,0 +1,127 @@
++#! /bin/bash
++# FS QA Test No. generic/392
++#
++# Test some small truncations to check inline_data and its cached data are
++# truncated correctly at the same time.
++#
++# The inline_data feature was introduced in ext4 and f2fs as follows.
++#  ext4 : http://lwn.net/Articles/468678/
++#  f2fs : http://lwn.net/Articles/573408/
++#
++# The basic idea is embedding small-sized file's data into relatively large
++# inode space.
++# In ext4, up to 132 bytes of data can be stored in 256 bytes-sized inode.
++# In f2fs, up to 3.4KB of data can be embedded into 4KB-sized inode block.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2014 Jaegeuk Kim.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
 +{
-+	while [ $# -gt 0 ]; do
-+		if [ $FSTYP == $1 ]; then
-+			_notrun "fs type \"$1\" is not allowed in this test"
-+		fi
-+	done
++    cd /
++    rm -f $tmp.*
 +}
 +
- # skip test if MOUNT_OPTIONS contains the given strings
- _exclude_scratch_mount_option()
- {
-diff --git a/tests/generic/372 b/tests/generic/372
-index 31dff20..5e4cfff 100755
---- a/tests/generic/372
-+++ b/tests/generic/372
-@@ -45,6 +45,7 @@ _cleanup()
- # real QA test starts here
- _supported_os Linux
- _supported_fs generic
-+_exclude_fs_type btrfs
- _require_scratch_reflink
- _require_fiemap
- 
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++
++testfile=$SCRATCH_MNT/testfile
++
++_scratch_mkfs > /dev/null 2>&1
++_scratch_mount
++
++# 1. make a file containing inline_data.
++# 2. "truncated 0"  is to check cached page #0 was truncated entirely.
++# 3. "truncated 50" is to check inline_data was truncated within its inode.
++$XFS_IO_PROG -t -f \
++	-c "pwrite -S 0x58 0 40" `# write    |XXXXXXXXXXXXXXXXXXXXXXXX|` \
++	-c "fsync"							 \
++	-c "truncate 0"          `# truncate |                        |` \
++	-c "truncate 50"         `# truncate |                        |` \
++$testfile | _filter_xfs_io
++
++echo "= truncate inline_data after #0 page was truncated entirely ="
++hexdump -C $testfile
++_scratch_remount
++hexdump -C $testfile
++rm $testfile
++
++# 1. make a file containing inline_data.
++# 2. "truncated 0"     is to check cached page #0 was truncated entirely.
++# 3. "truncated 4096"  is to check inline_data was dismissed and truncated.
++$XFS_IO_PROG -t -f \
++	-c "pwrite -S 0x58 0 40" `# write    |XXXXXXXXXXXXXXXXXXXXXXXX|` \
++	-c "fsync"							 \
++	-c "truncate 0"          `# truncate |                        |` \
++	-c "truncate 4096"       `# truncate |                        |` \
++$testfile | _filter_xfs_io
++
++echo "= truncate dismissed inline_data after #0 page was truncated entirely ="
++hexdump -C $testfile
++_scratch_remount
++hexdump -C $testfile
++rm $testfile
++
++# 1. make a file containing inline_data.
++# 2. "truncated 4"   is to check cached page #0 was truncated partially.
++# 3. "truncated 50"  is to check inline_data was truncated within its inode.
++$XFS_IO_PROG -t -f \
++	-c "pwrite -S 0x58 0 40" `# write    |XXXXXXXXXXXXXXXXXXXXXXXX|` \
++	-c "fsync"							 \
++	-c "truncate 4"          `# truncate |XXXX                    |` \
++	-c "truncate 50"         `# truncate |XXXX                    |` \
++$testfile | _filter_xfs_io
++
++echo "= truncate inline_data after #0 page was truncated partially ="
++hexdump -C $testfile
++_scratch_remount
++hexdump -C $testfile
++rm $testfile
++
++# 1. make a file containing inline_data.
++# 2. "truncated 4"     is to check cached page #0 was truncated partially.
++# 3. "truncated 4096"  is to check inline_data was dismissed and truncated.
++$XFS_IO_PROG -t -f \
++	-c "pwrite -S 0x58 0 40" `# write    |XXXXXXXXXXXXXXXXXXXXXXXX|` \
++	-c "fsync"							 \
++	-c "truncate 4"          `# truncate |XXXX                    |` \
++	-c "truncate 4096"       `# truncate |XXXX                    |` \
++$testfile | _filter_xfs_io
++
++echo "= truncate dismissed inline_data after #0 page was truncated partially ="
++hexdump -C $testfile
++_scratch_remount
++hexdump -C $testfile
++rm $testfile
++
++status=0
++exit
+diff --git a/tests/generic/392.out b/tests/generic/392.out
+new file mode 100644
+index 0000000..a041628
+--- /dev/null
++++ b/tests/generic/392.out
+@@ -0,0 +1,41 @@
++QA output created by 392
++wrote 40/40 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++= truncate inline_data after #0 page was truncated entirely =
++00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
++*
++00000032
++00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
++*
++00000032
++wrote 40/40 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++= truncate dismissed inline_data after #0 page was truncated entirely =
++00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
++*
++00001000
++00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
++*
++00001000
++wrote 40/40 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++= truncate inline_data after #0 page was truncated partially =
++00000000  58 58 58 58 00 00 00 00  00 00 00 00 00 00 00 00  |XXXX............|
++00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
++*
++00000032
++00000000  58 58 58 58 00 00 00 00  00 00 00 00 00 00 00 00  |XXXX............|
++00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
++*
++00000032
++wrote 40/40 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++= truncate dismissed inline_data after #0 page was truncated partially =
++00000000  58 58 58 58 00 00 00 00  00 00 00 00 00 00 00 00  |XXXX............|
++00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
++*
++00001000
++00000000  58 58 58 58 00 00 00 00  00 00 00 00 00 00 00 00  |XXXX............|
++00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
++*
++00001000
+diff --git a/tests/generic/group b/tests/generic/group
+index 9de3415..1b19010 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -393,3 +393,4 @@
+ 388 auto log metadata
+ 389 auto quick acl
+ 391 auto quick metadata
++392 auto quick rw
 -- 
-2.7.4
-
-
+2.8.3
 
