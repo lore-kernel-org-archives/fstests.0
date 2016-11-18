@@ -1,142 +1,68 @@
-Received: from mx1.redhat.com ([209.132.183.28]:55000 "EHLO mx1.redhat.com"
+Received: from imap.thunk.org ([74.207.234.97]:54716 "EHLO imap.thunk.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751058AbcKRHVH (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 18 Nov 2016 02:21:07 -0500
-Date: Fri, 18 Nov 2016 15:21:04 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] fstests: Introduce check for explicit SHARED extent flag
- reporting
-Message-ID: <20161118072104.GI27776@eguan.usersys.redhat.com>
-References: <20161117020648.19685-1-quwenruo@cn.fujitsu.com>
+        id S1753702AbcKRQW7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 18 Nov 2016 11:22:59 -0500
+Date: Fri, 18 Nov 2016 11:22:49 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH] xfstests-bld: add f2fs support
+Message-ID: <20161118162249.iu45dkdynxdaotq7@thunk.org>
+References: <1479412353-35154-1-git-send-email-ebiggers@google.com>
+ <20161118043835.GA22707@jaegeuk>
+ <20161118045157.nclslkbhumszrggz@thunk.org>
+ <20161118051113.GA24878@jaegeuk>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161117020648.19685-1-quwenruo@cn.fujitsu.com>
+In-Reply-To: <20161118051113.GA24878@jaegeuk>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: Jaegeuk Kim <jaegeuk@kernel.org>
+Cc: Eric Biggers <ebiggers@google.com>, fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Nov 17, 2016 at 10:06:48AM +0800, Qu Wenruo wrote:
-> For fs support reflink, some of them (OK, btrfs again) doesn't split
-> SHARED flag for extent fiemap reporting.
+On Thu, Nov 17, 2016 at 09:11:13PM -0800, Jaegeuk Kim wrote:
 > 
-> For example:
->   0         4K         8K
->    / File1: Extent 0  \
->   /                    \
->   |<- On disk Extent-->|
->   |        /
->   | File2 /
->     Extent: 0
-> 
-> Fs supports explicit SHARED extent reporting should report fiemap like:
-> File1: 2 extents
-> Extent 0-4K: SHARED
-> Extent 4-8K:
-> File2: 1 extents
-> Extent 0-4K: SHARED
-> 
-> Fs doesn't support explicit reporting will report fiemap like:
-> File1: 1 extent
-> Extent 0-8K: SHARED
-> File2: 1 extent
-> Extent 0-4K: SHARED
-> 
-> Test case like generic/372 require explicit reporting will cause false
-> alert on btrfs.
-> 
-> Add such runtime check for that requirememt.
-> 
-> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
-> ---
->  common/reflink    | 44 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/372 |  1 +
->  2 files changed, 45 insertions(+)
-> 
-> diff --git a/common/reflink b/common/reflink
-> index 8b34046..9ada2e8 100644
-> --- a/common/reflink
-> +++ b/common/reflink
-> @@ -78,6 +78,50 @@ _require_scratch_reflink()
->  	_scratch_unmount
->  }
->  
-> +# this test requires scratch fs to report explicit SHARED flag
-> +# e.g.
-> +#   0         4K         8K
-> +#    / File1: Extent 0  \
-> +#   /                    \
-> +#   |<- On disk Extent-->|
-> +#   |        /
-> +#   | File2 /
-> +#     Extent: 0
-> +# Fs supports explicit SHARED extent reporting should report fiemap like:
-> +# File1: 2 extents
-> +# Extent 0-4K: SHARED
-> +# Extent 4-8K:
-> +# File2: 1 extents
-> +# Extent 0-4K: SHARED
-> +#
-> +# Fs doesn't support explicit reporting will report fiemap like:
-> +# File1: 1 extent
-> +# Extent 0-8K: SHARED
-> +# File2: 1 extent
-> +# Extent 0-4K: SHARED
-> +_require_scratch_explicit_shared_extents()
-> +{
-> +	_require_scratch
-> +	_require_fiemap
-> +	_require_scratch_reflink
-> +	_require_xfs_io_command "reflink"
-> +	local nr_extents
-> +
-> +	_scratch_mkfs > /dev/null
-> +	_scratch_mount
-> +
-> +	_pwrite_byte 0x61 0 128k $SCRATCH_MNT/file1
-> +	_reflink_range $SCRATCH_MNT/file1 0 $SCRATCH_MNT/file2 0 64k
+> IIUC, I guess it'd be okay if VM installed that as a package. I tried to add
+> f2fs-tools repo likewise fio, I could't find /sbin/mkfs.f2fs, even if it was
+> installed into bld/sbin/. Instead, bld/sbin/* were copied into xfstests/bin/
+> in VM, which enables to execute mkfs.f2fs globally through $PATH.
 
-This looks fine to me. Only that we need to redirect stdout of above two
-commands to /dev/null, otherwise generic/372 fails on XFS because of
-extra xfs_io outputs.
+Ah, I see what you mean; I thought you were talking about your local
+f2fstools git repo, and not changes you've made to your local
+xfstests-bld repo.
 
-I can fix it at commit time, if there's no other comments.
+The reason why xfsprogs is installed in xfstests/bin is that
+historically, xfstests needed some of the xfsprogs tools (no matter
+what file system type you were testing), and the xfsprogs installed in
+Debian and Ubuntu was too old or didn't install all of the utilities
+that xfstests required.
 
-Thanks,
-Eryu
+However, I have not tried to build the file system utilities for other
+file systems in xfstests-bld --- and this includes e2fsprogs.  My goal
+is to allow xfstests-bld to support a large number of file systems,
+and it doesn't scale to build all file system utilities in
+xfstests-bld.  Also, most of the time, the file system utilities tend
+to move at a slower pace, and the requirements for needing a newer
+file system utility than what is shipped in the distribution is rarer.
 
-> +
-> +	_scratch_cycle_mount
-> +
-> +	nr_extents=$(_count_extents $SCRATCH_MNT/file1)
-> +	if [ $nr_extents -eq 1 ]; then
-> +		_notrun "Explicit SHARED flag reporting not support by filesystem type: $FSTYP"
-> +	fi
-> +	_scratch_unmount
-> +}
-> +
->  # this test requires the test fs support dedupe...
->  _require_test_dedupe()
->  {
-> diff --git a/tests/generic/372 b/tests/generic/372
-> index 31dff20..51a3eca 100755
-> --- a/tests/generic/372
-> +++ b/tests/generic/372
-> @@ -47,6 +47,7 @@ _supported_os Linux
->  _supported_fs generic
->  _require_scratch_reflink
->  _require_fiemap
-> +_require_scratch_explicit_shared_extents
->  
->  echo "Format and mount"
->  _scratch_mkfs > $seqres.full 2>&1
-> -- 
-> 2.7.4
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I have sometimes built a newer version of e2fsprogs as a Debian
+package, and installed it into the VM.  These days, what I tend to do
+when that's been necessary is to build a new Debian package for
+jessie-backports, and upload it to the jessie-backports repository, so
+everyone can use the same binary package.
+
+I guess I don't have any objections to allowing people to put locally
+compiled versions of the utilities in /root/xfstests/sbin and rely on
+the PATH to use that version in preference to the /sbin/mkfs.f2fs
+version of the utilities.  As far as adding the ability to download
+and build local versions of f2fstools in the upstream xfstests-bld, I
+guess I could accept that so long as it's optional, and not turned on
+by default.  The main issue here is that if i have a half dozen file
+system-specific utilities included in xfstests-bld, which were all
+enabled for download by default, it would increase the build time of
+xfstests-bld significantly, so it doesn't scale.  I'd much prefer to
+see newer versions of the utilities (if necessary) in
+debian-backports.
+
+Cheers,
+
+						- Ted
