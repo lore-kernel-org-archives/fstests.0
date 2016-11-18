@@ -1,36 +1,47 @@
-Received: from mail-pg0-f41.google.com ([74.125.83.41]:33569 "EHLO
-        mail-pg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753463AbcKRV1e (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 18 Nov 2016 16:27:34 -0500
-Received: by mail-pg0-f41.google.com with SMTP id 3so106829118pgd.0
-        for <fstests@vger.kernel.org>; Fri, 18 Nov 2016 13:27:33 -0800 (PST)
-From: Eric Biggers <ebiggers@google.com>
-Subject: [PATCH] xfstests-bld: fix typo in command to download root_fs.img
-Date: Fri, 18 Nov 2016 13:27:02 -0800
-Message-Id: <1479504422-123825-1-git-send-email-ebiggers@google.com>
+Received: from imap.thunk.org ([74.207.234.97]:33348 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752909AbcKRWHq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 18 Nov 2016 17:07:46 -0500
+Date: Fri, 18 Nov 2016 17:07:40 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH] xfstests-bld: add f2fs support
+Message-ID: <20161118220740.pisri5zaldj7h5ic@thunk.org>
+References: <1479412353-35154-1-git-send-email-ebiggers@google.com>
+ <20161118043835.GA22707@jaegeuk>
+ <20161118045157.nclslkbhumszrggz@thunk.org>
+ <20161118051113.GA24878@jaegeuk>
+ <20161118162249.iu45dkdynxdaotq7@thunk.org>
+ <20161118180421.GA31226@jaegeuk>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20161118180421.GA31226@jaegeuk>
 Sender: fstests-owner@vger.kernel.org
-To: tytso@mit.edu
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+To: Jaegeuk Kim <jaegeuk@kernel.org>
+Cc: Eric Biggers <ebiggers@google.com>, fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
 List-ID: <fstests@vger.kernel.org>
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- Documentation/kvm-quickstart.md | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+On Fri, Nov 18, 2016 at 10:04:21AM -0800, Jaegeuk Kim wrote:
+> 
+> I realize that xfstests-bld is really great to test multiple kernel versions.
+> I guess it can be quite doable to test arm-based kernel as well, as I can see
+> cross compile environment.
 
-diff --git a/Documentation/kvm-quickstart.md b/Documentation/kvm-quickstart.md
-index 94829c6..c18a39e 100644
---- a/Documentation/kvm-quickstart.md
-+++ b/Documentation/kvm-quickstart.md
-@@ -11,7 +11,7 @@
- 
-         git clone git://git.kernel.org/pub/scm/fs/ext2/xfstests-bld.git fstests
-         cd fstests/kvm-xfstests
--        wget -O test_appliance/root_fs.img https://www.kernel.org/pub/linux/kernel/people/tytso/kvm-xfstests/root_fs.img.i386
-+        wget -O test-appliance/root_fs.img https://www.kernel.org/pub/linux/kernel/people/tytso/kvm-xfstests/root_fs.img.i386
- 
- 3.  Build a kernel with all of the necessary drivers for kvm built
-     into the kernel.  No modules should be used, since kvm-xfstests
--- 
-2.8.0.rc3.226.g39d4020
+I have had reports that some folks have run into problems using the
+armhf chroot on an Android device.  I'm not sure what problems they
+ran into, since their report was quite vague.  I'm aware of one
+namespace-related test that will fail when you run xfstests in a
+chroot, and I would expect that SELinux would have to be disabled, but
+other than that I would have expected it to work.
 
+If you (or anyone else) have managed to use the armhf chroot
+successfully on an Android device, please let me know, and let me know
+if there are any updates we can make to Documentation/android-xfstests.md.
+
+Unfortunately I haven't had time to investigate those reports myself.
+If someone has time to try it out and send me a more detailed report,
+that would be great.
+
+Thanks!!
+
+						- Ted
