@@ -1,82 +1,140 @@
-Received: from mail.kernel.org ([198.145.29.136]:53250 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.136]:36960 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753271AbcKRSEZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 18 Nov 2016 13:04:25 -0500
-Date: Fri, 18 Nov 2016 10:04:21 -0800
+        id S1751989AbcKRTgY (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 18 Nov 2016 14:36:24 -0500
+Date: Fri, 18 Nov 2016 11:36:19 -0800
 From: Jaegeuk Kim <jaegeuk@kernel.org>
-Subject: Re: [PATCH] xfstests-bld: add f2fs support
-Message-ID: <20161118180421.GA31226@jaegeuk>
-References: <1479412353-35154-1-git-send-email-ebiggers@google.com>
- <20161118043835.GA22707@jaegeuk>
- <20161118045157.nclslkbhumszrggz@thunk.org>
- <20161118051113.GA24878@jaegeuk>
- <20161118162249.iu45dkdynxdaotq7@thunk.org>
+Subject: Re: [PATCH v2] generic/392: add a testcase to check some inline
+ truncation behaviors
+Message-ID: <20161118193619.GB31226@jaegeuk>
+References: <20161117034715.71966-1-jaegeuk@kernel.org>
+ <20161117180436.GB74211@jaegeuk>
+ <20161118064306.GG27776@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161118162249.iu45dkdynxdaotq7@thunk.org>
+In-Reply-To: <20161118064306.GG27776@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Eric Biggers <ebiggers@google.com>, fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Nov 18, 2016 at 11:22:49AM -0500, Theodore Ts'o wrote:
-> On Thu, Nov 17, 2016 at 09:11:13PM -0800, Jaegeuk Kim wrote:
+On Fri, Nov 18, 2016 at 02:43:06PM +0800, Eryu Guan wrote:
+> On Thu, Nov 17, 2016 at 10:04:36AM -0800, Jaegeuk Kim wrote:
+> > This patch introduces a new testcase to test some small truncations to check
+> > inline_data and its cached data are truncated correctly at the same time.
 > > 
-> > IIUC, I guess it'd be okay if VM installed that as a package. I tried to add
-> > f2fs-tools repo likewise fio, I could't find /sbin/mkfs.f2fs, even if it was
-> > installed into bld/sbin/. Instead, bld/sbin/* were copied into xfstests/bin/
-> > in VM, which enables to execute mkfs.f2fs globally through $PATH.
+> > The inline_data feature was introduced in ext4 and f2fs as follows.
+> >  ext4 : http://lwn.net/Articles/468678/
+> >  f2fs : http://lwn.net/Articles/573408/
+> > 
+> > The basic idea is embedding small-sized file's data into relatively large
+> > inode space.
+> > In ext4, up to 132 bytes of data can be stored in 256 bytes-sized inode.
+> > In f2fs, up to 3.4KB of data can be embedded into 4KB-sized inode block.
+> > 
+> > Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
+> > ---
+> >  tests/generic/392     | 128 ++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/392.out |  45 ++++++++++++++++++
+> >  tests/generic/group   |   1 +
+> >  3 files changed, 174 insertions(+)
+> >  create mode 100644 tests/generic/392
+> >  create mode 100644 tests/generic/392.out
+> > 
+> > diff --git a/tests/generic/392 b/tests/generic/392
+> > new file mode 100644
+> > index 0000000..c45018a
+> > --- /dev/null
+> > +++ b/tests/generic/392
+> > @@ -0,0 +1,128 @@
+> > +#! /bin/bash
+> > +# FS QA Test No. generic/392
+> > +#
+> > +# Test some small truncations to check inline_data and its cached data are
+> > +# truncated correctly at the same time.
+> > +#
+> > +# The inline_data feature was introduced in ext4 and f2fs as follows.
+> > +#  ext4 : http://lwn.net/Articles/468678/
+> > +#  f2fs : http://lwn.net/Articles/573408/
+> > +#
+> > +# The basic idea is embedding small-sized file's data into relatively large
+> > +# inode space.
+> > +# In ext4, up to 132 bytes of data can be stored in 256 bytes-sized inode.
+> > +# In f2fs, up to 3.4KB of data can be embedded into 4KB-sized inode block.
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2014 Jaegeuk Kim.  All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +#
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +    cd /
+> > +    rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +_require_scratch
+> > +
+> > +testfile=$SCRATCH_MNT/testfile
+> > +OD_CMD="od -A x -t x1z"
 > 
-> Ah, I see what you mean; I thought you were talking about your local
-> f2fstools git repo, and not changes you've made to your local
-> xfstests-bld repo.
+> This passed my test now. Thanks!
 > 
-> The reason why xfsprogs is installed in xfstests/bin is that
-> historically, xfstests needed some of the xfsprogs tools (no matter
-> what file system type you were testing), and the xfsprogs installed in
-> Debian and Ubuntu was too old or didn't install all of the utilities
-> that xfstests required.
+> > +
+> > +_scratch_mkfs > /dev/null 2>&1
+> > +_scratch_mount
+> > +
+> > +# 1. make a file containing inline_data.
+> > +# 2. "truncated 0"  is to check cached page #0 was truncated entirely.
+> > +# 3. "truncated 50" is to check inline_data was truncated within its inode.
+> > +$XFS_IO_PROG -t -f \
+> > +	-c "pwrite -S 0x58 0 40" `# write    |XXXXXXXXXXXXXXXXXXXXXXXX|` \
+> > +	-c "fsync"							 \
+> > +	-c "truncate 0"          `# truncate |                        |` \
+> > +	-c "truncate 50"         `# truncate |                        |` \
+> > +$testfile | _filter_xfs_io
+> > +
+> > +echo "= truncate inline_data after #0 page was truncated entirely ="
+> > +$OD_CMD $testfile
+> > +_scratch_remount
 > 
-> However, I have not tried to build the file system utilities for other
-> file systems in xfstests-bld --- and this includes e2fsprogs.  My goal
-> is to allow xfstests-bld to support a large number of file systems,
-> and it doesn't scale to build all file system utilities in
-> xfstests-bld.  Also, most of the time, the file system utilities tend
-> to move at a slower pace, and the requirements for needing a newer
-> file system utility than what is shipped in the distribution is rarer.
-> 
-> I have sometimes built a newer version of e2fsprogs as a Debian
-> package, and installed it into the VM.  These days, what I tend to do
-> when that's been necessary is to build a new Debian package for
-> jessie-backports, and upload it to the jessie-backports repository, so
-> everyone can use the same binary package.
-> 
-> I guess I don't have any objections to allowing people to put locally
-> compiled versions of the utilities in /root/xfstests/sbin and rely on
-> the PATH to use that version in preference to the /sbin/mkfs.f2fs
-> version of the utilities.  As far as adding the ability to download
-> and build local versions of f2fstools in the upstream xfstests-bld, I
-> guess I could accept that so long as it's optional, and not turned on
-> by default.  The main issue here is that if i have a half dozen file
-> system-specific utilities included in xfstests-bld, which were all
-> enabled for download by default, it would increase the build time of
-> xfstests-bld significantly, so it doesn't scale.  I'd much prefer to
-> see newer versions of the utilities (if necessary) in
-> debian-backports.
+> Seems you missed my comments on this "_scratch_remount".
+> _scratch_remount without any arguments is a no-op, do you mean
+> _scratch_cycle_mount here?
 
-Agreed to all of them. What I tried to set up actually was to test the latest
-f2fs-tools in prior to release out. Anyway, I agree it'd be good to add an
-option to select local fs utilities through config.custom to avoid the scaling
-problem.
-
-I realize that xfstests-bld is really great to test multiple kernel versions.
-I guess it can be quite doable to test arm-based kernel as well, as I can see
-cross compile environment.
-
-Thank you for sharing this tool.
+Ah, right.
+Will send v3.
+Thanks,
 
 > 
-> Cheers,
-> 
-> 						- Ted
+> Thanks
+> Eryu
