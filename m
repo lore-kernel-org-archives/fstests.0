@@ -1,215 +1,36 @@
-Received: from mail.kernel.org ([198.145.29.136]:37542 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752307AbcKRTpx (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 18 Nov 2016 14:45:53 -0500
-Date: Fri, 18 Nov 2016 11:45:49 -0800
-From: Jaegeuk Kim <jaegeuk@kernel.org>
-Subject: Re: [f2fs-dev] [PATCH v3] generic/391: check inode metadata on
- f{data}sync after power-cut
-Message-ID: <20161118194549.GE31226@jaegeuk>
-References: <20161117032753.69315-1-jaegeuk@kernel.org>
- <20161117192051.GE74211@jaegeuk>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20161117192051.GE74211@jaegeuk>
+Received: from mail-pg0-f49.google.com ([74.125.83.49]:33443 "EHLO
+        mail-pg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752907AbcKRV0g (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 18 Nov 2016 16:26:36 -0500
+Received: by mail-pg0-f49.google.com with SMTP id 3so106822277pgd.0
+        for <fstests@vger.kernel.org>; Fri, 18 Nov 2016 13:26:36 -0800 (PST)
+From: Eric Biggers <ebiggers@google.com>
+Subject: [PATCH] xfstests-bld: correct file permissions in xfstests.tar.gz
+Date: Fri, 18 Nov 2016 13:25:50 -0800
+Message-Id: <1479504350-123472-1-git-send-email-ebiggers@google.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Cc: linux-xfs@vger.kernel.org
+To: tytso@mit.edu
+Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-This patch adds tests/generic/391 to test fsync and fdatasync with power-cuts.
+The bug with --update-files also affected --update-xfstests-tar.
 
-The rule to check is:
-1) fsync should guarantee all the inode metadata after power-cut,
-2) fdatasync should guarantee i_size and i_blocks at least after power-cut.
-
-Note that, in XFS, it allocates more blocks when doing writes, and truncates
-them during fclose. If power-cut happens after fsync, recovery starts with
-the preallocated blocks. So, it needs to truncate them by fclose after mount.
-
-Suggested-by: Chao Yu <yuchao0@huawei.com>
-Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
+Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- tests/generic/391     | 140 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/391.out |  11 ++++
- tests/generic/group   |   1 +
- 3 files changed, 152 insertions(+)
- create mode 100755 tests/generic/391
- create mode 100644 tests/generic/391.out
+ gen-tarball | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/tests/generic/391 b/tests/generic/391
-new file mode 100755
-index 0000000..c6bb63e
---- /dev/null
-+++ b/tests/generic/391
-@@ -0,0 +1,140 @@
-+#! /bin/bash
-+# FS QA Test 391
-+#
-+# Test inode's metadata after fsync or fdatasync calls.
-+# In the case of fsync, filesystem should recover all the inode metadata, while
-+# recovering i_blocks and i_size at least for fdatasync.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Jaegeuk Kim.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/punch
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+
-+rm -f $seqres.full
-+_require_scratch
-+_require_scratch_shutdown
-+_require_xfs_io_command "fpunch"
-+
-+_scratch_mkfs >/dev/null 2>&1
-+_scratch_mount
-+
-+testfile=$SCRATCH_MNT/testfile
-+
-+stat()
-+{
-+	$XFS_IO_PROG -r -c "stat -v" $testfile >$tmp.$1
-+}
-+
-+# check inode metadata after shutdown
-+check_inode_metadata()
-+{
-+	stat before
-+	src/godown $SCRATCH_MNT >> $seqres.full
-+	_scratch_cycle_mount
-+
-+	# XFS needs to truncate preallocated blocks by close
-+	$XFS_IO_PROG -c "open" $testfile >/dev/null
-+	stat after
-+
-+	diff $tmp.before $tmp.after >$tmp.diff
-+
-+	if [ "$1" = "fdatasync" ]; then
-+		cat $tmp.diff | grep stat.size
-+		cat $tmp.diff | grep stat.blocks
-+	else
-+		cat $tmp.diff
-+	fi
-+	cat $tmp.before >> $seqres.full
-+	cat $tmp.after >> $seqres.full
-+}
-+
-+# append XX KB with f{data}sync, followed by power-cut
-+test_i_size()
-+{
-+	echo "==== i_size $2 test with $1 ====" | tee -a $seqres.full
-+	$XFS_IO_PROG -f -c "pwrite 0 4M"	\
-+			-c "fsync"		\
-+			-c "pwrite 4M $2"	\
-+			-c "$1"			\
-+			$testfile >/dev/null
-+	check_inode_metadata $1
-+}
-+
-+# update times with f{data}sync, followed by power-cut
-+test_i_time()
-+{
-+	echo "==== i_time test with $1 ====" | tee -a $seqres.full
-+	$XFS_IO_PROG -f -c "pwrite 0 4M"	\
-+			-c "fsync"		\
-+			$testfile >/dev/null
-+	sleep 1
-+	touch $testfile
-+	$XFS_IO_PROG -c "$1"			\
-+			$testfile >/dev/null
-+	check_inode_metadata $1
-+}
-+
-+# punch XX KB with f{data}sync, followed by power-cut
-+test_punch()
-+{
-+	echo "==== fpunch $2 test with $1 ====" | tee -a $seqres.full
-+	$XFS_IO_PROG -f -c "pwrite 0 4202496"	\
-+			-c "fsync"		\
-+			-c "fpunch 4194304 $2"\
-+			-c "$1"			\
-+			$testfile >/dev/null
-+
-+	check_inode_metadata $1
-+}
-+
-+for i in fsync fdatasync
-+do
-+	test_i_size $i 1024
-+	test_i_size $i 4096
-+	test_i_time $i
-+	test_punch $i 1024
-+	test_punch $i 4096
-+done
-+
-+rm -f $tmp.*
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/391.out b/tests/generic/391.out
-new file mode 100644
-index 0000000..7c66776
---- /dev/null
-+++ b/tests/generic/391.out
-@@ -0,0 +1,11 @@
-+QA output created by 391
-+==== i_size 1024 test with fsync ====
-+==== i_size 4096 test with fsync ====
-+==== i_time test with fsync ====
-+==== fpunch 1024 test with fsync ====
-+==== fpunch 4096 test with fsync ====
-+==== i_size 1024 test with fdatasync ====
-+==== i_size 4096 test with fdatasync ====
-+==== i_time test with fdatasync ====
-+==== fpunch 1024 test with fdatasync ====
-+==== fpunch 4096 test with fdatasync ====
-diff --git a/tests/generic/group b/tests/generic/group
-index 08007d7..9de3415 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -392,3 +392,4 @@
- 387 auto clone
- 388 auto log metadata
- 389 auto quick acl
-+391 auto quick metadata
+diff --git a/gen-tarball b/gen-tarball
+index daa6d4f..2626996 100755
+--- a/gen-tarball
++++ b/gen-tarball
+@@ -50,4 +50,5 @@ cp bld/lib/client.txt xfstests/lib
+ echo "STRIP xfstests/*"
+ find xfstests -mindepth 2 -type f -perm /0111 | xargs $STRIP 2> /dev/null
+ echo "TAR xfstests"
+-tar cf - xfstests | $GZIP -9 > xfstests.tar.gz
++tar c --owner=root --group=root --mode=o+g-w xfstests | \
++	$GZIP -9 > xfstests.tar.gz
 -- 
-2.8.3
+2.8.0.rc3.226.g39d4020
 
