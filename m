@@ -1,249 +1,199 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:9124 "EHLO
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:4017 "EHLO
         ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1752070AbcKTVUD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 20 Nov 2016 16:20:03 -0500
-Date: Mon, 21 Nov 2016 08:19:58 +1100
+        by vger.kernel.org with ESMTP id S1752072AbcKTVd3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 20 Nov 2016 16:33:29 -0500
+Date: Mon, 21 Nov 2016 08:33:13 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [f2fs-dev] [PATCH v4] generic/391: check inode metadata on
- f{data}sync after power-cut
-Message-ID: <20161120211958.GH28177@dastard>
-References: <20161117032753.69315-1-jaegeuk@kernel.org>
- <20161117192051.GE74211@jaegeuk>
- <20161118194549.GE31226@jaegeuk>
- <20161119015745.GB45056@jaegeuk>
+Subject: Re: [PATCH 1/4] generic: add utilities for testing filesystem
+ encryption
+Message-ID: <20161120213313.GI28177@dastard>
+References: <1479412027-34416-1-git-send-email-ebiggers@google.com>
+ <1479412027-34416-2-git-send-email-ebiggers@google.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161119015745.GB45056@jaegeuk>
+In-Reply-To: <1479412027-34416-2-git-send-email-ebiggers@google.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jaegeuk Kim <jaegeuk@kernel.org>
-Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-xfs@vger.kernel.org
+To: Eric Biggers <ebiggers@google.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, linux-f2fs@vger.kernel.org, "Theodore Y . Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Nov 18, 2016 at 05:57:45PM -0800, Jaegeuk Kim wrote:
-> This patch adds tests/generic/391 to test fsync and fdatasync with power-cuts.
+On Thu, Nov 17, 2016 at 11:47:04AM -0800, Eric Biggers wrote:
+> Add utilities for testing the filesystem-level encryption feature
+> currently supported by ext4 and f2fs.  Tests will be able to source
+> common/encrypt and call _begin_encryption_test to set up an
+> encryption-capable filesystem on the scratch device, or skip the test
+> when not supported.
 > 
-> The rule to check is:
-> 1) fsync should guarantee all the inode metadata after power-cut,
-> 2) fdatasync should guarantee i_size and i_blocks at least after power-cut.
+> A program fscrypt_util is also added to expose filesystem
+> encryption-related commands to shell scripts.
 > 
-> Note that, in XFS, it allocates more blocks when doing writes, so it should
-> close the file before fsync in order to get actual i_blocks after power-cut.
-> 
-> Suggested-by: Chao Yu <yuchao0@huawei.com>
-> Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
 > ---
->  tests/generic/391     | 149 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/391.out |  11 ++++
->  tests/generic/group   |   1 +
->  3 files changed, 161 insertions(+)
->  create mode 100755 tests/generic/391
->  create mode 100644 tests/generic/391.out
+>  .gitignore         |   1 +
+>  common/encrypt     |  89 ++++++++++++++++
+>  src/Makefile       |   2 +-
+>  src/fscrypt_util.c | 306 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  4 files changed, 397 insertions(+), 1 deletion(-)
+>  create mode 100755 common/encrypt
+>  create mode 100644 src/fscrypt_util.c
 > 
-> diff --git a/tests/generic/391 b/tests/generic/391
+> diff --git a/.gitignore b/.gitignore
+> index 915d2d8..7040f67 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -54,6 +54,7 @@
+>  /src/fill
+>  /src/fill2
+>  /src/fs_perms
+> +/src/fscrypt_util
+>  /src/fssum
+>  /src/fstest
+>  /src/fsync-tester
+> diff --git a/common/encrypt b/common/encrypt
 > new file mode 100755
-> index 0000000..121e01d
+> index 0000000..599d16f
 > --- /dev/null
-> +++ b/tests/generic/391
-> @@ -0,0 +1,149 @@
-> +#! /bin/bash
-> +# FS QA Test 391
+> +++ b/common/encrypt
+> @@ -0,0 +1,89 @@
+> +#!/bin/bash
 > +#
-> +# Test inode's metadata after fsync or fdatasync calls.
-> +# In the case of fsync, filesystem should recover all the inode metadata, while
-> +# recovering i_blocks and i_size at least for fdatasync.
+> +# Common functions for testing filesystem-level encryption
 > +#
 > +#-----------------------------------------------------------------------
-> +# Copyright (c) 2016 Jaegeuk Kim.  All Rights Reserved.
+> +# Copyright (C) 2016 Google, Inc.
 > +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
+> +# Author: Eric Biggers <ebiggers@google.com>
 > +#
-> +# This program is distributed in the hope that it would be useful,
+> +# This program is free software; you can redistribute it and/or modify
+> +# it under the terms of the GNU General Public License as published by
+> +# the Free Software Foundation; either version 2 of the License, or
+> +# (at your option) any later version.
+> +#
+> +# This program is distributed in the hope that it will be useful,
 > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
 > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 > +# GNU General Public License for more details.
 > +#
 > +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +# along with this program; if not, see <http://www.gnu.org/licenses/>.
 > +#-----------------------------------------------------------------------
-> +#
 > +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
 > +. ./common/rc
-> +. ./common/filter
-> +. ./common/punch
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +
-> +rm -f $seqres.full
-> +_require_scratch
-> +_require_scratch_shutdown
-> +_require_xfs_io_command "fpunch"
-> +
-> +_scratch_mkfs >/dev/null 2>&1
-> +_scratch_mount
-> +
-> +testfile=$SCRATCH_MNT/testfile
-> +
-> +f_stat()
-> +{
-> +	$XFS_IO_PROG -r -c "stat -v" $testfile >$tmp.$1
-> +}
-> +
-> +f_sync()
-> +{
-> +	$XFS_IO_PROG -c "$1" $testfile >/dev/null
-> +}
 
-This is factoring overkill and...
+Tests will already have included common/rc before this file, so we
+do not source it here.
+
 
 > +
-> +# check inode metadata after shutdown
-> +check_inode_metadata()
-> +{
-> +	# prepare syncing metadata
-> +	f_sync $1
+> +# Begin an encryption test.  This creates the scratch filesystem with encryption
+> +# enabled and mounts it, or skips the test if encryption isn't supported.
+> +_begin_encryption_test() {
 > +
-> +	# get inode metadata #1
-> +	f_stat before
+> +	_supported_os Linux
+> +	_supported_fs ext4 f2fs
+
+These go in the tests, not here.
+
 > +
-> +	# shutdown
-> +	src/godown $SCRATCH_MNT >> $seqres.full
-> +	_scratch_cycle_mount
+> +	# We use a dedicated test program 'fscrypt_util' for making API calls
+> +	# related to encryption.  We aren't using 'e4crypt' because 'e4crypt' is
+> +	# currently ext4-specific, and with a test program we can easily include
+> +	# test-only commands and other functionality or behavior that wouldn't
+> +	# make sense in a real program.
+> +	_require_test_program fscrypt_util
 > +
-> +	# get inode metadata #2
-> +	f_stat after
-> +
-> +	# compare #1 and #2
-> +	diff $tmp.before $tmp.after >$tmp.diff
-> +
-> +	# fdatasync only cares about i_size and i_blocks
-> +	if [ "$1" = "fdatasync" ]; then
-> +		cat $tmp.diff | grep stat.size
-> +		cat $tmp.diff | grep stat.blocks
-> +	else
-> +		cat $tmp.diff
+> +	# The 'test_dummy_encryption' mount option interferes with trying to use
+> +	# encryption for real.  So skip the real encryption tests if the
+> +	# 'test_dummy_encryption' mount option was specified.
+> +	if echo "$MOUNT_OPTIONS" | grep -q "test_dummy_encryption"; then
+> +		_notrun "Dummy encryption is on; skipping real encryption tests"
 > +	fi
 
-.... forces you to do things like this.
+_requires_real_encryption()
 
-We have the stat binary for getting specific fields from files.  We
-use it all over the place for exactly this sort of thing.  See, for
-example, _defrag(), which also does this "stat before/stat
-after/compare results" for specific metadata.
+In each test.
 
-i.e.:
 
-$ stat -c "blocks: %b size: %s" Makefile
-blocks: 8 size: 3069
-$
-
-check_inode_metadata()
-{
-	sync_mode=$1
-
-	stat_opts=""
-	if [ $sync_mode = "fdatasync" ]; then
-		stat_opts='-c "blocks: %b size: %s"'
-	fi
-
-	$XFS_IO_PROG -c "$sync_mode" $testfile | _filter_xfs_io
-	before=`stat $stat_opts $testfile`
-	...
-	after=`stat $stat_opts $testfile`
-
-	if [ $before != $after ]; then
-		echo "Before: $before"
-		echo "After: $after"
-		status=1;		# this is a failure!
-	fi
-
-> +	cat $tmp.before >> $seqres.full
-> +	cat $tmp.after >> $seqres.full
 > +
-> +	rm $testfile
+> +	# Make a filesystem on the scratch device with the encryption feature
+> +	# enabled.  If this fails then probably the userspace tools (e.g.
+> +	# e2fsprogs or f2fs-tools) are too old to understand encryption.
+> +	_require_scratch
+> +	if ! _scratch_mkfs_encrypted >/dev/null; then
+> +		_notrun "$FSTYP userspace tools do not support encryption"
+> +	fi
+> +
+> +	# Try to mount the filesystem.  If this fails then probably the kernel
+> +	# isn't aware of encryption.
+> +	if ! _scratch_mount &> /dev/null; then
+> +		_notrun "kernel is unaware of $FSTYP encryption feature"
+> +	fi
+> +
+> +	# The kernel may be aware of encryption without supporting it.  For
+> +	# example, for ext4 this is the case with kernels configured with
+> +	# CONFIG_EXT4_FS_ENCRYPTION=n.  Detect support for encryption by trying
+> +	# to set an encryption policy.  (For ext4 we could instead check for the
+> +	# presence of /sys/fs/ext4/features/encryption, but this is broken on
+> +	# some older kernels and is ext4-specific anyway.)
+> +	mkdir $SCRATCH_MNT/tmpdir
+> +	if src/fscrypt_util set_policy 0000111122223333 $SCRATCH_MNT/tmpdir \
+> +		2>&1 >/dev/null |
+> +		egrep -q 'Inappropriate ioctl for device|Operation not supported'
+> +	then
+> +		_notrun "kernel does not support $FSTYP encryption"
+> +	fi
+> +	rmdir $SCRATCH_MNT/tmpdir
+
+And this should all be in a _requires_encryption() function.
+
 > +}
 > +
-> +# append XX KB with f{data}sync, followed by power-cut
-> +test_i_size()
-> +{
-> +	$XFS_IO_PROG -f -c "pwrite 0 4M"	\
-> +			-c "fsync"		\
-> +			-c "pwrite 4M $2"	\
-> +			$testfile >/dev/null
-
-Make these all truncate to the final size first like this:
-
-	 $XFS_IO_PROG -f -c "truncate 4M"	\
-			 -c "pwrite 0 4M"	\
-			 -c "fsync"		\
-			 -c "pwrite 4M $2"	\
-			$testfile | _filter_xfs_io
-
-	check_inode_metadata $1
-
-And that will make all the problems with XFS preallocation go away,
-because the initial truncate to set the file size will turn off the
-preallocation.
-
-> +	$XFS_IO_PROG -f -c "pwrite 0 4M"	\
-> +			-c "fsync"		\
-> +			$testfile >/dev/null
-> +	sleep 1
-> +	touch $testfile
-> +	check_inode_metadata $1
+> +_scratch_mkfs_encrypted() {
+> +	case $FSTYP in
+> +	ext4)
+> +		# ext4 encryption requires block size = PAGE_SIZE.
+> +		MKFS_OPTIONS="-O encrypt -b $(getconf PAGE_SIZE)" _scratch_mkfs
+> +		;;
+> +	*)
+> +		MKFS_OPTIONS="-O encrypt" _scratch_mkfs
+> +		;;
+> +	esac
 > +}
-> +
-> +# punch XX KB with f{data}sync, followed by power-cut
-> +test_punch()
-> +{
-> +	echo "==== fpunch $2 test with $1 ====" | tee -a $seqres.full
-> +	$XFS_IO_PROG -f -c "pwrite 0 4202496"	\
-> +			-c "fsync"		\
-> +			-c "fpunch 4194304 $2"\
-> +			$testfile >/dev/null
-> +	check_inode_metadata $1
-> +}
-> +
-> +for i in fsync fdatasync
-> +do
-> +	test_i_size $i 1024
-> +	test_i_size $i 4096
-> +	test_i_time $i
-> +	test_punch $i 1024
-> +	test_punch $i 4096
-> +done
-> +
-> +rm -f $tmp.*
 
-No need for this here.
+THis completely overrides any user supplied mkfs options, which we
+try to avoid doing. Instead, this should simply be
 
-> +
-> +# success, all done
-> +status=0
+	_scratch_mkfs -O encrypt
 
-Set that at the start before we run the test so that if we detect a
-failure we can set status=1 for exit to handle appropriately.
+so that _scratch_mkfs_encrypted() fails if there are conflicting
+mkfs options specified. This means _requires_encryption() will
+not_run the test when this occurrs...
+
+
+> +FSCRYPT_UTIL=`pwd`/src/fscrypt_util
+
+_require_test_program fscrypt_util
+
+FSCRYPT_UTIL=src/fscrypt_util
+
+> diff --git a/src/fscrypt_util.c b/src/fscrypt_util.c
+> new file mode 100644
+> index 0000000..de63667
+> --- /dev/null
+> +++ b/src/fscrypt_util.c
+
+....
+
+Ok, can we get this added to xfs_io rather than a stand-alone
+fstests helper? There are three clear commands here:
+
+	{"gen_key", gen_key},
+	{"rm_key", rm_key},
+	{"set_policy", set_policy},
+
+So it should plug straight into the xfs_io command parsing
+infrastructure without much change at all.
 
 Cheers,
 
