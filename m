@@ -1,127 +1,253 @@
-Received: from mx1.redhat.com ([209.132.183.28]:34102 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750914AbcKTGbB (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 20 Nov 2016 01:31:01 -0500
-Message-Id: <201611200630.uAK6UxvA003140@int-mx10.intmail.prod.int.phx2.redhat.com>
-Date: Sun, 20 Nov 2016 14:30:58 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: [GIT PULL] fstests: updates on 2016-11-20
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:9124 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1752070AbcKTVUD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 20 Nov 2016 16:20:03 -0500
+Date: Mon, 21 Nov 2016 08:19:58 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [f2fs-dev] [PATCH v4] generic/391: check inode metadata on
+ f{data}sync after power-cut
+Message-ID: <20161120211958.GH28177@dastard>
+References: <20161117032753.69315-1-jaegeuk@kernel.org>
+ <20161117192051.GE74211@jaegeuk>
+ <20161118194549.GE31226@jaegeuk>
+ <20161119015745.GB45056@jaegeuk>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20161119015745.GB45056@jaegeuk>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
+To: Jaegeuk Kim <jaegeuk@kernel.org>
+Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave,
+On Fri, Nov 18, 2016 at 05:57:45PM -0800, Jaegeuk Kim wrote:
+> This patch adds tests/generic/391 to test fsync and fdatasync with power-cuts.
+> 
+> The rule to check is:
+> 1) fsync should guarantee all the inode metadata after power-cut,
+> 2) fdatasync should guarantee i_size and i_blocks at least after power-cut.
+> 
+> Note that, in XFS, it allocates more blocks when doing writes, so it should
+> close the file before fsync in order to get actual i_blocks after power-cut.
+> 
+> Suggested-by: Chao Yu <yuchao0@huawei.com>
+> Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
+> ---
+>  tests/generic/391     | 149 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/391.out |  11 ++++
+>  tests/generic/group   |   1 +
+>  3 files changed, 161 insertions(+)
+>  create mode 100755 tests/generic/391
+>  create mode 100644 tests/generic/391.out
+> 
+> diff --git a/tests/generic/391 b/tests/generic/391
+> new file mode 100755
+> index 0000000..121e01d
+> --- /dev/null
+> +++ b/tests/generic/391
+> @@ -0,0 +1,149 @@
+> +#! /bin/bash
+> +# FS QA Test 391
+> +#
+> +# Test inode's metadata after fsync or fdatasync calls.
+> +# In the case of fsync, filesystem should recover all the inode metadata, while
+> +# recovering i_blocks and i_size at least for fdatasync.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2016 Jaegeuk Kim.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/punch
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +
+> +rm -f $seqres.full
+> +_require_scratch
+> +_require_scratch_shutdown
+> +_require_xfs_io_command "fpunch"
+> +
+> +_scratch_mkfs >/dev/null 2>&1
+> +_scratch_mount
+> +
+> +testfile=$SCRATCH_MNT/testfile
+> +
+> +f_stat()
+> +{
+> +	$XFS_IO_PROG -r -c "stat -v" $testfile >$tmp.$1
+> +}
+> +
+> +f_sync()
+> +{
+> +	$XFS_IO_PROG -c "$1" $testfile >/dev/null
+> +}
 
-Can you please pull the fstests update from the location below? This update
-contains patches from last two weeks, in which we have new xfs, btrfs and
-generic tests added, and require xfs_io binary to be mandatory for fstests run.
-There're also updates to make xfs_copy tests without "-d" option on v5 XFS
-possible and to fix bugs in ocfs2 testing, and other small fixes.
+This is factoring overkill and...
 
-New failure I noticed in this update:
-- xfs/118 is a new test that may crash your kernel if you're not using latest
-  kernel from linux-xfs tree (for-next branch)
-- generic/391 is a new test and fails on btrfs
+> +
+> +# check inode metadata after shutdown
+> +check_inode_metadata()
+> +{
+> +	# prepare syncing metadata
+> +	f_sync $1
+> +
+> +	# get inode metadata #1
+> +	f_stat before
+> +
+> +	# shutdown
+> +	src/godown $SCRATCH_MNT >> $seqres.full
+> +	_scratch_cycle_mount
+> +
+> +	# get inode metadata #2
+> +	f_stat after
+> +
+> +	# compare #1 and #2
+> +	diff $tmp.before $tmp.after >$tmp.diff
+> +
+> +	# fdatasync only cares about i_size and i_blocks
+> +	if [ "$1" = "fdatasync" ]; then
+> +		cat $tmp.diff | grep stat.size
+> +		cat $tmp.diff | grep stat.blocks
+> +	else
+> +		cat $tmp.diff
+> +	fi
 
-Thanks,
-Eryu
+.... forces you to do things like this.
 
-The following changes since commit e604301e2605a152d8438f60d893ff29ed65d637:
+We have the stat binary for getting specific fields from files.  We
+use it all over the place for exactly this sort of thing.  See, for
+example, _defrag(), which also does this "stat before/stat
+after/compare results" for specific metadata.
 
-  common: add CephFS support (2016-11-05 17:30:14 +0800)
+i.e.:
 
-are available in the git repository at:
+$ stat -c "blocks: %b size: %s" Makefile
+blocks: 8 size: 3069
+$
 
-  https://github.com/guaneryu/xfstests.git for-dave
+check_inode_metadata()
+{
+	sync_mode=$1
 
-for you to fetch changes up to 083ff5827b603f2d646d20a20086fa55aa89b1c1:
+	stat_opts=""
+	if [ $sync_mode = "fdatasync" ]; then
+		stat_opts='-c "blocks: %b size: %s"'
+	fi
 
-  fstests: Introduce check for explicit SHARED extent flag reporting (2016-11-18 16:41:06 +0800)
+	$XFS_IO_PROG -c "$sync_mode" $testfile | _filter_xfs_io
+	before=`stat $stat_opts $testfile`
+	...
+	after=`stat $stat_opts $testfile`
 
-----------------------------------------------------------------
+	if [ $before != $after ]; then
+		echo "Before: $before"
+		echo "After: $after"
+		status=1;		# this is a failure!
+	fi
 
-fstests: update on 2016-11-20
+> +	cat $tmp.before >> $seqres.full
+> +	cat $tmp.after >> $seqres.full
+> +
+> +	rm $testfile
+> +}
+> +
+> +# append XX KB with f{data}sync, followed by power-cut
+> +test_i_size()
+> +{
+> +	$XFS_IO_PROG -f -c "pwrite 0 4M"	\
+> +			-c "fsync"		\
+> +			-c "pwrite 4M $2"	\
+> +			$testfile >/dev/null
 
-This update contains:
-o New tests for xfs and btrfs, and new generic test
-o xfs_io is made mandatory
-o Test xfs_copy v5 XFS without -d option
-o Bug fixes for ocfs2 testing
+Make these all truncate to the final size first like this:
 
-----------------------------------------------------------------
-Amir Goldstein (1):
-      generic/37[3-4]: use bind mount instead of 2nd _scratch_mount
+	 $XFS_IO_PROG -f -c "truncate 4M"	\
+			 -c "pwrite 0 4M"	\
+			 -c "fsync"		\
+			 -c "pwrite 4M $2"	\
+			$testfile | _filter_xfs_io
 
-Christoph Hellwig (1):
-      fstests: fix fsx fallocate error messages
+	check_inode_metadata $1
 
-Darrick J. Wong (1):
-      fstests: fix some minor problems testing ocfs2
+And that will make all the problems with XFS preallocation go away,
+because the initial truncate to set the file size will turn off the
+preallocation.
 
-Eric Sandeen (1):
-      xfs: testcase for kernelspace xfs_fsr extent handling flaw
+> +	$XFS_IO_PROG -f -c "pwrite 0 4M"	\
+> +			-c "fsync"		\
+> +			$testfile >/dev/null
+> +	sleep 1
+> +	touch $testfile
+> +	check_inode_metadata $1
+> +}
+> +
+> +# punch XX KB with f{data}sync, followed by power-cut
+> +test_punch()
+> +{
+> +	echo "==== fpunch $2 test with $1 ====" | tee -a $seqres.full
+> +	$XFS_IO_PROG -f -c "pwrite 0 4202496"	\
+> +			-c "fsync"		\
+> +			-c "fpunch 4194304 $2"\
+> +			$testfile >/dev/null
+> +	check_inode_metadata $1
+> +}
+> +
+> +for i in fsync fdatasync
+> +do
+> +	test_i_size $i 1024
+> +	test_i_size $i 4096
+> +	test_i_time $i
+> +	test_punch $i 1024
+> +	test_punch $i 4096
+> +done
+> +
+> +rm -f $tmp.*
 
-Eryu Guan (4):
-      fstests: make xfs_io mandatory
-      xfs/021: filter out detailed array element info from xfs_db
-      generic/38[3-6]: require project quota to be enabled on SCRATCH_DEV
-      generic: fix $tmp path in tests
+No need for this here.
 
-Liu Bo (1):
-      generic/098: update test for truncating a file into the middle of a hole
+> +
+> +# success, all done
+> +status=0
 
-Omar Sandoval (2):
-      xfs/298: cd to / instead of ~
-      generic: concurrent non-overlapping direct I/O on the same extents
+Set that at the start before we run the test so that if we detect a
+failure we can set status=1 for exit to handle appropriately.
 
-Qu Wenruo (2):
-      btrfs: Check false ENOSPC bug caused by incorrect metadata reserve
-      fstests: Introduce check for explicit SHARED extent flag reporting
+Cheers,
 
-Zorro Lang (2):
-      generic: multi-thread freeze/unfreeze test under fsstress
-      fstests: test xfs_copy V5 XFS without -d option
-
- .gitignore            |   1 +
- common/config         |   4 +-
- common/quota          |   2 +-
- common/rc             |  48 +++++++++++++----------
- common/reflink        |  44 +++++++++++++++++++++
- ltp/fsx.c             |  10 ++---
- src/Makefile          |   2 +-
- src/dio-interleaved.c |  98 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/132       | 103 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/132.out   |   2 +
- tests/btrfs/group     |   1 +
- tests/generic/018     |   2 +-
- tests/generic/094     |   2 +-
- tests/generic/098     |  60 +++++++++++++++++++----------
- tests/generic/098.out |  10 +++++
- tests/generic/225     |   2 +-
- tests/generic/249     |   2 +-
- tests/generic/372     |   1 +
- tests/generic/373     |   4 +-
- tests/generic/374     |   4 +-
- tests/generic/383     |   1 +
- tests/generic/384     |   2 +-
- tests/generic/385     |   2 +-
- tests/generic/386     |   2 +-
- tests/generic/390     |  94 +++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/390.out |   2 +
- tests/generic/391     |  76 +++++++++++++++++++++++++++++++++++++
- tests/generic/391.out |   2 +
- tests/generic/group   |   2 +
- tests/xfs/021         |   2 +-
- tests/xfs/032         |  21 +++++++---
- tests/xfs/073         |   8 +---
- tests/xfs/094         |   1 -
- tests/xfs/103         |   1 -
- tests/xfs/118         |  99 ++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/118.out     |   2 +
- tests/xfs/298         |   2 +-
- tests/xfs/group       |   1 +
- 38 files changed, 648 insertions(+), 74 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
