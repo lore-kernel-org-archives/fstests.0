@@ -1,108 +1,66 @@
-Received: from mail-pf0-f175.google.com ([209.85.192.175]:36393 "EHLO
-        mail-pf0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753934AbcKUSky (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 Nov 2016 13:40:54 -0500
-Received: by mail-pf0-f175.google.com with SMTP id 189so65574648pfz.3
-        for <fstests@vger.kernel.org>; Mon, 21 Nov 2016 10:40:54 -0800 (PST)
-Date: Mon, 21 Nov 2016 10:40:50 -0800
+Received: from mail-pf0-f171.google.com ([209.85.192.171]:35629 "EHLO
+        mail-pf0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753853AbcKUTXe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 21 Nov 2016 14:23:34 -0500
+Received: by mail-pf0-f171.google.com with SMTP id i88so65445392pfk.2
+        for <fstests@vger.kernel.org>; Mon, 21 Nov 2016 11:23:34 -0800 (PST)
+Date: Mon, 21 Nov 2016 11:23:30 -0800
 From: Eric Biggers <ebiggers@google.com>
-Subject: Re: [PATCH 1/4] generic: add utilities for testing filesystem
- encryption
-Message-ID: <20161121184050.GB30672@google.com>
+Subject: Re: [PATCH 3/4] generic: test encrypted file access
+Message-ID: <20161121192330.GD30672@google.com>
 References: <1479412027-34416-1-git-send-email-ebiggers@google.com>
- <1479412027-34416-2-git-send-email-ebiggers@google.com>
- <20161120213313.GI28177@dastard>
+ <1479412027-34416-4-git-send-email-ebiggers@google.com>
+ <20161120223151.GK28177@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161120213313.GI28177@dastard>
+In-Reply-To: <20161120223151.GK28177@dastard>
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, linux-f2fs@vger.kernel.org, "Theodore Y . Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, "Theodore Y . Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave, thanks for reviewing.
-
-On Mon, Nov 21, 2016 at 08:33:13AM +1100, Dave Chinner wrote:
-> > +
-> > +. ./common/rc
+On Mon, Nov 21, 2016 at 09:31:51AM +1100, Dave Chinner wrote:
 > 
-> Tests will already have included common/rc before this file, so we
-> do not source it here.
-...
-> These go in the tests, not here.
-...
-> _requires_real_encryption()
+> But, then again, why wouldn't you just dump:
 > 
-> In each test.
-...
-> And this should all be in a _requires_encryption() function.
+> ls -lR edir |_filter_scratch
+> 
+> to the golden output file to confirm everything is exactly as you
+> expect it to be in the encrypted directory? It'll catch un-encrypted
+> names, wrong subdir depth, etc.
 > 
 
-I'll do all of these.  Of course the intent was to avoid duplicating code in
-each test, but I will use the more verbose style if that's preferred.  I assume
-you'd also prefer explicitly formatting and mounting the scratch device in each
-test even though _require_encryption would already have to do that?
+This won't work because the encrypted filenames are unpredictable.  The
+filenames in a directory are encrypted by a key unique to that directory which
+is derived from the designated keyring key and a per-inode nonce.  Nonces are
+generated randomly by the kernel, so the per-inode encryption keys cannot be
+predicted even if you were to put a fixed key into the keyring rather than a
+random one.  This is by design because for confidentiality reasons, the same
+filename in different directories must not encrypt to the same ciphertext.  A
+similar argument applies to the contents of regular files and to symlink
+targets.
 
-> > +}
-> > +
-> > +_scratch_mkfs_encrypted() {
-> > +	case $FSTYP in
-> > +	ext4)
-> > +		# ext4 encryption requires block size = PAGE_SIZE.
-> > +		MKFS_OPTIONS="-O encrypt -b $(getconf PAGE_SIZE)" _scratch_mkfs
-> > +		;;
-> > +	*)
-> > +		MKFS_OPTIONS="-O encrypt" _scratch_mkfs
-> > +		;;
-> > +	esac
-> > +}
-> 
-> THis completely overrides any user supplied mkfs options, which we
-> try to avoid doing. Instead, this should simply be
-> 
-> 	_scratch_mkfs -O encrypt
-> 
-> so that _scratch_mkfs_encrypted() fails if there are conflicting
-> mkfs options specified. This means _requires_encryption() will
-> not_run the test when this occurrs...
-> 
+(Yes, I should make this clear in a comment in the test.)
 
-It wouldn't work exactly like that because mkfs.ext4 currently allows creating a
-filesystem with -O encrypt and a block size incompatible with encryption.  The
-kernel then refuses to mount the filesystem.  But your suggestion would
-basically still work, since we have to try mounting the filesystem anyway to
-check for kernel support for encryption.
+> 
+> > +cat $(find edir -maxdepth 1 -type f | head -1) 2>tmp
+> > +if ! egrep -q 'Required key not available' tmp; then
+> > +	echo "Reading encrypted file w/o key didn't fail with ENOKEY"
+> > +	cat tmp
+> > +	exit 1
+> > +fi
+> 
+> md5sum `find edir -maxdepth 1 -type f | head -1` | _filter_scratch
+> 
+> You'll either get a md5sum of the data or an error message
+> in the golden output. The wrong one will trigger a failure.
 
-> > diff --git a/src/fscrypt_util.c b/src/fscrypt_util.c
-> > new file mode 100644
-> > index 0000000..de63667
-> > --- /dev/null
-> > +++ b/src/fscrypt_util.c
-> 
-> ....
-> 
-> Ok, can we get this added to xfs_io rather than a stand-alone
-> fstests helper? There are three clear commands here:
-> 
-> 	{"gen_key", gen_key},
-> 	{"rm_key", rm_key},
-> 	{"set_policy", set_policy},
-> 
-> So it should plug straight into the xfs_io command parsing
-> infrastructure without much change at all.
+This won't quite work because the encrypted filename cannot be predicted, but it
+would work if the filename were to be filtered out.
 
-I see that xfs_io is part of xfsprogs, not xfstests.  Does it make sense to add
-filesystem encryption commands to xfs_io even though XFS doesn't support them
-yet?  Currently only ext4 and f2fs support filesystem encryption via this common
-API.  (ubifs support has been proposed too.)
+I'll take all your suggestions which don't assume predictable filenames.
 
-If we do go that route then it should be considered only adding "set_policy" and
-"get_policy" commands, and for "gen_key" and "rm_key" instead using shell
-wrappers around 'keyctl' instead.  gen_key and rm_key don't touch the filesystem
-at all; they only work with the keyring.  It's possible to use 'keyctl padd' to
-add a fscrypt key, though it's not completely trivial because you'd have to use
-'echo -e' to generate the C structure 'struct fscrypt_key' with mode = 0, raw =
-actual key in binary, size = 64.
+Thanks,
 
 Eric
