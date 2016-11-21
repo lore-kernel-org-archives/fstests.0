@@ -1,214 +1,89 @@
-Received: from mail.kernel.org ([198.145.29.136]:48718 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753971AbcKUUCy (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 21 Nov 2016 15:02:54 -0500
-Date: Mon, 21 Nov 2016 12:02:49 -0800
-From: Jaegeuk Kim <jaegeuk@kernel.org>
-Subject: Re: [f2fs-dev] [PATCH v5] generic/391: check inode metadata on
- f{data}sync after power-cut
-Message-ID: <20161121200249.GB66875@jaegeuk>
-References: <20161117032753.69315-1-jaegeuk@kernel.org>
- <20161117192051.GE74211@jaegeuk>
- <20161118194549.GE31226@jaegeuk>
- <20161119015745.GB45056@jaegeuk>
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:25873 "EHLO
+        ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1753564AbcKUVJQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 21 Nov 2016 16:09:16 -0500
+Date: Tue, 22 Nov 2016 08:08:49 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 1/4] generic: add utilities for testing filesystem
+ encryption
+Message-ID: <20161121210849.GI31101@dastard>
+References: <1479412027-34416-1-git-send-email-ebiggers@google.com>
+ <1479412027-34416-2-git-send-email-ebiggers@google.com>
+ <20161120213313.GI28177@dastard>
+ <20161121184050.GB30672@google.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161119015745.GB45056@jaegeuk>
+In-Reply-To: <20161121184050.GB30672@google.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Cc: linux-xfs@vger.kernel.org
+To: Eric Biggers <ebiggers@google.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, linux-f2fs@vger.kernel.org, "Theodore Y . Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>
 List-ID: <fstests@vger.kernel.org>
 
-This patch adds tests/generic/391 to test fsync and fdatasync with power-cuts.
+On Mon, Nov 21, 2016 at 10:40:50AM -0800, Eric Biggers wrote:
+> Hi Dave, thanks for reviewing.
+> 
+> On Mon, Nov 21, 2016 at 08:33:13AM +1100, Dave Chinner wrote:
+> > > +
+> > > +. ./common/rc
+> > 
+> > Tests will already have included common/rc before this file, so we
+> > do not source it here.
+> ...
+> > These go in the tests, not here.
+> ...
+> > _requires_real_encryption()
+> > 
+> > In each test.
+> ...
+> > And this should all be in a _requires_encryption() function.
+> > 
+> 
+> I'll do all of these.  Of course the intent was to avoid duplicating code in
+> each test, but I will use the more verbose style if that's preferred.  I assume
+> you'd also prefer explicitly formatting and mounting the scratch device in each
+> test even though _require_encryption would already have to do that?
 
-The rule to check is:
-1) fsync should guarantee all the inode metadata after power-cut,
-2) fdatasync should guarantee i_size and i_blocks at least after power-cut.
+Yes, because in future _require_encryption may change to no require
+touching the scratch device. Also, checking for encryption may
+create a filesystem with different configuration than the one we
+want to test. So it's better to be consistent across all tests and
+require the scratch_mkfs call in each test so we know the exact
+state of the filesystem before the test starts....
 
-Note that, in XFS, it allocates more blocks when doing writes, so it should
-close the file before fsync in order to get actual i_blocks after power-cut.
-Or, it needs to do truncate the file with a specific size to turn it off
-at the beginning.
+> > Ok, can we get this added to xfs_io rather than a stand-alone
+> > fstests helper? There are three clear commands here:
+> > 
+> > 	{"gen_key", gen_key},
+> > 	{"rm_key", rm_key},
+> > 	{"set_policy", set_policy},
+> > 
+> > So it should plug straight into the xfs_io command parsing
+> > infrastructure without much change at all.
+> 
+> I see that xfs_io is part of xfsprogs, not xfstests.  Does it make sense to add
+> filesystem encryption commands to xfs_io even though XFS doesn't support them
+> yet?  Currently only ext4 and f2fs support filesystem encryption via this common
+> API.  (ubifs support has been proposed too.)
 
-Suggested-by: Chao Yu <yuchao0@huawei.com>
-Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
----
- tests/generic/391     | 136 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/391.out |  11 ++++
- tests/generic/group   |   1 +
- 3 files changed, 148 insertions(+)
- create mode 100755 tests/generic/391
- create mode 100644 tests/generic/391.out
+Yes, because it is in the plan to support the generic encryption in
+XFS, too. It'll just take us a little while to get to it, but it
+won't hurt to support these operations ahead of that time...
 
-diff --git a/tests/generic/391 b/tests/generic/391
-new file mode 100755
-index 0000000..fd44a34
---- /dev/null
-+++ b/tests/generic/391
-@@ -0,0 +1,136 @@
-+#! /bin/bash
-+# FS QA Test 391
-+#
-+# Test inode's metadata after fsync or fdatasync calls.
-+# In the case of fsync, filesystem should recover all the inode metadata, while
-+# recovering i_blocks and i_size at least for fdatasync.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Jaegeuk Kim.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=0	# failure will be detected in runtime!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/punch
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+
-+rm -f $seqres.full
-+_require_scratch
-+_require_scratch_shutdown
-+_require_xfs_io_command "fpunch"
-+
-+_scratch_mkfs >/dev/null 2>&1
-+_scratch_mount
-+
-+testfile=$SCRATCH_MNT/testfile
-+
-+# check inode metadata after shutdown
-+check_inode_metadata()
-+{
-+	sync_mode=$1
-+
-+	# fsync or fdatasync
-+	if [ $sync_mode = "fsync" ]; then
-+		stat_opt='-c "b: %b s: %s a: %x m: %y c: %z"'
-+	else
-+		stat_opt='-c "b: %b s: %s"'
-+	fi
-+
-+	before=`stat "$stat_opt" $testfile`
-+
-+	$XFS_IO_PROG -c "$sync_mode" $testfile | _filter_xfs_io
-+	src/godown $SCRATCH_MNT | tee -a $seqres.full
-+	_scratch_cycle_mount
-+
-+	after=`stat "$stat_opt" $testfile`
-+
-+	if [ "$before" != "$after" ]; then
-+		echo "Before: $before"
-+		echo "After : $after"
-+		status=1;	# this is a failure!
-+	fi
-+	echo "Before: $before" >> $seqres.full
-+	echo "After : $after" >> $seqres.full
-+	rm $testfile
-+}
-+
-+# append XX KB with f{data}sync, followed by power-cut
-+test_i_size()
-+{
-+	echo "==== i_size $2 test with $1 ====" | tee -a $seqres.full
-+	$XFS_IO_PROG -f -c "truncate 4M"	\
-+			-c "pwrite 0 4M"	\
-+			-c "fsync"		\
-+			-c "pwrite 4M $2"	\
-+			$testfile >/dev/null
-+	check_inode_metadata $1
-+}
-+
-+# update times with f{data}sync, followed by power-cut
-+test_i_time()
-+{
-+	echo "==== i_time test with $1 ====" | tee -a $seqres.full
-+	$XFS_IO_PROG -f -c "truncate 4M"	\
-+			-c "pwrite 0 4M"	\
-+			-c "fsync"		\
-+			$testfile >/dev/null
-+	sleep 1
-+	touch $testfile
-+	check_inode_metadata $1
-+}
-+
-+# punch XX KB with f{data}sync, followed by power-cut
-+test_punch()
-+{
-+	echo "==== fpunch $2 test with $1 ====" | tee -a $seqres.full
-+	$XFS_IO_PROG -f -c "truncate 4202496"	\
-+			-c "pwrite 0 4202496"	\
-+			-c "fsync"		\
-+			-c "fpunch 4194304 $2"\
-+			$testfile >/dev/null
-+	check_inode_metadata $1
-+}
-+
-+for i in fsync fdatasync
-+do
-+	test_i_size $i 1024
-+	test_i_size $i 4096
-+	test_i_time $i
-+	test_punch $i 1024
-+	test_punch $i 4096
-+done
-+
-+exit
-diff --git a/tests/generic/391.out b/tests/generic/391.out
-new file mode 100644
-index 0000000..7c66776
---- /dev/null
-+++ b/tests/generic/391.out
-@@ -0,0 +1,11 @@
-+QA output created by 391
-+==== i_size 1024 test with fsync ====
-+==== i_size 4096 test with fsync ====
-+==== i_time test with fsync ====
-+==== fpunch 1024 test with fsync ====
-+==== fpunch 4096 test with fsync ====
-+==== i_size 1024 test with fdatasync ====
-+==== i_size 4096 test with fdatasync ====
-+==== i_time test with fdatasync ====
-+==== fpunch 1024 test with fdatasync ====
-+==== fpunch 4096 test with fdatasync ====
-diff --git a/tests/generic/group b/tests/generic/group
-index 08007d7..9de3415 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -392,3 +392,4 @@
- 387 auto clone
- 388 auto log metadata
- 389 auto quick acl
-+391 auto quick metadata
+> If we do go that route then it should be considered only adding
+> "set_policy" and "get_policy" commands, and for "gen_key" and
+> "rm_key" instead using shell wrappers around 'keyctl' instead.
+> gen_key and rm_key don't touch the filesystem at all; they only
+> work with the keyring.  It's possible to use 'keyctl padd' to add
+> a fscrypt key, though it's not completely trivial because you'd
+> have to use 'echo -e' to generate the C structure 'struct
+> fscrypt_key' with mode = 0, raw = actual key in binary, size = 64.
+
+Sounds fine to me.
+
+Cheers,
+
+Dave.
 -- 
-2.8.3
-
+Dave Chinner
+david@fromorbit.com
