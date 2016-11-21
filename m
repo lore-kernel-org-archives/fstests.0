@@ -1,146 +1,265 @@
-Received: from mail-pg0-f51.google.com ([74.125.83.51]:33603 "EHLO
-        mail-pg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753695AbcKUTjA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 Nov 2016 14:39:00 -0500
-Received: by mail-pg0-f51.google.com with SMTP id 3so133534392pgd.0
-        for <fstests@vger.kernel.org>; Mon, 21 Nov 2016 11:39:00 -0800 (PST)
-Date: Mon, 21 Nov 2016 11:11:45 -0800
-From: Eric Biggers <ebiggers@google.com>
-Subject: Re: [PATCH 2/4] generic: test setting and getting encryption policies
-Message-ID: <20161121191145.GC30672@google.com>
-References: <1479412027-34416-1-git-send-email-ebiggers@google.com>
- <1479412027-34416-3-git-send-email-ebiggers@google.com>
- <20161120220718.GJ28177@dastard>
+Received: from mail.kernel.org ([198.145.29.136]:48456 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753260AbcKUUAb (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 21 Nov 2016 15:00:31 -0500
+Date: Mon, 21 Nov 2016 12:00:24 -0800
+From: Jaegeuk Kim <jaegeuk@kernel.org>
+Subject: Re: [f2fs-dev] [PATCH v4] generic/391: check inode metadata on
+ f{data}sync after power-cut
+Message-ID: <20161121200024.GA66875@jaegeuk>
+References: <20161117032753.69315-1-jaegeuk@kernel.org>
+ <20161117192051.GE74211@jaegeuk>
+ <20161118194549.GE31226@jaegeuk>
+ <20161119015745.GB45056@jaegeuk>
+ <20161120211958.GH28177@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161120220718.GJ28177@dastard>
+In-Reply-To: <20161120211958.GH28177@dastard>
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, linux-f2fs@vger.kernel.org, "Theodore Y . Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>
+Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Nov 21, 2016 at 09:07:18AM +1100, Dave Chinner wrote:
-> 
-> i.e. we put all the functionality into the xfs_io comaand interface,
-> and it just passes through whatever the test script tells it. In
-> this case, the set_policy command needs several options to set
-> different parts of the policy appropriately.
-> 
-> The reason we tend to put this sort of thing into xfs_io is that
-> when we need to write a new test, all the commands we need to
-> construct specific policies/contexts already exist and we don't have
-> to write new helpers for each test....
-> 
-
-Thanks, I'll consider this.
-
-> 
-> Also, shouldn't a get without an args parameter always return
-> EINVAL, regardless of whether the underlying file is encrypted or
-> not?
-> 
-
-For most syscalls/ioctls, including this one (FS_IOC_GET_ENCRYPTION_POLICY),
-it's not expected for the kernel to check that a userspace pointer is NULL as
-opposed to some other random invalid value.  It will only notice at the very end
-of the operation, when copying data to userspace, in which case it's expected to
-fail with EFAULT.
-
-It would still make sense to pass in a valid pointer when testing some other
-failure case, though, to avoid confusion.
-
-> > +	verify_policy(dir, fd, &policy);
-> > +
-> > +	/* invalid pointer (get) */
-> > +	if (ioctl(fd, FS_IOC_GET_ENCRYPTION_POLICY, NULL) != -1 ||
-> > +	    errno != EFAULT) {
-> > +		die("expected FS_IOC_GET_ENCRYPTION_POLICY to fail with "
-> > +		    "EFAULT when invalid pointer specified");
-> > +	}
-> 
-> EINVAL - this should never get to copyout to generate EFAULT, so
-> should not require separate tests for having no policy vs a valid
-> policy.
-
-This is specifically testing the EFAULT case.  The directory has been assigned
-an encryption policy, so it does indeed get to this case.
-
-> 
-> These should all be in a single xfstest that "tests ioctl validity",
-> rather than appended to a "set_policy behaviour" test.
-
-Yes this may make sense.  It gets a little blurry when you talk about testing
-behavior like "an encryption policy cannot be set on a directory", since that's
-a type of validation too.
-
-> 
+On Mon, Nov 21, 2016 at 08:19:58AM +1100, Dave Chinner wrote:
+> On Fri, Nov 18, 2016 at 05:57:45PM -0800, Jaegeuk Kim wrote:
+> > This patch adds tests/generic/391 to test fsync and fdatasync with power-cuts.
+> > 
+> > The rule to check is:
+> > 1) fsync should guarantee all the inode metadata after power-cut,
+> > 2) fdatasync should guarantee i_size and i_blocks at least after power-cut.
+> > 
+> > Note that, in XFS, it allocates more blocks when doing writes, so it should
+> > close the file before fsync in order to get actual i_blocks after power-cut.
+> > 
+> > Suggested-by: Chao Yu <yuchao0@huawei.com>
+> > Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
+> > ---
+> >  tests/generic/391     | 149 ++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/391.out |  11 ++++
+> >  tests/generic/group   |   1 +
+> >  3 files changed, 161 insertions(+)
+> >  create mode 100755 tests/generic/391
+> >  create mode 100644 tests/generic/391.out
+> > 
+> > diff --git a/tests/generic/391 b/tests/generic/391
+> > new file mode 100755
+> > index 0000000..121e01d
+> > --- /dev/null
+> > +++ b/tests/generic/391
+> > @@ -0,0 +1,149 @@
+> > +#! /bin/bash
+> > +# FS QA Test 391
+> > +#
+> > +# Test inode's metadata after fsync or fdatasync calls.
+> > +# In the case of fsync, filesystem should recover all the inode metadata, while
+> > +# recovering i_blocks and i_size at least for fdatasync.
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2016 Jaegeuk Kim.  All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +#
 > > +
 > > +seq=`basename $0`
 > > +seqres=$RESULT_DIR/$seq
-> > +here=`pwd`
 > > +echo "QA output created by $seq"
 > > +
-> > +. ./common/encrypt
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +. ./common/punch
+> > +
+> > +# real QA test starts here
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +
+> > +rm -f $seqres.full
+> > +_require_scratch
+> > +_require_scratch_shutdown
+> > +_require_xfs_io_command "fpunch"
+> > +
+> > +_scratch_mkfs >/dev/null 2>&1
+> > +_scratch_mount
+> > +
+> > +testfile=$SCRATCH_MNT/testfile
+> > +
+> > +f_stat()
+> > +{
+> > +	$XFS_IO_PROG -r -c "stat -v" $testfile >$tmp.$1
+> > +}
+> > +
+> > +f_sync()
+> > +{
+> > +	$XFS_IO_PROG -c "$1" $testfile >/dev/null
+> > +}
 > 
-> This is not the way to include all the required scripts, as I
-> mentioned in my last email....
+> This is factoring overkill and...
 > 
-> Also, please do not gut the test script preamble - it's there in the
-> new test template for good reason and that is that all the common
-> code that is included relies on the setup it does. e.g. this means $tmp
-> is not properly set, so any common code that has been included that
-> does 'rm -rf $tmp/*' if going to erase your root filesystem.
+> > +
+> > +# check inode metadata after shutdown
+> > +check_inode_metadata()
+> > +{
+> > +	# prepare syncing metadata
+> > +	f_sync $1
+> > +
+> > +	# get inode metadata #1
+> > +	f_stat before
+> > +
+> > +	# shutdown
+> > +	src/godown $SCRATCH_MNT >> $seqres.full
+> > +	_scratch_cycle_mount
+> > +
+> > +	# get inode metadata #2
+> > +	f_stat after
+> > +
+> > +	# compare #1 and #2
+> > +	diff $tmp.before $tmp.after >$tmp.diff
+> > +
+> > +	# fdatasync only cares about i_size and i_blocks
+> > +	if [ "$1" = "fdatasync" ]; then
+> > +		cat $tmp.diff | grep stat.size
+> > +		cat $tmp.diff | grep stat.blocks
+> > +	else
+> > +		cat $tmp.diff
+> > +	fi
 > 
-
-Will do.  I think it's pretty riduculous for xfstests to potentially erase your
-root filesystem if you don't set some random variable though...
-
-What would be nice is for there to be a preamble that all the tests source that
-handles these boilerplate tasks.
-
-> > +# Should *not* be able to set an encryption policy on a directory on a
-> > +# filesystem mounted readonly.  Regression test for ba63f23d69a3: "fscrypto:
-> > +# require write access to mount to set encryption policy".  Test both a regular
-> > +# readonly filesystem and a read-write filesystem remounted with "ro,bind",
-> > +# which creates a readonly mount for a read-write filesystem.
-> > +echo -e "\n*** Setting encryption policy on readonly filesystem ***"
-> > +mkdir readonly_mnt_dir
-> > +_scratch_mount -o ro,remount
+> .... forces you to do things like this.
 > 
-> scratch_remount ro
+> We have the stat binary for getting specific fields from files.  We
+> use it all over the place for exactly this sort of thing.  See, for
+> example, _defrag(), which also does this "stat before/stat
+> after/compare results" for specific metadata.
 > 
-> > +$FSCRYPT_UTIL set_policy 0000111122223333 readonly_mnt_dir
-> > +_scratch_mount -o rw,remount
+> i.e.:
 > 
-> scratch_remount rw
+> $ stat -c "blocks: %b size: %s" Makefile
+> blocks: 8 size: 3069
+> $
 > 
-> > +_scratch_mount -o remount,ro,bind
+> check_inode_metadata()
+> {
+> 	sync_mode=$1
 > 
-> Umm, what does a bind mount do when there's no source/target
-> directory? Whatever you are doing here is not documented in the
-> mount(8) man page....
+> 	stat_opts=""
+> 	if [ $sync_mode = "fdatasync" ]; then
+> 		stat_opts='-c "blocks: %b size: %s"'
+> 	fi
+> 
+> 	$XFS_IO_PROG -c "$sync_mode" $testfile | _filter_xfs_io
+> 	before=`stat $stat_opts $testfile`
+> 	...
+> 	after=`stat $stat_opts $testfile`
+> 
+> 	if [ $before != $after ]; then
+> 		echo "Before: $before"
+> 		echo "After: $after"
+> 		status=1;		# this is a failure!
+> 	fi
+> 
+> > +	cat $tmp.before >> $seqres.full
+> > +	cat $tmp.after >> $seqres.full
+> > +
+> > +	rm $testfile
+> > +}
+> > +
+> > +# append XX KB with f{data}sync, followed by power-cut
+> > +test_i_size()
+> > +{
+> > +	$XFS_IO_PROG -f -c "pwrite 0 4M"	\
+> > +			-c "fsync"		\
+> > +			-c "pwrite 4M $2"	\
+> > +			$testfile >/dev/null
+> 
+> Make these all truncate to the final size first like this:
+> 
+> 	 $XFS_IO_PROG -f -c "truncate 4M"	\
+> 			 -c "pwrite 0 4M"	\
+> 			 -c "fsync"		\
+> 			 -c "pwrite 4M $2"	\
+> 			$testfile | _filter_xfs_io
+> 
+> 	check_inode_metadata $1
+> 
+> And that will make all the problems with XFS preallocation go away,
+> because the initial truncate to set the file size will turn off the
+> preallocation.
+> 
+> > +	$XFS_IO_PROG -f -c "pwrite 0 4M"	\
+> > +			-c "fsync"		\
+> > +			$testfile >/dev/null
+> > +	sleep 1
+> > +	touch $testfile
+> > +	check_inode_metadata $1
+> > +}
+> > +
+> > +# punch XX KB with f{data}sync, followed by power-cut
+> > +test_punch()
+> > +{
+> > +	echo "==== fpunch $2 test with $1 ====" | tee -a $seqres.full
+> > +	$XFS_IO_PROG -f -c "pwrite 0 4202496"	\
+> > +			-c "fsync"		\
+> > +			-c "fpunch 4194304 $2"\
+> > +			$testfile >/dev/null
+> > +	check_inode_metadata $1
+> > +}
+> > +
+> > +for i in fsync fdatasync
+> > +do
+> > +	test_i_size $i 1024
+> > +	test_i_size $i 4096
+> > +	test_i_time $i
+> > +	test_punch $i 1024
+> > +	test_punch $i 4096
+> > +done
+> > +
+> > +rm -f $tmp.*
+> 
+> No need for this here.
+> 
+> > +
+> > +# success, all done
+> > +status=0
+> 
+> Set that at the start before we run the test so that if we detect a
+> failure we can set status=1 for exit to handle appropriately.
 
-As I noted in the comment above this is creating a readonly mount for a
-read-write filesystem.  This is the way to tell the kernel to change the mount
-flags to readonly but not the filesystem.  Think of "bind" as meaning "operate
-on the mount, not on the filesystem".  Yes, mount(8) isn't clear that you can do
-this.  It does document setting the readonly flag in the context of setting up a
-new mount:
+Thank you so much for the review.
+Agreed to all, and let me send v5.
 
-	mount --bind olddir newdir
-	mount -o remount,ro,bind olddir newdir
+Thanks,
 
-The second command is misleading because 'olddir' isn't actually used at all;
-the command is really just operating on 'newdir'.
-
-Newer versions of mount also support 'mount -o bind,ro olddir newdir', which is
-really only a shorthand for the above two commands.  mount can still only set
-the readonly flag on the new mount using the mount syscall with
-MS_RDONLY|MS_BIND|MS_REMOUNT.
-
-Perhaps using the new mount syntax to set up a bind mount on a different
-directory, rather than reusing the same directory, would make things less
-confusing?
-
-Eric
+> 
+> Cheers,
+> 
+> Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
