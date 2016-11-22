@@ -1,53 +1,98 @@
-Received: from mail-pg0-f54.google.com ([74.125.83.54]:33546 "EHLO
-        mail-pg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752916AbcKUXlJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 Nov 2016 18:41:09 -0500
-Received: by mail-pg0-f54.google.com with SMTP id 3so554147pgd.0
-        for <fstests@vger.kernel.org>; Mon, 21 Nov 2016 15:41:09 -0800 (PST)
-Date: Mon, 21 Nov 2016 15:41:06 -0800
-From: Eric Biggers <ebiggers@google.com>
-Subject: Re: [PATCH 4/4] generic: test locking when setting encryption policy
-Message-ID: <20161121234106.GH30672@google.com>
-References: <1479412027-34416-1-git-send-email-ebiggers@google.com>
- <1479412027-34416-5-git-send-email-ebiggers@google.com>
- <20161120223536.GL28177@dastard>
- <20161121192519.GE30672@google.com>
- <20161121213251.GL31101@dastard>
+Received: from cn.fujitsu.com ([222.73.24.84]:63936 "EHLO song.cn.fujitsu.com"
+        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+        id S1755002AbcKVIi3 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 22 Nov 2016 03:38:29 -0500
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Subject: [RFC PATCH 1/3] fstests: common: rename _require_btrfs to _require_btrfs_subcommand
+Date: Tue, 22 Nov 2016 16:38:09 +0800
+Message-Id: <20161122083811.12636-2-quwenruo@cn.fujitsu.com>
+In-Reply-To: <20161122083811.12636-1-quwenruo@cn.fujitsu.com>
+References: <20161122083811.12636-1-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20161121213251.GL31101@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, "Theodore Y . Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Nov 22, 2016 at 08:32:51AM +1100, Dave Chinner wrote:
-> 
-> This means that reproducing the race condition is going to be
-> machine dependent regardless of how the test is written.
-> 
-> In cases like this for XFS, we tend towards adding a debug sysfs
-> file to introduce a delay into the code that allows the race to be
-> triggered reliably. The delay is only included in CONFIG_XFS_DEBUG=y
-> builds, and the test is conditional on the sysfs file being present.
-> 
-> e.g. xfs/051 uses a log recovery delay to allow us to reliably
-> trigger IO errors in the middle of log recovery and hence exercise
-> the IO error failure paths in the middle of recovery. This made an
-> extremely unreliable reproducer into a test case that triggered
-> reliably on every machine the test is run on....
-> 
-> Can something like this be done in this case?
-> 
+Rename _require_btrfs() to _require_btrfs_subcommand() to avoid
+confusion, as all other _require_btrfs_* has a quite clear suffix, like
+_require_btrfs_mkfs_feature() or _require_btrfs_fs_feature().
 
-I'd really rather not do something like that just for this test, which is really
-just testing that the kernel does inode_lock()/inode_unlock() in
-fscrypt_process_policy().  It would be more worthwhile if the testing-only
-kernel code would help expose many race conditions, not just this one particular
-race in this particular ioctl.
+Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+---
+ common/rc       | 2 +-
+ tests/btrfs/004 | 2 +-
+ tests/btrfs/048 | 2 +-
+ tests/btrfs/059 | 2 +-
+ tests/btrfs/131 | 2 +-
+ 5 files changed, 5 insertions(+), 5 deletions(-)
 
-So if you don't want to have the C version of this test in xfstests, I think it
-should just be dropped from the series.
+diff --git a/common/rc b/common/rc
+index e3b54ec..6d333dd 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3017,7 +3017,7 @@ _require_deletable_scratch_dev_pool()
+ }
+ 
+ # We check for btrfs and (optionally) features of the btrfs command
+-_require_btrfs()
++_require_btrfs_subcommand()
+ {
+ 	cmd=$1
+ 	_require_command "$BTRFS_UTIL_PROG" btrfs
+diff --git a/tests/btrfs/004 b/tests/btrfs/004
+index 905770a..2ce628e 100755
+--- a/tests/btrfs/004
++++ b/tests/btrfs/004
+@@ -51,7 +51,7 @@ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch
+ _require_no_large_scratch_dev
+-_require_btrfs inspect-internal
++_require_btrfs_subcommand inspect-internal
+ _require_command "/usr/sbin/filefrag" filefrag
+ 
+ rm -f $seqres.full
+diff --git a/tests/btrfs/048 b/tests/btrfs/048
+index 0b907b0..ac731d1 100755
+--- a/tests/btrfs/048
++++ b/tests/btrfs/048
+@@ -48,7 +48,7 @@ _supported_fs btrfs
+ _supported_os Linux
+ _require_test
+ _require_scratch
+-_require_btrfs "property"
++_require_btrfs_subcommand "property"
+ 
+ send_files_dir=$TEST_DIR/btrfs-test-$seq
+ 
+diff --git a/tests/btrfs/059 b/tests/btrfs/059
+index 8f106d2..fd67ebb 100755
+--- a/tests/btrfs/059
++++ b/tests/btrfs/059
+@@ -51,7 +51,7 @@ _supported_fs btrfs
+ _supported_os Linux
+ _require_test
+ _require_scratch
+-_require_btrfs "property"
++_require_btrfs_subcommand "property"
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/btrfs/131 b/tests/btrfs/131
+index d1a11d2..ff1dbdd 100755
+--- a/tests/btrfs/131
++++ b/tests/btrfs/131
+@@ -48,7 +48,7 @@ rm -f $seqres.full
+ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch
+-_require_btrfs inspect-internal
++_require_btrfs_subcommand inspect-internal
+ 
+ mkfs_v1()
+ {
+-- 
+2.7.4
 
-Eric
+
+
