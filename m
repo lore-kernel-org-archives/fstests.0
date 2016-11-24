@@ -1,84 +1,188 @@
-Received: from mx1.redhat.com ([209.132.183.28]:56940 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753806AbcK0Lxq (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 27 Nov 2016 06:53:46 -0500
-Message-Id: <201611271153.uARBriG3001593@int-mx11.intmail.prod.int.phx2.redhat.com>
-Date: Sun, 27 Nov 2016 19:53:43 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: [GIT PULL] fstests: updates on 2016-11-27
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:11445 "EHLO
+        ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1750830AbcKXXUD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 24 Nov 2016 18:20:03 -0500
+Date: Fri, 25 Nov 2016 10:15:58 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] generic/390: Add tests for inode timestamp policy
+Message-ID: <20161124231558.GV31101@dastard>
+References: <1479948722-2936-1-git-send-email-deepa.kernel@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1479948722-2936-1-git-send-email-deepa.kernel@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
+To: Deepa Dinamani <deepa.kernel@gmail.com>
+Cc: fstests@vger.kernel.org, arnd@arndb.de, y2038@lists.linaro.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave,
+On Wed, Nov 23, 2016 at 04:52:02PM -0800, Deepa Dinamani wrote:
+> The test helps to validate clamping and mount behaviors
+> according to supported file system timestamp ranges.
+> 
+> Note that the test can fail on 32-bit systems for a
+> few file systems. This will be corrected when vfs is
+> transitioned to use 64-bit timestamps.
 
-Can you please pull the fstests update from the location below? There're new
-generic and overlayfs tests, and two test updates caused by fs behavior changes
-(see below for details).
+Thanks for doing this, Deepa. A few comments below - Eryu has
+already given lots of feedback, so I won't repeat all that...
 
-New failure I noticed in this update:
-- overlay/016 is a new case that fails on current Linus tree (4.9-rc6)
-- generic/182 fails on reflink XFS, there's a behavior change pending in XFS
-  list
-- ext4/001 fails on DAX mount, this is also a behavior change pending in ext4
-  tree
+> Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
+> ---
+>  common/attr           |  27 ++++++
+>  src/Makefile          |   2 +-
+>  src/y2038_futimens.c  |  61 +++++++++++++
+>  tests/generic/390     | 238 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/390.out |   2 +
+>  tests/generic/group   |   1 +
+>  6 files changed, 330 insertions(+), 1 deletion(-)
+>  create mode 100644 src/y2038_futimens.c
+>  create mode 100755 tests/generic/390
+>  create mode 100644 tests/generic/390.out
+> 
+> diff --git a/common/attr b/common/attr
+> index ce2d76a..579dc9b 100644
+> --- a/common/attr
+> +++ b/common/attr
+> @@ -56,6 +56,33 @@ _acl_get_max()
+>  	esac
+>  }
+>  
+> +_filesystem_timestamp_range()
+> +{
+> +	device=${1:-$TEST_DEV}
+> +	case $FSTYP in
+> +	ext4)	#dumpe2fs
+> +		if [ $(dumpe2fs -h $device 2>/dev/null | grep "Inode size:" | cut -d: -f2) -gt 128 ]; then
+> +			echo "-2147483648 15032385535"
+> +		else
+> +			echo "-2147483648 2147483647"
+> +		fi
+> +		;;
+> +
+> +	xfs)
+> +		echo "-2147483648 2147483647"
+> +		;;
+> +	jfs)
+> +		echo "0 4294967295"
+> +		;;
+> +	f2fs)
+> +		echo "-2147483648 2147483647"
+> +		;;
+> +	*)
+> +		echo "-1 -1"
+> +		;;
+> +	esac
+> +}
 
-Thanks,
-Eryu
+This is better off in common/rc right now - common/attr is for
+extended attribute test code, not generic filesystem stuff.
 
-The following changes since commit 083ff5827b603f2d646d20a20086fa55aa89b1c1:
+> diff --git a/src/y2038_futimens.c b/src/y2038_futimens.c
+> new file mode 100644
+> index 0000000..291e4fa
+> --- /dev/null
+> +++ b/src/y2038_futimens.c
+> @@ -0,0 +1,61 @@
+> +#include <fcntl.h>
+> +#include <stdio.h>
+> +#include <sys/stat.h>
+> +#include <errno.h>
+> +#include <stdlib.h>
+> +
+> +int
+> +do_utime(int fd, long long time)
+> +{
+> +	struct timespec t[2];
+> +
+> +	/*
+> +	 * Convert long long to timespec format.
+> +	 * Seconds precision is assumed here.
+> +	 */
+> +	t[0].tv_sec = time;
+> +	t[0].tv_nsec = 0;
+> +	t[1].tv_sec = time;
+> +	t[1].tv_nsec = 0;
+> +
+> +	/* Call utimens to update time. */
+> +	if (futimens(fd, t)) {
+> +		perror("futimens");
+> +		return 1;
+> +	}
+> +
+> +	return 0;
+> +}
+> +
+> +int
+> +main(int argc, char **argv)
+> +{
+> +	int fd;
+> +	long long time;
+> +
+> +	if(argc < 3) {
+> +			fprintf(stderr, "Usage: %s filename timestamp\n"
+> +					"Filename: file to be created or opened in current directory\n"
+> +					"Timestamp: is seconds since 1970-01-01 00:00:00 UTC\n", argv[0]);
+> +			exit(1);
+> +	}
+> +
+> +	/* Create the file */
+> +	fd = creat(argv[1], 0666);
+> +	if(fd < 0) {
+> +		perror("creat");
+> +		exit(1);
+> +	}
+> +
+> +	/* Get the timestamp */
+> +	time = strtoull(argv[2], NULL, 0);
+> +	if (errno) {
+> +		perror("strtoull");
+> +		exit(1);
+> +	}
+> +
+> +	if (do_utime(fd, time))
+> +		return 1;
+> +
+> +	return 0;
+> +}
 
-  fstests: Introduce check for explicit SHARED extent flag reporting (2016-11-18 16:41:06 +0800)
+This might be useful to add to xfs_io rather than a one-off helper
+for xfstest - that avoids the need to create files, and it can be
+used to change times on existing files....
 
-are available in the git repository at:
+....
 
-  https://github.com/guaneryu/xfstests.git for-dave
+> +_run_test_individual() #_run_individual_test(file, timestamp, update_time)
+> +{
+> +    file=$1
+> +    timestamp=$2
+> +    update_time=$3
 
-for you to fetch changes up to 79a1c380829225292bf02c6b2de0ef2b93f40f37:
+No need for comments after the function declaration - the prototype
+is obvious from the local variable assignments....
 
-  ext4/001: Fixup file layout with DAX (2016-11-27 18:42:45 +0800)
+...
 
-----------------------------------------------------------------
+> +#Remove log from last run
+> +rm -f $seqres.full
+> +
+> +#install cleaner
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_scratch_mkfs &>> $seqres.full 2>&1 || _fail "mkfs failed"
+> +read tsmin tsmax <<<$(_filesystem_timestamp_range $SCRATCH_DEV)
 
-fstests: update on 2016-11-27
+This is all test setup preamble, so should be at the top.
 
-This update contains:
-o New generic and overlay tests
-o Test behavior changes to generic/182 and ext4/001
-o Bug fixes to btrfs/124-5
+> +if [ $tsmin -eq -1 -a $tsmax -eq -1 ]; then
+> +    _notrun "filesystem $FSTYP timestamp bounds are unknown"
+> +fi
 
-----------------------------------------------------------------
-Amir Goldstein (1):
-      overlay: test ro/rw fd data inconsistecies
+This should be in a _requires_timestamp_range() function, I think.
 
-Darrick J. Wong (1):
-      generic/182: retain existing btrfs behavior when len == 0
+Cheers,
 
-Filipe Manana (1):
-      btrfs/124-5: add missing umount for raid5 tests
-
-Jaegeuk Kim (2):
-      generic: check inode metadata on f{data}sync after power-cut
-      generic: check some inline truncation behaviors
-
-Jan Kara (1):
-      ext4/001: Fixup file layout with DAX
-
- tests/btrfs/124       |   1 +
- tests/btrfs/125       |   1 +
- tests/ext4/001.cfg    |   2 +-
- tests/generic/182     |   6 +--
- tests/generic/182.out |   2 -
- tests/generic/392     | 135 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/392.out |  11 ++++
- tests/generic/393     | 128 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/393.out |  45 +++++++++++++++++
- tests/generic/group   |   2 +
- tests/overlay/016     |  98 ++++++++++++++++++++++++++++++++++++
- tests/overlay/016.out |  12 +++++
- tests/overlay/group   |   1 +
- 13 files changed, 438 insertions(+), 6 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
