@@ -1,79 +1,63 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:4499 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1753960AbcK1Cuk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 27 Nov 2016 21:50:40 -0500
-Subject: Re: [RFC PATCH 0/3] Add testcase for fundamental scrub recovery
-References: <20161122083811.12636-1-quwenruo@cn.fujitsu.com>
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Message-ID: <ccbcb187-99dc-b6c3-7a94-3d6c25a74fc3@cn.fujitsu.com>
-Date: Mon, 28 Nov 2016 10:50:30 +0800
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:45988 "EHLO
+        ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1752058AbcKXX1M (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 24 Nov 2016 18:27:12 -0500
+Date: Fri, 25 Nov 2016 10:26:29 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 4/4] generic: test locking when setting encryption policy
+Message-ID: <20161124232629.GW31101@dastard>
+References: <1479412027-34416-1-git-send-email-ebiggers@google.com>
+ <1479412027-34416-5-git-send-email-ebiggers@google.com>
+ <20161120223536.GL28177@dastard>
+ <20161121192519.GE30672@google.com>
+ <20161121213251.GL31101@dastard>
+ <20161121234106.GH30672@google.com>
 MIME-Version: 1.0
-In-Reply-To: <20161122083811.12636-1-quwenruo@cn.fujitsu.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20161121234106.GH30672@google.com>
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: Eric Biggers <ebiggers@google.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, "Theodore Y . Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>
 List-ID: <fstests@vger.kernel.org>
 
-Any comment?
+On Mon, Nov 21, 2016 at 03:41:06PM -0800, Eric Biggers wrote:
+> On Tue, Nov 22, 2016 at 08:32:51AM +1100, Dave Chinner wrote:
+> > 
+> > This means that reproducing the race condition is going to be
+> > machine dependent regardless of how the test is written.
+> > 
+> > In cases like this for XFS, we tend towards adding a debug sysfs
+> > file to introduce a delay into the code that allows the race to be
+> > triggered reliably. The delay is only included in CONFIG_XFS_DEBUG=y
+> > builds, and the test is conditional on the sysfs file being present.
+> > 
+> > e.g. xfs/051 uses a log recovery delay to allow us to reliably
+> > trigger IO errors in the middle of log recovery and hence exercise
+> > the IO error failure paths in the middle of recovery. This made an
+> > extremely unreliable reproducer into a test case that triggered
+> > reliably on every machine the test is run on....
+> > 
+> > Can something like this be done in this case?
+> > 
+> 
+> I'd really rather not do something like that just for this test, which is really
+> just testing that the kernel does inode_lock()/inode_unlock() in
+> fscrypt_process_policy().  It would be more worthwhile if the testing-only
+> kernel code would help expose many race conditions, not just this one particular
+> race in this particular ioctl.
 
-At 11/22/2016 04:38 PM, Qu Wenruo wrote:
-> Despite the scrub test cases in fstests, there is not even one test case
-> which really checked if scrub can recover data.
->
-> In fact, btrfs scrub for RAID56 will even corrupt correct data stripes.
->
-> So let's start from the needed facilities and check scrub starting from RAID1.
->
-> The main reason the patchset is RFC, is the method I take to corrupt/verify
-> btrfs data.
->
-> unlike other stable fs, like ext* or xfs, which has good tool to
-> manipulate the fs.
->
-> There used to be btrfs-corrupt-block, but it gets fewer and fewer
-> update, no man page nor installed by default.
->
-> Here I take the method I normally do in my scripts: use btrfs-dump-tree
-> (btrfs inspect-internal dump-tree) and use bash to corrupt btrfs
-> pinpointly.
-> It works quite fine for several different mount options which affects
-> how data lies on-disk.
->
-> But the problem is also obvious, bash script is super hard to maintain,
-> and there is no promise that btrfs-dump-tree output won't change.
-> Such change will be destructive.
->
-> But IMHO it's still worthy, or btrfs scrub may break at any time.
->
-> Qu Wenruo (3):
->   fstests: common: rename _require_btrfs to _require_btrfs_subcommand
->   fstests: common/ondisk.btrfs: Introduce function to get btrfs ondisk
->       info
+OK.
 
-Especially for fstests guys, is this OK to use complex bash scripts to 
-extract needed data for btrfs?
+> So if you don't want to have the C version of this test in
+> xfstests, I think it should just be dropped from the series.
 
-Or should we just put things into btrfs-progs (and wait for some time, 
-leaving btrfs raid56 corrupted)
+If there's no other alternative, a test written in C is better than
+nothing.
 
-Thanks,
-Qu
->   fstests: btrfs: Add new test case to check scrub recovery and report
->
->  common/ondisk.btrfs | 113 ++++++++++++++++++++++++++
->  common/rc           |   2 +-
->  tests/btrfs/004     |   2 +-
->  tests/btrfs/048     |   2 +-
->  tests/btrfs/059     |   2 +-
->  tests/btrfs/131     |   2 +-
->  tests/btrfs/132     | 229 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/132.out | 111 +++++++++++++++++++++++++
->  tests/btrfs/group   |   2 +
->  9 files changed, 460 insertions(+), 5 deletions(-)
->  create mode 100644 common/ondisk.btrfs
->  create mode 100755 tests/btrfs/132
->  create mode 100644 tests/btrfs/132.out
->
+Thanks!
 
-
+-Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
