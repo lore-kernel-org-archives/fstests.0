@@ -1,184 +1,189 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:21332 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751031AbcKXBxS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 23 Nov 2016 20:53:18 -0500
-Date: Wed, 23 Nov 2016 17:53:09 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH v2 3/3] ocfs2: test reflinking to inline data files
-Message-ID: <20161124015309.GC30324@birch.djwong.org>
-References: <147986705412.27133.3961713804630246198.stgit@birch.djwong.org>
- <147986706651.27133.4210661621329152871.stgit@birch.djwong.org>
+Received: from mx1.redhat.com ([209.132.183.28]:37042 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750916AbcKYLaC (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 25 Nov 2016 06:30:02 -0500
+Date: Fri, 25 Nov 2016 19:28:55 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] common/rc: teach _scratch_mkfs to handle mkfs option
+ conflicts
+Message-ID: <20161125112855.GH4609@eguan.usersys.redhat.com>
+References: <20161124160643.2438-1-eguan@redhat.com>
+ <20161124200013.GT31101@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <147986706651.27133.4210661621329152871.stgit@birch.djwong.org>
+In-Reply-To: <20161124200013.GT31101@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: david@fromorbit.com, eguan@redhat.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Make sure that we can handle reflinking from and to inline-data files.
-This pounds on a regression test discovered while implementing ocfs2
-reflink support.
+On Fri, Nov 25, 2016 at 07:00:13AM +1100, Dave Chinner wrote:
+> On Fri, Nov 25, 2016 at 12:06:43AM +0800, Eryu Guan wrote:
+> > Currently in _scratch_mkfs only xfs and ext4 could handle the mkfs
+> > failure caused by conflicts between $MKFS_OPTIONS and mkfs options
+> > specified by tests, because of _scratch_mkfs_xfs and
+> > _scratch_mkfs_ext4. This is a very useful functionality that allows
+> > tests to specify mkfs options safely and to test specific fs
+> > configurations, without worrying about mkfs failures caused by these
+> > options.
+> > 
+> > Now teach _scratch_mkfs to handle such mkfs option conflicts for
+> > other filesystems too, i.e. mkfs again only with mkfs options
+> > specified by tests. Also add the ability to filter unnecessary
+> > messages from mkfs stderr.
+> 
+> Nice!
+> 
+> .....
+> > +	local extra_mkfs_options=$*
+> > +	local mkfs_cmd=""
+> > +	local mkfs_filter=""
+> > +	local mkfs_status
+> > +
+> > +	case $FSTYP in
+> > +	xfs)
+> > +		_scratch_mkfs_xfs $extra_mkfs_options
+> > +		;;
+> > +	nfs*)
+> > +		# unable to re-create NFS, just remove all files in
+> > +		# $SCRATCH_MNT to avoid EEXIST caused by the leftover files
+> > +		# created in previous runs
+> > +		_scratch_cleanup_files
+> > +		;;
+> > +	cifs)
+> > +		# unable to re-create CIFS, just remove all files in
+> > +		# $SCRATCH_MNT to avoid EEXIST caused by the leftover files
+> > +		# created in previous runs
+> > +		_scratch_cleanup_files
+> > +		;;
+> > +	ceph)
+> > +		# Don't re-create CephFS, just remove all files
+> > +		_scratch_cleanup_files
+> > +		;;
+> > +	overlay)
+> > +		# unable to re-create overlay, remove all files in $SCRATCH_MNT
+> > +		# to avoid EEXIST caused by the leftover files created in
+> > +		# previous runs
+> > +		_scratch_cleanup_files
+> > +		;;
+> > +	tmpfs)
+> > +		# do nothing for tmpfs
+> > +		;;
+> > +	ext4)
+> > +		_scratch_mkfs_ext4 $extra_mkfs_options
+> > +		;;
+> > +	udf)
+> > +		mkfs_cmd="$MKFS_UDF_PROG"
+> > +		mkfs_filter="cat"
+> > +		;;
+> > +	btrfs)
+> > +		mkfs_cmd="$MKFS_BTRFS_PROG"
+> > +		mkfs_filter="cat"
+> > +		;;
+> > +	ext2|ext3)
+> > +		mkfs_cmd="$MKFS_PROG -t $FSTYP -- -F"
+> > +		mkfs_filter="grep -v -e ^Warning: -e \"^mke2fs \""
+> > +		;;
+> > +	f2fs)
+> > +		mkfs_cmd="$MKFS_F2FS_PROG"
+> > +		mkfs_filter="cat"
+> > +		;;
+> > +	ocfs2)
+> > +		mkfs_cmd="yes | $MKFS_PROG -t $FSTYP --"
+> > +		mkfs_filter="grep -v -e ^mkfs\.ocfs2"
+> > +		;;
+> > +	*)
+> > +		mkfs_cmd="yes | $MKFS_PROG -t $FSTYP --"
+> > +		mkfs_filter="cat"
+> > +		;;
+> > +	esac
+> > +	mkfs_status=$?
+> 
+> I suspect that $? can be undefined at this point - it's value is set
+> by whatever the last command was run, and not all the cases above
+> run a command.  This might be better handled by something like:
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
-v2: Format the fs with the feature flags we need.
----
- tests/ocfs2/001      |   88 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/ocfs2/001.out  |   14 ++++++++
- tests/ocfs2/Makefile |   20 +++++++++++
- tests/ocfs2/group    |    1 +
- 4 files changed, 123 insertions(+)
- create mode 100755 tests/ocfs2/001
- create mode 100644 tests/ocfs2/001.out
- create mode 100644 tests/ocfs2/Makefile
- create mode 100644 tests/ocfs2/group
+I did spend some time on the return value handling, because I didn't
+want to do so many "return"s, and I confirmed that assigning a value
+does reset $? to 0 too, so mkfs_status is always defined.
 
-diff --git a/tests/ocfs2/001 b/tests/ocfs2/001
-new file mode 100755
-index 0000000..0f9765e
---- /dev/null
-+++ b/tests/ocfs2/001
-@@ -0,0 +1,88 @@
-+#! /bin/bash
-+# FS QA Test No. 001
-+#
-+# Ensure that reflink works correctly with inline-data files.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs ocfs2
-+_require_scratch
-+_require_cp_reflink
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs --fs-features=local,unwritten,refcount,inline-data > $seqres.full 2>&1
-+tunefs.ocfs2 --query '%H' $SCRATCH_DEV | grep -q 'inline-data' || \
-+	_notrun "Inline data is not supported."
-+_scratch_mount >> $seqres.full 2>&1
-+
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
-+
-+sz=65536
-+echo "Create the original files"
-+$XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file1 >> $seqres.full
-+echo x > $testdir/file2
-+echo x > $testdir/file3
-+echo y > $testdir/file4
-+$XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file5 >> $seqres.full
-+echo a > $testdir/file6
-+_scratch_cycle_mount
-+
-+echo "reflink into the start of file2"
-+_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
-+
-+echo "reflink past the stuff in file3"
-+_reflink_range $testdir/file1 0 $testdir/file3 $sz $sz >> $seqres.full
-+
-+echo "reflink an inline-data file to a regular one"
-+_cp_reflink $testdir/file4 $testdir/file5 >> $seqres.full
-+
-+echo "reflink an inline-data file to another inline-data file"
-+_cp_reflink $testdir/file4 $testdir/file6 >> $seqres.full
-+
-+echo "Verify the whole mess"
-+_scratch_cycle_mount
-+md5sum $testdir/file* | _filter_scratch
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/ocfs2/001.out b/tests/ocfs2/001.out
-new file mode 100644
-index 0000000..99fa43a
---- /dev/null
-+++ b/tests/ocfs2/001.out
-@@ -0,0 +1,14 @@
-+QA output created by 001
-+Format and mount
-+Create the original files
-+reflink into the start of file2
-+reflink past the stuff in file3
-+reflink an inline-data file to a regular one
-+reflink an inline-data file to another inline-data file
-+Verify the whole mess
-+2d61aa54b58c2e94403fb092c3dbc027  SCRATCH_MNT/test-001/file1
-+2d61aa54b58c2e94403fb092c3dbc027  SCRATCH_MNT/test-001/file2
-+4e68a2e24b6b0f386ab39d01d902293d  SCRATCH_MNT/test-001/file3
-+009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file4
-+009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file5
-+009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file6
-diff --git a/tests/ocfs2/Makefile b/tests/ocfs2/Makefile
-new file mode 100644
-index 0000000..70a4f16
---- /dev/null
-+++ b/tests/ocfs2/Makefile
-@@ -0,0 +1,20 @@
-+#
-+# Copyright (c) 2016 Oracle.  All Rights Reserved.
-+#
-+
-+TOPDIR = ../..
-+include $(TOPDIR)/include/builddefs
-+
-+OCFS2_DIR = ocfs2
-+TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(OCFS2_DIR)
-+
-+include $(BUILDRULES)
-+
-+install:
-+	$(INSTALL) -m 755 -d $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
-+	$(INSTALL) -m 644 group $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
-+
-+# Nothing.
-+install-dev install-lib:
-diff --git a/tests/ocfs2/group b/tests/ocfs2/group
-new file mode 100644
-index 0000000..28e6807
---- /dev/null
-+++ b/tests/ocfs2/group
-@@ -0,0 +1 @@
-+001 auto quick clone
+> 
+> 	case $FSTYP in
+> 	nfs*|cifs|ceph|overlay)
+> 		# unable to re-create this fstyp, just remove all files in
+> 		# $SCRATCH_MNT to avoid EEXIST caused by the leftover files
+> 		# created in previous runs
+> 		_scratch_cleanup_files
+> 		return 0
+> 		;;
+
+But apparently I forgot that I can group these cases together, this
+saves us three "return 0"s, and the logic is easier to understand, I'll
+take this approach.
+
+> 	tmpfs)
+> 		# do nothing
+> 		return 0
+> 		;;
+> 	ext4)
+> 		_scratch_mkfs_ext4 $extra_mkfs_options
+> 		return $?
+> 		;;
+> 	xfs)
+> 		_scratch_mkfs_xfs $extra_mkfs_options
+> 		return $?
+> 		;;
+> 	udf)
+> 		mkfs_cmd="$MKFS_UDF_PROG"
+> 		mkfs_filter="cat"
+> 		;;
+> 	.....
+> > +
+> > +	# return immediately if FSTYP is handled by dedicated helpers
+> > +	if [ -z "$mkfs_cmd" ]; then
+> > +		return $mkfs_status
+> > +	fi
+> 
+> And then this can go as well.
+> 
+> > +
+> > +	# save mkfs output in case conflict means we need to run again.
+> > +	# only the output for the mkfs that applies should be shown
+> > +	eval "$mkfs_cmd $MKFS_OPTIONS $extra_mkfs_options $SCRATCH_DEV" \
+> > +		2>$tmp.mkfserr 1>$tmp.mkfsstd
+> > +	mkfs_status=$?
+> > +
+> > +	# a mkfs failure may be caused by conflicts between $MKFS_OPTIONS and
+> > +	# $extra_mkfs_options
+> > +	if [ $mkfs_status -ne 0 -a -n "$extra_mkfs_options" ]; then
+> > +		(
+> > +		echo -n "** mkfs failed with extra mkfs options "
+> > +		echo "added to \"$MKFS_OPTIONS\" by test $seq **"
+> > +		echo -n "** attempting to mkfs using only test $seq "
+> > +		echo "options: $extra_mkfs_options **"
+> > +		) >> $seqres.full
+> > +
+> > +		# running mkfs again. overwrite previous mkfs output files
+> > +		eval "$mkfs_cmd $extra_mkfs_options $SCRATCH_DEV" \
+> > +			2>$tmp.mkfserr 1>$tmp.mkfsstd
+> > +		mkfs_status=$?
+> > +	fi
+> > +
+> > +	# output stored mkfs output, filtering unnecessary output from stderr
+> > +	cat $tmp.mkfsstd
+> > +	cat $tmp.mkfserr | $mkfs_filter >&2
+> 
+> Perhaps you could make this a function? Because then it can probably
+> be used in _scratch_mkfs_ext4 and _scratch_mkfs_xfs as well?
+
+I thought about it too, but I noticed that there're some codes to setup
+large fs in _scratch_mkfs_{xfs,ext4}, so I didn't dig into them.
+
+But now I think it actually can be done, and I'm testing an updated
+patch, will send v2 for review later, after the new patch passes my
+testing.
+
+Thanks for the review!
+
+Eryu
