@@ -1,63 +1,66 @@
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:45988 "EHLO
-        ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1752058AbcKXX1M (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 24 Nov 2016 18:27:12 -0500
-Date: Fri, 25 Nov 2016 10:26:29 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 4/4] generic: test locking when setting encryption policy
-Message-ID: <20161124232629.GW31101@dastard>
-References: <1479412027-34416-1-git-send-email-ebiggers@google.com>
- <1479412027-34416-5-git-send-email-ebiggers@google.com>
- <20161120223536.GL28177@dastard>
- <20161121192519.GE30672@google.com>
- <20161121213251.GL31101@dastard>
- <20161121234106.GH30672@google.com>
+Received: from fieldses.org ([173.255.197.46]:59066 "EHLO fieldses.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751373AbcKYDrZ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 24 Nov 2016 22:47:25 -0500
+Date: Thu, 24 Nov 2016 22:47:06 -0500
+From: "J. Bruce Fields" <bfields@fieldses.org>
+Subject: Re: [PATCH xfstests] dirstress: Allow ESTALE as well as ENOENT
+Message-ID: <20161125034706.GA20729@fieldses.org>
+References: <20161123222054.GA7900@fieldses.org>
+ <35420A4E-1698-4743-9523-CBF43F2A2DC6@dilger.ca>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161121234106.GH30672@google.com>
+In-Reply-To: <35420A4E-1698-4743-9523-CBF43F2A2DC6@dilger.ca>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers@google.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, "Theodore Y . Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>
+To: Andreas Dilger <adilger@dilger.ca>
+Cc: linux-fsdevel <linux-fsdevel@vger.kernel.org>, fstests@vger.kernel.org, Linux NFS Mailing List <linux-nfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Nov 21, 2016 at 03:41:06PM -0800, Eric Biggers wrote:
-> On Tue, Nov 22, 2016 at 08:32:51AM +1100, Dave Chinner wrote:
+On Wed, Nov 23, 2016 at 04:19:11PM -0700, Andreas Dilger wrote:
+> On Nov 23, 2016, at 3:20 PM, J. Bruce Fields <bfields@fieldses.org> wrote:
 > > 
-> > This means that reproducing the race condition is going to be
-> > machine dependent regardless of how the test is written.
+> > From: "J. Bruce Fields" <bfields@redhat.com>
 > > 
-> > In cases like this for XFS, we tend towards adding a debug sysfs
-> > file to introduce a delay into the code that allows the race to be
-> > triggered reliably. The delay is only included in CONFIG_XFS_DEBUG=y
-> > builds, and the test is conditional on the sysfs file being present.
+> > In the NFS case an attempt to chdir out of a removed directory could result
+> > in ESTALE, and that should not cause the test to fail.
 > > 
-> > e.g. xfs/051 uses a log recovery delay to allow us to reliably
-> > trigger IO errors in the middle of log recovery and hence exercise
-> > the IO error failure paths in the middle of recovery. This made an
-> > extremely unreliable reproducer into a test case that triggered
-> > reliably on every machine the test is run on....
+> > This was causing intermittent failures on generic/011 on NFS.
 > > 
-> > Can something like this be done in this case?
+> > Signed-off-by: J. Bruce Fields <bfields@redhat.com>
+> > ---
+> > src/dirstress.c | 12 ++++++++----
+> > 1 file changed, 8 insertions(+), 4 deletions(-)
 > > 
+> > Sorry, who do xfstests patches go to?--b.
 > 
-> I'd really rather not do something like that just for this test, which is really
-> just testing that the kernel does inode_lock()/inode_unlock() in
-> fscrypt_process_policy().  It would be more worthwhile if the testing-only
-> kernel code would help expose many race conditions, not just this one particular
-> race in this particular ioctl.
-
-OK.
-
-> So if you don't want to have the C version of this test in
-> xfstests, I think it should just be dropped from the series.
-
-If there's no other alternative, a test written in C is better than
-nothing.
+> They are sent to fstests@vger.kernel.org
 
 Thanks!
 
--Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Might be worth something like this too?
+
+--b.
+
+commit 0d61e7b9779d
+Author: J. Bruce Fields <bfields@redhat.com>
+Date:   Thu Nov 24 22:41:26 2016 -0500
+
+    Document fstests mailing list
+    
+    Signed-off-by: J. Bruce Fields <bfields@redhat.com>
+
+diff --git a/README b/README
+index d1f6788a17a3..0a6ac6ece5aa 100644
+--- a/README
++++ b/README
+@@ -248,3 +248,9 @@ Pass/failure:
+     The recent pass/fail history is maintained in the file "check.log".
+     The elapsed time for the most recent pass for each test is kept
+     in "check.time".
++
++__________________
++SUBMITTING PATCHES
++__________________
++
++Send patches to the fstests mailing list at fstests@vger.kernel.org.
