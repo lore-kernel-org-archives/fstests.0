@@ -1,85 +1,84 @@
-Received: from mail.kernel.org ([198.145.29.136]:48622 "EHLO mail.kernel.org"
+Received: from mx1.redhat.com ([209.132.183.28]:56940 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S966396AbcKXVDS (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 24 Nov 2016 16:03:18 -0500
-From: fdmanana@kernel.org
-Subject: [PATCH] fstests: btrfs, add missing umount for raid5 tests 124 and 125
-Date: Thu, 24 Nov 2016 06:25:19 +0000
-Message-Id: <1479968719-10713-1-git-send-email-fdmanana@kernel.org>
+        id S1753806AbcK0Lxq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 27 Nov 2016 06:53:46 -0500
+Message-Id: <201611271153.uARBriG3001593@int-mx11.intmail.prod.int.phx2.redhat.com>
+Date: Sun, 27 Nov 2016 19:53:43 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: [GIT PULL] fstests: updates on 2016-11-27
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+Hi Dave,
 
-The tests mount the second device in the device pool but never unmount
-it, causing the next test to fail.
+Can you please pull the fstests update from the location below? There're new
+generic and overlayfs tests, and two test updates caused by fs behavior changes
+(see below for details).
 
-Example:
+New failure I noticed in this update:
+- overlay/016 is a new case that fails on current Linus tree (4.9-rc6)
+- generic/182 fails on reflink XFS, there's a behavior change pending in XFS
+  list
+- ext4/001 fails on DAX mount, this is also a behavior change pending in ext4
+  tree
 
-$ cat local.config
-export TEST_DEV=/dev/sdb
-export TEST_DIR=/home/fdmanana/btrfs-tests/dev
-export SCRATCH_MNT="/home/fdmanana/btrfs-tests/scratch_1"
-export SCRATCH_DEV_POOL="/dev/sdc /dev/sdd /dev/sde /dev/sdf /dev/sdg"
-export FSTYP=btrfs
+Thanks,
+Eryu
 
-$ ./check btrfs/125 btrfs/126
-FSTYP         -- btrfs
-PLATFORM      -- Linux/x86_64 debian3 4.8.0-rc8-btrfs-next-35+
-MKFS_OPTIONS  -- /dev/sdc
-MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
+The following changes since commit 083ff5827b603f2d646d20a20086fa55aa89b1c1:
 
-btrfs/125 23s ... 22s
-btrfs/126 1s ... - output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/126.out.bad)
-    --- tests/btrfs/126.out	2016-11-24 06:11:42.048372385 +0000
-    +++ /home/fdmanana/git/hub/xfstests/results//btrfs/126.out.bad	2016-11-24 06:16:35.987988895 +0000
-    @@ -1,2 +1,5 @@
-     QA output created by 126
-    -pwrite: Disk quota exceeded
-    +ERROR: /dev/sdc is mounted
-    +mount: /dev/sdc is already mounted or /home/fdmanana/btrfs-tests/scratch_1 busy
-    +       /dev/sdc is already mounted on /home/fdmanana/btrfs-tests/scratch_1
-    +/home/fdmanana/btrfs-tests/scratch_1/test_file: Disk quota exceeded
-    ...
-    (Run 'diff -u tests/btrfs/126.out /home/fdmanana/git/hub/xfstests/results//btrfs/126.out.bad'  to see the entire diff)
-Ran: btrfs/125 btrfs/126
-Failures: btrfs/126
-Failed 1 of 2 tests
+  fstests: Introduce check for explicit SHARED extent flag reporting (2016-11-18 16:41:06 +0800)
 
-So just make sure those test unmount the device before they finish.
+are available in the git repository at:
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/124 | 1 +
- tests/btrfs/125 | 1 +
- 2 files changed, 2 insertions(+)
+  https://github.com/guaneryu/xfstests.git for-dave
 
-diff --git a/tests/btrfs/124 b/tests/btrfs/124
-index 2618a26..7206094 100755
---- a/tests/btrfs/124
-+++ b/tests/btrfs/124
-@@ -159,6 +159,7 @@ if [ "$checkpoint1" != "$checkpoint3" ]; then
- 	echo "Inital sum does not match with data on dev2 written by balance"
- fi
- 
-+$UMOUNT_PROG $dev2
- _scratch_dev_pool_put
- _test_mount
- 
-diff --git a/tests/btrfs/125 b/tests/btrfs/125
-index 1062b87..91aa8d8 100755
---- a/tests/btrfs/125
-+++ b/tests/btrfs/125
-@@ -175,6 +175,7 @@ if [ "$checkpoint1" != "$checkpoint3" ]; then
- 	echo "Inital sum does not match with data on dev2 written by balance"
- fi
- 
-+$UMOUNT_PROG $dev2
- _scratch_dev_pool_put
- _test_mount
- 
--- 
-2.7.0.rc3
+for you to fetch changes up to 79a1c380829225292bf02c6b2de0ef2b93f40f37:
 
+  ext4/001: Fixup file layout with DAX (2016-11-27 18:42:45 +0800)
+
+----------------------------------------------------------------
+
+fstests: update on 2016-11-27
+
+This update contains:
+o New generic and overlay tests
+o Test behavior changes to generic/182 and ext4/001
+o Bug fixes to btrfs/124-5
+
+----------------------------------------------------------------
+Amir Goldstein (1):
+      overlay: test ro/rw fd data inconsistecies
+
+Darrick J. Wong (1):
+      generic/182: retain existing btrfs behavior when len == 0
+
+Filipe Manana (1):
+      btrfs/124-5: add missing umount for raid5 tests
+
+Jaegeuk Kim (2):
+      generic: check inode metadata on f{data}sync after power-cut
+      generic: check some inline truncation behaviors
+
+Jan Kara (1):
+      ext4/001: Fixup file layout with DAX
+
+ tests/btrfs/124       |   1 +
+ tests/btrfs/125       |   1 +
+ tests/ext4/001.cfg    |   2 +-
+ tests/generic/182     |   6 +--
+ tests/generic/182.out |   2 -
+ tests/generic/392     | 135 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/392.out |  11 ++++
+ tests/generic/393     | 128 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/393.out |  45 +++++++++++++++++
+ tests/generic/group   |   2 +
+ tests/overlay/016     |  98 ++++++++++++++++++++++++++++++++++++
+ tests/overlay/016.out |  12 +++++
+ tests/overlay/group   |   1 +
+ 13 files changed, 438 insertions(+), 6 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
