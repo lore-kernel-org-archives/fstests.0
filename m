@@ -1,13 +1,13 @@
-Received: from mail-pg0-f53.google.com ([74.125.83.53]:33487 "EHLO
-        mail-pg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755337AbcK1WRZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 28 Nov 2016 17:17:25 -0500
-Received: by mail-pg0-f53.google.com with SMTP id 3so61393473pgd.0
-        for <fstests@vger.kernel.org>; Mon, 28 Nov 2016 14:17:24 -0800 (PST)
+Received: from mail-pf0-f172.google.com ([209.85.192.172]:33912 "EHLO
+        mail-pf0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755464AbcK1WR1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 28 Nov 2016 17:17:27 -0500
+Received: by mail-pf0-f172.google.com with SMTP id c4so27107584pfb.1
+        for <fstests@vger.kernel.org>; Mon, 28 Nov 2016 14:17:26 -0800 (PST)
 From: Eric Biggers <ebiggers@google.com>
-Subject: [PATCH v2 2/5] generic: test setting and getting encryption policies
-Date: Mon, 28 Nov 2016 14:16:39 -0800
-Message-Id: <1480371402-12204-3-git-send-email-ebiggers@google.com>
+Subject: [PATCH v2 3/5] generic: test validation of encryption policy structure
+Date: Mon, 28 Nov 2016 14:16:40 -0800
+Message-Id: <1480371402-12204-4-git-send-email-ebiggers@google.com>
 In-Reply-To: <1480371402-12204-1-git-send-email-ebiggers@google.com>
 References: <1480371402-12204-1-git-send-email-ebiggers@google.com>
 Sender: fstests-owner@vger.kernel.org
@@ -15,28 +15,29 @@ To: fstests@vger.kernel.org
 Cc: Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>, Michael Halcrow <mhalcrow@google.com>, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-Several kernel bugs were recently fixed regarding the constraints for
-setting encryption policies.  Add tests for these cases and a few more.
+Add an xfstest which verifies the kernel performs basic validation of
+the encryption policy structure.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- tests/generic/400     | 126 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/400.out |  43 +++++++++++++++++
- tests/generic/group   |   1 +
- 3 files changed, 170 insertions(+)
- create mode 100755 tests/generic/400
- create mode 100644 tests/generic/400.out
+ tests/generic/401     | 83 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/401.out | 18 +++++++++++
+ tests/generic/group   |  1 +
+ 3 files changed, 102 insertions(+)
+ create mode 100755 tests/generic/401
+ create mode 100644 tests/generic/401.out
 
-diff --git a/tests/generic/400 b/tests/generic/400
+diff --git a/tests/generic/401 b/tests/generic/401
 new file mode 100755
-index 0000000..5baf5e7
+index 0000000..553c547
 --- /dev/null
-+++ b/tests/generic/400
-@@ -0,0 +1,126 @@
++++ b/tests/generic/401
+@@ -0,0 +1,83 @@
 +#! /bin/bash
-+# FS QA Test generic/400
++# FS QA Test generic/401
 +#
-+# Test setting and getting encryption policies.
++# Test that FS_IOC_SET_ENCRYPTION_POLICY correctly validates the fscrypt_policy
++# structure that userspace passes to it.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2016 Google, Inc.  All Rights Reserved.
@@ -84,139 +85,70 @@ index 0000000..5baf5e7
 +# real QA test starts here
 +_supported_fs ext4 f2fs
 +_supported_os Linux
-+_require_xfs_io_command "get_encpolicy"
 +_require_xfs_io_command "set_encpolicy"
 +_require_scratch
 +_require_encryption
-+_require_user
 +
 +_scratch_mkfs_encrypted >> $seqres.full
 +_scratch_mount
++mkdir $SCRATCH_MNT/dir
 +cd $SCRATCH_MNT
 +
-+check_no_policy()
-+{
-+	# When a file is unencrypted, FS_IOC_GET_ENCRYPTION_POLICY currently
-+	# fails with ENOENT on ext4 but with ENODATA on f2fs.  It's planned to
-+	# consistently use ENODATA, but for now make this test accept both.
-+	$XFS_IO_PROG -c "get_encpolicy" $1 |&
-+		sed -e 's/No such file or directory/No data available/'
-+}
++echo -e "\n*** Invalid contents encryption mode ***"
++$XFS_IO_PROG -c "set_encpolicy -c 0xFF" dir
 +
-+# Should be able to set an encryption policy on an empty directory
-+echo -e "\n*** Setting encryption policy on empty directory ***"
-+mkdir empty_dir
-+check_no_policy empty_dir
-+$XFS_IO_PROG -c "set_encpolicy 0000111122223333" empty_dir
-+$XFS_IO_PROG -c "get_encpolicy" empty_dir
++echo -e "\n*** Invalid filenames encryption mode ***"
++$XFS_IO_PROG -c "set_encpolicy -n 0xFF" dir
 +
-+# Should be able to set the same policy again, but not a different one
-+echo -e "\n*** Setting encryption policy again ***"
-+$XFS_IO_PROG -c "set_encpolicy 0000111122223333" empty_dir
-+$XFS_IO_PROG -c "get_encpolicy" empty_dir
-+$XFS_IO_PROG -c "set_encpolicy 4444555566667777" empty_dir
-+$XFS_IO_PROG -c "get_encpolicy" empty_dir
++echo -e "\n*** Invalid flags ***"
++$XFS_IO_PROG -c "set_encpolicy -f 0xFF" dir
 +
-+# Should *not* be able to set an encryption policy on a nonempty directory
-+echo -e "\n*** Setting encryption policy on nonempty directory ***"
-+mkdir nonempty_dir
-+touch nonempty_dir/file
-+$XFS_IO_PROG -c "set_encpolicy" nonempty_dir
-+check_no_policy nonempty_dir
++echo -e "\n*** Invalid policy version ***"
++$XFS_IO_PROG -c "set_encpolicy -v 0xFF" dir
 +
-+# Should *not* be able to set an encryption policy on a nondirectory file, even
-+# an empty one.  Regression test for 002ced4be642: "fscrypto: only allow setting
-+# encryption policy on directories".
-+echo -e "\n*** Setting encryption policy on nondirectory ***"
-+touch nondirectory
-+$XFS_IO_PROG -c "set_encpolicy" nondirectory
-+check_no_policy nondirectory
-+
-+# Should *not* be able to set an encryption policy on another user's directory.
-+# Regression test for 163ae1c6ad62: "fscrypto: add authorization check for
-+# setting encryption policy".
-+echo -e "\n*** Setting encryption policy on another user's directory ***"
-+mkdir unauthorized_dir
-+su $qa_user -c "$XFS_IO_PROG -c \"set_encpolicy\" unauthorized_dir"
-+check_no_policy unauthorized_dir
-+
-+# Should *not* be able to set an encryption policy on a directory on a
-+# filesystem mounted readonly.  Regression test for ba63f23d69a3: "fscrypto:
-+# require write access to mount to set encryption policy".  Test both a regular
-+# readonly filesystem and a readonly bind mount of a read-write filesystem.
-+echo -e "\n*** Setting encryption policy on readonly filesystem ***"
-+mkdir ro_dir ro_bind_mnt
-+_scratch_remount ro
-+$XFS_IO_PROG -c "set_encpolicy" ro_dir
-+check_no_policy ro_dir
-+_scratch_remount rw
-+mount --bind $SCRATCH_MNT ro_bind_mnt
-+mount -o remount,ro ro_bind_mnt
-+$XFS_IO_PROG -c "set_encpolicy" ro_bind_mnt/ro_dir
-+check_no_policy ro_bind_mnt/ro_dir
-+umount ro_bind_mnt
++# Currently, the only supported combination of modes is AES-256-XTS for contents
++# and AES-256-CTS for filenames.  Nothing else should be accepted.
++echo -e "\n*** Invalid combinations of modes ***"
++$XFS_IO_PROG -c "set_encpolicy -c AES-256-CTS -n AES-256-CTS" dir
++$XFS_IO_PROG -c "set_encpolicy -c AES-256-CTS -n AES-256-XTS" dir
++$XFS_IO_PROG -c "set_encpolicy -c AES-256-XTS -n AES-256-XTS" dir
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/400.out b/tests/generic/400.out
+diff --git a/tests/generic/401.out b/tests/generic/401.out
 new file mode 100644
-index 0000000..79dc596
+index 0000000..eb6142e
 --- /dev/null
-+++ b/tests/generic/400.out
-@@ -0,0 +1,43 @@
-+QA output created by 400
++++ b/tests/generic/401.out
+@@ -0,0 +1,18 @@
++QA output created by 401
 +
-+*** Setting encryption policy on empty directory ***
-+empty_dir: failed to get encryption policy: No data available
-+Encryption policy for empty_dir:
-+	Policy version: 0
-+	Master key descriptor: 0000111122223333
-+	Contents encryption mode: 1 (AES-256-XTS)
-+	Filenames encryption mode: 4 (AES-256-CTS)
-+	Flags: 0x02
++*** Invalid contents encryption mode ***
++dir: failed to set encryption policy: Invalid argument
 +
-+*** Setting encryption policy again ***
-+Encryption policy for empty_dir:
-+	Policy version: 0
-+	Master key descriptor: 0000111122223333
-+	Contents encryption mode: 1 (AES-256-XTS)
-+	Filenames encryption mode: 4 (AES-256-CTS)
-+	Flags: 0x02
-+empty_dir: failed to set encryption policy: Invalid argument
-+Encryption policy for empty_dir:
-+	Policy version: 0
-+	Master key descriptor: 0000111122223333
-+	Contents encryption mode: 1 (AES-256-XTS)
-+	Filenames encryption mode: 4 (AES-256-CTS)
-+	Flags: 0x02
++*** Invalid filenames encryption mode ***
++dir: failed to set encryption policy: Invalid argument
 +
-+*** Setting encryption policy on nonempty directory ***
-+nonempty_dir: failed to set encryption policy: Directory not empty
-+nonempty_dir: failed to get encryption policy: No data available
++*** Invalid flags ***
++dir: failed to set encryption policy: Invalid argument
 +
-+*** Setting encryption policy on nondirectory ***
-+nondirectory: failed to set encryption policy: Invalid argument
-+nondirectory: failed to get encryption policy: No data available
++*** Invalid policy version ***
++dir: failed to set encryption policy: Invalid argument
 +
-+*** Setting encryption policy on another user's directory ***
-+unauthorized_dir: failed to set encryption policy: Permission denied
-+unauthorized_dir: failed to get encryption policy: No data available
-+
-+*** Setting encryption policy on readonly filesystem ***
-+ro_dir: failed to set encryption policy: Read-only file system
-+ro_dir: failed to get encryption policy: No data available
-+ro_bind_mnt/ro_dir: failed to set encryption policy: Read-only file system
-+ro_bind_mnt/ro_dir: failed to get encryption policy: No data available
++*** Invalid combinations of modes ***
++dir: failed to set encryption policy: Invalid argument
++dir: failed to set encryption policy: Invalid argument
++dir: failed to set encryption policy: Invalid argument
 diff --git a/tests/generic/group b/tests/generic/group
-index 2c16bd1..3f148a2 100644
+index 3f148a2..a3438cf 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -394,3 +394,4 @@
- 389 auto quick acl
+@@ -395,3 +395,4 @@
  390 auto freeze stress dangerous
  391 auto quick rw
-+400 auto quick encrypt
+ 400 auto quick encrypt
++401 auto quick encrypt
 -- 
 2.8.0.rc3.226.g39d4020
 
