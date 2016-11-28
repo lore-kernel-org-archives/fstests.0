@@ -1,13 +1,13 @@
-Received: from mail-pg0-f42.google.com ([74.125.83.42]:36787 "EHLO
-        mail-pg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755464AbcK1WR2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 28 Nov 2016 17:17:28 -0500
-Received: by mail-pg0-f42.google.com with SMTP id f188so61084193pgc.3
-        for <fstests@vger.kernel.org>; Mon, 28 Nov 2016 14:17:28 -0800 (PST)
+Received: from mail-pf0-f182.google.com ([209.85.192.182]:33917 "EHLO
+        mail-pf0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755470AbcK1WRa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 28 Nov 2016 17:17:30 -0500
+Received: by mail-pf0-f182.google.com with SMTP id c4so27107872pfb.1
+        for <fstests@vger.kernel.org>; Mon, 28 Nov 2016 14:17:30 -0800 (PST)
 From: Eric Biggers <ebiggers@google.com>
-Subject: [PATCH v2 4/5] generic: test encrypted file access
-Date: Mon, 28 Nov 2016 14:16:41 -0800
-Message-Id: <1480371402-12204-5-git-send-email-ebiggers@google.com>
+Subject: [PATCH v2 5/5] generic: test for weaknesses in filesystem encryption
+Date: Mon, 28 Nov 2016 14:16:42 -0800
+Message-Id: <1480371402-12204-6-git-send-email-ebiggers@google.com>
 In-Reply-To: <1480371402-12204-1-git-send-email-ebiggers@google.com>
 References: <1480371402-12204-1-git-send-email-ebiggers@google.com>
 Sender: fstests-owner@vger.kernel.org
@@ -15,37 +15,51 @@ To: fstests@vger.kernel.org
 Cc: Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>, Michael Halcrow <mhalcrow@google.com>, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-Test accessing encrypted files and directories, both with and without
-the encryption key.  As noted in the comment, this test is expected to
-fail on some old kernels.
+Add an xfstest which can detect some basic crypto mistakes that would
+reduce the confidentiality guarantee provided by filesystem encryption.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- tests/generic/402     | 145 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/402.out |  11 ++++
+ common/config         |   1 +
+ tests/generic/403     | 155 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/403.out |   3 +
  tests/generic/group   |   1 +
- 3 files changed, 157 insertions(+)
- create mode 100755 tests/generic/402
- create mode 100644 tests/generic/402.out
+ 4 files changed, 160 insertions(+)
+ create mode 100755 tests/generic/403
+ create mode 100644 tests/generic/403.out
 
-diff --git a/tests/generic/402 b/tests/generic/402
+diff --git a/common/config b/common/config
+index 3727ec0..6cce7ce 100644
+--- a/common/config
++++ b/common/config
+@@ -203,6 +203,7 @@ export UUIDGEN_PROG="`set_prog_path uuidgen`"
+ export GETRICHACL_PROG="`set_prog_path getrichacl`"
+ export SETRICHACL_PROG="`set_prog_path setrichacl`"
+ export KEYCTL_PROG="`set_prog_path keyctl`"
++export XZ_PROG="`set_prog_path xz`"
+ 
+ # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+ # newer systems have udevadm command but older systems like RHEL5 don't.
+diff --git a/tests/generic/403 b/tests/generic/403
 new file mode 100755
-index 0000000..f51b99f
+index 0000000..0ca3647
 --- /dev/null
-+++ b/tests/generic/402
-@@ -0,0 +1,145 @@
++++ b/tests/generic/403
+@@ -0,0 +1,155 @@
 +#! /bin/bash
-+# FS QA Test generic/402
++# FS QA Test generic/403
 +#
-+# Test accessing encrypted files and directories, both with and without the
-+# encryption key.  Access with the encryption key is more of a sanity check and
-+# is not intended to fully test all the encrypted I/O paths; to do that you'd
-+# need to run all the xfstests with encryption enabled.  Access without the
-+# encryption key, on the other hand, should result in some particular behaviors.
++# Check for weaknesses in filesystem encryption involving the same ciphertext
++# being repeated.  For file contents, we fill a small filesystem with large
++# files of 0's and verify the filesystem is incompressible.  For filenames, we
++# create an identical symlink in two different directories and verify the
++# ciphertext filenames and symlink targets are different.
 +#
-+# Note that this test uses the common key prefix (fscrypt:), which wasn't
-+# supported by ext4 before 4.8 and f2fs before 4.6.  It's expected that this
-+# test will fail on such old kernels.
++# This test can detect some basic cryptographic mistakes such as nonce reuse
++# (across files), initialization vector reuse (across blocks), or data somehow
++# being left in plaintext by accident.  For example, it detects the
++# initialization vector reuse bug fixed in commit 02fc59a0d28f ("f2fs/crypto:
++# fix xts_tweak initialization").
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2016 Google, Inc.  All Rights Reserved.
@@ -95,116 +109,116 @@ index 0000000..f51b99f
 +_supported_os Linux
 +_require_xfs_io_command "set_encpolicy"
 +_require_scratch
++_require_command "$XZ_PROG" xz
 +_require_command "$KEYCTL_PROG" keyctl
 +_require_encryption
 +
-+_scratch_mkfs_encrypted >> $seqres.full
++# Set up a small (32 MB) filesystem containing an encrypted directory.
++
++fs_size=$((32 * 1024 * 1024))
++MKFS_OPTIONS="$MKFS_OPTIONS -O encrypt" \
++	_scratch_mkfs_sized $fs_size &>> $seqres.full
 +_scratch_mount
 +
-+mkdir $SCRATCH_MNT/edir $SCRATCH_MNT/ref_dir
 +keydesc=$(_generate_encryption_key)
-+$XFS_IO_PROG -c "set_encpolicy $keydesc" $SCRATCH_MNT/edir
-+for dir in $SCRATCH_MNT/edir $SCRATCH_MNT/ref_dir; do
-+	touch $dir/empty > /dev/null
-+	$XFS_IO_PROG -t -f -c "pwrite 0 4k" $dir/a > /dev/null
-+	$XFS_IO_PROG -t -f -c "pwrite 0 33k" $dir/abcdefghijklmnopqrstuvwxyz > /dev/null
-+	maxname=$(yes | head -255 | tr -d '\n') # 255 character filename
-+	$XFS_IO_PROG -t -f -c "pwrite 0 1k" $dir/$maxname > /dev/null
-+	ln -s a $dir/symlink
-+	ln -s abcdefghijklmnopqrstuvwxyz $dir/symlink2
-+	ln -s $maxname $dir/symlink3
-+	mkdir $dir/subdir
-+	mkdir $dir/subdir/subsubdir
-+done
-+# Diff encrypted directory with unencrypted reference directory
-+diff -r $SCRATCH_MNT/edir $SCRATCH_MNT/ref_dir
-+# Cycle mount and diff again
-+_scratch_cycle_mount
-+diff -r $SCRATCH_MNT/edir $SCRATCH_MNT/ref_dir
++mkdir $SCRATCH_MNT/encrypted_dir
++$XFS_IO_PROG -c "set_encpolicy $keydesc" $SCRATCH_MNT/encrypted_dir
++
++# Create the "same" symlink in two different directories.
++# Later we'll check both the name and target of the symlink.
++mkdir $SCRATCH_MNT/encrypted_dir/subdir1
++mkdir $SCRATCH_MNT/encrypted_dir/subdir2
++ln -s symlink_target $SCRATCH_MNT/encrypted_dir/subdir1/symlink
++ln -s symlink_target $SCRATCH_MNT/encrypted_dir/subdir2/symlink
 +
 +#
-+# Now try accessing the files without the encryption key.  It should still be
-+# possible to list the directory and remove files.  But filenames should be
-+# encrypted, and it should not be possible to read regular files or to create
-+# new files or subdirectories.
++# Write files of 1 MB of all the same byte until we hit ENOSPC.  Note that we
++# must not create sparse files, since the contents of sparse files are not
++# stored on-disk.  Also, we create multiple files rather than one big file
++# because we want to test for reuse of per-file keys.
 +#
-+# Note that we cannot simply use ls -R to verify the files because the encrypted
-+# filenames are unpredictable.  By design, the key used to encrypt a directory's
-+# filenames is derived from the master key (the key in the keyring) and a nonce
-+# generated by the kernel.  Hence, the encrypted filenames will be different
-+# every time this test is run, even if we were to put a fixed key into the
-+# keyring instead of a random one.  The same applies to symlink targets.
++total_file_size=0
++i=1
++while true; do
++	file=$SCRATCH_MNT/encrypted_dir/file$i
++	if ! xfs_io -f $file -c 'pwrite 0 1M' &> $tmp.out; then
++		if ! grep -q 'No space left on device' $tmp.out; then
++			echo "FAIL: unexpected pwrite failure"
++			cat $tmp.out
++		elif [ -e $file ]; then
++			total_file_size=$((total_file_size + $(stat -c %s $file)))
++		fi
++		break
++	fi
++	total_file_size=$((total_file_size + $(stat -c %s $file)))
++	i=$((i + 1))
++	if [ $i -ge 33 ]; then
++		echo "FAIL: filesystem never filled up!"
++		break
++	fi
++done
++
++# We shouldn't have been able to write more data than we had space for.
++if (( $total_file_size > $fs_size )); then
++	echo "FAIL: wrote $total_file_size bytes but should have only" \
++		"had space for $fs_size bytes at most"
++fi
++
 +#
-+# Also, there are some inconsistencies in which error codes are returned on
-+# different kernel versions and filesystems when trying to create a file or
-+# subdirectory without access to the parent directory's encryption key.  For now
-+# we just accept multiple error codes.
++# Unmount the filesystem and compute its compressed size.  It must be no smaller
++# than the amount of data that was written; otherwise there was a compromise in
++# the confidentiality of the data.  False positives should not be possible
++# because filesystem metadata will also contribute to the compressed size.
++#
++# Note: it's important to use a strong compressor such as xz which can detect
++# redundancy across the whole filesystem.  For a 32 MB filesystem, xz -8 is
++# sufficient because it uses a 32 MB sliding window for compression.  At this
++# setting, compression will take 370 MB of memory as documented in xz(1).
 +#
 +_unlink_encryption_key $keydesc
-+_scratch_cycle_mount
++_scratch_unmount
++fs_compressed_size=$(head -c $fs_size $SCRATCH_DEV | xz -8 | wc -c)
 +
-+# Check that unencrypted names aren't there
-+stat $SCRATCH_MNT/edir/empty |& _filter_scratch
-+stat $SCRATCH_MNT/edir/symlink |& _filter_scratch
++if (( $fs_compressed_size < $total_file_size )); then
++	echo "FAIL: filesystem was compressible" \
++		"($total_file_size bytes => $fs_compressed_size bytes)"
++else
++	echo "PASS: ciphertexts were not repeated for contents"
++fi
 +
-+# Check that the correct numbers of files and subdirectories are there
-+ls $SCRATCH_MNT/edir | wc -l
-+find $SCRATCH_MNT/edir -mindepth 2 -maxdepth 2 -type d | wc -l
-+
-+# Try to read a nondirectory file (should fail with ENOKEY)
-+md5sum $(find $SCRATCH_MNT/edir -maxdepth 1 -type f | head -1) |& \
-+		cut -d ' ' -f3-
-+
-+filter_enoent()
-+{
-+	sed -e 's/No such file or directory/Permission denied/'
-+}
-+
-+filter_eperm()
-+{
-+	sed -e 's/Operation not permitted/Permission denied/'
-+}
-+
-+# Try to create new files and directories in the encrypted directory, both with
-+# and without using correctly base-64 encoded filenames.  These should all fail.
-+$XFS_IO_PROG -f $SCRATCH_MNT/edir/newfile |& filter_enoent | _filter_scratch
-+mkdir $SCRATCH_MNT/edir/newdir |& filter_enoent | _filter_scratch
-+$XFS_IO_PROG -f $SCRATCH_MNT/edir/0123456789abcdef |& filter_eperm | _filter_scratch
-+mkdir $SCRATCH_MNT/edir/0123456789abcdef |& filter_eperm | _filter_scratch
-+
-+# Delete the encrypted directory (should succeed)
-+rm -r $SCRATCH_MNT/edir
-+stat $SCRATCH_MNT/edir |& _filter_scratch
++# Verify that encrypted filenames and symlink targets were not reused.  Note
++# that since the ciphertexts should be unpredictable, we cannot simply include
++# the expected names in the expected output file.
++_scratch_mount
++find $SCRATCH_MNT/encrypted_dir -type l | wc -l
++link1=$(find $SCRATCH_MNT/encrypted_dir -type l | head -1)
++link2=$(find $SCRATCH_MNT/encrypted_dir -type l | tail -1)
++[ $(basename $link1) = $(basename $link2) ] && \
++	echo "Encrypted filenames were reused!"
++[ $(readlink $link1) = $(readlink $link2) ] && \
++	echo "Encrypted symlink targets were reused!"
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/402.out b/tests/generic/402.out
+diff --git a/tests/generic/403.out b/tests/generic/403.out
 new file mode 100644
-index 0000000..700d056
+index 0000000..05c1eaa
 --- /dev/null
-+++ b/tests/generic/402.out
-@@ -0,0 +1,11 @@
-+QA output created by 402
-+stat: cannot stat 'SCRATCH_MNT/edir/empty': No such file or directory
-+stat: cannot stat 'SCRATCH_MNT/edir/symlink': No such file or directory
-+8
-+1
-+Required key not available
-+SCRATCH_MNT/edir/newfile: Permission denied
-+mkdir: cannot create directory 'SCRATCH_MNT/edir/newdir': Permission denied
-+SCRATCH_MNT/edir/0123456789abcdef: Permission denied
-+mkdir: cannot create directory 'SCRATCH_MNT/edir/0123456789abcdef': Permission denied
-+stat: cannot stat 'SCRATCH_MNT/edir': No such file or directory
++++ b/tests/generic/403.out
+@@ -0,0 +1,3 @@
++QA output created by 403
++PASS: ciphertexts were not repeated for contents
++2
 diff --git a/tests/generic/group b/tests/generic/group
-index a3438cf..7af053d 100644
+index 7af053d..eb9361e 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -396,3 +396,4 @@
- 391 auto quick rw
+@@ -397,3 +397,4 @@
  400 auto quick encrypt
  401 auto quick encrypt
-+402 auto quick encrypt
+ 402 auto quick encrypt
++403 auto encrypt
 -- 
 2.8.0.rc3.226.g39d4020
 
