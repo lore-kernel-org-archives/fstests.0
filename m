@@ -1,131 +1,189 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:60724 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1755945AbcK2Iok (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 29 Nov 2016 03:44:40 -0500
-Subject: Re: [PATCH 01/10] fstests: common: Introduce function to check qgroup
- correctness
-References: <20161129073303.14776-1-quwenruo@cn.fujitsu.com>
- <20161129073303.14776-2-quwenruo@cn.fujitsu.com>
- <20161129081623.GM22989@eguan.usersys.redhat.com>
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Message-ID: <03813a09-9d7d-0d9d-3b04-02e79c3b3ec3@cn.fujitsu.com>
-Date: Tue, 29 Nov 2016 16:44:32 +0800
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:35037 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933177AbcK2Ixo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 29 Nov 2016 03:53:44 -0500
 MIME-Version: 1.0
-In-Reply-To: <20161129081623.GM22989@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+In-Reply-To: <1480018332-16567-1-git-send-email-amir73il@gmail.com>
+References: <1480018332-16567-1-git-send-email-amir73il@gmail.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Tue, 29 Nov 2016 10:53:36 +0200
+Message-ID: <CAOQ4uxgEgNJtFfauUTXAr9YedbJeNFrZaWAUbEJUzycf=r3Emw@mail.gmail.com>
+Subject: Re: [PATCH] overlay: test ro/rw fd data inconsistecies
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-
-
-At 11/29/2016 04:16 PM, Eryu Guan wrote:
-> On Tue, Nov 29, 2016 at 03:32:54PM +0800, Qu Wenruo wrote:
->> Old btrfs qgroup test cases uses fix golden output numbers, which limits
->> the coverage since they can't handle mount options like compress or
->> inode_map, and cause false alert.
->>
->> Introduce _btrfs_check_scratch_qgroup() function to check qgroup
->> correctness using "btrfs check --qgroup-report" function, which will
->> follow the way kernel handle qgroup and are proved very reliable.
->>
->> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
->> ---
->>  common/rc | 19 +++++++++++++++++++
->>  1 file changed, 19 insertions(+)
->>
->> diff --git a/common/rc b/common/rc
->> index 8c99306..35d2d56 100644
->> --- a/common/rc
->> +++ b/common/rc
->> @@ -3018,6 +3018,25 @@ _require_deletable_scratch_dev_pool()
->>  	done
->>  }
->>
->> +# We check if "btrfs check" support to check qgroup correctness
->> +# Old fixed golden output can cover case like compress and inode_map
->> +# mount options, which limits the coverage
->> +_require_btrfs_check_qgroup()
->> +{
->> +	_require_command "$BTRFS_UTIL_PROG" btrfs
->> +	output=$($BTRFS_UTIL_PROG check --help | grep "qgroup-report")
->> +	if [ -z "$output" ]; then
+On Thu, Nov 24, 2016 at 10:12 PM, Amir Goldstein <amir73il@gmail.com> wrote:
+> Introduce a new test to demonstrates a known issue with overlayfs:
+> - process A opens file F for read
+> - process B writes new data to file F
+> - process A reads old data from file F
 >
-> No need to save command output to a var, you can check the return value
-> of btrfs, e.g.
->
-> 	if ! $BTRFS_UTIL_PROG check --help | grep -q "qgroup-report"; then
-> 		_notrun "..."
-> 	fi
+> This issue is about to be fixed with a patch set by Miklos Szeredi.
 
-Thanks for the advice.
+Eryu and all,
 
-I'm not familiar with bash gramma, like the difference of [] or without [].
-So I choose the tried and true method.
+I wanted to ask what is the common practice for introducing tests for
+know issues
+that are *about* to be solved.
 
-Anyway I'll change it in next version.
+What is the preferred timing for merging these sort of tests?
+Is it productive to have these tests merged before a fix is merged to master?
+Before a fix is queued for next?
+Before a fix is available?
+
+I am asking because there are several known issues for overlayfs
+whose fixes are in several different states of maturity and I would like
+to know how to treat the tests I write for them.
+
+FYI, the fix for the test in this patch (test ro/rw fd data inconsistencies)
+is not queued for next yet, but I am hoping it will be.
+Miklos?
 
 >
-> The output is only needed when we need to do further operations on it,
-> e.g. in _require_xfs_io_command.
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+>  tests/overlay/016     | 98 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/016.out | 12 +++++++
+>  tests/overlay/group   |  1 +
+>  3 files changed, 111 insertions(+)
+>  create mode 100755 tests/overlay/016
+>  create mode 100644 tests/overlay/016.out
 >
->> +		_notrun "$BTRFS_UTIL_PROG too old (must support 'check --qgroup-report')"
->> +	fi
->> +}
->> +
->> +_btrfs_check_scratch_qgroup()
->> +{
->> +	_require_btrfs_check_qgroup
+> diff --git a/tests/overlay/016 b/tests/overlay/016
+> new file mode 100755
+> index 0000000..6d3e339
+> --- /dev/null
+> +++ b/tests/overlay/016
+> @@ -0,0 +1,98 @@
+> +#! /bin/bash
+> +# FSQA Test No. 016
+> +#
+> +# Test ro/rw fd data inconsistecies
+> +#
+> +# This simple test demonstrates a known issue with overlayfs:
+> +# - process A opens file F for read
+> +# - process B writes new data to file F
+> +# - process A reads old data from file F
+> +#
+> +#-----------------------------------------------------------------------
+> +#
+> +# Copyright (C) 2016 CTERA Networks. All Rights Reserved.
+> +# Author: Amir Goldstein <amir73il@gmail.com>
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +tmp=/tmp/$$
+> +status=1       # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs overlay
+> +_supported_os Linux
+> +_require_scratch
+> +
+> +rm -f $seqres.full
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +
+> +# Create our test files.
+> +lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
+> +mkdir -p $lowerdir
+> +echo "This is old news" > $lowerdir/foo
+> +echo "This is old news" > $lowerdir/bar
+> +
+> +_scratch_mount
+> +
+> +cd $SCRATCH_MNT
+> +
+> +#
+> +# case #1:
+> +# open file for read (rofd)
+> +# open file for write (rwfd)
+> +# write to rwfd
+> +# read from rofd
+> +#
+> +$XFS_IO_PROG << EOF | _filter_xfs_io
+> +open -r foo
+> +open foo
+> +pwrite -S 0x61 0 16
+> +file 0
+> +pread -v 0 16
+> +EOF
+> +
+> +#
+> +# case #2:
+> +# mmap MAP_SHARED|PROT_READ of rofd
+> +# write to rwfd
+> +# read from mapped memory
+> +#
+> +$XFS_IO_PROG << EOF | _filter_xfs_io
+> +open -r bar
+> +mmap -r 0 16
+> +open bar
+> +pwrite -S 0x61 0 16
+> +mread -v 0 16
+> +EOF
+> +
+> +status=0
+> +exit
+> diff --git a/tests/overlay/016.out b/tests/overlay/016.out
+> new file mode 100644
+> index 0000000..52b8cd7
+> --- /dev/null
+> +++ b/tests/overlay/016.out
+> @@ -0,0 +1,12 @@
+> +QA output created by 016
+> +xfs_io> xfs_io> xfs_io> wrote 16/16 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +xfs_io> [000] foo            (foreign,non-sync,non-direct,read-only)
+> + 001  foo            (foreign,non-sync,non-direct,read-write)
+> +xfs_io> 00000000:  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
+> +read 16/16 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +xfs_io> xfs_io> xfs_io> xfs_io> xfs_io> wrote 16/16 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +xfs_io> 00000000:  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
+> +xfs_io>
+> \ No newline at end of file
+> diff --git a/tests/overlay/group b/tests/overlay/group
+> index 84850b1..5740d2a 100644
+> --- a/tests/overlay/group
+> +++ b/tests/overlay/group
+> @@ -18,3 +18,4 @@
+>  013 auto quick
+>  014 auto quick copyup
+>  015 auto quick whiteout
+> +016 auto quick
+> --
+> 2.7.4
 >
-> This _require belongs to each test that calls
-> _btrfs_check_scratch_qgroup.
-
-Yes, I was originally planning to do it, but it seems that some other 
-common function also uses this method.
-So I choose this to reduce the modification.
-
-I'm OK to change it in next version.
-
->
-> And I think you can put the introduction of this helper and the
-> conversions to use this helper all together in one patch (so we know why
-> it's introduced and how it gets used from one patch), and all adding
-> extra qgroup check updates to another patch.
-
-The idea is allow further review for each test case modification.
-
-Since some modification is easy to be wrong.
-Like forget to add echo "Silence is golden" while removing the only output.
-
-If all the modification are proved to be good, I can fold them all into 
-one patch.
-
-Thanks,
-Qu
-
->
-> Thanks,
-> Eryu
->
->> +	$BTRFS_UTIL_PROG check --qgroup-report $SCRATCH_DEV 2>&1 |\
->> +		grep -E "Counts for qgroup.*are different"
->> +}
->> +
->>  # We check for btrfs and (optionally) features of the btrfs command
->>  _require_btrfs()
->>  {
->> --
->> 2.7.4
->>
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe fstests" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
-
-
