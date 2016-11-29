@@ -1,11 +1,11 @@
-Received: from cn.fujitsu.com ([222.73.24.84]:11304 "EHLO song.cn.fujitsu.com"
+Received: from cn.fujitsu.com ([222.73.24.84]:39314 "EHLO song.cn.fujitsu.com"
         rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-        id S1756020AbcK2Hdj (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 29 Nov 2016 02:33:39 -0500
+        id S1756073AbcK2Hdo (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 29 Nov 2016 02:33:44 -0500
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH 03/10] fstests: btrfs/022: Add extra qgroup verification after each work
-Date: Tue, 29 Nov 2016 15:32:56 +0800
-Message-Id: <20161129073303.14776-4-quwenruo@cn.fujitsu.com>
+Subject: [PATCH 06/10] fstests: btrfs/091: Use _btrfs_check_scratch_qgroup other than fixed golden output
+Date: Tue, 29 Nov 2016 15:32:59 +0800
+Message-Id: <20161129073303.14776-7-quwenruo@cn.fujitsu.com>
 In-Reply-To: <20161129073303.14776-1-quwenruo@cn.fujitsu.com>
 References: <20161129073303.14776-1-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
@@ -13,45 +13,40 @@ Sender: fstests-owner@vger.kernel.org
 To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-The old code is using rescan to verify the number.
-
-It will never hurt to add extra qgroup verification using btrfsck.
-
 Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 ---
- tests/btrfs/022 | 5 +++++
- 1 file changed, 5 insertions(+)
+ tests/btrfs/091     | 5 ++---
+ tests/btrfs/091.out | 4 ----
+ 2 files changed, 2 insertions(+), 7 deletions(-)
 
-diff --git a/tests/btrfs/022 b/tests/btrfs/022
-index 56d4f3d..d1ac921 100755
---- a/tests/btrfs/022
-+++ b/tests/btrfs/022
-@@ -125,20 +125,25 @@ _scratch_mkfs > /dev/null 2>&1
- _scratch_mount
- _basic_test
- _scratch_unmount
-+_btrfs_check_scratch_qgroup
+diff --git a/tests/btrfs/091 b/tests/btrfs/091
+index e3c43c7..ab4ff4e 100755
+--- a/tests/btrfs/091
++++ b/tests/btrfs/091
+@@ -94,9 +94,8 @@ cp --reflink $SCRATCH_MNT/subv1/file1 $SCRATCH_MNT/subv3/file1
+ # in commit tree. So need to sync to update the qgroup commit tree.
+ sync
  
- _scratch_mkfs > /dev/null 2>&1
- _scratch_mount
- _rescan_test
- _scratch_unmount
-+_btrfs_check_scratch_qgroup
- 
- _scratch_mkfs > /dev/null 2>&1
- _scratch_mount
- _limit_test_exceed
- _scratch_unmount
-+_btrfs_check_scratch_qgroup
- 
- _scratch_mkfs > /dev/null 2>&1
- _scratch_mount
- _limit_test_noexceed
+-units=`_btrfs_qgroup_units`
+-$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | $SED_PROG -n '/[0-9]/p' | \
+-	$AWK_PROG '{print $2" "$3}'
 +_scratch_unmount
 +_btrfs_check_scratch_qgroup
  
  # success, all done
- echo "Silence is golden"
+ status=0
+diff --git a/tests/btrfs/091.out b/tests/btrfs/091.out
+index 68fe2df..f2981b5 100644
+--- a/tests/btrfs/091.out
++++ b/tests/btrfs/091.out
+@@ -1,7 +1,3 @@
+ QA output created by 091
+ wrote 262144/262144 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-65536 65536
+-327680 65536
+-327680 65536
+-327680 65536
 -- 
 2.7.4
 
