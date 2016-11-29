@@ -1,90 +1,47 @@
-Received: from fieldses.org ([173.255.197.46]:36082 "EHLO fieldses.org"
+Received: from fieldses.org ([173.255.197.46]:36422 "EHLO fieldses.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754373AbcK2Ofn (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 29 Nov 2016 09:35:43 -0500
-Date: Tue, 29 Nov 2016 09:34:51 -0500
-From: "J. Bruce Fields" <bfields@fieldses.org>
-Subject: Re: [PATCH 2/2] dirstress: Allow ESTALE as well as ENOENT
-Message-ID: <20161129143451.GA6504@fieldses.org>
-References: <20161123222054.GA7900@fieldses.org>
- <35420A4E-1698-4743-9523-CBF43F2A2DC6@dilger.ca>
- <20161125034706.GA20729@fieldses.org>
- <20161125113511.GI4609@eguan.usersys.redhat.com>
- <20161126013901.GA32632@fieldses.org>
- <20161126013939.GB32632@fieldses.org>
- <20161129064306.GL22989@eguan.usersys.redhat.com>
+        id S1752526AbcK2UrX (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 29 Nov 2016 15:47:23 -0500
+Date: Tue, 29 Nov 2016 15:47:22 -0500
+Subject: Re: [PATCH v2 0/4] Add copy_file_range() tests
+Message-ID: <20161129204722.GA9331@fieldses.org>
+References: <20160907195619.25914-1-Anna.Schumaker@Netapp.com>
+ <20161026082638.GA19419@infradead.org>
+ <20161125080509.GA6082@infradead.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161129064306.GL22989@eguan.usersys.redhat.com>
+In-Reply-To: <20161125080509.GA6082@infradead.org>
+From: bfields@fieldses.org (J. Bruce Fields)
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Andreas Dilger <adilger@dilger.ca>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, fstests@vger.kernel.org, Linux NFS Mailing List <linux-nfs@vger.kernel.org>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Anna Schumaker <Anna.Schumaker@netapp.com>, fstests@vger.kernel.org, linux-nfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Nov 29, 2016 at 02:43:06PM +0800, Eryu Guan wrote:
-> On Fri, Nov 25, 2016 at 08:39:39PM -0500, J. Bruce Fields wrote:
-> > From: "J. Bruce Fields" <bfields@redhat.com>
+On Fri, Nov 25, 2016 at 12:05:10AM -0800, Christoph Hellwig wrote:
+> On Wed, Oct 26, 2016 at 01:26:38AM -0700, Christoph Hellwig wrote:
+> > On Wed, Sep 07, 2016 at 03:56:15PM -0400, Anna Schumaker wrote:
+> > > These tests exercise the copy_file_range() system call, and check copying
+> > > data to both a new file and overwriting data inside an existing file.  I use
+> > > the xfs_io "copy_range" command for the actual copies, so running these
+> > > tests requires an up-to-date version of xfsprogs.
 > > 
-> > In the NFS case an attempt to chdir out of a removed directory could result
-> > in ESTALE, and that should not cause the test to fail.
+> > Hi Anna,
 > > 
-> > This was causing intermittent failures on generic/011 on NFS.
-> > 
-> > Signed-off-by: J. Bruce Fields <bfields@redhat.com>
-> > ---
-> >  src/dirstress.c | 12 ++++++++----
-> >  1 file changed, 8 insertions(+), 4 deletions(-)
-> > 
-> > diff --git a/src/dirstress.c b/src/dirstress.c
-> > index f8f73553a1bc..33a166c51819 100644
-> > --- a/src/dirstress.c
-> > +++ b/src/dirstress.c
-> > @@ -203,8 +203,10 @@ dirstress(
-> >          if (verbose) fprintf(stderr,"** [%d] chdir ..\n", pid);
-> >  	error = chdir("..");
-> >  	if (error) {
-> > -		/* If this is multithreaded, then expecting a ENOENT here is fine */
-> > -		if (nprocs_per_dir > 1 && errno == ENOENT) {
-> > +		/* If this is multithreaded, then expecting a ENOENT here is fine,
-> > +		 * and ESTALE is normal in the NFS case. */
-> > +		if (nprocs_per_dir > 1 &&
-> > +				(errno == ENOENT || errno = ESTALE)) {
->                                                          ^^^ this should be ==
-> >  			return 0;
-> >  		}
-> >  
-> > @@ -224,8 +226,10 @@ dirstress(
-> >          if (verbose) fprintf(stderr,"** [%d] chdir ..\n", pid);
-> >  	error = chdir("..");
-> >  	if (error) {
-> > -		/* If this is multithreaded, then expecting a ENOENT here is fine */
-> > -		if (nprocs_per_dir > 1 && errno == ENOENT) {
-> > +		/* If this is multithreaded, then expecting a ENOENT here is fine,
-> > +		 * and ESTALE is normal in the NFS case. */
-> > +		if (nprocs_per_dir > 1 &&
-> > +				(errno == ENOENT || errno = ESTALE)) {
->                                                          ^^^ same here
+> > what's the status of these tests?  Did you get a chance to look
+> > into xfs_io copyfile support?
 > 
-> I can fix them at commit time, no resend is needed.
+> Another month, another ping - it would be really sad to not have any
+> real testing for copy_file_range.
 
-Oh, good grief.  Thanks for catching that!
-
-I can confirm that my problem's still fixed with the corrected patch.
+Agreed, Anna, are you still planning on doing this?
 
 --b.
 
-> 
-> Thanks,
-> Eryu
-> 
-> >  			return 0;
-> >  		}
-> >  
-> > -- 
-> > 2.9.3
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> I've been holding a pending change
+> for it back for month now because I want to verify it more than cursory,
+> but I guess I'll just have to send it anyway.
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
