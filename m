@@ -1,56 +1,38 @@
-Received: from mx143.netapp.com ([216.240.21.24]:6617 "EHLO mx143.netapp.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932692AbcK2VCm (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 29 Nov 2016 16:02:42 -0500
-Subject: Re: [PATCH v2 0/4] Add copy_file_range() tests
-References: <20160907195619.25914-1-Anna.Schumaker@Netapp.com>
- <20161026082638.GA19419@infradead.org> <20161125080509.GA6082@infradead.org>
- <20161129204722.GA9331@fieldses.org>
-From: Anna Schumaker <Anna.Schumaker@Netapp.com>
-Message-ID: <ce1c4ee0-eaa9-1011-857a-c4930bb12115@Netapp.com>
-Date: Tue, 29 Nov 2016 15:59:29 -0500
-MIME-Version: 1.0
-In-Reply-To: <20161129204722.GA9331@fieldses.org>
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:47022 "EHLO
+        ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751537AbcK2Vev (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 29 Nov 2016 16:34:51 -0500
+Received: from discord.disaster.area ([192.168.1.111])
+        by dastard with esmtp (Exim 4.80)
+        (envelope-from <david@fromorbit.com>)
+        id 1cBq10-0002kQ-1y
+        for fstests@vger.kernel.org; Wed, 30 Nov 2016 08:32:38 +1100
+Received: from dave by discord.disaster.area with local (Exim 4.88)
+        (envelope-from <david@fromorbit.com>)
+        id 1cBq10-0002EY-0n
+        for fstests@vger.kernel.org; Wed, 30 Nov 2016 08:32:38 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: [PATCH 0/2] common: make common/rc easier to manage
+Date: Wed, 30 Nov 2016 08:32:31 +1100
+Message-Id: <20161129213233.8462-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
-To: "J. Bruce Fields" <bfields@fieldses.org>, Christoph Hellwig <hch@infradead.org>
-Cc: fstests@vger.kernel.org, linux-nfs@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Sorry for the delay!  I've been busy looking at other things and forgot to update the copy_file_range() stuff :(
+Hi folks,
 
-On 11/29/2016 03:47 PM, J. Bruce Fields wrote:
-> On Fri, Nov 25, 2016 at 12:05:10AM -0800, Christoph Hellwig wrote:
->> On Wed, Oct 26, 2016 at 01:26:38AM -0700, Christoph Hellwig wrote:
->>> On Wed, Sep 07, 2016 at 03:56:15PM -0400, Anna Schumaker wrote:
->>>> These tests exercise the copy_file_range() system call, and check copying
->>>> data to both a new file and overwriting data inside an existing file.  I use
->>>> the xfs_io "copy_range" command for the actual copies, so running these
->>>> tests requires an up-to-date version of xfsprogs.
->>>
->>> Hi Anna,
->>>
->>> what's the status of these tests?  Did you get a chance to look
->>> into xfs_io copyfile support?
+common/rc has grown huge with lots of library functions, and it's
+becoming hard to manage. The following two patches split the XFS and
+btrfs specific functionality in common/rc into separate files which
+are sourced directly from common/rc based on $FSTYP.
 
-xfs_io has support for copying now, so I'll make sure that the tests use that correctly.  I promise to send out an update this week, once I check that everything still works!
+This moves a large chunk of code spread throughout common/rc into
+smaller, more contained files where it is easier to see how the
+filesystem specific pieces are put together. I'd like to see this
+happen for other filesytems, and quite possibly other groups of
+functionality that make sense to manage separately.
 
-Thanks for the reminders,
-Anna
+Thoughts and comments welcome!
 
->>
->> Another month, another ping - it would be really sad to not have any
->> real testing for copy_file_range.
-> 
-> Agreed, Anna, are you still planning on doing this?
-> 
-> --b.
-> 
->> I've been holding a pending change
->> for it back for month now because I want to verify it more than cursory,
->> but I guess I'll just have to send it anyway.
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-Dave.
+
