@@ -1,81 +1,65 @@
-Received: from mx1.redhat.com ([209.132.183.28]:49100 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752431AbcK2GnJ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 29 Nov 2016 01:43:09 -0500
-Date: Tue, 29 Nov 2016 14:43:06 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/2] dirstress: Allow ESTALE as well as ENOENT
-Message-ID: <20161129064306.GL22989@eguan.usersys.redhat.com>
-References: <20161123222054.GA7900@fieldses.org>
- <35420A4E-1698-4743-9523-CBF43F2A2DC6@dilger.ca>
- <20161125034706.GA20729@fieldses.org>
- <20161125113511.GI4609@eguan.usersys.redhat.com>
- <20161126013901.GA32632@fieldses.org>
- <20161126013939.GB32632@fieldses.org>
+Received: from cn.fujitsu.com ([222.73.24.84]:38188 "EHLO song.cn.fujitsu.com"
+        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+        id S1752169AbcK2HdZ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 29 Nov 2016 02:33:25 -0500
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Subject: [PATCH 00/10] Enhance btrfs qgroup test group coverage to support more mount options
+Date: Tue, 29 Nov 2016 15:32:53 +0800
+Message-Id: <20161129073303.14776-1-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20161126013939.GB32632@fieldses.org>
 Sender: fstests-owner@vger.kernel.org
-To: "J. Bruce Fields" <bfields@fieldses.org>
-Cc: Andreas Dilger <adilger@dilger.ca>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, fstests@vger.kernel.org, Linux NFS Mailing List <linux-nfs@vger.kernel.org>
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Nov 25, 2016 at 08:39:39PM -0500, J. Bruce Fields wrote:
-> From: "J. Bruce Fields" <bfields@redhat.com>
-> 
-> In the NFS case an attempt to chdir out of a removed directory could result
-> in ESTALE, and that should not cause the test to fail.
-> 
-> This was causing intermittent failures on generic/011 on NFS.
-> 
-> Signed-off-by: J. Bruce Fields <bfields@redhat.com>
-> ---
->  src/dirstress.c | 12 ++++++++----
->  1 file changed, 8 insertions(+), 4 deletions(-)
-> 
-> diff --git a/src/dirstress.c b/src/dirstress.c
-> index f8f73553a1bc..33a166c51819 100644
-> --- a/src/dirstress.c
-> +++ b/src/dirstress.c
-> @@ -203,8 +203,10 @@ dirstress(
->          if (verbose) fprintf(stderr,"** [%d] chdir ..\n", pid);
->  	error = chdir("..");
->  	if (error) {
-> -		/* If this is multithreaded, then expecting a ENOENT here is fine */
-> -		if (nprocs_per_dir > 1 && errno == ENOENT) {
-> +		/* If this is multithreaded, then expecting a ENOENT here is fine,
-> +		 * and ESTALE is normal in the NFS case. */
-> +		if (nprocs_per_dir > 1 &&
-> +				(errno == ENOENT || errno = ESTALE)) {
-                                                         ^^^ this should be ==
->  			return 0;
->  		}
->  
-> @@ -224,8 +226,10 @@ dirstress(
->          if (verbose) fprintf(stderr,"** [%d] chdir ..\n", pid);
->  	error = chdir("..");
->  	if (error) {
-> -		/* If this is multithreaded, then expecting a ENOENT here is fine */
-> -		if (nprocs_per_dir > 1 && errno == ENOENT) {
-> +		/* If this is multithreaded, then expecting a ENOENT here is fine,
-> +		 * and ESTALE is normal in the NFS case. */
-> +		if (nprocs_per_dir > 1 &&
-> +				(errno == ENOENT || errno = ESTALE)) {
-                                                         ^^^ same here
+Old test cases in btrfs qgroup test group use fixed golden output.
+This limits the coverage, since mount option like compress and
+inode_cache and populate output easily.
 
-I can fix them at commit time, no resend is needed.
+On the other hand, "btrfs check" has support for checking qgroup
+correctness at least from 3 kernel release before.
+And that function is proved to be stable and helped to exposed quite a
+lot of qgroup bugs.
 
-Thanks,
-Eryu
+So this patchset will use "btrfs check --qgroup-report" to replace fixed
+golden output, and add extra check for some existing test cases.
 
->  			return 0;
->  		}
->  
-> -- 
-> 2.9.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This will reduce false alerts and improve the coverage.
+In fact, with these patches and "-o inode_cache" mount option, we have
+already exposed a new qgroup bug.
+
+Qu Wenruo (10):
+  fstests: common: Introduce function to check qgroup correctness
+  fstests: btrfs/017: Use new _btrfs_check_scratch_qgroup function
+  fstests: btrfs/022: Add extra qgroup verification after each work
+  fstests: btrfs/028: Use new wrapped _btrfs_check_scratch_qgroup
+    function
+  fstests: btrfs/042: Add extra qgroup verification
+  fstests: btrfs/091: Use _btrfs_check_scratch_qgroup other than fixed  
+      golden output
+  fstests: btrfs/099: Add extra verification for qgroup
+  fstests: btrfs/104: Use _btrfs_check_scratch_qgroup to replace open   
+     codes
+  fstests: btrfs/122: Use _btrfs_check_scratch_qgroup to replace open   
+     code
+  fstests: btrfs/123: Use _btrfs_check_scratch_qgroup to replace open   
+     code
+
+ common/rc           | 19 +++++++++++++++++++
+ tests/btrfs/017     |  4 ++--
+ tests/btrfs/017.out |  2 --
+ tests/btrfs/022     |  5 +++++
+ tests/btrfs/028     |  4 ++--
+ tests/btrfs/042     |  3 +++
+ tests/btrfs/091     |  5 ++---
+ tests/btrfs/091.out |  4 ----
+ tests/btrfs/099     |  3 +++
+ tests/btrfs/104     | 11 ++---------
+ tests/btrfs/122     |  9 ++-------
+ tests/btrfs/123     |  4 +---
+ 12 files changed, 41 insertions(+), 32 deletions(-)
+
+-- 
+2.7.4
+
+
+
