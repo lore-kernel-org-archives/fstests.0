@@ -1,77 +1,56 @@
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:54850 "EHLO
-        ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1755712AbcK2VCA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 29 Nov 2016 16:02:00 -0500
-Date: Wed, 30 Nov 2016 08:01:55 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 01/10] fstests: common: Introduce function to check
- qgroup correctness
-Message-ID: <20161129210155.GD31101@dastard>
-References: <20161129073303.14776-1-quwenruo@cn.fujitsu.com>
- <20161129073303.14776-2-quwenruo@cn.fujitsu.com>
+Received: from mx143.netapp.com ([216.240.21.24]:6617 "EHLO mx143.netapp.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932692AbcK2VCm (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 29 Nov 2016 16:02:42 -0500
+Subject: Re: [PATCH v2 0/4] Add copy_file_range() tests
+References: <20160907195619.25914-1-Anna.Schumaker@Netapp.com>
+ <20161026082638.GA19419@infradead.org> <20161125080509.GA6082@infradead.org>
+ <20161129204722.GA9331@fieldses.org>
+From: Anna Schumaker <Anna.Schumaker@Netapp.com>
+Message-ID: <ce1c4ee0-eaa9-1011-857a-c4930bb12115@Netapp.com>
+Date: Tue, 29 Nov 2016 15:59:29 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20161129073303.14776-2-quwenruo@cn.fujitsu.com>
+In-Reply-To: <20161129204722.GA9331@fieldses.org>
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: "J. Bruce Fields" <bfields@fieldses.org>, Christoph Hellwig <hch@infradead.org>
+Cc: fstests@vger.kernel.org, linux-nfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Nov 29, 2016 at 03:32:54PM +0800, Qu Wenruo wrote:
-> Old btrfs qgroup test cases uses fix golden output numbers, which limits
-> the coverage since they can't handle mount options like compress or
-> inode_map, and cause false alert.
+Sorry for the delay!  I've been busy looking at other things and forgot to update the copy_file_range() stuff :(
+
+On 11/29/2016 03:47 PM, J. Bruce Fields wrote:
+> On Fri, Nov 25, 2016 at 12:05:10AM -0800, Christoph Hellwig wrote:
+>> On Wed, Oct 26, 2016 at 01:26:38AM -0700, Christoph Hellwig wrote:
+>>> On Wed, Sep 07, 2016 at 03:56:15PM -0400, Anna Schumaker wrote:
+>>>> These tests exercise the copy_file_range() system call, and check copying
+>>>> data to both a new file and overwriting data inside an existing file.  I use
+>>>> the xfs_io "copy_range" command for the actual copies, so running these
+>>>> tests requires an up-to-date version of xfsprogs.
+>>>
+>>> Hi Anna,
+>>>
+>>> what's the status of these tests?  Did you get a chance to look
+>>> into xfs_io copyfile support?
+
+xfs_io has support for copying now, so I'll make sure that the tests use that correctly.  I promise to send out an update this week, once I check that everything still works!
+
+Thanks for the reminders,
+Anna
+
+>>
+>> Another month, another ping - it would be really sad to not have any
+>> real testing for copy_file_range.
 > 
-> Introduce _btrfs_check_scratch_qgroup() function to check qgroup
-> correctness using "btrfs check --qgroup-report" function, which will
-> follow the way kernel handle qgroup and are proved very reliable.
+> Agreed, Anna, are you still planning on doing this?
 > 
-> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
-> ---
->  common/rc | 19 +++++++++++++++++++
->  1 file changed, 19 insertions(+)
+> --b.
 > 
-> diff --git a/common/rc b/common/rc
-> index 8c99306..35d2d56 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3018,6 +3018,25 @@ _require_deletable_scratch_dev_pool()
->  	done
->  }
->  
-> +# We check if "btrfs check" support to check qgroup correctness
-> +# Old fixed golden output can cover case like compress and inode_map
-> +# mount options, which limits the coverage
-> +_require_btrfs_check_qgroup()
-> +{
-> +	_require_command "$BTRFS_UTIL_PROG" btrfs
-> +	output=$($BTRFS_UTIL_PROG check --help | grep "qgroup-report")
-> +	if [ -z "$output" ]; then
-> +		_notrun "$BTRFS_UTIL_PROG too old (must support 'check --qgroup-report')"
-> +	fi
-> +}
-
-Why wouldn't this just set a global variable that you then
-check in _check_scratch_fs and run the _btrfs_check_scratch_qgroup()
-call then?
-
-What about all the tests that currently run without this
-functionality being present? They will now notrun rather than use
-the golden output match - this seems like a regression to me,
-especially for distro QE testing older kernel/progs combinations...
-
-> +
-> +_btrfs_check_scratch_qgroup()
-> +{
-> +	_require_btrfs_check_qgroup
-
-This needs to go in the test itself before the test is run,
-not get hidden in a function call at the end of the test.
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+>> I've been holding a pending change
+>> for it back for month now because I want to verify it more than cursory,
+>> but I guess I'll just have to send it anyway.
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
