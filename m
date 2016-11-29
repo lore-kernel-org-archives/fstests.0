@@ -1,66 +1,90 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46116 "EHLO mx1.redhat.com"
+Received: from fieldses.org ([173.255.197.46]:36082 "EHLO fieldses.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933385AbcK2LhR (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 29 Nov 2016 06:37:17 -0500
-Date: Tue, 29 Nov 2016 19:37:15 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] overlay: test ro/rw fd data inconsistecies
-Message-ID: <20161129113715.GN22989@eguan.usersys.redhat.com>
-References: <1480018332-16567-1-git-send-email-amir73il@gmail.com>
- <CAOQ4uxgEgNJtFfauUTXAr9YedbJeNFrZaWAUbEJUzycf=r3Emw@mail.gmail.com>
+        id S1754373AbcK2Ofn (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 29 Nov 2016 09:35:43 -0500
+Date: Tue, 29 Nov 2016 09:34:51 -0500
+From: "J. Bruce Fields" <bfields@fieldses.org>
+Subject: Re: [PATCH 2/2] dirstress: Allow ESTALE as well as ENOENT
+Message-ID: <20161129143451.GA6504@fieldses.org>
+References: <20161123222054.GA7900@fieldses.org>
+ <35420A4E-1698-4743-9523-CBF43F2A2DC6@dilger.ca>
+ <20161125034706.GA20729@fieldses.org>
+ <20161125113511.GI4609@eguan.usersys.redhat.com>
+ <20161126013901.GA32632@fieldses.org>
+ <20161126013939.GB32632@fieldses.org>
+ <20161129064306.GL22989@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxgEgNJtFfauUTXAr9YedbJeNFrZaWAUbEJUzycf=r3Emw@mail.gmail.com>
+In-Reply-To: <20161129064306.GL22989@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Andreas Dilger <adilger@dilger.ca>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, fstests@vger.kernel.org, Linux NFS Mailing List <linux-nfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Nov 29, 2016 at 10:53:36AM +0200, Amir Goldstein wrote:
-> On Thu, Nov 24, 2016 at 10:12 PM, Amir Goldstein <amir73il@gmail.com> wrote:
-> > Introduce a new test to demonstrates a known issue with overlayfs:
-> > - process A opens file F for read
-> > - process B writes new data to file F
-> > - process A reads old data from file F
-> >
-> > This issue is about to be fixed with a patch set by Miklos Szeredi.
+On Tue, Nov 29, 2016 at 02:43:06PM +0800, Eryu Guan wrote:
+> On Fri, Nov 25, 2016 at 08:39:39PM -0500, J. Bruce Fields wrote:
+> > From: "J. Bruce Fields" <bfields@redhat.com>
+> > 
+> > In the NFS case an attempt to chdir out of a removed directory could result
+> > in ESTALE, and that should not cause the test to fail.
+> > 
+> > This was causing intermittent failures on generic/011 on NFS.
+> > 
+> > Signed-off-by: J. Bruce Fields <bfields@redhat.com>
+> > ---
+> >  src/dirstress.c | 12 ++++++++----
+> >  1 file changed, 8 insertions(+), 4 deletions(-)
+> > 
+> > diff --git a/src/dirstress.c b/src/dirstress.c
+> > index f8f73553a1bc..33a166c51819 100644
+> > --- a/src/dirstress.c
+> > +++ b/src/dirstress.c
+> > @@ -203,8 +203,10 @@ dirstress(
+> >          if (verbose) fprintf(stderr,"** [%d] chdir ..\n", pid);
+> >  	error = chdir("..");
+> >  	if (error) {
+> > -		/* If this is multithreaded, then expecting a ENOENT here is fine */
+> > -		if (nprocs_per_dir > 1 && errno == ENOENT) {
+> > +		/* If this is multithreaded, then expecting a ENOENT here is fine,
+> > +		 * and ESTALE is normal in the NFS case. */
+> > +		if (nprocs_per_dir > 1 &&
+> > +				(errno == ENOENT || errno = ESTALE)) {
+>                                                          ^^^ this should be ==
+> >  			return 0;
+> >  		}
+> >  
+> > @@ -224,8 +226,10 @@ dirstress(
+> >          if (verbose) fprintf(stderr,"** [%d] chdir ..\n", pid);
+> >  	error = chdir("..");
+> >  	if (error) {
+> > -		/* If this is multithreaded, then expecting a ENOENT here is fine */
+> > -		if (nprocs_per_dir > 1 && errno == ENOENT) {
+> > +		/* If this is multithreaded, then expecting a ENOENT here is fine,
+> > +		 * and ESTALE is normal in the NFS case. */
+> > +		if (nprocs_per_dir > 1 &&
+> > +				(errno == ENOENT || errno = ESTALE)) {
+>                                                          ^^^ same here
 > 
-> Eryu and all,
-> 
-> I wanted to ask what is the common practice for introducing tests for
-> know issues
-> that are *about* to be solved.
-> 
-> What is the preferred timing for merging these sort of tests?
-> Is it productive to have these tests merged before a fix is merged to master?
-> Before a fix is queued for next?
-> Before a fix is available?
+> I can fix them at commit time, no resend is needed.
 
-Basically new regression tests will be merged as soon as possible, as
-long as there're no objections from reviewers or all comments are
-addressed.
+Oh, good grief.  Thanks for catching that!
 
-One exception is that for tests that could crash latest maintainer's
-tree (even there's a known fix), I'd perfer letting the fix go upstream
-first, so that the test doesn't break anyone's tests by crashing all the
-testing hosts. It's great if the test author could give a notification
-on the test to say that the fix has been merged, so the test could be
-merged too. I'll watch the patch status too, but maybe not so timely.
+I can confirm that my problem's still fixed with the corrected patch.
+
+--b.
 
 > 
-> I am asking because there are several known issues for overlayfs
-> whose fixes are in several different states of maturity and I would like
-> to know how to treat the tests I write for them.
-
-Thanks for writing test cases! You can send them out at anytime :)
-
+> Thanks,
+> Eryu
 > 
-> FYI, the fix for the test in this patch (test ro/rw fd data inconsistencies)
-> is not queued for next yet, but I am hoping it will be.
-> Miklos?
-
-FYI, this test is already in my last pull request to Dave.
-
-Thanks,
-Eryu
+> >  			return 0;
+> >  		}
+> >  
+> > -- 
+> > 2.9.3
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
