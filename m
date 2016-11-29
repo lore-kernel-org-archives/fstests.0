@@ -1,33 +1,77 @@
-Received: from b.ns.miles-group.at ([95.130.255.144]:44724 "EHLO radon.swed.at"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1755563AbcK2UwO (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 29 Nov 2016 15:52:14 -0500
-Subject: Re: [PATCH v2 4/5] generic: test encrypted file access
-References: <1480371402-12204-1-git-send-email-ebiggers@google.com>
- <1480371402-12204-5-git-send-email-ebiggers@google.com>
-From: Richard Weinberger <richard@nod.at>
-Message-ID: <efa324fb-6d0b-aad0-1916-cdf12f0072c0@nod.at>
-Date: Tue, 29 Nov 2016 21:52:10 +0100
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:54850 "EHLO
+        ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1755712AbcK2VCA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 29 Nov 2016 16:02:00 -0500
+Date: Wed, 30 Nov 2016 08:01:55 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 01/10] fstests: common: Introduce function to check
+ qgroup correctness
+Message-ID: <20161129210155.GD31101@dastard>
+References: <20161129073303.14776-1-quwenruo@cn.fujitsu.com>
+ <20161129073303.14776-2-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
-In-Reply-To: <1480371402-12204-5-git-send-email-ebiggers@google.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20161129073303.14776-2-quwenruo@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers@google.com>, fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, David Gstir <david@sigma-star.at>, Michael Halcrow <mhalcrow@google.com>, linux-api@vger.kernel.org, Michael Kerrisk <mtk.manpages@gmail.com>
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Eric,
+On Tue, Nov 29, 2016 at 03:32:54PM +0800, Qu Wenruo wrote:
+> Old btrfs qgroup test cases uses fix golden output numbers, which limits
+> the coverage since they can't handle mount options like compress or
+> inode_map, and cause false alert.
+> 
+> Introduce _btrfs_check_scratch_qgroup() function to check qgroup
+> correctness using "btrfs check --qgroup-report" function, which will
+> follow the way kernel handle qgroup and are proved very reliable.
+> 
+> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+> ---
+>  common/rc | 19 +++++++++++++++++++
+>  1 file changed, 19 insertions(+)
+> 
+> diff --git a/common/rc b/common/rc
+> index 8c99306..35d2d56 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3018,6 +3018,25 @@ _require_deletable_scratch_dev_pool()
+>  	done
+>  }
+>  
+> +# We check if "btrfs check" support to check qgroup correctness
+> +# Old fixed golden output can cover case like compress and inode_map
+> +# mount options, which limits the coverage
+> +_require_btrfs_check_qgroup()
+> +{
+> +	_require_command "$BTRFS_UTIL_PROG" btrfs
+> +	output=$($BTRFS_UTIL_PROG check --help | grep "qgroup-report")
+> +	if [ -z "$output" ]; then
+> +		_notrun "$BTRFS_UTIL_PROG too old (must support 'check --qgroup-report')"
+> +	fi
+> +}
 
-On 28.11.2016 23:16, Eric Biggers wrote:
-> +# Also, there are some inconsistencies in which error codes are returned on
-> +# different kernel versions and filesystems when trying to create a file or
-> +# subdirectory without access to the parent directory's encryption key.  For now
-> +# we just accept multiple error codes.
+Why wouldn't this just set a global variable that you then
+check in _check_scratch_fs and run the _btrfs_check_scratch_qgroup()
+call then?
 
-This is something I wanted to ask about some time ago but forgot.
-Can we please agree on a clear set of fscrypt related error codes
-and document them in the Linux man pages?
+What about all the tests that currently run without this
+functionality being present? They will now notrun rather than use
+the golden output match - this seems like a regression to me,
+especially for distro QE testing older kernel/progs combinations...
 
-Thanks,
-//richard
+> +
+> +_btrfs_check_scratch_qgroup()
+> +{
+> +	_require_btrfs_check_qgroup
+
+This needs to go in the test itself before the test is run,
+not get hidden in a function call at the end of the test.
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
