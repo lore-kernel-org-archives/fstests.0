@@ -1,59 +1,73 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:27198 "EHLO
-        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1753078AbcK3VLl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Nov 2016 16:11:41 -0500
-Date: Thu, 1 Dec 2016 08:11:04 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 0/2] common: make common/rc easier to manage
-Message-ID: <20161130211104.GB11750@dastard>
-References: <20161129213233.8462-1-david@fromorbit.com>
- <20161130101028.GS22989@eguan.usersys.redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20161130101028.GS22989@eguan.usersys.redhat.com>
+Received: from mail-pg0-f41.google.com ([74.125.83.41]:34598 "EHLO
+        mail-pg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753585AbcK3WcQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Nov 2016 17:32:16 -0500
+Received: by mail-pg0-f41.google.com with SMTP id x23so86728320pgx.1
+        for <fstests@vger.kernel.org>; Wed, 30 Nov 2016 14:32:16 -0800 (PST)
+From: Eric Biggers <ebiggers@google.com>
+Subject: [PATCH] fstests: allow building with latest xfslibs on 32-bit Linux
+Date: Wed, 30 Nov 2016 14:31:42 -0800
+Message-Id: <1480545102-51699-1-git-send-email-ebiggers@google.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Nov 30, 2016 at 06:10:28PM +0800, Eryu Guan wrote:
-> On Wed, Nov 30, 2016 at 08:32:31AM +1100, Dave Chinner wrote:
-> > Hi folks,
-> > 
-> > common/rc has grown huge with lots of library functions, and it's
-> > becoming hard to manage. The following two patches split the XFS and
-> > btrfs specific functionality in common/rc into separate files which
-> > are sourced directly from common/rc based on $FSTYP.
-> 
-> Thanks, Dave!
-> 
-> > 
-> > This moves a large chunk of code spread throughout common/rc into
-> > smaller, more contained files where it is easier to see how the
-> > filesystem specific pieces are put together. I'd like to see this
-> > happen for other filesytems, and quite possibly other groups of
-> > functionality that make sense to manage separately.
-> > 
-> > Thoughts and comments welcome!
-> 
-> They look good to me, and I'm testing them now. Two things I noticed:
-> - Can we take this opportunity to fix some code style issues, along with
->   the movement? e.g. tab indention, if-then-else-fi format and while-do
->   format and whitespace issues.
+The next version of xfslibs will require that its users enable
+transparent largefile support.  This broke building xfstests on 32-bit
+Linux because _FILE_OFFSET_BITS=64 was not getting defined when testing
+for xfs headers.  Fix this by defining _FILE_OFFSET_BITS=64 when doing
+configure checks for the xfs headers.
 
-In the patch that moves the code, no. In follow-on cleanup patches,
-yes.
+It was not necessary to define _FILE_OFFSET_BITS=64 for the actual build
+because it's already done, in builddefs.in.
 
-> - Should _require_scratch_richacl_xfs() be moved to common/xfs too?
+The problem could also be solved by adding AC_SYS_LARGEFILE to
+configure.ac.  It's debatable, but I chose not to do that because it
+might give the impression that it affects the actual compilation of the
+test programs and not just the configure checks.  (Since not all .c
+files include config.h first, a _FILE_OFFSET_BITS definition in config.h
+wouldn't always take effect.)
 
-I ignored that for the moment because XFS doesn't actually have any
-richacl support and I didn't want to think about how the richacl
-checks might be best separated.
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ m4/package_xfslibs.m4 | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
 
-Cheers,
-
-Dave.
+diff --git a/m4/package_xfslibs.m4 b/m4/package_xfslibs.m4
+index 6bf4704..5588e9e 100644
+--- a/m4/package_xfslibs.m4
++++ b/m4/package_xfslibs.m4
+@@ -1,5 +1,8 @@
+ AC_DEFUN([AC_PACKAGE_NEED_XFS_XFS_H],
+-  [ AC_CHECK_HEADERS([xfs/xfs.h],,,[#define _GNU_SOURCE])
++  [ AC_CHECK_HEADERS([xfs/xfs.h],,,[
++      #define _GNU_SOURCE
++      #define _FILE_OFFSET_BITS 64
++    ])
+     if test "$ac_cv_header_xfs_xfs_h" != "yes"; then
+         echo
+         echo 'FATAL ERROR: cannot find a valid <xfs/xfs.h> header file.'
+@@ -23,7 +26,10 @@ AC_DEFUN([AC_PACKAGE_WANT_XLOG_ASSIGN_LSN],
+   ])
+ 
+ AC_DEFUN([AC_PACKAGE_NEED_XFS_XQM_H],
+-  [ AC_CHECK_HEADERS([xfs/xqm.h],,,[#define _GNU_SOURCE])
++  [ AC_CHECK_HEADERS([xfs/xqm.h],,,[
++        #define _GNU_SOURCE
++        #define _FILE_OFFSET_BITS 64
++    ])
+     if test "$ac_cv_header_xfs_xqm_h" != "yes"; then
+         echo
+         echo 'FATAL ERROR: cannot find a valid <xfs/xqm.h> header file.'
+@@ -103,6 +109,7 @@ AC_DEFUN([AC_PACKAGE_NEED_XFSCTL_MACRO],
+   [ AC_MSG_CHECKING([xfsctl from xfs/xfs.h])
+     AC_TRY_LINK([
+ #define _GNU_SOURCE
++#define _FILE_OFFSET_BITS 64
+ #include <xfs/xfs.h> ],
+       [ int x = xfsctl(0, 0, 0, 0); ],
+       [ echo ok ],
 -- 
-Dave Chinner
-david@fromorbit.com
+2.8.0.rc3.226.g39d4020
+
