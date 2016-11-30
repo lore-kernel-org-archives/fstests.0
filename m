@@ -1,53 +1,45 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:43476 "EHLO
-        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1752857AbcK3E7O (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 29 Nov 2016 23:59:14 -0500
-Received: from discord.disaster.area ([192.168.1.111])
-        by dastard with esmtp (Exim 4.80)
-        (envelope-from <david@fromorbit.com>)
-        id 1cBwz6-0003RD-Nq
-        for fstests@vger.kernel.org; Wed, 30 Nov 2016 15:59:08 +1100
-Received: from dave by discord.disaster.area with local (Exim 4.88)
-        (envelope-from <david@fromorbit.com>)
-        id 1cBwz6-0003xq-MW
-        for fstests@vger.kernel.org; Wed, 30 Nov 2016 15:59:08 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH] generic/095: add iomap_dio_rw() to the dmesg filter
-Date: Wed, 30 Nov 2016 15:59:08 +1100
-Message-Id: <20161130045908.15200-1-david@fromorbit.com>
+Received: from mx1.redhat.com ([209.132.183.28]:39972 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754190AbcK3KKb (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 30 Nov 2016 05:10:31 -0500
+Date: Wed, 30 Nov 2016 18:10:28 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 0/2] common: make common/rc easier to manage
+Message-ID: <20161130101028.GS22989@eguan.usersys.redhat.com>
+References: <20161129213233.8462-1-david@fromorbit.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20161129213233.8462-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Dave Chinner <dchinner@redhat.com>
+On Wed, Nov 30, 2016 at 08:32:31AM +1100, Dave Chinner wrote:
+> Hi folks,
+> 
+> common/rc has grown huge with lots of library functions, and it's
+> becoming hard to manage. The following two patches split the XFS and
+> btrfs specific functionality in common/rc into separate files which
+> are sourced directly from common/rc based on $FSTYP.
 
-Oops, we did it again - we moved the XFS dio code warning to a new
-function with the iomap direct IO rework.  Update the filter to pick
-up the new warning location.
+Thanks, Dave!
 
-Signed-Off-By: Dave Chinner <dchinner@redhat.com>
----
- tests/generic/095 | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+> 
+> This moves a large chunk of code spread throughout common/rc into
+> smaller, more contained files where it is easier to see how the
+> filesystem specific pieces are put together. I'd like to see this
+> happen for other filesytems, and quite possibly other groups of
+> functionality that make sense to manage separately.
+> 
+> Thoughts and comments welcome!
 
-diff --git a/tests/generic/095 b/tests/generic/095
-index 474825bdf8d6..991baefaecdf 100755
---- a/tests/generic/095
-+++ b/tests/generic/095
-@@ -128,10 +128,12 @@ filter_xfs_dmesg()
- 	local warn2="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_dio_aio_read.*"
- 	local warn3="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_read_iter.*"
- 	local warn4="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_aio_read.*"
-+	local warn4="WARNING:.*fs/iomap\.c:.*iomap_dio_rw.*"
- 	sed -e "s#$warn1#Intentional warnings in xfs_file_dio_aio_write#" \
- 	    -e "s#$warn2#Intentional warnings in xfs_file_dio_aio_read#" \
- 	    -e "s#$warn3#Intentional warnings in xfs_file_read_iter#" \
--	    -e "s#$warn4#Intentional warnings in xfs_file_aio_read#"
-+	    -e "s#$warn4#Intentional warnings in xfs_file_aio_read#" \
-+	    -e "s#$warn4#Intentional warnings in iomap_dio_rw#"
- }
- 
- # umount before checking dmesg in case umount triggers any WARNING or Oops
--- 
-2.10.2
+They look good to me, and I'm testing them now. Two things I noticed:
+- Can we take this opportunity to fix some code style issues, along with
+  the movement? e.g. tab indention, if-then-else-fi format and while-do
+  format and whitespace issues.
+- Should _require_scratch_richacl_xfs() be moved to common/xfs too?
 
+Thanks,
+Eryu
