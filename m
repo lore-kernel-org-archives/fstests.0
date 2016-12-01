@@ -1,73 +1,85 @@
-Received: from mail-pg0-f41.google.com ([74.125.83.41]:34598 "EHLO
+Received: from mail-pg0-f41.google.com ([74.125.83.41]:33570 "EHLO
         mail-pg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753585AbcK3WcQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Nov 2016 17:32:16 -0500
-Received: by mail-pg0-f41.google.com with SMTP id x23so86728320pgx.1
-        for <fstests@vger.kernel.org>; Wed, 30 Nov 2016 14:32:16 -0800 (PST)
+        with ESMTP id S1754342AbcLAAbB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Nov 2016 19:31:01 -0500
+Received: by mail-pg0-f41.google.com with SMTP id 3so87762791pgd.0
+        for <fstests@vger.kernel.org>; Wed, 30 Nov 2016 16:31:01 -0800 (PST)
+Date: Wed, 30 Nov 2016 16:30:58 -0800
 From: Eric Biggers <ebiggers@google.com>
-Subject: [PATCH] fstests: allow building with latest xfslibs on 32-bit Linux
-Date: Wed, 30 Nov 2016 14:31:42 -0800
-Message-Id: <1480545102-51699-1-git-send-email-ebiggers@google.com>
+Subject: Re: [PATCH v2 4/5] generic: test encrypted file access
+Message-ID: <20161201003058.GB14029@google.com>
+References: <1480371402-12204-1-git-send-email-ebiggers@google.com>
+ <1480371402-12204-5-git-send-email-ebiggers@google.com>
+ <efa324fb-6d0b-aad0-1916-cdf12f0072c0@nod.at>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <efa324fb-6d0b-aad0-1916-cdf12f0072c0@nod.at>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eric Biggers <ebiggers@google.com>
+To: Richard Weinberger <richard@nod.at>
+Cc: fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, David Gstir <david@sigma-star.at>, Michael Halcrow <mhalcrow@google.com>, linux-api@vger.kernel.org, Michael Kerrisk <mtk.manpages@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-The next version of xfslibs will require that its users enable
-transparent largefile support.  This broke building xfstests on 32-bit
-Linux because _FILE_OFFSET_BITS=64 was not getting defined when testing
-for xfs headers.  Fix this by defining _FILE_OFFSET_BITS=64 when doing
-configure checks for the xfs headers.
+On Tue, Nov 29, 2016 at 09:52:10PM +0100, Richard Weinberger wrote:
+> Eric,
+> 
+> On 28.11.2016 23:16, Eric Biggers wrote:
+> > +# Also, there are some inconsistencies in which error codes are returned on
+> > +# different kernel versions and filesystems when trying to create a file or
+> > +# subdirectory without access to the parent directory's encryption key.  For now
+> > +# we just accept multiple error codes.
+> 
+> This is something I wanted to ask about some time ago but forgot.
+> Can we please agree on a clear set of fscrypt related error codes
+> and document them in the Linux man pages?
+> 
+> Thanks,
+> //richard
 
-It was not necessary to define _FILE_OFFSET_BITS=64 for the actual build
-because it's already done, in builddefs.in.
+Agreed.  Let's break down what kinds of "fscrypt related error codes" codes we
+currently use:
 
-The problem could also be solved by adding AC_SYS_LARGEFILE to
-configure.ac.  It's debatable, but I chose not to do that because it
-might give the impression that it affects the actual compilation of the
-test programs and not just the configure checks.  (Since not all .c
-files include config.h first, a _FILE_OFFSET_BITS definition in config.h
-wouldn't always take effect.)
+Errors for FS_IOC_GET_ENCRYPTION_POLICY:
+	* ENOTTY: filesystem doesn't implement ioctl
+	* ENODATA/ENOENT: file is not encrypted.  Currently ENOENT for ext4 but
+			  ENODATA for f2fs.  I prefer ENODATA.
+	* ENODATA: encryption context has unrecognized size (maybe should be
+		   EINVAL like below?)
+	* EINVAL: version of encryption context not recognized
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- m4/package_xfslibs.m4 | 11 +++++++++--
- 1 file changed, 9 insertions(+), 2 deletions(-)
+Errors for FS_IOC_SET_ENCRYPTION_POLICY:
+	* ENOTTY: filesystem doesn't implement ioctl
+	* EOPNOTSUPP: filesystem doesn't support encryption
+	* EACCES: user doesn't have permission to set the encryption policy
+	* EROFS: filesystem is readonly
+	* EINVAL: encryption modes, flags, or policy version not recognized
+	* EINVAL: file already has an encryption policy, but it's not the same
+		  as the one requested
+	* EINVAL: file is not a directory (maybe this should be ENOTDIR?)
+	* ENOTEMPTY: directory is not empty
 
-diff --git a/m4/package_xfslibs.m4 b/m4/package_xfslibs.m4
-index 6bf4704..5588e9e 100644
---- a/m4/package_xfslibs.m4
-+++ b/m4/package_xfslibs.m4
-@@ -1,5 +1,8 @@
- AC_DEFUN([AC_PACKAGE_NEED_XFS_XFS_H],
--  [ AC_CHECK_HEADERS([xfs/xfs.h],,,[#define _GNU_SOURCE])
-+  [ AC_CHECK_HEADERS([xfs/xfs.h],,,[
-+      #define _GNU_SOURCE
-+      #define _FILE_OFFSET_BITS 64
-+    ])
-     if test "$ac_cv_header_xfs_xfs_h" != "yes"; then
-         echo
-         echo 'FATAL ERROR: cannot find a valid <xfs/xfs.h> header file.'
-@@ -23,7 +26,10 @@ AC_DEFUN([AC_PACKAGE_WANT_XLOG_ASSIGN_LSN],
-   ])
- 
- AC_DEFUN([AC_PACKAGE_NEED_XFS_XQM_H],
--  [ AC_CHECK_HEADERS([xfs/xqm.h],,,[#define _GNU_SOURCE])
-+  [ AC_CHECK_HEADERS([xfs/xqm.h],,,[
-+        #define _GNU_SOURCE
-+        #define _FILE_OFFSET_BITS 64
-+    ])
-     if test "$ac_cv_header_xfs_xqm_h" != "yes"; then
-         echo
-         echo 'FATAL ERROR: cannot find a valid <xfs/xqm.h> header file.'
-@@ -103,6 +109,7 @@ AC_DEFUN([AC_PACKAGE_NEED_XFSCTL_MACRO],
-   [ AC_MSG_CHECKING([xfsctl from xfs/xfs.h])
-     AC_TRY_LINK([
- #define _GNU_SOURCE
-+#define _FILE_OFFSET_BITS 64
- #include <xfs/xfs.h> ],
-       [ int x = xfsctl(0, 0, 0, 0); ],
-       [ echo ok ],
--- 
-2.8.0.rc3.226.g39d4020
+Errors for FS_IOC_GET_ENCRYPTION_PWSALT:
+	* EOPNOTSUPP: filesystem doesn't support encryption
+	* EROFS: filesystem is readonly
 
+Errors for opening/creating files:
+	* ENOKEY: without the key, tried to open an encrypted regular file
+	* ENOENT/EACCES/EPERM: without the key, tried to create a file in an
+			       encrypted directory.  (Maybe we should make this
+			       always ENOKEY, like above?)
+	* EPERM: with the key, tried to create, in an encrypted directory, a
+	  hard link to a file that doesn't have a compatible encryption policy.
+	  (Note: I forgot to test this in my xfstests patches)
+
+I probably missed some.  There are also miscellaneous errors like ones that get
+returned when something is corrupted, but I think it's not worth worrying a lot
+about those in general.
+
+For the ioctls the error codes are not the main problem for documentation, since
+AFAICS we don't have man pages for them at all yet.
+
+For the errors with opening/creating files I don't know whether they should be
+documented places like open(2) and mkdir(2), but at least we do need to agree on
+the error codes.
+
+Eric
