@@ -1,160 +1,86 @@
-Subject: Re: [PATCH v4 5/5] generic/396: Add a copy test for invalid input
-References: <20161208184909.23321-1-Anna.Schumaker@Netapp.com>
- <20161208184909.23321-6-Anna.Schumaker@Netapp.com>
- <20161208202023.GD25841@birch.djwong.org>
-From: Anna Schumaker <Anna.Schumaker@netapp.com>
-Message-ID: <16caccc2-2a81-8f3b-25e1-0929e74b53d9@Netapp.com>
-Date: Thu, 8 Dec 2016 15:28:06 -0500
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:32851 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754978AbcLAQmp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 1 Dec 2016 11:42:45 -0500
 MIME-Version: 1.0
-In-Reply-To: <20161208202023.GD25841@birch.djwong.org>
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests@vger.kernel.org, linux-nfs@vger.kernel.org, hch@infradead.org
+In-Reply-To: <20161129113715.GN22989@eguan.usersys.redhat.com>
+References: <1480018332-16567-1-git-send-email-amir73il@gmail.com>
+ <CAOQ4uxgEgNJtFfauUTXAr9YedbJeNFrZaWAUbEJUzycf=r3Emw@mail.gmail.com> <20161129113715.GN22989@eguan.usersys.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 1 Dec 2016 18:42:00 +0200
+Message-ID: <CAOQ4uxjSZuKocjcLdn6eWmJJdRqYrXonoq0Czvk-UCH6aWfseA@mail.gmail.com>
+Subject: Re: [PATCH] overlay: test ro/rw fd data inconsistecies
+Content-Type: text/plain; charset=UTF-8
+Sender: fstests-owner@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
+On Tue, Nov 29, 2016 at 1:37 PM, Eryu Guan <eguan@redhat.com> wrote:
+> On Tue, Nov 29, 2016 at 10:53:36AM +0200, Amir Goldstein wrote:
 
-
-On 12/08/2016 03:20 PM, Darrick J. Wong wrote:
-> On Thu, Dec 08, 2016 at 01:49:08PM -0500, Anna Schumaker wrote:
->> This test passes invalid argumnt combinations to the copy_file_range()
->> system call to test that input is verified before attempting to copy.
 >>
->> Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
->> ---
->>  tests/generic/396     | 68 +++++++++++++++++++++++++++++++++++++++++++++++++++
->>  tests/generic/396.out |  8 ++++++
->>  tests/generic/group   |  1 +
->>  3 files changed, 77 insertions(+)
->>  create mode 100644 tests/generic/396
->>  create mode 100644 tests/generic/396.out
+>> Eryu and all,
 >>
->> diff --git a/tests/generic/396 b/tests/generic/396
->> new file mode 100644
->> index 0000000..c262070
->> --- /dev/null
->> +++ b/tests/generic/396
->> @@ -0,0 +1,68 @@
->> +#!/bin/bash
->> +# FS QA Test No. 396
->> +#
->> +# Tests vfs_copy_file_range() error checking
->> +#-----------------------------------------------------------------------
->> +# Copyright (c) 2016 Netapp, Inc. All rights reserved.
->> +#
->> +# This program is free software; you can redistribute it and/or
->> +# modify it under the terms of the GNU General Public License as
->> +# published by the Free Software Foundation.
->> +#
->> +# This program is distributed in the hope that it would be useful,
->> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
->> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
->> +# GNU General Public License for more details.
->> +#
->> +# You should have received a copy of the GNU General Public License
->> +# along with this program; if not, write the Free Software Foundation,
->> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
->> +#-----------------------------------------------------------------------
->> +#
->> +
->> +seq=`basename $0`
->> +seqres=$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +here=`pwd`
->> +tmp=/tmp/$$
->> +status=1    # failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +	cd /
->> +	rm -rf $tmp.*
->> +}
->> +
->> +# get standard environment
->> +. common/rc
->> +. common/filter
->> +
->> +# real QA test starts here
->> +_supported_fs generic
->> +_supported_os Linux
->> +
->> +_require_xfs_io_command "copy_range"
->> +_require_test
->> +
->> +testdir=$TEST_DIR/test-$seq
->> +rm -rf $testdir
->> +mkdir $testdir
->> +rm -f $seqres.full
->> +
->> +echo "Create the original file"
->> +$XFS_IO_PROG -f -c 'pwrite -S 0x61 0 1000' $testdir/file >> $seqres.full 2>&1
->> +
->> +echo "source pos > source size:"
->> +$XFS_IO_PROG -f -c "copy_range -s 1000 -l 100 $testdir/file" "$testdir/copy"
->> +
->> +echo "target read-only"
->> +$XFS_IO_PROG -r -f -c "copy_range -s 0 -l 100 $testdir/file" "$testdir/copy"
->> +
->> +echo "target append-only"
->> +$XFS_IO_PROG -a -f -c "copy_range -s 0 -l 100 $testdir/file" "$testdir/copy"
-> 
-> Good start, though I can think of a few more things...
-
-Thanks!
-
-> 
-> Copying when one or the other file arguments are directories/device files/etc.,
-
-Good suggestion, I didn't even think of that one.
-
-> copies where pos < size but (pos + len) > size,
-
-This is in the first patch as the "Copy beyond end of original file" test
-
-> copies where pos + len
-> overflow, overlapped src/dest ranges, and perhaps even copies across holes and
-> unwritten extents?
-
-These are also good suggestions.  I'll add them in!
-
-Anna
-
-> 
-> --D
-> 
->> +
->> +#success, all done
->> +status=0
->> +exit
->> diff --git a/tests/generic/396.out b/tests/generic/396.out
->> new file mode 100644
->> index 0000000..4031883
->> --- /dev/null
->> +++ b/tests/generic/396.out
->> @@ -0,0 +1,8 @@
->> +QA output created by 396
->> +Create the original file
->> +source pos > source size:
->> +copy_range: Invalid argument
->> +target read-only
->> +copy_range: Bad file descriptor
->> +target append-only
->> +copy_range: Bad file descriptor
->> diff --git a/tests/generic/group b/tests/generic/group
->> index 2b50ddb..eee0f39 100644
->> --- a/tests/generic/group
->> +++ b/tests/generic/group
->> @@ -398,3 +398,4 @@
->>  393 auto quick copy
->>  394 auto quick copy
->>  395 auto quick copy
->> +396 auto quick copy
->> -- 
->> 2.10.2
+>> I wanted to ask what is the common practice for introducing tests for
+>> know issues
+>> that are *about* to be solved.
 >>
->> --
->> To unsubscribe from this list: send the line "unsubscribe fstests" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> What is the preferred timing for merging these sort of tests?
+>> Is it productive to have these tests merged before a fix is merged to master?
+>> Before a fix is queued for next?
+>> Before a fix is available?
+>
+> Basically new regression tests will be merged as soon as possible, as
+> long as there're no objections from reviewers or all comments are
+> addressed.
+>
+> One exception is that for tests that could crash latest maintainer's
+> tree (even there's a known fix), I'd perfer letting the fix go upstream
+> first, so that the test doesn't break anyone's tests by crashing all the
+> testing hosts. It's great if the test author could give a notification
+> on the test to say that the fix has been merged, so the test could be
+> merged too. I'll watch the patch status too, but maybe not so timely.
+>
+
+Nothing of a sort lurking with the tests I am planning to write.
+Just tests that check for "Non-standard behavior" of overlayfs,
+some of it described in Documentation/filesystems/overlayfs.txt.
+
+>
+>>
+>> FYI, the fix for the test in this patch (test ro/rw fd data inconsistencies)
+>> is not queued for next yet, but I am hoping it will be.
+>> Miklos?
+>
+> FYI, this test is already in my last pull request to Dave.
+>
+
+Eryu,
+
+I am getting this error when running my test with an older xfs_io (4.3.0).
+I generated the good output with xfs_io from Dave's for-next branch (4.8.0).
+
+Have you any idea why in one setup I see the commands echoed
+to output and not in the other?
+
+I realize that the use of redirecting commands from here document
+to xfs_io has not been used in xfstests before, but I could not find
+another way to use 'open' commands, which are needed for this test.
+
+Amir.
+
+overlay/016      - output mismatch (see
+/home/amir/src/xfstests-dev/results//overlay/016.out.bad)
+    --- tests/overlay/016.out   2016-12-01 12:19:02.710370574 +0200
+    +++ /home/amir/src/xfstests-dev/results//overlay/016.out.bad
+ 2016-12-01 18:29:23.684327009 +0200
+    @@ -1,12 +1,22 @@
+     QA output created by 016
+    -xfs_io> xfs_io> xfs_io> wrote 16/16 bytes at offset 0
+    +xfs_io> open -r foo
+    +xfs_io> open foo
+    +xfs_io> pwrite -S 0x61 0 16
+    +wrote 16/16 bytes at offset 0
+     XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+    ...
