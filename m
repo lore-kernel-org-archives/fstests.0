@@ -1,155 +1,153 @@
-Received: from mx1.redhat.com ([209.132.183.28]:55718 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:51696 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751418AbcLBDfo (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 1 Dec 2016 22:35:44 -0500
-Date: Fri, 2 Dec 2016 11:35:04 +0800
+        id S1751970AbcLBFmd (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 2 Dec 2016 00:42:33 -0500
+Date: Fri, 2 Dec 2016 13:42:31 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] common: cleanups after common/rc split
-Message-ID: <20161202033504.GF29149@eguan.usersys.redhat.com>
-References: <20161201042213.16859-1-eguan@redhat.com>
- <20161202032935.GH11750@dastard>
+Subject: Re: [PATCH] overlay: test ro/rw fd data inconsistecies
+Message-ID: <20161202054231.GI29149@eguan.usersys.redhat.com>
+References: <1480018332-16567-1-git-send-email-amir73il@gmail.com>
+ <CAOQ4uxgEgNJtFfauUTXAr9YedbJeNFrZaWAUbEJUzycf=r3Emw@mail.gmail.com>
+ <20161129113715.GN22989@eguan.usersys.redhat.com>
+ <CAOQ4uxjSZuKocjcLdn6eWmJJdRqYrXonoq0Czvk-UCH6aWfseA@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161202032935.GH11750@dastard>
+In-Reply-To: <CAOQ4uxjSZuKocjcLdn6eWmJJdRqYrXonoq0Czvk-UCH6aWfseA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Dec 02, 2016 at 02:29:35PM +1100, Dave Chinner wrote:
-> On Thu, Dec 01, 2016 at 12:22:13PM +0800, Eryu Guan wrote:
-> > Fix code style issues after the common/rc split, e.g. use tab
-> > indention, fix if-then-else format, fix while-do and for-do format
-> > and various whitespace issues. No functional changes.
+On Thu, Dec 01, 2016 at 06:42:00PM +0200, Amir Goldstein wrote:
+> On Tue, Nov 29, 2016 at 1:37 PM, Eryu Guan <eguan@redhat.com> wrote:
+> > On Tue, Nov 29, 2016 at 10:53:36AM +0200, Amir Goldstein wrote:
 > 
-> Couple of quick things....
+> >>
+> >> Eryu and all,
+> >>
+> >> I wanted to ask what is the common practice for introducing tests for
+> >> know issues
+> >> that are *about* to be solved.
+> >>
+> >> What is the preferred timing for merging these sort of tests?
+> >> Is it productive to have these tests merged before a fix is merged to master?
+> >> Before a fix is queued for next?
+> >> Before a fix is available?
+> >
+> > Basically new regression tests will be merged as soon as possible, as
+> > long as there're no objections from reviewers or all comments are
+> > addressed.
+> >
+> > One exception is that for tests that could crash latest maintainer's
+> > tree (even there's a known fix), I'd perfer letting the fix go upstream
+> > first, so that the test doesn't break anyone's tests by crashing all the
+> > testing hosts. It's great if the test author could give a notification
+> > on the test to say that the fix has been merged, so the test could be
+> > merged too. I'll watch the patch status too, but maybe not so timely.
+> >
 > 
-> > +	OPTS=" "
-> > +	DBOPTS=" "
-> > +	USAGE="Usage: xfs_check [-fsvV] [-l logdev] [-i ino]... [-b bno]... special"
-> > +
-> > +	while getopts "b:fi:l:stvV" c; do
-> > +		case $c in
-> > +			s) OPTS=$OPTS"-s ";;
-> > +			t) OPTS=$OPTS"-t ";;
-> > +			v) OPTS=$OPTS"-v ";;
-> > +			i) OPTS=$OPTS"-i "$OPTARG" ";;
-> > +			b) OPTS=$OPTS"-b "$OPTARG" ";;
-> > +			f) DBOPTS=$DBOPTS" -f";;
-> > +			l) DBOPTS=$DBOPTS" -l "$OPTARG" ";;
-> > +			V) $XFS_DB_PROG -p xfs_check -V
-> > +			   return $?
-> > +			   ;;
-> > +		esac
+> Nothing of a sort lurking with the tests I am planning to write.
+> Just tests that check for "Non-standard behavior" of overlayfs,
+> some of it described in Documentation/filesystems/overlayfs.txt.
 > 
-> It saves space and makes it easier to read if you don't indent the
-> individual cases but do indent the code so multi-line operations
-> don't end up with weird space indenting:
+> >
+> >>
+> >> FYI, the fix for the test in this patch (test ro/rw fd data inconsistencies)
+> >> is not queued for next yet, but I am hoping it will be.
+> >> Miklos?
+> >
+> > FYI, this test is already in my last pull request to Dave.
+> >
 > 
-> 		case $c in
-> 		s)	OPTS=$OPTS"-s ";;
-> 		t)	OPTS=$OPTS"-t ";;
-> 		v)	OPTS=$OPTS"-v ";;
-> 		....
-> 		V)	$XFS_DB_PROG -p xfs_check -V
-> 			return $?
-> 			;;
+> Eryu,
 > 
+> I am getting this error when running my test with an older xfs_io (4.3.0).
+> I generated the good output with xfs_io from Dave's for-next branch (4.8.0).
+> 
+> Have you any idea why in one setup I see the commands echoed
+> to output and not in the other?
 
-Yes, this looks better.
+I'm also using latest for-next branch, so I didn't notice this issue
+either. I guess xfs_io changed its behavior on when to print \n in
+interactive mode, but I didn't dig into the history.
 
-> > @@ -198,23 +197,23 @@ _test_xfs_logprint()
-> >  
-> >  _scratch_xfs_check()
-> >  {
-> > -    SCRATCH_OPTIONS=""
-> > -    [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
-> > -        SCRATCH_OPTIONS="-l $SCRATCH_LOGDEV"
-> > -    [ "$LARGE_SCRATCH_DEV" = yes ] && \
-> > -        SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -t"
-> > -    _xfs_check $SCRATCH_OPTIONS $* $SCRATCH_DEV
-> > +	SCRATCH_OPTIONS=""
-> > +	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
-> > +		SCRATCH_OPTIONS="-l $SCRATCH_LOGDEV"
-> > +	[ "$LARGE_SCRATCH_DEV" = yes ] && \
-> > +		SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -t"
 > 
-> If it's a multi-line construct, just use if [...]; then.
+> I realize that the use of redirecting commands from here document
+> to xfs_io has not been used in xfstests before, but I could not find
+> another way to use 'open' commands, which are needed for this test.
+> 
+> Amir.
+> 
+> overlay/016      - output mismatch (see
+> /home/amir/src/xfstests-dev/results//overlay/016.out.bad)
+>     --- tests/overlay/016.out   2016-12-01 12:19:02.710370574 +0200
+>     +++ /home/amir/src/xfstests-dev/results//overlay/016.out.bad
+>  2016-12-01 18:29:23.684327009 +0200
+>     @@ -1,12 +1,22 @@
+>      QA output created by 016
+>     -xfs_io> xfs_io> xfs_io> wrote 16/16 bytes at offset 0
+>     +xfs_io> open -r foo
+>     +xfs_io> open foo
+>     +xfs_io> pwrite -S 0x61 0 16
+>     +wrote 16/16 bytes at offset 0
+>      XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>     ...
 
-I didn't pay attention to the actual code, just fixed the indention
-issue. I'll fix them in v2.
+I did find a better way to call open either, but if all we care about is
+the output from reading the file, then we can check that explicitly and
+ignore other outputs. e.g. 
 
-Thanks for the review!
+--- a/tests/overlay/016
++++ b/tests/overlay/016
+@@ -61,6 +61,8 @@ mkdir -p $lowerdir
+ echo "This is old news" > $lowerdir/foo
+ echo "This is old news" > $lowerdir/bar
+ 
++echo "Silence is golden"
++
+ _scratch_mount
+ 
+ cd $SCRATCH_MNT
+@@ -72,7 +74,7 @@ cd $SCRATCH_MNT
+ # write to rwfd
+ # read from rofd
+ #
+-$XFS_IO_PROG << EOF | _filter_xfs_io
++$XFS_IO_PROG << EOF | grep "old"
+ open -r foo
+ open foo
+ pwrite -S 0x61 0 16
+@@ -86,7 +88,7 @@ EOF
+ # write to rwfd
+ # read from mapped memory
+ #
+-$XFS_IO_PROG << EOF | _filter_xfs_io
++$XFS_IO_PROG << EOF | grep "old"
+ open -r bar
+ mmap -r 0 16
+ open bar
+diff --git a/tests/overlay/016.out b/tests/overlay/016.out
+index 52b8cd7..aa2526b 100644
+--- a/tests/overlay/016.out
++++ b/tests/overlay/016.out
+@@ -1,12 +1,2 @@
+ QA output created by 016
+-xfs_io> xfs_io> xfs_io> wrote 16/16 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-xfs_io> [000] foo            (foreign,non-sync,non-direct,read-only)
+- 001  foo            (foreign,non-sync,non-direct,read-write)
+-xfs_io> 00000000:  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
+-read 16/16 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-xfs_io> xfs_io> xfs_io> xfs_io> xfs_io> wrote 16/16 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-xfs_io> 00000000:  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
+-xfs_io> 
+\ No newline at end of file
++Silence is golden
 
+This should work for both old and new version of xfs_io.
+
+Thanks,
 Eryu
-
-> 
-> > +	_xfs_check $SCRATCH_OPTIONS $* $SCRATCH_DEV
-> >  }
-> >  
-> >  _scratch_xfs_repair()
-> >  {
-> > -    SCRATCH_OPTIONS=""
-> > -    [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
-> > -        SCRATCH_OPTIONS="-l$SCRATCH_LOGDEV"
-> > -    [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_RTDEV" ] && \
-> > -        SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -r$SCRATCH_RTDEV"
-> > -    [ "$LARGE_SCRATCH_DEV" = yes ] && SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -t"
-> > -    $XFS_REPAIR_PROG $SCRATCH_OPTIONS $* $SCRATCH_DEV
-> > +	SCRATCH_OPTIONS=""
-> > +	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
-> > +		SCRATCH_OPTIONS="-l$SCRATCH_LOGDEV"
-> > +	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_RTDEV" ] && \
-> > +		SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -r$SCRATCH_RTDEV"
-> 
-> And this can become:
-> 
-> 	if [ "$USE_EXTERNAL" = yes ]; then
-> 		[ -n "$SCRATCH_LOGDEV" ] && SCRATCH_OPTIONS="-l$SCRATCH_LOGDEV" 
-> 		[ -n "$SCRATCH_RTDEV" ] && SCRATCH_OPTIONS="-l$SCRATCH_RTDEV" 
-> 	fi
-> 
-> > +
-> > +	$XFS_LOGPRINT_PROG -t $extra_log_options $device 2>&1 \
-> > +		| tee $tmp.logprint | grep -q "<CLEAN>"
-> > +	if [ $? -ne 0 -a "$HOSTOS" = "Linux" ]; then
-> > +		echo "_check_xfs_filesystem: filesystem on $device has dirty log (see $seqres.full)"
-> > +
-> > +		echo "_check_xfs_filesystem: filesystem on $device has dirty log"   >>$seqres.full
-> > +		echo "*** xfs_logprint -t output ***"	>>$seqres.full
-> > +		cat $tmp.logprint			>>$seqres.full
-> > +		echo "*** end xfs_logprint output"	>>$seqres.full
-> 
-> Better, I think, with these multi-line file dumps is something like:
-> 
-> 		(
-> 		echo ....
-> 		echo ....
-> 		cat ...
-> 		echo
-> 		) >> $seqres.full
-> > +	if [ $ok -eq 0 ]; then
-> > +		echo "*** mount output ***"		>>$seqres.full
-> > +		_mount					>>$seqres.full
-> > +		echo "*** end mount output"		>>$seqres.full
-> > +	elif [ "$type" = "xfs" ]; then
-> > +		_mount_or_remount_rw "$extra_mount_options" $device $mountpoint
-> > +	fi
-> > +
-> > +	if [ $ok -eq 0 ]; then
-> > +		status=1
-> > +		if [ "$iam" != "check" ]; then
-> > +			exit 1
-> > +		fi
-> > +		return 1
-> > +	fi
-> 
-> THese $ok -eq 0 cases can be combined.
-> 
-> Cheers,
-> 
-> Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
