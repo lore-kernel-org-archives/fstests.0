@@ -1,86 +1,143 @@
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:32851 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754978AbcLAQmp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 1 Dec 2016 11:42:45 -0500
+Received: from userp1040.oracle.com ([156.151.31.81]:34239 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1759009AbcLBBMp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 1 Dec 2016 20:12:45 -0500
+Subject: Re: [PATCH] fstests: btrfs, add missing umount for raid5 tests 124
+ and 125
+References: <1479968719-10713-1-git-send-email-fdmanana@kernel.org>
+From: Anand Jain <anand.jain@oracle.com>
+Message-ID: <baee4697-7fee-e739-ad34-c4d8a45c453f@oracle.com>
+Date: Fri, 2 Dec 2016 09:14:47 +0800
 MIME-Version: 1.0
-In-Reply-To: <20161129113715.GN22989@eguan.usersys.redhat.com>
-References: <1480018332-16567-1-git-send-email-amir73il@gmail.com>
- <CAOQ4uxgEgNJtFfauUTXAr9YedbJeNFrZaWAUbEJUzycf=r3Emw@mail.gmail.com> <20161129113715.GN22989@eguan.usersys.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 1 Dec 2016 18:42:00 +0200
-Message-ID: <CAOQ4uxjSZuKocjcLdn6eWmJJdRqYrXonoq0Czvk-UCH6aWfseA@mail.gmail.com>
-Subject: Re: [PATCH] overlay: test ro/rw fd data inconsistecies
-Content-Type: text/plain; charset=UTF-8
+In-Reply-To: <1479968719-10713-1-git-send-email-fdmanana@kernel.org>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
+To: fdmanana@kernel.org, fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Nov 29, 2016 at 1:37 PM, Eryu Guan <eguan@redhat.com> wrote:
-> On Tue, Nov 29, 2016 at 10:53:36AM +0200, Amir Goldstein wrote:
 
->>
->> Eryu and all,
->>
->> I wanted to ask what is the common practice for introducing tests for
->> know issues
->> that are *about* to be solved.
->>
->> What is the preferred timing for merging these sort of tests?
->> Is it productive to have these tests merged before a fix is merged to master?
->> Before a fix is queued for next?
->> Before a fix is available?
+Hi,
+
+I didn't add umount at end of the test because...
+_check_btrfs_filesystem() does it, which gets called as this test does 
+not specify _require_scratch_nocheck
+
+----------------
+  _check_btrfs_filesystem()
+{
+     device=$1
+
+     # If type is set, we're mounted
+     type=`_fs_type $device`
+     ok=1
+
+     if [ "$type" = "$FSTYP" ]
+     then
+         # mounted ...
+         mountpoint=`_umount_or_remount_ro $device`  <----
+     fi
+
+     btrfsck $device >$tmp.fsck 2>&1
+----------------
+
+
+I faced the similar problem on some other tests and I found
+adding the delay is the right approach. for eg:
+
+--------------------------
+diff --git a/tests/generic/298 b/tests/generic/298
+index e85db1266fa9..4092efa6b961 100755
+--- a/tests/generic/298
++++ b/tests/generic/298
+@@ -92,7 +92,7 @@ echo "reflink of $n bytes took $delta seconds" >> 
+$seqres.full
+  test $delta -gt $timeout && _fail "reflink didn't stop in time, n=$n 
+t=$delta"
+
+  echo "Check scratch fs"
+-sleep 2		# give it a few seconds to actually die...
++sleep 40		# give it a few seconds to actually die...
+
+  # success, all done
+  status=0
+--------------------------
+
+
+HTH
+-Anand
+
+
+
+On 11/24/16 14:25, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 >
-> Basically new regression tests will be merged as soon as possible, as
-> long as there're no objections from reviewers or all comments are
-> addressed.
+> The tests mount the second device in the device pool but never unmount
+> it, causing the next test to fail.
 >
-> One exception is that for tests that could crash latest maintainer's
-> tree (even there's a known fix), I'd perfer letting the fix go upstream
-> first, so that the test doesn't break anyone's tests by crashing all the
-> testing hosts. It's great if the test author could give a notification
-> on the test to say that the fix has been merged, so the test could be
-> merged too. I'll watch the patch status too, but maybe not so timely.
+> Example:
 >
-
-Nothing of a sort lurking with the tests I am planning to write.
-Just tests that check for "Non-standard behavior" of overlayfs,
-some of it described in Documentation/filesystems/overlayfs.txt.
-
+> $ cat local.config
+> export TEST_DEV=/dev/sdb
+> export TEST_DIR=/home/fdmanana/btrfs-tests/dev
+> export SCRATCH_MNT="/home/fdmanana/btrfs-tests/scratch_1"
+> export SCRATCH_DEV_POOL="/dev/sdc /dev/sdd /dev/sde /dev/sdf /dev/sdg"
+> export FSTYP=btrfs
 >
->>
->> FYI, the fix for the test in this patch (test ro/rw fd data inconsistencies)
->> is not queued for next yet, but I am hoping it will be.
->> Miklos?
+> $ ./check btrfs/125 btrfs/126
+> FSTYP         -- btrfs
+> PLATFORM      -- Linux/x86_64 debian3 4.8.0-rc8-btrfs-next-35+
+> MKFS_OPTIONS  -- /dev/sdc
+> MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
 >
-> FYI, this test is already in my last pull request to Dave.
+> btrfs/125 23s ... 22s
+> btrfs/126 1s ... - output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/126.out.bad)
+>     --- tests/btrfs/126.out	2016-11-24 06:11:42.048372385 +0000
+>     +++ /home/fdmanana/git/hub/xfstests/results//btrfs/126.out.bad	2016-11-24 06:16:35.987988895 +0000
+>     @@ -1,2 +1,5 @@
+>      QA output created by 126
+>     -pwrite: Disk quota exceeded
+>     +ERROR: /dev/sdc is mounted
+>     +mount: /dev/sdc is already mounted or /home/fdmanana/btrfs-tests/scratch_1 busy
+>     +       /dev/sdc is already mounted on /home/fdmanana/btrfs-tests/scratch_1
+>     +/home/fdmanana/btrfs-tests/scratch_1/test_file: Disk quota exceeded
+>     ...
+>     (Run 'diff -u tests/btrfs/126.out /home/fdmanana/git/hub/xfstests/results//btrfs/126.out.bad'  to see the entire diff)
+> Ran: btrfs/125 btrfs/126
+> Failures: btrfs/126
+> Failed 1 of 2 tests
 >
-
-Eryu,
-
-I am getting this error when running my test with an older xfs_io (4.3.0).
-I generated the good output with xfs_io from Dave's for-next branch (4.8.0).
-
-Have you any idea why in one setup I see the commands echoed
-to output and not in the other?
-
-I realize that the use of redirecting commands from here document
-to xfs_io has not been used in xfstests before, but I could not find
-another way to use 'open' commands, which are needed for this test.
-
-Amir.
-
-overlay/016      - output mismatch (see
-/home/amir/src/xfstests-dev/results//overlay/016.out.bad)
-    --- tests/overlay/016.out   2016-12-01 12:19:02.710370574 +0200
-    +++ /home/amir/src/xfstests-dev/results//overlay/016.out.bad
- 2016-12-01 18:29:23.684327009 +0200
-    @@ -1,12 +1,22 @@
-     QA output created by 016
-    -xfs_io> xfs_io> xfs_io> wrote 16/16 bytes at offset 0
-    +xfs_io> open -r foo
-    +xfs_io> open foo
-    +xfs_io> pwrite -S 0x61 0 16
-    +wrote 16/16 bytes at offset 0
-     XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-    ...
+> So just make sure those test unmount the device before they finish.
+>
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> ---
+>  tests/btrfs/124 | 1 +
+>  tests/btrfs/125 | 1 +
+>  2 files changed, 2 insertions(+)
+>
+> diff --git a/tests/btrfs/124 b/tests/btrfs/124
+> index 2618a26..7206094 100755
+> --- a/tests/btrfs/124
+> +++ b/tests/btrfs/124
+> @@ -159,6 +159,7 @@ if [ "$checkpoint1" != "$checkpoint3" ]; then
+>  	echo "Inital sum does not match with data on dev2 written by balance"
+>  fi
+>
+> +$UMOUNT_PROG $dev2
+>  _scratch_dev_pool_put
+>  _test_mount
+>
+> diff --git a/tests/btrfs/125 b/tests/btrfs/125
+> index 1062b87..91aa8d8 100755
+> --- a/tests/btrfs/125
+> +++ b/tests/btrfs/125
+> @@ -175,6 +175,7 @@ if [ "$checkpoint1" != "$checkpoint3" ]; then
+>  	echo "Inital sum does not match with data on dev2 written by balance"
+>  fi
+>
+> +$UMOUNT_PROG $dev2
+>  _scratch_dev_pool_put
+>  _test_mount
+>
+>
