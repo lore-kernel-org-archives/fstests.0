@@ -1,143 +1,142 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:34239 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1759009AbcLBBMp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 1 Dec 2016 20:12:45 -0500
-Subject: Re: [PATCH] fstests: btrfs, add missing umount for raid5 tests 124
- and 125
-References: <1479968719-10713-1-git-send-email-fdmanana@kernel.org>
-From: Anand Jain <anand.jain@oracle.com>
-Message-ID: <baee4697-7fee-e739-ad34-c4d8a45c453f@oracle.com>
-Date: Fri, 2 Dec 2016 09:14:47 +0800
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:44996 "EHLO
+        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751895AbcLBD3k (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 1 Dec 2016 22:29:40 -0500
+Date: Fri, 2 Dec 2016 14:29:35 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] common: cleanups after common/rc split
+Message-ID: <20161202032935.GH11750@dastard>
+References: <20161201042213.16859-1-eguan@redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <1479968719-10713-1-git-send-email-fdmanana@kernel.org>
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20161201042213.16859-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fdmanana@kernel.org, fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+On Thu, Dec 01, 2016 at 12:22:13PM +0800, Eryu Guan wrote:
+> Fix code style issues after the common/rc split, e.g. use tab
+> indention, fix if-then-else format, fix while-do and for-do format
+> and various whitespace issues. No functional changes.
 
-Hi,
+Couple of quick things....
 
-I didn't add umount at end of the test because...
-_check_btrfs_filesystem() does it, which gets called as this test does 
-not specify _require_scratch_nocheck
+> +	OPTS=" "
+> +	DBOPTS=" "
+> +	USAGE="Usage: xfs_check [-fsvV] [-l logdev] [-i ino]... [-b bno]... special"
+> +
+> +	while getopts "b:fi:l:stvV" c; do
+> +		case $c in
+> +			s) OPTS=$OPTS"-s ";;
+> +			t) OPTS=$OPTS"-t ";;
+> +			v) OPTS=$OPTS"-v ";;
+> +			i) OPTS=$OPTS"-i "$OPTARG" ";;
+> +			b) OPTS=$OPTS"-b "$OPTARG" ";;
+> +			f) DBOPTS=$DBOPTS" -f";;
+> +			l) DBOPTS=$DBOPTS" -l "$OPTARG" ";;
+> +			V) $XFS_DB_PROG -p xfs_check -V
+> +			   return $?
+> +			   ;;
+> +		esac
 
-----------------
-  _check_btrfs_filesystem()
-{
-     device=$1
+It saves space and makes it easier to read if you don't indent the
+individual cases but do indent the code so multi-line operations
+don't end up with weird space indenting:
 
-     # If type is set, we're mounted
-     type=`_fs_type $device`
-     ok=1
+		case $c in
+		s)	OPTS=$OPTS"-s ";;
+		t)	OPTS=$OPTS"-t ";;
+		v)	OPTS=$OPTS"-v ";;
+		....
+		V)	$XFS_DB_PROG -p xfs_check -V
+			return $?
+			;;
 
-     if [ "$type" = "$FSTYP" ]
-     then
-         # mounted ...
-         mountpoint=`_umount_or_remount_ro $device`  <----
-     fi
+> @@ -198,23 +197,23 @@ _test_xfs_logprint()
+>  
+>  _scratch_xfs_check()
+>  {
+> -    SCRATCH_OPTIONS=""
+> -    [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
+> -        SCRATCH_OPTIONS="-l $SCRATCH_LOGDEV"
+> -    [ "$LARGE_SCRATCH_DEV" = yes ] && \
+> -        SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -t"
+> -    _xfs_check $SCRATCH_OPTIONS $* $SCRATCH_DEV
+> +	SCRATCH_OPTIONS=""
+> +	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
+> +		SCRATCH_OPTIONS="-l $SCRATCH_LOGDEV"
+> +	[ "$LARGE_SCRATCH_DEV" = yes ] && \
+> +		SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -t"
 
-     btrfsck $device >$tmp.fsck 2>&1
-----------------
+If it's a multi-line construct, just use if [...]; then.
 
+> +	_xfs_check $SCRATCH_OPTIONS $* $SCRATCH_DEV
+>  }
+>  
+>  _scratch_xfs_repair()
+>  {
+> -    SCRATCH_OPTIONS=""
+> -    [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
+> -        SCRATCH_OPTIONS="-l$SCRATCH_LOGDEV"
+> -    [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_RTDEV" ] && \
+> -        SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -r$SCRATCH_RTDEV"
+> -    [ "$LARGE_SCRATCH_DEV" = yes ] && SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -t"
+> -    $XFS_REPAIR_PROG $SCRATCH_OPTIONS $* $SCRATCH_DEV
+> +	SCRATCH_OPTIONS=""
+> +	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
+> +		SCRATCH_OPTIONS="-l$SCRATCH_LOGDEV"
+> +	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_RTDEV" ] && \
+> +		SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -r$SCRATCH_RTDEV"
 
-I faced the similar problem on some other tests and I found
-adding the delay is the right approach. for eg:
+And this can become:
 
---------------------------
-diff --git a/tests/generic/298 b/tests/generic/298
-index e85db1266fa9..4092efa6b961 100755
---- a/tests/generic/298
-+++ b/tests/generic/298
-@@ -92,7 +92,7 @@ echo "reflink of $n bytes took $delta seconds" >> 
-$seqres.full
-  test $delta -gt $timeout && _fail "reflink didn't stop in time, n=$n 
-t=$delta"
+	if [ "$USE_EXTERNAL" = yes ]; then
+		[ -n "$SCRATCH_LOGDEV" ] && SCRATCH_OPTIONS="-l$SCRATCH_LOGDEV" 
+		[ -n "$SCRATCH_RTDEV" ] && SCRATCH_OPTIONS="-l$SCRATCH_RTDEV" 
+	fi
 
-  echo "Check scratch fs"
--sleep 2		# give it a few seconds to actually die...
-+sleep 40		# give it a few seconds to actually die...
+> +
+> +	$XFS_LOGPRINT_PROG -t $extra_log_options $device 2>&1 \
+> +		| tee $tmp.logprint | grep -q "<CLEAN>"
+> +	if [ $? -ne 0 -a "$HOSTOS" = "Linux" ]; then
+> +		echo "_check_xfs_filesystem: filesystem on $device has dirty log (see $seqres.full)"
+> +
+> +		echo "_check_xfs_filesystem: filesystem on $device has dirty log"   >>$seqres.full
+> +		echo "*** xfs_logprint -t output ***"	>>$seqres.full
+> +		cat $tmp.logprint			>>$seqres.full
+> +		echo "*** end xfs_logprint output"	>>$seqres.full
 
-  # success, all done
-  status=0
---------------------------
+Better, I think, with these multi-line file dumps is something like:
 
+		(
+		echo ....
+		echo ....
+		cat ...
+		echo
+		) >> $seqres.full
+> +	if [ $ok -eq 0 ]; then
+> +		echo "*** mount output ***"		>>$seqres.full
+> +		_mount					>>$seqres.full
+> +		echo "*** end mount output"		>>$seqres.full
+> +	elif [ "$type" = "xfs" ]; then
+> +		_mount_or_remount_rw "$extra_mount_options" $device $mountpoint
+> +	fi
+> +
+> +	if [ $ok -eq 0 ]; then
+> +		status=1
+> +		if [ "$iam" != "check" ]; then
+> +			exit 1
+> +		fi
+> +		return 1
+> +	fi
 
-HTH
--Anand
+THese $ok -eq 0 cases can be combined.
 
+Cheers,
 
-
-On 11/24/16 14:25, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
->
-> The tests mount the second device in the device pool but never unmount
-> it, causing the next test to fail.
->
-> Example:
->
-> $ cat local.config
-> export TEST_DEV=/dev/sdb
-> export TEST_DIR=/home/fdmanana/btrfs-tests/dev
-> export SCRATCH_MNT="/home/fdmanana/btrfs-tests/scratch_1"
-> export SCRATCH_DEV_POOL="/dev/sdc /dev/sdd /dev/sde /dev/sdf /dev/sdg"
-> export FSTYP=btrfs
->
-> $ ./check btrfs/125 btrfs/126
-> FSTYP         -- btrfs
-> PLATFORM      -- Linux/x86_64 debian3 4.8.0-rc8-btrfs-next-35+
-> MKFS_OPTIONS  -- /dev/sdc
-> MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
->
-> btrfs/125 23s ... 22s
-> btrfs/126 1s ... - output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/126.out.bad)
->     --- tests/btrfs/126.out	2016-11-24 06:11:42.048372385 +0000
->     +++ /home/fdmanana/git/hub/xfstests/results//btrfs/126.out.bad	2016-11-24 06:16:35.987988895 +0000
->     @@ -1,2 +1,5 @@
->      QA output created by 126
->     -pwrite: Disk quota exceeded
->     +ERROR: /dev/sdc is mounted
->     +mount: /dev/sdc is already mounted or /home/fdmanana/btrfs-tests/scratch_1 busy
->     +       /dev/sdc is already mounted on /home/fdmanana/btrfs-tests/scratch_1
->     +/home/fdmanana/btrfs-tests/scratch_1/test_file: Disk quota exceeded
->     ...
->     (Run 'diff -u tests/btrfs/126.out /home/fdmanana/git/hub/xfstests/results//btrfs/126.out.bad'  to see the entire diff)
-> Ran: btrfs/125 btrfs/126
-> Failures: btrfs/126
-> Failed 1 of 2 tests
->
-> So just make sure those test unmount the device before they finish.
->
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> ---
->  tests/btrfs/124 | 1 +
->  tests/btrfs/125 | 1 +
->  2 files changed, 2 insertions(+)
->
-> diff --git a/tests/btrfs/124 b/tests/btrfs/124
-> index 2618a26..7206094 100755
-> --- a/tests/btrfs/124
-> +++ b/tests/btrfs/124
-> @@ -159,6 +159,7 @@ if [ "$checkpoint1" != "$checkpoint3" ]; then
->  	echo "Inital sum does not match with data on dev2 written by balance"
->  fi
->
-> +$UMOUNT_PROG $dev2
->  _scratch_dev_pool_put
->  _test_mount
->
-> diff --git a/tests/btrfs/125 b/tests/btrfs/125
-> index 1062b87..91aa8d8 100755
-> --- a/tests/btrfs/125
-> +++ b/tests/btrfs/125
-> @@ -175,6 +175,7 @@ if [ "$checkpoint1" != "$checkpoint3" ]; then
->  	echo "Inital sum does not match with data on dev2 written by balance"
->  fi
->
-> +$UMOUNT_PROG $dev2
->  _scratch_dev_pool_put
->  _test_mount
->
->
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
