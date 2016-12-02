@@ -1,203 +1,734 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:21700 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1758734AbcLBLyt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 2 Dec 2016 06:54:49 -0500
-Subject: Re: [PATCH] fstests: btrfs, add missing umount for raid5 tests 124
- and 125
-References: <1479968719-10713-1-git-send-email-fdmanana@kernel.org>
- <baee4697-7fee-e739-ad34-c4d8a45c453f@oracle.com>
- <CAL3q7H4hFp5-GMnD2oTEXc1aP8M4OJr60315b3S8JpQpuagKrQ@mail.gmail.com>
-From: Anand Jain <anand.jain@oracle.com>
-Message-ID: <13175080-98af-e09b-08fa-f792d1d3aaa4@oracle.com>
-Date: Fri, 2 Dec 2016 19:56:37 +0800
-MIME-Version: 1.0
-In-Reply-To: <CAL3q7H4hFp5-GMnD2oTEXc1aP8M4OJr60315b3S8JpQpuagKrQ@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Received: from mx1.redhat.com ([209.132.183.28]:57272 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1761353AbcLBOaj (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 2 Dec 2016 09:30:39 -0500
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 82864A2021
+        for <fstests@vger.kernel.org>; Fri,  2 Dec 2016 14:30:39 +0000 (UTC)
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH v2] common: cleanups after common/rc split
+Date: Fri,  2 Dec 2016 22:30:34 +0800
+Message-Id: <20161202143034.7269-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
+Fix code style issues after the common/rc split, e.g. use tab
+indention, fix if-then-else format, fix while-do and for-do format
+and various whitespace issues. No functional changes.
 
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
 
-On 12/02/16 18:54, Filipe Manana wrote:
-> On Fri, Dec 2, 2016 at 1:14 AM, Anand Jain <anand.jain@oracle.com> wrote:
->>
->> Hi,
->>
->> I didn't add umount at end of the test because...
->> _check_btrfs_filesystem() does it, which gets called as this test does not
->
-> Nop it doesn't.
->
-> See common/check:
->
-> _check_filesystems()
-> {
->    if [ -f ${RESULT_DIR}/require_test ]; then
->       _check_test_fs || err=true
->    rm -f ${RESULT_DIR}/require_test
->    fi
->    if [ -f ${RESULT_DIR}/require_scratch ]; then
->      _check_scratch_fs || err=true
->      rm -f ${RESULT_DIR}/require_scratch
->    fi
-> }
->
-> Those files are created by the _require_scratch and _require_test
-> functions, which are not called by btrfs/12[45].
->
+This is a v2 follow-up patch to Dave's "make common/rc easier to manage"
+patchset.
 
-  Ah yes. you are right.
+v2: Address Dave's comments
+- update indention of switch-case-esac code block
+- convert some multi-line "[ ... ] && ..." to "if-then-fi"
+- group multi-line file dump code together and do stdout redirection on the
+  whole code block once
 
->> specify _require_scratch_nocheck
->>
->> ----------------
->>  _check_btrfs_filesystem()
->> {
->>     device=$1
->>
->>     # If type is set, we're mounted
->>     type=`_fs_type $device`
->>     ok=1
->>
->>     if [ "$type" = "$FSTYP" ]
->>     then
->>         # mounted ...
->>         mountpoint=`_umount_or_remount_ro $device`  <----
->>     fi
->>
->>     btrfsck $device >$tmp.fsck 2>&1
->> ----------------
->>
->>
->> I faced the similar problem on some other tests and I found
->> adding the delay is the right approach. for eg:
->>
->> --------------------------
->> diff --git a/tests/generic/298 b/tests/generic/298
->> index e85db1266fa9..4092efa6b961 100755
->> --- a/tests/generic/298
->> +++ b/tests/generic/298
->> @@ -92,7 +92,7 @@ echo "reflink of $n bytes took $delta seconds" >>
->> $seqres.full
->>  test $delta -gt $timeout && _fail "reflink didn't stop in time, n=$n
->> t=$delta"
->>
->>  echo "Check scratch fs"
->> -sleep 2                # give it a few seconds to actually die...
->> +sleep 40               # give it a few seconds to actually die...
->
->
-> That might work for that test, but certainly not for btrfs/12[45] as
-> mentioned above.
-> Besides, that's a terrible solution. What guarantees you have that 40
-> seconds is enough for  everyone...
+ common/btrfs |  91 ++++++------
+ common/xfs   | 450 ++++++++++++++++++++++++++++++-----------------------------
+ 2 files changed, 272 insertions(+), 269 deletions(-)
 
-  yep. I agree.
+diff --git a/common/btrfs b/common/btrfs
+index 7cc4f5d..b022b79 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -68,53 +68,53 @@ _require_btrfs_fs_feature()
+ 
+ _check_btrfs_filesystem()
+ {
+-    device=$1
+-
+-    # If type is set, we're mounted
+-    type=`_fs_type $device`
+-    ok=1
+-
+-    if [ "$type" = "$FSTYP" ]
+-    then
+-        # mounted ...
+-        mountpoint=`_umount_or_remount_ro $device`
+-    fi
+-
+-    btrfsck $device >$tmp.fsck 2>&1
+-    if [ $? -ne 0 ]
+-    then
+-        echo "_check_btrfs_filesystem: filesystem on $device is inconsistent (see $seqres.full)"
+-
+-        echo "_check_btrfs_filesystem: filesystem on $device is inconsistent" >>$seqres.full
+-        echo "*** fsck.$FSTYP output ***"	>>$seqres.full
+-        cat $tmp.fsck				>>$seqres.full
+-        echo "*** end fsck.$FSTYP output"	>>$seqres.full
+-
+-        ok=0
+-    fi
+-    rm -f $tmp.fsck
+-
+-    if [ $ok -eq 0 ]
+-    then
+-        echo "*** mount output ***"		>>$seqres.full
+-        _mount					>>$seqres.full
+-        echo "*** end mount output"		>>$seqres.full
+-    elif [ "$type" = "$FSTYP" ]
+-    then
+-	# was mounted ...
+-	_mount_or_remount_rw "$MOUNT_OPTIONS" $device $mountpoint
+-	ok=$?
+-    fi
+-
+-    if [ $ok -eq 0 ]; then
+-	status=1
+-	if [ "$iam" != "check" ]; then
+-		exit 1
++	device=$1
++
++	# If type is set, we're mounted
++	type=`_fs_type $device`
++	ok=1
++
++	if [ "$type" = "$FSTYP" ]; then
++		# mounted ...
++		mountpoint=`_umount_or_remount_ro $device`
+ 	fi
+-	return 1
+-    fi
+ 
+-    return 0
++	btrfsck $device >$tmp.fsck 2>&1
++	if [ $? -ne 0 ]; then
++		(
++		echo "_check_btrfs_filesystem: filesystem on $device is inconsistent (see $seqres.full)"
++
++		echo "_check_btrfs_filesystem: filesystem on $device is inconsistent"
++		echo "*** fsck.$FSTYP output ***"
++		cat $tmp.fsck
++		echo "*** end fsck.$FSTYP output"
++		) >>$seqres.full
++
++		ok=0
++	fi
++	rm -f $tmp.fsck
++
++	if [ $ok -eq 0 ]; then
++		(
++		echo "*** mount output ***"
++		_mount
++		echo "*** end mount output"
++		) >>$seqres.full
++	elif [ "$type" = "$FSTYP" ]; then
++		# was mounted ...
++		_mount_or_remount_rw "$MOUNT_OPTIONS" $device $mountpoint
++		ok=$?
++	fi
++
++	if [ $ok -eq 0 ]; then
++		status=1
++		if [ "$iam" != "check" ]; then
++			exit 1
++		fi
++		return 1
++	fi
++
++	return 0
+ }
+ 
+ _require_btrfs_dev_del_by_devid()
+@@ -332,4 +332,3 @@ _reload_btrfs_ko()
+ 	modprobe -r btrfs || _fail "btrfs unload failed"
+ 	modprobe btrfs || _fail "btrfs load failed"
+ }
+-
+diff --git a/common/xfs b/common/xfs
+index 0dde83f..ca9bfe2 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -135,44 +135,43 @@ _scratch_mkfs_xfs()
+ # maintain the current verification levels.
+ _xfs_check()
+ {
+-    OPTS=" "
+-    DBOPTS=" "
+-    USAGE="Usage: xfs_check [-fsvV] [-l logdev] [-i ino]... [-b bno]... special"
+-
+-    while getopts "b:fi:l:stvV" c
+-    do
+-        case $c in
+-            s) OPTS=$OPTS"-s ";;
+-            t) OPTS=$OPTS"-t ";;
+-            v) OPTS=$OPTS"-v ";;
+-            i) OPTS=$OPTS"-i "$OPTARG" ";;
+-            b) OPTS=$OPTS"-b "$OPTARG" ";;
+-            f) DBOPTS=$DBOPTS" -f";;
+-            l) DBOPTS=$DBOPTS" -l "$OPTARG" ";;
+-            V) $XFS_DB_PROG -p xfs_check -V
+-                return $?
+-                ;;
+-        esac
+-    done
+-    set -- extra $@
+-    shift $OPTIND
+-    case $# in
+-        1)    ${XFS_DB_PROG}${DBOPTS} -F -i -p xfs_check -c "check$OPTS" $1
+-               status=$?
+-               ;;
+-        2)    echo $USAGE 1>&1
+-              status=2
+-              ;;
+-    esac
+-    return $status
++	OPTS=" "
++	DBOPTS=" "
++	USAGE="Usage: xfs_check [-fsvV] [-l logdev] [-i ino]... [-b bno]... special"
++
++	while getopts "b:fi:l:stvV" c; do
++		case $c in
++		s)	OPTS=$OPTS"-s ";;
++		t)	OPTS=$OPTS"-t ";;
++		v)	OPTS=$OPTS"-v ";;
++		i)	OPTS=$OPTS"-i "$OPTARG" ";;
++		b)	OPTS=$OPTS"-b "$OPTARG" ";;
++		f)	DBOPTS=$DBOPTS" -f";;
++		l)	DBOPTS=$DBOPTS" -l "$OPTARG" ";;
++		V)	$XFS_DB_PROG -p xfs_check -V
++			return $?
++			;;
++		esac
++	done
++	set -- extra $@
++	shift $OPTIND
++	case $# in
++	1)	${XFS_DB_PROG}${DBOPTS} -F -i -p xfs_check -c "check$OPTS" $1
++		status=$?
++		;;
++	2)	echo $USAGE 1>&1
++		status=2
++		;;
++	esac
++	return $status
+ }
+ 
+ _scratch_xfs_db_options()
+ {
+-    SCRATCH_OPTIONS=""
+-    [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
+-        SCRATCH_OPTIONS="-l$SCRATCH_LOGDEV"
+-    echo $SCRATCH_OPTIONS $* $SCRATCH_DEV
++	SCRATCH_OPTIONS=""
++	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
++		SCRATCH_OPTIONS="-l$SCRATCH_LOGDEV"
++	echo $SCRATCH_OPTIONS $* $SCRATCH_DEV
+ }
+ 
+ _scratch_xfs_db()
+@@ -182,10 +181,10 @@ _scratch_xfs_db()
+ 
+ _scratch_xfs_logprint()
+ {
+-    SCRATCH_OPTIONS=""
+-    [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
+-        SCRATCH_OPTIONS="-l$SCRATCH_LOGDEV"
+-    $XFS_LOGPRINT_PROG $SCRATCH_OPTIONS $* $SCRATCH_DEV
++	SCRATCH_OPTIONS=""
++	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
++		SCRATCH_OPTIONS="-l$SCRATCH_LOGDEV"
++	$XFS_LOGPRINT_PROG $SCRATCH_OPTIONS $* $SCRATCH_DEV
+ }
+ 
+ _test_xfs_logprint()
+@@ -198,37 +197,39 @@ _test_xfs_logprint()
+ 
+ _scratch_xfs_check()
+ {
+-    SCRATCH_OPTIONS=""
+-    [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
+-        SCRATCH_OPTIONS="-l $SCRATCH_LOGDEV"
+-    [ "$LARGE_SCRATCH_DEV" = yes ] && \
+-        SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -t"
+-    _xfs_check $SCRATCH_OPTIONS $* $SCRATCH_DEV
++	SCRATCH_OPTIONS=""
++	if [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ]; then
++		SCRATCH_OPTIONS="-l $SCRATCH_LOGDEV"
++	fi
++	if [ "$LARGE_SCRATCH_DEV" = yes ]; then
++		SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -t"
++	fi
++	_xfs_check $SCRATCH_OPTIONS $* $SCRATCH_DEV
+ }
+ 
+ _scratch_xfs_repair()
+ {
+-    SCRATCH_OPTIONS=""
+-    [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
+-        SCRATCH_OPTIONS="-l$SCRATCH_LOGDEV"
+-    [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_RTDEV" ] && \
+-        SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -r$SCRATCH_RTDEV"
+-    [ "$LARGE_SCRATCH_DEV" = yes ] && SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -t"
+-    $XFS_REPAIR_PROG $SCRATCH_OPTIONS $* $SCRATCH_DEV
++	SCRATCH_OPTIONS=""
++	if [ "$USE_EXTERNAL" = yes ]; then
++		[ -n "$SCRATCH_LOGDEV" ] && SCRATCH_OPTIONS="-l$SCRATCH_LOGDEV"
++		[ -n "$SCRATCH_RTDEV" ] && SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -r$SCRATCH_RTDEV"
++	fi
++	[ "$LARGE_SCRATCH_DEV" = yes ] && SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -t"
++	$XFS_REPAIR_PROG $SCRATCH_OPTIONS $* $SCRATCH_DEV
+ }
+ 
+ # this test requires the projid32bit feature to be available in mkfs.xfs.
+ #
+ _require_projid32bit()
+ {
+-       _scratch_mkfs_xfs_supported -i projid32bit=1 >/dev/null 2>&1 \
+-	   || _notrun "mkfs.xfs doesn't have projid32bit feature"
++	_scratch_mkfs_xfs_supported -i projid32bit=1 >/dev/null 2>&1 \
++		|| _notrun "mkfs.xfs doesn't have projid32bit feature"
+ }
+ 
+ _require_projid16bit()
+ {
+ 	_scratch_mkfs_xfs_supported -i projid32bit=0 >/dev/null 2>&1 \
+-	   || _notrun "16 bit project IDs not supported on $SCRATCH_DEV"
++		|| _notrun "16 bit project IDs not supported on $SCRATCH_DEV"
+ }
+ 
+ # this test requires the crc feature to be available in mkfs.xfs
+@@ -236,7 +237,7 @@ _require_projid16bit()
+ _require_xfs_mkfs_crc()
+ {
+ 	_scratch_mkfs_xfs_supported -m crc=1 >/dev/null 2>&1 \
+-	   || _notrun "mkfs.xfs doesn't have crc feature"
++		|| _notrun "mkfs.xfs doesn't have crc feature"
+ }
+ 
+ # this test requires the xfs kernel support crc feature
+@@ -245,7 +246,7 @@ _require_xfs_crc()
+ {
+ 	_scratch_mkfs_xfs -m crc=1 >/dev/null 2>&1
+ 	_scratch_mount >/dev/null 2>&1 \
+-	   || _notrun "Kernel doesn't support crc feature"
++		|| _notrun "Kernel doesn't support crc feature"
+ 	_scratch_unmount
+ }
+ 
+@@ -255,7 +256,7 @@ _require_scratch_xfs_crc()
+ {
+ 	_scratch_mkfs_xfs >/dev/null 2>&1
+ 	_scratch_mount >/dev/null 2>&1 \
+-	   || _notrun "Kernel doesn't support crc feature"
++		|| _notrun "Kernel doesn't support crc feature"
+ 	xfs_info $SCRATCH_MNT | grep -q 'crc=1' || _notrun "crc feature not supported by this filesystem"
+ 	_scratch_unmount
+ }
+@@ -265,7 +266,7 @@ _require_scratch_xfs_crc()
+ _require_xfs_mkfs_finobt()
+ {
+ 	_scratch_mkfs_xfs_supported -m crc=1,finobt=1 >/dev/null 2>&1 \
+-	   || _notrun "mkfs.xfs doesn't have finobt feature"
++		|| _notrun "mkfs.xfs doesn't have finobt feature"
+ }
+ 
+ # this test requires the xfs kernel support finobt feature
+@@ -274,7 +275,7 @@ _require_xfs_finobt()
+ {
+ 	_scratch_mkfs_xfs -m crc=1,finobt=1 >/dev/null 2>&1
+ 	_scratch_mount >/dev/null 2>&1 \
+-	   || _notrun "Kernel doesn't support finobt feature"
++		|| _notrun "Kernel doesn't support finobt feature"
+ 	_scratch_unmount
+ }
+ 
+@@ -309,8 +310,7 @@ _require_xfs_sparse_inodes()
+ # check that xfs_db supports a specific command
+ _require_xfs_db_command()
+ {
+-	if [ $# -ne 1 ]
+-	then
++	if [ $# -ne 1 ]; then
+ 		echo "Usage: _require_xfs_db_command command" 1>&2
+ 		exit 1
+ 	fi
+@@ -323,164 +323,170 @@ _require_xfs_db_command()
+ # run xfs_check and friends on a FS.
+ _check_xfs_filesystem()
+ {
+-    if [ $# -ne 3 ]
+-    then
+-	echo "Usage: _check_xfs_filesystem device <logdev>|none <rtdev>|none" 1>&2
+-	exit 1
+-    fi
+-
+-    extra_mount_options=""
+-    extra_log_options=""
+-    extra_options=""
+-    device=$1
+-    if [ -f $device ];then
+-       extra_options="-f"
+-    fi
+-
+-    if [ "$2" != "none" ]; then
+-	extra_log_options="-l$2"
+-        extra_mount_options="-ologdev=$2"
+-    fi
+-
+-    if [ "$3" != "none" ]; then
+-	extra_rt_options="-r$3"
+-        extra_mount_options=$extra_mount_options" -ortdev=$3"
+-    fi
+-    extra_mount_options=$extra_mount_options" $MOUNT_OPTIONS"
+-
+-    [ "$FSTYP" != xfs ] && return 0
+-
+-    type=`_fs_type $device`
+-    ok=1
+-
+-    if [ "$type" = "xfs" ]
+-    then
+-        if [ -n "$TEST_XFS_SCRUB" ] && [ -x "$XFS_SCRUB_PROG" ]; then
+-            "$XFS_SCRUB_PROG" $scrubflag -vd $device >>$seqres.full
+-            if [ $? -ne 0 ]; then
+-                echo "filesystem on $device failed scrub (see $seqres.full)"
+-                ok=0
+-            fi
+-        fi
+-        # mounted ...
+-        mountpoint=`_umount_or_remount_ro $device`
+-    fi
+-
+-    $XFS_LOGPRINT_PROG -t $extra_log_options $device 2>&1 \
+-                | tee $tmp.logprint | grep -q "<CLEAN>"
+-    if [ $? -ne 0 -a "$HOSTOS" = "Linux" ]
+-    then
+-        echo "_check_xfs_filesystem: filesystem on $device has dirty log (see $seqres.full)"
+-
+-        echo "_check_xfs_filesystem: filesystem on $device has dirty log"   >>$seqres.full
+-        echo "*** xfs_logprint -t output ***"	>>$seqres.full
+-        cat $tmp.logprint			>>$seqres.full
+-        echo "*** end xfs_logprint output"	>>$seqres.full
+-
+-        ok=0
+-    fi
+-
+-    # xfs_check runs out of memory on large files, so even providing the test
+-    # option (-t) to avoid indexing the free space trees doesn't make it pass on
+-    # large filesystems. Avoid it.
+-    if [ "$LARGE_SCRATCH_DEV" != yes ]; then
+-	    _xfs_check $extra_log_options $device 2>&1 |\
+-		 _fix_malloc >$tmp.fs_check
+-    fi
+-    if [ -s $tmp.fs_check ]
+-    then
+-        echo "_check_xfs_filesystem: filesystem on $device is inconsistent (c) (see $seqres.full)"
+-
+-        echo "_check_xfs_filesystem: filesystem on $device is inconsistent" >>$seqres.full
+-        echo "*** xfs_check output ***"		>>$seqres.full
+-        cat $tmp.fs_check			>>$seqres.full
+-        echo "*** end xfs_check output"		>>$seqres.full
+-
+-        ok=0
+-    fi
+-
+-    $XFS_REPAIR_PROG -n $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
+-    if [ $? -ne 0 ]
+-    then
+-        echo "_check_xfs_filesystem: filesystem on $device is inconsistent (r) (see $seqres.full)"
+-
+-        echo "_check_xfs_filesystem: filesystem on $device is inconsistent" >>$seqres.full
+-        echo "*** xfs_repair -n output ***"	>>$seqres.full
+-        cat $tmp.repair | _fix_malloc		>>$seqres.full
+-        echo "*** end xfs_repair output"	>>$seqres.full
+-
+-        ok=0
+-    fi
+-    rm -f $tmp.fs_check $tmp.logprint $tmp.repair
+-
+-    # Optionally test the index rebuilding behavior.
+-    if [ -n "$TEST_XFS_REPAIR_REBUILD" ]; then
+-        $XFS_REPAIR_PROG $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
+-        if [ $? -ne 0 ]; then
+-            echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild) (see $seqres.full)"
+-
+-            echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild)" >>$seqres.full
+-            echo "*** xfs_repair output ***"	>>$seqres.full
+-            cat $tmp.repair | _fix_malloc		>>$seqres.full
+-            echo "*** end xfs_repair output"	>>$seqres.full
+-
+-            ok=0
+-        fi
+-        rm -f $tmp.repair
+-
+-        $XFS_REPAIR_PROG -n $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
+-        if [ $? -ne 0 ]; then
+-            echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild-reverify) (see $seqres.full)"
+-
+-            echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild-reverify)" >>$seqres.full
+-            echo "*** xfs_repair -n output ***"	>>$seqres.full
+-            cat $tmp.repair | _fix_malloc		>>$seqres.full
+-            echo "*** end xfs_repair output"	>>$seqres.full
+-
+-            ok=0
+-        fi
+-        rm -f $tmp.repair
+-    fi
+-
+-    if [ $ok -eq 0 ]
+-    then
+-        echo "*** mount output ***"		>>$seqres.full
+-        _mount					>>$seqres.full
+-        echo "*** end mount output"		>>$seqres.full
+-    elif [ "$type" = "xfs" ]
+-    then
+-	_mount_or_remount_rw "$extra_mount_options" $device $mountpoint
+-    fi
+-
+-    if [ $ok -eq 0 ]; then
+-	status=1
+-	if [ "$iam" != "check" ]; then
++	if [ $# -ne 3 ]; then
++		echo "Usage: _check_xfs_filesystem device <logdev>|none <rtdev>|none" 1>&2
+ 		exit 1
+ 	fi
+-	return 1
+-    fi
+ 
+-    return 0
++	extra_mount_options=""
++	extra_log_options=""
++	extra_options=""
++	device=$1
++	if [ -f $device ]; then
++		extra_options="-f"
++	fi
++
++	if [ "$2" != "none" ]; then
++		extra_log_options="-l$2"
++		extra_mount_options="-ologdev=$2"
++	fi
++
++	if [ "$3" != "none" ]; then
++		extra_rt_options="-r$3"
++		extra_mount_options=$extra_mount_options" -ortdev=$3"
++	fi
++	extra_mount_options=$extra_mount_options" $MOUNT_OPTIONS"
++
++	[ "$FSTYP" != xfs ] && return 0
++
++	type=`_fs_type $device`
++	ok=1
++
++	if [ "$type" = "xfs" ]; then
++		if [ -n "$TEST_XFS_SCRUB" ] && [ -x "$XFS_SCRUB_PROG" ]; then
++			"$XFS_SCRUB_PROG" $scrubflag -vd $device >>$seqres.full
++			if [ $? -ne 0 ]; then
++				echo "filesystem on $device failed scrub (see $seqres.full)"
++				ok=0
++			fi
++		fi
++		# mounted ...
++		mountpoint=`_umount_or_remount_ro $device`
++	fi
++
++	$XFS_LOGPRINT_PROG -t $extra_log_options $device 2>&1 \
++		| tee $tmp.logprint | grep -q "<CLEAN>"
++	if [ $? -ne 0 -a "$HOSTOS" = "Linux" ]; then
++		(
++		echo "_check_xfs_filesystem: filesystem on $device has dirty log (see $seqres.full)"
++
++		echo "_check_xfs_filesystem: filesystem on $device has dirty log"
++		echo "*** xfs_logprint -t output ***"
++		cat $tmp.logprint
++		echo "*** end xfs_logprint output"
++		) >>$seqres.full
++
++		ok=0
++	fi
++
++	# xfs_check runs out of memory on large files, so even providing the test
++	# option (-t) to avoid indexing the free space trees doesn't make it pass on
++	# large filesystems. Avoid it.
++	if [ "$LARGE_SCRATCH_DEV" != yes ]; then
++		_xfs_check $extra_log_options $device 2>&1 |\
++			_fix_malloc >$tmp.fs_check
++	fi
++	if [ -s $tmp.fs_check ]; then
++		(
++		echo "_check_xfs_filesystem: filesystem on $device is inconsistent (c) (see $seqres.full)"
++
++		echo "_check_xfs_filesystem: filesystem on $device is inconsistent"
++		echo "*** xfs_check output ***"
++		cat $tmp.fs_check
++		echo "*** end xfs_check output"
++		) >>$seqres.full
++
++		ok=0
++	fi
++
++	$XFS_REPAIR_PROG -n $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
++	if [ $? -ne 0 ]; then
++		(
++		echo "_check_xfs_filesystem: filesystem on $device is inconsistent (r) (see $seqres.full)"
++
++		echo "_check_xfs_filesystem: filesystem on $device is inconsistent"
++		echo "*** xfs_repair -n output ***"
++		cat $tmp.repair | _fix_malloc
++		echo "*** end xfs_repair output"
++		) >>$seqres.full
++
++		ok=0
++	fi
++	rm -f $tmp.fs_check $tmp.logprint $tmp.repair
++
++	# Optionally test the index rebuilding behavior.
++	if [ -n "$TEST_XFS_REPAIR_REBUILD" ]; then
++		$XFS_REPAIR_PROG $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
++		if [ $? -ne 0 ]; then
++			(
++			echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild) (see $seqres.full)"
++
++			echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild)"
++			echo "*** xfs_repair output ***"
++			cat $tmp.repair | _fix_malloc
++			echo "*** end xfs_repair output"
++			) >>$seqres.full
++
++			ok=0
++		fi
++		rm -f $tmp.repair
++
++		$XFS_REPAIR_PROG -n $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
++		if [ $? -ne 0 ]; then
++			(
++			echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild-reverify) (see $seqres.full)"
++
++			echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild-reverify)"
++			echo "*** xfs_repair -n output ***"
++			cat $tmp.repair | _fix_malloc
++			echo "*** end xfs_repair output"
++			) >>$seqres.full
++
++			ok=0
++		fi
++		rm -f $tmp.repair
++	fi
++
++	if [ $ok -eq 0 ]; then
++		(
++		echo "*** mount output ***"
++		_mount
++		echo "*** end mount output"
++		) >>$seqres.full
++	elif [ "$type" = "xfs" ]; then
++		_mount_or_remount_rw "$extra_mount_options" $device $mountpoint
++		ok=$?
++	fi
++
++	if [ $ok -eq 0 ]; then
++		status=1
++		if [ "$iam" != "check" ]; then
++			exit 1
++		fi
++		return 1
++	fi
++
++	return 0
+ }
+ 
+ _check_xfs_test_fs()
+ {
+-    TEST_LOG="none"
+-    TEST_RT="none"
+-    [ "$USE_EXTERNAL" = yes -a ! -z "$TEST_LOGDEV" ] && \
+-        TEST_LOG="$TEST_LOGDEV"
+-
+-    [ "$USE_EXTERNAL" = yes -a ! -z "$TEST_RTDEV" ] && \
+-        TEST_RT="$TEST_RTDEV"
+-
+-    _check_xfs_filesystem $TEST_DEV $TEST_LOG $TEST_RT
+-
+-    # check for ipath consistency
+-    if $XFS_GROWFS_PROG -n $TEST_DIR | grep -q 'inode-paths=1'; then
+-	# errors go to stderr
+-	xfs_check_ipaths $TEST_DIR >/dev/null
+-	xfs_repair_ipaths -n $TEST_DIR >/dev/null
+-    fi
++	TEST_LOG="none"
++	TEST_RT="none"
++	[ "$USE_EXTERNAL" = yes -a ! -z "$TEST_LOGDEV" ] && \
++		TEST_LOG="$TEST_LOGDEV"
++
++	[ "$USE_EXTERNAL" = yes -a ! -z "$TEST_RTDEV" ] && \
++		TEST_RT="$TEST_RTDEV"
++
++	_check_xfs_filesystem $TEST_DEV $TEST_LOG $TEST_RT
++
++	# check for ipath consistency
++	if $XFS_GROWFS_PROG -n $TEST_DIR | grep -q 'inode-paths=1'; then
++		# errors go to stderr
++		xfs_check_ipaths $TEST_DIR >/dev/null
++		xfs_repair_ipaths -n $TEST_DIR >/dev/null
++	fi
+ }
+ 
+ _require_xfs_test_rmapbt()
+@@ -505,7 +511,8 @@ _require_xfs_scratch_rmapbt()
+ 	_scratch_unmount
+ }
+ 
+-_xfs_bmapx_find() {
++_xfs_bmapx_find()
++{
+ 	case "$1" in
+ 	"attr")
+ 		param="a"
+@@ -535,7 +542,7 @@ _reset_xfs_sysfs_error_handling()
+ {
+ 	local dev=$1
+ 
+-	if [ ! -b "$dev" -o "$FSTYP" != "xfs" ];then
++	if [ ! -b "$dev" -o "$FSTYP" != "xfs" ]; then
+ 		_fail "Usage: reset_xfs_sysfs_error_handling <device>"
+ 	fi
+ 
+@@ -547,16 +554,13 @@ _reset_xfs_sysfs_error_handling()
+ 	# for ENODEV, which is an unrecoverable error, so it will be configured
+ 	# to not retry on error by default.
+ 	for e in default EIO ENOSPC; do
+-		_set_fs_sysfs_attr $dev \
+-				   error/metadata/${e}/max_retries -1
++		_set_fs_sysfs_attr $dev error/metadata/${e}/max_retries -1
+ 		echo -n "error/metadata/${e}/max_retries="
+ 		_get_fs_sysfs_attr $dev error/metadata/${e}/max_retries
+ 
+-		_set_fs_sysfs_attr $dev \
+-				   error/metadata/${e}/retry_timeout_seconds 0
++		_set_fs_sysfs_attr $dev error/metadata/${e}/retry_timeout_seconds 0
+ 		echo -n "error/metadata/${e}/retry_timeout_seconds="
+-		_get_fs_sysfs_attr $dev \
+-				   error/metadata/${e}/retry_timeout_seconds
++		_get_fs_sysfs_attr $dev error/metadata/${e}/retry_timeout_seconds
+ 	done
+ }
+ 
+@@ -607,12 +611,12 @@ _require_meta_uuid()
+ 	_require_xfs_crc
+ 
+ 	_scratch_xfs_db -x -c "uuid restore" 2>&1 \
+-	   | grep -q "invalid UUID\|supported on V5 fs" \
+-	   && _notrun "Userspace doesn't support meta_uuid feature"
++		| grep -q "invalid UUID\|supported on V5 fs" \
++		&& _notrun "Userspace doesn't support meta_uuid feature"
+ 
+ 	_scratch_xfs_db -x -c "uuid generate" >/dev/null 2>&1
+ 
+ 	_scratch_mount >/dev/null 2>&1 \
+-	   || _notrun "Kernel doesn't support meta_uuid feature"
++		|| _notrun "Kernel doesn't support meta_uuid feature"
+ 	_scratch_unmount
+ }
+-- 
+2.9.3
 
-thanks,
-Anand
-
-
-> thanks
->
->>
->>  # success, all done
->>  status=0
->> --------------------------
->>
->>
->> HTH
->> -Anand
->>
->>
->>
->>
->> On 11/24/16 14:25, fdmanana@kernel.org wrote:
->>>
->>> From: Filipe Manana <fdmanana@suse.com>
->>>
->>> The tests mount the second device in the device pool but never unmount
->>> it, causing the next test to fail.
->>>
->>> Example:
->>>
->>> $ cat local.config
->>> export TEST_DEV=/dev/sdb
->>> export TEST_DIR=/home/fdmanana/btrfs-tests/dev
->>> export SCRATCH_MNT="/home/fdmanana/btrfs-tests/scratch_1"
->>> export SCRATCH_DEV_POOL="/dev/sdc /dev/sdd /dev/sde /dev/sdf /dev/sdg"
->>> export FSTYP=btrfs
->>>
->>> $ ./check btrfs/125 btrfs/126
->>> FSTYP         -- btrfs
->>> PLATFORM      -- Linux/x86_64 debian3 4.8.0-rc8-btrfs-next-35+
->>> MKFS_OPTIONS  -- /dev/sdc
->>> MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
->>>
->>> btrfs/125 23s ... 22s
->>> btrfs/126 1s ... - output mismatch (see
->>> /home/fdmanana/git/hub/xfstests/results//btrfs/126.out.bad)
->>>     --- tests/btrfs/126.out     2016-11-24 06:11:42.048372385 +0000
->>>     +++ /home/fdmanana/git/hub/xfstests/results//btrfs/126.out.bad
->>> 2016-11-24 06:16:35.987988895 +0000
->>>     @@ -1,2 +1,5 @@
->>>      QA output created by 126
->>>     -pwrite: Disk quota exceeded
->>>     +ERROR: /dev/sdc is mounted
->>>     +mount: /dev/sdc is already mounted or
->>> /home/fdmanana/btrfs-tests/scratch_1 busy
->>>     +       /dev/sdc is already mounted on
->>> /home/fdmanana/btrfs-tests/scratch_1
->>>     +/home/fdmanana/btrfs-tests/scratch_1/test_file: Disk quota exceeded
->>>     ...
->>>     (Run 'diff -u tests/btrfs/126.out
->>> /home/fdmanana/git/hub/xfstests/results//btrfs/126.out.bad'  to see the
->>> entire diff)
->>> Ran: btrfs/125 btrfs/126
->>> Failures: btrfs/126
->>> Failed 1 of 2 tests
->>>
->>> So just make sure those test unmount the device before they finish.
->>>
->>> Signed-off-by: Filipe Manana <fdmanana@suse.com>
->>> ---
->>>  tests/btrfs/124 | 1 +
->>>  tests/btrfs/125 | 1 +
->>>  2 files changed, 2 insertions(+)
->>>
->>> diff --git a/tests/btrfs/124 b/tests/btrfs/124
->>> index 2618a26..7206094 100755
->>> --- a/tests/btrfs/124
->>> +++ b/tests/btrfs/124
->>> @@ -159,6 +159,7 @@ if [ "$checkpoint1" != "$checkpoint3" ]; then
->>>         echo "Inital sum does not match with data on dev2 written by
->>> balance"
->>>  fi
->>>
->>> +$UMOUNT_PROG $dev2
->>>  _scratch_dev_pool_put
->>>  _test_mount
->>>
->>> diff --git a/tests/btrfs/125 b/tests/btrfs/125
->>> index 1062b87..91aa8d8 100755
->>> --- a/tests/btrfs/125
->>> +++ b/tests/btrfs/125
->>> @@ -175,6 +175,7 @@ if [ "$checkpoint1" != "$checkpoint3" ]; then
->>>         echo "Inital sum does not match with data on dev2 written by
->>> balance"
->>>  fi
->>>
->>> +$UMOUNT_PROG $dev2
->>>  _scratch_dev_pool_put
->>>  _test_mount
->>>
->>>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
