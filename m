@@ -1,147 +1,134 @@
-Received: from mx1.redhat.com ([209.132.183.28]:58928 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750701AbcLDGxD (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 4 Dec 2016 01:53:03 -0500
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id A7CB481138
-        for <fstests@vger.kernel.org>; Sun,  4 Dec 2016 06:53:02 +0000 (UTC)
-Received: from localhost (ovpn-12-17.pek2.redhat.com [10.72.12.17])
-        by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id uB46r0hD006674
-        for <fstests@vger.kernel.org>; Sun, 4 Dec 2016 01:53:01 -0500
-Date: Sun, 4 Dec 2016 14:53:00 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: [ANNOUNCE] fstests: master branch updated to adcc60c6bf6a
-Message-ID: <20161204065300.GM29149@eguan.usersys.redhat.com>
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:25412 "EHLO
+        ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751070AbcLDXKm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 4 Dec 2016 18:10:42 -0500
+Date: Mon, 5 Dec 2016 10:10:36 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] overlay: test ro/rw fd data inconsistecies
+Message-ID: <20161204231036.GA21916@dastard>
+References: <1480018332-16567-1-git-send-email-amir73il@gmail.com>
+ <CAOQ4uxgEgNJtFfauUTXAr9YedbJeNFrZaWAUbEJUzycf=r3Emw@mail.gmail.com>
+ <20161129113715.GN22989@eguan.usersys.redhat.com>
+ <CAOQ4uxjSZuKocjcLdn6eWmJJdRqYrXonoq0Czvk-UCH6aWfseA@mail.gmail.com>
+ <20161202064954.GI11750@dastard>
+ <CAOQ4uxi7UnJPCZS-Vg17=4U+0VPz4BvM0MDcrfaaFG+Y9Z9TgQ@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="mSxgbZZZvrAyzONB"
-Content-Disposition: inline
-Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-List-ID: <fstests@vger.kernel.org>
-
-
---mSxgbZZZvrAyzONB
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <CAOQ4uxi7UnJPCZS-Vg17=4U+0VPz4BvM0MDcrfaaFG+Y9Z9TgQ@mail.gmail.com>
+Sender: fstests-owner@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Eryu Guan <eguan@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
+List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+On Fri, Dec 02, 2016 at 10:13:33AM +0200, Amir Goldstein wrote:
+> On Fri, Dec 2, 2016 at 8:49 AM, Dave Chinner <david@fromorbit.com> wrote:
+> > On Thu, Dec 01, 2016 at 06:42:00PM +0200, Amir Goldstein wrote:
+> ...
+> >
+> > I think there's a bug somewhere in xfs_io to do with command line
+> > repetition of the open command. That is:
+> >
+> > # xfs_io
+> > xfs_io> open foo
+> > xfs_io> open -r foo
+> > xfs_io> print
+> >  000  foo            (foreign,non-sync,non-direct,read-write)
+> >  [001] foo            (foreign,non-sync,non-direct,read-only)
+> > xfs_io>
+> >
+> > Shows we have two open files, the second being read only.
+> >
+> > From the command line, opening a read-only file:
+> >
+> > # xfs_io -r -c file foo
+> > [000] foo            (foreign,non-sync,non-direct,read-only)
+> > #
+> >
+> > But if we try to open a second file from the CLI:
+> >
+> > sudo xfs_io -r -c "open -f bar" -c print foo
+> > bar: Too many open files
+> > [000] foo            (foreign,non-sync,non-direct,read-only)
+> >  001  bar            (foreign,non-sync,non-direct,read-write)
+> >  002  bar            (foreign,non-sync,non-direct,read-write)
+> >  003  bar            (foreign,non-sync,non-direct,read-write)
+> >  004  bar            (foreign,non-sync,non-direct,read-write)
+> >  005  bar            (foreign,non-sync,non-direct,read-write)
+> >  006  bar            (foreign,non-sync,non-direct,read-write)
+> > .....
+> >
+> > It just falls into an endless loop opening the file until we run out
+> > fd space.
+> >
+> > Oh, there's bugs all over the place here - Ok, I think the command
+> > loop handling is broken - it's making my head hurt right now.
+> > Functions that don't set CMD_FLAG_GLOBAL have problems with not
+> > breaking out of the args processing loop. I'll deal with this on
+> > Monday, not at beer o'clock on Friday afternoon.
+> >
+> >> I realize that the use of redirecting commands from here document
+> >> to xfs_io has not been used in xfstests before, but I could not find
+> >> another way to use 'open' commands, which are needed for this test.
+> >
+> > Let's fix xfs_io rather than hack yet another whacky way to execute
+> > xfs_io into xfstests...
+> >
+> 
+> I have started going down that path, because I initially mistaken
+> xfs_io -c to be similar to bash -c, but then I realized it is quite different.
+> xfs_io -c CMD1 -c CMD2 FILE1 FILE2 iterates CMD1, CMD2 on FILE1
+> and then on FILE2.
+> As long as this semantic holds, it is going to difficult be to support
+> -c "open file", without resorting to spaghetti code and confusing users.
 
-The master branch of the xfstests repository at:
+That's what I mean - that functionality is busted in xfs_io. the
+CMD_FLAG_GLOBAL set on various commands controls this iteration
+functionality, and it's not set on the open command so it tries to
+run iteratively when run from the CLI and so behaves differently
+(and incorrectly) comapred to interactive mode.  That's /one/ of the
+bugs that needs fixing.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+The other problem is that the function return values for almost all
+commands are wrong for the multi-iterator case, and that is what is
+leading to the endless repeat loop problem. The issue here is that
+the interactive/CMD_FLAG_GLOBAL mode requires 0 for "command
+completed, prompt for next command", and 1 for "error, terminate".
+In comparison, the iterative mode which calls the same functions
+requires 0 for "process next command arg" and 1 for "process next
+command". All of the functions return values required by the
+interactive/CMD_FLAG_GLOBAL mode, and so don't so the right thing in
+iterative mode....
 
-have just been updated. This is the first time I push updates to
-kernel.org repo directly. Thanks to Dave and Eric for helping me on
-this!
+> Incidentally, xfs_io does not advertise the "run all command per file"
+> behavior, so not sure why it was done for and if anybody relies on it.
 
-This update contains patches in the last two weeks. The most notable
-changes are the common/rc split, Dave split XFS and btrfs specific
-functions to common/xfs and common/btrfs seperately, there should not be
-any functional changes by this split. But You may have to rebase your
-pending patches on your local repo against new master head.
+Not everything in xfs_io is documented in the man page as it's
+always been a developer tool and the historic, sharp "cut you into
+little pieces" bleedy bits that aren't useful to typical users
+simply never got documented. This may be one of them, but I need to
+go look at the history to determine if it was added intentionally,
+or...
 
-Also, there're new generic and overlayfs tests, and two test updates
-caused by fs behavior changes (see below for details), and some other
-small fixes and improvements.
+> I did not notice any tests that make use of multiple file args for xfs_io,
+> but it wasn't easy to grep for this practice.
 
-Thanks to all who has contributed to this update! And my apologies for
-the patch review backlog, I was busier than I expected last week.
+... it's just an unexpected interaction with common functionality
+provided by libxcmd that is present to support xfs_quota
+requirements, not xfs_io. Hence there's every chance that it's use
+in xfs_io is simply incorrect and never intended, and you're the
+first person to ever trip over it.
 
-New failure I noticed in this update:
-- overlay/016 is a new case that fails on current Linus tree (4.9-rc7)
-- generic/182 fails on reflink XFS, there's a behavior change pending in XFS
-  list
-- ext4/001 fails on DAX mount, this is also a behavior change pending in ext4
-  tree
+The solution may simply be that we add CMD_FLAG_GLOBAL to
+every command in xfs_io, but I'm not sure yet.
 
-Thanks,
-Eryu
+> If you have a preference for solution I can execute the work.
 
-The new head of the master branch is commit:
+Always fix the broken tool first.
 
-adcc60c6bf6a build: allow building with latest xfslibs on 32-bit Linux
+Cheers,
 
-New commits:
-
-Amir Goldstein (1):
-      [d04d4bc07dc5] overlay: test ro/rw fd data inconsistecies
-
-Darrick J. Wong (1):
-      [738938aab26f] generic/182: retain existing btrfs behavior when len == 0
-
-Dave Chinner (4):
-      [37d78d97f657] check: add brief result summaries
-      [3d7ed77c6817] generic/095: add iomap_dio_rw() to the dmesg filter
-      [7d4f483f1bd2] common: split XFS functions from common/rc
-      [c3aba25afa87] common: split Btrfs functions from common/rc
-
-Eric Biggers (1):
-      [adcc60c6bf6a] build: allow building with latest xfslibs on 32-bit Linux
-
-Filipe Manana (1):
-      [47038bbea58b] btrfs/124-5: add missing umount for raid5 tests
-
-J. Bruce Fields (2):
-      [0240a9c12f61] README: Document fstests mailing list
-      [64ea47a87e9a] src/dirstress: Allow ESTALE as well as ENOENT
-
-Jaegeuk Kim (2):
-      [c74b1f84f93a] generic: check inode metadata on f{data}sync after power-cut
-      [9520450542b3] generic: check some inline truncation behaviors
-
-Jan Kara (1):
-      [79a1c3808292] ext4/001: Fixup file layout with DAX
-
-
-Code Diffstat:
-
- README                |   6 +
- check                 | 114 +++---
- common/btrfs          | 330 +++++++++++++++++
- common/rc             | 957 +-------------------------------------------------
- common/xfs            | 610 ++++++++++++++++++++++++++++++++
- m4/package_xfslibs.m4 |  11 +-
- src/dirstress.c       |  10 +-
- tests/btrfs/124       |   1 +
- tests/btrfs/125       |   1 +
- tests/ext4/001.cfg    |   2 +-
- tests/generic/095     |   4 +-
- tests/generic/182     |   6 +-
- tests/generic/182.out |   2 -
- tests/generic/392     | 135 +++++++
- tests/generic/392.out |  11 +
- tests/generic/393     | 128 +++++++
- tests/generic/393.out |  45 +++
- tests/generic/group   |   2 +
- tests/overlay/016     |  98 ++++++
- tests/overlay/016.out |  12 +
- tests/overlay/group   |   1 +
- 21 files changed, 1468 insertions(+), 1018 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
-
---mSxgbZZZvrAyzONB
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAEBAgAGBQJYQ71MAAoJECZSqilcj+djwlYP/ROEo8VhOfocxGZhazED/CGn
-DsCjOf08hKrjB8dYYNlzxr5kWqH1jnZGvYHLyC61OsY7TUdz5is6lKX2aZodWETT
-m94uTKPNM2GFmdvvmkvRpoT0Bf7aTECgGLGKr35EIviHJJ/IoXrZa6Gjy8uPF+Vz
-DgKUbgrH2W8+F+NGYSnILcCIfC2IfLPx1s/3FzMckVED0lreW6jGx4+VMJxpI11K
-XpV/Ikg+cNCEadoM6foNMdA8eHoRND87Hr5LapYcPUVcDB+JapZu6yvTuZB13s12
-5VO7Q0iA9PZs1zRWYPdAjVw8HvfTxUn52mZfX/aviToYRetoWGAemtp38Xpbz1+j
-Y49PJgzfCAL8m20eRC+fzhH09rLcOzU/K4GE+MUyYhhAxuvonWobavOMnMfSfDAa
-/eOkpBcI8b1CSnwNpvHZh6xtNU5OtJ+wP8TEiijEFa/ZQmBG0bjONTBodc9Sw4KA
-ynGi1nKwVt7AiGhryZxSwTvpzbVU019zme+Ho+5vyqj3fFzO1erKmtWbbSjWaYA/
-dIEXHyI+AK1AjQ4vMso3dzDRJaIHsUw7nNf7tQSaPavUUey664oKlkCAuW0Wffwj
-MlnwnPEnWK+nUw9e8BPX5qHqbdgheKr3+8C63P+jtXH0izYS5emFZ/KBA5ZqWBo4
-5DUBlBoOwegSf9stJ54D
-=GagG
------END PGP SIGNATURE-----
-
---mSxgbZZZvrAyzONB--
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
