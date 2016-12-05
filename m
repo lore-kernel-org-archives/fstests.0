@@ -1,77 +1,73 @@
-Received: from mail-wj0-f195.google.com ([209.85.210.195]:36227 "EHLO
-        mail-wj0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750951AbcLEL2A (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 5 Dec 2016 06:28:00 -0500
-MIME-Version: 1.0
-In-Reply-To: <20161205110257.GC4326@dastard>
-References: <1480921485-14888-1-git-send-email-amir73il@gmail.com> <20161205110257.GC4326@dastard>
+Received: from mail-wj0-f194.google.com ([209.85.210.194]:36274 "EHLO
+        mail-wj0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751134AbcLENXj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 5 Dec 2016 08:23:39 -0500
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 5 Dec 2016 13:27:57 +0200
-Message-ID: <CAOQ4uxg80mjF7KcLbfhdCnDQx8p50MABvh=fpSZaucKZPy9Chw@mail.gmail.com>
-Subject: Re: [PATCH] xfs_io: support -c <cmd> without <file> args
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH v2] xfs_io: support -c "open foo" command
+Date: Mon,  5 Dec 2016 15:03:37 +0200
+Message-Id: <1480943017-6175-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>
-Cc: Eryu Guan <eguan@redhat.com>, linux-xfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
+Cc: Eryu Guan <eguan@redhat.com>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 5, 2016 at 1:02 PM, Dave Chinner <david@fromorbit.com> wrote:
-> On Mon, Dec 05, 2016 at 09:04:45AM +0200, Amir Goldstein wrote:
->> There is an undocumented and possibly unused feature in xfs_io
->> where all commands are executed per file given in the file args list.
->>
->> This feature creates ambiguity when trying to execute commands
->> such as "open" and "file" from command line.
->>
->> When running xfs_io -c <cmd> without any file args, xfs_io exits
->> without doing anything. This behavior is undocumented and does not
->> make much sense either.
->>
->> Change the behavior in the case where no file args are given in
->> command line to execute every command exactly once, exactly as if
->> the commands where executed from an interactive shell.
->>
->> This enables writing proper xfs_io scripts in command line, which
->> include "open" and "file" commands.
->
-> NACK.
->
-> This does not fix any of the underlying problems. It just adds
-> another WTF case to CLI processing as two things that should be
-> equivlent now behave differently. i.e.
->
-> $ xfs_io -c "open foo" -c "open bar" -c file
->
+There is an undocumented and possibly unused feature in xfs_io
+where all commands are executed per file in the file args list.
 
-You meant:
-$ xfs_io -c "open foo" -c "open bar"
+This feature creates ambiguity when trying to execute commands
+such as "open" and "file" from command line and result in an
+endless loop in the command loop code.
 
-> and
->
-> $ xfs_io -c "open bar" -c file foo
->
-> will have different behaviour, even though the man page says they
-> should be equivalent and do exactly the same thing.
->
-> Fix the underlying problems once and for all: do not hack bandaids
-> into the code that only hides the symptom for your specific use
-> case.
->
+Also, when running xfs_io -c <cmd> without any file args, xfs_io
+exits without doing anything. This behavior is also undocumented
+and makes very little sense.
 
-Dave,
+Change the behavior of xfs_io to execute each command specified
+with -c <cmd> exactly once, regardless of the number of files in
+the file args list.
 
-I would be glad to fix the code, but you did not answer my question.
+This enables writing proper xfs_io scripts in command line, which
+include "open" and "file" commands.
 
-The "execute all commands per file" behavior is not documented,
-does not appear to have any known users and makes every attempt
-to parse "file" commands ambiguous.
+This change does not modify the behavior of xfs_io in the most
+commonly used case of single file argument in command line and
+no "open" and "file" commands in command line.
 
-Can we, in your option, do away with this behavior?
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ io/init.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
 
-If the answer is yes, then the patch is even simpler then these 16 lines.
-Just replace the old init_args_command() with the new
-do_once_args_command().
+v2:
+- Fix the case of multiple file args
 
-Would you like me to re-submit the patch with this change?
+v1:
+- Fix the case of zero file args
 
-Amir.
+diff --git a/io/init.c b/io/init.c
+index a9191cf..82b6700 100644
+--- a/io/init.c
++++ b/io/init.c
+@@ -90,14 +90,15 @@ init_commands(void)
+ 	cowextsize_init();
+ }
+ 
++/*
++ * Return true for first call and false for the next call,
++ * to execute each command once.
++ */
+ static int
+ init_args_command(
+ 	int	index)
+ {
+-	if (index >= filecount)
+-		return 0;
+-	file = &filetable[index++];
+-	return index;
++	return !index;
+ }
+ 
+ static int
+-- 
+2.7.4
+
