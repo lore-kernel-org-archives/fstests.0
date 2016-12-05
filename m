@@ -1,56 +1,79 @@
-Received: from mail-wj0-f195.google.com ([209.85.210.195]:35192 "EHLO
-        mail-wj0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752031AbcLEHCA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 5 Dec 2016 02:02:00 -0500
-MIME-Version: 1.0
-In-Reply-To: <20161204231036.GA21916@dastard>
-References: <1480018332-16567-1-git-send-email-amir73il@gmail.com>
- <CAOQ4uxgEgNJtFfauUTXAr9YedbJeNFrZaWAUbEJUzycf=r3Emw@mail.gmail.com>
- <20161129113715.GN22989@eguan.usersys.redhat.com> <CAOQ4uxjSZuKocjcLdn6eWmJJdRqYrXonoq0Czvk-UCH6aWfseA@mail.gmail.com>
- <20161202064954.GI11750@dastard> <CAOQ4uxi7UnJPCZS-Vg17=4U+0VPz4BvM0MDcrfaaFG+Y9Z9TgQ@mail.gmail.com>
- <20161204231036.GA21916@dastard>
+Received: from mail-wj0-f193.google.com ([209.85.210.193]:35168 "EHLO
+        mail-wj0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751059AbcLEHFJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 5 Dec 2016 02:05:09 -0500
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 5 Dec 2016 09:01:57 +0200
-Message-ID: <CAOQ4uxgcJvfC1DuZ25oiZ680TbrsiYckma_aeiJH4hFE+=UiWw@mail.gmail.com>
-Subject: Re: [PATCH] overlay: test ro/rw fd data inconsistecies
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH] xfs_io: support -c <cmd> without <file> args
+Date: Mon,  5 Dec 2016 09:04:45 +0200
+Message-Id: <1480921485-14888-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>
-Cc: Eryu Guan <eguan@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
+Cc: Eryu Guan <eguan@redhat.com>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 5, 2016 at 1:10 AM, Dave Chinner <david@fromorbit.com> wrote:
-> On Fri, Dec 02, 2016 at 10:13:33AM +0200
+There is an undocumented and possibly unused feature in xfs_io
+where all commands are executed per file given in the file args list.
 
-...
->
-> ... it's just an unexpected interaction with common functionality
-> provided by libxcmd that is present to support xfs_quota
-> requirements, not xfs_io. Hence there's every chance that it's use
-> in xfs_io is simply incorrect and never intended, and you're the
-> first person to ever trip over it.
->
-> The solution may simply be that we add CMD_FLAG_GLOBAL to
-> every command in xfs_io, but I'm not sure yet.
->
->> If you have a preference for solution I can execute the work.
->
-> Always fix the broken tool first.
->
+This feature creates ambiguity when trying to execute commands
+such as "open" and "file" from command line.
 
-The question was if I need to fix the run command per file or kill it.
+When running xfs_io -c <cmd> without any file args, xfs_io exits
+without doing anything. This behavior is undocumented and does not
+make much sense either.
 
-Anyway, I came up with a very simple patch that enabled running
-xfs_io -c <cmd> without any <file> args.
-In that case, it is easy to understand what the user wants and commands
-are just run once as if they where input in the interactive shell.
+Change the behavior in the case where no file args are given in
+command line to execute every command exactly once, exactly as if
+the commands where executed from an interactive shell.
 
-This is good enough for my test case and should be a good change
-for xfs_io all in all.
+This enables writing proper xfs_io scripts in command line, which
+include "open" and "file" commands.
 
-Patch on its way.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ io/init.c | 16 ++++++++++++++--
+ 1 file changed, 14 insertions(+), 2 deletions(-)
 
-I will let you decide how to handle the undocumented/unused/broken
-case of multiple files and "open" command.
+diff --git a/io/init.c b/io/init.c
+index a9191cf..785eb05 100644
+--- a/io/init.c
++++ b/io/init.c
+@@ -91,7 +91,7 @@ init_commands(void)
+ }
+ 
+ static int
+-init_args_command(
++per_file_args_command(
+ 	int	index)
+ {
+ 	if (index >= filecount)
+@@ -101,6 +101,13 @@ init_args_command(
+ }
+ 
+ static int
++do_once_args_command(
++	int	index)
++{
++	return !index;
++}
++
++static int
+ init_check_command(
+ 	const cmdinfo_t	*ct)
+ {
+@@ -214,7 +221,12 @@ init(
+ 	}
+ 
+ 	init_commands();
+-	add_args_command(init_args_command);
++	/*
++	 * If file args exist, execute all commands for every file.
++	 * Otherwise, execute every command once exactly as in interactive mode.
++	 */
++	add_args_command(filecount ? per_file_args_command :
++			 do_once_args_command);
+ 	add_check_command(init_check_command);
+ }
+ 
+-- 
+2.7.4
 
-Amir.
