@@ -1,91 +1,80 @@
-Received: from sandeen.net ([63.231.237.45]:55530 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750841AbcLEOTD (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 5 Dec 2016 09:19:03 -0500
-Subject: Re: [PATCH v2] xfs_io: support -c "open foo" command
-References: <1480943017-6175-1-git-send-email-amir73il@gmail.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <9125bb5e-49f5-e40e-0181-fea7f80ae553@sandeen.net>
-Date: Mon, 5 Dec 2016 08:19:01 -0600
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:36553 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751176AbcLEPUG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 5 Dec 2016 10:20:06 -0500
 MIME-Version: 1.0
-In-Reply-To: <1480943017-6175-1-git-send-email-amir73il@gmail.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <9125bb5e-49f5-e40e-0181-fea7f80ae553@sandeen.net>
+References: <1480943017-6175-1-git-send-email-amir73il@gmail.com> <9125bb5e-49f5-e40e-0181-fea7f80ae553@sandeen.net>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Mon, 5 Dec 2016 17:19:11 +0200
+Message-ID: <CAOQ4uxhw8Y_9NVwuAZ_xzvPYZ8k1CRonmQ=CAn=Y9j-_nkToMA@mail.gmail.com>
+Subject: Re: [PATCH v2] xfs_io: support -c "open foo" command
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>, Dave Chinner <david@fromorbit.com>
-Cc: Eryu Guan <eguan@redhat.com>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: Dave Chinner <david@fromorbit.com>, Eryu Guan <eguan@redhat.com>, linux-xfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On 12/5/16 7:03 AM, Amir Goldstein wrote:
-> There is an undocumented and possibly unused feature in xfs_io
-> where all commands are executed per file in the file args list.
-> 
-> This feature creates ambiguity when trying to execute commands
-> such as "open" and "file" from command line and result in an
-> endless loop in the command loop code.
+On Mon, Dec 5, 2016 at 4:19 PM, Eric Sandeen <sandeen@sandeen.net> wrote:
+> On 12/5/16 7:03 AM, Amir Goldstein wrote:
+>> There is an undocumented and possibly unused feature in xfs_io
+>> where all commands are executed per file in the file args list.
+>>
+>> This feature creates ambiguity when trying to execute commands
+>> such as "open" and "file" from command line and result in an
+>> endless loop in the command loop code.
+>
+> I may well be dense, but it's not immediately obvious what the
+> old and/or problematic behavior is.  Can you spell it out a bit
+> more?  What is an example of this loop?
 
-I may well be dense, but it's not immediately obvious what the
-old and/or problematic behavior is.  Can you spell it out a bit
-more?  What is an example of this loop?
- 
-> Also, when running xfs_io -c <cmd> without any file args, xfs_io
-> exits without doing anything. This behavior is also undocumented
-> and makes very little sense.
+$ touch foo
+$ xfs_io -c "open foo" foo
 
-What /should/ it do if there is no file specified?  Is this just for
-cmds that don't require a file, such as "-c sync?"
+you will see the shit storm
 
-> Change the behavior of xfs_io to execute each command specified
-> with -c <cmd> exactly once, regardless of the number of files in
-> the file args list.
+>
+>> Also, when running xfs_io -c <cmd> without any file args, xfs_io
+>> exits without doing anything. This behavior is also undocumented
+>> and makes very little sense.
+>
+> What /should/ it do if there is no file specified?  Is this just for
+> cmds that don't require a file, such as "-c sync?"
 
-So then which file does it act on?  I'm not saying this is incorrect,
-I'm just not quite understanding what this fixes, and what the new
-behavior is, sorry.
+Execute the commands as if you ran xfs_io and entered those commands
+in the shell, for example:
 
-Thanks,
--Eric
+$ xfs_io -c "open foo" -c "pread -v 0 4"
 
-> This enables writing proper xfs_io scripts in command line, which
-> include "open" and "file" commands.
-> 
-> This change does not modify the behavior of xfs_io in the most
-> commonly used case of single file argument in command line and
-> no "open" and "file" commands in command line.
-> 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
->  io/init.c | 9 +++++----
->  1 file changed, 5 insertions(+), 4 deletions(-)
-> 
-> v2:
-> - Fix the case of multiple file args
-> 
-> v1:
-> - Fix the case of zero file args
-> 
-> diff --git a/io/init.c b/io/init.c
-> index a9191cf..82b6700 100644
-> --- a/io/init.c
-> +++ b/io/init.c
-> @@ -90,14 +90,15 @@ init_commands(void)
->  	cowextsize_init();
->  }
->  
-> +/*
-> + * Return true for first call and false for the next call,
-> + * to execute each command once.
-> + */
->  static int
->  init_args_command(
->  	int	index)
->  {
-> -	if (index >= filecount)
-> -		return 0;
-> -	file = &filetable[index++];
-> -	return index;
-> +	return !index;
->  }
->  
->  static int
-> 
+>
+>> Change the behavior of xfs_io to execute each command specified
+>> with -c <cmd> exactly once, regardless of the number of files in
+>> the file args list.
+>
+> So then which file does it act on?  I'm not saying this is incorrect,
+> I'm just not quite understanding what this fixes, and what the new
+> behavior is, sorry.
+>
+
+You are not to be blamed for not knowing what the old behavior is
+it is undocumented and I have never seen it used in tests.
+
+Old behavior of
+
+$ xfs_io -c -c "pread -v 0 4" -c "pread -v 4 8" foo bar
+
+- print 0..4 from foo
+- print 4..8 from foo
+- print 0..4 from bar
+- print 4..8 from bar
+
+New behavior is:
+
+- print 0..4 from bar (the "current" file)
+- print 4..8 from bar
+
+Same behavior as when you issue the same command after running
+
+$ xfs_io foo bar
+
+Amir.
