@@ -1,52 +1,96 @@
-Received: from mx1.redhat.com ([209.132.183.28]:55480 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:58908 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750841AbcLEHKQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 5 Dec 2016 02:10:16 -0500
-Date: Mon, 5 Dec 2016 15:10:14 +0800
+        id S1750928AbcLEHOU (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 5 Dec 2016 02:14:20 -0500
+Date: Mon, 5 Dec 2016 15:07:16 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [RFC PATCH 1/3] fstests: common: rename _require_btrfs to
- _require_btrfs_subcommand
-Message-ID: <20161205071014.GR29149@eguan.usersys.redhat.com>
+Subject: Re: [RFC PATCH 0/3] Add testcase for fundamental scrub recovery
+Message-ID: <20161205070716.GQ29149@eguan.usersys.redhat.com>
 References: <20161122083811.12636-1-quwenruo@cn.fujitsu.com>
- <20161122083811.12636-2-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161122083811.12636-2-quwenruo@cn.fujitsu.com>
+In-Reply-To: <20161122083811.12636-1-quwenruo@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
 To: Qu Wenruo <quwenruo@cn.fujitsu.com>
 Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Nov 22, 2016 at 04:38:09PM +0800, Qu Wenruo wrote:
-> Rename _require_btrfs() to _require_btrfs_subcommand() to avoid
-> confusion, as all other _require_btrfs_* has a quite clear suffix, like
-> _require_btrfs_mkfs_feature() or _require_btrfs_fs_feature().
+On Tue, Nov 22, 2016 at 04:38:08PM +0800, Qu Wenruo wrote:
+> Despite the scrub test cases in fstests, there is not even one test case
+> which really checked if scrub can recover data.
 > 
-> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
-> ---
->  common/rc       | 2 +-
->  tests/btrfs/004 | 2 +-
->  tests/btrfs/048 | 2 +-
->  tests/btrfs/059 | 2 +-
->  tests/btrfs/131 | 2 +-
->  5 files changed, 5 insertions(+), 5 deletions(-)
+> In fact, btrfs scrub for RAID56 will even corrupt correct data stripes.
 > 
-> diff --git a/common/rc b/common/rc
-> index e3b54ec..6d333dd 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3017,7 +3017,7 @@ _require_deletable_scratch_dev_pool()
->  }
->  
->  # We check for btrfs and (optionally) features of the btrfs command
-> -_require_btrfs()
-> +_require_btrfs_subcommand()
+> So let's start from the needed facilities and check scrub starting from RAID1.
+> 
+> The main reason the patchset is RFC, is the method I take to corrupt/verify
+> btrfs data.
+> 
+> unlike other stable fs, like ext* or xfs, which has good tool to
+> manipulate the fs.
+> 
+> There used to be btrfs-corrupt-block, but it gets fewer and fewer
+> update, no man page nor installed by default.
 
-_require_btrfs_command seems good enough. And it should be improved to
-handle subcommands like dump-tree (like what _require_xfs_io_command
-does), otherwise tests fail if old version of btrfs-progs is installed
-where inspect-internal doesn't have dump-tree support.
+I really think that a tool manipulating btrfs should be developed first,
+especially it's greatly demanded now and there's already a prototype
+btrfs-corrupt-block available. Then this tool can act as a base &
+benefit all future tests that corrupt fs metadata. e.g. Darrick
+introduced blocktrash command to xfs_db and used it in many fuzz tests.
+
+IMO, let's build and/or fix the tools first. To me, this is just the
+right time to do this.
+
+> 
+> Here I take the method I normally do in my scripts: use btrfs-dump-tree
+> (btrfs inspect-internal dump-tree) and use bash to corrupt btrfs
+> pinpointly.
+> It works quite fine for several different mount options which affects
+> how data lies on-disk.
+> 
+> But the problem is also obvious, bash script is super hard to maintain,
+> and there is no promise that btrfs-dump-tree output won't change.
+> Such change will be destructive.
+
+Agreed, it's very hard to maintain, and, as you pointed out, the output
+format changing of btrfs-dump-tree makes the code even harder to read &
+maintain. And it's hard to extend to work with other profiles too.
+
+I'd like to hear what other btrfs developers and fstests users think.
 
 Thanks,
 Eryu
+
+> 
+> But IMHO it's still worthy, or btrfs scrub may break at any time.
+> 
+> Qu Wenruo (3):
+>   fstests: common: rename _require_btrfs to _require_btrfs_subcommand
+>   fstests: common/ondisk.btrfs: Introduce function to get btrfs ondisk  
+>       info
+>   fstests: btrfs: Add new test case to check scrub recovery and report
+> 
+>  common/ondisk.btrfs | 113 ++++++++++++++++++++++++++
+>  common/rc           |   2 +-
+>  tests/btrfs/004     |   2 +-
+>  tests/btrfs/048     |   2 +-
+>  tests/btrfs/059     |   2 +-
+>  tests/btrfs/131     |   2 +-
+>  tests/btrfs/132     | 229 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/132.out | 111 +++++++++++++++++++++++++
+>  tests/btrfs/group   |   2 +
+>  9 files changed, 460 insertions(+), 5 deletions(-)
+>  create mode 100644 common/ondisk.btrfs
+>  create mode 100755 tests/btrfs/132
+>  create mode 100644 tests/btrfs/132.out
+> 
+> -- 
+> 2.7.4
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
