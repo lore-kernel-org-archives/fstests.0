@@ -1,133 +1,65 @@
-Received: from mail-wj0-f194.google.com ([209.85.210.194]:33980 "EHLO
-        mail-wj0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751636AbcLFGC4 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 6 Dec 2016 01:02:56 -0500
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v4] xfs_io: support -c "open foo" command
-Date: Tue,  6 Dec 2016 07:43:58 +0200
-Message-Id: <1481003038-23740-1-git-send-email-amir73il@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:49766 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752135AbcLFIUP (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 6 Dec 2016 03:20:15 -0500
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 6236A7F7C8
+        for <fstests@vger.kernel.org>; Tue,  6 Dec 2016 08:09:46 +0000 (UTC)
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] generic/35[67]: update selinux context for mkswap
+Date: Tue,  6 Dec 2016 16:09:27 +0800
+Message-Id: <20161206080927.22379-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Eric Sandeen <sandeen@sandeen.net>, Eryu Guan <eguan@redhat.com>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-There is an undocumented and possibly unused feature in xfs_io
-where all commands are executed per file when multiple files
-are provided in the args list.
+With selinux enabled & the default selinux context in fstests,
+mkswap is denied, generic/35[67] fail as:
 
-This feature creates ambiguity when trying to execute commands
-such as "open" and "file" from command line and result in an
-endless loop in the command loop code, e.g.:
++mkswap: unable to relabel /mnt/testarea/scratch/test-357/file1 to system_u:object_r:swapfile_t:s0: Operation not supported
 
-xfs_io -r -c "open -f bar" -c print foo
-bar: Too many open files
-[000] foo            (foreign,non-sync,non-direct,read-only)
- 001  bar            (foreign,non-sync,non-direct,read-write)
- 002  bar            (foreign,non-sync,non-direct,read-write)
- 003  bar            (foreign,non-sync,non-direct,read-write)
- 004  bar            (foreign,non-sync,non-direct,read-write)
- 005  bar            (foreign,non-sync,non-direct,read-write)
- 006  bar            (foreign,non-sync,non-direct,read-write)
+So mount SCRATCH_DEV with swapfile selinux context if selinux is
+enabled (SELINUX_MOUNT_OPTIONS not empty).
 
-Also, when running xfs_io -c <cmd> without any file args, xfs_io
-exits without doing anything. This behavior is also undocumented
-and makes very little sense.
-
-Change the behavior of xfs_io, so commands given with -c <cmd>
-are executed exactly once, regardless of the number of file args.
-This enables writing proper xfs_io scripts in command line, which
-include "open" and "file" commands.
-
-Update the man page and usage to reflect the fact that multiple
-as well as zero file args can be given in args list.
-
-This change does not modify the behavior of xfs_io in the most
-commonly used case of single file argument in command line and
-no "open" and "file" commands in command line.
-
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- io/init.c         | 11 ++++++-----
- man/man8/xfs_io.8 |  9 +++++++--
- 2 files changed, 13 insertions(+), 7 deletions(-)
+ tests/generic/356 | 4 ++++
+ tests/generic/357 | 4 ++++
+ 2 files changed, 8 insertions(+)
 
-v4:
-- Allow multiple file args
-- Update man page and usage to allow multiple file args
-  and spell out the expected behavior in this case
-
-v3:
-- Forbid multiple file args
-- Update man page and usage to allow no file arg
-- Add endless loop bug report to commit message
-
-v2:
-- Fix the case of multiple file args
-
-v1:
-- Fix the case of zero file args
-
-diff --git a/io/init.c b/io/init.c
-index a9191cf..54b998c 100644
---- a/io/init.c
-+++ b/io/init.c
-@@ -34,7 +34,7 @@ void
- usage(void)
- {
- 	fprintf(stderr,
--		_("Usage: %s [-adfinrRstVx] [-m mode] [-p prog] [-c cmd]... file\n"),
-+		_("Usage: %s [-adfinrRstVx] [-m mode] [-p prog] [-c cmd]... [file]...\n"),
- 		progname);
- 	exit(1);
- }
-@@ -90,14 +90,15 @@ init_commands(void)
- 	cowextsize_init();
- }
+diff --git a/tests/generic/356 b/tests/generic/356
+index 6bb90c0..8bebad2 100755
+--- a/tests/generic/356
++++ b/tests/generic/356
+@@ -49,6 +49,10 @@ _require_cp_reflink
  
-+/*
-+ * Return true for first call and false for the next call,
-+ * to execute each command just once.
-+ */
- static int
- init_args_command(
- 	int	index)
- {
--	if (index >= filecount)
--		return 0;
--	file = &filetable[index++];
--	return index;
-+	return !index;
- }
+ echo "Format and mount"
+ _scratch_mkfs > $seqres.full 2>&1
++# the default selinux context won't allow mkswap
++if [ "$SELINUX_MOUNT_OPTIONS" != "" ]; then
++	export SELINUX_MOUNT_OPTIONS="-o context=system_u:object_r:swapfile_t:s0"
++fi
+ _scratch_mount >> $seqres.full 2>&1
  
- static int
-diff --git a/man/man8/xfs_io.8 b/man/man8/xfs_io.8
-index 885df7f..f61eee6 100644
---- a/man/man8/xfs_io.8
-+++ b/man/man8/xfs_io.8
-@@ -11,8 +11,9 @@ xfs_io \- debug the I/O path of an XFS filesystem
- ] ... [
- .B \-p
- .I prog
--]
-+] [
- .I file
-+] ...
- .br
- .B xfs_io \-V
- .SH DESCRIPTION
-@@ -42,7 +43,11 @@ the default value is
- .B \-f
- Create
- .I file
--if it does not already exist.
-+if it does not already exist. Multiple
-+.I file
-+arguments may be given. The files are open before the
-+.B \-c
-+commands are executed.
- .TP
- .B \-r
- Open
+ testdir=$SCRATCH_MNT/test-$seq
+diff --git a/tests/generic/357 b/tests/generic/357
+index 439b314..8941927 100755
+--- a/tests/generic/357
++++ b/tests/generic/357
+@@ -49,6 +49,10 @@ _require_cp_reflink
+ 
+ echo "Format and mount"
+ _scratch_mkfs > $seqres.full 2>&1
++# the default selinux context won't allow mkswap
++if [ "$SELINUX_MOUNT_OPTIONS" != "" ]; then
++	export SELINUX_MOUNT_OPTIONS="-o context=system_u:object_r:swapfile_t:s0"
++fi
+ _scratch_mount >> $seqres.full 2>&1
+ 
+ testdir=$SCRATCH_MNT/test-$seq
 -- 
-2.7.4
+2.9.3
 
