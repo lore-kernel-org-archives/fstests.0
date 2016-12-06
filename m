@@ -1,86 +1,133 @@
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:36559 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751556AbcLFFl3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 6 Dec 2016 00:41:29 -0500
-MIME-Version: 1.0
-In-Reply-To: <20161205221548.GD4326@dastard>
-References: <1480943017-6175-1-git-send-email-amir73il@gmail.com>
- <9125bb5e-49f5-e40e-0181-fea7f80ae553@sandeen.net> <CAOQ4uxhw8Y_9NVwuAZ_xzvPYZ8k1CRonmQ=CAn=Y9j-_nkToMA@mail.gmail.com>
- <00b2b645-3cd2-f3b2-b026-40dfc97f3f90@sandeen.net> <CAOQ4uxhmLe32AMkBmRJx37Pmg3oZMFLt_6Q0kTNYxix_qz7vZA@mail.gmail.com>
- <20161205221548.GD4326@dastard>
+Received: from mail-wj0-f194.google.com ([209.85.210.194]:33980 "EHLO
+        mail-wj0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751636AbcLFGC4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 6 Dec 2016 01:02:56 -0500
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 6 Dec 2016 07:24:12 +0200
-Message-ID: <CAOQ4uxiSDniBTpfgOT9AQ8YGG5Ffz1rSLcBvWdm8TgY_OEArJA@mail.gmail.com>
-Subject: Re: [PATCH v2] xfs_io: support -c "open foo" command
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH v4] xfs_io: support -c "open foo" command
+Date: Tue,  6 Dec 2016 07:43:58 +0200
+Message-Id: <1481003038-23740-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>
-Cc: Eric Sandeen <sandeen@sandeen.net>, Eryu Guan <eguan@redhat.com>, linux-xfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
+Cc: Eric Sandeen <sandeen@sandeen.net>, Eryu Guan <eguan@redhat.com>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Dec 6, 2016 at 12:15 AM, Dave Chinner <david@fromorbit.com> wrote:
-> On Mon, Dec 05, 2016 at 05:39:17PM +0200, Amir Goldstein wrote:
->> On Mon, Dec 5, 2016 at 5:26 PM, Eric Sandeen <sandeen@sandeen.net> wrote:
->> > On 12/5/16 9:19 AM, Amir Goldstein wrote:
->> >> On Mon, Dec 5, 2016 at 4:19 PM, Eric Sandeen <sandeen@sandeen.net> wrote:
->> >>> On 12/5/16 7:03 AM, Amir Goldstein wrote:
->> >>>> There is an undocumented and possibly unused feature in xfs_io
->> >>>> where all commands are executed per file in the file args list.
->> >>>>
->> >>>> This feature creates ambiguity when trying to execute commands
->> >>>> such as "open" and "file" from command line and result in an
->> >>>> endless loop in the command loop code.
->> >>>
->> >>> I may well be dense, but it's not immediately obvious what the
->> >>> old and/or problematic behavior is.  Can you spell it out a bit
->> >>> more?  What is an example of this loop?
->> >>
->> >> $ touch foo
->> >> $ xfs_io -c "open foo" foo
->> >>
->> >> you will see the shit storm
->> >
->> > ;)  Ok thanks.  (would be nice to have that in the changelog)
->> >
->>
->> Good point. I will add that.
->>
->>
->> >
->> > Given that neither the manpage nor the short help mention that more than
->> > one filename is accepted, should this even succeed at all?
->> >
->>
->> Make sense to me to fail on multiple file args.
->
-> It doesn't to me.
->
-> The fact that xfs_io has an open command, and it has
-> commands that can act on multiple files (e.g. sendfile) indicate
-> that it should be able to handle multiple files.
->
-> Indeed, in interactive mode, the current file is really just an
-> index into the stack of open files. It works exactly the same way as
-> other XFS tools do with context stacks and accessed object rings
-> (e.g. xfs_db). i.e. you only need to open the file/access the object
-> once and then you can use the stack/ring to jump straight back to
-> it. In this case, it's the xfs_io "file" command.
->
-> i.e. xfs_io is intended to by able to operate on multiple files at
-> once, and I do use that in interactive mode from time to time.
->
-> What I haven't ever done is try to access that through the command
-> line, so I didn't know it had this "command loop" iteration problem.
->
-> It's the command loop iteration problem we need to fix, not neuter
-> the multiple file capability of xfs_io.
->
+There is an undocumented and possibly unused feature in xfs_io
+where all commands are executed per file when multiple files
+are provided in the args list.
 
-OK, v4 it is.
-For some reason you fail to spell out your idea of "fixing",
-so I keep having to guess what you mean.
-This time I am guessing that you mean:
-- open all the files in args list (all using the same -r/-f flags)
-- iterate all commands exactly once without implicitly changing "file"
+This feature creates ambiguity when trying to execute commands
+such as "open" and "file" from command line and result in an
+endless loop in the command loop code, e.g.:
 
-Amir.
+xfs_io -r -c "open -f bar" -c print foo
+bar: Too many open files
+[000] foo            (foreign,non-sync,non-direct,read-only)
+ 001  bar            (foreign,non-sync,non-direct,read-write)
+ 002  bar            (foreign,non-sync,non-direct,read-write)
+ 003  bar            (foreign,non-sync,non-direct,read-write)
+ 004  bar            (foreign,non-sync,non-direct,read-write)
+ 005  bar            (foreign,non-sync,non-direct,read-write)
+ 006  bar            (foreign,non-sync,non-direct,read-write)
+
+Also, when running xfs_io -c <cmd> without any file args, xfs_io
+exits without doing anything. This behavior is also undocumented
+and makes very little sense.
+
+Change the behavior of xfs_io, so commands given with -c <cmd>
+are executed exactly once, regardless of the number of file args.
+This enables writing proper xfs_io scripts in command line, which
+include "open" and "file" commands.
+
+Update the man page and usage to reflect the fact that multiple
+as well as zero file args can be given in args list.
+
+This change does not modify the behavior of xfs_io in the most
+commonly used case of single file argument in command line and
+no "open" and "file" commands in command line.
+
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ io/init.c         | 11 ++++++-----
+ man/man8/xfs_io.8 |  9 +++++++--
+ 2 files changed, 13 insertions(+), 7 deletions(-)
+
+v4:
+- Allow multiple file args
+- Update man page and usage to allow multiple file args
+  and spell out the expected behavior in this case
+
+v3:
+- Forbid multiple file args
+- Update man page and usage to allow no file arg
+- Add endless loop bug report to commit message
+
+v2:
+- Fix the case of multiple file args
+
+v1:
+- Fix the case of zero file args
+
+diff --git a/io/init.c b/io/init.c
+index a9191cf..54b998c 100644
+--- a/io/init.c
++++ b/io/init.c
+@@ -34,7 +34,7 @@ void
+ usage(void)
+ {
+ 	fprintf(stderr,
+-		_("Usage: %s [-adfinrRstVx] [-m mode] [-p prog] [-c cmd]... file\n"),
++		_("Usage: %s [-adfinrRstVx] [-m mode] [-p prog] [-c cmd]... [file]...\n"),
+ 		progname);
+ 	exit(1);
+ }
+@@ -90,14 +90,15 @@ init_commands(void)
+ 	cowextsize_init();
+ }
+ 
++/*
++ * Return true for first call and false for the next call,
++ * to execute each command just once.
++ */
+ static int
+ init_args_command(
+ 	int	index)
+ {
+-	if (index >= filecount)
+-		return 0;
+-	file = &filetable[index++];
+-	return index;
++	return !index;
+ }
+ 
+ static int
+diff --git a/man/man8/xfs_io.8 b/man/man8/xfs_io.8
+index 885df7f..f61eee6 100644
+--- a/man/man8/xfs_io.8
++++ b/man/man8/xfs_io.8
+@@ -11,8 +11,9 @@ xfs_io \- debug the I/O path of an XFS filesystem
+ ] ... [
+ .B \-p
+ .I prog
+-]
++] [
+ .I file
++] ...
+ .br
+ .B xfs_io \-V
+ .SH DESCRIPTION
+@@ -42,7 +43,11 @@ the default value is
+ .B \-f
+ Create
+ .I file
+-if it does not already exist.
++if it does not already exist. Multiple
++.I file
++arguments may be given. The files are open before the
++.B \-c
++commands are executed.
+ .TP
+ .B \-r
+ Open
+-- 
+2.7.4
+
