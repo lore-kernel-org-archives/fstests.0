@@ -1,95 +1,86 @@
-Received: from mail-pf0-f180.google.com ([209.85.192.180]:36815 "EHLO
-        mail-pf0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751411AbcLFBBr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 5 Dec 2016 20:01:47 -0500
-Received: by mail-pf0-f180.google.com with SMTP id 189so66647833pfz.3
-        for <fstests@vger.kernel.org>; Mon, 05 Dec 2016 17:01:47 -0800 (PST)
-From: Omar Sandoval <osandov@osandov.com>
-Subject: [PATCH] generic/35[67]: disable swapfile tests on Btrfs
-Date: Mon,  5 Dec 2016 17:01:28 -0800
-Message-Id: <f0b9fc441b46d15ddcdb126d3aabb27784c3e758.1480985305.git.osandov@fb.com>
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:36559 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751556AbcLFFl3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 6 Dec 2016 00:41:29 -0500
+MIME-Version: 1.0
+In-Reply-To: <20161205221548.GD4326@dastard>
+References: <1480943017-6175-1-git-send-email-amir73il@gmail.com>
+ <9125bb5e-49f5-e40e-0181-fea7f80ae553@sandeen.net> <CAOQ4uxhw8Y_9NVwuAZ_xzvPYZ8k1CRonmQ=CAn=Y9j-_nkToMA@mail.gmail.com>
+ <00b2b645-3cd2-f3b2-b026-40dfc97f3f90@sandeen.net> <CAOQ4uxhmLe32AMkBmRJx37Pmg3oZMFLt_6Q0kTNYxix_qz7vZA@mail.gmail.com>
+ <20161205221548.GD4326@dastard>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Tue, 6 Dec 2016 07:24:12 +0200
+Message-ID: <CAOQ4uxiSDniBTpfgOT9AQ8YGG5Ffz1rSLcBvWdm8TgY_OEArJA@mail.gmail.com>
+Subject: Re: [PATCH v2] xfs_io: support -c "open foo" command
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, kernel-team@fb.com
+To: Dave Chinner <david@fromorbit.com>
+Cc: Eric Sandeen <sandeen@sandeen.net>, Eryu Guan <eguan@redhat.com>, linux-xfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-From: Omar Sandoval <osandov@fb.com>
+On Tue, Dec 6, 2016 at 12:15 AM, Dave Chinner <david@fromorbit.com> wrote:
+> On Mon, Dec 05, 2016 at 05:39:17PM +0200, Amir Goldstein wrote:
+>> On Mon, Dec 5, 2016 at 5:26 PM, Eric Sandeen <sandeen@sandeen.net> wrote:
+>> > On 12/5/16 9:19 AM, Amir Goldstein wrote:
+>> >> On Mon, Dec 5, 2016 at 4:19 PM, Eric Sandeen <sandeen@sandeen.net> wrote:
+>> >>> On 12/5/16 7:03 AM, Amir Goldstein wrote:
+>> >>>> There is an undocumented and possibly unused feature in xfs_io
+>> >>>> where all commands are executed per file in the file args list.
+>> >>>>
+>> >>>> This feature creates ambiguity when trying to execute commands
+>> >>>> such as "open" and "file" from command line and result in an
+>> >>>> endless loop in the command loop code.
+>> >>>
+>> >>> I may well be dense, but it's not immediately obvious what the
+>> >>> old and/or problematic behavior is.  Can you spell it out a bit
+>> >>> more?  What is an example of this loop?
+>> >>
+>> >> $ touch foo
+>> >> $ xfs_io -c "open foo" foo
+>> >>
+>> >> you will see the shit storm
+>> >
+>> > ;)  Ok thanks.  (would be nice to have that in the changelog)
+>> >
+>>
+>> Good point. I will add that.
+>>
+>>
+>> >
+>> > Given that neither the manpage nor the short help mention that more than
+>> > one filename is accepted, should this even succeed at all?
+>> >
+>>
+>> Make sense to me to fail on multiple file args.
+>
+> It doesn't to me.
+>
+> The fact that xfs_io has an open command, and it has
+> commands that can act on multiple files (e.g. sendfile) indicate
+> that it should be able to handle multiple files.
+>
+> Indeed, in interactive mode, the current file is really just an
+> index into the stack of open files. It works exactly the same way as
+> other XFS tools do with context stacks and accessed object rings
+> (e.g. xfs_db). i.e. you only need to open the file/access the object
+> once and then you can use the stack/ring to jump straight back to
+> it. In this case, it's the xfs_io "file" command.
+>
+> i.e. xfs_io is intended to by able to operate on multiple files at
+> once, and I do use that in interactive mode from time to time.
+>
+> What I haven't ever done is try to access that through the command
+> line, so I didn't know it had this "command loop" iteration problem.
+>
+> It's the command loop iteration problem we need to fix, not neuter
+> the multiple file capability of xfs_io.
+>
 
-Btrfs doesn't support swapfiles (yet?), so generic/356 fails
-erroneously, and generic/357 only passes by accident. Let's add a
-_require_scratch_swapfile helper and add it to these tests.
+OK, v4 it is.
+For some reason you fail to spell out your idea of "fixing",
+so I keep having to guess what you mean.
+This time I am guessing that you mean:
+- open all the files in args list (all using the same -r/-f flags)
+- iterate all commands exactly once without implicitly changing "file"
 
-Signed-off-by: Omar Sandoval <osandov@fb.com>
----
-I have some code enabling swapfiles for Btrfs [1], but there's some ABBA
-deadlock issues with i_rwsem and mmap_sem on swap-over-NFS that I
-haven't had time to sort out. In the meantime, let's just skip these
-tests.
-
-1: https://github.com/osandov/linux/tree/btrfs-swap
-
- common/rc         | 22 ++++++++++++++++++++++
- tests/generic/356 |  1 +
- tests/generic/357 |  1 +
- 3 files changed, 24 insertions(+)
-
-diff --git a/common/rc b/common/rc
-index 2719b23..d863e56 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1790,6 +1790,28 @@ _require_odirect()
- 	rm -f $testfile 2>&1 > /dev/null
- }
- 
-+# Check that the filesystem supports swapfiles
-+_require_scratch_swapfile()
-+{
-+	_require_scratch
-+
-+	_scratch_mkfs >/dev/null
-+	_scratch_mount
-+
-+	# Minimum size for mkswap is 10 pages
-+	local size=$(($(get_page_size) * 10))
-+
-+	_pwrite_byte 0x61 0 "$size" "$SCRATCH_MNT/swap" >/dev/null 2>&1
-+	mkswap "$SCRATCH_MNT/swap" >/dev/null 2>&1
-+	if ! swapon "$SCRATCH_MNT/swap" >/dev/null 2>&1; then
-+		_scratch_unmount
-+		_notrun "swapfiles are not supported"
-+	fi
-+
-+	swapoff "$SCRATCH_MNT/swap" >/dev/null 2>&1
-+	_scratch_unmount
-+}
-+
- # Check that a fs has enough free space (in 1024b blocks)
- #
- _require_fs_space()
-diff --git a/tests/generic/356 b/tests/generic/356
-index 6bb90c0..51eeb65 100755
---- a/tests/generic/356
-+++ b/tests/generic/356
-@@ -44,6 +44,7 @@ _cleanup()
- 
- # real QA test starts here
- _supported_os Linux
-+_require_scratch_swapfile
- _require_scratch_reflink
- _require_cp_reflink
- 
-diff --git a/tests/generic/357 b/tests/generic/357
-index 439b314..0dd0c10 100755
---- a/tests/generic/357
-+++ b/tests/generic/357
-@@ -44,6 +44,7 @@ _cleanup()
- 
- # real QA test starts here
- _supported_os Linux
-+_require_scratch_swapfile
- _require_scratch_reflink
- _require_cp_reflink
- 
--- 
-2.10.2
-
+Amir.
