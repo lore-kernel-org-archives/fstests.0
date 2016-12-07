@@ -1,12 +1,11 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:29524 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752099AbcLGATN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 6 Dec 2016 19:19:13 -0500
-Subject: [PATCH 09/11] populate: discover XFS structure fields and fuzz
- verbs, and use them to fuzz fields
+Received: from aserp1040.oracle.com ([141.146.126.69]:23806 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752018AbcLGATU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 6 Dec 2016 19:19:20 -0500
+Subject: [PATCH 10/11] common/populate: create attrs in different namespaces
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 06 Dec 2016 16:19:08 -0800
-Message-ID: <148106994815.19334.15616490016299864480.stgit@birch.djwong.org>
+Date: Tue, 06 Dec 2016 16:19:14 -0800
+Message-ID: <148106995441.19334.5444383157369397166.stgit@birch.djwong.org>
 In-Reply-To: <148106989109.19334.6839386416313318071.stgit@birch.djwong.org>
 References: <148106989109.19334.6839386416313318071.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -17,215 +16,72 @@ To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Create some routines to help us perform targeted fuzzing of individual
-fields in various XFS structures.  Specifically, we want the caller to
-drop the xfs_db iocursor on the victim field; from there, the scripts
-should discover all available fields and fuzzing verbs, and try each
-fuzz verb on every available field.
-
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
---
-v2: fix some errors found by Eryu Guan.
 ---
- common/fuzzy |  189 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 189 insertions(+)
+ common/populate |   30 ++++++++++++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
 
 
-diff --git a/common/fuzzy b/common/fuzzy
-index 964a463..046a198 100644
---- a/common/fuzzy
-+++ b/common/fuzzy
-@@ -81,3 +81,192 @@ _scratch_scrub() {
- 		;;
- 	esac
- }
+diff --git a/common/populate b/common/populate
+index 0e6bcfd..f0a9f68 100644
+--- a/common/populate
++++ b/common/populate
+@@ -166,6 +166,9 @@ _scratch_xfs_populate() {
+ 	mknod "${SCRATCH_MNT}/S_IFCHR" c 1 1
+ 	mknod "${SCRATCH_MNT}/S_IFBLK" c 1 1
+ 
++	# special file with an xattr
++	setfacl -P -m u:nobody:r ${SCRATCH_MNT}/S_IFCHR
 +
-+# Filter the xfs_db print command's field debug information
-+# into field name and type.
-+__filter_xfs_db_print_fields() {
-+	grep ' = ' | while read key equals value; do
-+		fuzzkey="$(echo "${key}" | sed -e 's/\([a-zA-Z0-9_]*\)\[\([0-9]*\)-[0-9]*\]/\1[\2]/g')"
-+		if [[ "${value}" == "["* ]]; then
-+			echo "${value}" | sed -e 's/^.//g' -e 's/.$//g' -e 's/,/\n/g' | while read subfield; do
-+				echo "${fuzzkey}.${subfield}"
-+			done
-+		else
-+			echo "${fuzzkey}"
-+		fi
-+	done
-+}
+ 	# Attribute formats
+ 	# LOCAL
+ 	echo "+ local attr"
+@@ -183,6 +186,18 @@ _scratch_xfs_populate() {
+ 	echo "+ btree attr"
+ 	__populate_create_attr "${SCRATCH_MNT}/ATTR.FMT_BTREE" "$((64 * blksz / 40))" true
+ 
++	# trusted namespace
++	touch ${SCRATCH_MNT}/ATTR.TRUSTED
++	setfattr -n trusted.moo -v urk ${SCRATCH_MNT}/ATTR.TRUSTED
 +
-+# Navigate to some part of the filesystem and print the field info.
-+_scratch_xfs_list_metadata_fields() {
-+	if [ -n "${SCRATCH_XFS_LIST_METADATA_FIELDS}" ]; then
-+		echo "${SCRATCH_XFS_LIST_METADATA_FIELDS}" | sed -e 's/ /\n/g'
-+		return;
-+	fi
++	# security namespace
++	touch ${SCRATCH_MNT}/ATTR.SECURITY
++	setfattr -n security.foo -v bar ${SCRATCH_MNT}/ATTR.SECURITY
 +
-+	(for arg in "$@"; do
-+		echo "${arg}"
-+	done
-+	echo "print") | _scratch_xfs_db | __filter_xfs_db_print_fields
-+}
++	# system namespace
++	touch ${SCRATCH_MNT}/ATTR.SYSTEM
++	setfacl -m u:root:r ${SCRATCH_MNT}/ATTR.SYSTEM
 +
-+# Get a metadata field
-+_scratch_xfs_get_metadata_field() {
-+	key="$1"
-+	shift
+ 	# FMT_EXTENTS with a remote less-than-a-block value
+ 	echo "+ attr extents with a remote less-than-a-block value"
+ 	touch "${SCRATCH_MNT}/ATTR.FMT_EXTENTS_REMOTE3K"
+@@ -305,6 +320,9 @@ _scratch_ext4_populate() {
+ 	mknod "${SCRATCH_MNT}/S_IFCHR" c 1 1
+ 	mknod "${SCRATCH_MNT}/S_IFBLK" c 1 1
+ 
++	# special file with an xattr
++	setfacl -P -m u:nobody:r ${SCRATCH_MNT}/S_IFCHR
 +
-+	grep_key="$(echo "${key}" | tr '[]()' '....')"
-+	(for arg in "$@"; do
-+		echo "${arg}"
-+	done
-+	echo "print ${key}") | _scratch_xfs_db | grep "^${grep_key}" | \
-+		sed -e 's/^.* = //g'
-+}
+ 	# Attribute formats
+ 	# LOCAL
+ 	echo "+ local attr"
+@@ -314,6 +332,18 @@ _scratch_ext4_populate() {
+ 	echo "+ block attr"
+ 	__populate_create_attr "${SCRATCH_MNT}/ATTR.FMT_BLOCK" "$((blksz / 40))"
+ 
++	# trusted namespace
++	touch ${SCRATCH_MNT}/ATTR.TRUSTED
++	setfattr -n trusted.moo -v urk ${SCRATCH_MNT}/ATTR.TRUSTED
 +
-+# Set a metadata field
-+_scratch_xfs_set_metadata_field() {
-+	key="$1"
-+	value="$2"
-+	shift; shift
-+	(for arg in "$@"; do
-+		echo "${arg}"
-+	done
-+	echo "write -d ${key} ${value}") | _scratch_xfs_db -x
-+	echo
-+}
++	# security namespace
++	touch ${SCRATCH_MNT}/ATTR.SECURITY
++	setfattr -n security.foo -v bar ${SCRATCH_MNT}/ATTR.SECURITY
 +
-+# Fuzz a metadata field
-+_scratch_xfs_fuzz_metadata_field() {
-+	key="$1"
-+	value="$2"
-+	shift; shift
++	# system namespace
++	touch ${SCRATCH_MNT}/ATTR.SYSTEM
++	setfacl -m u:root:r ${SCRATCH_MNT}/ATTR.SYSTEM
 +
-+	if [ "${key}" = "crc" ]; then
-+		fuzz_arg="-c"
-+	else
-+		fuzz_arg="-d"
-+	fi
-+	oldval="$(_scratch_xfs_get_metadata_field "${key}" "$@")"
-+	(for arg in "$@"; do
-+		echo "${arg}"
-+	done
-+	echo "fuzz ${fuzz_arg} ${key} ${value}") | _scratch_xfs_db -x
-+	echo
-+	newval="$(_scratch_xfs_get_metadata_field "${key}" "$@" 2> /dev/null)"
-+	if [ "${oldval}" = "${newval}" ]; then
-+		echo "Field ${key} already set to ${oldval}, skipping test."
-+		return 1
-+	fi
-+	return 0
-+}
-+
-+# Try to forcibly unmount the scratch fs
-+__scratch_xfs_fuzz_unmount()
-+{
-+	while ! _scratch_unmount 2>/dev/null; do sleep 0.2; done
-+}
-+
-+# Restore metadata to scratch device prior to field-fuzzing.
-+__scratch_xfs_fuzz_mdrestore()
-+{
-+	test -e "${POPULATE_METADUMP}" || _fail "Need to set POPULATE_METADUMP"
-+
-+	__scratch_xfs_fuzz_unmount
-+	xfs_mdrestore "${POPULATE_METADUMP}" "${SCRATCH_DEV}"
-+}
-+
-+__fuzz_notify() {
-+	echo "$@"
-+	test -w /dev/ttyprintk && echo "$@" >> /dev/ttyprintk
-+}
-+
-+# Fuzz one field of some piece of metadata
-+__scratch_xfs_fuzz_field_test() {
-+	field="$1"
-+	fuzzverb="$2"
-+	shift; shift
-+
-+	# Set the new field value
-+	__fuzz_notify "+ Fuzz ${field} = ${fuzzverb}"
-+	echo "========================"
-+	_scratch_xfs_fuzz_metadata_field "${field}" ${fuzzverb} "$@"
-+	res=$?
-+	test $res -ne 0 && return
-+
-+	# Try to catch the error with scrub
-+	echo "+ Try to catch the error"
-+	_scratch_mount 2>&1
-+	res=$?
-+	if [ $res -eq 0 ]; then
-+		_scratch_scrub -a 1 -e continue 2>&1
-+		res=$?
-+		test $res -eq 0 && \
-+			(>&2 echo "scrub didn't fail with ${field} = ${fuzzverb}.")
-+
-+		# Try modifying the filesystem!
-+		__fuzz_notify "++ Try to write filesystem"
-+		#_scratch_fuzz_modify 100 2>&1
-+		__scratch_xfs_fuzz_unmount
-+	fi
-+
-+	# Repair the filesystem
-+	echo "+ Fix the error"
-+	_repair_scratch_fs 2>&1
-+	res=$?
-+	test $res -ne 0 && \
-+		(>&2 echo "repair failed ($res) with ${field} = ${fuzzverb}.")
-+
-+	# See if scrub finds a clean fs
-+	echo "+ Make sure error is gone"
-+	_scratch_mount 2>&1
-+	res=$?
-+	if [ $res -eq 0 ]; then
-+		_scratch_scrub -e continue 2>&1
-+		res=$?
-+		test $res -ne 0 && \
-+			(>&2 echo "re-scrub ($res) with ${field} = ${fuzzverb}.")
-+
-+		# Try modifying the filesystem again!
-+		__fuzz_notify "++ Try to write filesystem again"
-+		_scratch_fuzz_modify 100 2>&1
-+		__scratch_xfs_fuzz_unmount
-+	else
-+		(>&2 echo "re-mount failed ($res) with ${field} = ${fuzzverb}.")
-+	fi
-+
-+	# See if repair finds a clean fs
-+	_scratch_xfs_repair -n 2>&1
-+	res=$?
-+	test $res -ne 0 && \
-+		(>&2 echo "re-repair failed ($res) with ${field} = ${fuzzverb}.")
-+}
-+
-+# Make sure we have all the pieces we need for field fuzzing
-+_require_scratch_xfs_fuzz_fields()
-+{
-+	_require_scratch
-+	_require_scrub
-+	_require_populate_commands
-+	_scratch_mkfs_xfs >/dev/null 2>&1
-+	_require_xfs_db_command "fuzz"
-+}
-+
-+# Grab the list of available fuzzing verbs
-+_scratch_xfs_list_fuzz_verbs() {
-+	if [ -n "${SCRATCH_XFS_LIST_FUZZ_VERBS}" ]; then
-+		echo "${SCRATCH_XFS_LIST_FUZZ_VERBS}" | sed -e 's/ /\n/g'
-+		return;
-+	fi
-+	_scratch_xfs_db -x -c 'sb 0' -c 'fuzz' | grep '^Verbs:' | \
-+		sed -e 's/[,.]//g' -e 's/Verbs: //g' -e 's/ /\n/g'
-+}
-+
-+# Fuzz the fields of some piece of metadata
-+_scratch_xfs_fuzz_fields() {
-+	_scratch_xfs_list_metadata_fields "$@" | while read field; do
-+		_scratch_xfs_list_fuzz_verbs | while read fuzzverb; do
-+			__scratch_xfs_fuzz_mdrestore
-+			__scratch_xfs_fuzz_field_test "${field}" "${fuzzverb}" "$@"
-+		done
-+	done
-+}
+ 	# Make an unused inode
+ 	echo "+ empty file"
+ 	touch "${SCRATCH_MNT}/unused"
 
