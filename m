@@ -1,177 +1,287 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:56135 "EHLO
-        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1752198AbcLGDre (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 6 Dec 2016 22:47:34 -0500
-From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH 3/6] libxcmd: merge command() and iterate_command()
-Date: Wed,  7 Dec 2016 14:47:21 +1100
-Message-Id: <20161207034724.1613-4-david@fromorbit.com>
-In-Reply-To: <20161207034724.1613-1-david@fromorbit.com>
-References: <20161207034724.1613-1-david@fromorbit.com>
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:34731 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751702AbcLGE6B (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 6 Dec 2016 23:58:01 -0500
+MIME-Version: 1.0
+In-Reply-To: <CAOQ4uxj2AROKtg=ZE64Q-RJbMaiRdP7SvoosmvCD4C1h-X-4bA@mail.gmail.com>
+References: <20161207034724.1613-1-david@fromorbit.com> <20161207034724.1613-7-david@fromorbit.com>
+ <CAOQ4uxj2AROKtg=ZE64Q-RJbMaiRdP7SvoosmvCD4C1h-X-4bA@mail.gmail.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Wed, 7 Dec 2016 06:57:58 +0200
+Message-ID: <CAOQ4uxgn3f10WS+chE7NTr8y3kcaO4EWDuqwoDVUZuT3FLLvBQ@mail.gmail.com>
+Subject: Re: [PATCH 6/6] libxcmd: add non-iterating user commands
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: linux-xfs@vger.kernel.org
-Cc: fstests@vger.kernel.org, amir73il@gmail.com
+To: Dave Chinner <david@fromorbit.com>
+Cc: linux-xfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-From: Dave Chinner <dchinner@redhat.com>
+On Wed, Dec 7, 2016 at 6:49 AM, Amir Goldstein <amir73il@gmail.com> wrote:
+> On Wed, Dec 7, 2016 at 5:47 AM, Dave Chinner <david@fromorbit.com> wrote:
+>> From: Dave Chinner <dchinner@redhat.com>
+>>
+>
+> Thank you for fixing this!
+> See some typo fixes below.
+> I will test the fix later today.
+>
+> Cheers,
+> Amir.
+>
+>
+>> Right now command iteration is not directly controllable by the
+>> user; it is controlled entirely by the application command flag
+>> setup. Sometimes we don't want commands to iterate but only operate
+>> on the currently selected object.
+>>
+>> For example, the stat command iterates:
+>>
+>> $ xfs_io -c "open -r foo" -c "open bar" -C "file" -c "stat" foo
+>
+> -c "file"
+>
+>>  000  foo            (foreign,non-sync,non-direct,read-write)
+>>  001  foo            (foreign,non-sync,non-direct,read-only)
+>> [002] bar            (foreign,non-sync,non-direct,read-write)
+>> fd.path = "foo"
+>> fd.flags = non-sync,non-direct,read-write
+>> stat.ino = 462399
+>> stat.type = regular file
+>> stat.size = 776508
+>> stat.blocks = 1528
+>> fd.path = "foo"
+>> fd.flags = non-sync,non-direct,read-only
+>> stat.ino = 462399
+>> stat.type = regular file
+>> stat.size = 776508
+>> stat.blocks = 1528
+>> fd.path = "bar"
+>> fd.flags = non-sync,non-direct,read-write
+>> stat.ino = 475227
+>> stat.type = regular file
+>> stat.size = 0
+>> stat.blocks = 0
+>> $
+>>
+>> To do this, add a function to supply a "non-iterating" user command
+>> that will execute an iterating-capable command as though it
+>> CMD_FLAG_ONESHOT was set. Add a new command line option to xfs_io to
+>> drive it (-C <command>) and connect it all up. Document it in the
+>> xfs_IO man page, too.
+>
+> xfs_io
+>
+>>
+>> The result of "-C stat":
+>>
+>> $ xfs_io -c "open -r foo" -c "open bar" -c "file" -C "stat" foo
+>>  000  foo            (foreign,non-sync,non-direct,read-write)
+>>  001  foo            (foreign,non-sync,non-direct,read-only)
+>> [002] bar            (foreign,non-sync,non-direct,read-write)
+>> fd.path = "bar"
+>> fd.flags = non-sync,non-direct,read-write
+>> stat.ino = 475227
+>> stat.type = regular file
+>> stat.size = 0
+>> stat.blocks = 0
+>> $
+>>
+>> Is that we only see the stat output for the active open file
+>> which is "bar".
+>>
+>> Signed-Off-By: Dave Chinner <dchinner@redhat.com>
+>> ---
+>>  include/command.h |  1 +
+>>  io/init.c         |  7 +++++--
+>>  libxcmd/command.c | 33 +++++++++++++++++++++++++++------
+>>  man/man8/xfs_io.8 | 36 ++++++++++++++++++++++++++++++------
+>>  4 files changed, 63 insertions(+), 14 deletions(-)
+>>
+>> diff --git a/include/command.h b/include/command.h
+>> index 348002cbe3ed..fb3f5c79b991 100644
+>> --- a/include/command.h
+>> +++ b/include/command.h
+>> @@ -56,6 +56,7 @@ typedef int (*checkfunc_t)(const cmdinfo_t *ci);
+>>
+>>  extern void            add_command(const cmdinfo_t *ci);
+>>  extern void            add_user_command(char *optarg);
+>> +extern void            add_oneshot_user_command(char *optarg);
+>>  extern void            add_command_iterator(iterfunc_t func);
+>>  extern void            add_check_command(checkfunc_t cf);
+>>
+>> diff --git a/io/init.c b/io/init.c
+>> index 5ce627ef22c9..cf8573f0ecd5 100644
+>> --- a/io/init.c
+>> +++ b/io/init.c
+>> @@ -34,7 +34,7 @@ void
+>>  usage(void)
+>>  {
+>>         fprintf(stderr,
+>> -               _("Usage: %s [-adfinrRstVx] [-m mode] [-p prog] [-c cmd]... file\n"),
+>> +_("Usage: %s [-adfinrRstVx] [-m mode] [-p prog] [[-c|-C] cmd]... file\n"),
+>
+> Suggest: [file]...
+>
+>>                 progname);
+>>         exit(1);
+>>  }
+>> @@ -145,7 +145,7 @@ init(
+>>         pagesize = getpagesize();
+>>         gettimeofday(&stopwatch, NULL);
+>>
+>> -       while ((c = getopt(argc, argv, "ac:dFfim:p:nrRstTVx")) != EOF) {
+>> +       while ((c = getopt(argc, argv, "ac:C:dFfim:p:nrRstTVx")) != EOF) {
+>>                 switch (c) {
+>>                 case 'a':
+>>                         flags |= IO_APPEND;
+>> @@ -153,6 +153,9 @@ init(
+>>                 case 'c':
+>>                         add_user_command(optarg);
+>>                         break;
+>> +               case 'C':
+>> +                       add_oneshot_user_command(optarg);
+>> +                       break;
+>>                 case 'd':
+>>                         flags |= IO_DIRECT;
+>>                         break;
+>> diff --git a/libxcmd/command.c b/libxcmd/command.c
+>> index decc442a9d03..5917aea42611 100644
+>> --- a/libxcmd/command.c
+>> +++ b/libxcmd/command.c
+>> @@ -25,8 +25,14 @@ int          ncmds;
+>>
+>>  static iterfunc_t      iter_func;
+>>  static checkfunc_t     check_func;
+>> -static int             ncmdline;
+>> -static char            **cmdline;
+>> +
+>> +struct cmdline {
+>> +       char    *cmdline;
+>> +       bool    iterate;
+>> +};
+>> +
+>> +static int     ncmdline;
+>> +struct cmdline *cmdline;
+>>
+>>  static int
+>>  compare(const void *a, const void *b)
+>> @@ -120,12 +126,27 @@ void
+>>  add_user_command(char *optarg)
+>>  {
+>>         ncmdline++;
+>> -       cmdline = realloc(cmdline, sizeof(char*) * (ncmdline));
+>> +       cmdline = realloc(cmdline, sizeof(struct cmdline) * (ncmdline));
+>> +       if (!cmdline) {
+>> +               perror("realloc");
+>> +               exit(1);
+>> +       }
+>> +       cmdline[ncmdline-1].cmdline = optarg;
+>> +       cmdline[ncmdline-1].iterate = true;
+>> +
+>> +}
+>> +
+>> +void
+>> +add_oneshot_user_command(char *optarg)
+>> +{
+>> +       ncmdline++;
+>> +       cmdline = realloc(cmdline, sizeof(struct cmdline) * (ncmdline));
+>>         if (!cmdline) {
+>>                 perror("realloc");
+>>                 exit(1);
+>>         }
+>> -       cmdline[ncmdline-1] = optarg;
+>> +       cmdline[ncmdline-1].cmdline = optarg;
+>> +       cmdline[ncmdline-1].iterate = false;
+>>  }
+>>
+>>  /*
+>> @@ -212,14 +233,14 @@ command_loop(void)
+>>
+>>         /* command line mode */
+>>         for (i = 0; !done && i < ncmdline; i++) {
+>> -               input = strdup(cmdline[i]);
+>> +               input = strdup(cmdline[i].cmdline);
+>>                 if (!input) {
+>>                         fprintf(stderr,
+>>                                 _("cannot strdup command '%s': %s\n"),
+>>                                 cmdline[i], strerror(errno));
 
-Simplify the command loop further by merging the command loop
-iteration checks with the command execution function. This removes
-all visibility of command iteration from the main command execution
-loop, and enables us to factor and clean up the command loop
-processing neatly.
+cmdline[i].cmdline, strerror(errno));
 
-Signed-Off-By: Dave Chinner <dchinner@redhat.com>
----
- libxcmd/command.c | 110 ++++++++++++++++++++++++++++++++----------------------
- 1 file changed, 66 insertions(+), 44 deletions(-)
-
-diff --git a/libxcmd/command.c b/libxcmd/command.c
-index 789aeb5c5e5a..2c94a3199115 100644
---- a/libxcmd/command.c
-+++ b/libxcmd/command.c
-@@ -125,22 +125,30 @@ add_user_command(char *optarg)
- }
- 
- /*
-- * To detect one-shot commands, they will return a negative index. If we
-- * get a negative index on entry, we've already run the one-shot command,
-- * so we abort straight away.
-+ * Run a command, iterating as necessary. Return 0 for success, non-zero
-+ * if an error occurred. Errors terminate loop iteration immediately.
-  */
- static int
- iterate_command(
- 	const cmdinfo_t	*ct,
--	int		index)
-+	int		argc,
-+	char		**argv)
- {
--	if (index < 0)
-+	int		error = 0;
-+	int		j;
-+
-+	/* if there's nothing to iterate, we're done! */
-+	if (!iter_func)
- 		return 0;
--	if (ct->flags & CMD_FLAG_ONESHOT)
--		return -1;
--	if (iter_func)
--		return iter_func(index);
--	return 0;
-+
-+	for (j = iter_func(0); j; j = iter_func(j)) {
-+		error = command(ct, argc, argv);
-+		if (error)
-+			break;
-+
-+	}
-+
-+	return error;
- }
- 
- void
-@@ -150,14 +158,55 @@ add_command_iterator(
- 	iter_func = func;
- }
- 
--void
--command_loop(void)
-+static int
-+process_input(
-+	char	*input,
-+	bool	iterate)
- {
--	int		c, i, j = 0, done = 0;
--	char		*input;
- 	char		**v;
- 	const cmdinfo_t	*ct;
-+	int		c = 0;
-+	int		error = 0;
-+
-+	v = breakline(input, &c);
-+	if (!c)
-+		goto out;
-+
-+	ct = find_command(v[0]);
-+	if (!ct) {
-+		fprintf(stderr, _("command \"%s\" not found\n"), v[0]);
-+		goto out;
-+	}
-+
-+	/* oneshot commands don't iterate */
-+	if (!iterate || (ct->flags & CMD_FLAG_ONESHOT))
-+		error = command(ct, c, v);
-+	else
-+		error = iterate_command(ct, c, v);
-+out:
-+	doneline(input, v);
-+	return error;
-+}
-+
-+void
-+command_loop(void)
-+{
-+	char	*input;
-+	int	done = 0;
-+	int	i;
-+
-+	if (!cmdline) {
-+		/* interactive mode */
-+		while (!done) {
-+			input = fetchline();
-+			if (!input)
-+				break;
-+			done = process_input(input, false);
-+		}
-+		return;
-+	}
- 
-+	/* command line mode */
- 	for (i = 0; !done && i < ncmdline; i++) {
- 		input = strdup(cmdline[i]);
- 		if (!input) {
-@@ -166,37 +215,10 @@ command_loop(void)
- 				cmdline[i], strerror(errno));
- 			exit(1);
- 		}
--		v = breakline(input, &c);
--		if (c) {
--			ct = find_command(v[0]);
--			if (ct) {
--				j = 0;
--				while (!done && (j = iterate_command(ct, j)))
--					done = command(ct, c, v);
--			} else
--				fprintf(stderr, _("command \"%s\" not found\n"),
--					v[0]);
--		}
--		doneline(input, v);
--	}
--	if (cmdline) {
--		free(cmdline);
--		return;
--	}
--	while (!done) {
--		if ((input = fetchline()) == NULL)
--			break;
--		v = breakline(input, &c);
--		if (c) {
--			ct = find_command(v[0]);
--			if (ct)
--				done = command(ct, c, v);
--			else
--				fprintf(stderr, _("command \"%s\" not found\n"),
--					v[0]);
--		}
--		doneline(input, v);
-+		done = process_input(input, true);
- 	}
-+	free(cmdline);
-+	return;
- }
- 
- void
--- 
-2.10.2
-
+>>                         exit(1);
+>>                 }
+>> -               done = process_input(input, true);
+>> +               done = process_input(input, cmdline[i].iterate);
+>>         }
+>>         free(cmdline);
+>>         return;
+>> diff --git a/man/man8/xfs_io.8 b/man/man8/xfs_io.8
+>> index 885df7f141e2..d6bacaf0438d 100644
+>> --- a/man/man8/xfs_io.8
+>> +++ b/man/man8/xfs_io.8
+>> @@ -9,10 +9,13 @@ xfs_io \- debug the I/O path of an XFS filesystem
+>>  .B \-c
+>>  .I cmd
+>>  ] ... [
+>> +.B \-C
+>> +.I cmd
+>> +] ... [
+>>  .B \-p
+>>  .I prog
+>>  ]
+>> -.I file
+>> +.I [ file ]
+>
+> Suggest: [ file ] ...
+>
+>>  .br
+>>  .B xfs_io \-V
+>>  .SH DESCRIPTION
+>> @@ -25,14 +28,35 @@ These code paths include not only the obvious read/write/mmap interfaces
+>>  for manipulating files, but also cover all of the XFS extensions (such
+>>  as space preallocation, additional inode flags, etc).
+>>  .SH OPTIONS
+>> +.B xfs_io
+>> +commands may be run interactively (the default) or as arguments on the
+>> +command line.
+>> +Interactive mode always runs commands on the current open file, whilst commands
+>> +run from the command line may operate on all open files rather than the current
+>> +open file.
+>
+> "operate on all open files" is ambiguous. does the loop go files -> cmds or
+> cmds -> files? this is part of the confusion IMO.
+>
+>> +Multiple arguments may be given on the command line and they are run in the
+>> +sequence given. The program exits one all commands have
+>> +been run.
+>>  .TP 1.0i
+>>  .BI \-c " cmd"
+>> -.B xfs_io
+>> -commands may be run interactively (the default) or as arguments on
+>> -the command line. Multiple
+>> +Run the specified command on all currently open files.
+>> +Some commands can not be run on all open files, so they will execute on only
+>> +the current open file to maintain compatibility with historical usage.
+>> +Multiple
+>> +.B \-c
+>> +arguments may be given and may be interleaved on the command line in any order
+>> +with
+>> +.B \-C
+>> +commands.
+>> +.TP
+>> +.BI \-C " cmd"
+>> +Run the specified command only on the active open file.
+>> +Multiple
+>> +.B \-C
+>> +arguments may be given and may be interleaved on the command line in any order
+>> +with
+>>  .B \-c
+>> -arguments may be given. The commands are run in the sequence given,
+>> -then the program exits.
+>> +commands.
+>>  .TP
+>>  .BI \-p " prog"
+>>  Set the program name for prompts and some error messages,
+>> --
+>> 2.10.2
+>>
