@@ -1,11 +1,11 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:29291 "EHLO
+Received: from userp1040.oracle.com ([156.151.31.81]:29327 "EHLO
         userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751762AbcLGASX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 6 Dec 2016 19:18:23 -0500
-Subject: [PATCH 01/11] ocfs2: test reflinking to inline data files
+        with ESMTP id S1751680AbcLGASa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 6 Dec 2016 19:18:30 -0500
+Subject: [PATCH 02/11] xfs/ext4: check negative inode size
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 06 Dec 2016 16:18:17 -0800
-Message-ID: <148106989741.19334.14324200960917685576.stgit@birch.djwong.org>
+Date: Tue, 06 Dec 2016 16:18:23 -0800
+Message-ID: <148106990395.19334.5033524587338012054.stgit@birch.djwong.org>
 In-Reply-To: <148106989109.19334.6839386416313318071.stgit@birch.djwong.org>
 References: <148106989109.19334.6839386416313318071.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -16,48 +16,42 @@ To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Make sure that we can handle reflinking from and to inline-data files.
+Craft a malicious filesystem image with a negative inode size,
+then try to trigger a kernel DoS by appending data to the file.
+Ideally this should trigger verifier errors instead of hanging.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- common/reflink       |    2 +
- tests/ocfs2/001      |   88 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/ocfs2/001.out  |   14 ++++++++
- tests/ocfs2/Makefile |   20 +++++++++++
- tests/ocfs2/group    |    1 +
- 5 files changed, 124 insertions(+), 1 deletion(-)
- create mode 100755 tests/ocfs2/001
- create mode 100644 tests/ocfs2/001.out
- create mode 100644 tests/ocfs2/Makefile
- create mode 100644 tests/ocfs2/group
+ tests/ext4/400   |   71 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/401   |   71 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/group |    2 ++
+ tests/xfs/400    |   72 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/401    |   72 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/group  |    2 ++
+ 6 files changed, 290 insertions(+)
+ create mode 100755 tests/ext4/400
+ create mode 100755 tests/ext4/401
+ create mode 100755 tests/xfs/400
+ create mode 100755 tests/xfs/401
 
 
-diff --git a/common/reflink b/common/reflink
-index 9d51729..d048045 100644
---- a/common/reflink
-+++ b/common/reflink
-@@ -197,7 +197,7 @@ _cp_reflink() {
- 	file1="$1"
- 	file2="$2"
- 
--	cp --reflink=always -p "$file1" "$file2"
-+	cp --reflink=always -p -f "$file1" "$file2"
- }
- 
- # Reflink some file1 into file2
-diff --git a/tests/ocfs2/001 b/tests/ocfs2/001
+diff --git a/tests/ext4/400 b/tests/ext4/400
 new file mode 100755
-index 0000000..afb9ce9
+index 0000000..5857549
 --- /dev/null
-+++ b/tests/ocfs2/001
-@@ -0,0 +1,88 @@
++++ b/tests/ext4/400
+@@ -0,0 +1,71 @@
 +#! /bin/bash
-+# FS QA Test No. 001
++# FSQA Test No. 400
 +#
-+# Ensure that reflink works correctly with inline-data files.
++# Since loff_t is a signed type, it is invalid for a filesystem to load
++# an inode with i_size = -1ULL.  Unfortunately, nobody checks this,
++# which means that we can trivially DoS the VFS by creating such a file
++# and appending to it.  This causes an integer overflow in the routines
++# underlying writeback, which results in the kernel locking up.
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++# Copyright (c) 2016-2017 Oracle, Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -77,119 +71,298 @@ index 0000000..afb9ce9
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
-+here=`pwd`
++PIDS=""
 +tmp=/tmp/$$
-+status=1    # failure is the default!
++status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+    cd /
-+    rm -rf $tmp.*
++	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/reflink
 +
 +# real QA test starts here
 +_supported_os Linux
-+_supported_fs ocfs2
-+_require_scratch_reflink
-+_require_cp_reflink
++_supported_fs ext2 ext3 ext4
++_require_scratch_nocheck
++_disable_dmesg_check
 +
 +rm -f $seqres.full
 +
 +echo "Format and mount"
-+_scratch_mkfs --fs-features=local,unwritten,refcount,inline-data > $seqres.full 2>&1
-+tunefs.ocfs2 --query '%H' $SCRATCH_DEV | grep -q 'inline-data' || \
-+	_notrun "Inline data is not supported."
-+_scratch_mount >> $seqres.full 2>&1
++_scratch_mkfs  >> $seqres.full 2>&1
++_scratch_mount
 +
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
++testdir=$SCRATCH_MNT
++echo m > $testdir/a
 +
-+sz=65536
-+echo "Create the original files"
-+$XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file1 >> $seqres.full
-+echo x > $testdir/file2
-+echo x > $testdir/file3
-+echo y > $testdir/file4
-+$XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file5 >> $seqres.full
-+echo a > $testdir/file6
-+_scratch_cycle_mount
++echo "Corrupt filesystem"
++_scratch_unmount
++debugfs -w -R "sif /a size -1" $SCRATCH_DEV >> $seqres.full 2>&1
 +
-+echo "reflink into the start of file2"
-+_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
-+
-+echo "reflink past the stuff in file3"
-+_reflink_range $testdir/file1 0 $testdir/file3 $sz $sz >> $seqres.full
-+
-+echo "reflink an inline-data file to a regular one"
-+_cp_reflink $testdir/file4 $testdir/file5 >> $seqres.full
-+
-+echo "reflink an inline-data file to another inline-data file"
-+_cp_reflink $testdir/file4 $testdir/file6 >> $seqres.full
-+
-+echo "Verify the whole mess"
-+_scratch_cycle_mount
-+md5sum $testdir/file* | _filter_scratch
++echo "Remount, try to append"
++_scratch_mount
++dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
++sync
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/ocfs2/001.out b/tests/ocfs2/001.out
-new file mode 100644
-index 0000000..99fa43a
+diff --git a/tests/ext4/401 b/tests/ext4/401
+new file mode 100755
+index 0000000..ee7ecf3
 --- /dev/null
-+++ b/tests/ocfs2/001.out
-@@ -0,0 +1,14 @@
-+QA output created by 001
-+Format and mount
-+Create the original files
-+reflink into the start of file2
-+reflink past the stuff in file3
-+reflink an inline-data file to a regular one
-+reflink an inline-data file to another inline-data file
-+Verify the whole mess
-+2d61aa54b58c2e94403fb092c3dbc027  SCRATCH_MNT/test-001/file1
-+2d61aa54b58c2e94403fb092c3dbc027  SCRATCH_MNT/test-001/file2
-+4e68a2e24b6b0f386ab39d01d902293d  SCRATCH_MNT/test-001/file3
-+009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file4
-+009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file5
-+009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file6
-diff --git a/tests/ocfs2/Makefile b/tests/ocfs2/Makefile
-new file mode 100644
-index 0000000..70a4f16
---- /dev/null
-+++ b/tests/ocfs2/Makefile
-@@ -0,0 +1,20 @@
++++ b/tests/ext4/401
+@@ -0,0 +1,71 @@
++#! /bin/bash
++# FSQA Test No. 401
 +#
-+# Copyright (c) 2016 Oracle.  All Rights Reserved.
++# Since loff_t is a signed type, it is invalid for a filesystem to load
++# an inode with i_size = -1ULL.  Unfortunately, nobody checks this,
++# which means that we can trivially DoS the VFS by creating such a file
++# and appending to it.  This causes an integer overflow in the routines
++# underlying writeback, which results in the kernel locking up.
 +#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016-2017 Oracle, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
 +
-+TOPDIR = ../..
-+include $(TOPDIR)/include/builddefs
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
 +
-+OCFS2_DIR = ocfs2
-+TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(OCFS2_DIR)
++PIDS=""
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
-+include $(BUILDRULES)
++_cleanup()
++{
++	rm -f $tmp.*
++}
 +
-+install:
-+	$(INSTALL) -m 755 -d $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
-+	$(INSTALL) -m 644 group $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
 +
-+# Nothing.
-+install-dev install-lib:
-diff --git a/tests/ocfs2/group b/tests/ocfs2/group
-new file mode 100644
-index 0000000..28e6807
++# real QA test starts here
++_supported_os Linux
++_supported_fs ext2 ext3 ext4
++_require_scratch_nocheck
++_disable_dmesg_check
++
++rm -f $seqres.full
++
++echo "Format and mount"
++_scratch_mkfs  >> $seqres.full 2>&1
++_scratch_mount
++
++testdir=$SCRATCH_MNT
++echo m > $testdir/a
++
++echo "Corrupt filesystem"
++_scratch_unmount
++debugfs -w -R "sif /a size 0xFFFFFFFFFFFFFE00" $SCRATCH_DEV >> $seqres.full 2>&1
++
++echo "Remount, try to append"
++_scratch_mount
++dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=direct,append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
++sync
++
++# success, all done
++status=0
++exit
+diff --git a/tests/ext4/group b/tests/ext4/group
+index 53fe03e..8e4aad2 100644
+--- a/tests/ext4/group
++++ b/tests/ext4/group
+@@ -34,3 +34,5 @@
+ 306 auto rw resize quick
+ 307 auto ioctl rw
+ 308 auto ioctl rw prealloc quick
++400 auto quick
++401 auto quick
+diff --git a/tests/xfs/400 b/tests/xfs/400
+new file mode 100755
+index 0000000..498c024
 --- /dev/null
-+++ b/tests/ocfs2/group
-@@ -0,0 +1 @@
-+001 auto quick clone
++++ b/tests/xfs/400
+@@ -0,0 +1,72 @@
++#! /bin/bash
++# FSQA Test No. 400
++#
++# Since loff_t is a signed type, it is invalid for a filesystem to load
++# an inode with i_size = -1ULL.  Unfortunately, nobody checks this,
++# which means that we can trivially DoS the VFS by creating such a file
++# and appending to it.  This causes an integer overflow in the routines
++# underlying writeback, which results in the kernel locking up.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016-2017 Oracle, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++PIDS=""
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_os Linux
++_supported_fs xfs
++_require_scratch_nocheck
++_disable_dmesg_check
++
++rm -f $seqres.full
++
++echo "Format and mount"
++_scratch_mkfs  >> $seqres.full 2>&1
++_scratch_mount
++
++testdir=$SCRATCH_MNT
++echo m > $testdir/a
++inum=$(stat -c "%i" $testdir/a)
++
++echo "Corrupt filesystem"
++_scratch_unmount
++_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -- -1' >> $seqres.full
++
++echo "Remount, try to append"
++_scratch_mount
++dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
++sync
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/401 b/tests/xfs/401
+new file mode 100755
+index 0000000..41b262d
+--- /dev/null
++++ b/tests/xfs/401
+@@ -0,0 +1,72 @@
++#! /bin/bash
++# FSQA Test No. 401
++#
++# Since loff_t is a signed type, it is invalid for a filesystem to load
++# an inode with i_size = -1ULL.  Unfortunately, nobody checks this,
++# which means that we can trivially DoS the VFS by creating such a file
++# and appending to it.  This causes an integer overflow in the routines
++# underlying writeback, which results in the kernel locking up.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016-2017 Oracle, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++PIDS=""
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_os Linux
++_supported_fs xfs
++_require_scratch_nocheck
++_disable_dmesg_check
++
++rm -f $seqres.full
++
++echo "Format and mount"
++_scratch_mkfs  >> $seqres.full 2>&1
++_scratch_mount
++
++testdir=$SCRATCH_MNT
++echo m > $testdir/a
++inum=$(stat -c "%i" $testdir/a)
++
++echo "Corrupt filesystem"
++_scratch_unmount
++_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -- -1' >> $seqres.full
++
++echo "Remount, try to append"
++_scratch_mount
++dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=direct,append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
++sync
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/group b/tests/xfs/group
+index c237b50..fcb9644 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -334,3 +334,5 @@
+ 345 auto quick clone
+ 346 auto quick clone
+ 347 auto quick clone
++400 auto quick
++401 auto quick
 
