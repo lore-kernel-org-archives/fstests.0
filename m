@@ -1,86 +1,254 @@
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35231 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752899AbcLGEVo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 6 Dec 2016 23:21:44 -0500
-MIME-Version: 1.0
-In-Reply-To: <20161206232547.GH4219@dastard>
-References: <1480943017-6175-1-git-send-email-amir73il@gmail.com>
- <9125bb5e-49f5-e40e-0181-fea7f80ae553@sandeen.net> <CAOQ4uxhw8Y_9NVwuAZ_xzvPYZ8k1CRonmQ=CAn=Y9j-_nkToMA@mail.gmail.com>
- <00b2b645-3cd2-f3b2-b026-40dfc97f3f90@sandeen.net> <CAOQ4uxhmLe32AMkBmRJx37Pmg3oZMFLt_6Q0kTNYxix_qz7vZA@mail.gmail.com>
- <20161205221548.GD4326@dastard> <CAOQ4uxiSDniBTpfgOT9AQ8YGG5Ffz1rSLcBvWdm8TgY_OEArJA@mail.gmail.com>
- <20161206232547.GH4219@dastard>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 7 Dec 2016 06:21:41 +0200
-Message-ID: <CAOQ4uxj8VQ106M_3dHoWXHUx8TROUYkvDMOGyE0qHjWuJgdp4w@mail.gmail.com>
-Subject: Re: [PATCH v2] xfs_io: support -c "open foo" command
-Content-Type: text/plain; charset=UTF-8
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:56135 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751618AbcLGDrd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 6 Dec 2016 22:47:33 -0500
+From: Dave Chinner <david@fromorbit.com>
+Subject: [PATCH 6/6] libxcmd: add non-iterating user commands
+Date: Wed,  7 Dec 2016 14:47:24 +1100
+Message-Id: <20161207034724.1613-7-david@fromorbit.com>
+In-Reply-To: <20161207034724.1613-1-david@fromorbit.com>
+References: <20161207034724.1613-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Eric Sandeen <sandeen@sandeen.net>, Eryu Guan <eguan@redhat.com>, linux-xfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
+To: linux-xfs@vger.kernel.org
+Cc: fstests@vger.kernel.org, amir73il@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Dec 7, 2016 at 1:25 AM, Dave Chinner <david@fromorbit.com> wrote:
-...
->
-> Nope. I meant "go look at the git history and determine what the
-> historical behaviour was and determine how we ended up with this
-> mess. Then from that analysis, decide what to do."
->
-> Unfortunately, you haven't shown any indication that you've looked
-> at the git history, nor that you actually listened to me about the
-> CMD_FLAG_GLOBAL. I've now done that code archeology and it indicates
-> that my suggestion was correct.
->
+From: Dave Chinner <dchinner@redhat.com>
 
-Thank you for doing that digging. I might have gotten the wrong impression
-that you were going to do that anyway and figured you would do a better
-job at this than me, having a longer history with libxfs and xfs_io than me.
+Right now command iteration is not directly controllable by the
+user; it is controlled entirely by the application command flag
+setup. Sometimes we don't want commands to iterate but only operate
+on the currently selected object.
 
-> If you didn't understand what I suggested, then say so clearly and
-> unambiguously so I know I need to explain it more clearly.
+For example, the stat command iterates:
 
-Sorry I wasn't clear about that. My problem, or lack of clarity, was
-revolving around the semantic changes that would have to be made.
-I did not want to go fix the problem without knowing what those are
-going to be, so in the mean while, I suggested a few starter options
-which do not change semantics for existing known users, allow
-overlay/016 to work properly and leave the multiple file semantics
-for you to clarify.
+$ xfs_io -c "open -r foo" -c "open bar" -C "file" -c "stat" foo
+ 000  foo            (foreign,non-sync,non-direct,read-write)
+ 001  foo            (foreign,non-sync,non-direct,read-only)
+[002] bar            (foreign,non-sync,non-direct,read-write)
+fd.path = "foo"
+fd.flags = non-sync,non-direct,read-write
+stat.ino = 462399
+stat.type = regular file
+stat.size = 776508
+stat.blocks = 1528
+fd.path = "foo"
+fd.flags = non-sync,non-direct,read-only
+stat.ino = 462399
+stat.type = regular file
+stat.size = 776508
+stat.blocks = 1528
+fd.path = "bar"
+fd.flags = non-sync,non-direct,read-write
+stat.ino = 475227
+stat.type = regular file
+stat.size = 0
+stat.blocks = 0
+$
 
-> The
-> /worst/ thing you can do is keep sending new patches that take the
-> same path to one I've already NACKed without having looked at the
-> solution I proposed or done the historical analysis I suggested was
-> necessary.
->
+To do this, add a function to supply a "non-iterating" user command
+that will execute an iterating-capable command as though it
+CMD_FLAG_ONESHOT was set. Add a new command line option to xfs_io to
+drive it (-C <command>) and connect it all up. Document it in the
+xfs_IO man page, too.
 
-Had I known /this/ was the worst thing in your book, I would have
-avoided it. I took that path mainly because we seem to have little
-overlap working hours, so the round trip of this thread makes progress
-hard. I apologize if this came off as "shut up Dave! and take my patch".
+The result of "-C stat":
 
-The only reason I suggested changing behavior for multiple
-files and "break existing users" is because Eric indicated he had
-no idea about this feature and indicated that it is an undocumented
-feature. With someone like Eric saying that, it grew my suspicion that
-maybe we really do not need to fix multiple files for xfs_io??
+$ xfs_io -c "open -r foo" -c "open bar" -c "file" -C "stat" foo
+ 000  foo            (foreign,non-sync,non-direct,read-write)
+ 001  foo            (foreign,non-sync,non-direct,read-only)
+[002] bar            (foreign,non-sync,non-direct,read-write)
+fd.path = "bar"
+fd.flags = non-sync,non-direct,read-write
+stat.ino = 475227
+stat.type = regular file
+stat.size = 0
+stat.blocks = 0
+$
 
-Could you please consider this option for a moment?
-Perhaps we are better off correcting a wrong turn taken in 2004
-then fixing its consequences now?
+Is that we only see the stat output for the active open file
+which is "bar".
 
-After all, xfs_io is not the Linux kernel. Its a tool used mainly
-by developers as you yourself indicated. If killing multiple files will
-break someones use case, you should know about it pretty quick
-and we can then resort to changing semantics and adding new
-command line flags.
+Signed-Off-By: Dave Chinner <dchinner@redhat.com>
+---
+ include/command.h |  1 +
+ io/init.c         |  7 +++++--
+ libxcmd/command.c | 33 +++++++++++++++++++++++++++------
+ man/man8/xfs_io.8 | 36 ++++++++++++++++++++++++++++++------
+ 4 files changed, 63 insertions(+), 14 deletions(-)
 
-The motivation for taking this path is not just laziness to
-"fix the real problem". It stands to make the code a lot simpler
-and to keep the man page correct and coherent with expected
-behavior rather then adding more obscure semantics which
-/are/ going to be confusing.
+diff --git a/include/command.h b/include/command.h
+index 348002cbe3ed..fb3f5c79b991 100644
+--- a/include/command.h
++++ b/include/command.h
+@@ -56,6 +56,7 @@ typedef int (*checkfunc_t)(const cmdinfo_t *ci);
+ 
+ extern void		add_command(const cmdinfo_t *ci);
+ extern void		add_user_command(char *optarg);
++extern void		add_oneshot_user_command(char *optarg);
+ extern void		add_command_iterator(iterfunc_t func);
+ extern void		add_check_command(checkfunc_t cf);
+ 
+diff --git a/io/init.c b/io/init.c
+index 5ce627ef22c9..cf8573f0ecd5 100644
+--- a/io/init.c
++++ b/io/init.c
+@@ -34,7 +34,7 @@ void
+ usage(void)
+ {
+ 	fprintf(stderr,
+-		_("Usage: %s [-adfinrRstVx] [-m mode] [-p prog] [-c cmd]... file\n"),
++_("Usage: %s [-adfinrRstVx] [-m mode] [-p prog] [[-c|-C] cmd]... file\n"),
+ 		progname);
+ 	exit(1);
+ }
+@@ -145,7 +145,7 @@ init(
+ 	pagesize = getpagesize();
+ 	gettimeofday(&stopwatch, NULL);
+ 
+-	while ((c = getopt(argc, argv, "ac:dFfim:p:nrRstTVx")) != EOF) {
++	while ((c = getopt(argc, argv, "ac:C:dFfim:p:nrRstTVx")) != EOF) {
+ 		switch (c) {
+ 		case 'a':
+ 			flags |= IO_APPEND;
+@@ -153,6 +153,9 @@ init(
+ 		case 'c':
+ 			add_user_command(optarg);
+ 			break;
++		case 'C':
++			add_oneshot_user_command(optarg);
++			break;
+ 		case 'd':
+ 			flags |= IO_DIRECT;
+ 			break;
+diff --git a/libxcmd/command.c b/libxcmd/command.c
+index decc442a9d03..5917aea42611 100644
+--- a/libxcmd/command.c
++++ b/libxcmd/command.c
+@@ -25,8 +25,14 @@ int		ncmds;
+ 
+ static iterfunc_t	iter_func;
+ static checkfunc_t	check_func;
+-static int		ncmdline;
+-static char		**cmdline;
++
++struct cmdline {
++	char	*cmdline;
++	bool	iterate;
++};
++
++static int	ncmdline;
++struct cmdline	*cmdline;
+ 
+ static int
+ compare(const void *a, const void *b)
+@@ -120,12 +126,27 @@ void
+ add_user_command(char *optarg)
+ {
+ 	ncmdline++;
+-	cmdline = realloc(cmdline, sizeof(char*) * (ncmdline));
++	cmdline = realloc(cmdline, sizeof(struct cmdline) * (ncmdline));
++	if (!cmdline) {
++		perror("realloc");
++		exit(1);
++	}
++	cmdline[ncmdline-1].cmdline = optarg;
++	cmdline[ncmdline-1].iterate = true;
++
++}
++
++void
++add_oneshot_user_command(char *optarg)
++{
++	ncmdline++;
++	cmdline = realloc(cmdline, sizeof(struct cmdline) * (ncmdline));
+ 	if (!cmdline) {
+ 		perror("realloc");
+ 		exit(1);
+ 	}
+-	cmdline[ncmdline-1] = optarg;
++	cmdline[ncmdline-1].cmdline = optarg;
++	cmdline[ncmdline-1].iterate = false;
+ }
+ 
+ /*
+@@ -212,14 +233,14 @@ command_loop(void)
+ 
+ 	/* command line mode */
+ 	for (i = 0; !done && i < ncmdline; i++) {
+-		input = strdup(cmdline[i]);
++		input = strdup(cmdline[i].cmdline);
+ 		if (!input) {
+ 			fprintf(stderr,
+ 				_("cannot strdup command '%s': %s\n"),
+ 				cmdline[i], strerror(errno));
+ 			exit(1);
+ 		}
+-		done = process_input(input, true);
++		done = process_input(input, cmdline[i].iterate);
+ 	}
+ 	free(cmdline);
+ 	return;
+diff --git a/man/man8/xfs_io.8 b/man/man8/xfs_io.8
+index 885df7f141e2..d6bacaf0438d 100644
+--- a/man/man8/xfs_io.8
++++ b/man/man8/xfs_io.8
+@@ -9,10 +9,13 @@ xfs_io \- debug the I/O path of an XFS filesystem
+ .B \-c
+ .I cmd
+ ] ... [
++.B \-C
++.I cmd
++] ... [
+ .B \-p
+ .I prog
+ ]
+-.I file
++.I [ file ]
+ .br
+ .B xfs_io \-V
+ .SH DESCRIPTION
+@@ -25,14 +28,35 @@ These code paths include not only the obvious read/write/mmap interfaces
+ for manipulating files, but also cover all of the XFS extensions (such
+ as space preallocation, additional inode flags, etc).
+ .SH OPTIONS
++.B xfs_io
++commands may be run interactively (the default) or as arguments on the
++command line.
++Interactive mode always runs commands on the current open file, whilst commands
++run from the command line may operate on all open files rather than the current
++open file.
++Multiple arguments may be given on the command line and they are run in the
++sequence given. The program exits one all commands have
++been run.
+ .TP 1.0i
+ .BI \-c " cmd"
+-.B xfs_io
+-commands may be run interactively (the default) or as arguments on
+-the command line. Multiple
++Run the specified command on all currently open files.
++Some commands can not be run on all open files, so they will execute on only
++the current open file to maintain compatibility with historical usage.
++Multiple
++.B \-c
++arguments may be given and may be interleaved on the command line in any order
++with
++.B \-C
++commands.
++.TP
++.BI \-C " cmd"
++Run the specified command only on the active open file. 
++Multiple
++.B \-C
++arguments may be given and may be interleaved on the command line in any order
++with
+ .B \-c
+-arguments may be given. The commands are run in the sequence given,
+-then the program exits.
++commands.
+ .TP
+ .BI \-p " prog"
+ Set the program name for prompts and some error messages,
+-- 
+2.10.2
 
-For your consideration.
-Sorry if we started off on the wrong foot.
-Amir.
