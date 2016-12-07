@@ -1,11 +1,11 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:29327 "EHLO
+Received: from userp1040.oracle.com ([156.151.31.81]:29353 "EHLO
         userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751680AbcLGASa (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 6 Dec 2016 19:18:30 -0500
-Subject: [PATCH 02/11] xfs/ext4: check negative inode size
+        with ESMTP id S1751680AbcLGASg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 6 Dec 2016 19:18:36 -0500
+Subject: [PATCH 03/11] populate: create all types of XFS metadata
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 06 Dec 2016 16:18:23 -0800
-Message-ID: <148106990395.19334.5033524587338012054.stgit@birch.djwong.org>
+Date: Tue, 06 Dec 2016 16:18:30 -0800
+Message-ID: <148106991020.19334.5494318632515755422.stgit@birch.djwong.org>
 In-Reply-To: <148106989109.19334.6839386416313318071.stgit@birch.djwong.org>
 References: <148106989109.19334.6839386416313318071.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -16,353 +16,175 @@ To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Craft a malicious filesystem image with a negative inode size,
-then try to trigger a kernel DoS by appending data to the file.
-Ideally this should trigger verifier errors instead of hanging.
+We have three new metadata types -- rmapbt, rtrmapbt, and refcountbt.
+Ensure that we populate the scratch fs with all three.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/ext4/400   |   71 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/401   |   71 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/group |    2 ++
- tests/xfs/400    |   72 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/401    |   72 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/group  |    2 ++
- 6 files changed, 290 insertions(+)
- create mode 100755 tests/ext4/400
- create mode 100755 tests/ext4/401
- create mode 100755 tests/xfs/400
- create mode 100755 tests/xfs/401
+ common/populate |   93 ++++++++++++++++++++++++++++++++++++++++++++++++++-----
+ 1 file changed, 85 insertions(+), 8 deletions(-)
 
 
-diff --git a/tests/ext4/400 b/tests/ext4/400
-new file mode 100755
-index 0000000..5857549
---- /dev/null
-+++ b/tests/ext4/400
-@@ -0,0 +1,71 @@
-+#! /bin/bash
-+# FSQA Test No. 400
-+#
-+# Since loff_t is a signed type, it is invalid for a filesystem to load
-+# an inode with i_size = -1ULL.  Unfortunately, nobody checks this,
-+# which means that we can trivially DoS the VFS by creating such a file
-+# and appending to it.  This causes an integer overflow in the routines
-+# underlying writeback, which results in the kernel locking up.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016-2017 Oracle, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
+diff --git a/common/populate b/common/populate
+index d0003c5..efabc1e 100644
+--- a/common/populate
++++ b/common/populate
+@@ -24,6 +24,7 @@
+ 
+ _require_xfs_io_command "falloc"
+ _require_xfs_io_command "fpunch"
++_require_test_program "punch-alternating"
+ 
+ _require_xfs_db_blocktrash_z_command() {
+ 	test "${FSTYP}" = "xfs" || _notrun "cannot run xfs_db on ${FSTYP}"
+@@ -97,6 +98,12 @@ _scratch_xfs_populate() {
+ 
+ 	# Data:
+ 
++	# Fill up the root inode chunk
++	echo "+ fill root ino chunk"
++	seq 1 64 | while read f; do
++		$XFS_IO_PROG -f -c "truncate 0" "${SCRATCH_MNT}/dummy${f}"
++	done
 +
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
+ 	# Regular files
+ 	# - FMT_EXTENTS
+ 	echo "+ extents file"
+@@ -106,9 +113,7 @@ _scratch_xfs_populate() {
+ 	echo "+ btree extents file"
+ 	nr="$((blksz * 2 / 16))"
+ 	$XFS_IO_PROG -f -c "pwrite -S 0x62 0 $((blksz * nr))" "${SCRATCH_MNT}/S_IFREG.FMT_BTREE"
+-	for i in $(seq 1 2 ${nr}); do
+-		$XFS_IO_PROG -f -c "fpunch $((i * blksz)) ${blksz}" "${SCRATCH_MNT}/S_IFREG.FMT_BTREE"
+-	done
++	./src/punch-alternating "${SCRATCH_MNT}/S_IFREG.FMT_BTREE"
+ 
+ 	# Directories
+ 	# - INLINE
+@@ -128,6 +133,7 @@ _scratch_xfs_populate() {
+ 	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_NODE" "$((16 * dblksz / 40))" true
+ 
+ 	# - BTREE
++	echo "+ btree dir"
+ 	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_BTREE" "$((128 * dblksz / 40))" true
+ 
+ 	# Symlinks
+@@ -180,10 +186,43 @@ _scratch_xfs_populate() {
+ 	$XFS_IO_PROG -f -c 'fsync' "${SCRATCH_MNT}/unused"
+ 	rm -rf "${SCRATCH_MNT}/unused"
+ 
++	# Free space btree
++	echo "+ freesp btree"
++	nr="$((blksz * 2 / 8))"
++	$XFS_IO_PROG -f -c "pwrite -S 0x62 0 $((blksz * nr))" "${SCRATCH_MNT}/BNOBT"
++	./src/punch-alternating "${SCRATCH_MNT}/BNOBT"
 +
-+PIDS=""
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
++	# Reverse-mapping btree
++	is_rmapbt="$(xfs_info "${SCRATCH_MNT}" | grep -c 'rmapbt=1')"
++	if [ $is_rmapbt -gt 0 ]; then
++		echo "+ rmapbt btree"
++		nr="$((blksz * 2 / 24))"
++		$XFS_IO_PROG -f -c "pwrite -S 0x62 0 $((blksz * nr))" "${SCRATCH_MNT}/RMAPBT"
++		./src/punch-alternating "${SCRATCH_MNT}/RMAPBT"
++	fi
 +
-+_cleanup()
-+{
-+	rm -f $tmp.*
++	# Realtime Reverse-mapping btree
++	is_rt="$(xfs_info "${SCRATCH_MNT}" | grep -c 'rtextents=[1-9]')"
++	if [ $is_rmapbt -gt 0 ] && [ $is_rt -gt 0 ]; then
++		echo "+ rtrmapbt btree"
++		nr="$((blksz * 2 / 32))"
++		$XFS_IO_PROG -f -R -c "pwrite -S 0x62 0 $((blksz * nr))" "${SCRATCH_MNT}/RTRMAPBT"
++		./src/punch-alternating "${SCRATCH_MNT}/RTRMAPBT"
++	fi
++
++	# Reference-count btree
++	is_reflink="$(xfs_info "${SCRATCH_MNT}" | grep -c 'reflink=1')"
++	if [ $is_reflink -gt 0 ]; then
++		echo "+ reflink btree"
++		nr="$((blksz * 2 / 12))"
++		$XFS_IO_PROG -f -c "pwrite -S 0x62 0 $((blksz * nr))" "${SCRATCH_MNT}/REFCOUNTBT"
++		cp --reflink=always "${SCRATCH_MNT}/REFCOUNTBT" "${SCRATCH_MNT}/REFCOUNTBT2"
++		./src/punch-alternating "${SCRATCH_MNT}/REFCOUNTBT"
++	fi
++
+ 	# Copy some real files (xfs tests, I guess...)
+ 	echo "+ real files"
+-	#__populate_fill_fs "${SCRATCH_MNT}" 40
+-	cp -pRdu --reflink=always "${SCRATCH_MNT}/S_IFREG.FMT_BTREE" "${SCRATCH_MNT}/S_IFREG.FMT_BTREE.REFLINK" 2> /dev/null
++	__populate_fill_fs "${SCRATCH_MNT}" 5
+ 
+ 	umount "${SCRATCH_MNT}"
+ }
+@@ -212,9 +251,7 @@ _scratch_ext4_populate() {
+ 	echo "+ extent tree file"
+ 	nr="$((blksz * 2 / 12))"
+ 	$XFS_IO_PROG -f -c "pwrite -S 0x62 0 $((blksz * nr))" "${SCRATCH_MNT}/S_IFREG.FMT_ETREE"
+-	for i in $(seq 1 2 ${nr}); do
+-		$XFS_IO_PROG -f -c "fpunch $((i * blksz)) ${blksz}" "${SCRATCH_MNT}/S_IFREG.FMT_ETREE"
+-	done
++	./src/punch-alternating "${SCRATCH_MNT}/S_IFREG.FMT_ETREE"
+ 
+ 	# Directories
+ 	# - INLINE
+@@ -349,6 +386,39 @@ __populate_check_xfs_attr() {
+ 	esac
+ }
+ 
++# Check that there's at least one per-AG btree with multiple levels
++__populate_check_xfs_agbtree_height() {
++	bt_type="$1"
++	nr_ags=$(_scratch_xfs_db -c 'sb 0' -c 'p agcount' | awk '{print $3}')
++
++	case "${bt_type}" in
++	"bno"|"cnt"|"rmap"|"refcnt")
++		hdr="agf"
++		bt_prefix="${bt_type}"
++		;;
++	"ino")
++		hdr="agi"
++		bt_prefix=""
++		;;
++	"fino")
++		hdr="agi"
++		bt_prefix="free_"
++		;;
++	*)
++		_fail "Don't know about AG btree ${bt_type}"
++		;;
++	esac
++
++	seq 0 $((nr_ags - 1)) | while read ag; do
++		bt_level=$(_scratch_xfs_db -c "${hdr} ${ag}" -c "p ${bt_prefix}level" | awk '{print $3}')
++		if [ "${bt_level}" -gt 1 ]; then
++			return 100
++		fi
++	done
++	test $? -eq 100 || _fail "Failed to create ${bt_type} of sufficient height!"
++	return 1
 +}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs ext2 ext3 ext4
-+_require_scratch_nocheck
-+_disable_dmesg_check
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs  >> $seqres.full 2>&1
-+_scratch_mount
-+
-+testdir=$SCRATCH_MNT
-+echo m > $testdir/a
-+
-+echo "Corrupt filesystem"
-+_scratch_unmount
-+debugfs -w -R "sif /a size -1" $SCRATCH_DEV >> $seqres.full 2>&1
-+
-+echo "Remount, try to append"
-+_scratch_mount
-+dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
-+sync
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/ext4/401 b/tests/ext4/401
-new file mode 100755
-index 0000000..ee7ecf3
---- /dev/null
-+++ b/tests/ext4/401
-@@ -0,0 +1,71 @@
-+#! /bin/bash
-+# FSQA Test No. 401
-+#
-+# Since loff_t is a signed type, it is invalid for a filesystem to load
-+# an inode with i_size = -1ULL.  Unfortunately, nobody checks this,
-+# which means that we can trivially DoS the VFS by creating such a file
-+# and appending to it.  This causes an integer overflow in the routines
-+# underlying writeback, which results in the kernel locking up.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016-2017 Oracle, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+PIDS=""
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs ext2 ext3 ext4
-+_require_scratch_nocheck
-+_disable_dmesg_check
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs  >> $seqres.full 2>&1
-+_scratch_mount
-+
-+testdir=$SCRATCH_MNT
-+echo m > $testdir/a
-+
-+echo "Corrupt filesystem"
-+_scratch_unmount
-+debugfs -w -R "sif /a size 0xFFFFFFFFFFFFFE00" $SCRATCH_DEV >> $seqres.full 2>&1
-+
-+echo "Remount, try to append"
-+_scratch_mount
-+dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=direct,append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
-+sync
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/ext4/group b/tests/ext4/group
-index 53fe03e..8e4aad2 100644
---- a/tests/ext4/group
-+++ b/tests/ext4/group
-@@ -34,3 +34,5 @@
- 306 auto rw resize quick
- 307 auto ioctl rw
- 308 auto ioctl rw prealloc quick
-+400 auto quick
-+401 auto quick
-diff --git a/tests/xfs/400 b/tests/xfs/400
-new file mode 100755
-index 0000000..498c024
---- /dev/null
-+++ b/tests/xfs/400
-@@ -0,0 +1,72 @@
-+#! /bin/bash
-+# FSQA Test No. 400
-+#
-+# Since loff_t is a signed type, it is invalid for a filesystem to load
-+# an inode with i_size = -1ULL.  Unfortunately, nobody checks this,
-+# which means that we can trivially DoS the VFS by creating such a file
-+# and appending to it.  This causes an integer overflow in the routines
-+# underlying writeback, which results in the kernel locking up.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016-2017 Oracle, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+PIDS=""
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs xfs
-+_require_scratch_nocheck
-+_disable_dmesg_check
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs  >> $seqres.full 2>&1
-+_scratch_mount
-+
-+testdir=$SCRATCH_MNT
-+echo m > $testdir/a
-+inum=$(stat -c "%i" $testdir/a)
-+
-+echo "Corrupt filesystem"
-+_scratch_unmount
-+_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -- -1' >> $seqres.full
-+
-+echo "Remount, try to append"
-+_scratch_mount
-+dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
-+sync
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/401 b/tests/xfs/401
-new file mode 100755
-index 0000000..41b262d
---- /dev/null
-+++ b/tests/xfs/401
-@@ -0,0 +1,72 @@
-+#! /bin/bash
-+# FSQA Test No. 401
-+#
-+# Since loff_t is a signed type, it is invalid for a filesystem to load
-+# an inode with i_size = -1ULL.  Unfortunately, nobody checks this,
-+# which means that we can trivially DoS the VFS by creating such a file
-+# and appending to it.  This causes an integer overflow in the routines
-+# underlying writeback, which results in the kernel locking up.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016-2017 Oracle, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+PIDS=""
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs xfs
-+_require_scratch_nocheck
-+_disable_dmesg_check
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs  >> $seqres.full 2>&1
-+_scratch_mount
-+
-+testdir=$SCRATCH_MNT
-+echo m > $testdir/a
-+inum=$(stat -c "%i" $testdir/a)
-+
-+echo "Corrupt filesystem"
-+_scratch_unmount
-+_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -- -1' >> $seqres.full
-+
-+echo "Remount, try to append"
-+_scratch_mount
-+dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=direct,append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
-+sync
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/group b/tests/xfs/group
-index c237b50..fcb9644 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -334,3 +334,5 @@
- 345 auto quick clone
- 346 auto quick clone
- 347 auto quick clone
-+400 auto quick
-+401 auto quick
+ # Check that populate created all the types of files we wanted
+ _scratch_xfs_populate_check() {
+ 	_scratch_mount
+@@ -367,6 +437,9 @@ _scratch_xfs_populate_check() {
+ 	leaf_attr="$(__populate_find_inode "${SCRATCH_MNT}/ATTR.FMT_LEAF")"
+ 	node_attr="$(__populate_find_inode "${SCRATCH_MNT}/ATTR.FMT_NODE")"
+ 	btree_attr="$(__populate_find_inode "${SCRATCH_MNT}/ATTR.FMT_BTREE")"
++	is_finobt=$(xfs_info "${SCRATCH_MNT}" | grep -c 'finobt=1')
++	is_rmapbt=$(xfs_info "${SCRATCH_MNT}" | grep -c 'rmapbt=1')
++	is_reflink=$(xfs_info "${SCRATCH_MNT}" | grep -c 'reflink=1')
+ 
+ 	blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
+ 	dblksz="$(xfs_info "${SCRATCH_MNT}" | grep naming.*bsize | sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g')"
+@@ -389,6 +462,10 @@ _scratch_xfs_populate_check() {
+ 	__populate_check_xfs_attr "${node_attr}" "node"
+ 	__populate_check_xfs_attr "${btree_attr}" "btree"
+ 	__populate_check_xfs_aformat "${btree_attr}" "btree"
++	__populate_check_xfs_agbtree_height "bno"
++	__populate_check_xfs_agbtree_height "cnt"
++	test -n $is_rmapbt && __populate_check_xfs_agbtree_height "rmap"
++	test -n $is_reflink && __populate_check_xfs_agbtree_height "refcnt"
+ }
+ 
+ # Check data fork format of ext4 file
 
