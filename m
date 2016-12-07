@@ -1,11 +1,13 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:23490 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751233AbcLGASR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 6 Dec 2016 19:18:17 -0500
-Subject: [PATCH v3 00/11] xfstests: online scrub/repair support
+Received: from userp1040.oracle.com ([156.151.31.81]:29291 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751762AbcLGASX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 6 Dec 2016 19:18:23 -0500
+Subject: [PATCH 01/11] ocfs2: test reflinking to inline data files
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 06 Dec 2016 16:18:11 -0800
-Message-ID: <148106989109.19334.6839386416313318071.stgit@birch.djwong.org>
+Date: Tue, 06 Dec 2016 16:18:17 -0800
+Message-ID: <148106989741.19334.14324200960917685576.stgit@birch.djwong.org>
+In-Reply-To: <148106989109.19334.6839386416313318071.stgit@birch.djwong.org>
+References: <148106989109.19334.6839386416313318071.stgit@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -14,48 +16,180 @@ To: david@fromorbit.com, eguan@redhat.com, darrick.wong@oracle.com
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+Make sure that we can handle reflinking from and to inline-data files.
 
-This is the third revision of a patchset that adds to XFS userland
-tools support for online metadata scrubbing and repair.
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ common/reflink       |    2 +
+ tests/ocfs2/001      |   88 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ocfs2/001.out  |   14 ++++++++
+ tests/ocfs2/Makefile |   20 +++++++++++
+ tests/ocfs2/group    |    1 +
+ 5 files changed, 124 insertions(+), 1 deletion(-)
+ create mode 100755 tests/ocfs2/001
+ create mode 100644 tests/ocfs2/001.out
+ create mode 100644 tests/ocfs2/Makefile
+ create mode 100644 tests/ocfs2/group
 
-The first patch tests ocfs2's ability to handle reflink when there are
-inline-data files.
 
-The second patch maliciously corrupts ext4 and xfs filesystems to
-exploit nonexistent checking of i_size in order to coerce Linux into
-loading a file with negative size.  It then exploits integer overflows
-in the VFS writeback code to hard lock the kernel.
+diff --git a/common/reflink b/common/reflink
+index 9d51729..d048045 100644
+--- a/common/reflink
++++ b/common/reflink
+@@ -197,7 +197,7 @@ _cp_reflink() {
+ 	file1="$1"
+ 	file2="$2"
+ 
+-	cp --reflink=always -p "$file1" "$file2"
++	cp --reflink=always -p -f "$file1" "$file2"
+ }
+ 
+ # Reflink some file1 into file2
+diff --git a/tests/ocfs2/001 b/tests/ocfs2/001
+new file mode 100755
+index 0000000..afb9ce9
+--- /dev/null
++++ b/tests/ocfs2/001
+@@ -0,0 +1,88 @@
++#! /bin/bash
++# FS QA Test No. 001
++#
++# Ensure that reflink works correctly with inline-data files.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_supported_fs ocfs2
++_require_scratch_reflink
++_require_cp_reflink
++
++rm -f $seqres.full
++
++echo "Format and mount"
++_scratch_mkfs --fs-features=local,unwritten,refcount,inline-data > $seqres.full 2>&1
++tunefs.ocfs2 --query '%H' $SCRATCH_DEV | grep -q 'inline-data' || \
++	_notrun "Inline data is not supported."
++_scratch_mount >> $seqres.full 2>&1
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++
++sz=65536
++echo "Create the original files"
++$XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file1 >> $seqres.full
++echo x > $testdir/file2
++echo x > $testdir/file3
++echo y > $testdir/file4
++$XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file5 >> $seqres.full
++echo a > $testdir/file6
++_scratch_cycle_mount
++
++echo "reflink into the start of file2"
++_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
++
++echo "reflink past the stuff in file3"
++_reflink_range $testdir/file1 0 $testdir/file3 $sz $sz >> $seqres.full
++
++echo "reflink an inline-data file to a regular one"
++_cp_reflink $testdir/file4 $testdir/file5 >> $seqres.full
++
++echo "reflink an inline-data file to another inline-data file"
++_cp_reflink $testdir/file4 $testdir/file6 >> $seqres.full
++
++echo "Verify the whole mess"
++_scratch_cycle_mount
++md5sum $testdir/file* | _filter_scratch
++
++# success, all done
++status=0
++exit
+diff --git a/tests/ocfs2/001.out b/tests/ocfs2/001.out
+new file mode 100644
+index 0000000..99fa43a
+--- /dev/null
++++ b/tests/ocfs2/001.out
+@@ -0,0 +1,14 @@
++QA output created by 001
++Format and mount
++Create the original files
++reflink into the start of file2
++reflink past the stuff in file3
++reflink an inline-data file to a regular one
++reflink an inline-data file to another inline-data file
++Verify the whole mess
++2d61aa54b58c2e94403fb092c3dbc027  SCRATCH_MNT/test-001/file1
++2d61aa54b58c2e94403fb092c3dbc027  SCRATCH_MNT/test-001/file2
++4e68a2e24b6b0f386ab39d01d902293d  SCRATCH_MNT/test-001/file3
++009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file4
++009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file5
++009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file6
+diff --git a/tests/ocfs2/Makefile b/tests/ocfs2/Makefile
+new file mode 100644
+index 0000000..70a4f16
+--- /dev/null
++++ b/tests/ocfs2/Makefile
+@@ -0,0 +1,20 @@
++#
++# Copyright (c) 2016 Oracle.  All Rights Reserved.
++#
++
++TOPDIR = ../..
++include $(TOPDIR)/include/builddefs
++
++OCFS2_DIR = ocfs2
++TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(OCFS2_DIR)
++
++include $(BUILDRULES)
++
++install:
++	$(INSTALL) -m 755 -d $(TARGET_DIR)
++	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
++	$(INSTALL) -m 644 group $(TARGET_DIR)
++	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
++
++# Nothing.
++install-dev install-lib:
+diff --git a/tests/ocfs2/group b/tests/ocfs2/group
+new file mode 100644
+index 0000000..28e6807
+--- /dev/null
++++ b/tests/ocfs2/group
+@@ -0,0 +1 @@
++001 auto quick clone
 
-** DO NOT RUN THESE TESTS UNLESS YOU HAVE APPLIED THIS PATCH: **
-"vfs: reject inodes with negative size to prevent kernel hang"
-
----------------
-
-The new patches in this series do three things: first, they expand the
-filesystem populate commands inside xfstests to be able to create all
-types of XFS metadata.  Second, they create a bunch of xfs_db wrapper
-functions to iterate all fields present in a given metadata object and
-fuzz them in various ways.  Finally, for each metadata object type there
-is a separate test that iteratively fuzzes all fields of that object
-and runs it through the mount/scrub/repair loop to see what happens.
-
-If you're going to start using this mess, you probably ought to just
-pull from my github trees for kernel[1], xfsprogs[2], and xfstests[3].
-The kernel patches in the git trees should apply to 4.9-rc8; xfsprogs
-patches to for-next; and xfstest to master.
-
-The patches have survived all auto group xfstests both with scrub-only
-mode and also a special debugging mode to xfs_scrub that forces it to
-rebuild the metadata structures even if they're not damaged.  Note that
-I haven't thoroughly run the new tests in [3] that try to fuzz every
-field in every data structure on disk.
-
-This is an extraordinary way to eat your data.  Enjoy! 
-Comments and questions are, as always, welcome.
-
---D
-
-[1] https://github.com/djwong/linux/tree/djwong-devel
-[2] https://github.com/djwong/xfsprogs/tree/djwong-devel
-[3] https://github.com/djwong/xfstests/tree/djwong-devel
