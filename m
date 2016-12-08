@@ -1,146 +1,122 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:47047 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752190AbcLHUU6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 8 Dec 2016 15:20:58 -0500
-Date: Thu, 8 Dec 2016 12:20:23 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v4 5/5] generic/396: Add a copy test for invalid input
-Message-ID: <20161208202023.GD25841@birch.djwong.org>
-References: <20161208184909.23321-1-Anna.Schumaker@Netapp.com>
- <20161208184909.23321-6-Anna.Schumaker@Netapp.com>
+Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:61931 "EHLO
+        ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S932427AbcLHWWy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 8 Dec 2016 17:22:54 -0500
+Date: Fri, 9 Dec 2016 09:22:49 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 6/6] libxcmd: add non-iterating user commands
+Message-ID: <20161208222249.GJ4219@dastard>
+References: <20161207034724.1613-1-david@fromorbit.com>
+ <20161207034724.1613-7-david@fromorbit.com>
+ <CAOQ4uxj2AROKtg=ZE64Q-RJbMaiRdP7SvoosmvCD4C1h-X-4bA@mail.gmail.com>
+ <CAOQ4uxhrtaHauNJypezpFAT0VCN61oZLFKtxuBLw32jn7FOSFw@mail.gmail.com>
+ <20161207201637.GI4219@dastard>
+ <CAOQ4uxh+QX5uzJCXtEG8vg0qhUTgQ0QG1ZWDkr1ryH0kQxi0ZA@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161208184909.23321-6-Anna.Schumaker@Netapp.com>
+In-Reply-To: <CAOQ4uxh+QX5uzJCXtEG8vg0qhUTgQ0QG1ZWDkr1ryH0kQxi0ZA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Anna Schumaker <Anna.Schumaker@Netapp.com>
-Cc: fstests@vger.kernel.org, linux-nfs@vger.kernel.org, hch@infradead.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: linux-xfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Dec 08, 2016 at 01:49:08PM -0500, Anna Schumaker wrote:
-> This test passes invalid argumnt combinations to the copy_file_range()
-> system call to test that input is verified before attempting to copy.
+On Thu, Dec 08, 2016 at 12:14:24PM +0200, Amir Goldstein wrote:
+> On Wed, Dec 7, 2016 at 10:16 PM, Dave Chinner <david@fromorbit.com> wrote:
+> > On Wed, Dec 07, 2016 at 04:21:31PM +0200, Amir Goldstein wrote:
+> ...
+> >>
+> >> 1. Do you think that xfs_io should error on -c "open foo"  to force
+> >> explicit -C "open foo"?
+> >
+> > No.
+> >
+> >>     it can't be breaking any existing users, because -c "open foo" is
+> >> already very broken.
+> >
+> > Maybe so, but there are users of it. e.g:
+> >
+> > $ git grep open |grep XFS_IO
+> > tests/overlay/001:      $XFS_IO_PROG -c "open" $f >>$seqres.full
+> > $
+> >
+> > This is precisely why I made oneshot commands just work silently
+> > with "-c" - who knows what will break if we start rejecting commands
+> > that otherwise work just fine when there is only one open file....
+> >
 > 
-> Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
-> ---
->  tests/generic/396     | 68 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/396.out |  8 ++++++
->  tests/generic/group   |  1 +
->  3 files changed, 77 insertions(+)
->  create mode 100644 tests/generic/396
->  create mode 100644 tests/generic/396.out
+> Interesting example. Here -c "open" is actually an 'alias' for
+> -c "stat", which could have been non one shot.
+> Nevertheless, I see your point.
 > 
-> diff --git a/tests/generic/396 b/tests/generic/396
-> new file mode 100644
-> index 0000000..c262070
-> --- /dev/null
-> +++ b/tests/generic/396
-> @@ -0,0 +1,68 @@
-> +#!/bin/bash
-> +# FS QA Test No. 396
-> +#
-> +# Tests vfs_copy_file_range() error checking
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2016 Netapp, Inc. All rights reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -rf $tmp.*
-> +}
-> +
-> +# get standard environment
-> +. common/rc
-> +. common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +
-> +_require_xfs_io_command "copy_range"
-> +_require_test
-> +
-> +testdir=$TEST_DIR/test-$seq
-> +rm -rf $testdir
-> +mkdir $testdir
-> +rm -f $seqres.full
-> +
-> +echo "Create the original file"
-> +$XFS_IO_PROG -f -c 'pwrite -S 0x61 0 1000' $testdir/file >> $seqres.full 2>&1
-> +
-> +echo "source pos > source size:"
-> +$XFS_IO_PROG -f -c "copy_range -s 1000 -l 100 $testdir/file" "$testdir/copy"
-> +
-> +echo "target read-only"
-> +$XFS_IO_PROG -r -f -c "copy_range -s 0 -l 100 $testdir/file" "$testdir/copy"
-> +
-> +echo "target append-only"
-> +$XFS_IO_PROG -a -f -c "copy_range -s 0 -l 100 $testdir/file" "$testdir/copy"
-
-Good start, though I can think of a few more things...
-
-Copying when one or the other file arguments are directories/device files/etc.,
-copies where pos < size but (pos + len) > size, copies where pos + len
-overflow, overlapped src/dest ranges, and perhaps even copies across holes and
-unwritten extents?
-
---D
-
-> +
-> +#success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/396.out b/tests/generic/396.out
-> new file mode 100644
-> index 0000000..4031883
-> --- /dev/null
-> +++ b/tests/generic/396.out
-> @@ -0,0 +1,8 @@
-> +QA output created by 396
-> +Create the original file
-> +source pos > source size:
-> +copy_range: Invalid argument
-> +target read-only
-> +copy_range: Bad file descriptor
-> +target append-only
-> +copy_range: Bad file descriptor
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 2b50ddb..eee0f39 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -398,3 +398,4 @@
->  393 auto quick copy
->  394 auto quick copy
->  395 auto quick copy
-> +396 auto quick copy
-> -- 
-> 2.10.2
+> >> 2. You marked mmap ONE_SHOT, but not all the m* commands.
+> >>    Stands to reason that they should all be marked ONE_SHOT. because iterating
+> >>    the file table has nothing to do with the m* commands. no?
+> >
+> > It is not clear to me what the correct thing to do here is, I don't
+> > have the time right now to look into it, so I didn't
+> > change mread/mwrite/msync behaviour. If it's broken before it is
+> > still broken now.
+> >
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Very well, but I am not sure why mmap should be marked one shot?
+
+Look at the help documentation:
+
+$ xfs_io -c "help mmap"
+mmap [N] | [-rwx] [-s size] [off len] -- mmap a range in the current file, show mappings
+
+ maps a range within the current file into memory
+
+ Example:
+ 'mmap -rw 0 1m' - maps one megabyte from the start of the current file
+....
+
+It explicitly and repeatedly says "current file" in the
+description of it's operation. Any typical user is going to read
+that and think that it means "current open file", not "map a range
+on all open files".
+
+> Possibly, mmap caught your filters because it is CMD_NOFILE_OK,
+> but in fact, the only case where mmap with no open files works is
+> after mmaping files and closing all open files.
+
+Well, yes. We've come across applications that do exactly this
+in the past, and had to simulate their behaviours. It's entirely
+reasonable to want to list or change the active mappings after all
+the open files have been closed.
+
+> Currently, this command:
+> $ xfs_io -c "mmap 0 4" -C "mmap" foo bar
+> 
+> Results in:
+> [000] 0x7f17319ae000 - 0x7f17319ae004 rwx             bar (0 : 4)
+> 
+> IMO, it would be more useful if it resulted in:
+>  000  0x7f27e289d000 - 0x7f27e289d004 rwx             foo (0 : 4)
+> [001] 0x7f27e289c000 - 0x7f27e289c004 rwx             bar (0 : 4)
+> 
+> Which will allow following up with more specific -C m* commands
+> and it would be more consistent with the result of:
+> $ xfs_io -C "file" foo bar
+>  000  foo            (foreign,non-sync,non-direct,read-write)
+> [001] bar            (foreign,non-sync,non-direct,read-write)
+
+Maybe so but, unfortunately, mapping tables are different to the
+file tables.
+
+As I have already said: it's not clear what the correct behaviour
+here is because mapping commands /don't iterate the mapping table/.
+The exception is the mmap command, and that mapping table iteration
+behaviour is the reason I changed mmap to be a oneshot command,
+otherwise it does stupid things when multiple files are open
+and they are iterated.
+
+If you want to have mmap commands do sane things for iteration, then
+you need to address the file vs mapping iteration problem, not hack
+special one-off behaviours into the mmap commands.
+
+-Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
