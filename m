@@ -1,102 +1,64 @@
-Received: from mail-wj0-f195.google.com ([209.85.210.195]:35366 "EHLO
-        mail-wj0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752088AbcLHKwo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 8 Dec 2016 05:52:44 -0500
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:34616 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753198AbcLHNew (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 8 Dec 2016 08:34:52 -0500
+Received: by mail-wm0-f65.google.com with SMTP id g23so3627194wme.1
+        for <fstests@vger.kernel.org>; Thu, 08 Dec 2016 05:34:51 -0800 (PST)
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 2/2] overlay/016: use xfs_io -C for executing commands
-Date: Thu,  8 Dec 2016 12:52:21 +0200
-Message-Id: <1481194341-3592-2-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1481194341-3592-1-git-send-email-amir73il@gmail.com>
-References: <1481194341-3592-1-git-send-email-amir73il@gmail.com>
+Subject: [PATCH] common: fix excluding test groups
+Date: Thu,  8 Dec 2016 15:34:30 +0200
+Message-Id: <1481204070-10881-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
+Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This test requires a fix to xfs_io to support
--C one shot commands and -c "open foo" command.
+The -x flag is used to exclude tests that belong to
+certain groups from the test args list.
+
+When the test args list is expressed as a match pattern,
+-x fails to exclude the tests that match the pattern
+and belong to excluded groups.
+
+For example:
+$ ./check -n -x xfs/??? | wc -l
+341
+$ ./check -n -x fuzzers,dangerous_fuzzers xfs/??? | wc -l
+341
+
+After the fix:
+$ ./check -n -x fuzzers,dangerous_fuzzers xfs/??? | wc -l
+315
+
+This bug seems to date back to this git repo epoc.
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- tests/overlay/016     | 27 +++++++++++++--------------
- tests/overlay/016.out | 11 +++++------
- 2 files changed, 18 insertions(+), 20 deletions(-)
+ check | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
 
-diff --git a/tests/overlay/016 b/tests/overlay/016
-index 6d3e339..041ab3d 100755
---- a/tests/overlay/016
-+++ b/tests/overlay/016
-@@ -50,6 +50,7 @@ _cleanup()
- _supported_fs overlay
- _supported_os Linux
- _require_scratch
-+_require_xfs_io_command "open"
+diff --git a/check b/check
+index 8f2a1bb..9732460 100755
+--- a/check
++++ b/check
+@@ -158,11 +158,14 @@ _timestamp()
+ _prepare_test_list()
+ {
+ 	unset list
++	touch $tmp.list
+ 	# Tests specified on the command line
+ 	if [ -s $tmp.arglist ]; then
+-		cat $tmp.arglist > $tmp.list
+-	else
+-		touch $tmp.list
++		# flatten multi tests line (tests/$fs/???) to 1 test per line
++		list=$(cat $tmp.arglist)
++		for t in $list; do
++			echo "$t" >> $tmp.list
++		done
+ 	fi
  
- rm -f $seqres.full
- 
-@@ -72,13 +73,12 @@ cd $SCRATCH_MNT
- # write to rwfd
- # read from rofd
- #
--$XFS_IO_PROG << EOF | _filter_xfs_io
--open -r foo
--open foo
--pwrite -S 0x61 0 16
--file 0
--pread -v 0 16
--EOF
-+$XFS_IO_PROG -r foo \
-+	-C "open foo" \
-+	-C "pwrite -S 0x61 0 16" \
-+	-C "file 0" \
-+	-C "pread -v 0 16" \
-+| _filter_xfs_io
- 
- #
- # case #2:
-@@ -86,13 +86,12 @@ EOF
- # write to rwfd
- # read from mapped memory
- #
--$XFS_IO_PROG << EOF | _filter_xfs_io
--open -r bar
--mmap -r 0 16
--open bar
--pwrite -S 0x61 0 16
--mread -v 0 16
--EOF
-+$XFS_IO_PROG -r bar \
-+	-C "mmap -r 0 16" \
-+	-C "open bar" \
-+	-C "pwrite -S 0x61 0 16" \
-+	-C "mread -v 0 16" \
-+| _filter_xfs_io
- 
- status=0
- exit
-diff --git a/tests/overlay/016.out b/tests/overlay/016.out
-index 52b8cd7..c49f8dc 100644
---- a/tests/overlay/016.out
-+++ b/tests/overlay/016.out
-@@ -1,12 +1,11 @@
- QA output created by 016
--xfs_io> xfs_io> xfs_io> wrote 16/16 bytes at offset 0
-+wrote 16/16 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--xfs_io> [000] foo            (foreign,non-sync,non-direct,read-only)
-+[000] foo            (foreign,non-sync,non-direct,read-only)
-  001  foo            (foreign,non-sync,non-direct,read-write)
--xfs_io> 00000000:  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
-+00000000:  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
- read 16/16 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--xfs_io> xfs_io> xfs_io> xfs_io> xfs_io> wrote 16/16 bytes at offset 0
-+wrote 16/16 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--xfs_io> 00000000:  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
--xfs_io> 
-\ No newline at end of file
-+00000000:  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
+ 	# Specified groups to include
 -- 
 2.7.4
 
