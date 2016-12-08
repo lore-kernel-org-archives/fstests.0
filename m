@@ -1,162 +1,134 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:56141 "EHLO
-        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1752017AbcLGDrf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 6 Dec 2016 22:47:35 -0500
-From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH 2/6] libxcmd: rename args_command to command_iterator
-Date: Wed,  7 Dec 2016 14:47:20 +1100
-Message-Id: <20161207034724.1613-3-david@fromorbit.com>
-In-Reply-To: <20161207034724.1613-1-david@fromorbit.com>
-References: <20161207034724.1613-1-david@fromorbit.com>
+Received: from cn.fujitsu.com ([222.73.24.84]:48550 "EHLO song.cn.fujitsu.com"
+        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+        id S1753177AbcLHCLW (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 7 Dec 2016 21:11:22 -0500
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Subject: [PATCH 1/2] fstests: common: rename and enhance _require_btrfs to _require_btrfs_subcommand
+Date: Thu,  8 Dec 2016 10:04:55 +0800
+Message-Id: <20161208020456.16116-1-quwenruo@cn.fujitsu.com>
+MIME-Version: 1.0
 Sender: fstests-owner@vger.kernel.org
-To: linux-xfs@vger.kernel.org
-Cc: fstests@vger.kernel.org, amir73il@gmail.com
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Dave Chinner <dchinner@redhat.com>
+Rename _require_btrfs() to _require_btrfs_subcommand() to avoid
+confusion, as all other _require_btrfs_* has a quite clear suffix, like
+_require_btrfs_mkfs_feature() or _require_btrfs_fs_feature().
 
-It is not particularly easy to understand the function of the
-args_command abstraction. it's actually a command iterator interface
-that allows callers to specify the target of the command and iterate
-the command multiple times over different targets. Rename and
-document the abstraction to make this functionality clear.
+Also enhance _require_btrfs_subcommand() to accept 2nd level commands or
+options.
+Options will be determined by the first "-" char.
+This is quite useful for case like "btrfs inspect-internal dump-tree"
+and "btrfs check --qgroup-report".
 
-Signed-Off-By: Dave Chinner <dchinner@redhat.com>
+Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 ---
- include/command.h |  4 ++--
- io/init.c         |  9 +++++++--
- libxcmd/command.c | 16 ++++++++--------
- quota/init.c      |  9 +++++++--
- 4 files changed, 24 insertions(+), 14 deletions(-)
+ common/rc       | 29 ++++++++++++++++++++++++-----
+ tests/btrfs/004 |  3 ++-
+ tests/btrfs/048 |  2 +-
+ tests/btrfs/059 |  2 +-
+ tests/btrfs/131 |  2 +-
+ 5 files changed, 29 insertions(+), 9 deletions(-)
 
-diff --git a/include/command.h b/include/command.h
-index 58bfcaac44a0..637ee06e6e9a 100644
---- a/include/command.h
-+++ b/include/command.h
-@@ -50,12 +50,12 @@ extern int		ncmds;
- extern void		help_init(void);
- extern void		quit_init(void);
- 
--typedef int (*argsfunc_t)(int index);
-+typedef int (*iterfunc_t)(int index);
- typedef int (*checkfunc_t)(const cmdinfo_t *ci);
- 
- extern void		add_command(const cmdinfo_t *ci);
- extern void		add_user_command(char *optarg);
--extern void		add_args_command(argsfunc_t af);
-+extern void		add_command_iterator(iterfunc_t func);
- extern void		add_check_command(checkfunc_t cf);
- 
- extern const cmdinfo_t	*find_command(const char *cmd);
-diff --git a/io/init.c b/io/init.c
-index ab40f3745390..34009b024833 100644
---- a/io/init.c
-+++ b/io/init.c
-@@ -90,8 +90,13 @@ init_commands(void)
- 	cowextsize_init();
+diff --git a/common/rc b/common/rc
+index 8c99306..1703232 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3019,15 +3019,34 @@ _require_deletable_scratch_dev_pool()
  }
  
-+/*
-+ * This allows xfs_io commands specified on the command line to be run on every
-+ * open file in the file table. Commands that should not be iterated across all
-+ * open files need to specify CMD_FLAG_ONESHOT in their command flags.
-+ */
- static int
--init_args_command(
-+filetable_iterator(
- 	int	index)
+ # We check for btrfs and (optionally) features of the btrfs command
+-_require_btrfs()
++# _require_btrfs_subcommand <subcommand> [<subfunction>|<option>]
++# It can handle both subfunction like "inspect-internal dump-tree"
++# and options like "check --qgroup-report"
++_require_btrfs_subcommand()
  {
- 	if (index >= filecount)
-@@ -214,7 +219,7 @@ init(
- 	}
- 
- 	init_commands();
--	add_args_command(init_args_command);
-+	add_command_iterator(filetable_iterator);
- 	add_check_command(init_check_command);
+-	cmd=$1
+-	_require_command "$BTRFS_UTIL_PROG" btrfs
+ 	if [ -z "$1" ]; then
+-		return 1;
++		echo "Usage: _require_btrfs_subcommand command [subcommand]" 1>&2
++		exit 1
+ 	fi
+-	$BTRFS_UTIL_PROG $cmd --help >/dev/null 2>&1
++	cmd=$1
++	param=$2
++
++	_require_command "$BTRFS_UTIL_PROG" btrfs
++	$BTRFS_UTIL_PROG $cmd --help &>/dev/null
+ 	[ $? -eq 0 ] || _notrun "$BTRFS_UTIL_PROG too old (must support $cmd)"
++
++	test -z "$param" && return
++
++	# if $param is an option, replace leading "-"s for grep
++	if [ ${param:0:1} == "-" ]; then
++		param=$(echo $param | sed 's/^-*//')
++		$BTRFS_UTIL_PROG $cmd --help | grep $param > /dev/null || \
++			_not_run "$BTRFS_UTIL_PROG too old (must support $cmd $param)"
++		return
++	fi
++
++	$BTRFS_UTIL_PROG $cmd $param --help &>/dev/null
++	[ $? -eq 0 ] || _notrun "$BTRFS_UTIL_PROG too old (must support $cmd $param)"
  }
  
-diff --git a/libxcmd/command.c b/libxcmd/command.c
-index dce8361ce3ea..789aeb5c5e5a 100644
---- a/libxcmd/command.c
-+++ b/libxcmd/command.c
-@@ -23,7 +23,7 @@
- cmdinfo_t	*cmdtab;
- int		ncmds;
+ # Check that fio is present, and it is able to execute given jobfile
+diff --git a/tests/btrfs/004 b/tests/btrfs/004
+index 905770a..e60a034 100755
+--- a/tests/btrfs/004
++++ b/tests/btrfs/004
+@@ -51,7 +51,8 @@ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch
+ _require_no_large_scratch_dev
+-_require_btrfs inspect-internal
++_require_btrfs_subcommand inspect-internal logical-resolve
++_require_btrfs_subcommand inspect-internal inode-resolve
+ _require_command "/usr/sbin/filefrag" filefrag
  
--static argsfunc_t	args_func;
-+static iterfunc_t	iter_func;
- static checkfunc_t	check_func;
- static int		ncmdline;
- static char		**cmdline;
-@@ -130,7 +130,7 @@ add_user_command(char *optarg)
-  * so we abort straight away.
-  */
- static int
--args_command(
-+iterate_command(
- 	const cmdinfo_t	*ct,
- 	int		index)
+ rm -f $seqres.full
+diff --git a/tests/btrfs/048 b/tests/btrfs/048
+index 0b907b0..ac731d1 100755
+--- a/tests/btrfs/048
++++ b/tests/btrfs/048
+@@ -48,7 +48,7 @@ _supported_fs btrfs
+ _supported_os Linux
+ _require_test
+ _require_scratch
+-_require_btrfs "property"
++_require_btrfs_subcommand "property"
+ 
+ send_files_dir=$TEST_DIR/btrfs-test-$seq
+ 
+diff --git a/tests/btrfs/059 b/tests/btrfs/059
+index 8f106d2..fd67ebb 100755
+--- a/tests/btrfs/059
++++ b/tests/btrfs/059
+@@ -51,7 +51,7 @@ _supported_fs btrfs
+ _supported_os Linux
+ _require_test
+ _require_scratch
+-_require_btrfs "property"
++_require_btrfs_subcommand "property"
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/btrfs/131 b/tests/btrfs/131
+index d1a11d2..d7c7f12 100755
+--- a/tests/btrfs/131
++++ b/tests/btrfs/131
+@@ -48,7 +48,7 @@ rm -f $seqres.full
+ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch
+-_require_btrfs inspect-internal
++_require_btrfs_subcommand inspect-internal dump-super
+ 
+ mkfs_v1()
  {
-@@ -138,16 +138,16 @@ args_command(
- 		return 0;
- 	if (ct->flags & CMD_FLAG_ONESHOT)
- 		return -1;
--	if (args_func)
--		return args_func(index);
-+	if (iter_func)
-+		return iter_func(index);
- 	return 0;
- }
- 
- void
--add_args_command(
--	argsfunc_t	af)
-+add_command_iterator(
-+	iterfunc_t	func)
- {
--	args_func = af;
-+	iter_func = func;
- }
- 
- void
-@@ -171,7 +171,7 @@ command_loop(void)
- 			ct = find_command(v[0]);
- 			if (ct) {
- 				j = 0;
--				while (!done && (j = args_command(ct, j)))
-+				while (!done && (j = iterate_command(ct, j)))
- 					done = command(ct, c, v);
- 			} else
- 				fprintf(stderr, _("command \"%s\" not found\n"),
-diff --git a/quota/init.c b/quota/init.c
-index 3bebbb8735f3..193f6421fd59 100644
---- a/quota/init.c
-+++ b/quota/init.c
-@@ -75,8 +75,13 @@ init_commands(void)
- 	state_init();
- }
- 
-+/*
-+ * This function allows xfs_quota commands to iterate across all discovered
-+ * quota enabled filesystems. Commands that should not iterate all filesystems
-+ * should specify CMD_FLAG_ONESHOT in their command flags.
-+ */
- static int
--init_args_command(
-+filesystem_iterator(
- 	int	index)
- {
- 	if (index >= fs_count)
-@@ -189,7 +194,7 @@ init(
- 	free(projopts);
- 
- 	init_commands();
--	add_args_command(init_args_command);
-+	add_command_iterator(filesystem_iterator);
- 	add_check_command(init_check_command);
- 
- 	/*
 -- 
-2.10.2
+2.7.4
+
+
 
