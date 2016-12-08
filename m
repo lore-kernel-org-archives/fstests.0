@@ -1,11 +1,11 @@
 Received: from mx141.netapp.com ([216.240.21.12]:34231 "EHLO mx141.netapp.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752057AbcLHSt0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 8 Dec 2016 13:49:26 -0500
+        id S932227AbcLHSt2 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 8 Dec 2016 13:49:28 -0500
 From: Anna Schumaker <Anna.Schumaker@Netapp.com>
-Subject: [PATCH v4 3/5] generic/394: Add copy test that overwrites data
-Date: Thu, 8 Dec 2016 13:49:06 -0500
-Message-ID: <20161208184909.23321-4-Anna.Schumaker@Netapp.com>
+Subject: [PATCH v4 5/5] generic/396: Add a copy test for invalid input
+Date: Thu, 8 Dec 2016 13:49:08 -0500
+Message-ID: <20161208184909.23321-6-Anna.Schumaker@Netapp.com>
 In-Reply-To: <20161208184909.23321-1-Anna.Schumaker@Netapp.com>
 References: <20161208184909.23321-1-Anna.Schumaker@Netapp.com>
 MIME-Version: 1.0
@@ -15,32 +15,28 @@ To: fstests@vger.kernel.org
 Cc: Anna.Schumaker@Netapp.com, linux-nfs@vger.kernel.org, hch@infradead.org
 List-ID: <fstests@vger.kernel.org>
 
-Using copy to overwrite data in the destination file is perfectly valid,
-so let's make sure this case works as expected.
+This test passes invalid argumnt combinations to the copy_file_range()
+system call to test that input is verified before attempting to copy.
 
 Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
 ---
- tests/generic/394     | 100 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/394.out |  17 +++++++++
- tests/generic/group   |   1 +
- 3 files changed, 118 insertions(+)
- create mode 100755 tests/generic/394
- create mode 100644 tests/generic/394.out
+ tests/generic/396     | 68 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/396.out |  8 ++++++
+ tests/generic/group   |  1 +
+ 3 files changed, 77 insertions(+)
+ create mode 100644 tests/generic/396
+ create mode 100644 tests/generic/396.out
 
-diff --git a/tests/generic/394 b/tests/generic/394
-new file mode 100755
-index 0000000..8095644
+diff --git a/tests/generic/396 b/tests/generic/396
+new file mode 100644
+index 0000000..c262070
 --- /dev/null
-+++ b/tests/generic/394
-@@ -0,0 +1,100 @@
++++ b/tests/generic/396
+@@ -0,0 +1,68 @@
 +#!/bin/bash
-+# FS QA Test No. 394
++# FS QA Test No. 396
 +#
-+# Tests vfs_copy_file_range():
-+#   - Copy a file
-+#   - Use copy to swap data at beginning and end
-+#   - Use copy to swap data in the middle
-+#   - Use copy to simultaneously overwrite and append to destination file
++# Tests vfs_copy_file_range() error checking
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2016 Netapp, Inc. All rights reserved.
 +#
@@ -90,81 +86,44 @@ index 0000000..8095644
 +mkdir $testdir
 +rm -f $seqres.full
 +
-+echo "Create the original file and then copy"
-+$XFS_IO_PROG -f -c 'pwrite -S 0x61 0    1000' $testdir/file >> $seqres.full 2>&1
-+$XFS_IO_PROG -f -c 'pwrite -S 0x62 1000 1000' $testdir/file >> $seqres.full 2>&1
-+$XFS_IO_PROG -f -c 'pwrite -S 0x63 2000 1000' $testdir/file >> $seqres.full 2>&1
-+$XFS_IO_PROG -f -c 'pwrite -S 0x64 3000 1000' $testdir/file >> $seqres.full 2>&1
-+$XFS_IO_PROG -f -c 'pwrite -S 0x65 4000 1000' $testdir/file >> $seqres.full 2>&1
-+$XFS_IO_PROG -f -c "copy_range $testdir/file" "$testdir/copy"
-+cmp $testdir/file  $testdir/copy
-+echo "Original md5sums:"
-+md5sum $testdir/{file,copy} | _filter_test_dir
++echo "Create the original file"
++$XFS_IO_PROG -f -c 'pwrite -S 0x61 0 1000' $testdir/file >> $seqres.full 2>&1
 +
-+echo "Swap beginning and end of original file"
-+$XFS_IO_PROG -f -c "copy_range -s 4000 -l 1000 $testdir/file" "$testdir/copy"
-+$XFS_IO_PROG -f -c "copy_range -d 4000 -l 1000 $testdir/file" "$testdir/copy"
-+cmp -n 1000 $testdir/file $testdir/copy 4000
-+cmp -n 3000 $testdir/file $testdir/copy 1000 1000
-+cmp -n 1000 $testdir/file $testdir/copy 0 4000
-+echo "md5sums after swapping beginning and end:"
-+md5sum $testdir/{file,copy} | _filter_test_dir
++echo "source pos > source size:"
++$XFS_IO_PROG -f -c "copy_range -s 1000 -l 100 $testdir/file" "$testdir/copy"
 +
-+echo "Swap middle parts of original file"
-+$XFS_IO_PROG -f -c "copy_range -s 1000 -d 3000 -l 1000 $testdir/file" "$testdir/copy"
-+$XFS_IO_PROG -f -c "copy_range -s 3000 -d 1000 -l 1000 $testdir/file" "$testdir/copy"
-+cmp -n 1000 $testdir/file $testdir/copy 4000
-+cmp -n 1000 $testdir/file $testdir/copy 3000 1000
-+cmp -n 1000 $testdir/file $testdir/copy 2000 2000
-+cmp -n 1000 $testdir/file $testdir/copy 1000 3000
-+cmp -n 1000 $testdir/file $testdir/copy 0 4000
-+echo "md5sums after swapping middle:"
-+md5sum $testdir/{file,copy} | _filter_test_dir
++echo "target read-only"
++$XFS_IO_PROG -r -f -c "copy_range -s 0 -l 100 $testdir/file" "$testdir/copy"
 +
-+echo "Copy tail of original file onto copy"
-+$XFS_IO_PROG -f -c "copy_range -s 1000 -d 3000 -l 4000 $testdir/file" "$testdir/copy"
-+cmp -n 1000 $testdir/file $testdir/copy 4000
-+cmp -n 1000 $testdir/file $testdir/copy 3000 1000
-+cmp -n 1000 $testdir/file $testdir/copy 2000 2000
-+cmp -n 4000 $testdir/file $testdir/copy 1000 3000
-+echo "md5sums after copying tail:"
-+md5sum $testdir/{file,copy} | _filter_test_dir
++echo "target append-only"
++$XFS_IO_PROG -a -f -c "copy_range -s 0 -l 100 $testdir/file" "$testdir/copy"
 +
 +#success, all done
 +status=0
 +exit
-diff --git a/tests/generic/394.out b/tests/generic/394.out
+diff --git a/tests/generic/396.out b/tests/generic/396.out
 new file mode 100644
-index 0000000..4121d24
+index 0000000..4031883
 --- /dev/null
-+++ b/tests/generic/394.out
-@@ -0,0 +1,17 @@
-+QA output created by 394
-+Create the original file and then copy
-+Original md5sums:
-+e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-394/file
-+e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-394/copy
-+Swap beginning and end of original file
-+md5sums after swapping beginning and end:
-+e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-394/file
-+5f4e111811dd9a810143c9db9bec6d80  TEST_DIR/test-394/copy
-+Swap middle parts of original file
-+md5sums after swapping middle:
-+e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-394/file
-+8c81889a5a50b311197110bcf769a695  TEST_DIR/test-394/copy
-+Copy tail of original file onto copy
-+md5sums after copying tail:
-+e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-394/file
-+e5fbacd993eaa5e80ebc2b14b969887d  TEST_DIR/test-394/copy
++++ b/tests/generic/396.out
+@@ -0,0 +1,8 @@
++QA output created by 396
++Create the original file
++source pos > source size:
++copy_range: Invalid argument
++target read-only
++copy_range: Bad file descriptor
++target append-only
++copy_range: Bad file descriptor
 diff --git a/tests/generic/group b/tests/generic/group
-index 7b40a3d..00f4f46 100644
+index 2b50ddb..eee0f39 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -396,3 +396,4 @@
- 391 auto quick rw
- 392 auto quick copy
+@@ -398,3 +398,4 @@
  393 auto quick copy
-+394 auto quick copy
+ 394 auto quick copy
+ 395 auto quick copy
++396 auto quick copy
 -- 
 2.10.2
 
