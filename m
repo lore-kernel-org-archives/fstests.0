@@ -1,92 +1,179 @@
-Received: from mx1.redhat.com ([209.132.183.28]:39438 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49930 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932872AbcLHEAy (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 7 Dec 2016 23:00:54 -0500
-Date: Thu, 8 Dec 2016 12:00:43 +0800
+        id S1751091AbcLHEiQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 7 Dec 2016 23:38:16 -0500
+Date: Thu, 8 Dec 2016 12:37:39 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 1/2] fstests: common: rename and enhance _require_btrfs
- to _require_btrfs_subcommand
-Message-ID: <20161208040043.GE29149@eguan.usersys.redhat.com>
-References: <20161208020456.16116-1-quwenruo@cn.fujitsu.com>
+Subject: Re: [PATCH] overlay: stress test changes to top and bottom layers
+ simultaneously
+Message-ID: <20161208043739.GF29149@eguan.usersys.redhat.com>
+References: <20161208035844.18544-1-tytso@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161208020456.16116-1-quwenruo@cn.fujitsu.com>
+In-Reply-To: <20161208035844.18544-1-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Dec 08, 2016 at 10:04:55AM +0800, Qu Wenruo wrote:
-> Rename _require_btrfs() to _require_btrfs_subcommand() to avoid
-> confusion, as all other _require_btrfs_* has a quite clear suffix, like
-> _require_btrfs_mkfs_feature() or _require_btrfs_fs_feature().
+On Wed, Dec 07, 2016 at 10:58:44PM -0500, Theodore Ts'o wrote:
+> Introduce a test which runs fsstress on the top and bottom overlayfs
+> directories simultaneously to find potential races that plagued wrapfs
+> derived file systems.
+
+I'm not sure if overlayfs supports doing changes to lowerdir when
+overlay is mounted. cc'ed linux-unionfs@vger.kernel.org for some inputs.
+
+But from kernel Documentation:
+
+"Changes to the underlying filesystems while part of a mounted overlay
+filesystem are not allowed.  If the underlying filesystem is changed,
+the behavior of the overlay is undefined, though it will not result in
+a crash or deadlock."
+
+So at least kernel should not crash or deadlock.
+
 > 
-> Also enhance _require_btrfs_subcommand() to accept 2nd level commands or
-> options.
-> Options will be determined by the first "-" char.
-> This is quite useful for case like "btrfs inspect-internal dump-tree"
-> and "btrfs check --qgroup-report".
-> 
-> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 > ---
->  common/rc       | 29 ++++++++++++++++++++++++-----
-
-Can you rebase on top of current master please? We've moved
-btrfs-specific functions to common/btrfs
-
->  tests/btrfs/004 |  3 ++-
->  tests/btrfs/048 |  2 +-
->  tests/btrfs/059 |  2 +-
->  tests/btrfs/131 |  2 +-
->  5 files changed, 29 insertions(+), 9 deletions(-)
+>  tests/overlay/017     | 81 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/017.out |  2 ++
+>  tests/overlay/group   |  1 +
+>  3 files changed, 84 insertions(+)
+>  create mode 100755 tests/overlay/017
+>  create mode 100644 tests/overlay/017.out
 > 
-> diff --git a/common/rc b/common/rc
-> index 8c99306..1703232 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3019,15 +3019,34 @@ _require_deletable_scratch_dev_pool()
->  }
->  
->  # We check for btrfs and (optionally) features of the btrfs command
-> -_require_btrfs()
-> +# _require_btrfs_subcommand <subcommand> [<subfunction>|<option>]
-> +# It can handle both subfunction like "inspect-internal dump-tree"
-> +# and options like "check --qgroup-report"
-> +_require_btrfs_subcommand()
-
-I'd prefer a name similar to _require_xfs_io_command, e.g.
-_require_btrfs_command, "subcommand" seems not necessary to me.
-
->  {
-> -	cmd=$1
-> -	_require_command "$BTRFS_UTIL_PROG" btrfs
->  	if [ -z "$1" ]; then
-> -		return 1;
-> +		echo "Usage: _require_btrfs_subcommand command [subcommand]" 1>&2
-> +		exit 1
->  	fi
-> -	$BTRFS_UTIL_PROG $cmd --help >/dev/null 2>&1
-> +	cmd=$1
-> +	param=$2
+> diff --git a/tests/overlay/017 b/tests/overlay/017
+> new file mode 100755
+> index 00000000..1dbde766
+> --- /dev/null
+> +++ b/tests/overlay/017
+> @@ -0,0 +1,81 @@
+> +#! /bin/bash
+> +# FS QA Test 017
+> +#
+> +# Run fsstress on lower dir and top dir at the same time
+> +#
 > +
-> +	_require_command "$BTRFS_UTIL_PROG" btrfs
-> +	$BTRFS_UTIL_PROG $cmd --help &>/dev/null
->  	[ $? -eq 0 ] || _notrun "$BTRFS_UTIL_PROG too old (must support $cmd)"
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
 > +
-> +	test -z "$param" && return
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
-> +	# if $param is an option, replace leading "-"s for grep
-> +	if [ ${param:0:1} == "-" ]; then
-> +		param=$(echo $param | sed 's/^-*//')
-> +		$BTRFS_UTIL_PROG $cmd --help | grep $param > /dev/null || \
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs overlay
+> +_supported_os Linux
+> +_require_scratch
+> +
+> +# Remove all files from previous tests
+> +_scratch_mkfs
+> +
+> +lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
+> +mkdir -p $lowerdir
+> +
+> +_scratch_mount
+> +
+> +echo "Silence is golden"
+> +
+> +d_low=$lowerdir/fsstress
+> +d_top=$SCRATCH_MNT/fsstress
+> +mkdir -p $d_low $d_top
 
-Use "grep -w" to be safer? And "-q" instead of "> /dev/null"
+I think you need to create $d_low before mounting overlayfs. As online
+changes to lower dir is not supported. e.g.
 
-> +			_not_run "$BTRFS_UTIL_PROG too old (must support $cmd $param)"
+lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
+d_low=$lowerdir/fsstress
+d_top=$SCRATCH_MNT/fsstress
+mkdir -p $d_low
 
-$param here is without leading "-", so the _notrun message is kind of
-misleading. And _notrun not _not_run :)
+_scratch_mount
+
+> +
+> +echo $FSSTRESS_PROG -s 42 -d $d_low -p 4 -n 1000 -l100 -v > $seqres.full.1
+> +$FSSTRESS_PROG -s 42 -d $d_low -p 4 -n 1000 -l100 -v >> $seqres.full.1 2>&1 &
+> +
+> +echo $FSSTRESS_PROG -s 42 -d $d_top -p 4 -n 1000 -l100 -v > $seqres.full.2
+> +$FSSTRESS_PROG -s 42 -d $d_top -p 4 -n 1000 -l100 -v >> $seqres.full.2 2>&1 &
+> +
+> +ret=0
+> +if ! wait %1
+> +then
+> +        echo "--------------------------------------"       >>$seqres.full.1
+> +	echo "fsstress on lower directory returned $? - see $seqres.full.1"
+> +        echo "--------------------------------------"       >>$seqres.full.1
+> +	ret=1
+> +fi
+> +
+> +if ! wait %2
+> +then
+> +        echo "--------------------------------------"       >>$seqres.full.2
+> +	echo "fsstress on overlay directory returned $? - see $seqres.full.2"
+> +        echo "--------------------------------------"       >>$seqres.full.2
+> +	ret=1
+> +fi
+
+I'm not sure if we can depend on the return status from fsstress, as the
+documentation says this results in undefined behavior. I think we can
+skip all the return value check and set status to 0 and exit as long as
+fsstress processes exit and don't crash or deadlock the kernel.
+
+> +
+> +cat $seqres.full.1 $seqres.full.2 > $seqres.full
+> +rm $seqres.full.1 $seqres.full.2
+> +
+> +if [ "$ret" -eq 1 ]
+> +then
+> +	status=1
+> +else
+> +	status=0
+> +fi
+> +
+> +exit $status
+> diff --git a/tests/overlay/017.out b/tests/overlay/017.out
+> new file mode 100644
+> index 00000000..82228448
+> --- /dev/null
+> +++ b/tests/overlay/017.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 017
+> +Silence is golden
+> diff --git a/tests/overlay/group b/tests/overlay/group
+> index 5740d2a2..b310aebe 100644
+> --- a/tests/overlay/group
+> +++ b/tests/overlay/group
+> @@ -19,3 +19,4 @@
+>  014 auto quick copyup
+>  015 auto quick whiteout
+>  016 auto quick
+> +017 auto quick
+
+It runs for 10 minutes, not a "quick" test :)
 
 Thanks,
 Eryu
+> -- 
+> 2.11.0.rc0.7.gbe5a750
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
