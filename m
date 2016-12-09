@@ -1,85 +1,104 @@
-Received: from mail-wj0-f194.google.com ([209.85.210.194]:36295 "EHLO
-        mail-wj0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932667AbcLIHvM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 9 Dec 2016 02:51:12 -0500
-Received: by mail-wj0-f194.google.com with SMTP id j10so1120100wjb.3
-        for <fstests@vger.kernel.org>; Thu, 08 Dec 2016 23:51:12 -0800 (PST)
-MIME-Version: 1.0
-In-Reply-To: <20161209054055.GO4326@dastard>
-References: <1481204070-10881-1-git-send-email-amir73il@gmail.com> <20161209054055.GO4326@dastard>
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:35178 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932495AbcLIIvH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 9 Dec 2016 03:51:07 -0500
+Received: by mail-wm0-f67.google.com with SMTP id a20so2526385wme.2
+        for <fstests@vger.kernel.org>; Fri, 09 Dec 2016 00:51:07 -0800 (PST)
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 9 Dec 2016 09:51:05 +0200
-Message-ID: <CAOQ4uxiwxk8feL0UjzUyLSaPMm1DmvLYTwhu6To1ZEPO84QhKg@mail.gmail.com>
-Subject: Re: [PATCH] common: fix excluding test groups
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH v2] common: fix excluding test groups
+Date: Fri,  9 Dec 2016 10:50:46 +0200
+Message-Id: <1481273446-32502-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Dec 9, 2016 at 7:40 AM, Dave Chinner <david@fromorbit.com> wrote:
-> On Thu, Dec 08, 2016 at 03:34:30PM +0200, Amir Goldstein wrote:
->> The -x flag is used to exclude tests that belong to
->> certain groups from the test args list.
->>
->> When the test args list is expressed as a match pattern,
->> -x fails to exclude the tests that match the pattern
->> and belong to excluded groups.
->>
->> For example:
->> $ ./check -n -x xfs/??? | wc -l
->> 341
->> $ ./check -n -x fuzzers,dangerous_fuzzers xfs/??? | wc -l
->> 341
->>
->> After the fix:
->> $ ./check -n -x fuzzers,dangerous_fuzzers xfs/??? | wc -l
->> 315
->>
->> This bug seems to date back to this git repo epoc.
->>
->> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
->> ---
->>  check | 9 ++++++---
->>  1 file changed, 6 insertions(+), 3 deletions(-)
->>
->> diff --git a/check b/check
->> index 8f2a1bb..9732460 100755
->> --- a/check
->> +++ b/check
->> @@ -158,11 +158,14 @@ _timestamp()
->>  _prepare_test_list()
->>  {
->>       unset list
->> +     touch $tmp.list
->>       # Tests specified on the command line
->>       if [ -s $tmp.arglist ]; then
->> -             cat $tmp.arglist > $tmp.list
->> -     else
->> -             touch $tmp.list
->> +             # flatten multi tests line (tests/$fs/???) to 1 test per line
->> +             list=$(cat $tmp.arglist)
->> +             for t in $list; do
->> +                     echo "$t" >> $tmp.list
->> +             done
->
-> Shouldn't the wildcard be evaluated when the CLI argument is being
-> processed and cheked against the group file contents, not hidden in
-> this code? i.e. in the CLI argument processing section starting
-> here:
->
-> # Process tests from command line now.
-> if $have_test_arg; then
-> ....
->
+The -x flag is used to exclude tests that belong to
+certain groups from the test args list.
 
-Yes, you are right.
+When the test args list is expressed as a match pattern,
+-x fails to exclude the tests that match the pattern
+and belong to excluded groups.
 
-The test:
+For example:
+$ ./check -n xfs/??? | wc -l
+341
+$ ./check -n -x fuzzers,dangerous_fuzzers xfs/??? | wc -l
+341
 
-if egrep "^$test_name" $group_file >/dev/null ; then
-                               # in group file ... OK
+After the fix:
+$ ./check -n -x fuzzers,dangerous_fuzzers xfs/??? | wc -l
+315
 
-is lousy if $test_name is ???
+This bug seems to date back to this git repo epoc.
 
-I moved the expansion to the right place.
+The fix also sorts out filtering of test that are not found
+in group files for the patten match input.
+
+For example:
+$ ./check xfs/001*
+...
+xfs/001	 2s
+xfs/001.out	 [failed, exit status 127] - no qualified output
+
+After the fix:
+$ ./check -n xfs/001*
+xfs/001.out - unknown test, ignored
+...
+xfs/001 2s
+
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ check | 30 ++++++++++++++++++------------
+ 1 file changed, 18 insertions(+), 12 deletions(-)
+
+v2:
+- Expand test match pattern when processing arglist
+
+v1:
+- Expand test match pattern before excluding groups
+
+diff --git a/check b/check
+index 8f2a1bb..1d08718 100755
+--- a/check
++++ b/check
+@@ -281,18 +281,24 @@ if $have_test_arg; then
+ 			status=1
+ 			exit $status
+ 			;;
+-		*)	test_dir=`dirname $1`
+-			test_dir=${test_dir#$SRC_DIR/*}
+-			test_name=`basename $1`
+-			group_file=$SRC_DIR/$test_dir/group
+-
+-			if egrep "^$test_name" $group_file >/dev/null ; then
+-				# in group file ... OK
+-				echo $SRC_DIR/$test_dir/$test_name >>$tmp.arglist
+-			else
+-				# oops
+-				echo "$1 - unknown test, ignored"
+-			fi
++		*)	# Expand test pattern (e.g. xfs/???, *fs/001)
++			list=$(cd $SRC_DIR; echo $1)
++			for t in $list; do
++				test_dir=`dirname $t`
++				test_dir=${test_dir#$SRC_DIR/*}
++				test_name=`basename $t`
++				group_file=$SRC_DIR/$test_dir/group
++
++				if egrep "^$test_name" $group_file >/dev/null
++				then
++					# in group file ... OK
++					echo $SRC_DIR/$test_dir/$test_name \
++						>>$tmp.arglist
++				else
++					# oops
++					echo "$t - unknown test, ignored"
++				fi
++			done
+ 			;;
+ 		esac
+ 
+-- 
+2.7.4
+
