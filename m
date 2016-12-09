@@ -1,201 +1,52 @@
-Received: from mx1.redhat.com ([209.132.183.28]:55476 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932457AbcLIRR6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 9 Dec 2016 12:17:58 -0500
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH] fstests: xfs_fsr SWAPEXT fails when temp forkoff smaller than target
-Date: Sat, 10 Dec 2016 01:17:53 +0800
-Message-Id: <1481303873-11981-1-git-send-email-zlang@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Received: from mfb01-md.ns.itscom.net ([175.177.155.109]:51647 "EHLO
+        mfb01-md.ns.itscom.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933872AbcLIRfV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 9 Dec 2016 12:35:21 -0500
+Received: from mail04-md.ns.itscom.net (mail04-md.ns.itscom.net [175.177.155.114])
+        by mfb01-md.ns.itscom.net (Postfix) with ESMTP id BB3D723813E
+        for <fstests@vger.kernel.org>; Sat, 10 Dec 2016 02:30:06 +0900 (JST)
+From: "J. R. Okajima" <hooanon05g@gmail.com>
+Subject: Re: [PATCH] overlay: stress test changes to top and bottom layers simultaneously
+In-Reply-To: <20161208141639.tzblbtwlqyzhckrm@thunk.org>
+References: <20161208035844.18544-1-tytso@mit.edu> <20161208043739.GF29149@eguan.usersys.redhat.com> <CAOQ4uxhKvQKMqUtGS+meRyt3WRzH=-DkGndCqmEUD1d+v1_Dog@mail.gmail.com> <20161208141639.tzblbtwlqyzhckrm@thunk.org>
+Date: Sat, 10 Dec 2016 02:30:03 +0900
+Message-ID: <14481.1481304603@jrobl>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Amir Goldstein <amir73il@gmail.com>, Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-If there's a file under a parent dir, but before running xfs_fsr the
-parent dir's attr is changed(grown), and these attrs will be inherited
-by new files. Then xfs_fsr's temp file and target file will have
-different attrs.
 
-At this moment, if the data already fill whole data area, then there
-is not enough space to move di_forkoff to data direction, swap the
-extents between temp and target file will fail.
+"Theodore Ts'o":
+> Since the use of unionfs is deprecated, I didn't bother to test it,
+> although I could if someone was really curious whether it would BUG or
+> not.  (Given that both wrapfs and sdcardfs did BUG, I'm pretty that
+> unionfs, as a wrapfs derivitive, also would go down in flames.  It
+> might also be fun, since there are some Ubuntu Docker users using
+> AUFS, to see if AUFS --- as another wrapfs derivitive --- might also
+> be succeptible.)
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
+If you mean that aufs is based upon wrapfs or unionfs, then it is not
+true. aufs1 was based upon unionfs acutally, but aufs2 and later are
+totally re-written and added many new approaches and ideas.
 
-Hi,
+Some of those new approaches are opposite of overlayfs' ones.
+For example,
+- overlayfs added d_real_inode(), lock_inode() and others into VFS. They
+  aim to get the layers' inode via overlayfs' dentry. Honestly speaking
+  I am afraid they confuse people who were calling d_inode().
+- aufs aims to be an ordinary filesystem against VFS, and VFS uses its
+  dentry as usual. Acessing the layers' inode is totally hidden within
+  aufs and VFS doesn't care about it.
+  One exception aufs modifies VFS (actually MM module) is vma_struct
+  which contains a file pointer to point the file mmapped. Aufs adds
+  another file pointer to show the path under procfs.
 
-The original case use SELinux to test. For common test, I change to use
-ACL. As my test, when inode size is 512 bytes(or more), it'll increase
-enough bytes to attr area, if add new default ACL attr.
+Also aufs allows users to modify the files on the layers direcly,
+ie. bypassing aufs. Next time when user accesses those files, aufs
+re-validates it and detect the changes. Additioanlly aufs has
+another option to discard the caches when the files on the layers
+changed directly.
 
-The "enough bytes" I expect is 16+ bytes. Because an extent is 128 bits,
-I keep using extent data format, so the growing step is 16 bytes. When I
-try to fill whole data area, at last (di_forkoff - size of di_u) will be
-in [0, 16).
 
-As my test, 256 bytes inode size can't always reproduce this bug(especial=
-ly
-in RHEL-6). But 512 (or more) inode size can help that.
-
-Thanks,
-Zorro
-
- tests/xfs/999     | 115 ++++++++++++++++++++++++++++++++++++++++++++++++=
-++++++
- tests/xfs/999.out |   2 +
- tests/xfs/group   |   1 +
- 3 files changed, 118 insertions(+)
- create mode 100755 tests/xfs/999
- create mode 100644 tests/xfs/999.out
-
-diff --git a/tests/xfs/999 b/tests/xfs/999
-new file mode 100755
-index 0000000..d896287
---- /dev/null
-+++ b/tests/xfs/999
-@@ -0,0 +1,115 @@
-+#! /bin/bash
-+# FS QA Test 999
-+#
-+# Test xfs_fsr when temp's attr is larger than the target attr area, and
-+# without enough room to move di_forkoff to date direction. Then it'll f=
-ail
-+# to swap extents between temp and target files.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=3D`basename $0`
-+seqres=3D$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=3D`pwd`
-+tmp=3D/tmp/$$
-+status=3D1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_supported_os Linux
-+_require_scratch
-+# need a user to set ACL
-+_require_user
-+_require_acls
-+_require_xfs_io_command "falloc"
-+
-+# use fixed attr test parameters, 512+ bytes inode size is helpful
-+# to alloc more default ACL space
-+_scratch_mkfs_xfs -i size=3D512,attr=3D2 >> $seqres.full 2>&1
-+# Manually mount to avoid effect from some mount options
-+mount $SCRATCH_DEV $SCRATCH_MNT
-+
-+rm -f $SCRATCH_MNT/$seq.test 2>/dev/null
-+# remove all default ACL
-+setfacl -k $SCRATCH_MNT
-+sync
-+touch $SCRATCH_MNT/$seq.test
-+INODE_NUM=3D`ls -i $SCRATCH_MNT/$seq.test | awk '{print $1}'`
-+
-+# unmount SCRATCH_DEV to get the di_forkoff size
-+_scratch_unmount
-+FORK_OFF=3D`_scratch_xfs_db -c "inode $INODE_NUM" -c "print core.forkoff=
-" | awk -F "=3D" '{print $2}'`
-+# the attributes are stored in the inode=E2=80=99s literal area starting=
- a forkoff * 8
-+FORK_OFF=3D$((FORK_OFF * 8))
-+# an on-disk extent takes 128 bits =3D 16 bytes, get the max in-fork ext=
-ents to
-+# keep using extent data format
-+MAX_EXTENTS=3D$((FORK_OFF / 16))
-+
-+mount $SCRATCH_DEV $SCRATCH_MNT
-+
-+# fragment the file by writing backwards, and alloc MAX_EXTENTS extents =
-to
-+# make the di_u nearly/already touch the di_forkoff
-+for i in `seq $((MAX_EXTENTS - 1)) -1 0`; do
-+	$XFS_IO_PROG -f -c "falloc $((i * 262144)) 262144" \
-+		$SCRATCH_MNT/$seq.test >> $seqres.full
-+done
-+
-+# add new default ACL to $SCRATCH_MNT, for xfs_fsr will use a *temp* fil=
-e
-+# which takes more di_a field (smaller di_forkoff than *target* file)
-+# Generally this operation need to grow attr area ~32 bytes
-+setfacl --set d:u:fsgqa:rwx,d:g:fsgqa:rwx,d:o:rwx $SCRATCH_MNT
-+sync
-+
-+# At this moment, xfs_fsr will hit below situation:
-+#
-+# target:         forkoff
-+#                    |
-+# +------------------v--------+
-+# |       di_u       |  di_a  |
-+# +------------------^--------+
-+#
-+# temp:       forkoff
-+#                |
-+# +--------------v------------+
-+# |       di_u   |     di_a   |
-+# +--------------^------------+
-+$XFS_FSR_PROG $SCRATCH_MNT/$seq.test
-+
-+dmesg | tail -10 >> $seqres.full
-+echo "Silence is golden"
-+
-+# success, all done
-+status=3D0
-+exit
-diff --git a/tests/xfs/999.out b/tests/xfs/999.out
-new file mode 100644
-index 0000000..3b276ca
---- /dev/null
-+++ b/tests/xfs/999.out
-@@ -0,0 +1,2 @@
-+QA output created by 999
-+Silence is golden
-diff --git a/tests/xfs/group b/tests/xfs/group
-index c237b50..ad01b8e 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -334,3 +334,4 @@
- 345 auto quick clone
- 346 auto quick clone
- 347 auto quick clone
-+999 auto quick fsr
---=20
-2.7.4
-
+J. R. Okajima
