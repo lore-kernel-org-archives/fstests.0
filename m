@@ -1,122 +1,297 @@
-Received: from ipmail05.adl6.internode.on.net ([150.101.137.143]:61931 "EHLO
-        ipmail05.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S932427AbcLHWWy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 8 Dec 2016 17:22:54 -0500
-Date: Fri, 9 Dec 2016 09:22:49 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 6/6] libxcmd: add non-iterating user commands
-Message-ID: <20161208222249.GJ4219@dastard>
-References: <20161207034724.1613-1-david@fromorbit.com>
- <20161207034724.1613-7-david@fromorbit.com>
- <CAOQ4uxj2AROKtg=ZE64Q-RJbMaiRdP7SvoosmvCD4C1h-X-4bA@mail.gmail.com>
- <CAOQ4uxhrtaHauNJypezpFAT0VCN61oZLFKtxuBLw32jn7FOSFw@mail.gmail.com>
- <20161207201637.GI4219@dastard>
- <CAOQ4uxh+QX5uzJCXtEG8vg0qhUTgQ0QG1ZWDkr1ryH0kQxi0ZA@mail.gmail.com>
+Received: from cn.fujitsu.com ([222.73.24.84]:33352 "EHLO song.cn.fujitsu.com"
+        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+        id S1752013AbcLIBUd (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 8 Dec 2016 20:20:33 -0500
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Subject: [PATCH v3 2/2] fstests: btrfs: Use _require_btrfs_qgroup_report to replace open code
+Date: Fri,  9 Dec 2016 09:19:59 +0800
+Message-Id: <20161209011959.32267-1-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxh+QX5uzJCXtEG8vg0qhUTgQ0QG1ZWDkr1ryH0kQxi0ZA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: linux-xfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, eguan@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Dec 08, 2016 at 12:14:24PM +0200, Amir Goldstein wrote:
-> On Wed, Dec 7, 2016 at 10:16 PM, Dave Chinner <david@fromorbit.com> wrote:
-> > On Wed, Dec 07, 2016 at 04:21:31PM +0200, Amir Goldstein wrote:
-> ...
-> >>
-> >> 1. Do you think that xfs_io should error on -c "open foo"  to force
-> >> explicit -C "open foo"?
-> >
-> > No.
-> >
-> >>     it can't be breaking any existing users, because -c "open foo" is
-> >> already very broken.
-> >
-> > Maybe so, but there are users of it. e.g:
-> >
-> > $ git grep open |grep XFS_IO
-> > tests/overlay/001:      $XFS_IO_PROG -c "open" $f >>$seqres.full
-> > $
-> >
-> > This is precisely why I made oneshot commands just work silently
-> > with "-c" - who knows what will break if we start rejecting commands
-> > that otherwise work just fine when there is only one open file....
-> >
-> 
-> Interesting example. Here -c "open" is actually an 'alias' for
-> -c "stat", which could have been non one shot.
-> Nevertheless, I see your point.
-> 
-> >> 2. You marked mmap ONE_SHOT, but not all the m* commands.
-> >>    Stands to reason that they should all be marked ONE_SHOT. because iterating
-> >>    the file table has nothing to do with the m* commands. no?
-> >
-> > It is not clear to me what the correct thing to do here is, I don't
-> > have the time right now to look into it, so I didn't
-> > change mread/mwrite/msync behaviour. If it's broken before it is
-> > still broken now.
-> >
-> 
-> Very well, but I am not sure why mmap should be marked one shot?
+Introduce new _require_btrfs_qgroup_report function, which will check
+the accessibility to "btrfs check --qgroup-report", then set a global
+flag to info _check_scratch_fs() to do extra qgroup check.
 
-Look at the help documentation:
+Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+---
+v2:
+  Use "${RESULT_DIR}/require_scratch.require_qgroup_report" instead of
+  global variant
+  Rebased to latest master
+  Replace btrfsck with $BTRFS_UTIL_PROG check.
+v3:
+  Fix a rebase error, which removes a necessary check of btrfs/042
+---
+ check           |  4 ++--
+ common/btrfs    | 22 +++++++++++++++++++++-
+ common/rc       |  5 +++--
+ tests/btrfs/022 |  4 ++++
+ tests/btrfs/028 |  5 ++---
+ tests/btrfs/042 |  1 +
+ tests/btrfs/099 |  1 +
+ tests/btrfs/104 | 20 +++++---------------
+ tests/btrfs/122 |  9 +++------
+ tests/btrfs/123 |  5 ++---
+ tests/btrfs/126 |  1 +
+ 11 files changed, 45 insertions(+), 32 deletions(-)
 
-$ xfs_io -c "help mmap"
-mmap [N] | [-rwx] [-s size] [off len] -- mmap a range in the current file, show mappings
-
- maps a range within the current file into memory
-
- Example:
- 'mmap -rw 0 1m' - maps one megabyte from the start of the current file
-....
-
-It explicitly and repeatedly says "current file" in the
-description of it's operation. Any typical user is going to read
-that and think that it means "current open file", not "map a range
-on all open files".
-
-> Possibly, mmap caught your filters because it is CMD_NOFILE_OK,
-> but in fact, the only case where mmap with no open files works is
-> after mmaping files and closing all open files.
-
-Well, yes. We've come across applications that do exactly this
-in the past, and had to simulate their behaviours. It's entirely
-reasonable to want to list or change the active mappings after all
-the open files have been closed.
-
-> Currently, this command:
-> $ xfs_io -c "mmap 0 4" -C "mmap" foo bar
-> 
-> Results in:
-> [000] 0x7f17319ae000 - 0x7f17319ae004 rwx             bar (0 : 4)
-> 
-> IMO, it would be more useful if it resulted in:
->  000  0x7f27e289d000 - 0x7f27e289d004 rwx             foo (0 : 4)
-> [001] 0x7f27e289c000 - 0x7f27e289c004 rwx             bar (0 : 4)
-> 
-> Which will allow following up with more specific -C m* commands
-> and it would be more consistent with the result of:
-> $ xfs_io -C "file" foo bar
->  000  foo            (foreign,non-sync,non-direct,read-write)
-> [001] bar            (foreign,non-sync,non-direct,read-write)
-
-Maybe so but, unfortunately, mapping tables are different to the
-file tables.
-
-As I have already said: it's not clear what the correct behaviour
-here is because mapping commands /don't iterate the mapping table/.
-The exception is the mmap command, and that mapping table iteration
-behaviour is the reason I changed mmap to be a oneshot command,
-otherwise it does stupid things when multiple files are open
-and they are iterated.
-
-If you want to have mmap commands do sane things for iteration, then
-you need to address the file vs mapping iteration problem, not hack
-special one-off behaviours into the mmap commands.
-
--Dave.
+diff --git a/check b/check
+index 8f2a1bb..76eb054 100755
+--- a/check
++++ b/check
+@@ -405,11 +405,11 @@ _check_filesystems()
+ {
+ 	if [ -f ${RESULT_DIR}/require_test ]; then
+ 		_check_test_fs || err=true
+-		rm -f ${RESULT_DIR}/require_test
++		rm -f ${RESULT_DIR}/require_test*
+ 	fi
+ 	if [ -f ${RESULT_DIR}/require_scratch ]; then
+ 		_check_scratch_fs || err=true
+-		rm -f ${RESULT_DIR}/require_scratch
++		rm -f ${RESULT_DIR}/require_scratch*
+ 	fi
+ }
+ 
+diff --git a/common/btrfs b/common/btrfs
+index 302edc6..a860228 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -40,6 +40,13 @@ _require_btrfs_command()
+ 	[ $? -eq 0 ] || _notrun "$BTRFS_UTIL_PROG too old (must support $cmd $param)"
+ }
+ 
++# Require extra check on btrfs qgroup numbers
++_require_btrfs_qgroup_report()
++{
++	_require_btrfs_command check --qgroup-report
++	touch ${RESULT_DIR}/require_scratch.require_qgroup_report
++}
++
+ _run_btrfs_util_prog()
+ {
+ 	run_check $BTRFS_UTIL_PROG $*
+@@ -97,7 +104,20 @@ _check_btrfs_filesystem()
+ 		mountpoint=`_umount_or_remount_ro $device`
+ 	fi
+ 
+-	btrfsck $device >$tmp.fsck 2>&1
++	if [ -f ${RESULT_DIR}/require_scratch.require_qgroup_report ]; then
++		$BTRFS_UTIL_PROG check $device --qgroup-report > $tmp.qgroup_report 2>&1
++		if grep -qE "Counts for qgroup.*are different" $tmp.qgroup_report ; then
++			echo "_check_btrfs_filesystem: filesystem on $device has wrong qgroup numbers (see $seqres.full)"
++			echo "_check_btrfs_filesystem: filesystem on $device has wrong qgroup numbers" \
++				>> $seqres.full
++			echo "*** qgroup_report.$FSTYP output ***"	>>$seqres.full
++			cat $tmp.qgroup_report				>>$seqres.full
++			echo "*** qgroup_report.$FSTYP output ***"	>>$seqres.full
++		fi
++		rm -f $tmp.qgroup_report
++	fi
++
++	$BTRFS_UTIL_PROG check $device >$tmp.fsck 2>&1
+ 	if [ $? -ne 0 ]; then
+ 		echo "_check_btrfs_filesystem: filesystem on $device is inconsistent (see $seqres.full)"
+ 
+diff --git a/common/rc b/common/rc
+index 2719b23..b50283c 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1222,8 +1222,9 @@ _notrun()
+ {
+     echo "$*" > $seqres.notrun
+     echo "$seq not run: $*"
+-    rm -f ${RESULT_DIR}/require_test
+-    rm -f ${RESULT_DIR}/require_scratch
++    rm -f ${RESULT_DIR}/require_test*
++    rm -f ${RESULT_DIR}/require_scratch*
++
+     status=0
+     exit
+ }
+diff --git a/tests/btrfs/022 b/tests/btrfs/022
+index 56d4f3d..9abad6c 100755
+--- a/tests/btrfs/022
++++ b/tests/btrfs/022
+@@ -43,6 +43,7 @@ _cleanup()
+ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch
++_require_btrfs_qgroup_report
+ 
+ rm -f $seqres.full
+ 
+@@ -125,16 +126,19 @@ _scratch_mkfs > /dev/null 2>&1
+ _scratch_mount
+ _basic_test
+ _scratch_unmount
++_check_scratch_fs
+ 
+ _scratch_mkfs > /dev/null 2>&1
+ _scratch_mount
+ _rescan_test
+ _scratch_unmount
++_check_scratch_fs
+ 
+ _scratch_mkfs > /dev/null 2>&1
+ _scratch_mount
+ _limit_test_exceed
+ _scratch_unmount
++_check_scratch_fs
+ 
+ _scratch_mkfs > /dev/null 2>&1
+ _scratch_mount
+diff --git a/tests/btrfs/028 b/tests/btrfs/028
+index 1425609..a3d9a27 100755
+--- a/tests/btrfs/028
++++ b/tests/btrfs/028
+@@ -51,6 +51,7 @@ rm -f $seqres.full
+ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch
++_require_btrfs_qgroup_report
+ 
+ _scratch_mkfs
+ _scratch_mount
+@@ -86,9 +87,7 @@ _run_btrfs_util_prog filesystem sync $SCRATCH_MNT
+ 
+ _scratch_unmount
+ 
+-# generate a qgroup report and look for inconsistent groups
+-$BTRFS_UTIL_PROG check --qgroup-report $SCRATCH_DEV 2>&1 | \
+-	grep -E "Counts for qgroup.*are different"
++# qgroup will be checked at _check_scratch_fs() by fstest.
+ echo "Silence is golden"
+ status=0
+ 
+diff --git a/tests/btrfs/042 b/tests/btrfs/042
+index 498ccc9..cf3eac2 100755
+--- a/tests/btrfs/042
++++ b/tests/btrfs/042
+@@ -43,6 +43,7 @@ _cleanup()
+ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch
++_require_btrfs_qgroup_report
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/btrfs/099 b/tests/btrfs/099
+index 70f07b5..65ea79b 100755
+--- a/tests/btrfs/099
++++ b/tests/btrfs/099
+@@ -46,6 +46,7 @@ _cleanup()
+ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch
++_require_btrfs_qgroup_report
+ 
+ # Use big blocksize to ensure there is still enough space left for metadata
+ # space reserve.
+diff --git a/tests/btrfs/104 b/tests/btrfs/104
+index 6afaa02..e6a6d3b 100755
+--- a/tests/btrfs/104
++++ b/tests/btrfs/104
+@@ -58,6 +58,7 @@ rm -f $seqres.full
+ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch
++_require_btrfs_qgroup_report
+ 
+ rm -f $seqres.full
+ 
+@@ -145,21 +146,10 @@ _scratch_cycle_mount
+ # referenced above.
+ _run_btrfs_util_prog subvolume delete $SCRATCH_MNT/snap1
+ 
+-# There is no way from userspace to force btrfs_drop_snapshot to run
+-# at a given time (even via mount/unmount). We must wait for it to
+-# start and complete. This is the shortest time on my tests systems I
+-# have found which always allows drop_snapshot to run to completion.
+-sleep 45
++# "btrfs filesystem sync" will trigger subvolume deletion
++_run_btrfs_util_prog filesystem sync $SCRATCH_MNT
+ 
+-_scratch_unmount
+-
+-# generate a qgroup report and look for inconsistent groups
+-#  - don't use _run_btrfs_util_prog here as it captures the output and
+-#    we need to grep it.
+-$BTRFS_UTIL_PROG check --qgroup-report $SCRATCH_DEV 2>&1 | \
+-			grep -E -q "Counts for qgroup.*are different"
+-if [ $? -ne 0 ]; then
+-	status=0
+-fi
++# Qgroup will be checked by fstest at _check_scratch_fs()
+ 
++status=0
+ exit
+diff --git a/tests/btrfs/122 b/tests/btrfs/122
+index 82252ab..6a7f17f 100755
+--- a/tests/btrfs/122
++++ b/tests/btrfs/122
+@@ -49,6 +49,7 @@ rm -f $seqres.full
+ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch
++_require_btrfs_qgroup_report
+ 
+ rm -f $seqres.full
+ 
+@@ -78,11 +79,7 @@ _run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT "$SCRATCH_MNT/snaps/snap2"
+ 
+ _scratch_unmount
+ 
+-# generate a qgroup report and look for inconsistent groups
+-$BTRFS_UTIL_PROG check --qgroup-report $SCRATCH_DEV 2>&1 | \
+-			grep -q -E "Counts for qgroup.*are different"
+-if [ $? -ne 0 ]; then
+-	status=0
+-fi
+ 
++# qgroup will be checked by fstest at _check_scratch_fs()
++status=0
+ exit
+diff --git a/tests/btrfs/123 b/tests/btrfs/123
+index e89d541..52d87fb 100755
+--- a/tests/btrfs/123
++++ b/tests/btrfs/123
+@@ -53,6 +53,7 @@ rm -f $seqres.full
+ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch
++_require_btrfs_qgroup_report
+ 
+ _scratch_mkfs
+ # Need to use inline extents to fill metadata rapidly
+@@ -76,9 +77,7 @@ _run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
+ _run_btrfs_util_prog balance start -d $SCRATCH_MNT
+ 
+ _scratch_unmount
+-# generate a qgroup report and look for inconsistent groups
+-$BTRFS_UTIL_PROG check --qgroup-report $SCRATCH_DEV 2>&1 | \
+-		grep -E "Counts for qgroup.*are different"
++# qgroup will be check at _check_scratch_fs() by fstest
+ 
+ # success, all done
+ status=0
+diff --git a/tests/btrfs/126 b/tests/btrfs/126
+index cc51f4a..c06c00b 100755
+--- a/tests/btrfs/126
++++ b/tests/btrfs/126
+@@ -49,6 +49,7 @@ rm -f $seqres.full
+ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch
++_require_btrfs_qgroup_report
+ 
+ _scratch_mkfs
+ # Use enospc_debug mount option to trigger restrict space info check
 -- 
-Dave Chinner
-david@fromorbit.com
+2.7.4
+
+
+
