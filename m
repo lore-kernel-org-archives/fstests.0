@@ -1,154 +1,94 @@
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35989 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753367AbcLKQi1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 11 Dec 2016 11:38:27 -0500
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH] overlay: test unstable inode number
-Date: Sun, 11 Dec 2016 18:38:00 +0200
-Message-Id: <1481474280-3821-1-git-send-email-amir73il@gmail.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:46645 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752345AbcLKSf2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 11 Dec 2016 13:35:28 -0500
+Date: Sun, 11 Dec 2016 10:34:26 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH v4 0/5] Add copy_file_range() tests
+Message-ID: <20161211183426.GE25841@birch.djwong.org>
+References: <20161208184909.23321-1-Anna.Schumaker@Netapp.com>
+ <CAOQ4uxj5ct3-jYzj7RKip5oKqfX-U+jTXqhXDPSR2qOeSPbXMg@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxj5ct3-jYzj7RKip5oKqfX-U+jTXqhXDPSR2qOeSPbXMg@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Anna Schumaker <Anna.Schumaker@netapp.com>, fstests <fstests@vger.kernel.org>, linux-nfs@vger.kernel.org, Christoph Hellwig <hch@infradead.org>
 List-ID: <fstests@vger.kernel.org>
 
-Introduce a new test to demonstrate a known issue with overlayfs:
-- stat file A shows inode number X
-- modify A to trigger copy up
-- stat file A shows inode number Y != X
+On Sun, Dec 11, 2016 at 11:03:50AM +0200, Amir Goldstein wrote:
+> On Thu, Dec 8, 2016 at 8:49 PM, Anna Schumaker
+> <Anna.Schumaker@netapp.com> wrote:
+> > These tests exercise the copy_file_range() system call, and check copying
+> > data to both a new file and overwriting data inside an existing file.
+> >
+> 
+> Hi Anna,
+> 
+> Both dedup and reflink have some generic tests to check for invalid cases
+> generic/{157,158}.
+> I wonder if there are any other dedup/reflink tests that should be
+> duplicated for copy_range. Darrick?
 
-Also test if d_ino of readdir entries changes after copy up.
+Yes, feel free to borrow from g/157. :)
 
-There is a POC patch by Miklos Szeredi that fixes this issue.
----
- tests/overlay/018     | 96 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/018.out |  5 +++
- tests/overlay/group   |  1 +
- 3 files changed, 102 insertions(+)
- create mode 100755 tests/overlay/018
- create mode 100644 tests/overlay/018.out
+> I also wonder if it would make sense to "deduplicate" some of these test
+> to repeat the same relevant checks for all 3 methods.
 
-diff --git a/tests/overlay/018 b/tests/overlay/018
-new file mode 100755
-index 0000000..4b358e5
---- /dev/null
-+++ b/tests/overlay/018
-@@ -0,0 +1,96 @@
-+#! /bin/bash
-+# FSQA Test No. 018
-+#
-+# Test unstable inode number
-+#
-+# This simple test demonstrates a known issue with overlayfs:
-+# - stat file A shows inode number X
-+# - modify A to trigger copy up
-+# - stat file A shows inode number Y != X
-+#
-+# Also test if d_ino of readdir entries changes after copy up.
-+#
-+#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2016 CTERA Networks. All Rights Reserved.
-+# Author: Amir Goldstein <amir73il@gmail.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+
-+# Create our test files
-+lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
-+mkdir -p $lowerdir
-+mkdir $lowerdir/dir
-+touch $lowerdir/file
-+ln -s $lowerdir/file $lowerdir/symlink
-+mkfifo $lowerdir/fifo
-+
-+
-+_scratch_mount
-+
-+cd $SCRATCH_MNT
-+
-+rm -f $tmp.before $tmp.after
-+
-+# Test stable stat(2) st_ino
-+
-+# Record inode numbers before and after copy up
-+for f in dir file symlink fifo; do
-+	ls -id $f >> $tmp.before
-+	# chown -h modifies all those file types
-+	chown -h fsgqa $f
-+	ls -id $f >> $tmp.after
-+done
-+
-+# Test stable readdir(3)/getdents(2) d_ino
-+
-+# find by inode number - expect to find file by inode number
-+cat $tmp.before | while read ino f; do
-+	find $f -inum $ino -maxdepth 0
-+done
-+
-+# Compare before..after - expect silence
-+diff $tmp.before $tmp.after
-+
-+status=0
-+exit
-diff --git a/tests/overlay/018.out b/tests/overlay/018.out
-new file mode 100644
-index 0000000..75e80e7
---- /dev/null
-+++ b/tests/overlay/018.out
-@@ -0,0 +1,5 @@
-+QA output created by 018
-+dir
-+file
-+symlink
-+fifo
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 5740d2a..683b2fc 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -19,3 +19,4 @@
- 014 auto quick copyup
- 015 auto quick whiteout
- 016 auto quick
-+018 auto quick
--- 
-2.7.4
+You could refactor them but for two tests (dedupe is its own weird
+animal) I don't think it's worth the effort.
 
+--D
+
+> 
+> 
+> > The last patch is a duplicate of a patch I already submitted for the
+> > xfs_io utility.  It adds in fixes for the 'copy_range' command so error
+> > checking can work and so some copies won't loop forever.
+> >
+> > Thanks,
+> > Anna
+> >
+> > Anna Schumaker (5):
+> >   generic/392: Add copy to new file test
+> >   generic/393: Add small copies to new file test
+> >   generic/394: Add copy test that overwrites data
+> >   generic/395: Add a copy test for overwriting small amounts of data
+> >   generic/396: Add a copy test for invalid input
+> >
+> >  common/rc             |   6 +++
+> >  tests/generic/392     | 102 ++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/392.out |  26 +++++++++++++
+> >  tests/generic/393     |  83 ++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/393.out |  16 ++++++++
+> >  tests/generic/394     | 100 +++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/394.out |  17 +++++++++
+> >  tests/generic/395     |  87 ++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/395.out |  17 +++++++++
+> >  tests/generic/396     |  68 +++++++++++++++++++++++++++++++++
+> >  tests/generic/396.out |   8 ++++
+> >  tests/generic/group   |   5 +++
+> >  12 files changed, 535 insertions(+)
+> >  create mode 100755 tests/generic/392
+> >  create mode 100644 tests/generic/392.out
+> >  create mode 100755 tests/generic/393
+> >  create mode 100644 tests/generic/393.out
+> >  create mode 100755 tests/generic/394
+> >  create mode 100644 tests/generic/394.out
+> >  create mode 100755 tests/generic/395
+> >  create mode 100644 tests/generic/395.out
+> >  create mode 100644 tests/generic/396
+> >  create mode 100644 tests/generic/396.out
+> >
+> > --
+> > 2.10.2
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
