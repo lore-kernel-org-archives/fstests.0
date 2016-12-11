@@ -1,11 +1,11 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:33214 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753865AbcLKVxI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 11 Dec 2016 16:53:08 -0500
-Subject: [PATCH 3/7] reflink: fix quota tests to work properly
+Received: from aserp1040.oracle.com ([141.146.126.69]:30245 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753865AbcLKVxG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 11 Dec 2016 16:53:06 -0500
+Subject: [PATCH 1/7] ocfs2: test reflinking to inline data files
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Sun, 11 Dec 2016 13:53:04 -0800
-Message-ID: <148149318401.31093.3864124073555352683.stgit@birch.djwong.org>
+Date: Sun, 11 Dec 2016 13:52:51 -0800
+Message-ID: <148149317133.31093.439907074888693999.stgit@birch.djwong.org>
 In-Reply-To: <148149316504.31093.16129068344227450710.stgit@birch.djwong.org>
 References: <148149316504.31093.16129068344227450710.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -16,292 +16,180 @@ To: eguan@redhat.com, darrick.wong@oracle.com
 Cc: ocfs2-devel@oss.oracle.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Fix the reflink quota tests to su to the fsgqa user so that we actually
-test enforcement of quotas.  Seems that XFS enforces user quotas even
-if root is writing to a user file, whereas everything else lets root
-writes through.  Also clean up some of the variable usage and
-_require_user.
+Make sure that we can handle reflinking from and to inline-data files.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/generic/305     |    2 +-
- tests/generic/305.out |   30 +++++++++++++++---------------
- tests/generic/326     |    2 +-
- tests/generic/326.out |   30 +++++++++++++++---------------
- tests/generic/327     |   12 +++++++-----
- tests/generic/327.out |   12 ++++++------
- tests/generic/328     |   14 ++++++++------
- tests/generic/328.out |   28 ++++++++++++++--------------
- 8 files changed, 67 insertions(+), 63 deletions(-)
+ common/reflink       |    2 +
+ tests/ocfs2/001      |   88 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ocfs2/001.out  |   14 ++++++++
+ tests/ocfs2/Makefile |   20 +++++++++++
+ tests/ocfs2/group    |    1 +
+ 5 files changed, 124 insertions(+), 1 deletion(-)
+ create mode 100755 tests/ocfs2/001
+ create mode 100644 tests/ocfs2/001.out
+ create mode 100644 tests/ocfs2/Makefile
+ create mode 100644 tests/ocfs2/group
 
 
-diff --git a/tests/generic/305 b/tests/generic/305
-index d73d87f..9c3489b 100755
---- a/tests/generic/305
-+++ b/tests/generic/305
-@@ -51,7 +51,7 @@ _require_quota
- _require_nobody
+diff --git a/common/reflink b/common/reflink
+index 9d51729..d048045 100644
+--- a/common/reflink
++++ b/common/reflink
+@@ -197,7 +197,7 @@ _cp_reflink() {
+ 	file1="$1"
+ 	file2="$2"
  
- _repquota() {
--	repquota $SCRATCH_MNT | egrep '^(fsgqa|root|nobody)'
-+	repquota -O csv $SCRATCH_MNT | egrep '^(fsgqa|root|nobody)' | awk -F ',' '{print $1, $4, $5, $6}'
+-	cp --reflink=always -p "$file1" "$file2"
++	cp --reflink=always -p -f "$file1" "$file2"
  }
- rm -f $seqres.full
  
-diff --git a/tests/generic/305.out b/tests/generic/305.out
-index 0bfd620..fbd4e24 100644
---- a/tests/generic/305.out
-+++ b/tests/generic/305.out
-@@ -1,22 +1,22 @@
- QA output created by 305
- Format and mount
- Create the original files
--root      --    3072       0       0              7     0     0       
--nobody    --       0       0       0              1     0     0       
--fsgqa     --       0       0       0              1     0     0       
-+root 3072 0 0
-+nobody 0 0 0
-+fsgqa 0 0 0
- Change file ownership
--root      --       0       0       0              4     0     0       
--nobody    --       0       0       0              1     0     0       
--fsgqa     --    3072       0       0              4     0     0       
-+root 0 0 0
-+nobody 0 0 0
-+fsgqa 3072 0 0
- CoW one of the files
--root      --       0       0       0              4     0     0       
--nobody    --       0       0       0              1     0     0       
--fsgqa     --    3072       0       0              4     0     0       
-+root 0 0 0
-+nobody 0 0 0
-+fsgqa 3072 0 0
- Remount the FS to see if accounting changes
--root      --       0       0       0              4     0     0       
--nobody    --       0       0       0              1     0     0       
--fsgqa     --    3072       0       0              4     0     0       
-+root 0 0 0
-+nobody 0 0 0
-+fsgqa 3072 0 0
- Chown one of the files
--root      --       0       0       0              4     0     0       
--nobody    --    1024       0       0              2     0     0       
--fsgqa     --    2048       0       0              3     0     0       
-+root 0 0 0
-+nobody 1024 0 0
-+fsgqa 2048 0 0
-diff --git a/tests/generic/326 b/tests/generic/326
-index 8afc6a2..b86f6a2 100755
---- a/tests/generic/326
-+++ b/tests/generic/326
-@@ -52,7 +52,7 @@ _require_nobody
- _require_odirect
- 
- _repquota() {
--	repquota $SCRATCH_MNT | egrep '^(fsgqa|root|nobody)'
-+	repquota -O csv $SCRATCH_MNT | egrep '^(fsgqa|root|nobody)' | awk -F ',' '{print $1, $4, $5, $6}'
- }
- rm -f $seqres.full
- 
-diff --git a/tests/generic/326.out b/tests/generic/326.out
-index e771eb7..de7f20b 100644
---- a/tests/generic/326.out
-+++ b/tests/generic/326.out
-@@ -1,22 +1,22 @@
- QA output created by 326
- Format and mount
- Create the original files
--root      --    3072       0       0              7     0     0       
--nobody    --       0       0       0              1     0     0       
--fsgqa     --       0       0       0              1     0     0       
-+root 3072 0 0
-+nobody 0 0 0
-+fsgqa 0 0 0
- Change file ownership
--root      --       0       0       0              4     0     0       
--nobody    --       0       0       0              1     0     0       
--fsgqa     --    3072       0       0              4     0     0       
-+root 0 0 0
-+nobody 0 0 0
-+fsgqa 3072 0 0
- CoW one of the files
--root      --       0       0       0              4     0     0       
--nobody    --       0       0       0              1     0     0       
--fsgqa     --    3072       0       0              4     0     0       
-+root 0 0 0
-+nobody 0 0 0
-+fsgqa 3072 0 0
- Remount the FS to see if accounting changes
--root      --       0       0       0              4     0     0       
--nobody    --       0       0       0              1     0     0       
--fsgqa     --    3072       0       0              4     0     0       
-+root 0 0 0
-+nobody 0 0 0
-+fsgqa 3072 0 0
- Chown one of the files
--root      --       0       0       0              4     0     0       
--nobody    --    1024       0       0              2     0     0       
--fsgqa     --    2048       0       0              3     0     0       
-+root 0 0 0
-+nobody 1024 0 0
-+fsgqa 2048 0 0
-diff --git a/tests/generic/327 b/tests/generic/327
-index c165ad5..29706e9 100755
---- a/tests/generic/327
-+++ b/tests/generic/327
-@@ -48,9 +48,10 @@ _require_cp_reflink
- _require_fiemap
- _require_quota
- _require_nobody
-+_require_user
- 
- _repquota() {
--	repquota $SCRATCH_MNT | egrep '^(fsgqa|root|nobody)'
-+	repquota -O csv $SCRATCH_MNT | egrep "^($qa_user|root|nobody)" | awk -F ',' '{print $1, $4, $5, $6}'
- }
- rm -f $seqres.full
- 
-@@ -67,19 +68,20 @@ mkdir $testdir
- sz=1048576
- echo "Create the original files"
- $XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file1 >> $seqres.full
--chown fsgqa $testdir/file1
-+chown $qa_user $testdir/file1
- _cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
- _repquota
- _scratch_cycle_mount
-+quotaon $SCRATCH_MNT 2> /dev/null
- 
- echo "Set hard quota to prevent third reflink"
--setquota -u fsgqa 0 1024 0 0 $SCRATCH_MNT
-+setquota -u $qa_user 0 1024 0 0 $SCRATCH_MNT
- _repquota
- 
- echo "Try to reflink again"
- touch $testdir/file3
--chown fsgqa $testdir/file3
--_cp_reflink $testdir/file1 $testdir/file3 2>&1 | _filter_scratch
-+chown $qa_user $testdir/file3
-+su $qa_user -c "cp --reflink=always -f $testdir/file1 $testdir/file3" 2>&1 | _filter_scratch
- _repquota
- 
- # success, all done
-diff --git a/tests/generic/327.out b/tests/generic/327.out
-index 7160ff2..f4e145a 100644
---- a/tests/generic/327.out
-+++ b/tests/generic/327.out
-@@ -1,12 +1,12 @@
- QA output created by 327
- Format and mount
- Create the original files
--root      --       0       0       0              4     0     0       
--fsgqa     --    2048       0       0              2     0     0       
-+root 0 0 0
-+fsgqa 2048 0 0
- Set hard quota to prevent third reflink
--root      --       0       0       0              4     0     0       
--fsgqa     +-    2048       0    1024              2     0     0       
-+root 0 0 0
-+fsgqa 2048 0 1024
- Try to reflink again
- cp: failed to clone 'SCRATCH_MNT/test-327/file3' from 'SCRATCH_MNT/test-327/file1': Disk quota exceeded
--root      --       0       0       0              4     0     0       
--fsgqa     +-    2048       0    1024              3     0     0       
-+root 0 0 0
-+fsgqa 2048 0 1024
-diff --git a/tests/generic/328 b/tests/generic/328
-index 705368e..7800246 100755
---- a/tests/generic/328
-+++ b/tests/generic/328
-@@ -49,9 +49,10 @@ _require_fiemap
- _require_quota
- _require_nobody
- _require_odirect
-+_require_user
- 
- _repquota() {
--	repquota $SCRATCH_MNT | egrep '^(fsgqa|root|nobody)'
-+	repquota -O csv $SCRATCH_MNT | egrep "^($qa_user|root|nobody)" | awk -F ',' '{print $1, $4, $5, $6}'
- }
- rm -f $seqres.full
- 
-@@ -68,28 +69,29 @@ mkdir $testdir
- sz=1048576
- echo "Create the original files"
- $XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file1 >> $seqres.full
--chown fsgqa $testdir/file1
-+chown $qa_user $testdir/file1
- _cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
- _cp_reflink $testdir/file1 $testdir/file3 >> $seqres.full
- _repquota
- _scratch_cycle_mount
-+quotaon $SCRATCH_MNT 2> /dev/null
- 
- echo "Set hard quota to prevent rewrite"
--setquota -u fsgqa 0 1024 0 0 $SCRATCH_MNT
-+setquota -u $qa_user 0 1024 0 0 $SCRATCH_MNT
- _repquota
- 
- echo "Try to dio write the whole file"
--_pwrite_byte 0x62 0 $sz $testdir/file1 -d 2>&1 >> $seqres.full | \
-+su $qa_user -c '$XFS_IO_PROG -d -c "pwrite 0 '$((sz+65536))'" '$testdir'/file1' 2>&1 >> $seqres.full | \
- 	_filter_xfs_io_error
- _repquota
- 
- echo "Try to write the whole file"
--_pwrite_byte 0x62 0 $sz $testdir/file1 2>&1 >> $seqres.full | \
-+su $qa_user -c '$XFS_IO_PROG -c "pwrite 0 '$((sz+65536))'" '$testdir'/file1' 2>&1 >> $seqres.full | \
- 	_filter_xfs_io_error
- _repquota
- 
- echo "Set hard quota to allow rewrite"
--setquota -u fsgqa 0 8192 0 0 $SCRATCH_MNT
-+setquota -u $qa_user 0 8192 0 0 $SCRATCH_MNT
- _repquota
- 
- echo "Try to dio write the whole file"
-diff --git a/tests/generic/328.out b/tests/generic/328.out
-index 4630151..b7fe9f8 100644
---- a/tests/generic/328.out
-+++ b/tests/generic/328.out
-@@ -1,25 +1,25 @@
- QA output created by 328
- Format and mount
- Create the original files
--root      --       0       0       0              4     0     0       
--fsgqa     --    3072       0       0              3     0     0       
-+root 0 0 0
-+fsgqa 3072 0 0
- Set hard quota to prevent rewrite
--root      --       0       0       0              4     0     0       
--fsgqa     +-    3072       0    1024              3     0     0       
-+root 0 0 0
-+fsgqa 3072 0 1024
- Try to dio write the whole file
- pwrite: Disk quota exceeded
--root      --       0       0       0              4     0     0       
--fsgqa     +-    3072       0    1024              3     0     0       
-+root 0 0 0
-+fsgqa 3072 0 1024
- Try to write the whole file
- pwrite: Disk quota exceeded
--root      --       0       0       0              4     0     0       
--fsgqa     +-    3072       0    1024              3     0     0       
-+root 0 0 0
-+fsgqa 3072 0 1024
- Set hard quota to allow rewrite
--root      --       0       0       0              4     0     0       
--fsgqa     --    3072       0    8192              3     0     0       
-+root 0 0 0
-+fsgqa 3072 0 8192
- Try to dio write the whole file
--root      --       0       0       0              4     0     0       
--fsgqa     --    3072       0    8192              3     0     0       
-+root 0 0 0
-+fsgqa 3072 0 8192
- Try to write the whole file
--root      --       0       0       0              4     0     0       
--fsgqa     --    3072       0    8192              3     0     0       
-+root 0 0 0
-+fsgqa 3072 0 8192
+ # Reflink some file1 into file2
+diff --git a/tests/ocfs2/001 b/tests/ocfs2/001
+new file mode 100755
+index 0000000..afb9ce9
+--- /dev/null
++++ b/tests/ocfs2/001
+@@ -0,0 +1,88 @@
++#! /bin/bash
++# FS QA Test No. 001
++#
++# Ensure that reflink works correctly with inline-data files.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_supported_fs ocfs2
++_require_scratch_reflink
++_require_cp_reflink
++
++rm -f $seqres.full
++
++echo "Format and mount"
++_scratch_mkfs --fs-features=local,unwritten,refcount,inline-data > $seqres.full 2>&1
++tunefs.ocfs2 --query '%H' $SCRATCH_DEV | grep -q 'inline-data' || \
++	_notrun "Inline data is not supported."
++_scratch_mount >> $seqres.full 2>&1
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++
++sz=65536
++echo "Create the original files"
++$XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file1 >> $seqres.full
++echo x > $testdir/file2
++echo x > $testdir/file3
++echo y > $testdir/file4
++$XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file5 >> $seqres.full
++echo a > $testdir/file6
++_scratch_cycle_mount
++
++echo "reflink into the start of file2"
++_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
++
++echo "reflink past the stuff in file3"
++_reflink_range $testdir/file1 0 $testdir/file3 $sz $sz >> $seqres.full
++
++echo "reflink an inline-data file to a regular one"
++_cp_reflink $testdir/file4 $testdir/file5 >> $seqres.full
++
++echo "reflink an inline-data file to another inline-data file"
++_cp_reflink $testdir/file4 $testdir/file6 >> $seqres.full
++
++echo "Verify the whole mess"
++_scratch_cycle_mount
++md5sum $testdir/file* | _filter_scratch
++
++# success, all done
++status=0
++exit
+diff --git a/tests/ocfs2/001.out b/tests/ocfs2/001.out
+new file mode 100644
+index 0000000..99fa43a
+--- /dev/null
++++ b/tests/ocfs2/001.out
+@@ -0,0 +1,14 @@
++QA output created by 001
++Format and mount
++Create the original files
++reflink into the start of file2
++reflink past the stuff in file3
++reflink an inline-data file to a regular one
++reflink an inline-data file to another inline-data file
++Verify the whole mess
++2d61aa54b58c2e94403fb092c3dbc027  SCRATCH_MNT/test-001/file1
++2d61aa54b58c2e94403fb092c3dbc027  SCRATCH_MNT/test-001/file2
++4e68a2e24b6b0f386ab39d01d902293d  SCRATCH_MNT/test-001/file3
++009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file4
++009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file5
++009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file6
+diff --git a/tests/ocfs2/Makefile b/tests/ocfs2/Makefile
+new file mode 100644
+index 0000000..70a4f16
+--- /dev/null
++++ b/tests/ocfs2/Makefile
+@@ -0,0 +1,20 @@
++#
++# Copyright (c) 2016 Oracle.  All Rights Reserved.
++#
++
++TOPDIR = ../..
++include $(TOPDIR)/include/builddefs
++
++OCFS2_DIR = ocfs2
++TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(OCFS2_DIR)
++
++include $(BUILDRULES)
++
++install:
++	$(INSTALL) -m 755 -d $(TARGET_DIR)
++	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
++	$(INSTALL) -m 644 group $(TARGET_DIR)
++	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
++
++# Nothing.
++install-dev install-lib:
+diff --git a/tests/ocfs2/group b/tests/ocfs2/group
+new file mode 100644
+index 0000000..28e6807
+--- /dev/null
++++ b/tests/ocfs2/group
+@@ -0,0 +1 @@
++001 auto quick clone
 
