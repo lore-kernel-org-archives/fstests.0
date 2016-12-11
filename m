@@ -1,119 +1,154 @@
-Received: from mx1.redhat.com ([209.132.183.28]:55832 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750899AbcLKG64 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 11 Dec 2016 01:58:56 -0500
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 67D7B61B8A
-        for <fstests@vger.kernel.org>; Sun, 11 Dec 2016 06:58:55 +0000 (UTC)
-Received: from localhost (vpn1-5-48.pek2.redhat.com [10.72.5.48])
-        by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id uBB6wr8b017679
-        for <fstests@vger.kernel.org>; Sun, 11 Dec 2016 01:58:54 -0500
-Message-Id: <201612110658.uBB6wr8b017679@int-mx10.intmail.prod.int.phx2.redhat.com>
-Date: Sun, 11 Dec 2016 14:58:53 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: [ANNOUNCE] fstests: master branch updated to e6111674ea18
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="lNHgrpiV1RJx"
-Content-Disposition: inline
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:35989 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753367AbcLKQi1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 11 Dec 2016 11:38:27 -0500
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH] overlay: test unstable inode number
+Date: Sun, 11 Dec 2016 18:38:00 +0200
+Message-Id: <1481474280-3821-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+Introduce a new test to demonstrate a known issue with overlayfs:
+- stat file A shows inode number X
+- modify A to trigger copy up
+- stat file A shows inode number Y != X
 
---lNHgrpiV1RJx
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Also test if d_ino of readdir entries changes after copy up.
 
-Hi all,
+There is a POC patch by Miklos Szeredi that fixes this issue.
+---
+ tests/overlay/018     | 96 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/018.out |  5 +++
+ tests/overlay/group   |  1 +
+ 3 files changed, 102 insertions(+)
+ create mode 100755 tests/overlay/018
+ create mode 100644 tests/overlay/018.out
 
-The master branch of the xfstests repository at:
+diff --git a/tests/overlay/018 b/tests/overlay/018
+new file mode 100755
+index 0000000..4b358e5
+--- /dev/null
++++ b/tests/overlay/018
+@@ -0,0 +1,96 @@
++#! /bin/bash
++# FSQA Test No. 018
++#
++# Test unstable inode number
++#
++# This simple test demonstrates a known issue with overlayfs:
++# - stat file A shows inode number X
++# - modify A to trigger copy up
++# - stat file A shows inode number Y != X
++#
++# Also test if d_ino of readdir entries changes after copy up.
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2016 CTERA Networks. All Rights Reserved.
++# Author: Amir Goldstein <amir73il@gmail.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++_require_scratch
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++
++# Create our test files
++lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
++mkdir -p $lowerdir
++mkdir $lowerdir/dir
++touch $lowerdir/file
++ln -s $lowerdir/file $lowerdir/symlink
++mkfifo $lowerdir/fifo
++
++
++_scratch_mount
++
++cd $SCRATCH_MNT
++
++rm -f $tmp.before $tmp.after
++
++# Test stable stat(2) st_ino
++
++# Record inode numbers before and after copy up
++for f in dir file symlink fifo; do
++	ls -id $f >> $tmp.before
++	# chown -h modifies all those file types
++	chown -h fsgqa $f
++	ls -id $f >> $tmp.after
++done
++
++# Test stable readdir(3)/getdents(2) d_ino
++
++# find by inode number - expect to find file by inode number
++cat $tmp.before | while read ino f; do
++	find $f -inum $ino -maxdepth 0
++done
++
++# Compare before..after - expect silence
++diff $tmp.before $tmp.after
++
++status=0
++exit
+diff --git a/tests/overlay/018.out b/tests/overlay/018.out
+new file mode 100644
+index 0000000..75e80e7
+--- /dev/null
++++ b/tests/overlay/018.out
+@@ -0,0 +1,5 @@
++QA output created by 018
++dir
++file
++symlink
++fifo
+diff --git a/tests/overlay/group b/tests/overlay/group
+index 5740d2a..683b2fc 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -19,3 +19,4 @@
+ 014 auto quick copyup
+ 015 auto quick whiteout
+ 016 auto quick
++018 auto quick
+-- 
+2.7.4
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. There're only bugfixes and improvements in this update,
-no new tests. We have improved btrfs qgroup tests, disabled swapfile tests on
-btrfs, overlay test fix and a build warning fix. There's no new failures I've
-noticed in this update.
-
-Currently there're three big outstanding patchsets sitting in my review queue,
-they're filesystem-level encryption tests from Eric Biggers, XFS online
-scrub/repair tests from Darrick and copy_file_range tests from Anna Schumaker.
-I'll work on them after this update, I appreciate if someone could help review
-them too!
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-e6111674ea18 overlay/016: use xfs_io -C for executing commands
-
-New commits:
-
-Amir Goldstein (2):
-      [53d31765f607] common: implement _require_xfs_io_command "open"
-      [e6111674ea18] overlay/016: use xfs_io -C for executing commands
-
-Omar Sandoval (1):
-      [8c96cfbfe530] generic/35[67]: disable swapfile tests on Btrfs
-
-Qu Wenruo (2):
-      [47bb69de19c6] common/btrfs: rename and enhance _require_btrfs to _require_btrfs_command
-      [180843c1f468] btrfs: Use _require_btrfs_qgroup_report to replace open code
-
-Ross Zwisler (1):
-      [490baac3805a] build: fix build warnings and notify_others() bug
-
-
-Code Diffstat:
-
- check                 |  4 ++--
- common/btrfs          | 47 +++++++++++++++++++++++++++++++++++++++++++----
- common/rc             | 35 +++++++++++++++++++++++++++++++++--
- ltp/fsx.c             |  8 ++++----
- ltp/growfiles.c       |  3 ++-
- tests/btrfs/004       |  3 ++-
- tests/btrfs/022       |  4 ++++
- tests/btrfs/028       |  5 ++---
- tests/btrfs/042       |  1 +
- tests/btrfs/048       |  2 +-
- tests/btrfs/059       |  2 +-
- tests/btrfs/099       |  1 +
- tests/btrfs/104       | 20 +++++---------------
- tests/btrfs/122       |  9 +++------
- tests/btrfs/123       |  5 ++---
- tests/btrfs/126       |  1 +
- tests/btrfs/131       |  2 +-
- tests/generic/356     |  1 +
- tests/generic/357     |  1 +
- tests/overlay/016     | 27 +++++++++++++--------------
- tests/overlay/016.out | 11 +++++------
- 21 files changed, 128 insertions(+), 64 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
-
---lNHgrpiV1RJx
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJYTPbPAAoJECZSqilcj+dj/bwQAIHefbgyH/QIMWh+F5YZo7V4
-1AMlXf/beqRnV/4xiZGhLUqutZFdiePWhzQC6IRgiRKXgL4qZ3XTCiIHnVOr9Mvl
-3DJ552Uw5byqewlV1Il5f8BcDKtxfpAabLNHLJj+2sNznxLIU/MQQBLJ2EY58dIb
-i14zc93m6sNRW3WZxc+Sp3+s3p1bzA4QZK2vuzMivYGJ5ZcB1PMTk/sKrqfIDX/y
-W3PZUTJnKl54jDCD9kDHrem4GQpmiJGDAsw0jXEnEOflx7bkG4CMZfSUgc6Gu4V6
-+lxBuGolNWdO/GOOElBhRPkcDOh4H4xOeVq8gE/yN0eBS9OIsTjP7JdzbODy7Uuj
-hzDDMzgTo7ZkD7nXbys3FOn4xxf2qAV9iFjjBsoBuSUMkroSLW7PPY9kryN7MsX+
-ugoXvnSUu7kzU+ZEc2FPCFCL37ZF+NGwiUP7m+zDYh4s3FNu35iyj+lu2A2nkcQc
-zJRWC/NZJxppsf5s6/WzE7VBbBxIr0giQcAcJrn/OCZTxv5kb73uOSgIb/pdiLar
-b6IDXMLCYpPtBDcuH14s6Gl5kmPLoST1VN3ABk9Zkkh1jATjHmerJC1XLnZyKx4S
-unesY83VFjM1h4HCydYz+mTl+fObf2j2ZrwMe6k5/aVw7iT0jMpjBUxrAlO8O8SL
-ddGOKVqK4ZVbz2VzwNav
-=qa1m
------END PGP SIGNATURE-----
-
---lNHgrpiV1RJx--
