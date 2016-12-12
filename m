@@ -1,246 +1,158 @@
-Received: from mx1.redhat.com ([209.132.183.28]:40820 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:51256 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751266AbcLLIB2 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 12 Dec 2016 03:01:28 -0500
-Date: Mon, 12 Dec 2016 16:01:25 +0800
+        id S1751799AbcLLIQk (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 12 Dec 2016 03:16:40 -0500
+Date: Mon, 12 Dec 2016 16:16:38 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] fstests: xfs_fsr SWAPEXT fails when temp forkoff smaller
- than target
-Message-ID: <20161212080125.GT29149@eguan.usersys.redhat.com>
-References: <1481303873-11981-1-git-send-email-zlang@redhat.com>
+Subject: Re: [PATCH] overlay: test unstable inode number
+Message-ID: <20161212081638.GU29149@eguan.usersys.redhat.com>
+References: <1481474280-3821-1-git-send-email-amir73il@gmail.com>
+ <20161212054409.GS29149@eguan.usersys.redhat.com>
+ <CAOQ4uxgNCZhWjo7ZVTDi2oX6=P4xGA65aKyrpnCbU=94O1W0nQ@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1481303873-11981-1-git-send-email-zlang@redhat.com>
+In-Reply-To: <CAOQ4uxgNCZhWjo7ZVTDi2oX6=P4xGA65aKyrpnCbU=94O1W0nQ@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Dec 10, 2016 at 01:17:53AM +0800, Zorro Lang wrote:
-> If there's a file under a parent dir, but before running xfs_fsr the
-> parent dir's attr is changed(grown), and these attrs will be inherited
-> by new files. Then xfs_fsr's temp file and target file will have
-> different attrs.
->=20
-> At this moment, if the data already fill whole data area, then there
-> is not enough space to move di_forkoff to data direction, swap the
-> extents between temp and target file will fail.
->=20
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
->=20
-> Hi,
->=20
-> The original case use SELinux to test. For common test, I change to use
-> ACL. As my test, when inode size is 512 bytes(or more), it'll increase
-> enough bytes to attr area, if add new default ACL attr.
->=20
-> The "enough bytes" I expect is 16+ bytes. Because an extent is 128 bits=
-,
-> I keep using extent data format, so the growing step is 16 bytes. When =
-I
-> try to fill whole data area, at last (di_forkoff - size of di_u) will b=
-e
-> in [0, 16).
->=20
-> As my test, 256 bytes inode size can't always reproduce this bug(especi=
-ally
-> in RHEL-6). But 512 (or more) inode size can help that.
->=20
-> Thanks,
-> Zorro
->=20
->  tests/xfs/999     | 115 ++++++++++++++++++++++++++++++++++++++++++++++=
-++++++++
->  tests/xfs/999.out |   2 +
->  tests/xfs/group   |   1 +
->  3 files changed, 118 insertions(+)
->  create mode 100755 tests/xfs/999
->  create mode 100644 tests/xfs/999.out
->=20
-> diff --git a/tests/xfs/999 b/tests/xfs/999
-> new file mode 100755
-> index 0000000..d896287
-> --- /dev/null
-> +++ b/tests/xfs/999
-> @@ -0,0 +1,115 @@
-> +#! /bin/bash
-> +# FS QA Test 999
-> +#
-> +# Test xfs_fsr when temp's attr is larger than the target attr area, a=
-nd
-> +# without enough room to move di_forkoff to date direction. Then it'll=
- fail
-> +# to swap extents between temp and target files.
-> +#
-> +#---------------------------------------------------------------------=
---
-> +# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#---------------------------------------------------------------------=
---
-> +#
-> +
-> +seq=3D`basename $0`
-> +seqres=3D$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=3D`pwd`
-> +tmp=3D/tmp/$$
-> +status=3D1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/attr
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_supported_os Linux
-> +_require_scratch
-> +# need a user to set ACL
-> +_require_user
-> +_require_acls
-> +_require_xfs_io_command "falloc"
-> +
-> +# use fixed attr test parameters, 512+ bytes inode size is helpful
-> +# to alloc more default ACL space
-> +_scratch_mkfs_xfs -i size=3D512,attr=3D2 >> $seqres.full 2>&1
-> +# Manually mount to avoid effect from some mount options
-> +mount $SCRATCH_DEV $SCRATCH_MNT
+On Mon, Dec 12, 2016 at 09:47:47AM +0200, Amir Goldstein wrote:
+> On Mon, Dec 12, 2016 at 7:44 AM, Eryu Guan <eguan@redhat.com> wrote:
+> > On Sun, Dec 11, 2016 at 06:38:00PM +0200, Amir Goldstein wrote:
+> >> Introduce a new test to demonstrate a known issue with overlayfs:
+> >> - stat file A shows inode number X
+> >> - modify A to trigger copy up
+> >> - stat file A shows inode number Y != X
+> >>
+> >> Also test if d_ino of readdir entries changes after copy up.
+> >>
+> >> There is a POC patch by Miklos Szeredi that fixes this issue.
+> >> ---
+> >>  tests/overlay/018     | 96 +++++++++++++++++++++++++++++++++++++++++++++++++++
+> >>  tests/overlay/018.out |  5 +++
+> >>  tests/overlay/group   |  1 +
+> >>  3 files changed, 102 insertions(+)
+> >>  create mode 100755 tests/overlay/018
+> >>  create mode 100644 tests/overlay/018.out
+> >>
+> >> diff --git a/tests/overlay/018 b/tests/overlay/018
+> >> new file mode 100755
+> >> index 0000000..4b358e5
+> >> --- /dev/null
+> >> +++ b/tests/overlay/018
+> >> @@ -0,0 +1,96 @@
+> >> +#! /bin/bash
+> >> +# FSQA Test No. 018
+> >> +#
+> >> +# Test unstable inode number
+> >> +#
+> >> +# This simple test demonstrates a known issue with overlayfs:
+> >> +# - stat file A shows inode number X
+> >> +# - modify A to trigger copy up
+> >> +# - stat file A shows inode number Y != X
+> >> +#
+> >> +# Also test if d_ino of readdir entries changes after copy up.
+> >> +#
+> >> +#-----------------------------------------------------------------------
+> >> +#
+> >> +# Copyright (C) 2016 CTERA Networks. All Rights Reserved.
+> >> +# Author: Amir Goldstein <amir73il@gmail.com>
+> >> +#
+> >> +# This program is free software; you can redistribute it and/or
+> >> +# modify it under the terms of the GNU General Public License as
+> >> +# published by the Free Software Foundation.
+> >> +#
+> >> +# This program is distributed in the hope that it would be useful,
+> >> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> >> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> >> +# GNU General Public License for more details.
+> >> +#
+> >> +# You should have received a copy of the GNU General Public License
+> >> +# along with this program; if not, write the Free Software Foundation,
+> >> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> >> +#-----------------------------------------------------------------------
+> >> +#
+> >> +
+> >> +seq=`basename $0`
+> >> +seqres=$RESULT_DIR/$seq
+> >> +echo "QA output created by $seq"
+> >> +
+> >> +tmp=/tmp/$$
+> >> +status=1     # failure is the default!
+> >> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> >> +
+> >> +_cleanup()
+> >> +{
+> >> +     cd /
+> >> +     rm -f $tmp.*
+> >> +}
+> >> +
+> >> +# get standard environment, filters and checks
+> >> +. ./common/rc
+> >> +. ./common/filter
+> >> +
+> >> +# real QA test starts here
+> >> +_supported_fs overlay
+> >> +_supported_os Linux
+> >
+> > Need a "_require_user" here.
+> 
+> Right, so I'll use an arbitrary uid instead, cause the value of uid is
+> not the issue.
+> v2 coming right up.
+> 
+> >
+> >> +_require_scratch
+> >> +
+> >> +rm -f $seqres.full
+> >> +
+> >> +_scratch_mkfs >>$seqres.full 2>&1
+> >> +
+> >> +# Create our test files
+> >> +lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
+> >> +mkdir -p $lowerdir
+> >> +mkdir $lowerdir/dir
+> >> +touch $lowerdir/file
+> >> +ln -s $lowerdir/file $lowerdir/symlink
+> >> +mkfifo $lowerdir/fifo
+> >
+> > Should hardlink and device-special be tested too?
+> >
+> 
+> Hardlink is a more complex issue, which is not solved by the POC patch
+> so I am leaving it to a test of its own.
+> Hardlinks should not only preserve inode number, but also nlink and actually
+> refer to same upper inode. The POC patch even breaks that brutally, by
 
-I think you can unset MOUNT_OPTS and SELINUX_MOUNT_OPTIONS and use
-_scratch_mount, e.g.
+I think the hardlinks are known to be broken on copy-up,
+Documentation/filesystems/overlayfs.txt documented this behavior
 
-# comments here
-MOUNT_OPTS=3D""
-SELINUX_MOUNT_OPTIONS=3D""
-export MOUNT_OPTS SELINUX_MOUNT_OPTIONS
-_scratch_mount
+"
+If a file with multiple hard links is copied up, then this will
+"break" the link.  Changes will not be propagated to other names
+referring to the same inode.
+"
 
-> +
-> +rm -f $SCRATCH_MNT/$seq.test 2>/dev/null
+> making all broken hardlink clones apear to have the same inode number,
+> but actually they are completely different files/inodes.
 
-SCRATCH_DEV was just created, there's no need to remove this test file.
+So after the POC patch, the hardlinks are still broken but having the
+same inode number and making the situation more complext :)
 
-> +# remove all default ACL
-> +setfacl -k $SCRATCH_MNT
-> +sync
-> +touch $SCRATCH_MNT/$seq.test
-> +INODE_NUM=3D`ls -i $SCRATCH_MNT/$seq.test | awk '{print $1}'`
+How about adding some comments on why hardlinks are not tested?
 
-I think it's time to introduce a new helper to get inode number and use
-"stat -c %i" to implement it.
+> 
+> fifo is a representative of the device special files.
+> Since overlayfs only ever tests for
+> special_file(m) := (S_ISCHR(m)||S_ISBLK(m)||S_ISFIFO(m)||S_ISSOCK(m))
+> and treats all special files the same,
+> it seemed excessive to test all of those types individually.
 
-> +
-> +# unmount SCRATCH_DEV to get the di_forkoff size
-> +_scratch_unmount
-> +FORK_OFF=3D`_scratch_xfs_db -c "inode $INODE_NUM" -c "print core.forko=
-ff" | awk -F "=3D" '{print $2}'`
-> +# the attributes are stored in the inode=E2=80=99s literal area starti=
-ng a forkoff * 8
-> +FORK_OFF=3D$((FORK_OFF * 8))
-> +# an on-disk extent takes 128 bits =3D 16 bytes, get the max in-fork e=
-xtents to
-> +# keep using extent data format
-> +MAX_EXTENTS=3D$((FORK_OFF / 16))
-> +
-> +mount $SCRATCH_DEV $SCRATCH_MNT
-> +
-> +# fragment the file by writing backwards, and alloc MAX_EXTENTS extent=
-s to
-> +# make the di_u nearly/already touch the di_forkoff
-> +for i in `seq $((MAX_EXTENTS - 1)) -1 0`; do
-> +	$XFS_IO_PROG -f -c "falloc $((i * 262144)) 262144" \
-> +		$SCRATCH_MNT/$seq.test >> $seqres.full
-> +done
-
-Any comments on this 256k size?
-
-> +
-> +# add new default ACL to $SCRATCH_MNT, for xfs_fsr will use a *temp* f=
-ile
-> +# which takes more di_a field (smaller di_forkoff than *target* file)
-> +# Generally this operation need to grow attr area ~32 bytes
-> +setfacl --set d:u:fsgqa:rwx,d:g:fsgqa:rwx,d:o:rwx $SCRATCH_MNT
-> +sync
-> +
-> +# At this moment, xfs_fsr will hit below situation:
-> +#
-> +# target:         forkoff
-> +#                    |
-> +# +------------------v--------+
-> +# |       di_u       |  di_a  |
-> +# +------------------^--------+
-> +#
-> +# temp:       forkoff
-> +#                |
-> +# +--------------v------------+
-> +# |       di_u   |     di_a   |
-> +# +--------------^------------+
-> +$XFS_FSR_PROG $SCRATCH_MNT/$seq.test
-
-I saw xfs_fsr reported EINVAL on failure, so better to have some
-comments on the failure behavior.
-
-BTW, upstream 4.8.0 xfsprogs fails this test too, an xfsprogs
-regression?
+The handles of these file types might be changed in future, and adding
+tests of these file types are easy to do, I'd prefer having a full test
+coverage of them.
 
 Thanks,
 Eryu
-
-> +
-> +dmesg | tail -10 >> $seqres.full
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/xfs/999.out b/tests/xfs/999.out
-> new file mode 100644
-> index 0000000..3b276ca
-> --- /dev/null
-> +++ b/tests/xfs/999.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 999
-> +Silence is golden
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index c237b50..ad01b8e 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -334,3 +334,4 @@
->  345 auto quick clone
->  346 auto quick clone
->  347 auto quick clone
-> +999 auto quick fsr
-> --=20
-> 2.7.4
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
