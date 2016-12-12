@@ -1,172 +1,105 @@
-Received: from mail-wj0-f193.google.com ([209.85.210.193]:34439 "EHLO
-        mail-wj0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752638AbcLLIp1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 12 Dec 2016 03:45:27 -0500
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v3] overlay: test unstable inode number
-Date: Mon, 12 Dec 2016 10:45:06 +0200
-Message-Id: <1481532306-26938-1-git-send-email-amir73il@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:50964 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751266AbcLLJBX (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 12 Dec 2016 04:01:23 -0500
+Date: Mon, 12 Dec 2016 17:01:20 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 1/7] ocfs2: test reflinking to inline data files
+Message-ID: <20161212090120.GV29149@eguan.usersys.redhat.com>
+References: <148149316504.31093.16129068344227450710.stgit@birch.djwong.org>
+ <148149317133.31093.439907074888693999.stgit@birch.djwong.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <148149317133.31093.439907074888693999.stgit@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: ocfs2-devel@oss.oracle.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Introduce a new test to demonstrate a known issue with overlayfs:
-- stat file A shows inode number X
-- modify A to trigger copy up
-- stat file A shows inode number Y != X
+On Sun, Dec 11, 2016 at 01:52:51PM -0800, Darrick J. Wong wrote:
+> Make sure that we can handle reflinking from and to inline-data files.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  common/reflink       |    2 +
+>  tests/ocfs2/001      |   88 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ocfs2/001.out  |   14 ++++++++
+>  tests/ocfs2/Makefile |   20 +++++++++++
+>  tests/ocfs2/group    |    1 +
+>  5 files changed, 124 insertions(+), 1 deletion(-)
+>  create mode 100755 tests/ocfs2/001
+>  create mode 100644 tests/ocfs2/001.out
+>  create mode 100644 tests/ocfs2/Makefile
+>  create mode 100644 tests/ocfs2/group
+> 
+> 
+> diff --git a/common/reflink b/common/reflink
+> index 9d51729..d048045 100644
+> --- a/common/reflink
+> +++ b/common/reflink
+> @@ -197,7 +197,7 @@ _cp_reflink() {
+>  	file1="$1"
+>  	file2="$2"
+>  
+> -	cp --reflink=always -p "$file1" "$file2"
+> +	cp --reflink=always -p -f "$file1" "$file2"
 
-Also test if d_ino of readdir entries changes after copy up.
+I'm still seeing "File exists" error with this patch, tested with your
+ocfs2-vfs-reflink-6 branch, compiled on openSUSE Tumbleweed.
 
-There is a POC patch by Miklos Szeredi that fixes this issue.
+FSTYP         -- ocfs2
+PLATFORM      -- Linux/x86_64 bootp-73-5-234 4.9.0-rc8.djwong-ocfs2+
+MKFS_OPTIONS  -- --fs-features=local /dev/sda5
+MOUNT_OPTIONS -- /dev/sda5 /mnt/testarea/scratch
 
-Not dealing with hardlinks here, because there is more to test
-then stable inode number.
-Hardlinks will get a test of their own.
----
- tests/overlay/018     | 101 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/018.out |   7 ++++
- tests/overlay/group   |   1 +
- 3 files changed, 109 insertions(+)
- create mode 100755 tests/overlay/018
- create mode 100644 tests/overlay/018.out
+ocfs2/001        - output mismatch (see /root/xfstests/results//ocfs2/ocfs2/001.out.bad)
+    --- tests/ocfs2/001.out     2016-12-12 13:51:38.053909486 +0800
+    +++ /root/xfstests/results//ocfs2/ocfs2/001.out.bad 2016-12-12 16:49:35.038882697 +0800
+    @@ -1,14 +1,18 @@
+     QA output created by 001
+    +mkfs.ocfs2 1.8.4
+     Format and mount
+     Create the original files
+     reflink into the start of file2
+    +cp: failed to reflink '/mnt/testarea/scratch/test-001/file2' from '/mnt/testarea/scratch/test-001/file1': File exists
+     reflink past the stuff in file3
+    ...
+    (Run 'diff -u tests/ocfs2/001.out /root/xfstests/results//ocfs2/ocfs2/001.out.bad'  to see the entire diff)
 
-v3:
-- test also special device files
-- document not testing hardlinks
+--- tests/ocfs2/001.out 2016-12-12 13:51:38.053909486 +0800
++++ /root/xfstests/results//ocfs2/ocfs2/001.out.bad     2016-12-12 16:44:31.991943842 +0800
+@@ -1,14 +1,18 @@
+ QA output created by 001
++mkfs.ocfs2 1.8.4
+ Format and mount
+ Create the original files
+ reflink into the start of file2
++cp: failed to reflink '/mnt/testarea/scratch/test-001/file2' from '/mnt/testarea/scratch/test-001/file1': File exists
+ reflink past the stuff in file3
+ reflink an inline-data file to a regular one
++cp: failed to reflink '/mnt/testarea/scratch/test-001/file5' from '/mnt/testarea/scratch/test-001/file4': File exists
+ reflink an inline-data file to another inline-data file
++cp: failed to reflink '/mnt/testarea/scratch/test-001/file6' from '/mnt/testarea/scratch/test-001/file4': File exists
+ Verify the whole mess
+ 2d61aa54b58c2e94403fb092c3dbc027  SCRATCH_MNT/test-001/file1
+-2d61aa54b58c2e94403fb092c3dbc027  SCRATCH_MNT/test-001/file2
++401b30e3b8b5d629635a5c613cdb7919  SCRATCH_MNT/test-001/file2
+ 4e68a2e24b6b0f386ab39d01d902293d  SCRATCH_MNT/test-001/file3
+ 009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file4
+-009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file5
+-009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file6
++2d61aa54b58c2e94403fb092c3dbc027  SCRATCH_MNT/test-001/file5
++60b725f10c9c85c70d97880dfe8191b3  SCRATCH_MNT/test-001/file6
 
-v2:
-- use arbitrary uid for chown
+I did the "reflink into the start of file2" test manually, and strace
+showed that it is file1 reports EEXIST.
 
-diff --git a/tests/overlay/018 b/tests/overlay/018
-new file mode 100755
-index 0000000..230245b
---- /dev/null
-+++ b/tests/overlay/018
-@@ -0,0 +1,101 @@
-+#! /bin/bash
-+# FSQA Test No. 018
-+#
-+# Test unstable inode number
-+#
-+# This simple test demonstrates a known issue with overlayfs:
-+# - stat file A shows inode number X
-+# - modify A to trigger copy up
-+# - stat file A shows inode number Y != X
-+#
-+# Also test if d_ino of readdir entries changes after copy up.
-+#
-+#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2016 CTERA Networks. All Rights Reserved.
-+# Author: Amir Goldstein <amir73il@gmail.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+
-+# Create our test files.
-+# Not dealing with hardlinks here, because there is more to test
-+# then stable inode number.
-+# Hardlinks will get a test of their own.
-+lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
-+mkdir -p $lowerdir
-+mkdir $lowerdir/dir
-+touch $lowerdir/file
-+ln -s $lowerdir/file $lowerdir/symlink
-+mknod $lowerdir/chrdev c 1 1
-+mknod $lowerdir/blkdev b 1 1
-+mknod $lowerdir/fifo p
-+
-+
-+_scratch_mount
-+
-+cd $SCRATCH_MNT
-+
-+rm -f $tmp.before $tmp.after
-+
-+# Test stable stat(2) st_ino
-+
-+# Record inode numbers before and after copy up
-+for f in dir file symlink chrdev blkdev fifo; do
-+	ls -id $f >> $tmp.before
-+	# chown -h modifies all those file types
-+	chown -h 100 $f
-+	ls -id $f >> $tmp.after
-+done
-+
-+# Test stable readdir(3)/getdents(2) d_ino
-+
-+# find by inode number - expect to find file by inode number
-+cat $tmp.before | while read ino f; do
-+	find $f -inum $ino -maxdepth 0
-+done
-+
-+# Compare before..after - expect silence
-+diff $tmp.before $tmp.after
-+
-+status=0
-+exit
-diff --git a/tests/overlay/018.out b/tests/overlay/018.out
-new file mode 100644
-index 0000000..bf4bce8
---- /dev/null
-+++ b/tests/overlay/018.out
-@@ -0,0 +1,7 @@
-+QA output created by 018
-+dir
-+file
-+symlink
-+chrdev
-+blkdev
-+fifo
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 5740d2a..683b2fc 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -19,3 +19,4 @@
- 014 auto quick copyup
- 015 auto quick whiteout
- 016 auto quick
-+018 auto quick
--- 
-2.7.4
+open("/mnt/ocfs2/testfile1", O_RDONLY)  = 3
+fstat(3, {st_mode=S_IFREG|0600, st_size=65536, ...}) = 0
+ioctl(3, _IOC(_IOC_WRITE, 0x6f, 0x04, 0x18), 0x7ffc8daf09f0) = -1 EEXIST (File exists)
 
+The same test on XFS works fine. Did I miss anything?
+
+Thanks,
+Eryu
