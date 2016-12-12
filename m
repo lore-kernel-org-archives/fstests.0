@@ -1,59 +1,66 @@
-Received: from mx1.redhat.com ([209.132.183.28]:51254 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:42706 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754031AbcLLKGZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 12 Dec 2016 05:06:25 -0500
-Date: Mon, 12 Dec 2016 18:06:22 +0800
+        id S1754077AbcLLKZm (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 12 Dec 2016 05:25:42 -0500
+Date: Mon, 12 Dec 2016 18:25:39 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 3/7] reflink: fix quota tests to work properly
-Message-ID: <20161212100622.GZ29149@eguan.usersys.redhat.com>
+Subject: Re: [PATCH 4/7] reflink: fix space consumption tests
+Message-ID: <20161212102539.GA29149@eguan.usersys.redhat.com>
 References: <148149316504.31093.16129068344227450710.stgit@birch.djwong.org>
- <148149318401.31093.3864124073555352683.stgit@birch.djwong.org>
+ <148149319048.31093.2083894591825614863.stgit@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <148149318401.31093.3864124073555352683.stgit@birch.djwong.org>
+In-Reply-To: <148149319048.31093.2083894591825614863.stgit@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
 To: "Darrick J. Wong" <darrick.wong@oracle.com>
 Cc: ocfs2-devel@oss.oracle.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Dec 11, 2016 at 01:53:04PM -0800, Darrick J. Wong wrote:
-> Fix the reflink quota tests to su to the fsgqa user so that we actually
-> test enforcement of quotas.  Seems that XFS enforces user quotas even
-> if root is writing to a user file, whereas everything else lets root
-> writes through.  Also clean up some of the variable usage and
-> _require_user.
+On Sun, Dec 11, 2016 at 01:53:10PM -0800, Darrick J. Wong wrote:
+> Some of the tests try to check that we can't COW when we're out of
+> space, but some tricky filesystems make this hard because writing N
+> blocks doesn't increase used blocks by N....
 > 
 > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
->  tests/generic/305     |    2 +-
->  tests/generic/305.out |   30 +++++++++++++++---------------
->  tests/generic/326     |    2 +-
->  tests/generic/326.out |   30 +++++++++++++++---------------
->  tests/generic/327     |   12 +++++++-----
->  tests/generic/327.out |   12 ++++++------
->  tests/generic/328     |   14 ++++++++------
->  tests/generic/328.out |   28 ++++++++++++++--------------
->  8 files changed, 67 insertions(+), 63 deletions(-)
+>  common/populate   |   14 ++++++++++++++
+>  tests/generic/171 |    5 ++---
+>  tests/generic/173 |    5 ++---
+>  tests/generic/174 |    5 ++---
+>  tests/generic/282 |    3 +--
+>  5 files changed, 21 insertions(+), 11 deletions(-)
 > 
 > 
-> diff --git a/tests/generic/305 b/tests/generic/305
-> index d73d87f..9c3489b 100755
-> --- a/tests/generic/305
-> +++ b/tests/generic/305
-> @@ -51,7 +51,7 @@ _require_quota
->  _require_nobody
+> diff --git a/common/populate b/common/populate
+> index d0003c5..9811d21 100644
+> --- a/common/populate
+> +++ b/common/populate
+> @@ -30,6 +30,20 @@ _require_xfs_db_blocktrash_z_command() {
+>  	$XFS_DB_PROG -x -f -c 'blocktrash -z' "${TEST_DEV}" | grep -q 'nothing on stack' || _notrun "blocktrash -z not supported"
+>  }
 >  
->  _repquota() {
-> -	repquota $SCRATCH_MNT | egrep '^(fsgqa|root|nobody)'
-> +	repquota -O csv $SCRATCH_MNT | egrep '^(fsgqa|root|nobody)' | awk -F ',' '{print $1, $4, $5, $6}'
+> +# Eat free space until we can't anymore.
+> +_consume_free_space() {
+> +	dir=$1
+> +
+> +	old_nr_free=0
+> +	nr_free=$(stat -f -c '%f' $dir)
+> +	x=0
+> +	while [ $nr_free -gt 0 ] && [ $old_nr_free != $nr_free ]; do
+> +		$XFS_IO_PROG -f -c "pwrite -b 4194304 0 $((blksz * nr_free))" $dir/eat_my_space.$((x++))
 
-The version of "quota" is a bit old shipped by RHEL7, there's no "-O"
-option support. And this works for me
+blksz not defined in the function.
 
-	repquota $SCRATCH_MNT | egrep '^(fsgqa|root|nobody)' | awk '{print $1, $3, $4, $5}'
+Xiaoguang Wang did something similar back in Nov. and I'm still queuing
+his patch. (His 1/2 patch conflicts with your scrub/repair patchset and
+it might be easier for you to let your patches go first.)
 
-Still worth chaning the .out files this way?
+generic: make 17[1-4] work well when btrfs compression is enabled
+https://patchwork.kernel.org/patch/9408451/
+
+Does this patch work for you? If so, perhaps you only need to update
+generic/282 using the "_fill_fs" helper?
 
 Thanks,
 Eryu
