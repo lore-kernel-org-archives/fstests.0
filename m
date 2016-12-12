@@ -1,47 +1,41 @@
-Received: from mx1.redhat.com ([209.132.183.28]:59240 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932115AbcLLJ0l (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 12 Dec 2016 04:26:41 -0500
-Date: Mon, 12 Dec 2016 17:26:34 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v3] overlay: test unstable inode number
-Message-ID: <20161212092634.GX29149@eguan.usersys.redhat.com>
-References: <1481532306-26938-1-git-send-email-amir73il@gmail.com>
- <20161212090851.GW29149@eguan.usersys.redhat.com>
- <CAOQ4uxhFDLr3XU7J-MGM2_L=UCHi8B99=p2C_kAj6mYUpsxstw@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxhFDLr3XU7J-MGM2_L=UCHi8B99=p2C_kAj6mYUpsxstw@mail.gmail.com>
+Received: from mail-wj0-f194.google.com ([209.85.210.194]:34408 "EHLO
+        mail-wj0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754013AbcLLJcd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 12 Dec 2016 04:32:33 -0500
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH] overlay: associate tests to copyup group
+Date: Mon, 12 Dec 2016 11:32:12 +0200
+Message-Id: <1481535132-27651-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 12, 2016 at 11:21:48AM +0200, Amir Goldstein wrote:
-> On Mon, Dec 12, 2016 at 11:08 AM, Eryu Guan <eguan@redhat.com> wrote:
-> > On Mon, Dec 12, 2016 at 10:45:06AM +0200, Amir Goldstein wrote:
-> >> Introduce a new test to demonstrate a known issue with overlayfs:
-> >> - stat file A shows inode number X
-> >> - modify A to trigger copy up
-> >> - stat file A shows inode number Y != X
-> >>
-> >> Also test if d_ino of readdir entries changes after copy up.
-> >>
-> >> There is a POC patch by Miklos Szeredi that fixes this issue.
-> >>
-> >> Not dealing with hardlinks here, because there is more to test
-> >> then stable inode number.
-> >> Hardlinks will get a test of their own.
-> >
-> > Thanks! I added the missing SOB line, and added "copyup" group too.
-> >
-> 
-> Right. Thanks.
-> I audited existing tests and I believe my 016 also calls for "copyup" tag
-> and 013 as well.
-> Do you want a patch for that or will you fix it up yourself?
+Tests 016 and 013 both test behavior of concurrent
+file access during copy up (truncate+exec and read+write).
 
-Please send a new patch to fix them. Thanks!
+Associate those tests to the copyup group.
 
-Eryu
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/overlay/group | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/tests/overlay/group b/tests/overlay/group
+index 550a155..fb6610d 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -15,8 +15,8 @@
+ 010 auto quick whiteout
+ 011 auto quick
+ 012 auto quick
+-013 auto quick
++013 auto quick copyup
+ 014 auto quick copyup
+ 015 auto quick whiteout
+-016 auto quick
++016 auto quick copyup
+ 018 auto quick copyup
+-- 
+2.7.4
+
