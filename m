@@ -1,53 +1,53 @@
-Received: from mail-pf0-f194.google.com ([209.85.192.194]:34728 "EHLO
-        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750818AbcLMGze (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 13 Dec 2016 01:55:34 -0500
+Received: from mail-pg0-f66.google.com ([74.125.83.66]:34837 "EHLO
+        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750801AbcLMG6B (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 13 Dec 2016 01:58:01 -0500
+Received: by mail-pg0-f66.google.com with SMTP id p66so3542389pga.2
+        for <fstests@vger.kernel.org>; Mon, 12 Dec 2016 22:58:01 -0800 (PST)
 From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH] xfstests-bld: populate keyring with default key for test_dummy_encryption
-Date: Mon, 12 Dec 2016 22:54:47 -0800
-Message-Id: <1481612087-65325-1-git-send-email-ebiggers3@gmail.com>
+Subject: [PATCH] generic/062: don't assume same readdir order after re-creating directory
+Date: Mon, 12 Dec 2016 22:57:01 -0800
+Message-Id: <1481612221-65504-1-git-send-email-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Theodore Y . Ts'o" <tytso@mit.edu>
-Cc: linux-ext4@vger.kernel.org, fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+To: fstests@vger.kernel.org
+Cc: Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
 From: Eric Biggers <ebiggers@google.com>
 
-We can improve test coverage and simplify the test_dummy_encryption
-kernel logic by requiring userspace to add a default master key to the
-keyring.  Update xfstests-bld to do this.  This allows xfstests-bld to
-test kernels with the corresponding kernel patch applied ("fscrypt /
-ext4: make test_dummy_encryption require a keyring key").  It can still
-test older kernels too; the key just doesn't get used in that case.
+generic/062 uses getfattr to dump xattrs for a directory tree, then
+deletes and recreates that directory tree, then dumps the xattrs again
+and compares the dump to the original.  This was failing when run on
+ext4 with encryption enabled because getfattr's output is in readdir
+order, but ext4 encryption by design chooses unpredictable encrypted
+filenames for each new directory, causing the readdir order to change
+after backup and restore.  It is not really a valid assumption that the
+readdir order will always be the same, so update the test to sort the
+filenames, removing this assumption.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- kvm-xfstests/test-appliance/files/root/fs/ext4/config | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
+ tests/generic/062 | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
-diff --git a/kvm-xfstests/test-appliance/files/root/fs/ext4/config b/kvm-xfstests/test-appliance/files/root/fs/ext4/config
-index 66d2633..1ae017d 100644
---- a/kvm-xfstests/test-appliance/files/root/fs/ext4/config
-+++ b/kvm-xfstests/test-appliance/files/root/fs/ext4/config
-@@ -36,6 +36,18 @@ function setup_mount_opts()
-     if test -n "$MNTOPTS" ; then
- 	EXT_MOUNT_OPTIONS="$EXT_MOUNT_OPTIONS,$MNTOPTS"
-     fi
-+    if echo "$EXT_MOUNT_OPTIONS" | grep -q test_dummy_encryption; then
-+	# Create a new session keyring and add a default master key to it.
-+	local raw=""
-+	for ((i = 0; i < 64; i++)); do
-+	    raw="${raw}\\x$(printf "%02x" $(( $RANDOM % 256 )))"
-+	done
-+	local mode='\x00\x00\x00\x00'
-+	local size='\x40\x00\x00\x00' # assuming little endian
-+	keyctl new_session > /dev/null
-+	echo -n -e "${mode}${raw}${size}" | \
-+		keyctl padd logon fscrypt:4242424242424242 @s > /dev/null
-+    fi
- }
+diff --git a/tests/generic/062 b/tests/generic/062
+index e4dc2cc..643f02c 100755
+--- a/tests/generic/062
++++ b/tests/generic/062
+@@ -178,8 +178,11 @@ echo; echo
  
- function get_mkfs_opts()
+ _backup()
+ {
+-	# NB: no filtering of scratch here... (need to restore too)
+-	$GETFATTR_PROG --absolute-names -dh -R -m '.' $SCRATCH_MNT >$1
++	# Note: we don't filter scratch here since we need to restore too.  But
++	# we *do* sort the output by path, since it otherwise would depend on
++	# readdir order, which on some filesystems may change after re-creating
++	# the files.
++	$GETFATTR_PROG --absolute-names -dh -R -m '.' $SCRATCH_MNT | _sort_getfattr_output >$1
+ 	echo BACKUP $1 >>$seqres.full
+ 	cat $1 >> $seqres.full
+ 	[ ! -s $1 ] && echo "warning: $1 (backup file) is empty"
 -- 
 2.8.0.rc3.226.g39d4020
 
