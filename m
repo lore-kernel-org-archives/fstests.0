@@ -1,46 +1,52 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44544 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:53158 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751221AbcLMF75 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 13 Dec 2016 00:59:57 -0500
-Date: Tue, 13 Dec 2016 13:59:54 +0800
+        id S932828AbcLMGHQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 13 Dec 2016 01:07:16 -0500
+Date: Tue, 13 Dec 2016 14:07:13 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v3 2/6] generic: test setting and getting encryption
- policies
-Message-ID: <20161213055954.GN29149@eguan.usersys.redhat.com>
+Subject: Re: [PATCH v3 5/6] generic: test enforcement of one encryption
+ policy per tree
+Message-ID: <20161213060713.GO29149@eguan.usersys.redhat.com>
 References: <1480965669-39714-1-git-send-email-ebiggers@google.com>
- <1480965669-39714-3-git-send-email-ebiggers@google.com>
+ <1480965669-39714-6-git-send-email-ebiggers@google.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1480965669-39714-3-git-send-email-ebiggers@google.com>
+In-Reply-To: <1480965669-39714-6-git-send-email-ebiggers@google.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eric Biggers <ebiggers@google.com>
 Cc: fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>, Michael Halcrow <mhalcrow@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 05, 2016 at 11:21:05AM -0800, Eric Biggers wrote:
-> Several kernel bugs were recently fixed regarding the constraints for
-> setting encryption policies.  Add tests for these cases and a few more.
+On Mon, Dec 05, 2016 at 11:21:08AM -0800, Eric Biggers wrote:
+> Add an xfstest which partially verifies that the filesystem enforces
+> that all files in an encrypted directory tree use the same encryption
+> policy.
 > 
 > Signed-off-by: Eric Biggers <ebiggers@google.com>
 > ---
->  tests/generic/400     | 132 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/400.out |  43 ++++++++++++++++
+>  tests/generic/403     | 130 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/403.out |  34 +++++++++++++
 >  tests/generic/group   |   1 +
->  3 files changed, 176 insertions(+)
->  create mode 100755 tests/generic/400
->  create mode 100644 tests/generic/400.out
+>  3 files changed, 165 insertions(+)
+>  create mode 100644 tests/generic/403
+>  create mode 100644 tests/generic/403.out
 > 
-> diff --git a/tests/generic/400 b/tests/generic/400
-> new file mode 100755
-> index 0000000..6bcc65d
+> diff --git a/tests/generic/403 b/tests/generic/403
+> new file mode 100644
+> index 0000000..77427b8
 > --- /dev/null
-> +++ b/tests/generic/400
-> @@ -0,0 +1,132 @@
+> +++ b/tests/generic/403
+> @@ -0,0 +1,130 @@
 > +#! /bin/bash
-> +# FS QA Test generic/400
+> +# FS QA Test generic/403
 > +#
-> +# Test setting and getting encryption policies.
+> +# Filesystem encryption is designed to enforce that a consistent encryption
+> +# policy is used within a given encrypted directory tree and that an encrypted
+> +# directory tree does not contain any unencrypted files.  This test verifies
+> +# that filesystem operations that would violate this constraint fail with EPERM.
+> +# This does not yet test enforcement of this constraint on lookup, which is
+> +# needed to detect offline changes.
 > +#
 > +#-----------------------------------------------------------------------
 > +# Copyright (c) 2016 Google, Inc.  All Rights Reserved.
@@ -81,170 +87,149 @@ On Mon, Dec 05, 2016 at 11:21:05AM -0800, Eric Biggers wrote:
 > +. ./common/rc
 > +. ./common/filter
 > +. ./common/encrypt
+> +. ./common/renameat2
 > +
 > +# remove previous $seqres.full before test
 > +rm -f $seqres.full
 > +
 > +# real QA test starts here
 > +_supported_fs ext4 f2fs
-
-The supported fs for generic tests should be "generic", we rule out all
-unsupported filesystems by all the _require rules. All other tests have
-this problem.
-
 > +_supported_os Linux
-> +_require_xfs_io_command "get_encpolicy"
 > +_require_xfs_io_command "set_encpolicy"
 > +_require_scratch
 > +_require_encryption
-> +_require_user
+> +_requires_renameat2
 > +
+> +_new_session_keyring
 > +_scratch_mkfs_encrypted >> $seqres.full
 > +_scratch_mount
-> +cd $SCRATCH_MNT
+> +
+> +# Set up two encrypted directories, with different encryption policies,
+> +# and one unencrypted directory.
+> +edir1=$SCRATCH_MNT/edir1
+> +edir2=$SCRATCH_MNT/edir2
+> +udir=$SCRATCH_MNT/udir
+> +mkdir $edir1 $edir2 $udir
+> +keydesc1=$(_generate_encryption_key)
+> +keydesc2=$(_generate_encryption_key)
+> +$XFS_IO_PROG -c "set_encpolicy $keydesc1" $edir1
+> +$XFS_IO_PROG -c "set_encpolicy $keydesc2" $edir2
+> +touch $edir1/efile1
+> +touch $edir2/efile2
+> +touch $udir/ufile
+> +
+> +echo -e "\n*** Link encrypted <= encrypted ***"
+> +ln $edir1/efile1 $edir2/efile1 |& _filter_scratch
+> +
+> +echo -e "\n*** Rename encrypted => encrypted ***"
+> +mv $edir1/efile1 $edir2/efile1 |& _filter_scratch
+> +
+> +echo -e "\n*** Exchange encrypted <=> encrypted ***"
+> +src/renameat2 -x $edir1/efile1 $edir2/efile2 |& _filter_scratch
+> +
+> +
+> +echo -e "\n\n*** Link unencrypted <= encrypted ***"
+> +ln $udir/ufile $edir1/ufile |& _filter_scratch
+> +
+> +echo -e "\n*** Rename unencrypted => encrypted ***"
+> +mv $udir/ufile $edir1/ufile |& _filter_scratch
+> +
+> +echo -e "\n*** Exchange unencrypted <=> encrypted ***"
+> +src/renameat2 -x $udir/ufile $edir1/efile1 |& _filter_scratch
+> +
+> +
+> +echo -e "\n\n*** Link encrypted <= unencrypted ***"
+> +ln -v $edir1/efile1 $udir/efile1 |& _filter_scratch # should succeed
+> +rm $udir/efile1 # undo
+> +
+> +echo -e "\n*** Rename encrypted => unencrypted ***"
+> +mv -v $edir1/efile1 $udir/efile1 |& _filter_scratch # should succeed
+> +mv $udir/efile1 $edir1/efile1 # undo
+> +
+> +echo -e "\n*** Exchange encrypted <=> unencrypted ***"
+> +src/renameat2 -x $edir1/efile1 $udir/ufile |& _filter_scratch
+> +
+> +# Now test the cases where we don't have access to the encryption keys.
+> +
+> +_unlink_encryption_key $keydesc1
+> +_unlink_encryption_key $keydesc2
+> +_scratch_cycle_mount
+> +efile1=$(find $edir1 -type f)
+> +efile2=$(find $edir2 -type f)
+> +echo
+> +
+> +# TODO: this currently succeeds.  It should fail.  Fix this kernel-side.
+> +#echo -e "\n*** Exchange encrypted <=> encrypted without key ***"
+> +#src/renameat2 -x $efile1 $efile2
 
-As Dave said, we usually don't cd to $SCRATCH_MNT, we usually do
+If it reveals a kernel bug, just uncomment it & update the .out file and
+let it fail, as long as it's not a kernel crash, so it acts as a
+reminder that there's an unfixed bug :)
 
-empty_dir=$SCRATCH_MNT/empty_dir
-mkdir $empty_dir
-<other tests on $empty_dir>
-
-And replace the actual $SCRATCH_MNT with "SCRATCH_MNT" by using
-_filter_scratch. You do this in patch "4/6" :)
+For kernel-crashing tests, we tend to merge them after there's a known
+fix, at least in maintainer's tree. But if it's a bug that won't be
+fixed in the near future, we can merge such tests with "dangerous"
+group, so they can be skipped by using "-x dangerous" option to check.
 
 Thanks,
 Eryu
 
 > +
-> +check_no_policy()
-> +{
-> +	# When a file is unencrypted, FS_IOC_GET_ENCRYPTION_POLICY currently
-> +	# fails with ENOENT on ext4 but with ENODATA on f2fs.  TODO: it's
-> +	# planned to consistently use ENODATA.  For now this test accepts both.
-> +	$XFS_IO_PROG -c "get_encpolicy" $1 |&
-> +		sed -e 's/No such file or directory/No data available/'
-> +}
-> +
-> +# Should be able to set an encryption policy on an empty directory
-> +echo -e "\n*** Setting encryption policy on empty directory ***"
-> +mkdir empty_dir
-> +check_no_policy empty_dir
-> +$XFS_IO_PROG -c "set_encpolicy 0000111122223333" empty_dir
-> +$XFS_IO_PROG -c "get_encpolicy" empty_dir
-> +
-> +# Should be able to set the same policy again, but not a different one.
-> +# TODO: the error code for "already has a different policy" is planned to switch
-> +# from EINVAL to EEXIST.  For now this test accepts both.
-> +echo -e "\n*** Setting encryption policy again ***"
-> +$XFS_IO_PROG -c "set_encpolicy 0000111122223333" empty_dir
-> +$XFS_IO_PROG -c "get_encpolicy" empty_dir
-> +$XFS_IO_PROG -c "set_encpolicy 4444555566667777" empty_dir |& \
-> +	sed -e 's/Invalid argument/File exists/'
-> +$XFS_IO_PROG -c "get_encpolicy" empty_dir
-> +
-> +# Should *not* be able to set an encryption policy on a nonempty directory
-> +echo -e "\n*** Setting encryption policy on nonempty directory ***"
-> +mkdir nonempty_dir
-> +touch nonempty_dir/file
-> +$XFS_IO_PROG -c "set_encpolicy" nonempty_dir
-> +check_no_policy nonempty_dir
-> +
-> +# Should *not* be able to set an encryption policy on a nondirectory file, even
-> +# an empty one.  Regression test for 002ced4be642: "fscrypto: only allow setting
-> +# encryption policy on directories".
-> +# TODO: the error code for "not a directory" is planned to switch from EINVAL to
-> +# ENOTDIR.  For now this test accepts both.
-> +echo -e "\n*** Setting encryption policy on nondirectory ***"
-> +touch nondirectory
-> +$XFS_IO_PROG -c "set_encpolicy" nondirectory |& \
-> +	sed -e 's/Invalid argument/Not a directory/'
-> +check_no_policy nondirectory
-> +
-> +# Should *not* be able to set an encryption policy on another user's directory.
-> +# Regression test for 163ae1c6ad62: "fscrypto: add authorization check for
-> +# setting encryption policy".
-> +echo -e "\n*** Setting encryption policy on another user's directory ***"
-> +mkdir unauthorized_dir
-> +su $qa_user -c "$XFS_IO_PROG -c \"set_encpolicy\" unauthorized_dir"
-> +check_no_policy unauthorized_dir
-> +
-> +# Should *not* be able to set an encryption policy on a directory on a
-> +# filesystem mounted readonly.  Regression test for ba63f23d69a3: "fscrypto:
-> +# require write access to mount to set encryption policy".  Test both a regular
-> +# readonly filesystem and a readonly bind mount of a read-write filesystem.
-> +echo -e "\n*** Setting encryption policy on readonly filesystem ***"
-> +mkdir ro_dir ro_bind_mnt
-> +_scratch_remount ro
-> +$XFS_IO_PROG -c "set_encpolicy" ro_dir
-> +check_no_policy ro_dir
-> +_scratch_remount rw
-> +mount --bind $SCRATCH_MNT ro_bind_mnt
-> +mount -o remount,ro ro_bind_mnt
-> +$XFS_IO_PROG -c "set_encpolicy" ro_bind_mnt/ro_dir
-> +check_no_policy ro_bind_mnt/ro_dir
-> +umount ro_bind_mnt
+> +echo -e "\n*** Exchange encrypted <=> unencrypted without key ***"
+> +src/renameat2 -x $efile1 $udir/ufile
 > +
 > +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/generic/400.out b/tests/generic/400.out
+> diff --git a/tests/generic/403.out b/tests/generic/403.out
 > new file mode 100644
-> index 0000000..d187841
+> index 0000000..27ed8cb
 > --- /dev/null
-> +++ b/tests/generic/400.out
-> @@ -0,0 +1,43 @@
-> +QA output created by 400
+> +++ b/tests/generic/403.out
+> @@ -0,0 +1,34 @@
+> +QA output created by 403
 > +
-> +*** Setting encryption policy on empty directory ***
-> +empty_dir: failed to get encryption policy: No data available
-> +Encryption policy for empty_dir:
-> +	Policy version: 0
-> +	Master key descriptor: 0000111122223333
-> +	Contents encryption mode: 1 (AES-256-XTS)
-> +	Filenames encryption mode: 4 (AES-256-CTS)
-> +	Flags: 0x02
+> +*** Link encrypted <= encrypted ***
+> +ln: failed to create hard link 'SCRATCH_MNT/edir2/efile1' => 'SCRATCH_MNT/edir1/efile1': Operation not permitted
 > +
-> +*** Setting encryption policy again ***
-> +Encryption policy for empty_dir:
-> +	Policy version: 0
-> +	Master key descriptor: 0000111122223333
-> +	Contents encryption mode: 1 (AES-256-XTS)
-> +	Filenames encryption mode: 4 (AES-256-CTS)
-> +	Flags: 0x02
-> +empty_dir: failed to set encryption policy: File exists
-> +Encryption policy for empty_dir:
-> +	Policy version: 0
-> +	Master key descriptor: 0000111122223333
-> +	Contents encryption mode: 1 (AES-256-XTS)
-> +	Filenames encryption mode: 4 (AES-256-CTS)
-> +	Flags: 0x02
+> +*** Rename encrypted => encrypted ***
+> +mv: cannot move 'SCRATCH_MNT/edir1/efile1' to 'SCRATCH_MNT/edir2/efile1': Operation not permitted
 > +
-> +*** Setting encryption policy on nonempty directory ***
-> +nonempty_dir: failed to set encryption policy: Directory not empty
-> +nonempty_dir: failed to get encryption policy: No data available
+> +*** Exchange encrypted <=> encrypted ***
+> +Operation not permitted
 > +
-> +*** Setting encryption policy on nondirectory ***
-> +nondirectory: failed to set encryption policy: Not a directory
-> +nondirectory: failed to get encryption policy: No data available
 > +
-> +*** Setting encryption policy on another user's directory ***
-> +unauthorized_dir: failed to set encryption policy: Permission denied
-> +unauthorized_dir: failed to get encryption policy: No data available
+> +*** Link unencrypted <= encrypted ***
+> +ln: failed to create hard link 'SCRATCH_MNT/edir1/ufile' => 'SCRATCH_MNT/udir/ufile': Operation not permitted
 > +
-> +*** Setting encryption policy on readonly filesystem ***
-> +ro_dir: failed to set encryption policy: Read-only file system
-> +ro_dir: failed to get encryption policy: No data available
-> +ro_bind_mnt/ro_dir: failed to set encryption policy: Read-only file system
-> +ro_bind_mnt/ro_dir: failed to get encryption policy: No data available
+> +*** Rename unencrypted => encrypted ***
+> +mv: cannot move 'SCRATCH_MNT/udir/ufile' to 'SCRATCH_MNT/edir1/ufile': Operation not permitted
+> +
+> +*** Exchange unencrypted <=> encrypted ***
+> +Operation not permitted
+> +
+> +
+> +*** Link encrypted <= unencrypted ***
+> +'SCRATCH_MNT/udir/efile1' => 'SCRATCH_MNT/edir1/efile1'
+> +
+> +*** Rename encrypted => unencrypted ***
+> +'SCRATCH_MNT/edir1/efile1' -> 'SCRATCH_MNT/udir/efile1'
+> +
+> +*** Exchange encrypted <=> unencrypted ***
+> +Operation not permitted
+> +
+> +
+> +*** Exchange encrypted <=> unencrypted without key ***
+> +Operation not permitted
 > diff --git a/tests/generic/group b/tests/generic/group
-> index f4af986..e6619ca 100644
+> index e218380..a0d6e84 100644
 > --- a/tests/generic/group
 > +++ b/tests/generic/group
-> @@ -396,3 +396,4 @@
->  391 auto quick rw
->  392 auto quick metadata
->  393 auto quick rw
-> +400 auto quick encrypt
+> @@ -399,3 +399,4 @@
+>  400 auto quick encrypt
+>  401 auto quick encrypt
+>  402 auto quick encrypt
+> +403 auto quick encrypt
 > -- 
 > 2.8.0.rc3.226.g39d4020
 > 
