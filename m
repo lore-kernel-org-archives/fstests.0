@@ -1,228 +1,138 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:51671 "EHLO
+Received: from aserp1040.oracle.com ([141.146.126.69]:18602 "EHLO
         aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750818AbcLMHFw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 13 Dec 2016 02:05:52 -0500
-Date: Mon, 12 Dec 2016 23:05:33 -0800
+        with ESMTP id S1750818AbcLMHLn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 13 Dec 2016 02:11:43 -0500
+Date: Mon, 12 Dec 2016 23:11:36 -0800
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v3 1/6] generic: add utilities for testing filesystem
- encryption
-Message-ID: <20161213070533.GA6366@birch.djwong.org>
-References: <1480965669-39714-1-git-send-email-ebiggers@google.com>
- <1480965669-39714-2-git-send-email-ebiggers@google.com>
- <20161213054155.GM29149@eguan.usersys.redhat.com>
+Subject: Re: [PATCH 1/7] ocfs2: test reflinking to inline data files
+Message-ID: <20161213071136.GB6366@birch.djwong.org>
+References: <148149316504.31093.16129068344227450710.stgit@birch.djwong.org>
+ <148149317133.31093.439907074888693999.stgit@birch.djwong.org>
+ <20161212090120.GV29149@eguan.usersys.redhat.com>
+ <20161212180922.GP8436@birch.djwong.org>
+ <20161213032057.GE29149@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161213054155.GM29149@eguan.usersys.redhat.com>
+In-Reply-To: <20161213032057.GE29149@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: Eric Biggers <ebiggers@google.com>, fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>, Michael Halcrow <mhalcrow@google.com>
+Cc: ocfs2-devel@oss.oracle.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Dec 13, 2016 at 01:41:55PM +0800, Eryu Guan wrote:
-> On Mon, Dec 05, 2016 at 11:21:04AM -0800, Eric Biggers wrote:
-> > Add utility functions for testing filesystem-level encryption via the
-> > common API currently supported by ext4 and f2fs, in development for
-> > ubifs and planned for xfs.  Setting and getting encryption policies will
-> > use new commands being added to xfs_io, while adding and removing
-> > encryption keys will use keyctl.
+On Tue, Dec 13, 2016 at 11:20:57AM +0800, Eryu Guan wrote:
+> On Mon, Dec 12, 2016 at 10:09:22AM -0800, Darrick J. Wong wrote:
+> > On Mon, Dec 12, 2016 at 05:01:20PM +0800, Eryu Guan wrote:
+> > > On Sun, Dec 11, 2016 at 01:52:51PM -0800, Darrick J. Wong wrote:
+> > > > Make sure that we can handle reflinking from and to inline-data files.
+> > > > 
+> > > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > > > ---
+> > > >  common/reflink       |    2 +
+> > > >  tests/ocfs2/001      |   88 ++++++++++++++++++++++++++++++++++++++++++++++++++
+> > > >  tests/ocfs2/001.out  |   14 ++++++++
+> > > >  tests/ocfs2/Makefile |   20 +++++++++++
+> > > >  tests/ocfs2/group    |    1 +
+> > > >  5 files changed, 124 insertions(+), 1 deletion(-)
+> > > >  create mode 100755 tests/ocfs2/001
+> > > >  create mode 100644 tests/ocfs2/001.out
+> > > >  create mode 100644 tests/ocfs2/Makefile
+> > > >  create mode 100644 tests/ocfs2/group
+> > > > 
+> > > > 
+> > > > diff --git a/common/reflink b/common/reflink
+> > > > index 9d51729..d048045 100644
+> > > > --- a/common/reflink
+> > > > +++ b/common/reflink
+> > > > @@ -197,7 +197,7 @@ _cp_reflink() {
+> > > >  	file1="$1"
+> > > >  	file2="$2"
+> > > >  
+> > > > -	cp --reflink=always -p "$file1" "$file2"
+> > > > +	cp --reflink=always -p -f "$file1" "$file2"
+> > > 
+> > > I'm still seeing "File exists" error with this patch, tested with your
+> > > ocfs2-vfs-reflink-6 branch, compiled on openSUSE Tumbleweed.
+> > > 
+> > > FSTYP         -- ocfs2
+> > > PLATFORM      -- Linux/x86_64 bootp-73-5-234 4.9.0-rc8.djwong-ocfs2+
+> > > MKFS_OPTIONS  -- --fs-features=local /dev/sda5
+> > > MOUNT_OPTIONS -- /dev/sda5 /mnt/testarea/scratch
+> > > 
+> > > ocfs2/001        - output mismatch (see /root/xfstests/results//ocfs2/ocfs2/001.out.bad)
+> > >     --- tests/ocfs2/001.out     2016-12-12 13:51:38.053909486 +0800
+> > >     +++ /root/xfstests/results//ocfs2/ocfs2/001.out.bad 2016-12-12 16:49:35.038882697 +0800
+> > >     @@ -1,14 +1,18 @@
+> > >      QA output created by 001
+> > >     +mkfs.ocfs2 1.8.4
 > > 
-> > Signed-off-by: Eric Biggers <ebiggers@google.com>
-> > ---
-> >  common/config  |   1 +
-> >  common/encrypt | 137 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  2 files changed, 138 insertions(+)
-> >  create mode 100644 common/encrypt
-> > 
-> > diff --git a/common/config b/common/config
-> > index f0f08d2..3727ec0 100644
-> > --- a/common/config
-> > +++ b/common/config
-> > @@ -202,6 +202,7 @@ export DEBUGFS_PROG="`set_prog_path debugfs`"
-> >  export UUIDGEN_PROG="`set_prog_path uuidgen`"
-> >  export GETRICHACL_PROG="`set_prog_path getrichacl`"
-> >  export SETRICHACL_PROG="`set_prog_path setrichacl`"
-> > +export KEYCTL_PROG="`set_prog_path keyctl`"
-> >  
-> >  # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
-> >  # newer systems have udevadm command but older systems like RHEL5 don't.
-> > diff --git a/common/encrypt b/common/encrypt
-> > new file mode 100644
-> > index 0000000..e18068e
-> > --- /dev/null
-> > +++ b/common/encrypt
-> > @@ -0,0 +1,137 @@
-> > +#-----------------------------------------------------------------------
-> > +#
-> > +# Common functions for testing filesystem-level encryption
-> > +#
-> > +#-----------------------------------------------------------------------
-> > +# Copyright (c) 2016 Google, Inc.  All Rights Reserved.
-> > +#
-> > +# Author: Eric Biggers <ebiggers@google.com>
-> > +#
-> > +# This program is free software; you can redistribute it and/or
-> > +# modify it under the terms of the GNU General Public License as
-> > +# published by the Free Software Foundation.
-> > +#
-> > +# This program is distributed in the hope that it would be useful,
-> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > +# GNU General Public License for more details.
-> > +#
-> > +# You should have received a copy of the GNU General Public License
-> > +# along with this program; if not, write the Free Software Foundation,
-> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > +#-----------------------------------------------------------------------
-> > +
-> > +_require_encryption()
+> > I guess I'll have to neuter this on newer ocfs2-tools.  (Still running 1.6.4
+> > here).
 > 
-> I think it's better to name it as _require_scratch_encryption (like
-> _require_scratch_reflink), so that we know it takes use of SCRATCH_DEV
-> and tests against it to check if encryption is supported.
+> I have a patch pending on review that could fix & filter this, FYI
+> 
+> fstests: teach _scratch_mkfs to handle mkfs option conflicts
+> https://www.spinics.net/lists/fstests/msg04550.html
 
-Agree, since the function is only capable of testing the scratch device.
+<nod> I actually meant the printing of the mkfs version string.
+
+> 
+> > 
+> > >      Format and mount
+> > >      Create the original files
+> > >      reflink into the start of file2
+> > >     +cp: failed to reflink '/mnt/testarea/scratch/test-001/file2' from '/mnt/testarea/scratch/test-001/file1': File exists
+> > >      reflink past the stuff in file3
+> > >     ...
+> > >     (Run 'diff -u tests/ocfs2/001.out /root/xfstests/results//ocfs2/ocfs2/001.out.bad'  to see the entire diff)
+> > > 
+> > > --- tests/ocfs2/001.out 2016-12-12 13:51:38.053909486 +0800
+> > > +++ /root/xfstests/results//ocfs2/ocfs2/001.out.bad     2016-12-12 16:44:31.991943842 +0800
+> > > @@ -1,14 +1,18 @@
+> > >  QA output created by 001
+> > > +mkfs.ocfs2 1.8.4
+> > >  Format and mount
+> > >  Create the original files
+> > >  reflink into the start of file2
+> > > +cp: failed to reflink '/mnt/testarea/scratch/test-001/file2' from '/mnt/testarea/scratch/test-001/file1': File exists
+> > >  reflink past the stuff in file3
+> > >  reflink an inline-data file to a regular one
+> > > +cp: failed to reflink '/mnt/testarea/scratch/test-001/file5' from '/mnt/testarea/scratch/test-001/file4': File exists
+> > >  reflink an inline-data file to another inline-data file
+> > > +cp: failed to reflink '/mnt/testarea/scratch/test-001/file6' from '/mnt/testarea/scratch/test-001/file4': File exists
+> > >  Verify the whole mess
+> > >  2d61aa54b58c2e94403fb092c3dbc027  SCRATCH_MNT/test-001/file1
+> > > -2d61aa54b58c2e94403fb092c3dbc027  SCRATCH_MNT/test-001/file2
+> > > +401b30e3b8b5d629635a5c613cdb7919  SCRATCH_MNT/test-001/file2
+> > >  4e68a2e24b6b0f386ab39d01d902293d  SCRATCH_MNT/test-001/file3
+> > >  009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file4
+> > > -009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file5
+> > > -009520053b00386d1173f3988c55d192  SCRATCH_MNT/test-001/file6
+> > > +2d61aa54b58c2e94403fb092c3dbc027  SCRATCH_MNT/test-001/file5
+> > > +60b725f10c9c85c70d97880dfe8191b3  SCRATCH_MNT/test-001/file6
+> > > 
+> > > I did the "reflink into the start of file2" test manually, and strace
+> > > showed that it is file1 reports EEXIST.
+> > > 
+> > > open("/mnt/ocfs2/testfile1", O_RDONLY)  = 3
+> > > fstat(3, {st_mode=S_IFREG|0600, st_size=65536, ...}) = 0
+> > > ioctl(3, _IOC(_IOC_WRITE, 0x6f, 0x04, 0x18), 0x7ffc8daf09f0) = -1 EEXIST (File exists)
+> > 
+> > Wait, that's the ocfs2 reflink ioctl, not FICLONE.  Well that explains
+> > why the functional parts of the tests fail.  I looked at latest coreutils
+> > source, which does not use OCFS2_IOC_REFLINK, so I guess this must be an
+> > opensuse thing?
+> 
+> Ok, I'll try a newer coreutils.
+
+coreutils 8.26 (latest) doesn't have any OCFS2_IOC_REFLINK support; I
+suspect a distro patch in the srpm or something....
 
 --D
 
-> > +{
-> > +	# The 'test_dummy_encryption' mount option interferes with trying to use
-> > +	# encryption for real, even if we are just trying to get/set policies
-> > +	# and never put any keys in the keyring.  So skip the real encryption
-> > +	# tests if the 'test_dummy_encryption' mount option was specified.
-> > +	if echo "$MOUNT_OPTIONS" | grep -q "test_dummy_encryption"; then
-> > +		_notrun "Dummy encryption is on; skipping real encryption tests"
-> > +	fi
 > 
-> There's a helper _exclude_scratch_mount_option to do this.
-> 
-> > +
-> > +	# Make a filesystem on the scratch device with the encryption feature
-> > +	# enabled.  If this fails then probably the userspace tools (e.g.
-> > +	# e2fsprogs or f2fs-tools) are too old to understand encryption.
-> > +	if ! _scratch_mkfs_encrypted &>>$seqres.full; then
-> > +		_notrun "$FSTYP userspace tools do not support encryption"
-> > +	fi
-> > +
-> > +	# Try to mount the filesystem.  If this fails then either the kernel
-> > +	# isn't aware of encryption, or the mkfs options were not compatible
-> > +	# with encryption (e.g. ext4 with block size != PAGE_SIZE).
-> > +	if ! _scratch_mount &>>$seqres.full; then
-> > +		_notrun "kernel is unaware of $FSTYP encryption feature, " \
-> > +			"or mkfs options are not compatible with encryption"
-> > +	fi
-> > +
-> > +	# The kernel may be aware of encryption without supporting it.  For
-> > +	# example, for ext4 this is the case with kernels configured with
-> > +	# CONFIG_EXT4_FS_ENCRYPTION=n.  Detect support for encryption by trying
-> > +	# to set an encryption policy.  (For ext4 we could instead check for the
-> > +	# presence of /sys/fs/ext4/features/encryption, but this is broken on
-> > +	# some older kernels and is ext4-specific anyway.)
-> > +	mkdir $SCRATCH_MNT/tmpdir
-> > +	if $XFS_IO_PROG -c set_encpolicy $SCRATCH_MNT/tmpdir \
-> > +		2>&1 >>$seqres.full | \
-> > +		egrep -q 'Inappropriate ioctl for device|Operation not supported'
-> > +	then
-> > +		_notrun "kernel does not support $FSTYP encryption"
-> > +	fi
-> > +	rmdir $SCRATCH_MNT/tmpdir
-> > +	_scratch_unmount
-> > +}
-> > +
-> > +_scratch_mkfs_encrypted()
-> > +{
-> > +	_scratch_mkfs -O encrypt
-> 
-> Do case switch based on FSTYP (like what you do in v1 patch), just don't
-> override MKFS_OPTIONS as Dave pointed out.
-> 
-> _scratch_mkfs_encrypted()
-> {
-> 	case $FSTYP in
-> 	ext4|f2fs)
-> 		_scratch_mkfs -O encrypt
-> 		;;
-> 	*)
-> 		_notrun "No encryption support for $FSTYP"
-> 		;;
-> 	esac
-> }
-> 
-> > +
-> > +# Give the invoking shell a new session keyring.  This makes any keys we add to
-> > +# the session keyring scoped to the lifetime of the test script.
-> > +_new_session_keyring()
-> > +{
-> > +	$KEYCTL_PROG new_session >>$seqres.full
-> > +}
-> > +
-> > +#
-> > +# Generate a random encryption key, add it to the session keyring, and print out
-> > +# the resulting key descriptor (example: "8bf798e1a494e1ec").  Requires the
-> > +# keyctl program.  It's assumed the caller has already set up a test-scoped
-> > +# session keyring using _new_session_keyring.
-> > +#
-> > +_generate_encryption_key()
-> > +{
-> > +	# Generate a key descriptor (16 character hex string)
-> > +	local keydesc=""
-> > +	for ((i = 0; i < 8; i++)); do
-> > +		keydesc="${keydesc}$(printf "%02x" $(( $RANDOM % 256 )))"
-> > +	done
-> > +
-> > +	# Generate the actual encryption key (64 bytes)
-> > +	local raw=""
-> > +	for ((i = 0; i < 64; i++)); do
-> > +		raw="${raw}\\x$(printf "%02x" $(( $RANDOM % 256 )))"
-> > +	done
-> > +
-> > +	#
-> > +	# Add the key to the session keyring.  The required structure is:
-> > +	#
-> > +	#	#define FS_MAX_KEY_SIZE 64
-> > +	#	struct fscrypt_key {
-> > +	#		u32 mode;
-> > +	#		u8 raw[FS_MAX_KEY_SIZE];
-> > +	#		u32 size;
-> > +	#	} __packed;
-> > +	#
-> > +	# The kernel ignores 'mode' but requires that 'size' be 64.
-> > +	#
-> > +	# Keys are named $FSTYP:KEYDESC where KEYDESC is the 16-character key
-> > +	# descriptor hex string.  Newer kernels (ext4 4.8 and later, f2fs 4.6
-> > +	# and later) also allow the common key prefix "fscrypt:" in addition to
-> > +	# their filesystem-specific key prefix ("ext4:", "f2fs:").  It would be
-> > +	# nice to use the common key prefix, but for now use the filesystem-
-> > +	# specific prefix to make it possible to test older kernels...
-> > +	#
-> > +	local big_endian=$(echo -ne '\x11' | od -tx2 | head -1 | \
-> > +			   cut -f2 -d' ' | cut -c1 )
-> > +	if (( big_endian )); then
-> > +		local mode='\x00\x00\x00\x00'
-> > +		local size='\x00\x00\x00\x40'
-> > +	else
-> > +		local mode='\x00\x00\x00\x00'
-> > +		local size='\x40\x00\x00\x00'
-> > +	fi
-> > +	echo -n -e "${mode}${raw}${size}" |
-> > +		$KEYCTL_PROG padd logon $FSTYP:$keydesc @s >>$seqres.full
-> > +	echo $keydesc
-> > +}
-> > +
-> > +# Unlink an encryption key from the session keyring, given its key descriptor.
-> > +_unlink_encryption_key()
-> > +{
-> > +	local keydesc=$1
-> > +	local keyid=$($KEYCTL_PROG search @s logon $FSTYP:$keydesc)
-> > +	$KEYCTL_PROG unlink $keyid >>$seqres.full
-> > +}
-> > -- 
-> > 2.8.0.rc3.226.g39d4020
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Thanks,
+> Eryu
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
 > the body of a message to majordomo@vger.kernel.org
