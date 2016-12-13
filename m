@@ -1,78 +1,170 @@
-Received: from mx1.redhat.com ([209.132.183.28]:35120 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:40268 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752941AbcLMDWK (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 12 Dec 2016 22:22:10 -0500
-Date: Tue, 13 Dec 2016 11:22:08 +0800
+        id S1751180AbcLMDfx (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 12 Dec 2016 22:35:53 -0500
+Date: Tue, 13 Dec 2016 11:35:50 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 4/7] reflink: fix space consumption tests
-Message-ID: <20161213032208.GF29149@eguan.usersys.redhat.com>
-References: <148149316504.31093.16129068344227450710.stgit@birch.djwong.org>
- <148149319048.31093.2083894591825614863.stgit@birch.djwong.org>
- <20161212102539.GA29149@eguan.usersys.redhat.com>
- <20161212230352.GF25841@birch.djwong.org>
+Subject: Re: [PATCH] overlay: test hardlink breakage on copy up
+Message-ID: <20161213033550.GG29149@eguan.usersys.redhat.com>
+References: <1481538561-10558-1-git-send-email-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161212230352.GF25841@birch.djwong.org>
+In-Reply-To: <1481538561-10558-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: ocfs2-devel@oss.oracle.com, fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 12, 2016 at 03:03:53PM -0800, Darrick J. Wong wrote:
-> On Mon, Dec 12, 2016 at 06:25:39PM +0800, Eryu Guan wrote:
-> > On Sun, Dec 11, 2016 at 01:53:10PM -0800, Darrick J. Wong wrote:
-> > > Some of the tests try to check that we can't COW when we're out of
-> > > space, but some tricky filesystems make this hard because writing N
-> > > blocks doesn't increase used blocks by N....
-> > > 
-> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > > ---
-> > >  common/populate   |   14 ++++++++++++++
-> > >  tests/generic/171 |    5 ++---
-> > >  tests/generic/173 |    5 ++---
-> > >  tests/generic/174 |    5 ++---
-> > >  tests/generic/282 |    3 +--
-> > >  5 files changed, 21 insertions(+), 11 deletions(-)
-> > > 
-> > > 
-> > > diff --git a/common/populate b/common/populate
-> > > index d0003c5..9811d21 100644
-> > > --- a/common/populate
-> > > +++ b/common/populate
-> > > @@ -30,6 +30,20 @@ _require_xfs_db_blocktrash_z_command() {
-> > >  	$XFS_DB_PROG -x -f -c 'blocktrash -z' "${TEST_DEV}" | grep -q 'nothing on stack' || _notrun "blocktrash -z not supported"
-> > >  }
-> > >  
-> > > +# Eat free space until we can't anymore.
-> > > +_consume_free_space() {
-> > > +	dir=$1
-> > > +
-> > > +	old_nr_free=0
-> > > +	nr_free=$(stat -f -c '%f' $dir)
-> > > +	x=0
-> > > +	while [ $nr_free -gt 0 ] && [ $old_nr_free != $nr_free ]; do
-> > > +		$XFS_IO_PROG -f -c "pwrite -b 4194304 0 $((blksz * nr_free))" $dir/eat_my_space.$((x++))
-> > 
-> > blksz not defined in the function.
-> > 
-> > Xiaoguang Wang did something similar back in Nov. and I'm still queuing
-> > his patch. (His 1/2 patch conflicts with your scrub/repair patchset and
-> > it might be easier for you to let your patches go first.)
-> > 
-> > generic: make 17[1-4] work well when btrfs compression is enabled
-> > https://patchwork.kernel.org/patch/9408451/
-> > 
-> > Does this patch work for you? If so, perhaps you only need to update
-> > generic/282 using the "_fill_fs" helper?
+On Mon, Dec 12, 2016 at 12:29:21PM +0200, Amir Goldstein wrote:
+> Introduce a new test to demonstrate a known issue with overlayfs:
+> - file A and B are hardlinked in lower
+> - modify A to trigger copy up
+> - file A is no longer a hardlink of file B
 > 
-> Aha!  I had this feeling in the back of my head that someone was
-> already trying to push a helper function.
-> 
-> At this point XFS online scrub/repair is slipping to 4.11 anyway so you
-> may as well take Xioguang's patches and I'll just rebase all my stuff
-> off of that.
+> There is no fix for this issue at this time.
 
-Ok, thanks!
+Is this something we want to fix eventually? If not, do we want a test
+that is failing forever? I ask because I heard that this is something
+not easy/worth fixing, at least low priority. But things may change now.
+
+> 
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+>  tests/overlay/019     | 88 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/019.out |  2 ++
+>  tests/overlay/group   |  1 +
+>  3 files changed, 91 insertions(+)
+>  create mode 100755 tests/overlay/019
+>  create mode 100644 tests/overlay/019.out
+> 
+> diff --git a/tests/overlay/019 b/tests/overlay/019
+> new file mode 100755
+> index 0000000..382e4ee
+> --- /dev/null
+> +++ b/tests/overlay/019
+> @@ -0,0 +1,88 @@
+> +#! /bin/bash
+> +# FSQA Test No. 019
+> +#
+> +# Test hardlink breakage
+> +#
+> +# This simple test demonstrates a known issue with overlayfs:
+> +# - file A and B are hardlinked in lower
+> +# - modify A to trigger copy up
+> +# - file A is no longer a hardlink of file B
+> +#
+> +#-----------------------------------------------------------------------
+> +#
+> +# Copyright (C) 2016 CTERA Networks. All Rights Reserved.
+> +# Author: Amir Goldstein <amir73il@gmail.com>
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs overlay
+> +_supported_os Linux
+> +_require_scratch
+> +
+> +rm -f $seqres.full
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +
+> +# Create 2 hardlinked files in lower
+> +lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
+> +mkdir -p $lowerdir
+> +echo "patient zero" >> $lowerdir/foo
+> +ln $lowerdir/foo $lowerdir/bar
+> +
+> +
+> +_scratch_mount
+> +
+> +cd $SCRATCH_MNT
+
+It's uncommon to cd to $SCRATCH_MNT in fstests, if it can be done
+without doing so. Usually we do
+
+testfile1=$SCRATCH_MNT/foo
+testfile2=$SCRATCH_MNT/bar
+
+<do tests on $testfile1 and $testfile2>
+
+Can this test be updated in this way? And patch "overlay: test unstable
+inode number"? Sorry that I forgot about this yesterday..
+
+Thanks!
 
 Eryu
+
+> +
+> +rm -f $tmp.before $tmp.after
+> +
+> +# Record inode number and nlink before copy up
+> +ls -li foo bar | awk '{ print $1, $3 }' > $tmp.before
+> +
+> +# Modify content of one of the hardlinks
+> +echo "mutated" >> foo
+> +
+> +# Record inode number and nlink after copy up
+> +ls -li foo bar | awk '{ print $1, $3 }' > $tmp.after
+> +
+> +# Compare ino/nlink before..after - expect silence
+> +diff $tmp.before $tmp.after
+> +
+> +# Compare content of files - expect silence
+> +diff foo bar
+> +
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/overlay/019.out b/tests/overlay/019.out
+> new file mode 100644
+> index 0000000..163484b
+> --- /dev/null
+> +++ b/tests/overlay/019.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 019
+> +Silence is golden
+> diff --git a/tests/overlay/group b/tests/overlay/group
+> index fb6610d..f266b0a 100644
+> --- a/tests/overlay/group
+> +++ b/tests/overlay/group
+> @@ -20,3 +20,4 @@
+>  015 auto quick whiteout
+>  016 auto quick copyup
+>  018 auto quick copyup
+> +019 auto quick copyup
+> -- 
+> 2.7.4
+> 
