@@ -1,239 +1,39 @@
-Received: from mx1.redhat.com ([209.132.183.28]:53158 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:39754 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932828AbcLMGHQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 13 Dec 2016 01:07:16 -0500
-Date: Tue, 13 Dec 2016 14:07:13 +0800
+        id S932188AbcLMGM6 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 13 Dec 2016 01:12:58 -0500
+Date: Tue, 13 Dec 2016 14:12:55 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v3 5/6] generic: test enforcement of one encryption
- policy per tree
-Message-ID: <20161213060713.GO29149@eguan.usersys.redhat.com>
+Subject: Re: [PATCH v3 0/6] Add filesystem-level encryption tests
+Message-ID: <20161213061255.GP29149@eguan.usersys.redhat.com>
 References: <1480965669-39714-1-git-send-email-ebiggers@google.com>
- <1480965669-39714-6-git-send-email-ebiggers@google.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1480965669-39714-6-git-send-email-ebiggers@google.com>
+In-Reply-To: <1480965669-39714-1-git-send-email-ebiggers@google.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eric Biggers <ebiggers@google.com>
 Cc: fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>, Michael Halcrow <mhalcrow@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 05, 2016 at 11:21:08AM -0800, Eric Biggers wrote:
-> Add an xfstest which partially verifies that the filesystem enforces
-> that all files in an encrypted directory tree use the same encryption
-> policy.
+On Mon, Dec 05, 2016 at 11:21:03AM -0800, Eric Biggers wrote:
+> This is the third version of the patch series to add some xfstests for
+> filesystem-level encryption.  The new tests are designed to run on any
+> filesystem that implements the "fscrypt" API, currently ext4 and f2fs.
+> (fscrypt support for ubifs is also under development, but it looks like
+> xfstests doesn't have ubifs support yet.)
 > 
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
-> ---
->  tests/generic/403     | 130 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/403.out |  34 +++++++++++++
->  tests/generic/group   |   1 +
->  3 files changed, 165 insertions(+)
->  create mode 100644 tests/generic/403
->  create mode 100644 tests/generic/403.out
-> 
-> diff --git a/tests/generic/403 b/tests/generic/403
-> new file mode 100644
-> index 0000000..77427b8
-> --- /dev/null
-> +++ b/tests/generic/403
-> @@ -0,0 +1,130 @@
-> +#! /bin/bash
-> +# FS QA Test generic/403
-> +#
-> +# Filesystem encryption is designed to enforce that a consistent encryption
-> +# policy is used within a given encrypted directory tree and that an encrypted
-> +# directory tree does not contain any unencrypted files.  This test verifies
-> +# that filesystem operations that would violate this constraint fail with EPERM.
-> +# This does not yet test enforcement of this constraint on lookup, which is
-> +# needed to detect offline changes.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2016 Google, Inc.  All Rights Reserved.
-> +#
-> +# Author: Eric Biggers <ebiggers@google.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/encrypt
-> +. ./common/renameat2
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs ext4 f2fs
-> +_supported_os Linux
-> +_require_xfs_io_command "set_encpolicy"
-> +_require_scratch
-> +_require_encryption
-> +_requires_renameat2
-> +
-> +_new_session_keyring
-> +_scratch_mkfs_encrypted >> $seqres.full
-> +_scratch_mount
-> +
-> +# Set up two encrypted directories, with different encryption policies,
-> +# and one unencrypted directory.
-> +edir1=$SCRATCH_MNT/edir1
-> +edir2=$SCRATCH_MNT/edir2
-> +udir=$SCRATCH_MNT/udir
-> +mkdir $edir1 $edir2 $udir
-> +keydesc1=$(_generate_encryption_key)
-> +keydesc2=$(_generate_encryption_key)
-> +$XFS_IO_PROG -c "set_encpolicy $keydesc1" $edir1
-> +$XFS_IO_PROG -c "set_encpolicy $keydesc2" $edir2
-> +touch $edir1/efile1
-> +touch $edir2/efile2
-> +touch $udir/ufile
-> +
-> +echo -e "\n*** Link encrypted <= encrypted ***"
-> +ln $edir1/efile1 $edir2/efile1 |& _filter_scratch
-> +
-> +echo -e "\n*** Rename encrypted => encrypted ***"
-> +mv $edir1/efile1 $edir2/efile1 |& _filter_scratch
-> +
-> +echo -e "\n*** Exchange encrypted <=> encrypted ***"
-> +src/renameat2 -x $edir1/efile1 $edir2/efile2 |& _filter_scratch
-> +
-> +
-> +echo -e "\n\n*** Link unencrypted <= encrypted ***"
-> +ln $udir/ufile $edir1/ufile |& _filter_scratch
-> +
-> +echo -e "\n*** Rename unencrypted => encrypted ***"
-> +mv $udir/ufile $edir1/ufile |& _filter_scratch
-> +
-> +echo -e "\n*** Exchange unencrypted <=> encrypted ***"
-> +src/renameat2 -x $udir/ufile $edir1/efile1 |& _filter_scratch
-> +
-> +
-> +echo -e "\n\n*** Link encrypted <= unencrypted ***"
-> +ln -v $edir1/efile1 $udir/efile1 |& _filter_scratch # should succeed
-> +rm $udir/efile1 # undo
-> +
-> +echo -e "\n*** Rename encrypted => unencrypted ***"
-> +mv -v $edir1/efile1 $udir/efile1 |& _filter_scratch # should succeed
-> +mv $udir/efile1 $edir1/efile1 # undo
-> +
-> +echo -e "\n*** Exchange encrypted <=> unencrypted ***"
-> +src/renameat2 -x $edir1/efile1 $udir/ufile |& _filter_scratch
-> +
-> +# Now test the cases where we don't have access to the encryption keys.
-> +
-> +_unlink_encryption_key $keydesc1
-> +_unlink_encryption_key $keydesc2
-> +_scratch_cycle_mount
-> +efile1=$(find $edir1 -type f)
-> +efile2=$(find $edir2 -type f)
-> +echo
-> +
-> +# TODO: this currently succeeds.  It should fail.  Fix this kernel-side.
-> +#echo -e "\n*** Exchange encrypted <=> encrypted without key ***"
-> +#src/renameat2 -x $efile1 $efile2
+> The new tests are designed to complement, not replace, doing a full
+> xfstests run with encryption enabled, which for ext4 can currently be
+> done by using the test_dummy_encryption mount option.
 
-If it reveals a kernel bug, just uncomment it & update the .out file and
-let it fail, as long as it's not a kernel crash, so it acts as a
-reminder that there's an unfixed bug :)
+These tests look good to me now overall, from fstests perspective of
+view. I tested them with 4.9 kernel with ext4 encryption enabled, latest
+e2fsprogs and latest xfsprogs plus the set|get_policy patch. All tests
+passed on ext4. Comments go to individual patch.
 
-For kernel-crashing tests, we tend to merge them after there's a known
-fix, at least in maintainer's tree. But if it's a bug that won't be
-fixed in the near future, we can merge such tests with "dangerous"
-group, so they can be skipped by using "-x dangerous" option to check.
+But I'm not so familiar with this new encryption API, it would be good
+to have some reviews on the tests from other fscrypt developers too.
 
 Thanks,
 Eryu
-
-> +
-> +echo -e "\n*** Exchange encrypted <=> unencrypted without key ***"
-> +src/renameat2 -x $efile1 $udir/ufile
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/403.out b/tests/generic/403.out
-> new file mode 100644
-> index 0000000..27ed8cb
-> --- /dev/null
-> +++ b/tests/generic/403.out
-> @@ -0,0 +1,34 @@
-> +QA output created by 403
-> +
-> +*** Link encrypted <= encrypted ***
-> +ln: failed to create hard link 'SCRATCH_MNT/edir2/efile1' => 'SCRATCH_MNT/edir1/efile1': Operation not permitted
-> +
-> +*** Rename encrypted => encrypted ***
-> +mv: cannot move 'SCRATCH_MNT/edir1/efile1' to 'SCRATCH_MNT/edir2/efile1': Operation not permitted
-> +
-> +*** Exchange encrypted <=> encrypted ***
-> +Operation not permitted
-> +
-> +
-> +*** Link unencrypted <= encrypted ***
-> +ln: failed to create hard link 'SCRATCH_MNT/edir1/ufile' => 'SCRATCH_MNT/udir/ufile': Operation not permitted
-> +
-> +*** Rename unencrypted => encrypted ***
-> +mv: cannot move 'SCRATCH_MNT/udir/ufile' to 'SCRATCH_MNT/edir1/ufile': Operation not permitted
-> +
-> +*** Exchange unencrypted <=> encrypted ***
-> +Operation not permitted
-> +
-> +
-> +*** Link encrypted <= unencrypted ***
-> +'SCRATCH_MNT/udir/efile1' => 'SCRATCH_MNT/edir1/efile1'
-> +
-> +*** Rename encrypted => unencrypted ***
-> +'SCRATCH_MNT/edir1/efile1' -> 'SCRATCH_MNT/udir/efile1'
-> +
-> +*** Exchange encrypted <=> unencrypted ***
-> +Operation not permitted
-> +
-> +
-> +*** Exchange encrypted <=> unencrypted without key ***
-> +Operation not permitted
-> diff --git a/tests/generic/group b/tests/generic/group
-> index e218380..a0d6e84 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -399,3 +399,4 @@
->  400 auto quick encrypt
->  401 auto quick encrypt
->  402 auto quick encrypt
-> +403 auto quick encrypt
-> -- 
-> 2.8.0.rc3.226.g39d4020
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
