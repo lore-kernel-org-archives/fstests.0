@@ -1,126 +1,78 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:48504 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932998AbcLMVtj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 13 Dec 2016 16:49:39 -0500
-Date: Tue, 13 Dec 2016 13:49:32 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 7/7] xfs/ext4: check negative inode size
-Message-ID: <20161213214932.GD6366@birch.djwong.org>
-References: <148149316504.31093.16129068344227450710.stgit@birch.djwong.org>
- <148149320892.31093.18280644018166858868.stgit@birch.djwong.org>
- <20161212110721.GC29149@eguan.usersys.redhat.com>
+Received: from sandeen.net ([63.231.237.45]:38398 "EHLO sandeen.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751152AbcLMXlO (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 13 Dec 2016 18:41:14 -0500
+Subject: Re: [PATCH] generic/38[3-6]: require project quota to be enabled on
+ SCRATCH_DEV
+References: <1478976065-2060-1-git-send-email-eguan@redhat.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <2b0336f2-8311-8bf7-08f3-ff0dc637b3fd@sandeen.net>
+Date: Tue, 13 Dec 2016 17:41:12 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20161212110721.GC29149@eguan.usersys.redhat.com>
+In-Reply-To: <1478976065-2060-1-git-send-email-eguan@redhat.com>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: ocfs2-devel@oss.oracle.com, fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 12, 2016 at 07:07:21PM +0800, Eryu Guan wrote:
-> On Sun, Dec 11, 2016 at 01:53:28PM -0800, Darrick J. Wong wrote:
-> > Craft a malicious filesystem image with a negative inode size,
-> > then try to trigger a kernel DoS by appending data to the file.
-> > Ideally this should trigger verifier errors instead of hanging.
-> > 
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> >  tests/ext4/400   |   71 +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/ext4/401   |   71 +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/ext4/group |    2 ++
-> >  tests/xfs/400    |   72 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/401    |   72 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/group  |    2 ++
-> >  6 files changed, 290 insertions(+)
-> >  create mode 100755 tests/ext4/400
-> >  create mode 100755 tests/ext4/401
-> >  create mode 100755 tests/xfs/400
-> >  create mode 100755 tests/xfs/401
-> > 
-> > 
-> > diff --git a/tests/ext4/400 b/tests/ext4/400
-> > new file mode 100755
-> > index 0000000..5857549
-> > --- /dev/null
-> > +++ b/tests/ext4/400
-> > @@ -0,0 +1,71 @@
-> > +#! /bin/bash
-> > +# FSQA Test No. 400
-> > +#
-> > +# Since loff_t is a signed type, it is invalid for a filesystem to load
-> > +# an inode with i_size = -1ULL.  Unfortunately, nobody checks this,
-> > +# which means that we can trivially DoS the VFS by creating such a file
-> > +# and appending to it.  This causes an integer overflow in the routines
-> > +# underlying writeback, which results in the kernel locking up.
+On 11/12/16 12:41 PM, Eryu Guan wrote:
+> generic/38[3-6] are made generic from xfs tests to test project
+> quota on other filesystems, e.g. ext4. But we should make sure
+> project quota is enabled in between of _scratch_enable_pquota and
+> _qmount. Otherwise mount will fail if there's no project quota
+> support on SCRATCH_DEV, e.g. ext2 and ext3.
 > 
-> The only difference between ext4/400 and ext4/401 is that 400 makes
-> i_size=-1 and 401 makes it 0xFFFFFFFFFFFFFE00, while xfs/400 and xfs/401
-> both create XFS with i_size -1. Is 0xFFFFFFFFFFFFFE00 a typo? Or update
-> the description accordingly if they are two different tests?
-
-The 0xFFFFFFFFFFFFFE00 rounds the file size down to a multiple of 512
-so that we can do the directio... which means that xfs/401 is buggy.
-Good catch!
-
-Hmmm, no golden output either.  WTF? :)
-
-> And I noticed that 400 is doing buffered I/O and 401 is doing direct
-> I/O, can the two be folded in one test?
-
-<shrug> They're testing different code paths (at least with pre-iomap
-filesystems) so I prefer they stay separate.
-
-> > +#
-> > +#-----------------------------------------------------------------------
-> > +# Copyright (c) 2016-2017 Oracle, Inc.  All Rights Reserved.
-> > +#
-> > +# This program is free software; you can redistribute it and/or
-> > +# modify it under the terms of the GNU General Public License as
-> > +# published by the Free Software Foundation.
-> > +#
-> > +# This program is distributed in the hope that it would be useful,
-> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > +# GNU General Public License for more details.
-> > +#
-> > +# You should have received a copy of the GNU General Public License
-> > +# along with this program; if not, write the Free Software Foundation,
-> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > +#-----------------------------------------------------------------------
-> > +
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +PIDS=""
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +# real QA test starts here
-> > +_supported_os Linux
-> > +_supported_fs ext2 ext3 ext4
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> ---
+>  tests/generic/383 | 1 +
+>  tests/generic/384 | 2 +-
+>  tests/generic/385 | 2 +-
+>  tests/generic/386 | 2 +-
+>  4 files changed, 4 insertions(+), 3 deletions(-)
 > 
-> Then it belongs to shared :)
+> diff --git a/tests/generic/383 b/tests/generic/383
+> index be5b19b..93836ea 100755
+> --- a/tests/generic/383
+> +++ b/tests/generic/383
+> @@ -54,6 +54,7 @@ _require_xfs_quota_foreign
+>  
+>  _scratch_mkfs >/dev/null 2>&1
+>  _scratch_enable_pquota
+> +_require_prjquota $SCRATCH_DEV
+>  
+>  do_project_test()
+>  {
+> diff --git a/tests/generic/384 b/tests/generic/384
+> index 452d26e..4784e47 100755
+> --- a/tests/generic/384
+> +++ b/tests/generic/384
+> @@ -73,10 +73,10 @@ chmod a+rwx $seqres.full	# arbitrary users will write here
+>  _require_scratch
+>  _scratch_mkfs >/dev/null 2>&1
+>  _scratch_enable_pquota
+> +_require_prjquota $SCRATCH_DEV
+>  
+>  _qmount_option "prjquota"
+>  _qmount
+> -_require_prjquota $SCRATCH_DEV
 
-Ah, so that's what tests/shared/ is for.  I've been wondering that for
-a long time.
+This commit seems to break things, on ext4 as well as on xfs.
+(Bill ran into this)
 
---D
+how can _require_projquota, which uses src/feature to call a quotactl,
+operate before the filesystem is mounted:
 
-> Thanks,
-> Eryu
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+# ./check  generic/384
+FSTYP         -- xfs (non-debug)
+PLATFORM      -- Linux/x86_64 bp-05 4.9.0-rc1+
+MKFS_OPTIONS  -- -f -bsize=4096 /dev/sdb2
+MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 /dev/sdb2 /mnt/scratch
+
+generic/384	 [not run] Installed kernel does not support project quotas
+
+
+did this work for you?
+
+-Eric
+
