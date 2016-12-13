@@ -1,39 +1,87 @@
-Received: from mx1.redhat.com ([209.132.183.28]:39754 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932188AbcLMGM6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 13 Dec 2016 01:12:58 -0500
-Date: Tue, 13 Dec 2016 14:12:55 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v3 0/6] Add filesystem-level encryption tests
-Message-ID: <20161213061255.GP29149@eguan.usersys.redhat.com>
-References: <1480965669-39714-1-git-send-email-ebiggers@google.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1480965669-39714-1-git-send-email-ebiggers@google.com>
+Received: from mail-wj0-f195.google.com ([209.85.210.195]:34793 "EHLO
+        mail-wj0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751237AbcLMGPv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 13 Dec 2016 01:15:51 -0500
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH v2] overlay/016: do not cd into $SCRATCH_MNT
+Date: Tue, 13 Dec 2016 08:15:29 +0200
+Message-Id: <1481609729-12341-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers@google.com>
-Cc: fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>, Michael Halcrow <mhalcrow@google.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 05, 2016 at 11:21:03AM -0800, Eric Biggers wrote:
-> This is the third version of the patch series to add some xfstests for
-> filesystem-level encryption.  The new tests are designed to run on any
-> filesystem that implements the "fscrypt" API, currently ext4 and f2fs.
-> (fscrypt support for ubifs is also under development, but it looks like
-> xfstests doesn't have ubifs support yet.)
-> 
-> The new tests are designed to complement, not replace, doing a full
-> xfstests run with encryption enabled, which for ext4 can currently be
-> done by using the test_dummy_encryption mount option.
+Avoid cd into $SCRATCH_MNT
 
-These tests look good to me now overall, from fstests perspective of
-view. I tested them with 4.9 kernel with ext4 encryption enabled, latest
-e2fsprogs and latest xfsprogs plus the set|get_policy patch. All tests
-passed on ext4. Comments go to individual patch.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/overlay/016     | 13 ++++++-------
+ tests/overlay/016.out |  4 ++--
+ 2 files changed, 8 insertions(+), 9 deletions(-)
 
-But I'm not so familiar with this new encryption API, it would be good
-to have some reviews on the tests from other fscrypt developers too.
+v2:
+- undo cleanup of _cleanup()
+- sperate patch for 016
 
-Thanks,
-Eryu
+diff --git a/tests/overlay/016 b/tests/overlay/016
+index 041ab3d..cffcde7 100755
+--- a/tests/overlay/016
++++ b/tests/overlay/016
+@@ -64,7 +64,6 @@ echo "This is old news" > $lowerdir/bar
+ 
+ _scratch_mount
+ 
+-cd $SCRATCH_MNT
+ 
+ #
+ # case #1:
+@@ -73,12 +72,12 @@ cd $SCRATCH_MNT
+ # write to rwfd
+ # read from rofd
+ #
+-$XFS_IO_PROG -r foo \
+-	-C "open foo" \
++$XFS_IO_PROG -r $SCRATCH_MNT/foo \
++	-C "open $SCRATCH_MNT/foo" \
+ 	-C "pwrite -S 0x61 0 16" \
+ 	-C "file 0" \
+ 	-C "pread -v 0 16" \
+-| _filter_xfs_io
++| _filter_xfs_io | _filter_scratch
+ 
+ #
+ # case #2:
+@@ -86,12 +85,12 @@ $XFS_IO_PROG -r foo \
+ # write to rwfd
+ # read from mapped memory
+ #
+-$XFS_IO_PROG -r bar \
++$XFS_IO_PROG -r $SCRATCH_MNT/bar \
+ 	-C "mmap -r 0 16" \
+-	-C "open bar" \
++	-C "open $SCRATCH_MNT/bar" \
+ 	-C "pwrite -S 0x61 0 16" \
+ 	-C "mread -v 0 16" \
+-| _filter_xfs_io
++| _filter_xfs_io | _filter_scratch
+ 
+ status=0
+ exit
+diff --git a/tests/overlay/016.out b/tests/overlay/016.out
+index c49f8dc..a28aaa6 100644
+--- a/tests/overlay/016.out
++++ b/tests/overlay/016.out
+@@ -1,8 +1,8 @@
+ QA output created by 016
+ wrote 16/16 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-[000] foo            (foreign,non-sync,non-direct,read-only)
+- 001  foo            (foreign,non-sync,non-direct,read-write)
++[000] SCRATCH_MNT/foo (foreign,non-sync,non-direct,read-only)
++ 001  SCRATCH_MNT/foo (foreign,non-sync,non-direct,read-write)
+ 00000000:  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
+ read 16/16 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-- 
+2.7.4
+
