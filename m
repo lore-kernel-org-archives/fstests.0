@@ -1,382 +1,441 @@
-Received: from mx1.redhat.com ([209.132.183.28]:40222 "EHLO mx1.redhat.com"
+Received: from sandeen.net ([63.231.237.45]:33636 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755920AbcLNQtq (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 14 Dec 2016 11:49:46 -0500
-Date: Thu, 15 Dec 2016 00:49:41 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH] fstests: xfs_fsr SWAPEXT fails when temp forkoff smaller
- than target
-Message-ID: <20161214164941.GE14383@dhcp12-143.nay.redhat.com>
-References: <1481303873-11981-1-git-send-email-zlang@redhat.com>
- <20161212080125.GT29149@eguan.usersys.redhat.com>
- <20161212083459.GD14383@dhcp12-143.nay.redhat.com>
+        id S933408AbcLNXqI (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 14 Dec 2016 18:46:08 -0500
+Subject: Re: [PATCH] xfs_io: implement 'set_encpolicy' and 'get_encpolicy'
+ commands
+References: <1480371512-12493-1-git-send-email-ebiggers@google.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <9f56ed00-177e-392f-0afd-f87b41777533@sandeen.net>
+Date: Wed, 14 Dec 2016 17:45:49 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=gb2312
-Content-Disposition: inline
-In-Reply-To: <20161212083459.GD14383@dhcp12-143.nay.redhat.com>
+In-Reply-To: <1480371512-12493-1-git-send-email-ebiggers@google.com>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org
+To: Eric Biggers <ebiggers@google.com>, linux-xfs@vger.kernel.org
+Cc: fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>, Michael Halcrow <mhalcrow@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 12, 2016 at 04:34:59PM +0800, Zorro Lang wrote:
-> On Mon, Dec 12, 2016 at 04:01:25PM +0800, Eryu Guan wrote:
-> > On Sat, Dec 10, 2016 at 01:17:53AM +0800, Zorro Lang wrote:
-> > > If there's a file under a parent dir, but before running xfs_fsr th=
-e
-> > > parent dir's attr is changed(grown), and these attrs will be inheri=
-ted
-> > > by new files. Then xfs_fsr's temp file and target file will have
-> > > different attrs.
-> > >=20
-> > > At this moment, if the data already fill whole data area, then ther=
-e
-> > > is not enough space to move di_forkoff to data direction, swap the
-> > > extents between temp and target file will fail.
-> > >=20
-> > > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > > ---
-> > >=20
-> > > Hi,
-> > >=20
-> > > The original case use SELinux to test. For common test, I change to=
- use
-> > > ACL. As my test, when inode size is 512 bytes(or more), it'll incre=
-ase
-> > > enough bytes to attr area, if add new default ACL attr.
-> > >=20
-> > > The "enough bytes" I expect is 16+ bytes. Because an extent is 128 =
-bits,
-> > > I keep using extent data format, so the growing step is 16 bytes. W=
-hen I
-> > > try to fill whole data area, at last (di_forkoff - size of di_u) wi=
-ll be
-> > > in [0, 16).
-> > >=20
-> > > As my test, 256 bytes inode size can't always reproduce this bug(es=
-pecially
-> > > in RHEL-6). But 512 (or more) inode size can help that.
-> > >=20
-> > > Thanks,
-> > > Zorro
-> > >=20
-> > >  tests/xfs/999     | 115 ++++++++++++++++++++++++++++++++++++++++++=
-++++++++++++
-> > >  tests/xfs/999.out |   2 +
-> > >  tests/xfs/group   |   1 +
-> > >  3 files changed, 118 insertions(+)
-> > >  create mode 100755 tests/xfs/999
-> > >  create mode 100644 tests/xfs/999.out
-> > >=20
-> > > diff --git a/tests/xfs/999 b/tests/xfs/999
-> > > new file mode 100755
-> > > index 0000000..d896287
-> > > --- /dev/null
-> > > +++ b/tests/xfs/999
-> > > @@ -0,0 +1,115 @@
-> > > +#! /bin/bash
-> > > +# FS QA Test 999
-> > > +#
-> > > +# Test xfs_fsr when temp's attr is larger than the target attr are=
-a, and
-> > > +# without enough room to move di_forkoff to date direction. Then i=
-t'll fail
-> > > +# to swap extents between temp and target files.
-> > > +#
-> > > +#-----------------------------------------------------------------=
-------
-> > > +# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
-> > > +#
-> > > +# This program is free software; you can redistribute it and/or
-> > > +# modify it under the terms of the GNU General Public License as
-> > > +# published by the Free Software Foundation.
-> > > +#
-> > > +# This program is distributed in the hope that it would be useful,
-> > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > > +# GNU General Public License for more details.
-> > > +#
-> > > +# You should have received a copy of the GNU General Public Licens=
-e
-> > > +# along with this program; if not, write the Free Software Foundat=
-ion,
-> > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > > +#-----------------------------------------------------------------=
-------
-> > > +#
-> > > +
-> > > +seq=3D`basename $0`
-> > > +seqres=3D$RESULT_DIR/$seq
-> > > +echo "QA output created by $seq"
-> > > +
-> > > +here=3D`pwd`
-> > > +tmp=3D/tmp/$$
-> > > +status=3D1	# failure is the default!
-> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +	cd /
-> > > +	rm -f $tmp.*
-> > > +}
-> > > +
-> > > +# get standard environment, filters and checks
-> > > +. ./common/rc
-> > > +. ./common/filter
-> > > +. ./common/attr
-> > > +
-> > > +# remove previous $seqres.full before test
-> > > +rm -f $seqres.full
-> > > +
-> > > +# real QA test starts here
-> > > +_supported_fs xfs
-> > > +_supported_os Linux
-> > > +_require_scratch
-> > > +# need a user to set ACL
-> > > +_require_user
-> > > +_require_acls
-> > > +_require_xfs_io_command "falloc"
-> > > +
-> > > +# use fixed attr test parameters, 512+ bytes inode size is helpful
-> > > +# to alloc more default ACL space
-> > > +_scratch_mkfs_xfs -i size=3D512,attr=3D2 >> $seqres.full 2>&1
-> > > +# Manually mount to avoid effect from some mount options
-> > > +mount $SCRATCH_DEV $SCRATCH_MNT
-> >=20
-> > I think you can unset MOUNT_OPTS and SELINUX_MOUNT_OPTIONS and use
-> > _scratch_mount, e.g.
->=20
-> OK
->=20
-> >=20
-> > # comments here
-> > MOUNT_OPTS=3D""
-> > SELINUX_MOUNT_OPTIONS=3D""
-> > export MOUNT_OPTS SELINUX_MOUNT_OPTIONS
-> > _scratch_mount
-> >=20
-> > > +
-> > > +rm -f $SCRATCH_MNT/$seq.test 2>/dev/null
-> >=20
-> > SCRATCH_DEV was just created, there's no need to remove this test fil=
-e.
->=20
-> Sure
->=20
-> >=20
-> > > +# remove all default ACL
-> > > +setfacl -k $SCRATCH_MNT
-> > > +sync
-> > > +touch $SCRATCH_MNT/$seq.test
-> > > +INODE_NUM=3D`ls -i $SCRATCH_MNT/$seq.test | awk '{print $1}'`
-> >=20
-> > I think it's time to introduce a new helper to get inode number and u=
-se
-> > "stat -c %i" to implement it.
->=20
-> Thanks, it looks better :)
->=20
-> >=20
-> > > +
-> > > +# unmount SCRATCH_DEV to get the di_forkoff size
-> > > +_scratch_unmount
-> > > +FORK_OFF=3D`_scratch_xfs_db -c "inode $INODE_NUM" -c "print core.f=
-orkoff" | awk -F "=3D" '{print $2}'`
-> > > +# the attributes are stored in the inode=A1=AFs literal area start=
-ing a forkoff * 8
-> > > +FORK_OFF=3D$((FORK_OFF * 8))
-> > > +# an on-disk extent takes 128 bits =3D 16 bytes, get the max in-fo=
-rk extents to
-> > > +# keep using extent data format
-> > > +MAX_EXTENTS=3D$((FORK_OFF / 16))
-> > > +
-> > > +mount $SCRATCH_DEV $SCRATCH_MNT
-> > > +
-> > > +# fragment the file by writing backwards, and alloc MAX_EXTENTS ex=
-tents to
-> > > +# make the di_u nearly/already touch the di_forkoff
-> > > +for i in `seq $((MAX_EXTENTS - 1)) -1 0`; do
-> > > +	$XFS_IO_PROG -f -c "falloc $((i * 262144)) 262144" \
-> > > +		$SCRATCH_MNT/$seq.test >> $seqres.full
-> > > +done
-> >=20
-> > Any comments on this 256k size?
->=20
-> Just try to take an extent :)
->=20
-> >=20
-> > > +
-> > > +# add new default ACL to $SCRATCH_MNT, for xfs_fsr will use a *tem=
-p* file
-> > > +# which takes more di_a field (smaller di_forkoff than *target* fi=
-le)
-> > > +# Generally this operation need to grow attr area ~32 bytes
-> > > +setfacl --set d:u:fsgqa:rwx,d:g:fsgqa:rwx,d:o:rwx $SCRATCH_MNT
-> > > +sync
-> > > +
-> > > +# At this moment, xfs_fsr will hit below situation:
-> > > +#
-> > > +# target:         forkoff
-> > > +#                    |
-> > > +# +------------------v--------+
-> > > +# |       di_u       |  di_a  |
-> > > +# +------------------^--------+
-> > > +#
-> > > +# temp:       forkoff
-> > > +#                |
-> > > +# +--------------v------------+
-> > > +# |       di_u   |     di_a   |
-> > > +# +--------------^------------+
-> > > +$XFS_FSR_PROG $SCRATCH_MNT/$seq.test
-> >=20
-> > I saw xfs_fsr reported EINVAL on failure, so better to have some
-> > comments on the failure behavior.
-> >=20
-> > BTW, upstream 4.8.0 xfsprogs fails this test too, an xfsprogs
-> > regression?
->=20
-> Hmm... There're some problems, I need to make sure if they're real
-> bugs at first.
+On 11/28/16 4:18 PM, Eric Biggers wrote:
+> Add set_encpolicy and get_encpolicy commands to xfs_io so that xfstests
+> will be able to test filesystem encryption using the actual user API,
+> not just hacked in with a mount option.  These commands use the common
+> "fscrypt" API currently implemented by ext4 and f2fs, but it's also
+> under development for ubifs and planned for xfs.
+> 
+> Note that to get encrypted files to actually work, it's also necessary
+> to add a key to the kernel keyring.  This patch does not add a command
+> for this to xfs_io because it's possible to do it using keyctl.  keyctl
+> can also be used to remove keys, revoke keys, invalidate keys, etc.
 
-OK, I think I know what's wrong with this:
+What is the standard utility for doing this?  I ask because while
+xfs_io does operate on non-xfs filesystems, this may be the first dedicated
+command proposed for xfs_io which isn't actually useful on xfs itself.
+And that seems a little out of place to me at this point.
 
-target: [     data|attr    ]
-temp  : [   data|attr      ]
-
-Because xfs_fsr try to move the di_forkoff to attr direction by write 2k =
-attr
-to try to change LOCAL attr format to EXTENT format:
-
-  if (diff < 0) {
-      char val[2048];
-      memset(val, 'X', 2048);
-      if (fsetxattr(tfd, name, val, 2048, 0)) {
-          fsrprintf(_("big ATTR set failed\n"));
-          return -1;
-      }
-
-But the truth is change attr from LOCAL to EXTENT maybe not move the di_f=
-orkoff
-or move not enough. Because kernel use xfs_bmap_forkoff_reset() to decide=
- how
-to move the di_forkoff:
-
-STATIC void
-xfs_bmap_forkoff_reset(
-        xfs_inode_t     *ip,
-        int             whichfork)
-{
-        if (whichfork =3D=3D XFS_ATTR_FORK &&
-            ip->i_d.di_format !=3D XFS_DINODE_FMT_DEV &&
-            ip->i_d.di_format !=3D XFS_DINODE_FMT_UUID &&
-            ip->i_d.di_format !=3D XFS_DINODE_FMT_BTREE) {
-                uint    dfl_forkoff =3D xfs_default_attroffset(ip) >> 3;
-
-                if (dfl_forkoff > ip->i_d.di_forkoff)
-                        ip->i_d.di_forkoff =3D dfl_forkoff;
-        }
-}
-
-You can see the di_forkoff depand on what dfl_forkoff is, the biggest
-forkoff (can be reset) is dfl_forkoff =3D xfs_default_attroffset(ip) >> 3.
-
-Then take a look at xfs_default_attroffset():
-
-uint
-xfs_default_attroffset(
-        struct xfs_inode        *ip)
-{
-        struct xfs_mount        *mp =3D ip->i_mount;
-        uint                    offset;
-
-        if (mp->m_sb.sb_inodesize =3D=3D 256) {
-                offset =3D XFS_LITINO(mp, ip->i_d.di_version) -
-                                XFS_BMDR_SPACE_CALC(MINABTPTRS);
-        } else {
-                offset =3D XFS_BMDR_SPACE_CALC(6 * MINABTPTRS);
-        }
-
-        ASSERT(offset < XFS_LITINO(mp, ip->i_d.di_version));
-        return offset;
-}
-
-If inodesize is 256 bytes, the default forkoff will be (di_version !=3D 3=
-):
-XFS_LITINO(mp, ip->i_d.di_version) - XFS_BMDR_SPACE_CALC(MINABTPTRS)
- =3D (256 - 100) - (16 * 2 + 4)
- =3D 120
-
-dfl_forkoff =3D 120 >> 3 =3D 15
-
-So if the target's forkoff is 16, temp's forkoff is 14, we can't move tem=
-p's
-forkoff to 16 (or bigger) by change attr format from LOCAL to EXTENT.
-
-If inodesize is 512 bytes, the default forkoff will be (di_version !=3D 3=
-):
-XFS_BMDR_SPACE_CALC(6 * MINABTPTRS)
- =3D 4 + (6 * 2) * (8 + 8)
- =3D 196
-
-dfl_forkoff =3D 196 >> 3 =3D 24
-
-So if the target's forkoff is 25, temp's forkoff 20, we can't move it big=
-ger
-than 24.
-
-That's kernel limit, I don't think we need to change that, right ?
+If it's just for the purpose of facilitating fstests, we do have some
+single-purpose helpers in src/ in the xfstests repo, as well.
 
 Thanks,
-Zorro
+-Eric
 
-
->=20
-> Thansk,
-> Zorro
->=20
-> >=20
-> > Thanks,
-> > Eryu
-> >=20
-> > > +
-> > > +dmesg | tail -10 >> $seqres.full
-> > > +echo "Silence is golden"
-> > > +
-> > > +# success, all done
-> > > +status=3D0
-> > > +exit
-> > > diff --git a/tests/xfs/999.out b/tests/xfs/999.out
-> > > new file mode 100644
-> > > index 0000000..3b276ca
-> > > --- /dev/null
-> > > +++ b/tests/xfs/999.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 999
-> > > +Silence is golden
-> > > diff --git a/tests/xfs/group b/tests/xfs/group
-> > > index c237b50..ad01b8e 100644
-> > > --- a/tests/xfs/group
-> > > +++ b/tests/xfs/group
-> > > @@ -334,3 +334,4 @@
-> > >  345 auto quick clone
-> > >  346 auto quick clone
-> > >  347 auto quick clone
-> > > +999 auto quick fsr
-> > > --=20
-> > > 2.7.4
-> > >=20
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe fstests" =
-in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-xfs" =
-in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
+> ---
+>  io/Makefile       |   6 +-
+>  io/encrypt.c      | 303 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  io/init.c         |   1 +
+>  io/io.h           |   1 +
+>  man/man8/xfs_io.8 |  27 +++++
+>  5 files changed, 335 insertions(+), 3 deletions(-)
+>  create mode 100644 io/encrypt.c
+> 
+> diff --git a/io/Makefile b/io/Makefile
+> index 1072e74..89cca66 100644
+> --- a/io/Makefile
+> +++ b/io/Makefile
+> @@ -9,9 +9,9 @@ LTCOMMAND = xfs_io
+>  LSRCFILES = xfs_bmap.sh xfs_freeze.sh xfs_mkfile.sh
+>  HFILES = init.h io.h
+>  CFILES = init.c \
+> -	attr.c bmap.c file.c freeze.c fsync.c getrusage.c imap.c link.c \
+> -	mmap.c open.c parent.c pread.c prealloc.c pwrite.c seek.c shutdown.c \
+> -	sync.c truncate.c reflink.c cowextsize.c
+> +	attr.c bmap.c encrypt.c file.c freeze.c fsync.c getrusage.c imap.c   \
+> +	link.c mmap.c open.c parent.c pread.c prealloc.c pwrite.c seek.c     \
+> +	shutdown.c sync.c truncate.c reflink.c cowextsize.c
+>  
+>  LLDLIBS = $(LIBXCMD) $(LIBHANDLE) $(LIBPTHREAD)
+>  LTDEPENDENCIES = $(LIBXCMD) $(LIBHANDLE)
+> diff --git a/io/encrypt.c b/io/encrypt.c
+> new file mode 100644
+> index 0000000..2006684
+> --- /dev/null
+> +++ b/io/encrypt.c
+> @@ -0,0 +1,303 @@
+> +/*
+> + * Copyright (c) 2016 Google, Inc.  All Rights Reserved.
+> + *
+> + * Author: Eric Biggers <ebiggers@google.com>
+> + *
+> + * This program is free software; you can redistribute it and/or
+> + * modify it under the terms of the GNU General Public License as
+> + * published by the Free Software Foundation.
+> + *
+> + * This program is distributed in the hope that it would be useful,
+> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
+> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> + * GNU General Public License for more details.
+> + *
+> + * You should have received a copy of the GNU General Public License
+> + * along with this program; if not, write the Free Software Foundation,
+> + * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> + */
+> +
+> +#include "platform_defs.h"
+> +#include "command.h"
+> +#include "init.h"
+> +#include "io.h"
+> +
+> +#ifndef ARRAY_SIZE
+> +#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+> +#endif
+> +
+> +/*
+> + * We have to define the ioctl structures and constants ourselves because
+> + * someone may be compiling xfsprogs with old kernel headers.  Also, as of Linux
+> + * 4.9, not all the needed definitions are in <linux/fs.h>.
+> + */
+> +
+> +#define FS_KEY_DESCRIPTOR_SIZE  8
+> +
+> +struct fscrypt_policy {
+> +	__u8 version;
+> +	__u8 contents_encryption_mode;
+> +	__u8 filenames_encryption_mode;
+> +	__u8 flags;
+> +	__u8 master_key_descriptor[FS_KEY_DESCRIPTOR_SIZE];
+> +} __attribute__((packed));
+> +
+> +#define FS_IOC_SET_ENCRYPTION_POLICY	_IOR('f', 19, struct fscrypt_policy)
+> +#define FS_IOC_GET_ENCRYPTION_PWSALT	_IOW('f', 20, __u8[16])
+> +#define FS_IOC_GET_ENCRYPTION_POLICY	_IOW('f', 21, struct fscrypt_policy)
+> +
+> +#define FS_POLICY_FLAGS_PAD_4		0x00
+> +#define FS_POLICY_FLAGS_PAD_8		0x01
+> +#define FS_POLICY_FLAGS_PAD_16		0x02
+> +#define FS_POLICY_FLAGS_PAD_32		0x03
+> +#define FS_POLICY_FLAGS_PAD_MASK	0x03
+> +#define FS_POLICY_FLAGS_VALID		0x03
+> +
+> +#define FS_ENCRYPTION_MODE_INVALID	0
+> +#define FS_ENCRYPTION_MODE_AES_256_XTS	1
+> +#define FS_ENCRYPTION_MODE_AES_256_GCM	2
+> +#define FS_ENCRYPTION_MODE_AES_256_CBC	3
+> +#define FS_ENCRYPTION_MODE_AES_256_CTS	4
+> +
+> +static cmdinfo_t get_encpolicy_cmd;
+> +static cmdinfo_t set_encpolicy_cmd;
+> +
+> +static void
+> +get_encpolicy_help(void)
+> +{
+> +	printf(_(
+> +"\n"
+> +" display the encryption policy of the currently open file\n"
+> +"\n"));
+> +}
+> +
+> +static void
+> +set_encpolicy_help(void)
+> +{
+> +	printf(_(
+> +"\n"
+> +" assign an encryption policy to the currently open file\n"
+> +"\n"
+> +" Examples:\n"
+> +" 'set_encpolicy' - assign policy with default key [0000000000000000]\n"
+> +" 'set_encpolicy 0000111122223333' - assign policy with specified key\n"
+> +"\n"
+> +" -c MODE -- contents encryption mode\n"
+> +" -n MODE -- filenames encryption mode\n"
+> +" -f FLAGS -- policy flags\n"
+> +" -v VERSION -- version of policy structure\n"
+> +"\n"
+> +"MODE can be numeric or one of the following predefined values:\n"
+> +"    AES-256-XTS, AES-256-CTS, AES-256-GCM, AES-256-CBC\n"
+> +"FLAGS and VERSION must be numeric.\n"
+> +"\n"
+> +"Note that it's only possible to set an encryption policy on an empty\n"
+> +"directory.  It's then inherited by new files and subdirectories.\n"
+> +"\n"));
+> +}
+> +
+> +static const struct {
+> +	__u8 mode;
+> +	const char *name;
+> +} available_modes[] = {
+> +	{FS_ENCRYPTION_MODE_AES_256_XTS, "AES-256-XTS"},
+> +	{FS_ENCRYPTION_MODE_AES_256_CTS, "AES-256-CTS"},
+> +	{FS_ENCRYPTION_MODE_AES_256_GCM, "AES-256-GCM"},
+> +	{FS_ENCRYPTION_MODE_AES_256_CBC, "AES-256-CBC"},
+> +};
+> +
+> +static int
+> +parse_byte_value(const char *arg, __u8 *value_ret)
+> +{
+> +	long value;
+> +	char *tmp;
+> +
+> +	value = strtol(arg, &tmp, 0);
+> +	if (value < 0 || value > 255 || tmp == arg || *tmp != '\0')
+> +		return 1;
+> +	*value_ret = value;
+> +	return 0;
+> +}
+> +
+> +static int
+> +parse_mode(const char *arg, __u8 *mode_ret)
+> +{
+> +	int i;
+> +
+> +	for (i = 0; i < ARRAY_SIZE(available_modes); i++) {
+> +		if (strcmp(arg, available_modes[i].name) == 0) {
+> +			*mode_ret = available_modes[i].mode;
+> +			return 0;
+> +		}
+> +	}
+> +
+> +	return parse_byte_value(arg, mode_ret);
+> +}
+> +
+> +static const char *
+> +mode2str(__u8 mode)
+> +{
+> +	static char buf[32];
+> +	int i;
+> +
+> +	for (i = 0; i < ARRAY_SIZE(available_modes); i++)
+> +		if (mode == available_modes[i].mode)
+> +			return available_modes[i].name;
+> +
+> +	sprintf(buf, "0x%02x", mode);
+> +	return buf;
+> +}
+> +
+> +static const char *
+> +keydesc2str(__u8 master_key_descriptor[FS_KEY_DESCRIPTOR_SIZE])
+> +{
+> +	static char buf[2 * FS_KEY_DESCRIPTOR_SIZE + 1];
+> +	int i;
+> +
+> +	for (i = 0; i < FS_KEY_DESCRIPTOR_SIZE; i++)
+> +		sprintf(&buf[2 * i], "%02x", master_key_descriptor[i]);
+> +
+> +	return buf;
+> +}
+> +
+> +static int
+> +get_encpolicy_f(int argc, char **argv)
+> +{
+> +	struct fscrypt_policy policy;
+> +
+> +	if (ioctl(file->fd, FS_IOC_GET_ENCRYPTION_POLICY, &policy) < 0) {
+> +		fprintf(stderr, "%s: failed to get encryption policy: %s\n",
+> +			file->name, strerror(errno));
+> +		return 1;
+> +	}
+> +
+> +	printf("Encryption policy for %s:\n", file->name);
+> +	printf("\tPolicy version: %u\n", policy.version);
+> +	printf("\tMaster key descriptor: %s\n",
+> +	       keydesc2str(policy.master_key_descriptor));
+> +	printf("\tContents encryption mode: %u (%s)\n",
+> +	       policy.contents_encryption_mode,
+> +	       mode2str(policy.contents_encryption_mode));
+> +	printf("\tFilenames encryption mode: %u (%s)\n",
+> +	       policy.filenames_encryption_mode,
+> +	       mode2str(policy.filenames_encryption_mode));
+> +	printf("\tFlags: 0x%02x\n", policy.flags);
+> +	return 0;
+> +}
+> +
+> +static int
+> +set_encpolicy_f(int argc, char **argv)
+> +{
+> +	int c;
+> +	struct fscrypt_policy policy;
+> +
+> +	/* Initialize the policy structure with default values */
+> +	memset(&policy, 0, sizeof(policy));
+> +	policy.contents_encryption_mode = FS_ENCRYPTION_MODE_AES_256_XTS;
+> +	policy.filenames_encryption_mode = FS_ENCRYPTION_MODE_AES_256_CTS;
+> +	policy.flags = FS_POLICY_FLAGS_PAD_16;
+> +
+> +	/* Parse options */
+> +	while ((c = getopt(argc, argv, "c:n:f:v:")) != EOF) {
+> +		switch (c) {
+> +		case 'c':
+> +			if (parse_mode(optarg,
+> +				       &policy.contents_encryption_mode)) {
+> +				fprintf(stderr, "invalid contents encryption "
+> +					"mode: %s\n", optarg);
+> +				return 1;
+> +			}
+> +			break;
+> +		case 'n':
+> +			if (parse_mode(optarg,
+> +				       &policy.filenames_encryption_mode)) {
+> +				fprintf(stderr, "invalid filenames encryption "
+> +					"mode: %s\n", optarg);
+> +				return 1;
+> +			}
+> +			break;
+> +		case 'f':
+> +			if (parse_byte_value(optarg, &policy.flags)) {
+> +				fprintf(stderr, "invalid flags: %s\n", optarg);
+> +				return 1;
+> +			}
+> +			break;
+> +		case 'v':
+> +			if (parse_byte_value(optarg, &policy.version)) {
+> +				fprintf(stderr, "invalid policy version: %s\n",
+> +					optarg);
+> +				return 1;
+> +			}
+> +			break;
+> +		default:
+> +			return command_usage(&set_encpolicy_cmd);
+> +		}
+> +	}
+> +	argc -= optind;
+> +	argv += optind;
+> +
+> +	if (argc > 1)
+> +		return command_usage(&set_encpolicy_cmd);
+> +
+> +	/* Parse key descriptor if specified */
+> +	if (argc > 0) {
+> +		const char *keydesc = argv[0];
+> +		char *tmp;
+> +		unsigned long long x;
+> +		int i;
+> +
+> +		if (strlen(keydesc) != FS_KEY_DESCRIPTOR_SIZE * 2) {
+> +			fprintf(stderr, "invalid key descriptor: %s\n",
+> +				keydesc);
+> +			return 1;
+> +		}
+> +
+> +		x = strtoull(keydesc, &tmp, 16);
+> +		if (tmp == keydesc || *tmp != '\0') {
+> +			fprintf(stderr, "invalid key descriptor: %s\n",
+> +				keydesc);
+> +			return 1;
+> +		}
+> +
+> +		for (i = 0; i < FS_KEY_DESCRIPTOR_SIZE; i++) {
+> +			policy.master_key_descriptor[i] = x >> 56;
+> +			x <<= 8;
+> +		}
+> +	}
+> +
+> +	/* Set the encryption policy */
+> +	if (ioctl(file->fd, FS_IOC_SET_ENCRYPTION_POLICY, &policy) < 0) {
+> +		fprintf(stderr, "%s: failed to set encryption policy: %s\n",
+> +			file->name, strerror(errno));
+> +		return 1;
+> +	}
+> +
+> +	return 0;
+> +}
+> +
+> +void
+> +encrypt_init(void)
+> +{
+> +	get_encpolicy_cmd.name = "get_encpolicy";
+> +	get_encpolicy_cmd.cfunc = get_encpolicy_f;
+> +	get_encpolicy_cmd.argmin = 0;
+> +	get_encpolicy_cmd.argmax = 0;
+> +	get_encpolicy_cmd.flags = CMD_NOMAP_OK | CMD_FOREIGN_OK;
+> +	get_encpolicy_cmd.oneline =
+> +		_("display the encryption policy of the current file");
+> +	get_encpolicy_cmd.help = get_encpolicy_help;
+> +
+> +	set_encpolicy_cmd.name = "set_encpolicy";
+> +	set_encpolicy_cmd.cfunc = set_encpolicy_f;
+> +	set_encpolicy_cmd.args =
+> +		_("[-c mode] [-n mode] [-f flags] [-v version] [keydesc]");
+> +	set_encpolicy_cmd.argmin = 0;
+> +	set_encpolicy_cmd.argmax = -1;
+> +	set_encpolicy_cmd.flags = CMD_NOMAP_OK | CMD_FOREIGN_OK;
+> +	set_encpolicy_cmd.oneline =
+> +		_("assign an encryption policy to the current file");
+> +	set_encpolicy_cmd.help = set_encpolicy_help;
+> +
+> +	add_command(&get_encpolicy_cmd);
+> +	add_command(&set_encpolicy_cmd);
+> +}
+> diff --git a/io/init.c b/io/init.c
+> index a9191cf..ee7683e 100644
+> --- a/io/init.c
+> +++ b/io/init.c
+> @@ -59,6 +59,7 @@ init_commands(void)
+>  	attr_init();
+>  	bmap_init();
+>  	copy_range_init();
+> +	encrypt_init();
+>  	fadvise_init();
+>  	file_init();
+>  	flink_init();
+> diff --git a/io/io.h b/io/io.h
+> index 5d21314..d257daa 100644
+> --- a/io/io.h
+> +++ b/io/io.h
+> @@ -94,6 +94,7 @@ extern void		dump_buffer(off64_t, ssize_t);
+>  
+>  extern void		attr_init(void);
+>  extern void		bmap_init(void);
+> +extern void		encrypt_init(void);
+>  extern void		file_init(void);
+>  extern void		flink_init(void);
+>  extern void		freeze_init(void);
+> diff --git a/man/man8/xfs_io.8 b/man/man8/xfs_io.8
+> index 885df7f..27008de 100644
+> --- a/man/man8/xfs_io.8
+> +++ b/man/man8/xfs_io.8
+> @@ -890,6 +890,33 @@ verbose output will be printed.
+>  .IP
+>  .B [NOTE: Not currently operational on Linux.]
+>  .PD
+> +.TP
+> +.BI "set_encpolicy [ \-c " mode " ] [ \-n " mode " ] [ \-f " flags " ] [ \-v " version " ] [ " keydesc " ]
+> +On filesystems that support encryption, assign an encryption policy to the
+> +current file.
+> +.I keydesc
+> +is a 16-byte hex string which identifies the encryption key to use.
+> +If not specified, a "default" key descriptor of all 0's will be used.
+> +.RS 1.0i
+> +.PD 0
+> +.TP 0.4i
+> +.BI \-c " mode
+> +contents encryption mode (e.g. AES-256-XTS)
+> +.TP
+> +.BI \-n " mode
+> +filenames encryption mode (e.g. AES-256-CTS)
+> +.TP
+> +.BI \-f " flags
+> +policy flags (numeric)
+> +.TP
+> +.BI \-v " version
+> +version of policy structure (numeric)
+> +.RE
+> +.PD
+> +.TP
+> +.BR get_encpolicy
+> +On filesystems that support encryption, display the encryption policy of the
+> +current file.
+>  
+>  .SH SEE ALSO
+>  .BR mkfs.xfs (8),
+> 
