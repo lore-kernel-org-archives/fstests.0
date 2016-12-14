@@ -1,42 +1,382 @@
-Received: from bombadil.infradead.org ([198.137.202.9]:60354 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755857AbcLNQnP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 14 Dec 2016 11:43:15 -0500
-Date: Wed, 14 Dec 2016 08:43:14 -0800
-From: Christoph Hellwig <hch@infradead.org>
-Subject: trouble with generic/081
-Message-ID: <20161214164314.GA25105@infradead.org>
+Received: from mx1.redhat.com ([209.132.183.28]:40222 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755920AbcLNQtq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 14 Dec 2016 11:49:46 -0500
+Date: Thu, 15 Dec 2016 00:49:41 +0800
+From: Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH] fstests: xfs_fsr SWAPEXT fails when temp forkoff smaller
+ than target
+Message-ID: <20161214164941.GE14383@dhcp12-143.nay.redhat.com>
+References: <1481303873-11981-1-git-send-email-zlang@redhat.com>
+ <20161212080125.GT29149@eguan.usersys.redhat.com>
+ <20161212083459.GD14383@dhcp12-143.nay.redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=gb2312
 Content-Disposition: inline
+In-Reply-To: <20161212083459.GD14383@dhcp12-143.nay.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com
-Cc: fstests@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Eryu,
+On Mon, Dec 12, 2016 at 04:34:59PM +0800, Zorro Lang wrote:
+> On Mon, Dec 12, 2016 at 04:01:25PM +0800, Eryu Guan wrote:
+> > On Sat, Dec 10, 2016 at 01:17:53AM +0800, Zorro Lang wrote:
+> > > If there's a file under a parent dir, but before running xfs_fsr th=
+e
+> > > parent dir's attr is changed(grown), and these attrs will be inheri=
+ted
+> > > by new files. Then xfs_fsr's temp file and target file will have
+> > > different attrs.
+> > >=20
+> > > At this moment, if the data already fill whole data area, then ther=
+e
+> > > is not enough space to move di_forkoff to data direction, swap the
+> > > extents between temp and target file will fail.
+> > >=20
+> > > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > > ---
+> > >=20
+> > > Hi,
+> > >=20
+> > > The original case use SELinux to test. For common test, I change to=
+ use
+> > > ACL. As my test, when inode size is 512 bytes(or more), it'll incre=
+ase
+> > > enough bytes to attr area, if add new default ACL attr.
+> > >=20
+> > > The "enough bytes" I expect is 16+ bytes. Because an extent is 128 =
+bits,
+> > > I keep using extent data format, so the growing step is 16 bytes. W=
+hen I
+> > > try to fill whole data area, at last (di_forkoff - size of di_u) wi=
+ll be
+> > > in [0, 16).
+> > >=20
+> > > As my test, 256 bytes inode size can't always reproduce this bug(es=
+pecially
+> > > in RHEL-6). But 512 (or more) inode size can help that.
+> > >=20
+> > > Thanks,
+> > > Zorro
+> > >=20
+> > >  tests/xfs/999     | 115 ++++++++++++++++++++++++++++++++++++++++++=
+++++++++++++
+> > >  tests/xfs/999.out |   2 +
+> > >  tests/xfs/group   |   1 +
+> > >  3 files changed, 118 insertions(+)
+> > >  create mode 100755 tests/xfs/999
+> > >  create mode 100644 tests/xfs/999.out
+> > >=20
+> > > diff --git a/tests/xfs/999 b/tests/xfs/999
+> > > new file mode 100755
+> > > index 0000000..d896287
+> > > --- /dev/null
+> > > +++ b/tests/xfs/999
+> > > @@ -0,0 +1,115 @@
+> > > +#! /bin/bash
+> > > +# FS QA Test 999
+> > > +#
+> > > +# Test xfs_fsr when temp's attr is larger than the target attr are=
+a, and
+> > > +# without enough room to move di_forkoff to date direction. Then i=
+t'll fail
+> > > +# to swap extents between temp and target files.
+> > > +#
+> > > +#-----------------------------------------------------------------=
+------
+> > > +# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
+> > > +#
+> > > +# This program is free software; you can redistribute it and/or
+> > > +# modify it under the terms of the GNU General Public License as
+> > > +# published by the Free Software Foundation.
+> > > +#
+> > > +# This program is distributed in the hope that it would be useful,
+> > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > > +# GNU General Public License for more details.
+> > > +#
+> > > +# You should have received a copy of the GNU General Public Licens=
+e
+> > > +# along with this program; if not, write the Free Software Foundat=
+ion,
+> > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > > +#-----------------------------------------------------------------=
+------
+> > > +#
+> > > +
+> > > +seq=3D`basename $0`
+> > > +seqres=3D$RESULT_DIR/$seq
+> > > +echo "QA output created by $seq"
+> > > +
+> > > +here=3D`pwd`
+> > > +tmp=3D/tmp/$$
+> > > +status=3D1	# failure is the default!
+> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > +
+> > > +_cleanup()
+> > > +{
+> > > +	cd /
+> > > +	rm -f $tmp.*
+> > > +}
+> > > +
+> > > +# get standard environment, filters and checks
+> > > +. ./common/rc
+> > > +. ./common/filter
+> > > +. ./common/attr
+> > > +
+> > > +# remove previous $seqres.full before test
+> > > +rm -f $seqres.full
+> > > +
+> > > +# real QA test starts here
+> > > +_supported_fs xfs
+> > > +_supported_os Linux
+> > > +_require_scratch
+> > > +# need a user to set ACL
+> > > +_require_user
+> > > +_require_acls
+> > > +_require_xfs_io_command "falloc"
+> > > +
+> > > +# use fixed attr test parameters, 512+ bytes inode size is helpful
+> > > +# to alloc more default ACL space
+> > > +_scratch_mkfs_xfs -i size=3D512,attr=3D2 >> $seqres.full 2>&1
+> > > +# Manually mount to avoid effect from some mount options
+> > > +mount $SCRATCH_DEV $SCRATCH_MNT
+> >=20
+> > I think you can unset MOUNT_OPTS and SELINUX_MOUNT_OPTIONS and use
+> > _scratch_mount, e.g.
+>=20
+> OK
+>=20
+> >=20
+> > # comments here
+> > MOUNT_OPTS=3D""
+> > SELINUX_MOUNT_OPTIONS=3D""
+> > export MOUNT_OPTS SELINUX_MOUNT_OPTIONS
+> > _scratch_mount
+> >=20
+> > > +
+> > > +rm -f $SCRATCH_MNT/$seq.test 2>/dev/null
+> >=20
+> > SCRATCH_DEV was just created, there's no need to remove this test fil=
+e.
+>=20
+> Sure
+>=20
+> >=20
+> > > +# remove all default ACL
+> > > +setfacl -k $SCRATCH_MNT
+> > > +sync
+> > > +touch $SCRATCH_MNT/$seq.test
+> > > +INODE_NUM=3D`ls -i $SCRATCH_MNT/$seq.test | awk '{print $1}'`
+> >=20
+> > I think it's time to introduce a new helper to get inode number and u=
+se
+> > "stat -c %i" to implement it.
+>=20
+> Thanks, it looks better :)
+>=20
+> >=20
+> > > +
+> > > +# unmount SCRATCH_DEV to get the di_forkoff size
+> > > +_scratch_unmount
+> > > +FORK_OFF=3D`_scratch_xfs_db -c "inode $INODE_NUM" -c "print core.f=
+orkoff" | awk -F "=3D" '{print $2}'`
+> > > +# the attributes are stored in the inode=A1=AFs literal area start=
+ing a forkoff * 8
+> > > +FORK_OFF=3D$((FORK_OFF * 8))
+> > > +# an on-disk extent takes 128 bits =3D 16 bytes, get the max in-fo=
+rk extents to
+> > > +# keep using extent data format
+> > > +MAX_EXTENTS=3D$((FORK_OFF / 16))
+> > > +
+> > > +mount $SCRATCH_DEV $SCRATCH_MNT
+> > > +
+> > > +# fragment the file by writing backwards, and alloc MAX_EXTENTS ex=
+tents to
+> > > +# make the di_u nearly/already touch the di_forkoff
+> > > +for i in `seq $((MAX_EXTENTS - 1)) -1 0`; do
+> > > +	$XFS_IO_PROG -f -c "falloc $((i * 262144)) 262144" \
+> > > +		$SCRATCH_MNT/$seq.test >> $seqres.full
+> > > +done
+> >=20
+> > Any comments on this 256k size?
+>=20
+> Just try to take an extent :)
+>=20
+> >=20
+> > > +
+> > > +# add new default ACL to $SCRATCH_MNT, for xfs_fsr will use a *tem=
+p* file
+> > > +# which takes more di_a field (smaller di_forkoff than *target* fi=
+le)
+> > > +# Generally this operation need to grow attr area ~32 bytes
+> > > +setfacl --set d:u:fsgqa:rwx,d:g:fsgqa:rwx,d:o:rwx $SCRATCH_MNT
+> > > +sync
+> > > +
+> > > +# At this moment, xfs_fsr will hit below situation:
+> > > +#
+> > > +# target:         forkoff
+> > > +#                    |
+> > > +# +------------------v--------+
+> > > +# |       di_u       |  di_a  |
+> > > +# +------------------^--------+
+> > > +#
+> > > +# temp:       forkoff
+> > > +#                |
+> > > +# +--------------v------------+
+> > > +# |       di_u   |     di_a   |
+> > > +# +--------------^------------+
+> > > +$XFS_FSR_PROG $SCRATCH_MNT/$seq.test
+> >=20
+> > I saw xfs_fsr reported EINVAL on failure, so better to have some
+> > comments on the failure behavior.
+> >=20
+> > BTW, upstream 4.8.0 xfsprogs fails this test too, an xfsprogs
+> > regression?
+>=20
+> Hmm... There're some problems, I need to make sure if they're real
+> bugs at first.
 
-I'm running into a fairly reproducable issue with generic/081
-(about every other run): For some reason the umount call in
-_cleanup doesn't do anything because it thinks the file system isn't
-mounted, but then vgremove complains that there is a mounted file
-system.  This leads to the scratch device no being release and all
-subsequent tests failing.
+OK, I think I know what's wrong with this:
 
-Here is the output if I let the commands in _cleanup print to stdout:
+target: [     data|attr    ]
+temp  : [   data|attr      ]
 
-QA output created by 081
-Silence is golden
-umount: /mnt/test/mnt_081: not mounted
-  Logical volume vg_081/snap_081 contains a filesystem in use.
-  PV /dev/sdc belongs to Volume Group vg_081 so please use vgreduce first.
+Because xfs_fsr try to move the di_forkoff to attr direction by write 2k =
+attr
+to try to change LOCAL attr format to EXTENT format:
 
-You added a comment in _cleanup that sais:
+  if (diff < 0) {
+      char val[2048];
+      memset(val, 'X', 2048);
+      if (fsetxattr(tfd, name, val, 2048, 0)) {
+          fsrprintf(_("big ATTR set failed\n"));
+          return -1;
+      }
 
-# lvm may have umounted it on I/O error, but in case it does not
+But the truth is change attr from LOCAL to EXTENT maybe not move the di_f=
+orkoff
+or move not enough. Because kernel use xfs_bmap_forkoff_reset() to decide=
+ how
+to move the di_forkoff:
 
-Does LVM really unmount filesystems on it's own?  Could we be racing
-with it?
+STATIC void
+xfs_bmap_forkoff_reset(
+        xfs_inode_t     *ip,
+        int             whichfork)
+{
+        if (whichfork =3D=3D XFS_ATTR_FORK &&
+            ip->i_d.di_format !=3D XFS_DINODE_FMT_DEV &&
+            ip->i_d.di_format !=3D XFS_DINODE_FMT_UUID &&
+            ip->i_d.di_format !=3D XFS_DINODE_FMT_BTREE) {
+                uint    dfl_forkoff =3D xfs_default_attroffset(ip) >> 3;
 
-With a "sleep 1" added before the umount call the test passes reliably
-for me, but that seems like papering over the issue.
+                if (dfl_forkoff > ip->i_d.di_forkoff)
+                        ip->i_d.di_forkoff =3D dfl_forkoff;
+        }
+}
+
+You can see the di_forkoff depand on what dfl_forkoff is, the biggest
+forkoff (can be reset) is dfl_forkoff =3D xfs_default_attroffset(ip) >> 3.
+
+Then take a look at xfs_default_attroffset():
+
+uint
+xfs_default_attroffset(
+        struct xfs_inode        *ip)
+{
+        struct xfs_mount        *mp =3D ip->i_mount;
+        uint                    offset;
+
+        if (mp->m_sb.sb_inodesize =3D=3D 256) {
+                offset =3D XFS_LITINO(mp, ip->i_d.di_version) -
+                                XFS_BMDR_SPACE_CALC(MINABTPTRS);
+        } else {
+                offset =3D XFS_BMDR_SPACE_CALC(6 * MINABTPTRS);
+        }
+
+        ASSERT(offset < XFS_LITINO(mp, ip->i_d.di_version));
+        return offset;
+}
+
+If inodesize is 256 bytes, the default forkoff will be (di_version !=3D 3=
+):
+XFS_LITINO(mp, ip->i_d.di_version) - XFS_BMDR_SPACE_CALC(MINABTPTRS)
+ =3D (256 - 100) - (16 * 2 + 4)
+ =3D 120
+
+dfl_forkoff =3D 120 >> 3 =3D 15
+
+So if the target's forkoff is 16, temp's forkoff is 14, we can't move tem=
+p's
+forkoff to 16 (or bigger) by change attr format from LOCAL to EXTENT.
+
+If inodesize is 512 bytes, the default forkoff will be (di_version !=3D 3=
+):
+XFS_BMDR_SPACE_CALC(6 * MINABTPTRS)
+ =3D 4 + (6 * 2) * (8 + 8)
+ =3D 196
+
+dfl_forkoff =3D 196 >> 3 =3D 24
+
+So if the target's forkoff is 25, temp's forkoff 20, we can't move it big=
+ger
+than 24.
+
+That's kernel limit, I don't think we need to change that, right ?
+
+Thanks,
+Zorro
+
+
+>=20
+> Thansk,
+> Zorro
+>=20
+> >=20
+> > Thanks,
+> > Eryu
+> >=20
+> > > +
+> > > +dmesg | tail -10 >> $seqres.full
+> > > +echo "Silence is golden"
+> > > +
+> > > +# success, all done
+> > > +status=3D0
+> > > +exit
+> > > diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+> > > new file mode 100644
+> > > index 0000000..3b276ca
+> > > --- /dev/null
+> > > +++ b/tests/xfs/999.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 999
+> > > +Silence is golden
+> > > diff --git a/tests/xfs/group b/tests/xfs/group
+> > > index c237b50..ad01b8e 100644
+> > > --- a/tests/xfs/group
+> > > +++ b/tests/xfs/group
+> > > @@ -334,3 +334,4 @@
+> > >  345 auto quick clone
+> > >  346 auto quick clone
+> > >  347 auto quick clone
+> > > +999 auto quick fsr
+> > > --=20
+> > > 2.7.4
+> > >=20
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe fstests" =
+in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-xfs" =
+in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
