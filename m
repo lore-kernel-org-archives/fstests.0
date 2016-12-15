@@ -1,86 +1,64 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43152 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755462AbcLOIXi (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 15 Dec 2016 03:23:38 -0500
-Date: Thu, 15 Dec 2016 16:23:35 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] common/rc: fix detection of already mounted test device
-Message-ID: <20161215082335.GI28577@eguan.usersys.redhat.com>
-References: <20161215071931.31651-1-eguan@redhat.com>
- <CAOQ4uxhQkFy+bN4naEQVw2Hcgr-ehzSrmk7p0UG1N3kmQL5b3Q@mail.gmail.com>
+Received: from bombadil.infradead.org ([198.137.202.9]:48034 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755417AbcLOIm0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 15 Dec 2016 03:42:26 -0500
+Date: Thu, 15 Dec 2016 00:42:24 -0800
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: trouble with generic/081
+Message-ID: <20161215084224.GA14395@infradead.org>
+References: <20161214164314.GA25105@infradead.org>
+ <20161215063650.GJ4326@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxhQkFy+bN4naEQVw2Hcgr-ehzSrmk7p0UG1N3kmQL5b3Q@mail.gmail.com>
+In-Reply-To: <20161215063650.GJ4326@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>, linux-unionfs@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: eguan@redhat.com, fstests@vger.kernel.org, dm-devel@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Dec 15, 2016 at 09:54:07AM +0200, Amir Goldstein wrote:
-> On Thu, Dec 15, 2016 at 9:19 AM, Eryu Guan <eguan@redhat.com> wrote:
-> > I saw this failure in overlayfs testing:
-> >
-> > +$SCRATCH_DEV=/mnt/ovl/scratch is mounted but not on $SCRATCH_MNT=/mnt/xfstests/mnt2 - aborting
-> > +Already mounted result:
-> > +/dev/sda5 on /mnt/ovl/scratch type xfs (rw,relatime,seclabel,attr2,inode64,logbsize=256k,sunit=512,swidth=1536,noquota)
-> >
-> > Because we grep for TEST_DEV and SCRATCH_DEV in mount output to see
-> > if test device is already mounted, and report failure if device is
-> > not mounted at desired mount point, but in the case of overlayfs
-> > testing these "test device"s are directories and may have other real
-> > devices mounted there.
-> >
-> > Fix it by checking TEST_DEV and SCRATCH_DEV at the beginning of
-> > mount entries.
-> >
-> > Signed-off-by: Eryu Guan <eguan@redhat.com>
-> > ---
-> >  common/rc | 4 ++--
-> >  1 file changed, 2 insertions(+), 2 deletions(-)
-> >
-> > diff --git a/common/rc b/common/rc
-> > index 26d715d..6fcab17 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -1363,7 +1363,7 @@ _require_scratch_nocheck()
-> >      # mounted?
-> >      # Note that we use -F here so grep doesn't try to interpret an NFS over
-> >      # IPv6 server as a regular expression.
-> > -    mount_rec=`_mount | grep -F $SCRATCH_DEV`
-> > +    mount_rec=`_mount | grep -F "^$SCRATCH_DEV"`
-> 
-> Are you sure?
-> A manual test I did -F treats ^ as regular char in string and fails to
-> grep the entry
+On Thu, Dec 15, 2016 at 05:36:50PM +1100, Dave Chinner wrote:
+> Yup, same here. My local patch is this:
 
-What have I done.. I really need some good rest.
+I have a sleep 1 before the unmount.  To be honest this lvm behavior
+of auto-unmounting on error seems like a huge mess, I wonder if there is
+a way to disable it?
+
+Even on a production system I'd much rather have a shutdown XFS fs
+than LVM trying to unmount, probably hanging because there are busy
+fds on the fs, and if not the application might not write to another
+fs becaus of this.  It's just an amazingly stupid idea.
 
 > 
-> How about grep -F "$SCRATCH_DEV on "` ?
-
-Will revise. Thanks for the review!
-
-Eryu
-
+> ---
+>  tests/generic/081 | 5 +++++
+>  1 file changed, 5 insertions(+)
 > 
+> diff --git a/tests/generic/081 b/tests/generic/081
+> index 11755d4d89ff..ff33ffaa4fb8 100755
+> --- a/tests/generic/081
+> +++ b/tests/generic/081
+> @@ -36,6 +36,11 @@ _cleanup()
+>  	rm -f $tmp.*
+>  	# lvm may have umounted it on I/O error, but in case it does not
+>  	$UMOUNT_PROG $mnt >/dev/null 2>&1
+> +
+> +	# on a pmem device, the vgremove/pvremove commands fail immediately
+> +	# after unmount. Wait a bit before removing them in the hope it
+> +	# succeeds.
+> +	sleep 5
+>  	$LVM_PROG vgremove -f $vgname >>$seqres.full 2>&1
+>  	$LVM_PROG pvremove -f $SCRATCH_DEV >>$seqres.full 2>&1
+>  }
 > 
-> >      if [ "$mount_rec" ]
-> >      then
-> >          # if it's mounted, make sure its on $SCRATCH_MNT
-> > @@ -1448,7 +1448,7 @@ _require_test()
-> >      # mounted?
-> >      # Note that we use -F here so grep doesn't try to interpret an NFS over
-> >      # IPv6 server as a regular expression.
-> > -    mount_rec=`_mount | grep -F $TEST_DEV`
-> > +    mount_rec=`_mount | grep -F "^$TEST_DEV"`
-> >      if [ "$mount_rec" ]
-> >      then
-> >          # if it's mounted, make sure its on $TEST_DIR
-> > --
-> > 2.9.3
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Cheers,
+> 
+> Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+---end quoted text---
