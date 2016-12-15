@@ -1,13 +1,13 @@
-Received: from mail-pg0-f68.google.com ([74.125.83.68]:34564 "EHLO
-        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753039AbcLOU2S (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 15 Dec 2016 15:28:18 -0500
-Received: by mail-pg0-f68.google.com with SMTP id e9so7200718pgc.1
-        for <fstests@vger.kernel.org>; Thu, 15 Dec 2016 12:28:18 -0800 (PST)
+Received: from mail-pg0-f67.google.com ([74.125.83.67]:35565 "EHLO
+        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753390AbcLOU2T (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 15 Dec 2016 15:28:19 -0500
+Received: by mail-pg0-f67.google.com with SMTP id p66so7196425pga.2
+        for <fstests@vger.kernel.org>; Thu, 15 Dec 2016 12:28:19 -0800 (PST)
 From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH v4 5/6] generic: test enforcement of one encryption policy per tree
-Date: Thu, 15 Dec 2016 12:26:24 -0800
-Message-Id: <1481833585-39148-6-git-send-email-ebiggers3@gmail.com>
+Subject: [PATCH v4 6/6] generic: test for weaknesses in filesystem encryption
+Date: Thu, 15 Dec 2016 12:26:25 -0800
+Message-Id: <1481833585-39148-7-git-send-email-ebiggers3@gmail.com>
 In-Reply-To: <1481833585-39148-1-git-send-email-ebiggers3@gmail.com>
 References: <1481833585-39148-1-git-send-email-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -17,34 +17,51 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Eric Biggers <ebiggers@google.com>
 
-Add an xfstest which verifies that the filesystem forbids operations
-that would violate the constraint that all files in an encrypted
-directory tree use the same encryption policy.
+Add an xfstest which can detect some basic crypto mistakes that would
+reduce the confidentiality guarantee provided by filesystem encryption.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- tests/generic/403     | 158 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/403.out |  45 ++++++++++++++
+ common/config         |   1 +
+ tests/generic/404     | 162 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/404.out |   3 +
  tests/generic/group   |   1 +
- 3 files changed, 204 insertions(+)
- create mode 100644 tests/generic/403
- create mode 100644 tests/generic/403.out
+ 4 files changed, 167 insertions(+)
+ create mode 100755 tests/generic/404
+ create mode 100644 tests/generic/404.out
 
-diff --git a/tests/generic/403 b/tests/generic/403
-new file mode 100644
-index 0000000..0e06cc5
+diff --git a/common/config b/common/config
+index 3727ec0..6cce7ce 100644
+--- a/common/config
++++ b/common/config
+@@ -203,6 +203,7 @@ export UUIDGEN_PROG="`set_prog_path uuidgen`"
+ export GETRICHACL_PROG="`set_prog_path getrichacl`"
+ export SETRICHACL_PROG="`set_prog_path setrichacl`"
+ export KEYCTL_PROG="`set_prog_path keyctl`"
++export XZ_PROG="`set_prog_path xz`"
+ 
+ # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+ # newer systems have udevadm command but older systems like RHEL5 don't.
+diff --git a/tests/generic/404 b/tests/generic/404
+new file mode 100755
+index 0000000..3d96f8f
 --- /dev/null
-+++ b/tests/generic/403
-@@ -0,0 +1,158 @@
++++ b/tests/generic/404
+@@ -0,0 +1,162 @@
 +#! /bin/bash
-+# FS QA Test generic/403
++# FS QA Test generic/404
 +#
-+# Filesystem encryption is designed to enforce that a consistent encryption
-+# policy is used within a given encrypted directory tree and that an encrypted
-+# directory tree does not contain any unencrypted files.  This test verifies
-+# that filesystem operations that would violate this constraint fail with EPERM.
-+# This does not test enforcement of this constraint on lookup, which is still
-+# needed to detect offline changes.
++# Check for weaknesses in filesystem encryption involving the same ciphertext
++# being repeated.  For file contents, we fill a small filesystem with large
++# files of 0's and verify the filesystem is incompressible.  For filenames, we
++# create an identical symlink in two different directories and verify the
++# ciphertext filenames and symlink targets are different.
++#
++# This test can detect some basic cryptographic mistakes such as nonce reuse
++# (across files), initialization vector reuse (across blocks), or data somehow
++# being left in plaintext by accident.  For example, it detects the
++# initialization vector reuse bug fixed in commit 02fc59a0d28f ("f2fs/crypto:
++# fix xts_tweak initialization").
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2016 Google, Inc.  All Rights Reserved.
@@ -85,7 +102,6 @@ index 0000000..0e06cc5
 +. ./common/rc
 +. ./common/filter
 +. ./common/encrypt
-+. ./common/renameat2
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
@@ -95,165 +111,123 @@ index 0000000..0e06cc5
 +_supported_os Linux
 +_require_scratch_encryption
 +_require_xfs_io_command "set_encpolicy"
-+_requires_renameat2
++_require_command "$XZ_PROG" xz
++_require_command "$KEYCTL_PROG" keyctl
 +
 +_new_session_keyring
-+_scratch_mkfs_encrypted &>> $seqres.full
++
++# Set up a small filesystem containing an encrypted directory.  64 MB is enough
++# for both ext4 and f2fs.  (f2fs doesn't support a 32 MB filesystem.)
++fs_size_in_mb=64
++fs_size=$((fs_size_in_mb * 1024 * 1024))
++dd if=/dev/zero of=$SCRATCH_DEV bs=$((1024 * 1024)) \
++	count=$fs_size_in_mb &>> $seqres.full
++MKFS_OPTIONS="$MKFS_OPTIONS -O encrypt" \
++	_scratch_mkfs_sized $fs_size &>> $seqres.full
 +_scratch_mount
 +
-+# Set up two encrypted directories, with different encryption policies,
-+# and one unencrypted directory.
-+edir1=$SCRATCH_MNT/edir1
-+edir2=$SCRATCH_MNT/edir2
-+udir=$SCRATCH_MNT/udir
-+mkdir $edir1 $edir2 $udir
-+keydesc1=$(_generate_encryption_key)
-+keydesc2=$(_generate_encryption_key)
-+$XFS_IO_PROG -c "set_encpolicy $keydesc1" $edir1
-+$XFS_IO_PROG -c "set_encpolicy $keydesc2" $edir2
-+touch $edir1/efile1
-+touch $edir2/efile2
-+touch $udir/ufile
++keydesc=$(_generate_encryption_key)
++mkdir $SCRATCH_MNT/encrypted_dir
++$XFS_IO_PROG -c "set_encpolicy $keydesc" $SCRATCH_MNT/encrypted_dir
 +
++# Create the "same" symlink in two different directories.
++# Later we'll check both the name and target of the symlink.
++mkdir $SCRATCH_MNT/encrypted_dir/subdir1
++mkdir $SCRATCH_MNT/encrypted_dir/subdir2
++ln -s symlink_target $SCRATCH_MNT/encrypted_dir/subdir1/symlink
++ln -s symlink_target $SCRATCH_MNT/encrypted_dir/subdir2/symlink
 +
-+# Test linking and moving an encrypted file into an encrypted directory with a
-+# different encryption policy.  Should fail with EPERM.
++#
++# Write files of 1 MB of all the same byte until we hit ENOSPC.  Note that we
++# must not create sparse files, since the contents of sparse files are not
++# stored on-disk.  Also, we create multiple files rather than one big file
++# because we want to test for reuse of per-file keys.
++#
++total_file_size=0
++i=1
++while true; do
++	file=$SCRATCH_MNT/encrypted_dir/file$i
++	if ! xfs_io -f $file -c 'pwrite 0 1M' &> $tmp.out; then
++		if ! grep -q 'No space left on device' $tmp.out; then
++			echo "FAIL: unexpected pwrite failure"
++			cat $tmp.out
++		elif [ -e $file ]; then
++			total_file_size=$((total_file_size + $(stat -c %s $file)))
++		fi
++		break
++	fi
++	total_file_size=$((total_file_size + $(stat -c %s $file)))
++	i=$((i + 1))
++	if [ $i -gt $fs_size_in_mb ]; then
++		echo "FAIL: filesystem never filled up!"
++		break
++	fi
++done
 +
-+echo -e "\n*** Link encrypted <= encrypted ***"
-+ln $edir1/efile1 $edir2/efile1 |& _filter_scratch
++# We shouldn't have been able to write more data than we had space for.
++if (( $total_file_size > $fs_size )); then
++	echo "FAIL: wrote $total_file_size bytes but should have only" \
++		"had space for $fs_size bytes at most"
++fi
 +
-+echo -e "\n*** Rename encrypted => encrypted ***"
-+mv $edir1/efile1 $edir2/efile1 |& _filter_scratch
++#
++# Unmount the filesystem and compute its compressed size.  It must be no smaller
++# than the amount of data that was written; otherwise there was a compromise in
++# the confidentiality of the data.  False positives should not be possible
++# because filesystem metadata will also contribute to the compressed size.
++#
++# Note: it's important to use a strong compressor such as xz which can detect
++# redundancy across most or all of the filesystem.  We run xz with a 64 MB
++# sliding window but use some custom settings to make it faster and use less
++# memory than the '-9' preset.  The memory needed with our settings will be
++# 64 * 6.5 = 416 MB; see xz(1).
++#
++_unlink_encryption_key $keydesc
++_scratch_unmount
++fs_compressed_size=$(head -c $fs_size $SCRATCH_DEV | \
++	xz --lzma2=dict=64M,mf=hc4,mode=fast,nice=16 | \
++	wc -c)
 +
++if (( $fs_compressed_size < $total_file_size )); then
++	echo "FAIL: filesystem was compressible" \
++		"($total_file_size bytes => $fs_compressed_size bytes)"
++else
++	echo "PASS: ciphertexts were not repeated for contents"
++fi
 +
-+# Test linking and moving an unencrypted file into an encrypted directory.
-+# Should fail with EPERM.
-+
-+echo -e "\n\n*** Link unencrypted <= encrypted ***"
-+ln $udir/ufile $edir1/ufile |& _filter_scratch
-+
-+echo -e "\n*** Rename unencrypted => encrypted ***"
-+mv $udir/ufile $edir1/ufile |& _filter_scratch
-+
-+
-+# Test linking and moving an encrypted file into an unencrypted directory.
-+# Should succeed.
-+
-+echo -e "\n\n*** Link encrypted <= unencrypted ***"
-+ln -v $edir1/efile1 $udir/efile1 |& _filter_scratch
-+rm $udir/efile1 # undo
-+
-+echo -e "\n*** Rename encrypted => unencrypted ***"
-+mv -v $edir1/efile1 $udir/efile1 |& _filter_scratch
-+mv $udir/efile1 $edir1/efile1 # undo
-+
-+
-+# Test moving a forbidden (unencrypted, or encrypted with a different encryption
-+# policy) file into an encrypted directory via an exchange (cross rename)
-+# operation.  Should fail with EPERM.
-+
-+echo -e "\n\n*** Exchange encrypted <=> encrypted ***"
-+src/renameat2 -x $edir1/efile1 $edir2/efile2 |& _filter_scratch
-+
-+echo -e "\n*** Exchange unencrypted <=> encrypted ***"
-+src/renameat2 -x $udir/ufile $edir1/efile1 |& _filter_scratch
-+
-+echo -e "\n*** Exchange encrypted <=> unencrypted ***"
-+src/renameat2 -x $edir1/efile1 $udir/ufile |& _filter_scratch
-+
-+
-+# Test a file with a special type, i.e. not regular, directory, or symlink.
-+# Since such files are not subject to encryption, there should be no
-+# restrictions on linking or moving them into encrypted directories.
-+
-+echo -e "\n\n*** Special file tests ***"
-+mkfifo $edir1/fifo
-+mv -v $edir1/fifo $edir2/fifo | _filter_scratch
-+mv -v $edir2/fifo $udir/fifo | _filter_scratch
-+mv -v $udir/fifo $edir1/fifo | _filter_scratch
-+mkfifo $udir/fifo
-+src/renameat2 -x $udir/fifo $edir1/fifo
-+ln -v $edir1/fifo $edir2/fifo | _filter_scratch
-+rm $edir1/fifo $edir2/fifo $udir/fifo
-+
-+
-+# Now test that *without* access to the encrypted key, we cannot use an exchange
-+# (cross rename) operation to move a forbidden file into an encrypted directory.
-+
-+_unlink_encryption_key $keydesc1
-+_unlink_encryption_key $keydesc2
-+_scratch_cycle_mount
-+efile1=$(find $edir1 -type f)
-+efile2=$(find $edir2 -type f)
-+
-+echo -e "\n\n*** Exchange encrypted <=> encrypted without key ***"
-+src/renameat2 -x $efile1 $efile2
-+echo -e "\n*** Exchange encrypted <=> unencrypted without key ***"
-+src/renameat2 -x $efile1 $udir/ufile
++# Verify that encrypted filenames and symlink targets were not reused.  Note
++# that since the ciphertexts should be unpredictable, we cannot simply include
++# the expected names in the expected output file.
++_scratch_mount
++find $SCRATCH_MNT/encrypted_dir -type l | wc -l
++link1=$(find $SCRATCH_MNT/encrypted_dir -type l | head -1)
++link2=$(find $SCRATCH_MNT/encrypted_dir -type l | tail -1)
++[ $(basename $link1) = $(basename $link2) ] && \
++	echo "Encrypted filenames were reused!"
++[ $(readlink $link1) = $(readlink $link2) ] && \
++	echo "Encrypted symlink targets were reused!"
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/403.out b/tests/generic/403.out
+diff --git a/tests/generic/404.out b/tests/generic/404.out
 new file mode 100644
-index 0000000..22d3255
+index 0000000..220edb4
 --- /dev/null
-+++ b/tests/generic/403.out
-@@ -0,0 +1,45 @@
-+QA output created by 403
-+
-+*** Link encrypted <= encrypted ***
-+ln: failed to create hard link 'SCRATCH_MNT/edir2/efile1' => 'SCRATCH_MNT/edir1/efile1': Operation not permitted
-+
-+*** Rename encrypted => encrypted ***
-+mv: cannot move 'SCRATCH_MNT/edir1/efile1' to 'SCRATCH_MNT/edir2/efile1': Operation not permitted
-+
-+
-+*** Link unencrypted <= encrypted ***
-+ln: failed to create hard link 'SCRATCH_MNT/edir1/ufile' => 'SCRATCH_MNT/udir/ufile': Operation not permitted
-+
-+*** Rename unencrypted => encrypted ***
-+mv: cannot move 'SCRATCH_MNT/udir/ufile' to 'SCRATCH_MNT/edir1/ufile': Operation not permitted
-+
-+
-+*** Link encrypted <= unencrypted ***
-+'SCRATCH_MNT/udir/efile1' => 'SCRATCH_MNT/edir1/efile1'
-+
-+*** Rename encrypted => unencrypted ***
-+'SCRATCH_MNT/edir1/efile1' -> 'SCRATCH_MNT/udir/efile1'
-+
-+
-+*** Exchange encrypted <=> encrypted ***
-+Operation not permitted
-+
-+*** Exchange unencrypted <=> encrypted ***
-+Operation not permitted
-+
-+*** Exchange encrypted <=> unencrypted ***
-+Operation not permitted
-+
-+
-+*** Special file tests ***
-+'SCRATCH_MNT/edir1/fifo' -> 'SCRATCH_MNT/edir2/fifo'
-+'SCRATCH_MNT/edir2/fifo' -> 'SCRATCH_MNT/udir/fifo'
-+'SCRATCH_MNT/udir/fifo' -> 'SCRATCH_MNT/edir1/fifo'
-+'SCRATCH_MNT/edir2/fifo' => 'SCRATCH_MNT/edir1/fifo'
-+
-+
-+*** Exchange encrypted <=> encrypted without key ***
-+Operation not permitted
-+
-+*** Exchange encrypted <=> unencrypted without key ***
-+Operation not permitted
++++ b/tests/generic/404.out
+@@ -0,0 +1,3 @@
++QA output created by 404
++PASS: ciphertexts were not repeated for contents
++2
 diff --git a/tests/generic/group b/tests/generic/group
-index e218380..a0d6e84 100644
+index a0d6e84..d310654 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -399,3 +399,4 @@
- 400 auto quick encrypt
+@@ -400,3 +400,4 @@
  401 auto quick encrypt
  402 auto quick encrypt
-+403 auto quick encrypt
+ 403 auto quick encrypt
++404 auto encrypt
 -- 
 2.8.0.rc3.226.g39d4020
 
