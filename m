@@ -1,41 +1,68 @@
-Received: from sandeen.net ([63.231.237.45]:35756 "EHLO sandeen.net"
+Received: from sandeen.net ([63.231.237.45]:38638 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754909AbcLOTJn (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 15 Dec 2016 14:09:43 -0500
-Subject: Re: [PATCH 6/6] libxcmd: add non-iterating user commands
-References: <20161207034724.1613-1-david@fromorbit.com>
- <20161207034724.1613-7-david@fromorbit.com>
- <CAOQ4uxj2AROKtg=ZE64Q-RJbMaiRdP7SvoosmvCD4C1h-X-4bA@mail.gmail.com>
+        id S1752964AbcLOTrm (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 15 Dec 2016 14:47:42 -0500
+Subject: Re: [PATCH] xfs_io: implement 'set_encpolicy' and 'get_encpolicy'
+ commands
+References: <1480371512-12493-1-git-send-email-ebiggers@google.com>
+ <c6553dba-e7da-0692-cc2e-a1a59aaa8bf8@sandeen.net>
 From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <3464a695-a76a-b7e2-5426-c013c92f2fe8@sandeen.net>
-Date: Thu, 15 Dec 2016 13:09:42 -0600
+Message-ID: <9445b3d2-d0d9-dec2-1c92-3e4e103a711e@sandeen.net>
+Date: Thu, 15 Dec 2016 13:40:12 -0600
 MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxj2AROKtg=ZE64Q-RJbMaiRdP7SvoosmvCD4C1h-X-4bA@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
+In-Reply-To: <c6553dba-e7da-0692-cc2e-a1a59aaa8bf8@sandeen.net>
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>, Dave Chinner <david@fromorbit.com>
-Cc: linux-xfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
+To: Eric Biggers <ebiggers@google.com>, linux-xfs@vger.kernel.org
+Cc: fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>, Michael Halcrow <mhalcrow@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 12/6/16 10:49 PM, Amir Goldstein wrote:
->> @@ -25,14 +28,35 @@ These code paths include not only the obvious read/write/mmap interfaces
->>  for manipulating files, but also cover all of the XFS extensions (such
->>  as space preallocation, additional inode flags, etc).
->>  .SH OPTIONS
->> +.B xfs_io
->> +commands may be run interactively (the default) or as arguments on the
->> +command line.
->> +Interactive mode always runs commands on the current open file, whilst commands
->> +run from the command line may operate on all open files rather than the current
->> +open file.
-> "operate on all open files" is ambiguous. does the loop go files -> cmds or
-> cmds -> files? this is part of the confusion IMO.
+On 12/14/16 10:19 PM, Eric Sandeen wrote:
+>> +
+>> +static int
+>> +get_encpolicy_f(int argc, char **argv)
+>> +{
+>> +	struct fscrypt_policy policy;
+>> +
+>> +	if (ioctl(file->fd, FS_IOC_GET_ENCRYPTION_POLICY, &policy) < 0) {
+>> +		fprintf(stderr, "%s: failed to get encryption policy: %s\n",
+>> +			file->name, strerror(errno));
+>> +		return 1;
+> Ok, I need to go look at dave's other patch series to give you guidance
+> on what to return here, or anything else under the foo_f() functions.
+> 
+> see [PATCH 0/6] xfs_io: fix up command iteration - I need to see how dave
+> wants that all to work now.  Prior to that, anyway, most commands returned
+> 0 even on an error, and possibly set exitcode = 1, but I have to see what
+> that patchset does.
 
-How about adding something like:
+Ok, having looked at dave's patchset, it doesn't really change this yet.
 
-Files specified at the end of the command line are added to the file
-table first, then files specified in -c and -C commands are added.
-The last file in the file table is the current open file.
+Today, almost every command returns 0 regardless of failure, but sets
+exitcode=1 if a failure occurred.  This lets command processing continue,
+but results in an ultimate non-zero exit from the utility.
 
--Eric 
+For argument parsing, failures should almost certainly return 0;
+even command_usage() does this.
+
+For functional failures, see i.e. allocsp_f:
+
+        if (xfsctl(file->name, file->fd, XFS_IOC_ALLOCSP64, &segment) < 0) {
+                perror("XFS_IOC_ALLOCSP64");
+                return 0;
+        }
+
+(though that didn't set exitcode...)
+
+This all needs cleanup across xfs_io, but I think these new functions will
+be outliers for now if you are returning 1 in many locations under your
+new foo_f functions.  Unless you want commandline processing to stop,
+and for interactive shell to quit, you probably want to switch to returning
+0 even on errors, (usually after printing a message.)
+
+At some point we should probably clean this up, and possibly make it
+continue for interactive shell, but stop for commandline operation,
+or something along those lines.  But that's for another day ...
+
+-Eric
