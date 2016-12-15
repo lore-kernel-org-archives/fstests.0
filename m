@@ -1,68 +1,92 @@
-Received: from sandeen.net ([63.231.237.45]:38638 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752964AbcLOTrm (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 15 Dec 2016 14:47:42 -0500
-Subject: Re: [PATCH] xfs_io: implement 'set_encpolicy' and 'get_encpolicy'
- commands
-References: <1480371512-12493-1-git-send-email-ebiggers@google.com>
- <c6553dba-e7da-0692-cc2e-a1a59aaa8bf8@sandeen.net>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <9445b3d2-d0d9-dec2-1c92-3e4e103a711e@sandeen.net>
-Date: Thu, 15 Dec 2016 13:40:12 -0600
-MIME-Version: 1.0
-In-Reply-To: <c6553dba-e7da-0692-cc2e-a1a59aaa8bf8@sandeen.net>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Received: from mail-pg0-f67.google.com ([74.125.83.67]:34471 "EHLO
+        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752020AbcLOU2G (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 15 Dec 2016 15:28:06 -0500
+Received: by mail-pg0-f67.google.com with SMTP id e9so7200162pgc.1
+        for <fstests@vger.kernel.org>; Thu, 15 Dec 2016 12:28:06 -0800 (PST)
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: [PATCH v4 0/6] Add filesystem-level encryption tests
+Date: Thu, 15 Dec 2016 12:26:19 -0800
+Message-Id: <1481833585-39148-1-git-send-email-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers@google.com>, linux-xfs@vger.kernel.org
-Cc: fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>, Michael Halcrow <mhalcrow@google.com>
+To: fstests@vger.kernel.org
+Cc: Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>, Michael Halcrow <mhalcrow@google.com>, Eric Sandeen <sandeen@redhat.com>, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 12/14/16 10:19 PM, Eric Sandeen wrote:
->> +
->> +static int
->> +get_encpolicy_f(int argc, char **argv)
->> +{
->> +	struct fscrypt_policy policy;
->> +
->> +	if (ioctl(file->fd, FS_IOC_GET_ENCRYPTION_POLICY, &policy) < 0) {
->> +		fprintf(stderr, "%s: failed to get encryption policy: %s\n",
->> +			file->name, strerror(errno));
->> +		return 1;
-> Ok, I need to go look at dave's other patch series to give you guidance
-> on what to return here, or anything else under the foo_f() functions.
-> 
-> see [PATCH 0/6] xfs_io: fix up command iteration - I need to see how dave
-> wants that all to work now.  Prior to that, anyway, most commands returned
-> 0 even on an error, and possibly set exitcode = 1, but I have to see what
-> that patchset does.
+From: Eric Biggers <ebiggers@google.com>
 
-Ok, having looked at dave's patchset, it doesn't really change this yet.
+This is the fourth revision of the patchset to add some xfstests for
+filesystem-level encryption.  The new tests are designed to run on any
+filesystem that implements the "fscrypt" API, currently ext4 and f2fs.
+(fscrypt support for ubifs is also under development, but it looks like
+xfstests doesn't have ubifs support yet.)
 
-Today, almost every command returns 0 regardless of failure, but sets
-exitcode=1 if a failure occurred.  This lets command processing continue,
-but results in an ultimate non-zero exit from the utility.
+The new tests are designed to complement, not replace, doing a full
+xfstests run with encryption enabled, which for ext4 can currently be
+done by using the test_dummy_encryption mount option.
 
-For argument parsing, failures should almost certainly return 0;
-even command_usage() does this.
+Due to kernel bugs, generic/403 is currently expected to fail.  I've sent
+patches to fix these.
 
-For functional failures, see i.e. allocsp_f:
+Changes since v3:
+	* Replace _require_encryption with _require_scratch_encryption
+	* Move filesystem type check into _scratch_mkfs_encrypted
+	* Use _exclude_scratch_mount_option
+	* Never cd into $SCRATCH_MNT
+	* generic/403: uncomment test of exchange without key
+	* generic/403: test linking and renaming special file
+	* Send both stdout and stderr from mkfs to $seqres.full
 
-        if (xfsctl(file->name, file->fd, XFS_IOC_ALLOCSP64, &segment) < 0) {
-                perror("XFS_IOC_ALLOCSP64");
-                return 0;
-        }
+Changes since v2:
+	* Use filesystem-specific key prefix rather than generic one
+	* Use a new keyring for each test
+	* Add a test for restrictions on moving and linking files
+	* Make "cryptographic weaknesses" test compatible with f2fs
+	* For now, accept both the old and new versions of certain error
+	  codes which are planned to be changed
 
-(though that didn't set exitcode...)
+Changes since v1:
+	* Drop fscrypt_util test program and use new xfs_io commands and
+	  keyctl instead (xfs_io patch sent separately)
+	* Updates to match xfstests coding style
+	* Move validation of policy structure into its own test
+	* Add test to detect some cryptographic weaknesses
+	* Drop ioctl locking test
 
-This all needs cleanup across xfs_io, but I think these new functions will
-be outliers for now if you are returning 1 in many locations under your
-new foo_f functions.  Unless you want commandline processing to stop,
-and for interactive shell to quit, you probably want to switch to returning
-0 even on errors, (usually after printing a message.)
+Eric Biggers (6):
+  generic: add utilities for testing filesystem encryption
+  generic: test setting and getting encryption policies
+  generic: test validation of encryption policy structure
+  generic: test encrypted file access
+  generic: test enforcement of one encryption policy per tree
+  generic: test for weaknesses in filesystem encryption
 
-At some point we should probably clean this up, and possibly make it
-continue for interactive shell, but stop for commandline operation,
-or something along those lines.  But that's for another day ...
+ common/config         |   2 +
+ common/encrypt        | 146 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/400     | 135 +++++++++++++++++++++++++++++++++++++++++
+ tests/generic/400.out |  43 ++++++++++++++
+ tests/generic/401     |  82 +++++++++++++++++++++++++
+ tests/generic/401.out |  18 ++++++
+ tests/generic/402     | 144 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/402.out |  13 ++++
+ tests/generic/403     | 158 ++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/403.out |  45 ++++++++++++++
+ tests/generic/404     | 162 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/404.out |   3 +
+ tests/generic/group   |   5 ++
+ 13 files changed, 956 insertions(+)
+ create mode 100644 common/encrypt
+ create mode 100755 tests/generic/400
+ create mode 100644 tests/generic/400.out
+ create mode 100755 tests/generic/401
+ create mode 100644 tests/generic/401.out
+ create mode 100755 tests/generic/402
+ create mode 100644 tests/generic/402.out
+ create mode 100644 tests/generic/403
+ create mode 100644 tests/generic/403.out
+ create mode 100755 tests/generic/404
+ create mode 100644 tests/generic/404.out
 
--Eric
+-- 
+2.8.0.rc3.226.g39d4020
+
