@@ -1,13 +1,13 @@
-Received: from mail-pg0-f67.google.com ([74.125.83.67]:34556 "EHLO
-        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753039AbcLOU2R (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 15 Dec 2016 15:28:17 -0500
-Received: by mail-pg0-f67.google.com with SMTP id e9so7200665pgc.1
-        for <fstests@vger.kernel.org>; Thu, 15 Dec 2016 12:28:17 -0800 (PST)
+Received: from mail-pg0-f68.google.com ([74.125.83.68]:34564 "EHLO
+        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753039AbcLOU2S (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 15 Dec 2016 15:28:18 -0500
+Received: by mail-pg0-f68.google.com with SMTP id e9so7200718pgc.1
+        for <fstests@vger.kernel.org>; Thu, 15 Dec 2016 12:28:18 -0800 (PST)
 From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH v4 4/6] generic: test encrypted file access
-Date: Thu, 15 Dec 2016 12:26:23 -0800
-Message-Id: <1481833585-39148-5-git-send-email-ebiggers3@gmail.com>
+Subject: [PATCH v4 5/6] generic: test enforcement of one encryption policy per tree
+Date: Thu, 15 Dec 2016 12:26:24 -0800
+Message-Id: <1481833585-39148-6-git-send-email-ebiggers3@gmail.com>
 In-Reply-To: <1481833585-39148-1-git-send-email-ebiggers3@gmail.com>
 References: <1481833585-39148-1-git-send-email-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -17,32 +17,34 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Eric Biggers <ebiggers@google.com>
 
-Test accessing encrypted files and directories, both with and without
-the encryption key.
+Add an xfstest which verifies that the filesystem forbids operations
+that would violate the constraint that all files in an encrypted
+directory tree use the same encryption policy.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- tests/generic/402     | 144 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/402.out |  13 +++++
+ tests/generic/403     | 158 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/403.out |  45 ++++++++++++++
  tests/generic/group   |   1 +
- 3 files changed, 158 insertions(+)
- create mode 100755 tests/generic/402
- create mode 100644 tests/generic/402.out
+ 3 files changed, 204 insertions(+)
+ create mode 100644 tests/generic/403
+ create mode 100644 tests/generic/403.out
 
-diff --git a/tests/generic/402 b/tests/generic/402
-new file mode 100755
-index 0000000..8f37f9f
+diff --git a/tests/generic/403 b/tests/generic/403
+new file mode 100644
+index 0000000..0e06cc5
 --- /dev/null
-+++ b/tests/generic/402
-@@ -0,0 +1,144 @@
++++ b/tests/generic/403
+@@ -0,0 +1,158 @@
 +#! /bin/bash
-+# FS QA Test generic/402
++# FS QA Test generic/403
 +#
-+# Test accessing encrypted files and directories, both with and without the
-+# encryption key.  Access with the encryption key is more of a sanity check and
-+# is not intended to fully test all the encrypted I/O paths; to do that you'd
-+# need to run all the xfstests with encryption enabled.  Access without the
-+# encryption key, on the other hand, should result in some particular behaviors.
++# Filesystem encryption is designed to enforce that a consistent encryption
++# policy is used within a given encrypted directory tree and that an encrypted
++# directory tree does not contain any unencrypted files.  This test verifies
++# that filesystem operations that would violate this constraint fail with EPERM.
++# This does not test enforcement of this constraint on lookup, which is still
++# needed to detect offline changes.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2016 Google, Inc.  All Rights Reserved.
@@ -83,6 +85,7 @@ index 0000000..8f37f9f
 +. ./common/rc
 +. ./common/filter
 +. ./common/encrypt
++. ./common/renameat2
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
@@ -92,121 +95,165 @@ index 0000000..8f37f9f
 +_supported_os Linux
 +_require_scratch_encryption
 +_require_xfs_io_command "set_encpolicy"
-+_require_command "$KEYCTL_PROG" keyctl
++_requires_renameat2
 +
 +_new_session_keyring
-+
 +_scratch_mkfs_encrypted &>> $seqres.full
 +_scratch_mount
 +
-+mkdir $SCRATCH_MNT/edir $SCRATCH_MNT/ref_dir
-+keydesc=$(_generate_encryption_key)
-+$XFS_IO_PROG -c "set_encpolicy $keydesc" $SCRATCH_MNT/edir
-+for dir in $SCRATCH_MNT/edir $SCRATCH_MNT/ref_dir; do
-+	touch $dir/empty > /dev/null
-+	$XFS_IO_PROG -t -f -c "pwrite 0 4k" $dir/a > /dev/null
-+	$XFS_IO_PROG -t -f -c "pwrite 0 33k" $dir/abcdefghijklmnopqrstuvwxyz > /dev/null
-+	maxname=$(yes | head -255 | tr -d '\n') # 255 character filename
-+	$XFS_IO_PROG -t -f -c "pwrite 0 1k" $dir/$maxname > /dev/null
-+	ln -s a $dir/symlink
-+	ln -s abcdefghijklmnopqrstuvwxyz $dir/symlink2
-+	ln -s $maxname $dir/symlink3
-+	mkdir $dir/subdir
-+	mkdir $dir/subdir/subsubdir
-+done
-+# Diff encrypted directory with unencrypted reference directory
-+diff -r $SCRATCH_MNT/edir $SCRATCH_MNT/ref_dir
-+# Cycle mount and diff again
++# Set up two encrypted directories, with different encryption policies,
++# and one unencrypted directory.
++edir1=$SCRATCH_MNT/edir1
++edir2=$SCRATCH_MNT/edir2
++udir=$SCRATCH_MNT/udir
++mkdir $edir1 $edir2 $udir
++keydesc1=$(_generate_encryption_key)
++keydesc2=$(_generate_encryption_key)
++$XFS_IO_PROG -c "set_encpolicy $keydesc1" $edir1
++$XFS_IO_PROG -c "set_encpolicy $keydesc2" $edir2
++touch $edir1/efile1
++touch $edir2/efile2
++touch $udir/ufile
++
++
++# Test linking and moving an encrypted file into an encrypted directory with a
++# different encryption policy.  Should fail with EPERM.
++
++echo -e "\n*** Link encrypted <= encrypted ***"
++ln $edir1/efile1 $edir2/efile1 |& _filter_scratch
++
++echo -e "\n*** Rename encrypted => encrypted ***"
++mv $edir1/efile1 $edir2/efile1 |& _filter_scratch
++
++
++# Test linking and moving an unencrypted file into an encrypted directory.
++# Should fail with EPERM.
++
++echo -e "\n\n*** Link unencrypted <= encrypted ***"
++ln $udir/ufile $edir1/ufile |& _filter_scratch
++
++echo -e "\n*** Rename unencrypted => encrypted ***"
++mv $udir/ufile $edir1/ufile |& _filter_scratch
++
++
++# Test linking and moving an encrypted file into an unencrypted directory.
++# Should succeed.
++
++echo -e "\n\n*** Link encrypted <= unencrypted ***"
++ln -v $edir1/efile1 $udir/efile1 |& _filter_scratch
++rm $udir/efile1 # undo
++
++echo -e "\n*** Rename encrypted => unencrypted ***"
++mv -v $edir1/efile1 $udir/efile1 |& _filter_scratch
++mv $udir/efile1 $edir1/efile1 # undo
++
++
++# Test moving a forbidden (unencrypted, or encrypted with a different encryption
++# policy) file into an encrypted directory via an exchange (cross rename)
++# operation.  Should fail with EPERM.
++
++echo -e "\n\n*** Exchange encrypted <=> encrypted ***"
++src/renameat2 -x $edir1/efile1 $edir2/efile2 |& _filter_scratch
++
++echo -e "\n*** Exchange unencrypted <=> encrypted ***"
++src/renameat2 -x $udir/ufile $edir1/efile1 |& _filter_scratch
++
++echo -e "\n*** Exchange encrypted <=> unencrypted ***"
++src/renameat2 -x $edir1/efile1 $udir/ufile |& _filter_scratch
++
++
++# Test a file with a special type, i.e. not regular, directory, or symlink.
++# Since such files are not subject to encryption, there should be no
++# restrictions on linking or moving them into encrypted directories.
++
++echo -e "\n\n*** Special file tests ***"
++mkfifo $edir1/fifo
++mv -v $edir1/fifo $edir2/fifo | _filter_scratch
++mv -v $edir2/fifo $udir/fifo | _filter_scratch
++mv -v $udir/fifo $edir1/fifo | _filter_scratch
++mkfifo $udir/fifo
++src/renameat2 -x $udir/fifo $edir1/fifo
++ln -v $edir1/fifo $edir2/fifo | _filter_scratch
++rm $edir1/fifo $edir2/fifo $udir/fifo
++
++
++# Now test that *without* access to the encrypted key, we cannot use an exchange
++# (cross rename) operation to move a forbidden file into an encrypted directory.
++
++_unlink_encryption_key $keydesc1
++_unlink_encryption_key $keydesc2
 +_scratch_cycle_mount
-+diff -r $SCRATCH_MNT/edir $SCRATCH_MNT/ref_dir
++efile1=$(find $edir1 -type f)
++efile2=$(find $edir2 -type f)
 +
-+#
-+# Now try accessing the files without the encryption key.  It should still be
-+# possible to list the directory and remove files.  But filenames should be
-+# encrypted, and it should not be possible to read regular files or to create
-+# new files or subdirectories.
-+#
-+# Note that we cannot simply use ls -R to verify the files because the encrypted
-+# filenames are unpredictable.  By design, the key used to encrypt a directory's
-+# filenames is derived from the master key (the key in the keyring) and a nonce
-+# generated by the kernel.  Hence, the encrypted filenames will be different
-+# every time this test is run, even if we were to put a fixed key into the
-+# keyring instead of a random one.  The same applies to symlink targets.
-+#
-+# TODO: there are some inconsistencies in which error codes are returned on
-+# different kernel versions and filesystems when trying to create a file or
-+# subdirectory without access to the parent directory's encryption key.  It's
-+# planned to consistently use ENOKEY, but for now make this test accept multiple
-+# error codes...
-+#
-+
-+filter_create_errors()
-+{
-+	sed -e 's/No such file or directory/Required key not available/' \
-+	    -e 's/Permission denied/Required key not available/' \
-+	    -e 's/Operation not permitted/Required key not available/'
-+}
-+
-+_unlink_encryption_key $keydesc
-+_scratch_cycle_mount
-+
-+# Check that unencrypted names aren't there
-+stat $SCRATCH_MNT/edir/empty |& _filter_scratch
-+stat $SCRATCH_MNT/edir/symlink |& _filter_scratch
-+
-+# Check that the correct numbers of files and subdirectories are there
-+ls $SCRATCH_MNT/edir | wc -l
-+find $SCRATCH_MNT/edir -mindepth 2 -maxdepth 2 -type d | wc -l
-+
-+# Try to read a nondirectory file (should fail with ENOKEY)
-+md5sum $(find $SCRATCH_MNT/edir -maxdepth 1 -type f | head -1) |& \
-+		cut -d ' ' -f3-
-+
-+# Try to create new files, directories, and symlinks in the encrypted directory,
-+# both with and without using correctly base-64 encoded filenames.  These should
-+# all fail with ENOKEY.
-+$XFS_IO_PROG -f $SCRATCH_MNT/edir/newfile |& filter_create_errors | _filter_scratch
-+$XFS_IO_PROG -f $SCRATCH_MNT/edir/0123456789abcdef |& filter_create_errors | _filter_scratch
-+mkdir $SCRATCH_MNT/edir/newdir |& filter_create_errors | _filter_scratch
-+mkdir $SCRATCH_MNT/edir/0123456789abcdef |& filter_create_errors | _filter_scratch
-+ln -s foo $SCRATCH_MNT/edir/newlink |& filter_create_errors | _filter_scratch
-+ln -s foo $SCRATCH_MNT/edir/0123456789abcdef |& filter_create_errors | _filter_scratch
-+
-+# Delete the encrypted directory (should succeed)
-+rm -r $SCRATCH_MNT/edir
-+stat $SCRATCH_MNT/edir |& _filter_scratch
++echo -e "\n\n*** Exchange encrypted <=> encrypted without key ***"
++src/renameat2 -x $efile1 $efile2
++echo -e "\n*** Exchange encrypted <=> unencrypted without key ***"
++src/renameat2 -x $efile1 $udir/ufile
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/402.out b/tests/generic/402.out
+diff --git a/tests/generic/403.out b/tests/generic/403.out
 new file mode 100644
-index 0000000..8573474
+index 0000000..22d3255
 --- /dev/null
-+++ b/tests/generic/402.out
-@@ -0,0 +1,13 @@
-+QA output created by 402
-+stat: cannot stat 'SCRATCH_MNT/edir/empty': No such file or directory
-+stat: cannot stat 'SCRATCH_MNT/edir/symlink': No such file or directory
-+8
-+1
-+Required key not available
-+SCRATCH_MNT/edir/newfile: Required key not available
-+SCRATCH_MNT/edir/0123456789abcdef: Required key not available
-+mkdir: cannot create directory 'SCRATCH_MNT/edir/newdir': Required key not available
-+mkdir: cannot create directory 'SCRATCH_MNT/edir/0123456789abcdef': Required key not available
-+ln: failed to create symbolic link 'SCRATCH_MNT/edir/newlink': Required key not available
-+ln: failed to create symbolic link 'SCRATCH_MNT/edir/0123456789abcdef': Required key not available
-+stat: cannot stat 'SCRATCH_MNT/edir': No such file or directory
++++ b/tests/generic/403.out
+@@ -0,0 +1,45 @@
++QA output created by 403
++
++*** Link encrypted <= encrypted ***
++ln: failed to create hard link 'SCRATCH_MNT/edir2/efile1' => 'SCRATCH_MNT/edir1/efile1': Operation not permitted
++
++*** Rename encrypted => encrypted ***
++mv: cannot move 'SCRATCH_MNT/edir1/efile1' to 'SCRATCH_MNT/edir2/efile1': Operation not permitted
++
++
++*** Link unencrypted <= encrypted ***
++ln: failed to create hard link 'SCRATCH_MNT/edir1/ufile' => 'SCRATCH_MNT/udir/ufile': Operation not permitted
++
++*** Rename unencrypted => encrypted ***
++mv: cannot move 'SCRATCH_MNT/udir/ufile' to 'SCRATCH_MNT/edir1/ufile': Operation not permitted
++
++
++*** Link encrypted <= unencrypted ***
++'SCRATCH_MNT/udir/efile1' => 'SCRATCH_MNT/edir1/efile1'
++
++*** Rename encrypted => unencrypted ***
++'SCRATCH_MNT/edir1/efile1' -> 'SCRATCH_MNT/udir/efile1'
++
++
++*** Exchange encrypted <=> encrypted ***
++Operation not permitted
++
++*** Exchange unencrypted <=> encrypted ***
++Operation not permitted
++
++*** Exchange encrypted <=> unencrypted ***
++Operation not permitted
++
++
++*** Special file tests ***
++'SCRATCH_MNT/edir1/fifo' -> 'SCRATCH_MNT/edir2/fifo'
++'SCRATCH_MNT/edir2/fifo' -> 'SCRATCH_MNT/udir/fifo'
++'SCRATCH_MNT/udir/fifo' -> 'SCRATCH_MNT/edir1/fifo'
++'SCRATCH_MNT/edir2/fifo' => 'SCRATCH_MNT/edir1/fifo'
++
++
++*** Exchange encrypted <=> encrypted without key ***
++Operation not permitted
++
++*** Exchange encrypted <=> unencrypted without key ***
++Operation not permitted
 diff --git a/tests/generic/group b/tests/generic/group
-index a455c29..e218380 100644
+index e218380..a0d6e84 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -398,3 +398,4 @@
- 393 auto quick rw
+@@ -399,3 +399,4 @@
  400 auto quick encrypt
  401 auto quick encrypt
-+402 auto quick encrypt
+ 402 auto quick encrypt
++403 auto quick encrypt
 -- 
 2.8.0.rc3.226.g39d4020
 
