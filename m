@@ -1,39 +1,54 @@
-Received: from sandeen.net ([63.231.237.45]:42268 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751710AbcLPDDk (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 15 Dec 2016 22:03:40 -0500
-Subject: Re: [PATCH v2] xfs_io: implement 'set_encpolicy' and 'get_encpolicy'
- commands
-References: <1481848815-104231-1-git-send-email-ebiggers3@gmail.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <9f588a76-beb9-6f9c-ece3-d2940815a565@sandeen.net>
-Date: Thu, 15 Dec 2016 21:03:39 -0600
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:32446 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1754177AbcLPEVm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 15 Dec 2016 23:21:42 -0500
+Date: Fri, 16 Dec 2016 15:21:13 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 5/6] xfs_io: make various commands one-shot only
+Message-ID: <20161216042113.GL4326@dastard>
+References: <20161207034724.1613-1-david@fromorbit.com>
+ <20161207034724.1613-6-david@fromorbit.com>
+ <fec1a6dd-cebd-1ff4-e916-f696139b876e@sandeen.net>
+ <20161216005326.GK4326@dastard>
+ <533e20be-406a-c028-f51f-9c90775a8b66@sandeen.net>
 MIME-Version: 1.0
-In-Reply-To: <1481848815-104231-1-git-send-email-ebiggers3@gmail.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <533e20be-406a-c028-f51f-9c90775a8b66@sandeen.net>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers3@gmail.com>, linux-xfs@vger.kernel.org
-Cc: fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>, Michael Halcrow <mhalcrow@google.com>, Eric Biggers <ebiggers@google.com>
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, amir73il@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-On 12/15/16 6:40 PM, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
+On Thu, Dec 15, 2016 at 07:50:33PM -0600, Eric Sandeen wrote:
+> On 12/15/16 6:53 PM, Dave Chinner wrote:
+> > On Thu, Dec 15, 2016 at 12:21:43PM -0600, Eric Sandeen wrote:
+> > Because they are aimed at single, specific filesystem operations
+> > only. It just doesn't make sense to iterate them across all open
+> > files inside xfs_io. If you have multiple filesystems youneed to
+> > query/modify, then do an xfs_io call for each. 
 > 
-> Add set_encpolicy and get_encpolicy commands to xfs_io so that xfstests
-> will be able to test filesystem encryption using the actual user API,
-> not just hacked in with a mount option.  These commands use the common
-> "fscrypt" API currently implemented by ext4 and f2fs, but it's also
-> under development for ubifs and planned for xfs.
+> Ok, I guess this finally clicked for me; a very easily described
+> test for whether the flag gets set:
 > 
-> Note that to get encrypted files to actually work, it's also necessary
-> to add a key to the kernel keyring.  This patch does not add a command
-> for this to xfs_io because it's possible to do it using keyctl.  keyctl
-> can also be used to remove keys, revoke keys, invalidate keys, etc.
+>   Only operations which specifically operate on /files/ will iterate*.
 > 
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
+>   System-wide and fs-wide operations (even if they happen to take a
+>   file as an argument, as i.e. freeze can) do /not/ iterate.
+> 
+> *and open doesn't iterate because recursion :)
+> 
+> I'm happy with that, though I think it should be documented clearly.
+> 
+> Sorry if I was slow getting to your point.
 
-Thanks for the update -
+No, you're not slow, I simply couldn't explain my rationale as
+clearly and obviously as you've just done. I'll add that to my man
+page updates, and repost the series for you.
 
-Reviewed-by: Eric Sandeen <sandeen@sandeen.net>
+Cheers,
 
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
