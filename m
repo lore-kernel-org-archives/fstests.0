@@ -1,54 +1,39 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:32446 "EHLO
-        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1754177AbcLPEVm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 15 Dec 2016 23:21:42 -0500
-Date: Fri, 16 Dec 2016 15:21:13 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 5/6] xfs_io: make various commands one-shot only
-Message-ID: <20161216042113.GL4326@dastard>
-References: <20161207034724.1613-1-david@fromorbit.com>
- <20161207034724.1613-6-david@fromorbit.com>
- <fec1a6dd-cebd-1ff4-e916-f696139b876e@sandeen.net>
- <20161216005326.GK4326@dastard>
- <533e20be-406a-c028-f51f-9c90775a8b66@sandeen.net>
+Received: from bombadil.infradead.org ([198.137.202.9]:53465 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752944AbcLPIPe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 16 Dec 2016 03:15:34 -0500
+Date: Fri, 16 Dec 2016 00:15:23 -0800
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: trouble with generic/081
+Message-ID: <20161216081523.GA13847@infradead.org>
+References: <20161214164314.GA25105@infradead.org>
+ <20161215063650.GJ4326@dastard>
+ <20161215084224.GA14395@infradead.org>
+ <c05b64b6-80d3-655d-db9b-6f49038e53ee@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <533e20be-406a-c028-f51f-9c90775a8b66@sandeen.net>
+In-Reply-To: <c05b64b6-80d3-655d-db9b-6f49038e53ee@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, amir73il@gmail.com
+To: Zdenek Kabelac <zkabelac@redhat.com>
+Cc: Christoph Hellwig <hch@infradead.org>, Dave Chinner <david@fromorbit.com>, eguan@redhat.com, fstests@vger.kernel.org, dm-devel@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Dec 15, 2016 at 07:50:33PM -0600, Eric Sandeen wrote:
-> On 12/15/16 6:53 PM, Dave Chinner wrote:
-> > On Thu, Dec 15, 2016 at 12:21:43PM -0600, Eric Sandeen wrote:
-> > Because they are aimed at single, specific filesystem operations
-> > only. It just doesn't make sense to iterate them across all open
-> > files inside xfs_io. If you have multiple filesystems youneed to
-> > query/modify, then do an xfs_io call for each. 
-> 
-> Ok, I guess this finally clicked for me; a very easily described
-> test for whether the flag gets set:
-> 
->   Only operations which specifically operate on /files/ will iterate*.
-> 
->   System-wide and fs-wide operations (even if they happen to take a
->   file as an argument, as i.e. freeze can) do /not/ iterate.
-> 
-> *and open doesn't iterate because recursion :)
-> 
-> I'm happy with that, though I think it should be documented clearly.
-> 
-> Sorry if I was slow getting to your point.
+On Thu, Dec 15, 2016 at 10:16:23AM +0100, Zdenek Kabelac wrote:
+> So let me explain the logic behind this 'amazingly stupid' idea.
 
-No, you're not slow, I simply couldn't explain my rationale as
-clearly and obviously as you've just done. I'll add that to my man
-page updates, and repost the series for you.
+And that logic doesn't make any sense at all.  invibly unmounting
+a file system behind the users back is actively harmful, as it is
+contradicting the principle of least surprise, and the xfstests mess
+is one simple example for it.  Add a callback in-kernel to tell the
+fs to shut down but NOT unmount and expose the namespace below it,
+which the administrator has probably intentionally hid.
 
-Cheers,
+Even worse unmount may trigger further writes and with fses not
+handling them the fs might now be stuck after being detached from
+the namespace without a way for the admin to detect or recover this.
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+What XFS did on IRIX was to let the volume manager call into the fs
+and shut it down.  At this point no further writes are possible,
+but we do not expose the namespace under the mount point, and the
+admin can fix the situation with all the normal tools.
