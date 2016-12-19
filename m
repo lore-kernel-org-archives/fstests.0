@@ -1,235 +1,234 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:18501 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932807AbcLSWfZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 19 Dec 2016 17:35:25 -0500
-Date: Mon, 19 Dec 2016 14:34:47 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v4 1/5] generic/392: Add copy to new file test
-Message-ID: <20161219223447.GA7300@birch.djwong.org>
-References: <20161208184909.23321-1-Anna.Schumaker@Netapp.com>
- <20161208184909.23321-2-Anna.Schumaker@Netapp.com>
- <20161219100404.GD1859@eguan.usersys.redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:53410 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932217AbcLSPXz (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 19 Dec 2016 10:23:55 -0500
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 7E8F4384B
+        for <fstests@vger.kernel.org>; Mon, 19 Dec 2016 15:23:55 +0000 (UTC)
+Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
+        by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id uBJFNsOh003236
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+        for <fstests@vger.kernel.org>; Mon, 19 Dec 2016 10:23:55 -0500
+From: Eric Sandeen <sandeen@redhat.com>
+Subject: [PATCH] generic/395: test GETNEXTQUOTA near INT_MAX
+Message-ID: <a3c43ff2-c641-aba4-b10e-781a3f3c86e3@redhat.com>
+Date: Mon, 19 Dec 2016 09:23:54 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20161219100404.GD1859@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Anna Schumaker <Anna.Schumaker@Netapp.com>, fstests@vger.kernel.org, linux-nfs@vger.kernel.org, hch@infradead.org
+To: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 19, 2016 at 06:04:04PM +0800, Eryu Guan wrote:
-> Hi Anna,
-> 
-> On Thu, Dec 08, 2016 at 01:49:04PM -0500, Anna Schumaker wrote:
-> > This test copies data from various points in a source file to a new
-> > file.  This is useful for testing the basics of copy_file_range().
-> > 
-> > Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
-> 
-> Sorry for the late review. I tested this patchset on 4.9 kernel and
-> xfs_io with your return code fix applied.
-> 
-> I met some common failures/behaviors in these tests, so I only comment
-> on this patch.
-> 
-> > ---
-> >  common/rc             |   6 +++
-> >  tests/generic/392     | 102 ++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/392.out |  26 +++++++++++++
-> >  tests/generic/group   |   1 +
-> >  4 files changed, 135 insertions(+)
-> >  create mode 100755 tests/generic/392
-> >  create mode 100644 tests/generic/392.out
-> > 
-> > diff --git a/common/rc b/common/rc
-> > index 8c99306..7c5d2a8 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -2054,6 +2054,12 @@ _require_xfs_io_command()
-> >  	"chproj")
-> >  		testio=`$XFS_IO_PROG -F -f -c "chproj 0" $testfile 2>&1`
-> >  		;;
-> > +	"copy_range")
-> > +		testcopy=$TEST_DIR/$$.copy.xfs_io
-> > +		$XFS_IO_PROG -F -f -c "pwrite 0 4k" $testfile 2>&1 > /dev/null
-> > +		testio=`$XFS_IO_PROG -F -f -c "copy_range $testfile" $testcopy 2>&1`
-> > +		rm -f $testcopy 2>&1 > /dev/null
-> > +		;;
-> >  	"falloc" )
-> >  		testio=`$XFS_IO_PROG -F -f -c "falloc 0 1m" $testfile 2>&1`
-> >  		;;
-> 
-> This is not able to _notrun as expect on a kernel without
-> copy_file_range syscall support, e.g. 4.4 kernel, xfs_io reports
-> "+copy_range: Function not implemented"
-> 
-> I think we need a new check on $testio after the case switch, e.g.
-> 
-> echo $testio | grep -q "not implemented" \
-> 	&& _notrun "xfs_io $command is not implemented in kernel"
-> 
-> > diff --git a/tests/generic/392 b/tests/generic/392
-> > new file mode 100755
-> > index 0000000..466643a
-> > --- /dev/null
-> > +++ b/tests/generic/392
-> > @@ -0,0 +1,102 @@
-> > +#!/bin/bash
-> > +# FS QA Test No. 392
-> > +#
-> > +# Tests vfs_copy_file_range():
-> > +#   - Copy a file
-> > +#   - Copy beginning of original to new file
-> > +#   - Copy middle of original to a new file
-> > +#   - Copy end of original to new file
-> > +#   - Copy middle of original to a new file, creating a hole
-> > +#-----------------------------------------------------------------------
-> > +# Copyright (c) 2016 Netapp, Inc. All rights reserved.
-> > +#
-> > +# This program is free software; you can redistribute it and/or
-> > +# modify it under the terms of the GNU General Public License as
-> > +# published by the Free Software Foundation.
-> > +#
-> > +# This program is distributed in the hope that it would be useful,
-> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > +# GNU General Public License for more details.
-> > +#
-> > +# You should have received a copy of the GNU General Public License
-> > +# along with this program; if not, write the Free Software Foundation,
-> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > +#-----------------------------------------------------------------------
-> > +#
-> > +
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1    # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -rf $tmp.*
-> > +}
-> > +
-> > +# get standard environment
-> > +. common/rc
-> > +. common/filter
-> > +
-> > +# real QA test starts here
-> > +_supported_fs generic
-> > +_supported_os Linux
-> > +
-> > +_require_xfs_io_command "copy_range"
-> > +_require_test
-> > +
-> > +testdir=$TEST_DIR/test-$seq
-> > +rm -rf $testdir
-> > +mkdir $testdir
-> > +rm -f $seqres.full
-> > +
-> > +echo "Create the original file and then copy"
-> > +$XFS_IO_PROG -f -c 'pwrite -S 0x61 0    1000' $testdir/file >> $seqres.full 2>&1
-> > +$XFS_IO_PROG -f -c 'pwrite -S 0x62 1000 1000' $testdir/file >> $seqres.full 2>&1
-> > +$XFS_IO_PROG -f -c 'pwrite -S 0x63 2000 1000' $testdir/file >> $seqres.full 2>&1
-> > +$XFS_IO_PROG -f -c 'pwrite -S 0x64 3000 1000' $testdir/file >> $seqres.full 2>&1
-> > +$XFS_IO_PROG -f -c 'pwrite -S 0x65 4000 1000' $testdir/file >> $seqres.full 2>&1
-> > +$XFS_IO_PROG -f -c "copy_range $testdir/file" "$testdir/copy"
-> > +cmp $testdir/file $testdir/copy
-> > +echo "Original md5sums:"
-> > +md5sum $testdir/{file,copy} | _filter_test_dir
-> > +
-> > +echo "Copy beginning of original file"
-> > +$XFS_IO_PROG -f -c "copy_range -l 1000 $testdir/file" "$testdir/beginning"
-> > +cmp -n 1000 $testdir/file $testdir/beginning
-> > +echo "md5sums after copying beginning:"
-> > +md5sum $testdir/{file,beginning} | _filter_test_dir
-> > +
-> > +echo "Copy middle of original file"
-> > +$XFS_IO_PROG -f -c "copy_range -s 1000 -l 3000 $testdir/file" "$testdir/middle"
-> > +cmp -n 3000 $testdir/file $testdir/middle 1000
-> > +echo "md5sums after copying middle:"
-> > +md5sum $testdir/{file,middle} | _filter_test_dir
-> > +
-> > +echo "Copy end of original file"
-> > +$XFS_IO_PROG -f -c "copy_range -s 4000 -l 1000 $testdir/file" "$testdir/end"
-> > +cmp -n 1000 $testdir/file $testdir/end 4000
-> > +echo "md5sums after copying end:"
-> > +md5sum $testdir/{file,end} | _filter_test_dir
-> > +
-> > +echo "Copy beyond end of original file"
-> > +$XFS_IO_PROG -f -c "copy_range -s 4000 -l 2000 $testdir/file" "$testdir/beyond"
-> 
-> This didn't return EINVAL for me on xfs, ext4 and NFS, btrfs reported
-> EINVAL but it failed cmp and md5sum test at many other places. What is
-> the expected behavior?
->
-> generic/393 and generic/396 failed in a similar way, missing
-> "copy_range: Invalid argument" in the test output.
-> 
-> And seems copy_range -l option doesn't work well with xfs reflink
-> enabled? I saw many EINVALs when testing reflink enabled xfs, all these
-> 5 tests failed. Kernel bug or xfs_io bug or we just want to _notrun on
-> reflink xfs?
+XFS kernel code had a bug where GETNEXTQUOTA-type
+quotactls requesting an ID near UINT_MAX could overflow
+and return 0 as the "next" active ID.
 
-Ugggggggghhhhhhhhh...
+This test checks that by creating an active quota near
+UINT_MAX, then asking for the next one after it.
 
-Prior to hch's vfs patch reorganizing vfs_copy_file_range to try clone first,
-this happened[1]:
+The proper answer is ENOENT, but if we wrap we'll return
+ID 0.
 
-ret = -EOPNOTSUPP;
-if (file_out->f_op->copy_file_range)
-	ret = file_out->f_op->copy_file_range(file_in, pos_in, file_out,
-					      pos_out, len, flags);
-if (ret == -EOPNOTSUPP)
-	ret = do_splice_direct(file_in, &pos_in, file_out, &pos_out,
-			len > MAX_RW_COUNT ? MAX_RW_COUNT : len, 0);
+This also changes test-nextquota.c so that it checks
+both GETNEXTQUOTA and XGETNEXTQUOTA even if one fails;
+it stores the failure conditions and returns 1 if either
+of them fails.
 
-Note that copy_file_range pointed to XFS's clone_range implementation,
-so if you pass in an offset/length that aren't block aligned, the clone
-code returns EINVAL and ... we pass that out to userspace instead of
-falling back.
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
 
-Now it does this[2]:
+diff --git a/src/test-nextquota.c b/src/test-nextquota.c
+index ba4de27..73c63d8 100644
+--- a/src/test-nextquota.c
++++ b/src/test-nextquota.c
+@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
+ 	int cmd;
+ 	int type = -1, typeflag = 0;
+ 	int verbose = 0;
++	int retval = 0;
+ 	uint id = 0, idflag = 0;
+ 	char *device = NULL;
+ 	char *tmp;
+@@ -140,30 +141,32 @@ int main(int argc, char *argv[])
+ 	cmd = QCMD(Q_GETNEXTQUOTA, type);
+ 	if (quotactl(cmd, device, id, (void *)&dqb) < 0) {
+ 		perror("Q_GETNEXTQUOTA");
+-		return 1;
++		retval = 1;
++	} else {
++		/*
++		 * We only print id and inode limits because
++		 * block count varies depending on fs block size, etc;
++		 * this is just a sanity test that we can retrieve the quota,
++		 * and inode limits have the same units across both calls.
++		 */
++		printf("id        %u\n", dqb.dqb_id);
++		printf("ihard     %llu\n",
++				  (unsigned long long)dqb.dqb_ihardlimit);
++		printf("isoft     %llu\n",
++				  (unsigned long long)dqb.dqb_isoftlimit);
+ 	}
+ 
+-	/*
+-	 * We only print id and inode limits because
+-	 * block count varies depending on fs block size, etc;
+-	 * this is just a sanity test that we can retrieve the quota,
+-	 * and inode limits have the same units across both calls.
+-	 */
+-	printf("id        %u\n", dqb.dqb_id);
+-	printf("ihard     %llu\n", (unsigned long long)dqb.dqb_ihardlimit);
+-	printf("isoft     %llu\n", (unsigned long long)dqb.dqb_isoftlimit);
+-
+ 	if (verbose)
+ 		printf("====Q_XGETNEXTQUOTA====\n");
+ 	cmd = QCMD(Q_XGETNEXTQUOTA, USRQUOTA);
+ 	if (quotactl(cmd, device, id, (void *)&xqb) < 0) {
+ 		perror("Q_XGETNEXTQUOTA");
+-		return 1;
++		retval = 1;
++	} else {
++		printf("id        %u\n", xqb.d_id);
++		printf("ihard     %llu\n", xqb.d_ino_hardlimit);
++		printf("isoft     %llu\n", xqb.d_ino_softlimit);
+ 	}
+ 
+-	printf("id        %u\n", xqb.d_id);
+-	printf("ihard     %llu\n", xqb.d_ino_hardlimit);
+-	printf("isoft     %llu\n", xqb.d_ino_softlimit);
+-
+-	return 0;
++	return retval;
+ }
+diff --git a/tests/generic/395 b/tests/generic/395
+new file mode 100755
+index 0000000..c0cfc31
+--- /dev/null
++++ b/tests/generic/395
+@@ -0,0 +1,99 @@
++#! /bin/bash
++# FS QA Test 394
++#
++# test out high quota ids retrieved by Q_GETNEXTQUOTA
++# Request for next ID near 2^32 should not wrap to 0
++#
++# Designed to use the new Q_GETNEXTQUOTA quotactl
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/quota
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++_supported_fs generic
++_supported_os Linux
++_require_quota
++_require_scratch
++
++scratch_unmount 2>/dev/null
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount "-o usrquota,grpquota"
++quotacheck -u -g $SCRATCH_MNT 2>/dev/null
++quotaon $SCRATCH_MNT 2>/dev/null
++_scratch_unmount
++
++TYPES="u g"
++MOUNT_OPTIONS="-o usrquota,grpquota"
++
++_qmount
++quotaon $SCRATCH_MNT 2>/dev/null
++
++# Ok, do we even have GETNEXTQUOTA?  Querying ID 0 should work.
++$here/src/test-nextquota -i 0 -u -d $SCRATCH_DEV &> $seqres.full || \
++	_notrun "No GETNEXTQUOTA support"
++
++echo "Launch all quotas"
++
++# We want to create a block of quotas for an id very near
++# 2^32, then ask for the next quota after it.  The returned
++# ID should not overflow to 0.
++
++# Populate  with 2^32-4
++ID=4294967292
++setquota -u $ID $ID $ID $ID $ID $SCRATCH_MNT
++touch ${SCRATCH_MNT}/${ID}
++chown ${ID} ${SCRATCH_MNT}/${ID}
++
++# remount just for kicks, make sure we get it off disk
++_scratch_unmount
++_qmount
++quotaon $SCRATCH_MNT 2>/dev/null
++
++# Ask for the next quota after $ID; should get nothing back
++# If kernelspace wraps, we'll get 0 back.
++for TYPE in u g; do
++	let NEXT=ID+1
++	echo "Ask for ID after $NEXT expecting nothing"
++	$here/src/test-nextquota -i $NEXT -${TYPE} -d $SCRATCH_DEV
++done
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/395.out b/tests/generic/395.out
+new file mode 100644
+index 0000000..bcd87ec
+--- /dev/null
++++ b/tests/generic/395.out
+@@ -0,0 +1,8 @@
++QA output created by 395
++Launch all quotas
++Ask for ID after 4294967293 expecting nothing
++Q_GETNEXTQUOTA: No such file or directory
++Q_XGETNEXTQUOTA: No such file or directory
++Ask for ID after 4294967293 expecting nothing
++Q_GETNEXTQUOTA: No such file or directory
++Q_XGETNEXTQUOTA: No such file or directory
+diff --git a/tests/generic/group b/tests/generic/group
+index 20b31ef..e9d3e4a 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -397,3 +397,4 @@
+ 392 auto quick metadata
+ 393 auto quick rw
+ 394 auto quick
++395 auto quick quota
 
-if (file_in->f_op->clone_file_range) {
-	ret = file_in->f_op->clone_file_range(file_in, pos_in,
-			file_out, pos_out, len);
-	if (ret == 0) {
-		ret = len;
-		goto done;
-	}
-}
 
-if (file_out->f_op->copy_file_range) {
-	ret = file_out->f_op->copy_file_range(file_in, pos_in, file_out,
-					      pos_out, len, flags);
-	if (ret != -EOPNOTSUPP)
-		goto done;
-}
-
-ret = do_splice_direct(file_in, &pos_in, file_out, &pos_out,
-		len > MAX_RW_COUNT ? MAX_RW_COUNT : len, 0);
-
-XFS removed the copy_file_range pointer, so therefore we'll try to
-reflink the range and if that doesn't succeed we'll fall back to
-whatever do_splice_direct does.  All those EINVALs should go away
-shortly, at least on reflink-XFS.
-
---D
-
-[1] https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/fs/read_write.c?id=ffecee4f2442bb8cb6b34c3335fef4eb50c22fdd#n1545
-[2] https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/fs/read_write.c#n1543
-
-> 
-> Thanks,
-> Eryu
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
