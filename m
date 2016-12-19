@@ -1,35 +1,46 @@
-Received: from mail-oi0-f65.google.com ([209.85.218.65]:34694 "EHLO
-        mail-oi0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755407AbcLSQ0G (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 19 Dec 2016 11:26:06 -0500
-MIME-Version: 1.0
-In-Reply-To: <20161219162247.GA12627@infradead.org>
-References: <1482164108-19389-1-git-send-email-amir73il@gmail.com> <20161219162247.GA12627@infradead.org>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 19 Dec 2016 18:26:05 +0200
-Message-ID: <CAOQ4uxiGJ-aq0aaqFYHfMSuSynGT3moym=HhSaWsOW+bZgMZqg@mail.gmail.com>
-Subject: Re: [PATCH] generic/396: test correct d_type value
-Content-Type: text/plain; charset=UTF-8
+Received: from mail-pg0-f66.google.com ([74.125.83.66]:36622 "EHLO
+        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932519AbcLSSpn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 19 Dec 2016 13:45:43 -0500
+Received: by mail-pg0-f66.google.com with SMTP id w68so3225146pgw.3
+        for <fstests@vger.kernel.org>; Mon, 19 Dec 2016 10:45:42 -0800 (PST)
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: [RFC][PATCH 0/2] xfstests on ubifs
+Date: Mon, 19 Dec 2016 10:45:30 -0800
+Message-Id: <1482173132-100690-1-git-send-email-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Eryu Guan <eguan@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-mtd@lists.infradead.org, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>, "Theodore Y . Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 19, 2016 at 6:22 PM, Christoph Hellwig <hch@infradead.org> wrote:
-> On Mon, Dec 19, 2016 at 06:15:08PM +0200, Amir Goldstein wrote:
->> Verify correct d_type values of dir enrties.
->>
->> This test would fail for file systems with no d_type support,
->> but I have no idea how to test d_type support in a generic way,
->> without confusing a bug of d_type = DT_UNKNOWN with no support.
->
-> XFS v4 without the rare ftype feature is such a file system.
->
-> We'll need to detect it, and I think a large enough directory where
-> all entries but . and .. are DT_UNKNOWN should be a clear indicator.
->
-> If that's a bug it's clearly not distinguishable from a non-buggy fs :)
+From: Eric Biggers <ebiggers@google.com>
 
-For xfs and ext* I know how to test if the feature is enabled and I probably
-should do that. The question is what to do with the rest of the fs.
-I can do the heuristic test you suggested...
+Hello,
+
+Since ubifs encryption has been merged into the 4.10 kernel, I wanted to run my
+new encryption tests on ubifs to make sure it's compatible with ext4 and f2fs.
+xfstests doesn't support ubifs yet but I was able to hack something together.
+I'm sending my patches for anyone who may be interested.
+
+The first patch adds ubifs support to xfstests itself.  This is a fairly small
+patch that just deals with a couple quirks of ubifs, e.g. requiring a char
+device rather than a block device.
+
+The second patch updates xfstests-bld (a separate project maintained by Theodore
+Ts'o) to support ubifs with kvm-xfstests and gce-xfstests.  It uses block2mtd to
+emulate MTD devices using standard block devices, then layers UBI volumes on top
+of these.  Of course, actually running the tests is dependent on the xfstests
+patch.
+
+Note: I'm *not* an ubifs developer, and so far I haven't done much else besides
+run the encryption tests.  There seemed to be a lot of failures when I tried
+running some of the other generic xfstests, and also a strange failure in the
+encryption test generic/402 that I wasn't able to fix; so if I haven't obviously
+screwed something up, I strongly suggest the ubifs developers look into this.
+
+Note 2: since mkfs.ubifs doesn't support creating encryption-capable filesystems
+yet (ubifs v5), to get the encryption tests to work I also had to hack
+_scratch_mkfs_encrypted() to use ubirmvol/ubimkvol instead of mkfs.  I assume
+that the ubifs developers are planning to update mkfs.ubifs.
+
+Eric
