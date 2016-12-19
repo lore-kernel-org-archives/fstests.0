@@ -1,168 +1,75 @@
-Received: from mx1.redhat.com ([209.132.183.28]:60152 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751198AbcLSH0c (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 19 Dec 2016 02:26:32 -0500
-Date: Mon, 19 Dec 2016 15:26:28 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v4 6/6] generic: test for weaknesses in filesystem
- encryption
-Message-ID: <20161219072628.GC1859@eguan.usersys.redhat.com>
-References: <1481833585-39148-1-git-send-email-ebiggers3@gmail.com>
- <1481833585-39148-7-git-send-email-ebiggers3@gmail.com>
+Received: from mail-io0-f194.google.com ([209.85.223.194]:34174 "EHLO
+        mail-io0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753878AbcLSVb0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 19 Dec 2016 16:31:26 -0500
+Received: by mail-io0-f194.google.com with SMTP id y124so20533498iof.1
+        for <fstests@vger.kernel.org>; Mon, 19 Dec 2016 13:31:26 -0800 (PST)
+Date: Mon, 19 Dec 2016 13:31:22 -0800
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: Re: [RFC][PATCH 0/2] xfstests on ubifs
+Message-ID: <20161219213122.GD37112@gmail.com>
+References: <1482173132-100690-1-git-send-email-ebiggers3@gmail.com>
+ <16b0ba94-bdef-00c5-acd9-d19200f81ecd@nod.at>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1481833585-39148-7-git-send-email-ebiggers3@gmail.com>
+In-Reply-To: <16b0ba94-bdef-00c5-acd9-d19200f81ecd@nod.at>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers3@gmail.com>
-Cc: fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>, Michael Halcrow <mhalcrow@google.com>, Eric Sandeen <sandeen@redhat.com>, Eric Biggers <ebiggers@google.com>
+To: Richard Weinberger <richard@nod.at>
+Cc: fstests@vger.kernel.org, linux-mtd@lists.infradead.org, David Gstir <david@sigma-star.at>, "Theodore Y . Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Dec 15, 2016 at 12:26:25PM -0800, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
+Hi Richard,
+
+On Mon, Dec 19, 2016 at 08:12:07PM +0100, Richard Weinberger wrote:
+> Eric,
 > 
-> Add an xfstest which can detect some basic crypto mistakes that would
-> reduce the confidentiality guarantee provided by filesystem encryption.
+> On 19.12.2016 19:45, Eric Biggers wrote:
+> > From: Eric Biggers <ebiggers@google.com>
+> > 
+> > Hello,
+> > 
+> > Since ubifs encryption has been merged into the 4.10 kernel, I wanted to run my
+> > new encryption tests on ubifs to make sure it's compatible with ext4 and f2fs.
+> > xfstests doesn't support ubifs yet but I was able to hack something together.
+> > I'm sending my patches for anyone who may be interested.
 > 
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
-> ---
->  common/config         |   1 +
->  tests/generic/404     | 162 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/404.out |   3 +
->  tests/generic/group   |   1 +
->  4 files changed, 167 insertions(+)
->  create mode 100755 tests/generic/404
->  create mode 100644 tests/generic/404.out
+> Thanks for doing this. This was already on my TODO but you were faster.
 > 
-> diff --git a/common/config b/common/config
-> index 3727ec0..6cce7ce 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -203,6 +203,7 @@ export UUIDGEN_PROG="`set_prog_path uuidgen`"
->  export GETRICHACL_PROG="`set_prog_path getrichacl`"
->  export SETRICHACL_PROG="`set_prog_path setrichacl`"
->  export KEYCTL_PROG="`set_prog_path keyctl`"
-> +export XZ_PROG="`set_prog_path xz`"
->  
->  # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
->  # newer systems have udevadm command but older systems like RHEL5 don't.
-> diff --git a/tests/generic/404 b/tests/generic/404
-> new file mode 100755
-> index 0000000..3d96f8f
-> --- /dev/null
-> +++ b/tests/generic/404
-> @@ -0,0 +1,162 @@
-> +#! /bin/bash
-> +# FS QA Test generic/404
-> +#
-> +# Check for weaknesses in filesystem encryption involving the same ciphertext
-> +# being repeated.  For file contents, we fill a small filesystem with large
-> +# files of 0's and verify the filesystem is incompressible.  For filenames, we
-> +# create an identical symlink in two different directories and verify the
-> +# ciphertext filenames and symlink targets are different.
-> +#
-> +# This test can detect some basic cryptographic mistakes such as nonce reuse
-> +# (across files), initialization vector reuse (across blocks), or data somehow
-> +# being left in plaintext by accident.  For example, it detects the
-> +# initialization vector reuse bug fixed in commit 02fc59a0d28f ("f2fs/crypto:
-> +# fix xts_tweak initialization").
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2016 Google, Inc.  All Rights Reserved.
-> +#
-> +# Author: Eric Biggers <ebiggers@google.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/encrypt
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch_encryption
-> +_require_xfs_io_command "set_encpolicy"
-> +_require_command "$XZ_PROG" xz
-> +_require_command "$KEYCTL_PROG" keyctl
-> +
-> +_new_session_keyring
-> +
-> +# Set up a small filesystem containing an encrypted directory.  64 MB is enough
-> +# for both ext4 and f2fs.  (f2fs doesn't support a 32 MB filesystem.)
-> +fs_size_in_mb=64
-> +fs_size=$((fs_size_in_mb * 1024 * 1024))
-> +dd if=/dev/zero of=$SCRATCH_DEV bs=$((1024 * 1024)) \
-> +	count=$fs_size_in_mb &>> $seqres.full
+> > The first patch adds ubifs support to xfstests itself.  This is a fairly small
+> > patch that just deals with a couple quirks of ubifs, e.g. requiring a char
+> > device rather than a block device.
+> > 
+> > The second patch updates xfstests-bld (a separate project maintained by Theodore
+> > Ts'o) to support ubifs with kvm-xfstests and gce-xfstests.  It uses block2mtd to
+> > emulate MTD devices using standard block devices, then layers UBI volumes on top
+> > of these.  Of course, actually running the tests is dependent on the xfstests
+> > patch.
+> > 
+> > Note: I'm *not* an ubifs developer, and so far I haven't done much else besides
+> > run the encryption tests.  There seemed to be a lot of failures when I tried
+> > running some of the other generic xfstests, and also a strange failure in the
+> > encryption test generic/402 that I wasn't able to fix; so if I haven't obviously
+> > screwed something up, I strongly suggest the ubifs developers look into this.
+> 
+> /me looks.
+> 
 
-Why is zeroing out the first 64M of SCRATCH_DEV necessary? Better to
-have some comments on it.
+Also, in case you weren't aware of this already, I should mention that with ext4
+we have a way to do a full xfstests run with encryption enabled, to find bugs
+that wouldn't be found in dedicated tests.  Basically you run xfstests with the
+"test_dummy_encryption" mount option (or with the "ext4/encrypt" config for
+xfstests-bld), and it makes ext4 encrypt all new files and directories without
+userspace having to set up encryption policies.  It may be useful to look into
+implementing this for ubifs and/or f2fs too.
 
-> +MKFS_OPTIONS="$MKFS_OPTIONS -O encrypt" \
-> +	_scratch_mkfs_sized $fs_size &>> $seqres.full
-> +_scratch_mount
-> +
-> +keydesc=$(_generate_encryption_key)
-> +mkdir $SCRATCH_MNT/encrypted_dir
-> +$XFS_IO_PROG -c "set_encpolicy $keydesc" $SCRATCH_MNT/encrypted_dir
-> +
-> +# Create the "same" symlink in two different directories.
-> +# Later we'll check both the name and target of the symlink.
-> +mkdir $SCRATCH_MNT/encrypted_dir/subdir1
-> +mkdir $SCRATCH_MNT/encrypted_dir/subdir2
-> +ln -s symlink_target $SCRATCH_MNT/encrypted_dir/subdir1/symlink
-> +ln -s symlink_target $SCRATCH_MNT/encrypted_dir/subdir2/symlink
-> +
-> +#
-> +# Write files of 1 MB of all the same byte until we hit ENOSPC.  Note that we
-> +# must not create sparse files, since the contents of sparse files are not
-> +# stored on-disk.  Also, we create multiple files rather than one big file
-> +# because we want to test for reuse of per-file keys.
-> +#
-> +total_file_size=0
-> +i=1
-> +while true; do
-> +	file=$SCRATCH_MNT/encrypted_dir/file$i
-> +	if ! xfs_io -f $file -c 'pwrite 0 1M' &> $tmp.out; then
+(I'd actually like to get rid of test_dummy_encryption and just use the ioctls,
+but currently it's not really possible because it would require some ugly hooks
+in xfstests, and also the root directory cannot be encrypted because e2fsck
+requires that lost+found exist and be unencrypted.  An "inherit-only" encryption
+policy settable by a mkfs flag is also an option, but it seems like overkill
+just for testing.  So I think we'll be stuck with test_dummy_encryption for a
+while longer.  At least I've written kernel and xfstests-bld patches that make
+it a little less ugly kernel-side...)
 
-Use $XFS_IO_PROG here.
-
-Can you please send an updated patch 6/6? Otherwise the whole series
-look good to me! I'm going to let the patchset sit in the list for
-another week and push them out to upstream in next fstests update, if
-there's no further comments from others.
-
-Thanks,
-Eryu
+Eric
