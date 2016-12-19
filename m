@@ -1,75 +1,235 @@
-Received: from mail-io0-f194.google.com ([209.85.223.194]:34174 "EHLO
-        mail-io0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753878AbcLSVb0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 19 Dec 2016 16:31:26 -0500
-Received: by mail-io0-f194.google.com with SMTP id y124so20533498iof.1
-        for <fstests@vger.kernel.org>; Mon, 19 Dec 2016 13:31:26 -0800 (PST)
-Date: Mon, 19 Dec 2016 13:31:22 -0800
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: Re: [RFC][PATCH 0/2] xfstests on ubifs
-Message-ID: <20161219213122.GD37112@gmail.com>
-References: <1482173132-100690-1-git-send-email-ebiggers3@gmail.com>
- <16b0ba94-bdef-00c5-acd9-d19200f81ecd@nod.at>
+Received: from userp1040.oracle.com ([156.151.31.81]:18501 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932807AbcLSWfZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 19 Dec 2016 17:35:25 -0500
+Date: Mon, 19 Dec 2016 14:34:47 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH v4 1/5] generic/392: Add copy to new file test
+Message-ID: <20161219223447.GA7300@birch.djwong.org>
+References: <20161208184909.23321-1-Anna.Schumaker@Netapp.com>
+ <20161208184909.23321-2-Anna.Schumaker@Netapp.com>
+ <20161219100404.GD1859@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <16b0ba94-bdef-00c5-acd9-d19200f81ecd@nod.at>
+In-Reply-To: <20161219100404.GD1859@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Richard Weinberger <richard@nod.at>
-Cc: fstests@vger.kernel.org, linux-mtd@lists.infradead.org, David Gstir <david@sigma-star.at>, "Theodore Y . Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Eric Biggers <ebiggers@google.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Anna Schumaker <Anna.Schumaker@Netapp.com>, fstests@vger.kernel.org, linux-nfs@vger.kernel.org, hch@infradead.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Richard,
-
-On Mon, Dec 19, 2016 at 08:12:07PM +0100, Richard Weinberger wrote:
-> Eric,
+On Mon, Dec 19, 2016 at 06:04:04PM +0800, Eryu Guan wrote:
+> Hi Anna,
 > 
-> On 19.12.2016 19:45, Eric Biggers wrote:
-> > From: Eric Biggers <ebiggers@google.com>
+> On Thu, Dec 08, 2016 at 01:49:04PM -0500, Anna Schumaker wrote:
+> > This test copies data from various points in a source file to a new
+> > file.  This is useful for testing the basics of copy_file_range().
 > > 
-> > Hello,
+> > Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
+> 
+> Sorry for the late review. I tested this patchset on 4.9 kernel and
+> xfs_io with your return code fix applied.
+> 
+> I met some common failures/behaviors in these tests, so I only comment
+> on this patch.
+> 
+> > ---
+> >  common/rc             |   6 +++
+> >  tests/generic/392     | 102 ++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/392.out |  26 +++++++++++++
+> >  tests/generic/group   |   1 +
+> >  4 files changed, 135 insertions(+)
+> >  create mode 100755 tests/generic/392
+> >  create mode 100644 tests/generic/392.out
 > > 
-> > Since ubifs encryption has been merged into the 4.10 kernel, I wanted to run my
-> > new encryption tests on ubifs to make sure it's compatible with ext4 and f2fs.
-> > xfstests doesn't support ubifs yet but I was able to hack something together.
-> > I'm sending my patches for anyone who may be interested.
+> > diff --git a/common/rc b/common/rc
+> > index 8c99306..7c5d2a8 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -2054,6 +2054,12 @@ _require_xfs_io_command()
+> >  	"chproj")
+> >  		testio=`$XFS_IO_PROG -F -f -c "chproj 0" $testfile 2>&1`
+> >  		;;
+> > +	"copy_range")
+> > +		testcopy=$TEST_DIR/$$.copy.xfs_io
+> > +		$XFS_IO_PROG -F -f -c "pwrite 0 4k" $testfile 2>&1 > /dev/null
+> > +		testio=`$XFS_IO_PROG -F -f -c "copy_range $testfile" $testcopy 2>&1`
+> > +		rm -f $testcopy 2>&1 > /dev/null
+> > +		;;
+> >  	"falloc" )
+> >  		testio=`$XFS_IO_PROG -F -f -c "falloc 0 1m" $testfile 2>&1`
+> >  		;;
 > 
-> Thanks for doing this. This was already on my TODO but you were faster.
+> This is not able to _notrun as expect on a kernel without
+> copy_file_range syscall support, e.g. 4.4 kernel, xfs_io reports
+> "+copy_range: Function not implemented"
 > 
-> > The first patch adds ubifs support to xfstests itself.  This is a fairly small
-> > patch that just deals with a couple quirks of ubifs, e.g. requiring a char
-> > device rather than a block device.
-> > 
-> > The second patch updates xfstests-bld (a separate project maintained by Theodore
-> > Ts'o) to support ubifs with kvm-xfstests and gce-xfstests.  It uses block2mtd to
-> > emulate MTD devices using standard block devices, then layers UBI volumes on top
-> > of these.  Of course, actually running the tests is dependent on the xfstests
-> > patch.
-> > 
-> > Note: I'm *not* an ubifs developer, and so far I haven't done much else besides
-> > run the encryption tests.  There seemed to be a lot of failures when I tried
-> > running some of the other generic xfstests, and also a strange failure in the
-> > encryption test generic/402 that I wasn't able to fix; so if I haven't obviously
-> > screwed something up, I strongly suggest the ubifs developers look into this.
+> I think we need a new check on $testio after the case switch, e.g.
 > 
-> /me looks.
+> echo $testio | grep -q "not implemented" \
+> 	&& _notrun "xfs_io $command is not implemented in kernel"
 > 
+> > diff --git a/tests/generic/392 b/tests/generic/392
+> > new file mode 100755
+> > index 0000000..466643a
+> > --- /dev/null
+> > +++ b/tests/generic/392
+> > @@ -0,0 +1,102 @@
+> > +#!/bin/bash
+> > +# FS QA Test No. 392
+> > +#
+> > +# Tests vfs_copy_file_range():
+> > +#   - Copy a file
+> > +#   - Copy beginning of original to new file
+> > +#   - Copy middle of original to a new file
+> > +#   - Copy end of original to new file
+> > +#   - Copy middle of original to a new file, creating a hole
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2016 Netapp, Inc. All rights reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +#
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1    # failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -rf $tmp.*
+> > +}
+> > +
+> > +# get standard environment
+> > +. common/rc
+> > +. common/filter
+> > +
+> > +# real QA test starts here
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +
+> > +_require_xfs_io_command "copy_range"
+> > +_require_test
+> > +
+> > +testdir=$TEST_DIR/test-$seq
+> > +rm -rf $testdir
+> > +mkdir $testdir
+> > +rm -f $seqres.full
+> > +
+> > +echo "Create the original file and then copy"
+> > +$XFS_IO_PROG -f -c 'pwrite -S 0x61 0    1000' $testdir/file >> $seqres.full 2>&1
+> > +$XFS_IO_PROG -f -c 'pwrite -S 0x62 1000 1000' $testdir/file >> $seqres.full 2>&1
+> > +$XFS_IO_PROG -f -c 'pwrite -S 0x63 2000 1000' $testdir/file >> $seqres.full 2>&1
+> > +$XFS_IO_PROG -f -c 'pwrite -S 0x64 3000 1000' $testdir/file >> $seqres.full 2>&1
+> > +$XFS_IO_PROG -f -c 'pwrite -S 0x65 4000 1000' $testdir/file >> $seqres.full 2>&1
+> > +$XFS_IO_PROG -f -c "copy_range $testdir/file" "$testdir/copy"
+> > +cmp $testdir/file $testdir/copy
+> > +echo "Original md5sums:"
+> > +md5sum $testdir/{file,copy} | _filter_test_dir
+> > +
+> > +echo "Copy beginning of original file"
+> > +$XFS_IO_PROG -f -c "copy_range -l 1000 $testdir/file" "$testdir/beginning"
+> > +cmp -n 1000 $testdir/file $testdir/beginning
+> > +echo "md5sums after copying beginning:"
+> > +md5sum $testdir/{file,beginning} | _filter_test_dir
+> > +
+> > +echo "Copy middle of original file"
+> > +$XFS_IO_PROG -f -c "copy_range -s 1000 -l 3000 $testdir/file" "$testdir/middle"
+> > +cmp -n 3000 $testdir/file $testdir/middle 1000
+> > +echo "md5sums after copying middle:"
+> > +md5sum $testdir/{file,middle} | _filter_test_dir
+> > +
+> > +echo "Copy end of original file"
+> > +$XFS_IO_PROG -f -c "copy_range -s 4000 -l 1000 $testdir/file" "$testdir/end"
+> > +cmp -n 1000 $testdir/file $testdir/end 4000
+> > +echo "md5sums after copying end:"
+> > +md5sum $testdir/{file,end} | _filter_test_dir
+> > +
+> > +echo "Copy beyond end of original file"
+> > +$XFS_IO_PROG -f -c "copy_range -s 4000 -l 2000 $testdir/file" "$testdir/beyond"
+> 
+> This didn't return EINVAL for me on xfs, ext4 and NFS, btrfs reported
+> EINVAL but it failed cmp and md5sum test at many other places. What is
+> the expected behavior?
+>
+> generic/393 and generic/396 failed in a similar way, missing
+> "copy_range: Invalid argument" in the test output.
+> 
+> And seems copy_range -l option doesn't work well with xfs reflink
+> enabled? I saw many EINVALs when testing reflink enabled xfs, all these
+> 5 tests failed. Kernel bug or xfs_io bug or we just want to _notrun on
+> reflink xfs?
 
-Also, in case you weren't aware of this already, I should mention that with ext4
-we have a way to do a full xfstests run with encryption enabled, to find bugs
-that wouldn't be found in dedicated tests.  Basically you run xfstests with the
-"test_dummy_encryption" mount option (or with the "ext4/encrypt" config for
-xfstests-bld), and it makes ext4 encrypt all new files and directories without
-userspace having to set up encryption policies.  It may be useful to look into
-implementing this for ubifs and/or f2fs too.
+Ugggggggghhhhhhhhh...
 
-(I'd actually like to get rid of test_dummy_encryption and just use the ioctls,
-but currently it's not really possible because it would require some ugly hooks
-in xfstests, and also the root directory cannot be encrypted because e2fsck
-requires that lost+found exist and be unencrypted.  An "inherit-only" encryption
-policy settable by a mkfs flag is also an option, but it seems like overkill
-just for testing.  So I think we'll be stuck with test_dummy_encryption for a
-while longer.  At least I've written kernel and xfstests-bld patches that make
-it a little less ugly kernel-side...)
+Prior to hch's vfs patch reorganizing vfs_copy_file_range to try clone first,
+this happened[1]:
 
-Eric
+ret = -EOPNOTSUPP;
+if (file_out->f_op->copy_file_range)
+	ret = file_out->f_op->copy_file_range(file_in, pos_in, file_out,
+					      pos_out, len, flags);
+if (ret == -EOPNOTSUPP)
+	ret = do_splice_direct(file_in, &pos_in, file_out, &pos_out,
+			len > MAX_RW_COUNT ? MAX_RW_COUNT : len, 0);
+
+Note that copy_file_range pointed to XFS's clone_range implementation,
+so if you pass in an offset/length that aren't block aligned, the clone
+code returns EINVAL and ... we pass that out to userspace instead of
+falling back.
+
+Now it does this[2]:
+
+if (file_in->f_op->clone_file_range) {
+	ret = file_in->f_op->clone_file_range(file_in, pos_in,
+			file_out, pos_out, len);
+	if (ret == 0) {
+		ret = len;
+		goto done;
+	}
+}
+
+if (file_out->f_op->copy_file_range) {
+	ret = file_out->f_op->copy_file_range(file_in, pos_in, file_out,
+					      pos_out, len, flags);
+	if (ret != -EOPNOTSUPP)
+		goto done;
+}
+
+ret = do_splice_direct(file_in, &pos_in, file_out, &pos_out,
+		len > MAX_RW_COUNT ? MAX_RW_COUNT : len, 0);
+
+XFS removed the copy_file_range pointer, so therefore we'll try to
+reflink the range and if that doesn't succeed we'll fall back to
+whatever do_splice_direct does.  All those EINVALs should go away
+shortly, at least on reflink-XFS.
+
+--D
+
+[1] https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/fs/read_write.c?id=ffecee4f2442bb8cb6b34c3335fef4eb50c22fdd#n1545
+[2] https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/fs/read_write.c#n1543
+
+> 
+> Thanks,
+> Eryu
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
