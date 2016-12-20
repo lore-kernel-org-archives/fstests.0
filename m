@@ -1,234 +1,237 @@
-Received: from mx1.redhat.com ([209.132.183.28]:53410 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932217AbcLSPXz (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 19 Dec 2016 10:23:55 -0500
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 7E8F4384B
-        for <fstests@vger.kernel.org>; Mon, 19 Dec 2016 15:23:55 +0000 (UTC)
-Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
-        by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id uBJFNsOh003236
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-        for <fstests@vger.kernel.org>; Mon, 19 Dec 2016 10:23:55 -0500
-From: Eric Sandeen <sandeen@redhat.com>
-Subject: [PATCH] generic/395: test GETNEXTQUOTA near INT_MAX
-Message-ID: <a3c43ff2-c641-aba4-b10e-781a3f3c86e3@redhat.com>
-Date: Mon, 19 Dec 2016 09:23:54 -0600
+Received: from cn.fujitsu.com ([222.73.24.84]:17078 "EHLO song.cn.fujitsu.com"
+        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+        id S1754124AbcLTBZl (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 19 Dec 2016 20:25:41 -0500
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Subject: [PATCH] fstests: btrfs: Remove btrfs/047 since upstream don't accept stream-version
+Date: Tue, 20 Dec 2016 09:24:56 +0800
+Message-Id: <20161220012456.19363-1-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-XFS kernel code had a bug where GETNEXTQUOTA-type
-quotactls requesting an ID near UINT_MAX could overflow
-and return 0 as the "next" active ID.
+Btrfs upstream doesn't accept stream-version, so the test is never ran
+on upstream kernel nor btrfs-progs.
 
-This test checks that by creating an active quota near
-UINT_MAX, then asking for the next one after it.
+Just remove it.
 
-The proper answer is ENOENT, but if we wrap we'll return
-ID 0.
-
-This also changes test-nextquota.c so that it checks
-both GETNEXTQUOTA and XGETNEXTQUOTA even if one fails;
-it stores the failure conditions and returns 1 if either
-of them fails.
-
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 ---
+ common/btrfs        |  14 ------
+ tests/btrfs/047     | 120 ----------------------------------------------------
+ tests/btrfs/047.out |  35 ---------------
+ tests/btrfs/group   |   1 -
+ 4 files changed, 170 deletions(-)
+ delete mode 100755 tests/btrfs/047
+ delete mode 100644 tests/btrfs/047.out
 
-diff --git a/src/test-nextquota.c b/src/test-nextquota.c
-index ba4de27..73c63d8 100644
---- a/src/test-nextquota.c
-+++ b/src/test-nextquota.c
-@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
- 	int cmd;
- 	int type = -1, typeflag = 0;
- 	int verbose = 0;
-+	int retval = 0;
- 	uint id = 0, idflag = 0;
- 	char *device = NULL;
- 	char *tmp;
-@@ -140,30 +141,32 @@ int main(int argc, char *argv[])
- 	cmd = QCMD(Q_GETNEXTQUOTA, type);
- 	if (quotactl(cmd, device, id, (void *)&dqb) < 0) {
- 		perror("Q_GETNEXTQUOTA");
--		return 1;
-+		retval = 1;
-+	} else {
-+		/*
-+		 * We only print id and inode limits because
-+		 * block count varies depending on fs block size, etc;
-+		 * this is just a sanity test that we can retrieve the quota,
-+		 * and inode limits have the same units across both calls.
-+		 */
-+		printf("id        %u\n", dqb.dqb_id);
-+		printf("ihard     %llu\n",
-+				  (unsigned long long)dqb.dqb_ihardlimit);
-+		printf("isoft     %llu\n",
-+				  (unsigned long long)dqb.dqb_isoftlimit);
- 	}
- 
--	/*
--	 * We only print id and inode limits because
--	 * block count varies depending on fs block size, etc;
--	 * this is just a sanity test that we can retrieve the quota,
--	 * and inode limits have the same units across both calls.
--	 */
--	printf("id        %u\n", dqb.dqb_id);
--	printf("ihard     %llu\n", (unsigned long long)dqb.dqb_ihardlimit);
--	printf("isoft     %llu\n", (unsigned long long)dqb.dqb_isoftlimit);
--
- 	if (verbose)
- 		printf("====Q_XGETNEXTQUOTA====\n");
- 	cmd = QCMD(Q_XGETNEXTQUOTA, USRQUOTA);
- 	if (quotactl(cmd, device, id, (void *)&xqb) < 0) {
- 		perror("Q_XGETNEXTQUOTA");
--		return 1;
-+		retval = 1;
-+	} else {
-+		printf("id        %u\n", xqb.d_id);
-+		printf("ihard     %llu\n", xqb.d_ino_hardlimit);
-+		printf("isoft     %llu\n", xqb.d_ino_softlimit);
- 	}
- 
--	printf("id        %u\n", xqb.d_id);
--	printf("ihard     %llu\n", xqb.d_ino_hardlimit);
--	printf("isoft     %llu\n", xqb.d_ino_softlimit);
--
--	return 0;
-+	return retval;
+diff --git a/common/btrfs b/common/btrfs
+index 237bb3d..c821d54 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -53,20 +53,6 @@ _run_btrfs_util_prog()
+ 	run_check $BTRFS_UTIL_PROG $*
  }
-diff --git a/tests/generic/395 b/tests/generic/395
-new file mode 100755
-index 0000000..c0cfc31
---- /dev/null
-+++ b/tests/generic/395
-@@ -0,0 +1,99 @@
-+#! /bin/bash
-+# FS QA Test 394
-+#
-+# test out high quota ids retrieved by Q_GETNEXTQUOTA
-+# Request for next ID near 2^32 should not wrap to 0
-+#
-+# Designed to use the new Q_GETNEXTQUOTA quotactl
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/quota
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs generic
-+_supported_os Linux
-+_require_quota
-+_require_scratch
-+
-+scratch_unmount 2>/dev/null
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount "-o usrquota,grpquota"
-+quotacheck -u -g $SCRATCH_MNT 2>/dev/null
-+quotaon $SCRATCH_MNT 2>/dev/null
-+_scratch_unmount
-+
-+TYPES="u g"
-+MOUNT_OPTIONS="-o usrquota,grpquota"
-+
-+_qmount
-+quotaon $SCRATCH_MNT 2>/dev/null
-+
-+# Ok, do we even have GETNEXTQUOTA?  Querying ID 0 should work.
-+$here/src/test-nextquota -i 0 -u -d $SCRATCH_DEV &> $seqres.full || \
-+	_notrun "No GETNEXTQUOTA support"
-+
-+echo "Launch all quotas"
-+
-+# We want to create a block of quotas for an id very near
-+# 2^32, then ask for the next quota after it.  The returned
-+# ID should not overflow to 0.
-+
-+# Populate  with 2^32-4
-+ID=4294967292
-+setquota -u $ID $ID $ID $ID $ID $SCRATCH_MNT
-+touch ${SCRATCH_MNT}/${ID}
-+chown ${ID} ${SCRATCH_MNT}/${ID}
-+
-+# remount just for kicks, make sure we get it off disk
-+_scratch_unmount
-+_qmount
-+quotaon $SCRATCH_MNT 2>/dev/null
-+
-+# Ask for the next quota after $ID; should get nothing back
-+# If kernelspace wraps, we'll get 0 back.
-+for TYPE in u g; do
-+	let NEXT=ID+1
-+	echo "Ask for ID after $NEXT expecting nothing"
-+	$here/src/test-nextquota -i $NEXT -${TYPE} -d $SCRATCH_DEV
-+done
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/395.out b/tests/generic/395.out
-new file mode 100644
-index 0000000..bcd87ec
---- /dev/null
-+++ b/tests/generic/395.out
-@@ -0,0 +1,8 @@
-+QA output created by 395
-+Launch all quotas
-+Ask for ID after 4294967293 expecting nothing
-+Q_GETNEXTQUOTA: No such file or directory
-+Q_XGETNEXTQUOTA: No such file or directory
-+Ask for ID after 4294967293 expecting nothing
-+Q_GETNEXTQUOTA: No such file or directory
-+Q_XGETNEXTQUOTA: No such file or directory
-diff --git a/tests/generic/group b/tests/generic/group
-index 20b31ef..e9d3e4a 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -397,3 +397,4 @@
- 392 auto quick metadata
- 393 auto quick rw
- 394 auto quick
-+395 auto quick quota
+ 
+-_require_btrfs_send_stream_version()
+-{
+-	$BTRFS_UTIL_PROG send 2>&1 | \
+-		grep '^[ \t]*\-\-stream\-version <version>' > /dev/null 2>&1
+-	if [ $? -ne 0 ]; then
+-		_notrun "Missing btrfs-progs send --stream-version command line option, skipped this test"
+-	fi
+-
+-	# test if btrfs kernel supports send stream version 2
+-	if [ ! -f /sys/fs/btrfs/send/stream_version ]; then
+-		_notrun "Missing btrfs kernel patch for send stream version 2, skipped this test"
+-	fi
+-}
+-
+ _require_btrfs_mkfs_feature()
+ {
+ 	if [ -z $1 ]; then
+diff --git a/tests/btrfs/047 b/tests/btrfs/047
+deleted file mode 100755
+index 6d7d351..0000000
+--- a/tests/btrfs/047
++++ /dev/null
+@@ -1,120 +0,0 @@
+-#! /bin/bash
+-# FS QA Test No. btrfs/047
+-#
+-# Verify that after an incremental btrfs send the replicated file has
+-# the same exact hole and data structure as in the origin filesystem.
+-# This didn't use to be the case before the send stream version 2 -
+-# holes were sent as write operations of 0 valued bytes instead of punching
+-# holes with the fallocate system call, and pre-allocated extents were sent
+-# as well as write operations of 0 valued bytes instead of intructions for
+-# the receiver to use the fallocate system call. Also check that prealloc
+-# extents that lie beyond the file's size are replicated by an incremental
+-# send.
+-#
+-# More specifically, this structure preserving guarantee was added by the
+-# following linux kernel commits:
+-#
+-#    Btrfs: send, use fallocate command to punch holes
+-#    Btrfs: send, use fallocate command to allocate extents
+-#
+-#-----------------------------------------------------------------------
+-# Copyright (c) 2014 Filipe Manana.  All Rights Reserved.
+-#
+-# This program is free software; you can redistribute it and/or
+-# modify it under the terms of the GNU General Public License as
+-# published by the Free Software Foundation.
+-#
+-# This program is distributed in the hope that it would be useful,
+-# but WITHOUT ANY WARRANTY; without even the implied warranty of
+-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-# GNU General Public License for more details.
+-#
+-# You should have received a copy of the GNU General Public License
+-# along with this program; if not, write the Free Software Foundation,
+-# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+-#-----------------------------------------------------------------------
+-#
+-
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
+-
+-tmp=/tmp/$$
+-status=1	# failure is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
+-
+-_cleanup()
+-{
+-    rm -fr $send_files_dir
+-    rm -fr $tmp
+-}
+-
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
+-. ./common/punch
+-
+-# real QA test starts here
+-_supported_fs btrfs
+-_supported_os Linux
+-_require_test
+-_require_scratch
+-_require_fssum
+-_require_xfs_io_command "fiemap"
+-_require_btrfs_send_stream_version
+-
+-send_files_dir=$TEST_DIR/btrfs-test-$seq
+-
+-rm -f $seqres.full
+-rm -fr $send_files_dir
+-mkdir $send_files_dir
+-
+-_scratch_mkfs >/dev/null 2>&1
+-_scratch_mount
+-
+-$XFS_IO_PROG -f -c "pwrite -S 0x01 -b 300000 0 300000" $SCRATCH_MNT/foo \
+-	| _filter_xfs_io
+-
+-_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap1
+-
+-$XFS_IO_PROG -c "fpunch 100000 50000" $SCRATCH_MNT/foo
+-$XFS_IO_PROG -c "falloc 100000 50000" $SCRATCH_MNT/foo
+-$XFS_IO_PROG -c "pwrite -S 0xff -b 1000 120000 1000" $SCRATCH_MNT/foo \
+-	| _filter_xfs_io
+-$XFS_IO_PROG -c "fpunch 250000 20000" $SCRATCH_MNT/foo
+-
+-$XFS_IO_PROG -c "falloc -k 300000 1000000" $SCRATCH_MNT/foo
+-$XFS_IO_PROG -c "falloc -k 9000000 2000000" $SCRATCH_MNT/foo
+-
+-_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap2
+-
+-_run_btrfs_util_prog send --stream-version 2 $SCRATCH_MNT/mysnap1 \
+-	-f $send_files_dir/1.snap
+-_run_btrfs_util_prog send --stream-version 2 -p $SCRATCH_MNT/mysnap1 \
+-	$SCRATCH_MNT/mysnap2 -f $send_files_dir/2.snap
+-
+-md5sum $SCRATCH_MNT/mysnap2/foo | _filter_scratch
+-# List all hole and data segments.
+-$XFS_IO_PROG -r -c "seek -r -a 0" $SCRATCH_MNT/mysnap2/foo
+-# List all extents, we're interested here in prealloc extents that lie beyond
+-# the file's size.
+-$XFS_IO_PROG -r -c "fiemap -v" $SCRATCH_MNT/mysnap2/foo | _filter_fiemap
+-
+-_scratch_unmount
+-_check_scratch_fs
+-
+-_scratch_mkfs >/dev/null 2>&1
+-_scratch_mount
+-
+-_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
+-_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
+-
+-md5sum $SCRATCH_MNT/mysnap2/foo | _filter_scratch
+-# List all hole and data segments.
+-$XFS_IO_PROG -r -c "seek -r -a 0" $SCRATCH_MNT/mysnap2/foo
+-# List all extents, we're interested here in prealloc extents that lie beyond
+-# the file's size.
+-$XFS_IO_PROG -r -c "fiemap -v" $SCRATCH_MNT/mysnap2/foo | _filter_fiemap
+-
+-status=0
+-exit
+diff --git a/tests/btrfs/047.out b/tests/btrfs/047.out
+deleted file mode 100644
+index be39edc..0000000
+--- a/tests/btrfs/047.out
++++ /dev/null
+@@ -1,35 +0,0 @@
+-QA output created by 047
+-wrote 300000/300000 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 1000/1000 bytes at offset 120000
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-5a88aa0da62c8999c16515050947a70a  SCRATCH_MNT/mysnap2/foo
+-Whence	Result
+-DATA	0
+-HOLE	102400
+-DATA	118784
+-HOLE	122880
+-DATA	147456
+-HOLE	253952
+-DATA	266240
+-HOLE	300000
+-0: [0..495]: data
+-1: [496..519]: hole
+-2: [520..2543]: data
+-3: [2544..17575]: hole
+-4: [17576..21487]: data
+-5a88aa0da62c8999c16515050947a70a  SCRATCH_MNT/mysnap2/foo
+-Whence	Result
+-DATA	0
+-HOLE	102400
+-DATA	118784
+-HOLE	122880
+-DATA	147456
+-HOLE	253952
+-DATA	266240
+-HOLE	300000
+-0: [0..495]: data
+-1: [496..519]: hole
+-2: [520..2543]: data
+-3: [2544..17575]: hole
+-4: [17576..21487]: data
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index b4e4ff2..3fbf706 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -49,7 +49,6 @@
+ 044 auto quick send
+ 045 auto quick send
+ 046 auto quick send
+-047 auto quick send
+ 048 auto quick
+ 049 auto quick
+ 050 auto quick send
+-- 
+2.10.2
+
 
 
