@@ -1,37 +1,84 @@
-Received: from mail-pg0-f67.google.com ([74.125.83.67]:33149 "EHLO
-        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752747AbcLIVVH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 9 Dec 2016 16:21:07 -0500
-Received: by mail-pg0-f67.google.com with SMTP id 3so3373326pgd.0
-        for <fstests@vger.kernel.org>; Fri, 09 Dec 2016 13:21:06 -0800 (PST)
-Date: Fri, 9 Dec 2016 13:21:03 -0800
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: Re: [PATCH] kvm-xfstests, gce-xfstests: correct file permissions
- with --update-files
-Message-ID: <20161209212103.GA64048@google.com>
-References: <1479260456-6723-1-git-send-email-ebiggers@google.com>
+Date: Tue, 20 Dec 2016 11:26:28 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v4 1/5] generic/392: Add copy to new file test
+Message-ID: <20161220032628.GE1859@eguan.usersys.redhat.com>
+References: <20161208184909.23321-1-Anna.Schumaker@Netapp.com>
+ <20161208184909.23321-2-Anna.Schumaker@Netapp.com>
+ <20161219100404.GD1859@eguan.usersys.redhat.com>
+ <20161219223447.GA7300@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1479260456-6723-1-git-send-email-ebiggers@google.com>
-Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org
+In-Reply-To: <20161219223447.GA7300@birch.djwong.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Anna Schumaker <Anna.Schumaker@Netapp.com>, fstests@vger.kernel.org, linux-nfs@vger.kernel.org, hch@infradead.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Nov 15, 2016 at 05:40:56PM -0800, Eric Biggers wrote:
-> The xfstests-bld repository may have been cloned with a umask that
-> masked out the other bits.  When using --update-files in this situation,
-> the VM ended up in a state where non-root users were unable to execute
-> anything, which made all tests using the fsgqa user get skipped.  Fix
-> this by copying the r and x group bits to the other bits when creating
-> files.tar.gz.  Also set the owner and group to root while we're at it.
+On Mon, Dec 19, 2016 at 02:34:47PM -0800, Darrick J. Wong wrote:
+> > 
+> > And seems copy_range -l option doesn't work well with xfs reflink
+> > enabled? I saw many EINVALs when testing reflink enabled xfs, all these
+> > 5 tests failed. Kernel bug or xfs_io bug or we just want to _notrun on
+> > reflink xfs?
 > 
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
+> Ugggggggghhhhhhhhh...
+> 
+> Prior to hch's vfs patch reorganizing vfs_copy_file_range to try clone first,
+> this happened[1]:
+> 
+> ret = -EOPNOTSUPP;
+> if (file_out->f_op->copy_file_range)
+> 	ret = file_out->f_op->copy_file_range(file_in, pos_in, file_out,
+> 					      pos_out, len, flags);
+> if (ret == -EOPNOTSUPP)
+> 	ret = do_splice_direct(file_in, &pos_in, file_out, &pos_out,
+> 			len > MAX_RW_COUNT ? MAX_RW_COUNT : len, 0);
+> 
+> Note that copy_file_range pointed to XFS's clone_range implementation,
+> so if you pass in an offset/length that aren't block aligned, the clone
+> code returns EINVAL and ... we pass that out to userspace instead of
+> falling back.
+> 
+> Now it does this[2]:
+> 
+> if (file_in->f_op->clone_file_range) {
+> 	ret = file_in->f_op->clone_file_range(file_in, pos_in,
+> 			file_out, pos_out, len);
+> 	if (ret == 0) {
+> 		ret = len;
+> 		goto done;
+> 	}
+> }
+> 
+> if (file_out->f_op->copy_file_range) {
+> 	ret = file_out->f_op->copy_file_range(file_in, pos_in, file_out,
+> 					      pos_out, len, flags);
+> 	if (ret != -EOPNOTSUPP)
+> 		goto done;
+> }
+> 
+> ret = do_splice_direct(file_in, &pos_in, file_out, &pos_out,
+> 		len > MAX_RW_COUNT ? MAX_RW_COUNT : len, 0);
+> 
+> XFS removed the copy_file_range pointer, so therefore we'll try to
+> reflink the range and if that doesn't succeed we'll fall back to
+> whatever do_splice_direct does.  All those EINVALs should go away
+> shortly, at least on reflink-XFS.
 
-Hi Ted, are you planning to apply this patch?  I see you applied the patch to
-fix --update-xfstests-tar but not this one, to fix --update-files.
+Good to know, thanks for the explanation!
 
-Thanks!
+Eryu
 
-Eric
+> 
+> --D
+> 
+> [1] https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/fs/read_write.c?id=ffecee4f2442bb8cb6b34c3335fef4eb50c22fdd#n1545
+> [2] https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/fs/read_write.c#n1543
+> 
+> > 
+> > Thanks,
+> > Eryu
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
