@@ -1,124 +1,237 @@
-Date: Sat, 24 Dec 2016 20:20:36 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v3 3/3] generic/396: test correct d_type values
-Message-ID: <20161224122036.GT1859@eguan.usersys.redhat.com>
-References: <1482239855-791-4-git-send-email-amir73il@gmail.com>
- <1482328221-31713-1-git-send-email-amir73il@gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1482328221-31713-1-git-send-email-amir73il@gmail.com>
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Dave Chinner <david@fromorbit.com>, Christoph Hellwig <hch@infradead.org>, "Darrick J . Wong" <darrick.wong@oracle.com>, Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org
+Received: from mail-pg0-f65.google.com ([74.125.83.65]:34587 "EHLO
+        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1758193AbcLUVYj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Dec 2016 16:24:39 -0500
+Received: by mail-pg0-f65.google.com with SMTP id b1so17563621pgc.1
+        for <fstests@vger.kernel.org>; Wed, 21 Dec 2016 13:24:39 -0800 (PST)
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: [PATCH v5 6/6] generic: test for weaknesses in filesystem encryption
+Date: Wed, 21 Dec 2016 13:22:02 -0800
+Message-Id: <1482355322-74978-7-git-send-email-ebiggers3@gmail.com>
+In-Reply-To: <1482355322-74978-1-git-send-email-ebiggers3@gmail.com>
+References: <1482355322-74978-1-git-send-email-ebiggers3@gmail.com>
+Sender: fstests-owner@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>, Michael Halcrow <mhalcrow@google.com>, Eric Sandeen <sandeen@redhat.com>, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Dec 21, 2016 at 03:50:21PM +0200, Amir Goldstein wrote:
-> Verify correct d_type values of dir entries.
-> 
-> This test does NOT require that file system support the filetype feature.
-> It verifies that either all file types are reported as DT_UNKNOWN
-> or that all file types are reported correctly.
-> 
-> For fs for which we know how to test the filetype feature (xfs|ext*)
-> verify getting DT_UNKNOWN IFF filetype feature is disabled.
-> 
-> Special dir entries . and .. MAY be reported as DT_UNKNOWN IF filetype
-> feature is disabled (ext4), but MAY also be reported as DT_DIR in this
-> case (xfs).
-> 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
->  tests/generic/396     | 93 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/396.out |  9 +++++
->  tests/generic/group   |  1 +
->  3 files changed, 103 insertions(+)
->  create mode 100755 tests/generic/396
->  create mode 100644 tests/generic/396.out
-> 
-> Added another test to the matrix, found another special case to handle:
-> ext4 vs. xfs returns DT_UNKNOWN for . and .. on ! _supports_filetype.
-> 
-> Fixes the test to correctly handle both cases.
-> 
-> Tested with tmpfs, ext2, ext4, xfs for d_type supported fs
-> Tested with xfs -m crc=0 -n ftype=0 for d_type unsupported fs
-> Tested with ext2/ext4 -O ^filetype  for d_type unsupported fs
-> 
-> v3:
-> - allow DT_UNKNOWN type for . and .. when filetype feature is disabled (ext4)
-> 
-> v2:
-> - use helper to test for file type support
-> - allow DT_UNKNOWN type, but only for all files
-> - verify . and .. have DT_DIR type
-> 
-> v1:
-> - verify that d_type matches actual file type
-> 
-> diff --git a/tests/generic/396 b/tests/generic/396
-> new file mode 100755
-> index 0000000..0d4a17d
-> --- /dev/null
-> +++ b/tests/generic/396
-> @@ -0,0 +1,93 @@
-> +#! /bin/bash
-> +# FSQA Test No. 396
-> +#
-> +# Test filetype feature
-> +#
-> +# This test does NOT require that file system support the d_type feature.
-> +# It verifies that either all file types are reported as DT_UNKNOWN
-> +# or all file types are reported correctly.
-> +#
-> +# For fs for which we know how to test the filetype feature (xfs|ext*)
-> +# verify getting DT_UNKNOWN IFF feature is disabled.
-> +# Special dir entries . and .. MAY be reported as DT_UNKNOWN IF filetype
-> +# feature is disabled (ext4), but MAY also be reported as DT_DIR in this
-> +# case (xfs).
-> +#
-> +#-----------------------------------------------------------------------
-> +#
-> +# Copyright (C) 2016 CTERA Networks. All Rights Reserved.
-> +# Author: Amir Goldstein <amir73il@gmail.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch
+From: Eric Biggers <ebiggers@google.com>
 
-I added a "_require_test_program t_dir_type" here and merged.
+Add an xfstest which can detect some basic crypto mistakes that would
+reduce the confidentiality guarantee provided by filesystem encryption.
 
-Thanks,
-Eryu
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ common/config         |   1 +
+ tests/generic/404     | 166 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/404.out |   3 +
+ tests/generic/group   |   1 +
+ 4 files changed, 171 insertions(+)
+ create mode 100755 tests/generic/404
+ create mode 100644 tests/generic/404.out
+
+diff --git a/common/config b/common/config
+index 3727ec0..6cce7ce 100644
+--- a/common/config
++++ b/common/config
+@@ -203,6 +203,7 @@ export UUIDGEN_PROG="`set_prog_path uuidgen`"
+ export GETRICHACL_PROG="`set_prog_path getrichacl`"
+ export SETRICHACL_PROG="`set_prog_path setrichacl`"
+ export KEYCTL_PROG="`set_prog_path keyctl`"
++export XZ_PROG="`set_prog_path xz`"
+ 
+ # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+ # newer systems have udevadm command but older systems like RHEL5 don't.
+diff --git a/tests/generic/404 b/tests/generic/404
+new file mode 100755
+index 0000000..dc16e2a
+--- /dev/null
++++ b/tests/generic/404
+@@ -0,0 +1,166 @@
++#! /bin/bash
++# FS QA Test generic/404
++#
++# Check for weaknesses in filesystem encryption involving the same ciphertext
++# being repeated.  For file contents, we fill a small filesystem with large
++# files of 0's and verify the filesystem is incompressible.  For filenames, we
++# create an identical symlink in two different directories and verify the
++# ciphertext filenames and symlink targets are different.
++#
++# This test can detect some basic cryptographic mistakes such as nonce reuse
++# (across files), initialization vector reuse (across blocks), or data somehow
++# being left in plaintext by accident.  For example, it detects the
++# initialization vector reuse bug fixed in commit 02fc59a0d28f ("f2fs/crypto:
++# fix xts_tweak initialization").
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Google, Inc.  All Rights Reserved.
++#
++# Author: Eric Biggers <ebiggers@google.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/encrypt
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch_encryption
++_require_xfs_io_command "set_encpolicy"
++_require_command "$XZ_PROG" xz
++_require_command "$KEYCTL_PROG" keyctl
++
++_new_session_keyring
++
++#
++# Set up a small filesystem containing an encrypted directory.  64 MB is enough
++# for both ext4 and f2fs (f2fs doesn't support a 32 MB filesystem).  Before
++# creating the filesystem, zero out the needed portion of the device so that
++# existing data on the device doesn't contribute to the compressed size.
++#
++fs_size_in_mb=64
++fs_size=$((fs_size_in_mb * 1024 * 1024))
++dd if=/dev/zero of=$SCRATCH_DEV bs=$((1024 * 1024)) \
++	count=$fs_size_in_mb &>> $seqres.full
++MKFS_OPTIONS="$MKFS_OPTIONS -O encrypt" \
++	_scratch_mkfs_sized $fs_size &>> $seqres.full
++_scratch_mount
++
++keydesc=$(_generate_encryption_key)
++mkdir $SCRATCH_MNT/encrypted_dir
++$XFS_IO_PROG -c "set_encpolicy $keydesc" $SCRATCH_MNT/encrypted_dir
++
++# Create the "same" symlink in two different directories.
++# Later we'll check both the name and target of the symlink.
++mkdir $SCRATCH_MNT/encrypted_dir/subdir1
++mkdir $SCRATCH_MNT/encrypted_dir/subdir2
++ln -s symlink_target $SCRATCH_MNT/encrypted_dir/subdir1/symlink
++ln -s symlink_target $SCRATCH_MNT/encrypted_dir/subdir2/symlink
++
++#
++# Write files of 1 MB of all the same byte until we hit ENOSPC.  Note that we
++# must not create sparse files, since the contents of sparse files are not
++# stored on-disk.  Also, we create multiple files rather than one big file
++# because we want to test for reuse of per-file keys.
++#
++total_file_size=0
++i=1
++while true; do
++	file=$SCRATCH_MNT/encrypted_dir/file$i
++	if ! $XFS_IO_PROG -f $file -c 'pwrite 0 1M' &> $tmp.out; then
++		if ! grep -q 'No space left on device' $tmp.out; then
++			echo "FAIL: unexpected pwrite failure"
++			cat $tmp.out
++		elif [ -e $file ]; then
++			total_file_size=$((total_file_size + $(stat -c %s $file)))
++		fi
++		break
++	fi
++	total_file_size=$((total_file_size + $(stat -c %s $file)))
++	i=$((i + 1))
++	if [ $i -gt $fs_size_in_mb ]; then
++		echo "FAIL: filesystem never filled up!"
++		break
++	fi
++done
++
++# We shouldn't have been able to write more data than we had space for.
++if (( $total_file_size > $fs_size )); then
++	echo "FAIL: wrote $total_file_size bytes but should have only" \
++		"had space for $fs_size bytes at most"
++fi
++
++#
++# Unmount the filesystem and compute its compressed size.  It must be no smaller
++# than the amount of data that was written; otherwise there was a compromise in
++# the confidentiality of the data.  False positives should not be possible
++# because filesystem metadata will also contribute to the compressed size.
++#
++# Note: it's important to use a strong compressor such as xz which can detect
++# redundancy across most or all of the filesystem.  We run xz with a 64 MB
++# sliding window but use some custom settings to make it faster and use less
++# memory than the '-9' preset.  The memory needed with our settings will be
++# 64 * 6.5 = 416 MB; see xz(1).
++#
++_unlink_encryption_key $keydesc
++_scratch_unmount
++fs_compressed_size=$(head -c $fs_size $SCRATCH_DEV | \
++	xz --lzma2=dict=64M,mf=hc4,mode=fast,nice=16 | \
++	wc -c)
++
++if (( $fs_compressed_size < $total_file_size )); then
++	echo "FAIL: filesystem was compressible" \
++		"($total_file_size bytes => $fs_compressed_size bytes)"
++else
++	echo "PASS: ciphertexts were not repeated for contents"
++fi
++
++# Verify that encrypted filenames and symlink targets were not reused.  Note
++# that since the ciphertexts should be unpredictable, we cannot simply include
++# the expected names in the expected output file.
++_scratch_mount
++find $SCRATCH_MNT/encrypted_dir -type l | wc -l
++link1=$(find $SCRATCH_MNT/encrypted_dir -type l | head -1)
++link2=$(find $SCRATCH_MNT/encrypted_dir -type l | tail -1)
++[ $(basename $link1) = $(basename $link2) ] && \
++	echo "Encrypted filenames were reused!"
++[ $(readlink $link1) = $(readlink $link2) ] && \
++	echo "Encrypted symlink targets were reused!"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/404.out b/tests/generic/404.out
+new file mode 100644
+index 0000000..220edb4
+--- /dev/null
++++ b/tests/generic/404.out
+@@ -0,0 +1,3 @@
++QA output created by 404
++PASS: ciphertexts were not repeated for contents
++2
+diff --git a/tests/generic/group b/tests/generic/group
+index 15acd25..4f53068 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -401,3 +401,4 @@
+ 401 auto quick encrypt
+ 402 auto quick encrypt
+ 403 auto quick encrypt
++404 auto encrypt
+-- 
+2.8.0.rc3.226.g39d4020
+
