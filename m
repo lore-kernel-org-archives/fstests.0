@@ -1,133 +1,50 @@
-Received: from imap.thunk.org ([74.207.234.97]:44568 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1758750AbcLVQnP (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 22 Dec 2016 11:43:15 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH -v2] overlay: stress test changes to top and bottom layers simultaneously
-Date: Thu, 22 Dec 2016 11:43:10 -0500
-Message-Id: <20161222164310.9615-1-tytso@mit.edu>
+Received: from mail-pg0-f67.google.com ([74.125.83.67]:34597 "EHLO
+        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752968AbcLUSHV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Dec 2016 13:07:21 -0500
+Received: by mail-pg0-f67.google.com with SMTP id b1so17072087pgc.1
+        for <fstests@vger.kernel.org>; Wed, 21 Dec 2016 10:07:21 -0800 (PST)
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: [PATCH] xfstests-bld: document how to add debian packages to GCE image
+Date: Wed, 21 Dec 2016 10:06:28 -0800
+Message-Id: <1482343592-135031-2-git-send-email-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-unionfs@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-Introduce a test which runs fsstress on the top and bottom overlayfs
-directories simultaneously to find potential races that plagued wrapfs
-derived file systems.
+From: Eric Biggers <ebiggers@google.com>
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- tests/overlay/019     | 81 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/019.out |  2 ++
- tests/overlay/group   |  1 +
- 3 files changed, 84 insertions(+)
- create mode 100644 tests/overlay/019
- create mode 100644 tests/overlay/019.out
+ Documentation/gce-xfstests.md | 14 ++++++++------
+ 1 file changed, 8 insertions(+), 6 deletions(-)
 
-diff --git a/tests/overlay/019 b/tests/overlay/019
-new file mode 100644
-index 00000000..1daf830f
---- /dev/null
-+++ b/tests/overlay/019
-@@ -0,0 +1,81 @@
-+#! /bin/bash
-+# FS QA Test 019
-+#
-+# Run fsstress on lower dir and top dir at the same time
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+
-+# Remove all files from previous tests
-+_scratch_mkfs
-+
-+lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
-+mkdir -p $lowerdir
-+
-+_scratch_mount
-+
-+echo "Silence is golden"
-+
-+d_low=$lowerdir/fsstress
-+d_top=$SCRATCH_MNT/fsstress
-+mkdir -p $d_low $d_top
-+
-+echo $FSSTRESS_PROG -s 42 -d $d_low -p 4 -n 1000 -l100 -v > $seqres.full.1
-+$FSSTRESS_PROG -s 42 -d $d_low -p 4 -n 1000 -l100 -v >> $seqres.full.1 2>&1 &
-+
-+echo $FSSTRESS_PROG -s 42 -d $d_top -p 4 -n 1000 -l100 -v > $seqres.full.2
-+$FSSTRESS_PROG -s 42 -d $d_top -p 4 -n 1000 -l100 -v >> $seqres.full.2 2>&1 &
-+
-+ret=0
-+if ! wait %1
-+then
-+        echo "--------------------------------------"       >>$seqres.full.1
-+	echo "fsstress on lower directory returned $? - see $seqres.full.1"
-+        echo "--------------------------------------"       >>$seqres.full.1
-+	ret=1
-+fi
-+
-+if ! wait %2
-+then
-+        echo "--------------------------------------"       >>$seqres.full.2
-+	echo "fsstress on overlay directory returned $? - see $seqres.full.2"
-+        echo "--------------------------------------"       >>$seqres.full.2
-+	ret=1
-+fi
-+
-+cat $seqres.full.1 $seqres.full.2 > $seqres.full
-+rm $seqres.full.1 $seqres.full.2
-+
-+if [ "$ret" -eq 1 ]
-+then
-+	status=1
-+else
-+	status=0
-+fi
-+
-+exit $status
-diff --git a/tests/overlay/019.out b/tests/overlay/019.out
-new file mode 100644
-index 00000000..163484bc
---- /dev/null
-+++ b/tests/overlay/019.out
-@@ -0,0 +1,2 @@
-+QA output created by 019
-+Silence is golden
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 74822cbf..f8de84be 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -21,3 +21,4 @@
- 016 auto quick copyup
- 017 auto quick copyup
- 018 auto quick copyup
-+019 quick stress
+diff --git a/Documentation/gce-xfstests.md b/Documentation/gce-xfstests.md
+index becc23d..1b7fa3e 100644
+--- a/Documentation/gce-xfstests.md
++++ b/Documentation/gce-xfstests.md
+@@ -306,12 +306,14 @@ to be unpacked into a directory in /tmp instead.
+ 
+ By default gce-xfstests uses the prebuilt image which is made
+ available via the xfstests-cloud project.  However, if you want to
+-build your own image, you must first build the xfstests tarball as
+-described in the [instructions for building
+-xfstests](building-xfstests.md).  Then run the command "gce-xfstests
+-create-image".  This will create a new GCE image with a name such as
+-"xfstests-201608132226" where 201608132226 indicates when the image
+-was created (in this case, August 13, 2016 at 22:26).
++build your own image, you must first build a 64-bit (amd64) xfstests
++tarball as described in the [instructions for building
++xfstests](building-xfstests.md).  Then copy any additional Debian
++packages, for the amd64 architecture, you want to include in the GCE
++image into the root directory of GS_BUCKET.  Then run the command
++"gce-xfstests create-image".  This will create a new GCE image with a
++name such as "xfstests-201608132226" where 201608132226 indicates when
++the image was created (in this case, August 13, 2016 at 22:26).
+ 
+ This image will be created as part of an image family called xfstests.
+ By default, when you start a test using gce-xfstests, the most
 -- 
-2.11.0.rc0.7.gbe5a750
+2.8.0.rc3.226.g39d4020
 
