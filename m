@@ -1,48 +1,39 @@
-Received: from imap.thunk.org ([74.207.234.97]:45056 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1757704AbcLVREf (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 22 Dec 2016 12:04:35 -0500
-Date: Thu, 22 Dec 2016 12:04:33 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH] xfstests-bld: document how to add debian packages to GCE
- image
-Message-ID: <20161222170433.cbyrt2phsapq2tr7@thunk.org>
-References: <1482343592-135031-2-git-send-email-ebiggers3@gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1482343592-135031-2-git-send-email-ebiggers3@gmail.com>
+Received: from mail-pg0-f68.google.com ([74.125.83.68]:33874 "EHLO
+        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756462AbcLUSHn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Dec 2016 13:07:43 -0500
+Received: by mail-pg0-f68.google.com with SMTP id b1so17072993pgc.1
+        for <fstests@vger.kernel.org>; Wed, 21 Dec 2016 10:07:43 -0800 (PST)
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: [PATCH] xfstests-bld: remove redundant listing of GCE images
+Date: Wed, 21 Dec 2016 10:06:32 -0800
+Message-Id: <1482343592-135031-6-git-send-email-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers3@gmail.com>
+To: Theodore Ts'o <tytso@mit.edu>
 Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Dec 21, 2016 at 10:06:28AM -0800, Eric Biggers wrote:
-> +build your own image, you must first build a 64-bit (amd64) xfstests
-> +tarball as described in the [instructions for building
-> +xfstests](building-xfstests.md).  Then copy any additional Debian
-> +packages, for the amd64 architecture, you want to include in the GCE
-> +image into the root directory of GS_BUCKET.
+From: Eric Biggers <ebiggers@google.com>
 
-This is phrased a bit awkwardly.  The official way is to put the
-debian packages in kvm-xfstests/test-appliances/debs.  This works for
-both building gce-xfstests and kvm-xfstests images.
+When a GCE image is created, the same information about the new image
+was being printed by both 'gcloud compute images create' and 'gcloud
+compute images list'.  Fix this by removing the call to 'gcloud compute
+images list'.
 
-And in general, you would need to use whatever debian packages for
-whatever architecture is compatible for the image or chroot tarball
-you are building.  For gce-xfstests, it is always amd64, since GCE
-currently only supports 64-bit x86.  (But for kvm-xfstests or chroot
-tarballs, it might be i386 or armhf.)
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ kvm-xfstests/test-appliance/gce-create-image | 1 -
+ 1 file changed, 1 deletion(-)
 
-So how about,
+diff --git a/kvm-xfstests/test-appliance/gce-create-image b/kvm-xfstests/test-appliance/gce-create-image
+index 005cc8e..830dd5b 100755
+--- a/kvm-xfstests/test-appliance/gce-create-image
++++ b/kvm-xfstests/test-appliance/gce-create-image
+@@ -138,4 +138,3 @@ gcloud compute --project "$GCE_PROJECT" -q images create "$ROOT_FS-$DATECODE" \
+ 	--family "$ROOT_FS"
+ gcloud compute --project "$GCE_PROJECT" -q disks delete "$BLD_DISK" \
+ 	--zone "$GCE_ZONE" >& /dev/null &
+-gcloud compute --project "$GCE_PROJECT" -q images list --filter="family=$ROOT_FS"
+-- 
+2.8.0.rc3.226.g39d4020
 
-   If you want to include any additional Debian packages, or you want
-   to override the default Jessie packages with newer versions from
-   jessie-backports, place them in the directory
-   kvm-xfstests/test-appliances/debs.  For gce-xfstests, the packages
-   must be for the amd64 architecture.
-
-We might want break up the paragraph into multiple smaller paragraphs
-just to make it easier to read.
-
-				- Ted
