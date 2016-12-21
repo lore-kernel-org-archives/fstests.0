@@ -1,41 +1,63 @@
-Received: from imap.thunk.org ([74.207.234.97]:47824 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1761226AbcLVTx5 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 22 Dec 2016 14:53:57 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH -v3] overlay: stress test changes to top and bottom layers simultaneously
-Date: Thu, 22 Dec 2016 14:53:46 -0500
-Message-Id: <20161222195346.16842-1-tytso@mit.edu>
-In-Reply-To: <CAOQ4uxjbYwCBEV_sC98yd9j4rkNrcf+okcVhZB-9JL_sbyAzmw@mail.gmail.com>
-References: <CAOQ4uxjbYwCBEV_sC98yd9j4rkNrcf+okcVhZB-9JL_sbyAzmw@mail.gmail.com>
+Received: from mail-pf0-f193.google.com ([209.85.192.193]:34594 "EHLO
+        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1758193AbcLUVYl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Dec 2016 16:24:41 -0500
+Received: by mail-pf0-f193.google.com with SMTP id y68so11371141pfb.1
+        for <fstests@vger.kernel.org>; Wed, 21 Dec 2016 13:24:41 -0800 (PST)
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: [PATCH v5 2/6] generic: test setting and getting encryption policies
+Date: Wed, 21 Dec 2016 13:21:58 -0800
+Message-Id: <1482355322-74978-3-git-send-email-ebiggers3@gmail.com>
+In-Reply-To: <1482355322-74978-1-git-send-email-ebiggers3@gmail.com>
+References: <1482355322-74978-1-git-send-email-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-unionfs@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>
+Cc: Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>, Michael Halcrow <mhalcrow@google.com>, Eric Sandeen <sandeen@redhat.com>, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-Introduce a test which runs fsstress on the top and bottom overlayfs
-directories simultaneously to find potential races that plagued wrapfs
-derived file systems.
+From: Eric Biggers <ebiggers@google.com>
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+Several kernel bugs were recently fixed regarding the constraints for
+setting encryption policies.  Add tests for these cases and a few more.
+
+Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- tests/overlay/019     | 81 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/019.out |  2 ++
- tests/overlay/group   |  1 +
- 3 files changed, 84 insertions(+)
- create mode 100644 tests/overlay/019
- create mode 100644 tests/overlay/019.out
+ tests/generic/400     | 135 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/400.out |  43 ++++++++++++++++
+ tests/generic/group   |   1 +
+ 3 files changed, 179 insertions(+)
+ create mode 100755 tests/generic/400
+ create mode 100644 tests/generic/400.out
 
-diff --git a/tests/overlay/019 b/tests/overlay/019
-new file mode 100644
-index 00000000..1daf830f
+diff --git a/tests/generic/400 b/tests/generic/400
+new file mode 100755
+index 0000000..9dbc024
 --- /dev/null
-+++ b/tests/overlay/019
-@@ -0,0 +1,81 @@
++++ b/tests/generic/400
+@@ -0,0 +1,135 @@
 +#! /bin/bash
-+# FS QA Test 019
++# FS QA Test generic/400
 +#
-+# Run fsstress on lower dir and top dir at the same time
++# Test setting and getting encryption policies.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Google, Inc.  All Rights Reserved.
++#
++# Author: Eric Biggers <ebiggers@google.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
 +#
 +
 +seq=`basename $0`
@@ -56,80 +78,156 @@ index 00000000..1daf830f
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
++. ./common/encrypt
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
 +# real QA test starts here
-+_supported_fs overlay
++_supported_fs generic
 +_supported_os Linux
-+_require_scratch
++_require_scratch_encryption
++_require_xfs_io_command "get_encpolicy"
++_require_xfs_io_command "set_encpolicy"
++_require_user
 +
-+# Remove all files from previous tests
-+_scratch_mkfs
-+
-+lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
-+mkdir -p $lowerdir
-+
++_scratch_mkfs_encrypted &>> $seqres.full
 +_scratch_mount
 +
-+echo "Silence is golden"
++check_no_policy()
++{
++	# When a file is unencrypted, FS_IOC_GET_ENCRYPTION_POLICY currently
++	# fails with ENOENT on ext4 but with ENODATA on f2fs.  TODO: it's
++	# planned to consistently use ENODATA.  For now this test accepts both.
++	$XFS_IO_PROG -c "get_encpolicy" $1 |&
++		sed -e 's/No such file or directory/No data available/'
++}
 +
-+d_low=$lowerdir/fsstress
-+d_top=$SCRATCH_MNT/fsstress
-+mkdir -p $d_low $d_top
++# Should be able to set an encryption policy on an empty directory
++empty_dir=$SCRATCH_MNT/empty_dir
++echo -e "\n*** Setting encryption policy on empty directory ***"
++mkdir $empty_dir
++check_no_policy $empty_dir |& _filter_scratch
++$XFS_IO_PROG -c "set_encpolicy 0000111122223333" $empty_dir
++$XFS_IO_PROG -c "get_encpolicy" $empty_dir | _filter_scratch
 +
-+echo $FSSTRESS_PROG -s 42 -d $d_low -p 4 -n 1000 -l100 -v > $seqres.full.1
-+$FSSTRESS_PROG -s 42 -d $d_low -p 4 -n 1000 -l100 -v >> $seqres.full.1 2>&1 &
++# Should be able to set the same policy again, but not a different one.
++# TODO: the error code for "already has a different policy" is planned to switch
++# from EINVAL to EEXIST.  For now this test accepts both.
++echo -e "\n*** Setting encryption policy again ***"
++$XFS_IO_PROG -c "set_encpolicy 0000111122223333" $empty_dir
++$XFS_IO_PROG -c "get_encpolicy" $empty_dir | _filter_scratch
++$XFS_IO_PROG -c "set_encpolicy 4444555566667777" $empty_dir |& \
++	_filter_scratch | sed -e 's/Invalid argument/File exists/'
++$XFS_IO_PROG -c "get_encpolicy" $empty_dir | _filter_scratch
 +
-+echo $FSSTRESS_PROG -s 42 -d $d_top -p 4 -n 1000 -l100 -v > $seqres.full.2
-+$FSSTRESS_PROG -s 42 -d $d_top -p 4 -n 1000 -l100 -v >> $seqres.full.2 2>&1 &
++# Should *not* be able to set an encryption policy on a nonempty directory
++nonempty_dir=$SCRATCH_MNT/nonempty_dir
++echo -e "\n*** Setting encryption policy on nonempty directory ***"
++mkdir $nonempty_dir
++touch $nonempty_dir/file
++$XFS_IO_PROG -c "set_encpolicy" $nonempty_dir |& _filter_scratch
++check_no_policy $nonempty_dir |& _filter_scratch
 +
-+ret=0
-+if ! wait %1
-+then
-+        echo "--------------------------------------"       >>$seqres.full.1
-+	echo "fsstress on lower directory returned $? - see $seqres.full.1"
-+        echo "--------------------------------------"       >>$seqres.full.1
-+	ret=1
-+fi
++# Should *not* be able to set an encryption policy on a nondirectory file, even
++# an empty one.  Regression test for 002ced4be642: "fscrypto: only allow setting
++# encryption policy on directories".
++# TODO: the error code for "not a directory" is planned to switch from EINVAL to
++# ENOTDIR.  For now this test accepts both.
++nondirectory=$SCRATCH_MNT/nondirectory
++echo -e "\n*** Setting encryption policy on nondirectory ***"
++touch $nondirectory
++$XFS_IO_PROG -c "set_encpolicy" $nondirectory |& \
++	_filter_scratch | sed -e 's/Invalid argument/Not a directory/'
++check_no_policy $nondirectory |& _filter_scratch
 +
-+if ! wait %2
-+then
-+        echo "--------------------------------------"       >>$seqres.full.2
-+	echo "fsstress on overlay directory returned $? - see $seqres.full.2"
-+        echo "--------------------------------------"       >>$seqres.full.2
-+	ret=1
-+fi
++# Should *not* be able to set an encryption policy on another user's directory.
++# Regression test for 163ae1c6ad62: "fscrypto: add authorization check for
++# setting encryption policy".
++unauthorized_dir=$SCRATCH_MNT/unauthorized_dir
++echo -e "\n*** Setting encryption policy on another user's directory ***"
++mkdir $unauthorized_dir
++su $qa_user -c "$XFS_IO_PROG -c \"set_encpolicy\" $unauthorized_dir" |& \
++	_filter_scratch
++check_no_policy $unauthorized_dir |& _filter_scratch
 +
-+cat $seqres.full.1 $seqres.full.2 > $seqres.full
-+rm $seqres.full.1 $seqres.full.2
++# Should *not* be able to set an encryption policy on a directory on a
++# filesystem mounted readonly.  Regression test for ba63f23d69a3: "fscrypto:
++# require write access to mount to set encryption policy".  Test both a regular
++# readonly filesystem and a readonly bind mount of a read-write filesystem.
++echo -e "\n*** Setting encryption policy on readonly filesystem ***"
++mkdir $SCRATCH_MNT/ro_dir $SCRATCH_MNT/ro_bind_mnt
++_scratch_remount ro
++$XFS_IO_PROG -c "set_encpolicy" $SCRATCH_MNT/ro_dir |& _filter_scratch
++check_no_policy $SCRATCH_MNT/ro_dir |& _filter_scratch
++_scratch_remount rw
++mount --bind $SCRATCH_MNT $SCRATCH_MNT/ro_bind_mnt
++mount -o remount,ro,bind $SCRATCH_MNT/ro_bind_mnt
++$XFS_IO_PROG -c "set_encpolicy" $SCRATCH_MNT/ro_bind_mnt/ro_dir |& _filter_scratch
++check_no_policy $SCRATCH_MNT/ro_bind_mnt/ro_dir |& _filter_scratch
++umount $SCRATCH_MNT/ro_bind_mnt
 +
-+if [ "$ret" -eq 1 ]
-+then
-+	status=1
-+else
-+	status=0
-+fi
-+
-+exit $status
-diff --git a/tests/overlay/019.out b/tests/overlay/019.out
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/400.out b/tests/generic/400.out
 new file mode 100644
-index 00000000..163484bc
+index 0000000..631c023
 --- /dev/null
-+++ b/tests/overlay/019.out
-@@ -0,0 +1,2 @@
-+QA output created by 019
-+Silence is golden
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 74822cbf..f8de84be 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -21,3 +21,4 @@
- 016 auto quick copyup
- 017 auto quick copyup
- 018 auto quick copyup
-+019 quick stress
++++ b/tests/generic/400.out
+@@ -0,0 +1,43 @@
++QA output created by 400
++
++*** Setting encryption policy on empty directory ***
++SCRATCH_MNT/empty_dir: failed to get encryption policy: No data available
++Encryption policy for SCRATCH_MNT/empty_dir:
++	Policy version: 0
++	Master key descriptor: 0000111122223333
++	Contents encryption mode: 1 (AES-256-XTS)
++	Filenames encryption mode: 4 (AES-256-CTS)
++	Flags: 0x02
++
++*** Setting encryption policy again ***
++Encryption policy for SCRATCH_MNT/empty_dir:
++	Policy version: 0
++	Master key descriptor: 0000111122223333
++	Contents encryption mode: 1 (AES-256-XTS)
++	Filenames encryption mode: 4 (AES-256-CTS)
++	Flags: 0x02
++SCRATCH_MNT/empty_dir: failed to set encryption policy: File exists
++Encryption policy for SCRATCH_MNT/empty_dir:
++	Policy version: 0
++	Master key descriptor: 0000111122223333
++	Contents encryption mode: 1 (AES-256-XTS)
++	Filenames encryption mode: 4 (AES-256-CTS)
++	Flags: 0x02
++
++*** Setting encryption policy on nonempty directory ***
++SCRATCH_MNT/nonempty_dir: failed to set encryption policy: Directory not empty
++SCRATCH_MNT/nonempty_dir: failed to get encryption policy: No data available
++
++*** Setting encryption policy on nondirectory ***
++SCRATCH_MNT/nondirectory: failed to set encryption policy: Not a directory
++SCRATCH_MNT/nondirectory: failed to get encryption policy: No data available
++
++*** Setting encryption policy on another user's directory ***
++SCRATCH_MNT/unauthorized_dir: failed to set encryption policy: Permission denied
++SCRATCH_MNT/unauthorized_dir: failed to get encryption policy: No data available
++
++*** Setting encryption policy on readonly filesystem ***
++SCRATCH_MNT/ro_dir: failed to set encryption policy: Read-only file system
++SCRATCH_MNT/ro_dir: failed to get encryption policy: No data available
++SCRATCH_MNT/ro_bind_mnt/ro_dir: failed to set encryption policy: Read-only file system
++SCRATCH_MNT/ro_bind_mnt/ro_dir: failed to get encryption policy: No data available
+diff --git a/tests/generic/group b/tests/generic/group
+index 20b31ef..3ecd8e9 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -397,3 +397,4 @@
+ 392 auto quick metadata
+ 393 auto quick rw
+ 394 auto quick
++400 auto quick encrypt
 -- 
-2.11.0.rc0.7.gbe5a750
+2.8.0.rc3.226.g39d4020
 
