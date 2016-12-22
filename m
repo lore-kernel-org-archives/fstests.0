@@ -1,39 +1,31 @@
-Received: from mail-pg0-f68.google.com ([74.125.83.68]:33874 "EHLO
-        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756462AbcLUSHn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Dec 2016 13:07:43 -0500
-Received: by mail-pg0-f68.google.com with SMTP id b1so17072993pgc.1
-        for <fstests@vger.kernel.org>; Wed, 21 Dec 2016 10:07:43 -0800 (PST)
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH] xfstests-bld: remove redundant listing of GCE images
-Date: Wed, 21 Dec 2016 10:06:32 -0800
-Message-Id: <1482343592-135031-6-git-send-email-ebiggers3@gmail.com>
+Received: from imap.thunk.org ([74.207.234.97]:45112 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755550AbcLVRHj (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 22 Dec 2016 12:07:39 -0500
+Date: Thu, 22 Dec 2016 12:07:37 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH] xfstests-bld: include f2fs userspace tools in test
+ appliances
+Message-ID: <20161222170737.x3ento5occiotnm5@thunk.org>
+References: <1482343592-135031-3-git-send-email-ebiggers3@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1482343592-135031-3-git-send-email-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
+To: Eric Biggers <ebiggers3@gmail.com>
 Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
+On Wed, Dec 21, 2016 at 10:06:29AM -0800, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
+> 
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
 
-When a GCE image is created, the same information about the new image
-was being printed by both 'gcloud compute images create' and 'gcloud
-compute images list'.  Fix this by removing the call to 'gcloud compute
-images list'.
+Sure, applied.  I hadn't bothered because I built a newer version of
+f2fs-tools from the git repository as a debian package and dropped it
+in kvm-xfststs/test-appliance/debs.  It's been on my todo list work
+with the Debian maintainer to get a newer version into
+jessie-backports....
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- kvm-xfstests/test-appliance/gce-create-image | 1 -
- 1 file changed, 1 deletion(-)
-
-diff --git a/kvm-xfstests/test-appliance/gce-create-image b/kvm-xfstests/test-appliance/gce-create-image
-index 005cc8e..830dd5b 100755
---- a/kvm-xfstests/test-appliance/gce-create-image
-+++ b/kvm-xfstests/test-appliance/gce-create-image
-@@ -138,4 +138,3 @@ gcloud compute --project "$GCE_PROJECT" -q images create "$ROOT_FS-$DATECODE" \
- 	--family "$ROOT_FS"
- gcloud compute --project "$GCE_PROJECT" -q disks delete "$BLD_DISK" \
- 	--zone "$GCE_ZONE" >& /dev/null &
--gcloud compute --project "$GCE_PROJECT" -q images list --filter="family=$ROOT_FS"
--- 
-2.8.0.rc3.226.g39d4020
-
+						- Ted
