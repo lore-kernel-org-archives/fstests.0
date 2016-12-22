@@ -1,99 +1,80 @@
-Received: from mx1.redhat.com ([209.132.183.28]:56194 "EHLO mx1.redhat.com"
+Received: from sandeen.net ([63.231.237.45]:35898 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754026AbcLUD1Y (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 20 Dec 2016 22:27:24 -0500
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 5781D83F47
-        for <fstests@vger.kernel.org>; Wed, 21 Dec 2016 03:27:24 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] Revert "generic/38[3-6]: require project quota to be enabled on SCRATCH_DEV"
-Date: Wed, 21 Dec 2016 11:26:54 +0800
-Message-Id: <20161221032654.24197-1-eguan@redhat.com>
+        id S965112AbcLVBYL (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 21 Dec 2016 20:24:11 -0500
+Subject: [PATCH 2/2] common: add _require_getnextquota helper
+References: <a3c43ff2-c641-aba4-b10e-781a3f3c86e3@redhat.com>
+ <8c91051e-8a78-cb20-d926-ea86e5b4645a@sandeen.net>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <bdf026bf-113e-6ba1-f157-d3d2f01143ad@sandeen.net>
+Date: Wed, 21 Dec 2016 19:24:10 -0600
+MIME-Version: 1.0
+In-Reply-To: <8c91051e-8a78-cb20-d926-ea86e5b4645a@sandeen.net>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: sandeen@redhat.com, Eryu Guan <eguan@redhat.com>
+To: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Commit 23f60ef304d ("generic/38[3-6]: require project quota to be
-enabled on SCRATCH_DEV") introduced a regression that leads
-_require_projquota, which uses src/feature to call a quotactl,
-operate before the filesystem is mounted, and results in tests not
-run on XFS and ext4.
+Add a helper to determine if the kernel supports
+the GETNEXTQUOTA quotactl.
 
-Revert the problematic patch first, because don't want to lose
-project quota test coverage on XFS and ext4. We can fix the false
-failure on ext3/2 later,
-
-Reported-by: Eric Sandeen <sandeen@redhat.com>
-Signed-off-by: Eryu Guan <eguan@redhat.com>
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 ---
- tests/generic/383 | 1 -
- tests/generic/384 | 2 +-
- tests/generic/385 | 2 +-
- tests/generic/386 | 2 +-
- 4 files changed, 3 insertions(+), 4 deletions(-)
 
-diff --git a/tests/generic/383 b/tests/generic/383
-index 93836ea..be5b19b 100755
---- a/tests/generic/383
-+++ b/tests/generic/383
-@@ -54,7 +54,6 @@ _require_xfs_quota_foreign
- 
- _scratch_mkfs >/dev/null 2>&1
- _scratch_enable_pquota
--_require_prjquota $SCRATCH_DEV
- 
- do_project_test()
- {
-diff --git a/tests/generic/384 b/tests/generic/384
-index 4784e47..452d26e 100755
---- a/tests/generic/384
-+++ b/tests/generic/384
-@@ -73,10 +73,10 @@ chmod a+rwx $seqres.full	# arbitrary users will write here
- _require_scratch
- _scratch_mkfs >/dev/null 2>&1
- _scratch_enable_pquota
--_require_prjquota $SCRATCH_DEV
- 
- _qmount_option "prjquota"
- _qmount
-+_require_prjquota $SCRATCH_DEV
- 
- report_quota()
- {
-diff --git a/tests/generic/385 b/tests/generic/385
-index b7c5bd3..f07ae5d 100755
---- a/tests/generic/385
-+++ b/tests/generic/385
-@@ -71,9 +71,9 @@ quota_cmd="$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid"
- 
- _scratch_mkfs >/dev/null 2>&1
- _scratch_enable_pquota
--_require_prjquota $SCRATCH_DEV
- _qmount_option "prjquota"
- _qmount
-+_require_prjquota $SCRATCH_DEV
+diff --git a/common/quota b/common/quota
+index d9bb8d9..d4ae861 100644
+--- a/common/quota
++++ b/common/quota
+@@ -109,6 +109,16 @@ _require_prjquota()
+ }
  
  #
- # Create the project root
-diff --git a/tests/generic/386 b/tests/generic/386
-index 0ceb14d..3aede60 100755
---- a/tests/generic/386
-+++ b/tests/generic/386
-@@ -127,10 +127,10 @@ echo $proj_num:$proj_dir > "$my_projects"
- 
- _scratch_mkfs					>> "$seqres.full" 2>&1
- _scratch_enable_pquota
--_require_prjquota $SCRATCH_DEV
- 
- _qmount_option "prjquota"
++# Do we have GETNEXTQUOTA?  Querying ID 0 should work.
++#
++_require_getnextquota()
++{
++	_require_test_program "test-nextquota"
++	$here/src/test-nextquota -i 0 -u -d $SCRATCH_DEV &> $seqres.full || \
++		_notrun "No GETNEXTQUOTA support"
++}
++
++#
+ # ext4 (for now) is unique in that we must enable the project quota feature
+ # prior to mount.  This is a relatively new feature ...
+ _scratch_enable_pquota()
+diff --git a/tests/generic/244 b/tests/generic/244
+index 36c632e..0c64330 100755
+--- a/tests/generic/244
++++ b/tests/generic/244
+@@ -59,10 +59,7 @@ _scratch_mkfs >> $seqres.full 2>&1
+ TYPES="u g"
+ MOUNT_OPTIONS="-o usrquota,grpquota"
  _qmount
-+_require_prjquota $SCRATCH_DEV
+-
+-# Ok, do we even have GETNEXTQUOTA?  Querying ID 0 should work.
+-$here/src/test-nextquota -i 0 -u -d $SCRATCH_DEV &> $seqres.full || \
+-	_notrun "No GETNEXTQUOTA support"
++_require_getnextquota
  
- mkdir -p "${proj_dir}"
+ echo "Launch all quotas"
  
--- 
-2.9.3
+diff --git a/tests/generic/395 b/tests/generic/395
+index cc4a93e..151229d 100755
+--- a/tests/generic/395
++++ b/tests/generic/395
+@@ -57,12 +57,8 @@ _require_scratch
+ _scratch_mkfs >> $seqres.full 2>&1
+ 
+ MOUNT_OPTIONS="-o usrquota,grpquota"
+-
+ _qmount
+-
+-# Ok, do we even have GETNEXTQUOTA?  Querying ID 0 should work.
+-$here/src/test-nextquota -i 0 -u -d $SCRATCH_DEV &> $seqres.full || \
+-	_notrun "No GETNEXTQUOTA support"
++_require_getnextquota
+ 
+ echo "Launch all quotas"
+ 
 
