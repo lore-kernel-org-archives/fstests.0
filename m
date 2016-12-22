@@ -1,37 +1,34 @@
-Received: from mx2.suse.de ([195.135.220.15]:41158 "EHLO mx2.suse.de"
+Received: from imap.thunk.org ([74.207.234.97]:44806 "EHLO imap.thunk.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753907AbcLUO1q (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 21 Dec 2016 09:27:46 -0500
-Date: Wed, 21 Dec 2016 15:27:30 +0100
-From: David Sterba <dsterba@suse.cz>
-Subject: Re: [PATCH] fstests: btrfs: Remove btrfs/047 since upstream don't
- accept stream-version
-Message-ID: <20161221142730.GD12081@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-References: <20161220012456.19363-1-quwenruo@cn.fujitsu.com>
- <20161221023355.GM1859@eguan.usersys.redhat.com>
+        id S1753089AbcLVQ4K (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 22 Dec 2016 11:56:10 -0500
+Date: Thu, 22 Dec 2016 11:55:51 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH v2] xfstests-bld: correct file permissions on test
+ appliance files
+Message-ID: <20161222165551.qvccd2sv3ujhkgkk@thunk.org>
+References: <1482343592-135031-1-git-send-email-ebiggers3@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161221023355.GM1859@eguan.usersys.redhat.com>
+In-Reply-To: <1482343592-135031-1-git-send-email-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Qu Wenruo <quwenruo@cn.fujitsu.com>, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: Eric Biggers <ebiggers3@gmail.com>
+Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Dec 21, 2016 at 10:33:55AM +0800, Eryu Guan wrote:
-> On Tue, Dec 20, 2016 at 09:24:56AM +0800, Qu Wenruo wrote:
-> > Btrfs upstream doesn't accept stream-version, so the test is never ran
-> > on upstream kernel nor btrfs-progs.
-> > 
-> > Just remove it.
-> > 
-> > Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+On Wed, Dec 21, 2016 at 10:06:27AM -0800, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
 > 
-> Looks fine to me, but I'd like to see an ack or review from btrfs
-> developers.
+> The xfstests-bld repository may have been cloned with a umask that
+> masked out the other bits.  When using --update-files in this situation
+> or when creating a GCE image, the VM ended up in a state where non-root
+> users were unable to execute anything, which made all tests using the
+> fsgqa user get skipped.  Fix this by copying the r and x group bits to
+> the other bits when creating files.tar.gz.  Also set the owner and group
+> to root while we're at it.
 
-We don't have ETA when the stream protocol version bump will happen. The
-test can be added back later.
+Wouldn't it be better to use "--mode=go+u-w"?  This will solve the
+problem for those people who use a umask of 077.
 
-Reviewed-by: David Sterba <dsterba@suse.com>
+	    	  	     	 - Ted
