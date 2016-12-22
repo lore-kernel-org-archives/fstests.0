@@ -1,50 +1,48 @@
-Received: from mail-pg0-f67.google.com ([74.125.83.67]:34597 "EHLO
-        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752968AbcLUSHV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Dec 2016 13:07:21 -0500
-Received: by mail-pg0-f67.google.com with SMTP id b1so17072087pgc.1
-        for <fstests@vger.kernel.org>; Wed, 21 Dec 2016 10:07:21 -0800 (PST)
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH] xfstests-bld: document how to add debian packages to GCE image
-Date: Wed, 21 Dec 2016 10:06:28 -0800
-Message-Id: <1482343592-135031-2-git-send-email-ebiggers3@gmail.com>
+Received: from imap.thunk.org ([74.207.234.97]:45056 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1757704AbcLVREf (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 22 Dec 2016 12:04:35 -0500
+Date: Thu, 22 Dec 2016 12:04:33 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH] xfstests-bld: document how to add debian packages to GCE
+ image
+Message-ID: <20161222170433.cbyrt2phsapq2tr7@thunk.org>
+References: <1482343592-135031-2-git-send-email-ebiggers3@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1482343592-135031-2-git-send-email-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
+To: Eric Biggers <ebiggers3@gmail.com>
 Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
+On Wed, Dec 21, 2016 at 10:06:28AM -0800, Eric Biggers wrote:
+> +build your own image, you must first build a 64-bit (amd64) xfstests
+> +tarball as described in the [instructions for building
+> +xfstests](building-xfstests.md).  Then copy any additional Debian
+> +packages, for the amd64 architecture, you want to include in the GCE
+> +image into the root directory of GS_BUCKET.
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- Documentation/gce-xfstests.md | 14 ++++++++------
- 1 file changed, 8 insertions(+), 6 deletions(-)
+This is phrased a bit awkwardly.  The official way is to put the
+debian packages in kvm-xfstests/test-appliances/debs.  This works for
+both building gce-xfstests and kvm-xfstests images.
 
-diff --git a/Documentation/gce-xfstests.md b/Documentation/gce-xfstests.md
-index becc23d..1b7fa3e 100644
---- a/Documentation/gce-xfstests.md
-+++ b/Documentation/gce-xfstests.md
-@@ -306,12 +306,14 @@ to be unpacked into a directory in /tmp instead.
- 
- By default gce-xfstests uses the prebuilt image which is made
- available via the xfstests-cloud project.  However, if you want to
--build your own image, you must first build the xfstests tarball as
--described in the [instructions for building
--xfstests](building-xfstests.md).  Then run the command "gce-xfstests
--create-image".  This will create a new GCE image with a name such as
--"xfstests-201608132226" where 201608132226 indicates when the image
--was created (in this case, August 13, 2016 at 22:26).
-+build your own image, you must first build a 64-bit (amd64) xfstests
-+tarball as described in the [instructions for building
-+xfstests](building-xfstests.md).  Then copy any additional Debian
-+packages, for the amd64 architecture, you want to include in the GCE
-+image into the root directory of GS_BUCKET.  Then run the command
-+"gce-xfstests create-image".  This will create a new GCE image with a
-+name such as "xfstests-201608132226" where 201608132226 indicates when
-+the image was created (in this case, August 13, 2016 at 22:26).
- 
- This image will be created as part of an image family called xfstests.
- By default, when you start a test using gce-xfstests, the most
--- 
-2.8.0.rc3.226.g39d4020
+And in general, you would need to use whatever debian packages for
+whatever architecture is compatible for the image or chroot tarball
+you are building.  For gce-xfstests, it is always amd64, since GCE
+currently only supports 64-bit x86.  (But for kvm-xfstests or chroot
+tarballs, it might be i386 or armhf.)
 
+So how about,
+
+   If you want to include any additional Debian packages, or you want
+   to override the default Jessie packages with newer versions from
+   jessie-backports, place them in the directory
+   kvm-xfstests/test-appliances/debs.  For gce-xfstests, the packages
+   must be for the amd64 architecture.
+
+We might want break up the paragraph into multiple smaller paragraphs
+just to make it easier to read.
+
+				- Ted
