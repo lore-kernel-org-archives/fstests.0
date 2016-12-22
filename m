@@ -1,79 +1,133 @@
-Received: from mail-pg0-f68.google.com ([74.125.83.68]:35236 "EHLO
-        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752395AbcLUSHV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Dec 2016 13:07:21 -0500
-Received: by mail-pg0-f68.google.com with SMTP id i5so7490916pgh.2
-        for <fstests@vger.kernel.org>; Wed, 21 Dec 2016 10:07:20 -0800 (PST)
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH v2] xfstests-bld: correct file permissions on test appliance files
-Date: Wed, 21 Dec 2016 10:06:27 -0800
-Message-Id: <1482343592-135031-1-git-send-email-ebiggers3@gmail.com>
+Received: from imap.thunk.org ([74.207.234.97]:44568 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1758750AbcLVQnP (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 22 Dec 2016 11:43:15 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH -v2] overlay: stress test changes to top and bottom layers simultaneously
+Date: Thu, 22 Dec 2016 11:43:10 -0500
+Message-Id: <20161222164310.9615-1-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+To: fstests@vger.kernel.org
+Cc: linux-unionfs@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
+Introduce a test which runs fsstress on the top and bottom overlayfs
+directories simultaneously to find potential races that plagued wrapfs
+derived file systems.
 
-The xfstests-bld repository may have been cloned with a umask that
-masked out the other bits.  When using --update-files in this situation
-or when creating a GCE image, the VM ended up in a state where non-root
-users were unable to execute anything, which made all tests using the
-fsgqa user get skipped.  Fix this by copying the r and x group bits to
-the other bits when creating files.tar.gz.  Also set the owner and group
-to root while we're at it.
-
-[v2: also fix gce-create-image]
-
-Signed-off-by: Eric Biggers <ebiggers@google.com>
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 ---
- kvm-xfstests/gce-xfstests                    | 3 ++-
- kvm-xfstests/kvm-xfstests                    | 3 ++-
- kvm-xfstests/test-appliance/gce-create-image | 3 ++-
- 3 files changed, 6 insertions(+), 3 deletions(-)
+ tests/overlay/019     | 81 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/019.out |  2 ++
+ tests/overlay/group   |  1 +
+ 3 files changed, 84 insertions(+)
+ create mode 100644 tests/overlay/019
+ create mode 100644 tests/overlay/019.out
 
-diff --git a/kvm-xfstests/gce-xfstests b/kvm-xfstests/gce-xfstests
-index 04eee78..8839ea2 100755
---- a/kvm-xfstests/gce-xfstests
-+++ b/kvm-xfstests/gce-xfstests
-@@ -471,7 +471,8 @@ then
- 	exit 1
-     fi
-     (cd "$DIR/test-appliance"; \
--     tar -X gce-exclude-files --exclude=etc -C files -cf - . | \
-+     tar -X gce-exclude-files --exclude=etc -C files \
-+		--owner=root --group=root --mode=o+g-w -cf - . | \
- 	 gzip -9n > $LOCAL_FILES)
-     get_local_hash "$LOCAL_FILES"
-     get_remote_hash "$GS_FILES"
-diff --git a/kvm-xfstests/kvm-xfstests b/kvm-xfstests/kvm-xfstests
-index fbdae7a..bcada9e 100755
---- a/kvm-xfstests/kvm-xfstests
-+++ b/kvm-xfstests/kvm-xfstests
-@@ -75,7 +75,8 @@ then
- 	exit 1
-     fi
-     (cd "$DIR/test-appliance"; \
--     tar -X kvm-exclude-files -C files -cf - . | \
-+     tar -X kvm-exclude-files -C files \
-+		--owner=root --group=root --mode=o+g-w -cf - . | \
- 	 gzip -9n > "$TDIR/files.tar.gz")
-     tar -r -f $VDH -C "$TDIR" files.tar.gz
-     rm -rf "$TDIR"
-diff --git a/kvm-xfstests/test-appliance/gce-create-image b/kvm-xfstests/test-appliance/gce-create-image
-index 56366d1..005cc8e 100755
---- a/kvm-xfstests/test-appliance/gce-create-image
-+++ b/kvm-xfstests/test-appliance/gce-create-image
-@@ -87,7 +87,8 @@ then
-     cat ../../*.ver > files/root/xfstests/git-versions
- fi
- 
--tar -X gce-exclude-files -C files -cf - . | gzip -9n > $t
-+tar -X gce-exclude-files -C files --owner=root --group=root --mode=o+g-w \
-+	-cf - . | gzip -9n > $t
- GS_FILES_TARBALL=gs://$GS_BUCKET/files.tar.gz
- 
- if test -f files/root/xfstests/git-versions
+diff --git a/tests/overlay/019 b/tests/overlay/019
+new file mode 100644
+index 00000000..1daf830f
+--- /dev/null
++++ b/tests/overlay/019
+@@ -0,0 +1,81 @@
++#! /bin/bash
++# FS QA Test 019
++#
++# Run fsstress on lower dir and top dir at the same time
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++_require_scratch
++
++# Remove all files from previous tests
++_scratch_mkfs
++
++lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
++mkdir -p $lowerdir
++
++_scratch_mount
++
++echo "Silence is golden"
++
++d_low=$lowerdir/fsstress
++d_top=$SCRATCH_MNT/fsstress
++mkdir -p $d_low $d_top
++
++echo $FSSTRESS_PROG -s 42 -d $d_low -p 4 -n 1000 -l100 -v > $seqres.full.1
++$FSSTRESS_PROG -s 42 -d $d_low -p 4 -n 1000 -l100 -v >> $seqres.full.1 2>&1 &
++
++echo $FSSTRESS_PROG -s 42 -d $d_top -p 4 -n 1000 -l100 -v > $seqres.full.2
++$FSSTRESS_PROG -s 42 -d $d_top -p 4 -n 1000 -l100 -v >> $seqres.full.2 2>&1 &
++
++ret=0
++if ! wait %1
++then
++        echo "--------------------------------------"       >>$seqres.full.1
++	echo "fsstress on lower directory returned $? - see $seqres.full.1"
++        echo "--------------------------------------"       >>$seqres.full.1
++	ret=1
++fi
++
++if ! wait %2
++then
++        echo "--------------------------------------"       >>$seqres.full.2
++	echo "fsstress on overlay directory returned $? - see $seqres.full.2"
++        echo "--------------------------------------"       >>$seqres.full.2
++	ret=1
++fi
++
++cat $seqres.full.1 $seqres.full.2 > $seqres.full
++rm $seqres.full.1 $seqres.full.2
++
++if [ "$ret" -eq 1 ]
++then
++	status=1
++else
++	status=0
++fi
++
++exit $status
+diff --git a/tests/overlay/019.out b/tests/overlay/019.out
+new file mode 100644
+index 00000000..163484bc
+--- /dev/null
++++ b/tests/overlay/019.out
+@@ -0,0 +1,2 @@
++QA output created by 019
++Silence is golden
+diff --git a/tests/overlay/group b/tests/overlay/group
+index 74822cbf..f8de84be 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -21,3 +21,4 @@
+ 016 auto quick copyup
+ 017 auto quick copyup
+ 018 auto quick copyup
++019 quick stress
 -- 
-2.8.0.rc3.226.g39d4020
+2.11.0.rc0.7.gbe5a750
 
