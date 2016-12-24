@@ -1,233 +1,124 @@
-Received: from mail-pf0-f193.google.com ([209.85.192.193]:34594 "EHLO
-        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1758193AbcLUVYl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Dec 2016 16:24:41 -0500
-Received: by mail-pf0-f193.google.com with SMTP id y68so11371141pfb.1
-        for <fstests@vger.kernel.org>; Wed, 21 Dec 2016 13:24:41 -0800 (PST)
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH v5 2/6] generic: test setting and getting encryption policies
-Date: Wed, 21 Dec 2016 13:21:58 -0800
-Message-Id: <1482355322-74978-3-git-send-email-ebiggers3@gmail.com>
-In-Reply-To: <1482355322-74978-1-git-send-email-ebiggers3@gmail.com>
-References: <1482355322-74978-1-git-send-email-ebiggers3@gmail.com>
-Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, David Gstir <david@sigma-star.at>, Michael Halcrow <mhalcrow@google.com>, Eric Sandeen <sandeen@redhat.com>, Eric Biggers <ebiggers@google.com>
+Date: Sat, 24 Dec 2016 20:20:36 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v3 3/3] generic/396: test correct d_type values
+Message-ID: <20161224122036.GT1859@eguan.usersys.redhat.com>
+References: <1482239855-791-4-git-send-email-amir73il@gmail.com>
+ <1482328221-31713-1-git-send-email-amir73il@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1482328221-31713-1-git-send-email-amir73il@gmail.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Dave Chinner <david@fromorbit.com>, Christoph Hellwig <hch@infradead.org>, "Darrick J . Wong" <darrick.wong@oracle.com>, Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
+On Wed, Dec 21, 2016 at 03:50:21PM +0200, Amir Goldstein wrote:
+> Verify correct d_type values of dir entries.
+> 
+> This test does NOT require that file system support the filetype feature.
+> It verifies that either all file types are reported as DT_UNKNOWN
+> or that all file types are reported correctly.
+> 
+> For fs for which we know how to test the filetype feature (xfs|ext*)
+> verify getting DT_UNKNOWN IFF filetype feature is disabled.
+> 
+> Special dir entries . and .. MAY be reported as DT_UNKNOWN IF filetype
+> feature is disabled (ext4), but MAY also be reported as DT_DIR in this
+> case (xfs).
+> 
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+>  tests/generic/396     | 93 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/396.out |  9 +++++
+>  tests/generic/group   |  1 +
+>  3 files changed, 103 insertions(+)
+>  create mode 100755 tests/generic/396
+>  create mode 100644 tests/generic/396.out
+> 
+> Added another test to the matrix, found another special case to handle:
+> ext4 vs. xfs returns DT_UNKNOWN for . and .. on ! _supports_filetype.
+> 
+> Fixes the test to correctly handle both cases.
+> 
+> Tested with tmpfs, ext2, ext4, xfs for d_type supported fs
+> Tested with xfs -m crc=0 -n ftype=0 for d_type unsupported fs
+> Tested with ext2/ext4 -O ^filetype  for d_type unsupported fs
+> 
+> v3:
+> - allow DT_UNKNOWN type for . and .. when filetype feature is disabled (ext4)
+> 
+> v2:
+> - use helper to test for file type support
+> - allow DT_UNKNOWN type, but only for all files
+> - verify . and .. have DT_DIR type
+> 
+> v1:
+> - verify that d_type matches actual file type
+> 
+> diff --git a/tests/generic/396 b/tests/generic/396
+> new file mode 100755
+> index 0000000..0d4a17d
+> --- /dev/null
+> +++ b/tests/generic/396
+> @@ -0,0 +1,93 @@
+> +#! /bin/bash
+> +# FSQA Test No. 396
+> +#
+> +# Test filetype feature
+> +#
+> +# This test does NOT require that file system support the d_type feature.
+> +# It verifies that either all file types are reported as DT_UNKNOWN
+> +# or all file types are reported correctly.
+> +#
+> +# For fs for which we know how to test the filetype feature (xfs|ext*)
+> +# verify getting DT_UNKNOWN IFF feature is disabled.
+> +# Special dir entries . and .. MAY be reported as DT_UNKNOWN IF filetype
+> +# feature is disabled (ext4), but MAY also be reported as DT_DIR in this
+> +# case (xfs).
+> +#
+> +#-----------------------------------------------------------------------
+> +#
+> +# Copyright (C) 2016 CTERA Networks. All Rights Reserved.
+> +# Author: Amir Goldstein <amir73il@gmail.com>
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch
 
-Several kernel bugs were recently fixed regarding the constraints for
-setting encryption policies.  Add tests for these cases and a few more.
+I added a "_require_test_program t_dir_type" here and merged.
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- tests/generic/400     | 135 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/400.out |  43 ++++++++++++++++
- tests/generic/group   |   1 +
- 3 files changed, 179 insertions(+)
- create mode 100755 tests/generic/400
- create mode 100644 tests/generic/400.out
-
-diff --git a/tests/generic/400 b/tests/generic/400
-new file mode 100755
-index 0000000..9dbc024
---- /dev/null
-+++ b/tests/generic/400
-@@ -0,0 +1,135 @@
-+#! /bin/bash
-+# FS QA Test generic/400
-+#
-+# Test setting and getting encryption policies.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Google, Inc.  All Rights Reserved.
-+#
-+# Author: Eric Biggers <ebiggers@google.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/encrypt
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch_encryption
-+_require_xfs_io_command "get_encpolicy"
-+_require_xfs_io_command "set_encpolicy"
-+_require_user
-+
-+_scratch_mkfs_encrypted &>> $seqres.full
-+_scratch_mount
-+
-+check_no_policy()
-+{
-+	# When a file is unencrypted, FS_IOC_GET_ENCRYPTION_POLICY currently
-+	# fails with ENOENT on ext4 but with ENODATA on f2fs.  TODO: it's
-+	# planned to consistently use ENODATA.  For now this test accepts both.
-+	$XFS_IO_PROG -c "get_encpolicy" $1 |&
-+		sed -e 's/No such file or directory/No data available/'
-+}
-+
-+# Should be able to set an encryption policy on an empty directory
-+empty_dir=$SCRATCH_MNT/empty_dir
-+echo -e "\n*** Setting encryption policy on empty directory ***"
-+mkdir $empty_dir
-+check_no_policy $empty_dir |& _filter_scratch
-+$XFS_IO_PROG -c "set_encpolicy 0000111122223333" $empty_dir
-+$XFS_IO_PROG -c "get_encpolicy" $empty_dir | _filter_scratch
-+
-+# Should be able to set the same policy again, but not a different one.
-+# TODO: the error code for "already has a different policy" is planned to switch
-+# from EINVAL to EEXIST.  For now this test accepts both.
-+echo -e "\n*** Setting encryption policy again ***"
-+$XFS_IO_PROG -c "set_encpolicy 0000111122223333" $empty_dir
-+$XFS_IO_PROG -c "get_encpolicy" $empty_dir | _filter_scratch
-+$XFS_IO_PROG -c "set_encpolicy 4444555566667777" $empty_dir |& \
-+	_filter_scratch | sed -e 's/Invalid argument/File exists/'
-+$XFS_IO_PROG -c "get_encpolicy" $empty_dir | _filter_scratch
-+
-+# Should *not* be able to set an encryption policy on a nonempty directory
-+nonempty_dir=$SCRATCH_MNT/nonempty_dir
-+echo -e "\n*** Setting encryption policy on nonempty directory ***"
-+mkdir $nonempty_dir
-+touch $nonempty_dir/file
-+$XFS_IO_PROG -c "set_encpolicy" $nonempty_dir |& _filter_scratch
-+check_no_policy $nonempty_dir |& _filter_scratch
-+
-+# Should *not* be able to set an encryption policy on a nondirectory file, even
-+# an empty one.  Regression test for 002ced4be642: "fscrypto: only allow setting
-+# encryption policy on directories".
-+# TODO: the error code for "not a directory" is planned to switch from EINVAL to
-+# ENOTDIR.  For now this test accepts both.
-+nondirectory=$SCRATCH_MNT/nondirectory
-+echo -e "\n*** Setting encryption policy on nondirectory ***"
-+touch $nondirectory
-+$XFS_IO_PROG -c "set_encpolicy" $nondirectory |& \
-+	_filter_scratch | sed -e 's/Invalid argument/Not a directory/'
-+check_no_policy $nondirectory |& _filter_scratch
-+
-+# Should *not* be able to set an encryption policy on another user's directory.
-+# Regression test for 163ae1c6ad62: "fscrypto: add authorization check for
-+# setting encryption policy".
-+unauthorized_dir=$SCRATCH_MNT/unauthorized_dir
-+echo -e "\n*** Setting encryption policy on another user's directory ***"
-+mkdir $unauthorized_dir
-+su $qa_user -c "$XFS_IO_PROG -c \"set_encpolicy\" $unauthorized_dir" |& \
-+	_filter_scratch
-+check_no_policy $unauthorized_dir |& _filter_scratch
-+
-+# Should *not* be able to set an encryption policy on a directory on a
-+# filesystem mounted readonly.  Regression test for ba63f23d69a3: "fscrypto:
-+# require write access to mount to set encryption policy".  Test both a regular
-+# readonly filesystem and a readonly bind mount of a read-write filesystem.
-+echo -e "\n*** Setting encryption policy on readonly filesystem ***"
-+mkdir $SCRATCH_MNT/ro_dir $SCRATCH_MNT/ro_bind_mnt
-+_scratch_remount ro
-+$XFS_IO_PROG -c "set_encpolicy" $SCRATCH_MNT/ro_dir |& _filter_scratch
-+check_no_policy $SCRATCH_MNT/ro_dir |& _filter_scratch
-+_scratch_remount rw
-+mount --bind $SCRATCH_MNT $SCRATCH_MNT/ro_bind_mnt
-+mount -o remount,ro,bind $SCRATCH_MNT/ro_bind_mnt
-+$XFS_IO_PROG -c "set_encpolicy" $SCRATCH_MNT/ro_bind_mnt/ro_dir |& _filter_scratch
-+check_no_policy $SCRATCH_MNT/ro_bind_mnt/ro_dir |& _filter_scratch
-+umount $SCRATCH_MNT/ro_bind_mnt
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/400.out b/tests/generic/400.out
-new file mode 100644
-index 0000000..631c023
---- /dev/null
-+++ b/tests/generic/400.out
-@@ -0,0 +1,43 @@
-+QA output created by 400
-+
-+*** Setting encryption policy on empty directory ***
-+SCRATCH_MNT/empty_dir: failed to get encryption policy: No data available
-+Encryption policy for SCRATCH_MNT/empty_dir:
-+	Policy version: 0
-+	Master key descriptor: 0000111122223333
-+	Contents encryption mode: 1 (AES-256-XTS)
-+	Filenames encryption mode: 4 (AES-256-CTS)
-+	Flags: 0x02
-+
-+*** Setting encryption policy again ***
-+Encryption policy for SCRATCH_MNT/empty_dir:
-+	Policy version: 0
-+	Master key descriptor: 0000111122223333
-+	Contents encryption mode: 1 (AES-256-XTS)
-+	Filenames encryption mode: 4 (AES-256-CTS)
-+	Flags: 0x02
-+SCRATCH_MNT/empty_dir: failed to set encryption policy: File exists
-+Encryption policy for SCRATCH_MNT/empty_dir:
-+	Policy version: 0
-+	Master key descriptor: 0000111122223333
-+	Contents encryption mode: 1 (AES-256-XTS)
-+	Filenames encryption mode: 4 (AES-256-CTS)
-+	Flags: 0x02
-+
-+*** Setting encryption policy on nonempty directory ***
-+SCRATCH_MNT/nonempty_dir: failed to set encryption policy: Directory not empty
-+SCRATCH_MNT/nonempty_dir: failed to get encryption policy: No data available
-+
-+*** Setting encryption policy on nondirectory ***
-+SCRATCH_MNT/nondirectory: failed to set encryption policy: Not a directory
-+SCRATCH_MNT/nondirectory: failed to get encryption policy: No data available
-+
-+*** Setting encryption policy on another user's directory ***
-+SCRATCH_MNT/unauthorized_dir: failed to set encryption policy: Permission denied
-+SCRATCH_MNT/unauthorized_dir: failed to get encryption policy: No data available
-+
-+*** Setting encryption policy on readonly filesystem ***
-+SCRATCH_MNT/ro_dir: failed to set encryption policy: Read-only file system
-+SCRATCH_MNT/ro_dir: failed to get encryption policy: No data available
-+SCRATCH_MNT/ro_bind_mnt/ro_dir: failed to set encryption policy: Read-only file system
-+SCRATCH_MNT/ro_bind_mnt/ro_dir: failed to get encryption policy: No data available
-diff --git a/tests/generic/group b/tests/generic/group
-index 20b31ef..3ecd8e9 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -397,3 +397,4 @@
- 392 auto quick metadata
- 393 auto quick rw
- 394 auto quick
-+400 auto quick encrypt
--- 
-2.8.0.rc3.226.g39d4020
-
+Thanks,
+Eryu
