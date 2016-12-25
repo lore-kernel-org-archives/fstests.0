@@ -1,152 +1,407 @@
-Received: from mx1.redhat.com ([209.132.183.28]:48934 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752547AbcLYK4q (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 25 Dec 2016 05:56:46 -0500
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id D6C754E4F2
-        for <fstests@vger.kernel.org>; Sun, 25 Dec 2016 10:56:45 +0000 (UTC)
-Received: from localhost (vpn1-7-91.pek2.redhat.com [10.72.7.91])
-        by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id uBPAui3g012338
-        for <fstests@vger.kernel.org>; Sun, 25 Dec 2016 05:56:45 -0500
-Message-Id: <201612251056.uBPAui3g012338@int-mx11.intmail.prod.int.phx2.redhat.com>
-Date: Sun, 25 Dec 2016 18:56:43 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: [ANNOUNCE] fstests: master branch updated to 7ee1d97c799b
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="s1qCufHgLkto"
-Content-Disposition: inline
+Received: from mail-wj0-f194.google.com ([209.85.210.194]:35879 "EHLO
+        mail-wj0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752940AbcLYLA1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 25 Dec 2016 06:00:27 -0500
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH] xfs/348: test handling of invalid inode modes
+Date: Sun, 25 Dec 2016 13:00:03 +0200
+Message-Id: <1482663603-17002-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: Brian Foster <bfoster@redhat.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+Set all possible file type values for different types of files
+and verify that xfs_repair detects the correct errors.
 
---s1qCufHgLkto
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+When setting invalid file type values (e.g. core.mode = 0170644),
+all files are expected to have been junked by xfs_repair.
 
-Hi all,
+When setting valid file type values to non matching file types,
+xfs_repair would either detect wrong format and junk the file, e.g.:
+  would have junked entry "FILE" in directory PARENT_INO
+or detect a ftype mismatch error, e.g.:
+  would fix ftype mismatch (5/3) in directory/child PARENT_INO/FIFO_INO
 
-The master branch of the xfstests repository at:
+If ftype feature is enabled, when setting file type to one of the
+special types (i.e. FIFO(1), CHRDEV(2),BLKDEV(6),SOCKET(14)),
+xfs_repair is expected to detect ftype mismatch error. Otherewise,
+xfs_repair is not expected to detect ftype mismatch error.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/xfs/348     | 128 ++++++++++++++++++++++++++++++++
+ tests/xfs/348.out | 216 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/group   |   1 +
+ 3 files changed, 345 insertions(+)
+ create mode 100755 tests/xfs/348
+ create mode 100644 tests/xfs/348.out
 
-have just been updated. This is a relatively large update. Notably, fs
-encryption tests from Eric Biggers have been merged. But these tests won't run
-now, as set|get_policy commands are not in xfs_io yet. _scratch_mkfs has also
-been updated so that, besides xfs and ext4, other filesystems are able to
-handle mkfs option conflicts between $MKFS_OPTIONS and options specified in
-tests. There're also new generic and overlay tests, one btrfs test is removed.
+diff --git a/tests/xfs/348 b/tests/xfs/348
+new file mode 100755
+index 0000000..89ba9a8
+--- /dev/null
++++ b/tests/xfs/348
+@@ -0,0 +1,128 @@
++#! /bin/bash
++# FSQA Test No. 348
++#
++# Test handling of invalid inode modes
++#
++# Set all possible file type values for different types of files
++# and verify that xfs_repair detects the correct errors.
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2016 CTERA Networks. All Rights Reserved.
++# Author: Amir Goldstein <amir73il@gmail.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/repair
++
++# real QA test starts here
++_supported_fs xfs
++_supported_os Linux
++_require_scratch
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++
++_scratch_mount
++
++# Create our test files.
++testdir=$SCRATCH_MNT/test
++mkdir -p $testdir
++mkdir $testdir/DIR
++touch $testdir/FILE
++ln -s $testdir/FILE $testdir/SYMLINK
++mknod $testdir/CHRDEV c 1 1
++mknod $testdir/BLKDEV b 1 1
++mknod $testdir/FIFO p
++
++xfs_info $SCRATCH_MNT | grep -q "ftype=1" && FTYPE_FEATURE=1
++
++# Record test dir inode for xfs_repair filter
++inode_filter=$tmp.sed
++rm -f $inode_filter
++pino=$(ls -id $testdir | awk '{print $1}')
++echo "s/inode $pino/PARENT_INO/" >> $inode_filter
++echo "s/directory $pino/directory PARENT_INO/" >> $inode_filter
++
++inodes=""
++# Record inode numbers for xfs_db commands and xfs_repair filter
++for f in DIR FILE SYMLINK CHRDEV BLKDEV FIFO; do
++	ino=$(ls -id $testdir/$f | awk '{print $1}')
++	inodes="$inodes $ino"
++	echo "s/inode $ino/${f}_INO/" >> $inode_filter
++done
++
++_scratch_unmount
++
++# Possible mode file type values (mode & S_IFMT) >> 12
++dtypes="0 1 2 3 4 5 6 7 10 11 12 13 14 15 16 17"
++echo "===== Find inode by file type:"
++for dt in $dtypes; do
++	# Set all our test files to dt value
++	for ino in $inodes; do
++		_scratch_xfs_db -c "inode $ino" -c "print core.mode" | \
++			grep -q "0${dt}0...$" && \
++			(echo "dt=$dt => inode $ino" | sed -f $inode_filter)
++	done
++done
++for dt in $dtypes; do
++	echo
++	echo "===== Setting dt=$dt to all files:"
++	# Set all our test files to dt value
++	for ino in $inodes; do
++		_scratch_xfs_db -x -c "inode $ino" -c "write core.mode 0${dt}0644"
++	done
++	# Repair should detect the inconsistencies
++	# For invalid dt values, all files would have been junked.
++	# For valid dt values, one test file is expected to be valid.
++	# The rest would either have wrong format or non matching dir ftype.
++	_scratch_xfs_repair -n 2>&1  | tee -a $seqres.full | \
++		_filter_repair | grep "^would have junked" | sed -f $inode_filter | sort -u
++	# If ftype feature is enabled, when setting file type to one of the
++	# special types (i.e. FIFO(1), CHRDEV(2),BLKDEV(6),SOCKET(14)),
++	# xfs_repair is expected to detect ftype mismatch error. Otherewise,
++	# xfs_repair is not expected to detect ftype mismatch error.
++	if [ "$FTYPE_FEATURE" = 1 ] && (echo ':1:2:6:14:' | grep -q ":$dt:"); then
++		_scratch_xfs_repair -n 2>&1 | grep -q "^would fix ftype mismatch" || \
++			_fail "xfs_repair should fix ftype mismatch"
++	else
++		_scratch_xfs_repair -n 2>&1 | grep -q -v "^would fix ftype mismatch" || \
++			_fail "xfs_repair should not fix ftype mismatch"
++	fi
++done
++
++# Repair should detect and junk all test files
++_scratch_xfs_repair 2>&1 >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
++
++status=0
++exit
+diff --git a/tests/xfs/348.out b/tests/xfs/348.out
+new file mode 100644
+index 0000000..bf4924b
+--- /dev/null
++++ b/tests/xfs/348.out
+@@ -0,0 +1,216 @@
++QA output created by 348
++===== Find inode by file type:
++dt=1 => FIFO_INO
++dt=2 => CHRDEV_INO
++dt=4 => DIR_INO
++dt=6 => BLKDEV_INO
++dt=10 => FILE_INO
++dt=12 => SYMLINK_INO
++
++===== Setting dt=0 to all files:
++core.mode = 0644
++core.mode = 0644
++core.mode = 0644
++core.mode = 0644
++core.mode = 0644
++core.mode = 0644
++would have junked entry "BLKDEV" in directory PARENT_INO
++would have junked entry "CHRDEV" in directory PARENT_INO
++would have junked entry "DIR" in directory PARENT_INO
++would have junked entry "FIFO" in directory PARENT_INO
++would have junked entry "FILE" in directory PARENT_INO
++would have junked entry "SYMLINK" in directory PARENT_INO
++
++===== Setting dt=1 to all files:
++core.mode = 010644
++core.mode = 010644
++core.mode = 010644
++core.mode = 010644
++core.mode = 010644
++core.mode = 010644
++would have junked entry "DIR" in directory PARENT_INO
++would have junked entry "FILE" in directory PARENT_INO
++would have junked entry "SYMLINK" in directory PARENT_INO
++
++===== Setting dt=2 to all files:
++core.mode = 020644
++core.mode = 020644
++core.mode = 020644
++core.mode = 020644
++core.mode = 020644
++core.mode = 020644
++would have junked entry "DIR" in directory PARENT_INO
++would have junked entry "FILE" in directory PARENT_INO
++would have junked entry "SYMLINK" in directory PARENT_INO
++
++===== Setting dt=3 to all files:
++core.mode = 030644
++core.mode = 030644
++core.mode = 030644
++core.mode = 030644
++core.mode = 030644
++core.mode = 030644
++would have junked entry "BLKDEV" in directory PARENT_INO
++would have junked entry "CHRDEV" in directory PARENT_INO
++would have junked entry "DIR" in directory PARENT_INO
++would have junked entry "FIFO" in directory PARENT_INO
++would have junked entry "FILE" in directory PARENT_INO
++would have junked entry "SYMLINK" in directory PARENT_INO
++
++===== Setting dt=4 to all files:
++core.mode = 040644
++core.mode = 040644
++core.mode = 040644
++core.mode = 040644
++core.mode = 040644
++core.mode = 040644
++would have junked entry "BLKDEV" in directory PARENT_INO
++would have junked entry "CHRDEV" in directory PARENT_INO
++would have junked entry "FIFO" in directory PARENT_INO
++would have junked entry "FILE" in directory PARENT_INO
++
++===== Setting dt=5 to all files:
++core.mode = 050644
++core.mode = 050644
++core.mode = 050644
++core.mode = 050644
++core.mode = 050644
++core.mode = 050644
++would have junked entry "BLKDEV" in directory PARENT_INO
++would have junked entry "CHRDEV" in directory PARENT_INO
++would have junked entry "DIR" in directory PARENT_INO
++would have junked entry "FIFO" in directory PARENT_INO
++would have junked entry "FILE" in directory PARENT_INO
++would have junked entry "SYMLINK" in directory PARENT_INO
++
++===== Setting dt=6 to all files:
++core.mode = 060644
++core.mode = 060644
++core.mode = 060644
++core.mode = 060644
++core.mode = 060644
++core.mode = 060644
++would have junked entry "DIR" in directory PARENT_INO
++would have junked entry "FILE" in directory PARENT_INO
++would have junked entry "SYMLINK" in directory PARENT_INO
++
++===== Setting dt=7 to all files:
++core.mode = 070644
++core.mode = 070644
++core.mode = 070644
++core.mode = 070644
++core.mode = 070644
++core.mode = 070644
++would have junked entry "BLKDEV" in directory PARENT_INO
++would have junked entry "CHRDEV" in directory PARENT_INO
++would have junked entry "DIR" in directory PARENT_INO
++would have junked entry "FIFO" in directory PARENT_INO
++would have junked entry "FILE" in directory PARENT_INO
++would have junked entry "SYMLINK" in directory PARENT_INO
++
++===== Setting dt=10 to all files:
++core.mode = 0100644
++core.mode = 0100644
++core.mode = 0100644
++core.mode = 0100644
++core.mode = 0100644
++core.mode = 0100644
++would have junked entry "BLKDEV" in directory PARENT_INO
++would have junked entry "CHRDEV" in directory PARENT_INO
++would have junked entry "DIR" in directory PARENT_INO
++would have junked entry "FIFO" in directory PARENT_INO
++would have junked entry "SYMLINK" in directory PARENT_INO
++
++===== Setting dt=11 to all files:
++core.mode = 0110644
++core.mode = 0110644
++core.mode = 0110644
++core.mode = 0110644
++core.mode = 0110644
++core.mode = 0110644
++would have junked entry "BLKDEV" in directory PARENT_INO
++would have junked entry "CHRDEV" in directory PARENT_INO
++would have junked entry "DIR" in directory PARENT_INO
++would have junked entry "FIFO" in directory PARENT_INO
++would have junked entry "FILE" in directory PARENT_INO
++would have junked entry "SYMLINK" in directory PARENT_INO
++
++===== Setting dt=12 to all files:
++core.mode = 0120644
++core.mode = 0120644
++core.mode = 0120644
++core.mode = 0120644
++core.mode = 0120644
++core.mode = 0120644
++would have junked entry "BLKDEV" in directory PARENT_INO
++would have junked entry "CHRDEV" in directory PARENT_INO
++would have junked entry "DIR" in directory PARENT_INO
++would have junked entry "FIFO" in directory PARENT_INO
++would have junked entry "FILE" in directory PARENT_INO
++
++===== Setting dt=13 to all files:
++core.mode = 0130644
++core.mode = 0130644
++core.mode = 0130644
++core.mode = 0130644
++core.mode = 0130644
++core.mode = 0130644
++would have junked entry "BLKDEV" in directory PARENT_INO
++would have junked entry "CHRDEV" in directory PARENT_INO
++would have junked entry "DIR" in directory PARENT_INO
++would have junked entry "FIFO" in directory PARENT_INO
++would have junked entry "FILE" in directory PARENT_INO
++would have junked entry "SYMLINK" in directory PARENT_INO
++
++===== Setting dt=14 to all files:
++core.mode = 0140644
++core.mode = 0140644
++core.mode = 0140644
++core.mode = 0140644
++core.mode = 0140644
++core.mode = 0140644
++would have junked entry "DIR" in directory PARENT_INO
++would have junked entry "FILE" in directory PARENT_INO
++would have junked entry "SYMLINK" in directory PARENT_INO
++
++===== Setting dt=15 to all files:
++core.mode = 0150644
++core.mode = 0150644
++core.mode = 0150644
++core.mode = 0150644
++core.mode = 0150644
++core.mode = 0150644
++would have junked entry "BLKDEV" in directory PARENT_INO
++would have junked entry "CHRDEV" in directory PARENT_INO
++would have junked entry "DIR" in directory PARENT_INO
++would have junked entry "FIFO" in directory PARENT_INO
++would have junked entry "FILE" in directory PARENT_INO
++would have junked entry "SYMLINK" in directory PARENT_INO
++
++===== Setting dt=16 to all files:
++core.mode = 0160644
++core.mode = 0160644
++core.mode = 0160644
++core.mode = 0160644
++core.mode = 0160644
++core.mode = 0160644
++would have junked entry "BLKDEV" in directory PARENT_INO
++would have junked entry "CHRDEV" in directory PARENT_INO
++would have junked entry "DIR" in directory PARENT_INO
++would have junked entry "FIFO" in directory PARENT_INO
++would have junked entry "FILE" in directory PARENT_INO
++would have junked entry "SYMLINK" in directory PARENT_INO
++
++===== Setting dt=17 to all files:
++core.mode = 0170644
++core.mode = 0170644
++core.mode = 0170644
++core.mode = 0170644
++core.mode = 0170644
++core.mode = 0170644
++would have junked entry "BLKDEV" in directory PARENT_INO
++would have junked entry "CHRDEV" in directory PARENT_INO
++would have junked entry "DIR" in directory PARENT_INO
++would have junked entry "FIFO" in directory PARENT_INO
++would have junked entry "FILE" in directory PARENT_INO
++would have junked entry "SYMLINK" in directory PARENT_INO
+diff --git a/tests/xfs/group b/tests/xfs/group
+index c237b50..68c2bb6 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -334,3 +334,4 @@
+ 345 auto quick clone
+ 346 auto quick clone
+ 347 auto quick clone
++348 auto quick repair
+-- 
+2.7.4
 
-New failures I've noticed in this update:
-- generic/399 fails on ext4, it's a known fs encryption bug (if you tested with
-  set|get_policy xfs_io patch applied manually)
-- generic/400 fails on XFS, there's a patch from Eric Sandeen to fix it in XFS
-- generic/401 fails on NFSv4 (NFSv3 passes the filetype test) as NFSv4 reports
-  filetype of . and .. as DT_UNKNOWN, while reports filetype of other files
-  correctly
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-7ee1d97c799b generic: test correct d_type values
-
-New commits:
-
-Amir Goldstein (3):
-      [9aead226d330] common/rc: factor out _supports_filetype() helper
-      [d0d42a38211c] common/rc: add generic file type support check
-      [7ee1d97c799b] generic: test correct d_type values
-
-Eric Biggers (6):
-      [3419026f0719] encrypt: add utilities for testing filesystem encryption
-      [b8f280fcdb67] generic: test setting and getting encryption policies
-      [88d1c426f4ea] generic: test validation of encryption policy structure
-      [758175fad3c6] generic: test encrypted file access
-      [0f7a9791309e] generic: test enforcement of one encryption policy per tree
-      [716691159e4f] generic: test for weaknesses in filesystem encryption
-
-Eric Sandeen (3):
-      [3cbd329a14bd] generic: test GETNEXTQUOTA near INT_MAX
-      [a4f96daeb1c8] generic/244: remove extra junk
-      [3b3191806f67] common: add _require_getnextquota helper
-
-Eryu Guan (1):
-      [596a068bf130] fstests: teach _scratch_mkfs to handle mkfs option conflicts
-
-Qu Wenruo (1):
-      [312e7ce2da53] btrfs/047: Remove test since upstream don't accept stream-version
-
-Theodore Ts'o (1):
-      [030fd2aea20f] overlay: stress test changes to top and bottom layers simultaneously
-
-
-Code Diffstat:
-
- .gitignore            |   1 +
- common/btrfs          |  14 ----
- common/config         |   2 +
- common/encrypt        | 146 +++++++++++++++++++++++++++++++++
- common/quota          |  10 +++
- common/rc             | 220 ++++++++++++++++++++++++++++++--------------------
- common/xfs            |  47 +++--------
- src/Makefile          |   2 +-
- src/t_dir_type.c      | 108 +++++++++++++++++++++++++
- src/test-nextquota.c  |  37 +++++----
- tests/btrfs/028       |   2 +-
- tests/btrfs/047       | 120 ---------------------------
- tests/btrfs/047.out   |  35 --------
- tests/btrfs/121       |   2 +-
- tests/btrfs/122       |   2 +-
- tests/btrfs/123       |   2 +-
- tests/btrfs/126       |   2 +-
- tests/btrfs/group     |   1 -
- tests/generic/244     |  12 +--
- tests/generic/395     | 135 +++++++++++++++++++++++++++++++
- tests/generic/395.out |  43 ++++++++++
- tests/generic/396     |  82 +++++++++++++++++++
- tests/generic/396.out |  18 +++++
- tests/generic/397     | 144 +++++++++++++++++++++++++++++++++
- tests/generic/397.out |  13 +++
- tests/generic/398     | 158 ++++++++++++++++++++++++++++++++++++
- tests/generic/398.out |  45 +++++++++++
- tests/generic/399     | 166 +++++++++++++++++++++++++++++++++++++
- tests/generic/399.out |   3 +
- tests/generic/400     |  89 ++++++++++++++++++++
- tests/generic/400.out |   8 ++
- tests/generic/401     |  95 ++++++++++++++++++++++
- tests/generic/401.out |   9 +++
- tests/generic/group   |   7 ++
- tests/overlay/019     |  95 ++++++++++++++++++++++
- tests/overlay/019.out |   2 +
- tests/overlay/group   |   1 +
- 37 files changed, 1554 insertions(+), 324 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
-
---s1qCufHgLkto
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJYX6RGAAoJECZSqilcj+djyV8QAKeyewRg+lLuk6XfjYo/YfRE
-1oz0JMkRhZrX6stYaIphYtfqzKE+aqKZ6/9ZGgeE5E0nledzr+vOPf44lld5TK15
-Bfhf8TXPyUl9QiOWS1IaUwAqteSC1Q30xH5HKs2wUsMZHV2CoGw7XzrIxR+jYais
-Uf1lPJ/rSg0YLW4pHdqcs6bXsPflynPvizX3bFUgIVMJ7lhijaQF7smySxLLtnA2
-9zqg5+S6X/FakgzKfL4DozOzZlNuPwsFutOeikvAJ2bmZ3SIdQStqDEXdgdhht2z
-upQsyMLLoh61z9lT+LxKQPYQxYDmW0cesdJ7M2YgyfUh2xFBV+BDSADMxs0MKZn3
-/Ra0ZzLKw9Eh/xxJZyPyrnubtd3Y2lAENkXMmLSOKmwMdk8+CgHWeWXqKLAaQ7SQ
-U8TNmQ/+LeXAXl3DvenjIznelBWM4N5QmT+rQPY/krFihBJuOzUuhZau9RVB4uZ/
-WDGZAQdXBsJbqLaJz5mS6UKkvt60iYd0Y0DnLtKxgJiDSK8kngjtEeNFaLoAQ03/
-91+7p/WiDGC6f9DhnSxr289rnGXXqJLgm5ZgtQQsGil9SZ95I88d6VkriRFAnaW+
-2vvZcOKXqFJsa9EmQstZixnFWN8xLq2jobeOr5lgL7VQGVmmELbnrL3A29lPJtys
-+tO6LyPWPxUefBnhravF
-=sDAJ
------END PGP SIGNATURE-----
-
---s1qCufHgLkto--
