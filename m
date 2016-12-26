@@ -1,54 +1,61 @@
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:36394 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752426AbcLYSKD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 25 Dec 2016 13:10:03 -0500
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2 3/3] xfs/348: test readlink/readdir with malformed inode mode
-Date: Sun, 25 Dec 2016 20:09:36 +0200
-Message-Id: <1482689376-23553-4-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1482689376-23553-1-git-send-email-amir73il@gmail.com>
-References: <1482689376-23553-1-git-send-email-amir73il@gmail.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:13064 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1752007AbcLZAXY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 25 Dec 2016 19:23:24 -0500
+Subject: Re: [PATCH] fstests: btrfs: Test scrub and replace race for RAID56
+References: <20161222020251.12272-1-quwenruo@cn.fujitsu.com>
+ <20161224094525.GR1859@eguan.usersys.redhat.com>
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Message-ID: <7c3f647d-9851-ce4a-f8f8-33b9c90e53e9@cn.fujitsu.com>
+Date: Mon, 26 Dec 2016 08:23:18 +0800
+MIME-Version: 1.0
+In-Reply-To: <20161224094525.GR1859@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Christoph Hellwig <hch@infradead.org>
-Cc: Brian Foster <bfoster@redhat.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-In addition to testing xfs_repair on inodes with malformed mode,
-and fstat of those inodes on a mounted fs, try to also list content
-of mock directory and readlink of mock symlink.
 
-Readdir of mock directory triggers XFS assertion on umount:
- XFS: Assertion failed: !rwsem_is_locked(&inode->i_rwsem), file:
- /home/amir/build/src/linux/fs/xfs/xfs_super.c, line: 951
 
-To reproduce, need to comment out the variable 'safety'.
+At 12/24/2016 05:45 PM, Eryu Guan wrote:
+> On Thu, Dec 22, 2016 at 10:02:51AM +0800, Qu Wenruo wrote:
+>> Although by design, btrfs scrub and replace share the same code path, so
+>> they are exclusive to each other.
+>>
+>> But the fact is, there is still some critical region not protected well,
+>> so we can have the following kernel panic, especially easy to trigger on
+>> RAID5/6 profiles.
+>
+> Could btrfs/069 reproduce the panic? It also races scrub and replace,
+> but with fsstress running in background, raid5/6 profiles are part of
+> the default test configs.
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/xfs/348 | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+Yes, but the possibility is very low and depends on the test machine.
+I never reproduced it with btrfs/069 on all my VMs, but can produce it 
+on my physical machines.
 
-diff --git a/tests/xfs/348 b/tests/xfs/348
-index 2a54f9e..cb0e3ea 100755
---- a/tests/xfs/348
-+++ b/tests/xfs/348
-@@ -132,6 +132,16 @@ for dt in $dtypes; do
- 			cat $tmp.stat.err
- 		else
- 			echo "stat: '$testdir/$file' is a $ftype"
-+			# Verify that readlink of a file posing as a symlink
-+			# and ls of a file posing as a directory does not blow up
-+			safety="-d"
-+			# NOTE that ls DOES blow up with kernel 4.9 on malformed
-+			# directory - remove the safety pin to explode
-+			if [ -d $testdir/$file ]; then
-+				ls "$safety" $testdir/$file &> /dev/null
-+			elif [ -h $testdir/$file ]; then
-+				readlink $testdir/$file &> /dev/null
-+			fi
- 		fi | _filter_scratch
- 	done
- 	_scratch_unmount
--- 
-2.7.4
+Nor btrfs/069 supports TIME_FACTOR to improve the possibility.
+>
+> Also, is there a known fix available in Linus tree or btrfs tree? If
+> not, I'd push this new test after there's a known fix (if it's worth a
+> new test).
+
+Not yet, still WIP.
+
+I'll CC you as the fix is submitted.
+
+Thanks,
+Qu
+>
+> Thanks,
+> Eryu
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+
 
