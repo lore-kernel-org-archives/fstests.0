@@ -1,61 +1,49 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:13064 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1752007AbcLZAXY (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 25 Dec 2016 19:23:24 -0500
-Subject: Re: [PATCH] fstests: btrfs: Test scrub and replace race for RAID56
-References: <20161222020251.12272-1-quwenruo@cn.fujitsu.com>
- <20161224094525.GR1859@eguan.usersys.redhat.com>
+Received: from cn.fujitsu.com ([222.73.24.84]:3767 "EHLO song.cn.fujitsu.com"
+        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+        id S1754047AbcLZE60 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 25 Dec 2016 23:58:26 -0500
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Message-ID: <7c3f647d-9851-ce4a-f8f8-33b9c90e53e9@cn.fujitsu.com>
-Date: Mon, 26 Dec 2016 08:23:18 +0800
+Subject: [PATCH] fstests: btrfs/132: Use better method to wait the writer to avoid EBUSY
+Date: Mon, 26 Dec 2016 12:57:52 +0800
+Message-Id: <20161226045752.19979-1-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
-In-Reply-To: <20161224094525.GR1859@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+The kill and wait method will only wait for the children process to
+exit, while the xfs_io can still run at background.
 
+This makes the test always fails on HDD backed physical machine.
 
-At 12/24/2016 05:45 PM, Eryu Guan wrote:
-> On Thu, Dec 22, 2016 at 10:02:51AM +0800, Qu Wenruo wrote:
->> Although by design, btrfs scrub and replace share the same code path, so
->> they are exclusive to each other.
->>
->> But the fact is, there is still some critical region not protected well,
->> so we can have the following kernel panic, especially easy to trigger on
->> RAID5/6 profiles.
->
-> Could btrfs/069 reproduce the panic? It also races scrub and replace,
-> but with fsstress running in background, raid5/6 profiles are part of
-> the default test configs.
+Use the "while ps aux | grep" method in btrfs/069 to truely wait the
+xfs_io to finish.
 
-Yes, but the possibility is very low and depends on the test machine.
-I never reproduced it with btrfs/069 on all my VMs, but can produce it 
-on my physical machines.
+Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+---
+ tests/btrfs/132 | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-Nor btrfs/069 supports TIME_FACTOR to improve the possibility.
->
-> Also, is there a known fix available in Linus tree or btrfs tree? If
-> not, I'd push this new test after there's a known fix (if it's worth a
-> new test).
+diff --git a/tests/btrfs/132 b/tests/btrfs/132
+index 0516177..db0dcb0 100755
+--- a/tests/btrfs/132
++++ b/tests/btrfs/132
+@@ -94,9 +94,10 @@ sleep $sleep_time
+ kill $pids
+ wait
+ 
+-# Sync the fs to avoid EBUSY while umount, which is quite common for btrfs
+-# compression
+-sync
++# Wait all writers really exits
++while ps aux | grep "$SCRATCH_MNT" | grep -qv grep; do
++	sleep 1
++done
+ 
+ echo "Silence is golden"
+ status=0
+-- 
+2.7.4
 
-Not yet, still WIP.
-
-I'll CC you as the fix is submitted.
-
-Thanks,
-Qu
->
-> Thanks,
-> Eryu
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
 
 
