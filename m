@@ -1,143 +1,121 @@
-Received: from mx1.redhat.com ([209.132.183.28]:50564 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753591AbcL3EJE (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 29 Dec 2016 23:09:04 -0500
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] generic/158,304: filter dedupe error message
-Date: Fri, 30 Dec 2016 12:08:54 +0800
-Message-Id: <20161230040854.17512-1-eguan@redhat.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:63052 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1753096AbcL3EOY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Dec 2016 23:14:24 -0500
+From: Su Yue <suy.fnst@cn.fujitsu.com>
+Subject: [PATCH 2/2] fstests: btrfs/006: Fix false alert due to output change
+Date: Thu, 29 Dec 2016 23:14:10 -0500
+Message-ID: <20161230041410.10038-2-suy.fnst@cn.fujitsu.com>
+In-Reply-To: <20161230041410.10038-1-suy.fnst@cn.fujitsu.com>
+References: <20161230041410.10038-1-suy.fnst@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org, darrick.wong@oracle.com, Eryu Guan <eguan@redhat.com>
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Kernel commit 22725ce4e4a0 ("vfs: fix isize/pos/len checks for reflink &
-dedupe") added more checks on reflink and dedupe, rejected dedupe past
-EOF early and explicitly, and causes generic/158 and generic/304 to fail.
+Btrfs-progs v4.9 changed "device status" output by adding one more
+space, which differs from golden output.
 
-  Try dedupe from past EOF
- -dedupe: Invalid argument
- +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-  Try dedupe to past EOF, destination offset beyond EOF
+Fix it by introducing new filter to convert multi space into one.
 
-Fix it by replacing fs-specific ioctl in error message to "dedupe".
-
-Signed-off-by: Eryu Guan <eguan@redhat.com>
+Signed-off-by: Su Yue <suy.fnst@cn.fujitsu.com>
 ---
- common/reflink        | 7 +++++++
- tests/generic/158     | 7 +++++--
- tests/generic/158.out | 4 ++--
- tests/generic/304     | 9 ++++++---
- tests/generic/304.out | 2 +-
- 5 files changed, 21 insertions(+), 8 deletions(-)
+ common/filter       |  6 ++++++
+ tests/btrfs/006     | 16 ++++++++++++----
+ tests/btrfs/006.out | 24 ++++++++++++------------
+ 3 files changed, 30 insertions(+), 16 deletions(-)
 
-diff --git a/common/reflink b/common/reflink
-index 64ee04f..7306efd 100644
---- a/common/reflink
-+++ b/common/reflink
-@@ -241,6 +241,13 @@ _dedupe_range() {
- 	$XFS_IO_PROG $xfs_io_args -f -c "dedupe $file1 $offset1 $offset2 $len" "$file2"
+diff --git a/common/filter b/common/filter
+index 397b456..4d5e4d0 100644
+--- a/common/filter
++++ b/common/filter
+@@ -401,5 +401,11 @@ _filter_mknod()
+ 	sed -e "s/mknod: [\`']\(.*\)': File exists/mknod: \1: File exists/"
  }
  
-+# Filter fs-specific ioctl in error message to "dedupe"
-+# e.g. replace XFS_IOC_FILE_EXTENT_SAME with dedupe
-+_filter_dedupe()
++# Filter spaces into one
++_filter_spaces()
 +{
-+	sed -e 's/XFS_IOC_FILE_EXTENT_SAME/dedupe/g'
++	sed -e "s/\s\+/ /g"
 +}
 +
- # Create a file of interleaved unwritten and reflinked blocks
- _weave_reflink_unwritten() {
- 	blksz=$1
-diff --git a/tests/generic/158 b/tests/generic/158
-index 086c522..77ab1ce 100755
---- a/tests/generic/158
-+++ b/tests/generic/158
-@@ -81,10 +81,12 @@ mkfifo $testdir1/fifo1
- sync
+ # make sure this script returns success
+ /bin/true
+diff --git a/tests/btrfs/006 b/tests/btrfs/006
+index 0863394..dc9bfb9 100755
+--- a/tests/btrfs/006
++++ b/tests/btrfs/006
+@@ -82,13 +82,21 @@ echo "== Sync filesystem"
+ $BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT > /dev/null
  
- _filter_enotty() {
-+	_filter_dedupe | \
- 	sed -e 's/Inappropriate ioctl for device/Invalid argument/g'
- }
+ echo "== Show device stats by mountpoint"
+-$BTRFS_UTIL_PROG device stats $SCRATCH_MNT | _filter_btrfs_device_stats $TOTAL_DEVS
++$BTRFS_UTIL_PROG device stats $SCRATCH_MNT | \
++       	_filter_btrfs_device_stats $TOTAL_DEVS | \
++	_filter_spaces
+ echo "== Show device stats by first/scratch dev"
+-$BTRFS_UTIL_PROG device stats $SCRATCH_DEV | _filter_btrfs_device_stats
++$BTRFS_UTIL_PROG device stats $SCRATCH_DEV | \
++	_filter_btrfs_device_stats | \
++	_filter_spaces
+ echo "== Show device stats by second dev"
+-$BTRFS_UTIL_PROG device stats $FIRST_POOL_DEV | sed -e "s,$FIRST_POOL_DEV,FIRST_POOL_DEV,g"
++$BTRFS_UTIL_PROG device stats $FIRST_POOL_DEV | \
++	sed -e "s,$FIRST_POOL_DEV,FIRST_POOL_DEV,g" | \
++	_filter_spaces
+ echo "== Show device stats by last dev"
+-$BTRFS_UTIL_PROG device stats $LAST_POOL_DEV | sed -e "s,$LAST_POOL_DEV,LAST_POOL_DEV,g"
++$BTRFS_UTIL_PROG device stats $LAST_POOL_DEV | \
++	sed -e "s,$LAST_POOL_DEV,LAST_POOL_DEV,g" | \
++	_filter_spaces
  
- _filter_eperm() {
-+	_filter_dedupe | \
- 	sed -e 's/Permission denied/Invalid argument/g'
- }
- 
-@@ -98,7 +100,8 @@ echo "Try overlapping dedupe"
- _dedupe_range $testdir1/file1 0 $testdir1/file1 1 $((blksz * 2))
- 
- echo "Try dedupe from past EOF"
--_dedupe_range $testdir1/file1 $(( (blks + 10) * blksz)) $testdir1/file1 0 $blksz
-+_dedupe_range $testdir1/file1 $(( (blks + 10) * blksz)) $testdir1/file1 0 $blksz \
-+	2>&1 | _filter_dedupe
- 
- echo "Try dedupe to past EOF, destination offset beyond EOF"
- _dedupe_range $testdir1/file1 0 $testdir1/file1 $(( (blks + 10) * blksz)) \
-@@ -109,7 +112,7 @@ _dedupe_range $testdir1/file1 0 $testdir1/file1 $(( (blks - 1) * blksz)) \
- 	$((blksz * 2))
- 
- echo "Try to dedupe a dir"
--_dedupe_range $testdir1/dir1 0 $testdir1/file2 0 $blksz
-+_dedupe_range $testdir1/dir1 0 $testdir1/file2 0 $blksz 2>&1 | _filter_dedupe
- 
- echo "Try to dedupe a device"
- _dedupe_range $testdir1/dev1 0 $testdir1/file2 0 $blksz 2>&1 | _filter_enotty
-diff --git a/tests/generic/158.out b/tests/generic/158.out
-index 9b82ddf..3a9596f 100644
---- a/tests/generic/158.out
-+++ b/tests/generic/158.out
-@@ -14,9 +14,9 @@ dedupe: Invalid argument
- Try dedupe to past EOF, destination offset behind EOF
- dedupe: Invalid argument
- Try to dedupe a dir
--XFS_IOC_FILE_EXTENT_SAME: Is a directory
-+dedupe: Is a directory
- Try to dedupe a device
--XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-+dedupe: Invalid argument
- Try to dedupe to a dir
- TEST_DIR/test-158/dir1: Is a directory
- Try to dedupe to a device
-diff --git a/tests/generic/304 b/tests/generic/304
-index b7ee7b9..8f0a3b4 100755
---- a/tests/generic/304
-+++ b/tests/generic/304
-@@ -75,13 +75,16 @@ echo "Dedupe high offset to low offset"
- _dedupe_range $testdir/file1 $bigoff_64k $testdir/file6 1048576 65535 >> $seqres.full
- 
- echo "Dedupe past source file EOF (should fail)"
--_dedupe_range $testdir/file2 524288 $testdir/file7 0 1048576 >> $seqres.full
-+_dedupe_range $testdir/file2 524288 $testdir/file7 0 1048576 \
-+	2>&1 >> $seqres.full | _filter_dedupe
- 
- echo "Dedupe max size at nonzero offset (should fail)"
--_dedupe_range $testdir/file2 524288 $testdir/file8 0 $len >> $seqres.full
-+_dedupe_range $testdir/file2 524288 $testdir/file8 0 $len \
-+	2>&1 >> $seqres.full | _filter_dedupe
- 
- echo "Dedupe with huge off/len (should fail)"
--_dedupe_range $testdir/file2 $bigoff_64k $testdir/file9 0 $bigoff_64k >> $seqres.full
-+_dedupe_range $testdir/file2 $bigoff_64k $testdir/file9 0 $bigoff_64k \
-+	2>&1 >> $seqres.full | _filter_dedupe
- 
- echo "Check file creation"
- _test_cycle_mount
-diff --git a/tests/generic/304.out b/tests/generic/304.out
-index 7b5ff0e..fbba6f3 100644
---- a/tests/generic/304.out
-+++ b/tests/generic/304.out
-@@ -14,7 +14,7 @@ dedupe: Invalid argument
- Dedupe max size at nonzero offset (should fail)
- dedupe: Invalid argument
- Dedupe with huge off/len (should fail)
--XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-+dedupe: Invalid argument
- Check file creation
- file3
- 7ffffffffffffffe:  61  a
+ # success, all done
+ status=0
+diff --git a/tests/btrfs/006.out b/tests/btrfs/006.out
+index 05b9ac0..a976972 100644
+--- a/tests/btrfs/006.out
++++ b/tests/btrfs/006.out
+@@ -16,25 +16,25 @@ Label: 'TestLabel.006'  uuid: <EXACTUUID>
+ == Sync filesystem
+ == Show device stats by mountpoint
+ <NUMDEVS> [SCRATCH_DEV].corruption_errs <NUM>
+-<NUMDEVS> [SCRATCH_DEV].flush_io_errs   <NUM>
++<NUMDEVS> [SCRATCH_DEV].flush_io_errs <NUM>
+ <NUMDEVS> [SCRATCH_DEV].generation_errs <NUM>
+-<NUMDEVS> [SCRATCH_DEV].read_io_errs    <NUM>
+-<NUMDEVS> [SCRATCH_DEV].write_io_errs   <NUM>
++<NUMDEVS> [SCRATCH_DEV].read_io_errs <NUM>
++<NUMDEVS> [SCRATCH_DEV].write_io_errs <NUM>
+ == Show device stats by first/scratch dev
+ [SCRATCH_DEV].corruption_errs <NUM>
+-[SCRATCH_DEV].flush_io_errs   <NUM>
++[SCRATCH_DEV].flush_io_errs <NUM>
+ [SCRATCH_DEV].generation_errs <NUM>
+-[SCRATCH_DEV].read_io_errs    <NUM>
+-[SCRATCH_DEV].write_io_errs   <NUM>
++[SCRATCH_DEV].read_io_errs <NUM>
++[SCRATCH_DEV].write_io_errs <NUM>
+ == Show device stats by second dev
+-[FIRST_POOL_DEV].write_io_errs   0
+-[FIRST_POOL_DEV].read_io_errs    0
+-[FIRST_POOL_DEV].flush_io_errs   0
++[FIRST_POOL_DEV].write_io_errs 0
++[FIRST_POOL_DEV].read_io_errs 0
++[FIRST_POOL_DEV].flush_io_errs 0
+ [FIRST_POOL_DEV].corruption_errs 0
+ [FIRST_POOL_DEV].generation_errs 0
+ == Show device stats by last dev
+-[LAST_POOL_DEV].write_io_errs   0
+-[LAST_POOL_DEV].read_io_errs    0
+-[LAST_POOL_DEV].flush_io_errs   0
++[LAST_POOL_DEV].write_io_errs 0
++[LAST_POOL_DEV].read_io_errs 0
++[LAST_POOL_DEV].flush_io_errs 0
+ [LAST_POOL_DEV].corruption_errs 0
+ [LAST_POOL_DEV].generation_errs 0
 -- 
 2.9.3
+
+
 
