@@ -1,49 +1,143 @@
-Received: from mail-io0-f196.google.com ([209.85.223.196]:32890 "EHLO
-        mail-io0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750735AbcL1V3k (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 28 Dec 2016 16:29:40 -0500
-Received: by mail-io0-f196.google.com with SMTP id j76so19943176ioe.0
-        for <fstests@vger.kernel.org>; Wed, 28 Dec 2016 13:29:40 -0800 (PST)
-Date: Wed, 28 Dec 2016 15:21:32 -0600
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: Re: [PATCH] xfstests-bld: document how to add debian packages to GCE
- image
-Message-ID: <20161228212132.GB8557@zzz>
-References: <1482343592-135031-2-git-send-email-ebiggers3@gmail.com>
- <20161222170433.cbyrt2phsapq2tr7@thunk.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20161222170433.cbyrt2phsapq2tr7@thunk.org>
+Received: from mx1.redhat.com ([209.132.183.28]:50564 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753591AbcL3EJE (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 29 Dec 2016 23:09:04 -0500
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] generic/158,304: filter dedupe error message
+Date: Fri, 30 Dec 2016 12:08:54 +0800
+Message-Id: <20161230040854.17512-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org, darrick.wong@oracle.com, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Dec 22, 2016 at 12:04:33PM -0500, Theodore Ts'o wrote:
-> On Wed, Dec 21, 2016 at 10:06:28AM -0800, Eric Biggers wrote:
-> > +build your own image, you must first build a 64-bit (amd64) xfstests
-> > +tarball as described in the [instructions for building
-> > +xfstests](building-xfstests.md).  Then copy any additional Debian
-> > +packages, for the amd64 architecture, you want to include in the GCE
-> > +image into the root directory of GS_BUCKET.
-> 
-> This is phrased a bit awkwardly.  The official way is to put the
-> debian packages in kvm-xfstests/test-appliances/debs.  This works for
-> both building gce-xfstests and kvm-xfstests images.
-> 
+Kernel commit 22725ce4e4a0 ("vfs: fix isize/pos/len checks for reflink &
+dedupe") added more checks on reflink and dedupe, rejected dedupe past
+EOF early and explicitly, and causes generic/158 and generic/304 to fail.
 
-That works with kvm-xfstests (gen-image), but it didn't work when I tried it
-with gce-xfstests (gce-create-image) because nothing was actually copying the
-debian packages into the GS bucket for the test appliance to install.  How about
-we update gce-create-image to copy the debian packages from
-test-appliances/debs/ into the GS bucket (maybe gsutil rsync -d to a directory
-'debs'), so that it works in the way you're suggesting?
+  Try dedupe from past EOF
+ -dedupe: Invalid argument
+ +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
+  Try dedupe to past EOF, destination offset beyond EOF
 
-Also, Documentation/building-rootfs.md already describes adding packages for
-kvm-xfstests; it's just gce-xfstests that was missing the documentation.  So
-perhaps the gce-xfstests documentation should refer to the kvm-xfstests
-documentation for full details on adding packages, if the procedure is going to
-be the same.
+Fix it by replacing fs-specific ioctl in error message to "dedupe".
 
-Eric
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+ common/reflink        | 7 +++++++
+ tests/generic/158     | 7 +++++--
+ tests/generic/158.out | 4 ++--
+ tests/generic/304     | 9 ++++++---
+ tests/generic/304.out | 2 +-
+ 5 files changed, 21 insertions(+), 8 deletions(-)
+
+diff --git a/common/reflink b/common/reflink
+index 64ee04f..7306efd 100644
+--- a/common/reflink
++++ b/common/reflink
+@@ -241,6 +241,13 @@ _dedupe_range() {
+ 	$XFS_IO_PROG $xfs_io_args -f -c "dedupe $file1 $offset1 $offset2 $len" "$file2"
+ }
+ 
++# Filter fs-specific ioctl in error message to "dedupe"
++# e.g. replace XFS_IOC_FILE_EXTENT_SAME with dedupe
++_filter_dedupe()
++{
++	sed -e 's/XFS_IOC_FILE_EXTENT_SAME/dedupe/g'
++}
++
+ # Create a file of interleaved unwritten and reflinked blocks
+ _weave_reflink_unwritten() {
+ 	blksz=$1
+diff --git a/tests/generic/158 b/tests/generic/158
+index 086c522..77ab1ce 100755
+--- a/tests/generic/158
++++ b/tests/generic/158
+@@ -81,10 +81,12 @@ mkfifo $testdir1/fifo1
+ sync
+ 
+ _filter_enotty() {
++	_filter_dedupe | \
+ 	sed -e 's/Inappropriate ioctl for device/Invalid argument/g'
+ }
+ 
+ _filter_eperm() {
++	_filter_dedupe | \
+ 	sed -e 's/Permission denied/Invalid argument/g'
+ }
+ 
+@@ -98,7 +100,8 @@ echo "Try overlapping dedupe"
+ _dedupe_range $testdir1/file1 0 $testdir1/file1 1 $((blksz * 2))
+ 
+ echo "Try dedupe from past EOF"
+-_dedupe_range $testdir1/file1 $(( (blks + 10) * blksz)) $testdir1/file1 0 $blksz
++_dedupe_range $testdir1/file1 $(( (blks + 10) * blksz)) $testdir1/file1 0 $blksz \
++	2>&1 | _filter_dedupe
+ 
+ echo "Try dedupe to past EOF, destination offset beyond EOF"
+ _dedupe_range $testdir1/file1 0 $testdir1/file1 $(( (blks + 10) * blksz)) \
+@@ -109,7 +112,7 @@ _dedupe_range $testdir1/file1 0 $testdir1/file1 $(( (blks - 1) * blksz)) \
+ 	$((blksz * 2))
+ 
+ echo "Try to dedupe a dir"
+-_dedupe_range $testdir1/dir1 0 $testdir1/file2 0 $blksz
++_dedupe_range $testdir1/dir1 0 $testdir1/file2 0 $blksz 2>&1 | _filter_dedupe
+ 
+ echo "Try to dedupe a device"
+ _dedupe_range $testdir1/dev1 0 $testdir1/file2 0 $blksz 2>&1 | _filter_enotty
+diff --git a/tests/generic/158.out b/tests/generic/158.out
+index 9b82ddf..3a9596f 100644
+--- a/tests/generic/158.out
++++ b/tests/generic/158.out
+@@ -14,9 +14,9 @@ dedupe: Invalid argument
+ Try dedupe to past EOF, destination offset behind EOF
+ dedupe: Invalid argument
+ Try to dedupe a dir
+-XFS_IOC_FILE_EXTENT_SAME: Is a directory
++dedupe: Is a directory
+ Try to dedupe a device
+-XFS_IOC_FILE_EXTENT_SAME: Invalid argument
++dedupe: Invalid argument
+ Try to dedupe to a dir
+ TEST_DIR/test-158/dir1: Is a directory
+ Try to dedupe to a device
+diff --git a/tests/generic/304 b/tests/generic/304
+index b7ee7b9..8f0a3b4 100755
+--- a/tests/generic/304
++++ b/tests/generic/304
+@@ -75,13 +75,16 @@ echo "Dedupe high offset to low offset"
+ _dedupe_range $testdir/file1 $bigoff_64k $testdir/file6 1048576 65535 >> $seqres.full
+ 
+ echo "Dedupe past source file EOF (should fail)"
+-_dedupe_range $testdir/file2 524288 $testdir/file7 0 1048576 >> $seqres.full
++_dedupe_range $testdir/file2 524288 $testdir/file7 0 1048576 \
++	2>&1 >> $seqres.full | _filter_dedupe
+ 
+ echo "Dedupe max size at nonzero offset (should fail)"
+-_dedupe_range $testdir/file2 524288 $testdir/file8 0 $len >> $seqres.full
++_dedupe_range $testdir/file2 524288 $testdir/file8 0 $len \
++	2>&1 >> $seqres.full | _filter_dedupe
+ 
+ echo "Dedupe with huge off/len (should fail)"
+-_dedupe_range $testdir/file2 $bigoff_64k $testdir/file9 0 $bigoff_64k >> $seqres.full
++_dedupe_range $testdir/file2 $bigoff_64k $testdir/file9 0 $bigoff_64k \
++	2>&1 >> $seqres.full | _filter_dedupe
+ 
+ echo "Check file creation"
+ _test_cycle_mount
+diff --git a/tests/generic/304.out b/tests/generic/304.out
+index 7b5ff0e..fbba6f3 100644
+--- a/tests/generic/304.out
++++ b/tests/generic/304.out
+@@ -14,7 +14,7 @@ dedupe: Invalid argument
+ Dedupe max size at nonzero offset (should fail)
+ dedupe: Invalid argument
+ Dedupe with huge off/len (should fail)
+-XFS_IOC_FILE_EXTENT_SAME: Invalid argument
++dedupe: Invalid argument
+ Check file creation
+ file3
+ 7ffffffffffffffe:  61  a
+-- 
+2.9.3
+
