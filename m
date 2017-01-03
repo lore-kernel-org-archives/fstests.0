@@ -1,54 +1,117 @@
-Received: from mail-wj0-f196.google.com ([209.85.210.196]:36294 "EHLO
-        mail-wj0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932325AbdABNXR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 2 Jan 2017 08:23:17 -0500
-Received: by mail-wj0-f196.google.com with SMTP id j10so68615921wjb.3
-        for <fstests@vger.kernel.org>; Mon, 02 Jan 2017 05:23:16 -0800 (PST)
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 2/2] check: support include/exclude of sub groups
-Date: Mon,  2 Jan 2017 15:22:59 +0200
-Message-Id: <1483363379-10210-2-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1483363379-10210-1-git-send-email-amir73il@gmail.com>
-References: <1483363379-10210-1-git-send-email-amir73il@gmail.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:26949 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1753711AbdACDQW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 2 Jan 2017 22:16:22 -0500
+From: Su Yue <suy.fnst@cn.fujitsu.com>
+Subject: [PATCH v2] fstests: btrfs/006: Fix false alert due to output change
+Date: Mon, 2 Jan 2017 22:16:17 -0500
+Message-ID: <20170103031617.439-1-suy.fnst@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Allow including and/or excluding tests by test dir and group.
--g and -x command line arguments can take the form of
-<subdir>/<group>.
-
-For example:
-
-./check -n -g xfs/quick
-./check -n -g stress -x xfs/stress
-./check -n -g xfs/punch -x dangerous_fuzzers
-
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+Btrfs-progs v4.9 changed "device status" output by adding one more
+space, which differs from golden output.
+Fix it by using filter '_filter_spaces' to convert multi space into one.
 ---
- check | 8 ++++++++
- 1 file changed, 8 insertions(+)
+v2:
+  Changed the '_filter_spaces' to match both Tab and Space and tested
+all related tests.
+---
+ common/filter       |  2 +-
+ tests/btrfs/006     | 16 ++++++++++++----
+ tests/btrfs/006.out | 24 ++++++++++++------------
+ 3 files changed, 25 insertions(+), 17 deletions(-)
 
-diff --git a/check b/check
-index faf6281..8d1ec71 100755
---- a/check
-+++ b/check
-@@ -105,6 +105,14 @@ get_group_list()
- {
- 	local grp=$1
- 	local grpl=""
-+	local sub=$(dirname $grp)
-+
-+	if [ -n "$sub" -a "$sub" != "." -a -d "$SRC_DIR/$sub" ]; then
-+		# group is given as <subdir>/<group> (e.g. xfs/quick)
-+		grp=$(basename $grp)
-+		get_sub_group_list $sub $grp
-+		return
-+	fi
+diff --git a/common/filter b/common/filter
+index 397b456..98eff57 100644
+--- a/common/filter
++++ b/common/filter
+@@ -299,7 +299,7 @@ _filter_scratch_pool()
  
- 	for d in $SRC_GROUPS $FSTYP; do
- 		if ! test -d "$SRC_DIR/$d" ; then
+ _filter_spaces()
+ {
+-       sed -e 's/ [ ]*/ /g'
++	sed -e "s/\s\+/ /g"
+ }
+ 
+ _filter_quota()
+diff --git a/tests/btrfs/006 b/tests/btrfs/006
+index 0863394..d84dfcb 100755
+--- a/tests/btrfs/006
++++ b/tests/btrfs/006
+@@ -82,13 +82,21 @@ echo "== Sync filesystem"
+ $BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT > /dev/null
+ 
+ echo "== Show device stats by mountpoint"
+-$BTRFS_UTIL_PROG device stats $SCRATCH_MNT | _filter_btrfs_device_stats $TOTAL_DEVS
++$BTRFS_UTIL_PROG device stats $SCRATCH_MNT | \
++    _filter_btrfs_device_stats $TOTAL_DEVS | \
++    _filter_spaces
+ echo "== Show device stats by first/scratch dev"
+-$BTRFS_UTIL_PROG device stats $SCRATCH_DEV | _filter_btrfs_device_stats
++$BTRFS_UTIL_PROG device stats $SCRATCH_DEV | \
++    _filter_btrfs_device_stats | \
++    _filter_spaces
+ echo "== Show device stats by second dev"
+-$BTRFS_UTIL_PROG device stats $FIRST_POOL_DEV | sed -e "s,$FIRST_POOL_DEV,FIRST_POOL_DEV,g"
++$BTRFS_UTIL_PROG device stats $FIRST_POOL_DEV | \
++    sed -e "s,$FIRST_POOL_DEV,FIRST_POOL_DEV,g" | \
++    _filter_spaces
+ echo "== Show device stats by last dev"
+-$BTRFS_UTIL_PROG device stats $LAST_POOL_DEV | sed -e "s,$LAST_POOL_DEV,LAST_POOL_DEV,g"
++$BTRFS_UTIL_PROG device stats $LAST_POOL_DEV | \
++    sed -e "s,$LAST_POOL_DEV,LAST_POOL_DEV,g" | \
++    _filter_spaces
+ 
+ # success, all done
+ status=0
+diff --git a/tests/btrfs/006.out b/tests/btrfs/006.out
+index 05b9ac0..a976972 100644
+--- a/tests/btrfs/006.out
++++ b/tests/btrfs/006.out
+@@ -16,25 +16,25 @@ Label: 'TestLabel.006'  uuid: <EXACTUUID>
+ == Sync filesystem
+ == Show device stats by mountpoint
+ <NUMDEVS> [SCRATCH_DEV].corruption_errs <NUM>
+-<NUMDEVS> [SCRATCH_DEV].flush_io_errs   <NUM>
++<NUMDEVS> [SCRATCH_DEV].flush_io_errs <NUM>
+ <NUMDEVS> [SCRATCH_DEV].generation_errs <NUM>
+-<NUMDEVS> [SCRATCH_DEV].read_io_errs    <NUM>
+-<NUMDEVS> [SCRATCH_DEV].write_io_errs   <NUM>
++<NUMDEVS> [SCRATCH_DEV].read_io_errs <NUM>
++<NUMDEVS> [SCRATCH_DEV].write_io_errs <NUM>
+ == Show device stats by first/scratch dev
+ [SCRATCH_DEV].corruption_errs <NUM>
+-[SCRATCH_DEV].flush_io_errs   <NUM>
++[SCRATCH_DEV].flush_io_errs <NUM>
+ [SCRATCH_DEV].generation_errs <NUM>
+-[SCRATCH_DEV].read_io_errs    <NUM>
+-[SCRATCH_DEV].write_io_errs   <NUM>
++[SCRATCH_DEV].read_io_errs <NUM>
++[SCRATCH_DEV].write_io_errs <NUM>
+ == Show device stats by second dev
+-[FIRST_POOL_DEV].write_io_errs   0
+-[FIRST_POOL_DEV].read_io_errs    0
+-[FIRST_POOL_DEV].flush_io_errs   0
++[FIRST_POOL_DEV].write_io_errs 0
++[FIRST_POOL_DEV].read_io_errs 0
++[FIRST_POOL_DEV].flush_io_errs 0
+ [FIRST_POOL_DEV].corruption_errs 0
+ [FIRST_POOL_DEV].generation_errs 0
+ == Show device stats by last dev
+-[LAST_POOL_DEV].write_io_errs   0
+-[LAST_POOL_DEV].read_io_errs    0
+-[LAST_POOL_DEV].flush_io_errs   0
++[LAST_POOL_DEV].write_io_errs 0
++[LAST_POOL_DEV].read_io_errs 0
++[LAST_POOL_DEV].flush_io_errs 0
+ [LAST_POOL_DEV].corruption_errs 0
+ [LAST_POOL_DEV].generation_errs 0
 -- 
-2.7.4
+2.9.3
+
+
 
