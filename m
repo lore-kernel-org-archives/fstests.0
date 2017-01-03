@@ -1,69 +1,70 @@
-Received: from mail-oi0-f65.google.com ([209.85.218.65]:35978 "EHLO
-        mail-oi0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752820AbdACJKw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 3 Jan 2017 04:10:52 -0500
-Received: by mail-oi0-f65.google.com with SMTP id u15so69408826oie.3
-        for <fstests@vger.kernel.org>; Tue, 03 Jan 2017 01:10:51 -0800 (PST)
-MIME-Version: 1.0
-In-Reply-To: <20170103050607.GJ1859@eguan.usersys.redhat.com>
-References: <1483363379-10210-1-git-send-email-amir73il@gmail.com>
- <1483363379-10210-2-git-send-email-amir73il@gmail.com> <20170103050607.GJ1859@eguan.usersys.redhat.com>
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:33823 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934881AbdACJP2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 3 Jan 2017 04:15:28 -0500
+Received: by mail-wm0-f66.google.com with SMTP id c85so47309191wmi.1
+        for <fstests@vger.kernel.org>; Tue, 03 Jan 2017 01:15:28 -0800 (PST)
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 3 Jan 2017 11:10:50 +0200
-Message-ID: <CAOQ4uxjTHcOdA_F7SOCbrQq8D1_UArd7zjbxm4VjUs8n3DWCxw@mail.gmail.com>
-Subject: Re: [PATCH 2/2] check: support include/exclude of sub groups
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH 3/3] check: document tests include/exclude options
+Date: Tue,  3 Jan 2017 11:15:14 +0200
+Message-Id: <1483434914-15909-1-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1483363379-10210-2-git-send-email-amir73il@gmail.com>
+References: <1483363379-10210-2-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jan 3, 2017 at 7:06 AM, Eryu Guan <eguan@redhat.com> wrote:
-> On Mon, Jan 02, 2017 at 03:22:59PM +0200, Amir Goldstein wrote:
->> Allow including and/or excluding tests by test dir and group.
->> -g and -x command line arguments can take the form of
->> <subdir>/<group>.
->>
->> For example:
->>
->> ./check -n -g xfs/quick
->> ./check -n -g stress -x xfs/stress
->> ./check -n -g xfs/punch -x dangerous_fuzzers
->>
->> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
->
-> This looks handy to me! Mention this usage in usage() function too?
->
+Add argument description and examples to usage() for the
+various tests include and exclude options.
 
-usage() is so far behind and cryptic (what is the difference between -E and -X?)
-I will send a separate patch to address these and the new subgroup as well.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ check | 29 ++++++++++++++++++++++++++++-
+ 1 file changed, 28 insertions(+), 1 deletion(-)
 
-> Thanks,
-> Eryu
->
->> ---
->>  check | 8 ++++++++
->>  1 file changed, 8 insertions(+)
->>
->> diff --git a/check b/check
->> index faf6281..8d1ec71 100755
->> --- a/check
->> +++ b/check
->> @@ -105,6 +105,14 @@ get_group_list()
->>  {
->>       local grp=$1
->>       local grpl=""
->> +     local sub=$(dirname $grp)
->> +
->> +     if [ -n "$sub" -a "$sub" != "." -a -d "$SRC_DIR/$sub" ]; then
->> +             # group is given as <subdir>/<group> (e.g. xfs/quick)
->> +             grp=$(basename $grp)
->> +             get_sub_group_list $sub $grp
->> +             return
->> +     fi
->>
->>       for d in $SRC_GROUPS $FSTYP; do
->>               if ! test -d "$SRC_DIR/$d" ; then
->> --
->> 2.7.4
->>
+diff --git a/check b/check
+index 8d1ec71..5a93c94 100755
+--- a/check
++++ b/check
+@@ -80,9 +80,36 @@ check options
+ testlist options
+     -g group[,group...]	include tests from these groups
+     -x group[,group...]	exclude tests from these groups
+-    -X file		exclude individual tests
++    -X exclude_file	exclude individual tests
+     -E external_file	exclude individual tests
+     [testlist]		include tests matching names in testlist
++
++testlist argument is a list of tests in the form of <test dir>/<test name>.
++
++<test dir> is a directory under tests that contains a group file,
++with a list of the names of the tests in that directory.
++
++<test name> may be either a specific test file name (e.g. xfs/001) or
++a test file name match pattern (e.g. xfs/*).
++
++group argument is either a name of a tests group to collect from all
++the test dirs (e.g. quick) or a name of a tests group to collect from
++a specific tests dir in the form of <test dir>/<group name> (e.g. xfs/quick).
++
++exclude_file argument refers to a name of a file inside each test directory.
++for every test dir where this file is found, the listed test names are
++excluded from the list of tests to run from that test dir.
++
++external_file argument is a path to a single file containing a list of tests
++to exclude in the form of <test dir>/<test name>.
++
++examples:
++ check xfs/001
++ check -g quick
++ check -g xfs/quick
++ check -x stress xfs/*
++ check -X .exclude -g auto
++ check -E ~/.xfstests.exclude
+ '
+ 	    exit 0
+ }
+-- 
+2.7.4
+
