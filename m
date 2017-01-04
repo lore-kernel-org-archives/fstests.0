@@ -1,55 +1,51 @@
-Received: from synology.com ([59.124.61.242]:58731 "EHLO synology.com"
+Received: from mx1.redhat.com ([209.132.183.28]:56544 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S935369AbdADLuQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 4 Jan 2017 06:50:16 -0500
-From: robbieko <robbieko@synology.com>
-Subject: [PATCH v3 4/4] xfstests: btrfs/134: add test for incremental send which renames a directory already being deleted
-Date: Wed,  4 Jan 2017 18:53:30 +0800
-Message-Id: <1483527210-2530-5-git-send-email-robbieko@synology.com>
-In-Reply-To: <1483527210-2530-1-git-send-email-robbieko@synology.com>
-References: <1483527210-2530-1-git-send-email-robbieko@synology.com>
+        id S1753302AbdADI7l (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 4 Jan 2017 03:59:41 -0500
+From: Xiong Zhou <xzhou@redhat.com>
+Subject: [PATCH] overlay: copy up and remove from another namespace
+Date: Wed,  4 Jan 2017 16:59:11 +0800
+Message-Id: <1483520351-26897-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Robbie Ko <robbieko@synology.com>
+Cc: linux-unionfs@vger.kernel.org, amurdaca@redhat.com, Xiong Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Robbie Ko <robbieko@synology.com>
+Via unshare, copy up dir from lower dir then remove
+them in another unshared namespace.
 
-Test that an incremental send operation dosen't work because
-it tries to rename a directory which is already deleted.
+This would fail before v4.7 kernel with EPERM.
 
-This test exercises scenarios used to fail in btrfs and are fixed by
-the following patch for the linux kernel:
+Kernel commit 3fe6e52f
+  ovl: override creds with the ones from the superblock mounter
+fixed this issue, with this reproducer provided. Original
+reproducer was written by commit author:
+Antonio Murdaca <amurdaca@redhat.com>
 
-"Btrfs: incremental send, add generation check for inode is waiting for move."
-
-Signed-off-by: Robbie Ko <robbieko@synology.com>
+Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 ---
-V3: remove "run_" based helpers
-V2: improve the change log
+ tests/overlay/020     | 70 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/020.out |  2 ++
+ tests/overlay/group   |  1 +
+ 3 files changed, 73 insertions(+)
+ create mode 100755 tests/overlay/020
+ create mode 100644 tests/overlay/020.out
 
- tests/btrfs/134     | 124 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/134.out |   9 ++++
- tests/btrfs/group   |   1 +
- 3 files changed, 134 insertions(+)
- create mode 100755 tests/btrfs/134
- create mode 100644 tests/btrfs/134.out
-
-diff --git a/tests/btrfs/134 b/tests/btrfs/134
+diff --git a/tests/overlay/020 b/tests/overlay/020
 new file mode 100755
-index 0000000..87c108e
+index 0000000..4afd40a
 --- /dev/null
-+++ b/tests/btrfs/134
-@@ -0,0 +1,124 @@
++++ b/tests/overlay/020
+@@ -0,0 +1,70 @@
 +#! /bin/bash
-+# FS QA Test No. btrfs/134
++# FS QA Test 020
 +#
-+# Test that an incremental send operation dosen't work because
-+# it tries to rename a directory which is already deleted.
++# Reproducer from kernel commit 3fe6e52
++#    ovl: override creds with the ones from the superblock mounter
++# Testing ovl copyup/namespace/cred issue.
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (C) 2016 Synology Inc. All Rights Reserved.
-+# Author: Robbie Ko <robbieko@synology.com>
++# Copyright (c) 2016 Red Hat Inc. All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -70,6 +66,7 @@ index 0000000..87c108e
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
++here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
@@ -77,7 +74,6 @@ index 0000000..87c108e
 +_cleanup()
 +{
 +	cd /
-+	rm -fr $send_files_dir
 +	rm -f $tmp.*
 +}
 +
@@ -85,110 +81,49 @@ index 0000000..87c108e
 +. ./common/rc
 +. ./common/filter
 +
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+_require_fssum
-+
-+send_files_dir=$TEST_DIR/btrfs-test-$seq
-+
++# remove previous $seqres.full before test
 +rm -f $seqres.full
-+rm -fr $send_files_dir
-+mkdir $send_files_dir
 +
-+_scratch_mkfs >>$seqres.full 2>&1
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs overlay
++_supported_os Linux
++_require_scratch
++
++# Remove all files from previous tests
++_scratch_mkfs
++
++lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
++mkdir -p $lowerdir/dir
++
 +_scratch_mount
 +
-+mkdir $SCRATCH_MNT/d1
-+mkdir $SCRATCH_MNT/d4
-+mkdir $SCRATCH_MNT/d3
-+
-+# Filesystem looks like:
-+#
-+# .                                                             (ino 256)
-+# |--- d1                                                       (ino 257)
-+# |--- d4                                                       (ino 258)
-+# |--- d3                                                       (ino 259)
-+#
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+    $SCRATCH_MNT/mysnap1 > /dev/null
-+
-+$BTRFS_UTIL_PROG send $SCRATCH_MNT/mysnap1 -f \
-+    $send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
-+
-+_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+mkdir $SCRATCH_MNT/d1
-+mkdir $SCRATCH_MNT/d2
-+mkdir $SCRATCH_MNT/d3
-+mkdir $SCRATCH_MNT/d4
-+mv $SCRATCH_MNT/d1 $SCRATCH_MNT/d3/d1
-+mv $SCRATCH_MNT/d3 $SCRATCH_MNT/d4/d3
-+mv $SCRATCH_MNT/d2 $SCRATCH_MNT/d1
-+
-+# Filesystem now looks like:
-+#
-+# .                                                             (ino 256)
-+# |--- d1                                                       (ino 258)
-+# |--- d4                                                       (ino 260)
-+# |    |--- d3/                                                 (ino 259)
-+# |    |    |--- d1/                                            (ino 257)
-+#
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+    $SCRATCH_MNT/mysnap2 > /dev/null
-+
-+$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/1.snap > /dev/null
-+rm $send_files_dir/1.snap
-+
-+$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-+$FSSUM_PROG -A -f -w $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
-+
-+$BTRFS_UTIL_PROG send $SCRATCH_MNT/mysnap1 -f \
-+    $send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
-+$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
-+	-f $send_files_dir/2.snap 2>&1 1>/dev/null | _filter_scratch
-+
-+# Now recreate the filesystem by receiving both send streams and verify we get
-+# the same content that the original filesystem had.
-+_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/1.snap > /dev/null
-+$FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-+$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/2.snap > /dev/null
-+$FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
++unshare -m -p -f -U -r bash -c \
++	"touch $SCRATCH_MNT/dir/{1,2,3}; rm -fR $SCRATCH_MNT/*"
 +
 +echo "Silence is golden"
++
++# success, all done
 +status=0
 +exit
-diff --git a/tests/btrfs/134.out b/tests/btrfs/134.out
+diff --git a/tests/overlay/020.out b/tests/overlay/020.out
 new file mode 100644
-index 0000000..700a78f
+index 0000000..20d7944
 --- /dev/null
-+++ b/tests/btrfs/134.out
-@@ -0,0 +1,9 @@
-+QA output created by 134
-+At subvol SCRATCH_MNT/mysnap1
-+At subvol mysnap1
-+At subvol SCRATCH_MNT/mysnap1
-+At subvol SCRATCH_MNT/mysnap2
-+At subvol mysnap1
-+OK
-+OK
++++ b/tests/overlay/020.out
+@@ -0,0 +1,2 @@
++QA output created by 020
 +Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 779caec..831283e 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -136,3 +136,4 @@
- 131 auto quick send
- 132 auto quick send
- 133 auto quick send
-+134 auto quick send
+diff --git a/tests/overlay/group b/tests/overlay/group
+index 66f780f..684ed45 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -22,3 +22,4 @@
+ 017 auto quick copyup
+ 018 auto quick copyup
+ 019 auto stress
++020 auto quick copyup perms
 -- 
-1.9.1
+1.8.3.1
 
