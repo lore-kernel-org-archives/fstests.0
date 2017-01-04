@@ -1,139 +1,55 @@
-Received: from mail-pf0-f193.google.com ([209.85.192.193]:35695 "EHLO
-        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750719AbdADDvS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 3 Jan 2017 22:51:18 -0500
-Received: by mail-pf0-f193.google.com with SMTP id i88so26359915pfk.2
-        for <fstests@vger.kernel.org>; Tue, 03 Jan 2017 19:51:18 -0800 (PST)
-From: Deepa Dinamani <deepa.kernel@gmail.com>
-Subject: [PATCH v3] generic/390: Add tests for inode timestamp policy
-Date: Tue,  3 Jan 2017 19:51:11 -0800
-Message-Id: <1483501871-15389-1-git-send-email-deepa.kernel@gmail.com>
+Received: from synology.com ([59.124.61.242]:53994 "EHLO synology.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1758101AbdADLAR (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 4 Jan 2017 06:00:17 -0500
+From: robbieko <robbieko@synology.com>
+Subject: [PATCH v3 3/4] xfstests: btrfs/133: add test for incremental send with rmdir applied on wrong name
+Date: Wed,  4 Jan 2017 18:53:29 +0800
+Message-Id: <1483527210-2530-4-git-send-email-robbieko@synology.com>
+In-Reply-To: <1483527210-2530-1-git-send-email-robbieko@synology.com>
+References: <1483527210-2530-1-git-send-email-robbieko@synology.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: arnd@arndb.de, y2038@lists.linaro.org
+Cc: linux-btrfs@vger.kernel.org, Robbie Ko <robbieko@synology.com>
 List-ID: <fstests@vger.kernel.org>
 
-The test helps to validate clamping and mount behaviors
-according to supported file system timestamp ranges.
+From: Robbie Ko <robbieko@synology.com>
 
-Note that the test can fail on 32-bit systems for a
-few file systems. This will be corrected when vfs is
-transitioned to use 64-bit timestamps.
+Test that an incremental send operation doesn't work for rmdir
+because it uses the wrong name to delete.
 
-Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
+This test exercises scenarios used to fail in btrfs and are fixed by
+the following patch for the linux kernel:
+
+"Btrfs: incremental send, skip check overwritten if parents' generation are different"
+
+Signed-off-by: Robbie Ko <robbieko@synology.com>
 ---
-The branch of the kernel tree can be located at
+V3: remove "run_" based helpers
+V2: improve the change log
 
-https://github.com/deepa-hub/vfs refs/heads/vfs_timestamp_policy
+ tests/btrfs/133     | 123 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/133.out |   9 ++++
+ tests/btrfs/group   |   1 +
+ 3 files changed, 133 insertions(+)
+ create mode 100755 tests/btrfs/133
+ create mode 100644 tests/btrfs/133.out
 
-The xfs_io patch to add utimes is at
-
-https://www.spinics.net/lists/linux-xfs/msg02952.html
-
-Changes since v2:
-* Refactored notrun handling
-* Updated comments
-
-Changes since v1:
-* Use xfs_io utimes command
-* Updated error handling
-* Reorganized code according to review comments
-
- common/rc             |  48 +++++++++++++
- tests/generic/390     | 192 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/390.out |   2 +
- tests/generic/group   |   1 +
- 4 files changed, 243 insertions(+)
- create mode 100755 tests/generic/390
- create mode 100644 tests/generic/390.out
-
-diff --git a/common/rc b/common/rc
-index e3b54ec..17f025e 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1960,6 +1960,51 @@ _run_aiodio()
-     return $status
- }
- 
-+# this test requires y2038 sysfs switch and filesystem
-+# timestamp ranges support.
-+_require_y2038()
-+{
-+	local device=${1:-$TEST_DEV}
-+	local sysfsdir=/proc/sys/fs/fs-timestamp-check-on
-+
-+	if [ ! -e $sysfsdir ]; then
-+		_notrun "no kernel support for y2038 sysfs switch"
-+	fi
-+
-+	local tsmin tsmax
-+	read tsmin tsmax <<<$(_filesystem_timestamp_range $device)
-+	if [ $tsmin -eq -1 -a $tsmax -eq -1 ]; then
-+		_notrun "filesystem $FSTYP timestamp bounds are unknown"
-+	fi
-+}
-+
-+_filesystem_timestamp_range()
-+{
-+	device=${1:-$TEST_DEV}
-+	case $FSTYP in
-+	ext4)
-+		if [ $(dumpe2fs -h $device 2>/dev/null | grep "Inode size:" | cut -d: -f2) -gt 128 ]; then
-+			echo "-2147483648 15032385535"
-+		else
-+			echo "-2147483648 2147483647"
-+		fi
-+		;;
-+
-+	xfs)
-+		echo "-2147483648 2147483647"
-+		;;
-+	jfs)
-+		echo "0 4294967295"
-+		;;
-+	f2fs)
-+		echo "-2147483648 2147483647"
-+		;;
-+	*)
-+		echo "-1 -1"
-+		;;
-+	esac
-+}
-+
- # indicate whether YP/NIS is active or not
- #
- _yp_active()
-@@ -2070,6 +2115,9 @@ _require_xfs_io_command()
- 		echo $testio | egrep -q "Inappropriate ioctl" && \
- 			_notrun "xfs_io $command support is missing"
- 		;;
-+	"utimes" )
-+		testio=`$XFS_IO_PROG -f -c "utimes" 0 0 0 0 $testfile 2>&1`
-+		;;
- 	*)
- 		testio=`$XFS_IO_PROG -c "$command help" 2>&1`
- 	esac
-diff --git a/tests/generic/390 b/tests/generic/390
+diff --git a/tests/btrfs/133 b/tests/btrfs/133
 new file mode 100755
-index 0000000..f68b931
+index 0000000..a7375c9
 --- /dev/null
-+++ b/tests/generic/390
-@@ -0,0 +1,192 @@
++++ b/tests/btrfs/133
+@@ -0,0 +1,123 @@
 +#! /bin/bash
-+# FS QA Test 390
++# FS QA Test No. btrfs/133
 +#
-+# Tests to verify policy for filesystem timestamps for
-+# supported ranges:
-+# 1. Verify filesystem rw mount according to sysctl
-+# timestamp_supported.
-+# 2. Verify timestamp clamping for timestamps beyond max
-+# timestamp supported.
-+#
-+# Exit status 1: either or both tests above fail.
-+# Exit status 0: both the above tests pass.
++# Test that an incremental send operation doesn't work for rmdir
++# because it uses the wrong name to delete.
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Deepa Dinamani.  All Rights Reserved.
++# Copyright (C) 2016 Synology Inc. All Rights Reserved.
++# Author: Robbie Ko <robbieko@synology.com>
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -154,180 +70,124 @@ index 0000000..f68b931
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
-+here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
-+trap "exit \$status" 0 1 2 3 15
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
-+# Get standard environment, filters and checks.
++_cleanup()
++{
++	cd /
++	rm -fr $send_files_dir
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/attr
 +
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# Prerequisites for the test run.
-+_supported_fs generic
++# real QA test starts here
++_supported_fs btrfs
 +_supported_os Linux
++_require_test
 +_require_scratch
-+_require_xfs_io_command utimes
++_require_fssum
 +
-+# Compare file timestamps obtained from stat
-+# with a given timestamp.
-+check_stat()
-+{
-+	file=$1
-+	timestamp=$2
++send_files_dir=$TEST_DIR/btrfs-test-$seq
 +
-+	stat_timestamp=`stat -c"%X;%Y" $file`
++rm -f $seqres.full
++rm -fr $send_files_dir
++mkdir $send_files_dir
 +
-+	prev_timestamp="$timestamp;$timestamp"
-+	if [ $prev_timestamp != $stat_timestamp ]; then
-+		echo "$prev_timestamp != $stat_timestamp" | tee -a $seqres.full
-+	fi
-+}
-+
-+run_test_individual()
-+{
-+	file=$1
-+	timestamp=$2
-+	update_time=$3
-+
-+	#check if the time needs update
-+	if [ $update_time -eq 1 ]; then
-+		echo "Updating file: $file to timestamp `date -d @$timestamp`"  >> $seqres.full
-+		$XFS_IO_PROG -f -c "utimes $timestamp 0 $timestamp 0" $file
-+		if [ $? -ne 0 ]; then
-+			echo "Failed to update times on $file" | tee -a $seqres.full
-+		fi
-+	fi
-+
-+	tsclamp=$(($timestamp>$tsmax?$tsmax:$timestamp))
-+	echo "Checking file: $file Updated timestamp is `date -d @$tsclamp`"  >> $seqres.full
-+	check_stat $file $tsclamp
-+}
-+
-+run_test()
-+{
-+	update_time=$1
-+
-+	n=1
-+
-+	for TIME in "${TIMESTAMPS[@]}"
-+	do
-+		#Run the test
-+		run_test_individual ${SCRATCH_MNT}/test_$n $TIME $update_time
-+
-+		#update iterator
-+		((n++))
-+	done
-+}
-+
-+_scratch_mkfs &>> $seqres.full 2>&1 || _fail "mkfs failed"
-+_require_y2038 $SCRATCH_DEV
-+
-+read tsmin tsmax <<<$(_filesystem_timestamp_range $SCRATCH_DEV)
-+echo min supported timestamp $tsmin $(date --date=@$tsmin) >> $seqres.full
-+echo max supported timestamp $tsmax $(date --date=@$tsmax) >> $seqres.full
-+
-+# Test timestamps array
-+
-+declare -a TIMESTAMPS=(
-+	$tsmin
-+	0
-+	$tsmax
-+	$((tsmax+1))
-+	4294967295
-+	8589934591
-+	34359738367
-+)
-+
-+# Max timestamp is hardcoded to Mon Jan 18 19:14:07 PST 2038
-+sys_tsmax=2147483647
-+echo "max timestamp that needs to be supported by fs for rw mount is" \
-+	"$((sys_tsmax+1)) $(date --date=@$((sys_tsmax+1)))" >> $seqres.full
-+
-+read ts_check <<<$(cat /proc/sys/fs/fs-timestamp-check-on)
-+
++_scratch_mkfs >>$seqres.full 2>&1
 +_scratch_mount
-+result=$?
 +
-+if [ $ts_check -ne 0 ]; then
-+	echo "sysctl filesystem timestamp check is on" >> $seqres.full
-+	# check for mount failure if the minimum requirement for max timestamp
-+	# supported is not met.
-+	if [ $sys_tsmax -ge $tsmax ]; then
-+		if [ $result -eq 0 ]; then
-+			echo "mount test failed"  | tee -a $seqres.full
-+			exit
-+		fi
-+	else
-+		if [ $result -ne 0 ]; then
-+			echo "failed to mount $SCRATCH_DEV"  | tee -a $seqres.full
-+			exit
-+		fi
-+	fi
-+else
-+	# if sysctl switch is off then mount should succeed always.
-+	echo "sysctl filesystem timestamp check is off" >> $seqres.full
-+	if [ $result -ne 0 ]; then
-+		echo "failed to mount $SCRATCH_DEV and timestamp check is off"  >> $seqres.full
-+		exit
-+	fi
-+fi
++touch $SCRATCH_MNT/f
++mkdir $SCRATCH_MNT/d1
++mkdir $SCRATCH_MNT/d259_old
++mv $SCRATCH_MNT/d1 $SCRATCH_MNT/d259_old/d1
 +
-+# Begin test case 1
-+echo "In memory timestamps update test start" >> $seqres.full
++# Filesystem looks like:
++#
++# .                                                             (ino 256)
++# |--- f                                                        (ino 257)
++# |
++# |--- d259_old/                                                (ino 259)
++# |    |--- d1/                                                 (ino 258)
++#
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
++    $SCRATCH_MNT/mysnap1 > /dev/null
 +
-+# update time on the file
-+update_time=1
++$BTRFS_UTIL_PROG send $SCRATCH_MNT/mysnap1 -f \
++    $send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
 +
-+run_test $update_time
++_scratch_unmount
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++mkdir $SCRATCH_MNT/d1
++mkdir $SCRATCH_MNT/dir258
++mkdir $SCRATCH_MNT/dir259
++mv $SCRATCH_MNT/d1 $SCRATCH_MNT/dir259/d1
 +
-+echo "In memory timestamps update complete" >> $seqres.full
++# Filesystem now looks like:
++#
++# .                                                             (ino 256)
++# |--- dir258                                                   (ino 258)
++# |
++# |--- dir259/                                                  (ino 259)
++# |    |--- d1/                                                 (ino 257)
++#
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
++    $SCRATCH_MNT/mysnap2 > /dev/null
 +
-+echo "Unmounting and mounting scratch $SCRATCH_MNT" >> $seqres.full
++$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/1.snap > /dev/null
++rm $send_files_dir/1.snap
 +
-+# unmount and remount $SCRATCH_DEV
-+_scratch_cycle_mount
++$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
++$FSSUM_PROG -A -f -w $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
 +
-+# Begin test case 2
++$BTRFS_UTIL_PROG send $SCRATCH_MNT/mysnap1 -f \
++    $send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
++$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
++	-f $send_files_dir/2.snap 2>&1 1>/dev/null | _filter_scratch
 +
-+n=1
++# Now recreate the filesystem by receiving both send streams and verify we get
++# the same content that the original filesystem had.
++_scratch_unmount
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
 +
-+# Do not update time on the file this time, just read from disk
-+update_time=0
++$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/1.snap > /dev/null
++$FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
++$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/2.snap > /dev/null
++$FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
 +
-+echo "On disk timestamps update test start" >> $seqres.full
-+
-+# Re-run test
-+run_test $update_time
-+
-+echo "On disk timestamps update test complete" >> $seqres.full
-+
-+echo "y2038 inode timestamp tests completed successfully"
-+
-+# success, all done
++echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/generic/390.out b/tests/generic/390.out
+diff --git a/tests/btrfs/133.out b/tests/btrfs/133.out
 new file mode 100644
-index 0000000..82bd4eb
+index 0000000..ae53750
 --- /dev/null
-+++ b/tests/generic/390.out
-@@ -0,0 +1,2 @@
-+QA output created by 390
-+y2038 inode timestamp tests completed successfully
-diff --git a/tests/generic/group b/tests/generic/group
-index 08007d7..d137d01 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -392,3 +392,4 @@
- 387 auto clone
- 388 auto log metadata
- 389 auto quick acl
-+390 auto quick rw
++++ b/tests/btrfs/133.out
+@@ -0,0 +1,9 @@
++QA output created by 133
++At subvol SCRATCH_MNT/mysnap1
++At subvol mysnap1
++At subvol SCRATCH_MNT/mysnap1
++At subvol SCRATCH_MNT/mysnap2
++At subvol mysnap1
++OK
++OK
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 1b12382..779caec 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -135,3 +135,4 @@
+ 130 auto clone send
+ 131 auto quick send
+ 132 auto quick send
++133 auto quick send
 -- 
-2.7.4
+1.9.1
 
