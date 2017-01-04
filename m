@@ -1,16 +1,16 @@
-Received: from mail-it0-f65.google.com ([209.85.214.65]:33127 "EHLO
-        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1759375AbdADNHf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 4 Jan 2017 08:07:35 -0500
+Received: from mail-io0-f195.google.com ([209.85.223.195]:36343 "EHLO
+        mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S965937AbdADNJq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 4 Jan 2017 08:09:46 -0500
 MIME-Version: 1.0
 Reply-To: fdmanana@gmail.com
-In-Reply-To: <1483527210-2530-5-git-send-email-robbieko@synology.com>
-References: <1483527210-2530-1-git-send-email-robbieko@synology.com> <1483527210-2530-5-git-send-email-robbieko@synology.com>
+In-Reply-To: <1483527210-2530-3-git-send-email-robbieko@synology.com>
+References: <1483527210-2530-1-git-send-email-robbieko@synology.com> <1483527210-2530-3-git-send-email-robbieko@synology.com>
 From: Filipe Manana <fdmanana@gmail.com>
-Date: Wed, 4 Jan 2017 13:07:33 +0000
-Message-ID: <CAL3q7H6eNoP6v+T=AXwB+5V0z_GMaJq8BxU=PO6z0mhRNtyuBA@mail.gmail.com>
-Subject: Re: [PATCH v3 4/4] xfstests: btrfs/134: add test for incremental send
- which renames a directory already being deleted
+Date: Wed, 4 Jan 2017 13:09:44 +0000
+Message-ID: <CAL3q7H7y2iLrUQVGBDBsNUqn0JRTqqUCrpL6m1yAvHyK1E7ZLg@mail.gmail.com>
+Subject: Re: [PATCH v3 2/4] xfstests: btrfs/132: add test for invaild update
+ time by an incremental send
 Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
 To: robbieko <robbieko@synology.com>
@@ -20,49 +20,49 @@ List-ID: <fstests@vger.kernel.org>
 On Wed, Jan 4, 2017 at 10:53 AM, robbieko <robbieko@synology.com> wrote:
 > From: Robbie Ko <robbieko@synology.com>
 >
-> Test that an incremental send operation dosen't work because
-
-dosen't -> doesn't
-
-> it tries to rename a directory which is already deleted.
+> Test that an incremental send operation dosen't' work because
+> it tries to update the time to a deleted directory after it finishes
+> a move operation.
+>
+> The other one is that an operation is applied to a file using the old
+> name not the new name.
 >
 > This test exercises scenarios used to fail in btrfs and are fixed by
-> the following patch for the linux kernel:
+> the following patches for the linux kernel:
 >
-> "Btrfs: incremental send, add generation check for inode is waiting for move."
+> "Btrfs: incremental send, add generation check for the inode waiting for rmdir operation."
+> "Btrfs: incremental send, add generation check in existence demtermination for the parent directory"
 >
 > Signed-off-by: Robbie Ko <robbieko@synology.com>
 > ---
 > V3: remove "run_" based helpers
 > V2: improve the change log
 >
->  tests/btrfs/134     | 124 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/134.out |   9 ++++
+>  tests/btrfs/132     | 123 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/132.out |   7 +++
 >  tests/btrfs/group   |   1 +
->  3 files changed, 134 insertions(+)
->  create mode 100755 tests/btrfs/134
->  create mode 100644 tests/btrfs/134.out
+>  3 files changed, 131 insertions(+)
+>  create mode 100755 tests/btrfs/132
+>  create mode 100644 tests/btrfs/132.out
 >
-> diff --git a/tests/btrfs/134 b/tests/btrfs/134
+> diff --git a/tests/btrfs/132 b/tests/btrfs/132
 > new file mode 100755
-> index 0000000..87c108e
+> index 0000000..f1bb698
 > --- /dev/null
-> +++ b/tests/btrfs/134
-> @@ -0,0 +1,124 @@
+> +++ b/tests/btrfs/132
+> @@ -0,0 +1,123 @@
 > +#! /bin/bash
-> +# FS QA Test No. btrfs/134
+> +# FS QA Test No. btrfs/132
 > +#
-> +# Test that an incremental send operation dosen't work because
-
-dosen't -> doesn't
-
-> +# it tries to rename a directory which is already deleted.
+> +# Test that an incremental send operation dosen't' work because
+> +# it tries to update the time to a deleted directory after it finishes
+> +# a move operation.
+> +#
+> +# The other one is that an operation is applied to a file using the old
+> +# name not the new name.
 > +#
 > +#-----------------------------------------------------------------------
 > +# Copyright (C) 2016 Synology Inc. All Rights Reserved.
-
-We're already in 2017 btw.
-
 > +# Author: Robbie Ko <robbieko@synology.com>
 > +#
 > +# This program is free software; you can redistribute it and/or
@@ -115,64 +115,54 @@ We're already in 2017 btw.
 > +_scratch_mkfs >>$seqres.full 2>&1
 > +_scratch_mount
 > +
-> +mkdir $SCRATCH_MNT/d1
-> +mkdir $SCRATCH_MNT/d4
-> +mkdir $SCRATCH_MNT/d3
+> +mkdir $SCRATCH_MNT/dir257
+> +mkdir $SCRATCH_MNT/dir258
+> +mkdir $SCRATCH_MNT/dir259
+> +mv $SCRATCH_MNT/dir257 $SCRATCH_MNT/dir258/dir257
 > +
 > +# Filesystem looks like:
 > +#
 > +# .                                                             (ino 256)
-> +# |--- d1                                                       (ino 257)
-> +# |--- d4                                                       (ino 258)
-> +# |--- d3                                                       (ino 259)
+> +# |--- dir258/                                                  (ino 258)
+> +# |    |--- dir257/                                             (ino 257)
+> +# |
+> +# |--- dir259/                                                  (ino 259)
 > +#
 > +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
 > +    $SCRATCH_MNT/mysnap1 > /dev/null
 > +
-> +$BTRFS_UTIL_PROG send $SCRATCH_MNT/mysnap1 -f \
-> +    $send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
-> +
+> +mv $SCRATCH_MNT/dir258/dir257 $SCRATCH_MNT/dir257
+> +rmdir $SCRATCH_MNT/dir258
+> +rmdir $SCRATCH_MNT/dir259
 > +_scratch_unmount
-> +_scratch_mkfs >>$seqres.full 2>&1
 > +_scratch_mount
 
-I don't understand this. Why do we need to recreate the filesystem?
-Why don't we just create the first and second snapshots in the same
-filesystems, just like all the other tests do.
+Why do need to remount the fs? There's also a _scratch_remount function.
 
-I would like to see comments explaining why that is needed and how/why
-the incremental send used to fail (in a user understandable way, not
-in a very technical way referring to pieces of code of btrfs), just
-like most of the existing send/receive tests have.
-
-I haven't tried nor reviewed the btrfs patches, but I hope to do it this week.
+Again, I would like to see comments in the test explaining why and
+how/why did the incremental send operation used to fail (like most of
+the existing send/receive tests have).
 
 thanks
 
-> +mkdir $SCRATCH_MNT/d1
-> +mkdir $SCRATCH_MNT/d2
-> +mkdir $SCRATCH_MNT/d3
-> +mkdir $SCRATCH_MNT/d4
-> +mv $SCRATCH_MNT/d1 $SCRATCH_MNT/d3/d1
-> +mv $SCRATCH_MNT/d3 $SCRATCH_MNT/d4/d3
-> +mv $SCRATCH_MNT/d2 $SCRATCH_MNT/d1
+> +touch $SCRATCH_MNT/file258
+> +mkdir $SCRATCH_MNT/new_dir259
+> +mv $SCRATCH_MNT/dir257 $SCRATCH_MNT/new_dir259/dir257
 > +
 > +# Filesystem now looks like:
 > +#
 > +# .                                                             (ino 256)
-> +# |--- d1                                                       (ino 258)
-> +# |--- d4                                                       (ino 260)
-> +# |    |--- d3/                                                 (ino 259)
-> +# |    |    |--- d1/                                            (ino 257)
+> +# |--- file258                                                  (ino 258)
+> +# |
+> +# |--- new_dir259/                                              (ino 259)
+> +# |    |--- dir257/                                             (ino 257)
 > +#
 > +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
 > +    $SCRATCH_MNT/mysnap2 > /dev/null
 > +
-> +$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/1.snap > /dev/null
-> +rm $send_files_dir/1.snap
-> +
 > +$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-> +$FSSUM_PROG -A -f -w $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
+> +$FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
+> +        -x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
 > +
 > +$BTRFS_UTIL_PROG send $SCRATCH_MNT/mysnap1 -f \
 > +    $send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
@@ -193,15 +183,13 @@ thanks
 > +echo "Silence is golden"
 > +status=0
 > +exit
-> diff --git a/tests/btrfs/134.out b/tests/btrfs/134.out
+> diff --git a/tests/btrfs/132.out b/tests/btrfs/132.out
 > new file mode 100644
-> index 0000000..700a78f
+> index 0000000..ff21547
 > --- /dev/null
-> +++ b/tests/btrfs/134.out
-> @@ -0,0 +1,9 @@
-> +QA output created by 134
-> +At subvol SCRATCH_MNT/mysnap1
-> +At subvol mysnap1
+> +++ b/tests/btrfs/132.out
+> @@ -0,0 +1,7 @@
+> +QA output created by 132
 > +At subvol SCRATCH_MNT/mysnap1
 > +At subvol SCRATCH_MNT/mysnap2
 > +At subvol mysnap1
@@ -209,14 +197,14 @@ thanks
 > +OK
 > +Silence is golden
 > diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 779caec..831283e 100644
+> index a7a070a..1b12382 100644
 > --- a/tests/btrfs/group
 > +++ b/tests/btrfs/group
-> @@ -136,3 +136,4 @@
+> @@ -134,3 +134,4 @@
+>  129 auto quick send
+>  130 auto clone send
 >  131 auto quick send
->  132 auto quick send
->  133 auto quick send
-> +134 auto quick send
+> +132 auto quick send
 > --
 > 1.9.1
 >
