@@ -1,13 +1,13 @@
-Received: from mail-wm0-f43.google.com ([74.125.82.43]:38780 "EHLO
-        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S968583AbdADPwC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 4 Jan 2017 10:52:02 -0500
-Received: by mail-wm0-f43.google.com with SMTP id k184so264399667wme.1
-        for <fstests@vger.kernel.org>; Wed, 04 Jan 2017 07:51:44 -0800 (PST)
+Received: from mail-wj0-f180.google.com ([209.85.210.180]:33447 "EHLO
+        mail-wj0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1031771AbdADTIU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 4 Jan 2017 14:08:20 -0500
+Received: by mail-wj0-f180.google.com with SMTP id tq7so239688793wjb.0
+        for <fstests@vger.kernel.org>; Wed, 04 Jan 2017 11:08:19 -0800 (PST)
 From: Roman Pen <roman.penyaev@profitbricks.com>
-Subject: [PATCH 1/1] xfstests: ext4/023: reproduces incorrect right shift (insert range)
-Date: Wed,  4 Jan 2017 16:51:29 +0100
-Message-Id: <20170104155129.2290-1-roman.penyaev@profitbricks.com>
+Subject: [PATCH v2 1/1] xfstests: ext4/023: reproduces incorrect right shift (insert range)
+Date: Wed,  4 Jan 2017 20:08:06 +0100
+Message-Id: <20170104190806.10795-1-roman.penyaev@profitbricks.com>
 Sender: fstests-owner@vger.kernel.org
 Cc: Roman Pen <roman.penyaev@profitbricks.com>, Theodore Ts'o <tytso@mit.edu>, linux-ext4@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
@@ -42,19 +42,25 @@ Cc: "Theodore Ts'o <tytso@mit.edu>"
 Cc: linux-ext4@vger.kernel.org
 Cc: fstests@vger.kernel.org
 ---
- tests/ext4/023     | 124 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+v1..v2:
+
+'_require_xfs_io_command "finsert"' line was added to prevent
+the test to fail on "ext3", "bigalloc" and "bigalloc_1k"
+configurations.
+
+ tests/ext4/023     | 125 +++++++++++++++++++++++++++++++++++++++++++++++++++++
  tests/ext4/023.out |   2 +
  tests/ext4/group   |   1 +
- 3 files changed, 127 insertions(+)
+ 3 files changed, 128 insertions(+)
  create mode 100755 tests/ext4/023
  create mode 100644 tests/ext4/023.out
 
 diff --git a/tests/ext4/023 b/tests/ext4/023
 new file mode 100755
-index 000000000000..2ca9d2fcf086
+index 000000000000..2cd890731eb5
 --- /dev/null
 +++ b/tests/ext4/023
-@@ -0,0 +1,124 @@
+@@ -0,0 +1,125 @@
 +#! /bin/bash
 +# FS QA Test 023
 +#
@@ -133,6 +139,7 @@ index 000000000000..2ca9d2fcf086
 +_supported_os Linux
 +_require_test
 +_require_dumpe2fs
++_require_xfs_io_command "finsert"
 +
 +pattern=$tmp
 +testfile=$TEST_DIR/023.file
