@@ -1,220 +1,109 @@
-Received: from mail-it0-f48.google.com ([209.85.214.48]:33849 "EHLO
-        mail-it0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934061AbdADTNb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 4 Jan 2017 14:13:31 -0500
-Received: by mail-it0-f48.google.com with SMTP id k132so5115948ita.1
-        for <fstests@vger.kernel.org>; Wed, 04 Jan 2017 11:12:51 -0800 (PST)
+Received: from userp1040.oracle.com ([156.151.31.81]:24954 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751847AbdADUe2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 4 Jan 2017 15:34:28 -0500
+Date: Wed, 4 Jan 2017 12:33:57 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH v2 1/3] xfs/348: test handling of invalid inode modes
+Message-ID: <20170104203357.GG14031@birch.djwong.org>
+References: <1482689376-23553-1-git-send-email-amir73il@gmail.com>
+ <1482689376-23553-2-git-send-email-amir73il@gmail.com>
+ <20170103203602.GA14034@birch.djwong.org>
+ <CAOQ4uxhWj2aS95E2OXG0+9n8DRy7Uz2KEJ9cpX6gXQHWO7DvWg@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20170104155129.2290-1-roman.penyaev@profitbricks.com>
-References: <20170104155129.2290-1-roman.penyaev@profitbricks.com>
-From: Roman Penyaev <roman.penyaev@profitbricks.com>
-Date: Wed, 4 Jan 2017 20:04:08 +0100
-Message-ID: <CAJrWOzC4ih-FK+0=_CcJ1bUi7eCpvBVf7m_2Z3LGu-cR5aze3g@mail.gmail.com>
-Subject: Re: [PATCH 1/1] xfstests: ext4/023: reproduces incorrect right shift
- (insert range)
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxhWj2aS95E2OXG0+9n8DRy7Uz2KEJ9cpX6gXQHWO7DvWg@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Roman Pen <roman.penyaev@profitbricks.com>
-Cc: Theodore Ts'o <tytso@mit.edu>, linux-ext4@vger.kernel.org, fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Eryu Guan <eguan@redhat.com>, Christoph Hellwig <hch@infradead.org>, Brian Foster <bfoster@redhat.com>, fstests <fstests@vger.kernel.org>, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-I forgot to specify '_require_xfs_io_command "finsert"', thus test
-fails on "ext3", "bigalloc" and "bigalloc_1k" configurations.
+On Wed, Jan 04, 2017 at 12:36:24PM +0200, Amir Goldstein wrote:
+> On Tue, Jan 3, 2017 at 10:36 PM, Darrick J. Wong
+> <darrick.wong@oracle.com> wrote:
+> > On Sun, Dec 25, 2016 at 08:09:34PM +0200, Amir Goldstein wrote:
+> >> Set all possible file type values for different types of files
+> >> and verify that xfs_repair detects the correct errors.
+> >>
+> >> When setting invalid file type values (e.g. core.mode = 0170644),
+> >> all files are expected to have been junked by xfs_repair.
+> >>
+> >> When setting valid file type values to non matching file types,
+> >> xfs_repair would either detect wrong format and junk the file, e.g.:
+> >>   would have junked entry "FILE" in directory PARENT_INO
+> >> or detect a ftype mismatch error, e.g.:
+> >>   would fix ftype mismatch (5/3) in directory/child PARENT_INO/FIFO_INO
+> >>
+> >> If ftype feature is enabled, when setting file type to one of the
+> >> special types (i.e. FIFO(1), CHRDEV(2),BLKDEV(6),SOCKET(14)),
+> >> xfs_repair is expected to detect ftype mismatch error. Otherewise,
+> >
+> > "Otherwise"
+> >
+> 
+> thanks
+> 
+> > I would also like to see a second test that scrambles the ftype field in
+> > the directory entry (instead of changing the inode core.mode) but xfs_db
+> > can't write to dir3 blocks because it doesn't know how to set the dir
+> > block CRC.
+> >
+> > I'm going to send a patch to add that as part of my xfsprogs 4.11
+> > patchbomb (hopefully next week, but after the xfsprogs 4.9 release) so
+> > that test can wait.
+> >
+> 
+> Sure, I'll beef up the test when that code arrives.
+> 
+> >> +     # If ftype feature is enabled, when setting file type to one of the
+> >> +     # special types (i.e. FIFO(1), CHRDEV(2),BLKDEV(6),SOCKET(14)),
+> >> +     # xfs_repair is expected to detect ftype mismatch error. Otherewise,
+> >> +     # xfs_repair is not expected to detect ftype mismatch error.
+> >> +     if [ "$FTYPE_FEATURE" = 1 ] && (echo ':1:2:6:14:' | grep -q ":$dt:"); then
+> >> +             _scratch_xfs_repair -n 2>&1 | grep -q "^would fix ftype mismatch" || \
+> >> +                     _fail "xfs_repair should fix ftype mismatch"
+> >> +     else
+> >> +             _scratch_xfs_repair -n 2>&1 | grep -q -v "^would fix ftype mismatch" || \
+> >> +                     _fail "xfs_repair should not fix ftype mismatch"
+> >
+> > Just FYI the whole test will stop as soon as we hit a _fail.  Please
+> > consider simply echoing a complaint to stdout so that the golden output
+> > diff will catch this, and we can see all the failing cases.
+> >
+> 
+> Will do.
+> 
+> Can you please reply to v2 patch series.
+> It contain 2 more patches beyond this one with additional testing of access
+> to mounted fs with the malformed inodes.
+> 
+> My question is what to do WRT patch 3/3 which triggers an XFS Assert in the
+> kernel (readdir of a phony directory that is really a regular file or symlink).
+> http://www.spinics.net/lists/linux-xfs/msg03059.html
+> 
+> Is this something of concern to you? Can you instruct me whether the assertion
+> should be fixed or propose a fix yourself?
+> Or is it just a non issue and we should not add patch 3/3 to this test.
 
-Will resend a patch.
+ASSERTs by definition halt the system, so it's only a crasher bug if
+CONFIG_XFS_DEBUG=y.  However, your test writes garbage to the
+filesystem, so we must try to avoid interacting with corrupted junk when
+possible.
 
---
-Roman
+I suggest bouncing corruption out to userspace by changing that ASSERT to:
 
-On Wed, Jan 4, 2017 at 4:51 PM, Roman Pen
-<roman.penyaev@profitbricks.com> wrote:
-> Test tries to insert many blocks at the same offset to reproduce
-> the following layout:
->
->    block #0  block #1
->    |ext0 ext1|ext2 ext3 ...|
->         ^
->      insert of a new block
->
-> Because of an incorrect range first block is never reached,
-> thus ext1 is untouched, resulting to a hole at a wrong offset:
->
-> What we got:
->
->    block #0   block #1
->    |ext0 ext1|   ext2 ext3 ...|
->               ^
->               hole at a wrong offset
->
-> What we expect:
->
->    block #0    block #1
->    |ext0   ext1|ext2 ext3 ...|
->         ^
->         hole at a correct offset
->
-> Signed-off-by: Roman Pen <roman.penyaev@profitbricks.com>
-> Cc: "Theodore Ts'o <tytso@mit.edu>"
-> Cc: linux-ext4@vger.kernel.org
-> Cc: fstests@vger.kernel.org
-> ---
->  tests/ext4/023     | 124 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/ext4/023.out |   2 +
->  tests/ext4/group   |   1 +
->  3 files changed, 127 insertions(+)
->  create mode 100755 tests/ext4/023
->  create mode 100644 tests/ext4/023.out
->
-> diff --git a/tests/ext4/023 b/tests/ext4/023
-> new file mode 100755
-> index 000000000000..2ca9d2fcf086
-> --- /dev/null
-> +++ b/tests/ext4/023
-> @@ -0,0 +1,124 @@
-> +#! /bin/bash
-> +# FS QA Test 023
-> +#
-> +# Regression test which reproduces an incorrect right shift
-> +# (insert range) for the first extent in a range.
-> +#
-> +# Test tries to insert many blocks at the same offset to reproduce
-> +# the following layout:
-> +#
-> +#    block #0  block #1
-> +#    |ext0 ext1|ext2 ext3 ...|
-> +#         ^
-> +#      insert of a new block
-> +#
-> +# Because of an incorrect range first block is never reached,
-> +# thus ext1 is untouched, resulting to a hole at a wrong offset:
-> +#
-> +# What we got:
-> +#
-> +#    block #0   block #1
-> +#    |ext0 ext1|   ext2 ext3 ...|
-> +#               ^
-> +#               hole at a wrong offset
-> +#
-> +# What we expect:
-> +#
-> +#    block #0    block #1
-> +#    |ext0   ext1|ext2 ext3 ...|
-> +#         ^
-> +#         hole at a correct offset
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Roman Penyaev.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs ext4
-> +_supported_os Linux
-> +_require_test
-> +_require_dumpe2fs
-> +
-> +pattern=$tmp
-> +testfile=$TEST_DIR/023.file
-> +
-> +blksize=`$DUMPE2FS_PROG -h $TEST_DEV 2>/dev/null | grep "Block size" | \
-> +       awk '{print $3}'`
-> +
-> +# Generate a block with a repeating number represented as 4 bytes decimal.
-> +function generate_pattern() {
-> +       blkind=$1
-> +       printf "%04d" $blkind | awk  '{ while (c++ < '$(($blksize/4))') \
-> +               printf "%s", $0 }' > $pattern
-> +}
-> +
-> +echo -n > $testfile
-> +$XFS_IO_PROG -c "falloc 0 $(($blksize * 2))" $testfile \
-> +                        >> $seqres.full 2>&1
-> +
-> +# First block, has 0001 as a pattern
-> +generate_pattern 1
-> +$XFS_IO_PROG -c "pwrite -i $pattern        0 $blksize" $testfile \
-> +                        >> $seqres.full 2>&1
-> +
-> +# Second block, has 0002 as a pattern
-> +generate_pattern 2
-> +$XFS_IO_PROG -c "pwrite -i $pattern $blksize $blksize" $testfile \
-> +                        >> $seqres.full 2>&1
-> +
-> +# Insert 998 blocks after the first block
-> +for (( block=3; block<=1000; block++ )); do
-> +       $XFS_IO_PROG -c "finsert $blksize $blksize" $testfile \
-> +                                >> $seqres.full 2>&1
-> +
-> +       generate_pattern $block
-> +       $XFS_IO_PROG -c "pwrite -i $pattern $blksize $blksize" $testfile \
-> +                                >> $seqres.full 2>&1
-> +done
-> +
-> +# Avoid offsets because block size can vary.
-> +# Expected blocks content is the following:
-> +#   0001 1000 0999 0998 ... 0002
-> +hexdump -e '16/1 "%_p" "\n"' $testfile | md5sum
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/ext4/023.out b/tests/ext4/023.out
-> new file mode 100644
-> index 000000000000..383e305d43fa
-> --- /dev/null
-> +++ b/tests/ext4/023.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 023
-> +d1c3b6f63c5420ca8248ca380a8c00cb  -
-> diff --git a/tests/ext4/group b/tests/ext4/group
-> index 53fe03e87083..ace5cf1a3d47 100644
-> --- a/tests/ext4/group
-> +++ b/tests/ext4/group
-> @@ -25,6 +25,7 @@
->  020 auto quick ioctl rw
->  021 auto quick
->  022 auto quick attr dangerous
-> +023 auto quick
->  271 auto rw quick
->  301 aio auto ioctl rw stress
->  302 aio auto ioctl rw stress
+if (rval == 0 || args->dp->i_d.di_size == args->geo->blksize)
+	return -EFSCORRUPTED;
+
+...and perhaps following it up with a check in _dinode_verify to reject
+the inode if it has an obviously bogus i_size.
+
+--D
+
+> 
+> Amir.
 > --
-> 2.10.2
->
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
