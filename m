@@ -1,164 +1,85 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:39224 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752574AbdACUBz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 3 Jan 2017 15:01:55 -0500
-Date: Tue, 3 Jan 2017 12:01:49 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] generic/158,304: filter dedupe error message
-Message-ID: <20170103200149.GB14031@birch.djwong.org>
-References: <20161230040854.17512-1-eguan@redhat.com>
+Received: from mail-oi0-f66.google.com ([209.85.218.66]:35273 "EHLO
+        mail-oi0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935051AbdADKgb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 4 Jan 2017 05:36:31 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20161230040854.17512-1-eguan@redhat.com>
+In-Reply-To: <20170103203602.GA14034@birch.djwong.org>
+References: <1482689376-23553-1-git-send-email-amir73il@gmail.com>
+ <1482689376-23553-2-git-send-email-amir73il@gmail.com> <20170103203602.GA14034@birch.djwong.org>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Wed, 4 Jan 2017 12:36:24 +0200
+Message-ID: <CAOQ4uxhWj2aS95E2OXG0+9n8DRy7Uz2KEJ9cpX6gXQHWO7DvWg@mail.gmail.com>
+Subject: Re: [PATCH v2 1/3] xfs/348: test handling of invalid inode modes
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Eryu Guan <eguan@redhat.com>, Christoph Hellwig <hch@infradead.org>, Brian Foster <bfoster@redhat.com>, fstests <fstests@vger.kernel.org>, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Dec 30, 2016 at 12:08:54PM +0800, Eryu Guan wrote:
-> Kernel commit 22725ce4e4a0 ("vfs: fix isize/pos/len checks for reflink &
-> dedupe") added more checks on reflink and dedupe, rejected dedupe past
-> EOF early and explicitly, and causes generic/158 and generic/304 to fail.
-> 
->   Try dedupe from past EOF
->  -dedupe: Invalid argument
->  +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
->   Try dedupe to past EOF, destination offset beyond EOF
-> 
-> Fix it by replacing fs-specific ioctl in error message to "dedupe".
-> 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> ---
->  common/reflink        | 7 +++++++
->  tests/generic/158     | 7 +++++--
->  tests/generic/158.out | 4 ++--
->  tests/generic/304     | 9 ++++++---
->  tests/generic/304.out | 2 +-
->  5 files changed, 21 insertions(+), 8 deletions(-)
-> 
-> diff --git a/common/reflink b/common/reflink
-> index 64ee04f..7306efd 100644
-> --- a/common/reflink
-> +++ b/common/reflink
-> @@ -241,6 +241,13 @@ _dedupe_range() {
->  	$XFS_IO_PROG $xfs_io_args -f -c "dedupe $file1 $offset1 $offset2 $len" "$file2"
->  }
->  
-> +# Filter fs-specific ioctl in error message to "dedupe"
-> +# e.g. replace XFS_IOC_FILE_EXTENT_SAME with dedupe
-> +_filter_dedupe()
-> +{
-> +	sed -e 's/XFS_IOC_FILE_EXTENT_SAME/dedupe/g'
-> +}
+On Tue, Jan 3, 2017 at 10:36 PM, Darrick J. Wong
+<darrick.wong@oracle.com> wrote:
+> On Sun, Dec 25, 2016 at 08:09:34PM +0200, Amir Goldstein wrote:
+>> Set all possible file type values for different types of files
+>> and verify that xfs_repair detects the correct errors.
+>>
+>> When setting invalid file type values (e.g. core.mode = 0170644),
+>> all files are expected to have been junked by xfs_repair.
+>>
+>> When setting valid file type values to non matching file types,
+>> xfs_repair would either detect wrong format and junk the file, e.g.:
+>>   would have junked entry "FILE" in directory PARENT_INO
+>> or detect a ftype mismatch error, e.g.:
+>>   would fix ftype mismatch (5/3) in directory/child PARENT_INO/FIFO_INO
+>>
+>> If ftype feature is enabled, when setting file type to one of the
+>> special types (i.e. FIFO(1), CHRDEV(2),BLKDEV(6),SOCKET(14)),
+>> xfs_repair is expected to detect ftype mismatch error. Otherewise,
+>
+> "Otherwise"
+>
 
-I sent a patch to the xfs list last month ("xfs_io: prefix dedupe
-command error messages consistently") changing all the error message
-prefixes to "XFS_IOC_FILE_EXTENT_SAME".  Was going to send a patch to
-fix up xfstests too... but evidently didn't.
+thanks
 
-If you change the sed command to 's/dedupe:/XFS_IOC_FILE_EXTENT_SAME:/g'
-that'll suffice, I think.
+> I would also like to see a second test that scrambles the ftype field in
+> the directory entry (instead of changing the inode core.mode) but xfs_db
+> can't write to dir3 blocks because it doesn't know how to set the dir
+> block CRC.
+>
+> I'm going to send a patch to add that as part of my xfsprogs 4.11
+> patchbomb (hopefully next week, but after the xfsprogs 4.9 release) so
+> that test can wait.
+>
 
---D
+Sure, I'll beef up the test when that code arrives.
 
-> +
->  # Create a file of interleaved unwritten and reflinked blocks
->  _weave_reflink_unwritten() {
->  	blksz=$1
-> diff --git a/tests/generic/158 b/tests/generic/158
-> index 086c522..77ab1ce 100755
-> --- a/tests/generic/158
-> +++ b/tests/generic/158
-> @@ -81,10 +81,12 @@ mkfifo $testdir1/fifo1
->  sync
->  
->  _filter_enotty() {
-> +	_filter_dedupe | \
->  	sed -e 's/Inappropriate ioctl for device/Invalid argument/g'
->  }
->  
->  _filter_eperm() {
-> +	_filter_dedupe | \
->  	sed -e 's/Permission denied/Invalid argument/g'
->  }
->  
-> @@ -98,7 +100,8 @@ echo "Try overlapping dedupe"
->  _dedupe_range $testdir1/file1 0 $testdir1/file1 1 $((blksz * 2))
->  
->  echo "Try dedupe from past EOF"
-> -_dedupe_range $testdir1/file1 $(( (blks + 10) * blksz)) $testdir1/file1 0 $blksz
-> +_dedupe_range $testdir1/file1 $(( (blks + 10) * blksz)) $testdir1/file1 0 $blksz \
-> +	2>&1 | _filter_dedupe
->  
->  echo "Try dedupe to past EOF, destination offset beyond EOF"
->  _dedupe_range $testdir1/file1 0 $testdir1/file1 $(( (blks + 10) * blksz)) \
-> @@ -109,7 +112,7 @@ _dedupe_range $testdir1/file1 0 $testdir1/file1 $(( (blks - 1) * blksz)) \
->  	$((blksz * 2))
->  
->  echo "Try to dedupe a dir"
-> -_dedupe_range $testdir1/dir1 0 $testdir1/file2 0 $blksz
-> +_dedupe_range $testdir1/dir1 0 $testdir1/file2 0 $blksz 2>&1 | _filter_dedupe
->  
->  echo "Try to dedupe a device"
->  _dedupe_range $testdir1/dev1 0 $testdir1/file2 0 $blksz 2>&1 | _filter_enotty
-> diff --git a/tests/generic/158.out b/tests/generic/158.out
-> index 9b82ddf..3a9596f 100644
-> --- a/tests/generic/158.out
-> +++ b/tests/generic/158.out
-> @@ -14,9 +14,9 @@ dedupe: Invalid argument
->  Try dedupe to past EOF, destination offset behind EOF
->  dedupe: Invalid argument
->  Try to dedupe a dir
-> -XFS_IOC_FILE_EXTENT_SAME: Is a directory
-> +dedupe: Is a directory
->  Try to dedupe a device
-> -XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-> +dedupe: Invalid argument
->  Try to dedupe to a dir
->  TEST_DIR/test-158/dir1: Is a directory
->  Try to dedupe to a device
-> diff --git a/tests/generic/304 b/tests/generic/304
-> index b7ee7b9..8f0a3b4 100755
-> --- a/tests/generic/304
-> +++ b/tests/generic/304
-> @@ -75,13 +75,16 @@ echo "Dedupe high offset to low offset"
->  _dedupe_range $testdir/file1 $bigoff_64k $testdir/file6 1048576 65535 >> $seqres.full
->  
->  echo "Dedupe past source file EOF (should fail)"
-> -_dedupe_range $testdir/file2 524288 $testdir/file7 0 1048576 >> $seqres.full
-> +_dedupe_range $testdir/file2 524288 $testdir/file7 0 1048576 \
-> +	2>&1 >> $seqres.full | _filter_dedupe
->  
->  echo "Dedupe max size at nonzero offset (should fail)"
-> -_dedupe_range $testdir/file2 524288 $testdir/file8 0 $len >> $seqres.full
-> +_dedupe_range $testdir/file2 524288 $testdir/file8 0 $len \
-> +	2>&1 >> $seqres.full | _filter_dedupe
->  
->  echo "Dedupe with huge off/len (should fail)"
-> -_dedupe_range $testdir/file2 $bigoff_64k $testdir/file9 0 $bigoff_64k >> $seqres.full
-> +_dedupe_range $testdir/file2 $bigoff_64k $testdir/file9 0 $bigoff_64k \
-> +	2>&1 >> $seqres.full | _filter_dedupe
->  
->  echo "Check file creation"
->  _test_cycle_mount
-> diff --git a/tests/generic/304.out b/tests/generic/304.out
-> index 7b5ff0e..fbba6f3 100644
-> --- a/tests/generic/304.out
-> +++ b/tests/generic/304.out
-> @@ -14,7 +14,7 @@ dedupe: Invalid argument
->  Dedupe max size at nonzero offset (should fail)
->  dedupe: Invalid argument
->  Dedupe with huge off/len (should fail)
-> -XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-> +dedupe: Invalid argument
->  Check file creation
->  file3
->  7ffffffffffffffe:  61  a
-> -- 
-> 2.9.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> +     # If ftype feature is enabled, when setting file type to one of the
+>> +     # special types (i.e. FIFO(1), CHRDEV(2),BLKDEV(6),SOCKET(14)),
+>> +     # xfs_repair is expected to detect ftype mismatch error. Otherewise,
+>> +     # xfs_repair is not expected to detect ftype mismatch error.
+>> +     if [ "$FTYPE_FEATURE" = 1 ] && (echo ':1:2:6:14:' | grep -q ":$dt:"); then
+>> +             _scratch_xfs_repair -n 2>&1 | grep -q "^would fix ftype mismatch" || \
+>> +                     _fail "xfs_repair should fix ftype mismatch"
+>> +     else
+>> +             _scratch_xfs_repair -n 2>&1 | grep -q -v "^would fix ftype mismatch" || \
+>> +                     _fail "xfs_repair should not fix ftype mismatch"
+>
+> Just FYI the whole test will stop as soon as we hit a _fail.  Please
+> consider simply echoing a complaint to stdout so that the golden output
+> diff will catch this, and we can see all the failing cases.
+>
+
+Will do.
+
+Can you please reply to v2 patch series.
+It contain 2 more patches beyond this one with additional testing of access
+to mounted fs with the malformed inodes.
+
+My question is what to do WRT patch 3/3 which triggers an XFS Assert in the
+kernel (readdir of a phony directory that is really a regular file or symlink).
+http://www.spinics.net/lists/linux-xfs/msg03059.html
+
+Is this something of concern to you? Can you instruct me whether the assertion
+should be fixed or propose a fix yourself?
+Or is it just a non issue and we should not add patch 3/3 to this test.
+
+Amir.
