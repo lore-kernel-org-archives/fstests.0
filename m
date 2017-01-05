@@ -1,66 +1,264 @@
-Date: Thu, 26 Jan 2017 13:08:38 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v5 0/9] xfstests: online scrub/repair support
-Message-ID: <20170126050838.GN1859@eguan.usersys.redhat.com>
-References: <148498621936.17109.4249711513404036449.stgit@birch.djwong.org>
+Received: from userp1040.oracle.com ([156.151.31.81]:16681 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1034321AbdAERdl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 5 Jan 2017 12:33:41 -0500
+Date: Thu, 5 Jan 2017 09:33:26 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH v2] generic/158,304: filter dedupe error message
+Message-ID: <20170105173326.GD14034@birch.djwong.org>
+References: <20170105072837.8679-1-eguan@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <148498621936.17109.4249711513404036449.stgit@birch.djwong.org>
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+In-Reply-To: <20170105072837.8679-1-eguan@redhat.com>
+Sender: fstests-owner@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Jan 21, 2017 at 12:10:19AM -0800, Darrick J. Wong wrote:
-> Hi all,
+On Thu, Jan 05, 2017 at 03:28:37PM +0800, Eryu Guan wrote:
+> Kernel commit 22725ce4e4a0 ("vfs: fix isize/pos/len checks for reflink &
+> dedupe") added more checks on reflink and dedupe, rejected dedupe past
+> EOF early and explicitly, and causes generic/158 and generic/304 to fail.
 > 
-> This is the fifth revision of a patchset that adds to XFS userland tools
-> support for online metadata scrubbing and repair.
+>   Try dedupe from past EOF
+>  -dedupe: Invalid argument
+>  +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
+>   Try dedupe to past EOF, destination offset beyond EOF
 > 
-> The new patches in this series do three things: first, they expand the
-> filesystem populate commands inside xfstests to be able to create all
-> types of XFS metadata.  Second, they create a bunch of xfs_db wrapper
-> functions to iterate all fields present in a given metadata object and
-> fuzz them in various ways.  Finally, for each metadata object type there
-> is a separate test that iteratively fuzzes all fields of that object and
-> runs it through the mount/scrub/repair loop to see what happens.
+> Also there's an xfsprogs patch from Darrick ("xfs_io: prefix dedupe
+> command error messages consistently") to change all xfs_io dedupe
+> error message prefixes to "XFS_IOC_FILE_EXTENT_SAME".
 > 
-> If you're going to start using this mess, you probably ought to just
-> pull from my github trees for kernel[1], xfsprogs[2], and xfstests[3].
-
-Are your github trees synced with kernel.org trees? Seems so, and I did
-my tests with your kernel.org trees.
-
-> The kernel patches in the git trees should apply to 4.10-rc4; xfsprogs
-> patches to for-next; and xfstest to master.
+> So introduce a new _filter_dedupe_error, change all "dedupe" prefix
+> to XFS_IOC_FILE_EXTENT_SAME, make tests pass with both old/new
+> kernel & userspace.
 > 
-> The patches have survived all auto group xfstests both with scrub-only
-> mode and also a special debugging mode to xfs_scrub that forces it to
-> rebuild the metadata structures even if they're not damaged.
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
 
-I have trouble finishing running all the tests so far, the tests need
-long time to run and in some tests xfs_repair or xfs_scrub are just
-spinning there, sometimes I can kill them to make test continue,
-sometimes I can't (e.g. xfs/1312, I tried to kill the xfs_scrub process,
-but it became <defunc>).
+Heh, there's actually a few more to convert (g/{122,136,374}) but since we
+basically have duelling patches at this point and my patch needs this one to
+complete those three, just commit yours and I'll follow up immediately with a
+revised "dedupe: fix consistent error message prefixes for dedupe tests" patch.
 
-And in most tests I have run, I see such failures:
+So,
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-    +scrub didn't fail with length = ones.
-    +scrub didn't fail with length = firstbit.
-    +scrub didn't fail with length = middlebit.
-    +scrub didn't fail with length = lastbit.
-    ....
+--D
 
-Not sure if that's expected?
-
-I also hit xfs_scrub and xfs_repair double free bug in xfs/1312 (perhaps
-that's why I can't kill it).
-
-OTOH, all these failures/issues seem like kernel or userspace bug, I
-went through all the patches and new tests and I didn't find anything
-wrong obviously. So I think it's fine to merge them in this week's
-update. Unless you have a second thought?
-
-Thanks,
-Eryu
+> ---
+> v2:
+> - filter "dedupe:" to "XFS_IOC_FILE_EXTENT_SAME:" and update more _dedupe_range
+>   lines accordingly
+> 
+>  common/reflink        |  6 ++++++
+>  tests/generic/158     | 30 +++++++++++++++++++-----------
+>  tests/generic/158.out | 16 ++++++++--------
+>  tests/generic/304     | 21 ++++++++++++++-------
+>  tests/generic/304.out | 12 ++++++------
+>  5 files changed, 53 insertions(+), 32 deletions(-)
+> 
+> diff --git a/common/reflink b/common/reflink
+> index 64ee04f..9dc67f0 100644
+> --- a/common/reflink
+> +++ b/common/reflink
+> @@ -241,6 +241,12 @@ _dedupe_range() {
+>  	$XFS_IO_PROG $xfs_io_args -f -c "dedupe $file1 $offset1 $offset2 $len" "$file2"
+>  }
+>  
+> +# Unify xfs_io dedupe ioctl error message prefix
+> +_filter_dedupe_error()
+> +{
+> +	sed -e 's/^dedupe:/XFS_IOC_FILE_EXTENT_SAME:/g'
+> +}
+> +
+>  # Create a file of interleaved unwritten and reflinked blocks
+>  _weave_reflink_unwritten() {
+>  	blksz=$1
+> diff --git a/tests/generic/158 b/tests/generic/158
+> index 086c522..2d34df9 100755
+> --- a/tests/generic/158
+> +++ b/tests/generic/158
+> @@ -81,41 +81,48 @@ mkfifo $testdir1/fifo1
+>  sync
+>  
+>  _filter_enotty() {
+> +	_filter_dedupe_error | \
+>  	sed -e 's/Inappropriate ioctl for device/Invalid argument/g'
+>  }
+>  
+>  _filter_eperm() {
+> +	_filter_dedupe_error | \
+>  	sed -e 's/Permission denied/Invalid argument/g'
+>  }
+>  
+>  echo "Try cross-device dedupe"
+> -_dedupe_range $testdir1/file1 0 $testdir2/file1 0 $blksz
+> +_dedupe_range $testdir1/file1 0 $testdir2/file1 0 $blksz \
+> +	2>&1 | _filter_dedupe_error
+>  
+>  echo "Try unaligned dedupe"
+> -_dedupe_range $testdir1/file1 37 $testdir1/file1 59 23
+> +_dedupe_range $testdir1/file1 37 $testdir1/file1 59 23 \
+> +	2>&1 | _filter_dedupe_error
+>  
+>  echo "Try overlapping dedupe"
+> -_dedupe_range $testdir1/file1 0 $testdir1/file1 1 $((blksz * 2))
+> +_dedupe_range $testdir1/file1 0 $testdir1/file1 1 $((blksz * 2)) \
+> +	2>&1 | _filter_dedupe_error
+>  
+>  echo "Try dedupe from past EOF"
+> -_dedupe_range $testdir1/file1 $(( (blks + 10) * blksz)) $testdir1/file1 0 $blksz
+> +_dedupe_range $testdir1/file1 $(( (blks + 10) * blksz)) $testdir1/file1 0 $blksz \
+> +	2>&1 | _filter_dedupe_error
+>  
+>  echo "Try dedupe to past EOF, destination offset beyond EOF"
+> -_dedupe_range $testdir1/file1 0 $testdir1/file1 $(( (blks + 10) * blksz)) \
+> -	$blksz
+> +_dedupe_range $testdir1/file1 0 $testdir1/file1 $(( (blks + 10) * blksz)) $blksz \
+> +	2>&1 | _filter_dedupe_error
+>  
+>  echo "Try dedupe to past EOF, destination offset behind EOF"
+> -_dedupe_range $testdir1/file1 0 $testdir1/file1 $(( (blks - 1) * blksz)) \
+> -	$((blksz * 2))
+> +_dedupe_range $testdir1/file1 0 $testdir1/file1 $(( (blks - 1) * blksz)) $((blksz * 2)) \
+> +	2>&1 | _filter_dedupe_error
+>  
+>  echo "Try to dedupe a dir"
+> -_dedupe_range $testdir1/dir1 0 $testdir1/file2 0 $blksz
+> +_dedupe_range $testdir1/dir1 0 $testdir1/file2 0 $blksz 2>&1 | _filter_dedupe_error
+>  
+>  echo "Try to dedupe a device"
+>  _dedupe_range $testdir1/dev1 0 $testdir1/file2 0 $blksz 2>&1 | _filter_enotty
+>  
+>  echo "Try to dedupe to a dir"
+> -_dedupe_range $testdir1/file1 0 $testdir1/dir1 0 $blksz 2>&1 | _filter_test_dir
+> +_dedupe_range $testdir1/file1 0 $testdir1/dir1 0 $blksz \
+> +	2>&1 | _filter_test_dir | _filter_dedupe_error
+>  
+>  echo "Try to dedupe to a device"
+>  _dedupe_range $testdir1/file1 0 $testdir1/dev1 0 $blksz 2>&1 | _filter_eperm
+> @@ -124,7 +131,8 @@ echo "Try to dedupe to a fifo"
+>  _dedupe_range $testdir1/file1 0 $testdir1/fifo1 0 $blksz -n 2>&1 | _filter_eperm
+>  
+>  echo "Try to dedupe an append-only file"
+> -_dedupe_range $testdir1/file1 0 $testdir1/file3 0 $blksz -a >> $seqres.full
+> +_dedupe_range $testdir1/file1 0 $testdir1/file3 0 $blksz -a \
+> +	2>&1 >> $seqres.full | _filter_dedupe_error
+>  
+>  echo "Dedupe two files"
+>  _dedupe_range $testdir1/file1 0 $testdir1/file2 0 $blksz >> $seqres.full
+> diff --git a/tests/generic/158.out b/tests/generic/158.out
+> index 9b82ddf..8df9d9a 100644
+> --- a/tests/generic/158.out
+> +++ b/tests/generic/158.out
+> @@ -2,17 +2,17 @@ QA output created by 158
+>  Format and mount
+>  Create the original files
+>  Try cross-device dedupe
+> -dedupe: Invalid cross-device link
+> +XFS_IOC_FILE_EXTENT_SAME: Invalid cross-device link
+>  Try unaligned dedupe
+> -dedupe: Invalid argument
+> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
+>  Try overlapping dedupe
+> -dedupe: Invalid argument
+> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
+>  Try dedupe from past EOF
+> -dedupe: Invalid argument
+> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
+>  Try dedupe to past EOF, destination offset beyond EOF
+> -dedupe: Invalid argument
+> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
+>  Try dedupe to past EOF, destination offset behind EOF
+> -dedupe: Invalid argument
+> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
+>  Try to dedupe a dir
+>  XFS_IOC_FILE_EXTENT_SAME: Is a directory
+>  Try to dedupe a device
+> @@ -20,8 +20,8 @@ XFS_IOC_FILE_EXTENT_SAME: Invalid argument
+>  Try to dedupe to a dir
+>  TEST_DIR/test-158/dir1: Is a directory
+>  Try to dedupe to a device
+> -dedupe: Invalid argument
+> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
+>  Try to dedupe to a fifo
+> -dedupe: Invalid argument
+> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
+>  Try to dedupe an append-only file
+>  Dedupe two files
+> diff --git a/tests/generic/304 b/tests/generic/304
+> index b7ee7b9..6c36a68 100755
+> --- a/tests/generic/304
+> +++ b/tests/generic/304
+> @@ -63,25 +63,32 @@ _pwrite_byte 0x61 $bigoff 1 $testdir/file3 >> $seqres.full
+>  _pwrite_byte 0x61 1048575 1 $testdir/file2 >> $seqres.full
+>  
+>  echo "Dedupe large single byte file"
+> -_dedupe_range $testdir/file1 0 $testdir/file3 0 $len >> $seqres.full
+> +_dedupe_range $testdir/file1 0 $testdir/file3 0 $len \
+> +	2>&1 >> $seqres.full | _filter_dedupe_error
+>  
+>  echo "Dedupe large empty file"
+> -_dedupe_range $testdir/file0 0 $testdir/file4 0 $len >> $seqres.full
+> +_dedupe_range $testdir/file0 0 $testdir/file4 0 $len \
+> +	2>&1 >> $seqres.full | _filter_dedupe_error
+>  
+>  echo "Dedupe past maximum file size in dest file (should fail)"
+> -_dedupe_range $testdir/file1 0 $testdir/file5 4611686018427322368 $len >> $seqres.full
+> +_dedupe_range $testdir/file1 0 $testdir/file5 4611686018427322368 $len \
+> +	2>&1 >> $seqres.full | _filter_dedupe_error
+>  
+>  echo "Dedupe high offset to low offset"
+> -_dedupe_range $testdir/file1 $bigoff_64k $testdir/file6 1048576 65535 >> $seqres.full
+> +_dedupe_range $testdir/file1 $bigoff_64k $testdir/file6 1048576 65535 \
+> +	2>&1 >> $seqres.full | _filter_dedupe_error
+>  
+>  echo "Dedupe past source file EOF (should fail)"
+> -_dedupe_range $testdir/file2 524288 $testdir/file7 0 1048576 >> $seqres.full
+> +_dedupe_range $testdir/file2 524288 $testdir/file7 0 1048576 \
+> +	2>&1 >> $seqres.full | _filter_dedupe_error
+>  
+>  echo "Dedupe max size at nonzero offset (should fail)"
+> -_dedupe_range $testdir/file2 524288 $testdir/file8 0 $len >> $seqres.full
+> +_dedupe_range $testdir/file2 524288 $testdir/file8 0 $len \
+> +	2>&1 >> $seqres.full | _filter_dedupe_error
+>  
+>  echo "Dedupe with huge off/len (should fail)"
+> -_dedupe_range $testdir/file2 $bigoff_64k $testdir/file9 0 $bigoff_64k >> $seqres.full
+> +_dedupe_range $testdir/file2 $bigoff_64k $testdir/file9 0 $bigoff_64k \
+> +	2>&1 >> $seqres.full | _filter_dedupe_error
+>  
+>  echo "Check file creation"
+>  _test_cycle_mount
+> diff --git a/tests/generic/304.out b/tests/generic/304.out
+> index 7b5ff0e..a979099 100644
+> --- a/tests/generic/304.out
+> +++ b/tests/generic/304.out
+> @@ -2,17 +2,17 @@ QA output created by 304
+>  Format and mount
+>  Create the original files
+>  Dedupe large single byte file
+> -dedupe: Invalid argument
+> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
+>  Dedupe large empty file
+> -dedupe: Invalid argument
+> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
+>  Dedupe past maximum file size in dest file (should fail)
+> -dedupe: Invalid argument
+> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
+>  Dedupe high offset to low offset
+> -dedupe: Invalid argument
+> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
+>  Dedupe past source file EOF (should fail)
+> -dedupe: Invalid argument
+> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
+>  Dedupe max size at nonzero offset (should fail)
+> -dedupe: Invalid argument
+> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
+>  Dedupe with huge off/len (should fail)
+>  XFS_IOC_FILE_EXTENT_SAME: Invalid argument
+>  Check file creation
+> -- 
+> 2.9.3
+> 
