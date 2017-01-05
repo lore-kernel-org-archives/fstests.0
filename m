@@ -1,264 +1,147 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:16681 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1034321AbdAERdl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 5 Jan 2017 12:33:41 -0500
-Date: Thu, 5 Jan 2017 09:33:26 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v2] generic/158,304: filter dedupe error message
-Message-ID: <20170105173326.GD14034@birch.djwong.org>
-References: <20170105072837.8679-1-eguan@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:58648 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1760085AbdAESHl (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 5 Jan 2017 13:07:41 -0500
+Date: Thu, 5 Jan 2017 13:07:39 -0500
+From: Mike Snitzer <snitzer@redhat.com>
+Subject: Re: trouble with generic/081
+Message-ID: <20170105180739.GA7699@redhat.com>
+References: <20161214164314.GA25105@infradead.org>
+ <20161215063650.GJ4326@dastard>
+ <20161215084224.GA14395@infradead.org>
+ <c05b64b6-80d3-655d-db9b-6f49038e53ee@redhat.com>
+ <20161216081523.GA13847@infradead.org>
+ <5806882c-4807-cb2a-80dd-147de5bf176a@sandeen.net>
+ <a0c8e06f-db87-393b-419d-d6f8c345fbc8@redhat.com>
+ <20170105162600.GD6874@redhat.com>
+ <89cd4c0b-e8eb-3804-adba-2f7f376e776a@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170105072837.8679-1-eguan@redhat.com>
+In-Reply-To: <89cd4c0b-e8eb-3804-adba-2f7f376e776a@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: Zdenek Kabelac <zkabelac@redhat.com>
+Cc: Eric Sandeen <sandeen@sandeen.net>, Christoph Hellwig <hch@infradead.org>, dm-devel@redhat.com, Dave Chinner <david@fromorbit.com>, eguan@redhat.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 05, 2017 at 03:28:37PM +0800, Eryu Guan wrote:
-> Kernel commit 22725ce4e4a0 ("vfs: fix isize/pos/len checks for reflink &
-> dedupe") added more checks on reflink and dedupe, rejected dedupe past
-> EOF early and explicitly, and causes generic/158 and generic/304 to fail.
-> 
->   Try dedupe from past EOF
->  -dedupe: Invalid argument
->  +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
->   Try dedupe to past EOF, destination offset beyond EOF
-> 
-> Also there's an xfsprogs patch from Darrick ("xfs_io: prefix dedupe
-> command error messages consistently") to change all xfs_io dedupe
-> error message prefixes to "XFS_IOC_FILE_EXTENT_SAME".
-> 
-> So introduce a new _filter_dedupe_error, change all "dedupe" prefix
-> to XFS_IOC_FILE_EXTENT_SAME, make tests pass with both old/new
-> kernel & userspace.
-> 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
+On Thu, Jan 05 2017 at 12:42pm -0500,
+Zdenek Kabelac <zkabelac@redhat.com> wrote:
 
-Heh, there's actually a few more to convert (g/{122,136,374}) but since we
-basically have duelling patches at this point and my patch needs this one to
-complete those three, just commit yours and I'll follow up immediately with a
-revised "dedupe: fix consistent error message prefixes for dedupe tests" patch.
-
-So,
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
-
---D
-
-> ---
-> v2:
-> - filter "dedupe:" to "XFS_IOC_FILE_EXTENT_SAME:" and update more _dedupe_range
->   lines accordingly
+> Dne 5.1.2017 v 17:26 Mike Snitzer napsal(a):
+> >On Thu, Jan 05 2017 at  5:35am -0500,
+> >Zdenek Kabelac <zkabelac@redhat.com> wrote:
+> >
+> >>Dne 5.1.2017 v 00:03 Eric Sandeen napsal(a):
+> >>>
+> >>>
+> >>>On 12/16/16 2:15 AM, Christoph Hellwig wrote:
+> >>>>On Thu, Dec 15, 2016 at 10:16:23AM +0100, Zdenek Kabelac wrote:
+> >>>>>So let me explain the logic behind this 'amazingly stupid' idea.
+> >>>>
+> >>>>And that logic doesn't make any sense at all.  invibly unmounting
+> >>>>a file system behind the users back is actively harmful, as it is
+> >>>>contradicting the principle of least surprise, and the xfstests mess
+> >>>>is one simple example for it.  Add a callback in-kernel to tell the
+> >>>>fs to shut down but NOT unmount and expose the namespace below it,
+> >>>>which the administrator has probably intentionally hid.
+> >>>>
+> >>>>Even worse unmount may trigger further writes and with fses not
+> >>>>handling them the fs might now be stuck after being detached from
+> >>>>the namespace without a way for the admin to detect or recover this.
+> >>>>
+> >>>>What XFS did on IRIX was to let the volume manager call into the fs
+> >>>>and shut it down.  At this point no further writes are possible,
+> >>>>but we do not expose the namespace under the mount point, and the
+> >>>>admin can fix the situation with all the normal tools.
+> >>>
+> >>><late to the party>
+> >>>
+> >>>Is there a need for this kind of call-up when xfs now has the configurable
+> >>>error handling so that it will shut down after X retries or Y seconds
+> >>>of a persistent error?
+> >>
+> >>
+> >>We need likely to open  RFE bugzilla  here - and specify how it should
+> >>work when some conditions are met.
+> >>
+> >>Current 'best effort' tries to minimize damage by trying to do a full-stop
+> >>when pool approaches 95% fullness.  Which is relatively 'low/small'
+> >>for small sized thin-pool - but there is reasonable big free space
+> >>for
+> >>commonly sized thin-pool to be able to flush most of page cache on
+> >>disk before things will go crazy.
+> >>
+> >>Now - we could probably detect presence of kernel version and
+> >>xfs/ext4 present features - and change reactions.
+> >>
+> >>What I expect from this BZ is -  how to detect things and what is
+> >>the 'best' thing to do.
+> >>
+> >>I'm clearly not an expert on all filesystem and all their features - but lvm2
+> >>needs to work reasonable well across all variants of kernels and
+> >>filesystems -  so we cannot say to user - now  we require you to use
+> >>the latest 4.10
+> >>kernel with these features enabled otherwise all your data could be lost.
+> >>
+> >>We need to know what to do with 3.X  kernel,  4.X kernel and present
+> >>features in kernel and how we can detect them in runtime.
+> >
+> >No we need to fix upstream.  It is the job of distros to sort out other
+> >solutions.  And yeah I appreciate that you need to worry about distro X,
+> >Y, Z from Red Hat but lvm2 needs to not be so cute about things.
+> >
+> >And there has been significant progress on XFS's error handling so that
+> >it no longer hangs in the face of ENOSPC.
+> >
+> >Eric says the basics are documented in Documentation/filesystems/xfs.txt
+> >under "Error Handling".
+> >
+> >Bottomline is lvm2 really has no business unmounting the filesystem.
+> >That lvm2 "feature" should be reverted.  It isn't what anyone would
+> >expect.  And it only serves to create problems.  Nice intent but it was
+> >a misfire to implement it.  At most a discard should be issued once you
+> >cross a threshold.
+> >
 > 
->  common/reflink        |  6 ++++++
->  tests/generic/158     | 30 +++++++++++++++++++-----------
->  tests/generic/158.out | 16 ++++++++--------
->  tests/generic/304     | 21 ++++++++++++++-------
->  tests/generic/304.out | 12 ++++++------
->  5 files changed, 53 insertions(+), 32 deletions(-)
 > 
-> diff --git a/common/reflink b/common/reflink
-> index 64ee04f..9dc67f0 100644
-> --- a/common/reflink
-> +++ b/common/reflink
-> @@ -241,6 +241,12 @@ _dedupe_range() {
->  	$XFS_IO_PROG $xfs_io_args -f -c "dedupe $file1 $offset1 $offset2 $len" "$file2"
->  }
->  
-> +# Unify xfs_io dedupe ioctl error message prefix
-> +_filter_dedupe_error()
-> +{
-> +	sed -e 's/^dedupe:/XFS_IOC_FILE_EXTENT_SAME:/g'
-> +}
-> +
->  # Create a file of interleaved unwritten and reflinked blocks
->  _weave_reflink_unwritten() {
->  	blksz=$1
-> diff --git a/tests/generic/158 b/tests/generic/158
-> index 086c522..2d34df9 100755
-> --- a/tests/generic/158
-> +++ b/tests/generic/158
-> @@ -81,41 +81,48 @@ mkfifo $testdir1/fifo1
->  sync
->  
->  _filter_enotty() {
-> +	_filter_dedupe_error | \
->  	sed -e 's/Inappropriate ioctl for device/Invalid argument/g'
->  }
->  
->  _filter_eperm() {
-> +	_filter_dedupe_error | \
->  	sed -e 's/Permission denied/Invalid argument/g'
->  }
->  
->  echo "Try cross-device dedupe"
-> -_dedupe_range $testdir1/file1 0 $testdir2/file1 0 $blksz
-> +_dedupe_range $testdir1/file1 0 $testdir2/file1 0 $blksz \
-> +	2>&1 | _filter_dedupe_error
->  
->  echo "Try unaligned dedupe"
-> -_dedupe_range $testdir1/file1 37 $testdir1/file1 59 23
-> +_dedupe_range $testdir1/file1 37 $testdir1/file1 59 23 \
-> +	2>&1 | _filter_dedupe_error
->  
->  echo "Try overlapping dedupe"
-> -_dedupe_range $testdir1/file1 0 $testdir1/file1 1 $((blksz * 2))
-> +_dedupe_range $testdir1/file1 0 $testdir1/file1 1 $((blksz * 2)) \
-> +	2>&1 | _filter_dedupe_error
->  
->  echo "Try dedupe from past EOF"
-> -_dedupe_range $testdir1/file1 $(( (blks + 10) * blksz)) $testdir1/file1 0 $blksz
-> +_dedupe_range $testdir1/file1 $(( (blks + 10) * blksz)) $testdir1/file1 0 $blksz \
-> +	2>&1 | _filter_dedupe_error
->  
->  echo "Try dedupe to past EOF, destination offset beyond EOF"
-> -_dedupe_range $testdir1/file1 0 $testdir1/file1 $(( (blks + 10) * blksz)) \
-> -	$blksz
-> +_dedupe_range $testdir1/file1 0 $testdir1/file1 $(( (blks + 10) * blksz)) $blksz \
-> +	2>&1 | _filter_dedupe_error
->  
->  echo "Try dedupe to past EOF, destination offset behind EOF"
-> -_dedupe_range $testdir1/file1 0 $testdir1/file1 $(( (blks - 1) * blksz)) \
-> -	$((blksz * 2))
-> +_dedupe_range $testdir1/file1 0 $testdir1/file1 $(( (blks - 1) * blksz)) $((blksz * 2)) \
-> +	2>&1 | _filter_dedupe_error
->  
->  echo "Try to dedupe a dir"
-> -_dedupe_range $testdir1/dir1 0 $testdir1/file2 0 $blksz
-> +_dedupe_range $testdir1/dir1 0 $testdir1/file2 0 $blksz 2>&1 | _filter_dedupe_error
->  
->  echo "Try to dedupe a device"
->  _dedupe_range $testdir1/dev1 0 $testdir1/file2 0 $blksz 2>&1 | _filter_enotty
->  
->  echo "Try to dedupe to a dir"
-> -_dedupe_range $testdir1/file1 0 $testdir1/dir1 0 $blksz 2>&1 | _filter_test_dir
-> +_dedupe_range $testdir1/file1 0 $testdir1/dir1 0 $blksz \
-> +	2>&1 | _filter_test_dir | _filter_dedupe_error
->  
->  echo "Try to dedupe to a device"
->  _dedupe_range $testdir1/file1 0 $testdir1/dev1 0 $blksz 2>&1 | _filter_eperm
-> @@ -124,7 +131,8 @@ echo "Try to dedupe to a fifo"
->  _dedupe_range $testdir1/file1 0 $testdir1/fifo1 0 $blksz -n 2>&1 | _filter_eperm
->  
->  echo "Try to dedupe an append-only file"
-> -_dedupe_range $testdir1/file1 0 $testdir1/file3 0 $blksz -a >> $seqres.full
-> +_dedupe_range $testdir1/file1 0 $testdir1/file3 0 $blksz -a \
-> +	2>&1 >> $seqres.full | _filter_dedupe_error
->  
->  echo "Dedupe two files"
->  _dedupe_range $testdir1/file1 0 $testdir1/file2 0 $blksz >> $seqres.full
-> diff --git a/tests/generic/158.out b/tests/generic/158.out
-> index 9b82ddf..8df9d9a 100644
-> --- a/tests/generic/158.out
-> +++ b/tests/generic/158.out
-> @@ -2,17 +2,17 @@ QA output created by 158
->  Format and mount
->  Create the original files
->  Try cross-device dedupe
-> -dedupe: Invalid cross-device link
-> +XFS_IOC_FILE_EXTENT_SAME: Invalid cross-device link
->  Try unaligned dedupe
-> -dedupe: Invalid argument
-> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
->  Try overlapping dedupe
-> -dedupe: Invalid argument
-> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
->  Try dedupe from past EOF
-> -dedupe: Invalid argument
-> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
->  Try dedupe to past EOF, destination offset beyond EOF
-> -dedupe: Invalid argument
-> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
->  Try dedupe to past EOF, destination offset behind EOF
-> -dedupe: Invalid argument
-> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
->  Try to dedupe a dir
->  XFS_IOC_FILE_EXTENT_SAME: Is a directory
->  Try to dedupe a device
-> @@ -20,8 +20,8 @@ XFS_IOC_FILE_EXTENT_SAME: Invalid argument
->  Try to dedupe to a dir
->  TEST_DIR/test-158/dir1: Is a directory
->  Try to dedupe to a device
-> -dedupe: Invalid argument
-> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
->  Try to dedupe to a fifo
-> -dedupe: Invalid argument
-> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
->  Try to dedupe an append-only file
->  Dedupe two files
-> diff --git a/tests/generic/304 b/tests/generic/304
-> index b7ee7b9..6c36a68 100755
-> --- a/tests/generic/304
-> +++ b/tests/generic/304
-> @@ -63,25 +63,32 @@ _pwrite_byte 0x61 $bigoff 1 $testdir/file3 >> $seqres.full
->  _pwrite_byte 0x61 1048575 1 $testdir/file2 >> $seqres.full
->  
->  echo "Dedupe large single byte file"
-> -_dedupe_range $testdir/file1 0 $testdir/file3 0 $len >> $seqres.full
-> +_dedupe_range $testdir/file1 0 $testdir/file3 0 $len \
-> +	2>&1 >> $seqres.full | _filter_dedupe_error
->  
->  echo "Dedupe large empty file"
-> -_dedupe_range $testdir/file0 0 $testdir/file4 0 $len >> $seqres.full
-> +_dedupe_range $testdir/file0 0 $testdir/file4 0 $len \
-> +	2>&1 >> $seqres.full | _filter_dedupe_error
->  
->  echo "Dedupe past maximum file size in dest file (should fail)"
-> -_dedupe_range $testdir/file1 0 $testdir/file5 4611686018427322368 $len >> $seqres.full
-> +_dedupe_range $testdir/file1 0 $testdir/file5 4611686018427322368 $len \
-> +	2>&1 >> $seqres.full | _filter_dedupe_error
->  
->  echo "Dedupe high offset to low offset"
-> -_dedupe_range $testdir/file1 $bigoff_64k $testdir/file6 1048576 65535 >> $seqres.full
-> +_dedupe_range $testdir/file1 $bigoff_64k $testdir/file6 1048576 65535 \
-> +	2>&1 >> $seqres.full | _filter_dedupe_error
->  
->  echo "Dedupe past source file EOF (should fail)"
-> -_dedupe_range $testdir/file2 524288 $testdir/file7 0 1048576 >> $seqres.full
-> +_dedupe_range $testdir/file2 524288 $testdir/file7 0 1048576 \
-> +	2>&1 >> $seqres.full | _filter_dedupe_error
->  
->  echo "Dedupe max size at nonzero offset (should fail)"
-> -_dedupe_range $testdir/file2 524288 $testdir/file8 0 $len >> $seqres.full
-> +_dedupe_range $testdir/file2 524288 $testdir/file8 0 $len \
-> +	2>&1 >> $seqres.full | _filter_dedupe_error
->  
->  echo "Dedupe with huge off/len (should fail)"
-> -_dedupe_range $testdir/file2 $bigoff_64k $testdir/file9 0 $bigoff_64k >> $seqres.full
-> +_dedupe_range $testdir/file2 $bigoff_64k $testdir/file9 0 $bigoff_64k \
-> +	2>&1 >> $seqres.full | _filter_dedupe_error
->  
->  echo "Check file creation"
->  _test_cycle_mount
-> diff --git a/tests/generic/304.out b/tests/generic/304.out
-> index 7b5ff0e..a979099 100644
-> --- a/tests/generic/304.out
-> +++ b/tests/generic/304.out
-> @@ -2,17 +2,17 @@ QA output created by 304
->  Format and mount
->  Create the original files
->  Dedupe large single byte file
-> -dedupe: Invalid argument
-> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
->  Dedupe large empty file
-> -dedupe: Invalid argument
-> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
->  Dedupe past maximum file size in dest file (should fail)
-> -dedupe: Invalid argument
-> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
->  Dedupe high offset to low offset
-> -dedupe: Invalid argument
-> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
->  Dedupe past source file EOF (should fail)
-> -dedupe: Invalid argument
-> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
->  Dedupe max size at nonzero offset (should fail)
-> -dedupe: Invalid argument
-> +XFS_IOC_FILE_EXTENT_SAME: Invalid argument
->  Dedupe with huge off/len (should fail)
->  XFS_IOC_FILE_EXTENT_SAME: Invalid argument
->  Check file creation
-> -- 
-> 2.9.3
+> Users are mostly using thin LVs with  ext4 and XFS filesytems.
+> Lots of users do use quite ancient kernels (<4.X).
 > 
+> When lvm2 decides to UNMOUNT volumes - it's the moment where
+> everything else HAS failed (mainly Admin has failed to provide
+> promised space)
+> And it should be seen as mild OOPS replacement.
+> 
+> 
+> Un/fortunately lvm2 does care about older distributions and kernels
+> - so unlike many other 'modern' software you can take recent lvm2 -
+> compile & run on several years system and it does its best - so far
+> I'd call it a feature.
+> 
+> Not really sure what do you mean by - leaving this on 'distro'
+> maintainers since these are typically able to run   'configure &
+> make',
+> without no big idea about configurable lvm2 internals.
+> 
+> --
+> 
+> Now there is no objection about adding configurable behavior on such cases
+> (policies) here you are 'breaking to the open doors' since we do
+> plan to provide these for some time (I think there are couple BZs
+> already)
+> 
+> So far I understand that admin  HAS to configure 'better XFS logic'
+> himself on filesystem - it's not  granted default so far even on
+> 4.10 kernel ?
+> 
+> On lvm2 side we need to first convert plugin code executions to
+> lvconvert policies (will make BZ for this one).
+
+lvm2 isn't the one that needs to fix this!
+
+but it certainly should not be doing an unmount.  discard at most.
+
+why is discard kernel version dependent?
+
+You're making an historically annoying problem even more so.  please
+stop this.
