@@ -1,61 +1,79 @@
-Received: from mx1.redhat.com ([209.132.183.28]:42792 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49838 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S938274AbdAEJip (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 5 Jan 2017 04:38:45 -0500
-Date: Thu, 5 Jan 2017 17:38:43 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic/102: Update strict check
-Message-ID: <20170105093843.GU1859@eguan.usersys.redhat.com>
-References: <1483606569-6515-1-git-send-email-yangx.jy@cn.fujitsu.com>
+        id S936019AbdAEKou (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 5 Jan 2017 05:44:50 -0500
+Subject: Re: trouble with generic/081
+References: <20161214164314.GA25105@infradead.org>
+ <20161215063650.GJ4326@dastard> <20161215084224.GA14395@infradead.org>
+ <c05b64b6-80d3-655d-db9b-6f49038e53ee@redhat.com>
+ <20161216081523.GA13847@infradead.org>
+ <5806882c-4807-cb2a-80dd-147de5bf176a@sandeen.net>
+From: Zdenek Kabelac <zkabelac@redhat.com>
+Message-ID: <a0c8e06f-db87-393b-419d-d6f8c345fbc8@redhat.com>
+Date: Thu, 5 Jan 2017 11:35:47 +0100
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1483606569-6515-1-git-send-email-yangx.jy@cn.fujitsu.com>
+In-Reply-To: <5806882c-4807-cb2a-80dd-147de5bf176a@sandeen.net>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org
+To: Eric Sandeen <sandeen@sandeen.net>, Christoph Hellwig <hch@infradead.org>, Zdenek Kabelac <zkabelac@redhat.com>
+Cc: Dave Chinner <david@fromorbit.com>, eguan@redhat.com, fstests@vger.kernel.org, dm-devel@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 05, 2017 at 04:56:09PM +0800, Xiao Yang wrote:
-> Low memory may lead to "written less bytes than
-> requested".  We only care about if xfs_io returned
-> ENOSPC or not, so we can check stderr of xfs_io
-> instead of stdout.
-> 
-> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Dne 5.1.2017 v 00:03 Eric Sandeen napsal(a):
+>
+>
+> On 12/16/16 2:15 AM, Christoph Hellwig wrote:
+>> On Thu, Dec 15, 2016 at 10:16:23AM +0100, Zdenek Kabelac wrote:
+>>> So let me explain the logic behind this 'amazingly stupid' idea.
+>>
+>> And that logic doesn't make any sense at all.  invibly unmounting
+>> a file system behind the users back is actively harmful, as it is
+>> contradicting the principle of least surprise, and the xfstests mess
+>> is one simple example for it.  Add a callback in-kernel to tell the
+>> fs to shut down but NOT unmount and expose the namespace below it,
+>> which the administrator has probably intentionally hid.
+>>
+>> Even worse unmount may trigger further writes and with fses not
+>> handling them the fs might now be stuck after being detached from
+>> the namespace without a way for the admin to detect or recover this.
+>>
+>> What XFS did on IRIX was to let the volume manager call into the fs
+>> and shut it down.  At this point no further writes are possible,
+>> but we do not expose the namespace under the mount point, and the
+>> admin can fix the situation with all the normal tools.
+>
+> <late to the party>
+>
+> Is there a need for this kind of call-up when xfs now has the configurable
+> error handling so that it will shut down after X retries or Y seconds
+> of a persistent error?
 
-I thought this was fine, but I'm not sure now. Because I recalled that
-there was an ext4 bug in dax mount exposed by generic/102, and it was
-the case that xfs_io returned less bytes than requested. See commit
 
-e84dfbe ext4: retry block allocation for failed DIO and DAX writes
+We need likely to open  RFE bugzilla  here - and specify how it should
+work when some conditions are met.
 
-If we discard all the xfs_io stdout, we may miss such bugs in the
-future. But I'd like to see more comments on this from filesystem
-developers.
+Current 'best effort' tries to minimize damage by trying to do a full-stop
+when pool approaches 95% fullness.  Which is relatively 'low/small' for small 
+sized thin-pool - but there is reasonable big free space for
+commonly sized thin-pool to be able to flush most of page cache on
+disk before things will go crazy.
 
-> ---
->  tests/generic/102     |  5 +++--
->  tests/generic/102.out | 20 --------------------
->  2 files changed, 3 insertions(+), 22 deletions(-)
-> 
-> diff --git a/tests/generic/102 b/tests/generic/102
-> index 3cdc2ba..104edc0 100755
-> --- a/tests/generic/102
-> +++ b/tests/generic/102
-> @@ -54,8 +54,9 @@ _scratch_mount
->  for ((i = 0; i < 10; i++)); do
->  	echo "loop $i" >>$seqres.full
->  
-> -	$XFS_IO_PROG -f -c "pwrite -b 1m 0 400m" "$SCRATCH_MNT"/file | \
-> -_filter_xfs_io | _filter_scratch
-> +	out="$($XFS_IO_PROG -f -c "pwrite -b 1m 0 400m" "$SCRATCH_MNT"/file 2>&1)"
-> +	echo $out >>$seqres.full 2>&1
-> +	echo $out | grep -q "No space left on device" && echo "pwrite failed with ENOSPC"
+Now - we could probably detect presence of kernel version and xfs/ext4 present 
+features - and change reactions.
 
-If we want to discard xfs_io stdout, just redirect it to /dev/null,
-ENOSPC error messgage will go to stderr and break the golden image
-anyway.
+What I expect from this BZ is -  how to detect things and what is the 'best' 
+thing to do.
 
-Thanks,
-Eryu
+I'm clearly not an expert on all filesystem and all their features - but lvm2
+needs to work reasonable well across all variants of kernels and filesystems - 
+  so we cannot say to user - now  we require you to use the latest 4.10
+kernel with these features enabled otherwise all your data could be lost.
+
+We need to know what to do with 3.X  kernel,  4.X kernel and present features 
+in kernel and how we can detect them in runtime.
+
+Regards
+
+Zdenek
+
