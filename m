@@ -1,87 +1,250 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:45742 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933960AbdAEBRz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 4 Jan 2017 20:17:55 -0500
-Subject: [PATCH 8/9] common/populate: create attrs in different namespaces
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Wed, 04 Jan 2017 17:17:51 -0800
-Message-ID: <148357907124.10436.3642646882075522970.stgit@birch.djwong.org>
-In-Reply-To: <148357902056.10436.12795484251467155460.stgit@birch.djwong.org>
-References: <148357902056.10436.12795484251467155460.stgit@birch.djwong.org>
+Received: from synology.com ([59.124.61.242]:43326 "EHLO synology.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753623AbdAECpu (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 4 Jan 2017 21:45:50 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Date: Thu, 05 Jan 2017 10:45:34 +0800
+From: robbieko <robbieko@synology.com>
+Subject: Re: [PATCH v3 2/4] xfstests: btrfs/132: add test for invaild update
+ time by an incremental send
+In-Reply-To: <CAL3q7H7y2iLrUQVGBDBsNUqn0JRTqqUCrpL6m1yAvHyK1E7ZLg@mail.gmail.com>
+References: <1483527210-2530-1-git-send-email-robbieko@synology.com>
+ <1483527210-2530-3-git-send-email-robbieko@synology.com>
+ <CAL3q7H7y2iLrUQVGBDBsNUqn0JRTqqUCrpL6m1yAvHyK1E7ZLg@mail.gmail.com>
+Message-ID: <ea8911b56cc08ecb821c4a6bb8e4646c@synology.com>
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: fdmanana@gmail.com
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Filipe Manana =E6=96=BC 2017-01-04 21:09 =E5=AF=AB=E5=88=B0:
+> On Wed, Jan 4, 2017 at 10:53 AM, robbieko <robbieko@synology.com>=20
+> wrote:
+>> From: Robbie Ko <robbieko@synology.com>
+>>=20
+>> Test that an incremental send operation dosen't' work because
+>> it tries to update the time to a deleted directory after it finishes
+>> a move operation.
+>>=20
+>> The other one is that an operation is applied to a file using the old
+>> name not the new name.
+>>=20
+>> This test exercises scenarios used to fail in btrfs and are fixed by
+>> the following patches for the linux kernel:
+>>=20
+>> "Btrfs: incremental send, add generation check for the inode waiting=20
+>> for rmdir operation."
+>> "Btrfs: incremental send, add generation check in existence=20
+>> demtermination for the parent directory"
+>>=20
+>> Signed-off-by: Robbie Ko <robbieko@synology.com>
+>> ---
+>> V3: remove "run_" based helpers
+>> V2: improve the change log
+>>=20
+>>  tests/btrfs/132     | 123=20
+>> ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/btrfs/132.out |   7 +++
+>>  tests/btrfs/group   |   1 +
+>>  3 files changed, 131 insertions(+)
+>>  create mode 100755 tests/btrfs/132
+>>  create mode 100644 tests/btrfs/132.out
+>>=20
+>> diff --git a/tests/btrfs/132 b/tests/btrfs/132
+>> new file mode 100755
+>> index 0000000..f1bb698
+>> --- /dev/null
+>> +++ b/tests/btrfs/132
+>> @@ -0,0 +1,123 @@
+>> +#! /bin/bash
+>> +# FS QA Test No. btrfs/132
+>> +#
+>> +# Test that an incremental send operation dosen't' work because
+>> +# it tries to update the time to a deleted directory after it=20
+>> finishes
+>> +# a move operation.
+>> +#
+>> +# The other one is that an operation is applied to a file using the=20
+>> old
+>> +# name not the new name.
+>> +#
+>> +#--------------------------------------------------------------------=
 ---
- common/populate |   30 ++++++++++++++++++++++++++++++
- 1 file changed, 30 insertions(+)
+>> +# Copyright (C) 2016 Synology Inc. All Rights Reserved.
+>> +# Author: Robbie Ko <robbieko@synology.com>
+>> +#
+>> +# This program is free software; you can redistribute it and/or
+>> +# modify it under the terms of the GNU General Public License as
+>> +# published by the Free Software Foundation.
+>> +#
+>> +# This program is distributed in the hope that it would be useful,
+>> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+>> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>> +# GNU General Public License for more details.
+>> +#
+>> +# You should have received a copy of the GNU General Public License
+>> +# along with this program; if not, write the Free Software=20
+>> Foundation,
+>> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+>> +#--------------------------------------------------------------------=
+---
+>> +#
+>> +
+>> +seq=3D`basename $0`
+>> +seqres=3D$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +
+>> +tmp=3D/tmp/$$
+>> +status=3D1       # failure is the default!
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +       cd /
+>> +       rm -fr $send_files_dir
+>> +       rm -f $tmp.*
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +
+>> +# real QA test starts here
+>> +_supported_fs btrfs
+>> +_supported_os Linux
+>> +_require_test
+>> +_require_scratch
+>> +_require_fssum
+>> +
+>> +send_files_dir=3D$TEST_DIR/btrfs-test-$seq
+>> +
+>> +rm -f $seqres.full
+>> +rm -fr $send_files_dir
+>> +mkdir $send_files_dir
+>> +
+>> +_scratch_mkfs >>$seqres.full 2>&1
+>> +_scratch_mount
+>> +
+>> +mkdir $SCRATCH_MNT/dir257
+>> +mkdir $SCRATCH_MNT/dir258
+>> +mkdir $SCRATCH_MNT/dir259
+>> +mv $SCRATCH_MNT/dir257 $SCRATCH_MNT/dir258/dir257
+>> +
+>> +# Filesystem looks like:
+>> +#
+>> +# .                                                             (ino=20
+>> 256)
+>> +# |--- dir258/                                                  (ino=20
+>> 258)
+>> +# |    |--- dir257/                                             (ino=20
+>> 257)
+>> +# |
+>> +# |--- dir259/                                                  (ino=20
+>> 259)
+>> +#
+>> +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
+>> +    $SCRATCH_MNT/mysnap1 > /dev/null
+>> +
+>> +mv $SCRATCH_MNT/dir258/dir257 $SCRATCH_MNT/dir257
+>> +rmdir $SCRATCH_MNT/dir258
+>> +rmdir $SCRATCH_MNT/dir259
+>> +_scratch_unmount
+>> +_scratch_mount
+>=20
+> Why do need to remount the fs? There's also a _scratch_remount=20
+> function.
+>=20
+> Again, I would like to see comments in the test explaining why and
+> how/why did the incremental send operation used to fail (like most of
+> the existing send/receive tests have).
+>=20
+> thanks
 
+Because we need to use the same inode 258 recreate, so need to delete=20
+the
+old dir258 and dir259, then remount the fs, the next new file will be=20
+generated
+from inode 258.
 
-diff --git a/common/populate b/common/populate
-index 91a7753..9cd9362 100644
---- a/common/populate
-+++ b/common/populate
-@@ -166,6 +166,9 @@ _scratch_xfs_populate() {
- 	mknod "${SCRATCH_MNT}/S_IFCHR" c 1 1
- 	mknod "${SCRATCH_MNT}/S_IFBLK" c 1 1
- 
-+	# special file with an xattr
-+	setfacl -P -m u:nobody:r ${SCRATCH_MNT}/S_IFCHR
-+
- 	# Attribute formats
- 	# LOCAL
- 	echo "+ local attr"
-@@ -183,6 +186,18 @@ _scratch_xfs_populate() {
- 	echo "+ btree attr"
- 	__populate_create_attr "${SCRATCH_MNT}/ATTR.FMT_BTREE" "$((64 * blksz / 40))" true
- 
-+	# trusted namespace
-+	touch ${SCRATCH_MNT}/ATTR.TRUSTED
-+	setfattr -n trusted.moo -v urk ${SCRATCH_MNT}/ATTR.TRUSTED
-+
-+	# security namespace
-+	touch ${SCRATCH_MNT}/ATTR.SECURITY
-+	setfattr -n security.foo -v bar ${SCRATCH_MNT}/ATTR.SECURITY
-+
-+	# system namespace
-+	touch ${SCRATCH_MNT}/ATTR.SYSTEM
-+	setfacl -m u:root:r ${SCRATCH_MNT}/ATTR.SYSTEM
-+
- 	# FMT_EXTENTS with a remote less-than-a-block value
- 	echo "+ attr extents with a remote less-than-a-block value"
- 	touch "${SCRATCH_MNT}/ATTR.FMT_EXTENTS_REMOTE3K"
-@@ -305,6 +320,9 @@ _scratch_ext4_populate() {
- 	mknod "${SCRATCH_MNT}/S_IFCHR" c 1 1
- 	mknod "${SCRATCH_MNT}/S_IFBLK" c 1 1
- 
-+	# special file with an xattr
-+	setfacl -P -m u:nobody:r ${SCRATCH_MNT}/S_IFCHR
-+
- 	# Attribute formats
- 	# LOCAL
- 	echo "+ local attr"
-@@ -314,6 +332,18 @@ _scratch_ext4_populate() {
- 	echo "+ block attr"
- 	__populate_create_attr "${SCRATCH_MNT}/ATTR.FMT_BLOCK" "$((blksz / 40))"
- 
-+	# trusted namespace
-+	touch ${SCRATCH_MNT}/ATTR.TRUSTED
-+	setfattr -n trusted.moo -v urk ${SCRATCH_MNT}/ATTR.TRUSTED
-+
-+	# security namespace
-+	touch ${SCRATCH_MNT}/ATTR.SECURITY
-+	setfattr -n security.foo -v bar ${SCRATCH_MNT}/ATTR.SECURITY
-+
-+	# system namespace
-+	touch ${SCRATCH_MNT}/ATTR.SYSTEM
-+	setfacl -m u:root:r ${SCRATCH_MNT}/ATTR.SYSTEM
-+
- 	# Make an unused inode
- 	echo "+ empty file"
- 	touch "${SCRATCH_MNT}/unused"
+thanks
 
+>=20
+>> +touch $SCRATCH_MNT/file258
+>> +mkdir $SCRATCH_MNT/new_dir259
+>> +mv $SCRATCH_MNT/dir257 $SCRATCH_MNT/new_dir259/dir257
+>> +
+>> +# Filesystem now looks like:
+>> +#
+>> +# .                                                             (ino=20
+>> 256)
+>> +# |--- file258                                                  (ino=20
+>> 258)
+>> +# |
+>> +# |--- new_dir259/                                              (ino=20
+>> 259)
+>> +# |    |--- dir257/                                             (ino=20
+>> 257)
+>> +#
+>> +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
+>> +    $SCRATCH_MNT/mysnap2 > /dev/null
+>> +
+>> +$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
+>> +$FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
+>> +        -x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
+>> +
+>> +$BTRFS_UTIL_PROG send $SCRATCH_MNT/mysnap1 -f \
+>> +    $send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
+>> +$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
+>> +       -f $send_files_dir/2.snap 2>&1 1>/dev/null | _filter_scratch
+>> +
+>> +# Now recreate the filesystem by receiving both send streams and=20
+>> verify we get
+>> +# the same content that the original filesystem had.
+>> +_scratch_unmount
+>> +_scratch_mkfs >>$seqres.full 2>&1
+>> +_scratch_mount
+>> +
+>> +$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/1.snap >=20
+>> /dev/null
+>> +$FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
+>> +$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/2.snap >=20
+>> /dev/null
+>> +$FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
+>> +
+>> +echo "Silence is golden"
+>> +status=3D0
+>> +exit
+>> diff --git a/tests/btrfs/132.out b/tests/btrfs/132.out
+>> new file mode 100644
+>> index 0000000..ff21547
+>> --- /dev/null
+>> +++ b/tests/btrfs/132.out
+>> @@ -0,0 +1,7 @@
+>> +QA output created by 132
+>> +At subvol SCRATCH_MNT/mysnap1
+>> +At subvol SCRATCH_MNT/mysnap2
+>> +At subvol mysnap1
+>> +OK
+>> +OK
+>> +Silence is golden
+>> diff --git a/tests/btrfs/group b/tests/btrfs/group
+>> index a7a070a..1b12382 100644
+>> --- a/tests/btrfs/group
+>> +++ b/tests/btrfs/group
+>> @@ -134,3 +134,4 @@
+>>  129 auto quick send
+>>  130 auto clone send
+>>  131 auto quick send
+>> +132 auto quick send
+>> --
+>> 1.9.1
+>>=20
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-btrfs"=
+=20
+>> in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
