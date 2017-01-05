@@ -1,348 +1,306 @@
-Received: from mail-it0-f52.google.com ([209.85.214.52]:37048 "EHLO
-        mail-it0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965870AbdAEK4k (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 5 Jan 2017 05:56:40 -0500
-Received: by mail-it0-f52.google.com with SMTP id 192so3489694itl.0
-        for <fstests@vger.kernel.org>; Thu, 05 Jan 2017 02:56:35 -0800 (PST)
+Received: from mail-io0-f193.google.com ([209.85.223.193]:35069 "EHLO
+        mail-io0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1762062AbdAEL2m (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 5 Jan 2017 06:28:42 -0500
 MIME-Version: 1.0
-In-Reply-To: <20170105092812.GT1859@eguan.usersys.redhat.com>
-References: <20170104190806.10795-1-roman.penyaev@profitbricks.com> <20170105092812.GT1859@eguan.usersys.redhat.com>
-From: Roman Penyaev <roman.penyaev@profitbricks.com>
-Date: Thu, 5 Jan 2017 11:56:14 +0100
-Message-ID: <CAJrWOzBkqoN3oxJRgDG5KBaY8xXma_GmaEYg-7PDBGfhMFO7zg@mail.gmail.com>
-Subject: Re: [PATCH v2 1/1] xfstests: ext4/023: reproduces incorrect right
- shift (insert range)
+Reply-To: fdmanana@gmail.com
+In-Reply-To: <edb59fe19caeed584141d9616f428c10@synology.com>
+References: <1483527210-2530-1-git-send-email-robbieko@synology.com>
+ <1483527210-2530-5-git-send-email-robbieko@synology.com> <CAL3q7H6eNoP6v+T=AXwB+5V0z_GMaJq8BxU=PO6z0mhRNtyuBA@mail.gmail.com>
+ <edb59fe19caeed584141d9616f428c10@synology.com>
+From: Filipe Manana <fdmanana@gmail.com>
+Date: Thu, 5 Jan 2017 11:28:17 +0000
+Message-ID: <CAL3q7H4+qHR-wQqDJ960sXNdTipoqxQX-0aEsmQSpS9oSo+Upw@mail.gmail.com>
+Subject: Re: [PATCH v3 4/4] xfstests: btrfs/134: add test for incremental send
+ which renames a directory already being deleted
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Theodore Ts'o <tytso@mit.edu>, linux-ext4@vger.kernel.org, fstests@vger.kernel.org
+To: robbieko <robbieko@synology.com>
+Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 5, 2017 at 10:28 AM, Eryu Guan <eguan@redhat.com> wrote:
-> On Wed, Jan 04, 2017 at 08:08:06PM +0100, Roman Pen wrote:
->> Test tries to insert many blocks at the same offset to reproduce
->> the following layout:
+On Thu, Jan 5, 2017 at 5:22 AM, robbieko <robbieko@synology.com> wrote:
+> Filipe Manana =E6=96=BC 2017-01-04 21:07 =E5=AF=AB=E5=88=B0:
+>
+>> On Wed, Jan 4, 2017 at 10:53 AM, robbieko <robbieko@synology.com> wrote:
+>>>
+>>> From: Robbie Ko <robbieko@synology.com>
+>>>
+>>> Test that an incremental send operation dosen't work because
 >>
->>    block #0  block #1
->>    |ext0 ext1|ext2 ext3 ...|
->>         ^
->>      insert of a new block
 >>
->> Because of an incorrect range first block is never reached,
->> thus ext1 is untouched, resulting to a hole at a wrong offset:
+>> dosen't -> doesn't
 >>
->> What we got:
+>>> it tries to rename a directory which is already deleted.
+>>>
+>>> This test exercises scenarios used to fail in btrfs and are fixed by
+>>> the following patch for the linux kernel:
+>>>
+>>> "Btrfs: incremental send, add generation check for inode is waiting for
+>>> move."
+>>>
+>>> Signed-off-by: Robbie Ko <robbieko@synology.com>
+>>> ---
+>>> V3: remove "run_" based helpers
+>>> V2: improve the change log
+>>>
+>>>  tests/btrfs/134     | 124
+>>> ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>>>  tests/btrfs/134.out |   9 ++++
+>>>  tests/btrfs/group   |   1 +
+>>>  3 files changed, 134 insertions(+)
+>>>  create mode 100755 tests/btrfs/134
+>>>  create mode 100644 tests/btrfs/134.out
+>>>
+>>> diff --git a/tests/btrfs/134 b/tests/btrfs/134
+>>> new file mode 100755
+>>> index 0000000..87c108e
+>>> --- /dev/null
+>>> +++ b/tests/btrfs/134
+>>> @@ -0,0 +1,124 @@
+>>> +#! /bin/bash
+>>> +# FS QA Test No. btrfs/134
+>>> +#
+>>> +# Test that an incremental send operation dosen't work because
 >>
->>    block #0   block #1
->>    |ext0 ext1|   ext2 ext3 ...|
->>               ^
->>               hole at a wrong offset
 >>
->> What we expect:
+>> dosen't -> doesn't
 >>
->>    block #0    block #1
->>    |ext0   ext1|ext2 ext3 ...|
->>         ^
->>         hole at a correct offset
->>
->> Signed-off-by: Roman Pen <roman.penyaev@profitbricks.com>
->> Cc: "Theodore Ts'o <tytso@mit.edu>"
->> Cc: linux-ext4@vger.kernel.org
->> Cc: fstests@vger.kernel.org
->
-> Thanks for the test! A few comments inline.
->
->> ---
->> v1..v2:
->>
->> '_require_xfs_io_command "finsert"' line was added to prevent
->> the test to fail on "ext3", "bigalloc" and "bigalloc_1k"
->> configurations.
->>
->>  tests/ext4/023     | 125 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->>  tests/ext4/023.out |   2 +
->>  tests/ext4/group   |   1 +
->>  3 files changed, 128 insertions(+)
->>  create mode 100755 tests/ext4/023
->>  create mode 100644 tests/ext4/023.out
->>
->> diff --git a/tests/ext4/023 b/tests/ext4/023
->> new file mode 100755
->> index 000000000000..2cd890731eb5
->> --- /dev/null
->> +++ b/tests/ext4/023
->> @@ -0,0 +1,125 @@
->> +#! /bin/bash
->> +# FS QA Test 023
->> +#
->> +# Regression test which reproduces an incorrect right shift
->> +# (insert range) for the first extent in a range.
->> +#
->> +# Test tries to insert many blocks at the same offset to reproduce
->> +# the following layout:
->> +#
->> +#    block #0  block #1
->> +#    |ext0 ext1|ext2 ext3 ...|
->> +#         ^
->> +#      insert of a new block
->> +#
->> +# Because of an incorrect range first block is never reached,
->> +# thus ext1 is untouched, resulting to a hole at a wrong offset:
->> +#
->> +# What we got:
->> +#
->> +#    block #0   block #1
->> +#    |ext0 ext1|   ext2 ext3 ...|
->> +#               ^
->> +#               hole at a wrong offset
->> +#
->> +# What we expect:
->> +#
->> +#    block #0    block #1
->> +#    |ext0   ext1|ext2 ext3 ...|
->> +#         ^
->> +#         hole at a correct offset
->> +#
->> +#-----------------------------------------------------------------------
->> +# Copyright (c) 2017 Roman Penyaev.  All Rights Reserved.
->> +#
->> +# This program is free software; you can redistribute it and/or
->> +# modify it under the terms of the GNU General Public License as
->> +# published by the Free Software Foundation.
->> +#
->> +# This program is distributed in the hope that it would be useful,
->> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
->> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
->> +# GNU General Public License for more details.
->> +#
->> +# You should have received a copy of the GNU General Public License
->> +# along with this program; if not, write the Free Software Foundation,
->> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
->> +#-----------------------------------------------------------------------
->> +#
->> +
->> +seq=`basename $0`
->> +seqres=$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +here=`pwd`
->> +tmp=/tmp/$$
->> +status=1     # failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +     cd /
->> +     rm -f $tmp.*
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +
->> +# remove previous $seqres.full before test
->> +rm -f $seqres.full
->> +
->> +# real QA test starts here
->> +
->> +# Modify as appropriate.
->> +_supported_fs ext4
->
-> This test can be made generic, there's nothing ext4-specific in this
-> test, and you can use helper function "get_block_size" to query
-> filesystem blocksize, so ..
-
-Test is generic, true.  My thoughts were that it targets specific ext4
-bug. But you are right, better to make it generic.  Will move it there.
-
->
->> +_supported_os Linux
->> +_require_test
->> +_require_dumpe2fs
->
-> no need to require & use dumpe2fs.
-
-ok.
-
->
->> +_require_xfs_io_command "finsert"
->> +
->> +pattern=$tmp
->> +testfile=$TEST_DIR/023.file
->
-> Use $seq number not hardcoded number. e.g.
->
-> testfile=$TEST_DIR/$seq.file
-
-ok.
-
->
->> +
->> +blksize=`$DUMPE2FS_PROG -h $TEST_DEV 2>/dev/null | grep "Block size" | \
->> +     awk '{print $3}'`
->
-> blksize=`get_block_size $TEST_DIR`
-
-good hint, thanks.
-
->
->> +
->> +# Generate a block with a repeating number represented as 4 bytes decimal.
->> +function generate_pattern() {
->> +     blkind=$1
->> +     printf "%04d" $blkind | awk  '{ while (c++ < '$(($blksize/4))') \
->> +             printf "%s", $0 }' > $pattern
->> +}
->
-> I don't think this is necessary, see below
->
->> +
->> +echo -n > $testfile
->> +$XFS_IO_PROG -c "falloc 0 $(($blksize * 2))" $testfile \
->> +                      >> $seqres.full 2>&1
->
-> $XFS_IO_PROG -f -c "...", -f option creates the file for you if it's not
-> existed :)
-
-This 'echo -n' it creates & truncates a test file.  Truncation is important,
-I experienced that the file is not removed between runs.
-
-Where is the good place to remove testfile?  Put rm to cleanup() ?
-
->
->> +
->> +# First block, has 0001 as a pattern
->> +generate_pattern 1
->> +$XFS_IO_PROG -c "pwrite -i $pattern        0 $blksize" $testfile \
->> +                      >> $seqres.full 2>&1
->> +
->> +# Second block, has 0002 as a pattern
->> +generate_pattern 2
->> +$XFS_IO_PROG -c "pwrite -i $pattern $blksize $blksize" $testfile \
->> +                      >> $seqres.full 2>&1
->> +
->> +# Insert 998 blocks after the first block
->> +for (( block=3; block<=1000; block++ )); do
->> +     $XFS_IO_PROG -c "finsert $blksize $blksize" $testfile \
->> +                              >> $seqres.full 2>&1
->> +
->> +     generate_pattern $block
->> +     $XFS_IO_PROG -c "pwrite -i $pattern $blksize $blksize" $testfile \
->> +                              >> $seqres.full 2>&1
->> +done
->
-> I think we can write any non-zero pattern to the file, and check if
-> there's any zero pattern in the file after doing all the insert & write
-> operations, because every zero block meant to be written by xfs_io in
-> the loop. If we see zero pattern, we know insert happens at the wrong
-> offset. So I'd suggest something like:
-
-Yes, that was my first variant.  'xfs_io -c pwrite' is able to write
-random bytes (also pattern), I used this feature.  The test looked nicer
-and not so bloated.
-
-But, the thing is that behind this 'insert range' bug, there is another
-one: https://www.spinics.net/lists/linux-ext4/msg54934.html
-
-This is hard to reproduce and the major symptom is that you do not see
-zero blocks, but the order of blocks are wrong.
-
-(It can be reproduced if we stop insertion just after we got this layout
-|ext0 ext1|ext2 ext3 ...|.  So probably the test could be modified and
- after each insert 'debugfs dump_extents' should be called in order
- to stop in a correct moment.  But seems that's overkill.)
-
-That's why I decided to make a test more robust and to write blocks with
-some index inside to make sure, that the test will immediately observe
-the wrong order.
-
-Also, I would like to use this -S 0xXX feature of pwrite, but unfortunately
-the pattern can be only 1 byte long, but I insert 1000 blocks (with smaller
-number the reproduction can be lost because of a physical block merge), so
-at least I need 2 bytes for pattern to make blocks unique.
-
-That's why so complicated :(
-
-So, I would like to keep the test as is.  Probably this generate_pattern()
-can be simplified, but I did not find a good way.
-
-Thanks for feedback.
-
+>>> +# it tries to rename a directory which is already deleted.
+>>> +#
+>>> +#---------------------------------------------------------------------=
 --
-Roman
-
-
-
->
-> # First block, has 'a' as a pattern
-> $XFS_IO_PROG -fc "pwrite -S 0x61 0 $blksize" $testfile \
->         >>$seqres.full 2>&1
->
-> # Second block, has 'b' as a pattern
-> $XFS_IO_PROG -fc "pwrite -S 0x62 $blksize $blksize" $testfile \
->         >>$seqres.full 2>&1
->
-> # Insert 998 blocks after the first block and fill the block with 'c' as
-> # a pattern
-> for (( i=0; i<998; i++ )); do
->         $XFS_IO_PROG -c "finsert $blksize $blksize" $testfile \
->                                  >> $seqres.full 2>&1
->         $XFS_IO_PROG -c "pwrite -S 0x63 $blksize $blksize" $testfile \
->                                  >> $seqres.full 2>&1
-> done
->
-> # Dump the file but avoid offsets because block size can vary.
-> # No zero should be seen in the file
-> hexdump -e '16/1 "%_p" "\n"' $testfile
->
-> And .out file is like:
->
-> QA output created by 023
-> aaaaaaaaaaaaaaaa
-> *
-> cccccccccccccccc
-> *
-> bbbbbbbbbbbbbbbb
-> *
->
->> +# Avoid offsets because block size can vary.
->> +# Expected blocks content is the following:
->> +#   0001 1000 0999 0998 ... 0002
->> +hexdump -e '16/1 "%_p" "\n"' $testfile | md5sum
->> +
->> +# success, all done
->> +status=0
->> +exit
->> diff --git a/tests/ext4/023.out b/tests/ext4/023.out
->> new file mode 100644
->> index 000000000000..383e305d43fa
->> --- /dev/null
->> +++ b/tests/ext4/023.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 023
->> +d1c3b6f63c5420ca8248ca380a8c00cb  -
->> diff --git a/tests/ext4/group b/tests/ext4/group
->> index 53fe03e87083..ace5cf1a3d47 100644
->> --- a/tests/ext4/group
->> +++ b/tests/ext4/group
->> @@ -25,6 +25,7 @@
->>  020 auto quick ioctl rw
->>  021 auto quick
->>  022 auto quick attr dangerous
->> +023 auto quick
->
-> Can be in 'insert' group too.
->
-> Thanks,
-> Eryu
->
->>  271 auto rw quick
->>  301 aio auto ioctl rw stress
->>  302 aio auto ioctl rw stress
->> --
->> 2.10.2
+>>> +# Copyright (C) 2016 Synology Inc. All Rights Reserved.
 >>
->> --
->> To unsubscribe from this list: send the line "unsubscribe fstests" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>> We're already in 2017 btw.
+>>
+>>> +# Author: Robbie Ko <robbieko@synology.com>
+>>> +#
+>>> +# This program is free software; you can redistribute it and/or
+>>> +# modify it under the terms of the GNU General Public License as
+>>> +# published by the Free Software Foundation.
+>>> +#
+>>> +# This program is distributed in the hope that it would be useful,
+>>> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+>>> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>>> +# GNU General Public License for more details.
+>>> +#
+>>> +# You should have received a copy of the GNU General Public License
+>>> +# along with this program; if not, write the Free Software Foundation,
+>>> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+>>> +#---------------------------------------------------------------------=
+--
+>>> +#
+>>> +
+>>> +seq=3D`basename $0`
+>>> +seqres=3D$RESULT_DIR/$seq
+>>> +echo "QA output created by $seq"
+>>> +
+>>> +tmp=3D/tmp/$$
+>>> +status=3D1       # failure is the default!
+>>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>>> +
+>>> +_cleanup()
+>>> +{
+>>> +       cd /
+>>> +       rm -fr $send_files_dir
+>>> +       rm -f $tmp.*
+>>> +}
+>>> +
+>>> +# get standard environment, filters and checks
+>>> +. ./common/rc
+>>> +. ./common/filter
+>>> +
+>>> +# real QA test starts here
+>>> +_supported_fs btrfs
+>>> +_supported_os Linux
+>>> +_require_test
+>>> +_require_scratch
+>>> +_require_fssum
+>>> +
+>>> +send_files_dir=3D$TEST_DIR/btrfs-test-$seq
+>>> +
+>>> +rm -f $seqres.full
+>>> +rm -fr $send_files_dir
+>>> +mkdir $send_files_dir
+>>> +
+>>> +_scratch_mkfs >>$seqres.full 2>&1
+>>> +_scratch_mount
+>>> +
+>>> +mkdir $SCRATCH_MNT/d1
+>>> +mkdir $SCRATCH_MNT/d4
+>>> +mkdir $SCRATCH_MNT/d3
+>>> +
+>>> +# Filesystem looks like:
+>>> +#
+>>> +# .                                                             (ino
+>>> 256)
+>>> +# |--- d1                                                       (ino
+>>> 257)
+>>> +# |--- d4                                                       (ino
+>>> 258)
+>>> +# |--- d3                                                       (ino
+>>> 259)
+>>> +#
+>>> +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
+>>> +    $SCRATCH_MNT/mysnap1 > /dev/null
+>>> +
+>>> +$BTRFS_UTIL_PROG send $SCRATCH_MNT/mysnap1 -f \
+>>> +    $send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
+>>> +
+>>> +_scratch_unmount
+>>> +_scratch_mkfs >>$seqres.full 2>&1
+>>> +_scratch_mount
+>>
+>>
+>> I don't understand this. Why do we need to recreate the filesystem?
+>> Why don't we just create the first and second snapshots in the same
+>> filesystems, just like all the other tests do.
+>>
+>> I would like to see comments explaining why that is needed and how/why
+>> the incremental send used to fail (in a user understandable way, not
+>> in a very technical way referring to pieces of code of btrfs), just
+>> like most of the existing send/receive tests have.
+>>
+>> I haven't tried nor reviewed the btrfs patches, but I hope to do it this
+>> week.
+>>
+>> thanks
+>
+>
+> Does not require recreate the filesystem, it just a scenario,
+> there are many ways to do the same thing,
+
+If there are many ways, then use the simpler one which doesn't raise
+any questions and anyone can understand it.
+If a non-obvious scenario is needed then just add a comment explaining why.
+
+> we just need to use the same inode number, but different from the old one=
+.
+
+What you want to say is creating the same inode (same number) but with
+a different generation, is that it?
+
+And I would like to see this explanations as comments in the code.
+Whenever in the future someone reads the test, he/she is unlikely to
+go search the mailing list thread for explanations.
+
+> Let btrfs send need to recreate dir.
+>
+> The primary mistake is "ERROR: rename d1 -> o257-44-0 failed: No such fil=
+e
+> or directory"
+> But in fact the old d1 has been deleted.
+
+Again, explain it in the test as a comment that send used to issue a
+rename operation with a no longer valid source name (and why that
+happened).
+Look at the existing send/receive tests that have explanations of the
+problems they test, for example:
+https://git.kernel.org/cgit/fs/xfs/xfstests-dev.git/tree/tests/btrfs/129#n8=
+1
+
+thanks
+
+
+>
+> thanks.
+>
+>
+>>> +mkdir $SCRATCH_MNT/d1
+>>> +mkdir $SCRATCH_MNT/d2
+>>> +mkdir $SCRATCH_MNT/d3
+>>> +mkdir $SCRATCH_MNT/d4
+>>> +mv $SCRATCH_MNT/d1 $SCRATCH_MNT/d3/d1
+>>> +mv $SCRATCH_MNT/d3 $SCRATCH_MNT/d4/d3
+>>> +mv $SCRATCH_MNT/d2 $SCRATCH_MNT/d1
+>>> +
+>>> +# Filesystem now looks like:
+>>> +#
+>>> +# .                                                             (ino
+>>> 256)
+>>> +# |--- d1                                                       (ino
+>>> 258)
+>>> +# |--- d4                                                       (ino
+>>> 260)
+>>> +# |    |--- d3/                                                 (ino
+>>> 259)
+>>> +# |    |    |--- d1/                                            (ino
+>>> 257)
+>>> +#
+>>> +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
+>>> +    $SCRATCH_MNT/mysnap2 > /dev/null
+>>> +
+>>> +$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/1.snap >
+>>> /dev/null
+>>> +rm $send_files_dir/1.snap
+>>> +
+>>> +$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
+>>> +$FSSUM_PROG -A -f -w $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
+>>> +
+>>> +$BTRFS_UTIL_PROG send $SCRATCH_MNT/mysnap1 -f \
+>>> +    $send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
+>>> +$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
+>>> +       -f $send_files_dir/2.snap 2>&1 1>/dev/null | _filter_scratch
+>>> +
+>>> +# Now recreate the filesystem by receiving both send streams and verif=
+y
+>>> we get
+>>> +# the same content that the original filesystem had.
+>>> +_scratch_unmount
+>>> +_scratch_mkfs >>$seqres.full 2>&1
+>>> +_scratch_mount
+>>> +
+>>> +$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/1.snap >
+>>> /dev/null
+>>> +$FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
+>>> +$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/2.snap >
+>>> /dev/null
+>>> +$FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
+>>> +
+>>> +echo "Silence is golden"
+>>> +status=3D0
+>>> +exit
+>>> diff --git a/tests/btrfs/134.out b/tests/btrfs/134.out
+>>> new file mode 100644
+>>> index 0000000..700a78f
+>>> --- /dev/null
+>>> +++ b/tests/btrfs/134.out
+>>> @@ -0,0 +1,9 @@
+>>> +QA output created by 134
+>>> +At subvol SCRATCH_MNT/mysnap1
+>>> +At subvol mysnap1
+>>> +At subvol SCRATCH_MNT/mysnap1
+>>> +At subvol SCRATCH_MNT/mysnap2
+>>> +At subvol mysnap1
+>>> +OK
+>>> +OK
+>>> +Silence is golden
+>>> diff --git a/tests/btrfs/group b/tests/btrfs/group
+>>> index 779caec..831283e 100644
+>>> --- a/tests/btrfs/group
+>>> +++ b/tests/btrfs/group
+>>> @@ -136,3 +136,4 @@
+>>>  131 auto quick send
+>>>  132 auto quick send
+>>>  133 auto quick send
+>>> +134 auto quick send
+>>> --
+>>> 1.9.1
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" =
+in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+--=20
+Filipe David Manana,
+
+"People will forget what you said,
+ people will forget what you did,
+ but people will never forget how you made them feel."
