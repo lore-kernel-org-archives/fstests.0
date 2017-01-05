@@ -1,50 +1,43 @@
-Received: from sandeen.net ([63.231.237.45]:45516 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751998AbdADXFa (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 4 Jan 2017 18:05:30 -0500
-Subject: Re: trouble with generic/081
-References: <20161214164314.GA25105@infradead.org>
- <20161215063650.GJ4326@dastard> <20161215084224.GA14395@infradead.org>
- <c05b64b6-80d3-655d-db9b-6f49038e53ee@redhat.com>
- <20161216081523.GA13847@infradead.org>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <5806882c-4807-cb2a-80dd-147de5bf176a@sandeen.net>
-Date: Wed, 4 Jan 2017 17:03:46 -0600
+Received: from mail-pg0-f65.google.com ([74.125.83.65]:35115 "EHLO
+        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932445AbdAEA3S (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 4 Jan 2017 19:29:18 -0500
+Received: by mail-pg0-f65.google.com with SMTP id i5so38748465pgh.2
+        for <fstests@vger.kernel.org>; Wed, 04 Jan 2017 16:29:18 -0800 (PST)
+Date: Wed, 4 Jan 2017 16:29:15 -0800
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: Re: [PATCH v3] xfstests-bld: correct file permissions on test
+ appliance files
+Message-ID: <20170105002915.GD21696@gmail.com>
+References: <20161228210820.13832-1-ebiggers3@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20161216081523.GA13847@infradead.org>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20161228210820.13832-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>, Zdenek Kabelac <zkabelac@redhat.com>
-Cc: Dave Chinner <david@fromorbit.com>, eguan@redhat.com, fstests@vger.kernel.org, dm-devel@redhat.com
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-
-
-On 12/16/16 2:15 AM, Christoph Hellwig wrote:
-> On Thu, Dec 15, 2016 at 10:16:23AM +0100, Zdenek Kabelac wrote:
->> So let me explain the logic behind this 'amazingly stupid' idea.
+On Wed, Dec 28, 2016 at 03:08:20PM -0600, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
 > 
-> And that logic doesn't make any sense at all.  invibly unmounting
-> a file system behind the users back is actively harmful, as it is
-> contradicting the principle of least surprise, and the xfstests mess
-> is one simple example for it.  Add a callback in-kernel to tell the
-> fs to shut down but NOT unmount and expose the namespace below it,
-> which the administrator has probably intentionally hid.
+> The xfstests-bld repository may have been cloned with a umask that
+> masked out the group and/or the other bits.  When using --update-files
+> in this situation or when creating a GCE image, the VM ended up in a
+> state where non-root users were unable to execute anything, which made
+> all tests using the fsgqa user get skipped.  Fix this by copying the r
+> and x user bits to the group and other bits when creating files.tar.gz.
+> Also set the owner and group to root while we're at it.
 > 
-> Even worse unmount may trigger further writes and with fses not
-> handling them the fs might now be stuck after being detached from
-> the namespace without a way for the admin to detect or recover this.
+> Note that git doesn't actually store file owners, groups, or any mode
+> bits other than "is the file executable"?  So this patch really just
+> enforces a consistent, sane default for this "unstored" metadata.
 > 
-> What XFS did on IRIX was to let the volume manager call into the fs
-> and shut it down.  At this point no further writes are possible,
-> but we do not expose the namespace under the mount point, and the
-> admin can fix the situation with all the normal tools.
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
 
-<late to the party>
+As it turns out, update_xfstests() in kvm-xfstests/test-appliance/gen-image also
+needs to be updated.  (I'm not sure why it wasn't a problem for me before.)  So
+I'll send yet another version of this patch.
 
-Is there a need for this kind of call-up when xfs now has the configurable
-error handling so that it will shut down after X retries or Y seconds 
-of a persistent error?
-
--Eric
+Eric
