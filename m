@@ -1,58 +1,42 @@
-Received: from mail-pg0-f68.google.com ([74.125.83.68]:36073 "EHLO
-        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752127AbdAGE5e (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 6 Jan 2017 23:57:34 -0500
-Received: by mail-pg0-f68.google.com with SMTP id 75so7648564pgf.3
-        for <fstests@vger.kernel.org>; Fri, 06 Jan 2017 20:57:34 -0800 (PST)
-Date: Fri, 6 Jan 2017 20:57:31 -0800
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: Re: [PATCH] fstests: cleanup tmp files in tests
-Message-ID: <20170107045731.GC575@zzz>
-References: <20170106034507.5915-1-eguan@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:33224 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S937060AbdAGQcC (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 7 Jan 2017 11:32:02 -0500
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 17C09C05681D
+        for <fstests@vger.kernel.org>; Sat,  7 Jan 2017 16:32:03 +0000 (UTC)
+Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
+        by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id v07GW27G015532
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+        for <fstests@vger.kernel.org>; Sat, 7 Jan 2017 11:32:02 -0500
+From: Eric Sandeen <sandeen@redhat.com>
+Subject: xfs/118: add to dangerous group
+Message-ID: <f3f2db11-2278-4b0e-f7a4-22c49eb8e0b5@redhat.com>
+Date: Sat, 7 Jan 2017 10:32:01 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170106034507.5915-1-eguan@redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Hi Eryu,
+Failure results in an oops, so add it to dangerous.
 
-On Fri, Jan 06, 2017 at 11:45:07AM +0800, Eryu Guan wrote:
-> $tmp.* files should be removed in _cleanup() even if the test is not
-> using any $tmp.* file explicitly, because common helper functions
-> may take use of them too.
-> 
-> So cleanup tmp files properly in tests, and add a _cleanup()
-> function and trap it on exit if the test doesn't do so, to make all
-> tests consistent on the way they do cleanup.
-> 
-> Also remove other tmp files used by the tests and the harness so
-> that we leave no new tmp files in /tmp dir after a full test run.
-> 
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
 
-Why exactly can't the boilerplate go in a preamble file which is sourced by all
-the tests?  For example common/preamble containing something like:
-
-	seq=`basename $0`
-	seqres=$RESULT_DIR/$seq
-	echo "QA output created by $seq"
-
-	_cleanup()
-	{
-		cd /
-		rm -f $tmp.*
-	}
-
-	here=`pwd`
-	tmp=/tmp/$$
-	status=1        # failure is the default!
-	trap "_cleanup; exit \$status" 0 1 2 3 15
-
-	. ./common/rc
-
-Tests that need to do more cleanup could override the default trap.
-
-Eric
+diff --git a/tests/xfs/group b/tests/xfs/group
+index c237b50..5b872d9 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -115,7 +115,7 @@
+ 115 parent attr
+ 116 quota auto quick
+ 117 fuzzers
+-118 auto quick fsr
++118 auto quick fsr dangerous
+ 119 log v2log auto freeze dangerous
+ 120 fuzzers
+ 121 log auto quick
