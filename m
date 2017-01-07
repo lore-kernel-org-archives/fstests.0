@@ -1,41 +1,37 @@
-Received: from imap.thunk.org ([74.207.234.97]:50580 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:50610 "EHLO imap.thunk.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933289AbdAGQnM (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 7 Jan 2017 11:43:12 -0500
-Date: Sat, 7 Jan 2017 11:43:07 -0500
+        id S1753004AbdAGRAO (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 7 Jan 2017 12:00:14 -0500
+Date: Sat, 7 Jan 2017 12:00:11 -0500
 From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH v4] xfstests-bld: correct file permissions on test
- appliance files
-Message-ID: <20170107164307.5w7ordjrg3sjpkns@thunk.org>
-References: <20170105003137.112962-1-ebiggers3@gmail.com>
+Subject: Re: [PATCH] xfstests-bld: document how to add debian packages to GCE
+ image
+Message-ID: <20170107170011.yovxavb32r77awhv@thunk.org>
+References: <1482343592-135031-2-git-send-email-ebiggers3@gmail.com>
+ <20161222170433.cbyrt2phsapq2tr7@thunk.org>
+ <20161228212132.GB8557@zzz>
+ <20161231155223.pooklm4xsbv5yxhz@thunk.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170105003137.112962-1-ebiggers3@gmail.com>
+In-Reply-To: <20161231155223.pooklm4xsbv5yxhz@thunk.org>
 Sender: fstests-owner@vger.kernel.org
 To: Eric Biggers <ebiggers3@gmail.com>
 Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jan 04, 2017 at 04:31:37PM -0800, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
-> 
-> The xfstests-bld repository may have been cloned with a umask that
-> masked out the group and/or the other bits.  When using --update-files
-> in this situation or when creating a GCE image, the VM ended up in a
-> state where non-root users were unable to execute the binaries in
-> /root/xfstests, which made all tests using the fsgqa user get skipped.
-> Fix this by copying the r and x user bits to the group and other bits
-> when creating files.tar.gz, creating xfstests.tar.gz, or copying files
-> directly to the kvm-xfstests appliance.  Also consistently set the owner
-> and group to root.
-> 
-> Note that git doesn't actually store file owners, groups, or any mode
-> bits other than "is the file executable"?  So this patch really just
-> enforces a consistent, sane default for this "unstored" metadata.
-> 
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
+It looks like "gsutil rsync -cd" is actually pretty efficient, so I'll
+be adopting your suggestion of using that so we can use the same
+mechanism for the kvm-xfstests create-image script.
 
-Applied, thanks.
+I'm also going to be teaching gce-xfstests-bld.sh to use the
+jessie-backports version for e2fsprogs and btrfs-progs, and f2fs-tools
+is currently waiting to be installed in the debian backports queue.
+Once that's done, we won't actually need any extra packages for the
+gce-xfstests image which I am distributing, since we can just use the
+jessie-backports version.
+
+We still need a similar mechanism for the other build mechanisms, but
+we can do that later.
 
 					- Ted
