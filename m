@@ -1,62 +1,59 @@
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:34483 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934994AbdAINax (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 9 Jan 2017 08:30:53 -0500
+Received: from mail-wj0-f195.google.com ([209.85.210.195]:36657 "EHLO
+        mail-wj0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S938479AbdAINa6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 9 Jan 2017 08:30:58 -0500
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v3 0/3] xfs: test malformed inode mode
-Date: Mon,  9 Jan 2017 15:30:22 +0200
-Message-Id: <1483968625-29160-1-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v3 3/3] xfs: test readlink/readdir with malformed inode mode
+Date: Mon,  9 Jan 2017 15:30:25 +0200
+Message-Id: <1483968625-29160-4-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1483968625-29160-1-git-send-email-amir73il@gmail.com>
+References: <1483968625-29160-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
 Cc: Brian Foster <bfoster@redhat.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Eryu,
+In addition to testing xfs_repair on inodes with malformed mode,
+and fstat of those inodes on a mounted fs, try to also list content
+of mock directory and readlink of mock symlink.
 
-This is the 3rd revision of the malformed inode mode test.
+Readdir of mock directory triggers XFS assertion on kernel 4.9 with
+XFS_DEBUG=y
 
-Like with v2, patch 1 is safe and it passes on kernel 4.9.
+XFS: Assertion failed:
+     rval == 0 || args->dp->i_d.di_size == args->geo->blksize,
+file: /home/amir/build/src/linux/fs/xfs/libxfs/xfs_dir2.c, line: 634
 
-Like with v2, patch 2 is safe, but unlike v2, it fails on
-kernel 4.9, because I added a stronger expectation for the
-test to fails on stat of directory with inode size 0.
+A fix patch, as suggested by Darrick, changes this ASSERT() to
+return -EFSCORRUPTED ("xfs: sanity check directory inode di_size").
 
-Like with v2, patch 3 triggers an XFS assert and I removed
-the "safety pin" that was there in v2.
+Merging this test should be deferred to after fix patch is merged.
 
-I already sent the fix patch to Darick, which addresses the
-failures in both patch 2 and 3.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/xfs/348 | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-You could merge patch 1 now and defer merging patches 2-3
-or you could wait with merging the entire test. up to you.
-
-Amir.
-
-v3:
-- added empty and non empty regular file cases (patch 1)
-- expect to detect directory with size 0 as an error (patch 2)
-- removed the "safety pin" from patch 3
-
-v2:
-- test fstat with malformed inode mode
-- test readlink/readdir with malformed inode mode
-
-v1:
-- test xfs_repair with malformed inode mode
-
-
-Amir Goldstein (3):
-  xfs: test handling of invalid inode modes
-  xfs: test fstat with malformed inode mode
-  xfs: test readlink/readdir with malformed inode mode
-
- tests/xfs/348     | 154 +++++++++++++++++++++++
- tests/xfs/348.out | 360 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/group   |   1 +
- 3 files changed, 515 insertions(+)
- create mode 100755 tests/xfs/348
- create mode 100644 tests/xfs/348.out
-
+diff --git a/tests/xfs/348 b/tests/xfs/348
+index 30825a4..20d5d7e 100755
+--- a/tests/xfs/348
++++ b/tests/xfs/348
+@@ -133,6 +133,15 @@ for dt in $dtypes; do
+ 			cat $tmp.stat.err
+ 		else
+ 			echo "stat: '$testdir/$file' is a $ftype"
++			# Verify that readlink of a file posing as a symlink
++			# and ls of a file posing as a directory does not blow up.
++			# NOTE that ls DOES ASSERT with kernel 4.9 and XFS_DEBUG=y
++			# on malformed directory
++			if [ -d $testdir/$file ]; then
++				ls "$safety" $testdir/$file &> /dev/null
++			elif [ -h $testdir/$file ]; then
++				readlink $testdir/$file &> /dev/null
++			fi
+ 		fi | _filter_scratch
+ 	done
+ 	_scratch_unmount
 -- 
 2.7.4
 
