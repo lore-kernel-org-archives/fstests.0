@@ -1,33 +1,56 @@
-Received: from bombadil.infradead.org ([198.137.202.9]:33574 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932933AbdAINkJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 9 Jan 2017 08:40:09 -0500
-Date: Mon, 9 Jan 2017 05:40:08 -0800
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH] fstests: fix error redirection in generic/256
-Message-ID: <20170109134008.GC19577@infradead.org>
-References: <20161112164720.GA18127@infradead.org>
- <20161112183943.GK27776@eguan.usersys.redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:53666 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S934508AbdAIPhj (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 9 Jan 2017 10:37:39 -0500
+Date: Mon, 9 Jan 2017 10:37:38 -0500
+From: Brian Foster <bfoster@redhat.com>
+Subject: Re: [PATCH] generic/081: hack around the lvm unmount race
+Message-ID: <20170109153738.GB22368@bfoster.bfoster>
+References: <1483969098-16653-1-git-send-email-hch@lst.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20161112183943.GK27776@eguan.usersys.redhat.com>
+In-Reply-To: <1483969098-16653-1-git-send-email-hch@lst.de>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org
+To: Christoph Hellwig <hch@lst.de>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Nov 13, 2016 at 02:39:43AM +0800, Eryu Guan wrote:
-> On Sat, Nov 12, 2016 at 08:47:20AM -0800, Christoph Hellwig wrote:
-> > Not sure if my shell is the problem here, but I need this explicit
-> > redirection to ignore the error output from mkdir and xfs_io, otherwise
-> > the test fails due to the error messages from these commands.
+On Mon, Jan 09, 2017 at 02:38:18PM +0100, Christoph Hellwig wrote:
+> This is butt ugly, but I see no better way than to wait a bit to
+> work around the race between the weird umount in LVM, and the mount
+> ismounted checks.
 > 
-> That's weird, from bash manpage, "&>" should be equivalent to "> ... 2>&1"
-> 
-> There're many other tests use "&>" as well, do you see such failures
-> from other tests, such as generic/347?
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
 
-No.  But 256 keeps on failing for me without this.  Given that it's
-just a slightly more verbose syntax is there any reason not to just
-apply this patch for now?
+Yes please:
+
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+
+I've had this test expunged from some setups simply because this failure
+can cause the entire test run to go off the rails.
+
+>  tests/generic/081 | 2 ++
+>  1 file changed, 2 insertions(+)
+> 
+> diff --git a/tests/generic/081 b/tests/generic/081
+> index 11755d4..426766d 100755
+> --- a/tests/generic/081
+> +++ b/tests/generic/081
+> @@ -35,6 +35,8 @@ _cleanup()
+>  	cd /
+>  	rm -f $tmp.*
+>  	# lvm may have umounted it on I/O error, but in case it does not
+> +	# wait a bit for lvm to settle, sigh..
+> +	sleep 2
+>  	$UMOUNT_PROG $mnt >/dev/null 2>&1
+>  	$LVM_PROG vgremove -f $vgname >>$seqres.full 2>&1
+>  	$LVM_PROG pvremove -f $SCRATCH_DEV >>$seqres.full 2>&1
+> -- 
+> 2.1.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
