@@ -1,56 +1,62 @@
-Received: from mx1.redhat.com ([209.132.183.28]:53666 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:34944 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S934508AbdAIPhj (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 9 Jan 2017 10:37:39 -0500
-Date: Mon, 9 Jan 2017 10:37:38 -0500
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH] generic/081: hack around the lvm unmount race
-Message-ID: <20170109153738.GB22368@bfoster.bfoster>
-References: <1483969098-16653-1-git-send-email-hch@lst.de>
+        id S1756899AbdAIQtW (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 9 Jan 2017 11:49:22 -0500
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 9167FA4669
+        for <fstests@vger.kernel.org>; Mon,  9 Jan 2017 16:49:23 +0000 (UTC)
+Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
+        by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id v09GnMAp004796
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+        for <fstests@vger.kernel.org>; Mon, 9 Jan 2017 11:49:23 -0500
+From: Eric Sandeen <sandeen@redhat.com>
+Subject: [PATCH] xfs/010: explicitly allow corrupted write in xfs_db
+Message-ID: <9d52a01a-78db-3ee1-66e7-bddd1f3f9598@redhat.com>
+Date: Mon, 9 Jan 2017 10:49:21 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1483969098-16653-1-git-send-email-hch@lst.de>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: fstests@vger.kernel.org
+To: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jan 09, 2017 at 02:38:18PM +0100, Christoph Hellwig wrote:
-> This is butt ugly, but I see no better way than to wait a bit to
-> work around the race between the weird umount in LVM, and the mount
-> ismounted checks.
-> 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
+xfs/010 wants to write corruption and test how xfs_repair
+deals, but when:
 
-Yes please:
+  xfs: forbid AG btrees with level == 0
 
-Reviewed-by: Brian Foster <bfoster@redhat.com>
+is merged to userspace, this new test fails the write verifier
+in xfs_db.
 
-I've had this test expunged from some setups simply because this failure
-can cause the entire test run to go off the rails.
+Add "-c" to allow the corrupted write, do the corruptions all
+in one xfs_db command (so it doesn't have to re-read the
+corrupted data on 2nd startup), and filter out the
 
->  tests/generic/081 | 2 ++
->  1 file changed, 2 insertions(+)
-> 
-> diff --git a/tests/generic/081 b/tests/generic/081
-> index 11755d4..426766d 100755
-> --- a/tests/generic/081
-> +++ b/tests/generic/081
-> @@ -35,6 +35,8 @@ _cleanup()
->  	cd /
->  	rm -f $tmp.*
->  	# lvm may have umounted it on I/O error, but in case it does not
-> +	# wait a bit for lvm to settle, sigh..
-> +	sleep 2
->  	$UMOUNT_PROG $mnt >/dev/null 2>&1
->  	$LVM_PROG vgremove -f $vgname >>$seqres.full 2>&1
->  	$LVM_PROG pvremove -f $SCRATCH_DEV >>$seqres.full 2>&1
-> -- 
-> 2.1.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+  "Allowing write of corrupted data and bad CRC"
+
+output from the "write -c" command.
+
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
+
+diff --git a/tests/xfs/010 b/tests/xfs/010
+index d350d64..471ec2c 100755
+--- a/tests/xfs/010
++++ b/tests/xfs/010
+@@ -95,8 +95,11 @@ _corrupt_finobt_root()
+ 	dev=$1
+ 
+ 	# nuke the agi finobt root fields
+-	$XFS_DB_PROG -x -c "agi 0" -c "write free_root 0" $dev
+-	$XFS_DB_PROG -x -c "agi 0" -c "write free_level 0" $dev
++	$XFS_DB_PROG -x				\
++		-c "agi 0"			\
++		-c "write -c free_root 0"	\
++		-c "write -c free_level 0"	\
++		$dev | grep -v "Allowing write of corrupted"
+ }
+ 
+ # real QA test starts here
+
