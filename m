@@ -1,57 +1,72 @@
-Received: from mail-oi0-f44.google.com ([209.85.218.44]:33234 "EHLO
-        mail-oi0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1030891AbdAHNGu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 8 Jan 2017 08:06:50 -0500
-Received: by mail-oi0-f44.google.com with SMTP id 128so469714430oig.0
-        for <fstests@vger.kernel.org>; Sun, 08 Jan 2017 05:06:50 -0800 (PST)
+Received: from mx1.redhat.com ([209.132.183.28]:55248 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751133AbdAIIzP (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 9 Jan 2017 03:55:15 -0500
+Date: Mon, 9 Jan 2017 16:55:14 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 4/7] reflink: fix quota tests to work properly
+Message-ID: <20170109085514.GZ1859@eguan.usersys.redhat.com>
+References: <148357827617.7677.15595044775254927245.stgit@birch.djwong.org>
+ <148357830178.7677.13949115107817848755.stgit@birch.djwong.org>
 MIME-Version: 1.0
-In-Reply-To: <20170106034507.5915-1-eguan@redhat.com>
-References: <20170106034507.5915-1-eguan@redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Sun, 8 Jan 2017 15:06:49 +0200
-Message-ID: <CAOQ4uxgPOKc=qUyTfKW1g-uwCrfxYHwE3NSwNY3R=0Tj-LpSPw@mail.gmail.com>
-Subject: Re: [PATCH] fstests: cleanup tmp files in tests
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <148357830178.7677.13949115107817848755.stgit@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jan 6, 2017 at 5:45 AM, Eryu Guan <eguan@redhat.com> wrote:
-> $tmp.* files should be removed in _cleanup() even if the test is not
-> using any $tmp.* file explicitly, because common helper functions
-> may take use of them too.
->
-> So cleanup tmp files properly in tests, and add a _cleanup()
-> function and trap it on exit if the test doesn't do so, to make all
-> tests consistent on the way they do cleanup.
->
-> Also remove other tmp files used by the tests and the harness so
-> that we leave no new tmp files in /tmp dir after a full test run.
->
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
+On Wed, Jan 04, 2017 at 05:05:01PM -0800, Darrick J. Wong wrote:
+> Fix the reflink quota tests to su to the fsgqa user so that we actually
+> test enforcement of quotas.  Seems that XFS enforces user quotas even
+> if root is writing to a user file, whereas everything else lets root
+> writes through.  Also clean up some of the variable usage and
+> _require_user.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
+> v2: Refactor the quota block reporting into a helper function and
+> port all the existing tests.  Fix "fsgqa"/$qa_user usage too.
+> ---
+>  common/quota          |   10 ++++++++++
+>  tests/generic/305     |   22 ++++++++++------------
+>  tests/generic/305.out |   30 +++++++++++++++---------------
+>  tests/generic/326     |   22 ++++++++++------------
+>  tests/generic/326.out |   30 +++++++++++++++---------------
+>  tests/generic/327     |   19 +++++++++----------
+>  tests/generic/327.out |   12 ++++++------
+>  tests/generic/328     |   29 ++++++++++++++---------------
+>  tests/generic/328.out |   28 ++++++++++++++--------------
+>  tests/xfs/213         |   22 ++++++++++------------
+>  tests/xfs/213.out     |   30 +++++++++++++++---------------
+>  tests/xfs/214         |   22 ++++++++++------------
+>  tests/xfs/214.out     |   30 +++++++++++++++---------------
+>  13 files changed, 153 insertions(+), 153 deletions(-)
+> 
+> 
+> diff --git a/common/quota b/common/quota
+> index d4ae861..5c6e680 100644
+> --- a/common/quota
+> +++ b/common/quota
+> @@ -302,5 +302,15 @@ _check_quota_usage()
+>  	}
+>  }
+>  
+> +# Report the block usage of root, $qa_user, and nobody
+> +_report_quota_blocks() {
+> +	repquota $SCRATCH_MNT | egrep "^($qa_user|root|nobody)" | awk '{print $1, $3, $4, $5}'
+> +}
+> +
+> +# Report the inode usage of root, $qa_user, and nobody
+> +_report_quota_inodes() {
+> +	repquota $SCRATCH_MNT | egrep "^($qa_user|root|nobody)" | awk '{print $1, $6, $7, $8}'
+> +}
+> +
 
-So much duplicated code!!
+Name them as _scratch_report_quota_blocks|inodes ? Since they're
+assuming mount point is SCRATCH_MNT. Or take the mount point as the
+first argument?
 
-Did you consider consolidating all those lines that MUST start every test
-with:
-
-# Always start a test with this line
-. ./common/prologue
-# This is the standatd cleanup trigger - remove to implement a private
-cleanup trigger
-. ./common/cleanup
-
-And while at it, why not put exit \$status inside the generic _cleanup()?
-
-non generic cleanup implementations could looks like this:
-
-trap "my_cleanup" 0 1 2 3 15
-
-my_cleanup()
-{
-        # my cleanup stuff...
-        # generic cleanup and exit $status
-        _cleanup
-}
+Thanks,
+Eryu
