@@ -1,46 +1,60 @@
-Received: from mx1.redhat.com ([209.132.183.28]:39134 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1162825AbdAJE1C (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 9 Jan 2017 23:27:02 -0500
-Date: Tue, 10 Jan 2017 12:27:01 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] fstests: fix error redirection in generic/256
-Message-ID: <20170110042701.GJ1859@eguan.usersys.redhat.com>
-References: <20161112164720.GA18127@infradead.org>
- <20161112183943.GK27776@eguan.usersys.redhat.com>
- <20170109134008.GC19577@infradead.org>
+Received: from userp1040.oracle.com ([156.151.31.81]:51548 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933132AbdAJEwe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 9 Jan 2017 23:52:34 -0500
+Date: Mon, 9 Jan 2017 20:52:29 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH v2 7/7] xfs/ext4: check negative inode size
+Message-ID: <20170110045229.GD3732@birch.djwong.org>
+References: <148357827617.7677.15595044775254927245.stgit@birch.djwong.org>
+ <148357832063.7677.12994144585642711957.stgit@birch.djwong.org>
+ <20170109205518.GF14033@birch.djwong.org>
+ <20170110044023.GK1859@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170109134008.GC19577@infradead.org>
+In-Reply-To: <20170110044023.GK1859@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jan 09, 2017 at 05:40:08AM -0800, Christoph Hellwig wrote:
-> On Sun, Nov 13, 2016 at 02:39:43AM +0800, Eryu Guan wrote:
-> > On Sat, Nov 12, 2016 at 08:47:20AM -0800, Christoph Hellwig wrote:
-> > > Not sure if my shell is the problem here, but I need this explicit
-> > > redirection to ignore the error output from mkdir and xfs_io, otherwise
-> > > the test fails due to the error messages from these commands.
+On Tue, Jan 10, 2017 at 12:40:23PM +0800, Eryu Guan wrote:
+> On Mon, Jan 09, 2017 at 12:55:18PM -0800, Darrick J. Wong wrote:
+> > Craft a malicious filesystem image with a negative inode size,
+> > then try to trigger a kernel DoS by appending data to the file.
+> > Ideally this should trigger verifier errors instead of hanging.
 > > 
-> > That's weird, from bash manpage, "&>" should be equivalent to "> ... 2>&1"
-> > 
-> > There're many other tests use "&>" as well, do you see such failures
-> > from other tests, such as generic/347?
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> > v2: use $DEBUGFS_PROG instead of debugfs; improve documentation
 > 
-> No.  But 256 keeps on failing for me without this.  Given that it's
-> just a slightly more verbose syntax is there any reason not to just
-> apply this patch for now?
+> Thanks for all the updated patches! I fixed a minor typo locally and
+> committed.
+> 
+> > diff --git a/tests/shared/401 b/tests/shared/401
+> > new file mode 100755
+> > index 0000000..7b61cbb
+> > --- /dev/null
+> > +++ b/tests/shared/401
+> > @@ -0,0 +1,77 @@
+> > +#! /bin/bash
+> > +# FSQA Test No. 401
+> > +#
+> > +# Since loff_t is a signed type, it is invalid for a filesystem to load
+> > +# an inode with i_size = -1ULL.  Unfortunately, nobody checks this,
+> > +# which means that we can trivially DoS the VFS by creating such a file
+> > +# and appending to it.  This causes an integer overflow in the routines
+> > +# underlying writeback, which results in the kernel locking up.
+> > +#
+> > +# So, create this malformed inode and try a buffered dio append to make
+>                                                ^^^^^^^^
+> I removed the "buffered" here and from xfs/401.
 
-BTW, are you using Debian, or your default shell is not bash? If so, I
-guess you may hit this
+D'oh!!!  Thanks for fixing that.
 
-https://www.spinics.net/lists/fstests/msg00686.html
+--D
 
-Changing the default shell to bash for fsgqa user should do the work for
-you, I guess.
-
-Thanks,
-Eryu
+> 
+> Thanks,
+> Eryu
