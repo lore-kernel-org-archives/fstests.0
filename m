@@ -1,56 +1,65 @@
-Received: from sandeen.net ([63.231.237.45]:48782 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752669AbdAKDB3 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 10 Jan 2017 22:01:29 -0500
-Subject: Re: Generic/389 xfs_io segfault on btrfs and ext4
-References: <ca7ae533-8d7f-9783-1900-bdfb17d6a32c@cn.fujitsu.com>
- <d5116871-0bb3-46b0-c9e3-def74bd57967@sandeen.net>
- <5c56afcd-13b0-d3b3-e18c-0b902691d8f4@cn.fujitsu.com>
- <c5ea839d-1962-e363-d83b-936328f985df@redhat.com>
- <8e1e082b-11c0-e597-cd38-744938537c2e@cn.fujitsu.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <c2bfb9eb-ad3b-bf04-9b8e-108b3a1a7ce8@sandeen.net>
-Date: Tue, 10 Jan 2017 21:01:28 -0600
+Received: from mail-oi0-f68.google.com ([209.85.218.68]:33116 "EHLO
+        mail-oi0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751874AbdAKGiq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 Jan 2017 01:38:46 -0500
 MIME-Version: 1.0
-In-Reply-To: <8e1e082b-11c0-e597-cd38-744938537c2e@cn.fujitsu.com>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+In-Reply-To: <1483968625-29160-4-git-send-email-amir73il@gmail.com>
+References: <1483968625-29160-1-git-send-email-amir73il@gmail.com> <1483968625-29160-4-git-send-email-amir73il@gmail.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Wed, 11 Jan 2017 08:38:45 +0200
+Message-ID: <CAOQ4uxhoDdfoh0-OMkNgB6VEOpeOO5qj1GG9=D+cXpi6XLPQkA@mail.gmail.com>
+Subject: Re: [PATCH v3 3/3] xfs: test readlink/readdir with malformed inode mode
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>, Eric Sandeen <sandeen@redhat.com>, Eryu Guan <eguan@redhat.com>, agruenba@redhat.com, btrfs <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: Brian Foster <bfoster@redhat.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, fstests <fstests@vger.kernel.org>, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 1/10/17 9:00 PM, Qu Wenruo wrote:
-> 
-> 
-> At 01/11/2017 10:53 AM, Eric Sandeen wrote:
->> On 1/10/17 8:45 PM, Qu Wenruo wrote:
->>>
->>>
->>> At 01/11/2017 10:40 AM, Eric Sandeen wrote:
->>
->> ...
->>
->>>> What version of kernel and xfsprogs were you testing, and what was the segfault?
->>>
->>> Kernel is mainline v4.10-rc1.
->>> No debuginfo installed, so no backtrace, but since there is so many
->>>
->>> So the problem is the old xfsprogs, I'll update or compile xfsprogs.
->>> Thanks for your kind info.
->>
->> Just FWIW, I always have latest xfsprogs in rawhide, but I don't usually push
->> to other fedoras.
->>
->> It should be easy to grab
->> https://kojipkgs.fedoraproject.org/packages/xfsprogs/4.9.0/1.fc26/src/xfsprogs-4.9.0-1.fc26.src.rpm
->> and rebuild & install.
-> 
-> Thanks for the info.
-> 
-> I have already compiled latest version and it works perfectly.
-> 
-> BTW, just wonder if or when Fedora will do rolling release, which should avoid such problem.
+On Mon, Jan 9, 2017 at 3:30 PM, Amir Goldstein <amir73il@gmail.com> wrote:
+> In addition to testing xfs_repair on inodes with malformed mode,
+> and fstat of those inodes on a mounted fs, try to also list content
+> of mock directory and readlink of mock symlink.
+>
+> Readdir of mock directory triggers XFS assertion on kernel 4.9 with
+> XFS_DEBUG=y
+>
+> XFS: Assertion failed:
+>      rval == 0 || args->dp->i_d.di_size == args->geo->blksize,
+> file: /home/amir/build/src/linux/fs/xfs/libxfs/xfs_dir2.c, line: 634
+>
+> A fix patch, as suggested by Darrick, changes this ASSERT() to
+> return -EFSCORRUPTED ("xfs: sanity check directory inode di_size").
+>
+> Merging this test should be deferred to after fix patch is merged.
+>
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+>  tests/xfs/348 | 9 +++++++++
+>  1 file changed, 9 insertions(+)
+>
+> diff --git a/tests/xfs/348 b/tests/xfs/348
+> index 30825a4..20d5d7e 100755
+> --- a/tests/xfs/348
+> +++ b/tests/xfs/348
+> @@ -133,6 +133,15 @@ for dt in $dtypes; do
+>                         cat $tmp.stat.err
+>                 else
+>                         echo "stat: '$testdir/$file' is a $ftype"
+> +                       # Verify that readlink of a file posing as a symlink
+> +                       # and ls of a file posing as a directory does not blow up.
+> +                       # NOTE that ls DOES ASSERT with kernel 4.9 and XFS_DEBUG=y
+> +                       # on malformed directory
+> +                       if [ -d $testdir/$file ]; then
+> +                               ls "$safety" $testdir/$file &> /dev/null
 
-You can always run rawhide.  :)
+leftover: "$safety"
 
--Eric
+> +                       elif [ -h $testdir/$file ]; then
+> +                               readlink $testdir/$file &> /dev/null
+> +                       fi
+>                 fi | _filter_scratch
+>         done
+>         _scratch_unmount
+> --
+> 2.7.4
+>
