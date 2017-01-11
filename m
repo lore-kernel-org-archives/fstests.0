@@ -1,73 +1,52 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:23074 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S933704AbdAKIYg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 Jan 2017 03:24:36 -0500
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v2] generic/102: Update strict check
-Date: Wed, 11 Jan 2017 16:24:47 +0800
-Message-ID: <1484123087-31114-1-git-send-email-yangx.jy@cn.fujitsu.com>
-In-Reply-To: <20170105093843.GU1859@eguan.usersys.redhat.com>
-References: <20170105093843.GU1859@eguan.usersys.redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from mail-wj0-f193.google.com ([209.85.210.193]:33118 "EHLO
+        mail-wj0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755341AbdAKJAQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 Jan 2017 04:00:16 -0500
+Received: by mail-wj0-f193.google.com with SMTP id kp2so89878700wjc.0
+        for <fstests@vger.kernel.org>; Wed, 11 Jan 2017 01:00:16 -0800 (PST)
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH] Support xfstest -x group command line option
+Date: Wed, 11 Jan 2017 11:00:03 +0200
+Message-Id: <1484125203-12175-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com
-Cc: fstests@vger.kernel.org, Xiao Yang <yangx.jy@cn.fujitsu.com>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Low memory may lead to "written less bytes than requested".
-We only care about if xfs_io returned ENOSPC or not, so we
-can check stderr of xfs_io instead of stdout.
+Note that while kvm-xfstests -X <test> is NOT equivalent to
+the check -X command line option, kvm-xfstests -x <group> is
+exactly the same as check -x <group>.
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- tests/generic/102     |  4 +---
- tests/generic/102.out | 20 --------------------
- 2 files changed, 1 insertion(+), 23 deletions(-)
+ kvm-xfstests/util/parse_cli | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/tests/generic/102 b/tests/generic/102
-index 3cdc2ba..3ecf39e 100755
---- a/tests/generic/102
-+++ b/tests/generic/102
-@@ -54,9 +54,7 @@ _scratch_mount
- for ((i = 0; i < 10; i++)); do
- 	echo "loop $i" >>$seqres.full
- 
--	$XFS_IO_PROG -f -c "pwrite -b 1m 0 400m" "$SCRATCH_MNT"/file | \
--_filter_xfs_io | _filter_scratch
--
-+	$XFS_IO_PROG -f -c "pwrite -b 1m 0 400m" "$SCRATCH_MNT"/file >/dev/null
- 	rm -f "$SCRATCH_MNT"/file
- done
- 
-diff --git a/tests/generic/102.out b/tests/generic/102.out
-index fc9275d..6fea359 100644
---- a/tests/generic/102.out
-+++ b/tests/generic/102.out
-@@ -1,21 +1 @@
- QA output created by 102
--wrote 419430400/419430400 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+Also via github pull request:
+https://github.com/tytso/xfstests-bld/pull/3
+
+diff --git a/kvm-xfstests/util/parse_cli b/kvm-xfstests/util/parse_cli
+index b42c8ba..0956ebb 100644
+--- a/kvm-xfstests/util/parse_cli
++++ b/kvm-xfstests/util/parse_cli
+@@ -26,6 +26,7 @@ print_help ()
+     fi
+     echo "	-o opts		- Extra kernel command line options"
+     echo "	-r ram		- Specify memory to be used in megabytes"
++    echo "	-x group	- Exclude group of tests from running"
+     echo "	-X test		- Exclude test from running"
+     echo "	--kernel file	- Boot the specified kernel"
+     if test "$GCE_XFSTESTS" != "yes" ; then
+@@ -155,6 +156,9 @@ while [ "$1" != "" ]; do
+ 	-g) shift
+ 	    FSTESTSET="$FSTESTSET,-g,$1"
+ 	    ;;
++	-x) shift
++	    FSTESTSET="$FSTESTSET,-x,$1"
++	    ;;
+ 	-h|--help|help)
+ 	    print_help
+ 	    ;;
 -- 
-1.8.3.1
-
-
+2.7.4
 
