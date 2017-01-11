@@ -1,74 +1,73 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:5183 "EHLO
+Received: from cn.fujitsu.com ([59.151.112.132]:23074 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1762313AbdAKHt6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 Jan 2017 02:49:58 -0500
-Message-ID: <5875E397.9060708@cn.fujitsu.com>
-Date: Wed, 11 Jan 2017 15:49:43 +0800
+        with ESMTP id S933704AbdAKIYg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 Jan 2017 03:24:36 -0500
 From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-MIME-Version: 1.0
-Subject: Re: [PATCH] generic/102: Update strict check
-References: <1483606569-6515-1-git-send-email-yangx.jy@cn.fujitsu.com> <20170105093843.GU1859@eguan.usersys.redhat.com>
+Subject: [PATCH v2] generic/102: Update strict check
+Date: Wed, 11 Jan 2017 16:24:47 +0800
+Message-ID: <1484123087-31114-1-git-send-email-yangx.jy@cn.fujitsu.com>
 In-Reply-To: <20170105093843.GU1859@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <20170105093843.GU1859@eguan.usersys.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: eguan@redhat.com
+Cc: fstests@vger.kernel.org, Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 2017/01/05 17:38, Eryu Guan wrote:
-> On Thu, Jan 05, 2017 at 04:56:09PM +0800, Xiao Yang wrote:
->> Low memory may lead to "written less bytes than
->> requested".  We only care about if xfs_io returned
->> ENOSPC or not, so we can check stderr of xfs_io
->> instead of stdout.
->>
->> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
-> I thought this was fine, but I'm not sure now. Because I recalled that
-> there was an ext4 bug in dax mount exposed by generic/102, and it was
-> the case that xfs_io returned less bytes than requested. See commit
->
-> e84dfbe ext4: retry block allocation for failed DIO and DAX writes
->
-> If we discard all the xfs_io stdout, we may miss such bugs in the
-> future. But I'd like to see more comments on this from filesystem
-> developers.
->
-Hi Eryu
+Low memory may lead to "written less bytes than requested".
+We only care about if xfs_io returned ENOSPC or not, so we
+can check stderr of xfs_io instead of stdout.
 
-Yes,  I'd like to see more comments on this from filesystem developers too.
-New case may be added to test the ext4 bug in dax mount and we only care
-about if xfs_io returned ENOSPC or not in generic/102.   Do you think so?
->> ---
->>   tests/generic/102     |  5 +++--
->>   tests/generic/102.out | 20 --------------------
->>   2 files changed, 3 insertions(+), 22 deletions(-)
->>
->> diff --git a/tests/generic/102 b/tests/generic/102
->> index 3cdc2ba..104edc0 100755
->> --- a/tests/generic/102
->> +++ b/tests/generic/102
->> @@ -54,8 +54,9 @@ _scratch_mount
->>   for ((i = 0; i<  10; i++)); do
->>   	echo "loop $i">>$seqres.full
->>
->> -	$XFS_IO_PROG -f -c "pwrite -b 1m 0 400m" "$SCRATCH_MNT"/file | \
->> -_filter_xfs_io | _filter_scratch
->> +	out="$($XFS_IO_PROG -f -c "pwrite -b 1m 0 400m" "$SCRATCH_MNT"/file 2>&1)"
->> +	echo $out>>$seqres.full 2>&1
->> +	echo $out | grep -q "No space left on device"&&  echo "pwrite failed with ENOSPC"
-> If we want to discard xfs_io stdout, just redirect it to /dev/null,
-> ENOSPC error messgage will go to stderr and break the golden image
-> anyway.
-Agree it.  I will send v2 patch as you said.
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+---
+ tests/generic/102     |  4 +---
+ tests/generic/102.out | 20 --------------------
+ 2 files changed, 1 insertion(+), 23 deletions(-)
 
-Thanks,
-Xiao Yang
-> Thanks,
-> Eryu
->
->
->
+diff --git a/tests/generic/102 b/tests/generic/102
+index 3cdc2ba..3ecf39e 100755
+--- a/tests/generic/102
++++ b/tests/generic/102
+@@ -54,9 +54,7 @@ _scratch_mount
+ for ((i = 0; i < 10; i++)); do
+ 	echo "loop $i" >>$seqres.full
+ 
+-	$XFS_IO_PROG -f -c "pwrite -b 1m 0 400m" "$SCRATCH_MNT"/file | \
+-_filter_xfs_io | _filter_scratch
+-
++	$XFS_IO_PROG -f -c "pwrite -b 1m 0 400m" "$SCRATCH_MNT"/file >/dev/null
+ 	rm -f "$SCRATCH_MNT"/file
+ done
+ 
+diff --git a/tests/generic/102.out b/tests/generic/102.out
+index fc9275d..6fea359 100644
+--- a/tests/generic/102.out
++++ b/tests/generic/102.out
+@@ -1,21 +1 @@
+ QA output created by 102
+-wrote 419430400/419430400 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 419430400/419430400 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 419430400/419430400 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 419430400/419430400 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 419430400/419430400 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 419430400/419430400 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 419430400/419430400 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 419430400/419430400 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 419430400/419430400 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 419430400/419430400 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-- 
+1.8.3.1
 
 
 
