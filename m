@@ -1,49 +1,74 @@
-Received: from mail-oi0-f65.google.com ([209.85.218.65]:36187 "EHLO
-        mail-oi0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755982AbdAKGpg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 Jan 2017 01:45:36 -0500
+Received: from cn.fujitsu.com ([59.151.112.132]:5183 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1762313AbdAKHt6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 Jan 2017 02:49:58 -0500
+Message-ID: <5875E397.9060708@cn.fujitsu.com>
+Date: Wed, 11 Jan 2017 15:49:43 +0800
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-In-Reply-To: <20170103055256.GK1859@eguan.usersys.redhat.com>
-References: <1482689376-23553-1-git-send-email-amir73il@gmail.com> <20170103055256.GK1859@eguan.usersys.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 11 Jan 2017 08:45:34 +0200
-Message-ID: <CAOQ4uxhJUPUsPjLg6kX4X7VMwE2DqzL_cNmEU3aEfo-37MH4bA@mail.gmail.com>
-Subject: Re: [PATCH v2 0/3] xfs/348: test handling of malformed inode mode
-Content-Type: text/plain; charset=UTF-8
+Subject: Re: [PATCH] generic/102: Update strict check
+References: <1483606569-6515-1-git-send-email-yangx.jy@cn.fujitsu.com> <20170105093843.GU1859@eguan.usersys.redhat.com>
+In-Reply-To: <20170105093843.GU1859@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, Christoph Hellwig <hch@infradead.org>, Brian Foster <bfoster@redhat.com>, fstests <fstests@vger.kernel.org>, linux-xfs@vger.kernel.org
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jan 3, 2017 at 7:52 AM, Eryu Guan <eguan@redhat.com> wrote:
-> On Sun, Dec 25, 2016 at 08:09:33PM +0200, Amir Goldstein wrote:
->> Eryu,
+On 2017/01/05 17:38, Eryu Guan wrote:
+> On Thu, Jan 05, 2017 at 04:56:09PM +0800, Xiao Yang wrote:
+>> Low memory may lead to "written less bytes than
+>> requested".  We only care about if xfs_io returned
+>> ENOSPC or not, so we can check stderr of xfs_io
+>> instead of stdout.
 >>
->> I beefed up the initial test sent earlier today with more checks
->> on mounted fs.
->>
->> The original patch testing only xfs_repair remains patch 1 in this series.
->>
->> Patch 2 adds fstat tests on mounted fs, which are safe on my test system.
->>
->> Patch 3 is explosive. It exposes an XFS assert, but I left a "safety pin"
->> that needs to be commented out to reproduce the assert.
+>> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
+> I thought this was fine, but I'm not sure now. Because I recalled that
+> there was an ext4 bug in dax mount exposed by generic/102, and it was
+> the case that xfs_io returned less bytes than requested. See commit
 >
-> My kenrel config doesn't turn DEBUG on, so I don't see a kernel crash :)
+> e84dfbe ext4: retry block allocation for failed DIO and DAX writes
 >
-> I can push this test out after the fix lands in upstream, then I think
-> there's no need to leave a switch in the test.
+> If we discard all the xfs_io stdout, we may miss such bugs in the
+> future. But I'd like to see more comments on this from filesystem
+> developers.
 >
-> Otherwise tests look good to me. But I'd like to have Darrick to review
-> too, as he had written many fuzzer tests and suggested this test :)
+Hi Eryu
+
+Yes,  I'd like to see more comments on this from filesystem developers too.
+New case may be added to test the ext4 bug in dax mount and we only care
+about if xfs_io returned ENOSPC or not in generic/102.   Do you think so?
+>> ---
+>>   tests/generic/102     |  5 +++--
+>>   tests/generic/102.out | 20 --------------------
+>>   2 files changed, 3 insertions(+), 22 deletions(-)
+>>
+>> diff --git a/tests/generic/102 b/tests/generic/102
+>> index 3cdc2ba..104edc0 100755
+>> --- a/tests/generic/102
+>> +++ b/tests/generic/102
+>> @@ -54,8 +54,9 @@ _scratch_mount
+>>   for ((i = 0; i<  10; i++)); do
+>>   	echo "loop $i">>$seqres.full
+>>
+>> -	$XFS_IO_PROG -f -c "pwrite -b 1m 0 400m" "$SCRATCH_MNT"/file | \
+>> -_filter_xfs_io | _filter_scratch
+>> +	out="$($XFS_IO_PROG -f -c "pwrite -b 1m 0 400m" "$SCRATCH_MNT"/file 2>&1)"
+>> +	echo $out>>$seqres.full 2>&1
+>> +	echo $out | grep -q "No space left on device"&&  echo "pwrite failed with ENOSPC"
+> If we want to discard xfs_io stdout, just redirect it to /dev/null,
+> ENOSPC error messgage will go to stderr and break the golden image
+> anyway.
+Agree it.  I will send v2 patch as you said.
+
+Thanks,
+Xiao Yang
+> Thanks,
+> Eryu
+>
+>
 >
 
-Eryu,
 
-Darrick has actually reviewed patch 1 v1 and gave only minor comments,
-which I addressed in v3.
 
-So how about merging patch 1 (v3) (sanity of xfs_repair) and leave patches 2-3
-for later?
-
-Amir.
