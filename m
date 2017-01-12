@@ -1,86 +1,47 @@
-Received: from mail-io0-f177.google.com ([209.85.223.177]:34961 "EHLO
-        mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750822AbdALICq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 12 Jan 2017 03:02:46 -0500
-Received: by mail-io0-f177.google.com with SMTP id j18so12616301ioe.2
-        for <fstests@vger.kernel.org>; Thu, 12 Jan 2017 00:02:46 -0800 (PST)
+Received: from mx2.suse.de ([195.135.220.15]:34469 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750755AbdALM07 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 12 Jan 2017 07:26:59 -0500
+Date: Thu, 12 Jan 2017 13:26:56 +0100
+From: David Disseldorp <ddiss@suse.de>
+Subject: Re: [PATCH] common: use xfs_io to obtain the xfsprogs version
+Message-ID: <20170112132656.7caa64dd@suse.de>
+In-Reply-To: <20170112035124.GU1859@eguan.usersys.redhat.com>
+References: <20170111104820.7367-1-ddiss@suse.de>
+        <20170112035124.GU1859@eguan.usersys.redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <20170112040820.GV1859@eguan.usersys.redhat.com>
-References: <20170111095239.18825-1-roman.penyaev@profitbricks.com> <20170112040820.GV1859@eguan.usersys.redhat.com>
-From: Roman Penyaev <roman.penyaev@profitbricks.com>
-Date: Thu, 12 Jan 2017 09:02:25 +0100
-Message-ID: <CAJrWOzDhdm1awxwrukzimxWGpXjD89T8fFGXabJYHvfEJEvxBQ@mail.gmail.com>
-Subject: Re: [PATCH v3 1/1] xfstests: generic/403: reproduce ext4 bugs in a
- shift extents logic
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: Theodore Ts'o <tytso@mit.edu>, linux-ext4@vger.kernel.org, fstests <fstests@vger.kernel.org>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 12, 2017 at 5:08 AM, Eryu Guan <eguan@redhat.com> wrote:
-> On Wed, Jan 11, 2017 at 10:52:39AM +0100, Roman Pen wrote:
->> Regression test which targets two nasty ext4 bugs in a logic which
->> shifts extents:
->>
->> 1) 14d981f468a1 ("ext4: Include forgotten start block on fallocate insert range")
->>
->> Test tries to insert many blocks at the same offset to reproduce
->> the following layout on ext4:
->>
->>    block #0  block #1
->>    |ext0 ext1|ext2 ext3 ...|
->>         ^
->>      insert of a new block
->>
->> Because of an incorrect range first block is never reached,
->> thus ext1 is untouched, resulting to a hole at a wrong offset:
->>
->> What we got:
->>
->>    block #0   block #1
->>    |ext0 ext1|   ext2 ext3 ...|
->>               ^
->>               hole at a wrong offset
->>
->> What we expect:
->>
->>    block #0    block #1
->>    |ext0   ext1|ext2 ext3 ...|
->>         ^
->>         hole at a correct offset
->>
->> 2) 2b3864b32403 ("ext4: do not polute the extents cache while shifting extents")
->>
->> Extents status tree is filled in with outdated offsets while doing
->> extent shift, that leads to wrong data blocks.   That's why md5sum
->> of a result file is being checked after each block insert.
->
-> Thanks a lot! I did a minor update and queued it up.
->
->>
->> Signed-off-by: Roman Pen <roman.penyaev@profitbricks.com>
->> Cc: "Theodore Ts'o <tytso@mit.edu>"
->> Cc: Eryu Guan <eguan@redhat.com>
->> Cc: linux-ext4@vger.kernel.org
->> Cc: fstests@vger.kernel.org
->> ---
->
->> +# Modify as appropriate.
->> +_supported_fs generic
->> +_supported_os Linux
->> +_require_test
->> +_require_xfs_io_command "finsert"
->> +
->> +blksize=`get_block_size $TEST_DIR`
->
-> I merged a patch earlier from Darrick to rename get_block_size to
-> _get_block_size. So I did the rename here too.
+On Thu, 12 Jan 2017 11:51:24 +0800, Eryu Guan wrote:
+...
+> I noticed that this $_version is only assigned to XFSPROGS_VERSION, and
+> the only user of $XFSPROGS_VERSION is xfs/188.
+> 
+> if [ $XFSPROGS_VERSION -lt 21000 ]; then
+>     _notrun "this test requires case-insensitive support"
+> fi
+> 
+> That's a test added in 2008, now we avoid skipping tests by checking on
+> some version number, we tend to add new _require rules to actually test
+> for the requirements. e.g. for xfs/188, I think we can have:
+> 
+> in common/xfs:
+> # this test requires mkfs.xfs have case-insensitive naming support
+> _require_xfs_mkfs_ciname()
+> {
+> 	_scratch_mkfs_xfs_supported -n version=ci >/dev/null 2>&1 \
+> 		|| _notrun "need case-insensitive naming support in mkfs.xfs"
+> }
+> 
+> And remove all the version detection & checking code from common/config
+> and xfs/188, and call the new _require rule in the test.
 
-Thanks.  The only thing which worries me is those commits references.
-These patches are in Theodore's dev branch and I hope SHA1 wont be
-changed.  Or maybe we have to postpone this new test till patches
-appear in mainline.  I do not know.
+This seems much nicer, Eryu. I'm giving it a spin now, and will send a
+patch once tested - thanks for the feedback.
 
---
-Roman
+Cheers, David
