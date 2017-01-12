@@ -1,47 +1,87 @@
-Received: from mx2.suse.de ([195.135.220.15]:34469 "EHLO mx2.suse.de"
+Received: from sandeen.net ([63.231.237.45]:37930 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750755AbdALM07 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 12 Jan 2017 07:26:59 -0500
-Date: Thu, 12 Jan 2017 13:26:56 +0100
-From: David Disseldorp <ddiss@suse.de>
-Subject: Re: [PATCH] common: use xfs_io to obtain the xfsprogs version
-Message-ID: <20170112132656.7caa64dd@suse.de>
-In-Reply-To: <20170112035124.GU1859@eguan.usersys.redhat.com>
-References: <20170111104820.7367-1-ddiss@suse.de>
-        <20170112035124.GU1859@eguan.usersys.redhat.com>
+        id S1751098AbdALMwG (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 12 Jan 2017 07:52:06 -0500
+Subject: Re: [PATCH 0/6] xfs_io: fix up command iteration
+References: <20161207034724.1613-1-david@fromorbit.com>
+ <CAOQ4uxivcaKy6X3i41Tjh25Uy_UpnvXgJUKY8fpZ3r5REm6BPw@mail.gmail.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <58adfc4f-8904-0ea6-7429-f9566e0340ec@sandeen.net>
+Date: Thu, 12 Jan 2017 06:52:03 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+In-Reply-To: <CAOQ4uxivcaKy6X3i41Tjh25Uy_UpnvXgJUKY8fpZ3r5REm6BPw@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: linux-xfs@vger.kernel.org, fstests <fstests@vger.kernel.org>, Dave Chinner <david@fromorbit.com>, Christoph Hellwig <hch@lst.de>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, 12 Jan 2017 11:51:24 +0800, Eryu Guan wrote:
-...
-> I noticed that this $_version is only assigned to XFSPROGS_VERSION, and
-> the only user of $XFSPROGS_VERSION is xfs/188.
+On 1/11/17 11:14 PM, Amir Goldstein wrote:
+> On Wed, Dec 7, 2016 at 5:47 AM, Dave Chinner <david@fromorbit.com> wrote:
+>> Hi folks,
+>>
+>> Here are teh changes I've put together to address the command
+>> iteration problems that xfs_io is demonstrating. I described the
+>> history that lead us to the current problems here:
+>>
+>> https://www.spinics.net/lists/fstests/msg04572.html
+>>
+>> This series cleans up the libxcmd command code and fixes the xfs_io
+>> problems without completely removing the existing iteration
+>> behaviour.
+>>
+>> The first three patches address the "args_command" abstraction,
+>> renaming it to a "command iterator" abstraction and clean up the
+>> command loop implementation to make it easier to follow. It is now
+>> clear that the the command loop has an external command iterator
+>> control function, and it has a clean and clear mechanism for the
+>> external commands to prevent iteration from occurring
+>> (CMD_FLAG_ONESHOT).
+>>
+>> The fourth patch cleans up a recent change made to the xfs_quota
+>> interface to support foreign filesystems - it still needs to be abel
+>> to run the help and quit commands regardless of other state. The
+>> same requirement exists for xfs_io, it just implemented the command
+>> check that allowed them to be run differently. This patch
+>> centralises that by marking libxcmd functions as "library" functions
+>> and skips the application provided command checking altogether.
+>> Hence the apps no longer need to handle these cases at all.
+>>
+>> The fifth patch makes all the xfs_io commands that shouldn't iterate
+>> the file table one-shot only commands. This avoids all the nasty
+>> problems with commands like open that end up completely filling
+>> the open file table with thousands of filedescriptors pointing to
+>> the same file. THis makes those commands usable and predictable.
+>>
+>> Finally, the last patch adds CLI support for running xfs_io commands
+>> as one-shot commands rather than iterating commands. This is useful
+>> for being able to set up multiple files and operate on them as a
+>> whole or individually as necessary. This patch also documents in the
+>> man page that some commands may iterate all open files and that the
+>> new "-C" command option can be used to avoid problems arising from
+>> this historical behaviour.
+>>
+>> -Dave.
+>>
 > 
-> if [ $XFSPROGS_VERSION -lt 21000 ]; then
->     _notrun "this test requires case-insensitive support"
-> fi
+> Eric,
 > 
-> That's a test added in 2008, now we avoid skipping tests by checking on
-> some version number, we tend to add new _require rules to actually test
-> for the requirements. e.g. for xfs/188, I think we can have:
-> 
-> in common/xfs:
-> # this test requires mkfs.xfs have case-insensitive naming support
-> _require_xfs_mkfs_ciname()
-> {
-> 	_scratch_mkfs_xfs_supported -n version=ci >/dev/null 2>&1 \
-> 		|| _notrun "need case-insensitive naming support in mkfs.xfs"
-> }
-> 
-> And remove all the version detection & checking code from common/config
-> and xfs/188, and call the new _require rule in the test.
+> I wanted to make sure that this work by Dave is on your radar for next.
+> Please note that most of the patches got Reviewed-by Christoph on v1,
+> but Dave did not add the tag on v2 posting.
 
-This seems much nicer, Eryu. I'm giving it a spin now, and will send a
-patch once tested - thanks for the feedback.
+Yes, it's in my queue.
 
-Cheers, David
+I wanted to do the libxfs sync first, then add the bits outside that.
+
+Thanks,
+-Eric
+ 
+> Thanks,
+> Amir.
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
