@@ -1,11 +1,11 @@
-Received: from mail.kernel.org ([198.145.29.136]:38520 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.136]:38602 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752523AbdASMKM (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 19 Jan 2017 07:10:12 -0500
+        id S1752233AbdASMKT (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 19 Jan 2017 07:10:19 -0500
 From: fdmanana@kernel.org
-Subject: [PATCH v4 1/3] fstests: test btrfs incremental send after replacing a top level inode
-Date: Thu, 12 Jan 2017 03:13:13 +0000
-Message-Id: <1484190793-17277-1-git-send-email-fdmanana@kernel.org>
+Subject: [PATCH v4 2/3] fstests: test btrfs incremental send after moving a directory
+Date: Thu, 12 Jan 2017 03:13:37 +0000
+Message-Id: <1484190817-17326-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>, Robbie Ko <robbieko@synology.com>
@@ -13,14 +13,13 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Filipe Manana <fdmanana@suse.com>
 
-Test that an incremental send operation does not fail when a new inode
-replaces an old inode that has the same number but different generation,
-and both are direct children of the subvolume/snapshot root.
+Test that an incremental send operation works after moving a directory
+into a new parent directory, deleting its previous parent directory and
+creating a new inode that has the same inode number as the old parent.
 
-This is fixed by the following patch for the linux kernel:
+This issue is fixed by the following patch for the linux kernel:
 
-  "Btrfs: send, fix failure to rename top level inode due to name
-   collision"
+  "Btrfs: incremental send, do not delay rename when parent inode is new"
 
 Signed-off-by: Robbie Ko <robbieko@synology.com>
 Signed-off-by: Filipe Manana <fdmanana@suse.com>
@@ -29,25 +28,25 @@ Signed-off-by: Filipe Manana <fdmanana@suse.com>
 v4: Improved changelog and added comments to the test that explain what is
     being tested and the problem.
 
- tests/btrfs/133     | 127 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/133.out |   8 ++++
+ tests/btrfs/134     | 126 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/134.out |   6 +++
  tests/btrfs/group   |   1 +
- 3 files changed, 136 insertions(+)
- create mode 100755 tests/btrfs/133
- create mode 100644 tests/btrfs/133.out
+ 3 files changed, 133 insertions(+)
+ create mode 100755 tests/btrfs/134
+ create mode 100644 tests/btrfs/134.out
 
-diff --git a/tests/btrfs/133 b/tests/btrfs/133
+diff --git a/tests/btrfs/134 b/tests/btrfs/134
 new file mode 100755
-index 0000000..5839f17
+index 0000000..e4b4c6d
 --- /dev/null
-+++ b/tests/btrfs/133
-@@ -0,0 +1,127 @@
++++ b/tests/btrfs/134
+@@ -0,0 +1,126 @@
 +#! /bin/bash
-+# FS QA Test No. btrfs/133
++# FS QA Test No. btrfs/134
 +#
-+# Test that an incremental send operation does not fail when a new inode
-+# replaces an old inode that has the same number but different generation,
-+# and both are direct children of the subvolume/snapshot root.
++# Test that an incremental send operation works after moving a directory into
++# a new parent directory, deleting its previous parent directory and creating
++# a new inode that has the same inode number as the old parent.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (C) 2017 Synology Inc. All Rights Reserved.
@@ -103,61 +102,60 @@ index 0000000..5839f17
 +_scratch_mkfs >>$seqres.full 2>&1
 +_scratch_mount
 +
-+mkdir $SCRATCH_MNT/a1
-+mkdir $SCRATCH_MNT/a2
++mkdir $SCRATCH_MNT/dir257
++mkdir $SCRATCH_MNT/dir258
++mkdir $SCRATCH_MNT/dir259
++mv $SCRATCH_MNT/dir257 $SCRATCH_MNT/dir258/dir257
 +
 +# Filesystem looks like:
 +#
-+# .                                                             (ino 256)
-+# |--- a1/                                                      (ino 257)
-+# |--- a2/                                                      (ino 258)
++# .                                                             (ino 256, gen 3)
++# |--- dir258/                                                  (ino 258, gen 7)
++# |       |--- dir257/                                          (ino 257, gen 7)
++# |
++# |--- dir259/                                                  (ino 259, gen 7)
 +#
 +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
 +    $SCRATCH_MNT/mysnap1 > /dev/null
 +
-+$BTRFS_UTIL_PROG send $SCRATCH_MNT/mysnap1 -f \
-+    $send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
-+
++mv $SCRATCH_MNT/dir258/dir257 $SCRATCH_MNT/dir257
++rmdir $SCRATCH_MNT/dir258
++rmdir $SCRATCH_MNT/dir259
++# Remount the filesystem so that the next created inodes will have the numbers
++# 258 and 259. This is because when a filesystem is mounted, btrfs sets the
++# subvolume's inode counter to a value corresponding to the highest inode number
++# in the subvolume plus 1. This inode counter is used to assign a unique number
++# to each new inode and it's incremented by 1 after very inode creation.
++# Note: we unmount and then mount instead of doing a mount with "-o remount"
++# because otherwise the inode counter remains at value 260.
 +_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
 +_scratch_mount
-+touch $SCRATCH_MNT/a2
++touch $SCRATCH_MNT/file258
++mkdir $SCRATCH_MNT/new_dir259
++mv $SCRATCH_MNT/dir257 $SCRATCH_MNT/new_dir259/dir257
 +
 +# Filesystem now looks like:
 +#
-+# .                                                             (ino 256)
-+# |--- a2                                                       (ino 257)
++# .                                                            (ino 256, gen 3)
++# |--- file258                                                 (ino 258, gen 10)
++# |
++# |--- new_dir259/                                             (ino 259, gen 10)
++#          |--- dir257/                                        (ino 257, gen 7)
 +#
-+# Notice that at this point inode 257 has a generation with value 7, which is
-+# the generation value for a brand new filesystem.
-+
-+# Now create the second snapshot. This makes the filesystem's current generation
-+# value to increase to the value 8, due to a transaction commit performed by the
-+# snapshot creation ioctl.
 +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+    $SCRATCH_MNT/mysnap2 > /dev/null
-+
-+# Now receive the first snapshot created in the first filesystem.
-+# Before creating any inodes, the receive command creates the first snapshot,
-+# which causes a transaction commit and therefore bumps the filesystem's current
-+# generation to the value 9. All the inodes created end up getting a generation
-+# value of 9 and the snapshot's root inode (256) gets a generation value of 8.
-+$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/1.snap > /dev/null
-+rm $send_files_dir/1.snap
++		 $SCRATCH_MNT/mysnap2 > /dev/null
 +
 +$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-+$FSSUM_PROG -A -f -w $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
++$FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
++        -x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
 +
 +$BTRFS_UTIL_PROG send $SCRATCH_MNT/mysnap1 -f \
-+    $send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
++	$send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
 +$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
 +	-f $send_files_dir/2.snap 2>&1 1>/dev/null | _filter_scratch
 +
 +# Now recreate the filesystem by receiving both send streams and verify we get
 +# the same content that the original filesystem had.
-+# The receive for the second snapshot used to fail because the send stream had
-+# an operation to rename the new inode 257 (generation 7) from its orphan name
-+# to its final name (a2) before the operation to delete (rmdir) the inode 258.
 +_scratch_unmount
 +_scratch_mkfs >>$seqres.full 2>&1
 +_scratch_mount
@@ -169,29 +167,27 @@ index 0000000..5839f17
 +
 +status=0
 +exit
-diff --git a/tests/btrfs/133.out b/tests/btrfs/133.out
+diff --git a/tests/btrfs/134.out b/tests/btrfs/134.out
 new file mode 100644
-index 0000000..97f29b1
+index 0000000..75b30a1
 --- /dev/null
-+++ b/tests/btrfs/133.out
-@@ -0,0 +1,8 @@
-+QA output created by 133
-+At subvol SCRATCH_MNT/mysnap1
-+At subvol mysnap1
++++ b/tests/btrfs/134.out
+@@ -0,0 +1,6 @@
++QA output created by 134
 +At subvol SCRATCH_MNT/mysnap1
 +At subvol SCRATCH_MNT/mysnap2
 +At subvol mysnap1
 +OK
 +OK
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 3fbf706..0cdd413 100644
+index 0cdd413..f33befb 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -134,3 +134,4 @@
- 130 auto clone send
+@@ -135,3 +135,4 @@
  131 auto quick
  132 auto enospc
-+133 auto quick send
+ 133 auto quick send
++134 auto quick send
 -- 
 2.7.0.rc3
 
