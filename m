@@ -1,69 +1,102 @@
-Received: from mx1.redhat.com ([209.132.183.28]:41078 "EHLO mx1.redhat.com"
+Received: from sandeen.net ([63.231.237.45]:51076 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751280AbdALDv0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 11 Jan 2017 22:51:26 -0500
-Date: Thu, 12 Jan 2017 11:51:24 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] common: use xfs_io to obtain the xfsprogs version
-Message-ID: <20170112035124.GU1859@eguan.usersys.redhat.com>
-References: <20170111104820.7367-1-ddiss@suse.de>
+        id S1750730AbdALEGk (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 11 Jan 2017 23:06:40 -0500
+Subject: Re: [PATCH] Revert "generic/38[3-6]: require project quota to be
+ enabled on SCRATCH_DEV"
+References: <20161221032654.24197-1-eguan@redhat.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <a043bce2-185d-5fa9-77c9-c8b02b480ab0@sandeen.net>
+Date: Wed, 11 Jan 2017 22:06:38 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170111104820.7367-1-ddiss@suse.de>
+In-Reply-To: <20161221032654.24197-1-eguan@redhat.com>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: David Disseldorp <ddiss@suse.de>
-Cc: fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
+Cc: sandeen@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jan 11, 2017 at 11:48:20AM +0100, David Disseldorp wrote:
-> xfs_db is currently used for this, but is otherwise only used for XFS
-> specific tests. This change allows for the generic tests to be run on a
-> system without the xfs_db binary.
+On 12/20/16 9:26 PM, Eryu Guan wrote:
+> Commit 23f60ef304d ("generic/38[3-6]: require project quota to be
+> enabled on SCRATCH_DEV") introduced a regression that leads
+> _require_projquota, which uses src/feature to call a quotactl,
+> operate before the filesystem is mounted, and results in tests not
+> run on XFS and ext4.
 > 
-> Signed-off-by: David Disseldorp <ddiss@suse.de>
+> Revert the problematic patch first, because don't want to lose
+> project quota test coverage on XFS and ext4. We can fix the false
+> failure on ext3/2 later,
+> 
+> Reported-by: Eric Sandeen <sandeen@redhat.com>
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
+
+Reviewed-by: Eric Sandeen <sandeen@redhat.com>
+
 > ---
->  common/config | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
+>  tests/generic/383 | 1 -
+>  tests/generic/384 | 2 +-
+>  tests/generic/385 | 2 +-
+>  tests/generic/386 | 2 +-
+>  4 files changed, 3 insertions(+), 4 deletions(-)
 > 
-> diff --git a/common/config b/common/config
-> index 6cce7ce..1604aa9 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -226,11 +226,11 @@ export UDEV_SETTLE_PROG
->  # Generate a comparable xfsprogs version number in the form of
->  # major * 10000 + minor * 100 + release
+> diff --git a/tests/generic/383 b/tests/generic/383
+> index 93836ea..be5b19b 100755
+> --- a/tests/generic/383
+> +++ b/tests/generic/383
+> @@ -54,7 +54,6 @@ _require_xfs_quota_foreign
+>  
+>  _scratch_mkfs >/dev/null 2>&1
+>  _scratch_enable_pquota
+> -_require_prjquota $SCRATCH_DEV
+>  
+>  do_project_test()
+>  {
+> diff --git a/tests/generic/384 b/tests/generic/384
+> index 4784e47..452d26e 100755
+> --- a/tests/generic/384
+> +++ b/tests/generic/384
+> @@ -73,10 +73,10 @@ chmod a+rwx $seqres.full	# arbitrary users will write here
+>  _require_scratch
+>  _scratch_mkfs >/dev/null 2>&1
+>  _scratch_enable_pquota
+> -_require_prjquota $SCRATCH_DEV
+>  
+>  _qmount_option "prjquota"
+>  _qmount
+> +_require_prjquota $SCRATCH_DEV
+>  
+>  report_quota()
+>  {
+> diff --git a/tests/generic/385 b/tests/generic/385
+> index b7c5bd3..f07ae5d 100755
+> --- a/tests/generic/385
+> +++ b/tests/generic/385
+> @@ -71,9 +71,9 @@ quota_cmd="$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid"
+>  
+>  _scratch_mkfs >/dev/null 2>&1
+>  _scratch_enable_pquota
+> -_require_prjquota $SCRATCH_DEV
+>  _qmount_option "prjquota"
+>  _qmount
+> +_require_prjquota $SCRATCH_DEV
+>  
 >  #
-> -# $ xfs_db -V
-> -# xfs_db version 2.9.7
-> +# $ xfs_io -V
-> +# xfs_io version 2.9.7
->  #
->  # so, 2.9.7 = 20907
-> -_version=`$XFS_DB_PROG -V | $AWK_PROG '
-> +_version=`$XFS_IO_PROG -V | $AWK_PROG '
-
-I noticed that this $_version is only assigned to XFSPROGS_VERSION, and
-the only user of $XFSPROGS_VERSION is xfs/188.
-
-if [ $XFSPROGS_VERSION -lt 21000 ]; then
-    _notrun "this test requires case-insensitive support"
-fi
-
-That's a test added in 2008, now we avoid skipping tests by checking on
-some version number, we tend to add new _require rules to actually test
-for the requirements. e.g. for xfs/188, I think we can have:
-
-in common/xfs:
-# this test requires mkfs.xfs have case-insensitive naming support
-_require_xfs_mkfs_ciname()
-{
-	_scratch_mkfs_xfs_supported -n version=ci >/dev/null 2>&1 \
-		|| _notrun "need case-insensitive naming support in mkfs.xfs"
-}
-
-And remove all the version detection & checking code from common/config
-and xfs/188, and call the new _require rule in the test.
-
-Thanks,
-Eryu
+>  # Create the project root
+> diff --git a/tests/generic/386 b/tests/generic/386
+> index 0ceb14d..3aede60 100755
+> --- a/tests/generic/386
+> +++ b/tests/generic/386
+> @@ -127,10 +127,10 @@ echo $proj_num:$proj_dir > "$my_projects"
+>  
+>  _scratch_mkfs					>> "$seqres.full" 2>&1
+>  _scratch_enable_pquota
+> -_require_prjquota $SCRATCH_DEV
+>  
+>  _qmount_option "prjquota"
+>  _qmount
+> +_require_prjquota $SCRATCH_DEV
+>  
+>  mkdir -p "${proj_dir}"
+>  
+> 
