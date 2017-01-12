@@ -1,74 +1,94 @@
-Received: from mx1.redhat.com ([209.132.183.28]:56300 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:36152 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751145AbdALEZe (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 11 Jan 2017 23:25:34 -0500
-Date: Thu, 12 Jan 2017 12:24:30 +0800
+        id S1750852AbdALE1W (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 11 Jan 2017 23:27:22 -0500
+Received: from smtp.corp.redhat.com (int-mx16.intmail.prod.int.phx2.redhat.com [10.5.11.28])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id DC73A13A5E
+        for <fstests@vger.kernel.org>; Thu, 12 Jan 2017 04:27:22 +0000 (UTC)
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] fstests: cleanup tmp files in tests
-Message-ID: <20170112042430.GW1859@eguan.usersys.redhat.com>
-References: <20170106034507.5915-1-eguan@redhat.com>
- <20170107045731.GC575@zzz>
- <20170109101717.GD1859@eguan.usersys.redhat.com>
- <CAOQ4uxjqYFxCedvvYo8=YgoXDCPXogozAuVGd842sJLGQ9ipFQ@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxjqYFxCedvvYo8=YgoXDCPXogozAuVGd842sJLGQ9ipFQ@mail.gmail.com>
+Subject: [PATCH v2] fstests: remove tmp files properly
+Date: Thu, 12 Jan 2017 12:27:14 +0800
+Message-Id: <20170112042714.24385-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Eric Biggers <ebiggers3@gmail.com>, fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jan 09, 2017 at 12:46:23PM +0200, Amir Goldstein wrote:
-> On Mon, Jan 9, 2017 at 12:17 PM, Eryu Guan <eguan@redhat.com> wrote:
-> > Hi Eric and Amir,
-> >
-> > On Fri, Jan 06, 2017 at 08:57:31PM -0800, Eric Biggers wrote:
-> >> Hi Eryu,
-> >>
-> >> On Fri, Jan 06, 2017 at 11:45:07AM +0800, Eryu Guan wrote:
-> >> > $tmp.* files should be removed in _cleanup() even if the test is not
-> >> > using any $tmp.* file explicitly, because common helper functions
-> >> > may take use of them too.
-> >> >
-> >> > So cleanup tmp files properly in tests, and add a _cleanup()
-> >> > function and trap it on exit if the test doesn't do so, to make all
-> >> > tests consistent on the way they do cleanup.
-> >> >
-> >> > Also remove other tmp files used by the tests and the harness so
-> >> > that we leave no new tmp files in /tmp dir after a full test run.
-> >> >
-> >>
-> >> Why exactly can't the boilerplate go in a preamble file which is sourced by all
-> >> the tests?  For example common/preamble containing something like:
-> >
-> > Thanks for your review! As you two are basically suggesting the same
-> > solution, so I reply to you together.
-> >
-> > I agree that we can do a common/preamble for all tests to source, but I
-> > don't think we need to do that and it's not worth the effort.
-> >
-> > IMO, we define and setup the tests in the tests themselves, not in a
-> > common/preamble file, which makes the tests clear and easy to read. We
-> > don't want to "hide" any setups in a common file and to be a "surprise"
-> > to the reader, we don't have to look around for a certain setup.
-> >
-> 
-> The motivation for your work is the fact that tmp files are being created
-> in a way that is "hidden" from the test author  and therefore, IMO,
-> the cleanup of those temp files should also be in a common function
-> that is "hidden" from the test author.
+Some tests and common helpers don't properly clean up tmp files and
+leave them behind in /tmp dir, and these tmp files are accumulating
+over time.
 
-[Sorry, I got back to this late.]
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+v2:
+- let common helper functions do their cleanups by themselves,
+  no hidden usage of $tmp
+- only remove/adjust necessary files, don't do large scale test updates
 
-That's a good point, so I think what should be done is let common
-functions clean up their tmp files, so there's no hidden usage of $tmp
-and tests only need to remove $tmp.* used explicitly in the tests.
+ common/rc         | 4 ++++
+ tests/generic/100 | 2 +-
+ tests/generic/260 | 2 +-
+ 3 files changed, 6 insertions(+), 2 deletions(-)
 
-I checked all the common functions, there're only two that are not
-cleaning up their tmp files properly, _do() and run_fsx().
+diff --git a/common/rc b/common/rc
+index 5e54fc2..1f3727f 100644
+--- a/common/rc
++++ b/common/rc
+@@ -566,6 +566,7 @@ _scratch_mkfs_ext4()
+ 	# output mkfs stdout and stderr
+ 	cat $tmp.mkfsstd
+ 	cat $tmp.mkfserr >&2
++	rm -f $tmp*
+ 
+ 	return $mkfs_status
+ }
+@@ -1244,6 +1245,7 @@ _do()
+     (eval "echo '---' \"$_cmd\"") >>$seqres.full
+     (eval "$_cmd") >$tmp._out 2>&1; ret=$?
+     cat $tmp._out | _fix_malloc >>$seqres.full
++    rm -f $tmp._out
+     if [ $# -eq 2 ]; then
+ 	if [ $ret -eq 0 ]; then
+ 	    echo "done"
+@@ -3150,8 +3152,10 @@ run_fsx()
+ 	"$@" 2>&1 | tee -a $seqres.full >$tmp.fsx
+ 	if [ ${PIPESTATUS[0]} -ne 0 ]; then
+ 		cat $tmp.fsx
++		rm -f $tmp.fsx
+ 		exit 1
+ 	fi
++	rm -f $tmp.fsx
+ }
+ 
+ # Test for the existence of a sysfs entry at /sys/fs/$FSTYP/DEV/$ATTR
+diff --git a/tests/generic/100 b/tests/generic/100
+index e5e819d..161982f 100755
+--- a/tests/generic/100
++++ b/tests/generic/100
+@@ -38,7 +38,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ 
+ _cleanup()
+ {
+-     rm -f $tmp.* $testfile
++     rm -f $tmp.* $TEMP_DIR/$TAR_FILE
+ }
+  
+ # real QA test starts here
+diff --git a/tests/generic/260 b/tests/generic/260
+index 312e6d2..4c15292 100755
+--- a/tests/generic/260
++++ b/tests/generic/260
+@@ -26,7 +26,7 @@ seqres=$RESULT_DIR/$seq
+ echo "QA output created by $seq"
+ 
+ here=`pwd`
+-tmp=`mktemp -d`
++tmp=/tmp/$$
+ status=0
+ trap "exit \$status" 0 1 2 3 15
+ chpid=0
+-- 
+2.9.3
 
-I'll send v2 patch for review, which will be a much simpler patch.
-
-Thanks,
-Eryu
