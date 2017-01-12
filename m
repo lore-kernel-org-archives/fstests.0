@@ -1,72 +1,86 @@
-Received: from mail-it0-f65.google.com ([209.85.214.65]:34192 "EHLO
-        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750700AbdALFOK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 12 Jan 2017 00:14:10 -0500
+Received: from mail-io0-f177.google.com ([209.85.223.177]:34961 "EHLO
+        mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750822AbdALICq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 12 Jan 2017 03:02:46 -0500
+Received: by mail-io0-f177.google.com with SMTP id j18so12616301ioe.2
+        for <fstests@vger.kernel.org>; Thu, 12 Jan 2017 00:02:46 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <20161207034724.1613-1-david@fromorbit.com>
-References: <20161207034724.1613-1-david@fromorbit.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 12 Jan 2017 07:14:09 +0200
-Message-ID: <CAOQ4uxivcaKy6X3i41Tjh25Uy_UpnvXgJUKY8fpZ3r5REm6BPw@mail.gmail.com>
-Subject: Re: [PATCH 0/6] xfs_io: fix up command iteration
+In-Reply-To: <20170112040820.GV1859@eguan.usersys.redhat.com>
+References: <20170111095239.18825-1-roman.penyaev@profitbricks.com> <20170112040820.GV1859@eguan.usersys.redhat.com>
+From: Roman Penyaev <roman.penyaev@profitbricks.com>
+Date: Thu, 12 Jan 2017 09:02:25 +0100
+Message-ID: <CAJrWOzDhdm1awxwrukzimxWGpXjD89T8fFGXabJYHvfEJEvxBQ@mail.gmail.com>
+Subject: Re: [PATCH v3 1/1] xfstests: generic/403: reproduce ext4 bugs in a
+ shift extents logic
 Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: linux-xfs@vger.kernel.org, fstests <fstests@vger.kernel.org>, Dave Chinner <david@fromorbit.com>, Christoph Hellwig <hch@lst.de>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Theodore Ts'o <tytso@mit.edu>, linux-ext4@vger.kernel.org, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Dec 7, 2016 at 5:47 AM, Dave Chinner <david@fromorbit.com> wrote:
-> Hi folks,
+On Thu, Jan 12, 2017 at 5:08 AM, Eryu Guan <eguan@redhat.com> wrote:
+> On Wed, Jan 11, 2017 at 10:52:39AM +0100, Roman Pen wrote:
+>> Regression test which targets two nasty ext4 bugs in a logic which
+>> shifts extents:
+>>
+>> 1) 14d981f468a1 ("ext4: Include forgotten start block on fallocate insert range")
+>>
+>> Test tries to insert many blocks at the same offset to reproduce
+>> the following layout on ext4:
+>>
+>>    block #0  block #1
+>>    |ext0 ext1|ext2 ext3 ...|
+>>         ^
+>>      insert of a new block
+>>
+>> Because of an incorrect range first block is never reached,
+>> thus ext1 is untouched, resulting to a hole at a wrong offset:
+>>
+>> What we got:
+>>
+>>    block #0   block #1
+>>    |ext0 ext1|   ext2 ext3 ...|
+>>               ^
+>>               hole at a wrong offset
+>>
+>> What we expect:
+>>
+>>    block #0    block #1
+>>    |ext0   ext1|ext2 ext3 ...|
+>>         ^
+>>         hole at a correct offset
+>>
+>> 2) 2b3864b32403 ("ext4: do not polute the extents cache while shifting extents")
+>>
+>> Extents status tree is filled in with outdated offsets while doing
+>> extent shift, that leads to wrong data blocks.   That's why md5sum
+>> of a result file is being checked after each block insert.
 >
-> Here are teh changes I've put together to address the command
-> iteration problems that xfs_io is demonstrating. I described the
-> history that lead us to the current problems here:
+> Thanks a lot! I did a minor update and queued it up.
 >
-> https://www.spinics.net/lists/fstests/msg04572.html
+>>
+>> Signed-off-by: Roman Pen <roman.penyaev@profitbricks.com>
+>> Cc: "Theodore Ts'o <tytso@mit.edu>"
+>> Cc: Eryu Guan <eguan@redhat.com>
+>> Cc: linux-ext4@vger.kernel.org
+>> Cc: fstests@vger.kernel.org
+>> ---
 >
-> This series cleans up the libxcmd command code and fixes the xfs_io
-> problems without completely removing the existing iteration
-> behaviour.
+>> +# Modify as appropriate.
+>> +_supported_fs generic
+>> +_supported_os Linux
+>> +_require_test
+>> +_require_xfs_io_command "finsert"
+>> +
+>> +blksize=`get_block_size $TEST_DIR`
 >
-> The first three patches address the "args_command" abstraction,
-> renaming it to a "command iterator" abstraction and clean up the
-> command loop implementation to make it easier to follow. It is now
-> clear that the the command loop has an external command iterator
-> control function, and it has a clean and clear mechanism for the
-> external commands to prevent iteration from occurring
-> (CMD_FLAG_ONESHOT).
->
-> The fourth patch cleans up a recent change made to the xfs_quota
-> interface to support foreign filesystems - it still needs to be abel
-> to run the help and quit commands regardless of other state. The
-> same requirement exists for xfs_io, it just implemented the command
-> check that allowed them to be run differently. This patch
-> centralises that by marking libxcmd functions as "library" functions
-> and skips the application provided command checking altogether.
-> Hence the apps no longer need to handle these cases at all.
->
-> The fifth patch makes all the xfs_io commands that shouldn't iterate
-> the file table one-shot only commands. This avoids all the nasty
-> problems with commands like open that end up completely filling
-> the open file table with thousands of filedescriptors pointing to
-> the same file. THis makes those commands usable and predictable.
->
-> Finally, the last patch adds CLI support for running xfs_io commands
-> as one-shot commands rather than iterating commands. This is useful
-> for being able to set up multiple files and operate on them as a
-> whole or individually as necessary. This patch also documents in the
-> man page that some commands may iterate all open files and that the
-> new "-C" command option can be used to avoid problems arising from
-> this historical behaviour.
->
-> -Dave.
->
+> I merged a patch earlier from Darrick to rename get_block_size to
+> _get_block_size. So I did the rename here too.
 
-Eric,
+Thanks.  The only thing which worries me is those commits references.
+These patches are in Theodore's dev branch and I hope SHA1 wont be
+changed.  Or maybe we have to postpone this new test till patches
+appear in mainline.  I do not know.
 
-I wanted to make sure that this work by Dave is on your radar for next.
-Please note that most of the patches got Reviewed-by Christoph on v1,
-but Dave did not add the tag on v2 posting.
-
-Thanks,
-Amir.
+--
+Roman
