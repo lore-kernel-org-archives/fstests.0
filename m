@@ -1,99 +1,133 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:46555 "EHLO
+Received: from aserp1040.oracle.com ([141.146.126.69]:38404 "EHLO
         aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750707AbdALTS7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 12 Jan 2017 14:18:59 -0500
-Date: Thu, 12 Jan 2017 11:18:50 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v3 1/1] xfstests: generic/403: reproduce ext4 bugs in a
- shift extents logic
-Message-ID: <20170112191850.GI14033@birch.djwong.org>
-References: <20170111095239.18825-1-roman.penyaev@profitbricks.com>
- <20170112040820.GV1859@eguan.usersys.redhat.com>
- <CAJrWOzDhdm1awxwrukzimxWGpXjD89T8fFGXabJYHvfEJEvxBQ@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAJrWOzDhdm1awxwrukzimxWGpXjD89T8fFGXabJYHvfEJEvxBQ@mail.gmail.com>
+        with ESMTP id S1750730AbdALWOf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 12 Jan 2017 17:14:35 -0500
+From: Liu Bo <bo.li.liu@oracle.com>
+Subject: [PATCH] fstests: generic: splitted large dio write could trigger assertion on btrfs
+Date: Thu, 12 Jan 2017 14:22:06 -0800
+Message-Id: <1484259726-3561-1-git-send-email-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: Roman Penyaev <roman.penyaev@profitbricks.com>
-Cc: Eryu Guan <eguan@redhat.com>, Theodore Ts'o <tytso@mit.edu>, linux-ext4@vger.kernel.org, fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 12, 2017 at 09:02:25AM +0100, Roman Penyaev wrote:
-> On Thu, Jan 12, 2017 at 5:08 AM, Eryu Guan <eguan@redhat.com> wrote:
-> > On Wed, Jan 11, 2017 at 10:52:39AM +0100, Roman Pen wrote:
-> >> Regression test which targets two nasty ext4 bugs in a logic which
-> >> shifts extents:
-> >>
-> >> 1) 14d981f468a1 ("ext4: Include forgotten start block on fallocate insert range")
-> >>
-> >> Test tries to insert many blocks at the same offset to reproduce
-> >> the following layout on ext4:
-> >>
-> >>    block #0  block #1
-> >>    |ext0 ext1|ext2 ext3 ...|
-> >>         ^
-> >>      insert of a new block
-> >>
-> >> Because of an incorrect range first block is never reached,
-> >> thus ext1 is untouched, resulting to a hole at a wrong offset:
-> >>
-> >> What we got:
-> >>
-> >>    block #0   block #1
-> >>    |ext0 ext1|   ext2 ext3 ...|
-> >>               ^
-> >>               hole at a wrong offset
-> >>
-> >> What we expect:
-> >>
-> >>    block #0    block #1
-> >>    |ext0   ext1|ext2 ext3 ...|
-> >>         ^
-> >>         hole at a correct offset
-> >>
-> >> 2) 2b3864b32403 ("ext4: do not polute the extents cache while shifting extents")
-> >>
-> >> Extents status tree is filled in with outdated offsets while doing
-> >> extent shift, that leads to wrong data blocks.   That's why md5sum
-> >> of a result file is being checked after each block insert.
-> >
-> > Thanks a lot! I did a minor update and queued it up.
-> >
-> >>
-> >> Signed-off-by: Roman Pen <roman.penyaev@profitbricks.com>
-> >> Cc: "Theodore Ts'o <tytso@mit.edu>"
-> >> Cc: Eryu Guan <eguan@redhat.com>
-> >> Cc: linux-ext4@vger.kernel.org
-> >> Cc: fstests@vger.kernel.org
-> >> ---
-> >
-> >> +# Modify as appropriate.
-> >> +_supported_fs generic
-> >> +_supported_os Linux
-> >> +_require_test
-> >> +_require_xfs_io_command "finsert"
-> >> +
-> >> +blksize=`get_block_size $TEST_DIR`
-> >
-> > I merged a patch earlier from Darrick to rename get_block_size to
-> > _get_block_size. So I did the rename here too.
-> 
-> Thanks.  The only thing which worries me is those commits references.
-> These patches are in Theodore's dev branch and I hope SHA1 wont be
-> changed.  Or maybe we have to postpone this new test till patches
-> appear in mainline.  I do not know.
+On btrfs, if a large dio write (>=128MB) got splitted, the outstanding_extents
+assertion would complain.  Note that CONFIG_BTRFS_ASSERT is required.
 
-Please cite the subject line of the patch alongside the hash.
+Regression test for
+  Btrfs: adjust outstanding_extents counter properly when dio write is split
 
-e.g. 'This test accompanies 9a1f4e6 ("xfs: inflate colorful balloons").'
+Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+---
+I didn't figure out how to check if CONFIG_BTRFS_ASSERT is enabled, but since
+there is no btrfs specific stuff in the test case, it might be better to not
+have such a _require check b/c it doesn't make sense to other FS.
 
---D
+ tests/generic/392     | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/392.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 78 insertions(+)
+ create mode 100755 tests/generic/392
+ create mode 100644 tests/generic/392.out
 
-> 
-> --
-> Roman
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/tests/generic/392 b/tests/generic/392
+new file mode 100755
+index 0000000..4d88c44
+--- /dev/null
++++ b/tests/generic/392
+@@ -0,0 +1,75 @@
++#! /bin/bash
++# FS QA Test generic/392
++#
++# If a larger dio write (size >= 128M) got splitted, the assertion in endio
++# would complain (CONFIG_BTRFS_ASSERT is required).
++#
++# Regression test for
++#   Btrfs: adjust outstanding_extents counter properly when dio write is split
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_odirect
++
++# 2G / 1K
++fsblock=$((1 << 21))
++fssize=$((1 << 31))
++_require_fs_space $SCRATCH_MNT $fsblock
++
++_scratch_mkfs_sized $fssize >> $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++
++echo "Silence is golden"
++
++blocksize=$(( (128 + 1) * 2 * 1024 * 1024))
++$XFS_IO_PROG -f -d -c "pwrite -b ${blocksize} 0 ${blocksize}" $SCRATCH_MNT/testfile.$seq >> $seqres.full 2>&1
++
++_scratch_unmount
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/392.out b/tests/generic/392.out
+new file mode 100644
+index 0000000..665233c
+--- /dev/null
++++ b/tests/generic/392.out
+@@ -0,0 +1,2 @@
++QA output created by 392
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 2c16bd1..1631933 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -394,3 +394,4 @@
+ 389 auto quick acl
+ 390 auto freeze stress dangerous
+ 391 auto quick rw
++392 auto quick dangerous
+-- 
+2.5.0
+
