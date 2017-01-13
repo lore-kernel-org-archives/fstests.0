@@ -1,40 +1,63 @@
-Received: from bombadil.infradead.org ([198.137.202.9]:48392 "EHLO
+Received: from bombadil.infradead.org ([198.137.202.9]:45244 "EHLO
         bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750796AbdAMQiU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 13 Jan 2017 11:38:20 -0500
-Received: from clnet-p099-196.ikbnet.co.at ([83.175.99.196] helo=localhost)
-        by bombadil.infradead.org with esmtpsa (Exim 4.87 #1 (Red Hat Linux))
-        id 1cS4rr-0001fJ-5S
-        for fstests@vger.kernel.org; Fri, 13 Jan 2017 16:38:19 +0000
+        with ESMTP id S1751013AbdAMRFp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 13 Jan 2017 12:05:45 -0500
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH] common/rc: use /bin/bash in _user_do()
-Date: Fri, 13 Jan 2017 17:38:16 +0100
-Message-Id: <1484325496-3995-1-git-send-email-hch@lst.de>
+Subject: [PATCH] xfs/004: account for XFS reservations changes in 4.10-rc
+Date: Fri, 13 Jan 2017 18:05:40 +0100
+Message-Id: <1484327140-13654-1-git-send-email-hch@lst.de>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Without this the epressions in generic/256 will fail on a system
-where /bin/sh is the Default (e.g. modern Debian versions).
+And drop support for some really old kernels to clean things up.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- common/rc | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ tests/xfs/004 | 23 ++++++-----------------
+ 1 file changed, 6 insertions(+), 17 deletions(-)
 
-diff --git a/common/rc b/common/rc
-index 37d0fc8..63cabfd 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1809,7 +1809,7 @@ _user_do()
- 	then
- 	echo $1 | /bin/bash "su $qa_user 2>&1" | _filter_user_do
-     else
--	echo $1 | su $qa_user 2>&1 | _filter_user_do
-+	echo $1 | su -s /bin/bash $qa_user 2>&1 | _filter_user_do
-     fi
- }
+diff --git a/tests/xfs/004 b/tests/xfs/004
+index 09da2fe..bbc1aee 100755
+--- a/tests/xfs/004
++++ b/tests/xfs/004
+@@ -83,29 +83,18 @@ eval `$XFS_IO_PROG -x -c resblks $SCRATCH_MNT 2>&1 \
+ echo "resblks gave: resblks=$resblks" >>$seqres.full
  
+ # check the 'blocks' field from freesp command is OK
+-# since 2.6.18, df does not report the 4 blocks per AG that cannot
+-# be allocated, hence we check for that exact mismatch.
+-# since ~2.6.22, reserved blocks are used by default and df does
+-# not report them, hence check for an exact mismatch.
++#  - starting with Linux 4.10-rc the bmbt split reservation moved to be per-AG
+ perl -ne '
+-	BEGIN	{ $avail ='$avail' * 512;
++	BEGIN	{ $avail ='$avail' * 512 + ('$resblks' * '$dbsize');
+ 		  $answer="(no xfs_db free blocks line?)" }
+ 	/free blocks (\d+)$/	|| next;
+ 	$freesp = $1 * '$dbsize';
+-	if ($freesp == $avail) {
++	if ($freesp == $avail + ('$agcount') * '$dbsize' * 8) {
++		$answer = "yes";
++	} elsif ($freesp == $avail + (('$agcount' + 1) * '$dbsize' * 4)) {
+ 		$answer = "yes";
+ 	} else {
+-		$avail = $avail + (('$agcount' + 1) * '$dbsize' * 4);
+-		if ($freesp == $avail) {
+-			$answer = "yes";
+-		} else {
+-			$avail = $avail + ('$resblks' * '$dbsize');
+-			if ($freesp == $avail) {
+-				$answer = "yes";
+-			} else {
+-				$answer = "no ($freesp != $avail)";
+-			}
+-		}
++		$answer = "no ($freesp != $avail)";
+ 	}
+ 	END	{ print "$answer\n" }
+ 	' <$tmp.xfs_db >$tmp.ans
 -- 
 2.1.4
 
