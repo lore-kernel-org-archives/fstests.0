@@ -1,35 +1,26 @@
-Received: from mx1.redhat.com ([209.132.183.28]:50770 "EHLO mx1.redhat.com"
+Received: from sandeen.net ([63.231.237.45]:58310 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751739AbdAMOph (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 13 Jan 2017 09:45:37 -0500
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 92212C04B940
-        for <fstests@vger.kernel.org>; Fri, 13 Jan 2017 14:45:28 +0000 (UTC)
-Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
-        by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id v0DEjRS3026401
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-        for <fstests@vger.kernel.org>; Fri, 13 Jan 2017 09:45:28 -0500
-From: Eric Sandeen <sandeen@redhat.com>
-Subject: [PATCH] tools: compare-failures script
-Message-ID: <c756a755-8b9e-2c42-3855-4ffe507f9bd2@redhat.com>
-Date: Fri, 13 Jan 2017 08:45:26 -0600
+        id S1751482AbdAMO4Q (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 13 Jan 2017 09:56:16 -0500
+Subject: [PATCH V2] tools: compare-failures script
+References: <c756a755-8b9e-2c42-3855-4ffe507f9bd2@redhat.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <b8709bd8-fc9a-3804-7b28-71bc4bfe5985@sandeen.net>
+Date: Fri, 13 Jan 2017 08:56:15 -0600
 MIME-Version: 1.0
+In-Reply-To: <c756a755-8b9e-2c42-3855-4ffe507f9bd2@redhat.com>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>
+To: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
 This is a simple script to compare failures across runs.
 
-Given files containing stdout from several runs, each
-of which contains a Failures: line, it will print
-a table of all failures for each run.  Test subdir
-names are abbreviated for compactness, i.e.
-generic->g, xfs->x.  i.e. for 7 results files named
-test 1 through test 7:
+Given files containing stdout from several runs, each of which contains
+a Failures: line, it will print a table of all failures for each run.
+Test subdir names are abbreviated for compactness, i.e. generic->g.
+For 7 results files named test 1 through test 7:
 
 # compare-fail.sh test*
 
@@ -46,13 +37,14 @@ g/075 g/082 g/209 g/233             x/004 x/073       test7
 
 This lets us easily spot unique failures and outliers.
 
-This could be enhanced to output CSV etc, but for now I think
-it's helpful to visualize changes in failures across multiple
-runs.
+This could be enhanced to output CSV etc, but for now I think it's
+helpful to visualize changes in failures across multiple runs.
 
 Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 ---
 
+V2: not sure why I had the commit log in so few columns ;)
+That's the only change.
 
 diff --git a/README b/README
 index 400e902..3213d02 100644
@@ -141,5 +133,3 @@ index 0000000..13b07b9
 +	done
 +	echo $FILE
 +done
-
-
