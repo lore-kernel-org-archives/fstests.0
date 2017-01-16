@@ -1,237 +1,163 @@
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:36394 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751098AbdAOPBe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 15 Jan 2017 10:01:34 -0500
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH] overlay: test concurrent copy up
-Date: Sun, 15 Jan 2017 17:01:18 +0200
-Message-Id: <1484492478-13883-1-git-send-email-amir73il@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:39502 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751064AbdAPEbC (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 15 Jan 2017 23:31:02 -0500
+Date: Mon, 16 Jan 2017 12:30:59 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] fstests: generic: splitted large dio write could trigger
+ assertion on btrfs
+Message-ID: <20170116043059.GD1859@eguan.usersys.redhat.com>
+References: <1484259726-3561-1-git-send-email-bo.li.liu@oracle.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1484259726-3561-1-git-send-email-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: Liu Bo <bo.li.liu@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Run 4 process pairs, each competing over copy up of 1K files
-in 1 directory. One opponent touches all files in the directory
-and the other truncates all files in the directory.
+On Thu, Jan 12, 2017 at 02:22:06PM -0800, Liu Bo wrote:
+> On btrfs, if a large dio write (>=128MB) got splitted, the outstanding_extents
+> assertion would complain.  Note that CONFIG_BTRFS_ASSERT is required.
+> 
+> Regression test for
+>   Btrfs: adjust outstanding_extents counter properly when dio write is split
+> 
+> Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+> ---
+> I didn't figure out how to check if CONFIG_BTRFS_ASSERT is enabled, but since
+> there is no btrfs specific stuff in the test case, it might be better to not
+> have such a _require check b/c it doesn't make sense to other FS.
+> 
+>  tests/generic/392     | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/392.out |  2 ++
+>  tests/generic/group   |  1 +
+>  3 files changed, 78 insertions(+)
+>  create mode 100755 tests/generic/392
+>  create mode 100644 tests/generic/392.out
 
-This test does NOT check for concurrent copy up support. It only
-fails on unexpected errors of any of the touch/truncate operations.
+There're over 400 generic tests now, seems your repo hasn't been updated
+for a long time :)
 
-The test full output should demonstrate the expected results -
-for kernel with concurrent copy up support, truncate workers are
-not delayed by touch workers. As a result, truncate workers will
-finish their work much sooner than a test run without concurrent
-copy up support.
+> 
+> diff --git a/tests/generic/392 b/tests/generic/392
+> new file mode 100755
+> index 0000000..4d88c44
+> --- /dev/null
+> +++ b/tests/generic/392
+> @@ -0,0 +1,75 @@
+> +#! /bin/bash
+> +# FS QA Test generic/392
+> +#
+> +# If a larger dio write (size >= 128M) got splitted, the assertion in endio
+> +# would complain (CONFIG_BTRFS_ASSERT is required).
+> +#
+> +# Regression test for
+> +#   Btrfs: adjust outstanding_extents counter properly when dio write is split
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch
+> +_require_odirect
+> +
+> +# 2G / 1K
+> +fsblock=$((1 << 21))
+> +fssize=$((1 << 31))
+> +_require_fs_space $SCRATCH_MNT $fsblock
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/overlay/021     | 163 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/021.out |   2 +
- tests/overlay/group   |   1 +
- 3 files changed, 166 insertions(+)
- create mode 100755 tests/overlay/021
- create mode 100644 tests/overlay/021.out
+You should mkfs & mount $SCRATCH_DEV first before _require_fs_space,
+otherwise it's testing against the wrong fs.
 
-Eryu,
+> +
+> +_scratch_mkfs_sized $fssize >> $seqres.full 2>&1
 
-I wrote this test to excercise "ovl: concurrent copy up", but it does not
-require concurrent copy up support to run, nor does it fail due to lack of
-concurrent copy up support (it may run a bit slower), so there is nothing
-blocking from merging this test for kernel 4.9.
+_scratch_mkfs_sized also make sure SCRATCH_DEV is big enough to make the
+filesystem, in this test _require_fs_space and _scratch_mkfs_sized both
+could do the work, only one is needed.
 
-Note that although I used fsstress to create/truncate a bunch of files,
-this is by no means a stress test, so I did not add it to stress group.
-It is rather 'quick', less than half the time of the 'quick' overlay/001.
+But not all filesystems have _scratch_mkfs_sized support, I'd prefer
+using _require_fs_space.
 
-Amir.
+Thanks,
+Eryu
 
-diff --git a/tests/overlay/021 b/tests/overlay/021
-new file mode 100755
-index 0000000..405d3d0
---- /dev/null
-+++ b/tests/overlay/021
-@@ -0,0 +1,163 @@
-+#! /bin/bash
-+# FS QA Test 021
-+#
-+# test concurrent copy up
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2016 CTERA Networks. All Rights Reserved.
-+# Author: Amir Goldstein <amir73il@gmail.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+
-+# Remove all files from previous tests
-+_scratch_mkfs
-+
-+# overlay copy_up doesn't deal with sparse file well, holes will be filled by
-+# zeros, so for the worst case of hitting all the copy up bomb files, we need
-+# (64*(16+32+64+128)M) free space on $SCRATCH_DEV.
-+# However, triggering more than a total of 16 copy up bombs would require
-+# really fast data copy (clone up doesn't take up space at all), so let's be
-+# conservative and reserve space for 16 data copy ups per directory.
-+_require_fs_space $SCRATCH_DEV $((16*(16+32+64+128)*1024))
-+
-+lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
-+mkdir -p $lowerdir
-+
-+_scratch_mount
-+
-+echo "Silence is golden"
-+
-+testdir=arena
-+d_low=$lowerdir/$testdir
-+d_top=$SCRATCH_MNT/$testdir
-+mkdir -p $d_low
-+
-+# Create 4K empty files in 4 directories
-+echo $FSSTRESS_PROG -d $d_low -p 4 -z -f creat=1 -n 1024 -v >> $seqres.full
-+$FSSTRESS_PROG -d $d_low -p 4 -z -f creat=1 -n 1024 -v >> $seqres.full 2>&1
-+echo "--------------------------------------"       >> $seqres.full
-+echo "Created 1K files in lower directory.  "       >> $seqres.full
-+
-+# Plant 64 copy up bombs in each directory
-+for f in $d_low/p0/*0; do truncate -s 128M $f ;done
-+for f in $d_low/p1/*4; do truncate -s 64M $f ;done
-+for f in $d_low/p2/*8; do truncate -s 32M $f ;done
-+for f in $d_low/p3/*b; do truncate -s 16M $f ;done
-+echo "Created 64*4 copy up bombs.           "       >> $seqres.full
-+echo "--------------------------------------"       >> $seqres.full
-+
-+#
-+# Run 2 process teams - 4 pairs of rival processes
-+# Each process pair competing on copy up of 1K files in 1 directory.
-+# Team 'touch' players touch all files in readdir order.
-+# Team 'truncate' players truncates all files in numeric (name) order.
-+#
-+# If player from team 'touch' reaches a copy up bomb before player
-+# from team 'truncate' does, the copy up of (sparse) data will delay
-+# the end of the process pair match.
-+#
-+# If copy up of bomb is not concurrent with other copy ups, then
-+# 'touch' player p0 with the largest copy up bombs will delay players
-+# of both teams and all matches will take longer.
-+#
-+# If copy up is concurrent with copy ups in different directories,
-+# process pair 3 match will be over first and process pair 0 match
-+# will be over last.
-+#
-+# If copy up of data is concurrent with other copy ups on the same directory,
-+# then all the 'touch' team players will finish far behind their 'truncate'
-+# opponenets.
-+#
-+# This test doesn't verify any of those conditions, it will only fail
-+# on unexpected errors of any of the touch/truncate operations.
-+# The test full output should demonstrate the expected game results,
-+# as described above and depending on concurrent copy up support in kernel.
-+#
-+cd $d_top
-+echo "--------------------------------------"       >> $seqres.full
-+echo "Go team touch!!                       "       >> $seqres.full
-+find p0 -type f -print -exec touch {} \; >> $seqres.full 2>&1 &
-+find p1 -type f -print -exec touch {} \; >> $seqres.full 2>&1 &
-+find p2 -type f -print -exec touch {} \; >> $seqres.full 2>&1 &
-+find p3 -type f -print -exec touch {} \; >> $seqres.full 2>&1 &
-+cd - > /dev/null
-+
-+# Give team 'touch' a 1 second head start.
-+# Team 'truncate' players should catch up after few copy up bombs.
-+sleep 1
-+echo "--------------------------------------"       >> $seqres.full
-+echo "Go team truncate!!                    "       >> $seqres.full
-+# Give team 'touch' a 1 second head start.
-+# Team 'truncate' players should catch up after few copy up bombs.
-+sleep 1
-+$FSSTRESS_PROG -d $d_top -p 4 -z -f creat=1 -n 1024 -v >> $seqres.full 2>&1 &
-+
-+err=0
-+if ! wait %1; then
-+	echo "Player p0/touch returned $? - see $seqres.full"
-+	err=1
-+fi
-+
-+if ! wait %2; then
-+	echo "Player p1/touch returned $? - see $seqres.full"
-+	err=1
-+fi
-+
-+if ! wait %3; then
-+	echo "Player p2/touch returned $? - see $seqres.full"
-+	err=1
-+fi
-+
-+if ! wait %4; then
-+	echo "Player p3/touch returned $? - see $seqres.full"
-+	err=1
-+fi
-+
-+if ! wait %5; then
-+	echo "Team truncate returned $? - see $seqres.full"
-+	err=1
-+fi
-+
-+status=$err
-+
-+exit $status
-diff --git a/tests/overlay/021.out b/tests/overlay/021.out
-new file mode 100644
-index 0000000..09f4062
---- /dev/null
-+++ b/tests/overlay/021.out
-@@ -0,0 +1,2 @@
-+QA output created by 021
-+Silence is golden
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 684ed45..5bcc25e 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -23,3 +23,4 @@
- 018 auto quick copyup
- 019 auto stress
- 020 auto quick copyup perms
-+021 auto quick copyup
--- 
-2.7.4
-
+> +_scratch_mount >> $seqres.full 2>&1
+> +
+> +echo "Silence is golden"
+> +
+> +blocksize=$(( (128 + 1) * 2 * 1024 * 1024))
+> +$XFS_IO_PROG -f -d -c "pwrite -b ${blocksize} 0 ${blocksize}" $SCRATCH_MNT/testfile.$seq >> $seqres.full 2>&1
+> +
+> +_scratch_unmount
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/392.out b/tests/generic/392.out
+> new file mode 100644
+> index 0000000..665233c
+> --- /dev/null
+> +++ b/tests/generic/392.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 392
+> +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 2c16bd1..1631933 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -394,3 +394,4 @@
+>  389 auto quick acl
+>  390 auto freeze stress dangerous
+>  391 auto quick rw
+> +392 auto quick dangerous
+> -- 
+> 2.5.0
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
