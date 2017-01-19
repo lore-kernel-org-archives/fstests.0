@@ -1,297 +1,183 @@
-Received: from mail-io0-f194.google.com ([209.85.223.194]:34428 "EHLO
-        mail-io0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752378AbdASMSc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 Jan 2017 07:18:32 -0500
+Received: from mga03.intel.com ([134.134.136.65]:17121 "EHLO mga03.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750882AbdASUwg (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 19 Jan 2017 15:52:36 -0500
+Date: Thu, 19 Jan 2017 13:49:25 -0700
+From: Ross Zwisler <ross.zwisler@linux.intel.com>
+Subject: Re: [PATCH v2 1/2] xfs: test per-inode DAX flag by IO
+Message-ID: <20170119204925.GB28456@linux.intel.com>
+References: <20170119055405.GT1859@eguan.usersys.redhat.com>
+ <1484820838-5098-1-git-send-email-xzhou@redhat.com>
+ <1484820838-5098-2-git-send-email-xzhou@redhat.com>
 MIME-Version: 1.0
-Reply-To: fdmanana@gmail.com
-In-Reply-To: <CAL3q7H6qQZ+H8KU86x46Va8bmwhrMrWzH=8K7385BpuPLD5MFQ@mail.gmail.com>
-References: <1483527210-2530-1-git-send-email-robbieko@synology.com>
- <1483527210-2530-3-git-send-email-robbieko@synology.com> <CAL3q7H7y2iLrUQVGBDBsNUqn0JRTqqUCrpL6m1yAvHyK1E7ZLg@mail.gmail.com>
- <ea8911b56cc08ecb821c4a6bb8e4646c@synology.com> <CAL3q7H6qQZ+H8KU86x46Va8bmwhrMrWzH=8K7385BpuPLD5MFQ@mail.gmail.com>
-From: Filipe Manana <fdmanana@gmail.com>
-Date: Thu, 19 Jan 2017 12:10:43 +0000
-Message-ID: <CAL3q7H7HGkfcKtgwWvqA=MN7QnC0v27gE3gU63iGdbLTTvPvsw@mail.gmail.com>
-Subject: Re: [PATCH v3 2/4] xfstests: btrfs/132: add test for invaild update
- time by an incremental send
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1484820838-5098-2-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: robbieko <robbieko@synology.com>
-Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
+To: Xiong Zhou <xzhou@redhat.com>
+Cc: eguan@redhat.com, linux-nvdimm@ml01.01.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 5, 2017 at 11:31 AM, Filipe Manana <fdmanana@gmail.com> wrote:
-> On Thu, Jan 5, 2017 at 2:45 AM, robbieko <robbieko@synology.com> wrote:
->> Filipe Manana =E6=96=BC 2017-01-04 21:09 =E5=AF=AB=E5=88=B0:
->>
->>> On Wed, Jan 4, 2017 at 10:53 AM, robbieko <robbieko@synology.com> wrote=
-:
->>>>
->>>> From: Robbie Ko <robbieko@synology.com>
->>>>
->>>> Test that an incremental send operation dosen't' work because
->>>> it tries to update the time to a deleted directory after it finishes
->>>> a move operation.
->>>>
->>>> The other one is that an operation is applied to a file using the old
->>>> name not the new name.
->>>>
->>>> This test exercises scenarios used to fail in btrfs and are fixed by
->>>> the following patches for the linux kernel:
->>>>
->>>> "Btrfs: incremental send, add generation check for the inode waiting f=
-or
->>>> rmdir operation."
->>>> "Btrfs: incremental send, add generation check in existence
->>>> demtermination for the parent directory"
->>>>
->>>> Signed-off-by: Robbie Ko <robbieko@synology.com>
->>>> ---
->>>> V3: remove "run_" based helpers
->>>> V2: improve the change log
->>>>
->>>>  tests/btrfs/132     | 123
->>>> ++++++++++++++++++++++++++++++++++++++++++++++++++++
->>>>  tests/btrfs/132.out |   7 +++
->>>>  tests/btrfs/group   |   1 +
->>>>  3 files changed, 131 insertions(+)
->>>>  create mode 100755 tests/btrfs/132
->>>>  create mode 100644 tests/btrfs/132.out
->>>>
->>>> diff --git a/tests/btrfs/132 b/tests/btrfs/132
->>>> new file mode 100755
->>>> index 0000000..f1bb698
->>>> --- /dev/null
->>>> +++ b/tests/btrfs/132
->>>> @@ -0,0 +1,123 @@
->>>> +#! /bin/bash
->>>> +# FS QA Test No. btrfs/132
->>>> +#
->>>> +# Test that an incremental send operation dosen't' work because
->>>> +# it tries to update the time to a deleted directory after it finishe=
-s
->>>> +# a move operation.
->>>> +#
->>>> +# The other one is that an operation is applied to a file using the o=
-ld
->>>> +# name not the new name.
->>>> +#
->>>> +#--------------------------------------------------------------------=
----
->>>> +# Copyright (C) 2016 Synology Inc. All Rights Reserved.
->>>> +# Author: Robbie Ko <robbieko@synology.com>
->>>> +#
->>>> +# This program is free software; you can redistribute it and/or
->>>> +# modify it under the terms of the GNU General Public License as
->>>> +# published by the Free Software Foundation.
->>>> +#
->>>> +# This program is distributed in the hope that it would be useful,
->>>> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
->>>> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
->>>> +# GNU General Public License for more details.
->>>> +#
->>>> +# You should have received a copy of the GNU General Public License
->>>> +# along with this program; if not, write the Free Software Foundation=
-,
->>>> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
->>>> +#--------------------------------------------------------------------=
----
->>>> +#
->>>> +
->>>> +seq=3D`basename $0`
->>>> +seqres=3D$RESULT_DIR/$seq
->>>> +echo "QA output created by $seq"
->>>> +
->>>> +tmp=3D/tmp/$$
->>>> +status=3D1       # failure is the default!
->>>> +trap "_cleanup; exit \$status" 0 1 2 3 15
->>>> +
->>>> +_cleanup()
->>>> +{
->>>> +       cd /
->>>> +       rm -fr $send_files_dir
->>>> +       rm -f $tmp.*
->>>> +}
->>>> +
->>>> +# get standard environment, filters and checks
->>>> +. ./common/rc
->>>> +. ./common/filter
->>>> +
->>>> +# real QA test starts here
->>>> +_supported_fs btrfs
->>>> +_supported_os Linux
->>>> +_require_test
->>>> +_require_scratch
->>>> +_require_fssum
->>>> +
->>>> +send_files_dir=3D$TEST_DIR/btrfs-test-$seq
->>>> +
->>>> +rm -f $seqres.full
->>>> +rm -fr $send_files_dir
->>>> +mkdir $send_files_dir
->>>> +
->>>> +_scratch_mkfs >>$seqres.full 2>&1
->>>> +_scratch_mount
->>>> +
->>>> +mkdir $SCRATCH_MNT/dir257
->>>> +mkdir $SCRATCH_MNT/dir258
->>>> +mkdir $SCRATCH_MNT/dir259
->>>> +mv $SCRATCH_MNT/dir257 $SCRATCH_MNT/dir258/dir257
->>>> +
->>>> +# Filesystem looks like:
->>>> +#
->>>> +# .                                                             (ino
->>>> 256)
->>>> +# |--- dir258/                                                  (ino
->>>> 258)
->>>> +# |    |--- dir257/                                             (ino
->>>> 257)
->>>> +# |
->>>> +# |--- dir259/                                                  (ino
->>>> 259)
->>>> +#
->>>> +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
->>>> +    $SCRATCH_MNT/mysnap1 > /dev/null
->>>> +
->>>> +mv $SCRATCH_MNT/dir258/dir257 $SCRATCH_MNT/dir257
->>>> +rmdir $SCRATCH_MNT/dir258
->>>> +rmdir $SCRATCH_MNT/dir259
->>>> +_scratch_unmount
->>>> +_scratch_mount
->>>
->>>
->>> Why do need to remount the fs? There's also a _scratch_remount function=
-.
->>>
->>> Again, I would like to see comments in the test explaining why and
->>> how/why did the incremental send operation used to fail (like most of
->>> the existing send/receive tests have).
->>>
->>> thanks
->>
->>
->> Because we need to use the same inode 258 recreate, so need to delete th=
-e
->> old dir258 and dir259, then remount the fs, the next new file will be
->> generated
->> from inode 258.
->
-> So you want to recreate the same inodes, with the same numbers but
-> different generation values. You can get the same effect by using the
-> mount option "-o inode_cache" (which is more obvious and doesn't rely
-> on an implementation detail that is not guaranteed to exist forever).
-> Again, as I said in my reply to some other test, this should be well
-> explained as a comment in the test.
+On Thu, Jan 19, 2017 at 06:13:57PM +0800, Xiong Zhou wrote:
+> In a DAX mountpoint, do IO betwen files with and
+> without DAX per-inode flag. We do mmap and O_DIRECT
+> read/write IO in this case. Then test again in the
+> same device without dax mountoption.
+> 
+> Add help _require_scratch_dax to make sure we can
+> test DAX feature on SCRATCH_DEV.
+> 
+> Add mmap dio test programme to test read/write
+> between a mmap area of one file and another file
+> directly, with different size.
+> 
+> Signed-off-by: Xiong Zhou <xzhou@redhat.com>
+> ---
+>  .gitignore        |   1 +
+>  common/rc         |  14 +++++++
+>  src/Makefile      |   2 +-
+>  src/t_mmap_dio.c  |  81 ++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/138     | 110 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/138.out |   2 +
+>  tests/xfs/group   |   1 +
+>  7 files changed, 210 insertions(+), 1 deletion(-)
+>  create mode 100644 src/t_mmap_dio.c
+>  create mode 100755 tests/xfs/138
+>  create mode 100644 tests/xfs/138.out
+> 
+> diff --git a/.gitignore b/.gitignore
+> index 7dcea14..48a40a0 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -129,6 +129,7 @@
+>  /src/cloner
+>  /src/renameat2
+>  /src/t_rename_overwrite
+> +/src/t_mmap_dio
+>  
+>  # dmapi/ binaries
+>  /dmapi/src/common/cmd/read_invis
+> diff --git a/common/rc b/common/rc
+> index 892c46e..3706620 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2632,6 +2632,20 @@ _require_scratch_shutdown()
+>  	_scratch_unmount
+>  }
+>  
+> +# Does dax mount option work on this dev/fs?
+> +_require_scratch_dax()
+> +{
+> +	_require_scratch
+> +	_scratch_mkfs > /dev/null 2>&1
+> +	_scratch_mount -o dax
+> +	# Check options to be sure. XFS ignores dax option
+> +	# and goes on if dev underneath does not support dax.
+> +	_fs_options $SCRATCH_DEV | grep -w "dax" > /dev/null 2>&1
+> +	[ $? -ne 0 ] && \
+> +		_notrun "$SCRATCH_DEV $FSTYP does not support -o dax"
+> +	_scratch_unmount
+> +}
+> +
+>  # Does norecovery support by this fs?
+>  _require_norecovery()
+>  {
+> diff --git a/src/Makefile b/src/Makefile
+> index 94d74aa..eb5a56c 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -12,7 +12,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+>  	godown resvtest writemod makeextents itrash rename \
+>  	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
+>  	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
+> -	holetest t_truncate_self
+> +	holetest t_truncate_self t_mmap_dio
+>  
+>  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+> diff --git a/src/t_mmap_dio.c b/src/t_mmap_dio.c
+> new file mode 100644
+> index 0000000..1a26e1b
+> --- /dev/null
+> +++ b/src/t_mmap_dio.c
+> @@ -0,0 +1,81 @@
+> +/*
+> + * This programme was originally written by
+> + *     Jeff Moyer <jmoyer@redhat.com>
+> + */
+> +#define _GNU_SOURCE 1
+> +#include <stdio.h>
+> +#include <stdlib.h>
+> +#include <string.h>
+> +#include <unistd.h>
+> +#include <fcntl.h>
+> +#include <sys/mman.h>
+> +#include <libaio.h>
+> +#include <errno.h>
+> +#include <sys/time.h>
+> +
+> +void usage(char *prog)
+> +{
+> +	fprintf(stderr,
+> +		"usage: %s <src file> <dest file> <size> <msg>\n",
+> +		prog);
+> +	exit(1);
+> +}
+> +
+> +void err_exit(char *op, unsigned long len, char *s)
+> +{
+> +	fprintf(stderr, "%s(%s) len %lu %s\n",
+> +		op, strerror(errno), len, s);
+> +	exit(1);
+> +}
+> +
+> +int main(int argc, char **argv)
+> +{
+> +	int fd, fd2, ret;
+> +	char *map;
+> +	unsigned long len;
+> +
+> +	if (argc < 3)
+> +		usage(basename(argv[0]));
+> +
+> +	len = strtoul(argv[3], NULL, 10);
+> +	if (errno == ERANGE)
+> +		err_exit("strtoul", 0, argv[4]);
+> +
+> +	/* Open source file and mmap*/
+> +	fd = open(argv[1], O_RDWR, 0644);
+> +	if (fd < 0)
+> +		err_exit("open s", len, argv[4]);
+> +
+> +	map = (char *)mmap(NULL, len,
+> +		PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+> +	if (map == MAP_FAILED)
+> +		err_exit("mmap", len, argv[4]);
+> +
+> +	/* Open dest file with O_DIRECT */
+> +	fd2 = open(argv[2], O_RDWR|O_DIRECT, 0644);
+> +	if (fd2 < 0)
+> +		err_exit("open d", len, argv[4]);
+> +
+> +	/* First, test storing to dest file from source mapping */
+> +	ret = write(fd2, map, len);
+> +	if (ret != len)
+> +		err_exit("write", len, argv[4]);
+> +
+> +	ret = (int)lseek(fd2, 0, SEEK_SET);
+> +	if (ret == -1)
+> +		err_exit("lseek", len, argv[4]);
+> +
+> +	/* Next, test reading from dest file into source mapping */
+> +	ret = read(fd2, map, len);
+> +	if (ret != len)
+> +		err_exit("read", len, argv[4]);
+> +	ret = msync(map, len, MS_SYNC);
+> +	if (ret < 0)
+> +		err_exit("msync", len, argv[4]);
+> +
+> +	ret = munmap(map, len);
+> +	if (ret < 0)
+> +		err_exit("munmap", len, argv[4]);
 
-Nevermind. I have made the changes myself and sent a new version of
-this test and the others, preserving your authorship.
-
-In the future, please also take the care to update the change log to
-mention the subject of the last versions of the kernel patches.
-Right now these change logs refers to the subjects of older versions
-of the kernel patches... Not really helpful.
-
-thanks
-
->
-> thanks
->
->>
->>
->> thanks
->>
->>>
->>>> +touch $SCRATCH_MNT/file258
->>>> +mkdir $SCRATCH_MNT/new_dir259
->>>> +mv $SCRATCH_MNT/dir257 $SCRATCH_MNT/new_dir259/dir257
->>>> +
->>>> +# Filesystem now looks like:
->>>> +#
->>>> +# .                                                             (ino
->>>> 256)
->>>> +# |--- file258                                                  (ino
->>>> 258)
->>>> +# |
->>>> +# |--- new_dir259/                                              (ino
->>>> 259)
->>>> +# |    |--- dir257/                                             (ino
->>>> 257)
->>>> +#
->>>> +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
->>>> +    $SCRATCH_MNT/mysnap2 > /dev/null
->>>> +
->>>> +$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
->>>> +$FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
->>>> +        -x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
->>>> +
->>>> +$BTRFS_UTIL_PROG send $SCRATCH_MNT/mysnap1 -f \
->>>> +    $send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
->>>> +$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
->>>> +       -f $send_files_dir/2.snap 2>&1 1>/dev/null | _filter_scratch
->>>> +
->>>> +# Now recreate the filesystem by receiving both send streams and veri=
-fy
->>>> we get
->>>> +# the same content that the original filesystem had.
->>>> +_scratch_unmount
->>>> +_scratch_mkfs >>$seqres.full 2>&1
->>>> +_scratch_mount
->>>> +
->>>> +$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/1.snap >
->>>> /dev/null
->>>> +$FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
->>>> +$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/2.snap >
->>>> /dev/null
->>>> +$FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
->>>> +
->>>> +echo "Silence is golden"
->>>> +status=3D0
->>>> +exit
->>>> diff --git a/tests/btrfs/132.out b/tests/btrfs/132.out
->>>> new file mode 100644
->>>> index 0000000..ff21547
->>>> --- /dev/null
->>>> +++ b/tests/btrfs/132.out
->>>> @@ -0,0 +1,7 @@
->>>> +QA output created by 132
->>>> +At subvol SCRATCH_MNT/mysnap1
->>>> +At subvol SCRATCH_MNT/mysnap2
->>>> +At subvol mysnap1
->>>> +OK
->>>> +OK
->>>> +Silence is golden
->>>> diff --git a/tests/btrfs/group b/tests/btrfs/group
->>>> index a7a070a..1b12382 100644
->>>> --- a/tests/btrfs/group
->>>> +++ b/tests/btrfs/group
->>>> @@ -134,3 +134,4 @@
->>>>  129 auto quick send
->>>>  130 auto clone send
->>>>  131 auto quick send
->>>> +132 auto quick send
->>>> --
->>>> 1.9.1
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe linux-btrfs"=
- in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-> --
-> Filipe David Manana,
->
-> "People will forget what you said,
->  people will forget what you did,
->  but people will never forget how you made them feel."
-
-
-
---=20
-Filipe David Manana,
-
-"People will forget what you said,
- people will forget what you did,
- but people will never forget how you made them feel."
+Small nit: you munmap() to clean up the mmap(), but you don't close fd or fd2.
