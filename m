@@ -1,229 +1,87 @@
-Received: from mail.kernel.org ([198.145.29.136]:38664 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752453AbdASMK2 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 19 Jan 2017 07:10:28 -0500
-From: fdmanana@kernel.org
-Subject: [PATCH v4 3/3] fstests: test btrfs incremental send after replacing directory
-Date: Thu, 12 Jan 2017 03:13:50 +0000
-Message-Id: <1484190830-17376-1-git-send-email-fdmanana@kernel.org>
+Received: from mail-it0-f66.google.com ([209.85.214.66]:35630 "EHLO
+        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752183AbdASMMP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 19 Jan 2017 07:12:15 -0500
+MIME-Version: 1.0
+Reply-To: fdmanana@gmail.com
+In-Reply-To: <5a436c110e0b823a9b6babedfe450734@synology.com>
+References: <1477619046-16375-1-git-send-email-robbieko@synology.com>
+ <1477619046-16375-5-git-send-email-robbieko@synology.com> <20161101072055.GQ27776@eguan.usersys.redhat.com>
+ <5a436c110e0b823a9b6babedfe450734@synology.com>
+From: Filipe Manana <fdmanana@gmail.com>
+Date: Thu, 19 Jan 2017 12:11:23 +0000
+Message-ID: <CAL3q7H61M__ttxvEDBVp7qQgCvcnW0=M2vzW0A0wppTtr+-Nxw@mail.gmail.com>
+Subject: Re: [PATCH v2 4/4] xfstests: btrfs/134: add test for incremental send
+ which renames a directory already being deleted
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>, Robbie Ko <robbieko@synology.com>
+To: robbieko <robbieko@synology.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Wed, Nov 2, 2016 at 3:52 AM, robbieko <robbieko@synology.com> wrote:
+> Hi Eryu Guan,
+>
+> Yes, it need apply
+> [PATCH] "Btrfs: incremental send, do not skip generation inconsistency ch=
+eck
+> for inode 256."
+> and test again, it will failed.
+>
+> because current code there is a problem, but just will not happen.
 
-Test that an incremental send operation works when in both snapshots
-there are two directory inodes that have the same number but different
-generations and have an entry with the same name that corresponds to
-different inodes in each snapshot.
+Then it's not a problem...
+What your're saying is confusing to say the least.
 
-The btrfs issue is fixed by the following patch for the linux kernel:
+I really don't like the idea of adding a patch that is know to
+introduce a regression and then adding another patch that fixes it.
+Anyway, your patchset has been reviewed and those patches are not
+needed anymore as there's a better solution that doesn't imply
+introducing a regression temporarily, so this test is not really
+needed.
 
-  "Btrfs: incremental send, do not issue invalid rmdir operations"
+thanks
 
-Signed-off-by: Robbie Ko <robbieko@synology.com>
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
+>
+> Thansk
+> Robbie Ko
+>
+> Eryu Guan =E6=96=BC 2016-11-01 15:20 =E5=AF=AB=E5=88=B0:
+>
+>> On Fri, Oct 28, 2016 at 09:44:06AM +0800, robbieko wrote:
+>>>
+>>> From: Robbie Ko <robbieko@synology.com>
+>>>
+>>> Test that an incremental send operation dosen't work because
+>>> it tries to rename a directory which is already deleted.
+>>>
+>>> This test exercises scenarios used to fail in btrfs and are fixed by
+>>> the following patch for the linux kernel:
+>>>
+>>> "Btrfs: incremental send, add generation check for inode is waiting for
+>>> move."
+>>
+>>
+>> I was testing with v4.9-rc1+ kernel and btrfs-progs v4.6. Seems above
+>> patch is not merged in 4.9-rc1 kernel, but test passed for me, is that
+>> expected?
+>>
+>> Thanks,
+>> Eryu
+>
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-v4: Improved changelog and added comments to the test that explain what is
-    being tested and the problem.
 
- tests/btrfs/135     | 159 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/135.out |   8 +++
- tests/btrfs/group   |   1 +
- 3 files changed, 168 insertions(+)
- create mode 100755 tests/btrfs/135
- create mode 100644 tests/btrfs/135.out
 
-diff --git a/tests/btrfs/135 b/tests/btrfs/135
-new file mode 100755
-index 0000000..bdc70b3
---- /dev/null
-+++ b/tests/btrfs/135
-@@ -0,0 +1,159 @@
-+#! /bin/bash
-+# FS QA Test No. btrfs/135
-+#
-+# Test that an incremental send operation works when in both snapshots there are
-+# two directory inodes that have the same number but different generations and
-+# have an entry with the same name that corresponds to different inodes in each
-+# snapshot.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2017 Synology Inc. All Rights Reserved.
-+# Author: Robbie Ko <robbieko@synology.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -fr $send_files_dir
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+_require_fssum
-+
-+send_files_dir=$TEST_DIR/btrfs-test-$seq
-+
-+rm -f $seqres.full
-+rm -fr $send_files_dir
-+mkdir $send_files_dir
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+touch $SCRATCH_MNT/f
-+mkdir $SCRATCH_MNT/d1
-+mkdir $SCRATCH_MNT/d259_old
-+mv $SCRATCH_MNT/d1 $SCRATCH_MNT/d259_old/d1
-+
-+# Filesystem looks like:
-+#
-+# .                                                             (ino 256)
-+# |--- f                                                        (ino 257)
-+# |
-+# |--- d259_old/                                                (ino 259)
-+#         |--- d1/                                              (ino 258)
-+#
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+	$SCRATCH_MNT/mysnap1 > /dev/null
-+
-+$BTRFS_UTIL_PROG send $SCRATCH_MNT/mysnap1 -f \
-+	$send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
-+
-+_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+mkdir $SCRATCH_MNT/d1
-+mkdir $SCRATCH_MNT/dir258
-+mkdir $SCRATCH_MNT/dir259
-+mv $SCRATCH_MNT/d1 $SCRATCH_MNT/dir259/d1
-+
-+# Filesystem now looks like:
-+#
-+# .                                                             (ino 256)
-+# |--- dir258/                                                  (ino 258)
-+# |
-+# |--- dir259/                                                  (ino 259)
-+#        |--- d1/                                               (ino 257)
-+#
-+# Notice that at this point all inodes have a generation with value 7, which is
-+# the generation value for a brand new filesystem.
-+
-+# Now create the second snapshot. This makes the filesystem's current generation
-+# value to increase to the value 8, due to a transaction commit performed by the
-+# snapshot creation ioctl.
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+	$SCRATCH_MNT/mysnap2 > /dev/null
-+
-+# Now receive the first snapshot created in the first filesystem.
-+# Before creating any inodes, the receive command creates the first snapshot,
-+# which causes a transaction commit and therefore bumps the filesystem's current
-+# generation to the value 9. All the inodes created end up getting a generation
-+# value of 9 and the snapshot's root inode (256) gets a generation value of 8.
-+$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/1.snap > /dev/null
-+rm $send_files_dir/1.snap
-+
-+$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-+$FSSUM_PROG -A -f -w $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
-+
-+$BTRFS_UTIL_PROG send $SCRATCH_MNT/mysnap1 -f \
-+	$send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
-+$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
-+	-f $send_files_dir/2.snap 2>&1 1>/dev/null | _filter_scratch
-+
-+# Now recreate the filesystem by receiving both send streams and verify we get
-+# the same content that the original filesystem had.
-+_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/1.snap > /dev/null
-+$FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-+# The receive of the incremental send stream used to fail because it contained
-+# a rmdir operation with an invalid path. The output of the receive command,
-+# with verbose mode (argument -vv), was the following:
-+#
-+# utimes
-+# unlink f
-+# mkdir o257-7-0
-+# mkdir o259-7-0
-+# rename o257-7-0 -> o259-7-0/d1
-+# chown o259-7-0/d1 - uid=0, gid=0
-+# chmod o259-7-0/d1 - mode=0755
-+# utimes o259-7-0/d1
-+# rmdir o258-9-0
-+# ERROR: rmdir o258-9-0 failed: No such file or directory
-+#
-+# When the kernel was computing the send stream and processing inode 258, it
-+# noticed that in both snapshots this inode is a direct child of inode 259, and
-+# that in both snapshots inode 259 as an entry with the name "d1". Because of
-+# that it decided (incorrectly) to issue an rmdir operation using the orphanized
-+# name of the inode 258 from the parent snapshot (which has a generation of 9).
-+# However that decision to send an rmdir operation due to the dentry collision
-+# was incorrect because the inodes with number 259 in both snapshots are not the
-+# same, they have different generations.
-+#
-+$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/2.snap > /dev/null
-+$FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/135.out b/tests/btrfs/135.out
-new file mode 100644
-index 0000000..c917842
---- /dev/null
-+++ b/tests/btrfs/135.out
-@@ -0,0 +1,8 @@
-+QA output created by 135
-+At subvol SCRATCH_MNT/mysnap1
-+At subvol mysnap1
-+At subvol SCRATCH_MNT/mysnap1
-+At subvol SCRATCH_MNT/mysnap2
-+At subvol mysnap1
-+OK
-+OK
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index f33befb..88fb8db 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -136,3 +136,4 @@
- 132 auto enospc
- 133 auto quick send
- 134 auto quick send
-+135 auto quick send
--- 
-2.7.0.rc3
+--=20
+Filipe David Manana,
 
+"People will forget what you said,
+ people will forget what you did,
+ but people will never forget how you made them feel."
