@@ -1,47 +1,62 @@
-Received: from mail-pf0-f196.google.com ([209.85.192.196]:34821 "EHLO
-        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753014AbdARKvl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 18 Jan 2017 05:51:41 -0500
-Received: by mail-pf0-f196.google.com with SMTP id f144so916268pfa.2
-        for <fstests@vger.kernel.org>; Wed, 18 Jan 2017 02:51:41 -0800 (PST)
-Subject: Re: [PATCH] README: fix the typo of local.config.example
-References: <83ca1aaa-7f30-bece-87e1-4faab1ebdc72@gmail.com>
-From: Kinglong Mee <kinglongmee@gmail.com>
-Message-ID: <dd0f58ba-01e8-64f5-b0dd-8d2835b29616@gmail.com>
-Date: Wed, 18 Jan 2017 18:51:28 +0800
+Received: from mx1.redhat.com ([209.132.183.28]:34696 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751656AbdASER7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 18 Jan 2017 23:17:59 -0500
+Date: Thu, 19 Jan 2017 12:17:00 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 1/4] common/rc: add _require_scratch_dax
+Message-ID: <20170119041700.GR1859@eguan.usersys.redhat.com>
+References: <1484708826-23529-1-git-send-email-xzhou@redhat.com>
+ <1484708826-23529-2-git-send-email-xzhou@redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <83ca1aaa-7f30-bece-87e1-4faab1ebdc72@gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1484708826-23529-2-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
-Cc: sandeen@redhat.com, Kinglong Mee <kinglongmee@gmail.com>
+To: Xiong Zhou <xzhou@redhat.com>
+Cc: fstests@vger.kernel.org, linux-nvdimm@ml01.01.org
 List-ID: <fstests@vger.kernel.org>
 
-I find Lakshmipathi.G have send it yesterday, please ignore it.
-Sorry for the noise.
-
-On 1/18/2017 18:33, Kinglong Mee wrote:
-> Commit b7d908a0e8eb "README: document Fedora, RHEL, and
->  CentOS dependencies" adds a typo of local.config.example 
-> to config.local.example, fix it.
+On Wed, Jan 18, 2017 at 11:07:03AM +0800, Xiong Zhou wrote:
+> To make sure we can test DAX feature on SCRATCH_DEV.
 > 
-> Signed-off-by: Kinglong Mee <kinglongmee@gmail.com>
+> Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 > ---
->  README | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  common/rc | 10 ++++++++++
+>  1 file changed, 10 insertions(+)
 > 
-> diff --git a/README b/README
-> index 400e902..f788e71 100644
-> --- a/README
-> +++ b/README
-> @@ -63,7 +63,7 @@ Preparing system for tests (IRIX and Linux):
->                
->      - setup your environment
->  	Quick start:
-> -	- copy config.local.example to config.local and edit as needed
-> +	- copy local.config.example to local.config and edit as needed
->  	Or:
->          - setenv TEST_DEV "device containing TEST PARTITION"
->          - setenv TEST_DIR "mount point of TEST PARTITION"   
+> diff --git a/common/rc b/common/rc
+> index 892c46e..ea7956b 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2632,6 +2632,16 @@ _require_scratch_shutdown()
+>  	_scratch_unmount
+>  }
+>  
+> +# Does dax mount option work on this dev/fs?
+> +_require_scratch_dax()
+> +{
+> +	_scratch_unmount
+
+Use _require_scratch instead of _scratch_unmount here. _require_scratch
+ensures we have SCRATCH_DEV defined and unmounts it if it's mounted.
+
+Thanks,
+Eryu
+
+> +	_scratch_mkfs > /dev/null 2>&1
+> +	_scratch_mount -o dax || \
+> +		_notrun "$SCRATCH_DEV $FSTYP does not support -o dax"
+> +	_scratch_unmount
+> +}
+> +
+>  # Does norecovery support by this fs?
+>  _require_norecovery()
+>  {
+> -- 
+> 1.8.3.1
 > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
