@@ -1,181 +1,130 @@
-Received: from mx1.redhat.com ([209.132.183.28]:36180 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:42006 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751273AbdASFys (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 19 Jan 2017 00:54:48 -0500
-Date: Thu, 19 Jan 2017 13:54:05 +0800
+        id S1750874AbdASHzZ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 19 Jan 2017 02:55:25 -0500
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id B22073D945
+        for <fstests@vger.kernel.org>; Thu, 19 Jan 2017 07:54:00 +0000 (UTC)
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 4/4] generic: test mmap dio through DAX and non-DAX
-Message-ID: <20170119055405.GT1859@eguan.usersys.redhat.com>
-References: <1484708826-23529-1-git-send-email-xzhou@redhat.com>
- <1484708826-23529-5-git-send-email-xzhou@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1484708826-23529-5-git-send-email-xzhou@redhat.com>
+Subject: [PATCH v3] fstests: remove tmp files properly
+Date: Thu, 19 Jan 2017 15:53:57 +0800
+Message-Id: <20170119075357.12241-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Xiong Zhou <xzhou@redhat.com>
-Cc: fstests@vger.kernel.org, linux-nvdimm@ml01.01.org
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jan 18, 2017 at 11:07:06AM +0800, Xiong Zhou wrote:
-> Signed-off-by: Xiong Zhou <xzhou@redhat.com>
+Some tests and common helpers don't properly clean up tmp files and
+leave them behind in /tmp dir, and these tmp files are accumulating
+over time.
 
-Better to have detailed commit log.
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+v3:
+- replace dangerous "rm -f $tmp*" with "rm -f $tmp.*", just in
+  case $tmp is empty
 
-> ---
->  tests/generic/405     | 100 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/405.out |   2 +
->  tests/generic/group   |   1 +
->  3 files changed, 103 insertions(+)
->  create mode 100755 tests/generic/405
->  create mode 100644 tests/generic/405.out
-> 
-> diff --git a/tests/generic/405 b/tests/generic/405
-> new file mode 100755
-> index 0000000..3717937
-> --- /dev/null
-> +++ b/tests/generic/405
-> @@ -0,0 +1,100 @@
-> +#! /bin/bash
-> +# FS QA Test 405
-> +#
-> +# mmap dio between DAX and non-DAX mountpoints.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs xfs ext4
+v2:
+- let common helper functions do their cleanups by themselves,
+  no hidden usage of $tmp
+- only remove/adjust necessary files, don't do large scale test updates
 
-_supported_fs generic
+ common/rc         | 6 +++++-
+ common/xfs        | 4 ++--
+ tests/generic/100 | 2 +-
+ tests/generic/260 | 2 +-
+ 4 files changed, 9 insertions(+), 5 deletions(-)
 
-Other _require rules make sure we have everything we need, so no need to
-restrict supported fs to xfs and ext4. (And if we really want to do so,
-the test should be a "shared" test, not generic.)
+diff --git a/common/rc b/common/rc
+index 269c24a..19ae697 100644
+--- a/common/rc
++++ b/common/rc
+@@ -544,7 +544,7 @@ _scratch_mkfs_ext4()
+ {
+ 	local mkfs_cmd="$MKFS_EXT4_PROG -F"
+ 	local mkfs_filter="grep -v -e ^Warning: -e \"^mke2fs \""
+-	local tmp=`mktemp`
++	local tmp=/tmp/$$._mkfs
+ 	local mkfs_status
+ 
+ 
+@@ -566,6 +566,7 @@ _scratch_mkfs_ext4()
+ 	# output mkfs stdout and stderr
+ 	cat $tmp.mkfsstd
+ 	cat $tmp.mkfserr >&2
++	rm -f $tmp.*
+ 
+ 	return $mkfs_status
+ }
+@@ -1244,6 +1245,7 @@ _do()
+     (eval "echo '---' \"$_cmd\"") >>$seqres.full
+     (eval "$_cmd") >$tmp._out 2>&1; ret=$?
+     cat $tmp._out | _fix_malloc >>$seqres.full
++    rm -f $tmp._out
+     if [ $# -eq 2 ]; then
+ 	if [ $ret -eq 0 ]; then
+ 	    echo "done"
+@@ -3167,8 +3169,10 @@ run_fsx()
+ 	"$@" 2>&1 | tee -a $seqres.full >$tmp.fsx
+ 	if [ ${PIPESTATUS[0]} -ne 0 ]; then
+ 		cat $tmp.fsx
++		rm -f $tmp.fsx
+ 		exit 1
+ 	fi
++	rm -f $tmp.fsx
+ }
+ 
+ # Test for the existence of a sysfs entry at /sys/fs/$FSTYP/DEV/$ATTR
+diff --git a/common/xfs b/common/xfs
+index 767a481..4859971 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -82,7 +82,7 @@ _scratch_mkfs_xfs()
+ 	local mkfs_cmd="`_scratch_mkfs_xfs_opts`"
+ 	local mkfs_filter="sed -e '/less than device physical sector/d' \
+ 			       -e '/switching to logical sector/d'"
+-	local tmp=`mktemp`
++	local tmp=/tmp/$$._mkfs
+ 	local mkfs_status
+ 
+ 	_scratch_do_mkfs "$mkfs_cmd" "$mkfs_filter" $* 2>$tmp.mkfserr 1>$tmp.mkfsstd
+@@ -104,7 +104,7 @@ _scratch_mkfs_xfs()
+ 	# output mkfs stdout and stderr
+ 	cat $tmp.mkfsstd
+ 	cat $tmp.mkfserr >&2
+-	rm -f $tmp*
++	rm -f $tmp.*
+ 
+ 	return $mkfs_status
+ }
+diff --git a/tests/generic/100 b/tests/generic/100
+index e5e819d..161982f 100755
+--- a/tests/generic/100
++++ b/tests/generic/100
+@@ -38,7 +38,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ 
+ _cleanup()
+ {
+-     rm -f $tmp.* $testfile
++     rm -f $tmp.* $TEMP_DIR/$TAR_FILE
+ }
+  
+ # real QA test starts here
+diff --git a/tests/generic/260 b/tests/generic/260
+index 312e6d2..4c15292 100755
+--- a/tests/generic/260
++++ b/tests/generic/260
+@@ -26,7 +26,7 @@ seqres=$RESULT_DIR/$seq
+ echo "QA output created by $seq"
+ 
+ here=`pwd`
+-tmp=`mktemp -d`
++tmp=/tmp/$$
+ status=0
+ trap "exit \$status" 0 1 2 3 15
+ chpid=0
+-- 
+2.9.3
 
-> +_supported_os Linux
-> +_require_test
-> +_require_scratch_dax
-> +_require_test_program "feature"
-> +
-> +# $1 mmap read/write size
-> +_dax_flag_mmap_dio()
-
-Not testing per-file flag now, the name seems a bit misleading.
-
-> +{
-> +	# both dax
-> +	src/t_mmap_dio $SCRATCH_MNT/tf_s $SCRATCH_MNT/tf_d $1
-> +
-> +	# from non dax to dax
-> +	src/t_mmap_dio $TEST_DIR/tf_s $SCRATCH_MNT/tf_d $1
-
-Assuming TEST_DIR isn't a DAX mount, which seems not always the case.
-
-Perhaps you can check mount options of TEST_DEV using _fs_options() to
-see if it's mounted with dax, and _notrun if it is.
-
-Thanks,
-Eryu
-
-> +
-> +	# from dax to non dax
-> +	src/t_mmap_dio $SCRATCH_MNT/tf_s $TEST_DIR/tf_d $1
-> +
-> +	# both non dax
-> +	src/t_mmap_dio $TEST_DIR/tf_s $TEST_DIR/tf_d $1
-> +}
-> +
-> +_do_tests()
-> +{
-> +	# less than page size
-> +	_dax_flag_mmap_dio 1024
-> +	# page size
-> +	_dax_flag_mmap_dio `src/feature -s`
-> +	# bigger sizes, for PMD faults
-> +	_dax_flag_mmap_dio 16777216
-> +	_dax_flag_mmap_dio 67108864
-> +}
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
-> +
-> +# SCRATCH_DEV mount with dax option
-> +_scratch_mount "-o dax" >> $seqres.full 2>&1 || \
-> +	_fail "mount -o dax failed"
-> +
-> +dd if=/dev/zero of=$SCRATCH_MNT/tf_s bs=4k count=256k > /dev/null 2>&1
-> +dd if=/dev/zero of=$SCRATCH_MNT/tf_d bs=4k count=256k > /dev/null 2>&1
-> +dd if=/dev/zero of=$TEST_DIR/tf_s bs=4k count=256k > /dev/null 2>&1
-> +dd if=/dev/zero of=$TEST_DIR/tf_d bs=4k count=256k > /dev/null 2>&1
-> +
-> +_do_tests
-> +_test_unmount
-> +_scratch_unmount
-> +
-> +# success, all done
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/generic/405.out b/tests/generic/405.out
-> new file mode 100644
-> index 0000000..bae761d
-> --- /dev/null
-> +++ b/tests/generic/405.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 405
-> +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 6fc9c3d..a1be466 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -407,3 +407,4 @@
->  402 auto quick rw
->  403 auto quick attr
->  404 auto quick insert
-> +405 auto quick
-> -- 
-> 1.8.3.1
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
