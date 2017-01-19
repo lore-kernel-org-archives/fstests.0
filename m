@@ -1,49 +1,45 @@
-Received: from mx1.redhat.com ([209.132.183.28]:36056 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:36180 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752033AbdASEdY (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 18 Jan 2017 23:33:24 -0500
-Date: Thu, 19 Jan 2017 12:24:01 +0800
+        id S1751273AbdASFys (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 19 Jan 2017 00:54:48 -0500
+Date: Thu, 19 Jan 2017 13:54:05 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 3/4] xfs: test per-inode DAX flag by IO
-Message-ID: <20170119042401.GS1859@eguan.usersys.redhat.com>
+Subject: Re: [PATCH 4/4] generic: test mmap dio through DAX and non-DAX
+Message-ID: <20170119055405.GT1859@eguan.usersys.redhat.com>
 References: <1484708826-23529-1-git-send-email-xzhou@redhat.com>
- <1484708826-23529-4-git-send-email-xzhou@redhat.com>
+ <1484708826-23529-5-git-send-email-xzhou@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1484708826-23529-4-git-send-email-xzhou@redhat.com>
+In-Reply-To: <1484708826-23529-5-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Xiong Zhou <xzhou@redhat.com>
 Cc: fstests@vger.kernel.org, linux-nvdimm@ml01.01.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jan 18, 2017 at 11:07:05AM +0800, Xiong Zhou wrote:
-> We do mmap and O_DIRECT read/write, through files
-> with and without DAX flag.
-> 
+On Wed, Jan 18, 2017 at 11:07:06AM +0800, Xiong Zhou wrote:
 > Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 
-I think patch 1/4 and 2/4 could be folded into this patch, where the new
-helper and test program are used for the first time.
+Better to have detailed commit log.
 
 > ---
->  tests/xfs/138     | 105 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/138.out |   2 ++
->  tests/xfs/group   |   1 +
->  3 files changed, 108 insertions(+)
->  create mode 100755 tests/xfs/138
->  create mode 100644 tests/xfs/138.out
+>  tests/generic/405     | 100 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/405.out |   2 +
+>  tests/generic/group   |   1 +
+>  3 files changed, 103 insertions(+)
+>  create mode 100755 tests/generic/405
+>  create mode 100644 tests/generic/405.out
 > 
-> diff --git a/tests/xfs/138 b/tests/xfs/138
+> diff --git a/tests/generic/405 b/tests/generic/405
 > new file mode 100755
-> index 0000000..4b965b3
+> index 0000000..3717937
 > --- /dev/null
-> +++ b/tests/xfs/138
-> @@ -0,0 +1,105 @@
+> +++ b/tests/generic/405
+> @@ -0,0 +1,100 @@
 > +#! /bin/bash
-> +# FS QA Test 138
+> +# FS QA Test 405
 > +#
-> +# Test per-inode DAX flag by mmap direct IO.
+> +# mmap dio between DAX and non-DAX mountpoints.
 > +#
 > +#-----------------------------------------------------------------------
 > +# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
@@ -85,39 +81,48 @@ helper and test program are used for the first time.
 > +# remove previous $seqres.full before test
 > +rm -f $seqres.full
 > +
-> +_supported_fs xfs
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs xfs ext4
+
+_supported_fs generic
+
+Other _require rules make sure we have everything we need, so no need to
+restrict supported fs to xfs and ext4. (And if we really want to do so,
+the test should be a "shared" test, not generic.)
+
 > +_supported_os Linux
+> +_require_test
 > +_require_scratch_dax
 > +_require_test_program "feature"
-
-Need _require_test_program "t_mmap_dio"
-
-> +_require_xfs_io_command "chattr" "+/-x"
 > +
 > +# $1 mmap read/write size
 > +_dax_flag_mmap_dio()
 
-Name local functions without leading underscore, it's reserved for
-common helpers.
+Not testing per-file flag now, the name seems a bit misleading.
 
 > +{
 > +	# both dax
-> +	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_s
-> +	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_d
 > +	src/t_mmap_dio $SCRATCH_MNT/tf_s $SCRATCH_MNT/tf_d $1
 > +
 > +	# from non dax to dax
-> +	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_s
-> +	src/t_mmap_dio $SCRATCH_MNT/tf_s $SCRATCH_MNT/tf_d $1
+> +	src/t_mmap_dio $TEST_DIR/tf_s $SCRATCH_MNT/tf_d $1
+
+Assuming TEST_DIR isn't a DAX mount, which seems not always the case.
+
+Perhaps you can check mount options of TEST_DEV using _fs_options() to
+see if it's mounted with dax, and _notrun if it is.
+
+Thanks,
+Eryu
+
 > +
 > +	# from dax to non dax
-> +	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_s
-> +	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_d
-> +	src/t_mmap_dio $SCRATCH_MNT/tf_s $SCRATCH_MNT/tf_d $1
+> +	src/t_mmap_dio $SCRATCH_MNT/tf_s $TEST_DIR/tf_d $1
 > +
 > +	# both non dax
-> +	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_s
-> +	src/t_mmap_dio $SCRATCH_MNT/tf_s $SCRATCH_MNT/tf_d $1
+> +	src/t_mmap_dio $TEST_DIR/tf_s $TEST_DIR/tf_d $1
 > +}
 > +
 > +_do_tests()
@@ -133,54 +138,40 @@ common helpers.
 > +
 > +_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
 > +
-> +# mount with dax option
+> +# SCRATCH_DEV mount with dax option
 > +_scratch_mount "-o dax" >> $seqres.full 2>&1 || \
 > +	_fail "mount -o dax failed"
-
-No need to _fail, test would fail if mkfs & mount failed.
-
 > +
 > +dd if=/dev/zero of=$SCRATCH_MNT/tf_s bs=4k count=256k > /dev/null 2>&1
 > +dd if=/dev/zero of=$SCRATCH_MNT/tf_d bs=4k count=256k > /dev/null 2>&1
+> +dd if=/dev/zero of=$TEST_DIR/tf_s bs=4k count=256k > /dev/null 2>&1
+> +dd if=/dev/zero of=$TEST_DIR/tf_d bs=4k count=256k > /dev/null 2>&1
 > +
 > +_do_tests
-> +_scratch_unmount >> $seqres.full 2>&1 || _fail "umount failed"
-> +
-> +# mount again wo/ dax option
-> +_scratch_mount >> $seqres.full 2>&1 || _fail "mount failed"
-> +_do_tests
-> +_scratch_unmount >> $seqres.full 2>&1
-
-No need to unmount, test harness does this for you after test :)
-
-Thanks,
-Eryu
-
+> +_test_unmount
+> +_scratch_unmount
 > +
 > +# success, all done
 > +echo "Silence is golden"
 > +status=0
 > +exit
-> diff --git a/tests/xfs/138.out b/tests/xfs/138.out
+> diff --git a/tests/generic/405.out b/tests/generic/405.out
 > new file mode 100644
-> index 0000000..614ba1a
+> index 0000000..bae761d
 > --- /dev/null
-> +++ b/tests/xfs/138.out
+> +++ b/tests/generic/405.out
 > @@ -0,0 +1,2 @@
-> +QA output created by 138
+> +QA output created by 405
 > +Silence is golden
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 3c5884c..4b406c0 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -135,6 +135,7 @@
->  135 auto logprint quick v2log
->  136 attr2
->  137 auto metadata v2log
-> +138 auto attr quick
->  139 auto quick clone
->  140 auto clone
->  141 auto log metadata
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 6fc9c3d..a1be466 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -407,3 +407,4 @@
+>  402 auto quick rw
+>  403 auto quick attr
+>  404 auto quick insert
+> +405 auto quick
 > -- 
 > 1.8.3.1
 > 
