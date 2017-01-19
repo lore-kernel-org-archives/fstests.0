@@ -1,130 +1,318 @@
-Received: from mx1.redhat.com ([209.132.183.28]:42006 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:34430 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750874AbdASHzZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 19 Jan 2017 02:55:25 -0500
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id B22073D945
-        for <fstests@vger.kernel.org>; Thu, 19 Jan 2017 07:54:00 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v3] fstests: remove tmp files properly
-Date: Thu, 19 Jan 2017 15:53:57 +0800
-Message-Id: <20170119075357.12241-1-eguan@redhat.com>
+        id S1751634AbdASKYN (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 19 Jan 2017 05:24:13 -0500
+From: Xiong Zhou <xzhou@redhat.com>
+Subject: [PATCH v2 1/2] xfs: test per-inode DAX flag by IO
+Date: Thu, 19 Jan 2017 18:13:57 +0800
+Message-Id: <1484820838-5098-2-git-send-email-xzhou@redhat.com>
+In-Reply-To: <1484820838-5098-1-git-send-email-xzhou@redhat.com>
+References: <20170119055405.GT1859@eguan.usersys.redhat.com>
+ <1484820838-5098-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+To: eguan@redhat.com
+Cc: fstests@vger.kernel.org, linux-nvdimm@ml01.01.org, Xiong Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Some tests and common helpers don't properly clean up tmp files and
-leave them behind in /tmp dir, and these tmp files are accumulating
-over time.
+In a DAX mountpoint, do IO betwen files with and
+without DAX per-inode flag. We do mmap and O_DIRECT
+read/write IO in this case. Then test again in the
+same device without dax mountoption.
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
+Add help _require_scratch_dax to make sure we can
+test DAX feature on SCRATCH_DEV.
+
+Add mmap dio test programme to test read/write
+between a mmap area of one file and another file
+directly, with different size.
+
+Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 ---
-v3:
-- replace dangerous "rm -f $tmp*" with "rm -f $tmp.*", just in
-  case $tmp is empty
+ .gitignore        |   1 +
+ common/rc         |  14 +++++++
+ src/Makefile      |   2 +-
+ src/t_mmap_dio.c  |  81 ++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/138     | 110 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/138.out |   2 +
+ tests/xfs/group   |   1 +
+ 7 files changed, 210 insertions(+), 1 deletion(-)
+ create mode 100644 src/t_mmap_dio.c
+ create mode 100755 tests/xfs/138
+ create mode 100644 tests/xfs/138.out
 
-v2:
-- let common helper functions do their cleanups by themselves,
-  no hidden usage of $tmp
-- only remove/adjust necessary files, don't do large scale test updates
-
- common/rc         | 6 +++++-
- common/xfs        | 4 ++--
- tests/generic/100 | 2 +-
- tests/generic/260 | 2 +-
- 4 files changed, 9 insertions(+), 5 deletions(-)
-
+diff --git a/.gitignore b/.gitignore
+index 7dcea14..48a40a0 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -129,6 +129,7 @@
+ /src/cloner
+ /src/renameat2
+ /src/t_rename_overwrite
++/src/t_mmap_dio
+ 
+ # dmapi/ binaries
+ /dmapi/src/common/cmd/read_invis
 diff --git a/common/rc b/common/rc
-index 269c24a..19ae697 100644
+index 892c46e..3706620 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -544,7 +544,7 @@ _scratch_mkfs_ext4()
+@@ -2632,6 +2632,20 @@ _require_scratch_shutdown()
+ 	_scratch_unmount
+ }
+ 
++# Does dax mount option work on this dev/fs?
++_require_scratch_dax()
++{
++	_require_scratch
++	_scratch_mkfs > /dev/null 2>&1
++	_scratch_mount -o dax
++	# Check options to be sure. XFS ignores dax option
++	# and goes on if dev underneath does not support dax.
++	_fs_options $SCRATCH_DEV | grep -w "dax" > /dev/null 2>&1
++	[ $? -ne 0 ] && \
++		_notrun "$SCRATCH_DEV $FSTYP does not support -o dax"
++	_scratch_unmount
++}
++
+ # Does norecovery support by this fs?
+ _require_norecovery()
  {
- 	local mkfs_cmd="$MKFS_EXT4_PROG -F"
- 	local mkfs_filter="grep -v -e ^Warning: -e \"^mke2fs \""
--	local tmp=`mktemp`
-+	local tmp=/tmp/$$._mkfs
- 	local mkfs_status
+diff --git a/src/Makefile b/src/Makefile
+index 94d74aa..eb5a56c 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -12,7 +12,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	godown resvtest writemod makeextents itrash rename \
+ 	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
+ 	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
+-	holetest t_truncate_self
++	holetest t_truncate_self t_mmap_dio
  
- 
-@@ -566,6 +566,7 @@ _scratch_mkfs_ext4()
- 	# output mkfs stdout and stderr
- 	cat $tmp.mkfsstd
- 	cat $tmp.mkfserr >&2
-+	rm -f $tmp.*
- 
- 	return $mkfs_status
- }
-@@ -1244,6 +1245,7 @@ _do()
-     (eval "echo '---' \"$_cmd\"") >>$seqres.full
-     (eval "$_cmd") >$tmp._out 2>&1; ret=$?
-     cat $tmp._out | _fix_malloc >>$seqres.full
-+    rm -f $tmp._out
-     if [ $# -eq 2 ]; then
- 	if [ $ret -eq 0 ]; then
- 	    echo "done"
-@@ -3167,8 +3169,10 @@ run_fsx()
- 	"$@" 2>&1 | tee -a $seqres.full >$tmp.fsx
- 	if [ ${PIPESTATUS[0]} -ne 0 ]; then
- 		cat $tmp.fsx
-+		rm -f $tmp.fsx
- 		exit 1
- 	fi
-+	rm -f $tmp.fsx
- }
- 
- # Test for the existence of a sysfs entry at /sys/fs/$FSTYP/DEV/$ATTR
-diff --git a/common/xfs b/common/xfs
-index 767a481..4859971 100644
---- a/common/xfs
-+++ b/common/xfs
-@@ -82,7 +82,7 @@ _scratch_mkfs_xfs()
- 	local mkfs_cmd="`_scratch_mkfs_xfs_opts`"
- 	local mkfs_filter="sed -e '/less than device physical sector/d' \
- 			       -e '/switching to logical sector/d'"
--	local tmp=`mktemp`
-+	local tmp=/tmp/$$._mkfs
- 	local mkfs_status
- 
- 	_scratch_do_mkfs "$mkfs_cmd" "$mkfs_filter" $* 2>$tmp.mkfserr 1>$tmp.mkfsstd
-@@ -104,7 +104,7 @@ _scratch_mkfs_xfs()
- 	# output mkfs stdout and stderr
- 	cat $tmp.mkfsstd
- 	cat $tmp.mkfserr >&2
--	rm -f $tmp*
-+	rm -f $tmp.*
- 
- 	return $mkfs_status
- }
-diff --git a/tests/generic/100 b/tests/generic/100
-index e5e819d..161982f 100755
---- a/tests/generic/100
-+++ b/tests/generic/100
-@@ -38,7 +38,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
- 
- _cleanup()
- {
--     rm -f $tmp.* $testfile
-+     rm -f $tmp.* $TEMP_DIR/$TAR_FILE
- }
-  
- # real QA test starts here
-diff --git a/tests/generic/260 b/tests/generic/260
-index 312e6d2..4c15292 100755
---- a/tests/generic/260
-+++ b/tests/generic/260
-@@ -26,7 +26,7 @@ seqres=$RESULT_DIR/$seq
- echo "QA output created by $seq"
- 
- here=`pwd`
--tmp=`mktemp -d`
+ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+diff --git a/src/t_mmap_dio.c b/src/t_mmap_dio.c
+new file mode 100644
+index 0000000..1a26e1b
+--- /dev/null
++++ b/src/t_mmap_dio.c
+@@ -0,0 +1,81 @@
++/*
++ * This programme was originally written by
++ *     Jeff Moyer <jmoyer@redhat.com>
++ */
++#define _GNU_SOURCE 1
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <unistd.h>
++#include <fcntl.h>
++#include <sys/mman.h>
++#include <libaio.h>
++#include <errno.h>
++#include <sys/time.h>
++
++void usage(char *prog)
++{
++	fprintf(stderr,
++		"usage: %s <src file> <dest file> <size> <msg>\n",
++		prog);
++	exit(1);
++}
++
++void err_exit(char *op, unsigned long len, char *s)
++{
++	fprintf(stderr, "%s(%s) len %lu %s\n",
++		op, strerror(errno), len, s);
++	exit(1);
++}
++
++int main(int argc, char **argv)
++{
++	int fd, fd2, ret;
++	char *map;
++	unsigned long len;
++
++	if (argc < 3)
++		usage(basename(argv[0]));
++
++	len = strtoul(argv[3], NULL, 10);
++	if (errno == ERANGE)
++		err_exit("strtoul", 0, argv[4]);
++
++	/* Open source file and mmap*/
++	fd = open(argv[1], O_RDWR, 0644);
++	if (fd < 0)
++		err_exit("open s", len, argv[4]);
++
++	map = (char *)mmap(NULL, len,
++		PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
++	if (map == MAP_FAILED)
++		err_exit("mmap", len, argv[4]);
++
++	/* Open dest file with O_DIRECT */
++	fd2 = open(argv[2], O_RDWR|O_DIRECT, 0644);
++	if (fd2 < 0)
++		err_exit("open d", len, argv[4]);
++
++	/* First, test storing to dest file from source mapping */
++	ret = write(fd2, map, len);
++	if (ret != len)
++		err_exit("write", len, argv[4]);
++
++	ret = (int)lseek(fd2, 0, SEEK_SET);
++	if (ret == -1)
++		err_exit("lseek", len, argv[4]);
++
++	/* Next, test reading from dest file into source mapping */
++	ret = read(fd2, map, len);
++	if (ret != len)
++		err_exit("read", len, argv[4]);
++	ret = msync(map, len, MS_SYNC);
++	if (ret < 0)
++		err_exit("msync", len, argv[4]);
++
++	ret = munmap(map, len);
++	if (ret < 0)
++		err_exit("munmap", len, argv[4]);
++
++	exit(0);
++}
+diff --git a/tests/xfs/138 b/tests/xfs/138
+new file mode 100755
+index 0000000..9822441
+--- /dev/null
++++ b/tests/xfs/138
+@@ -0,0 +1,110 @@
++#! /bin/bash
++# FS QA Test 138
++#
++# Test per-inode DAX flag by mmap direct IO.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
 +tmp=/tmp/$$
- status=0
- trap "exit \$status" 0 1 2 3 15
- chpid=0
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++_supported_fs xfs
++_supported_os Linux
++_require_scratch_dax
++_require_test_program "feature"
++_require_test_program "t_mmap_dio"
++_require_xfs_io_command "chattr" "+/-x"
++
++# $1 mmap read/write size
++t_dax_flag_mmap_dio()
++{
++	# both dax
++	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_s
++	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_d
++	src/t_mmap_dio $SCRATCH_MNT/tf_{s,d} $1 "both dax"
++
++	# from non dax to dax
++	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_s
++	src/t_mmap_dio $SCRATCH_MNT/tf_{s,d} $1 "nondax to dax"
++
++	# from dax to non dax
++	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_s
++	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_d
++	src/t_mmap_dio $SCRATCH_MNT/tf_{s,d} $1 "dax to nondax"
++
++	# both non dax
++	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_s
++	src/t_mmap_dio $SCRATCH_MNT/tf_{s,d} $1 "both nondax"
++}
++
++do_tests()
++{
++	# less than page size
++	t_dax_flag_mmap_dio 1024
++	# page size
++	t_dax_flag_mmap_dio `src/feature -s`
++	# bigger sizes, for PMD faults
++	t_dax_flag_mmap_dio 16777216
++	t_dax_flag_mmap_dio 67108864
++}
++
++_scratch_mkfs > /dev/null 2>&1
++
++# mount with dax option
++_scratch_mount "-o dax"
++
++psize=`src/feature -s`
++tsize=$((1024 * 1024 * 1024))
++
++$XFS_IO_PROG -f -c "pwrite -W -b $psize 0 $tsize" \
++	$SCRATCH_MNT/tf_s >> $seqres.full 2>&1
++$XFS_IO_PROG -f -c "pwrite -W -b $psize 0 $tsize" \
++	$SCRATCH_MNT/tf_d >> $seqres.full 2>&1
++
++do_tests
++_scratch_unmount
++
++# mount again without dax option
++export MOUNT_OPTIONS=""
++_scratch_mount
++do_tests
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/xfs/138.out b/tests/xfs/138.out
+new file mode 100644
+index 0000000..614ba1a
+--- /dev/null
++++ b/tests/xfs/138.out
+@@ -0,0 +1,2 @@
++QA output created by 138
++Silence is golden
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 3c5884c..4b406c0 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -135,6 +135,7 @@
+ 135 auto logprint quick v2log
+ 136 attr2
+ 137 auto metadata v2log
++138 auto attr quick
+ 139 auto quick clone
+ 140 auto clone
+ 141 auto log metadata
 -- 
-2.9.3
+1.8.3.1
 
