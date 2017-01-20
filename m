@@ -1,52 +1,77 @@
-Received: from mx1.redhat.com ([209.132.183.28]:38652 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:58634 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750735AbdATFXB (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 20 Jan 2017 00:23:01 -0500
-Date: Fri, 20 Jan 2017 13:22:58 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v4 2/3] fstests: test btrfs incremental send after moving
- a directory
-Message-ID: <20170120052258.GU1859@eguan.usersys.redhat.com>
-References: <1484190817-17326-1-git-send-email-fdmanana@kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1484190817-17326-1-git-send-email-fdmanana@kernel.org>
+        id S1751059AbdATGSS (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 20 Jan 2017 01:18:18 -0500
+From: Xiong Zhou <xzhou@redhat.com>
+Subject: [PATCH v4 0/2] mmap dio and DAX
+Date: Fri, 20 Jan 2017 14:15:48 +0800
+Message-Id: <1484892950-25178-1-git-send-email-xzhou@redhat.com>
+In-Reply-To: <1484878888-11483-1-git-send-email-xzhou@redhat.com>
+References: <1484878888-11483-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>, Robbie Ko <robbieko@synology.com>
+To: fstests@vger.kernel.org
+Cc: jmoyer@redhat.com, ross.zwisler@linux.intel.com, eguan@redhat.com, linux-nvdimm@ml01.01.org, Xiong Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 12, 2017 at 03:13:37AM +0000, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
-> 
-> Test that an incremental send operation works after moving a directory
-> into a new parent directory, deleting its previous parent directory and
-> creating a new inode that has the same inode number as the old parent.
-> 
-> This issue is fixed by the following patch for the linux kernel:
-> 
->   "Btrfs: incremental send, do not delay rename when parent inode is new"
-> 
-> Signed-off-by: Robbie Ko <robbieko@synology.com>
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+common/rc         : requires SCRATCH_DEV support DAX
+src/t_mmap_dio.c  : intro mmap and O_DIRECT rw through files
+tests/generic/405 : IO between DAX/non-DAX mountpoints
+tests/xfs/138     : IO between DAX/non-DAX xfs files(per-inode flag)
 
-I tested this patchset with/without proposed kernel patches, all tests
-worked as expected. Just one tiny update on commit below.
+v2 :
+  Merge helper function changes into the first patch;
+  Rewrite _require_dax, check options for sure;
+  Print msg in t_mmap_dio.c to show which test going wrong;
+  Empty mount options and check after mount to ensure we
+wont mount with wrong option;
+  Remove unnecessary leading underscore and _fail;
+  Use xfs_io instead of dd;
+  Other minor fixes.
 
-> ---
+v3:
+ close fds in C test programme for clean up.
 
-> +# Remount the filesystem so that the next created inodes will have the numbers
-> +# 258 and 259. This is because when a filesystem is mounted, btrfs sets the
-> +# subvolume's inode counter to a value corresponding to the highest inode number
-> +# in the subvolume plus 1. This inode counter is used to assign a unique number
-> +# to each new inode and it's incremented by 1 after very inode creation.
-> +# Note: we unmount and then mount instead of doing a mount with "-o remount"
-> +# because otherwise the inode counter remains at value 260.
-> +_scratch_unmount
-> +_scratch_mount
+v4:
+ Test both buffered and O_DIRECT IO;
+ Fix arg numbers in C test programme;
+ Fix fs options check after mount.
+ Cc Jeff Moyer since this test is based on his code.
+ (Sorry for the late cc!)
 
-I replaced these with _scratch_cycle_mount.
+Test status:
+  Both cases not run on normal block device;
+  Both cases PASS on ramdisk based pmem devices;
+  DIO in both cases FAIL on brd based ramdisk with:
+  DIO in both cases FAIL on nvdimm devices with:
+    +write(Bad address) len 1024 dio dax to nondax
+    +write(Bad address) len 4096 dio dax to nondax
+    +write(Bad address) len 16777216 dio dax to nondax
+    +write(Bad address) len 67108864 dio dax to nondax
 
-Thanks,
-Eryu
+  I've reported this to nvdimm list.
+  https://lists.01.org/pipermail/linux-nvdimm/2017-January/008600.html
+
+Xiong Zhou (2):
+  xfs: test per-inode DAX flag by IO
+  generic: test mmap io through DAX and non-DAX
+
+ .gitignore            |   1 +
+ common/rc             |  13 ++++++
+ src/Makefile          |   2 +-
+ src/t_mmap_dio.c      | 105 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/405     | 119 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/405.out |   2 +
+ tests/generic/group   |   1 +
+ tests/xfs/138         | 116 ++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/138.out     |   2 +
+ tests/xfs/group       |   1 +
+ 10 files changed, 361 insertions(+), 1 deletion(-)
+ create mode 100644 src/t_mmap_dio.c
+ create mode 100755 tests/generic/405
+ create mode 100644 tests/generic/405.out
+ create mode 100755 tests/xfs/138
+ create mode 100644 tests/xfs/138.out
+
+-- 
+1.8.3.1
+
