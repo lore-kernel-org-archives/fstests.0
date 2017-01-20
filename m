@@ -1,59 +1,91 @@
-Received: from mx1.redhat.com ([209.132.183.28]:35332 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:41216 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751643AbdATJO0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 20 Jan 2017 04:14:26 -0500
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 8ACC0A89D
-        for <fstests@vger.kernel.org>; Fri, 20 Jan 2017 09:03:33 +0000 (UTC)
-From: Xiong Zhou <xzhou@redhat.com>
-Subject: [RFC PATCH] check: add flag file to stop running xfstests
-Date: Fri, 20 Jan 2017 17:03:28 +0800
-Message-Id: <1484903008-32422-1-git-send-email-xzhou@redhat.com>
+        id S1751719AbdATMMa (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 20 Jan 2017 07:12:30 -0500
+Date: Fri, 20 Jan 2017 20:03:47 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 0/2] overlayfs: support freeze/thaw/syncfs
+Message-ID: <20170120120347.GX1859@eguan.usersys.redhat.com>
+References: <1484828008-27507-1-git-send-email-amir73il@gmail.com>
+ <CAOQ4uxjaFRXaHRmZSbBzSCDcL0HnNxCyVevjCPqoOROkse8wGw@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxjaFRXaHRmZSbBzSCDcL0HnNxCyVevjCPqoOROkse8wGw@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Xiong Zhou <xzhou@redhat.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Jan Kara <jack@suse.com>, Al Viro <viro@zeniv.linux.org.uk>, linux-unionfs@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Eric Sandeen <sandeen@sandeen.net>
 List-ID: <fstests@vger.kernel.org>
 
-Check if file /tmp/.stopxfstests exists after every
-case, break and report if positive.
+On Fri, Jan 20, 2017 at 10:49:07AM +0200, Amir Goldstein wrote:
+> On Thu, Jan 19, 2017 at 2:13 PM, Amir Goldstein <amir73il@gmail.com> wrote:
+> > Miklos,
+> >
+> > I implemented freeze/thaw of overlayfs, because I need it for
+> > overlay snapshots (CoW decision is made before mnt_wat_write(upper)
+> > and I need to serialize it with snapshot take).
+> >
+> > Not sure if there are other use cases for overlayfs freeze??
+> >
+> > Tested freeze stress with xfstest generic/068 generic/390.
+> >
+> > While staring at the code, I realized that syncfs(2) for overlayfs
+> > seems broken.  It looks like only inodes are synced and upper fs
+> > metadata is not being flushed, but I could be wrong.
+> >
+> > Tested sync sanity with -g quick (although no test calls syncfs directly).
+> > Tested the usual unionmount sanity over xfs and over tmpfs.
+> >
+> > I am not sure exactly how to write a test case to verify this alleged
+> > breakage?
+> >
+> 
+> Well, I have a smoking gun.
+> Wrote this xfs specific test, which checks xfs stats after syncfs/fsync:
+> https://github.com/amir73il/overlayfs/blob/master/tests/xfs_syncfs.sh
+> 
+> Good (on xfs 4.10.0-rc4):
+> # ./syncfs.sh /base/
+> before touch
+> xfs_log_force = 375
+> after touch
+> xfs_log_force = 375
+> after syncfs
+> xfs_log_force = 376
+> after fsync
+> xfs_log_force = 376
+> after fsync #2
+> xfs_log_force = 376
+> 
+> Bad (on overlayfs 4.10.0-rc4):
+> # ./syncfs.sh /mnt
+> before touch
+> xfs_log_force = 376
+> after touch
+> xfs_log_force = 376
+> after syncfs
+> xfs_log_force = 376
+> after fsync
+> xfs_log_force = 377
+> after fsync #2
+> xfs_log_force = 377
+> 
+> Overlayfs syncfs fails to flush the xfs log.
+> 
+> I'll see if I can put this test into xfstests.
+> I am going to need some sort of require_upper_fs_is_xfs
+> not sure id it already exists.
 
-This could gentlely end a xfstests run, instead of
-killing processes around.
+There's no such _require rules in xfstests yet.
 
-Signed-off-by: Xiong Zhou <xzhou@redhat.com>
----
- check | 9 +++++++++
- 1 file changed, 9 insertions(+)
+> 
+> If anyone has suggestions how to write this test not xfs specific I
+> would be happy to hear.
+> Eryu?
 
-diff --git a/check b/check
-index 5a93c94..75ef245 100755
---- a/check
-+++ b/check
-@@ -472,6 +472,7 @@ else
- 	trap "_wrapup; exit \$status" 0 1 2 3 15
- fi
- 
-+rm -f /tmp/.stopxfstests
- for section in $HOST_OPTIONS_SECTIONS; do
- 	OLD_FSTYP=$FSTYP
- 	OLD_MOUNT_OPTIONS=$MOUNT_OPTIONS
-@@ -595,6 +596,14 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 
- 	for seq in $list
- 	do
-+	    if [ -e /tmp/.stopxfstests ] ; then
-+	        _wrapup
-+	        echo "WARN: This is an interruptted run."
-+	        echo
-+                _test_unmount 2> /dev/null
-+                _scratch_unmount 2> /dev/null
-+                break 2
-+            fi
- 	    err=false
- 	    if [ ! -f $seq ]; then
- 	        # Try to get full name in case the user supplied only seq id
--- 
-1.8.3.1
+Sorry, I have no idea right now..
 
+Eryu
+> 
+> Also, FYI, xfs_io -c syncfs is broken.
+> Going to send a fix patch soon.
