@@ -1,74 +1,46 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:17096 "EHLO
+Received: from userp1040.oracle.com ([156.151.31.81]:26187 "EHLO
         userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752663AbdATQoO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 20 Jan 2017 11:44:14 -0500
-Date: Fri, 20 Jan 2017 08:44:10 -0800
+        with ESMTP id S1751026AbdAUIKX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 21 Jan 2017 03:10:23 -0500
+Subject: [PATCH v5 0/9] xfstests: online scrub/repair support
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [RFC PATCH] check: add flag file to stop running xfstests
-Message-ID: <20170120164410.GN14033@birch.djwong.org>
-References: <1484903008-32422-1-git-send-email-xzhou@redhat.com>
+Date: Sat, 21 Jan 2017 00:10:19 -0800
+Message-ID: <148498621936.17109.4249711513404036449.stgit@birch.djwong.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1484903008-32422-1-git-send-email-xzhou@redhat.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Xiong Zhou <xzhou@redhat.com>
-Cc: fstests@vger.kernel.org
+To: eguan@redhat.com, darrick.wong@oracle.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jan 20, 2017 at 05:03:28PM +0800, Xiong Zhou wrote:
-> Check if file /tmp/.stopxfstests exists after every
-> case, break and report if positive.
-> 
-> This could gentlely end a xfstests run, instead of
-> killing processes around.
-> 
-> Signed-off-by: Xiong Zhou <xzhou@redhat.com>
-> ---
->  check | 9 +++++++++
->  1 file changed, 9 insertions(+)
-> 
-> diff --git a/check b/check
-> index 5a93c94..75ef245 100755
-> --- a/check
-> +++ b/check
-> @@ -472,6 +472,7 @@ else
->  	trap "_wrapup; exit \$status" 0 1 2 3 15
->  fi
->  
-> +rm -f /tmp/.stopxfstests
->  for section in $HOST_OPTIONS_SECTIONS; do
->  	OLD_FSTYP=$FSTYP
->  	OLD_MOUNT_OPTIONS=$MOUNT_OPTIONS
-> @@ -595,6 +596,14 @@ for section in $HOST_OPTIONS_SECTIONS; do
->  
->  	for seq in $list
->  	do
-> +	    if [ -e /tmp/.stopxfstests ] ; then
-> +	        _wrapup
-> +	        echo "WARN: This is an interruptted run."
+Hi all,
 
-"interrupted"
+This is the fifth revision of a patchset that adds to XFS userland tools
+support for online metadata scrubbing and repair.
 
-And, uh, why do we need the ability to programmatically kill xfstests?
+The new patches in this series do three things: first, they expand the
+filesystem populate commands inside xfstests to be able to create all
+types of XFS metadata.  Second, they create a bunch of xfs_db wrapper
+functions to iterate all fields present in a given metadata object and
+fuzz them in various ways.  Finally, for each metadata object type there
+is a separate test that iteratively fuzzes all fields of that object and
+runs it through the mount/scrub/repair loop to see what happens.
 
-> +	        echo
-> +                _test_unmount 2> /dev/null
-> +                _scratch_unmount 2> /dev/null
-> +                break 2
+If you're going to start using this mess, you probably ought to just
+pull from my github trees for kernel[1], xfsprogs[2], and xfstests[3].
+The kernel patches in the git trees should apply to 4.10-rc4; xfsprogs
+patches to for-next; and xfstest to master.
 
-Weird indentation...?
+The patches have survived all auto group xfstests both with scrub-only
+mode and also a special debugging mode to xfs_scrub that forces it to
+rebuild the metadata structures even if they're not damaged.
+
+This is an extraordinary way to eat your data.  Enjoy! 
+Comments and questions are, as always, welcome.
 
 --D
 
-> +            fi
->  	    err=false
->  	    if [ ! -f $seq ]; then
->  	        # Try to get full name in case the user supplied only seq id
-> -- 
-> 1.8.3.1
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+[1] https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=djwong-devel
+[2] https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=djwong-devel
+[3] https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=djwong-devel
