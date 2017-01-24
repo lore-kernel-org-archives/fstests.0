@@ -1,93 +1,52 @@
-Received: from mga06.intel.com ([134.134.136.31]:19094 "EHLO mga06.intel.com"
+Received: from mx1.redhat.com ([209.132.183.28]:36430 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750752AbdAXW25 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 24 Jan 2017 17:28:57 -0500
-Date: Tue, 24 Jan 2017 15:28:55 -0700
-From: Ross Zwisler <ross.zwisler@linux.intel.com>
-Subject: Re: [PATCH v4 0/2] mmap dio and DAX
-Message-ID: <20170124222855.GA26631@linux.intel.com>
-References: <1484878888-11483-1-git-send-email-xzhou@redhat.com>
- <1484892950-25178-1-git-send-email-xzhou@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1484892950-25178-1-git-send-email-xzhou@redhat.com>
+        id S1750713AbdAXKfa (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 24 Jan 2017 05:35:30 -0500
+Received: from smtp.corp.redhat.com (int-mx16.intmail.prod.int.phx2.redhat.com [10.5.11.28])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 3EC513D95E
+        for <fstests@vger.kernel.org>; Tue, 24 Jan 2017 10:35:31 +0000 (UTC)
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] tools/nextid: pad 0 in next test id seq number
+Date: Tue, 24 Jan 2017 18:35:26 +0800
+Message-Id: <20170124103526.8639-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Xiong Zhou <xzhou@redhat.com>
-Cc: fstests@vger.kernel.org, jmoyer@redhat.com, ross.zwisler@linux.intel.com, eguan@redhat.com, linux-nvdimm@ml01.01.org
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jan 20, 2017 at 02:15:48PM +0800, Xiong Zhou wrote:
-> common/rc         : requires SCRATCH_DEV support DAX
-> src/t_mmap_dio.c  : intro mmap and O_DIRECT rw through files
-> tests/generic/405 : IO between DAX/non-DAX mountpoints
-> tests/xfs/138     : IO between DAX/non-DAX xfs files(per-inode flag)
-> 
-> v2 :
->   Merge helper function changes into the first patch;
->   Rewrite _require_dax, check options for sure;
->   Print msg in t_mmap_dio.c to show which test going wrong;
->   Empty mount options and check after mount to ensure we
-> wont mount with wrong option;
->   Remove unnecessary leading underscore and _fail;
->   Use xfs_io instead of dd;
->   Other minor fixes.
-> 
-> v3:
->  close fds in C test programme for clean up.
-> 
-> v4:
->  Test both buffered and O_DIRECT IO;
->  Fix arg numbers in C test programme;
->  Fix fs options check after mount.
->  Cc Jeff Moyer since this test is based on his code.
->  (Sorry for the late cc!)
-> 
-> Test status:
->   Both cases not run on normal block device;
->   Both cases PASS on ramdisk based pmem devices;
->   DIO in both cases FAIL on brd based ramdisk with:
->   DIO in both cases FAIL on nvdimm devices with:
->     +write(Bad address) len 1024 dio dax to nondax
->     +write(Bad address) len 4096 dio dax to nondax
->     +write(Bad address) len 16777216 dio dax to nondax
->     +write(Bad address) len 67108864 dio dax to nondax
-> 
->   I've reported this to nvdimm list.
->   https://lists.01.org/pipermail/linux-nvdimm/2017-January/008600.html
-> 
-> Xiong Zhou (2):
->   xfs: test per-inode DAX flag by IO
->   generic: test mmap io through DAX and non-DAX
-> 
->  .gitignore            |   1 +
->  common/rc             |  13 ++++++
->  src/Makefile          |   2 +-
->  src/t_mmap_dio.c      | 105 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/405     | 119 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/405.out |   2 +
->  tests/generic/group   |   1 +
->  tests/xfs/138         | 116 ++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/138.out     |   2 +
->  tests/xfs/group       |   1 +
->  10 files changed, 361 insertions(+), 1 deletion(-)
->  create mode 100644 src/t_mmap_dio.c
->  create mode 100755 tests/generic/405
->  create mode 100644 tests/generic/405.out
->  create mode 100755 tests/xfs/138
->  create mode 100644 tests/xfs/138.out
-> 
-> -- 
-> 1.8.3.1
+nextid returns the next available seq number, but it doesn't pad id
+number with 0, e.g.
 
-I just wanted to let you know that I'm testing with these new xfstests right
-now, and so far I've been unable to successfully get any PMD faults.  I'm
-looking into why that is right now, and should hopefully have some changes so
-we can do both PTE and PMD testing with this set.
+./tools/nextid ext4
+23
 
-Also, it looks like the test number "generic/405" was already used in
-xfstests/master by this commit:
+After the fix it returns:
 
-66768bc generic/405: test mkfs against thin provision device
+./tools/nextid ext4
+023
 
-So this may need to be generic/406. :)
+This eases the process of moving tests around in a script.
+
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+ tools/sort-group | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tools/sort-group b/tools/sort-group
+index 84944ed..6fcaad7 100755
+--- a/tools/sort-group
++++ b/tools/sort-group
+@@ -103,7 +103,7 @@ def nextid_main():
+ 		xid = startid
+ 		while xid in xkeys:
+ 			xid += 1
+-		print('%s/%d' % (group, xid))
++		print('%s/%03d' % (group, xid))
+ 
+ if __name__ == '__main__':
+ 	if 'nextid' in sys.argv[0]:
+-- 
+2.9.3
+
