@@ -1,97 +1,97 @@
-Received: from mx1.redhat.com ([209.132.183.28]:37106 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1031348AbdAEQ0B (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 5 Jan 2017 11:26:01 -0500
-Date: Thu, 5 Jan 2017 11:26:00 -0500
-From: Mike Snitzer <snitzer@redhat.com>
-Subject: Re: trouble with generic/081
-Message-ID: <20170105162600.GD6874@redhat.com>
-References: <20161214164314.GA25105@infradead.org>
- <20161215063650.GJ4326@dastard>
- <20161215084224.GA14395@infradead.org>
- <c05b64b6-80d3-655d-db9b-6f49038e53ee@redhat.com>
- <20161216081523.GA13847@infradead.org>
- <5806882c-4807-cb2a-80dd-147de5bf176a@sandeen.net>
- <a0c8e06f-db87-393b-419d-d6f8c345fbc8@redhat.com>
+Date: Tue, 24 Jan 2017 12:37:08 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] xfs: test xfs_db source command
+Message-ID: <20170124043708.GE1859@eguan.usersys.redhat.com>
+References: <20170123215750.GO14033@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <a0c8e06f-db87-393b-419d-d6f8c345fbc8@redhat.com>
-Sender: fstests-owner@vger.kernel.org
-To: Zdenek Kabelac <zkabelac@redhat.com>
-Cc: Eric Sandeen <sandeen@sandeen.net>, Christoph Hellwig <hch@infradead.org>, dm-devel@redhat.com, Dave Chinner <david@fromorbit.com>, eguan@redhat.com, fstests@vger.kernel.org
+In-Reply-To: <20170123215750.GO14033@birch.djwong.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 05 2017 at  5:35am -0500,
-Zdenek Kabelac <zkabelac@redhat.com> wrote:
+On Mon, Jan 23, 2017 at 01:57:50PM -0800, Darrick J. Wong wrote:
+> Make sure that the 'source' command works correctly whether supplied
+> via command line or interactive prompt.
+> 
+> You probably want "xfs_db: fix the 'source' command when passed as a -c
+> option" in xfsprogs.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  tests/xfs/400     |   69 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/400.out |   11 ++++++++
+>  tests/xfs/group   |    1 +
+>  3 files changed, 81 insertions(+)
+>  create mode 100755 tests/xfs/400
+>  create mode 100644 tests/xfs/400.out
+> 
+> diff --git a/tests/xfs/400 b/tests/xfs/400
+> new file mode 100755
+> index 0000000..a11ea12
+> --- /dev/null
+> +++ b/tests/xfs/400
+> @@ -0,0 +1,69 @@
+> +#! /bin/bash
+> +# FS QA Test No. 400
+> +#
+> +# Test nesting the 'source' command in xfs_db via -c and interactive.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Oracle, Inc.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1303  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 7 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -rf $tmp.* $seqres.a $seqres.b
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs xfs
+> +_require_scratch
+> +
+> +cat > $seqres.a << ENDL
+> +echo This is file A
+> +source $seqres.b
+> +ENDL
+> +cat > $seqres.b << ENDL
+> +echo This is file B
+> +ENDL
 
-> Dne 5.1.2017 v 00:03 Eric Sandeen napsal(a):
-> >
-> >
-> >On 12/16/16 2:15 AM, Christoph Hellwig wrote:
-> >>On Thu, Dec 15, 2016 at 10:16:23AM +0100, Zdenek Kabelac wrote:
-> >>>So let me explain the logic behind this 'amazingly stupid' idea.
-> >>
-> >>And that logic doesn't make any sense at all.  invibly unmounting
-> >>a file system behind the users back is actively harmful, as it is
-> >>contradicting the principle of least surprise, and the xfstests mess
-> >>is one simple example for it.  Add a callback in-kernel to tell the
-> >>fs to shut down but NOT unmount and expose the namespace below it,
-> >>which the administrator has probably intentionally hid.
-> >>
-> >>Even worse unmount may trigger further writes and with fses not
-> >>handling them the fs might now be stuck after being detached from
-> >>the namespace without a way for the admin to detect or recover this.
-> >>
-> >>What XFS did on IRIX was to let the volume manager call into the fs
-> >>and shut it down.  At this point no further writes are possible,
-> >>but we do not expose the namespace under the mount point, and the
-> >>admin can fix the situation with all the normal tools.
-> >
-> ><late to the party>
-> >
-> >Is there a need for this kind of call-up when xfs now has the configurable
-> >error handling so that it will shut down after X retries or Y seconds
-> >of a persistent error?
-> 
-> 
-> We need likely to open  RFE bugzilla  here - and specify how it should
-> work when some conditions are met.
-> 
-> Current 'best effort' tries to minimize damage by trying to do a full-stop
-> when pool approaches 95% fullness.  Which is relatively 'low/small'
-> for small sized thin-pool - but there is reasonable big free space
-> for
-> commonly sized thin-pool to be able to flush most of page cache on
-> disk before things will go crazy.
-> 
-> Now - we could probably detect presence of kernel version and
-> xfs/ext4 present features - and change reactions.
-> 
-> What I expect from this BZ is -  how to detect things and what is
-> the 'best' thing to do.
-> 
-> I'm clearly not an expert on all filesystem and all their features - but lvm2
-> needs to work reasonable well across all variants of kernels and
-> filesystems -  so we cannot say to user - now  we require you to use
-> the latest 4.10
-> kernel with these features enabled otherwise all your data could be lost.
-> 
-> We need to know what to do with 3.X  kernel,  4.X kernel and present
-> features in kernel and how we can detect them in runtime.
+Seems $seqres.a/b should really be $tmp.a/b, they're used and cleaned up
+after test. I think $seqres.* is something can be saved after test for
+future reference.
 
-No we need to fix upstream.  It is the job of distros to sort out other
-solutions.  And yeah I appreciate that you need to worry about distro X,
-Y, Z from Red Hat but lvm2 needs to not be so cute about things.
+I can fix them at commit time. Otherwise looks good to me.
 
-And there has been significant progress on XFS's error handling so that
-it no longer hangs in the face of ENOSPC.
-
-Eric says the basics are documented in Documentation/filesystems/xfs.txt
-under "Error Handling".
-
-Bottomline is lvm2 really has no business unmounting the filesystem.
-That lvm2 "feature" should be reverted.  It isn't what anyone would
-expect.  And it only serves to create problems.  Nice intent but it was
-a misfire to implement it.  At most a discard should be issued once you
-cross a threshold.
+Thanks,
+Eryu
