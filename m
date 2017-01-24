@@ -1,34 +1,35 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43966 "EHLO mx1.redhat.com"
+Received: from sandeen.net ([63.231.237.45]:49958 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750703AbdAXDYZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 23 Jan 2017 22:24:25 -0500
-Date: Tue, 24 Jan 2017 11:24:24 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: xfstest mailing list archives
-Message-ID: <20170124032424.GD1859@eguan.usersys.redhat.com>
-References: <CAH2r5mtrAnAL_YJKaRPAiyk6fB0XFYZn5jtObjBKMCYqgU476g@mail.gmail.com>
+        id S1750813AbdAXRLq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 24 Jan 2017 12:11:46 -0500
+Subject: Re: [PATCH] xfs/122: reduce xfs_dsb_t size
+References: <20170124170819.GP14033@birch.djwong.org>
+ <20170124170930.GA24572@infradead.org>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <cc480f83-5d14-fbeb-f56d-be4dbd002b01@sandeen.net>
+Date: Tue, 24 Jan 2017 11:11:35 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAH2r5mtrAnAL_YJKaRPAiyk6fB0XFYZn5jtObjBKMCYqgU476g@mail.gmail.com>
+In-Reply-To: <20170124170930.GA24572@infradead.org>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Steve French <smfrench@gmail.com>
-Cc: fstests@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, mohan.kumar@primarydata.com
+To: Christoph Hellwig <hch@infradead.org>, "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Eryu Guan <eguan@redhat.com>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jan 23, 2017 at 07:58:56PM -0600, Steve French wrote:
-> I noticed that the archives for the fstests mailing list have been
-> down a while (http://vger.kernel.org/vger-lists.html#fstests) -
-> actually all of dir.gmane.org seems to be down.
+On 1/24/17 11:09 AM, Christoph Hellwig wrote:
+> On Tue, Jan 24, 2017 at 09:08:19AM -0800, Darrick J. Wong wrote:
+>> We're not going to do reverse-mapping on the realtime device for
+>> some time, so let's fix xfs/122 in the meantime.
+>>
+>> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> There were other sites that had archives in the past (e.g.
-> http://www.mail-archive.com/fstests@vger.kernel.org/) but those are
-> out of date.
+> Looks fine,
 > 
-> Any suggestions for where to find an archive of the fstests mailing
-> list (to make sure someone doesn't ask the same question twice)?
+> Reviewed-by: Christoph Hellwig <hch@lst.de>
 
-I find http://www.spinics.net/lists/fstests/ is working too.
+Philosophically (I'm good at that) how do we handle tests like this
+that really only work on the latest version of the code, but don't
+actually indicate a bug if it fails on something older?
 
-Thanks,
-Eryu
+-Eric
