@@ -1,243 +1,117 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:41310 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751171AbdA1RiT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 28 Jan 2017 12:38:19 -0500
-Subject: [PATCH 1/3] xfs/263: don't hardcode inode numbers in output
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Sat, 28 Jan 2017 09:38:12 -0800
-Message-ID: <148562509264.30594.7506967863745489318.stgit@birch.djwong.org>
+Received: from p3nlsmtpcp01-03.prod.phx3.secureserver.net ([184.168.200.142]:57294
+        "EHLO p3nlsmtpcp01-03.prod.phx3.secureserver.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751482AbdAYUIn (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 25 Jan 2017 15:08:43 -0500
+Date: Thu, 26 Jan 2017 01:37:30 +0530
+From: "Lakshmipathi.G" <lakshmipathi.g@giis.co.in>
+Subject: Re: [PATCH] xfstests: btrfs/047: check btrfs-convert with extent and
+ non-extent source
+Message-ID: <20170125200730.GA11044@giis.co.in>
+References: <20170118014702.GA6682@giis.co.in>
+ <20170118063953.GO1859@eguan.usersys.redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170118063953.GO1859@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+On Wed, Jan 18, 2017 at 02:39:53PM +0800, Eryu Guan wrote:
+> On Wed, Jan 18, 2017 at 07:17:02AM +0530, Lakshmipathi.G wrote:
+> > Signed-off-by: Lakshmipathi.G <Lakshmipathi.G@giis.co.in>
+> 
+> Need detailed test description in commit log too.
 
-Since we can't control the inode number assignments when creating files,
-don't hardcode them in the golden output.
+Okay will include them.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/xfs/263     |    6 +++++-
- tests/xfs/263.out |   52 ++++++++++++++++++++++++++--------------------------
- 2 files changed, 31 insertions(+), 27 deletions(-)
+> 
+> 
+> Trailing whitespace in above line.
+> 
 
+> > +BTRFS_CONVERT_PROG="`set_prog_path btrfs-convert`"
+> > +E2FSCK_PROG="`set_prog_path e2fsck`"
+> > +TUNE2FS_PROG="`set_prog_path tune2fs`"
+> 
+> These should go to common/config. Can you please update btrfs/012 as
+> well to move such defines to common/config?
+> 
 
-diff --git a/tests/xfs/263 b/tests/xfs/263
-index 1dc47ae..7aebf90 100755
---- a/tests/xfs/263
-+++ b/tests/xfs/263
-@@ -71,6 +71,10 @@ function option_string()
- 	echo $OPT
- }
- 
-+filter_quota_state() {
-+	sed -e 's/Inode: #[0-9]\+/Inode #XXX/g' | _filter_scratch
-+}
-+
- function test_all_state()
- {
- 	for I in `seq 0 7`; do
-@@ -79,7 +83,7 @@ function test_all_state()
- 		# Some combinations won't mount on V4 supers (grp + prj)
- 		_qmount_option "$OPTIONS"
- 		_scratch_mount &>> $seqres.full || continue
--		$XFS_QUOTA_PROG -x -c "state" $SCRATCH_MNT | _filter_scratch
-+		$XFS_QUOTA_PROG -x -c "state" $SCRATCH_MNT | filter_quota_state
- 		_scratch_unmount
- 	done
- }
-diff --git a/tests/xfs/263.out b/tests/xfs/263.out
-index 70454dd..531d45d 100644
---- a/tests/xfs/263.out
-+++ b/tests/xfs/263.out
-@@ -5,7 +5,7 @@ QA output created by 263
- User quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: ON
-   Enforcement: ON
--  Inode: #131 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Group quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: OFF
-   Enforcement: OFF
-@@ -21,11 +21,11 @@ Realtime Blocks grace time: [7 days]
- User quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: OFF
-   Enforcement: OFF
--  Inode: #131 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Group quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: ON
-   Enforcement: ON
--  Inode: #132 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Project quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: OFF
-   Enforcement: OFF
-@@ -37,11 +37,11 @@ Realtime Blocks grace time: [7 days]
- User quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: ON
-   Enforcement: ON
--  Inode: #131 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Group quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: ON
-   Enforcement: ON
--  Inode: #132 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Project quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: OFF
-   Enforcement: OFF
-@@ -53,7 +53,7 @@ Realtime Blocks grace time: [7 days]
- User quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: OFF
-   Enforcement: OFF
--  Inode: #131 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Group quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: OFF
-   Enforcement: OFF
-@@ -61,7 +61,7 @@ Group quota state on SCRATCH_MNT (SCRATCH_DEV)
- Project quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: ON
-   Enforcement: ON
--  Inode: #132 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Blocks grace time: [7 days]
- Inodes grace time: [7 days]
- Realtime Blocks grace time: [7 days]
-@@ -69,7 +69,7 @@ Realtime Blocks grace time: [7 days]
- User quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: ON
-   Enforcement: ON
--  Inode: #131 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Group quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: OFF
-   Enforcement: OFF
-@@ -77,7 +77,7 @@ Group quota state on SCRATCH_MNT (SCRATCH_DEV)
- Project quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: ON
-   Enforcement: ON
--  Inode: #132 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Blocks grace time: [7 days]
- Inodes grace time: [7 days]
- Realtime Blocks grace time: [7 days]
-@@ -89,7 +89,7 @@ Realtime Blocks grace time: [7 days]
- User quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: ON
-   Enforcement: ON
--  Inode: #99 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Group quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: OFF
-   Enforcement: OFF
-@@ -105,11 +105,11 @@ Realtime Blocks grace time: [7 days]
- User quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: OFF
-   Enforcement: OFF
--  Inode: #99 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Group quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: ON
-   Enforcement: ON
--  Inode: #100 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Project quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: OFF
-   Enforcement: OFF
-@@ -121,11 +121,11 @@ Realtime Blocks grace time: [7 days]
- User quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: ON
-   Enforcement: ON
--  Inode: #99 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Group quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: ON
-   Enforcement: ON
--  Inode: #100 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Project quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: OFF
-   Enforcement: OFF
-@@ -137,15 +137,15 @@ Realtime Blocks grace time: [7 days]
- User quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: OFF
-   Enforcement: OFF
--  Inode: #99 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Group quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: OFF
-   Enforcement: OFF
--  Inode: #100 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Project quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: ON
-   Enforcement: ON
--  Inode: #101 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Blocks grace time: [7 days]
- Inodes grace time: [7 days]
- Realtime Blocks grace time: [7 days]
-@@ -153,15 +153,15 @@ Realtime Blocks grace time: [7 days]
- User quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: ON
-   Enforcement: ON
--  Inode: #99 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Group quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: OFF
-   Enforcement: OFF
--  Inode: #100 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Project quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: ON
-   Enforcement: ON
--  Inode: #101 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Blocks grace time: [7 days]
- Inodes grace time: [7 days]
- Realtime Blocks grace time: [7 days]
-@@ -169,15 +169,15 @@ Realtime Blocks grace time: [7 days]
- User quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: OFF
-   Enforcement: OFF
--  Inode: #99 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Group quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: ON
-   Enforcement: ON
--  Inode: #100 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Project quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: ON
-   Enforcement: ON
--  Inode: #101 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Blocks grace time: [7 days]
- Inodes grace time: [7 days]
- Realtime Blocks grace time: [7 days]
-@@ -185,15 +185,15 @@ Realtime Blocks grace time: [7 days]
- User quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: ON
-   Enforcement: ON
--  Inode: #99 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Group quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: ON
-   Enforcement: ON
--  Inode: #100 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Project quota state on SCRATCH_MNT (SCRATCH_DEV)
-   Accounting: ON
-   Enforcement: ON
--  Inode: #101 (1 blocks, 1 extents)
-+  Inode #XXX (1 blocks, 1 extents)
- Blocks grace time: [7 days]
- Inodes grace time: [7 days]
- Realtime Blocks grace time: [7 days]
+> > +# Create & populate an ext3 filesystem
+> > +$MKFS_EXT4_PROG -t ext3 -b $BLOCK_SIZE $SCRATCH_DEV > $seqres.full 2>&1 || \
+> > +	_notrun "Could not create ext3 filesystem"
+> 
+> Better to add "-F" option to mkfs to force mkfs so it won't stop when
+> there's an existing fs on SCRATCH_DEV.
+> 
+> > +
+> > +# mount and populate non-extent file
+> > +mount -t ext3 $SCRATCH_DEV $SCRATCH_MNT
+> > +dd if=/dev/urandom of=$SCRATCH_MNT/f1.txt bs=1MB count=10 >> $seqres.full 2>&1
+> > +NON_EXTENT_MD5=`md5sum $SCRATCH_MNT/f1.txt  | awk '{print $1}' `
+> 
+> Better to have different files with different file sizes and different
+> types, e.g. run fsstress to create such a fs structure.
+> 
 
+Will look into fsstress tool or else simply copy files from hosts machine. (ex: /usr/lib)
+
+> > +_scratch_unmount
+> > +
+> > +# Upgrade it to ext4.
+> > +$TUNE2FS_PROG -O extents,uninit_bg,dir_index $SCRATCH_DEV >> $seqres.full 2>&1
+> > +$E2FSCK_PROG -fyD $SCRATCH_DEV >> $seqres.full 2>&1
+> 
+> Why is this e2fsck needed? Add some comments? Or it just can be removed?
+> 
+It recommended to run e2fsck after conversion as per https://ext4.wiki.kernel.org/index.php/UpgradeToExt4
+
+> > +
+> > +if [ $NON_EXTENT_MD5 != $F1_MD5 ] ; then 
+> 
+> Trailing whitespace in above line.
+> 
+> > +_fail "ext3 file mismatch."
+> 
+> No need to _fail, just echo this message to break golden image.
+> 
+> And need indention inside "if-then-fi"
+> 
+> > +fi
+> > +
+> > +if [ $EXTENT_MD5 != $F2_MD5 ] ; then 
+> 
+> Trailing whitespace.
+> 
+> > +_fail "ext4 file mismatch."
+> 
+> Same here. Use echo and indention.
+> 
+> > +fi
+> > +   
+> 
+> Trailing whitespace.
+> 
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/btrfs/047.out b/tests/btrfs/047.out
+> > new file mode 100644
+> > index 0000000..58e2353
+> > --- /dev/null
+> > +++ b/tests/btrfs/047.out
+> > @@ -0,0 +1 @@
+> > +QA output created by 047
+> 
+> Usually we print a message "Silence is golden" to indicate that this
+> test doesn't expect any output.
+> 
+> Thanks,
+> Eryu
+> 
+Will modify the script to reflect above review comments.
+
+Cheers.
+Lakshmipathi.G 
