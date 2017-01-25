@@ -1,224 +1,132 @@
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:33031 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754581AbdA0JXe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 27 Jan 2017 04:23:34 -0500
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2 3/3] overlay: mount/unmount base fs before/after running tests
-Date: Fri, 27 Jan 2017 10:56:05 +0200
-Message-Id: <1485507365-29012-4-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1485507365-29012-1-git-send-email-amir73il@gmail.com>
-References: <1485507365-29012-1-git-send-email-amir73il@gmail.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:28665 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752173AbdAYWOs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 Jan 2017 17:14:48 -0500
+From: Liu Bo <bo.li.liu@oracle.com>
+Subject: [PATCH v2] fstests: generic: splitted large dio write could trigger assertion on btrfs
+Date: Wed, 25 Jan 2017 14:13:57 -0800
+Message-Id: <1485382437-19867-1-git-send-email-bo.li.liu@oracle.com>
+In-Reply-To: <1484259726-3561-1-git-send-email-bo.li.liu@oracle.com>
+References: <1484259726-3561-1-git-send-email-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Optionally configure TEST/SCRATCH_BASE_DEV, for overlay base fs
-to be mounted/unmounted before/after running tests. For example:
+On btrfs, if a large dio write (>=128MB) got splitted, the outstanding_extents
+assertion would complain.  Note that CONFIG_BTRFS_ASSERT is required.
 
-+export TEST_BASE_DEV=/dev/mapper/base-test
-export TEST_BASE_MNT=/mnt/base/test
-+export SCRATCH_BASE_DEV=/dev/mapper/base-scratch
-export SCRATCH_BASE_MNT=/mnt/base/scratch
-export TEST_DIR=/mnt/test
-export SCRATCH_MNT=/mnt/scratch
-export FSTYP=overlay
+Regression test for
+  Btrfs: adjust outstanding_extents counter properly when dio write is split
 
-With this change, the base fs is mounted before running tests,
-unmounted after running tests and recycled on _test_cycle_mount
-along with the overlay mounts.
-This helps catching overlayfs bugs related to leaking objects in
-underlying (base) fs.
-
-The standard way that overlay tests work is:
-- _scratch_mkfs
-- setup lower/upper dir files
-- _scratch_mount (or custom overlay mount)
-- (sometimes) _scratch_unmount/_scratch_mount recycle
-
-To preserve expected tests behavior, the semantics are:
-- _scratch_mkfs mounts the base fs, cleans the lower/upper dirs and
-  keeps base fs mounted.
-- _scratch_mount mounts or recycles base fs and mounts overlay
-- _scratch_unmount unmounts overlay and base fs
-
-Tests that use _scratch_unmount to unmount a custom overlay mount
-and expect to have access to overlay base dir, were converted to use
-explicit umount $SCRATCH_MNT instead.
+Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
 ---
- common/config     |  6 +++++-
- common/rc         | 42 ++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/003 |  3 ++-
- tests/overlay/004 |  3 ++-
- tests/overlay/014 |  5 +++--
- 5 files changed, 54 insertions(+), 5 deletions(-)
+v2: Rebase and change to only use _require_fs_space
 
-diff --git a/common/config b/common/config
-index db5721c..f431a8d 100644
---- a/common/config
-+++ b/common/config
-@@ -35,7 +35,9 @@
- # RMT_TAPE_DEV -    the remote tape device for the xfsdump tests
- # RMT_IRIXTAPE_DEV- the IRIX remote tape device for the xfsdump tests
- # RMT_TAPE_USER -   remote user for tape device
-+# TEST_BASE_DEV -   device for base fs containing overlay test dirs
- # TEST_BASE_MNT -   mount point for base fs of overlay test dirs
-+# SCRATCH_BASE_DEV- device for base fs containing overlay scratch dirs
- # SCRATCH_BASE_MNT- mount point for base fs of overlay scratch dirs
- #
- # - These can be added to $HOST_CONFIG_DIR (witch default to ./config)
-@@ -470,11 +472,12 @@ _config_overlay()
- 	[ -z "$TEST_DEV" ] || export TEST_BASE_DIR="$TEST_DEV"
- 	[ -z "$SCRATCH_DEV" ] || export SCRATCH_BASE_DIR="$SCRATCH_DEV"
- 
--	# 2. set SCRATCH/TEST_BASE_MNT to configure base fs.
-+	# 2. set SCRATCH/TEST_BASE_DEV/MNT to configure base fs.
- 	#    SCRATCH/TEST_DEV are derived from SCRATCH/TEST_BASE_MNT
- 	#    and therein, overlay fs directories will be created.
- 	[ -n "$TEST_BASE_MNT" ] || return
- 
-+	_check_device TEST_BASE_DEV optional $TEST_BASE_DEV
- 	if [ ! -d "$TEST_BASE_MNT" ]; then
- 		echo "common/config: Error: \$TEST_BASE_MNT ($TEST_BASE_MNT) is not a directory"
- 		exit 1
-@@ -486,6 +489,7 @@ _config_overlay()
- 
- 	[ -n "$SCRATCH_BASE_MNT" ] || return
- 
-+	_check_device SCRATCH_BASE_DEV optional $SCRATCH_BASE_DEV
- 	if [ ! -d "$SCRATCH_BASE_MNT" ]; then
- 		echo "common/config: Error: \$SCRATCH_BASE_MNT ($SCRATCH_BASE_MNT) is not a directory"
- 		exit 1
-diff --git a/common/rc b/common/rc
-index f5ab869..5033ed4 100644
---- a/common/rc
-+++ b/common/rc
-@@ -320,24 +320,62 @@ _overlay_mount()
- 			    $SELINUX_MOUNT_OPTIONS $* $dir $mnt
- }
- 
-+_overlay_test_base_mount()
+ tests/generic/406     | 74 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/406.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 77 insertions(+)
+ create mode 100755 tests/generic/406
+ create mode 100644 tests/generic/406.out
+
+diff --git a/tests/generic/406 b/tests/generic/406
+new file mode 100755
+index 0000000..88ab0da
+--- /dev/null
++++ b/tests/generic/406
+@@ -0,0 +1,74 @@
++#! /bin/bash
++# FS QA Test generic/406
++#
++# If a larger dio write (size >= 128M) got splitted, the assertion in endio
++# would complain (CONFIG_BTRFS_ASSERT is required).
++#
++# Regression test for
++#   Btrfs: adjust outstanding_extents counter properly when dio write is split
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
 +{
-+	if [ -n "$TEST_BASE_DEV" -a -n "$TEST_BASE_MNT" ]; then
-+		_mount $TEST_BASE_MOUNT_OPTIONS \
-+			$SELINUX_MOUNT_OPTIONS \
-+			$TEST_BASE_DEV $TEST_BASE_MNT
-+	fi
++	cd /
++	rm -f $tmp.*
 +}
 +
- _overlay_test_mount()
- {
-+	_overlay_test_base_mount
- 	_overlay_mount $TEST_BASE_DIR $TEST_DIR $*
- }
- 
-+_overlay_scratch_base_mount()
-+{
-+	if [ -n "$SCRATCH_BASE_DEV" -a -n "$SCRATCH_BASE_MNT" ]; then
-+		_mount $SCRATCH_BASE_MOUNT_OPTIONS \
-+			$SELINUX_MOUNT_OPTIONS \
-+			$SCRATCH_BASE_DEV $SCRATCH_BASE_MNT
-+	fi
-+}
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
 +
-+_overlay_scratch_base_unmount()
-+{
-+	if [ -n "$SCRATCH_BASE_DEV" -a -n "$SCRATCH_BASE_MNT" ]; then
-+		$UMOUNT_PROG $SCRATCH_BASE_MNT
-+	fi
-+}
++# remove previous $seqres.full before test
++rm -f $seqres.full
 +
- _overlay_scratch_mount()
- {
-+	# base fs may be mounted after overlay mkfs
-+	_overlay_scratch_base_unmount 2>/dev/null
-+	_overlay_scratch_base_mount
- 	_overlay_mount $SCRATCH_BASE_DIR $SCRATCH_MNT $*
- }
- 
-+_overlay_test_base_unmount()
-+{
-+	if [ -n "$TEST_BASE_DEV" -a -n "$TEST_BASE_MNT" ]; then
-+		$UMOUNT_PROG $TEST_BASE_MNT
-+	fi
-+}
++# real QA test starts here
 +
- _overlay_test_unmount()
- {
- 	$UMOUNT_PROG $TEST_DIR
-+	_overlay_test_base_unmount
- }
- 
- _overlay_scratch_unmount()
- {
- 	$UMOUNT_PROG $SCRATCH_MNT
-+	_overlay_scratch_base_unmount
- }
- 
- _scratch_mount()
-@@ -643,7 +681,11 @@ _scratch_cleanup_files()
- 	overlay)
- 		# Avoid rm -rf /* if we messed up
- 		[ -n "$SCRATCH_BASE_DIR" ] || return
-+		# overlay 'mkfs' needs to make sure base fs is mounted and clean
-+		_overlay_scratch_base_unmount 2>/dev/null
-+		_overlay_scratch_base_mount
- 		rm -rf $SCRATCH_BASE_DIR/*
-+		# leave base fs mouted so tests can setup lower dir
- 		;;
- 	*)
- 		[ -n "$SCRATCH_MNT" ] || return
-diff --git a/tests/overlay/003 b/tests/overlay/003
-index bb59700..81aea85 100755
---- a/tests/overlay/003
-+++ b/tests/overlay/003
-@@ -89,7 +89,8 @@ rm -rf ${SCRATCH_MNT}/*
- # nothing should be listed
- ls ${SCRATCH_MNT}/
- 
--_scratch_unmount
-+# unmount overlayfs but not base fs
-+$UMOUNT_PROG $SCRATCH_MNT
- 
- rm -rf $lowerdir
- echo "Silence is golden"
-diff --git a/tests/overlay/004 b/tests/overlay/004
-index 6d78f9f..26ac547 100755
---- a/tests/overlay/004
-+++ b/tests/overlay/004
-@@ -85,7 +85,8 @@ _user_do "chmod g+t ${SCRATCH_MNT}/attr_file2 > /dev/null 2>&1"
- _user_do "chmod u-X ${SCRATCH_MNT}/attr_file2 > /dev/null 2>&1"
- stat -c %a ${SCRATCH_MNT}/attr_file2
- 
--_scratch_unmount
-+# unmount overlayfs but not base fs
-+$UMOUNT_PROG $SCRATCH_MNT
- 
- # check mode bits of the file that has been copied up, and
- # the file that should not have been copied up.
-diff --git a/tests/overlay/014 b/tests/overlay/014
-index 7426c31..6519432 100755
---- a/tests/overlay/014
-+++ b/tests/overlay/014
-@@ -73,7 +73,8 @@ mkdir -p $lowerdir1/testdir/d
- _overlay_mount_dirs $lowerdir1 $lowerdir2 $workdir $SCRATCH_BASE_DIR $SCRATCH_MNT
- rm -rf $SCRATCH_MNT/testdir
- mkdir -p $SCRATCH_MNT/testdir/visibledir
--_scratch_unmount
-+# unmount overlayfs but not base fs
-+$UMOUNT_PROG $SCRATCH_MNT
- 
- # mount overlay again, with lowerdir1 and lowerdir2 as multiple lowerdirs,
- # and create a new file in testdir, triggers copyup from lowerdir,
-@@ -84,7 +85,7 @@ touch $SCRATCH_MNT/testdir/visiblefile
- 
- # umount and mount overlay again, buggy kernel treats the copied-up dir as
- # opaque, visibledir is not seen in merged dir.
--_scratch_unmount
-+$UMOUNT_PROG $SCRATCH_MNT
- _overlay_mount_dirs "$lowerdir2:$lowerdir1" $upperdir $workdir \
- 		    $SCRATCH_BASE_DIR $SCRATCH_MNT
- ls $SCRATCH_MNT/testdir
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_odirect
++
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount
++
++# 2G / 1K
++blocksize=$(( (128 + 1) * 2 * 1024 * 1024))
++fsblock=$(( (128 + 1) * 2 * 1024))
++_require_fs_space $SCRATCH_MNT $fsblock
++
++echo "Silence is golden"
++
++$XFS_IO_PROG -f -d -c "pwrite -b ${blocksize} 0 ${blocksize}" $SCRATCH_MNT/testfile.$seq >> $seqres.full 2>&1
++
++_scratch_unmount
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/406.out b/tests/generic/406.out
+new file mode 100644
+index 0000000..eaf210d
+--- /dev/null
++++ b/tests/generic/406.out
+@@ -0,0 +1,2 @@
++QA output created by 406
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 5621906..159d691 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -408,3 +408,4 @@
+ 403 auto quick attr
+ 404 auto quick insert
+ 405 auto mkfs
++406 auto quick dangerous
 -- 
-2.7.4
+2.5.0
 
