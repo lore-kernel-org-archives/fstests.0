@@ -1,123 +1,153 @@
-Received: from imap.thunk.org ([74.207.234.97]:60978 "EHLO imap.thunk.org"
+Received: from mx1.redhat.com ([209.132.183.28]:37968 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751155AbdA0VK0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 27 Jan 2017 16:10:26 -0500
-Date: Fri, 27 Jan 2017 16:10:03 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: xfstest and chromeos
-Message-ID: <20170127211003.ypphb36xhsn4vczq@thunk.org>
-References: <CAMHSBOWq5oFTgpZ1hT_Nd7ebVc2nEp8yLp3CFB146fPmizOkEQ@mail.gmail.com>
- <20170127034557.l6kzxxjh2md2rfgs@thunk.org>
- <CAAbOSckhztYa6q56rzATXOKHJS6o4WEZPicMEc9RdOUHuWELdQ@mail.gmail.com>
- <20170127163748.vhqizartavwa7vxt@thunk.org>
- <CAAbOScmd_j-HgZj929fbWzs3JjLkB817dJ_A-ghLyD7kHjh7GA@mail.gmail.com>
+        id S1751875AbdAYKYV (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 25 Jan 2017 05:24:21 -0500
+Date: Wed, 25 Jan 2017 18:24:20 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] btrfs: add regression test for setxattr on subvolume
+ directory
+Message-ID: <20170125102420.GJ1859@eguan.usersys.redhat.com>
+References: <28ac6254ad926413836489a46cbf14497f4802ed.1485327013.git.osandov@fb.com>
+ <20170125092024.GH1859@eguan.usersys.redhat.com>
+ <60fac92f-8918-2517-7cad-e8ba9cfe4774@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAAbOScmd_j-HgZj929fbWzs3JjLkB817dJ_A-ghLyD7kHjh7GA@mail.gmail.com>
+In-Reply-To: <60fac92f-8918-2517-7cad-e8ba9cfe4774@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Mike Frysinger <vapier@chromium.org>
-Cc: Gwendal Grignou <gwendal@chromium.org>, fstests@vger.kernel.org
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: Omar Sandoval <osandov@osandov.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, kernel-team@fb.com
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jan 27, 2017 at 08:02:30AM -1000, Mike Frysinger wrote:
-> > Right, but I'm able to create libtool without any problems and messing
-> > with aclocal.m4 and acinclude.m4, et. al.  I probably am relying on
-> > libtoolize from the local Debian or Guubuntu build host, though.  Is
-> > that the issue you're having with ChromeOS?  That you're using a
-> > different version of the libtool/autoconf macros?
+On Wed, Jan 25, 2017 at 05:30:32PM +0800, Qu Wenruo wrote:
 > 
-> if we wanted, we could do all this manually too, but i don't think it
-> makes sense to force every developer to learn autotools and how to set
-> up a local copy.  Gwendal's patch makes things "just work" w/out
-> having to learn anything new.  the overhead is, arguably, negligible.
-
-Most developers are forced to learn autotools, since it's generally
-considered good practice by people who use libtools at all to not
-check in build artifacts into the git tree.  And developers can also
-check out my xfstests-bld git tree if they wanted something completely
-turnkey.   Not that it's all that hard:
-
-if test -z "$SKIP_XFSTESTS" ; then
-    build_start "xfstests"
-    (cd xfstests-dev; \
-     ver=$(git describe --always --dirty); echo "xfstests	$ver ($(git log -1 --pretty=%cD))" > ../xfstests.ver ; \
-     autoheader ; autoconf ; \
-     CFLAGS="$LCF -I$DESTDIR/include -fno-stack-protector" \
-     CPPFLAGS="-I$DESTDIR/include" \
-     LDFLAGS="$LLF -static -L$DESTDIR/lib" \
-     LIBS=-lpthread \
-     ./configure $cross ; \
-     make $J LLDFLAGS=$EXEC_LLDFLAGS PLDLIBS="$android_compat" \
-	  LIBTOOL="/usr/bin/libtool --tag=CC" BUILD_VERBOSE=1)
-fi
-
-I personally don't mind checking in generated build artificats such as
-"configure" into the git tree --- see how I do things with e2fsprogs
---- but I also have the good taste to absolutely consider libtool
-and automake as abominations from hell.  :-)
-
-If you want to try to convince Darrin and From: Theodore Ts'o <tytso@mit.edu>
-To: Mike Frysinger <vapier@chromium.org>
-Cc: Gwendal Grignou <gwendal@chromium.org>, fstests@vger.kernel.org
-Bcc: tytso@mit.edu
-Subject: Re: xfstest and chromeos
-Reply-To: 
-In-Reply-To: <CAAbOScmd_j-HgZj929fbWzs3JjLkB817dJ_A-ghLyD7kHjh7GA@mail.gmail.com>
-
-On Fri, Jan 27, 2017 at 08:02:30AM -1000, Mike Frysinger wrote:
-> > Right, but I'm able to create libtool without any problems and messing
-> > with aclocal.m4 and acinclude.m4, et. al.  I probably am relying on
-> > libtoolize from the local Debian or Guubuntu build host, though.  Is
-> > that the issue you're having with ChromeOS?  That you're using a
-> > different version of the libtool/autoconf macros?
 > 
-> if we wanted, we could do all this manually too, but i don't think it
-> makes sense to force every developer to learn autotools and how to set
-> up a local copy.  Gwendal's patch makes things "just work" w/out
-> having to learn anything new.  the overhead is, arguably, negligible.
+> At 01/25/2017 05:20 PM, Eryu Guan wrote:
+> > On Tue, Jan 24, 2017 at 10:50:29PM -0800, Omar Sandoval wrote:
+> > > From: Omar Sandoval <osandov@fb.com>
+> > > 
+> > > This is a regression test for "Btrfs: disable xattr operations on
+> > > subvolume directories". On v4.9, it will result in an aborted
+> > > transaction.
+> > > 
+> > > Signed-off-by: Omar Sandoval <osandov@fb.com>
+> > 
+> > Looks good to me overall, tested with 4.10-rc5 kernel with and without
+> > the proposed kernel fix, results are all as expected. Some minor issues
+> > inline.
+> > 
+> > > ---
+> > >  tests/btrfs/047     | 69 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/btrfs/047.out |  2 ++
+> > >  tests/btrfs/group   |  1 +
+> > >  3 files changed, 72 insertions(+)
+> > >  create mode 100644 tests/btrfs/047
+> > 
+> > Better to add new test with mode 755, otherwise git diff shows mode
+> > changes after tests being run.
+> > 
+> > >  create mode 100644 tests/btrfs/047.out
+> > > 
+> > > diff --git a/tests/btrfs/047 b/tests/btrfs/047
+> > > new file mode 100644
+> > > index 00000000..c3222f8b
+> > > --- /dev/null
+> > > +++ b/tests/btrfs/047
+> > > @@ -0,0 +1,69 @@
+> > > +#! /bin/bash
+> > > +# FS QA Test 047
+> > > +#
+> > > +# Test that we can't set xattrs on read-only subvolume placeholder directories.
+> > > +# Regression test for Btrfs: disable xattr operations on subvolume directories.
+> > > +#
+> > > +#-----------------------------------------------------------------------
+> > > +# Copyright (c) 2017 Facebook.  All Rights Reserved.
+> > > +#
+> > > +# This program is free software; you can redistribute it and/or
+> > > +# modify it under the terms of the GNU General Public License as
+> > > +# published by the Free Software Foundation.
+> > > +#
+> > > +# This program is distributed in the hope that it would be useful,
+> > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > > +# GNU General Public License for more details.
+> > > +#
+> > > +# You should have received a copy of the GNU General Public License
+> > > +# along with this program; if not, write the Free Software Foundation,
+> > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > > +#-----------------------------------------------------------------------
+> > > +#
+> > > +
+> > > +seq=`basename $0`
+> > > +seqres=$RESULT_DIR/$seq
+> > > +echo "QA output created by $seq"
+> > > +
+> > > +here=`pwd`
+> > > +tmp=/tmp/$$
+> > > +status=1	# failure is the default!
+> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > +
+> > > +_cleanup()
+> > > +{
+> > > +	cd /
+> > > +	rm -f $tmp.*
+> > > +}
+> > > +
+> > > +# get standard environment, filters and checks
+> > > +. ./common/rc
+> > > +. ./common/filter
+> > > +. ./common/attr
+> > > +
+> > > +# remove previous $seqres.full before test
+> > > +rm -f $seqres.full
+> > > +
+> > > +# real QA test starts here
+> > > +
+> > > +_supported_fs btrfs
+> > > +_supported_os Linux
+> > > +_require_attrs
+> > > +_require_scratch
+> > > +
+> > > +_scratch_mkfs >/dev/null 2>&1
+> > > +_scratch_mount
+> > > +
+> > > +_run_btrfs_util_prog subvolume create "$SCRATCH_MNT/parent"
+> > > +_run_btrfs_util_prog subvolume create "$SCRATCH_MNT/parent/child"
+> > > +_run_btrfs_util_prog subvolume snapshot "$SCRATCH_MNT/parent" "$SCRATCH_MNT/snapshot"
+> > 
+> > Please avoid using "run_check" (called by _run_btrfs_util_prog) if
+> > possible. We can use $BTRFS_UTIL_PROG directly and throw away stdout or
+> > append it to $seqres.full, and stderr from these commands will break the
+> > golden image.
+> 
+> Isn't it designed to use "run_check" to break the test case if it returns
+> any thing other than 0?
 
-Most developers are forced to learn autotools, since it's generally
-considered good practice by people who use libtools at all to not
-check in build artifacts into the git tree.  And developers can also
-check out my xfstests-bld git tree if they wanted something completely
-turnkey.   Not that it's all that hard:
+The whole fstests is built upon the golden image matching mechanism,
+it's designed to let you don't have to check the return value of
+commands. IMO, this run_check should not be introduced in the first
+place. I agree that this "golden image matching" has some problems, e.g.
+we have to write lots of filters to make the outputs deterministic, it
+has both up and down sides, as well as the "check return value" way. But
+that's the way fstests has chosen to go since the beginning.
 
-if test -z "$SKIP_XFSTESTS" ; then
-    build_start "xfstests"
-    (cd xfstests-dev; \
-     autoheader ; autoconf ; \
-     CFLAGS="$LCF -I$DESTDIR/include -fno-stack-protector" \
-     CPPFLAGS="-I$DESTDIR/include" \
-     LDFLAGS="$LLF -static -L$DESTDIR/lib" \
-     LIBS=-lpthread \
-     ./configure $cross ; \
-     make $J LLDFLAGS=$EXEC_LLDFLAGS PLDLIBS="$android_compat" \
-	  LIBTOOL="/usr/bin/libtool --tag=CC" BUILD_VERBOSE=1)
-fi
+> 
+> IMHO any stderr output should be unexpected in this case.
 
-At least for xfstests, "autoheader ; autoconf ; configure ; make"
-should be sufficient.  It's really not that hard.  And for cross
-compilations, it's just:
+Yes, so any unexpected output breaks & fails the test, and we can see
+why it fails from the diff output. And run_check "hides" this info and
+makes it harder to parse the result, e.g.
 
-    cross="--build=$(config.guess) --host=$CROSS_COMPILE"
+-setfattr: SCRATCH_MNT/snapshot/child: Operation not supported
++failed: '/usr/local/bin/btrfs filesystem sync /mnt/testarea/scratch'
++(see /root/workspace/xfstests/results//btrfs/btrfs/047.full for details)
 
-and then using "configure $cross" instead.  I guess I'm not
-understanding why it's considered tricky.
+And without run_check:
 
-						- Ted
+-setfattr: SCRATCH_MNT/snapshot/child: Operation not supported
++ERROR: sync ioctl failed on '/mnt/testarea/scratch': No such file or directory
 
-P.S.  I personally don't mind checking in generated build artificats
-such as "configure" into the git tree --- see how I do things with
-e2fsprogs --- but I also have the good taste to absolutely consider
-libtool and automake as abominations from hell.  :-)
+We know why and where it fails.
 
-Especially given that xfstests and xfsprogs only need to work on Linux
-these days (we have enough other Linixisms that it would be hopeless
-to get it to work on, say, BSD or Open Solaris), in my opinion the
-right thing to do would be to completely ditch automake and libtool;
-e2fsprogs autoconf mainly for things like "--enable-elf-shlibs" and
-using Makefile fragments included as part of the configure process is
-plenty to handle shared libraries.  But that's up to Darrick and Eryu
-to decide.  :-)
-
+Thanks,
+Eryu
