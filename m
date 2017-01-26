@@ -1,97 +1,66 @@
-Date: Tue, 24 Jan 2017 12:37:08 +0800
+Date: Thu, 26 Jan 2017 13:08:38 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] xfs: test xfs_db source command
-Message-ID: <20170124043708.GE1859@eguan.usersys.redhat.com>
-References: <20170123215750.GO14033@birch.djwong.org>
+Subject: Re: [PATCH v5 0/9] xfstests: online scrub/repair support
+Message-ID: <20170126050838.GN1859@eguan.usersys.redhat.com>
+References: <148498621936.17109.4249711513404036449.stgit@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170123215750.GO14033@birch.djwong.org>
+In-Reply-To: <148498621936.17109.4249711513404036449.stgit@birch.djwong.org>
 To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests <fstests@vger.kernel.org>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jan 23, 2017 at 01:57:50PM -0800, Darrick J. Wong wrote:
-> Make sure that the 'source' command works correctly whether supplied
-> via command line or interactive prompt.
+On Sat, Jan 21, 2017 at 12:10:19AM -0800, Darrick J. Wong wrote:
+> Hi all,
 > 
-> You probably want "xfs_db: fix the 'source' command when passed as a -c
-> option" in xfsprogs.
+> This is the fifth revision of a patchset that adds to XFS userland tools
+> support for online metadata scrubbing and repair.
 > 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  tests/xfs/400     |   69 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/400.out |   11 ++++++++
->  tests/xfs/group   |    1 +
->  3 files changed, 81 insertions(+)
->  create mode 100755 tests/xfs/400
->  create mode 100644 tests/xfs/400.out
+> The new patches in this series do three things: first, they expand the
+> filesystem populate commands inside xfstests to be able to create all
+> types of XFS metadata.  Second, they create a bunch of xfs_db wrapper
+> functions to iterate all fields present in a given metadata object and
+> fuzz them in various ways.  Finally, for each metadata object type there
+> is a separate test that iteratively fuzzes all fields of that object and
+> runs it through the mount/scrub/repair loop to see what happens.
 > 
-> diff --git a/tests/xfs/400 b/tests/xfs/400
-> new file mode 100755
-> index 0000000..a11ea12
-> --- /dev/null
-> +++ b/tests/xfs/400
-> @@ -0,0 +1,69 @@
-> +#! /bin/bash
-> +# FS QA Test No. 400
-> +#
-> +# Test nesting the 'source' command in xfs_db via -c and interactive.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Oracle, Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1303  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 7 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -rf $tmp.* $seqres.a $seqres.b
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_supported_fs xfs
-> +_require_scratch
-> +
-> +cat > $seqres.a << ENDL
-> +echo This is file A
-> +source $seqres.b
-> +ENDL
-> +cat > $seqres.b << ENDL
-> +echo This is file B
-> +ENDL
+> If you're going to start using this mess, you probably ought to just
+> pull from my github trees for kernel[1], xfsprogs[2], and xfstests[3].
 
-Seems $seqres.a/b should really be $tmp.a/b, they're used and cleaned up
-after test. I think $seqres.* is something can be saved after test for
-future reference.
+Are your github trees synced with kernel.org trees? Seems so, and I did
+my tests with your kernel.org trees.
 
-I can fix them at commit time. Otherwise looks good to me.
+> The kernel patches in the git trees should apply to 4.10-rc4; xfsprogs
+> patches to for-next; and xfstest to master.
+> 
+> The patches have survived all auto group xfstests both with scrub-only
+> mode and also a special debugging mode to xfs_scrub that forces it to
+> rebuild the metadata structures even if they're not damaged.
+
+I have trouble finishing running all the tests so far, the tests need
+long time to run and in some tests xfs_repair or xfs_scrub are just
+spinning there, sometimes I can kill them to make test continue,
+sometimes I can't (e.g. xfs/1312, I tried to kill the xfs_scrub process,
+but it became <defunc>).
+
+And in most tests I have run, I see such failures:
+
+    +scrub didn't fail with length = ones.
+    +scrub didn't fail with length = firstbit.
+    +scrub didn't fail with length = middlebit.
+    +scrub didn't fail with length = lastbit.
+    ....
+
+Not sure if that's expected?
+
+I also hit xfs_scrub and xfs_repair double free bug in xfs/1312 (perhaps
+that's why I can't kill it).
+
+OTOH, all these failures/issues seem like kernel or userspace bug, I
+went through all the patches and new tests and I didn't find anything
+wrong obviously. So I think it's fine to merge them in this week's
+update. Unless you have a second thought?
 
 Thanks,
 Eryu
