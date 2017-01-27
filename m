@@ -1,203 +1,118 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:32836 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757251AbdAJXdE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 10 Jan 2017 18:33:04 -0500
-Date: Tue, 10 Jan 2017 15:32:52 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 5/9] common/fuzzy: move fuzzing helper functions here
-Message-ID: <20170110233252.GH14033@birch.djwong.org>
-References: <148357902056.10436.12795484251467155460.stgit@birch.djwong.org>
- <148357905253.10436.560781214557366417.stgit@birch.djwong.org>
+Date: Fri, 27 Jan 2017 09:41:46 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v5 0/9] xfstests: online scrub/repair support
+Message-ID: <20170127014146.GQ1859@eguan.usersys.redhat.com>
+References: <148498621936.17109.4249711513404036449.stgit@birch.djwong.org>
+ <20170126050838.GN1859@eguan.usersys.redhat.com>
+ <20170126064434.GD2584@birch.djwong.org>
+ <20170126072638.GP1859@eguan.usersys.redhat.com>
+ <20170126075323.GE2584@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <148357905253.10436.560781214557366417.stgit@birch.djwong.org>
-Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com
+In-Reply-To: <20170126075323.GE2584@birch.djwong.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jan 04, 2017 at 05:17:32PM -0800, Darrick J. Wong wrote:
-> Move some fuzzing helper functions into a new common/fuzzy file.
-> We'll add a lot more fuzzing helpers in subsequent patches.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  common/fuzzy    |   83 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  common/populate |   35 -----------------------
->  tests/ext4/006  |    1 +
->  tests/xfs/083   |    1 +
->  4 files changed, 85 insertions(+), 35 deletions(-)
->  create mode 100644 common/fuzzy
-> 
-> 
-> diff --git a/common/fuzzy b/common/fuzzy
-> new file mode 100644
-> index 0000000..1cc1d5e
-> --- /dev/null
-> +++ b/common/fuzzy
-> @@ -0,0 +1,83 @@
-> +##/bin/bash
-> +
-> +# Routines for fuzzing and scrubbing a filesystem.
-> +#
-> +#-----------------------------------------------------------------------
-> +#  Copyright (c) 2017 Oracle.  All Rights Reserved.
-> +#  This program is free software; you can redistribute it and/or modify
-> +#  it under the terms of the GNU General Public License as published by
-> +#  the Free Software Foundation; either version 2 of the License, or
-> +#  (at your option) any later version.
-> +#
-> +#  This program is distributed in the hope that it will be useful,
-> +#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +#  GNU General Public License for more details.
-> +#
-> +#  You should have received a copy of the GNU General Public License
-> +#  along with this program; if not, write to the Free Software
-> +#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
-> +#  USA
-> +#
-> +#  Contact information: Silicon Graphics, Inc., 1500 Crittenden Lane,
-> +#  Mountain View, CA 94043, USA, or: http://www.sgi.com
+On Wed, Jan 25, 2017 at 11:53:23PM -0800, Darrick J. Wong wrote:
 
-SGI isn't on Crittenden Lane anymore -- the site has been taken over by some
-flashy startup company, so this should go away.
-
---D
-
-> +#-----------------------------------------------------------------------
-> +
-> +# Modify various files after a fuzzing operation
-> +_scratch_fuzz_modify() {
-> +	nr="$1"
-> +
-> +	test -z "${nr}" && nr=50000
-> +	echo "+++ touch ${nr} files"
-> +	blk_sz=$(stat -f -c '%s' ${SCRATCH_MNT})
-> +	$XFS_IO_PROG -f -c "pwrite -S 0x63 0 ${blk_sz}" "/tmp/afile" > /dev/null
-> +	date="$(date)"
-> +	find "${SCRATCH_MNT}/" -type f 2> /dev/null | head -n "${nr}" | while read f; do
-> +		setfattr -n "user.date" -v "${date}" "$f"
-> +		cat "/tmp/afile" >> "$f"
-> +		mv "$f" "$f.longer"
-> +	done
-> +	sync
-> +	rm -rf "/tmp/afile"
-> +
-> +	echo "+++ create files"
-> +	mkdir -p "${SCRATCH_MNT}/test.moo"
-> +	$XFS_IO_PROG -f -c 'pwrite -S 0x80 0 65536' "${SCRATCH_MNT}/test.moo/urk"
-> +	sync
-> +
-> +	echo "+++ remove files"
-> +	rm -rf "${SCRATCH_MNT}/test.moo"
-> +}
-> +
-> +# Try to access files after fuzzing
-> +_scratch_fuzz_test() {
-> +	echo "+++ ls -laR" >> $seqres.full
-> +	ls -laR "${SCRATCH_MNT}/test.1/" >/dev/null 2>&1
-> +
-> +	echo "+++ cat files" >> $seqres.full
-> +	(find "${SCRATCH_MNT}/test.1/" -type f -size -1048576k -print0 | xargs -0 cat) >/dev/null 2>&1
-> +}
-> +
-> +# Do we have an online scrub program?
-> +_require_scrub() {
-> +	case "${FSTYP}" in
-> +	"xfs"|"ext4")
-> +		test -x $XFS_SCRUB_PROG || _notrun "xfs_scrub not found"
-> +		;;
-> +	*)
-> +		_notrun "No online scrub program for ${FSTYP}."
-> +		;;
-> +	esac
-> +}
-> +
-> +# Scrub the scratch filesystem metadata (online)
-> +_scratch_scrub() {
-> +	case "${FSTYP}" in
-> +	"xfs"|"ext4"|"ext3"|"ext2")
-> +		$XFS_SCRUB_PROG -d -T -v "$@" $SCRATCH_MNT
-> +		;;
-> +	*)
-> +		_fail "No online scrub program for ${FSTYP}."
-> +		;;
-> +	esac
-> +}
-> diff --git a/common/populate b/common/populate
-> index 5808bc9..f012173 100644
-> --- a/common/populate
-> +++ b/common/populate
-> @@ -606,41 +606,6 @@ _scratch_populate() {
->  	esac
->  }
->  
-> -# Modify various files after a fuzzing operation
-> -_scratch_fuzz_modify() {
-> -	nr="$1"
-> -
-> -	test -z "${nr}" && nr=50000
-> -	echo "+++ touch ${nr} files"
-> -	blk_sz=$(stat -f -c '%s' ${SCRATCH_MNT})
-> -	$XFS_IO_PROG -f -c "pwrite -S 0x63 0 ${blk_sz}" "/tmp/afile" > /dev/null
-> -	date="$(date)"
-> -	find "${SCRATCH_MNT}/" -type f 2> /dev/null | head -n "${nr}" | while read f; do
-> -		setfattr -n "user.date" -v "${date}" "$f"
-> -		cat "/tmp/afile" >> "$f"
-> -		mv "$f" "$f.longer"
-> -	done
-> -	sync
-> -	rm -rf "/tmp/afile"
-> -
-> -	echo "+++ create files"
-> -	mkdir -p "${SCRATCH_MNT}/test.moo"
-> -	$XFS_IO_PROG -f -c 'pwrite -S 0x80 0 65536' "${SCRATCH_MNT}/test.moo/urk"
-> -	sync
-> -
-> -	echo "+++ remove files"
-> -	rm -rf "${SCRATCH_MNT}/test.moo"
-> -}
-> -
-> -# Try to access files after fuzzing
-> -_scratch_fuzz_test() {
-> -	echo "+++ ls -laR" >> $seqres.full
-> -	ls -laR "${SCRATCH_MNT}/test.1/" >/dev/null 2>&1
-> -
-> -	echo "+++ cat files" >> $seqres.full
-> -	(find "${SCRATCH_MNT}/test.1/" -type f -size -1048576k -print0 | xargs -0 cat) >/dev/null 2>&1
-> -}
-> -
->  # Fill a file system by repeatedly creating files in the given folder
->  # starting with the given file size.  Files are reduced in size when
->  # they can no longer fit until no more files can be created.
-> diff --git a/tests/ext4/006 b/tests/ext4/006
-> index 9662f50..bb9b7e5 100755
-> --- a/tests/ext4/006
-> +++ b/tests/ext4/006
-> @@ -43,6 +43,7 @@ _cleanup()
->  . ./common/filter
->  . ./common/attr
->  . ./common/populate
-> +. ./common/fuzzy
->  
->  if [ ! -x "$(which e2fuzz)" ]; then
->  	_notrun "Couldn't find e2fuzz"
-> diff --git a/tests/xfs/083 b/tests/xfs/083
-> index 39bd75f..e2b5f82 100755
-> --- a/tests/xfs/083
-> +++ b/tests/xfs/083
-> @@ -43,6 +43,7 @@ _cleanup()
->  . ./common/filter
->  . ./common/attr
->  . ./common/populate
-> +. ./common/fuzzy
->  
->  # real QA test starts here
->  _supported_fs xfs
+> > > Sure.  I will never enable them in any of the heavily used groups, so
+> > > that should be fine.  Though I do have a request -- the 13xx numbers are
+> > > set up so that if test (1300+x) fuzzes object X and tries to xfs_repair
+> > > it, then test (1340+x) fuzzes the same X but tries to xfs_scrub it.
+> > > Could you interweave them when you renumber the tests?
+> > 
+> > Perhaps that explains why there's no 1336-1340 :)
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Yep.
+> 
+> > > 
+> > > e.g. 1302 -> 510, 1342 -> 511, 1303 -> 512, 1343 -> 513?
+> > > 
+> > > That'll help me to keep together the repair & scrub fuzz tests.
+> > 
+> > Sure, I'll renumber the tests and let you review first before pushing
+> > them to upstream.
+> 
+> Ok, thanks!  I really appreciate it!
+
+This is what it's like after renumbering, I'm going to fold it to patch
+9/9 if you think it's OK.
+
+
+Moved "xfs/1300" to "xfs/349"
+
+Moved "xfs/1301" to "xfs/350".
+Moved "xfs/1302" to "xfs/352".
+Moved "xfs/1303" to "xfs/354".
+Moved "xfs/1304" to "xfs/356".
+Moved "xfs/1305" to "xfs/358".
+Moved "xfs/1306" to "xfs/360".
+Moved "xfs/1307" to "xfs/362".
+Moved "xfs/1308" to "xfs/364".
+Moved "xfs/1309" to "xfs/366".
+Moved "xfs/1310" to "xfs/368".
+Moved "xfs/1311" to "xfs/370".
+Moved "xfs/1312" to "xfs/372".
+Moved "xfs/1313" to "xfs/374".
+Moved "xfs/1314" to "xfs/376".
+Moved "xfs/1315" to "xfs/378".
+Moved "xfs/1316" to "xfs/380".
+Moved "xfs/1317" to "xfs/382".
+Moved "xfs/1318" to "xfs/384".
+Moved "xfs/1319" to "xfs/386".
+Moved "xfs/1320" to "xfs/388".
+Moved "xfs/1321" to "xfs/390".
+Moved "xfs/1322" to "xfs/392".
+Moved "xfs/1323" to "xfs/394".
+Moved "xfs/1324" to "xfs/396".
+Moved "xfs/1325" to "xfs/398".
+Moved "xfs/1326" to "xfs/400".
+Moved "xfs/1327" to "xfs/402".
+Moved "xfs/1328" to "xfs/404".
+Moved "xfs/1329" to "xfs/406".
+Moved "xfs/1330" to "xfs/408".
+Moved "xfs/1331" to "xfs/410".
+Moved "xfs/1332" to "xfs/412".
+Moved "xfs/1333" to "xfs/414".
+Moved "xfs/1334" to "xfs/416".
+Moved "xfs/1335" to "xfs/418".
+
+Moved "xfs/1341" to "xfs/351".
+Moved "xfs/1342" to "xfs/353".
+Moved "xfs/1343" to "xfs/355".
+Moved "xfs/1344" to "xfs/357".
+Moved "xfs/1345" to "xfs/359".
+Moved "xfs/1346" to "xfs/361".
+Moved "xfs/1347" to "xfs/363".
+Moved "xfs/1348" to "xfs/365".
+Moved "xfs/1349" to "xfs/367".
+Moved "xfs/1350" to "xfs/369".
+Moved "xfs/1351" to "xfs/371".
+Moved "xfs/1352" to "xfs/373".
+Moved "xfs/1353" to "xfs/375".
+Moved "xfs/1354" to "xfs/377".
+Moved "xfs/1355" to "xfs/379".
+Moved "xfs/1356" to "xfs/381".
+Moved "xfs/1357" to "xfs/383".
+Moved "xfs/1358" to "xfs/385".
+Moved "xfs/1359" to "xfs/387".
+Moved "xfs/1360" to "xfs/389".
+Moved "xfs/1361" to "xfs/391".
+Moved "xfs/1362" to "xfs/393".
+Moved "xfs/1363" to "xfs/395".
+Moved "xfs/1364" to "xfs/397".
+Moved "xfs/1365" to "xfs/399".
+Moved "xfs/1366" to "xfs/401".
+Moved "xfs/1367" to "xfs/403".
+Moved "xfs/1368" to "xfs/405".
+Moved "xfs/1369" to "xfs/407".
+Moved "xfs/1370" to "xfs/409".
+Moved "xfs/1371" to "xfs/411".
+Moved "xfs/1372" to "xfs/413".
+Moved "xfs/1373" to "xfs/415".
+Moved "xfs/1374" to "xfs/417".
+
+Thanks,
+Eryu
