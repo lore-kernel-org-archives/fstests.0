@@ -1,115 +1,200 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:36226 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752792AbdAZGol (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 26 Jan 2017 01:44:41 -0500
-Date: Wed, 25 Jan 2017 22:44:34 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v5 0/9] xfstests: online scrub/repair support
-Message-ID: <20170126064434.GD2584@birch.djwong.org>
-References: <148498621936.17109.4249711513404036449.stgit@birch.djwong.org>
- <20170126050838.GN1859@eguan.usersys.redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170126050838.GN1859@eguan.usersys.redhat.com>
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:36721 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754771AbdA0JXV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 27 Jan 2017 04:23:21 -0500
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH v2 1/3] overlay: configure base fs mount point for running tests
+Date: Fri, 27 Jan 2017 10:56:03 +0200
+Message-Id: <1485507365-29012-2-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1485507365-29012-1-git-send-email-amir73il@gmail.com>
+References: <1485507365-29012-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 26, 2017 at 01:08:38PM +0800, Eryu Guan wrote:
-> On Sat, Jan 21, 2017 at 12:10:19AM -0800, Darrick J. Wong wrote:
-> > Hi all,
-> > 
-> > This is the fifth revision of a patchset that adds to XFS userland tools
-> > support for online metadata scrubbing and repair.
-> > 
-> > The new patches in this series do three things: first, they expand the
-> > filesystem populate commands inside xfstests to be able to create all
-> > types of XFS metadata.  Second, they create a bunch of xfs_db wrapper
-> > functions to iterate all fields present in a given metadata object and
-> > fuzz them in various ways.  Finally, for each metadata object type there
-> > is a separate test that iteratively fuzzes all fields of that object and
-> > runs it through the mount/scrub/repair loop to see what happens.
-> > 
-> > If you're going to start using this mess, you probably ought to just
-> > pull from my github trees for kernel[1], xfsprogs[2], and xfstests[3].
-> 
-> Are your github trees synced with kernel.org trees? Seems so, and I did
-> my tests with your kernel.org trees.
+Instead of setting the vars TEST/SCRATCH_DEV to overlay base dirs,
+allow setting the vars SCRATCH/TEST_BASE_MNT, to configure where
+the base fs is mounted and where overlay dirs will be created.
+For example:
 
-Yes, they are.  (Or at least they should be, if I did it correctly.)
+-export TEST_DEV=/mnt/base/test/ovl
+-export SCRATCH_DEV=/mnt/base/scratch/ovl
++export TEST_BASE_MNT=/mnt/base/test
++export SCRATCH_BASE_MNT=/mnt/base/scratch
+export TEST_DIR=/mnt/test
+export SCRATCH_MNT=/mnt/scratch
+export FSTYP=overlay
 
-> > The kernel patches in the git trees should apply to 4.10-rc4; xfsprogs
-> > patches to for-next; and xfstest to master.
-> > 
-> > The patches have survived all auto group xfstests both with scrub-only
-> > mode and also a special debugging mode to xfs_scrub that forces it to
-> > rebuild the metadata structures even if they're not damaged.
-> 
-> I have trouble finishing running all the tests so far, the tests need
-> long time to run and in some tests xfs_repair or xfs_scrub are just
+The new canonical vars SCRATCH/TEST_BASE_DIR are defined to refer to
+overlay base dir explicitly, whether it was set by old or new config
+method. Tests should always use these canonical vars and not the fake
+SCRATCH/TEST_DEV vars when referring to overlay based dir.
 
-Yes, the amount of dmesg noise slows the tests wayyyyyy down.  One of
-the newer patches reduces the amount of spew when the scrubbers are
-running.
+An upcoming change is going to support mount/umount of base fs.
 
-(FWIW when I run them I have a debug patch that shuts up all the
-warnings.)
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ common/config | 52 +++++++++++++++++++++++++++++++++++++++++++++++++++-
+ common/rc     | 20 +++++++++++---------
+ 2 files changed, 62 insertions(+), 10 deletions(-)
 
-> spinning there, sometimes I can kill them to make test continue,
+diff --git a/common/config b/common/config
+index 0706aca..db5721c 100644
+--- a/common/config
++++ b/common/config
+@@ -35,6 +35,8 @@
+ # RMT_TAPE_DEV -    the remote tape device for the xfsdump tests
+ # RMT_IRIXTAPE_DEV- the IRIX remote tape device for the xfsdump tests
+ # RMT_TAPE_USER -   remote user for tape device
++# TEST_BASE_MNT -   mount point for base fs of overlay test dirs
++# SCRATCH_BASE_MNT- mount point for base fs of overlay scratch dirs
+ #
+ # - These can be added to $HOST_CONFIG_DIR (witch default to ./config)
+ #   below or a separate local configuration file can be used (using
+@@ -77,6 +79,9 @@ export XFS_MKFS_OPTIONS=${XFS_MKFS_OPTIONS:=-bsize=4096}
+ export TIME_FACTOR=${TIME_FACTOR:=1}
+ export LOAD_FACTOR=${LOAD_FACTOR:=1}
+ export DEBUGFS_MNT=${DEBUGFS_MNT:="/sys/kernel/debug"}
++# directory inside TEST/SCRATCH_BASE_MNT where overlay dirs are created
++export OVERLAY_BASE_DIR=${OVERLAY_BASE_DIR:="ovl"}
++# directories created inside TEST/SCRATCH_BASE_DIR
+ export OVERLAY_UPPER_DIR=${OVERLAY_UPPER_DIR:="upper"}
+ export OVERLAY_LOWER_DIR=${OVERLAY_LOWER_DIR:="lower"}
+ export OVERLAY_WORK_DIR=${OVERLAY_WORK_DIR:="work"}
+@@ -443,7 +448,7 @@ _check_device()
+ 	echo $dev | grep -qE ":|//" > /dev/null 2>&1
+ 	network_dev=$?
+ 	if [ "$FSTYP" == "overlay" ]; then
+-		if [ ! -d "$dev" ]; then
++		if [ -z "$TEST_BASE_MNT" -a ! -d "$dev" ]; then
+ 			_fatal "common/config: $name ($dev) is not a directory for overlay"
+ 		fi
+ 	elif [ ! -b "$dev" -a "$network_dev" != "0" ]; then
+@@ -451,6 +456,46 @@ _check_device()
+ 	fi
+ }
+ 
++# Set SCRATCH/TEST_BASE_DIR either from legacy TEST/SCRATCH_DEV
++# Or by deriving them from base fs if SCRATCH/TEST_BASE_MNT are defined.
++# Tests should always use SCRATCH/TEST_BASE_DIR when referering to
++# overlay base dir explicitly.
++_config_overlay()
++{
++	# There are 2 options for testing overlayfs:
++	#
++	# 1. (legacy) set SCRATCH/TEST_DEV to existing directories
++	#    on an already mounted fs.
++	#
++	[ -z "$TEST_DEV" ] || export TEST_BASE_DIR="$TEST_DEV"
++	[ -z "$SCRATCH_DEV" ] || export SCRATCH_BASE_DIR="$SCRATCH_DEV"
++
++	# 2. set SCRATCH/TEST_BASE_MNT to configure base fs.
++	#    SCRATCH/TEST_DEV are derived from SCRATCH/TEST_BASE_MNT
++	#    and therein, overlay fs directories will be created.
++	[ -n "$TEST_BASE_MNT" ] || return
++
++	if [ ! -d "$TEST_BASE_MNT" ]; then
++		echo "common/config: Error: \$TEST_BASE_MNT ($TEST_BASE_MNT) is not a directory"
++		exit 1
++	fi
++
++	export TEST_BASE_DIR="$TEST_BASE_MNT/$OVERLAY_BASE_DIR"
++	# Set TEST_DEV to base dir to satisfy common helpers
++	export TEST_DEV="$TEST_BASE_DIR"
++
++	[ -n "$SCRATCH_BASE_MNT" ] || return
++
++	if [ ! -d "$SCRATCH_BASE_MNT" ]; then
++		echo "common/config: Error: \$SCRATCH_BASE_MNT ($SCRATCH_BASE_MNT) is not a directory"
++		exit 1
++	fi
++
++	export SCRATCH_BASE_DIR="$SCRATCH_BASE_MNT/$OVERLAY_BASE_DIR"
++	# Set SCRATCH_DEV to base dir to satisfy common helpers
++	export SCRATCH_DEV="$SCRATCH_BASE_DIR"
++}
++
+ # Parse config section options. This function will parse all the configuration
+ # within a single section which name is passed as an argument. For section
+ # name format see comments in get_config_sections().
+@@ -525,6 +570,11 @@ get_next_config() {
+ 		export RESULT_BASE="$here/results/"
+ 	fi
+ 
++	# Maybe derive TEST_DEV from TEST_BASE_MNT
++	if [ "$FSTYP" == "overlay" ]; then
++		_config_overlay
++	fi
++
+ 	#  Mandatory Config values.
+ 	MC=""
+ 	[ -z "$EMAIL" ]          && MC="$MC EMAIL"
+diff --git a/common/rc b/common/rc
+index 862bc04..f5ab869 100644
+--- a/common/rc
++++ b/common/rc
+@@ -257,7 +257,7 @@ _scratch_mount_options()
+ 	_scratch_options mount
+ 
+ 	if [ "$FSTYP" == "overlay" ]; then
+-		echo `_overlay_mount_options $SCRATCH_DEV`
++		echo `_overlay_mount_options $SCRATCH_BASE_DIR`
+ 		return 0
+ 	fi
+ 	echo `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
+@@ -322,12 +322,12 @@ _overlay_mount()
+ 
+ _overlay_test_mount()
+ {
+-	_overlay_mount $TEST_DEV $TEST_DIR $*
++	_overlay_mount $TEST_BASE_DIR $TEST_DIR $*
+ }
+ 
+ _overlay_scratch_mount()
+ {
+-	_overlay_mount $SCRATCH_DEV $SCRATCH_MNT $*
++	_overlay_mount $SCRATCH_BASE_DIR $SCRATCH_MNT $*
+ }
+ 
+ _overlay_test_unmount()
+@@ -641,10 +641,12 @@ _scratch_cleanup_files()
+ {
+ 	case $FSTYP in
+ 	overlay)
+-		# $SCRATCH_DEV is a valid directory in overlay case
+-		rm -rf $SCRATCH_DEV/*
++		# Avoid rm -rf /* if we messed up
++		[ -n "$SCRATCH_BASE_DIR" ] || return
++		rm -rf $SCRATCH_BASE_DIR/*
+ 		;;
+ 	*)
++		[ -n "$SCRATCH_MNT" ] || return
+ 		_scratch_mount
+ 		rm -rf $SCRATCH_MNT/*
+ 		_scratch_unmount
+@@ -1343,8 +1345,8 @@ _require_scratch_nocheck()
+ 		fi
+ 		;;
+ 	overlay)
+-		if [ -z "$SCRATCH_DEV" -o ! -d "$SCRATCH_DEV" ]; then
+-			_notrun "this test requires a valid \$SCRATCH_DEV as ovl base dir"
++		if [ -z "$SCRATCH_BASE_DIR" -o ! -d "$SCRATCH_BASE_DIR" ]; then
++			_notrun "this test requires a valid \$SCRATCH_BASE_DIR as ovl base dir"
+ 		fi
+ 		if [ ! -d "$SCRATCH_MNT" ]; then
+ 			_notrun "this test requires a valid \$SCRATCH_MNT"
+@@ -1428,8 +1430,8 @@ _require_test()
+ 		fi
+ 		;;
+ 	overlay)
+-		if [ -z "$TEST_DEV" -o ! -d "$TEST_DEV" ]; then
+-			_notrun "this test requires a valid \$TEST_DEV as ovl base dir"
++		if [ -z "$TEST_BASE_DIR" -o ! -d "$TEST_BASE_DIR" ]; then
++			_notrun "this test requires a valid \$TEST_BASE_DIR as ovl base dir"
+ 		fi
+ 		if [ ! -d "$TEST_DIR" ]; then
+ 			_notrun "this test requires a valid \$TEST_DIR"
+-- 
+2.7.4
 
-There are some undiagnosed deadlocks in xfs_repair, and some OOM
-problems in xfs_db that didn't get fixed until recently.
-
-> sometimes I can't (e.g. xfs/1312, I tried to kill the xfs_scrub process,
-> but it became <defunc>).
-
-That's odd.  Next time that happens can you sysrq-t to find out where
-the scrub threads are stuck, please?
-
-> And in most tests I have run, I see such failures:
-> 
->     +scrub didn't fail with length = ones.
->     +scrub didn't fail with length = firstbit.
->     +scrub didn't fail with length = middlebit.
->     +scrub didn't fail with length = lastbit.
->     ....
-> 
-> Not sure if that's expected?
-
-Yes, that's expected.  The scrub routines expect that the repairing
-program (xfs_{scrub,repair}) will complain about the corrupt field,
-repair it, and a subsequent re-run will exit cleanly.  There are quite a
-few fields like uid/gid and timestamps that have no inherent meaning to
-XFS.  As a result, there's no problem to be detected.  Some of the
-fuzzes will prevent the fs from mounting, which causes other error
-messages.
-
-The rest could be undiagnosed problems in other parts of XFS (or scrub).
-I've not had time to triage a lot of it.  I've been recording exactly
-what and where things fail and I'll have a look at them as time allows.
-
-> I also hit xfs_scrub and xfs_repair double free bug in xfs/1312 (perhaps
-> that's why I can't kill it).
-
-Maybe.  In theory the page refcounts get reset, I think, but I've seen
-the VM crash with double-fault errors and other weirdness that seem to
-go away when the refcount bugs go away.
-
-> OTOH, all these failures/issues seem like kernel or userspace bug, I
-> went through all the patches and new tests and I didn't find anything
-> wrong obviously. So I think it's fine to merge them in this week's
-> update. Unless you have a second thought?
-
-Sure.  I will never enable them in any of the heavily used groups, so
-that should be fine.  Though I do have a request -- the 13xx numbers are
-set up so that if test (1300+x) fuzzes object X and tries to xfs_repair
-it, then test (1340+x) fuzzes the same X but tries to xfs_scrub it.
-Could you interweave them when you renumber the tests?
-
-e.g. 1302 -> 510, 1342 -> 511, 1303 -> 512, 1343 -> 513?
-
-That'll help me to keep together the repair & scrub fuzz tests.
-
---D
