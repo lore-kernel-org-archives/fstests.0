@@ -1,101 +1,52 @@
-Received: from mail-oi0-f66.google.com ([209.85.218.66]:33536 "EHLO
-        mail-oi0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751630AbdAYKdH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 25 Jan 2017 05:33:07 -0500
+Received: from mail-io0-f175.google.com ([209.85.223.175]:36572 "EHLO
+        mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754474AbdA0IlR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 27 Jan 2017 03:41:17 -0500
+Received: by mail-io0-f175.google.com with SMTP id j13so55851570iod.3
+        for <fstests@vger.kernel.org>; Fri, 27 Jan 2017 00:41:10 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <20170125100535.GI1859@eguan.usersys.redhat.com>
-References: <1485327084-26190-1-git-send-email-amir73il@gmail.com> <20170125100535.GI1859@eguan.usersys.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 25 Jan 2017 12:33:06 +0200
-Message-ID: <CAOQ4uxhivG451A0Oh_ajYcto03FVM87OOFR9ffb+dnPWe5mZHA@mail.gmail.com>
-Subject: Re: [RFC][PATCH] common: mount overlay base fs for running tests
+In-Reply-To: <20170127034557.l6kzxxjh2md2rfgs@thunk.org>
+References: <CAMHSBOWq5oFTgpZ1hT_Nd7ebVc2nEp8yLp3CFB146fPmizOkEQ@mail.gmail.com>
+ <20170127034557.l6kzxxjh2md2rfgs@thunk.org>
+From: Mike Frysinger <vapier@chromium.org>
+Date: Thu, 26 Jan 2017 22:40:39 -1000
+Message-ID: <CAAbOSckhztYa6q56rzATXOKHJS6o4WEZPicMEc9RdOUHuWELdQ@mail.gmail.com>
+Subject: Re: xfstest and chromeos
 Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Gwendal Grignou <gwendal@chromium.org>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jan 25, 2017 at 12:05 PM, Eryu Guan <eguan@redhat.com> wrote:
-> On Wed, Jan 25, 2017 at 08:51:24AM +0200, Amir Goldstein wrote:
->> Instead of setting the fake TEST/SCRATCH_DEV vars to existing overlay
->> directories, allow setting the vars OVERLAY_BASE_DEV/MNT, to configure
->> the base fs where overlay directories are created. For example:
->>
->> -export TEST_DEV=/mnt/xfs/ovl/test
->> -export SCRATCH_DEV=/mnt/xfs/ovl/scratch
->> +export OVERLAY_BASE_DEV=/dev/mapper/test-xfs
->> +export OVERLAY_BASE_MNT=/mnt/xfs
->> export TEST_DIR=/mnt/test
->> export SCRATCH_MNT=/mnt/scratch
->> export FSTYP=overlay
->>
->> With this change, the base fs is mounted before running the tests
->> unmounted after running the tests and recycled on _test_cycle_mount.
->> This helps catching overlayfs bugs related to leaking objects in
->> underlying (base) fs.
+On Thu, Jan 26, 2017 at 5:45 PM, Theodore Ts'o wrote:
+> On Mon, Jan 23, 2017 at 09:57:15AM -0800, Gwendal Grignou wrote:
+>> https://chromium-review.googlesource.com/#/c/424191
+>> - Chromeos needs libtool to (cross-)compile packages and put them at
+>> the right place. I needed to move archived aclocal.m4 to acinclude.m4.
+>> Does it make sense to require aclocal to run to compile xfstests?
 >
-> This looks useful to me, actually overlay/005 is one test that is
-> testing a memleak bug, but it uses loop device as a underlying fs and
-> umount the loop dev to trigger memleak bug.
+> I'm kind of curious why you need libtool to be able to cross-compile
+> packages.
 >
-> But having two methods to config overlayfs testing worries me a bit, it
-> can be confusing to users. At least we should document them well.
-> Perhaps eventually we can kill the old way?
+> I've been cross-compiling xfstests to armhf, ppcle, and arm64 without
+> any issues.
 >
+> See:   https://git.kernel.org/cgit/fs/ext2/xfstests-bld.git/tree/build-all
+>
+> Are you trying to build with shared libraries, or some such?
 
-I would love to kill the old way and replace all explicit references to
-TEST/SCRATCH_DEV as directory in tests/overlay with
-TEST/SCRATCH_BASE_DIR
-I'll let you define the phasing out procedure...
-Let me know if you want me to add a "deprecated!!!" warning for
-old style config.
+it isn't about "needing" libtool, nor what we're attempting to do.  we
+don't care if xfstools uses libtool or plain automake rules or
+something else.  however, xfstests itself already utilizes `libtool`
+to compile+link things, and indeed to also create libs like libtest.la
+and libdmtest.la.
 
->>
->> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
->> ---
->>  common/config | 35 ++++++++++++++++++++++++++++++++++-
->>  common/rc     |  8 ++++++++
->>  2 files changed, 42 insertions(+), 1 deletion(-)
->>
->> Eryu,
->>
->> I was planning to also support _test_mkfs for base fs (as kvm-xfstests does),
->> but decided to make a RFC rest stop after _test_mount, which seems useful in
->> its own right.
->
-> I'm not sure about this. One down side of doing this is it introduces
-> the complexity of handling FSTYP and MKFS_OPTIONS of underlying fs,
-> which seems way too complex at this point. I think a user pre-mkfs'ed
-> device would be sufficient?
->
+the host `libtool` is specifically generated with settings that target
+the host system only.  just grep for your tuple in there (e.g. `grep
+x86_64 /usr/bin/libtool`) to see.  for simpler builds, the differences
+might go unnoticed as a happy accident.
 
-Me too. That's why I stopped here.
-
->>
->> The main point to consider is whether it is worth separating OVERLAY_BASE_DEV
->> to test and scratch base devices. This patch (with shared dev) is much simpler
->> to configure to I am sending it out to see if folk think it is sufficiently
->> useful as is.
->
-> I'd prefer separating test and scratch devices, so we have a fine
-> control on them in tests. One problem with this shared dev is it's
-> possible for either _overlay_test_unmount or _overlay_scratch_unmount to
-> unmount the underlying fs, while the other overlay is still mounted.
->
-> That's a strange behavior, I expected umount the base dev return EBUSY
-> in this case, but it doesn't (but a subsequent mkfs does return EBUSY,
-> so the device is not really usable).  I reported this bug in RH bugzilla
-> (a private bug) and it was closed as WONTFIX.
->
-
-Right... overlay holds a reference to a private clone of the base fs mount.
-It's true that the only reason this patch is "correct" is because
-there is no test
-(at the moment) that calls _test_cycle_mount and also mounts scratch,
-so I agree that separating is the right thing to do, I just hate the
-variable names
-it implies (OVERLAY_SCRATCH_BASE_DEV???)
-Would you accept that I use variable names TEST/SCRATCH_BASE_* without
-the OVERLAY prefix?
-I guess BASE_ is a generic enough name to describe testing of any
-stackable fs (e.g. ecryptfs) although I doubt anyone is going to add those.
+by using LT_INIT in autoconf, it'll include a libtool script that
+configure will create & use automatically tailored for the current
+target.
+-mike
