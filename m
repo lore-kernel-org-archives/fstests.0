@@ -1,58 +1,69 @@
-Received: from mail-wm0-f52.google.com ([74.125.82.52]:35057 "EHLO
-        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751124AbdA2N4l (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 29 Jan 2017 08:56:41 -0500
-Received: by mail-wm0-f52.google.com with SMTP id r126so179133344wmr.0
-        for <fstests@vger.kernel.org>; Sun, 29 Jan 2017 05:56:40 -0800 (PST)
-From: Omer Zilberberg <omzg@plexistor.com>
-Subject: [PATCH] generic/074: _cleanup potentially removes local FS files
-Date: Sun, 29 Jan 2017 15:56:20 +0200
-Message-Id: <20170129135620.25464-1-omzg@plexistor.com>
+Received: from mail-wj0-f193.google.com ([209.85.210.193]:33493 "EHLO
+        mail-wj0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754418AbdA0J1d (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 27 Jan 2017 04:27:33 -0500
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH v2 0/3] xfstests: mount cycle overlay base fs
+Date: Fri, 27 Jan 2017 10:56:02 +0200
+Message-Id: <1485507365-29012-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Omer Zilberberg <omzg@plexistor.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-fstest_dir is set after _cleanup() is defined and _require_test is
-called. If _require_test fails (due to some unrelated bug in tested FS),
-_cleanup will attempt to remove $fstest_dir.*, which expands to .*
-This has the unfortunate effect of removing xfstests' .git and
-.gitignore.
+Eryu,
 
-Here is the 074.out.bad file for this case:
-QA output created by 074
-mount: permission denied
-common/rc: retrying test device mount with external set
-mount: permission denied
-common/rc: could not mount /dev/pmem0 on /mnt
-rm: refusing to remove '.' or '..' directory: skipping '.'
-rm: refusing to remove '.' or '..' directory: skipping '..'
-----
+The main motivation for this work was to help catch overlayfs bugs
+related to leaking objects in underlying (base) fs.
+Along the way, it also addresses the config of fake TEST/SCRATCH_DEV
+to refer to directories.
 
-The only other test which could face the same problem is generic/285.
-However, that test defines _cleanup after the _require* calls, and so on
-_require_test failure, 285.out.bad contains the harmless:
-./common/rc: line 1: _cleanup: command not found
+I split the patches to 2 main changes:
+1) convert old config with config of already mounted test/scratch base fs
+   (backward compat with old config is maintained)
+2) (optional) configure blockdev of base fs for mount cycling base fs
 
-Signed-off-by: Omer Zilberberg <omzg@plexistor.com>
----
- tests/generic/074 | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+I tested -g quick with all 3 configuraions:
+- old (*_DEV)
+- new (only *_BASE_MNT)
+- new (*_BASE_MNT and *_BASE_DEV)
 
-diff --git a/tests/generic/074 b/tests/generic/074
-index 55264bd..ef84263 100755
---- a/tests/generic/074
-+++ b/tests/generic/074
-@@ -33,7 +33,8 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
- 
- _cleanup()
- {
--    rm -rf $fstest_dir.* $tmp.*
-+    [ -n "$fstest_dir" ] && rm -rf $fstest_dir.*
-+    rm -rf $tmp.*
- }
- 
- # get standard environment, filters and checks
+v2:
+- Test and scratch base dirs each have thier own base fs
+- Support mount cycles of base fs for scratch tests
+
+v1:
+- Both test and scratch base dirs on a single base fs
+
+Amir Goldstein (3):
+  overlay: configure base fs mount point for running tests
+  overlay: use SCRATCH_BASE_DIR instead of SCRATCH_DEV
+  overlay: mount/unmount base fs before/after running tests
+
+ common/config     | 56 ++++++++++++++++++++++++++++++++++++++++++++++++-
+ common/rc         | 62 +++++++++++++++++++++++++++++++++++++++++++++++--------
+ tests/overlay/001 |  7 +++----
+ tests/overlay/002 |  2 +-
+ tests/overlay/003 |  5 +++--
+ tests/overlay/004 |  7 ++++---
+ tests/overlay/005 | 30 +++++++++++++--------------
+ tests/overlay/006 |  8 +++----
+ tests/overlay/008 |  4 ++--
+ tests/overlay/009 |  2 +-
+ tests/overlay/010 | 10 ++++-----
+ tests/overlay/011 |  4 ++--
+ tests/overlay/012 |  4 ++--
+ tests/overlay/013 |  4 ++--
+ tests/overlay/014 | 19 +++++++++--------
+ tests/overlay/015 |  2 +-
+ tests/overlay/016 |  2 +-
+ tests/overlay/017 |  2 +-
+ tests/overlay/018 |  2 +-
+ tests/overlay/019 |  2 +-
+ tests/overlay/020 |  2 +-
+ tests/overlay/021 |  6 +++---
+ 22 files changed, 171 insertions(+), 71 deletions(-)
+
 -- 
-2.9.3
+2.7.4
 
