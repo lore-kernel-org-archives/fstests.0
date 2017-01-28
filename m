@@ -1,132 +1,243 @@
-Received: from mail-pf0-f177.google.com ([209.85.192.177]:35179 "EHLO
-        mail-pf0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751036AbdAYQof (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 25 Jan 2017 11:44:35 -0500
-Received: by mail-pf0-f177.google.com with SMTP id f144so59394274pfa.2
-        for <fstests@vger.kernel.org>; Wed, 25 Jan 2017 08:44:35 -0800 (PST)
-From: Omar Sandoval <osandov@osandov.com>
-Subject: [PATCH v2] btrfs: add regression test for setxattr on subvolume directory
-Date: Wed, 25 Jan 2017 08:44:01 -0800
-Message-Id: <e305204790623c5b7eb39a5f76e091af529c6fa1.1485362533.git.osandov@fb.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:41310 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751171AbdA1RiT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 28 Jan 2017 12:38:19 -0500
+Subject: [PATCH 1/3] xfs/263: don't hardcode inode numbers in output
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Sat, 28 Jan 2017 09:38:12 -0800
+Message-ID: <148562509264.30594.7506967863745489318.stgit@birch.djwong.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, kernel-team@fb.com
+To: eguan@redhat.com, darrick.wong@oracle.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Omar Sandoval <osandov@fb.com>
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-This is a regression test for "Btrfs: disable xattr operations on
-subvolume directories". On v4.9, it will result in an aborted
-transaction.
+Since we can't control the inode number assignments when creating files,
+don't hardcode them in the golden output.
 
-Reviewed-by: Anand Jain <anand.jain@oracle.com>
-Signed-off-by: Omar Sandoval <osandov@fb.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
-Changes since v1: fix executable permissions, use $BTRFS_UTIL_PROG, add
-Anand's Reviewed-by.
+ tests/xfs/263     |    6 +++++-
+ tests/xfs/263.out |   52 ++++++++++++++++++++++++++--------------------------
+ 2 files changed, 31 insertions(+), 27 deletions(-)
 
- tests/btrfs/047     | 69 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/047.out |  2 ++
- tests/btrfs/group   |  1 +
- 3 files changed, 72 insertions(+)
- create mode 100755 tests/btrfs/047
- create mode 100644 tests/btrfs/047.out
 
-diff --git a/tests/btrfs/047 b/tests/btrfs/047
-new file mode 100755
-index 00000000..411f1aff
---- /dev/null
-+++ b/tests/btrfs/047
-@@ -0,0 +1,69 @@
-+#! /bin/bash
-+# FS QA Test 047
-+#
-+# Test that we can't set xattrs on subvolume placeholder directories.
-+# Regression test for Btrfs: disable xattr operations on subvolume directories.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Facebook.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
+diff --git a/tests/xfs/263 b/tests/xfs/263
+index 1dc47ae..7aebf90 100755
+--- a/tests/xfs/263
++++ b/tests/xfs/263
+@@ -71,6 +71,10 @@ function option_string()
+ 	echo $OPT
+ }
+ 
++filter_quota_state() {
++	sed -e 's/Inode: #[0-9]\+/Inode #XXX/g' | _filter_scratch
 +}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_attrs
-+_require_scratch
-+
-+_scratch_mkfs >/dev/null 2>&1
-+_scratch_mount
-+
-+$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/parent" >>$seqres.full
-+$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/parent/child" >>$seqres.full
-+$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/parent" "$SCRATCH_MNT/snapshot" >>$seqres.full
-+
-+$SETFATTR_PROG -n user.test -v foo "$SCRATCH_MNT/snapshot/child" |& _filter_scratch
-+
-+# The original bug resulted in bogus delayed inodes being inserted, so run the
-+# delayed inodes by doing a commit.
-+$BTRFS_UTIL_PROG filesystem sync "$SCRATCH_MNT" >>$seqres.full
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/047.out b/tests/btrfs/047.out
-new file mode 100644
-index 00000000..48555e90
---- /dev/null
-+++ b/tests/btrfs/047.out
-@@ -0,0 +1,2 @@
-+QA output created by 047
-+setfattr: SCRATCH_MNT/snapshot/child: Operation not supported
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 88fb8db4..69451c6b 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -49,6 +49,7 @@
- 044 auto quick send
- 045 auto quick send
- 046 auto quick send
-+047 auto quick snapshot attr
- 048 auto quick
- 049 auto quick
- 050 auto quick send
--- 
-2.11.0
+ function test_all_state()
+ {
+ 	for I in `seq 0 7`; do
+@@ -79,7 +83,7 @@ function test_all_state()
+ 		# Some combinations won't mount on V4 supers (grp + prj)
+ 		_qmount_option "$OPTIONS"
+ 		_scratch_mount &>> $seqres.full || continue
+-		$XFS_QUOTA_PROG -x -c "state" $SCRATCH_MNT | _filter_scratch
++		$XFS_QUOTA_PROG -x -c "state" $SCRATCH_MNT | filter_quota_state
+ 		_scratch_unmount
+ 	done
+ }
+diff --git a/tests/xfs/263.out b/tests/xfs/263.out
+index 70454dd..531d45d 100644
+--- a/tests/xfs/263.out
++++ b/tests/xfs/263.out
+@@ -5,7 +5,7 @@ QA output created by 263
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+   Enforcement: ON
+-  Inode: #131 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Group quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: OFF
+   Enforcement: OFF
+@@ -21,11 +21,11 @@ Realtime Blocks grace time: [7 days]
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: OFF
+   Enforcement: OFF
+-  Inode: #131 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Group quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+   Enforcement: ON
+-  Inode: #132 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Project quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: OFF
+   Enforcement: OFF
+@@ -37,11 +37,11 @@ Realtime Blocks grace time: [7 days]
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+   Enforcement: ON
+-  Inode: #131 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Group quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+   Enforcement: ON
+-  Inode: #132 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Project quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: OFF
+   Enforcement: OFF
+@@ -53,7 +53,7 @@ Realtime Blocks grace time: [7 days]
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: OFF
+   Enforcement: OFF
+-  Inode: #131 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Group quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: OFF
+   Enforcement: OFF
+@@ -61,7 +61,7 @@ Group quota state on SCRATCH_MNT (SCRATCH_DEV)
+ Project quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+   Enforcement: ON
+-  Inode: #132 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Blocks grace time: [7 days]
+ Inodes grace time: [7 days]
+ Realtime Blocks grace time: [7 days]
+@@ -69,7 +69,7 @@ Realtime Blocks grace time: [7 days]
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+   Enforcement: ON
+-  Inode: #131 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Group quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: OFF
+   Enforcement: OFF
+@@ -77,7 +77,7 @@ Group quota state on SCRATCH_MNT (SCRATCH_DEV)
+ Project quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+   Enforcement: ON
+-  Inode: #132 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Blocks grace time: [7 days]
+ Inodes grace time: [7 days]
+ Realtime Blocks grace time: [7 days]
+@@ -89,7 +89,7 @@ Realtime Blocks grace time: [7 days]
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+   Enforcement: ON
+-  Inode: #99 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Group quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: OFF
+   Enforcement: OFF
+@@ -105,11 +105,11 @@ Realtime Blocks grace time: [7 days]
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: OFF
+   Enforcement: OFF
+-  Inode: #99 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Group quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+   Enforcement: ON
+-  Inode: #100 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Project quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: OFF
+   Enforcement: OFF
+@@ -121,11 +121,11 @@ Realtime Blocks grace time: [7 days]
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+   Enforcement: ON
+-  Inode: #99 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Group quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+   Enforcement: ON
+-  Inode: #100 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Project quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: OFF
+   Enforcement: OFF
+@@ -137,15 +137,15 @@ Realtime Blocks grace time: [7 days]
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: OFF
+   Enforcement: OFF
+-  Inode: #99 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Group quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: OFF
+   Enforcement: OFF
+-  Inode: #100 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Project quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+   Enforcement: ON
+-  Inode: #101 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Blocks grace time: [7 days]
+ Inodes grace time: [7 days]
+ Realtime Blocks grace time: [7 days]
+@@ -153,15 +153,15 @@ Realtime Blocks grace time: [7 days]
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+   Enforcement: ON
+-  Inode: #99 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Group quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: OFF
+   Enforcement: OFF
+-  Inode: #100 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Project quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+   Enforcement: ON
+-  Inode: #101 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Blocks grace time: [7 days]
+ Inodes grace time: [7 days]
+ Realtime Blocks grace time: [7 days]
+@@ -169,15 +169,15 @@ Realtime Blocks grace time: [7 days]
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: OFF
+   Enforcement: OFF
+-  Inode: #99 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Group quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+   Enforcement: ON
+-  Inode: #100 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Project quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+   Enforcement: ON
+-  Inode: #101 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Blocks grace time: [7 days]
+ Inodes grace time: [7 days]
+ Realtime Blocks grace time: [7 days]
+@@ -185,15 +185,15 @@ Realtime Blocks grace time: [7 days]
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+   Enforcement: ON
+-  Inode: #99 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Group quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+   Enforcement: ON
+-  Inode: #100 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Project quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+   Enforcement: ON
+-  Inode: #101 (1 blocks, 1 extents)
++  Inode #XXX (1 blocks, 1 extents)
+ Blocks grace time: [7 days]
+ Inodes grace time: [7 days]
+ Realtime Blocks grace time: [7 days]
 
