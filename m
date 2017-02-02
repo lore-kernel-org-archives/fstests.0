@@ -1,151 +1,71 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:29362 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751206AbdBBUSc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 2 Feb 2017 15:18:32 -0500
-Date: Thu, 2 Feb 2017 12:17:47 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] generic/407: check that destination timestamps are
- updated on clone
-Message-ID: <20170202201747.GA6280@birch.djwong.org>
-References: <20170202162755.21101-1-hch@lst.de>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170202162755.21101-1-hch@lst.de>
+Received: from imap.thunk.org ([74.207.234.97]:54690 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751823AbdBBW7s (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 2 Feb 2017 17:59:48 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: [RFC/PATCH 0/3] Implement XFS's GOINGDOWN ioctl for ext4
+Date: Thu,  2 Feb 2017 17:59:21 -0500
+Message-Id: <20170202225924.19301-1-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: fstests@vger.kernel.org
+To: Ext4 Developers List <linux-ext4@vger.kernel.org>
+Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Feb 02, 2017 at 05:27:55PM +0100, Christoph Hellwig wrote:
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->  tests/generic/407     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/407.out |  2 ++
->  tests/generic/group   |  1 +
->  3 files changed, 88 insertions(+)
->  create mode 100755 tests/generic/407
->  create mode 100644 tests/generic/407.out
-> 
-> diff --git a/tests/generic/407 b/tests/generic/407
-> new file mode 100755
-> index 00000000..94d8af5f
-> --- /dev/null
-> +++ b/tests/generic/407
-> @@ -0,0 +1,85 @@
-> +#! /bin/bash
-> +# FS QA Test No. 407
-> +#
-> +# Verify that mtime is updated when cloning files
-> +#
-> +#-----------------------------------------------------------------------
-> +#
-> +# Copyright (c) 2014 Christoph Hellwig.  All Rights Reserved.
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=0
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	rm -f $destfile
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. common/reflink
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +
-> +_require_cp_reflink
-> +_require_test
-> +
-> +echo "Silence is golden."
-> +rm -f $seqres.full
-> +
-> +# pattern the file.
-> +sourcefile=$TEST_DIR/clone_mtime_sourcefile
-> +$XFS_IO_PROG -f -c "pwrite 0 4k" -c fsync $sourcefile >> $seqres.full
-> +
-> +destfile=$TEST_DIR/clone_mtime_destfile
-> +touch $destfile >> $seqres.full
-> +
-> +# sample timestamps.
-> +mtime1=`stat -c %Y $destfile`
-> +ctime1=`stat -c %Z $destfile`
-> +echo "before clone: $mtime1 $ctime1" >> $seqres.full
-> +
-> +# clone to trigger timestamp change
-> +sleep 2
-> +$XFS_IO_PROG -c "reflink $sourcefile " $destfile >> $seqres.full
+This is a proof of concept implementation of XFS's GOINGDOWN ioctl for
+ext4.
 
-This follow from the discussion of "xfs: update ctime and mtime on clone
-destinatation inodes" -- there ought to be a second test that dedupe
-doesn't modify mtime.
+I've tried to replicate XFS's semantics (as much as they can translate
+to ext4).  This test series is currently *not* passing xfstests.
+Specifically, the following tests are failing:
 
---D
+	generic/042 generic/044 generic/045 generic/046
 
-> +
-> +# sample and verify that timestamps have changed.
-> +mtime2=`stat -c %Y $destfile`
-> +ctime2=`stat -c %Z $destfile`
-> +echo "after clone : $mtime2 $ctime2" >> $seqres.full
-> +
-> +if [ "$mtime1" == "$mtime2" ]; then
-> +	echo "mtime not updated"
-> +	let status=$status+1
-> +fi
-> +if [ "$ctime1" == "$ctime2" ]; then
-> +	echo "ctime not updated"
-> +	let status=$status+1
-> +fi
-> +
-> +exit
-> diff --git a/tests/generic/407.out b/tests/generic/407.out
-> new file mode 100644
-> index 00000000..e29fe156
-> --- /dev/null
-> +++ b/tests/generic/407.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 407
-> +Silence is golden.
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 159d691b..72d6b3cb 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -409,3 +409,4 @@
->  404 auto quick insert
->  405 auto mkfs
->  406 auto quick dangerous
-> +407 auto quick clone metadata
-> -- 
-> 2.11.0
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+As near as I can tell, these tests are sensitive to how the file
+system implements and handles delayed allocation.  In particular,
+generic/04[456] assumes that if you do a delayed allocation write of
+64k, and then truncate the file to 64k or 32k, the file will either be
+zero length, or i_size is non-zero, it MUST NOT have no extents.
+
+It's not clear to me why this needs to be true.  The test description
+says "test for NULL files problem".  But since POSIX states that how
+truncate will handle truncates beyond i_size is unspecified, and what
+happens after a crash w/o an fsync() is similarly unspecified, it's
+not clear what is the best way to deal with this.
+
+One is to simply use a different ioctl code point, to avoid enabling
+the xfstests tests.  Another to modify the tests to skip them for
+ext4.  Or I can teach kvm-xfstests and gce-xfstests to ignore these
+test failures by skipping the tests in my test framework.
+
+Comments, thoughts?
+
+						- Ted
+
+P.S.  So I'm not implementing this just for increased xfstests
+coverage; I have an operational need for this functionality on
+production systems.  The short version is if you are tearing down a
+container, and you don't care about its scratch space, being able to
+drop all of the writes from being sent to the storage device (which
+might be over the network, say using iSCSI), is a Good Thing.
+
+Theodore Ts'o (3):
+  ext4: rename s_resize_flags to s_ext4_flags
+  ext4: add shutdown bit and check for it
+  ext4: add EXT4_IOC_GOINGDOWN ioctl
+
+ fs/ext4/ext4.h      | 26 +++++++++++++++++++++++---
+ fs/ext4/ext4_jbd2.c |  2 ++
+ fs/ext4/file.c      | 12 ++++++++++++
+ fs/ext4/fsync.c     |  3 +++
+ fs/ext4/ialloc.c    |  3 +++
+ fs/ext4/inode.c     | 25 +++++++++++++++++++++++++
+ fs/ext4/ioctl.c     | 42 ++++++++++++++++++++++++++++++++++++++++++
+ fs/ext4/namei.c     | 12 ++++++++++++
+ fs/ext4/resize.c    |  5 +++--
+ fs/ext4/super.c     |  2 +-
+ fs/ext4/xattr.c     |  3 +++
+ 11 files changed, 129 insertions(+), 6 deletions(-)
+
+-- 
+2.11.0.rc0.7.gbe5a750
+
