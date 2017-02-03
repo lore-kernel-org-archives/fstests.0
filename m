@@ -1,71 +1,107 @@
-Received: from imap.thunk.org ([74.207.234.97]:54690 "EHLO imap.thunk.org"
+Received: from mx1.redhat.com ([209.132.183.28]:58198 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751823AbdBBW7s (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 2 Feb 2017 17:59:48 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [RFC/PATCH 0/3] Implement XFS's GOINGDOWN ioctl for ext4
-Date: Thu,  2 Feb 2017 17:59:21 -0500
-Message-Id: <20170202225924.19301-1-tytso@mit.edu>
+        id S1752230AbdBCF5S (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 3 Feb 2017 00:57:18 -0500
+Date: Fri, 3 Feb 2017 13:57:17 +0800
+From: Xiong Zhou <xzhou@redhat.com>
+Subject: Re: [PATCH v4 0/2] mmap dio and DAX
+Message-ID: <20170203055717.acjivw4o4zmxhd64@XZHOUW.usersys.redhat.com>
+References: <1484878888-11483-1-git-send-email-xzhou@redhat.com>
+ <1484892950-25178-1-git-send-email-xzhou@redhat.com>
+ <20170124222855.GA26631@linux.intel.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170124222855.GA26631@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ext4 Developers List <linux-ext4@vger.kernel.org>
-Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org
+To: Ross Zwisler <ross.zwisler@linux.intel.com>
+Cc: fstests@vger.kernel.org, jmoyer@redhat.com, eguan@redhat.com, linux-nvdimm@ml01.01.org
 List-ID: <fstests@vger.kernel.org>
 
-This is a proof of concept implementation of XFS's GOINGDOWN ioctl for
-ext4.
+On Tue, Jan 24, 2017 at 03:28:55PM -0700, Ross Zwisler wrote:
+> On Fri, Jan 20, 2017 at 02:15:48PM +0800, Xiong Zhou wrote:
+> > common/rc         : requires SCRATCH_DEV support DAX
+> > src/t_mmap_dio.c  : intro mmap and O_DIRECT rw through files
+> > tests/generic/405 : IO between DAX/non-DAX mountpoints
+> > tests/xfs/138     : IO between DAX/non-DAX xfs files(per-inode flag)
+> > 
+> > v2 :
+> >   Merge helper function changes into the first patch;
+> >   Rewrite _require_dax, check options for sure;
+> >   Print msg in t_mmap_dio.c to show which test going wrong;
+> >   Empty mount options and check after mount to ensure we
+> > wont mount with wrong option;
+> >   Remove unnecessary leading underscore and _fail;
+> >   Use xfs_io instead of dd;
+> >   Other minor fixes.
+> > 
+> > v3:
+> >  close fds in C test programme for clean up.
+> > 
+> > v4:
+> >  Test both buffered and O_DIRECT IO;
+> >  Fix arg numbers in C test programme;
+> >  Fix fs options check after mount.
+> >  Cc Jeff Moyer since this test is based on his code.
+> >  (Sorry for the late cc!)
+> > 
+> > Test status:
+> >   Both cases not run on normal block device;
+> >   Both cases PASS on ramdisk based pmem devices;
+> >   DIO in both cases FAIL on brd based ramdisk with:
+> >   DIO in both cases FAIL on nvdimm devices with:
+> >     +write(Bad address) len 1024 dio dax to nondax
+> >     +write(Bad address) len 4096 dio dax to nondax
+> >     +write(Bad address) len 16777216 dio dax to nondax
+> >     +write(Bad address) len 67108864 dio dax to nondax
+> > 
+> >   I've reported this to nvdimm list.
+> >   https://lists.01.org/pipermail/linux-nvdimm/2017-January/008600.html
+> > 
+> > Xiong Zhou (2):
+> >   xfs: test per-inode DAX flag by IO
+> >   generic: test mmap io through DAX and non-DAX
+> > 
+> >  .gitignore            |   1 +
+> >  common/rc             |  13 ++++++
+> >  src/Makefile          |   2 +-
+> >  src/t_mmap_dio.c      | 105 ++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/405     | 119 ++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/405.out |   2 +
+> >  tests/generic/group   |   1 +
+> >  tests/xfs/138         | 116 ++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/138.out     |   2 +
+> >  tests/xfs/group       |   1 +
+> >  10 files changed, 361 insertions(+), 1 deletion(-)
+> >  create mode 100644 src/t_mmap_dio.c
+> >  create mode 100755 tests/generic/405
+> >  create mode 100644 tests/generic/405.out
+> >  create mode 100755 tests/xfs/138
+> >  create mode 100644 tests/xfs/138.out
+> > 
+> > -- 
+> > 1.8.3.1
+> 
+> I just wanted to let you know that I'm testing with these new xfstests right
+> now, and so far I've been unable to successfully get any PMD faults.  I'm
+> looking into why that is right now, and should hopefully have some changes so
+> we can do both PTE and PMD testing with this set.
 
-I've tried to replicate XFS's semantics (as much as they can translate
-to ext4).  This test series is currently *not* passing xfstests.
-Specifically, the following tests are failing:
+Thank you very much for looking into this!
 
-	generic/042 generic/044 generic/045 generic/046
+Adding a printk msg in dax_iomap_pmd_fault in fs/dax.c shows that
+these 2 cases called this function, so do __radix_tree_insert
+in lib/radix-tree.c with order > 0.  I must have missed something..
 
-As near as I can tell, these tests are sensitive to how the file
-system implements and handles delayed allocation.  In particular,
-generic/04[456] assumes that if you do a delayed allocation write of
-64k, and then truncate the file to 64k or 32k, the file will either be
-zero length, or i_size is non-zero, it MUST NOT have no extents.
+> 
+> Also, it looks like the test number "generic/405" was already used in
+> xfstests/master by this commit:
+> 
+> 66768bc generic/405: test mkfs against thin provision device
+> 
+> So this may need to be generic/406. :)
 
-It's not clear to me why this needs to be true.  The test description
-says "test for NULL files problem".  But since POSIX states that how
-truncate will handle truncates beyond i_size is unspecified, and what
-happens after a crash w/o an fsync() is similarly unspecified, it's
-not clear what is the best way to deal with this.
+Ya, i can update this or Eryu can handle it while applying.
 
-One is to simply use a different ioctl code point, to avoid enabling
-the xfstests tests.  Another to modify the tests to skip them for
-ext4.  Or I can teach kvm-xfstests and gce-xfstests to ignore these
-test failures by skipping the tests in my test framework.
-
-Comments, thoughts?
-
-						- Ted
-
-P.S.  So I'm not implementing this just for increased xfstests
-coverage; I have an operational need for this functionality on
-production systems.  The short version is if you are tearing down a
-container, and you don't care about its scratch space, being able to
-drop all of the writes from being sent to the storage device (which
-might be over the network, say using iSCSI), is a Good Thing.
-
-Theodore Ts'o (3):
-  ext4: rename s_resize_flags to s_ext4_flags
-  ext4: add shutdown bit and check for it
-  ext4: add EXT4_IOC_GOINGDOWN ioctl
-
- fs/ext4/ext4.h      | 26 +++++++++++++++++++++++---
- fs/ext4/ext4_jbd2.c |  2 ++
- fs/ext4/file.c      | 12 ++++++++++++
- fs/ext4/fsync.c     |  3 +++
- fs/ext4/ialloc.c    |  3 +++
- fs/ext4/inode.c     | 25 +++++++++++++++++++++++++
- fs/ext4/ioctl.c     | 42 ++++++++++++++++++++++++++++++++++++++++++
- fs/ext4/namei.c     | 12 ++++++++++++
- fs/ext4/resize.c    |  5 +++--
- fs/ext4/super.c     |  2 +-
- fs/ext4/xattr.c     |  3 +++
- 11 files changed, 129 insertions(+), 6 deletions(-)
-
--- 
-2.11.0.rc0.7.gbe5a750
-
+Thanks,
+Xiong
