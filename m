@@ -1,62 +1,36 @@
-Received: from mail-wj0-f195.google.com ([209.85.210.195]:36677 "EHLO
-        mail-wj0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752232AbdBCLFt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Feb 2017 06:05:49 -0500
-Received: by mail-wj0-f195.google.com with SMTP id kq3so505976wjc.3
-        for <fstests@vger.kernel.org>; Fri, 03 Feb 2017 03:05:49 -0800 (PST)
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2] generic/007: cleanup $TEST_DIR/$seq dir
-Date: Fri,  3 Feb 2017 13:05:37 +0200
-Message-Id: <1486119937-2803-1-git-send-email-amir73il@gmail.com>
+Received: from imap.thunk.org ([74.207.234.97]:39134 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751052AbdBCPJS (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 3 Feb 2017 10:09:18 -0500
+Date: Fri, 3 Feb 2017 10:09:14 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [RFC/PATCH 0/3] Implement XFS's GOINGDOWN ioctl for ext4
+Message-ID: <20170203150914.vkahg2lyfi2ryk26@thunk.org>
+References: <20170202225924.19301-1-tytso@mit.edu>
+ <CAOQ4uxhQubTwdOtmXXsaW4hVjKt2yBhSFG92ie0QcO+HGD9ioQ@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxhQubTwdOtmXXsaW4hVjKt2yBhSFG92ie0QcO+HGD9ioQ@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Ext4 Developers List <linux-ext4@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Test generic/007 was failing after running test overlay/007,
-because the latter left behind a non empty directory named 007
-in test dir and the former failed to mkdir a directory with the
-same name.
+On Fri, Feb 03, 2017 at 09:05:01AM +0200, Amir Goldstein wrote:
+> 
+> I have a naive question about generic implementation:
+> We already have mnt_want_write() hooks in generic vfs code,
+> so it should be easy enough to set the shutdown bit on sb and return -EIO there.
+> Wouldn't it be better to add mnt_want_read() hooks in vfs helpers
+> instead of duplicating
+> the fs specific hooks? I hear f2fs is yet another potential customer??
 
-Cleanup $TEST_DIR/$seq both at end of overlay/007 and beginning of
-generic/007 to avoid this collision.
+There are *portions* of shutdown functionality which could be done in
+the generic VFS code.  The checks to have various system calls return
+early, and to have writeback skipped for inodes belonging to that file
+system, could be done in the generic code, sure.  But the code to
+shutdown or abort the journal would always have to be fs specific, for
+example.
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/generic/007 | 1 +
- tests/overlay/007 | 1 +
- 2 files changed, 2 insertions(+)
-
-v2:
-- Cleanup just $TEST_DIR/007
-
-v1:
-- Cleanup $TEST_DIR/$seq* files after tests
-
-diff --git a/tests/generic/007 b/tests/generic/007
-index 88cd6cc..cfa4554 100755
---- a/tests/generic/007
-+++ b/tests/generic/007
-@@ -64,6 +64,7 @@ while [ $i -le $num_filenames ]; do
-   let i=$i+1
- done
- 
-+rm -rf $TEST_DIR/$seq
- mkdir $TEST_DIR/$seq
- cd $TEST_DIR/$seq
- $here/src/nametest -l $sourcefile -s $seed -i $iterations -z
-diff --git a/tests/overlay/007 b/tests/overlay/007
-index ccf2b75..ed7914b 100755
---- a/tests/overlay/007
-+++ b/tests/overlay/007
-@@ -37,6 +37,7 @@ _cleanup()
- {
- 	cd /
- 	rm -f $tmp.*
-+	rm -rf $TEST_DIR/$seq
- }
- 
- # get standard environment, filters and checks
--- 
-2.7.4
-
+						- Ted
