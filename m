@@ -1,40 +1,37 @@
-Received: from bombadil.infradead.org ([65.50.211.133]:54403 "EHLO
+Received: from bombadil.infradead.org ([65.50.211.133]:50106 "EHLO
         bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752967AbdBCJ6w (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Feb 2017 04:58:52 -0500
-Received: from 80-109-146-114.cable.dynamic.surfer.at ([80.109.146.114] helo=localhost)
-        by bombadil.infradead.org with esmtpsa (Exim 4.87 #1 (Red Hat Linux))
-        id 1cZadk-0007p0-4E
-        for fstests@vger.kernel.org; Fri, 03 Feb 2017 09:58:48 +0000
+        with ESMTP id S1752990AbdBCJ6y (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 3 Feb 2017 04:58:54 -0500
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 1/2] generic/407: check that destination timestamps are updated on clone
-Date: Fri,  3 Feb 2017 10:58:38 +0100
-Message-Id: <20170203095839.8007-2-hch@lst.de>
+Subject: [PATCH 2/2] generic/408: check that destination timestamps are not updated on dedupe
+Date: Fri,  3 Feb 2017 10:58:39 +0100
+Message-Id: <20170203095839.8007-3-hch@lst.de>
 In-Reply-To: <20170203095839.8007-1-hch@lst.de>
 References: <20170203095839.8007-1-hch@lst.de>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: Christoph Hellwig <hch@lst.de>
 List-ID: <fstests@vger.kernel.org>
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
+Signed-off-by: Christoph Hellwig <hch@lst.de
 ---
- tests/generic/407     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/407.out |  2 ++
+ tests/generic/408     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/408.out |  2 ++
  tests/generic/group   |  1 +
- 3 files changed, 88 insertions(+)
- create mode 100755 tests/generic/407
- create mode 100644 tests/generic/407.out
+ 3 files changed, 87 insertions(+)
+ create mode 100644 tests/generic/408
+ create mode 100644 tests/generic/408.out
 
-diff --git a/tests/generic/407 b/tests/generic/407
-new file mode 100755
-index 00000000..0fd111ca
+diff --git a/tests/generic/408 b/tests/generic/408
+new file mode 100644
+index 00000000..26cfc35e
 --- /dev/null
-+++ b/tests/generic/407
-@@ -0,0 +1,85 @@
++++ b/tests/generic/408
+@@ -0,0 +1,84 @@
 +#! /bin/bash
-+# FS QA Test No. 407
++# FS QA Test No. 408
 +#
-+# Verify that mtime is updated when cloning files
++# Verify that mtime is not updated when deduping files.
 +#
 +#-----------------------------------------------------------------------
 +#
@@ -79,60 +76,59 @@ index 00000000..0fd111ca
 +_supported_os Linux
 +
 +_require_test
-+_require_test_reflink
-+_require_cp_reflink
++_require_test_dedupe
 +
 +echo "Silence is golden."
 +rm -f $seqres.full
 +
 +# pattern the files.
-+sourcefile=$TEST_DIR/clone_mtime_sourcefile
++sourcefile=$TEST_DIR/dedup_mtime_sourcefile
 +$XFS_IO_PROG -f -c "pwrite 0 4k" -c fsync $sourcefile >> $seqres.full
 +
-+destfile=$TEST_DIR/clone_mtime_destfile
-+touch $destfile >> $seqres.full
++destfile=$TEST_DIR/dedup_mtime_destfile
++$XFS_IO_PROG -f -c "pwrite 0 4k" -c fsync $destfile >> $seqres.full
 +
 +# sample timestamps.
 +mtime1=`stat -c %Y $destfile`
 +ctime1=`stat -c %Z $destfile`
-+echo "before clone: $mtime1 $ctime1" >> $seqres.full
++echo "before dedup: $mtime1 $ctime1" >> $seqres.full
 +
-+# clone to trigger timestamp change
++# dedup to trigger timestamp change
 +sleep 1
-+$XFS_IO_PROG -c "reflink $sourcefile " $destfile >> $seqres.full
++_dedupe_range $sourcefile 0 $destfile 0 "4k" >> $seqres.full
 +
 +# sample and verify that timestamps have changed.
 +mtime2=`stat -c %Y $destfile`
 +ctime2=`stat -c %Z $destfile`
-+echo "after clone : $mtime2 $ctime2" >> $seqres.full
++echo "after dedup : $mtime2 $ctime2" >> $seqres.full
 +
-+if [ "$mtime1" == "$mtime2" ]; then
-+	echo "mtime not updated"
++if [ "$mtime1" != "$mtime2" ]; then
++	echo "mtime updated"
 +	let status=$status+1
 +fi
-+if [ "$ctime1" == "$ctime2" ]; then
-+	echo "ctime not updated"
++if [ "$ctime1" != "$ctime2" ]; then
++	echo "ctime updated"
 +	let status=$status+1
 +fi
 +
 +exit
-diff --git a/tests/generic/407.out b/tests/generic/407.out
+diff --git a/tests/generic/408.out b/tests/generic/408.out
 new file mode 100644
-index 00000000..e29fe156
+index 00000000..29ec47a8
 --- /dev/null
-+++ b/tests/generic/407.out
++++ b/tests/generic/408.out
 @@ -0,0 +1,2 @@
-+QA output created by 407
++QA output created by 408
 +Silence is golden.
 diff --git a/tests/generic/group b/tests/generic/group
-index 159d691b..72d6b3cb 100644
+index 72d6b3cb..740ce45b 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -409,3 +409,4 @@
- 404 auto quick insert
+@@ -410,3 +410,4 @@
  405 auto mkfs
  406 auto quick dangerous
-+407 auto quick clone metadata
+ 407 auto quick clone metadata
++408 auto quick clone dedupe metadata
 -- 
 2.11.0
 
