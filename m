@@ -1,53 +1,39 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:24058 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751064AbdBCRrJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Feb 2017 12:47:09 -0500
-Date: Fri, 3 Feb 2017 09:46:50 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 1/3] xfs/263: don't hardcode inode numbers in output
-Message-ID: <20170203174650.GT9134@birch.djwong.org>
-References: <148562509264.30594.7506967863745489318.stgit@birch.djwong.org>
- <7df1dabe-3832-ffa7-cb80-07ee602bd455@sandeen.net>
- <20170128203012.GQ14033@birch.djwong.org>
- <20170203064230.GA1859@eguan.usersys.redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170203064230.GA1859@eguan.usersys.redhat.com>
+Received: from imap.thunk.org ([74.207.234.97]:46990 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752182AbdBCUup (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 3 Feb 2017 15:50:45 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH] generic/388: use the src/godown program instead of xfs_io
+Date: Fri,  3 Feb 2017 15:50:37 -0500
+Message-Id: <20170203205037.6027-1-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Eric Sandeen <sandeen@sandeen.net>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Feb 03, 2017 at 02:42:30PM +0800, Eryu Guan wrote:
-> On Sat, Jan 28, 2017 at 12:30:12PM -0800, Darrick J. Wong wrote:
-> > On Sat, Jan 28, 2017 at 12:10:56PM -0600, Eric Sandeen wrote:
-> > > On 1/28/17 11:38 AM, Darrick J. Wong wrote:
-> > > > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > > > 
-> > > > Since we can't control the inode number assignments when creating files,
-> > > > don't hardcode them in the golden output.
-> > > 
-> > > what numbers are you seeing?
-> > > 
-> > > The inode numbers aren't important for the test, but I don't want to
-> > > gloss over something unexpected.
-> > 
-> > I consistently see 131+64 = 195 and things like that.
-> 
-> I occasionally see 195/6 inode numbers too, I suspect it has something
-> to do with 4k-sector disks. Test failed if I point SCRATCH_DEV to a
-> 4k-sector scsi_debug device, and test passed after applying this patch.
+The "xfs_io -xc shutdown $MNT" command doesn't work on non-xfs file
+systems.  So use the equivalent src/godown program instead, which is
+how the other tests which use the shutdown command were converted from
+xfs-specific tests to generic tests.
 
-Aha!  I do have 4k-sector disks underlying the VMs that fail.  Yes,
-that's the key.
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ tests/generic/388 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
---D
+diff --git a/tests/generic/388 b/tests/generic/388
+index c00a7548..9d4ba9d6 100755
+--- a/tests/generic/388
++++ b/tests/generic/388
+@@ -71,7 +71,7 @@ for i in $(seq 1 50); do
+ 	# purposely include 0 second sleeps to test shutdown immediately after
+ 	# recovery
+ 	sleep $((RANDOM % 3))
+-	$XFS_IO_PROG -xc shutdown $SCRATCH_MNT
++	./src/godown $SCRATCH_MNT
+ 
+ 	ps -e | grep fsstress > /dev/null 2>&1
+ 	while [ $? -eq 0 ]; do
+-- 
+2.11.0.rc0.7.gbe5a750
 
-> 
-> Thanks,
-> Eryu
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
