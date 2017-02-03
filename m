@@ -1,134 +1,33 @@
-Received: from bombadil.infradead.org ([65.50.211.133]:50106 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752990AbdBCJ6y (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Feb 2017 04:58:54 -0500
-From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 2/2] generic/408: check that destination timestamps are not updated on dedupe
-Date: Fri,  3 Feb 2017 10:58:39 +0100
-Message-Id: <20170203095839.8007-3-hch@lst.de>
-In-Reply-To: <20170203095839.8007-1-hch@lst.de>
-References: <20170203095839.8007-1-hch@lst.de>
+Received: from mail-oi0-f48.google.com ([209.85.218.48]:34576 "EHLO
+        mail-oi0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753110AbdBCKcW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 3 Feb 2017 05:32:22 -0500
+Received: by mail-oi0-f48.google.com with SMTP id s203so8682644oie.1
+        for <fstests@vger.kernel.org>; Fri, 03 Feb 2017 02:32:21 -0800 (PST)
+MIME-Version: 1.0
+In-Reply-To: <20170203095606.GA28569@lst.de>
+References: <20170202162755.21101-1-hch@lst.de> <CAOQ4uxiPdAvGe7LT9OtvGJrXozxtTxQi_iDU--y_9aPUTsSkaA@mail.gmail.com>
+ <20170203095606.GA28569@lst.de>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Fri, 3 Feb 2017 12:32:21 +0200
+Message-ID: <CAOQ4uxh4Wp8YtX283=X0Kp=8BXZCdeoPamBAwimpq2RmZkxkKg@mail.gmail.com>
+Subject: Re: [PATCH] generic/407: check that destination timestamps are
+ updated on clone
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Christoph Hellwig <hch@lst.de>
+To: Christoph Hellwig <hch@lst.de>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Signed-off-by: Christoph Hellwig <hch@lst.de
----
- tests/generic/408     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/408.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 87 insertions(+)
- create mode 100644 tests/generic/408
- create mode 100644 tests/generic/408.out
+On Fri, Feb 3, 2017 at 11:56 AM, Christoph Hellwig <hch@lst.de> wrote:
+>> Although this may be nit picking, why 2 seconds?
+>
+> Copied from a test that did it, 1 is enough though.
 
-diff --git a/tests/generic/408 b/tests/generic/408
-new file mode 100644
-index 00000000..26cfc35e
---- /dev/null
-+++ b/tests/generic/408
-@@ -0,0 +1,84 @@
-+#! /bin/bash
-+# FS QA Test No. 408
-+#
-+# Verify that mtime is not updated when deduping files.
-+#
-+#-----------------------------------------------------------------------
-+#
-+# Copyright (c) 2017 Christoph Hellwig.  All Rights Reserved.
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+status=0
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $sourcefile
-+	rm -f $destfile
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. common/reflink
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+
-+_require_test
-+_require_test_dedupe
-+
-+echo "Silence is golden."
-+rm -f $seqres.full
-+
-+# pattern the files.
-+sourcefile=$TEST_DIR/dedup_mtime_sourcefile
-+$XFS_IO_PROG -f -c "pwrite 0 4k" -c fsync $sourcefile >> $seqres.full
-+
-+destfile=$TEST_DIR/dedup_mtime_destfile
-+$XFS_IO_PROG -f -c "pwrite 0 4k" -c fsync $destfile >> $seqres.full
-+
-+# sample timestamps.
-+mtime1=`stat -c %Y $destfile`
-+ctime1=`stat -c %Z $destfile`
-+echo "before dedup: $mtime1 $ctime1" >> $seqres.full
-+
-+# dedup to trigger timestamp change
-+sleep 1
-+_dedupe_range $sourcefile 0 $destfile 0 "4k" >> $seqres.full
-+
-+# sample and verify that timestamps have changed.
-+mtime2=`stat -c %Y $destfile`
-+ctime2=`stat -c %Z $destfile`
-+echo "after dedup : $mtime2 $ctime2" >> $seqres.full
-+
-+if [ "$mtime1" != "$mtime2" ]; then
-+	echo "mtime updated"
-+	let status=$status+1
-+fi
-+if [ "$ctime1" != "$ctime2" ]; then
-+	echo "ctime updated"
-+	let status=$status+1
-+fi
-+
-+exit
-diff --git a/tests/generic/408.out b/tests/generic/408.out
-new file mode 100644
-index 00000000..29ec47a8
---- /dev/null
-+++ b/tests/generic/408.out
-@@ -0,0 +1,2 @@
-+QA output created by 408
-+Silence is golden.
-diff --git a/tests/generic/group b/tests/generic/group
-index 72d6b3cb..740ce45b 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -410,3 +410,4 @@
- 405 auto mkfs
- 406 auto quick dangerous
- 407 auto quick clone metadata
-+408 auto quick clone dedupe metadata
--- 
-2.11.0
+Yes, I saw that, generic/215 which was copied from generic/080 I guess
+someone should clean up those 2 some time.
 
+And while we are busy saving more angels lives, do 407 and 408 really need
+to be separate tests?
+How about consolidating them into a single test that works with 2 sets of files?
+Sorry again for nit picking on those lost seconds.
