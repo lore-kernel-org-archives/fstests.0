@@ -1,59 +1,73 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:40910 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752268AbdBCVqd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Feb 2017 16:46:33 -0500
-Date: Fri, 3 Feb 2017 13:46:26 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] generic/388: use the src/godown program instead of xfs_io
-Message-ID: <20170203214626.GB6280@birch.djwong.org>
-References: <20170203205037.6027-1-tytso@mit.edu>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170203205037.6027-1-tytso@mit.edu>
+Received: from imap.thunk.org ([74.207.234.97]:49256 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752989AbdBCXBs (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 3 Feb 2017 18:01:48 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH] generic: add shutdown group
+Date: Fri,  3 Feb 2017 18:01:37 -0500
+Message-Id: <20170203230137.25941-1-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Feb 03, 2017 at 03:50:37PM -0500, Theodore Ts'o wrote:
-> The "xfs_io -xc shutdown $MNT" command doesn't work on non-xfs file
-> systems.  So use the equivalent src/godown program instead, which is
-> how the other tests which use the shutdown command were converted from
-> xfs-specific tests to generic tests.
-> 
-> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> ---
->  tests/generic/388 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/388 b/tests/generic/388
-> index c00a7548..9d4ba9d6 100755
-> --- a/tests/generic/388
-> +++ b/tests/generic/388
-> @@ -71,7 +71,7 @@ for i in $(seq 1 50); do
->  	# purposely include 0 second sleeps to test shutdown immediately after
->  	# recovery
->  	sleep $((RANDOM % 3))
-> -	$XFS_IO_PROG -xc shutdown $SCRATCH_MNT
-> +	./src/godown $SCRATCH_MNT
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ tests/generic/group | 30 +++++++++++++++---------------
+ 1 file changed, 15 insertions(+), 15 deletions(-)
 
-Looks ok,
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+diff --git a/tests/generic/group b/tests/generic/group
+index 159d691b..9b06ba72 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -44,20 +44,20 @@
+ 039 metadata auto quick
+ 040 metadata auto quick
+ 041 metadata auto quick
+-042 rw punch zero
+-043 metadata log auto
+-044 metadata log auto
+-045 metadata log auto
+-046 metadata log auto
+-047 metadata rw auto
+-048 metadata rw auto
+-049 metadata rw auto
+-050 mount auto quick
+-051 auto stress log metadata repair
+-052 log auto quick
++042 shutdown rw punch zero
++043 shutdown metadata log auto
++044 shutdown metadata log auto
++045 shutdown metadata log auto
++046 shutdown metadata log auto
++047 shutdown metadata rw auto
++048 shutdown metadata rw auto
++049 shutdown metadata rw auto
++050 shutdown mount auto quick
++051 shutdown auto stress log metadata repair
++052 shutdown log auto quick
+ 053 acl repair auto quick
+-054 log v2log auto
+-055 log v2log auto quota stress
++054 shutdown log v2log auto
++055 shutdown log v2log auto quota stress
+ 056 metadata auto quick
+ 057 metadata auto quick
+ 058 auto quick prealloc punch insert
+@@ -390,11 +390,11 @@
+ 385 quota auto quick
+ 386 auto quick quota
+ 387 auto clone
+-388 auto log metadata
++388 shutdown auto log metadata
+ 389 auto quick acl
+ 390 auto freeze stress dangerous
+ 391 auto quick rw
+-392 auto quick metadata
++392 shutdown auto quick metadata
+ 393 auto quick rw
+ 394 auto quick
+ 395 auto quick encrypt
+-- 
+2.11.0.rc0.7.gbe5a750
 
-Though to avoid inconsistency I recommend sending an xfsprogs patch
-adding CMD_FLAG_FOREIGN_OK to the shutdown command once support lands in
-ext4.
-
---D
-
->  
->  	ps -e | grep fsstress > /dev/null 2>&1
->  	while [ $? -eq 0 ]; do
-> -- 
-> 2.11.0.rc0.7.gbe5a750
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
