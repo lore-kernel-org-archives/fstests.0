@@ -1,73 +1,40 @@
-Received: from mx1.redhat.com ([209.132.183.28]:35034 "EHLO mx1.redhat.com"
+Received: from imap.thunk.org ([74.207.234.97]:53364 "EHLO imap.thunk.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753538AbdBDESu (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 3 Feb 2017 23:18:50 -0500
-Date: Sat, 4 Feb 2017 12:18:48 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic/074: _cleanup potentially removes local FS files
-Message-ID: <20170204041848.GG1859@eguan.usersys.redhat.com>
-References: <20170129135620.25464-1-omzg@plexistor.com>
+        id S1753595AbdBDFYX (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 4 Feb 2017 00:24:23 -0500
+Date: Sat, 4 Feb 2017 00:24:19 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH] generic: add shutdown group
+Message-ID: <20170204052419.3m4stq3p6ch2rmoo@thunk.org>
+References: <20170203230137.25941-1-tytso@mit.edu>
+ <20170204034752.GD1859@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170129135620.25464-1-omzg@plexistor.com>
+In-Reply-To: <20170204034752.GD1859@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Omer Zilberberg <omzg@plexistor.com>
+To: Eryu Guan <eguan@redhat.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Jan 29, 2017 at 03:56:20PM +0200, Omer Zilberberg wrote:
-> fstest_dir is set after _cleanup() is defined and _require_test is
-> called. If _require_test fails (due to some unrelated bug in tested FS),
-> _cleanup will attempt to remove $fstest_dir.*, which expands to .*
-> This has the unfortunate effect of removing xfstests' .git and
-> .gitignore.
+On Sat, Feb 04, 2017 at 11:47:52AM +0800, Eryu Guan wrote:
+> On Fri, Feb 03, 2017 at 06:01:37PM -0500, Theodore Ts'o wrote:
+> > Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> > ---
+> >  tests/generic/group | 30 +++++++++++++++---------------
+> >  1 file changed, 15 insertions(+), 15 deletions(-)
 > 
-> Here is the 074.out.bad file for this case:
-> QA output created by 074
-> mount: permission denied
-> common/rc: retrying test device mount with external set
-> mount: permission denied
-> common/rc: could not mount /dev/pmem0 on /mnt
-> rm: refusing to remove '.' or '..' directory: skipping '.'
-> rm: refusing to remove '.' or '..' directory: skipping '..'
-> ----
+> I notice that there're also some xfs tests are doing shutdown, I think
+> they belong to shutdown group too, e.g.
 > 
-> The only other test which could face the same problem is generic/285.
-> However, that test defines _cleanup after the _require* calls, and so on
-> _require_test failure, 285.out.bad contains the harmless:
-> ./common/rc: line 1: _cleanup: command not found
+> xfs/051
+> xfs/079
+> xfs/121
+> xfs/181
+> xfs/212
+> 
+> I can update the patch at commit time if you think it's ok.
 
-How about defining fstest_dir before _cleanup function? Along with
-"here" and "tmp", which looks clearer and makes more sense to me.
+Sure.  I should have checked the xfs tests as well, thanks.
 
-Thanks,
-Eryu
-
-> 
-> Signed-off-by: Omer Zilberberg <omzg@plexistor.com>
-> ---
->  tests/generic/074 | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/074 b/tests/generic/074
-> index 55264bd..ef84263 100755
-> --- a/tests/generic/074
-> +++ b/tests/generic/074
-> @@ -33,7 +33,8 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
->  
->  _cleanup()
->  {
-> -    rm -rf $fstest_dir.* $tmp.*
-> +    [ -n "$fstest_dir" ] && rm -rf $fstest_dir.*
-> +    rm -rf $tmp.*
->  }
->  
->  # get standard environment, filters and checks
-> -- 
-> 2.9.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+      	       	 	     	     	 - Ted
