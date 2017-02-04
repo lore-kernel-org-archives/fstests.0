@@ -1,40 +1,47 @@
-Received: from imap.thunk.org ([74.207.234.97]:53364 "EHLO imap.thunk.org"
+Received: from verein.lst.de ([213.95.11.211]:52738 "EHLO newverein.lst.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753595AbdBDFYX (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 4 Feb 2017 00:24:23 -0500
-Date: Sat, 4 Feb 2017 00:24:19 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH] generic: add shutdown group
-Message-ID: <20170204052419.3m4stq3p6ch2rmoo@thunk.org>
-References: <20170203230137.25941-1-tytso@mit.edu>
- <20170204034752.GD1859@eguan.usersys.redhat.com>
+        id S1753811AbdBDKCr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 4 Feb 2017 05:02:47 -0500
+Date: Sat, 4 Feb 2017 11:02:45 +0100
+From: Christoph Hellwig <hch@lst.de>
+Subject: Re: [PATCH 1/2] generic/407: check that destination timestamps are
+        updated on clone
+Message-ID: <20170204100245.GB18697@lst.de>
+References: <20170203095839.8007-1-hch@lst.de> <20170203095839.8007-2-hch@lst.de> <20170204041526.GF1859@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170204034752.GD1859@eguan.usersys.redhat.com>
+In-Reply-To: <20170204041526.GF1859@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+Cc: Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Feb 04, 2017 at 11:47:52AM +0800, Eryu Guan wrote:
-> On Fri, Feb 03, 2017 at 06:01:37PM -0500, Theodore Ts'o wrote:
-> > Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> > ---
-> >  tests/generic/group | 30 +++++++++++++++---------------
-> >  1 file changed, 15 insertions(+), 15 deletions(-)
+On Sat, Feb 04, 2017 at 12:15:26PM +0800, Eryu Guan wrote:
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +. common/reflink
 > 
-> I notice that there're also some xfs tests are doing shutdown, I think
-> they belong to shutdown group too, e.g.
-> 
-> xfs/051
-> xfs/079
-> xfs/121
-> xfs/181
-> xfs/212
-> 
-> I can update the patch at commit time if you think it's ok.
+> For consistency, ". ./common/reflink" looks better.
 
-Sure.  I should have checked the xfs tests as well, thanks.
+Sure, this was fat fingered anyway :)
 
-      	       	 	     	     	 - Ted
+> > +
+> > +# real QA test starts here
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +
+> > +_require_test
+> > +_require_test_reflink
+> > +_require_cp_reflink
+> 
+> This seems not necessary, cp is not used and xfs_io reflink command is
+> checked in _require_test_reflink.
+
+Yeah - the first version used cp, but I changed it later so this an be
+safely dropped.
+
+> Otherwise looks good to me. I can fix them at commit time.
+
+Please do, thanks a lot!
