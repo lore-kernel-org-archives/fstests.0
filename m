@@ -1,150 +1,91 @@
-Received: from mx1.redhat.com ([209.132.183.28]:38522 "EHLO mx1.redhat.com"
+Received: from mga03.intel.com ([134.134.136.65]:26197 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753811AbdBDKOH (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 4 Feb 2017 05:14:07 -0500
-Date: Sat, 4 Feb 2017 18:14:05 +0800
-From: Xiong Zhou <xzhou@redhat.com>
-Subject: Re: [PATCH v4 0/2] mmap dio and DAX
-Message-ID: <20170204101405.qszwyshcr463wvft@XZHOUW.usersys.redhat.com>
-References: <1484878888-11483-1-git-send-email-xzhou@redhat.com>
- <1484892950-25178-1-git-send-email-xzhou@redhat.com>
- <20170124222855.GA26631@linux.intel.com>
- <20170203055717.acjivw4o4zmxhd64@XZHOUW.usersys.redhat.com>
- <20170203165710.GA24667@linux.intel.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170203165710.GA24667@linux.intel.com>
+        id S1751192AbdBDPSP (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 4 Feb 2017 10:18:15 -0500
+From: Ross Zwisler <ross.zwisler@linux.intel.com>
+Subject: [PATCH] fixup! xfs: test per-inode DAX flag by IO
+Date: Sat,  4 Feb 2017 08:17:52 -0700
+Message-Id: <1486221472-1007-1-git-send-email-ross.zwisler@linux.intel.com>
+In-Reply-To: <1484892950-25178-2-git-send-email-xzhou@redhat.com>
+References: <1484892950-25178-2-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ross Zwisler <ross.zwisler@linux.intel.com>
-Cc: fstests@vger.kernel.org, jmoyer@redhat.com, eguan@redhat.com, linux-nvdimm@ml01.01.org
+To: Xiong Zhou <xzhou@redhat.com>, fstests@vger.kernel.org
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, jmoyer@redhat.com, eguan@redhat.com, linux-nvdimm@ml01.01.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Feb 03, 2017 at 09:57:10AM -0700, Ross Zwisler wrote:
-> On Fri, Feb 03, 2017 at 01:57:17PM +0800, Xiong Zhou wrote:
-> > On Tue, Jan 24, 2017 at 03:28:55PM -0700, Ross Zwisler wrote:
-> > > On Fri, Jan 20, 2017 at 02:15:48PM +0800, Xiong Zhou wrote:
-> > > > common/rc         : requires SCRATCH_DEV support DAX
-> > > > src/t_mmap_dio.c  : intro mmap and O_DIRECT rw through files
-> > > > tests/generic/405 : IO between DAX/non-DAX mountpoints
-> > > > tests/xfs/138     : IO between DAX/non-DAX xfs files(per-inode flag)
-> > > > 
-> > > > v2 :
-> > > >   Merge helper function changes into the first patch;
-> > > >   Rewrite _require_dax, check options for sure;
-> > > >   Print msg in t_mmap_dio.c to show which test going wrong;
-> > > >   Empty mount options and check after mount to ensure we
-> > > > wont mount with wrong option;
-> > > >   Remove unnecessary leading underscore and _fail;
-> > > >   Use xfs_io instead of dd;
-> > > >   Other minor fixes.
-> > > > 
-> > > > v3:
-> > > >  close fds in C test programme for clean up.
-> > > > 
-> > > > v4:
-> > > >  Test both buffered and O_DIRECT IO;
-> > > >  Fix arg numbers in C test programme;
-> > > >  Fix fs options check after mount.
-> > > >  Cc Jeff Moyer since this test is based on his code.
-> > > >  (Sorry for the late cc!)
-> > > > 
-> > > > Test status:
-> > > >   Both cases not run on normal block device;
-> > > >   Both cases PASS on ramdisk based pmem devices;
-> > > >   DIO in both cases FAIL on brd based ramdisk with:
-> > > >   DIO in both cases FAIL on nvdimm devices with:
-> > > >     +write(Bad address) len 1024 dio dax to nondax
-> > > >     +write(Bad address) len 4096 dio dax to nondax
-> > > >     +write(Bad address) len 16777216 dio dax to nondax
-> > > >     +write(Bad address) len 67108864 dio dax to nondax
-> > > > 
-> > > >   I've reported this to nvdimm list.
-> > > >   https://lists.01.org/pipermail/linux-nvdimm/2017-January/008600.html
-> > > > 
-> > > > Xiong Zhou (2):
-> > > >   xfs: test per-inode DAX flag by IO
-> > > >   generic: test mmap io through DAX and non-DAX
-> > > > 
-> > > >  .gitignore            |   1 +
-> > > >  common/rc             |  13 ++++++
-> > > >  src/Makefile          |   2 +-
-> > > >  src/t_mmap_dio.c      | 105 ++++++++++++++++++++++++++++++++++++++++++++
-> > > >  tests/generic/405     | 119 ++++++++++++++++++++++++++++++++++++++++++++++++++
-> > > >  tests/generic/405.out |   2 +
-> > > >  tests/generic/group   |   1 +
-> > > >  tests/xfs/138         | 116 ++++++++++++++++++++++++++++++++++++++++++++++++
-> > > >  tests/xfs/138.out     |   2 +
-> > > >  tests/xfs/group       |   1 +
-> > > >  10 files changed, 361 insertions(+), 1 deletion(-)
-> > > >  create mode 100644 src/t_mmap_dio.c
-> > > >  create mode 100755 tests/generic/405
-> > > >  create mode 100644 tests/generic/405.out
-> > > >  create mode 100755 tests/xfs/138
-> > > >  create mode 100644 tests/xfs/138.out
-> > > > 
-> > > > -- 
-> > > > 1.8.3.1
-> > > 
-> > > I just wanted to let you know that I'm testing with these new xfstests right
-> > > now, and so far I've been unable to successfully get any PMD faults.  I'm
-> > > looking into why that is right now, and should hopefully have some changes so
-> > > we can do both PTE and PMD testing with this set.
-> > 
-> > Thank you very much for looking into this!
-> > 
-> > Adding a printk msg in dax_iomap_pmd_fault in fs/dax.c shows that
-> > these 2 cases called this function, so do __radix_tree_insert
-> > in lib/radix-tree.c with order > 0.  I must have missed something..
-> 
-> Ah, yea, the flow is a little confusing.  When we first try to do a PMD fault
-> we insert a 2MiB "empty" entry into the radix tree that basically just allows
-> us to lock an entire 2MiB range.  This happens in dax_iomap_pmd_fault() via 
-> grab_mapping_entry().  This is most likely what you're seeing with your debug.
-> 
-> Then, with that empty 2MiB entry in place we try and actually service the
-> fault and insert a real mapping to a 2MiB huge page.  There are still cases
-> when this can fall back to 4k pages, and one of them is if the block
-> allocation we are given by the filesystem isn't 2MiB aligned.  That is the
-> alignment check against PG_PMD_COLOUR in dax_pmd_insert_mapping(), and that's
-> what we were hitting.  The way to get around this is to tell XFS that we would
-> like 2MiB aligned and sized block allocations via the following mkfs options:
-> 
-> export MKFS_OPTIONS="-d su=2m,sw=1"
-> 
-> We also need to fallocate our storage space so that we get 2 MiB allocations
-> instead of 4k allocations.
+This makes a few changes to allow xfs/138 to use PMD faults, and has a few
+other changes which I think are improvements.
 
-Aha, I forgot to checking return status of fault handler. Thanks very much
-for the detailed explanation and instructions. :)
+For PMD faults:
+- We need to use MKFS_OPTIONS="-d su=2m,sw=1" to ensure that the block
+  allocations we get from XFS are 2MiB sized and aligned.  Without this we
+  will fall back to 4k DAX pages for all the tests.
 
-> 
-> I've been working on patches that do all of this - I'll try and send them out
-> today.
-> 
-> This has taken a little longer than I would have liked because when debugging
-> this issue I found an issue with DAX + DIO in the kernel.  So, your test has
-> already found an important bug in the kernel before it was even committed to
-> xfstests!  :)
+- We need to preallocate the file size with fallocate, rather than using
+  "xfs_io -c pwrite".  This lets XFS increase the size of the test files
+  before the test starts, giving us 2MiB sized and aligned blocks.  This
+  also has the added bonus that we don't start out the mmap portion of the
+  test with all the areas of the files written to and allocated.  This
+  means that on the first read pass through a portion of a file we exercise
+  the zero page DAX path for holes, then on subsequent passes we'll fill
+  the holes and exercise the normal DAX path, giving us better overall
+  coverage of the DAX code.  It also makes the test run slightly faster.
 
-Good to know. :)
+- For some reason I was having trouble getting XFS to give me 2MiB aligned
+  and sized block allocations with file size 1GiB?  The test only needs
+  file sizes of 64 MiB, and dropping the files used to that size ensured
+  that I always got 2MiB allocations, but truthfully I don't understand
+  this behavior from XFS.
 
-> 
-> BTW, if we fallocate our files, is there additional value in writing data into
-> the files before we start testing as you do via these lines?
-> 
-> $XFS_IO_PROG -f -c "pwrite -W -b $psize 0 $tsize" \
->         $SCRATCH_MNT/tf_s >> $seqres.full 2>&1
-> $XFS_IO_PROG -f -c "pwrite -W -b $psize 0 $tsize" \
->         $SCRATCH_MNT/tf_d >> $seqres.full 2>&1
-> 
-> This puts a known pattern into the files and means that reads are handled from
-> media instead of from hole pages, but we never verify the data pattern and it
-> slows down the test quite a bit.  What do you think?
+And one cleanup thing:
 
-falloc is better for this job. I'll send next version after more tests.
+- Changed the sizes above 4k to use bash math instead of having hard coded
+  values.  I personally don't have 67108864 memorized to be 64 MiB (maybe
+  everyone else does), but the meaning of $((64 * 1024 * 1024)) is more
+  obvious to the reader.
 
-Thanks for reviewing!
+I'm working on similar changes for your generic/405, but am still having
+trouble getting PMD faults from ext4, even with the mkfs options I had
+previously been using for other testing.
 
---
-Xiong
+Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+---
+ tests/xfs/138 | 13 ++++++-------
+ 1 file changed, 6 insertions(+), 7 deletions(-)
+
+diff --git a/tests/xfs/138 b/tests/xfs/138
+index 9822441..4762534 100755
+--- a/tests/xfs/138
++++ b/tests/xfs/138
+@@ -79,22 +79,21 @@ do_tests()
+ 	# page size
+ 	t_dax_flag_mmap_dio `src/feature -s`
+ 	# bigger sizes, for PMD faults
+-	t_dax_flag_mmap_dio 16777216
+-	t_dax_flag_mmap_dio 67108864
++	t_dax_flag_mmap_dio $((16 * 1024 * 1024))
++	t_dax_flag_mmap_dio $((64 * 1024 * 1024))
+ }
+ 
++export MKFS_OPTIONS="-d su=2m,sw=1"
+ _scratch_mkfs > /dev/null 2>&1
+ 
+ # mount with dax option
+ _scratch_mount "-o dax"
+ 
+ psize=`src/feature -s`
+-tsize=$((1024 * 1024 * 1024))
++tsize=$((64 * 1024 * 1024))
+ 
+-$XFS_IO_PROG -f -c "pwrite -W -b $psize 0 $tsize" \
+-	$SCRATCH_MNT/tf_s >> $seqres.full 2>&1
+-$XFS_IO_PROG -f -c "pwrite -W -b $psize 0 $tsize" \
+-	$SCRATCH_MNT/tf_d >> $seqres.full 2>&1
++$XFS_IO_PROG -f -c "falloc 0 $tsize" $SCRATCH_MNT/tf_s >> $seqres.full 2>&1
++$XFS_IO_PROG -f -c "falloc 0 $tsize" $SCRATCH_MNT/tf_d >> $seqres.full 2>&1
+ 
+ do_tests
+ _scratch_unmount
+-- 
+2.7.4
+
