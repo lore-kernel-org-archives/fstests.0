@@ -1,81 +1,79 @@
-Received: from mail-wr0-f170.google.com ([209.85.128.170]:35494 "EHLO
-        mail-wr0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751385AbdBEGpH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 5 Feb 2017 01:45:07 -0500
-Received: by mail-wr0-f170.google.com with SMTP id 89so7607314wrr.2
-        for <fstests@vger.kernel.org>; Sat, 04 Feb 2017 22:45:07 -0800 (PST)
-Subject: Re: [PATCH] generic/074: _cleanup potentially removes local FS files
-References: <20170129135620.25464-1-omzg@plexistor.com>
- <20170204041848.GG1859@eguan.usersys.redhat.com>
-From: Omer Zilberberg <omzg@plexistor.com>
-Message-ID: <d428f2b8-5e3a-d9b8-955d-d5467c823b95@plexistor.com>
-Date: Sun, 5 Feb 2017 08:45:02 +0200
-MIME-Version: 1.0
-In-Reply-To: <20170204041848.GG1859@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Received: from imap.thunk.org ([74.207.234.97]:33742 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751735AbdBEGxq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 5 Feb 2017 01:53:46 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH 3/3] generic: filter out lost+found when running "ls $SCRATCH_MNT"
+Date: Sun,  5 Feb 2017 01:53:36 -0500
+Message-Id: <20170205065336.14994-3-tytso@mit.edu>
+In-Reply-To: <20170205065336.14994-1-tytso@mit.edu>
+References: <20170205065336.14994-1-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
+The generic/052 and generic/054 tests run ls on the root directory,
+and on ext4 we have a lost+found directory which is not in the golden
+output.
 
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ common/filter     | 5 +++++
+ tests/generic/052 | 2 +-
+ tests/generic/054 | 4 ++--
+ 3 files changed, 8 insertions(+), 3 deletions(-)
 
-On 02/04/2017 06:18 AM, Eryu Guan wrote:
-> On Sun, Jan 29, 2017 at 03:56:20PM +0200, Omer Zilberberg wrote:
->> fstest_dir is set after _cleanup() is defined and _require_test is
->> called. If _require_test fails (due to some unrelated bug in tested FS),
->> _cleanup will attempt to remove $fstest_dir.*, which expands to .*
->> This has the unfortunate effect of removing xfstests' .git and
->> .gitignore.
->>
->> Here is the 074.out.bad file for this case:
->> QA output created by 074
->> mount: permission denied
->> common/rc: retrying test device mount with external set
->> mount: permission denied
->> common/rc: could not mount /dev/pmem0 on /mnt
->> rm: refusing to remove '.' or '..' directory: skipping '.'
->> rm: refusing to remove '.' or '..' directory: skipping '..'
->> ----
->>
->> The only other test which could face the same problem is generic/285.
->> However, that test defines _cleanup after the _require* calls, and so on
->> _require_test failure, 285.out.bad contains the harmless:
->> ./common/rc: line 1: _cleanup: command not found
-> 
-> How about defining fstest_dir before _cleanup function? Along with
-> "here" and "tmp", which looks clearer and makes more sense to me.
-Sure, no problem. I'll send a new patch momentarily.
-Thanks for the review
-> 
-> Thanks,
-> Eryu
-> 
->>
->> Signed-off-by: Omer Zilberberg <omzg@plexistor.com>
->> ---
->>  tests/generic/074 | 3 ++-
->>  1 file changed, 2 insertions(+), 1 deletion(-)
->>
->> diff --git a/tests/generic/074 b/tests/generic/074
->> index 55264bd..ef84263 100755
->> --- a/tests/generic/074
->> +++ b/tests/generic/074
->> @@ -33,7 +33,8 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
->>  
->>  _cleanup()
->>  {
->> -    rm -rf $fstest_dir.* $tmp.*
->> +    [ -n "$fstest_dir" ] && rm -rf $fstest_dir.*
->> +    rm -rf $tmp.*
->>  }
->>  
->>  # get standard environment, filters and checks
->> -- 
->> 2.9.3
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe fstests" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/common/filter b/common/filter
+index e39ac0e2..43281599 100644
+--- a/common/filter
++++ b/common/filter
+@@ -401,5 +401,10 @@ _filter_mknod()
+ 	sed -e "s/mknod: [\`']\(.*\)': File exists/mknod: \1: File exists/"
+ }
+ 
++_filter_lostfound()
++{
++	sed -e '/^lost+found$/d'
++}
++
+ # make sure this script returns success
+ /bin/true
+diff --git a/tests/generic/052 b/tests/generic/052
+index 74cf5b62..f7cdd09c 100755
+--- a/tests/generic/052
++++ b/tests/generic/052
+@@ -82,7 +82,7 @@ _scratch_mount $mnt >>$seqres.full 2>&1 \
+     || _fail "mount failed: $mnt $MOUNT_OPTIONS"
+ 
+ echo "ls SCRATCH_MNT"
+-ls $SCRATCH_MNT
++ls $SCRATCH_MNT | _filter_lostfound
+ 
+ echo "unmount"
+ _scratch_unmount
+diff --git a/tests/generic/054 b/tests/generic/054
+index 238741c1..8375e574 100755
+--- a/tests/generic/054
++++ b/tests/generic/054
+@@ -102,7 +102,7 @@ for s in sync nosync ; do
+ 
+ 	# check before on what FS should look like
+ 	_echofull "ls SCRATCH_MNT"
+-	ls $SCRATCH_MNT
++	ls $SCRATCH_MNT | _filter_lostfound
+ 
+ 	_echofull "godown"
+ 	src/godown -v -f $SCRATCH_MNT >> $seqres.full
+@@ -120,7 +120,7 @@ for s in sync nosync ; do
+ 
+ 	# check on what FS looks like after log recovery
+ 	_echofull "ls SCRATCH_MNT"
+-	ls $SCRATCH_MNT
++	ls $SCRATCH_MNT | _filter_lostfound
+ 
+ 	_echofull "unmount"
+ 	_scratch_unmount
+-- 
+2.11.0.rc0.7.gbe5a750
+
