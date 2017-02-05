@@ -1,125 +1,38 @@
-Received: from mx1.redhat.com ([209.132.183.28]:33756 "EHLO mx1.redhat.com"
+Received: from imap.thunk.org ([74.207.234.97]:35628 "EHLO imap.thunk.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751774AbdBEKGV (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 5 Feb 2017 05:06:21 -0500
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id D5AF34E4CD
-        for <fstests@vger.kernel.org>; Sun,  5 Feb 2017 10:06:21 +0000 (UTC)
-Received: from localhost (ovpn-12-24.pek2.redhat.com [10.72.12.24])
-        by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id v15A6K4M019304
-        for <fstests@vger.kernel.org>; Sun, 5 Feb 2017 05:06:21 -0500
-Message-Id: <201702051006.v15A6K4M019304@int-mx14.intmail.prod.int.phx2.redhat.com>
-Date: Sun, 05 Feb 2017 18:06:18 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: [ANNOUNCE] fstests: master branch updated to a9915de6628b
+        id S1753644AbdBEUKI (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 5 Feb 2017 15:10:08 -0500
+Date: Sun, 5 Feb 2017 15:09:54 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH 1/3] generic: honor the FSSTRESS_AVOID environment
+ variable
+Message-ID: <20170205200954.wrqp6fdsvcohlcjn@thunk.org>
+References: <20170205065336.14994-1-tytso@mit.edu>
+ <CAOQ4uxisNW+zew4NgKtykJQs8dcC==u1rMvWVZwH=Mnp7r0SkA@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="Z4yagEmUbxTV"
-Content-Disposition: inline
-Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-List-ID: <fstests@vger.kernel.org>
-
-
---Z4yagEmUbxTV
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <CAOQ4uxisNW+zew4NgKtykJQs8dcC==u1rMvWVZwH=Mnp7r0SkA@mail.gmail.com>
+Sender: fstests-owner@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: fstests <fstests@vger.kernel.org>
+List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+On Sun, Feb 05, 2017 at 10:02:03AM +0200, Amir Goldstein wrote:
+> On Sun, Feb 5, 2017 at 8:53 AM, Theodore Ts'o <tytso@mit.edu> wrote:
+> > Make sure all tests which run fsstress, and which do not have a very
+> > specific custom profile of which file system operations to run,
+> 
+> Can you elaborate about this criteria?
+> Specifically, what about overlay/019? and several other {xfs,btrfs}/* stress
+> tests. Why do they not qualify?
 
-The master branch of the xfstests repository at:
+I didn't bother looking at the tests beyond tests/generic, sorry.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+The general criteria I used is that fstress invocation didn't specify
+any -f options, then I would definitely add a $FSSTRESS_AVOID.  If
+there was a large number of -f options, then definitely don't add
+$FSSTRESS_AVOID.  If there are only 2 or 3 -f options, then I'd
+probably add $FSSTRESS_AVOID but it's more of a test by test basis.
 
-have just been updated. As usual, there're new generic and btrfs tests added in
-this update, as well as various bug fixes, and a new 'shutdown' group is added
-to all tests that shutdown the filesystems on purpose.
-
-I haven't gone through all the backlogs yet, I'll try to do that in next week.
-
-New failures I've noticed in this update:
-- generic/407 fails on reflink-enabled XFS, there's an XFS patch in review
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-a9915de6628b generic: check that destination timestamps are not updated on dedupe
-
-New commits:
-
-Amir Goldstein (1):
-      [080446d64f72] generic/007: cleanup $TEST_DIR/$seq dir
-
-Christoph Hellwig (2):
-      [de89357bad06] generic: check that destination timestamps are updated on clone
-      [a9915de6628b] generic: check that destination timestamps are not updated on dedupe
-
-Darrick J. Wong (3):
-      [baaa392c8838] xfs/263: don't hardcode inode numbers in output
-      [c83c12e89e5f] xfs/299: don't chmod the underlying mountpoints prior to mounting
-      [6c0aa31ff174] xfs/030: ignore lost rmapbt blocks
-
-Lakshmipathi.G (1):
-      [34d728d280d8] btrfs: check btrfs-convert with extent and non-extent source
-
-Omar Sandoval (1):
-      [caae8cb393ff] xfs/014: fix typo in xfs_quota command
-
-Theodore Ts'o (3):
-      [3d99741cebfa] generic/388: use the src/godown program instead of xfs_io
-      [781bf49055d8] generic/398: update errors to be returned when doing cross renames w/o keys
-      [4a2e9b0c0560] generic: add shutdown group
-
-
-Code Diffstat:
-
- common/config         |   3 ++
- tests/btrfs/012       |   3 --
- tests/btrfs/136       | 122 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/136.out   |   2 +
- tests/btrfs/group     |   1 +
- tests/generic/007     |   1 +
- tests/generic/388     |   2 +-
- tests/generic/398.out |   4 +-
- tests/generic/407     |  84 ++++++++++++++++++++++++++++++++++
- tests/generic/407.out |   2 +
- tests/generic/408     |  84 ++++++++++++++++++++++++++++++++++
- tests/generic/408.out |   2 +
- tests/generic/group   |  32 ++++++-------
- tests/overlay/007     |   1 +
- tests/xfs/014         |   2 +-
- tests/xfs/030         |   3 +-
- tests/xfs/263         |   6 ++-
- tests/xfs/263.out     |  52 ++++++++++-----------
- tests/xfs/299         |   7 +--
- tests/xfs/group       |  10 ++---
- 20 files changed, 365 insertions(+), 58 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
-
---Z4yagEmUbxTV
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJYlvfPAAoJECZSqilcj+djNC8P/Ax28CbbjQDnGNMyHsXgyr18
-sD1Y48NNRa0Ye21Onwg1UodAeCyYeDDutiEK0lPalfyHfRpbKbBqZR6ChBP2cxns
-i6JxHf/ns2o99GNXrads1S0r9F2/HHtqsSspalLgMtEXu+JkNpQCXDU4eP1To06l
-mBS+Ulea23cN3Lx19/lZrfufwB+m/Rycd1FYJKutlP46kU9G2nMXWB98gt2aze8q
-jvb54YUUJlHgz0qTlZwm86RDfzj9DyJfapk5U9XcLtcmULB17D8QCOnM3aY+85O7
-nIPvLHeJYryu7CowADO16B+T0Gp8+kZDjKCOqmfA0UXwD7DuRjC15Eqbz6XifLG0
-IO/lrmkOtfiSazv+xqynyFXhTMMAV/BxAbEJBii0h1a27SYMfx3ukJWesL7NPSBG
-CE99ZWrokGY0Yfvp7hSLSo9f3p1mMPX8F4Tp2lk0wCMJS1Ri1tMU6IyM/E2kgSU2
-9UtL4JYEP86fYYxIsu+BvQv+Vugj3yyX8n1ta48/U1xw7sTcviwc6Kja1CcGDQ20
-XAV7kDYreo/Zbr7b5ePeLUHV0ysFEY1h3RmOX8YQG3Qnq0PI60V/MxlFSnnmE69Z
-PAmS/sfG3gCX/EjHUvaaoZTG+68M5NYGfj1qs36R6uoh5XVxjSQqh8oTt8t34wBg
-Q4T2ZimX2B/JqBebSg6R
-=F3io
------END PGP SIGNATURE-----
-
---Z4yagEmUbxTV--
+	     		     	      	   - Ted
