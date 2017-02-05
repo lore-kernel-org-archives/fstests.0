@@ -1,119 +1,66 @@
-Received: from imap.thunk.org ([74.207.234.97]:33748 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:33740 "EHLO imap.thunk.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751710AbdBEGxq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1751734AbdBEGxq (ORCPT <rfc822;fstests@vger.kernel.org>);
         Sun, 5 Feb 2017 01:53:46 -0500
 From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH 2/3] common/log: add ext4 support for log state probing
-Date: Sun,  5 Feb 2017 01:53:35 -0500
-Message-Id: <20170205065336.14994-2-tytso@mit.edu>
-In-Reply-To: <20170205065336.14994-1-tytso@mit.edu>
-References: <20170205065336.14994-1-tytso@mit.edu>
+Subject: [PATCH 1/3] generic: honor the FSSTRESS_AVOID environment variable
+Date: Sun,  5 Feb 2017 01:53:34 -0500
+Message-Id: <20170205065336.14994-1-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-This enables generic/052, generic/054, and generic/055 for ext4.
+Make sure all tests which run fsstress, and which do not have a very
+specific custom profile of which file system operations to run, honor
+the FSSTRESS_AVOID environment variable.
 
 Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 ---
- common/log | 41 +++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 41 insertions(+)
+ tests/generic/051 | 2 +-
+ tests/generic/232 | 2 +-
+ tests/generic/388 | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/common/log b/common/log
-index 82899c67..d1c19ff5 100644
---- a/common/log
-+++ b/common/log
-@@ -228,6 +228,14 @@ _scratch_f2fs_logstate()
-     echo $?
- }
+diff --git a/tests/generic/051 b/tests/generic/051
+index b0c37824..7b807b9f 100755
+--- a/tests/generic/051
++++ b/tests/generic/051
+@@ -63,7 +63,7 @@ PROCS=$((2 * LOAD_FACTOR))
+ load_dir=$SCRATCH_MNT/test
  
-+_scratch_ext4_logstate()
-+{
-+    $DUMPE2FS_PROG -h $SCRATCH_DEV 2> /dev/null | tee -a $seqres.full | \
-+	grep "^Filesystem features" | grep -q needs_recovery
-+    test $? -ne 0
-+    echo $?
-+}
-+
- _scratch_dump_log()
- {
- 	case "$FSTYP" in
-@@ -237,6 +245,9 @@ _scratch_dump_log()
- 	f2fs)
- 		$DUMP_F2FS_PROG $SCRATCH_DEV
- 		;;
-+	ext4)
-+		$DUMPE2FS_PROG -h $SCRATCH_DEV
-+		;;
- 	*)
- 		;;
- 	esac
-@@ -251,6 +262,9 @@ _test_dump_log()
- 	f2fs)
- 		$DUMP_F2FS_PROG $TEST_DEV
- 		;;
-+	ext4)
-+		$DUMPE2FS_PROG -h $TEST_DEV
-+		;;
- 	*)
- 		;;
- 	esac
-@@ -265,6 +279,9 @@ _print_logstate()
-     f2fs)
-         dirty=$(_scratch_f2fs_logstate)
-         ;;
-+    ext4)
-+        dirty=$(_scratch_ext4_logstate)
-+        ;;
-     *)
-         ;;
-     esac
-@@ -532,6 +549,11 @@ _require_logstate()
-             _notrun "This test requires dump.f2fs utility."
-         fi
-         ;;
-+    ext4)
-+	if [ -z "$DUMPE2FS_PROG" ]; then
-+		_notrun "This test requires dumpe2fs utility."
-+	fi
-+	;;
-     *)
-         _notrun "$FSTYP does not support log state probing."
-         ;;
-@@ -570,6 +592,22 @@ _f2fs_log_config()
-     echo "  test10    active_logs=6,background_gc=on,discard,inline_data,inline_dentry"
- }
+ # let this run for a while
+-$FSSTRESS_PROG -n10000000 -p $PROCS -d $load_dir >> $seqres.full 2>&1 &
++$FSSTRESS_PROG $FSSTRESS_AVOID -n10000000 -p $PROCS -d $load_dir >> $seqres.full 2>&1 &
+ sleep $SLEEP_TIME
+ $KILLALL_PROG -q $FSSTRESS_PROG
+ wait
+diff --git a/tests/generic/232 b/tests/generic/232
+index 6b197791..f4853f72 100755
+--- a/tests/generic/232
++++ b/tests/generic/232
+@@ -53,7 +53,7 @@ _fsstress()
  
-+_ext4_log_config()
-+{
-+    echo "# mkfs-opt             mount-opt"
-+    echo "# ------------------------------"
-+    echo "  /dev/null     data=writeback"
-+    echo "  /dev/null     data=ordered"
-+    echo "  /dev/null     data=journal"
-+    echo "  /dev/null     data=ordered,data_err=abort"
-+    echo "  /dev/null     data=writeback,nojournal_checksum"
-+    echo "  /dev/null     data=ordered,nojournal_checksum"
-+    echo "  /dev/null     data=journal,nojournal_checksum"
-+    echo "  /dev/null     data=ordered,data_err=abort,nojournal_checksum"
-+    echo "  /dev/null     data=writeback,journal_checksum"
-+    echo "  /dev/null     data=ordered,journal_checksum"
-+}
-+
- _get_log_configs()
- {
-     case "$FSTYP" in
-@@ -579,6 +617,9 @@ _get_log_configs()
-     f2fs)
-         _f2fs_log_config
-         ;;
-+    ext4)
-+        _ext4_log_config
-+        ;;
-     *)
-         _notrun "$FSTYP does not support log configs."
-         ;;
+ 	out=$SCRATCH_MNT/fsstress.$$
+ 	count=2000
+-	args=`_scale_fsstress_args -d $out -n $count -p 7`
++	args=`_scale_fsstress_args -d $out -n $count -p 7 $FSSTRESS_AVOID`
+ 
+ 	echo "fsstress $args" >> $seqres.full
+ 	if ! $FSSTRESS_PROG $args | tee -a $seqres.full | _filter_num
+diff --git a/tests/generic/388 b/tests/generic/388
+index 9d4ba9d6..3729aa5b 100755
+--- a/tests/generic/388
++++ b/tests/generic/388
+@@ -65,7 +65,7 @@ _scratch_mkfs >> $seqres.full 2>&1
+ _scratch_mount || _fail "mount failed"
+ 
+ for i in $(seq 1 50); do
+-	($FSSTRESS_PROG -d $SCRATCH_MNT -n 999999 -p 4 >> $seqres.full &) \
++	($FSSTRESS_PROG $FSSTRESS_AVOID -d $SCRATCH_MNT -n 999999 -p 4 >> $seqres.full &) \
+ 		> /dev/null 2>&1
+ 
+ 	# purposely include 0 second sleeps to test shutdown immediately after
 -- 
 2.11.0.rc0.7.gbe5a750
 
