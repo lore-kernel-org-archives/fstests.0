@@ -1,71 +1,31 @@
-Received: from mail-ot0-f194.google.com ([74.125.82.194]:32776 "EHLO
-        mail-ot0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754007AbdBGNcx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 7 Feb 2017 08:32:53 -0500
+Received: from imap.thunk.org ([74.207.234.97]:43318 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753322AbdBGRjq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 7 Feb 2017 12:39:46 -0500
+Date: Tue, 7 Feb 2017 12:39:43 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH] xfstests-bld: be tolerant of /proc/slabinfo being missing
+Message-ID: <20170207173943.hkcipu36syvgdtxk@thunk.org>
+References: <20170206214237.8838-1-ebiggers3@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20170207123514.GK1859@eguan.usersys.redhat.com>
-References: <1485507365-29012-1-git-send-email-amir73il@gmail.com>
- <1485507365-29012-2-git-send-email-amir73il@gmail.com> <20170207123514.GK1859@eguan.usersys.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 7 Feb 2017 15:32:51 +0200
-Message-ID: <CAOQ4uxgXXEAkUZ5AWS7S10gKFufxSpgVtF5U_wCXPk_WYo_QFw@mail.gmail.com>
-Subject: Re: [PATCH v2 1/3] overlay: configure base fs mount point for running tests
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170206214237.8838-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
+To: Eric Biggers <ebiggers3@gmail.com>
+Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Feb 7, 2017 at 2:35 PM, Eryu Guan <eguan@redhat.com> wrote:
-> On Fri, Jan 27, 2017 at 10:56:03AM +0200, Amir Goldstein wrote:
->> Instead of setting the vars TEST/SCRATCH_DEV to overlay base dirs,
->> allow setting the vars SCRATCH/TEST_BASE_MNT, to configure where
->> the base fs is mounted and where overlay dirs will be created.
->> For example:
->>
->> -export TEST_DEV=/mnt/base/test/ovl
->> -export SCRATCH_DEV=/mnt/base/scratch/ovl
->> +export TEST_BASE_MNT=/mnt/base/test
->> +export SCRATCH_BASE_MNT=/mnt/base/scratch
->
-> [sorry for the late review, I came back from holiday then played with
-> this patchset for a while]
->
-> Hmm, I noticed that there're TEST/SCRATCH_BASE_MNT and
-> TEST/SCRATCH_BASE_DIR and OVERLAY_BASE_DIR introduced. They seem a bit
-> complex and can be confusing to users. I'm wondering if they can be
-> simplified somehow? e.g. use TEST/SCRATCH_BASE_MNT only, no ..BASE_DIR
-> vars, no OVERLAY_BASE_DIR (which seems not necessary to me, it only adds
-> another level to the path structure).
+On Mon, Feb 06, 2017 at 01:42:33PM -0800, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
+> 
+> In kernels compiled without /proc/slabinfo (CONFIG_SLABINFO),
+> runtests.sh would report errors when trying to save the contents of
+> /proc/slabinfo.  Update runtests.sh to consider /proc/slabinfo to be
+> optional, saving its contents only if present.
+> 
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
 
-I find the extra level necessary.
-For example, I use the same BASE_DEV for other tests, so I would like
-to isolate overlayfs tests under ovl dir.
-If we were to support mkfs of BASE_DEV that would have been different
-but we don't.
+Thanks, applied.
 
-However, I will try to get rid of some of the variables to reduce confusion.
-IMO, _BASE_DIR, which replaces the bogus TEST/SCRATCH_DEV is
-important for tests that mount their own custom overlays, e.g. overlay/005.
-I will try to see how this can be simplified or better explained.
-Please give this another thought as well.
-
->
-> And I gave the variables naming a second thought, I think
-> TEST/SCRATCH_BASE_MNT are confusing, they're used only in overlayfs
-> testing, but the names seem to imply they're generic enough and useful
-> in other filesystems testing too. I'd like to name them with little
-> confusion. OTOH, I agree that adding "OVERLAY_" prefix is not good
-> enough either (names too long).
->
-> I'm not good at naming variables.., just a random idea in my head, how
-> about using OVL_ prefix? i.e.
->
-> OVL_TEST/SCRATCH_BASE_MNT, a bit shorter, and indicates they're only
-> useful in overlayfs testing, but OVL_ prefix introduces inconsistency
-> (with OVERLAY_UPPER_DIR etc., perhaps we can change all OVERLAY_ to
-> OVL_?).
->
-
-Yes, I considered OVL_ as well. I guess it is the least worse option.
-No problem to align OVL_UPPER/LOWER_DIR. Will do.
+					- Ted
