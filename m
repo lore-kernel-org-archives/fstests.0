@@ -1,38 +1,103 @@
-Received: from imap.thunk.org ([74.207.234.97]:43428 "EHLO imap.thunk.org"
+Received: from mx1.redhat.com ([209.132.183.28]:50500 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753433AbdBGR50 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 7 Feb 2017 12:57:26 -0500
-Date: Tue, 7 Feb 2017 12:57:24 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH] xfstests-bld: enable crypto self-tests in kernel configs
-Message-ID: <20170207175724.awvz2yhwkln7ry63@thunk.org>
-References: <20170206214237.8838-5-ebiggers3@gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170206214237.8838-5-ebiggers3@gmail.com>
+        id S1751698AbdBHEL1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 7 Feb 2017 23:11:27 -0500
+From: Xiong Zhou <xzhou@redhat.com>
+Subject: [PATCH v6 0/2]  mmap dio and DAX
+Date: Wed,  8 Feb 2017 12:11:16 +0800
+Message-Id: <1486527078-11173-1-git-send-email-xzhou@redhat.com>
+In-Reply-To: <20170206191717.GB12290@linux.intel.com>
+References: <20170206191717.GB12290@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers3@gmail.com>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+To: ross.zwisler@linux.intel.com, fstests@vger.kernel.org
+Cc: linux-nvdimm@ml01.01.org, jmoyer@redhat.com, eguan@redhat.com, Xiong Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Feb 06, 2017 at 01:42:37PM -0800, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
-> 
-> It can be useful to enable crypto self-tests by setting
-> CONFIG_CRYPTO_MANAGER_DISABLE_TESTS=n.  This makes the crypto API test
-> each algorithm against its test vectors before it is used.  Otherwise,
-> there could be undetected bugs or incompatibilities in the algorithms
-> --- which would be especially problematic for filesystem encryption.
-> Note that the crypto self-tests are quite fast and only happen for a
-> given algorithm when someone first requests that algorithm.
-> 
-> I updated all configs for kernels 3.18 and later, excluding 4.2 which
-> I've proposed removing, and regenerated the configs for the latest
-> upstream stable version of each.  I didn't bother with pre-3.18 kernels.
-> 
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
+Hi Ross and all,
 
-Thanks, applied.
+After adding some initialization of test files, I've
+got different test results that the write call succeeds
+while the following read call fails.
 
-					- Ted
+Please help test and review, Thanks!
+
+-----
+common/rc         : requires SCRATCH_DEV support DAX
+src/t_mmap_dio.c  : intro mmap and O_DIRECT rw through files
+tests/generic/405 : IO between DAX/non-DAX mountpoints
+tests/xfs/138     : IO between DAX/non-DAX xfs files(per-inode flag)
+
+v2 :
+  Merge helper function changes into the first patch;
+  Rewrite _require_dax, check options for sure;
+  Print msg in t_mmap_dio.c to show which test going wrong;
+  Empty mount options and check after mount to ensure we
+wont mount with wrong option;
+  Remove unnecessary leading underscore and _fail;
+  Use xfs_io instead of dd;
+  Other minor fixes.
+
+v3:
+ close fds in C test programme for clean up.
+
+v4:
+ Test both buffered and O_DIRECT IO;
+ Fix arg numbers in C test programme;
+ Fix fs options check after mount.
+ Cc Jeff Moyer since this test is based on his code.
+ (Sorry for the late cc!)
+
+v5:
+ Mainly from Ross Zwisler <ross.zwisler@linux.intel.com>
+ Add mkfs options to make fs 2M aligned, to hit PMD faults;
+ Use falloc instead of pwrite to init test file aviding 4k
+alignment;
+ 64M test file instead of 1G;
+ Bumping test seq numners;
+ Other minor fixes.
+
+v6:
+ Test file size increase to 128M;
+ Add fsync after write in t_mmap_dio.c;
+ Split sub tests in both cases, re-initialize test files
+before every sub test. This change reveals the new read
+failure issue.
+
+Test status:
+  Both cases not run on normal block device;
+  Both cases not run on ext2/3 fs(no falloc);
+  Both cases PASS on memory-mode nvdimm devices;
+  DIO in both cases FAIL on brd based ramdisk with:
+  DIO in both cases FAIL on raw-mode nvdimm devices with:
+    +read(Bad address) len 1024 dio dax to nondax
+    +read(Bad address) len 4096 dio dax to nondax
+    +read(Bad address) len 16777216 dio dax to nondax
+    +read(Bad address) len 67108864 dio dax to nondax
+  I've reported this as an issue:
+  https://lists.01.org/pipermail/linux-nvdimm/2017-February/008781.html
+
+
+Xiong Zhou (2):
+  xfs: test per-inode DAX flag by IO
+  generic: test mmap io through DAX and non-DAX
+
+ .gitignore            |   1 +
+ common/rc             |  13 +++++
+ src/Makefile          |   2 +-
+ src/t_mmap_dio.c      | 111 +++++++++++++++++++++++++++++++++++
+ tests/generic/407     | 152 ++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/407.out |   2 +
+ tests/generic/group   |   1 +
+ tests/xfs/196         | 158 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/196.out     |   2 +
+ tests/xfs/group       |   1 +
+ 10 files changed, 442 insertions(+), 1 deletion(-)
+ create mode 100644 src/t_mmap_dio.c
+ create mode 100755 tests/generic/407
+ create mode 100644 tests/generic/407.out
+ create mode 100755 tests/xfs/196
+ create mode 100644 tests/xfs/196.out
+
+-- 
+1.8.3.1
+
