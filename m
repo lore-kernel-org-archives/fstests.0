@@ -1,19 +1,19 @@
-Received: from mail-wr0-f174.google.com ([209.85.128.174]:35067 "EHLO
-        mail-wr0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752533AbdBJREZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 10 Feb 2017 12:04:25 -0500
-Received: by mail-wr0-f174.google.com with SMTP id 89so112562516wrr.2
-        for <fstests@vger.kernel.org>; Fri, 10 Feb 2017 09:04:25 -0800 (PST)
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:32972 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751712AbdBJRGv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 10 Feb 2017 12:06:51 -0500
+Received: by mail-wm0-f68.google.com with SMTP id v77so8241565wmv.0
+        for <fstests@vger.kernel.org>; Fri, 10 Feb 2017 09:06:33 -0800 (PST)
 From: Amir Goldstein <amir73il@gmail.com>
 Subject: [PATCH] fstests: sanity check that test partitions are not mounted elsewhere
-Date: Fri, 10 Feb 2017 19:04:15 +0200
-Message-Id: <1486746255-5281-1-git-send-email-amir73il@gmail.com>
+Date: Fri, 10 Feb 2017 19:06:25 +0200
+Message-Id: <1486746385-5364-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-When $TEST_DEV is mounted at a different location then $TEST_DIR,
+When $TEST_DEV is mounted at a different location than $TEST_DIR,
 _require_test() aborts the test with an error:
  TEST_DEV=/dev/sda5 is mounted but not on TEST_DIR=/mnt/test
 
@@ -30,7 +30,7 @@ It checks if a device is mounted on a given mount point and optionally
 checks the mounted fs type.
 
 The sanity checks in _require_scratch() and _require_test() are
-converted to use the helper and gain the check for correct fs type.
+converted to use the _check_mounted_on() helper.
 
 The helper is used in init_rc() to sanity check both test and scratch
 partitions, before tests are run and before $SCRATCH_DEV is unmounted.
