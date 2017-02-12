@@ -1,192 +1,108 @@
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:32972 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751712AbdBJRGv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 10 Feb 2017 12:06:51 -0500
-Received: by mail-wm0-f68.google.com with SMTP id v77so8241565wmv.0
-        for <fstests@vger.kernel.org>; Fri, 10 Feb 2017 09:06:33 -0800 (PST)
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH] fstests: sanity check that test partitions are not mounted elsewhere
-Date: Fri, 10 Feb 2017 19:06:25 +0200
-Message-Id: <1486746385-5364-1-git-send-email-amir73il@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:44544 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750780AbdBLITE (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 12 Feb 2017 03:19:04 -0500
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id EABD33D944
+        for <fstests@vger.kernel.org>; Sun, 12 Feb 2017 08:19:04 +0000 (UTC)
+Received: from localhost (ovpn-12-21.pek2.redhat.com [10.72.12.21])
+        by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id v1C8J37r026647
+        for <fstests@vger.kernel.org>; Sun, 12 Feb 2017 03:19:04 -0500
+Message-Id: <201702120819.v1C8J37r026647@int-mx13.intmail.prod.int.phx2.redhat.com>
+Date: Sun, 12 Feb 2017 16:19:01 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: [ANNOUNCE] fstests: master branch updated to 7e4f7a370ca4
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="JCSE4jMwcRlU"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-When $TEST_DEV is mounted at a different location than $TEST_DIR,
-_require_test() aborts the test with an error:
- TEST_DEV=/dev/sda5 is mounted but not on TEST_DIR=/mnt/test
 
-There are several problems with current sanity check:
-1. the output of the error is mixed into out.bad and hard to see
-2. the test partition is unmounted at the end of the test regardless
-   of the fact that it not pass the sanity that we have exclusivity
-3. scratch partition has a similar sanity check in _require_scratch(),
-   but we may not get to it, because $SCRATCH_DEV is unmounted prior
-   to running the tests (which could unmount another mount point).
+--JCSE4jMwcRlU
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-To solve all these problems, introduce a helper _check_mounted_on().
-It checks if a device is mounted on a given mount point and optionally
-checks the mounted fs type.
+Hi all,
 
-The sanity checks in _require_scratch() and _require_test() are
-converted to use the _check_mounted_on() helper.
+The master branch of the xfstests repository at:
 
-The helper is used in init_rc() to sanity check both test and scratch
-partitions, before tests are run and before $SCRATCH_DEV is unmounted.
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- common/rc | 85 ++++++++++++++++++++++++++++++++++++++-------------------------
- 1 file changed, 51 insertions(+), 34 deletions(-)
+have just been updated. There're mainly bug fixes and improvements in this
+update, notably that we have log state support for ext4, which enables
+generic/05[24] on ext4, though the kernel support is not ready yet.
 
-Eryu,
+Thanks,
+Eryu
 
-As result of your request to add sanity checks to overlay base fs, I ended
-up finding several bugs in current sanity checks (not overlay related).
+The new head of the master branch is commit:
 
-So sending this one out because it is useful on its own. Overlay base fs
-patches are going to be on top of this change and use the helper as well.
+7e4f7a370ca4 common/fuzzy: discard xfs_io stdout in _scratch_fuzz_modify
 
-Incidently, this change also fixes an overlay setup bug, but I did not
-want to add this info to the already overloaded commit message, as the
-following base fs patches will make this bug obsolete -
-If you configure SCRATCH_DEV to a mount point (and not to a directory therein)
-then you will get a false positive error in scratch tests:
+New commits:
 
- $SCRATCH_DEV=/mnt/base/scratch is mounted but not on $SCRATCH_MNT=/mnt/scratch
- Already mounted result:
- /dev/sda6 on /mnt/base/scratch type xfs (rw,relatime,attr2,inode64,noquota)
+Anand Jain (1):
+      [96459fb68785] fstests: btrfs: Use compressible data
 
-This is due to the wrong `grep -F $SCRATCH_DEV` which matches the mount
-point instead of the device in that mount.
-I am pretty sure we already has this discussion where you changed the pattern
-to `grep -F ^$dev` and I advised you to go with `grep -F "$dev on "`. Anyway,
-this change includes this fix.
+Omer Zilberberg (1):
+      [6d0d254312dc] generic/074: _cleanup potentially removes local FS files
 
-Amir.
+Theodore Ts'o (3):
+      [3e42a35711e1] generic: honor the FSSTRESS_AVOID environment variable
+      [b4d4037eeb3b] common/log: add ext4 support for log state probing
+      [c7320b4cacf6] generic/052,4: filter out lost+found when running "ls $SCRATCH_MNT"
+
+Xiao Yang (1):
+      [7e4f7a370ca4] common/fuzzy: discard xfs_io stdout in _scratch_fuzz_modify
 
 
-diff --git a/common/rc b/common/rc
-index 7e2eaee..1c773cc 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1319,6 +1319,45 @@ _supported_os()
-     _notrun "not suitable for this OS: $HOSTOS"
- }
- 
-+# check if a FS on a device is mounted
-+# if so, verify that it is mounted on mount point
-+# if fstype is given as argument, verify that it is also
-+# mounted with correct fs type
-+#
-+_check_mounted_on()
-+{
-+	local devname=$1
-+	local dev=$2
-+	local mntname=$3
-+	local mnt=$4
-+	local type=$5
-+
-+	# Note that we use -F here so grep doesn't try to interpret an NFS over
-+	# IPv6 server as a regular expression.  Because of that, we cannot use
-+	# ^$dev so we use "$dev on " to avoid matching $dev to mount point field
-+	# for overlay case, where $dev is a directory.
-+	local mount_rec=`_mount | grep -F "$dev on "`
-+	[ -n "$mount_rec" ] || return 1
-+
-+	# if it's mounted, make sure its on $mnt
-+	if ! (echo $mount_rec | grep -q "$dev on $mnt")
-+	then
-+		echo "$devname=$dev is mounted but not on $mntname=$mnt - aborting"
-+		echo "Already mounted result:"
-+		echo $mount_rec
-+		exit 1
-+	fi
-+
-+	if [ -n "$type" -a "`_fs_type $dev`" != "$type" ]
-+	then
-+		echo "$devname=$dev is mounted but not a type $type filesystem"
-+		# raw $DF_PROG cannot handle NFS/CIFS/overlay correctly
-+		_df_device $dev
-+		exit 1
-+	fi
-+	return 0
-+}
-+
- # this test needs a scratch partition - check we're ok & unmount it
- # No post-test check of the device is required. e.g. the test intentionally
- # finishes the test with the filesystem in a corrupt state
-@@ -1373,21 +1412,9 @@ _require_scratch_nocheck()
- 		 ;;
-     esac
- 
--    # mounted?
--    # Note that we use -F here so grep doesn't try to interpret an NFS over
--    # IPv6 server as a regular expression.
--    mount_rec=`_mount | grep -F $SCRATCH_DEV`
--    if [ "$mount_rec" ]
-+    if _check_mounted_on SCRATCH_DEV $SCRATCH_DEV SCRATCH_MNT $SCRATCH_MNT
-     then
--        # if it's mounted, make sure its on $SCRATCH_MNT
--        if ! echo $mount_rec | grep -q $SCRATCH_MNT
--        then
--            echo "\$SCRATCH_DEV=$SCRATCH_DEV is mounted but not on \$SCRATCH_MNT=$SCRATCH_MNT - aborting"
--            echo "Already mounted result:"
--            echo $mount_rec
--            exit 1
--        fi
--        # and then unmount it
-+        # if it's mounted, unmount it
-         if ! _scratch_unmount
-         then
-             echo "failed to unmount $SCRATCH_DEV"
-@@ -1458,21 +1485,8 @@ _require_test()
- 		 ;;
-     esac
- 
--    # mounted?
--    # Note that we use -F here so grep doesn't try to interpret an NFS over
--    # IPv6 server as a regular expression.
--    mount_rec=`_mount | grep -F $TEST_DEV`
--    if [ "$mount_rec" ]
-+    if ! _check_mounted_on TEST_DEV $TEST_DEV TEST_DIR $TEST_DIR
-     then
--        # if it's mounted, make sure its on $TEST_DIR
--        if ! echo $mount_rec | grep -q $TEST_DIR
--        then
--            echo "\$TEST_DEV=$TEST_DEV is mounted but not on \$TEST_DIR=$TEST_DIR - aborting"
--            echo "Already mounted result:"
--            echo $mount_rec
--            exit 1
--        fi
--    else
- 	out=`_mount_or_remount_rw "$MOUNT_OPTIONS" $TEST_DEV $TEST_DIR`
- 	if [ $? -ne 1 ]; then
- 		echo $out
-@@ -3066,13 +3080,16 @@ init_rc()
- 		fi
- 	fi
- 
--	if [ "`_fs_type $TEST_DEV`" != "$FSTYP" ]
--	then
--		echo "common/rc: Error: \$TEST_DEV ($TEST_DEV) is not a MOUNTED $FSTYP filesystem"
--		# raw $DF_PROG cannot handle NFS/CIFS/overlay correctly
--		_df_device $TEST_DEV
--		exit 1
-+	# Sanity check that TEST partition is not mounted at another mount point
-+	# or as another fs type
-+	_check_mounted_on TEST_DEV $TEST_DEV TEST_DIR $TEST_DIR $FSTYP
-+	if [ -n "$SCRATCH_DEV" ]; then
-+		# Sanity check that SCRATCH partition is not mounted at another
-+		# mount point, because it is about to be unmounted and formatted.
-+		# Another fs type for scratch is fine (bye bye old fs type).
-+		_check_mounted_on SCRATCH_DEV $SCRATCH_DEV SCRATCH_MNT $SCRATCH_MNT
- 	fi
-+
- 	# Figure out if we need to add -F ("foreign", deprecated) option to xfs_io
- 	$XFS_IO_PROG -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \
- 		export XFS_IO_PROG="$XFS_IO_PROG -F"
--- 
-2.7.4
+Code Diffstat:
 
+ common/filter     |  5 +++++
+ common/fuzzy      |  2 +-
+ common/log        | 41 +++++++++++++++++++++++++++++++++++++++++
+ common/rc         | 13 +++++++++++--
+ tests/btrfs/002   |  6 +++---
+ tests/btrfs/003   |  4 ++--
+ tests/btrfs/008   |  4 ++--
+ tests/btrfs/011   | 11 ++++-------
+ tests/btrfs/016   |  2 +-
+ tests/btrfs/022   |  6 ++----
+ tests/btrfs/027   |  9 +++------
+ tests/generic/051 |  2 +-
+ tests/generic/052 |  2 +-
+ tests/generic/054 |  4 ++--
+ tests/generic/074 |  2 +-
+ tests/generic/232 |  2 +-
+ tests/generic/388 |  2 +-
+ 17 files changed, 82 insertions(+), 35 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
+
+--JCSE4jMwcRlU
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJYoBluAAoJECZSqilcj+djQRUQANZvoJUB5z4YQuwYXRqV0p15
+GQ4IED5WW4jj02sOWjr0rjLKEVOST112Ip8DVgq89RpLavcknvRdThgys4dEKPe2
+q2zbX8xgskTj9mePg7oLOd1/zwcq2ZnXbIjiOiY1wS0n9G030wx08u/NwyLoDdU5
+0zW8/LrtngyPF2vMCDHF+rpiVlKx4QrMfHAZ4w/Tom9Da5MlLa+8xzxHThWQP+EV
+CCBQ4N/C4PLgQTW3uHOI6SzhK211nTUUaYQCtFrj6RW8zNwxXn8LDGy1mRETBWnz
+KFPZqirhQA6YfyMZA5B+gG/tx1ys1WO2J9qo2qCm71Yv9WHjcgnC37RWVN1tzGa5
+FcwmvOWHt/5aIeF714ZCdC3XPlTdWDPQ4nrwCVstHCxyrNGE4LeZl7062ooB3ZGH
+xNSbDUIx1xTdPBzow3XUNeQ6ifBNmSFNWnuYXa7GsCRzF3nA/vGnQIO5g0wCG+ix
+vGuF0WcDzyqmz50cJKtRMTSaYxAoc9unJyvjMIOH2BW/LNK3F+FFb/AHzERR4xzQ
+Sn5esUo3/W80J+wE/sF8Cr3ZxyJRF0EVE6YR03TFV5lGmzE1hZosWHZu6WmfKPyA
+shEneaVUvPOX1LtkogMNZNWP7gKoEoKRjHJMZZQoZqOrAMoI/zscMxt2x906xKDV
+LdZdrr+zAhZJPTZ+BlNu
+=tRvd
+-----END PGP SIGNATURE-----
+
+--JCSE4jMwcRlU--
