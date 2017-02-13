@@ -1,127 +1,71 @@
-Received: from mx1.redhat.com ([209.132.183.28]:59322 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752043AbdBMLRS (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 13 Feb 2017 06:17:18 -0500
-Date: Mon, 13 Feb 2017 19:17:11 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v3 2/9] fstests: use _test_mount() consistently
-Message-ID: <20170213111711.GG24562@eguan.usersys.redhat.com>
-References: <1486932224-17075-1-git-send-email-amir73il@gmail.com>
- <1486932224-17075-3-git-send-email-amir73il@gmail.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:48526 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1752408AbdBMLYG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 13 Feb 2017 06:24:06 -0500
+Received: from G08CNEXCHPEKD01.g08.fujitsu.local (unknown [10.167.33.80])
+        by cn.fujitsu.com (Postfix) with ESMTP id BD80847D8AAF
+        for <fstests@vger.kernel.org>; Mon, 13 Feb 2017 19:23:19 +0800 (CST)
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH] shared/005,7: add check whether debugfs succeeds to set a negative i_size or not
+Date: Mon, 13 Feb 2017 19:21:50 +0800
+Message-ID: <1486984910-4623-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1486932224-17075-3-git-send-email-amir73il@gmail.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Feb 12, 2017 at 10:43:37PM +0200, Amir Goldstein wrote:
-> On start of every test run and on every test, in init_rc() helper,
-> the test partition is verified to be mounted, or is mounted by
-> the helper _test_mount().
-> 
-> _test_mount() uses mount options $TEST_FS_MOUNT_OPTS and not
-> $MOUNT_OPTIONS like _scratch_mount() does.
-> 
-> _test_cycle_mount(), which is called by some tests uses the
-> _test_mount() helper as well.
-> 
-> Contrary to those cases, in _require_test() helper, if test
-> partition is not mounted, the helper _mount_or_remount_rw()
-> is called to mount the test partition with $MOUNT_OPTIONS.
-> Although this should never happen, because of the test in
-> init_rc(), this case is inconsistent with the rest of the code,
-> so it has been changed to use _test_mount() as it should.
-> 
-> When running tests with a multi section configuration, and
-> either FSTYP or MOUNT_OPTIONS change between sections, the
-> helper _test_unmount() is called to unmount the old test mount
-> and then _mount_or_remount_rw() is called to mount it again
-> with new FSTYP and/or MOUNT_OPTIONS.
-> This is again inconsistent with the rest of the code, so
-> was changed to use _test_mount() and instead of checking
-> if MOUNT_OPTIONS have changed between sections, we check if
-> TEST_FS_MOUNT_OPTS were changed between sections.
-> Otherwise, we can leave the test partition mounted.
-> 
-> This change is needed to support overlay base fs mount
-> and for multi section config files which include overlay FSTYP.
-> 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
->  check     | 22 ++++++++++------------
->  common/rc |  6 +++---
->  2 files changed, 13 insertions(+), 15 deletions(-)
-> 
-> diff --git a/check b/check
-> index 5a93c94..ec9798a 100755
-> --- a/check
-> +++ b/check
-> @@ -474,7 +474,7 @@ fi
->  
->  for section in $HOST_OPTIONS_SECTIONS; do
->  	OLD_FSTYP=$FSTYP
-> -	OLD_MOUNT_OPTIONS=$MOUNT_OPTIONS
-> +	OLD_TEST_FS_MOUNT_OPTS=$TEST_FS_MOUNT_OPTS
->  	get_next_config $section
->  
->  	# Do we need to run only some sections ?
-> @@ -527,20 +527,18 @@ for section in $HOST_OPTIONS_SECTIONS; do
->  			status=1
->  			exit
->  		fi
-> -		out=`_mount_or_remount_rw "$MOUNT_OPTIONS" $TEST_DEV $TEST_DIR`
-> -		if [ $? -ne 1 ]; then
-> -			echo $out
-> -			status=1
-> -			exit
-> +		if ! _test_mount
-> +		then
-> +			echo "check: failed to mount $TEST_DEV on $TEST_DIR"
-> +			exit 1
+shared/005 and shared/007 work abnornamlly on RHEL6.8GA and
+RHEL6.9Beta because debugfs fails to set i_size to -1 or -512
+and reports "exceeds field size maximum".  When debugfs fails
+to set a negative i_size, we can skip these cases which don't
+trigger the kernel bug.
 
-Have to set status=1 before exiting here and below, otherwise return
-value of check is zero even when error happens. See commit a276c261c9c
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+---
+ tests/shared/005 | 7 +++++++
+ tests/shared/007 | 7 +++++++
+ 2 files changed, 14 insertions(+)
 
-Thanks,
-Eryu
+diff --git a/tests/shared/005 b/tests/shared/005
+index 296de17..37912d6 100755
+--- a/tests/shared/005
++++ b/tests/shared/005
+@@ -67,6 +67,13 @@ $DEBUGFS_PROG -w -R "sif /a size -1" $SCRATCH_DEV >> $seqres.full 2>&1
+ 
+ echo "Remount, try to append"
+ _scratch_mount
++
++#check whether debugfs succeeds to set i_size to -1 or not
++i_size=$(stat -c "%s" $testdir/a)
++if [ $i_size -ne -1 ]; then
++	_notrun "Could not set i_size to -1 successfully, skip test."
++fi
++
+ dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
+ sync
+ 
+diff --git a/tests/shared/007 b/tests/shared/007
+index 0729ab8..06055a0 100755
+--- a/tests/shared/007
++++ b/tests/shared/007
+@@ -69,6 +69,13 @@ $DEBUGFS_PROG -w -R "sif /a size 0xFFFFFFFFFFFFFE00" $SCRATCH_DEV >> $seqres.ful
+ 
+ echo "Remount, try to append"
+ _scratch_mount
++
++#check whether debugfs succeeds to set i_size to -512 or not
++i_size=$(stat -c "%s" $testdir/a)
++if [ $i_size -ne -512 ]; then
++	_notrun "Could not set i_size to -512 successfully, skip test."
++fi
++
+ dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=direct,append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
+ sync
+ 
+-- 
+1.8.3.1
 
->  		fi
->  		_prepare_test_list
-> -	elif [ "$OLD_MOUNT_OPTIONS" != "$MOUNT_OPTIONS" ]; then
-> +	elif [ "$OLD_TEST_FS_MOUNT_OPTS" != "$TEST_FS_MOUNT_OPTS" ]; then
->  		_test_unmount 2> /dev/null
-> -		out=`_mount_or_remount_rw "$MOUNT_OPTIONS" $TEST_DEV $TEST_DIR`
-> -		if [ $? -ne 1 ]; then
-> -			echo $out
-> -			status=1
-> -			exit
-> +		if ! _test_mount
-> +		then
-> +			echo "check: failed to mount $TEST_DEV on $TEST_DIR"
-> +			exit 1
->  		fi
->  	fi
->  
-> diff --git a/common/rc b/common/rc
-> index d831b17..00afb31 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1485,9 +1485,9 @@ _require_test()
->  
->      if ! _check_mounted_on TEST_DEV $TEST_DEV TEST_DIR $TEST_DIR
->      then
-> -	out=`_mount_or_remount_rw "$MOUNT_OPTIONS" $TEST_DEV $TEST_DIR`
-> -	if [ $? -ne 1 ]; then
-> -		echo $out
-> +	if ! _test_mount
-> +	then
-> +		echo "!!! failed to mount $TEST_DEV on $TEST_DIR"
->  		exit 1
->  	fi
->      fi
-> -- 
-> 2.7.4
-> 
+
+
