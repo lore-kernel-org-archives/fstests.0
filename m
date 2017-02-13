@@ -1,178 +1,107 @@
-Received: from mx1.redhat.com ([209.132.183.28]:13805 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751714AbdBMPPy (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 13 Feb 2017 10:15:54 -0500
-From: Brian Foster <bfoster@redhat.com>
-Subject: [PATCH v2] tests/xfs: test to stress XFS delalloc indirect block reservations
-Date: Mon, 13 Feb 2017 10:15:53 -0500
-Message-Id: <1486998953-26481-1-git-send-email-bfoster@redhat.com>
+Received: from mail-oi0-f66.google.com ([209.85.218.66]:34431 "EHLO
+        mail-oi0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751578AbdBMUbb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 13 Feb 2017 15:31:31 -0500
+MIME-Version: 1.0
+In-Reply-To: <20170213112824.GH24562@eguan.usersys.redhat.com>
+References: <1486932224-17075-1-git-send-email-amir73il@gmail.com>
+ <1486932224-17075-7-git-send-email-amir73il@gmail.com> <20170213112824.GH24562@eguan.usersys.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Mon, 13 Feb 2017 22:31:30 +0200
+Message-ID: <CAOQ4uxjgGN5zxv-AG4qnz+46M9+JK8AaU+-1m4DTfx=YDTPc=w@mail.gmail.com>
+Subject: Re: [PATCH v3 6/9] overlay: configure TEST/SCRATCH vars to base fs
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-This test is based on generic/033, which originally used zero range
-operations to reproduce indlen reservation problems. Zero range now
-includes a pagecache flush before it updates extents, which means
-generic/033 is no longer able to reproduce the problem it was originally
-written to test.
+On Mon, Feb 13, 2017 at 1:28 PM, Eryu Guan <eguan@redhat.com> wrote:
+> On Sun, Feb 12, 2017 at 10:43:41PM +0200, Amir Goldstein wrote:
+>> Instead of setting the vars TEST/SCRATCH_DEV to overlay base dirs,
+>> allow setting them to block devices to configure the base fs partition,
+>> where overlay dirs will be created.
+>>
+>> For example, the following config file can be used to run tests on
+>> xfs test/scratch partitions:
+>>
+>>  TEST_DEV=/dev/sda5
+>>  TEST_DIR=/mnt/test
+>>  SCRATCH_DEV=/dev/sda6
+>>  SCRATCH_MNT=/mnt/scratch
+>>  FSTYP=xfs
+>>
+>> Using the same config file, but executing './check -overlay' will
+>> use the same partitions as base fs for overlayfs directories
+>> and set TEST_DIR/SCRATCH_MNT values to overlay mount points, i.e.:
+>> /mnt/test/ovl-mnt and /mnt/scratch/ovl-mnt.
+>>
+>> The base fs should be pre-formatted and mounted when starting the test.
+>> An upcoming change is going to support mount/umount of base fs.
+>>
+>> The new OVL_BASE_SCRATCH/TEST_* vars are set to point at the
+>> overlayfs base dirs in either legacy or new config method.
+>> Tests should always use these vars and not the legacy SCRATCH/TEST_DEV
+>> vars when referring to overlay base dir.
+>>
+>> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+>> ---
+...
+>>
+>>  # Parse config section options. This function will parse all the configuration
+>> @@ -516,6 +574,15 @@ get_next_config() {
+>>               unset SCRATCH_DEV
+>>       fi
+>>
+>> +     # We might have overriden TEST/SCRATCH vars with overlay base dir in the
+>> +     # previous run, so restore them to original values stored in OVL_BASE_*
+>> +     if [ "$FSTYP" == "overlay" ]; then
+>> +             [ -z "$OVL_BASE_TEST_DEV" ] || export TEST_DEV=$OVL_BASE_TEST_DEV
+>> +             [ -z "$OVL_BASE_TEST_DIR" ] || export TEST_DIR=$OVL_BASE_TEST_DIR
+>> +             [ -z "$OVL_BASE_SCRATCH_DEV" ] || export SCRATCH_DEV=$OVL_BASE_SCRATCH_DEV
+>> +             [ -z "$OVL_BASE_SCRATCH_MNT" ] || export SCRATCH_MNT=$OVL_BASE_SCRATCH_MNT
+>> +     fi
+>> +
+>>       parse_config_section $1
+>>
+>>       if [ ! -z "$OLD_FSTYP" ] && [ $OLD_FSTYP != $FSTYP ]; then
+>> @@ -544,6 +611,12 @@ get_next_config() {
+>>               export RESULT_BASE="$here/results/"
+>>       fi
+>>
+>> +     # Override FSTYP from config when running ./check -overlay
+>> +     # and maybe derive overlay TEST/SCRATCH from base fs values
+>> +     if [ "$OVERLAY" == "true" -o "$FSTYP" == "overlay" ]; then
+>> +             _config_overlay
+>> +     fi
+>> +
+>
+> If I have SCRATCH_DEV_POOL defined, e.g.
+>
+> TEST_DEV=/dev/sda5
+> TEST_DIR=/mnt/testarea/test
+> SCRATCH_DEV_POOL="/dev/sda6 /dev/sda7"
+> SCRATCH_MNT=/mnt/testarea/scratch
+>
+> I got error like:
+>
+> [root@dhcp-66-86-11 xfstests]# ./check -overlay overlay/002
+> common/config: SCRATCH_DEV (/dev/sda6) is not a directory for overlay
+>
+> Because we obtain SCRATCH_DEV from SCRATCH_DEV_POOL after we call
+> _config_overlay, and SCRATCH_DEV is not set when configing overlay, so
+> SCRATCH_DEV stays as a block device and fails _check_device.
+>
+> Moving the SCRATCH_DEV_POOL handling just after "unset SCRATCH_DEV"
+> fixes this problem for me.
+>
 
-Create a new test that uses an XFS-specific mechanism (in DEBUG mode) to
-induce delalloc extent splits and reproduce the problem originally
-reproduced by generic/033. In addition, update the test to include a
-larger buffered write pattern that is known to reproduce premature
-indlen exhaustion on delalloc extents.
+Right, I didn't test this setup. It appears to me that SCRATCH_DEV_POOL handling
+should be *after* parse_config_section for multi section config, where
+SCRATCH_DEV_POOL is assigned a new value in current section??
 
-Signed-off-by: Brian Foster <bfoster@redhat.com>
----
+Can you check if SCRATCH_DEV_POOL handling could be moved right before
+_config_overlay?
 
-v2:
-- Copy original generic/033 rather than move.
-- Squash series into single patch.
-v1: http://www.spinics.net/lists/fstests/msg05187.html
-
- tests/xfs/289     | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/289.out |   2 +
- tests/xfs/group   |   1 +
- 3 files changed, 112 insertions(+)
- create mode 100755 tests/xfs/289
- create mode 100644 tests/xfs/289.out
-
-diff --git a/tests/xfs/289 b/tests/xfs/289
-new file mode 100755
-index 0000000..11844cf
---- /dev/null
-+++ b/tests/xfs/289
-@@ -0,0 +1,109 @@
-+#! /bin/bash
-+# FS QA Test No. 289
-+#
-+# This test stresses indirect block reservation for delayed allocation extents.
-+# XFS reserves extra blocks for deferred allocation of delalloc extents. These
-+# reserved blocks can be divided among more extents than anticipated if the
-+# original extent for which the blocks were reserved is split into multiple
-+# delalloc extents. If this scenario repeats, eventually some extents are left
-+# without any indirect block reservation whatsoever. This leads to assert
-+# failures and possibly other problems in XFS.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/punch
-+
-+# real QA test starts here
-+rm -f $seqres.full
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_xfs_sysfs $(_short_dev $TEST_DEV)/drop_writes
-+
-+_scratch_mkfs >/dev/null 2>&1
-+_scratch_mount
-+
-+sdev=$(_short_dev $SCRATCH_DEV)
-+file=$SCRATCH_MNT/file.$seq
-+bytes=$((64 * 1024))
-+
-+# create sequential delayed allocation
-+$XFS_IO_PROG -f -c "pwrite 0 $bytes" $file >> $seqres.full 2>&1
-+
-+# Enable write drops. All buffered writes are dropped from this point on.
-+echo 1 > /sys/fs/xfs/$sdev/drop_writes
-+
-+# Write every other 4k range to split the larger delalloc extent into many more
-+# smaller extents. Use pwrite because with write failures enabled, all
-+# preexisting delalloc blocks in the range of the I/O are tossed without
-+# discretion. This allows manipulation of the delalloc extent without conversion
-+# to real blocks (and thus releasing the indirect reservation).
-+endoff=$((bytes - 4096))
-+for i in $(seq 0 8192 $endoff); do
-+	$XFS_IO_PROG -c "pwrite $i 4k" $file >> $seqres.full 2>&1
-+done
-+
-+# now pwrite the opposite set to remove remaining delalloc extents
-+for i in $(seq 4096 8192 $endoff); do
-+	$XFS_IO_PROG -c "pwrite $i 4k" $file >> $seqres.full 2>&1
-+done
-+
-+echo 0 > /sys/fs/xfs/$sdev/drop_writes
-+
-+_scratch_cycle_mount
-+$XFS_IO_PROG -c 'bmap -vp' $file | _filter_bmap
-+
-+# Now test a buffered write workload with larger extents. Write a 100m extent,
-+# split it at the 3/4 mark, then write another 100m extent that is contiguous
-+# with the 1/4 portion of the split extent. Repeat several times. This pattern
-+# is known to prematurely exhaust indirect reservations and cause warnings and
-+# assert failures.
-+rm -f $file
-+for offset in $(seq 0 100 500); do
-+	$XFS_IO_PROG -fc "pwrite ${offset}m 100m" $file >> $seqres.full 2>&1
-+
-+	punchoffset=$((offset + 75))
-+	echo 1 > /sys/fs/xfs/$sdev/drop_writes
-+	$XFS_IO_PROG -c "pwrite ${punchoffset}m 4k" $file >> $seqres.full 2>&1
-+	echo 0 > /sys/fs/xfs/$sdev/drop_writes
-+done
-+
-+echo "Silence is golden."
-+
-+status=0
-+exit
-diff --git a/tests/xfs/289.out b/tests/xfs/289.out
-new file mode 100644
-index 0000000..72e60f9
---- /dev/null
-+++ b/tests/xfs/289.out
-@@ -0,0 +1,2 @@
-+QA output created by 289
-+Silence is golden.
-diff --git a/tests/xfs/group b/tests/xfs/group
-index e2dfae2..7c188fe 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -280,6 +280,7 @@
- 283 dump ioctl auto quick
- 284 auto quick dump copy db mkfs repair
- 287 auto dump quota quick
-+289 auto quick rw
- 290 auto rw prealloc quick ioctl zero
- 291 auto repair
- 292 auto mkfs quick
--- 
-2.7.4
-
+I'm not really sure how that configuration should be working with
+overlay anyway.
