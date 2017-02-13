@@ -1,160 +1,178 @@
-Received: from mail-ot0-f195.google.com ([74.125.82.195]:33103 "EHLO
-        mail-ot0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752684AbdBMNdZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 13 Feb 2017 08:33:25 -0500
-MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxiWwVCN07yxwWQbp5Yi011TYV509RqWov9+szJnmP5NkA@mail.gmail.com>
-References: <1486932224-17075-1-git-send-email-amir73il@gmail.com>
- <1486932224-17075-2-git-send-email-amir73il@gmail.com> <20170213111053.GF24562@eguan.usersys.redhat.com>
- <CAOQ4uxiWwVCN07yxwWQbp5Yi011TYV509RqWov9+szJnmP5NkA@mail.gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 13 Feb 2017 15:33:23 +0200
-Message-ID: <CAOQ4uxg-DS7+j0DLLr20nZGrA6752D2ZUhfQeHPz5hGDb=DRfA@mail.gmail.com>
-Subject: Re: [PATCH v3 1/9] fstests: sanity check that test partitions are not
- mounted elsewhere
-Content-Type: text/plain; charset=UTF-8
+Received: from mx1.redhat.com ([209.132.183.28]:13805 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751714AbdBMPPy (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 13 Feb 2017 10:15:54 -0500
+From: Brian Foster <bfoster@redhat.com>
+Subject: [PATCH v2] tests/xfs: test to stress XFS delalloc indirect block reservations
+Date: Mon, 13 Feb 2017 10:15:53 -0500
+Message-Id: <1486998953-26481-1-git-send-email-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Feb 13, 2017 at 1:44 PM, Amir Goldstein <amir73il@gmail.com> wrote:
-> On Mon, Feb 13, 2017 at 1:10 PM, Eryu Guan <eguan@redhat.com> wrote:
->> On Sun, Feb 12, 2017 at 10:43:36PM +0200, Amir Goldstein wrote:
->>> When $TEST_DEV is mounted at a different location then $TEST_DIR,
->>> _require_test() aborts the test with an error:
->>>  TEST_DEV=/dev/sda5 is mounted but not on TEST_DIR=/mnt/test
->>>
->>> There are several problems with current sanity check:
->>> 1. the output of the error is mixed into out.bad and hard to see
->>> 2. the test partition is unmounted at the end of the test regardless
->>>    of the fact that it not pass the sanity that we have exclusivity
->>> 3. scratch partition has a similar sanity check in _require_scratch(),
->>>    but we may not get to it, because $SCRATCH_DEV is unmounted prior
->>>    to running the tests (which could unmount another mount point).
->>>
->>> To solve all these problems, introduce a helper _check_mounted_on().
->>> It checks if a device is mounted on a given mount point and optionally
->>> checks the mounted fs type.
->>>
->>> The sanity checks in _require_scratch() and _require_test() are
->>> converted to use the helper and gain the check for correct fs type.
->>>
->>> The helper is used in init_rc() to sanity check both test and scratch
->>> partitions, before tests are run and before $SCRATCH_DEV is unmounted.
->>>
->>> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
->>> ---
->>>  common/rc | 83 +++++++++++++++++++++++++++++++++++++--------------------------
->>>  1 file changed, 49 insertions(+), 34 deletions(-)
->
-> ...
->
->> My test configs look like:
->>
->> TEST_DEV=/dev/sda5
->> SCRATCH_DEV=/dev/sda6
->> TEST_DIR=/mnt/testarea/test
->> SCRATCH_MNT=/mnt/testarea/scratch
->>
->> and if I mount SCRATCH_DEV at /mnt/xfs (or some other mountpoints rather
->> than SCRATCH_MNT), ./check -overlay overlay/??? isn't able to detect
->> this mis-configuration.
->>
->> [root@dhcp-66-86-11 xfstests]# ./check  -overlay overlay/002
->> FSTYP         -- overlay
->> PLATFORM      -- Linux/x86_64 dhcp-66-86-11 4.10.0-rc7
->> MKFS_OPTIONS  -- /mnt/testarea/scratch
->> MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 -o lowerdir=/mnt/testarea/scratch/ovl-lower,upperdir=/mnt/testarea/scratch/ovl-upper,workdir=/mnt/testarea/scratch/ovl-work
->>
->> [root@dhcp-66-86-11 xfstests]#
->>
->> And nothing useful was printed. This is because my rootfs has no
->> filetype support, but the _notrun message is redirected to a file in
->> check, as
->>
->> "if ! _scratch_mkfs >$tmp.err 2>&1"
->>
->> Adding _check_mounted_on against OVL_BASE_TEST/SCRATCH_DEV here could
->> fix it for me.
->>
->
-> Actually, there that test already exists in:
->
-> _scratch_mkfs
->   _scratch_cleanup_files
->     _overlay_base_scratch_mount
->       _check_mounted_on
->
-> Only I forgot to cleanup an unneeded _overlay_base_scratch_unmount()
-> from _scratch_cleanup_files()..
->
-> @@ -698,8 +698,6 @@ _scratch_cleanup_files()
->         overlay)
->                 # Avoid rm -rf /* if we messed up
->                 [ -n "$OVL_BASE_SCRATCH_MNT" ] || return 1
-> -               # overlay 'mkfs' needs to make sure base fs is mounted and clean
-> -               _overlay_base_scratch_unmount 2>/dev/null
->                 _overlay_base_scratch_mount
->                 rm -rf $OVL_BASE_SCRATCH_MNT/*
->                 _overlay_mkdirs $OVL_BASE_SCRATCH_MNT
->
-> With this patch, test does abort for _check_mounted_on() failure,
-> (please verify)
-> but output is still lost inside tmp.err.
-> To fix this I would need to not exit 1 inside _check_mounted_on() but
-> always by callers.
-> Is that what you prefer that I do?
+This test is based on generic/033, which originally used zero range
+operations to reproduce indlen reservation problems. Zero range now
+includes a pagecache flush before it updates extents, which means
+generic/033 is no longer able to reproduce the problem it was originally
+written to test.
 
-How about something more general like this:
-(tested with your test case and with wipefs -a $SCRATCH_DEV):
+Create a new test that uses an XFS-specific mechanism (in DEBUG mode) to
+induce delalloc extent splits and reproduce the problem originally
+reproduced by generic/033. In addition, update the test to include a
+larger buffered write pattern that is known to reproduce premature
+indlen exhaustion on delalloc extents.
 
-@@ -376,6 +376,11 @@ _wrapup()
-        seq="check"
-        check="$RESULT_BASE/check"
+Signed-off-by: Brian Foster <bfoster@redhat.com>
+---
 
-+       if [ -n "$check_err" ]; then
-+               echo "check: $check_err"
-+               check_err=""
-+       fi
+v2:
+- Copy original generic/033 rather than move.
+- Squash series into single patch.
+v1: http://www.spinics.net/lists/fstests/msg05187.html
+
+ tests/xfs/289     | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/289.out |   2 +
+ tests/xfs/group   |   1 +
+ 3 files changed, 112 insertions(+)
+ create mode 100755 tests/xfs/289
+ create mode 100644 tests/xfs/289.out
+
+diff --git a/tests/xfs/289 b/tests/xfs/289
+new file mode 100755
+index 0000000..11844cf
+--- /dev/null
++++ b/tests/xfs/289
+@@ -0,0 +1,109 @@
++#! /bin/bash
++# FS QA Test No. 289
++#
++# This test stresses indirect block reservation for delayed allocation extents.
++# XFS reserves extra blocks for deferred allocation of delalloc extents. These
++# reserved blocks can be divided among more extents than anticipated if the
++# original extent for which the blocks were reserved is split into multiple
++# delalloc extents. If this scenario repeats, eventually some extents are left
++# without any indirect block reservation whatsoever. This leads to assert
++# failures and possibly other problems in XFS.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
 +
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/punch
++
++# real QA test starts here
++rm -f $seqres.full
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_xfs_sysfs $(_short_dev $TEST_DEV)/drop_writes
++
++_scratch_mkfs >/dev/null 2>&1
++_scratch_mount
++
++sdev=$(_short_dev $SCRATCH_DEV)
++file=$SCRATCH_MNT/file.$seq
++bytes=$((64 * 1024))
++
++# create sequential delayed allocation
++$XFS_IO_PROG -f -c "pwrite 0 $bytes" $file >> $seqres.full 2>&1
++
++# Enable write drops. All buffered writes are dropped from this point on.
++echo 1 > /sys/fs/xfs/$sdev/drop_writes
++
++# Write every other 4k range to split the larger delalloc extent into many more
++# smaller extents. Use pwrite because with write failures enabled, all
++# preexisting delalloc blocks in the range of the I/O are tossed without
++# discretion. This allows manipulation of the delalloc extent without conversion
++# to real blocks (and thus releasing the indirect reservation).
++endoff=$((bytes - 4096))
++for i in $(seq 0 8192 $endoff); do
++	$XFS_IO_PROG -c "pwrite $i 4k" $file >> $seqres.full 2>&1
++done
++
++# now pwrite the opposite set to remove remaining delalloc extents
++for i in $(seq 4096 8192 $endoff); do
++	$XFS_IO_PROG -c "pwrite $i 4k" $file >> $seqres.full 2>&1
++done
++
++echo 0 > /sys/fs/xfs/$sdev/drop_writes
++
++_scratch_cycle_mount
++$XFS_IO_PROG -c 'bmap -vp' $file | _filter_bmap
++
++# Now test a buffered write workload with larger extents. Write a 100m extent,
++# split it at the 3/4 mark, then write another 100m extent that is contiguous
++# with the 1/4 portion of the split extent. Repeat several times. This pattern
++# is known to prematurely exhaust indirect reservations and cause warnings and
++# assert failures.
++rm -f $file
++for offset in $(seq 0 100 500); do
++	$XFS_IO_PROG -fc "pwrite ${offset}m 100m" $file >> $seqres.full 2>&1
++
++	punchoffset=$((offset + 75))
++	echo 1 > /sys/fs/xfs/$sdev/drop_writes
++	$XFS_IO_PROG -c "pwrite ${punchoffset}m 4k" $file >> $seqres.full 2>&1
++	echo 0 > /sys/fs/xfs/$sdev/drop_writes
++done
++
++echo "Silence is golden."
++
++status=0
++exit
+diff --git a/tests/xfs/289.out b/tests/xfs/289.out
+new file mode 100644
+index 0000000..72e60f9
+--- /dev/null
++++ b/tests/xfs/289.out
+@@ -0,0 +1,2 @@
++QA output created by 289
++Silence is golden.
+diff --git a/tests/xfs/group b/tests/xfs/group
+index e2dfae2..7c188fe 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -280,6 +280,7 @@
+ 283 dump ioctl auto quick
+ 284 auto quick dump copy db mkfs repair
+ 287 auto dump quota quick
++289 auto quick rw
+ 290 auto rw prealloc quick ioctl zero
+ 291 auto repair
+ 292 auto mkfs quick
+-- 
+2.7.4
 
-@@ -466,6 +471,7 @@ _check_filesystems()
-
- _prepare_test_list
-
-+check_err=""
- if $OPTIONS_HAVE_SECTIONS; then
-        trap "_summary; exit \$status" 0 1 2 3 15
- else
-
-@@ -567,10 +576,10 @@ for section in $HOST_OPTIONS_SECTIONS; do
-          # call the overridden mkfs - make sure the FS is built
-          # the same as we'll create it later.
-
--         if ! _scratch_mkfs >$tmp.err 2>&1
-+         check_err=`_scratch_mkfs 2>&1`
-+         if [ $? -ne 0 ]
-          then
-              echo "our local _scratch_mkfs routine ..."
--             cat $tmp.err
-              echo "check: failed to mkfs \$SCRATCH_DEV using specified options"
-              status=1
-              exit
-@@ -578,14 +587,15 @@ for section in $HOST_OPTIONS_SECTIONS; do
-
-          # call the overridden mount - make sure the FS mounts with
-          # the same options that we'll mount with later.
--         if ! _scratch_mount >$tmp.err 2>&1
-+         check_err=`_scratch_mount 2>&1`
-+         if [ $? -ne 0 ]
-          then
-              echo "our local mount routine ..."
--             cat $tmp.err
-              echo "check: failed to mount \$SCRATCH_DEV using
-specified options"
-              status=1
-              exit
-          fi
-+         check_err=""
-        fi
