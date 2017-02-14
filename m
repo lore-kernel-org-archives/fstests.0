@@ -1,11 +1,11 @@
-Received: from mail.kernel.org ([198.145.29.136]:37200 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.136]:37340 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751457AbdBNUgD (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 14 Feb 2017 15:36:03 -0500
+        id S1751517AbdBNUgb (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 14 Feb 2017 15:36:31 -0500
 From: fdmanana@kernel.org
-Subject: [PATCH] fstests: add test for btrfs send/receive with sparse files
-Date: Tue, 14 Feb 2017 20:35:53 +0000
-Message-Id: <1487104553-13858-1-git-send-email-fdmanana@kernel.org>
+Subject: [PATCH] fstests: add test for truncate after a mix of dio and buffered writes
+Date: Tue, 14 Feb 2017 20:36:17 +0000
+Message-Id: <1487104577-14110-1-git-send-email-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
@@ -13,35 +13,39 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Filipe Manana <fdmanana@suse.com>
 
-Test that both a full and incremental btrfs send operation preserves file
-holes.
+Test that if we have a file with a hole, do a mix of direct IO and
+buffered writes to it and truncate the file to a size that lies in the
+middle of the hole, after unmounting and mounting again the filesystem,
+the file has a correct size and no data loss happened.
 
-This used to fail when the filesystem had the NO_HOLES feature enabled,
-that is, when the test is run with MKFS_OPTIONS="-O no-holes".
+This test is motivated by a bug found in btrfs when used with the
+no-holes feature (i.e. MKFS_OPTIONS="-O no-holes") which is fixed by
+the following patch for the linux kernel:
 
-This is fixed by the following patch for the linux kernel:
-
-  "Btrfs: incremental send, fix unnecessary hole writes for sparse files"
+  Btrfs: fix data loss after truncate when using the no-holes feature
 
 Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- tests/btrfs/137     | 141 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/137.out |  63 +++++++++++++++++++++++
- tests/btrfs/group   |   1 +
- 3 files changed, 205 insertions(+)
- create mode 100755 tests/btrfs/137
- create mode 100644 tests/btrfs/137.out
+ tests/generic/409     | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/409.out |  9 +++++++
+ tests/generic/group   |  1 +
+ 3 files changed, 85 insertions(+)
+ create mode 100755 tests/generic/409
+ create mode 100644 tests/generic/409.out
 
-diff --git a/tests/btrfs/137 b/tests/btrfs/137
+diff --git a/tests/generic/409 b/tests/generic/409
 new file mode 100755
-index 0000000..3ff2c6b
+index 0000000..8d3fd33
 --- /dev/null
-+++ b/tests/btrfs/137
-@@ -0,0 +1,141 @@
++++ b/tests/generic/409
+@@ -0,0 +1,75 @@
 +#! /bin/bash
-+# FS QA Test No. btrfs/137
++# FSQA Test No. 409
 +#
-+# Test that both incremental and full send operations preserve file holes.
++# Test that if we have a file with a hole, do a mix of direct IO and buffered
++# writes to it and truncate the file to a size that lies in the middle of the
++# hole, after unmounting and mounting again the filesystem, the file has a
++# correct size and no data loss happened.
 +#
 +#-----------------------------------------------------------------------
 +#
@@ -66,197 +70,74 @@ index 0000000..3ff2c6b
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
-+
 +tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+	cd /
-+	rm -fr $send_files_dir
 +	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/punch
 +
 +# real QA test starts here
-+_supported_fs btrfs
++_supported_fs generic
 +_supported_os Linux
-+_require_test
 +_require_scratch
-+_require_xfs_io_command "fiemap"
-+
-+send_files_dir=$TEST_DIR/btrfs-test-$seq
 +
 +rm -f $seqres.full
-+rm -fr $send_files_dir
-+mkdir $send_files_dir
 +
 +_scratch_mkfs >>$seqres.full 2>&1
 +_scratch_mount
 +
-+# Create the first test file.
-+$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 4K" $SCRATCH_MNT/foo | _filter_xfs_io
++# Create out test file with two extents and a hole between those extents.
++# The extent that lies beyond the hole must be written using direct IO and later
++# we truncate the file to a size that lies within the hole's range.
++$XFS_IO_PROG -f -c "pwrite -S 0x01 0K 32K" $SCRATCH_MNT/foo | _filter_xfs_io
++$XFS_IO_PROG -d -c "pwrite -S 0x02 -b 32K 64K 32K" $SCRATCH_MNT/foo \
++	| _filter_xfs_io
 +
-+# Create a second test file with a 1Mb hole.
-+$XFS_IO_PROG -f \
-+     -c "pwrite -S 0xaa 0 4K" \
-+     -c "pwrite -S 0xbb 1028K 4K" \
-+     $SCRATCH_MNT/bar | _filter_xfs_io
++# Now truncate our file to a smaller size that lies behind the offset used by
++# the previous direct IO write and that lies in a file hole.
++$XFS_IO_PROG -c "truncate 60K" $SCRATCH_MNT/foo
 +
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+	$SCRATCH_MNT/snap1 >/dev/null
-+
-+# Now add one new extent to our first test file, increasing its size and leaving
-+# a 1Mb hole between the first extent and this new extent.
-+$XFS_IO_PROG -c "pwrite -S 0xbb 1028K 4K" $SCRATCH_MNT/foo | _filter_xfs_io
-+
-+# Now overwrite the last extent of our second test file.
-+$XFS_IO_PROG -c "pwrite -S 0xcc 1028K 4K" $SCRATCH_MNT/bar | _filter_xfs_io
-+
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+		 $SCRATCH_MNT/snap2 >/dev/null
-+
-+echo
-+echo "File digests in the original filesystem:"
-+md5sum $SCRATCH_MNT/snap1/foo | _filter_scratch
-+md5sum $SCRATCH_MNT/snap1/bar | _filter_scratch
-+md5sum $SCRATCH_MNT/snap2/foo | _filter_scratch
-+md5sum $SCRATCH_MNT/snap2/bar | _filter_scratch
-+
-+echo
-+echo "File snap1/foo fiemap results in the original filesystem:"
-+$XFS_IO_PROG -r -c "fiemap -v" $SCRATCH_MNT/snap1/foo | _filter_fiemap
-+echo
-+echo "File snap1/bar fiemap results in the original filesystem:"
-+$XFS_IO_PROG -r -c "fiemap -v" $SCRATCH_MNT/snap1/bar | _filter_fiemap
-+echo
-+echo "File snap2/foo fiemap results in the original filesystem:"
-+$XFS_IO_PROG -r -c "fiemap -v" $SCRATCH_MNT/snap2/foo | _filter_fiemap
-+echo
-+echo "File snap2/bar fiemap results in the original filesystem:"
-+$XFS_IO_PROG -r -c "fiemap -v" $SCRATCH_MNT/snap2/bar | _filter_fiemap
-+echo
-+
-+# Create the send streams to apply later on a new filesystem.
-+$BTRFS_UTIL_PROG send $SCRATCH_MNT/snap1 -f $send_files_dir/1.snap 2>&1 \
-+	| _filter_scratch
-+$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/snap1 $SCRATCH_MNT/snap2 \
-+	-f $send_files_dir/2.snap 2>&1 | _filter_scratch
-+
-+# Create a new filesystem, receive the send streams and verify that the file
-+# contents are the same as in the original filesystem and that the file holes
-+# exists in both snapshots.
-+_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/1.snap >/dev/null
-+$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/2.snap >/dev/null
-+
-+echo
-+echo "File digests in the new filesystem:"
-+md5sum $SCRATCH_MNT/snap1/foo | _filter_scratch
-+md5sum $SCRATCH_MNT/snap1/bar | _filter_scratch
-+md5sum $SCRATCH_MNT/snap2/foo | _filter_scratch
-+md5sum $SCRATCH_MNT/snap2/bar | _filter_scratch
-+
-+echo
-+echo "File snap1/foo fiemap results in the new filesystem:"
-+$XFS_IO_PROG -r -c "fiemap -v" $SCRATCH_MNT/snap1/foo | _filter_fiemap
-+echo
-+echo "File snap1/bar fiemap results in the new filesystem:"
-+$XFS_IO_PROG -r -c "fiemap -v" $SCRATCH_MNT/snap1/bar | _filter_fiemap
-+echo
-+echo "File snap2/foo fiemap results in the new filesystem:"
-+$XFS_IO_PROG -r -c "fiemap -v" $SCRATCH_MNT/snap2/foo | _filter_fiemap
-+echo
-+echo "File snap2/bar fiemap results in the new filesystem:"
-+$XFS_IO_PROG -r -c "fiemap -v" $SCRATCH_MNT/snap2/bar | _filter_fiemap
++# Now get file digests before unmounting the filesystem and after mounting it
++# again. The digests should match (same file data and size in both cases).
++echo "File digest before unmounting the filesystem:"
++md5sum $SCRATCH_MNT/foo | _filter_scratch
++_scratch_cycle_mount
++echo "File digest after mounting again the filesystem:"
++md5sum $SCRATCH_MNT/foo | _filter_scratch
 +
 +status=0
 +exit
-diff --git a/tests/btrfs/137.out b/tests/btrfs/137.out
+diff --git a/tests/generic/409.out b/tests/generic/409.out
 new file mode 100644
-index 0000000..8554399
+index 0000000..02a7dc5
 --- /dev/null
-+++ b/tests/btrfs/137.out
-@@ -0,0 +1,63 @@
-+QA output created by 137
-+wrote 4096/4096 bytes at offset 0
++++ b/tests/generic/409.out
+@@ -0,0 +1,9 @@
++QA output created by 409
++wrote 32768/32768 bytes at offset 0
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 4096/4096 bytes at offset 0
++wrote 32768/32768 bytes at offset 65536
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 4096/4096 bytes at offset 1052672
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 4096/4096 bytes at offset 1052672
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 4096/4096 bytes at offset 1052672
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+
-+File digests in the original filesystem:
-+3e4309c7cc81f23d45e260a8f13ca860  SCRATCH_MNT/snap1/foo
-+f3934f0cf164e2efa1bab71f2f164990  SCRATCH_MNT/snap1/bar
-+f3934f0cf164e2efa1bab71f2f164990  SCRATCH_MNT/snap2/foo
-+d3dc847171f9081bd75d7a2d3b53d322  SCRATCH_MNT/snap2/bar
-+
-+File snap1/foo fiemap results in the original filesystem:
-+0: [0..7]: data
-+
-+File snap1/bar fiemap results in the original filesystem:
-+0: [0..7]: data
-+1: [8..2055]: hole
-+2: [2056..2063]: data
-+
-+File snap2/foo fiemap results in the original filesystem:
-+0: [0..7]: data
-+1: [8..2055]: hole
-+2: [2056..2063]: data
-+
-+File snap2/bar fiemap results in the original filesystem:
-+0: [0..7]: data
-+1: [8..2055]: hole
-+2: [2056..2063]: data
-+
-+At subvol SCRATCH_MNT/snap1
-+At subvol SCRATCH_MNT/snap2
-+At subvol snap1
-+
-+File digests in the new filesystem:
-+3e4309c7cc81f23d45e260a8f13ca860  SCRATCH_MNT/snap1/foo
-+f3934f0cf164e2efa1bab71f2f164990  SCRATCH_MNT/snap1/bar
-+f3934f0cf164e2efa1bab71f2f164990  SCRATCH_MNT/snap2/foo
-+d3dc847171f9081bd75d7a2d3b53d322  SCRATCH_MNT/snap2/bar
-+
-+File snap1/foo fiemap results in the new filesystem:
-+0: [0..7]: data
-+
-+File snap1/bar fiemap results in the new filesystem:
-+0: [0..7]: data
-+1: [8..2055]: hole
-+2: [2056..2063]: data
-+
-+File snap2/foo fiemap results in the new filesystem:
-+0: [0..7]: data
-+1: [8..2055]: hole
-+2: [2056..2063]: data
-+
-+File snap2/bar fiemap results in the new filesystem:
-+0: [0..7]: data
-+1: [8..2055]: hole
-+2: [2056..2063]: data
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index ea88ba4..009dea1 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -139,3 +139,4 @@
- 134 auto quick send
- 135 auto quick send
- 136 auto convert
-+137 auto quick send
++File digest before unmounting the filesystem:
++3c5ca3c3ab42f4b04d7e7eb0b0d4d806  SCRATCH_MNT/foo
++File digest after mounting again the filesystem:
++3c5ca3c3ab42f4b04d7e7eb0b0d4d806  SCRATCH_MNT/foo
+diff --git a/tests/generic/group b/tests/generic/group
+index d0bc47d..074b494 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -411,3 +411,4 @@
+ 406 auto quick dangerous
+ 407 auto quick clone metadata
+ 408 auto quick clone dedupe metadata
++409 auto quick metadata
 -- 
 2.7.0.rc3
 
