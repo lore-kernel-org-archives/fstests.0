@@ -1,16 +1,16 @@
-Received: from mail-ot0-f195.google.com ([74.125.82.195]:36767 "EHLO
-        mail-ot0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754100AbdBPMGi (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 16 Feb 2017 07:06:38 -0500
-Received: by mail-ot0-f195.google.com with SMTP id l26so1453434ota.3
-        for <fstests@vger.kernel.org>; Thu, 16 Feb 2017 04:06:37 -0800 (PST)
+Received: from mail-ot0-f194.google.com ([74.125.82.194]:34433 "EHLO
+        mail-ot0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753618AbdBPMVq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 16 Feb 2017 07:21:46 -0500
+Received: by mail-ot0-f194.google.com with SMTP id 73so1492169otj.1
+        for <fstests@vger.kernel.org>; Thu, 16 Feb 2017 04:21:46 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <1487236435-6222-7-git-send-email-xzhou@redhat.com>
-References: <1487236435-6222-1-git-send-email-xzhou@redhat.com> <1487236435-6222-7-git-send-email-xzhou@redhat.com>
+In-Reply-To: <1487236435-6222-8-git-send-email-xzhou@redhat.com>
+References: <1487236435-6222-1-git-send-email-xzhou@redhat.com> <1487236435-6222-8-git-send-email-xzhou@redhat.com>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 16 Feb 2017 14:06:36 +0200
-Message-ID: <CAOQ4uxjPz3FEOOzmSOSCDGbVczzKAG-=sUQfu7dVwyycWt7V6A@mail.gmail.com>
-Subject: Re: [PATCH 7/8] overlay: test flock after copied up
+Date: Thu, 16 Feb 2017 14:21:45 +0200
+Message-ID: <CAOQ4uxhMa+u53gvQ2UbVj33SuYbaHF0HM2y5ik_151H6pM6crg@mail.gmail.com>
+Subject: Re: [PATCH 8/8] overlay: accessing stacked overlayfs files
 Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
 To: Xiong Zhou <xzhou@redhat.com>
@@ -18,33 +18,35 @@ Cc: fstests <fstests@vger.kernel.org>, Miklos Szeredi <mszeredi@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
 On Thu, Feb 16, 2017 at 11:13 AM, Xiong Zhou <xzhou@redhat.com> wrote:
-> Locks of file in lower dir should working after it's
-> been copied up.
+> Lower dir comes from another overlayfs dir, then
+> accessing files in it should work.
 >
 > CC: Miklos Szeredi <mszeredi@redhat.com>
 > Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 > ---
->  tests/overlay/028     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/028.out |  2 ++
+>  tests/overlay/029     | 92 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/029.out |  3 ++
 >  tests/overlay/group   |  1 +
->  3 files changed, 83 insertions(+)
->  create mode 100755 tests/overlay/028
->  create mode 100644 tests/overlay/028.out
+>  3 files changed, 96 insertions(+)
+>  create mode 100755 tests/overlay/029
+>  create mode 100644 tests/overlay/029.out
 >
-> diff --git a/tests/overlay/028 b/tests/overlay/028
+> diff --git a/tests/overlay/029 b/tests/overlay/029
 > new file mode 100755
-> index 0000000..2e0995e
+> index 0000000..aedd141
 > --- /dev/null
-> +++ b/tests/overlay/028
-> @@ -0,0 +1,80 @@
+> +++ b/tests/overlay/029
+> @@ -0,0 +1,92 @@
 > +#! /bin/bash
-> +# FS QA Test 028
+> +# FS QA Test 029
 > +#
-> +# When file in lower dir is locked and it's been copied up,
-> +# make sure the lock is working in overlayfs.
+> +# There are dirs/files in lower dir and upper dir before
+> +# mounting overlayfs. After mounting, use dir in overlayfs
+> +# mountpoint as lowerdir to mount another overlayfs, then
+> +# access old files through the second overlayfs. It was
+> +# not working, kernel commit below fixed it.
 > +#
-> +# Kernel commit below fixed it.
-> +# c568d68341be locks: fix file locking on overlayfs
+> +# c4fcfc1619ea ovl: fix d_real() for stacked fs
 > +#
 > +# This reproducer was originally written by
 > +#     Miklos Szeredi <mszeredi@redhat.com>
@@ -99,44 +101,79 @@ On Thu, Feb 16, 2017 at 11:13 AM, Xiong Zhou <xzhou@redhat.com> wrote:
 > +# Remove all files from previous tests
 > +_scratch_mkfs
 > +
+> +# Preparing files
+> +upperdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
 > +lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
-> +mkdir -p $lowerdir
-> +touch $lowerdir/foo
+> +mkdir -p $upperdir/up
+> +echo foo > $upperdir/up/foo
+> +mkdir -p $lowerdir/low
+> +echo bar > $lowerdir/low/bar
 > +
-> +# Mounting overlay
+> +# mount overlay in SCRATCH_MNT
 > +_scratch_mount
 > +
-> +# Testing copyup and flock
-> +flock $SCRATCH_MNT/foo sleep 5 &
-> +# flock in subshell should fail with no output
-> +(sleep 1; echo bar > $SCRATCH_MNT/foo; \
-> +  flock -n $SCRATCH_MNT/foo echo LOCKED)
+> +mkdir -p $tmp/{upper,mnt,work}
+> +# mount overlay again using lower dir from SCRATCH_MNT dir
+> +_overlay_mount_dirs $SCRATCH_MNT/up $tmp/{upper,work} \
+
+comment and code mismatch lower vs. up
+
+> +  overlay $tmp/mnt
+> +# accessing file in the second mount
+> +cat $tmp/mnt/foo
+> +$UMOUNT_PROG $tmp/mnt
 > +
 
-I think this echo is meant to say NOTLOCKED ;-)
+cleanup mount and $tmp/mnt on cleanup()
 
-> +wait
-> +echo "Silence is golden"
+> +# mount overlay again using upper dir from SCRATCH_MNT dir
+> +_overlay_mount_dirs $SCRATCH_MNT/low $tmp/{upper,work} \
+
+comment and code mismatch upper vs. low
+
+> +  overlay $tmp/mnt
+> +cat $tmp/mnt/bar
+> +$UMOUNT_PROG $tmp/mnt
+> +
+
+
+Suggesting to add:
+_overlay_mount_dirs $SCRATCH_MNT/ $tmp/{upper,work} \
+  overlay $tmp/mnt
+cat $tmp/mnt/up/foo
+cat $tmp/mnt/low/bar
+
+This differs from the 2 tests above in 2 ways:
+1. $SCRATCH_MNT/ is an overlay root
+2. $SCRATCH_MNT/ is a merge dir
+
+You may want to further split these 2 cases by creating up and low under
+a common 'ovl' base dir and testing both on $SCRATCH_MNT/ and
+$SCRATCH_MNT/ovl - not critical IMO.
+
+
+
 > +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/overlay/028.out b/tests/overlay/028.out
+> diff --git a/tests/overlay/029.out b/tests/overlay/029.out
 > new file mode 100644
-> index 0000000..2615f73
+> index 0000000..870fcd9
 > --- /dev/null
-> +++ b/tests/overlay/028.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 028
-> +Silence is golden
+> +++ b/tests/overlay/029.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 029
+> +foo
+> +bar
 > diff --git a/tests/overlay/group b/tests/overlay/group
-> index 4db6751..cf058fc 100644
+> index cf058fc..7e72a30 100644
 > --- a/tests/overlay/group
 > +++ b/tests/overlay/group
-> @@ -30,3 +30,4 @@
->  025 auto quick attr
+> @@ -31,3 +31,4 @@
 >  026 auto attr quick
 >  027 auto quick perms
-> +028 auto copyup quick
+>  028 auto copyup quick
+> +029 auto quick
 > --
 > 1.8.3.1
 >
