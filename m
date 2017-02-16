@@ -1,117 +1,111 @@
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:34459 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932344AbdBPT5U (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 16 Feb 2017 14:57:20 -0500
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:35974 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933083AbdBPT5X (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 16 Feb 2017 14:57:23 -0500
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v4 0/10] fstests: new way to run overlay tests
-Date: Thu, 16 Feb 2017 21:56:58 +0200
-Message-Id: <1487275028-29885-1-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v4 02/10] fstests: use _test_mount() consistently
+Date: Thu, 16 Feb 2017 21:57:00 +0200
+Message-Id: <1487275028-29885-3-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1487275028-29885-1-git-send-email-amir73il@gmail.com>
+References: <1487275028-29885-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
 Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Eryu and all,
+On start of every test run and on every test, in init_rc() helper,
+the test partition is verified to be mounted, or is mounted by
+the helper _test_mount().
 
-This is the 4th revision of new overlayfs config.
-The main motivation of this work is to help catch overlayfs bugs
-related to leaking objects in underlying (base) fs.
+_test_mount() uses mount options $TEST_FS_MOUNT_OPTS and not
+$MOUNT_OPTIONS like _scratch_mount() does.
 
-With this change, all you have to do to run overlay tests if you
-already have a local.config setup to test a local file system is:
- ./check -overlay
+_test_cycle_mount(), which is called by some tests uses the
+_test_mount() helper as well.
 
-It uses existing local.config that was setup to run tests on
-the base fs (e.g. xfs) and you can run './check' and './check -overlay'
-without re-formatting the test partitions and without changing the
-config file.
+Contrary to those cases, in _require_test() helper, if test
+partition is not mounted, the helper _mount_or_remount_rw()
+is called to mount the test partition with $MOUNT_OPTIONS.
+Although this should never happen, because of the test in
+init_rc(), this case is inconsistent with the rest of the code,
+so it has been changed to use _test_mount() as it should.
 
-The legacy overlayfs configuration, where TEST_DEV is a directory
-still works, but it should be deprecated.
+When running tests with a multi section configuration, and
+either FSTYP or MOUNT_OPTIONS change between sections, the
+helper _test_unmount() is called to unmount the old test mount
+and then _mount_or_remount_rw() is called to mount it again
+with new FSTYP and/or MOUNT_OPTIONS.
+This is again inconsistent with the rest of the code, so
+was changed to use _test_mount() and instead of checking
+if MOUNT_OPTIONS have changed between sections, we check if
+TEST_FS_MOUNT_OPTS were changed between sections.
+Otherwise, we can leave the test partition mounted.
 
-I tested ./check -overlay -g quick with both legacy overlay configuration
-and the new base fs configuration.
+This change is needed to support overlay base fs mount
+and for multi section config files which include overlay FSTYP.
 
-Until now, overlay test configuration was not documented at all.
-I updated README per Eryu's request and tried to keep the documentation
-short and simple.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ check     | 16 ++++++++--------
+ common/rc |  6 +++---
+ 2 files changed, 11 insertions(+), 11 deletions(-)
 
-Also added README.overlay with some easy example for config files
-to use with -overlay.
-
-I would very much appreciate if anyone could test these changes with their
-own set of configuration, with or without adding overlay tests into the mix.
-You can get the branch for testing from my github tree [1].
-
-Thanks,
-Amir.
-
-[1] https://github.com/amir73il/xfstests/tree/ovl_base_fs
-
-v4:
-- Address review comments from Eryu
-- Fix sanity checks for already mounted scratch base fs
-- Fix handling of SCRATCH_DEV_POOL
-- Fix problems when run in kvm-xfstests
-- Add README.overlay with example config files
-- Remove documentation for overlay config sections
-
-v3:
-- Mount cycle base test fs
-- Fix bugs in non overlay specific sanity checks
-- Run -overlay test with existing config file of base fs
-- Run overlay tests per base fs by adding overlay config sections
-
-v2:
-- Test and scratch base dirs each have thier own base fs
-- Support mount cycles of base fs for scratch tests
-
-v1:
-- Both test and scratch base dirs on a single base fs
-
-
-Amir Goldstein (10):
-  fstests: sanity check that test partitions are not mounted elsewhere
-  fstests: use _test_mount() consistently
-  fstests: canonicalize mount points on every config section
-  overlay: rename OVERLAY_LOWER/UPPER/WORK_DIR
-  overlay: allow SCRATCH_DEV to be the base fs mount point
-  overlay: configure TEST/SCRATCH vars to base fs
-  overlay: use OVL_BASE_SCRATCH_MNT instead of SCRATCH_DEV
-  overlay: fix test and scratch filters for overlay base fs
-  overlay: mount/unmount base fs before/after running tests
-  generic/064: access SCRATCH_MNT after _scratch_mount
-
- README            |  16 +++--
- README.overlay    |  46 ++++++++++++
- check             |  18 ++---
- common/config     | 160 ++++++++++++++++++++++++++++++++++++------
- common/filter     |  26 +++++--
- common/rc         | 206 +++++++++++++++++++++++++++++++++++++++---------------
- tests/generic/064 |  10 +--
- tests/overlay/001 |   7 +-
- tests/overlay/002 |   2 +-
- tests/overlay/003 |   5 +-
- tests/overlay/004 |   7 +-
- tests/overlay/005 |  30 ++++----
- tests/overlay/006 |  10 +--
- tests/overlay/008 |   8 +--
- tests/overlay/009 |   2 +-
- tests/overlay/010 |  10 +--
- tests/overlay/011 |   6 +-
- tests/overlay/012 |   4 +-
- tests/overlay/013 |   4 +-
- tests/overlay/014 |  19 ++---
- tests/overlay/015 |   2 +-
- tests/overlay/016 |   2 +-
- tests/overlay/017 |   2 +-
- tests/overlay/018 |   2 +-
- tests/overlay/019 |   2 +-
- tests/overlay/020 |   2 +-
- tests/overlay/021 |   6 +-
- 27 files changed, 450 insertions(+), 164 deletions(-)
- create mode 100644 README.overlay
-
+diff --git a/check b/check
+index 5a93c94..68f070b 100755
+--- a/check
++++ b/check
+@@ -474,7 +474,7 @@ fi
+ 
+ for section in $HOST_OPTIONS_SECTIONS; do
+ 	OLD_FSTYP=$FSTYP
+-	OLD_MOUNT_OPTIONS=$MOUNT_OPTIONS
++	OLD_TEST_FS_MOUNT_OPTS=$TEST_FS_MOUNT_OPTS
+ 	get_next_config $section
+ 
+ 	# Do we need to run only some sections ?
+@@ -527,18 +527,18 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 			status=1
+ 			exit
+ 		fi
+-		out=`_mount_or_remount_rw "$MOUNT_OPTIONS" $TEST_DEV $TEST_DIR`
+-		if [ $? -ne 1 ]; then
+-			echo $out
++		if ! _test_mount
++		then
++			echo "check: failed to mount $TEST_DEV on $TEST_DIR"
+ 			status=1
+ 			exit
+ 		fi
+ 		_prepare_test_list
+-	elif [ "$OLD_MOUNT_OPTIONS" != "$MOUNT_OPTIONS" ]; then
++	elif [ "$OLD_TEST_FS_MOUNT_OPTS" != "$TEST_FS_MOUNT_OPTS" ]; then
+ 		_test_unmount 2> /dev/null
+-		out=`_mount_or_remount_rw "$MOUNT_OPTIONS" $TEST_DEV $TEST_DIR`
+-		if [ $? -ne 1 ]; then
+-			echo $out
++		if ! _test_mount
++		then
++			echo "check: failed to mount $TEST_DEV on $TEST_DIR"
+ 			status=1
+ 			exit
+ 		fi
+diff --git a/common/rc b/common/rc
+index b9c5541..debef5e 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1491,9 +1491,9 @@ _require_test()
+     [ $err -le 1 ] || exit 1
+     if [ $err -ne 0 ]
+     then
+-	out=`_mount_or_remount_rw "$MOUNT_OPTIONS" $TEST_DEV $TEST_DIR`
+-	if [ $? -ne 1 ]; then
+-		echo $out
++	if ! _test_mount
++	then
++		echo "!!! failed to mount $TEST_DEV on $TEST_DIR"
+ 		exit 1
+ 	fi
+     fi
 -- 
 2.7.4
 
