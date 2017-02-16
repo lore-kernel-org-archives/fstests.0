@@ -1,171 +1,170 @@
-Received: from mail-ot0-f196.google.com ([74.125.82.196]:36787 "EHLO
-        mail-ot0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753285AbdBPMlR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 16 Feb 2017 07:41:17 -0500
-Received: by mail-ot0-f196.google.com with SMTP id l26so1530379ota.3
-        for <fstests@vger.kernel.org>; Thu, 16 Feb 2017 04:41:17 -0800 (PST)
-MIME-Version: 1.0
-In-Reply-To: <1487236435-6222-5-git-send-email-xzhou@redhat.com>
-References: <1487236435-6222-1-git-send-email-xzhou@redhat.com> <1487236435-6222-5-git-send-email-xzhou@redhat.com>
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:35968 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932344AbdBPT5V (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 16 Feb 2017 14:57:21 -0500
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 16 Feb 2017 14:41:16 +0200
-Message-ID: <CAOQ4uxif0Z_xnxOr_jKqwYeVF4rHbX78X5hYY=wrGUOq_eA6ag@mail.gmail.com>
-Subject: Re: [PATCH 5/8] overlay: filter out xattr starts with "trusted.overlay."
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH v4 01/10] fstests: sanity check that test partitions are not mounted elsewhere
+Date: Thu, 16 Feb 2017 21:56:59 +0200
+Message-Id: <1487275028-29885-2-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1487275028-29885-1-git-send-email-amir73il@gmail.com>
+References: <1487275028-29885-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Xiong Zhou <xzhou@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>, Miklos Szeredi <mszeredi@redhat.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Feb 16, 2017 at 11:13 AM, Xiong Zhou <xzhou@redhat.com> wrote:
-> Not "trusted.overlay".
->   "trusted.overlayxxx" is allowed.
->   "trusted.overlay.xxx" is not allowed.
->
-> CC: Miklos Szeredi <mszeredi@redhat.com>
-> Signed-off-by: Xiong Zhou <xzhou@redhat.com>
-> ---
->  tests/overlay/026     | 88 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/026.out |  2 ++
->  tests/overlay/group   |  1 +
->  3 files changed, 91 insertions(+)
->  create mode 100755 tests/overlay/026
->  create mode 100644 tests/overlay/026.out
->
-> diff --git a/tests/overlay/026 b/tests/overlay/026
-> new file mode 100755
-> index 0000000..d409286
-> --- /dev/null
-> +++ b/tests/overlay/026
-> @@ -0,0 +1,88 @@
-> +#! /bin/bash
-> +# FS QA Test 026
-> +#
-> +# Overlayfs should only filter out xattr starting with
-> +# "trusted.overlay.", not "trusted.overlay".
-> +# Setting acls like "trusted.overlay.xxx" is not allowed.
-> +# Setting acls like "trusted.overlayxxx" is allowed.
+When $TEST_DEV is mounted at a different location then $TEST_DIR,
+_require_test() aborts the test with an error:
+ TEST_DEV=/dev/sda5 is mounted but not on TEST_DIR=/mnt/test
 
-Those are not acls. they are xattr.
+There are several problems with current sanity check:
+1. the output of the error is mixed into out.bad and hard to see
+2. the test partition is unmounted at the end of the test regardless
+   of the fact that it not pass the sanity that we have exclusivity
+3. scratch partition has a similar sanity check in _require_scratch(),
+   but we may not get to it, because $SCRATCH_DEV is unmounted prior
+   to running the tests (which could unmount another mount point).
 
-> +#
-> +# Kernel commit below fixed it.
-> +# fe2b75952347 ovl: Fix OVL_XATTR_PREFIX
-> +#
+To solve all these problems, introduce a helper _check_mounted_on().
+It checks if a device is mounted on a given mount point and optionally
+checks the mounted fs type.
 
-That commit also changes the behavior of getxattr, so maybe check
-that as well is this test.
+The sanity checks in _require_scratch() and _require_test() are
+converted to use the helper and gain the check for correct fs type.
 
-> +# This reproducer was originally written by
-> +#     Miklos Szeredi <mszeredi@redhat.com>
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/attr
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs overlay
-> +_supported_os Linux
-> +_require_scratch
-> +_require_attrs
-> +
-> +# Remove all files from previous tests
-> +_scratch_mkfs
-> +
-> +# Mounting overlay
-> +_scratch_mount
-> +touch $SCRATCH_MNT/testf0
-> +touch $SCRATCH_MNT/testf1
-> +
-> +# The first setfattr should pass silently
-> +$SETFATTR_PROG -n "trusted.overlayfsrz" -v "n" \
-> +  $SCRATCH_MNT/testf0
-> +
+The helper is used in init_rc() to sanity check both test and scratch
+partitions, before tests are run and before $SCRATCH_DEV is unmounted.
 
-Suggesting to add:
-$GETFATTR_PROG -n "trusted.overlayxxx" \
-  $SCRATCH_MNT/testf0 2>&1 | grep "No such attribute" | _filter_scratch
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ common/rc | 90 +++++++++++++++++++++++++++++++++++++++------------------------
+ 1 file changed, 56 insertions(+), 34 deletions(-)
 
-and expect "No such attribute" in output.
-either "not supported" or "not permitted" will fail to match the output.
+diff --git a/common/rc b/common/rc
+index 76515e2..b9c5541 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1319,6 +1319,43 @@ _supported_os()
+     _notrun "not suitable for this OS: $HOSTOS"
+ }
+ 
++# check if a FS on a device is mounted
++# if so, verify that it is mounted on mount point
++# if fstype is given as argument, verify that it is also
++# mounted with correct fs type
++#
++_check_mounted_on()
++{
++	local devname=$1
++	local dev=$2
++	local mntname=$3
++	local mnt=$4
++	local type=$5
++
++	# Note that we use -F here so grep doesn't try to interpret an NFS over
++	# IPv6 server as a regular expression
++	local mount_rec=`_mount | grep -F "$dev"`
++	[ -n "$mount_rec" ] || return 1 # 1 = not mounted
++
++	# if it's mounted, make sure its on $mnt
++	if ! (echo $mount_rec | grep -q "$mnt")
++	then
++		echo "$devname=$dev is mounted but not on $mntname=$mnt - aborting"
++		echo "Already mounted result:"
++		echo $mount_rec
++		return 2 # 2 = mounted on wrong mnt
++	fi
++
++	if [ -n "$type" -a "`_fs_type $dev`" != "$type" ]
++	then
++		echo "$devname=$dev is mounted but not a type $type filesystem"
++		# raw $DF_PROG cannot handle NFS/CIFS/overlay correctly
++		_df_device $dev
++		return 3 # 3 = mounted as wrong type
++	fi
++	return 0 # 0 = mounted as expected
++}
++
+ # this test needs a scratch partition - check we're ok & unmount it
+ # No post-test check of the device is required. e.g. the test intentionally
+ # finishes the test with the filesystem in a corrupt state
+@@ -1373,21 +1410,12 @@ _require_scratch_nocheck()
+ 		 ;;
+     esac
+ 
+-    # mounted?
+-    # Note that we use -F here so grep doesn't try to interpret an NFS over
+-    # IPv6 server as a regular expression.
+-    mount_rec=`_mount | grep -F $SCRATCH_DEV`
+-    if [ "$mount_rec" ]
++    _check_mounted_on SCRATCH_DEV $SCRATCH_DEV SCRATCH_MNT $SCRATCH_MNT
++    local err=$?
++    [ $err -le 1 ] || exit 1
++    if [ $err -eq 0 ]
+     then
+-        # if it's mounted, make sure its on $SCRATCH_MNT
+-        if ! echo $mount_rec | grep -q $SCRATCH_MNT
+-        then
+-            echo "\$SCRATCH_DEV=$SCRATCH_DEV is mounted but not on \$SCRATCH_MNT=$SCRATCH_MNT - aborting"
+-            echo "Already mounted result:"
+-            echo $mount_rec
+-            exit 1
+-        fi
+-        # and then unmount it
++        # if it's mounted, unmount it
+         if ! _scratch_unmount
+         then
+             echo "failed to unmount $SCRATCH_DEV"
+@@ -1458,21 +1486,11 @@ _require_test()
+ 		 ;;
+     esac
+ 
+-    # mounted?
+-    # Note that we use -F here so grep doesn't try to interpret an NFS over
+-    # IPv6 server as a regular expression.
+-    mount_rec=`_mount | grep -F $TEST_DEV`
+-    if [ "$mount_rec" ]
++    _check_mounted_on TEST_DEV $TEST_DEV TEST_DIR $TEST_DIR
++    local err=$?
++    [ $err -le 1 ] || exit 1
++    if [ $err -ne 0 ]
+     then
+-        # if it's mounted, make sure its on $TEST_DIR
+-        if ! echo $mount_rec | grep -q $TEST_DIR
+-        then
+-            echo "\$TEST_DEV=$TEST_DEV is mounted but not on \$TEST_DIR=$TEST_DIR - aborting"
+-            echo "Already mounted result:"
+-            echo $mount_rec
+-            exit 1
+-        fi
+-    else
+ 	out=`_mount_or_remount_rw "$MOUNT_OPTIONS" $TEST_DEV $TEST_DIR`
+ 	if [ $? -ne 1 ]; then
+ 		echo $out
+@@ -3075,13 +3093,17 @@ init_rc()
+ 		fi
+ 	fi
+ 
+-	if [ "`_fs_type $TEST_DEV`" != "$FSTYP" ]
+-	then
+-		echo "common/rc: Error: \$TEST_DEV ($TEST_DEV) is not a MOUNTED $FSTYP filesystem"
+-		# raw $DF_PROG cannot handle NFS/CIFS/overlay correctly
+-		_df_device $TEST_DEV
+-		exit 1
++	# Sanity check that TEST partition is not mounted at another mount point
++	# or as another fs type
++	_check_mounted_on TEST_DEV $TEST_DEV TEST_DIR $TEST_DIR $FSTYP || exit 1
++	if [ -n "$SCRATCH_DEV" ]; then
++		# Sanity check that SCRATCH partition is not mounted at another
++		# mount point, because it is about to be unmounted and formatted.
++		# Another fs type for scratch is fine (bye bye old fs type).
++		_check_mounted_on SCRATCH_DEV $SCRATCH_DEV SCRATCH_MNT $SCRATCH_MNT
++		[ $? -le 1 ] || exit 1
+ 	fi
++
+ 	# Figure out if we need to add -F ("foreign", deprecated) option to xfs_io
+ 	$XFS_IO_PROG -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \
+ 		export XFS_IO_PROG="$XFS_IO_PROG -F"
+-- 
+2.7.4
 
-> +# The second setfattr should fail, the reason not using
-> +# filter SCRATCH here is errno returned varies between
-> +# kernel versions, "not supported" vs "not permitted".
-> +$SETFATTR_PROG -n "trusted.overlay.fsz" -v "n" \
-> +  $SCRATCH_MNT/testf1 > /dev/null 2>&1
-> +if [ $? -eq 0 ] ; then
-> +       echo "Test Fail"
-> +else
-> +       echo "Silence is golden"
-> +fi
-
-For $GETFATTR_PROG -n "trusted.overlay.xxx"
-you can also grep for "No such attribute" and expect no output.
-
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/overlay/026.out b/tests/overlay/026.out
-> new file mode 100644
-> index 0000000..e45c6a3
-> --- /dev/null
-> +++ b/tests/overlay/026.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 026
-> +Silence is golden
-> diff --git a/tests/overlay/group b/tests/overlay/group
-> index 82fe69e..92afa8d 100644
-> --- a/tests/overlay/group
-> +++ b/tests/overlay/group
-> @@ -28,3 +28,4 @@
->  023 auto quick attr
->  024 auto quick
->  025 auto quick attr
-> +026 auto attr quick
-> --
-> 1.8.3.1
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
