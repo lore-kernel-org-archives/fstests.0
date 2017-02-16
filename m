@@ -1,16 +1,16 @@
-Received: from mail-ot0-f196.google.com ([74.125.82.196]:33397 "EHLO
-        mail-ot0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932120AbdBPLtB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 16 Feb 2017 06:49:01 -0500
-Received: by mail-ot0-f196.google.com with SMTP id t47so1420673ota.0
-        for <fstests@vger.kernel.org>; Thu, 16 Feb 2017 03:49:00 -0800 (PST)
+Received: from mail-ot0-f193.google.com ([74.125.82.193]:35600 "EHLO
+        mail-ot0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754548AbdBPLyO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 16 Feb 2017 06:54:14 -0500
+Received: by mail-ot0-f193.google.com with SMTP id y13so1420993oty.2
+        for <fstests@vger.kernel.org>; Thu, 16 Feb 2017 03:54:14 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <1487236435-6222-3-git-send-email-xzhou@redhat.com>
-References: <1487236435-6222-1-git-send-email-xzhou@redhat.com> <1487236435-6222-3-git-send-email-xzhou@redhat.com>
+In-Reply-To: <1487236435-6222-4-git-send-email-xzhou@redhat.com>
+References: <1487236435-6222-1-git-send-email-xzhou@redhat.com> <1487236435-6222-4-git-send-email-xzhou@redhat.com>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 16 Feb 2017 13:48:59 +0200
-Message-ID: <CAOQ4uxgdEpbUYE0bsk8ANgofpnVLuy3GfbTfEu1_sNSxUAr8yg@mail.gmail.com>
-Subject: Re: [PATCH 3/8] overlay: test workdir cleanup in mounting
+Date: Thu, 16 Feb 2017 13:54:13 +0200
+Message-ID: <CAOQ4uxg5wuFuEz56vu5qK=hJbSh--3HGX=t0VX4uQ+6qiTiwWw@mail.gmail.com>
+Subject: Re: [PATCH 4/8] overlay: permission check with cached acls in tmpfs
 Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
 To: Xiong Zhou <xzhou@redhat.com>
@@ -18,34 +18,33 @@ Cc: fstests <fstests@vger.kernel.org>, Miklos Szeredi <mszeredi@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
 On Thu, Feb 16, 2017 at 11:13 AM, Xiong Zhou <xzhou@redhat.com> wrote:
-> "work" directory in workdir should be cleaned up
-> and recreated while overlayfs mounting. Or overlayfs
-> will be mounted read-only.
+> tmpfs does not implement ->get_acl method, overlayfs
+> need to get its cached acls in permission check when
+> lower or upper fs is tmpfs.
 >
 > CC: Miklos Szeredi <mszeredi@redhat.com>
 > Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 > ---
->  tests/overlay/024     | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/024.out |  2 ++
+>  tests/overlay/025     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/025.out |  2 ++
 >  tests/overlay/group   |  1 +
->  3 files changed, 78 insertions(+)
->  create mode 100755 tests/overlay/024
->  create mode 100644 tests/overlay/024.out
+>  3 files changed, 88 insertions(+)
+>  create mode 100755 tests/overlay/025
+>  create mode 100644 tests/overlay/025.out
 >
-> diff --git a/tests/overlay/024 b/tests/overlay/024
+> diff --git a/tests/overlay/025 b/tests/overlay/025
 > new file mode 100755
-> index 0000000..a1d306e
+> index 0000000..2e24c70
 > --- /dev/null
-> +++ b/tests/overlay/024
-> @@ -0,0 +1,75 @@
+> +++ b/tests/overlay/025
+> @@ -0,0 +1,85 @@
 > +#! /bin/bash
-> +# FS QA Test 024
+> +# FS QA Test 025
 > +#
-> +# "work" directory under workdir should be cleaned up
-> +# well on overlayfs startup, or overlayfs will be mounted
-> +# read-only.
-> +# Kernel commit below fixes it.
-> +# eea2fb4851e9 ovl: proper cleanup of workdir
+> +# Overlayfs failed to get posix acls if lower or upper
+> +# fs is tmpfs.
+> +# Kernel commit below fixed it.
+> +# 5201dc449e4b ovl: use cached acl on underlying layer
 > +#
 > +# This reproducer was originally written by
 > +#     Miklos Szeredi <mszeredi@redhat.com>
@@ -95,47 +94,58 @@ On Thu, Feb 16, 2017 at 11:13 AM, Xiong Zhou <xzhou@redhat.com> wrote:
 > +# Modify as appropriate.
 > +_supported_fs overlay
 > +_supported_os Linux
-> +_require_scratch
+> +_require_user
 > +
-> +# Remove all files from previous tests
-> +_scratch_mkfs
+> +# create a tmpfs under $tmp
+> +mkdir -p $tmp/tmpfs
+> +$MOUNT_PROG -t tmpfs tmpfs $tmp/tmpfs || \
+> +  _notrun "this test requires a valid tmpfs"
 > +
-> +# making workdir
-> +wkdir=$SCRATCH_DEV/$OVERLAY_WORK_DIR
-> +mkdir -p $wkdir/work/foo
+> +pushd $tmp/tmpfs > /dev/null 2>&1
 > +
-> +_scratch_mount
+> +mkdir -p lower upper work mnt
+> +mkdir -p -m 0 upper/testd
+> +# grant perssion for $qa_user
+
+typo (perssion)
+
+> +setfacl -m u:$qa_user:rx upper/testd
 > +
-> +# try writing to mountpoint
-> +touch $SCRATCH_MNT/bar
+> +# mount overlay using dirs in tmpfs
+> +_overlay_mount_dirs lower upper work overlay mnt
+> +
+> +popd > /dev/null 2>&1
+> +
+> +# user accessing test dir, should be Okay
+> +_user_do "ls $tmp/tmpfs/mnt/testd"
+> +
+> +$UMOUNT_PROG $tmp/tmpfs/mnt
+> +$UMOUNT_PROG $tmp/tmpfs
 > +
 
-This doesn't really prove that workdir was cleaned, only that overlay mount
-did not error.
-
-Maybe also check that $wkdir/work/foo was really removed?
+Clean those mounts and $tmp/tmpfs itself in cleanup()
 
 > +echo "Silence is golden"
 > +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/overlay/024.out b/tests/overlay/024.out
+> diff --git a/tests/overlay/025.out b/tests/overlay/025.out
 > new file mode 100644
-> index 0000000..fd6fbb1
+> index 0000000..3d70951
 > --- /dev/null
-> +++ b/tests/overlay/024.out
+> +++ b/tests/overlay/025.out
 > @@ -0,0 +1,2 @@
-> +QA output created by 024
+> +QA output created by 025
 > +Silence is golden
 > diff --git a/tests/overlay/group b/tests/overlay/group
-> index 09da1be..0563a04 100644
+> index 0563a04..82fe69e 100644
 > --- a/tests/overlay/group
 > +++ b/tests/overlay/group
-> @@ -26,3 +26,4 @@
->  021 auto quick copyup
+> @@ -27,3 +27,4 @@
 >  022 auto quick
 >  023 auto quick attr
-> +024 auto quick
+>  024 auto quick
+> +025 auto quick attr
 > --
 > 1.8.3.1
 >
