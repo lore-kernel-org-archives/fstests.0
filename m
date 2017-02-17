@@ -1,16 +1,16 @@
-Received: from mail-oi0-f65.google.com ([209.85.218.65]:33078 "EHLO
-        mail-oi0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755774AbdBQHQP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 17 Feb 2017 02:16:15 -0500
-Received: by mail-oi0-f65.google.com with SMTP id s131so1130721oie.0
-        for <fstests@vger.kernel.org>; Thu, 16 Feb 2017 23:16:14 -0800 (PST)
+Received: from mail-ot0-f194.google.com ([74.125.82.194]:35690 "EHLO
+        mail-ot0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755711AbdBQHTL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 17 Feb 2017 02:19:11 -0500
+Received: by mail-ot0-f194.google.com with SMTP id y13so3830019oty.2
+        for <fstests@vger.kernel.org>; Thu, 16 Feb 2017 23:19:10 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <1487306188-2097-8-git-send-email-xzhou@redhat.com>
-References: <1487306188-2097-1-git-send-email-xzhou@redhat.com> <1487306188-2097-8-git-send-email-xzhou@redhat.com>
+In-Reply-To: <1487306188-2097-1-git-send-email-xzhou@redhat.com>
+References: <1487306188-2097-1-git-send-email-xzhou@redhat.com>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 17 Feb 2017 09:16:13 +0200
-Message-ID: <CAOQ4uxirZ3MyJv_nfB5Rt9UYGHspU7Xei-YWi-NaQ39pTjQwrw@mail.gmail.com>
-Subject: Re: [PATCH v2 8/8] overlay: accessing stacked overlayfs files
+Date: Fri, 17 Feb 2017 09:19:09 +0200
+Message-ID: <CAOQ4uxiAEoKOELYFxoMCBLVc+e3gqdrb7F=CMq2OGdvN8QNBFA@mail.gmail.com>
+Subject: Re: [PATCH v2 1/8] overlay: disallow overlayfs as upperdir
 Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
 To: Xiong Zhou <xzhou@redhat.com>
@@ -18,41 +18,36 @@ Cc: fstests <fstests@vger.kernel.org>, Miklos Szeredi <mszeredi@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
 On Fri, Feb 17, 2017 at 6:36 AM, Xiong Zhou <xzhou@redhat.com> wrote:
-> Lower dir comes from another overlayfs dir, then
-> accessing files in it should work.
+> Using overlayfs dir as upperdir to mount another
+> overlayfs should fail.
 >
 > CC: Miklos Szeredi <mszeredi@redhat.com>
 > Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 > ---
->  tests/overlay/029     | 100 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/029.out |   5 +++
->  tests/overlay/group   |   1 +
->  3 files changed, 106 insertions(+)
->  create mode 100755 tests/overlay/029
->  create mode 100644 tests/overlay/029.out
+>  tests/overlay/022     | 82 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/022.out |  2 ++
+>  tests/overlay/group   |  1 +
+>  3 files changed, 85 insertions(+)
+>  create mode 100755 tests/overlay/022
+>  create mode 100644 tests/overlay/022.out
 >
-> diff --git a/tests/overlay/029 b/tests/overlay/029
+> diff --git a/tests/overlay/022 b/tests/overlay/022
 > new file mode 100755
-> index 0000000..3909155
+> index 0000000..ee1d1e5
 > --- /dev/null
-> +++ b/tests/overlay/029
-> @@ -0,0 +1,100 @@
+> +++ b/tests/overlay/022
+> @@ -0,0 +1,82 @@
 > +#! /bin/bash
-> +# FS QA Test 029
+> +# FS QA Test 022
 > +#
-> +# There are dirs/files in lower dir and upper dir before
-> +# mounting overlayfs. After mounting, use dir in overlayfs
-> +# mountpoint as lowerdir to mount another overlayfs, then
-> +# access old files through the second overlayfs. It was
-> +# not working, kernel commit below fixed it.
-> +#
-> +# c4fcfc1619ea ovl: fix d_real() for stacked fs
+> +# Regression test for kernel commit:
+> +#     76bc8e2 ovl: disallow overlayfs as upperdir
 > +#
 > +# This reproducer was originally written by
 > +#     Miklos Szeredi <mszeredi@redhat.com>
 > +#
 > +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
+> +# Copyright (c) 2017 Red Hat Inc. All Rights Reserved.
 > +#
 > +# This program is free software; you can redistribute it and/or
 > +# modify it under the terms of the GNU General Public License as
@@ -81,9 +76,7 @@ On Fri, Feb 17, 2017 at 6:36 AM, Xiong Zhou <xzhou@redhat.com> wrote:
 > +_cleanup()
 > +{
 > +       cd /
-> +       $UMOUNT_PROG $tmp/mnt
-> +       rm -rf $tmp/{upper,mnt,work}
-rm -rf $tmp (which test has created)
+> +       rm -rf $tmp/{lower,mnt}
 > +       rm -f $tmp.*
 > +}
 > +
@@ -104,60 +97,49 @@ rm -rf $tmp (which test has created)
 > +# Remove all files from previous tests
 > +_scratch_mkfs
 > +
-> +# Preparing files
 > +upperdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
-> +lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
-> +mkdir -p $upperdir/up
-> +echo foo > $upperdir/up/foo
-> +mkdir -p $lowerdir/low
-> +echo bar > $lowerdir/low/bar
-> +
-> +# mount overlay in SCRATCH_MNT
+> +mkdir -p $upperdir/upper
+> +mkdir -p $upperdir/work
+> +# mount overlay with dirs in upper
 > +_scratch_mount
 > +
-> +mkdir -p $tmp/{upper,mnt,work}
-> +# mount overlay again using upper dir from SCRATCH_MNT dir
-> +_overlay_mount_dirs $SCRATCH_MNT/up $tmp/{upper,work} \
-> +  overlay $tmp/mnt
-> +# accessing file in the second mount
-> +cat $tmp/mnt/foo
-> +$UMOUNT_PROG $tmp/mnt
-> +
-> +# mount overlay again using lower dir from SCRATCH_MNT dir
-> +_overlay_mount_dirs $SCRATCH_MNT/low $tmp/{upper,work} \
-> +  overlay $tmp/mnt
-> +cat $tmp/mnt/bar
-> +$UMOUNT_PROG $tmp/mnt
-> +
-> +# mount overlay again using SCRATCH_MNT dir
-> +_overlay_mount_dirs $SCRATCH_MNT/ $tmp/{upper,work} \
-> +  overlay $tmp/mnt
-> +cat $tmp/mnt/up/foo
-> +cat $tmp/mnt/low/bar
+> +mkdir -p $tmp/{lower,mnt}
+> +# mount overlay using upper from another overlay upper
+> +# should fail
+> +_overlay_mount_dirs $tmp/lower $SCRATCH_MNT/upper \
+> +  $SCRATCH_MNT/work overlay $tmp/mnt > /dev/null 2>&1
+> +if [ $? -ne 0 ] ; then
+> +       echo "Silence is golden"
+> +else
+> +       echo "Test Fail"
+> +       echo "Overlay upperdir can't be another overlay upperdir"
+> +       $UMOUNT_PROG $tmp/mnt
+
+Better unmount and rm -rf $tmp in cleanup()
+to be sure we are not leaving a dangling tmpfs mount
+
+> +fi
 > +
 > +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/overlay/029.out b/tests/overlay/029.out
+> diff --git a/tests/overlay/022.out b/tests/overlay/022.out
 > new file mode 100644
-> index 0000000..e7f192c
+> index 0000000..394c6a7
 > --- /dev/null
-> +++ b/tests/overlay/029.out
-> @@ -0,0 +1,5 @@
-> +QA output created by 029
-> +foo
-> +bar
-> +foo
-> +bar
+> +++ b/tests/overlay/022.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 022
+> +Silence is golden
 > diff --git a/tests/overlay/group b/tests/overlay/group
-> index cf058fc..7e72a30 100644
+> index 5bcc25e..45768f5 100644
 > --- a/tests/overlay/group
 > +++ b/tests/overlay/group
-> @@ -31,3 +31,4 @@
->  026 auto attr quick
->  027 auto quick perms
->  028 auto copyup quick
-> +029 auto quick
+> @@ -24,3 +24,4 @@
+>  019 auto stress
+>  020 auto quick copyup perms
+>  021 auto quick copyup
+> +022 auto quick
 > --
 > 1.8.3.1
 >
