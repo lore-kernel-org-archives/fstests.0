@@ -1,54 +1,58 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44044 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:52146 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751822AbdBQIVI (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 17 Feb 2017 03:21:08 -0500
-Date: Fri, 17 Feb 2017 16:21:07 +0800
+        id S932295AbdBQIYt (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 17 Feb 2017 03:24:49 -0500
+Date: Fri, 17 Feb 2017 16:24:48 +0800
 From: Xiong Zhou <xzhou@redhat.com>
-Subject: Re: [PATCH v2 1/8] overlay: disallow overlayfs as upperdir
-Message-ID: <20170217082107.uvb3zqp7arsesi5i@XZHOUW.usersys.redhat.com>
+Subject: Re: [PATCH v2 7/8] overlay: test flock after copied up
+Message-ID: <20170217082448.upf77gcjsci7al54@XZHOUW.usersys.redhat.com>
 References: <1487306188-2097-1-git-send-email-xzhou@redhat.com>
- <CAOQ4uxiAEoKOELYFxoMCBLVc+e3gqdrb7F=CMq2OGdvN8QNBFA@mail.gmail.com>
+ <1487306188-2097-7-git-send-email-xzhou@redhat.com>
+ <CAOQ4uxgQVoxFxPQ_jjCGbUbjbNthf22+csBU+M-frvB2QsJZrg@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxiAEoKOELYFxoMCBLVc+e3gqdrb7F=CMq2OGdvN8QNBFA@mail.gmail.com>
+In-Reply-To: <CAOQ4uxgQVoxFxPQ_jjCGbUbjbNthf22+csBU+M-frvB2QsJZrg@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Amir Goldstein <amir73il@gmail.com>
 Cc: Xiong Zhou <xzhou@redhat.com>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <mszeredi@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Feb 17, 2017 at 09:19:09AM +0200, Amir Goldstein wrote:
+On Fri, Feb 17, 2017 at 09:37:54AM +0200, Amir Goldstein wrote:
 > On Fri, Feb 17, 2017 at 6:36 AM, Xiong Zhou <xzhou@redhat.com> wrote:
-> > Using overlayfs dir as upperdir to mount another
-> > overlayfs should fail.
+> > Locks of file in lower dir should working after it's
+> > been copied up.
 > >
 > > CC: Miklos Szeredi <mszeredi@redhat.com>
 > > Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 > > ---
-> >  tests/overlay/022     | 82 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/overlay/022.out |  2 ++
+> >  tests/overlay/028     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/overlay/028.out |  2 ++
 > >  tests/overlay/group   |  1 +
-> >  3 files changed, 85 insertions(+)
-> >  create mode 100755 tests/overlay/022
-> >  create mode 100644 tests/overlay/022.out
+> >  3 files changed, 83 insertions(+)
+> >  create mode 100755 tests/overlay/028
+> >  create mode 100644 tests/overlay/028.out
 > >
-> > diff --git a/tests/overlay/022 b/tests/overlay/022
+> > diff --git a/tests/overlay/028 b/tests/overlay/028
 > > new file mode 100755
-> > index 0000000..ee1d1e5
+> > index 0000000..2e0995e
 > > --- /dev/null
-> > +++ b/tests/overlay/022
-> > @@ -0,0 +1,82 @@
+> > +++ b/tests/overlay/028
+> > @@ -0,0 +1,80 @@
 > > +#! /bin/bash
-> > +# FS QA Test 022
+> > +# FS QA Test 028
 > > +#
-> > +# Regression test for kernel commit:
-> > +#     76bc8e2 ovl: disallow overlayfs as upperdir
+> > +# When file in lower dir is locked and it's been copied up,
+> > +# make sure the lock is working in overlayfs.
+> > +#
+> > +# Kernel commit below fixed it.
+> > +# c568d68341be locks: fix file locking on overlayfs
 > > +#
 > > +# This reproducer was originally written by
 > > +#     Miklos Szeredi <mszeredi@redhat.com>
 > > +#
 > > +#-----------------------------------------------------------------------
-> > +# Copyright (c) 2017 Red Hat Inc. All Rights Reserved.
+> > +# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
 > > +#
 > > +# This program is free software; you can redistribute it and/or
 > > +# modify it under the terms of the GNU General Public License as
@@ -77,7 +81,6 @@ On Fri, Feb 17, 2017 at 09:19:09AM +0200, Amir Goldstein wrote:
 > > +_cleanup()
 > > +{
 > > +       cd /
-> > +       rm -rf $tmp/{lower,mnt}
 > > +       rm -f $tmp.*
 > > +}
 > > +
@@ -98,54 +101,55 @@ On Fri, Feb 17, 2017 at 09:19:09AM +0200, Amir Goldstein wrote:
 > > +# Remove all files from previous tests
 > > +_scratch_mkfs
 > > +
-> > +upperdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
-> > +mkdir -p $upperdir/upper
-> > +mkdir -p $upperdir/work
-> > +# mount overlay with dirs in upper
+> > +lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
+> > +mkdir -p $lowerdir
+> > +touch $lowerdir/foo
+> > +
+> > +# Mounting overlay
 > > +_scratch_mount
 > > +
-> > +mkdir -p $tmp/{lower,mnt}
-> > +# mount overlay using upper from another overlay upper
-> > +# should fail
-> > +_overlay_mount_dirs $tmp/lower $SCRATCH_MNT/upper \
-> > +  $SCRATCH_MNT/work overlay $tmp/mnt > /dev/null 2>&1
-> > +if [ $? -ne 0 ] ; then
-> > +       echo "Silence is golden"
-> > +else
-> > +       echo "Test Fail"
-> > +       echo "Overlay upperdir can't be another overlay upperdir"
-> > +       $UMOUNT_PROG $tmp/mnt
+> > +# Testing copyup and flock
+> > +flock $SCRATCH_MNT/foo sleep 5 &
+> > +# flock in subshell should fail with no output
+> > +(sleep 1; echo bar > $SCRATCH_MNT/foo; \
+> > +  flock -n $SCRATCH_MNT/foo echo LOCKED)
 > 
-> Better unmount and rm -rf $tmp in cleanup()
-> to be sure we are not leaving a dangling tmpfs mount
+> What I meant, though it does not change the correctness of the test,
+> is that echo is executed only if foo in NOT LOCKED, so its kind of
+> weird and may be confusing to readers, that echo writes LOCKED.
 
-Ya, I just thought better take the advantage that i've checked
-the mount exit status here, onlu umount if mount succeeded.
-Adding to cleanup is better.
+If it gets its chance to run this echo, it has held the lock.
 
 > 
-> > +fi
 > > +
+> > +wait
+> 
+> maybe kill %1 to save the impatient among us a few seconds of waiting...
+
+I'll do some testing.
+
+> 
+> > +echo "Silence is golden"
 > > +# success, all done
 > > +status=0
 > > +exit
-> > diff --git a/tests/overlay/022.out b/tests/overlay/022.out
+> > diff --git a/tests/overlay/028.out b/tests/overlay/028.out
 > > new file mode 100644
-> > index 0000000..394c6a7
+> > index 0000000..2615f73
 > > --- /dev/null
-> > +++ b/tests/overlay/022.out
+> > +++ b/tests/overlay/028.out
 > > @@ -0,0 +1,2 @@
-> > +QA output created by 022
+> > +QA output created by 028
 > > +Silence is golden
 > > diff --git a/tests/overlay/group b/tests/overlay/group
-> > index 5bcc25e..45768f5 100644
+> > index 4db6751..cf058fc 100644
 > > --- a/tests/overlay/group
 > > +++ b/tests/overlay/group
-> > @@ -24,3 +24,4 @@
-> >  019 auto stress
-> >  020 auto quick copyup perms
-> >  021 auto quick copyup
-> > +022 auto quick
+> > @@ -30,3 +30,4 @@
+> >  025 auto quick attr
+> >  026 auto attr quick
+> >  027 auto quick perms
+> > +028 auto copyup quick
 > > --
 > > 1.8.3.1
 > >
