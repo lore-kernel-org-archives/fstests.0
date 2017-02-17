@@ -1,16 +1,16 @@
-Received: from mx1.redhat.com ([209.132.183.28]:40078 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:34094 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755319AbdBQEgp (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 16 Feb 2017 23:36:45 -0500
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+        id S1755319AbdBQEgs (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 16 Feb 2017 23:36:48 -0500
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id AE1424D68D
-        for <fstests@vger.kernel.org>; Fri, 17 Feb 2017 04:36:45 +0000 (UTC)
+        by mx1.redhat.com (Postfix) with ESMTPS id E809680F7C
+        for <fstests@vger.kernel.org>; Fri, 17 Feb 2017 04:36:48 +0000 (UTC)
 From: Xiong Zhou <xzhou@redhat.com>
-Subject: [PATCH v2 4/8] overlay: permission check with cached acls in tmpfs
-Date: Fri, 17 Feb 2017 12:36:24 +0800
-Message-Id: <1487306188-2097-4-git-send-email-xzhou@redhat.com>
+Subject: [PATCH v2 5/8] overlay: filter out xattr starts with "trusted.overlay."
+Date: Fri, 17 Feb 2017 12:36:25 +0800
+Message-Id: <1487306188-2097-5-git-send-email-xzhou@redhat.com>
 In-Reply-To: <1487306188-2097-1-git-send-email-xzhou@redhat.com>
 References: <1487306188-2097-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -18,33 +18,36 @@ To: fstests@vger.kernel.org
 Cc: Xiong Zhou <xzhou@redhat.com>, Miklos Szeredi <mszeredi@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-tmpfs does not implement ->get_acl method, overlayfs
-need to get its cached acls in permission check when
-lower or upper fs is tmpfs.
+Not "trusted.overlay".
+  "trusted.overlayxxx" is allowed.
+  "trusted.overlay.xxx" is not allowed.
 
 CC: Miklos Szeredi <mszeredi@redhat.com>
 Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 ---
- tests/overlay/025     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/025.out |  2 ++
- tests/overlay/group   |  1 +
- 3 files changed, 88 insertions(+)
- create mode 100755 tests/overlay/025
- create mode 100644 tests/overlay/025.out
+ tests/overlay/026     | 101 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/026.out |   3 ++
+ tests/overlay/group   |   1 +
+ 3 files changed, 105 insertions(+)
+ create mode 100755 tests/overlay/026
+ create mode 100644 tests/overlay/026.out
 
-diff --git a/tests/overlay/025 b/tests/overlay/025
+diff --git a/tests/overlay/026 b/tests/overlay/026
 new file mode 100755
-index 0000000..ad3ebe1
+index 0000000..5b51239
 --- /dev/null
-+++ b/tests/overlay/025
-@@ -0,0 +1,85 @@
++++ b/tests/overlay/026
+@@ -0,0 +1,101 @@
 +#! /bin/bash
-+# FS QA Test 025
++# FS QA Test 026
 +#
-+# Overlayfs failed to get posix acls if lower or upper
-+# fs is tmpfs.
++# Overlayfs should only filter out xattr starting with
++# "trusted.overlay.", not "trusted.overlay".
++# Setting xattrs like "trusted.overlay.xxx" is not allowed.
++# Setting xattrs like "trusted.overlayxxx" is allowed.
++#
 +# Kernel commit below fixed it.
-+# 5201dc449e4b ovl: use cached acl on underlying layer
++# fe2b75952347 ovl: Fix OVL_XATTR_PREFIX
 +#
 +# This reproducer was originally written by
 +#     Miklos Szeredi <mszeredi@redhat.com>
@@ -79,14 +82,12 @@ index 0000000..ad3ebe1
 +_cleanup()
 +{
 +	cd /
-+	$UMOUNT_PROG $tmp/tmpfs/mnt
-+	$UMOUNT_PROG $tmp/tmpfs
-+	rm -rf $tmp/tmpfs
 +	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
++. ./common/attr
 +. ./common/filter
 +
 +# remove previous $seqres.full before test
@@ -97,49 +98,65 @@ index 0000000..ad3ebe1
 +# Modify as appropriate.
 +_supported_fs overlay
 +_supported_os Linux
-+_require_user
++_require_scratch
++_require_attrs
 +
-+# create a tmpfs under $tmp
-+mkdir -p $tmp/tmpfs
-+$MOUNT_PROG -t tmpfs tmpfs $tmp/tmpfs || \
-+  _notrun "this test requires a valid tmpfs"
++# Remove all files from previous tests
++_scratch_mkfs
 +
-+pushd $tmp/tmpfs > /dev/null 2>&1
++# Mounting overlay
++_scratch_mount
++touch $SCRATCH_MNT/testf0
++touch $SCRATCH_MNT/testf1
 +
-+mkdir -p lower upper work mnt
-+mkdir -p -m 0 upper/testd
-+# grant permission for $qa_user
-+setfacl -m u:$qa_user:rx upper/testd
++# The first setfattr should pass silently
++$SETFATTR_PROG -n "trusted.overlayfsrz" -v "n" \
++  $SCRATCH_MNT/testf0
 +
-+# mount overlay using dirs in tmpfs
-+_overlay_mount_dirs lower upper work overlay mnt
++# The second setfattr should fail, the reason not using
++# filter SCRATCH here is errno returned varies between
++# kernel versions, "not supported" vs "not permitted".
++$SETFATTR_PROG -n "trusted.overlay.fsz" -v "n" \
++  $SCRATCH_MNT/testf1 > /dev/null 2>&1
++if [ $? -eq 0 ] ; then
++	echo "Setting trusted.overlay.xxx should fail"
++fi
 +
-+popd > /dev/null 2>&1
++# The first getfattr should pass
++$GETFATTR_PROG -n "trusted.overlayfsrz" $SCRATCH_MNT/testf0 \
++  2>&1 | sed -e "s,${SCRATCH_MNT#/},SCRATCH_MNT,g" \
++	     -e "/Removing leading/ d" \
++	     -e "/^$/ d"
 +
-+# user accessing test dir, should be Okay
-+_user_do "ls $tmp/tmpfs/mnt/testd"
++# The second getfattr should fail. Only check exit status
++# silently because errno returned varies among kernel vers.
++$GETFATTR_PROG -n "trusted.overlay.fsz" $SCRATCH_MNT/testf1 \
++  > /dev/null 2>&1
++if [ $? -eq 0 ] ; then
++	echo "Getting trusted.overlay.xxx should fail"
++fi
 +
-+echo "Silence is golden"
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/overlay/025.out b/tests/overlay/025.out
+diff --git a/tests/overlay/026.out b/tests/overlay/026.out
 new file mode 100644
-index 0000000..3d70951
+index 0000000..4f0e2d3
 --- /dev/null
-+++ b/tests/overlay/025.out
-@@ -0,0 +1,2 @@
-+QA output created by 025
-+Silence is golden
++++ b/tests/overlay/026.out
+@@ -0,0 +1,3 @@
++QA output created by 026
++# file: SCRATCH_MNT/testf0
++trusted.overlayfsrz="n"
 diff --git a/tests/overlay/group b/tests/overlay/group
-index 0563a04..82fe69e 100644
+index 82fe69e..92afa8d 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -27,3 +27,4 @@
- 022 auto quick
+@@ -28,3 +28,4 @@
  023 auto quick attr
  024 auto quick
-+025 auto quick attr
+ 025 auto quick attr
++026 auto attr quick
 -- 
 1.8.3.1
 
