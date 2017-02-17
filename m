@@ -1,16 +1,16 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43630 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:40078 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755319AbdBQEgm (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 16 Feb 2017 23:36:42 -0500
-Received: from smtp.corp.redhat.com (int-mx16.intmail.prod.int.phx2.redhat.com [10.5.11.28])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        id S1755319AbdBQEgp (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 16 Feb 2017 23:36:45 -0500
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 1BE77C057FA5
-        for <fstests@vger.kernel.org>; Fri, 17 Feb 2017 04:36:43 +0000 (UTC)
+        by mx1.redhat.com (Postfix) with ESMTPS id AE1424D68D
+        for <fstests@vger.kernel.org>; Fri, 17 Feb 2017 04:36:45 +0000 (UTC)
 From: Xiong Zhou <xzhou@redhat.com>
-Subject: [PATCH v2 3/8] overlay: test workdir cleanup in mounting
-Date: Fri, 17 Feb 2017 12:36:23 +0800
-Message-Id: <1487306188-2097-3-git-send-email-xzhou@redhat.com>
+Subject: [PATCH v2 4/8] overlay: permission check with cached acls in tmpfs
+Date: Fri, 17 Feb 2017 12:36:24 +0800
+Message-Id: <1487306188-2097-4-git-send-email-xzhou@redhat.com>
 In-Reply-To: <1487306188-2097-1-git-send-email-xzhou@redhat.com>
 References: <1487306188-2097-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -18,34 +18,33 @@ To: fstests@vger.kernel.org
 Cc: Xiong Zhou <xzhou@redhat.com>, Miklos Szeredi <mszeredi@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-"work" directory in workdir should be cleaned up
-and recreated while overlayfs mounting. Or overlayfs
-will be mounted read-only.
+tmpfs does not implement ->get_acl method, overlayfs
+need to get its cached acls in permission check when
+lower or upper fs is tmpfs.
 
 CC: Miklos Szeredi <mszeredi@redhat.com>
 Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 ---
- tests/overlay/024     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/024.out |  2 ++
+ tests/overlay/025     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/025.out |  2 ++
  tests/overlay/group   |  1 +
- 3 files changed, 83 insertions(+)
- create mode 100755 tests/overlay/024
- create mode 100644 tests/overlay/024.out
+ 3 files changed, 88 insertions(+)
+ create mode 100755 tests/overlay/025
+ create mode 100644 tests/overlay/025.out
 
-diff --git a/tests/overlay/024 b/tests/overlay/024
+diff --git a/tests/overlay/025 b/tests/overlay/025
 new file mode 100755
-index 0000000..2dbef12
+index 0000000..ad3ebe1
 --- /dev/null
-+++ b/tests/overlay/024
-@@ -0,0 +1,80 @@
++++ b/tests/overlay/025
+@@ -0,0 +1,85 @@
 +#! /bin/bash
-+# FS QA Test 024
++# FS QA Test 025
 +#
-+# "work" directory under workdir should be cleaned up
-+# well on overlayfs startup, or overlayfs will be mounted
-+# read-only.
-+# Kernel commit below fixes it.
-+# eea2fb4851e9 ovl: proper cleanup of workdir
++# Overlayfs failed to get posix acls if lower or upper
++# fs is tmpfs.
++# Kernel commit below fixed it.
++# 5201dc449e4b ovl: use cached acl on underlying layer
 +#
 +# This reproducer was originally written by
 +#     Miklos Szeredi <mszeredi@redhat.com>
@@ -80,6 +79,9 @@ index 0000000..2dbef12
 +_cleanup()
 +{
 +	cd /
++	$UMOUNT_PROG $tmp/tmpfs/mnt
++	$UMOUNT_PROG $tmp/tmpfs
++	rm -rf $tmp/tmpfs
 +	rm -f $tmp.*
 +}
 +
@@ -95,46 +97,49 @@ index 0000000..2dbef12
 +# Modify as appropriate.
 +_supported_fs overlay
 +_supported_os Linux
-+_require_scratch
++_require_user
 +
-+# Remove all files from previous tests
-+_scratch_mkfs
++# create a tmpfs under $tmp
++mkdir -p $tmp/tmpfs
++$MOUNT_PROG -t tmpfs tmpfs $tmp/tmpfs || \
++  _notrun "this test requires a valid tmpfs"
 +
-+# making workdir
-+wkdir=$SCRATCH_DEV/$OVERLAY_WORK_DIR
-+mkdir -p $wkdir/work/foo
++pushd $tmp/tmpfs > /dev/null 2>&1
 +
-+_scratch_mount
++mkdir -p lower upper work mnt
++mkdir -p -m 0 upper/testd
++# grant permission for $qa_user
++setfacl -m u:$qa_user:rx upper/testd
 +
-+# try writing to mountpoint
-+touch $SCRATCH_MNT/bar
++# mount overlay using dirs in tmpfs
++_overlay_mount_dirs lower upper work overlay mnt
 +
-+# checking work dir is clean
-+if [ -e $wkdir/work/foo ] ; then
-+	echo "work dir is not clean"
-+else
-+	echo "Silence is golden"
-+fi
++popd > /dev/null 2>&1
++
++# user accessing test dir, should be Okay
++_user_do "ls $tmp/tmpfs/mnt/testd"
++
++echo "Silence is golden"
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/overlay/024.out b/tests/overlay/024.out
+diff --git a/tests/overlay/025.out b/tests/overlay/025.out
 new file mode 100644
-index 0000000..fd6fbb1
+index 0000000..3d70951
 --- /dev/null
-+++ b/tests/overlay/024.out
++++ b/tests/overlay/025.out
 @@ -0,0 +1,2 @@
-+QA output created by 024
++QA output created by 025
 +Silence is golden
 diff --git a/tests/overlay/group b/tests/overlay/group
-index 09da1be..0563a04 100644
+index 0563a04..82fe69e 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -26,3 +26,4 @@
- 021 auto quick copyup
+@@ -27,3 +27,4 @@
  022 auto quick
  023 auto quick attr
-+024 auto quick
+ 024 auto quick
++025 auto quick attr
 -- 
 1.8.3.1
 
