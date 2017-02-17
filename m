@@ -1,16 +1,16 @@
-Received: from mail-ot0-f193.google.com ([74.125.82.193]:36013 "EHLO
-        mail-ot0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752574AbdBQHLp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 17 Feb 2017 02:11:45 -0500
-Received: by mail-ot0-f193.google.com with SMTP id l26so3830936ota.3
-        for <fstests@vger.kernel.org>; Thu, 16 Feb 2017 23:11:45 -0800 (PST)
+Received: from mail-oi0-f65.google.com ([209.85.218.65]:33078 "EHLO
+        mail-oi0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755774AbdBQHQP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 17 Feb 2017 02:16:15 -0500
+Received: by mail-oi0-f65.google.com with SMTP id s131so1130721oie.0
+        for <fstests@vger.kernel.org>; Thu, 16 Feb 2017 23:16:14 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <1487306188-2097-5-git-send-email-xzhou@redhat.com>
-References: <1487306188-2097-1-git-send-email-xzhou@redhat.com> <1487306188-2097-5-git-send-email-xzhou@redhat.com>
+In-Reply-To: <1487306188-2097-8-git-send-email-xzhou@redhat.com>
+References: <1487306188-2097-1-git-send-email-xzhou@redhat.com> <1487306188-2097-8-git-send-email-xzhou@redhat.com>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 17 Feb 2017 09:11:44 +0200
-Message-ID: <CAOQ4uxiAmPjaK_93HHmNOyhrMkFVvuHSU2ZhjteaHVtWRgJs7A@mail.gmail.com>
-Subject: Re: [PATCH v2 5/8] overlay: filter out xattr starts with "trusted.overlay."
+Date: Fri, 17 Feb 2017 09:16:13 +0200
+Message-ID: <CAOQ4uxirZ3MyJv_nfB5Rt9UYGHspU7Xei-YWi-NaQ39pTjQwrw@mail.gmail.com>
+Subject: Re: [PATCH v2 8/8] overlay: accessing stacked overlayfs files
 Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
 To: Xiong Zhou <xzhou@redhat.com>
@@ -18,36 +18,35 @@ Cc: fstests <fstests@vger.kernel.org>, Miklos Szeredi <mszeredi@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
 On Fri, Feb 17, 2017 at 6:36 AM, Xiong Zhou <xzhou@redhat.com> wrote:
-> Not "trusted.overlay".
->   "trusted.overlayxxx" is allowed.
->   "trusted.overlay.xxx" is not allowed.
+> Lower dir comes from another overlayfs dir, then
+> accessing files in it should work.
 >
 > CC: Miklos Szeredi <mszeredi@redhat.com>
 > Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 > ---
->  tests/overlay/026     | 101 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/026.out |   3 ++
+>  tests/overlay/029     | 100 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/029.out |   5 +++
 >  tests/overlay/group   |   1 +
->  3 files changed, 105 insertions(+)
->  create mode 100755 tests/overlay/026
->  create mode 100644 tests/overlay/026.out
+>  3 files changed, 106 insertions(+)
+>  create mode 100755 tests/overlay/029
+>  create mode 100644 tests/overlay/029.out
 >
-> diff --git a/tests/overlay/026 b/tests/overlay/026
+> diff --git a/tests/overlay/029 b/tests/overlay/029
 > new file mode 100755
-> index 0000000..5b51239
+> index 0000000..3909155
 > --- /dev/null
-> +++ b/tests/overlay/026
-> @@ -0,0 +1,101 @@
+> +++ b/tests/overlay/029
+> @@ -0,0 +1,100 @@
 > +#! /bin/bash
-> +# FS QA Test 026
+> +# FS QA Test 029
 > +#
-> +# Overlayfs should only filter out xattr starting with
-> +# "trusted.overlay.", not "trusted.overlay".
-> +# Setting xattrs like "trusted.overlay.xxx" is not allowed.
-> +# Setting xattrs like "trusted.overlayxxx" is allowed.
+> +# There are dirs/files in lower dir and upper dir before
+> +# mounting overlayfs. After mounting, use dir in overlayfs
+> +# mountpoint as lowerdir to mount another overlayfs, then
+> +# access old files through the second overlayfs. It was
+> +# not working, kernel commit below fixed it.
 > +#
-> +# Kernel commit below fixed it.
-> +# fe2b75952347 ovl: Fix OVL_XATTR_PREFIX
+> +# c4fcfc1619ea ovl: fix d_real() for stacked fs
 > +#
 > +# This reproducer was originally written by
 > +#     Miklos Szeredi <mszeredi@redhat.com>
@@ -82,12 +81,14 @@ On Fri, Feb 17, 2017 at 6:36 AM, Xiong Zhou <xzhou@redhat.com> wrote:
 > +_cleanup()
 > +{
 > +       cd /
+> +       $UMOUNT_PROG $tmp/mnt
+> +       rm -rf $tmp/{upper,mnt,work}
+rm -rf $tmp (which test has created)
 > +       rm -f $tmp.*
 > +}
 > +
 > +# get standard environment, filters and checks
 > +. ./common/rc
-> +. ./common/attr
 > +. ./common/filter
 > +
 > +# remove previous $seqres.full before test
@@ -99,69 +100,64 @@ On Fri, Feb 17, 2017 at 6:36 AM, Xiong Zhou <xzhou@redhat.com> wrote:
 > +_supported_fs overlay
 > +_supported_os Linux
 > +_require_scratch
-> +_require_attrs
 > +
 > +# Remove all files from previous tests
 > +_scratch_mkfs
 > +
-> +# Mounting overlay
+> +# Preparing files
+> +upperdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
+> +lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
+> +mkdir -p $upperdir/up
+> +echo foo > $upperdir/up/foo
+> +mkdir -p $lowerdir/low
+> +echo bar > $lowerdir/low/bar
+> +
+> +# mount overlay in SCRATCH_MNT
 > +_scratch_mount
-> +touch $SCRATCH_MNT/testf0
-> +touch $SCRATCH_MNT/testf1
 > +
-> +# The first setfattr should pass silently
-> +$SETFATTR_PROG -n "trusted.overlayfsrz" -v "n" \
-> +  $SCRATCH_MNT/testf0
+> +mkdir -p $tmp/{upper,mnt,work}
+> +# mount overlay again using upper dir from SCRATCH_MNT dir
+> +_overlay_mount_dirs $SCRATCH_MNT/up $tmp/{upper,work} \
+> +  overlay $tmp/mnt
+> +# accessing file in the second mount
+> +cat $tmp/mnt/foo
+> +$UMOUNT_PROG $tmp/mnt
 > +
-> +# The second setfattr should fail, the reason not using
-> +# filter SCRATCH here is errno returned varies between
-> +# kernel versions, "not supported" vs "not permitted".
-> +$SETFATTR_PROG -n "trusted.overlay.fsz" -v "n" \
-> +  $SCRATCH_MNT/testf1 > /dev/null 2>&1
-> +if [ $? -eq 0 ] ; then
-> +       echo "Setting trusted.overlay.xxx should fail"
-> +fi
+> +# mount overlay again using lower dir from SCRATCH_MNT dir
+> +_overlay_mount_dirs $SCRATCH_MNT/low $tmp/{upper,work} \
+> +  overlay $tmp/mnt
+> +cat $tmp/mnt/bar
+> +$UMOUNT_PROG $tmp/mnt
 > +
-> +# The first getfattr should pass
-> +$GETFATTR_PROG -n "trusted.overlayfsrz" $SCRATCH_MNT/testf0 \
-> +  2>&1 | sed -e "s,${SCRATCH_MNT#/},SCRATCH_MNT,g" \
-> +            -e "/Removing leading/ d" \
-> +            -e "/^$/ d"
-> +
-> +# The second getfattr should fail. Only check exit status
-> +# silently because errno returned varies among kernel vers.
-> +$GETFATTR_PROG -n "trusted.overlay.fsz" $SCRATCH_MNT/testf1 \
-> +  > /dev/null 2>&1
-> +if [ $? -eq 0 ] ; then
-> +       echo "Getting trusted.overlay.xxx should fail"
-
-But it would fail anyway if setfattr fails. question is if it would fail
-on ENODATA or on ENOTSUPP/EPERM.
-That's why I suggested to grep for "No such attribute" in stderr
-
-> +fi
+> +# mount overlay again using SCRATCH_MNT dir
+> +_overlay_mount_dirs $SCRATCH_MNT/ $tmp/{upper,work} \
+> +  overlay $tmp/mnt
+> +cat $tmp/mnt/up/foo
+> +cat $tmp/mnt/low/bar
 > +
 > +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/overlay/026.out b/tests/overlay/026.out
+> diff --git a/tests/overlay/029.out b/tests/overlay/029.out
 > new file mode 100644
-> index 0000000..4f0e2d3
+> index 0000000..e7f192c
 > --- /dev/null
-> +++ b/tests/overlay/026.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 026
-> +# file: SCRATCH_MNT/testf0
-> +trusted.overlayfsrz="n"
+> +++ b/tests/overlay/029.out
+> @@ -0,0 +1,5 @@
+> +QA output created by 029
+> +foo
+> +bar
+> +foo
+> +bar
 > diff --git a/tests/overlay/group b/tests/overlay/group
-> index 82fe69e..92afa8d 100644
+> index cf058fc..7e72a30 100644
 > --- a/tests/overlay/group
 > +++ b/tests/overlay/group
-> @@ -28,3 +28,4 @@
->  023 auto quick attr
->  024 auto quick
->  025 auto quick attr
-> +026 auto attr quick
+> @@ -31,3 +31,4 @@
+>  026 auto attr quick
+>  027 auto quick perms
+>  028 auto copyup quick
+> +029 auto quick
 > --
 > 1.8.3.1
 >
