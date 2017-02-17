@@ -1,68 +1,40 @@
-Received: from mx1.redhat.com ([209.132.183.28]:47424 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752574AbdBQGwI (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 17 Feb 2017 01:52:08 -0500
-Date: Fri, 17 Feb 2017 14:52:07 +0800
-From: Xiong Zhou <xzhou@redhat.com>
-Subject: Re: [PATCH v6 2/2] generic: test mmap io through DAX and non-DAX
-Message-ID: <20170217065207.fr2lwf2jdobc6jsl@XZHOUW.usersys.redhat.com>
-References: <20170206191717.GB12290@linux.intel.com>
- <1486527078-11173-1-git-send-email-xzhou@redhat.com>
- <1486527078-11173-3-git-send-email-xzhou@redhat.com>
- <20170217064624.GC24562@eguan.usersys.redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170217064624.GC24562@eguan.usersys.redhat.com>
+Received: from mail-pg0-f51.google.com ([74.125.83.51]:33896 "EHLO
+        mail-pg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752574AbdBQGzi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 17 Feb 2017 01:55:38 -0500
+Received: by mail-pg0-f51.google.com with SMTP id z67so13181933pgb.1
+        for <fstests@vger.kernel.org>; Thu, 16 Feb 2017 22:55:38 -0800 (PST)
+From: Omar Sandoval <osandov@osandov.com>
+Subject: [PATCH v2 1/2] common/rc: remove unnecessary cat in _ddt
+Date: Thu, 16 Feb 2017 22:54:51 -0800
+Message-Id: <7e55bbd20c8e6515e0b76b1ee4c348fb6066c502.1487314416.git.osandov@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Xiong Zhou <xzhou@redhat.com>, ross.zwisler@linux.intel.com, fstests@vger.kernel.org, linux-nvdimm@ml01.01.org, jmoyer@redhat.com
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, kernel-team@fb.com
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Feb 17, 2017 at 02:46:24PM +0800, Eryu Guan wrote:
-> On Wed, Feb 08, 2017 at 12:11:18PM +0800, Xiong Zhou wrote:
-> > Mount TEST_DEV as non-DAX, SCRATCH_DEV as DAX, then
-> > do some IO between them. In this case we use mmap
-> > and dio/buffered IO read/write test programme.
-> > 
-> > Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
-> > Signed-off-by: Xiong Zhou <xzhou@redhat.com>
-> > ---
-> >  tests/generic/407     | 152 ++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/407.out |   2 +
-> >  tests/generic/group   |   1 +
-> >  3 files changed, 155 insertions(+)
-> >  create mode 100755 tests/generic/407
-> >  create mode 100644 tests/generic/407.out
-> > 
-> > diff --git a/tests/generic/407 b/tests/generic/407
-> > new file mode 100755
-> > index 0000000..b5b2ce4
-> > --- /dev/null
-> > +++ b/tests/generic/407
-> > @@ -0,0 +1,152 @@
-> > +#! /bin/bash
-> > +# FS QA Test 407
-> > +#
-> > +# mmap direct/buffered io between DAX and non-DAX mountpoints.
-> [snip]
-> > +
-> > +# make fs 2Mb aligned for PMD fault testing
-> > +if [[ $FSTYP =~ ext ]] ; then
-> > +	_scratch_mkfs "-E stride=512,stripe_width=1" \
-> > +		> /dev/null 2>&1
-> > +elif [[ $FSTYP =~ xfs ]] ; then
-> > +	_scratch_mkfs "-d su=2m,sw=1" > /dev/null 2>&1
-> > +fi
-> 
-> If FSTYP isn't extN nor xfs, then scratch device is not mkfs'ed, I think
-> you're missing a default "else" here, which calls _scratch_mkfs without
-> any options.
-> 
-> If you're OK with this update, I can fix it at commit time.
+From: Omar Sandoval <osandov@fb.com>
 
-Okay, Thank you!
+Signed-off-by: Omar Sandoval <osandov@fb.com>
+---
+Identical to v1
 
-> 
-> Thanks,
-> Eryu
+ common/rc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/common/rc b/common/rc
+index 76515e2b..6304d690 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2417,7 +2417,7 @@ _die()
+ # convert urandom incompressible data to compressible text data
+ _ddt()
+ {
+-	cat /dev/urandom | od | dd iflag=fullblock ${*}
++	od /dev/urandom | dd iflag=fullblock ${*}
+ }
+ 
+ #takes files, randomdata
+-- 
+2.11.1
+
