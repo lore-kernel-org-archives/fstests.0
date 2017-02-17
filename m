@@ -1,16 +1,16 @@
-Received: from mx1.redhat.com ([209.132.183.28]:34094 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:40120 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755319AbdBQEgs (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 16 Feb 2017 23:36:48 -0500
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        id S1755319AbdBQEgu (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 16 Feb 2017 23:36:50 -0500
+Received: from smtp.corp.redhat.com (int-mx16.intmail.prod.int.phx2.redhat.com [10.5.11.28])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id E809680F7C
-        for <fstests@vger.kernel.org>; Fri, 17 Feb 2017 04:36:48 +0000 (UTC)
+        by mx1.redhat.com (Postfix) with ESMTPS id 7D92F8EB35
+        for <fstests@vger.kernel.org>; Fri, 17 Feb 2017 04:36:51 +0000 (UTC)
 From: Xiong Zhou <xzhou@redhat.com>
-Subject: [PATCH v2 5/8] overlay: filter out xattr starts with "trusted.overlay."
-Date: Fri, 17 Feb 2017 12:36:25 +0800
-Message-Id: <1487306188-2097-5-git-send-email-xzhou@redhat.com>
+Subject: [PATCH v2 6/8] overlay: can not change underlying immutable file
+Date: Fri, 17 Feb 2017 12:36:26 +0800
+Message-Id: <1487306188-2097-6-git-send-email-xzhou@redhat.com>
 In-Reply-To: <1487306188-2097-1-git-send-email-xzhou@redhat.com>
 References: <1487306188-2097-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -18,36 +18,32 @@ To: fstests@vger.kernel.org
 Cc: Xiong Zhou <xzhou@redhat.com>, Miklos Szeredi <mszeredi@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Not "trusted.overlay".
-  "trusted.overlayxxx" is allowed.
-  "trusted.overlay.xxx" is not allowed.
+Even timestamp change by touch.
 
 CC: Miklos Szeredi <mszeredi@redhat.com>
 Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 ---
- tests/overlay/026     | 101 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/026.out |   3 ++
- tests/overlay/group   |   1 +
- 3 files changed, 105 insertions(+)
- create mode 100755 tests/overlay/026
- create mode 100644 tests/overlay/026.out
+ tests/overlay/027     | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/027.out |  2 ++
+ tests/overlay/group   |  1 +
+ 3 files changed, 90 insertions(+)
+ create mode 100755 tests/overlay/027
+ create mode 100644 tests/overlay/027.out
 
-diff --git a/tests/overlay/026 b/tests/overlay/026
+diff --git a/tests/overlay/027 b/tests/overlay/027
 new file mode 100755
-index 0000000..5b51239
+index 0000000..4bb0329
 --- /dev/null
-+++ b/tests/overlay/026
-@@ -0,0 +1,101 @@
++++ b/tests/overlay/027
+@@ -0,0 +1,87 @@
 +#! /bin/bash
-+# FS QA Test 026
++# FS QA Test 027
 +#
-+# Overlayfs should only filter out xattr starting with
-+# "trusted.overlay.", not "trusted.overlay".
-+# Setting xattrs like "trusted.overlay.xxx" is not allowed.
-+# Setting xattrs like "trusted.overlayxxx" is allowed.
++# If underlying upper file is immutable, it should stays
++# untouchable in the overlayfs mount.
 +#
 +# Kernel commit below fixed it.
-+# fe2b75952347 ovl: Fix OVL_XATTR_PREFIX
++# f2b20f6ee842 vfs: move permission checking into ...
 +#
 +# This reproducer was originally written by
 +#     Miklos Szeredi <mszeredi@redhat.com>
@@ -82,12 +78,12 @@ index 0000000..5b51239
 +_cleanup()
 +{
 +	cd /
++	$CHATTR_PROG -i $upperdir/foo
 +	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
-+. ./common/attr
 +. ./common/filter
 +
 +# remove previous $seqres.full before test
@@ -99,64 +95,51 @@ index 0000000..5b51239
 +_supported_fs overlay
 +_supported_os Linux
 +_require_scratch
-+_require_attrs
++_require_chattr
 +
 +# Remove all files from previous tests
 +_scratch_mkfs
 +
++# Preparing immutable file
++upperdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
++mkdir -p $upperdir
++touch $upperdir/foo
++$CHATTR_PROG +i $upperdir/foo
++
 +# Mounting overlay
 +_scratch_mount
-+touch $SCRATCH_MNT/testf0
-+touch $SCRATCH_MNT/testf1
 +
-+# The first setfattr should pass silently
-+$SETFATTR_PROG -n "trusted.overlayfsrz" -v "n" \
-+  $SCRATCH_MNT/testf0
-+
-+# The second setfattr should fail, the reason not using
-+# filter SCRATCH here is errno returned varies between
-+# kernel versions, "not supported" vs "not permitted".
-+$SETFATTR_PROG -n "trusted.overlay.fsz" -v "n" \
-+  $SCRATCH_MNT/testf1 > /dev/null 2>&1
-+if [ $? -eq 0 ] ; then
-+	echo "Setting trusted.overlay.xxx should fail"
-+fi
-+
-+# The first getfattr should pass
-+$GETFATTR_PROG -n "trusted.overlayfsrz" $SCRATCH_MNT/testf0 \
-+  2>&1 | sed -e "s,${SCRATCH_MNT#/},SCRATCH_MNT,g" \
-+	     -e "/Removing leading/ d" \
-+	     -e "/^$/ d"
-+
-+# The second getfattr should fail. Only check exit status
-+# silently because errno returned varies among kernel vers.
-+$GETFATTR_PROG -n "trusted.overlay.fsz" $SCRATCH_MNT/testf1 \
-+  > /dev/null 2>&1
-+if [ $? -eq 0 ] ; then
-+	echo "Getting trusted.overlay.xxx should fail"
++# Touching immutable file in overlay, should fail.
++# Not filtering output here because of errno returned
++# varies among kernel versions:
++#   touch: setting times of 'foo': Operation not permitted
++#   touch: cannot touch 'foo': Permission denied
++if touch $SCRATCH_MNT/foo > /dev/null 2>&1 ; then
++	echo "Test Fail, you can't change an immutable file"
++else
++	echo "Silence is golden"
 +fi
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/overlay/026.out b/tests/overlay/026.out
+diff --git a/tests/overlay/027.out b/tests/overlay/027.out
 new file mode 100644
-index 0000000..4f0e2d3
+index 0000000..ef78cda
 --- /dev/null
-+++ b/tests/overlay/026.out
-@@ -0,0 +1,3 @@
-+QA output created by 026
-+# file: SCRATCH_MNT/testf0
-+trusted.overlayfsrz="n"
++++ b/tests/overlay/027.out
+@@ -0,0 +1,2 @@
++QA output created by 027
++Silence is golden
 diff --git a/tests/overlay/group b/tests/overlay/group
-index 82fe69e..92afa8d 100644
+index 92afa8d..4db6751 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -28,3 +28,4 @@
- 023 auto quick attr
+@@ -29,3 +29,4 @@
  024 auto quick
  025 auto quick attr
-+026 auto attr quick
+ 026 auto attr quick
++027 auto quick perms
 -- 
 1.8.3.1
 
