@@ -1,11 +1,11 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43996 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:44042 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752321AbdBTItG (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 20 Feb 2017 03:49:06 -0500
+        id S1752326AbdBTItI (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 20 Feb 2017 03:49:08 -0500
 From: Xiong Zhou <xzhou@redhat.com>
-Subject: [xfstests v3 1/8] overlay: disallow overlayfs as upperdir
-Date: Mon, 20 Feb 2017 16:48:37 +0800
-Message-Id: <1487580524-21503-2-git-send-email-xzhou@redhat.com>
+Subject: [xfstests v3 4/8] overlay: permission check with cached acls in tmpfs
+Date: Mon, 20 Feb 2017 16:48:40 +0800
+Message-Id: <1487580524-21503-5-git-send-email-xzhou@redhat.com>
 In-Reply-To: <1487580524-21503-1-git-send-email-xzhou@redhat.com>
 References: <1487580524-21503-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,36 +13,39 @@ To: fstests@vger.kernel.org
 Cc: linux-unionfs@vger.kernel.org, mszeredi@redhat.com, Xiong Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Using overlayfs dir as upperdir to mount another
-overlayfs should fail.
+tmpfs does not implement ->get_acl method, overlayfs
+need to get its cached acls in permission check when
+lower or upper fs is tmpfs.
 
 CC: Miklos Szeredi <mszeredi@redhat.com>
 Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 ---
- tests/overlay/022     | 82 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/022.out |  2 ++
+ tests/overlay/025     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/025.out |  2 ++
  tests/overlay/group   |  1 +
- 3 files changed, 85 insertions(+)
- create mode 100755 tests/overlay/022
- create mode 100644 tests/overlay/022.out
+ 3 files changed, 88 insertions(+)
+ create mode 100755 tests/overlay/025
+ create mode 100644 tests/overlay/025.out
 
-diff --git a/tests/overlay/022 b/tests/overlay/022
+diff --git a/tests/overlay/025 b/tests/overlay/025
 new file mode 100755
-index 0000000..817ee63
+index 0000000..69d7f91
 --- /dev/null
-+++ b/tests/overlay/022
-@@ -0,0 +1,82 @@
++++ b/tests/overlay/025
+@@ -0,0 +1,85 @@
 +#! /bin/bash
-+# FS QA Test 022
++# FS QA Test 025
 +#
-+# Regression test for kernel commit:
-+#     76bc8e2 ovl: disallow overlayfs as upperdir
++# Overlayfs failed to get posix acls if lower or upper
++# fs is tmpfs.
++# Kernel commit below fixed it.
++# 5201dc449e4b ovl: use cached acl on underlying layer
 +#
 +# This reproducer was originally written by
 +#     Miklos Szeredi <mszeredi@redhat.com>
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Red Hat Inc. All Rights Reserved.
++# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -71,7 +74,8 @@ index 0000000..817ee63
 +_cleanup()
 +{
 +	cd /
-+	$UMOUNT_PROG $tmp/mnt > /dev/null 2>&1
++	$UMOUNT_PROG $tmp/tmpfs/mnt
++	$UMOUNT_PROG $tmp/tmpfs
 +	rm -rf $tmp
 +	rm -f $tmp.*
 +}
@@ -88,49 +92,49 @@ index 0000000..817ee63
 +# Modify as appropriate.
 +_supported_fs overlay
 +_supported_os Linux
-+_require_scratch
++_require_user
 +
-+# Remove all files from previous tests
-+_scratch_mkfs
++# create a tmpfs under $tmp
++mkdir -p $tmp/tmpfs
++$MOUNT_PROG -t tmpfs tmpfs $tmp/tmpfs || \
++  _notrun "this test requires a valid tmpfs"
 +
-+upperdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
-+mkdir -p $upperdir/upper
-+mkdir -p $upperdir/work
-+# mount overlay with dirs in upper
-+_scratch_mount
++pushd $tmp/tmpfs > /dev/null 2>&1
 +
-+mkdir -p $tmp/{lower,mnt}
-+# mount overlay using upper from another overlay upper
-+# should fail
-+_overlay_mount_dirs $tmp/lower $SCRATCH_MNT/upper \
-+  $SCRATCH_MNT/work overlay $tmp/mnt > /dev/null 2>&1
-+if [ $? -ne 0 ] ; then
-+	echo "Silence is golden"
-+else
-+	echo "Test Fail"
-+	echo "Overlay upperdir can't be another overlay upperdir"
-+fi
++mkdir -p lower upper work mnt
++mkdir -p -m 0 upper/testd
++# grant permission for $qa_user
++setfacl -m u:$qa_user:rx upper/testd
 +
++# mount overlay using dirs in tmpfs
++_overlay_mount_dirs lower upper work overlay mnt
++
++popd > /dev/null 2>&1
++
++# user accessing test dir, should be Okay
++_user_do "ls $tmp/tmpfs/mnt/testd"
++
++echo "Silence is golden"
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/overlay/022.out b/tests/overlay/022.out
+diff --git a/tests/overlay/025.out b/tests/overlay/025.out
 new file mode 100644
-index 0000000..394c6a7
+index 0000000..3d70951
 --- /dev/null
-+++ b/tests/overlay/022.out
++++ b/tests/overlay/025.out
 @@ -0,0 +1,2 @@
-+QA output created by 022
++QA output created by 025
 +Silence is golden
 diff --git a/tests/overlay/group b/tests/overlay/group
-index 5bcc25e..45768f5 100644
+index 0563a04..82fe69e 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -24,3 +24,4 @@
- 019 auto stress
- 020 auto quick copyup perms
- 021 auto quick copyup
-+022 auto quick
+@@ -27,3 +27,4 @@
+ 022 auto quick
+ 023 auto quick attr
+ 024 auto quick
++025 auto quick attr
 -- 
 1.8.3.1
 
