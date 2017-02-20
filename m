@@ -1,11 +1,11 @@
-Received: from mx1.redhat.com ([209.132.183.28]:49162 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:35252 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752374AbdBTItQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 20 Feb 2017 03:49:16 -0500
+        id S1752438AbdBTIt3 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 20 Feb 2017 03:49:29 -0500
 From: Xiong Zhou <xzhou@redhat.com>
-Subject: [xfstests v3 7/8] overlay: test flock after copied up
-Date: Mon, 20 Feb 2017 16:48:43 +0800
-Message-Id: <1487580524-21503-8-git-send-email-xzhou@redhat.com>
+Subject: [xfstests v3 8/8] overlay: accessing stacked overlayfs files
+Date: Mon, 20 Feb 2017 16:48:44 +0800
+Message-Id: <1487580524-21503-9-git-send-email-xzhou@redhat.com>
 In-Reply-To: <1487580524-21503-1-git-send-email-xzhou@redhat.com>
 References: <1487580524-21503-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,33 +13,35 @@ To: fstests@vger.kernel.org
 Cc: linux-unionfs@vger.kernel.org, mszeredi@redhat.com, Xiong Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Locks of file in lower dir should working after it's
-been copied up.
+Lower dir comes from another overlayfs dir, then
+accessing files in it should work.
 
 CC: Miklos Szeredi <mszeredi@redhat.com>
 Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 ---
- tests/overlay/028     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/028.out |  2 ++
- tests/overlay/group   |  1 +
- 3 files changed, 83 insertions(+)
- create mode 100755 tests/overlay/028
- create mode 100644 tests/overlay/028.out
+ tests/overlay/029     | 100 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/029.out |   5 +++
+ tests/overlay/group   |   1 +
+ 3 files changed, 106 insertions(+)
+ create mode 100755 tests/overlay/029
+ create mode 100644 tests/overlay/029.out
 
-diff --git a/tests/overlay/028 b/tests/overlay/028
+diff --git a/tests/overlay/029 b/tests/overlay/029
 new file mode 100755
-index 0000000..cf0b77a
+index 0000000..902a84c
 --- /dev/null
-+++ b/tests/overlay/028
-@@ -0,0 +1,80 @@
++++ b/tests/overlay/029
+@@ -0,0 +1,100 @@
 +#! /bin/bash
-+# FS QA Test 028
++# FS QA Test 029
 +#
-+# When file in lower dir is locked and it's been copied up,
-+# make sure the lock is working in overlayfs.
++# There are dirs/files in lower dir and upper dir before
++# mounting overlayfs. After mounting, use dir in overlayfs
++# mountpoint as lowerdir to mount another overlayfs, then
++# access old files through the second overlayfs. It was
++# not working, kernel commit below fixed it.
 +#
-+# Kernel commit below fixed it.
-+# c568d68341be locks: fix file locking on overlayfs
++# c4fcfc1619ea ovl: fix d_real() for stacked fs
 +#
 +# This reproducer was originally written by
 +#     Miklos Szeredi <mszeredi@redhat.com>
@@ -74,6 +76,8 @@ index 0000000..cf0b77a
 +_cleanup()
 +{
 +	cd /
++	$UMOUNT_PROG $tmp/mnt
++	rm -rf $tmp
 +	rm -f $tmp.*
 +}
 +
@@ -94,41 +98,60 @@ index 0000000..cf0b77a
 +# Remove all files from previous tests
 +_scratch_mkfs
 +
++# Preparing files
++upperdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
 +lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
-+mkdir -p $lowerdir
-+touch $lowerdir/foo
++mkdir -p $upperdir/up
++echo foo > $upperdir/up/foo
++mkdir -p $lowerdir/low
++echo bar > $lowerdir/low/bar
 +
-+# Mounting overlay
++# mount overlay in SCRATCH_MNT
 +_scratch_mount
 +
-+# Testing copyup and flock
-+flock $SCRATCH_MNT/foo sleep 3 &
-+# flock in subshell should fail with no output
-+(sleep 1; echo bar > $SCRATCH_MNT/foo; \
-+  flock -n $SCRATCH_MNT/foo echo LOCKED)
++mkdir -p $tmp/{upper,mnt,work}
++# mount overlay again using upper dir from SCRATCH_MNT dir
++_overlay_mount_dirs $SCRATCH_MNT/up $tmp/{upper,work} \
++  overlay $tmp/mnt
++# accessing file in the second mount
++cat $tmp/mnt/foo
++$UMOUNT_PROG $tmp/mnt
 +
-+wait
-+echo "Silence is golden"
++# mount overlay again using lower dir from SCRATCH_MNT dir
++_overlay_mount_dirs $SCRATCH_MNT/low $tmp/{upper,work} \
++  overlay $tmp/mnt
++cat $tmp/mnt/bar
++$UMOUNT_PROG $tmp/mnt
++
++# mount overlay again using SCRATCH_MNT dir
++_overlay_mount_dirs $SCRATCH_MNT/ $tmp/{upper,work} \
++  overlay $tmp/mnt
++cat $tmp/mnt/up/foo
++cat $tmp/mnt/low/bar
++
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/overlay/028.out b/tests/overlay/028.out
+diff --git a/tests/overlay/029.out b/tests/overlay/029.out
 new file mode 100644
-index 0000000..2615f73
+index 0000000..e7f192c
 --- /dev/null
-+++ b/tests/overlay/028.out
-@@ -0,0 +1,2 @@
-+QA output created by 028
-+Silence is golden
++++ b/tests/overlay/029.out
+@@ -0,0 +1,5 @@
++QA output created by 029
++foo
++bar
++foo
++bar
 diff --git a/tests/overlay/group b/tests/overlay/group
-index 4db6751..cf058fc 100644
+index cf058fc..7e72a30 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -30,3 +30,4 @@
- 025 auto quick attr
+@@ -31,3 +31,4 @@
  026 auto attr quick
  027 auto quick perms
-+028 auto copyup quick
+ 028 auto copyup quick
++029 auto quick
 -- 
 1.8.3.1
 
