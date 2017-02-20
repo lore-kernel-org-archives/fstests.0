@@ -1,113 +1,137 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:18860 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1750920AbdBTJi6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 20 Feb 2017 04:38:58 -0500
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH] xfs/133,4: make sure xfs_db sets negative i_size && add strict check for dd
-Date: Mon, 20 Feb 2017 17:37:45 +0800
-Message-ID: <1487583465-17572-1-git-send-email-yangx.jy@cn.fujitsu.com>
-In-Reply-To: <20170220023646.GG24562@eguan.usersys.redhat.com>
-References: <20170220023646.GG24562@eguan.usersys.redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:23407 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752703AbdBTKa3 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 20 Feb 2017 05:30:29 -0500
+Date: Mon, 20 Feb 2017 18:30:28 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v4 0/10] fstests: new way to run overlay tests
+Message-ID: <20170220103028.GJ24562@eguan.usersys.redhat.com>
+References: <1487275028-29885-1-git-send-email-amir73il@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1487275028-29885-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com
-Cc: fstests@vger.kernel.org, Xiao Yang <yangx.jy@cn.fujitsu.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-1) xfs/133 and xfs/134 work abnornamlly on RHEL6.8GA and RHEL6.9Beta
-   because xfs_db fails to set i_size to -1 or -512 and reports "usage:
-   write fieldname value".  The special argument "--" is only used to
-   end option-scanning in getopt().  So we should add "--" for write
-   command in xfs_db when -c option is supported by write command.
-   getopt() has been produced by 'commit c9f5e3db22098 ("xfs_db: Allow
-   writes of corrupted data")'.
+Hi Amir,
 
-2) When xfs_db fails to set a negative i_size due to unknown error, we can
-   skip these cases which don't trigger the kernel bug.
+On Thu, Feb 16, 2017 at 09:56:58PM +0200, Amir Goldstein wrote:
+> Hi Eryu and all,
+> 
+> This is the 4th revision of new overlayfs config.
+> The main motivation of this work is to help catch overlayfs bugs
+> related to leaking objects in underlying (base) fs.
 
-3) xfs/134 passes unexpectedly on RHEL7.3GA due to no space left on device,
-   So we can add strict check.
+Thank you so much for your work! I went through the patches and they
+look fine to me, I didn't find anything obviously wrong. Now I'm doing
+more tests with both new & legacy configs.
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
- tests/xfs/133 | 20 ++++++++++++++++++--
- tests/xfs/134 | 23 +++++++++++++++++++----
- 2 files changed, 37 insertions(+), 6 deletions(-)
+And again, since this is quite a invasive update, I'd like to let it sit
+in the list for longer time for broader review. Any comments/ideas are
+appreciated!
 
-diff --git a/tests/xfs/133 b/tests/xfs/133
-index d756d2e..0d7587e 100755
---- a/tests/xfs/133
-+++ b/tests/xfs/133
-@@ -63,11 +63,27 @@ inum=$(stat -c "%i" $testdir/a)
- 
- echo "Corrupt filesystem"
- _scratch_unmount
--_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -- -1' >> $seqres.full
-+
-+# 1) we should add "--" for write command in xfs_db when -c option is
-+#    supported by write command.
-+# 2) check whether xfs_db succeeds to set i_size to -1 or not
-+_scratch_xfs_db -x -c "help" | grep -q "write \[-c\]"
-+if [ $? -eq 0 ]; then
-+	_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -- -1' >> $seqres.full 2>&1 || \
-+	_notrun "Could not set i_size to -1 successfully, skip test."
-+else
-+	_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -1' >> $seqres.full 2>&1 || \
-+	_notrun "Could not set i_size to -1 successfully, skip test."
-+fi
- 
- echo "Remount, try to append"
- _scratch_mount
--dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
-+
-+# dd may fail unexpectedly(eg. no space left on device), So we add strict check.
-+dd_out=$(dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=append conv=notrunc 2>&1)
-+echo $dd_out | grep -q "Structure needs cleaning" && echo "Write did not succeed (ok)."
-+echo $dd_out >> $seqres.full
-+
- sync
- 
- # success, all done
-diff --git a/tests/xfs/134 b/tests/xfs/134
-index 09466cd..d6d2dec 100755
---- a/tests/xfs/134
-+++ b/tests/xfs/134
-@@ -63,13 +63,28 @@ inum=$(stat -c "%i" $testdir/a)
- 
- echo "Corrupt filesystem"
- _scratch_unmount
--# Set the file size to the highest multiple of 512 below
--# -1 so that we can perform a dio write.
--_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -- -512' >> $seqres.full
-+
-+# 1) Set the file size to the highest multiple of 512 below -1 so
-+#    that we can perform a dio write.
-+# 2) we should add "--" for write command in xfs_db when -c option is
-+#    supported by write command.
-+# 3) check whether xfs_db succeeds to set i_size to -512 or not
-+_scratch_xfs_db -x -c "help" | grep -q "write \[-c\]"
-+if [ $? -eq 0 ]; then
-+	_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -- -512' >> $seqres.full 2>&1 || \
-+	_notrun "Could not set i_size to -512 successfully, skip test."
-+else
-+	_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -512' >> $seqres.full 2>&1 || \
-+	_notrun "Could not set i_size to -512 successfully, skip test."
-+fi
- 
- echo "Remount, try to append"
- _scratch_mount
--dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=direct,append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
-+
-+# dd may fail unexpectedly(eg. no space left on device), So we add strict check.
-+dd_out=$(dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=direct,append conv=notrunc 2>&1)
-+echo $dd_out | grep -q "Structure needs cleaning" && echo "Write did not succeed (ok)."
-+echo $dd_out >> $seqres.full
- sync
- 
- # success, all done
--- 
-1.8.3.1
+Thanks,
+Eryu
 
-
-
+> 
+> With this change, all you have to do to run overlay tests if you
+> already have a local.config setup to test a local file system is:
+>  ./check -overlay
+> 
+> It uses existing local.config that was setup to run tests on
+> the base fs (e.g. xfs) and you can run './check' and './check -overlay'
+> without re-formatting the test partitions and without changing the
+> config file.
+> 
+> The legacy overlayfs configuration, where TEST_DEV is a directory
+> still works, but it should be deprecated.
+> 
+> I tested ./check -overlay -g quick with both legacy overlay configuration
+> and the new base fs configuration.
+> 
+> Until now, overlay test configuration was not documented at all.
+> I updated README per Eryu's request and tried to keep the documentation
+> short and simple.
+> 
+> Also added README.overlay with some easy example for config files
+> to use with -overlay.
+> 
+> I would very much appreciate if anyone could test these changes with their
+> own set of configuration, with or without adding overlay tests into the mix.
+> You can get the branch for testing from my github tree [1].
+> 
+> Thanks,
+> Amir.
+> 
+> [1] https://github.com/amir73il/xfstests/tree/ovl_base_fs
+> 
+> v4:
+> - Address review comments from Eryu
+> - Fix sanity checks for already mounted scratch base fs
+> - Fix handling of SCRATCH_DEV_POOL
+> - Fix problems when run in kvm-xfstests
+> - Add README.overlay with example config files
+> - Remove documentation for overlay config sections
+> 
+> v3:
+> - Mount cycle base test fs
+> - Fix bugs in non overlay specific sanity checks
+> - Run -overlay test with existing config file of base fs
+> - Run overlay tests per base fs by adding overlay config sections
+> 
+> v2:
+> - Test and scratch base dirs each have thier own base fs
+> - Support mount cycles of base fs for scratch tests
+> 
+> v1:
+> - Both test and scratch base dirs on a single base fs
+> 
+> 
+> Amir Goldstein (10):
+>   fstests: sanity check that test partitions are not mounted elsewhere
+>   fstests: use _test_mount() consistently
+>   fstests: canonicalize mount points on every config section
+>   overlay: rename OVERLAY_LOWER/UPPER/WORK_DIR
+>   overlay: allow SCRATCH_DEV to be the base fs mount point
+>   overlay: configure TEST/SCRATCH vars to base fs
+>   overlay: use OVL_BASE_SCRATCH_MNT instead of SCRATCH_DEV
+>   overlay: fix test and scratch filters for overlay base fs
+>   overlay: mount/unmount base fs before/after running tests
+>   generic/064: access SCRATCH_MNT after _scratch_mount
+> 
+>  README            |  16 +++--
+>  README.overlay    |  46 ++++++++++++
+>  check             |  18 ++---
+>  common/config     | 160 ++++++++++++++++++++++++++++++++++++------
+>  common/filter     |  26 +++++--
+>  common/rc         | 206 +++++++++++++++++++++++++++++++++++++++---------------
+>  tests/generic/064 |  10 +--
+>  tests/overlay/001 |   7 +-
+>  tests/overlay/002 |   2 +-
+>  tests/overlay/003 |   5 +-
+>  tests/overlay/004 |   7 +-
+>  tests/overlay/005 |  30 ++++----
+>  tests/overlay/006 |  10 +--
+>  tests/overlay/008 |   8 +--
+>  tests/overlay/009 |   2 +-
+>  tests/overlay/010 |  10 +--
+>  tests/overlay/011 |   6 +-
+>  tests/overlay/012 |   4 +-
+>  tests/overlay/013 |   4 +-
+>  tests/overlay/014 |  19 ++---
+>  tests/overlay/015 |   2 +-
+>  tests/overlay/016 |   2 +-
+>  tests/overlay/017 |   2 +-
+>  tests/overlay/018 |   2 +-
+>  tests/overlay/019 |   2 +-
+>  tests/overlay/020 |   2 +-
+>  tests/overlay/021 |   6 +-
+>  27 files changed, 450 insertions(+), 164 deletions(-)
+>  create mode 100644 README.overlay
+> 
+> -- 
+> 2.7.4
+> 
