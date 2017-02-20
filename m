@@ -1,11 +1,11 @@
-Received: from mx1.redhat.com ([209.132.183.28]:42344 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:53948 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752370AbdBTItQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 20 Feb 2017 03:49:16 -0500
+        id S1751082AbdBTItO (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 20 Feb 2017 03:49:14 -0500
 From: Xiong Zhou <xzhou@redhat.com>
-Subject: [xfstests v3 3/8] overlay: test workdir cleanup in mounting
-Date: Mon, 20 Feb 2017 16:48:39 +0800
-Message-Id: <1487580524-21503-4-git-send-email-xzhou@redhat.com>
+Subject: [xfstests v3 6/8] overlay: can not change underlying immutable file
+Date: Mon, 20 Feb 2017 16:48:42 +0800
+Message-Id: <1487580524-21503-7-git-send-email-xzhou@redhat.com>
 In-Reply-To: <1487580524-21503-1-git-send-email-xzhou@redhat.com>
 References: <1487580524-21503-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,34 +13,32 @@ To: fstests@vger.kernel.org
 Cc: linux-unionfs@vger.kernel.org, mszeredi@redhat.com, Xiong Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-"work" directory in workdir should be cleaned up
-and recreated while overlayfs mounting. Or overlayfs
-will be mounted read-only.
+Even timestamp change by touch.
 
 CC: Miklos Szeredi <mszeredi@redhat.com>
 Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 ---
- tests/overlay/024     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/024.out |  2 ++
+ tests/overlay/027     | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/027.out |  2 ++
  tests/overlay/group   |  1 +
- 3 files changed, 83 insertions(+)
- create mode 100755 tests/overlay/024
- create mode 100644 tests/overlay/024.out
+ 3 files changed, 90 insertions(+)
+ create mode 100755 tests/overlay/027
+ create mode 100644 tests/overlay/027.out
 
-diff --git a/tests/overlay/024 b/tests/overlay/024
+diff --git a/tests/overlay/027 b/tests/overlay/027
 new file mode 100755
-index 0000000..2dbef12
+index 0000000..4bb0329
 --- /dev/null
-+++ b/tests/overlay/024
-@@ -0,0 +1,80 @@
++++ b/tests/overlay/027
+@@ -0,0 +1,87 @@
 +#! /bin/bash
-+# FS QA Test 024
++# FS QA Test 027
 +#
-+# "work" directory under workdir should be cleaned up
-+# well on overlayfs startup, or overlayfs will be mounted
-+# read-only.
-+# Kernel commit below fixes it.
-+# eea2fb4851e9 ovl: proper cleanup of workdir
++# If underlying upper file is immutable, it should stays
++# untouchable in the overlayfs mount.
++#
++# Kernel commit below fixed it.
++# f2b20f6ee842 vfs: move permission checking into ...
 +#
 +# This reproducer was originally written by
 +#     Miklos Szeredi <mszeredi@redhat.com>
@@ -75,6 +73,7 @@ index 0000000..2dbef12
 +_cleanup()
 +{
 +	cd /
++	$CHATTR_PROG -i $upperdir/foo
 +	rm -f $tmp.*
 +}
 +
@@ -91,45 +90,51 @@ index 0000000..2dbef12
 +_supported_fs overlay
 +_supported_os Linux
 +_require_scratch
++_require_chattr
 +
 +# Remove all files from previous tests
 +_scratch_mkfs
 +
-+# making workdir
-+wkdir=$SCRATCH_DEV/$OVERLAY_WORK_DIR
-+mkdir -p $wkdir/work/foo
++# Preparing immutable file
++upperdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
++mkdir -p $upperdir
++touch $upperdir/foo
++$CHATTR_PROG +i $upperdir/foo
 +
++# Mounting overlay
 +_scratch_mount
 +
-+# try writing to mountpoint
-+touch $SCRATCH_MNT/bar
-+
-+# checking work dir is clean
-+if [ -e $wkdir/work/foo ] ; then
-+	echo "work dir is not clean"
++# Touching immutable file in overlay, should fail.
++# Not filtering output here because of errno returned
++# varies among kernel versions:
++#   touch: setting times of 'foo': Operation not permitted
++#   touch: cannot touch 'foo': Permission denied
++if touch $SCRATCH_MNT/foo > /dev/null 2>&1 ; then
++	echo "Test Fail, you can't change an immutable file"
 +else
 +	echo "Silence is golden"
 +fi
++
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/overlay/024.out b/tests/overlay/024.out
+diff --git a/tests/overlay/027.out b/tests/overlay/027.out
 new file mode 100644
-index 0000000..fd6fbb1
+index 0000000..ef78cda
 --- /dev/null
-+++ b/tests/overlay/024.out
++++ b/tests/overlay/027.out
 @@ -0,0 +1,2 @@
-+QA output created by 024
++QA output created by 027
 +Silence is golden
 diff --git a/tests/overlay/group b/tests/overlay/group
-index 09da1be..0563a04 100644
+index 92afa8d..4db6751 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -26,3 +26,4 @@
- 021 auto quick copyup
- 022 auto quick
- 023 auto quick attr
-+024 auto quick
+@@ -29,3 +29,4 @@
+ 024 auto quick
+ 025 auto quick attr
+ 026 auto attr quick
++027 auto quick perms
 -- 
 1.8.3.1
 
