@@ -1,116 +1,90 @@
-Received: from mx1.redhat.com ([209.132.183.28]:59378 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754504AbdBQKOC (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 17 Feb 2017 05:14:02 -0500
-Date: Fri, 17 Feb 2017 18:14:01 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2 4/8] overlay: permission check with cached acls in
- tmpfs
-Message-ID: <20170217101401.GE24562@eguan.usersys.redhat.com>
-References: <1487306188-2097-1-git-send-email-xzhou@redhat.com>
- <1487306188-2097-4-git-send-email-xzhou@redhat.com>
- <CAOQ4uxie4S-YVu61foCqERq_z41p89zwCv43Kn+its1HPJvqGg@mail.gmail.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:51250 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751789AbdBTCNz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 19 Feb 2017 21:13:55 -0500
+Received: from G08CNEXCHPEKD01.g08.fujitsu.local (unknown [10.167.33.80])
+        by cn.fujitsu.com (Postfix) with ESMTP id 239F247C4E82
+        for <fstests@vger.kernel.org>; Mon, 20 Feb 2017 10:13:46 +0800 (CST)
+Message-ID: <58AA50DA.8080409@cn.fujitsu.com>
+Date: Mon, 20 Feb 2017 10:13:46 +0800
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxie4S-YVu61foCqERq_z41p89zwCv43Kn+its1HPJvqGg@mail.gmail.com>
+Subject: Re: [PATCH] shared/005,7: add check whether debugfs succeeds to set
+ a negative i_size or not
+References: <1486984910-4623-1-git-send-email-yangx.jy@cn.fujitsu.com>
+In-Reply-To: <1486984910-4623-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Content-Type: text/plain; charset="GB2312"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Xiong Zhou <xzhou@redhat.com>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <mszeredi@redhat.com>
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Feb 17, 2017 at 09:29:18AM +0200, Amir Goldstein wrote:
-> On Fri, Feb 17, 2017 at 6:36 AM, Xiong Zhou <xzhou@redhat.com> wrote:
-> > tmpfs does not implement ->get_acl method, overlayfs
-> > need to get its cached acls in permission check when
-> > lower or upper fs is tmpfs.
-> >
-> > CC: Miklos Szeredi <mszeredi@redhat.com>
-> > Signed-off-by: Xiong Zhou <xzhou@redhat.com>
-> > ---
-> >  tests/overlay/025     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/overlay/025.out |  2 ++
-> >  tests/overlay/group   |  1 +
-> >  3 files changed, 88 insertions(+)
-> >  create mode 100755 tests/overlay/025
-> >  create mode 100644 tests/overlay/025.out
-> >
-> > diff --git a/tests/overlay/025 b/tests/overlay/025
-> > new file mode 100755
-> > index 0000000..ad3ebe1
-> > --- /dev/null
-> > +++ b/tests/overlay/025
-> > @@ -0,0 +1,85 @@
-> > +#! /bin/bash
-> > +# FS QA Test 025
-> > +#
-> > +# Overlayfs failed to get posix acls if lower or upper
-> > +# fs is tmpfs.
-> > +# Kernel commit below fixed it.
-> > +# 5201dc449e4b ovl: use cached acl on underlying layer
-> > +#
-> > +# This reproducer was originally written by
-> > +#     Miklos Szeredi <mszeredi@redhat.com>
-> > +#
-> > +#-----------------------------------------------------------------------
-> > +# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
-> > +#
-> > +# This program is free software; you can redistribute it and/or
-> > +# modify it under the terms of the GNU General Public License as
-> > +# published by the Free Software Foundation.
-> > +#
-> > +# This program is distributed in the hope that it would be useful,
-> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > +# GNU General Public License for more details.
-> > +#
-> > +# You should have received a copy of the GNU General Public License
-> > +# along with this program; if not, write the Free Software Foundation,
-> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > +#-----------------------------------------------------------------------
-> > +#
-> > +
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1       # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +       cd /
-> > +       $UMOUNT_PROG $tmp/tmpfs/mnt
-> > +       $UMOUNT_PROG $tmp/tmpfs
-> > +       rm -rf $tmp/tmpfs
-> 
-> rm -rf $tmp
+Hi Eryu
 
-Yes, otherwise test leaves $tmp dir after test.
+Sorry, The previous patch is defective. Please see the following two points:
 
-> 
-> > +       rm -f $tmp.*
-> 
-> I am not so sure you need that anymore since your test is not creating
-> $tmp.* files.
+1) If the kernel bug has been fixed, stat command fails to get i_size and
+reports "Structure needs cleaning".
 
-Seems not, but it's fine to me to remove $tmp.* explicitly even test
-doesn't create any $tmp.* files, I even like it :)
+2) shared/007 passed unexpectedly because of invalid argument when debugfs
+fails to set i_size to the highest multiple of 512 below -1. So we need
+to add strict check.
 
-It's in new test template and consistent across tests (all right, most
-of the tests), and makes people don't have to worry about if they should
-add "rm -f $tmp.*" in _cleanup when updating tests, just use $tmp.xxx
-freely, and fstests has been this way for a long time and people are
-familar with this style.
+Thanks for you review. I will rewrite this patch.
 
-Anyway, it's not a big issue, as long as all tmp files are cleaned up
-properly.
+Best Regards,
+Xiao Yang
 
-> I think Eryu cleaned up the common functions that create $tmp.* files?
+On 2017/02/13 19:21, Xiao Yang Wrote:
+> shared/005 and shared/007 work abnornamlly on RHEL6.8GA and
+> RHEL6.9Beta because debugfs fails to set i_size to -1 or -512
+> and reports "exceeds field size maximum".  When debugfs fails
+> to set a negative i_size, we can skip these cases which don't
+> trigger the kernel bug.
+>
+> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+> ---
+>  tests/shared/005 | 7 +++++++
+>  tests/shared/007 | 7 +++++++
+>  2 files changed, 14 insertions(+)
+>
+> diff --git a/tests/shared/005 b/tests/shared/005
+> index 296de17..37912d6 100755
+> --- a/tests/shared/005
+> +++ b/tests/shared/005
+> @@ -67,6 +67,13 @@ $DEBUGFS_PROG -w -R "sif /a size -1" $SCRATCH_DEV >> $seqres.full 2>&1
+>  
+>  echo "Remount, try to append"
+>  _scratch_mount
+> +
+> +#check whether debugfs succeeds to set i_size to -1 or not
+> +i_size=$(stat -c "%s" $testdir/a)
+> +if [ $i_size -ne -1 ]; then
+> +	_notrun "Could not set i_size to -1 successfully, skip test."
+> +fi
+> +
+>  dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
+>  sync
+>  
+> diff --git a/tests/shared/007 b/tests/shared/007
+> index 0729ab8..06055a0 100755
+> --- a/tests/shared/007
+> +++ b/tests/shared/007
+> @@ -69,6 +69,13 @@ $DEBUGFS_PROG -w -R "sif /a size 0xFFFFFFFFFFFFFE00" $SCRATCH_DEV >> $seqres.ful
+>  
+>  echo "Remount, try to append"
+>  _scratch_mount
+> +
+> +#check whether debugfs succeeds to set i_size to -512 or not
+> +i_size=$(stat -c "%s" $testdir/a)
+> +if [ $i_size -ne -512 ]; then
+> +	_notrun "Could not set i_size to -512 successfully, skip test."
+> +fi
+> +
+>  dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=direct,append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
+>  sync
+>  
 
-Yes, patch still sits in the list waiting for review.
 
-Thanks,
-Eryu
+
