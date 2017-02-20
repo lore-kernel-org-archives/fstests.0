@@ -1,11 +1,11 @@
-Received: from mx1.redhat.com ([209.132.183.28]:53948 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49162 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751082AbdBTItO (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 20 Feb 2017 03:49:14 -0500
+        id S1752374AbdBTItQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 20 Feb 2017 03:49:16 -0500
 From: Xiong Zhou <xzhou@redhat.com>
-Subject: [xfstests v3 6/8] overlay: can not change underlying immutable file
-Date: Mon, 20 Feb 2017 16:48:42 +0800
-Message-Id: <1487580524-21503-7-git-send-email-xzhou@redhat.com>
+Subject: [xfstests v3 7/8] overlay: test flock after copied up
+Date: Mon, 20 Feb 2017 16:48:43 +0800
+Message-Id: <1487580524-21503-8-git-send-email-xzhou@redhat.com>
 In-Reply-To: <1487580524-21503-1-git-send-email-xzhou@redhat.com>
 References: <1487580524-21503-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,32 +13,33 @@ To: fstests@vger.kernel.org
 Cc: linux-unionfs@vger.kernel.org, mszeredi@redhat.com, Xiong Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Even timestamp change by touch.
+Locks of file in lower dir should working after it's
+been copied up.
 
 CC: Miklos Szeredi <mszeredi@redhat.com>
 Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 ---
- tests/overlay/027     | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/027.out |  2 ++
+ tests/overlay/028     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/028.out |  2 ++
  tests/overlay/group   |  1 +
- 3 files changed, 90 insertions(+)
- create mode 100755 tests/overlay/027
- create mode 100644 tests/overlay/027.out
+ 3 files changed, 83 insertions(+)
+ create mode 100755 tests/overlay/028
+ create mode 100644 tests/overlay/028.out
 
-diff --git a/tests/overlay/027 b/tests/overlay/027
+diff --git a/tests/overlay/028 b/tests/overlay/028
 new file mode 100755
-index 0000000..4bb0329
+index 0000000..cf0b77a
 --- /dev/null
-+++ b/tests/overlay/027
-@@ -0,0 +1,87 @@
++++ b/tests/overlay/028
+@@ -0,0 +1,80 @@
 +#! /bin/bash
-+# FS QA Test 027
++# FS QA Test 028
 +#
-+# If underlying upper file is immutable, it should stays
-+# untouchable in the overlayfs mount.
++# When file in lower dir is locked and it's been copied up,
++# make sure the lock is working in overlayfs.
 +#
 +# Kernel commit below fixed it.
-+# f2b20f6ee842 vfs: move permission checking into ...
++# c568d68341be locks: fix file locking on overlayfs
 +#
 +# This reproducer was originally written by
 +#     Miklos Szeredi <mszeredi@redhat.com>
@@ -73,7 +74,6 @@ index 0000000..4bb0329
 +_cleanup()
 +{
 +	cd /
-+	$CHATTR_PROG -i $upperdir/foo
 +	rm -f $tmp.*
 +}
 +
@@ -90,51 +90,45 @@ index 0000000..4bb0329
 +_supported_fs overlay
 +_supported_os Linux
 +_require_scratch
-+_require_chattr
 +
 +# Remove all files from previous tests
 +_scratch_mkfs
 +
-+# Preparing immutable file
-+upperdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
-+mkdir -p $upperdir
-+touch $upperdir/foo
-+$CHATTR_PROG +i $upperdir/foo
++lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
++mkdir -p $lowerdir
++touch $lowerdir/foo
 +
 +# Mounting overlay
 +_scratch_mount
 +
-+# Touching immutable file in overlay, should fail.
-+# Not filtering output here because of errno returned
-+# varies among kernel versions:
-+#   touch: setting times of 'foo': Operation not permitted
-+#   touch: cannot touch 'foo': Permission denied
-+if touch $SCRATCH_MNT/foo > /dev/null 2>&1 ; then
-+	echo "Test Fail, you can't change an immutable file"
-+else
-+	echo "Silence is golden"
-+fi
++# Testing copyup and flock
++flock $SCRATCH_MNT/foo sleep 3 &
++# flock in subshell should fail with no output
++(sleep 1; echo bar > $SCRATCH_MNT/foo; \
++  flock -n $SCRATCH_MNT/foo echo LOCKED)
 +
++wait
++echo "Silence is golden"
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/overlay/027.out b/tests/overlay/027.out
+diff --git a/tests/overlay/028.out b/tests/overlay/028.out
 new file mode 100644
-index 0000000..ef78cda
+index 0000000..2615f73
 --- /dev/null
-+++ b/tests/overlay/027.out
++++ b/tests/overlay/028.out
 @@ -0,0 +1,2 @@
-+QA output created by 027
++QA output created by 028
 +Silence is golden
 diff --git a/tests/overlay/group b/tests/overlay/group
-index 92afa8d..4db6751 100644
+index 4db6751..cf058fc 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -29,3 +29,4 @@
- 024 auto quick
+@@ -30,3 +30,4 @@
  025 auto quick attr
  026 auto attr quick
-+027 auto quick perms
+ 027 auto quick perms
++028 auto copyup quick
 -- 
 1.8.3.1
 
