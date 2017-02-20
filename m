@@ -1,11 +1,11 @@
-Received: from mx1.redhat.com ([209.132.183.28]:59704 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:52008 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752326AbdBTItL (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 20 Feb 2017 03:49:11 -0500
+        id S1752336AbdBTItJ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 20 Feb 2017 03:49:09 -0500
 From: Xiong Zhou <xzhou@redhat.com>
-Subject: [xfstests v3 5/8] overlay: filter out xattr starts with "trusted.overlay."
-Date: Mon, 20 Feb 2017 16:48:41 +0800
-Message-Id: <1487580524-21503-6-git-send-email-xzhou@redhat.com>
+Subject: [xfstests v3 2/8] overlay: work dir in overlay inherits no ACLs
+Date: Mon, 20 Feb 2017 16:48:38 +0800
+Message-Id: <1487580524-21503-3-git-send-email-xzhou@redhat.com>
 In-Reply-To: <1487580524-21503-1-git-send-email-xzhou@redhat.com>
 References: <1487580524-21503-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,36 +13,32 @@ To: fstests@vger.kernel.org
 Cc: linux-unionfs@vger.kernel.org, mszeredi@redhat.com, Xiong Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Not "trusted.overlay".
-  "trusted.overlayxxx" is allowed.
-  "trusted.overlay.xxx" is not allowed.
+They should be cleaned while mounting overlayfs.
 
 CC: Miklos Szeredi <mszeredi@redhat.com>
 Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 ---
- tests/overlay/026     | 99 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/026.out |  5 +++
+ tests/overlay/023     | 81 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/023.out |  8 +++++
  tests/overlay/group   |  1 +
- 3 files changed, 105 insertions(+)
- create mode 100755 tests/overlay/026
- create mode 100644 tests/overlay/026.out
+ 3 files changed, 90 insertions(+)
+ create mode 100755 tests/overlay/023
+ create mode 100644 tests/overlay/023.out
 
-diff --git a/tests/overlay/026 b/tests/overlay/026
+diff --git a/tests/overlay/023 b/tests/overlay/023
 new file mode 100755
-index 0000000..86f73ea
+index 0000000..9f4ace5
 --- /dev/null
-+++ b/tests/overlay/026
-@@ -0,0 +1,99 @@
++++ b/tests/overlay/023
+@@ -0,0 +1,81 @@
 +#! /bin/bash
-+# FS QA Test 026
++# FS QA Test 023
 +#
-+# Overlayfs should only filter out xattr starting with
-+# "trusted.overlay.", not "trusted.overlay".
-+# Setting xattrs like "trusted.overlay.xxx" is not allowed.
-+# Setting xattrs like "trusted.overlayxxx" is allowed.
-+#
-+# Kernel commit below fixed it.
-+# fe2b75952347 ovl: Fix OVL_XATTR_PREFIX
++# The "work" directory in an overlyfs workdir should not inherit
++# ACL attrs from workdir.
++# Kernel commits below fix it.
++#   c11b9fdd6a61 ovl: remove posix_acl_default from workdir
++#   e1ff3dd1ae52 ovl: fix workdir creation
 +#
 +# This reproducer was originally written by
 +#     Miklos Szeredi <mszeredi@redhat.com>
@@ -82,8 +78,8 @@ index 0000000..86f73ea
 +
 +# get standard environment, filters and checks
 +. ./common/rc
-+. ./common/attr
 +. ./common/filter
++. ./common/attr
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
@@ -93,65 +89,52 @@ index 0000000..86f73ea
 +# Modify as appropriate.
 +_supported_fs overlay
 +_supported_os Linux
++_require_acls
 +_require_scratch
-+_require_attrs
 +
 +# Remove all files from previous tests
 +_scratch_mkfs
 +
-+# Mounting overlay
++# setting acls before mount
++wkdir=$SCRATCH_DEV/$OVERLAY_WORK_DIR
++mkdir -p $wkdir
++setfacl -d -m o::rwx $wkdir
++
 +_scratch_mount
-+touch $SCRATCH_MNT/testf0
-+touch $SCRATCH_MNT/testf1
 +
-+# {s,g}etfattr of "trusted.overlayxxx" should work.
-+$SETFATTR_PROG -n "trusted.overlayfsrz" -v "n" \
-+  $SCRATCH_MNT/testf0
-+
-+$GETFATTR_PROG -n "trusted.overlayfsrz" $SCRATCH_MNT/testf0 \
-+  2>&1 | sed -e "s,${SCRATCH_MNT#/},SCRATCH_MNT,g" \
-+	     -e "/Removing leading/ d" \
-+	     -e "/^$/ d"
-+
-+# {s,g}etfattr of "trusted.overlay.xxx" should fail.
-+# The errno returned varies between kernel versions,
-+#            v4.3       v4.7       v4.8      v4.10
-+# setfattr  not perm  not perm   not perm   not supp
-+# getfattr  no attr   no attr    not perm   not supp
-+#
-+# Checking the latest(not supported).
-+#
-+$SETFATTR_PROG -n "trusted.overlay.fsz" -v "n" \
-+  $SCRATCH_MNT/testf1 2>&1 | \
-+  sed -e "s,${SCRATCH_MNT},SCRATCH_MNT,g" \
-+
-+$GETFATTR_PROG -n "trusted.overlay.fsz" \
-+  $SCRATCH_MNT/testf1 2>&1 | \
-+  sed -e "s,${SCRATCH_MNT},SCRATCH_MNT,g" \
++# getting acls and doing a non-common filter,
++# since getfacl will remove leading / from absolute
++# path names.
++getfacl $wkdir/work 2>&1 | \
++	sed -e "s,${wkdir#/},wkdir,g" \
++	    -e "/Removing leading/ d"
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/overlay/026.out b/tests/overlay/026.out
+diff --git a/tests/overlay/023.out b/tests/overlay/023.out
 new file mode 100644
-index 0000000..94da51b
+index 0000000..3bdaca4
 --- /dev/null
-+++ b/tests/overlay/026.out
-@@ -0,0 +1,5 @@
-+QA output created by 026
-+# file: SCRATCH_MNT/testf0
-+trusted.overlayfsrz="n"
-+setfattr: SCRATCH_MNT/testf1: Operation not supported
-+SCRATCH_MNT/testf1: trusted.overlay.fsz: Operation not supported
++++ b/tests/overlay/023.out
+@@ -0,0 +1,8 @@
++QA output created by 023
++# file: wkdir/work
++# owner: root
++# group: root
++user::---
++group::---
++other::---
++
 diff --git a/tests/overlay/group b/tests/overlay/group
-index 82fe69e..92afa8d 100644
+index 45768f5..09da1be 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -28,3 +28,4 @@
- 023 auto quick attr
- 024 auto quick
- 025 auto quick attr
-+026 auto attr quick
+@@ -25,3 +25,4 @@
+ 020 auto quick copyup perms
+ 021 auto quick copyup
+ 022 auto quick
++023 auto quick attr
 -- 
 1.8.3.1
 
