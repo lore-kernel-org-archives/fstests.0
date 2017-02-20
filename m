@@ -1,157 +1,113 @@
-Received: from mx1.redhat.com ([209.132.183.28]:35252 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752438AbdBTIt3 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 20 Feb 2017 03:49:29 -0500
-From: Xiong Zhou <xzhou@redhat.com>
-Subject: [xfstests v3 8/8] overlay: accessing stacked overlayfs files
-Date: Mon, 20 Feb 2017 16:48:44 +0800
-Message-Id: <1487580524-21503-9-git-send-email-xzhou@redhat.com>
-In-Reply-To: <1487580524-21503-1-git-send-email-xzhou@redhat.com>
-References: <1487580524-21503-1-git-send-email-xzhou@redhat.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:18860 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1750920AbdBTJi6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 20 Feb 2017 04:38:58 -0500
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH] xfs/133,4: make sure xfs_db sets negative i_size && add strict check for dd
+Date: Mon, 20 Feb 2017 17:37:45 +0800
+Message-ID: <1487583465-17572-1-git-send-email-yangx.jy@cn.fujitsu.com>
+In-Reply-To: <20170220023646.GG24562@eguan.usersys.redhat.com>
+References: <20170220023646.GG24562@eguan.usersys.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-unionfs@vger.kernel.org, mszeredi@redhat.com, Xiong Zhou <xzhou@redhat.com>
+To: eguan@redhat.com
+Cc: fstests@vger.kernel.org, Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-Lower dir comes from another overlayfs dir, then
-accessing files in it should work.
+1) xfs/133 and xfs/134 work abnornamlly on RHEL6.8GA and RHEL6.9Beta
+   because xfs_db fails to set i_size to -1 or -512 and reports "usage:
+   write fieldname value".  The special argument "--" is only used to
+   end option-scanning in getopt().  So we should add "--" for write
+   command in xfs_db when -c option is supported by write command.
+   getopt() has been produced by 'commit c9f5e3db22098 ("xfs_db: Allow
+   writes of corrupted data")'.
 
-CC: Miklos Szeredi <mszeredi@redhat.com>
-Signed-off-by: Xiong Zhou <xzhou@redhat.com>
+2) When xfs_db fails to set a negative i_size due to unknown error, we can
+   skip these cases which don't trigger the kernel bug.
+
+3) xfs/134 passes unexpectedly on RHEL7.3GA due to no space left on device,
+   So we can add strict check.
+
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 ---
- tests/overlay/029     | 100 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/029.out |   5 +++
- tests/overlay/group   |   1 +
- 3 files changed, 106 insertions(+)
- create mode 100755 tests/overlay/029
- create mode 100644 tests/overlay/029.out
+ tests/xfs/133 | 20 ++++++++++++++++++--
+ tests/xfs/134 | 23 +++++++++++++++++++----
+ 2 files changed, 37 insertions(+), 6 deletions(-)
 
-diff --git a/tests/overlay/029 b/tests/overlay/029
-new file mode 100755
-index 0000000..902a84c
---- /dev/null
-+++ b/tests/overlay/029
-@@ -0,0 +1,100 @@
-+#! /bin/bash
-+# FS QA Test 029
-+#
-+# There are dirs/files in lower dir and upper dir before
-+# mounting overlayfs. After mounting, use dir in overlayfs
-+# mountpoint as lowerdir to mount another overlayfs, then
-+# access old files through the second overlayfs. It was
-+# not working, kernel commit below fixed it.
-+#
-+# c4fcfc1619ea ovl: fix d_real() for stacked fs
-+#
-+# This reproducer was originally written by
-+#     Miklos Szeredi <mszeredi@redhat.com>
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
+diff --git a/tests/xfs/133 b/tests/xfs/133
+index d756d2e..0d7587e 100755
+--- a/tests/xfs/133
++++ b/tests/xfs/133
+@@ -63,11 +63,27 @@ inum=$(stat -c "%i" $testdir/a)
+ 
+ echo "Corrupt filesystem"
+ _scratch_unmount
+-_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -- -1' >> $seqres.full
 +
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
++# 1) we should add "--" for write command in xfs_db when -c option is
++#    supported by write command.
++# 2) check whether xfs_db succeeds to set i_size to -1 or not
++_scratch_xfs_db -x -c "help" | grep -q "write \[-c\]"
++if [ $? -eq 0 ]; then
++	_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -- -1' >> $seqres.full 2>&1 || \
++	_notrun "Could not set i_size to -1 successfully, skip test."
++else
++	_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -1' >> $seqres.full 2>&1 || \
++	_notrun "Could not set i_size to -1 successfully, skip test."
++fi
+ 
+ echo "Remount, try to append"
+ _scratch_mount
+-dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
 +
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
++# dd may fail unexpectedly(eg. no space left on device), So we add strict check.
++dd_out=$(dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=append conv=notrunc 2>&1)
++echo $dd_out | grep -q "Structure needs cleaning" && echo "Write did not succeed (ok)."
++echo $dd_out >> $seqres.full
 +
-+_cleanup()
-+{
-+	cd /
-+	$UMOUNT_PROG $tmp/mnt
-+	rm -rf $tmp
-+	rm -f $tmp.*
-+}
+ sync
+ 
+ # success, all done
+diff --git a/tests/xfs/134 b/tests/xfs/134
+index 09466cd..d6d2dec 100755
+--- a/tests/xfs/134
++++ b/tests/xfs/134
+@@ -63,13 +63,28 @@ inum=$(stat -c "%i" $testdir/a)
+ 
+ echo "Corrupt filesystem"
+ _scratch_unmount
+-# Set the file size to the highest multiple of 512 below
+-# -1 so that we can perform a dio write.
+-_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -- -512' >> $seqres.full
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
++# 1) Set the file size to the highest multiple of 512 below -1 so
++#    that we can perform a dio write.
++# 2) we should add "--" for write command in xfs_db when -c option is
++#    supported by write command.
++# 3) check whether xfs_db succeeds to set i_size to -512 or not
++_scratch_xfs_db -x -c "help" | grep -q "write \[-c\]"
++if [ $? -eq 0 ]; then
++	_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -- -512' >> $seqres.full 2>&1 || \
++	_notrun "Could not set i_size to -512 successfully, skip test."
++else
++	_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -512' >> $seqres.full 2>&1 || \
++	_notrun "Could not set i_size to -512 successfully, skip test."
++fi
+ 
+ echo "Remount, try to append"
+ _scratch_mount
+-dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=direct,append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
 +
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+
-+# Remove all files from previous tests
-+_scratch_mkfs
-+
-+# Preparing files
-+upperdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
-+lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
-+mkdir -p $upperdir/up
-+echo foo > $upperdir/up/foo
-+mkdir -p $lowerdir/low
-+echo bar > $lowerdir/low/bar
-+
-+# mount overlay in SCRATCH_MNT
-+_scratch_mount
-+
-+mkdir -p $tmp/{upper,mnt,work}
-+# mount overlay again using upper dir from SCRATCH_MNT dir
-+_overlay_mount_dirs $SCRATCH_MNT/up $tmp/{upper,work} \
-+  overlay $tmp/mnt
-+# accessing file in the second mount
-+cat $tmp/mnt/foo
-+$UMOUNT_PROG $tmp/mnt
-+
-+# mount overlay again using lower dir from SCRATCH_MNT dir
-+_overlay_mount_dirs $SCRATCH_MNT/low $tmp/{upper,work} \
-+  overlay $tmp/mnt
-+cat $tmp/mnt/bar
-+$UMOUNT_PROG $tmp/mnt
-+
-+# mount overlay again using SCRATCH_MNT dir
-+_overlay_mount_dirs $SCRATCH_MNT/ $tmp/{upper,work} \
-+  overlay $tmp/mnt
-+cat $tmp/mnt/up/foo
-+cat $tmp/mnt/low/bar
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/overlay/029.out b/tests/overlay/029.out
-new file mode 100644
-index 0000000..e7f192c
---- /dev/null
-+++ b/tests/overlay/029.out
-@@ -0,0 +1,5 @@
-+QA output created by 029
-+foo
-+bar
-+foo
-+bar
-diff --git a/tests/overlay/group b/tests/overlay/group
-index cf058fc..7e72a30 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -31,3 +31,4 @@
- 026 auto attr quick
- 027 auto quick perms
- 028 auto copyup quick
-+029 auto quick
++# dd may fail unexpectedly(eg. no space left on device), So we add strict check.
++dd_out=$(dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=direct,append conv=notrunc 2>&1)
++echo $dd_out | grep -q "Structure needs cleaning" && echo "Write did not succeed (ok)."
++echo $dd_out >> $seqres.full
+ sync
+ 
+ # success, all done
 -- 
 1.8.3.1
+
+
 
