@@ -1,13 +1,13 @@
-Received: from mail-lf0-f49.google.com ([209.85.215.49]:36707 "EHLO
-        mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752469AbdBUMoP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 21 Feb 2017 07:44:15 -0500
-Received: by mail-lf0-f49.google.com with SMTP id b80so26877537lfe.3
-        for <fstests@vger.kernel.org>; Tue, 21 Feb 2017 04:44:14 -0800 (PST)
+Received: from mail-lf0-f67.google.com ([209.85.215.67]:34204 "EHLO
+        mail-lf0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752308AbdBUMoN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 21 Feb 2017 07:44:13 -0500
+Received: by mail-lf0-f67.google.com with SMTP id h67so3244054lfg.1
+        for <fstests@vger.kernel.org>; Tue, 21 Feb 2017 04:44:12 -0800 (PST)
 From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: [PATCH 2/2] report: Add xunit format report generator
-Date: Tue, 21 Feb 2017 16:44:05 +0400
-Message-Id: <1487681045-22884-4-git-send-email-dmonakhov@openvz.org>
+Subject: [PATCH 1/2] check: prepare test report generator infrastructure
+Date: Tue, 21 Feb 2017 16:44:04 +0400
+Message-Id: <1487681045-22884-3-git-send-email-dmonakhov@openvz.org>
 In-Reply-To: <1487681045-22884-1-git-send-email-dmonakhov@openvz.org>
 References: <1487681045-22884-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
@@ -15,377 +15,298 @@ To: fstests@vger.kernel.org
 Cc: Dmitry Monakhov <dmonakhov@openvz.org>
 List-ID: <fstests@vger.kernel.org>
 
-xunit[1]/junit[2] are well known report formats for tests frameworks which
-supported by most of test CI frameworks(such as Jenkins [3], Bamboo [4], Avocado [5])
-Basically this is just xml document which can be easily parsed later by external tools.
+Save testcase data which later may be used by report generators
+- Save failure reason to $err_msg variable
+- Save number of notrun tests to $n_notrun counter, similar to $n_try,$n_bad
 
 changes since v1:
- - Use generic '-R fmt' option for report generation, asked by eguan@
- - localize variables, asked by eguan@
- - do not add empty files to report asked by eguan@
- - Add properties
- - Fix system-err/system-out node nesting
-
-EXAMPLE:
-#./check -R xunit -s ext4 generic/001 generic/010
-#cat results/ext4/result.xml
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="xfstests" errors="0" skipped="1" tests="2" time="7"  hostname="alice" timestamp="2017-02-21T15:15:06"  >
-	<properties>
-		<property name="SECTION" value="ext4"/>
-		<property name="FSTYP" value="ext4"/>
-		<property name="MOUNT_OPTIONS" value="-o acl,user_xattr "/>
-		<property name="HOST_OPTIONS" value="/devel/xfstests-dev.git/configs/alice.config"/>
-		<property name="XFS_MKFS_OPTIONS" value="-bsize=4096"/>
-		<property name="TIME_FACTOR" value="1"/>
-		<property name="LOAD_FACTOR" value="1"/>
-		<property name="TEST_DIR" value="/mnt/test"/>
-		<property name="TEST_DEV" value="/dev/ram0"/>
-		<property name="SCRATCH_DEV" value="/dev/ram1"/>
-		<property name="SCRATCH_MNT" value="/mnt/scratch"/>
-		<property name="OVERLAY_UPPER_DIR" value="upper"/>
-		<property name="OVERLAY_LOWER_DIR" value="lower"/>
-		<property name="OVERLAY_WORK_DIR" value="work"/>
-	</properties>
-	<testcase classname="xfstests.ext4" name="generic/001" time="5">
-	</testcase>
-	<testcase classname="xfstests.ext4" name="generic/010" time="1">
-		<skipped message="src/dbtest not built" />
-	</testcase>
-</testsuite>
-
-Footnotes:
-[1] https://xunit.github.io/docs/format-xml-v2.html
-[2] http://help.catchsoftware.com/display/ET/JUnit+Format
-[3] https://jenkins.io
-[4] https://www.atlassian.com/software/bamboo
-[5] https://github.com/avocado-framework/avocado
+ - add _dump_err[,2] _log_err helper functions
 
 Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
 ---
- check         |  38 +++++++++++---
- common/rc     |   5 +-
- common/report | 161 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 195 insertions(+), 9 deletions(-)
- create mode 100644 common/report
+ check         | 31 +++++++++++++++++++++----------
+ common/btrfs  |  8 ++------
+ common/config | 19 +++++++++++++++++++
+ common/rc     | 14 +++++++-------
+ common/xfs    | 22 ++++++----------------
+ 5 files changed, 55 insertions(+), 39 deletions(-)
 
 diff --git a/check b/check
-index 8ee2f6f..bd2d763 100755
+index 5a93c94..8ee2f6f 100755
 --- a/check
 +++ b/check
-@@ -39,7 +39,7 @@ export here=`pwd`
+@@ -28,6 +28,7 @@ try=""
+ n_bad=0
+ sum_bad=0
+ bad=""
++n_notrun=0
+ notrun=""
+ interrupt=true
+ diff="diff -u"
+@@ -37,6 +38,7 @@ randomize=false
+ export here=`pwd`
  xfile=""
  brief_test_summary=false
- err_msg=""
--
-+do_report=false
++err_msg=""
+ 
  DUMP_OUTPUT=false
  
- # start the initialisation work now
-@@ -54,7 +54,7 @@ export DIFF_LENGTH=${DIFF_LENGTH:=10}
- # by default don't output timestamps
- timestamp=${TIMESTAMP:=false}
+@@ -368,6 +370,7 @@ _wipe_counters()
+ {
+ 	n_try="0"
+ 	n_bad="0"
++	n_notrun="0"
+ 	unset try notrun bad
+ }
  
--rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist
-+rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.*
- 
- SRC_GROUPS="generic shared"
- export SRC_DIR="tests"
-@@ -75,6 +75,7 @@ check options
-     -r			randomize test order
-     -d			dump test output to stdout
-     -b			brief test summary
-+    -R fmt[,fmt]	generate report in formats specified. Supported format: [xunit]
-     --large-fs		optimise scratch device for large filesystems
-     -s section		run only specified section from config file
-     -S section		exclude the specified section from the config file
-@@ -295,7 +296,10 @@ while [ $# -gt 0 ]; do
- 	-T)	timestamp=true ;;
- 	-d)	DUMP_OUTPUT=true ;;
- 	-b)	brief_test_summary=true;;
--
-+	-R)	report_fmt=$2 ; shift ;
-+		REPORT_LIST="$REPORT_LIST ${report_fmt//,/ }"
-+		do_report=true
-+		;;
- 	--large-fs) export LARGE_SCRATCH_DEV=yes ;;
- 	--extra-space=*) export SCRATCH_DEV_EMPTY_SPACE=${r#*=} ;;
- 
-@@ -380,7 +384,12 @@ _wrapup()
- 	check="$RESULT_BASE/check"
- 
- 	if $showme; then
--	:
-+		if $needwrap; then
-+			if $do_report; then
-+				_make_section_report
-+			fi
-+			needwrap=false
-+		fi
- 	elif $needwrap; then
- 		if [ -f $check.time -a -f $tmp.time ]; then
- 			cat $check.time $tmp.time  \
-@@ -431,6 +440,9 @@ _wrapup()
- 			echo "Passed all $n_try tests" >>$tmp.summary
- 		fi
- 		echo "" >>$tmp.summary
-+		if $do_report; then
-+			_make_section_report
-+		fi
- 		needwrap=false
- 	fi
- 
-@@ -519,6 +531,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 		echo "SECTION       -- $section"
- 	fi
- 
-+	sect_start=`_wallclock`
- 	if $RECREATE_TEST_DEV || [ "$OLD_FSTYP" != "$FSTYP" ]; then
- 		echo "RECREATING    -- $FSTYP on $TEST_DEV"
- 		_test_unmount 2> /dev/null
-@@ -623,11 +636,12 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 	    group=`dirname $seq`
- 	    if $OPTIONS_HAVE_SECTIONS; then
- 		export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;${RESULT_BASE}/$section;"`
--		seqres="$RESULT_BASE/$section/$seqnum"
-+		REPORT_DIR="$RESULT_BASE/$section"
- 	    else
- 		export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;$RESULT_BASE;"`
--		seqres="$RESULT_BASE/$seqnum"
-+		REPORT_DIR="$RESULT_BASE"
- 	    fi
-+	    seqres="$REPORT_DIR/$seqnum"
- 
- 	    mkdir -p $RESULT_DIR
- 
-@@ -638,9 +652,12 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 		start=0
- 		stop=0
- 		n_notrun=`expr $n_notrun + 1`
-+		if $do_report; then
-+			_make_testcase_report "list"
-+		fi
- 		continue
- 	    fi
--
-+	    tc_status="pass"
+@@ -596,6 +599,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 	for seq in $list
+ 	do
+ 	    err=false
++	    err_msg=""
  	    if [ ! -f $seq ]; then
- 		echo " - no such test?"
- 	    else
-@@ -704,6 +721,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 	        # Try to get full name in case the user supplied only seq id
+ 	        # and the test has a name. A bit of hassle to find really
+@@ -629,14 +633,17 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 
+ 	    echo -n "$seqnum"
+ 
+-		if $showme; then
+-			echo
+-			continue
+-		fi
++	    if $showme; then
++		echo
++		start=0
++		stop=0
++		n_notrun=`expr $n_notrun + 1`
++		continue
++	    fi
+ 
+-		if [ ! -f $seq ]; then
+-			echo " - no such test?"
+-		else
++	    if [ ! -f $seq ]; then
++		echo " - no such test?"
++	    else
+ 		# really going to try and run this one
+ 		#
+ 		rm -f $seqres.out.bad
+@@ -684,7 +691,8 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 
+ 		if [ -f core ]
+ 		then
+-		    echo -n " [dumped core]"
++		    err_msg="[dumped core]"
++		    echo -n " $err_msg"
+ 		    mv core $RESULT_BASE/$seqnum.core
+ 		    err=true
+ 		fi
+@@ -695,15 +703,17 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 		    $timestamp && echo " [not run]" && echo -n "	$seqnum -- "
  		    cat $seqres.notrun
  		    notrun="$notrun $seqnum"
- 		    n_notrun=`expr $n_notrun + 1`
-+		    tc_status="notrun"
++		    n_notrun=`expr $n_notrun + 1`
  		else
  		    if [ $sts -ne 0 ]
  		    then
-@@ -762,10 +780,14 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 		bad="$bad $seqnum"
- 		n_bad=`expr $n_bad + 1`
- 		quick=false
-+		tc_status="fail"
-+	    fi
-+	    if $do_report; then
-+		_make_testcase_report "$tc_status"
- 	    fi
+-			echo -n " [failed, exit status $sts]"
++			err_msg="[failed, exit status $sts]"
++			echo -n " $err_msg"
+ 			err=true
+ 		    fi
+ 		    if [ ! -f $seq.out ]
+ 		    then
+-			echo " - no qualified output"
++			_dump_err "no qualified output"
+ 			err=true
+ 		    else
+ 
+@@ -733,6 +743,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 						" to see the entire diff)"
+ 				fi; } | \
+ 				sed -e 's/^\(.\)/    \1/'
++			    err_msg="output mismatch (see $diff $seq.out $seqres.out.bad)"
+ 			    err=true
+ 			fi
+ 		    fi
+diff --git a/common/btrfs b/common/btrfs
+index b342644..fd762ef 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -105,9 +105,7 @@ _check_btrfs_filesystem()
+ 	if [ -f ${RESULT_DIR}/require_scratch.require_qgroup_report ]; then
+ 		$BTRFS_UTIL_PROG check $device --qgroup-report > $tmp.qgroup_report 2>&1
+ 		if grep -qE "Counts for qgroup.*are different" $tmp.qgroup_report ; then
+-			echo "_check_btrfs_filesystem: filesystem on $device has wrong qgroup numbers (see $seqres.full)"
+-			echo "_check_btrfs_filesystem: filesystem on $device has wrong qgroup numbers" \
+-				>> $seqres.full
++			_log_err "_check_btrfs_filesystem: filesystem on $device has wrong qgroup numbers"
+ 			echo "*** qgroup_report.$FSTYP output ***"	>>$seqres.full
+ 			cat $tmp.qgroup_report				>>$seqres.full
+ 			echo "*** qgroup_report.$FSTYP output ***"	>>$seqres.full
+@@ -117,9 +115,7 @@ _check_btrfs_filesystem()
+ 
+ 	$BTRFS_UTIL_PROG check $device >$tmp.fsck 2>&1
+ 	if [ $? -ne 0 ]; then
+-		echo "_check_btrfs_filesystem: filesystem on $device is inconsistent (see $seqres.full)"
 -
- 	    seq="after_$seqnum"
- 	done
-+	sect_stop=`_wallclock`
- 	_wrapup
- 	echo
- 
-diff --git a/common/rc b/common/rc
-index ec9b2a0..6ac8ea3 100644
---- a/common/rc
-+++ b/common/rc
-@@ -155,6 +155,10 @@ case "$FSTYP" in
- 	 ;;
- esac
- 
-+if [ ! -z "$REPORT_LIST" ]; then
-+   . ./common/report
-+fi
-+
- _mount()
- {
-     $MOUNT_PROG `_mount_ops_filter $*`
-@@ -3297,7 +3301,6 @@ _get_fs_sysfs_attr()
+-		echo "_check_btrfs_filesystem: filesystem on $device is inconsistent" >>$seqres.full
++		_log_err "_check_btrfs_filesystem: filesystem on $device is inconsistent"
+ 		echo "*** fsck.$FSTYP output ***"	>>$seqres.full
+ 		cat $tmp.fsck				>>$seqres.full
+ 		echo "*** end fsck.$FSTYP output"	>>$seqres.full
+diff --git a/common/config b/common/config
+index 03c2f9f..66b1972 100644
+--- a/common/config
++++ b/common/config
+@@ -128,6 +128,25 @@ _fatal()
+     exit 1
  }
  
++_dump_err()
++{
++    err_msg="$*"
++    echo "$err_msg"
++}
++
++_dump_err2()
++{
++    err_msg="$*"
++    >2& echo "$err_msg"
++}
++
++_log_err()
++{
++    err_msg="$*"
++    echo "$err_msg" | tee -a $seqres.full
++    echo "(see $seqres.full for details)"
++}
++
+ export MKFS_PROG="`set_prog_path mkfs`"
+ [ "$MKFS_PROG" = "" ] && _fatal "mkfs not found"
  
+diff --git a/common/rc b/common/rc
+index ec59b88..ec9b2a0 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1052,7 +1052,9 @@ _repair_scratch_fs()
+ 		_scratch_xfs_repair "$@" 2>&1
+ 		res=$?
+ 	fi
+-	test $res -ne 0 && >&2 echo "xfs_repair failed, err=$res"
++	if [ test $res -ne 0]; then
++		_dump_err2 "xfs_repair failed, err=$res"
++	fi
+ 	return $res
+         ;;
+     *)
+@@ -1064,7 +1066,7 @@ _repair_scratch_fs()
+ 		res=0
+ 		;;
+ 	*)
+-		>&2 echo "fsck.$FSTYP failed, err=$res"
++		_dump_err2 "fsck.$FSTYP failed, err=$res"
+ 		;;
+ 	esac
+ 	return $res
+@@ -2165,7 +2167,7 @@ _mount_or_remount_rw()
+ 			_overlay_mount $device $mountpoint
+ 		fi
+ 		if [ $? -ne 0 ]; then
+-			echo "!!! failed to remount $device on $mountpoint"
++			_dump_err "!!! failed to remount $device on $mountpoint"
+ 			return 0 # ok=0
+ 		fi
+ 	else
+@@ -2199,9 +2201,7 @@ _check_generic_filesystem()
+     fsck -t $FSTYP $FSCK_OPTIONS $device >$tmp.fsck 2>&1
+     if [ $? -ne 0 ]
+     then
+-        echo "_check_generic_filesystem: filesystem on $device is inconsistent (see $seqres.full)"
 -
- init_rc
+-        echo "_check_generic filesystem: filesystem on $device is inconsistent" >>$seqres.full
++	_log_err "_check_generic_filesystem: filesystem on $device is inconsistent"
+         echo "*** fsck.$FSTYP output ***"	>>$seqres.full
+         cat $tmp.fsck				>>$seqres.full
+         echo "*** end fsck.$FSTYP output"	>>$seqres.full
+@@ -3080,7 +3080,7 @@ _check_dmesg()
+ 	     -e "general protection fault:" \
+ 	     $seqres.dmesg
+ 	if [ $? -eq 0 ]; then
+-		echo "_check_dmesg: something found in dmesg (see $seqres.dmesg)"
++		_dump_err "_check_dmesg: something found in dmesg (see $seqres.dmesg)"
+ 		return 1
+ 	else
+ 		rm -f $seqres.dmesg
+diff --git a/common/xfs b/common/xfs
+index 767a481..adbcaf7 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -333,7 +333,7 @@ _check_xfs_filesystem()
+ 		if [ -n "$TEST_XFS_SCRUB" ] && [ -x "$XFS_SCRUB_PROG" ]; then
+ 			"$XFS_SCRUB_PROG" $scrubflag -vd $device >>$seqres.full
+ 			if [ $? -ne 0 ]; then
+-				echo "filesystem on $device failed scrub (see $seqres.full)"
++				_log_err "filesystem on $device failed scrub"
+ 				ok=0
+ 			fi
+ 		fi
+@@ -344,9 +344,7 @@ _check_xfs_filesystem()
+ 	$XFS_LOGPRINT_PROG -t $extra_log_options $device 2>&1 \
+ 		| tee $tmp.logprint | grep -q "<CLEAN>"
+ 	if [ $? -ne 0 -a "$HOSTOS" = "Linux" ]; then
+-		echo "_check_xfs_filesystem: filesystem on $device has dirty log (see $seqres.full)"
+-
+-		echo "_check_xfs_filesystem: filesystem on $device has dirty log"   >>$seqres.full
++		_log_err "_check_xfs_filesystem: filesystem on $device has dirty log"
+ 		echo "*** xfs_logprint -t output ***"	>>$seqres.full
+ 		cat $tmp.logprint			>>$seqres.full
+ 		echo "*** end xfs_logprint output"	>>$seqres.full
+@@ -362,9 +360,7 @@ _check_xfs_filesystem()
+ 			_fix_malloc >$tmp.fs_check
+ 	fi
+ 	if [ -s $tmp.fs_check ]; then
+-		echo "_check_xfs_filesystem: filesystem on $device is inconsistent (c) (see $seqres.full)"
+-
+-		echo "_check_xfs_filesystem: filesystem on $device is inconsistent" >>$seqres.full
++		_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (c)"
+ 		echo "*** xfs_check output ***"		>>$seqres.full
+ 		cat $tmp.fs_check			>>$seqres.full
+ 		echo "*** end xfs_check output"		>>$seqres.full
+@@ -374,9 +370,7 @@ _check_xfs_filesystem()
  
- ################################################################################
-diff --git a/common/report b/common/report
-new file mode 100644
-index 0000000..1a1eadd
---- /dev/null
-+++ b/common/report
-@@ -0,0 +1,161 @@
-+#
-+# Reports generator funcitons lives here
-+#
-+
-+# List of xfstests's enviroment variables to include reports
-+## TODO automate list population inside common/conf
-+REPORT_ENV_LIST="$REPORT_ENV_LIST SECTION"
-+REPORT_ENV_LIST="$REPORT_ENV_LIST FSTYP"
-+REPORT_ENV_LIST="$REPORT_ENV_LIST PLATFORM"
-+REPORT_ENV_LIST="$REPORT_ENV_LIST MKFS_OPTIONS"
-+REPORT_ENV_LIST="$REPORT_ENV_LIST MOUNT_OPTIONS"
-+
-+REPORT_ENV_LIST="$REPORT_ENV_LIST HOST_OPTIONS"
-+REPORT_ENV_LIST="$REPORT_ENV_LIST CHECK_OPTIONS"
-+REPORT_ENV_LIST="$REPORT_ENV_LIST XFS_MKFS_OPTIONS"
-+REPORT_ENV_LIST="$REPORT_ENV_LIST TIME_FACTOR"
-+REPORT_ENV_LIST="$REPORT_ENV_LIST LOAD_FACTOR"
-+
-+REPORT_ENV_LIST="$REPORT_ENV_LIST TEST_DIR"
-+REPORT_ENV_LIST="$REPORT_ENV_LIST TEST_DEV"
-+REPORT_ENV_LIST="$REPORT_ENV_LIST SCRATCH_DEV"
-+REPORT_ENV_LIST="$REPORT_ENV_LIST SCRATCH_MNT"
-+
-+REPORT_ENV_LIST="$REPORT_ENV_LIST OVERLAY_UPPER_DIR"
-+REPORT_ENV_LIST="$REPORT_ENV_LIST OVERLAY_LOWER_DIR"
-+REPORT_ENV_LIST="$REPORT_ENV_LIST OVERLAY_WORK_DIR"
-+
-+#
-+# Xunit format report functions
-+_xunit_add_property()
-+{
-+    local name="$1"
-+    local value="${!name}"
-+
-+    if [ ! -z "$value" ]; then
-+	echo -e "\t\t<property name=\"$name\" value=\"$value\"/>" >> $REPORT_DIR/result.xml
-+    fi
-+}
-+_xunit_make_section_report()
-+{
-+	# xfstest:section ==> xunit:testsuite
-+	local sect_name=$section
-+	local sect_time=`expr $sect_stop - $sect_start`
-+	local n_total=`expr $n_try + $n_notrun`
-+
-+	if [ $sect_name == '-no-sections-' ]; then
-+	    sect_name='global'
-+	fi
-+	local report=$tmp.report.xunit.$sect_name.xml
-+	#Header
-+	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $REPORT_DIR/result.xml
-+	local dtime=`echo $date_time| tr  " " 'T'`
-+	local stats="errors=\"$n_bad\" skipped=\"$n_notrun\" tests=\"$n_total\" time=\"$sect_time\""
-+	local hw_info="hostname=\"$HOST\" timestamp=\"$dtime\" "
-+	echo "<testsuite name=\"xfstests\" $stats  $hw_info >" >> $REPORT_DIR/result.xml
-+	#Properties
-+
-+	echo -e "\t<properties>" >> $REPORT_DIR/result.xml
-+	for p in $REPORT_ENV_LIST;do
-+	    _xunit_add_property "$p"
-+	done
-+	echo -e "\t</properties>" >> $REPORT_DIR/result.xml
-+	cat $tmp.report.xunit.$sect_name.xml >> $REPORT_DIR/result.xml
-+	echo "</testsuite>" >> $REPORT_DIR/result.xml
-+	echo "Xunit report: $REPORT_DIR/result.xml"
-+}
-+
-+_xunit_make_testcase_report()
-+{
-+	local test_status="$1"
-+	local test_time=`expr $stop - $start`
-+	local strip="$SRC_DIR/"
-+	local test_name=${seq#$strip}
-+	local sect_name=$section
-+
-+	#TODO: other places may also win if no-section mode will be named like 'default/global'
-+	if [ $sect_name == '-no-sections-' ]; then
-+		sect_name='global'
-+
-+	fi
-+	local report=$tmp.report.xunit.$sect_name.xml
-+
-+	echo -e "\t<testcase classname=\"xfstests.$sect_name\" name=\"$test_name\" time=\"$test_time\">" >> $report
-+	case $test_status in
-+		"pass")
-+			;;
-+		"notrun")
-+			if [ -f $seqres.notrun ]; then
-+			    local msg=`cat $seqres.notrun`
-+			    echo -e "\t\t<skipped message=\"$msg\" />" >> $report
-+			else
-+				echo -e "\t\t<skipped/>" >> $report
-+			fi
-+			;;
-+		"list")
-+			echo -e "\t\t<skipped/>" >> $report
-+			;;
-+		"fail")
-+			if [ -z "$err_msg" ]; then
-+			    err_msg="Test $sequm failed, reason unknown"
-+			fi
-+			echo -e "\t\t<failure message=\"$err_msg\" type=\"TestFail\" />" >> $report
-+			if [ -s $seqres.full ]; then
-+			    echo -e "\t\t<system-out>" >> $report
-+			    printf  '<![CDATA[\n' >>$report
-+			    cat $seqres.full | tr -dc '[:print:][:space:]' >>$report
-+			    printf ']]>\n'  >>$report
-+			    echo -e "\t\t</system-out>" >> $report
-+			fi
-+			if [ -f $seqres.dmesg ]; then
-+			    echo -e "\t\t<system-err>" >> $report
-+			    printf  '<![CDATA[\n' >>$report
-+			    cat $seqres.dmesg | tr -dc '[:print:][:space:]' >>$report
-+			    printf ']]>\n'  >>$report
-+			    echo -e "\t\t</system-err>" >> $report
-+			elif [ -s $seqres.out.bad ]; then
-+			    echo -e "\t\t<system-err>" >> $report
-+			    printf  '<![CDATA[\n' >>$report
-+			    $diff $seq.out $seqres.out.bad >>$report
-+			    printf ']]>\n'  >>$report
-+			    echo -e "\t\t</system-err>" >> $report
-+			fi
-+			;;
-+		*)
-+			echo -e "\t\t<failure message=\"Unknown ret_state=$ret_state\" type=\"TestFail\"/>" >> $report
-+			;;
-+	esac
-+	echo -e "\t</testcase>" >> $report
-+}
-+
-+
-+#
-+#  Common report generator entry points
-+_make_section_report()
-+{
-+	for report in $REPORT_LIST; do
-+		case "$report" in
-+			"xunit")
-+				_xunit_make_section_report "$test_status"
-+				;;
-+			*)
-+				_fatal "report format '$report' is not supported"
-+				;;
-+		esac
-+	done
-+}
-+
-+_make_testcase_report()
-+{
-+	test_status="$1"
-+	for report in $REPORT_LIST; do
-+		case "$report" in
-+			"xunit")
-+				_xunit_make_testcase_report "$test_status"
-+				;;
-+			*)
-+				_fatal "report format '$report' is not supported"
-+				;;
-+		esac
-+	done
-+}
+ 	$XFS_REPAIR_PROG -n $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
+ 	if [ $? -ne 0 ]; then
+-		echo "_check_xfs_filesystem: filesystem on $device is inconsistent (r) (see $seqres.full)"
+-
+-		echo "_check_xfs_filesystem: filesystem on $device is inconsistent" >>$seqres.full
++		_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (r)"
+ 		echo "*** xfs_repair -n output ***"	>>$seqres.full
+ 		cat $tmp.repair | _fix_malloc		>>$seqres.full
+ 		echo "*** end xfs_repair output"	>>$seqres.full
+@@ -389,9 +383,7 @@ _check_xfs_filesystem()
+ 	if [ -n "$TEST_XFS_REPAIR_REBUILD" ]; then
+ 		$XFS_REPAIR_PROG $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
+ 		if [ $? -ne 0 ]; then
+-			echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild) (see $seqres.full)"
+-
+-			echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild)" >>$seqres.full
++			_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild)"
+ 			echo "*** xfs_repair output ***"	>>$seqres.full
+ 			cat $tmp.repair | _fix_malloc		>>$seqres.full
+ 			echo "*** end xfs_repair output"	>>$seqres.full
+@@ -402,9 +394,7 @@ _check_xfs_filesystem()
+ 
+ 		$XFS_REPAIR_PROG -n $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
+ 		if [ $? -ne 0 ]; then
+-			echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild-reverify) (see $seqres.full)"
+-
+-			echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild-reverify)" >>$seqres.full
++			_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild-reverify)"
+ 			echo "*** xfs_repair -n output ***"	>>$seqres.full
+ 			cat $tmp.repair | _fix_malloc		>>$seqres.full
+ 			echo "*** end xfs_repair output"	>>$seqres.full
 -- 
 2.9.3
 
