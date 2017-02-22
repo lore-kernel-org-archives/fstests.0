@@ -1,61 +1,80 @@
-Received: from mx1.redhat.com ([209.132.183.28]:53994 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751349AbdBVGxt (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 22 Feb 2017 01:53:49 -0500
-Date: Wed, 22 Feb 2017 14:53:47 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] shared/005,7: fix making sure debugfs sets negative
- i_size && add strict check for dd
-Message-ID: <20170222065347.GW24562@eguan.usersys.redhat.com>
-References: <20170220023646.GG24562@eguan.usersys.redhat.com>
- <1487566979-6147-1-git-send-email-yangx.jy@cn.fujitsu.com>
- <20170222042041.GT24562@eguan.usersys.redhat.com>
- <58AD1A16.10109@cn.fujitsu.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:41526 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1754345AbdBVIRZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 22 Feb 2017 03:17:25 -0500
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH v2] shared/005,7: fix making sure debugfs sets negative i_size
+Date: Wed, 22 Feb 2017 16:17:03 +0800
+Message-ID: <1487751423-2310-1-git-send-email-yangx.jy@cn.fujitsu.com>
+In-Reply-To: <20170222065347.GW24562@eguan.usersys.redhat.com>
+References: <20170222065347.GW24562@eguan.usersys.redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <58AD1A16.10109@cn.fujitsu.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org
+To: eguan@redhat.com
+Cc: fstests@vger.kernel.org, Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Feb 22, 2017 at 12:56:54PM +0800, Xiao Yang wrote:
-> On 2017/02/22 12:20, Eryu Guan wrote:
-> > On Mon, Feb 20, 2017 at 01:02:59PM +0800, Xiao Yang wrote:
-> > > 1) If the kernel bug has been fixed, stat command fails to get i_size
-> > >     and reports "Structure needs cleaning".  So we use debugfs -R "stat"
-> > >     instead of stat command to make sure debugfs sets negative i_size.
-> > >     These cases have been broken by commit 0e13e40b247a1 ("shared/005,7:
-> > >     make sure debugfs sets negative i_size").
-> > > 
-> > > 2) shared/007 passes unexpectedly on RHEL6.8GA and RHEL6.9Beta
-> > >     because of invalid argument. When debugfs fails to set i_size
-> > >     to -512, dd with direct flag fails and reports "invalid argument".
-> > >     So we can add strict check.
-> > But you've already added the check for i_size and _notrun if debugfs
-> > failed to set i_size to -512, there's no chance for dd to hit EINVAL.
-> > And I think any error dd is hitting is acceptable, as long as test runs
-> > (which means i_size was set to -1/-512 successfully). So I don't think
-> > we need the check on dd's output. Did I miss anything?
-> Hi Eryu
-> 
-> Thanks for your comments.
-> 
-> xfs/134 passed unexpectedly on RHEL7.3GA because dd hits ENOSPC.  So I think
+If the kernel bug has been fixed, stat command fails to get i_size
+and reports "Structure needs cleaning".  So we use debugfs -R "stat"
+instead of stat command to make sure debugfs sets negative i_size.
+These cases have been broken by commit 0e13e40b247a1 ("shared/005,7:
+make sure debugfs sets negative i_size").
 
-Hmm, xfs/134 hits ENOSPC even on 4.9 kernel (where xfs/133 triggers
-kernel BUG_ON), so I think the buffer I/O tests are targeded regression
-tests and the dio tests are nice-to-have tests.
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+---
+ tests/shared/005 | 9 +++------
+ tests/shared/007 | 9 +++------
+ 2 files changed, 6 insertions(+), 12 deletions(-)
 
-> all of these cases should fail instead of pass when hitting  unexpected
-> error.
-> Do you think whether we only check on dd's output of xfs/133,4 or remove
-> all? :-)
+diff --git a/tests/shared/005 b/tests/shared/005
+index 76c551c..de7b84f 100755
+--- a/tests/shared/005
++++ b/tests/shared/005
+@@ -65,15 +65,12 @@ echo "Corrupt filesystem"
+ _scratch_unmount
+ $DEBUGFS_PROG -w -R "sif /a size -1" $SCRATCH_DEV >> $seqres.full 2>&1
+ 
+-echo "Remount, try to append"
+-_scratch_mount
+-
+ # check whether debugfs succeeds to set i_size to -1 or not
+-i_size=$(stat -c "%s" $testdir/a)
+-if [ $i_size -ne -1 ]; then
++$DEBUGFS_PROG -R "stat /a" $SCRATCH_DEV 2>&1 | grep -q "Size: 18446744073709551615" || \
+ 	_notrun "Could not set i_size to -1 successfully, skip test."
+-fi
+ 
++echo "Remount, try to append"
++_scratch_mount
+ dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
+ sync
+ 
+diff --git a/tests/shared/007 b/tests/shared/007
+index 77636f4..785f19f 100755
+--- a/tests/shared/007
++++ b/tests/shared/007
+@@ -67,15 +67,12 @@ _scratch_unmount
+ # -1 so that we can perform a dio write.
+ $DEBUGFS_PROG -w -R "sif /a size 0xFFFFFFFFFFFFFE00" $SCRATCH_DEV >> $seqres.full 2>&1
+ 
+-echo "Remount, try to append"
+-_scratch_mount
+-
+ # check whether debugfs succeeds to set i_size to -512 or not
+-i_size=$(stat -c "%s" $testdir/a)
+-if [ $i_size -ne -512 ]; then
++$DEBUGFS_PROG -R "stat /a" $SCRATCH_DEV 2>&1 | grep -q "Size: 18446744073709551104" || \
+ 	_notrun "Could not set i_size to -512 successfully, skip test."
+-fi
+ 
++echo "Remount, try to append"
++_scratch_mount
+ dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=direct,append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
+ sync
+ 
+-- 
+1.8.3.1
 
-IMO, what we're going to test is to make sure kernel doesn't hang or
-crash when dealing with negative i_size, any error is acceptable as long
-as kernel could detect this corruption without crashing or hanging.
 
-Thanks,
-Eryu
+
