@@ -1,57 +1,195 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:31247 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1752760AbdBVE5E (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 21 Feb 2017 23:57:04 -0500
-Message-ID: <58AD1A16.10109@cn.fujitsu.com>
-Date: Wed, 22 Feb 2017 12:56:54 +0800
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Received: from mx1.redhat.com ([209.132.183.28]:52150 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750890AbdBVF6H (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 22 Feb 2017 00:58:07 -0500
+Date: Wed, 22 Feb 2017 13:58:05 +0800
+From: Xiong Zhou <xzhou@redhat.com>
+Subject: Re: [xfstests v3 5/8] overlay: filter out xattr starts with
+ "trusted.overlay."
+Message-ID: <20170222055805.rhkf7lycsun4ttns@XZHOUW.usersys.redhat.com>
+References: <1487580524-21503-1-git-send-email-xzhou@redhat.com>
+ <1487580524-21503-6-git-send-email-xzhou@redhat.com>
+ <20170221062322.GR24562@eguan.usersys.redhat.com>
 MIME-Version: 1.0
-Subject: Re: [PATCH] shared/005,7: fix making sure debugfs sets negative i_size
- && add strict check for dd
-References: <20170220023646.GG24562@eguan.usersys.redhat.com> <1487566979-6147-1-git-send-email-yangx.jy@cn.fujitsu.com> <20170222042041.GT24562@eguan.usersys.redhat.com>
-In-Reply-To: <20170222042041.GT24562@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170221062322.GR24562@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+Cc: Xiong Zhou <xzhou@redhat.com>, fstests@vger.kernel.org, linux-unionfs@vger.kernel.org, mszeredi@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On 2017/02/22 12:20, Eryu Guan wrote:
-> On Mon, Feb 20, 2017 at 01:02:59PM +0800, Xiao Yang wrote:
->> 1) If the kernel bug has been fixed, stat command fails to get i_size
->>     and reports "Structure needs cleaning".  So we use debugfs -R "stat"
->>     instead of stat command to make sure debugfs sets negative i_size.
->>     These cases have been broken by commit 0e13e40b247a1 ("shared/005,7:
->>     make sure debugfs sets negative i_size").
->>
->> 2) shared/007 passes unexpectedly on RHEL6.8GA and RHEL6.9Beta
->>     because of invalid argument. When debugfs fails to set i_size
->>     to -512, dd with direct flag fails and reports "invalid argument".
->>     So we can add strict check.
-> But you've already added the check for i_size and _notrun if debugfs
-> failed to set i_size to -512, there's no chance for dd to hit EINVAL.
-> And I think any error dd is hitting is acceptable, as long as test runs
-> (which means i_size was set to -1/-512 successfully). So I don't think
-> we need the check on dd's output. Did I miss anything?
-Hi Eryu
+On Tue, Feb 21, 2017 at 02:23:22PM +0800, Eryu Guan wrote:
+> On Mon, Feb 20, 2017 at 04:48:41PM +0800, Xiong Zhou wrote:
+> > Not "trusted.overlay".
+> >   "trusted.overlayxxx" is allowed.
+> >   "trusted.overlay.xxx" is not allowed.
+> 
+> Need better description in commit log :)
+> 
+> > 
+> > CC: Miklos Szeredi <mszeredi@redhat.com>
+> > Signed-off-by: Xiong Zhou <xzhou@redhat.com>
+> > ---
+> >  tests/overlay/026     | 99 +++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/overlay/026.out |  5 +++
+> >  tests/overlay/group   |  1 +
+> >  3 files changed, 105 insertions(+)
+> >  create mode 100755 tests/overlay/026
+> >  create mode 100644 tests/overlay/026.out
+> > 
+> > diff --git a/tests/overlay/026 b/tests/overlay/026
+> > new file mode 100755
+> > index 0000000..86f73ea
+> > --- /dev/null
+> > +++ b/tests/overlay/026
+> > @@ -0,0 +1,99 @@
+> > +#! /bin/bash
+> > +# FS QA Test 026
+> > +#
+> > +# Overlayfs should only filter out xattr starting with
+> > +# "trusted.overlay.", not "trusted.overlay".
+> > +# Setting xattrs like "trusted.overlay.xxx" is not allowed.
+> > +# Setting xattrs like "trusted.overlayxxx" is allowed.
+> > +#
+> > +# Kernel commit below fixed it.
+> > +# fe2b75952347 ovl: Fix OVL_XATTR_PREFIX
+> > +#
+> > +# This reproducer was originally written by
+> > +#     Miklos Szeredi <mszeredi@redhat.com>
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +#
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/attr
+> > +. ./common/filter
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs overlay
+> > +_supported_os Linux
+> > +_require_scratch
+> > +_require_attrs
+> > +
+> > +# Remove all files from previous tests
+> > +_scratch_mkfs
+> > +
+> > +# Mounting overlay
+> > +_scratch_mount
+> > +touch $SCRATCH_MNT/testf0
+> > +touch $SCRATCH_MNT/testf1
+> > +
+> > +# {s,g}etfattr of "trusted.overlayxxx" should work.
+> > +$SETFATTR_PROG -n "trusted.overlayfsrz" -v "n" \
+> > +  $SCRATCH_MNT/testf0
+> > +
+> > +$GETFATTR_PROG -n "trusted.overlayfsrz" $SCRATCH_MNT/testf0 \
+> > +  2>&1 | sed -e "s,${SCRATCH_MNT#/},SCRATCH_MNT,g" \
+> 
+> getfattr has "--absolute-names" option too. And does _filter_scratch
+> work in this case?
 
-Thanks for your comments.
+That works! Thanks!
 
-xfs/134 passed unexpectedly on RHEL7.3GA because dd hits ENOSPC.  So I think
-all of these cases should fail instead of pass when hitting  unexpected 
-error.
-Do you think whether we only check on dd's output of xfs/133,4 or 
-remove  all? :-)
+> 
+> > +	     -e "/Removing leading/ d" \
+> > +	     -e "/^$/ d"
+> > +
+> > +# {s,g}etfattr of "trusted.overlay.xxx" should fail.
+> > +# The errno returned varies between kernel versions,
+> > +#            v4.3       v4.7       v4.8      v4.10
+> > +# setfattr  not perm  not perm   not perm   not supp
+> > +# getfattr  no attr   no attr    not perm   not supp
+> > +#
+> > +# Checking the latest(not supported).
+> > +#
+> 
+> How about filtering all kinds error messages to current "Operation not
+> supported"?
 
-Best Regards,
-XIao Yang
->
->
+I think it's wrong to return "No such attribute" here, "Operation not
+permitted" makes some sense.
+
+How about only do a  's/permitted/supported/g' here ?
+
+Thanks,
+Xiong
+
+> 
 > Thanks,
 > Eryu
->
->
-
-
-
+> 
+> > +$SETFATTR_PROG -n "trusted.overlay.fsz" -v "n" \
+> > +  $SCRATCH_MNT/testf1 2>&1 | \
+> > +  sed -e "s,${SCRATCH_MNT},SCRATCH_MNT,g" \
+> > +
+> > +$GETFATTR_PROG -n "trusted.overlay.fsz" \
+> > +  $SCRATCH_MNT/testf1 2>&1 | \
+> > +  sed -e "s,${SCRATCH_MNT},SCRATCH_MNT,g" \
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/overlay/026.out b/tests/overlay/026.out
+> > new file mode 100644
+> > index 0000000..94da51b
+> > --- /dev/null
+> > +++ b/tests/overlay/026.out
+> > @@ -0,0 +1,5 @@
+> > +QA output created by 026
+> > +# file: SCRATCH_MNT/testf0
+> > +trusted.overlayfsrz="n"
+> > +setfattr: SCRATCH_MNT/testf1: Operation not supported
+> > +SCRATCH_MNT/testf1: trusted.overlay.fsz: Operation not supported
+> > diff --git a/tests/overlay/group b/tests/overlay/group
+> > index 82fe69e..92afa8d 100644
+> > --- a/tests/overlay/group
+> > +++ b/tests/overlay/group
+> > @@ -28,3 +28,4 @@
+> >  023 auto quick attr
+> >  024 auto quick
+> >  025 auto quick attr
+> > +026 auto attr quick
+> > -- 
+> > 1.8.3.1
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
