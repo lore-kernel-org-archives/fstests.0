@@ -1,37 +1,40 @@
-Received: from mail-lf0-f66.google.com ([209.85.215.66]:35305 "EHLO
-        mail-lf0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752308AbdBUMoM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 21 Feb 2017 07:44:12 -0500
-Received: by mail-lf0-f66.google.com with SMTP id z127so9031815lfa.2
-        for <fstests@vger.kernel.org>; Tue, 21 Feb 2017 04:44:11 -0800 (PST)
-From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: [PATCH 0/2] Add report generators support
-Date: Tue, 21 Feb 2017 16:44:03 +0400
-Message-Id: <1487681045-22884-2-git-send-email-dmonakhov@openvz.org>
-In-Reply-To: <1487681045-22884-1-git-send-email-dmonakhov@openvz.org>
-References: <1487681045-22884-1-git-send-email-dmonakhov@openvz.org>
+Received: from mx1.redhat.com ([209.132.183.28]:56890 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752878AbdBVEUn (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 21 Feb 2017 23:20:43 -0500
+Date: Wed, 22 Feb 2017 12:20:41 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] shared/005,7: fix making sure debugfs sets negative
+ i_size && add strict check for dd
+Message-ID: <20170222042041.GT24562@eguan.usersys.redhat.com>
+References: <20170220023646.GG24562@eguan.usersys.redhat.com>
+ <1487566979-6147-1-git-send-email-yangx.jy@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1487566979-6147-1-git-send-email-yangx.jy@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Dmitry Monakhov <dmonakhov@openvz.org>
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-xfstests has no stable logging API which is suitable for machine parsing.
-This makes it difficult to integrate with external atomation tools (Jenkins.io, k8s jobs)
-In fact thare are alot of well known parsable report formats TAP [1], Junit [2], yaml.
-Let's add basic infrastructure so people may add report formats they do care about.
+On Mon, Feb 20, 2017 at 01:02:59PM +0800, Xiao Yang wrote:
+> 1) If the kernel bug has been fixed, stat command fails to get i_size
+>    and reports "Structure needs cleaning".  So we use debugfs -R "stat"
+>    instead of stat command to make sure debugfs sets negative i_size.
+>    These cases have been broken by commit 0e13e40b247a1 ("shared/005,7:
+>    make sure debugfs sets negative i_size").
+> 
+> 2) shared/007 passes unexpectedly on RHEL6.8GA and RHEL6.9Beta
+>    because of invalid argument. When debugfs fails to set i_size
+>    to -512, dd with direct flag fails and reports "invalid argument".
+>    So we can add strict check.
 
-Usecase example with Jenkins:
-- Split huge xfstest job to smaller peaces.
-- Submit it as separate jobs and run it in parallel on different VMs
-- Fetch and merge results to single job report.
-This approach allow me to speedup xfstests x50 times,
-now full run of '-g auto' takes only 3minutes
+But you've already added the check for i_size and _notrun if debugfs
+failed to set i_size to -512, there's no chance for dd to hit EINVAL.
+And I think any error dd is hitting is acceptable, as long as test runs
+(which means i_size was set to -1/-512 successfully). So I don't think
+we need the check on dd's output. Did I miss anything? 
 
-TOC
-- check: prepare test report generator infrastructure
-- report:Add xunit format report generator
-
-Footnotes: 
-[1]  https://testanything.org
-[2] http://help.catchsoftware.com/display/ET/JUnit+Format
-
+Thanks,
+Eryu
