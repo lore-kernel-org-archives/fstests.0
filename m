@@ -1,91 +1,44 @@
-Received: from mx1.redhat.com ([209.132.183.28]:39510 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932155AbdBVKtq (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 22 Feb 2017 05:49:46 -0500
-Date: Wed, 22 Feb 2017 18:49:44 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2] xfs/133,4: make sure xfs_db sets negative i_size
-Message-ID: <20170222104944.GX24562@eguan.usersys.redhat.com>
-References: <1487583465-17572-1-git-send-email-yangx.jy@cn.fujitsu.com>
- <1487755900-6083-1-git-send-email-yangx.jy@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1487755900-6083-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Received: from mail-pg0-f66.google.com ([74.125.83.66]:33125 "EHLO
+        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933234AbdBVTbe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 22 Feb 2017 14:31:34 -0500
+Received: by mail-pg0-f66.google.com with SMTP id 5so1635383pgj.0
+        for <fstests@vger.kernel.org>; Wed, 22 Feb 2017 11:31:33 -0800 (PST)
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: [PATCH] xfstests-bld: fix setting mkfs options for ext4
+Date: Wed, 22 Feb 2017 11:30:13 -0800
+Message-Id: <20170222193013.116510-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Feb 22, 2017 at 05:31:40PM +0800, Xiao Yang wrote:
-> 1) xfs/133 and xfs/134 work abnornamlly on RHEL6.8GA and RHEL6.9Beta
->    because xfs_db fails to set i_size to -1 or -512 and reports "usage:
->    write fieldname value".  The special argument "--" is only used to
->    end option-scanning in getopt().  So we should add "--" for write
->    command in xfs_db when -c option is supported by write command.
->    getopt() has been produced by 'commit c9f5e3db22098 ("xfs_db: Allow
->    writes of corrupted data")'.
-> 
-> 2) When xfs_db fails to set a negative i_size due to unknown error, we
->    can skip these cases which don't trigger the kernel bug.
-> 
-> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+From: Eric Biggers <ebiggers@google.com>
 
-Sorry for the late review on this patch. I just got some time to look at
-xfs/133,4 a bit closely.
+Commit ebbfbefce909 ("test-appliance: add support for xfstests to use
+EXT_MKFS_OPTIONS") changed the test appliances to set both MKFS_OPTIONS
+and EXT_MKFS_OPTIONS when starting 'check'.  However, MKFS_OPTIONS was
+not exported into the environment, so it was not actually being
+recognized.  Fix this by exporting it.
 
-It turns out that the EINVAL error you saw is because of
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ kvm-xfstests/test-appliance/files/root/fs/ext4/config | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-echo m > $testdir/a
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/ext4/config b/kvm-xfstests/test-appliance/files/root/fs/ext4/config
+index 0dfedf6..cbfbeec 100644
+--- a/kvm-xfstests/test-appliance/files/root/fs/ext4/config
++++ b/kvm-xfstests/test-appliance/files/root/fs/ext4/config
+@@ -28,7 +28,7 @@ function format_filesystem()
+ 
+ function setup_mount_opts()
+ {
+-    MKFS_OPTIONS="$EXT_MKFS_OPTIONS"
++    export MKFS_OPTIONS="$EXT_MKFS_OPTIONS"
+     if test -n "$EXT_MOUNT_OPTIONS" ; then
+ 	EXT_MOUNT_OPTIONS="-o block_validity,$EXT_MOUNT_OPTIONS"
+     else
+-- 
+2.11.0.483.g087da7b7c-goog
 
-and direct append failed because the write offset is not 512-aligned.
-
-Just "touch $testdir/a" should work (you can see test failure on RHEL6.8
-with current master).
-
-> ---
->  tests/xfs/133 | 13 ++++++++++++-
->  tests/xfs/134 | 17 ++++++++++++++---
->  2 files changed, 26 insertions(+), 4 deletions(-)
-> 
-> diff --git a/tests/xfs/133 b/tests/xfs/133
-> index d756d2e..91b3b9b 100755
-> --- a/tests/xfs/133
-> +++ b/tests/xfs/133
-> @@ -63,7 +63,18 @@ inum=$(stat -c "%i" $testdir/a)
->  
->  echo "Corrupt filesystem"
->  _scratch_unmount
-> -_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -- -1' >> $seqres.full
-> +
-> +# 1) we should add "--" for write command in xfs_db when -c option is
-> +#    supported by write command.
-> +# 2) check whether xfs_db succeeds to set i_size to -1 or not
-> +_scratch_xfs_db -x -c "help" | grep -q "write \[-c\]"
-> +if [ $? -eq 0 ]; then
-> +	_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -- -1' >> $seqres.full 2>&1 || \
-> +	_notrun "Could not set i_size to -1 successfully, skip test."
-> +else
-> +	_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -1' >> $seqres.full 2>&1 || \
-> +	_notrun "Could not set i_size to -1 successfully, skip test."
-> +fi
-
-This check looks tedious, and xfs_db doesn't return non-zero on error,
-so this will never _notrun.
-
-I'd suggest running the two xfs_db commands unconditionally (with clear
-comments), there has to be one suitable call for the xfs_db version in
-use, and check core.size is -1/-512 by printing it with xfs_db. e.g.
-
-# <comments about these two calls>
-_scratch_xfs_db -x -c "inode ${inum}" -c "write core.size -1" >>$seqres.full 2>&1
-_scratch_xfs_db -x -c "inode ${inum}" -c "write core.size -- -1" >>$seqres.full 2>&1
-
-# check core.size and _notrun if it's not set correctly
-isize=`_scratch_xfs_db -c "inode ${inum}" -c "print core.size" | $AWK_PROG '{print $3}'`
-if [ $isize -ne -1 ]; then
-	_notrun "..."
-fi
-
-Thanks,
-Eryu
