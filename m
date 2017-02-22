@@ -1,91 +1,53 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:37488 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1754543AbdBVJdg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 22 Feb 2017 04:33:36 -0500
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v2] xfs/133,4: make sure xfs_db sets negative i_size
-Date: Wed, 22 Feb 2017 17:31:40 +0800
-Message-ID: <1487755900-6083-1-git-send-email-yangx.jy@cn.fujitsu.com>
-In-Reply-To: <1487583465-17572-1-git-send-email-yangx.jy@cn.fujitsu.com>
-References: <1487583465-17572-1-git-send-email-yangx.jy@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from mail-lf0-f66.google.com ([209.85.215.66]:35013 "EHLO
+        mail-lf0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754457AbdBVJsS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 22 Feb 2017 04:48:18 -0500
+Received: by mail-lf0-f66.google.com with SMTP id z127so545319lfa.2
+        for <fstests@vger.kernel.org>; Wed, 22 Feb 2017 01:48:17 -0800 (PST)
+From: Dmitry Monakhov <dmonakhov@openvz.org>
+Subject: [PATCH] check: fix incorrect interrupt detection
+Date: Wed, 22 Feb 2017 13:48:13 +0400
+Message-Id: <1487756893-27717-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com
-Cc: fstests@vger.kernel.org, Xiao Yang <yangx.jy@cn.fujitsu.com>
+To: fstests@vger.kernel.org
+Cc: Dmitry Monakhov <dmonakhov@openvz.org>
 List-ID: <fstests@vger.kernel.org>
 
-1) xfs/133 and xfs/134 work abnornamlly on RHEL6.8GA and RHEL6.9Beta
-   because xfs_db fails to set i_size to -1 or -512 and reports "usage:
-   write fieldname value".  The special argument "--" is only used to
-   end option-scanning in getopt().  So we should add "--" for write
-   command in xfs_db when -c option is supported by write command.
-   getopt() has been produced by 'commit c9f5e3db22098 ("xfs_db: Allow
-   writes of corrupted data")'.
+Currently "Interrupted!" string always appeared in check.log because
+flag cleared at very end after summary was dumped already.
+It looks strange strange, but it was broken from very beginning 27fba05e (2001-01-15)
 
-2) When xfs_db fails to set a negative i_size due to unknown error, we
-   can skip these cases which don't trigger the kernel bug.
+- update interrupt flag at the end of a section loop, but before _wrapup
+- dump 'Interrupted' to stdout
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
 ---
- tests/xfs/133 | 13 ++++++++++++-
- tests/xfs/134 | 17 ++++++++++++++---
- 2 files changed, 26 insertions(+), 4 deletions(-)
+ check | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/tests/xfs/133 b/tests/xfs/133
-index d756d2e..91b3b9b 100755
---- a/tests/xfs/133
-+++ b/tests/xfs/133
-@@ -63,7 +63,18 @@ inum=$(stat -c "%i" $testdir/a)
+diff --git a/check b/check
+index 5a93c94..5d7f75c 100755
+--- a/check
++++ b/check
+@@ -405,7 +405,7 @@ _wrapup()
+ 			echo "Ran:$try" >>$check.log
+ 		fi
  
- echo "Corrupt filesystem"
- _scratch_unmount
--_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -- -1' >> $seqres.full
-+
-+# 1) we should add "--" for write command in xfs_db when -c option is
-+#    supported by write command.
-+# 2) check whether xfs_db succeeds to set i_size to -1 or not
-+_scratch_xfs_db -x -c "help" | grep -q "write \[-c\]"
-+if [ $? -eq 0 ]; then
-+	_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -- -1' >> $seqres.full 2>&1 || \
-+	_notrun "Could not set i_size to -1 successfully, skip test."
-+else
-+	_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -1' >> $seqres.full 2>&1 || \
-+	_notrun "Could not set i_size to -1 successfully, skip test."
-+fi
+-		$interrupt && echo "Interrupted!" >>$check.log
++		$interrupt && echo "Interrupted!" | tee -a $check.log
  
- echo "Remount, try to append"
- _scratch_mount
-diff --git a/tests/xfs/134 b/tests/xfs/134
-index 09466cd..788f8e9 100755
---- a/tests/xfs/134
-+++ b/tests/xfs/134
-@@ -63,9 +63,20 @@ inum=$(stat -c "%i" $testdir/a)
+ 		if [ ! -z "$notrun" ]; then
+ 			if [ $brief_test_summary == "false" ]; then
+@@ -755,7 +755,9 @@ for section in $HOST_OPTIONS_SECTIONS; do
  
- echo "Corrupt filesystem"
- _scratch_unmount
--# Set the file size to the highest multiple of 512 below
--# -1 so that we can perform a dio write.
--_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -- -512' >> $seqres.full
-+
-+# 1) Set the file size to the highest multiple of 512 below -1 so
-+#    that we can perform a dio write.
-+# 2) we should add "--" for write command in xfs_db when -c option is
-+#    supported by write command.
-+# 3) check whether xfs_db succeeds to set i_size to -512 or not
-+_scratch_xfs_db -x -c "help" | grep -q "write \[-c\]"
-+if [ $? -eq 0 ]; then
-+	_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -- -512' >> $seqres.full 2>&1 || \
-+	_notrun "Could not set i_size to -512 successfully, skip test."
-+else
-+	_scratch_xfs_db -x -c "inode ${inum}" -c 'write core.size -512' >> $seqres.full 2>&1 || \
-+	_notrun "Could not set i_size to -512 successfully, skip test."
-+fi
+ 	    seq="after_$seqnum"
+ 	done
++	interrupt=false
+ 	_wrapup
++	interrupt=true
+ 	echo
  
- echo "Remount, try to append"
- _scratch_mount
+ 	_test_unmount 2> /dev/null
 -- 
-1.8.3.1
-
-
+2.9.3
 
