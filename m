@@ -1,39 +1,76 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:26119 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750952AbdBWHxn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 23 Feb 2017 02:53:43 -0500
-Date: Wed, 22 Feb 2017 23:53:33 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH] xfs/348: don't run a fuzzer in the auto group
-Message-ID: <20170223075333.GB22332@birch.djwong.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Received: from mx1.redhat.com ([209.132.183.28]:54546 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751034AbdBWJna (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 23 Feb 2017 04:43:30 -0500
+From: Xiong Zhou <xzhou@redhat.com>
+Subject: [xfstests v4 0/8] bunch of overlay tests
+Date: Thu, 23 Feb 2017 17:42:38 +0800
+Message-Id: <1487842966-30986-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-unionfs@vger.kernel.org, mszeredi@redhat.com, Xiong Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-xfs/348 can cause the kernel to crash by blowing the i_rwsem assert in
-xfs_destroy_inode on the corrupted inode.  Since this is a fuzzer test
-anyway (it calls xfs_db to break the scratch fs), move it to the fuzzers
-group.
+v4:
+  use --absolute-names for get/set fattr/facl
+  add helper _require_and_mount_tmpfs
+  mount tmpfs in TEST_DIR
+  add entry for _require_command "$FLOCK_PROG" flock
+  tune xattr filter case errno handling and log
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/xfs/group |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+v3:
+  cc linux-unionfs
+  rm -rf $tmp in cleanup
+  checking exact errno in set/getfattr case
+  sleep less in flock case
 
-diff --git a/tests/xfs/group b/tests/xfs/group
-index e2dfae2..e597326 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -337,7 +337,7 @@
- 345 auto quick clone
- 346 auto quick clone
- 347 auto quick clone
--348 auto quick repair
-+348 fuzzers repair
- 349 dangerous_fuzzers scrub
- 350 dangerous_fuzzers dangerous_scrub dangerous_repair
- 351 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+Xiong Zhou (8):
+  overlay: disallow overlayfs as upperdir
+  overlay: work dir in overlay inherits no ACLs
+  overlay: test workdir cleanup in mounting
+  overlay: permission check with cached acls in tmpfs
+  overlay: filter out xattr starts with "trusted.overlay."
+  overlay: can not change underlying immutable file
+  overlay: test flock after copied up
+  overlay: accessing stacked overlayfs files
+
+ common/config         |   1 +
+ common/rc             |  10 +++++
+ tests/overlay/022     |  82 +++++++++++++++++++++++++++++++++++++
+ tests/overlay/022.out |   2 +
+ tests/overlay/023     |  79 ++++++++++++++++++++++++++++++++++++
+ tests/overlay/023.out |   8 ++++
+ tests/overlay/024     |  80 ++++++++++++++++++++++++++++++++++++
+ tests/overlay/024.out |   2 +
+ tests/overlay/025     |  81 +++++++++++++++++++++++++++++++++++++
+ tests/overlay/025.out |   2 +
+ tests/overlay/026     | 110 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/026.out |   6 +++
+ tests/overlay/027     |  87 +++++++++++++++++++++++++++++++++++++++
+ tests/overlay/027.out |   2 +
+ tests/overlay/028     |  81 +++++++++++++++++++++++++++++++++++++
+ tests/overlay/028.out |   2 +
+ tests/overlay/029     | 100 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/029.out |   5 +++
+ tests/overlay/group   |   8 ++++
+ 19 files changed, 748 insertions(+)
+ create mode 100755 tests/overlay/022
+ create mode 100644 tests/overlay/022.out
+ create mode 100755 tests/overlay/023
+ create mode 100644 tests/overlay/023.out
+ create mode 100755 tests/overlay/024
+ create mode 100644 tests/overlay/024.out
+ create mode 100755 tests/overlay/025
+ create mode 100644 tests/overlay/025.out
+ create mode 100755 tests/overlay/026
+ create mode 100644 tests/overlay/026.out
+ create mode 100755 tests/overlay/027
+ create mode 100644 tests/overlay/027.out
+ create mode 100755 tests/overlay/028
+ create mode 100644 tests/overlay/028.out
+ create mode 100755 tests/overlay/029
+ create mode 100644 tests/overlay/029.out
+
+-- 
+1.8.3.1
+
