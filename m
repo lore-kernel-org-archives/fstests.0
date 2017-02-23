@@ -1,11 +1,11 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46546 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:46506 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751198AbdBWJna (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1751196AbdBWJna (ORCPT <rfc822;fstests@vger.kernel.org>);
         Thu, 23 Feb 2017 04:43:30 -0500
 From: Xiong Zhou <xzhou@redhat.com>
-Subject: [xfstests v4 7/8] overlay: test flock after copied up
-Date: Thu, 23 Feb 2017 17:42:45 +0800
-Message-Id: <1487842966-30986-8-git-send-email-xzhou@redhat.com>
+Subject: [xfstests v4 6/8] overlay: can not change underlying immutable file
+Date: Thu, 23 Feb 2017 17:42:44 +0800
+Message-Id: <1487842966-30986-7-git-send-email-xzhou@redhat.com>
 In-Reply-To: <1487842966-30986-1-git-send-email-xzhou@redhat.com>
 References: <1487842966-30986-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,46 +13,32 @@ To: fstests@vger.kernel.org
 Cc: linux-unionfs@vger.kernel.org, mszeredi@redhat.com, Xiong Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Locks of file in lower dir should working after it's
-been copied up.
+Even timestamp change by touch.
 
 CC: Miklos Szeredi <mszeredi@redhat.com>
 Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 ---
- common/config         |  1 +
- tests/overlay/028     | 81 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/028.out |  2 ++
+ tests/overlay/027     | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/027.out |  2 ++
  tests/overlay/group   |  1 +
- 4 files changed, 85 insertions(+)
- create mode 100755 tests/overlay/028
- create mode 100644 tests/overlay/028.out
+ 3 files changed, 90 insertions(+)
+ create mode 100755 tests/overlay/027
+ create mode 100644 tests/overlay/027.out
 
-diff --git a/common/config b/common/config
-index fa89f42..3ef401b 100644
---- a/common/config
-+++ b/common/config
-@@ -204,6 +204,7 @@ export GETRICHACL_PROG="`set_prog_path getrichacl`"
- export SETRICHACL_PROG="`set_prog_path setrichacl`"
- export KEYCTL_PROG="`set_prog_path keyctl`"
- export XZ_PROG="`set_prog_path xz`"
-+export FLOCK_PROG="`set_prog_path flock`"
- 
- # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
- # newer systems have udevadm command but older systems like RHEL5 don't.
-diff --git a/tests/overlay/028 b/tests/overlay/028
+diff --git a/tests/overlay/027 b/tests/overlay/027
 new file mode 100755
-index 0000000..6045e09
+index 0000000..4bb0329
 --- /dev/null
-+++ b/tests/overlay/028
-@@ -0,0 +1,81 @@
++++ b/tests/overlay/027
+@@ -0,0 +1,87 @@
 +#! /bin/bash
-+# FS QA Test 028
++# FS QA Test 027
 +#
-+# When file in lower dir is locked and it's been copied up,
-+# make sure the lock is working in overlayfs.
++# If underlying upper file is immutable, it should stays
++# untouchable in the overlayfs mount.
 +#
 +# Kernel commit below fixed it.
-+# c568d68341be locks: fix file locking on overlayfs
++# f2b20f6ee842 vfs: move permission checking into ...
 +#
 +# This reproducer was originally written by
 +#     Miklos Szeredi <mszeredi@redhat.com>
@@ -87,6 +73,7 @@ index 0000000..6045e09
 +_cleanup()
 +{
 +	cd /
++	$CHATTR_PROG -i $upperdir/foo
 +	rm -f $tmp.*
 +}
 +
@@ -103,46 +90,51 @@ index 0000000..6045e09
 +_supported_fs overlay
 +_supported_os Linux
 +_require_scratch
-+_require_command "$FLOCK_PROG" flock
++_require_chattr
 +
 +# Remove all files from previous tests
 +_scratch_mkfs
 +
-+lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
-+mkdir -p $lowerdir
-+touch $lowerdir/foo
++# Preparing immutable file
++upperdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
++mkdir -p $upperdir
++touch $upperdir/foo
++$CHATTR_PROG +i $upperdir/foo
 +
 +# Mounting overlay
 +_scratch_mount
 +
-+# Testing copyup and flock
-+flock $SCRATCH_MNT/foo sleep 3 &
-+# flock in subshell should fail with no output
-+(sleep 1; echo bar > $SCRATCH_MNT/foo; \
-+  flock -n $SCRATCH_MNT/foo echo LOCKED)
++# Touching immutable file in overlay, should fail.
++# Not filtering output here because of errno returned
++# varies among kernel versions:
++#   touch: setting times of 'foo': Operation not permitted
++#   touch: cannot touch 'foo': Permission denied
++if touch $SCRATCH_MNT/foo > /dev/null 2>&1 ; then
++	echo "Test Fail, you can't change an immutable file"
++else
++	echo "Silence is golden"
++fi
 +
-+wait
-+echo "Silence is golden"
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/overlay/028.out b/tests/overlay/028.out
+diff --git a/tests/overlay/027.out b/tests/overlay/027.out
 new file mode 100644
-index 0000000..2615f73
+index 0000000..ef78cda
 --- /dev/null
-+++ b/tests/overlay/028.out
++++ b/tests/overlay/027.out
 @@ -0,0 +1,2 @@
-+QA output created by 028
++QA output created by 027
 +Silence is golden
 diff --git a/tests/overlay/group b/tests/overlay/group
-index 4db6751..cf058fc 100644
+index 92afa8d..4db6751 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -30,3 +30,4 @@
+@@ -29,3 +29,4 @@
+ 024 auto quick
  025 auto quick attr
  026 auto attr quick
- 027 auto quick perms
-+028 auto copyup quick
++027 auto quick perms
 -- 
 1.8.3.1
 
