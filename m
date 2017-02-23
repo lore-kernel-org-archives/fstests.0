@@ -1,11 +1,11 @@
-Received: from mx1.redhat.com ([209.132.183.28]:39772 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:41118 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751195AbdBWJna (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1751191AbdBWJna (ORCPT <rfc822;fstests@vger.kernel.org>);
         Thu, 23 Feb 2017 04:43:30 -0500
 From: Xiong Zhou <xzhou@redhat.com>
-Subject: [xfstests v4 5/8] overlay: filter out xattr starts with "trusted.overlay."
-Date: Thu, 23 Feb 2017 17:42:43 +0800
-Message-Id: <1487842966-30986-6-git-send-email-xzhou@redhat.com>
+Subject: [xfstests v4 3/8] overlay: test workdir cleanup in mounting
+Date: Thu, 23 Feb 2017 17:42:41 +0800
+Message-Id: <1487842966-30986-4-git-send-email-xzhou@redhat.com>
 In-Reply-To: <1487842966-30986-1-git-send-email-xzhou@redhat.com>
 References: <1487842966-30986-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,59 +13,34 @@ To: fstests@vger.kernel.org
 Cc: linux-unionfs@vger.kernel.org, mszeredi@redhat.com, Xiong Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Overlayfs should only filter out xattr starting with
-"trusted.overlay.", not "trusted.overlay".
-
-Setting xattrs like "trusted.overlay.xxx" is not allowed.
-Setting xattrs like "trusted.overlayxxx" is allowed.
-
-v4.8-rc1 introduced a regression that we can't set xattrs
-like "trusted.overlayxxx".  Kernel commit below fixed it
-in v4.8:
-  fe2b75952347 ovl: Fix OVL_XATTR_PREFIX
-
-This case tests both get/set of these 2 kinds of xattrs.
-
-Pattern "trusted.overlay.xxx" should fail, however the
-errno returned by set/get varies among kernel versions.
-
-Pattern "trusted.overlayxxx" shold always work.
+"work" directory in workdir should be cleaned up
+and recreated while overlayfs mounting. Or overlayfs
+will be mounted read-only.
 
 CC: Miklos Szeredi <mszeredi@redhat.com>
 Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 ---
- tests/overlay/026     | 110 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/026.out |   6 +++
- tests/overlay/group   |   1 +
- 3 files changed, 117 insertions(+)
- create mode 100755 tests/overlay/026
- create mode 100644 tests/overlay/026.out
+ tests/overlay/024     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/024.out |  2 ++
+ tests/overlay/group   |  1 +
+ 3 files changed, 83 insertions(+)
+ create mode 100755 tests/overlay/024
+ create mode 100644 tests/overlay/024.out
 
-diff --git a/tests/overlay/026 b/tests/overlay/026
+diff --git a/tests/overlay/024 b/tests/overlay/024
 new file mode 100755
-index 0000000..55adbad
+index 0000000..2dbef12
 --- /dev/null
-+++ b/tests/overlay/026
-@@ -0,0 +1,110 @@
++++ b/tests/overlay/024
+@@ -0,0 +1,80 @@
 +#! /bin/bash
-+# FS QA Test 026
++# FS QA Test 024
 +#
-+# Overlayfs should only filter out xattr starting with
-+# "trusted.overlay.", not "trusted.overlay".
-+#
-+# Setting xattrs like "trusted.overlay.xxx" is not allowed.
-+# Setting xattrs like "trusted.overlayxxx" is allowed.
-+#
-+# v4.8-rc1 introduced a regression that we can't set xattrs
-+# like "trusted.overlayxxx".  Kernel commit below fixed it
-+# in v4.8:
-+#   fe2b75952347 ovl: Fix OVL_XATTR_PREFIX
-+#
-+# This case tests both get/set of these 2 kinds of xattrs.
-+#
-+# Pattern "trusted.overlay.xxx" should fail, however the
-+# errno returned by set/get varies among kernel versions.
-+# Pattern "trusted.overlayxxx" shold always work.
++# "work" directory under workdir should be cleaned up
++# well on overlayfs startup, or overlayfs will be mounted
++# read-only.
++# Kernel commit below fixes it.
++# eea2fb4851e9 ovl: proper cleanup of workdir
 +#
 +# This reproducer was originally written by
 +#     Miklos Szeredi <mszeredi@redhat.com>
@@ -105,7 +80,6 @@ index 0000000..55adbad
 +
 +# get standard environment, filters and checks
 +. ./common/rc
-+. ./common/attr
 +. ./common/filter
 +
 +# remove previous $seqres.full before test
@@ -117,67 +91,45 @@ index 0000000..55adbad
 +_supported_fs overlay
 +_supported_os Linux
 +_require_scratch
-+_require_attrs
 +
 +# Remove all files from previous tests
 +_scratch_mkfs
 +
-+# Mounting overlay
++# making workdir
++wkdir=$SCRATCH_DEV/$OVERLAY_WORK_DIR
++mkdir -p $wkdir/work/foo
++
 +_scratch_mount
-+touch $SCRATCH_MNT/testf0
-+touch $SCRATCH_MNT/testf1
 +
-+# {s,g}etfattr of "trusted.overlayxxx" should work.
-+#            v4.3/6/7    v4.8-rc1   v4.8  v4.10
-+# setfattr    ok         not perm    ok    ok
-+# getfattr    ok         no attr     ok    ok
-+#
-+$SETFATTR_PROG -n "trusted.overlayfsrz" -v "n" \
-+  $SCRATCH_MNT/testf0 2>&1 | _filter_scratch
++# try writing to mountpoint
++touch $SCRATCH_MNT/bar
 +
-+$GETFATTR_PROG --absolute-names -n "trusted.overlayfsrz" \
-+  $SCRATCH_MNT/testf0 2>&1 | _filter_scratch
-+
-+# {s,g}etfattr of "trusted.overlay.xxx" should fail.
-+# The errno returned varies among kernel versions,
-+#            v4.3/7   v4.8-rc1    v4.8       v4.10
-+# setfattr  not perm  not perm   not perm   not supp
-+# getfattr  no attr   no attr    not perm   not supp
-+#
-+# Consider "Operation not {supported,permitted}" pass.
-+#
-+$SETFATTR_PROG -n "trusted.overlay.fsz" -v "n" \
-+  $SCRATCH_MNT/testf1 2>&1 | _filter_scratch | \
-+  sed -e 's/permitted/supported/g'
-+
-+$GETFATTR_PROG --absolute-names -n "trusted.overlay.fsz" \
-+  $SCRATCH_MNT/testf1 2>&1 | _filter_scratch | \
-+  sed -e 's/permitted/supported/g'
-+
++# checking work dir is clean
++if [ -e $wkdir/work/foo ] ; then
++	echo "work dir is not clean"
++else
++	echo "Silence is golden"
++fi
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/overlay/026.out b/tests/overlay/026.out
+diff --git a/tests/overlay/024.out b/tests/overlay/024.out
 new file mode 100644
-index 0000000..c4572d6
+index 0000000..fd6fbb1
 --- /dev/null
-+++ b/tests/overlay/026.out
-@@ -0,0 +1,6 @@
-+QA output created by 026
-+# file: SCRATCH_MNT/testf0
-+trusted.overlayfsrz="n"
-+
-+setfattr: SCRATCH_MNT/testf1: Operation not supported
-+SCRATCH_MNT/testf1: trusted.overlay.fsz: Operation not supported
++++ b/tests/overlay/024.out
+@@ -0,0 +1,2 @@
++QA output created by 024
++Silence is golden
 diff --git a/tests/overlay/group b/tests/overlay/group
-index 82fe69e..92afa8d 100644
+index 09da1be..0563a04 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -28,3 +28,4 @@
+@@ -26,3 +26,4 @@
+ 021 auto quick copyup
+ 022 auto quick
  023 auto quick attr
- 024 auto quick
- 025 auto quick attr
-+026 auto attr quick
++024 auto quick
 -- 
 1.8.3.1
 
