@@ -1,62 +1,39 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:43705 "EHLO
+Received: from userp1040.oracle.com ([156.151.31.81]:26119 "EHLO
         userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750951AbdBWHBh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 23 Feb 2017 02:01:37 -0500
-Date: Wed, 22 Feb 2017 23:01:30 -0800
+        with ESMTP id S1750952AbdBWHxn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 23 Feb 2017 02:53:43 -0500
+Date: Wed, 22 Feb 2017 23:53:33 -0800
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] generic/095: fix duplicate variable name
-Message-ID: <20170223070130.GA22332@birch.djwong.org>
-References: <1487819301-7401-1-git-send-email-zlang@redhat.com>
+Subject: [PATCH] xfs/348: don't run a fuzzer in the auto group
+Message-ID: <20170223075333.GB22332@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1487819301-7401-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Feb 23, 2017 at 11:08:21AM +0800, Zorro Lang wrote:
-> I think this definitely isn't what we want:
->   local warn4="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_aio_read.*"
->   local warn4="WARNING:.*fs/iomap\.c:.*iomap_dio_rw.*"
-> 
-> The second warn4 will overlay the first one. So change the second
-> to warn5.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
+xfs/348 can cause the kernel to crash by blowing the i_rwsem assert in
+xfs_destroy_inode on the corrupted inode.  Since this is a fuzzer test
+anyway (it calls xfs_db to break the scratch fs), move it to the fuzzers
+group.
 
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ tests/xfs/group |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
---D
-
-> ---
->  tests/generic/095 | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/tests/generic/095 b/tests/generic/095
-> index 991baef..d837564 100755
-> --- a/tests/generic/095
-> +++ b/tests/generic/095
-> @@ -128,12 +128,12 @@ filter_xfs_dmesg()
->  	local warn2="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_dio_aio_read.*"
->  	local warn3="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_read_iter.*"
->  	local warn4="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_aio_read.*"
-> -	local warn4="WARNING:.*fs/iomap\.c:.*iomap_dio_rw.*"
-> +	local warn5="WARNING:.*fs/iomap\.c:.*iomap_dio_rw.*"
->  	sed -e "s#$warn1#Intentional warnings in xfs_file_dio_aio_write#" \
->  	    -e "s#$warn2#Intentional warnings in xfs_file_dio_aio_read#" \
->  	    -e "s#$warn3#Intentional warnings in xfs_file_read_iter#" \
->  	    -e "s#$warn4#Intentional warnings in xfs_file_aio_read#" \
-> -	    -e "s#$warn4#Intentional warnings in iomap_dio_rw#"
-> +	    -e "s#$warn5#Intentional warnings in iomap_dio_rw#"
->  }
->  
->  # umount before checking dmesg in case umount triggers any WARNING or Oops
-> -- 
-> 2.7.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/tests/xfs/group b/tests/xfs/group
+index e2dfae2..e597326 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -337,7 +337,7 @@
+ 345 auto quick clone
+ 346 auto quick clone
+ 347 auto quick clone
+-348 auto quick repair
++348 fuzzers repair
+ 349 dangerous_fuzzers scrub
+ 350 dangerous_fuzzers dangerous_scrub dangerous_repair
+ 351 dangerous_fuzzers dangerous_scrub dangerous_online_repair
