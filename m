@@ -1,47 +1,54 @@
-Received: from imap.thunk.org ([74.207.234.97]:34068 "EHLO imap.thunk.org"
+Received: from mx1.redhat.com ([209.132.183.28]:35482 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754964AbdBVULl (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 22 Feb 2017 15:11:41 -0500
-Date: Wed, 22 Feb 2017 15:11:26 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH] xfstests-bld: fix setting mkfs options for ext4
-Message-ID: <20170222201126.gx3pvz7jhby45gzn@thunk.org>
-References: <20170222193013.116510-1-ebiggers3@gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170222193013.116510-1-ebiggers3@gmail.com>
+        id S1751191AbdBWDRJ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 22 Feb 2017 22:17:09 -0500
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 62D1CC049D5D
+        for <fstests@vger.kernel.org>; Thu, 23 Feb 2017 03:08:28 +0000 (UTC)
+Received: from dhcp12-154.nay.redhat.com (dhcp12-154.nay.redhat.com [10.66.12.154] (may be forged))
+        by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id v1N38QSm013952
+        for <fstests@vger.kernel.org>; Wed, 22 Feb 2017 22:08:27 -0500
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] generic/095: fix duplicate variable name
+Date: Thu, 23 Feb 2017 11:08:21 +0800
+Message-Id: <1487819301-7401-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers3@gmail.com>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Feb 22, 2017 at 11:30:13AM -0800, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
-> 
-> Commit ebbfbefce909 ("test-appliance: add support for xfstests to use
-> EXT_MKFS_OPTIONS") changed the test appliances to set both MKFS_OPTIONS
-> and EXT_MKFS_OPTIONS when starting 'check'.  However, MKFS_OPTIONS was
-> not exported into the environment, so it was not actually being
-> recognized.  Fix this by exporting it.
-> 
+I think this definitely isn't what we want:
+  local warn4="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_aio_read.*"
+  local warn4="WARNING:.*fs/iomap\.c:.*iomap_dio_rw.*"
 
-Oops.   Nice catch!
+The second warn4 will overlay the first one. So change the second
+to warn5.
 
-BTW, I am very much thinking about sending in a patch upstream so that
-xfstests recognizes EXT_MKFS_OPTIONS.  The problem is once we do this
-it will break people's config file or other systems that wrap xfstests
-if they are just using the bare MKFS_OPTIONS.  I'm making
-kvm-xfstests/gce-xfstests be able to be agile with respect to this
-proposed change, by setting both, but this could potentially break
-other people.
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
+ tests/generic/095 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-There's a larger issue here, which is that xfstests as a whole is very
-inconsistent, on a file system by file system basis, about whether or
-not <FSTYPE>_MKFS_OPTIONS and <FSTYPE>_MOUNT_OPTIONS are used or not.
+diff --git a/tests/generic/095 b/tests/generic/095
+index 991baef..d837564 100755
+--- a/tests/generic/095
++++ b/tests/generic/095
+@@ -128,12 +128,12 @@ filter_xfs_dmesg()
+ 	local warn2="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_dio_aio_read.*"
+ 	local warn3="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_read_iter.*"
+ 	local warn4="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_aio_read.*"
+-	local warn4="WARNING:.*fs/iomap\.c:.*iomap_dio_rw.*"
++	local warn5="WARNING:.*fs/iomap\.c:.*iomap_dio_rw.*"
+ 	sed -e "s#$warn1#Intentional warnings in xfs_file_dio_aio_write#" \
+ 	    -e "s#$warn2#Intentional warnings in xfs_file_dio_aio_read#" \
+ 	    -e "s#$warn3#Intentional warnings in xfs_file_read_iter#" \
+ 	    -e "s#$warn4#Intentional warnings in xfs_file_aio_read#" \
+-	    -e "s#$warn4#Intentional warnings in iomap_dio_rw#"
++	    -e "s#$warn5#Intentional warnings in iomap_dio_rw#"
+ }
+ 
+ # umount before checking dmesg in case umount triggers any WARNING or Oops
+-- 
+2.7.4
 
-It might be nice to fix the larger problem, but for now I'm more
-focused on making ext4 consistent with most (but not all) of the other
-file systems supported by xfstests.
-
-					- Ted
