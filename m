@@ -1,157 +1,153 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46588 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49218 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751199AbdBWJna (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 23 Feb 2017 04:43:30 -0500
-From: Xiong Zhou <xzhou@redhat.com>
-Subject: [xfstests v4 8/8] overlay: accessing stacked overlayfs files
-Date: Thu, 23 Feb 2017 17:42:46 +0800
-Message-Id: <1487842966-30986-9-git-send-email-xzhou@redhat.com>
-In-Reply-To: <1487842966-30986-1-git-send-email-xzhou@redhat.com>
+        id S1751346AbdBWKoZ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 23 Feb 2017 05:44:25 -0500
+Date: Thu, 23 Feb 2017 18:44:23 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [xfstests v4 2/8] overlay: work dir in overlay inherits no ACLs
+Message-ID: <20170223104423.GB24562@eguan.usersys.redhat.com>
 References: <1487842966-30986-1-git-send-email-xzhou@redhat.com>
+ <1487842966-30986-3-git-send-email-xzhou@redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1487842966-30986-3-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-unionfs@vger.kernel.org, mszeredi@redhat.com, Xiong Zhou <xzhou@redhat.com>
+To: Xiong Zhou <xzhou@redhat.com>
+Cc: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org, mszeredi@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-Lower dir comes from another overlayfs dir, then
-accessing files in it should work.
+On Thu, Feb 23, 2017 at 05:42:40PM +0800, Xiong Zhou wrote:
+> They should be cleaned while mounting overlayfs.
+> 
+> CC: Miklos Szeredi <mszeredi@redhat.com>
+> Signed-off-by: Xiong Zhou <xzhou@redhat.com>
+> ---
+>  tests/overlay/023     | 79 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/023.out |  8 ++++++
+>  tests/overlay/group   |  1 +
+>  3 files changed, 88 insertions(+)
+>  create mode 100755 tests/overlay/023
+>  create mode 100644 tests/overlay/023.out
+> 
+> diff --git a/tests/overlay/023 b/tests/overlay/023
+> new file mode 100755
+> index 0000000..0d0da93
+> --- /dev/null
+> +++ b/tests/overlay/023
+> @@ -0,0 +1,79 @@
+> +#! /bin/bash
+> +# FS QA Test 023
+> +#
+> +# The "work" directory in an overlyfs workdir should not inherit
+> +# ACL attrs from workdir.
+> +# Kernel commits below fix it.
+> +#   c11b9fdd6a61 ovl: remove posix_acl_default from workdir
+> +#   e1ff3dd1ae52 ovl: fix workdir creation
+> +#
+> +# This reproducer was originally written by
+> +#     Miklos Szeredi <mszeredi@redhat.com>
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/attr
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs overlay
+> +_supported_os Linux
+> +_require_acls
+> +_require_scratch
+> +
+> +# Remove all files from previous tests
+> +_scratch_mkfs
+> +
+> +# setting acls before mount
+> +wkdir=$SCRATCH_DEV/$OVERLAY_WORK_DIR
+> +mkdir -p $wkdir
+> +setfacl -d -m o::rwx $wkdir
+> +
+> +_scratch_mount
+> +
+> +# getting acls and doing a non-common filter,
+> +# since getfacl will remove leading / from absolute
+> +# path names.
 
-CC: Miklos Szeredi <mszeredi@redhat.com>
-Signed-off-by: Xiong Zhou <xzhou@redhat.com>
----
- tests/overlay/029     | 100 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/029.out |   5 +++
- tests/overlay/group   |   1 +
- 3 files changed, 106 insertions(+)
- create mode 100755 tests/overlay/029
- create mode 100644 tests/overlay/029.out
+This comment is not needed anymore. I can fix it at commit time.
 
-diff --git a/tests/overlay/029 b/tests/overlay/029
-new file mode 100755
-index 0000000..902a84c
---- /dev/null
-+++ b/tests/overlay/029
-@@ -0,0 +1,100 @@
-+#! /bin/bash
-+# FS QA Test 029
-+#
-+# There are dirs/files in lower dir and upper dir before
-+# mounting overlayfs. After mounting, use dir in overlayfs
-+# mountpoint as lowerdir to mount another overlayfs, then
-+# access old files through the second overlayfs. It was
-+# not working, kernel commit below fixed it.
-+#
-+# c4fcfc1619ea ovl: fix d_real() for stacked fs
-+#
-+# This reproducer was originally written by
-+#     Miklos Szeredi <mszeredi@redhat.com>
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	$UMOUNT_PROG $tmp/mnt
-+	rm -rf $tmp
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+
-+# Remove all files from previous tests
-+_scratch_mkfs
-+
-+# Preparing files
-+upperdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
-+lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
-+mkdir -p $upperdir/up
-+echo foo > $upperdir/up/foo
-+mkdir -p $lowerdir/low
-+echo bar > $lowerdir/low/bar
-+
-+# mount overlay in SCRATCH_MNT
-+_scratch_mount
-+
-+mkdir -p $tmp/{upper,mnt,work}
-+# mount overlay again using upper dir from SCRATCH_MNT dir
-+_overlay_mount_dirs $SCRATCH_MNT/up $tmp/{upper,work} \
-+  overlay $tmp/mnt
-+# accessing file in the second mount
-+cat $tmp/mnt/foo
-+$UMOUNT_PROG $tmp/mnt
-+
-+# mount overlay again using lower dir from SCRATCH_MNT dir
-+_overlay_mount_dirs $SCRATCH_MNT/low $tmp/{upper,work} \
-+  overlay $tmp/mnt
-+cat $tmp/mnt/bar
-+$UMOUNT_PROG $tmp/mnt
-+
-+# mount overlay again using SCRATCH_MNT dir
-+_overlay_mount_dirs $SCRATCH_MNT/ $tmp/{upper,work} \
-+  overlay $tmp/mnt
-+cat $tmp/mnt/up/foo
-+cat $tmp/mnt/low/bar
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/overlay/029.out b/tests/overlay/029.out
-new file mode 100644
-index 0000000..e7f192c
---- /dev/null
-+++ b/tests/overlay/029.out
-@@ -0,0 +1,5 @@
-+QA output created by 029
-+foo
-+bar
-+foo
-+bar
-diff --git a/tests/overlay/group b/tests/overlay/group
-index cf058fc..7e72a30 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -31,3 +31,4 @@
- 026 auto attr quick
- 027 auto quick perms
- 028 auto copyup quick
-+029 auto quick
--- 
-1.8.3.1
+Thanks,
+Eryu
 
+> +getfacl -p $wkdir/work 2>&1 | _filter_scratch
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/overlay/023.out b/tests/overlay/023.out
+> new file mode 100644
+> index 0000000..a1a3c37
+> --- /dev/null
+> +++ b/tests/overlay/023.out
+> @@ -0,0 +1,8 @@
+> +QA output created by 023
+> +# file: SCRATCH_DEV/work/work
+> +# owner: root
+> +# group: root
+> +user::---
+> +group::---
+> +other::---
+> +
+> diff --git a/tests/overlay/group b/tests/overlay/group
+> index 45768f5..09da1be 100644
+> --- a/tests/overlay/group
+> +++ b/tests/overlay/group
+> @@ -25,3 +25,4 @@
+>  020 auto quick copyup perms
+>  021 auto quick copyup
+>  022 auto quick
+> +023 auto quick attr
+> -- 
+> 1.8.3.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
