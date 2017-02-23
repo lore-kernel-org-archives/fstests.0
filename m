@@ -1,11 +1,11 @@
-Received: from mx1.redhat.com ([209.132.183.28]:54572 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:41096 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751110AbdBWJna (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1751070AbdBWJna (ORCPT <rfc822;fstests@vger.kernel.org>);
         Thu, 23 Feb 2017 04:43:30 -0500
 From: Xiong Zhou <xzhou@redhat.com>
-Subject: [xfstests v4 2/8] overlay: work dir in overlay inherits no ACLs
-Date: Thu, 23 Feb 2017 17:42:40 +0800
-Message-Id: <1487842966-30986-3-git-send-email-xzhou@redhat.com>
+Subject: [xfstests v4 1/8] overlay: disallow overlayfs as upperdir
+Date: Thu, 23 Feb 2017 17:42:39 +0800
+Message-Id: <1487842966-30986-2-git-send-email-xzhou@redhat.com>
 In-Reply-To: <1487842966-30986-1-git-send-email-xzhou@redhat.com>
 References: <1487842966-30986-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,38 +13,36 @@ To: fstests@vger.kernel.org
 Cc: linux-unionfs@vger.kernel.org, mszeredi@redhat.com, Xiong Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-They should be cleaned while mounting overlayfs.
+Using overlayfs dir as upperdir to mount another
+overlayfs should fail.
 
 CC: Miklos Szeredi <mszeredi@redhat.com>
 Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 ---
- tests/overlay/023     | 79 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/023.out |  8 ++++++
+ tests/overlay/022     | 82 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/022.out |  2 ++
  tests/overlay/group   |  1 +
- 3 files changed, 88 insertions(+)
- create mode 100755 tests/overlay/023
- create mode 100644 tests/overlay/023.out
+ 3 files changed, 85 insertions(+)
+ create mode 100755 tests/overlay/022
+ create mode 100644 tests/overlay/022.out
 
-diff --git a/tests/overlay/023 b/tests/overlay/023
+diff --git a/tests/overlay/022 b/tests/overlay/022
 new file mode 100755
-index 0000000..0d0da93
+index 0000000..817ee63
 --- /dev/null
-+++ b/tests/overlay/023
-@@ -0,0 +1,79 @@
++++ b/tests/overlay/022
+@@ -0,0 +1,82 @@
 +#! /bin/bash
-+# FS QA Test 023
++# FS QA Test 022
 +#
-+# The "work" directory in an overlyfs workdir should not inherit
-+# ACL attrs from workdir.
-+# Kernel commits below fix it.
-+#   c11b9fdd6a61 ovl: remove posix_acl_default from workdir
-+#   e1ff3dd1ae52 ovl: fix workdir creation
++# Regression test for kernel commit:
++#     76bc8e2 ovl: disallow overlayfs as upperdir
 +#
 +# This reproducer was originally written by
 +#     Miklos Szeredi <mszeredi@redhat.com>
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
++# Copyright (c) 2017 Red Hat Inc. All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -73,13 +71,14 @@ index 0000000..0d0da93
 +_cleanup()
 +{
 +	cd /
++	$UMOUNT_PROG $tmp/mnt > /dev/null 2>&1
++	rm -rf $tmp
 +	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/attr
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
@@ -89,50 +88,49 @@ index 0000000..0d0da93
 +# Modify as appropriate.
 +_supported_fs overlay
 +_supported_os Linux
-+_require_acls
 +_require_scratch
 +
 +# Remove all files from previous tests
 +_scratch_mkfs
 +
-+# setting acls before mount
-+wkdir=$SCRATCH_DEV/$OVERLAY_WORK_DIR
-+mkdir -p $wkdir
-+setfacl -d -m o::rwx $wkdir
-+
++upperdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
++mkdir -p $upperdir/upper
++mkdir -p $upperdir/work
++# mount overlay with dirs in upper
 +_scratch_mount
 +
-+# getting acls and doing a non-common filter,
-+# since getfacl will remove leading / from absolute
-+# path names.
-+getfacl -p $wkdir/work 2>&1 | _filter_scratch
++mkdir -p $tmp/{lower,mnt}
++# mount overlay using upper from another overlay upper
++# should fail
++_overlay_mount_dirs $tmp/lower $SCRATCH_MNT/upper \
++  $SCRATCH_MNT/work overlay $tmp/mnt > /dev/null 2>&1
++if [ $? -ne 0 ] ; then
++	echo "Silence is golden"
++else
++	echo "Test Fail"
++	echo "Overlay upperdir can't be another overlay upperdir"
++fi
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/overlay/023.out b/tests/overlay/023.out
+diff --git a/tests/overlay/022.out b/tests/overlay/022.out
 new file mode 100644
-index 0000000..a1a3c37
+index 0000000..394c6a7
 --- /dev/null
-+++ b/tests/overlay/023.out
-@@ -0,0 +1,8 @@
-+QA output created by 023
-+# file: SCRATCH_DEV/work/work
-+# owner: root
-+# group: root
-+user::---
-+group::---
-+other::---
-+
++++ b/tests/overlay/022.out
+@@ -0,0 +1,2 @@
++QA output created by 022
++Silence is golden
 diff --git a/tests/overlay/group b/tests/overlay/group
-index 45768f5..09da1be 100644
+index 5bcc25e..45768f5 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -25,3 +25,4 @@
+@@ -24,3 +24,4 @@
+ 019 auto stress
  020 auto quick copyup perms
  021 auto quick copyup
- 022 auto quick
-+023 auto quick attr
++022 auto quick
 -- 
 1.8.3.1
 
