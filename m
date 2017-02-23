@@ -1,11 +1,11 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46506 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:46588 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751196AbdBWJna (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1751199AbdBWJna (ORCPT <rfc822;fstests@vger.kernel.org>);
         Thu, 23 Feb 2017 04:43:30 -0500
 From: Xiong Zhou <xzhou@redhat.com>
-Subject: [xfstests v4 6/8] overlay: can not change underlying immutable file
-Date: Thu, 23 Feb 2017 17:42:44 +0800
-Message-Id: <1487842966-30986-7-git-send-email-xzhou@redhat.com>
+Subject: [xfstests v4 8/8] overlay: accessing stacked overlayfs files
+Date: Thu, 23 Feb 2017 17:42:46 +0800
+Message-Id: <1487842966-30986-9-git-send-email-xzhou@redhat.com>
 In-Reply-To: <1487842966-30986-1-git-send-email-xzhou@redhat.com>
 References: <1487842966-30986-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,32 +13,35 @@ To: fstests@vger.kernel.org
 Cc: linux-unionfs@vger.kernel.org, mszeredi@redhat.com, Xiong Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Even timestamp change by touch.
+Lower dir comes from another overlayfs dir, then
+accessing files in it should work.
 
 CC: Miklos Szeredi <mszeredi@redhat.com>
 Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 ---
- tests/overlay/027     | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/027.out |  2 ++
- tests/overlay/group   |  1 +
- 3 files changed, 90 insertions(+)
- create mode 100755 tests/overlay/027
- create mode 100644 tests/overlay/027.out
+ tests/overlay/029     | 100 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/029.out |   5 +++
+ tests/overlay/group   |   1 +
+ 3 files changed, 106 insertions(+)
+ create mode 100755 tests/overlay/029
+ create mode 100644 tests/overlay/029.out
 
-diff --git a/tests/overlay/027 b/tests/overlay/027
+diff --git a/tests/overlay/029 b/tests/overlay/029
 new file mode 100755
-index 0000000..4bb0329
+index 0000000..902a84c
 --- /dev/null
-+++ b/tests/overlay/027
-@@ -0,0 +1,87 @@
++++ b/tests/overlay/029
+@@ -0,0 +1,100 @@
 +#! /bin/bash
-+# FS QA Test 027
++# FS QA Test 029
 +#
-+# If underlying upper file is immutable, it should stays
-+# untouchable in the overlayfs mount.
++# There are dirs/files in lower dir and upper dir before
++# mounting overlayfs. After mounting, use dir in overlayfs
++# mountpoint as lowerdir to mount another overlayfs, then
++# access old files through the second overlayfs. It was
++# not working, kernel commit below fixed it.
 +#
-+# Kernel commit below fixed it.
-+# f2b20f6ee842 vfs: move permission checking into ...
++# c4fcfc1619ea ovl: fix d_real() for stacked fs
 +#
 +# This reproducer was originally written by
 +#     Miklos Szeredi <mszeredi@redhat.com>
@@ -73,7 +76,8 @@ index 0000000..4bb0329
 +_cleanup()
 +{
 +	cd /
-+	$CHATTR_PROG -i $upperdir/foo
++	$UMOUNT_PROG $tmp/mnt
++	rm -rf $tmp
 +	rm -f $tmp.*
 +}
 +
@@ -90,51 +94,64 @@ index 0000000..4bb0329
 +_supported_fs overlay
 +_supported_os Linux
 +_require_scratch
-+_require_chattr
 +
 +# Remove all files from previous tests
 +_scratch_mkfs
 +
-+# Preparing immutable file
++# Preparing files
 +upperdir=$SCRATCH_DEV/$OVERLAY_UPPER_DIR
-+mkdir -p $upperdir
-+touch $upperdir/foo
-+$CHATTR_PROG +i $upperdir/foo
++lowerdir=$SCRATCH_DEV/$OVERLAY_LOWER_DIR
++mkdir -p $upperdir/up
++echo foo > $upperdir/up/foo
++mkdir -p $lowerdir/low
++echo bar > $lowerdir/low/bar
 +
-+# Mounting overlay
++# mount overlay in SCRATCH_MNT
 +_scratch_mount
 +
-+# Touching immutable file in overlay, should fail.
-+# Not filtering output here because of errno returned
-+# varies among kernel versions:
-+#   touch: setting times of 'foo': Operation not permitted
-+#   touch: cannot touch 'foo': Permission denied
-+if touch $SCRATCH_MNT/foo > /dev/null 2>&1 ; then
-+	echo "Test Fail, you can't change an immutable file"
-+else
-+	echo "Silence is golden"
-+fi
++mkdir -p $tmp/{upper,mnt,work}
++# mount overlay again using upper dir from SCRATCH_MNT dir
++_overlay_mount_dirs $SCRATCH_MNT/up $tmp/{upper,work} \
++  overlay $tmp/mnt
++# accessing file in the second mount
++cat $tmp/mnt/foo
++$UMOUNT_PROG $tmp/mnt
++
++# mount overlay again using lower dir from SCRATCH_MNT dir
++_overlay_mount_dirs $SCRATCH_MNT/low $tmp/{upper,work} \
++  overlay $tmp/mnt
++cat $tmp/mnt/bar
++$UMOUNT_PROG $tmp/mnt
++
++# mount overlay again using SCRATCH_MNT dir
++_overlay_mount_dirs $SCRATCH_MNT/ $tmp/{upper,work} \
++  overlay $tmp/mnt
++cat $tmp/mnt/up/foo
++cat $tmp/mnt/low/bar
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/overlay/027.out b/tests/overlay/027.out
+diff --git a/tests/overlay/029.out b/tests/overlay/029.out
 new file mode 100644
-index 0000000..ef78cda
+index 0000000..e7f192c
 --- /dev/null
-+++ b/tests/overlay/027.out
-@@ -0,0 +1,2 @@
-+QA output created by 027
-+Silence is golden
++++ b/tests/overlay/029.out
+@@ -0,0 +1,5 @@
++QA output created by 029
++foo
++bar
++foo
++bar
 diff --git a/tests/overlay/group b/tests/overlay/group
-index 92afa8d..4db6751 100644
+index cf058fc..7e72a30 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -29,3 +29,4 @@
- 024 auto quick
- 025 auto quick attr
+@@ -31,3 +31,4 @@
  026 auto attr quick
-+027 auto quick perms
+ 027 auto quick perms
+ 028 auto copyup quick
++029 auto quick
 -- 
 1.8.3.1
 
