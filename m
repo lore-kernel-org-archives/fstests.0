@@ -1,11 +1,11 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:37283 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751791AbdBXDjD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 23 Feb 2017 22:39:03 -0500
-Date: Thu, 23 Feb 2017 19:38:28 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Received: from mx1.redhat.com ([209.132.183.28]:42134 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751257AbdBXJrJ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 24 Feb 2017 04:47:09 -0500
+Date: Fri, 24 Feb 2017 17:47:06 +0800
+From: Eryu Guan <eguan@redhat.com>
 Subject: Re: [PATCH] generic/409: reflink concurrent operations
-Message-ID: <20170224033828.GC22332@birch.djwong.org>
+Message-ID: <20170224094706.GF24562@eguan.usersys.redhat.com>
 References: <1487853054-3194-1-git-send-email-nave.vardy@plexistor.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
@@ -22,9 +22,10 @@ On Thu, Feb 23, 2017 at 02:30:54PM +0200, Nave Vardy wrote:
 > perform read operation on the target file while
 > doing write or fpunch operations on the reflinks.
 
-A read vs. (write|fpunch) race... is this a regression test for a
-specific problem you found?
+I'm having the same question as Darrick's, is this test reproducing some
+kind of bugs for you?
 
+> 
 > Signed-off-by: Nave Vardy <nave.vardy@plexistor.com>
 > ---
 >  tests/generic/409     | 97 +++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -32,6 +33,10 @@ specific problem you found?
 >  tests/generic/group   |  1 +
 >  3 files changed, 100 insertions(+)
 >  create mode 100644 tests/generic/409
+
+0755 file mode for new test. This is done automatically if you use
+"./new generic" to setup new test template.
+
 >  create mode 100644 tests/generic/409.out
 > 
 > diff --git a/tests/generic/409 b/tests/generic/409
@@ -95,50 +100,26 @@ specific problem you found?
 > +
 > +_scratch_mkfs_sized $((400 * 1024 ** 2)) >> $seqres.full 2>&1 || _fail "mkfs failed"
 
-Any particular reason for formatting a 400MB filesystem?
-
-_require_fs_space is customary for "skip test if we don't have this much
-free space"
+Same question on the filesystem size.
 
 > +_scratch_mount || _fail "mount failed"
 > +
 > +echo "Silence is golden"
-
-Until something fails, and now you have to go figure out which part of
-the test script has the failed command.
-
-It's much easier to diagnose test failures if the test case occasionally
-echoes a section heading into the output file so that any error output
-can be pinpointed to within a few lines.
-
 > +
 > +workfile=${SCRATCH_MNT}/workfile
 > +light_clone=${SCRATCH_MNT}/light_clone
 > +
 > +file_size=$((10 * 1024 * 1024))
 > +bs=4096
-
-Um, what if the block size isn't 4k?  Does this test case work on a
-filesystem with 64k blocks?  Or weird things like ocfs2 that map
-clusters instead of blocks?
-
-_get_file_block_size perhaps?
-
 > +block_num=$((file_size / bs))
 > +reflinks_num=20
 > +
 > +$XFS_IO_PROG -f -c "pwrite 0 $file_size" $workfile >> $seqres.full
 > +
 > +#create all reflinkfs
-
-"create all reflinks" ?
-
 > +for ((i=1; i<reflinks_num; i++));
 > +do
 > +	cp --reflink $workfile ${light_clone}_$i
-
-_cp_reflink?
-
 > +done
 > +
 > +#for each block simultaneously write to all reflinks
@@ -155,14 +136,29 @@ _cp_reflink?
 > +		else
 > +			$XFS_IO_PROG -c "fpunch $((block_index * bs)) $bs" \
 > +					${light_clone}_$i >> $seqres.full &
-
-So... is this test only concerned with pread/pwrite/fpunch returning
-some kind of error code or crashing the kernel?  Should we check that
-the read data is the old shared data, the newly written data, or zeroes?
-
---D
-
 > +		fi
+
+I don't see much concurrency in this loop, for each block_index there's
+only one pread process and reflinks_num processes doing pwrite or
+fpunch. Seems only pwrites are racing with pwrites and fpunchs are
+racing with fpunchs. How about:
+
+for ((block_index=0; block_index<block_num; block_index++)); do
+	for ((i=0; i<reflinks_num; i++)); do
+		$XFS_IO_PROG -c "pread ..." ... &
+		if [ $((i % 2)) -eq 0 ]; then
+			$XFS_IO_PROG -c "pwrite ..." ... &
+		else
+			$XFS_IO_PROG -c "fpunch ..." ... &
+		fi
+	done
+	wait
+done
+
+So for every pwrite or fpunch there's a pread racing with it. But
+because I don't know if you're reproducing some specific bug with this
+loop, I'm not sure if my version still works.
+
 > +	done
 > +	# wait for all threads to join before moving to next index
 > +	wait
@@ -188,6 +184,13 @@ the read data is the old shared data, the newly written data, or zeroes?
 >  407 auto quick clone metadata
 >  408 auto quick clone dedupe metadata
 > +409 auto quick clone
+
+If you decide to increase the concurrency/workload, probably the test
+will not be quick enough to fit in quick group :)
+
+Thanks,
+Eryu
+
 > -- 
 > 2.5.5
 > 
