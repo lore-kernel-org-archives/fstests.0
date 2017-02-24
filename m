@@ -1,200 +1,197 @@
-Received: from mx1.redhat.com ([209.132.183.28]:49322 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750828AbdBWM7A (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 23 Feb 2017 07:59:00 -0500
-Date: Thu, 23 Feb 2017 20:49:20 +0800
-From: Xiong Zhou <xzhou@redhat.com>
-Subject: Re: [xfstests v4 4/8] overlay: permission check with cached acls in
- tmpfs
-Message-ID: <20170223124920.upyysjrejz5ci5yi@XZHOUW.usersys.redhat.com>
-References: <1487842966-30986-1-git-send-email-xzhou@redhat.com>
- <1487842966-30986-5-git-send-email-xzhou@redhat.com>
- <20170223105256.GC24562@eguan.usersys.redhat.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:37283 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751791AbdBXDjD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 23 Feb 2017 22:39:03 -0500
+Date: Thu, 23 Feb 2017 19:38:28 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] generic/409: reflink concurrent operations
+Message-ID: <20170224033828.GC22332@birch.djwong.org>
+References: <1487853054-3194-1-git-send-email-nave.vardy@plexistor.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170223105256.GC24562@eguan.usersys.redhat.com>
+In-Reply-To: <1487853054-3194-1-git-send-email-nave.vardy@plexistor.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Xiong Zhou <xzhou@redhat.com>, fstests@vger.kernel.org, linux-unionfs@vger.kernel.org, mszeredi@redhat.com
+To: Nave Vardy <nave.vardy@plexistor.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Feb 23, 2017 at 06:52:56PM +0800, Eryu Guan wrote:
-> On Thu, Feb 23, 2017 at 05:42:42PM +0800, Xiong Zhou wrote:
-> > tmpfs does not implement ->get_acl method, overlayfs
-> > need to get its cached acls in permission check when
-> > lower or upper fs is tmpfs.
-> > 
-> > CC: Miklos Szeredi <mszeredi@redhat.com>
-> > Signed-off-by: Xiong Zhou <xzhou@redhat.com>
-> > ---
-> >  common/rc             | 10 +++++++
-> >  tests/overlay/025     | 81 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/overlay/025.out |  2 ++
-> >  tests/overlay/group   |  1 +
-> >  4 files changed, 94 insertions(+)
-> >  create mode 100755 tests/overlay/025
-> >  create mode 100644 tests/overlay/025.out
-> > 
-> > diff --git a/common/rc b/common/rc
-> > index ec59b88..b58f7c6 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -3297,6 +3297,16 @@ _get_fs_sysfs_attr()
-> >  }
-> >  
-> >  
-> > +# Attempt to mount tmpfs at given directory in $1.
-> > +#
-> > +# Example:
-> > +# _require_and_mount_tmpfs $tmpdir
-> > +#
-> > +_require_and_mount_tmpfs()
-> > +{
-> > +	$MOUNT_PROG -t tmpfs tmpfs $1 || \
-> > +		_notrun "this test requires valid tmpfs"
-> > +}
+On Thu, Feb 23, 2017 at 02:30:54PM +0200, Nave Vardy wrote:
+> reflink: concurrent operations test
 > 
-> We don't mix a _require rule with doing a specific operation. And we can
-> follow the way in _require_ext2, e.g.
-> 
-> # this test requires tmpfs filesystem support
-> #
-> _require_tmpfs()
-> {
-> 	modprobe tmpfs >/dev/null 2>&1
-> 	grep -q tmpfs /proc/filesystems ||
-> 		_notrun "this test requires tmpfs support"
-> }
-> 
-> >  
-> >  init_rc
-> >  
-> > diff --git a/tests/overlay/025 b/tests/overlay/025
-> > new file mode 100755
-> > index 0000000..3c9f843
-> > --- /dev/null
-> > +++ b/tests/overlay/025
-> > @@ -0,0 +1,81 @@
-> > +#! /bin/bash
-> > +# FS QA Test 025
-> > +#
-> > +# Overlayfs failed to get posix acls if lower or upper
-> > +# fs is tmpfs.
-> > +# Kernel commit below fixed it.
-> > +# 5201dc449e4b ovl: use cached acl on underlying layer
-> > +#
-> > +# This reproducer was originally written by
-> > +#     Miklos Szeredi <mszeredi@redhat.com>
-> > +#
-> > +#-----------------------------------------------------------------------
-> > +# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
-> > +#
-> > +# This program is free software; you can redistribute it and/or
-> > +# modify it under the terms of the GNU General Public License as
-> > +# published by the Free Software Foundation.
-> > +#
-> > +# This program is distributed in the hope that it would be useful,
-> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > +# GNU General Public License for more details.
-> > +#
-> > +# You should have received a copy of the GNU General Public License
-> > +# along with this program; if not, write the Free Software Foundation,
-> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > +#-----------------------------------------------------------------------
-> > +#
-> > +
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	$UMOUNT_PROG $tmpfsdir/mnt
-> > +	$UMOUNT_PROG $tmpfsdir
-> > +	rm -rf $tmpfsdir
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
-> > +# real QA test starts here
-> > +
-> > +# Modify as appropriate.
-> > +_supported_fs overlay
-> > +_supported_os Linux
-> > +_require_user
-> 
-> _require_tmpfs
-> 
-> > +
-> > +# create a tmpfs in $TEST_DIR
-> > +tmpfsdir=$TEST_DIR/tmpfs
-> > +mkdir -p $tmpfsdir
-> > +_require_and_mount_tmpfs $tmpfsdir
-> 
-> then this simply becomes
-> 
-> $MOUNT_PROG -t tmpfs tmpfs $tmpfsdir
-> 
-> If all these look sane to you, I can do this straightforward update at
-> commit time.
+> perform read operation on the target file while
+> doing write or fpunch operations on the reflinks.
 
-OK, many thanks!
+A read vs. (write|fpunch) race... is this a regression test for a
+specific problem you found?
 
+> Signed-off-by: Nave Vardy <nave.vardy@plexistor.com>
+> ---
+>  tests/generic/409     | 97 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/409.out |  2 ++
+>  tests/generic/group   |  1 +
+>  3 files changed, 100 insertions(+)
+>  create mode 100644 tests/generic/409
+>  create mode 100644 tests/generic/409.out
 > 
-> Thanks,
-> Eryu
+> diff --git a/tests/generic/409 b/tests/generic/409
+> new file mode 100644
+> index 0000000..eb1da13
+> --- /dev/null
+> +++ b/tests/generic/409
+> @@ -0,0 +1,97 @@
+> +#!/bin/bash
+> +# FS QA Test No. 409
+> +#
+> +# test for races between write or fpunch operations on reflinked files
+> +# to read operations on the targed file
+> +#
+> +#-----------------------------------------------------------------------
+> +#
+> +# Copyright (c) 2017 Plexistor Ltd. All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=0    # success is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/reflink
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch_reflink
+> +_require_cp_reflink
+> +
+> +_scratch_mkfs_sized $((400 * 1024 ** 2)) >> $seqres.full 2>&1 || _fail "mkfs failed"
+
+Any particular reason for formatting a 400MB filesystem?
+
+_require_fs_space is customary for "skip test if we don't have this much
+free space"
+
+> +_scratch_mount || _fail "mount failed"
+> +
+> +echo "Silence is golden"
+
+Until something fails, and now you have to go figure out which part of
+the test script has the failed command.
+
+It's much easier to diagnose test failures if the test case occasionally
+echoes a section heading into the output file so that any error output
+can be pinpointed to within a few lines.
+
+> +
+> +workfile=${SCRATCH_MNT}/workfile
+> +light_clone=${SCRATCH_MNT}/light_clone
+> +
+> +file_size=$((10 * 1024 * 1024))
+> +bs=4096
+
+Um, what if the block size isn't 4k?  Does this test case work on a
+filesystem with 64k blocks?  Or weird things like ocfs2 that map
+clusters instead of blocks?
+
+_get_file_block_size perhaps?
+
+> +block_num=$((file_size / bs))
+> +reflinks_num=20
+> +
+> +$XFS_IO_PROG -f -c "pwrite 0 $file_size" $workfile >> $seqres.full
+> +
+> +#create all reflinkfs
+
+"create all reflinks" ?
+
+> +for ((i=1; i<reflinks_num; i++));
+> +do
+> +	cp --reflink $workfile ${light_clone}_$i
+
+_cp_reflink?
+
+> +done
+> +
+> +#for each block simultaneously write to all reflinks
+> +for ((block_index=0; block_index<block_num; block_index++));
+> +do
+> +	for ((i=0; i<reflinks_num; i++));
+> +	do
+> +		if [ $i -eq 0 ]; then
+> +			$XFS_IO_PROG -c "pread $((block_index * bs)) $bs" \
+> +						$workfile >> $seqres.full &
+> +		elif [ $((block_index % 2)) -eq 0 ]; then
+> +			$XFS_IO_PROG -c "pwrite $((block_index * bs)) $bs" \
+> +					${light_clone}_$i  >> $seqres.full &
+> +		else
+> +			$XFS_IO_PROG -c "fpunch $((block_index * bs)) $bs" \
+> +					${light_clone}_$i >> $seqres.full &
+
+So... is this test only concerned with pread/pwrite/fpunch returning
+some kind of error code or crashing the kernel?  Should we check that
+the read data is the old shared data, the newly written data, or zeroes?
+
+--D
+
+> +		fi
+> +	done
+> +	# wait for all threads to join before moving to next index
+> +	wait
+> +done
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/409.out b/tests/generic/409.out
+> new file mode 100644
+> index 0000000..6f11537
+> --- /dev/null
+> +++ b/tests/generic/409.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 409
+> +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index d14f221..27ff229 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -411,3 +411,4 @@
+>  406 auto quick dangerous
+>  407 auto quick clone metadata
+>  408 auto quick clone dedupe metadata
+> +409 auto quick clone
+> -- 
+> 2.5.5
 > 
-> > +
-> > +mkdir -p $tmpfsdir/{lower,upper,work,mnt}
-> > +mkdir -p -m 0 $tmpfsdir/upper/testd
-> > +# grant permission for $qa_user
-> > +setfacl -m u:$qa_user:rx $tmpfsdir/upper/testd
-> > +
-> > +# mount overlay using dirs in tmpfs
-> > +_overlay_mount_dirs $tmpfsdir/{lower,upper,work,overlay,mnt}
-> > +
-> > +# user accessing test dir, should be OKay
-> > +_user_do "ls $tmpfsdir/mnt/testd"
-> > +
-> > +echo "Silence is golden"
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/overlay/025.out b/tests/overlay/025.out
-> > new file mode 100644
-> > index 0000000..3d70951
-> > --- /dev/null
-> > +++ b/tests/overlay/025.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 025
-> > +Silence is golden
-> > diff --git a/tests/overlay/group b/tests/overlay/group
-> > index 0563a04..82fe69e 100644
-> > --- a/tests/overlay/group
-> > +++ b/tests/overlay/group
-> > @@ -27,3 +27,4 @@
-> >  022 auto quick
-> >  023 auto quick attr
-> >  024 auto quick
-> > +025 auto quick attr
-> > -- 
-> > 1.8.3.1
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
