@@ -1,339 +1,129 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:22018 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751291AbdBYBNJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 24 Feb 2017 20:13:09 -0500
-Subject: [PATCH 4/4] xfs: stress test xfs_scrub
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Fri, 24 Feb 2017 17:13:04 -0800
-Message-ID: <148798518415.25833.11653991983531432757.stgit@birch.djwong.org>
-In-Reply-To: <148798515933.25833.2842247083803775089.stgit@birch.djwong.org>
-References: <148798515933.25833.2842247083803775089.stgit@birch.djwong.org>
+Received: from mx1.redhat.com ([209.132.183.28]:50908 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751997AbdBZLPs (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 26 Feb 2017 06:15:48 -0500
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 20BE03B707
+        for <fstests@vger.kernel.org>; Sun, 26 Feb 2017 11:15:23 +0000 (UTC)
+Received: from localhost (ovpn-12-19.pek2.redhat.com [10.72.12.19])
+        by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id v1QBFLhl006306
+        for <fstests@vger.kernel.org>; Sun, 26 Feb 2017 06:15:22 -0500
+Message-Id: <201702261115.v1QBFLhl006306@int-mx14.intmail.prod.int.phx2.redhat.com>
+Date: Sun, 26 Feb 2017 19:15:19 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: [ANNOUNCE] fstests: master branch updated to 07e89f0913cf
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="Ph9dKvWobmNa"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Three new tests:
+--Ph9dKvWobmNa
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-- Repair files that are mapped into memory in running programs
-- Run scrub -n concurrently with fsstress
-- Run scrub -y concurrently with fsstress
+Hi all,
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/xfs/1375     |   69 +++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/1375.out |    3 ++
- tests/xfs/1376     |   83 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/1376.out |    4 ++
- tests/xfs/1377     |   84 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/1377.out |    4 ++
- tests/xfs/group    |    3 ++
- 7 files changed, 250 insertions(+)
- create mode 100755 tests/xfs/1375
- create mode 100644 tests/xfs/1375.out
- create mode 100755 tests/xfs/1376
- create mode 100644 tests/xfs/1376.out
- create mode 100755 tests/xfs/1377
- create mode 100644 tests/xfs/1377.out
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. There're mainly several new overlayfs tests added in
+this update, along with other small buf fixes. Many thanks to Xiong and Amir
+for writing and reviewing these new tests!
+
+There should be no new failures introduced in this update.
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+07e89f0913cf overlay: accessing stacked overlayfs files
+
+New commits:
+
+Dmitry Monakhov (1):
+      [f64fb746abe6] check: fix incorrect interrupt detection
+
+Theodore Ts'o (1):
+      [96bb374aa331] generic,ext4: add defrag group
+
+Xiao Yang (2):
+      [6e56c6b59aa7] shared/005,7: fix making sure debugfs sets negative i_size
+      [cf895a2a0590] xfs/133,4: make sure xfs_db sets negative i_size
+
+Xiong Zhou (8):
+      [223352946292] overlay: disallow overlayfs as upperdir
+      [1cd821c2c335] overlay: work dir in overlay inherits no ACLs
+      [69d6ea934697] overlay: test workdir cleanup in mounting
+      [3eb12b45efa2] overlay: permission check with cached acls in tmpfs
+      [ddac6e077318] overlay: filter out xattr starts with "trusted.overlay."
+      [276523adae8e] overlay: can not change underlying immutable file
+      [59c2158c2504] overlay: test flock after copied up
+      [07e89f0913cf] overlay: accessing stacked overlayfs files
+
+Zorro Lang (1):
+      [46a1e87e51f1] generic/095: fix duplicate variable name
 
 
-diff --git a/tests/xfs/1375 b/tests/xfs/1375
-new file mode 100755
-index 0000000..d3119ef
---- /dev/null
-+++ b/tests/xfs/1375
-@@ -0,0 +1,69 @@
-+#! /bin/bash
-+# FS QA Test No. 1375
-+#
-+# Copy xfs_scrub to the scratch device, then run xfs_scrub in forced
-+# repair mode (which will rebuild the data forks of the running scrub
-+# executable and libraries!) to see what happens.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Oracle, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1335  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 7 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/fuzzy
-+. ./common/inject
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs xfs
-+_require_command /usr/bin/ldd "ldd"
-+_require_scrub
-+_require_scratch
-+_require_xfs_io_error_injection "force_repair"
-+
-+echo "Format and populate"
-+_scratch_mkfs > "$seqres.full" 2>&1
-+_scratch_mount
-+cp $XFS_SCRUB_PROG $SCRATCH_MNT/xfs_scrub
-+ldd $XFS_SCRUB_PROG | sed -e '/\//!d;/linux-gate/d;/=>/ {s/.*=>[[:blank:]]*\([^[:blank:]]*\).*/\1/};s/[[:blank:]]*\([^[:blank:]]*\) (.*)/\1/' | while read lib; do
-+	cp $lib $SCRATCH_MNT/
-+done
-+LD_LIBRARY_PATH=$SCRATCH_MNT ldd $SCRATCH_MNT/xfs_scrub >> $seqres.full
-+
-+echo "Force online repairs"
-+XFS_SCRUB_FORCE_REPAIR=1 LD_LIBRARY_PATH=$SCRATCH_MNT $SCRATCH_MNT/xfs_scrub -dTvy $SCRATCH_MNT >> $seqres.full
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/1375.out b/tests/xfs/1375.out
-new file mode 100644
-index 0000000..dd7025e
---- /dev/null
-+++ b/tests/xfs/1375.out
-@@ -0,0 +1,3 @@
-+QA output created by 1375
-+Format and populate
-+Force online repairs
-diff --git a/tests/xfs/1376 b/tests/xfs/1376
-new file mode 100755
-index 0000000..f037b43
---- /dev/null
-+++ b/tests/xfs/1376
-@@ -0,0 +1,83 @@
-+#! /bin/bash
-+# FS QA Test No. 1376
-+#
-+# Race fio and xfs_scrub for a while to see if we crash or livelock.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Oracle, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1335  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 7 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/fuzzy
-+. ./common/inject
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs xfs
-+_require_scrub
-+_require_scratch
-+_require_command "$KILLALL_PROG" killall
-+
-+echo "Format and populate"
-+_scratch_mkfs > "$seqres.full" 2>&1
-+_scratch_mount
-+
-+STRESS_DIR="$SCRATCH_MNT/testdir"
-+mkdir -p $STRESS_DIR
-+
-+cpus=$((16 * LOAD_FACTOR))
-+$FSSTRESS_PROG -d $STRESS_DIR -p $cpus -n $((cpus * 100000)) $FSSTRESS_AVOID >/dev/null 2>&1 &
-+$XFS_SCRUB_PROG -d -T -v -n $SCRATCH_MNT >> $seqres.full
-+
-+killstress() {
-+	sleep $(( 60 * LOAD_FACTOR ))
-+	$KILLALL_PROG -q $FSSTRESS_PROG
-+}
-+
-+echo "Concurrent scrub"
-+start=$(date +%s)
-+end=$((start + (60 * LOAD_FACTOR) ))
-+killstress &
-+echo "Scrub started at $(date --date="@${start}"), ending at $(date --date="@${end}")" >> $seqres.full
-+while [ "$(date +%s)" -lt "$end" ]; do
-+	timeout -s TERM $(( end - $(date +%s) + 2 )) $XFS_SCRUB_PROG -d -T -v -n $SCRATCH_MNT >> $seqres.full 2>&1
-+done
-+
-+echo "Test done"
-+echo "Scrub finished at $(date)" >> $seqres.full
-+$KILLALL_PROG -q $FSSTRESS_PROG
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/1376.out b/tests/xfs/1376.out
-new file mode 100644
-index 0000000..155f424
---- /dev/null
-+++ b/tests/xfs/1376.out
-@@ -0,0 +1,4 @@
-+QA output created by 1376
-+Format and populate
-+Concurrent scrub
-+Test done
-diff --git a/tests/xfs/1377 b/tests/xfs/1377
-new file mode 100755
-index 0000000..1e0814c
---- /dev/null
-+++ b/tests/xfs/1377
-@@ -0,0 +1,84 @@
-+#! /bin/bash
-+# FS QA Test No. 1377
-+#
-+# Race fio and xfs_scrub -y for a while to see if we crash or livelock.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Oracle, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1335  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 7 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/fuzzy
-+. ./common/inject
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs xfs
-+_require_scrub
-+_require_scratch
-+_require_command "$KILLALL_PROG" killall
-+_require_xfs_io_error_injection "force_repair"
-+
-+echo "Format and populate"
-+_scratch_mkfs > "$seqres.full" 2>&1
-+_scratch_mount
-+
-+STRESS_DIR="$SCRATCH_MNT/testdir"
-+mkdir -p $STRESS_DIR
-+
-+cpus=$((16 * LOAD_FACTOR))
-+$FSSTRESS_PROG -d $STRESS_DIR -p $cpus -n $((cpus * 100000)) $FSSTRESS_AVOID >/dev/null 2>&1 &
-+$XFS_SCRUB_PROG -d -T -v -n $SCRATCH_MNT >> $seqres.full
-+
-+killstress() {
-+	sleep $(( 60 * LOAD_FACTOR ))
-+	$KILLALL_PROG -q $FSSTRESS_PROG
-+}
-+
-+echo "Concurrent repair"
-+start=$(date +%s)
-+end=$((start + (60 * LOAD_FACTOR) ))
-+killstress &
-+echo "Repair started at $(date --date="@${start}"), ending at $(date --date="@${end}")" >> $seqres.full
-+while [ "$(date +%s)" -lt "$end" ]; do
-+	XFS_SCRUB_FORCE_REPAIR=1 timeout -s TERM $(( end - $(date +%s) + 2 )) $XFS_SCRUB_PROG -d -T -v -y $SCRATCH_MNT >> $seqres.full
-+done
-+
-+echo "Test done"
-+echo "Repair finished at $(date)" >> $seqres.full
-+$KILLALL_PROG -q $FSSTRESS_PROG
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/1377.out b/tests/xfs/1377.out
-new file mode 100644
-index 0000000..0454a87
---- /dev/null
-+++ b/tests/xfs/1377.out
-@@ -0,0 +1,4 @@
-+QA output created by 1377
-+Format and populate
-+Concurrent repair
-+Test done
-diff --git a/tests/xfs/group b/tests/xfs/group
-index eaa65b1..7fce0a0 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -408,3 +408,6 @@
- 416 dangerous_fuzzers dangerous_scrub dangerous_repair
- 417 dangerous_fuzzers dangerous_scrub dangerous_online_repair
- 418 dangerous_fuzzers dangerous_scrub dangerous_repair
-+1375 dangerous_fuzzers dangerous_scrub dangerous_online_repair
-+1376 dangerous_fuzzers dangerous_scrub
-+1377 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+Code Diffstat:
 
+ check                 |   4 +-
+ common/config         |   1 +
+ common/rc             |   9 +++++
+ tests/ext4/group      |  14 +++----
+ tests/generic/095     |   4 +-
+ tests/generic/group   |   4 +-
+ tests/overlay/022     |  82 +++++++++++++++++++++++++++++++++++++
+ tests/overlay/022.out |   2 +
+ tests/overlay/023     |  77 +++++++++++++++++++++++++++++++++++
+ tests/overlay/023.out |   8 ++++
+ tests/overlay/024     |  80 ++++++++++++++++++++++++++++++++++++
+ tests/overlay/024.out |   2 +
+ tests/overlay/025     |  82 +++++++++++++++++++++++++++++++++++++
+ tests/overlay/025.out |   2 +
+ tests/overlay/026     | 110 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/026.out |   6 +++
+ tests/overlay/027     |  87 +++++++++++++++++++++++++++++++++++++++
+ tests/overlay/027.out |   2 +
+ tests/overlay/028     |  81 +++++++++++++++++++++++++++++++++++++
+ tests/overlay/028.out |   2 +
+ tests/overlay/029     | 100 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/029.out |   5 +++
+ tests/overlay/group   |   8 ++++
+ tests/shared/005      |   9 ++---
+ tests/shared/007      |   9 ++---
+ tests/xfs/133         |  12 +++++-
+ tests/xfs/134         |  19 +++++++--
+ 27 files changed, 792 insertions(+), 29 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
+
+--Ph9dKvWobmNa
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJYso1KAAoJECZSqilcj+dj2owQAKZvSvuFdFnDOFfR69wnrb6T
+576yUitg3CPqV76vcZOajTV8Ip3q2XDNpIEUF/hI5GY+wJzZvuvms5LBtcP7dsbS
+duFiPqbpZGTTn4FzvFge4K9tYnfkvB4GDfqMOcde6nsCqwlLoMwOUFU+zaBElra4
+AiuITUjY+JZstgrFkp+/riMdCZHy/WLzGKRzYqeH6mNDlsIpXWc75uoU7cB6/jwo
+V+vD4/zl85+YDp5FuP3yozEqzem84X5rrFxIEQzQwQFfS4VoeL4PKNZZLqvqGHnj
+AU52L9K8elrUr4gDX9QN6UTg/bhY6yxxGWxoDZASnw+AUSsEqjnWBfaKTemeBIkd
+2E+qQx1SUmBqv1xnsix99h9voDGqd7NSr7jjLzkDJQ6MV5fUtA1LSsUF450wjmr5
+nzDpVp1ROEyYB2x+42QPZvYxy4Zbp6T6I1n0JJD3wXvaaoepqjvYvs9r75AGhSN7
+2nkyLPz22QNmC82Z0aEU6HtV1TWOSk7fFR0RYL/9sQ+3MA1h+oVsgBF/CqR/Iv1j
+IWuuxZP0iDIU46Zo0lL3xv61U+7WuYZSqX4L38rOel61wmY4R4EjmAO1a+xPw5XD
++N/Dg/dF4n+82xJGzHNIQLzJZ15GEiQ2cSKuX+Vs3tVOhrnhwM2y759pBIE/txC/
+T0YvoNIR7orVqs1/vbm6
+=glOk
+-----END PGP SIGNATURE-----
+
+--Ph9dKvWobmNa--
