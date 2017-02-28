@@ -1,60 +1,67 @@
-Received: from imap.thunk.org ([74.207.234.97]:33522 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751025AbdB1FOA (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 28 Feb 2017 00:14:00 -0500
-Date: Tue, 28 Feb 2017 00:13:37 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: Ext4 new shutdown ioctl fails generic/04{4,5,6}
-Message-ID: <20170228051337.lxmiiz7jzhojmagz@thunk.org>
-References: <20170228032556.dc5d26cldwku4puw@XZHOUW.usersys.redhat.com>
+Received: from aserp1050.oracle.com ([141.146.126.70]:27058 "EHLO
+        aserp1050.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751378AbdB1Fh3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 28 Feb 2017 00:37:29 -0500
+Date: Mon, 27 Feb 2017 21:35:48 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] xfs/004: relax freespace check
+Message-ID: <20170228053548.GH5297@birch.djwong.org>
+References: <20170228005235.9839-1-hch@lst.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170228032556.dc5d26cldwku4puw@XZHOUW.usersys.redhat.com>
+In-Reply-To: <20170228005235.9839-1-hch@lst.de>
 Sender: fstests-owner@vger.kernel.org
-To: Xiong Zhou <xzhou@redhat.com>
-Cc: linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, fstests@vger.kernel.org
+To: Christoph Hellwig <hch@lst.de>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Feb 28, 2017 at 11:25:56AM +0800, Xiong Zhou wrote:
+On Mon, Feb 27, 2017 at 04:52:35PM -0800, Christoph Hellwig wrote:
+> Just check for a greater equals relation so that we don't have
+> to adjust the test for every new reservation scheme we add..
 > 
-> On latest Linus tree, xfstests generic/04{4,5,6} fails.
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-Yes, that's known issue.  generic/04[456] were originally XFS specific
-tests, and they have have assumptions about the implementation of the
-underlying file system.
+Looks good!
 
-We have a few of those at the moment in kvm-xfstests/gce-xfstests's
-exclude file:
+Tired-of-fixing-this-so-hooray: Darrick J. Wong <darrick.wong@oracle.com>
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-https://git.kernel.org/cgit/fs/ext2/xfstests-bld.git/tree/kvm-xfstests/test-appliance/files/root/fs/ext4/exclude
+--D
 
-# generic/042 and generic/392 are failing because ext4 forces the
-# resolution of all delayed allocation writes before allowing the
-# punch operation to proceed.  We probably want to see if we can avoid
-# this for the future, but what ext4 is doing is legal, so just skip
-# the test for now
-generic/042
-generic/392
-
-# generic/04[456] tests how truncate and delayed allocation works
-# ext4 uses the data=ordered to avoid exposing stale data, and
-# so it uses a different mechanism than xfs.  So these tests will fail
-generic/044
-generic/045
-generic/046
-
-# generic/223 tests file alignment, which works on ext4 only by
-# accident because we're not RAID stripe aware yet, and works at all
-# because we have bias towards aligning on power-of-two block numbers.
-# It is a flaky test for some configurations, so skip it.
-generic/223
-
-# ext4/304 fails for all configurations, and this appears to be at
-# test or fio bug.
-#
-ext4/304
-
-Cheers,
-
-						- Ted
+> ---
+>  tests/xfs/004 | 7 ++-----
+>  1 file changed, 2 insertions(+), 5 deletions(-)
+> 
+> diff --git a/tests/xfs/004 b/tests/xfs/004
+> index bbc1aee3..f27f4b79 100755
+> --- a/tests/xfs/004
+> +++ b/tests/xfs/004
+> @@ -83,18 +83,15 @@ eval `$XFS_IO_PROG -x -c resblks $SCRATCH_MNT 2>&1 \
+>  echo "resblks gave: resblks=$resblks" >>$seqres.full
+>  
+>  # check the 'blocks' field from freesp command is OK
+> -#  - starting with Linux 4.10-rc the bmbt split reservation moved to be per-AG
+>  perl -ne '
+>  	BEGIN	{ $avail ='$avail' * 512 + ('$resblks' * '$dbsize');
+>  		  $answer="(no xfs_db free blocks line?)" }
+>  	/free blocks (\d+)$/	|| next;
+>  	$freesp = $1 * '$dbsize';
+> -	if ($freesp == $avail + ('$agcount') * '$dbsize' * 8) {
+> -		$answer = "yes";
+> -	} elsif ($freesp == $avail + (('$agcount' + 1) * '$dbsize' * 4)) {
+> +	if ($freesp >= $avail) {
+>  		$answer = "yes";
+>  	} else {
+> -		$answer = "no ($freesp != $avail)";
+> +		$answer = "no ($freesp < $avail)";
+>  	}
+>  	END	{ print "$answer\n" }
+>  	' <$tmp.xfs_db >$tmp.ans
+> -- 
+> 2.11.0
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
