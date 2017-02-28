@@ -1,311 +1,97 @@
-Received: from mx1.redhat.com ([209.132.183.28]:33170 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751663AbdB1JAO (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 28 Feb 2017 04:00:14 -0500
-Date: Tue, 28 Feb 2017 16:46:12 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 4/4] xfs: stress test xfs_scrub
-Message-ID: <20170228084612.GH16443@eguan.usersys.redhat.com>
-References: <148798515933.25833.2842247083803775089.stgit@birch.djwong.org>
- <148798518415.25833.11653991983531432757.stgit@birch.djwong.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <148798518415.25833.11653991983531432757.stgit@birch.djwong.org>
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:33128 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751737AbdB1MUQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 28 Feb 2017 07:20:16 -0500
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH v5 03/10] fstests: canonicalize mount points on every config section
+Date: Tue, 28 Feb 2017 14:18:30 +0200
+Message-Id: <1488284317-3119-4-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1488284317-3119-1-git-send-email-amir73il@gmail.com>
+References: <1488284317-3119-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Xiong Zhou <xzhou@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Feb 24, 2017 at 05:13:04PM -0800, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> Three new tests:
-> 
-> - Repair files that are mapped into memory in running programs
-> - Run scrub -n concurrently with fsstress
-> - Run scrub -y concurrently with fsstress
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  tests/xfs/1375     |   69 +++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/1375.out |    3 ++
->  tests/xfs/1376     |   83 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/1376.out |    4 ++
->  tests/xfs/1377     |   84 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/1377.out |    4 ++
->  tests/xfs/group    |    3 ++
->  7 files changed, 250 insertions(+)
->  create mode 100755 tests/xfs/1375
->  create mode 100644 tests/xfs/1375.out
->  create mode 100755 tests/xfs/1376
->  create mode 100644 tests/xfs/1376.out
->  create mode 100755 tests/xfs/1377
->  create mode 100644 tests/xfs/1377.out
-> 
-> 
-> diff --git a/tests/xfs/1375 b/tests/xfs/1375
-> new file mode 100755
-> index 0000000..d3119ef
-> --- /dev/null
-> +++ b/tests/xfs/1375
-> @@ -0,0 +1,69 @@
-> +#! /bin/bash
-> +# FS QA Test No. 1375
-> +#
-> +# Copy xfs_scrub to the scratch device, then run xfs_scrub in forced
-> +# repair mode (which will rebuild the data forks of the running scrub
-> +# executable and libraries!) to see what happens.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Oracle, Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1335  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 7 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -rf $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_supported_fs xfs
-> +_require_command /usr/bin/ldd "ldd"
+Create helper _canonicalize_mountpoint() to check and canonicalize
+a mount point path.
+Use helper to canonicalize TEST_DIR and SCRATCH_MNT after parse
+of every config section.
 
-Introduce a new LDD_PROG? So that the path of ldd is set by
-set_prog_path not hardcoded.
+This is needed for overlay base fs mount.
 
-> +_require_scrub
-> +_require_scratch
-> +_require_xfs_io_error_injection "force_repair"
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ common/config | 34 +++++++++++++++++++++-------------
+ 1 file changed, 21 insertions(+), 13 deletions(-)
 
-Seems error injection is not used in this test.
+diff --git a/common/config b/common/config
+index 3ef401b..c402576 100644
+--- a/common/config
++++ b/common/config
+@@ -455,6 +455,20 @@ _check_device()
+ 	fi
+ }
+ 
++# check and return a canonical mount point path
++_canonicalize_mountpoint()
++{
++	local name=$1
++	local dir=$2
++
++	if [ ! -d "$dir" ]; then
++		_fatal "common/config: $name ($dir) is not a directory"
++	fi
++
++	# this follows symlinks and removes all trailing "/"s
++	readlink -e "$dir"
++}
++
+ # Parse config section options. This function will parse all the configuration
+ # within a single section which name is passed as an argument. For section
+ # name format see comments in get_config_sections().
+@@ -543,10 +557,7 @@ get_next_config() {
+ 	fi
+ 
+ 	_check_device TEST_DEV required $TEST_DEV
+-	if [ ! -d "$TEST_DIR" ]; then
+-		echo "common/config: Error: \$TEST_DIR ($TEST_DIR) is not a directory"
+-		exit 1
+-	fi
++	export TEST_DIR=`_canonicalize_mountpoint TEST_DIR $TEST_DIR`
+ 
+ 	# a btrfs tester will set only SCRATCH_DEV_POOL, we will put first of its dev
+ 	# to SCRATCH_DEV and rest to SCRATCH_DEV_POOL to maintain the backward compatibility
+@@ -561,10 +572,7 @@ get_next_config() {
+ 	fi
+ 
+ 	_check_device SCRATCH_DEV optional $SCRATCH_DEV
+-	if [ ! -z "$SCRATCH_MNT" -a ! -d "$SCRATCH_MNT" ]; then
+-		echo "common/config: Error: \$SCRATCH_MNT ($SCRATCH_MNT) is not a directory"
+-		exit 1
+-	fi
++	export SCRATCH_MNT=`_canonicalize_mountpoint SCRATCH_MNT $SCRATCH_MNT`
+ 
+ 	if [ -n "$USE_EXTERNAL" ]; then
+ 		_check_device TEST_RTDEV optional $TEST_RTDEV
+@@ -591,12 +599,12 @@ if [ -z "$CONFIG_INCLUDED" ]; then
+ 	[ -z "$TEST_FS_MOUNT_OPTS" ] && _test_mount_opts
+ 	[ -z "$MKFS_OPTIONS" ] && _mkfs_opts
+ 	[ -z "$FSCK_OPTIONS" ] && _fsck_opts
++else
++	# canonicalize the mount points
++	# this follows symlinks and removes all trailing "/"s
++	export TEST_DIR=`_canonicalize_mountpoint TEST_DIR $TEST_DIR`
++	export SCRATCH_MNT=`_canonicalize_mountpoint SCRATCH_MNT $SCRATCH_MNT`
+ fi
+ 
+-# canonicalize the mount points
+-# this follows symlinks and removes all trailing "/"s
+-export TEST_DIR=`readlink -e "$TEST_DIR"`
+-export SCRATCH_MNT=`readlink -e "$SCRATCH_MNT"`
+-
+ # make sure this script returns success
+ /bin/true
+-- 
+2.7.4
 
-> +
-> +echo "Format and populate"
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_scratch_mount
-> +cp $XFS_SCRUB_PROG $SCRATCH_MNT/xfs_scrub
-> +ldd $XFS_SCRUB_PROG | sed -e '/\//!d;/linux-gate/d;/=>/ {s/.*=>[[:blank:]]*\([^[:blank:]]*\).*/\1/};s/[[:blank:]]*\([^[:blank:]]*\) (.*)/\1/' | while read lib; do
-> +	cp $lib $SCRATCH_MNT/
-> +done
-> +LD_LIBRARY_PATH=$SCRATCH_MNT ldd $SCRATCH_MNT/xfs_scrub >> $seqres.full
-> +
-> +echo "Force online repairs"
-> +XFS_SCRUB_FORCE_REPAIR=1 LD_LIBRARY_PATH=$SCRATCH_MNT $SCRATCH_MNT/xfs_scrub -dTvy $SCRATCH_MNT >> $seqres.full
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/1375.out b/tests/xfs/1375.out
-> new file mode 100644
-> index 0000000..dd7025e
-> --- /dev/null
-> +++ b/tests/xfs/1375.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 1375
-> +Format and populate
-> +Force online repairs
-> diff --git a/tests/xfs/1376 b/tests/xfs/1376
-> new file mode 100755
-> index 0000000..f037b43
-> --- /dev/null
-> +++ b/tests/xfs/1376
-> @@ -0,0 +1,83 @@
-> +#! /bin/bash
-> +# FS QA Test No. 1376
-> +#
-> +# Race fio and xfs_scrub for a while to see if we crash or livelock.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Oracle, Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1335  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 7 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -rf $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_supported_fs xfs
-> +_require_scrub
-> +_require_scratch
-> +_require_command "$KILLALL_PROG" killall
-> +
-> +echo "Format and populate"
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_scratch_mount
-> +
-> +STRESS_DIR="$SCRATCH_MNT/testdir"
-> +mkdir -p $STRESS_DIR
-> +
-> +cpus=$((16 * LOAD_FACTOR))
-
-_require_test_program "feature"
-then
-cpus=$((`src/feature -o` * LOAD_FACTOR)) ?
-
-> +$FSSTRESS_PROG -d $STRESS_DIR -p $cpus -n $((cpus * 100000)) $FSSTRESS_AVOID >/dev/null 2>&1 &
-> +$XFS_SCRUB_PROG -d -T -v -n $SCRATCH_MNT >> $seqres.full
-> +
-> +killstress() {
-> +	sleep $(( 60 * LOAD_FACTOR ))
-
-There's a TIME_FACTOR for this, I think.
-
-> +	$KILLALL_PROG -q $FSSTRESS_PROG
-> +}
-> +
-> +echo "Concurrent scrub"
-> +start=$(date +%s)
-> +end=$((start + (60 * LOAD_FACTOR) ))
-> +killstress &
-> +echo "Scrub started at $(date --date="@${start}"), ending at $(date --date="@${end}")" >> $seqres.full
-> +while [ "$(date +%s)" -lt "$end" ]; do
-> +	timeout -s TERM $(( end - $(date +%s) + 2 )) $XFS_SCRUB_PROG -d -T -v -n $SCRATCH_MNT >> $seqres.full 2>&1
-
-Introduce TIMEOUT_PROG and _require it?
-
-> +done
-> +
-> +echo "Test done"
-> +echo "Scrub finished at $(date)" >> $seqres.full
-> +$KILLALL_PROG -q $FSSTRESS_PROG
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/1376.out b/tests/xfs/1376.out
-> new file mode 100644
-> index 0000000..155f424
-> --- /dev/null
-> +++ b/tests/xfs/1376.out
-> @@ -0,0 +1,4 @@
-> +QA output created by 1376
-> +Format and populate
-> +Concurrent scrub
-> +Test done
-> diff --git a/tests/xfs/1377 b/tests/xfs/1377
-> new file mode 100755
-> index 0000000..1e0814c
-> --- /dev/null
-> +++ b/tests/xfs/1377
-> @@ -0,0 +1,84 @@
-> +#! /bin/bash
-> +# FS QA Test No. 1377
-> +#
-> +# Race fio and xfs_scrub -y for a while to see if we crash or livelock.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Oracle, Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1335  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 7 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -rf $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_supported_fs xfs
-> +_require_scrub
-> +_require_scratch
-> +_require_command "$KILLALL_PROG" killall
-> +_require_xfs_io_error_injection "force_repair"
-
-Seems not used either.
-
-Comments to 1376 also apply to 1377 :)
-
-Thanks,
-Eryu
