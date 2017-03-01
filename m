@@ -1,59 +1,42 @@
-Received: from mx1.redhat.com ([209.132.183.28]:60760 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751824AbdCAErM (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 28 Feb 2017 23:47:12 -0500
-Date: Wed, 1 Mar 2017 11:47:36 +0800
+Date: Wed, 1 Mar 2017 11:33:16 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v5 0/10] fstests: new way to run overlay tests
-Message-ID: <20170301034736.GC14226@eguan.usersys.redhat.com>
-References: <1488284317-3119-1-git-send-email-amir73il@gmail.com>
+Subject: Re: [PATCH v2 4/4] xfs: stress test xfs_scrub
+Message-ID: <20170301033316.GB14226@eguan.usersys.redhat.com>
+References: <148798515933.25833.2842247083803775089.stgit@birch.djwong.org>
+ <148798518415.25833.11653991983531432757.stgit@birch.djwong.org>
+ <20170228205710.GC26275@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1488284317-3119-1-git-send-email-amir73il@gmail.com>
-Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, Xiong Zhou <xzhou@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+In-Reply-To: <20170228205710.GC26275@birch.djwong.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Feb 28, 2017 at 02:18:27PM +0200, Amir Goldstein wrote:
-> Hi Eryu,
+On Tue, Feb 28, 2017 at 12:57:10PM -0800, Darrick J. Wong wrote:
+> Three new tests:
 > 
-> I rebased my branch to your master and made some minor adaptations
-> to Xiong's new tests. Also reordered the patches:
+> - Repair files that are mapped into memory in running programs
+> - Run scrub -n concurrently with fsstress
+> - Run scrub -y concurrently with fsstress
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+> v2: fix checks for external programs per eryu guan's recommendations
+> ---
+[snip]
+> +
+> +killstress() {
+> +	sleep $(( 60 * TIME_FACTOR ))
+> +	$KILLALL_PROG -q $FSSTRESS_PROG
+> +}
+> +
+> +echo "Concurrent scrub"
+> +start=$(date +%s)
+> +end=$((start + (60 * LOAD_FACTOR) ))
 
-Thanks for the resending! I was about to ask for it :)
+In 137[67], I think this should be TIME_FACTOR too. I can fix them at
+commit time if this change looks OK to you.
 
-> 
-> - patches 1-6 are generic fixes and re-factoring - if you wish,
->   you can merge them before the overlay config changes.
-> 
-> - patches 7-10 implement the new overlay config. patches 7 and 10
->   include adaptations of Xiong's new tests to new config.
-> 
-> This is the 5th revision of new overlayfs config.
-> The main motivation of this work is to help catch overlayfs bugs
-> related to leaking objects in underlying (base) fs.
-> 
-> With this change, all you have to do to run overlay tests if you
-> already have a local.config setup to test a local file system is:
->  ./check -overlay
-> 
-> See README.overlay for some examples of config files to use with -overlay.
-> 
-> The legacy overlayfs configuration, where TEST_DEV is a directory
-> still works, but it should be deprecated.
-> 
-> Tested ./check -overlay -g quick with both legacy overlay configuration
-> and the new base fs configuration.
-> 
-> Eryu wished to keep these changes soaking on the list for while,
-> so for those who can help with testing, you can get pull the branch
-> for testing from my github tree [1].
-
-I was planning to pull them in via this week's update, if there's no
-objections.
-
-Thanks again for the work!
-
+Thanks,
 Eryu
