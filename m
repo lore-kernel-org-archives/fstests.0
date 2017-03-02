@@ -1,96 +1,93 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:27735 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1750910AbdCBGw6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 2 Mar 2017 01:52:58 -0500
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v3] ext4: add _require_ext4_mkfs_feature to check different features
-Date: Thu, 2 Mar 2017 14:03:12 +0800
-Message-ID: <1488434592-12834-1-git-send-email-yangx.jy@cn.fujitsu.com>
-In-Reply-To: <20170302042212.GI14226@eguan.usersys.redhat.com>
-References: <20170302042212.GI14226@eguan.usersys.redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:47508 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754228AbdCBJAK (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 2 Mar 2017 04:00:10 -0500
+Date: Thu, 2 Mar 2017 16:05:46 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 1/2] check: prepare test report generator infrastructure
+Message-ID: <20170302080546.GK14226@eguan.usersys.redhat.com>
+References: <1487681045-22884-1-git-send-email-dmonakhov@openvz.org>
+ <1487681045-22884-3-git-send-email-dmonakhov@openvz.org>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1487681045-22884-3-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com
-Cc: fstests@vger.kernel.org, Xiao Yang <yangx.jy@cn.fujitsu.com>
+To: Dmitry Monakhov <dmonakhov@openvz.org>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-1) We add _require_ext4_mkfs_feature to check the specified
-   feature whether it is available in mkfs.ext4 or not.
+On Tue, Feb 21, 2017 at 04:44:04PM +0400, Dmitry Monakhov wrote:
+> Save testcase data which later may be used by report generators
+> - Save failure reason to $err_msg variable
+> - Save number of notrun tests to $n_notrun counter, similar to $n_try,$n_bad
+> 
+> changes since v1:
+>  - add _dump_err[,2] _log_err helper functions
+> 
+> Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
 
-2) We apply _require_ext4_mkfs_feature in ext4/003 and remove
-   _require_mkfs_mkfs_bigalloc.
+Sorry for the late review, and thanks for the update! Some minor
+comments inline.
 
-3) We add _require_ext4_mkfs_feature in ext4/306.  When 64bit
-   feature is supported by mkfs.ext4, ext4/306 could skip.
+> ---
+>  check         | 31 +++++++++++++++++++++----------
+>  common/btrfs  |  8 ++------
+>  common/config | 19 +++++++++++++++++++
+>  common/rc     | 14 +++++++-------
+>  common/xfs    | 22 ++++++----------------
+>  5 files changed, 55 insertions(+), 39 deletions(-)
+> 
+> diff --git a/check b/check
+> index 5a93c94..8ee2f6f 100755
+> --- a/check
+> +++ b/check
+[snip]
+> diff --git a/common/config b/common/config
+> index 03c2f9f..66b1972 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -128,6 +128,25 @@ _fatal()
+>      exit 1
+>  }
+>  
+> +_dump_err()
+> +{
+> +    err_msg="$*"
+> +    echo "$err_msg"
+> +}
+> +
+> +_dump_err2()
+> +{
+> +    err_msg="$*"
+> +    >2& echo "$err_msg"
+> +}
+> +
+> +_log_err()
+> +{
+> +    err_msg="$*"
+> +    echo "$err_msg" | tee -a $seqres.full
+> +    echo "(see $seqres.full for details)"
+> +}
+> +
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
- common/rc      | 21 ++++++++++++++++-----
- tests/ext4/003 |  2 +-
- tests/ext4/306 |  1 +
- 3 files changed, 18 insertions(+), 6 deletions(-)
+I think these functions belong to common/rc
 
-diff --git a/common/rc b/common/rc
-index 8f23334..cba7b84 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1669,12 +1669,23 @@ _require_scratch_ext4_crc()
- 	_scratch_unmount
- }
- 
--# this test requires the bigalloc feature to be available in mkfs.ext4
--#
--_require_ext4_mkfs_bigalloc()
-+# Check the specified feature whether it is available in mkfs.ext4 or not.
-+_require_ext4_mkfs_feature()
- {
--	$MKFS_EXT4_PROG -F -O bigalloc -n $SCRATCH_DEV 512m >/dev/null 2>&1 \
--	   || _notrun "mkfs.ext4 doesn't have bigalloc feature"
-+	local feature=$1
-+	local testfile=$TEST_DIR/$$.ext4_mkfs
-+
-+	if [ -z "$feature" ]; then
-+                echo "Usage: _require_ext4_mkfs_feature feature"
-+                exit 1
-+        fi
-+
-+	touch $testfile
-+	local result=$($MKFS_EXT4_PROG -F -O $feature -n $testfile 512m 2>&1)
-+	echo $result | grep -q "Invalid filesystem option" && \
-+		_notrun "mkfs.ext4 doesn't support $feature feature"
-+
-+	rm -f $testfile
- }
- 
- # this test requires the ext4 kernel support bigalloc feature
-diff --git a/tests/ext4/003 b/tests/ext4/003
-index 53875a9..9be4017 100755
---- a/tests/ext4/003
-+++ b/tests/ext4/003
-@@ -38,7 +38,7 @@ _supported_fs ext4
- _supported_os Linux
- 
- _require_scratch
--_require_ext4_mkfs_bigalloc
-+_require_ext4_mkfs_feature "bigalloc"
- _require_ext4_bigalloc
- 
- rm -f $seqres.full
-diff --git a/tests/ext4/306 b/tests/ext4/306
-index fa3b782..be765e6 100755
---- a/tests/ext4/306
-+++ b/tests/ext4/306
-@@ -44,6 +44,7 @@ _supported_fs ext4
- _supported_os Linux
- 
- _require_scratch
-+_require_ext4_mkfs_feature "64bit"
- 
- rm -f $seqres.full
- 
--- 
-1.8.3.1
+>  export MKFS_PROG="`set_prog_path mkfs`"
+>  [ "$MKFS_PROG" = "" ] && _fatal "mkfs not found"
+>  
+> diff --git a/common/rc b/common/rc
+> index ec59b88..ec9b2a0 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1052,7 +1052,9 @@ _repair_scratch_fs()
+>  		_scratch_xfs_repair "$@" 2>&1
+>  		res=$?
+>  	fi
+> -	test $res -ne 0 && >&2 echo "xfs_repair failed, err=$res"
+> +	if [ test $res -ne 0]; then
 
+Use "[" or "test", not both :) , and need a space before "]".
 
-
+Thanks,
+Eryu
