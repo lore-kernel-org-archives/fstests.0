@@ -1,146 +1,96 @@
-Received: from mx1.redhat.com ([209.132.183.28]:33412 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750714AbdCBFjM (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 2 Mar 2017 00:39:12 -0500
-Date: Thu, 2 Mar 2017 13:32:01 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2] generic/414: reflink concurrent operations
-Message-ID: <20170302053201.GJ14226@eguan.usersys.redhat.com>
-References: <1488377434-12064-1-git-send-email-nave.vardy@plexistor.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:27735 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1750910AbdCBGw6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 2 Mar 2017 01:52:58 -0500
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH v3] ext4: add _require_ext4_mkfs_feature to check different features
+Date: Thu, 2 Mar 2017 14:03:12 +0800
+Message-ID: <1488434592-12834-1-git-send-email-yangx.jy@cn.fujitsu.com>
+In-Reply-To: <20170302042212.GI14226@eguan.usersys.redhat.com>
+References: <20170302042212.GI14226@eguan.usersys.redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1488377434-12064-1-git-send-email-nave.vardy@plexistor.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Nave Vardy <nave.vardy@plexistor.com>
-Cc: fstests@vger.kernel.org
+To: eguan@redhat.com
+Cc: fstests@vger.kernel.org, Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Mar 01, 2017 at 04:10:34PM +0200, Nave Vardy wrote:
-> reflink: concurrent operations test
-> 
-> perform read operation on the target file while
-> doing write or fpunch operations on the reflinks.
-> 
-> Signed-off-by: Nave Vardy <nave.vardy@plexistor.com>
-> ---
-> 
-> This is the V2 of [PATCH] generic/409: reflink concurrent operations
-> 
-> v2:
->  - change file's permissions to 755
->  - use _require_fs_space()
->  - use _get_block_size() instead of hard-coded 4096
->  - use _cp_reflink instead of cp --reflink
->  - increase loop concurrency by doing more preads from the target file
->  - remove test from group quick
+1) We add _require_ext4_mkfs_feature to check the specified
+   feature whether it is available in mkfs.ext4 or not.
 
-Thanks for the update!
+2) We apply _require_ext4_mkfs_feature in ext4/003 and remove
+   _require_mkfs_mkfs_bigalloc.
 
-> 
->  tests/generic/414     | 97 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/414.out |  2 ++
->  tests/generic/group   |  1 +
->  3 files changed, 100 insertions(+)
->  create mode 100755 tests/generic/414
->  create mode 100644 tests/generic/414.out
-> 
-> diff --git a/tests/generic/414 b/tests/generic/414
-> new file mode 100755
-> index 0000000..d3c368b
-> --- /dev/null
-> +++ b/tests/generic/414
-> @@ -0,0 +1,97 @@
-> +#!/bin/bash
-> +# FS QA Test No. 414
-> +#
-> +# test for races between write or fpunch operations on reflinked files
-> +# to read operations on the target file
-> +#
-> +#-----------------------------------------------------------------------
-> +#
-> +# Copyright (c) 2017 Plexistor Ltd. All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#
-> +#-----------------------------------------------------------------------
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=0    # success is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/reflink
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch_reflink
-> +_require_cp_reflink
-> +_require_fs_space $SCRATCH_MNT $((250 * 1024))
+3) We add _require_ext4_mkfs_feature in ext4/306.  When 64bit
+   feature is supported by mkfs.ext4, ext4/306 could skip.
 
-We should check SCRATCH_MNT free space *after* mounting SCRATCH_DEV,
-i.e. _scratch_mount
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+---
+ common/rc      | 21 ++++++++++++++++-----
+ tests/ext4/003 |  2 +-
+ tests/ext4/306 |  1 +
+ 3 files changed, 18 insertions(+), 6 deletions(-)
 
-> +
-> +_scratch_mkfs_sized $((250 * 1024 ** 2)) >> $seqres.full 2>&1 \
+diff --git a/common/rc b/common/rc
+index 8f23334..cba7b84 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1669,12 +1669,23 @@ _require_scratch_ext4_crc()
+ 	_scratch_unmount
+ }
+ 
+-# this test requires the bigalloc feature to be available in mkfs.ext4
+-#
+-_require_ext4_mkfs_bigalloc()
++# Check the specified feature whether it is available in mkfs.ext4 or not.
++_require_ext4_mkfs_feature()
+ {
+-	$MKFS_EXT4_PROG -F -O bigalloc -n $SCRATCH_DEV 512m >/dev/null 2>&1 \
+-	   || _notrun "mkfs.ext4 doesn't have bigalloc feature"
++	local feature=$1
++	local testfile=$TEST_DIR/$$.ext4_mkfs
++
++	if [ -z "$feature" ]; then
++                echo "Usage: _require_ext4_mkfs_feature feature"
++                exit 1
++        fi
++
++	touch $testfile
++	local result=$($MKFS_EXT4_PROG -F -O $feature -n $testfile 512m 2>&1)
++	echo $result | grep -q "Invalid filesystem option" && \
++		_notrun "mkfs.ext4 doesn't support $feature feature"
++
++	rm -f $testfile
+ }
+ 
+ # this test requires the ext4 kernel support bigalloc feature
+diff --git a/tests/ext4/003 b/tests/ext4/003
+index 53875a9..9be4017 100755
+--- a/tests/ext4/003
++++ b/tests/ext4/003
+@@ -38,7 +38,7 @@ _supported_fs ext4
+ _supported_os Linux
+ 
+ _require_scratch
+-_require_ext4_mkfs_bigalloc
++_require_ext4_mkfs_feature "bigalloc"
+ _require_ext4_bigalloc
+ 
+ rm -f $seqres.full
+diff --git a/tests/ext4/306 b/tests/ext4/306
+index fa3b782..be765e6 100755
+--- a/tests/ext4/306
++++ b/tests/ext4/306
+@@ -44,6 +44,7 @@ _supported_fs ext4
+ _supported_os Linux
+ 
+ _require_scratch
++_require_ext4_mkfs_feature "64bit"
+ 
+ rm -f $seqres.full
+ 
+-- 
+1.8.3.1
 
-We use _require_fs_space to make sure there's enough space, no need to
-mkfs a specific sized filesystem then.
 
-> +					|| _fail "mkfs failed"
-> +_scratch_mount || _fail "mount failed"
 
-So this part should be like:
-
-_scratch_mkfs
-_scratch_mount
-_require_fs_space $SCRATCH_MNT $((250 * 1024))
-
-> +
-> +echo "Silence is golden"
-> +
-> +workfile=${SCRATCH_MNT}/workfile
-> +light_clone=${SCRATCH_MNT}/light_clone
-> +
-> +file_size=$((10 * 1024 * 1024))
-> +bs=`_get_block_size $SCRATCH_MNT`
-> +block_num=$((file_size / bs))
-> +reflinks_num=20
-> +
-> +$XFS_IO_PROG -f -c "pwrite 0 $file_size" $workfile >> $seqres.full
-> +
-> +for ((i=1; i<=reflinks_num; i++));
-> +do
-
-fstests prefers putting "do" to the end of for loop :)
-
-No need to send a new version, I can fix them at commit time.
-
-Thanks,
-Eryu
