@@ -1,429 +1,90 @@
-Received: from mx1.redhat.com ([209.132.183.28]:56428 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:50742 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754427AbdCBJH4 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 2 Mar 2017 04:07:56 -0500
-Date: Thu, 2 Mar 2017 16:13:22 +0800
+        id S1751141AbdCBQdr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 2 Mar 2017 11:33:47 -0500
+Date: Fri, 3 Mar 2017 00:32:01 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/2] report: Add xunit format report generator
-Message-ID: <20170302081322.GL14226@eguan.usersys.redhat.com>
-References: <1487681045-22884-1-git-send-email-dmonakhov@openvz.org>
- <1487681045-22884-4-git-send-email-dmonakhov@openvz.org>
+Subject: Re: _fiemap_filter awk brokeness causing test failures
+Message-ID: <20170302163201.GO14226@eguan.usersys.redhat.com>
+References: <30ba15cb-0503-5337-b447-f1228d431534@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1487681045-22884-4-git-send-email-dmonakhov@openvz.org>
+In-Reply-To: <30ba15cb-0503-5337-b447-f1228d431534@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dmitry Monakhov <dmonakhov@openvz.org>
+To: Nikolay Borisov <nborisov@suse.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Feb 21, 2017 at 04:44:05PM +0400, Dmitry Monakhov wrote:
-> xunit[1]/junit[2] are well known report formats for tests frameworks which
-> supported by most of test CI frameworks(such as Jenkins [3], Bamboo [4], Avocado [5])
-> Basically this is just xml document which can be easily parsed later by external tools.
+Hi,
+
+On Wed, Mar 01, 2017 at 06:48:04PM +0200, Nikolay Borisov wrote:
+> Hello,
 > 
-> changes since v1:
->  - Use generic '-R fmt' option for report generation, asked by eguan@
->  - localize variables, asked by eguan@
->  - do not add empty files to report asked by eguan@
->  - Add properties
->  - Fix system-err/system-out node nesting
+> Running the script at http://paste.opensuse.org/6056e809 produces the
+> following output:
 > 
-> EXAMPLE:
-> #./check -R xunit -s ext4 generic/001 generic/010
-> #cat results/ext4/result.xml
-> <?xml version="1.0" encoding="UTF-8"?>
-> <testsuite name="xfstests" errors="0" skipped="1" tests="2" time="7"  hostname="alice" timestamp="2017-02-21T15:15:06"  >
-> 	<properties>
-> 		<property name="SECTION" value="ext4"/>
-> 		<property name="FSTYP" value="ext4"/>
-> 		<property name="MOUNT_OPTIONS" value="-o acl,user_xattr "/>
-> 		<property name="HOST_OPTIONS" value="/devel/xfstests-dev.git/configs/alice.config"/>
-> 		<property name="XFS_MKFS_OPTIONS" value="-bsize=4096"/>
-> 		<property name="TIME_FACTOR" value="1"/>
-> 		<property name="LOAD_FACTOR" value="1"/>
-> 		<property name="TEST_DIR" value="/mnt/test"/>
-> 		<property name="TEST_DEV" value="/dev/ram0"/>
-> 		<property name="SCRATCH_DEV" value="/dev/ram1"/>
-> 		<property name="SCRATCH_MNT" value="/mnt/scratch"/>
-> 		<property name="OVERLAY_UPPER_DIR" value="upper"/>
-> 		<property name="OVERLAY_LOWER_DIR" value="lower"/>
-> 		<property name="OVERLAY_WORK_DIR" value="work"/>
-> 	</properties>
-> 	<testcase classname="xfstests.ext4" name="generic/001" time="5">
-> 	</testcase>
-> 	<testcase classname="xfstests.ext4" name="generic/010" time="1">
-> 		<skipped message="src/dbtest not built" />
-> 	</testcase>
-> </testsuite>
+> root@ubuntu-virtual:~/xfstests-dev# ./test.sh /media/test/file1
+> 0: [0..39]: hole
 > 
-> Footnotes:
-> [1] https://xunit.github.io/docs/format-xml-v2.html
-> [2] http://help.catchsoftware.com/display/ET/JUnit+Format
-> [3] https://jenkins.io
-> [4] https://www.atlassian.com/software/bamboo
-> [5] https://github.com/avocado-framework/avocado
+> However, if I run the xfs_io -c "fiemap -v" command I get something
+> different:
 > 
-> Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
-> ---
->  check         |  38 +++++++++++---
->  common/rc     |   5 +-
->  common/report | 161 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  3 files changed, 195 insertions(+), 9 deletions(-)
->  create mode 100644 common/report
+> root@ubuntu-virtual:~/xfstests-dev# xfs_io -c "fiemap -v" /media/test/file1
+> /media/test/file1:
+>  EXT: FILE-OFFSET      BLOCK-RANGE      TOTAL FLAGS
+>    0: [0..7]:          hole                 8
+>    1: [8..23]:         192..207            16 0x801
+>    2: [24..39]:        hole                16
 > 
-> diff --git a/check b/check
-> index 8ee2f6f..bd2d763 100755
-> --- a/check
-> +++ b/check
-> @@ -39,7 +39,7 @@ export here=`pwd`
->  xfile=""
->  brief_test_summary=false
->  err_msg=""
-> -
-> +do_report=false
->  DUMP_OUTPUT=false
->  
->  # start the initialisation work now
-> @@ -54,7 +54,7 @@ export DIFF_LENGTH=${DIFF_LENGTH:=10}
->  # by default don't output timestamps
->  timestamp=${TIMESTAMP:=false}
->  
-> -rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist
-> +rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.*
->  
->  SRC_GROUPS="generic shared"
->  export SRC_DIR="tests"
-> @@ -75,6 +75,7 @@ check options
->      -r			randomize test order
->      -d			dump test output to stdout
->      -b			brief test summary
-> +    -R fmt[,fmt]	generate report in formats specified. Supported format: [xunit]
->      --large-fs		optimise scratch device for large filesystems
->      -s section		run only specified section from config file
->      -S section		exclude the specified section from the config file
-> @@ -295,7 +296,10 @@ while [ $# -gt 0 ]; do
->  	-T)	timestamp=true ;;
->  	-d)	DUMP_OUTPUT=true ;;
->  	-b)	brief_test_summary=true;;
-> -
-> +	-R)	report_fmt=$2 ; shift ;
-> +		REPORT_LIST="$REPORT_LIST ${report_fmt//,/ }"
-> +		do_report=true
-> +		;;
->  	--large-fs) export LARGE_SCRATCH_DEV=yes ;;
->  	--extra-space=*) export SCRATCH_DEV_EMPTY_SPACE=${r#*=} ;;
+> 
+> Finally, if I remove the invocation of _coalesce_extents in the script I
+> get:
+> root@ubuntu-virtual:~/xfstests-dev# ./test.sh /media/test/file1
+> 0: [0..7]: hole
+> 2: [24..39]: hole
+> 
+> 
+> The script is a streamlined version of _test_generic_punc into a whole.
+> However, due to the wrong output it's causing this particular test to
+> fail and some other which deal with hole punching. The correct output
+> should be :
+> 
+> 0: [0..7]: hole
+> 1: [8..23]: unwritten
+> 2: [24..39]: hole
+> 
+> My AWK version is the default coming with ubuntu 16.04:
 
-I think we should check, somewhere before running tests, if the report
-format is supported, not after running the test. Right now it fails like
-below if I use "-R <random_string>"
+I haven't looked into these two filters deeply, but a quick test showed
+that mawk works fine for me too. But the mawk version is 1.3.4, and it's
+from RHEL7 epel repo.
 
-[root@dhcp-66-86-11 xfstests]# ./check -s xfs_4k_crc -R teststr generic/001 generic/002
-SECTION       -- xfs_4k_crc
-RECREATING    -- xfs on /dev/sda5
-FSTYP         -- xfs (non-debug)
-PLATFORM      -- Linux/x86_64 dhcp-66-86-11 4.10.0
-MKFS_OPTIONS  -- -f -f -b size=4k -m crc=1 /dev/sda6
-MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 /dev/sda6 /mnt/testarea/scratch
+# mawk -W version
+mawk 1.3.4 20131226
+Copyright 2013, Thomas E. Dickey
+Copyright 1996, Michael D. Brennan
 
-generic/001 7s ... 7s
-report format 'teststr' is not supported
-Ran: generic/001
-Interrupted!
-Passed all 1 tests
-report format 'teststr' is not supported
+internal regex
+compiled limits:
+max NF             32767
+sprintf buffer      2040
 
->  
-> @@ -380,7 +384,12 @@ _wrapup()
->  	check="$RESULT_BASE/check"
->  
->  	if $showme; then
-> -	:
-> +		if $needwrap; then
-> +			if $do_report; then
-> +				_make_section_report
-> +			fi
-> +			needwrap=false
-> +		fi
->  	elif $needwrap; then
->  		if [ -f $check.time -a -f $tmp.time ]; then
->  			cat $check.time $tmp.time  \
-> @@ -431,6 +440,9 @@ _wrapup()
->  			echo "Passed all $n_try tests" >>$tmp.summary
->  		fi
->  		echo "" >>$tmp.summary
-> +		if $do_report; then
-> +			_make_section_report
-> +		fi
->  		needwrap=false
->  	fi
->  
-> @@ -519,6 +531,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
->  		echo "SECTION       -- $section"
->  	fi
->  
-> +	sect_start=`_wallclock`
->  	if $RECREATE_TEST_DEV || [ "$OLD_FSTYP" != "$FSTYP" ]; then
->  		echo "RECREATING    -- $FSTYP on $TEST_DEV"
->  		_test_unmount 2> /dev/null
-> @@ -623,11 +636,12 @@ for section in $HOST_OPTIONS_SECTIONS; do
->  	    group=`dirname $seq`
->  	    if $OPTIONS_HAVE_SECTIONS; then
->  		export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;${RESULT_BASE}/$section;"`
-> -		seqres="$RESULT_BASE/$section/$seqnum"
-> +		REPORT_DIR="$RESULT_BASE/$section"
->  	    else
->  		export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;$RESULT_BASE;"`
-> -		seqres="$RESULT_BASE/$seqnum"
-> +		REPORT_DIR="$RESULT_BASE"
->  	    fi
-> +	    seqres="$REPORT_DIR/$seqnum"
->  
->  	    mkdir -p $RESULT_DIR
->  
-> @@ -638,9 +652,12 @@ for section in $HOST_OPTIONS_SECTIONS; do
->  		start=0
->  		stop=0
->  		n_notrun=`expr $n_notrun + 1`
-> +		if $do_report; then
-> +			_make_testcase_report "list"
-> +		fi
->  		continue
->  	    fi
-> -
-> +	    tc_status="pass"
->  	    if [ ! -f $seq ]; then
->  		echo " - no such test?"
->  	    else
-> @@ -704,6 +721,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
->  		    cat $seqres.notrun
->  		    notrun="$notrun $seqnum"
->  		    n_notrun=`expr $n_notrun + 1`
-> +		    tc_status="notrun"
->  		else
->  		    if [ $sts -ne 0 ]
->  		    then
-> @@ -762,10 +780,14 @@ for section in $HOST_OPTIONS_SECTIONS; do
->  		bad="$bad $seqnum"
->  		n_bad=`expr $n_bad + 1`
->  		quick=false
-> +		tc_status="fail"
-> +	    fi
-> +	    if $do_report; then
-> +		_make_testcase_report "$tc_status"
->  	    fi
-> -
->  	    seq="after_$seqnum"
->  	done
-> +	sect_stop=`_wallclock`
->  	_wrapup
->  	echo
->  
-> diff --git a/common/rc b/common/rc
-> index ec9b2a0..6ac8ea3 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -155,6 +155,10 @@ case "$FSTYP" in
->  	 ;;
->  esac
->  
-> +if [ ! -z "$REPORT_LIST" ]; then
-> +   . ./common/report
-> +fi
-> +
->  _mount()
->  {
->      $MOUNT_PROG `_mount_ops_filter $*`
-> @@ -3297,7 +3301,6 @@ _get_fs_sysfs_attr()
->  }
->  
->  
-> -
->  init_rc
->  
->  ################################################################################
-> diff --git a/common/report b/common/report
-> new file mode 100644
-> index 0000000..1a1eadd
-> --- /dev/null
-> +++ b/common/report
-> @@ -0,0 +1,161 @@
-> +#
-> +# Reports generator funcitons lives here
-> +#
-> +
-> +# List of xfstests's enviroment variables to include reports
-> +## TODO automate list population inside common/conf
-> +REPORT_ENV_LIST="$REPORT_ENV_LIST SECTION"
-> +REPORT_ENV_LIST="$REPORT_ENV_LIST FSTYP"
-> +REPORT_ENV_LIST="$REPORT_ENV_LIST PLATFORM"
-> +REPORT_ENV_LIST="$REPORT_ENV_LIST MKFS_OPTIONS"
-> +REPORT_ENV_LIST="$REPORT_ENV_LIST MOUNT_OPTIONS"
-> +
-> +REPORT_ENV_LIST="$REPORT_ENV_LIST HOST_OPTIONS"
-> +REPORT_ENV_LIST="$REPORT_ENV_LIST CHECK_OPTIONS"
-> +REPORT_ENV_LIST="$REPORT_ENV_LIST XFS_MKFS_OPTIONS"
-> +REPORT_ENV_LIST="$REPORT_ENV_LIST TIME_FACTOR"
-> +REPORT_ENV_LIST="$REPORT_ENV_LIST LOAD_FACTOR"
-> +
-> +REPORT_ENV_LIST="$REPORT_ENV_LIST TEST_DIR"
-> +REPORT_ENV_LIST="$REPORT_ENV_LIST TEST_DEV"
-> +REPORT_ENV_LIST="$REPORT_ENV_LIST SCRATCH_DEV"
-> +REPORT_ENV_LIST="$REPORT_ENV_LIST SCRATCH_MNT"
-> +
-> +REPORT_ENV_LIST="$REPORT_ENV_LIST OVERLAY_UPPER_DIR"
-> +REPORT_ENV_LIST="$REPORT_ENV_LIST OVERLAY_LOWER_DIR"
-> +REPORT_ENV_LIST="$REPORT_ENV_LIST OVERLAY_WORK_DIR"
-> +
-> +#
-> +# Xunit format report functions
-> +_xunit_add_property()
-> +{
-> +    local name="$1"
-> +    local value="${!name}"
-> +
-> +    if [ ! -z "$value" ]; then
-> +	echo -e "\t\t<property name=\"$name\" value=\"$value\"/>" >> $REPORT_DIR/result.xml
-> +    fi
-> +}
-
-Please use one tab for indention for new code, common/report is a new
-file, we don't have to worry about legacy code :)
-
-> +_xunit_make_section_report()
-> +{
-> +	# xfstest:section ==> xunit:testsuite
-> +	local sect_name=$section
-> +	local sect_time=`expr $sect_stop - $sect_start`
-> +	local n_total=`expr $n_try + $n_notrun`
-> +
-> +	if [ $sect_name == '-no-sections-' ]; then
-> +	    sect_name='global'
-> +	fi
-> +	local report=$tmp.report.xunit.$sect_name.xml
-> +	#Header
-> +	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $REPORT_DIR/result.xml
-> +	local dtime=`echo $date_time| tr  " " 'T'`
-> +	local stats="errors=\"$n_bad\" skipped=\"$n_notrun\" tests=\"$n_total\" time=\"$sect_time\""
-> +	local hw_info="hostname=\"$HOST\" timestamp=\"$dtime\" "
-> +	echo "<testsuite name=\"xfstests\" $stats  $hw_info >" >> $REPORT_DIR/result.xml
-> +	#Properties
-> +
-> +	echo -e "\t<properties>" >> $REPORT_DIR/result.xml
-> +	for p in $REPORT_ENV_LIST;do
-> +	    _xunit_add_property "$p"
-> +	done
-> +	echo -e "\t</properties>" >> $REPORT_DIR/result.xml
-> +	cat $tmp.report.xunit.$sect_name.xml >> $REPORT_DIR/result.xml
-> +	echo "</testsuite>" >> $REPORT_DIR/result.xml
-> +	echo "Xunit report: $REPORT_DIR/result.xml"
-> +}
-> +
-> +_xunit_make_testcase_report()
-> +{
-> +	local test_status="$1"
-> +	local test_time=`expr $stop - $start`
-> +	local strip="$SRC_DIR/"
-> +	local test_name=${seq#$strip}
-> +	local sect_name=$section
-> +
-> +	#TODO: other places may also win if no-section mode will be named like 'default/global'
-> +	if [ $sect_name == '-no-sections-' ]; then
-> +		sect_name='global'
-> +
-> +	fi
-> +	local report=$tmp.report.xunit.$sect_name.xml
-> +
-> +	echo -e "\t<testcase classname=\"xfstests.$sect_name\" name=\"$test_name\" time=\"$test_time\">" >> $report
-> +	case $test_status in
-> +		"pass")
-> +			;;
-> +		"notrun")
-> +			if [ -f $seqres.notrun ]; then
-> +			    local msg=`cat $seqres.notrun`
-> +			    echo -e "\t\t<skipped message=\"$msg\" />" >> $report
-> +			else
-> +				echo -e "\t\t<skipped/>" >> $report
-> +			fi
-> +			;;
-> +		"list")
-> +			echo -e "\t\t<skipped/>" >> $report
-> +			;;
-> +		"fail")
-> +			if [ -z "$err_msg" ]; then
-> +			    err_msg="Test $sequm failed, reason unknown"
-> +			fi
-> +			echo -e "\t\t<failure message=\"$err_msg\" type=\"TestFail\" />" >> $report
-> +			if [ -s $seqres.full ]; then
-> +			    echo -e "\t\t<system-out>" >> $report
-> +			    printf  '<![CDATA[\n' >>$report
-> +			    cat $seqres.full | tr -dc '[:print:][:space:]' >>$report
-> +			    printf ']]>\n'  >>$report
-> +			    echo -e "\t\t</system-out>" >> $report
-> +			fi
-> +			if [ -f $seqres.dmesg ]; then
-> +			    echo -e "\t\t<system-err>" >> $report
-> +			    printf  '<![CDATA[\n' >>$report
-> +			    cat $seqres.dmesg | tr -dc '[:print:][:space:]' >>$report
-> +			    printf ']]>\n'  >>$report
-> +			    echo -e "\t\t</system-err>" >> $report
-> +			elif [ -s $seqres.out.bad ]; then
-> +			    echo -e "\t\t<system-err>" >> $report
-> +			    printf  '<![CDATA[\n' >>$report
-> +			    $diff $seq.out $seqres.out.bad >>$report
-> +			    printf ']]>\n'  >>$report
-> +			    echo -e "\t\t</system-err>" >> $report
-> +			fi
-> +			;;
-> +		*)
-> +			echo -e "\t\t<failure message=\"Unknown ret_state=$ret_state\" type=\"TestFail\"/>" >> $report
-> +			;;
-> +	esac
-> +	echo -e "\t</testcase>" >> $report
-> +}
-> +
-> +
-> +#
-> +#  Common report generator entry points
-> +_make_section_report()
-> +{
-> +	for report in $REPORT_LIST; do
-> +		case "$report" in
-> +			"xunit")
-> +				_xunit_make_section_report "$test_status"
-> +				;;
-> +			*)
-> +				_fatal "report format '$report' is not supported"
-> +				;;
-
-If the supported report format has been checked before running tests, I
-think it's fine to do nothing here for unsupported format, or just give
-a warning?
+Perhaps that's an mawk bug caused the test failure?
 
 Thanks,
 Eryu
 
-> +		esac
-> +	done
-> +}
-> +
-> +_make_testcase_report()
-> +{
-> +	test_status="$1"
-> +	for report in $REPORT_LIST; do
-> +		case "$report" in
-> +			"xunit")
-> +				_xunit_make_testcase_report "$test_status"
-> +				;;
-> +			*)
-> +				_fatal "report format '$report' is not supported"
-> +				;;
-> +		esac
-> +	done
-> +}
-> -- 
-> 2.9.3
 > 
+> awk -W version
+> mawk 1.3.3 Nov 1996, Copyright (C) Michael D. Brennan
+> 
+> compiled limits:
+> max NF             32767
+> sprintf buffer      2040
+> 
+> However, if I install gawk the filter works as expected. Perhaps gawk
+> should be made a hard requirement of xfstests?
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
 > the body of a message to majordomo@vger.kernel.org
