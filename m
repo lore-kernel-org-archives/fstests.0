@@ -1,59 +1,40 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:29699 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751571AbdCCRXE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Mar 2017 12:23:04 -0500
-Date: Fri, 3 Mar 2017 09:21:57 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [RFC PATCH] check: try to fix the test device if it gets
- corrupted
-Message-ID: <20170303172157.GA5070@birch.djwong.org>
-References: <20170302232050.31125-1-tytso@mit.edu>
- <20170303090332.GP14226@eguan.usersys.redhat.com>
+Received: from imap.thunk.org ([74.207.234.97]:39630 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751989AbdCCWya (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 3 Mar 2017 17:54:30 -0500
+Date: Fri, 3 Mar 2017 17:53:37 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH] xfstests-bld: add an android-xfstests command
+Message-ID: <20170303225337.sbvwi6xhggbbimdl@thunk.org>
+References: <20170303010238.76005-1-ebiggers3@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170303090332.GP14226@eguan.usersys.redhat.com>
+In-Reply-To: <20170303010238.76005-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org
+To: Eric Biggers <ebiggers3@gmail.com>
+Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Mar 03, 2017 at 05:03:32PM +0800, Eryu Guan wrote:
-> On Thu, Mar 02, 2017 at 06:20:50PM -0500, Theodore Ts'o wrote:
-> > If the test device gets corrupted all subsequent tests will fail.  To
-> > prevent this from causing all subsequent tests to be useless, try
-> > repair the file system on TEST_DEV if possible.  We don't need to do
-> > this with the scratch device since that file system gets recreated
-> > each time anyway.
-> > 
-> > Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> > ---
-> > 
-> > This is a quick hack that I needed while debubgging some research
-> > code[1].  It turns out that when the grad student is up against a
-> > paper deadline is an, this becomes amazing evolutionary process which
-> > creates file system modifications which are optimized for running
-> > postmark and file bench --- and falls over very easily otherwise.  So
-> > when TEST_DEV is getting corrupted very frequently, it's nice to be
-> > able to continue running other tests in the quick or auto group.
-> > 
-> > So please consider this a proof-concept-patch; would people consider
-> > it worthwhile to have this in xfstests upstream?
+On Thu, Mar 02, 2017 at 05:02:38PM -0800, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
 > 
-> This idea looks reasonable to me, and TEST_DEV is supposed to be aging,
-> perhaps being currupted & repaired is kind of aging too :)
-
-<shrug> The test device isn't supposed to get corrupted, since it (at
-least in theory) should be an old filesystem.  That said, I suppose
-there's little point in banging around with a corrupt test fs.  Maybe we
-could go further and stop running if there's unfixable corruption?
-
---D
-
+> Add a command android-xfstests which has an interface similar to
+> kvm-xfstests and gce-xfstests, but runs xfstests on the internal storage
+> of an Android device instead.  It works by setting up temporary
+> partitions in space freed up by reformatting the userdata filesystem
+> with a smaller size, then running the tests in a Debian chroot.  More
+> information can be found in the documentation in android-xfstests.md.
 > 
-> Thanks,
-> Eryu
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Some features of kvm-xfstests and gce-xfstests, such as selecting the
+> kernel to use, are not yet implemented for android-xfstests but may be
+> possible to add later.
+> 
+> So far I have only tested android-xfstests on two devices, but it's
+> intended to work on other devices too.
+> 
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
+
+Very Nice!   Thanks, applied.
+
+					- Ted
