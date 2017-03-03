@@ -1,45 +1,409 @@
-Received: from mx1.redhat.com ([209.132.183.28]:51848 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751494AbdCCJFW (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 3 Mar 2017 04:05:22 -0500
-Date: Fri, 3 Mar 2017 17:03:32 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [RFC PATCH] check: try to fix the test device if it gets
- corrupted
-Message-ID: <20170303090332.GP14226@eguan.usersys.redhat.com>
-References: <20170302232050.31125-1-tytso@mit.edu>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170302232050.31125-1-tytso@mit.edu>
+Received: from mail-lf0-f66.google.com ([209.85.215.66]:35568 "EHLO
+        mail-lf0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751673AbdCCJ32 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 3 Mar 2017 04:29:28 -0500
+Received: by mail-lf0-f66.google.com with SMTP id v2so1348197lfi.2
+        for <fstests@vger.kernel.org>; Fri, 03 Mar 2017 01:29:13 -0800 (PST)
+From: Dmitry Monakhov <dmonakhov@openvz.org>
+Subject: [PATCH 2/2] report: Add xunit format report generator
+Date: Fri,  3 Mar 2017 12:26:16 +0400
+Message-Id: <1488529576-17034-3-git-send-email-dmonakhov@openvz.org>
+In-Reply-To: <1488529576-17034-1-git-send-email-dmonakhov@openvz.org>
+References: <1488529576-17034-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: eguan@redhat.com, Dmitry Monakhov <dmonakhov@openvz.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 02, 2017 at 06:20:50PM -0500, Theodore Ts'o wrote:
-> If the test device gets corrupted all subsequent tests will fail.  To
-> prevent this from causing all subsequent tests to be useless, try
-> repair the file system on TEST_DEV if possible.  We don't need to do
-> this with the scratch device since that file system gets recreated
-> each time anyway.
-> 
-> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> ---
-> 
-> This is a quick hack that I needed while debubgging some research
-> code[1].  It turns out that when the grad student is up against a
-> paper deadline is an, this becomes amazing evolutionary process which
-> creates file system modifications which are optimized for running
-> postmark and file bench --- and falls over very easily otherwise.  So
-> when TEST_DEV is getting corrupted very frequently, it's nice to be
-> able to continue running other tests in the quick or auto group.
-> 
-> So please consider this a proof-concept-patch; would people consider
-> it worthwhile to have this in xfstests upstream?
+xunit[1]/junit[2] are well known report formats for tests frameworks which
+supported by most of test CI frameworks(such as Jenkins [3], Bamboo [4], Avocado [5])
+Basically this is just xml document which can be easily parsed later by external tools.
 
-This idea looks reasonable to me, and TEST_DEV is supposed to be aging,
-perhaps being currupted & repaired is kind of aging too :)
+changes since v2: (in response to eguan@)
+ - assert repot format on initialization
+ - Tabify new files
 
-Thanks,
-Eryu
+changes since v1:
+ - Use generic '-R fmt' option for report generation, asked by eguan@
+ - localize variables, asked by eguan@
+ - do not add empty files to report asked by eguan@
+ - Add properties
+ - Fix system-err/system-out node nesting
+
+EXAMPLE:
+#./check -R xunit -s ext4 generic/001 generic/010
+#cat results/ext4/result.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="xfstests" errors="0" skipped="1" tests="2" time="7"  hostname="alice" timestamp="2017-02-21T15:15:06"  >
+	<properties>
+		<property name="SECTION" value="ext4"/>
+		<property name="FSTYP" value="ext4"/>
+		<property name="MOUNT_OPTIONS" value="-o acl,user_xattr "/>
+		<property name="HOST_OPTIONS" value="/devel/xfstests-dev.git/configs/alice.config"/>
+		<property name="XFS_MKFS_OPTIONS" value="-bsize=4096"/>
+		<property name="TIME_FACTOR" value="1"/>
+		<property name="LOAD_FACTOR" value="1"/>
+		<property name="TEST_DIR" value="/mnt/test"/>
+		<property name="TEST_DEV" value="/dev/ram0"/>
+		<property name="SCRATCH_DEV" value="/dev/ram1"/>
+		<property name="SCRATCH_MNT" value="/mnt/scratch"/>
+		<property name="OVERLAY_UPPER_DIR" value="upper"/>
+		<property name="OVERLAY_LOWER_DIR" value="lower"/>
+		<property name="OVERLAY_WORK_DIR" value="work"/>
+	</properties>
+	<testcase classname="xfstests.ext4" name="generic/001" time="5">
+	</testcase>
+	<testcase classname="xfstests.ext4" name="generic/010" time="1">
+		<skipped message="src/dbtest not built" />
+	</testcase>
+</testsuite>
+
+Footnotes:
+[1] https://xunit.github.io/docs/format-xml-v2.html
+[2] http://help.catchsoftware.com/display/ET/JUnit+Format
+[3] https://jenkins.io
+[4] https://www.atlassian.com/software/bamboo
+[5] https://github.com/avocado-framework/avocado
+
+Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
+---
+ check         |  38 ++++++++++---
+ common/rc     |   6 +-
+ common/report | 174 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 209 insertions(+), 9 deletions(-)
+ create mode 100644 common/report
+
+diff --git a/check b/check
+index c4deb4d..a3ee591 100755
+--- a/check
++++ b/check
+@@ -39,7 +39,7 @@ export here=`pwd`
+ xfile=""
+ brief_test_summary=false
+ err_msg=""
+-
++do_report=false
+ DUMP_OUTPUT=false
+ 
+ # start the initialisation work now
+@@ -54,7 +54,7 @@ export DIFF_LENGTH=${DIFF_LENGTH:=10}
+ # by default don't output timestamps
+ timestamp=${TIMESTAMP:=false}
+ 
+-rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist
++rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.*
+ 
+ SRC_GROUPS="generic shared"
+ export SRC_DIR="tests"
+@@ -75,6 +75,7 @@ check options
+     -r			randomize test order
+     -d			dump test output to stdout
+     -b			brief test summary
++    -R fmt[,fmt]	generate report in formats specified. Supported format: [xunit]
+     --large-fs		optimise scratch device for large filesystems
+     -s section		run only specified section from config file
+     -S section		exclude the specified section from the config file
+@@ -295,7 +296,10 @@ while [ $# -gt 0 ]; do
+ 	-T)	timestamp=true ;;
+ 	-d)	DUMP_OUTPUT=true ;;
+ 	-b)	brief_test_summary=true;;
+-
++	-R)	report_fmt=$2 ; shift ;
++		REPORT_LIST="$REPORT_LIST ${report_fmt//,/ }"
++		do_report=true
++		;;
+ 	--large-fs) export LARGE_SCRATCH_DEV=yes ;;
+ 	--extra-space=*) export SCRATCH_DEV_EMPTY_SPACE=${r#*=} ;;
+ 
+@@ -380,7 +384,12 @@ _wrapup()
+ 	check="$RESULT_BASE/check"
+ 
+ 	if $showme; then
+-	:
++		if $needwrap; then
++			if $do_report; then
++				_make_section_report
++			fi
++			needwrap=false
++		fi
+ 	elif $needwrap; then
+ 		if [ -f $check.time -a -f $tmp.time ]; then
+ 			cat $check.time $tmp.time  \
+@@ -431,6 +440,9 @@ _wrapup()
+ 			echo "Passed all $n_try tests" >>$tmp.summary
+ 		fi
+ 		echo "" >>$tmp.summary
++		if $do_report; then
++			_make_section_report
++		fi
+ 		needwrap=false
+ 	fi
+ 
+@@ -519,6 +531,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 		echo "SECTION       -- $section"
+ 	fi
+ 
++	sect_start=`_wallclock`
+ 	if $RECREATE_TEST_DEV || [ "$OLD_FSTYP" != "$FSTYP" ]; then
+ 		echo "RECREATING    -- $FSTYP on $TEST_DEV"
+ 		_test_unmount 2> /dev/null
+@@ -623,11 +636,12 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 	    group=`dirname $seq`
+ 	    if $OPTIONS_HAVE_SECTIONS; then
+ 		export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;${RESULT_BASE}/$section;"`
+-		seqres="$RESULT_BASE/$section/$seqnum"
++		REPORT_DIR="$RESULT_BASE/$section"
+ 	    else
+ 		export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;$RESULT_BASE;"`
+-		seqres="$RESULT_BASE/$seqnum"
++		REPORT_DIR="$RESULT_BASE"
+ 	    fi
++	    seqres="$REPORT_DIR/$seqnum"
+ 
+ 	    mkdir -p $RESULT_DIR
+ 
+@@ -638,9 +652,12 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 		start=0
+ 		stop=0
+ 		n_notrun=`expr $n_notrun + 1`
++		if $do_report; then
++			_make_testcase_report "list"
++		fi
+ 		continue
+ 	    fi
+-
++	    tc_status="pass"
+ 	    if [ ! -f $seq ]; then
+ 		echo " - no such test?"
+ 	    else
+@@ -704,6 +721,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 		    cat $seqres.notrun
+ 		    notrun="$notrun $seqnum"
+ 		    n_notrun=`expr $n_notrun + 1`
++		    tc_status="notrun"
+ 		else
+ 		    if [ $sts -ne 0 ]
+ 		    then
+@@ -762,10 +780,14 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 		bad="$bad $seqnum"
+ 		n_bad=`expr $n_bad + 1`
+ 		quick=false
++		tc_status="fail"
++	    fi
++	    if $do_report; then
++		_make_testcase_report "$tc_status"
+ 	    fi
+-
+ 	    seq="after_$seqnum"
+ 	done
++	sect_stop=`_wallclock`
+ 	interrupt=false
+ 	_wrapup
+ 	interrupt=true
+diff --git a/common/rc b/common/rc
+index 166400f..a49f14a 100644
+--- a/common/rc
++++ b/common/rc
+@@ -174,6 +174,11 @@ case "$FSTYP" in
+ 	 ;;
+ esac
+ 
++if [ ! -z "$REPORT_LIST" ]; then
++   . ./common/report
++   _assert_report_list
++fi
++
+ _mount()
+ {
+     $MOUNT_PROG `_mount_ops_filter $*`
+@@ -3325,7 +3330,6 @@ _get_fs_sysfs_attr()
+ }
+ 
+ 
+-
+ init_rc
+ 
+ ################################################################################
+diff --git a/common/report b/common/report
+new file mode 100644
+index 0000000..4b2d38f
+--- /dev/null
++++ b/common/report
+@@ -0,0 +1,174 @@
++#
++# Reports generator funcitons lives here
++#
++
++# List of xfstests's enviroment variables to include reports
++## TODO automate list population inside common/conf
++REPORT_ENV_LIST="$REPORT_ENV_LIST SECTION"
++REPORT_ENV_LIST="$REPORT_ENV_LIST FSTYP"
++REPORT_ENV_LIST="$REPORT_ENV_LIST PLATFORM"
++REPORT_ENV_LIST="$REPORT_ENV_LIST MKFS_OPTIONS"
++REPORT_ENV_LIST="$REPORT_ENV_LIST MOUNT_OPTIONS"
++
++REPORT_ENV_LIST="$REPORT_ENV_LIST HOST_OPTIONS"
++REPORT_ENV_LIST="$REPORT_ENV_LIST CHECK_OPTIONS"
++REPORT_ENV_LIST="$REPORT_ENV_LIST XFS_MKFS_OPTIONS"
++REPORT_ENV_LIST="$REPORT_ENV_LIST TIME_FACTOR"
++REPORT_ENV_LIST="$REPORT_ENV_LIST LOAD_FACTOR"
++
++REPORT_ENV_LIST="$REPORT_ENV_LIST TEST_DIR"
++REPORT_ENV_LIST="$REPORT_ENV_LIST TEST_DEV"
++REPORT_ENV_LIST="$REPORT_ENV_LIST SCRATCH_DEV"
++REPORT_ENV_LIST="$REPORT_ENV_LIST SCRATCH_MNT"
++
++REPORT_ENV_LIST="$REPORT_ENV_LIST OVERLAY_UPPER_DIR"
++REPORT_ENV_LIST="$REPORT_ENV_LIST OVERLAY_LOWER_DIR"
++REPORT_ENV_LIST="$REPORT_ENV_LIST OVERLAY_WORK_DIR"
++
++#
++# Xunit format report functions
++_xunit_add_property()
++{
++	local name="$1"
++	local value="${!name}"
++
++	if [ ! -z "$value" ]; then
++		echo -e "\t\t<property name=\"$name\" value=\"$value\"/>" >> $REPORT_DIR/result.xml
++	fi
++}
++_xunit_make_section_report()
++{
++	# xfstest:section ==> xunit:testsuite
++	local sect_name=$section
++	local sect_time=`expr $sect_stop - $sect_start`
++	local n_total=`expr $n_try + $n_notrun`
++
++	if [ $sect_name == '-no-sections-' ]; then
++		sect_name='global'
++	fi
++	local report=$tmp.report.xunit.$sect_name.xml
++	#Header
++	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $REPORT_DIR/result.xml
++	local dtime=`echo $date_time| tr  " " 'T'`
++	local stats="errors=\"$n_bad\" skipped=\"$n_notrun\" tests=\"$n_total\" time=\"$sect_time\""
++	local hw_info="hostname=\"$HOST\" timestamp=\"$dtime\" "
++	echo "<testsuite name=\"xfstests\" $stats  $hw_info >" >> $REPORT_DIR/result.xml
++	#Properties
++
++	echo -e "\t<properties>" >> $REPORT_DIR/result.xml
++	for p in $REPORT_ENV_LIST;do
++		_xunit_add_property "$p"
++	done
++	echo -e "\t</properties>" >> $REPORT_DIR/result.xml
++	cat $tmp.report.xunit.$sect_name.xml >> $REPORT_DIR/result.xml
++	echo "</testsuite>" >> $REPORT_DIR/result.xml
++	echo "Xunit report: $REPORT_DIR/result.xml"
++}
++
++_xunit_make_testcase_report()
++{
++	local test_status="$1"
++	local test_time=`expr $stop - $start`
++	local strip="$SRC_DIR/"
++	local test_name=${seq#$strip}
++	local sect_name=$section
++
++	#TODO: other places may also win if no-section mode will be named like 'default/global'
++	if [ $sect_name == '-no-sections-' ]; then
++		sect_name='global'
++
++	fi
++	local report=$tmp.report.xunit.$sect_name.xml
++
++	echo -e "\t<testcase classname=\"xfstests.$sect_name\" name=\"$test_name\" time=\"$test_time\">" >> $report
++	case $test_status in
++		"pass")
++			;;
++		"notrun")
++			if [ -f $seqres.notrun ]; then
++				local msg=`cat $seqres.notrun`
++				echo -e "\t\t<skipped message=\"$msg\" />" >> $report
++			else
++				echo -e "\t\t<skipped/>" >> $report
++			fi
++			;;
++		"list")
++			echo -e "\t\t<skipped/>" >> $report
++			;;
++		"fail")
++			if [ -z "$err_msg" ]; then
++				err_msg="Test $sequm failed, reason unknown"
++			fi
++			echo -e "\t\t<failure message=\"$err_msg\" type=\"TestFail\" />" >> $report
++			if [ -s $seqres.full ]; then
++				echo -e "\t\t<system-out>" >> $report
++				printf	'<![CDATA[\n' >>$report
++				cat $seqres.full | tr -dc '[:print:][:space:]' >>$report
++				printf ']]>\n'	>>$report
++				echo -e "\t\t</system-out>" >> $report
++			fi
++			if [ -f $seqres.dmesg ]; then
++				echo -e "\t\t<system-err>" >> $report
++				printf	'<![CDATA[\n' >>$report
++				cat $seqres.dmesg | tr -dc '[:print:][:space:]' >>$report
++				printf ']]>\n'	>>$report
++				echo -e "\t\t</system-err>" >> $report
++			elif [ -s $seqres.out.bad ]; then
++				echo -e "\t\t<system-err>" >> $report
++				printf	'<![CDATA[\n' >>$report
++				$diff $seq.out $seqres.out.bad >>$report
++				printf ']]>\n'	>>$report
++				echo -e "\t\t</system-err>" >> $report
++			fi
++			;;
++		*)
++			echo -e "\t\t<failure message=\"Unknown ret_state=$ret_state\" type=\"TestFail\"/>" >> $report
++			;;
++	esac
++	echo -e "\t</testcase>" >> $report
++}
++
++
++#
++#  Common report generator entry points
++_make_section_report()
++{
++	for report in $REPORT_LIST; do
++		case "$report" in
++			"xunit")
++				_xunit_make_section_report "$test_status"
++				;;
++			*)
++				_dump_err "format '$report' is not supported"
++				;;
++		esac
++	done
++}
++
++_make_testcase_report()
++{
++	test_status="$1"
++	for report in $REPORT_LIST; do
++		case "$report" in
++			"xunit")
++				_xunit_make_testcase_report "$test_status"
++				;;
++			*)
++				_dump_err "report format '$report' is not supported"
++				;;
++		esac
++	done
++}
++
++_assert_report_list() {
++	test_status="$1"
++	for report in $REPORT_LIST; do
++		case "$report" in
++			"xunit")
++				;;
++			*)
++				_fatal "report format '$report' is not supported"
++				;;
++		esac
++	done
++}
+-- 
+2.9.3
+
