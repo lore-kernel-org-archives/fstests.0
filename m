@@ -1,106 +1,311 @@
-Received: from mail-ot0-f193.google.com ([74.125.82.193]:34583 "EHLO
-        mail-ot0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751394AbdCCI3Z (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Mar 2017 03:29:25 -0500
-Received: by mail-ot0-f193.google.com with SMTP id x37so3566843ota.1
-        for <fstests@vger.kernel.org>; Fri, 03 Mar 2017 00:28:07 -0800 (PST)
-MIME-Version: 1.0
-In-Reply-To: <1487842966-30986-9-git-send-email-xzhou@redhat.com>
-References: <1487842966-30986-1-git-send-email-xzhou@redhat.com> <1487842966-30986-9-git-send-email-xzhou@redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 3 Mar 2017 10:19:52 +0200
-Message-ID: <CAOQ4uxgDpd_i=p6ECaL2kkvcSRDrpj9xRLQbRWrhGvGCF2BGgQ@mail.gmail.com>
-Subject: Re: [xfstests v4 8/8] overlay: accessing stacked overlayfs files
-Content-Type: text/plain; charset=UTF-8
+Received: from mail-lf0-f67.google.com ([209.85.215.67]:34821 "EHLO
+        mail-lf0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751176AbdCCI4S (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 3 Mar 2017 03:56:18 -0500
+Received: by mail-lf0-f67.google.com with SMTP id v2so1286029lfi.2
+        for <fstests@vger.kernel.org>; Fri, 03 Mar 2017 00:55:22 -0800 (PST)
+From: Dmitry Monakhov <dmonakhov@openvz.org>
+Subject: [PATCH 1/2] check: prepare test report generator infrastructure
+Date: Fri,  3 Mar 2017 12:26:15 +0400
+Message-Id: <1488529576-17034-2-git-send-email-dmonakhov@openvz.org>
+In-Reply-To: <1488529576-17034-1-git-send-email-dmonakhov@openvz.org>
+References: <1488529576-17034-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
-To: Xiong Zhou <xzhou@redhat.com>, Eryu Guan <eguan@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>, linux-unionfs@vger.kernel.org, Miklos Szeredi <mszeredi@redhat.com>
+To: fstests@vger.kernel.org
+Cc: eguan@redhat.com, Dmitry Monakhov <dmonakhov@openvz.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Feb 23, 2017 at 11:42 AM, Xiong Zhou <xzhou@redhat.com> wrote:
-> Lower dir comes from another overlayfs dir, then
-> accessing files in it should work.
->
-> CC: Miklos Szeredi <mszeredi@redhat.com>
-> Signed-off-by: Xiong Zhou <xzhou@redhat.com>
-> ---
+Save testcase data which later may be used by report generators
+- Save failure reason to $err_msg variable
+- Save number of notrun tests to $n_notrun counter, similar to $n_try,$n_bad
 
-FYI, this test triggers a false positive lockdep splat.
-I did not notice it earlier, because I carry a fix patch that Miklos
-did not pick up yet.
+changes since v2:
+ - fix typo with tests
+ - move logging funtions to common/rc
 
-The fix patch is here:
-http://www.spinics.net/lists/linux-unionfs/msg01428.html
+changes since v1:
+ - add _dump_err[,2] _log_err helper functions
 
-overlay/029 [08:14:06]
-=============================================
-[ INFO: possible recursive locking detected ]
-4.9.0-debug-12264-g60ae0f1 #426 Not tainted
----------------------------------------------
-cat/3367 is trying to acquire lock:
- (&sb->s_type->i_mutex_key#15){.+.+.+}, at: [<ffffffff81217858>]
-lookup_slow+0x81/0x185
+Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
+---
+ check        | 31 +++++++++++++++++++++----------
+ common/btrfs |  8 ++------
+ common/rc    | 33 ++++++++++++++++++++++++++-------
+ common/xfs   | 22 ++++++----------------
+ 4 files changed, 55 insertions(+), 39 deletions(-)
 
-but task is already holding lock:
- (&sb->s_type->i_mutex_key#15){.+.+.+}, at: [<ffffffff8121b955>]
-do_last+0x179/0x608
+diff --git a/check b/check
+index 5d7f75c..c4deb4d 100755
+--- a/check
++++ b/check
+@@ -28,6 +28,7 @@ try=""
+ n_bad=0
+ sum_bad=0
+ bad=""
++n_notrun=0
+ notrun=""
+ interrupt=true
+ diff="diff -u"
+@@ -37,6 +38,7 @@ randomize=false
+ export here=`pwd`
+ xfile=""
+ brief_test_summary=false
++err_msg=""
+ 
+ DUMP_OUTPUT=false
+ 
+@@ -368,6 +370,7 @@ _wipe_counters()
+ {
+ 	n_try="0"
+ 	n_bad="0"
++	n_notrun="0"
+ 	unset try notrun bad
+ }
+ 
+@@ -596,6 +599,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 	for seq in $list
+ 	do
+ 	    err=false
++	    err_msg=""
+ 	    if [ ! -f $seq ]; then
+ 	        # Try to get full name in case the user supplied only seq id
+ 	        # and the test has a name. A bit of hassle to find really
+@@ -629,14 +633,17 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 
+ 	    echo -n "$seqnum"
+ 
+-		if $showme; then
+-			echo
+-			continue
+-		fi
++	    if $showme; then
++		echo
++		start=0
++		stop=0
++		n_notrun=`expr $n_notrun + 1`
++		continue
++	    fi
+ 
+-		if [ ! -f $seq ]; then
+-			echo " - no such test?"
+-		else
++	    if [ ! -f $seq ]; then
++		echo " - no such test?"
++	    else
+ 		# really going to try and run this one
+ 		#
+ 		rm -f $seqres.out.bad
+@@ -684,7 +691,8 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 
+ 		if [ -f core ]
+ 		then
+-		    echo -n " [dumped core]"
++		    err_msg="[dumped core]"
++		    echo -n " $err_msg"
+ 		    mv core $RESULT_BASE/$seqnum.core
+ 		    err=true
+ 		fi
+@@ -695,15 +703,17 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 		    $timestamp && echo " [not run]" && echo -n "	$seqnum -- "
+ 		    cat $seqres.notrun
+ 		    notrun="$notrun $seqnum"
++		    n_notrun=`expr $n_notrun + 1`
+ 		else
+ 		    if [ $sts -ne 0 ]
+ 		    then
+-			echo -n " [failed, exit status $sts]"
++			err_msg="[failed, exit status $sts]"
++			echo -n " $err_msg"
+ 			err=true
+ 		    fi
+ 		    if [ ! -f $seq.out ]
+ 		    then
+-			echo " - no qualified output"
++			_dump_err "no qualified output"
+ 			err=true
+ 		    else
+ 
+@@ -733,6 +743,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 						" to see the entire diff)"
+ 				fi; } | \
+ 				sed -e 's/^\(.\)/    \1/'
++			    err_msg="output mismatch (see $diff $seq.out $seqres.out.bad)"
+ 			    err=true
+ 			fi
+ 		    fi
+diff --git a/common/btrfs b/common/btrfs
+index b342644..fd762ef 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -105,9 +105,7 @@ _check_btrfs_filesystem()
+ 	if [ -f ${RESULT_DIR}/require_scratch.require_qgroup_report ]; then
+ 		$BTRFS_UTIL_PROG check $device --qgroup-report > $tmp.qgroup_report 2>&1
+ 		if grep -qE "Counts for qgroup.*are different" $tmp.qgroup_report ; then
+-			echo "_check_btrfs_filesystem: filesystem on $device has wrong qgroup numbers (see $seqres.full)"
+-			echo "_check_btrfs_filesystem: filesystem on $device has wrong qgroup numbers" \
+-				>> $seqres.full
++			_log_err "_check_btrfs_filesystem: filesystem on $device has wrong qgroup numbers"
+ 			echo "*** qgroup_report.$FSTYP output ***"	>>$seqres.full
+ 			cat $tmp.qgroup_report				>>$seqres.full
+ 			echo "*** qgroup_report.$FSTYP output ***"	>>$seqres.full
+@@ -117,9 +115,7 @@ _check_btrfs_filesystem()
+ 
+ 	$BTRFS_UTIL_PROG check $device >$tmp.fsck 2>&1
+ 	if [ $? -ne 0 ]; then
+-		echo "_check_btrfs_filesystem: filesystem on $device is inconsistent (see $seqres.full)"
+-
+-		echo "_check_btrfs_filesystem: filesystem on $device is inconsistent" >>$seqres.full
++		_log_err "_check_btrfs_filesystem: filesystem on $device is inconsistent"
+ 		echo "*** fsck.$FSTYP output ***"	>>$seqres.full
+ 		cat $tmp.fsck				>>$seqres.full
+ 		echo "*** end fsck.$FSTYP output"	>>$seqres.full
+diff --git a/common/rc b/common/rc
+index 8f23334..166400f 100644
+--- a/common/rc
++++ b/common/rc
+@@ -115,6 +115,25 @@ then
+     fi
+ fi
+ 
++_dump_err()
++{
++    err_msg="$*"
++    echo "$err_msg"
++}
++
++_dump_err2()
++{
++    err_msg="$*"
++    >2& echo "$err_msg"
++}
++
++_log_err()
++{
++    err_msg="$*"
++    echo "$err_msg" | tee -a $seqres.full
++    echo "(see $seqres.full for details)"
++}
++
+ # make sure we have a standard umask
+ umask 022
+ 
+@@ -1052,7 +1071,9 @@ _repair_scratch_fs()
+ 		_scratch_xfs_repair "$@" 2>&1
+ 		res=$?
+ 	fi
+-	test $res -ne 0 && >&2 echo "xfs_repair failed, err=$res"
++	if [ $res -ne 0 ]; then
++		_dump_err2 "xfs_repair failed, err=$res"
++	fi
+ 	return $res
+         ;;
+     *)
+@@ -1064,7 +1085,7 @@ _repair_scratch_fs()
+ 		res=0
+ 		;;
+ 	*)
+-		>&2 echo "fsck.$FSTYP failed, err=$res"
++		_dump_err2 "fsck.$FSTYP failed, err=$res"
+ 		;;
+ 	esac
+ 	return $res
+@@ -2174,7 +2195,7 @@ _mount_or_remount_rw()
+ 			_overlay_mount $device $mountpoint
+ 		fi
+ 		if [ $? -ne 0 ]; then
+-			echo "!!! failed to remount $device on $mountpoint"
++			_dump_err "!!! failed to remount $device on $mountpoint"
+ 			return 0 # ok=0
+ 		fi
+ 	else
+@@ -2208,9 +2229,7 @@ _check_generic_filesystem()
+     fsck -t $FSTYP $FSCK_OPTIONS $device >$tmp.fsck 2>&1
+     if [ $? -ne 0 ]
+     then
+-        echo "_check_generic_filesystem: filesystem on $device is inconsistent (see $seqres.full)"
+-
+-        echo "_check_generic filesystem: filesystem on $device is inconsistent" >>$seqres.full
++	_log_err "_check_generic_filesystem: filesystem on $device is inconsistent"
+         echo "*** fsck.$FSTYP output ***"	>>$seqres.full
+         cat $tmp.fsck				>>$seqres.full
+         echo "*** end fsck.$FSTYP output"	>>$seqres.full
+@@ -3089,7 +3108,7 @@ _check_dmesg()
+ 	     -e "general protection fault:" \
+ 	     $seqres.dmesg
+ 	if [ $? -eq 0 ]; then
+-		echo "_check_dmesg: something found in dmesg (see $seqres.dmesg)"
++		_dump_err "_check_dmesg: something found in dmesg (see $seqres.dmesg)"
+ 		return 1
+ 	else
+ 		rm -f $seqres.dmesg
+diff --git a/common/xfs b/common/xfs
+index 767a481..adbcaf7 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -333,7 +333,7 @@ _check_xfs_filesystem()
+ 		if [ -n "$TEST_XFS_SCRUB" ] && [ -x "$XFS_SCRUB_PROG" ]; then
+ 			"$XFS_SCRUB_PROG" $scrubflag -vd $device >>$seqres.full
+ 			if [ $? -ne 0 ]; then
+-				echo "filesystem on $device failed scrub (see $seqres.full)"
++				_log_err "filesystem on $device failed scrub"
+ 				ok=0
+ 			fi
+ 		fi
+@@ -344,9 +344,7 @@ _check_xfs_filesystem()
+ 	$XFS_LOGPRINT_PROG -t $extra_log_options $device 2>&1 \
+ 		| tee $tmp.logprint | grep -q "<CLEAN>"
+ 	if [ $? -ne 0 -a "$HOSTOS" = "Linux" ]; then
+-		echo "_check_xfs_filesystem: filesystem on $device has dirty log (see $seqres.full)"
+-
+-		echo "_check_xfs_filesystem: filesystem on $device has dirty log"   >>$seqres.full
++		_log_err "_check_xfs_filesystem: filesystem on $device has dirty log"
+ 		echo "*** xfs_logprint -t output ***"	>>$seqres.full
+ 		cat $tmp.logprint			>>$seqres.full
+ 		echo "*** end xfs_logprint output"	>>$seqres.full
+@@ -362,9 +360,7 @@ _check_xfs_filesystem()
+ 			_fix_malloc >$tmp.fs_check
+ 	fi
+ 	if [ -s $tmp.fs_check ]; then
+-		echo "_check_xfs_filesystem: filesystem on $device is inconsistent (c) (see $seqres.full)"
+-
+-		echo "_check_xfs_filesystem: filesystem on $device is inconsistent" >>$seqres.full
++		_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (c)"
+ 		echo "*** xfs_check output ***"		>>$seqres.full
+ 		cat $tmp.fs_check			>>$seqres.full
+ 		echo "*** end xfs_check output"		>>$seqres.full
+@@ -374,9 +370,7 @@ _check_xfs_filesystem()
+ 
+ 	$XFS_REPAIR_PROG -n $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
+ 	if [ $? -ne 0 ]; then
+-		echo "_check_xfs_filesystem: filesystem on $device is inconsistent (r) (see $seqres.full)"
+-
+-		echo "_check_xfs_filesystem: filesystem on $device is inconsistent" >>$seqres.full
++		_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (r)"
+ 		echo "*** xfs_repair -n output ***"	>>$seqres.full
+ 		cat $tmp.repair | _fix_malloc		>>$seqres.full
+ 		echo "*** end xfs_repair output"	>>$seqres.full
+@@ -389,9 +383,7 @@ _check_xfs_filesystem()
+ 	if [ -n "$TEST_XFS_REPAIR_REBUILD" ]; then
+ 		$XFS_REPAIR_PROG $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
+ 		if [ $? -ne 0 ]; then
+-			echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild) (see $seqres.full)"
+-
+-			echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild)" >>$seqres.full
++			_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild)"
+ 			echo "*** xfs_repair output ***"	>>$seqres.full
+ 			cat $tmp.repair | _fix_malloc		>>$seqres.full
+ 			echo "*** end xfs_repair output"	>>$seqres.full
+@@ -402,9 +394,7 @@ _check_xfs_filesystem()
+ 
+ 		$XFS_REPAIR_PROG -n $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
+ 		if [ $? -ne 0 ]; then
+-			echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild-reverify) (see $seqres.full)"
+-
+-			echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild-reverify)" >>$seqres.full
++			_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild-reverify)"
+ 			echo "*** xfs_repair -n output ***"	>>$seqres.full
+ 			cat $tmp.repair | _fix_malloc		>>$seqres.full
+ 			echo "*** end xfs_repair output"	>>$seqres.full
+-- 
+2.9.3
 
-other info that might help us debug this:
- Possible unsafe locking scenario:
-
-       CPU0
-       ----
-  lock(&sb->s_type->i_mutex_key#15);
-  lock(&sb->s_type->i_mutex_key#15);
-
- *** DEADLOCK ***
-
- May be due to missing lock nesting notation
-
-1 lock held by cat/3367:
- #0:  (&sb->s_type->i_mutex_key#15){.+.+.+}, at: [<ffffffff8121b955>]
-do_last+0x179/0x608
-
-stack backtrace:
-CPU: 0 PID: 3367 Comm: cat Not tainted 4.9.0-debug-12264-g60ae0f1 #426
-Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS
-Ubuntu-1.8.2-1ubuntu1 04/01/2014
-Call Trace:
- dump_stack+0x85/0xbe
- __lock_acquire+0x1082/0x153f
- ? mark_held_locks+0x5e/0x74
- lock_acquire+0x13b/0x1d6
- ? lock_acquire+0x13b/0x1d6
- ? lookup_slow+0x81/0x185
- down_read+0x43/0x9a
- ? lookup_slow+0x81/0x185
- lookup_slow+0x81/0x185
- lookup_one_len_unlocked+0xca/0xdc
- ovl_lookup_single+0x30/0x2c6
- ? ovl_lookup+0x158/0x414
- ovl_lookup_layer+0x46/0x137
- ovl_lookup+0x1b5/0x414
- ? __d_lookup+0x22a/0x23c
- lookup_open+0x44c/0x622
- ? lookup_open+0x44c/0x622
- ? rwsem_down_read_failed+0x25/0x164
- do_last+0x196/0x608
- ? path_init+0x2d9/0x681
- path_openat+0x285/0x30c
- ? __might_fault+0x37/0x84
- do_filp_open+0x4d/0xa3
- ? sched_clock+0x9/0xd
- ? __alloc_fd+0x1af/0x1c1
- ? _raw_spin_unlock+0x27/0x31
- do_sys_open+0x13c/0x1cb
- ? do_sys_open+0x13c/0x1cb
- SyS_open+0x1e/0x20
- entry_SYSCALL_64_fastpath+0x1f/0xc2
-RIP: 0033:0x7f253e9d7960
-RSP: 002b:00007fff5caeba48 EFLAGS: 00000246 ORIG_RAX: 0000000000000002
-RAX: ffffffffffffffda RBX: 00007fff5caebca8 RCX: 00007f253e9d7960
-RDX: 0000000000020000 RSI: 0000000000000000 RDI: 00007fff5caee235
-RBP: 0000000000001000 R08: 0000000000000000 R09: 0000000000000000
-R10: 00007fff5caeb810 R11: 0000000000000246 R12: 00000000004025a6
-R13: 00007fff5caebca0 R14: 0000000000000000 R15: 0000000000000000
- [08:14:07] 1s
