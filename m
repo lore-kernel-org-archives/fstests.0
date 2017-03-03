@@ -1,311 +1,45 @@
-Received: from mail-lf0-f67.google.com ([209.85.215.67]:34821 "EHLO
-        mail-lf0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751176AbdCCI4S (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Mar 2017 03:56:18 -0500
-Received: by mail-lf0-f67.google.com with SMTP id v2so1286029lfi.2
-        for <fstests@vger.kernel.org>; Fri, 03 Mar 2017 00:55:22 -0800 (PST)
-From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: [PATCH 1/2] check: prepare test report generator infrastructure
-Date: Fri,  3 Mar 2017 12:26:15 +0400
-Message-Id: <1488529576-17034-2-git-send-email-dmonakhov@openvz.org>
-In-Reply-To: <1488529576-17034-1-git-send-email-dmonakhov@openvz.org>
-References: <1488529576-17034-1-git-send-email-dmonakhov@openvz.org>
+Received: from mx1.redhat.com ([209.132.183.28]:51848 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751494AbdCCJFW (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 3 Mar 2017 04:05:22 -0500
+Date: Fri, 3 Mar 2017 17:03:32 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [RFC PATCH] check: try to fix the test device if it gets
+ corrupted
+Message-ID: <20170303090332.GP14226@eguan.usersys.redhat.com>
+References: <20170302232050.31125-1-tytso@mit.edu>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170302232050.31125-1-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: eguan@redhat.com, Dmitry Monakhov <dmonakhov@openvz.org>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Save testcase data which later may be used by report generators
-- Save failure reason to $err_msg variable
-- Save number of notrun tests to $n_notrun counter, similar to $n_try,$n_bad
+On Thu, Mar 02, 2017 at 06:20:50PM -0500, Theodore Ts'o wrote:
+> If the test device gets corrupted all subsequent tests will fail.  To
+> prevent this from causing all subsequent tests to be useless, try
+> repair the file system on TEST_DEV if possible.  We don't need to do
+> this with the scratch device since that file system gets recreated
+> each time anyway.
+> 
+> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> ---
+> 
+> This is a quick hack that I needed while debubgging some research
+> code[1].  It turns out that when the grad student is up against a
+> paper deadline is an, this becomes amazing evolutionary process which
+> creates file system modifications which are optimized for running
+> postmark and file bench --- and falls over very easily otherwise.  So
+> when TEST_DEV is getting corrupted very frequently, it's nice to be
+> able to continue running other tests in the quick or auto group.
+> 
+> So please consider this a proof-concept-patch; would people consider
+> it worthwhile to have this in xfstests upstream?
 
-changes since v2:
- - fix typo with tests
- - move logging funtions to common/rc
+This idea looks reasonable to me, and TEST_DEV is supposed to be aging,
+perhaps being currupted & repaired is kind of aging too :)
 
-changes since v1:
- - add _dump_err[,2] _log_err helper functions
-
-Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
----
- check        | 31 +++++++++++++++++++++----------
- common/btrfs |  8 ++------
- common/rc    | 33 ++++++++++++++++++++++++++-------
- common/xfs   | 22 ++++++----------------
- 4 files changed, 55 insertions(+), 39 deletions(-)
-
-diff --git a/check b/check
-index 5d7f75c..c4deb4d 100755
---- a/check
-+++ b/check
-@@ -28,6 +28,7 @@ try=""
- n_bad=0
- sum_bad=0
- bad=""
-+n_notrun=0
- notrun=""
- interrupt=true
- diff="diff -u"
-@@ -37,6 +38,7 @@ randomize=false
- export here=`pwd`
- xfile=""
- brief_test_summary=false
-+err_msg=""
- 
- DUMP_OUTPUT=false
- 
-@@ -368,6 +370,7 @@ _wipe_counters()
- {
- 	n_try="0"
- 	n_bad="0"
-+	n_notrun="0"
- 	unset try notrun bad
- }
- 
-@@ -596,6 +599,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 	for seq in $list
- 	do
- 	    err=false
-+	    err_msg=""
- 	    if [ ! -f $seq ]; then
- 	        # Try to get full name in case the user supplied only seq id
- 	        # and the test has a name. A bit of hassle to find really
-@@ -629,14 +633,17 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 
- 	    echo -n "$seqnum"
- 
--		if $showme; then
--			echo
--			continue
--		fi
-+	    if $showme; then
-+		echo
-+		start=0
-+		stop=0
-+		n_notrun=`expr $n_notrun + 1`
-+		continue
-+	    fi
- 
--		if [ ! -f $seq ]; then
--			echo " - no such test?"
--		else
-+	    if [ ! -f $seq ]; then
-+		echo " - no such test?"
-+	    else
- 		# really going to try and run this one
- 		#
- 		rm -f $seqres.out.bad
-@@ -684,7 +691,8 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 
- 		if [ -f core ]
- 		then
--		    echo -n " [dumped core]"
-+		    err_msg="[dumped core]"
-+		    echo -n " $err_msg"
- 		    mv core $RESULT_BASE/$seqnum.core
- 		    err=true
- 		fi
-@@ -695,15 +703,17 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 		    $timestamp && echo " [not run]" && echo -n "	$seqnum -- "
- 		    cat $seqres.notrun
- 		    notrun="$notrun $seqnum"
-+		    n_notrun=`expr $n_notrun + 1`
- 		else
- 		    if [ $sts -ne 0 ]
- 		    then
--			echo -n " [failed, exit status $sts]"
-+			err_msg="[failed, exit status $sts]"
-+			echo -n " $err_msg"
- 			err=true
- 		    fi
- 		    if [ ! -f $seq.out ]
- 		    then
--			echo " - no qualified output"
-+			_dump_err "no qualified output"
- 			err=true
- 		    else
- 
-@@ -733,6 +743,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 						" to see the entire diff)"
- 				fi; } | \
- 				sed -e 's/^\(.\)/    \1/'
-+			    err_msg="output mismatch (see $diff $seq.out $seqres.out.bad)"
- 			    err=true
- 			fi
- 		    fi
-diff --git a/common/btrfs b/common/btrfs
-index b342644..fd762ef 100644
---- a/common/btrfs
-+++ b/common/btrfs
-@@ -105,9 +105,7 @@ _check_btrfs_filesystem()
- 	if [ -f ${RESULT_DIR}/require_scratch.require_qgroup_report ]; then
- 		$BTRFS_UTIL_PROG check $device --qgroup-report > $tmp.qgroup_report 2>&1
- 		if grep -qE "Counts for qgroup.*are different" $tmp.qgroup_report ; then
--			echo "_check_btrfs_filesystem: filesystem on $device has wrong qgroup numbers (see $seqres.full)"
--			echo "_check_btrfs_filesystem: filesystem on $device has wrong qgroup numbers" \
--				>> $seqres.full
-+			_log_err "_check_btrfs_filesystem: filesystem on $device has wrong qgroup numbers"
- 			echo "*** qgroup_report.$FSTYP output ***"	>>$seqres.full
- 			cat $tmp.qgroup_report				>>$seqres.full
- 			echo "*** qgroup_report.$FSTYP output ***"	>>$seqres.full
-@@ -117,9 +115,7 @@ _check_btrfs_filesystem()
- 
- 	$BTRFS_UTIL_PROG check $device >$tmp.fsck 2>&1
- 	if [ $? -ne 0 ]; then
--		echo "_check_btrfs_filesystem: filesystem on $device is inconsistent (see $seqres.full)"
--
--		echo "_check_btrfs_filesystem: filesystem on $device is inconsistent" >>$seqres.full
-+		_log_err "_check_btrfs_filesystem: filesystem on $device is inconsistent"
- 		echo "*** fsck.$FSTYP output ***"	>>$seqres.full
- 		cat $tmp.fsck				>>$seqres.full
- 		echo "*** end fsck.$FSTYP output"	>>$seqres.full
-diff --git a/common/rc b/common/rc
-index 8f23334..166400f 100644
---- a/common/rc
-+++ b/common/rc
-@@ -115,6 +115,25 @@ then
-     fi
- fi
- 
-+_dump_err()
-+{
-+    err_msg="$*"
-+    echo "$err_msg"
-+}
-+
-+_dump_err2()
-+{
-+    err_msg="$*"
-+    >2& echo "$err_msg"
-+}
-+
-+_log_err()
-+{
-+    err_msg="$*"
-+    echo "$err_msg" | tee -a $seqres.full
-+    echo "(see $seqres.full for details)"
-+}
-+
- # make sure we have a standard umask
- umask 022
- 
-@@ -1052,7 +1071,9 @@ _repair_scratch_fs()
- 		_scratch_xfs_repair "$@" 2>&1
- 		res=$?
- 	fi
--	test $res -ne 0 && >&2 echo "xfs_repair failed, err=$res"
-+	if [ $res -ne 0 ]; then
-+		_dump_err2 "xfs_repair failed, err=$res"
-+	fi
- 	return $res
-         ;;
-     *)
-@@ -1064,7 +1085,7 @@ _repair_scratch_fs()
- 		res=0
- 		;;
- 	*)
--		>&2 echo "fsck.$FSTYP failed, err=$res"
-+		_dump_err2 "fsck.$FSTYP failed, err=$res"
- 		;;
- 	esac
- 	return $res
-@@ -2174,7 +2195,7 @@ _mount_or_remount_rw()
- 			_overlay_mount $device $mountpoint
- 		fi
- 		if [ $? -ne 0 ]; then
--			echo "!!! failed to remount $device on $mountpoint"
-+			_dump_err "!!! failed to remount $device on $mountpoint"
- 			return 0 # ok=0
- 		fi
- 	else
-@@ -2208,9 +2229,7 @@ _check_generic_filesystem()
-     fsck -t $FSTYP $FSCK_OPTIONS $device >$tmp.fsck 2>&1
-     if [ $? -ne 0 ]
-     then
--        echo "_check_generic_filesystem: filesystem on $device is inconsistent (see $seqres.full)"
--
--        echo "_check_generic filesystem: filesystem on $device is inconsistent" >>$seqres.full
-+	_log_err "_check_generic_filesystem: filesystem on $device is inconsistent"
-         echo "*** fsck.$FSTYP output ***"	>>$seqres.full
-         cat $tmp.fsck				>>$seqres.full
-         echo "*** end fsck.$FSTYP output"	>>$seqres.full
-@@ -3089,7 +3108,7 @@ _check_dmesg()
- 	     -e "general protection fault:" \
- 	     $seqres.dmesg
- 	if [ $? -eq 0 ]; then
--		echo "_check_dmesg: something found in dmesg (see $seqres.dmesg)"
-+		_dump_err "_check_dmesg: something found in dmesg (see $seqres.dmesg)"
- 		return 1
- 	else
- 		rm -f $seqres.dmesg
-diff --git a/common/xfs b/common/xfs
-index 767a481..adbcaf7 100644
---- a/common/xfs
-+++ b/common/xfs
-@@ -333,7 +333,7 @@ _check_xfs_filesystem()
- 		if [ -n "$TEST_XFS_SCRUB" ] && [ -x "$XFS_SCRUB_PROG" ]; then
- 			"$XFS_SCRUB_PROG" $scrubflag -vd $device >>$seqres.full
- 			if [ $? -ne 0 ]; then
--				echo "filesystem on $device failed scrub (see $seqres.full)"
-+				_log_err "filesystem on $device failed scrub"
- 				ok=0
- 			fi
- 		fi
-@@ -344,9 +344,7 @@ _check_xfs_filesystem()
- 	$XFS_LOGPRINT_PROG -t $extra_log_options $device 2>&1 \
- 		| tee $tmp.logprint | grep -q "<CLEAN>"
- 	if [ $? -ne 0 -a "$HOSTOS" = "Linux" ]; then
--		echo "_check_xfs_filesystem: filesystem on $device has dirty log (see $seqres.full)"
--
--		echo "_check_xfs_filesystem: filesystem on $device has dirty log"   >>$seqres.full
-+		_log_err "_check_xfs_filesystem: filesystem on $device has dirty log"
- 		echo "*** xfs_logprint -t output ***"	>>$seqres.full
- 		cat $tmp.logprint			>>$seqres.full
- 		echo "*** end xfs_logprint output"	>>$seqres.full
-@@ -362,9 +360,7 @@ _check_xfs_filesystem()
- 			_fix_malloc >$tmp.fs_check
- 	fi
- 	if [ -s $tmp.fs_check ]; then
--		echo "_check_xfs_filesystem: filesystem on $device is inconsistent (c) (see $seqres.full)"
--
--		echo "_check_xfs_filesystem: filesystem on $device is inconsistent" >>$seqres.full
-+		_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (c)"
- 		echo "*** xfs_check output ***"		>>$seqres.full
- 		cat $tmp.fs_check			>>$seqres.full
- 		echo "*** end xfs_check output"		>>$seqres.full
-@@ -374,9 +370,7 @@ _check_xfs_filesystem()
- 
- 	$XFS_REPAIR_PROG -n $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
- 	if [ $? -ne 0 ]; then
--		echo "_check_xfs_filesystem: filesystem on $device is inconsistent (r) (see $seqres.full)"
--
--		echo "_check_xfs_filesystem: filesystem on $device is inconsistent" >>$seqres.full
-+		_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (r)"
- 		echo "*** xfs_repair -n output ***"	>>$seqres.full
- 		cat $tmp.repair | _fix_malloc		>>$seqres.full
- 		echo "*** end xfs_repair output"	>>$seqres.full
-@@ -389,9 +383,7 @@ _check_xfs_filesystem()
- 	if [ -n "$TEST_XFS_REPAIR_REBUILD" ]; then
- 		$XFS_REPAIR_PROG $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
- 		if [ $? -ne 0 ]; then
--			echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild) (see $seqres.full)"
--
--			echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild)" >>$seqres.full
-+			_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild)"
- 			echo "*** xfs_repair output ***"	>>$seqres.full
- 			cat $tmp.repair | _fix_malloc		>>$seqres.full
- 			echo "*** end xfs_repair output"	>>$seqres.full
-@@ -402,9 +394,7 @@ _check_xfs_filesystem()
- 
- 		$XFS_REPAIR_PROG -n $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
- 		if [ $? -ne 0 ]; then
--			echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild-reverify) (see $seqres.full)"
--
--			echo "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild-reverify)" >>$seqres.full
-+			_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild-reverify)"
- 			echo "*** xfs_repair -n output ***"	>>$seqres.full
- 			cat $tmp.repair | _fix_malloc		>>$seqres.full
- 			echo "*** end xfs_repair output"	>>$seqres.full
--- 
-2.9.3
-
+Thanks,
+Eryu
