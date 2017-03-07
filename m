@@ -1,67 +1,218 @@
-Received: from mail-ua0-f172.google.com ([209.85.217.172]:34690 "EHLO
-        mail-ua0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753106AbdCGA7D (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 6 Mar 2017 19:59:03 -0500
-Received: by mail-ua0-f172.google.com with SMTP id f54so189414497uaa.1
-        for <fstests@vger.kernel.org>; Mon, 06 Mar 2017 16:57:19 -0800 (PST)
-MIME-Version: 1.0
-In-Reply-To: <20170127211003.ypphb36xhsn4vczq@thunk.org>
-References: <CAMHSBOWq5oFTgpZ1hT_Nd7ebVc2nEp8yLp3CFB146fPmizOkEQ@mail.gmail.com>
- <20170127034557.l6kzxxjh2md2rfgs@thunk.org> <CAAbOSckhztYa6q56rzATXOKHJS6o4WEZPicMEc9RdOUHuWELdQ@mail.gmail.com>
- <20170127163748.vhqizartavwa7vxt@thunk.org> <CAAbOScmd_j-HgZj929fbWzs3JjLkB817dJ_A-ghLyD7kHjh7GA@mail.gmail.com>
- <20170127211003.ypphb36xhsn4vczq@thunk.org>
-From: Mike Frysinger <vapier@chromium.org>
-Date: Mon, 6 Mar 2017 17:56:48 -0700
-Message-ID: <CAAbOScn5FooUbgM59QH40tdZ5D6B3MoYpfM8mBqLMfbMgxk=5w@mail.gmail.com>
-Subject: Re: xfstest and chromeos
-Content-Type: text/plain; charset=UTF-8
+Received: from mx1.redhat.com ([209.132.183.28]:38050 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751838AbdCGHTS (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 7 Mar 2017 02:19:18 -0500
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] generic: require journal in shutdown tests
+Date: Tue,  7 Mar 2017 14:16:09 +0800
+Message-Id: <20170307061609.27099-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Gwendal Grignou <gwendal@chromium.org>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jan 27, 2017 at 2:10 PM, Theodore Ts'o wrote:
-> On Fri, Jan 27, 2017 at 08:02:30AM -1000, Mike Frysinger wrote:
->> > Right, but I'm able to create libtool without any problems and messing
->> > with aclocal.m4 and acinclude.m4, et. al.  I probably am relying on
->> > libtoolize from the local Debian or Guubuntu build host, though.  Is
->> > that the issue you're having with ChromeOS?  That you're using a
->> > different version of the libtool/autoconf macros?
->>
->> if we wanted, we could do all this manually too, but i don't think it
->> makes sense to force every developer to learn autotools and how to set
->> up a local copy.  Gwendal's patch makes things "just work" w/out
->> having to learn anything new.  the overhead is, arguably, negligible.
->
-> Most developers are forced to learn autotools, since it's generally
-> considered good practice by people who use libtools at all to not
-> check in build artifacts into the git tree.
+Tests in shutdown group are supposed to test journal recovery after
+filesystem shutdown, and the tests assume the filesystem in test has
+journal support. But with the ext4 shutdown function added in
+4.11-rc kernel, ext2 gains shutdown support too when driving with
+ext4 driver, so generic/051 fails because fs corruption after test.
 
-i have no idea what you're trying to argue here.
-(1) xfstests already uses autotools.  disliking autotools doesn't change that.
-(2) developers don't need to learn anything new.  you always run
-`autoreconf -fi`.  FIN.  there is no need to figure out which specific
-sub-tools to run (autoheader, autoconf, libtoolize, whatever), or in
-what order.  if you're worried about people not knowing how to run
-this one command, then we can add an "autogen.sh" script to the root
-to run `autoreconf -fi` for you.  that's a semi-common practice in
-autotool based projects.
-(3) no one (on the CrOS side) is arguing for committing generated
-artifacts into git.  that's a terrible practice regardless of
-autotools.
+Adding _require_metadata_journaling to all generic tests in shutdown
+group to ensure there's journal present.
 
-> Especially given that xfstests and xfsprogs only need to work on Linux
-> these days (we have enough other Linixisms that it would be hopeless
-> to get it to work on, say, BSD or Open Solaris), in my opinion the
-> right thing to do would be to completely ditch automake and libtool;
-> e2fsprogs autoconf mainly for things like "--enable-elf-shlibs" and
-> using Makefile fragments included as part of the configure process is
-> plenty to handle shared libraries.  But that's up to Darrick and Eryu
-> to decide.  :-)
+generic/050 is skipped because it has _require_scratch_nocheck,
+which indicates no fsck is done after test.
 
-so we trade one pile of standard scripts/hacks that the rest of the
-world uses for a pile of non-standard/unique scripts/hacks that only
-one project uses ?  that doesn't sound like an improvement, it just
-sounds like "this is the pile i know".  except in the case of
-xfstests, it isn't something we know.
--mike
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+ tests/generic/042 | 1 +
+ tests/generic/043 | 1 +
+ tests/generic/044 | 1 +
+ tests/generic/045 | 1 +
+ tests/generic/046 | 1 +
+ tests/generic/047 | 1 +
+ tests/generic/048 | 1 +
+ tests/generic/049 | 1 +
+ tests/generic/051 | 1 +
+ tests/generic/052 | 1 +
+ tests/generic/054 | 3 +++
+ tests/generic/055 | 3 +++
+ tests/generic/388 | 1 +
+ tests/generic/392 | 1 +
+ 14 files changed, 18 insertions(+)
+
+diff --git a/tests/generic/042 b/tests/generic/042
+index 6eecbdc..68ff03c 100755
+--- a/tests/generic/042
++++ b/tests/generic/042
+@@ -92,6 +92,7 @@ _require_xfs_io_command "fpunch"
+ _require_xfs_io_command "fzero"
+ 
+ _scratch_mkfs >/dev/null 2>&1
++_require_metadata_journaling $SCRATCH_DEV
+ _scratch_mount
+ 
+ _crashtest "falloc -k"
+diff --git a/tests/generic/043 b/tests/generic/043
+index b76a5aa..3d98ab0 100755
+--- a/tests/generic/043
++++ b/tests/generic/043
+@@ -43,6 +43,7 @@ _require_scratch
+ _require_scratch_shutdown
+ _require_fiemap
+ _scratch_mkfs >/dev/null 2>&1
++_require_metadata_journaling $SCRATCH_DEV
+ _scratch_mount
+ 
+ # create files
+diff --git a/tests/generic/044 b/tests/generic/044
+index 0331baa..eb64b86 100755
+--- a/tests/generic/044
++++ b/tests/generic/044
+@@ -43,6 +43,7 @@ _require_scratch
+ _require_scratch_shutdown
+ _require_fiemap
+ _scratch_mkfs >/dev/null 2>&1
++_require_metadata_journaling $SCRATCH_DEV
+ _scratch_mount
+ 
+ # create files
+diff --git a/tests/generic/045 b/tests/generic/045
+index 874c955..5ef747f 100755
+--- a/tests/generic/045
++++ b/tests/generic/045
+@@ -43,6 +43,7 @@ _require_scratch
+ _require_scratch_shutdown
+ _require_fiemap
+ _scratch_mkfs >/dev/null 2>&1
++_require_metadata_journaling $SCRATCH_DEV
+ _scratch_mount
+ 
+ # create files
+diff --git a/tests/generic/046 b/tests/generic/046
+index 5a894b8..882cb09 100755
+--- a/tests/generic/046
++++ b/tests/generic/046
+@@ -43,6 +43,7 @@ _require_scratch
+ _require_scratch_shutdown
+ _require_fiemap
+ _scratch_mkfs >/dev/null 2>&1
++_require_metadata_journaling $SCRATCH_DEV
+ _scratch_mount
+ 
+ # create files
+diff --git a/tests/generic/047 b/tests/generic/047
+index 631dc1e..d7e4610 100755
+--- a/tests/generic/047
++++ b/tests/generic/047
+@@ -44,6 +44,7 @@ _require_scratch
+ _require_scratch_shutdown
+ _require_fiemap
+ _scratch_mkfs >/dev/null 2>&1
++_require_metadata_journaling $SCRATCH_DEV
+ _scratch_mount
+ 
+ _check_files()
+diff --git a/tests/generic/048 b/tests/generic/048
+index 51d7efd..3f0bcc1 100755
+--- a/tests/generic/048
++++ b/tests/generic/048
+@@ -44,6 +44,7 @@ _require_scratch
+ _require_scratch_shutdown
+ _require_fiemap
+ _scratch_mkfs >/dev/null 2>&1
++_require_metadata_journaling $SCRATCH_DEV
+ _scratch_mount
+ 
+ # Do we have enough space on disk?  10G
+diff --git a/tests/generic/049 b/tests/generic/049
+index 1299242..1f2a4b2 100755
+--- a/tests/generic/049
++++ b/tests/generic/049
+@@ -44,6 +44,7 @@ _require_scratch
+ _require_scratch_shutdown
+ _require_fiemap
+ _scratch_mkfs >/dev/null 2>&1
++_require_metadata_journaling $SCRATCH_DEV
+ _scratch_mount
+ 
+ _check_files()
+diff --git a/tests/generic/051 b/tests/generic/051
+index 7b807b9..29ac61b 100755
+--- a/tests/generic/051
++++ b/tests/generic/051
+@@ -55,6 +55,7 @@ _require_command "$KILLALL_PROG" killall
+ rm -f $seqres.full
+ 
+ _scratch_mkfs > $seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
+ _scratch_mount
+ 
+ SLEEP_TIME=$((30 * $TIME_FACTOR))
+diff --git a/tests/generic/052 b/tests/generic/052
+index f7cdd09..65d430d 100755
+--- a/tests/generic/052
++++ b/tests/generic/052
+@@ -53,6 +53,7 @@ _require_logstate
+ echo "mkfs"
+ _scratch_mkfs >>$seqres.full 2>&1 \
+     || _fail "mkfs scratch failed"
++_require_metadata_journaling $SCRATCH_DEV
+ 
+ echo "mount"
+ _scratch_mount >>$seqres.full 2>&1 \
+diff --git a/tests/generic/054 b/tests/generic/054
+index 8375e57..4d4be59 100755
+--- a/tests/generic/054
++++ b/tests/generic/054
+@@ -50,6 +50,9 @@ _require_logstate
+ echo "*** init FS"
+ _scratch_unmount >/dev/null 2>&1
+ 
++_scratch_mkfs >/dev/null 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++
+ _get_log_configs > $tmp.seq.params
+ 
+ # Do the work for various log params which
+diff --git a/tests/generic/055 b/tests/generic/055
+index 207c007..aed3b28 100755
+--- a/tests/generic/055
++++ b/tests/generic/055
+@@ -79,6 +79,9 @@ QUOTA_OPTION=`_get_quota_option`
+ echo "*** init FS"
+ _scratch_unmount >/dev/null 2>&1
+ 
++_scratch_mkfs >/dev/null 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++
+ _get_log_configs > $tmp.seq.params
+ 
+ cat $tmp.seq.params \
+diff --git a/tests/generic/388 b/tests/generic/388
+index 3729aa5..2760208 100755
+--- a/tests/generic/388
++++ b/tests/generic/388
+@@ -62,6 +62,7 @@ rm -f $seqres.full
+ echo "Silence is golden."
+ 
+ _scratch_mkfs >> $seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
+ _scratch_mount || _fail "mount failed"
+ 
+ for i in $(seq 1 50); do
+diff --git a/tests/generic/392 b/tests/generic/392
+index b8af8a0..6922f7d 100755
+--- a/tests/generic/392
++++ b/tests/generic/392
+@@ -53,6 +53,7 @@ _require_scratch_shutdown
+ _require_xfs_io_command "fpunch"
+ 
+ _scratch_mkfs >/dev/null 2>&1
++_require_metadata_journaling $SCRATCH_DEV
+ _scratch_mount
+ 
+ testfile=$SCRATCH_MNT/testfile
+-- 
+2.9.3
+
