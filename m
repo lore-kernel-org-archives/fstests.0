@@ -1,100 +1,127 @@
-Received: from mail-lf0-f65.google.com ([209.85.215.65]:33598 "EHLO
-        mail-lf0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750853AbdCHMRg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 8 Mar 2017 07:17:36 -0500
-Received: by mail-lf0-f65.google.com with SMTP id r36so2245562lfi.0
-        for <fstests@vger.kernel.org>; Wed, 08 Mar 2017 04:16:43 -0800 (PST)
-From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: Re: [PATCH 2/2] report: Add xunit format report generator
-In-Reply-To: <20170308030023.GW14226@eguan.usersys.redhat.com>
-References: <1488529576-17034-1-git-send-email-dmonakhov@openvz.org> <1488529576-17034-3-git-send-email-dmonakhov@openvz.org> <20170307120534.GV14226@eguan.usersys.redhat.com> <CAOQ4uxggR96taZ0Bs3JnNEU-YW6f1QO9t2MDHiThc2DOLHcQ3A@mail.gmail.com> <20170308030023.GW14226@eguan.usersys.redhat.com>
-Date: Wed, 08 Mar 2017 15:16:39 +0300
-Message-ID: <87shmo6k0o.fsf@dmlp.sw.ru>
+Received: from mx1.redhat.com ([209.132.183.28]:46238 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753333AbdCHNWO (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 8 Mar 2017 08:22:14 -0500
+Date: Wed, 8 Mar 2017 21:15:43 +0800
+From: Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH] generic/411: change sub-path name that's duplicate of
+ TEST_DIR
+Message-ID: <20170308131543.GQ14075@dhcp12-143.nay.redhat.com>
+References: <1488957991-18194-1-git-send-email-zlang@redhat.com>
+ <CAOQ4uxhq2h_WEKz1o+_AC8qFT6n6x40eUcBUpoe2eT1pfHAo7w@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxhq2h_WEKz1o+_AC8qFT6n6x40eUcBUpoe2eT1pfHAo7w@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>, Amir Goldstein <amir73il@gmail.com>
+To: Amir Goldstein <amir73il@gmail.com>
 Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Eryu Guan <eguan@redhat.com> writes:
+On Wed, Mar 08, 2017 at 12:01:33PM +0200, Amir Goldstein wrote:
+> On Wed, Mar 8, 2017 at 9:26 AM, Zorro Lang <zlang@redhat.com> wrote:
+> > Darrick found generic/411 golden output mismatch if use
+> > TEST_DIR=/mnt. Because g/411 use some test path named
+> > /mnt/XXXX/mnt1/mnt2, _filter_test_dir will replace all
+> > "/mnt" things to "TEST_DIR".
+> >
+> > For stop this failure, change all directory names to be
+> > "$seq-XXX", that's less likely to be mistaken for TEST_*
+> > and SCRATCH_*.
+> >
+> 
+> Although you have a right to choose whichever names you
+> want top use for your test, this is papering over a bug.
+> 
+> I re-read the docuemtnation for \B:
+> http://www.rexegg.com/regex-boundaries.html#bengines
 
-> On Tue, Mar 07, 2017 at 03:13:01PM +0200, Amir Goldstein wrote:
->> On Tue, Mar 7, 2017 at 2:05 PM, Eryu Guan <eguan@redhat.com> wrote:
->> > On Fri, Mar 03, 2017 at 12:26:16PM +0400, Dmitry Monakhov wrote:
->> >> xunit[1]/junit[2] are well known report formats for tests frameworks which
->> >> supported by most of test CI frameworks(such as Jenkins [3], Bamboo [4], Avocado [5])
->> >> Basically this is just xml document which can be easily parsed later by external tools.
->> >>
->> >> changes since v2: (in response to eguan@)
->> >>  - assert repot format on initialization
->> >>  - Tabify new files
->> >>
->> >> changes since v1:
->> >>  - Use generic '-R fmt' option for report generation, asked by eguan@
->> >>  - localize variables, asked by eguan@
->> >>  - do not add empty files to report asked by eguan@
->> >>  - Add properties
->> >>  - Fix system-err/system-out node nesting
->> >>
->> >> EXAMPLE:
->> >> #./check -R xunit -s ext4 generic/001 generic/010
->> >> #cat results/ext4/result.xml
->> >> <?xml version="1.0" encoding="UTF-8"?>
->> >> <testsuite name="xfstests" errors="0" skipped="1" tests="2" time="7"  hostname="alice" timestamp="2017-02-21T15:15:06"  >
->> >>       <properties>
->> >>               <property name="SECTION" value="ext4"/>
->> >>               <property name="FSTYP" value="ext4"/>
->> >>               <property name="MOUNT_OPTIONS" value="-o acl,user_xattr "/>
->> >>               <property name="HOST_OPTIONS" value="/devel/xfstests-dev.git/configs/alice.config"/>
->> >>               <property name="XFS_MKFS_OPTIONS" value="-bsize=4096"/>
->> >>               <property name="TIME_FACTOR" value="1"/>
->> >>               <property name="LOAD_FACTOR" value="1"/>
->> >>               <property name="TEST_DIR" value="/mnt/test"/>
->> >>               <property name="TEST_DEV" value="/dev/ram0"/>
->> >>               <property name="SCRATCH_DEV" value="/dev/ram1"/>
->> >>               <property name="SCRATCH_MNT" value="/mnt/scratch"/>
->> >>               <property name="OVERLAY_UPPER_DIR" value="upper"/>
->> >>               <property name="OVERLAY_LOWER_DIR" value="lower"/>
->> >>               <property name="OVERLAY_WORK_DIR" value="work"/>
->> >>       </properties>
->> >>       <testcase classname="xfstests.ext4" name="generic/001" time="5">
->> >>       </testcase>
->> >>       <testcase classname="xfstests.ext4" name="generic/010" time="1">
->> >>               <skipped message="src/dbtest not built" />
->> >>       </testcase>
->> >> </testsuite>
->> >>
->> >> Footnotes:
->> >> [1] https://xunit.github.io/docs/format-xml-v2.html
->> >> [2] http://help.catchsoftware.com/display/ET/JUnit+Format
->> >> [3] https://jenkins.io
->> >> [4] https://www.atlassian.com/software/bamboo
->> >> [5] https://github.com/avocado-framework/avocado
->> >>
->> >> Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
->> >
->> > I renamed OVERLAY_{UPPER,LOWER,WORK}_DIR to OVL_{UPPER,LOWER,WORK} in
->> > this patch, as they've been updated by recent overlayfs patch.
->> >
->> 
->> I would prefer if those were not configuration options at all.
->> 
->> As I wrote in commit 6f5ba68b:
->> 
->>     - Make those vars values non-configurable, because lower/upper/work
->>       directory names are an internal test detail which should
->>       not concern the user and because we wish to simplify
->>       and document the overlay tests setup
->
-> Thanks for the reminder!
->
-> Dmitry, do you mind I removing all these overlay variables from
-> REPORT_ENV_LIST?
-Off course. Please.
-This list should contains only externally configurable options necessery for
-later reproduction.
+Oh, sorry, I sent this patch before I saw your reply about "\B".
+I don't think this's the best way to fix this problem, just sent
+a demo patch which follow the first round discussion result with
+Eryu. We can NACK this patch and keep looking for a better one
+anytime :)
 
->
-> Thanks,
-> Eryu
+Let me read above documentation at first :)
+
+Thanks,
+Zorro
+
+
+> 
+> To my understanding, the expression "\B$TEST_DIR" will
+> match every instance of $TEST_DIR, where preceding character
+> is NOT a letter, number or underscore.
+> This is because $TEST_DIR must start with '/', which is not
+> a letter, number or underscore.
+> 
+> I think it should be safe to fix _filter_test_dir and _filter_scratch.
+> 
+> Eryu?
+> 
+> > Reported-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > ---
+> >  tests/generic/411     | 10 +++++-----
+> >  tests/generic/411.out |  8 ++++----
+> >  2 files changed, 9 insertions(+), 9 deletions(-)
+> >
+> > diff --git a/tests/generic/411 b/tests/generic/411
+> > index 414d3a5..8a45f14 100755
+> > --- a/tests/generic/411
+> > +++ b/tests/generic/411
+> > @@ -123,18 +123,18 @@ crash_test()
+> >         start_test shared
+> >
+> >         _get_mount $SCRATCH_DEV $mpA
+> > -       mkdir $mpA/mnt1
+> > +       mkdir $mpA/${seq}-mnt1
+> >         $MOUNT_PROG --make-shared $mpA
+> >         _get_mount --bind $mpA $mpB
+> >         _get_mount --bind $mpA $mpC
+> >         $MOUNT_PROG --make-slave $mpB
+> >         $MOUNT_PROG --make-slave $mpC
+> > -       _get_mount $SCRATCH_DEV $mpA/mnt1
+> > -       mkdir $mpA/mnt1/mnt2
+> > +       _get_mount $SCRATCH_DEV $mpA/${seq}-mnt1
+> > +       mkdir $mpA/${seq}-mnt1/${seq}-mnt2
+> >
+> > -       _get_mount $SCRATCH_DEV $mpB/mnt1/mnt2
+> > +       _get_mount $SCRATCH_DEV $mpB/${seq}-mnt1/${seq}-mnt2
+> >         find_mnt
+> > -       fs_stress $mpB/mnt1/mnt2
+> > +       fs_stress $mpB/${seq}-mnt1/${seq}-mnt2
+> >
+> >         end_test
+> >         echo "crash test passed"
+> > diff --git a/tests/generic/411.out b/tests/generic/411.out
+> > index 16dadaf..01a0cdd 100644
+> > --- a/tests/generic/411.out
+> > +++ b/tests/generic/411.out
+> > @@ -2,11 +2,11 @@ QA output created by 411
+> >  ------
+> >  TEST_DIR/411 SCRATCH_DEV
+> >  mpA SCRATCH_DEV
+> > -mpA/mnt1 SCRATCH_DEV
+> > +mpA/411-mnt1 SCRATCH_DEV
+> >  mpB SCRATCH_DEV
+> > -mpB/mnt1 SCRATCH_DEV
+> > -mpB/mnt1/mnt2 SCRATCH_DEV
+> > +mpB/411-mnt1 SCRATCH_DEV
+> > +mpB/411-mnt1/411-mnt2 SCRATCH_DEV
+> >  mpC SCRATCH_DEV
+> > -mpC/mnt1 SCRATCH_DEV
+> > +mpC/411-mnt1 SCRATCH_DEV
+> >  ======
+> >  crash test passed
+> > --
+> > 2.7.4
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
