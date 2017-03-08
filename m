@@ -1,96 +1,84 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46684 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:40018 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933150AbdCHDAZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 7 Mar 2017 22:00:25 -0500
-Date: Wed, 8 Mar 2017 11:00:23 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/2] report: Add xunit format report generator
-Message-ID: <20170308030023.GW14226@eguan.usersys.redhat.com>
-References: <1488529576-17034-1-git-send-email-dmonakhov@openvz.org>
- <1488529576-17034-3-git-send-email-dmonakhov@openvz.org>
- <20170307120534.GV14226@eguan.usersys.redhat.com>
- <CAOQ4uxggR96taZ0Bs3JnNEU-YW6f1QO9t2MDHiThc2DOLHcQ3A@mail.gmail.com>
+        id S1750730AbdCHFHP (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 8 Mar 2017 00:07:15 -0500
+Date: Wed, 8 Mar 2017 11:50:45 +0800
+From: Zorro Lang <zlang@redhat.com>
+Subject: Re: generic/411 clash with TEST_DIR=/mnt
+Message-ID: <20170308035045.GN14075@dhcp12-143.nay.redhat.com>
+References: <20170307165027.GA15724@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxggR96taZ0Bs3JnNEU-YW6f1QO9t2MDHiThc2DOLHcQ3A@mail.gmail.com>
+In-Reply-To: <20170307165027.GA15724@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Dmitry Monakhov <dmonakhov@openvz.org>, fstests <fstests@vger.kernel.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Mar 07, 2017 at 03:13:01PM +0200, Amir Goldstein wrote:
-> On Tue, Mar 7, 2017 at 2:05 PM, Eryu Guan <eguan@redhat.com> wrote:
-> > On Fri, Mar 03, 2017 at 12:26:16PM +0400, Dmitry Monakhov wrote:
-> >> xunit[1]/junit[2] are well known report formats for tests frameworks which
-> >> supported by most of test CI frameworks(such as Jenkins [3], Bamboo [4], Avocado [5])
-> >> Basically this is just xml document which can be easily parsed later by external tools.
-> >>
-> >> changes since v2: (in response to eguan@)
-> >>  - assert repot format on initialization
-> >>  - Tabify new files
-> >>
-> >> changes since v1:
-> >>  - Use generic '-R fmt' option for report generation, asked by eguan@
-> >>  - localize variables, asked by eguan@
-> >>  - do not add empty files to report asked by eguan@
-> >>  - Add properties
-> >>  - Fix system-err/system-out node nesting
-> >>
-> >> EXAMPLE:
-> >> #./check -R xunit -s ext4 generic/001 generic/010
-> >> #cat results/ext4/result.xml
-> >> <?xml version="1.0" encoding="UTF-8"?>
-> >> <testsuite name="xfstests" errors="0" skipped="1" tests="2" time="7"  hostname="alice" timestamp="2017-02-21T15:15:06"  >
-> >>       <properties>
-> >>               <property name="SECTION" value="ext4"/>
-> >>               <property name="FSTYP" value="ext4"/>
-> >>               <property name="MOUNT_OPTIONS" value="-o acl,user_xattr "/>
-> >>               <property name="HOST_OPTIONS" value="/devel/xfstests-dev.git/configs/alice.config"/>
-> >>               <property name="XFS_MKFS_OPTIONS" value="-bsize=4096"/>
-> >>               <property name="TIME_FACTOR" value="1"/>
-> >>               <property name="LOAD_FACTOR" value="1"/>
-> >>               <property name="TEST_DIR" value="/mnt/test"/>
-> >>               <property name="TEST_DEV" value="/dev/ram0"/>
-> >>               <property name="SCRATCH_DEV" value="/dev/ram1"/>
-> >>               <property name="SCRATCH_MNT" value="/mnt/scratch"/>
-> >>               <property name="OVERLAY_UPPER_DIR" value="upper"/>
-> >>               <property name="OVERLAY_LOWER_DIR" value="lower"/>
-> >>               <property name="OVERLAY_WORK_DIR" value="work"/>
-> >>       </properties>
-> >>       <testcase classname="xfstests.ext4" name="generic/001" time="5">
-> >>       </testcase>
-> >>       <testcase classname="xfstests.ext4" name="generic/010" time="1">
-> >>               <skipped message="src/dbtest not built" />
-> >>       </testcase>
-> >> </testsuite>
-> >>
-> >> Footnotes:
-> >> [1] https://xunit.github.io/docs/format-xml-v2.html
-> >> [2] http://help.catchsoftware.com/display/ET/JUnit+Format
-> >> [3] https://jenkins.io
-> >> [4] https://www.atlassian.com/software/bamboo
-> >> [5] https://github.com/avocado-framework/avocado
-> >>
-> >> Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
-> >
-> > I renamed OVERLAY_{UPPER,LOWER,WORK}_DIR to OVL_{UPPER,LOWER,WORK} in
-> > this patch, as they've been updated by recent overlayfs patch.
-> >
+On Tue, Mar 07, 2017 at 08:50:27AM -0800, Darrick J. Wong wrote:
+> Hi Zorro,
 > 
-> I would prefer if those were not configuration options at all.
+> I noticed that generic/411 creates some sort of directory structure
+> involving $TEST_DIR/$seq/$$_mpA/mnt1/mnt2, then pipes the findmnt output
+> through _filter_test_dir.
 > 
-> As I wrote in commit 6f5ba68b:
+> Unfortunately, on my test system I have TEST_DIR=/mnt, so the filtering
+> produces this output:
 > 
->     - Make those vars values non-configurable, because lower/upper/work
->       directory names are an internal test detail which should
->       not concern the user and because we wish to simplify
->       and document the overlay tests setup
+> QA output created by 411
+> ------
+> TEST_DIR/411 SCRATCH_DEV
+> mpA SCRATCH_DEV
+> mpATEST_DIR1 SCRATCH_DEV
+> mpB SCRATCH_DEV
+> mpBTEST_DIR1 SCRATCH_DEV
+> mpBTEST_DIR1/TEST_DIR2 SCRATCH_DEV
+> mpC SCRATCH_DEV
+> mpCTESTDIR1 SCRATCH_DEV
+> ======
 
-Thanks for the reminder!
+Hmm, that's really a problem, thanks for finding it:) If someone
+use "/mnt" as TEST_DIR, _filter_test_dir will change all "/mnt"
+things to "TEST_DIR".
 
-Dmitry, do you mind I removing all these overlay variables from
-REPORT_ENV_LIST?
+Except we recommend all cases shouldn't contain "/mnt"
+in its test path name. Or we'd better change _filter_test_dir,
+make it to be more picky.
+
+I prefer the second way, except someone has a third way :)
+
+> crash test passed
+> 
+> Which means that the golden output comparison fails. :(
+> 
+> I'm not sure what's a proper fix here: changing _filter_test_dir to be
+> more picky about what gets sed'ed?
+> 
+> e.g. sed -e "s,\([[:space:]]\)$TEST_DIR,\1TEST_DIR,g/"
+
+Except [[:space:]]$TEST_DIR, maybe we should think about "^$TEST_DIR" too,
+e.g:
+
+echo "/mnt/mnt1/mnt2     /mnt/mnt3/mnt4" | \
+     sed -e "s,\([[:space:]]\)$TEST_DIR,\1TEST_DIR,g" | \
+     sed -e "s,^$TEST_DIR,TEST_DIR,g"
+
+(Is there a simpler way to do above things ^^ ? :)
+
+But this change will affect lots of cases, we need to run full around
+xfstests to make sure it won't change some cases' golden output. What
+do you think?
 
 Thanks,
-Eryu
+Zorro
+
+> 
+> Or just to change the test to use directory names that are less likely to be
+> mistaken for TEST_* and SCRATCH_*?
+> 
+> --D
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
