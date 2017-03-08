@@ -1,104 +1,80 @@
-Received: from mail-ot0-f179.google.com ([74.125.82.179]:34217 "EHLO
-        mail-ot0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751747AbdCHI1s (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 8 Mar 2017 03:27:48 -0500
-Received: by mail-ot0-f179.google.com with SMTP id o24so26083507otb.1
-        for <fstests@vger.kernel.org>; Wed, 08 Mar 2017 00:27:42 -0800 (PST)
-MIME-Version: 1.0
-In-Reply-To: <20170308071446.GP14075@dhcp12-143.nay.redhat.com>
-References: <20170307165027.GA15724@birch.djwong.org> <20170308035045.GN14075@dhcp12-143.nay.redhat.com>
- <CAOQ4uxj=98L4i_F5kBvfYi_gbA5FwuUw0QMz2jGaBqw4D1O6Ww@mail.gmail.com> <20170308071446.GP14075@dhcp12-143.nay.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 8 Mar 2017 10:20:19 +0200
-Message-ID: <CAOQ4uxjcXGsMzJ5pvJEYTT8=iWGWB62EbLW3ApJoFQNkkjvY=g@mail.gmail.com>
-Subject: Re: generic/411 clash with TEST_DIR=/mnt
-Content-Type: text/plain; charset=UTF-8
+Received: from mx1.redhat.com ([209.132.183.28]:49554 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751336AbdCHJUV (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 8 Mar 2017 04:20:21 -0500
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] generic/411: change sub-path name that's duplicate of TEST_DIR
+Date: Wed,  8 Mar 2017 15:26:31 +0800
+Message-Id: <1488957991-18194-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: darrick.wong@oracle.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Mar 8, 2017 at 9:14 AM, Zorro Lang <zlang@redhat.com> wrote:
-> On Wed, Mar 08, 2017 at 08:50:50AM +0200, Amir Goldstein wrote:
->> On Wed, Mar 8, 2017 at 5:50 AM, Zorro Lang <zlang@redhat.com> wrote:
->> > On Tue, Mar 07, 2017 at 08:50:27AM -0800, Darrick J. Wong wrote:
->> >> Hi Zorro,
->> >>
->> >> I noticed that generic/411 creates some sort of directory structure
->> >> involving $TEST_DIR/$seq/$$_mpA/mnt1/mnt2, then pipes the findmnt output
->> >> through _filter_test_dir.
->> >>
->> >> Unfortunately, on my test system I have TEST_DIR=/mnt, so the filtering
->> >> produces this output:
->> >>
->> >> QA output created by 411
->> >> ------
->> >> TEST_DIR/411 SCRATCH_DEV
->> >> mpA SCRATCH_DEV
->> >> mpATEST_DIR1 SCRATCH_DEV
->> >> mpB SCRATCH_DEV
->> >> mpBTEST_DIR1 SCRATCH_DEV
->> >> mpBTEST_DIR1/TEST_DIR2 SCRATCH_DEV
->> >> mpC SCRATCH_DEV
->> >> mpCTESTDIR1 SCRATCH_DEV
->> >> ======
->> >
->> > Hmm, that's really a problem, thanks for finding it:) If someone
->> > use "/mnt" as TEST_DIR, _filter_test_dir will change all "/mnt"
->> > things to "TEST_DIR".
->> >
->> > Except we recommend all cases shouldn't contain "/mnt"
->> > in its test path name. Or we'd better change _filter_test_dir,
->> > make it to be more picky.
->> >
->> > I prefer the second way, except someone has a third way :)
->> >
->> >> crash test passed
->> >>
->> >> Which means that the golden output comparison fails. :(
->> >>
->> >> I'm not sure what's a proper fix here: changing _filter_test_dir to be
->> >> more picky about what gets sed'ed?
->> >>
->> >> e.g. sed -e "s,\([[:space:]]\)$TEST_DIR,\1TEST_DIR,g/"
->> >
->> > Except [[:space:]]$TEST_DIR, maybe we should think about "^$TEST_DIR" too,
->> > e.g:
->> >
->> > echo "/mnt/mnt1/mnt2     /mnt/mnt3/mnt4" | \
->> >      sed -e "s,\([[:space:]]\)$TEST_DIR,\1TEST_DIR,g" | \
->> >      sed -e "s,^$TEST_DIR,TEST_DIR,g"
->> >
->>
->> That's not enough.
->> It's true that currently golden outputs only have ' ' and ^ preceding TEST_DIR,
->> but why should we limit the solution to TEST_DIR
->> SCRATCH_MNT could just as well be /mnt and we have SCRATCH_MNT
->> in golden outputs following '\'' '\"' and : as well.
->
-> Hmm, yes, you're right, maybe follow other things... I didn't think
-> about this. So change the filter is not easy.
->
->>
->> > (Is there a simpler way to do above things ^^ ? :)
->> >
->>
->> I'm not a regexp master, but can't we setup an expression that matches
->> $TEST_DIR.\S and only replaces the $TEST_DIR part,
->> that would replace only the first occurrence of  $TEST_DIR is every word.
->
-> Maybe output $TEST_* or $SCRATCH_* twice in one line.
->
-> Maybe there's not a better way to change the filter. Stop all cases using
-> sub-path name that's same with $TEST_* or $SCRATCH_* maybe the best way.
->
+Darrick found generic/411 golden output mismatch if use
+TEST_DIR=/mnt. Because g/411 use some test path named
+/mnt/XXXX/mnt1/mnt2, _filter_test_dir will replace all
+"/mnt" things to "TEST_DIR".
 
-Or maybe there is
+For stop this failure, change all directory names to be
+"$seq-XXX", that's less likely to be mistaken for TEST_*
+and SCRATCH_*.
 
-$ echo '/mnt/mnt/mnt /mnt/mnt1/mnt2 "/mnt/mnt/mnt:/mnt/mnt/mnt"' | sed
--e 's,\B/mnt,TEST_DIR,g'
-TEST_DIR/mnt/mnt TEST_DIR/mnt1/mnt2 "TEST_DIR/mnt/mnt:TEST_DIR/mnt/mnt"
+Reported-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
+ tests/generic/411     | 10 +++++-----
+ tests/generic/411.out |  8 ++++----
+ 2 files changed, 9 insertions(+), 9 deletions(-)
 
-\b should stand for word boundary, so I thought regexp should use \b, but that
-yields the opposite result. \B yields the correct result, but I do not
-understand why...?
+diff --git a/tests/generic/411 b/tests/generic/411
+index 414d3a5..8a45f14 100755
+--- a/tests/generic/411
++++ b/tests/generic/411
+@@ -123,18 +123,18 @@ crash_test()
+ 	start_test shared
+ 
+ 	_get_mount $SCRATCH_DEV $mpA
+-	mkdir $mpA/mnt1
++	mkdir $mpA/${seq}-mnt1
+ 	$MOUNT_PROG --make-shared $mpA
+ 	_get_mount --bind $mpA $mpB
+ 	_get_mount --bind $mpA $mpC
+ 	$MOUNT_PROG --make-slave $mpB
+ 	$MOUNT_PROG --make-slave $mpC
+-	_get_mount $SCRATCH_DEV $mpA/mnt1
+-	mkdir $mpA/mnt1/mnt2
++	_get_mount $SCRATCH_DEV $mpA/${seq}-mnt1
++	mkdir $mpA/${seq}-mnt1/${seq}-mnt2
+ 
+-	_get_mount $SCRATCH_DEV $mpB/mnt1/mnt2
++	_get_mount $SCRATCH_DEV $mpB/${seq}-mnt1/${seq}-mnt2
+ 	find_mnt
+-	fs_stress $mpB/mnt1/mnt2
++	fs_stress $mpB/${seq}-mnt1/${seq}-mnt2
+ 
+ 	end_test
+ 	echo "crash test passed"
+diff --git a/tests/generic/411.out b/tests/generic/411.out
+index 16dadaf..01a0cdd 100644
+--- a/tests/generic/411.out
++++ b/tests/generic/411.out
+@@ -2,11 +2,11 @@ QA output created by 411
+ ------
+ TEST_DIR/411 SCRATCH_DEV
+ mpA SCRATCH_DEV
+-mpA/mnt1 SCRATCH_DEV
++mpA/411-mnt1 SCRATCH_DEV
+ mpB SCRATCH_DEV
+-mpB/mnt1 SCRATCH_DEV
+-mpB/mnt1/mnt2 SCRATCH_DEV
++mpB/411-mnt1 SCRATCH_DEV
++mpB/411-mnt1/411-mnt2 SCRATCH_DEV
+ mpC SCRATCH_DEV
+-mpC/mnt1 SCRATCH_DEV
++mpC/411-mnt1 SCRATCH_DEV
+ ======
+ crash test passed
+-- 
+2.7.4
+
