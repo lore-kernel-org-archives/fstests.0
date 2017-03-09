@@ -1,185 +1,192 @@
-Received: from mx1.redhat.com ([209.132.183.28]:52536 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:50538 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752627AbdCIQly (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 9 Mar 2017 11:41:54 -0500
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v3] xfs/078: instead file image by mkfs on loopback device
-Date: Fri, 10 Mar 2017 00:40:19 +0800
-Message-Id: <1489077619-14263-1-git-send-email-zlang@redhat.com>
+        id S1752985AbdCIVbo (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 9 Mar 2017 16:31:44 -0500
+Received: from smtp.corp.redhat.com (int-mx16.intmail.prod.int.phx2.redhat.com [10.5.11.28])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id C4D258047A
+        for <fstests@vger.kernel.org>; Thu,  9 Mar 2017 21:31:44 +0000 (UTC)
+Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 9AAFE2DB4B
+        for <fstests@vger.kernel.org>; Thu,  9 Mar 2017 21:31:44 +0000 (UTC)
+From: Eric Sandeen <sandeen@redhat.com>
+Subject: [PATCH] xfstests: test orphan inode recovery on RO mount
+Message-ID: <517ceead-de32-1fdb-f002-ce9d7acdf330@redhat.com>
+Date: Thu, 9 Mar 2017 15:31:43 -0600
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: amir73il@gmail.com
+To: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-If test on 4k sector size device, xfs/078 will fail when it try to
-make a filesystem image with block size less than 4096. But if we
-attach the file image to a loop device, it can accept 512 block
-size. So this patch attach a loop device before do mkfs.xfs.
+There's a bug in xfs where the orphan inode list
+is not processed on a readonly mount, and is still not
+processed even if it gets mounted rw.  This test exercises
+that, and makes sure that the unlinked list is empty after
+a transition to rw and an unmount.
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
+While we're at it, sanity check the same thing for pure ro
+and rw unmounts.
+
+Now that shutdown is generic, we can test other filesystems
+as well, so this is in the generic group.
+
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 ---
- tests/xfs/078     | 49 ++++++++++++++++++++++++++-----------------------
- tests/xfs/078.out | 16 ++++++++--------
- 2 files changed, 34 insertions(+), 31 deletions(-)
 
-diff --git a/tests/xfs/078 b/tests/xfs/078
-index 0d6eb55..63219d9 100755
---- a/tests/xfs/078
-+++ b/tests/xfs/078
-@@ -34,11 +34,13 @@ trap "_cleanup; rm -f $tmp.*; exit \$status" 0 1 2 3 15
- 
- _cleanup()
- {
--    cd /
--    rm -f $tmp.*
--    umount $LOOP_MNT 2>/dev/null
--    [ -n "$LOOP_DEV" ] && losetup -d $LOOP_DEV
--    rmdir $LOOP_MNT
+diff --git a/tests/generic/416 b/tests/generic/416
+new file mode 100755
+index 0000000..b4a3b6e
+--- /dev/null
++++ b/tests/generic/416
+@@ -0,0 +1,118 @@
++#! /bin/bash
++# FS QA Test 416
++#
++# Test orphan inode / unlinked list processing on RO mount & RW transition
++#
++# A filesystem that crashes with open but unlinked inodes should
++# be consistent after a ro, ro->rw, or rw mount cycle.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
 +	cd /
 +	rm -f $tmp.*
-+	umount $LOOP_MNT 2>/dev/null
-+	[ -n "$LOOP_DEV" ] && _destroy_loop_device $LOOP_DEV 2>/dev/null
-+	# try to keep the image file if test fails
-+	[ $status -eq 0 ] && rm -f $LOOP_IMG
-+	rmdir $LOOP_MNT
- }
- 
- # get standard environment, filters and checks
-@@ -52,6 +54,7 @@ _supported_os Linux
- _require_test
- # Must have loop device
- _require_loop
-+_require_xfs_io_command "truncate"
- 
- LOOP_IMG=$TEST_DIR/$seq.fs
- LOOP_MNT=$TEST_DIR/$seq.mnt
-@@ -77,9 +80,12 @@ _grow_loop()
- 	check=$4
- 	agsize=$5
- 
--	dparam="file,name=$LOOP_IMG,size=$original"
-+	$XFS_IO_PROG -f -c "truncate $original" $LOOP_IMG
-+	LOOP_DEV=`_create_loop_device $LOOP_IMG`
++}
 +
-+	dparam=""
- 	if [ -n "$agsize" ]; then
--		dparam="$dparam,agsize=$agsize"
-+		dparam="-d agsize=$agsize"
- 	fi
- 
- 	echo
-@@ -87,46 +93,43 @@ _grow_loop()
- 	echo
- 
- 	echo "*** mkfs loop file (size=$original)"
--	mkfs_crc_opts="-m crc=0"
--	if [ -n "$XFS_MKFS_HAS_NO_META_SUPPORT" ]; then
--		mkfs_crc_opts=""
-+	mkfs_crc_opts=""
-+	if [ $bsize -lt 1024 -a -z "$XFS_MKFS_HAS_NO_META_SUPPORT" ]; then
-+		mkfs_crc_opts="-m crc=0"
- 	fi
--	$MKFS_XFS_PROG $mkfs_crc_opts -b size=$bsize -d $dparam \
-+	$MKFS_XFS_PROG $mkfs_crc_opts -b size=$bsize $dparam $LOOP_DEV \
- 		| _filter_mkfs 2>/dev/null
- 
- 	echo "*** extend loop file"
-+	_destroy_loop_device $LOOP_DEV
- 	$XFS_IO_PROG -c "pwrite $new_size $bsize" $LOOP_IMG | _filter_io
-+	LOOP_DEV=`_create_loop_device $LOOP_IMG`
- 	echo "*** mount loop filesystem"
--	mount -t xfs -o loop $LOOP_IMG $LOOP_MNT
-+	mount -t xfs $LOOP_DEV $LOOP_MNT
- 
- 	echo "*** grow loop filesystem"
--	#xfs_growfs $LOOP_MNT 2>&1 | grep -e "^data" #| _filter_growfs 2>/dev/null
- 	$XFS_GROWFS_PROG $LOOP_MNT 2>&1 |  _filter_growfs 2>&1
- 
- 	echo "*** unmount"
--	umount $LOOP_MNT > /dev/null 2>&1
-+	umount -d $LOOP_MNT && LOOP_DEV=
- 
- 	# Large grows takes forever to check..
- 	if [ "$check" -gt "0" ]
- 	then
- 		echo "*** check"
--		LOOP_DEV=`losetup -f`
--		losetup $LOOP_DEV $LOOP_IMG
--		 _check_xfs_filesystem $LOOP_DEV none none
--		losetup -d $LOOP_DEV
--		LOOP_DEV=
-+		_check_xfs_filesystem $LOOP_IMG none none
- 	fi
- 
- 	rm -f $LOOP_IMG
- }
- 
- # Wes' problem sizes...
--_grow_loop 168024b 1376452608 4096 1
-+_grow_loop $((168024*4096)) 1376452608 4096 1
- 
- # Some other blocksize cases...
--_grow_loop 168024b 1376452608 2048 1
--_grow_loop 168024b 1376452608 512 1 16m
--_grow_loop 168024b 688230400 1024 1
-+_grow_loop $((168024*2048)) 1376452608 2048 1
-+_grow_loop $((168024*512)) 1376452608 512 1 16m
-+_grow_loop $((168024*1024)) 688230400 1024 1
- 
- # Other corner cases suggested by dgc
- # also the following doesn't check if the filesystem is consistent.
-diff --git a/tests/xfs/078.out b/tests/xfs/078.out
-index 4d294aa..cc3c47d 100644
---- a/tests/xfs/078.out
-+++ b/tests/xfs/078.out
-@@ -1,9 +1,9 @@
- QA output created by 078
- *** create loop mount point
- 
--=== GROWFS (from 168024b to 1376452608, 4096 blocksize)
-+=== GROWFS (from 688226304 to 1376452608, 4096 blocksize)
- 
--*** mkfs loop file (size=168024b)
-+*** mkfs loop file (size=688226304)
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -19,9 +19,9 @@ data blocks changed from 168024 to 336048
- *** unmount
- *** check
- 
--=== GROWFS (from 168024b to 1376452608, 2048 blocksize)
-+=== GROWFS (from 344113152 to 1376452608, 2048 blocksize)
- 
--*** mkfs loop file (size=168024b)
-+*** mkfs loop file (size=344113152)
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -37,9 +37,9 @@ data blocks changed from 168024 to 672096
- *** unmount
- *** check
- 
--=== GROWFS (from 168024b to 1376452608, 512 blocksize)
-+=== GROWFS (from 86028288 to 1376452608, 512 blocksize)
- 
--*** mkfs loop file (size=168024b)
-+*** mkfs loop file (size=86028288)
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
-@@ -55,9 +55,9 @@ data blocks changed from 163840 to 2688384
- *** unmount
- *** check
- 
--=== GROWFS (from 168024b to 688230400, 1024 blocksize)
-+=== GROWFS (from 172056576 to 688230400, 1024 blocksize)
- 
--*** mkfs loop file (size=168024b)
-+*** mkfs loop file (size=172056576)
- meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
- data     = bsize=XXX blocks=XXX, imaxpct=PCT
-          = sunit=XXX swidth=XXX, unwritten=X
--- 
-2.7.4
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_scratch_shutdown
++
++function create_dirty_orphans() {
++
++	_scratch_mount
++
++	num_files=200
++	num_eas=1
++	ea_val_size=1024
++
++	# sleep for ages and we will kill this pid when we are ready
++	delay=100
++
++	echo "open and unlink $num_files files with EAs"
++	src/multi_open_unlink -f $SCRATCH_MNT/test_file \
++		-n $num_files -s $delay -e $num_eas -v $ea_val_size &
++	pid=$!
++
++	# time to create and unlink all the files
++	sleep 10
++
++	echo "godown"
++	src/godown -v -f $SCRATCH_MNT >> $seqres.full
++
++	# kill the multi_open_unlink
++	kill $pid 2>/dev/null
++	wait $pid 2>/dev/null
++	pid=""
++
++	_scratch_unmount
++}
++
++# Does a regular rw mount handle the orphan list?
++echo "mount dirty orphans rw, then unmount"
++create_dirty_orphans
++_scratch_mount
++_scratch_unmount
++# We should be clean at this point
++echo "check fs consistency"
++_check_scratch_fs
++
++# Does a ro mount handle the orphan list?
++echo "mount dirty orphans ro, then unmount"
++create_dirty_orphans
++_scratch_mount -o ro
++_scratch_unmount
++# We should be clean at this point
++echo "check fs consistency"
++_check_scratch_fs
++
++# Does a mount with ro->rw transition handle orphan list?
++echo "mount dirty orphans ro and remount rw, then unmount"
++create_dirty_orphans
++_scratch_mount -o ro
++_scratch_remount rw
++_scratch_unmount
++# We should be clean at this point
++echo "check fs consistency"
++_check_scratch_fs
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/416.out b/tests/generic/416.out
+new file mode 100644
+index 0000000..f79a25d
+--- /dev/null
++++ b/tests/generic/416.out
+@@ -0,0 +1,13 @@
++QA output created by 416
++mount dirty orphans rw, then unmount
++open and unlink 200 files with EAs
++godown
++check fs consistency
++mount dirty orphans ro, then unmount
++open and unlink 200 files with EAs
++godown
++check fs consistency
++mount dirty orphans ro and remount rw, then unmount
++open and unlink 200 files with EAs
++godown
++check fs consistency
+diff --git a/tests/generic/group b/tests/generic/group
+index b510d41..e267a92 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -418,3 +418,4 @@
+ 413 auto quick
+ 414 auto quick clone
+ 415 auto clone
++416 auto quick shutdown log
+
 
