@@ -1,52 +1,44 @@
-Received: from mail-ot0-f193.google.com ([74.125.82.193]:36378 "EHLO
-        mail-ot0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750844AbdCJHow (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 10 Mar 2017 02:44:52 -0500
-Received: by mail-ot0-f193.google.com with SMTP id i1so9347353ota.3
-        for <fstests@vger.kernel.org>; Thu, 09 Mar 2017 23:44:51 -0800 (PST)
+Received: from mx1.redhat.com ([209.132.183.28]:59288 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755325AbdCJIpO (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 10 Mar 2017 03:45:14 -0500
+Date: Fri, 10 Mar 2017 16:45:11 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] common/rc: use findmnt to check mounted device
+Message-ID: <20170310084511.GO14226@eguan.usersys.redhat.com>
+References: <20170310063343.8722-1-eguan@redhat.com>
+ <CAOQ4uxjYMz0vTxDsRaZoPmYyNuU1mjNUyZsFGw1PUontRep1Cw@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20170310065734.GN14226@eguan.usersys.redhat.com>
-References: <1488957991-18194-1-git-send-email-zlang@redhat.com>
- <CAOQ4uxhq2h_WEKz1o+_AC8qFT6n6x40eUcBUpoe2eT1pfHAo7w@mail.gmail.com>
- <20170308115136.GF14226@eguan.usersys.redhat.com> <CAOQ4uxiJKouz9c=91Odd1CsrmkiKcnFuQT1r2V1Fa+UuOm9fxw@mail.gmail.com>
- <20170309095938.GJ14226@eguan.usersys.redhat.com> <CAOQ4uxhcb1UnX29nsEEvp5djaWMHXc_dO==Pibv4i2AvXmfjTA@mail.gmail.com>
- <CAOQ4uxijM=6AJjPCG23w6QWK8z4+a-5pRW2wZEXbVXJbGz=csQ@mail.gmail.com>
- <20170310035240.GK14226@eguan.usersys.redhat.com> <20170310065734.GN14226@eguan.usersys.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 10 Mar 2017 09:44:50 +0200
-Message-ID: <CAOQ4uxjB_HMVsUD3XU+kFcc2CwB8P0QC52pRp+kjKShKyj1ffw@mail.gmail.com>
-Subject: Re: [PATCH] generic/411: change sub-path name that's duplicate of TEST_DIR
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxjYMz0vTxDsRaZoPmYyNuU1mjNUyZsFGw1PUontRep1Cw@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Zorro Lang <zlang@redhat.com>, fstests <fstests@vger.kernel.org>, "Darrick J. Wong" <darrick.wong@oracle.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Mar 10, 2017 at 8:57 AM, Eryu Guan <eguan@redhat.com> wrote:
-> On Fri, Mar 10, 2017 at 11:52:40AM +0800, Eryu Guan wrote:
-[...]
->> > > Are you planning to keep my patch as is or drop the else statement in
->> > > the filters?
->>
->> I was testing your attached patch as is, if you can send a formal patch
->> with the else statement dropped that'd be great.
->
-> Your test patch worked fine in my testing. I tested the following
-> configs with both reflink enabled xfs (which could cover the most test
-> cases) and overlayfs on top of xfs (both old and new config)
->
-> # kvm-xfstests config
-> TEST_DEV=/dev/sdc1
-> TEST_DIR=/sdc1
-> SCRATCH_DEV=/dev/sdc2
-> SCRATCH_MNT=/sdc2
->
-> # djwong config
-> TEST_DEV=/dev/sdc1
-> TEST_DIR=/mnt
-> SCRATCH_DEV=/dev/sdc2
-> SCRATCH_MNT=/opt
->
+On Fri, Mar 10, 2017 at 09:43:36AM +0200, Amir Goldstein wrote:
+> On Fri, Mar 10, 2017 at 8:33 AM, Eryu Guan <eguan@redhat.com> wrote:
+> > Doing 'grep -F "$dev on "' to find the mounted device is not
+> > always accurate, e.g.
+> >
+> >  SCRATCH_DEV=/vda6 is mounted but not on SCRATCH_MNT=/vda6/ovl-mnt - aborting
+> >  Already mounted result:
+> >  /dev/vda6 on /vda6 type xfs (rw,relatime,context=system_u:object_r:nfs_t:s0,attr2,inode64,noquota)
+> >
+> > Fix it by using findmnt command and specifying the $dev as mount
+> > source, print the result in "$dev $mnt" format. This works for local
+> > filesystems, network filesystems and overlayfs, avoids all kinds of
+> > tricky and error-prone grep pattern/regex.
+> >
+> > Also fixed the if-then-fi format in _check_mounted_on() while we're
+> > at it.
+> >
+> > Signed-off-by: Eryu Guan <eguan@redhat.com>
+> > ---
+> 
+> Looks good. Also passed my kvm-xfstests -c overlay run.
 
-Cool. I sent you the formal patch without the else statement.
-It passed my kvm-xfstests run with new overlay config (along with your patch)
+Thanks! Can I take it as a Reviewed-by tag?
+
+Eryu
