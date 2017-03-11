@@ -1,70 +1,39 @@
-Received: from mail-pf0-f193.google.com ([209.85.192.193]:34288 "EHLO
+Received: from mail-pf0-f193.google.com ([209.85.192.193]:35535 "EHLO
         mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932790AbdCKAxi (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 10 Mar 2017 19:53:38 -0500
-Received: by mail-pf0-f193.google.com with SMTP id o126so12421929pfb.1
-        for <fstests@vger.kernel.org>; Fri, 10 Mar 2017 16:53:37 -0800 (PST)
+        with ESMTP id S932687AbdCKAzu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 10 Mar 2017 19:55:50 -0500
+Received: by mail-pf0-f193.google.com with SMTP id 67so12418873pfg.2
+        for <fstests@vger.kernel.org>; Fri, 10 Mar 2017 16:55:49 -0800 (PST)
 From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH] android-xfstests: allow detection of SELinux
-Date: Fri, 10 Mar 2017 16:53:06 -0800
-Message-Id: <20170311005306.129624-1-ebiggers3@gmail.com>
+Subject: [PATCH] generic/361: add _require_loop
+Date: Fri, 10 Mar 2017 16:55:12 -0800
+Message-Id: <20170311005512.129820-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+To: fstests@vger.kernel.org
+Cc: Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
 From: Eric Biggers <ebiggers@google.com>
 
-xfstests is supposed to disable the creation of SELinux xattrs because
-this interferes with some tests (e.g. generic/062 and generic/377), but
-this was not working on Android.  For the android-xfstests portion of
-the fix, make the following changes:
-
-1. To stop the mount program from stripping the 'context' mount option,
-mount selinuxfs and create an empty /etc/selinux/config.  This makes the
-is_selinux_enabled() function from libselinux return true.
-
-2. To stop xfstests from thinking that SELinux is disabled, link
-/usr/sbin/selinuxenabled to /bin/true.  (Note: getting the real version
-of selinuxenabled by adding selinux-utils to the chroot tarball would
-also work, though no other programs from it are needed yet, and some
-don't work in the chroot environment yet.)
-
-In combination with the xfstests patch to stop hard-coding SELinux
-contexts in xfstests, this fixes the failing tests.
+generic/361 uses a loopback device, so it should have _require_loop.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- kvm-xfstests/android-xfstests | 9 +++++++++
- 1 file changed, 9 insertions(+)
+ tests/generic/361 | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/kvm-xfstests/android-xfstests b/kvm-xfstests/android-xfstests
-index 7e3eab3..e798c7e 100755
---- a/kvm-xfstests/android-xfstests
-+++ b/kvm-xfstests/android-xfstests
-@@ -81,6 +81,14 @@ chroot_prepare()
- ! mountpoint $CHROOT_DIR/proc > /dev/null && mount proc -t proc $CHROOT_DIR/proc
- ! mountpoint $CHROOT_DIR/dev > /dev/null && mount --bind /dev $CHROOT_DIR/dev
+diff --git a/tests/generic/361 b/tests/generic/361
+index c09863c3..cdd480f2 100755
+--- a/tests/generic/361
++++ b/tests/generic/361
+@@ -53,6 +53,7 @@ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
+ _require_block_device $SCRATCH_DEV
++_require_loop
  
-+# Allow xfstests to detect that SELinux is in use.
-+! mountpoint $CHROOT_DIR/sys/fs/selinux > /dev/null && \
-+		mount selinuxfs -t selinuxfs $CHROOT_DIR/sys/fs/selinux
-+touch $CHROOT_DIR/etc/selinux/config
-+if [ ! -e $CHROOT_DIR/usr/sbin/selinuxenabled ]; then
-+	ln $CHROOT_DIR/bin/true $CHROOT_DIR/usr/sbin/selinuxenabled
-+fi
-+
- # 'mountpoint' doesn't work with directory bind mounts; use /proc/mounts instead
- if ! cut -d' ' -f2 /proc/mounts 2>/dev/null | grep -q '^$CHROOT_DIR/results$'; then
-     mkdir -p $RESULTS_DIR
-@@ -92,6 +100,7 @@ EOF
- chroot_wipe()
- {
-     cat <<EOF | adb shell
-+umount $CHROOT_DIR/sys/fs/selinux &> /dev/null
- umount $CHROOT_DIR/sys &> /dev/null
- umount $CHROOT_DIR/proc &> /dev/null
- umount $CHROOT_DIR/dev &> /dev/null
+ # create a small filesystem to hold another filesystem image
+ _scratch_mkfs_sized $((512 * 1024 * 1024)) >>$seqres.full 2>&1
 -- 
 2.12.0.246.ga2ecc84866-goog
 
