@@ -1,66 +1,70 @@
-Received: from mail-pf0-f194.google.com ([209.85.192.194]:33262 "EHLO
-        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933376AbdCKAwh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 10 Mar 2017 19:52:37 -0500
-Received: by mail-pf0-f194.google.com with SMTP id v190so12418539pfb.0
-        for <fstests@vger.kernel.org>; Fri, 10 Mar 2017 16:52:36 -0800 (PST)
+Received: from mail-pf0-f193.google.com ([209.85.192.193]:34288 "EHLO
+        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932790AbdCKAxi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 10 Mar 2017 19:53:38 -0500
+Received: by mail-pf0-f193.google.com with SMTP id o126so12421929pfb.1
+        for <fstests@vger.kernel.org>; Fri, 10 Mar 2017 16:53:37 -0800 (PST)
 From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH 2/2] common/config: don't hard-code SELinux context
-Date: Fri, 10 Mar 2017 16:50:48 -0800
-Message-Id: <20170311005048.128477-2-ebiggers3@gmail.com>
-In-Reply-To: <20170311005048.128477-1-ebiggers3@gmail.com>
-References: <20170311005048.128477-1-ebiggers3@gmail.com>
+Subject: [PATCH] android-xfstests: allow detection of SELinux
+Date: Fri, 10 Mar 2017 16:53:06 -0800
+Message-Id: <20170311005306.129624-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>, Eric Biggers <ebiggers@google.com>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
 From: Eric Biggers <ebiggers@google.com>
 
-If SELinux is enabled, xfstests mounts its filesystems with
-"-o context=system_u:object_r:nfs_t:s0" so that no SELinux xattrs get
-created and interfere with tests.  However, this particular context is
-not guaranteed to be available because the context names are a detail of
-the SELinux policy.  The SELinux policy on Android systems, for example,
-does not have a context with this name.
+xfstests is supposed to disable the creation of SELinux xattrs because
+this interferes with some tests (e.g. generic/062 and generic/377), but
+this was not working on Android.  For the android-xfstests portion of
+the fix, make the following changes:
 
-To fix this, just grab the SELinux context of the root directory.  This
-is arbitrary, but it should always provide a valid context.  And any
-valid context *should* be okay (i.e. we don't necessarily need a
-"liberal" one), since one would likely encounter many other problems if
-they were to run xfstests in a confined context with SELinux in
-enforcing mode.
+1. To stop the mount program from stripping the 'context' mount option,
+mount selinuxfs and create an empty /etc/selinux/config.  This makes the
+is_selinux_enabled() function from libselinux return true.
+
+2. To stop xfstests from thinking that SELinux is disabled, link
+/usr/sbin/selinuxenabled to /bin/true.  (Note: getting the real version
+of selinuxenabled by adding selinux-utils to the chroot tarball would
+also work, though no other programs from it are needed yet, and some
+don't work in the chroot environment yet.)
+
+In combination with the xfstests patch to stop hard-coding SELinux
+contexts in xfstests, this fixes the failing tests.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- common/config | 13 +++++++++----
- 1 file changed, 9 insertions(+), 4 deletions(-)
+ kvm-xfstests/android-xfstests | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-diff --git a/common/config b/common/config
-index fb60216c..ab635767 100644
---- a/common/config
-+++ b/common/config
-@@ -259,11 +259,16 @@ case "$HOSTOS" in
- esac
+diff --git a/kvm-xfstests/android-xfstests b/kvm-xfstests/android-xfstests
+index 7e3eab3..e798c7e 100755
+--- a/kvm-xfstests/android-xfstests
++++ b/kvm-xfstests/android-xfstests
+@@ -81,6 +81,14 @@ chroot_prepare()
+ ! mountpoint $CHROOT_DIR/proc > /dev/null && mount proc -t proc $CHROOT_DIR/proc
+ ! mountpoint $CHROOT_DIR/dev > /dev/null && mount --bind /dev $CHROOT_DIR/dev
  
- # SELinux adds extra xattrs which can mess up our expected output.
--# So, mount with a context, and they won't be created
--# # nfs_t is a "liberal" context so we can use it.
-+# So, mount with a context, and they won't be created.
-+#
-+# Since the context= option only accepts contexts defined in the
-+# SELinux policy, and different systems may have different policies
-+# with different context names, use the context of an existing
-+# directory.  (Assume that any valid context is fine, since xfstests
-+# should really only be run from an "unconfined" process, or with
-+# SELinux in permissive mode.)
- if [ -x /usr/sbin/selinuxenabled ] && /usr/sbin/selinuxenabled; then
--	SELINUX_MOUNT_OPTIONS="-o context=system_u:object_r:nfs_t:s0"
--	export SELINUX_MOUNT_OPTIONS
-+	export SELINUX_MOUNT_OPTIONS="-o context=$(stat -c %C /)"
- fi
- 
- # check if mkfs.xfs supports v5 xfs
++# Allow xfstests to detect that SELinux is in use.
++! mountpoint $CHROOT_DIR/sys/fs/selinux > /dev/null && \
++		mount selinuxfs -t selinuxfs $CHROOT_DIR/sys/fs/selinux
++touch $CHROOT_DIR/etc/selinux/config
++if [ ! -e $CHROOT_DIR/usr/sbin/selinuxenabled ]; then
++	ln $CHROOT_DIR/bin/true $CHROOT_DIR/usr/sbin/selinuxenabled
++fi
++
+ # 'mountpoint' doesn't work with directory bind mounts; use /proc/mounts instead
+ if ! cut -d' ' -f2 /proc/mounts 2>/dev/null | grep -q '^$CHROOT_DIR/results$'; then
+     mkdir -p $RESULTS_DIR
+@@ -92,6 +100,7 @@ EOF
+ chroot_wipe()
+ {
+     cat <<EOF | adb shell
++umount $CHROOT_DIR/sys/fs/selinux &> /dev/null
+ umount $CHROOT_DIR/sys &> /dev/null
+ umount $CHROOT_DIR/proc &> /dev/null
+ umount $CHROOT_DIR/dev &> /dev/null
 -- 
 2.12.0.246.ga2ecc84866-goog
 
