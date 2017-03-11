@@ -1,57 +1,47 @@
-Received: from mx1.redhat.com ([209.132.183.28]:40110 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933867AbdCJOUx (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 10 Mar 2017 09:20:53 -0500
-Received: from smtp.corp.redhat.com (int-mx16.intmail.prod.int.phx2.redhat.com [10.5.11.28])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 71B17C04BD2D
-        for <fstests@vger.kernel.org>; Fri, 10 Mar 2017 14:20:38 +0000 (UTC)
-Subject: Re: [PATCH] xfstests: test orphan inode recovery on RO mount
-References: <517ceead-de32-1fdb-f002-ce9d7acdf330@redhat.com>
- <20170310043612.GL14226@eguan.usersys.redhat.com>
-From: Eric Sandeen <sandeen@redhat.com>
-Message-ID: <e3f1b026-16e7-38e5-5af3-4e475caa94d8@redhat.com>
-Date: Fri, 10 Mar 2017 08:20:36 -0600
-MIME-Version: 1.0
-In-Reply-To: <20170310043612.GL14226@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Received: from mail-pf0-f193.google.com ([209.85.192.193]:33235 "EHLO
+        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933382AbdCKAwc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 10 Mar 2017 19:52:32 -0500
+Received: by mail-pf0-f193.google.com with SMTP id v190so12418401pfb.0
+        for <fstests@vger.kernel.org>; Fri, 10 Mar 2017 16:52:31 -0800 (PST)
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: [PATCH 1/2] common/quota: remove redundant SELinux detection code
+Date: Fri, 10 Mar 2017 16:50:47 -0800
+Message-Id: <20170311005048.128477-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: Theodore Ts'o <tytso@mit.edu>, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 3/9/17 10:36 PM, Eryu Guan wrote:
-> On Thu, Mar 09, 2017 at 03:31:43PM -0600, Eric Sandeen wrote:
->> There's a bug in xfs where the orphan inode list
->> is not processed on a readonly mount, and is still not
->> processed even if it gets mounted rw.  This test exercises
->> that, and makes sure that the unlinked list is empty after
->> a transition to rw and an unmount.
->>
->> While we're at it, sanity check the same thing for pure ro
->> and rw unmounts.
->>
->> Now that shutdown is generic, we can test other filesystems
->> as well, so this is in the generic group.
->>
->> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+From: Eric Biggers <ebiggers@google.com>
 
-...
+SELINUX_MOUNT_OPTIONS is already set in common/config.  Setting it again
+in common/quota is not necessary.  Nor is SELINUX_MOUNT_OPTIONS specific
+to quota tests, so common/quota is not the right place for it.
 
-> Do we really need 10s? That seems a bit long to me, and I tested with
-> sleep 3, it also reproduced on XFS (4.11-rc1).
-> 
-> Otherwise look good to me. I can fix them all at commit time if you're
-> OK with "sleep 3".
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ common/quota | 7 -------
+ 1 file changed, 7 deletions(-)
 
-Sure, thanks.  The 10s came from another test w/ the same setup.
-Happy to resend too, if you'd prefer.
-
--Eric
+diff --git a/common/quota b/common/quota
+index c48cc70b..f49728c2 100644
+--- a/common/quota
++++ b/common/quota
+@@ -51,13 +51,6 @@ _require_quota()
+ 	_notrun "disk quotas not supported by this filesystem type: $FSTYP"
+ 	;;
+     esac
+-
+-    # SELinux adds extra xattrs which can mess up our expected output.
+-    # So, mount with a context, and they won't be created
+-    # nfs_t is a "liberal" context so we can use it.
+-    if [ -x /usr/sbin/selinuxenabled ] && /usr/sbin/selinuxenabled; then
+-        export SELINUX_MOUNT_OPTIONS="-o context=system_u:object_r:nfs_t:s0"
+-    fi
+ }
  
-> Thanks,
-> Eryu
-> 
+ #
+-- 
+2.12.0.246.ga2ecc84866-goog
 
