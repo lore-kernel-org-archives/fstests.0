@@ -1,49 +1,44 @@
-Received: from mail-pg0-f65.google.com ([74.125.83.65]:35777 "EHLO
-        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932687AbdCKA5B (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 10 Mar 2017 19:57:01 -0500
-Received: by mail-pg0-f65.google.com with SMTP id g2so7394045pge.2
-        for <fstests@vger.kernel.org>; Fri, 10 Mar 2017 16:57:00 -0800 (PST)
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH] android-xfstests: create loopback device nodes in standard location
-Date: Fri, 10 Mar 2017 16:56:32 -0800
-Message-Id: <20170311005632.130135-1-ebiggers3@gmail.com>
+Received: from imap.thunk.org ([74.207.234.97]:50274 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755330AbdCKB5k (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 10 Mar 2017 20:57:40 -0500
+Date: Fri, 10 Mar 2017 20:57:36 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH] android-xfstests: allow detection of SELinux
+Message-ID: <20170311015736.vl2cj34cfnu34qp4@thunk.org>
+References: <20170311005306.129624-1-ebiggers3@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170311005306.129624-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
+To: Eric Biggers <ebiggers3@gmail.com>
 Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
+On Fri, Mar 10, 2017 at 04:53:06PM -0800, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
+> 
+> xfstests is supposed to disable the creation of SELinux xattrs because
+> this interferes with some tests (e.g. generic/062 and generic/377), but
+> this was not working on Android.  For the android-xfstests portion of
+> the fix, make the following changes:
+> 
+> 1. To stop the mount program from stripping the 'context' mount option,
+> mount selinuxfs and create an empty /etc/selinux/config.  This makes the
+> is_selinux_enabled() function from libselinux return true.
+> 
+> 2. To stop xfstests from thinking that SELinux is disabled, link
+> /usr/sbin/selinuxenabled to /bin/true.  (Note: getting the real version
+> of selinuxenabled by adding selinux-utils to the chroot tarball would
+> also work, though no other programs from it are needed yet, and some
+> don't work in the chroot environment yet.)
+> 
+> In combination with the xfstests patch to stop hard-coding SELinux
+> contexts in xfstests, this fixes the failing tests.
 
-Android creates loopback device nodes in /dev/block/, where they can't
-be found by losetup.  Create them in /dev/ too so that losetup can find
-them.  This stops tests using loopback devices, e.g. generic/361 and
-shared/298, from failing.
+Thanks!
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- kvm-xfstests/android-xfstests | 8 ++++++++
- 1 file changed, 8 insertions(+)
+I think you're missing the list of tests this fixes here?
 
-diff --git a/kvm-xfstests/android-xfstests b/kvm-xfstests/android-xfstests
-index e798c7e..3489bc2 100755
---- a/kvm-xfstests/android-xfstests
-+++ b/kvm-xfstests/android-xfstests
-@@ -94,6 +94,14 @@ if ! cut -d' ' -f2 /proc/mounts 2>/dev/null | grep -q '^$CHROOT_DIR/results$'; t
-     mkdir -p $RESULTS_DIR
-     mount --bind $RESULTS_DIR $CHROOT_DIR/results
- fi
-+
-+# Android puts loopback device nodes in /dev/block/ instead of /dev/.
-+# But losetup can only find them in /dev/, so create them there too.
-+for i in \`seq 0 7\`; do
-+	if [ ! -e /dev/loop\$i ]; then
-+		mknod /dev/loop\$i b 7 \$i
-+	fi
-+done
- EOF
- }
- 
--- 
-2.12.0.246.ga2ecc84866-goog
-
+  	       	       	   	- Ted
