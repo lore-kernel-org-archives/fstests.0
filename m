@@ -1,161 +1,65 @@
-Received: from mx2.suse.de ([195.135.220.15]:38708 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751693AbdCNRax (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 14 Mar 2017 13:30:53 -0400
-From: Goldwyn Rodrigues <rgoldwyn@suse.de>
-Subject: [PATCH v2] btrfs/139: creation/deletion within qgroup limits
-Date: Tue, 14 Mar 2017 12:30:26 -0500
-Message-Id: <20170314173026.19401-1-rgoldwyn@suse.de>
+Received: from mail-pf0-f193.google.com ([209.85.192.193]:35109 "EHLO
+        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750996AbdCNR4B (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 14 Mar 2017 13:56:01 -0400
+Received: by mail-pf0-f193.google.com with SMTP id 67so20049151pfg.2
+        for <fstests@vger.kernel.org>; Tue, 14 Mar 2017 10:56:01 -0700 (PDT)
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: [PATCH v2] common/config: don't hard-code SELinux context
+Date: Tue, 14 Mar 2017 10:55:46 -0700
+Message-Id: <20170314175546.62834-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: eguan@redhat.com, Goldwyn Rodrigues <rgoldwyn@suse.com>
+Cc: Gwendal Grignou <gwendal@chromium.org>, Theodore Ts'o <tytso@mit.edu>, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Goldwyn Rodrigues <rgoldwyn@suse.com>
+From: Eric Biggers <ebiggers@google.com>
 
-If we create and delete files within the qgroup limits, qg->reserved
-(allocations before commits) over-inflates and causes -EDQUOT to
-be returned pre-maturely.
+If SELinux is enabled, by default xfstests mounts its filesystems with
+"-o context=system_u:object_r:nfs_t:s0" so that no SELinux xattrs get
+created and interfere with tests.  However, this particular context is
+not guaranteed to be available because the context names are a detail of
+the SELinux policy.  The SELinux policy on Android systems, for example,
+does not have a context with this name.
 
-Also, 32/64bit data-type exchanges can cause reserved (u64)
-to go negative (very large) and -EDQUOT is returned
-pre-maturely.
+To fix this without having to manually override SELINUX_MOUNT_OPTIONS,
+just grab the SELinux context of the root directory.  This is arbitrary,
+but it should always provide a valid context.  And if for some reason
+someone is actually running xfstests in a specific SELinux context that
+needs files labeled with a particular context, then they may still
+override SELINUX_MOUNT_OPTIONS.
 
-Will be fixed by patches with subjects:
-btrfs: Retry after commit on getting EDQUOT
-btrfs: Change qgroup_meta_rsv to 64bit
-
-Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
+Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
+ common/config | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
 
-Changes since v1:
- - require_scratch inclusion
- - output of xfs_io programs for a smaller out file
- - Code Comments
-
- tests/btrfs/139     | 79 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/139.out | 16 +++++++++++
- tests/btrfs/group   |  1 +
- 3 files changed, 96 insertions(+)
- create mode 100755 tests/btrfs/139
- create mode 100644 tests/btrfs/139.out
-
-diff --git a/tests/btrfs/139 b/tests/btrfs/139
-new file mode 100755
-index 0000000..e930d78
---- /dev/null
-+++ b/tests/btrfs/139
-@@ -0,0 +1,79 @@
-+#! /bin/bash
-+# FS QA Test 139
+diff --git a/common/config b/common/config
+index 0c7335ad..5bcf114d 100644
+--- a/common/config
++++ b/common/config
+@@ -260,11 +260,18 @@ case "$HOSTOS" in
+ esac
+ 
+ # SELinux adds extra xattrs which can mess up our expected output.
+-# So, mount with a context, and they won't be created
+-# # nfs_t is a "liberal" context so we can use it.
++# So, mount with a context, and they won't be created.
 +#
-+# Check if btrfs quota limits are not reached when you constantly
-+# create and delete files within the exclusive qgroup limits.
-+#
-+# Finally we create files to exceed the quota.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 SUSE. All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
++# Since the context= option only accepts contexts defined in the SELinux
++# policy, and different systems may have different policies with
++# different context names, use the context of an existing directory.
++# Assume that any valid context is fine, since xfstests should really
++# only be run from an "unconfined" process, or with SELinux in permissive
++# mode.  But if not, just specify your own SELINUX_MOUNT_OPTIONS.
+ if [ -x /usr/sbin/selinuxenabled ] && /usr/sbin/selinuxenabled; then
+-	: ${SELINUX_MOUNT_OPTIONS:="-o context=system_u:object_r:nfs_t:s0"}
++	: ${SELINUX_MOUNT_OPTIONS:="-o context=$(stat -c %C /)"}
+ 	export SELINUX_MOUNT_OPTIONS
 +
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount
-+
-+SUBVOL=$SCRATCH_MNT/subvol
-+
-+_run_btrfs_util_prog subvolume create $SUBVOL
-+_run_btrfs_util_prog quota enable $SCRATCH_MNT
-+_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-+_run_btrfs_util_prog qgroup limit -e 1G $SUBVOL
-+
-+
-+# Write and delete files within 1G limits, multiple times
-+for i in $(seq 1 5); do
-+	for j in $(seq 1 240); do
-+		$XFS_IO_PROG -f -c "pwrite 0 4m" $SUBVOL/file_$j > /dev/null
-+	done
-+	rm -f $SUBVOL/file*
-+done
-+
-+# Exceed the limits here
-+for j in $(seq 1 8); do
-+	$XFS_IO_PROG -f -c "pwrite 0 128m" $SUBVOL/file_$j 2>&1 | _filter_xfs_io | _filter_xfs_io_error
-+done
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/139.out b/tests/btrfs/139.out
-new file mode 100644
-index 0000000..6146844
---- /dev/null
-+++ b/tests/btrfs/139.out
-@@ -0,0 +1,16 @@
-+QA output created by 139
-+wrote 134217728/134217728 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 134217728/134217728 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 134217728/134217728 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 134217728/134217728 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 134217728/134217728 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 134217728/134217728 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 134217728/134217728 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+pwrite: Disk quota exceeded
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 76a1181..641d826 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -141,3 +141,4 @@
- 136 auto convert
- 137 auto quick send
- 138 auto compress
-+139 auto qgroup
+ fi
+ 
+ # check if mkfs.xfs supports v5 xfs
 -- 
-2.10.2
+2.12.0.367.g23dc2f6d3c-goog
 
