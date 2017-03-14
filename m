@@ -1,154 +1,72 @@
-Received: from mx1.redhat.com ([209.132.183.28]:42242 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:51112 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750760AbdCNFhs (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 14 Mar 2017 01:37:48 -0400
-Date: Tue, 14 Mar 2017 13:37:36 +0800
+        id S1750806AbdCNNGV (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 14 Mar 2017 09:06:21 -0400
+Date: Tue, 14 Mar 2017 21:06:19 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] btrfs/139: creation/deletion within qgroup limits
-Message-ID: <20170314053736.GZ14226@eguan.usersys.redhat.com>
-References: <20170313213716.9579-1-rgoldwyn@suse.de>
+Subject: Re: [PATCH 2/2] common/config: don't hard-code SELinux context
+Message-ID: <20170314130619.GD14226@eguan.usersys.redhat.com>
+References: <20170311005048.128477-1-ebiggers3@gmail.com>
+ <20170311005048.128477-2-ebiggers3@gmail.com>
+ <20170313040226.GV14226@eguan.usersys.redhat.com>
+ <20170313175935.GA108079@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170313213716.9579-1-rgoldwyn@suse.de>
+In-Reply-To: <20170313175935.GA108079@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Goldwyn Rodrigues <rgoldwyn@suse.de>
-Cc: fstests@vger.kernel.org, Goldwyn Rodrigues <rgoldwyn@suse.com>, linux-btrfs@vger.kernel.org
+To: Eric Biggers <ebiggers3@gmail.com>
+Cc: fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>, Gwendal Grignou <gwendal@chromium.org>, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-[please cc linux-btrfs@vger.kernel.org for btrfs specific tests]
-
-On Mon, Mar 13, 2017 at 04:37:16PM -0500, Goldwyn Rodrigues wrote:
-> From: Goldwyn Rodrigues <rgoldwyn@suse.com>
+On Mon, Mar 13, 2017 at 10:59:35AM -0700, Eric Biggers wrote:
+> On Mon, Mar 13, 2017 at 12:02:26PM +0800, Eryu Guan wrote:
+> > On Fri, Mar 10, 2017 at 04:50:48PM -0800, Eric Biggers wrote:
+> > > From: Eric Biggers <ebiggers@google.com>
+> > > 
+> > > If SELinux is enabled, xfstests mounts its filesystems with
+> > > "-o context=system_u:object_r:nfs_t:s0" so that no SELinux xattrs get
+> > > created and interfere with tests.  However, this particular context is
+> > > not guaranteed to be available because the context names are a detail of
+> > > the SELinux policy.  The SELinux policy on Android systems, for example,
+> > > does not have a context with this name.
+> > > 
+> > > To fix this, just grab the SELinux context of the root directory.  This
+> > > is arbitrary, but it should always provide a valid context.  And any
+> > > valid context *should* be okay (i.e. we don't necessarily need a
+> > > "liberal" one), since one would likely encounter many other problems if
+> > > they were to run xfstests in a confined context with SELinux in
+> > > enforcing mode.
+> > > 
+> > > Signed-off-by: Eric Biggers <ebiggers@google.com>
+> > 
+> > SELINUX_MOUNT_OPTIONS has just been updated to be configurable, you can
+> > set your own SELINUX_MOUNT_OPTIONS to override the default one, does
+> > this work for you?
+> > 
+> > d8b1dc1 common/config: make SELinux protection conditional
+> > 
+> > Thanks,
+> > Eryu
 > 
-> If we create and delete files within the qgroup limits, qg->reserved
-> (allocations before commits) over-inflates and causes -EDQUOT to
-> be returned pre-maturely.
+> Oh, I didn't notice this.  It looks like Gwendal ran into the same problem, but
+> on ChromeOS instead of Android.
 > 
-> Also, 32/64bit data-type exchanges can cause reserved (u64)
-> to go negative (very large) and -EDQUOT is returned
-> pre-maturely.
+> The problem can indeed be solved by overriding SELINUX_MOUNT_OPTIONS.  But I
+> think auto-detecting a valid context is better because then xfstests will just
+> work without having to override SELINUX_MOUNT_OPTIONS.
 > 
-> Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
-
-Thanks for the test! I tested it with 4.10 kernel and test failed. I
-assume it's expected result. Some comments inline.
-
-> ---
->  tests/btrfs/139     |  75 +++++++++++++++++++++++++
->  tests/btrfs/139.out | 156 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/group   |   1 +
->  3 files changed, 232 insertions(+)
->  create mode 100755 tests/btrfs/139
->  create mode 100644 tests/btrfs/139.out
+> An exception would be that if for some reason someone actually wants to run
+> xfstests in some particular SELinux context (maybe one they've set up
+> specifically for xfstests), then they'd likely need to specify a particular
+> context when mounting.
 > 
-> diff --git a/tests/btrfs/139 b/tests/btrfs/139
-> new file mode 100755
-> index 0000000..df0ef3e
-> --- /dev/null
-> +++ b/tests/btrfs/139
-> @@ -0,0 +1,75 @@
-> +#! /bin/bash
-> +# FS QA Test 139
-> +#
-> +# Check if btrfs quota limits are not reached when you constantly
-> +# create and delete files within the exclusive qgroup limits.
-> +#
-> +# Finally we create files to exceed the quota.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 SUSE. All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +_supported_fs btrfs
-> +_supported_os Linux
+> How about just doing it both ways: use SELINUX_MOUNT_OPTIONS in the environment
+> if set, otherwise mount with an auto-detected valid context?
 
-Need _require_scratch, it check if SCRATCH_DEV is present and unmounts
-it if so.
-
-> +
-> +_scratch_mkfs > /dev/null 2>&1
-> +#_scratch_mount
-
-Then need to _scratch_mount here.
-
-> +
-> +SUBVOL=$SCRATCH_MNT/subvol
-> +
-> +_run_btrfs_util_prog subvolume create $SUBVOL
-> +_run_btrfs_util_prog quota enable $SCRATCH_MNT
-> +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-
-I always see this message in dmesg, not sure if it affects test?
-
-BTRFS info (device sdc2): qgroup_rescan_init failed with -115
-
-> +_run_btrfs_util_prog qgroup limit -e 1G $SUBVOL
-> +
-> +for i in $(seq 1 10); do
-> +	for j in $(seq 1 7); do
-> +		$XFS_IO_PROG -f -c "pwrite 0 128m" $SUBVOL/file_$j | _filter_xfs_io
-
-No need to filter & print xfs_io stdout, it makes the .out file not
-necessarily too long. We can discard stdout, so if error happens the
-stderr output could break the .out file match anyway.
-
-		$XFS_IO_PROG -f -c "pwrite 0 128m" $SUBVOL/file_$j >/dev/null
-
-
-> +	done
-> +	rm -f $SUBVOL/file*
-> +done
-> +
-> +for j in $(seq 1 8); do
-> +	$XFS_IO_PROG -f -c "pwrite 0 128m" $SUBVOL/file_$j | _filter_xfs_io
-
-pwrite error is expected here, and newer xfs_io only prints "pwrite" not
-"pwrite64", so _filter_xfs_io_error should be used to filter the error
-message from stderr (not stdout).
-
-	$XFS_IO_PROG -f -c "pwrite 0 128m" $SUBVOL/file_$j 2>&1 | _filter_xfs_io_error
-
-> +done
-
-Better to add comments about these two for loops, what is the purpose of
-each loop etc.
+This looks reasonable to me, and I tested ext4 ext3 and xfs with auto
+group tests with selinux mount option set to `stat -c %C /`, and didn't
+see any new failures.
 
 Thanks,
 Eryu
