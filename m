@@ -1,63 +1,44 @@
-Received: from mx1.redhat.com ([209.132.183.28]:53544 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751642AbdCOKSw (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 15 Mar 2017 06:18:52 -0400
-Date: Wed, 15 Mar 2017 18:18:49 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic: test encryption key revocation during
- concurrent I/O
-Message-ID: <20170315101849.GO14226@eguan.usersys.redhat.com>
-References: <20170315002551.9423-1-ebiggers3@gmail.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:49411 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751195AbdCOKhf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 15 Mar 2017 06:37:35 -0400
+Received: from G08CNEXCHPEKD01.g08.fujitsu.local (unknown [10.167.33.80])
+        by cn.fujitsu.com (Postfix) with ESMTP id 7D30648A2975
+        for <fstests@vger.kernel.org>; Wed, 15 Mar 2017 18:37:34 +0800 (CST)
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH] common/config: apply specific mount options for nfs in _test_mount_opts
+Date: Wed, 15 Mar 2017 18:37:26 +0800
+Message-ID: <1489574246-6073-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170315002551.9423-1-ebiggers3@gmail.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers3@gmail.com>
-Cc: fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org, Eric Biggers <ebiggers@google.com>, Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>, Michael Halcrow <mhalcrow@google.com>
+To: fstests@vger.kernel.org
+Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Mar 14, 2017 at 05:25:51PM -0700, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
-> 
-> Add a test which revokes a keyring key while other processes are
-> performing I/O on an encrypted file that was "unlocked" using that key.
-> This crashes unpatched kernels with filesystem encryption enabled, so
-> place it in the "dangerous" group.
-> 
-> [The patch to fix this is titled "fscrypt: remove broken support for
-> detecting keyring key revocation" but hasn't been merged yet; we may
-> want to wait a bit before merging this test.]
+NFS_MOUNT_OPTIONS is always not applied by TEST_DEV when it has been defined.
 
-Agreed.
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+---
+ common/config | 3 +++
+ 1 file changed, 3 insertions(+)
 
-> 
-> Cc: Theodore Ts'o <tytso@mit.edu>
-> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> Cc: Richard Weinberger <richard@nod.at>
-> Cc: Michael Halcrow <mhalcrow@google.com>
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
+diff --git a/common/config b/common/config
+index 0c7335a..a7f8a5a 100644
+--- a/common/config
++++ b/common/config
+@@ -341,6 +341,9 @@ _test_mount_opts()
+ 	ceph)
+ 		export TEST_FS_MOUNT_OPTS=$CEPHFS_MOUNT_OPTIONS
+ 		;;
++	nfs)
++		export TEST_FS_MOUNT_OPTS=$NFS_MOUNT_OPTIONS
++		;;
+ 	*)
+ 		;;
+ 	esac
+-- 
+1.8.3.1
 
-This looks good to me, and it crashed my 4.11-rc2 test host very
-quickly. Just one minor comment below.
 
-> ---
->  common/encrypt        |   8 ++++
->  tests/generic/500     | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/500.out |   2 +
->  tests/generic/group   |   1 +
->  4 files changed, 120 insertions(+)
->  create mode 100755 tests/generic/500
->  create mode 100644 tests/generic/500.out
-...
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs ext4 f2fs
 
-supported fs should be generic if it's in generic dir. If it only
-supports some specific filesystems, then it should go to shared dir.
-
-Thanks,
-Eryu
