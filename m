@@ -1,27 +1,90 @@
-Received: from mx1.redhat.com ([209.132.183.28]:50570 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:59180 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750774AbdCODZy (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 14 Mar 2017 23:25:54 -0400
-Date: Wed, 15 Mar 2017 11:25:52 +0800
+        id S1752016AbdCOIof (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 15 Mar 2017 04:44:35 -0400
+Date: Wed, 15 Mar 2017 16:44:33 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] fstests: generic: Test space allocation when there is
- only fragmented space
-Message-ID: <20170315032552.GE14226@eguan.usersys.redhat.com>
-References: <20170308022040.13827-1-quwenruo@cn.fujitsu.com>
- <712d5564-3d3f-e5f2-3c41-f4d39acce455@cn.fujitsu.com>
+Subject: Re: [PATCH] common/rc: Use -v option with findmnt
+Message-ID: <20170315084433.GK14226@eguan.usersys.redhat.com>
+References: <20170313180726.1967-1-rgoldwyn@suse.de>
+ <20170314050739.GY14226@eguan.usersys.redhat.com>
+ <34649364-41c7-7d05-45a3-616c45cc59cf@suse.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <712d5564-3d3f-e5f2-3c41-f4d39acce455@cn.fujitsu.com>
+In-Reply-To: <34649364-41c7-7d05-45a3-616c45cc59cf@suse.de>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, Filipe Manana <fdmanana@kernel.org>, Liu Bo <bo.li.liu@oracle.com>
+To: Goldwyn Rodrigues <rgoldwyn@suse.de>
+Cc: fstests@vger.kernel.org, Goldwyn Rodrigues <rgoldwyn@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Mar 15, 2017 at 11:01:05AM +0800, Qu Wenruo wrote:
-> Any comment on this patch?
+On Tue, Mar 14, 2017 at 09:07:05AM -0500, Goldwyn Rodrigues wrote:
+> 
+> 
+> On 03/14/2017 12:07 AM, Eryu Guan wrote:
+> > On Mon, Mar 13, 2017 at 01:07:26PM -0500, Goldwyn Rodrigues wrote:
+> >> From: Goldwyn Rodrigues <rgoldwyn@suse.com>
+> >>
+> >> Since btrfs puts in the subvol name in the device, we should
+> >> use -v option to not print the bind mounts or btrfs volumes.
+> >>
+> >> Fixes: 5e6892d ("common/rc: use findmnt to check mounted device")
+> >> Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
+> > 
+> > Hmm, I mounted a btrfs snapshot of TEST_DEV to another dir and ran
+> > check, check reported:
+> > 
+> > TEST_DEV=/dev/sdc1 is mounted but not on TEST_DIR=/mnt - aborting
+> > Already mounted result:
+> > /dev/sdc1[/snap] /mnt/scratch
+> > 
+> > which seems fine and clear to me. Did you hit any particular failures
+> > without this fix?
+> 
+> 
+> The problem is you hit this error even if /dev/sdc1 is mounted on
+> TEST_DIR=/mnt because of the subvolume name appended to the device name.
+> 
+> IOW, the test fails when it should not have. Here is an output of
+> executing btrfs/021:
+> 
+>     --- tests/btrfs/021.out	2017-01-26 02:23:04.444778259 -0600
+>     +++ /fiona/xfstests/results//btrfs/021.out.bad	2017-03-14
+> 04:25:38.807212599 -0500
+>     @@ -1,2 +1,4 @@
+>      QA output created by 021
+>     -Silence is golden
+>     +SCRATCH_DEV=/dev/vdc is mounted but not on SCRATCH_MNT=/scratch -
+> aborting
+>     +Already mounted result:
+>     +/dev/vdc[/newvol] /scratch
 
-It's already committed, see commit 726726d.
+Ah, I see the problem. It's because btrfs/009 sets default volume to the
+newly created "newvol", then _scratch_mount mounts the newvol by
+default. And _check_mounted_on finds the inconsistency because of the
+subvolume name.
+
+> 
+> However, this fix is incorrect.
+
+I think this patch is a clearer fix, it doesn't require test to do
+_scratch_umount at the end of test, and works for future tests that do
+the same setup.
 
 Thanks,
 Eryu
+
+> 
+> I found that this was because of reminiscences of btrfs/009
+> Adding _scratch_umount to the end of btrfs/009 solves the issue, since
+> the filesystem is created fresh in the next test.
+> 
+> The filesystem was not created fresh in the next test because findmnt
+> would fail in _require_scratch.
+> 
+> I will shortly post a new patch which would fix this.
+> 
+> 
+> 
+> -- 
+> Goldwyn
