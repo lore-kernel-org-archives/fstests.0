@@ -1,90 +1,79 @@
-Received: from mx1.redhat.com ([209.132.183.28]:59180 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:46018 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752016AbdCOIof (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 15 Mar 2017 04:44:35 -0400
-Date: Wed, 15 Mar 2017 16:44:33 +0800
+        id S1750932AbdCOJQS (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 15 Mar 2017 05:16:18 -0400
+Date: Wed, 15 Mar 2017 17:16:16 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] common/rc: Use -v option with findmnt
-Message-ID: <20170315084433.GK14226@eguan.usersys.redhat.com>
-References: <20170313180726.1967-1-rgoldwyn@suse.de>
- <20170314050739.GY14226@eguan.usersys.redhat.com>
- <34649364-41c7-7d05-45a3-616c45cc59cf@suse.de>
+Subject: Re: [PATCH v2] common/config: don't hard-code SELinux context
+Message-ID: <20170315091616.GM14226@eguan.usersys.redhat.com>
+References: <20170314175546.62834-1-ebiggers3@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <34649364-41c7-7d05-45a3-616c45cc59cf@suse.de>
+In-Reply-To: <20170314175546.62834-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Goldwyn Rodrigues <rgoldwyn@suse.de>
-Cc: fstests@vger.kernel.org, Goldwyn Rodrigues <rgoldwyn@suse.com>
+To: Eric Biggers <ebiggers3@gmail.com>
+Cc: fstests@vger.kernel.org, Gwendal Grignou <gwendal@chromium.org>, Theodore Ts'o <tytso@mit.edu>, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Mar 14, 2017 at 09:07:05AM -0500, Goldwyn Rodrigues wrote:
+On Tue, Mar 14, 2017 at 10:55:46AM -0700, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
 > 
+> If SELinux is enabled, by default xfstests mounts its filesystems with
+> "-o context=system_u:object_r:nfs_t:s0" so that no SELinux xattrs get
+> created and interfere with tests.  However, this particular context is
+> not guaranteed to be available because the context names are a detail of
+> the SELinux policy.  The SELinux policy on Android systems, for example,
+> does not have a context with this name.
 > 
-> On 03/14/2017 12:07 AM, Eryu Guan wrote:
-> > On Mon, Mar 13, 2017 at 01:07:26PM -0500, Goldwyn Rodrigues wrote:
-> >> From: Goldwyn Rodrigues <rgoldwyn@suse.com>
-> >>
-> >> Since btrfs puts in the subvol name in the device, we should
-> >> use -v option to not print the bind mounts or btrfs volumes.
-> >>
-> >> Fixes: 5e6892d ("common/rc: use findmnt to check mounted device")
-> >> Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
-> > 
-> > Hmm, I mounted a btrfs snapshot of TEST_DEV to another dir and ran
-> > check, check reported:
-> > 
-> > TEST_DEV=/dev/sdc1 is mounted but not on TEST_DIR=/mnt - aborting
-> > Already mounted result:
-> > /dev/sdc1[/snap] /mnt/scratch
-> > 
-> > which seems fine and clear to me. Did you hit any particular failures
-> > without this fix?
+> To fix this without having to manually override SELINUX_MOUNT_OPTIONS,
+> just grab the SELinux context of the root directory.  This is arbitrary,
+> but it should always provide a valid context.  And if for some reason
+> someone is actually running xfstests in a specific SELinux context that
+> needs files labeled with a particular context, then they may still
+> override SELINUX_MOUNT_OPTIONS.
 > 
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
+> ---
+>  common/config | 13 ++++++++++---
+>  1 file changed, 10 insertions(+), 3 deletions(-)
 > 
-> The problem is you hit this error even if /dev/sdc1 is mounted on
-> TEST_DIR=/mnt because of the subvolume name appended to the device name.
-> 
-> IOW, the test fails when it should not have. Here is an output of
-> executing btrfs/021:
-> 
->     --- tests/btrfs/021.out	2017-01-26 02:23:04.444778259 -0600
->     +++ /fiona/xfstests/results//btrfs/021.out.bad	2017-03-14
-> 04:25:38.807212599 -0500
->     @@ -1,2 +1,4 @@
->      QA output created by 021
->     -Silence is golden
->     +SCRATCH_DEV=/dev/vdc is mounted but not on SCRATCH_MNT=/scratch -
-> aborting
->     +Already mounted result:
->     +/dev/vdc[/newvol] /scratch
+> diff --git a/common/config b/common/config
+> index 0c7335ad..5bcf114d 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -260,11 +260,18 @@ case "$HOSTOS" in
+>  esac
+>  
+>  # SELinux adds extra xattrs which can mess up our expected output.
+> -# So, mount with a context, and they won't be created
+> -# # nfs_t is a "liberal" context so we can use it.
+> +# So, mount with a context, and they won't be created.
+> +#
+> +# Since the context= option only accepts contexts defined in the SELinux
+> +# policy, and different systems may have different policies with
+> +# different context names, use the context of an existing directory.
+> +# Assume that any valid context is fine, since xfstests should really
+> +# only be run from an "unconfined" process, or with SELinux in permissive
+> +# mode.  But if not, just specify your own SELINUX_MOUNT_OPTIONS.
+>  if [ -x /usr/sbin/selinuxenabled ] && /usr/sbin/selinuxenabled; then
+> -	: ${SELINUX_MOUNT_OPTIONS:="-o context=system_u:object_r:nfs_t:s0"}
+> +	: ${SELINUX_MOUNT_OPTIONS:="-o context=$(stat -c %C /)"}
+>  	export SELINUX_MOUNT_OPTIONS
+> +
 
-Ah, I see the problem. It's because btrfs/009 sets default volume to the
-newly created "newvol", then _scratch_mount mounts the newvol by
-default. And _check_mounted_on finds the inconsistency because of the
-subvolume name.
-
-> 
-> However, this fix is incorrect.
-
-I think this patch is a clearer fix, it doesn't require test to do
-_scratch_umount at the end of test, and works for future tests that do
-the same setup.
+I removed this extra empty line and committed patch to stage tree.
 
 Thanks,
 Eryu
 
-> 
-> I found that this was because of reminiscences of btrfs/009
-> Adding _scratch_umount to the end of btrfs/009 solves the issue, since
-> the filesystem is created fresh in the next test.
-> 
-> The filesystem was not created fresh in the next test because findmnt
-> would fail in _require_scratch.
-> 
-> I will shortly post a new patch which would fix this.
-> 
-> 
-> 
+>  fi
+>  
+>  # check if mkfs.xfs supports v5 xfs
 > -- 
-> Goldwyn
+> 2.12.0.367.g23dc2f6d3c-goog
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
