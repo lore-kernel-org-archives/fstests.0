@@ -1,45 +1,56 @@
-Received: from mx1.redhat.com ([209.132.183.28]:59100 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:41716 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751110AbdCPHGm (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 16 Mar 2017 03:06:42 -0400
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id AC8E0C0092D3
-        for <fstests@vger.kernel.org>; Thu, 16 Mar 2017 07:06:42 +0000 (UTC)
+        id S1751037AbdCPHYC (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 16 Mar 2017 03:24:02 -0400
+Date: Thu, 16 Mar 2017 15:24:01 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] generic/417: reduce extend attribute size
-Date: Thu, 16 Mar 2017 15:06:37 +0800
-Message-Id: <20170316070637.6489-1-eguan@redhat.com>
+Subject: Re: [PATCH] common/dmthin: Fix grep command for finding exact value
+Message-ID: <20170316072401.GQ14226@eguan.usersys.redhat.com>
+References: <1489639730-15004-1-git-send-email-harish@linux.vnet.ibm.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1489639730-15004-1-git-send-email-harish@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+To: Harish <harish@linux.vnet.ibm.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-xattr size 1024 is too big for 1k block size ext3/4 filesystem, so
-test fails due to ENSPC message from multi_open_unlink when setting
-xattr.
+On Thu, Mar 16, 2017 at 10:18:50AM +0530, Harish wrote:
+> Sometimes there are multiple occurences of pool_name and data_name in
+> dmsetup command which causes failures while adding in next line.
+> This patch greps for pool_name at start of line.
+> 
+> Signed-off-by: Harish <harish@linux.vnet.ibm.com>
+> ---
+>  common/dmthin | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/common/dmthin b/common/dmthin
+> index e774175..fe48eef 100644
+> --- a/common/dmthin
+> +++ b/common/dmthin
+> @@ -180,8 +180,8 @@ _dmthin_grow()
+>  	# Get current sizes & values
+>  	local   meta_dev_size=`$DMSETUP_PROG table | grep $DMTHIN_META_NAME | awk '{print $3}'`
+>  	local meta_dev_offset=`$DMSETUP_PROG table | grep $DMTHIN_META_NAME | awk '{print $6}'`
+> -	local   data_dev_size=`$DMSETUP_PROG table | grep $DMTHIN_DATA_NAME | awk '{print $3}'`
+> -	local   pool_dev_size=`$DMSETUP_PROG table | grep $DMTHIN_POOL_NAME | awk '{print $3}'`
+> +	local   data_dev_size=`$DMSETUP_PROG table | grep ^$DMTHIN_DATA_NAME | awk '{print $3}'`
+> +	local   pool_dev_size=`$DMSETUP_PROG table | grep ^$DMTHIN_POOL_NAME | awk '{print $3}'`
 
-Reduce the xattr size to 512 so it fits in 1k block size ext3/4.
+Do we need to do the same to all other $DMTHIN_.*_NAME, not only
+DMTHIN_DATA_NAME and DMTHIN_POOL_NAME?
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
- tests/generic/417 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/tests/generic/417 b/tests/generic/417
-index 45d63f5..690ceb5 100755
---- a/tests/generic/417
-+++ b/tests/generic/417
-@@ -61,7 +61,7 @@ function create_dirty_orphans() {
- 
- 	num_files=200
- 	num_eas=1
--	ea_val_size=1024
-+	ea_val_size=512
- 
- 	# sleep for ages and we will kill this pid when we are ready
- 	delay=100
--- 
-2.9.3
-
+Thanks,
+Eryu
+>  	local    cluster_size=`$DMSETUP_PROG table | grep $DMTHIN_POOL_NAME | awk '{print $7}'`
+>  	local       low_water=`$DMSETUP_PROG table | grep $DMTHIN_POOL_NAME | awk '{print $8}'`
+>  
+> -- 
+> 2.7.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
