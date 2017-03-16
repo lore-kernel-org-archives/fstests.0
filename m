@@ -1,69 +1,55 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:50374 "EHLO
+Received: from cn.fujitsu.com ([59.151.112.132]:31031 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751259AbdCPBul (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 15 Mar 2017 21:50:41 -0400
+        with ESMTP id S1751154AbdCPBum (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 15 Mar 2017 21:50:42 -0400
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH] fstests: generic: Test space allocation when there is only fragmented space
-Date: Thu, 16 Mar 2017 09:50:26 +0800
-Message-ID: <20170316015028.20020-3-quwenruo@cn.fujitsu.com>
+Subject: [PATCH 2/3] fstests: btrfs: Add testcase for btrfs dedupe and metadata balance race test
+Date: Thu, 16 Mar 2017 09:50:27 +0800
+Message-ID: <20170316015028.20020-4-quwenruo@cn.fujitsu.com>
 In-Reply-To: <20170316015028.20020-1-quwenruo@cn.fujitsu.com>
 References: <20170316015028.20020-1-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
 To: linux-btrfs@vger.kernel.org
-Cc: fstests@vger.kernel.org, Filipe Manana <fdmanana@kernel.org>, Liu Bo <bo.li.liu@oracle.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This test case will test if file system works well when handling large
-write while available space are all fragmented.
+Btrfs balance with inband dedupe enable/disable will expose a lot of
+hidden dedupe bug:
 
-This can expose a bug in a btrfs unmerged patch, which wrongly modified
-the delayed allocation code, to exit before allocating all space, and
-cause hang when unmounting.
+1) Enable/disable race bug
+2) Btrfs dedupe tree balance corrupted delayed_ref
+3) Btrfs disable and balance will cause balance BUG_ON
 
-The wrong patch is:
-[PATCH v6 1/2] btrfs: Fix metadata underflow caused by btrfs_reloc_clone_csum error
-
-The test case will:
-1) Fill small filesystem with page sized small files
-   All these files has a sequential number as file name
-2) Remove files with odd number as file name
-   This will free almost half of the space
-3) Try to write a file which takes 1/8 of the file system
-
-The method to create fragmented fs may not be generic enough, but should
-work for most extent based fs.
-Unless one file system will allocate extents from both end of its free
-space.
-
-Cc: Filipe Manana <fdmanana@kernel.org>
-Cc: Liu Bo <bo.li.liu@oracle.com>
+Reported-by: Satoru Takeuchi <takeuchi_satoru@jp.fujitsu.com>
 Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
 ---
- tests/generic/416     | 99 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/416.out |  3 ++
- tests/generic/group   |  1 +
- 3 files changed, 103 insertions(+)
- create mode 100755 tests/generic/416
- create mode 100644 tests/generic/416.out
+ tests/btrfs/201     | 112 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/201.out |   2 +
+ tests/btrfs/group   |   1 +
+ 3 files changed, 115 insertions(+)
+ create mode 100755 tests/btrfs/201
+ create mode 100644 tests/btrfs/201.out
 
-diff --git a/tests/generic/416 b/tests/generic/416
+diff --git a/tests/btrfs/201 b/tests/btrfs/201
 new file mode 100755
-index 0000000..925524b
+index 00000000..d6913c13
 --- /dev/null
-+++ b/tests/generic/416
-@@ -0,0 +1,99 @@
++++ b/tests/btrfs/201
+@@ -0,0 +1,112 @@
 +#! /bin/bash
-+# FS QA Test 416
++# FS QA Test 201
 +#
-+# Test fs behavior when large write request can't be met by one single extent
++# Btrfs inband dedup enable/disable race with metadata balance
 +#
-+# Inspired by a bug in a btrfs fix, which doesn't get exposed by current test
-+# cases
++# This tests will test the following bugs exposed in development:
++# 1) enable/disable race
++# 2) tree balance cause delayed ref corruption
++# 3) disable and balance cause BUG_ON
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Fujitsu.  All Rights Reserved.
++# Copyright (c) 2016 Fujitsu.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -93,6 +79,13 @@ index 0000000..925524b
 +{
 +	cd /
 +	rm -f $tmp.*
++	killall $FSSTRESS_PROG &> /dev/null
++	kill $trigger_pid &> /dev/null
++	kill $balance_pid &> /dev/null
++	wait
++
++	# See comment later
++	$BTRFS_UTIL_PROG balance cancel $SCRATCH_MNT &> /dev/null
 +}
 +
 +# get standard environment, filters and checks
@@ -104,75 +97,78 @@ index 0000000..925524b
 +
 +# real QA test starts here
 +
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os IRIX Linux
++_supported_fs btrfs
++_supported_os Linux
 +_require_scratch
++_require_btrfs_command dedupe
++_require_btrfs_fs_feature dedupe
 +
-+fs_size=$((128 * 1024 * 1024))
-+page_size=$(get_page_size)
++# Use 64K dedupe size to keep compatibility for 64K page size
++dedupe_bs=64K
 +
-+# We will never reach this number though
-+nr_files=$(($fs_size / $page_size))
-+
-+# Use small fs to make the fill more faster
-+_scratch_mkfs_sized $fs_size >> $seqres.full 2>&1
-+
++_scratch_mkfs >> $seqres.full 2>&1
 +_scratch_mount
 +
-+fill_fs()
++mkdir -p $SCRATCH_MNT/stressdir
++
++runtime=$((60 * $TIME_FACTOR))
++
++trigger_work()
 +{
-+	dir=$1
-+	for i in $(seq -w $nr_files); do
-+		# xfs_io can't return correct value when it hit ENOSPC, use
-+		# dd here to detect ENOSPC
-+		dd if=/dev/zero of=$SCRATCH_MNT/$i bs=$page_size count=1 \
-+			&> /dev/null
-+		if [ $? -ne 0 ]; then
-+			break
-+		fi
++	while true; do
++		_run_btrfs_util_prog dedupe enable -s inmemory \
++			-b $dedupe_bs $SCRATCH_MNT
++		sleep 1
++		_run_btrfs_util_prog dedupe disable $SCRATCH_MNT
++		sleep 1
 +	done
 +}
 +
-+fill_fs $SCRATCH_MNT
++# redirect all output, as error output like 'balance cancelled by user'
++# will populuate the golden output.
++_btrfs_stress_balance -m $SCRATCH_MNT &> /dev/null &
++balance_pid=$!
 +
-+# remount to sync every thing into fs, and drop all cache
-+_scratch_remount
++$FSSTRESS_PROG $(_scale_fsstress_args -p 1 -n 10000000) $FSSTRESS_AVOID \
++	-d $SCRATCH_MNT/stressdir > /dev/null 2>&1 &
 +
-+# remove all files with odd file names, which should free near half
-+# of the space
-+rm $SCRATCH_MNT/*[13579]
-+sync
++trigger_work &
++trigger_pid=$!
 +
-+# We should be able to write at least 1/8 of the whole fs size
-+# The number 1/8 is for btrfs, which only has about 47M for data.
-+# And half of the 47M is already taken up, so only 1/8 is safe here
-+$XFS_IO_PROG -f -c "pwrite 0 $(($fs_size / 8))" $SCRATCH_MNT/large_file | \
-+	_filter_xfs_io
++sleep $runtime
++killall $FSSTRESS_PROG &> /dev/null
++kill $trigger_pid &> /dev/null
++kill $balance_pid &> /dev/null
++wait
 +
++# Manually stop balance as it's possible balance is still running for a short
++# time. And we don't want to populate $seqres.full, so call $BTRFS_UTIL_PROG
++# directly
++$BTRFS_UTIL_PROG balance cancel $SCRATCH_MNT &> /dev/null
++
++echo "Silence is golden"
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/416.out b/tests/generic/416.out
+diff --git a/tests/btrfs/201.out b/tests/btrfs/201.out
 new file mode 100644
-index 0000000..8d2ffac
+index 00000000..5ac973f5
 --- /dev/null
-+++ b/tests/generic/416.out
-@@ -0,0 +1,3 @@
-+QA output created by 416
-+wrote 16777216/16777216 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-diff --git a/tests/generic/group b/tests/generic/group
-index b510d41..59f94f9 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -418,3 +418,4 @@
- 413 auto quick
- 414 auto quick clone
- 415 auto clone
-+416 auto enospc
++++ b/tests/btrfs/201.out
+@@ -0,0 +1,2 @@
++QA output created by 201
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index bf001d3c..f87d995c 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -143,3 +143,4 @@
+ 137 auto quick send
+ 138 auto compress
+ 200 auto ib-dedupe
++201 auto ib-dedupe
 -- 
-2.9.3
+2.12.0
 
 
 
