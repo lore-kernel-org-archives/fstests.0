@@ -1,65 +1,58 @@
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:52715 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751136AbdCPKch (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 16 Mar 2017 06:32:37 -0400
-Received: from pps.filterd (m0098394.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.20/8.16.0.20) with SMTP id v2GANmt4057470
-        for <fstests@vger.kernel.org>; Thu, 16 Mar 2017 06:32:35 -0400
-Received: from e23smtp07.au.ibm.com (e23smtp07.au.ibm.com [202.81.31.140])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 297mmx511p-1
-        (version=TLSv1.2 cipher=AES256-SHA bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Thu, 16 Mar 2017 06:32:26 -0400
-Received: from localhost
-        by e23smtp07.au.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-        for <fstests@vger.kernel.org> from <harish@linux.vnet.ibm.com>;
-        Thu, 16 Mar 2017 20:32:22 +1000
-Received: from d23av01.au.ibm.com (d23av01.au.ibm.com [9.190.234.96])
-        by d23relay10.au.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id v2GAWC4V49348614
-        for <fstests@vger.kernel.org>; Thu, 16 Mar 2017 21:32:20 +1100
-Received: from d23av01.au.ibm.com (localhost [127.0.0.1])
-        by d23av01.au.ibm.com (8.14.4/8.14.4/NCO v10.0 AVout) with ESMTP id v2GAVm5a024469
-        for <fstests@vger.kernel.org>; Thu, 16 Mar 2017 21:31:48 +1100
-From: Harish <harish@linux.vnet.ibm.com>
-Subject: [PATCH] common/dmthin: Fix grep command for finding exact value
-Date: Thu, 16 Mar 2017 16:01:25 +0530
-Message-Id: <1489660285-19947-1-git-send-email-harish@linux.vnet.ibm.com>
+Received: from mx1.redhat.com ([209.132.183.28]:34812 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751173AbdCQEuH (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 17 Mar 2017 00:50:07 -0400
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id DAD613DBE2
+        for <fstests@vger.kernel.org>; Fri, 17 Mar 2017 04:50:06 +0000 (UTC)
+Date: Fri, 17 Mar 2017 12:50:05 +0800
+From: Xiong Zhou <xzhou@redhat.com>
+Subject: Re: [PATCH] generic/417: reduce extend attribute size
+Message-ID: <20170317045005.yzdc5t2rzcpihkto@XZHOUW.usersys.redhat.com>
+References: <20170316070637.6489-1-eguan@redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170316070637.6489-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Harish <harish@linux.vnet.ibm.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Sometimes there are multiple occurances of meta_name, pool_name,
-data_name in dmsetup command which causes failures while adding
-in next line. This patch greps for names at start of line.
+On Thu, Mar 16, 2017 at 03:06:37PM +0800, Eryu Guan wrote:
+> xattr size 1024 is too big for 1k block size ext3/4 filesystem, so
+> test fails due to ENSPC message from multi_open_unlink when setting
+> xattr.
+> 
+> Reduce the xattr size to 512 so it fits in 1k block size ext3/4.
 
-Signed-off-by: Harish <harish@linux.vnet.ibm.com>
----
- common/dmthin | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
+Tested and ack.
 
-diff --git a/common/dmthin b/common/dmthin
-index e774175..baab628 100644
---- a/common/dmthin
-+++ b/common/dmthin
-@@ -178,12 +178,12 @@ _dmthin_grow()
- 	local blk_dev_size=`blockdev --getsz $dm_backing_dev`
- 
- 	# Get current sizes & values
--	local   meta_dev_size=`$DMSETUP_PROG table | grep $DMTHIN_META_NAME | awk '{print $3}'`
--	local meta_dev_offset=`$DMSETUP_PROG table | grep $DMTHIN_META_NAME | awk '{print $6}'`
--	local   data_dev_size=`$DMSETUP_PROG table | grep $DMTHIN_DATA_NAME | awk '{print $3}'`
--	local   pool_dev_size=`$DMSETUP_PROG table | grep $DMTHIN_POOL_NAME | awk '{print $3}'`
--	local    cluster_size=`$DMSETUP_PROG table | grep $DMTHIN_POOL_NAME | awk '{print $7}'`
--	local       low_water=`$DMSETUP_PROG table | grep $DMTHIN_POOL_NAME | awk '{print $8}'`
-+	local   meta_dev_size=`$DMSETUP_PROG table | grep ^$DMTHIN_META_NAME | awk '{print $3}'`
-+	local meta_dev_offset=`$DMSETUP_PROG table | grep ^$DMTHIN_META_NAME | awk '{print $6}'`
-+	local   data_dev_size=`$DMSETUP_PROG table | grep ^$DMTHIN_DATA_NAME | awk '{print $3}'`
-+	local   pool_dev_size=`$DMSETUP_PROG table | grep ^$DMTHIN_POOL_NAME | awk '{print $3}'`
-+	local    cluster_size=`$DMSETUP_PROG table | grep ^$DMTHIN_POOL_NAME | awk '{print $7}'`
-+	local       low_water=`$DMSETUP_PROG table | grep ^$DMTHIN_POOL_NAME | awk '{print $8}'`
- 
- 	# default to 25% growth
- 	if [ -z "$add_sectors" ]; then
--- 
-2.7.4
-
+> 
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> ---
+>  tests/generic/417 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/tests/generic/417 b/tests/generic/417
+> index 45d63f5..690ceb5 100755
+> --- a/tests/generic/417
+> +++ b/tests/generic/417
+> @@ -61,7 +61,7 @@ function create_dirty_orphans() {
+>  
+>  	num_files=200
+>  	num_eas=1
+> -	ea_val_size=1024
+> +	ea_val_size=512
+>  
+>  	# sleep for ages and we will kill this pid when we are ready
+>  	delay=100
+> -- 
+> 2.9.3
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
