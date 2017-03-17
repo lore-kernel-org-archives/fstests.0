@@ -1,58 +1,116 @@
-Received: from mx1.redhat.com ([209.132.183.28]:34812 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:36726 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751173AbdCQEuH (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 17 Mar 2017 00:50:07 -0400
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id DAD613DBE2
-        for <fstests@vger.kernel.org>; Fri, 17 Mar 2017 04:50:06 +0000 (UTC)
-Date: Fri, 17 Mar 2017 12:50:05 +0800
-From: Xiong Zhou <xzhou@redhat.com>
-Subject: Re: [PATCH] generic/417: reduce extend attribute size
-Message-ID: <20170317045005.yzdc5t2rzcpihkto@XZHOUW.usersys.redhat.com>
-References: <20170316070637.6489-1-eguan@redhat.com>
+        id S1750932AbdCQHlt (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 17 Mar 2017 03:41:49 -0400
+Date: Fri, 17 Mar 2017 15:41:47 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2] fstests: add GlusterFS support
+Message-ID: <20170317074147.GD14226@eguan.usersys.redhat.com>
+References: <1489642099-9019-1-git-send-email-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170316070637.6489-1-eguan@redhat.com>
+In-Reply-To: <1489642099-9019-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, gluster-devel@gluster.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 16, 2017 at 03:06:37PM +0800, Eryu Guan wrote:
-> xattr size 1024 is too big for 1k block size ext3/4 filesystem, so
-> test fails due to ENSPC message from multi_open_unlink when setting
-> xattr.
+On Thu, Mar 16, 2017 at 01:28:19PM +0800, Zorro Lang wrote:
+> Add basic GlusterFS support. Neither new GlusterFS specific tests
+> nor related patches are included. Only support FSTYP=glusterfs or
+> check -glusterfs XXX.
 > 
-> Reduce the xattr size to 512 so it fits in 1k block size ext3/4.
-
-Tested and ack.
-
+> To test on glusterfs, two gluster volumes and two mountpoint
+> directories are needed.
 > 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
 > ---
->  tests/generic/417 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/tests/generic/417 b/tests/generic/417
-> index 45d63f5..690ceb5 100755
-> --- a/tests/generic/417
-> +++ b/tests/generic/417
-> @@ -61,7 +61,7 @@ function create_dirty_orphans() {
->  
->  	num_files=200
->  	num_eas=1
-> -	ea_val_size=1024
-> +	ea_val_size=512
->  
->  	# sleep for ages and we will kill this pid when we are ready
->  	delay=100
-> -- 
-> 2.9.3
+> Hi glusterfs developers,
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Recently some people cares about testing kernel FUSE by running
+> xfstests. We can't test FUSE independently, we must depend upon
+> someone real FS base on FUSE, e.g. GlusterFS.
+> 
+> This patch only want to run xfstests on glusterfs, but I haven't
+> made sure if there's no case bugs for glusterfs. I think that's
+> another problem which I will fix in later patches.
+> 
+> At first I prepare two gluster volumes and two directories, then
+> set into xfstests/local.config.
+> 
+> [root@ibm-x3650m4-10 xfstests-dev]# cat local.config
+> TEST_DIR=/mnt/gluster/test
+> TEST_DEV=ibm-xxxx-xx.redhat.com:testvol
+> SCRATCH_MNT=/mnt/gluster/scratch
+> SCRATCH_DEV=ibm-xxxx-xx.redhat.com:scratchvol
+> 
+> (feel free to set MOUNT_OPTIONS, or GLUSTERFS_MOUNT_OPTIONS)
+> 
+> Then I ran some generic cases, e.g. g/001 and g/117, one test on
+> TEST_DEV, and the other run on SCRATCH_DEV:
+> 
+> [root@ibm-x3650m4-10 xfstests-dev]# ./check -glusterfs generic/001
+> FSTYP         -- glusterfs
+> PLATFORM      -- Linux/x86_64 ibm-x3650m4-10 3.10.0-581.el7.x86_64
+> MKFS_OPTIONS  -- ibm-x3650m4-10.rhts.eng.pek2.redhat.com:scratchvol
+> MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 ibm-x3650m4-10.rhts.eng.pek2.redhat.com:scratchvol /mnt/gluster/scratch
+> 
+> generic/001 9s ... 8s
+> Ran: generic/001
+> Passed all 1 tests
+> 
+> [root@ibm-x3650m4-10 xfstests-dev]# ./check -glusterfs generic/117
+> FSTYP         -- glusterfs
+> PLATFORM      -- Linux/x86_64 ibm-x3650m4-10 3.10.0-581.el7.x86_64
+> MKFS_OPTIONS  -- ibm-x3650m4-10.rhts.eng.pek2.redhat.com:scratchvol
+> MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 ibm-x3650m4-10.rhts.eng.pek2.redhat.com:scratchvol /mnt/gluster/scratch
+> 
+> generic/117 24s ... 24s
+> Ran: generic/117
+> Passed all 1 tests
+> 
+> The results look good. But there're some cases fails on glusterfs,
+> I think that's case problem or glusterfs problems. I'll look into
+> them in the future.
+
+Looks fine to me. I tested with quick group and noticed some failures
+too, but I agreed we can fix them later if they're fstests bugs.
+
+I tend to merge this patch in this week's update, unless there're more
+comments from glusterfs community.
+
+> 
+> I only know how to use "mount -t glusterfs XXXX:vol /mnt", if you
+> have any other requirements or suggestions, please tell me.
+> Welcome send more patches to fstests@ mail list:)
+> 
+> Thanks,
+> Zorro
+> 
+>  README.config-sections |  7 +++++++
+>  check                  |  2 ++
+>  common/config          |  6 ++++++
+>  common/rc              | 34 ++++++++++++++++++++++++++++++++--
+>  4 files changed, 47 insertions(+), 2 deletions(-)
+> 
+> diff --git a/README.config-sections b/README.config-sections
+> index df7c929..9133997 100644
+> --- a/README.config-sections
+> +++ b/README.config-sections
+> @@ -121,3 +121,10 @@ TEST_DIR=/mnt/test
+>  TEST_DEV=192.168.14.1:6789:/
+>  TEST_FS_MOUNT_OPTS="-o name=admin,secret=AQDuEBtYKEYRINGSECRETriSC8YJGDZsQHcr7g=="
+>  FSTYP="ceph"
+> +
+> +[glusterfs]
+> +FSTYP=glusterfs
+> +TEST_DIR=/mnt/gluster/test
+> +TEST_DEV=192.168.1.1:testvol
+> +SCRATCH_DIR=/mnt/gluster/scratch
+
+s/SCRATCH_DIR/SCRATCH_MNT/ , I can fix it at commit time.
+
+Thanks,
+Eryu
