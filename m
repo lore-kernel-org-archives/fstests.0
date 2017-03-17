@@ -1,95 +1,152 @@
-Received: from mail-ot0-f196.google.com ([74.125.82.196]:35372 "EHLO
-        mail-ot0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751037AbdCQOOc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 17 Mar 2017 10:14:32 -0400
-Received: by mail-ot0-f196.google.com with SMTP id a12so12797316ota.2
-        for <fstests@vger.kernel.org>; Fri, 17 Mar 2017 07:13:27 -0700 (PDT)
+Received: from mx144.netapp.com ([216.240.21.25]:36095 "EHLO mx144.netapp.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751098AbdCQTz1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 17 Mar 2017 15:55:27 -0400
+From: Anna Schumaker <Anna.Schumaker@Netapp.com>
+Subject: [PATCH v5 2/5] generic/417: Add small copies to new file test
+Date: Fri, 17 Mar 2017 15:52:30 -0400
+Message-ID: <20170317195233.4042-3-Anna.Schumaker@Netapp.com>
+In-Reply-To: <20170317195233.4042-1-Anna.Schumaker@Netapp.com>
+References: <20170317195233.4042-1-Anna.Schumaker@Netapp.com>
 MIME-Version: 1.0
-In-Reply-To: <20170317132710.GJ21915@dhcp12-143.nay.redhat.com>
-References: <1489752862-15786-1-git-send-email-zlang@redhat.com>
- <CAOQ4uxh77DoqDa+O0NvjABzhosZWWG5_COy6=4U5s5eDwpPPUw@mail.gmail.com> <20170317132710.GJ21915@dhcp12-143.nay.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 17 Mar 2017 16:03:43 +0200
-Message-ID: <CAOQ4uxhv63-ngWrNsX=h7ywet1_qotNcPoAjzQbg4w-MusLQDA@mail.gmail.com>
-Subject: Re: [PATCH] fsstress: add mmap/munmap into test operation list
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: Anna.Schumaker@Netapp.com, linux-nfs@vger.kernel.org, hch@infradead.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Mar 17, 2017 at 3:27 PM, Zorro Lang <zlang@redhat.com> wrote:
-> On Fri, Mar 17, 2017 at 02:44:13PM +0200, Amir Goldstein wrote:
->> On Fri, Mar 17, 2017 at 2:14 PM, Zorro Lang <zlang@redhat.com> wrote:
->> > mmap as a popular and basic operation, most of softwares use it to
->> > access files.
->> >
->> > More and more customers report bugs related with mmap/munmap and
->> > other stress conditions. So add mmap test into fsstress to reproduce
->> > or find more bugs easily.
->> >
->> > Signed-off-by: Zorro Lang <zlang@redhat.com>
->> > ---
->> >
->> > Hi,
->> >
->> > I've tested this patch on XFS by running:
->> >
->> > ./ltp/fsstress -d /mnt/scratch -f mmap=1000 -f creat=500 -f mkdir=500 -n 2000 -p10 -v
->> > ./ltp/fsstress -d /mnt/scratch -f mmap=1000 -f dwrite=1000 -f write=1000 -f creat=500 -f mkdir=500 -n 4000 -p10 -v
->> > ./ltp/fsstress -d /mnt/scratch -n 5000 -p10 -v
->> >
->> > I didn't find any unexpected errors. Please help to review.
->> > I'll send another patch to LTP if this patch can be merged into xfstests.
->> >
->> > Thanks,
->> > Zorro
->> >
->> >  ltp/fsstress.c | 77 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
->> >  src/global.h   |  4 +++
->> >  2 files changed, 81 insertions(+)
->> >
->> > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
->> > index 35e2765..5914551 100644
->> > --- a/ltp/fsstress.c
->> > +++ b/ltp/fsstress.c
->> > @@ -2585,7 +2585,84 @@ link_f(int opno, long r)
->> >  void
->> >  mmap_f(int opno, long r)
->> >  {
->
-> Hi Amir,
->
-> Thanks for your reviewing.
->
->>
->> IMO, the operation you implemented would be better named 'mwrite'
->> and it makes sense while you're at it to add 'mread' counterpart.
->
-> Hmm, make sense.
->
->>
->> It might have been nice to have 'mmap'/'munmap' commands
->> which actually maintain a set of files on which mwrite/mread acts
->> upon, similarly to the relation between creat/unlink and the rest of
->> the file ops.
->>
->> This could actually allow to stress test concurrent access the shared memory
->> between processes, but it is going to be a lot more work...
->
-> If so, I have to record addr and length with file together in mwrite when
-> mmap a file, and one file maybe mapped not only once. Then mread
-> need to choose one addr+length+file group randomly to test and munmap.
->
-> Hmm... That's a good suggestion. But I just hope to add some mmap/munmap
-> random load I/Os in fsstress, to trigger more writeback + munmap + memory reclaim
-> race situations in this simple patch. I didn't plan to test concurrent access
-> the shared memory this time, due to what you said, it's going to be lots more
-> work:)
->
-> How about add this feature in later patch, after this patch can be merged?
-> What do you think?
->
+This test copies single bytes from a source file into various new files
+just to make sure that we can handle very small copies.
 
-Certainly. I wasn't implying that your patch should be blocked.
-My only review comment was to name of the operation which is misleading.
+Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
+---
+ tests/generic/417     | 83 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/417.out | 16 ++++++++++
+ tests/generic/group   |  1 +
+ 3 files changed, 100 insertions(+)
+ create mode 100755 tests/generic/417
+ create mode 100644 tests/generic/417.out
+
+diff --git a/tests/generic/417 b/tests/generic/417
+new file mode 100755
+index 00000000..dde3f4d6
+--- /dev/null
++++ b/tests/generic/417
+@@ -0,0 +1,83 @@
++#!/bin/bash
++# FS QA Test No. 417
++#
++# Tests vfs_copy_file_range():
++#   - Copy a small file
++#   - Small copies from various points in the original file
++#-----------------------------------------------------------------------
++# Copyright (c) 2016 Netapp, Inc. All rights reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -rf $tmp.*
++}
++
++# get standard environment
++. common/rc
++. common/filter
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++
++_require_xfs_io_command "copy_range"
++_require_test
++
++testdir=$TEST_DIR/test-$seq
++rm -rf $testdir
++mkdir $testdir
++rm -f $seqres.full
++
++echo "Create the original file and then copy"
++echo -n "abcde" > $testdir/file
++$XFS_IO_PROG -f -c "copy_range $testdir/file" "$testdir/copy"
++echo -n "abcde" | cmp $testdir/copy
++echo "Original md5sums:"
++md5sum $testdir/{file,copy} | _filter_test_dir
++
++echo "Small copies from various points in the original file"
++$XFS_IO_PROG -f -c "copy_range -s 0 -l 1      $testdir/file" "$testdir/a" 2>&1
++$XFS_IO_PROG -f -c "copy_range -s 1 -l 1      $testdir/file" "$testdir/b" 2>&1
++$XFS_IO_PROG -f -c "copy_range -s 2 -l 1      $testdir/file" "$testdir/c" 2>&1
++$XFS_IO_PROG -f -c "copy_range -s 3 -l 1      $testdir/file" "$testdir/d" 2>&1
++$XFS_IO_PROG -f -c "copy_range -s 4 -l 1      $testdir/file" "$testdir/e" 2>&1
++$XFS_IO_PROG -f -c "copy_range -s 4 -l 1 -d 1 $testdir/file" "$testdir/f" 2>&1
++$XFS_IO_PROG -f -c "copy_range -s 5 -l 1      $testdir/file" "$testdir/g" 2>&1
++echo -n "a"    | cmp $testdir/a
++echo -n "b"    | cmp $testdir/b
++echo -n "c"    | cmp $testdir/c
++echo -n "d"    | cmp $testdir/d
++echo -n "e"    | cmp $testdir/e
++echo -en "\0e" | cmp $testdir/f
++echo -n ""     | cmp $testdir/g
++echo "md5sums after small copies"
++md5sum $testdir/{file,a,b,c,d,e,f,g} | _filter_test_dir
++
++#success, all done
++status=0
++exit
+diff --git a/tests/generic/417.out b/tests/generic/417.out
+new file mode 100644
+index 00000000..36c98478
+--- /dev/null
++++ b/tests/generic/417.out
+@@ -0,0 +1,16 @@
++QA output created by 417
++Create the original file and then copy
++Original md5sums:
++ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-417/file
++ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-417/copy
++Small copies from various points in the original file
++copy_range: Invalid argument
++md5sums after small copies
++ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-417/file
++0cc175b9c0f1b6a831c399e269772661  TEST_DIR/test-417/a
++92eb5ffee6ae2fec3ad71c777531578f  TEST_DIR/test-417/b
++4a8a08f09d37b73795649038408b5f33  TEST_DIR/test-417/c
++8277e0910d750195b448797616e091ad  TEST_DIR/test-417/d
++e1671797c52e15f763380b45e841ec32  TEST_DIR/test-417/e
++2015eb238d706eceefc784742928054f  TEST_DIR/test-417/f
++d41d8cd98f00b204e9800998ecf8427e  TEST_DIR/test-417/g
+diff --git a/tests/generic/group b/tests/generic/group
+index 9541fff5..57ef9d22 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -419,3 +419,4 @@
+ 414 auto quick clone
+ 415 auto clone
+ 416 auto quick copy
++417 auto quick copy
+-- 
+2.12.0
+
