@@ -1,19 +1,19 @@
-Received: from mx1.redhat.com ([209.132.183.28]:37096 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:34376 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750926AbdCQMZW (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 17 Mar 2017 08:25:22 -0400
+        id S1751209AbdCQMyh (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 17 Mar 2017 08:54:37 -0400
 Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 82E4680477
-        for <fstests@vger.kernel.org>; Fri, 17 Mar 2017 12:14:53 +0000 (UTC)
+        by mx1.redhat.com (Postfix) with ESMTPS id 4F60AC05B1E3
+        for <fstests@vger.kernel.org>; Fri, 17 Mar 2017 12:46:09 +0000 (UTC)
 Received: from localhost.localdomain.com (ovpn-8-67.pek2.redhat.com [10.72.8.67])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 2378262927
-        for <fstests@vger.kernel.org>; Fri, 17 Mar 2017 12:14:51 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 5A34A627DD
+        for <fstests@vger.kernel.org>; Fri, 17 Mar 2017 12:46:08 +0000 (UTC)
 From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH] fsstress: add mmap/munmap into test operation list
-Date: Fri, 17 Mar 2017 20:14:22 +0800
-Message-Id: <1489752862-15786-1-git-send-email-zlang@redhat.com>
+Subject: [PATCH v2] fsstress: add mmap/munmap into test operation list
+Date: Fri, 17 Mar 2017 20:46:01 +0800
+Message-Id: <1489754761-19414-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
@@ -30,30 +30,50 @@ Signed-off-by: Zorro Lang <zlang@redhat.com>
 
 Hi,
 
-I've tested this patch on XFS by running:
-
-./ltp/fsstress -d /mnt/scratch -f mmap=1000 -f creat=500 -f mkdir=500 -n 2000 -p10 -v
-./ltp/fsstress -d /mnt/scratch -f mmap=1000 -f dwrite=1000 -f write=1000 -f creat=500 -f mkdir=500 -n 4000 -p10 -v
-./ltp/fsstress -d /mnt/scratch -n 5000 -p10 -v
-
-I didn't find any unexpected errors. Please help to review.
-I'll send another patch to LTP if this patch can be merged into xfstests.
+Sorry, I made a mistake. The V1 is part of the whole patch. So send
+V2 now. Please review this patch, V1 can't be patched.
 
 Thanks,
 Zorro
 
- ltp/fsstress.c | 77 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ ltp/fsstress.c | 86 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  src/global.h   |  4 +++
- 2 files changed, 81 insertions(+)
+ 2 files changed, 90 insertions(+)
 
 diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-index 35e2765..5914551 100644
+index 7e7cf60..5914551 100644
 --- a/ltp/fsstress.c
 +++ b/ltp/fsstress.c
-@@ -2585,7 +2585,84 @@ link_f(int opno, long r)
+@@ -67,6 +67,7 @@ typedef enum {
+ 	OP_GETATTR,
+ 	OP_GETDENTS,
+ 	OP_LINK,
++	OP_MMAP,
+ 	OP_MKDIR,
+ 	OP_MKNOD,
+ 	OP_PUNCH,
+@@ -166,6 +167,7 @@ void	fsync_f(int, long);
+ void	getattr_f(int, long);
+ void	getdents_f(int, long);
+ void	link_f(int, long);
++void	mmap_f(int, long);
+ void	mkdir_f(int, long);
+ void	mknod_f(int, long);
+ void	punch_f(int, long);
+@@ -206,6 +208,7 @@ opdesc_t	ops[] = {
+ 	{ OP_GETATTR, "getattr", getattr_f, 1, 0 },
+ 	{ OP_GETDENTS, "getdents", getdents_f, 1, 0 },
+ 	{ OP_LINK, "link", link_f, 1, 1 },
++	{ OP_MMAP, "mmap", mmap_f, 2, 1 },
+ 	{ OP_MKDIR, "mkdir", mkdir_f, 2, 1 },
+ 	{ OP_MKNOD, "mknod", mknod_f, 2, 1 },
+ 	{ OP_PUNCH, "punch", punch_f, 1, 1 },
+@@ -2580,6 +2583,89 @@ link_f(int opno, long r)
+ }
+ 
  void
- mmap_f(int opno, long r)
- {
++mmap_f(int opno, long r)
++{
 +	char		*addr;
 +	int		e;
 +	pathname_t	f;
@@ -65,7 +85,7 @@ index 35e2765..5914551 100644
 +	struct stat64	stb;
 +	int		v;
 +	char		st[1024];
- 
++
 +	init_pathname(&f);
 +	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
 +		if (v)
@@ -132,9 +152,12 @@ index 35e2765..5914551 100644
 +
 +	free_pathname(&f);
 +	close(fd);
- }
- 
- void
++}
++
++void
+ mkdir_f(int opno, long r)
+ {
+ 	int		e;
 diff --git a/src/global.h b/src/global.h
 index f63246b..51d1e94 100644
 --- a/src/global.h
