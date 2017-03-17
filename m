@@ -1,116 +1,153 @@
-Received: from mx1.redhat.com ([209.132.183.28]:36726 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:37096 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750932AbdCQHlt (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 17 Mar 2017 03:41:49 -0400
-Date: Fri, 17 Mar 2017 15:41:47 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2] fstests: add GlusterFS support
-Message-ID: <20170317074147.GD14226@eguan.usersys.redhat.com>
-References: <1489642099-9019-1-git-send-email-zlang@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1489642099-9019-1-git-send-email-zlang@redhat.com>
+        id S1750926AbdCQMZW (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 17 Mar 2017 08:25:22 -0400
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 82E4680477
+        for <fstests@vger.kernel.org>; Fri, 17 Mar 2017 12:14:53 +0000 (UTC)
+Received: from localhost.localdomain.com (ovpn-8-67.pek2.redhat.com [10.72.8.67])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 2378262927
+        for <fstests@vger.kernel.org>; Fri, 17 Mar 2017 12:14:51 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] fsstress: add mmap/munmap into test operation list
+Date: Fri, 17 Mar 2017 20:14:22 +0800
+Message-Id: <1489752862-15786-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, gluster-devel@gluster.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 16, 2017 at 01:28:19PM +0800, Zorro Lang wrote:
-> Add basic GlusterFS support. Neither new GlusterFS specific tests
-> nor related patches are included. Only support FSTYP=glusterfs or
-> check -glusterfs XXX.
-> 
-> To test on glusterfs, two gluster volumes and two mountpoint
-> directories are needed.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
-> 
-> Hi glusterfs developers,
-> 
-> Recently some people cares about testing kernel FUSE by running
-> xfstests. We can't test FUSE independently, we must depend upon
-> someone real FS base on FUSE, e.g. GlusterFS.
-> 
-> This patch only want to run xfstests on glusterfs, but I haven't
-> made sure if there's no case bugs for glusterfs. I think that's
-> another problem which I will fix in later patches.
-> 
-> At first I prepare two gluster volumes and two directories, then
-> set into xfstests/local.config.
-> 
-> [root@ibm-x3650m4-10 xfstests-dev]# cat local.config
-> TEST_DIR=/mnt/gluster/test
-> TEST_DEV=ibm-xxxx-xx.redhat.com:testvol
-> SCRATCH_MNT=/mnt/gluster/scratch
-> SCRATCH_DEV=ibm-xxxx-xx.redhat.com:scratchvol
-> 
-> (feel free to set MOUNT_OPTIONS, or GLUSTERFS_MOUNT_OPTIONS)
-> 
-> Then I ran some generic cases, e.g. g/001 and g/117, one test on
-> TEST_DEV, and the other run on SCRATCH_DEV:
-> 
-> [root@ibm-x3650m4-10 xfstests-dev]# ./check -glusterfs generic/001
-> FSTYP         -- glusterfs
-> PLATFORM      -- Linux/x86_64 ibm-x3650m4-10 3.10.0-581.el7.x86_64
-> MKFS_OPTIONS  -- ibm-x3650m4-10.rhts.eng.pek2.redhat.com:scratchvol
-> MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 ibm-x3650m4-10.rhts.eng.pek2.redhat.com:scratchvol /mnt/gluster/scratch
-> 
-> generic/001 9s ... 8s
-> Ran: generic/001
-> Passed all 1 tests
-> 
-> [root@ibm-x3650m4-10 xfstests-dev]# ./check -glusterfs generic/117
-> FSTYP         -- glusterfs
-> PLATFORM      -- Linux/x86_64 ibm-x3650m4-10 3.10.0-581.el7.x86_64
-> MKFS_OPTIONS  -- ibm-x3650m4-10.rhts.eng.pek2.redhat.com:scratchvol
-> MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 ibm-x3650m4-10.rhts.eng.pek2.redhat.com:scratchvol /mnt/gluster/scratch
-> 
-> generic/117 24s ... 24s
-> Ran: generic/117
-> Passed all 1 tests
-> 
-> The results look good. But there're some cases fails on glusterfs,
-> I think that's case problem or glusterfs problems. I'll look into
-> them in the future.
+mmap as a popular and basic operation, most of softwares use it to
+access files.
 
-Looks fine to me. I tested with quick group and noticed some failures
-too, but I agreed we can fix them later if they're fstests bugs.
+More and more customers report bugs related with mmap/munmap and
+other stress conditions. So add mmap test into fsstress to reproduce
+or find more bugs easily.
 
-I tend to merge this patch in this week's update, unless there're more
-comments from glusterfs community.
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
 
-> 
-> I only know how to use "mount -t glusterfs XXXX:vol /mnt", if you
-> have any other requirements or suggestions, please tell me.
-> Welcome send more patches to fstests@ mail list:)
-> 
-> Thanks,
-> Zorro
-> 
->  README.config-sections |  7 +++++++
->  check                  |  2 ++
->  common/config          |  6 ++++++
->  common/rc              | 34 ++++++++++++++++++++++++++++++++--
->  4 files changed, 47 insertions(+), 2 deletions(-)
-> 
-> diff --git a/README.config-sections b/README.config-sections
-> index df7c929..9133997 100644
-> --- a/README.config-sections
-> +++ b/README.config-sections
-> @@ -121,3 +121,10 @@ TEST_DIR=/mnt/test
->  TEST_DEV=192.168.14.1:6789:/
->  TEST_FS_MOUNT_OPTS="-o name=admin,secret=AQDuEBtYKEYRINGSECRETriSC8YJGDZsQHcr7g=="
->  FSTYP="ceph"
-> +
-> +[glusterfs]
-> +FSTYP=glusterfs
-> +TEST_DIR=/mnt/gluster/test
-> +TEST_DEV=192.168.1.1:testvol
-> +SCRATCH_DIR=/mnt/gluster/scratch
+Hi,
 
-s/SCRATCH_DIR/SCRATCH_MNT/ , I can fix it at commit time.
+I've tested this patch on XFS by running:
+
+./ltp/fsstress -d /mnt/scratch -f mmap=1000 -f creat=500 -f mkdir=500 -n 2000 -p10 -v
+./ltp/fsstress -d /mnt/scratch -f mmap=1000 -f dwrite=1000 -f write=1000 -f creat=500 -f mkdir=500 -n 4000 -p10 -v
+./ltp/fsstress -d /mnt/scratch -n 5000 -p10 -v
+
+I didn't find any unexpected errors. Please help to review.
+I'll send another patch to LTP if this patch can be merged into xfstests.
 
 Thanks,
-Eryu
+Zorro
+
+ ltp/fsstress.c | 77 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ src/global.h   |  4 +++
+ 2 files changed, 81 insertions(+)
+
+diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+index 35e2765..5914551 100644
+--- a/ltp/fsstress.c
++++ b/ltp/fsstress.c
+@@ -2585,7 +2585,84 @@ link_f(int opno, long r)
+ void
+ mmap_f(int opno, long r)
+ {
++	char		*addr;
++	int		e;
++	pathname_t	f;
++	int		fd;
++	size_t		len;
++	__int64_t	lr;
++	off64_t		off;
++	int		flags;
++	struct stat64	stb;
++	int		v;
++	char		st[1024];
+ 
++	init_pathname(&f);
++	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
++		if (v)
++			printf("%d/%d: mmap - no filename\n", procid, opno);
++		free_pathname(&f);
++		return;
++	}
++	fd = open_path(&f, O_RDWR);
++	e = fd < 0 ? errno : 0;
++	check_cwd();
++	if (fd < 0) {
++		if (v)
++			printf("%d/%d: mmap - open %s failed %d\n",
++			       procid, opno, f.path, e);
++		free_pathname(&f);
++		return;
++	}
++	if (fstat64(fd, &stb) < 0) {
++		if (v)
++			printf("%d/%d: write - fstat64 %s failed %d\n",
++			       procid, opno, f.path, errno);
++		free_pathname(&f);
++		close(fd);
++		return;
++	}
++	inode_info(st, sizeof(st), &stb, v);
++	lr = ((__int64_t)random() << 32) + random();
++	off = (off64_t)(lr % MIN(stb.st_size + (1024 * 1024), MAXFSIZE));
++	off %= maxfsize;
++	off &= (off64_t)(~(sysconf(_SC_PAGE_SIZE) - 1));
++	len = (size_t)(random() % MIN(maxfsize - off, FILELEN_MAX)) + 1;
++
++	/*
++	 * truncate file to the size we need to map and access,
++	 * keep away SIGBUS / SIGSEGV killing this process
++	 */
++	e = truncate64_path(&f, off + len) < 0 ? errno : 0;
++	/* try private file mappings with 20% rate */
++	flags = (random() % 20) ? MAP_SHARED : MAP_PRIVATE;
++	do {
++		addr = mmap(NULL, len, PROT_READ | PROT_WRITE, flags, fd, off);
++		e = (addr == MAP_FAILED) ? errno : 0;
++		if (errno == ENOMEM && flags & MAP_PRIVATE) {
++		/* turn to shared mapping if memeory is not enough for private mapping */
++			flags = MAP_SHARED;
++		} else if (errno == ENOMEM && len > sysconf(_SC_PAGE_SIZE)) {
++		/* reduce mapping length, if memeory is not enough for shared mapping */
++			len /= 2;
++		}
++	} while (errno == ENOMEM && len > sysconf(_SC_PAGE_SIZE));
++	if (v)
++		printf("%d/%d: mmap %s%s [%lld,%d,%s] %d\n",
++		       procid, opno, f.path, st, (long long)off, (int)len,
++		       (flags & MAP_PRIVATE) ? "MAP_PRIVATE" : "MAP_SHARED", e);
++
++	if (addr != MAP_FAILED) {
++		memset(addr, nameseq & 0xff, len);
++		e = munmap(addr, len) < 0 ? errno : 0;
++		if (v)
++			printf("%d/%d: munmap %s%s [%lld,%d] %d\n",
++			       procid, opno, f.path, st, (long long)off,
++			       (int)len, e);
++	}
++
++	free_pathname(&f);
++	close(fd);
+ }
+ 
+ void
+diff --git a/src/global.h b/src/global.h
+index f63246b..51d1e94 100644
+--- a/src/global.h
++++ b/src/global.h
+@@ -178,4 +178,8 @@
+ 
+ #endif /* HAVE_LINUX_FALLOC_H */
+ 
++#ifndef HAVE_SYS_MMAN_H
++#include <sys/mman.h>
++#endif
++
+ #endif /* GLOBAL_H */
+-- 
+2.7.4
+
