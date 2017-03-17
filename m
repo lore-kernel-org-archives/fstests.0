@@ -1,157 +1,123 @@
-Received: from mx144.netapp.com ([216.240.21.25]:38477 "EHLO mx144.netapp.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751101AbdCQUE2 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 17 Mar 2017 16:04:28 -0400
-From: Anna Schumaker <Anna.Schumaker@Netapp.com>
-Subject: [PATCH v5 4/5] generic/419: Add a copy test for overwriting small amounts of data
-Date: Fri, 17 Mar 2017 15:52:32 -0400
-Message-ID: <20170317195233.4042-5-Anna.Schumaker@Netapp.com>
-In-Reply-To: <20170317195233.4042-1-Anna.Schumaker@Netapp.com>
+Received: from userp1050.oracle.com ([156.151.31.82]:47278 "EHLO
+        userp1050.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751174AbdCQWIl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 17 Mar 2017 18:08:41 -0400
+Date: Fri, 17 Mar 2017 15:02:46 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH v5 0/5] Add copy_file_range() tests
+Message-ID: <20170317220246.GA12585@birch.djwong.org>
 References: <20170317195233.4042-1-Anna.Schumaker@Netapp.com>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170317195233.4042-1-Anna.Schumaker@Netapp.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Anna.Schumaker@Netapp.com, linux-nfs@vger.kernel.org, hch@infradead.org
+To: Anna Schumaker <Anna.Schumaker@Netapp.com>
+Cc: fstests@vger.kernel.org, linux-nfs@vger.kernel.org, hch@infradead.org
 List-ID: <fstests@vger.kernel.org>
 
-This test is similar to 345, except that it copies one byte at a time to
-make sure that this case works as expected.
+On Fri, Mar 17, 2017 at 03:52:28PM -0400, Anna Schumaker wrote:
+> These tests exercise the copy_file_range() system call, and check copying
+> data to both a new file and overwriting data inside an existing file.
+> 
+> Sorry it took so long to get this version out.  I forgot about these patches
+> after the last submission.
 
-Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
----
- tests/generic/419     | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/419.out | 17 ++++++++++
- tests/generic/group   |  1 +
- 3 files changed, 105 insertions(+)
- create mode 100755 tests/generic/419
- create mode 100644 tests/generic/419.out
+Hooray, tests finally!
 
-diff --git a/tests/generic/419 b/tests/generic/419
-new file mode 100755
-index 00000000..967412a2
---- /dev/null
-+++ b/tests/generic/419
-@@ -0,0 +1,87 @@
-+#!/bin/bash
-+# FS QA Test No. 419
-+#
-+# Tests vfs_copy_file_range():
-+#   - Copy a small file
-+#   - Use copy to swap data at beginning and end
-+#   - Use copy to swap data in the middle
-+#   - Use copy to swap data in a small file
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2016 Netapp, Inc. All rights reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -rf $tmp.*
-+}
-+
-+# get standard environment
-+. common/rc
-+. common/filter
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+
-+_require_xfs_io_command "copy_range"
-+_require_test
-+
-+testdir=$TEST_DIR/test-$seq
-+rm -rf $testdir
-+mkdir $testdir
-+rm -f $seqres.full
-+
-+echo "Create the original file and then copy"
-+echo -n "abcde" > $testdir/file
-+$XFS_IO_PROG -f -c "copy_range $testdir/file" "$testdir/copy" 2>&1
-+cmp $testdir/file $testdir/copy
-+echo "Original md5sums:"
-+md5sum $testdir/{file,copy} | _filter_test_dir
-+
-+echo "Swap beginning and end of original file"
-+$XFS_IO_PROG -f -c "copy_range -s 0 -d 4 -l 1 $testdir/file" "$testdir/copy" 2>&1
-+$XFS_IO_PROG -f -c "copy_range -s 4 -d 0 -l 1 $testdir/file" "$testdir/copy" 2>&1
-+echo -n "ebcda" | cmp $testdir/copy
-+echo "md5sums after swapping beginning and end:"
-+md5sum $testdir/{file,copy} | _filter_test_dir
-+
-+echo "Swap middle parts of original file"
-+$XFS_IO_PROG -f -c "copy_range -s 1 -d 3 -l 1 $testdir/file" "$testdir/copy" 2>&1
-+$XFS_IO_PROG -f -c "copy_range -s 3 -d 1 -l 1 $testdir/file" "$testdir/copy" 2>&1
-+echo -n "edcba" | cmp $testdir/copy
-+echo "md5sums after swapping middle:"
-+md5sum $testdir/{file,copy} | _filter_test_dir
-+
-+echo "Copy tail of original file onto copy"
-+$XFS_IO_PROG -f -c "copy_range -s 1 -d 3 -l 4 $testdir/file" "$testdir/copy" 2>&1
-+echo -n "edcbcde" | cmp $testdir/copy
-+echo "md5sums after copying tail:"
-+md5sum $testdir/{file,copy} | _filter_test_dir
-+
-+#success, all done
-+status=0
-+exit
-diff --git a/tests/generic/419.out b/tests/generic/419.out
-new file mode 100644
-index 00000000..a5ab24db
---- /dev/null
-+++ b/tests/generic/419.out
-@@ -0,0 +1,17 @@
-+QA output created by 419
-+Create the original file and then copy
-+Original md5sums:
-+ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-419/file
-+ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-419/copy
-+Swap beginning and end of original file
-+md5sums after swapping beginning and end:
-+ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-419/file
-+32db1f6d06d15f7e38e1ab1c69da498a  TEST_DIR/test-419/copy
-+Swap middle parts of original file
-+md5sums after swapping middle:
-+ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-419/file
-+295228f3d82d344bbcf2f0030519c2ea  TEST_DIR/test-419/copy
-+Copy tail of original file onto copy
-+md5sums after copying tail:
-+ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-419/file
-+0c4aac952f72fa078e2f8419aca70b28  TEST_DIR/test-419/copy
-diff --git a/tests/generic/group b/tests/generic/group
-index f55b2b49..6a2d3ee8 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -421,3 +421,4 @@
- 416 auto quick copy
- 417 auto quick copy
- 418 auto quick copy
-+419 auto quick copy
--- 
-2.12.0
+I had to bump the numbers up due to conflicts (it's usually best to pick
+a really high number and let Eryu mvtest them to their real numbers),
+but these mostly look ok.
 
+However, I do see that something isn't triggering an EINVAL return code:
+
+generic/816      - output mismatch (see /tmp/xfstests/results//generic/816.out.bad)
+    --- tests/generic/816.out   2017-03-17 14:46:21.064521899 -0700
+    +++ /tmp/xfstests/results//generic/816.out.bad      2017-03-17 14:58:15.848000000 -0700
+    @@ -16,7 +16,6 @@
+     e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-816/file
+     e68d4a150c4e42f4f9ea3ffe4c9cf4ed  TEST_DIR/test-816/end
+     Copy beyond end of original file
+    -copy_range: Invalid argument
+     md5sums after copying beyond:
+     e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-816/file
+     e68d4a150c4e42f4f9ea3ffe4c9cf4ed  TEST_DIR/test-816/beyond
+    ...
+    (Run 'diff -u tests/generic/816.out /tmp/xfstests/results//generic/816.out.bad'  to see the entire diff)
+generic/817      - output mismatch (see /tmp/xfstests/results//generic/817.out.bad)
+    --- tests/generic/817.out   2017-03-17 14:47:02.916437143 -0700
+    +++ /tmp/xfstests/results//generic/817.out.bad      2017-03-17 14:58:17.168000000 -0700
+    @@ -4,7 +4,6 @@
+     ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-817/file
+     ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-817/copy
+     Small copies from various points in the original file
+    -copy_range: Invalid argument
+     md5sums after small copies
+     ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-817/file
+     0cc175b9c0f1b6a831c399e269772661  TEST_DIR/test-817/a
+    ...
+    (Run 'diff -u tests/generic/817.out /tmp/xfstests/results//generic/817.out.bad'  to see the entire diff)
+generic/818      1s
+generic/819      1s
+generic/820      - output mismatch (see /tmp/xfstests/results//generic/820.out.bad)
+    --- tests/generic/820.out   2017-03-17 14:47:44.140338654 -0700
+    +++ /tmp/xfstests/results//generic/820.out.bad      2017-03-17 14:58:21.120000000 -0700
+    @@ -1,7 +1,6 @@
+     QA output created by 820
+     Create the original files
+     Try to copy when source pos > source size
+    -copy_range: Invalid argument
+     Try to copy to a read-only file
+     copy_range: Bad file descriptor
+     Try to copy to an append-only file
+    ...
+    (Run 'diff -u tests/generic/820.out /tmp/xfstests/results//generic/820.out.bad'  to see the entire diff)
+
+Running 4.11-rc2 here with a ton of XFS patches, though these results
+are from an FSTYP=ext4 run.  FSTYP=xfs produces the same diff output.
+
+--D
+
+> 
+> Thanks,
+> Anna
+> 
+> 
+> Anna Schumaker (5):
+>   generic/416: Add copy to new file test
+>   generic/417: Add small copies to new file test
+>   generic/418: Add copy test that overwrites data
+>   generic/419: Add a copy test for overwriting small amounts of data
+>   generic/420: Add a copy test for invalid input
+> 
+>  common/rc             |   6 +++
+>  tests/generic/416     | 102 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/416.out |  26 +++++++++++++
+>  tests/generic/417     |  83 ++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/417.out |  16 ++++++++
+>  tests/generic/418     | 100 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/418.out |  17 +++++++++
+>  tests/generic/419     |  87 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/419.out |  17 +++++++++
+>  tests/generic/420     |  76 +++++++++++++++++++++++++++++++++++++
+>  tests/generic/420.out |  12 ++++++
+>  tests/generic/group   |   5 +++
+>  12 files changed, 547 insertions(+)
+>  create mode 100755 tests/generic/416
+>  create mode 100644 tests/generic/416.out
+>  create mode 100755 tests/generic/417
+>  create mode 100644 tests/generic/417.out
+>  create mode 100755 tests/generic/418
+>  create mode 100644 tests/generic/418.out
+>  create mode 100755 tests/generic/419
+>  create mode 100644 tests/generic/419.out
+>  create mode 100644 tests/generic/420
+>  create mode 100644 tests/generic/420.out
+> 
+> -- 
+> 2.12.0
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
