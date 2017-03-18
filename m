@@ -1,123 +1,134 @@
-Received: from userp1050.oracle.com ([156.151.31.82]:47278 "EHLO
-        userp1050.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751174AbdCQWIl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 17 Mar 2017 18:08:41 -0400
-Date: Fri, 17 Mar 2017 15:02:46 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v5 0/5] Add copy_file_range() tests
-Message-ID: <20170317220246.GA12585@birch.djwong.org>
-References: <20170317195233.4042-1-Anna.Schumaker@Netapp.com>
+Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:50834 "EHLO
+        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751133AbdCRCj1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 17 Mar 2017 22:39:27 -0400
+Received: from pps.filterd (m0109333.ppops.net [127.0.0.1])
+        by mx0a-00082601.pphosted.com (8.16.0.20/8.16.0.20) with SMTP id v2I1Q4I6027239
+        for <fstests@vger.kernel.org>; Fri, 17 Mar 2017 18:26:05 -0700
+Received: from mail.thefacebook.com ([199.201.64.23])
+        by mx0a-00082601.pphosted.com with ESMTP id 298pr00wnc-1
+        (version=TLSv1 cipher=ECDHE-RSA-AES256-SHA bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Fri, 17 Mar 2017 18:26:05 -0700
+Received: from facebook.com (2401:db00:11:d0be:face:0:1b:0)     by
+ mx-out.facebook.com (10.102.107.97) with ESMTP id
+ dad6dda80b7911e7be760002c99331b0-e2dc79a0 for <fstests@vger.kernel.org>;       Fri,
+ 17 Mar 2017 18:26:04 -0700
+From: Calvin Owens <calvinowens@fb.com>
+Subject: [PATCH] generic/418: Add test for fallocate() PUNCH_HOLE|KEEP_SIZE
+Date: Fri, 17 Mar 2017 18:26:01 -0700
+Message-ID: <8044718e71d02568f3fe84fc57478e9ca99b4f1a.1489799266.git.calvinowens@fb.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170317195233.4042-1-Anna.Schumaker@Netapp.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Anna Schumaker <Anna.Schumaker@Netapp.com>
-Cc: fstests@vger.kernel.org, linux-nfs@vger.kernel.org, hch@infradead.org
+To: fstests@vger.kernel.org
+Cc: kernel-team@fb.com, calvinowens@fb.com
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Mar 17, 2017 at 03:52:28PM -0400, Anna Schumaker wrote:
-> These tests exercise the copy_file_range() system call, and check copying
-> data to both a new file and overwriting data inside an existing file.
-> 
-> Sorry it took so long to get this version out.  I forgot about these patches
-> after the last submission.
+Verify that punching holes at ends of files does not alter st_size if we
+pass FALLOC_FL_KEEP_SIZE to fallocate().
 
-Hooray, tests finally!
+Signed-off-by: Calvin Owens <calvinowens@fb.com>
+---
+ tests/generic/418     | 69 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/418.out |  3 +++
+ tests/generic/group   |  1 +
+ 3 files changed, 73 insertions(+)
+ create mode 100755 tests/generic/418
+ create mode 100644 tests/generic/418.out
 
-I had to bump the numbers up due to conflicts (it's usually best to pick
-a really high number and let Eryu mvtest them to their real numbers),
-but these mostly look ok.
+diff --git a/tests/generic/418 b/tests/generic/418
+new file mode 100755
+index 0000000..658c4c3
+--- /dev/null
++++ b/tests/generic/418
+@@ -0,0 +1,69 @@
++#! /bin/bash
++# FS QA Test 418
++#
++# Verify fallocate(mode=FALLOC_FL_KEEP_SIZE|FALLOC_FL_PUNCH_HOLE) does
++# not alter the file size.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Calvin Owens.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_test
++
++testfile="${TEST_DIR}/testfile"
++
++echo "Testing fallocate(mode=FALLOC_FL_KEEP_SIZE|FALLOC_FL_PUNCH_HOLE)"
++dd if=/dev/urandom of=$testfile bs=2048 count=1 >/dev/null 2>/dev/null
++
++# FIXME: A bug in xfs_io prevents multiple flags in mode from being set at once,
++# use the standard command to test this until that is fixed.
++
++#$XFS_IO_PROG -c "falloc -k -p 2048 2048" $testfile
++fallocate -n -p -l 2048 -o 2048 $testfile
++
++$XFS_IO_PROG -c "stat" $testfile 2>/dev/null | grep -F 'stat.size'
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/418.out b/tests/generic/418.out
+new file mode 100644
+index 0000000..9927731
+--- /dev/null
++++ b/tests/generic/418.out
+@@ -0,0 +1,3 @@
++QA output created by 418
++Testing fallocate(mode=FALLOC_FL_KEEP_SIZE|FALLOC_FL_PUNCH_HOLE)
++stat.size = 2048
+diff --git a/tests/generic/group b/tests/generic/group
+index f0096bb..a2368ae 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -420,3 +420,4 @@
+ 415 auto clone
+ 416 auto enospc
+ 417 auto quick shutdown log
++418 auto quick
+-- 
+2.9.3
 
-However, I do see that something isn't triggering an EINVAL return code:
-
-generic/816      - output mismatch (see /tmp/xfstests/results//generic/816.out.bad)
-    --- tests/generic/816.out   2017-03-17 14:46:21.064521899 -0700
-    +++ /tmp/xfstests/results//generic/816.out.bad      2017-03-17 14:58:15.848000000 -0700
-    @@ -16,7 +16,6 @@
-     e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-816/file
-     e68d4a150c4e42f4f9ea3ffe4c9cf4ed  TEST_DIR/test-816/end
-     Copy beyond end of original file
-    -copy_range: Invalid argument
-     md5sums after copying beyond:
-     e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-816/file
-     e68d4a150c4e42f4f9ea3ffe4c9cf4ed  TEST_DIR/test-816/beyond
-    ...
-    (Run 'diff -u tests/generic/816.out /tmp/xfstests/results//generic/816.out.bad'  to see the entire diff)
-generic/817      - output mismatch (see /tmp/xfstests/results//generic/817.out.bad)
-    --- tests/generic/817.out   2017-03-17 14:47:02.916437143 -0700
-    +++ /tmp/xfstests/results//generic/817.out.bad      2017-03-17 14:58:17.168000000 -0700
-    @@ -4,7 +4,6 @@
-     ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-817/file
-     ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-817/copy
-     Small copies from various points in the original file
-    -copy_range: Invalid argument
-     md5sums after small copies
-     ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-817/file
-     0cc175b9c0f1b6a831c399e269772661  TEST_DIR/test-817/a
-    ...
-    (Run 'diff -u tests/generic/817.out /tmp/xfstests/results//generic/817.out.bad'  to see the entire diff)
-generic/818      1s
-generic/819      1s
-generic/820      - output mismatch (see /tmp/xfstests/results//generic/820.out.bad)
-    --- tests/generic/820.out   2017-03-17 14:47:44.140338654 -0700
-    +++ /tmp/xfstests/results//generic/820.out.bad      2017-03-17 14:58:21.120000000 -0700
-    @@ -1,7 +1,6 @@
-     QA output created by 820
-     Create the original files
-     Try to copy when source pos > source size
-    -copy_range: Invalid argument
-     Try to copy to a read-only file
-     copy_range: Bad file descriptor
-     Try to copy to an append-only file
-    ...
-    (Run 'diff -u tests/generic/820.out /tmp/xfstests/results//generic/820.out.bad'  to see the entire diff)
-
-Running 4.11-rc2 here with a ton of XFS patches, though these results
-are from an FSTYP=ext4 run.  FSTYP=xfs produces the same diff output.
-
---D
-
-> 
-> Thanks,
-> Anna
-> 
-> 
-> Anna Schumaker (5):
->   generic/416: Add copy to new file test
->   generic/417: Add small copies to new file test
->   generic/418: Add copy test that overwrites data
->   generic/419: Add a copy test for overwriting small amounts of data
->   generic/420: Add a copy test for invalid input
-> 
->  common/rc             |   6 +++
->  tests/generic/416     | 102 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/416.out |  26 +++++++++++++
->  tests/generic/417     |  83 ++++++++++++++++++++++++++++++++++++++++
->  tests/generic/417.out |  16 ++++++++
->  tests/generic/418     | 100 +++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/418.out |  17 +++++++++
->  tests/generic/419     |  87 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/419.out |  17 +++++++++
->  tests/generic/420     |  76 +++++++++++++++++++++++++++++++++++++
->  tests/generic/420.out |  12 ++++++
->  tests/generic/group   |   5 +++
->  12 files changed, 547 insertions(+)
->  create mode 100755 tests/generic/416
->  create mode 100644 tests/generic/416.out
->  create mode 100755 tests/generic/417
->  create mode 100644 tests/generic/417.out
->  create mode 100755 tests/generic/418
->  create mode 100644 tests/generic/418.out
->  create mode 100755 tests/generic/419
->  create mode 100644 tests/generic/419.out
->  create mode 100644 tests/generic/420
->  create mode 100644 tests/generic/420.out
-> 
-> -- 
-> 2.12.0
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
