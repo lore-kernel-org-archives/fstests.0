@@ -1,14 +1,21 @@
-Received: from mx1.redhat.com ([209.132.183.28]:33952 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:33630 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750990AbdCRFke (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 18 Mar 2017 01:40:34 -0400
+        id S1750725AbdCSEU6 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 19 Mar 2017 00:20:58 -0400
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id B1828437F44
+        for <fstests@vger.kernel.org>; Sun, 19 Mar 2017 04:20:58 +0000 (UTC)
+Received: from localhost.localdomain.com (ovpn-8-27.pek2.redhat.com [10.72.8.27])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id C14F018BA1
+        for <fstests@vger.kernel.org>; Sun, 19 Mar 2017 04:20:57 +0000 (UTC)
 From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v3] fsstress: add mwrite/mread into test operation list
-Date: Sat, 18 Mar 2017 13:40:11 +0800
-Message-Id: <1489815611-15434-1-git-send-email-zlang@redhat.com>
+Subject: [PATCH v4] fsstress: add mwrite/mread into test operation list
+Date: Sun, 19 Mar 2017 12:20:46 +0800
+Message-Id: <1489897246-11275-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: amir73il@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
 mmap as a popular and basic operation, most of softwares use it to
@@ -23,17 +30,14 @@ Signed-off-by: Zorro Lang <zlang@redhat.com>
 
 Hi,
 
-According to Amir's suggestion, V3 change mmap_f to mwrite_f and mread_f.
+According to Amir's suggestions:
 
-Recently we got more and more bug reports about writeback, mmap/munmap
-and memory reclaim race condition under heavy memeory load. We never
-reproduce these bugs before and still hard to reproduce it until now.
-Only some servers with real stress from lots of real customers can
-reproduce this kind of bugs.
+V3 change mmap_f to mwrite_f and mread_f
+V4 make sure mread and mwrite are sorted alphabetically in fsstress
 
-fsstress is a popular tool to simulate randome load stress test used by
-many developers and QEs. For we can reproduce more bugs easier (maybe
-can't improve too much :-P), add mmap/munmap stress in this patch.
+I found I set "is_write" of mread to 1, so change it to 0 in V4.
+
+Hope to get more review.
 
 Thanks,
 Zorro
@@ -43,127 +47,40 @@ Zorro
  2 files changed, 191 insertions(+)
 
 diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-index 7e7cf60..248fd30 100644
+index 7e7cf60..e341aa1 100644
 --- a/ltp/fsstress.c
 +++ b/ltp/fsstress.c
-@@ -67,6 +67,8 @@ typedef enum {
- 	OP_GETATTR,
- 	OP_GETDENTS,
+@@ -69,6 +69,8 @@ typedef enum {
  	OP_LINK,
-+	OP_MWRITE,
-+	OP_MREAD,
  	OP_MKDIR,
  	OP_MKNOD,
++	OP_MREAD,
++	OP_MWRITE,
  	OP_PUNCH,
-@@ -166,6 +168,8 @@ void	fsync_f(int, long);
- void	getattr_f(int, long);
- void	getdents_f(int, long);
+ 	OP_ZERO,
+ 	OP_COLLAPSE,
+@@ -168,6 +170,8 @@ void	getdents_f(int, long);
  void	link_f(int, long);
-+void	mwrite_f(int, long);
-+void	mread_f(int, long);
  void	mkdir_f(int, long);
  void	mknod_f(int, long);
++void	mread_f(int, long);
++void	mwrite_f(int, long);
  void	punch_f(int, long);
-@@ -206,6 +210,8 @@ opdesc_t	ops[] = {
- 	{ OP_GETATTR, "getattr", getattr_f, 1, 0 },
- 	{ OP_GETDENTS, "getdents", getdents_f, 1, 0 },
+ void	zero_f(int, long);
+ void	collapse_f(int, long);
+@@ -208,6 +212,8 @@ opdesc_t	ops[] = {
  	{ OP_LINK, "link", link_f, 1, 1 },
-+	{ OP_MWRITE, "mwrite", mwrite_f, 4, 1 },
-+	{ OP_MREAD, "mread", mread_f, 4, 1 },
  	{ OP_MKDIR, "mkdir", mkdir_f, 2, 1 },
  	{ OP_MKNOD, "mknod", mknod_f, 2, 1 },
++	{ OP_MREAD, "mread", mread_f, 4, 0 },
++	{ OP_MWRITE, "mwrite", mwrite_f, 4, 1 },
  	{ OP_PUNCH, "punch", punch_f, 1, 1 },
-@@ -2580,6 +2586,187 @@ link_f(int opno, long r)
+ 	{ OP_ZERO, "zero", zero_f, 1, 1 },
+ 	{ OP_COLLAPSE, "collapse", collapse_f, 1, 1 },
+@@ -2656,6 +2662,187 @@ mknod_f(int opno, long r)
  }
  
  void
-+mwrite_f(int opno, long r)
-+{
-+	char		*addr;
-+	int		e;
-+	pathname_t	f;
-+	int		fd;
-+	size_t		len;
-+	__int64_t	lr;
-+	off64_t		off;
-+	int		flags;
-+	struct stat64	stb;
-+	int		v;
-+	char		st[1024];
-+
-+	init_pathname(&f);
-+	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
-+		if (v)
-+			printf("%d/%d: mwrite - no filename\n", procid, opno);
-+		free_pathname(&f);
-+		return;
-+	}
-+	fd = open_path(&f, O_WRONLY);
-+	e = fd < 0 ? errno : 0;
-+	check_cwd();
-+	if (fd < 0) {
-+		if (v)
-+			printf("%d/%d: mwrite - open %s failed %d\n",
-+			       procid, opno, f.path, e);
-+		free_pathname(&f);
-+		return;
-+	}
-+	if (fstat64(fd, &stb) < 0) {
-+		if (v)
-+			printf("%d/%d: mwrite - fstat64 %s failed %d\n",
-+			       procid, opno, f.path, errno);
-+		free_pathname(&f);
-+		close(fd);
-+		return;
-+	}
-+	inode_info(st, sizeof(st), &stb, v);
-+	lr = ((__int64_t)random() << 32) + random();
-+	off = (off64_t)(lr % MIN(stb.st_size + (1024 * 1024), MAXFSIZE));
-+	off %= maxfsize;
-+	off &= (off64_t)(~(sysconf(_SC_PAGE_SIZE) - 1));
-+	len = (size_t)(random() % MIN(maxfsize - off, FILELEN_MAX)) + 1;
-+
-+	/*
-+	 * truncate file to the size we need to map and access,
-+	 * keep away SIGBUS / SIGSEGV killing this process
-+	 */
-+	e = truncate64_path(&f, off + len) < 0 ? errno : 0;
-+	/* try private file mappings with 20% rate */
-+	flags = (random() % 20) ? MAP_SHARED : MAP_PRIVATE;
-+	do {
-+		addr = mmap(NULL, len, PROT_WRITE, flags, fd, off);
-+		e = (addr == MAP_FAILED) ? errno : 0;
-+		if (errno == ENOMEM && flags & MAP_PRIVATE) {
-+		/* turn to shared mapping if memeory is not enough for private mapping */
-+			flags = MAP_SHARED;
-+		} else if (errno == ENOMEM && len > sysconf(_SC_PAGE_SIZE)) {
-+		/* reduce mapping length, if memeory is not enough for shared mapping */
-+			len /= 2;
-+		}
-+	} while (errno == ENOMEM && len > sysconf(_SC_PAGE_SIZE));
-+	if (e && v)
-+		printf("%d/%d: mwrite - mmap failed %s%s [%lld,%d,%s] %d\n",
-+		       procid, opno, f.path, st, (long long)off, (int)len,
-+		       (flags & MAP_PRIVATE) ? "MAP_PRIVATE" : "MAP_SHARED", e);
-+
-+	if (addr != MAP_FAILED) {
-+		memset(addr, nameseq & 0xff, len);
-+		e = munmap(addr, len) < 0 ? errno : 0;
-+		if (e && v)
-+			printf("%d/%d: mwrite - munmap failed %s%s [%lld,%d] %d\n",
-+			       procid, opno, f.path, st, (long long)off,
-+			       (int)len, e);
-+	}
-+	if (v)
-+		printf("%d/%d: mwrite %s%s [%lld,%d,%s] %d\n",
-+		       procid, opno, f.path, st, (long long)off, (int)len,
-+		       (flags & MAP_PRIVATE) ? "MAP_PRIVATE" : "MAP_SHARED", e);
-+
-+	free_pathname(&f);
-+	close(fd);
-+}
-+
-+void
 +mread_f(int opno, long r)
 +{
 +	char		*addr;
@@ -258,9 +175,96 @@ index 7e7cf60..248fd30 100644
 +}
 +
 +void
- mkdir_f(int opno, long r)
++mwrite_f(int opno, long r)
++{
++	char		*addr;
++	int		e;
++	pathname_t	f;
++	int		fd;
++	size_t		len;
++	__int64_t	lr;
++	off64_t		off;
++	int		flags;
++	struct stat64	stb;
++	int		v;
++	char		st[1024];
++
++	init_pathname(&f);
++	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
++		if (v)
++			printf("%d/%d: mwrite - no filename\n", procid, opno);
++		free_pathname(&f);
++		return;
++	}
++	fd = open_path(&f, O_WRONLY);
++	e = fd < 0 ? errno : 0;
++	check_cwd();
++	if (fd < 0) {
++		if (v)
++			printf("%d/%d: mwrite - open %s failed %d\n",
++			       procid, opno, f.path, e);
++		free_pathname(&f);
++		return;
++	}
++	if (fstat64(fd, &stb) < 0) {
++		if (v)
++			printf("%d/%d: mwrite - fstat64 %s failed %d\n",
++			       procid, opno, f.path, errno);
++		free_pathname(&f);
++		close(fd);
++		return;
++	}
++	inode_info(st, sizeof(st), &stb, v);
++	lr = ((__int64_t)random() << 32) + random();
++	off = (off64_t)(lr % MIN(stb.st_size + (1024 * 1024), MAXFSIZE));
++	off %= maxfsize;
++	off &= (off64_t)(~(sysconf(_SC_PAGE_SIZE) - 1));
++	len = (size_t)(random() % MIN(maxfsize - off, FILELEN_MAX)) + 1;
++
++	/*
++	 * truncate file to the size we need to map and access,
++	 * keep away SIGBUS / SIGSEGV killing this process
++	 */
++	e = truncate64_path(&f, off + len) < 0 ? errno : 0;
++	/* try private file mappings with 20% rate */
++	flags = (random() % 20) ? MAP_SHARED : MAP_PRIVATE;
++	do {
++		addr = mmap(NULL, len, PROT_WRITE, flags, fd, off);
++		e = (addr == MAP_FAILED) ? errno : 0;
++		if (errno == ENOMEM && flags & MAP_PRIVATE) {
++		/* turn to shared mapping if memeory is not enough for private mapping */
++			flags = MAP_SHARED;
++		} else if (errno == ENOMEM && len > sysconf(_SC_PAGE_SIZE)) {
++		/* reduce mapping length, if memeory is not enough for shared mapping */
++			len /= 2;
++		}
++	} while (errno == ENOMEM && len > sysconf(_SC_PAGE_SIZE));
++	if (e && v)
++		printf("%d/%d: mwrite - mmap failed %s%s [%lld,%d,%s] %d\n",
++		       procid, opno, f.path, st, (long long)off, (int)len,
++		       (flags & MAP_PRIVATE) ? "MAP_PRIVATE" : "MAP_SHARED", e);
++
++	if (addr != MAP_FAILED) {
++		memset(addr, nameseq & 0xff, len);
++		e = munmap(addr, len) < 0 ? errno : 0;
++		if (e && v)
++			printf("%d/%d: mwrite - munmap failed %s%s [%lld,%d] %d\n",
++			       procid, opno, f.path, st, (long long)off,
++			       (int)len, e);
++	}
++	if (v)
++		printf("%d/%d: mwrite %s%s [%lld,%d,%s] %d\n",
++		       procid, opno, f.path, st, (long long)off, (int)len,
++		       (flags & MAP_PRIVATE) ? "MAP_PRIVATE" : "MAP_SHARED", e);
++
++	free_pathname(&f);
++	close(fd);
++}
++
++void
+ punch_f(int opno, long r)
  {
- 	int		e;
+ #ifdef HAVE_LINUX_FALLOC_H
 diff --git a/src/global.h b/src/global.h
 index f63246b..51d1e94 100644
 --- a/src/global.h
