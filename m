@@ -1,54 +1,42 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:49511 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751950AbdCAGIN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 1 Mar 2017 01:08:13 -0500
-Date: Tue, 28 Feb 2017 22:08:07 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v2 4/4] xfs: stress test xfs_scrub
-Message-ID: <20170301060807.GD26319@birch.djwong.org>
-References: <148798515933.25833.2842247083803775089.stgit@birch.djwong.org>
- <148798518415.25833.11653991983531432757.stgit@birch.djwong.org>
- <20170228205710.GC26275@birch.djwong.org>
- <20170301033316.GB14226@eguan.usersys.redhat.com>
+Date: Mon, 20 Mar 2017 13:24:57 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v5 0/5] Add copy_file_range() tests
+Message-ID: <20170320052457.GH14226@eguan.usersys.redhat.com>
+References: <20170317195233.4042-1-Anna.Schumaker@Netapp.com>
+ <20170317220246.GA12585@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170301033316.GB14226@eguan.usersys.redhat.com>
-Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+In-Reply-To: <20170317220246.GA12585@birch.djwong.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>, Anna Schumaker <Anna.Schumaker@Netapp.com>
+Cc: fstests@vger.kernel.org, linux-nfs@vger.kernel.org, hch@infradead.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Mar 01, 2017 at 11:33:16AM +0800, Eryu Guan wrote:
-> On Tue, Feb 28, 2017 at 12:57:10PM -0800, Darrick J. Wong wrote:
-> > Three new tests:
+On Fri, Mar 17, 2017 at 03:02:46PM -0700, Darrick J. Wong wrote:
+> On Fri, Mar 17, 2017 at 03:52:28PM -0400, Anna Schumaker wrote:
+> > These tests exercise the copy_file_range() system call, and check copying
+> > data to both a new file and overwriting data inside an existing file.
 > > 
-> > - Repair files that are mapped into memory in running programs
-> > - Run scrub -n concurrently with fsstress
-> > - Run scrub -y concurrently with fsstress
-> > 
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> > v2: fix checks for external programs per eryu guan's recommendations
-> > ---
-> [snip]
-> > +
-> > +killstress() {
-> > +	sleep $(( 60 * TIME_FACTOR ))
-> > +	$KILLALL_PROG -q $FSSTRESS_PROG
-> > +}
-> > +
-> > +echo "Concurrent scrub"
-> > +start=$(date +%s)
-> > +end=$((start + (60 * LOAD_FACTOR) ))
+> > Sorry it took so long to get this version out.  I forgot about these patches
+> > after the last submission.
 > 
-> In 137[67], I think this should be TIME_FACTOR too. I can fix them at
-> commit time if this change looks OK to you.
+> Hooray, tests finally!
+> 
+> I had to bump the numbers up due to conflicts (it's usually best to pick
+> a really high number and let Eryu mvtest them to their real numbers),
+> but these mostly look ok.
 
-Ugh, I thought I fixed those too.  Yes, the change is correct, thank you.
+Usually the test numbers are not a problem, as long as the patchset is
+based on latest master and there's no test number conflicts :)
 
---D
+Overall the tests look fine to me too.
 
 > 
-> Thanks,
-> Eryu
+> However, I do see that something isn't triggering an EINVAL return code:
+
+Same results here, tested with xfs/ext4/btrfs on 4.11-rc2 kernel.
+
+And another nitpick is the year in copyright, s/2016/2017/ ?
+
+Thanks,
+Eryu
