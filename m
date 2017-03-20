@@ -1,113 +1,148 @@
-Received: from mail-pf0-f196.google.com ([209.85.192.196]:35763 "EHLO
-        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752862AbdCTDkt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 19 Mar 2017 23:40:49 -0400
-Received: by mail-pf0-f196.google.com with SMTP id n11so3954030pfg.2
-        for <fstests@vger.kernel.org>; Sun, 19 Mar 2017 20:40:48 -0700 (PDT)
-Received: from localhost ([128.199.137.77])
-        by smtp.gmail.com with ESMTPSA id i124sm29748613pgd.22.2017.03.19.20.40.47
-        for <fstests@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Sun, 19 Mar 2017 20:40:47 -0700 (PDT)
-Message-ID: <58cf4f3f.829d630a.94f54.f2f4@mx.google.com>
-Date: Mon, 20 Mar 2017 11:40:43 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE RESEND] fstests: master branch updated to 780dd1eaffaf
+Received: from mx1.redhat.com ([209.132.183.28]:40590 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752153AbdCTGix (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 20 Mar 2017 02:38:53 -0400
+Date: Mon, 20 Mar 2017 14:38:49 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] generic/418: Add test for fallocate()
+ PUNCH_HOLE|KEEP_SIZE
+Message-ID: <20170320063849.GI14226@eguan.usersys.redhat.com>
+References: <8044718e71d02568f3fe84fc57478e9ca99b4f1a.1489799266.git.calvinowens@fb.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="nHqpCfRngK1X"
-Content-Disposition: inline
-Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-List-ID: <fstests@vger.kernel.org>
-
-
---nHqpCfRngK1X
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <8044718e71d02568f3fe84fc57478e9ca99b4f1a.1489799266.git.calvinowens@fb.com>
+Sender: fstests-owner@vger.kernel.org
+To: Calvin Owens <calvinowens@fb.com>
+Cc: fstests@vger.kernel.org, kernel-team@fb.com
+List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+On Fri, Mar 17, 2017 at 06:26:01PM -0700, Calvin Owens wrote:
+> Verify that punching holes at ends of files does not alter st_size if we
+> pass FALLOC_FL_KEEP_SIZE to fallocate().
+> 
+> Signed-off-by: Calvin Owens <calvinowens@fb.com>
+> ---
+>  tests/generic/418     | 69 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/418.out |  3 +++
+>  tests/generic/group   |  1 +
+>  3 files changed, 73 insertions(+)
+>  create mode 100755 tests/generic/418
+>  create mode 100644 tests/generic/418.out
+> 
+> diff --git a/tests/generic/418 b/tests/generic/418
+> new file mode 100755
+> index 0000000..658c4c3
+> --- /dev/null
+> +++ b/tests/generic/418
+> @@ -0,0 +1,69 @@
+> +#! /bin/bash
+> +# FS QA Test 418
+> +#
+> +# Verify fallocate(mode=FALLOC_FL_KEEP_SIZE|FALLOC_FL_PUNCH_HOLE) does
+> +# not alter the file size.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Calvin Owens.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_test
+> +
+> +testfile="${TEST_DIR}/testfile"
+> +
+> +echo "Testing fallocate(mode=FALLOC_FL_KEEP_SIZE|FALLOC_FL_PUNCH_HOLE)"
+> +dd if=/dev/urandom of=$testfile bs=2048 count=1 >/dev/null 2>/dev/null
 
-The master branch of the xfstests repository at:
+Any reason to use /dev/urandom? I think a plain xfs_io pwrite would be
+sufficient?
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+$XFS_IO_PROG -fc "pwrite -b 2048 0 2048" $testfile
 
-have just been updated. We have glusterfs support in this update, thanks to
-Zorro! Besides that, this is mainly a bug-fix update, along with a new btrfs
-test.
+> +
+> +# FIXME: A bug in xfs_io prevents multiple flags in mode from being set at once,
+> +# use the standard command to test this until that is fixed.
+> +
+> +#$XFS_IO_PROG -c "falloc -k -p 2048 2048" $testfile
+> +fallocate -n -p -l 2048 -o 2048 $testfile
 
-New failures I've noticed:
-- btrfs/139 is a new test and fails on current linus tree
+Seems fpunch command from xfs_io already sets KEEP_SIZE flag, a strace
+run of "xfs_io -c 'fpunch 0 4m' file" shows flag is 03:
+
+fallocate(3, 03, 0, 4194304)            = 0
+
+And the flag definitions:
+#define FALLOC_FL_KEEP_SIZE     0x01 /* default is extend size */                                                                                                                              
+#define FALLOC_FL_PUNCH_HOLE    0x02 /* de-allocates range */
+
+I also tested fpunch command and it could reproduce the failure on XFS too.
+
+> +
+> +$XFS_IO_PROG -c "stat" $testfile 2>/dev/null | grep -F 'stat.size'
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/418.out b/tests/generic/418.out
+> new file mode 100644
+> index 0000000..9927731
+> --- /dev/null
+> +++ b/tests/generic/418.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 418
+> +Testing fallocate(mode=FALLOC_FL_KEEP_SIZE|FALLOC_FL_PUNCH_HOLE)
+> +stat.size = 2048
+> diff --git a/tests/generic/group b/tests/generic/group
+> index f0096bb..a2368ae 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -420,3 +420,4 @@
+>  415 auto clone
+>  416 auto enospc
+>  417 auto quick shutdown log
+> +418 auto quick
+
+We can add it to 'punch' group too.
 
 Thanks,
 Eryu
-
-The new head of the master branch is commit:
-
-780dd1eaffaf generic/417: reduce extend attribute size
-
-New commits:
-
-Eric Biggers (4):
-      [4ff270110015] generic/361: add _require_loop
-      [fe5461d6e370] btrfs/020: add _require_loop
-      [b4d26d40527a] common/quota: remove redundant SELinux detection code
-      [de88e28a1d33] common/config: don't hard-code SELinux context
-
-Eryu Guan (1):
-      [780dd1eaffaf] generic/417: reduce extend attribute size
-
-Goldwyn Rodrigues (2):
-      [c26958bc5d67] btrfs/139: creation/deletion within qgroup limits
-      [a913637bd706] common/rc: Use -v option with findmnt
-
-Harish (1):
-      [516a24b96586] common/dmthin: Fix grep command for finding exact value
-
-Xiao Yang (1):
-      [643c6850277a] common/config: honor NFS_MOUNT_OPTIONS in _test_mount_opts
-
-Zorro Lang (1):
-      [4cbc0a0fa8bc] fstests: add GlusterFS support
-
-
-Code Diffstat:
-
- README.config-sections |  7 +++++
- check                  |  2 ++
- common/config          | 21 ++++++++++++--
- common/dmthin          | 12 ++++----
- common/quota           |  7 -----
- common/rc              | 36 +++++++++++++++++++++--
- tests/btrfs/020        |  1 +
- tests/btrfs/139        | 79 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/139.out    | 16 ++++++++++
- tests/btrfs/group      |  1 +
- tests/generic/361      |  1 +
- tests/generic/417      |  2 +-
- 12 files changed, 165 insertions(+), 20 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
-
---nHqpCfRngK1X
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJYzk+cAAoJECZSqilcj+djAnUQAOTPlDC2tnYIEgYEjmpM8Myu
-1nvOWl309aTQHe1ehKsw+gMmircUNLcpw9nkuCZwCJW+eMsThIAfeXRJjym9qio0
-JqkW57Khv9nsIrsO8RXSVzdl2jWqvOME+jRkq3gO59G+dNwNVtgaG8isptRY6BJK
-rKMnsnva31ngQaLPzMZwyBxjq6R7BkBYQHPrHL/6CntgCyqhhirbDWg5bfwqEWBb
-kTtQ+wfc5Olk1YmHIzv+YsAoRZXjf5hfCGF4FyAwb4wK4o0DPslLUvB7zG8Ah8Hy
-O8TpgPiW49ojQCKltN2j5Lrb/F1W1nKh9MWKfwS+yxttmO5UDfHaKKlD/X5cxys7
-JFYm9Oz61OJ7wDCXIniVr/bAL/wupuODiipil9u3V+8eS2NUC+dM6uqKHVKkyTDh
-zECCPmakV661+H+KWlKedjtQ01LGWy6ym7y4b3K01t1dsmXMXqpIHTGvPyunIr2E
-BFrnUGUSGWdwesNhH8zArHNrJ95OiXNn0+9qIarWjMIua6rdvy0q35qw28xO3kql
-Cth/IEB0xKU71b+63JSbzMj7JmKALwyJiZowCdf4JWpGTox3n42IA7Y/Qlg3ICzT
-dpdxvxpMLtHFUlFeNqJNGz8oBkOLjwtm0+wn3GHBbcoDKJX6QiTqcpP1Ms+0RJLm
-9ylT4BtCPLA3t5pE9Hoe
-=Q5rZ
------END PGP SIGNATURE-----
-
---nHqpCfRngK1X--
