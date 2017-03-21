@@ -1,146 +1,130 @@
-Received: from mail-pf0-f194.google.com ([209.85.192.194]:34226 "EHLO
-        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1758250AbdCUVQK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 21 Mar 2017 17:16:10 -0400
-Received: by mail-pf0-f194.google.com with SMTP id o126so23782735pfb.1
-        for <fstests@vger.kernel.org>; Tue, 21 Mar 2017 14:16:09 -0700 (PDT)
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH v2] generic: test renaming encrypted files without key
-Date: Tue, 21 Mar 2017 14:14:32 -0700
-Message-Id: <20170321211432.96524-1-ebiggers3@gmail.com>
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:59762 "EHLO
+        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1757648AbdCUVfO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 21 Mar 2017 17:35:14 -0400
+Date: Wed, 22 Mar 2017 08:34:26 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH v5 2/2] xfs/068: skip new fsstress operations mwrite and
+ mread
+Message-ID: <20170321213426.GA17542@dastard>
+References: <1490087883-24453-1-git-send-email-zlang@redhat.com>
+ <1490087883-24453-2-git-send-email-zlang@redhat.com>
+ <CAOQ4uxhfwuGD3NG5xfW11eXJT1LODi-7WyP6z9pPhOKaeFrcOQ@mail.gmail.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxhfwuGD3NG5xfW11eXJT1LODi-7WyP6z9pPhOKaeFrcOQ@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eric Biggers <ebiggers@google.com>, Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>
+Content-Transfer-Encoding: Quoted-printable
+MIME-Version: 1.0
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Zorro Lang <zlang@redhat.com>, Eric Sandeen <sandeen@sandeen.net>, fstests <fstests@vger.kernel.org>, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
+On Tue, Mar 21, 2017 at 06:55:31AM -0400, Amir Goldstein wrote:
+> On Tue, Mar 21, 2017 at 5:18 AM, Zorro Lang <zlang@redhat.com> wrote:
+> > The output of x/068 will be perturbed by new fsstress operations.
+> > For keep away breaking x/068's golden image, skip mread and
+> > mwrite which are brought in by a new fsstress patch.
+> >
+> > Reported-by: Eryu Guan <eguan@redhat.com>
+> > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > ---
+> >  tests/xfs/068 | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> >
+> > diff --git a/tests/xfs/068 b/tests/xfs/068
+> > index 4dac95e..568ba60 100755
+> > --- a/tests/xfs/068
+> > +++ b/tests/xfs/068
+> > @@ -44,7 +44,7 @@ _supported_fs xfs
+> >  _supported_os Linux
+> >
+> >  # need to ensure new fsstress operations don't perturb expected output
+> > -FSSTRESS_AVOID=3D"-f insert=3D0 $FSSTRESS_AVOID"
+> > +FSSTRESS_AVOID=3D"-f insert=3D0 -f mwrite=3D0 -f mread=3D0 $FSSTRESS_A=
+VOID"
+>=20
+> What?? This is so fragile!
 
-Add a new test to test another behavior when accessing encrypted files
-without the key: renames should be forbidden, even though they may be
-possible cryptographically.  Test both a regular rename and a cross
-rename.  (It happens that generic/398 also covers the cross rename case,
-but it's primarily for a different reason.)
+Yet, it is is the existing method for telling fsstress not to run
+certain optionsi on an "as needed" basis:
 
-Cc: Theodore Ts'o <tytso@mit.edu>
-Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-Cc: Richard Weinberger <richard@nod.at>
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- tests/generic/533     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/533.out |  3 ++
- tests/generic/group   |  1 +
- 3 files changed, 88 insertions(+)
- create mode 100755 tests/generic/533
- create mode 100644 tests/generic/533.out
+$ git grep ^FSSTRESS_AVOID
+tests/ext4/307:FSSTRESS_AVOID=3D"$FSSTRESS_AVOID -ffsync=3D0 -fsync=3D0 -ff=
+datasync=3D0"
+tests/generic/019:FSSTRESS_AVOID=3D"$FSSTRESS_AVOID -ffsync=3D0 -fsync=3D0 =
+-ffdatasync=3D0 -f setattr=3D1"
+tests/generic/269:FSSTRESS_AVOID=3D"$FSSTRESS_AVOID -ffsync=3D0 -fsync=3D0 =
+-ffdatasync=3D0"
+tests/generic/270:FSSTRESS_AVOID=3D"$FSSTRESS_AVOID -ffsync=3D0 -fsync=3D0 =
+-ffdatasync=3D0"
+tests/xfs/068:FSSTRESS_AVOID=3D"-f insert=3D0 $FSSTRESS_AVOID"
 
-diff --git a/tests/generic/533 b/tests/generic/533
-new file mode 100755
-index 00000000..6d8b323b
---- /dev/null
-+++ b/tests/generic/533
-@@ -0,0 +1,84 @@
-+#! /bin/bash
-+# FS QA Test generic/533
-+#
-+# Try to rename files in an encrypted directory, without access to the
-+# encryption key.  This should fail with ENOKEY.  Test both a regular rename and
-+# a cross rename.  This is a regression test for:
-+#	173b8439e1ba ("ext4: don't allow encrypted operations without keys")
-+#	363fa4e078cb ("f2fs: don't allow encrypted operations without keys")
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Google, Inc.  All Rights Reserved.
-+#
-+# Author: Eric Biggers <ebiggers@google.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/encrypt
-+. ./common/renameat2
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch_encryption
-+_require_xfs_io_command "set_encpolicy"
-+_require_command "$KEYCTL_PROG" keyctl
-+_requires_renameat2
-+
-+_new_session_keyring
-+
-+_scratch_mkfs_encrypted &>> $seqres.full
-+_scratch_mount
-+
-+mkdir $SCRATCH_MNT/edir
-+keydesc=$(_generate_encryption_key)
-+$XFS_IO_PROG -c "set_encpolicy $keydesc" $SCRATCH_MNT/edir
-+echo a > $SCRATCH_MNT/edir/a
-+echo b > $SCRATCH_MNT/edir/b
-+_unlink_encryption_key $keydesc
-+_scratch_cycle_mount
-+
-+# Note that because encrypted filenames are unpredictable, this needs to be
-+# written in a way that does not assume any particular filenames.
-+efile1=$(find $SCRATCH_MNT/edir -maxdepth 1 -type f | head -1)
-+efile2=$(find $SCRATCH_MNT/edir -maxdepth 1 -type f | tail -1)
-+mv $efile1 $efile2 |& _filter_scratch | sed 's|edir/[a-zA-Z0-9+,_]\+|edir/FILENAME|g'
-+src/renameat2 -x $efile1 $efile2
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/533.out b/tests/generic/533.out
-new file mode 100644
-index 00000000..7db871be
---- /dev/null
-+++ b/tests/generic/533.out
-@@ -0,0 +1,3 @@
-+QA output created by 533
-+mv: cannot move 'SCRATCH_MNT/edir/FILENAME' to 'SCRATCH_MNT/edir/FILENAME': Required key not available
-+Required key not available
-diff --git a/tests/generic/group b/tests/generic/group
-index f0096bbc..383ad1e9 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -420,3 +420,4 @@
- 415 auto clone
- 416 auto enospc
- 417 auto quick shutdown log
-+533 auto quick encrypt
--- 
-2.12.1.500.gab5fba24ee-goog
+> If the test wanted to restrict fsstress to a pre-defined set of operation=
+s, then
+> _create_dumpdir_stress_num() should have prefixed '_param' with -z and
+> mention all pre-defined ops (and not only the more frequent ones).
 
+Reality: _create_dumpdir_stress_num(), along with all the other dump
+tests and infrastructure, was ported from the Irix version of
+xfstests way back in:
+
+commit 27fba05e66981c239c3be7a7e5a3aa0d8dc59247
+Author: Nathan Scott <nathans@sgi.com>
+Date:   Mon Jan 15 05:01:19 2001 +0000
+
+    cmd/xfs/stress/001 1.6 Renamed to cmd/xfstests/001
+
+The dump infrastructure is muddy and obtuse, and rather than risk
+breaking other dump tests by changing infrastructure, I simply
+applied the known, accepted method for making fsstress avoid certain
+operations.
+
+> I am very surprised that Dave was the one that made this bandaid.
+
+Reality: Maintainers consider more than just the code when it comes
+to merging things. Encouraging community participation and making
+forwards progress is rather more important than having any single
+change be perfect. IOWs, rather than have things drag on endlessly
+by sending the patchset back to the authors for yet another round of
+review, I simply said "fuck it, no more bikeshedding, we need to
+merge this" and made the obvious, one line change that fixed the
+only regression my testing uncovered.
+
+
+> Eric,
+>=20
+> Can you say if adding -z to _create_dumpdir_stress_num() params
+> would be fine with the 2 tests that use it - xfs/022 and xfs/068?
+
+That means dump tests will /never/ exercise new fsstress operations
+which, IMO, is much worse than having to keep a test up to date with
+new operations.
+
+i.e. The whole point of adding new operations to fsstress and have
+tests run them is that we automatically get coverage of new
+functionality. Neutering this for all xfsdump tests by using "-z" is
+- philosophically speaking - the wrong thing to do.
+
+> 068 output would have to be fixed to accommodate this change,
+> but then we can remove the bandaid above and never think of
+> this ever again.
+
+And so never get coverage of new functionality fsstress exposes that
+may affect xfsdump behaviour, and hence we may very well miss
+regressions those new operations cause....
+
+Cheers,
+
+Dave.
+--=20
+Dave Chinner
+david@fromorbit.com
+--
+To unsubscribe from this list: send the line "unsubscribe fstests" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3=
+A__vger.kernel.org_majordomo-2Dinfo.html&d=3DDwIBAg&c=3DRoP1YumCXCgaWHvlZYR=
+8PQcxBKCX5YTpkKY057SbK10&r=3D-yMrTV4jriXR7ieyzzjV-QgHBD0UDw8ixoR77aMeAHE&m=
+=3Ds-j946QcZgePt_3VNOjzsGT__vmiWVJef1uioYoIFnc&s=3Dy4gWloi2adUFJL0DbFQVduLg=
+SbUYkM0QBpM-DdrEeao&e=3D=20
