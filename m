@@ -1,217 +1,69 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:52586 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1752125AbdCUHOn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 21 Mar 2017 03:14:43 -0400
-Subject: Re: [PATCH 3/4] reflink: test adjacency of reflinked blocks
-References: <148798515933.25833.2842247083803775089.stgit@birch.djwong.org>
- <148798517790.25833.2585159479268361866.stgit@birch.djwong.org>
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Message-ID: <6511f176-ee8e-09d8-d955-8aed36abaa29@cn.fujitsu.com>
-Date: Tue, 21 Mar 2017 15:14:36 +0800
-In-Reply-To: <148798517790.25833.2585159479268361866.stgit@birch.djwong.org>
-Content-Type: text/plain; charset="utf-8"; format=flowed
+Received: from mx1.redhat.com ([209.132.183.28]:57052 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751792AbdCUHXm (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 21 Mar 2017 03:23:42 -0400
+Date: Tue, 21 Mar 2017 15:23:40 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 0/3] Btrfs in-band de-duplication test cases
+Message-ID: <20170321072340.GT14226@eguan.usersys.redhat.com>
+References: <20170316015028.20020-1-quwenruo@cn.fujitsu.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170316015028.20020-1-quwenruo@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
 Content-Transfer-Encoding: Quoted-printable
 MIME-Version: 1.0
-To: "Darrick J. Wong" <darrick.wong@oracle.com>, eguan@redhat.com
-Cc: linux-xfs@vger.kernel.org, "Darrick J. Wong" <djwong@djwong.org>, fstests@vger.kernel.org
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Darrick
+On Thu, Mar 16, 2017 at 09:50:24AM +0800, Qu Wenruo wrote:
+> Btrfs in-band de-duplication test cases for in-memory backend, which cove=
+rs
+> the bugs exposed during the development.
 
-At 02/25/2017 09:12 AM, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
->
-> If we reflink a file with N blocks to another file one block at a time,
-> does the destination file end up with the same number of extents as the
-> source file?  In other words, does the filesystem succeed at combining
-> adjacent mappings into a maximal extents?
+Sorry, I'm having trouble enabling inband dedupe in tests, I always get
+ioctl failure, $seqres.full shows:
 
-Btrfs can't pass the test since it doesn't merge such mapping, not only=20
-the fiemap result, but also on-disk extents.
+btrfs-progs v4.10-5-g23d4fd5
+See https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3A__btrfs.wiki.kernel=
+.org&d=3DDwIBAg&c=3DRoP1YumCXCgaWHvlZYR8PQcxBKCX5YTpkKY057SbK10&r=3D-yMrTV4=
+jriXR7ieyzzjV-QgHBD0UDw8ixoR77aMeAHE&m=3DQW8j5ytjvhSULN9SgVewhinVZVh9U-etu9=
+FpCxFlsCc&s=3DN3fHeukNWyZ1Av8wPL6uQRaIzk0Y6Z90W-7loCAj4J8&e=3D  for more in=
+formation.
 
-IIRC ocfs also merges it, so I wonder if this is a documented behavior=20
-to merge any extent maps that are adjacent.
+Label:              (null)
+UUID:               3d2cedd0-64ae-4667-ba09-9c12e28ecadd
+Node size:          16384
+Sector size:        4096
+Filesystem size:    15.00GiB
+Block group profiles:
+  Data:             single            8.00MiB
+  Metadata:         DUP               1.00GiB
+  System:           DUP               8.00MiB
+SSD detected:       no
+Incompat features:  extref, skinny-metadata
+Number of devices:  1
+Devices:
+   ID        SIZE  PATH
+    1    15.00GiB  /dev/mapper/systemvg-testlv2
 
-Further more, if a fs has a limit on extent size on disk, e.g 128M.
-But 2 file extents are also adjacent on disk, then should fiemap return=20
-a large 256M map or just 2 adjacent 128M maps?
+# /usr/local/bin/btrfs dedupe enable -f -s inmemory -b 64K /scratch
+ERROR: failed to (enable) inband deduplication: Inappropriate ioctl for dev=
+ice
+ERROR: unsupported dedupe limit combination: nr: 0, mem: 0
+failed: '/usr/local/bin/btrfs dedupe enable -f -s inmemory -b 64K /scratch'
+
+I have no special MKFS_OPTIONS or MOUNT_OPTIONS specified, all defaults.
+kernel is built from your test tree. Did I miss anything?
 
 Thanks,
-Qu
->
-> Signed-off-by: Darrick J. Wong <djwong@djwong.org>
-> ---
->  tests/generic/930     |  106 +++++++++++++++++++++++++++++++++++++++++++=
-++++++
->  tests/generic/930.out |   11 +++++
->  tests/generic/group   |    1
->  3 files changed, 118 insertions(+)
->  create mode 100755 tests/generic/930
->  create mode 100644 tests/generic/930.out
->
->
-> diff --git a/tests/generic/930 b/tests/generic/930
-> new file mode 100755
-> index 0000000..15d8cbf
-> --- /dev/null
-> +++ b/tests/generic/930
-> @@ -0,0 +1,106 @@
-> +#! /bin/bash
-> +# FS QA Test No. 930
-> +#
-> +# Check that reflinking adjacent blocks in a file produces a single
-> +# block mapping extent.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Oracle, Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=3D`basename $0`
-> +seqres=3D$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=3D`pwd`
-> +tmp=3D/tmp/$$
-> +status=3D1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 7 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -rf $tmp.*
-> +	wait
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/reflink
-> +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_supported_fs generic
-> +_require_scratch_reflink
-> +_require_fiemap
-> +
-> +echo "Format and mount"
-> +_scratch_mkfs > $seqres.full 2>&1
-> +_scratch_mount >> $seqres.full 2>&1
-> +
-> +testdir=3D$SCRATCH_MNT/test-$seq
-> +mkdir $testdir
-> +
-> +blocks=3D32
-> +blksz=3D65536
-> +sz=3D$((blocks * blksz))
-> +
-> +echo "Create the original files"
-> +$XFS_IO_PROG -f -c "falloc 0 $sz" $testdir/file1 >> $seqres.full
-> +_pwrite_byte 0x61 0 $sz $testdir/file1 >> $seqres.full
-> +seq 0 $blksz $((sz - blksz)) | while read offset; do
-> +	_reflink_range $testdir/file1 $offset $testdir/file2 $offset $blksz >> =
-$seqres.full
-> +done
-> +
-> +echo "Compare files"
-> +md5sum $testdir/file1 | _filter_scratch
-> +md5sum $testdir/file2 | _filter_scratch
-> +
-> +echo "Check extent counts"
-> +f1=3D$(_count_extents $testdir/file1)
-> +f2=3D$(_count_extents $testdir/file2)
-> +s1=3D$($XFS_IO_PROG -c 'fiemap -v' $testdir/file1 | awk '{print $5}' | g=
-rep -c '0x.*[2367aAbBfF]...$')
-> +s2=3D$($XFS_IO_PROG -c 'fiemap -v' $testdir/file2 | awk '{print $5}' | g=
-rep -c '0x.*[2367aAbBfF]...$')
-> +
-> +# Did the fs combine the extent mappings when we made f2?
-> +test $f1 -eq $f2 || echo "f1 ($f1) !=3D f2 ($f2)"
-> +test $s1 -eq $s2 || echo "s1 ($s1) !=3D s2 ($s2)"
-> +test $f1 -eq $s1 || echo "f1 ($f1) !=3D s1 ($f1)"
-> +test $f2 -eq $s2 || echo "f2 ($f2) !=3D s2 ($f2)"
-> +
-> +_scratch_cycle_mount
-> +
-> +echo "Compare files after remounting"
-> +md5sum $testdir/file1 | _filter_scratch
-> +md5sum $testdir/file2 | _filter_scratch
-> +
-> +echo "Check extent counts"
-> +f1=3D$(_count_extents $testdir/file1)
-> +f2=3D$(_count_extents $testdir/file2)
-> +s1=3D$($XFS_IO_PROG -c 'fiemap -v' $testdir/file1 | awk '{print $5}' | g=
-rep -c '0x.*[2367aAbBfF]...$')
-> +s2=3D$($XFS_IO_PROG -c 'fiemap -v' $testdir/file2 | awk '{print $5}' | g=
-rep -c '0x.*[2367aAbBfF]...$')
-> +
-> +# Are the mappings still combined?
-> +test $f1 -eq $f2 || echo "f1 ($f1) !=3D f2 ($f2)"
-> +test $s1 -eq $s2 || echo "s1 ($s1) !=3D s2 ($s2)"
-> +test $f1 -eq $s1 || echo "f1 ($f1) !=3D s1 ($f1)"
-> +test $f2 -eq $s2 || echo "f2 ($f2) !=3D s2 ($f2)"
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/generic/930.out b/tests/generic/930.out
-> new file mode 100644
-> index 0000000..556108a
-> --- /dev/null
-> +++ b/tests/generic/930.out
-> @@ -0,0 +1,11 @@
-> +QA output created by 930
-> +Format and mount
-> +Create the original files
-> +Compare files
-> +de89461b64701958984c95d1bfb0065a  SCRATCH_MNT/test-930/file1
-> +de89461b64701958984c95d1bfb0065a  SCRATCH_MNT/test-930/file2
-> +Check extent counts
-> +Compare files after remounting
-> +de89461b64701958984c95d1bfb0065a  SCRATCH_MNT/test-930/file1
-> +de89461b64701958984c95d1bfb0065a  SCRATCH_MNT/test-930/file2
-> +Check extent counts
-> diff --git a/tests/generic/group b/tests/generic/group
-> index d0bc47d..4b4df66 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -411,3 +411,4 @@
->  406 auto quick dangerous
->  407 auto quick clone metadata
->  408 auto quick clone dedupe metadata
-> +930 auto quick clone
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  https://urldefense.proofpoint.com/v2/url?u=3Dhttp=
--3A__vger.kernel.org_majordomo-2Dinfo.html&d=3DDwICaQ&c=3DRoP1YumCXCgaWHvlZ=
-YR8PQcxBKCX5YTpkKY057SbK10&r=3D-yMrTV4jriXR7ieyzzjV-QgHBD0UDw8ixoR77aMeAHE&=
-m=3DzLZW67c3IwvZjBGr4cIg8v5ywQZq5TdY4rYizcb5vLI&s=3DN2J_WqHQvVybd3Oz82W7gXL=
-b3rC204UQHpktWS1e0Tc&e=3D=20
->
->
-
-
+Eryu
 --
 To unsubscribe from this list: send the line "unsubscribe fstests" in
 the body of a message to majordomo@vger.kernel.org
 More majordomo info at  https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3=
-A__vger.kernel.org_majordomo-2Dinfo.html&d=3DDwICaQ&c=3DRoP1YumCXCgaWHvlZYR=
+A__vger.kernel.org_majordomo-2Dinfo.html&d=3DDwIBAg&c=3DRoP1YumCXCgaWHvlZYR=
 8PQcxBKCX5YTpkKY057SbK10&r=3D-yMrTV4jriXR7ieyzzjV-QgHBD0UDw8ixoR77aMeAHE&m=
-=3DzLZW67c3IwvZjBGr4cIg8v5ywQZq5TdY4rYizcb5vLI&s=3DN2J_WqHQvVybd3Oz82W7gXLb=
-3rC204UQHpktWS1e0Tc&e=3D=20
+=3DQW8j5ytjvhSULN9SgVewhinVZVh9U-etu9FpCxFlsCc&s=3DeaJ-tn7MdocpEA2Dssf3q1ti=
+BAMCKm3MbKiI4S_bkL0&e=3D=20
