@@ -1,498 +1,146 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46640 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1756925AbdCURfL (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 21 Mar 2017 13:35:11 -0400
-Date: Tue, 21 Mar 2017 13:35:09 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH v2] generic: test pagecache invalidation after direct
- write
-Message-ID: <20170321173509.GC59313@bfoster.bfoster>
-References: <20170321165314.11434-1-eguan@redhat.com>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170321165314.11434-1-eguan@redhat.com>
+Received: from mail-pf0-f194.google.com ([209.85.192.194]:34226 "EHLO
+        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1758250AbdCUVQK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 21 Mar 2017 17:16:10 -0400
+Received: by mail-pf0-f194.google.com with SMTP id o126so23782735pfb.1
+        for <fstests@vger.kernel.org>; Tue, 21 Mar 2017 14:16:09 -0700 (PDT)
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: [PATCH v2] generic: test renaming encrypted files without key
+Date: Tue, 21 Mar 2017 14:14:32 -0700
+Message-Id: <20170321211432.96524-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: Quoted-printable
-MIME-Version: 1.0
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Eric Biggers <ebiggers@google.com>, Theodore Ts'o <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Richard Weinberger <richard@nod.at>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Mar 22, 2017 at 12:53:14AM +0800, Eryu Guan wrote:
-> Test if direct write invalidates pagecache correctly, so that subsequent
-> buffer read reads the correct data from disk.
->=20
-> This test is inspired by LTP tests dio29, and serves as a regression
-> test for the bug found by it, see kernel commit c771c14baa33
-> ("iomap: invalidate page caches should be after iomap_dio_complete()
-> in direct write").
->=20
-> The test can be easily expanded to other write/read combinations, e.g.
-> buffer write + direct read and direct write + direct read, so they are
-> also being tested.
->=20
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> ---
-> v2: Address Brian's review comments
-> - compare buffer content byte-by-byte instead of strncmp
-> - use 'pids[i]' not *(pids + 1)
-> - dump buffer content to stdout on error
-> - initialize write buffer with (i + 1)
-> - use pwrite/pread instead of lseek+write/read
-> - remove increment of unused 'ret'
-> - call fsync(fd) instead of sync()
-> - fix typos
->=20
->  .gitignore                 |   1 +
->  src/Makefile               |   3 +-
->  src/dio-invalidate-cache.c | 326 +++++++++++++++++++++++++++++++++++++++=
-++++++
->  tests/generic/418          | 122 +++++++++++++++++
->  tests/generic/418.out      |   2 +
->  tests/generic/group        |   1 +
->  6 files changed, 454 insertions(+), 1 deletion(-)
->  create mode 100644 src/dio-invalidate-cache.c
->  create mode 100755 tests/generic/418
->  create mode 100644 tests/generic/418.out
->=20
-...
-> diff --git a/src/dio-invalidate-cache.c b/src/dio-invalidate-cache.c
-> new file mode 100644
-> index 0000000..bc795f9
-> --- /dev/null
-> +++ b/src/dio-invalidate-cache.c
-> @@ -0,0 +1,326 @@
-...
-> +static void kill_children(pid_t *pids, int nr_child)
-> +{
-> +	int i;
-> +	pid_t pid;
-> +
-> +	for (i =3D 0; i < nr_child; i++) {
-> +		pid =3D *(pids + i);
-> +		if (pid =3D=3D 0)
-> +			continue;
-> +		kill(pid, SIGTERM);
-> +	}
-> +	return;
+From: Eric Biggers <ebiggers@google.com>
 
-Still have pids pointer arithmetic above and the return is unnecessary.
-Otherwise looks Ok to me:
+Add a new test to test another behavior when accessing encrypted files
+without the key: renames should be forbidden, even though they may be
+possible cryptographically.  Test both a regular rename and a cross
+rename.  (It happens that generic/398 also covers the cross rename case,
+but it's primarily for a different reason.)
 
-Reviewed-by: Brian Foster <bfoster@redhat.com>
+Cc: Theodore Ts'o <tytso@mit.edu>
+Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+Cc: Richard Weinberger <richard@nod.at>
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ tests/generic/533     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/533.out |  3 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 88 insertions(+)
+ create mode 100755 tests/generic/533
+ create mode 100644 tests/generic/533.out
 
-> +}
-> +
-> +static int wait_children(pid_t *pids, int nr_child)
-> +{
-> +	int i, status, ret =3D 0;
-> +	pid_t pid;
-> +
-> +	for (i =3D 0; i < nr_child; i++) {
-> +		pid =3D pids[i];
-> +		if (pid =3D=3D 0)
-> +			continue;
-> +		waitpid(pid, &status, 0);
-> +		ret +=3D WEXITSTATUS(status);
-> +	}
-> +	return ret;
-> +}
-> +
-> +static void dumpbuf(char *buf, int size, int blksz)
-> +{
-> +	int i;
-> +
-> +	printf("dumping buffer content\n");
-> +	for (i =3D 0; i < size; i++) {
-> +		if (((i % blksz) =3D=3D 0) || ((i % 64) =3D=3D 0))
-> +			putchar('\n');
-> +		printf("%x", buf[i]);
-> +	}
-> +	putchar('\n');
-> +}
-> +
-> +static int run_test(const char *filename, int n_child, int blksz, off_t =
-offset,
-> +		    int nr_iter, int flag_rd, int flag_wr)
-> +{
-> +	char *buf_rd;
-> +	char *buf_wr;
-> +	off_t seekoff;
-> +	int fd_rd, fd_wr;
-> +	int i, ret;
-> +	long page_size;
-> +
-> +	seekoff =3D offset + blksz * n_child;
-> +
-> +	page_size =3D sysconf(_SC_PAGESIZE);
-> +	ret =3D posix_memalign((void **)&buf_rd, (size_t)page_size,
-> +		blksz > page_size ? blksz : (size_t)page_size);
-> +	if (ret) {
-> +		fprintf(stderr, "posix_memalign(buf_rd, %d, %d) failed: %d\n",
-> +			blksz, blksz, ret);
-> +		exit(EXIT_FAILURE);
-> +	}
-> +	memset(buf_rd, 0, blksz);
-> +	ret =3D posix_memalign((void **)&buf_wr, (size_t)page_size,
-> +		blksz > page_size ? blksz : (size_t)page_size);
-> +	if (ret) {
-> +		fprintf(stderr, "posix_memalign(buf_wr, %d, %d) failed: %d\n",
-> +			blksz, blksz, ret);
-> +		exit(EXIT_FAILURE);
-> +	}
-> +	memset(buf_wr, 0, blksz);
-> +
-> +	fd_rd =3D open(filename, flag_rd);
-> +	if (fd_rd < 0) {
-> +		perror("open readonly for read");
-> +		exit(EXIT_FAILURE);
-> +	}
-> +
-> +	fd_wr =3D open(filename, flag_wr);
-> +	if (fd_wr < 0) {
-> +		perror("open writeonly for direct write");
-> +		exit(EXIT_FAILURE);
-> +	}
-> +
-> +#define log(format, ...) 			\
-> +	if (verbose) {				\
-> +		printf("[%d:%d] ", n_child, i);	\
-> +		printf(format, __VA_ARGS__);	\
-> +	}
-> +
-> +
-> +	/* seek, write, read and verify */
-> +	for (i =3D 0; i < nr_iter; i++) {
-> +		memset(buf_wr, i + 1, blksz);
-> +		log("pwrite(fd_wr, %p, %d, %lu)\n", buf_wr, blksz, seekoff);
-> +		if (pwrite(fd_wr, buf_wr, blksz, seekoff) !=3D blksz) {
-> +			perror("direct write");
-> +			exit(EXIT_FAILURE);
-> +		}
-> +
-> +		/* make sure buffer write hits disk before direct read */
-> +		if (!(flag_wr & O_DIRECT)) {
-> +			if (fsync(fd_wr) < 0) {
-> +				perror("fsync(fd_wr)");
-> +				exit(EXIT_FAILURE);
-> +			}
-> +		}
-> +
-> +		log("pread(fd_rd, %p, %d, %lu)\n", buf_rd, blksz, seekoff);
-> +		if (pread(fd_rd, buf_rd, blksz, seekoff) !=3D blksz) {
-> +			perror("buffer read");
-> +			exit(EXIT_FAILURE);
-> +		}
-> +		if (cmpbuf(buf_wr, buf_rd, blksz) !=3D 0) {
-> +			fprintf(stderr, "[%d:%d] FAIL - comparison failed, "
-> +				"offset %d\n", n_child, i, (int)seekoff);
-> +			if (verbose)
-> +				dumpbuf(buf_rd, blksz, blksz);
-> +			exit(EXIT_FAILURE);
-> +		}
-> +	}
-> +	exit(EXIT_SUCCESS);
-> +}
-> +
-> +int main(int argc, char *argv[])
-> +{
-> +	int nr_iter =3D 1;
-> +	int nr_child =3D 1;
-> +	int blksz =3D DEF_BLKSZ;
-> +	int fd, i, ret =3D 0;
-> +	int flag_rd =3D O_RDONLY;
-> +	int flag_wr =3D O_WRONLY;
-> +	int do_trunc =3D 0;
-> +	int pre_fill =3D 0;
-> +	int pre_alloc =3D 0;
-> +	pid_t pid;
-> +	pid_t *pids;
-> +	off_t offset =3D 0;
-> +	char *filename =3D NULL;
-> +
-> +	while ((i =3D getopt(argc, argv, "b:i:n:f:Fpo:tvrw")) !=3D -1) {
-> +		switch (i) {
-> +		case 'b':
-> +			if ((blksz =3D atoi(optarg)) <=3D 0) {
-> +				fprintf(stderr, "blksz must be > 0\n");
-> +				exit(EXIT_FAILURE);
-> +			}
-> +			if (blksz % 512 !=3D 0) {
-> +				fprintf(stderr, "blksz must be multiple of 512\n");
-> +				exit(EXIT_FAILURE);
-> +			}
-> +			break;
-> +		case 'i':
-> +			if ((nr_iter =3D atoi(optarg)) <=3D 0) {
-> +				fprintf(stderr, "iterations must be > 0\n");
-> +				exit(EXIT_FAILURE);
-> +			}
-> +			break;
-> +		case 'n':
-> +			if ((nr_child =3D atoi(optarg)) <=3D 0) {
-> +				fprintf(stderr, "no of children must be > 0\n");
-> +				exit(EXIT_FAILURE);
-> +			}
-> +			break;
-> +		case 'f':
-> +			filename =3D optarg;
-> +			break;
-> +		case 'F':
-> +			pre_fill =3D 1;
-> +			break;
-> +		case 'p':
-> +			pre_alloc =3D 1;
-> +			break;
-> +		case 'r':
-> +			flag_rd |=3D O_DIRECT;
-> +			break;
-> +		case 'w':
-> +			flag_wr |=3D O_DIRECT;
-> +			break;
-> +		case 't':
-> +			do_trunc =3D 1;
-> +			break;
-> +		case 'o':
-> +			if ((offset =3D atol(optarg)) < 0) {
-> +				fprintf(stderr, "offset must be >=3D 0\n");
-> +				exit(EXIT_FAILURE);
-> +			}
-> +			break;
-> +		case 'v':
-> +			verbose =3D 1;
-> +			break;
-> +		case 'h':	/* fall through */
-> +		default:
-> +			usage(argv[0]);
-> +		}
-> +	}
-> +
-> +	if (filename =3D=3D NULL)
-> +		usage(argv[0]);
-> +	if (pre_fill && pre_alloc) {
-> +		fprintf(stderr, "Error: -F and -p are both specified\n");
-> +		exit(EXIT_FAILURE);
-> +	}
-> +
-> +	pids =3D malloc(nr_child * sizeof(pid_t));
-> +	if (!pids) {
-> +		fprintf(stderr, "failed to malloc memory for pids\n");
-> +		exit(EXIT_FAILURE);
-> +	}
-> +	memset(pids, 0, nr_child * sizeof(pid_t));
-> +
-> +	/* create & truncate testfile first */
-> +	fd =3D open(filename, O_CREAT | O_TRUNC | O_RDWR, 0600);
-> +	if (fd < 0) {
-> +		perror("create & truncate testfile");
-> +		free(pids);
-> +		exit(EXIT_FAILURE);
-> +	}
-> +	if (do_trunc && (ftruncate(fd, blksz * nr_child) < 0)) {
-> +		perror("ftruncate failed");
-> +		free(pids);
-> +		exit(EXIT_FAILURE);
-> +	}
-> +	if (pre_fill) {
-> +		char *buf;
-> +		buf =3D malloc(blksz * nr_child);
-> +		memset(buf, 's', blksz * nr_child);
-> +		write(fd, buf, blksz * nr_child);
-> +		free(buf);
-> +	}
-> +	if (pre_alloc) {
-> +		fallocate(fd, 0, 0, blksz * nr_child);
-> +	}
-> +	fsync(fd);
-> +	close(fd);
-> +
-> +	/* fork workers */
-> +	for (i =3D 0; i < nr_child; i++) {
-> +		pid =3D fork();
-> +		if (pid < 0) {
-> +			perror("fork");
-> +			kill_children(pids, nr_child);
-> +			free(pids);
-> +			exit(EXIT_FAILURE);
-> +		} else if (pid =3D=3D 0) {
-> +			/* never returns */
-> +			run_test(filename, i, blksz, offset, nr_iter,
-> +				 flag_rd, flag_wr);
-> +		} else {
-> +			pids[i] =3D pid;
-> +		}
-> +	}
-> +
-> +	ret =3D wait_children(pids, nr_child);
-> +	free(pids);
-> +	exit(ret);
-> +}
-> diff --git a/tests/generic/418 b/tests/generic/418
-> new file mode 100755
-> index 0000000..1fa782e
-> --- /dev/null
-> +++ b/tests/generic/418
-> @@ -0,0 +1,122 @@
-> +#! /bin/bash
-> +# FS QA Test 418
-> +#
-> +# Test pagecache invalidation in buffer/direct write/read combination.
-> +#
-> +# Fork N children, each child writes to and reads from its own region of=
- the
-> +# same test file, and check if what it reads is what it writes. The test=
- region
-> +# is determined by N * blksz. Write and read operation can be either dir=
-ect or
-> +# buffered.
-> +#
-> +# Regression test for commit c771c14baa33 ("iomap: invalidate page caches
-> +# should be after iomap_dio_complete() in direct write")
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=3D`basename $0`
-> +seqres=3D$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=3D`pwd`
-> +tmp=3D/tmp/$$
-> +status=3D1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_test
-> +_require_odirect
-> +_require_block_device $TEST_DEV
-> +_require_test_program "dio-invalidate-cache"
-> +_require_test_program "feature"
-> +
-> +diotest=3D$here/src/dio-invalidate-cache
-> +testfile=3D$TEST_DIR/$seq-diotest
-> +sectorsize=3D`blockdev --getss $TEST_DEV`
-> +pagesize=3D`src/feature -s`
-> +
-> +# test case array, test different write/read combinations
-> +# -r: use direct read
-> +# -w: use direct write
-> +# -t: truncate file to final size before test, i.e. write to hole
-> +# -p: fallocate whole file before test, i.e. write to allocated but unwr=
-itten extents
-> +# -F: fulfill whole file before test, i.e. write to allocated & written =
-extents
-> +t_cases=3D(
-> +	"-w"
-> +	"-wt"
-> +	"-wp"
-> +	"-wF"
-> +	"-r"
-> +	"-rt"
-> +	"-rp"
-> +	"-rF"
-> +	"-rw"
-> +	"-rwt"
-> +	"-rwp"
-> +	"-rwF"
-> +)
-> +
-> +runtest()
-> +{
-> +	local i=3D0
-> +	local tc=3D""
-> +	local loop=3D$1
-> +	shift
-> +
-> +	for tc in ${t_cases[*]}; do
-> +		echo "diotest $tc $*" >> $seqres.full
-> +		i=3D0
-> +		while [ $i -lt $loop ]; do
-> +			$diotest $tc $* -f $testfile
-> +			if [ $? -ne 0 ]; then
-> +				echo "diotest $tc $* failed at loop $i" | \
-> +					tee -a $seqres.full
-> +				break
-> +			fi
-> +			let i=3Di+1
-> +		done
-> +	done
-> +}
-> +
-> +while [ $sectorsize -le $((pagesize * 2)) ]; do
-> +	# reproducer for the original bug
-> +	runtest $((10 * LOAD_FACTOR)) -b $sectorsize -n 3 -i 1
-> +	# try more processes and iterations
-> +	runtest $((5 * LOAD_FACTOR))  -b $sectorsize -n 8 -i 4
-> +	sectorsize=3D$((sectorsize * 2))
-> +done
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/generic/418.out b/tests/generic/418.out
-> new file mode 100644
-> index 0000000..954de31
-> --- /dev/null
-> +++ b/tests/generic/418.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 418
-> +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index f0096bb..0a272b7 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -420,3 +420,4 @@
->  415 auto clone
->  416 auto enospc
->  417 auto quick shutdown log
-> +418 auto rw
-> --=20
-> 2.9.3
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  https://urldefense.proofpoint.com/v2/url?u=3Dhttp=
--3A__vger.kernel.org_majordomo-2Dinfo.html&d=3DDwIBAg&c=3DRoP1YumCXCgaWHvlZ=
-YR8PQcxBKCX5YTpkKY057SbK10&r=3D-yMrTV4jriXR7ieyzzjV-QgHBD0UDw8ixoR77aMeAHE&=
-m=3D7tJ_wjCZlOd8r18FjAYGsThvh1azz2B7kqtQT_HxtcM&s=3DKY7TChfT-0VRqvVgQNafXJJ=
-n-9WQZwjqsW02zBABo1g&e=3D=20
---
-To unsubscribe from this list: send the line "unsubscribe fstests" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3=
-A__vger.kernel.org_majordomo-2Dinfo.html&d=3DDwIBAg&c=3DRoP1YumCXCgaWHvlZYR=
-8PQcxBKCX5YTpkKY057SbK10&r=3D-yMrTV4jriXR7ieyzzjV-QgHBD0UDw8ixoR77aMeAHE&m=
-=3D7tJ_wjCZlOd8r18FjAYGsThvh1azz2B7kqtQT_HxtcM&s=3DKY7TChfT-0VRqvVgQNafXJJn=
--9WQZwjqsW02zBABo1g&e=3D=20
+diff --git a/tests/generic/533 b/tests/generic/533
+new file mode 100755
+index 00000000..6d8b323b
+--- /dev/null
++++ b/tests/generic/533
+@@ -0,0 +1,84 @@
++#! /bin/bash
++# FS QA Test generic/533
++#
++# Try to rename files in an encrypted directory, without access to the
++# encryption key.  This should fail with ENOKEY.  Test both a regular rename and
++# a cross rename.  This is a regression test for:
++#	173b8439e1ba ("ext4: don't allow encrypted operations without keys")
++#	363fa4e078cb ("f2fs: don't allow encrypted operations without keys")
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Google, Inc.  All Rights Reserved.
++#
++# Author: Eric Biggers <ebiggers@google.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/encrypt
++. ./common/renameat2
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch_encryption
++_require_xfs_io_command "set_encpolicy"
++_require_command "$KEYCTL_PROG" keyctl
++_requires_renameat2
++
++_new_session_keyring
++
++_scratch_mkfs_encrypted &>> $seqres.full
++_scratch_mount
++
++mkdir $SCRATCH_MNT/edir
++keydesc=$(_generate_encryption_key)
++$XFS_IO_PROG -c "set_encpolicy $keydesc" $SCRATCH_MNT/edir
++echo a > $SCRATCH_MNT/edir/a
++echo b > $SCRATCH_MNT/edir/b
++_unlink_encryption_key $keydesc
++_scratch_cycle_mount
++
++# Note that because encrypted filenames are unpredictable, this needs to be
++# written in a way that does not assume any particular filenames.
++efile1=$(find $SCRATCH_MNT/edir -maxdepth 1 -type f | head -1)
++efile2=$(find $SCRATCH_MNT/edir -maxdepth 1 -type f | tail -1)
++mv $efile1 $efile2 |& _filter_scratch | sed 's|edir/[a-zA-Z0-9+,_]\+|edir/FILENAME|g'
++src/renameat2 -x $efile1 $efile2
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/533.out b/tests/generic/533.out
+new file mode 100644
+index 00000000..7db871be
+--- /dev/null
++++ b/tests/generic/533.out
+@@ -0,0 +1,3 @@
++QA output created by 533
++mv: cannot move 'SCRATCH_MNT/edir/FILENAME' to 'SCRATCH_MNT/edir/FILENAME': Required key not available
++Required key not available
+diff --git a/tests/generic/group b/tests/generic/group
+index f0096bbc..383ad1e9 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -420,3 +420,4 @@
+ 415 auto clone
+ 416 auto enospc
+ 417 auto quick shutdown log
++533 auto quick encrypt
+-- 
+2.12.1.500.gab5fba24ee-goog
+
