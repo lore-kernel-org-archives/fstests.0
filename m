@@ -1,98 +1,67 @@
-Received: from mail-ot0-f193.google.com ([74.125.82.193]:33334 "EHLO
-        mail-ot0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934151AbdCVKeC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 22 Mar 2017 06:34:02 -0400
-Received: by mail-ot0-f193.google.com with SMTP id i50so15660787otd.0
-        for <fstests@vger.kernel.org>; Wed, 22 Mar 2017 03:34:01 -0700 (PDT)
-In-Reply-To: <1490165188-488-1-git-send-email-zlang@redhat.com>
-References: <1490165188-488-1-git-send-email-zlang@redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 22 Mar 2017 06:34:00 -0400
-Message-ID: <CAOQ4uxjeZaZPE6W3wvBmpu4Daf9UkiL4DhiRQDB6F0POkr8bJQ@mail.gmail.com>
-Subject: Re: [PATCH] common/rc: support gluster volume start with a slash
+Received: from mail-vk0-f43.google.com ([209.85.213.43]:34910 "EHLO
+        mail-vk0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1759362AbdCVMeY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 22 Mar 2017 08:34:24 -0400
+Received: by mail-vk0-f43.google.com with SMTP id r69so13125743vke.2
+        for <fstests@vger.kernel.org>; Wed, 22 Mar 2017 05:34:16 -0700 (PDT)
+In-Reply-To: <20170321155512.GZ14226@eguan.usersys.redhat.com>
+References: <20170315163347.29743-1-jtulak@redhat.com> <20170316074941.GS14226@eguan.usersys.redhat.com>
+ <20170321152253.GB59313@bfoster.bfoster> <20170321155512.GZ14226@eguan.usersys.redhat.com>
+From: Jan Tulak <jtulak@redhat.com>
+Date: Wed, 22 Mar 2017 13:33:55 +0100
+Message-ID: <CACj3i73zH0f_saV21nD5=g6jYWStf0QfaV79tt5_UOheRY9zMA@mail.gmail.com>
+Subject: Re: [PATCH] xfstests: xfs/191 update
 Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
 Content-Transfer-Encoding: Quoted-printable
 MIME-Version: 1.0
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>, ndevos@redhat.com
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Mar 22, 2017 at 2:46 AM, Zorro Lang <zlang@redhat.com> wrote:
-> The format of glusterfs' TEST_DEV or SCRATCH_DEV is XXX:XXX or
-> XXX:/XXX, but xfstests can't accept the latter now. So change
+On Tue, Mar 21, 2017 at 4:55 PM, Eryu Guan <eguan@redhat.com> wrote:
+> On Tue, Mar 21, 2017 at 11:22:54AM -0400, Brian Foster wrote:
+>> On Thu, Mar 16, 2017 at 03:49:41PM +0800, Eryu Guan wrote:
+>> > On Wed, Mar 15, 2017 at 05:33:47PM +0100, Jan Tulak wrote:
+>> > > The removed 'do_mkfs_pass -l size=3D4096b' was against man page
+>> > > (-b section). Other entries are things that weren't covered before.
+>> > >
+>> > > Specifically, a standalone "-l size=3D4096b" should fail, because:
+>> > > To  specify any options on the command line in units of filesys=E2=
+=80=90
+>> > > tem blocks, this option must be  specified  first  so  that  the
+>> > > filesystem block size is applied consistently to all options.
+>> > >
+>> > > Signed-off-by: Jan Tulak <jtulak@redhat.com>
+>> >
+>> > This looks fine to me. But I'd like some reviews from xfs developers
+>> > too. (cc'd linux-xfs@vger.kernel.org).
+>> >
+>>
+>> So has mkfs been fixed to cause '-l size=3D4096b' to fail? I'm not sure =
+we
+>> should cause the test to fail until/unless the mkfs behavior is fixed
+>> up.
+>
+> I agreed, we don't want to update existing test and introduce false
+> regressions. This is one of the reasons I want more reviews on this
+> patch :)
+>
 
-Why can't xfstest accept the latter?
+I forgot to mention that this patch is a complement to my patchset for
+mkfs.xfs. So yes, do not merge it now, it looks like the set won't get
+merged yet. Sorry for not stating it in the description.
 
-> the regular expression from "\w:\w" to ":/?", to accept more
-> glusterfs device format.
->
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
->
-> Hi,
->
-> According to the feedback from glusterfs developer:
->
-> "Yes, it would be good to have an optional "/" after the ":". It is not
-> required, but would probably help when someone runs the tests with the
-> "hostname:/volume" device format."
->
+Jan
 
-The developer also said
-"We mostly use the format of 192.168.1.1:/testvol, matching the way NFS"
-If we can enforce the more common format which xfstest already expects
-for nfs*|ceph)
-Why would we want to support another optional format and have a special
-test case for it?
 
-> Maybe there's a slash before the gluster volume name. This patch
-> try to support this format.
->
-> Thanks,
-> Zorro
->
->  common/rc | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/common/rc b/common/rc
-> index edfba5d..e1ab2c6 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1496,7 +1496,7 @@ _require_scratch_nocheck()
->  {
->      case "$FSTYP" in
->         glusterfs)
-> -               echo $SCRATCH_DEV | grep -q "\w:\w" > /dev/null 2>&1
-> +               echo $SCRATCH_DEV | egrep -q ":/?" > /dev/null 2>&1
->                 if [ -z "$SCRATCH_DEV" -o "$?" !=3D "0" ]; then
->                         _notrun "this test requires a valid \$SCRATCH_DEV"
->                 fi
-> @@ -1584,7 +1584,7 @@ _require_test()
->  {
->      case "$FSTYP" in
->         glusterfs)
-> -               echo $TEST_DEV | grep -q "\w:\w" > /dev/null 2>&1
-> +               echo $TEST_DEV | egrep -q ":/?" > /dev/null 2>&1
->                 if [ -z "$TEST_DEV" -o "$?" !=3D "0" ]; then
->                         _notrun "this test requires a valid \$TEST_DEV"
->                 fi
-> --
-> 2.7.4
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  https://urldefense.proofpoint.com/v2/url?u=3Dhttp=
--3A__vger.kernel.org_majordomo-2Dinfo.html&d=3DDwIBaQ&c=3DRoP1YumCXCgaWHvlZ=
-YR8PQcxBKCX5YTpkKY057SbK10&r=3D-yMrTV4jriXR7ieyzzjV-QgHBD0UDw8ixoR77aMeAHE&=
-m=3DsOFnPHY2QhAN81NfL6asak_zXdrfW6RhlugKVBncYLI&s=3DyJiytpG_eCqCMJGVP0irt3M=
-fTtk6ueexsRUQRH2Gb9c&e=3D=20
+--=20
+Jan Tulak
+jtulak@redhat.com / jan@tulak.me
 --
 To unsubscribe from this list: send the line "unsubscribe fstests" in
 the body of a message to majordomo@vger.kernel.org
 More majordomo info at  https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3=
-A__vger.kernel.org_majordomo-2Dinfo.html&d=3DDwIBaQ&c=3DRoP1YumCXCgaWHvlZYR=
+A__vger.kernel.org_majordomo-2Dinfo.html&d=3DDwIDaQ&c=3DRoP1YumCXCgaWHvlZYR=
 8PQcxBKCX5YTpkKY057SbK10&r=3D-yMrTV4jriXR7ieyzzjV-QgHBD0UDw8ixoR77aMeAHE&m=
-=3DsOFnPHY2QhAN81NfL6asak_zXdrfW6RhlugKVBncYLI&s=3DyJiytpG_eCqCMJGVP0irt3Mf=
-Ttk6ueexsRUQRH2Gb9c&e=3D=20
+=3DdG0cxiQCPfpOfaaJhDEjEmvlhcF1qnO3R2meJjj_BKc&s=3Dn1HBnGdKSV0BvDaovv65anaY=
+6jPnHRZLh17r-oRQ4Zc&e=3D=20
