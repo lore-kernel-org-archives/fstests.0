@@ -1,231 +1,64 @@
-Received: from mx1.redhat.com ([209.132.183.28]:38170 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:42010 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751964AbdCWILD (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1751995AbdCWILD (ORCPT <rfc822;fstests@vger.kernel.org>);
         Thu, 23 Mar 2017 04:11:03 -0400
 Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 7C07742BC9
-        for <fstests@vger.kernel.org>; Thu, 23 Mar 2017 08:10:31 +0000 (UTC)
+        by mx1.redhat.com (Postfix) with ESMTPS id 6FE63C049D59
+        for <fstests@vger.kernel.org>; Thu, 23 Mar 2017 08:10:34 +0000 (UTC)
 Received: from dhcp-12-168.nay.redhat.com (dhcp-12-168.nay.redhat.com [10.66.12.168])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id BF413852A1
-        for <fstests@vger.kernel.org>; Thu, 23 Mar 2017 08:10:30 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id AB362785C1
+        for <fstests@vger.kernel.org>; Thu, 23 Mar 2017 08:10:33 +0000 (UTC)
 From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v8 1/2] fsstress: add mwrite/mread into test operation list
-Date: Thu, 23 Mar 2017 16:10:26 +0800
-Message-Id: <1490256627-32034-1-git-send-email-zlang@redhat.com>
+Subject: [PATCH v8 2/2] xfs/068: update golden output due to new operations in fsstress
+Date: Thu, 23 Mar 2017 16:10:27 +0800
+Message-Id: <1490256627-32034-2-git-send-email-zlang@redhat.com>
+In-Reply-To: <1490256627-32034-1-git-send-email-zlang@redhat.com>
+References: <1490256627-32034-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 Content-Transfer-Encoding: Quoted-printable
 MIME-Version: 1.0
 To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-mmap as a popular and basic operation, most of softwares use it to
-access files. More and more customers report bugs related with
-mmap/munmap and other stress conditions.
-
-So add mmap read/write test into fsstress to increase mmap related
-stress to reproduce or find more bugs easily.
+xfs/068 use a fixed seed (-s) and number of operations (-n) to run
+fsstress, to get fixed number of files and directories. But new
+operations of fsstress will break this "fixed number". So update
+it, after fsstress get new operations.
 
 Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
+ tests/xfs/068     | 2 --
+ tests/xfs/068.out | 2 +-
+ 2 files changed, 1 insertion(+), 3 deletions(-)
 
-Hi,
-
-V8 add "struct print_flags mmap_flags[]" and "translate_mmap_flags" definit=
-ion,
-use it to print more details about mmap flags.
-
-Thanks,
-Zorro
-
- configure.ac   |   1 +
- ltp/fsstress.c | 124 +++++++++++++++++++++++++++++++++++++++++++++++++++++=
-++++
- src/global.h   |   4 ++
- 3 files changed, 129 insertions(+)
-
-diff --git a/configure.ac b/configure.ac
-index fa48d2f..246f92e 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -32,6 +32,7 @@ AC_HEADER_STDC
- 			xfs/platform_defs.h	\
- 			btrfs/ioctl.h		\
- 			cifs/ioctl.h		\
-+			sys/mman.h		\
-     ])
+diff --git a/tests/xfs/068 b/tests/xfs/068
+index 4dac95e..7151e28 100755
+--- a/tests/xfs/068
++++ b/tests/xfs/068
+@@ -43,8 +43,6 @@ trap "rm -rf $tmp.*; exit \$status" 0 1 2 3 15
+ _supported_fs xfs
+ _supported_os Linux
 =20
- AC_CHECK_HEADERS([xfs/xfs_log_format.h],,,[
-diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-index 7e7cf60..96a328c 100644
---- a/ltp/fsstress.c
-+++ b/ltp/fsstress.c
-@@ -69,6 +69,8 @@ typedef enum {
- 	OP_LINK,
- 	OP_MKDIR,
- 	OP_MKNOD,
-+	OP_MREAD,
-+	OP_MWRITE,
- 	OP_PUNCH,
- 	OP_ZERO,
- 	OP_COLLAPSE,
-@@ -168,6 +170,8 @@ void	getdents_f(int, long);
- void	link_f(int, long);
- void	mkdir_f(int, long);
- void	mknod_f(int, long);
-+void	mread_f(int, long);
-+void	mwrite_f(int, long);
- void	punch_f(int, long);
- void	zero_f(int, long);
- void	collapse_f(int, long);
-@@ -208,6 +212,8 @@ opdesc_t	ops[] =3D {
- 	{ OP_LINK, "link", link_f, 1, 1 },
- 	{ OP_MKDIR, "mkdir", mkdir_f, 2, 1 },
- 	{ OP_MKNOD, "mknod", mknod_f, 2, 1 },
-+	{ OP_MREAD, "mread", mread_f, 2, 0 },
-+	{ OP_MWRITE, "mwrite", mwrite_f, 2, 1 },
- 	{ OP_PUNCH, "punch", punch_f, 1, 1 },
- 	{ OP_ZERO, "zero", zero_f, 1, 1 },
- 	{ OP_COLLAPSE, "collapse", collapse_f, 1, 1 },
-@@ -2655,6 +2661,124 @@ mknod_f(int opno, long r)
- 	free_pathname(&f);
- }
+-# need to ensure new fsstress operations don't perturb expected output
+-FSSTRESS_AVOID=3D"-f insert=3D0 $FSSTRESS_AVOID"
+ _create_dumpdir_stress_num 4096
+ _do_dump_restore
 =20
-+#ifdef HAVE_SYS_MMAN_H
-+struct print_flags mmap_flags[] =3D {
-+	{ MAP_SHARED, "SHARED"},
-+	{ MAP_PRIVATE, "PRIVATE"},
-+	{ -1, NULL}
-+};
-+
-+#define translate_mmap_flags(flags)	  \
-+	({translate_flags(flags, "|", mmap_flags);})
-+#endif
-+
-+void
-+do_mmap(int opno, long r, int prot)
-+{
-+#ifdef HAVE_SYS_MMAN_H
-+	char		*addr;
-+	int		e;
-+	pathname_t	f;
-+	int		fd;
-+	size_t		len;
-+	__int64_t	lr;
-+	off64_t		off;
-+	int		flags;
-+	struct stat64	stb;
-+	int		v;
-+	char		st[1024];
-+
-+	init_pathname(&f);
-+	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
-+		if (v)
-+			printf("%d/%d: do_mmap - no filename\n", procid, opno);
-+		free_pathname(&f);
-+		return;
-+	}
-+	fd =3D open_path(&f, O_RDWR);
-+	e =3D fd < 0 ? errno : 0;
-+	check_cwd();
-+	if (fd < 0) {
-+		if (v)
-+			printf("%d/%d: do_mmap - open %s failed %d\n",
-+			       procid, opno, f.path, e);
-+		free_pathname(&f);
-+		return;
-+	}
-+	if (fstat64(fd, &stb) < 0) {
-+		if (v)
-+			printf("%d/%d: do_mmap - fstat64 %s failed %d\n",
-+			       procid, opno, f.path, errno);
-+		free_pathname(&f);
-+		close(fd);
-+		return;
-+	}
-+	inode_info(st, sizeof(st), &stb, v);
-+	if (stb.st_size =3D=3D 0) {
-+		if (v)
-+			printf("%d/%d: do_mmap - %s%s zero size\n", procid, opno,
-+			       f.path, st);
-+		free_pathname(&f);
-+		close(fd);
-+		return;
-+	}
-+
-+	lr =3D ((__int64_t)random() << 32) + random();
-+	off =3D (off64_t)(lr % stb.st_size);
-+	off &=3D (off64_t)(~(sysconf(_SC_PAGE_SIZE) - 1));
-+	len =3D (size_t)(random() % MIN(stb.st_size - off, FILELEN_MAX)) + 1;
-+
-+	flags =3D (random() % 2) ? MAP_SHARED : MAP_PRIVATE;
-+	addr =3D mmap(NULL, len, prot, flags, fd, off);
-+	e =3D (addr =3D=3D MAP_FAILED) ? errno : 0;
-+	if (e) {
-+		if (v)
-+			printf("%d/%d: do_mmap - mmap failed %s%s [%lld,%d,%s] %d\n",
-+			       procid, opno, f.path, st, (long long)off,
-+			       (int)len, translate_mmap_flags(flags), e);
-+		free_pathname(&f);
-+		close(fd);
-+		return;
-+	}
-+
-+	if (prot & PROT_WRITE) {
-+		/* PROT_READ maybe set, if PROT_WRITE is set. Not vice versa */
-+		memset(addr, nameseq & 0xff, len);
-+	} else {
-+		char *buf;
-+		if ((buf =3D malloc(len)) !=3D NULL) {
-+			memcpy(buf, addr, len);
-+			free(buf);
-+		}
-+	}
-+	munmap(addr, len);
-+	if (v)
-+		printf("%d/%d: %s %s%s [%lld,%d,%s] %d\n",
-+		       procid, opno, (prot & PROT_WRITE) ? "mwrite" : "mread",
-+		       f.path, st, (long long)off, (int)len,
-+		       translate_mmap_flags(flags), e);
-+
-+	free_pathname(&f);
-+	close(fd);
-+#endif
-+}
-+
-+void
-+mread_f(int opno, long r)
-+{
-+#ifdef HAVE_SYS_MMAN_H
-+	do_mmap(opno, r, PROT_READ);
-+#endif
-+}
-+
-+void
-+mwrite_f(int opno, long r)
-+{
-+#ifdef HAVE_SYS_MMAN_H
-+	do_mmap(opno, r, PROT_WRITE);
-+#endif
-+}
-+
- void
- punch_f(int opno, long r)
- {
-diff --git a/src/global.h b/src/global.h
-index f63246b..3920c0d 100644
---- a/src/global.h
-+++ b/src/global.h
-@@ -178,4 +178,8 @@
-=20
- #endif /* HAVE_LINUX_FALLOC_H */
-=20
-+#ifdef HAVE_SYS_MMAN_H
-+#include <sys/mman.h>
-+#endif
-+
- #endif /* GLOBAL_H */
+diff --git a/tests/xfs/068.out b/tests/xfs/068.out
+index 2196eee..b20604f 100644
+--- a/tests/xfs/068.out
++++ b/tests/xfs/068.out
+@@ -22,7 +22,7 @@ xfsrestore: session id: ID
+ xfsrestore: media ID: ID
+ xfsrestore: searching media for directory dump
+ xfsrestore: reading directories
+-xfsrestore: 495 directories and 1593 entries processed
++xfsrestore: 474 directories and 1592 entries processed
+ xfsrestore: directory post-processing
+ xfsrestore: restoring non-directory files
+ xfsrestore: restore complete: SECS seconds elapsed
 --=20
 2.7.4
 
@@ -235,5 +68,5 @@ the body of a message to majordomo@vger.kernel.org
 More majordomo info at  https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3=
 A__vger.kernel.org_majordomo-2Dinfo.html&d=3DDwIBAg&c=3DRoP1YumCXCgaWHvlZYR=
 8PQcxBKCX5YTpkKY057SbK10&r=3D-yMrTV4jriXR7ieyzzjV-QgHBD0UDw8ixoR77aMeAHE&m=
-=3DiS_NCagRxuuP2DiWMCNXNA2E9qV5B9Bix1B-dlqMb1Q&s=3DBA28-MS2W4fO6WQxGdzljq34=
-aE_plmKEbxi0d33rUMc&e=3D=20
+=3D_2r65LqNtlb6k2CII-boNlegEnQZJ80LPgaIfTDWUEc&s=3DY6Yulw2mWSpWxd0qQw6eY5_P=
+qYFsy8JKy9IySo-meB4&e=3D=20
