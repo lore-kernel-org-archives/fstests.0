@@ -1,148 +1,143 @@
-Received: from mail-pg0-f67.google.com ([74.125.83.67]:34179 "EHLO
-        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751923AbdCWTQv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 23 Mar 2017 15:16:51 -0400
-Received: by mail-pg0-f67.google.com with SMTP id w20so12992942pgc.1
-        for <fstests@vger.kernel.org>; Thu, 23 Mar 2017 12:16:50 -0700 (PDT)
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH] ext4: test mounting filesystem with encrypted inode on orphan list
-Date: Thu, 23 Mar 2017 12:16:08 -0700
-Message-Id: <20170323191608.96422-1-ebiggers3@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:44824 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751255AbdCXEXt (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 24 Mar 2017 00:23:49 -0400
+Date: Fri, 24 Mar 2017 12:23:47 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] Code to allow cros-compilation on chromeOS
+Message-ID: <20170324042347.GL14226@eguan.usersys.redhat.com>
+References: <CAAbOScn5FooUbgM59QH40tdZ5D6B3MoYpfM8mBqLMfbMgxk=5w@mail.gmail.com>
+ <20170320212045.4849-1-gwendal@chromium.org>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170320212045.4849-1-gwendal@chromium.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eric Biggers <ebiggers@google.com>, Theodore Ts'o <tytso@mit.edu>, Michael Halcrow <mhalcrow@google.com>
+Content-Transfer-Encoding: Quoted-printable
+MIME-Version: 1.0
+To: Gwendal Grignou <gwendal@chromium.org>
+Cc: tytso@mit.edu, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
+On Mon, Mar 20, 2017 at 02:20:45PM -0700, Gwendal Grignou wrote:
+> - Request LIBTOOL to be used
+> - Set topbuildir based on a Makefile variable to call libtool
+> - Use /usr/local instead of /var for xfstest final location
+> - Move macros from aclocal.m4 to acinclude.m4, aclocal.m4 is autogenerate=
+d.
+>=20
+> TEST=3DCompile in chromeOS chroot.
+> TEST=3DUsing a snippet of build-all at https://urldefense.proofpoint.com/=
+v2/url?u=3Dhttps-3A__github.com_tytso_xfstests-2Dbld&d=3DDwIBAg&c=3DRoP1Yum=
+CXCgaWHvlZYR8PQcxBKCX5YTpkKY057SbK10&r=3D-yMrTV4jriXR7ieyzzjV-QgHBD0UDw8ixo=
+R77aMeAHE&m=3DCfsgeRzY4RIPfAUQqWlSEu0A-gXQ3jhYRYWh8njYK1Q&s=3DwJL4qnWAA1n2e=
+k4-DxvFWIGPw8HbXGuN7Pl2SSpK6No&e=3D=20
+> After adding config.sub and config.guess with:
+> cp /usr/share/misc/config.sub /usr/share/misc/config.guess
+> Verified that compilation of xfstest works:
+> ver=3D$(git describe --always --dirty); echo "xfstests       $ver ($(git =
+log -1 --pretty=3D%cD))" > ../xfstests.ver ;
+> autoheader ; autoconf ;
+> CFLAGS=3D"$LCF -I$DESTDIR/include -fno-stack-protector"
+> CPPFLAGS=3D"-I$DESTDIR/include"
+> LDFLAGS=3D"$LLF -static -L$DESTDIR/lib"
+> LIBS=3D-lpthread
+> ./configure
+> make -j40 LLDFLAGS=3D$EXEC_LLDFLAGS LIBTOOL=3D"/usr/bin/libtool --tag=3DC=
+C" BUILD_VERBOSE=3D1
+>=20
+> Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
 
-Add an ext4-specific regression test for a bug which caused ext4 to
-crash when mounting a filesystem which had an encrypted inode on its
-orphan list.
+I'm not an autotools expert, and I really appreciate if someone could
+help review build/packaging patches, thanks in advance!
 
-This bug was present in kernels v4.1 and later.  It has been fixed in
-v4.11-rc1, v4.10.4, v4.9.16, and v4.4.55.
+But I did hit errors when "make" on default fedora25 and RHEL7 hosts
+(which worked fine prior to this patch), I tried to "fix" them but
+failed.
 
-Cc: Theodore Ts'o <tytso@mit.edu>
-Cc: Michael Halcrow <mhalcrow@google.com>
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- tests/ext4/309     | 87 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/309.out |  2 ++
- tests/ext4/group   |  1 +
- 3 files changed, 90 insertions(+)
- create mode 100755 tests/ext4/309
- create mode 100644 tests/ext4/309.out
+[root@bootp-73-5-211 fstests]# make
+autoheader
+autoconf
+configure.ac:2: error: possibly undefined macro: AC_CONFIG_MACRO_DIRS
+      If this token and others are legitimate, please use m4_pattern_allow.
+      See the Autoconf documentation.
+configure.ac:5: error: possibly undefined macro: AC_PACKAGE_GLOBALS
+configure.ac:6: error: possibly undefined macro: AC_PACKAGE_UTILITIES
+configure.ac:43: error: possibly undefined macro: AC_PACKAGE_NEED_UUIDCOMPA=
+RE
+...
 
-diff --git a/tests/ext4/309 b/tests/ext4/309
-new file mode 100755
-index 00000000..a557024a
---- /dev/null
-+++ b/tests/ext4/309
-@@ -0,0 +1,87 @@
-+#! /bin/bash
-+# FS QA Test ext4/309
-+#
-+# Regression test for 0d06863f903a ("ext4: don't BUG when truncating encrypted
-+# inodes on the orphan list").
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Google, Inc.  All Rights Reserved.
-+#
-+# Author: Eric Biggers <ebiggers@google.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment and checks
-+. ./common/rc
-+. ./common/encrypt
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs ext4
-+_supported_os Linux
-+_require_scratch_encryption
-+_require_xfs_io_command "set_encpolicy"
-+_require_command "$KEYCTL_PROG" keyctl
-+
-+_new_session_keyring
-+
-+#
-+# Create an encrypted file whose size is not a multiple of the filesystem block
-+# size, then add it to the orphan list.
-+#
-+# We create the encrypted file normally, rather than use debugfs to force the
-+# inode flags to ENCRYPT|EXTENTS as done in the example listed in the commit
-+# message of the kernel fix, because forcing the inode flags is incompatible
-+# with some MKFS_OPTIONS such as inline_data or ^extents.
-+#
-+# This choice does, however, have the disadvantage that this test won't detect
-+# the bug in as many situations, such as in kernels configured without
-+# encryption support.
-+#
-+_scratch_mkfs_encrypted &>>$seqres.full
-+_scratch_mount
-+mkdir $SCRATCH_MNT/edir
-+keydesc=$(_generate_encryption_key)
-+$XFS_IO_PROG -c "set_encpolicy $keydesc" $SCRATCH_MNT/edir
-+echo foo > $SCRATCH_MNT/edir/file
-+inum=$(stat -c '%i' $SCRATCH_MNT/edir/file)
-+_scratch_unmount
-+debugfs -w -R "set_super_value s_last_orphan $inum" $SCRATCH_DEV &>>$seqres.full
-+
-+# Try to mount the filesystem.  This would hit a BUG() in fs/ext4/inode.c.
-+_scratch_mount
-+
-+# success, all done
-+echo "Didn't crash!"
-+status=0
-+exit
-diff --git a/tests/ext4/309.out b/tests/ext4/309.out
-new file mode 100644
-index 00000000..ea3e66ed
---- /dev/null
-+++ b/tests/ext4/309.out
-@@ -0,0 +1,2 @@
-+QA output created by 309
-+Didn't crash!
-diff --git a/tests/ext4/group b/tests/ext4/group
-index 70d619e4..da0493f3 100644
---- a/tests/ext4/group
-+++ b/tests/ext4/group
-@@ -35,3 +35,4 @@
- 306 auto rw resize quick
- 307 auto ioctl rw defrag
- 308 auto ioctl rw prealloc quick defrag
-+309 auto quick encrypt dangerous
--- 
-2.12.1.500.gab5fba24ee-goog
+Seems AC_CONFIG_MACRO_DIRS is only available starting from autoconf
+2.70, but f25 and rhel7 ship autoconf 2.69 by default.
 
+After changing AC_CONFIG_MACRO_DIRS to AC_CONFIG_MACRO_DIR, above error
+is gone, but other errors remain.
+
+[root@bootp-73-5-211 fstests]# make
+autoheader
+autoconf
+configure.ac:5: error: possibly undefined macro: AC_PACKAGE_GLOBALS
+      If this token and others are legitimate, please use m4_pattern_allow.
+      See the Autoconf documentation.
+configure.ac:6: error: possibly undefined macro: AC_PACKAGE_UTILITIES
+configure.ac:43: error: possibly undefined macro: AC_PACKAGE_NEED_UUIDCOMPA=
+RE
+...
+
+These macros are all defined in m4/ directory, so seems .m4 files are
+not included correctly, because aclocal.m4 was not generated
+automatically.
+
+After doing this change to Makefile, I got 'configure' file generated,
+but configure process failed again, because of missing config.sub file.
+
+diff --git a/Makefile b/Makefile
+index 30d8747..aa8db92 100644
+--- a/Makefile
++++ b/Makefile
+@@ -75,7 +75,7 @@ else
+ clean:  # if configure hasn't run, nothing to clean
+ endif
+=20
+-configure: configure.ac
++configure: aclocal.m4 configure.ac
+        autoheader
+        autoconf
+=20
+@@ -84,7 +84,7 @@ include/builddefs include/config.h: configure
+                 --libexecdir=3D/usr/lib
+=20
+ aclocal.m4::
+-       aclocal --acdir=3D`pwd`/m4 --output=3D$@
++       aclocal -I`pwd`/m4 --output=3D$@
+=20
+ depend: include/builddefs $(addsuffix -depend,$(SUBDIRS))
+=20
+
+[root@bootp-73-5-211 fstests]# make
+aclocal -I`pwd`/m4 --output=3Daclocal.m4
+autoheader
+autoconf
+./configure \=20=20=20
+                --libexecdir=3D/usr/lib
+configure: error: cannot run /bin/sh ./config.sub
+Makefile:83: recipe for target 'include/builddefs' failed
+make: *** [include/builddefs] Error 127
+
+
+I noticed that you copied config.sub and config.guess manually to
+xfstests directory, but this would break existing build process which
+doesn't expect to do that. And forcing users to do manually copy files
+to meet build requirements doesn't seem right to me either.
+
+Can you please take a look at these issues?
+
+Thanks,
+Eryu
+--
+To unsubscribe from this list: send the line "unsubscribe fstests" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3=
+A__vger.kernel.org_majordomo-2Dinfo.html&d=3DDwIBAg&c=3DRoP1YumCXCgaWHvlZYR=
+8PQcxBKCX5YTpkKY057SbK10&r=3D-yMrTV4jriXR7ieyzzjV-QgHBD0UDw8ixoR77aMeAHE&m=
+=3DCfsgeRzY4RIPfAUQqWlSEu0A-gXQ3jhYRYWh8njYK1Q&s=3D59ruBSBPZdkktlllER_f54rd=
+80OfRe1pqnP1pe02x0Y&e=3D=20
