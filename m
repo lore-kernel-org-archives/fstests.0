@@ -1,101 +1,126 @@
-Received: from mail-pg0-f67.google.com ([74.125.83.67]:32935 "EHLO
-        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750762AbdCZFTp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 26 Mar 2017 01:19:45 -0400
-Received: by mail-pg0-f67.google.com with SMTP id 79so4977090pgf.0
-        for <fstests@vger.kernel.org>; Sat, 25 Mar 2017 22:19:36 -0700 (PDT)
-Received: from localhost ([128.199.137.77])
-        by smtp.gmail.com with ESMTPSA id l28sm13325776pgc.11.2017.03.25.22.19.35
-        for <fstests@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Sat, 25 Mar 2017 22:19:35 -0700 (PDT)
-Message-ID: <58d74f67.1c70630a.f33df.3595@mx.google.com>
-From: Eryu Guan <guaneryu@gmail.com>
-Date: Sun, 26 Mar 2017 13:19:29 +0800
-Subject: [ANNOUNCE] fstests: master branch updated to 7400c10e503f
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="xO0JphtiPhLg"
-Content-Disposition: inline
-Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-List-ID: <fstests@vger.kernel.org>
-
-
---xO0JphtiPhLg
+Received: from imap.thunk.org ([74.207.234.97]:52662 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751794AbdC0Bsh (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 26 Mar 2017 21:48:37 -0400
+Date: Sun, 26 Mar 2017 21:48:02 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [RFC PATCH] check: try to fix the test device if it gets
+ corrupted
+Message-ID: <20170327014802.wc5as2tdgecy3rzu@thunk.org>
+References: <20170302232050.31125-1-tytso@mit.edu>
+ <20170303090332.GP14226@eguan.usersys.redhat.com>
+ <20170303172157.GA5070@birch.djwong.org>
+ <20170303230129.apzqe77r4d5jtf63@thunk.org>
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20170303230129.apzqe77r4d5jtf63@thunk.org>
+Sender: fstests-owner@vger.kernel.org
+Content-Transfer-Encoding: Quoted-printable
+MIME-Version: 1.0
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
+List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+On Fri, Mar 03, 2017 at 06:01:29PM -0500, Theodore Ts'o wrote:
+> On Fri, Mar 03, 2017 at 09:21:57AM -0800, Darrick J. Wong wrote:
+> >=20
+> > <shrug> The test device isn't supposed to get corrupted, since it (at
+> > least in theory) should be an old filesystem.  That said, I suppose
+> > there's little point in banging around with a corrupt test fs.  Maybe we
+> > could go further and stop running if there's unfixable corruption?
+>=20
+> Yes, that was the other alternative I considered.  In my case, though,
+> since I'm trying to get a sense of how many failures I have to deal
+> with, I really wanted a "make -k" behavior that would continue after
+> the first failure.  After all, all I was going to do was manually run
+> fsck, and then continue the run --- so we might as well have the check
+> script do it automatically and then allow things to continue.
+>=20
+> We could make it be configurable, via a command-line option.  The -k
+> option isn't taken so we could have check -k that works like make -k
+> if you think that's better.  OTOH, perhaps making -k the default
+> behaviour is actually the better way to go, and in that case, maybe
+> it's not worth having the command-line flag?
 
-The master branch of the xfstests repository at:
+Eryu, do you have any preferences or comments about how you'd like me
+to modify this patch for upstreaming?  (Attached is my current version
+of the patch).
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Thanks!!
 
-have just been updated. This is relatively a small update, two fs encryption
-tests and one dio test are added, along with a glusterfs test fix. Most patches
-reviewed last week are still in the review-revision process.
+					- Ted
 
-There should be no new failures introduced ater this update, if you hit one
-please report bug and/or contribute patches.
+commit 727c737d1f0a40288fc897c0263fbf8e7a5db8b3
+Author: Theodore Ts'o <tytso@mit.edu>
+Date:   Wed Mar 1 19:54:08 2017 -0500
 
-Thanks,
-Eryu
+    check: try to fix the test device if it gets corrupted
+=20=20=20=20
+    If the test device gets corrupted all subsequent tests will fail.  To
+    prevent this from causing all subsequent tests to be useless, try
+    repair the file system on TEST_DEV if possible.  We don't need to do
+    this with the scratch device since that file system gets recreated
+    each time anyway.
+=20=20=20=20
+    Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 
-The new head of the master branch is commit:
-
-7400c10e503f ext4: test mounting filesystem with encrypted inode on orphan list
-
-New commits:
-
-Eric Biggers (2):
-      [0753e1278f4d] generic: test renaming encrypted files without key
-      [7400c10e503f] ext4: test mounting filesystem with encrypted inode on orphan list
-
-Eryu Guan (1):
-      [9953b149b5e1] generic: test pagecache invalidation after direct write
-
-Zorro Lang (1):
-      [7687a3293c96] common/rc: support gluster volume start with a slash
-
-
-Code Diffstat:
-
- .gitignore                 |   1 +
- common/rc                  |   4 +-
- src/Makefile               |   3 +-
- src/dio-invalidate-cache.c | 325 +++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/024             |  87 ++++++++++++
- tests/ext4/024.out         |   2 +
- tests/ext4/group           |   1 +
- tests/generic/418          | 122 +++++++++++++++++
- tests/generic/418.out      |   2 +
- tests/generic/419          |  84 ++++++++++++
- tests/generic/419.out      |   3 +
- tests/generic/group        |   2 +
- 12 files changed, 633 insertions(+), 3 deletions(-)
+diff --git a/check b/check
+index 2fcf385f..d253f744 100755
+--- a/check
++++ b/check
+@@ -472,7 +472,11 @@ _summary()
+ _check_filesystems()
+ {
+ 	if [ -f ${RESULT_DIR}/require_test ]; then
+-		_check_test_fs || err=3Dtrue
++		if ! _check_test_fs ; then
++		    err=3Dtrue
++		    echo "Trying to repair broken TEST_DEV file system"
++		    _repair_test_fs
++		fi
+ 		rm -f ${RESULT_DIR}/require_test*
+ 	fi
+ 	if [ -f ${RESULT_DIR}/require_scratch ]; then
+diff --git a/common/rc b/common/rc
+index 052f67aa..ce491f3f 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1172,6 +1172,28 @@ _repair_scratch_fs()
+     esac
+ }
+=20
++_repair_test_fs()
++{
++    case $FSTYP in
++    ext2|ext3|ext4)
++        fsck -t $FSTYP -fy $TEST_DEV >$tmp.repair 2>&1
++	if test $? -ge 4 ; then
++	    echo "_repair_test_fs: couldn't repair filesystem on $device (see $se=
+qres.full)"
++
++	    echo "_repair_test_fs: couldn't repair filesystem on $device" >>$seqr=
+es.full
++	    echo "*** fsck.$FSTYP output ***"	>>$seqres.full
++            cat $tmp.repair			>>$seqres.full
++	    echo "*** end fsck.$FSTYP output"	>>$seqres.full
++	    return 1
++	fi
++	return 0
++	;;
++    *)
++	return 1
++	;;
++    esac
++}
++
+ _get_pids_by_name()
+ {
+     if [ $# -ne 1 ]
 --
-Eryu Guan
-eguan@redhat.com
-
---xO0JphtiPhLg
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJY10PcAAoJECZSqilcj+dj3PQP/Aw8QEJAFLs2AKkuhN8iLh75
-W87WkAvOJLK/PEaj+v2O9maa4PGaaZJ86tUdAcinxNNUuONktYYagjGUdvqQRUZk
-BMEgFPYyndjBnjmFRWXFO4UrGYv5lJ68MJ5VFjd7RSfgIDcvxhe9BOXfhH/bDMbT
-JgQeuGUDCHvro7Dyq8pVwy2+jXaiHIkhGRQceVUuMJuUrmsQYbGHLmUyeJeK9rLM
-eGiQsBzVfeQv35DjEHuUVt+KWb+BI++kcx3lTQ13JAHjYq+344zhXVPYmnkpDivB
-U7+utJ+610CgnnGFq19VNYC76nL5oocJnOP2C9Szg9xZJqVo82OSJXh7NLFHB0x8
-xtnY4kNmPoQAPyv79sXNT1oPeVAkiHuH/pNrvkc8ZDQmopMRBsav6m55yHogtFBr
-vQWZ7D1jIL83T3n4hpQ0c68/ewF2o1sMY6C5csbu9m/Puk5iHixu8kcqI1x0W8Kq
-5+AvB9JhNUlV4le0W0ClDXie5iLHIxSlvkK/RjqrODcFFKtoMxx1eixemDORbDz8
-I3SJxJagXmR0U9NnLbyPASrmLs+3OQrY8iDweKZYu6O77kNkCQQc+6oDW2WS03uZ
-He6ojrn/c9Ozs5VikAvGjOgPTVXsK1+1e6zGgtJgASFuuI8PKY4TidA3k4iOcHyH
-Cw2LeCFHhr355G9wfxW6
-=op/S
------END PGP SIGNATURE-----
-
---xO0JphtiPhLg--
+To unsubscribe from this list: send the line "unsubscribe fstests" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3=
+A__vger.kernel.org_majordomo-2Dinfo.html&d=3DDwIBAg&c=3DRoP1YumCXCgaWHvlZYR=
+8PQcxBKCX5YTpkKY057SbK10&r=3D-yMrTV4jriXR7ieyzzjV-QgHBD0UDw8ixoR77aMeAHE&m=
+=3DTzkdhjUlBq8jw7ezkl6BuvazC1ulmLiwN0_zxLN0WsE&s=3DBrM0YkzpJep1zV6T-XPTWCIj=
+CTjMYv_CK_yzXPCXfKY&e=3D=20
