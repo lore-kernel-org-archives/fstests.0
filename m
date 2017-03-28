@@ -1,44 +1,55 @@
-Received: from mx1.redhat.com ([209.132.183.28]:48936 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:44086 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S934741AbdC3TcG (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 30 Mar 2017 15:32:06 -0400
-From: David Howells <dhowells@redhat.com>
-In-Reply-To: <CAOQ4uxiEzYvbAOdsJLOMKESUEVJuC57PPbYHvo-HtDZEiihb3A@mail.gmail.com>
-References: <CAOQ4uxiEzYvbAOdsJLOMKESUEVJuC57PPbYHvo-HtDZEiihb3A@mail.gmail.com> <15267.1490891560@warthog.procyon.org.uk>
-Subject: Re: [PATCH] xfstests: Add first statx test
-MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-ID: <23330.1490902318.1@warthog.procyon.org.uk>
-Date: Thu, 30 Mar 2017 20:31:58 +0100
-Message-ID: <23331.1490902318@warthog.procyon.org.uk>
+        id S1754732AbdC1IrB (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 28 Mar 2017 04:47:01 -0400
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH v9 2/2] xfs/068: update golden output due to new operations in fsstress
+Date: Tue, 28 Mar 2017 16:46:35 +0800
+Message-Id: <1490690795-4527-2-git-send-email-zlang@redhat.com>
+In-Reply-To: <1490690795-4527-1-git-send-email-zlang@redhat.com>
+References: <1490690795-4527-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: dhowells@redhat.com, linux-xfs <linux-xfs@vger.kernel.org>, Andreas Dilger <adilger@dilger.ca>, Christoph Hellwig <hch@infradead.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Eric Sandeen <sandeen@sandeen.net>, fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Amir Goldstein <amir73il@gmail.com> wrote:
+xfs/068 use a fixed seed (-s) and number of operations (-n) to run
+fsstress, to get fixed number of files and directories. But new
+operations of fsstress will break this "fixed number". So update
+it, after fsstress get new operations.
 
-> >  (2) Optionally compares the timestamps to see that they're sensibly
-> >      ordered with respect to the saved clock time[**] and each other.
-> 
-> I suggest that instead of comparing to absolute timestamp value
-> compare to a timestamp of the cmp file.
-> This will also solve you the problem of gettimeofday() vs. kernel_time
-> and will also open up the possibility of adding more interesting tests
-> later on (e.g. make sure that mtime of file A >= atime of file B).
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
+ tests/xfs/068     | 2 --
+ tests/xfs/068.out | 2 +-
+ 2 files changed, 1 insertion(+), 3 deletions(-)
 
-The whole point was to compare to a preceding time to make sure the timestamp
-didn't go backwards - exactly as it can do:-/.  Comparing to a reference file
-doesn't prove that unless you've checked the reference file...
+diff --git a/tests/xfs/068 b/tests/xfs/068
+index 4dac95e..7151e28 100755
+--- a/tests/xfs/068
++++ b/tests/xfs/068
+@@ -43,8 +43,6 @@ trap "rm -rf $tmp.*; exit \$status" 0 1 2 3 15
+ _supported_fs xfs
+ _supported_os Linux
+ 
+-# need to ensure new fsstress operations don't perturb expected output
+-FSSTRESS_AVOID="-f insert=0 $FSSTRESS_AVOID"
+ _create_dumpdir_stress_num 4096
+ _do_dump_restore
+ 
+diff --git a/tests/xfs/068.out b/tests/xfs/068.out
+index 2196eee..b20604f 100644
+--- a/tests/xfs/068.out
++++ b/tests/xfs/068.out
+@@ -22,7 +22,7 @@ xfsrestore: session id: ID
+ xfsrestore: media ID: ID
+ xfsrestore: searching media for directory dump
+ xfsrestore: reading directories
+-xfsrestore: 495 directories and 1593 entries processed
++xfsrestore: 474 directories and 1592 entries processed
+ xfsrestore: directory post-processing
+ xfsrestore: restoring non-directory files
+ xfsrestore: restore complete: SECS seconds elapsed
+-- 
+2.7.4
 
-Making use of more of a reference file's timestamps could be useful for other
-checks, though.
-
-> > +420 other
-> 
-> Since your test takes a few seconds, you should add it to auto, quick groups
-> I don't know what this 'other' group is about.
-
-I don't know either.  Ask the 'new' script.
-
-David
