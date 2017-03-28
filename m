@@ -1,175 +1,277 @@
-Received: from mail-it0-f67.google.com ([209.85.214.67]:32869 "EHLO
-        mail-it0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934128AbdC3Sph (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 30 Mar 2017 14:45:37 -0400
-MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxiEzYvbAOdsJLOMKESUEVJuC57PPbYHvo-HtDZEiihb3A@mail.gmail.com>
-References: <15267.1490891560@warthog.procyon.org.uk> <CAOQ4uxiEzYvbAOdsJLOMKESUEVJuC57PPbYHvo-HtDZEiihb3A@mail.gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 30 Mar 2017 21:45:35 +0300
-Message-ID: <CAOQ4uxj6eOQ+XukToULq3-y3gv18qMW+dphXBqqZYyiVgeqxwA@mail.gmail.com>
-Subject: Re: [PATCH] xfstests: Add first statx test
-Content-Type: text/plain; charset=UTF-8
+Received: from mx1.redhat.com ([209.132.183.28]:36112 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754644AbdC1IrB (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 28 Mar 2017 04:47:01 -0400
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH v9 1/2] fsstress: add mwrite/mread into test operation list
+Date: Tue, 28 Mar 2017 16:46:34 +0800
+Message-Id: <1490690795-4527-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: linux-xfs <linux-xfs@vger.kernel.org>, Andreas Dilger <adilger@dilger.ca>, Christoph Hellwig <hch@infradead.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Eric Sandeen <sandeen@sandeen.net>, fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 30, 2017 at 9:36 PM, Amir Goldstein <amir73il@gmail.com> wrote:
-> [ + cc: fstests ]
->
-> On Thu, Mar 30, 2017 at 7:32 PM, David Howells <dhowells@redhat.com> wrote:
->> Add a statx test that does the following:
->>
->>  (1) Creates one each of the various types of file object and creates a
->>      hard link to the regular file.
->>
->>      Note that the creation of an AF_UNIX socket is done with netcat in a
->>      bash coprocessing thread.  This might be best done with another
->>      in-house helper to avoid a dependency on nc.
->>
->>  (2) Notes the clock time before creating the file.
->>
->>  (3) Invokes the C test program included in this patch after the creation,
->>      handing it the clock time from (2) and providing a selection of
->>      invariants to check.
->>
->> The patch also creates a C[*] test program to do the actual stat checking.
->> The test program then does the following:
->>
->>  (1) Compares the output of statx() to that of fstatat().
->>
->>  (2) Optionally compares the timestamps to see that they're sensibly
->>      ordered with respect to the saved clock time[**] and each other.
->>
->
-> I suggest that instead of comparing to absolute timestamp value
-> compare to a timestamp of the cmp file.
-> This will also solve you the problem of gettimeofday() vs. kernel_time
-> and will also open up the possibility of adding more interesting tests
-> later on (e.g. make sure that mtime of file A >= atime of file B).
->
->>  (3) Optionally compares selected stats to values specified on the command
->>      line.
->>
->>  (4) Optionally compares the stats to those of another file, requiring them
->>      to be the same (hard link checking).
->>
->> For example:
->>
->>         ./src/stat_test /dev/null \
->>                0.0 \
->>                stx_type=char \
->>                stx_rdev_major=3 \
->>                stx_rdev_minor=8 \
->>                stx_nlink=1
->>
->>
->> [*] Note that it proved much easier to do this in C than trying to do it in
->>     shell script and trying parsing the output of xfs_io.  Using xfs_io has
->>     other pitfalls also: it wants to *open* the file, even if the file is
->>     not an appropriate type for this or does not grant permission to do so.
->>     I can get around this by opening O_PATH, but then xfs_io fails to
->>     handle XFS files because it wants to issue ioctls on every fd it opens.
->>
->
-> IMO, you reached the correct solution :)
-> Minor nits below.
->
->> [**] It turns out they may be *before* the clock time.  This would seem to
->>      indicate a bug in the kernel's time-tracking system.
->>
->> Signed-off-by: David Howells <dhowells@redhat.com>
->> ---
->
-> [...]
->
->> +
->> +static __attribute__((noreturn))
->> +void format(void)
->> +{
->> +       fprintf(stderr, "usage: %s [-v] [-m<mask>] <testfile> <origintime> [checks]\n",
->> +               prog);
->> +       fprintf(stderr, "\t<mask> can be basic, all or a number; all is the default\n");
->> +       fprintf(stderr, "checks is a list of zero or more of:\n");
->> +       fprintf(stderr, "\tts-order -- check the timestamp order after init\n");
->> +       fprintf(stderr, "\tts=<a>,<b> -- timestamp a <= b, where a and b are one of 'Oabcm'\n");
->
-> How about ABCMabcm,
-> where ABCM are timestamps of cmp file
->
->> +       fprintf(stderr, "\tcmp=<file> -- check that the specified file has identical stats\n");
->> +       fprintf(stderr, "\tstx_<field>=<val> -- statx field value check\n");
+mmap as a popular and basic operation, most of softwares use it to
+access files. More and more customers report bugs related with
+mmap/munmap and other stress conditions.
 
-And maybe use the flag "stx_<field>" (without =<val>) to indicate
-'compare statx field
-with that of the cmp file'.
-So instead of having an all on nothing 'check that the specified file
-has identical stats'
-tests could be more specific than that.
-And maybe a '-a' flag for 'compare all stats'.
+So add mmap read/write test into fsstress to increase mmap related
+stress to reproduce or find more bugs easily.
 
->> +       fprintf(stderr, "\t\t(for stx_type, fifo char dir, block, file, sym, sock can be used)\n");
->> +       exit(2);
->> +}
->> +
->
-> [...]
->
->> +
->> +if [ $failed = 1 ]
->> +then
->> +    echo "Test script failed"
->
-> That's not really needed
->
->> +    exit
->> +fi
->> +
->> +echo "Success"
->
-> And neither is this.
->
->> +
->> +# optional stuff if your test has verbose output to help resolve problems
->> +#echo
->> +#echo "If failure, check $seqres.full (this) and $seqres.full.ok (reference)"
->> +
->> +# success, all done
->> +status=0
->
-> status=fail will do the trick.
->
->> +exit
->> diff --git a/tests/generic/420.out b/tests/generic/420.out
->> new file mode 100644
->> index 0000000..e2956a6
->> --- /dev/null
->> +++ b/tests/generic/420.out
->> @@ -0,0 +1,12 @@
->> +QA output created by 420
->> +Test statx on a fifo
->> +Test statx on a chardev
->> +Test statx on a directory
->> +Test statx on a blockdev
->> +Test statx on a file
->> +20+0 records in
->> +20+0 records out
->> +Test statx on a symlink
->> +Test statx on an AF_UNIX socket
->> +Test a hard link to a file
->> +Success
->> diff --git a/tests/generic/group b/tests/generic/group
->> index 0781f35..c420998 100644
->> --- a/tests/generic/group
->> +++ b/tests/generic/group
->> @@ -422,3 +422,4 @@
->>  417 auto quick shutdown log
->>  418 auto rw
->>  419 auto quick encrypt
->> +420 other
->
-> Since your test takes a few seconds, you should add it to auto, quick groups
-> I don't know what this 'other' group is about.
->
-> Amir.
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
+ configure.ac   |   1 +
+ ltp/fsstress.c | 159 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++-
+ src/global.h   |   4 ++
+ 3 files changed, 162 insertions(+), 2 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index fa48d2f..246f92e 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -32,6 +32,7 @@ AC_HEADER_STDC
+ 			xfs/platform_defs.h	\
+ 			btrfs/ioctl.h		\
+ 			cifs/ioctl.h		\
++			sys/mman.h		\
+     ])
+ 
+ AC_CHECK_HEADERS([xfs/xfs_log_format.h],,,[
+diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+index 7e7cf60..6d8f117 100644
+--- a/ltp/fsstress.c
++++ b/ltp/fsstress.c
+@@ -17,6 +17,7 @@
+  */
+ 
+ #include <linux/fs.h>
++#include <setjmp.h>
+ #include "global.h"
+ 
+ #ifdef HAVE_ATTR_XATTR_H
+@@ -69,6 +70,8 @@ typedef enum {
+ 	OP_LINK,
+ 	OP_MKDIR,
+ 	OP_MKNOD,
++	OP_MREAD,
++	OP_MWRITE,
+ 	OP_PUNCH,
+ 	OP_ZERO,
+ 	OP_COLLAPSE,
+@@ -168,6 +171,8 @@ void	getdents_f(int, long);
+ void	link_f(int, long);
+ void	mkdir_f(int, long);
+ void	mknod_f(int, long);
++void	mread_f(int, long);
++void	mwrite_f(int, long);
+ void	punch_f(int, long);
+ void	zero_f(int, long);
+ void	collapse_f(int, long);
+@@ -208,6 +213,8 @@ opdesc_t	ops[] = {
+ 	{ OP_LINK, "link", link_f, 1, 1 },
+ 	{ OP_MKDIR, "mkdir", mkdir_f, 2, 1 },
+ 	{ OP_MKNOD, "mknod", mknod_f, 2, 1 },
++	{ OP_MREAD, "mread", mread_f, 2, 0 },
++	{ OP_MWRITE, "mwrite", mwrite_f, 2, 1 },
+ 	{ OP_PUNCH, "punch", punch_f, 1, 1 },
+ 	{ OP_ZERO, "zero", zero_f, 1, 1 },
+ 	{ OP_COLLAPSE, "collapse", collapse_f, 1, 1 },
+@@ -262,6 +269,7 @@ int		cleanup = 0;
+ int		verbose = 0;
+ int		verifiable_log = 0;
+ sig_atomic_t	should_stop = 0;
++sigjmp_buf	*sigbus_jmp = NULL;
+ char		*execute_cmd = NULL;
+ int		execute_freq = 1;
+ struct print_string	flag_str = {0};
+@@ -311,7 +319,26 @@ void	zero_freq(void);
+ 
+ void sg_handler(int signum)
+ {
+-	should_stop = 1;
++	switch (signum) {
++	case SIGTERM:
++		should_stop = 1;
++		break;
++	case SIGBUS:
++		/*
++		 * Only handle SIGBUS when mmap write to a hole and no
++		 * block can be allocated due to ENOSPC, abort otherwise.
++		 */
++		if (sigbus_jmp) {
++			siglongjmp(*sigbus_jmp, -1);
++		} else {
++			printf("Unknown SIGBUS is caught, Abort!\n");
++			abort();
++		}
++		/* should not reach here */
++		break;
++	default:
++		break;
++	}
+ }
+ 
+ int main(int argc, char **argv)
+@@ -527,10 +554,13 @@ int main(int argc, char **argv)
+ 
+ 	for (i = 0; i < nproc; i++) {
+ 		if (fork() == 0) {
+-			action.sa_handler = SIG_DFL;
+ 			sigemptyset(&action.sa_mask);
++			action.sa_handler = SIG_DFL;
+ 			if (sigaction(SIGTERM, &action, 0))
+ 				return 1;
++			action.sa_handler = sg_handler;
++			if (sigaction(SIGBUS, &action, 0))
++				return 1;
+ #ifdef HAVE_SYS_PRCTL_H
+ 			prctl(PR_SET_PDEATHSIG, SIGKILL);
+ 			if (getppid() == 1) /* parent died already? */
+@@ -2655,6 +2685,131 @@ mknod_f(int opno, long r)
+ 	free_pathname(&f);
+ }
+ 
++#ifdef HAVE_SYS_MMAN_H
++struct print_flags mmap_flags[] = {
++	{ MAP_SHARED, "SHARED"},
++	{ MAP_PRIVATE, "PRIVATE"},
++	{ -1, NULL}
++};
++
++#define translate_mmap_flags(flags)	  \
++	({translate_flags(flags, "|", mmap_flags);})
++#endif
++
++void
++do_mmap(int opno, long r, int prot)
++{
++#ifdef HAVE_SYS_MMAN_H
++	char		*addr;
++	int		e;
++	pathname_t	f;
++	int		fd;
++	size_t		len;
++	__int64_t	lr;
++	off64_t		off;
++	int		flags;
++	struct stat64	stb;
++	int		v;
++	char		st[1024];
++	sigjmp_buf	sigbus_jmpbuf;
++
++	init_pathname(&f);
++	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
++		if (v)
++			printf("%d/%d: do_mmap - no filename\n", procid, opno);
++		free_pathname(&f);
++		return;
++	}
++	fd = open_path(&f, O_RDWR);
++	e = fd < 0 ? errno : 0;
++	check_cwd();
++	if (fd < 0) {
++		if (v)
++			printf("%d/%d: do_mmap - open %s failed %d\n",
++			       procid, opno, f.path, e);
++		free_pathname(&f);
++		return;
++	}
++	if (fstat64(fd, &stb) < 0) {
++		if (v)
++			printf("%d/%d: do_mmap - fstat64 %s failed %d\n",
++			       procid, opno, f.path, errno);
++		free_pathname(&f);
++		close(fd);
++		return;
++	}
++	inode_info(st, sizeof(st), &stb, v);
++	if (stb.st_size == 0) {
++		if (v)
++			printf("%d/%d: do_mmap - %s%s zero size\n", procid, opno,
++			       f.path, st);
++		free_pathname(&f);
++		close(fd);
++		return;
++	}
++
++	lr = ((__int64_t)random() << 32) + random();
++	off = (off64_t)(lr % stb.st_size);
++	off &= (off64_t)(~(sysconf(_SC_PAGE_SIZE) - 1));
++	len = (size_t)(random() % MIN(stb.st_size - off, FILELEN_MAX)) + 1;
++
++	flags = (random() % 2) ? MAP_SHARED : MAP_PRIVATE;
++	addr = mmap(NULL, len, prot, flags, fd, off);
++	e = (addr == MAP_FAILED) ? errno : 0;
++	if (e) {
++		if (v)
++			printf("%d/%d: do_mmap - mmap failed %s%s [%lld,%d,%s] %d\n",
++			       procid, opno, f.path, st, (long long)off,
++			       (int)len, translate_mmap_flags(flags), e);
++		free_pathname(&f);
++		close(fd);
++		return;
++	}
++
++	if (prot & PROT_WRITE) {
++		if ((e = sigsetjmp(sigbus_jmpbuf, 1)) == 0) {
++			sigbus_jmp = &sigbus_jmpbuf;
++			memset(addr, nameseq & 0xff, len);
++		}
++	} else {
++		char *buf;
++		if ((buf = malloc(len)) != NULL) {
++			memcpy(buf, addr, len);
++			free(buf);
++		}
++	}
++	munmap(addr, len);
++	/* set NULL to stop other functions from doing siglongjmp */
++	sigbus_jmp = NULL;
++
++	if (v)
++		printf("%d/%d: %s %s%s [%lld,%d,%s] %s\n",
++		       procid, opno, (prot & PROT_WRITE) ? "mwrite" : "mread",
++		       f.path, st, (long long)off, (int)len,
++		       translate_mmap_flags(flags),
++		       (e == 0) ? "0" : "Bus error");
++
++	free_pathname(&f);
++	close(fd);
++#endif
++}
++
++void
++mread_f(int opno, long r)
++{
++#ifdef HAVE_SYS_MMAN_H
++	do_mmap(opno, r, PROT_READ);
++#endif
++}
++
++void
++mwrite_f(int opno, long r)
++{
++#ifdef HAVE_SYS_MMAN_H
++	do_mmap(opno, r, PROT_WRITE);
++#endif
++}
++
+ void
+ punch_f(int opno, long r)
+ {
+diff --git a/src/global.h b/src/global.h
+index f63246b..3920c0d 100644
+--- a/src/global.h
++++ b/src/global.h
+@@ -178,4 +178,8 @@
+ 
+ #endif /* HAVE_LINUX_FALLOC_H */
+ 
++#ifdef HAVE_SYS_MMAN_H
++#include <sys/mman.h>
++#endif
++
+ #endif /* GLOBAL_H */
+-- 
+2.7.4
+
