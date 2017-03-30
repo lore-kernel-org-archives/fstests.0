@@ -1,68 +1,63 @@
-Received: from mail-lf0-f53.google.com ([209.85.215.53]:34363 "EHLO
-        mail-lf0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754272AbdCaKCK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 31 Mar 2017 06:02:10 -0400
-From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: Re: [PATCH 0/3] Improve block device testing coverage
-In-Reply-To: <20170331093801.GK22845@eguan.usersys.redhat.com>
-References: <1490879944-26240-1-git-send-email-dmonakhov@openvz.org> <20170331065702.GA17435@infradead.org> <8760ip28o8.fsf@dmlp.sw.ru> <20170331093801.GK22845@eguan.usersys.redhat.com>
-Date: Fri, 31 Mar 2017 13:02:06 +0300
-Message-ID: <8737dt228x.fsf@dmlp.sw.ru>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from mx2.suse.de ([195.135.220.15]:56112 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S933187AbdC3PNE (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 30 Mar 2017 11:13:04 -0400
+Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 16046AD0D
+        for <fstests@vger.kernel.org>; Thu, 30 Mar 2017 15:13:02 +0000 (UTC)
+From: David Sterba <dsterba@suse.com>
+Subject: [PATCH] btrfs: use full subcommand names
+Date: Thu, 30 Mar 2017 17:06:33 +0200
+Message-Id: <20170330150633.14962-1-dsterba@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org, linux-scsi@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: David Sterba <dsterba@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Eryu Guan <eguan@redhat.com> writes:
+Update the remaining calls to 'btrfs' that use shortened command names.
+Use of full names is recommended to avoid any ambiguities.
 
-> On Fri, Mar 31, 2017 at 10:43:19AM +0300, Dmitry Monakhov wrote:
->> Christoph Hellwig <hch@infradead.org> writes:
->> 
->> > On Thu, Mar 30, 2017 at 05:19:01PM +0400, Dmitry Monakhov wrote:
->> >> During LSFMM we have discussed how to test lower-backend of linux IO-stack.
->> >> Common opinion was that xfstests is the most obvious solution which cover
->> >> most of use cases filesystem care about.
->> >> 
->> >> I'm working on integration T10-DIF/DIF data integrity features to ext4,
->> >> for that reason we need to be shure that linux integrity framework is
->> >> in working state, which is currently broken in several places.
->> >> 
->> >> In fact, it is relatively simple to add basic coverage tests for basic
->> >> IO operations over virtual device with integrity support. All we need
->> >> is to add lio target support.
->> >
->> > First:  Thanks for adding block layer testing!
->> >
->> > Second: even more so than Darrick's blockdev fallocate test this is
->> > the wrong place.  If I run xfstests I want to test my file system,
->> > not random block device features.  Please start a proper block device
->> > testsuite instead, possibly by copy and pasting code from xfstests.
->> Fair enough. I also not happy to place blkdev feature  to tests/generic
->> namespace. But altearnative to fork xfstests infrastructure to dedicated
->> test-framework only for blkdevice seems not very good. Because fork is
->> always pain. I already maintain one internal fork of xfstests which
->> tests our Vituozzo's speciffic features.
->> 
->> May be it would be reasonable idea to add didicated namespace
->> 'tests/blockdev' in xfstests, and move all blkdev related tests here?
->> IMHO this is good idea. Because filesystem relay on some basic
->> features from blkdev which should be tested explicitly, because
->> implicit testing is too hard to debug/investigation.
->
-> I'm not sure if xfstests is the right place for blockdev tests,
-> especially for the pure blockdev level features (at least Darrick's
-> blockdev tests are testing fallocate(2) interface).
-Another good example may be a bug with dirty page cache after blkdiscard
-https://lkml.org/lkml/2017/3/22/789 . This simple bug  result in crappy
-fsimage if mkfs relay on discard_zeroes_data behaviour.
-So IMHO basic blkdev test coverage is important filesystem testing. i.e.
-important for xfstests.
->
-> But yeah, a new tests/blockdev dir would be good if we eventually decide
-> adding blockdev tests to xfstests, so they're not run by default when
-> people want to test filesystems.
->
-> Thanks,
-> Eryu
+Signed-off-by: David Sterba <dsterba@suse.com>
+---
+ tests/btrfs/027 | 2 +-
+ tests/btrfs/085 | 6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/tests/btrfs/027 b/tests/btrfs/027
+index 46970a2918a7..2c8b458e5ff4 100755
+--- a/tests/btrfs/027
++++ b/tests/btrfs/027
+@@ -78,7 +78,7 @@ run_test()
+ 	_scratch_mount >>$seqres.full 2>&1
+ 
+ 	local missing_dev=`echo $SCRATCH_DEV_POOL | awk '{print $2}'`
+-	local missing_dev_id=`$BTRFS_UTIL_PROG fi show $SCRATCH_MNT | grep $missing_dev | awk '{print $2}'`
++	local missing_dev_id=`$BTRFS_UTIL_PROG filesystem show $SCRATCH_MNT | grep $missing_dev | awk '{print $2}'`
+ 
+ 	# get some data on the filesystem so there's something to replace
+ 	_ddt of="$SCRATCH_MNT"/file1 bs=1M count=1 >> $seqres.full 2>&1
+diff --git a/tests/btrfs/085 b/tests/btrfs/085
+index 3dbc67f5d40b..804899724cba 100755
+--- a/tests/btrfs/085
++++ b/tests/btrfs/085
+@@ -134,14 +134,14 @@ test_orphan()
+ 
+ new_subvolume()
+ {
+-	_run_btrfs_util_prog subvol create $SCRATCH_MNT/testdir
++	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/testdir
+ }
+ 
+ new_default()
+ {
+ 	new_subvolume
+-	SUB=$($BTRFS_UTIL_PROG subvol list $SCRATCH_MNT |awk '{print $2}')
+-	_run_btrfs_util_prog subvol set-default $SUB $SCRATCH_MNT
++	SUB=$($BTRFS_UTIL_PROG subvolume list $SCRATCH_MNT |awk '{print $2}')
++	_run_btrfs_util_prog subvolume set-default $SUB $SCRATCH_MNT
+ 
+ 	_unmount_flakey
+ 	_mount_flakey
+-- 
+2.12.0
+
