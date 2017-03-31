@@ -1,127 +1,64 @@
-Received: from mail-lf0-f67.google.com ([209.85.215.67]:36719 "EHLO
-        mail-lf0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933576AbdC3NTV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 30 Mar 2017 09:19:21 -0400
-From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: [PATCH 2/3] add test: generic/420 check information lead for lio-fileio
-Date: Thu, 30 Mar 2017 17:19:03 +0400
-Message-Id: <1490879944-26240-3-git-send-email-dmonakhov@openvz.org>
-In-Reply-To: <1490879944-26240-1-git-send-email-dmonakhov@openvz.org>
+Received: from mx1.redhat.com ([209.132.183.28]:50440 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754141AbdCaJiJ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 31 Mar 2017 05:38:09 -0400
+Date: Fri, 31 Mar 2017 17:38:01 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 0/3] Improve block device testing coverage
+Message-ID: <20170331093801.GK22845@eguan.usersys.redhat.com>
 References: <1490879944-26240-1-git-send-email-dmonakhov@openvz.org>
+ <20170331065702.GA17435@infradead.org>
+ <8760ip28o8.fsf@dmlp.sw.ru>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <8760ip28o8.fsf@dmlp.sw.ru>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-scsi@vger.kernel.org, Dmitry Monakhov <dmonakhov@openvz.org>
+To: Dmitry Monakhov <dmonakhov@openvz.org>
+Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org, linux-scsi@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
----
- tests/generic/420     | 77 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/420.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 80 insertions(+)
- create mode 100755 tests/generic/420
- create mode 100644 tests/generic/420.out
+On Fri, Mar 31, 2017 at 10:43:19AM +0300, Dmitry Monakhov wrote:
+> Christoph Hellwig <hch@infradead.org> writes:
+> 
+> > On Thu, Mar 30, 2017 at 05:19:01PM +0400, Dmitry Monakhov wrote:
+> >> During LSFMM we have discussed how to test lower-backend of linux IO-stack.
+> >> Common opinion was that xfstests is the most obvious solution which cover
+> >> most of use cases filesystem care about.
+> >> 
+> >> I'm working on integration T10-DIF/DIF data integrity features to ext4,
+> >> for that reason we need to be shure that linux integrity framework is
+> >> in working state, which is currently broken in several places.
+> >> 
+> >> In fact, it is relatively simple to add basic coverage tests for basic
+> >> IO operations over virtual device with integrity support. All we need
+> >> is to add lio target support.
+> >
+> > First:  Thanks for adding block layer testing!
+> >
+> > Second: even more so than Darrick's blockdev fallocate test this is
+> > the wrong place.  If I run xfstests I want to test my file system,
+> > not random block device features.  Please start a proper block device
+> > testsuite instead, possibly by copy and pasting code from xfstests.
+> Fair enough. I also not happy to place blkdev feature  to tests/generic
+> namespace. But altearnative to fork xfstests infrastructure to dedicated
+> test-framework only for blkdevice seems not very good. Because fork is
+> always pain. I already maintain one internal fork of xfstests which
+> tests our Vituozzo's speciffic features.
+> 
+> May be it would be reasonable idea to add didicated namespace
+> 'tests/blockdev' in xfstests, and move all blkdev related tests here?
+> IMHO this is good idea. Because filesystem relay on some basic
+> features from blkdev which should be tested explicitly, because
+> implicit testing is too hard to debug/investigation.
 
-diff --git a/tests/generic/420 b/tests/generic/420
-new file mode 100755
-index 0000000..592703d
---- /dev/null
-+++ b/tests/generic/420
-@@ -0,0 +1,77 @@
-+#! /bin/bash
-+# FS QA Test 420
-+#
-+# Regression test for  information leak for lio-fileio target
-+# BUG: If image  file is less than virtual blockdev then read() may return
-+#      unitilized data.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Dmitry Monakhov <dmonakhov@openvz.org>
-+# All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	_liotgt_cleanup
-+	rm -rf $TEST_DIR/$$
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/liotarget
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+_require_liotarget
-+
-+mkdir -p $TEST_DIR/$$ || _fail "Can not make test dir"
-+
-+cfg_path=$(_liotgt_create_fileio  420-test.img $TEST_DIR/$$/420-test.img 128M)
-+dev=$(_liotgt_attach_target /backstores/fileio/420-test.img)
-+
-+$XFS_IO_PROG -f -c "truncate 1M" $TEST_DIR/$$/420-test.img >> $seqres.full
-+
-+$XFS_IO_PROG -c "pwrite -S 0xa0 -b 512 512 1k" -d $dev >>$seqres.full 2>&1 || \
-+    _fail "pwrite failed"
-+
-+$XFS_IO_PROG -c "pwrite -S 0xab -b 512 2M 1k" -d $dev >>$seqres.full 2>&1 || \
-+    _fail "pwrite failed"
-+
-+md5sum $dev | sed -e "s,$dev,loopdev,g"
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/420.out b/tests/generic/420.out
-new file mode 100644
-index 0000000..deed5da
---- /dev/null
-+++ b/tests/generic/420.out
-@@ -0,0 +1,2 @@
-+QA output created by 420
-+f5cfb0d8d7bfadbc2127f4f6ca4a0eba  loopdev
-diff --git a/tests/generic/group b/tests/generic/group
-index 0781f35..1261547 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -422,3 +422,4 @@
- 417 auto quick shutdown log
- 418 auto rw
- 419 auto quick encrypt
-+420 auto blockdev liotarget
--- 
-2.9.3
+I'm not sure if xfstests is the right place for blockdev tests,
+especially for the pure blockdev level features (at least Darrick's
+blockdev tests are testing fallocate(2) interface).
 
+But yeah, a new tests/blockdev dir would be good if we eventually decide
+adding blockdev tests to xfstests, so they're not run by default when
+people want to test filesystems.
+
+Thanks,
+Eryu
