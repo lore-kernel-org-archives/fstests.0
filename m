@@ -1,1240 +1,403 @@
-Received: from mx2.suse.de ([195.135.220.15]:57053 "EHLO mx2.suse.de"
+Received: from mx1.redhat.com ([209.132.183.28]:55972 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933048AbdC3PVQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 30 Mar 2017 11:21:16 -0400
-Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id 5F8A8AB45
-        for <fstests@vger.kernel.org>; Thu, 30 Mar 2017 15:21:14 +0000 (UTC)
-From: David Sterba <dsterba@suse.com>
-Subject: [PATCH v2] btrfs: reorder arguments so that options come first
-Date: Thu, 30 Mar 2017 17:20:18 +0200
-Message-Id: <20170330152018.16575-1-dsterba@suse.com>
-In-Reply-To: <20170330145551.14159-1-dsterba@suse.com>
-References: <20170330145551.14159-1-dsterba@suse.com>
+        id S932896AbdCaKTp (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 31 Mar 2017 06:19:45 -0400
+Date: Fri, 31 Mar 2017 18:19:41 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] xfstests: Add first statx test
+Message-ID: <20170331101941.GL22845@eguan.usersys.redhat.com>
+References: <15267.1490891560@warthog.procyon.org.uk>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <15267.1490891560@warthog.procyon.org.uk>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: David Sterba <dsterba@suse.com>
+To: David Howells <dhowells@redhat.com>
+Cc: linux-xfs <linux-xfs@vger.kernel.org>, Andreas Dilger <adilger@dilger.ca>, Christoph Hellwig <hch@infradead.org>, linux-fsdevel@vger.kernel.org, Eric Sandeen <sandeen@sandeen.net>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-The option parser in the btrfs utility is going to be updated and will
-accept arguments in a stricter form, namely that options must come
-before their non-option argument. Otherwise eg. the -f option in send
-would be understood as another path and not an option leading to many
-test failures.
+On Thu, Mar 30, 2017 at 05:32:40PM +0100, David Howells wrote:
+> Add a statx test that does the following:
+> 
+>  (1) Creates one each of the various types of file object and creates a
+>      hard link to the regular file.
+> 
+>      Note that the creation of an AF_UNIX socket is done with netcat in a
+>      bash coprocessing thread.  This might be best done with another
+>      in-house helper to avoid a dependency on nc.
+> 
+>  (2) Notes the clock time before creating the file.
+> 
+>  (3) Invokes the C test program included in this patch after the creation,
+>      handing it the clock time from (2) and providing a selection of
+>      invariants to check.
+> 
+> The patch also creates a C[*] test program to do the actual stat checking.
+> The test program then does the following:
+> 
+>  (1) Compares the output of statx() to that of fstatat().
+> 
+>  (2) Optionally compares the timestamps to see that they're sensibly
+>      ordered with respect to the saved clock time[**] and each other.
+> 
+>  (3) Optionally compares selected stats to values specified on the command
+>      line.
+> 
+>  (4) Optionally compares the stats to those of another file, requiring them
+>      to be the same (hard link checking).
+> 
+> For example:
+> 
+>         ./src/stat_test /dev/null \
+>                0.0 \
+>                stx_type=char \
+>                stx_rdev_major=3 \
+>                stx_rdev_minor=8 \
+>                stx_nlink=1
+> 
+> 
+> [*] Note that it proved much easier to do this in C than trying to do it in
+>     shell script and trying parsing the output of xfs_io.  Using xfs_io has
+>     other pitfalls also: it wants to *open* the file, even if the file is
+>     not an appropriate type for this or does not grant permission to do so.
+>     I can get around this by opening O_PATH, but then xfs_io fails to
+>     handle XFS files because it wants to issue ioctls on every fd it opens.
+> 
+> [**] It turns out they may be *before* the clock time.  This would seem to
+>      indicate a bug in the kernel's time-tracking system.
+> 
+> Signed-off-by: David Howells <dhowells@redhat.com>
 
-The canonical form should be:
+I haven't looked into the statx(2) tests deeply, I'll just comment from
+xfstests' perspective of view for now.
 
-  btrfs command subcommand [-options] [arguments]
+> ---
+>  src/Makefile          |    2 
+>  src/stat_test.c       |  666 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  src/statx.h           |  166 ++++++++++++
+>  tests/generic/420     |  221 ++++++++++++++++
+>  tests/generic/420.out |   12 
+>  tests/generic/group   |    1 
+>  6 files changed, 1067 insertions(+), 1 deletion(-)
 
-Signed-off-by: David Sterba <dsterba@suse.com>
----
+Need an entry in .gitignore for the new stat_test binary.
 
-- one case missed
+...
 
- tests/btrfs/008 |  4 ++--
- tests/btrfs/016 |  7 ++++---
- tests/btrfs/019 |  2 +-
- tests/btrfs/025 | 10 +++++-----
- tests/btrfs/030 | 10 +++++-----
- tests/btrfs/034 | 10 +++++-----
- tests/btrfs/036 |  2 +-
- tests/btrfs/038 | 12 ++++++------
- tests/btrfs/039 | 10 +++++-----
- tests/btrfs/040 | 10 +++++-----
- tests/btrfs/043 | 10 +++++-----
- tests/btrfs/044 | 10 +++++-----
- tests/btrfs/045 | 10 +++++-----
- tests/btrfs/046 | 10 +++++-----
- tests/btrfs/048 | 10 +++++-----
- tests/btrfs/050 |  4 ++--
- tests/btrfs/051 |  4 ++--
- tests/btrfs/053 | 10 +++++-----
- tests/btrfs/054 | 10 +++++-----
- tests/btrfs/058 |  2 +-
- tests/btrfs/077 | 10 +++++-----
- tests/btrfs/083 | 10 +++++-----
- tests/btrfs/084 | 10 +++++-----
- tests/btrfs/087 | 10 +++++-----
- tests/btrfs/092 | 10 +++++-----
- tests/btrfs/094 | 10 +++++-----
- tests/btrfs/097 | 10 +++++-----
- tests/btrfs/105 | 10 +++++-----
- tests/btrfs/108 |  4 ++--
- tests/btrfs/109 |  4 ++--
- tests/btrfs/110 | 12 ++++++------
- tests/btrfs/111 | 20 ++++++++++----------
- tests/btrfs/117 | 12 ++++++------
- tests/btrfs/127 | 10 +++++-----
- tests/btrfs/128 | 10 +++++-----
- tests/btrfs/129 | 10 +++++-----
- tests/btrfs/133 | 18 +++++++++---------
- tests/btrfs/134 | 12 ++++++------
- tests/btrfs/135 | 18 +++++++++---------
- tests/btrfs/137 | 10 +++++-----
- 40 files changed, 189 insertions(+), 188 deletions(-)
+> diff --git a/tests/generic/420 b/tests/generic/420
+> new file mode 100755
+> index 0000000..e9a6dda
+> --- /dev/null
+> +++ b/tests/generic/420
+> @@ -0,0 +1,221 @@
+> +#! /bin/bash
+> +# FS QA Test 420
+> +#
+> +# Test the statx system call
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
+> +# Written by David Howells (dhowells@redhat.com)
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_test
 
-diff --git a/tests/btrfs/008 b/tests/btrfs/008
-index d08003ab8efc..d60f2555b1e1 100755
---- a/tests/btrfs/008
-+++ b/tests/btrfs/008
-@@ -77,9 +77,9 @@ $BTRFS_UTIL_PROG subvolume snapshot -r $work_dir $work_dir/snapshots/backup2 \
- 	>> $seqres.full 2>&1 || _fail "failed backup2"
- $BTRFS_UTIL_PROG subvolume snapshot -r $work_dir $work_dir/snapshots/backup3 \
- 	>> $seqres.full 2>&1 || _fail "failed backup3"
--$BTRFS_UTIL_PROG send $work_dir/snapshots/backup3/ -f $TEST_DIR/$tmp_dir/blah \
-+$BTRFS_UTIL_PROG send -f $TEST_DIR/$tmp_dir/blah $work_dir/snapshots/backup3 \
- 	>> $seqres.full 2>&1 || _fail "send failed"
--$BTRFS_UTIL_PROG receive $SCRATCH_MNT -vvvv -f $TEST_DIR/$tmp_dir/blah \
-+$BTRFS_UTIL_PROG receive -vvvv -f $TEST_DIR/$tmp_dir/blah $SCRATCH_MNT \
- 	>> $seqres.full 2>&1 || _fail "receive failed"
- 
- echo "Silence is golden"
-diff --git a/tests/btrfs/016 b/tests/btrfs/016
-index 833246d304f6..de4f1a840195 100755
---- a/tests/btrfs/016
-+++ b/tests/btrfs/016
-@@ -79,10 +79,11 @@ $FSSUM_PROG -A -f -w $tmp/fssum.snap $TEST_DIR/$tmp_dir/snap >> $seqres.full \
- $FSSUM_PROG -A -f -w $tmp/fssum.snap1 $TEST_DIR/$tmp_dir/snap1 >> $seqres.full \
- 	2>&1 || _fail "fssum gen failed"
- 
--$BTRFS_UTIL_PROG send $TEST_DIR/$tmp_dir/snap -f $tmp/send.snap >> \
-+$BTRFS_UTIL_PROG send -f $tmp/send.snap $TEST_DIR/$tmp_dir/snap >> \
- 	$seqres.full 2>&1 || _fail "failed send"
--$BTRFS_UTIL_PROG send $TEST_DIR/$tmp_dir/snap1 -p $TEST_DIR/$tmp_dir/snap \
--	-f $tmp/send.snap1 >> $seqres.full 2>&1 || _fail "failed send"
-+$BTRFS_UTIL_PROG send -p $TEST_DIR/$tmp_dir/snap \
-+	-f $tmp/send.snap1 $TEST_DIR/$tmp_dir/snap1 \
-+	>> $seqres.full 2>&1 || _fail "failed send"
- 
- $BTRFS_UTIL_PROG receive -f $tmp/send.snap $SCRATCH_MNT >> $seqres.full 2>&1 \
- 	|| _fail "failed recv"
-diff --git a/tests/btrfs/019 b/tests/btrfs/019
-index 452d24b809d7..212c0586be68 100755
---- a/tests/btrfs/019
-+++ b/tests/btrfs/019
-@@ -96,7 +96,7 @@ $BTRFS_UTIL_PROG subvolume snapshot -r $TEST_DIR/$tmp_dir/send \
- 	$TEST_DIR/$tmp_dir/snap2 >> $seqres.full 2>&1 || _fail "failed snap2"
- 
- $BTRFS_UTIL_PROG send -f $TEST_DIR/$tmp_dir/send2.dump \
--	$TEST_DIR/$tmp_dir/snap2 -p $TEST_DIR/$tmp_dir/snap1 \
-+	-p $TEST_DIR/$tmp_dir/snap1 $TEST_DIR/$tmp_dir/snap2 \
- 	>> $seqres.full 2>&1 || _fail "failed second send"
- 
- $BTRFS_UTIL_PROG receive -f $TEST_DIR/$tmp_dir/send2.dump $SCRATCH_MNT \
-diff --git a/tests/btrfs/025 b/tests/btrfs/025
-index 81ae94371d3c..43d7e6cb33f0 100755
---- a/tests/btrfs/025
-+++ b/tests/btrfs/025
-@@ -71,9 +71,9 @@ _run_btrfs_util_prog filesystem sync $SCRATCH_MNT
- _run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT \
-     $SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $tmp/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--    -f $tmp/2.snap 2>&1
-+_run_btrfs_util_prog send -f $tmp/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $tmp/2.snap \
-+    $SCRATCH_MNT/mysnap2 2>&1
- 
- md5sum $SCRATCH_MNT/foo | _filter_scratch
- md5sum $SCRATCH_MNT/mysnap1/foo | _filter_scratch
-@@ -84,10 +84,10 @@ _check_btrfs_filesystem $SCRATCH_DEV
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/1.snap
-+_run_btrfs_util_prog receive -f $tmp/1.snap $SCRATCH_MNT
- md5sum $SCRATCH_MNT/mysnap1/foo | _filter_scratch
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/2.snap
-+_run_btrfs_util_prog receive -f $tmp/2.snap $SCRATCH_MNT
- md5sum $SCRATCH_MNT/mysnap2/foo | _filter_scratch
- 
- _scratch_unmount
-diff --git a/tests/btrfs/030 b/tests/btrfs/030
-index a8e08f6ed742..6b67de08713f 100755
---- a/tests/btrfs/030
-+++ b/tests/btrfs/030
-@@ -165,19 +165,19 @@ run_check $FSSUM_PROG -A -f -w $tmp/1.fssum $SCRATCH_MNT/mysnap1
- run_check $FSSUM_PROG -A -f -w $tmp/2.fssum -x $SCRATCH_MNT/mysnap2/mysnap1 \
-     $SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $tmp/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--    -f $tmp/2.snap
-+_run_btrfs_util_prog send -f $tmp/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -f $tmp/2.snap -p $SCRATCH_MNT/mysnap1 \
-+    $SCRATCH_MNT/mysnap2
- 
- _scratch_unmount
- _check_btrfs_filesystem $SCRATCH_DEV
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/1.snap
-+_run_btrfs_util_prog receive -f $tmp/1.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $tmp/1.fssum $SCRATCH_MNT/mysnap1 2>> $seqres.full
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/2.snap
-+_run_btrfs_util_prog receive -f $tmp/2.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $tmp/2.fssum $SCRATCH_MNT/mysnap2 2>> $seqres.full
- 
- _scratch_unmount
-diff --git a/tests/btrfs/034 b/tests/btrfs/034
-index 179c827c1a16..f27ab34cbde5 100755
---- a/tests/btrfs/034
-+++ b/tests/btrfs/034
-@@ -72,9 +72,9 @@ $XFS_IO_PROG -c "truncate 3882008" $SCRATCH_MNT/foo
- 
- _run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $tmp/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--    -f $tmp/2.snap
-+_run_btrfs_util_prog send -f $tmp/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -f $tmp/2.snap -p $SCRATCH_MNT/mysnap1 \
-+	$SCRATCH_MNT/mysnap2
- 
- md5sum $SCRATCH_MNT/foo | _filter_scratch
- md5sum $SCRATCH_MNT/mysnap1/foo | _filter_scratch
-@@ -85,10 +85,10 @@ _check_btrfs_filesystem $SCRATCH_DEV
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/1.snap
-+_run_btrfs_util_prog receive -f $tmp/1.snap $SCRATCH_MNT
- md5sum $SCRATCH_MNT/mysnap1/foo | _filter_scratch
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/2.snap
-+_run_btrfs_util_prog receive -f $tmp/2.snap $SCRATCH_MNT
- md5sum $SCRATCH_MNT/mysnap2/foo | _filter_scratch
- 
- _scratch_unmount
-diff --git a/tests/btrfs/036 b/tests/btrfs/036
-index 57ad73717f68..7e5f281e164e 100755
---- a/tests/btrfs/036
-+++ b/tests/btrfs/036
-@@ -80,6 +80,6 @@ $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
- do_snapshots &
- snapshots_pid=$!
- 
--$BTRFS_UTIL_PROG send $SCRATCH_MNT/snap_1 -f /dev/null 2>&1 | _filter_scratch
-+$BTRFS_UTIL_PROG send -f /dev/null $SCRATCH_MNT/snap_1 2>&1 | _filter_scratch
- 
- status=0 ; exit
-diff --git a/tests/btrfs/038 b/tests/btrfs/038
-index d75ed4819a04..e46b7eb13a5c 100755
---- a/tests/btrfs/038
-+++ b/tests/btrfs/038
-@@ -88,10 +88,10 @@ run_check $FSSUM_PROG -A -f -w $tmp/2.fssum -x $SCRATCH_MNT/mysnap2/mysnap1 \
- run_check $FSSUM_PROG -A -f -w $tmp/clones.fssum $SCRATCH_MNT/clones_snap \
- 	-x $SCRATCH_MNT/clones_snap/mysnap1 -x $SCRATCH_MNT/clones_snap/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $tmp/1.snap
--_run_btrfs_util_prog send $SCRATCH_MNT/clones_snap -f $tmp/clones.snap
-+_run_btrfs_util_prog send -f $tmp/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -f $tmp/clones.snap $SCRATCH_MNT/clones_snap
- _run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 \
--	-c $SCRATCH_MNT/clones_snap $SCRATCH_MNT/mysnap2 -f $tmp/2.snap
-+	-c $SCRATCH_MNT/clones_snap -f $tmp/2.snap $SCRATCH_MNT/mysnap2
- 
- _scratch_unmount
- _check_btrfs_filesystem $SCRATCH_DEV
-@@ -99,13 +99,13 @@ _check_btrfs_filesystem $SCRATCH_DEV
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/1.snap
-+_run_btrfs_util_prog receive -f $tmp/1.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $tmp/1.fssum $SCRATCH_MNT/mysnap1 2>> $seqres.full
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/clones.snap
-+_run_btrfs_util_prog receive -f $tmp/clones.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $tmp/clones.fssum $SCRATCH_MNT/clones_snap 2>> $seqres.full
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/2.snap
-+_run_btrfs_util_prog receive -f $tmp/2.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $tmp/2.fssum $SCRATCH_MNT/mysnap2 2>> $seqres.full
- 
- _scratch_unmount
-diff --git a/tests/btrfs/039 b/tests/btrfs/039
-index ac7144ff8a5f..25380dc178ba 100755
---- a/tests/btrfs/039
-+++ b/tests/btrfs/039
-@@ -104,9 +104,9 @@ run_check $FSSUM_PROG -A -f -w $tmp/1.fssum $SCRATCH_MNT/mysnap1
- run_check $FSSUM_PROG -A -f -w $tmp/2.fssum -x $SCRATCH_MNT/mysnap2/mysnap1 \
- 	$SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $tmp/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $tmp/2.snap
-+_run_btrfs_util_prog send -f $tmp/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $tmp/2.snap \
-+	$SCRATCH_MNT/mysnap2
- 
- _scratch_unmount
- _check_btrfs_filesystem $SCRATCH_DEV
-@@ -114,10 +114,10 @@ _check_btrfs_filesystem $SCRATCH_DEV
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/1.snap
-+_run_btrfs_util_prog receive -f $tmp/1.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $tmp/1.fssum $SCRATCH_MNT/mysnap1 2>> $seqres.full
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/2.snap
-+_run_btrfs_util_prog receive -f $tmp/2.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $tmp/2.fssum $SCRATCH_MNT/mysnap2 2>> $seqres.full
- 
- _scratch_unmount
-diff --git a/tests/btrfs/040 b/tests/btrfs/040
-index c97ed508e723..13584b1e514c 100755
---- a/tests/btrfs/040
-+++ b/tests/btrfs/040
-@@ -97,9 +97,9 @@ run_check $FSSUM_PROG -A -f -w $tmp/1.fssum $SCRATCH_MNT/mysnap1
- run_check $FSSUM_PROG -A -f -w $tmp/2.fssum -x $SCRATCH_MNT/mysnap2/mysnap1 \
- 	$SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $tmp/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $tmp/2.snap
-+_run_btrfs_util_prog send -f $tmp/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $tmp/2.snap \
-+	$SCRATCH_MNT/mysnap2
- 
- _scratch_unmount
- _check_btrfs_filesystem $SCRATCH_DEV
-@@ -107,10 +107,10 @@ _check_btrfs_filesystem $SCRATCH_DEV
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/1.snap
-+_run_btrfs_util_prog receive -f $tmp/1.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $tmp/1.fssum $SCRATCH_MNT/mysnap1 2>> $seqres.full
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/2.snap
-+_run_btrfs_util_prog receive -f $tmp/2.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $tmp/2.fssum $SCRATCH_MNT/mysnap2 2>> $seqres.full
- 
- _scratch_unmount
-diff --git a/tests/btrfs/043 b/tests/btrfs/043
-index 1ba5acd1038d..7bf83036931d 100755
---- a/tests/btrfs/043
-+++ b/tests/btrfs/043
-@@ -126,9 +126,9 @@ run_check $FSSUM_PROG -A -f -w $tmp/1.fssum $SCRATCH_MNT/mysnap1
- run_check $FSSUM_PROG -A -f -w $tmp/2.fssum -x $SCRATCH_MNT/mysnap2/mysnap1 \
- 	$SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $tmp/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $tmp/2.snap
-+_run_btrfs_util_prog send -f $tmp/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $tmp/2.snap \
-+	$SCRATCH_MNT/mysnap2
- 
- _check_scratch_fs
- 
-@@ -136,10 +136,10 @@ _scratch_unmount
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/1.snap
-+_run_btrfs_util_prog receive -f $tmp/1.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $tmp/1.fssum $SCRATCH_MNT/mysnap1
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/2.snap
-+_run_btrfs_util_prog receive -f $tmp/2.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $tmp/2.fssum $SCRATCH_MNT/mysnap2
- 
- status=0
-diff --git a/tests/btrfs/044 b/tests/btrfs/044
-index 9d6d212db2a9..8668d767ad05 100755
---- a/tests/btrfs/044
-+++ b/tests/btrfs/044
-@@ -106,9 +106,9 @@ run_check $FSSUM_PROG -A -f -w $tmp/1.fssum $SCRATCH_MNT/mysnap1
- run_check $FSSUM_PROG -A -f -w $tmp/2.fssum -x $SCRATCH_MNT/mysnap2/mysnap1 \
- 	$SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $tmp/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $tmp/2.snap
-+_run_btrfs_util_prog send -f $tmp/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $tmp/2.snap \
-+	$SCRATCH_MNT/mysnap2
- 
- _check_scratch_fs
- 
-@@ -116,10 +116,10 @@ _scratch_unmount
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/1.snap
-+_run_btrfs_util_prog receive -f $tmp/1.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $tmp/1.fssum $SCRATCH_MNT/mysnap1
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/2.snap
-+_run_btrfs_util_prog receive -f $tmp/2.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $tmp/2.fssum $SCRATCH_MNT/mysnap2
- 
- status=0
-diff --git a/tests/btrfs/045 b/tests/btrfs/045
-index bdafbab571c6..9fad27d50526 100755
---- a/tests/btrfs/045
-+++ b/tests/btrfs/045
-@@ -352,10 +352,10 @@ run_check $FSSUM_PROG -A -f -w $tmp/1.fssum $SCRATCH_MNT/mysnap1
- run_check $FSSUM_PROG -A -f -w $tmp/2.fssum -x $SCRATCH_MNT/mysnap2/mysnap1 \
- 	$SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $tmp/1.snap
-+_run_btrfs_util_prog send -f $tmp/1.snap $SCRATCH_MNT/mysnap1
- 
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $tmp/2.snap
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $tmp/2.snap \
-+	$SCRATCH_MNT/mysnap2
- 
- _check_scratch_fs
- 
-@@ -363,10 +363,10 @@ _scratch_unmount
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/1.snap
-+_run_btrfs_util_prog receive -f $tmp/1.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $tmp/1.fssum $SCRATCH_MNT/mysnap1
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/2.snap
-+_run_btrfs_util_prog receive -f $tmp/2.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $tmp/2.fssum $SCRATCH_MNT/mysnap2
- 
- status=0
-diff --git a/tests/btrfs/046 b/tests/btrfs/046
-index 6bf50005b507..284fa955567b 100755
---- a/tests/btrfs/046
-+++ b/tests/btrfs/046
-@@ -282,17 +282,17 @@ md5sum $SCRATCH_MNT/mysnap0/foo | _filter_scratch
- md5sum $SCRATCH_MNT/mysnap1/foo | _filter_scratch
- md5sum $SCRATCH_MNT/mysnap2/foo | _filter_scratch
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $send_files_dir/2.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/mysnap2
- 
- _check_scratch_fs
- _scratch_unmount
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
-+_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
- 
- echo "File digests in the replica filesystem:"
- md5sum $SCRATCH_MNT/mysnap1/foo | _filter_scratch
-diff --git a/tests/btrfs/048 b/tests/btrfs/048
-index e03b3c57ad19..01613367db0a 100755
---- a/tests/btrfs/048
-+++ b/tests/btrfs/048
-@@ -172,17 +172,17 @@ _run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap1
- touch $SCRATCH_MNT/testdir/subdir1/foobar2
- _run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $send_files_dir/2.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/mysnap2
- 
- _scratch_unmount
- _check_scratch_fs
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
-+_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
- $BTRFS_UTIL_PROG property get $SCRATCH_MNT/mysnap2/testdir/subdir1 compression
- $BTRFS_UTIL_PROG property get $SCRATCH_MNT/mysnap2/testdir/subdir1/foobar \
- 	compression
-diff --git a/tests/btrfs/050 b/tests/btrfs/050
-index 9a1f5e486f21..62e2cfc4c881 100755
---- a/tests/btrfs/050
-+++ b/tests/btrfs/050
-@@ -92,7 +92,7 @@ done
- 
- _run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap1
- run_check $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/mysnap1
- 
- _scratch_unmount
- _check_scratch_fs
-@@ -100,7 +100,7 @@ _check_scratch_fs
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
- 
- status=0
-diff --git a/tests/btrfs/051 b/tests/btrfs/051
-index 9ffbde371392..0a8741203914 100755
---- a/tests/btrfs/051
-+++ b/tests/btrfs/051
-@@ -68,7 +68,7 @@ echo "hello world" > $TEST_PATH/amaiAdvancedStreamingPlugin.txt
- 
- _run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap1
- run_check $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/mysnap1
- 
- _scratch_unmount
- _check_scratch_fs
-@@ -76,7 +76,7 @@ _check_scratch_fs
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
- 
- status=0
-diff --git a/tests/btrfs/053 b/tests/btrfs/053
-index 06dcaff0ca3d..1f9bffd26549 100755
---- a/tests/btrfs/053
-+++ b/tests/btrfs/053
-@@ -87,9 +87,9 @@ _run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap2
- run_check $FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
- 	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $send_files_dir/2.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/mysnap2
- 
- _scratch_unmount
- _check_scratch_fs
-@@ -97,10 +97,10 @@ _check_scratch_fs
- _scratch_mkfs "-l $leaf_size" >/dev/null 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
- 
- status=0
-diff --git a/tests/btrfs/054 b/tests/btrfs/054
-index 606fb40e1d92..9e0dd463a47f 100755
---- a/tests/btrfs/054
-+++ b/tests/btrfs/054
-@@ -85,9 +85,9 @@ mkdir $SCRATCH_MNT/first_subvol
- 
- _run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap2 -p $SCRATCH_MNT/mysnap1 \
--	-f $send_files_dir/2.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/mysnap2
- 
- _scratch_unmount
- _check_scratch_fs
-@@ -95,11 +95,11 @@ _check_scratch_fs
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
- [ -e $SCRATCH_MNT/first_subvol ] && \
- 	echo "Subvolume first_subvol was not supposed to be replicated by full send!"
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
- [ -e $SCRATCH_MNT/testdir ] && \
- 	echo "Directory testdir was supposed to be deleted after incremental send!"
- 
-diff --git a/tests/btrfs/058 b/tests/btrfs/058
-index ecfe85719287..ed39f9433271 100755
---- a/tests/btrfs/058
-+++ b/tests/btrfs/058
-@@ -77,7 +77,7 @@ sleep 3
- # The send operation used to fail with -ESTALE due to the presence of the
- # orphan inode.
- _run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap -f /dev/null
-+_run_btrfs_util_prog send -f /dev/null $SCRATCH_MNT/mysnap
- 
- status=0
- exit
-diff --git a/tests/btrfs/077 b/tests/btrfs/077
-index e56fe5bc3965..8d6541aaab4a 100755
---- a/tests/btrfs/077
-+++ b/tests/btrfs/077
-@@ -125,9 +125,9 @@ run_check $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
- run_check $FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
- 	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $send_files_dir/2.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/mysnap2
- 
- _check_scratch_fs
- 
-@@ -135,10 +135,10 @@ _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
- 
- echo "Silence is golden"
-diff --git a/tests/btrfs/083 b/tests/btrfs/083
-index 47fc3e72309c..80c8cc39b245 100755
---- a/tests/btrfs/083
-+++ b/tests/btrfs/083
-@@ -136,9 +136,9 @@ run_check $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
- run_check $FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
- 	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $send_files_dir/2.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/mysnap2
- 
- # Now recreate the filesystem by receiving both send streams and verify we get
- # the same content that the original filesystem had.
-@@ -146,10 +146,10 @@ _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
- 
- echo "Silence is golden"
-diff --git a/tests/btrfs/084 b/tests/btrfs/084
-index 55e989ac8db0..0dc940684e1f 100755
---- a/tests/btrfs/084
-+++ b/tests/btrfs/084
-@@ -111,9 +111,9 @@ run_check $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
- run_check $FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
- 	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $send_files_dir/2.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/mysnap2
- 
- # Now recreate the filesystem by receiving both send streams and verify we get
- # the same content that the original filesystem had.
-@@ -121,9 +121,9 @@ _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
- 
- echo "Silence is golden"
-diff --git a/tests/btrfs/087 b/tests/btrfs/087
-index b4a62e5787a3..15b050dbd124 100755
---- a/tests/btrfs/087
-+++ b/tests/btrfs/087
-@@ -178,9 +178,9 @@ run_check $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
- run_check $FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
- 	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $send_files_dir/2.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/mysnap2
- 
- # Now recreate the filesystem by receiving both send streams and verify we get
- # the same content that the original filesystem had.
-@@ -188,9 +188,9 @@ _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
- 
- echo "Silence is golden"
-diff --git a/tests/btrfs/092 b/tests/btrfs/092
-index 71fceec507ba..5f9c5d609ea5 100755
---- a/tests/btrfs/092
-+++ b/tests/btrfs/092
-@@ -165,9 +165,9 @@ run_check $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
- run_check $FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
- 	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $send_files_dir/2.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/mysnap2
- 
- # Now recreate the filesystem by receiving both send streams and verify we get
- # the same content that the original filesystem had.
-@@ -175,9 +175,9 @@ _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
- 
- echo "Silence is golden"
-diff --git a/tests/btrfs/094 b/tests/btrfs/094
-index 452c00840668..aa1e9ab9a9fc 100755
---- a/tests/btrfs/094
-+++ b/tests/btrfs/094
-@@ -105,9 +105,9 @@ $CLONER_PROG -s $((44 * $BLOCK_SIZE)) -d $((44 * $BLOCK_SIZE)) -l $BLOCK_SIZE \
- 
- _run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $send_files_dir/2.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/mysnap2
- 
- echo "File contents in the original filesystem:"
- echo "mysnap1/foo"
-@@ -123,8 +123,8 @@ _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
-+_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
- 
- echo "File contents in the new filesystem:"
- echo "mysnap1/foo"
-diff --git a/tests/btrfs/097 b/tests/btrfs/097
-index d83cc4628829..6c6988fbc8f7 100755
---- a/tests/btrfs/097
-+++ b/tests/btrfs/097
-@@ -96,9 +96,9 @@ $CLONER_PROG -s $(((32 + 12) * $BLOCK_SIZE)) -d $((4 * $BLOCK_SIZE)) \
- 
- _run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $send_files_dir/2.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/mysnap2
- 
- echo "File contents in the original filesystem:"
- od -t x1 $SCRATCH_MNT/mysnap2/foo | _filter_od
-@@ -109,8 +109,8 @@ _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
-+_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
- 
- echo "File contents in the new filesystem:"
- od -t x1 $SCRATCH_MNT/mysnap2/foo | _filter_od
-diff --git a/tests/btrfs/105 b/tests/btrfs/105
-index cdbdb8ffa62f..c6c12a9bceeb 100755
---- a/tests/btrfs/105
-+++ b/tests/btrfs/105
-@@ -87,9 +87,9 @@ $XFS_IO_PROG -f -c "pwrite -S 0xbb 0 96K" \
- _run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/mysnap2 \
- 	$SCRATCH_MNT/mysnap2_ro
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2_ro \
--	-f $send_files_dir/2.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/mysnap2_ro
- 
- echo "File digest in the original filesystem after being replaced:"
- md5sum $SCRATCH_MNT/mysnap2_ro/foo/bar | _filter_scratch
-@@ -100,8 +100,8 @@ _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
-+_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
- 
- echo "File digest in the new filesystem:"
- # Must match the digest from the new file.
-diff --git a/tests/btrfs/108 b/tests/btrfs/108
-index 9c6d35db1d79..23d2fa6dbc42 100755
---- a/tests/btrfs/108
-+++ b/tests/btrfs/108
-@@ -77,7 +77,7 @@ echo "File digests in the original filesystem:"
- md5sum $SCRATCH_MNT/snap/foo | _filter_scratch
- md5sum $SCRATCH_MNT/snap/bar | _filter_scratch
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/snap -f $send_files_dir/1.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/snap
- 
- # Now recreate the filesystem by receiving the send stream and verify we get
- # the same file contents that the original filesystem had.
-@@ -85,7 +85,7 @@ _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
- 
- # We expect the destination filesystem to have exactly the same file data as
- # the original filesystem.
-diff --git a/tests/btrfs/109 b/tests/btrfs/109
-index 8ee1aa190a1b..c5ab00337e32 100755
---- a/tests/btrfs/109
-+++ b/tests/btrfs/109
-@@ -87,7 +87,7 @@ echo "File digests in the original filesystem:"
- md5sum $SCRATCH_MNT/snap/foo | _filter_scratch
- md5sum $SCRATCH_MNT/snap/bar | _filter_scratch
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/snap -f $send_files_dir/1.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/snap
- 
- # Now recreate the filesystem by receiving the send stream and verify we get
- # the same file contents that the original filesystem had.
-@@ -100,7 +100,7 @@ _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount "-o compress"
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
- 
- echo "File digests in the new filesystem:"
- # Must match the digests we got in the original filesystem.
-diff --git a/tests/btrfs/110 b/tests/btrfs/110
-index 7548af4c4e95..3404887999eb 100755
---- a/tests/btrfs/110
-+++ b/tests/btrfs/110
-@@ -66,14 +66,14 @@ echo "File digest in the first filesystem, first snapshot:"
- md5sum $SCRATCH_MNT/snap1/foo | _filter_scratch
- 
- # Save send stream for this snapshot.
--_run_btrfs_util_prog send $SCRATCH_MNT/snap1 -f $send_files_dir/1.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/snap1
- 
- # Create a new filesystem and receive the snapshot.
- _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
- 
- echo "File digest in the second filesystem, first snapshot:"
- # Must match the digest we got in the first filesystem.
-@@ -92,8 +92,8 @@ _run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/snap2_rw \
- echo "File digest in the second filesystem, second snapshot:"
- md5sum $SCRATCH_MNT/snap2/foo | _filter_scratch
- 
--_run_btrfs_util_prog send -p $SCRATCH_MNT/snap1 $SCRATCH_MNT/snap2 \
--	-f $send_files_dir/2.snap
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/snap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/snap2
- 
- # Create a new filesystem and receive both the first snapshot, through the first
- # send stream we created, and the second snapshot through the incremental send
-@@ -103,12 +103,12 @@ _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
- # Receiving the second snapshot used to fail because the send stream used an
- # incorrect value for the clone sources uuid field - it used the uuid of
- # snapshot 1, which is different on each filesystem, instead of the received
- # uuid value, which is preserved across different filesystems.
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
- 
- echo "File digests in the third filesystem:"
- # Must match the digests we got in the previous filesystems.
-diff --git a/tests/btrfs/111 b/tests/btrfs/111
-index 56085dc1b9dc..fd13469ecd6e 100755
---- a/tests/btrfs/111
-+++ b/tests/btrfs/111
-@@ -74,17 +74,17 @@ md5sum $SCRATCH_MNT/snap2/foo | _filter_scratch
- 
- # Save send streams for the snapshots. For the first one we use a full send
- # operation and the for the second snapshot we use an incremental send.
--_run_btrfs_util_prog send $SCRATCH_MNT/snap1 -f $send_files_dir/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/snap1 $SCRATCH_MNT/snap2 \
--	-f $send_files_dir/2.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/snap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/snap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/snap2
- 
- # Create a new filesystem and receive the snapshots.
- _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -vv -f $send_files_dir/1.snap
--_run_btrfs_util_prog receive $SCRATCH_MNT -vv -f $send_files_dir/2.snap
-+_run_btrfs_util_prog receive -vv -f $send_files_dir/1.snap $SCRATCH_MNT
-+_run_btrfs_util_prog receive -vv -f $send_files_dir/2.snap $SCRATCH_MNT
- 
- echo "File digests in the second filesystem:"
- # Must match the digests we got in the first filesystem.
-@@ -106,9 +106,9 @@ sync
- # Now create send streams for the snapshots from this new filesystem. For the
- # first snapshot we do a full send while for the second snapshot we do an
- # incremental send.
--_run_btrfs_util_prog send $SCRATCH_MNT/snap1 -f $send_files_dir/1_2.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/snap1 $SCRATCH_MNT/snap2 \
--	-f $send_files_dir/2_2.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1_2.snap $SCRATCH_MNT/snap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/snap1 -f $send_files_dir/2_2.snap \
-+	$SCRATCH_MNT/snap2
- 
- # Create a new filesystem and receive the send streams we just created from the
- # second filesystem. This worked until the linux kernel 4.2, where a regression
-@@ -120,8 +120,8 @@ _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -vv -f $send_files_dir/1_2.snap
--_run_btrfs_util_prog receive $SCRATCH_MNT -vv -f $send_files_dir/2_2.snap
-+_run_btrfs_util_prog receive -vv -f $send_files_dir/1_2.snap $SCRATCH_MNT
-+_run_btrfs_util_prog receive -vv -f $send_files_dir/2_2.snap $SCRATCH_MNT
- 
- echo "File digests in the third filesystem:"
- # Must match the digests we got in the first and second filesystems.
-diff --git a/tests/btrfs/117 b/tests/btrfs/117
-index a028da56acff..2e5ecf7ded1b 100755
---- a/tests/btrfs/117
-+++ b/tests/btrfs/117
-@@ -80,10 +80,10 @@ _run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/clones_snap
- 
- _run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/snap1 -f $tmp/1.snap
--_run_btrfs_util_prog send $SCRATCH_MNT/clones_snap -f $tmp/clones.snap
-+_run_btrfs_util_prog send -f $tmp/1.snap $SCRATCH_MNT/snap1
-+_run_btrfs_util_prog send -f $tmp/clones.snap $SCRATCH_MNT/clones_snap
- _run_btrfs_util_prog send -p $SCRATCH_MNT/snap1 \
--	-c $SCRATCH_MNT/clones_snap $SCRATCH_MNT/snap2 -f $tmp/2.snap
-+	-c $SCRATCH_MNT/clones_snap -f $tmp/2.snap $SCRATCH_MNT/snap2
- 
- echo "File digests in the original filesystem:"
- md5sum $SCRATCH_MNT/snap1/a/b/c/x | _filter_scratch
-@@ -94,9 +94,9 @@ _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/1.snap
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/clones.snap
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $tmp/2.snap
-+_run_btrfs_util_prog receive -f $tmp/1.snap $SCRATCH_MNT
-+_run_btrfs_util_prog receive -f $tmp/clones.snap $SCRATCH_MNT
-+_run_btrfs_util_prog receive -f $tmp/2.snap $SCRATCH_MNT
- 
- echo "File digests in the new filesystem:"
- # Should match the digests we had in the original filesystem.
-diff --git a/tests/btrfs/127 b/tests/btrfs/127
-index c44e74d61e39..d1e873ac00be 100755
---- a/tests/btrfs/127
-+++ b/tests/btrfs/127
-@@ -243,9 +243,9 @@ run_check $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
- run_check $FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
- 	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $send_files_dir/2.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/mysnap2
- 
- # Now recreate the filesystem by receiving both send streams and verify we get
- # the same content that the original filesystem had.
-@@ -253,9 +253,9 @@ _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
- 
- echo "Silence is golden"
-diff --git a/tests/btrfs/128 b/tests/btrfs/128
-index 089205f06e33..b5563a7af8b0 100755
---- a/tests/btrfs/128
-+++ b/tests/btrfs/128
-@@ -109,9 +109,9 @@ run_check $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
- run_check $FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
- 	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $send_files_dir/2.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/mysnap2
- 
- # Now recreate the filesystem by receiving both send streams and verify we get
- # the same content that the original filesystem had.
-@@ -119,9 +119,9 @@ _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
- 
- echo "Silence is golden"
-diff --git a/tests/btrfs/129 b/tests/btrfs/129
-index 089d95583c3c..e1fb7b50643f 100755
---- a/tests/btrfs/129
-+++ b/tests/btrfs/129
-@@ -105,9 +105,9 @@ run_check $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
- run_check $FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
- 	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
- 
--_run_btrfs_util_prog send $SCRATCH_MNT/mysnap1 -f $send_files_dir/1.snap
--_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $send_files_dir/2.snap
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/mysnap1
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/mysnap2
- 
- # Now recreate the filesystem by receiving both send streams and verify we get
- # the same content that the original filesystem had.
-@@ -115,9 +115,9 @@ _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/1.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
--_run_btrfs_util_prog receive $SCRATCH_MNT -f $send_files_dir/2.snap
-+_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
- run_check $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
- 
- echo "Silence is golden"
-diff --git a/tests/btrfs/133 b/tests/btrfs/133
-index 5839f1779426..34b6c13163d6 100755
---- a/tests/btrfs/133
-+++ b/tests/btrfs/133
-@@ -71,8 +71,8 @@ mkdir $SCRATCH_MNT/a2
- $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-     $SCRATCH_MNT/mysnap1 > /dev/null
- 
--$BTRFS_UTIL_PROG send $SCRATCH_MNT/mysnap1 -f \
--    $send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
-+$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap \
-+	$SCRATCH_MNT/mysnap1 2>&1 1>/dev/null | _filter_scratch
- 
- _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
-@@ -98,16 +98,16 @@ $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
- # which causes a transaction commit and therefore bumps the filesystem's current
- # generation to the value 9. All the inodes created end up getting a generation
- # value of 9 and the snapshot's root inode (256) gets a generation value of 8.
--$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/1.snap > /dev/null
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT > /dev/null
- rm $send_files_dir/1.snap
- 
- $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
- $FSSUM_PROG -A -f -w $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
- 
--$BTRFS_UTIL_PROG send $SCRATCH_MNT/mysnap1 -f \
--    $send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
--$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $send_files_dir/2.snap 2>&1 1>/dev/null | _filter_scratch
-+$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap \
-+	$SCRATCH_MNT/mysnap1 2>&1 1>/dev/null | _filter_scratch
-+$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/mysnap2 2>&1 1>/dev/null | _filter_scratch
- 
- # Now recreate the filesystem by receiving both send streams and verify we get
- # the same content that the original filesystem had.
-@@ -118,9 +118,9 @@ _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/1.snap > /dev/null
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT > /dev/null
- $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
--$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/2.snap > /dev/null
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT > /dev/null
- $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
- 
- status=0
-diff --git a/tests/btrfs/134 b/tests/btrfs/134
-index 8224e477509b..f65200888c84 100755
---- a/tests/btrfs/134
-+++ b/tests/btrfs/134
-@@ -105,10 +105,10 @@ $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
- $FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
-         -x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
- 
--$BTRFS_UTIL_PROG send $SCRATCH_MNT/mysnap1 -f \
--	$send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
--$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $send_files_dir/2.snap 2>&1 1>/dev/null | _filter_scratch
-+$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap \
-+	$SCRATCH_MNT/mysnap1 2>&1 1>/dev/null | _filter_scratch
-+$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/mysnap2 2>&1 1>/dev/null | _filter_scratch
- 
- # Now recreate the filesystem by receiving both send streams and verify we get
- # the same content that the original filesystem had.
-@@ -116,9 +116,9 @@ _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/1.snap > /dev/null
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT > /dev/null
- $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
--$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/2.snap > /dev/null
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT > /dev/null
- $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
- 
- status=0
-diff --git a/tests/btrfs/135 b/tests/btrfs/135
-index bdc70b3da7cc..2199d6aefc0c 100755
---- a/tests/btrfs/135
-+++ b/tests/btrfs/135
-@@ -76,8 +76,8 @@ mv $SCRATCH_MNT/d1 $SCRATCH_MNT/d259_old/d1
- $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
- 	$SCRATCH_MNT/mysnap1 > /dev/null
- 
--$BTRFS_UTIL_PROG send $SCRATCH_MNT/mysnap1 -f \
--	$send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
-+$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap \
-+	$SCRATCH_MNT/mysnap1 2>&1 1>/dev/null | _filter_scratch
- 
- _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
-@@ -109,16 +109,16 @@ $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
- # which causes a transaction commit and therefore bumps the filesystem's current
- # generation to the value 9. All the inodes created end up getting a generation
- # value of 9 and the snapshot's root inode (256) gets a generation value of 8.
--$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/1.snap > /dev/null
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT > /dev/null
- rm $send_files_dir/1.snap
- 
- $FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
- $FSSUM_PROG -A -f -w $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
- 
--$BTRFS_UTIL_PROG send $SCRATCH_MNT/mysnap1 -f \
--	$send_files_dir/1.snap 2>&1 1>/dev/null | _filter_scratch
--$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 $SCRATCH_MNT/mysnap2 \
--	-f $send_files_dir/2.snap 2>&1 1>/dev/null | _filter_scratch
-+$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap \
-+	$SCRATCH_MNT/mysnap1 2>&1 1>/dev/null | _filter_scratch
-+$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/mysnap2 2>&1 1>/dev/null | _filter_scratch
- 
- # Now recreate the filesystem by receiving both send streams and verify we get
- # the same content that the original filesystem had.
-@@ -126,7 +126,7 @@ _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
--$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/1.snap > /dev/null
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT > /dev/null
- $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
- # The receive of the incremental send stream used to fail because it contained
- # a rmdir operation with an invalid path. The output of the receive command,
-@@ -152,7 +152,7 @@ $FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
- # was incorrect because the inodes with number 259 in both snapshots are not the
- # same, they have different generations.
- #
--$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/2.snap > /dev/null
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT > /dev/null
- $FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
- 
- status=0
-diff --git a/tests/btrfs/137 b/tests/btrfs/137
-index 3ff2c6b4a04e..eaac5d4960f1 100755
---- a/tests/btrfs/137
-+++ b/tests/btrfs/137
-@@ -103,10 +103,10 @@ $XFS_IO_PROG -r -c "fiemap -v" $SCRATCH_MNT/snap2/bar | _filter_fiemap
- echo
- 
- # Create the send streams to apply later on a new filesystem.
--$BTRFS_UTIL_PROG send $SCRATCH_MNT/snap1 -f $send_files_dir/1.snap 2>&1 \
-+$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap $SCRATCH_MNT/snap1 2>&1 \
- 	| _filter_scratch
--$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/snap1 $SCRATCH_MNT/snap2 \
--	-f $send_files_dir/2.snap 2>&1 | _filter_scratch
-+$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/snap1 -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/snap2 2>&1 | _filter_scratch
- 
- # Create a new filesystem, receive the send streams and verify that the file
- # contents are the same as in the original filesystem and that the file holes
-@@ -114,8 +114,8 @@ $BTRFS_UTIL_PROG send -p $SCRATCH_MNT/snap1 $SCRATCH_MNT/snap2 \
- _scratch_unmount
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
--$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/1.snap >/dev/null
--$BTRFS_UTIL_PROG receive $SCRATCH_MNT -f $send_files_dir/2.snap >/dev/null
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT >/dev/null
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT >/dev/null
- 
- echo
- echo "File digests in the new filesystem:"
--- 
-2.12.0
+_require_scratch is not called, but in the test $SCRATCH_MNT is used. So
+you need to either call "_require_scratch" here or use $TEST_DIR in the
+test. For this statx(2) test, I think test in $TEST_DIR would be
+sufficient.
 
+TEST_DEV and TEST_DIR are mandatory in xfstests, while SCRATCH_DEV and
+SCRATCH_MNT are optional, so need to _require_scratch before using them.
+
+> +_require_test_program "stat_test"
+
+Also, we need to detect if the filesystem in test supports statx(2) or
+not, and call _notrun to exit immediately and skip the test, so test
+doesn't fail when running on older kernels where don't have statx
+support. e.g. a new _require rule like
+
+_require_statx
+
+Perhaps you can update src/stat_test so that it could perform statx(2)
+call on a give file and report the support status of statx syscall of
+the filesystem. e.g. common/rc::_require_seek_data_hole(), it runs
+"src/seek_sanity_test -t $testfile" to check statx support status.
+
+> +
+> +function check_stat () {
+> +    $here/src/stat_test $*
+> +}
+> +
+> +###############################################################################
+> +#
+> +# Check statx'ing of various types of object
+> +#
+> +###############################################################################
+> +failed=0
+
+This is not needed, "status" is sufficient.
+
+> +
+> +echo "Test statx on a fifo"
+> +origin=`date +%s.%N`
+> +if mkfifo -m 0600 $SCRATCH_MNT/fifo
+> +then
+> +    check_stat $SCRATCH_MNT/fifo \
+> +	       $origin\
+> +	       ts_order \
+> +	       stx_type=fifo \
+> +	       stx_mode=0600 \
+> +	       stx_rdev_major=0 \
+> +	       stx_rdev_minor=0 \
+> +	       stx_nlink=1 \
+> +	|| failed=1
+> +else
+> +    echo "- mkfifo failed"
+> +    failed=1
+> +fi
+
+No need to check if mkfifo's status (and all later similar commands like
+mkmod, mkdir, ln etc.). The test harness compares the test output with
+the predefined golden output file (420.out in this case) and fails the
+test if the output doesn't match. So any error message from mkfifo,
+mknod, mkdir commands will break golden image and fails the test.
+
+And prefix or suffix the test file name with current test sequence
+number would be good, to avoid file name conflicts with test files from
+other tests.
+
+So this could be simplified to:
+
+echo "Test statx on a fifo"
+origin=`date +%s.%N`
+mkfifo -m 0600 $TEST_DIR/$seq-fifo
+check_stat $TEST_DIR/$seq-fifo $origin ....
+
+> +
+> +echo "Test statx on a chardev"
+> +origin=`date +%s.%N`
+> +if mknod -m 0600 $SCRATCH_MNT/null c 1 3
+> +then
+> +    check_stat $SCRATCH_MNT/null \
+> +	       $origin \
+> +	       ts_order \
+> +	       stx_type=char \
+> +	       stx_mode=0600 \
+> +	       stx_rdev_major=1 \
+> +	       stx_rdev_minor=3 \
+> +	       stx_nlink=1 \
+> +	|| failed=1
+> +else
+> +    echo "- mknod failed"
+> +    failed=1
+> +fi
+> +
+> +echo "Test statx on a directory"
+> +origin=`date +%s.%N`
+> +if mkdir $SCRATCH_MNT/dir
+> +then
+> +    check_stat $SCRATCH_MNT/dir \
+> +	       $origin \
+> +	       ts_order \
+> +	       stx_type=dir \
+> +	       stx_mode=0755 \
+> +	       stx_rdev_major=0 \
+> +	       stx_rdev_minor=0 \
+> +	       stx_nlink=2 \
+> +	|| failed=1
+> +else
+> +    echo "- mkdir failed"
+> +    failed=1
+> +fi
+> +
+> +echo "Test statx on a blockdev"
+> +origin=`date +%s.%N`
+> +if mknod -m 0600 $SCRATCH_MNT/loopy b 7 123
+> +then
+> +    check_stat $SCRATCH_MNT/loopy \
+> +	       $origin \
+> +	       ts_order \
+> +	       stx_type=block \
+> +	       stx_mode=0600 \
+> +	       stx_rdev_major=7 \
+> +	       stx_rdev_minor=123 \
+> +	       stx_nlink=1 \
+> +	|| failed=1
+> +else
+> +    echo "- mknod failed"
+> +    failed=1
+> +fi
+> +
+> +echo "Test statx on a file"
+> +origin=`date +%s.%N`
+> +if dd if=/dev/zero of=$SCRATCH_MNT/file bs=1024 count=20
+> +then
+> +    check_stat $SCRATCH_MNT/file \
+> +	       $origin \
+> +	       ts_order \
+> +	       stx_type=file \
+> +	       stx_size=20480 \
+> +	       stx_rdev_major=0 \
+> +	       stx_rdev_minor=0 \
+> +	       stx_nlink=1 \
+> +	|| failed=1
+> +else
+> +    echo "- dd failed"
+> +    failed=1
+> +fi
+> +
+> +echo "Test statx on a symlink"
+> +origin=`date +%s.%N`
+> +if ln -s $SCRATCH_MNT/nowhere $SCRATCH_MNT/symlink
+> +then
+> +    check_stat $SCRATCH_MNT/symlink \
+> +	       $origin \
+> +	       ts_order \
+> +	       stx_type=sym \
+> +	       stx_rdev_major=0 \
+> +	       stx_rdev_minor=0 \
+> +	       stx_nlink=1 \
+> +	|| failed=1
+> +else
+> +    echo "- ln -s failed"
+> +    failed=1
+> +fi
+> +
+> +echo "Test statx on an AF_UNIX socket"
+> +origin=`date +%s.%N`
+> +if (coproc SERVER { nc -U -l $SCRATCH_MNT/sock </dev/null; };
+> +    nc -U $SCRATCH_MNT/sock </dev/null;
+> +    wait)
+> +then
+> +    check_stat $SCRATCH_MNT/sock \
+> +	       $origin \
+> +	       ts_order \
+> +	       stx_type=sock \
+> +	       stx_rdev_major=0 \
+> +	       stx_rdev_minor=0 \
+> +	       stx_nlink=1 \
+> +	|| failed=1
+> +else
+> +    echo "- nc failed"
+> +    failed=1
+> +fi
+
+If nc is really needed, we should check the existence of it before
+starting the actual test, so test won't fail because of lack of nc
+command. i.e. define NC_PROG in common/config and call _require_command
+to check the existence of it. e.g.
+
+common/config:
+export NC_PROG="`set_prog_path nc`"
+
+In this test, along with other _require rules:
+_require_command "$NC_PROG" "nc"
+
+> +
+> +echo "Test a hard link to a file"
+> +origin=`date +%s.%N`
+> +if ln $SCRATCH_MNT/file $SCRATCH_MNT/link
+> +then
+> +    check_stat $SCRATCH_MNT/link \
+> +	       $origin \
+> +	       ts=O,c \
+> +	       cmp=$SCRATCH_MNT/file \
+> +	       stx_nlink=2 \
+> +	|| failed=1
+> +else
+> +    echo "- ln failed"
+> +    failed=1
+> +fi
+> +
+> +if [ $failed = 1 ]
+> +then
+> +    echo "Test script failed"
+> +    exit
+> +fi
+
+This is not needed either.
+
+> +
+> +echo "Success"
+> +
+> +# optional stuff if your test has verbose output to help resolve problems
+> +#echo
+> +#echo "If failure, check $seqres.full (this) and $seqres.full.ok (reference)"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/420.out b/tests/generic/420.out
+> new file mode 100644
+> index 0000000..e2956a6
+> --- /dev/null
+> +++ b/tests/generic/420.out
+> @@ -0,0 +1,12 @@
+> +QA output created by 420
+> +Test statx on a fifo
+> +Test statx on a chardev
+> +Test statx on a directory
+> +Test statx on a blockdev
+> +Test statx on a file
+> +20+0 records in
+> +20+0 records out
+> +Test statx on a symlink
+> +Test statx on an AF_UNIX socket
+> +Test a hard link to a file
+> +Success
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 0781f35..c420998 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -422,3 +422,4 @@
+>  417 auto quick shutdown log
+>  418 auto rw
+>  419 auto quick encrypt
+> +420 other
+
+I noticed you've already updated group to 'auto quick' :)
+
+Thanks,
+Eryu
