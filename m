@@ -1,229 +1,146 @@
-Received: from mx1.redhat.com ([209.132.183.28]:34508 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750797AbdDAHfw (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 1 Apr 2017 03:35:52 -0400
-Date: Sat, 1 Apr 2017 15:35:49 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 1/2] xfstests: Add first statx test
-Message-ID: <20170401073549.GP22845@eguan.usersys.redhat.com>
-References: <149097291264.20089.7010494679305716312.stgit@warthog.procyon.org.uk>
+Received: from mail-pf0-f176.google.com ([209.85.192.176]:33561 "EHLO
+        mail-pf0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751465AbdDBOPj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 2 Apr 2017 10:15:39 -0400
+Received: by mail-pf0-f176.google.com with SMTP id s16so22726293pfs.0
+        for <fstests@vger.kernel.org>; Sun, 02 Apr 2017 07:15:39 -0700 (PDT)
+Received: from localhost ([128.199.137.77])
+        by smtp.gmail.com with ESMTPSA id b10sm20584748pga.39.2017.04.02.07.15.37
+        for <fstests@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Sun, 02 Apr 2017 07:15:37 -0700 (PDT)
+Message-ID: <58e10789.0a34630a.21b0.eb31@mx.google.com>
+From: Eryu Guan <guaneryu@gmail.com>
+Date: Sun, 02 Apr 2017 22:15:33 +0800
+Subject: [ANNOUNCE] fstests: master branch updated to 98ac3be36022
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="qywp53FxmPPY"
 Content-Disposition: inline
-In-Reply-To: <149097291264.20089.7010494679305716312.stgit@warthog.procyon.org.uk>
 Sender: fstests-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: linux-xfs@vger.kernel.org, hch@infradead.org, amir73il@gmail.com, david@fromorbit.com, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Mar 31, 2017 at 04:08:32PM +0100, David Howells wrote:
-> Add a statx test script that does the following:
-> 
->  (1) Creates one each of the various types of file object and creates a
->      hard link to the regular file.
-> 
->      Note that the creation of an AF_UNIX socket is done with netcat in a
->      bash coprocessing thread.  This might be best done with another
->      in-house helper to avoid a dependency on nc.
-> 
->  (2) Invokes the C test program included in this patch after the creation
->      and hands it a list of things to check appropriate to each object.
-> 
->  (3) Asks the test program to check the creation time of each object
->      against that of the preceding object.
-> 
->  (4) Makes various tests on the timestamps of the hardlinked file.
-> 
-> The patch also creates a C[*] test program to do the actual stat checking.
-> The test program then does the following:
-> 
->  (1) Compares the output of statx() to that of fstatat().
-> 
->  (2) Optionally compares the timestamps to see that they're sensibly
->      ordered with respect to each other.
-> 
->  (3) Optionally compares the timestamps to those of a reference file.
-> 
->  (4) Optionally compares the timestamps to a specified time.
-> 
->  (5) Optionally compares selected stats to values specified on the command
->      line.
-> 
->  (6) Optionally compares all the stats to those of a reference file,
->      requiring them to be the same (hard link checking).
-> 
-> For example:
-> 
-> 	./src/stat_test /dev/null \
-> 	       stx_type=char \
-> 	       stx_rdev_major=3 \
-> 	       stx_rdev_minor=8 \
-> 	       stx_nlink=1 \
-> 	       ref=/dev/zero \
-> 	       ts=B,b
-> 
-> The test program can also be given a --check-statx parameter to give a
-> quick exit code-based answer on whether statx() exists within the kernel.
-> 
-> [*] Note that it proved much easier to do this in C than trying to do it in
->     shell script and trying parsing the output of xfs_io.  Using xfs_io has
->     other pitfalls also: it wants to *open* the file, even if the file is
->     not an appropriate type for this or does not grant permission to do so.
->     I can get around this by opening O_PATH, but then xfs_io fails to
->     handle XFS files because it wants to issue ioctls on every fd it opens.
-> 
-> Signed-off-by: David Howells <dhowells@redhat.com>
-> ---
 
-...
+--qywp53FxmPPY
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> diff --git a/src/stat_test.c b/src/stat_test.c
-> new file mode 100644
-> index 0000000..f1f1756
-> --- /dev/null
-> +++ b/src/stat_test.c
+Hi all,
 
-I saw the same "may be used uninitialized" warning compiling this, gcc
-4.8.5 shipped by RHEL7.3
+The master branch of the xfstests repository at:
 
-...
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-> diff --git a/tests/generic/420 b/tests/generic/420
-> new file mode 100755
-> index 0000000..d772815
-> --- /dev/null
-> +++ b/tests/generic/420
-> @@ -0,0 +1,181 @@
-> +#! /bin/bash
-> +# FS QA Test 420
-> +#
-> +# Test the statx system call
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
-> +# Written by David Howells (dhowells@redhat.com)
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=0
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_test
-> +_require_test_program "stat_test"
-> +_require_statx
-> +_require_command "$NC_PROG" nc
-> +
-> +function check_stat () {
-> +    $here/src/stat_test $*
-> +}
-> +
-> +###############################################################################
-> +#
-> +# Check statx'ing of various types of object
-> +#
-> +# After each object is created, barring the first, we check that the creation
-> +# time and the change time of the new object as same as or later than the
-> +# corresponding timestamps on the previous object created.
-> +#
-> +###############################################################################
-> +echo "Test statx on a fifo"
-> +mkfifo -m 0600 $TEST_DIR/$seq-fifo
+have just been updated. In this update, mmap read/write operations are added to
+fsstress, many thanks to Zorro! Also there're new punch hole test and fs
+encryption test, and btrfs command line fixes.
 
-Because TEST_DEV is not re-created by default, these test files should
-be removed either before creating them or in _cleanup, otherwise test
-fails as:
-
-     Test statx on a fifo
-    +mkfifo: cannot create fifo '/mnt/testarea/test/420-fifo': File exists
-     Test statx on a chardev
-    +mknod: '/mnt/testarea/test/420-null': File exists
-     Test statx on a directory
-    +mkdir: cannot create directory '/mnt/testarea/test/420-dir': File exists
-    ...
-
-I think adding "rm -rf $TEST_DIR/$seq*" in _cleanup would make it work.
-
-...
-
-> +echo "Test statx on an AF_UNIX socket"
-> +coproc SERVER { $NC_PROG -U -l $TEST_DIR/$seq-sock </dev/null; };
-> +nc -U $TEST_DIR/$seq-sock </dev/null;
-> +wait
-> +check_stat $TEST_DIR/$seq-sock \
-> +	   ts_order \
-> +	   ref=$TEST_DIR/$seq-symlink \
-> +	   ts=B,b \
-> +	   ts=M,m \
-> +	   stx_type=sock \
-> +	   stx_rdev_major=0 \
-> +	   stx_rdev_minor=0 \
-> +	   stx_nlink=1
-
-Along with the "-U option not being recognized" issue on Debian, I also
-noticed nc hanging there and waiting for input thus hung the whole test,
-but it's rare and hard to reproduce. Just FYI.
-
-> +
-> +#
-> +# Test hard link creation.  Make sure that the file's ctime is now same as or
-> +# later than the creation time of the socket, but that the file's creation time
-> +# still lies somewhere between those of the directory and the socket.
-> +#
-> +echo "Test a hard link to a file"
-> +ln $TEST_DIR/$seq-file $TEST_DIR/$seq-link
-> +check_stat $TEST_DIR/$seq-link \
-> +	   ref=$TEST_DIR/$seq-dir \
-> +	   ts=B,b \
-> +	   ref=$TEST_DIR/$seq-sock \
-> +	   ts=b,B \
-> +	   ts=B,c \
-> +	   ts=C,c \
-> +	   ref=$TEST_DIR/$seq-file \
-> +	   cmp_ref \
-> +	   stx_nlink=2
-> +
-> +# optional stuff if your test has verbose output to help resolve problems
-> +#echo
-> +#echo "If failure, check $seqres.full (this) and $seqres.full.ok (reference)"
-
-Above comments can be removed, they're in template for document purpose.
+New failures I've noticed:
+- generic/420 fails on XFS, the fix is in XFS list for review
 
 Thanks,
 Eryu
+
+The new head of the master branch is commit:
+
+98ac3be36022 generic: test encryption key revocation during concurrent I/O
+
+New commits:
+
+Calvin Owens (1):
+      [9d0c04653458] generic: Add test for fallocate() PUNCH_HOLE|KEEP_SIZE
+
+David Sterba (2):
+      [df8c7225ba00] btrfs: reorder arguments so that options come first
+      [2fd80caf7175] btrfs: use full subcommand names
+
+Eric Biggers (1):
+      [98ac3be36022] generic: test encryption key revocation during concurrent I/O
+
+Zorro Lang (2):
+      [4e7d1c5e09eb] fsstress: add mwrite/mread into test operation list
+      [5d36d8585afc] xfs/068: update golden output due to new operations in fsstress
+
+
+Code Diffstat:
+
+ common/encrypt        |   8 +++
+ configure.ac          |   1 +
+ ltp/fsstress.c        | 159 +++++++++++++++++++++++++++++++++++++++++++++++++-
+ src/global.h          |   4 ++
+ tests/btrfs/008       |   4 +-
+ tests/btrfs/016       |   7 ++-
+ tests/btrfs/019       |   2 +-
+ tests/btrfs/025       |  10 ++--
+ tests/btrfs/027       |   2 +-
+ tests/btrfs/030       |  10 ++--
+ tests/btrfs/034       |  10 ++--
+ tests/btrfs/036       |   2 +-
+ tests/btrfs/038       |  12 ++--
+ tests/btrfs/039       |  10 ++--
+ tests/btrfs/040       |  10 ++--
+ tests/btrfs/043       |  10 ++--
+ tests/btrfs/044       |  10 ++--
+ tests/btrfs/045       |  10 ++--
+ tests/btrfs/046       |  10 ++--
+ tests/btrfs/048       |  10 ++--
+ tests/btrfs/050       |   4 +-
+ tests/btrfs/051       |   4 +-
+ tests/btrfs/053       |  10 ++--
+ tests/btrfs/054       |  10 ++--
+ tests/btrfs/058       |   2 +-
+ tests/btrfs/077       |  10 ++--
+ tests/btrfs/083       |  10 ++--
+ tests/btrfs/084       |  10 ++--
+ tests/btrfs/085       |   6 +-
+ tests/btrfs/087       |  10 ++--
+ tests/btrfs/092       |  10 ++--
+ tests/btrfs/094       |  10 ++--
+ tests/btrfs/097       |  10 ++--
+ tests/btrfs/105       |  10 ++--
+ tests/btrfs/108       |   4 +-
+ tests/btrfs/109       |   4 +-
+ tests/btrfs/110       |  12 ++--
+ tests/btrfs/111       |  20 +++----
+ tests/btrfs/117       |  12 ++--
+ tests/btrfs/127       |  10 ++--
+ tests/btrfs/128       |  10 ++--
+ tests/btrfs/129       |  10 ++--
+ tests/btrfs/133       |  18 +++---
+ tests/btrfs/134       |  12 ++--
+ tests/btrfs/135       |  18 +++---
+ tests/btrfs/137       |  10 ++--
+ tests/generic/420     |  65 +++++++++++++++++++++
+ tests/generic/420.out |   4 ++
+ tests/generic/421     | 110 ++++++++++++++++++++++++++++++++++
+ tests/generic/421.out |   2 +
+ tests/generic/group   |   2 +
+ tests/xfs/068         |   2 -
+ tests/xfs/068.out     |   2 +-
+ 53 files changed, 547 insertions(+), 197 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
+
+--qywp53FxmPPY
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJY4QbgAAoJECZSqilcj+djlt8QALtjFtNbZMPQGj6uOX0/W8YN
+oGJtX7pbWnPt7+B4tr8Q3LD4AFS/brb3L+kPbZtrympFPQ51wWYk8TnE6dDFkdEp
+84JXDRV84JrSNLiP4XoCIEmfDtyZ+f6puhHO92xGbWkSy/+G/cqmZYrpCy+fZCSw
+RLVTH4aXrh76Ed/fo1EDbDHw400h0z1SB/8kpbgcJ/cV0ZZScDeTr9mDq+QlHd8e
+MXQ+SQrCneLLM55SJoYZ9v5FootANKuDaODRsNJnXQtmu+bwr1T7JGr71sD35Fq+
+ARkTfv8CieGxvnnFcgTM5b6O6ikPodI3dS1UgKFRP6Pjf6p9Xmh7lmtX8J804+g0
+AsAqnpvbMXFXQQw3UE5p7isXqJs1Xs8iX/1MwYRFNc75h4expFR9JkZ5ecDMnukV
+u12QdsJQwQrwxpj+9RvaN9fV8Op7tUtf8mRq3NAvuCjoY/QT7ZHxm6J7oArU8NuH
+kINIi9MPXMT3CYS4zRFYsdnDbTbK352YEB+0LIeP5dDD2Bz1CAT95WYRgAA4FT65
+Rqa0hIfg7d2p8+KBdQtVrKSLX60YHL8fgwynKkWQz1ClKtTOZZgFq9Ft7doAC9NL
+BFJtiQPRJ0Rox/WSxc/7KNNw59J5F4UxbL+kW1ocZSvCGZJMA04mFfs38mX3Q6I1
+bLoZKpLU4nw6MolMsSr4
+=DTjr
+-----END PGP SIGNATURE-----
+
+--qywp53FxmPPY--
