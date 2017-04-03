@@ -1,140 +1,33 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:30640 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751861AbdDCQ7i (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 3 Apr 2017 12:59:38 -0400
-Date: Mon, 3 Apr 2017 09:59:06 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 1/4] xfstests: Add an auxiliary program to create an
- AF_UNIX socket [ver #3]
-Message-ID: <20170403165906.GF10881@birch.djwong.org>
-References: <149122078093.24821.17192375733082382807.stgit@warthog.procyon.org.uk>
+Received: from mx1.redhat.com ([209.132.183.28]:40858 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751564AbdDCVFT (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 3 Apr 2017 17:05:19 -0400
+From: David Howells <dhowells@redhat.com>
+In-Reply-To: <20170403163910.GD10881@birch.djwong.org>
+References: <20170403163910.GD10881@birch.djwong.org> <149122078093.24821.17192375733082382807.stgit@warthog.procyon.org.uk> <149122081486.24821.15266397607503484126.stgit@warthog.procyon.org.uk>
+Subject: Re: [PATCH 4/4] xfstests: Check the stx_attributes settable by chattr [ver #3]
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <149122078093.24821.17192375733082382807.stgit@warthog.procyon.org.uk>
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <9633.1491253516.1@warthog.procyon.org.uk>
+Date: Mon, 03 Apr 2017 22:05:16 +0100
+Message-ID: <9634.1491253516@warthog.procyon.org.uk>
 Sender: fstests-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: linux-xfs@vger.kernel.org, hch@infradead.org, amir73il@gmail.com, david@fromorbit.com, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: dhowells@redhat.com, linux-xfs@vger.kernel.org, hch@infradead.org, amir73il@gmail.com, david@fromorbit.com, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Apr 03, 2017 at 12:59:40PM +0100, David Howells wrote:
-> Add an auxiliary program to create an AF_UNIX socket at the specified
-> location so that tests can do things with it.
-> 
-> Signed-off-by: David Howells <dhowells@redhat.com>
-> ---
-> 
->  .gitignore    |    1 +
->  src/Makefile  |    2 +-
->  src/af_unix.c |   66 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  3 files changed, 68 insertions(+), 1 deletion(-)
->  create mode 100644 src/af_unix.c
-> 
-> diff --git a/.gitignore b/.gitignore
-> index 1ed2a92..8a7c052 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -35,6 +35,7 @@
->  /ltp/iogen
->  
->  # src/ binaries
-> +/src/af_unix
->  /src/alloc
->  /src/append_reader
->  /src/append_writer
-> diff --git a/src/Makefile b/src/Makefile
-> index a7f27f0..716c178 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -12,7 +12,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
->  	godown resvtest writemod makeextents itrash rename \
->  	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
->  	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
-> -	holetest t_truncate_self t_mmap_dio
-> +	holetest t_truncate_self t_mmap_dio af_unix
->  
->  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-> diff --git a/src/af_unix.c b/src/af_unix.c
-> new file mode 100644
-> index 0000000..dc2368e
-> --- /dev/null
-> +++ b/src/af_unix.c
-> @@ -0,0 +1,66 @@
-> +/* Create an AF_UNIX socket.
-> + *
-> + * Copyright (C) 2017 Red Hat, Inc. All Rights Reserved.
-> + * Written by David Howells (dhowells@redhat.com)
-> + *
-> + * This program is free software; you can redistribute it and/or
-> + * modify it under the terms of the GNU General Public Licence
-> + * as published by the Free Software Foundation; either version
-> + * 2 of the Licence, or (at your option) any later version.
-> + */
-> +
-> +#include <stdarg.h>
-> +#include <stdio.h>
-> +#include <stdlib.h>
-> +#include <stdbool.h>
-> +#include <string.h>
-> +#include <unistd.h>
-> +#include <errno.h>
-> +#include <fcntl.h>
-> +#include <sys/types.h>
-> +#include <sys/stat.h>
-> +#include <sys/socket.h>
-> +#include <sys/un.h>
-> +
-> +#define offsetof(TYPE, MEMBER)	((size_t)&((TYPE *)0)->MEMBER)
-> +
-> +int main(int argc, char *argv[])
-> +{
-> +	struct sockaddr_un sun;
-> +	struct stat st;
-> +	size_t len, max;
-> +	int fd;
-> +
-> +	if (argc != 2) {
-> +		fprintf(stderr, "Format: %s <socketpath>\n", argv[0]);
-> +		exit(2);
-> +	}
-> +
-> +	max = sizeof(sun.sun_path);
-> +	len = strlen(argv[1]);
-> +	if (len >= max) {
-> +		fprintf(stderr, "Filename too long (max %zu)\n", max);
-> +		exit(2);
-> +	}
-> +
-> +	fd = socket(AF_UNIX, SOCK_DGRAM, 0);
-> +	if (fd < 0) {
-> +		perror("socket");
-> +		exit(1);
-> +	}
-> +
-> +	memset(&sun, 0, sizeof(sun));
-> +	sun.sun_family = AF_UNIX;
-> +	strcpy(sun.sun_path, argv[1]);
-> +	if (bind(fd, (struct sockaddr *)&sun, sizeof(sun)) == -1) {
-> +		perror("bind");
-> +		exit(1);
-> +	}
-> +
-> +	if (stat(argv[1], &st)) {
-> +		fprintf(stderr, "Couldn't stat socket after creation: %m\n");
-> +		exit(1);
-> +	}
+Darrick J. Wong <darrick.wong@oracle.com> wrote:
 
-Looks ok,
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
-
---D
-
-> +
-> +	exit(0);
-> +}
+> > +# We can turn on and off append (a), compressed (c), immutable (i) and
+> > +# no-dump (d)
+> > +for a in +a -a
+> > +do
+> > +    for c in +c -c
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Does this test fail for any fs that doesn't support compressed files?
+> 
+> If so, perhaps there should be separate tests for each of the 4 attrs.
+
+They should also be tested in combination.  Hmmm...
+
+David
