@@ -1,35 +1,40 @@
-Received: from mail-oi0-f54.google.com ([209.85.218.54]:36236 "EHLO
-        mail-oi0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752153AbdDCKxs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 3 Apr 2017 06:53:48 -0400
+Received: from mail-oi0-f68.google.com ([209.85.218.68]:32848 "EHLO
+        mail-oi0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752118AbdDCLCE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 3 Apr 2017 07:02:04 -0400
 MIME-Version: 1.0
-In-Reply-To: <149121524183.22344.1748203777026246762.stgit@warthog.procyon.org.uk>
+In-Reply-To: <149121525845.22344.2910294693531349827.stgit@warthog.procyon.org.uk>
 References: <149121523070.22344.187602366514567082.stgit@warthog.procyon.org.uk>
- <149121524183.22344.1748203777026246762.stgit@warthog.procyon.org.uk>
+ <149121525845.22344.2910294693531349827.stgit@warthog.procyon.org.uk>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 3 Apr 2017 13:53:46 +0300
-Message-ID: <CAOQ4uxhBgQ6q5GMe=G14Swvxto+y2_rZucZzK521Z4mCryOrZg@mail.gmail.com>
-Subject: Re: [PATCH 2/4] xfstests: Add first statx test
+Date: Mon, 3 Apr 2017 14:02:02 +0300
+Message-ID: <CAOQ4uxj3heVi+x4Gf_-PBAK5gE36DVCsqi8wWXaNniZxNxgZQQ@mail.gmail.com>
+Subject: Re: [PATCH 4/4] xfstests: Check the stx_attributes settable by chattr
 Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
 To: David Howells <dhowells@redhat.com>
-Cc: linux-xfs <linux-xfs@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>, Dave Chinner <david@fromorbit.com>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Eryu Guan <eguan@redhat.com>
+Cc: linux-xfs <linux-xfs@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>, Dave Chinner <david@fromorbit.com>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
 On Mon, Apr 3, 2017 at 1:27 PM, David Howells <dhowells@redhat.com> wrote:
-> Add a statx test script that does the following:
+> Check the stx_attributes that can be set by calling chattr.
 >
+> Signed-off-by: David Howells <dhowells@redhat.com>
+> ---
 [...]
-> +++ b/tests/generic/420
-> @@ -0,0 +1,180 @@
+> diff --git a/tests/generic/421 b/tests/generic/421
+> new file mode 100755
+> index 0000000..6fca8f6
+> --- /dev/null
+> +++ b/tests/generic/421
+> @@ -0,0 +1,94 @@
 > +#! /bin/bash
-> +# FS QA Test 420
+> +# FS QA Test 421
 > +#
-> +# Test the statx system call
+> +# Test the statx stx_attribute flags that can be set with chattr
 > +#
 > +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
-> +# Written by David Howells (dhowells@redhat.com)
+> +# Copyright (c) 2017 YOUR NAME HERE.  All Rights Reserved.
 > +#
 > +# This program is free software; you can redistribute it and/or
 > +# modify it under the terms of the GNU General Public License as
@@ -54,9 +59,7 @@ On Mon, Apr 3, 2017 at 1:27 PM, David Howells <dhowells@redhat.com> wrote:
 > +tmp=/tmp/$$
 > +status=0
 
-I know Eryu told you that you can change the default of status to success,
-but I don't don't that this is a good idea or what's the benefit of doing that.
-(see below)
+Better default to failure. see my comments on test 420.
 
 > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
@@ -64,60 +67,84 @@ but I don't don't that this is a good idea or what's the benefit of doing that.
 > +{
 > +       cd /
 > +       rm -f $tmp.*
-> +       rm -rf $TEST_DIR/$seq-*
+> +       rm -f $seq-file
 > +}
 > +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
 > +
-
-[...]
-
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_supported_os IRIX Linux
+> +_require_test
+> +_require_test_program "stat_test"
+> +_require_statx
+> +_require_chattr
+> +
+> +function check_stat () {
+> +    $here/src/stat_test $*
+> +}
+> +
+> +touch $seq-file
+> +
+> +function try () {
+> +    chattr $* $seq-file
+> +    check_stat $seq-file \
+> +              attr=${1/a/append} \
+> +              attr=${2/c/compressed} \
+> +              attr=${3/i/immutable} \
+> +              attr=${4/d/nodump} \
+> +              stx_type=file \
+> +              stx_size=0 \
+> +              stx_rdev_major=0 \
+> +              stx_rdev_minor=0 \
+> +              stx_nlink=1
+> +}
+> +
+> +# We can turn on and off append (a), compressed (c), immutable (i) and
+> +# no-dump (d)
+> +for a in +a -a
+> +do
+> +    for c in +c -c
+> +    do
+> +       for i in +i -i
+> +       do
+> +           for d in +d -d
+> +           do
+> +               try $a $c $i $d
+> +           done
+> +       done
+> +    done
+> +done
+> +
 > +# Done.  We leave the determination to the output comparator.
-
-Not exactly. what happens if stat_test crashes without any output?
-or if the test script itself gets kills while running this last stat_test.
-test output would still look sane.
-
-A simple way to deal with this is to do
-
-function check_stat () {
-    $here/src/stat_test $* || exit
-}
-
-and set status=0 here at the end of the test, like all the other tests
-in xfstests do.
-I think the reasoning is that some (older) common functions can sometimes
-exit without setting status and you want exit status to be non zero when that
-happens.
-
-Eryu,
-
-do you agree?
-
 > +exit
-> diff --git a/tests/generic/420.out b/tests/generic/420.out
+> diff --git a/tests/generic/421.out b/tests/generic/421.out
 > new file mode 100644
-> index 0000000..21d6ffc
+> index 0000000..984fb43
 > --- /dev/null
-> +++ b/tests/generic/420.out
-> @@ -0,0 +1,11 @@
-> +QA output created by 420
-> +Test statx on a fifo
-> +Test statx on a chardev
-> +Test statx on a directory
-> +Test statx on a blockdev
-> +Test statx on a file
-> +20+0 records in
-> +20+0 records out
-> +Test statx on a symlink
-> +Test statx on an AF_UNIX socket
-> +Test a hard link to a file
+> +++ b/tests/generic/421.out
+> @@ -0,0 +1 @@
+> +QA output created by 421
+
+If the output is meant to stay empty, please copy from the tests that do
+echo "Silence is golden"
+Again, I believe this is to protect from test crashing and resulting in empty
+output (well in addition to the status thingy...)
+
 > diff --git a/tests/generic/group b/tests/generic/group
-> index 0781f35..5678101 100644
+> index 5678101..f8b01fc 100644
 > --- a/tests/generic/group
 > +++ b/tests/generic/group
-> @@ -422,3 +422,4 @@
->  417 auto quick shutdown log
+> @@ -423,3 +423,4 @@
 >  418 auto rw
 >  419 auto quick encrypt
-> +420 auto quick
+>  420 auto quick
+> +421 auto quick
 >
