@@ -1,188 +1,127 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:32261 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751785AbdDCHJb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 3 Apr 2017 03:09:31 -0400
-From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Subject: [PATCH] fstests: generic: Check if cycle mount and sleep can affect fiemap result
-Date: Mon, 3 Apr 2017 15:09:23 +0800
-Message-ID: <20170403070923.18518-1-quwenruo@cn.fujitsu.com>
+Received: from mx1.redhat.com ([209.132.183.28]:49982 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752270AbdDCK1W (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 3 Apr 2017 06:27:22 -0400
+Subject: [PATCH 1/4] xfstests: Add an auxiliary program to create an AF_UNIX
+ socket
+From: David Howells <dhowells@redhat.com>
+Date: Mon, 03 Apr 2017 11:27:10 +0100
+Message-ID: <149121523070.22344.187602366514567082.stgit@warthog.procyon.org.uk>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: linux-xfs@vger.kernel.org
+Cc: hch@infradead.org, amir73il@gmail.com, david@fromorbit.com, fstests@vger.kernel.org, dhowells@redhat.com, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-As long as we don't modify the on-disk data, fiemap result should always
-be constant.
+Add an auxiliary program to create an AF_UNIX socket at the specified
+location so that tests can do things with it.
 
-Operation like cycle mount and sleep should not affect fiemap result.
-While unfortunately, btrfs doesn't follow that behavior.
-
-Btrfs fiemap sometimes return merged result, while after cycle mount, it
-returns split result. Furthermore after a snap, btrfs returns merged
-result again.
-
-Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Signed-off-by: David Howells <dhowells@redhat.com>
 ---
- tests/generic/422     | 127 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/422.out |   2 +
- tests/generic/group   |   1 +
- 3 files changed, 130 insertions(+)
- create mode 100755 tests/generic/422
- create mode 100644 tests/generic/422.out
 
-diff --git a/tests/generic/422 b/tests/generic/422
-new file mode 100755
-index 0000000..4ca4476
---- /dev/null
-+++ b/tests/generic/422
-@@ -0,0 +1,127 @@
-+#! /bin/bash
-+# FS QA Test 422
-+#
-+# Test if a file system returns constant fiemap result after remount and
-+# fiemap.
-+# Unfortunately, btrfs doesn't follow this behavior.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Fujitsu.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os IRIX Linux
-+_require_scratch
-+
-+block_size=$((64 * 1024))
-+block_count=32
-+dst=$SCRATCH_MNT/file
-+sleeptime=3
-+
-+# It's almost 100% for btrfs to trigger inconstant fiemap result 
-+# just in case
-+runtime=$((2 * $LOAD_FACTOR))
-+
-+# record fiemap as checkpoint, and output the hash of fiemap result
-+# to stdout
-+fiemap_checkpoint()
-+{
-+	local number=$1
-+	local message=$2
-+
-+	echo "=== $message ===" >> $seqres.full
-+	$XFS_IO_PROG -c "fiemap -v" $dst > ${tmp}.cp$number
-+	cat ${tmp}.cp${number} >> $seqres.full
-+
-+	md5sum ${tmp}.cp${number} | cut -d ' ' -f 1
-+}
-+
-+do_test()
-+{
-+	local number=$1
-+
-+	# Use 16 times of file size to ensure we have enough space
-+	_scratch_mkfs_sized $((16 * $block_size * $block_count)) \
-+		> /dev/null 2>&1
-+	_scratch_mount 
-+
-+	echo "====== Loop $number ======" >> $seqres.full
-+	touch $dst
-+	# Xfsprogs 4.9.0 still has a bug that xfs_io "open" with O_SYNC command
-+	# doesn't work well with "pwrite", although it gets fixed in v4.10.0,
-+	# use dd here to avoid it won't hurt for non-xfs developers
-+	dd if=/dev/zero of=$dst bs=$block_size count=$block_count oflag=dsync \
-+		status=none 2>&1
-+
-+	hash1=$(fiemap_checkpoint 1 "Fiemap just after dsync write")
-+
-+	# Sleep should not modify fiemap result
-+	sleep $sleeptime
-+
-+	hash2=$(fiemap_checkpoint 2 "Fiemap after dsync write and sleep")
-+
-+	# cycle mount should not modify fiemap result
-+	_scratch_cycle_mount
-+
-+	hash3=$(fiemap_checkpoint 3 "Fiemap after cycle mount")
-+
-+	# Sleep should not modify fiemap result
-+	sleep $sleeptime
-+
-+	hash4=$(fiemap_checkpoint 4 "Fiemap after cycle mount and sleep")
-+
-+	_scratch_unmount
-+
-+	if [ $hash1 != $hash2 -o $hash2 != $hash3 -o $hash3 != $hash4 ]; then
-+		echo "Inconstant fiemap result detected"
-+	fi
-+	echo >> $seqres.full
-+}
-+
-+for i in $(seq 1 $runtime); do
-+	do_test $i
-+done
-+
-+echo "Silence is golden"
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/422.out b/tests/generic/422.out
+ .gitignore    |    1 +
+ src/Makefile  |    2 +-
+ src/af_unix.c |   66 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 68 insertions(+), 1 deletion(-)
+ create mode 100644 src/af_unix.c
+
+diff --git a/.gitignore b/.gitignore
+index 1ed2a92..8a7c052 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -35,6 +35,7 @@
+ /ltp/iogen
+ 
+ # src/ binaries
++/src/af_unix
+ /src/alloc
+ /src/append_reader
+ /src/append_writer
+diff --git a/src/Makefile b/src/Makefile
+index a7f27f0..716c178 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -12,7 +12,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	godown resvtest writemod makeextents itrash rename \
+ 	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
+ 	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
+-	holetest t_truncate_self t_mmap_dio
++	holetest t_truncate_self t_mmap_dio af_unix
+ 
+ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+diff --git a/src/af_unix.c b/src/af_unix.c
 new file mode 100644
-index 0000000..f70693f
+index 0000000..dc2368e
 --- /dev/null
-+++ b/tests/generic/422.out
-@@ -0,0 +1,2 @@
-+QA output created by 422
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 3c7c5e4..86d2325 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -424,3 +424,4 @@
- 419 auto quick encrypt
- 420 auto quick punch
- 421 auto quick encrypt dangerous
-+422 auto
--- 
-2.9.3
-
-
++++ b/src/af_unix.c
+@@ -0,0 +1,66 @@
++/* Create an AF_UNIX socket.
++ *
++ * Copyright (C) 2017 Red Hat, Inc. All Rights Reserved.
++ * Written by David Howells (dhowells@redhat.com)
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public Licence
++ * as published by the Free Software Foundation; either version
++ * 2 of the Licence, or (at your option) any later version.
++ */
++
++#include <stdarg.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <stdbool.h>
++#include <string.h>
++#include <unistd.h>
++#include <errno.h>
++#include <fcntl.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <sys/socket.h>
++#include <sys/un.h>
++
++#define offsetof(TYPE, MEMBER)	((size_t)&((TYPE *)0)->MEMBER)
++
++int main(int argc, char *argv[])
++{
++	struct sockaddr_un sun;
++	struct stat st;
++	size_t len, max;
++	int fd;
++
++	if (argc != 2) {
++		fprintf(stderr, "Format: %s <socketpath>\n", argv[0]);
++		exit(2);
++	}
++
++	max = sizeof(sun.sun_path);
++	len = strlen(argv[1]);
++	if (len >= max) {
++		fprintf(stderr, "Filename too long (max %zu)\n", max);
++		exit(2);
++	}
++
++	fd = socket(AF_UNIX, SOCK_DGRAM, 0);
++	if (fd < 0) {
++		perror("socket");
++		exit(1);
++	}
++
++	memset(&sun, 0, sizeof(sun));
++	sun.sun_family = AF_UNIX;
++	strcpy(sun.sun_path, argv[1]);
++	if (bind(fd, (struct sockaddr *)&sun, sizeof(sun)) == -1) {
++		perror("bind");
++		exit(1);
++	}
++
++	if (stat(argv[1], &st)) {
++		fprintf(stderr, "Couldn't stat socket after creation: %m\n");
++		exit(1);
++	}
++
++	exit(0);
++}
 
