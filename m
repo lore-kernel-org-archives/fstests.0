@@ -1,146 +1,194 @@
-Received: from mail-pf0-f176.google.com ([209.85.192.176]:33561 "EHLO
-        mail-pf0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751465AbdDBOPj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 2 Apr 2017 10:15:39 -0400
-Received: by mail-pf0-f176.google.com with SMTP id s16so22726293pfs.0
-        for <fstests@vger.kernel.org>; Sun, 02 Apr 2017 07:15:39 -0700 (PDT)
-Received: from localhost ([128.199.137.77])
-        by smtp.gmail.com with ESMTPSA id b10sm20584748pga.39.2017.04.02.07.15.37
-        for <fstests@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Sun, 02 Apr 2017 07:15:37 -0700 (PDT)
-Message-ID: <58e10789.0a34630a.21b0.eb31@mx.google.com>
-From: Eryu Guan <guaneryu@gmail.com>
-Date: Sun, 02 Apr 2017 22:15:33 +0800
-Subject: [ANNOUNCE] fstests: master branch updated to 98ac3be36022
+Received: from cn.fujitsu.com ([59.151.112.132]:50958 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751280AbdDCDBu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 2 Apr 2017 23:01:50 -0400
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Subject: [PATCH] fstests: btrfs: Check if btrfs will create inline-then-regular file extents
+Date: Mon, 3 Apr 2017 11:01:39 +0800
+Message-ID: <20170403030139.7677-1-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="qywp53FxmPPY"
-Content-Disposition: inline
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+Btrfs allows inline file extent if and only if
+1) It's at offset 0
+2) It's smaller than min(max_inline, page_size)
+   Although we don't specify if the size is before compression or after
+   compression.
+   At least according to current behavior, we are only limiting the size
+   after compression.
+3) It's the only file extent
+   So that if we append existing inline extent, it should be converted
+   to regular file extents.
 
---qywp53FxmPPY
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+However several users in btrfs mail list have reported invalid inline
+file extent, which only meets the first two condition, but with regular
+file extents follows.
 
-Hi all,
+The bug is here for a long long time, so long that we have modified
+kernel and btrfs-progs to accept such case, but it's still not designed
+behavior, and must be detected and fixed.
 
-The master branch of the xfstests repository at:
+Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+---
+ tests/btrfs/140     | 124 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/140.out |   2 +
+ tests/btrfs/group   |   1 +
+ 3 files changed, 127 insertions(+)
+ create mode 100755 tests/btrfs/140
+ create mode 100644 tests/btrfs/140.out
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+diff --git a/tests/btrfs/140 b/tests/btrfs/140
+new file mode 100755
+index 0000000..139df76
+--- /dev/null
++++ b/tests/btrfs/140
+@@ -0,0 +1,124 @@
++#! /bin/bash
++# FS QA Test 140
++#
++# Check if btrfs will create inline-then-regular file layout.
++#
++# Btrfs only allows inline file extent if file is small enough, and any
++# incoming write enlarges the file beyong max_inline should replace inline
++# extents with regular extents.
++# This is a long standing bug, so fsck won't detect it and kernel will allow
++# normal read on it, but should be avoided.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Fujitsu.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_btrfs_command inspect-internal dump-tree
++
++inline_size=2048
++page_size=$(get_page_size)
++src_subv="$SCRATCH_MNT/src"
++dst_subv="$SCRATCH_MNT/dst"
++runtime=$(($LOAD_FACTOR * 8))	#The possibility is over 80%, just in case
++corrupted=0
++
++do_test()
++{
++	local ret
++	_scratch_mkfs > /dev/null >&1
++
++	# specify max_inline and compress explicitly to create
++	# inlined compressed extent
++	_scratch_mount "-o max_inline=$inline_size,compress"
++	
++	# Subvolume id=257
++	_run_btrfs_util_prog subvolume create $src_subv
++
++	# Page sized data will be compressed to quite small size,
++	# which is about 50 bytes for 4K, 100 bytes for 64K,
++	# far smaller than $inline_size, causing a inlined compressed
++	# file extent
++	xfs_io -f -c "pwrite 0 $page_size" $src_subv/file > /dev/null
++	sync
++
++	# Subvolume id=258
++	_run_btrfs_util_prog subvolume snapshot $src_subv $dst_subv
++	
++	# Append another page to file in snapshot, since its offset is not
++	# 0, it will cause regular extent, and should convert inline extent
++	# to regular too.
++	xfs_io -c "pwrite $page_size $page_size" $dst_subv/file > /dev/null
++	_scratch_unmount
++
++	# Fsck won't report inline-then-regular as error, as it's so long
++	# standing that we have no choice but to accept.
++	# So here we use dump-tree to catch inline extent of $dst_subv, and
++	# we need piping stdout, call btrfs-progs directly
++	$BTRFS_UTIL_PROG inspect-internal dump-tree -t 258 $SCRATCH_DEV \
++		> $tmp.dump_tree
++	if [[ $(cat $tmp.dump_tree | grep inline) ]]; then
++		cat $tmp.dump_tree >> $seqres.full
++		echo "Invalid inline file extent detected"
++		return 1
++	fi
++	return 0
++}
++
++for i in $(seq 1 $runtime); do
++	do_test
++	if [ $? -ne 0 ]; then
++		corrupted=$(($corrupted + 1))
++	fi
++done
++
++if [ $corrupted -ne 0 ]; then
++	echo "Corruption possibility: $corrupted/$runtime" >> $seqres.full
++fi
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
+new file mode 100644
+index 0000000..24e90bc
+--- /dev/null
++++ b/tests/btrfs/140.out
+@@ -0,0 +1,2 @@
++QA output created by 140
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 641d826..e4c76e3 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -142,3 +142,4 @@
+ 137 auto quick send
+ 138 auto compress
+ 139 auto qgroup
++140 auto
+-- 
+2.9.3
 
-have just been updated. In this update, mmap read/write operations are added to
-fsstress, many thanks to Zorro! Also there're new punch hole test and fs
-encryption test, and btrfs command line fixes.
-
-New failures I've noticed:
-- generic/420 fails on XFS, the fix is in XFS list for review
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-98ac3be36022 generic: test encryption key revocation during concurrent I/O
-
-New commits:
-
-Calvin Owens (1):
-      [9d0c04653458] generic: Add test for fallocate() PUNCH_HOLE|KEEP_SIZE
-
-David Sterba (2):
-      [df8c7225ba00] btrfs: reorder arguments so that options come first
-      [2fd80caf7175] btrfs: use full subcommand names
-
-Eric Biggers (1):
-      [98ac3be36022] generic: test encryption key revocation during concurrent I/O
-
-Zorro Lang (2):
-      [4e7d1c5e09eb] fsstress: add mwrite/mread into test operation list
-      [5d36d8585afc] xfs/068: update golden output due to new operations in fsstress
 
 
-Code Diffstat:
-
- common/encrypt        |   8 +++
- configure.ac          |   1 +
- ltp/fsstress.c        | 159 +++++++++++++++++++++++++++++++++++++++++++++++++-
- src/global.h          |   4 ++
- tests/btrfs/008       |   4 +-
- tests/btrfs/016       |   7 ++-
- tests/btrfs/019       |   2 +-
- tests/btrfs/025       |  10 ++--
- tests/btrfs/027       |   2 +-
- tests/btrfs/030       |  10 ++--
- tests/btrfs/034       |  10 ++--
- tests/btrfs/036       |   2 +-
- tests/btrfs/038       |  12 ++--
- tests/btrfs/039       |  10 ++--
- tests/btrfs/040       |  10 ++--
- tests/btrfs/043       |  10 ++--
- tests/btrfs/044       |  10 ++--
- tests/btrfs/045       |  10 ++--
- tests/btrfs/046       |  10 ++--
- tests/btrfs/048       |  10 ++--
- tests/btrfs/050       |   4 +-
- tests/btrfs/051       |   4 +-
- tests/btrfs/053       |  10 ++--
- tests/btrfs/054       |  10 ++--
- tests/btrfs/058       |   2 +-
- tests/btrfs/077       |  10 ++--
- tests/btrfs/083       |  10 ++--
- tests/btrfs/084       |  10 ++--
- tests/btrfs/085       |   6 +-
- tests/btrfs/087       |  10 ++--
- tests/btrfs/092       |  10 ++--
- tests/btrfs/094       |  10 ++--
- tests/btrfs/097       |  10 ++--
- tests/btrfs/105       |  10 ++--
- tests/btrfs/108       |   4 +-
- tests/btrfs/109       |   4 +-
- tests/btrfs/110       |  12 ++--
- tests/btrfs/111       |  20 +++----
- tests/btrfs/117       |  12 ++--
- tests/btrfs/127       |  10 ++--
- tests/btrfs/128       |  10 ++--
- tests/btrfs/129       |  10 ++--
- tests/btrfs/133       |  18 +++---
- tests/btrfs/134       |  12 ++--
- tests/btrfs/135       |  18 +++---
- tests/btrfs/137       |  10 ++--
- tests/generic/420     |  65 +++++++++++++++++++++
- tests/generic/420.out |   4 ++
- tests/generic/421     | 110 ++++++++++++++++++++++++++++++++++
- tests/generic/421.out |   2 +
- tests/generic/group   |   2 +
- tests/xfs/068         |   2 -
- tests/xfs/068.out     |   2 +-
- 53 files changed, 547 insertions(+), 197 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
-
---qywp53FxmPPY
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJY4QbgAAoJECZSqilcj+djlt8QALtjFtNbZMPQGj6uOX0/W8YN
-oGJtX7pbWnPt7+B4tr8Q3LD4AFS/brb3L+kPbZtrympFPQ51wWYk8TnE6dDFkdEp
-84JXDRV84JrSNLiP4XoCIEmfDtyZ+f6puhHO92xGbWkSy/+G/cqmZYrpCy+fZCSw
-RLVTH4aXrh76Ed/fo1EDbDHw400h0z1SB/8kpbgcJ/cV0ZZScDeTr9mDq+QlHd8e
-MXQ+SQrCneLLM55SJoYZ9v5FootANKuDaODRsNJnXQtmu+bwr1T7JGr71sD35Fq+
-ARkTfv8CieGxvnnFcgTM5b6O6ikPodI3dS1UgKFRP6Pjf6p9Xmh7lmtX8J804+g0
-AsAqnpvbMXFXQQw3UE5p7isXqJs1Xs8iX/1MwYRFNc75h4expFR9JkZ5ecDMnukV
-u12QdsJQwQrwxpj+9RvaN9fV8Op7tUtf8mRq3NAvuCjoY/QT7ZHxm6J7oArU8NuH
-kINIi9MPXMT3CYS4zRFYsdnDbTbK352YEB+0LIeP5dDD2Bz1CAT95WYRgAA4FT65
-Rqa0hIfg7d2p8+KBdQtVrKSLX60YHL8fgwynKkWQz1ClKtTOZZgFq9Ft7doAC9NL
-BFJtiQPRJ0Rox/WSxc/7KNNw59J5F4UxbL+kW1ocZSvCGZJMA04mFfs38mX3Q6I1
-bLoZKpLU4nw6MolMsSr4
-=DTjr
------END PGP SIGNATURE-----
-
---qywp53FxmPPY--
