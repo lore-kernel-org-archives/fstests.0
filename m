@@ -1,55 +1,109 @@
-Received: from mail-oi0-f67.google.com ([209.85.218.67]:35902 "EHLO
-        mail-oi0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751097AbdDENpP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Apr 2017 09:45:15 -0400
+Received: from mail-io0-f196.google.com ([209.85.223.196]:34796 "EHLO
+        mail-io0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932642AbdDEQAC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 Apr 2017 12:00:02 -0400
 MIME-Version: 1.0
-In-Reply-To: <149139658242.12368.4089798272550801222.stgit@warthog.procyon.org.uk>
-References: <149139655968.12368.18434671350530288572.stgit@warthog.procyon.org.uk>
- <149139658242.12368.4089798272550801222.stgit@warthog.procyon.org.uk>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 5 Apr 2017 16:45:13 +0300
-Message-ID: <CAOQ4uxhsv2xyUCXh08sOOYa1Lc80FKtUm5a1fmrEFhi70SR2-g@mail.gmail.com>
-Subject: Re: [PATCH 4/4] xfstests: Check the stx_attributes settable by chattr
- [ver #6]
+Reply-To: fdmanana@gmail.com
+In-Reply-To: <20170405021428.14742-1-quwenruo@cn.fujitsu.com>
+References: <20170405021428.14742-1-quwenruo@cn.fujitsu.com>
+From: Filipe Manana <fdmanana@gmail.com>
+Date: Wed, 5 Apr 2017 17:00:00 +0100
+Message-ID: <CAL3q7H4Qh1bU5pyOQgzmi5D2NcawW3e9333w5qHv49ugzPn-eA@mail.gmail.com>
+Subject: Re: [PATCH] fstests: btrfs: Check if btrfs will create
+ inline-then-regular file extents
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: linux-xfs <linux-xfs@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>, Dave Chinner <david@fromorbit.com>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 5, 2017 at 3:49 PM, David Howells <dhowells@redhat.com> wrote:
-> Check the stx_attributes that can be set by calling chattr.
+On Wed, Apr 5, 2017 at 3:14 AM, Qu Wenruo <quwenruo@cn.fujitsu.com> wrote:
+> Btrfs allows inline file extent if and only if
+> 1) It's at offset 0
+> 2) It's smaller than min(max_inline, page_size)
+>    Although we don't specify if the size is before compression or after
+>    compression.
+>    At least according to current behavior, we are only limiting the size
+>    after compression.
+> 3) It's the only file extent
+>    So that if we append existing inline extent, it should be converted
+>    to regular file extents.
 >
-> The script probes the filesystem with chattr to find out which of +a, +c,
-> +d and +i are supported before testing combinations of attrs.  Note that if
-> a filesystem supports chattr with these, but doesn't paste the flag values
-> into stx_attributes, the test will fail as there's no way to distinguish
-> cleared from unset.
->
-> Certain chattr flags are reflected in specific stx_attributes flags:
->
->         chattr flag     stx_attributes flag
->         +a              STATX_ATTR_APPEND
->         +c              STATX_ATTR_COMPRESSED
->         +d              STATX_ATTR_NODUMP
->         +i              STATX_ATTR_IMMUTABLE
->
-> Signed-off-by: David Howells <dhowells@redhat.com>
-> ---
-[...]
+> However several users in btrfs mail list have reported invalid inline
+> file extent, which only meets the first two condition, but with regular
+> file extents follows.
 
+follows -> following
+
+>
+> The bug is here for a long long time, so long that we have modified
+> kernel and btrfs-progs to accept such case, but it's still not designed
+> behavior, and must be detected and fixed.
+>
+> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+> ---
+>  tests/btrfs/140     | 120 ++++++++++++++++++++++++++++++++++++++++++++++=
+++++++
+>  tests/btrfs/140.out |   2 +
+>  tests/btrfs/group   |   1 +
+>  3 files changed, 123 insertions(+)
+>  create mode 100755 tests/btrfs/140
+>  create mode 100644 tests/btrfs/140.out
+>
+> diff --git a/tests/btrfs/140 b/tests/btrfs/140
+> new file mode 100755
+> index 0000000..55f81f2
+> --- /dev/null
+> +++ b/tests/btrfs/140
+> @@ -0,0 +1,120 @@
+> +#! /bin/bash
+> +# FS QA Test 140
+> +#
+> +# Check if btrfs will create inline-then-regular file layout.
+> +#
+> +# Btrfs only allows inline file extent if file is small enough, and any
+> +# incoming write enlarges the file beyong max_inline should replace inli=
+ne
+
+beyong -> beyond
+
+> +# extents with regular extents.
+> +# This is a long standing bug, so fsck won't detect it and kernel will a=
+llow
+> +# normal read on it, but should be avoided.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Fujitsu.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=3D`basename $0`
+> +seqres=3D$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=3D`pwd`
+> +tmp=3D/tmp/$$
+> +status=3D1       # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
 > +_cleanup()
 > +{
 > +       cd /
 > +       rm -f $tmp.*
-
-You need to
-$CHATTR_PROG -a -i $testfile
-
-otherwise rm will fail on non clean exit
-
-> +       rm -f $testfile
 > +}
 > +
 > +# get standard environment, filters and checks
@@ -62,156 +116,133 @@ otherwise rm will fail on non clean exit
 > +# real QA test starts here
 > +
 > +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os IRIX Linux
-> +_require_test
-> +_require_test_program "stat_test"
-> +_require_statx
-
-I am only giving this comment because your new documentation
-reminded me about it... I hope this won't discourage you from keep
-writing more docs :-)
-
-_require_command "$CHATTR_PROG" chattr
-
-For the record, there is only one test that does this out
-of 38 tests that use chattr. As you have already realized, there
-are some good practices in xfstests that grew over the years,
-but some tests date back to before those practices and some
-tests we just did not review well enough...
-
-I feel the need to apologize for the number of review rounds
-because I keep noticing new nits. I am also new to this.
-Thanks for your patience!
-
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
+> +_require_btrfs_command inspect-internal dump-tree
 > +
-> +function check_stat () {
-> +    $here/src/stat_test $* || echo stat_test failed
+> +inline_size=3D2048
+> +page_size=3D$(get_page_size)
+> +src_subv=3D"$SCRATCH_MNT/src"
+> +dst_subv=3D"$SCRATCH_MNT/dst"
+> +loop_counts=3D$(($LOAD_FACTOR * 4)) #The possibility is over 80%, just i=
+n case
+> +
+> +do_test()
+> +{
+> +       local ret
+
+unused variable
+
+> +       _scratch_mkfs > /dev/null 2>&1
+> +
+> +       # specify max_inline and compress explicitly to create
+> +       # inlined compressed extent
+> +       _scratch_mount "-o max_inline=3D$inline_size,compress"
+> +
+> +       # Subvolume id=3D257
+> +       _run_btrfs_util_prog subvolume create $src_subv
+> +
+> +       # Page sized data will be compressed to quite small size,
+> +       # which is about 50 bytes for 4K, 100 bytes for 64K,
+> +       # far smaller than $inline_size, causing a inlined compressed
+> +       # file extent
+> +       $XFS_IO_PROG -f -c "pwrite 0 $page_size" -c "fsync" $src_subv/fil=
+e \
+> +               > /dev/null
+> +
+> +       # Subvolume id=3D258
+> +       _run_btrfs_util_prog subvolume snapshot $src_subv $dst_subv
+> +
+> +       # Append another page to file in snapshot, since its offset is no=
+t
+> +       # 0, it will cause regular extent, and should convert inline exte=
+nt
+> +       # to regular too.
+> +       $XFS_IO_PROG -c "pwrite $page_size $page_size" $dst_subv/file > /=
+dev/null
+> +       _scratch_unmount
+> +
+> +       # Fsck won't report inline-then-regular as error, as it's so long
+> +       # standing that we have no choice but to accept.
+> +       # So here we use dump-tree to catch inline extent of $dst_subv, a=
+nd
+> +       # we need piping stdout, call btrfs-progs directly
+
+I don't understand the last sentence of the comment. Need piping
+stdout? What pipe, to where? And call btrfs-progs directly where, what
+does it mean?
+
+> +       $BTRFS_UTIL_PROG inspect-internal dump-tree -t 258 $SCRATCH_DEV \
+> +               > $tmp.dump_tree
+> +       if grep -q inline $tmp.dump_tree; then
+> +               cat $tmp.dump_tree >> $seqres.full
+> +               echo "Invalid inline file extent detected"
+> +               return 1
+> +       fi
+> +       return 0
 > +}
-> +
-> +testfile=$TEST_DIR/$seq-file
-> +touch $testfile
-> +
-> +# Work out what chattrs are supported on the fs under test
-> +a_supported=""
-> +c_supported=""
-> +d_supported=""
-> +i_supported=""
-> +a_list="0"
-> +c_list="0"
-> +d_list="0"
-> +i_list="0"
-> +
-> +if chattr +a $testfile >&/dev/null
 
-$CHATTR_PROG +a (and all below)
+This is unnecessarily complex to reproduce the issue.
+It is enough to:
 
-> +then
-> +    a_supported=1
-> +    a_list="+a -a"
-> +fi
+1) Create a file with an inline extent in the default subvolume (5)
+2) Create a snapshot of the default subvolume (can be readonly)
+3) Do the second write against the file in the default subvolume
+
+I.e., no need to create a second subvolume/snapshot. The file in the
+default subvolume will have the issue.
+
 > +
-> +if chattr +c $testfile >&/dev/null
-> +then
-> +    c_supported=1
-> +    c_list="+c -c"
-> +fi
-> +
-> +if chattr +d $testfile >&/dev/null
-> +then
-> +    d_supported=1
-> +    d_list="+d -d"
-> +fi
-> +
-> +if chattr +i $testfile >&/dev/null
-> +then
-> +    i_supported=1
-> +    i_list="+i -i"
-> +fi
-> +
-> +echo "a=$a_supported d=$d_supported c=$c_supported i=$i_supported" >>$seqres.full
-> +
-> +if [ "$a_supported$c_supported$d_supported$i_supported" = "" ]
-> +then
-> +    _notrun "file system doesn't support any of chattr +a/+c/+d/+i"
-> +fi
-> +
-> +chattr -a -c -d -i $testfile
-> +
-> +###############################################################################
-> +#
-> +# Now do the actual test.  We can turn on and off append (a), compressed (c),
-> +# immutable (i) and no-dump (d) and theoretically see the output in the
-> +# attribute flags.  The following associations can be seen:
-> +#
-> +#      chattr flag     stx_attributes flag
-> +#      +a              STATX_ATTR_APPEND
-> +#      +c              STATX_ATTR_COMPRESSED
-> +#      +d              STATX_ATTR_NODUMP
-> +#      +i              STATX_ATTR_IMMUTABLE
-> +#
-> +# Note, however, that if the filesystem doesn't paste this information into
-> +# stx_attributes, there's no way to tell the difference between cleared and
-> +# unset.
-> +#
-> +###############################################################################
-> +function try () {
-> +    echo Trying "$*" >>$seqres.full
-> +    chattr ${a_supported:+$1} \
-> +          ${c_supported:+$2} \
-> +          ${d_supported:+$3} \
-> +          ${i_supported:+$4} \
-> +          $testfile
-> +    check_stat $testfile \
-> +              ${a_supported:+attr=${1/a/append}} \
-> +              ${c_supported:+attr=${2/c/compressed}} \
-> +              ${d_supported:+attr=${3/d/nodump}} \
-> +              ${i_supported:+attr=${4/i/immutable}} \
-> +              stx_type=file \
-> +              stx_size=0 \
-> +              stx_rdev_major=0 \
-> +              stx_rdev_minor=0 \
-> +              stx_nlink=1
-> +}
-> +
-> +for a in $a_list
-> +do
-> +    for c in $c_list
-> +    do
-> +       for d in $d_list
-> +       do
-> +           for i in $i_list
-> +           do
-> +               try $a $c $d $i
-> +           done
-> +       done
-> +    done
+> +for i in $(seq 1 $loop_counts); do
+> +       do_test
+> +       if [ $? -ne 0 ]; then
+> +               corrupted=3D$(($corrupted + 1))
+> +       fi
 > +done
 > +
-> +# For tradition's sake
-
-For tradition's sake, better add it to 420 as well ;-)
-
+> +echo "Corruption possibility: $corrupted/$loop_counts" >> $seqres.full
 > +echo "Silence is golden"
 > +
-> +# Done.  We leave the success determination to the output comparator.
-> +status=0
+> +# success, all done
+> +status=3D0
 > +exit
-> diff --git a/tests/generic/421.out b/tests/generic/421.out
+> diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
 > new file mode 100644
-> index 0000000..6986277
+> index 0000000..24e90bc
 > --- /dev/null
-> +++ b/tests/generic/421.out
+> +++ b/tests/btrfs/140.out
 > @@ -0,0 +1,2 @@
-> +QA output created by 421
+> +QA output created by 140
 > +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 5678101..f8b01fc 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -423,3 +423,4 @@
->  418 auto rw
->  419 auto quick encrypt
->  420 auto quick
-> +421 auto quick
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 641d826..e4c76e3 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -142,3 +142,4 @@
+>  137 auto quick send
+>  138 auto compress
+>  139 auto qgroup
+> +140 auto
+
+Add the compress group.
+
+thanks
+
+> --
+> 2.9.3
 >
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+--=20
+Filipe David Manana,
+
+=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
+ right.=E2=80=9D
