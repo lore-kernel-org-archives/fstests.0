@@ -1,46 +1,128 @@
-Received: from mail-oi0-f66.google.com ([209.85.218.66]:35377 "EHLO
-        mail-oi0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755265AbdDEMcb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Apr 2017 08:32:31 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:49332 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932212AbdDEMtX (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 5 Apr 2017 08:49:23 -0400
+Subject: [PATCH 1/4] xfstests: Add an auxiliary program to create an AF_UNIX
+ socket [ver #6]
+From: David Howells <dhowells@redhat.com>
+Date: Wed, 05 Apr 2017 13:49:19 +0100
+Message-ID: <149139655968.12368.18434671350530288572.stgit@warthog.procyon.org.uk>
 MIME-Version: 1.0
-In-Reply-To: <20170405123008.GB4781@twin.jikos.cz>
-References: <20170405103809.GY22845@eguan.usersys.redhat.com>
- <149132130900.18980.537296385250153410.stgit@warthog.procyon.org.uk>
- <149132131706.18980.7074156386090748482.stgit@warthog.procyon.org.uk>
- <2600.1491389621@warthog.procyon.org.uk> <20170405123008.GB4781@twin.jikos.cz>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 5 Apr 2017 15:32:30 +0300
-Message-ID: <CAOQ4uxik1EbovazuEnMErR433Eh=Ls8h3LhQPEU2nJhigcR+Cw@mail.gmail.com>
-Subject: Re: Does btrfs get nlink on directories wrong? -- was Re: [PATCH 2/4]
- xfstests: Add first statx test [ver #5]
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: dsterba@suse.cz, David Howells <dhowells@redhat.com>, Linux Btrfs <linux-btrfs@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>, Amir Goldstein <amir73il@gmail.com>, Dave Chinner <david@fromorbit.com>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Eryu Guan <eguan@redhat.com>
+To: linux-xfs@vger.kernel.org
+Cc: hch@infradead.org, amir73il@gmail.com, david@fromorbit.com, fstests@vger.kernel.org, dhowells@redhat.com, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 5, 2017 at 3:30 PM, David Sterba <dsterba@suse.cz> wrote:
-> On Wed, Apr 05, 2017 at 11:53:41AM +0100, David Howells wrote:
->> I've added a test to xfstests that exercises the new statx syscall.  However,
->> it fails on btrfs:
->>
->>      Test statx on a directory
->>     +[!] stx_nlink differs, 1 != 2
->>     +Failed
->>     +stat_test failed
->>
->> because a new directory it creates has an nlink of 1, not 2.  Is this a case
->> of my making an incorrect assumption or is it an fs bug?
->
-> Afaik nlink == 1 means that there's no accounting of subdirectories, and
-> it's a valid value. The 'find' utility can use nlink to optimize
-> directory traversal but otherwise I'm not aware of other usage.
->
-> All directories in btrfs have nlink == 1.
+Add an auxiliary program to create an AF_UNIX socket at the specified
+location so that tests can do things with it.
 
-FYI,
+Signed-off-by: David Howells <dhowells@redhat.com>
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
 
-Overlayfs uses nlink = 1 for merge dirs to silence 'find' et al.
-Ext4 uses nlink = 1 for directories with more than 32K subdirs
-(EXT4_FEATURE_RO_COMPAT_DIR_NLINK).
+ .gitignore    |    1 +
+ src/Makefile  |    2 +-
+ src/af_unix.c |   66 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 68 insertions(+), 1 deletion(-)
+ create mode 100644 src/af_unix.c
 
-But in both those fs newly created directories will have nlink = 2.
+diff --git a/.gitignore b/.gitignore
+index 1ed2a92..8a7c052 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -35,6 +35,7 @@
+ /ltp/iogen
+ 
+ # src/ binaries
++/src/af_unix
+ /src/alloc
+ /src/append_reader
+ /src/append_writer
+diff --git a/src/Makefile b/src/Makefile
+index a7f27f0..716c178 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -12,7 +12,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	godown resvtest writemod makeextents itrash rename \
+ 	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
+ 	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
+-	holetest t_truncate_self t_mmap_dio
++	holetest t_truncate_self t_mmap_dio af_unix
+ 
+ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+diff --git a/src/af_unix.c b/src/af_unix.c
+new file mode 100644
+index 0000000..dc2368e
+--- /dev/null
++++ b/src/af_unix.c
+@@ -0,0 +1,66 @@
++/* Create an AF_UNIX socket.
++ *
++ * Copyright (C) 2017 Red Hat, Inc. All Rights Reserved.
++ * Written by David Howells (dhowells@redhat.com)
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public Licence
++ * as published by the Free Software Foundation; either version
++ * 2 of the Licence, or (at your option) any later version.
++ */
++
++#include <stdarg.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <stdbool.h>
++#include <string.h>
++#include <unistd.h>
++#include <errno.h>
++#include <fcntl.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <sys/socket.h>
++#include <sys/un.h>
++
++#define offsetof(TYPE, MEMBER)	((size_t)&((TYPE *)0)->MEMBER)
++
++int main(int argc, char *argv[])
++{
++	struct sockaddr_un sun;
++	struct stat st;
++	size_t len, max;
++	int fd;
++
++	if (argc != 2) {
++		fprintf(stderr, "Format: %s <socketpath>\n", argv[0]);
++		exit(2);
++	}
++
++	max = sizeof(sun.sun_path);
++	len = strlen(argv[1]);
++	if (len >= max) {
++		fprintf(stderr, "Filename too long (max %zu)\n", max);
++		exit(2);
++	}
++
++	fd = socket(AF_UNIX, SOCK_DGRAM, 0);
++	if (fd < 0) {
++		perror("socket");
++		exit(1);
++	}
++
++	memset(&sun, 0, sizeof(sun));
++	sun.sun_family = AF_UNIX;
++	strcpy(sun.sun_path, argv[1]);
++	if (bind(fd, (struct sockaddr *)&sun, sizeof(sun)) == -1) {
++		perror("bind");
++		exit(1);
++	}
++
++	if (stat(argv[1], &st)) {
++		fprintf(stderr, "Couldn't stat socket after creation: %m\n");
++		exit(1);
++	}
++
++	exit(0);
++}
+
