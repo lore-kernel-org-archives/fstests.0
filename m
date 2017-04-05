@@ -1,276 +1,378 @@
-Received: from mail-io0-f196.google.com ([209.85.223.196]:35160 "EHLO
-        mail-io0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753608AbdDEQZi (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Apr 2017 12:25:38 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:59014 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754805AbdDEQco (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 5 Apr 2017 12:32:44 -0400
+Subject: [PATCH 4/4] xfstests: Check the stx_attributes settable by chattr
+ [ver #7]
+From: David Howells <dhowells@redhat.com>
+Date: Wed, 05 Apr 2017 17:32:41 +0100
+Message-ID: <149140996132.27340.12936555593689822963.stgit@warthog.procyon.org.uk>
+In-Reply-To: <149140993804.27340.4198614944626347024.stgit@warthog.procyon.org.uk>
+References: <149140993804.27340.4198614944626347024.stgit@warthog.procyon.org.uk>
 MIME-Version: 1.0
-Reply-To: fdmanana@gmail.com
-In-Reply-To: <CAL3q7H4Qh1bU5pyOQgzmi5D2NcawW3e9333w5qHv49ugzPn-eA@mail.gmail.com>
-References: <20170405021428.14742-1-quwenruo@cn.fujitsu.com> <CAL3q7H4Qh1bU5pyOQgzmi5D2NcawW3e9333w5qHv49ugzPn-eA@mail.gmail.com>
-From: Filipe Manana <fdmanana@gmail.com>
-Date: Wed, 5 Apr 2017 17:25:36 +0100
-Message-ID: <CAL3q7H4n4ORQ4Jxgkzr7d0ZD911vN-kyvFJKzPY5KH3oUj3uew@mail.gmail.com>
-Subject: Re: [PATCH] fstests: btrfs: Check if btrfs will create
- inline-then-regular file extents
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>
+To: linux-xfs@vger.kernel.org
+Cc: hch@infradead.org, amir73il@gmail.com, david@fromorbit.com, fstests@vger.kernel.org, dhowells@redhat.com, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 5, 2017 at 5:00 PM, Filipe Manana <fdmanana@gmail.com> wrote:
-> On Wed, Apr 5, 2017 at 3:14 AM, Qu Wenruo <quwenruo@cn.fujitsu.com> wrote=
-:
->> Btrfs allows inline file extent if and only if
->> 1) It's at offset 0
->> 2) It's smaller than min(max_inline, page_size)
->>    Although we don't specify if the size is before compression or after
->>    compression.
->>    At least according to current behavior, we are only limiting the size
->>    after compression.
->> 3) It's the only file extent
->>    So that if we append existing inline extent, it should be converted
->>    to regular file extents.
->>
->> However several users in btrfs mail list have reported invalid inline
->> file extent, which only meets the first two condition, but with regular
->> file extents follows.
->
-> follows -> following
->
->>
->> The bug is here for a long long time, so long that we have modified
->> kernel and btrfs-progs to accept such case, but it's still not designed
->> behavior, and must be detected and fixed.
->>
->> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
->> ---
->>  tests/btrfs/140     | 120 +++++++++++++++++++++++++++++++++++++++++++++=
-+++++++
->>  tests/btrfs/140.out |   2 +
->>  tests/btrfs/group   |   1 +
->>  3 files changed, 123 insertions(+)
->>  create mode 100755 tests/btrfs/140
->>  create mode 100644 tests/btrfs/140.out
->>
->> diff --git a/tests/btrfs/140 b/tests/btrfs/140
->> new file mode 100755
->> index 0000000..55f81f2
->> --- /dev/null
->> +++ b/tests/btrfs/140
->> @@ -0,0 +1,120 @@
->> +#! /bin/bash
->> +# FS QA Test 140
->> +#
->> +# Check if btrfs will create inline-then-regular file layout.
->> +#
->> +# Btrfs only allows inline file extent if file is small enough, and any
->> +# incoming write enlarges the file beyong max_inline should replace inl=
-ine
->
-> beyong -> beyond
->
->> +# extents with regular extents.
->> +# This is a long standing bug, so fsck won't detect it and kernel will =
-allow
->> +# normal read on it, but should be avoided.
->> +#
->> +#----------------------------------------------------------------------=
--
->> +# Copyright (c) 2017 Fujitsu.  All Rights Reserved.
->> +#
->> +# This program is free software; you can redistribute it and/or
->> +# modify it under the terms of the GNU General Public License as
->> +# published by the Free Software Foundation.
->> +#
->> +# This program is distributed in the hope that it would be useful,
->> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
->> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
->> +# GNU General Public License for more details.
->> +#
->> +# You should have received a copy of the GNU General Public License
->> +# along with this program; if not, write the Free Software Foundation,
->> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
->> +#----------------------------------------------------------------------=
--
->> +#
->> +
->> +seq=3D`basename $0`
->> +seqres=3D$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +here=3D`pwd`
->> +tmp=3D/tmp/$$
->> +status=3D1       # failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +       cd /
->> +       rm -f $tmp.*
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +
->> +# remove previous $seqres.full before test
->> +rm -f $seqres.full
->> +
->> +# real QA test starts here
->> +
->> +# Modify as appropriate.
->> +_supported_fs btrfs
->> +_supported_os Linux
->> +_require_scratch
->> +_require_btrfs_command inspect-internal dump-tree
->> +
->> +inline_size=3D2048
->> +page_size=3D$(get_page_size)
->> +src_subv=3D"$SCRATCH_MNT/src"
->> +dst_subv=3D"$SCRATCH_MNT/dst"
->> +loop_counts=3D$(($LOAD_FACTOR * 4)) #The possibility is over 80%, just =
-in case
->> +
->> +do_test()
->> +{
->> +       local ret
->
-> unused variable
->
->> +       _scratch_mkfs > /dev/null 2>&1
->> +
->> +       # specify max_inline and compress explicitly to create
->> +       # inlined compressed extent
->> +       _scratch_mount "-o max_inline=3D$inline_size,compress"
->> +
->> +       # Subvolume id=3D257
->> +       _run_btrfs_util_prog subvolume create $src_subv
->> +
->> +       # Page sized data will be compressed to quite small size,
->> +       # which is about 50 bytes for 4K, 100 bytes for 64K,
->> +       # far smaller than $inline_size, causing a inlined compressed
->> +       # file extent
->> +       $XFS_IO_PROG -f -c "pwrite 0 $page_size" -c "fsync" $src_subv/fi=
-le \
->> +               > /dev/null
->> +
->> +       # Subvolume id=3D258
->> +       _run_btrfs_util_prog subvolume snapshot $src_subv $dst_subv
->> +
->> +       # Append another page to file in snapshot, since its offset is n=
-ot
->> +       # 0, it will cause regular extent, and should convert inline ext=
-ent
->> +       # to regular too.
->> +       $XFS_IO_PROG -c "pwrite $page_size $page_size" $dst_subv/file > =
-/dev/null
->> +       _scratch_unmount
->> +
->> +       # Fsck won't report inline-then-regular as error, as it's so lon=
-g
->> +       # standing that we have no choice but to accept.
->> +       # So here we use dump-tree to catch inline extent of $dst_subv, =
-and
->> +       # we need piping stdout, call btrfs-progs directly
->
-> I don't understand the last sentence of the comment. Need piping
-> stdout? What pipe, to where? And call btrfs-progs directly where, what
-> does it mean?
->
->> +       $BTRFS_UTIL_PROG inspect-internal dump-tree -t 258 $SCRATCH_DEV =
-\
->> +               > $tmp.dump_tree
->> +       if grep -q inline $tmp.dump_tree; then
->> +               cat $tmp.dump_tree >> $seqres.full
->> +               echo "Invalid inline file extent detected"
->> +               return 1
->> +       fi
->> +       return 0
->> +}
->
-> This is unnecessarily complex to reproduce the issue.
-> It is enough to:
->
-> 1) Create a file with an inline extent in the default subvolume (5)
-> 2) Create a snapshot of the default subvolume (can be readonly)
-> 3) Do the second write against the file in the default subvolume
->
-> I.e., no need to create a second subvolume/snapshot. The file in the
-> default subvolume will have the issue.
+Check the stx_attributes that can be set by calling chattr.
 
-Even simpler:
+The script probes the filesystem with chattr to find out which of +a, +c,
++d and +i are supported before testing combinations of attrs.  Note that if
+a filesystem supports chattr with these, but doesn't paste the flag values
+into stx_attributes, the test will fail as there's no way to distinguish
+cleared from unset.
 
-1) Create the file with the data that results in the inline extent
-2) fsync the file or call sync
-3) Do the second write to the file
-4) fsync the file, call sync or unmount the fs
+Certain chattr flags are reflected in specific stx_attributes flags:
 
-No need for creation of any snapshot/subvolume.
-Basically what you had here is a shorter version of btrfs/137 forced
-with mount option -o compress.
+	chattr flag	stx_attributes flag
+	+a		STATX_ATTR_APPEND
+	+c		STATX_ATTR_COMPRESSED
+	+d		STATX_ATTR_NODUMP
+	+i		STATX_ATTR_IMMUTABLE
 
-thanks
+Signed-off-by: David Howells <dhowells@redhat.com>
+---
 
->
->> +
->> +for i in $(seq 1 $loop_counts); do
->> +       do_test
->> +       if [ $? -ne 0 ]; then
->> +               corrupted=3D$(($corrupted + 1))
->> +       fi
->> +done
->> +
->> +echo "Corruption possibility: $corrupted/$loop_counts" >> $seqres.full
->> +echo "Silence is golden"
->> +
->> +# success, all done
->> +status=3D0
->> +exit
->> diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
->> new file mode 100644
->> index 0000000..24e90bc
->> --- /dev/null
->> +++ b/tests/btrfs/140.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 140
->> +Silence is golden
->> diff --git a/tests/btrfs/group b/tests/btrfs/group
->> index 641d826..e4c76e3 100644
->> --- a/tests/btrfs/group
->> +++ b/tests/btrfs/group
->> @@ -142,3 +142,4 @@
->>  137 auto quick send
->>  138 auto compress
->>  139 auto qgroup
->> +140 auto
->
-> Add the compress group.
->
-> thanks
->
->> --
->> 2.9.3
->>
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe fstests" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-> --
-> Filipe David Manana,
->
-> =E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you'=
-re right.=E2=80=9D
+ doc/requirement-checking.txt |   22 +++++-
+ src/stat_test.c              |   71 ++++++++++++++++++
+ tests/generic/421            |  164 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/421.out        |    2 +
+ tests/generic/group          |    1 
+ 5 files changed, 259 insertions(+), 1 deletion(-)
+ create mode 100755 tests/generic/421
+ create mode 100644 tests/generic/421.out
 
+diff --git a/doc/requirement-checking.txt b/doc/requirement-checking.txt
+index f3fc9f4..730c7ac 100644
+--- a/doc/requirement-checking.txt
++++ b/doc/requirement-checking.txt
+@@ -12,7 +12,11 @@ they have.  This is done with _require_<xxx> macros, which may take parameters.
+ 	_require_test_program <name>
+ 	_require_xfs_io_command <name> [<switch>]
+ 
+- (2) System call requirements.
++ (2) Filesystem capability requirements.
++
++	_require_chattr <letters>
++
++ (3) System call requirements.
+ 
+ 	_require_statx
+ 
+@@ -67,6 +71,22 @@ _require_xfs_io_command <name> [<switch>]
+      the +x and -x arguments (DAX attribute).
+ 
+ 
++==================================
++FILESYSTEM CAPABILITY REQUIREMENTS
++==================================
++
++_require_chattr <letters>
++
++     The test requires that the filesystem attribute set by the chattr command
++     with +<letters> as an argument be available and supported by the $TEST_DEV
++     filesystem.  No check is made of the scratch filesystem.  For example:
++
++	_require_chattr ai
++
++     tests to see if setting the append-only and immutable attributes on a file
++     (chattr +a +i) is supported.
++
++
+ ========================
+ SYSTEM CALL REQUIREMENTS
+ ========================
+diff --git a/src/stat_test.c b/src/stat_test.c
+index cb3d4f4..b1205ec 100644
+--- a/src/stat_test.c
++++ b/src/stat_test.c
+@@ -102,6 +102,30 @@ static int field_cmp(const void *_key, const void *_p)
+ 	return strcmp(key, p->name);
+ }
+ 
++/*
++ * Sorted list of attribute flags for bsearch().
++ */
++struct attr_name {
++	const char	*name;
++	__u64		attr_flag;
++};
++
++static const struct attr_name attr_list[] = {
++	{ "append",	STATX_ATTR_APPEND },
++	{ "automount",	STATX_ATTR_AUTOMOUNT },
++	{ "compressed",	STATX_ATTR_COMPRESSED },
++	{ "encrypted",	STATX_ATTR_ENCRYPTED },
++	{ "immutable",	STATX_ATTR_IMMUTABLE },
++	{ "nodump",	STATX_ATTR_NODUMP },
++};
++
++static int attr_name_cmp(const void *_key, const void *_p)
++{
++	const char *key = _key;
++	const struct attr_name *p = _p;
++	return strcmp(key, p->name);
++}
++
+ struct file_type {
+ 	const char *name;
+ 	mode_t mode;
+@@ -128,6 +152,13 @@ void format(void)
+ 	fprintf(stderr, "usage: %s [-v] [-m<mask>] <testfile> [checks]\n", prog);
+ 	fprintf(stderr, "\t<mask> can be basic, all or a number; all is the default\n");
+ 	fprintf(stderr, "checks is a list of zero or more of:\n");
++	fprintf(stderr, "\tattr=[+-]<name> -- check an attribute in stx_attributes\n");
++	fprintf(stderr, "\t\tappend -- The file is marked as append only\n");
++	fprintf(stderr, "\t\tautomount -- The object is an automount point\n");
++	fprintf(stderr, "\t\tcompressed -- The file is marked as compressed\n");
++	fprintf(stderr, "\t\tencrypted -- The file is marked as encrypted\n");
++	fprintf(stderr, "\t\timmutable -- The file is marked as immutable\n");
++	fprintf(stderr, "\t\tnodump -- The file is marked as no-dump\n");
+ 	fprintf(stderr, "\tcmp_ref -- check that the reference file has identical stats\n");
+ 	fprintf(stderr, "\tref=<file> -- get reference stats from file\n");
+ 	fprintf(stderr, "\tstx_<field>=<val> -- statx field value check\n");
+@@ -564,6 +595,40 @@ static void check_field(const struct statx *stx, char *arg)
+ }
+ 
+ /*
++ * Check attributes in stx_attributes.  When stx_attributes_mask gets in
++ * upstream, we will need to consider that also.
++ */
++static void check_attribute(const struct statx *stx, char *arg)
++{
++	const struct attr_name *p;
++	__u64 attr;
++	bool set;
++
++	verbose("check attr %s\n", arg);
++	switch (arg[0]) {
++	case '+': set = true;	break;
++	case '-': set = false;	break;
++	default:
++		bad_arg("attr flag must be marked + (set) or - (unset)\n");
++	}
++	arg++;
++
++	p = bsearch(arg, attr_list, sizeof(attr_list) / sizeof(attr_list[0]),
++		    sizeof(attr_list[0]), attr_name_cmp);
++	if (!p)
++		bad_arg("Unrecognised attr name '%s'\n", arg);
++
++	attr = p->attr_flag;
++	if (set) {
++		check(stx->stx_attributes && attr,
++		      "Attribute %s should be set\n", arg);
++	} else {
++		check(~stx->stx_attributes && attr,
++		      "Attribute %s should be unset\n", arg);
++	}
++}
++
++/*
+  * Do the testing.
+  */
+ int main(int argc, char **argv)
+@@ -669,6 +734,12 @@ int main(int argc, char **argv)
+ 	for (; *argv; argv++) {
+ 		char *arg = *argv;
+ 
++		if (strncmp("attr=", arg, 5) == 0) {
++			/* attr=[+-]<attr> - check attribute flag */
++			check_attribute(&stx, arg + 5);
++			continue;
++		}
++
+ 		if (strcmp("cmp_ref", arg) == 0) {
+ 			/* cmp_ref - check ref file has same stats */
+ 			cmp_ref(&stx, mask);
+diff --git a/tests/generic/421 b/tests/generic/421
+new file mode 100755
+index 0000000..b31a3a9
+--- /dev/null
++++ b/tests/generic/421
+@@ -0,0 +1,164 @@
++#! /bin/bash
++# FS QA Test 421
++#
++# Test the statx stx_attribute flags that can be set with chattr
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
++# Written by David Howells (dhowells@redhat.com)
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	$CHATTR_PROG -a -i $testfile
++	rm -f $testfile
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os IRIX Linux
++_require_test
++_require_test_program stat_test
++_require_statx
++_require_command "$CHATTR_PROG" chattr
++
++function check_stat () {
++    $here/src/stat_test $* || echo stat_test failed
++}
++
++testfile=$TEST_DIR/$seq-file
++touch $testfile
++
++# Work out what $CHATTR_PROGs are supported on the fs under test
++a_supported=""
++c_supported=""
++d_supported=""
++i_supported=""
++a_list="0"
++c_list="0"
++d_list="0"
++i_list="0"
++
++if $CHATTR_PROG +a $testfile >&/dev/null
++then
++    a_supported=1
++    a_list="+a -a"
++fi
++
++if $CHATTR_PROG +c $testfile >&/dev/null
++then
++    c_supported=1
++    c_list="+c -c"
++fi
++
++if $CHATTR_PROG +d $testfile >&/dev/null
++then
++    d_supported=1
++    d_list="+d -d"
++fi
++
++if $CHATTR_PROG +i $testfile >&/dev/null
++then
++    i_supported=1
++    i_list="+i -i"
++fi
++
++echo "a=$a_supported d=$d_supported c=$c_supported i=$i_supported" >>$seqres.full
++
++if [ "$a_supported$c_supported$d_supported$i_supported" = "" ]
++then
++    _notrun "file system doesn't support any of $CHATTR_PROG +a/+c/+d/+i"
++fi
++
++$CHATTR_PROG -a -c -d -i $testfile
++
++###############################################################################
++#
++# Now do the actual test.  We can turn on and off append (a), compressed (c),
++# immutable (i) and no-dump (d) and theoretically see the output in the
++# attribute flags.  The following associations can be seen:
++#
++#	$CHATTR_PROG flag	stx_attributes flag
++#	+a		STATX_ATTR_APPEND
++#	+c		STATX_ATTR_COMPRESSED
++#	+d		STATX_ATTR_NODUMP
++#	+i		STATX_ATTR_IMMUTABLE
++#
++# Note, however, that if the filesystem doesn't paste this information into
++# stx_attributes, there's no way to tell the difference between cleared and
++# unset.
++#
++###############################################################################
++function try () {
++    echo Trying "$*" >>$seqres.full
++    $CHATTR_PROG ${a_supported:+$1} \
++	   ${c_supported:+$2} \
++	   ${d_supported:+$3} \
++	   ${i_supported:+$4} \
++	   $testfile
++    check_stat $testfile \
++	       ${a_supported:+attr=${1/a/append}} \
++	       ${c_supported:+attr=${2/c/compressed}} \
++	       ${d_supported:+attr=${3/d/nodump}} \
++	       ${i_supported:+attr=${4/i/immutable}} \
++	       stx_type=file \
++	       stx_size=0 \
++	       stx_rdev_major=0 \
++	       stx_rdev_minor=0 \
++	       stx_nlink=1
++}
++
++for a in $a_list
++do
++    for c in $c_list
++    do
++	for d in $d_list
++	do
++	    for i in $i_list
++	    do
++		try $a $c $d $i
++	    done
++	done
++    done
++done
++
++# For tradition's sake
++echo "Silence is golden"
++
++# Done.  We leave the success determination to the output comparator.
++status=0
++exit
+diff --git a/tests/generic/421.out b/tests/generic/421.out
+new file mode 100644
+index 0000000..6986277
+--- /dev/null
++++ b/tests/generic/421.out
+@@ -0,0 +1,2 @@
++QA output created by 421
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 5678101..f8b01fc 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -423,3 +423,4 @@
+ 418 auto rw
+ 419 auto quick encrypt
+ 420 auto quick
++421 auto quick
 
-
---=20
-Filipe David Manana,
-
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
