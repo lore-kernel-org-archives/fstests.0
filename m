@@ -1,28 +1,56 @@
-Received: from mx1.redhat.com ([209.132.183.28]:58892 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:44808 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754952AbdDEK7T (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 5 Apr 2017 06:59:19 -0400
-From: David Howells <dhowells@redhat.com>
-In-Reply-To: <20170405104205.GZ22845@eguan.usersys.redhat.com>
-References: <20170405104205.GZ22845@eguan.usersys.redhat.com> <149132130900.18980.537296385250153410.stgit@warthog.procyon.org.uk> <149132132595.18980.156040870381065105.stgit@warthog.procyon.org.uk>
-Subject: Should xfstest generic/388 be using _require_command for fsstress?
+        id S932105AbdDELKu (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 5 Apr 2017 07:10:50 -0400
+Date: Wed, 5 Apr 2017 19:10:48 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: Should xfstest generic/388 be using _require_command for
+ fsstress?
+Message-ID: <20170405111048.GB22845@eguan.usersys.redhat.com>
+References: <20170405104205.GZ22845@eguan.usersys.redhat.com>
+ <149132130900.18980.537296385250153410.stgit@warthog.procyon.org.uk>
+ <149132132595.18980.156040870381065105.stgit@warthog.procyon.org.uk>
+ <2718.1491389955@warthog.procyon.org.uk>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-ID: <2717.1491389955.1@warthog.procyon.org.uk>
-Date: Wed, 05 Apr 2017 11:59:15 +0100
-Message-ID: <2718.1491389955@warthog.procyon.org.uk>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <2718.1491389955@warthog.procyon.org.uk>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>, bfoster@redhat.com
-Cc: dhowells@redhat.com, linux-xfs@vger.kernel.org, hch@infradead.org, amir73il@gmail.com, david@fromorbit.com, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: bfoster@redhat.com, linux-xfs@vger.kernel.org, hch@infradead.org, amir73il@gmail.com, david@fromorbit.com, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-| 388:45:	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
-| 388:58:_require_command "$KILLALL_PROG" "killall"
-| 388:79:		$KILLALL_PROG -9 fsstress > /dev/null 2>&1
+On Wed, Apr 05, 2017 at 11:59:15AM +0100, David Howells wrote:
+> | 388:45:	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
+> | 388:58:_require_command "$KILLALL_PROG" "killall"
+> | 388:79:		$KILLALL_PROG -9 fsstress > /dev/null 2>&1
+> 
+> Should this be using _require_command for fsstress and $FSSTRESS_PROG like the
+> other tests that use fsstress?
 
-Should this be using _require_command for fsstress and $FSSTRESS_PROG like the
-other tests that use fsstress?
+fsstress is a bit special, it's mandatory for xfstests, it's checked in
+common/config
 
-Also, should 388 be printing "Silence is golden" at the end of the test?
+[ ! -x $FSSTRESS_PROG ] && _fatal "fsstress not found or executable"
 
-David
+(Perhaps we should treat fsstress just as other test binaries, but it's
+been this way since the beginning of xfstests.)
+
+And generic/388 does invoke fsstress by calling $FSSTRESS_PROG, but not
+necessary in this killall case.
+
+We define NAME_PROG variables mainly for doing tweeks easily in this
+variable, like adding an option globally. Take $XFS_IO_PROG as an
+example in init_rc.
+
+        # Figure out if we need to add -F ("foreign", deprecated) option to xfs_io                                                                                                             
+        $XFS_IO_PROG -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \                                                                                                       
+                export XFS_IO_PROG="$XFS_IO_PROG -F"
+
+> 
+> Also, should 388 be printing "Silence is golden" at the end of the test?
+
+Yes, and it does print this message, but in the middle of test, not end.
+
+Thanks,
+Eryu
