@@ -1,56 +1,32 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44808 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:43680 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932105AbdDELKu (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 5 Apr 2017 07:10:50 -0400
-Date: Wed, 5 Apr 2017 19:10:48 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: Should xfstest generic/388 be using _require_command for
- fsstress?
-Message-ID: <20170405111048.GB22845@eguan.usersys.redhat.com>
-References: <20170405104205.GZ22845@eguan.usersys.redhat.com>
- <149132130900.18980.537296385250153410.stgit@warthog.procyon.org.uk>
- <149132132595.18980.156040870381065105.stgit@warthog.procyon.org.uk>
- <2718.1491389955@warthog.procyon.org.uk>
+        id S1753902AbdDELLl (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 5 Apr 2017 07:11:41 -0400
+From: David Howells <dhowells@redhat.com>
+In-Reply-To: <20170405105226.GA22845@eguan.usersys.redhat.com>
+References: <20170405105226.GA22845@eguan.usersys.redhat.com> <149132130900.18980.537296385250153410.stgit@warthog.procyon.org.uk> <149132133562.18980.13032775360715592290.stgit@warthog.procyon.org.uk>
+Subject: Re: [PATCH 4/4] xfstests: Check the stx_attributes settable by chattr [ver #5]
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <2718.1491389955@warthog.procyon.org.uk>
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <3175.1491390698.1@warthog.procyon.org.uk>
+Date: Wed, 05 Apr 2017 12:11:38 +0100
+Message-ID: <3176.1491390698@warthog.procyon.org.uk>
 Sender: fstests-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: bfoster@redhat.com, linux-xfs@vger.kernel.org, hch@infradead.org, amir73il@gmail.com, david@fromorbit.com, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: dhowells@redhat.com, linux-xfs@vger.kernel.org, hch@infradead.org, amir73il@gmail.com, david@fromorbit.com, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 05, 2017 at 11:59:15AM +0100, David Howells wrote:
-> | 388:45:	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
-> | 388:58:_require_command "$KILLALL_PROG" "killall"
-> | 388:79:		$KILLALL_PROG -9 fsstress > /dev/null 2>&1
-> 
-> Should this be using _require_command for fsstress and $FSSTRESS_PROG like the
-> other tests that use fsstress?
+Eryu Guan <eguan@redhat.com> wrote:
 
-fsstress is a bit special, it's mandatory for xfstests, it's checked in
-common/config
+> Need a "Silence is golden" output to indicate this test expects no
+> output.
 
-[ ! -x $FSSTRESS_PROG ] && _fatal "fsstress not found or executable"
+But why is it needed?  You have an exit code.  Further, it's not in the .out
+file, so you can see just by looking at that that there's no output expected.
 
-(Perhaps we should treat fsstress just as other test binaries, but it's
-been this way since the beginning of xfstests.)
+Actually, how do I *prevent* the output comparator from comparing?  I really
+want to print out what chattr+statx tests I'm actually running (as opposed to
+the ones I'm skipping), but I can't do that because the output comparator
+would bark.
 
-And generic/388 does invoke fsstress by calling $FSSTRESS_PROG, but not
-necessary in this killall case.
-
-We define NAME_PROG variables mainly for doing tweeks easily in this
-variable, like adding an option globally. Take $XFS_IO_PROG as an
-example in init_rc.
-
-        # Figure out if we need to add -F ("foreign", deprecated) option to xfs_io                                                                                                             
-        $XFS_IO_PROG -c stat $TEST_DIR 2>&1 | grep -q "is not on an XFS filesystem" && \                                                                                                       
-                export XFS_IO_PROG="$XFS_IO_PROG -F"
-
-> 
-> Also, should 388 be printing "Silence is golden" at the end of the test?
-
-Yes, and it does print this message, but in the middle of test, not end.
-
-Thanks,
-Eryu
+David
