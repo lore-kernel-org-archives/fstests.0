@@ -1,86 +1,89 @@
-Received: from mx1.redhat.com ([209.132.183.28]:57976 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:53204 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932371AbdDEKUS (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 5 Apr 2017 06:20:18 -0400
-Date: Wed, 5 Apr 2017 18:20:16 +0800
+        id S933394AbdDEKiM (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 5 Apr 2017 06:38:12 -0400
+Date: Wed, 5 Apr 2017 18:38:09 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic: test for number of bytes used by files after
- buffered writes
-Message-ID: <20170405102016.GX22845@eguan.usersys.redhat.com>
-References: <1491272615-3795-1-git-send-email-fdmanana@kernel.org>
- <20170405094600.GW22845@eguan.usersys.redhat.com>
- <CAL3q7H4PN51XpGJc+EsHN+oaRT=fMnWxfe+Z1RH2G0+a8NgZcg@mail.gmail.com>
+Subject: Re: [PATCH 2/4] xfstests: Add first statx test [ver #5]
+Message-ID: <20170405103809.GY22845@eguan.usersys.redhat.com>
+References: <149132130900.18980.537296385250153410.stgit@warthog.procyon.org.uk>
+ <149132131706.18980.7074156386090748482.stgit@warthog.procyon.org.uk>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAL3q7H4PN51XpGJc+EsHN+oaRT=fMnWxfe+Z1RH2G0+a8NgZcg@mail.gmail.com>
+In-Reply-To: <149132131706.18980.7074156386090748482.stgit@warthog.procyon.org.uk>
 Sender: fstests-owner@vger.kernel.org
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>, hch@lst.de
+To: David Howells <dhowells@redhat.com>
+Cc: linux-xfs@vger.kernel.org, hch@infradead.org, amir73il@gmail.com, david@fromorbit.com, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 05, 2017 at 11:13:56AM +0100, Filipe Manana wrote:
-> On Wed, Apr 5, 2017 at 10:46 AM, Eryu Guan <eguan@redhat.com> wrote:
-> > On Tue, Apr 04, 2017 at 03:23:35AM +0100, fdmanana@kernel.org wrote:
-> >> From: Filipe Manana <fdmanana@suse.com>
-> >>
-> >> Test that a filesystem's implementation of the stat(2) system call
-> >> reports correct values for the number of blocks allocated for a file
-> >> when there are delayed allocations.
-> >>
-> >> This test is motivated by a bug in btrfs which is fixed by the following
-> >> path for the linux kernel:
-> >>
-> >>  "Btrfs: fix reported number of inode blocks"
-> >>
-> >> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-...
-> >
-> >> +_require_xfs_io_command "falloc"
-> >
-> > This has some problems with the "-k" flag. NFSv4.2 supports fallocate(2)
-> > but not KEEP_SIZE flag, so test fails with NFSv4.2 mount.
-> >
-> >      XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> >     +fallocate: Operation not supported
-> >      wrote 65536/65536 bytes at offset 0
-> >
-> > We met the same issue before with generic/071.
-> > http://www.spinics.net/lists/fstests/msg03527.html
-> >
-> > So I have two options now, one is the method proposed by Eric in above
-> > thread, run falloc command with $param.
-> >
-> > common/rc::_require_xfs_io_command
-> > -               testio=`$XFS_IO_PROG -F -f -c "falloc 0 1m" $testfile 2>&1`
-> > +               testio=`$XFS_IO_PROG -F -f -c "falloc $param 0 1m" $testfile 2>&1`
-> >
-> > tests/generic/422:
-> > -_require_xfs_io_command "falloc"
-> > +_require_xfs_io_command "falloc" "-k"
-> >
-> >
-> > The other is requiring "falloc -k" in the test:
-> >
-> > common/rc::_require_xfs_io_command
-> > -       "falloc" )
-> > -               testio=`$XFS_IO_PROG -F -f -c "falloc 0 1m" $testfile 2>&1`
-> > +       falloc* )
-> > +               testio=`$XFS_IO_PROG -F -f -c "$command 0 1m" $testfile 2>&1`
-> >
-> > tests/generic/422:
-> > -_require_xfs_io_command "falloc"
-> > +_require_xfs_io_command "falloc -k"
-> >
-> > I slightly prefer the second way, as it doesn't change the default
-> > behavior and makes falloc a special-case.
-> > (_require_xfs_io_command "<cmd>" "<param>" behaves the same as other
-> > commands).
+On Tue, Apr 04, 2017 at 04:55:17PM +0100, David Howells wrote:
+> Add a statx test script that does the following:
 > 
-> Ok, do you prefer the changes to common/rc in a separate patch or can
-> they be folded in v2 for this test?
+>  (1) Creates one each of the various types of file object and creates a
+>      hard link to the regular file.
+> 
+>      Note that the creation of an AF_UNIX socket is done with netcat in a
+>      bash coprocessing thread.  This might be best done with another
+>      in-house helper to avoid a dependency on nc.
+> 
+>  (2) Invokes the C test program included in this patch after the creation
+>      and hands it a list of things to check appropriate to each object.
+> 
+>  (3) Asks the test program to check the creation time of each object
+>      against that of the preceding object.
+> 
+>  (4) Makes various tests on the timestamps of the hardlinked file.
+> 
+> The patch also creates a C[*] test program to do the actual stat checking.
+> The test program then does the following:
+> 
+>  (1) Compares the output of statx() to that of fstatat().
+> 
+>  (2) Optionally compares the timestamps to see that they're sensibly
+>      ordered with respect to each other.
+> 
+>  (3) Optionally compares the timestamps to those of a reference file.
+> 
+>  (4) Optionally compares the timestamps to a specified time.
+> 
+>  (5) Optionally compares selected stats to values specified on the command
+>      line.
+> 
+>  (6) Optionally compares all the stats to those of a reference file,
+>      requiring them to be the same (hard link checking).
+> 
+> For example:
+> 
+> 	./src/stat_test /dev/null \
+> 	       stx_type=char \
+> 	       stx_rdev_major=3 \
+> 	       stx_rdev_minor=8 \
+> 	       stx_nlink=1 \
+> 	       ref=/dev/zero \
+> 	       ts=B,b
+> 
+> The test program can also be given a --check-statx parameter to give a
+> quick exit code-based answer on whether statx() exists within the kernel.
+> 
+> [*] Note that it proved much easier to do this in C than trying to do it in
+>     shell script and trying parsing the output of xfs_io.  Using xfs_io has
+>     other pitfalls also: it wants to *open* the file, even if the file is
+>     not an appropriate type for this or does not grant permission to do so.
+>     I can get around this by opening O_PATH, but then xfs_io fails to
+>     handle XFS files because it wants to issue ioctls on every fd it opens.
+> 
+> Signed-off-by: David Howells <dhowells@redhat.com>
 
-A separate patch would be good, as it fixes a separate & long standing
-issue. Thanks!
+btrfs fails this test as:
 
+     Test statx on a directory
+    +[!] stx_nlink differs, 1 != 2
+    +Failed
+    +stat_test failed
+
+And it's the only filesystem I've tested that fails this test, is this
+a known failure? (Tried extN, xfs, btrfs, NFSv4.0/1/2, 4.11-rc5 kernel)
+
+Thanks,
 Eryu
