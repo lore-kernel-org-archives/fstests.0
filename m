@@ -1,43 +1,30 @@
-Received: from mail.kernel.org ([198.145.29.136]:41670 "EHLO mail.kernel.org"
+Received: from mx1.redhat.com ([209.132.183.28]:57624 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933608AbdDEKwZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 5 Apr 2017 06:52:25 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH 1/3] common/rc: test that xfs_io's falloc command supports specific flags
-Date: Tue,  4 Apr 2017 07:34:29 +0100
-Message-Id: <1491287671-23097-1-git-send-email-fdmanana@kernel.org>
+        id S1753477AbdDEKxq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 5 Apr 2017 06:53:46 -0400
+From: David Howells <dhowells@redhat.com>
+In-Reply-To: <20170405103809.GY22845@eguan.usersys.redhat.com>
+References: <20170405103809.GY22845@eguan.usersys.redhat.com> <149132130900.18980.537296385250153410.stgit@warthog.procyon.org.uk> <149132131706.18980.7074156386090748482.stgit@warthog.procyon.org.uk>
+Subject: Does btrfs get nlink on directories wrong? -- was Re: [PATCH 2/4] xfstests: Add first statx test [ver #5]
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <2599.1491389621.1@warthog.procyon.org.uk>
+Date: Wed, 05 Apr 2017 11:53:41 +0100
+Message-ID: <2600.1491389621@warthog.procyon.org.uk>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: linux-btrfs@vger.kernel.org
+Cc: dhowells@redhat.com, linux-xfs@vger.kernel.org, hch@infradead.org, amir73il@gmail.com, david@fromorbit.com, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+I've added a test to xfstests that exercises the new statx syscall.  However,
+it fails on btrfs:
 
-For example NFS 4.2 supports fallocate but it does not support its
-KEEP_SIZE flag, so we want to skip tests that use fallocate with that
-flag on filesystems that don't support it.
+     Test statx on a directory
+    +[!] stx_nlink differs, 1 != 2
+    +Failed
+    +stat_test failed
 
-Suggested-by: Eryu Guan <eguan@redhat.com>
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- common/rc | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+because a new directory it creates has an nlink of 1, not 2.  Is this a case
+of my making an incorrect assumption or is it an fs bug?
 
-diff --git a/common/rc b/common/rc
-index e1ab2c6..3d0f089 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2021,8 +2021,8 @@ _require_xfs_io_command()
- 	"chproj")
- 		testio=`$XFS_IO_PROG -F -f -c "chproj 0" $testfile 2>&1`
- 		;;
--	"falloc" )
--		testio=`$XFS_IO_PROG -F -f -c "falloc 0 1m" $testfile 2>&1`
-+	"falloc*" )
-+		testio=`$XFS_IO_PROG -F -f -c "$command 0 1m" $testfile 2>&1`
- 		;;
- 	"fpunch" | "fcollapse" | "zero" | "fzero" | "finsert" | "funshare")
- 		testio=`$XFS_IO_PROG -F -f -c "pwrite 0 20k" -c "fsync" \
--- 
-2.7.0.rc3
-
+David
