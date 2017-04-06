@@ -1,56 +1,53 @@
-Received: from sandeen.net ([63.231.237.45]:33322 "EHLO sandeen.net"
+Received: from imap.thunk.org ([74.207.234.97]:37596 "EHLO imap.thunk.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933197AbdDFPcp (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 6 Apr 2017 11:32:45 -0400
-Subject: Re: [PATCH 0/6] RFC add blkdev tests v2
-References: <1491484750-9164-1-git-send-email-dmonakhov@openvz.org>
- <20170406135524.GA12230@infradead.org>
- <74f90aa0-bb3f-ba74-cdbc-d6e96be51376@kernel.dk>
- <20170406144741.GA27776@infradead.org>
- <bb45e36c-93af-9565-1dc0-a4850aec393c@kernel.dk>
- <20170406152000.GF3768@linux-x5ow.site>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <b7b785ef-21a6-19f6-07c6-5dcc3053f274@sandeen.net>
-Date: Thu, 6 Apr 2017 10:32:43 -0500
+        id S1754908AbdDFPe7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 6 Apr 2017 11:34:59 -0400
+Date: Thu, 6 Apr 2017 11:34:53 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH] fstests: Remove IRIX os support from template
+Message-ID: <20170406153453.2e5fhjqiamllpce4@thunk.org>
+References: <20170405032628.22370-1-quwenruo@cn.fujitsu.com>
+ <20170406140233.20dc6553@suse.de>
 MIME-Version: 1.0
-In-Reply-To: <20170406152000.GF3768@linux-x5ow.site>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170406140233.20dc6553@suse.de>
 Sender: fstests-owner@vger.kernel.org
-To: Johannes Thumshirn <jthumshirn@suse.de>, Jens Axboe <axboe@kernel.dk>
-Cc: Christoph Hellwig <hch@infradead.org>, Dmitry Monakhov <dmonakhov@openvz.org>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-block@vger.kernel.org
+To: David Disseldorp <ddiss@suse.de>
+Cc: Qu Wenruo <quwenruo@cn.fujitsu.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-
-
-On 4/6/17 10:20 AM, Johannes Thumshirn wrote:
-> On Thu, Apr 06, 2017 at 08:51:36AM -0600, Jens Axboe wrote:
->> On 04/06/2017 08:47 AM, Christoph Hellwig wrote:
->>> On Thu, Apr 06, 2017 at 08:33:55AM -0600, Jens Axboe wrote:
->>>> That is exactly what my recommendation was at lsfmm as well - fork
->>>> xfstest, prune bits we don't need, and off we go. I'll get around to
->>>> it soonish.
->>>
->>> So you volunteer to do it?  I was -><- this close to offering it myself,
->>> and than thought of all the other backlog I have on my plate :)
->>
->> Yeah, I'll get something cobbled together next week.
+On Thu, Apr 06, 2017 at 02:02:33PM +0200, David Disseldorp wrote:
+> On Wed, 5 Apr 2017 11:26:28 +0800, Qu Wenruo wrote:
 > 
-> Yay!
+> > Since the last release of IRIX is already 10 years ago and support for
+> > it has ended after 2014, there is no need to support IRIX any way.
+> > 
+> > Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+> > ---
+> >  new | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > 
+> > diff --git a/new b/new
+> > index c21d8db..eb7da0f 100755
+> > --- a/new
+> > +++ b/new
+> > @@ -207,7 +207,7 @@ rm -f \$seqres.full
+> >  
+> >  # Modify as appropriate.
+> >  _supported_fs generic
+> > -_supported_os IRIX Linux
+> > +_supported_os Linux
+> >  _require_test
+> >  
+> >  # if error
 > 
-> But please keep the dependencies small. It'll suck when we'd have to pull in a
-> gazillion megabytes for perl/pyhthon/whatever.
+> Reviewed-by: David Disseldorp <ddiss@suse.de>
+> 
+> Looking forward to seeing the floodgates open for the rest of the Irix
+> removal changes.
 
-Full-blown xfstests doesn't have /that/ much in the way of deps,
-on debian it's ostensibly just:
+Wouldn't it be better to do a wholesale removal of Irix support
+instead of having lots of teeny-tiny patches?
 
-                sudo apt-get install xfslibs-dev uuid-dev libtool-bin \
-                e2fsprogs automake gcc libuuid1 quota attr libattr1-dev make \
-                libacl1-dev libaio-dev xfsprogs libgdbm-dev gawk fio dbench \
-                uuid-runtime
-
-and lots of that might not be needed for non-fs tests.
-
-Otherwise well, you do need bash ... ;)
-
--Eric
+		   	       	  - Ted
