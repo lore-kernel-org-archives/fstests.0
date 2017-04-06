@@ -1,154 +1,128 @@
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:35296 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754176AbdDFFtT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Apr 2017 01:49:19 -0400
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v4 3/3] overlay/030: test immutable and append-only upper files
-Date: Thu,  6 Apr 2017 08:49:20 +0300
-Message-Id: <1491457760-9240-3-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1491457760-9240-1-git-send-email-amir73il@gmail.com>
-References: <1491457760-9240-1-git-send-email-amir73il@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:47950 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1756298AbdDFHF4 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 6 Apr 2017 03:05:56 -0400
+Subject: [PATCH 1/4] xfstests: Add an auxiliary program to create an AF_UNIX
+ socket [ver #8]
+From: David Howells <dhowells@redhat.com>
+Date: Thu, 06 Apr 2017 08:05:54 +0100
+Message-ID: <149146235422.11655.14742408053140983607.stgit@warthog.procyon.org.uk>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, Xiong Zhou <xzhou@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: linux-xfs@vger.kernel.org
+Cc: hch@infradead.org, amir73il@gmail.com, david@fromorbit.com, fstests@vger.kernel.org, dhowells@redhat.com, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Run the t_immutable test program for immutable/append-only files
-and directories in an overlayfs upper directory.
+Add an auxiliary program to create an AF_UNIX socket at the specified
+location so that tests can do things with it.
 
-This test is similar and was derived from generic/079, but
-the original test is _notrun on overlay mount because FS_IOC_GETFLAGS
-FS_IOC_SETFLAGS ioctls fail on overlay directory inodes.
-
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+Signed-off-by: David Howells <dhowells@redhat.com>
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/overlay/030     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/030.out |  5 ++++
- tests/overlay/group   |  1 +
- 3 files changed, 79 insertions(+)
- create mode 100755 tests/overlay/030
- create mode 100644 tests/overlay/030.out
 
-Eryu,
+ .gitignore    |    1 +
+ src/Makefile  |    2 +-
+ src/af_unix.c |   66 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 68 insertions(+), 1 deletion(-)
+ create mode 100644 src/af_unix.c
 
-My previous statement that overlayfs does not enforce directory immutable
-directory inodes was wrong. The directory tests do pass because overlayfs
-does the right thing.
-
-So only failures are for open(O_TRUNC) and truncate() of IS_APPEND
-regular file inodes, which shouldn't be too hard to fix:
-
-QA output created by 030
-open(/mnt/scratch/ovl-mnt/t_immutable/append-only.f, O_RDWR) did not fail
-open(/mnt/scratch/ovl-mnt/t_immutable/append-only.f, O_WRONLY) did not fail
-open(/mnt/scratch/ovl-mnt/t_immutable/append-only.f, O_RDWR|O_TRUNC) did not fail
-open(/mnt/scratch/ovl-mnt/t_immutable/append-only.f, O_WRONLY|O_TRUNC) did not fail
-open(/mnt/scratch/ovl-mnt/t_immutable/append-only.f, O_RDWR|O_APPEND|O_TRUNC) did not fail
-open(/mnt/scratch/ovl-mnt/t_immutable/append-only.f, O_WRONLY|O_APPEND|O_TRUNC) did not fail
-truncate(/mnt/scratch/ovl-mnt/t_immutable/append-only.f, 0) did not fail
-testing immutable...PASS.
-testing append-only...FAILED! (7 tests failed)
-
-
-diff --git a/tests/overlay/030 b/tests/overlay/030
-new file mode 100755
-index 0000000..bbce140
---- /dev/null
-+++ b/tests/overlay/030
-@@ -0,0 +1,73 @@
-+#! /bin/bash
-+# FS QA Test No. 030
-+#
-+# Run the t_immutable test program for immutable/append-only files
-+# and directories in an overlayfs upper directory.
-+#
-+# This test is similar and was derived from generic/079, but
-+# the original test is _notrun on overlay mount because FS_IOC_GETFLAGS
-+# FS_IOC_SETFLAGS ioctls fail on overlay directory inodes.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2017 CTERA Networks. All Rights Reserved.
-+# Author: Amir Goldstein <amir73il@gmail.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+timmutable=$here/src/t_immutable
-+upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	$timmutable -r $upperdir/t_immutable &> /dev/null
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+_supported_fs overlay
-+_supported_os Linux
-+
-+_require_chattr ia
-+_require_test_program "t_immutable"
-+_require_scratch
-+
-+_scratch_mkfs
-+
-+# Preparing immutable files in uppper dir
-+mkdir -p $upperdir
-+$timmutable -C $upperdir/t_immutable >$tmp.out 2>&1
-+if grep -q -e 'Operation not supported' -e "Inappropriate ioctl" $tmp.out; then
-+	_notrun "Setting immutable/append flag not supported"
-+fi
-+
-+_scratch_mount
-+
-+# Test immutability of files in overlay
-+$timmutable $SCRATCH_MNT/t_immutable 2>&1
-+status=$?
-+exit
-diff --git a/tests/overlay/030.out b/tests/overlay/030.out
+diff --git a/.gitignore b/.gitignore
+index 1ed2a92..8a7c052 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -35,6 +35,7 @@
+ /ltp/iogen
+ 
+ # src/ binaries
++/src/af_unix
+ /src/alloc
+ /src/append_reader
+ /src/append_writer
+diff --git a/src/Makefile b/src/Makefile
+index a7f27f0..716c178 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -12,7 +12,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	godown resvtest writemod makeextents itrash rename \
+ 	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
+ 	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
+-	holetest t_truncate_self t_mmap_dio
++	holetest t_truncate_self t_mmap_dio af_unix
+ 
+ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+diff --git a/src/af_unix.c b/src/af_unix.c
 new file mode 100644
-index 0000000..57ba0cd
+index 0000000..dc2368e
 --- /dev/null
-+++ b/tests/overlay/030.out
-@@ -0,0 +1,5 @@
-+QA output created by 030
-+testing immutable...PASS.
-+testing append-only...PASS.
-+testing immutable as non-root...PASS.
-+testing append-only as non-root...PASS.
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 7e72a30..c5048c4 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -32,3 +32,4 @@
- 027 auto quick perms
- 028 auto copyup quick
- 029 auto quick
-+030 auto quick perms
--- 
-2.7.4
++++ b/src/af_unix.c
+@@ -0,0 +1,66 @@
++/* Create an AF_UNIX socket.
++ *
++ * Copyright (C) 2017 Red Hat, Inc. All Rights Reserved.
++ * Written by David Howells (dhowells@redhat.com)
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public Licence
++ * as published by the Free Software Foundation; either version
++ * 2 of the Licence, or (at your option) any later version.
++ */
++
++#include <stdarg.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <stdbool.h>
++#include <string.h>
++#include <unistd.h>
++#include <errno.h>
++#include <fcntl.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <sys/socket.h>
++#include <sys/un.h>
++
++#define offsetof(TYPE, MEMBER)	((size_t)&((TYPE *)0)->MEMBER)
++
++int main(int argc, char *argv[])
++{
++	struct sockaddr_un sun;
++	struct stat st;
++	size_t len, max;
++	int fd;
++
++	if (argc != 2) {
++		fprintf(stderr, "Format: %s <socketpath>\n", argv[0]);
++		exit(2);
++	}
++
++	max = sizeof(sun.sun_path);
++	len = strlen(argv[1]);
++	if (len >= max) {
++		fprintf(stderr, "Filename too long (max %zu)\n", max);
++		exit(2);
++	}
++
++	fd = socket(AF_UNIX, SOCK_DGRAM, 0);
++	if (fd < 0) {
++		perror("socket");
++		exit(1);
++	}
++
++	memset(&sun, 0, sizeof(sun));
++	sun.sun_family = AF_UNIX;
++	strcpy(sun.sun_path, argv[1]);
++	if (bind(fd, (struct sockaddr *)&sun, sizeof(sun)) == -1) {
++		perror("bind");
++		exit(1);
++	}
++
++	if (stat(argv[1], &st)) {
++		fprintf(stderr, "Couldn't stat socket after creation: %m\n");
++		exit(1);
++	}
++
++	exit(0);
++}
 
