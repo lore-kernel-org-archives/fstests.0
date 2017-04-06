@@ -1,11 +1,11 @@
-Received: from mail-lf0-f65.google.com ([209.85.215.65]:33745 "EHLO
-        mail-lf0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757082AbdDFNTU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Apr 2017 09:19:20 -0400
+Received: from mail-lf0-f66.google.com ([209.85.215.66]:35158 "EHLO
+        mail-lf0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933785AbdDFNTX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Apr 2017 09:19:23 -0400
 From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: [PATCH 3/6] new: blockdev/002 check information leak for lio-fileio
-Date: Thu,  6 Apr 2017 17:19:07 +0400
-Message-Id: <1491484750-9164-4-git-send-email-dmonakhov@openvz.org>
+Subject: [PATCH 6/6] new: blockdev/005 Check that busy fs survives blkdev page truncation
+Date: Thu,  6 Apr 2017 17:19:10 +0400
+Message-Id: <1491484750-9164-7-git-send-email-dmonakhov@openvz.org>
 In-Reply-To: <1491484750-9164-1-git-send-email-dmonakhov@openvz.org>
 References: <1491484750-9164-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
@@ -13,27 +13,33 @@ To: fstests@vger.kernel.org
 Cc: linux-fsdevel@vger.kernel.org, linux-block@vger.kernel.org, Dmitry Monakhov <dmonakhov@openvz.org>
 List-ID: <fstests@vger.kernel.org>
 
+same as blockdev/004 but with add more stress on corrupted fs.
+
 Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
 ---
- tests/blockdev/002     | 77 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/blockdev/002.out | 12 ++++++++
+ tests/blockdev/005     | 92 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/blockdev/005.out |  2 ++
  tests/blockdev/group   |  1 +
- 3 files changed, 90 insertions(+)
- create mode 100755 tests/blockdev/002
- create mode 100644 tests/blockdev/002.out
+ tests/generic/390      |  1 +
+ 4 files changed, 96 insertions(+)
+ create mode 100755 tests/blockdev/005
+ create mode 100644 tests/blockdev/005.out
 
-diff --git a/tests/blockdev/002 b/tests/blockdev/002
+diff --git a/tests/blockdev/005 b/tests/blockdev/005
 new file mode 100755
-index 0000000..71867d1
+index 0000000..fa3eadc
 --- /dev/null
-+++ b/tests/blockdev/002
-@@ -0,0 +1,77 @@
++++ b/tests/blockdev/005
+@@ -0,0 +1,92 @@
 +#! /bin/bash
-+# FS QA Test 002
++# FS QA Test 005
 +#
-+# Regression test for  information leak for lio-fileio target
-+# BUG: If image  file is less than virtual blockdev then read() may return
-+#      unitilized data.
++# Check that busy filesystem survives blockdev pagecache truncation.
++# blkdev page cache can be truncated due to various reasons
++# 1)ioctl: BLKDISCARD
++# 2)blkdev: falloc{ FALLOC_FL_ZERO_RANGE, FALLOC_FL_PUNCH_HOLE }
++# 3)nbd: NBD_CLEAR_SOCK
++# test is similar blockdev/004 but push more stress on filesystem.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2017 Dmitry Monakhov <dmonakhov@openvz.org>
@@ -63,75 +69,89 @@ index 0000000..71867d1
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
-+
 +_cleanup()
 +{
++	$UMOUNT_PROG $fs_mnt
++	_destroy_loop_device $loop_dev
 +	cd /
-+	rm -f $tmp.*
-+	_liotgt_cleanup
 +	rm -rf $TEST_DIR/$$
++	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/liotarget
 +
-+# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
 +# real QA test starts here
-+
-+# Modify as appropriate.
 +_supported_fs generic
 +_supported_os Linux
-+_require_test
-+_require_liotarget
++_require_loop
++#_require_xfs_io_command "fzero"
++
++# create the fs image and mount point
 +
 +mkdir -p $TEST_DIR/$$ || _fail "Can not make test dir"
++fs_img=$TEST_DIR/$$/fs.img
++fs_mnt=$TEST_DIR/$$/mnt
++$XFS_IO_PROG -fc "truncate 1g" $fs_img >>$seqres.full 2>&1
++mkdir -p $fs_mnt
++loop_dev=$(_create_loop_device $fs_img)
++_mkfs_dev $loop_dev
++_mount $loop_dev $fs_mnt
 +
-+cfg_path=$(_liotgt_create_fileio  002-test.img $TEST_DIR/$$/002-test.img 128M)
-+dev=$(_liotgt_attach_target /backstores/fileio/002-test.img)
++stress_dir="$fs_mnt/stress"
++mkdir "$stress_dir"
++# Disable all sync operations to get higher load
++FSSTRESS_AVOID="$FSSTRESS_AVOID -ffsync=0 -fsync=0 -ffdatasync=0"
++fsstress_args=`_scale_fsstress_args -d $stress_dir -p4 -n9999999 $FSSTRESS_AVOID`
++$FSSTRESS_PROG $fsstress_args > /dev/null 2>&1 &
++fsstress_pid=$!
++# Warm-up
++sleep 3
 +
-+$XFS_IO_PROG -f -c "truncate 1M" $TEST_DIR/$$/002-test.img >> $seqres.full
-+
-+$XFS_IO_PROG -c "pwrite -S 0xa0 -b 512 512 1k" -d $dev >>$seqres.full 2>&1 || \
-+    _fail "pwrite failed"
-+
-+$XFS_IO_PROG -c "pwrite -S 0xab -b 512 2M 1k" -d $dev >>$seqres.full 2>&1 || \
-+    _fail "pwrite failed"
-+
-+dd if=$dev bs=4k  2>>$seqres.full | hexdump
++# Issue zeroout on block device, this act just a giant hammer for fs,
++# A lot of complains are expected, bug_on/panic is not.
++$XFS_IO_PROG -c "fzero -k 0 1G" -f $loop_dev >>$seqres.full 2>&1
++# Force sync operation in order to flush data to screwed disk.
++$XFS_IO_PROG -c "pwrite 0 4k" -c "syncfs" -f $fs_mnt/check_ro >>$seqres.full 2>&1
++sleep 3
++$KILLALL_PROG -q $FSSTRESS_PROG
++wait $pid
 +# success, all done
++echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/blockdev/002.out b/tests/blockdev/002.out
+diff --git a/tests/blockdev/005.out b/tests/blockdev/005.out
 new file mode 100644
-index 0000000..e761c06
+index 0000000..a5027f1
 --- /dev/null
-+++ b/tests/blockdev/002.out
-@@ -0,0 +1,12 @@
-+QA output created by 002
-+0000000 0000 0000 0000 0000 0000 0000 0000 0000
-+*
-+0000200 a0a0 a0a0 a0a0 a0a0 a0a0 a0a0 a0a0 a0a0
-+*
-+0000600 0000 0000 0000 0000 0000 0000 0000 0000
-+*
-+0200000 abab abab abab abab abab abab abab abab
-+*
-+0200400 0000 0000 0000 0000 0000 0000 0000 0000
-+*
-+8000000
++++ b/tests/blockdev/005.out
+@@ -0,0 +1,2 @@
++QA output created by 005
++Silence is golden
 diff --git a/tests/blockdev/group b/tests/blockdev/group
-index bdfdcb9..0b511f3 100644
+index d100c85..445b97c 100644
 --- a/tests/blockdev/group
 +++ b/tests/blockdev/group
-@@ -4,3 +4,4 @@
- # - comment line before each group is "new" description
- #
- 001 rw blockdev
-+002 rw blockdev liotarget
+@@ -7,3 +7,4 @@
+ 002 rw blockdev liotarget
+ 003 rw blockdev liotarget integrity dangerous
+ 004 rw blockdev dangerous zero
++005 rw blockdev dangerous zero
+diff --git a/tests/generic/390 b/tests/generic/390
+index 473015a..a717888 100755
+--- a/tests/generic/390
++++ b/tests/generic/390
+@@ -55,6 +55,7 @@ _supported_os Linux
+ _require_scratch
+ _require_freeze
+ _require_test_program "feature"
++_require_command "$KILLALL_PROG" killall
+ 
+ _scratch_mkfs >>$seqres.full 2>&1
+ # We don't want to freeze/unfreeze root fs if mount scratch dev failed
 -- 
 2.9.3
 
