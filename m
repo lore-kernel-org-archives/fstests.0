@@ -1,47 +1,56 @@
-Received: from sandeen.net ([63.231.237.45]:38038 "EHLO sandeen.net"
+Received: from mx2.suse.de ([195.135.220.15]:47486 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751169AbdDFQ2D (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 6 Apr 2017 12:28:03 -0400
-Subject: Re: [PATCH] fstests: generic: Check if cycle mount and sleep can
- affect fiemap result
-References: <20170403070923.18518-1-quwenruo@cn.fujitsu.com>
- <20170405023526.GS22845@eguan.usersys.redhat.com>
- <20170406162616.zsnbgx6vy2fgugmq@thunk.org>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <36663e81-9520-0c52-5e72-1d54ddbfb0b7@sandeen.net>
-Date: Thu, 6 Apr 2017 11:28:01 -0500
+        id S1753736AbdDFSQC (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 6 Apr 2017 14:16:02 -0400
+Date: Thu, 6 Apr 2017 20:15:56 +0200
+From: Johannes Thumshirn <jthumshirn@suse.de>
+Subject: Re: [PATCH 0/6] RFC add blkdev tests v2
+Message-ID: <20170406181555.GA8215@linux-x5ow.site>
+References: <1491484750-9164-1-git-send-email-dmonakhov@openvz.org>
+ <20170406135524.GA12230@infradead.org>
+ <74f90aa0-bb3f-ba74-cdbc-d6e96be51376@kernel.dk>
+ <20170406144741.GA27776@infradead.org>
+ <bb45e36c-93af-9565-1dc0-a4850aec393c@kernel.dk>
+ <20170406152000.GF3768@linux-x5ow.site>
+ <b7b785ef-21a6-19f6-07c6-5dcc3053f274@sandeen.net>
 MIME-Version: 1.0
-In-Reply-To: <20170406162616.zsnbgx6vy2fgugmq@thunk.org>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+In-Reply-To: <b7b785ef-21a6-19f6-07c6-5dcc3053f274@sandeen.net>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>, Eryu Guan <eguan@redhat.com>
-Cc: Qu Wenruo <quwenruo@cn.fujitsu.com>, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@infradead.org>, Dmitry Monakhov <dmonakhov@openvz.org>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-block@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 4/6/17 11:26 AM, Theodore Ts'o wrote:
-> On Wed, Apr 05, 2017 at 10:35:26AM +0800, Eryu Guan wrote:
->>
->> Test fails with ext3/2 when driving with ext4 driver, fiemap changed
->> after umount/mount cycle, then changed back to original result after
->> sleeping some time. An ext4 bug? (cc'ed linux-ext4 list.)
-> 
-> I haven't had time to look at this, but I'm not sure this test is a
-> reasonable one on the face of it.
-> 
-> A file system may choose to optimize a file's extent tree for whatever
-> reason it wants, whenever it wants, including on an unmount --- and
-> that would not be an invalid thing to do.  So to have an xfstests that
-> causes a test failure if a file system were to, say, do some cleanup
-> at mount or unmount time, or when the file is next opened, to merge
-> adjacent extents together (and hence change what is returned by
-> FIEMAP) might be strange, or even weird --- but is this any of user
-> space's business?  Or anything we want to enforce as wrong wrong wrong
-> by xfstests?
+On Thu, Apr 06, 2017 at 10:32:43AM -0500, Eric Sandeen wrote:
+> Full-blown xfstests doesn't have /that/ much in the way of deps,
+> on debian it's ostensibly just:
+>=20
+>                 sudo apt-get install xfslibs-dev uuid-dev libtool-bin \
+>                 e2fsprogs automake gcc libuuid1 quota attr libattr1-dev=
+ make \
+>                 libacl1-dev libaio-dev xfsprogs libgdbm-dev gawk fio db=
+ench \
+>                 uuid-runtime
+>=20
+> and lots of that might not be needed for non-fs tests.
+>=20
+> Otherwise well, you do need bash ... ;)
 
-I had the same question.  If the exact behavior isn't defined anywhere,
-I don't know what we can be testing, TBH.
+Yeah that's OK. Maybe I misphrased it a bit. No more additional dependenc=
+ies.
+Currently xfstest is "small" engough to be run in an initrd and that's go=
+od
+for qemu -kernel .. -initrd .. style test runs.
 
--Eric
+Byte,
+	Johannes
 
-> 		       		   	   - Ted
+--=20
+Johannes Thumshirn                                          Storage
+jthumshirn@suse.de                                +49 911 74053 689
+SUSE LINUX GmbH, Maxfeldstr. 5, 90409 N=FCrnberg
+GF: Felix Imend=F6rffer, Jane Smithard, Graham Norton
+HRB 21284 (AG N=FCrnberg)
+Key fingerprint =3D EC38 9CAB C2C4 F25D 8600 D0D0 0393 969D 2D76 0850
