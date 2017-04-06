@@ -1,38 +1,50 @@
-Received: from mx1.redhat.com ([209.132.183.28]:48418 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:43442 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753339AbdDFDRo (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 5 Apr 2017 23:17:44 -0400
-Date: Thu, 6 Apr 2017 11:17:42 +0800
+        id S1755587AbdDFDqF (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 5 Apr 2017 23:46:05 -0400
+Date: Thu, 6 Apr 2017 11:45:57 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 4/4] xfstests: Check the stx_attributes settable by
- chattr [ver #5]
-Message-ID: <20170406031742.GF22845@eguan.usersys.redhat.com>
-References: <20170405105226.GA22845@eguan.usersys.redhat.com>
- <149132130900.18980.537296385250153410.stgit@warthog.procyon.org.uk>
- <149132133562.18980.13032775360715592290.stgit@warthog.procyon.org.uk>
- <5766.1491395157@warthog.procyon.org.uk>
+Subject: Re: [PATCH v2] overlay/030: test immutable and append-only upper
+ files
+Message-ID: <20170406034557.GG22845@eguan.usersys.redhat.com>
+References: <1491389271-24726-2-git-send-email-amir73il@gmail.com>
+ <1491394167-31409-1-git-send-email-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <5766.1491395157@warthog.procyon.org.uk>
+In-Reply-To: <1491394167-31409-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: linux-xfs@vger.kernel.org, hch@infradead.org, amir73il@gmail.com, david@fromorbit.com, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Xiong Zhou <xzhou@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 05, 2017 at 01:25:57PM +0100, David Howells wrote:
-> Eryu Guan <eguan@redhat.com> wrote:
+On Wed, Apr 05, 2017 at 03:09:27PM +0300, Amir Goldstein wrote:
+> Run the t_immutable test program for immutable/append-only files
+> and directories in an overlayfs upper directory.
 > 
-> > And this test is expected to fail with 4.11-rc5 kernel on all
-> > filesystems, right?
+> This test is similar and was derived from generic/079, but
+> the original test is _notrun on overlay mount because FS_IOC_GETFLAGS
+> FS_IOC_SETFLAGS ioctls fail on overlay directory inodes.
 > 
-> Yes, and probably some thereafter.  Is there a way of requiring the kernel
-> version?
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+>  tests/generic/079     |  6 ++---
+>  tests/overlay/030     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/030.out |  5 ++++
+>  tests/overlay/group   |  1 +
+>  4 files changed, 81 insertions(+), 4 deletions(-)
+>  create mode 100755 tests/overlay/030
+>  create mode 100644 tests/overlay/030.out
+> 
+> Eryu,
+> 
+> Here is v2 with fixes to your comments.
+> 
+> I also changed generic/079 to use modern _require_* statements.
+> and removed _scratch_unmount from its cleanup callback.
 
-No need to require a specific kernel version to let test pass or
-_notrun, just let it fail so we know there's an unfixed bug :)
-
-I wanted to make sure the failure was expected and not a test case flaw.
+Thanks! But it'd be better to have two patches, one for new case and one
+for 079 cleanup.
 
 Thanks,
 Eryu
