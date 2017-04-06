@@ -1,11 +1,10 @@
-Received: from mx2.suse.de ([195.135.220.15]:47486 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753736AbdDFSQC (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 6 Apr 2017 14:16:02 -0400
-Date: Thu, 6 Apr 2017 20:15:56 +0200
-From: Johannes Thumshirn <jthumshirn@suse.de>
+Received: from mail-it0-f50.google.com ([209.85.214.50]:35637 "EHLO
+        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752503AbdDFSTt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Apr 2017 14:19:49 -0400
+Received: by mail-it0-f50.google.com with SMTP id y18so106323431itc.0
+        for <fstests@vger.kernel.org>; Thu, 06 Apr 2017 11:19:49 -0700 (PDT)
 Subject: Re: [PATCH 0/6] RFC add blkdev tests v2
-Message-ID: <20170406181555.GA8215@linux-x5ow.site>
 References: <1491484750-9164-1-git-send-email-dmonakhov@openvz.org>
  <20170406135524.GA12230@infradead.org>
  <74f90aa0-bb3f-ba74-cdbc-d6e96be51376@kernel.dk>
@@ -13,44 +12,40 @@ References: <1491484750-9164-1-git-send-email-dmonakhov@openvz.org>
  <bb45e36c-93af-9565-1dc0-a4850aec393c@kernel.dk>
  <20170406152000.GF3768@linux-x5ow.site>
  <b7b785ef-21a6-19f6-07c6-5dcc3053f274@sandeen.net>
+ <20170406181555.GA8215@linux-x5ow.site>
+From: Jens Axboe <axboe@kernel.dk>
+Message-ID: <b58871ff-2b34-acce-318c-479dccf4d596@kernel.dk>
+Date: Thu, 6 Apr 2017 12:19:46 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-In-Reply-To: <b7b785ef-21a6-19f6-07c6-5dcc3053f274@sandeen.net>
+In-Reply-To: <20170406181555.GA8215@linux-x5ow.site>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@infradead.org>, Dmitry Monakhov <dmonakhov@openvz.org>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-block@vger.kernel.org
+To: Johannes Thumshirn <jthumshirn@suse.de>, Eric Sandeen <sandeen@sandeen.net>
+Cc: Christoph Hellwig <hch@infradead.org>, Dmitry Monakhov <dmonakhov@openvz.org>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-block@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Apr 06, 2017 at 10:32:43AM -0500, Eric Sandeen wrote:
-> Full-blown xfstests doesn't have /that/ much in the way of deps,
-> on debian it's ostensibly just:
->=20
->                 sudo apt-get install xfslibs-dev uuid-dev libtool-bin \
->                 e2fsprogs automake gcc libuuid1 quota attr libattr1-dev=
- make \
->                 libacl1-dev libaio-dev xfsprogs libgdbm-dev gawk fio db=
-ench \
->                 uuid-runtime
->=20
-> and lots of that might not be needed for non-fs tests.
->=20
-> Otherwise well, you do need bash ... ;)
+On 04/06/2017 12:15 PM, Johannes Thumshirn wrote:
+> On Thu, Apr 06, 2017 at 10:32:43AM -0500, Eric Sandeen wrote:
+>> Full-blown xfstests doesn't have /that/ much in the way of deps,
+>> on debian it's ostensibly just:
+>>
+>>                 sudo apt-get install xfslibs-dev uuid-dev libtool-bin \
+>>                 e2fsprogs automake gcc libuuid1 quota attr libattr1-dev make \
+>>                 libacl1-dev libaio-dev xfsprogs libgdbm-dev gawk fio dbench \
+>>                 uuid-runtime
+>>
+>> and lots of that might not be needed for non-fs tests.
+>>
+>> Otherwise well, you do need bash ... ;)
+> 
+> Yeah that's OK. Maybe I misphrased it a bit. No more additional dependencies.
+> Currently xfstest is "small" engough to be run in an initrd and that's good
+> for qemu -kernel .. -initrd .. style test runs.
 
-Yeah that's OK. Maybe I misphrased it a bit. No more additional dependenc=
-ies.
-Currently xfstest is "small" engough to be run in an initrd and that's go=
-od
-for qemu -kernel .. -initrd .. style test runs.
+We share that goal. The block related tests will have _fewer_ dependencies.
+And it'll also be Linux only, so we don't have to worry about cross platform.
 
-Byte,
-	Johannes
+-- 
+Jens Axboe
 
---=20
-Johannes Thumshirn                                          Storage
-jthumshirn@suse.de                                +49 911 74053 689
-SUSE LINUX GmbH, Maxfeldstr. 5, 90409 N=FCrnberg
-GF: Felix Imend=F6rffer, Jane Smithard, Graham Norton
-HRB 21284 (AG N=FCrnberg)
-Key fingerprint =3D EC38 9CAB C2C4 F25D 8600 D0D0 0393 969D 2D76 0850
