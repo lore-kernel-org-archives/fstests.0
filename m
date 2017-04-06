@@ -1,11 +1,11 @@
-Received: from mail-lf0-f66.google.com ([209.85.215.66]:35844 "EHLO
+Received: from mail-lf0-f66.google.com ([209.85.215.66]:33751 "EHLO
         mail-lf0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933187AbdDFNTS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Apr 2017 09:19:18 -0400
+        with ESMTP id S1756093AbdDFNTU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Apr 2017 09:19:20 -0400
 From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: [PATCH 2/6] add: blockdev/001 check page-cache coherency after BLKDISCARD
-Date: Thu,  6 Apr 2017 17:19:06 +0400
-Message-Id: <1491484750-9164-3-git-send-email-dmonakhov@openvz.org>
+Subject: [PATCH 4/6] new: blockdev/003 basic blockdev T10-DIF-TYPE1 integrity checks
+Date: Thu,  6 Apr 2017 17:19:08 +0400
+Message-Id: <1491484750-9164-5-git-send-email-dmonakhov@openvz.org>
 In-Reply-To: <1491484750-9164-1-git-send-email-dmonakhov@openvz.org>
 References: <1491484750-9164-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
@@ -13,44 +13,37 @@ To: fstests@vger.kernel.org
 Cc: linux-fsdevel@vger.kernel.org, linux-block@vger.kernel.org, Dmitry Monakhov <dmonakhov@openvz.org>
 List-ID: <fstests@vger.kernel.org>
 
-Regression test for fix https://lkml.org/lkml/2017/3/22/789
-Page cache should be dropped after successful discard
+Test create virtual block device via lio-targed infastructure and
+perform basic IO operations with data corruption detection.
+
+Temprorally mark is as dangerous, because currently it trigger BUG_ON
+inside blkdev_issue_flush
+
+BTW: I use 'dd' to test read from corrupted image instead of xfs_io
+because even if pread failed, xfs_io still exit with success, BUG?
 
 Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
 ---
- common/config          |  1 +
- tests/blockdev/001     | 74 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/blockdev/001.out |  7 +++++
- tests/blockdev/group   |  6 ++++
- 4 files changed, 88 insertions(+)
- create mode 100755 tests/blockdev/001
- create mode 100644 tests/blockdev/001.out
- create mode 100644 tests/blockdev/group
+ tests/blockdev/003     | 164 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/blockdev/003.out |  39 ++++++++++++
+ tests/blockdev/group   |   1 +
+ 3 files changed, 204 insertions(+)
+ create mode 100755 tests/blockdev/003
+ create mode 100644 tests/blockdev/003.out
 
-diff --git a/common/config b/common/config
-index cfe7913..aef842c 100644
---- a/common/config
-+++ b/common/config
-@@ -199,6 +199,7 @@ export LOGGER_PROG="`set_prog_path logger`"
- export DBENCH_PROG="`set_prog_path dbench`"
- export DMSETUP_PROG="`set_prog_path dmsetup`"
- export WIPEFS_PROG="`set_prog_path wipefs`"
-+export BLKDISCARD_PROG="`set_prog_path blkdiscard`"
- export DUMP_PROG="`set_prog_path dump`"
- export RESTORE_PROG="`set_prog_path restore`"
- export LVM_PROG="`set_prog_path lvm`"
-diff --git a/tests/blockdev/001 b/tests/blockdev/001
+diff --git a/tests/blockdev/003 b/tests/blockdev/003
 new file mode 100755
-index 0000000..53b0664
+index 0000000..8f31f0d
 --- /dev/null
-+++ b/tests/blockdev/001
-@@ -0,0 +1,74 @@
++++ b/tests/blockdev/003
+@@ -0,0 +1,164 @@
 +#! /bin/bash
-+# FS QA Test 001
++# FS QA Test 003
 +#
-+# Regression test for fix https://lkml.org/lkml/2017/3/22/789
-+# Page cache should be dropped after successful discard
++# Check basic T10-DIF integrity features for a block device
 +#
++# DIF/DIX TYPE: T10-DIF-TYPE1-CRC
++# Kernel docs: Documentation/blockdev/data-integrity.txt
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2017 Dmitry Monakhov <dmonakhov@openvz.org>
 +# All Rights Reserved.
@@ -84,66 +77,184 @@ index 0000000..53b0664
 +{
 +	cd /
 +	rm -f $tmp.*
++	_liotgt_cleanup
++	rm -rf $TEST_DIR/$$
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/scsi_debug
++. ./common/liotarget
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
 +# real QA test starts here
++
++# Modify as appropriate.
 +_supported_fs generic
 +_supported_os Linux
-+_require_scsi_debug
-+_require_command $BLKDISCARD_PROG blkdiscard
++_require_test
++_require_liotarget
 +
++mkdir -p $TEST_DIR/$$ || _fail "Can not make test dir"
 +
-+# Create virtual device with unmap_zeroes_data support
-+dev=$(_get_scsi_debug_dev 512 512 0 32 "lbpws=1 lbpws10=1")
++# One full test suite
++_run_one()
++{
++	local img_name=$1
 +
-+# Initialize data with known pattern
-+$XFS_IO_PROG -c "pwrite -S 0xaa -b 2M 0 32M -w" -d $dev >>$seqres.full 2>&1 || \
-+    _fail "pwrite failed"
++	echo "Run: $img_name"
++	echo "T0: Test basic IO"
++	$XFS_IO_PROG -c "pwrite -S 0xa0 -b 4M 0 16M" -d $dev >>$seqres.full 2>&1 || \
++	    _fail "pwrite failed"
 +
-+# Fill page cache with dirty data
-+$XFS_IO_PROG -c "pwrite -S 0xbb -b 2M 2M 10M" -f $dev >>$seqres.full 2>&1 || \
-+    _fail "pwrite failed"
++	$XFS_IO_PROG -c "pwrite -S 0xa3 -b 1k -V8  20M 32k" -d $dev >>$seqres.full 2>&1 || \
++	    _fail "pwrite failed"
 +
-+$BLKDISCARD_PROG $dev
-+# After device was fully discarded, read sould return all zeroes
-+dd if=$dev bs=4k  2>>$seqres.full | hexdump
-+dd if=$dev bs=4M iflag=direct 2>>$seqres.full | hexdump
-+# success, all done
++	$XFS_IO_PROG -c "pwrite -S 0xa2 -b 1k -V8  2M 32k" -f $dev >>$seqres.full 2>&1 || \
++	    _fail "pwrite failed"
++
++	$XFS_IO_PROG -c "pwrite -S 0xa1 -b 4k  1536000 8k" -f $dev >>$seqres.full 2>&1 || \
++	    _fail "pwrite failed"
++
++	$XFS_IO_PROG -c "fsync" -d $dev >>$seqres.full 2>&1 || _fail "fsync failed"
++
++	echo "Check that buffered IO"
++	dd if=$dev bs=4k  2>>$seqres.full | md5sum
++	echo "Check that direct IO"
++	# Small requests will not being splitted
++	dd if=$dev bs=64k iflag=direct 2>>$seqres.full | md5sum
++	# Big requests may be splitted on flight, but result MUST be the same.
++	dd if=$dev bs=4M iflag=direct 2>>$seqres.full | md5sum
++
++	echo "Check csum corruption detection"
++	# LIO-fileio store t10 DIF data in separate file ${IMG}.protection
++	# struct t10_pi_tuple {
++	#	__be16 guard_tag;       /* Checksum */
++	#       __be16 app_tag;         /* Opaque storage */
++	#       __be32 ref_tag;         /* Target LBA or indirect LBA */
++	#}
++	# Play with 3000'th sector -> t10_pi_tuple offset == 3000 * 8 == 24000
++	#
++	echo "T1: Corrupt guard_tag, next read should fail"
++	$XFS_IO_PROG -c "pwrite -S 0xde -b2 24000 2 -w" \
++		     -f $TEST_DIR/$$/$img_name.protection >>$seqres.full 2>&1
++	dd if=$dev of=/dev/null bs=1M count=2 iflag=direct >>$seqres.full 2>&1 &&
++	    _fail "read should fail on 3000'th sector"
++
++	echo "T2: Check that unaffected blocks are still readable"
++	dd if=$dev of=/dev/null bs=1M count=1 iflag=direct >>$seqres.full 2>&1 || _fail "read failed"
++
++	echo "T3: Rewrite corrupted sector and check that read works"
++	$XFS_IO_PROG -c "pwrite -S 0xa1 -b 4k 1536000 4k" -d $dev >>$seqres.full 2>&1 || \
++	    _fail "pwrite failed"
++	dd if=$dev bs=2M count=1 iflag=direct >>$seqres.full 2>&1 || _fail "read failed"
++
++	echo "T4: Corrupt app_tag, should not affect read"
++	$XFS_IO_PROG -c "pwrite -S 0xde -b2 24002 2 -w" \
++		     -f $TEST_DIR/$$/$img_name.protection >>$seqres.full 2>&1
++	dd if=$dev bs=2M count=1 iflag=direct >>$seqres.full 2>&1 || _fail "read failed"
++
++	echo "T5: Corrupt ref_tag, next read should fail"
++	$XFS_IO_PROG -c "pwrite -S 0xde -b4 24004 4 -w"  \
++		     $TEST_DIR/$$/$img_name.protection  >>$seqres.full 2>&1
++	dd if=$dev of=/dev/null bs=1M count=2 iflag=direct >>$seqres.full 2>&1 &&
++	    _fail "read should fail on 3000'th sector"
++
++	echo "T6: Check that unaffected blocks are still readable"
++	dd if=$dev of=/dev/null bs=1M count=1 iflag=direct >>$seqres.full 2>&1 || _fail "read failed"
++
++	echo "T7: Rewrite corrupted sector and check that read works"
++	$XFS_IO_PROG -c "pwrite -S 0xa1 -b 4k 1536000 4k" -d $dev >>$seqres.full 2>&1 || \
++	    _fail "pwrite failed"
++
++	echo "Check that buffered and direct read works"
++	dd if=$dev bs=4k  2>>$seqres.full | md5sum
++	# Small requests will not being splitted
++	dd if=$dev bs=64k iflag=direct 2>>$seqres.full | md5sum
++	# Big requests may be splitted on flight, but result MUST be the same.
++	dd if=$dev bs=4M iflag=direct 2>>$seqres.full | md5sum
++}
++
++# Create virtual scsi target with internal csum verification
++name=dif-type1-w
++cfg_path=$(_liotgt_create_fileio $name $TEST_DIR/$$/$name 32M)
++
++_liotgt_set_attribute $cfg_path  pi_prot_type 1
++_liotgt_set_attribute $cfg_path  pi_prot_format 1
++_liotgt_set_attribute $cfg_path  pi_prot_verify 1
++dev=$(_liotgt_attach_target /backstores/fileio/$name)
++_run_one $name
++
++# Create virtual scsi target w/o internal csum verification,
++# check that core blk_integrity_profile->verify_fn works
++#
++name=dif-type1-wo
++cfg_path=$(_liotgt_create_fileio $name $TEST_DIR/$$/$name 32M)
++
++_liotgt_set_attribute $cfg_path  pi_prot_type 1
++_liotgt_set_attribute $cfg_path  pi_prot_format 1
++_liotgt_set_attribute $cfg_path  pi_prot_verify 0
++dev=$(_liotgt_attach_target /backstores/fileio/$name)
++_run_one $name
++
 +status=0
 +exit
-diff --git a/tests/blockdev/001.out b/tests/blockdev/001.out
+diff --git a/tests/blockdev/003.out b/tests/blockdev/003.out
 new file mode 100644
-index 0000000..0f81a92
+index 0000000..be2efbb
 --- /dev/null
-+++ b/tests/blockdev/001.out
-@@ -0,0 +1,7 @@
-+QA output created by 001
-+0000000 0000 0000 0000 0000 0000 0000 0000 0000
-+*
-+2000000
-+0000000 0000 0000 0000 0000 0000 0000 0000 0000
-+*
-+2000000
++++ b/tests/blockdev/003.out
+@@ -0,0 +1,39 @@
++QA output created by 003
++Run: dif-type1-w
++T0: Test basic IO
++Check that buffered IO
++f18a6c9b9d69ff8ed61daa62dfab4341  -
++Check that direct IO
++f18a6c9b9d69ff8ed61daa62dfab4341  -
++f18a6c9b9d69ff8ed61daa62dfab4341  -
++Check csum corruption detection
++T1: Corrupt guard_tag, next read should fail
++T2: Check that unaffected blocks are still readable
++T3: Rewrite corrupted sector and check that read works
++T4: Corrupt app_tag, should not affect read
++T5: Corrupt ref_tag, next read should fail
++T6: Check that unaffected blocks are still readable
++T7: Rewrite corrupted sector and check that read works
++Check that buffered and direct read works
++f18a6c9b9d69ff8ed61daa62dfab4341  -
++f18a6c9b9d69ff8ed61daa62dfab4341  -
++f18a6c9b9d69ff8ed61daa62dfab4341  -
++Run: dif-type1-wo
++T0: Test basic IO
++Check that buffered IO
++f18a6c9b9d69ff8ed61daa62dfab4341  -
++Check that direct IO
++f18a6c9b9d69ff8ed61daa62dfab4341  -
++f18a6c9b9d69ff8ed61daa62dfab4341  -
++Check csum corruption detection
++T1: Corrupt guard_tag, next read should fail
++T2: Check that unaffected blocks are still readable
++T3: Rewrite corrupted sector and check that read works
++T4: Corrupt app_tag, should not affect read
++T5: Corrupt ref_tag, next read should fail
++T6: Check that unaffected blocks are still readable
++T7: Rewrite corrupted sector and check that read works
++Check that buffered and direct read works
++f18a6c9b9d69ff8ed61daa62dfab4341  -
++f18a6c9b9d69ff8ed61daa62dfab4341  -
++f18a6c9b9d69ff8ed61daa62dfab4341  -
 diff --git a/tests/blockdev/group b/tests/blockdev/group
-new file mode 100644
-index 0000000..bdfdcb9
---- /dev/null
+index 0b511f3..e5ce864 100644
+--- a/tests/blockdev/group
 +++ b/tests/blockdev/group
-@@ -0,0 +1,6 @@
-+# QA groups control file
-+# Defines test groups and nominal group owners
-+# - do not start group names with a digit
-+# - comment line before each group is "new" description
-+#
-+001 rw blockdev
+@@ -5,3 +5,4 @@
+ #
+ 001 rw blockdev
+ 002 rw blockdev liotarget
++003 rw blockdev liotarget integrity dangerous
 -- 
 2.9.3
 
