@@ -1,187 +1,251 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:17393 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755136AbdDFQBh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Apr 2017 12:01:37 -0400
-Date: Thu, 6 Apr 2017 09:01:30 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH] generic: test FIEMAP on extended attribute blocks
-Message-ID: <20170406160130.GX4864@birch.djwong.org>
+Received: from mail-it0-f67.google.com ([209.85.214.67]:34273 "EHLO
+        mail-it0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751415AbdDFQCh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Apr 2017 12:02:37 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Reply-To: fdmanana@gmail.com
+In-Reply-To: <20170406012853.31414-1-quwenruo@cn.fujitsu.com>
+References: <20170406012853.31414-1-quwenruo@cn.fujitsu.com>
+From: Filipe Manana <fdmanana@gmail.com>
+Date: Thu, 6 Apr 2017 17:02:35 +0100
+Message-ID: <CAL3q7H6dUOL-WhsFBvgDSRgg3DwKnUP2f0Z11DK+ab+3ZKBOHg@mail.gmail.com>
+Subject: Re: [PATCH v3] fstests: btrfs: Check if btrfs will create
+ inline-then-regular file extents
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Cc: "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Make sure that FIEMAP produces some output when we add enough xattrs
-to force the xattrs to be stored in an external block.
+On Thu, Apr 6, 2017 at 2:28 AM, Qu Wenruo <quwenruo@cn.fujitsu.com> wrote:
+> Btrfs allows inline file extent if and only if
+> 1) It's at offset 0
+> 2) It's smaller than min(max_inline, page_size)
+>    Although we don't specify if the size is before compression or after
+>    compression.
+>    At least according to current behavior, we are only limiting the size
+>    after compression.
+> 3) It's the only file extent
+>    So that if we append existing inline extent, it should be converted
+>    to regular file extents.
+>
+> However several users in btrfs mail list have reported invalid inline
+> file extent, which only meets the first two condition, but with regular
+> file extents following.
+>
+> The bug is here for a long long time, so long that we have modified
+> kernel and btrfs-progs to accept such case, but it's still not designed
+> behavior, and must be detected and fixed.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- common/rc             |   15 +++++++-
- tests/generic/700     |   92 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/700.out |    5 +++
- tests/generic/group   |    1 +
- 4 files changed, 112 insertions(+), 1 deletion(-)
- create mode 100755 tests/generic/700
- create mode 100644 tests/generic/700.out
+So after looking at this better, I'm not convinced it's a problem.
+Other than making btrfs/137 fail when compression is enabled, what
+problems have you observed?
 
-diff --git a/common/rc b/common/rc
-index 6665f8d..80597e9 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2037,7 +2037,7 @@ _require_xfs_io_command()
- 		;;
- 	"fiemap")
- 		testio=`$XFS_IO_PROG -F -f -c "pwrite 0 20k" -c "fsync" \
--			-c "fiemap -v" $testfile 2>&1`
-+			-c "fiemap -v $param" $testfile 2>&1`
- 		;;
- 	"flink" )
- 		testio=`$XFS_IO_PROG -T -F -c "flink $testfile" \
-@@ -2070,6 +2070,8 @@ _require_xfs_io_command()
- 		_notrun "xfs_io $command support is missing"
- 	echo $testio | grep -q "Operation not supported" && \
- 		_notrun "xfs_io $command failed (old kernel/wrong fs?)"
-+	echo $testio | grep -q "Invalid" && \
-+		_notrun "xfs_io $command failed (old kernel/wrong fs/bad args?)"
- 	echo $testio | grep -q "foreign file active" && \
- 		_notrun "xfs_io $command not supported on $FSTYP"
- 
-@@ -2915,6 +2917,17 @@ _count_holes()
- 	$XFS_IO_PROG -c "fiemap" $1 | tail -n +2 | grep hole | wc -l
- }
- 
-+# Does fiemap support reporting xattr extents?
-+_require_fiemap_attr()
-+{
-+	_require_xfs_io_command "fiemap" "-a"
-+}
-+
-+_count_attr_extents()
-+{
-+	$XFS_IO_PROG -c "fiemap -a" $1 | tail -n +2 | grep -v hole | wc -l
-+}
-+
- # arg 1 is dev to remove and is output of the below eg.
- # ls -l /sys/class/block/sdd | rev | cut -d "/" -f 3 | rev
- _devmgt_remove()
-diff --git a/tests/generic/700 b/tests/generic/700
-new file mode 100755
-index 0000000..157cd27
---- /dev/null
-+++ b/tests/generic/700
-@@ -0,0 +1,92 @@
-+#! /bin/bash
-+# FS QA Test No. 700
-+#
-+# Check that FIEMAP produces some output when we require an external
-+# block to hold extended attributes.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Oracle, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 7 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -rf $tmp.*
-+	wait
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs generic
-+_require_scratch
-+_require_attrs
-+_require_fiemap_attr
-+
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
-+
-+echo "Create the original files"
-+testfile=$testdir/attrfile
-+touch $testfile
-+blk_sz=$(_get_file_block_size $SCRATCH_MNT)
-+
-+# Assume each attr eats at least 20 bytes.  Try to fill 2 fs blocks.
-+max_attrs=$((2 * blk_sz / 20))
-+
-+i=0
-+while [ $i -lt $max_attrs ]; do
-+	n="$(printf "%010d" $i)"
-+	$SETFATTR_PROG -n "user.$n" -v "$n" $testfile > $seqres.full 2>&1 || break
-+	i=$((i + 1))
-+done
-+sync
-+
-+echo "Check attr extent counts"
-+f1=$(_count_attr_extents $testfile)
-+echo "$f1 xattr extents" >> $seqres.full
-+$XFS_IO_PROG -c 'fiemap -a -v' $testfile >> $seqres.full
-+test $f1 -gt 0 || echo "Expected at least one xattr extent."
-+
-+_scratch_cycle_mount
-+
-+echo "Check attr extent counts after remount"
-+f1=$(_count_attr_extents $testfile)
-+echo "$f1 xattr extents" >> $seqres.full
-+$XFS_IO_PROG -c 'fiemap -a -v' $testfile >> $seqres.full
-+test $f1 -gt 0 || echo "Expected at least one xattr extent."
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/700.out b/tests/generic/700.out
-new file mode 100644
-index 0000000..a6b0562
---- /dev/null
-+++ b/tests/generic/700.out
-@@ -0,0 +1,5 @@
-+QA output created by 700
-+Format and mount
-+Create the original files
-+Check attr extent counts
-+Check attr extent counts after remount
-diff --git a/tests/generic/group b/tests/generic/group
-index 3c7c5e4..cb2a7bb 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -424,3 +424,4 @@
- 419 auto quick encrypt
- 420 auto quick punch
- 421 auto quick encrypt dangerous
-+700 auto quick attr
+btrfs/137 fails due to the incremental send code not being prepared
+for this case, which does not seem harmful to me because the inline
+extent represents 4096 bytes of uncompressed data. It would be a
+problem only if the uncompressed data was less than 4096 bytes.
+
+So unless there's evidence that this particular case causes problems
+somewhere, I don't think it's useful to have this test.
+
+As for btrfs/137, I'm sending a fix for the incremental send code.
+
+More comments below anyway.
+
+>
+> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+> ---
+> v2:
+>   All suggested by Eryu Guan
+>   Use loop_counts instead of runtime to avoid naming confusion.
+>   Fix whitespace issues
+>   Use fsync instead of sync
+>   Use $XFS_IO_PROG instead of calling xfs_io directly
+>   Always output corruption possibility into seqres.full
+>
+> v3:
+>   All suggested by Filipe Manana
+>   Fix gramma errors
+>   Use simpler reproducer
+>   Add test case to compress group
+> ---
+>  tests/btrfs/140     | 111 ++++++++++++++++++++++++++++++++++++++++++++++=
+++++++
+>  tests/btrfs/140.out |   2 +
+>  tests/btrfs/group   |   1 +
+>  3 files changed, 114 insertions(+)
+>  create mode 100755 tests/btrfs/140
+>  create mode 100644 tests/btrfs/140.out
+>
+> diff --git a/tests/btrfs/140 b/tests/btrfs/140
+> new file mode 100755
+> index 0000000..183d9cd
+> --- /dev/null
+> +++ b/tests/btrfs/140
+> @@ -0,0 +1,111 @@
+> +#! /bin/bash
+> +# FS QA Test 140
+> +#
+> +# Check if btrfs will create inline-then-regular file layout.
+> +#
+> +# Btrfs only allows inline file extent if file is small enough, and any
+> +# incoming write enlarges the file beyond max_inline should replace inli=
+ne
+> +# extents with regular extents.
+> +# This is a long standing bug, so fsck won't detect it and kernel will a=
+llow
+> +# normal read on it, but should be avoided.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Fujitsu.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=3D`basename $0`
+> +seqres=3D$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=3D`pwd`
+> +tmp=3D/tmp/$$
+> +status=3D1       # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
+> +_require_btrfs_command inspect-internal dump-tree
+> +
+> +inline_size=3D2048
+> +page_size=3D$(get_page_size)
+> +loop_counts=3D$(($LOAD_FACTOR * 4)) #The possibility is over 80%, just i=
+n case
+
+Sorry I forgot about this before.
+But why is the possibility not 100%? The code that skips the inline
+extent expansion/conversion is 100% deterministic
+(btrfs_file_write_iter() -> btrfs_cont_expand() ->
+btrfs_truncate_block()) since the first extent always has a size of
+4096 bytes.
+
+So even if we end up having this test for some reason, there's no need
+to have loops and the test could be added to the quick group.
+
+> +
+> +do_test()
+> +{
+> +       _scratch_mkfs > /dev/null 2>&1
+> +
+> +       # specify max_inline and compress explicitly to create
+> +       # inlined compressed extent
+> +       _scratch_mount "-o max_inline=3D$inline_size,compress"
+> +
+> +       # Page sized data will be compressed to quite small size,
+> +       # which is about 50 bytes for 4K, 100 bytes for 64K,
+> +       # far smaller than $inline_size, causing a inlined compressed
+> +       # file extent
+> +       $XFS_IO_PROG -f -c "pwrite 0 $page_size" -c "fsync" $SCRATCH_MNT/=
+file \
+> +               > /dev/null 2>&1
+> +
+> +       # Append another page to file in snapshot, since its offset is no=
+t
+
+There are no more snapshots, the comment is outdated.
+
+Thanks.
+
+> +       # 0, it will cause regular extent, and should convert inline exte=
+nt
+> +       # to regular too.
+> +       $XFS_IO_PROG -c "pwrite $page_size $page_size" $SCRATCH_MNT/file =
+\
+> +               > /dev/null 2>&1
+> +       _scratch_unmount
+> +
+> +       # Fsck won't report inline-then-regular as error, as it's so long
+> +       # standing that we have no choice but to accept.
+> +       # So here we use dump-tree to catch inline extent.
+> +       $BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV \
+> +               > $tmp.dump_tree 2>&1
+> +       if grep -q inline $tmp.dump_tree; then
+> +               cat $tmp.dump_tree >> $seqres.full
+> +               echo "Invalid inline file extent detected"
+> +               return 1
+> +       fi
+> +       return 0
+> +}
+> +
+> +for i in $(seq 1 $loop_counts); do
+> +       do_test
+> +       if [ $? -ne 0 ]; then
+> +               corrupted=3D$(($corrupted + 1))
+> +       fi
+> +done
+> +
+> +echo "Corruption possibility: $corrupted/$loop_counts" >> $seqres.full
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
+> new file mode 100644
+> index 0000000..24e90bc
+> --- /dev/null
+> +++ b/tests/btrfs/140.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 140
+> +Silence is golden
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 641d826..2c38fdd 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -142,3 +142,4 @@
+>  137 auto quick send
+>  138 auto compress
+>  139 auto qgroup
+> +140 auto compress
+> --
+> 2.9.3
+>
+>
+>
+
+
+
+--=20
+Filipe David Manana,
+
+=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
+ right.=E2=80=9D
