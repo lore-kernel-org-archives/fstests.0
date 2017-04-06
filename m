@@ -1,52 +1,268 @@
-Received: from mail-oi0-f45.google.com ([209.85.218.45]:36251 "EHLO
-        mail-oi0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754421AbdDEQjM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Apr 2017 12:39:12 -0400
+Received: from cn.fujitsu.com ([59.151.112.132]:11401 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S933226AbdDFAcn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 Apr 2017 20:32:43 -0400
+Subject: Re: [PATCH] fstests: btrfs: Check if btrfs will create
+ inline-then-regular file extents
+References: <20170405021428.14742-1-quwenruo@cn.fujitsu.com>
+ <CAL3q7H4Qh1bU5pyOQgzmi5D2NcawW3e9333w5qHv49ugzPn-eA@mail.gmail.com>
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Message-ID: <654f0fea-8220-ac0f-7f19-0b7d2ddf07c2@cn.fujitsu.com>
+Date: Thu, 6 Apr 2017 08:32:39 +0800
 MIME-Version: 1.0
-In-Reply-To: <149140996132.27340.12936555593689822963.stgit@warthog.procyon.org.uk>
-References: <149140993804.27340.4198614944626347024.stgit@warthog.procyon.org.uk>
- <149140996132.27340.12936555593689822963.stgit@warthog.procyon.org.uk>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 5 Apr 2017 19:39:11 +0300
-Message-ID: <CAOQ4uxgsmKHZ85Qg__zhU13tb4ARLHHWzUoCEvEUE7LNYNnHnQ@mail.gmail.com>
-Subject: Re: [PATCH 4/4] xfstests: Check the stx_attributes settable by chattr
- [ver #7]
-Content-Type: text/plain; charset=UTF-8
+In-Reply-To: <CAL3q7H4Qh1bU5pyOQgzmi5D2NcawW3e9333w5qHv49ugzPn-eA@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
 Sender: fstests-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: linux-xfs <linux-xfs@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>, Dave Chinner <david@fromorbit.com>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
+Content-Transfer-Encoding: quoted-printable
+To: fdmanana@gmail.com
+Cc: "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 5, 2017 at 7:32 PM, David Howells <dhowells@redhat.com> wrote:
-> Check the stx_attributes that can be set by calling chattr.
->
-> The script probes the filesystem with chattr to find out which of +a, +c,
-> +d and +i are supported before testing combinations of attrs.  Note that if
-> a filesystem supports chattr with these, but doesn't paste the flag values
-> into stx_attributes, the test will fail as there's no way to distinguish
-> cleared from unset.
->
-> Certain chattr flags are reflected in specific stx_attributes flags:
->
->         chattr flag     stx_attributes flag
->         +a              STATX_ATTR_APPEND
->         +c              STATX_ATTR_COMPRESSED
->         +d              STATX_ATTR_NODUMP
->         +i              STATX_ATTR_IMMUTABLE
->
-> Signed-off-by: David Howells <dhowells@redhat.com>
 
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
 
-I think you have an unintentional search&replace typo below.
-I don't mind though.
-Eryu is usually generous in offering to fix these sort of things at
-commit time ;-)
+At 04/06/2017 12:00 AM, Filipe Manana wrote:
+> On Wed, Apr 5, 2017 at 3:14 AM, Qu Wenruo <quwenruo@cn.fujitsu.com> wro=
+te:
+>> Btrfs allows inline file extent if and only if
+>> 1) It's at offset 0
+>> 2) It's smaller than min(max_inline, page_size)
+>>    Although we don't specify if the size is before compression or afte=
+r
+>>    compression.
+>>    At least according to current behavior, we are only limiting the si=
+ze
+>>    after compression.
+>> 3) It's the only file extent
+>>    So that if we append existing inline extent, it should be converted
+>>    to regular file extents.
+>>
+>> However several users in btrfs mail list have reported invalid inline
+>> file extent, which only meets the first two condition, but with regula=
+r
+>> file extents follows.
+>
+> follows -> following
+>
+>>
+>> The bug is here for a long long time, so long that we have modified
+>> kernel and btrfs-progs to accept such case, but it's still not designe=
+d
+>> behavior, and must be detected and fixed.
+>>
+>> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+>> ---
+>>  tests/btrfs/140     | 120 +++++++++++++++++++++++++++++++++++++++++++=
++++++++++
+>>  tests/btrfs/140.out |   2 +
+>>  tests/btrfs/group   |   1 +
+>>  3 files changed, 123 insertions(+)
+>>  create mode 100755 tests/btrfs/140
+>>  create mode 100644 tests/btrfs/140.out
+>>
+>> diff --git a/tests/btrfs/140 b/tests/btrfs/140
+>> new file mode 100755
+>> index 0000000..55f81f2
+>> --- /dev/null
+>> +++ b/tests/btrfs/140
+>> @@ -0,0 +1,120 @@
+>> +#! /bin/bash
+>> +# FS QA Test 140
+>> +#
+>> +# Check if btrfs will create inline-then-regular file layout.
+>> +#
+>> +# Btrfs only allows inline file extent if file is small enough, and a=
+ny
+>> +# incoming write enlarges the file beyong max_inline should replace i=
+nline
+>
+> beyong -> beyond
+>
+>> +# extents with regular extents.
+>> +# This is a long standing bug, so fsck won't detect it and kernel wil=
+l allow
+>> +# normal read on it, but should be avoided.
+>> +#
+>> +#--------------------------------------------------------------------=
+---
+>> +# Copyright (c) 2017 Fujitsu.  All Rights Reserved.
+>> +#
+>> +# This program is free software; you can redistribute it and/or
+>> +# modify it under the terms of the GNU General Public License as
+>> +# published by the Free Software Foundation.
+>> +#
+>> +# This program is distributed in the hope that it would be useful,
+>> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+>> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>> +# GNU General Public License for more details.
+>> +#
+>> +# You should have received a copy of the GNU General Public License
+>> +# along with this program; if not, write the Free Software Foundation=
+,
+>> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+>> +#--------------------------------------------------------------------=
+---
+>> +#
+>> +
+>> +seq=3D`basename $0`
+>> +seqres=3D$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +
+>> +here=3D`pwd`
+>> +tmp=3D/tmp/$$
+>> +status=3D1       # failure is the default!
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +       cd /
+>> +       rm -f $tmp.*
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +
+>> +# remove previous $seqres.full before test
+>> +rm -f $seqres.full
+>> +
+>> +# real QA test starts here
+>> +
+>> +# Modify as appropriate.
+>> +_supported_fs btrfs
+>> +_supported_os Linux
+>> +_require_scratch
+>> +_require_btrfs_command inspect-internal dump-tree
+>> +
+>> +inline_size=3D2048
+>> +page_size=3D$(get_page_size)
+>> +src_subv=3D"$SCRATCH_MNT/src"
+>> +dst_subv=3D"$SCRATCH_MNT/dst"
+>> +loop_counts=3D$(($LOAD_FACTOR * 4)) #The possibility is over 80%, jus=
+t in case
+>> +
+>> +do_test()
+>> +{
+>> +       local ret
+>
+> unused variable
+>
+>> +       _scratch_mkfs > /dev/null 2>&1
+>> +
+>> +       # specify max_inline and compress explicitly to create
+>> +       # inlined compressed extent
+>> +       _scratch_mount "-o max_inline=3D$inline_size,compress"
+>> +
+>> +       # Subvolume id=3D257
+>> +       _run_btrfs_util_prog subvolume create $src_subv
+>> +
+>> +       # Page sized data will be compressed to quite small size,
+>> +       # which is about 50 bytes for 4K, 100 bytes for 64K,
+>> +       # far smaller than $inline_size, causing a inlined compressed
+>> +       # file extent
+>> +       $XFS_IO_PROG -f -c "pwrite 0 $page_size" -c "fsync" $src_subv/=
+file \
+>> +               > /dev/null
+>> +
+>> +       # Subvolume id=3D258
+>> +       _run_btrfs_util_prog subvolume snapshot $src_subv $dst_subv
+>> +
+>> +       # Append another page to file in snapshot, since its offset is=
+ not
+>> +       # 0, it will cause regular extent, and should convert inline e=
+xtent
+>> +       # to regular too.
+>> +       $XFS_IO_PROG -c "pwrite $page_size $page_size" $dst_subv/file =
+> /dev/null
+>> +       _scratch_unmount
+>> +
+>> +       # Fsck won't report inline-then-regular as error, as it's so l=
+ong
+>> +       # standing that we have no choice but to accept.
+>> +       # So here we use dump-tree to catch inline extent of $dst_subv=
+, and
+>> +       # we need piping stdout, call btrfs-progs directly
+>
+> I don't understand the last sentence of the comment. Need piping
+> stdout? What pipe, to where? And call btrfs-progs directly where, what
+> does it mean?
 
-> +#
-> +#      $CHATTR_PROG flag       stx_attributes flag
-> +#      +a              STATX_ATTR_APPEND
-> +#      +c              STATX_ATTR_COMPRESSED
-> +#      +d              STATX_ATTR_NODUMP
-> +#      +i              STATX_ATTR_IMMUTABLE
-> +#
+Redirect=E3=80=80to a file without populating stdout.
+
+Directly means calling $BTRFS_UTIL_PROG other than the=20
+_run_btrfs_util_progs wrapper.
+
+Thanks,
+Qu
+>
+>> +       $BTRFS_UTIL_PROG inspect-internal dump-tree -t 258 $SCRATCH_DE=
+V \
+>> +               > $tmp.dump_tree
+>> +       if grep -q inline $tmp.dump_tree; then
+>> +               cat $tmp.dump_tree >> $seqres.full
+>> +               echo "Invalid inline file extent detected"
+>> +               return 1
+>> +       fi
+>> +       return 0
+>> +}
+>
+> This is unnecessarily complex to reproduce the issue.
+> It is enough to:
+>
+> 1) Create a file with an inline extent in the default subvolume (5)
+> 2) Create a snapshot of the default subvolume (can be readonly)
+> 3) Do the second write against the file in the default subvolume
+>
+> I.e., no need to create a second subvolume/snapshot. The file in the
+> default subvolume will have the issue.
+>
+>> +
+>> +for i in $(seq 1 $loop_counts); do
+>> +       do_test
+>> +       if [ $? -ne 0 ]; then
+>> +               corrupted=3D$(($corrupted + 1))
+>> +       fi
+>> +done
+>> +
+>> +echo "Corruption possibility: $corrupted/$loop_counts" >> $seqres.ful=
+l
+>> +echo "Silence is golden"
+>> +
+>> +# success, all done
+>> +status=3D0
+>> +exit
+>> diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
+>> new file mode 100644
+>> index 0000000..24e90bc
+>> --- /dev/null
+>> +++ b/tests/btrfs/140.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 140
+>> +Silence is golden
+>> diff --git a/tests/btrfs/group b/tests/btrfs/group
+>> index 641d826..e4c76e3 100644
+>> --- a/tests/btrfs/group
+>> +++ b/tests/btrfs/group
+>> @@ -142,3 +142,4 @@
+>>  137 auto quick send
+>>  138 auto compress
+>>  139 auto qgroup
+>> +140 auto
+>
+> Add the compress group.
+>
+> thanks
+>
+>> --
+>> 2.9.3
+>>
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+
+
