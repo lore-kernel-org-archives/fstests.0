@@ -1,11 +1,11 @@
-Received: from mail-lf0-f66.google.com ([209.85.215.66]:33751 "EHLO
-        mail-lf0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756093AbdDFNTU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Apr 2017 09:19:20 -0400
+Received: from mail-lf0-f67.google.com ([209.85.215.67]:35863 "EHLO
+        mail-lf0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933835AbdDFNTW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Apr 2017 09:19:22 -0400
 From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: [PATCH 4/6] new: blockdev/003 basic blockdev T10-DIF-TYPE1 integrity checks
-Date: Thu,  6 Apr 2017 17:19:08 +0400
-Message-Id: <1491484750-9164-5-git-send-email-dmonakhov@openvz.org>
+Subject: [PATCH 5/6] new: blockdev/004 Check that live fs survives blkdev page truncation
+Date: Thu,  6 Apr 2017 17:19:09 +0400
+Message-Id: <1491484750-9164-6-git-send-email-dmonakhov@openvz.org>
 In-Reply-To: <1491484750-9164-1-git-send-email-dmonakhov@openvz.org>
 References: <1491484750-9164-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
@@ -13,37 +13,30 @@ To: fstests@vger.kernel.org
 Cc: linux-fsdevel@vger.kernel.org, linux-block@vger.kernel.org, Dmitry Monakhov <dmonakhov@openvz.org>
 List-ID: <fstests@vger.kernel.org>
 
-Test create virtual block device via lio-targed infastructure and
-perform basic IO operations with data corruption detection.
-
-Temprorally mark is as dangerous, because currently it trigger BUG_ON
-inside blkdev_issue_flush
-
-BTW: I use 'dd' to test read from corrupted image instead of xfs_io
-because even if pread failed, xfs_io still exit with success, BUG?
-
 Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
 ---
- tests/blockdev/003     | 164 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/blockdev/003.out |  39 ++++++++++++
- tests/blockdev/group   |   1 +
- 3 files changed, 204 insertions(+)
- create mode 100755 tests/blockdev/003
- create mode 100644 tests/blockdev/003.out
+ tests/blockdev/004     | 81 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/blockdev/004.out |  2 ++
+ tests/blockdev/group   |  1 +
+ 3 files changed, 84 insertions(+)
+ create mode 100755 tests/blockdev/004
+ create mode 100644 tests/blockdev/004.out
 
-diff --git a/tests/blockdev/003 b/tests/blockdev/003
+diff --git a/tests/blockdev/004 b/tests/blockdev/004
 new file mode 100755
-index 0000000..8f31f0d
+index 0000000..decb4ad
 --- /dev/null
-+++ b/tests/blockdev/003
-@@ -0,0 +1,164 @@
++++ b/tests/blockdev/004
+@@ -0,0 +1,81 @@
 +#! /bin/bash
-+# FS QA Test 003
++# FS QA Test 004
 +#
-+# Check basic T10-DIF integrity features for a block device
++# Check that live filesystem survives blockdev pagecache truncation.
++# blkdev page cache can be truncated due to various reasons
++# 1)ioctl: BLKDISCARD
++# 2)blkdev: falloc{ FALLOC_FL_ZERO_RANGE, FALLOC_FL_PUNCH_HOLE }
++# 3)nbd: NBD_CLEAR_SOCK
 +#
-+# DIF/DIX TYPE: T10-DIF-TYPE1-CRC
-+# Kernel docs: Documentation/blockdev/data-integrity.txt
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2017 Dmitry Monakhov <dmonakhov@openvz.org>
 +# All Rights Reserved.
@@ -72,189 +65,67 @@ index 0000000..8f31f0d
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
-+
 +_cleanup()
 +{
++	$UMOUNT_PROG $fs_mnt
++	_destroy_loop_device $loop_dev
 +	cd /
-+	rm -f $tmp.*
-+	_liotgt_cleanup
 +	rm -rf $TEST_DIR/$$
++	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/liotarget
 +
-+# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
 +# real QA test starts here
-+
-+# Modify as appropriate.
 +_supported_fs generic
 +_supported_os Linux
-+_require_test
-+_require_liotarget
++_require_loop
++
++# create the fs image and mount point
 +
 +mkdir -p $TEST_DIR/$$ || _fail "Can not make test dir"
++fs_img=$TEST_DIR/$$/fs.img
++fs_mnt=$TEST_DIR/$$/mnt
++$XFS_IO_PROG -fc "truncate 1g" $fs_img >>$seqres.full 2>&1
++mkdir -p $fs_mnt
++loop_dev=$(_create_loop_device $fs_img)
++_mkfs_dev $loop_dev
++_mount $loop_dev $fs_mnt
 +
-+# One full test suite
-+_run_one()
-+{
-+	local img_name=$1
++# Issue zeroout on block device, this act just a giant hammer for fs,
++# A lot of complains are expected, bug_on/panic is not.
++$XFS_IO_PROG -c "fzero -k 0 1G" -f $loop_dev >>$seqres.full 2>&1
++# Try IO on corrupted fs
++for ((i=0;i<1000;i++));do
++	$XFS_IO_PROG -fc "pwrite -S $i 0 16k" $fs_mnt/test-$i >>$seqres.full 2>&1
++done
++$XFS_IO_PROG -fc "fsync" $fs_mnt/test-0 >>$seqres.full 2>&1
 +
-+	echo "Run: $img_name"
-+	echo "T0: Test basic IO"
-+	$XFS_IO_PROG -c "pwrite -S 0xa0 -b 4M 0 16M" -d $dev >>$seqres.full 2>&1 || \
-+	    _fail "pwrite failed"
-+
-+	$XFS_IO_PROG -c "pwrite -S 0xa3 -b 1k -V8  20M 32k" -d $dev >>$seqres.full 2>&1 || \
-+	    _fail "pwrite failed"
-+
-+	$XFS_IO_PROG -c "pwrite -S 0xa2 -b 1k -V8  2M 32k" -f $dev >>$seqres.full 2>&1 || \
-+	    _fail "pwrite failed"
-+
-+	$XFS_IO_PROG -c "pwrite -S 0xa1 -b 4k  1536000 8k" -f $dev >>$seqres.full 2>&1 || \
-+	    _fail "pwrite failed"
-+
-+	$XFS_IO_PROG -c "fsync" -d $dev >>$seqres.full 2>&1 || _fail "fsync failed"
-+
-+	echo "Check that buffered IO"
-+	dd if=$dev bs=4k  2>>$seqres.full | md5sum
-+	echo "Check that direct IO"
-+	# Small requests will not being splitted
-+	dd if=$dev bs=64k iflag=direct 2>>$seqres.full | md5sum
-+	# Big requests may be splitted on flight, but result MUST be the same.
-+	dd if=$dev bs=4M iflag=direct 2>>$seqres.full | md5sum
-+
-+	echo "Check csum corruption detection"
-+	# LIO-fileio store t10 DIF data in separate file ${IMG}.protection
-+	# struct t10_pi_tuple {
-+	#	__be16 guard_tag;       /* Checksum */
-+	#       __be16 app_tag;         /* Opaque storage */
-+	#       __be32 ref_tag;         /* Target LBA or indirect LBA */
-+	#}
-+	# Play with 3000'th sector -> t10_pi_tuple offset == 3000 * 8 == 24000
-+	#
-+	echo "T1: Corrupt guard_tag, next read should fail"
-+	$XFS_IO_PROG -c "pwrite -S 0xde -b2 24000 2 -w" \
-+		     -f $TEST_DIR/$$/$img_name.protection >>$seqres.full 2>&1
-+	dd if=$dev of=/dev/null bs=1M count=2 iflag=direct >>$seqres.full 2>&1 &&
-+	    _fail "read should fail on 3000'th sector"
-+
-+	echo "T2: Check that unaffected blocks are still readable"
-+	dd if=$dev of=/dev/null bs=1M count=1 iflag=direct >>$seqres.full 2>&1 || _fail "read failed"
-+
-+	echo "T3: Rewrite corrupted sector and check that read works"
-+	$XFS_IO_PROG -c "pwrite -S 0xa1 -b 4k 1536000 4k" -d $dev >>$seqres.full 2>&1 || \
-+	    _fail "pwrite failed"
-+	dd if=$dev bs=2M count=1 iflag=direct >>$seqres.full 2>&1 || _fail "read failed"
-+
-+	echo "T4: Corrupt app_tag, should not affect read"
-+	$XFS_IO_PROG -c "pwrite -S 0xde -b2 24002 2 -w" \
-+		     -f $TEST_DIR/$$/$img_name.protection >>$seqres.full 2>&1
-+	dd if=$dev bs=2M count=1 iflag=direct >>$seqres.full 2>&1 || _fail "read failed"
-+
-+	echo "T5: Corrupt ref_tag, next read should fail"
-+	$XFS_IO_PROG -c "pwrite -S 0xde -b4 24004 4 -w"  \
-+		     $TEST_DIR/$$/$img_name.protection  >>$seqres.full 2>&1
-+	dd if=$dev of=/dev/null bs=1M count=2 iflag=direct >>$seqres.full 2>&1 &&
-+	    _fail "read should fail on 3000'th sector"
-+
-+	echo "T6: Check that unaffected blocks are still readable"
-+	dd if=$dev of=/dev/null bs=1M count=1 iflag=direct >>$seqres.full 2>&1 || _fail "read failed"
-+
-+	echo "T7: Rewrite corrupted sector and check that read works"
-+	$XFS_IO_PROG -c "pwrite -S 0xa1 -b 4k 1536000 4k" -d $dev >>$seqres.full 2>&1 || \
-+	    _fail "pwrite failed"
-+
-+	echo "Check that buffered and direct read works"
-+	dd if=$dev bs=4k  2>>$seqres.full | md5sum
-+	# Small requests will not being splitted
-+	dd if=$dev bs=64k iflag=direct 2>>$seqres.full | md5sum
-+	# Big requests may be splitted on flight, but result MUST be the same.
-+	dd if=$dev bs=4M iflag=direct 2>>$seqres.full | md5sum
-+}
-+
-+# Create virtual scsi target with internal csum verification
-+name=dif-type1-w
-+cfg_path=$(_liotgt_create_fileio $name $TEST_DIR/$$/$name 32M)
-+
-+_liotgt_set_attribute $cfg_path  pi_prot_type 1
-+_liotgt_set_attribute $cfg_path  pi_prot_format 1
-+_liotgt_set_attribute $cfg_path  pi_prot_verify 1
-+dev=$(_liotgt_attach_target /backstores/fileio/$name)
-+_run_one $name
-+
-+# Create virtual scsi target w/o internal csum verification,
-+# check that core blk_integrity_profile->verify_fn works
-+#
-+name=dif-type1-wo
-+cfg_path=$(_liotgt_create_fileio $name $TEST_DIR/$$/$name 32M)
-+
-+_liotgt_set_attribute $cfg_path  pi_prot_type 1
-+_liotgt_set_attribute $cfg_path  pi_prot_format 1
-+_liotgt_set_attribute $cfg_path  pi_prot_verify 0
-+dev=$(_liotgt_attach_target /backstores/fileio/$name)
-+_run_one $name
-+
++# success, all done
++echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/blockdev/003.out b/tests/blockdev/003.out
+diff --git a/tests/blockdev/004.out b/tests/blockdev/004.out
 new file mode 100644
-index 0000000..be2efbb
+index 0000000..af8614a
 --- /dev/null
-+++ b/tests/blockdev/003.out
-@@ -0,0 +1,39 @@
-+QA output created by 003
-+Run: dif-type1-w
-+T0: Test basic IO
-+Check that buffered IO
-+f18a6c9b9d69ff8ed61daa62dfab4341  -
-+Check that direct IO
-+f18a6c9b9d69ff8ed61daa62dfab4341  -
-+f18a6c9b9d69ff8ed61daa62dfab4341  -
-+Check csum corruption detection
-+T1: Corrupt guard_tag, next read should fail
-+T2: Check that unaffected blocks are still readable
-+T3: Rewrite corrupted sector and check that read works
-+T4: Corrupt app_tag, should not affect read
-+T5: Corrupt ref_tag, next read should fail
-+T6: Check that unaffected blocks are still readable
-+T7: Rewrite corrupted sector and check that read works
-+Check that buffered and direct read works
-+f18a6c9b9d69ff8ed61daa62dfab4341  -
-+f18a6c9b9d69ff8ed61daa62dfab4341  -
-+f18a6c9b9d69ff8ed61daa62dfab4341  -
-+Run: dif-type1-wo
-+T0: Test basic IO
-+Check that buffered IO
-+f18a6c9b9d69ff8ed61daa62dfab4341  -
-+Check that direct IO
-+f18a6c9b9d69ff8ed61daa62dfab4341  -
-+f18a6c9b9d69ff8ed61daa62dfab4341  -
-+Check csum corruption detection
-+T1: Corrupt guard_tag, next read should fail
-+T2: Check that unaffected blocks are still readable
-+T3: Rewrite corrupted sector and check that read works
-+T4: Corrupt app_tag, should not affect read
-+T5: Corrupt ref_tag, next read should fail
-+T6: Check that unaffected blocks are still readable
-+T7: Rewrite corrupted sector and check that read works
-+Check that buffered and direct read works
-+f18a6c9b9d69ff8ed61daa62dfab4341  -
-+f18a6c9b9d69ff8ed61daa62dfab4341  -
-+f18a6c9b9d69ff8ed61daa62dfab4341  -
++++ b/tests/blockdev/004.out
+@@ -0,0 +1,2 @@
++QA output created by 004
++Silence is golden
 diff --git a/tests/blockdev/group b/tests/blockdev/group
-index 0b511f3..e5ce864 100644
+index e5ce864..d100c85 100644
 --- a/tests/blockdev/group
 +++ b/tests/blockdev/group
-@@ -5,3 +5,4 @@
- #
+@@ -6,3 +6,4 @@
  001 rw blockdev
  002 rw blockdev liotarget
-+003 rw blockdev liotarget integrity dangerous
+ 003 rw blockdev liotarget integrity dangerous
++004 rw blockdev dangerous zero
 -- 
 2.9.3
 
