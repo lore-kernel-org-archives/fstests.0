@@ -1,48 +1,38 @@
-Received: from mx2.suse.de ([195.135.220.15]:54910 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932134AbdDFMCe (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 6 Apr 2017 08:02:34 -0400
-Date: Thu, 6 Apr 2017 14:02:33 +0200
-From: David Disseldorp <ddiss@suse.de>
-Subject: Re: [PATCH] fstests: Remove IRIX os support from template
-Message-ID: <20170406140233.20dc6553@suse.de>
-In-Reply-To: <20170405032628.22370-1-quwenruo@cn.fujitsu.com>
-References: <20170405032628.22370-1-quwenruo@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Received: from mail-lf0-f65.google.com ([209.85.215.65]:34518 "EHLO
+        mail-lf0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753213AbdDFNTP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Apr 2017 09:19:15 -0400
+From: Dmitry Monakhov <dmonakhov@openvz.org>
+Subject: [PATCH 0/6] RFC add blkdev tests v2
+Date: Thu,  6 Apr 2017 17:19:04 +0400
+Message-Id: <1491484750-9164-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-fsdevel@vger.kernel.org, linux-block@vger.kernel.org, Dmitry Monakhov <dmonakhov@openvz.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, 5 Apr 2017 11:26:28 +0800, Qu Wenruo wrote:
+During LSFMM we have discussed how to test lower-backend of linux IO-stack.
+Main idea was that xfstests is the most obvious solution which cover
+most use-cases filesystem do care about. There were reasonable objections
+that xfstests is not ideal place for that, especially when they mixed
+with pure FS specific ones.
 
-> Since the last release of IRIX is already 10 years ago and support for
-> it has ended after 2014, there is no need to support IRIX any way.
-> 
-> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
-> ---
->  new | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/new b/new
-> index c21d8db..eb7da0f 100755
-> --- a/new
-> +++ b/new
-> @@ -207,7 +207,7 @@ rm -f \$seqres.full
->  
->  # Modify as appropriate.
->  _supported_fs generic
-> -_supported_os IRIX Linux
-> +_supported_os Linux
->  _require_test
->  
->  # if error
+My opinion is that it is worth to have blkdev tests here, in xfstests,
+instead of not have it at all. But tests have to be placed to separate
+namespace "tests/blockdev" to prevent confusion.
 
-Reviewed-by: David Disseldorp <ddiss@suse.de>
+Please review my RFC and tell me: Is my proposal too ugly? And we have to
+have completely separate framework for basic blockdev sanity checks.
+Assumptions:
+  - All new feature and regression tests should goes to "tests/blockdev"
+  - All tests belongs to 'blockdev' group
+  - Pure blkdev tests (tests which behavior is independent from fs) is not
+    added to 'auto' group. So it will not affect normal fs testing flow.
 
-Looking forward to seeing the floodgates open for the rest of the Irix
-removal changes.
-
-Cheers, David
+TOC:
+0001-add-lio-target-helpers.patch
+0002-add-blockdev-001-check-page-cache-coherency-after-BLKDISCARD
+0003-new-blockdev-002-check-information-leak-for-lio-file
+0004-new-blockdev-003-basic-blockdev-T10-DIF-TYPE1-integr
+0005-new-blockdev-004-Check-that-live-fs-survives-blkdev
+0006-new-blockdev-005-Check-that-busy-fs-survives-blkdev
