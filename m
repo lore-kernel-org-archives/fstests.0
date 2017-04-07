@@ -1,65 +1,30 @@
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:36246 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755304AbdDGJPf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 7 Apr 2017 05:15:35 -0400
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v4 4/4] t_immutable: add ftruncate to append only tests
-Date: Fri,  7 Apr 2017 12:15:39 +0300
-Message-Id: <1491556539-17147-1-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1491457434-7359-3-git-send-email-amir73il@gmail.com>
-References: <1491457434-7359-3-git-send-email-amir73il@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:59608 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932555AbdDGJ0X (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 7 Apr 2017 05:26:23 -0400
+Date: Fri, 7 Apr 2017 17:26:16 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] generic: test FIEMAP on extended attribute blocks
+Message-ID: <20170407092616.GT22845@eguan.usersys.redhat.com>
+References: <20170406160130.GX4864@birch.djwong.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170406160130.GX4864@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, Xiong Zhou <xzhou@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-The truncate and ftruncate syscalls check the IS_APPEND() flag
-in 2 different vfs code paths and I had to fix both in order to
-fix overlayfs IS_APPEND() violations.
+On Thu, Apr 06, 2017 at 09:01:30AM -0700, Darrick J. Wong wrote:
+> Make sure that FIEMAP produces some output when we add enough xattrs
+> to force the xattrs to be stored in an external block.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-Add the ftruncate test to t_immutable, so overlay/030 can verify
-the fix.
+Test itself looks fine to me. But given that there's disagreement on
+fiemap on xattr (still an reasonable test?) and test crashes debug built
+& 512b block size XFS, I'll hold this test for now.
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- src/t_immutable.c | 15 +++++++++++++++
- 1 file changed, 15 insertions(+)
-
-Eryu,
-
-Added another patch to the series.
-It stands by itself regardless of test overlay/030, but
-together with overlay/030 they provide full coverage of the
-kernel fixes I posted.
-
-Amir.
-
-diff --git a/src/t_immutable.c b/src/t_immutable.c
-index 8a12d2c..7a7195e 100644
---- a/src/t_immutable.c
-+++ b/src/t_immutable.c
-@@ -892,6 +892,21 @@ static int test_append(const char *dir)
-      }
- 
-      errno = 0;
-+     if ((fd = open(path, O_RDWR|O_APPEND)) == -1) {
-+	  fprintf(stderr, "open(%s, O_RDWR|O_APPEND) failed: %s\n", path, strerror(errno));
-+	  fail++;
-+     } else {
-+	     if (ftruncate(fd, 0) != -1) {
-+		     fprintf(stderr, "ftruncate(%s, 0) did not fail\n", path);
-+		     fail++;
-+	     } else if (errno != EPERM) {
-+		     fprintf(stderr, "ftruncate(%s, 0) did not set errno == EPERM\n", path);
-+		     fail++;
-+	     }
-+	     close(fd);
-+     }
-+
-+     errno = 0;
-      if (truncate(path, 0) != -1) {
- 	  fprintf(stderr, "truncate(%s, 0) did not fail\n", path);
- 	  fail++;
--- 
-2.7.4
-
+Thanks,
+Eryu
