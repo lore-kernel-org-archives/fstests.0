@@ -1,106 +1,78 @@
-Received: from mx1.redhat.com ([209.132.183.28]:38644 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755381AbdDGJpt (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 7 Apr 2017 05:45:49 -0400
-Date: Fri, 7 Apr 2017 17:45:46 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 1/3] common/rc: test that xfs_io's falloc command
- supports specific flags
-Message-ID: <20170407094546.GU22845@eguan.usersys.redhat.com>
-References: <1491287671-23097-1-git-send-email-fdmanana@kernel.org>
- <20170407085117.GS22845@eguan.usersys.redhat.com>
- <CAL3q7H7SN5stPdFDD87kUBtLhJkA2E5dHJ+Cf0m601WeyA9H+A@mail.gmail.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:18515 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755116AbdDGPmi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 7 Apr 2017 11:42:38 -0400
+Date: Fri, 7 Apr 2017 08:42:25 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] fstests: generic: Check if cycle mount and sleep can
+ affect fiemap result
+Message-ID: <20170407154225.GG10881@birch.djwong.org>
+References: <20170403070923.18518-1-quwenruo@cn.fujitsu.com>
+ <20170405023526.GS22845@eguan.usersys.redhat.com>
+ <20170406162616.zsnbgx6vy2fgugmq@thunk.org>
+ <36663e81-9520-0c52-5e72-1d54ddbfb0b7@sandeen.net>
+ <20170407050258.GO22845@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAL3q7H7SN5stPdFDD87kUBtLhJkA2E5dHJ+Cf0m601WeyA9H+A@mail.gmail.com>
+In-Reply-To: <20170407050258.GO22845@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Eric Sandeen <sandeen@sandeen.net>, Theodore Ts'o <tytso@mit.edu>, Qu Wenruo <quwenruo@cn.fujitsu.com>, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Apr 07, 2017 at 10:13:09AM +0100, Filipe Manana wrote:
-> On Fri, Apr 7, 2017 at 9:51 AM, Eryu Guan <eguan@redhat.com> wrote:
-> > On Tue, Apr 04, 2017 at 07:34:29AM +0100, fdmanana@kernel.org wrote:
-> >> From: Filipe Manana <fdmanana@suse.com>
-> >>
-> >> For example NFS 4.2 supports fallocate but it does not support its
-> >> KEEP_SIZE flag, so we want to skip tests that use fallocate with that
-> >> flag on filesystems that don't support it.
-> >>
-> >> Suggested-by: Eryu Guan <eguan@redhat.com>
-> >> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> >> ---
-> >>  common/rc | 4 ++--
-> >>  1 file changed, 2 insertions(+), 2 deletions(-)
-> >>
-> >> diff --git a/common/rc b/common/rc
-> >> index e1ab2c6..3d0f089 100644
-> >> --- a/common/rc
-> >> +++ b/common/rc
-> >> @@ -2021,8 +2021,8 @@ _require_xfs_io_command()
-> >>       "chproj")
-> >>               testio=`$XFS_IO_PROG -F -f -c "chproj 0" $testfile 2>&1`
-> >>               ;;
-> >> -     "falloc" )
-> >> -             testio=`$XFS_IO_PROG -F -f -c "falloc 0 1m" $testfile 2>&1`
-> >> +     "falloc*" )
-> >> +             testio=`$XFS_IO_PROG -F -f -c "$command 0 1m" $testfile 2>&1`
-> >
-> > Sorry, I was wrong about this. It would break the subsequent
-> > $XFS_IO_PROG -c "help $command" | grep ... command if another $param is
-> > specified.
+On Fri, Apr 07, 2017 at 01:02:58PM +0800, Eryu Guan wrote:
+> On Thu, Apr 06, 2017 at 11:28:01AM -0500, Eric Sandeen wrote:
+> > On 4/6/17 11:26 AM, Theodore Ts'o wrote:
+> > > On Wed, Apr 05, 2017 at 10:35:26AM +0800, Eryu Guan wrote:
+> > >>
+> > >> Test fails with ext3/2 when driving with ext4 driver, fiemap changed
+> > >> after umount/mount cycle, then changed back to original result after
+> > >> sleeping some time. An ext4 bug? (cc'ed linux-ext4 list.)
+> > > 
+> > > I haven't had time to look at this, but I'm not sure this test is a
+> > > reasonable one on the face of it.
+> > > 
+> > > A file system may choose to optimize a file's extent tree for whatever
+> > > reason it wants, whenever it wants, including on an unmount --- and
+> > > that would not be an invalid thing to do.  So to have an xfstests that
+> > > causes a test failure if a file system were to, say, do some cleanup
+> > > at mount or unmount time, or when the file is next opened, to merge
+> > > adjacent extents together (and hence change what is returned by
+> > > FIEMAP) might be strange, or even weird --- but is this any of user
+> > > space's business?  Or anything we want to enforce as wrong wrong wrong
+> > > by xfstests?
 > 
-> Yeah I had noticed that because the following won't cause the return anymore:
-> 
-> test -z "$param" && return
-> 
-> > Seems adding $param to falloc command is the right way, as
-> > what Darrick did to fiemap in his new test.
-> >
-> > -               testio=`$XFS_IO_PROG -F -f -c "falloc 0 1m" $testfile 2>&1`
-> > +               testio=`$XFS_IO_PROG -F -f -c "falloc $param 0 1m" $testfile 2>&1`
-> 
-> But in that case grepping the help output, at the very end of the
-> function, will fail for falloc since its help output fails to match
-> the grep pattern (as highlighted in the thread you pointed before).
-> So that grep pattern would have to change as well.
+> So I was asking for a review from ext4 side instead of queuing it for
+> next xfstests update :)
 
-This should be fixed by xfsprogs commit 0c2ed80a3590 ("xfs_io: provide
-long-format help for falloc"). But I agreed searching the help message
-again for it would be redundant. But perhaps that needs wider review and
-doesn't belong to this patch. I'll try to do that in my cleanup patch
-for _require_xfs_io_command().
+In general FIEMAP can return pretty much whatever it wants, which
+usually means that it won't report extents larger than the underlying
+block mapping extents, though as we've seen it can split a single
+on-disk extent into multiple FIEMAP records for the purpose of reporting
+sharedness.
 
-Thanks,
-Eryu
+For ext3 I'm wondering if it's the case that the first time we FIEMAP an
+indirect map file we see a possibly-merged version of whatever's in the
+particular leaf node we land in; then that information gets cached &
+merged with other records in the extent status tree, such that
+subsequent FIEMAP calls see longer extents than the first time around.
+
+> > I had the same question.  If the exact behavior isn't defined anywhere,
+> > I don't know what we can be testing, TBH.
+> 
+> Agreed, I was about to ask for the expected behavior today if there was
+> no new review comments on this patch.
+
+I think the expected behavior is that any behavior is expected. :(
+
+--D
 
 > 
-> >
-> > Do you mind me updating these three patches accordingly? Or can you send
-> > out new version if you like?
+> Thanks for the comments and review!
 > 
-> Sure, fell free to update it as you feel it's the best way.
-> 
-> Thanks!
-> 
-> >
-> > Thanks! And sorry again!
-> >
-> > Eryu
-> >
-> > P.S. I'm thinking of converting all the case switches (except the
-> > default one) in _require_xfs_io_command() to actually run the $command
-> > with $param, and doing other cleanups, but that won't block this patch
-> > and I can do it in another patch.
-> >
-> >>               ;;
-> >>       "fpunch" | "fcollapse" | "zero" | "fzero" | "finsert" | "funshare")
-> >>               testio=`$XFS_IO_PROG -F -f -c "pwrite 0 20k" -c "fsync" \
-> >> --
-> >> 2.7.0.rc3
-> >>
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Eryu
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
