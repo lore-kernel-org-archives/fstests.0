@@ -1,56 +1,185 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43274 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:37374 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751039AbdDGFDB (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 7 Apr 2017 01:03:01 -0400
-Date: Fri, 7 Apr 2017 13:02:58 +0800
+        id S1752083AbdDGFWd (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 7 Apr 2017 01:22:33 -0400
+Date: Fri, 7 Apr 2017 13:22:29 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] fstests: generic: Check if cycle mount and sleep can
- affect fiemap result
-Message-ID: <20170407050258.GO22845@eguan.usersys.redhat.com>
-References: <20170403070923.18518-1-quwenruo@cn.fujitsu.com>
- <20170405023526.GS22845@eguan.usersys.redhat.com>
- <20170406162616.zsnbgx6vy2fgugmq@thunk.org>
- <36663e81-9520-0c52-5e72-1d54ddbfb0b7@sandeen.net>
+Subject: Re: [PATCH] fstests: add orangefs (pvfs2) support
+Message-ID: <20170407052229.GP22845@eguan.usersys.redhat.com>
+References: <1491517514-15633-1-git-send-email-martin@omnibond.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <36663e81-9520-0c52-5e72-1d54ddbfb0b7@sandeen.net>
+In-Reply-To: <1491517514-15633-1-git-send-email-martin@omnibond.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>, Theodore Ts'o <tytso@mit.edu>
-Cc: Qu Wenruo <quwenruo@cn.fujitsu.com>, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+To: Martin Brandenburg <martin@omnibond.com>
+Cc: hubcap@omnibond.com, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Apr 06, 2017 at 11:28:01AM -0500, Eric Sandeen wrote:
-> On 4/6/17 11:26 AM, Theodore Ts'o wrote:
-> > On Wed, Apr 05, 2017 at 10:35:26AM +0800, Eryu Guan wrote:
-> >>
-> >> Test fails with ext3/2 when driving with ext4 driver, fiemap changed
-> >> after umount/mount cycle, then changed back to original result after
-> >> sleeping some time. An ext4 bug? (cc'ed linux-ext4 list.)
-> > 
-> > I haven't had time to look at this, but I'm not sure this test is a
-> > reasonable one on the face of it.
-> > 
-> > A file system may choose to optimize a file's extent tree for whatever
-> > reason it wants, whenever it wants, including on an unmount --- and
-> > that would not be an invalid thing to do.  So to have an xfstests that
-> > causes a test failure if a file system were to, say, do some cleanup
-> > at mount or unmount time, or when the file is next opened, to merge
-> > adjacent extents together (and hence change what is returned by
-> > FIEMAP) might be strange, or even weird --- but is this any of user
-> > space's business?  Or anything we want to enforce as wrong wrong wrong
-> > by xfstests?
-
-So I was asking for a review from ext4 side instead of queuing it for
-next xfstests update :)
-
+On Thu, Apr 06, 2017 at 06:25:14PM -0400, Martin Brandenburg wrote:
+> The filesystem was renamed OrangeFS from PVFS2 recently.  The mount -t
+> type remains pvfs2, so I have used that name throughout despite the
+> kernel module being named orangefs.
 > 
-> I had the same question.  If the exact behavior isn't defined anywhere,
-> I don't know what we can be testing, TBH.
+> We've been maintaining this as a patch for quite some time.
+> 
+> The easiest way to use is to setup a single server installation with
+> multiple filesystems orangefs and scratch, put the following in
+> /etc/xfsqa.config, and run ./check -pvfs2 -g quick.
+> 
+> TEST_DIR=/mnt
+> TEST_DEV=tcp://server1vm:3334/orangefs
+> SCRATCH_MNT=/scratch
+> SCRATCH_DEV=tcp://server1vm:3334/scratch
+> 
+> Signed-off-by: Martin Brandenburg <martin@omnibond.com>
 
-Agreed, I was about to ask for the expected behavior today if there was
-no new review comments on this patch.
+Looks fine to me overall, though I don't have a orangefs environment to
+test it right now. One minor question below.
 
-Thanks for the comments and review!
+> ---
+>  check       |  2 ++
+>  common/attr |  4 +++-
+>  common/rc   | 23 +++++++++++++++++++++--
+>  3 files changed, 26 insertions(+), 3 deletions(-)
+> 
+> diff --git a/check b/check
+> index 2fcf385..9cef58b 100755
+> --- a/check
+> +++ b/check
+> @@ -68,6 +68,7 @@ check options
+>      -glusterfs                test GlusterFS
+>      -cifs               test CIFS
+>      -overlay		test overlay
+> +    -pvfs2          test PVFS2
+>      -tmpfs              test TMPFS
+>      -l			line mode diff
+>      -udiff		show unified diff (default)
+> @@ -264,6 +265,7 @@ while [ $# -gt 0 ]; do
+>  	-glusterfs)	FSTYP=glusterfs ;;
+>  	-cifs)		FSTYP=cifs ;;
+>  	-overlay)	FSTYP=overlay; export OVERLAY=true ;;
+> +	-pvfs2)		FSTYP=pvfs2 ;;
+>  	-tmpfs)		FSTYP=tmpfs ;;
+>  
+>  	-g)	group=$2 ; shift ;
+> diff --git a/common/attr b/common/attr
+> index 08643e6..ac139e6 100644
+> --- a/common/attr
+> +++ b/common/attr
+> @@ -254,7 +254,7 @@ _sort_getfattr_output()
+>  }
+>  
+>  # set maximum total attr space based on fs type
+> -if [ "$FSTYP" == "xfs" -o "$FSTYP" == "udf" ]; then
+> +if [ "$FSTYP" == "xfs" -o "$FSTYP" == "udf" -o "$FSTYP" == "pvfs2" ]; then
+>  	MAX_ATTRS=1000
+>  else # Assume max ~1 block of attrs
+>  	BLOCK_SIZE=`_get_block_size $TEST_DIR`
+> @@ -267,6 +267,8 @@ export MAX_ATTRS
+>  # Set max attr value size based on fs type
+>  if [ "$FSTYP" == "xfs" -o "$FSTYP" == "udf" -o "$FSTYP" == "btrfs" ]; then
+>  	MAX_ATTRVAL_SIZE=64
+> +elif [ "$FSTYP" == "pvfs2" ]; then
+> +	MAX_ATTRVAL_SIZE=8192
+>  else # Assume max ~1 block of attrs
+>  	BLOCK_SIZE=`_get_block_size $TEST_DIR`
+>  	# leave a little overhead
+> diff --git a/common/rc b/common/rc
+> index e1ab2c6..140658d 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -174,6 +174,8 @@ case "$FSTYP" in
+>      reiser4)
+>  	 [ "$MKFS_REISER4_PROG" = "" ] && _fatal "mkfs.reiser4 not found"
+>  	 ;;
+> +    pvfs2)
+> +	;;
+>  esac
+>  
+>  if [ ! -z "$REPORT_LIST" ]; then
+> @@ -714,6 +716,8 @@ _test_mkfs()
+>      overlay)
+>  	# do nothing for overlay
+>  	;;
+> +    pvfs2)
+> +	;;
+>      udf)
+>          $MKFS_UDF_PROG $MKFS_OPTIONS $* $TEST_DEV > /dev/null
+>  	;;
+> @@ -738,6 +742,8 @@ _mkfs_dev()
+>      overlay)
+>  	# do nothing for overlay
+>  	;;
+> +    pvfs2)
+> +	;;
+>      udf)
+>          $MKFS_UDF_PROG $MKFS_OPTIONS $* 2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
+>  	;;
+> @@ -793,7 +799,7 @@ _scratch_mkfs()
+>  	local mkfs_status
+>  
+>  	case $FSTYP in
+> -	nfs*|cifs|ceph|overlay|glusterfs)
+> +	nfs*|cifs|ceph|overlay|glusterfs|pvfs2)
+>  		# unable to re-create this fstyp, just remove all files in
+>  		# $SCRATCH_MNT to avoid EEXIST caused by the leftover files
+>  		# created in previous runs
+> @@ -1504,7 +1510,7 @@ _require_scratch_nocheck()
+>  			_notrun "this test requires a valid \$SCRATCH_MNT"
+>  		fi
+>  		;;
+> -	nfs*|ceph)
+> +	nfs*|ceph|pvfs2)
+>  		echo $SCRATCH_DEV | grep -q ":/" > /dev/null 2>&1
+>  		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
+>  			_notrun "this test requires a valid \$SCRATCH_DEV"
+> @@ -1618,6 +1624,15 @@ _require_test()
+>  			_notrun "this test requires a valid \$TEST_DIR"
+>  		fi
+>  		;;
+> +	pvfs2)
+> +		echo $TEST_DEV | grep -q "://" > /dev/null 2>&1
+> +		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
+> +			_notrun "this test requires a valid \$TEST_DIR"
+> +		fi
+> +		if [ ! -d "$TEST_DIR" ]; then
+> +			_notrun "this test requires a valid \$TEST_DIR"
+> +		fi
+> +		;;
 
+pvfs2 has its own entry in _require_test() to validate TEST_DEV and
+TEST_DIR, but in _require_scratch_nocheck() pvfs2 shares the entry for
+nfs and ceph. This seems inconsistent, is it intentional?
+
+Thanks,
 Eryu
+
+>  	tmpfs)
+>  		if [ -z "$TEST_DEV" -o ! -d "$TEST_DIR" ];
+>  		then
+> @@ -2451,6 +2466,8 @@ _check_test_fs()
+>      overlay)
+>  	# no way to check consistency for overlay
+>  	;;
+> +    pvfs2)
+> +	;;
+>      udf)
+>  	# do nothing for now
+>  	;;
+> @@ -2501,6 +2518,8 @@ _check_scratch_fs()
+>      overlay)
+>  	# no way to check consistency for overlay
+>  	;;
+> +    pvfs2)
+> +	;;
+>      btrfs)
+>  	_check_btrfs_filesystem $device
+>  	;;
+> -- 
+> 2.1.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
