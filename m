@@ -1,92 +1,65 @@
-Received: from mail.kernel.org ([198.145.29.136]:44942 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932691AbdDGJNP (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 7 Apr 2017 05:13:15 -0400
-MIME-Version: 1.0
-In-Reply-To: <20170407085117.GS22845@eguan.usersys.redhat.com>
-References: <1491287671-23097-1-git-send-email-fdmanana@kernel.org> <20170407085117.GS22845@eguan.usersys.redhat.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Fri, 7 Apr 2017 10:13:09 +0100
-Message-ID: <CAL3q7H7SN5stPdFDD87kUBtLhJkA2E5dHJ+Cf0m601WeyA9H+A@mail.gmail.com>
-Subject: Re: [PATCH 1/3] common/rc: test that xfs_io's falloc command supports
- specific flags
-Content-Type: text/plain; charset=UTF-8
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:36246 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755304AbdDGJPf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 7 Apr 2017 05:15:35 -0400
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH v4 4/4] t_immutable: add ftruncate to append only tests
+Date: Fri,  7 Apr 2017 12:15:39 +0300
+Message-Id: <1491556539-17147-1-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1491457434-7359-3-git-send-email-amir73il@gmail.com>
+References: <1491457434-7359-3-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Xiong Zhou <xzhou@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Apr 7, 2017 at 9:51 AM, Eryu Guan <eguan@redhat.com> wrote:
-> On Tue, Apr 04, 2017 at 07:34:29AM +0100, fdmanana@kernel.org wrote:
->> From: Filipe Manana <fdmanana@suse.com>
->>
->> For example NFS 4.2 supports fallocate but it does not support its
->> KEEP_SIZE flag, so we want to skip tests that use fallocate with that
->> flag on filesystems that don't support it.
->>
->> Suggested-by: Eryu Guan <eguan@redhat.com>
->> Signed-off-by: Filipe Manana <fdmanana@suse.com>
->> ---
->>  common/rc | 4 ++--
->>  1 file changed, 2 insertions(+), 2 deletions(-)
->>
->> diff --git a/common/rc b/common/rc
->> index e1ab2c6..3d0f089 100644
->> --- a/common/rc
->> +++ b/common/rc
->> @@ -2021,8 +2021,8 @@ _require_xfs_io_command()
->>       "chproj")
->>               testio=`$XFS_IO_PROG -F -f -c "chproj 0" $testfile 2>&1`
->>               ;;
->> -     "falloc" )
->> -             testio=`$XFS_IO_PROG -F -f -c "falloc 0 1m" $testfile 2>&1`
->> +     "falloc*" )
->> +             testio=`$XFS_IO_PROG -F -f -c "$command 0 1m" $testfile 2>&1`
->
-> Sorry, I was wrong about this. It would break the subsequent
-> $XFS_IO_PROG -c "help $command" | grep ... command if another $param is
-> specified.
+The truncate and ftruncate syscalls check the IS_APPEND() flag
+in 2 different vfs code paths and I had to fix both in order to
+fix overlayfs IS_APPEND() violations.
 
-Yeah I had noticed that because the following won't cause the return anymore:
+Add the ftruncate test to t_immutable, so overlay/030 can verify
+the fix.
 
-test -z "$param" && return
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ src/t_immutable.c | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
 
-> Seems adding $param to falloc command is the right way, as
-> what Darrick did to fiemap in his new test.
->
-> -               testio=`$XFS_IO_PROG -F -f -c "falloc 0 1m" $testfile 2>&1`
-> +               testio=`$XFS_IO_PROG -F -f -c "falloc $param 0 1m" $testfile 2>&1`
+Eryu,
 
-But in that case grepping the help output, at the very end of the
-function, will fail for falloc since its help output fails to match
-the grep pattern (as highlighted in the thread you pointed before).
-So that grep pattern would have to change as well.
+Added another patch to the series.
+It stands by itself regardless of test overlay/030, but
+together with overlay/030 they provide full coverage of the
+kernel fixes I posted.
 
->
-> Do you mind me updating these three patches accordingly? Or can you send
-> out new version if you like?
+Amir.
 
-Sure, fell free to update it as you feel it's the best way.
+diff --git a/src/t_immutable.c b/src/t_immutable.c
+index 8a12d2c..7a7195e 100644
+--- a/src/t_immutable.c
++++ b/src/t_immutable.c
+@@ -892,6 +892,21 @@ static int test_append(const char *dir)
+      }
+ 
+      errno = 0;
++     if ((fd = open(path, O_RDWR|O_APPEND)) == -1) {
++	  fprintf(stderr, "open(%s, O_RDWR|O_APPEND) failed: %s\n", path, strerror(errno));
++	  fail++;
++     } else {
++	     if (ftruncate(fd, 0) != -1) {
++		     fprintf(stderr, "ftruncate(%s, 0) did not fail\n", path);
++		     fail++;
++	     } else if (errno != EPERM) {
++		     fprintf(stderr, "ftruncate(%s, 0) did not set errno == EPERM\n", path);
++		     fail++;
++	     }
++	     close(fd);
++     }
++
++     errno = 0;
+      if (truncate(path, 0) != -1) {
+ 	  fprintf(stderr, "truncate(%s, 0) did not fail\n", path);
+ 	  fail++;
+-- 
+2.7.4
 
-Thanks!
-
->
-> Thanks! And sorry again!
->
-> Eryu
->
-> P.S. I'm thinking of converting all the case switches (except the
-> default one) in _require_xfs_io_command() to actually run the $command
-> with $param, and doing other cleanups, but that won't block this patch
-> and I can do it in another patch.
->
->>               ;;
->>       "fpunch" | "fcollapse" | "zero" | "fzero" | "finsert" | "funshare")
->>               testio=`$XFS_IO_PROG -F -f -c "pwrite 0 20k" -c "fsync" \
->> --
->> 2.7.0.rc3
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe fstests" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
