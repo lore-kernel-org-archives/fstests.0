@@ -1,259 +1,91 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:52414 "EHLO
+Received: from cn.fujitsu.com ([59.151.112.132]:5461 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751557AbdDGA24 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Apr 2017 20:28:56 -0400
-Subject: Re: [PATCH v3] fstests: btrfs: Check if btrfs will create
- inline-then-regular file extents
-References: <20170406012853.31414-1-quwenruo@cn.fujitsu.com>
- <CAL3q7H6dUOL-WhsFBvgDSRgg3DwKnUP2f0Z11DK+ab+3ZKBOHg@mail.gmail.com>
+        with ESMTP id S1752666AbdDGAs3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Apr 2017 20:48:29 -0400
+Subject: Re: [PATCH] fstests: generic: Check if cycle mount and sleep can
+ affect fiemap result
+References: <20170403070923.18518-1-quwenruo@cn.fujitsu.com>
+ <20170405023526.GS22845@eguan.usersys.redhat.com>
+ <20170406162616.zsnbgx6vy2fgugmq@thunk.org>
+ <36663e81-9520-0c52-5e72-1d54ddbfb0b7@sandeen.net>
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
-Message-ID: <cb1aed11-abd7-967f-9633-517034341016@cn.fujitsu.com>
-Date: Fri, 7 Apr 2017 08:28:48 +0800
+Message-ID: <519beb0e-f82c-91dc-4eae-7c61e9ee69fa@cn.fujitsu.com>
+Date: Fri, 7 Apr 2017 08:48:20 +0800
 MIME-Version: 1.0
-In-Reply-To: <CAL3q7H6dUOL-WhsFBvgDSRgg3DwKnUP2f0Z11DK+ab+3ZKBOHg@mail.gmail.com>
+In-Reply-To: <36663e81-9520-0c52-5e72-1d54ddbfb0b7@sandeen.net>
 Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fdmanana@gmail.com
-Cc: "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>
+To: Eric Sandeen <sandeen@sandeen.net>, Theodore Ts'o <tytso@mit.edu>, Eryu Guan <eguan@redhat.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
 
 
-At 04/07/2017 12:02 AM, Filipe Manana wrote:
-> On Thu, Apr 6, 2017 at 2:28 AM, Qu Wenruo <quwenruo@cn.fujitsu.com> wrote:
->> Btrfs allows inline file extent if and only if
->> 1) It's at offset 0
->> 2) It's smaller than min(max_inline, page_size)
->>    Although we don't specify if the size is before compression or after
->>    compression.
->>    At least according to current behavior, we are only limiting the size
->>    after compression.
->> 3) It's the only file extent
->>    So that if we append existing inline extent, it should be converted
->>    to regular file extents.
+At 04/07/2017 12:28 AM, Eric Sandeen wrote:
+> On 4/6/17 11:26 AM, Theodore Ts'o wrote:
+>> On Wed, Apr 05, 2017 at 10:35:26AM +0800, Eryu Guan wrote:
+>>>
+>>> Test fails with ext3/2 when driving with ext4 driver, fiemap changed
+>>> after umount/mount cycle, then changed back to original result after
+>>> sleeping some time. An ext4 bug? (cc'ed linux-ext4 list.)
 >>
->> However several users in btrfs mail list have reported invalid inline
->> file extent, which only meets the first two condition, but with regular
->> file extents following.
+>> I haven't had time to look at this, but I'm not sure this test is a
+>> reasonable one on the face of it.
 >>
->> The bug is here for a long long time, so long that we have modified
->> kernel and btrfs-progs to accept such case, but it's still not designed
->> behavior, and must be detected and fixed.
+>> A file system may choose to optimize a file's extent tree for whatever
+>> reason it wants, whenever it wants, including on an unmount --- and
+>> that would not be an invalid thing to do.  So to have an xfstests that
+>> causes a test failure if a file system were to, say, do some cleanup
+>> at mount or unmount time, or when the file is next opened, to merge
+>> adjacent extents together (and hence change what is returned by
+>> FIEMAP) might be strange, or even weird --- but is this any of user
+>> space's business?  Or anything we want to enforce as wrong wrong wrong
+>> by xfstests?
 >
-> So after looking at this better, I'm not convinced it's a problem.
-> Other than making btrfs/137 fail when compression is enabled, what
-> problems have you observed?
+> I had the same question.  If the exact behavior isn't defined anywhere,
+> I don't know what we can be testing, TBH.
 
-Inline-then-regular file extent layout itself is a problem.
+For unmount cleanup, it's acceptable.
 
-Just check the behavior of plain btrfs.
+But if we're getting different result even we didn't modify the fs 
+during the same mount duration, fiemap still changes, then it's at least 
+anti-instinct.
 
-Inline extent must be the *only* extent, hole/regular/prealloc extent 
-shouldn't co-exist with inline extent.
+And unfortunately, btrfs and ext3 shares the same problem here:
 
-Such append should convert the inline extent to regular.
+=== Fiemap after cycle mount ===
+/mnt/scratch/file:
+  EXT: FILE-OFFSET      BLOCK-RANGE      TOTAL FLAGS
+    0: [0..95]:         139264..139359      96 0x1000
+    1: [96..127]:       139360..139391      32 0x1000
+    2: [128..511]:      138112..138495     384 0x1000
+    3: [512..1023]:     138752..139263     512 0x1000
+    4: [1024..2047]:    143360..144383    1024 0x1000
+    5: [2048..4095]:    145408..147455    2048 0x1001
+=== Fiemap after cycle mount and sleep ===
+/mnt/scratch/file:
+  EXT: FILE-OFFSET      BLOCK-RANGE      TOTAL FLAGS
+    0: [0..127]:        139264..139391     128 0x1000
+    1: [128..511]:      138112..138495     384 0x1000
+    2: [512..1023]:     138752..139263     512 0x1000
+    3: [1024..2047]:    143360..144383    1024 0x1000
+    4: [2048..4095]:    145408..147455    2048 0x1001
 
-Furthermore, this behavior also exposes the confusion of max_inline.
-If we are limiting inline extent size by its compressed size other than 
-plain size, then we're hiding a new limit, page size.
+I was using the same excuse just as you guys, until I found btrfs is 
+merging extent maps at read time, which causes the problem.
+That's why the 2nd fiemap in btrfs returns merged result.
+
+We fix btrfs by caching fiemap extent result before calling 
+fiemap_fill_next_extent(), and try to merge with cached result.
+Which fixes the problem quite easy.
 
 Thanks,
 Qu
-
 >
-> btrfs/137 fails due to the incremental send code not being prepared
-> for this case, which does not seem harmful to me because the inline
-> extent represents 4096 bytes of uncompressed data. It would be a
-> problem only if the uncompressed data was less than 4096 bytes.
+> -Eric
 >
-> So unless there's evidence that this particular case causes problems
-> somewhere, I don't think it's useful to have this test.
->
-> As for btrfs/137, I'm sending a fix for the incremental send code.
->
-> More comments below anyway.
->
->>
->> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
->> ---
->> v2:
->>   All suggested by Eryu Guan
->>   Use loop_counts instead of runtime to avoid naming confusion.
->>   Fix whitespace issues
->>   Use fsync instead of sync
->>   Use $XFS_IO_PROG instead of calling xfs_io directly
->>   Always output corruption possibility into seqres.full
->>
->> v3:
->>   All suggested by Filipe Manana
->>   Fix gramma errors
->>   Use simpler reproducer
->>   Add test case to compress group
->> ---
->>  tests/btrfs/140     | 111 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->>  tests/btrfs/140.out |   2 +
->>  tests/btrfs/group   |   1 +
->>  3 files changed, 114 insertions(+)
->>  create mode 100755 tests/btrfs/140
->>  create mode 100644 tests/btrfs/140.out
->>
->> diff --git a/tests/btrfs/140 b/tests/btrfs/140
->> new file mode 100755
->> index 0000000..183d9cd
->> --- /dev/null
->> +++ b/tests/btrfs/140
->> @@ -0,0 +1,111 @@
->> +#! /bin/bash
->> +# FS QA Test 140
->> +#
->> +# Check if btrfs will create inline-then-regular file layout.
->> +#
->> +# Btrfs only allows inline file extent if file is small enough, and any
->> +# incoming write enlarges the file beyond max_inline should replace inline
->> +# extents with regular extents.
->> +# This is a long standing bug, so fsck won't detect it and kernel will allow
->> +# normal read on it, but should be avoided.
->> +#
->> +#-----------------------------------------------------------------------
->> +# Copyright (c) 2017 Fujitsu.  All Rights Reserved.
->> +#
->> +# This program is free software; you can redistribute it and/or
->> +# modify it under the terms of the GNU General Public License as
->> +# published by the Free Software Foundation.
->> +#
->> +# This program is distributed in the hope that it would be useful,
->> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
->> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
->> +# GNU General Public License for more details.
->> +#
->> +# You should have received a copy of the GNU General Public License
->> +# along with this program; if not, write the Free Software Foundation,
->> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
->> +#-----------------------------------------------------------------------
->> +#
->> +
->> +seq=`basename $0`
->> +seqres=$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +here=`pwd`
->> +tmp=/tmp/$$
->> +status=1       # failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +       cd /
->> +       rm -f $tmp.*
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +
->> +# remove previous $seqres.full before test
->> +rm -f $seqres.full
->> +
->> +# real QA test starts here
->> +
->> +# Modify as appropriate.
->> +_supported_fs btrfs
->> +_supported_os Linux
->> +_require_scratch
->> +_require_btrfs_command inspect-internal dump-tree
->> +
->> +inline_size=2048
->> +page_size=$(get_page_size)
->> +loop_counts=$(($LOAD_FACTOR * 4)) #The possibility is over 80%, just in case
->
-> Sorry I forgot about this before.
-> But why is the possibility not 100%? The code that skips the inline
-> extent expansion/conversion is 100% deterministic
-> (btrfs_file_write_iter() -> btrfs_cont_expand() ->
-> btrfs_truncate_block()) since the first extent always has a size of
-> 4096 bytes.
->
-> So even if we end up having this test for some reason, there's no need
-> to have loops and the test could be added to the quick group.
->
->> +
->> +do_test()
->> +{
->> +       _scratch_mkfs > /dev/null 2>&1
->> +
->> +       # specify max_inline and compress explicitly to create
->> +       # inlined compressed extent
->> +       _scratch_mount "-o max_inline=$inline_size,compress"
->> +
->> +       # Page sized data will be compressed to quite small size,
->> +       # which is about 50 bytes for 4K, 100 bytes for 64K,
->> +       # far smaller than $inline_size, causing a inlined compressed
->> +       # file extent
->> +       $XFS_IO_PROG -f -c "pwrite 0 $page_size" -c "fsync" $SCRATCH_MNT/file \
->> +               > /dev/null 2>&1
->> +
->> +       # Append another page to file in snapshot, since its offset is not
->
-> There are no more snapshots, the comment is outdated.
->
-> Thanks.
->
->> +       # 0, it will cause regular extent, and should convert inline extent
->> +       # to regular too.
->> +       $XFS_IO_PROG -c "pwrite $page_size $page_size" $SCRATCH_MNT/file \
->> +               > /dev/null 2>&1
->> +       _scratch_unmount
->> +
->> +       # Fsck won't report inline-then-regular as error, as it's so long
->> +       # standing that we have no choice but to accept.
->> +       # So here we use dump-tree to catch inline extent.
->> +       $BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV \
->> +               > $tmp.dump_tree 2>&1
->> +       if grep -q inline $tmp.dump_tree; then
->> +               cat $tmp.dump_tree >> $seqres.full
->> +               echo "Invalid inline file extent detected"
->> +               return 1
->> +       fi
->> +       return 0
->> +}
->> +
->> +for i in $(seq 1 $loop_counts); do
->> +       do_test
->> +       if [ $? -ne 0 ]; then
->> +               corrupted=$(($corrupted + 1))
->> +       fi
->> +done
->> +
->> +echo "Corruption possibility: $corrupted/$loop_counts" >> $seqres.full
->> +echo "Silence is golden"
->> +
->> +# success, all done
->> +status=0
->> +exit
->> diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
->> new file mode 100644
->> index 0000000..24e90bc
->> --- /dev/null
->> +++ b/tests/btrfs/140.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 140
->> +Silence is golden
->> diff --git a/tests/btrfs/group b/tests/btrfs/group
->> index 641d826..2c38fdd 100644
->> --- a/tests/btrfs/group
->> +++ b/tests/btrfs/group
->> @@ -142,3 +142,4 @@
->>  137 auto quick send
->>  138 auto compress
->>  139 auto qgroup
->> +140 auto compress
->> --
->> 2.9.3
->>
->>
->>
->
+>> 		       		   	   - Ted
 >
 >
 
