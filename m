@@ -1,175 +1,82 @@
-Received: from mail-yw0-f173.google.com ([209.85.161.173]:34998 "EHLO
-        mail-yw0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933936AbdDGUJ4 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 7 Apr 2017 16:09:56 -0400
-Received: by mail-yw0-f173.google.com with SMTP id d191so39388806ywe.2
-        for <fstests@vger.kernel.org>; Fri, 07 Apr 2017 13:09:56 -0700 (PDT)
-From: Martin Brandenburg <martin@omnibond.com>
-Subject: [PATCH] fstests: add orangefs (pvfs2) support
-Date: Fri,  7 Apr 2017 16:09:43 -0400
-Message-Id: <1491595783-16079-1-git-send-email-martin@omnibond.com>
-In-Reply-To: <alpine.DEB.2.11.1704071608320.16149@mbmbp.sysblue.org>
-References: <alpine.DEB.2.11.1704071608320.16149@mbmbp.sysblue.org>
+Received: from mail-io0-f172.google.com ([209.85.223.172]:33747 "EHLO
+        mail-io0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933823AbdDGVmU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 7 Apr 2017 17:42:20 -0400
+Received: by mail-io0-f172.google.com with SMTP id t68so23776602iof.0
+        for <fstests@vger.kernel.org>; Fri, 07 Apr 2017 14:42:20 -0700 (PDT)
+MIME-Version: 1.0
+In-Reply-To: <20170407041227.GN22845@eguan.usersys.redhat.com>
+References: <20170327113537.GR14226@eguan.usersys.redhat.com>
+ <20170404173722.23696-1-gwendal@chromium.org> <20170406111815.GK22845@eguan.usersys.redhat.com>
+ <CAMHSBOVkP9tckPZGv8nPXDrx-tb=N6-Q5eQ8kzCRc0NUsAipKQ@mail.gmail.com> <20170407041227.GN22845@eguan.usersys.redhat.com>
+From: Gwendal Grignou <gwendal@chromium.org>
+Date: Fri, 7 Apr 2017 14:41:59 -0700
+Message-ID: <CAMHSBOVYcqdByoCvtow5agrBE+f39M6zTsg1CHGift2d13tgcg@mail.gmail.com>
+Subject: Re: [PATCH v3] Code to allow cros-compilation on chromeOS
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com, hubcap@omnibond.com, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
-Cc: Martin Brandenburg <martin@omnibond.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-The filesystem was renamed OrangeFS from PVFS2 recently.  The mount -t
-type remains pvfs2, so I have used that name throughout despite the
-kernel module being named orangefs.
+Reading  stack overflow further, the fact AC_PACKAGE_GLOBALS and
+AC_PACKAGE_UTILITIES are not defined are just the consequence of the
+error.
+When all work fine, the autoconfigued ./aclocal.m4 should contains
+several m4_include and in particular
+m4_include([m4/package_globals.m4])" that will load the definitions
+for these macros.
+I am shooting in the dark, how ./aclocal.m4 compares between RH7.0 and RH6.9?
+What are the revisions of automake, autoconf, m4 andlibtoolize.
+Does autoreconf -fi help?
 
-We've been maintaining this as a patch for quite some time.
+Thanks for your help,
+Gwendal.
 
-The easiest way to use is to setup a single server installation with
-multiple filesystems orangefs and scratch, put the following in
-/etc/xfsqa.config, and run ./check -pvfs2 -g quick.
-
-TEST_DIR=/mnt
-TEST_DEV=tcp://server1vm:3334/orangefs
-SCRATCH_MNT=/scratch
-SCRATCH_DEV=tcp://server1vm:3334/scratch
-
-Signed-off-by: Martin Brandenburg <martin@omnibond.com>
----
- check       |  2 ++
- common/attr |  4 +++-
- common/rc   | 31 ++++++++++++++++++++++++++++++-
- 3 files changed, 35 insertions(+), 2 deletions(-)
-
-diff --git a/check b/check
-index 2fcf385..9cef58b 100755
---- a/check
-+++ b/check
-@@ -68,6 +68,7 @@ check options
-     -glusterfs                test GlusterFS
-     -cifs               test CIFS
-     -overlay		test overlay
-+    -pvfs2          test PVFS2
-     -tmpfs              test TMPFS
-     -l			line mode diff
-     -udiff		show unified diff (default)
-@@ -264,6 +265,7 @@ while [ $# -gt 0 ]; do
- 	-glusterfs)	FSTYP=glusterfs ;;
- 	-cifs)		FSTYP=cifs ;;
- 	-overlay)	FSTYP=overlay; export OVERLAY=true ;;
-+	-pvfs2)		FSTYP=pvfs2 ;;
- 	-tmpfs)		FSTYP=tmpfs ;;
- 
- 	-g)	group=$2 ; shift ;
-diff --git a/common/attr b/common/attr
-index 08643e6..ac139e6 100644
---- a/common/attr
-+++ b/common/attr
-@@ -254,7 +254,7 @@ _sort_getfattr_output()
- }
- 
- # set maximum total attr space based on fs type
--if [ "$FSTYP" == "xfs" -o "$FSTYP" == "udf" ]; then
-+if [ "$FSTYP" == "xfs" -o "$FSTYP" == "udf" -o "$FSTYP" == "pvfs2" ]; then
- 	MAX_ATTRS=1000
- else # Assume max ~1 block of attrs
- 	BLOCK_SIZE=`_get_block_size $TEST_DIR`
-@@ -267,6 +267,8 @@ export MAX_ATTRS
- # Set max attr value size based on fs type
- if [ "$FSTYP" == "xfs" -o "$FSTYP" == "udf" -o "$FSTYP" == "btrfs" ]; then
- 	MAX_ATTRVAL_SIZE=64
-+elif [ "$FSTYP" == "pvfs2" ]; then
-+	MAX_ATTRVAL_SIZE=8192
- else # Assume max ~1 block of attrs
- 	BLOCK_SIZE=`_get_block_size $TEST_DIR`
- 	# leave a little overhead
-diff --git a/common/rc b/common/rc
-index e1ab2c6..be2bc26 100644
---- a/common/rc
-+++ b/common/rc
-@@ -174,6 +174,8 @@ case "$FSTYP" in
-     reiser4)
- 	 [ "$MKFS_REISER4_PROG" = "" ] && _fatal "mkfs.reiser4 not found"
- 	 ;;
-+    pvfs2)
-+	;;
- esac
- 
- if [ ! -z "$REPORT_LIST" ]; then
-@@ -714,6 +716,9 @@ _test_mkfs()
-     overlay)
- 	# do nothing for overlay
- 	;;
-+    pvfs2)
-+	# do nothing for pvfs2
-+	;;
-     udf)
-         $MKFS_UDF_PROG $MKFS_OPTIONS $* $TEST_DEV > /dev/null
- 	;;
-@@ -738,6 +743,9 @@ _mkfs_dev()
-     overlay)
- 	# do nothing for overlay
- 	;;
-+    pvfs2)
-+	# do nothing for pvfs2
-+	;;
-     udf)
-         $MKFS_UDF_PROG $MKFS_OPTIONS $* 2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
- 	;;
-@@ -793,7 +801,7 @@ _scratch_mkfs()
- 	local mkfs_status
- 
- 	case $FSTYP in
--	nfs*|cifs|ceph|overlay|glusterfs)
-+	nfs*|cifs|ceph|overlay|glusterfs|pvfs2)
- 		# unable to re-create this fstyp, just remove all files in
- 		# $SCRATCH_MNT to avoid EEXIST caused by the leftover files
- 		# created in previous runs
-@@ -1513,6 +1521,14 @@ _require_scratch_nocheck()
- 			_notrun "this test requires a valid \$SCRATCH_MNT"
- 		fi
- 		;;
-+	pvfs2)
-+		echo $SCRATCH_DEV | grep -q "://" > /dev/null 2>&1
-+		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
-+			_notrun "this test requires a valid \$SCRATCH_DEV"
-+		fi
-+		if [ ! -d "$SCRATCH_MNT" ]; then
-+			_notrun "this test requires a valid \$SCRATCH_MNT"
-+		fi
- 	cifs)
- 		echo $SCRATCH_DEV | grep -q "//" > /dev/null 2>&1
- 		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
-@@ -1610,6 +1626,15 @@ _require_test()
- 		     _notrun "this test requires a valid \$TEST_DIR"
- 		fi
- 		;;
-+	pvfs2)
-+		echo $TEST_DEV | grep -q "://" > /dev/null 2>&1
-+		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
-+			_notrun "this test requires a valid \$TEST_DIR"
-+		fi
-+		if [ ! -d "$TEST_DIR" ]; then
-+			_notrun "this test requires a valid \$TEST_DIR"
-+		fi
-+		;;
- 	overlay)
- 		if [ -z "$OVL_BASE_TEST_DIR" -o ! -d "$OVL_BASE_TEST_DIR" ]; then
- 			_notrun "this test requires a valid \$TEST_DIR as ovl base dir"
-@@ -2451,6 +2476,8 @@ _check_test_fs()
-     overlay)
- 	# no way to check consistency for overlay
- 	;;
-+    pvfs2)
-+	;;
-     udf)
- 	# do nothing for now
- 	;;
-@@ -2501,6 +2528,8 @@ _check_scratch_fs()
-     overlay)
- 	# no way to check consistency for overlay
- 	;;
-+    pvfs2)
-+	;;
-     btrfs)
- 	_check_btrfs_filesystem $device
- 	;;
--- 
-2.1.4
-
+On Thu, Apr 6, 2017 at 9:12 PM, Eryu Guan <eguan@redhat.com> wrote:
+> On Thu, Apr 06, 2017 at 04:26:01PM -0700, Gwendal Grignou wrote:
+>> On Thu, Apr 6, 2017 at 4:18 AM, Eryu Guan <eguan@redhat.com> wrote:
+>> >
+>> > On Tue, Apr 04, 2017 at 10:37:22AM -0700, Gwendal Grignou wrote:
+>> > > - Request LIBTOOL to be used
+>> > > - Set topbuildir based on a Makefile variable to call libtool
+>> > > - Use /usr/local instead of /var for xfstest final location
+>> > > - Move macros from aclocal.m4 to acinclude.m4, aclocal.m4 is autogenerated.
+>> > > - Use autoconf variables @prefix@, @exec_prefix@.
+>> > >
+>> > > The regular way of compiling xfstests - make - remains.
+>> > > But it now runs autoreconf and libtoolize -i to produce a valid
+>> > > configure.
+>> > > Verified with 'make install --dry-run' that files are installed at the
+>> > > same place.
+>> > > Verified compiling in chromeOS chroot works as well.
+>> > >
+>> > > Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
+>> > > ---
+>> > >
+>> > > Changes in v2:
+>> > > Removal of instal-sh, use of autoreconf
+>> > >
+>> > > Changes in v3:
+>> > > Use of @exec_prefix@ variable, unify installation location.
+>> > >
+>> >
+>> > Sorry, I didn't notice this in last review. But I don't know why this
+>> > AC_CONFIG_MACRO_DIR doesn't work on my RHEL6.9 system (it does work on
+>> > RHEL7), make reports:
+>> >
+>> > configure.ac:5: error: possibly undefined macro: AC_PACKAGE_GLOBALS
+>> >       If this token and others are legitimate, please use m4_pattern_allow.
+>> >       See the Autoconf documentation.
+>> > configure.ac:6: error: possibly undefined macro: AC_PACKAGE_UTILITIES
+>>
+>> Checking stack overflow
+>> (http://stackoverflow.com/questions/8811381/possibly-undefined-macro-ac-msg-error/8946674),
+>> is pkg_config installed on your RH6.9 system.
+>
+> Yes, it's installed.
+>
+> # rpm -q pkgconfig
+> pkgconfig-0.23-9.1.el6.x86_64
+>
+> Eryu
