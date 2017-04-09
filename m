@@ -1,82 +1,46 @@
-Received: from mail-oi0-f65.google.com ([209.85.218.65]:33146 "EHLO
-        mail-oi0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751825AbdDIKGL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 9 Apr 2017 06:06:11 -0400
-Received: by mail-oi0-f65.google.com with SMTP id t63so2935373oih.0
-        for <fstests@vger.kernel.org>; Sun, 09 Apr 2017 03:06:11 -0700 (PDT)
+Received: from userp1040.oracle.com ([156.151.31.81]:25576 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752631AbdDITjq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 9 Apr 2017 15:39:46 -0400
+Date: Sun, 9 Apr 2017 12:39:05 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 2/4] xfstests: Add first statx test [ver #10]
+Message-ID: <20170409193905.GS4864@birch.djwong.org>
+References: <149146774821.12770.3592235770964461857.stgit@warthog.procyon.org.uk>
+ <149146775556.12770.11943651470996193921.stgit@warthog.procyon.org.uk>
+ <CAOQ4uxiXF4_N9Zu_OAWzC5STYyNY7VuGRYPeg1m4WPqhyZBOtA@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <58ea0380.c78e630a.22dd3.a5d5@mx.google.com>
-References: <58ea0380.c78e630a.22dd3.a5d5@mx.google.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Sun, 9 Apr 2017 13:06:10 +0300
-Message-ID: <CAOQ4uxjz9hvj3RuHEj8apvG3onVPCZYd6USBznKh5z7m7u_8Wg@mail.gmail.com>
-Subject: Re: [ANNOUNCE] fstests: master branch updated to a589a208405d
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxiXF4_N9Zu_OAWzC5STYyNY7VuGRYPeg1m4WPqhyZBOtA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: David Howells <dhowells@redhat.com>, linux-xfs <linux-xfs@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>, Dave Chinner <david@fromorbit.com>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Apr 9, 2017 at 12:48 PM, Eryu Guan <guaneryu@gmail.com> wrote:
-> Hi all,
->
-> The master branch of the xfstests repository at:
->
->         git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
->
-> have just been updated. This is a normal update that has two new tests added,
-> one generic test and one overlay test, and other improvements and bug fixes.
-> Note that IRIX support is removed in the new test template, eventually we may
-> want to remove whole IRIX support.
->
-> New failures I've noticed in this update:
-> - overlay/030 fails as append-only dirs are not honored in truncate operation
+On Sun, Apr 09, 2017 at 10:47:10AM +0300, Amir Goldstein wrote:
+> On Thu, Apr 6, 2017 at 11:35 AM, David Howells <dhowells@redhat.com> wrote:
+> > Add a statx test script that does the following:
+> >
+> 
+> David,
+> 
+> Just wanted to mention that albeit 'xfs' in 'xfstests', you don't need
+> to send generic
+> xfstests patched in the future to linux-xfs list.
+> I don't know that xfs folks mind, but you're discriminating other-fs folks ;-)
 
-Actually, it's append-only regular files that are not honored.
-chattr +a on directories seems to be honored correctly.
-One of my earlier emails had some wrong statements wrt directories
-which may have confused you.
+It's a test for generic vfs functionality that has just been wired up in
+XFS, so it /is/ appropriate to cc the xfs list.
 
->
-> Thanks,
-> Eryu
->
-> The new head of the master branch is commit:
->
-> a589a208405d src/t_immutable: add ftruncate to append only tests
->
-> New commits:
->
-> Amir Goldstein (4):
->       [e1a49994e579] fstests: _require_chattr() must get an input arg
->       [8a8a4b95b25c] generic/079: use _require_test_program
->       [941ea73ec3c5] overlay: test immutable and append-only upper files
->       [a589a208405d] src/t_immutable: add ftruncate to append only tests
->
-> Filipe Manana (3):
->       [a62c85dbabf3] common/rc: check fs supports xfs_io falloc's specific flags
->       [c7cbc1cd614a] generic: test for number of bytes used by files after buffered writes
->       [f3c84f3d553e] generic/071: check if fs supports fallocate KEEP_SIZE flag
->
-> Qu Wenruo (1):
->       [073b2def71ff] fstests: Remove IRIX os support from template
->
->
-> Code Diffstat:
->
->  common/rc             |  27 ++++++-----
->  new                   |   2 +-
->  src/t_immutable.c     |  15 ++++++
->  tests/generic/071     |   2 +-
->  tests/generic/079     |   6 +--
->  tests/generic/422     | 127 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/422.out |  41 ++++++++++++++++
->  tests/generic/group   |   1 +
->  tests/overlay/027     |   2 +-
->  tests/overlay/030     |  73 +++++++++++++++++++++++++++++
->  tests/overlay/030.out |   5 ++
->  tests/overlay/group   |   1 +
->  12 files changed, 283 insertions(+), 19 deletions(-)
+That said, it just got wired up in ext4 so they should be cc'd as well.
+
+--D
+
+> 
+> Cheers,
+> Amir.
 > --
-> Eryu Guan
-> eguan@redhat.com
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
