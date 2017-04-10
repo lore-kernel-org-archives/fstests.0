@@ -1,47 +1,75 @@
-Received: from mx1.redhat.com ([209.132.183.28]:40540 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:38702 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751209AbdDJDSr (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 9 Apr 2017 23:18:47 -0400
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] generic/422: check fallocate KEEP_SIZE flag correctly
-Date: Mon, 10 Apr 2017 11:18:28 +0800
-Message-Id: <20170410031828.2110-1-eguan@redhat.com>
+        id S1751087AbdDJGGB (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 10 Apr 2017 02:06:01 -0400
+From: Xiong Zhou <xzhou@redhat.com>
+Subject: [PATCH v2 1/3] common: helper to get value from ndctl list by key
+Date: Mon, 10 Apr 2017 14:05:51 +0800
+Message-Id: <1491804353-1326-1-git-send-email-xzhou@redhat.com>
+In-Reply-To: <20170407171600.GA29489@linux.intel.com>
+References: <20170407171600.GA29489@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: fdmanana@kernel.org, Eryu Guan <eguan@redhat.com>
+Cc: ross.zwisler@linux.intel.com, dan.j.williams@intel.com, jmoyer@redhat.com, eguan@redhat.com, Xiong Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-"-k" should be passed to _require_xfs_io_command() as a separate
-parameter.
+For some nvdimm DAX related tests, it's better to know
+some details of devices being tested. Adding new prog
+ndctl to manage nvdimms and jq to parse outputs.
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
+Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 ---
 
-Hi Filipe,
+v2:
+  use _require_command instead of running cmds
 
-This is a merge error, I did correct updates to _require_xfs_io_command() and
-generic/071 but forgot generic/422. Sorry again for the whole mess :-(
+ common/config |  2 ++
+ common/rc     | 19 +++++++++++++++++++
+ 2 files changed, 21 insertions(+)
 
-(Not sure why my release testing didn't catch this merge error, I guess it had
-something to do with post-release-testing modifications to the stage tree when
-I dropped statx tests)
-
- tests/generic/422 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/tests/generic/422 b/tests/generic/422
-index cae76a9..a42a30d 100755
---- a/tests/generic/422
-+++ b/tests/generic/422
-@@ -48,7 +48,7 @@ _supported_fs generic
- _supported_os Linux
- _require_test
- _require_scratch
--_require_xfs_io_command "falloc -k"
-+_require_xfs_io_command "falloc" "-k"
- _require_odirect
+diff --git a/common/config b/common/config
+index 59041a3..dfdcb8e 100644
+--- a/common/config
++++ b/common/config
+@@ -212,6 +212,8 @@ export XZ_PROG="`set_prog_path xz`"
+ export FLOCK_PROG="`set_prog_path flock`"
+ export LDD_PROG="`set_prog_path ldd`"
+ export TIMEOUT_PROG="`set_prog_path timeout`"
++export NDCTL_PROG="`set_prog_path ndctl`"
++export JQ_PROG="`set_prog_path jq`"
  
- rm -f $seqres.full
+ # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+ # newer systems have udevadm command but older systems like RHEL5 don't.
+diff --git a/common/rc b/common/rc
+index e1ab2c6..bc387cf 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3148,6 +3148,25 @@ _require_chattr()
+     rm -f $TEST_DIR/syscalltest.out
+ }
+ 
++_require_ndctl()
++{
++	_require_command "$NDCTL_PROG" ndctl
++}
++
++_require_jq()
++{
++	_require_command "$JQ_PROG" jq
++}
++
++# $1 SCRATCH_DEV or TEST_DEV or other dev
++# $2 key
++_ndctl_get_pmem_key_value()
++{
++	$NDCTL_PROG list | \
++	  $JQ_PROG -r ".[] | \
++	  select(.blockdev == \"${1#/dev/}\") | .$2"
++}
++
+ _get_total_inode()
+ {
+ 	if [ -z "$1" ]; then
 -- 
-2.9.3
+1.8.3.1
 
