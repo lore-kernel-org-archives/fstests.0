@@ -1,64 +1,128 @@
-Received: from mx1.redhat.com ([209.132.183.28]:39748 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49688 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753160AbdDJJZa (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 10 Apr 2017 05:25:30 -0400
-Date: Mon, 10 Apr 2017 17:25:28 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v3] Code to allow cros-compilation on chromeOS
-Message-ID: <20170410092528.GE22845@eguan.usersys.redhat.com>
-References: <20170327113537.GR14226@eguan.usersys.redhat.com>
- <20170404173722.23696-1-gwendal@chromium.org>
- <20170406111815.GK22845@eguan.usersys.redhat.com>
- <CAMHSBOVkP9tckPZGv8nPXDrx-tb=N6-Q5eQ8kzCRc0NUsAipKQ@mail.gmail.com>
- <20170407041227.GN22845@eguan.usersys.redhat.com>
- <CAMHSBOVYcqdByoCvtow5agrBE+f39M6zTsg1CHGift2d13tgcg@mail.gmail.com>
+        id S1753205AbdDJNcr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 10 Apr 2017 09:32:47 -0400
+Subject: [PATCH 1/4] xfstests: Add an auxiliary program to create an AF_UNIX
+ socket [ver #13]
+From: David Howells <dhowells@redhat.com>
+Date: Mon, 10 Apr 2017 14:32:44 +0100
+Message-ID: <149183116432.15254.18007860333273781614.stgit@warthog.procyon.org.uk>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAMHSBOVYcqdByoCvtow5agrBE+f39M6zTsg1CHGift2d13tgcg@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Gwendal Grignou <gwendal@chromium.org>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: dhowells@redhat.com, hch@infradead.org, linux-fsdevel@vger.kernel.org, david@fromorbit.com, amir73il@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Apr 07, 2017 at 02:41:59PM -0700, Gwendal Grignou wrote:
-> Reading  stack overflow further, the fact AC_PACKAGE_GLOBALS and
-> AC_PACKAGE_UTILITIES are not defined are just the consequence of the
-> error.
-> When all work fine, the autoconfigued ./aclocal.m4 should contains
-> several m4_include and in particular
-> m4_include([m4/package_globals.m4])" that will load the definitions
-> for these macros.
-> I am shooting in the dark, how ./aclocal.m4 compares between RH7.0 and RH6.9?
+Add an auxiliary program to create an AF_UNIX socket at the specified
+location so that tests can do things with it.
 
-RHEL6.9:
-https://paste.fedoraproject.org/paste/EUo-NKzoZPwbIIhn1bjoJF5M1UNdIGYhyRLivL9gydE=
+Signed-off-by: David Howells <dhowells@redhat.com>
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
 
-RHEL7.3:
-https://paste.fedoraproject.org/paste/SEhryYO0GXT8VIA0-24q8V5M1UNdIGYhyRLivL9gydE=
+ .gitignore    |    1 +
+ src/Makefile  |    2 +-
+ src/af_unix.c |   66 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 68 insertions(+), 1 deletion(-)
+ create mode 100644 src/af_unix.c
 
-> What are the revisions of automake, autoconf, m4 andlibtoolize.
+diff --git a/.gitignore b/.gitignore
+index 1ed2a92..8a7c052 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -35,6 +35,7 @@
+ /ltp/iogen
+ 
+ # src/ binaries
++/src/af_unix
+ /src/alloc
+ /src/append_reader
+ /src/append_writer
+diff --git a/src/Makefile b/src/Makefile
+index a7f27f0..716c178 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -12,7 +12,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	godown resvtest writemod makeextents itrash rename \
+ 	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
+ 	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
+-	holetest t_truncate_self t_mmap_dio
++	holetest t_truncate_self t_mmap_dio af_unix
+ 
+ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+diff --git a/src/af_unix.c b/src/af_unix.c
+new file mode 100644
+index 0000000..dc2368e
+--- /dev/null
++++ b/src/af_unix.c
+@@ -0,0 +1,66 @@
++/* Create an AF_UNIX socket.
++ *
++ * Copyright (C) 2017 Red Hat, Inc. All Rights Reserved.
++ * Written by David Howells (dhowells@redhat.com)
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public Licence
++ * as published by the Free Software Foundation; either version
++ * 2 of the Licence, or (at your option) any later version.
++ */
++
++#include <stdarg.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <stdbool.h>
++#include <string.h>
++#include <unistd.h>
++#include <errno.h>
++#include <fcntl.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <sys/socket.h>
++#include <sys/un.h>
++
++#define offsetof(TYPE, MEMBER)	((size_t)&((TYPE *)0)->MEMBER)
++
++int main(int argc, char *argv[])
++{
++	struct sockaddr_un sun;
++	struct stat st;
++	size_t len, max;
++	int fd;
++
++	if (argc != 2) {
++		fprintf(stderr, "Format: %s <socketpath>\n", argv[0]);
++		exit(2);
++	}
++
++	max = sizeof(sun.sun_path);
++	len = strlen(argv[1]);
++	if (len >= max) {
++		fprintf(stderr, "Filename too long (max %zu)\n", max);
++		exit(2);
++	}
++
++	fd = socket(AF_UNIX, SOCK_DGRAM, 0);
++	if (fd < 0) {
++		perror("socket");
++		exit(1);
++	}
++
++	memset(&sun, 0, sizeof(sun));
++	sun.sun_family = AF_UNIX;
++	strcpy(sun.sun_path, argv[1]);
++	if (bind(fd, (struct sockaddr *)&sun, sizeof(sun)) == -1) {
++		perror("bind");
++		exit(1);
++	}
++
++	if (stat(argv[1], &st)) {
++		fprintf(stderr, "Couldn't stat socket after creation: %m\n");
++		exit(1);
++	}
++
++	exit(0);
++}
 
-[root@eguan-rhel6 xfstests]# rpm -q automake autoconf m4 libtool
-automake-1.11.1-4.el6.noarch
-autoconf-2.63-5.1.el6.noarch
-m4-1.4.13-5.el6.x86_64
-libtool-2.2.6-15.5.el6.x86_64
-
-[root@dhcp-66-87-213 xfstests]# rpm -q automake autoconf m4 libtool
-automake-1.13.4-3.el7.noarch
-autoconf-2.69-11.el7.noarch
-m4-1.4.16-10.el7.x86_64
-libtool-2.4.2-21.el7_2.x86_64
-
-> Does autoreconf -fi help?
-
-No, autoreconf -fi has the same issue.
-
-> 
-> Thanks for your help,
-> Gwendal.
-
-Thank you!
-
-Eryu
