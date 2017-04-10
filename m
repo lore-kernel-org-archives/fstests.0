@@ -1,71 +1,64 @@
-Received: from mx1.redhat.com ([209.132.183.28]:55024 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:39748 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751705AbdDJIBa (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 10 Apr 2017 04:01:30 -0400
-Date: Mon, 10 Apr 2017 16:01:27 +0800
+        id S1753160AbdDJJZa (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 10 Apr 2017 05:25:30 -0400
+Date: Mon, 10 Apr 2017 17:25:28 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 4/4] xfstests: Check the stx_attributes settable by
- chattr [ver #12]
-Message-ID: <20170410080127.GD22845@eguan.usersys.redhat.com>
-References: <149168615504.10019.12886002807349389794.stgit@warthog.procyon.org.uk>
- <149168617693.10019.12322515006388694205.stgit@warthog.procyon.org.uk>
+Subject: Re: [PATCH v3] Code to allow cros-compilation on chromeOS
+Message-ID: <20170410092528.GE22845@eguan.usersys.redhat.com>
+References: <20170327113537.GR14226@eguan.usersys.redhat.com>
+ <20170404173722.23696-1-gwendal@chromium.org>
+ <20170406111815.GK22845@eguan.usersys.redhat.com>
+ <CAMHSBOVkP9tckPZGv8nPXDrx-tb=N6-Q5eQ8kzCRc0NUsAipKQ@mail.gmail.com>
+ <20170407041227.GN22845@eguan.usersys.redhat.com>
+ <CAMHSBOVYcqdByoCvtow5agrBE+f39M6zTsg1CHGift2d13tgcg@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <149168617693.10019.12322515006388694205.stgit@warthog.procyon.org.uk>
+In-Reply-To: <CAMHSBOVYcqdByoCvtow5agrBE+f39M6zTsg1CHGift2d13tgcg@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: David Howells <dhowells@redhat.com>
-Cc: linux-xfs@vger.kernel.org, hch@infradead.org, amir73il@gmail.com, david@fromorbit.com, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
+To: Gwendal Grignou <gwendal@chromium.org>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Apr 08, 2017 at 10:16:16PM +0100, David Howells wrote:
-> diff --git a/src/statx.h b/src/statx.h
-> index 711d1ba..f361a68 100644
-> --- a/src/statx.h
-> +++ b/src/statx.h
-> @@ -19,7 +19,7 @@
->  #define __NR_statx 383
->  #elif defined (__ILP32__)
->  #define __NR_statx (__X32_SYSCALL_BIT + 332)
-> -#else
-> +#elif defined(__x86_64__)
->  #define __NR_statx 332
->  #endif
+On Fri, Apr 07, 2017 at 02:41:59PM -0700, Gwendal Grignou wrote:
+> Reading  stack overflow further, the fact AC_PACKAGE_GLOBALS and
+> AC_PACKAGE_UTILITIES are not defined are just the consequence of the
+> error.
+> When all work fine, the autoconfigued ./aclocal.m4 should contains
+> several m4_include and in particular
+> m4_include([m4/package_globals.m4])" that will load the definitions
+> for these macros.
+> I am shooting in the dark, how ./aclocal.m4 compares between RH7.0 and RH6.9?
 
-Seems like this only enables statx(2) test on specific arches, even if
-current arch has wired up statx syscall.
+RHEL6.9:
+https://paste.fedoraproject.org/paste/EUo-NKzoZPwbIIhn1bjoJF5M1UNdIGYhyRLivL9gydE=
 
-For example, I noticed as for 4.11-rc6 kernel, many platforms have
-enabled statx syscall:
+RHEL7.3:
+https://paste.fedoraproject.org/paste/SEhryYO0GXT8VIA0-24q8V5M1UNdIGYhyRLivL9gydE=
 
-eguan@eguan:~/workspace/src/kernel$ git lo | grep -i "wire up statx"
-1493aa6 xtensa: wire up statx system call
-fdfe4a3 generic syscalls: Wire up statx syscall
-e3b1ebd m68k: Wire up statx
-f717629 powerpc: Wire up statx() syscall
-63d32d1 parisc: Wire up statx system call
-a1016e9 ARM: wire up statx syscall
-8bd49ac s390: wire up statx system call
-9cb74b5 MIPS: Wire up statx system call
+> What are the revisions of automake, autoconf, m4 andlibtoolize.
 
-But many of them are not covered in this test. (Tested with ppc64 host
-and test _notrun there.)
+[root@eguan-rhel6 xfstests]# rpm -q automake autoconf m4 libtool
+automake-1.11.1-4.el6.noarch
+autoconf-2.63-5.1.el6.noarch
+m4-1.4.13-5.el6.x86_64
+libtool-2.2.6-15.5.el6.x86_64
 
-How about including <sys/syscall.h> to get __NR_statx definition first
-and define our own syscall number only if it's not yet defined?
+[root@dhcp-66-87-213 xfstests]# rpm -q automake autoconf m4 libtool
+automake-1.13.4-3.el7.noarch
+autoconf-2.69-11.el7.noarch
+m4-1.4.16-10.el7.x86_64
+libtool-2.4.2-21.el7_2.x86_64
 
-Thanks,
+> Does autoreconf -fi help?
+
+No, autoreconf -fi has the same issue.
+
+> 
+> Thanks for your help,
+> Gwendal.
+
+Thank you!
+
 Eryu
-
->  
-> @@ -159,7 +159,12 @@ static inline
->  int xfstests_statx(int dfd, const char *filename, unsigned flags,
->  		   unsigned int mask, struct statx *buffer)
->  {
-> +#ifdef __NR_statx
->  	return syscall(__NR_statx, dfd, filename, flags, mask, buffer);
-> +#else
-> +	errno = ENOSYS;
-> +	return -1;
-> +#endif
->  }
