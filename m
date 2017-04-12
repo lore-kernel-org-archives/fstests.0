@@ -1,160 +1,61 @@
-Received: from mx1.redhat.com ([209.132.183.28]:54938 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:48272 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753968AbdDLOq6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 12 Apr 2017 10:46:58 -0400
-From: Xiong Zhou <xzhou@redhat.com>
-Subject: [PATCH v3 4/4] generic: mmap write readonly DAX file
-Date: Wed, 12 Apr 2017 22:46:20 +0800
-Message-Id: <1492008380-29164-5-git-send-email-xzhou@redhat.com>
-In-Reply-To: <1492008380-29164-1-git-send-email-xzhou@redhat.com>
-References: <20170412062608.y2u5og3xz2oly44b@XZHOUW.usersys.redhat.com>
- <1492008380-29164-1-git-send-email-xzhou@redhat.com>
+        id S1752412AbdDLPjs (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 12 Apr 2017 11:39:48 -0400
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH v2] fstests/xfs: xfs_repair should junk empty attribute leaf blocks
+Date: Wed, 12 Apr 2017 23:39:37 +0800
+Message-Id: <1492011577-13436-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: ross.zwisler@linux.intel.com, dan.j.williams@intel.com, jmoyer@redhat.com, eguan@redhat.com, Xiong Zhou <xzhou@redhat.com>
+Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Regression case that one can write to read-only
-file in a DAX mountpoint.
+There was a bug during log replay, the attr/attr3 leaf verifier
+reported corruption when encountering a leaf attribute with a
+count of 0 in the header, as below:
 
-Signed-off-by: Xiong Zhou <xzhou@redhat.com>
+Metadata corruption detected at xfs_attr3_leaf block 0x480988/0x1000
+
+commit f714016 from xfsprogs has fixed this bug. This test case
+will emulate this corruption by xfs_db and use xfs_repair to fix
+it.
+
+Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
- .gitignore            |  1 +
- src/Makefile          |  2 +-
- src/t_mmap_write_ro.c | 76 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/424     | 92 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/424.out |  2 ++
- tests/generic/group   |  1 +
- 6 files changed, 173 insertions(+), 1 deletion(-)
- create mode 100644 src/t_mmap_write_ro.c
- create mode 100755 tests/generic/424
- create mode 100644 tests/generic/424.out
 
-diff --git a/.gitignore b/.gitignore
-index 1ed2a92..ee9329f 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -131,6 +131,7 @@
- /src/renameat2
- /src/t_rename_overwrite
- /src/t_mmap_dio
-+/src/t_mmap_write_ro
- 
- # dmapi/ binaries
- /dmapi/src/common/cmd/read_invis
-diff --git a/src/Makefile b/src/Makefile
-index a7f27f0..2604f52 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -12,7 +12,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
- 	godown resvtest writemod makeextents itrash rename \
- 	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
- 	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
--	holetest t_truncate_self t_mmap_dio
-+	holetest t_truncate_self t_mmap_dio t_mmap_write_ro
- 
- LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-diff --git a/src/t_mmap_write_ro.c b/src/t_mmap_write_ro.c
-new file mode 100644
-index 0000000..b6bf2a7
---- /dev/null
-+++ b/src/t_mmap_write_ro.c
-@@ -0,0 +1,76 @@
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <string.h>
-+#include <fcntl.h>
-+#include <unistd.h>
-+#include <libgen.h>
-+#include <errno.h>
-+#include <sys/mman.h>
-+
-+void
-+err_exit(char *op)
-+{
-+	fprintf(stderr, "%s: %s\n", op, strerror(errno));
-+	exit(1);
-+}
-+
-+int
-+main(int argc, char **argv)
-+{
-+	int fd, pfd, ret;
-+	char *buf;
-+	volatile char foo;
-+	int pagesize = getpagesize();
-+
-+	if (argc < 2) {
-+		printf("Usage: %s <file> <pmem file>\n", basename(argv[0]));
-+		exit(0);
-+	}
-+
-+	fd = open(argv[1], O_RDONLY|O_DIRECT);
-+	if (fd < 0)
-+		err_exit("open");
-+
-+	pfd = open(argv[2], O_RDONLY);
-+	if (pfd < 0)
-+		err_exit("pmem open");
-+
-+	buf = mmap(NULL, pagesize, PROT_READ, MAP_SHARED, pfd, 0);
-+	if (buf == MAP_FAILED)
-+		err_exit("mmap");
-+
-+	/*
-+	 * Read from the DAX mmap to populate the first page in the
-+	 * address_space with a read-only mapping.
-+	 */
-+	foo = *buf;
-+
-+	/* quiet the compiler's "unused-but-set-variable" warning */
-+	foo;
-+
-+	/*
-+	 * Now write to the DAX mmap.  This *should* fail, but if the bug is
-+	 * present in __get_user_pages_fast(), it will succeed.
-+	 */
-+	ret = read(fd, buf, pagesize);
-+	if (ret != pagesize)
-+		err_exit("read");
-+
-+	ret = msync(buf, pagesize, MS_SYNC);
-+	if (ret != 0)
-+		err_exit("msync");
-+
-+	ret = munmap(buf, pagesize);
-+	if (ret < 0)
-+		err_exit("munmap");
-+
-+	ret = close(fd);
-+	if (ret < 0)
-+		err_exit("clsoe fd");
-+
-+	ret = close(pfd);
-+	if (ret < 0)
-+		err_exit("close pfd");
-+
-+	exit(0);
-+}
-diff --git a/tests/generic/424 b/tests/generic/424
+Hi,
+
+V2 did below changes:
+1) remove the requirement for xfs_db's write and addr commands
+2) check if xfs_db support write -d option
+3) turn to get filesystem block size from _filter_mkfs output
+4) add more comments
+
+Thanks,
+Zorro
+
+ tests/xfs/288     | 110 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/288.out |   2 +
+ tests/xfs/group   |   1 +
+ 3 files changed, 113 insertions(+)
+ create mode 100755 tests/xfs/288
+ create mode 100644 tests/xfs/288.out
+
+diff --git a/tests/xfs/288 b/tests/xfs/288
 new file mode 100755
-index 0000000..f73e08a
+index 0000000..81e7b50
 --- /dev/null
-+++ b/tests/generic/424
-@@ -0,0 +1,92 @@
++++ b/tests/xfs/288
+@@ -0,0 +1,110 @@
 +#! /bin/bash
-+# FS QA Test 424
++# FS QA Test 288
 +#
-+# This is a regression test for kernel commit
-+#  ef947b2 x86, mm: fix gup_pte_range() vs DAX mappings
-+# created by Jeffrey Moyer <jmoyer@redhat.com>
-+#
-+# This is reproducible only when testing on pmem device
-+# which is configured in "memory mode", not in "raw mode".
++# When an attribute leaf block count is 0, xfs_repair should junk
++# that leaf directly (as xfsprogs commit f714016).
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Red Hat.  All Rights Reserved.
++# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -183,75 +84,100 @@ index 0000000..f73e08a
 +_cleanup()
 +{
 +	cd /
-+	rm -rf $tmp.*
++	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
++. ./common/attr
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
++# V4 XFS attr type is 'attr'
++write_cmd="write"
++
 +# Modify as appropriate.
-+_supported_fs generic
++_supported_fs xfs
 +_supported_os Linux
-+_require_scratch_dax
-+_require_test_program "t_mmap_write_ro"
-+_require_user
++_require_scratch
++_require_attrs
 +
-+# real QA test starts here
++_scratch_mkfs_xfs | _filter_mkfs 2>$tmp.mkfs >/dev/null
++. $tmp.mkfs
 +
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount "-o dax"
++# If test on XFS with CRC enabled, after change attr's hdr.count we need
++# to recalculate crc by use write -d option
++if [ $_fs_has_crcs -eq 1 ]; then
++	# check if xfs_db support write -d option
++	_scratch_xfs_db -x -c "sb" -c "write -d" 2>&1 | \
++		grep -q "invalid option"
++	if [ $? -eq 0 ];then
++		_notrun "xfs_db doesn't support write -d option"
++	fi
++	# This's a trick to check if xfs_db support recalculating
++	# CRCs of attr3
++	_scratch_xfs_db -x -c "daddr 0" \
++			   -c "type attr3" \
++			   -c "write -d" 2>/dev/null | \
++		grep -q "Cannot recalculate CRCs on this type of object"
++	if [ $? -eq 0 ];then
++		_notrun "xfs_db can't recalculate CRCs of attr3"
++	fi
++	# V5 XFS attr type is 'attr3'
++	write_cmd="write -d"
++fi
 +
-+# remount TEST_DEV wo/ dax
-+export MOUNT_OPTIONS=""
-+export TEST_FS_MOUNT_OPTS=""
-+_test_cycle_mount
++_scratch_mount
 +
-+# prepare a 4k read-only DAX file, save its md5sum
-+$XFS_IO_PROG -f -c "pwrite -S 0xFFFF 0 4096" \
-+  $SCRATCH_MNT/readonlyfile >> $seqres.full 2>&1
-+chmod 0644  $SCRATCH_MNT/readonlyfile
-+md5_1="$(_md5_checksum $SCRATCH_MNT/readonlyfile)"
++touch $SCRATCH_MNT/$seq.attrfile
++inum=$(stat -c '%i' $SCRATCH_MNT/$seq.attrfile)
 +
-+# prepare another larger non-DAX file
-+$XFS_IO_PROG -f -c "pwrite -S 0x0000 0 40960" \
-+  $TEST_DIR/${seq}.largefile >> $seqres.full 2>&1
-+# allow qa_user access
-+chown $qa_user $TEST_DIR/${seq}.largefile
++# To get an attr block leaf, we need to extend attr format to extent
++# format at least, and the max inode size is half of filesystem
++# block size, so write half of block size attr to make sure attr
++# out of local format.
++maxisize=$((dbsize/2))
++$SETFATTR_PROG -n "user.testattr${seq}" \
++	       -v `python -c "print ($maxisize * 'a')"` \
++	       $SCRATCH_MNT/$seq.attrfile
 +
-+# run test programme, read another larger file writing into
-+# the read-only file with mmap, which should fail.
-+_user_do "src/t_mmap_write_ro $TEST_DIR/${seq}.largefile \
-+  $SCRATCH_MNT/readonlyfile"
++_scratch_unmount
++# manually corrupt the XFS, by set the header count of attr to 0
++_scratch_xfs_db -x -c "inode $inum" \
++		   -c "addr a.bmx[0].startblock" \
++		   -c "$write_cmd hdr.count 0" >> $seqres.full
 +
-+# read-only file should not get updated, md5sum again.
-+md5_2="$(_md5_checksum $SCRATCH_MNT/readonlyfile)"
++# This repair should junk above leaf attribute and fix this XFS, then
++# SCRATCH_DEV shouldn't be corrupted after this case done.
++_repair_scratch_fs >> $seqres.full
 +
-+[ "$md5_1" != "$md5_2" ] && echo "read only file changed"
++echo "Silence is golden"
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/424.out b/tests/generic/424.out
+diff --git a/tests/xfs/288.out b/tests/xfs/288.out
 new file mode 100644
-index 0000000..c836ec8
+index 0000000..2958a5c
 --- /dev/null
-+++ b/tests/generic/424.out
++++ b/tests/xfs/288.out
 @@ -0,0 +1,2 @@
-+QA output created by 424
-+read: Bad address
-diff --git a/tests/generic/group b/tests/generic/group
-index 52553fa..81db660 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -426,3 +426,4 @@
- 421 auto quick encrypt dangerous
- 422 auto quick
- 423 auto quick
-+424 auto quick
++QA output created by 288
++Silence is golden
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 75769f9..f27a7b6 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -285,6 +285,7 @@
+ 285 dangerous_fuzzers dangerous_scrub
+ 286 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+ 287 auto dump quota quick
++288 auto quick repair fuzzers
+ 290 auto rw prealloc quick ioctl zero
+ 291 auto repair
+ 292 auto mkfs quick
 -- 
-1.8.3.1
+2.7.4
 
