@@ -1,47 +1,77 @@
-Received: from mx2.suse.de ([195.135.220.15]:56232 "EHLO mx2.suse.de"
+Received: from mx1.redhat.com ([209.132.183.28]:40780 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752697AbdDLMw0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 12 Apr 2017 08:52:26 -0400
-Date: Wed, 12 Apr 2017 14:52:23 +0200
-From: David Sterba <dsterba@suse.cz>
-Subject: Re: [PATCH] fstests: introduce btrfs-map-logical
-Message-ID: <20170412125222.GI4781@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-References: <1491960463-28680-1-git-send-email-bo.li.liu@oracle.com>
- <5d7f7d05-b7af-5d8d-93f6-0db2db4ade85@cn.fujitsu.com>
- <20170412123201.GG4781@twin.jikos.cz>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170412123201.GG4781@twin.jikos.cz>
+        id S1752650AbdDLOqj (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 12 Apr 2017 10:46:39 -0400
+From: Xiong Zhou <xzhou@redhat.com>
+Subject: [PATCH v3 0/4] split DAX mmap DIO cases
+Date: Wed, 12 Apr 2017 22:46:16 +0800
+Message-Id: <1492008380-29164-1-git-send-email-xzhou@redhat.com>
+In-Reply-To: <20170412062608.y2u5og3xz2oly44b@XZHOUW.usersys.redhat.com>
+References: <20170412062608.y2u5og3xz2oly44b@XZHOUW.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: dsterba@suse.cz, Qu Wenruo <quwenruo@cn.fujitsu.com>, Liu Bo <bo.li.liu@oracle.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: ross.zwisler@linux.intel.com, dan.j.williams@intel.com, jmoyer@redhat.com, eguan@redhat.com, Xiong Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 12, 2017 at 02:32:02PM +0200, David Sterba wrote:
-> On Wed, Apr 12, 2017 at 09:35:00AM +0800, Qu Wenruo wrote:
-> > 
-> > 
-> > At 04/12/2017 09:27 AM, Liu Bo wrote:
-> > > A typical use case of 'btrfs-map-logical' is to translate btrfs logical
-> > > address to physical address on each disk.
-> > 
-> > Could we avoid usage of btrfs-map-logical here?
-> 
-> Agreed.
-> 
-> > I understand that we need to do corruption so that we can test if the 
-> > repair works, but I'm not sure if the output format will change, or if 
-> > the program will get replace by "btrfs inspect-internal" group.
-> 
-> In the long-term it will be repleaced, but there's no ETA.
+In generic/413 and xfs/260, we run mmap DIO tests between
+DAX and non-DAX mountpoints: dax_to_dax, dax_to_nondax,
+nondax_to_dax, nondax_to_nondax.
 
-Possibly, if fstests maintainer agrees, we can add btrfs-map-logical to
-fstests. It's small and uses headers from libbtrfs, so this would become
-a new dependency but I believe is still bearable.
+Now tests from DAX to non-DAX fails as:
+  read(Bad address) len 1024 dio dax to nondax
+  ...
 
-I'm not sure if we should export all debuging functionality in 'btrfs'
-as this is typically something that a user will never want, not even in
-the emergency environments. There's an overlap in the information to be
-exported but I'd be more inclined to satisfy user needs than testsuite
-needs. So an independent tool would give us more freedom on both sides.
+It is expected:
+https://lists.01.org/pipermail/linux-nvdimm/2017-February/008959.html
+
+So, this patchset run dax_to_nondax in separated cases, in which
+checking devices underneath, _notrun if not compatible. The checking
+helper may be ugly, though it stops confusing failures and tests
+as much as possible. Comments are welcome.
+
+The 4/4 write read only file test is not related to above changes,
+just sending it together.
+
+v3:
+  split dax_to_nondax to separated cases;
+  adding helper _require_pmem_key_value to require *_DEV in specific
+status;
+  adding Ross's fix to t_mmap_write_ro.c;
+  adding munmap and close to t_mmap_write_ro.c;
+  do not require devs' status in read-only file case, just adding
+comment that it requires pmem memory mode device to reproduce;
+  throw large testfile in TEST_DIR instead of $tmp.
+
+Xiong Zhou (4):
+  DAX-DIO: make dax_to_non_dax dio test solo
+  generic: test mmap io fom DAX to non-DAX
+  xfs: test per-inode DAX flag DAX to non-DAX
+  generic: mmap write readonly DAX file
+
+ .gitignore            |   1 +
+ common/config         |   2 +
+ common/rc             |  41 ++++++++++++++++++
+ src/Makefile          |   2 +-
+ src/t_mmap_write_ro.c |  76 +++++++++++++++++++++++++++++++++
+ tests/generic/413     |  13 +-----
+ tests/generic/423     | 113 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/423.out |   2 +
+ tests/generic/424     |  92 ++++++++++++++++++++++++++++++++++++++++
+ tests/generic/424.out |   2 +
+ tests/generic/group   |   2 +
+ tests/xfs/260         |  19 ++-------
+ tests/xfs/288         | 111 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/288.out     |   2 +
+ tests/xfs/group       |   1 +
+ 15 files changed, 450 insertions(+), 29 deletions(-)
+ create mode 100644 src/t_mmap_write_ro.c
+ create mode 100755 tests/generic/423
+ create mode 100644 tests/generic/423.out
+ create mode 100755 tests/generic/424
+ create mode 100644 tests/generic/424.out
+ create mode 100755 tests/xfs/288
+ create mode 100644 tests/xfs/288.out
+
+-- 
+1.8.3.1
+
