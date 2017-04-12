@@ -1,38 +1,38 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:46064 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751564AbdDLB3G (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 11 Apr 2017 21:29:06 -0400
+Received: from userp1040.oracle.com ([156.151.31.81]:40306 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751564AbdDLB3O (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 11 Apr 2017 21:29:14 -0400
 From: Liu Bo <bo.li.liu@oracle.com>
-Subject: [PATCH] fstests: regression test for btrfs dio read repair
-Date: Tue, 11 Apr 2017 18:27:50 -0700
-Message-Id: <1491960470-28789-1-git-send-email-bo.li.liu@oracle.com>
+Subject: [PATCH] fstests: regression test for btrfs buffered read's repair
+Date: Tue, 11 Apr 2017 18:27:58 -0700
+Message-Id: <1491960478-28904-1-git-send-email-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This case tests whether dio read can repair the bad copy if we have
-a good copy.
+This case tests whether buffered read can repair the bad copy if we
+have a good copy.
 
 Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
 ---
- tests/btrfs/140     | 152 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/140.out |  39 ++++++++++++++
+ tests/btrfs/141     | 152 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/141.out |  39 ++++++++++++++
  tests/btrfs/group   |   1 +
  3 files changed, 192 insertions(+)
- create mode 100755 tests/btrfs/140
- create mode 100644 tests/btrfs/140.out
+ create mode 100755 tests/btrfs/141
+ create mode 100644 tests/btrfs/141.out
 
-diff --git a/tests/btrfs/140 b/tests/btrfs/140
+diff --git a/tests/btrfs/141 b/tests/btrfs/141
 new file mode 100755
-index 0000000..db56123
+index 0000000..53fd75c
 --- /dev/null
-+++ b/tests/btrfs/140
++++ b/tests/btrfs/141
 @@ -0,0 +1,152 @@
 +#! /bin/bash
-+# FS QA Test 140
++# FS QA Test 141
 +#
-+# Regression test for btrfs DIO read's repair during read.
++# Regression test for btrfs buffered read's repair during read.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
@@ -82,7 +82,6 @@ index 0000000..db56123
 +_require_scratch_dev_pool 2
 +_require_command "$BTRFS_MAP_LOGICAL_PROG" btrfs-map-logical
 +_require_command "$FILEFRAG_PROG" filefrag
-+_require_odirect
 +
 +# helpe to convert 'file offset' to btrfs logical offset
 +FILEFRAG_FILTER='
@@ -165,7 +164,8 @@ index 0000000..db56123
 +# copy directly, so lets loop 10 times here and discard output that dio reads
 +# give
 +for i in `seq 1 10`; do
-+	$XFS_IO_PROG -d -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" > /dev/null
++	echo 3 > /proc/sys/vm/drop_caches
++	$XFS_IO_PROG -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" > /dev/null
 +	repair=`_check_repair`
 +	if [ $repair -eq 1 ]; then
 +		break
@@ -175,19 +175,19 @@ index 0000000..db56123
 +_scratch_unmount
 +
 +# check if the repair works
-+$XFS_IO_PROG -d -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_DEV | _filter_xfs_io
++$XFS_IO_PROG -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_DEV | _filter_xfs_io
 +
 +_scratch_dev_pool_put
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
+diff --git a/tests/btrfs/141.out b/tests/btrfs/141.out
 new file mode 100644
-index 0000000..d8e3856
+index 0000000..6b780ac
 --- /dev/null
-+++ b/tests/btrfs/140.out
++++ b/tests/btrfs/141.out
 @@ -0,0 +1,39 @@
-+QA output created by 140
++QA output created by 141
 +wrote 131072/131072 bytes at offset 0
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 +wrote 65536/65536 bytes at offset 244056064
@@ -227,14 +227,14 @@ index 0000000..d8e3856
 +read 512/512 bytes at offset 244056064
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 9d4b80b..1cb9c98 100644
+index 1cb9c98..7b380e5 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -141,3 +141,4 @@
- 137 auto quick send
+@@ -142,3 +142,4 @@
  138 auto compress
  139 auto qgroup
-+140 auto quick
+ 140 auto quick
++141 auto quick
 -- 
 2.5.0
 
