@@ -1,15 +1,15 @@
-Received: from mail-io0-f193.google.com ([209.85.223.193]:34690 "EHLO
-        mail-io0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751218AbdDLJmt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Apr 2017 05:42:49 -0400
+Received: from mail-io0-f194.google.com ([209.85.223.194]:34954 "EHLO
+        mail-io0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752144AbdDLJpY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 12 Apr 2017 05:45:24 -0400
 MIME-Version: 1.0
 Reply-To: fdmanana@gmail.com
-In-Reply-To: <1491960470-28789-1-git-send-email-bo.li.liu@oracle.com>
-References: <1491960470-28789-1-git-send-email-bo.li.liu@oracle.com>
+In-Reply-To: <1491960478-28904-1-git-send-email-bo.li.liu@oracle.com>
+References: <1491960478-28904-1-git-send-email-bo.li.liu@oracle.com>
 From: Filipe Manana <fdmanana@gmail.com>
-Date: Wed, 12 Apr 2017 10:42:47 +0100
-Message-ID: <CAL3q7H741v+JatRj_YuVNcvK-1DupuuP5pZUc8gkSAZ8NVGO0A@mail.gmail.com>
-Subject: Re: [PATCH] fstests: regression test for btrfs dio read repair
+Date: Wed, 12 Apr 2017 10:45:23 +0100
+Message-ID: <CAL3q7H66GoD8hLEpkd5c7=DwhohrGTDf_qbRhWL+=A4b+JM53Q@mail.gmail.com>
+Subject: Re: [PATCH] fstests: regression test for btrfs buffered read's repair
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
@@ -18,38 +18,38 @@ Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.ker
 List-ID: <fstests@vger.kernel.org>
 
 On Wed, Apr 12, 2017 at 2:27 AM, Liu Bo <bo.li.liu@oracle.com> wrote:
-> This case tests whether dio read can repair the bad copy if we have
-> a good copy.
+> This case tests whether buffered read can repair the bad copy if we
+> have a good copy.
 
 Regardless of being a test we should have always had (thanks for
 this!), it would be useful to mention we had a regression (as the test
-description in the btrfs/140 file says) and which patch fixed it (and
+description in the btrfs/141 file says) and which patch fixed it (and
 possibly which kernel version or patch/commit introduced the
 regression).
 
-Just a comment/question below.
+Just a couple comments/questions below.
 
 >
 > Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
 > ---
->  tests/btrfs/140     | 152 ++++++++++++++++++++++++++++++++++++++++++++++=
+>  tests/btrfs/141     | 152 ++++++++++++++++++++++++++++++++++++++++++++++=
 ++++++
->  tests/btrfs/140.out |  39 ++++++++++++++
+>  tests/btrfs/141.out |  39 ++++++++++++++
 >  tests/btrfs/group   |   1 +
 >  3 files changed, 192 insertions(+)
->  create mode 100755 tests/btrfs/140
->  create mode 100644 tests/btrfs/140.out
+>  create mode 100755 tests/btrfs/141
+>  create mode 100644 tests/btrfs/141.out
 >
-> diff --git a/tests/btrfs/140 b/tests/btrfs/140
+> diff --git a/tests/btrfs/141 b/tests/btrfs/141
 > new file mode 100755
-> index 0000000..db56123
+> index 0000000..53fd75c
 > --- /dev/null
-> +++ b/tests/btrfs/140
+> +++ b/tests/btrfs/141
 > @@ -0,0 +1,152 @@
 > +#! /bin/bash
-> +# FS QA Test 140
+> +# FS QA Test 141
 > +#
-> +# Regression test for btrfs DIO read's repair during read.
+> +# Regression test for btrfs buffered read's repair during read.
 > +#
 > +#-----------------------------------------------------------------------
 > +# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
@@ -99,7 +99,6 @@ Just a comment/question below.
 > +_require_scratch_dev_pool 2
 > +_require_command "$BTRFS_MAP_LOGICAL_PROG" btrfs-map-logical
 > +_require_command "$FILEFRAG_PROG" filefrag
-> +_require_odirect
 > +
 > +# helpe to convert 'file offset' to btrfs logical offset
 > +FILEFRAG_FILTER=3D'
@@ -160,10 +159,9 @@ Just a comment/question below.
 > +
 > +_scratch_mount -o nospace_cache
 
-Why do we need to mount without space cache?
-I don't see why nor I think it's obvious. A comment in the test
-mentioning why would be useful for everyone.
-
+Same as the other test, why do we need to mount without space cache?
+It isn't obvious if it's needed nor why - a comment in the test
+explaining why would be useful for everyone.
 
 > +
 > +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foob=
@@ -188,16 +186,25 @@ ATCH_DEV | _filter_xfs_io
 > +_scratch_mount -o nospace_cache
 > +
 > +# step 3, 128k dio read (this read can repair bad copy)
+
+dio read -> buffered read
+
 > +echo "step 3......repair the bad copy" >>$seqres.full
 > +
 > +# since raid1 consists of two copies, and the following read may read th=
 e good
 > +# copy directly, so lets loop 10 times here and discard output that dio =
 reads
+
+dio reads -> buffered reads
+
+thanks!
+
 > +# give
 > +for i in `seq 1 10`; do
-> +       $XFS_IO_PROG -d -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" >=
- /dev/null
+> +       echo 3 > /proc/sys/vm/drop_caches
+> +       $XFS_IO_PROG -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" > /d=
+ev/null
 > +       repair=3D`_check_repair`
 > +       if [ $repair -eq 1 ]; then
 > +               break
@@ -207,20 +214,20 @@ reads
 > +_scratch_unmount
 > +
 > +# check if the repair works
-> +$XFS_IO_PROG -d -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_D=
-EV | _filter_xfs_io
+> +$XFS_IO_PROG -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_DEV =
+| _filter_xfs_io
 > +
 > +_scratch_dev_pool_put
 > +# success, all done
 > +status=3D0
 > +exit
-> diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
+> diff --git a/tests/btrfs/141.out b/tests/btrfs/141.out
 > new file mode 100644
-> index 0000000..d8e3856
+> index 0000000..6b780ac
 > --- /dev/null
-> +++ b/tests/btrfs/140.out
+> +++ b/tests/btrfs/141.out
 > @@ -0,0 +1,39 @@
-> +QA output created by 140
+> +QA output created by 141
 > +wrote 131072/131072 bytes at offset 0
 > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 > +wrote 65536/65536 bytes at offset 244056064
@@ -292,19 +299,19 @@ EV | _filter_xfs_io
 > +read 512/512 bytes at offset 244056064
 > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 > diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 9d4b80b..1cb9c98 100644
+> index 1cb9c98..7b380e5 100644
 > --- a/tests/btrfs/group
 > +++ b/tests/btrfs/group
-> @@ -141,3 +141,4 @@
->  137 auto quick send
+> @@ -142,3 +142,4 @@
 >  138 auto compress
 >  139 auto qgroup
-> +140 auto quick
+>  140 auto quick
+> +141 auto quick
 > --
 > 2.5.0
 >
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
