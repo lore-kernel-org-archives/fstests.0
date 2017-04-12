@@ -1,239 +1,336 @@
-Received: from mx1.redhat.com ([209.132.183.28]:26013 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752057AbdDLRNI (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 12 Apr 2017 13:13:08 -0400
-Date: Thu, 13 Apr 2017 01:13:05 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH v2] fstests/xfs: xfs_repair should junk empty attribute
- leaf blocks
-Message-ID: <20170412171305.GD5081@dhcp12-143.nay.redhat.com>
-References: <1492011577-13436-1-git-send-email-zlang@redhat.com>
- <20170412161434.GM8502@birch.djwong.org>
- <20170412162706.GC5081@dhcp12-143.nay.redhat.com>
- <20170412165535.GN8502@birch.djwong.org>
+Received: from userp1040.oracle.com ([156.151.31.81]:16615 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754675AbdDLUaE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 12 Apr 2017 16:30:04 -0400
+Date: Wed, 12 Apr 2017 13:28:57 -0700
+From: Liu Bo <bo.li.liu@oracle.com>
+Subject: Re: [PATCH] fstests: regression test for btrfs dio read repair
+Message-ID: <20170412202857.GA10431@lim.localdomain>
+Reply-To: bo.li.liu@oracle.com
+References: <1491960470-28789-1-git-send-email-bo.li.liu@oracle.com>
+ <CAL3q7H741v+JatRj_YuVNcvK-1DupuuP5pZUc8gkSAZ8NVGO0A@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20170412165535.GN8502@birch.djwong.org>
+In-Reply-To: <CAL3q7H741v+JatRj_YuVNcvK-1DupuuP5pZUc8gkSAZ8NVGO0A@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: Filipe Manana <fdmanana@gmail.com>
+Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 12, 2017 at 09:55:35AM -0700, Darrick J. Wong wrote:
-> On Thu, Apr 13, 2017 at 12:27:07AM +0800, Zorro Lang wrote:
-> > On Wed, Apr 12, 2017 at 09:14:34AM -0700, Darrick J. Wong wrote:
-> > > On Wed, Apr 12, 2017 at 11:39:37PM +0800, Zorro Lang wrote:
-> > > > There was a bug during log replay, the attr/attr3 leaf verifier
-> > > > reported corruption when encountering a leaf attribute with a
-> > > > count of 0 in the header, as below:
-> > > > 
-> > > > Metadata corruption detected at xfs_attr3_leaf block 0x480988/0x1000
-> > > > 
-> > > > commit f714016 from xfsprogs has fixed this bug. This test case
-> > > > will emulate this corruption by xfs_db and use xfs_repair to fix
-> > > > it.
-> > > > 
-> > > > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > > > ---
-> > > > 
-> > > > Hi,
-> > > > 
-> > > > V2 did below changes:
-> > > > 1) remove the requirement for xfs_db's write and addr commands
-> > > > 2) check if xfs_db support write -d option
-> > > > 3) turn to get filesystem block size from _filter_mkfs output
-> > > > 4) add more comments
-> > > > 
-> > > > Thanks,
-> > > > Zorro
-> > > > 
-> > > >  tests/xfs/288     | 110 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> > > >  tests/xfs/288.out |   2 +
-> > > >  tests/xfs/group   |   1 +
-> > > >  3 files changed, 113 insertions(+)
-> > > >  create mode 100755 tests/xfs/288
-> > > >  create mode 100644 tests/xfs/288.out
-> > > > 
-> > > > diff --git a/tests/xfs/288 b/tests/xfs/288
-> > > > new file mode 100755
-> > > > index 0000000..81e7b50
-> > > > --- /dev/null
-> > > > +++ b/tests/xfs/288
-> > > > @@ -0,0 +1,110 @@
-> > > > +#! /bin/bash
-> > > > +# FS QA Test 288
-> > > > +#
-> > > > +# When an attribute leaf block count is 0, xfs_repair should junk
-> > > > +# that leaf directly (as xfsprogs commit f714016).
-> > > > +#
-> > > > +#-----------------------------------------------------------------------
-> > > > +# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
-> > > > +#
-> > > > +# This program is free software; you can redistribute it and/or
-> > > > +# modify it under the terms of the GNU General Public License as
-> > > > +# published by the Free Software Foundation.
-> > > > +#
-> > > > +# This program is distributed in the hope that it would be useful,
-> > > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > > > +# GNU General Public License for more details.
-> > > > +#
-> > > > +# You should have received a copy of the GNU General Public License
-> > > > +# along with this program; if not, write the Free Software Foundation,
-> > > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > > > +#-----------------------------------------------------------------------
-> > > > +#
-> > > > +
-> > > > +seq=`basename $0`
-> > > > +seqres=$RESULT_DIR/$seq
-> > > > +echo "QA output created by $seq"
-> > > > +
-> > > > +here=`pwd`
-> > > > +tmp=/tmp/$$
-> > > > +status=1	# failure is the default!
-> > > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > > +
-> > > > +_cleanup()
-> > > > +{
-> > > > +	cd /
-> > > > +	rm -f $tmp.*
-> > > > +}
-> > > > +
-> > > > +# get standard environment, filters and checks
-> > > > +. ./common/rc
-> > > > +. ./common/filter
-> > > > +. ./common/attr
-> > > > +
-> > > > +# remove previous $seqres.full before test
-> > > > +rm -f $seqres.full
-> > > > +
-> > > > +# V4 XFS attr type is 'attr'
-> > > > +write_cmd="write"
-> > > > +
-> > > > +# Modify as appropriate.
-> > > > +_supported_fs xfs
-> > > > +_supported_os Linux
-> > > > +_require_scratch
-> > > > +_require_attrs
-> > > > +
-> > > > +_scratch_mkfs_xfs | _filter_mkfs 2>$tmp.mkfs >/dev/null
-> > > > +. $tmp.mkfs
-> > > > +
-> > > > +# If test on XFS with CRC enabled, after change attr's hdr.count we need
-> > > > +# to recalculate crc by use write -d option
-> > > > +if [ $_fs_has_crcs -eq 1 ]; then
-> > > > +	# check if xfs_db support write -d option
-> > > > +	_scratch_xfs_db -x -c "sb" -c "write -d" 2>&1 | \
-> > > > +		grep -q "invalid option"
-> > > > +	if [ $? -eq 0 ];then
-> > > > +		_notrun "xfs_db doesn't support write -d option"
-> > > > +	fi
-> > > > +	# This's a trick to check if xfs_db support recalculating
-> > > > +	# CRCs of attr3
-> > > > +	_scratch_xfs_db -x -c "daddr 0" \
-> > > > +			   -c "type attr3" \
-> > > > +			   -c "write -d" 2>/dev/null | \
-> > > > +		grep -q "Cannot recalculate CRCs on this type of object"
-> > > > +	if [ $? -eq 0 ];then
-> > > > +		_notrun "xfs_db can't recalculate CRCs of attr3"
-> > > > +	fi
-> > > > +	# V5 XFS attr type is 'attr3'
-> > > > +	write_cmd="write -d"
-> > > > +fi
-> > > > +
-> > > > +_scratch_mount
-> > > > +
-> > > > +touch $SCRATCH_MNT/$seq.attrfile
-> > > > +inum=$(stat -c '%i' $SCRATCH_MNT/$seq.attrfile)
-> > > > +
-> > > > +# To get an attr block leaf, we need to extend attr format to extent
-> > > > +# format at least, and the max inode size is half of filesystem
-> > > > +# block size, so write half of block size attr to make sure attr
-> > > > +# out of local format.
-> > > > +maxisize=$((dbsize/2))
-> > > > +$SETFATTR_PROG -n "user.testattr${seq}" \
-> > > > +	       -v `python -c "print ($maxisize * 'a')"` \
-> > > 
-> > > Need to check for the existence of python, or use xfs_io to write
-> > > $maxisize bytes to a file and backtick-cat it into the command line.
-> > 
-> > As you and Eric all don't like this 'python' way, I'll change it :)
-> > 
-> > > 
-> > > > +	       $SCRATCH_MNT/$seq.attrfile
-> > > > +
-> > > > +_scratch_unmount
-> > > > +# manually corrupt the XFS, by set the header count of attr to 0
-> > > > +_scratch_xfs_db -x -c "inode $inum" \
-> > > > +		   -c "addr a.bmx[0].startblock" \
-> > > 
-> > > "ablock 0" ?
-> > 
-> > Anything weird ?
-> 
-> Well... if the attr fork should somehow be in btree format then 'ablock 0'
-> will handle it just fine, whereas directly reading the extents-format
-> extent array will break.
+On Wed, Apr 12, 2017 at 10:42:47AM +0100, Filipe Manana wrote:
+> On Wed, Apr 12, 2017 at 2:27 AM, Liu Bo <bo.li.liu@oracle.com> wrote:
+> > This case tests whether dio read can repair the bad copy if we have
+> > a good copy.
+>=20
+> Regardless of being a test we should have always had (thanks for
+> this!), it would be useful to mention we had a regression (as the test
+> description in the btrfs/140 file says) and which patch fixed it (and
+> possibly which kernel version or patch/commit introduced the
+> regression).
+>
 
-Wow, yes, that's really helpful! Thanks so much :)
+Sure, thanks for the review.
 
-> 
-> --D
-> 
-> > > 
-> > > > +		   -c "$write_cmd hdr.count 0" >> $seqres.full
-> > > > +
-> > > 
-> > > Uh... we need an xfs_repair -n run here to validate that repair actually
-> > > finds a broken xattr block.  Only then should we fix the fs.  Remember
-> > > that xfs_repair only tells us if it thinks the fs is still broken.
-> > 
-> > Yes, I'll change it.
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > > 
-> > > --D
-> > > 
-> > > > +# This repair should junk above leaf attribute and fix this XFS, then
-> > > > +# SCRATCH_DEV shouldn't be corrupted after this case done.
-> > > > +_repair_scratch_fs >> $seqres.full
-> > > > +
-> > > > +echo "Silence is golden"
-> > > > +
-> > > > +# success, all done
-> > > > +status=0
-> > > > +exit
-> > > > diff --git a/tests/xfs/288.out b/tests/xfs/288.out
-> > > > new file mode 100644
-> > > > index 0000000..2958a5c
-> > > > --- /dev/null
-> > > > +++ b/tests/xfs/288.out
-> > > > @@ -0,0 +1,2 @@
-> > > > +QA output created by 288
-> > > > +Silence is golden
-> > > > diff --git a/tests/xfs/group b/tests/xfs/group
-> > > > index 75769f9..f27a7b6 100644
-> > > > --- a/tests/xfs/group
-> > > > +++ b/tests/xfs/group
-> > > > @@ -285,6 +285,7 @@
-> > > >  285 dangerous_fuzzers dangerous_scrub
-> > > >  286 dangerous_fuzzers dangerous_scrub dangerous_online_repair
-> > > >  287 auto dump quota quick
-> > > > +288 auto quick repair fuzzers
-> > > >  290 auto rw prealloc quick ioctl zero
-> > > >  291 auto repair
-> > > >  292 auto mkfs quick
-> > > > -- 
-> > > > 2.7.4
-> > > > 
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> > > > the body of a message to majordomo@vger.kernel.org
-> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Just a comment/question below.
+>=20
+> >
+> > Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+> > ---
+> >  tests/btrfs/140     | 152 ++++++++++++++++++++++++++++++++++++++++++=
+++++++++++
+> >  tests/btrfs/140.out |  39 ++++++++++++++
+> >  tests/btrfs/group   |   1 +
+> >  3 files changed, 192 insertions(+)
+> >  create mode 100755 tests/btrfs/140
+> >  create mode 100644 tests/btrfs/140.out
+> >
+> > diff --git a/tests/btrfs/140 b/tests/btrfs/140
+> > new file mode 100755
+> > index 0000000..db56123
+> > --- /dev/null
+> > +++ b/tests/btrfs/140
+> > @@ -0,0 +1,152 @@
+> > +#! /bin/bash
+> > +# FS QA Test 140
+> > +#
+> > +# Regression test for btrfs DIO read's repair during read.
+> > +#
+> > +#-------------------------------------------------------------------=
+----
+> > +# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundatio=
+n,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-------------------------------------------------------------------=
+----
+> > +#
+> > +
+> > +seq=3D`basename $0`
+> > +seqres=3D$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=3D`pwd`
+> > +tmp=3D/tmp/$$
+> > +status=3D1       # failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +       cd /
+> > +       rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs btrfs
+> > +_supported_os Linux
+> > +_require_scratch_dev_pool 2
+> > +_require_command "$BTRFS_MAP_LOGICAL_PROG" btrfs-map-logical
+> > +_require_command "$FILEFRAG_PROG" filefrag
+> > +_require_odirect
+> > +
+> > +# helpe to convert 'file offset' to btrfs logical offset
+> > +FILEFRAG_FILTER=3D'
+> > +       if (/blocks? of (\d+) bytes/) {
+> > +               $blocksize =3D $1;
+> > +               next
+> > +       }
+> > +       ($ext, $logical, $physical, $length) =3D
+> > +               (/^\s*(\d+):\s+(\d+)..\s+\d+:\s+(\d+)..\s+\d+:\s+(\d+=
+):/)
+> > +       or next;
+> > +       ($flags) =3D /.*:\s*(\S*)$/;
+> > +       print $physical * $blocksize, "#",
+> > +             $length * $blocksize, "#",
+> > +             $logical * $blocksize, "#",
+> > +             $flags, " "'
+> > +
+> > +# this makes filefrag output script readable by using a perl helper.
+> > +# output is one extent per line, with three numbers separated by '#'
+> > +# the numbers are: physical, length, logical (all in bytes)
+> > +# sample output: "1234#10#5678" -> physical 1234, length 10, logical=
+ 5678
+> > +_filter_extents()
+> > +{
+> > +       tee -a $seqres.full | $PERL_PROG -ne "$FILEFRAG_FILTER"
+> > +}
+> > +
+> > +_check_file_extents()
+> > +{
+> > +       cmd=3D"filefrag -v $1"
+> > +       echo "# $cmd" >> $seqres.full
+> > +       out=3D`$cmd | _filter_extents`
+> > +       if [ -z "$out" ]; then
+> > +               return 1
+> > +       fi
+> > +       echo "after filter: $out" >> $seqres.full
+> > +       echo $out
+> > +       return 0
+> > +}
+> > +
+> > +_check_repair()
+> > +{
+> > +       filter=3D${1:-cat}
+> > +       dmesg | tac | sed -ne "0,\#run fstests $seqnum at $date_time#=
+p" | tac | $filter | grep -q -e "csum failed"
+> > +       if [ $? -eq 0 ]; then
+> > +               echo 1
+> > +       else
+> > +               echo 0
+> > +       fi
+> > +}
+> > +
+> > +_scratch_dev_pool_get 2
+> > +# step 1, create a raid1 btrfs which contains one 128k file.
+> > +echo "step 1......mkfs.btrfs" >>$seqres.full
+> > +
+> > +mkfs_opts=3D"-d raid1"
+> > +_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+> > +
+> > +_scratch_mount -o nospace_cache
+>=20
+> Why do we need to mount without space cache?
+> I don't see why nor I think it's obvious. A comment in the test
+> mentioning why would be useful for everyone.
+>
+
+Thanks for spotting it, we can safely get rid of it, it's a leftover when=
+ I
+convert it to a fstests case.
+
+Thanks,
+
+-liubo
+>=20
+> > +
+> > +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/=
+foobar" | _filter_xfs_io
+> > +
+> > +sync
+> > +
+> > +# step 2, corrupt the first 64k of one copy (on SCRATCH_DEV which is=
+ the first
+> > +# one in $SCRATCH_DEV_POOL
+> > +echo "step 2......corrupt file extent" >>$seqres.full
+> > +
+> > +extents=3D`_check_file_extents $SCRATCH_MNT/foobar`
+> > +logical_in_btrfs=3D`echo ${extents} | cut -d '#' -f 1`
+> > +physical_on_scratch=3D`$BTRFS_MAP_LOGICAL_PROG -l ${logical_in_btrfs=
+} $SCRATCH_DEV | grep "$SCRATCH_DEV" | awk '{print $6}'`
+> > +
+> > +_scratch_unmount
+> > +$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical_on_scratch 64K" =
+$SCRATCH_DEV | _filter_xfs_io
+> > +
+> > +_scratch_mount -o nospace_cache
+> > +
+> > +# step 3, 128k dio read (this read can repair bad copy)
+> > +echo "step 3......repair the bad copy" >>$seqres.full
+> > +
+> > +# since raid1 consists of two copies, and the following read may rea=
+d the good
+> > +# copy directly, so lets loop 10 times here and discard output that =
+dio reads
+> > +# give
+> > +for i in `seq 1 10`; do
+> > +       $XFS_IO_PROG -d -c "pread -b 128K 0 128K" "$SCRATCH_MNT/fooba=
+r" > /dev/null
+> > +       repair=3D`_check_repair`
+> > +       if [ $repair -eq 1 ]; then
+> > +               break
+> > +       fi
+> > +done
+> > +
+> > +_scratch_unmount
+> > +
+> > +# check if the repair works
+> > +$XFS_IO_PROG -d -c "pread -v -b 512 $physical_on_scratch 512" $SCRAT=
+CH_DEV | _filter_xfs_io
+> > +
+> > +_scratch_dev_pool_put
+> > +# success, all done
+> > +status=3D0
+> > +exit
+> > diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
+> > new file mode 100644
+> > index 0000000..d8e3856
+> > --- /dev/null
+> > +++ b/tests/btrfs/140.out
+> > @@ -0,0 +1,39 @@
+> > +QA output created by 140
+> > +wrote 131072/131072 bytes at offset 0
+> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > +wrote 65536/65536 bytes at offset 244056064
+> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > +0e8c0000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c0010:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c0020:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c0030:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c0040:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c0050:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c0060:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c0070:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c0080:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c0090:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c00a0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c00b0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c00c0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c00d0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c00e0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c00f0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c0100:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c0110:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c0120:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c0130:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c0140:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c0150:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c0160:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c0170:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c0180:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c0190:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c01a0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c01b0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c01c0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c01d0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c01e0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +0e8c01f0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +read 512/512 bytes at offset 244056064
+> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > diff --git a/tests/btrfs/group b/tests/btrfs/group
+> > index 9d4b80b..1cb9c98 100644
+> > --- a/tests/btrfs/group
+> > +++ b/tests/btrfs/group
+> > @@ -141,3 +141,4 @@
+> >  137 auto quick send
+> >  138 auto compress
+> >  139 auto qgroup
+> > +140 auto quick
 > > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> > 2.5.0
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-btrfs=
+" in
 > > the body of a message to majordomo@vger.kernel.org
 > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+>=20
+> --=20
+> Filipe David Manana,
+>=20
+> =E2=80=9CWhether you think you can, or you think you can't =E2=80=94 yo=
+u're right.=E2=80=9D
