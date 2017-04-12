@@ -1,62 +1,58 @@
-Received: from mx1.redhat.com ([209.132.183.28]:59776 "EHLO mx1.redhat.com"
+Received: from mga02.intel.com ([134.134.136.20]:27439 "EHLO mga02.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751685AbdDLCxC (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 11 Apr 2017 22:53:02 -0400
-Date: Wed, 12 Apr 2017 10:52:59 +0800
-From: Xiong Zhou <xzhou@redhat.com>
-Subject: Re: [PATCH v2 3/3] DAX: mmap write readonly file
-Message-ID: <20170412025259.6duxlnabxem23mlc@XZHOUW.usersys.redhat.com>
-References: <20170407171600.GA29489@linux.intel.com>
- <1491804353-1326-1-git-send-email-xzhou@redhat.com>
- <1491804353-1326-3-git-send-email-xzhou@redhat.com>
- <20170411114619.GK22845@eguan.usersys.redhat.com>
- <x498tn7jbep.fsf@segfault.boston.devel.redhat.com>
- <20170411185235.GA32027@linux.intel.com>
- <20170411224542.GA12746@linux.intel.com>
+        id S1751992AbdDLDaz (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 11 Apr 2017 23:30:55 -0400
+Date: Tue, 11 Apr 2017 21:30:53 -0600
+From: Ross Zwisler <ross.zwisler@linux.intel.com>
+Subject: Re: [PATCH 2/3] DAX-DIO: skip DAX to non-DAX if unsupported
+Message-ID: <20170412033053.GA9671@linux.intel.com>
+References: <1491551764-18779-1-git-send-email-xzhou@redhat.com>
+ <1491551764-18779-2-git-send-email-xzhou@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170411224542.GA12746@linux.intel.com>
+In-Reply-To: <1491551764-18779-2-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ross Zwisler <ross.zwisler@linux.intel.com>
-Cc: Jeff Moyer <jmoyer@redhat.com>, Eryu Guan <eguan@redhat.com>, Xiong Zhou <xzhou@redhat.com>, fstests@vger.kernel.org, dan.j.williams@intel.com
+To: Xiong Zhou <xzhou@redhat.com>
+Cc: fstests@vger.kernel.org, ross.zwisler@linux.intel.com, dan.j.williams@intel.com, jmoyer@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Apr 11, 2017 at 04:45:42PM -0600, Ross Zwisler wrote:
-> On Tue, Apr 11, 2017 at 12:52:35PM -0600, Ross Zwisler wrote:
-> > On Tue, Apr 11, 2017 at 09:56:14AM -0400, Jeff Moyer wrote:
-> > > Eryu Guan <eguan@redhat.com> writes:
-> > > 
-> > > > On Mon, Apr 10, 2017 at 02:05:53PM +0800, Xiong Zhou wrote:
-> > > >> Regression case that one can write to read-only
-> > > >> file in a DAX mountpoint.
-> > > >> 
-> > > >> Signed-off-by: Xiong Zhou <xzhou@redhat.com>
-> > > >> ---
-> > > >> 
-> > > >> v2:
-> > > >>   compile test programme manually in this test because default
-> > > >> cc option -O2 prevents this issue reproduction;
-> > > >
-> > > > Hmm, this looks.. ugly to me :) Better to find out the exact reason that
-> > > > prevents the bug from reproducing and update the c program accordingly.
-> > > 
-> > > The compiler probably optimizes this bit out:
-> > > 
-> > > +	/* fault in the page */
-> > > +	foo = *buf;
-> > 
-> > Yep, verified this with objdump.  You can prevent the compiler from
-> > optimizing out this bit by making 'foo' volatile.  Patch at the end of this
-> > mail, and I also verified that this works with objdump.
-> > 
-> > In my setup at least this test passes both with v4.10.0 (which does not
-> > contain the fix we are testing for, and should fail) and with v4.10.3 (which
-> > does contain the kernel fix, and should pass).
-> > 
-> > So, I think the test still needs a little love. :)
+On Fri, Apr 07, 2017 at 03:56:03PM +0800, Xiong Zhou wrote:
+> By tweaking SCRATCH_DEV by ndctl, only run DAX mapped
+> area DIO to non-DAX area tests when pmem device is in
+> "memory mode".
 > 
-> Umm...never mind, my testing was broken. I was accidentally testing with the
-> upstream generic/422.  :(  Will retest tomorrow.
+> Signed-off-by: Xiong Zhou <xzhou@redhat.com>
+> ---
+>  tests/generic/413 | 25 ++++++++++++++++++++++++-
+>  tests/xfs/260     | 25 ++++++++++++++++++++++++-
+>  2 files changed, 48 insertions(+), 2 deletions(-)
+> 
+> diff --git a/tests/generic/413 b/tests/generic/413
+> index a1cc514..55a871f 100755
+> --- a/tests/generic/413
+> +++ b/tests/generic/413
+> @@ -34,6 +34,11 @@ _cleanup()
+>  {
+>  	cd /
+>  	rm -f $tmp.*
+> +	_check_scratch_fs
+> +	# umount and restore SCRATCH_DEV to original mode
+> +	_scratch_unmount
+> +	$NDCTL_PROG create-namespace -f -e $scns -m $scmode \
+> +	  > /dev/null 2>&1
 
-Thank you very much Ross, your patch is working fine.
+If we are running on a system where the PMEM namespace was created with the
+memmap kernel command line parameter (which is how I usually test), we don't
+want to do any reconfig (our namespaces are already in "memory" mode), and
+indeed the NDCTL and JSON commands will fail.  Really we can even run the test
+without requiring these guys to be there.
+
+We need to detect this situation, and only do NDCTL & JSON commands if we're
+running against PMEM that came from an NFIT.
+
+Perhaps it's as easy as just grepping for "memmap" in /proc/cmdline?  IMO we
+don't need to worry too much about people running with both an memmap command
+line *and* a valid NFIT...
+
+This comment applies to patches 2 and 3 in this series.
