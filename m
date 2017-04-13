@@ -1,119 +1,44 @@
-Received: from mail-oi0-f43.google.com ([209.85.218.43]:32791 "EHLO
-        mail-oi0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751132AbdDMNgg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 13 Apr 2017 09:36:36 -0400
-Received: by mail-oi0-f43.google.com with SMTP id b187so65444726oif.0
-        for <fstests@vger.kernel.org>; Thu, 13 Apr 2017 06:36:35 -0700 (PDT)
+Received: from userp1040.oracle.com ([156.151.31.81]:40662 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752644AbdDMPkS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 13 Apr 2017 11:40:18 -0400
+Date: Thu, 13 Apr 2017 08:39:43 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: [PATCH] xfs/348: update error message when transmogrifying symlink
+ into directory
+Message-ID: <20170413153942.GA5083@birch.djwong.org>
 MIME-Version: 1.0
-In-Reply-To: <20170413041157.rcctxishunypgtvv@XZHOUW.usersys.redhat.com>
-References: <20170412062608.y2u5og3xz2oly44b@XZHOUW.usersys.redhat.com>
- <1492008380-29164-1-git-send-email-xzhou@redhat.com> <1492008380-29164-3-git-send-email-xzhou@redhat.com>
- <20170413041157.rcctxishunypgtvv@XZHOUW.usersys.redhat.com>
-From: Dan Williams <dan.j.williams@intel.com>
-Date: Thu, 13 Apr 2017 06:36:34 -0700
-Message-ID: <CAPcyv4iEk2BVq=W=Dd36Dfra7WD2LpGT0FV4afFU4HuOfzdFmQ@mail.gmail.com>
-Subject: Re: [PATCH v3 2/4] generic: test mmap io fom DAX to non-DAX
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: Xiong Zhou <xzhou@redhat.com>
-Cc: fstests@vger.kernel.org, Ross Zwisler <ross.zwisler@linux.intel.com>, jmoyer <jmoyer@redhat.com>, Eryu Guan <eguan@redhat.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests <fstests@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 12, 2017 at 9:11 PM, Xiong Zhou <xzhou@redhat.com> wrote:
-> On Wed, Apr 12, 2017 at 10:46:18PM +0800, Xiong Zhou wrote:
->> Mount TEST_DEV as non-DAX, SCRATCH_DEV as DAX, then
->> do mmap DIO from DAX to non-DAX.
->>
->> This test is split from generic/413. Since DIO from DAX
->> to non-DAX is only supported/doable when device underneath
->> has memory(struct page) backend.
->>
->> By ndctl looking at SCRATCH_DEV, skip this test if it is
->> not in "memory mode".
->>
->> Adding helper to check pmem device status, which requires new
->> PROGs ndctl to tweaking pmem devices and jq to parse ndctl's
->> JSON format outputs.
->>
->> Signed-off-by: Xiong Zhou <xzhou@redhat.com>
->> ---
->>  common/config         |   2 +
->>  common/rc             |  41 ++++++++++++++++++
->>  tests/generic/423     | 113 ++++++++++++++++++++++++++++++++++++++++++++++++++
->>  tests/generic/423.out |   2 +
->>  tests/generic/group   |   1 +
->>  5 files changed, 159 insertions(+)
->>  create mode 100755 tests/generic/423
->>  create mode 100644 tests/generic/423.out
->>
->> diff --git a/common/config b/common/config
->> index 59041a3..dfdcb8e 100644
->> --- a/common/config
->> +++ b/common/config
->> @@ -212,6 +212,8 @@ export XZ_PROG="`set_prog_path xz`"
->>  export FLOCK_PROG="`set_prog_path flock`"
->>  export LDD_PROG="`set_prog_path ldd`"
->>  export TIMEOUT_PROG="`set_prog_path timeout`"
->> +export NDCTL_PROG="`set_prog_path ndctl`"
->> +export JQ_PROG="`set_prog_path jq`"
->>
->>  # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
->>  # newer systems have udevadm command but older systems like RHEL5 don't.
->> diff --git a/common/rc b/common/rc
->> index 78a2101..35b8f6a 100644
->> --- a/common/rc
->> +++ b/common/rc
->> @@ -3151,6 +3151,47 @@ _require_chattr()
->>       rm -f $TEST_DIR/syscalltest.out
->>  }
->>
->> +# Looking up pmem devices' arttributes in
->> +# `ndctl list` output like this:
->> +#  {
->> +#    "dev":"namespace2.0",
->> +#    "mode":"raw",
->> +#    "size":8589934592,
->> +#    "blockdev":"pmem2"
->> +#  },
->> +_ndctl_get_pmem_key_value()
->> +{
->> +     local dev=$1
->> +     local key=$2
->> +
->> +     $NDCTL_PROG list | \
->> +       $JQ_PROG -r ".[] | \
->> +       select(.blockdev == \"${dev#/dev/}\") | .$key"
->> +}
->> +
->> +# Require pmem device having specific arttibute key/value
->> +# we need.
->> +_require_pmem_key_value()
->> +{
->> +     local dev=$1
->> +     local key=$2
->> +     local value=$3
->> +
->> +     [[ ! "${dev#/dev/}" =~ pmem ]] && \
->> +       _notrun "this test requires pmem device"
->> +
->> +     # if pmem devices are setup by memmap, just run
->> +     grep -q memmap /proc/cmdline && return
->> +
->> +     # pmem devices from NFIT
->> +     _require_command "$NDCTL_PROG" "ndctl"
->> +     _require_command "$JQ_PROG" "jq"
->> +     # get dev specific attr
->> +     dev_value=$(_ndctl_get_pmem_key_value $dev $key)
->> +     [ "$dev_value" != "$value" ] && \
->> +       _notrun "this test requires $dev $value $key"
->
-> This is too ugly. I'm looking for another way by searching sysfs for
-> required info of *_DEV, then we don't need these commands and ugly
-> device name matching.
->
-> Thanks Eryu for the review!
+We introduced the inline directory verifier in 4.11 to prevent the
+system from trying to use corrupt inline directories.  This has the
+effect of changing the error message in one step of the i_mode fuzz
+tester, so update the test accordingly.
 
-Why not just let jq do this key matching validation for you? I don't
-think the word NFIT should appear anywhere in xfstests. That's an
-internal detail of an nvdimm implementation and going forward makes no
-sense when we have NVDIMMs on powerpc for example.
+Note that prior to the existence of the verifier, this test would
+occasionally result in memory corruption that did not become evident
+until later.
+
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ tests/xfs/348.out |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/xfs/348.out b/tests/xfs/348.out
+index 805d530..f4a7a71 100644
+--- a/tests/xfs/348.out
++++ b/tests/xfs/348.out
+@@ -110,7 +110,7 @@ would have junked entry "FIFO" in directory PARENT_INO
+ stat: 'SCRATCH_MNT/test/DIR' is a directory
+ stat: 'SCRATCH_MNT/test/DATA' is a directory
+ stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
+-stat: 'SCRATCH_MNT/test/SYMLINK' is a directory
++stat: cannot stat 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
+ stat: cannot stat 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
+ stat: cannot stat 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
+ stat: cannot stat 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
