@@ -1,187 +1,215 @@
-Received: from mx1.redhat.com ([209.132.183.28]:52528 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:51104 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755863AbdDMGX2 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 13 Apr 2017 02:23:28 -0400
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v3] fstests/xfs: xfs_repair should junk empty attribute leaf blocks
-Date: Thu, 13 Apr 2017 14:23:21 +0800
-Message-Id: <1492064601-13298-1-git-send-email-zlang@redhat.com>
+        id S1752236AbdDMG5F (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 13 Apr 2017 02:57:05 -0400
+Date: Thu, 13 Apr 2017 14:57:02 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v3] fstests/xfs: xfs_repair should junk empty attribute
+ leaf blocks
+Message-ID: <20170413065702.GV22845@eguan.usersys.redhat.com>
+References: <1492064601-13298-1-git-send-email-zlang@redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1492064601-13298-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-There was a bug during log replay, the attr/attr3 leaf verifier
-reported corruption when encountering a leaf attribute with a
-count of 0 in the header, as below:
+On Thu, Apr 13, 2017 at 02:23:21PM +0800, Zorro Lang wrote:
+> There was a bug during log replay, the attr/attr3 leaf verifier
+> reported corruption when encountering a leaf attribute with a
+> count of 0 in the header, as below:
+> 
+> Metadata corruption detected at xfs_attr3_leaf block 0x480988/0x1000
+> 
+> commit f714016 from xfsprogs has fixed this bug. This test case
+> will emulate this corruption by xfs_db and use xfs_repair to fix
+> it.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> ---
+> 
+> Hi,
+> 
+> V3 did below changes:
+> 1) Only test on V4 XFS.
+> 2) Use 'ablock 0' to instead of "a.bmx[0].startblock"
+> 3) Use "dd ... | attr -s ..." to instead of that python command in
+>    "setfattr ..."
+> 4) Do "xfs_repair -n" to check if xfs_repair can find the corruption
+>    we made.
+> 5) Use xfs_db to check if xfs_repair has fixed the corruption properly.
+>    I check it by trying to locate 'ablock 0' again. Should I turn to
+>    check if core.naextents == 0?
+> 
+> Thanks,
+> Zorro
+> 
+>  tests/xfs/288     | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/288.out |   2 +
+>  tests/xfs/group   |   1 +
+>  3 files changed, 112 insertions(+)
+>  create mode 100755 tests/xfs/288
+>  create mode 100644 tests/xfs/288.out
+> 
+> diff --git a/tests/xfs/288 b/tests/xfs/288
+> new file mode 100755
+> index 0000000..5e6167f
+> --- /dev/null
+> +++ b/tests/xfs/288
+> @@ -0,0 +1,109 @@
+> +#! /bin/bash
+> +# FS QA Test 288
+> +#
+> +# When an attribute leaf block count is 0, xfs_repair should junk
+> +# that leaf directly (as xfsprogs commit f714016).
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/attr
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# V4 XFS attr type is 'attr'
+> +write_cmd="write"
 
-Metadata corruption detected at xfs_attr3_leaf block 0x480988/0x1000
+This variable is not used in this test.
 
-commit f714016 from xfsprogs has fixed this bug. This test case
-will emulate this corruption by xfs_db and use xfs_repair to fix
-it.
+> +
+> +# Modify as appropriate.
+> +_supported_fs xfs
+> +_supported_os Linux
+> +_require_scratch
+> +_require_attrs
+> +
+> +# Due to xfs_db's write -d option is still not stable, and there's no
+> +# plan to support attr3. So only run this case on V4 XFS.
+> +# Please update this if xfs_db get enough improvement in one day.
+> +if [ -z "$XFS_MKFS_HAS_NO_META_SUPPORT" ]; then
+> +	mkfs_opts="-m crc=0"
+> +fi
+> +$MKFS_XFS_PROG -f $mkfs_opts $SCRATCH_DEV | _filter_mkfs 2>$tmp.mkfs >/dev/null
+> +. $tmp.mkfs
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
+_scratch_mkfs "$mkfs_opts" | _filter_mkfs ...
 
-Hi,
+If there's mkfs option conflicts between $MKFS_OPTIONS and local
+$mkfs_opts, _scratch_mkfs will try mkfs again with user specified
+$mkfs_opts only.
 
-V3 did below changes:
-1) Only test on V4 XFS.
-2) Use 'ablock 0' to instead of "a.bmx[0].startblock"
-3) Use "dd ... | attr -s ..." to instead of that python command in
-   "setfattr ..."
-4) Do "xfs_repair -n" to check if xfs_repair can find the corruption
-   we made.
-5) Use xfs_db to check if xfs_repair has fixed the corruption properly.
-   I check it by trying to locate 'ablock 0' again. Should I turn to
-   check if core.naextents == 0?
+> +
+> +_scratch_mount
+> +
+> +touch $SCRATCH_MNT/$seq.attrfile
+> +inum=$(stat -c '%i' $SCRATCH_MNT/$seq.attrfile)
+> +
+> +# To get an attr block leaf, we need to extend attr format to extent
+> +# or btree format at least, and the max inode size is half of filesystem
+> +# block size, so write half of block size attr to make sure attr
+> +# out of local format.
+> +dd if=/dev/zero bs=$((dbsize/2)) count=1 2>/dev/null | \
+> +	$ATTR_PROG -s testattr $SCRATCH_MNT/$seq.attrfile >/dev/null
+
+I think we can use perl here, as perl is widely used in fstests and no
+new dependency needed.
 
 Thanks,
-Zorro
+Eryu
 
- tests/xfs/288     | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/288.out |   2 +
- tests/xfs/group   |   1 +
- 3 files changed, 112 insertions(+)
- create mode 100755 tests/xfs/288
- create mode 100644 tests/xfs/288.out
-
-diff --git a/tests/xfs/288 b/tests/xfs/288
-new file mode 100755
-index 0000000..5e6167f
---- /dev/null
-+++ b/tests/xfs/288
-@@ -0,0 +1,109 @@
-+#! /bin/bash
-+# FS QA Test 288
-+#
-+# When an attribute leaf block count is 0, xfs_repair should junk
-+# that leaf directly (as xfsprogs commit f714016).
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# V4 XFS attr type is 'attr'
-+write_cmd="write"
-+
-+# Modify as appropriate.
-+_supported_fs xfs
-+_supported_os Linux
-+_require_scratch
-+_require_attrs
-+
-+# Due to xfs_db's write -d option is still not stable, and there's no
-+# plan to support attr3. So only run this case on V4 XFS.
-+# Please update this if xfs_db get enough improvement in one day.
-+if [ -z "$XFS_MKFS_HAS_NO_META_SUPPORT" ]; then
-+	mkfs_opts="-m crc=0"
-+fi
-+$MKFS_XFS_PROG -f $mkfs_opts $SCRATCH_DEV | _filter_mkfs 2>$tmp.mkfs >/dev/null
-+. $tmp.mkfs
-+
-+_scratch_mount
-+
-+touch $SCRATCH_MNT/$seq.attrfile
-+inum=$(stat -c '%i' $SCRATCH_MNT/$seq.attrfile)
-+
-+# To get an attr block leaf, we need to extend attr format to extent
-+# or btree format at least, and the max inode size is half of filesystem
-+# block size, so write half of block size attr to make sure attr
-+# out of local format.
-+dd if=/dev/zero bs=$((dbsize/2)) count=1 2>/dev/null | \
-+	$ATTR_PROG -s testattr $SCRATCH_MNT/$seq.attrfile >/dev/null
-+
-+_scratch_unmount
-+# manually corrupt the XFS, by set the header count of attr to 0
-+_scratch_xfs_db -x -c "inode $inum" \
-+		   -c "ablock 0" \
-+		   -c "write hdr.count 0" >> $seqres.full
-+
-+# make sure xfs_repair can find above corruption. If it can't, that
-+# means we need to fix this bug on current xfs_repair
-+_scratch_xfs_repair -n >> $seqres.full 2>&1
-+if [ $? -eq 0 ];then
-+	_fail "xfs_repair can't find the corruption"
-+else
-+	# If xfs_repair can find this corruption, then this repair
-+	# should junk above leaf attribute and fix this XFS.
-+	_scratch_xfs_repair >> $seqres.full 2>&1
-+
-+	# Old xfs_repair maybe find and fix this corruption by
-+	# reset the first used heap value and the usedbytes cnt
-+	# in ablock 0. That's not what we want. So check if
-+	# xfs_repair has junked the whole ablock 0 by xfs_db.
-+	_scratch_xfs_db -x -c "inode $inum" -c "ablock 0" | \
-+		grep -q "no attribute data"
-+	if [ $? -ne 0 ]; then
-+		_fail "xfs_repair didn't junk the empty attr leaf"
-+	fi
-+fi
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/288.out b/tests/xfs/288.out
-new file mode 100644
-index 0000000..2958a5c
---- /dev/null
-+++ b/tests/xfs/288.out
-@@ -0,0 +1,2 @@
-+QA output created by 288
-+Silence is golden
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 75769f9..f27a7b6 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -285,6 +285,7 @@
- 285 dangerous_fuzzers dangerous_scrub
- 286 dangerous_fuzzers dangerous_scrub dangerous_online_repair
- 287 auto dump quota quick
-+288 auto quick repair fuzzers
- 290 auto rw prealloc quick ioctl zero
- 291 auto repair
- 292 auto mkfs quick
--- 
-2.7.4
-
+> +
+> +_scratch_unmount
+> +# manually corrupt the XFS, by set the header count of attr to 0
+> +_scratch_xfs_db -x -c "inode $inum" \
+> +		   -c "ablock 0" \
+> +		   -c "write hdr.count 0" >> $seqres.full
+> +
+> +# make sure xfs_repair can find above corruption. If it can't, that
+> +# means we need to fix this bug on current xfs_repair
+> +_scratch_xfs_repair -n >> $seqres.full 2>&1
+> +if [ $? -eq 0 ];then
+> +	_fail "xfs_repair can't find the corruption"
+> +else
+> +	# If xfs_repair can find this corruption, then this repair
+> +	# should junk above leaf attribute and fix this XFS.
+> +	_scratch_xfs_repair >> $seqres.full 2>&1
+> +
+> +	# Old xfs_repair maybe find and fix this corruption by
+> +	# reset the first used heap value and the usedbytes cnt
+> +	# in ablock 0. That's not what we want. So check if
+> +	# xfs_repair has junked the whole ablock 0 by xfs_db.
+> +	_scratch_xfs_db -x -c "inode $inum" -c "ablock 0" | \
+> +		grep -q "no attribute data"
+> +	if [ $? -ne 0 ]; then
+> +		_fail "xfs_repair didn't junk the empty attr leaf"
+> +	fi
+> +fi
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/288.out b/tests/xfs/288.out
+> new file mode 100644
+> index 0000000..2958a5c
+> --- /dev/null
+> +++ b/tests/xfs/288.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 288
+> +Silence is golden
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index 75769f9..f27a7b6 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -285,6 +285,7 @@
+>  285 dangerous_fuzzers dangerous_scrub
+>  286 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+>  287 auto dump quota quick
+> +288 auto quick repair fuzzers
+>  290 auto rw prealloc quick ioctl zero
+>  291 auto repair
+>  292 auto mkfs quick
+> -- 
+> 2.7.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
