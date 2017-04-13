@@ -1,336 +1,68 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:16615 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754675AbdDLUaE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Apr 2017 16:30:04 -0400
-Date: Wed, 12 Apr 2017 13:28:57 -0700
-From: Liu Bo <bo.li.liu@oracle.com>
-Subject: Re: [PATCH] fstests: regression test for btrfs dio read repair
-Message-ID: <20170412202857.GA10431@lim.localdomain>
-Reply-To: bo.li.liu@oracle.com
-References: <1491960470-28789-1-git-send-email-bo.li.liu@oracle.com>
- <CAL3q7H741v+JatRj_YuVNcvK-1DupuuP5pZUc8gkSAZ8NVGO0A@mail.gmail.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:48732 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1752765AbdDMAmt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 12 Apr 2017 20:42:49 -0400
+Subject: Re: [PATCH] fstests: introduce btrfs-map-logical
+References: <1491960463-28680-1-git-send-email-bo.li.liu@oracle.com>
+ <5d7f7d05-b7af-5d8d-93f6-0db2db4ade85@cn.fujitsu.com>
+ <20170412123201.GG4781@twin.jikos.cz> <20170412125222.GI4781@twin.jikos.cz>
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Message-ID: <2842eab0-6295-d81d-6c7e-da52d4e00755@cn.fujitsu.com>
+Date: Thu, 13 Apr 2017 08:42:43 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <CAL3q7H741v+JatRj_YuVNcvK-1DupuuP5pZUc8gkSAZ8NVGO0A@mail.gmail.com>
+In-Reply-To: <20170412125222.GI4781@twin.jikos.cz>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Filipe Manana <fdmanana@gmail.com>
-Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
+To: dsterba@suse.cz, Liu Bo <bo.li.liu@oracle.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 12, 2017 at 10:42:47AM +0100, Filipe Manana wrote:
-> On Wed, Apr 12, 2017 at 2:27 AM, Liu Bo <bo.li.liu@oracle.com> wrote:
-> > This case tests whether dio read can repair the bad copy if we have
-> > a good copy.
->=20
-> Regardless of being a test we should have always had (thanks for
-> this!), it would be useful to mention we had a regression (as the test
-> description in the btrfs/140 file says) and which patch fixed it (and
-> possibly which kernel version or patch/commit introduced the
-> regression).
->
 
-Sure, thanks for the review.
 
-> Just a comment/question below.
->=20
-> >
-> > Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
-> > ---
-> >  tests/btrfs/140     | 152 ++++++++++++++++++++++++++++++++++++++++++=
-++++++++++
-> >  tests/btrfs/140.out |  39 ++++++++++++++
-> >  tests/btrfs/group   |   1 +
-> >  3 files changed, 192 insertions(+)
-> >  create mode 100755 tests/btrfs/140
-> >  create mode 100644 tests/btrfs/140.out
-> >
-> > diff --git a/tests/btrfs/140 b/tests/btrfs/140
-> > new file mode 100755
-> > index 0000000..db56123
-> > --- /dev/null
-> > +++ b/tests/btrfs/140
-> > @@ -0,0 +1,152 @@
-> > +#! /bin/bash
-> > +# FS QA Test 140
-> > +#
-> > +# Regression test for btrfs DIO read's repair during read.
-> > +#
-> > +#-------------------------------------------------------------------=
-----
-> > +# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
-> > +#
-> > +# This program is free software; you can redistribute it and/or
-> > +# modify it under the terms of the GNU General Public License as
-> > +# published by the Free Software Foundation.
-> > +#
-> > +# This program is distributed in the hope that it would be useful,
-> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > +# GNU General Public License for more details.
-> > +#
-> > +# You should have received a copy of the GNU General Public License
-> > +# along with this program; if not, write the Free Software Foundatio=
-n,
-> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > +#-------------------------------------------------------------------=
-----
-> > +#
-> > +
-> > +seq=3D`basename $0`
-> > +seqres=3D$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=3D`pwd`
-> > +tmp=3D/tmp/$$
-> > +status=3D1       # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +       cd /
-> > +       rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
-> > +# real QA test starts here
-> > +
-> > +# Modify as appropriate.
-> > +_supported_fs btrfs
-> > +_supported_os Linux
-> > +_require_scratch_dev_pool 2
-> > +_require_command "$BTRFS_MAP_LOGICAL_PROG" btrfs-map-logical
-> > +_require_command "$FILEFRAG_PROG" filefrag
-> > +_require_odirect
-> > +
-> > +# helpe to convert 'file offset' to btrfs logical offset
-> > +FILEFRAG_FILTER=3D'
-> > +       if (/blocks? of (\d+) bytes/) {
-> > +               $blocksize =3D $1;
-> > +               next
-> > +       }
-> > +       ($ext, $logical, $physical, $length) =3D
-> > +               (/^\s*(\d+):\s+(\d+)..\s+\d+:\s+(\d+)..\s+\d+:\s+(\d+=
-):/)
-> > +       or next;
-> > +       ($flags) =3D /.*:\s*(\S*)$/;
-> > +       print $physical * $blocksize, "#",
-> > +             $length * $blocksize, "#",
-> > +             $logical * $blocksize, "#",
-> > +             $flags, " "'
-> > +
-> > +# this makes filefrag output script readable by using a perl helper.
-> > +# output is one extent per line, with three numbers separated by '#'
-> > +# the numbers are: physical, length, logical (all in bytes)
-> > +# sample output: "1234#10#5678" -> physical 1234, length 10, logical=
- 5678
-> > +_filter_extents()
-> > +{
-> > +       tee -a $seqres.full | $PERL_PROG -ne "$FILEFRAG_FILTER"
-> > +}
-> > +
-> > +_check_file_extents()
-> > +{
-> > +       cmd=3D"filefrag -v $1"
-> > +       echo "# $cmd" >> $seqres.full
-> > +       out=3D`$cmd | _filter_extents`
-> > +       if [ -z "$out" ]; then
-> > +               return 1
-> > +       fi
-> > +       echo "after filter: $out" >> $seqres.full
-> > +       echo $out
-> > +       return 0
-> > +}
-> > +
-> > +_check_repair()
-> > +{
-> > +       filter=3D${1:-cat}
-> > +       dmesg | tac | sed -ne "0,\#run fstests $seqnum at $date_time#=
-p" | tac | $filter | grep -q -e "csum failed"
-> > +       if [ $? -eq 0 ]; then
-> > +               echo 1
-> > +       else
-> > +               echo 0
-> > +       fi
-> > +}
-> > +
-> > +_scratch_dev_pool_get 2
-> > +# step 1, create a raid1 btrfs which contains one 128k file.
-> > +echo "step 1......mkfs.btrfs" >>$seqres.full
-> > +
-> > +mkfs_opts=3D"-d raid1"
-> > +_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
-> > +
-> > +_scratch_mount -o nospace_cache
->=20
-> Why do we need to mount without space cache?
-> I don't see why nor I think it's obvious. A comment in the test
-> mentioning why would be useful for everyone.
->
+At 04/12/2017 08:52 PM, David Sterba wrote:
+> On Wed, Apr 12, 2017 at 02:32:02PM +0200, David Sterba wrote:
+>> On Wed, Apr 12, 2017 at 09:35:00AM +0800, Qu Wenruo wrote:
+>>>
+>>>
+>>> At 04/12/2017 09:27 AM, Liu Bo wrote:
+>>>> A typical use case of 'btrfs-map-logical' is to translate btrfs logical
+>>>> address to physical address on each disk.
+>>>
+>>> Could we avoid usage of btrfs-map-logical here?
+>>
+>> Agreed.
+>>
+>>> I understand that we need to do corruption so that we can test if the
+>>> repair works, but I'm not sure if the output format will change, or if
+>>> the program will get replace by "btrfs inspect-internal" group.
+>>
+>> In the long-term it will be repleaced, but there's no ETA.
+> 
+> Possibly, if fstests maintainer agrees, we can add btrfs-map-logical to
+> fstests. It's small and uses headers from libbtrfs, so this would become
+> a new dependency but I believe is still bearable.
+> 
+> I'm not sure if we should export all debuging functionality in 'btrfs'
+> as this is typically something that a user will never want, not even in
+> the emergency environments. There's an overlap in the information to be
+> exported but I'd be more inclined to satisfy user needs than testsuite
+> needs. So an independent tool would give us more freedom on both sides.
+> 
+I'm working on the new btrfs-corrupt-block equivalent, considering the 
+demand to corrupt on-disk data for recovery test, I could provide tool 
+with fundamental corruption support.
 
-Thanks for spotting it, we can safely get rid of it, it's a leftover when=
- I
-convert it to a fstests case.
+Which could corrupt on-disk data, either specified by (root, inode, 
+offset, length) or just (logical address, length).
+And support to corrupt given mirror or even P/Q for RAID56.
+(With btrfs_map_block_v2 from offline scrub)
+
+I'm not sure if I should just replace btrfs-corrupt-block or add a new 
+individual prog or add a btrfs subcommand group which is disabled by 
+default?
 
 Thanks,
+Qu
 
--liubo
->=20
-> > +
-> > +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/=
-foobar" | _filter_xfs_io
-> > +
-> > +sync
-> > +
-> > +# step 2, corrupt the first 64k of one copy (on SCRATCH_DEV which is=
- the first
-> > +# one in $SCRATCH_DEV_POOL
-> > +echo "step 2......corrupt file extent" >>$seqres.full
-> > +
-> > +extents=3D`_check_file_extents $SCRATCH_MNT/foobar`
-> > +logical_in_btrfs=3D`echo ${extents} | cut -d '#' -f 1`
-> > +physical_on_scratch=3D`$BTRFS_MAP_LOGICAL_PROG -l ${logical_in_btrfs=
-} $SCRATCH_DEV | grep "$SCRATCH_DEV" | awk '{print $6}'`
-> > +
-> > +_scratch_unmount
-> > +$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical_on_scratch 64K" =
-$SCRATCH_DEV | _filter_xfs_io
-> > +
-> > +_scratch_mount -o nospace_cache
-> > +
-> > +# step 3, 128k dio read (this read can repair bad copy)
-> > +echo "step 3......repair the bad copy" >>$seqres.full
-> > +
-> > +# since raid1 consists of two copies, and the following read may rea=
-d the good
-> > +# copy directly, so lets loop 10 times here and discard output that =
-dio reads
-> > +# give
-> > +for i in `seq 1 10`; do
-> > +       $XFS_IO_PROG -d -c "pread -b 128K 0 128K" "$SCRATCH_MNT/fooba=
-r" > /dev/null
-> > +       repair=3D`_check_repair`
-> > +       if [ $repair -eq 1 ]; then
-> > +               break
-> > +       fi
-> > +done
-> > +
-> > +_scratch_unmount
-> > +
-> > +# check if the repair works
-> > +$XFS_IO_PROG -d -c "pread -v -b 512 $physical_on_scratch 512" $SCRAT=
-CH_DEV | _filter_xfs_io
-> > +
-> > +_scratch_dev_pool_put
-> > +# success, all done
-> > +status=3D0
-> > +exit
-> > diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
-> > new file mode 100644
-> > index 0000000..d8e3856
-> > --- /dev/null
-> > +++ b/tests/btrfs/140.out
-> > @@ -0,0 +1,39 @@
-> > +QA output created by 140
-> > +wrote 131072/131072 bytes at offset 0
-> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> > +wrote 65536/65536 bytes at offset 244056064
-> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> > +0e8c0000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c0010:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c0020:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c0030:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c0040:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c0050:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c0060:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c0070:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c0080:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c0090:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c00a0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c00b0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c00c0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c00d0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c00e0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c00f0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c0100:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c0110:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c0120:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c0130:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c0140:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c0150:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c0160:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c0170:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c0180:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c0190:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c01a0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c01b0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c01c0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c01d0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c01e0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +0e8c01f0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
-........
-> > +read 512/512 bytes at offset 244056064
-> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> > diff --git a/tests/btrfs/group b/tests/btrfs/group
-> > index 9d4b80b..1cb9c98 100644
-> > --- a/tests/btrfs/group
-> > +++ b/tests/btrfs/group
-> > @@ -141,3 +141,4 @@
-> >  137 auto quick send
-> >  138 auto compress
-> >  139 auto qgroup
-> > +140 auto quick
-> > --
-> > 2.5.0
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-btrfs=
-" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
->=20
-> --=20
-> Filipe David Manana,
->=20
-> =E2=80=9CWhether you think you can, or you think you can't =E2=80=94 yo=
-u're right.=E2=80=9D
+
