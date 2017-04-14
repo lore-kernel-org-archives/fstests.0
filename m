@@ -1,26 +1,22 @@
-Received: from sandeen.net ([63.231.237.45]:56526 "EHLO sandeen.net"
+Received: from mx1.redhat.com ([209.132.183.28]:34192 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750735AbdDMWth (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 13 Apr 2017 18:49:37 -0400
-Received: from [10.0.0.4] (liberator [10.0.0.4])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by sandeen.net (Postfix) with ESMTPSA id 6E8B92A9B
-        for <fstests@vger.kernel.org>; Thu, 13 Apr 2017 17:49:36 -0500 (CDT)
+        id S1751544AbdDNDum (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 13 Apr 2017 23:50:42 -0400
+Date: Fri, 14 Apr 2017 11:50:40 +0800
+From: Eryu Guan <eguan@redhat.com>
 Subject: Re: [PATCH] xfs/288: test fragmented multi-fsb readdir
+Message-ID: <20170414035040.GC8951@eguan.usersys.redhat.com>
 References: <ca07fe07-ac0a-a927-494f-34f7205e81d4@sandeen.net>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <2f107f35-ed81-a70a-0c56-8f57656f6a19@sandeen.net>
-Date: Thu, 13 Apr 2017 17:49:36 -0500
 MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 In-Reply-To: <ca07fe07-ac0a-a927-494f-34f7205e81d4@sandeen.net>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On 4/13/17 3:28 PM, Eric Sandeen wrote:
+On Thu, Apr 13, 2017 at 03:28:02PM -0500, Eric Sandeen wrote:
 > Test for the patch I just sent to the xfs list,
 > xfs: handle array index overrun in xfs_dir2_leaf_readbuf()
 > 
@@ -31,90 +27,162 @@ On 4/13/17 3:28 PM, Eric Sandeen wrote:
 > it, since the test is just looking for a hang or a KASAN
 > splat.
 
+If failure is a hang, then I agree that probably we don't need the long
+.out file :)
 
-yes, KASAN finds it:
+> 
+> diff --git a/tests/xfs/288 b/tests/xfs/288
+> new file mode 100755
+> index 0000000..537b45b
+> --- /dev/null
+> +++ b/tests/xfs/288
+> @@ -0,0 +1,119 @@
+> +#! /bin/bash
+> +# FS QA Test 288
+> +#
+> +# Test readdir on fragmented multi-fsb dir blocks
+> +#
+> +# If the readahead map ends with a partial multi-fsb dir
+> +# block, the loop at the end of xfs_dir2_leaf_readbuf() may
+> +# walk off the end of the mapping array, read garbage,
+> +# corrupt the loop control counter, and never return.
+> +#
+> +# Failure is a hang; KASAN should also catch this.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
+> +# Author: Eric Sandeen <sandeen@redhat.com>
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs xfs
+> +_supported_os Linux
+> +_require_scratch
+> +_require_test_program "punch-alternating"
+> +
+> +# We want to override mkfs with a very specific geometry
+> +$MKFS_XFS_PROG -f -d size=512m -n size=8192 -i size=1024 $SCRATCH_DEV  \
+> +	> $seqres.full 2>&1 || _fail "mkfs failed"
 
-[  967.157394] ==================================================================
-[  967.164844] BUG: KASAN: slab-out-of-bounds in xfs_dir2_leaf_readbuf+0x1fb0/0x22b0 [xfs] at addr ffff8800b9b1e538
-[  967.175017] Read of size 8 by task find/13180
-[  967.179405] CPU: 9 PID: 13180 Comm: find Tainted: G          IO    4.11.0-rc6+ #1
-[  967.186887] Hardware name: Dell Inc. PowerEdge M710/0N583M, BIOS 3.0.0 01/31/2011
-[  967.194368] Call Trace:
-[  967.196830]  dump_stack+0xe3/0x191
-[  967.200240]  ? _atomic_dec_and_lock+0x18f/0x18f
-[  967.204780]  ? pm_qos_get_value.part.4+0x6/0x6
-[  967.209292]  kasan_object_err+0x21/0x70
-[  967.213190]  kasan_report+0x26f/0x520
-[  967.216948]  ? xfs_dir2_leaf_readbuf+0x1fb0/0x22b0 [xfs]
-[  967.222335]  __asan_report_load8_noabort+0x19/0x20
-[  967.227272]  xfs_dir2_leaf_readbuf+0x1fb0/0x22b0 [xfs]
-[  967.232621]  ? xfs_dir3_get_dtype+0x140/0x140 [xfs]
-[  967.237623]  ? xfs_get_cowextsz_hint+0x130/0x130 [xfs]
-[  967.242770]  ? kasan_kmalloc+0xad/0xe0
-[  967.246706]  xfs_dir2_leaf_getdents+0x4c6/0x10a0 [xfs]
-[  967.251964]  ? xfs_dir2_leaf_getdents+0x4c6/0x10a0 [xfs]
-[  967.257289]  ? save_trace+0x350/0x350
-[  967.261027]  ? __fsnotify_update_child_dentry_flags.part.2+0x260/0x260
-[  967.267715]  ? xfs_dir2_leaf_readbuf+0x22b0/0x22b0 [xfs]
-[  967.273181]  ? xfs_dir2_isblock+0xa0/0x340 [xfs]
-[  967.277899]  ? xfs_dir2_grow_inode+0x890/0x890 [xfs]
-[  967.283031]  xfs_readdir+0x3f4/0x880 [xfs]
-[  967.287278]  ? xfs_dir2_block_getdents.isra.9+0x970/0x970 [xfs]
-[  967.293284]  ? debug_lockdep_rcu_enabled+0x77/0x90
-[  967.298192]  ? down_read+0xca/0x1b0
-[  967.301714]  ? down_write_killable_nested+0x1b0/0x1b0
-[  967.306931]  xfs_file_readdir+0x72/0xa0 [xfs]
-[  967.311410]  iterate_dir+0x46d/0x670
-[  967.315022]  SyS_getdents+0x1fc/0x400
-[  967.318747]  ? SyS_old_readdir+0x230/0x230
-[  967.322850]  ? fillonedir+0x260/0x260
-[  967.326575]  ? trace_hardirqs_on_caller+0x38b/0x590
-[  967.331470]  ? trace_hardirqs_on_thunk+0x1a/0x1c
-[  967.336158]  entry_SYSCALL_64_fastpath+0x1f/0xc2
-[  967.340831] RIP: 0033:0x7efc1434df5b
-[  967.344417] RSP: 002b:00007ffccf244920 EFLAGS: 00000202 ORIG_RAX: 000000000000004e
-[  967.352053] RAX: ffffffffffffffda RBX: 000055e74cd8c550 RCX: 00007efc1434df5b
-[  967.359184] RDX: 0000000000008000 RSI: 000055e74cd8c550 RDI: 0000000000000004
-[  967.366316] RBP: 0000000000000046 R08: 000055e74cd8a960 R09: 0000000000000078
-[  967.373449] R10: 0000000000000100 R11: 0000000000000202 R12: 0000000000000000
-[  967.380583] R13: 0000000000008040 R14: 00007efc14649b38 R15: 0000000000002710
-[  967.387716]  ? entry_SYSCALL_64_fastpath+0x1f/0xc2
-[  967.392606] Object at ffff8800b9b1e300, in cache kmalloc-1024 size: 1024
-[  967.399343] Allocated:
-[  967.401709] PID = 13180
-[  967.404164]  save_stack_trace+0x1b/0x20
-[  967.408048]  save_stack+0x43/0xd0
-[  967.411374]  kasan_kmalloc+0xad/0xe0
-[  967.414998]  __kmalloc+0x14d/0x360
-[  967.418498]  kmem_alloc+0x81/0x190 [xfs]
-[  967.422567]  xfs_dir2_leaf_getdents+0x24a/0x10a0 [xfs]
-[  967.427870]  xfs_readdir+0x3f4/0x880 [xfs]
-[  967.432066]  xfs_file_readdir+0x72/0xa0 [xfs]
-[  967.436490]  iterate_dir+0x46d/0x670
-[  967.440070]  SyS_getdents+0x1fc/0x400
-[  967.443743]  entry_SYSCALL_64_fastpath+0x1f/0xc2
-[  967.448396] Freed:
-[  967.450416] PID = 0
-[  967.452565]  save_stack_trace+0x1b/0x20
-[  967.456406]  save_stack+0x43/0xd0
-[  967.459733]  kasan_slab_free+0x73/0xc0
-[  967.463511]  kfree+0x109/0x300
-[  967.466571]  free_request_size+0x4c/0x60
-[  967.470498]  mempool_free+0xca/0x1b0
-[  967.474128]  __blk_put_request+0x3a7/0x780
-[  967.478229]  blk_finish_request+0x286/0x600
-[  967.482475]  scsi_end_request+0x2c8/0x700
-[  967.486495]  scsi_io_completion+0x83a/0x1c50
-[  967.490796]  scsi_finish_command+0x5a2/0x8e0
-[  967.495083]  scsi_softirq_done+0x348/0x480
-[  967.499184]  blk_done_softirq+0x40f/0x6d0
-[  967.503257]  __do_softirq+0x2e6/0xb5f
-[  967.506927] Memory state around the buggy address:
-[  967.511775]  ffff8800b9b1e400: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-[  967.519003]  ffff8800b9b1e480: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-[  967.526221] >ffff8800b9b1e500: 00 00 00 00 00 fc fc fc fc fc fc fc fc fc fc fc
-[  967.533440]                                         ^
-[  967.538493]  ffff8800b9b1e580: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
-[  967.545780]  ffff8800b9b1e600: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
-[  967.553084] ==================================================================
-[  967.560305] Disabling lock debugging due to kernel taint
+_scratch_mkfs "-d size=512m -n size=8192 -i size=1024" || _fail ...
+
+should just do the work. If there's any mkfs options conflicts between
+MKFS_OPTIONS and this local-specified mkfs options, _scratch_mkfs would
+try mkfs again without MKFS_OPTIONS.
+
+Or further, set MKFS_OPTIONS to empty before _scratch_mkfs call, if it's
+not relevant in this test?
+
+> +
+> +_scratch_mount
+> +
+> +# Make a ton of mostly-empty inode clusters so we can always
+> +# make more inodes
+> +mkdir $SCRATCH_MNT/tmp
+> +for I in `seq 1 10000`; do touch $SCRATCH_MNT/tmp/$I; done
+
+"echo > somefile" might be faster. Replace all touch with echo in this
+test?
+
+> +
+> +# These mostly-empty clusters will live here:
+> +mkdir $SCRATCH_MNT/clusters
+> +for I in `seq 1 32 10000`; do
+> +	mv $SCRATCH_MNT/tmp/$I $SCRATCH_MNT/clusters;
+> +done
+> +rm -rf $SCRATCH_MNT/tmp
+> +
+> +# Make our test dir with a couple blocks, should be contiguous
+> +mkdir $SCRATCH_MNT/testdir
+> +# roughly 20 chars per file
+> +for I in `seq 1 100`; do
+> +	touch $SCRATCH_MNT/testdir/12345678901234567890$I;
+> +done
+> +
+> +# Now completely fragment freespace.
+> +# Consume most of it:
+> +xfs_io -f -c "falloc 0 400m" $SCRATCH_MNT/fillfile ||
+> +	_fail "Could not allocate space"
+> +
+> +# File to fragment:
+> +xfs_io -f -c "falloc 0 70m" $SCRATCH_MNT/fragfile ||
+> +	_fail "Could not allocate space"
+
+s/xfs_io/$XFS_IO_PROG/
+
+And I think we can continue the test even if falloc failed, no harm to
+run more tests in this 'error' path.
+
+> +
+> +df -h $SCRATCH_MNT > $seqres.full 2>&1
+> +
+> +# Fill remaining space; let this run to failure
+> +dd if=/dev/zero of=$SCRATCH_MNT/spacefile1 oflag=direct > $seqres.full 2>&1
+> +# Fragment our all-consuming file
+> +./src/punch-alternating $SCRATCH_MNT/fragfile > $seqres.full 2>&1
+> +
+> +# Punching might have freed up large-ish swaths of metadata
+> +# Consume hopefully any remaining contiguous freespace
+> +# (and then some for good measure)
+> +dd if=/dev/zero of=$SCRATCH_MNT/spacefile2 bs=1M count=64 > $seqres.full 2>&1
+> +xfs_io -c fsync $SCRATCH_MNT/spacefile2 > $seqres.full 2>&1
+> +
+> +# Now populate the directory so that it must allocate these
+> +# fragmented blocks
+> +for I in `seq 1 1400`;
+> +	do touch $SCRATCH_MNT/testdir/12345678901234567890$I;
+
+Place "do" at the end of last line?
+
+> +done
+> +
+> +# Now traverse that ugly thing!
+> +find $SCRATCH_MNT/testdir
+> +
+
+If we want to verify we get all the right files back from testdir,
+probably we can take an md5 checksum of the find output, instead of
+dumping all these files. (not tested, but I think should work)
+
+find $SCRATCH_MNT/testdir | sort | _filter_scratch | md5sum
+
+Thanks,
+Eryu
