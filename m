@@ -1,164 +1,54 @@
-Received: from imap.thunk.org ([74.207.234.97]:35046 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2992521AbdEAA4o (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 30 Apr 2017 20:56:44 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH] src: fix compiler warnings
-Date: Sun, 30 Apr 2017 20:56:37 -0400
-Message-Id: <20170501005637.32347-1-tytso@mit.edu>
+From: <nathalie.colle@univ-lorraine.fr>
+Subject: (unknown)
+Date: Sun, 16 Apr 2017 18:32:45 -0000
+Message-ID: <149236756567.20709.2408211260506959881@tedata.net>
+Mime-Version: 1.0
+Content-Type: application/zip; name="EMAIL_40898969311_fstests.zip"
+Content-Transfer-Encoding: base64
+Return-path: <fstests-owner@vger.kernel.org>
+Received: from host-41.41.46.110.tedata.net ([41.41.46.110]:49986 "HELO
+        [41.41.46.110]" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with SMTP id S1752467AbdDPSc5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 16 Apr 2017 14:32:57 -0400
+Subject: 
+Content-Disposition: attachment
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>
-List-ID: <fstests@vger.kernel.org>
+List-Id: fstests@vger.kernel.org
+To: fstests <fstests@vger.kernel.org>
 
-Most of the fixes are printf format type warnings, but apparently GCC
-6 is smart enough to realize is that if you don't do proper error
-checking with posix_memalign, the resulting pointer can be undefined,
-and whines about it.  So while fixing this in aio-dio-fcntl-race, I
-also cleaned up the error checking and reporting.
-
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
- src/aio-dio-regress/aio-dio-eof-race.c   |  3 ++-
- src/aio-dio-regress/aio-dio-fcntl-race.c | 32 +++++++++++++++++++++++---------
- src/dio-invalidate-cache.c               |  6 ++++--
- src/holetest.c                           |  8 ++++----
- src/t_rename_overwrite.c                 |  3 ++-
- 5 files changed, 35 insertions(+), 17 deletions(-)
-
-diff --git a/src/aio-dio-regress/aio-dio-eof-race.c b/src/aio-dio-regress/aio-dio-eof-race.c
-index bd71b030..67c0b2de 100644
---- a/src/aio-dio-regress/aio-dio-eof-race.c
-+++ b/src/aio-dio-regress/aio-dio-eof-race.c
-@@ -202,7 +202,8 @@ int main(int argc, char *argv[])
- 		 * a seamless buf_size worth of IO_PATTERN to the last block.
- 		 */
- 		if (memcmp(buf, cmp_buf, buf_size)) {
--			printf("corruption while extending from %ld\n", eof);
-+			printf("corruption while extending from %lld\n",
-+			       (unsigned long long) eof);
- 			dump_buffer(buf, 0, buf_size);
- 			return 1;
- 		}
-diff --git a/src/aio-dio-regress/aio-dio-fcntl-race.c b/src/aio-dio-regress/aio-dio-fcntl-race.c
-index cdf97736..88a27472 100644
---- a/src/aio-dio-regress/aio-dio-fcntl-race.c
-+++ b/src/aio-dio-regress/aio-dio-fcntl-race.c
-@@ -92,12 +92,16 @@ int main(int argc, char **argv)
- 		return 1;
- 	}
- 	fd = open(argv[1], O_CREAT | O_TRUNC | O_RDWR, 0600);
--	if (fd < 0)
-+	if (fd < 0) {
-+		perror("open");
- 		return 1;
-+	}
- 
- 	pid1 = fork();
--	if (pid1 < 0)
-+	if (pid1 < 0) {
-+		perror("fork");
- 		return 1;
-+	}
- 
- 	if (pid1 == 0) {
- 		struct timeval start, now, delta = { 0, 0 };
-@@ -108,12 +112,15 @@ int main(int argc, char **argv)
- 		flags = fcntl(fd, F_GETFL);
- 		while (1) {
- 			ret = fcntl(fd, F_SETFL, flags | O_DIRECT);
--			if (ret)
--				return ret;
-+			if (ret) {
-+				perror("fcntl O_DIRECT");
-+				return 1;
-+			}
- 			ret = fcntl(fd, F_SETFL, flags);
--			if (ret)
--				return ret;
--
-+			if (ret) {
-+				perror("fcntl");
-+				return 1;
-+			}
- 			gettimeofday(&now, NULL);
- 			timersub(&now, &start, &delta);
- 			if (delta.tv_sec >= LOOP_SECONDS)
-@@ -121,8 +128,15 @@ int main(int argc, char **argv)
- 		}
- 	} else {
- 		/* parent: AIO */
--		void *buf;
--		posix_memalign(&buf, BUF_SIZE, BUF_SIZE);
-+		void *buf = NULL;
-+		int err;
-+
-+		err = posix_memalign(&buf, BUF_SIZE, BUF_SIZE);
-+		if (err || buf == NULL) {
-+			fprintf(stderr, "posix_memalign failed: %s\n",
-+				strerror(err));
-+			exit(1);
-+		}
- 		/* Two tasks which performs unaligned aio will be serialized
- 		   which maks race window wider */
- 		pid2 = fork();
-diff --git a/src/dio-invalidate-cache.c b/src/dio-invalidate-cache.c
-index 4c40c87d..004588ab 100644
---- a/src/dio-invalidate-cache.c
-+++ b/src/dio-invalidate-cache.c
-@@ -160,7 +160,8 @@ static int run_test(const char *filename, int n_child, int blksz, off_t offset,
- 	/* seek, write, read and verify */
- 	for (i = 0; i < nr_iter; i++) {
- 		memset(buf_wr, i + 1, blksz);
--		log("pwrite(fd_wr, %p, %d, %lu)\n", buf_wr, blksz, seekoff);
-+		log("pwrite(fd_wr, %p, %d, %llu)\n", buf_wr, blksz,
-+		    (unsigned long long) seekoff);
- 		if (pwrite(fd_wr, buf_wr, blksz, seekoff) != blksz) {
- 			perror("direct write");
- 			exit(EXIT_FAILURE);
-@@ -174,7 +175,8 @@ static int run_test(const char *filename, int n_child, int blksz, off_t offset,
- 			}
- 		}
- 
--		log("pread(fd_rd, %p, %d, %lu)\n", buf_rd, blksz, seekoff);
-+		log("pread(fd_rd, %p, %d, %llu)\n", buf_rd, blksz,
-+		    (unsigned long long) seekoff);
- 		if (pread(fd_rd, buf_rd, blksz, seekoff) != blksz) {
- 			perror("buffer read");
- 			exit(EXIT_FAILURE);
-diff --git a/src/holetest.c b/src/holetest.c
-index edd85fe7..1939b35f 100644
---- a/src/holetest.c
-+++ b/src/holetest.c
-@@ -101,10 +101,10 @@ int verify_mapping(char *vastart, long npages, uint64_t *expect)
- 		for (i = 0; i < THREADS; i++) {
- 			if (*(uint64_t*)(va + page_offs[i]) != expect[i]) {
- 				printf("ERROR: thread %d, "
--				       "offset %08lx, %08lx != %08lx\n", i,
--				       (va + page_offs[i] - vastart),
--				       *(uint64_t*)(va + page_offs[i]),
--				       expect[i]);
-+				       "offset %08llx, %08llx != %08llx\n", i,
-+				       (unsigned long long) (va + page_offs[i] - vastart),
-+				       (unsigned long long) *(uint64_t*)(va + page_offs[i]),
-+				       (unsigned long long) expect[i]);
- 				errcnt++;
- 			}
- 		}
-diff --git a/src/t_rename_overwrite.c b/src/t_rename_overwrite.c
-index fe17f9d5..c5cdd1db 100644
---- a/src/t_rename_overwrite.c
-+++ b/src/t_rename_overwrite.c
-@@ -31,7 +31,8 @@ int main(int argc, char *argv[])
- 		err(1, "fstat(%i)", fd);
- 
- 	if (stbuf.st_nlink != 0) {
--		fprintf(stderr, "nlink is %lu, should be 0\n", stbuf.st_nlink);
-+		fprintf(stderr, "nlink is %lu, should be 0\n",
-+			(unsigned long) stbuf.st_nlink);
- 		return 1;
- 	}
- 
--- 
-2.11.0.rc0.7.gbe5a750
-
+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
