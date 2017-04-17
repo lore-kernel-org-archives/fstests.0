@@ -1,13 +1,13 @@
-Received: from mail-pf0-f193.google.com ([209.85.192.193]:35967 "EHLO
-        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753250AbdDQVeV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 17 Apr 2017 17:34:21 -0400
-Received: by mail-pf0-f193.google.com with SMTP id i5so27067022pfc.3
-        for <fstests@vger.kernel.org>; Mon, 17 Apr 2017 14:34:21 -0700 (PDT)
+Received: from mail-pg0-f65.google.com ([74.125.83.65]:33285 "EHLO
+        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754372AbdDQVeX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 17 Apr 2017 17:34:23 -0400
+Received: by mail-pg0-f65.google.com with SMTP id 63so16626216pgh.0
+        for <fstests@vger.kernel.org>; Mon, 17 Apr 2017 14:34:23 -0700 (PDT)
 From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH 2/3] gce-xfstests: move NR_CPU, MEM, and ROOT_FS into config.gce
-Date: Mon, 17 Apr 2017 14:33:26 -0700
-Message-Id: <20170417213327.36520-2-ebiggers3@gmail.com>
+Subject: [PATCH 3/3] android-xfstests: move ROOT_FS and ROOT_FS_URL into config.android
+Date: Mon, 17 Apr 2017 14:33:27 -0700
+Message-Id: <20170417213327.36520-3-ebiggers3@gmail.com>
 In-Reply-To: <20170417213327.36520-1-ebiggers3@gmail.com>
 References: <20170417213327.36520-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -17,75 +17,71 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Eric Biggers <ebiggers@google.com>
 
-This allows them to be overridden by ~/.config/gce-xfstests.
+This allows them to be overridden by ~/.config/android-xfstests.  Also
+start treating an empty ROOT_FS_URL as meaning that no URL is provided.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- Documentation/gce-xfstests.md | 12 +++++++-----
- kvm-xfstests/config.gce       | 12 ++++++++++++
- kvm-xfstests/gce-xfstests     |  9 ---------
- 3 files changed, 19 insertions(+), 14 deletions(-)
+ Documentation/android-xfstests.md | 3 ++-
+ kvm-xfstests/android-xfstests     | 9 +++------
+ kvm-xfstests/config.android       | 6 ++++++
+ 3 files changed, 11 insertions(+), 7 deletions(-)
 
-diff --git a/Documentation/gce-xfstests.md b/Documentation/gce-xfstests.md
-index 6d053d1..5b1c9a7 100644
---- a/Documentation/gce-xfstests.md
-+++ b/Documentation/gce-xfstests.md
-@@ -345,8 +345,10 @@ variable is defined:
-         GCE_IMAGE_PROJECT="$GCE_PROJECT"
+diff --git a/Documentation/android-xfstests.md b/Documentation/android-xfstests.md
+index b309c21..5b37f9e 100644
+--- a/Documentation/android-xfstests.md
++++ b/Documentation/android-xfstests.md
+@@ -39,7 +39,8 @@ devices.  If you encounter a problem, please submit a fix!
+   [building-xfstests](building-xfstests.md).  Then, either put the
+   chroot tarball in the default location of
+   kvm-xfstests/test-appliance/armhf_root_fs.tar.gz, or specify it with
+-  the -I option to android-xfstests.
++  ROOT_FS in your ~/.config/android-xfstests or the -I option to
++  android-xfstests.
  
- Normally, the most recently created image in the xfstests image family
--will be used by default.  You can however override this by using the
---I option to specify a specific image file.  (For example:
--"gce-xfstests -I xfstests-201608130052 smoke".)  You can also use the
----image-project command line option to override the GCE_IMAGE_PROJECT
--setting in your configuration file.
-+will be used by default.  You can however override this and use a
-+specific image by setting `ROOT_FS` in your `~/.config/gce-xfstests`
-+configuration file, or by using the -I option to gce-xfstests.  (For
-+example: `ROOT_FS=xfstests-201608130052`, or "gce-xfstests -I
-+xfstests-201608130052 smoke".)  You can also use the --image-project
-+command line option to override the GCE_IMAGE_PROJECT setting in your
-+configuration file.
-diff --git a/kvm-xfstests/config.gce b/kvm-xfstests/config.gce
-index 96b64f8..3358ae3 100644
---- a/kvm-xfstests/config.gce
-+++ b/kvm-xfstests/config.gce
-@@ -13,3 +13,15 @@
- # List of firewall rules to create.  By default the gce-xfstests web interface
- # is made available to everyone over the public Internet.
- GCE_FIREWALL_RULES=("allow-http --allow tcp:80 --target-tags http-server")
-+
-+# Use different defaults for GCE because the background ruby monitoring
-+# program uses extra memory --- the n1-standard-2 machine type has 7.5 GB,
-+# so use that.
-+NR_CPU=2
-+MEM=7680
-+
-+# Name of the GCE image from which the test instances will be created.
-+# This can also be set by the -I option.
-+# If "xfstests" (the default), this is actually treated as an image family, and
-+# the latest image from the xfstests family will be used.
-+ROOT_FS="xfstests"
-diff --git a/kvm-xfstests/gce-xfstests b/kvm-xfstests/gce-xfstests
-index 7b678bc..240467e 100755
---- a/kvm-xfstests/gce-xfstests
-+++ b/kvm-xfstests/gce-xfstests
-@@ -9,15 +9,6 @@ fi
+ ## Procedure
+ 
+diff --git a/kvm-xfstests/android-xfstests b/kvm-xfstests/android-xfstests
+index 3489bc2..e33955e 100755
+--- a/kvm-xfstests/android-xfstests
++++ b/kvm-xfstests/android-xfstests
+@@ -10,12 +10,6 @@ fi
  
  . "$DIR/util/get-config"
  
--# Use different defaults for GCE because the background ruby monitoring
--# program uses extra memory --- the n1-standard-2 machine type has 7.5 GB,
--# so use that.
--NR_CPU=2
--MEM=7680
+-# Path to chroot tarball; can be overridden with -I
+-ROOT_FS="$DIR/test-appliance/armhf_root_fs.tar.gz"
 -
--# We use ROOT_FS for the GCE image; this can be set by the -I option
--ROOT_FS="xfstests"
+-# Where to download the tarball from (at user's request) if we don't have it
+-ROOT_FS_URL="https://www.kernel.org/pub/linux/kernel/people/tytso/kvm-xfstests/armhf_root_fs.tar.gz"
 -
- if test -r "$DIR/test-appliance/config.custom" ; then
-    . "$DIR/test-appliance/config.custom"
- fi
+ # Chroot directory on device.
+ # Note: this will be wiped clean when deploying a new chroot tarball.
+ CHROOT_DIR="/data/xfstests-chroot"
+@@ -142,6 +136,9 @@ setup_chroot()
+     if ! [ -f "$ROOT_FS" ]; then
+ 	echo "The xfstests chroot tarball does not exist:"
+ 	echo "        $ROOT_FS"
++	if [ -z "$ROOT_FS_URL" ]; then
++	    exit 1
++	fi
+ 	ask_yesno "Would you like to download the latest public tarball to that location?"
+ 	wget -O "$ROOT_FS" "$ROOT_FS_URL"
+ 	echo "Finished downloading chroot tarball."
+diff --git a/kvm-xfstests/config.android b/kvm-xfstests/config.android
+index 4b668f8..ed7098c 100644
+--- a/kvm-xfstests/config.android
++++ b/kvm-xfstests/config.android
+@@ -4,3 +4,9 @@
+ # Variables set here may be overridden in ~/.config/android-xfstests
+ #
+ 
++# Path to chroot tarball; this can also be set by the -I option
++ROOT_FS="$DIR/test-appliance/armhf_root_fs.tar.gz"
++
++# Where to download the tarball from (at user's request) if we don't have it.
++# If you want to disable this functionality, set this to an empty string.
++ROOT_FS_URL="https://www.kernel.org/pub/linux/kernel/people/tytso/kvm-xfstests/armhf_root_fs.tar.gz"
 -- 
 2.12.2.762.g0e3151a226-goog
 
