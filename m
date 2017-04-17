@@ -1,87 +1,91 @@
-Received: from mail-pg0-f65.google.com ([74.125.83.65]:33285 "EHLO
-        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754372AbdDQVeX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 17 Apr 2017 17:34:23 -0400
-Received: by mail-pg0-f65.google.com with SMTP id 63so16626216pgh.0
-        for <fstests@vger.kernel.org>; Mon, 17 Apr 2017 14:34:23 -0700 (PDT)
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH 3/3] android-xfstests: move ROOT_FS and ROOT_FS_URL into config.android
-Date: Mon, 17 Apr 2017 14:33:27 -0700
-Message-Id: <20170417213327.36520-3-ebiggers3@gmail.com>
-In-Reply-To: <20170417213327.36520-1-ebiggers3@gmail.com>
-References: <20170417213327.36520-1-ebiggers3@gmail.com>
+Received: from mail-oi0-f44.google.com ([209.85.218.44]:36010 "EHLO
+        mail-oi0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754393AbdDQWyb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 17 Apr 2017 18:54:31 -0400
+Received: by mail-oi0-f44.google.com with SMTP id r203so157996349oib.3
+        for <fstests@vger.kernel.org>; Mon, 17 Apr 2017 15:54:31 -0700 (PDT)
+MIME-Version: 1.0
+In-Reply-To: <CAPcyv4g_+hWc4KbnvBnSsyDzwGxMaObfOfxEWqpwO_r1-iieug@mail.gmail.com>
+References: <1492008380-29164-1-git-send-email-xzhou@redhat.com>
+ <1492413255-11146-1-git-send-email-xzhou@redhat.com> <1492413255-11146-3-git-send-email-xzhou@redhat.com>
+ <CAPcyv4g_+hWc4KbnvBnSsyDzwGxMaObfOfxEWqpwO_r1-iieug@mail.gmail.com>
+From: Dan Williams <dan.j.williams@intel.com>
+Date: Mon, 17 Apr 2017 15:54:30 -0700
+Message-ID: <CAPcyv4hUut86oUm=W=nUJ9tHajYaTK=RAzHge_UYhjHKufP6Fw@mail.gmail.com>
+Subject: Re: [PATCH v4 2/4] generic: test mmap io fom DAX to non-DAX
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+To: Xiong Zhou <xzhou@redhat.com>
+Cc: fstests@vger.kernel.org, Ross Zwisler <ross.zwisler@linux.intel.com>, jmoyer <jmoyer@redhat.com>, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
+On Mon, Apr 17, 2017 at 7:14 AM, Dan Williams <dan.j.williams@intel.com> wrote:
+> On Mon, Apr 17, 2017 at 12:14 AM, Xiong Zhou <xzhou@redhat.com> wrote:
+>> Mount TEST_DEV as non-DAX, SCRATCH_DEV as DAX, then
+>> do mmap DIO from DAX to non-DAX.
+>>
+>> This test is split from generic/413. Since DIO from DAX
+>> to non-DAX is only supported/doable when device underneath
+>> has memory(struct page) backend.
+>>
+>> By ndctl looking at SCRATCH_DEV, skip this test if it is
+>> not in "memory mode".
+>>
+>> Adding helper to check pmem device status, which requires new
+>> PROGs ndctl to tweaking pmem devices and jq to parse ndctl's
+>> JSON format outputs.
+>>
+>> Signed-off-by: Xiong Zhou <xzhou@redhat.com>
+>> ---
+>>  common/rc             |  45 ++++++++++++++++++++
+>>  tests/generic/423     | 113 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/generic/423.out |   2 +
+>>  tests/generic/group   |   1 +
+>>  4 files changed, 161 insertions(+)
+>>  create mode 100755 tests/generic/423
+>>  create mode 100644 tests/generic/423.out
+>>
+>> diff --git a/common/rc b/common/rc
+>> index 78a2101..73ac79c 100644
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -3151,6 +3151,51 @@ _require_chattr()
+>>         rm -f $TEST_DIR/syscalltest.out
+>>  }
+>>
+>> +# Require test/scratch device nvdimm and having specific
+>> +# arttibute key/value we need.
+>> +#
+>> +# This is designed to get attr values of nvdimm persistent
+>> +# memory device, by searching sysfs.
+>> +#
+>> +# Other non-nvdimm or non-persistent-memory devices would
+>> +# fail this helper anyway.
+>> +#
+>> +# So, ONLY use this helper when you REALLY need nvdimm and
+>> +# specific attr on it.
+>> +#
+>> +_require_pmem_key_value()
+>> +{
+>> +       local dev=${1#/dev/}
+>> +       local key=$2
+>> +       local value=$3
+>> +       local region index keyfile dev_value
+>> +
+>> +       # find a filename string contains the region of dev, eg:
+>> +       #  /sys/devices/platform/e820_pmem/ndbus0/region1/\
+>> +       #  namespace1.0/block/pmem1
+>> +       #
+>> +       region=$(find /sys/ | grep $dev | grep region | head -1)
+>> +       [ -z "$region" ] && \
+>> +         _notrun "requires persistent memory $dev $key $value"
+>
+> Running 'find' in sysfs is overkill. You can go directly to the sysfs
+> path for a given block device by stat(1) on the block device special
+> file to get the device major and minor numbers. Then go directly to
+> the sysfs path for that device by following this link
+> /sys/dev/block/$major:$minor.
 
-This allows them to be overridden by ~/.config/android-xfstests.  Also
-start treating an empty ROOT_FS_URL as meaning that no URL is provided.
-
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- Documentation/android-xfstests.md | 3 ++-
- kvm-xfstests/android-xfstests     | 9 +++------
- kvm-xfstests/config.android       | 6 ++++++
- 3 files changed, 11 insertions(+), 7 deletions(-)
-
-diff --git a/Documentation/android-xfstests.md b/Documentation/android-xfstests.md
-index b309c21..5b37f9e 100644
---- a/Documentation/android-xfstests.md
-+++ b/Documentation/android-xfstests.md
-@@ -39,7 +39,8 @@ devices.  If you encounter a problem, please submit a fix!
-   [building-xfstests](building-xfstests.md).  Then, either put the
-   chroot tarball in the default location of
-   kvm-xfstests/test-appliance/armhf_root_fs.tar.gz, or specify it with
--  the -I option to android-xfstests.
-+  ROOT_FS in your ~/.config/android-xfstests or the -I option to
-+  android-xfstests.
- 
- ## Procedure
- 
-diff --git a/kvm-xfstests/android-xfstests b/kvm-xfstests/android-xfstests
-index 3489bc2..e33955e 100755
---- a/kvm-xfstests/android-xfstests
-+++ b/kvm-xfstests/android-xfstests
-@@ -10,12 +10,6 @@ fi
- 
- . "$DIR/util/get-config"
- 
--# Path to chroot tarball; can be overridden with -I
--ROOT_FS="$DIR/test-appliance/armhf_root_fs.tar.gz"
--
--# Where to download the tarball from (at user's request) if we don't have it
--ROOT_FS_URL="https://www.kernel.org/pub/linux/kernel/people/tytso/kvm-xfstests/armhf_root_fs.tar.gz"
--
- # Chroot directory on device.
- # Note: this will be wiped clean when deploying a new chroot tarball.
- CHROOT_DIR="/data/xfstests-chroot"
-@@ -142,6 +136,9 @@ setup_chroot()
-     if ! [ -f "$ROOT_FS" ]; then
- 	echo "The xfstests chroot tarball does not exist:"
- 	echo "        $ROOT_FS"
-+	if [ -z "$ROOT_FS_URL" ]; then
-+	    exit 1
-+	fi
- 	ask_yesno "Would you like to download the latest public tarball to that location?"
- 	wget -O "$ROOT_FS" "$ROOT_FS_URL"
- 	echo "Finished downloading chroot tarball."
-diff --git a/kvm-xfstests/config.android b/kvm-xfstests/config.android
-index 4b668f8..ed7098c 100644
---- a/kvm-xfstests/config.android
-+++ b/kvm-xfstests/config.android
-@@ -4,3 +4,9 @@
- # Variables set here may be overridden in ~/.config/android-xfstests
- #
- 
-+# Path to chroot tarball; this can also be set by the -I option
-+ROOT_FS="$DIR/test-appliance/armhf_root_fs.tar.gz"
-+
-+# Where to download the tarball from (at user's request) if we don't have it.
-+# If you want to disable this functionality, set this to an empty string.
-+ROOT_FS_URL="https://www.kernel.org/pub/linux/kernel/people/tytso/kvm-xfstests/armhf_root_fs.tar.gz"
--- 
-2.12.2.762.g0e3151a226-goog
-
+Of course, this is all handled for you if you just use ndctl, so I'm
+not sure what the motivation is to bypass those tools? They are widely
+available.
