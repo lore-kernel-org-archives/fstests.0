@@ -1,130 +1,71 @@
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:34735 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S937977AbdDSQ3R (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Apr 2017 12:29:17 -0400
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2 4/4] fstests: add generic test for file handles
-Date: Wed, 19 Apr 2017 19:29:19 +0300
-Message-Id: <1492619359-24763-5-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1492619359-24763-1-git-send-email-amir73il@gmail.com>
-References: <1492619359-24763-1-git-send-email-amir73il@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:34298 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S966537AbdDSSJq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 19 Apr 2017 14:09:46 -0400
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 106AF80F9F
+        for <fstests@vger.kernel.org>; Wed, 19 Apr 2017 18:09:46 +0000 (UTC)
+Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id DDECF18987
+        for <fstests@vger.kernel.org>; Wed, 19 Apr 2017 18:09:45 +0000 (UTC)
+From: Eric Sandeen <sandeen@redhat.com>
+Subject: [PATCH] make xfs/293 more robust
+Message-ID: <bf7bdb00-59d0-2283-e040-af1e86f14b95@redhat.com>
+Date: Wed, 19 Apr 2017 13:09:45 -0500
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Trond Myklebust <trondmy@primarydata.com>, Jeff Layton <jlayton@poochiereds.net>, "J . Bruce Fields" <bfields@fieldses.org>, David Howells <dhowells@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
+To: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Cloned from xfs specific test xfs/238, which checks
-stale file handles of deleted files.
+xfs/293 is supposed to make sure every command in xfs_io
+is documented, but it was missing the inode command because
+it's a common word, and depending on how man formatted the
+page, the magic "   inode" string could show up and appear
+to indicate that documentation is present for the command
+when it's not actually there.
 
-This test uses the generic open_by_handle_at() syscall
-and also tests for non-stale file handles of linked files.
+Change the test to inspect the manpage source directly, with
+the assumption that each documented command will start
+with ^\.B.*$COMMAND on a manpage line.
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+This handles a few different compressed manpage formats -
+I don't know if anybody uses bz2 or xz, but hey.
+
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 ---
- tests/generic/426     | 74 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/426.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 77 insertions(+)
- create mode 100755 tests/generic/426
- create mode 100644 tests/generic/426.out
 
-diff --git a/tests/generic/426 b/tests/generic/426
-new file mode 100755
-index 0000000..c39c165
---- /dev/null
-+++ b/tests/generic/426
-@@ -0,0 +1,74 @@
-+#! /bin/bash
-+# FS QA Test No. 426
-+#
-+# Check stale handles pointing to unlinked files
-+# and non-stale handles pointing to linked files
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2017 CTERA Networks. All Rights Reserved.
-+# Author: Amir Goldstein <amir73il@gmail.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
+diff --git a/tests/xfs/293 b/tests/xfs/293
+index ade6015..a342cb6 100755
+--- a/tests/xfs/293
++++ b/tests/xfs/293
+@@ -48,8 +48,24 @@ _supported_os IRIX Linux
+ 
+ echo "Silence is golden"
+ 
++MANPAGE=`man --path xfs_io`
 +
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
++[ -z "$MANPAGE" ] && _notrun "xfs_io manpage not found"
 +
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
++if `echo $MANPAGE | grep -q .gz$`; then
++	CAT=zcat
++elif `echo $MANPAGE | grep -q .bz2$`; then
++	CAT=bzcat
++elif `echo $MANPAGE | grep -q .xz$`; then
++	CAT=xzcat
++else
++	CAT=cat
++fi
 +
-+_cleanup()
-+{
-+    cd /
-+    rm -f $tmp.*
-+}
++which $CAT &>/dev/null || _notrun "$CAT utility not found"
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+# _require_exportfs already requires open_by_handle, but let's not count on it
-+_require_test_program "open_by_handle"
-+_require_exportfs
-+
-+numfiles=1024
-+testdir=$TEST_DIR/$seq-dir
-+mkdir -p $testdir
-+
-+# Check stale handles to deleted files
-+rm -f $testdir/*
-+src/open_by_handle -c $testdir $numfiles
-+src/open_by_handle -d $testdir $numfiles
-+
-+# Check non-stale handles to linked files
-+rm -f $testdir/*
-+src/open_by_handle -c $testdir $numfiles
-+src/open_by_handle    $testdir $numfiles
-+
-+# Check non-stale handles to files that were hardlinked and original deleted
-+src/open_by_handle -l $testdir $numfiles
-+src/open_by_handle -u $testdir $numfiles
-+
-+echo "Silence is golden"
-+status=$?
-+exit
-diff --git a/tests/generic/426.out b/tests/generic/426.out
-new file mode 100644
-index 0000000..777cbcd
---- /dev/null
-+++ b/tests/generic/426.out
-@@ -0,0 +1,2 @@
-+QA output created by 426
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 6d6e4f6..f29009c 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -428,3 +428,4 @@
- 423 auto quick
- 424 auto quick
- 425 auto quick attr
-+426 auto quick exportfs
--- 
-2.7.4
+ for COMMAND in `$XFS_IO_PROG -c help | awk '{print $1}' | grep -v "^Use"`; do
+-  man xfs_io | col -b | grep -wq "   $COMMAND" || \
++  $CAT `man --path xfs_io` | egrep -q "^\.B.*$COMMAND" || \
+ 	echo "$COMMAND not documented in the xfs_io manpage"
+ done
+ 
 
