@@ -1,128 +1,131 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43646 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:54500 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1761004AbdDSIks (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 19 Apr 2017 04:40:48 -0400
-Date: Wed, 19 Apr 2017 16:40:45 +0800
-From: Xiong Zhou <xzhou@redhat.com>
-Subject: Re: [PATCH v4 2/4] generic: test mmap io fom DAX to non-DAX
-Message-ID: <20170419084045.fquoubljwnxwwq4y@XZHOUW.usersys.redhat.com>
-References: <1492008380-29164-1-git-send-email-xzhou@redhat.com>
- <1492413255-11146-1-git-send-email-xzhou@redhat.com>
- <1492413255-11146-3-git-send-email-xzhou@redhat.com>
- <CAPcyv4g_+hWc4KbnvBnSsyDzwGxMaObfOfxEWqpwO_r1-iieug@mail.gmail.com>
+        id S1752167AbdDSIyD (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 19 Apr 2017 04:54:03 -0400
+Date: Wed, 19 Apr 2017 16:53:58 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 1/4] src/open_by_handle: helper to test
+ open_by_handle_at() syscall
+Message-ID: <20170419085358.GM8951@eguan.usersys.redhat.com>
+References: <1492539444-25938-1-git-send-email-amir73il@gmail.com>
+ <1492539444-25938-2-git-send-email-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAPcyv4g_+hWc4KbnvBnSsyDzwGxMaObfOfxEWqpwO_r1-iieug@mail.gmail.com>
+In-Reply-To: <1492539444-25938-2-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dan Williams <dan.j.williams@intel.com>
-Cc: Xiong Zhou <xzhou@redhat.com>, fstests@vger.kernel.org, Ross Zwisler <ross.zwisler@linux.intel.com>, jmoyer <jmoyer@redhat.com>, Eryu Guan <eguan@redhat.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Trond Myklebust <trondmy@primarydata.com>, Jeff Layton <jlayton@poochiereds.net>, "J . Bruce Fields" <bfields@fieldses.org>, fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Apr 17, 2017 at 07:14:32AM -0700, Dan Williams wrote:
-> On Mon, Apr 17, 2017 at 12:14 AM, Xiong Zhou <xzhou@redhat.com> wrote:
-> > Mount TEST_DEV as non-DAX, SCRATCH_DEV as DAX, then
-> > do mmap DIO from DAX to non-DAX.
-> >
-> > This test is split from generic/413. Since DIO from DAX
-> > to non-DAX is only supported/doable when device underneath
-> > has memory(struct page) backend.
-> >
-> > By ndctl looking at SCRATCH_DEV, skip this test if it is
-> > not in "memory mode".
-> >
-> > Adding helper to check pmem device status, which requires new
-> > PROGs ndctl to tweaking pmem devices and jq to parse ndctl's
-> > JSON format outputs.
-> >
-> > Signed-off-by: Xiong Zhou <xzhou@redhat.com>
-> > ---
-> >  common/rc             |  45 ++++++++++++++++++++
-> >  tests/generic/423     | 113 ++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/423.out |   2 +
-> >  tests/generic/group   |   1 +
-> >  4 files changed, 161 insertions(+)
-> >  create mode 100755 tests/generic/423
-> >  create mode 100644 tests/generic/423.out
-> >
-> > diff --git a/common/rc b/common/rc
-> > index 78a2101..73ac79c 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -3151,6 +3151,51 @@ _require_chattr()
-> >         rm -f $TEST_DIR/syscalltest.out
-> >  }
-> >
-> > +# Require test/scratch device nvdimm and having specific
-> > +# arttibute key/value we need.
-> > +#
-> > +# This is designed to get attr values of nvdimm persistent
-> > +# memory device, by searching sysfs.
-> > +#
-> > +# Other non-nvdimm or non-persistent-memory devices would
-> > +# fail this helper anyway.
-> > +#
-> > +# So, ONLY use this helper when you REALLY need nvdimm and
-> > +# specific attr on it.
-> > +#
-> > +_require_pmem_key_value()
-> > +{
-> > +       local dev=${1#/dev/}
-> > +       local key=$2
-> > +       local value=$3
-> > +       local region index keyfile dev_value
-> > +
-> > +       # find a filename string contains the region of dev, eg:
-> > +       #  /sys/devices/platform/e820_pmem/ndbus0/region1/\
-> > +       #  namespace1.0/block/pmem1
-> > +       #
-> > +       region=$(find /sys/ | grep $dev | grep region | head -1)
-> > +       [ -z "$region" ] && \
-> > +         _notrun "requires persistent memory $dev $key $value"
+On Tue, Apr 18, 2017 at 09:17:21PM +0300, Amir Goldstein wrote:
+> This is a clone of src/stale_handle.c test that uses generic
+> open_by_handle_at() syscall instead of the xfs specific ioctl.
 > 
-> Running 'find' in sysfs is overkill. You can go directly to the sysfs
-> path for a given block device by stat(1) on the block device special
-> file to get the device major and minor numbers. Then go directly to
-> the sysfs path for that device by following this link
+> No test is using this helper yet.
+> 
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+>  src/Makefile         |   2 +-
+>  src/open_by_handle.c | 145 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  2 files changed, 146 insertions(+), 1 deletion(-)
+>  create mode 100644 src/open_by_handle.c
+> 
+> diff --git a/src/Makefile b/src/Makefile
+> index e62d7a9..6b38e77 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -22,7 +22,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>  	seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
+>  	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
+>  	attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_type \
+> -	dio-invalidate-cache stat_test
+> +	dio-invalidate-cache stat_test open_by_handle
 
-> /sys/dev/block/$major:$minor.
+Need an entry in .gitignore file too.
 
-This sounds better. While I have trouble with getting the right region
-mode through this sysfs path.
+>  
+>  SUBDIRS =
+>  
+> diff --git a/src/open_by_handle.c b/src/open_by_handle.c
+> new file mode 100644
+> index 0000000..8f04865
+> --- /dev/null
+> +++ b/src/open_by_handle.c
+> @@ -0,0 +1,145 @@
+> +/*
+> + * open_by_handle.c - attempt to create a file handle and open it
+> + *                    with open_by_handle_at() syscall
+> + *
+> + * Copyright (C) 2017 CTERA Networks. All Rights Reserved.
+> + * Author: Amir Goldstein <amir73il@gmail.com>
+> + * 
 
-sh-4.2# ndctl list -r 2 -N
-{
-  "dev":"namespace2.0",
-  "mode":"raw",
-  "size":8589934592,
-  "blockdev":"pmem2"
-}
-sh-4.2# cat /sys/devices/LNXSYSTM:00/device:00/ACPI0012:00/ndbus0/region2/namespace2.0/mode
-raw
-sh-4.2# stat -c %t:%T /dev/pmem2
-103:2
-sh-4.2# cat /sys/dev/block/259\:2/device/mode
-raw
-sh-4.2# ndctl create-namespace -f -e namespace2.0 -m memory
-{
-  "dev":"namespace2.0",
-  "mode":"memory",
-  "size":8453619712,
-  "uuid":"66d5afc1-6876-4e8b-a0ba-0082af84bf82",
-  "blockdev":"pmem2"
-}
-sh-4.2# stat -c %t:%T /dev/pmem2
-103:2
-sh-4.2# cat /sys/dev/block/259\:2/device/mode     # Here
-pmem
-sh-4.2# cat /sys/devices/LNXSYSTM:00/device:00/ACPI0012:00/ndbus0/region2/namespace2.0/mode
-memory
-sh-4.2# ndctl list -r 2 -N
-{
-  "dev":"namespace2.0",
-  "mode":"memory",
-  "size":8453619712,
-  "uuid":"66d5afc1-6876-4e8b-a0ba-0082af84bf82",
-  "blockdev":"pmem2"
-}
-sh-4.2# 
+Trailing whitespace in above line.
+
+> + * from:
+> + *  stale_handle.c
+> + *
+> + *  Copyright (C) 2010 Red Hat, Inc. All Rights reserved.
+> + *
+> + *  This program is free software; you can redistribute it and/or modify
+> + *  it under the terms of the GNU General Public License as published by
+> + *  the Free Software Foundation; either version 2 of the License, or
+> + *  (at your option) any later version.
+> + *
+> + *  This program is distributed in the hope that it will be useful,
+> + *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+> + *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> + *  GNU General Public License for more details.
+> + *
+> + *  You should have received a copy of the GNU General Public License
+> + *  along with this program; if not, write to the Free Software
+> + *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+> + */
+> +
+> +#define TEST_UTIME
+
+This is not used, remove it? (I think it's not used in the original
+stale_handle.c too).
+
+> +
+> +#include <stdio.h>
+> +#include <stdlib.h>
+> +#include <string.h>
+> +#include <fcntl.h>
+> +#include <unistd.h>
+> +#include <sys/stat.h>
+> +#include <sys/types.h>
+> +#include <errno.h>
+> +#include <linux/limits.h>
+> +
+> +#define NUMFILES 1024
+> +
+> +struct handle {
+> +	struct file_handle fh;
+> +	unsigned char fid[MAX_HANDLE_SZ];
+> +} handle[NUMFILES];
+
+>From open_by_handle_at(2):
+
+"These system calls first appeared in Linux 2.6.39.  Library support is
+provided in glibc since version 2.14."
+
+I think we should check if the system supports open_by_handle_at(2)
+syscalls at build time and _require_test_program "open_by_handle" in
+tests in case it's not built.
+
+Currently it fails to build on my RHEL6 host:
+Building src
+    [CC]    open_by_handle
+open_by_handle.c:43: error: field 'fh' has incomplete type
+open_by_handle.c:44: error: 'MAX_HANDLE_SZ' undeclared here (not in a function)
+open_by_handle.c: In function 'main':
+open_by_handle.c:135: warning: implicit declaration of function 'name_to_handle_at'
+open_by_handle.c:193: warning: implicit declaration of function 'open_by_handle_at'
+gmake[2]: *** [open_by_handle] Error 1
+gmake[1]: *** [src] Error 2
+make: *** [default] Error 2
+
+Thanks,
+Eryu
