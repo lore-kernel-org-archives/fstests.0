@@ -1,74 +1,84 @@
-Received: from mail-io0-f182.google.com ([209.85.223.182]:33576 "EHLO
-        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1764634AbdDSV71 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Apr 2017 17:59:27 -0400
-Received: by mail-io0-f182.google.com with SMTP id k87so39529044ioi.0
-        for <fstests@vger.kernel.org>; Wed, 19 Apr 2017 14:59:27 -0700 (PDT)
+Received: from userp1040.oracle.com ([156.151.31.81]:35179 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S936371AbdDSWvv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 19 Apr 2017 18:51:51 -0400
+Date: Wed, 19 Apr 2017 15:51:44 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH V2] make xfs/293 more robust
+Message-ID: <20170419225144.GB5190@birch.djwong.org>
+References: <bf7bdb00-59d0-2283-e040-af1e86f14b95@redhat.com>
+ <6e4cecf7-dbcf-3cf3-22e0-50e8e1e859fd@sandeen.net>
 MIME-Version: 1.0
-In-Reply-To: <20170410092528.GE22845@eguan.usersys.redhat.com>
-References: <20170327113537.GR14226@eguan.usersys.redhat.com>
- <20170404173722.23696-1-gwendal@chromium.org> <20170406111815.GK22845@eguan.usersys.redhat.com>
- <CAMHSBOVkP9tckPZGv8nPXDrx-tb=N6-Q5eQ8kzCRc0NUsAipKQ@mail.gmail.com>
- <20170407041227.GN22845@eguan.usersys.redhat.com> <CAMHSBOVYcqdByoCvtow5agrBE+f39M6zTsg1CHGift2d13tgcg@mail.gmail.com>
- <20170410092528.GE22845@eguan.usersys.redhat.com>
-From: Gwendal Grignou <gwendal@chromium.org>
-Date: Wed, 19 Apr 2017 14:59:05 -0700
-Message-ID: <CAMHSBOXJHiuadYEdbrpcD05dSAxw95RzfWa3mMo24X0Lf7Df3Q@mail.gmail.com>
-Subject: Re: [PATCH v3] Code to allow cros-compilation on chromeOS
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <6e4cecf7-dbcf-3cf3-22e0-50e8e1e859fd@sandeen.net>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Apr 10, 2017 at 2:25 AM, Eryu Guan <eguan@redhat.com> wrote:
-> On Fri, Apr 07, 2017 at 02:41:59PM -0700, Gwendal Grignou wrote:
->> Reading  stack overflow further, the fact AC_PACKAGE_GLOBALS and
->> AC_PACKAGE_UTILITIES are not defined are just the consequence of the
->> error.
->> When all work fine, the autoconfigued ./aclocal.m4 should contains
->> several m4_include and in particular
->> m4_include([m4/package_globals.m4])" that will load the definitions
->> for these macros.
->> I am shooting in the dark, how ./aclocal.m4 compares between RH7.0 and RH6.9?
->
-> RHEL6.9:
-> https://paste.fedoraproject.org/paste/EUo-NKzoZPwbIIhn1bjoJF5M1UNdIGYhyRLivL9gydE=
->
-> RHEL7.3:
-> https://paste.fedoraproject.org/paste/SEhryYO0GXT8VIA0-24q8V5M1UNdIGYhyRLivL9gydE=
+On Wed, Apr 19, 2017 at 02:25:44PM -0500, Eric Sandeen wrote:
+> xfs/293 is supposed to make sure every command in xfs_io
+> is documented, but it was missing the inode command because
+> it's a common word, and depending on how man formatted the
+> page, the magic "   inode" string could show up and appear
+> to indicate that documentation is present for the command
+> when it's not actually there.
+> 
+> Change the test to inspect the manpage source directly, with
+> the assumption that each documented command will start
+> with ^\.B.*$COMMAND on a manpage line.
+> 
+> This handles a few different compressed manpage formats -
+> I don't know if anybody uses bz2 or xz, but hey.
+> 
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+> ---
+> 
+> V2: reduce cat assignment derp
+>     use _require_command instead of hand-rolling it
+> 
+> diff --git a/tests/xfs/293 b/tests/xfs/293
+> index ade6015..749205a 100755
+> --- a/tests/xfs/293
+> +++ b/tests/xfs/293
+> @@ -48,8 +48,19 @@ _supported_os IRIX Linux
+>  
+>  echo "Silence is golden"
+>  
+> +MANPAGE=`man --path xfs_io`
+> +
+> +case "$MANPAGE" in
+> +*.gz)	CAT=zcat;;
 
-I was out for a while, the pastes seems to have expired.
->
->> What are the revisions of automake, autoconf, m4 andlibtoolize.
->
-> [root@eguan-rhel6 xfstests]# rpm -q automake autoconf m4 libtool
-> automake-1.11.1-4.el6.noarch
-> autoconf-2.63-5.1.el6.noarch
-> m4-1.4.13-5.el6.x86_64
-> libtool-2.2.6-15.5.el6.x86_64
->
-> [root@dhcp-66-87-213 xfstests]# rpm -q automake autoconf m4 libtool
-> automake-1.13.4-3.el7.noarch
-> autoconf-2.69-11.el7.noarch
-> m4-1.4.16-10.el7.x86_64
-> libtool-2.4.2-21.el7_2.x86_64
+What about .z and .Z files? :)
 
-Maybe it is the same problem as explained in
-https://lists.gnu.org/archive/html/autoconf/2013-08/msg00013.html.
+Those are also gzip files, but with weird extensions because ... eh.
 
-I submit a patch shortly which calls autoreconf --install=m4.
+Granted I bet few people /have/ .z files.
 
-Gwendal.
->
->> Does autoreconf -fi help?
->
-> No, autoreconf -fi has the same issue.
->
->>
->> Thanks for your help,
->> Gwendal.
->
-> Thank you!
->
-> Eryu
+But I guess we could be over-pedantic just in case someone wants to go
+all retro with umsdos and whatever.  Or I guess if we start charging by
+the byte for filenames.
+
+--D
+
+> +*.bz2)	CAT=bzcat;;
+> +*.xz)	CAT=xzcat;;
+> +*)	CAT=cat;;
+> +esac
+> +
+> +_require_command `which $CAT` $CAT
+> +
+>  for COMMAND in `$XFS_IO_PROG -c help | awk '{print $1}' | grep -v "^Use"`; do
+> -  man xfs_io | col -b | grep -wq "   $COMMAND" || \
+> +  $CAT `man --path xfs_io` | egrep -q "^\.B.*$COMMAND" || \
+>  	echo "$COMMAND not documented in the xfs_io manpage"
+>  done
+>  
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
