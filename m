@@ -1,261 +1,166 @@
-Received: from fieldses.org ([173.255.197.46]:36048 "EHLO fieldses.org"
+Received: from mx1.redhat.com ([209.132.183.28]:35036 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755272AbdDRTfU (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 18 Apr 2017 15:35:20 -0400
-Date: Tue, 18 Apr 2017 15:35:19 -0400
-From: "J . Bruce Fields" <bfields@fieldses.org>
-Subject: Re: [PATCH 2/4] src/open_by_handle: flexible usage options
-Message-ID: <20170418193519.GL6208@fieldses.org>
-References: <1492539444-25938-1-git-send-email-amir73il@gmail.com>
- <1492539444-25938-3-git-send-email-amir73il@gmail.com>
- <20170418191417.GJ6208@fieldses.org>
- <CAOQ4uxiXmx9N_y3gHGXxtBM8bySwG_GaeGRBjX4qNf1tyGzUcA@mail.gmail.com>
+        id S1759084AbdDSCyn (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 18 Apr 2017 22:54:43 -0400
+Date: Wed, 19 Apr 2017 10:54:40 +0800
+From: Xiong Zhou <xzhou@redhat.com>
+Subject: Re: [PATCH v4 4/4] generic: mmap write readonly DAX file
+Message-ID: <20170419025440.bedwhf4twz5bk77a@XZHOUW.usersys.redhat.com>
+References: <1492008380-29164-1-git-send-email-xzhou@redhat.com>
+ <1492413255-11146-1-git-send-email-xzhou@redhat.com>
+ <1492413255-11146-5-git-send-email-xzhou@redhat.com>
+ <20170418170506.GD25618@linux.intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxiXmx9N_y3gHGXxtBM8bySwG_GaeGRBjX4qNf1tyGzUcA@mail.gmail.com>
+In-Reply-To: <20170418170506.GD25618@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Eryu Guan <eguan@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, Trond Myklebust <trondmy@primarydata.com>, Jeff Layton <jlayton@poochiereds.net>, fstests <fstests@vger.kernel.org>, linux-unionfs@vger.kernel.org
+To: Ross Zwisler <ross.zwisler@linux.intel.com>
+Cc: Xiong Zhou <xzhou@redhat.com>, fstests@vger.kernel.org, dan.j.williams@intel.com, jmoyer@redhat.com, eguan@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Apr 18, 2017 at 10:22:20PM +0300, Amir Goldstein wrote:
-> On Tue, Apr 18, 2017 at 10:14 PM, J . Bruce Fields <bfields@fieldses.org> wrote:
-> > On Tue, Apr 18, 2017 at 09:17:22PM +0300, Amir Goldstein wrote:
-> >> More usage options for testing open_by_handle, which are needed
-> >> for testing stable handles across copy up in overlayfs.
-> >>
-> >> usage: open_by_handle [-c|-l|-u|-d] <test_dir> [num_files]
-> >>
-> >> Examples:
-> >>
-> >> 1. Create N test files (nlink=1) under test_dir and exit:
-> >>  $ open_by_handle -c <test_dir> [N]
-> >>
-> >> 2. Get file handles, drop caches and try to open by handle
-> >>    (expects success):
-> >>  $ open_by_handle <test_dir> [N]
-> >>
-> >> 3. Get file handles, create hardlinks to test files (nlink=2),
-> >>    drop caches and try to open by handle (expects success):
-> >>  $ open_by_handle -l <test_dir> [N]
-> >
-> > I guess I don't see the point of this particular test case.  It might be
-> > more interesting if it then unlinked the original names, to test for the
-> > case when a filesystem depends on the filename or parent directory being
-> > encoded in the filehandle?
-> >
-> > Or maybe you are doing that in one of these tests, I'm not sure I follow
-> > the descriptions.
-> >
+On Tue, Apr 18, 2017 at 11:05:06AM -0600, Ross Zwisler wrote:
+> On Mon, Apr 17, 2017 at 03:14:15PM +0800, Xiong Zhou wrote:
+> > Regression case that one can write to read-only
+> > file in a DAX mountpoint.
+> > 
+> > Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 > 
-> I am doing that, but with 2 separate invocations:
-> open_by_handle -l <test_dir> [N]
-> open_by_handle -u <test_dir> [N]
-
-Oh, got it, I forgot these were building blocks for tests and not tests
-in themselves....
-
-> -u differs from -d because it expects the handle to be opened.
+> Yep, this test works fine in my setup.  It fails for me, as expected, with
+> v4.10.0, and passes as expected with v4.10.3. I've added a few small comments
+> below, but with those addressed you can add:
 > 
-> The reason I separated -l (link) and -u (unlink) is because
-> for overlayfs I need to test linking in lower layer and unlinking
-> from overlay.
+> Reviewed-by: Ross Zwisler <ross.zwisler@linux.intel.com>
 > 
-> I guess my intentions will become more clear after I post some
-> overlay specific tests.
-> It's kind of weird for me to post these tests when overlay
-> doesn't have exportfs support yet, but I may do it anyway.
+> > +int
+> > +main(int argc, char **argv)
+> > +{
+> > +	int fd, pfd, ret;
+> > +	char *buf;
+> > +	/* gcc -O2 will optimize foo's storage, preventing
+> > +	 * reproduce this issue.
+> > +	 * foo is never actually used after fault in value stored.
+> > +	 */
+> > +	volatile char foo __attribute__((__unused__));
+> > +	int pagesize = getpagesize();
+> > +
+> > +	if (argc < 2) {
+> > +		printf("Usage: %s <file> <pmem file>\n", basename(argv[0]));
+> > +		exit(0);
+> > +	}
+> > +
+> > +	fd = open(argv[1], O_RDONLY|O_DIRECT);
+> > +	if (fd < 0)
+> > +		err_exit("open");
+> > +
+> > +	pfd = open(argv[2], O_RDONLY);
+> > +	if (pfd < 0)
+> > +		err_exit("pmem open");
+> > +
+> > +	buf = mmap(NULL, pagesize, PROT_READ, MAP_SHARED, pfd, 0);
+> > +	if (buf == MAP_FAILED)
+> > +		err_exit("mmap");
+> > +
+> > +	/*
+> > +	 * Read from the DAX mmap to populate the first page in the
+> > +	 * address_space with a read-only mapping.
+> > +	 */
+> > +	foo = *buf;
+> > +
+> > +	/*
+> > +	 * Now write to the DAX mmap.  This *should* fail, but if the bug is
+> > +	 * present in __get_user_pages_fast(), it will succeed.
+> > +	 */
+> > +	ret = read(fd, buf, pagesize);
+> > +	if (ret != pagesize)
+> > +		err_exit("read");
+> > +
+> > +	ret = msync(buf, pagesize, MS_SYNC);
+> > +	if (ret != 0)
+> > +		err_exit("msync");
+> > +
+> > +	ret = munmap(buf, pagesize);
+> > +	if (ret < 0)
+> > +		err_exit("munmap");
+> > +
+> > +	ret = close(fd);
+> > +	if (ret < 0)
+> > +		err_exit("clsoe fd");
+> 			  close
+> 
+> > diff --git a/tests/generic/424 b/tests/generic/424
+> > new file mode 100755
+> > index 0000000..f73e08a
+> > --- /dev/null
+> > +++ b/tests/generic/424
+> > @@ -0,0 +1,92 @@
+> > +#! /bin/bash
+> > +# FS QA Test 424
+> > +#
+> > +# This is a regression test for kernel commit
+> > +#  ef947b2 x86, mm: fix gup_pte_range() vs DAX mappings
+> > +# created by Jeffrey Moyer <jmoyer@redhat.com>
+> > +#
+> > +# This is reproducible only when testing on pmem device
+> > +# which is configured in "memory mode", not in "raw mode".
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2017 Red Hat.  All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +#
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -rf $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +_require_scratch_dax
+> > +_require_test_program "t_mmap_write_ro"
+> > +_require_user
+> 
+> Could also maybe benefit from "_require_test", which makes sure your TEST_DEV
 
-I don't think the filehandle lookup code has very good test coverage, so
-it's probably useful to have anyway, thanks for working on this.
+Yes! Good catch!
 
---b.
+> is a block device?  I don't think you get this explicitly tested with
+> _test_cycle_mount?
+> 
+> I think you're also missing a:
+> 	_require_pmem_key_value $SCRATCH_DEV "mode" "memory"
 
-> >> 4. Get file handles, unlink test files w/o the hardlinks (nlink=1),
-> >>    drop caches and try to open by handle (expects success):
-> >>  $ open_by_handle -u <test_dir> [N]
-> >>
-> >> 5. Get file handles, unlink test files and hardlinks (nlink=0),
-> >>    drop caches and try to open by handle (expects failure):
-> >>  $ open_by_handle -d <test_dir> [N]
-> >>
-> >> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> >> ---
-> >>  src/open_by_handle.c | 93 ++++++++++++++++++++++++++++++++++++++++++++--------
-> >>  1 file changed, 80 insertions(+), 13 deletions(-)
-> >>
-> >> diff --git a/src/open_by_handle.c b/src/open_by_handle.c
-> >> index 8f04865..c33a4aa 100644
-> >> --- a/src/open_by_handle.c
-> >> +++ b/src/open_by_handle.c
-> >> @@ -37,12 +37,12 @@
-> >>  #include <errno.h>
-> >>  #include <linux/limits.h>
-> >>
-> >> -#define NUMFILES 1024
-> >> +#define MAXFILES 1024
-> >>
-> >>  struct handle {
-> >>       struct file_handle fh;
-> >>       unsigned char fid[MAX_HANDLE_SZ];
-> >> -} handle[NUMFILES];
-> >> +} handle[MAXFILES];
-> >>
-> >>  int main(int argc, char **argv)
-> >>  {
-> >> @@ -51,18 +51,60 @@ int main(int argc, char **argv)
-> >>       int     ret;
-> >>       int     failed = 0;
-> >>       char    fname[PATH_MAX];
-> >> +     char    fname2[PATH_MAX];
-> >>       char    *test_dir;
-> >>       int     mount_fd, mount_id;
-> >> +     int     argi = 1, numfiles = 1;
-> >> +     int     create = 0, delete = 0, nlink = 1;
-> >>
-> >> -     if (argc != 2) {
-> >> -             fprintf(stderr, "usage: open_by_handle <test_dir>\n");
-> >> +     if (argc < 2 || argc > 4) {
-> >> +usage:
-> >> +             fprintf(stderr, "usage: open_by_handle [-c|-l|-u|-d] <test_dir> [num_files]\n");
-> >> +             fprintf(stderr, "\n");
-> >> +             fprintf(stderr, "open_by_handle -c <test_dir> [N] - create N test files under test_dir, get file handles and exit\n");
-> >> +             fprintf(stderr, "open_by_handle    <test_dir> [N] - get file handles, drop caches and try to open by handle (expects success)\n");
-> >> +             fprintf(stderr, "open_by_handle -l <test_dir> [N] - get file handles, create hardlinks to test files (nlink=2), drop caches and try to open by handle (expects success)\n");
-> >> +             fprintf(stderr, "open_by_handle -u <test_dir> [N] - get file handles, unlink test files w/o hardlinks (nlink=1), drop caches and try to open by handle (expects success)\n");
-> >> +             fprintf(stderr, "open_by_handle -d <test_dir> [N] - get file handles, unlink test files and hardlinks (nlink=0), drop caches and try to open by handle (expects failure)\n");
-> >>               return EXIT_FAILURE;
-> >>       }
-> >>
-> >> -     test_dir = argv[1];
-> >> +     if (argv[1][0] == '-') {
-> >> +             if (argv[1][2])
-> >> +                     goto usage;
-> >> +             switch (argv[1][1]) {
-> >> +             case 'c':
-> >> +                     create = 1;
-> >> +                     break;
-> >> +             case 'l':
-> >> +                     nlink = 2;
-> >> +                     break;
-> >> +             case 'u':
-> >> +                     delete = 1;
-> >> +                     nlink = 1;
-> >> +                     break;
-> >> +             case 'd':
-> >> +                     delete = 1;
-> >> +                     nlink = 0;
-> >> +                     break;
-> >> +             default:
-> >> +                     fprintf(stderr, "illegal option '%s'\n", argv[1]);
-> >> +             case 'h':
-> >> +                     goto usage;
-> >> +             }
-> >> +             argi++;
-> >> +     }
-> >> +     test_dir = argv[argi++];
-> >> +     if (argc > argi)
-> >> +             numfiles = atoi(argv[argi]);
-> >> +     if (!numfiles || numfiles > MAXFILES) {
-> >> +             fprintf(stderr, "illegal value '%s' for num_files\n", argv[argi]);
-> >> +             goto usage;
-> >> +     }
-> >> +
-> >>       mount_fd = open(test_dir, O_RDONLY|O_DIRECTORY);
-> >>       if (mount_fd < 0) {
-> >> -             perror("open test_dir");
-> >> +             perror(test_dir);
-> >>               return EXIT_FAILURE;
-> >>       }
-> >>
-> >> @@ -70,8 +112,9 @@ int main(int argc, char **argv)
-> >>        * create a large number of files to force allocation of new inode
-> >>        * chunks on disk.
-> >>        */
-> >> -     for (i=0; i < NUMFILES; i++) {
-> >> +     for (i=0; create && i < numfiles; i++) {
-> >>               sprintf(fname, "%s/file%06d", test_dir, i);
-> >> +             sprintf(fname2, "%s/link%06d", test_dir, i);
-> >>               fd = open(fname, O_RDWR | O_CREAT | O_TRUNC, 0644);
-> >>               if (fd < 0) {
-> >>                       printf("Warning (%s,%d), open(%s) failed.\n", __FILE__, __LINE__, fname);
-> >> @@ -79,13 +122,14 @@ int main(int argc, char **argv)
-> >>                       return EXIT_FAILURE;
-> >>               }
-> >>               close(fd);
-> >> +             ret = unlink(fname2);
-> >>       }
-> >>
-> >>       /* sync to get the new inodes to hit the disk */
-> >>       sync();
-> >>
-> >>       /* create the handles */
-> >> -     for (i=0; i < NUMFILES; i++) {
-> >> +     for (i=0; i < numfiles; i++) {
-> >>               sprintf(fname, "%s/file%06d", test_dir, i);
-> >>               handle[i].fh.handle_bytes = MAX_HANDLE_SZ;
-> >>               ret = name_to_handle_at(AT_FDCWD, fname, &handle[i].fh, &mount_id, 0);
-> >> @@ -95,14 +139,32 @@ int main(int argc, char **argv)
-> >>               }
-> >>       }
-> >>
-> >> +     /* after creating test set only check that fs supports exportfs */
-> >> +     if (create)
-> >> +             return EXIT_SUCCESS;
-> >> +
-> >> +     /* hardlink the files */
-> >> +     for (i=0; nlink > 1 && i < numfiles; i++) {
-> >> +             sprintf(fname, "%s/file%06d", test_dir, i);
-> >> +             sprintf(fname2, "%s/link%06d", test_dir, i);
-> >> +             ret = link(fname, fname2);
-> >> +             if (ret < 0) {
-> >> +                     perror("link");
-> >> +                     return EXIT_FAILURE;
-> >> +             }
-> >> +     }
-> >> +
-> >>       /* unlink the files */
-> >> -     for (i=0; i < NUMFILES; i++) {
-> >> +     for (i=0; delete && i < numfiles; i++) {
-> >>               sprintf(fname, "%s/file%06d", test_dir, i);
-> >> +             sprintf(fname2, "%s/link%06d", test_dir, i);
-> >>               ret = unlink(fname);
-> >>               if (ret < 0) {
-> >>                       perror("unlink");
-> >>                       return EXIT_FAILURE;
-> >>               }
-> >> +             if (!nlink)
-> >> +                     ret = unlink(fname2);
-> >>       }
-> >>
-> >>       /* sync to get log forced for unlink transactions to hit the disk */
-> >> @@ -126,17 +188,22 @@ int main(int argc, char **argv)
-> >>        * now try to open the files by the stored handles. Expecting ENOENT
-> >>        * for all of them.
-> >>        */
-> >> -     for (i=0; i < NUMFILES; i++) {
-> >> +     for (i=0; i < numfiles; i++) {
-> >>               errno = 0;
-> >>               fd = open_by_handle_at(mount_fd, &handle[i].fh, O_RDWR);
-> >> -             if (fd < 0 && (errno == ENOENT || errno == ESTALE)) {
-> >> +             if (nlink && fd >= 0) {
-> >> +                     close(fd);
-> >> +                     continue;
-> >> +             } else if (!nlink && fd < 0 && (errno == ENOENT || errno == ESTALE)) {
-> >>                       continue;
-> >>               }
-> >>               if (fd >= 0) {
-> >>                       printf("open_by_handle(%d) opened an unlinked file!\n", i);
-> >>                       close(fd);
-> >> -             } else
-> >> -                     printf("open_by_handle(%d) returned %d incorrectly on an unlinked file!\n", i, errno);
-> >> +             } else {
-> >> +                     printf("open_by_handle(%d) returned %d incorrectly on %s file!\n", i, errno,
-> >> +                                     nlink ? "a linked" : "an unlinked");
-> >> +             }
-> >>               failed++;
-> >>       }
-> >>       if (failed)
-> >> --
-> >> 2.7.4
+No. I don't wanna limit this test running only on "memory mode" pmem
+devices because it CAN run on "raw mode" devices. More testing will
+not hurt, :)
