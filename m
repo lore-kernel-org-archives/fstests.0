@@ -1,166 +1,128 @@
-Received: from mx1.redhat.com ([209.132.183.28]:35036 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:43646 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1759084AbdDSCyn (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 18 Apr 2017 22:54:43 -0400
-Date: Wed, 19 Apr 2017 10:54:40 +0800
+        id S1761004AbdDSIks (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 19 Apr 2017 04:40:48 -0400
+Date: Wed, 19 Apr 2017 16:40:45 +0800
 From: Xiong Zhou <xzhou@redhat.com>
-Subject: Re: [PATCH v4 4/4] generic: mmap write readonly DAX file
-Message-ID: <20170419025440.bedwhf4twz5bk77a@XZHOUW.usersys.redhat.com>
+Subject: Re: [PATCH v4 2/4] generic: test mmap io fom DAX to non-DAX
+Message-ID: <20170419084045.fquoubljwnxwwq4y@XZHOUW.usersys.redhat.com>
 References: <1492008380-29164-1-git-send-email-xzhou@redhat.com>
  <1492413255-11146-1-git-send-email-xzhou@redhat.com>
- <1492413255-11146-5-git-send-email-xzhou@redhat.com>
- <20170418170506.GD25618@linux.intel.com>
+ <1492413255-11146-3-git-send-email-xzhou@redhat.com>
+ <CAPcyv4g_+hWc4KbnvBnSsyDzwGxMaObfOfxEWqpwO_r1-iieug@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170418170506.GD25618@linux.intel.com>
+In-Reply-To: <CAPcyv4g_+hWc4KbnvBnSsyDzwGxMaObfOfxEWqpwO_r1-iieug@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ross Zwisler <ross.zwisler@linux.intel.com>
-Cc: Xiong Zhou <xzhou@redhat.com>, fstests@vger.kernel.org, dan.j.williams@intel.com, jmoyer@redhat.com, eguan@redhat.com
+To: Dan Williams <dan.j.williams@intel.com>
+Cc: Xiong Zhou <xzhou@redhat.com>, fstests@vger.kernel.org, Ross Zwisler <ross.zwisler@linux.intel.com>, jmoyer <jmoyer@redhat.com>, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Apr 18, 2017 at 11:05:06AM -0600, Ross Zwisler wrote:
-> On Mon, Apr 17, 2017 at 03:14:15PM +0800, Xiong Zhou wrote:
-> > Regression case that one can write to read-only
-> > file in a DAX mountpoint.
-> > 
+On Mon, Apr 17, 2017 at 07:14:32AM -0700, Dan Williams wrote:
+> On Mon, Apr 17, 2017 at 12:14 AM, Xiong Zhou <xzhou@redhat.com> wrote:
+> > Mount TEST_DEV as non-DAX, SCRATCH_DEV as DAX, then
+> > do mmap DIO from DAX to non-DAX.
+> >
+> > This test is split from generic/413. Since DIO from DAX
+> > to non-DAX is only supported/doable when device underneath
+> > has memory(struct page) backend.
+> >
+> > By ndctl looking at SCRATCH_DEV, skip this test if it is
+> > not in "memory mode".
+> >
+> > Adding helper to check pmem device status, which requires new
+> > PROGs ndctl to tweaking pmem devices and jq to parse ndctl's
+> > JSON format outputs.
+> >
 > > Signed-off-by: Xiong Zhou <xzhou@redhat.com>
-> 
-> Yep, this test works fine in my setup.  It fails for me, as expected, with
-> v4.10.0, and passes as expected with v4.10.3. I've added a few small comments
-> below, but with those addressed you can add:
-> 
-> Reviewed-by: Ross Zwisler <ross.zwisler@linux.intel.com>
-> 
-> > +int
-> > +main(int argc, char **argv)
+> > ---
+> >  common/rc             |  45 ++++++++++++++++++++
+> >  tests/generic/423     | 113 ++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/423.out |   2 +
+> >  tests/generic/group   |   1 +
+> >  4 files changed, 161 insertions(+)
+> >  create mode 100755 tests/generic/423
+> >  create mode 100644 tests/generic/423.out
+> >
+> > diff --git a/common/rc b/common/rc
+> > index 78a2101..73ac79c 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -3151,6 +3151,51 @@ _require_chattr()
+> >         rm -f $TEST_DIR/syscalltest.out
+> >  }
+> >
+> > +# Require test/scratch device nvdimm and having specific
+> > +# arttibute key/value we need.
+> > +#
+> > +# This is designed to get attr values of nvdimm persistent
+> > +# memory device, by searching sysfs.
+> > +#
+> > +# Other non-nvdimm or non-persistent-memory devices would
+> > +# fail this helper anyway.
+> > +#
+> > +# So, ONLY use this helper when you REALLY need nvdimm and
+> > +# specific attr on it.
+> > +#
+> > +_require_pmem_key_value()
 > > +{
-> > +	int fd, pfd, ret;
-> > +	char *buf;
-> > +	/* gcc -O2 will optimize foo's storage, preventing
-> > +	 * reproduce this issue.
-> > +	 * foo is never actually used after fault in value stored.
-> > +	 */
-> > +	volatile char foo __attribute__((__unused__));
-> > +	int pagesize = getpagesize();
+> > +       local dev=${1#/dev/}
+> > +       local key=$2
+> > +       local value=$3
+> > +       local region index keyfile dev_value
 > > +
-> > +	if (argc < 2) {
-> > +		printf("Usage: %s <file> <pmem file>\n", basename(argv[0]));
-> > +		exit(0);
-> > +	}
-> > +
-> > +	fd = open(argv[1], O_RDONLY|O_DIRECT);
-> > +	if (fd < 0)
-> > +		err_exit("open");
-> > +
-> > +	pfd = open(argv[2], O_RDONLY);
-> > +	if (pfd < 0)
-> > +		err_exit("pmem open");
-> > +
-> > +	buf = mmap(NULL, pagesize, PROT_READ, MAP_SHARED, pfd, 0);
-> > +	if (buf == MAP_FAILED)
-> > +		err_exit("mmap");
-> > +
-> > +	/*
-> > +	 * Read from the DAX mmap to populate the first page in the
-> > +	 * address_space with a read-only mapping.
-> > +	 */
-> > +	foo = *buf;
-> > +
-> > +	/*
-> > +	 * Now write to the DAX mmap.  This *should* fail, but if the bug is
-> > +	 * present in __get_user_pages_fast(), it will succeed.
-> > +	 */
-> > +	ret = read(fd, buf, pagesize);
-> > +	if (ret != pagesize)
-> > +		err_exit("read");
-> > +
-> > +	ret = msync(buf, pagesize, MS_SYNC);
-> > +	if (ret != 0)
-> > +		err_exit("msync");
-> > +
-> > +	ret = munmap(buf, pagesize);
-> > +	if (ret < 0)
-> > +		err_exit("munmap");
-> > +
-> > +	ret = close(fd);
-> > +	if (ret < 0)
-> > +		err_exit("clsoe fd");
-> 			  close
+> > +       # find a filename string contains the region of dev, eg:
+> > +       #  /sys/devices/platform/e820_pmem/ndbus0/region1/\
+> > +       #  namespace1.0/block/pmem1
+> > +       #
+> > +       region=$(find /sys/ | grep $dev | grep region | head -1)
+> > +       [ -z "$region" ] && \
+> > +         _notrun "requires persistent memory $dev $key $value"
 > 
-> > diff --git a/tests/generic/424 b/tests/generic/424
-> > new file mode 100755
-> > index 0000000..f73e08a
-> > --- /dev/null
-> > +++ b/tests/generic/424
-> > @@ -0,0 +1,92 @@
-> > +#! /bin/bash
-> > +# FS QA Test 424
-> > +#
-> > +# This is a regression test for kernel commit
-> > +#  ef947b2 x86, mm: fix gup_pte_range() vs DAX mappings
-> > +# created by Jeffrey Moyer <jmoyer@redhat.com>
-> > +#
-> > +# This is reproducible only when testing on pmem device
-> > +# which is configured in "memory mode", not in "raw mode".
-> > +#
-> > +#-----------------------------------------------------------------------
-> > +# Copyright (c) 2017 Red Hat.  All Rights Reserved.
-> > +#
-> > +# This program is free software; you can redistribute it and/or
-> > +# modify it under the terms of the GNU General Public License as
-> > +# published by the Free Software Foundation.
-> > +#
-> > +# This program is distributed in the hope that it would be useful,
-> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > +# GNU General Public License for more details.
-> > +#
-> > +# You should have received a copy of the GNU General Public License
-> > +# along with this program; if not, write the Free Software Foundation,
-> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > +#-----------------------------------------------------------------------
-> > +#
-> > +
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -rf $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
-> > +# Modify as appropriate.
-> > +_supported_fs generic
-> > +_supported_os Linux
-> > +_require_scratch_dax
-> > +_require_test_program "t_mmap_write_ro"
-> > +_require_user
-> 
-> Could also maybe benefit from "_require_test", which makes sure your TEST_DEV
+> Running 'find' in sysfs is overkill. You can go directly to the sysfs
+> path for a given block device by stat(1) on the block device special
+> file to get the device major and minor numbers. Then go directly to
+> the sysfs path for that device by following this link
 
-Yes! Good catch!
+> /sys/dev/block/$major:$minor.
 
-> is a block device?  I don't think you get this explicitly tested with
-> _test_cycle_mount?
-> 
-> I think you're also missing a:
-> 	_require_pmem_key_value $SCRATCH_DEV "mode" "memory"
+This sounds better. While I have trouble with getting the right region
+mode through this sysfs path.
 
-No. I don't wanna limit this test running only on "memory mode" pmem
-devices because it CAN run on "raw mode" devices. More testing will
-not hurt, :)
+sh-4.2# ndctl list -r 2 -N
+{
+  "dev":"namespace2.0",
+  "mode":"raw",
+  "size":8589934592,
+  "blockdev":"pmem2"
+}
+sh-4.2# cat /sys/devices/LNXSYSTM:00/device:00/ACPI0012:00/ndbus0/region2/namespace2.0/mode
+raw
+sh-4.2# stat -c %t:%T /dev/pmem2
+103:2
+sh-4.2# cat /sys/dev/block/259\:2/device/mode
+raw
+sh-4.2# ndctl create-namespace -f -e namespace2.0 -m memory
+{
+  "dev":"namespace2.0",
+  "mode":"memory",
+  "size":8453619712,
+  "uuid":"66d5afc1-6876-4e8b-a0ba-0082af84bf82",
+  "blockdev":"pmem2"
+}
+sh-4.2# stat -c %t:%T /dev/pmem2
+103:2
+sh-4.2# cat /sys/dev/block/259\:2/device/mode     # Here
+pmem
+sh-4.2# cat /sys/devices/LNXSYSTM:00/device:00/ACPI0012:00/ndbus0/region2/namespace2.0/mode
+memory
+sh-4.2# ndctl list -r 2 -N
+{
+  "dev":"namespace2.0",
+  "mode":"memory",
+  "size":8453619712,
+  "uuid":"66d5afc1-6876-4e8b-a0ba-0082af84bf82",
+  "blockdev":"pmem2"
+}
+sh-4.2# 
