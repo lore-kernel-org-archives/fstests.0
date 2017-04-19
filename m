@@ -1,42 +1,29 @@
-Received: from mx1.redhat.com ([209.132.183.28]:33112 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1761980AbdDSKCL (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 19 Apr 2017 06:02:11 -0400
-Date: Wed, 19 Apr 2017 18:02:08 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/4] src/open_by_handle: flexible usage options
-Message-ID: <20170419100208.GS8951@eguan.usersys.redhat.com>
-References: <1492539444-25938-1-git-send-email-amir73il@gmail.com>
- <1492539444-25938-3-git-send-email-amir73il@gmail.com>
- <20170419094202.GO8951@eguan.usersys.redhat.com>
- <CAOQ4uxjo+tMAnCWYfby-n+dJSyYCe1q1MHDvTkF=DDMQeS071w@mail.gmail.com>
+Received: from mail-oi0-f51.google.com ([209.85.218.51]:34470 "EHLO
+        mail-oi0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1761817AbdDSKI6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 19 Apr 2017 06:08:58 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxjo+tMAnCWYfby-n+dJSyYCe1q1MHDvTkF=DDMQeS071w@mail.gmail.com>
+In-Reply-To: <9896.1492595482@warthog.procyon.org.uk>
+References: <1492539444-25938-1-git-send-email-amir73il@gmail.com>
+ <1492539444-25938-2-git-send-email-amir73il@gmail.com> <9896.1492595482@warthog.procyon.org.uk>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Wed, 19 Apr 2017 13:08:57 +0300
+Message-ID: <CAOQ4uxg6WMYLFB=GwCRyb3UiJFYDBhoBfERacG9niVtnXXxM_Q@mail.gmail.com>
+Subject: Re: [PATCH 1/4] src/open_by_handle: helper to test
+ open_by_handle_at() syscall
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, Trond Myklebust <trondmy@primarydata.com>, Jeff Layton <jlayton@poochiereds.net>, "J . Bruce Fields" <bfields@fieldses.org>, fstests <fstests@vger.kernel.org>, linux-unionfs@vger.kernel.org
+To: David Howells <dhowells@redhat.com>
+Cc: Eryu Guan <eguan@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, Trond Myklebust <trondmy@primarydata.com>, Jeff Layton <jlayton@poochiereds.net>, "J . Bruce Fields" <bfields@fieldses.org>, fstests <fstests@vger.kernel.org>, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 19, 2017 at 12:57:49PM +0300, Amir Goldstein wrote:
-...
-> >> @@ -95,14 +139,32 @@ int main(int argc, char **argv)
-> >>               }
-> >>       }
-> >>
-> >> +     /* after creating test set only check that fs supports exportfs */
-> >> +     if (create)
-> >> +             return EXIT_SUCCESS;
-> >
-> > "-c" means "Create N test files (nlink=1) under test_dir and exit", so
-> > we could move it before name_to_handle_at() calls?
-> 
-> That's the wording from commit message which is out of date.
-> usage says -c also tries to get handles, because it is being used for
-> _require_exportfs
+On Wed, Apr 19, 2017 at 12:51 PM, David Howells <dhowells@redhat.com> wrote:
+> Amir Goldstein <amir73il@gmail.com> wrote:
+>
+>> This is a clone of src/stale_handle.c test that uses generic
+>> open_by_handle_at() syscall instead of the xfs specific ioctl.
+>
+> Don't forget to add it to doc/auxiliary-programs.txt!
+>
 
-Right, I missed that. Then yes, commit message should be updated :)
-
-Thanks,
-Eryu
+Will do :) Thanks!
