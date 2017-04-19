@@ -1,130 +1,51 @@
-Received: from mail-yw0-f178.google.com ([209.85.161.178]:33827 "EHLO
-        mail-yw0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S937536AbdDSPxv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Apr 2017 11:53:51 -0400
-Received: by mail-yw0-f178.google.com with SMTP id k13so13702576ywk.1
-        for <fstests@vger.kernel.org>; Wed, 19 Apr 2017 08:53:50 -0700 (PDT)
-MIME-Version: 1.0
-In-Reply-To: <20170419084045.fquoubljwnxwwq4y@XZHOUW.usersys.redhat.com>
-References: <1492008380-29164-1-git-send-email-xzhou@redhat.com>
- <1492413255-11146-1-git-send-email-xzhou@redhat.com> <1492413255-11146-3-git-send-email-xzhou@redhat.com>
- <CAPcyv4g_+hWc4KbnvBnSsyDzwGxMaObfOfxEWqpwO_r1-iieug@mail.gmail.com> <20170419084045.fquoubljwnxwwq4y@XZHOUW.usersys.redhat.com>
-From: Dan Williams <dan.j.williams@intel.com>
-Date: Wed, 19 Apr 2017 08:53:49 -0700
-Message-ID: <CAPcyv4iH3=WvXPqrQtS5FShfRAbQhW=bVpnx_Ao=JEXdR7RUMw@mail.gmail.com>
-Subject: Re: [PATCH v4 2/4] generic: test mmap io fom DAX to non-DAX
-Content-Type: text/plain; charset=UTF-8
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:33395 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S937939AbdDSQ3K (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 19 Apr 2017 12:29:10 -0400
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH v2 0/4] fstests: generic test for NFS handles
+Date: Wed, 19 Apr 2017 19:29:15 +0300
+Message-Id: <1492619359-24763-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Xiong Zhou <xzhou@redhat.com>
-Cc: fstests@vger.kernel.org, Ross Zwisler <ross.zwisler@linux.intel.com>, jmoyer <jmoyer@redhat.com>, Eryu Guan <eguan@redhat.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Trond Myklebust <trondmy@primarydata.com>, Jeff Layton <jlayton@poochiereds.net>, "J . Bruce Fields" <bfields@fieldses.org>, David Howells <dhowells@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 19, 2017 at 1:40 AM, Xiong Zhou <xzhou@redhat.com> wrote:
-> On Mon, Apr 17, 2017 at 07:14:32AM -0700, Dan Williams wrote:
->> On Mon, Apr 17, 2017 at 12:14 AM, Xiong Zhou <xzhou@redhat.com> wrote:
->> > Mount TEST_DEV as non-DAX, SCRATCH_DEV as DAX, then
->> > do mmap DIO from DAX to non-DAX.
->> >
->> > This test is split from generic/413. Since DIO from DAX
->> > to non-DAX is only supported/doable when device underneath
->> > has memory(struct page) backend.
->> >
->> > By ndctl looking at SCRATCH_DEV, skip this test if it is
->> > not in "memory mode".
->> >
->> > Adding helper to check pmem device status, which requires new
->> > PROGs ndctl to tweaking pmem devices and jq to parse ndctl's
->> > JSON format outputs.
->> >
->> > Signed-off-by: Xiong Zhou <xzhou@redhat.com>
->> > ---
->> >  common/rc             |  45 ++++++++++++++++++++
->> >  tests/generic/423     | 113 ++++++++++++++++++++++++++++++++++++++++++++++++++
->> >  tests/generic/423.out |   2 +
->> >  tests/generic/group   |   1 +
->> >  4 files changed, 161 insertions(+)
->> >  create mode 100755 tests/generic/423
->> >  create mode 100644 tests/generic/423.out
->> >
->> > diff --git a/common/rc b/common/rc
->> > index 78a2101..73ac79c 100644
->> > --- a/common/rc
->> > +++ b/common/rc
->> > @@ -3151,6 +3151,51 @@ _require_chattr()
->> >         rm -f $TEST_DIR/syscalltest.out
->> >  }
->> >
->> > +# Require test/scratch device nvdimm and having specific
->> > +# arttibute key/value we need.
->> > +#
->> > +# This is designed to get attr values of nvdimm persistent
->> > +# memory device, by searching sysfs.
->> > +#
->> > +# Other non-nvdimm or non-persistent-memory devices would
->> > +# fail this helper anyway.
->> > +#
->> > +# So, ONLY use this helper when you REALLY need nvdimm and
->> > +# specific attr on it.
->> > +#
->> > +_require_pmem_key_value()
->> > +{
->> > +       local dev=${1#/dev/}
->> > +       local key=$2
->> > +       local value=$3
->> > +       local region index keyfile dev_value
->> > +
->> > +       # find a filename string contains the region of dev, eg:
->> > +       #  /sys/devices/platform/e820_pmem/ndbus0/region1/\
->> > +       #  namespace1.0/block/pmem1
->> > +       #
->> > +       region=$(find /sys/ | grep $dev | grep region | head -1)
->> > +       [ -z "$region" ] && \
->> > +         _notrun "requires persistent memory $dev $key $value"
->>
->> Running 'find' in sysfs is overkill. You can go directly to the sysfs
->> path for a given block device by stat(1) on the block device special
->> file to get the device major and minor numbers. Then go directly to
->> the sysfs path for that device by following this link
->
->> /sys/dev/block/$major:$minor.
->
-> This sounds better. While I have trouble with getting the right region
-> mode through this sysfs path.
->
-> sh-4.2# ndctl list -r 2 -N
-> {
->   "dev":"namespace2.0",
->   "mode":"raw",
->   "size":8589934592,
->   "blockdev":"pmem2"
-> }
-> sh-4.2# cat /sys/devices/LNXSYSTM:00/device:00/ACPI0012:00/ndbus0/region2/namespace2.0/mode
-> raw
-> sh-4.2# stat -c %t:%T /dev/pmem2
-> 103:2
-> sh-4.2# cat /sys/dev/block/259\:2/device/mode
-> raw
-> sh-4.2# ndctl create-namespace -f -e namespace2.0 -m memory
-> {
->   "dev":"namespace2.0",
->   "mode":"memory",
->   "size":8453619712,
->   "uuid":"66d5afc1-6876-4e8b-a0ba-0082af84bf82",
->   "blockdev":"pmem2"
-> }
-> sh-4.2# stat -c %t:%T /dev/pmem2
-> 103:2
-> sh-4.2# cat /sys/dev/block/259\:2/device/mode     # Here
-> pmem
+Hi Eryu,
 
-This is another reason to use ndctl and not sysfs directly. After the
-create-namespace command the namespace is "claimed" by a pfn-device
-instance which writes metadata to the device to indicate where the
-struct page memmap is located. In this case the sysfs path for the
-parent device is a pfn-device. So the "device/mode" link is pointing
-to:
+Changes since v1:
+- Build time checks for open_by_handle_at()
+- Update docs
+- Improve usage and commit messages
+- Remove unused program open_unlink
+- Squash _require_exportfs into patch 3
+- Change test to run on $TEST_DIR/$seq-dir
 
-    /sys/devices/LNXSYSTM:00/device:00/ACPI0012:00/ndbus0/region2/pfn2.0/mode
+Amir Goldstein (4):
+  fstests: remove IRIX test program open_unlink
+  src/open_by_handle: program to exercise open_by_handle_at() syscall
+  src/open_by_handle: flexible usage options
+  fstests: add generic test for file handles
 
-...and in that case "pmem" means that the struct page memmap is being
-allocated on the pmem range directly.
+ .gitignore                   |   1 +
+ aclocal.m4                   |  15 +++
+ common/rc                    |  10 ++
+ configure.ac                 |   1 +
+ doc/auxiliary-programs.txt   |  16 ++-
+ doc/requirement-checking.txt |   7 ++
+ include/builddefs.in         |   1 +
+ src/Makefile                 |   7 +-
+ src/open_by_handle.c         | 261 +++++++++++++++++++++++++++++++++++++++++++
+ src/open_unlink.c            | 147 ------------------------
+ tests/generic/426            |  74 ++++++++++++
+ tests/generic/426.out        |   2 +
+ tests/generic/group          |   1 +
+ 13 files changed, 390 insertions(+), 153 deletions(-)
+ create mode 100644 src/open_by_handle.c
+ delete mode 100644 src/open_unlink.c
+ create mode 100755 tests/generic/426
+ create mode 100644 tests/generic/426.out
+
+-- 
+2.7.4
+
