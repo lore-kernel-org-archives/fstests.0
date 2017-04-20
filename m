@@ -1,50 +1,59 @@
-Received: from mail-io0-f175.google.com ([209.85.223.175]:34062 "EHLO
-        mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S968551AbdDSXzC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Apr 2017 19:55:02 -0400
-Received: by mail-io0-f175.google.com with SMTP id a103so44156829ioj.1
-        for <fstests@vger.kernel.org>; Wed, 19 Apr 2017 16:55:02 -0700 (PDT)
-From: Gwendal Grignou <gwendal@chromium.org>
-Subject: [PATCH] generic: fix statx definition for non-x86 architecture
-Date: Wed, 19 Apr 2017 16:54:53 -0700
-Message-Id: <20170419235453.8237-1-gwendal@chromium.org>
+Received: from sandeen.net ([63.231.237.45]:38724 "EHLO sandeen.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S937876AbdDTA1i (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 19 Apr 2017 20:27:38 -0400
+Subject: Re: [PATCH] generic: fix statx definition for non-x86 architecture
+References: <20170419235453.8237-1-gwendal@chromium.org>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <2d3170ce-77ce-c33f-a7a8-b681d1da92db@sandeen.net>
+Date: Wed, 19 Apr 2017 19:27:36 -0500
+MIME-Version: 1.0
+In-Reply-To: <20170419235453.8237-1-gwendal@chromium.org>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: dhowells@redhat.com, eguan@redhat.com
+To: Gwendal Grignou <gwendal@chromium.org>, dhowells@redhat.com, eguan@redhat.com
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Fix a compilation error for ARM:
-__ILP32__ is defined but not __X32_SYSCALL_BIT.
+On 4/19/17 6:54 PM, Gwendal Grignou wrote:
+> Fix a compilation error for ARM:
+> __ILP32__ is defined but not __X32_SYSCALL_BIT.
+> 
+> The check should only apply for x86_64 architecture, statx for other
+> architectures is not implemented yet - see commit 7acc839c9e57
+> "statx: Add a system call to make enhanced file info available".
+> 
+> Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
 
-The check should only apply for x86_64 architecture, statx for other
-architectures is not implemented yet - see commit 7acc839c9e57
-"statx: Add a system call to make enhanced file info available".
+Reviewed-by: Eric Sandeen <sandeen@redhat.com>
 
-Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
----
- src/statx.h | 8 +++++---
- 1 file changed, 5 insertions(+), 3 deletions(-)
+probably needs fixing in xfs_io too, thanks.
 
-diff --git a/src/statx.h b/src/statx.h
-index b491c018..5d58208a 100644
---- a/src/statx.h
-+++ b/src/statx.h
-@@ -19,10 +19,12 @@
- #ifndef __NR_statx
- # ifdef __i386__
- #  define __NR_statx 383
--# elif defined (__ILP32__)
--#  define __NR_statx (__X32_SYSCALL_BIT + 332)
- # elif defined(__x86_64__)
--#  define __NR_statx 332
-+#  if defined (__ILP32__)
-+#   define __NR_statx (__X32_SYSCALL_BIT + 332)
-+#  else
-+#   define __NR_statx 332
-+#  endif
- # endif
- #endif
- 
--- 
-2.12.2
+-Eric
 
+> ---
+>  src/statx.h | 8 +++++---
+>  1 file changed, 5 insertions(+), 3 deletions(-)
+> 
+> diff --git a/src/statx.h b/src/statx.h
+> index b491c018..5d58208a 100644
+> --- a/src/statx.h
+> +++ b/src/statx.h
+> @@ -19,10 +19,12 @@
+>  #ifndef __NR_statx
+>  # ifdef __i386__
+>  #  define __NR_statx 383
+> -# elif defined (__ILP32__)
+> -#  define __NR_statx (__X32_SYSCALL_BIT + 332)
+>  # elif defined(__x86_64__)
+> -#  define __NR_statx 332
+> +#  if defined (__ILP32__)
+> +#   define __NR_statx (__X32_SYSCALL_BIT + 332)
+> +#  else
+> +#   define __NR_statx 332
+> +#  endif
+>  # endif
+>  #endif
+>  
+> 
