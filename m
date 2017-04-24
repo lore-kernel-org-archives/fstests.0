@@ -1,272 +1,358 @@
-Received: from mx1.redhat.com ([209.132.183.28]:41800 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:48638 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1169708AbdDXMQw (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 24 Apr 2017 08:16:52 -0400
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id C235779350
-        for <fstests@vger.kernel.org>; Mon, 24 Apr 2017 12:16:50 +0000 (UTC)
-Date: Mon, 24 Apr 2017 08:16:49 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH] generic: test eofblocks race with file extending aio dio
- writes
-Message-ID: <20170424121647.GA10555@bfoster.bfoster>
-References: <1492701663-9209-1-git-send-email-zlang@redhat.com>
- <20170420182228.GA47198@bfoster.bfoster>
- <20170424053242.GN5081@dhcp12-143.nay.redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170424053242.GN5081@dhcp12-143.nay.redhat.com>
+        id S1171731AbdDXNqA (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 24 Apr 2017 09:46:00 -0400
+From: Jeff Layton <jlayton@redhat.com>
+Subject: [RFC xfstests PATCH] xfstests: add a writeback error handling test
+Date: Mon, 24 Apr 2017 09:45:51 -0400
+Message-Id: <20170424134551.10301-1-jlayton@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-cifs@vger.kernel.org, linux-mm@kvack.org, jfs-discussion@lists.sourceforge.net, linux-xfs@vger.kernel.org, cluster-devel@redhat.com, linux-f2fs-devel@lists.sourceforge.net, v9fs-developer@lists.sourceforge.net, osd-dev@open-osd.org, linux-nilfs@vger.kernel.org, linux-block@vger.kernel.org
+Cc: dhowells@redhat.com, akpm@linux-foundation.org, hch@infradead.org, ross.zwisler@linux.intel.com, mawilcox@microsoft.com, jack@suse.com, viro@zeniv.linux.org.uk, corbet@lwn.net, neilb@suse.de, clm@fb.com, tytso@mit.edu, axboe@kernel.dk
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Apr 24, 2017 at 01:32:42PM +0800, Zorro Lang wrote:
-> On Thu, Apr 20, 2017 at 02:22:30PM -0400, Brian Foster wrote:
-> > On Thu, Apr 20, 2017 at 11:21:03PM +0800, Zorro Lang wrote:
-> > > It's possible for post-eof blocks to end up being used for direct I/O
-> > > writes. dio write performs an upfront unwritten extent allocation, sends
-> > > the dio and then updates the inode size (if necessary) on write
-> > > completion. If a file release occurs while a file extending dio write is
-> > > in flight, it is possible to mistake the post-eof blocks for speculative
-> > > preallocation and incorrectly truncate them from the inode. This means
-> > > that the resulting dio write completion can discover a hole and allocate
-> > > new blocks rather than perform unwritten extent conversion.
-> > > 
-> > > A kernel warning can be reproduced by generic/299 on XFS:
-> > >   XFS: Assertion failed: tp->t_blk_res_used <= tp->t_blk_res, \
-> > >        file: fs/xfs//xfs_trans.c, line: 309
-> > > 
-> > 
-> > It might be important to point out that this test also exposes file
-> > corruption and/or stale data exposure. E.g., the verification of written
-> > data is an important distinction between this test and generic/299.
-> 
-> Sure, I'll add that. Hah, Sorry I pasted your commit log at here directly :)
-> 
-> > 
-> > > The root cause is that xfs_free_eofblocks() uses i_size to truncate
-> > > post-eof blocks from the inode, but async, file extending direct writes
-> > > do not update i_size until write completion, long after inode locks are
-> > > dropped. Therefore, xfs_free_eofblocks() effectively truncates the inode
-> > > to the incorrect size.
-> > > 
-> > > For cover this filesystem corruption testing, write this new case to
-> > > check data integrality manually, not only depend on a kernel warning.
-> > > 
-> > > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > > ---
-> > > 
-> > > Hi,
-> > > 
-> > > This case is similar with generic/114 which use same aio-dio-eof-race.c
-> > > program. I was planning to write an aio writer, but I found there's
-> > > already a good program written by Eric, so I turn to use it directly :)
-> > > 
-> > 
-> > Well, that is convenient. ;) A few quick notes...
-> 
-> Yeah, but I've written one, then I found this one T_T..
-> 
-> > 
-> > > This case is different with g/114, this case runs aio-dio-eof-race
-> > > with an "open & close" process together. This multi-processes
-> > > maybe trigger a free_eofblocks race with file extending dio write.
-> > > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > > 
-> > >  tests/generic/426     | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/generic/426.out |  2 ++
-> > >  tests/generic/group   |  1 +
-> > >  3 files changed, 90 insertions(+)
-> > >  create mode 100755 tests/generic/426
-> > >  create mode 100644 tests/generic/426.out
-> > > 
-> > > diff --git a/tests/generic/426 b/tests/generic/426
-> > > new file mode 100755
-> > > index 0000000..ff022ad
-> > > --- /dev/null
-> > > +++ b/tests/generic/426
-> > > @@ -0,0 +1,87 @@
-> > > +#! /bin/bash
-> > > +# FS QA Test 426
-> > > +#
-> > > +# Try to trigger a race of free eofblocks and file extending dio writes.
-> > > +# A known bug of XFS has been fixed by "e4229d6 xfs: fix eofblocks race
-> > > +# with file extending async dio writes"
-> > > +#
-> > > +#-----------------------------------------------------------------------
-> > > +# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
-> > > +#
-> > > +# This program is free software; you can redistribute it and/or
-> > > +# modify it under the terms of the GNU General Public License as
-> > > +# published by the Free Software Foundation.
-> > > +#
-> > > +# This program is distributed in the hope that it would be useful,
-> > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > > +# GNU General Public License for more details.
-> > > +#
-> > > +# You should have received a copy of the GNU General Public License
-> > > +# along with this program; if not, write the Free Software Foundation,
-> > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > > +#-----------------------------------------------------------------------
-> > > +#
-> > > +
-> > > +seq=`basename $0`
-> > > +seqres=$RESULT_DIR/$seq
-> > > +echo "QA output created by $seq"
-> > > +
-> > > +here=`pwd`
-> > > +tmp=/tmp/$$
-> > > +status=1	# failure is the default!
-> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +	cd /
-> > > +	rm -f $tmp.*
-> > > +}
-> > > +
-> > > +# get standard environment, filters and checks
-> > > +. ./common/rc
-> > > +. ./common/filter
-> > > +
-> > > +# remove previous $seqres.full before test
-> > > +rm -f $seqres.full
-> > > +
-> > > +# real QA test starts here
-> > > +
-> > > +# Modify as appropriate.
-> > > +_supported_fs generic
-> > > +_supported_os Linux
-> > > +_require_scratch
-> > > +_require_aiodio aio-dio-eof-race
-> > > +
-> > 
-> > It looks like this tool doesn't do a ton of writing... up to 8MB. Has
-> > that proven to be a reliable reproducer in your testing so far? I'm kind
-> > of wondering if we should update that tool with a flag to accept a
-> > configurable file size, but that's not a big deal if the reproducer is
-> > reliable.
-> 
-> Yes, compare with the original reproducer of this bug, aio-dio-eof-race
-> do leass writing. For reproduce this bug, I increase the frequence of
-> open & close (no sleep 1), then the bug still can be reproduced as my
-> testing with very high reproducible.
-> 
-> I was thinking if I should change aio-dio-eof-race.c, because I don't know
-> if it always can be 100% reproduced on high performance machine.
-> 
+This is just an RFC set for now. I've numbered it 999 for the moment so
+as not to collide with tests being added.
 
-Ok, well it may be worth a try on a different environment, though I
-would expect it to still work.
+I'm working on a set of kernel patches to change how writeback errors
+are handled and reported in the kernel. Instead of reporting a
+writeback error to only the first fsync caller on the file, I aim
+to make the kernel report them once on every file description:
 
-> > 
-> > > +# limit the filesystem size, to save the time of filling filesystem
-> > > +_scratch_mkfs_sized $((1024 * 1024 * 1024)) >>$seqres.full 2>&1
-> > > +_scratch_mount
-> > > +
-> > 
-> > That's 1G... I wonder if we can get away with smaller (a couple hundred
-> > MB perhaps?), since we have to fill the whole thing first.
-> 
-> Sure, how about 512MB or 256MB? What's the minimum hint size of XFS?
-> 
+    https://lkml.org/lkml/2017/4/24/438
 
-IMO, the smallest you can possibly use, the better. I'm not sure we have
-a specific min size, it may depend on what mkfs options are provided.
-256MB sounds more reasonable to me...? This is something that is
-probably going to run during every auto xfstests run, so the less time
-spent doing unnecessary test preparation like stamping unused fs blocks
-with a pattern, the easier it is to keep the overall runtime down.
+This patch adds a test for the new behavior. Basically, open many fds to
+the same file, turn on dm_error, write to each of the fds, and then
+fsync them all to ensure that they all get an error back. 
 
-Brian
+With the patch series above, ext4 now passes. xfs and btrfs end up in
+r/o mode after the test. xfs returns -EIO at that point though, and
+btrfs returns -EROFS. What behavior we actually want there, I'm not
+certain. We might be able to mitigate that by putting the journals on a
+separate device?
 
-> > 
-> > > +# try to write more bytes than filesystem size to fill the filesystem
-> > > +$XFS_IO_PROG -f -c "pwrite -S 0x55 0 $((1024 * 1024 * 1024 * 2))" \
-> > > +	     $SCRATCH_MNT/fillfs-$seq 2>/dev/null
-> > > +rm -f $SCRATCH_MNT/fillfs-$seq
-> > > +
-> > > +# start a background aio writer, which does several extending loops
-> > > +# internally and check data integrality
-> > > +$AIO_TEST $SCRATCH_MNT/tst-aio-dio-eof-race.$seq &
-> > > +aio_pid=$!
-> > > +
-> > > +# open & close the file frequently, to trigger xfs_free_eofblocks
-> > > +while true; do
-> > > +	cat $SCRATCH_MNT/tst-aio-dio-eof-race.$seq >/dev/null 2>&1
-> > > +done &
-> > > +open_close_pid=$!
-> > > +
-> > 
-> > We probably want to start the open/close loop before the writer to
-> > reduce the chances of the writer doing much work before the open/close
-> > loop actually starts.
-> > 
-> > I also wonder if something like the following would be better than using
-> > cat:
-> > 
-> > while true; do
-> > 	exec 3<>$SCRATCH_MNT/tst-aio-dio-eof-race.$seq
-> > 	exec 3<>-
-> > done
-> > 
-> > ... because we can skip useless reads of the file. Something like
-> > '$XFS_IO -c open <file>' may be another option as well.
-> 
-> Sure, that's better !
-> 
-> > 
-> > Brian
-> > 
-> > > +wait $aio_pid
-> > > +status=$?
-> > > +kill $open_close_pid
-> > > +wait $open_close_pid
-> > > +if [ $status -ne 0 ]; then
-> > > +	od -t x1 $SCRATCH_MNT/tst-aio-dio-eof-race.$seq >> $seqres.full
-> > > +	exit
-> > > +fi
-> > > +
-> > > +# success, all done
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/generic/426.out b/tests/generic/426.out
-> > > new file mode 100644
-> > > index 0000000..ad7a01a
-> > > --- /dev/null
-> > > +++ b/tests/generic/426.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 426
-> > > +Success, all done.
-> > > diff --git a/tests/generic/group b/tests/generic/group
-> > > index 6d6e4f6..70c36f9 100644
-> > > --- a/tests/generic/group
-> > > +++ b/tests/generic/group
-> > > @@ -428,3 +428,4 @@
-> > >  423 auto quick
-> > >  424 auto quick
-> > >  425 auto quick attr
-> > > +426 auto aio rw
-> > > -- 
-> > > 2.7.4
-> > > 
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Signed-off-by: Jeff Layton <jlayton@redhat.com>
+---
+ common/dmerror        |  13 ++++---
+ src/Makefile          |   2 +-
+ src/fsync-err.c       | 102 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/999     |  74 ++++++++++++++++++++++++++++++++++++
+ tests/generic/999.out |   3 ++
+ tests/generic/group   |   1 +
+ tools/dmerror         |  47 +++++++++++++++++++++++
+ 7 files changed, 236 insertions(+), 6 deletions(-)
+ create mode 100644 src/fsync-err.c
+ create mode 100755 tests/generic/999
+ create mode 100644 tests/generic/999.out
+ create mode 100755 tools/dmerror
+
+diff --git a/common/dmerror b/common/dmerror
+index d46c5d0b7266..238baa213b1f 100644
+--- a/common/dmerror
++++ b/common/dmerror
+@@ -23,22 +23,25 @@ if [ $? -eq 0 ]; then
+ 	_notrun "Cannot run tests with DAX on dmerror devices"
+ fi
+ 
+-_dmerror_init()
++_dmerror_setup()
+ {
+ 	local dm_backing_dev=$SCRATCH_DEV
+ 
+-	$DMSETUP_PROG remove error-test > /dev/null 2>&1
+-
+ 	local blk_dev_size=`blockdev --getsz $dm_backing_dev`
+ 
+ 	DMERROR_DEV='/dev/mapper/error-test'
+ 
+ 	DMLINEAR_TABLE="0 $blk_dev_size linear $dm_backing_dev 0"
+ 
++	DMERROR_TABLE="0 $blk_dev_size error $dm_backing_dev 0"
++}
++
++_dmerror_init()
++{
++	_dmerror_setup
++	$DMSETUP_PROG remove error-test > /dev/null 2>&1
+ 	$DMSETUP_PROG create error-test --table "$DMLINEAR_TABLE" || \
+ 		_fatal "failed to create dm linear device"
+-
+-	DMERROR_TABLE="0 $blk_dev_size error $dm_backing_dev 0"
+ }
+ 
+ _dmerror_mount()
+diff --git a/src/Makefile b/src/Makefile
+index e62d7a9774d7..056a75b9f7bb 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -12,7 +12,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	godown resvtest writemod makeextents itrash rename \
+ 	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
+ 	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
+-	holetest t_truncate_self t_mmap_dio af_unix
++	holetest t_truncate_self t_mmap_dio af_unix fsync-err
+ 
+ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+diff --git a/src/fsync-err.c b/src/fsync-err.c
+new file mode 100644
+index 000000000000..8ebfd145bd70
+--- /dev/null
++++ b/src/fsync-err.c
+@@ -0,0 +1,102 @@
++/*
++ * fsync-err.c: test whether writeback errors are reported to all open fds
++ * Copyright (c) 2017: Jeff Layton <jlayton@redhat.com>
++ *
++ * Open a file several times, write to it and then fsync. Flip dm_error over
++ * to make the backing device stop working. Overwrite the same section and
++ * call fsync on all fds and verify that we get errors on all of them. Then,
++ * fsync one more time on all of them and verify that they return 0.
++ */
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <errno.h>
++#include <fcntl.h>
++#include <stdlib.h>
++#include <stdio.h>
++#include <string.h>
++#include <unistd.h>
++
++#define NUM_FDS	10
++
++static void usage() {
++	fprintf(stderr, "Usage: fsync-err <filename>\n");
++}
++
++int main(int argc, char **argv)
++{
++	int fd[NUM_FDS], ret, i;
++	char *fname, *buf;
++
++	if (argc < 1) {
++		usage();
++		return 1;
++	}
++
++	/* First argument is filename */
++	fname = argv[1];
++
++	for (i = 0; i < NUM_FDS; ++i) {
++		fd[i] = open(fname, O_WRONLY | O_CREAT | O_TRUNC, 0644);
++		if (fd[i] < 0) {
++			printf("open of fd[%d] failed: %m\n", i);
++			return 1;
++		}
++	}
++
++	buf = "foobar";
++	for (i = 0; i < NUM_FDS; ++i) {
++		ret = write(fd[i], buf, strlen(buf) + 1);
++		if (ret < 0) {
++			printf("First write on fd[%d] failed: %m\n", i);
++			return 1;
++		}
++	}
++
++	for (i = 0; i < NUM_FDS; ++i) {
++		ret = fsync(fd[i]);
++		if (ret < 0) {
++			printf("First fsync on fd[%d] failed: %m\n", i);
++			return 1;
++		}
++	}
++
++	/* flip the device to non-working mode */
++	ret = system("./tools/dmerror load_error_table");
++	if (ret) {
++		if (WIFEXITED(ret))
++			printf("system: program exited: %d\n",
++					WEXITSTATUS(ret));
++		else
++			printf("system: 0x%x\n", (int)ret);
++
++		return 1;
++	}
++
++	for (i = 0; i < NUM_FDS; ++i) {
++		ret = write(fd[i], buf, strlen(buf) + 1);
++		if (ret < 0) {
++			printf("Second write on fd[%d] failed: %m\n", i);
++			return 1;
++		}
++	}
++
++	for (i = 0; i < NUM_FDS; ++i) {
++		ret = fsync(fd[i]);
++		/* Now, we EXPECT the error! */
++		if (ret >= 0) {
++			printf("Success on second fsync on fd[%d]!\n", i);
++			return 1;
++		}
++	}
++
++	for (i = 0; i < NUM_FDS; ++i) {
++		ret = fsync(fd[i]);
++		if (ret < 0) {
++			/* Now the error should be clear */
++			printf("Third fsync on fd[%d] failed: %m\n", i);
++			return 1;
++		}
++	}
++	printf("Test passed!\n");
++	return 0;
++}
+diff --git a/tests/generic/999 b/tests/generic/999
+new file mode 100755
+index 000000000000..0ae20bb2c3a1
+--- /dev/null
++++ b/tests/generic/999
+@@ -0,0 +1,74 @@
++#! /bin/bash
++# FS QA Test No. 999
++#
++# Open a file several times, write to it, fsync on all fds and make sure that
++# they all return 0. Change the device to start throwing errors. Write again
++# on all fds and fsync on all fds. Ensure that we get errors on all of them.
++# Then fsync on all one last time and verify that all return 0.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017, Jeff Layton <jlayton@redhat.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.* $testdir
++    _dmerror_cleanup
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmerror
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch
++_require_dm_target error
++
++rm -f $seqres.full
++
++echo "Format and mount"
++$XFS_IO_PROG -d -c "pwrite -S 0x7c -b 1048576 0 $((64 * 1048576))" $SCRATCH_DEV >> $seqres.full
++_scratch_mkfs_sized $((64 * 1048576)) > $seqres.full 2>&1
++_dmerror_init
++_dmerror_mount >> $seqres.full 2>&1
++_dmerror_unmount
++_dmerror_mount
++
++_require_fs_space $SCRATCH_MNT 8192
++
++testfile=$SCRATCH_MNT/fsync-err-test
++
++$here/src/fsync-err $testfile
++
++# success, all done
++_dmerror_load_working_table
++_dmerror_unmount
++_dmerror_cleanup
++_repair_scratch_fs >> $seqres.full
++status=0
++exit
+diff --git a/tests/generic/999.out b/tests/generic/999.out
+new file mode 100644
+index 000000000000..2e48492ff6d1
+--- /dev/null
++++ b/tests/generic/999.out
+@@ -0,0 +1,3 @@
++QA output created by 999
++Format and mount
++Test passed!
+diff --git a/tests/generic/group b/tests/generic/group
+index 6d6e4f695905..1c7a14d35c42 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -428,3 +428,4 @@
+ 423 auto quick
+ 424 auto quick
+ 425 auto quick attr
++999 auto quick
+diff --git a/tools/dmerror b/tools/dmerror
+new file mode 100755
+index 000000000000..bc8fd78a46d6
+--- /dev/null
++++ b/tools/dmerror
+@@ -0,0 +1,47 @@
++#!/bin/bash
++#-----------------------------------------------------------------------
++# Copyright (c) 2017, Jeff Layton <jlayton@redhat.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++. ./common/rc
++. ./common/dmerror
++
++_dmerror_setup
++
++case $1 in
++cleanup)
++	_dmerror_cleanup
++	;;
++init)
++	_dmerror_init
++	;;
++load_error_table)
++	_dmerror_load_error_table
++	;;
++load_working_table)
++	_dmerror_load_working_table
++	;;
++mount)
++	_dmerror_mount
++	;;
++*)
++	echo "Usage: $0 {load_error_table}"
++	exit 1
++	;;
++esac
++
++status=0
++exit
+-- 
+2.9.3
+
