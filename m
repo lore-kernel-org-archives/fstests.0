@@ -1,132 +1,58 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:10543 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1165536AbdDXGeu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Apr 2017 02:34:50 -0400
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v2] ext4: check mount's handling for very large s_first_meta_bg
-Date: Mon, 24 Apr 2017 14:34:40 +0800
-Message-ID: <1493015680-7633-1-git-send-email-yangx.jy@cn.fujitsu.com>
-In-Reply-To: <20170424044717.GK26397@eguan.usersys.redhat.com>
-References: <20170424044717.GK26397@eguan.usersys.redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:41824 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1166973AbdDXInw (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 24 Apr 2017 04:43:52 -0400
+Date: Mon, 24 Apr 2017 16:43:39 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 1/2] ext4: check mount's handling for very large
+ s_first_meta_bg
+Message-ID: <20170424084339.GL26397@eguan.usersys.redhat.com>
+References: <1492769440-12413-1-git-send-email-yangx.jy@cn.fujitsu.com>
+ <20170424044717.GK26397@eguan.usersys.redhat.com>
+ <58FD929A.4040008@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <58FD929A.4040008@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com
-Cc: fstests@vger.kernel.org, Xiao Yang <yangx.jy@cn.fujitsu.com>
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On ext4 filesystem, the kernel carshes at mount time when
-s_first_meta_bg's value exceeds the largest possible meta_bg
-number.  This kernel bug has been fixed in:
+On Mon, Apr 24, 2017 at 01:52:26PM +0800, Xiao Yang wrote:
 
-3a4b77c ext4: validate s_first_meta_bg at mount time
+> > > +_require_command "$DEBUGFS_PROG" debugfs
+> > > +_require_ext4_mkfs_feature "bigalloc,meta_bg,^resize_inode"
+> > > +
+> > > +echo "Create ext4 fs and modify first_meta_bg's value"
+> > > +$MKFS_EXT4_PROG -F -b 4096 -O bigalloc,meta_bg,^resize_inode $SCRATCH_DEV 16m>>  $seqres.full 2>&1 \
+> > > +	|| _notrun "Could not create ext4 filesystem"
+> > _scratch_mkfs "-O bigalloc,meta_bg,^resize_inode">>  $seqres.full 2>&1
+> > 
+> > should be fine, if there're conflicts between MKFS_OPTIONS and these
+> > extra mkfs options _scratch_mkfs will mkfs again only with test-provided
+> > mkfs options.
+> > 
+> I will use _scratch_mkfs as you said.  However, i still specify 4096 as
+> block size, because debugfs can't set first_meta_bg
+> to 842150400 on RHEL7 when default block size is 1024.   Please see the
+> following e2fsprogs bug:
+> 
+> commit d36b957b345ee6e4b529be99b8fdc8d3e70ccdc1
+> Author: Darrick J. Wong <darrick.wong@oracle.com>
+> Date:   Sat Jan 11 13:58:15 2014 -0500
+> 
+>     libext2fs: don't always read backup group descriptors on a 1k-block
+> meta_bg fs
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
- tests/ext4/025     | 67 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/025.out |  4 ++++
- tests/ext4/group   |  1 +
- 3 files changed, 72 insertions(+)
- create mode 100755 tests/ext4/025
- create mode 100644 tests/ext4/025.out
+I noticed this too, debugfs failed to open ext4 fs when block size is 1k
+when testing on my rhel7 host. But I think what should be done is fixing
+e2fsprogs on RHEL7 not workarounding the bug in the test code. The test
+is doing nothing wrong, and it 'finds' a bug (test not run).
 
-diff --git a/tests/ext4/025 b/tests/ext4/025
-new file mode 100755
-index 0000000..703250c
---- /dev/null
-+++ b/tests/ext4/025
-@@ -0,0 +1,67 @@
-+#! /bin/bash
-+# FS QA Test ext4/025
-+#
-+# Regression test for commit:
-+# 3a4b77c ("ext4: validate s_first_meta_bg at mount time").
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Fujitsu.  All Rights Reserved.
-+# Author: Xiao Yang <yangx.jy@cn.fujitsu.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs ext4
-+_supported_os Linux
-+_require_scratch_nocheck
-+_require_command "$DEBUGFS_PROG" debugfs
-+_require_ext4_mkfs_feature "bigalloc,meta_bg,^resize_inode"
-+
-+echo "Create ext4 fs and modify first_meta_bg's value"
-+_scratch_mkfs "-b 4096 -O bigalloc,meta_bg,^resize_inode" >> $seqres.full 2>&1
-+
-+$DEBUGFS_PROG -w -R "ssv first_meta_bg 842150400" $SCRATCH_DEV >> $seqres.full 2>&1
-+
-+# check whether debugfs succeeds to set first_meta_bg to 842150400 or not
-+$DEBUGFS_PROG -R "show_super_stats" $SCRATCH_DEV 2>&1 | grep -q "First meta block group:   842150400" \
-+	|| _notrun "Could not set first_meta_bg to 842150400 successfully, skip test."
-+
-+echo "Try to mount a modified ext4 fs"
-+_scratch_mount >> $seqres.full 2>&1 || echo "Fail to mount ext4 fs expectedly"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/ext4/025.out b/tests/ext4/025.out
-new file mode 100644
-index 0000000..f9a76bb
---- /dev/null
-+++ b/tests/ext4/025.out
-@@ -0,0 +1,4 @@
-+QA output created by 025
-+Create ext4 fs and modify first_meta_bg's value
-+Try to mount a modified ext4 fs
-+Fail to mount ext4 fs expectedly
-diff --git a/tests/ext4/group b/tests/ext4/group
-index cac5aa5..47c71b9 100644
---- a/tests/ext4/group
-+++ b/tests/ext4/group
-@@ -27,6 +27,7 @@
- 022 auto quick attr dangerous
- 023 auto quick scrub
- 024 auto quick encrypt dangerous
-+025 auto quick fuzzers dangerous
- 271 auto rw quick
- 301 aio auto ioctl rw stress defrag
- 302 aio auto ioctl rw stress defrag
--- 
-1.8.3.1
+This leads me to wonder if we should skip this test if debugfs hanppened
+to fail to set first_meta_bg? So that test would fail explicitly (mount
+succeeds unexpectedly) instead of _notrun and being ignored.
 
-
-
+Thanks,
+Eryu
