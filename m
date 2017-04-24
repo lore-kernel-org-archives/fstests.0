@@ -1,28 +1,302 @@
-Received: from bombadil.infradead.org ([65.50.211.133]:34020 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1171094AbdDXPAZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Apr 2017 11:00:25 -0400
-Date: Mon, 24 Apr 2017 08:00:19 -0700
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [RFC xfstests PATCH] xfstests: add a writeback error handling
- test
-Message-ID: <20170424150019.GA3288@infradead.org>
-References: <20170424134551.10301-1-jlayton@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170424134551.10301-1-jlayton@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:36104 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1172305AbdDXPJh (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 24 Apr 2017 11:09:37 -0400
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 421CC8051B
+        for <fstests@vger.kernel.org>; Mon, 24 Apr 2017 15:09:37 +0000 (UTC)
+Received: from localhost.localdomain.com (ovpn-121-64.rdu2.redhat.com [10.10.121.64])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id CF8A518A7B
+        for <fstests@vger.kernel.org>; Mon, 24 Apr 2017 15:09:36 +0000 (UTC)
+From: "Bill O'Donnell" <billodo@redhat.com>
+Subject: [PATCH] xfs/288: test xfs_growfs to ensure rejection if target isn't mounted
+Date: Mon, 24 Apr 2017 10:09:35 -0500
+Message-Id: <20170424150935.28707-1-billodo@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jeff Layton <jlayton@redhat.com>
-Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-cifs@vger.kernel.org, linux-mm@kvack.org, jfs-discussion@lists.sourceforge.net, linux-xfs@vger.kernel.org, cluster-devel@redhat.com, linux-f2fs-devel@lists.sourceforge.net, v9fs-developer@lists.sourceforge.net, osd-dev@open-osd.org, linux-nilfs@vger.kernel.org, linux-block@vger.kernel.org, dhowells@redhat.com, akpm@linux-foundation.org, hch@infradead.org, ross.zwisler@linux.intel.com, mawilcox@microsoft.com, jack@suse.com, viro@zeniv.linux.org.uk, corbet@lwn.net, neilb@suse.de, clm@fb.com, tytso@mit.edu, axboe@kernel.dk
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Apr 24, 2017 at 09:45:51AM -0400, Jeff Layton wrote:
-> With the patch series above, ext4 now passes. xfs and btrfs end up in
-> r/o mode after the test. xfs returns -EIO at that point though, and
-> btrfs returns -EROFS. What behavior we actually want there, I'm not
-> certain. We might be able to mitigate that by putting the journals on a
-> separate device?
+The manpage for xfs_growfs specifies that the file/dir to be
+grown must be mounted. This is a test to ensure that if the
+target isn't mounted, the command is rejected. The test covers
+absolute paths and relative paths, including symbolic links
+and bind mounts.
 
-This looks like XFS shut down because of a permanent write error from
-dm-error.  Which seems like the expected behavior.
+Signed-off-by: Bill O'Donnell <billodo@redhat.com>
+---
+ tests/xfs/288     | 121 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/288.out | 119 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/group   |   1 +
+ 3 files changed, 241 insertions(+)
+ create mode 100755 tests/xfs/288
+ create mode 100644 tests/xfs/288.out
+
+diff --git a/tests/xfs/288 b/tests/xfs/288
+new file mode 100755
+index 0000000..628f753
+--- /dev/null
++++ b/tests/xfs/288
+@@ -0,0 +1,121 @@
++#! /bin/bash
++# FS QA Test 288
++#
++# Test to ensure xfs_growfs command rejects non-existent mount points
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    umount $tmpdir
++    umount $tmpbind
++    rmdir $tmpdir
++    rm -f $tmpsymlink
++    rmdir $tmpbind
++    rm -f $tmp
++    rm -f $tmpfile
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs xfs
++_supported_os Linux
++_require_test
++_require_loop
++
++tmpfile=$TEST_DIR/fsfile
++tmpdir=$TEST_DIR/tmpdir
++tmpsymlink=$TEST_DIR/tmpsymlink.$$
++tmpbind=$TEST_DIR/tmpbind.$$
++
++mkdir -p $tmpdir || _fail "!!! failed to create temp mount dir"
++
++echo "=== mkfs.xfs ==="
++mkfs.xfs -d file,name=$tmpfile,size=64m -f
++
++echo "=== truncate ==="
++truncate --size=128m $tmpfile
++
++echo "=== xfs_growfs - unmounted, command should be rejected ==="
++xfs_growfs $tmpdir
++
++echo "=== xfs_growfs - check relative path, unmounted ==="
++cd $TEST_DIR
++xfs_growfs ./tmpdir
++
++echo "=== xfs_growfs - no path, unmounted ==="
++cd $TEST_DIR
++xfs_growfs tmpdir
++
++echo "=== mount ==="
++mount -o loop $tmpfile $tmpdir || _fail "!!! failed to loopback mount"
++
++echo "=== xfs_growfs - mounted ==="
++xfs_growfs $tmpdir
++
++echo "=== xfs_growfs - check relative path ==="
++cd $TEST_DIR
++xfs_growfs ./tmpdir
++
++echo "=== xfs_growfs - no path ==="
++cd $TEST_DIR
++xfs_growfs tmpdir
++
++echo "=== test symbolic link ==="
++ln -s $tmpdir $tmpsymlink
++xfs_growfs $tmpsymlink
++
++echo "=== test symbolic link using relative path ==="
++xfs_growfs ./tmpsymlink.$$
++
++echo "=== test symbolic link using no path ==="
++xfs_growfs tmpsymlink.$$
++
++echo "=== test bind mount ==="
++mkdir $tmpbind
++mount -o bind $tmpdir $tmpbind
++xfs_growfs $tmpbind
++
++echo "=== test bind mount - relative path ==="
++
++xfs_growfs ./tmpbind.$$
++
++echo "=== test bind mount - no path ==="
++xfs_growfs tmpbind.$$
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/288.out b/tests/xfs/288.out
+new file mode 100644
+index 0000000..a526048
+--- /dev/null
++++ b/tests/xfs/288.out
+@@ -0,0 +1,119 @@
++QA output created by 288
++=== mkfs.xfs ===
++meta-data=/mnt/test/fsfile       isize=512    agcount=4, agsize=4096 blks
++         =                       sectsz=512   attr=2, projid32bit=1
++         =                       crc=1        finobt=1, sparse=0, rmapbt=0, reflink=0
++data     =                       bsize=4096   blocks=16384, imaxpct=25
++         =                       sunit=0      swidth=0 blks
++naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
++log      =internal log           bsize=4096   blocks=855, version=2
++         =                       sectsz=512   sunit=0 blks, lazy-count=1
++realtime =none                   extsz=4096   blocks=0, rtextents=0
++=== truncate ===
++=== xfs_growfs - unmounted, command should be rejected ===
++xfs_growfs: /mnt/test/tmpdir is not a mounted XFS filesystem
++=== xfs_growfs - check relative path, unmounted ===
++xfs_growfs: ./tmpdir is not a mounted XFS filesystem
++=== xfs_growfs - no path, unmounted ===
++xfs_growfs: tmpdir is not a mounted XFS filesystem
++=== mount ===
++=== xfs_growfs - mounted ===
++meta-data=/dev/loop0             isize=512    agcount=4, agsize=4096 blks
++         =                       sectsz=512   attr=2, projid32bit=1
++         =                       crc=1        finobt=1 spinodes=0 rmapbt=0
++         =                       reflink=0
++data     =                       bsize=4096   blocks=16384, imaxpct=25
++         =                       sunit=0      swidth=0 blks
++naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
++log      =internal               bsize=4096   blocks=855, version=2
++         =                       sectsz=512   sunit=0 blks, lazy-count=1
++realtime =none                   extsz=4096   blocks=0, rtextents=0
++data blocks changed from 16384 to 32768
++=== xfs_growfs - check relative path ===
++meta-data=/dev/loop0             isize=512    agcount=8, agsize=4096 blks
++         =                       sectsz=512   attr=2, projid32bit=1
++         =                       crc=1        finobt=1 spinodes=0 rmapbt=0
++         =                       reflink=0
++data     =                       bsize=4096   blocks=32768, imaxpct=25
++         =                       sunit=0      swidth=0 blks
++naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
++log      =internal               bsize=4096   blocks=855, version=2
++         =                       sectsz=512   sunit=0 blks, lazy-count=1
++realtime =none                   extsz=4096   blocks=0, rtextents=0
++=== xfs_growfs - no path ===
++meta-data=/dev/loop0             isize=512    agcount=8, agsize=4096 blks
++         =                       sectsz=512   attr=2, projid32bit=1
++         =                       crc=1        finobt=1 spinodes=0 rmapbt=0
++         =                       reflink=0
++data     =                       bsize=4096   blocks=32768, imaxpct=25
++         =                       sunit=0      swidth=0 blks
++naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
++log      =internal               bsize=4096   blocks=855, version=2
++         =                       sectsz=512   sunit=0 blks, lazy-count=1
++realtime =none                   extsz=4096   blocks=0, rtextents=0
++=== test symbolic link ===
++meta-data=/dev/loop0             isize=512    agcount=8, agsize=4096 blks
++         =                       sectsz=512   attr=2, projid32bit=1
++         =                       crc=1        finobt=1 spinodes=0 rmapbt=0
++         =                       reflink=0
++data     =                       bsize=4096   blocks=32768, imaxpct=25
++         =                       sunit=0      swidth=0 blks
++naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
++log      =internal               bsize=4096   blocks=855, version=2
++         =                       sectsz=512   sunit=0 blks, lazy-count=1
++realtime =none                   extsz=4096   blocks=0, rtextents=0
++=== test symbolic link using relative path ===
++meta-data=/dev/loop0             isize=512    agcount=8, agsize=4096 blks
++         =                       sectsz=512   attr=2, projid32bit=1
++         =                       crc=1        finobt=1 spinodes=0 rmapbt=0
++         =                       reflink=0
++data     =                       bsize=4096   blocks=32768, imaxpct=25
++         =                       sunit=0      swidth=0 blks
++naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
++log      =internal               bsize=4096   blocks=855, version=2
++         =                       sectsz=512   sunit=0 blks, lazy-count=1
++realtime =none                   extsz=4096   blocks=0, rtextents=0
++=== test symbolic link using no path ===
++meta-data=/dev/loop0             isize=512    agcount=8, agsize=4096 blks
++         =                       sectsz=512   attr=2, projid32bit=1
++         =                       crc=1        finobt=1 spinodes=0 rmapbt=0
++         =                       reflink=0
++data     =                       bsize=4096   blocks=32768, imaxpct=25
++         =                       sunit=0      swidth=0 blks
++naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
++log      =internal               bsize=4096   blocks=855, version=2
++         =                       sectsz=512   sunit=0 blks, lazy-count=1
++realtime =none                   extsz=4096   blocks=0, rtextents=0
++=== test bind mount ===
++meta-data=/dev/loop0             isize=512    agcount=8, agsize=4096 blks
++         =                       sectsz=512   attr=2, projid32bit=1
++         =                       crc=1        finobt=1 spinodes=0 rmapbt=0
++         =                       reflink=0
++data     =                       bsize=4096   blocks=32768, imaxpct=25
++         =                       sunit=0      swidth=0 blks
++naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
++log      =internal               bsize=4096   blocks=855, version=2
++         =                       sectsz=512   sunit=0 blks, lazy-count=1
++realtime =none                   extsz=4096   blocks=0, rtextents=0
++=== test bind mount - relative path ===
++meta-data=/dev/loop0             isize=512    agcount=8, agsize=4096 blks
++         =                       sectsz=512   attr=2, projid32bit=1
++         =                       crc=1        finobt=1 spinodes=0 rmapbt=0
++         =                       reflink=0
++data     =                       bsize=4096   blocks=32768, imaxpct=25
++         =                       sunit=0      swidth=0 blks
++naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
++log      =internal               bsize=4096   blocks=855, version=2
++         =                       sectsz=512   sunit=0 blks, lazy-count=1
++realtime =none                   extsz=4096   blocks=0, rtextents=0
++=== test bind mount - no path ===
++meta-data=/dev/loop0             isize=512    agcount=8, agsize=4096 blks
++         =                       sectsz=512   attr=2, projid32bit=1
++         =                       crc=1        finobt=1 spinodes=0 rmapbt=0
++         =                       reflink=0
++data     =                       bsize=4096   blocks=32768, imaxpct=25
++         =                       sunit=0      swidth=0 blks
++naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
++log      =internal               bsize=4096   blocks=855, version=2
++         =                       sectsz=512   sunit=0 blks, lazy-count=1
++realtime =none                   extsz=4096   blocks=0, rtextents=0
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 75769f9..0dcb8e0 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -285,6 +285,7 @@
+ 285 dangerous_fuzzers dangerous_scrub
+ 286 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+ 287 auto dump quota quick
++288 growfs auto quick
+ 290 auto rw prealloc quick ioctl zero
+ 291 auto repair
+ 292 auto mkfs quick
+-- 
+2.9.3
+
