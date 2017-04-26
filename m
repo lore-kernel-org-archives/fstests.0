@@ -1,39 +1,43 @@
-Received: from mga09.intel.com ([134.134.136.24]:26539 "EHLO mga09.intel.com"
+Received: from mga14.intel.com ([192.55.52.115]:20566 "EHLO mga14.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932610AbdDZSAX (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 26 Apr 2017 14:00:23 -0400
-Date: Wed, 26 Apr 2017 12:00:21 -0600
+        id S1753765AbdDZSFk (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 26 Apr 2017 14:05:40 -0400
 From: Ross Zwisler <ross.zwisler@linux.intel.com>
-Subject: Re: [PATCH v2 2/2] dax: add regression test for stale mmap reads
-Message-ID: <20170426180021.GB15921@linux.intel.com>
-References: <20170425205106.20576-1-ross.zwisler@linux.intel.com>
- <20170425205106.20576-2-ross.zwisler@linux.intel.com>
- <20170426090907.q5jj3ywsvldsbq7n@XZHOUW.usersys.redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170426090907.q5jj3ywsvldsbq7n@XZHOUW.usersys.redhat.com>
+Subject: [PATCH v3 1/2] xfs: fix incorrect argument count check
+Date: Wed, 26 Apr 2017 12:05:30 -0600
+Message-Id: <20170426180531.26291-1-ross.zwisler@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: Xiong Zhou <xzhou@redhat.com>
-Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, fstests@vger.kernel.org, jmoyer@redhat.com, eguan@redhat.com, Christoph Hellwig <hch@lst.de>, Dan Williams <dan.j.williams@intel.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, Jan Kara <jack@suse.cz>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-nvdimm@ml01.01.org, Andrew Morton <akpm@linux-foundation.org>
+To: fstests@vger.kernel.org, Xiong Zhou <xzhou@redhat.com>, jmoyer@redhat.com, eguan@redhat.com
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, Christoph Hellwig <hch@lst.de>, Dan Williams <dan.j.williams@intel.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, Jan Kara <jack@suse.cz>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-nvdimm@ml01.01.org, Andrew Morton <akpm@linux-foundation.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 26, 2017 at 05:09:07PM +0800, Xiong Zhou wrote:
-> On Tue, Apr 25, 2017 at 02:51:06PM -0600, Ross Zwisler wrote:
-<>
-> > +	/*
-> > +	 * Try and use the mmap to read back the data we just wrote with
-> > +	 * pwrite().  If the kernel bug is present the mapping from the 2MiB
-> > +	 * zero page will still be intact, and we'll read back zeros instead.
-> > +	 */
-> > +	if (strncmp(buffer, data, strlen(buffer))) {
-> > +		fprintf(stderr, "strncmp mismatch: '%s' vs '%s'\n", buffer,
-> > +				data);
-> 		munmap
-> 		close(fd);
-> > +		exit(1);
-> > +	}
-> > +
-> 	munmap
+t_mmap_dio.c actually requires 4 arguments, not 3 as the current check
+enforces:
 
-Yep, thanks, fixed in v3.
+	# ./src/t_mmap_dio
+	usage: t_mmap_dio <src file> <dest file> <size> <msg>
+	# ./src/t_mmap_dio  one two three
+	open src(No such file or directory) len 0 (null)
+
+Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+Fixes: 456581661b4d ("xfs: test per-inode DAX flag by IO")
+---
+ src/t_mmap_dio.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/t_mmap_dio.c b/src/t_mmap_dio.c
+index 69b9ca8..6c8ca1a 100644
+--- a/src/t_mmap_dio.c
++++ b/src/t_mmap_dio.c
+@@ -39,7 +39,7 @@ int main(int argc, char **argv)
+ 	char *dfile;
+ 	unsigned long len, opt;
+ 
+-	if (argc < 4)
++	if (argc < 5)
+ 		usage(basename(argv[0]));
+ 
+ 	while ((opt = getopt(argc, argv, "b")) != -1)
+-- 
+2.9.3
+
