@@ -1,53 +1,55 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:46430 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965891AbdDZTKy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 26 Apr 2017 15:10:54 -0400
+Received: from userp1040.oracle.com ([156.151.31.81]:49765 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S965904AbdDZTLA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 26 Apr 2017 15:11:00 -0400
 From: Liu Bo <bo.li.liu@oracle.com>
-Subject: [PATCH v2] fstests: regression test for btrfs dio read repair
-Date: Wed, 26 Apr 2017 12:09:21 -0600
-Message-Id: <1493230161-8809-1-git-send-email-bo.li.liu@oracle.com>
+Subject: [PATCH v2] fstests: regression test for btrfs buffered read's repair
+Date: Wed, 26 Apr 2017 12:09:32 -0600
+Message-Id: <1493230172-8951-1-git-send-email-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This case tests whether dio read can repair the bad copy if we have
-a good copy.
+This case tests whether buffered read can repair the bad copy if we
+have a good copy.
 
-Commit 2dabb3248453 ("Btrfs: Direct I/O read: Work on sectorsized blocks")
-introduced the regression.
+Commit 20a7db8ab3f2 ("btrfs: add dummy callback for readpage_io_failed
+and drop checks") introduced the regression.
 
 The upstream fix is
-	Btrfs: fix invalid dereference in btrfs_retry_endio
+	Btrfs: bring back repair during read
 
 Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
 ---
 v2: - Add regression commit and the fix to the description
     - Use btrfs inspect-internal dump-tree to get rid of the dependence btrfs-map-logical
     - Add comments in several places
+    - Fix typo, dio->buffered.
 
- tests/btrfs/140     | 167 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/140.out |  39 ++++++++++++
+ tests/btrfs/141     | 169 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/141.out |  39 ++++++++++++
  tests/btrfs/group   |   1 +
- 3 files changed, 207 insertions(+)
- create mode 100755 tests/btrfs/140
- create mode 100644 tests/btrfs/140.out
+ 3 files changed, 209 insertions(+)
+ create mode 100755 tests/btrfs/141
+ create mode 100644 tests/btrfs/141.out
 
-diff --git a/tests/btrfs/140 b/tests/btrfs/140
+diff --git a/tests/btrfs/141 b/tests/btrfs/141
 new file mode 100755
-index 0000000..63641b4
+index 0000000..f95dd2b
 --- /dev/null
-+++ b/tests/btrfs/140
-@@ -0,0 +1,167 @@
++++ b/tests/btrfs/141
+@@ -0,0 +1,169 @@
 +#! /bin/bash
-+# FS QA Test 140
++# FS QA Test 141
 +#
-+# Regression test for btrfs DIO read's repair during read.
++# Regression test for btrfs buffered read's repair during read.
 +#
-+# Commit 2dabb3248453 ("Btrfs: Direct I/O read: Work on sectorsized blocks")
-+# introduced the regression.
++# Commit 20a7db8ab3f2 ("btrfs: add dummy callback for readpage_io_failed
++# and drop checks") introduced the regression.
++#
 +# The upstream fix is
-+# 	Btrfs: fix invalid dereference in btrfs_retry_endio
++# 	Btrfs: bring back repair during read
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
@@ -98,7 +100,7 @@ index 0000000..63641b4
 +
 +_require_btrfs_command inspect-internal dump-tree
 +_require_command "$FILEFRAG_PROG" filefrag
-+_require_odirect
++
 +
 +# helpe to convert 'file offset' to btrfs logical offset
 +FILEFRAG_FILTER='
@@ -150,9 +152,9 @@ index 0000000..63641b4
 +
 +_get_physical()
 +{
-+	# $1 is logical address
-+	# print chunk tree and find devid 2 which is $SCRATCH_DEV
-+	$BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | grep $1 -A 6 | awk '($1 ~ /stripe/ && $3 ~ /devid/ && $4 ~ /1/) { print $6 }'
++        # $1 is logical address
++        # print chunk tree and find devid 2 which is $SCRATCH_DEV
++        $BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | grep $1 -A 6 | awk '($1 ~ /stripe/ && $3 ~ /devid/ && $4 ~ /1/) { print $6 }'
 +}
 +
 +_scratch_dev_pool_get 2
@@ -183,14 +185,15 @@ index 0000000..63641b4
 +
 +_scratch_mount
 +
-+# step 3, 128k dio read (this read can repair bad copy)
++# step 3, 128k buffered read (this read can repair bad copy)
 +echo "step 3......repair the bad copy" >>$seqres.full
 +
 +# since raid1 consists of two copies, and the following read may read the good
-+# copy directly, so lets loop 10 times here and discard output that dio reads
++# copy directly, lets loop 10 times here and discard output that buffered reads
 +# give
 +for i in `seq 1 10`; do
-+	$XFS_IO_PROG -d -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" > /dev/null
++	echo 3 > /proc/sys/vm/drop_caches
++	$XFS_IO_PROG -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" > /dev/null
 +	repair=`_check_repair`
 +	if [ $repair -eq 1 ]; then
 +		break
@@ -200,19 +203,19 @@ index 0000000..63641b4
 +_scratch_unmount
 +
 +# check if the repair works
-+$XFS_IO_PROG -d -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_DEV | _filter_xfs_io
++$XFS_IO_PROG -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_DEV | _filter_xfs_io
 +
 +_scratch_dev_pool_put
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
+diff --git a/tests/btrfs/141.out b/tests/btrfs/141.out
 new file mode 100644
-index 0000000..d8e3856
+index 0000000..6b780ac
 --- /dev/null
-+++ b/tests/btrfs/140.out
++++ b/tests/btrfs/141.out
 @@ -0,0 +1,39 @@
-+QA output created by 140
++QA output created by 141
 +wrote 131072/131072 bytes at offset 0
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 +wrote 65536/65536 bytes at offset 244056064
@@ -252,14 +255,14 @@ index 0000000..d8e3856
 +read 512/512 bytes at offset 244056064
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 9d4b80b..1cb9c98 100644
+index 1cb9c98..7b380e5 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -141,3 +141,4 @@
- 137 auto quick send
+@@ -142,3 +142,4 @@
  138 auto compress
  139 auto qgroup
-+140 auto quick
+ 140 auto quick
++141 auto quick
 -- 
 2.5.0
 
