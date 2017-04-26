@@ -1,167 +1,56 @@
-Received: from mga14.intel.com ([192.55.52.115]:20566 "EHLO mga14.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753774AbdDZSFl (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 26 Apr 2017 14:05:41 -0400
-From: Ross Zwisler <ross.zwisler@linux.intel.com>
-Subject: [PATCH v3 2/2] dax: add regression test for stale mmap reads
-Date: Wed, 26 Apr 2017 12:05:31 -0600
-Message-Id: <20170426180531.26291-2-ross.zwisler@linux.intel.com>
-In-Reply-To: <20170426180531.26291-1-ross.zwisler@linux.intel.com>
-References: <20170426180531.26291-1-ross.zwisler@linux.intel.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:46430 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S965891AbdDZTKy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 26 Apr 2017 15:10:54 -0400
+From: Liu Bo <bo.li.liu@oracle.com>
+Subject: [PATCH v2] fstests: regression test for btrfs dio read repair
+Date: Wed, 26 Apr 2017 12:09:21 -0600
+Message-Id: <1493230161-8809-1-git-send-email-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, Xiong Zhou <xzhou@redhat.com>, jmoyer@redhat.com, eguan@redhat.com
-Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, Christoph Hellwig <hch@lst.de>, Dan Williams <dan.j.williams@intel.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, Jan Kara <jack@suse.cz>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-nvdimm@ml01.01.org, Andrew Morton <akpm@linux-foundation.org>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This adds a regression test for the following kernel patch:
+This case tests whether dio read can repair the bad copy if we have
+a good copy.
 
-  dax: fix data corruption due to stale mmap reads
+Commit 2dabb3248453 ("Btrfs: Direct I/O read: Work on sectorsized blocks")
+introduced the regression.
 
-The above patch fixes an issue where users of DAX can suffer data
-corruption from stale mmap reads via the following sequence:
+The upstream fix is
+	Btrfs: fix invalid dereference in btrfs_retry_endio
 
-- open an mmap over a 2MiB hole
-
-- read from a 2MiB hole, faulting in a 2MiB zero page
-
-- write to the hole with write(3p).  The write succeeds but we incorrectly
-  leave the 2MiB zero page mapping intact.
-
-- via the mmap, read the data that was just written.  Since the zero page
-  mapping is still intact we read back zeroes instead of the new data.
-
-Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
 ---
- .gitignore             |  1 +
- src/Makefile           |  2 +-
- src/t_mmap_stale_pmd.c | 73 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/427      | 59 ++++++++++++++++++++++++++++++++++++++++
- tests/generic/427.out  |  2 ++
- tests/generic/group    |  1 +
- 6 files changed, 137 insertions(+), 1 deletion(-)
- create mode 100644 src/t_mmap_stale_pmd.c
- create mode 100755 tests/generic/427
- create mode 100644 tests/generic/427.out
+v2: - Add regression commit and the fix to the description
+    - Use btrfs inspect-internal dump-tree to get rid of the dependence btrfs-map-logical
+    - Add comments in several places
 
-diff --git a/.gitignore b/.gitignore
-index ded4a61..4d64414 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -134,6 +134,7 @@
- /src/renameat2
- /src/t_rename_overwrite
- /src/t_mmap_dio
-+/src/t_mmap_stale_pmd
- 
- # dmapi/ binaries
- /dmapi/src/common/cmd/read_invis
-diff --git a/src/Makefile b/src/Makefile
-index abfd873..f1338ca 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -12,7 +12,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
- 	godown resvtest writemod makeextents itrash rename \
- 	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
- 	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
--	holetest t_truncate_self t_mmap_dio af_unix
-+	holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd
- 
- LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-diff --git a/src/t_mmap_stale_pmd.c b/src/t_mmap_stale_pmd.c
-new file mode 100644
-index 0000000..b447222
---- /dev/null
-+++ b/src/t_mmap_stale_pmd.c
-@@ -0,0 +1,73 @@
-+#include <errno.h>
-+#include <fcntl.h>
-+#include <libgen.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <string.h>
-+#include <sys/mman.h>
-+#include <sys/stat.h>
-+#include <sys/types.h>
-+#include <unistd.h>
-+
-+#define MiB(a) ((a)*1024*1024)
-+
-+void err_exit(char *op)
-+{
-+	fprintf(stderr, "%s: %s\n", op, strerror(errno));
-+	exit(1);
-+}
-+
-+int main(int argc, char *argv[])
-+{
-+	volatile int a __attribute__((__unused__));
-+	char *buffer = "HELLO WORLD!";
-+	char *data;
-+	int fd, err, ret = 0;
-+
-+	if (argc < 2) {
-+		printf("Usage: %s <pmem file>\n", basename(argv[0]));
-+		exit(0);
-+	}
-+
-+	fd = open(argv[1], O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
-+	if (fd < 0)
-+		err_exit("fd");
-+
-+	/*
-+	 * This allows us to map a huge zero page, and we do it at a non-zero
-+	 * offset for a little additional testing.
-+	 */
-+	ftruncate(fd, 0);
-+	ftruncate(fd, MiB(4));
-+
-+	data = mmap(NULL, MiB(2), PROT_READ, MAP_SHARED, fd, MiB(2));
-+
-+	/*
-+	 * This faults in a 2MiB zero page to satisfy the read.
-+	 * 'a' is volatile so this read doesn't get optimized out.
-+	 */
-+	a = data[0];
-+
-+	pwrite(fd, buffer, strlen(buffer), MiB(2));
-+
-+	/*
-+	 * Try and use the mmap to read back the data we just wrote with
-+	 * pwrite().  If the kernel bug is present the mapping from the 2MiB
-+	 * zero page will still be intact, and we'll read back zeros instead.
-+	 */
-+	if (strncmp(buffer, data, strlen(buffer))) {
-+		fprintf(stderr, "strncmp mismatch: '%s' vs '%s'\n", buffer,
-+				data);
-+		ret = 1;
-+	}
-+
-+	err = munmap(data, MiB(2));
-+	if (err < 0)
-+		err_exit("munmap");
-+
-+	err = close(fd);
-+	if (err < 0)
-+		err_exit("close");
-+
-+	return ret;
-+}
-diff --git a/tests/generic/427 b/tests/generic/427
+ tests/btrfs/140     | 167 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/140.out |  39 ++++++++++++
+ tests/btrfs/group   |   1 +
+ 3 files changed, 207 insertions(+)
+ create mode 100755 tests/btrfs/140
+ create mode 100644 tests/btrfs/140.out
+
+diff --git a/tests/btrfs/140 b/tests/btrfs/140
 new file mode 100755
-index 0000000..3677fce
+index 0000000..63641b4
 --- /dev/null
-+++ b/tests/generic/427
-@@ -0,0 +1,59 @@
++++ b/tests/btrfs/140
+@@ -0,0 +1,167 @@
 +#! /bin/bash
-+# FS QA Test 427
++# FS QA Test 140
 +#
-+# This is a regression test for kernel patch:
-+#  dax: fix data corruption due to stale mmap reads
-+# created by Ross Zwisler <ross.zwisler@linux.intel.com>
++# Regression test for btrfs DIO read's repair during read.
++#
++# Commit 2dabb3248453 ("Btrfs: Direct I/O read: Work on sectorsized blocks")
++# introduced the regression.
++# The upstream fix is
++# 	Btrfs: fix invalid dereference in btrfs_retry_endio
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Intel Corporation.  All Rights Reserved.
++# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -200,35 +89,177 @@ index 0000000..3677fce
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_test_program "t_mmap_stale_pmd"
-+
 +# real QA test starts here
-+src/t_mmap_stale_pmd $TEST_DIR/testfile
 +
++# Modify as appropriate.
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch_dev_pool 2
++
++_require_btrfs_command inspect-internal dump-tree
++_require_command "$FILEFRAG_PROG" filefrag
++_require_odirect
++
++# helpe to convert 'file offset' to btrfs logical offset
++FILEFRAG_FILTER='
++	if (/blocks? of (\d+) bytes/) {
++		$blocksize = $1;
++		next
++	}
++	($ext, $logical, $physical, $length) =
++		(/^\s*(\d+):\s+(\d+)..\s+\d+:\s+(\d+)..\s+\d+:\s+(\d+):/)
++	or next;
++	($flags) = /.*:\s*(\S*)$/;
++	print $physical * $blocksize, "#",
++	      $length * $blocksize, "#",
++	      $logical * $blocksize, "#",
++	      $flags, " "'
++
++# this makes filefrag output script readable by using a perl helper.
++# output is one extent per line, with three numbers separated by '#'
++# the numbers are: physical, length, logical (all in bytes)
++# sample output: "1234#10#5678" -> physical 1234, length 10, logical 5678
++_filter_extents()
++{
++	tee -a $seqres.full | $PERL_PROG -ne "$FILEFRAG_FILTER"
++}
++
++_check_file_extents()
++{
++	cmd="filefrag -v $1"
++	echo "# $cmd" >> $seqres.full
++	out=`$cmd | _filter_extents`
++	if [ -z "$out" ]; then
++		return 1
++	fi
++	echo "after filter: $out" >> $seqres.full
++	echo $out
++	return 0
++}
++
++_check_repair()
++{
++	filter=${1:-cat}
++	dmesg | tac | sed -ne "0,\#run fstests $seqnum at $date_time#p" | tac | $filter | grep -q -e "csum failed"
++	if [ $? -eq 0 ]; then
++		echo 1
++	else
++		echo 0
++	fi
++}
++
++_get_physical()
++{
++	# $1 is logical address
++	# print chunk tree and find devid 2 which is $SCRATCH_DEV
++	$BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | grep $1 -A 6 | awk '($1 ~ /stripe/ && $3 ~ /devid/ && $4 ~ /1/) { print $6 }'
++}
++
++_scratch_dev_pool_get 2
++# step 1, create a raid1 btrfs which contains one 128k file.
++echo "step 1......mkfs.btrfs" >>$seqres.full
++
++mkfs_opts="-d raid1"
++_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
++
++# -o nospace_cache makes sure data is written to the start position of the data
++# chunk
++_scratch_mount -o nospace_cache
++
++$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" | _filter_xfs_io
++
++sync
++
++# step 2, corrupt the first 64k of one copy (on SCRATCH_DEV which is the first
++# one in $SCRATCH_DEV_POOL
++echo "step 2......corrupt file extent" >>$seqres.full
++
++extents=`_check_file_extents $SCRATCH_MNT/foobar`
++logical_in_btrfs=`echo ${extents} | cut -d '#' -f 1`
++physical_on_scratch=`_get_physical ${logical_in_btrfs}`
++
++_scratch_unmount
++$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical_on_scratch 64K" $SCRATCH_DEV | _filter_xfs_io
++
++_scratch_mount
++
++# step 3, 128k dio read (this read can repair bad copy)
++echo "step 3......repair the bad copy" >>$seqres.full
++
++# since raid1 consists of two copies, and the following read may read the good
++# copy directly, so lets loop 10 times here and discard output that dio reads
++# give
++for i in `seq 1 10`; do
++	$XFS_IO_PROG -d -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" > /dev/null
++	repair=`_check_repair`
++	if [ $repair -eq 1 ]; then
++		break
++	fi
++done
++
++_scratch_unmount
++
++# check if the repair works
++$XFS_IO_PROG -d -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_DEV | _filter_xfs_io
++
++_scratch_dev_pool_put
 +# success, all done
-+echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/generic/427.out b/tests/generic/427.out
+diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
 new file mode 100644
-index 0000000..61295e5
+index 0000000..d8e3856
 --- /dev/null
-+++ b/tests/generic/427.out
-@@ -0,0 +1,2 @@
-+QA output created by 427
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index f29009c..06f6e9d 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -429,3 +429,4 @@
- 424 auto quick
- 425 auto quick attr
- 426 auto quick exportfs
-+427 auto quick
++++ b/tests/btrfs/140.out
+@@ -0,0 +1,39 @@
++QA output created by 140
++wrote 131072/131072 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 65536/65536 bytes at offset 244056064
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++0e8c0000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c0010:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c0020:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c0030:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c0040:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c0050:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c0060:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c0070:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c0080:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c0090:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c00a0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c00b0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c00c0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c00d0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c00e0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c00f0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c0100:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c0110:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c0120:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c0130:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c0140:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c0150:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c0160:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c0170:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c0180:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c0190:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c01a0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c01b0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c01c0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c01d0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c01e0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++0e8c01f0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++read 512/512 bytes at offset 244056064
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 9d4b80b..1cb9c98 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -141,3 +141,4 @@
+ 137 auto quick send
+ 138 auto compress
+ 139 auto qgroup
++140 auto quick
 -- 
-2.9.3
+2.5.0
 
