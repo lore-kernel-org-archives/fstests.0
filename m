@@ -1,11 +1,11 @@
-Received: from mx1.redhat.com ([209.132.183.28]:58552 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:59652 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1946472AbdDZHra (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 26 Apr 2017 03:47:30 -0400
-Date: Wed, 26 Apr 2017 15:47:27 +0800
-From: Eryu Guan <eguan@redhat.com>
+        id S969470AbdDZJJK (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 26 Apr 2017 05:09:10 -0400
+Date: Wed, 26 Apr 2017 17:09:07 +0800
+From: Xiong Zhou <xzhou@redhat.com>
 Subject: Re: [PATCH v2 2/2] dax: add regression test for stale mmap reads
-Message-ID: <20170426074727.GG26397@eguan.usersys.redhat.com>
+Message-ID: <20170426090907.q5jj3ywsvldsbq7n@XZHOUW.usersys.redhat.com>
 References: <20170425205106.20576-1-ross.zwisler@linux.intel.com>
  <20170425205106.20576-2-ross.zwisler@linux.intel.com>
 MIME-Version: 1.0
@@ -14,7 +14,7 @@ Content-Disposition: inline
 In-Reply-To: <20170425205106.20576-2-ross.zwisler@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
 To: Ross Zwisler <ross.zwisler@linux.intel.com>
-Cc: fstests@vger.kernel.org, Xiong Zhou <xzhou@redhat.com>, jmoyer@redhat.com, Christoph Hellwig <hch@lst.de>, Dan Williams <dan.j.williams@intel.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, Jan Kara <jack@suse.cz>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-nvdimm@ml01.01.org, Andrew Morton <akpm@linux-foundation.org>
+Cc: fstests@vger.kernel.org, Xiong Zhou <xzhou@redhat.com>, jmoyer@redhat.com, eguan@redhat.com, Christoph Hellwig <hch@lst.de>, Dan Williams <dan.j.williams@intel.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, Jan Kara <jack@suse.cz>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-nvdimm@ml01.01.org, Andrew Morton <akpm@linux-foundation.org>
 List-ID: <fstests@vger.kernel.org>
 
 On Tue, Apr 25, 2017 at 02:51:06PM -0600, Ross Zwisler wrote:
@@ -36,11 +36,6 @@ On Tue, Apr 25, 2017 at 02:51:06PM -0600, Ross Zwisler wrote:
 >   mapping is still intact we read back zeroes instead of the new data.
 > 
 > Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
-
-I reproduced it now with 4.10 kernel, I think it was because I enalbed
-KASAN on my 4.11-rc8 kernel. And the special mkfs options for ext4/xfs
-are not needed either.
-
 > ---
 >  .gitignore            |  1 +
 >  src/Makefile          |  2 +-
@@ -137,9 +132,16 @@ are not needed either.
 > +	if (strncmp(buffer, data, strlen(buffer))) {
 > +		fprintf(stderr, "strncmp mismatch: '%s' vs '%s'\n", buffer,
 > +				data);
+		munmap
+		close(fd);
 > +		exit(1);
 > +	}
 > +
+	munmap
+
+Thanks, :)
+--
+Xiong
 > +	close(fd);
 > +	return 0;
 > +}
@@ -201,33 +203,13 @@ are not needed either.
 > +_supported_os Linux
 > +_require_test_program "t_dax_stale_pmd"
 > +_require_xfs_io_command "falloc"
-
-I'm wondering if falloc is really needed? If not, this test could be run
-with ext2/3 too. See below.
-
 > +_require_user
-
-This is not needed anymore.
-
 > +
 > +# real QA test starts here
 > +
 > +# ensure we have no pre-existing block allocations, so we get a hole
 > +rm -f $TEST_DIR/testfile
 > +$XFS_IO_PROG -f -c "falloc 0 4M" $TEST_DIR/testfile >> $seqres.full 2>&1
-
-I found that 'xfs_io -fc "truncate 4M" $TEST_DIR/testfile' works too,
-from the comments in test and kernel patch, if I understand correctly,
-we only need to mmap un-allocated blocks, right?
-
-If truncate(2) works too, I think we can move truncate operation to the
-t_dax_stale_pmd program too, because the whole truncate && mmap && read
-sequence are logically together, this also avoids the confusion on why
-testfile is in 4M size.
-
-Thanks,
-Eryu
-
 > +chmod 0644 $TEST_DIR/testfile
 > +
 > +src/t_dax_stale_pmd $TEST_DIR/testfile
