@@ -1,61 +1,47 @@
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:33290 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934542AbdD0PJh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 27 Apr 2017 11:09:37 -0400
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 5/5] overlay/017: test persistent inode numbers after mount cycle
-Date: Thu, 27 Apr 2017 18:09:35 +0300
-Message-Id: <1493305775-12559-6-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1493305775-12559-1-git-send-email-amir73il@gmail.com>
-References: <1493305775-12559-1-git-send-email-amir73il@gmail.com>
+Received: from mail-pf0-f194.google.com ([209.85.192.194]:34909 "EHLO
+        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932161AbdD0SQf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 27 Apr 2017 14:16:35 -0400
+Received: by mail-pf0-f194.google.com with SMTP id a188so12645096pfa.2
+        for <fstests@vger.kernel.org>; Thu, 27 Apr 2017 11:16:35 -0700 (PDT)
+Date: Thu, 27 Apr 2017 11:16:32 -0700
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: Re: [PATCH] android-xfstests: allow detection of SELinux
+Message-ID: <20170427181632.GA11396@gmail.com>
+References: <20170311005306.129624-1-ebiggers3@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170311005306.129624-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, Xiong Zhou <xzhou@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-Overlayfs directory inodes are constant across copy up,
-but not persistent on mount cycle.
-Compare the inode numbers before and after mount cycle.
+On Fri, Mar 10, 2017 at 04:53:06PM -0800, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
+> 
+> xfstests is supposed to disable the creation of SELinux xattrs because
+> this interferes with some tests (e.g. generic/062 and generic/377), but
+> this was not working on Android.  For the android-xfstests portion of
+> the fix, make the following changes:
+> 
+> 1. To stop the mount program from stripping the 'context' mount option,
+> mount selinuxfs and create an empty /etc/selinux/config.  This makes the
+> is_selinux_enabled() function from libselinux return true.
+> 
+> 2. To stop xfstests from thinking that SELinux is disabled, link
+> /usr/sbin/selinuxenabled to /bin/true.  (Note: getting the real version
+> of selinuxenabled by adding selinux-utils to the chroot tarball would
+> also work, though no other programs from it are needed yet, and some
+> don't work in the chroot environment yet.)
+> 
+> In combination with the xfstests patch to stop hard-coding SELinux
+> contexts in xfstests, this fixes the failing tests.
+> 
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/overlay/017 | 16 +++++++++++++++-
- 1 file changed, 15 insertions(+), 1 deletion(-)
+Ted, this patch seems to have gotten lost; can you apply it?  The corresponding
+xfstests-dev fix has already been merged.  Thanks!
 
-diff --git a/tests/overlay/017 b/tests/overlay/017
-index 1cf684d..fe66f4c 100755
---- a/tests/overlay/017
-+++ b/tests/overlay/017
-@@ -9,7 +9,8 @@
- # - stat file A shows inode number Y != X
- #
- # Also test if d_ino of readdir entries changes after copy up
--# and if inode numbers persist after rename and drop caches.
-+# and if inode numbers persist after rename, drop caches and
-+# mount cycle.
- #
- #-----------------------------------------------------------------------
- #
-@@ -133,6 +134,19 @@ done
- diff -u $tmp.before $tmp.after_copyup
- diff -u $tmp.after_copyup $tmp.after_move
- 
-+# Verify that the inode numbers survive a mount cycle
-+_scratch_cycle_mount
-+
-+record_inode_numbers $testdir $tmp.after_cycle
-+
-+cat $tmp.after_move | while read ino f; do
-+	find $testdir/ -inum $ino -maxdepth 1 | grep -q $f || \
-+		echo "$f not found by ino $ino"
-+done
-+
-+# Compare before..after - expect silence
-+diff -u $tmp.after_move $tmp.after_cycle
-+
- echo "Silence is golden"
- status=0
- exit
--- 
-2.7.4
-
+- Eric
