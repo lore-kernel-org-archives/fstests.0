@@ -1,41 +1,50 @@
-Received: from mail-wr0-f178.google.com ([209.85.128.178]:32830 "EHLO
-        mail-wr0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S967252AbdD0LyK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 27 Apr 2017 07:54:10 -0400
-MIME-Version: 1.0
-Reply-To: mtk.manpages@gmail.com
-In-Reply-To: <CA+55aFwUwQCJQFur67_FF3=5L1-q5P32JTm+TwPadKYnOo1B-A@mail.gmail.com>
-References: <149324135581.24512.17200609423997054366.stgit@warthog.procyon.org.uk>
- <CA+55aFwUwQCJQFur67_FF3=5L1-q5P32JTm+TwPadKYnOo1B-A@mail.gmail.com>
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:33916 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S967575AbdD0LyT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 27 Apr 2017 07:54:19 -0400
+Subject: [PATCH] statx: correct error handling of NULL pathname
 From: "Michael Kerrisk (man-pages)" <mtk.manpages@gmail.com>
-Date: Thu, 27 Apr 2017 13:53:47 +0200
-Message-ID: <CAKgNAkhBa6yiwY3unzxnK6TZ5umZUNTWxpXt1C9odHXfpcBuJg@mail.gmail.com>
-Subject: Re: [PATCH] statx: Kill fd-with-NULL-path support in favour of AT_EMPTY_PATH
-Content-Type: text/plain; charset=UTF-8
+Message-ID: <d10d318c-7461-96fb-952b-c246811a8228@gmail.com>
+Date: Thu, 27 Apr 2017 13:54:11 +0200
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: David Howells <dhowells@redhat.com>, Al Viro <viro@zeniv.linux.org.uk>, linux-man <linux-man@vger.kernel.org>, Linux API <linux-api@vger.kernel.org>, Eric Sandeen <sandeen@sandeen.net>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Michael Kerrisk <mtk.manpages@gmail.com>, Christoph Hellwig <hch@infradead.org>
+Cc: mtk.manpages@gmail.com, David Howells <dhowells@redhat.com>, Al Viro <viro@zeniv.linux.org.uk>, linux-man <linux-man@vger.kernel.org>, Linux API <linux-api@vger.kernel.org>, Eric Sandeen <sandeen@sandeen.net>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>Michael Kerrisk <mtk.manpages@gmail.com>, hch@infradead.org
 List-ID: <fstests@vger.kernel.org>
 
-On 27 April 2017 at 00:03, Linus Torvalds <torvalds@linux-foundation.org> wrote:
-> On Wed, Apr 26, 2017 at 2:15 PM, David Howells <dhowells@redhat.com> wrote:
->> [!] NOTE: This breaks UAPI introduced in 4.11-rc1.
->
-> Ugh.
->
-> I'm, applying this now, so that we don't end up with a released kernel
-> that supports the NULL filename thing.
->
-> I'm not happy about the timing though. And I hope nobody started using
-> statx() outside of tests.
 
-Agreed on the timing. Late review on my part didn't help.
+The change in 1e2f82d1e9d1 to error on a NULL pathname to statx()
+is inconsistent.  It results in the error EINVAL for a NULL pathname.
+Consistent with similar APIs (fchownat(), fstatat(), linkat()),
+the error should be EFAULT.
 
-But, also, David's fix is not quite right. I will send a patch.
+The solution is simply to remove the EINVAL check. As I already
+pointed out in https://lkml.org/lkml/2017/4/26/561, user_path_at*()
+and filename_lookup() will handle the NULL pathname as per
+the other APIs, to correctly produce the error EFAULT.
 
-Cheers,
+Signed-off-by: Michael Kerrisk <mtk.manpages@gmail.com>
+---
+ fs/stat.c | 2 --
+ 1 file changed, 2 deletions(-)
 
-Michael
+diff --git a/fs/stat.c b/fs/stat.c
+index 3d85747..a257b87 100644
+--- a/fs/stat.c
++++ b/fs/stat.c
+@@ -567,8 +567,6 @@ SYSCALL_DEFINE5(statx,
+ 		return -EINVAL;
+ 	if ((flags & AT_STATX_SYNC_TYPE) == AT_STATX_SYNC_TYPE)
+ 		return -EINVAL;
+-	if (!filename)
+-		return -EINVAL;
+ 
+ 	error = vfs_statx(dfd, filename, flags, &stat, mask);
+ 	if (error)
+-- 
+2.5.5
 
 -- 
 Michael Kerrisk
