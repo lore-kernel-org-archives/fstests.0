@@ -1,76 +1,76 @@
-Received: from mx1.redhat.com ([209.132.183.28]:36974 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1163902AbdD1Fuh (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 28 Apr 2017 01:50:37 -0400
-Date: Fri, 28 Apr 2017 13:50:35 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 1/5] overlay/017: silence test output
-Message-ID: <20170428055035.GN26397@eguan.usersys.redhat.com>
-References: <1493305775-12559-1-git-send-email-amir73il@gmail.com>
- <1493305775-12559-2-git-send-email-amir73il@gmail.com>
- <20170428053633.GL26397@eguan.usersys.redhat.com>
- <CAOQ4uxiQ__f4eoZT+qyszHPK7KwuW+NbDfFz3E=d6+nkSEKVRg@mail.gmail.com>
+Received: from mail-io0-f195.google.com ([209.85.223.195]:34739 "EHLO
+        mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S964804AbdD1GeT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 28 Apr 2017 02:34:19 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxiQ__f4eoZT+qyszHPK7KwuW+NbDfFz3E=d6+nkSEKVRg@mail.gmail.com>
+In-Reply-To: <20170428055035.GN26397@eguan.usersys.redhat.com>
+References: <1493305775-12559-1-git-send-email-amir73il@gmail.com>
+ <1493305775-12559-2-git-send-email-amir73il@gmail.com> <20170428053633.GL26397@eguan.usersys.redhat.com>
+ <CAOQ4uxiQ__f4eoZT+qyszHPK7KwuW+NbDfFz3E=d6+nkSEKVRg@mail.gmail.com> <20170428055035.GN26397@eguan.usersys.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Fri, 28 Apr 2017 09:34:18 +0300
+Message-ID: <CAOQ4uxisjtWLnHxXg+PbaJjFOmY7ZFEkF+ggsWB+54FSHvMLjA@mail.gmail.com>
+Subject: Re: [PATCH 1/5] overlay/017: silence test output
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
+To: Eryu Guan <eguan@redhat.com>
 Cc: Miklos Szeredi <miklos@szeredi.hu>, Xiong Zhou <xzhou@redhat.com>, linux-unionfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Apr 28, 2017 at 08:45:22AM +0300, Amir Goldstein wrote:
-> On Fri, Apr 28, 2017 at 8:36 AM, Eryu Guan <eguan@redhat.com> wrote:
-> > On Thu, Apr 27, 2017 at 06:09:31PM +0300, Amir Goldstein wrote:
-> >> Change test to output golden silence on success.
-> >
-> > Some words on why this change is needed would be good.
-> >
-> >>
-> >> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> >> ---
-> >>  tests/overlay/017     | 4 +++-
-> >>  tests/overlay/017.out | 7 +------
-> >>  2 files changed, 4 insertions(+), 7 deletions(-)
-> >>
-> >> diff --git a/tests/overlay/017 b/tests/overlay/017
-> >> index 5ca3040..d6ba2ae 100755
-> >> --- a/tests/overlay/017
-> >> +++ b/tests/overlay/017
-> >> @@ -89,11 +89,13 @@ done
-> >>
-> >>  # find by inode number - expect to find file by inode number
-> >>  cat $tmp.before | while read ino f; do
-> >> -     find $f -inum $ino -maxdepth 0 | _filter_scratch
-> >> +     find $SCRATCH_MNT/ -inum $ino -maxdepth 1 | grep -q $f || \
-> >> +             echo "$f not found by ino $ino"
-> >
-> > Hmm, if I run this find command manually, I got warning about -maxdepth
-> > position.
-> >
-> > # find `pwd` -inum 3932421 -maxdepth 1
-> > find: warning: you have specified the -maxdepth option after a non-option argument -inum, but options are not positional (-maxdepth affects tests specified before it as well as those specified after it).  Please specify options before other arguments.
-> >
-> > /root/xfstests/check
-> >
-> > Move -maxdepth option just after find path works fine
-> >
-> > # find `pwd` -maxdepth 1 -inum 3932421
-> > /root/xfstests/check
-> >
-> > But I'm not sure why I didn't see this warning by running overlay/017..
-> 
-> man find...
-> 
-> "The default behavior corresponds to -warn if standard input is a tty,
-> and to -nowarn otherwise."
+On Fri, Apr 28, 2017 at 8:50 AM, Eryu Guan <eguan@redhat.com> wrote:
+> On Fri, Apr 28, 2017 at 08:45:22AM +0300, Amir Goldstein wrote:
+>> On Fri, Apr 28, 2017 at 8:36 AM, Eryu Guan <eguan@redhat.com> wrote:
+>> > On Thu, Apr 27, 2017 at 06:09:31PM +0300, Amir Goldstein wrote:
+>> >> Change test to output golden silence on success.
+>> >
+>> > Some words on why this change is needed would be good.
+>> >
+>> >>
+>> >> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+>> >> ---
+>> >>  tests/overlay/017     | 4 +++-
+>> >>  tests/overlay/017.out | 7 +------
+>> >>  2 files changed, 4 insertions(+), 7 deletions(-)
+>> >>
+>> >> diff --git a/tests/overlay/017 b/tests/overlay/017
+>> >> index 5ca3040..d6ba2ae 100755
+>> >> --- a/tests/overlay/017
+>> >> +++ b/tests/overlay/017
+>> >> @@ -89,11 +89,13 @@ done
+>> >>
+>> >>  # find by inode number - expect to find file by inode number
+>> >>  cat $tmp.before | while read ino f; do
+>> >> -     find $f -inum $ino -maxdepth 0 | _filter_scratch
+>> >> +     find $SCRATCH_MNT/ -inum $ino -maxdepth 1 | grep -q $f || \
+>> >> +             echo "$f not found by ino $ino"
+>> >
+>> > Hmm, if I run this find command manually, I got warning about -maxdepth
+>> > position.
+>> >
+>> > # find `pwd` -inum 3932421 -maxdepth 1
+>> > find: warning: you have specified the -maxdepth option after a non-option argument -inum, but options are not positional (-maxdepth affects tests specified before it as well as those specified after it).  Please specify options before other arguments.
+>> >
+>> > /root/xfstests/check
+>> >
+>> > Move -maxdepth option just after find path works fine
+>> >
+>> > # find `pwd` -maxdepth 1 -inum 3932421
+>> > /root/xfstests/check
+>> >
+>> > But I'm not sure why I didn't see this warning by running overlay/017..
+>>
+>> man find...
+>>
+>> "The default behavior corresponds to -warn if standard input is a tty,
+>> and to -nowarn otherwise."
+>
+> That explains, thanks!
+>
 
-That explains, thanks!
+In your setup does strace find `pwd` -maxdepth 1 -inum 3932421
+show newfstatat  for each inode?
+It should be doing stat only for dirs according to the code and
+Enabled features of find --version.
+Not sure why it does newfstatat for every inode on my kvm machine...
 
-Eryu
-
-> 
-> > Anyway, moving -maxdepth around seems better to me.
-> >
-> 
-> Sure.
+Amir.
