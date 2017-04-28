@@ -1,72 +1,52 @@
-Received: from mail-io0-f195.google.com ([209.85.223.195]:33108 "EHLO
-        mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932768AbdD1Kxa (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 28 Apr 2017 06:53:30 -0400
-MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxiTJDQj4YNnaHY6AYvYAv+QF+bE4EPWC0K09hyNU6k4oA@mail.gmail.com>
-References: <1493367888-26550-1-git-send-email-amir73il@gmail.com>
- <1493367888-26550-5-git-send-email-amir73il@gmail.com> <20170428092402.GQ26397@eguan.usersys.redhat.com>
- <CAOQ4uxiTJDQj4YNnaHY6AYvYAv+QF+bE4EPWC0K09hyNU6k4oA@mail.gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 28 Apr 2017 13:53:29 +0300
-Message-ID: <CAOQ4uxju70vY9ZCYWqFkN-UCZBd76UHnnVP58f836gtYZZ1Pow@mail.gmail.com>
-Subject: Re: [PATCH v2 4/6] overlay/017: create helpers to record and check
- inode numbers
-Content-Type: text/plain; charset=UTF-8
+Received: from mail.kernel.org ([198.145.29.136]:56166 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753520AbdD1NPY (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 28 Apr 2017 09:15:24 -0400
+From: Chao Yu <chao@kernel.org>
+Subject: [PATCH] attr: adbjust acl_max of f2fs
+Date: Fri, 28 Apr 2017 21:13:07 +0800
+Message-Id: <20170428131307.3384-1-chao@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, Xiong Zhou <xzhou@redhat.com>, linux-unionfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org, eguan@redhat.com
+Cc: jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net, Chao Yu <yuchao0@huawei.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Apr 28, 2017 at 1:04 PM, Amir Goldstein <amir73il@gmail.com> wrote:
-> On Fri, Apr 28, 2017 at 12:24 PM, Eryu Guan <eguan@redhat.com> wrote:
->> On Fri, Apr 28, 2017 at 11:24:46AM +0300, Amir Goldstein wrote:
->>> Use helpers to records and check inode numbers so we can repeat
->>> the same test after rename and mount cycle.
->>>
->>> Suggested-by: Eryu Guan <eguan@redhat.com>
->>> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
->>> ---
->>>  tests/overlay/017 | 57 ++++++++++++++++++++++++++++++++++++++++---------------
->>>  1 file changed, 42 insertions(+), 15 deletions(-)
->>>
->>> diff --git a/tests/overlay/017 b/tests/overlay/017
->>> index 779907d..3ff429f 100755
->>> --- a/tests/overlay/017
->>> +++ b/tests/overlay/017
->>> @@ -72,32 +72,59 @@ mknod $lowerdir/blkdev b 1 1
->>>  mknod $lowerdir/fifo p
->>>  $here/src/af_unix $lowerdir/socket
->>>
->>> +FILES="dir file symlink chrdev blkdev fifo socket"
->>> +
->>> +# Record inode numbers in format <ino> <basename>
->>> +function record_inode_numbers()
->>> +{
->>> +     dir=$1
->>> +     outfile=$2
->>> +
->>> +     for f in $FILES; do
->>> +             ls -id $dir/$f
->>> +     done | \
->>> +     while read ino file; do
->>> +             echo $ino `basename $file` >> $outfile
->>> +     done
->>> +}
->>> +
->>> +# Check inode numbers match recorder inode numbers
->>> +function check_inode_numbers()
->>> +{
->>> +     dir=$1
->>> +     before=$2
->>> +     after=$2
->>              ^^^ $3
->> Otherwise looks good to me. I can fix this typo at commit time.
->
-> Oh boy! That's a lousy test :-)
-> Now I wonder why the test failed when I ran it on kernel v4.10
-> (when feeding after to find -inum)... something for me to check.
->
+From: Chao Yu <yuchao0@huawei.com>
 
-Ah. got it. 'after' inode number where appended to $tmp.before,
-so find was also looking by the before inodes.
+f2fs has set inline_xattr as a default option, and introduced a new option
+named 'noinline_xattr' for disabling default inline_xattr option. So in
+_acl_get_max we need to check 'noinline_xattr' string in fs option,
+otherwise we may select the wrong max acl number since we always found
+the string 'ininline_xattr' in fs option.
+
+Additionally, f2fs has changed disk layout of xattr block a bit, so will
+contain one more entry in both inline and noinline xattr inode, this patch
+will modify the max acl number to adjust it.
+
+Signed-off-by: Chao Yu <yuchao0@huawei.com>
+---
+ common/attr | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/common/attr b/common/attr
+index ac139e61..6d4f68ed 100644
+--- a/common/attr
++++ b/common/attr
+@@ -43,11 +43,11 @@ _acl_get_max()
+ 		echo 8191
+ 		;;
+ 	f2fs)
+-		_fs_options $TEST_DEV | grep "inline_xattr" >/dev/null 2>&1
++		_fs_options $TEST_DEV | grep "noinline_xattr" >/dev/null 2>&1
+ 		if [ $? -eq 0 ]; then
+-			echo 531
++			echo 507
+ 		else
+-			echo 506
++			echo 532
+ 		fi
+ 		;;
+ 	*)
+-- 
+2.12.2.575.gb14f27f
+
