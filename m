@@ -1,58 +1,50 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:48691 "EHLO
+Received: from userp1040.oracle.com ([156.151.31.81]:48763 "EHLO
         userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S637852AbdD1S1c (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 28 Apr 2017 14:27:32 -0400
+        with ESMTP id S637852AbdD1S1k (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 28 Apr 2017 14:27:40 -0400
 From: Liu Bo <bo.li.liu@oracle.com>
-Subject: [PATCH v3] fstests: regression test for btrfs buffered read's repair
-Date: Fri, 28 Apr 2017 11:26:02 -0600
-Message-Id: <1493400362-5989-1-git-send-email-bo.li.liu@oracle.com>
+Subject: [PATCH v2] fstests: regression test for nocsum dio read's repair
+Date: Fri, 28 Apr 2017 11:26:10 -0600
+Message-Id: <1493400370-6096-1-git-send-email-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-This case tests whether buffered read can repair the bad copy if we
-have a good copy.
-
-Commit 20a7db8ab3f2 ("btrfs: add dummy callback for readpage_io_failed
-and drop checks") introduced the regression.
+Commit 2dabb3248453 ("Btrfs: Direct I/O read: Work on sectorsized blocks")
+introduced this regression.  It'd cause 'Segmentation fault' error.
 
 The upstream fix is
-	Btrfs: bring back repair during read
+	Btrfs: fix segment fault when doing dio read
 
 Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
 ---
-v2: - Add regression commit and the fix to the description
-    - Use btrfs inspect-internal dump-tree to get rid of the dependence btrfs-map-logical
-    - Add comments in several places
-    - Fix typo, dio->buffered.
-
-v3: - Add 'mkfs -b 1G' to limit filesystem size to 2G in raid1 profile so that
+v2: - Add 'mkfs -b 1G' to limit filesystem size to 2G in raid1 profile so that
       we get a consistent output.
 
- tests/btrfs/141     | 169 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/141.out |  39 ++++++++++++
+ tests/btrfs/142     | 189 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/142.out |  39 +++++++++++
  tests/btrfs/group   |   1 +
- 3 files changed, 209 insertions(+)
- create mode 100755 tests/btrfs/141
- create mode 100644 tests/btrfs/141.out
+ 3 files changed, 229 insertions(+)
+ create mode 100755 tests/btrfs/142
+ create mode 100644 tests/btrfs/142.out
 
-diff --git a/tests/btrfs/141 b/tests/btrfs/141
+diff --git a/tests/btrfs/142 b/tests/btrfs/142
 new file mode 100755
-index 0000000..c4e08ed
+index 0000000..94566de
 --- /dev/null
-+++ b/tests/btrfs/141
-@@ -0,0 +1,169 @@
++++ b/tests/btrfs/142
+@@ -0,0 +1,189 @@
 +#! /bin/bash
-+# FS QA Test 141
++# FS QA Test 142
 +#
-+# Regression test for btrfs buffered read's repair during read.
++# Regression test for btrfs DIO read's repair during read without checksum.
 +#
-+# Commit 20a7db8ab3f2 ("btrfs: add dummy callback for readpage_io_failed
-+# and drop checks") introduced the regression.
++# Commit 2dabb3248453 ("Btrfs: Direct I/O read: Work on sectorsized blocks")
++# introduced this regression.  It'd cause 'Segmentation fault' error.
 +#
 +# The upstream fix is
-+# 	Btrfs: bring back repair during read
++#	Btrfs: fix segment fault when doing dio read
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
@@ -104,7 +96,6 @@ index 0000000..c4e08ed
 +_require_btrfs_command inspect-internal dump-tree
 +_require_command "$FILEFRAG_PROG" filefrag
 +
-+
 +# helpe to convert 'file offset' to btrfs logical offset
 +FILEFRAG_FILTER='
 +	if (/blocks? of (\d+) bytes/) {
@@ -145,7 +136,7 @@ index 0000000..c4e08ed
 +_check_repair()
 +{
 +	filter=${1:-cat}
-+	dmesg | tac | sed -ne "0,\#run fstests $seqnum at $date_time#p" | tac | $filter | grep -q -e "csum failed"
++	dmesg | tac | sed -ne "0,\#run fstests $seqnum at $date_time#p" | tac | $filter | grep -q -e "direct IO failed"
 +	if [ $? -eq 0 ]; then
 +		echo 1
 +	else
@@ -160,6 +151,24 @@ index 0000000..c4e08ed
 +        $BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | grep $1 -A 6 | awk '($1 ~ /stripe/ && $3 ~ /devid/ && $4 ~ /1/) { print $6 }'
 +}
 +
++
++SYSFS_BDEV=`_sysfs_dev $SCRATCH_DEV`
++
++start_fail()
++{
++	echo 100 > $DEBUGFS_MNT/fail_make_request/probability
++	echo 1 > $DEBUGFS_MNT/fail_make_request/times
++	echo 0 > $DEBUGFS_MNT/fail_make_request/verbose
++	echo 1 > $SYSFS_BDEV/make-it-fail
++}
++
++stop_fail()
++{
++	echo 0 > $DEBUGFS_MNT/fail_make_request/probability
++	echo 0 > $DEBUGFS_MNT/fail_make_request/times
++	echo 0 > $SYSFS_BDEV/make-it-fail
++}
++
 +_scratch_dev_pool_get 2
 +# step 1, create a raid1 btrfs which contains one 128k file.
 +echo "step 1......mkfs.btrfs" >>$seqres.full
@@ -169,7 +178,7 @@ index 0000000..c4e08ed
 +
 +# -o nospace_cache makes sure data is written to the start position of the data
 +# chunk
-+_scratch_mount -o nospace_cache
++_scratch_mount -o nospace_cache,nodatasum
 +
 +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" | _filter_xfs_io
 +
@@ -186,17 +195,20 @@ index 0000000..c4e08ed
 +_scratch_unmount
 +$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical_on_scratch 64K" $SCRATCH_DEV | _filter_xfs_io
 +
-+_scratch_mount
++_scratch_mount -o nospace_cache,nodatasum
 +
-+# step 3, 128k buffered read (this read can repair bad copy)
++# step 3, 128k dio read (this read can repair bad copy)
 +echo "step 3......repair the bad copy" >>$seqres.full
 +
 +# since raid1 consists of two copies, and the following read may read the good
-+# copy directly, lets loop 10 times here and discard output that buffered reads
++# copy directly, so lets loop 10 times here and discard output that dio reads
 +# give
 +for i in `seq 1 10`; do
-+	echo 3 > /proc/sys/vm/drop_caches
-+	$XFS_IO_PROG -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" > /dev/null
++	# start_fail only fails the following dio read so the repair is
++	# supposed to work.
++	start_fail
++	$XFS_IO_PROG -d -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" > /dev/null
++	stop_fail
 +	repair=`_check_repair`
 +	if [ $repair -eq 1 ]; then
 +		break
@@ -212,13 +224,13 @@ index 0000000..c4e08ed
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/btrfs/141.out b/tests/btrfs/141.out
+diff --git a/tests/btrfs/142.out b/tests/btrfs/142.out
 new file mode 100644
-index 0000000..2e08fc2
+index 0000000..d8be7fb
 --- /dev/null
-+++ b/tests/btrfs/141.out
++++ b/tests/btrfs/142.out
 @@ -0,0 +1,39 @@
-+QA output created by 141
++QA output created by 142
 +wrote 131072/131072 bytes at offset 0
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 +wrote 65536/65536 bytes at offset 136708096
@@ -258,14 +270,14 @@ index 0000000..2e08fc2
 +read 512/512 bytes at offset 136708096
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 1cb9c98..7b380e5 100644
+index 7b380e5..a4f97cd 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -142,3 +142,4 @@
- 138 auto compress
+@@ -143,3 +143,4 @@
  139 auto qgroup
  140 auto quick
-+141 auto quick
+ 141 auto quick
++142 auto quick
 -- 
 2.5.0
 
