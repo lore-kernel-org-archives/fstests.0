@@ -1,11 +1,11 @@
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:36189 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1034791AbdD1IYr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 28 Apr 2017 04:24:47 -0400
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:33159 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1034798AbdD1IYs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 28 Apr 2017 04:24:48 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2 2/6] overlay/017: fix some comments
-Date: Fri, 28 Apr 2017 11:24:44 +0300
-Message-Id: <1493367888-26550-3-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v2 5/6] overlay/017: verify constant inode number after rename
+Date: Fri, 28 Apr 2017 11:24:47 +0300
+Message-Id: <1493367888-26550-6-git-send-email-amir73il@gmail.com>
 In-Reply-To: <1493367888-26550-1-git-send-email-amir73il@gmail.com>
 References: <1493367888-26550-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,39 +13,57 @@ To: Eryu Guan <eguan@redhat.com>
 Cc: Miklos Szeredi <miklos@szeredi.hu>, Xiong Zhou <xzhou@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Align all comments to the term 'constant inode numbers' and
-explain why hardlinks are excluded from this test.
+The test verifies constant inode number after copy up.
+
+Verify that inode number remains constant also after rename
+and drop caches (when overlayfs needs to find the lower
+inodes in another location).
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- tests/overlay/017 | 7 +++----
- 1 file changed, 3 insertions(+), 4 deletions(-)
+ tests/overlay/017 | 15 ++++++++++++++-
+ 1 file changed, 14 insertions(+), 1 deletion(-)
 
 diff --git a/tests/overlay/017 b/tests/overlay/017
-index 7c1430d..e04690c 100755
+index 3ff429f..fe2518b 100755
 --- a/tests/overlay/017
 +++ b/tests/overlay/017
-@@ -1,7 +1,7 @@
- #! /bin/bash
- # FSQA Test No. 017
+@@ -8,7 +8,8 @@
+ # - modify A to trigger copy up
+ # - stat file A shows inode number Y != X
  #
--# Test unstable inode number
-+# Test constant inode numbers
+-# Also test if d_ino of readdir entries changes after copy up.
++# Also test if d_ino of readdir entries changes after copy up
++# and if inode numbers persist after rename and drop caches.
  #
- # This simple test demonstrates a known issue with overlayfs:
- # - stat file A shows inode number X
-@@ -58,9 +58,8 @@ rm -f $seqres.full
- _scratch_mkfs >>$seqres.full 2>&1
+ #-----------------------------------------------------------------------
+ #
+@@ -114,6 +115,8 @@ _scratch_mount
  
- # Create our test files.
--# Not dealing with hardlinks here, because there is more to test
--# then stable inode number.
--# Hardlinks will get a test of their own.
-+# Not dealing with hardlinks here, when hardlinks are broken they
-+# should not preserve the inode number.
- lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
- mkdir -p $lowerdir
- mkdir $lowerdir/dir
+ 
+ rm -f $tmp.*
++testdir=$SCRATCH_MNT/test
++mkdir -p $testdir
+ 
+ # Record inode numbers before copy up
+ record_inode_numbers $SCRATCH_MNT $tmp.before
+@@ -126,6 +129,16 @@ done
+ # Compare inode numbers before/after copy up
+ check_inode_numbers $SCRATCH_MNT $tmp.before $tmp.after_copyup
+ 
++for f in $FILES; do
++	# move to another dir
++	mv $SCRATCH_MNT/$f $testdir/
++done
++
++echo 3 > /proc/sys/vm/drop_caches
++
++# Compare inode numbers before/after rename and drop caches
++check_inode_numbers $testdir $tmp.after_copyup $tmp.after_move
++
+ echo "Silence is golden"
+ status=0
+ exit
 -- 
 2.7.4
 
