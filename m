@@ -1,64 +1,81 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44836 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S938590AbdD1Guy (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 28 Apr 2017 02:50:54 -0400
-Date: Fri, 28 Apr 2017 14:50:51 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 1/5] overlay/017: silence test output
-Message-ID: <20170428065051.GO26397@eguan.usersys.redhat.com>
-References: <1493305775-12559-1-git-send-email-amir73il@gmail.com>
- <1493305775-12559-2-git-send-email-amir73il@gmail.com>
- <20170428053633.GL26397@eguan.usersys.redhat.com>
- <CAOQ4uxiQ__f4eoZT+qyszHPK7KwuW+NbDfFz3E=d6+nkSEKVRg@mail.gmail.com>
- <20170428055035.GN26397@eguan.usersys.redhat.com>
- <CAOQ4uxisjtWLnHxXg+PbaJjFOmY7ZFEkF+ggsWB+54FSHvMLjA@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxisjtWLnHxXg+PbaJjFOmY7ZFEkF+ggsWB+54FSHvMLjA@mail.gmail.com>
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:36182 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1033676AbdD1IYm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 28 Apr 2017 04:24:42 -0400
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH v2 1/6] overlay/017: silence test output
+Date: Fri, 28 Apr 2017 11:24:43 +0300
+Message-Id: <1493367888-26550-2-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1493367888-26550-1-git-send-email-amir73il@gmail.com>
+References: <1493367888-26550-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, Xiong Zhou <xzhou@redhat.com>, linux-unionfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Xiong Zhou <xzhou@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Apr 28, 2017 at 09:34:18AM +0300, Amir Goldstein wrote:
-> In your setup does strace find `pwd` -maxdepth 1 -inum 3932421
-> show newfstatat  for each inode?
-> It should be doing stat only for dirs according to the code and
-> Enabled features of find --version.
-> Not sure why it does newfstatat for every inode on my kvm machine...
-> 
-> Amir.
+Change test to output golden silence on success.
 
-My find only calls newfstatat on dirs, find version
-findutils-4.5.11-5.el7.x86_64
+We are going to run the same check several times,
+so instead of cloning the test output, cloning the
+silence will be more conveniet.
 
-# strace find `pwd` -maxdepth 1 -inum 3932421 2>&1 | grep newfstatat
-newfstatat(AT_FDCWD, "/root/xfstests", {st_mode=S_IFDIR|0755, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(AT_FDCWD, "/root/xfstests", {st_mode=S_IFDIR|0755, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "testlogs", {st_mode=S_IFDIR|0755, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "tests", {st_mode=S_IFDIR|0775, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "btrfsstress-v5", {st_mode=S_IFDIR|0755, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "testpatch", {st_mode=S_IFDIR|0755, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "btrfsstress-v4", {st_mode=S_IFDIR|0755, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "include", {st_mode=S_IFDIR|0775, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "ltp", {st_mode=S_IFDIR|0775, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "autom4te.cache", {st_mode=S_IFDIR|0755, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "btrfsstress", {st_mode=S_IFDIR|0755, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "crash", {st_mode=S_IFDIR|0775, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "build", {st_mode=S_IFDIR|0775, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "tools", {st_mode=S_IFDIR|0775, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "lib", {st_mode=S_IFDIR|0775, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "btrfsstress-v2", {st_mode=S_IFDIR|0755, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, ".git", {st_mode=S_IFDIR|0775, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "configs", {st_mode=S_IFDIR|0775, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "dmapi", {st_mode=S_IFDIR|0775, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "patches", {st_mode=S_IFDIR|0755, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "btrfsstress-v3", {st_mode=S_IFDIR|0755, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "src", {st_mode=S_IFDIR|0775, st_size=12288, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "results", {st_mode=S_IFDIR|0755, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "m4", {st_mode=S_IFDIR|0775, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "doc", {st_mode=S_IFDIR|0775, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
-newfstatat(5, "common", {st_mode=S_IFDIR|0775, st_size=4096, ...}, AT_SYMLINK_NOFOLLOW) = 0
+Generalize cleanup of temp files for the same reason.
 
-Eryu
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/overlay/017     | 7 +++++--
+ tests/overlay/017.out | 7 +------
+ 2 files changed, 6 insertions(+), 8 deletions(-)
+
+diff --git a/tests/overlay/017 b/tests/overlay/017
+index 5ca3040..7c1430d 100755
+--- a/tests/overlay/017
++++ b/tests/overlay/017
+@@ -40,6 +40,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ 
+ _cleanup()
+ {
++	cd /
+ 	rm -f $tmp.*
+ }
+ 
+@@ -73,7 +74,7 @@ mknod $lowerdir/fifo p
+ _scratch_mount
+ 
+ 
+-rm -f $tmp.before $tmp.after
++rm -f $tmp.*
+ 
+ # Test stable stat(2) st_ino
+ 
+@@ -89,11 +90,13 @@ done
+ 
+ # find by inode number - expect to find file by inode number
+ cat $tmp.before | while read ino f; do
+-	find $f -inum $ino -maxdepth 0 | _filter_scratch
++	find $SCRATCH_MNT/ -maxdepth 1 -inum $ino | grep -q $f || \
++		echo "$f not found by ino $ino"
+ done
+ 
+ # Compare before..after - expect silence
+ diff $tmp.before $tmp.after
+ 
++echo "Silence is golden"
+ status=0
+ exit
+diff --git a/tests/overlay/017.out b/tests/overlay/017.out
+index 1f277c5..8222844 100644
+--- a/tests/overlay/017.out
++++ b/tests/overlay/017.out
+@@ -1,7 +1,2 @@
+ QA output created by 017
+-SCRATCH_MNT/dir
+-SCRATCH_MNT/file
+-SCRATCH_MNT/symlink
+-SCRATCH_MNT/chrdev
+-SCRATCH_MNT/blkdev
+-SCRATCH_MNT/fifo
++Silence is golden
+-- 
+2.7.4
+
