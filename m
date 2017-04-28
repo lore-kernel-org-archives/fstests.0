@@ -1,60 +1,55 @@
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:34905 "EHLO
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:35006 "EHLO
         mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1033622AbdD1IYk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 28 Apr 2017 04:24:40 -0400
+        with ESMTP id S1033096AbdD1IYu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 28 Apr 2017 04:24:50 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2 0/6] fstests: more tests for overlay constant inode numbers
-Date: Fri, 28 Apr 2017 11:24:42 +0300
-Message-Id: <1493367888-26550-1-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v2 6/6] overlay/017: test persistent inode numbers after mount cycle
+Date: Fri, 28 Apr 2017 11:24:48 +0300
+Message-Id: <1493367888-26550-7-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1493367888-26550-1-git-send-email-amir73il@gmail.com>
+References: <1493367888-26550-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
 Cc: Miklos Szeredi <miklos@szeredi.hu>, Xiong Zhou <xzhou@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Eryu,
+Overlayfs directory inodes are constant across copy up,
+but not persistent on mount cycle.
 
-This series contains enhancements to overlay/017, which I used to test
-my work on overlayfs constant inode numbers. [1]
+Compare the inode numbers before and after mount cycle.
 
-The original test was a bit naiive, not taking into account renames,
-drop caches and mount cycle. All those are added by this series.
-Since the original test does not pass on stable kernel nor will
-it pass with the changes by this series, these changes should cause
-no regressions to testers.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/overlay/017 | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
 
-My work covers only the inode numbers returned from stat(2) and not
-the inode numbers returned in d_ino from readdir(3), so the 'find -inum'
-part of this test could still fail with my overlayfs patches.
-
-However, I ran my tests in kvm-xfstests VM, where 'find -inum' called
-stat(2) for each entry, so the test did pass.
-
-I will dig deeper into this behavior when I work on fixing d_ino
-values in the next part of my work.
-
-Changes since v1:
-- Re-factor check_inode_numbers
-- Move -maxdepth option position
-- Fix somme comments
-- Blurb more in commit messages
-
-Amir.
-
-[1] https://marc.info/?l=linux-unionfs&m=149324252301397&w=2
-
-
-Amir Goldstein (6):
-  overlay/017: silence test output
-  overlay/017: fix some comments
-  overlay/017: use af_unix to create socket test file
-  overlay/017: create helpers to record and check inode numbers
-  overlay/017: verify constant inode number after rename
-  overlay/017: test persistent inode numbers after mount cycle
-
- tests/overlay/017     | 86 +++++++++++++++++++++++++++++++++++++++++----------
- tests/overlay/017.out |  7 +----
- 2 files changed, 70 insertions(+), 23 deletions(-)
-
+diff --git a/tests/overlay/017 b/tests/overlay/017
+index fe2518b..c5671ec 100755
+--- a/tests/overlay/017
++++ b/tests/overlay/017
+@@ -9,7 +9,8 @@
+ # - stat file A shows inode number Y != X
+ #
+ # Also test if d_ino of readdir entries changes after copy up
+-# and if inode numbers persist after rename and drop caches.
++# and if inode numbers persist after rename, drop caches and
++# mount cycle.
+ #
+ #-----------------------------------------------------------------------
+ #
+@@ -139,6 +140,12 @@ echo 3 > /proc/sys/vm/drop_caches
+ # Compare inode numbers before/after rename and drop caches
+ check_inode_numbers $testdir $tmp.after_copyup $tmp.after_move
+ 
++# Verify that the inode numbers survive a mount cycle
++_scratch_cycle_mount
++
++# Compare inode numbers before/after mount cycle
++check_inode_numbers $testdir $tmp.after_move $tmp.after_cycle
++
+ echo "Silence is golden"
+ status=0
+ exit
 -- 
 2.7.4
 
