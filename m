@@ -1,69 +1,68 @@
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:33159 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1034798AbdD1IYs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 28 Apr 2017 04:24:48 -0400
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2 5/6] overlay/017: verify constant inode number after rename
-Date: Fri, 28 Apr 2017 11:24:47 +0300
-Message-Id: <1493367888-26550-6-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1493367888-26550-1-git-send-email-amir73il@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:42988 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1164497AbdD1JYE (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 28 Apr 2017 05:24:04 -0400
+Date: Fri, 28 Apr 2017 17:24:02 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2 4/6] overlay/017: create helpers to record and check
+ inode numbers
+Message-ID: <20170428092402.GQ26397@eguan.usersys.redhat.com>
 References: <1493367888-26550-1-git-send-email-amir73il@gmail.com>
+ <1493367888-26550-5-git-send-email-amir73il@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1493367888-26550-5-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
+To: Amir Goldstein <amir73il@gmail.com>
 Cc: Miklos Szeredi <miklos@szeredi.hu>, Xiong Zhou <xzhou@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-The test verifies constant inode number after copy up.
+On Fri, Apr 28, 2017 at 11:24:46AM +0300, Amir Goldstein wrote:
+> Use helpers to records and check inode numbers so we can repeat
+> the same test after rename and mount cycle.
+> 
+> Suggested-by: Eryu Guan <eguan@redhat.com>
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+>  tests/overlay/017 | 57 ++++++++++++++++++++++++++++++++++++++++---------------
+>  1 file changed, 42 insertions(+), 15 deletions(-)
+> 
+> diff --git a/tests/overlay/017 b/tests/overlay/017
+> index 779907d..3ff429f 100755
+> --- a/tests/overlay/017
+> +++ b/tests/overlay/017
+> @@ -72,32 +72,59 @@ mknod $lowerdir/blkdev b 1 1
+>  mknod $lowerdir/fifo p
+>  $here/src/af_unix $lowerdir/socket
+>  
+> +FILES="dir file symlink chrdev blkdev fifo socket"
+> +
+> +# Record inode numbers in format <ino> <basename>
+> +function record_inode_numbers()
+> +{
+> +	dir=$1
+> +	outfile=$2
+> +
+> +	for f in $FILES; do
+> +		ls -id $dir/$f
+> +	done | \
+> +	while read ino file; do
+> +		echo $ino `basename $file` >> $outfile
+> +	done
+> +}
+> +
+> +# Check inode numbers match recorder inode numbers
+> +function check_inode_numbers()
+> +{
+> +	dir=$1
+> +	before=$2
+> +	after=$2
+             ^^^ $3
+Otherwise looks good to me. I can fix this typo at commit time.
 
-Verify that inode number remains constant also after rename
-and drop caches (when overlayfs needs to find the lower
-inodes in another location).
+But I've already kicked off release testing for this week's update,
+I'll queue these patches for next update.
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/overlay/017 | 15 ++++++++++++++-
- 1 file changed, 14 insertions(+), 1 deletion(-)
-
-diff --git a/tests/overlay/017 b/tests/overlay/017
-index 3ff429f..fe2518b 100755
---- a/tests/overlay/017
-+++ b/tests/overlay/017
-@@ -8,7 +8,8 @@
- # - modify A to trigger copy up
- # - stat file A shows inode number Y != X
- #
--# Also test if d_ino of readdir entries changes after copy up.
-+# Also test if d_ino of readdir entries changes after copy up
-+# and if inode numbers persist after rename and drop caches.
- #
- #-----------------------------------------------------------------------
- #
-@@ -114,6 +115,8 @@ _scratch_mount
- 
- 
- rm -f $tmp.*
-+testdir=$SCRATCH_MNT/test
-+mkdir -p $testdir
- 
- # Record inode numbers before copy up
- record_inode_numbers $SCRATCH_MNT $tmp.before
-@@ -126,6 +129,16 @@ done
- # Compare inode numbers before/after copy up
- check_inode_numbers $SCRATCH_MNT $tmp.before $tmp.after_copyup
- 
-+for f in $FILES; do
-+	# move to another dir
-+	mv $SCRATCH_MNT/$f $testdir/
-+done
-+
-+echo 3 > /proc/sys/vm/drop_caches
-+
-+# Compare inode numbers before/after rename and drop caches
-+check_inode_numbers $testdir $tmp.after_copyup $tmp.after_move
-+
- echo "Silence is golden"
- status=0
- exit
--- 
-2.7.4
-
+Thanks,
+Eryu
