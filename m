@@ -1,15 +1,15 @@
-Received: from mail-io0-f177.google.com ([209.85.223.177]:35518 "EHLO
-        mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S939220AbdD1JrQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 28 Apr 2017 05:47:16 -0400
+Received: from mail-it0-f66.google.com ([209.85.214.66]:33693 "EHLO
+        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1164648AbdD1JwS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 28 Apr 2017 05:52:18 -0400
 MIME-Version: 1.0
 Reply-To: fdmanana@gmail.com
-In-Reply-To: <1493230161-8809-1-git-send-email-bo.li.liu@oracle.com>
-References: <1493230161-8809-1-git-send-email-bo.li.liu@oracle.com>
+In-Reply-To: <1493230172-8951-1-git-send-email-bo.li.liu@oracle.com>
+References: <1493230172-8951-1-git-send-email-bo.li.liu@oracle.com>
 From: Filipe Manana <fdmanana@gmail.com>
-Date: Fri, 28 Apr 2017 10:47:14 +0100
-Message-ID: <CAL3q7H7kOmDdK0OMy+Zhq8jGM0xR1K2aYiLn-e-kaLACSJ9avw@mail.gmail.com>
-Subject: Re: [PATCH v2] fstests: regression test for btrfs dio read repair
+Date: Fri, 28 Apr 2017 10:52:12 +0100
+Message-ID: <CAL3q7H7Q6BuOLYTi5AD529x+N02-z5B6MuRxLuUvRVPNDE1Obw@mail.gmail.com>
+Subject: Re: [PATCH v2] fstests: regression test for btrfs buffered read's repair
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
@@ -18,35 +18,32 @@ Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.ker
 List-ID: <fstests@vger.kernel.org>
 
 On Wed, Apr 26, 2017 at 7:09 PM, Liu Bo <bo.li.liu@oracle.com> wrote:
-> This case tests whether dio read can repair the bad copy if we have
-> a good copy.
+> This case tests whether buffered read can repair the bad copy if we
+> have a good copy.
 >
-> Commit 2dabb3248453 ("Btrfs: Direct I/O read: Work on sectorsized blocks"=
-)
-> introduced the regression.
+> Commit 20a7db8ab3f2 ("btrfs: add dummy callback for readpage_io_failed
+> and drop checks") introduced the regression.
 >
 > The upstream fix is
->         Btrfs: fix invalid dereference in btrfs_retry_endio
->
-> Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+>         Btrfs: bring back repair during read
 
-Thanks for doing this.
+Same issue as reported for the other new test (btrfs/140), the test
+fails on a kernel with the mentioned patch. Seems like it does wrong
+assumptions somewhere (I haven't investigated, just run the test):
 
-Just tested this, on a kernel with the mentioned fix, and it fails:
-
-root 08:04:11 /home/fdmanana/git/hub/xfstests (master)> ./check btrfs/140
+root 08:09:17 /home/fdmanana/git/hub/xfstests (master)> ./check btrfs/141
 FSTYP         -- btrfs
 PLATFORM      -- Linux/x86_64 debian3 4.10.0-rc8-btrfs-next-40+
 MKFS_OPTIONS  -- /dev/sdc
 MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
 
-btrfs/140 - output mismatch (see
-/home/fdmanana/git/hub/xfstests/results//btrfs/140.out.bad)
-    --- tests/btrfs/140.out 2017-04-28 07:59:13.069289130 +0100
-    +++ /home/fdmanana/git/hub/xfstests/results//btrfs/140.out.bad
-2017-04-28 08:04:18.209544574 +0100
+btrfs/141 - output mismatch (see
+/home/fdmanana/git/hub/xfstests/results//btrfs/141.out.bad)
+    --- tests/btrfs/141.out 2017-04-28 08:09:13.289791597 +0100
+    +++ /home/fdmanana/git/hub/xfstests/results//btrfs/141.out.bad
+2017-04-28 08:09:28.469804304 +0100
     @@ -1,39 +1,39 @@
-     QA output created by 140
+     QA output created by 141
      wrote 131072/131072 bytes at offset 0
      XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
     -wrote 65536/65536 bytes at offset 244056064
@@ -55,22 +52,22 @@ btrfs/140 - output mismatch (see
     -0e8c0000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
 ................
     ...
-    (Run 'diff -u tests/btrfs/140.out
-/home/fdmanana/git/hub/xfstests/results//btrfs/140.out.bad'  to see
+    (Run 'diff -u tests/btrfs/141.out
+/home/fdmanana/git/hub/xfstests/results//btrfs/141.out.bad'  to see
 the entire diff)
-Ran: btrfs/140
-Failures: btrfs/140
+Ran: btrfs/141
+Failures: btrfs/141
 Failed 1 of 1 tests
 
-root 08:04:18 /home/fdmanana/git/hub/xfstests (master)>
-root 08:04:27 /home/fdmanana/git/hub/xfstests (master)> diff -u
-tests/btrfs/140.out
-/home/fdmanana/git/hub/xfstests/results//btrfs/140.out.bad
---- tests/btrfs/140.out 2017-04-28 07:59:13.069289130 +0100
-+++ /home/fdmanana/git/hub/xfstests/results//btrfs/140.out.bad
-2017-04-28 08:04:18.209544574 +0100
+root 08:09:29 /home/fdmanana/git/hub/xfstests (master)>
+root 08:09:31 /home/fdmanana/git/hub/xfstests (master)> diff -u
+tests/btrfs/141.out
+/home/fdmanana/git/hub/xfstests/results//btrfs/141.out.bad
+--- tests/btrfs/141.out 2017-04-28 08:09:13.289791597 +0100
++++ /home/fdmanana/git/hub/xfstests/results//btrfs/141.out.bad
+2017-04-28 08:09:28.469804304 +0100
 @@ -1,39 +1,39 @@
- QA output created by 140
+ QA output created by 141
  wrote 131072/131072 bytes at offset 0
  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 -wrote 65536/65536 bytes at offset 244056064
@@ -207,41 +204,44 @@ tests/btrfs/140.out
 ..
 +read 512/512 bytes at offset 1103101952
  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+root 08:09:42 /home/fdmanana/git/hub/xfstests (master)>
 
-Tried with btrfs-progs 4.7 and 4.10.2.
 
 thanks
 
+>
+> Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
 > ---
 > v2: - Add regression commit and the fix to the description
 >     - Use btrfs inspect-internal dump-tree to get rid of the dependence b=
 trfs-map-logical
 >     - Add comments in several places
+>     - Fix typo, dio->buffered.
 >
->  tests/btrfs/140     | 167 ++++++++++++++++++++++++++++++++++++++++++++++=
+>  tests/btrfs/141     | 169 ++++++++++++++++++++++++++++++++++++++++++++++=
 ++++++
->  tests/btrfs/140.out |  39 ++++++++++++
+>  tests/btrfs/141.out |  39 ++++++++++++
 >  tests/btrfs/group   |   1 +
->  3 files changed, 207 insertions(+)
->  create mode 100755 tests/btrfs/140
->  create mode 100644 tests/btrfs/140.out
+>  3 files changed, 209 insertions(+)
+>  create mode 100755 tests/btrfs/141
+>  create mode 100644 tests/btrfs/141.out
 >
-> diff --git a/tests/btrfs/140 b/tests/btrfs/140
+> diff --git a/tests/btrfs/141 b/tests/btrfs/141
 > new file mode 100755
-> index 0000000..63641b4
+> index 0000000..f95dd2b
 > --- /dev/null
-> +++ b/tests/btrfs/140
-> @@ -0,0 +1,167 @@
+> +++ b/tests/btrfs/141
+> @@ -0,0 +1,169 @@
 > +#! /bin/bash
-> +# FS QA Test 140
+> +# FS QA Test 141
 > +#
-> +# Regression test for btrfs DIO read's repair during read.
+> +# Regression test for btrfs buffered read's repair during read.
 > +#
-> +# Commit 2dabb3248453 ("Btrfs: Direct I/O read: Work on sectorsized bloc=
-ks")
-> +# introduced the regression.
+> +# Commit 20a7db8ab3f2 ("btrfs: add dummy callback for readpage_io_failed
+> +# and drop checks") introduced the regression.
+> +#
 > +# The upstream fix is
-> +#      Btrfs: fix invalid dereference in btrfs_retry_endio
+> +#      Btrfs: bring back repair during read
 > +#
 > +#-----------------------------------------------------------------------
 > +# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
@@ -292,7 +292,7 @@ ks")
 > +
 > +_require_btrfs_command inspect-internal dump-tree
 > +_require_command "$FILEFRAG_PROG" filefrag
-> +_require_odirect
+> +
 > +
 > +# helpe to convert 'file offset' to btrfs logical offset
 > +FILEFRAG_FILTER=3D'
@@ -346,11 +346,11 @@ ks")
 > +
 > +_get_physical()
 > +{
-> +       # $1 is logical address
-> +       # print chunk tree and find devid 2 which is $SCRATCH_DEV
-> +       $BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | g=
-rep $1 -A 6 | awk '($1 ~ /stripe/ && $3 ~ /devid/ && $4 ~ /1/) { print $6 }=
-'
+> +        # $1 is logical address
+> +        # print chunk tree and find devid 2 which is $SCRATCH_DEV
+> +        $BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | =
+grep $1 -A 6 | awk '($1 ~ /stripe/ && $3 ~ /devid/ && $4 ~ /1/) { print $6 =
+}'
 > +}
 > +
 > +_scratch_dev_pool_get 2
@@ -385,17 +385,18 @@ ATCH_DEV | _filter_xfs_io
 > +
 > +_scratch_mount
 > +
-> +# step 3, 128k dio read (this read can repair bad copy)
+> +# step 3, 128k buffered read (this read can repair bad copy)
 > +echo "step 3......repair the bad copy" >>$seqres.full
 > +
 > +# since raid1 consists of two copies, and the following read may read th=
 e good
-> +# copy directly, so lets loop 10 times here and discard output that dio =
-reads
+> +# copy directly, lets loop 10 times here and discard output that buffere=
+d reads
 > +# give
 > +for i in `seq 1 10`; do
-> +       $XFS_IO_PROG -d -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" >=
- /dev/null
+> +       echo 3 > /proc/sys/vm/drop_caches
+> +       $XFS_IO_PROG -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" > /d=
+ev/null
 > +       repair=3D`_check_repair`
 > +       if [ $repair -eq 1 ]; then
 > +               break
@@ -405,20 +406,20 @@ reads
 > +_scratch_unmount
 > +
 > +# check if the repair works
-> +$XFS_IO_PROG -d -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_D=
-EV | _filter_xfs_io
+> +$XFS_IO_PROG -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_DEV =
+| _filter_xfs_io
 > +
 > +_scratch_dev_pool_put
 > +# success, all done
 > +status=3D0
 > +exit
-> diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
+> diff --git a/tests/btrfs/141.out b/tests/btrfs/141.out
 > new file mode 100644
-> index 0000000..d8e3856
+> index 0000000..6b780ac
 > --- /dev/null
-> +++ b/tests/btrfs/140.out
+> +++ b/tests/btrfs/141.out
 > @@ -0,0 +1,39 @@
-> +QA output created by 140
+> +QA output created by 141
 > +wrote 131072/131072 bytes at offset 0
 > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 > +wrote 65536/65536 bytes at offset 244056064
@@ -490,14 +491,14 @@ EV | _filter_xfs_io
 > +read 512/512 bytes at offset 244056064
 > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 > diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 9d4b80b..1cb9c98 100644
+> index 1cb9c98..7b380e5 100644
 > --- a/tests/btrfs/group
 > +++ b/tests/btrfs/group
-> @@ -141,3 +141,4 @@
->  137 auto quick send
+> @@ -142,3 +142,4 @@
 >  138 auto compress
 >  139 auto qgroup
-> +140 auto quick
+>  140 auto quick
+> +141 auto quick
 > --
 > 2.5.0
 >
