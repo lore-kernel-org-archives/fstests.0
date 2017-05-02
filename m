@@ -1,187 +1,348 @@
-Received: from mx1.redhat.com ([209.132.183.28]:38270 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750751AbdEBNSZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 2 May 2017 09:18:25 -0400
-Date: Tue, 2 May 2017 21:18:23 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] src: fix compiler warnings
-Message-ID: <20170502131823.GA7250@eguan.usersys.redhat.com>
-References: <20170501005637.32347-1-tytso@mit.edu>
+Received: from mail-it0-f66.google.com ([209.85.214.66]:33069 "EHLO
+        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750723AbdEBOhR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 2 May 2017 10:37:17 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170501005637.32347-1-tytso@mit.edu>
+Reply-To: fdmanana@gmail.com
+In-Reply-To: <1493400352-5845-1-git-send-email-bo.li.liu@oracle.com>
+References: <1493400352-5845-1-git-send-email-bo.li.liu@oracle.com>
+From: Filipe Manana <fdmanana@gmail.com>
+Date: Tue, 2 May 2017 15:37:15 +0100
+Message-ID: <CAL3q7H52wjV6V4h6WNrbje=A702BmD_SGDq+5O60OyLx09cXKA@mail.gmail.com>
+Subject: Re: [PATCH v3] fstests: regression test for btrfs dio read repair
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org
+To: Liu Bo <bo.li.liu@oracle.com>
+Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Apr 30, 2017 at 08:56:37PM -0400, Theodore Ts'o wrote:
-> Most of the fixes are printf format type warnings, but apparently GCC
-> 6 is smart enough to realize is that if you don't do proper error
-> checking with posix_memalign, the resulting pointer can be undefined,
-> and whines about it.  So while fixing this in aio-dio-fcntl-race, I
-> also cleaned up the error checking and reporting.
-> 
-> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+On Fri, Apr 28, 2017 at 6:25 PM, Liu Bo <bo.li.liu@oracle.com> wrote:
+> This case tests whether dio read can repair the bad copy if we have
+> a good copy.
+>
+> Commit 2dabb3248453 ("Btrfs: Direct I/O read: Work on sectorsized blocks"=
+)
+> introduced the regression.
+>
+> The upstream fix is
+>         Btrfs: fix invalid dereference in btrfs_retry_endio
+>
+> Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
+
+Just a comment below.
+
 > ---
->  src/aio-dio-regress/aio-dio-eof-race.c   |  3 ++-
->  src/aio-dio-regress/aio-dio-fcntl-race.c | 32 +++++++++++++++++++++++---------
->  src/dio-invalidate-cache.c               |  6 ++++--
->  src/holetest.c                           |  8 ++++----
->  src/t_rename_overwrite.c                 |  3 ++-
->  5 files changed, 35 insertions(+), 17 deletions(-)
-> 
-> diff --git a/src/aio-dio-regress/aio-dio-eof-race.c b/src/aio-dio-regress/aio-dio-eof-race.c
-> index bd71b030..67c0b2de 100644
-> --- a/src/aio-dio-regress/aio-dio-eof-race.c
-> +++ b/src/aio-dio-regress/aio-dio-eof-race.c
-> @@ -202,7 +202,8 @@ int main(int argc, char *argv[])
->  		 * a seamless buf_size worth of IO_PATTERN to the last block.
->  		 */
->  		if (memcmp(buf, cmp_buf, buf_size)) {
-> -			printf("corruption while extending from %ld\n", eof);
-> +			printf("corruption while extending from %lld\n",
-> +			       (unsigned long long) eof);
-
-The format is %lld, cast eof to (long long)? off_t seems to be a signed
-value.
-
->  			dump_buffer(buf, 0, buf_size);
->  			return 1;
->  		}
-> diff --git a/src/aio-dio-regress/aio-dio-fcntl-race.c b/src/aio-dio-regress/aio-dio-fcntl-race.c
-> index cdf97736..88a27472 100644
-> --- a/src/aio-dio-regress/aio-dio-fcntl-race.c
-> +++ b/src/aio-dio-regress/aio-dio-fcntl-race.c
-> @@ -92,12 +92,16 @@ int main(int argc, char **argv)
->  		return 1;
->  	}
->  	fd = open(argv[1], O_CREAT | O_TRUNC | O_RDWR, 0600);
-> -	if (fd < 0)
-> +	if (fd < 0) {
-> +		perror("open");
->  		return 1;
-> +	}
->  
->  	pid1 = fork();
-> -	if (pid1 < 0)
-> +	if (pid1 < 0) {
-> +		perror("fork");
->  		return 1;
-> +	}
->  
->  	if (pid1 == 0) {
->  		struct timeval start, now, delta = { 0, 0 };
-> @@ -108,12 +112,15 @@ int main(int argc, char **argv)
->  		flags = fcntl(fd, F_GETFL);
->  		while (1) {
->  			ret = fcntl(fd, F_SETFL, flags | O_DIRECT);
-> -			if (ret)
-> -				return ret;
-> +			if (ret) {
-> +				perror("fcntl O_DIRECT");
-> +				return 1;
-> +			}
->  			ret = fcntl(fd, F_SETFL, flags);
-> -			if (ret)
-> -				return ret;
-> -
-> +			if (ret) {
-> +				perror("fcntl");
-> +				return 1;
-> +			}
->  			gettimeofday(&now, NULL);
->  			timersub(&now, &start, &delta);
->  			if (delta.tv_sec >= LOOP_SECONDS)
-> @@ -121,8 +128,15 @@ int main(int argc, char **argv)
->  		}
->  	} else {
->  		/* parent: AIO */
-> -		void *buf;
-> -		posix_memalign(&buf, BUF_SIZE, BUF_SIZE);
-> +		void *buf = NULL;
-> +		int err;
+> v2: - Add regression commit and the fix to the description
+>     - Use btrfs inspect-internal dump-tree to get rid of the dependence b=
+trfs-map-logical
+>     - Add comments in several places
+>
+> v3: - Add 'mkfs -b 1G' to limit filesystem size to 2G in raid1 profile so=
+ that
+>       we get a consistent output.
+>
+>  tests/btrfs/140     | 167 ++++++++++++++++++++++++++++++++++++++++++++++=
+++++++
+>  tests/btrfs/140.out |  39 ++++++++++++
+>  tests/btrfs/group   |   1 +
+>  3 files changed, 207 insertions(+)
+>  create mode 100755 tests/btrfs/140
+>  create mode 100644 tests/btrfs/140.out
+>
+> diff --git a/tests/btrfs/140 b/tests/btrfs/140
+> new file mode 100755
+> index 0000000..dcd8807
+> --- /dev/null
+> +++ b/tests/btrfs/140
+> @@ -0,0 +1,167 @@
+> +#! /bin/bash
+> +# FS QA Test 140
+> +#
+> +# Regression test for btrfs DIO read's repair during read.
+> +#
+> +# Commit 2dabb3248453 ("Btrfs: Direct I/O read: Work on sectorsized bloc=
+ks")
+> +# introduced the regression.
+> +# The upstream fix is
+> +#      Btrfs: fix invalid dereference in btrfs_retry_endio
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
 > +
-> +		err = posix_memalign(&buf, BUF_SIZE, BUF_SIZE);
-> +		if (err || buf == NULL) {
-> +			fprintf(stderr, "posix_memalign failed: %s\n",
-> +				strerror(err));
-> +			exit(1);
-> +		}
->  		/* Two tasks which performs unaligned aio will be serialized
->  		   which maks race window wider */
->  		pid2 = fork();
-> diff --git a/src/dio-invalidate-cache.c b/src/dio-invalidate-cache.c
-> index 4c40c87d..004588ab 100644
-> --- a/src/dio-invalidate-cache.c
-> +++ b/src/dio-invalidate-cache.c
-> @@ -160,7 +160,8 @@ static int run_test(const char *filename, int n_child, int blksz, off_t offset,
->  	/* seek, write, read and verify */
->  	for (i = 0; i < nr_iter; i++) {
->  		memset(buf_wr, i + 1, blksz);
-> -		log("pwrite(fd_wr, %p, %d, %lu)\n", buf_wr, blksz, seekoff);
-> +		log("pwrite(fd_wr, %p, %d, %llu)\n", buf_wr, blksz,
-> +		    (unsigned long long) seekoff);
+> +seq=3D`basename $0`
+> +seqres=3D$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=3D`pwd`
+> +tmp=3D/tmp/$$
+> +status=3D1       # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch_dev_pool 2
+> +
+> +_require_btrfs_command inspect-internal dump-tree
+> +_require_command "$FILEFRAG_PROG" filefrag
+> +_require_odirect
+> +
+> +# helpe to convert 'file offset' to btrfs logical offset
+> +FILEFRAG_FILTER=3D'
+> +       if (/blocks? of (\d+) bytes/) {
+> +               $blocksize =3D $1;
+> +               next
+> +       }
+> +       ($ext, $logical, $physical, $length) =3D
+> +               (/^\s*(\d+):\s+(\d+)..\s+\d+:\s+(\d+)..\s+\d+:\s+(\d+):/)
+> +       or next;
+> +       ($flags) =3D /.*:\s*(\S*)$/;
+> +       print $physical * $blocksize, "#",
+> +             $length * $blocksize, "#",
+> +             $logical * $blocksize, "#",
+> +             $flags, " "'
+> +
+> +# this makes filefrag output script readable by using a perl helper.
+> +# output is one extent per line, with three numbers separated by '#'
+> +# the numbers are: physical, length, logical (all in bytes)
+> +# sample output: "1234#10#5678" -> physical 1234, length 10, logical 567=
+8
+> +_filter_extents()
+> +{
+> +       tee -a $seqres.full | $PERL_PROG -ne "$FILEFRAG_FILTER"
+> +}
+> +
+> +_check_file_extents()
+> +{
+> +       cmd=3D"filefrag -v $1"
+> +       echo "# $cmd" >> $seqres.full
+> +       out=3D`$cmd | _filter_extents`
+> +       if [ -z "$out" ]; then
+> +               return 1
+> +       fi
+> +       echo "after filter: $out" >> $seqres.full
+> +       echo $out
+> +       return 0
+> +}
+> +
+> +_check_repair()
+> +{
+> +       filter=3D${1:-cat}
+> +       dmesg | tac | sed -ne "0,\#run fstests $seqnum at $date_time#p" |=
+ tac | $filter | grep -q -e "csum failed"
+> +       if [ $? -eq 0 ]; then
+> +               echo 1
+> +       else
+> +               echo 0
+> +       fi
+> +}
+> +
+> +_get_physical()
+> +{
+> +       # $1 is logical address
+> +       # print chunk tree and find devid 2 which is $SCRATCH_DEV
+> +       $BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | g=
+rep $1 -A 6 | awk '($1 ~ /stripe/ && $3 ~ /devid/ && $4 ~ /1/) { print $6 }=
+'
+> +}
+> +
+> +_scratch_dev_pool_get 2
+> +# step 1, create a raid1 btrfs which contains one 128k file.
+> +echo "step 1......mkfs.btrfs" >>$seqres.full
+> +
+> +mkfs_opts=3D"-d raid1 -b 1G"
+> +_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+> +
+> +# -o nospace_cache makes sure data is written to the start position of t=
+he data
+> +# chunk
+> +_scratch_mount -o nospace_cache
+> +
+> +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foob=
+ar" | _filter_xfs_io
+> +
+> +sync
 
-Same here, change format to %lld and cast seekoff to (long long)?
+The sync is not necessary, since we cleanly unmount the fs below.
 
->  		if (pwrite(fd_wr, buf_wr, blksz, seekoff) != blksz) {
->  			perror("direct write");
->  			exit(EXIT_FAILURE);
-> @@ -174,7 +175,8 @@ static int run_test(const char *filename, int n_child, int blksz, off_t offset,
->  			}
->  		}
->  
-> -		log("pread(fd_rd, %p, %d, %lu)\n", buf_rd, blksz, seekoff);
-> +		log("pread(fd_rd, %p, %d, %llu)\n", buf_rd, blksz,
-> +		    (unsigned long long) seekoff);
+The test works now with a patched kernel and fails with an unpatched
+kernel as expected.
 
-Same here.
+Looks good to me, but FILEFRAG_FILTER, _filter_extents,
+_check_file_extents, _get_physical and _check_repair are duplicated
+across all the 4 test case files in the series. Could be factored into
+common/btrfs later for example.
 
-Thanks,
-Eryu
-
->  		if (pread(fd_rd, buf_rd, blksz, seekoff) != blksz) {
->  			perror("buffer read");
->  			exit(EXIT_FAILURE);
-> diff --git a/src/holetest.c b/src/holetest.c
-> index edd85fe7..1939b35f 100644
-> --- a/src/holetest.c
-> +++ b/src/holetest.c
-> @@ -101,10 +101,10 @@ int verify_mapping(char *vastart, long npages, uint64_t *expect)
->  		for (i = 0; i < THREADS; i++) {
->  			if (*(uint64_t*)(va + page_offs[i]) != expect[i]) {
->  				printf("ERROR: thread %d, "
-> -				       "offset %08lx, %08lx != %08lx\n", i,
-> -				       (va + page_offs[i] - vastart),
-> -				       *(uint64_t*)(va + page_offs[i]),
-> -				       expect[i]);
-> +				       "offset %08llx, %08llx != %08llx\n", i,
-> +				       (unsigned long long) (va + page_offs[i] - vastart),
-> +				       (unsigned long long) *(uint64_t*)(va + page_offs[i]),
-> +				       (unsigned long long) expect[i]);
->  				errcnt++;
->  			}
->  		}
-> diff --git a/src/t_rename_overwrite.c b/src/t_rename_overwrite.c
-> index fe17f9d5..c5cdd1db 100644
-> --- a/src/t_rename_overwrite.c
-> +++ b/src/t_rename_overwrite.c
-> @@ -31,7 +31,8 @@ int main(int argc, char *argv[])
->  		err(1, "fstat(%i)", fd);
->  
->  	if (stbuf.st_nlink != 0) {
-> -		fprintf(stderr, "nlink is %lu, should be 0\n", stbuf.st_nlink);
-> +		fprintf(stderr, "nlink is %lu, should be 0\n",
-> +			(unsigned long) stbuf.st_nlink);
->  		return 1;
->  	}
->  
-> -- 
-> 2.11.0.rc0.7.gbe5a750
-> 
+> +
+> +# step 2, corrupt the first 64k of one copy (on SCRATCH_DEV which is the=
+ first
+> +# one in $SCRATCH_DEV_POOL
+> +echo "step 2......corrupt file extent" >>$seqres.full
+> +
+> +extents=3D`_check_file_extents $SCRATCH_MNT/foobar`
+> +logical_in_btrfs=3D`echo ${extents} | cut -d '#' -f 1`
+> +physical_on_scratch=3D`_get_physical ${logical_in_btrfs}`
+> +
+> +_scratch_unmount
+> +$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical_on_scratch 64K" $SCR=
+ATCH_DEV | _filter_xfs_io
+> +
+> +_scratch_mount
+> +
+> +# step 3, 128k dio read (this read can repair bad copy)
+> +echo "step 3......repair the bad copy" >>$seqres.full
+> +
+> +# since raid1 consists of two copies, and the following read may read th=
+e good
+> +# copy directly, so lets loop 10 times here and discard output that dio =
+reads
+> +# give
+> +for i in `seq 1 10`; do
+> +       $XFS_IO_PROG -d -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" >=
+ /dev/null
+> +       repair=3D`_check_repair`
+> +       if [ $repair -eq 1 ]; then
+> +               break
+> +       fi
+> +done
+> +
+> +_scratch_unmount
+> +
+> +# check if the repair works
+> +$XFS_IO_PROG -d -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_D=
+EV | _filter_xfs_io
+> +
+> +_scratch_dev_pool_put
+> +# success, all done
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
+> new file mode 100644
+> index 0000000..c8565f5
+> --- /dev/null
+> +++ b/tests/btrfs/140.out
+> @@ -0,0 +1,39 @@
+> +QA output created by 140
+> +wrote 131072/131072 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +wrote 65536/65536 bytes at offset 136708096
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +08260000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +08260010:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +08260020:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +08260030:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +08260040:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +08260050:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +08260060:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +08260070:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +08260080:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +08260090:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +082600a0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +082600b0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +082600c0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +082600d0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +082600e0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +082600f0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +08260100:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +08260110:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +08260120:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +08260130:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +08260140:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +08260150:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +08260160:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +08260170:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +08260180:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +08260190:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +082601a0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +082601b0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +082601c0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +082601d0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +082601e0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +082601f0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> +read 512/512 bytes at offset 136708096
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 9d4b80b..1cb9c98 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -141,3 +141,4 @@
+>  137 auto quick send
+>  138 auto compress
+>  139 auto qgroup
+> +140 auto quick
 > --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 2.5.0
+>
+
+
+
+--=20
+Filipe David Manana,
+
+=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
+ right.=E2=80=9D
