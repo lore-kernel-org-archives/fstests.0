@@ -1,385 +1,59 @@
-Received: from mail-it0-f67.google.com ([209.85.214.67]:34992 "EHLO
-        mail-it0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750740AbdEBOj3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 2 May 2017 10:39:29 -0400
+Received: from aserp1040.oracle.com ([141.146.126.69]:41654 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751741AbdEBWR1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 2 May 2017 18:17:27 -0400
+Date: Tue, 2 May 2017 15:16:49 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH v5 0/5] Add copy_file_range() tests
+Message-ID: <20170502221649.GA5970@birch.djwong.org>
+References: <20170317195233.4042-1-Anna.Schumaker@Netapp.com>
+ <20170317220246.GA12585@birch.djwong.org>
+ <20170320052457.GH14226@eguan.usersys.redhat.com>
 MIME-Version: 1.0
-Reply-To: fdmanana@gmail.com
-In-Reply-To: <1493400377-6215-1-git-send-email-bo.li.liu@oracle.com>
-References: <1493400377-6215-1-git-send-email-bo.li.liu@oracle.com>
-From: Filipe Manana <fdmanana@gmail.com>
-Date: Tue, 2 May 2017 15:39:27 +0100
-Message-ID: <CAL3q7H5jppGEuSBuCrReiqSKfbVH_6Ppowaa=a-XDAEcxSB9qw@mail.gmail.com>
-Subject: Re: [PATCH v2] fstests: regression test for nocsum buffered read's repair
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170320052457.GH14226@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Liu Bo <bo.li.liu@oracle.com>
-Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
+To: Anna Schumaker <Anna.Schumaker@Netapp.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-nfs@vger.kernel.org, hch@infradead.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Apr 28, 2017 at 6:26 PM, Liu Bo <bo.li.liu@oracle.com> wrote:
-> This is to test whether buffered read retry-repair code is able to work i=
-n
-> raid1 case as expected.
->
-> Please note that without checksum, btrfs doesn't know if the data used to
-> repair is correct, so repair is more of resync which makes sure that both
-> of the copy has the same content.
->
-> Commit 20a7db8ab3f2 ("btrfs: add dummy callback for readpage_io_failed an=
-d drop
-> checks") introduced the regression.
->
-> The upstream fix is
->         Btrfs: bring back repair during read
->
-> Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+On Mon, Mar 20, 2017 at 01:24:57PM +0800, Eryu Guan wrote:
+> On Fri, Mar 17, 2017 at 03:02:46PM -0700, Darrick J. Wong wrote:
+> > On Fri, Mar 17, 2017 at 03:52:28PM -0400, Anna Schumaker wrote:
+> > > These tests exercise the copy_file_range() system call, and check copying
+> > > data to both a new file and overwriting data inside an existing file.
+> > > 
+> > > Sorry it took so long to get this version out.  I forgot about these patches
+> > > after the last submission.
+> > 
+> > Hooray, tests finally!
+> > 
+> > I had to bump the numbers up due to conflicts (it's usually best to pick
+> > a really high number and let Eryu mvtest them to their real numbers),
+> > but these mostly look ok.
+> 
+> Usually the test numbers are not a problem, as long as the patchset is
+> based on latest master and there's no test number conflicts :)
+> 
+> Overall the tests look fine to me too.
+> 
+> > 
+> > However, I do see that something isn't triggering an EINVAL return code:
+> 
+> Same results here, tested with xfs/ext4/btrfs on 4.11-rc2 kernel.
+> 
+> And another nitpick is the year in copyright, s/2016/2017/ ?
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Another month, another kernel release... can we please get these tests
+fixed and integrated?
 
-Just a comment below.
+--D
 
-> ---
-> v2: - Add 'mkfs -b 1G' to limit filesystem size to 2G in raid1 profile so=
- that
->       we get a consistent output.
->
->  tests/btrfs/143     | 197 ++++++++++++++++++++++++++++++++++++++++++++++=
-++++++
->  tests/btrfs/143.out |  39 +++++++++++
->  tests/btrfs/group   |   1 +
->  3 files changed, 237 insertions(+)
->  create mode 100755 tests/btrfs/143
->  create mode 100644 tests/btrfs/143.out
->
-> diff --git a/tests/btrfs/143 b/tests/btrfs/143
-> new file mode 100755
-> index 0000000..70f3f9f
-> --- /dev/null
-> +++ b/tests/btrfs/143
-> @@ -0,0 +1,197 @@
-> +#! /bin/bash
-> +# FS QA Test 143
-> +#
-> +# Regression test for btrfs buffered read's repair during read without c=
-hecksum.
-> +#
-> +# This is to test whether buffered read retry-repair code is able to wor=
-k in
-> +# raid1 case as expected.
-> +#
-> +# Please note that without checksum, btrfs doesn't know if the data used=
- to
-> +# repair is correct, so repair is more of resync which makes sure that b=
-oth
-> +# of the copy has the same content.
-> +#
-> +# Commit 20a7db8ab3f2 ("btrfs: add dummy callback for readpage_io_failed=
- and drop
-> +# checks") introduced the regression.
-> +#
-> +# The upstream fix is
-> +#        Btrfs: bring back repair during read
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=3D`basename $0`
-> +seqres=3D$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=3D`pwd`
-> +tmp=3D/tmp/$$
-> +status=3D1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch_dev_pool 2
-> +
-> +_require_btrfs_command inspect-internal dump-tree
-> +_require_command "$FILEFRAG_PROG" filefrag
-> +
-> +# helpe to convert 'file offset' to btrfs logical offset
-> +FILEFRAG_FILTER=3D'
-> +       if (/blocks? of (\d+) bytes/) {
-> +               $blocksize =3D $1;
-> +               next
-> +       }
-> +       ($ext, $logical, $physical, $length) =3D
-> +               (/^\s*(\d+):\s+(\d+)..\s+\d+:\s+(\d+)..\s+\d+:\s+(\d+):/)
-> +       or next;
-> +       ($flags) =3D /.*:\s*(\S*)$/;
-> +       print $physical * $blocksize, "#",
-> +             $length * $blocksize, "#",
-> +             $logical * $blocksize, "#",
-> +             $flags, " "'
-> +
-> +# this makes filefrag output script readable by using a perl helper.
-> +# output is one extent per line, with three numbers separated by '#'
-> +# the numbers are: physical, length, logical (all in bytes)
-> +# sample output: "1234#10#5678" -> physical 1234, length 10, logical 567=
-8
-> +_filter_extents()
-> +{
-> +       tee -a $seqres.full | $PERL_PROG -ne "$FILEFRAG_FILTER"
-> +}
-> +
-> +_check_file_extents()
-> +{
-> +       cmd=3D"filefrag -v $1"
-> +       echo "# $cmd" >> $seqres.full
-> +       out=3D`$cmd | _filter_extents`
-> +       if [ -z "$out" ]; then
-> +               return 1
-> +       fi
-> +       echo "after filter: $out" >> $seqres.full
-> +       echo $out
-> +       return 0
-> +}
-> +
-> +_check_repair()
-> +{
-> +       filter=3D${1:-cat}
-> +       dmesg | tac | sed -ne "0,\#run fstests $seqnum at $date_time#p" |=
- tac | $filter | grep -q -e "read error corrected"
-> +       if [ $? -eq 0 ]; then
-> +               echo 1
-> +       else
-> +               echo 0
-> +       fi
-> +}
-> +
-> +_get_physical()
-> +{
-> +        # $1 is logical address
-> +        # print chunk tree and find devid 2 which is $SCRATCH_DEV
-> +        $BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | =
-grep $1 -A 6 | awk '($1 ~ /stripe/ && $3 ~ /devid/ && $4 ~ /1/) { print $6 =
-}'
-> +}
-> +
-> +SYSFS_BDEV=3D`_sysfs_dev $SCRATCH_DEV`
-> +
-> +start_fail()
-> +{
-> +       echo 100 > $DEBUGFS_MNT/fail_make_request/probability
-> +       echo 4 > $DEBUGFS_MNT/fail_make_request/times
-> +       echo 0 > $DEBUGFS_MNT/fail_make_request/verbose
-> +       echo 1 > $SYSFS_BDEV/make-it-fail
-> +}
-> +
-> +stop_fail()
-> +{
-> +       echo 0 > $DEBUGFS_MNT/fail_make_request/probability
-> +       echo 0 > $DEBUGFS_MNT/fail_make_request/times
-> +       echo 0 > $SYSFS_BDEV/make-it-fail
-> +}
-> +
-> +_scratch_dev_pool_get 2
-> +# step 1, create a raid1 btrfs which contains one 128k file.
-> +echo "step 1......mkfs.btrfs" >>$seqres.full
-> +
-> +mkfs_opts=3D"-d raid1 -b 1G"
-> +_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
-> +
-> +# -o nospace_cache makes sure data is written to the start position of t=
-he data
-> +# chunk
-> +_scratch_mount -o nospace_cache,nodatasum
-> +
-> +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foob=
-ar" | _filter_xfs_io
-> +
-> +sync
-
-The sync is not necessary, since we cleanly unmount the fs below.
-
-The test works now with a patched kernel and fails with an unpatched
-kernel as expected.
-
-Looks good to me, but FILEFRAG_FILTER, _filter_extents,
-_check_file_extents, _get_physical and _check_repair are duplicated
-across all the 4 test case files in the series. Could be factored into
-common/btrfs later for example.
-
-Thanks.
-
-> +
-> +# step 2, corrupt the first 64k of one copy (on SCRATCH_DEV which is the=
- first
-> +# one in $SCRATCH_DEV_POOL
-> +echo "step 2......corrupt file extent" >>$seqres.full
-> +
-> +extents=3D`_check_file_extents $SCRATCH_MNT/foobar`
-> +logical_in_btrfs=3D`echo ${extents} | cut -d '#' -f 1`
-> +physical_on_scratch=3D`_get_physical ${logical_in_btrfs}`
-> +
-> +_scratch_unmount
-> +$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical_on_scratch 64K" $SCR=
-ATCH_DEV | _filter_xfs_io
-> +
-> +_scratch_mount -o nospace_cache
-> +
-> +# step 3, 128k buffered read (this read can repair bad copy)
-> +echo "step 3......repair the bad copy" >>$seqres.full
-> +
-> +# since raid1 consists of two copies, and the following read may read th=
-e good
-> +# copy directly, so lets loop 10 times here and discard output that buff=
-ered
-> +# reads give
-> +for i in `seq 1 10`; do
-> +       # start_fail only fails the following buffered read so the repair=
- is
-> +       # supposed to work.
-> +       echo 3 > /proc/sys/vm/drop_caches
-> +       start_fail
-> +       $XFS_IO_PROG -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" > /d=
-ev/null
-> +       stop_fail
-> +       repair=3D`_check_repair`
-> +       if [ $repair -eq 1 ]; then
-> +               break
-> +       fi
-> +       echo "$repair" >> $seqres.full
-> +done
-> +
-> +_scratch_unmount
-> +
-> +# check if the repair works
-> +$XFS_IO_PROG -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_DEV =
-| _filter_xfs_io
-> +
-> +_scratch_dev_pool_put
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/143.out b/tests/btrfs/143.out
-> new file mode 100644
-> index 0000000..97bf45c
-> --- /dev/null
-> +++ b/tests/btrfs/143.out
-> @@ -0,0 +1,39 @@
-> +QA output created by 143
-> +wrote 131072/131072 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 65536/65536 bytes at offset 136708096
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +08260000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +08260010:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +08260020:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +08260030:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +08260040:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +08260050:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +08260060:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +08260070:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +08260080:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +08260090:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +082600a0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +082600b0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +082600c0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +082600d0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +082600e0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +082600f0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +08260100:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +08260110:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +08260120:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +08260130:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +08260140:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +08260150:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +08260160:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +08260170:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +08260180:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +08260190:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +082601a0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +082601b0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +082601c0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +082601d0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +082601e0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +082601f0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> +read 512/512 bytes at offset 136708096
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index a4f97cd..6f19619 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -144,3 +144,4 @@
->  140 auto quick
->  141 auto quick
->  142 auto quick
-> +143 auto quick
+> 
+> Thanks,
+> Eryu
 > --
-> 2.5.0
->
-
-
-
---=20
-Filipe David Manana,
-
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
