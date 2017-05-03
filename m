@@ -1,54 +1,63 @@
-From: <nathalie.colle@univ-lorraine.fr>
-Subject: (unknown)
-Date: Sun, 16 Apr 2017 18:32:45 -0000
-Message-ID: <149236756567.20709.2408211260506959881@tedata.net>
-Mime-Version: 1.0
-Content-Type: application/zip; name="EMAIL_40898969311_fstests.zip"
-Content-Transfer-Encoding: base64
-Return-path: <fstests-owner@vger.kernel.org>
-Received: from host-41.41.46.110.tedata.net ([41.41.46.110]:49986 "HELO
-        [41.41.46.110]" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with SMTP id S1752467AbdDPSc5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 16 Apr 2017 14:32:57 -0400
-Subject: 
-Content-Disposition: attachment
-Sender: fstests-owner@vger.kernel.org
-List-Id: fstests@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>
+MIME-Version: 1.0
+Sender: olga.kornievskaia@gmail.com
+In-Reply-To: <20170502221649.GA5970@birch.djwong.org>
+References: <20170317195233.4042-1-Anna.Schumaker@Netapp.com>
+ <20170317220246.GA12585@birch.djwong.org> <20170320052457.GH14226@eguan.usersys.redhat.com>
+ <20170502221649.GA5970@birch.djwong.org>
+From: Olga Kornievskaia <aglo@umich.edu>
+Date: Wed, 3 May 2017 08:56:11 -0400
+Message-ID: <CAN-5tyGaaPrHSmxNGYWfsbxNECKE1NZz9bp4shy-kQDs2D=MrQ@mail.gmail.com>
+Subject: Re: [PATCH v5 0/5] Add copy_file_range() tests
+Content-Type: text/plain; charset=UTF-8
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Anna Schumaker <Anna.Schumaker@netapp.com>, Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-nfs <linux-nfs@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>
+List-ID: <fstests@vger.kernel.org>
 
-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
+On Tue, May 2, 2017 at 6:16 PM, Darrick J. Wong <darrick.wong@oracle.com> wrote:
+> On Mon, Mar 20, 2017 at 01:24:57PM +0800, Eryu Guan wrote:
+>> On Fri, Mar 17, 2017 at 03:02:46PM -0700, Darrick J. Wong wrote:
+>> > On Fri, Mar 17, 2017 at 03:52:28PM -0400, Anna Schumaker wrote:
+>> > > These tests exercise the copy_file_range() system call, and check copying
+>> > > data to both a new file and overwriting data inside an existing file.
+>> > >
+>> > > Sorry it took so long to get this version out.  I forgot about these patches
+>> > > after the last submission.
+>> >
+>> > Hooray, tests finally!
+>> >
+>> > I had to bump the numbers up due to conflicts (it's usually best to pick
+>> > a really high number and let Eryu mvtest them to their real numbers),
+>> > but these mostly look ok.
+>>
+>> Usually the test numbers are not a problem, as long as the patchset is
+>> based on latest master and there's no test number conflicts :)
+>>
+>> Overall the tests look fine to me too.
+>>
+>> >
+>> > However, I do see that something isn't triggering an EINVAL return code:
+>>
+>> Same results here, tested with xfs/ext4/btrfs on 4.11-rc2 kernel.
+>>
+>> And another nitpick is the year in copyright, s/2016/2017/ ?
+>
+> Another month, another kernel release... can we please get these tests
+> fixed and integrated?
+>
+
+I'm curious when you say "testing with btrfs" does it mean NFS server
+exporting btrfs or does it mean just local btrfs?
+
+> --D
+>
+>>
+>> Thanks,
+>> Eryu
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
