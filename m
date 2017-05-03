@@ -1,76 +1,67 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:27503 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752299AbdECPto (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 3 May 2017 11:49:44 -0400
-Date: Wed, 3 May 2017 08:48:39 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v5 0/5] Add copy_file_range() tests
-Message-ID: <20170503154839.GF5975@birch.djwong.org>
-References: <20170317195233.4042-1-Anna.Schumaker@Netapp.com>
- <20170317220246.GA12585@birch.djwong.org>
- <20170320052457.GH14226@eguan.usersys.redhat.com>
- <20170502221649.GA5970@birch.djwong.org>
- <CAN-5tyGaaPrHSmxNGYWfsbxNECKE1NZz9bp4shy-kQDs2D=MrQ@mail.gmail.com>
+Received: from mail.kernel.org ([198.145.29.136]:44458 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753773AbdECRCe (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 3 May 2017 13:02:34 -0400
+Date: Wed, 3 May 2017 10:02:27 -0700
+From: Jaegeuk Kim <jaegeuk@kernel.org>
+Subject: Re: [PATCH] attr: adbjust acl_max of f2fs
+Message-ID: <20170503170227.GA93619@jaegeuk.local>
+References: <20170428131307.3384-1-chao@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAN-5tyGaaPrHSmxNGYWfsbxNECKE1NZz9bp4shy-kQDs2D=MrQ@mail.gmail.com>
+In-Reply-To: <20170428131307.3384-1-chao@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Olga Kornievskaia <aglo@umich.edu>
-Cc: Anna Schumaker <Anna.Schumaker@netapp.com>, Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-nfs <linux-nfs@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>
+To: Chao Yu <chao@kernel.org>
+Cc: fstests@vger.kernel.org, eguan@redhat.com, linux-f2fs-devel@lists.sourceforge.net, Chao Yu <yuchao0@huawei.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, May 03, 2017 at 08:56:11AM -0400, Olga Kornievskaia wrote:
-> On Tue, May 2, 2017 at 6:16 PM, Darrick J. Wong <darrick.wong@oracle.com> wrote:
-> > On Mon, Mar 20, 2017 at 01:24:57PM +0800, Eryu Guan wrote:
-> >> On Fri, Mar 17, 2017 at 03:02:46PM -0700, Darrick J. Wong wrote:
-> >> > On Fri, Mar 17, 2017 at 03:52:28PM -0400, Anna Schumaker wrote:
-> >> > > These tests exercise the copy_file_range() system call, and check copying
-> >> > > data to both a new file and overwriting data inside an existing file.
-> >> > >
-> >> > > Sorry it took so long to get this version out.  I forgot about these patches
-> >> > > after the last submission.
-> >> >
-> >> > Hooray, tests finally!
-> >> >
-> >> > I had to bump the numbers up due to conflicts (it's usually best to pick
-> >> > a really high number and let Eryu mvtest them to their real numbers),
-> >> > but these mostly look ok.
-> >>
-> >> Usually the test numbers are not a problem, as long as the patchset is
-> >> based on latest master and there's no test number conflicts :)
-> >>
-> >> Overall the tests look fine to me too.
-> >>
-> >> >
-> >> > However, I do see that something isn't triggering an EINVAL return code:
-> >>
-> >> Same results here, tested with xfs/ext4/btrfs on 4.11-rc2 kernel.
-> >>
-> >> And another nitpick is the year in copyright, s/2016/2017/ ?
-> >
-> > Another month, another kernel release... can we please get these tests
-> > fixed and integrated?
-> >
+Hello,
+
+On 04/28, Chao Yu wrote:
+> From: Chao Yu <yuchao0@huawei.com>
 > 
-> I'm curious when you say "testing with btrfs" does it mean NFS server
-> exporting btrfs or does it mean just local btrfs?
-
-Local btrfs, xfs, and ext4.
-
---D
-
+> f2fs has set inline_xattr as a default option, and introduced a new option
+> named 'noinline_xattr' for disabling default inline_xattr option. So in
+> _acl_get_max we need to check 'noinline_xattr' string in fs option,
+> otherwise we may select the wrong max acl number since we always found
+> the string 'ininline_xattr' in fs option.
 > 
-> > --D
-> >
-> >>
-> >> Thanks,
-> >> Eryu
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Additionally, f2fs has changed disk layout of xattr block a bit, so will
+> contain one more entry in both inline and noinline xattr inode, this patch
+> will modify the max acl number to adjust it.
+> 
+> Signed-off-by: Chao Yu <yuchao0@huawei.com>
+> ---
+>  common/attr | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+> 
+> diff --git a/common/attr b/common/attr
+> index ac139e61..6d4f68ed 100644
+> --- a/common/attr
+> +++ b/common/attr
+> @@ -43,11 +43,11 @@ _acl_get_max()
+>  		echo 8191
+>  		;;
+>  	f2fs)
+> -		_fs_options $TEST_DEV | grep "inline_xattr" >/dev/null 2>&1
+> +		_fs_options $TEST_DEV | grep "noinline_xattr" >/dev/null 2>&1
+
+This breaks old kernel support which has no "noinline_xattr". It'd be good to
+check "inline_xattr" again after checking "noinline_xattr". And, in terms of
+different number of entries, can we get the number from local.config by adding
+an export symbol likewise FSTYP?
+
+Thanks,
+
+>  		if [ $? -eq 0 ]; then
+> -			echo 531
+> +			echo 507
+>  		else
+> -			echo 506
+> +			echo 532
+>  		fi
+>  		;;
+>  	*)
+> -- 
+> 2.12.2.575.gb14f27f
