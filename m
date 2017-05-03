@@ -1,59 +1,65 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:41654 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751741AbdEBWR1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 2 May 2017 18:17:27 -0400
-Date: Tue, 2 May 2017 15:16:49 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v5 0/5] Add copy_file_range() tests
-Message-ID: <20170502221649.GA5970@birch.djwong.org>
-References: <20170317195233.4042-1-Anna.Schumaker@Netapp.com>
- <20170317220246.GA12585@birch.djwong.org>
- <20170320052457.GH14226@eguan.usersys.redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:56458 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751014AbdECH3q (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 3 May 2017 03:29:46 -0400
+Date: Wed, 3 May 2017 15:29:43 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] attr: adbjust acl_max of f2fs
+Message-ID: <20170503072943.GE7250@eguan.usersys.redhat.com>
+References: <20170428131307.3384-1-chao@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170320052457.GH14226@eguan.usersys.redhat.com>
+In-Reply-To: <20170428131307.3384-1-chao@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Anna Schumaker <Anna.Schumaker@Netapp.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-nfs@vger.kernel.org, hch@infradead.org
+To: Chao Yu <chao@kernel.org>
+Cc: fstests@vger.kernel.org, jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net, Chao Yu <yuchao0@huawei.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Mar 20, 2017 at 01:24:57PM +0800, Eryu Guan wrote:
-> On Fri, Mar 17, 2017 at 03:02:46PM -0700, Darrick J. Wong wrote:
-> > On Fri, Mar 17, 2017 at 03:52:28PM -0400, Anna Schumaker wrote:
-> > > These tests exercise the copy_file_range() system call, and check copying
-> > > data to both a new file and overwriting data inside an existing file.
-> > > 
-> > > Sorry it took so long to get this version out.  I forgot about these patches
-> > > after the last submission.
-> > 
-> > Hooray, tests finally!
-> > 
-> > I had to bump the numbers up due to conflicts (it's usually best to pick
-> > a really high number and let Eryu mvtest them to their real numbers),
-> > but these mostly look ok.
+On Fri, Apr 28, 2017 at 09:13:07PM +0800, Chao Yu wrote:
+> From: Chao Yu <yuchao0@huawei.com>
 > 
-> Usually the test numbers are not a problem, as long as the patchset is
-> based on latest master and there's no test number conflicts :)
+> f2fs has set inline_xattr as a default option, and introduced a new option
+> named 'noinline_xattr' for disabling default inline_xattr option. So in
+> _acl_get_max we need to check 'noinline_xattr' string in fs option,
+> otherwise we may select the wrong max acl number since we always found
+> the string 'ininline_xattr' in fs option.
 > 
-> Overall the tests look fine to me too.
+> Additionally, f2fs has changed disk layout of xattr block a bit, so will
+> contain one more entry in both inline and noinline xattr inode, this patch
+> will modify the max acl number to adjust it.
 > 
-> > 
-> > However, I do see that something isn't triggering an EINVAL return code:
-> 
-> Same results here, tested with xfs/ext4/btrfs on 4.11-rc2 kernel.
-> 
-> And another nitpick is the year in copyright, s/2016/2017/ ?
+> Signed-off-by: Chao Yu <yuchao0@huawei.com>
 
-Another month, another kernel release... can we please get these tests
-fixed and integrated?
+Thanks for the patch! It looks fine to me from fstests POV, but need
+review from f2fs developers too.
 
---D
+Thanks,
+Eryu
 
+> ---
+>  common/attr | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
 > 
-> Thanks,
-> Eryu
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> diff --git a/common/attr b/common/attr
+> index ac139e61..6d4f68ed 100644
+> --- a/common/attr
+> +++ b/common/attr
+> @@ -43,11 +43,11 @@ _acl_get_max()
+>  		echo 8191
+>  		;;
+>  	f2fs)
+> -		_fs_options $TEST_DEV | grep "inline_xattr" >/dev/null 2>&1
+> +		_fs_options $TEST_DEV | grep "noinline_xattr" >/dev/null 2>&1
+>  		if [ $? -eq 0 ]; then
+> -			echo 531
+> +			echo 507
+>  		else
+> -			echo 506
+> +			echo 532
+>  		fi
+>  		;;
+>  	*)
+> -- 
+> 2.12.2.575.gb14f27f
+> 
