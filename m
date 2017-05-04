@@ -1,86 +1,117 @@
-Received: from mail.kernel.org ([198.145.29.136]:36500 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751746AbdEDPdN (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 4 May 2017 11:33:13 -0400
-Subject: Re: [PATCH] attr: adbjust acl_max of f2fs
-References: <20170428131307.3384-1-chao@kernel.org>
- <20170503170227.GA93619@jaegeuk.local>
-From: Chao Yu <chao@kernel.org>
-Message-ID: <3c80f5f0-f68e-a6f6-b355-fd5e0fcdbe76@kernel.org>
-Date: Thu, 4 May 2017 23:32:39 +0800
+Received: from userp1040.oracle.com ([156.151.31.81]:26504 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752203AbdEDPtV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 4 May 2017 11:49:21 -0400
+Date: Thu, 4 May 2017 08:49:16 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] punch-alternating: add some options
+Message-ID: <20170504154916.GB5970@birch.djwong.org>
+References: <ad311156-c99a-4269-051e-082b259bb0de@redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <20170503170227.GA93619@jaegeuk.local>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ad311156-c99a-4269-051e-082b259bb0de@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jaegeuk Kim <jaegeuk@kernel.org>
-Cc: fstests@vger.kernel.org, eguan@redhat.com, linux-f2fs-devel@lists.sourceforge.net, Chao Yu <yuchao0@huawei.com>
+To: Eric Sandeen <sandeen@redhat.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Hi Jaegeuk,
-
-On 2017/5/4 1:02, Jaegeuk Kim wrote:
-> Hello,
+On Thu, May 04, 2017 at 10:16:54AM -0500, Eric Sandeen wrote:
+> I didn't end up using this, but somebody else might find
+> it useful, so sending it.
 > 
-> On 04/28, Chao Yu wrote:
->> From: Chao Yu <yuchao0@huawei.com>
->>
->> f2fs has set inline_xattr as a default option, and introduced a new option
->> named 'noinline_xattr' for disabling default inline_xattr option. So in
->> _acl_get_max we need to check 'noinline_xattr' string in fs option,
->> otherwise we may select the wrong max acl number since we always found
->> the string 'ininline_xattr' in fs option.
->>
->> Additionally, f2fs has changed disk layout of xattr block a bit, so will
->> contain one more entry in both inline and noinline xattr inode, this patch
->> will modify the max acl number to adjust it.
->>
->> Signed-off-by: Chao Yu <yuchao0@huawei.com>
->> ---
->>  common/attr | 6 +++---
->>  1 file changed, 3 insertions(+), 3 deletions(-)
->>
->> diff --git a/common/attr b/common/attr
->> index ac139e61..6d4f68ed 100644
->> --- a/common/attr
->> +++ b/common/attr
->> @@ -43,11 +43,11 @@ _acl_get_max()
->>  		echo 8191
->>  		;;
->>  	f2fs)
->> -		_fs_options $TEST_DEV | grep "inline_xattr" >/dev/null 2>&1
->> +		_fs_options $TEST_DEV | grep "noinline_xattr" >/dev/null 2>&1
+> This change lets us specify punch patterns other than
+> literally every other block.
 > 
-> This breaks old kernel support which has no "noinline_xattr". It'd be good to
-> check "inline_xattr" again after checking "noinline_xattr". And, in terms of
-
-Hmm, we have changed xattr layout a bit in new kernel, so even we have
-knew that user set inline_xattr mount option, still we don't know
-whether the last kernel was been used, so we can not decide to choose
-532 or 531 as acl_max value. Maybe we need to check result of 'uname -r'
-either.
-
-> different number of entries, can we get the number from local.config by adding
-> an export symbol likewise FSTYP?
-
-You mean adding one more configuration parameter which can be defined by
-user, then _acl_get_max can return correct acl_max value depend on that
-parameter?
-
-Thanks,
-
+> i.e. punch-alternating with no options will do:
 > 
-> Thanks,
+> ...HDHDHDHDHDHD...
 > 
->>  		if [ $? -eq 0 ]; then
->> -			echo 531
->> +			echo 507
->>  		else
->> -			echo 506
->> +			echo 532
->>  		fi
->>  		;;
->>  	*)
->> -- 
->> 2.12.2.575.gb14f27f
+> -i 4 -s 2 will do:
+> 
+> ...DDHHDDHHDDHH...
+> 
+> or -i 3 -s 1 will do:
+> 
+> ...DDHDDHDDHDDH...
+> 
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+> ---
+> 
+> diff --git a/src/punch-alternating.c b/src/punch-alternating.c
+> index 4148622..0c7a7ff 100644
+> --- a/src/punch-alternating.c
+> +++ b/src/punch-alternating.c
+> @@ -11,6 +11,14 @@
+>  #include <string.h>
+>  #include "global.h"
+>  
+> +void usage(char *cmd)
+> +{
+> +	printf("Usage: %s [-i interval] [-s size] file\n", cmd);
+> +	printf("Punches every other block in the file by default,\n");
+> +	printf("or 'size' blocks every 'interval' blocks with options.\n");
+> +	exit(1);
+> +}
+> +
+>  int main(int argc, char *argv[])
+>  {
+>  	struct stat	s;
+> @@ -21,14 +29,27 @@ int main(int argc, char *argv[])
+>  	off_t		sz;
+>  	int		mode;
+>  	int		error;
+> +	int		c;
+> +	int		size = 1;	/* punch $SIZE blocks ... */
+> +	int		interval = 2;	/* every $INTERVAL blocks */
+> +
+> +	if (argc < 2)
+> +		usage(argv[0]);
+
+I think you want a (optind == argc - 1) check after the getopt to
+preserve the "only one file at a time" semantics... or an optind loop to
+process a bunch of files.
+
+> -	if (argc != 2) {
+> -		printf("Usage: %s file\n", argv[0]);
+> -		printf("Punches every other block in the file.\n");
+> -		return 1;
+> +	while ((c = getopt(argc, argv, "i:s:")) != EOF) {
+> +		switch (c) {
+> +		case 'i':
+> +			interval = atoi(optarg);
+> +			break;
+> +		case 's':
+> +			size = atoi(optarg);
+> +			break;
+> +		default:
+> +			usage(argv[0]);
+> +		}
+>  	}
+
+Is it valid to -i 0 -s -5 here? :)
+
+--D
+
+> -	fd = open(argv[1], O_WRONLY);
+> +	fd = open(argv[optind], O_WRONLY);
+>  	if (fd < 0)
+>  		goto err;
+>  
+> @@ -44,8 +65,8 @@ int main(int argc, char *argv[])
+>  	blksz = sf.f_bsize;
+>  
+>  	mode = FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE;
+> -	for (offset = 0; offset < sz; offset += blksz * 2) {
+> -		error = fallocate(fd, mode, offset, blksz);
+> +	for (offset = 0; offset < sz; offset += blksz * interval) {
+> +		error = fallocate(fd, mode, offset, blksz * size);
+>  		if (error)
+>  			goto err;
+>  	}
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
