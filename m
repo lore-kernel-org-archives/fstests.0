@@ -1,64 +1,47 @@
-Received: from mx1.redhat.com ([209.132.183.28]:37894 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:12008 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754040AbdEDFJ0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 4 May 2017 01:09:26 -0400
-Date: Thu, 4 May 2017 13:09:23 +0800
+        id S1751362AbdEDHaL (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 4 May 2017 03:30:11 -0400
+Date: Thu, 4 May 2017 15:30:08 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] check: catch updated suspicious RCU usage message in
- _check_dmesg()
-Message-ID: <20170504050923.GJ7250@eguan.usersys.redhat.com>
-References: <20170504005730.29862-1-ebiggers3@gmail.com>
+Subject: Re: [PATCH] generic: test that encrypted filenames are presented
+ without collisions
+Message-ID: <20170504073008.GK7250@eguan.usersys.redhat.com>
+References: <20170502001524.114018-1-ebiggers3@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170504005730.29862-1-ebiggers3@gmail.com>
+In-Reply-To: <20170502001524.114018-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eric Biggers <ebiggers3@gmail.com>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>, linux-fscrypt@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, May 03, 2017 at 05:57:30PM -0700, Eric Biggers wrote:
+On Mon, May 01, 2017 at 05:15:24PM -0700, Eric Biggers wrote:
 > From: Eric Biggers <ebiggers@google.com>
 > 
-> In the v4.11 kernel, the suspicious RCU usage message uses the word
-> "ERR" rather than "INFO".  Update _check_dmesg to accept both versions.
+> [RFC for now since the kernel fixes are currently sitting in fscrypt/master and
+> haven't been merged to Linus's tree yet; I'll resend this once they're merged]
 > 
+> Add a test which creates many similarly-named files in an encrypted
+> directory, then verifies they can be deleted without access to the
+> encryption key.  This is a regression test for two related bugs which
+> caused presented names to "collide" and point to the wrong inodes.
+> 
+> Cc: linux-fscrypt@vger.kernel.org
 > Signed-off-by: Eric Biggers <ebiggers@google.com>
 
-Thanks! I updated the commit log a bit to refer to kernel commit
-4d4f88fa235f ("lockdep: Make RCU suspicious-access splats use pr_err")
+The test looks fine to me, it fails on ext4 with rm reporting "Structure
+needs cleaning".
+
+One minor issue is that rm reports too many failures (around 98000
+lines in my test)
+
++rm: cannot remove '/mnt/testarea/scratch/edir/_SET,lbqVCybotHoHkKrq4xM7FtbuBCLY': Structure needs cleaning
+
+and that makes the output diff a bit harder to review, and takes too
+much space in 500.out.bad file unnecessarily (11M). Better to trim or
+limit the error log somehow, e.g. using "head -n 10"?
 
 Thanks,
 Eryu
-
-> ---
->  common/rc | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 8dafd4bc..257b1903 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3285,13 +3285,13 @@ _check_dmesg()
->  	# use sed \cregexpc address type, since $seqnum contains "/"
->  	dmesg | tac | sed -ne "0,\#run fstests $seqnum at $date_time#p" | \
->  		tac | $filter >$seqres.dmesg
-> -	grep -q -e "kernel BUG at" \
-> +	egrep -q -e "kernel BUG at" \
->  	     -e "WARNING:" \
->  	     -e "BUG:" \
->  	     -e "Oops:" \
->  	     -e "possible recursive locking detected" \
->  	     -e "Internal error" \
-> -	     -e "INFO: suspicious RCU usage" \
-> +	     -e "(INFO|ERR): suspicious RCU usage" \
->  	     -e "INFO: possible circular locking dependency detected" \
->  	     -e "general protection fault:" \
->  	     $seqres.dmesg
-> -- 
-> 2.13.0.rc1.294.g07d810a77f-goog
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
