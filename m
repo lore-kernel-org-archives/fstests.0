@@ -1,121 +1,167 @@
-Received: from mx2.suse.de ([195.135.220.15]:34931 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751572AbdEDJ3s (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 4 May 2017 05:29:48 -0400
-Date: Thu, 4 May 2017 10:29:37 +0100
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Re: [PATCH] fstests: attr: add support for cephfs
-Message-ID: <20170504092937.ck2fhmw4k6472exi@hermes.olymp>
-References: <20170503105413.8314-1-lhenriques@suse.com>
- <20170504032340.GH7250@eguan.usersys.redhat.com>
- <CAAM7YAnOZW0xcOhMgnG_O3Wdy1SktKgRyr09jd7v1cupCTQ=Ow@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-In-Reply-To: <CAAM7YAnOZW0xcOhMgnG_O3Wdy1SktKgRyr09jd7v1cupCTQ=Ow@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:38608 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751482AbdEDJww (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 4 May 2017 05:52:52 -0400
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id A728F15561
+        for <fstests@vger.kernel.org>; Thu,  4 May 2017 09:52:51 +0000 (UTC)
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH 1/2] tasks-upstream: remove xfs finobt tests and add sparse inode tests
+Date: Thu,  4 May 2017 17:52:38 +0800
+Message-Id: <20170504095239.15901-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, ceph-devel <ceph-devel@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 04, 2017 at 11:44:46AM +0800, Yan, Zheng wrote:
-> On Thu, May 4, 2017 at 11:23 AM, Eryu Guan <eguan@redhat.com> wrote:
-> > On Wed, May 03, 2017 at 11:54:13AM +0100, Luis Henriques wrote:
-> >> Block size for cephfs is 4M, which makes generic/020 test fail as th=
-e
-> >> value for MAX_ATTRS and MAX_ATTRVAL_SIZE will be too high.  Restrict=
- these
-> >> two variables to sane values for this FSTYP.
-> >>
-> >> Signed-off-by: Luis Henriques <lhenriques@suse.com>
-> >
-> > Thanks for the patch! I'd like some reviews from ceph developers on t=
-he
-> > ceph MAX_ATTRS and MAX_ATTRVAL_SIZE numbers.
-> >
->=20
-> Currently we don't have any limitation on single xattr size and number
-> of xattrs. But single xattr size is limited to 65536 by kernel.
+finobt feature is enabled by default in upstream xfsprogs, there's
+no need to test finobt explicitly.
 
-Right, and the same limit is also applied when trying to list (listxattr)
-more than XATTR_LIST_MAX bytes.  One of the failures in the generic/020
-test was because it was getting a -E2BIG in getfattr.
+Instead, test sparse inode feature, which is off by default.
 
-Cheers,
---
-Lu=EDs
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+ tasks-upstream/function-ltp-aiodio.task |  8 +++-----
+ tasks-upstream/function-ltp.task        |  8 +++-----
+ tasks-upstream/regression-xfs.task      |  8 ++++----
+ tasks-upstream/regression-xfstests.task | 26 ++++++++++++--------------
+ 4 files changed, 22 insertions(+), 28 deletions(-)
 
->=20
-> Regards
-> Yan, Zheng
->=20
-> > Thanks,
-> > Eryu
-> >
-> >> ---
-> >>  common/attr | 24 +++++++++++++++++-------
-> >>  1 file changed, 17 insertions(+), 7 deletions(-)
-> >>
-> >> diff --git a/common/attr b/common/attr
-> >> index ac139e618b2a..c840ce42a1fa 100644
-> >> --- a/common/attr
-> >> +++ b/common/attr
-> >> @@ -254,26 +254,36 @@ _sort_getfattr_output()
-> >>  }
-> >>
-> >>  # set maximum total attr space based on fs type
-> >> -if [ "$FSTYP" =3D=3D "xfs" -o "$FSTYP" =3D=3D "udf" -o "$FSTYP" =3D=
-=3D "pvfs2" ]; then
-> >> +case "$FSTYP" in
-> >> +xfs|udf|pvfs2|ceph)
-> >>       MAX_ATTRS=3D1000
-> >> -else # Assume max ~1 block of attrs
-> >> +     ;;
-> >> +*)
-> >> +     # Assume max ~1 block of attrs
-> >>       BLOCK_SIZE=3D`_get_block_size $TEST_DIR`
-> >>       # user.attribute_XXX=3D"value.XXX" is about 32 bytes; leave so=
-me overhead
-> >>       let MAX_ATTRS=3D$BLOCK_SIZE/40
-> >> -fi
-> >> +esac
-> >>
-> >>  export MAX_ATTRS
-> >>
-> >>  # Set max attr value size based on fs type
-> >> -if [ "$FSTYP" =3D=3D "xfs" -o "$FSTYP" =3D=3D "udf" -o "$FSTYP" =3D=
-=3D "btrfs" ]; then
-> >> +case "$FSTYP" in
-> >> +xfs|udf|btrfs)
-> >>       MAX_ATTRVAL_SIZE=3D64
-> >> -elif [ "$FSTYP" =3D=3D "pvfs2" ]; then
-> >> +     ;;
-> >> +pvfs2)
-> >>       MAX_ATTRVAL_SIZE=3D8192
-> >> -else # Assume max ~1 block of attrs
-> >> +     ;;
-> >> +ceph)
-> >> +     MAX_ATTRVAL_SIZE=3D65536
-> >> +     ;;
-> >> +*)
-> >> +     # Assume max ~1 block of attrs
-> >>       BLOCK_SIZE=3D`_get_block_size $TEST_DIR`
-> >>       # leave a little overhead
-> >>       let MAX_ATTRVAL_SIZE=3D$BLOCK_SIZE-256
-> >> -fi
-> >> +esac
-> >>
-> >>  export MAX_ATTRVAL_SIZE
-> >>  # make sure this script returns success
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe fstests" i=
-n
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
+diff --git a/tasks-upstream/function-ltp-aiodio.task b/tasks-upstream/function-ltp-aiodio.task
+index 8c7d4f7..6bbadf8 100644
+--- a/tasks-upstream/function-ltp-aiodio.task
++++ b/tasks-upstream/function-ltp-aiodio.task
+@@ -41,13 +41,11 @@ param=MKFS_OPTS=-m crc=1
+ distro=-el6
+ arch=all
+ 
+-# free inode btree feature is only available on v5 xfs and it's off by default
+-# this feature is only available on RHEL7.2 and later releases
+-[xfs-finobt]
+-desc=ltp-aiodio tests on xfs with crc and finobt enabled
++[xfs-sparse]
++desc=ltp-aiodio tests on xfs with crc and sparse enabled
+ tag=tier3 xfs
+ param=FSTYP=xfs
+-param=MKFS_OPTS=-m crc=1,finobt=1
++param=MKFS_OPTS=-m crc=1 -i sparse=1
+ # only RHEL7 supports v5 xfs
+ distro=-el6
+ arch=all
+diff --git a/tasks-upstream/function-ltp.task b/tasks-upstream/function-ltp.task
+index 4f0f1c1..9a92801 100644
+--- a/tasks-upstream/function-ltp.task
++++ b/tasks-upstream/function-ltp.task
+@@ -48,17 +48,15 @@ distro=-el6
+ partition=fs="xfs" name="/mnt/ltp" size="5" type="part"
+ arch=all
+ 
+-# free inode btree feature is only available on v5 xfs and it's off by default
+-# this feature is only available on RHEL7.2 and later releases
+-[xfs-finobt]
+-desc=ltp tests on xfs with crc and finobt enabled
++[xfs-sparse]
++desc=ltp tests on xfs with crc and sparse enabled
+ tag=tier3 xfs
+ param=FSTYP=xfs
+ # TEST_MNT should not be /mnt/testarea, unable to umount /mnt/testarea since beaker
+ # is using it. So let's grab the test device mounted on /mnt/ltp then mount it on
+ # /mnt/testarea
+ param=TEST_MNT=/mnt/ltp
+-param=MKFS_OPTS=-m crc=1,finobt=1
++param=MKFS_OPTS=-m crc=1 -i sparse=1
+ # only RHEL7 supports v5 xfs
+ distro=-el6
+ partition=fs="xfs" name="/mnt/ltp" size="5" type="part"
+diff --git a/tasks-upstream/regression-xfs.task b/tasks-upstream/regression-xfs.task
+index b52b3e6..b017177 100644
+--- a/tasks-upstream/regression-xfs.task
++++ b/tasks-upstream/regression-xfs.task
+@@ -18,13 +18,13 @@ task=/kernel/filesystems/xfs/regression
+ arch=all
+ param=MKFS_OPTS=-m crc=1
+ 
+-[xfs-regression-finobt]
++[xfs-regression-sparse]
+ type=regression
+ schedule=alone
+ tag=tier3 xfs
+-# only RHEL7 supports v5 xfs(metadata checksum) and finobt feature
++# only RHEL7 supports v5 xfs(metadata checksum) and sparse feature
+ distro=-el6
+-desc=xfs regression tests with crc and finobt enabled
++desc=xfs regression tests with crc and sparse enabled
+ task=/kernel/filesystems/xfs/regression
+ arch=all
+-param=MKFS_OPTS=-m crc=1,finobt=1
++param=MKFS_OPTS=-m crc=1 -i sparse=1
+diff --git a/tasks-upstream/regression-xfstests.task b/tasks-upstream/regression-xfstests.task
+index e4fe0ba..b332949 100644
+--- a/tasks-upstream/regression-xfstests.task
++++ b/tasks-upstream/regression-xfstests.task
+@@ -289,16 +289,14 @@ cond: arch_not_s390x ? param=TEST_PARAM_SCRATCH_MNT=/mnt/xfstests/mnt2
+ cond: arch_not_s390x ? partition=fs="xfs" name="/mnt/xfstests/mnt1" size="15" type="part"
+ cond: arch_not_s390x ? partition=fs="xfs" name="/mnt/xfstests/mnt2" size="15" type="part"
+ 
+-# free inode btree feature is only available on v5 xfs and it's off by default
+-# this feature is only available on RHEL7.2 and later releases
+-[xfs-4k-finobt]
+-desc=xfstests on xfs with crc and finobt enabled
++[xfs-4k-sparse]
++desc=xfstests on xfs with crc and sparse enabled
+ tag=tier2 xfs
+ arch=all
+ distro=-el6
+ param=TEST_PARAM_FSTYPE=xfs
+-param=TEST_PARAM_MKFS_OPTS=-m crc=1,finobt=1
+-param=TEST_PARAM_KNOWN_ISSUE=upstream_xfs__4k_finobt
++param=TEST_PARAM_MKFS_OPTS=-m crc=1 -i sparse=1
++param=TEST_PARAM_KNOWN_ISSUE=upstream_xfs__4k_sparse
+ cond: arch_not_s390x ? param=TEST_PARAM_TEST_DIR=/mnt/xfstests/mnt1
+ cond: arch_not_s390x ? param=TEST_PARAM_SCRATCH_MNT=/mnt/xfstests/mnt2
+ cond: arch_not_s390x ? partition=fs="xfs" name="/mnt/xfstests/mnt1" size="15" type="part"
+@@ -331,15 +329,15 @@ cond: arch_not_s390x ? param=TEST_PARAM_SCRATCH_MNT=/mnt/xfstests/mnt2
+ cond: arch_not_s390x ? partition=fs="xfs" name="/mnt/xfstests/mnt1" size="15" type="part"
+ cond: arch_not_s390x ? partition=fs="xfs" name="/mnt/xfstests/mnt2" size="15" type="part"
+ 
+-[xfs-2k-finobt]
+-desc=xfstests on 2k block size xfs with crc and finobt enabled
++[xfs-2k-sparse]
++desc=xfstests on 2k block size xfs with crc and sparse enabled
+ tag=tier3 xfs
+ arch=all
+ distro=-el6
+ param=TEST_PARAM_FSTYPE=xfs
+ param=TEST_PARAM_BLKSIZE=2048
+-param=TEST_PARAM_MKFS_OPTS=-m crc=1,finobt=1
+-param=TEST_PARAM_KNOWN_ISSUE=upstream_xfs__2k_finobt
++param=TEST_PARAM_MKFS_OPTS=-m crc=1 -i sparse=1
++param=TEST_PARAM_KNOWN_ISSUE=upstream_xfs__2k_sparse
+ cond: arch_not_s390x ? param=TEST_PARAM_TEST_DIR=/mnt/xfstests/mnt1
+ cond: arch_not_s390x ? param=TEST_PARAM_SCRATCH_MNT=/mnt/xfstests/mnt2
+ cond: arch_not_s390x ? partition=fs="xfs" name="/mnt/xfstests/mnt1" size="15" type="part"
+@@ -372,15 +370,15 @@ cond: arch_not_s390x ? param=TEST_PARAM_SCRATCH_MNT=/mnt/xfstests/mnt2
+ cond: arch_not_s390x ? partition=fs="xfs" name="/mnt/xfstests/mnt1" size="15" type="part"
+ cond: arch_not_s390x ? partition=fs="xfs" name="/mnt/xfstests/mnt2" size="15" type="part"
+ 
+-[xfs-1k-finobt]
+-desc=xfstests on 1k block size xfs with crc and finobt enabled
++[xfs-1k-sparse]
++desc=xfstests on 1k block size xfs with crc and sparse enabled
+ tag=tier3 xfs
+ arch=all
+ distro=-el6
+ param=TEST_PARAM_FSTYPE=xfs
+ param=TEST_PARAM_BLKSIZE=1024
+-param=TEST_PARAM_MKFS_OPTS=-m crc=1,finobt=1
+-param=TEST_PARAM_KNOWN_ISSUE=upstream_xfs__1k_finobt
++param=TEST_PARAM_MKFS_OPTS=-m crc=1 -i sparse=1
++param=TEST_PARAM_KNOWN_ISSUE=upstream_xfs__1k_sparse
+ cond: arch_not_s390x ? param=TEST_PARAM_TEST_DIR=/mnt/xfstests/mnt1
+ cond: arch_not_s390x ? param=TEST_PARAM_SCRATCH_MNT=/mnt/xfstests/mnt2
+ cond: arch_not_s390x ? partition=fs="xfs" name="/mnt/xfstests/mnt1" size="15" type="part"
+-- 
+2.9.3
+
