@@ -1,40 +1,43 @@
-Received: from mx1.redhat.com ([209.132.183.28]:57656 "EHLO mx1.redhat.com"
+Received: from imap.thunk.org ([74.207.234.97]:47324 "EHLO imap.thunk.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751319AbdEDJ6g (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 4 May 2017 05:58:36 -0400
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 4B5707D4E0
-        for <fstests@vger.kernel.org>; Thu,  4 May 2017 09:58:36 +0000 (UTC)
-Received: from localhost (dhcp-12-173.nay.redhat.com [10.66.12.173])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id C68B318380
-        for <fstests@vger.kernel.org>; Thu,  4 May 2017 09:58:35 +0000 (UTC)
-Date: Thu, 4 May 2017 17:58:34 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 1/2] tasks-upstream: remove xfs finobt tests and add
- sparse inode tests
-Message-ID: <20170504095834.GM7250@eguan.usersys.redhat.com>
-References: <20170504095239.15901-1-eguan@redhat.com>
+        id S1751751AbdEDO3X (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 4 May 2017 10:29:23 -0400
+Date: Thu, 4 May 2017 10:29:20 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH] android-xfstests: support userdata on device-mapper
+ device
+Message-ID: <20170504142920.z2y3o6jghmbkpe72@thunk.org>
+References: <20170503230854.112349-1-ebiggers3@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170504095239.15901-1-eguan@redhat.com>
+In-Reply-To: <20170503230854.112349-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Eric Biggers <ebiggers3@gmail.com>
+Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 04, 2017 at 05:52:38PM +0800, Eryu Guan wrote:
-> finobt feature is enabled by default in upstream xfsprogs, there's
-> no need to test finobt explicitly.
+On Wed, May 03, 2017 at 04:08:54PM -0700, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
 > 
-> Instead, test sparse inode feature, which is off by default.
+> Update android-xfstests to support setting up the xfstests partitions on
+> Android devices where the userdata filesystem is located on a
+> device-mapper device backed by the userdata partition, rather than on
+> the userdata partition itself.  This is the case for devices using
+> "full-disk encryption", for example, in which case dm-crypt is used.
 > 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> We can do things pretty similarly to the non-dm case: just shrink the
+> raw userdata partition after reformatting the filesystem to be smaller,
+> then create the test partitions in the newly "free" space.  Shrinking
+> the dm device itself is not required.  We do however need to make sure
+> not to clobber any footer, e.g. a crypto footer, that may be present.
+> 
+> Note that it's not possible to create the test partitions on top of the
+> dm device.  However, it would be possible to add an option to set up
+> separate dm devices for the test partitions.
+> 
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
 
-Sorry for the noise! Sent to wrong list, please ignore these patches.
+Thanks, applied.
 
-(my finger typed fstests@vger.kernel.org automatically without
-thinking..)
-
-Eryu
+					- Ted
