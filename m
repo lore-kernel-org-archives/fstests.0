@@ -1,60 +1,51 @@
-Received: from mx1.redhat.com ([209.132.183.28]:42694 "EHLO mx1.redhat.com"
+Received: from sandeen.net ([63.231.237.45]:35484 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751508AbdEEKMJ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 5 May 2017 06:12:09 -0400
-Date: Fri, 5 May 2017 18:12:06 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic: test revalidation of encrypted dentries
-Message-ID: <20170505101206.GS7250@eguan.usersys.redhat.com>
-References: <20170504215548.13698-1-ebiggers3@gmail.com>
+        id S1751788AbdEENTZ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 5 May 2017 09:19:25 -0400
+Subject: Re: [PATCH V3] punch-alternating: add some options
+References: <ad311156-c99a-4269-051e-082b259bb0de@redhat.com>
+ <1a55a8a0-00dd-bb73-c888-5c1a889c7302@sandeen.net>
+ <0768eacb-b76f-3a4b-e05a-bc39dde343b4@sandeen.net>
+ <20170505043234.GQ7250@eguan.usersys.redhat.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <313bd3ed-8760-c7ee-3a7f-85daa79b510c@sandeen.net>
+Date: Fri, 5 May 2017 08:19:24 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170504215548.13698-1-ebiggers3@gmail.com>
+In-Reply-To: <20170505043234.GQ7250@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers3@gmail.com>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>, linux-fscrypt@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 04, 2017 at 02:55:48PM -0700, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
-> 
-> Add a test which verifies that dentries in an encrypted directory are
-> invalidated when an encryption key is added --- which should cause the
-> plaintext filenames to be visible and accessible, replacing the encoded
-> ciphertext filenames and any negative dentries for the plaintext names.
-> This primarily tests for a bug which was fixed in the v4.5 kernel, plus
-> a v4.6 fix for incorrect RCU usage in the earlier fix.
-> 
-> Cc: linux-fscrypt@vger.kernel.org
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
 
-Looks good to me, ext4 passed this test with 4.11-rc8 kernel.
+On 5/4/17 11:32 PM, Eryu Guan wrote:
+> On Thu, May 04, 2017 at 01:25:05PM -0500, Eric Sandeen wrote:
 
 ...
-> +_filter_ciphertext_filenames()
-> +{
-> +	_filter_scratch | sed 's|edir/[a-zA-Z0-9+,_]\+|edir/ENCRYPTED_NAME|g'
-> +}
-> +
-> +_show_file_contents()
-> +{
-> +	echo "--- Contents of files using plaintext names:"
-> +	cat $SCRATCH_MNT/edir/@@@ |& _filter_scratch
-> +	cat $SCRATCH_MNT/edir/abcd |& _filter_scratch
-> +	echo "--- Contents of files using ciphertext names:"
-> +	cat ${ciphertext_names[@]} |& _filter_ciphertext_filenames
-> +}
-> +
-> +_show_directory_with_key()
-> +{
-> +	echo "--- Directory listing:"
-> +	find $SCRATCH_MNT/edir -mindepth 1 | sort | _filter_scratch
-> +	_show_file_contents
-> +}
 
-I just removed the leading underscore from above three local functions,
-leading underscores are reserved for global helpers.
+>> -	if (argc != 2) {
+>> -		printf("Usage: %s file\n", argv[0]);
+>> -		printf("Punches every other block in the file.\n");
+>> -		return 1;
+>> +	if (size < 0) {
+>> +		printf("size must be >= 0\n");
+>> +		usage(argv[0]);
+> 
+> Can size be 0? Seems not, otherwise we call fallocate with zero length.
+> I got this error if I use "-s 0"
+> 
+> $ ./src/punch-alternating -s 0 -i 8 testfile
+> -s: Invalid argument
+> 
+> And the "-s" part indicates that the perror call in 'err' label should
+> be updated too, i.e. argv[1] => argv[optind]
+> 
+> They're simple enough to be fixed at commit time, if you think they're
+> sane fixes :)
 
-Thanks,
-Eryu
+Sigh, yes please.  I'm apparently now unable to write or test the simplest
+code.  :/
+
+-Eric
