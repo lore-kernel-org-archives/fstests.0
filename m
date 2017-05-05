@@ -1,51 +1,77 @@
-Received: from sandeen.net ([63.231.237.45]:35484 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751788AbdEENTZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 5 May 2017 09:19:25 -0400
-Subject: Re: [PATCH V3] punch-alternating: add some options
-References: <ad311156-c99a-4269-051e-082b259bb0de@redhat.com>
- <1a55a8a0-00dd-bb73-c888-5c1a889c7302@sandeen.net>
- <0768eacb-b76f-3a4b-e05a-bc39dde343b4@sandeen.net>
- <20170505043234.GQ7250@eguan.usersys.redhat.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <313bd3ed-8760-c7ee-3a7f-85daa79b510c@sandeen.net>
-Date: Fri, 5 May 2017 08:19:24 -0500
-MIME-Version: 1.0
-In-Reply-To: <20170505043234.GQ7250@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Received: from mx2.suse.de ([195.135.220.15]:33274 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752898AbdEEO51 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 5 May 2017 10:57:27 -0400
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [PATCH] src/seek_sanity_test: ensure file size is big enough
+Date: Fri,  5 May 2017 15:57:23 +0100
+Message-Id: <20170505145723.13582-1-lhenriques@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: "Yan, Zheng" <ukernel@gmail.com>, Luis Henriques <lhenriques@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
+Tests test07, test08, and test09 preallocate a file and assume the file
+size used is bigger than 10xbufsz (100xbufsz for test09).  This patch
+adjusts the file size so this assumption is always true.
 
-On 5/4/17 11:32 PM, Eryu Guan wrote:
-> On Thu, May 04, 2017 at 01:25:05PM -0500, Eric Sandeen wrote:
+As an example, here's test06 output for cephfs, where the allocation size
+is set to 4194304, and the output is (4194304 * 10 + 4194304)
 
-...
+  07. Test file with unwritten extents, only have dirty pages
+  07.01 SEEK_HOLE expected 0 or 4194304, got 46137344.              FAIL
+  07.02 SEEK_HOLE expected 1 or 4194304, got 46137344.              FAIL
 
->> -	if (argc != 2) {
->> -		printf("Usage: %s file\n", argv[0]);
->> -		printf("Punches every other block in the file.\n");
->> -		return 1;
->> +	if (size < 0) {
->> +		printf("size must be >= 0\n");
->> +		usage(argv[0]);
-> 
-> Can size be 0? Seems not, otherwise we call fallocate with zero length.
-> I got this error if I use "-s 0"
-> 
-> $ ./src/punch-alternating -s 0 -i 8 testfile
-> -s: Invalid argument
-> 
-> And the "-s" part indicates that the perror call in 'err' label should
-> be updated too, i.e. argv[1] => argv[optind]
-> 
-> They're simple enough to be fixed at commit time, if you think they're
-> sane fixes :)
+(Note: The test will be skipped if an integer overflow occurs.)
 
-Sigh, yes please.  I'm apparently now unable to write or test the simplest
-code.  :/
+Signed-off-by: Luis Henriques <lhenriques@suse.com>
+---
+ src/seek_sanity_test.c | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
 
--Eric
+diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
+index a6dd48cc257b..41da59801212 100644
+--- a/src/seek_sanity_test.c
++++ b/src/seek_sanity_test.c
+@@ -282,6 +282,13 @@ static int test09(int fd, int testnum)
+ 	int bufsz = alloc_size;
+ 	int filsz = 8 << 20;
+ 
++	while ((filsz < (bufsz * 100 + bufsz)) && (filsz > 0))
++		filsz <<= 1;
++	if (filsz <= 0) {
++		fprintf(stdout, "Test skipped due to int overflow.\n");
++		return ret;
++	}
++
+ 	/*
+ 	 * HOLE - unwritten DATA in dirty page - HOLE -
+ 	 * unwritten DATA in writeback page
+@@ -338,6 +345,13 @@ static int test08(int fd, int testnum)
+ 	int bufsz = alloc_size;
+ 	int filsz = 4 << 20;
+ 
++	while ((filsz < (bufsz * 10 + bufsz)) && (filsz > 0))
++		filsz <<= 1;
++	if (filsz <= 0) {
++		fprintf(stdout, "Test skipped due to int overflow.\n");
++		return ret;
++	}
++
+ 	/* HOLE - unwritten DATA in writeback page */
+ 	/* Each unit is bufsz */
+ 	buf = do_malloc(bufsz);
+@@ -387,6 +401,13 @@ static int test07(int fd, int testnum)
+ 	int bufsz = alloc_size;
+ 	int filsz = 4 << 20;
+ 
++	while ((filsz < (bufsz * 10 + bufsz)) && (filsz > 0))
++		filsz <<= 1;
++	if (filsz <= 0) {
++		fprintf(stdout, "Test skipped due to int overflow.\n");
++		return ret;
++	}
++
+ 	/* HOLE - unwritten DATA in dirty page */
+ 	/* Each unit is bufsz */
+ 	buf = do_malloc(bufsz);
