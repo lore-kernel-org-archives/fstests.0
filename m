@@ -1,77 +1,60 @@
-Received: from mx2.suse.de ([195.135.220.15]:33274 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752898AbdEEO51 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 5 May 2017 10:57:27 -0400
-From: Luis Henriques <lhenriques@suse.com>
-Subject: [PATCH] src/seek_sanity_test: ensure file size is big enough
-Date: Fri,  5 May 2017 15:57:23 +0100
-Message-Id: <20170505145723.13582-1-lhenriques@suse.com>
+Received: from mail-pf0-f196.google.com ([209.85.192.196]:33342 "EHLO
+        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751326AbdEFAVP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 5 May 2017 20:21:15 -0400
+Received: by mail-pf0-f196.google.com with SMTP id b23so2406979pfc.0
+        for <fstests@vger.kernel.org>; Fri, 05 May 2017 17:21:15 -0700 (PDT)
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: [PATCH 1/2] common/config: make set_prog_path() accept one argument only
+Date: Fri,  5 May 2017 17:19:32 -0700
+Message-Id: <20170506001933.49582-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: "Yan, Zheng" <ukernel@gmail.com>, Luis Henriques <lhenriques@suse.com>
+Cc: Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-Tests test07, test08, and test09 preallocate a file and assume the file
-size used is bigger than 10xbufsz (100xbufsz for test09).  This patch
-adjusts the file size so this assumption is always true.
+From: Eric Biggers <ebiggers@google.com>
 
-As an example, here's test06 output for cephfs, where the allocation size
-is set to 4194304, and the output is (4194304 * 10 + 4194304)
+All callers of set_prog_path() pass it only one argument, the program to
+find on the $PATH.  Therefore, to simplify things remove the unused code
+which allowed fallback paths to be specified in the remaining arguments.
 
-  07. Test file with unwritten extents, only have dirty pages
-  07.01 SEEK_HOLE expected 0 or 4194304, got 46137344.              FAIL
-  07.02 SEEK_HOLE expected 1 or 4194304, got 46137344.              FAIL
-
-(Note: The test will be skipped if an integer overflow occurs.)
-
-Signed-off-by: Luis Henriques <lhenriques@suse.com>
+Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- src/seek_sanity_test.c | 21 +++++++++++++++++++++
- 1 file changed, 21 insertions(+)
+ common/config | 13 +------------
+ 1 file changed, 1 insertion(+), 12 deletions(-)
 
-diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
-index a6dd48cc257b..41da59801212 100644
---- a/src/seek_sanity_test.c
-+++ b/src/seek_sanity_test.c
-@@ -282,6 +282,13 @@ static int test09(int fd, int testnum)
- 	int bufsz = alloc_size;
- 	int filsz = 8 << 20;
+diff --git a/common/config b/common/config
+index 59041a39..b29c0eb0 100644
+--- a/common/config
++++ b/common/config
+@@ -93,7 +93,7 @@ export LOCAL_CONFIGURE_OPTIONS=${LOCAL_CONFIGURE_OPTIONS:=--enable-readline=yes}
  
-+	while ((filsz < (bufsz * 100 + bufsz)) && (filsz > 0))
-+		filsz <<= 1;
-+	if (filsz <= 0) {
-+		fprintf(stdout, "Test skipped due to int overflow.\n");
-+		return ret;
-+	}
-+
- 	/*
- 	 * HOLE - unwritten DATA in dirty page - HOLE -
- 	 * unwritten DATA in writeback page
-@@ -338,6 +345,13 @@ static int test08(int fd, int testnum)
- 	int bufsz = alloc_size;
- 	int filsz = 4 << 20;
+ export RECREATE_TEST_DEV=false
  
-+	while ((filsz < (bufsz * 10 + bufsz)) && (filsz > 0))
-+		filsz <<= 1;
-+	if (filsz <= 0) {
-+		fprintf(stdout, "Test skipped due to int overflow.\n");
-+		return ret;
-+	}
-+
- 	/* HOLE - unwritten DATA in writeback page */
- 	/* Each unit is bufsz */
- 	buf = do_malloc(bufsz);
-@@ -387,6 +401,13 @@ static int test07(int fd, int testnum)
- 	int bufsz = alloc_size;
- 	int filsz = 4 << 20;
+-# $1 = prog to look for, $2* = default pathnames if not found in $PATH
++# $1 = prog to look for
+ set_prog_path()
+ {
+     p=`which $1 2> /dev/null`
+@@ -101,17 +101,6 @@ set_prog_path()
+         echo $p
+         return 0
+     fi
+-    p=$1
+-
+-    shift
+-    for f; do
+-        if [ -x $f ]; then
+-            echo $f
+-            return 0
+-        fi
+-    done
+-
+-    echo ""
+     return 1
+ }
  
-+	while ((filsz < (bufsz * 10 + bufsz)) && (filsz > 0))
-+		filsz <<= 1;
-+	if (filsz <= 0) {
-+		fprintf(stdout, "Test skipped due to int overflow.\n");
-+		return ret;
-+	}
-+
- 	/* HOLE - unwritten DATA in dirty page */
- 	/* Each unit is bufsz */
- 	buf = do_malloc(bufsz);
+-- 
+2.13.0.rc1.294.g07d810a77f-goog
+
