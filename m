@@ -1,70 +1,115 @@
-Received: from mail-pf0-f194.google.com ([209.85.192.194]:33358 "EHLO
-        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751618AbdEFAVS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 5 May 2017 20:21:18 -0400
-Received: by mail-pf0-f194.google.com with SMTP id b23so2407077pfc.0
-        for <fstests@vger.kernel.org>; Fri, 05 May 2017 17:21:18 -0700 (PDT)
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH 2/2] common/config: implement set_prog_path() using 'type -P'
-Date: Fri,  5 May 2017 17:19:33 -0700
-Message-Id: <20170506001933.49582-2-ebiggers3@gmail.com>
-In-Reply-To: <20170506001933.49582-1-ebiggers3@gmail.com>
-References: <20170506001933.49582-1-ebiggers3@gmail.com>
+Received: from mail-pf0-f195.google.com ([209.85.192.195]:36678 "EHLO
+        mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751516AbdEGX6g (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 7 May 2017 19:58:36 -0400
+Received: by mail-pf0-f195.google.com with SMTP id v14so7629718pfd.3
+        for <fstests@vger.kernel.org>; Sun, 07 May 2017 16:58:35 -0700 (PDT)
+Received: from localhost ([128.199.137.77])
+        by smtp.gmail.com with ESMTPSA id l185sm10590988pfl.106.2017.05.07.00.23.52
+        for <fstests@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Sun, 07 May 2017 00:23:53 -0700 (PDT)
+Message-ID: <590ecb89.c225620a.b2144.8203@mx.google.com>
+From: Eryu Guan <guaneryu@gmail.com>
+Date: Sun, 07 May 2017 15:23:47 +0800
+Subject: [ANNOUNCE] fstests: master branch updated to 52f9ebbda94d
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="DuaSAlWLvlxE"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
 
-Bash's 'type -P' builtin is equivalent to 'which', but it's more
-efficient because it doesn't involve executing an external binary.
-Because set_prog_path() is executed 60+ times in common/config, which is
-sourced by common/rc, which in turn is sourced by every test, switching
-to 'type -P' actually can make a noticeable performance improvement for
-short-running or skipped tests.  For example:
+--DuaSAlWLvlxE
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Before:
-    # time ./check generic/002
-    ...
-    Passed all 1 tests
+Hi all,
 
-    real    0m1.365s
-    user    0m0.746s
-    sys     0m0.644s
+The master branch of the xfstests repository at:
 
-After:
-    # time ./check generic/002
-    ...
-    Passed all 1 tests
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-    real    0m1.026s
-    user    0m0.511s
-    sys     0m0.470s
+have just been updated. There're mainly new tests added in this update. The
+overlay consistent inode tests has been improved extensively, new encryption
+and xfs tests has been added. And _check_dmesg now could catch new "suspicious
+RCU usage" message in dmesg, cephfs gained better attr test support. Many
+thanks to all who have contributed and/or helped reviewed patches!
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- common/config | 7 +------
- 1 file changed, 1 insertion(+), 6 deletions(-)
+New failures I've noticed in this update:
+- xfs/294 hangs (soft lockup) v4.11 kernel, which should be fixed in 4.12-rc1
 
-diff --git a/common/config b/common/config
-index b29c0eb0..8211356c 100644
---- a/common/config
-+++ b/common/config
-@@ -96,12 +96,7 @@ export RECREATE_TEST_DEV=false
- # $1 = prog to look for
- set_prog_path()
- {
--    p=`which $1 2> /dev/null`
--    if [ -n "$p" -a -x "$p" ]; then
--        echo $p
--        return 0
--    fi
--    return 1
-+	type -P $1
- }
- 
- # Handle mkfs.btrfs which does (or does not) require -f to overwrite
--- 
-2.13.0.rc1.294.g07d810a77f-goog
+Thanks,
+Eryu
 
+The new head of the master branch is commit:
+
+52f9ebbda94d generic: test revalidation of encrypted dentries
+
+New commits:
+
+Amir Goldstein (6):
+      [c2c9d7ef1adb] overlay/017: silence test output
+      [3813cafb81db] overlay/017: fix some comments
+      [8a76c404454f] overlay/017: use af_unix to create socket test file
+      [dca98801ed2e] overlay/017: create helpers to record and check inode numbers
+      [08253234856c] overlay/017: verify constant inode number after rename
+      [cf0e25209dcc] overlay/017: test persistent inode numbers after mount cycle
+
+Eric Biggers (2):
+      [3c309f26fbd7] common/rc: catch updated suspicious RCU usage message in _check_dmesg()
+      [52f9ebbda94d] generic: test revalidation of encrypted dentries
+
+Eric Sandeen (2):
+      [9343320e6788] xfs: test fragmented multi-fsb readdir
+      [54ac0dd3086d] punch-alternating: add some options
+
+Luis Henriques (1):
+      [5fcc706aab43] attr: add support for cephfs
+
+
+Code Diffstat:
+
+ .gitignore                     |   1 +
+ common/attr                    |  24 +++++--
+ common/encrypt                 |  42 ++++++++---
+ common/rc                      |   4 +-
+ src/Makefile                   |   2 +-
+ src/punch-alternating.c        |  47 ++++++++++---
+ src/t_encrypted_d_revalidate.c | 122 ++++++++++++++++++++++++++++++++
+ tests/generic/429              | 154 +++++++++++++++++++++++++++++++++++++++++
+ tests/generic/429.out          |  37 ++++++++++
+ tests/generic/group            |   1 +
+ tests/overlay/017              |  86 ++++++++++++++++++-----
+ tests/overlay/017.out          |   7 +-
+ tests/xfs/294                  | 118 +++++++++++++++++++++++++++++++
+ tests/xfs/294.out              |   2 +
+ tests/xfs/group                |   1 +
+ 15 files changed, 598 insertions(+), 50 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
+
+--DuaSAlWLvlxE
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJZDsqwAAoJECZSqilcj+djcp0P/2/Vs+pUcO+ZA6Zn0di5GQzQ
+pEBVLmRdrYeQ6U4n2mErlWU5XxFEH6yhPxtANeo2bJM75A48hB1ertF9HwsGkAbC
+ubq6va54HUUHFi6elarnYLfQcKxzPvH7uUJwn4yX02JkqyWh0dswDBg61Nc79pGT
+US22xEsEB4Y+xDVYcJq6VhQ8x7/a815h3Bokf3O43bbDEyjtqQX6NuM8pFwIef8q
+7vKlYgo+vXxjFmjvSk5U3Sjp8cVPfkR1Z2oLdMQVAUr7NtI/CP3l3wT5CFOmr5iv
+GRz5zC9wZGByzqqTriB9vGtVKV+floNjl+BILjVZRlxdipgvM06JyHJeiGspaUT/
+kTETRSB15hbIfW98Bv294OiERPidixKj8hTb1VobntusNLfHPKBKK5NtcFZfJKiS
+GtMJWVHH5Qvo5go+bfBUpN9pkIFUhxKBU6+/x9aYGJnFah9CUyvPzL96FFLKxp5G
+lqi4KafkF9TxwRPWOyPFF774wd/Yx+B3/yUxvEel0Dt7LmtXta9i+IXgzNR5d3BI
+D1hwzsu6pDUfbXNXhH3UYgJAmlvV1ksvwQTAO6LDd4q3DwWhVEQtX+TNP1X/U7JY
+IOIXecWtwXU706rogoqrfNpGaVPv1dwc1e4WpTx/mRXVRwlsgtPFENwG9mbwjw+r
+Mjl7ro3FrA1+7oF7x9oL
+=iAhq
+-----END PGP SIGNATURE-----
+
+--DuaSAlWLvlxE--
