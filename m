@@ -1,41 +1,368 @@
-Received: from mx1.redhat.com ([209.132.183.28]:56106 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754261AbdEIQNC (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 9 May 2017 12:13:02 -0400
-From: Jeff Layton <jlayton@redhat.com>
-Subject: [xfstests PATCH v2 3/3] btrfs: allow it to use $SCRATCH_LOGDEV
-Date: Tue,  9 May 2017 12:12:45 -0400
-Message-Id: <20170509161245.29908-4-jlayton@redhat.com>
-In-Reply-To: <20170509161245.29908-1-jlayton@redhat.com>
-References: <20170509161245.29908-1-jlayton@redhat.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:45006 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750786AbdEHSpd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 8 May 2017 14:45:33 -0400
+Date: Mon, 8 May 2017 11:43:59 -0700
+From: Liu Bo <bo.li.liu@oracle.com>
+Subject: Re: [PATCH v3] fstests: regression test for btrfs dio read repair
+Message-ID: <20170508184359.GC20619@lim.localdomain>
+Reply-To: bo.li.liu@oracle.com
+References: <1493400352-5845-1-git-send-email-bo.li.liu@oracle.com>
+ <CAL3q7H52wjV6V4h6WNrbje=A702BmD_SGDq+5O60OyLx09cXKA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <CAL3q7H52wjV6V4h6WNrbje=A702BmD_SGDq+5O60OyLx09cXKA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, linux-mm@kvack.org, jfs-discussion@lists.sourceforge.net, linux-xfs@vger.kernel.org, cluster-devel@redhat.com, linux-f2fs-devel@lists.sourceforge.net, v9fs-developer@lists.sourceforge.net, linux-nilfs@vger.kernel.org, linux-block@vger.kernel.org, fstests@vger.kernel.org
-Cc: dhowells@redhat.com, akpm@linux-foundation.org, hch@infradead.org, ross.zwisler@linux.intel.com, mawilcox@microsoft.com, jack@suse.com, viro@zeniv.linux.org.uk, corbet@lwn.net, neilb@suse.de, clm@fb.com, tytso@mit.edu, axboe@kernel.dk, josef@toxicpanda.com, hubcap@omnibond.com, rpeterso@redhat.com, bo.li.liu@oracle.com
+Content-Transfer-Encoding: quoted-printable
+To: Filipe Manana <fdmanana@gmail.com>
+Cc: fstests@vger.kernel.org, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-With btrfs, we can't really put the log on a separate device. What we
-can do however is mirror the metadata across two devices and put the
-data on a single device. When we turn on dmerror then the metadata can
-fall back to using the other mirror while the data errors out.
+On Tue, May 02, 2017 at 03:37:15PM +0100, Filipe Manana wrote:
+> On Fri, Apr 28, 2017 at 6:25 PM, Liu Bo <bo.li.liu@oracle.com> wrote:
+> > This case tests whether dio read can repair the bad copy if we have
+> > a good copy.
+> >
+> > Commit 2dabb3248453 ("Btrfs: Direct I/O read: Work on sectorsized blo=
+cks")
+> > introduced the regression.
+> >
+> > The upstream fix is
+> >         Btrfs: fix invalid dereference in btrfs_retry_endio
+> >
+> > Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+>=20
+> Reviewed-by: Filipe Manana <fdmanana@suse.com>
+>=20
+> Just a comment below.
+>=20
+> > ---
+> > v2: - Add regression commit and the fix to the description
+> >     - Use btrfs inspect-internal dump-tree to get rid of the dependen=
+ce btrfs-map-logical
+> >     - Add comments in several places
+> >
+> > v3: - Add 'mkfs -b 1G' to limit filesystem size to 2G in raid1 profil=
+e so that
+> >       we get a consistent output.
+> >
+> >  tests/btrfs/140     | 167 ++++++++++++++++++++++++++++++++++++++++++=
+++++++++++
+> >  tests/btrfs/140.out |  39 ++++++++++++
+> >  tests/btrfs/group   |   1 +
+> >  3 files changed, 207 insertions(+)
+> >  create mode 100755 tests/btrfs/140
+> >  create mode 100644 tests/btrfs/140.out
+> >
+> > diff --git a/tests/btrfs/140 b/tests/btrfs/140
+> > new file mode 100755
+> > index 0000000..dcd8807
+> > --- /dev/null
+> > +++ b/tests/btrfs/140
+> > @@ -0,0 +1,167 @@
+> > +#! /bin/bash
+> > +# FS QA Test 140
+> > +#
+> > +# Regression test for btrfs DIO read's repair during read.
+> > +#
+> > +# Commit 2dabb3248453 ("Btrfs: Direct I/O read: Work on sectorsized =
+blocks")
+> > +# introduced the regression.
+> > +# The upstream fix is
+> > +#      Btrfs: fix invalid dereference in btrfs_retry_endio
+> > +#
+> > +#-------------------------------------------------------------------=
+----
+> > +# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundatio=
+n,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-------------------------------------------------------------------=
+----
+> > +#
+> > +
+> > +seq=3D`basename $0`
+> > +seqres=3D$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=3D`pwd`
+> > +tmp=3D/tmp/$$
+> > +status=3D1       # failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +       cd /
+> > +       rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs btrfs
+> > +_supported_os Linux
+> > +_require_scratch_dev_pool 2
+> > +
+> > +_require_btrfs_command inspect-internal dump-tree
+> > +_require_command "$FILEFRAG_PROG" filefrag
+> > +_require_odirect
+> > +
+> > +# helpe to convert 'file offset' to btrfs logical offset
+> > +FILEFRAG_FILTER=3D'
+> > +       if (/blocks? of (\d+) bytes/) {
+> > +               $blocksize =3D $1;
+> > +               next
+> > +       }
+> > +       ($ext, $logical, $physical, $length) =3D
+> > +               (/^\s*(\d+):\s+(\d+)..\s+\d+:\s+(\d+)..\s+\d+:\s+(\d+=
+):/)
+> > +       or next;
+> > +       ($flags) =3D /.*:\s*(\S*)$/;
+> > +       print $physical * $blocksize, "#",
+> > +             $length * $blocksize, "#",
+> > +             $logical * $blocksize, "#",
+> > +             $flags, " "'
+> > +
+> > +# this makes filefrag output script readable by using a perl helper.
+> > +# output is one extent per line, with three numbers separated by '#'
+> > +# the numbers are: physical, length, logical (all in bytes)
+> > +# sample output: "1234#10#5678" -> physical 1234, length 10, logical=
+ 5678
+> > +_filter_extents()
+> > +{
+> > +       tee -a $seqres.full | $PERL_PROG -ne "$FILEFRAG_FILTER"
+> > +}
+> > +
+> > +_check_file_extents()
+> > +{
+> > +       cmd=3D"filefrag -v $1"
+> > +       echo "# $cmd" >> $seqres.full
+> > +       out=3D`$cmd | _filter_extents`
+> > +       if [ -z "$out" ]; then
+> > +               return 1
+> > +       fi
+> > +       echo "after filter: $out" >> $seqres.full
+> > +       echo $out
+> > +       return 0
+> > +}
+> > +
+> > +_check_repair()
+> > +{
+> > +       filter=3D${1:-cat}
+> > +       dmesg | tac | sed -ne "0,\#run fstests $seqnum at $date_time#=
+p" | tac | $filter | grep -q -e "csum failed"
+> > +       if [ $? -eq 0 ]; then
+> > +               echo 1
+> > +       else
+> > +               echo 0
+> > +       fi
+> > +}
+> > +
+> > +_get_physical()
+> > +{
+> > +       # $1 is logical address
+> > +       # print chunk tree and find devid 2 which is $SCRATCH_DEV
+> > +       $BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV=
+ | grep $1 -A 6 | awk '($1 ~ /stripe/ && $3 ~ /devid/ && $4 ~ /1/) { prin=
+t $6 }'
+> > +}
+> > +
+> > +_scratch_dev_pool_get 2
+> > +# step 1, create a raid1 btrfs which contains one 128k file.
+> > +echo "step 1......mkfs.btrfs" >>$seqres.full
+> > +
+> > +mkfs_opts=3D"-d raid1 -b 1G"
+> > +_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+> > +
+> > +# -o nospace_cache makes sure data is written to the start position =
+of the data
+> > +# chunk
+> > +_scratch_mount -o nospace_cache
+> > +
+> > +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/=
+foobar" | _filter_xfs_io
+> > +
+> > +sync
+>=20
+> The sync is not necessary, since we cleanly unmount the fs below.
+>
 
-Signed-off-by: Jeff Layton <jlayton@redhat.com>
----
- common/rc | 2 ++
- 1 file changed, 2 insertions(+)
+Oops, good catch.
 
-diff --git a/common/rc b/common/rc
-index 8b815d9c8c33..2084c1f24f30 100644
---- a/common/rc
-+++ b/common/rc
-@@ -829,6 +829,8 @@ _scratch_mkfs()
- 		;;
- 	btrfs)
- 		mkfs_cmd="$MKFS_BTRFS_PROG"
-+		[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
-+			mkfs_cmd="$mkfs_cmd -d single -m raid1 $SCRATCH_LOGDEV"
- 		mkfs_filter="cat"
- 		;;
- 	ext2|ext3)
--- 
-2.9.3
+> The test works now with a patched kernel and fails with an unpatched
+> kernel as expected.
+>
 
+Thanks for trying it out.
+
+> Looks good to me, but FILEFRAG_FILTER, _filter_extents,
+> _check_file_extents, _get_physical and _check_repair are duplicated
+> across all the 4 test case files in the series. Could be factored into
+> common/btrfs later for example.
+>
+
+Sure, this piece of code is taken from the scrub testcase, so it'd be
+a good candidate for common/btrfs.
+
+Thanks,
+
+-liubo
+> > +
+> > +# step 2, corrupt the first 64k of one copy (on SCRATCH_DEV which is=
+ the first
+> > +# one in $SCRATCH_DEV_POOL
+> > +echo "step 2......corrupt file extent" >>$seqres.full
+> > +
+> > +extents=3D`_check_file_extents $SCRATCH_MNT/foobar`
+> > +logical_in_btrfs=3D`echo ${extents} | cut -d '#' -f 1`
+> > +physical_on_scratch=3D`_get_physical ${logical_in_btrfs}`
+> > +
+> > +_scratch_unmount
+> > +$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical_on_scratch 64K" =
+$SCRATCH_DEV | _filter_xfs_io
+> > +
+> > +_scratch_mount
+> > +
+> > +# step 3, 128k dio read (this read can repair bad copy)
+> > +echo "step 3......repair the bad copy" >>$seqres.full
+> > +
+> > +# since raid1 consists of two copies, and the following read may rea=
+d the good
+> > +# copy directly, so lets loop 10 times here and discard output that =
+dio reads
+> > +# give
+> > +for i in `seq 1 10`; do
+> > +       $XFS_IO_PROG -d -c "pread -b 128K 0 128K" "$SCRATCH_MNT/fooba=
+r" > /dev/null
+> > +       repair=3D`_check_repair`
+> > +       if [ $repair -eq 1 ]; then
+> > +               break
+> > +       fi
+> > +done
+> > +
+> > +_scratch_unmount
+> > +
+> > +# check if the repair works
+> > +$XFS_IO_PROG -d -c "pread -v -b 512 $physical_on_scratch 512" $SCRAT=
+CH_DEV | _filter_xfs_io
+> > +
+> > +_scratch_dev_pool_put
+> > +# success, all done
+> > +status=3D0
+> > +exit
+> > diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
+> > new file mode 100644
+> > index 0000000..c8565f5
+> > --- /dev/null
+> > +++ b/tests/btrfs/140.out
+> > @@ -0,0 +1,39 @@
+> > +QA output created by 140
+> > +wrote 131072/131072 bytes at offset 0
+> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > +wrote 65536/65536 bytes at offset 136708096
+> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > +08260000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +08260010:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +08260020:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +08260030:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +08260040:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +08260050:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +08260060:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +08260070:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +08260080:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +08260090:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +082600a0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +082600b0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +082600c0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +082600d0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +082600e0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +082600f0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +08260100:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +08260110:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +08260120:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +08260130:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +08260140:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +08260150:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +08260160:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +08260170:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +08260180:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +08260190:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +082601a0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +082601b0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +082601c0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +082601d0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +082601e0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +082601f0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ........=
+........
+> > +read 512/512 bytes at offset 136708096
+> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > diff --git a/tests/btrfs/group b/tests/btrfs/group
+> > index 9d4b80b..1cb9c98 100644
+> > --- a/tests/btrfs/group
+> > +++ b/tests/btrfs/group
+> > @@ -141,3 +141,4 @@
+> >  137 auto quick send
+> >  138 auto compress
+> >  139 auto qgroup
+> > +140 auto quick
+> > --
+> > 2.5.0
+> >
+>=20
+>=20
+>=20
+> --=20
+> Filipe David Manana,
+>=20
+> =E2=80=9CWhether you think you can, or you think you can't =E2=80=94 yo=
+u're right.=E2=80=9D
