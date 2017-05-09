@@ -1,43 +1,45 @@
-Received: from mail-qk0-f173.google.com ([209.85.220.173]:36375 "EHLO
-        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753571AbdEIPdI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 9 May 2017 11:33:08 -0400
-Received: by mail-qk0-f173.google.com with SMTP id u75so4014555qka.3
-        for <fstests@vger.kernel.org>; Tue, 09 May 2017 08:33:07 -0700 (PDT)
-Message-ID: <1494343983.2659.7.camel@redhat.com>
-Subject: Re: [RFC xfstests PATCH] xfstests: add a writeback error handling
- test
+Received: from mx1.redhat.com ([209.132.183.28]:33130 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754894AbdEIQM7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 9 May 2017 12:12:59 -0400
 From: Jeff Layton <jlayton@redhat.com>
-Date: Tue, 09 May 2017 11:33:03 -0400
-In-Reply-To: <20170424150019.GA3288@infradead.org>
-References: <20170424134551.10301-1-jlayton@redhat.com>
-         <20170424150019.GA3288@infradead.org>
-Content-Type: text/plain; charset="UTF-8"
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Subject: [xfstests PATCH v2 2/3] ext4: allow ext4 to use $SCRATCH_LOGDEV
+Date: Tue,  9 May 2017 12:12:44 -0400
+Message-Id: <20170509161245.29908-3-jlayton@redhat.com>
+In-Reply-To: <20170509161245.29908-1-jlayton@redhat.com>
+References: <20170509161245.29908-1-jlayton@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-cifs@vger.kernel.org, linux-mm@kvack.org, jfs-discussion@lists.sourceforge.net, linux-xfs@vger.kernel.org, cluster-devel@redhat.com, linux-f2fs-devel@lists.sourceforge.net, v9fs-developer@lists.sourceforge.net, osd-dev@open-osd.org, linux-nilfs@vger.kernel.org, linux-block@vger.kernel.org, dhowells@redhat.com, akpm@linux-foundation.org, ross.zwisler@linux.intel.com, mawilcox@microsoft.com, jack@suse.com, viro@zeniv.linux.org.uk, corbet@lwn.net, neilb@suse.de, clm@fb.com, tytso@mit.edu, axboe@kernel.dk
+To: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, linux-mm@kvack.org, jfs-discussion@lists.sourceforge.net, linux-xfs@vger.kernel.org, cluster-devel@redhat.com, linux-f2fs-devel@lists.sourceforge.net, v9fs-developer@lists.sourceforge.net, linux-nilfs@vger.kernel.org, linux-block@vger.kernel.org, fstests@vger.kernel.org
+Cc: dhowells@redhat.com, akpm@linux-foundation.org, hch@infradead.org, ross.zwisler@linux.intel.com, mawilcox@microsoft.com, jack@suse.com, viro@zeniv.linux.org.uk, corbet@lwn.net, neilb@suse.de, clm@fb.com, tytso@mit.edu, axboe@kernel.dk, josef@toxicpanda.com, hubcap@omnibond.com, rpeterso@redhat.com, bo.li.liu@oracle.com
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, 2017-04-24 at 08:00 -0700, Christoph Hellwig wrote:
-> On Mon, Apr 24, 2017 at 09:45:51AM -0400, Jeff Layton wrote:
-> > With the patch series above, ext4 now passes. xfs and btrfs end up in
-> > r/o mode after the test. xfs returns -EIO at that point though, and
-> > btrfs returns -EROFS. What behavior we actually want there, I'm not
-> > certain. We might be able to mitigate that by putting the journals on a
-> > separate device?
-> 
-> This looks like XFS shut down because of a permanent write error from
-> dm-error.  Which seems like the expected behavior.
+The writeback error handling test requires that you put the journal on a
+separate device. This allows us to use dmerror to simulate data
+writeback failure, without affecting the journal.
 
-Oops, didn't see this message earlier...
+xfs already has infrastructure for this (a'la $SCRATCH_LOGDEV), so wire
+up the ext4 code so that it can do the same thing when _scratch_mkfs is
+called.
 
-Yeah, that's entirely reasonable when there is a write error to the
-journal. The latest version of this uses $SCRATCH_LOGDEV to put the
-journal on a different device, and with that I get the expected behavior
-from xfs.
+Signed-off-by: Jeff Layton <jlayton@redhat.com>
+---
+ common/rc | 3 +++
+ 1 file changed, 3 insertions(+)
 
-Thanks,
+diff --git a/common/rc b/common/rc
+index 257b1903359d..8b815d9c8c33 100644
+--- a/common/rc
++++ b/common/rc
+@@ -675,6 +675,9 @@ _scratch_mkfs_ext4()
+ 	local tmp=`mktemp`
+ 	local mkfs_status
+ 
++	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
++	    $mkfs_cmd -O journal_dev $SCRATCH_LOGDEV && \
++	    mkfs_cmd="$mkfs_cmd -J device=$SCRATCH_LOGDEV"
+ 
+ 	_scratch_do_mkfs "$mkfs_cmd" "$mkfs_filter" $* 2>$tmp.mkfserr 1>$tmp.mkfsstd
+ 	mkfs_status=$?
 -- 
-Jeff Layton <jlayton@redhat.com>
+2.9.3
+
