@@ -1,57 +1,220 @@
-Received: from mx1.redhat.com ([209.132.183.28]:53530 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753554AbdEIQMx (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 9 May 2017 12:12:53 -0400
-From: Jeff Layton <jlayton@redhat.com>
-Subject: [xfstests PATCH v2 0/3] xfstest for updated writeback error handling
-Date: Tue,  9 May 2017 12:12:42 -0400
-Message-Id: <20170509161245.29908-1-jlayton@redhat.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:39339 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753562AbdEIS4q (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 9 May 2017 14:56:46 -0400
+Date: Tue, 9 May 2017 11:55:10 -0700
+From: Liu Bo <bo.li.liu@oracle.com>
+Subject: Re: [PATCH v3] fstests: regression test for btrfs dio read repair
+Message-ID: <20170509185510.GA17312@lim.localdomain>
+Reply-To: bo.li.liu@oracle.com
+References: <1493400352-5845-1-git-send-email-bo.li.liu@oracle.com>
+ <20170503100836.GF7250@eguan.usersys.redhat.com>
+ <20170508195040.GD20619@lim.localdomain>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170508195040.GD20619@lim.localdomain>
 Sender: fstests-owner@vger.kernel.org
-To: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, linux-mm@kvack.org, jfs-discussion@lists.sourceforge.net, linux-xfs@vger.kernel.org, cluster-devel@redhat.com, linux-f2fs-devel@lists.sourceforge.net, v9fs-developer@lists.sourceforge.net, linux-nilfs@vger.kernel.org, linux-block@vger.kernel.org, fstests@vger.kernel.org
-Cc: dhowells@redhat.com, akpm@linux-foundation.org, hch@infradead.org, ross.zwisler@linux.intel.com, mawilcox@microsoft.com, jack@suse.com, viro@zeniv.linux.org.uk, corbet@lwn.net, neilb@suse.de, clm@fb.com, tytso@mit.edu, axboe@kernel.dk, josef@toxicpanda.com, hubcap@omnibond.com, rpeterso@redhat.com, bo.li.liu@oracle.com
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-I've numbered the new test as 999 for the moment so as not to collide with
-tests being added while I've been working on this. I can change that and
-resend if this should go in.
+On Mon, May 08, 2017 at 12:50:40PM -0700, Liu Bo wrote:
+> On Wed, May 03, 2017 at 06:08:36PM +0800, Eryu Guan wrote:
+> > On Fri, Apr 28, 2017 at 11:25:52AM -0600, Liu Bo wrote:
+> > > This case tests whether dio read can repair the bad copy if we have
+> > > a good copy.
+> > > 
+> > > Commit 2dabb3248453 ("Btrfs: Direct I/O read: Work on sectorsized blocks")
+> > > introduced the regression.
+> > > 
+> > > The upstream fix is
+> > > 	Btrfs: fix invalid dereference in btrfs_retry_endio
+> > > 
+> > > Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+> > 
+> > Sorry for the late review, and many thanks to Filipe's reviews! I agreed
+> > with Filipe that the common helpers can be placed in common/btrfs and/or
+> > common/rc files.
+> > 
+> > Some thoughts inline.
+> > 
+> > > ---
+> > > v2: - Add regression commit and the fix to the description
+> > >     - Use btrfs inspect-internal dump-tree to get rid of the dependence btrfs-map-logical
+> > >     - Add comments in several places
+> > > 
+> > > v3: - Add 'mkfs -b 1G' to limit filesystem size to 2G in raid1 profile so that
+> > >       we get a consistent output.
+> > > 
+> > >  tests/btrfs/140     | 167 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/btrfs/140.out |  39 ++++++++++++
+> > >  tests/btrfs/group   |   1 +
+> > >  3 files changed, 207 insertions(+)
+> > >  create mode 100755 tests/btrfs/140
+> > >  create mode 100644 tests/btrfs/140.out
+> > > 
+> > > diff --git a/tests/btrfs/140 b/tests/btrfs/140
+> > > new file mode 100755
+> > > index 0000000..dcd8807
+> > > --- /dev/null
+> > > +++ b/tests/btrfs/140
+> > > @@ -0,0 +1,167 @@
+> > > +#! /bin/bash
+> > > +# FS QA Test 140
+> > > +#
+> > > +# Regression test for btrfs DIO read's repair during read.
+> > > +#
+> > > +# Commit 2dabb3248453 ("Btrfs: Direct I/O read: Work on sectorsized blocks")
+> > > +# introduced the regression.
+> > > +# The upstream fix is
+> > > +# 	Btrfs: fix invalid dereference in btrfs_retry_endio
+> > > +#
+> > > +#-----------------------------------------------------------------------
+> > > +# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
+> > > +#
+> > > +# This program is free software; you can redistribute it and/or
+> > > +# modify it under the terms of the GNU General Public License as
+> > > +# published by the Free Software Foundation.
+> > > +#
+> > > +# This program is distributed in the hope that it would be useful,
+> > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > > +# GNU General Public License for more details.
+> > > +#
+> > > +# You should have received a copy of the GNU General Public License
+> > > +# along with this program; if not, write the Free Software Foundation,
+> > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > > +#-----------------------------------------------------------------------
+> > > +#
+> > > +
+> > > +seq=`basename $0`
+> > > +seqres=$RESULT_DIR/$seq
+> > > +echo "QA output created by $seq"
+> > > +
+> > > +here=`pwd`
+> > > +tmp=/tmp/$$
+> > > +status=1	# failure is the default!
+> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > +
+> > > +_cleanup()
+> > > +{
+> > > +	cd /
+> > > +	rm -f $tmp.*
+> > > +}
+> > > +
+> > > +# get standard environment, filters and checks
+> > > +. ./common/rc
+> > > +. ./common/filter
+> > > +
+> > > +# remove previous $seqres.full before test
+> > > +rm -f $seqres.full
+> > > +
+> > > +# real QA test starts here
+> > > +
+> > > +# Modify as appropriate.
+> > > +_supported_fs btrfs
+> > > +_supported_os Linux
+> > > +_require_scratch_dev_pool 2
+> > > +
+> > > +_require_btrfs_command inspect-internal dump-tree
+> > > +_require_command "$FILEFRAG_PROG" filefrag
+> > > +_require_odirect
+> > > +
+> > > +# helpe to convert 'file offset' to btrfs logical offset
+> > > +FILEFRAG_FILTER='
+> > > +	if (/blocks? of (\d+) bytes/) {
+> > > +		$blocksize = $1;
+> > > +		next
+> > > +	}
+> > > +	($ext, $logical, $physical, $length) =
+> > > +		(/^\s*(\d+):\s+(\d+)..\s+\d+:\s+(\d+)..\s+\d+:\s+(\d+):/)
+> > > +	or next;
+> > > +	($flags) = /.*:\s*(\S*)$/;
+> > > +	print $physical * $blocksize, "#",
+> > > +	      $length * $blocksize, "#",
+> > > +	      $logical * $blocksize, "#",
+> > > +	      $flags, " "'
+> >                       ^^^ "\n" so one extent per line?
+> > 
+> > This can be embedded in the filter function, like what _filter_mkfs
+> > does.
+> >
+> 
+> OK.
+> 
+> > > +
+> > > +# this makes filefrag output script readable by using a perl helper.
+> > > +# output is one extent per line, with three numbers separated by '#'
+> > > +# the numbers are: physical, length, logical (all in bytes)
+> > > +# sample output: "1234#10#5678" -> physical 1234, length 10, logical 5678
+> > > +_filter_extents()
+> > 
+> > Global functions start with underscore, local functions don't.
+> > 
+> 
+> OK.
+> 
+> > > +{
+> > > +	tee -a $seqres.full | $PERL_PROG -ne "$FILEFRAG_FILTER"
+> > 
+> > I don't think this tee belongs here, see below.
+> > 
+> > > +}
+> > > +
+> > > +_check_file_extents()
+> > > +{
+> > > +	cmd="filefrag -v $1"
+> > 
+> > $FILEFRAG_PROG
+> > 
+> > > +	echo "# $cmd" >> $seqres.full
+> > 
+> > Just call filefrag -v again to dump the filefrag output to $seqres.full
+> > 
+> 
+> Make sense.
+> 
+> > > +	out=`$cmd | _filter_extents`
+> > > +	if [ -z "$out" ]; then
+> > > +		return 1
+> > > +	fi
+> > > +	echo "after filter: $out" >> $seqres.full
+> > > +	echo $out
+> > > +	return 0
+> > > +}
+> > 
+> > Hmm, seems that all you want from all these filters is the logical byte
+> > of the first extent in the file. How about converting
+> > _check_file_extents to _filter_filefrag and put it in common/filter?
+> > And _get_physical can also be converted to _btrfs_get_physical and
+> > placed in common/btrfs
+> > e.g.
+> > 
+> > common/filter:
+> > # <comments>
+> > _filter_filefrag()
+> > {
+> > 	perl -ne '
+> > 	<all the perl filter code here>
+> > 	<like what _filter_mkfs does>
+> > 	'
+> > }
+> > 
+> > then
+> > 
+> > logical_in_btrfs=`$FILEFRAG -v $SCRATCH_MNT/foobar | _filter_filefrag | cut -d '#' -f 1`
+> > physical_on_scratch=`_btrfs_get_physical $logical_in_btrfs`
+> >
+> 
+> Sounds good.
 
-I'm working on a set of kernel patches to change how writeback errors
-are handled and reported in the kernel. Instead of reporting a
-writeback error to only the first fsync caller on the file, I aim
-to make the kernel report them once on every file description:
+_btrfs_get_physical in this testcase assumes that the test data has been written
+to a fixed position (the start position of the only data chunk), so it's not for
+generic use, I'd leave it for now instead of creating a new helper in
+common/btrfs.  After we have stable btrfs-map-block output format, we can build
+that helper on top of it.
 
-   http://www.spinics.net/lists/kernel/msg2504453.html
+Thanks,
 
-This patch adds a test for the new behavior, on local filesystems that
-can handle journalling to a separate device. Basically, open many fds to
-the same file, turn on dm_error, write to each of the fds, and then
-fsync them all to ensure that they all get an error back. Then, flip the
-device back to working, reopen the files and ensure that no error is
-reported.
-
-With the kernel patch series in place, ext4 and xfs now pass. btrfs still
-clears the error after the first fsync, so it seems like it still needs a
-bit of work.
-
-Jeff Layton (3):
-  generic: add a writeback error handling test
-  ext4: allow ext4 to use $SCRATCH_LOGDEV
-  btrfs: allow it to use $SCRATCH_LOGDEV
-
- common/dmerror        |  13 +++--
- common/rc             |   5 ++
- src/Makefile          |   2 +-
- src/fsync-err.c       | 138 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/999     |  75 +++++++++++++++++++++++++++
- tests/generic/999.out |   3 ++
- tests/generic/group   |   1 +
- tools/dmerror         |  47 +++++++++++++++++
- 8 files changed, 278 insertions(+), 6 deletions(-)
- create mode 100644 src/fsync-err.c
- create mode 100755 tests/generic/999
- create mode 100644 tests/generic/999.out
- create mode 100755 tools/dmerror
-
--- 
-2.9.3
-
+liubo
