@@ -1,243 +1,134 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:12916 "EHLO
+Received: from cn.fujitsu.com ([59.151.112.132]:50579 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751094AbdEIBhS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 8 May 2017 21:37:18 -0400
-Message-ID: <59111D46.9080902@cn.fujitsu.com>
-Date: Tue, 9 May 2017 09:37:10 +0800
+        with ESMTP id S1750877AbdEIHMV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 9 May 2017 03:12:21 -0400
+Message-ID: <59116BCD.2010104@cn.fujitsu.com>
+Date: Tue, 9 May 2017 15:12:13 +0800
 From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Subject: Re: [PATCH v4] Code to allow cros-compilation on chromeOS
-References: <CAMHSBOXJHiuadYEdbrpcD05dSAxw95RzfWa3mMo24X0Lf7Df3Q@mail.gmail.com> <20170419233348.33617-1-gwendal@chromium.org> <20170425130944.GX26397@eguan.usersys.redhat.com> <5910462F.7060704@cn.fujitsu.com> <20170508105014.GX7250@eguan.usersys.redhat.com> <59105437.40901@cn.fujitsu.com> <CAMHSBOVr+wuHeFQ=7zfHRKwNKhcji86nxmu5rueyyNrcLRX1dQ@mail.gmail.com>
-In-Reply-To: <CAMHSBOVr+wuHeFQ=7zfHRKwNKhcji86nxmu5rueyyNrcLRX1dQ@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+References: <CAMHSBOXJHiuadYEdbrpcD05dSAxw95RzfWa3mMo24X0Lf7Df3Q@mail.gmail.com> <20170419233348.33617-1-gwendal@chromium.org> <20170425130944.GX26397@eguan.usersys.redhat.com> <5910462F.7060704@cn.fujitsu.com> <20170508105014.GX7250@eguan.usersys.redhat.com>
+In-Reply-To: <20170508105014.GX7250@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Gwendal Grignou <gwendal@google.com>
-Cc: Eryu Guan <eguan@redhat.com>, Gwendal Grignou <gwendal@chromium.org>, fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>, Gwendal Grignou <gwendal@chromium.org>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 2017/05/09 5:22, Gwendal Grignou wrote:
-> Xiao,
->
-> Be sure to use a clean checkout from the git tree, Eyri has improved
-> patch v4 when submitting it.
->
-> Can you try:
-> make distclean
-> If it fails,  rm include/builddefs and make distclean again
->
-> And then send the output of:
-> autoreconf --verbose --include=m4"?
->
-Hi Gwendal
-
-My environmental infomation:
-=========================================================
-[root@RHEL6U9GA_Intel64 xfstests]# uname -r
-2.6.32-696.el6.x86_64
-[root@RHEL6U9GA_Intel64 ~]# rpm -q automake autoconf m4 libtool
-automake-1.11.1-4.el6.noarch
-autoconf-2.63-5.1.el6.noarch
-m4-1.4.13-5.el6.x86_64
-libtool-2.2.6-15.5.el6.x86_64
-=========================================================
-
-I tried to make distclean and autoreconf --verbose --include=m4", please 
-see the following output:
-===================================================================================
-[root@RHEL6U9GA_Intel64 xfstests]# make distclean
-[root@RHEL6U9GA_Intel64 xfstests]#
-[root@RHEL6U9GA_Intel64 xfstests]# autoreconf --include=m4 --verbose
-autoreconf: Entering directory `.'
-autoreconf: configure.ac: not using Gettext
-autoreconf: running: aclocal
-autoreconf: configure.ac: tracing
-autoreconf: configure.ac: not running libtoolize: --install not given
-autoreconf: running: /usr/bin/autoconf --include=m4
-configure.ac:5: error: possibly undefined macro: AC_PACKAGE_GLOBALS
-       If this token and others are legitimate, please use m4_pattern_allow.
-       See the Autoconf documentation.
-configure.ac:6: error: possibly undefined macro: AC_PACKAGE_UTILITIES
-configure.ac:43: error: possibly undefined macro: 
-AC_PACKAGE_NEED_UUIDCOMPARE
-configure.ac:48: error: possibly undefined macro: AC_PACKAGE_NEED_SYS_ACL_H
-configure.ac:49: error: possibly undefined macro: 
-AC_PACKAGE_NEED_ATTRIBUTES_H
-configure.ac:50: error: possibly undefined macro: AC_PACKAGE_WANT_NDBM
-configure.ac:51: error: possibly undefined macro: 
-AC_PACKAGE_NEED_IRIX_LIBHANDLE
-configure.ac:56: error: possibly undefined macro: AC_MULTILIB
-configure.ac:57: error: possibly undefined macro: AC_PACKAGE_NEED_XFS_XFS_H
-configure.ac:58: error: possibly undefined macro: AC_PACKAGE_WANT_LIBXFS_H
-configure.ac:59: error: possibly undefined macro: 
-AC_PACKAGE_WANT_XLOG_ASSIGN_LSN
-configure.ac:60: error: possibly undefined macro: AC_PACKAGE_NEED_XFS_XQM_H
-configure.ac:61: error: possibly undefined macro: 
-AC_PACKAGE_NEED_XFSCTL_MACRO
-configure.ac:62: error: possibly undefined macro: 
-AC_PACKAGE_NEED_XFS_HANDLE_H
-configure.ac:64: error: possibly undefined macro: 
-AC_PACKAGE_NEED_ATTRLIST_LIBHANDLE
-configure.ac:65: error: possibly undefined macro: 
-AC_PACKAGE_NEED_ATTR_XATTR_H
-configure.ac:67: error: possibly undefined macro: 
-AC_PACKAGE_WANT_ATTRLIST_LIBATTR
-configure.ac:68: error: possibly undefined macro: 
-AC_PACKAGE_NEED_GETXATTR_LIBATTR
-configure.ac:71: error: possibly undefined macro: 
-AC_PACKAGE_NEED_ACL_LIBACL_H
-configure.ac:72: error: possibly undefined macro: 
-AC_PACKAGE_NEED_ACLINIT_LIBACL
-configure.ac:74: error: possibly undefined macro: AC_PACKAGE_WANT_GDBM
-configure.ac:75: error: possibly undefined macro: AC_PACKAGE_WANT_AIO
-configure.ac:76: error: possibly undefined macro: AC_PACKAGE_WANT_DMAPI
-configure.ac:82: error: possibly undefined macro: AC_PACKAGE_WANT_SSL
-autoreconf: /usr/bin/autoconf failed with exit status: 1
-===================================================================================
-
-aclocal may not be called with -I m4 on RHEL6.9GA when adding --include 
-option to autoreconf.
-
-Thanks for your reply,
-Xiao Yang.
-> Thanks,
-> Gwendal.
->
->
-> On Mon, May 8, 2017 at 4:19 AM, Xiao Yang<yangx.jy@cn.fujitsu.com>  wrote:
->> On 2017/05/08 18:50, Eryu Guan wrote:
->>> On Mon, May 08, 2017 at 06:19:27PM +0800, Xiao Yang wrote:
->>>> On 2017/04/25 21:09, Eryu Guan wrote:
->>>>> On Wed, Apr 19, 2017 at 04:33:48PM -0700, Gwendal Grignou wrote:
->>>>>> - Request LIBTOOL to be used
->>>>>> - Set topbuildir based on a Makefile variable to call libtool
->>>>>> - Use /usr/local instead of /var for xfstest final location
->>>>>> - Move macros from aclocal.m4 to acinclude.m4, aclocal.m4 is
->>>>>> autogenerated.
->>>>>> - Use autoconf variables @prefix@, @exec_prefix@.
->>>>>>
->>>>>> The regular way of compiling xfstests - make - remains.
->>>>>> But it now runs autoreconf and libtoolize -i to produce a valid
->>>>>> configure.
->>>>>> Verified with 'make install --dry-run' that files are installed at the
->>>>>> same place.
->>>>>> Verified compiling in chromeOS chroot works as well.
->>>>>>
->>>>>> Signed-off-by: Gwendal Grignou<gwendal@chromium.org>
->>>>>> ---
->>>>>>
->>>>>> Changes in v2:
->>>>>> Removal of instal-sh, use of autoreconf
->>>>>>
->>>>>> Changes in v3:
->>>>>> Use of @exec_prefix@ variable, unify installation location.
->>>>>>
->>>>>> Changes in v4:
->>>>>> Add --install option to autoreconf so that aclocal is called with -I
->>>>>> m4.
->>>>>> Keep using AC_CONFIG_MACRO_DIR when autoconf is called directly.
->>>>>> With --install option and AC_CONFIG_MACRO_DIR undefined verify that
->>>>>> configure
->>>>>> still works.
->>>>> Thanks a lot for the update! v4 works for me too with RHEL6, RHEL7 and
->>>>> Fedora 25 hosts.
->>>>>
->>>> Hi Eryu
+On 2017/05/08 18:50, Eryu Guan wrote:
+> On Mon, May 08, 2017 at 06:19:27PM +0800, Xiao Yang wrote:
+>> On 2017/04/25 21:09, Eryu Guan wrote:
+>>> On Wed, Apr 19, 2017 at 04:33:48PM -0700, Gwendal Grignou wrote:
+>>>> - Request LIBTOOL to be used
+>>>> - Set topbuildir based on a Makefile variable to call libtool
+>>>> - Use /usr/local instead of /var for xfstest final location
+>>>> - Move macros from aclocal.m4 to acinclude.m4, aclocal.m4 is autogenerated.
+>>>> - Use autoconf variables @prefix@, @exec_prefix@.
 >>>>
->>>> When appling v4 patch, i still got the following error messgae on
->>>> RHEL6.9GA:
+>>>> The regular way of compiling xfstests - make - remains.
+>>>> But it now runs autoreconf and libtoolize -i to produce a valid
+>>>> configure.
+>>>> Verified with 'make install --dry-run' that files are installed at the
+>>>> same place.
+>>>> Verified compiling in chromeOS chroot works as well.
 >>>>
->>>> ============================================================================
->>>> [root@RHEL6U9GA_Intel64 xfstests]# make
->>>> autoreconf --include=m4
->>>> configure.ac:5: error: possibly undefined macro: AC_PACKAGE_GLOBALS
->>>> If this token and others are legitimate, please use m4_pattern_allow.
->>>> See the Autoconf documentation.
->>>> configure.ac:6: error: possibly undefined macro: AC_PACKAGE_UTILITIES
->>>> configure.ac:43: error: possibly undefined macro:
->>>> AC_PACKAGE_NEED_UUIDCOMPARE
->>>> configure.ac:48: error: possibly undefined macro:
->>>> AC_PACKAGE_NEED_SYS_ACL_H
->>>> configure.ac:49: error: possibly undefined macro:
->>>> AC_PACKAGE_NEED_ATTRIBUTES_H
->>>> configure.ac:50: error: possibly undefined macro: AC_PACKAGE_WANT_NDBM
->>>> configure.ac:51: error: possibly undefined macro:
->>>> AC_PACKAGE_NEED_IRIX_LIBHANDLE
->>>> configure.ac:56: error: possibly undefined macro: AC_MULTILIB
->>>> configure.ac:57: error: possibly undefined macro:
->>>> AC_PACKAGE_NEED_XFS_XFS_H
->>>> configure.ac:58: error: possibly undefined macro:
->>>> AC_PACKAGE_WANT_LIBXFS_H
->>>> configure.ac:59: error: possibly undefined macro:
->>>> AC_PACKAGE_WANT_XLOG_ASSIGN_LSN
->>>> configure.ac:60: error: possibly undefined macro:
->>>> AC_PACKAGE_NEED_XFS_XQM_H
->>>> configure.ac:61: error: possibly undefined macro:
->>>> AC_PACKAGE_NEED_XFSCTL_MACRO
->>>> configure.ac:62: error: possibly undefined macro:
->>>> AC_PACKAGE_NEED_XFS_HANDLE_H
->>>> configure.ac:64: error: possibly undefined macro:
->>>> AC_PACKAGE_NEED_ATTRLIST_LIBHANDLE
->>>> configure.ac:65: error: possibly undefined macro:
->>>> AC_PACKAGE_NEED_ATTR_XATTR_H
->>>> configure.ac:67: error: possibly undefined macro:
->>>> AC_PACKAGE_WANT_ATTRLIST_LIBATTR
->>>> configure.ac:68: error: possibly undefined macro:
->>>> AC_PACKAGE_NEED_GETXATTR_LIBATTR
->>>> configure.ac:71: error: possibly undefined macro:
->>>> AC_PACKAGE_NEED_ACL_LIBACL_H
->>>> configure.ac:72: error: possibly undefined macro:
->>>> AC_PACKAGE_NEED_ACLINIT_LIBACL
->>>> configure.ac:74: error: possibly undefined macro: AC_PACKAGE_WANT_GDBM
->>>> configure.ac:75: error: possibly undefined macro: AC_PACKAGE_WANT_AIO
->>>> configure.ac:76: error: possibly undefined macro: AC_PACKAGE_WANT_DMAPI
->>>> configure.ac:82: error: possibly undefined macro: AC_PACKAGE_WANT_SSL
->>>> autoreconf: /usr/bin/autoconf failed with exit status: 1
->>>> make: *** [configure] Error 1
->>>> [root@RHEL6U9GA_Intel64 xfstests]# uname -r
->>>> 2.6.32-696.el6.x86_64
->>>> [root@RHEL6U9GA_Intel64 ~]# rpm -q automake autoconf m4 libtool
->>>> automake-1.11.1-4.el6.noarch
->>>> autoconf-2.63-5.1.el6.noarch
->>>> m4-1.4.13-5.el6.x86_64
->>>> libtool-2.2.6-15.5.el6.x86_64
+>>>> Signed-off-by: Gwendal Grignou<gwendal@chromium.org>
+>>>> ---
 >>>>
->>>> ============================================================================
+>>>> Changes in v2:
+>>>> Removal of instal-sh, use of autoreconf
 >>>>
->>>> autoreconf with --include m4 may not fix undefined macro on RHEL6.9GA,
->>>> do you have the same issue?
->>> No, make works fine on my RHEL6.9 host. And this patch should be pushed
->>> to upstream already. Does 'make realclean' make any difference? Does a
->>> clean 'git clone' work for you?
+>>>> Changes in v3:
+>>>> Use of @exec_prefix@ variable, unify installation location.
+>>>>
+>>>> Changes in v4:
+>>>> Add --install option to autoreconf so that aclocal is called with -I m4.
+>>>> Keep using AC_CONFIG_MACRO_DIR when autoconf is called directly.
+>>>> With --install option and AC_CONFIG_MACRO_DIR undefined verify that configure
+>>>> still works.
+>>> Thanks a lot for the update! v4 works for me too with RHEL6, RHEL7 and
+>>> Fedora 25 hosts.
+>>>
 >> Hi Eryu
 >>
->> I cloned the upstream xfstests and cleaned before make on RHEL6.9GA, i
->> always got the same error on
->> both physical machine and virtual machine.  However it works fine on
->> RHEL7.3GA.
->>
->> I tried to use 'autoreconf --include=m4' directly, and also got the same
->> error:
->> =====================================================================
->> [root@RHEL6U9GA_Intel64 xfstests]# autoreconf --include=m4
+>> When appling v4 patch, i still got the following error messgae on RHEL6.9GA:
+>> ============================================================================
+>> [root@RHEL6U9GA_Intel64 xfstests]# make
+>> autoreconf --include=m4
 >> configure.ac:5: error: possibly undefined macro: AC_PACKAGE_GLOBALS
->>        If this token and others are legitimate, please use m4_pattern_allow.
->>        See the Autoconf documentation.
->> ......
->> =====================================================================
->> Do you have some suggestions about it?
+>> If this token and others are legitimate, please use m4_pattern_allow.
+>> See the Autoconf documentation.
+>> configure.ac:6: error: possibly undefined macro: AC_PACKAGE_UTILITIES
+>> configure.ac:43: error: possibly undefined macro:
+>> AC_PACKAGE_NEED_UUIDCOMPARE
+>> configure.ac:48: error: possibly undefined macro: AC_PACKAGE_NEED_SYS_ACL_H
+>> configure.ac:49: error: possibly undefined macro:
+>> AC_PACKAGE_NEED_ATTRIBUTES_H
+>> configure.ac:50: error: possibly undefined macro: AC_PACKAGE_WANT_NDBM
+>> configure.ac:51: error: possibly undefined macro:
+>> AC_PACKAGE_NEED_IRIX_LIBHANDLE
+>> configure.ac:56: error: possibly undefined macro: AC_MULTILIB
+>> configure.ac:57: error: possibly undefined macro: AC_PACKAGE_NEED_XFS_XFS_H
+>> configure.ac:58: error: possibly undefined macro: AC_PACKAGE_WANT_LIBXFS_H
+>> configure.ac:59: error: possibly undefined macro:
+>> AC_PACKAGE_WANT_XLOG_ASSIGN_LSN
+>> configure.ac:60: error: possibly undefined macro: AC_PACKAGE_NEED_XFS_XQM_H
+>> configure.ac:61: error: possibly undefined macro:
+>> AC_PACKAGE_NEED_XFSCTL_MACRO
+>> configure.ac:62: error: possibly undefined macro:
+>> AC_PACKAGE_NEED_XFS_HANDLE_H
+>> configure.ac:64: error: possibly undefined macro:
+>> AC_PACKAGE_NEED_ATTRLIST_LIBHANDLE
+>> configure.ac:65: error: possibly undefined macro:
+>> AC_PACKAGE_NEED_ATTR_XATTR_H
+>> configure.ac:67: error: possibly undefined macro:
+>> AC_PACKAGE_WANT_ATTRLIST_LIBATTR
+>> configure.ac:68: error: possibly undefined macro:
+>> AC_PACKAGE_NEED_GETXATTR_LIBATTR
+>> configure.ac:71: error: possibly undefined macro:
+>> AC_PACKAGE_NEED_ACL_LIBACL_H
+>> configure.ac:72: error: possibly undefined macro:
+>> AC_PACKAGE_NEED_ACLINIT_LIBACL
+>> configure.ac:74: error: possibly undefined macro: AC_PACKAGE_WANT_GDBM
+>> configure.ac:75: error: possibly undefined macro: AC_PACKAGE_WANT_AIO
+>> configure.ac:76: error: possibly undefined macro: AC_PACKAGE_WANT_DMAPI
+>> configure.ac:82: error: possibly undefined macro: AC_PACKAGE_WANT_SSL
+>> autoreconf: /usr/bin/autoconf failed with exit status: 1
+>> make: *** [configure] Error 1
+>> [root@RHEL6U9GA_Intel64 xfstests]# uname -r
+>> 2.6.32-696.el6.x86_64
+>> [root@RHEL6U9GA_Intel64 ~]# rpm -q automake autoconf m4 libtool
+>> automake-1.11.1-4.el6.noarch
+>> autoconf-2.63-5.1.el6.noarch
+>> m4-1.4.13-5.el6.x86_64
+>> libtool-2.2.6-15.5.el6.x86_64
+>> ============================================================================
 >>
->> Thanks,
->> Xiao Yang
->>> Thanks,
->>> Eryu
->>>
->>>
->>> .
->>>
->>
->>
+>> autoreconf with --include m4 may not fix undefined macro on RHEL6.9GA,
+>> do you have the same issue?
+> No, make works fine on my RHEL6.9 host. And this patch should be pushed
+> to upstream already. Does 'make realclean' make any difference? Does a
+> clean 'git clone' work for you?
 >
+> Thanks,
+> Eryu
+>
+>
+Hi Eryu and Gwendal,
+
+I found that autoreconf could not pass -I/--include option to aclocal in 
+autoconf-2.63-5.1.el6.noarch on RHEL6.9GA.
+This bug has been fixed by the following patch:
+http://git.savannah.gnu.org/gitweb/?p=autoconf.git;a=commit;h=44fbeef86d03f2b754a4444e38f38631ad318946
+
+This fixed patch was not merged into autoconf-2.63-5.1.el6.noarch.  I 
+tried to apply this patch into autoconf-2.63-5.1.el6.noarch,
+so make worked fine in xfstests on RHEL6.9GA.  How can we workaroud this 
+issue?
+
+Thanks,
+Xiao Yang
 > .
 >
 
