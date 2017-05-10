@@ -1,11 +1,11 @@
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35483 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753465AbdEJPVC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 10 May 2017 11:21:02 -0400
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:33896 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753539AbdEJPVG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 10 May 2017 11:21:06 -0400
 From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: [PATCH 3/9] bio-integrity:  bio_integrity_advance must update integrity seed
-Date: Wed, 10 May 2017 19:20:46 +0400
-Message-Id: <1494429652-9488-4-git-send-email-dmonakhov@openvz.org>
+Subject: [PATCH 6/9] T10: Move opencoded contants to common header
+Date: Wed, 10 May 2017 19:20:49 +0400
+Message-Id: <1494429652-9488-7-git-send-email-dmonakhov@openvz.org>
 In-Reply-To: <1494429652-9488-1-git-send-email-dmonakhov@openvz.org>
 References: <1494429652-9488-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
@@ -13,27 +13,126 @@ To: fstests@vger.kernel.org
 Cc: linux-fsdevel@vger.kernel.org, linux-block@vger.kernel.org, Dmitry Monakhov <dmonakhov@openvz.org>
 List-ID: <fstests@vger.kernel.org>
 
-SCSI drivers do care about bip_seed so we must update it accordingly.
-
-Reviewed-by: Hannes Reinecke <hare@suse.com>
-Reviewed-by: Christoph Hellwig <hch@lst.de>
 Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
 ---
- block/bio-integrity.c | 1 +
- 1 file changed, 1 insertion(+)
+ block/t10-pi.c                   | 9 +++------
+ drivers/scsi/lpfc/lpfc_scsi.c    | 5 +++--
+ drivers/scsi/qla2xxx/qla_isr.c   | 8 ++++----
+ drivers/target/target_core_sbc.c | 2 +-
+ include/linux/t10-pi.h           | 2 ++
+ 5 files changed, 13 insertions(+), 13 deletions(-)
 
-diff --git a/block/bio-integrity.c b/block/bio-integrity.c
-index b5009a8..82a6ffb 100644
---- a/block/bio-integrity.c
-+++ b/block/bio-integrity.c
-@@ -425,6 +425,7 @@ void bio_integrity_advance(struct bio *bio, unsigned int bytes_done)
- 	struct blk_integrity *bi = bdev_get_integrity(bio->bi_bdev);
- 	unsigned bytes = bio_integrity_bytes(bi, bytes_done >> 9);
+diff --git a/block/t10-pi.c b/block/t10-pi.c
+index 680c6d6..bb099f2 100644
+--- a/block/t10-pi.c
++++ b/block/t10-pi.c
+@@ -28,9 +28,6 @@
  
-+	bip->bip_iter.bi_sector += bytes_done >> 9;
- 	bvec_iter_advance(bip->bip_vec, &bip->bip_iter, bytes);
- }
- EXPORT_SYMBOL(bio_integrity_advance);
+ typedef __be16 (csum_fn) (void *, unsigned int);
+ 
+-static const __be16 APP_ESCAPE = (__force __be16) 0xffff;
+-static const __be32 REF_ESCAPE = (__force __be32) 0xffffffff;
+-
+ static __be16 t10_pi_crc_fn(void *data, unsigned int len)
+ {
+ 	return cpu_to_be16(crc_t10dif(data, len));
+@@ -82,7 +79,7 @@ static int t10_pi_verify(struct blk_integrity_iter *iter, csum_fn *fn,
+ 		switch (type) {
+ 		case 1:
+ 		case 2:
+-			if (pi->app_tag == APP_ESCAPE)
++			if (pi->app_tag == T10_PI_APP_ESCAPE)
+ 				goto next;
+ 
+ 			if (be32_to_cpu(pi->ref_tag) !=
+@@ -95,8 +92,8 @@ static int t10_pi_verify(struct blk_integrity_iter *iter, csum_fn *fn,
+ 			}
+ 			break;
+ 		case 3:
+-			if (pi->app_tag == APP_ESCAPE &&
+-			    pi->ref_tag == REF_ESCAPE)
++			if (pi->app_tag == T10_PI_APP_ESCAPE &&
++			    pi->ref_tag == T10_PI_REF_ESCAPE)
+ 				goto next;
+ 			break;
+ 		}
+diff --git a/drivers/scsi/lpfc/lpfc_scsi.c b/drivers/scsi/lpfc/lpfc_scsi.c
+index 54fd0c8..99d2e99 100644
+--- a/drivers/scsi/lpfc/lpfc_scsi.c
++++ b/drivers/scsi/lpfc/lpfc_scsi.c
+@@ -26,6 +26,7 @@
+ #include <linux/export.h>
+ #include <linux/delay.h>
+ #include <asm/unaligned.h>
++#include <linux/t10-pi.h>
+ #include <linux/crc-t10dif.h>
+ #include <net/checksum.h>
+ 
+@@ -2934,8 +2935,8 @@ lpfc_calc_bg_err(struct lpfc_hba *phba, struct lpfc_scsi_buf *lpfc_cmd)
+ 				 * First check to see if a protection data
+ 				 * check is valid
+ 				 */
+-				if ((src->ref_tag == 0xffffffff) ||
+-				    (src->app_tag == 0xffff)) {
++				if ((src->ref_tag == T10_PI_REF_ESCAPE) ||
++				    (src->app_tag == T10_PI_APP_ESCAPE)) {
+ 					start_ref_tag++;
+ 					goto skipit;
+ 				}
+diff --git a/drivers/scsi/qla2xxx/qla_isr.c b/drivers/scsi/qla2xxx/qla_isr.c
+index aac0350..7fa1712 100644
+--- a/drivers/scsi/qla2xxx/qla_isr.c
++++ b/drivers/scsi/qla2xxx/qla_isr.c
+@@ -1950,9 +1950,9 @@ qla2x00_handle_dif_error(srb_t *sp, struct sts_entry_24xx *sts24)
+ 	 * For type     3: ref & app tag is all 'f's
+ 	 * For type 0,1,2: app tag is all 'f's
+ 	 */
+-	if ((a_app_tag == 0xffff) &&
++	if ((a_app_tag == T10_PI_APP_ESCAPE) &&
+ 	    ((scsi_get_prot_type(cmd) != SCSI_PROT_DIF_TYPE3) ||
+-	     (a_ref_tag == 0xffffffff))) {
++	     (a_ref_tag == T10_PI_REF_ESCAPE))) {
+ 		uint32_t blocks_done, resid;
+ 		sector_t lba_s = scsi_get_lba(cmd);
+ 
+@@ -1994,9 +1994,9 @@ qla2x00_handle_dif_error(srb_t *sp, struct sts_entry_24xx *sts24)
+ 			spt = page_address(sg_page(sg)) + sg->offset;
+ 			spt += j;
+ 
+-			spt->app_tag = 0xffff;
++			spt->app_tag = T10_PI_APP_ESCAPE;
+ 			if (scsi_get_prot_type(cmd) == SCSI_PROT_DIF_TYPE3)
+-				spt->ref_tag = 0xffffffff;
++				spt->ref_tag = T10_PI_REF_ESCAPE;
+ 		}
+ 
+ 		return 0;
+diff --git a/drivers/target/target_core_sbc.c b/drivers/target/target_core_sbc.c
+index a0ad618..d542a12 100644
+--- a/drivers/target/target_core_sbc.c
++++ b/drivers/target/target_core_sbc.c
+@@ -1504,7 +1504,7 @@ sbc_dif_verify(struct se_cmd *cmd, sector_t start, unsigned int sectors,
+ 				 (unsigned long long)sector, sdt->guard_tag,
+ 				 sdt->app_tag, be32_to_cpu(sdt->ref_tag));
+ 
+-			if (sdt->app_tag == cpu_to_be16(0xffff)) {
++			if (sdt->app_tag == T10_PI_APP_ESCAPE) {
+ 				dsg_off += block_size;
+ 				goto next;
+ 			}
+diff --git a/include/linux/t10-pi.h b/include/linux/t10-pi.h
+index 9375d23..635a3c5 100644
+--- a/include/linux/t10-pi.h
++++ b/include/linux/t10-pi.h
+@@ -33,6 +33,8 @@ struct t10_pi_tuple {
+ 	__be32 ref_tag;		/* Target LBA or indirect LBA */
+ };
+ 
++#define T10_PI_APP_ESCAPE cpu_to_be16(0xffff)
++#define T10_PI_REF_ESCAPE cpu_to_be32(0xffffffff)
+ 
+ extern const struct blk_integrity_profile t10_pi_type1_crc;
+ extern const struct blk_integrity_profile t10_pi_type1_ip;
 -- 
 2.9.3
 
