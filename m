@@ -1,11 +1,11 @@
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:35531 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753526AbdEJPVE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 10 May 2017 11:21:04 -0400
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:35752 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753533AbdEJPVK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 10 May 2017 11:21:10 -0400
 From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: [PATCH 4/9] bio-integrity: fix interface for bio_integrity_trim
-Date: Wed, 10 May 2017 19:20:47 +0400
-Message-Id: <1494429652-9488-5-git-send-email-dmonakhov@openvz.org>
+Subject: [PATCH 8/9] bio: add bvec_iter rewind API
+Date: Wed, 10 May 2017 19:20:51 +0400
+Message-Id: <1494429652-9488-9-git-send-email-dmonakhov@openvz.org>
 In-Reply-To: <1494429652-9488-1-git-send-email-dmonakhov@openvz.org>
 References: <1494429652-9488-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
@@ -13,112 +13,116 @@ To: fstests@vger.kernel.org
 Cc: linux-fsdevel@vger.kernel.org, linux-block@vger.kernel.org, Dmitry Monakhov <dmonakhov@openvz.org>
 List-ID: <fstests@vger.kernel.org>
 
-bio_integrity_trim inherent it's interface from bio_trim and accept
-offset and size, but this API is error prone because data offset
-must always be insync with bio's data offset. That is why we have
-integrity update hook in bio_advance()
+Some ->bi_end_io handlers (for example: pi_verify or decrypt handlers)
+need to know original data vector, but after bio traverse io-stack it may
+be advanced, splited and relocated many times so it is hard to guess
+original iterator. Let's add 'bi_done' conter which accounts number
+of bytes iterator was advanced during it's evolution. Later end_io handler
+may easily restore original iterator by rewinding iterator to
+iter->bi_done.
 
-So only meaningful values are: offset == 0, sectors == bio_sectors(bio)
-Let's just remove them completely.
+Note: this change makes sizeof (struct bvec_iter) multiple to 8
 
 Reviewed-by: Hannes Reinecke <hare@suse.com>
 Reviewed-by: Christoph Hellwig <hch@lst.de>
-Reviewed-by: Martin K. Petersen <martin.petersen@oracle.com>
 Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
 ---
- block/bio-integrity.c | 11 ++---------
- block/bio.c           |  4 ++--
- drivers/md/dm.c       |  2 +-
- include/linux/bio.h   |  5 ++---
- 4 files changed, 7 insertions(+), 15 deletions(-)
+ include/linux/bio.h  | 21 +++++++++++++++++++--
+ include/linux/bvec.h | 27 +++++++++++++++++++++++++++
+ 2 files changed, 46 insertions(+), 2 deletions(-)
 
-diff --git a/block/bio-integrity.c b/block/bio-integrity.c
-index 82a6ffb..6170dad 100644
---- a/block/bio-integrity.c
-+++ b/block/bio-integrity.c
-@@ -433,22 +433,15 @@ EXPORT_SYMBOL(bio_integrity_advance);
- /**
-  * bio_integrity_trim - Trim integrity vector
-  * @bio:	bio whose integrity vector to update
-- * @offset:	offset to first data sector
-- * @sectors:	number of data sectors
-  *
-  * Description: Used to trim the integrity vector in a cloned bio.
-- * The ivec will be advanced corresponding to 'offset' data sectors
-- * and the length will be truncated corresponding to 'len' data
-- * sectors.
-  */
--void bio_integrity_trim(struct bio *bio, unsigned int offset,
--			unsigned int sectors)
-+void bio_integrity_trim(struct bio *bio)
- {
- 	struct bio_integrity_payload *bip = bio_integrity(bio);
- 	struct blk_integrity *bi = bdev_get_integrity(bio->bi_bdev);
- 
--	bio_integrity_advance(bio, offset << 9);
--	bip->bip_iter.bi_size = bio_integrity_bytes(bi, sectors);
-+	bip->bip_iter.bi_size = bio_integrity_bytes(bi, bio_sectors(bio));
- }
- EXPORT_SYMBOL(bio_integrity_trim);
- 
-diff --git a/block/bio.c b/block/bio.c
-index 2f01f1b..d42e602 100644
---- a/block/bio.c
-+++ b/block/bio.c
-@@ -1857,7 +1857,7 @@ struct bio *bio_split(struct bio *bio, int sectors,
- 	split->bi_iter.bi_size = sectors << 9;
- 
- 	if (bio_integrity(split))
--		bio_integrity_trim(split, 0, sectors);
-+		bio_integrity_trim(split);
- 
- 	bio_advance(bio, split->bi_iter.bi_size);
- 
-@@ -1891,7 +1891,7 @@ void bio_trim(struct bio *bio, int offset, int size)
- 	bio->bi_iter.bi_size = size;
- 
- 	if (bio_integrity(bio))
--		bio_integrity_trim(bio, 0, size);
-+		bio_integrity_trim(bio);
- 
- }
- EXPORT_SYMBOL_GPL(bio_trim);
-diff --git a/drivers/md/dm.c b/drivers/md/dm.c
-index 6ef9500..35e5f57 100644
---- a/drivers/md/dm.c
-+++ b/drivers/md/dm.c
-@@ -1146,7 +1146,7 @@ static int clone_bio(struct dm_target_io *tio, struct bio *bio,
- 	clone->bi_iter.bi_size = to_bytes(len);
- 
- 	if (unlikely(bio_integrity(bio) != NULL))
--		bio_integrity_trim(clone, 0, len);
-+		bio_integrity_trim(clone);
- 
- 	return 0;
- }
 diff --git a/include/linux/bio.h b/include/linux/bio.h
-index d1b04b0..5834186 100644
+index 643ecba..ab812a0 100644
 --- a/include/linux/bio.h
 +++ b/include/linux/bio.h
-@@ -724,7 +724,7 @@ extern bool bio_integrity_enabled(struct bio *bio);
- extern int bio_integrity_prep(struct bio *);
- extern void bio_integrity_endio(struct bio *);
- extern void bio_integrity_advance(struct bio *, unsigned int);
--extern void bio_integrity_trim(struct bio *, unsigned int, unsigned int);
-+extern void bio_integrity_trim(struct bio *);
- extern int bio_integrity_clone(struct bio *, struct bio *, gfp_t);
- extern int bioset_integrity_create(struct bio_set *, int);
- extern void bioset_integrity_free(struct bio_set *);
-@@ -774,8 +774,7 @@ static inline void bio_integrity_advance(struct bio *bio,
- 	return;
+@@ -166,9 +166,10 @@ static inline void bio_advance_iter(struct bio *bio, struct bvec_iter *iter,
+ {
+ 	iter->bi_sector += bytes >> 9;
+ 
+-	if (bio_no_advance_iter(bio))
++	if (bio_no_advance_iter(bio)) {
+ 		iter->bi_size -= bytes;
+-	else {
++		iter->bi_done += bytes;
++	} else {
+ 		int err;
+ 
+ 		err = bvec_iter_advance(bio->bi_io_vec, iter, bytes);
+@@ -176,6 +177,22 @@ static inline void bio_advance_iter(struct bio *bio, struct bvec_iter *iter,
+ 	}
  }
  
--static inline void bio_integrity_trim(struct bio *bio, unsigned int offset,
--				      unsigned int sectors)
-+static inline void bio_integrity_trim(struct bio *bio)
- {
- 	return;
++static inline int bio_rewind_iter(struct bio *bio, struct bvec_iter *iter,
++				    unsigned int bytes)
++{
++	int err = 0;
++
++	iter->bi_sector -= bytes >> 9;
++
++	if (bio_no_advance_iter(bio)) {
++		iter->bi_size += bytes;
++		iter->bi_done -= bytes;
++	} else {
++		err = bvec_iter_rewind(bio->bi_io_vec, iter, bytes);
++	}
++	return err;
++}
++
+ #define __bio_for_each_segment(bvl, bio, iter, start)			\
+ 	for (iter = (start);						\
+ 	     (iter).bi_size &&						\
+diff --git a/include/linux/bvec.h b/include/linux/bvec.h
+index 984a7a8..8cfe4d6 100644
+--- a/include/linux/bvec.h
++++ b/include/linux/bvec.h
+@@ -40,6 +40,8 @@ struct bvec_iter {
+ 
+ 	unsigned int		bi_idx;		/* current index into bvl_vec */
+ 
++	unsigned int            bi_done;	/* number of bytes completed */
++
+ 	unsigned int            bi_bvec_done;	/* number of bytes completed in
+ 						   current bvec */
+ };
+@@ -84,6 +86,7 @@ static inline int bvec_iter_advance(const struct bio_vec *bv,
+ 		bytes -= len;
+ 		iter->bi_size -= len;
+ 		iter->bi_bvec_done += len;
++		iter->bi_done += len;
+ 
+ 		if (iter->bi_bvec_done == __bvec_iter_bvec(bv, *iter)->bv_len) {
+ 			iter->bi_bvec_done = 0;
+@@ -93,6 +96,30 @@ static inline int bvec_iter_advance(const struct bio_vec *bv,
+ 	return 0;
  }
+ 
++static inline int bvec_iter_rewind(const struct bio_vec *bv,
++				     struct bvec_iter *iter,
++				     unsigned int bytes)
++{
++	while (bytes) {
++		unsigned len = min(bytes, iter->bi_bvec_done);
++
++		if (iter->bi_bvec_done == 0) {
++			if (WARN_ONCE(iter->bi_idx == 0,
++				      "Attempted to rewind iter beyond "
++				      "bvec's boundaries\n")) {
++				return -EINVAL;
++			}
++			iter->bi_idx--;
++			iter->bi_bvec_done = __bvec_iter_bvec(bv, *iter)->bv_len;
++			continue;
++		}
++		bytes -= len;
++		iter->bi_size += len;
++		iter->bi_bvec_done -= len;
++	}
++	return 0;
++}
++
+ #define for_each_bvec(bvl, bio_vec, iter, start)			\
+ 	for (iter = (start);						\
+ 	     (iter).bi_size &&						\
 -- 
 2.9.3
 
