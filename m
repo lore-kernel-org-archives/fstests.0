@@ -1,51 +1,67 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:42210 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751471AbdEIS54 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 9 May 2017 14:57:56 -0400
-From: Liu Bo <bo.li.liu@oracle.com>
-Subject: [PATCH 0/6] Regression test for btrfs read repair
-Date: Tue,  9 May 2017 11:56:05 -0600
-Message-Id: <1494352571-17199-1-git-send-email-bo.li.liu@oracle.com>
+Received: from mx1.redhat.com ([209.132.183.28]:55334 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751829AbdEJKkf (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 10 May 2017 06:40:35 -0400
+Date: Wed, 10 May 2017 18:40:32 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 2/6] fstests: add _get_current_dmesg
+Message-ID: <20170510104032.GA7250@eguan.usersys.redhat.com>
+References: <1494352571-17199-1-git-send-email-bo.li.liu@oracle.com>
+ <1494352571-17199-3-git-send-email-bo.li.liu@oracle.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1494352571-17199-3-git-send-email-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@gmail.com>, Eryu Guan <eguan@redhat.com>
+To: Liu Bo <bo.li.liu@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-This set is adding four regression test case for btrfs read repair, and both
-directIO read and buffered read are tested.
+On Tue, May 09, 2017 at 11:56:07AM -0600, Liu Bo wrote:
+> _get_current_dmesg can be used to grep customized pattern.
+> 
+> Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
 
-Patch 1 and 2 is adding two helpers to summarize the common code among the
-following test cases in patch 3-6. 
+I can't apply this patch on top of current master, perhaps it needs a
+rebase :)
 
-Liu Bo (6):
-  fstests: add _filter_filefrag
-  fstests: add _get_current_dmesg
-  fstests: regression test for btrfs dio read repair
-  fstests: regression test for btrfs buffered read's repair
-  fstests: regression test for nocsum dio read's repair
-  fstests: regression test for nocsum buffered read's repair
+> ---
+>  common/rc | 9 +++++++--
+>  1 file changed, 7 insertions(+), 2 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 78a2101..111ed69 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3215,6 +3215,12 @@ _get_device_size()
+>  	grep `_short_dev $1` /proc/partitions | awk '{print $3}'
+>  }
+>  
+> +# get current dmesg log
+> +_get_current_dmesg()
+> +{
+> +	dmesg | tac | sed -ne "0,\#run fstests $seqnum at $date_time#p" | tac
+> +}
+> +
+>  # check dmesg log for WARNING/Oops/etc.
+>  _check_dmesg()
+>  {
+> @@ -3230,8 +3236,7 @@ _check_dmesg()
+>  
+>  	# search the dmesg log of last run of $seqnum for possible failures
+>  	# use sed \cregexpc address type, since $seqnum contains "/"
 
- common/filter       |  19 +++++++
- common/rc           |   9 ++-
- tests/btrfs/140     | 115 ++++++++++++++++++++++++++++++++++++++
- tests/btrfs/140.out |  39 +++++++++++++
- tests/btrfs/141     | 116 +++++++++++++++++++++++++++++++++++++++
- tests/btrfs/141.out |  39 +++++++++++++
- tests/btrfs/142     | 137 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/142.out |  39 +++++++++++++
- tests/btrfs/143     | 155 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/143.out |  39 +++++++++++++
- tests/btrfs/group   |   4 ++
- 11 files changed, 709 insertions(+), 2 deletions(-)
- create mode 100755 tests/btrfs/140
- create mode 100644 tests/btrfs/140.out
- create mode 100755 tests/btrfs/141
- create mode 100644 tests/btrfs/141.out
- create mode 100755 tests/btrfs/142
- create mode 100644 tests/btrfs/142.out
- create mode 100755 tests/btrfs/143
- create mode 100644 tests/btrfs/143.out
+This second line of comment should go to _get_current_dmesg.
 
--- 
-2.5.0
+Thanks,
+Eryu
 
+> -	dmesg | tac | sed -ne "0,\#run fstests $seqnum at $date_time#p" | \
+> -		tac | $filter >$seqres.dmesg
+> +	_get_current_dmesg | $filter >$seqres.dmesg
+>  	grep -q -e "kernel BUG at" \
+>  	     -e "WARNING:" \
+>  	     -e "BUG:" \
+> -- 
+> 2.5.0
+> 
