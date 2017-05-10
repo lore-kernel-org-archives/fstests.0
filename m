@@ -1,11 +1,11 @@
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:33896 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753539AbdEJPVG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 10 May 2017 11:21:06 -0400
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:35531 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753526AbdEJPVE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 10 May 2017 11:21:04 -0400
 From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: [PATCH 6/9] T10: Move opencoded contants to common header
-Date: Wed, 10 May 2017 19:20:49 +0400
-Message-Id: <1494429652-9488-7-git-send-email-dmonakhov@openvz.org>
+Subject: [PATCH 4/9] bio-integrity: fix interface for bio_integrity_trim
+Date: Wed, 10 May 2017 19:20:47 +0400
+Message-Id: <1494429652-9488-5-git-send-email-dmonakhov@openvz.org>
 In-Reply-To: <1494429652-9488-1-git-send-email-dmonakhov@openvz.org>
 References: <1494429652-9488-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
@@ -13,126 +13,112 @@ To: fstests@vger.kernel.org
 Cc: linux-fsdevel@vger.kernel.org, linux-block@vger.kernel.org, Dmitry Monakhov <dmonakhov@openvz.org>
 List-ID: <fstests@vger.kernel.org>
 
+bio_integrity_trim inherent it's interface from bio_trim and accept
+offset and size, but this API is error prone because data offset
+must always be insync with bio's data offset. That is why we have
+integrity update hook in bio_advance()
+
+So only meaningful values are: offset == 0, sectors == bio_sectors(bio)
+Let's just remove them completely.
+
+Reviewed-by: Hannes Reinecke <hare@suse.com>
+Reviewed-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: Martin K. Petersen <martin.petersen@oracle.com>
 Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
 ---
- block/t10-pi.c                   | 9 +++------
- drivers/scsi/lpfc/lpfc_scsi.c    | 5 +++--
- drivers/scsi/qla2xxx/qla_isr.c   | 8 ++++----
- drivers/target/target_core_sbc.c | 2 +-
- include/linux/t10-pi.h           | 2 ++
- 5 files changed, 13 insertions(+), 13 deletions(-)
+ block/bio-integrity.c | 11 ++---------
+ block/bio.c           |  4 ++--
+ drivers/md/dm.c       |  2 +-
+ include/linux/bio.h   |  5 ++---
+ 4 files changed, 7 insertions(+), 15 deletions(-)
 
-diff --git a/block/t10-pi.c b/block/t10-pi.c
-index 680c6d6..bb099f2 100644
---- a/block/t10-pi.c
-+++ b/block/t10-pi.c
-@@ -28,9 +28,6 @@
- 
- typedef __be16 (csum_fn) (void *, unsigned int);
- 
--static const __be16 APP_ESCAPE = (__force __be16) 0xffff;
--static const __be32 REF_ESCAPE = (__force __be32) 0xffffffff;
--
- static __be16 t10_pi_crc_fn(void *data, unsigned int len)
+diff --git a/block/bio-integrity.c b/block/bio-integrity.c
+index 82a6ffb..6170dad 100644
+--- a/block/bio-integrity.c
++++ b/block/bio-integrity.c
+@@ -433,22 +433,15 @@ EXPORT_SYMBOL(bio_integrity_advance);
+ /**
+  * bio_integrity_trim - Trim integrity vector
+  * @bio:	bio whose integrity vector to update
+- * @offset:	offset to first data sector
+- * @sectors:	number of data sectors
+  *
+  * Description: Used to trim the integrity vector in a cloned bio.
+- * The ivec will be advanced corresponding to 'offset' data sectors
+- * and the length will be truncated corresponding to 'len' data
+- * sectors.
+  */
+-void bio_integrity_trim(struct bio *bio, unsigned int offset,
+-			unsigned int sectors)
++void bio_integrity_trim(struct bio *bio)
  {
- 	return cpu_to_be16(crc_t10dif(data, len));
-@@ -82,7 +79,7 @@ static int t10_pi_verify(struct blk_integrity_iter *iter, csum_fn *fn,
- 		switch (type) {
- 		case 1:
- 		case 2:
--			if (pi->app_tag == APP_ESCAPE)
-+			if (pi->app_tag == T10_PI_APP_ESCAPE)
- 				goto next;
+ 	struct bio_integrity_payload *bip = bio_integrity(bio);
+ 	struct blk_integrity *bi = bdev_get_integrity(bio->bi_bdev);
  
- 			if (be32_to_cpu(pi->ref_tag) !=
-@@ -95,8 +92,8 @@ static int t10_pi_verify(struct blk_integrity_iter *iter, csum_fn *fn,
- 			}
- 			break;
- 		case 3:
--			if (pi->app_tag == APP_ESCAPE &&
--			    pi->ref_tag == REF_ESCAPE)
-+			if (pi->app_tag == T10_PI_APP_ESCAPE &&
-+			    pi->ref_tag == T10_PI_REF_ESCAPE)
- 				goto next;
- 			break;
- 		}
-diff --git a/drivers/scsi/lpfc/lpfc_scsi.c b/drivers/scsi/lpfc/lpfc_scsi.c
-index 54fd0c8..99d2e99 100644
---- a/drivers/scsi/lpfc/lpfc_scsi.c
-+++ b/drivers/scsi/lpfc/lpfc_scsi.c
-@@ -26,6 +26,7 @@
- #include <linux/export.h>
- #include <linux/delay.h>
- #include <asm/unaligned.h>
-+#include <linux/t10-pi.h>
- #include <linux/crc-t10dif.h>
- #include <net/checksum.h>
+-	bio_integrity_advance(bio, offset << 9);
+-	bip->bip_iter.bi_size = bio_integrity_bytes(bi, sectors);
++	bip->bip_iter.bi_size = bio_integrity_bytes(bi, bio_sectors(bio));
+ }
+ EXPORT_SYMBOL(bio_integrity_trim);
  
-@@ -2934,8 +2935,8 @@ lpfc_calc_bg_err(struct lpfc_hba *phba, struct lpfc_scsi_buf *lpfc_cmd)
- 				 * First check to see if a protection data
- 				 * check is valid
- 				 */
--				if ((src->ref_tag == 0xffffffff) ||
--				    (src->app_tag == 0xffff)) {
-+				if ((src->ref_tag == T10_PI_REF_ESCAPE) ||
-+				    (src->app_tag == T10_PI_APP_ESCAPE)) {
- 					start_ref_tag++;
- 					goto skipit;
- 				}
-diff --git a/drivers/scsi/qla2xxx/qla_isr.c b/drivers/scsi/qla2xxx/qla_isr.c
-index aac0350..7fa1712 100644
---- a/drivers/scsi/qla2xxx/qla_isr.c
-+++ b/drivers/scsi/qla2xxx/qla_isr.c
-@@ -1950,9 +1950,9 @@ qla2x00_handle_dif_error(srb_t *sp, struct sts_entry_24xx *sts24)
- 	 * For type     3: ref & app tag is all 'f's
- 	 * For type 0,1,2: app tag is all 'f's
- 	 */
--	if ((a_app_tag == 0xffff) &&
-+	if ((a_app_tag == T10_PI_APP_ESCAPE) &&
- 	    ((scsi_get_prot_type(cmd) != SCSI_PROT_DIF_TYPE3) ||
--	     (a_ref_tag == 0xffffffff))) {
-+	     (a_ref_tag == T10_PI_REF_ESCAPE))) {
- 		uint32_t blocks_done, resid;
- 		sector_t lba_s = scsi_get_lba(cmd);
+diff --git a/block/bio.c b/block/bio.c
+index 2f01f1b..d42e602 100644
+--- a/block/bio.c
++++ b/block/bio.c
+@@ -1857,7 +1857,7 @@ struct bio *bio_split(struct bio *bio, int sectors,
+ 	split->bi_iter.bi_size = sectors << 9;
  
-@@ -1994,9 +1994,9 @@ qla2x00_handle_dif_error(srb_t *sp, struct sts_entry_24xx *sts24)
- 			spt = page_address(sg_page(sg)) + sg->offset;
- 			spt += j;
+ 	if (bio_integrity(split))
+-		bio_integrity_trim(split, 0, sectors);
++		bio_integrity_trim(split);
  
--			spt->app_tag = 0xffff;
-+			spt->app_tag = T10_PI_APP_ESCAPE;
- 			if (scsi_get_prot_type(cmd) == SCSI_PROT_DIF_TYPE3)
--				spt->ref_tag = 0xffffffff;
-+				spt->ref_tag = T10_PI_REF_ESCAPE;
- 		}
+ 	bio_advance(bio, split->bi_iter.bi_size);
  
- 		return 0;
-diff --git a/drivers/target/target_core_sbc.c b/drivers/target/target_core_sbc.c
-index a0ad618..d542a12 100644
---- a/drivers/target/target_core_sbc.c
-+++ b/drivers/target/target_core_sbc.c
-@@ -1504,7 +1504,7 @@ sbc_dif_verify(struct se_cmd *cmd, sector_t start, unsigned int sectors,
- 				 (unsigned long long)sector, sdt->guard_tag,
- 				 sdt->app_tag, be32_to_cpu(sdt->ref_tag));
+@@ -1891,7 +1891,7 @@ void bio_trim(struct bio *bio, int offset, int size)
+ 	bio->bi_iter.bi_size = size;
  
--			if (sdt->app_tag == cpu_to_be16(0xffff)) {
-+			if (sdt->app_tag == T10_PI_APP_ESCAPE) {
- 				dsg_off += block_size;
- 				goto next;
- 			}
-diff --git a/include/linux/t10-pi.h b/include/linux/t10-pi.h
-index 9375d23..635a3c5 100644
---- a/include/linux/t10-pi.h
-+++ b/include/linux/t10-pi.h
-@@ -33,6 +33,8 @@ struct t10_pi_tuple {
- 	__be32 ref_tag;		/* Target LBA or indirect LBA */
- };
+ 	if (bio_integrity(bio))
+-		bio_integrity_trim(bio, 0, size);
++		bio_integrity_trim(bio);
  
-+#define T10_PI_APP_ESCAPE cpu_to_be16(0xffff)
-+#define T10_PI_REF_ESCAPE cpu_to_be32(0xffffffff)
+ }
+ EXPORT_SYMBOL_GPL(bio_trim);
+diff --git a/drivers/md/dm.c b/drivers/md/dm.c
+index 6ef9500..35e5f57 100644
+--- a/drivers/md/dm.c
++++ b/drivers/md/dm.c
+@@ -1146,7 +1146,7 @@ static int clone_bio(struct dm_target_io *tio, struct bio *bio,
+ 	clone->bi_iter.bi_size = to_bytes(len);
  
- extern const struct blk_integrity_profile t10_pi_type1_crc;
- extern const struct blk_integrity_profile t10_pi_type1_ip;
+ 	if (unlikely(bio_integrity(bio) != NULL))
+-		bio_integrity_trim(clone, 0, len);
++		bio_integrity_trim(clone);
+ 
+ 	return 0;
+ }
+diff --git a/include/linux/bio.h b/include/linux/bio.h
+index d1b04b0..5834186 100644
+--- a/include/linux/bio.h
++++ b/include/linux/bio.h
+@@ -724,7 +724,7 @@ extern bool bio_integrity_enabled(struct bio *bio);
+ extern int bio_integrity_prep(struct bio *);
+ extern void bio_integrity_endio(struct bio *);
+ extern void bio_integrity_advance(struct bio *, unsigned int);
+-extern void bio_integrity_trim(struct bio *, unsigned int, unsigned int);
++extern void bio_integrity_trim(struct bio *);
+ extern int bio_integrity_clone(struct bio *, struct bio *, gfp_t);
+ extern int bioset_integrity_create(struct bio_set *, int);
+ extern void bioset_integrity_free(struct bio_set *);
+@@ -774,8 +774,7 @@ static inline void bio_integrity_advance(struct bio *bio,
+ 	return;
+ }
+ 
+-static inline void bio_integrity_trim(struct bio *bio, unsigned int offset,
+-				      unsigned int sectors)
++static inline void bio_integrity_trim(struct bio *bio)
+ {
+ 	return;
+ }
 -- 
 2.9.3
 
