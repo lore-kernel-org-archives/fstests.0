@@ -1,11 +1,11 @@
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:35752 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753533AbdEJPVK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 10 May 2017 11:21:10 -0400
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:33280 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753527AbdEJPVF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 10 May 2017 11:21:05 -0400
 From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: [PATCH 8/9] bio: add bvec_iter rewind API
-Date: Wed, 10 May 2017 19:20:51 +0400
-Message-Id: <1494429652-9488-9-git-send-email-dmonakhov@openvz.org>
+Subject: [PATCH 1/9] bio-integrity: Do not allocate integrity context for bio w/o data
+Date: Wed, 10 May 2017 19:20:44 +0400
+Message-Id: <1494429652-9488-2-git-send-email-dmonakhov@openvz.org>
 In-Reply-To: <1494429652-9488-1-git-send-email-dmonakhov@openvz.org>
 References: <1494429652-9488-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
@@ -13,116 +13,63 @@ To: fstests@vger.kernel.org
 Cc: linux-fsdevel@vger.kernel.org, linux-block@vger.kernel.org, Dmitry Monakhov <dmonakhov@openvz.org>
 List-ID: <fstests@vger.kernel.org>
 
-Some ->bi_end_io handlers (for example: pi_verify or decrypt handlers)
-need to know original data vector, but after bio traverse io-stack it may
-be advanced, splited and relocated many times so it is hard to guess
-original iterator. Let's add 'bi_done' conter which accounts number
-of bytes iterator was advanced during it's evolution. Later end_io handler
-may easily restore original iterator by rewinding iterator to
-iter->bi_done.
+If bio has no data, such as ones from blkdev_issue_flush(),
+then we have nothing to protect.
 
-Note: this change makes sizeof (struct bvec_iter) multiple to 8
+This patch prevent bugon like follows:
 
-Reviewed-by: Hannes Reinecke <hare@suse.com>
+kfree_debugcheck: out of range ptr ac1fa1d106742a5ah
+kernel BUG at mm/slab.c:2773!
+invalid opcode: 0000 [#1] SMP
+Modules linked in: bcache
+CPU: 0 PID: 4428 Comm: xfs_io Tainted: G        W       4.11.0-rc4-ext4-00041-g2ef0043-dirty #43
+Hardware name: Virtuozzo KVM, BIOS seabios-1.7.5-11.vz7.4 04/01/2014
+task: ffff880137786440 task.stack: ffffc90000ba8000
+RIP: 0010:kfree_debugcheck+0x25/0x2a
+RSP: 0018:ffffc90000babde0 EFLAGS: 00010082
+RAX: 0000000000000034 RBX: ac1fa1d106742a5a RCX: 0000000000000007
+RDX: 0000000000000000 RSI: 0000000000000000 RDI: ffff88013f3ccb40
+RBP: ffffc90000babde8 R08: 0000000000000000 R09: 0000000000000000
+R10: 00000000fcb76420 R11: 00000000725172ed R12: 0000000000000282
+R13: ffffffff8150e766 R14: ffff88013a145e00 R15: 0000000000000001
+FS:  00007fb09384bf40(0000) GS:ffff88013f200000(0000) knlGS:0000000000000000
+CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+CR2: 00007fd0172f9e40 CR3: 0000000137fa9000 CR4: 00000000000006f0
+Call Trace:
+ kfree+0xc8/0x1b3
+ bio_integrity_free+0xc3/0x16b
+ bio_free+0x25/0x66
+ bio_put+0x14/0x26
+ blkdev_issue_flush+0x7a/0x85
+ blkdev_fsync+0x35/0x42
+ vfs_fsync_range+0x8e/0x9f
+ vfs_fsync+0x1c/0x1e
+ do_fsync+0x31/0x4a
+ SyS_fsync+0x10/0x14
+ entry_SYSCALL_64_fastpath+0x1f/0xc2
+
 Reviewed-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: Hannes Reinecke <hare@suse.com>
+Reviewed-by: Martin K. Petersen <martin.petersen@oracle.com>
 Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
 ---
- include/linux/bio.h  | 21 +++++++++++++++++++--
- include/linux/bvec.h | 27 +++++++++++++++++++++++++++
- 2 files changed, 46 insertions(+), 2 deletions(-)
+ block/bio-integrity.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/include/linux/bio.h b/include/linux/bio.h
-index 643ecba..ab812a0 100644
---- a/include/linux/bio.h
-+++ b/include/linux/bio.h
-@@ -166,9 +166,10 @@ static inline void bio_advance_iter(struct bio *bio, struct bvec_iter *iter,
- {
- 	iter->bi_sector += bytes >> 9;
+diff --git a/block/bio-integrity.c b/block/bio-integrity.c
+index 5384713..b5009a8 100644
+--- a/block/bio-integrity.c
++++ b/block/bio-integrity.c
+@@ -175,6 +175,9 @@ bool bio_integrity_enabled(struct bio *bio)
+ 	if (bio_op(bio) != REQ_OP_READ && bio_op(bio) != REQ_OP_WRITE)
+ 		return false;
  
--	if (bio_no_advance_iter(bio))
-+	if (bio_no_advance_iter(bio)) {
- 		iter->bi_size -= bytes;
--	else {
-+		iter->bi_done += bytes;
-+	} else {
- 		int err;
- 
- 		err = bvec_iter_advance(bio->bi_io_vec, iter, bytes);
-@@ -176,6 +177,22 @@ static inline void bio_advance_iter(struct bio *bio, struct bvec_iter *iter,
- 	}
- }
- 
-+static inline int bio_rewind_iter(struct bio *bio, struct bvec_iter *iter,
-+				    unsigned int bytes)
-+{
-+	int err = 0;
++	if (!bio_sectors(bio))
++		return false;
 +
-+	iter->bi_sector -= bytes >> 9;
-+
-+	if (bio_no_advance_iter(bio)) {
-+		iter->bi_size += bytes;
-+		iter->bi_done -= bytes;
-+	} else {
-+		err = bvec_iter_rewind(bio->bi_io_vec, iter, bytes);
-+	}
-+	return err;
-+}
-+
- #define __bio_for_each_segment(bvl, bio, iter, start)			\
- 	for (iter = (start);						\
- 	     (iter).bi_size &&						\
-diff --git a/include/linux/bvec.h b/include/linux/bvec.h
-index 984a7a8..8cfe4d6 100644
---- a/include/linux/bvec.h
-+++ b/include/linux/bvec.h
-@@ -40,6 +40,8 @@ struct bvec_iter {
- 
- 	unsigned int		bi_idx;		/* current index into bvl_vec */
- 
-+	unsigned int            bi_done;	/* number of bytes completed */
-+
- 	unsigned int            bi_bvec_done;	/* number of bytes completed in
- 						   current bvec */
- };
-@@ -84,6 +86,7 @@ static inline int bvec_iter_advance(const struct bio_vec *bv,
- 		bytes -= len;
- 		iter->bi_size -= len;
- 		iter->bi_bvec_done += len;
-+		iter->bi_done += len;
- 
- 		if (iter->bi_bvec_done == __bvec_iter_bvec(bv, *iter)->bv_len) {
- 			iter->bi_bvec_done = 0;
-@@ -93,6 +96,30 @@ static inline int bvec_iter_advance(const struct bio_vec *bv,
- 	return 0;
- }
- 
-+static inline int bvec_iter_rewind(const struct bio_vec *bv,
-+				     struct bvec_iter *iter,
-+				     unsigned int bytes)
-+{
-+	while (bytes) {
-+		unsigned len = min(bytes, iter->bi_bvec_done);
-+
-+		if (iter->bi_bvec_done == 0) {
-+			if (WARN_ONCE(iter->bi_idx == 0,
-+				      "Attempted to rewind iter beyond "
-+				      "bvec's boundaries\n")) {
-+				return -EINVAL;
-+			}
-+			iter->bi_idx--;
-+			iter->bi_bvec_done = __bvec_iter_bvec(bv, *iter)->bv_len;
-+			continue;
-+		}
-+		bytes -= len;
-+		iter->bi_size += len;
-+		iter->bi_bvec_done -= len;
-+	}
-+	return 0;
-+}
-+
- #define for_each_bvec(bvl, bio_vec, iter, start)			\
- 	for (iter = (start);						\
- 	     (iter).bi_size &&						\
+ 	/* Already protected? */
+ 	if (bio_integrity(bio))
+ 		return false;
 -- 
 2.9.3
 
