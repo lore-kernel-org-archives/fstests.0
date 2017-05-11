@@ -1,11 +1,11 @@
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:34554 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754757AbdEKGzH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 11 May 2017 02:55:07 -0400
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:33896 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754559AbdEKGzA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 11 May 2017 02:55:00 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 3/4] overlay/017: test consistent st_ino/d_ino for hardlinks
-Date: Thu, 11 May 2017 09:55:09 +0300
-Message-Id: <1494485710-2400-4-git-send-email-amir73il@gmail.com>
+Subject: [PATCH 2/4] overlay/017: use t_dir_type to find file by d_ino
+Date: Thu, 11 May 2017 09:55:08 +0300
+Message-Id: <1494485710-2400-3-git-send-email-amir73il@gmail.com>
 In-Reply-To: <1494485710-2400-1-git-send-email-amir73il@gmail.com>
 References: <1494485710-2400-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,43 +13,42 @@ To: Eryu Guan <eguan@redhat.com>
 Cc: Miklos Szeredi <miklos@szeredi.hu>, Xiong Zhou <xzhou@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Currently hardlinks do not preserve the inode number across copy up,
-so hardlinks did not participate in this test so far.
+'find -ino' is this test was supposed to filter files by inode number
+that was recorded with 'ls -i' to compare st_ino returned by stat(2)
+with d_ino returned by getdents64(2).
 
-Stay honest and let the test verify what is was meant to verify and
-let it fail because of the fact that hardlinks inode numbers are not
-constant across copy up.
+It turns out that on some systems, 'find -ino' uses stat(2) for
+filtering by inode number, which is not what we want.
+
+Use the auxiliary program t_dir_type to filter files by inode number
+instead.
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- tests/overlay/017 | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ tests/overlay/017 | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/tests/overlay/017 b/tests/overlay/017
-index bb467f7..e9c8525 100755
+index fabfbb5..bb467f7 100755
 --- a/tests/overlay/017
 +++ b/tests/overlay/017
-@@ -63,8 +63,6 @@ rm -f $seqres.full
- _scratch_mkfs >>$seqres.full 2>&1
+@@ -56,6 +56,7 @@ _supported_fs overlay
+ _supported_os Linux
+ _require_scratch
+ _require_test_program "af_unix"
++_require_test_program "t_dir_type"
  
- # Create our test files.
--# Not dealing with hardlinks here, when hardlinks are broken they
--# should not preserve the inode number.
- lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
- mkdir -p $lowerdir
- mkdir $lowerdir/dir
-@@ -74,8 +72,10 @@ mknod $lowerdir/chrdev c 1 1
- mknod $lowerdir/blkdev b 1 1
- mknod $lowerdir/fifo p
- $here/src/af_unix $lowerdir/socket
-+touch $lowerdir/hardlink1
-+ln $lowerdir/hardlink1 $lowerdir/hardlink2
+ rm -f $seqres.full
  
--FILES="dir file symlink chrdev blkdev fifo socket"
-+FILES="dir file symlink chrdev blkdev fifo socket hardlink1 hardlink2"
- 
- # Record inode numbers in format <ino> <basename>
- function record_inode_numbers()
+@@ -107,7 +108,7 @@ function check_inode_numbers()
+ 	# Test constant readdir(3)/getdents(2) d_ino -
+ 	#   Expect to find file by inode number
+ 	cat $before | while read ino f; do
+-		find $dir/ -maxdepth 1 -inum $ino | grep -q $f || \
++		$here/src/t_dir_type $dir $ino | grep -q $f || \
+ 			echo "$f not found by ino $ino (from $before)"
+ 	done
+ }
 -- 
 2.7.4
 
