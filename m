@@ -1,11 +1,11 @@
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:36565 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754534AbdEKGy7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 11 May 2017 02:54:59 -0400
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:35178 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754746AbdEKGzD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 11 May 2017 02:55:03 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 1/4] src/t_dir_type: support filtering by inode number
-Date: Thu, 11 May 2017 09:55:07 +0300
-Message-Id: <1494485710-2400-2-git-send-email-amir73il@gmail.com>
+Subject: [PATCH 4/4] overlay: tag tests 016-018 as experimental
+Date: Thu, 11 May 2017 09:55:10 +0300
+Message-Id: <1494485710-2400-5-git-send-email-amir73il@gmail.com>
 In-Reply-To: <1494485710-2400-1-git-send-email-amir73il@gmail.com>
 References: <1494485710-2400-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,83 +13,37 @@ To: Eryu Guan <eguan@redhat.com>
 Cc: Miklos Szeredi <miklos@szeredi.hu>, Xiong Zhou <xzhou@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-usage: t_dir_type <dir> <inode number>
+The tests 016-018 were added to track overlayfs 'Non-standard behavior'
+as are documented in Documentation/filesystems/overlayfs.txt, with the
+intention of fixing those behaviors 'some day'.
+
+While that day seems to be seen in the horizon, at least for test 017,
+it may take a while longer for all those tests to pass.
+Add those tests to group 'experimental' so at least this special status
+is published somehow.
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- doc/auxiliary-programs.txt |  7 +++++++
- src/t_dir_type.c           | 11 ++++++++---
- 2 files changed, 15 insertions(+), 3 deletions(-)
+ tests/overlay/group | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/doc/auxiliary-programs.txt b/doc/auxiliary-programs.txt
-index 2e2060a..21ef118 100644
---- a/doc/auxiliary-programs.txt
-+++ b/doc/auxiliary-programs.txt
-@@ -18,6 +18,7 @@ Contents:
-  - af_unix		-- Create an AF_UNIX socket
-  - open_by_handle	-- open_by_handle_at syscall exercise
-  - stat_test		-- statx syscall exercise
-+ - t_dir_type		-- print directory entries and their file type
-  - xfs_io		-- General I/O operation exercise
- 
- 
-@@ -48,6 +49,12 @@ stat_test
- 		_require_statx
- 
- 
-+t_dir_type
-+
-+	The t_dir_type program exercises the getdents64() system call.
-+	It prints directory entry names returned from getdents64() and
-+	thier d_type, optionally filtered by type or by inode number.
-+
- xfs_io
- 
- 	The xfs_io program can be found in the xfsprogs package and can be used
-diff --git a/src/t_dir_type.c b/src/t_dir_type.c
-index 344bef8..76aaa9b 100644
---- a/src/t_dir_type.c
-+++ b/src/t_dir_type.c
-@@ -19,9 +19,10 @@
- /*
-  * t_dir_type
-  *
-- * print directory entries, optionally filtered by d_type
-+ * print directory entries and their file type, optionally filtered by d_type
-+ * or by inode number.
-  *
-- * ./t_dir_type <path> [u|f|d|c|b|l|p|s|w]
-+ * ./t_dir_type <path> [u|f|d|c|b|l|p|s|w|<ino>]
-  */
- 
- #include <fcntl.h>
-@@ -67,6 +68,7 @@ main(int argc, char *argv[])
- 	struct linux_dirent64 *d;
- 	int bpos;
- 	int type = -1; /* -1 means all types */
-+	uint64_t ino = 0;
- 	int ret = 1;
- 
- 	fd = open(argv[1], O_RDONLY | O_DIRECTORY);
-@@ -82,6 +84,8 @@ main(int argc, char *argv[])
- 			if (DT_CHAR(type) == t)
- 				break;
- 		/* no match ends up with type = -1 */
-+		if (type < 0)
-+			ino = atoll(argv[2]);
- 	}
- 
- 	for ( ; ; ) {
-@@ -96,7 +100,8 @@ main(int argc, char *argv[])
- 
- 		for (bpos = 0; bpos < nread;) {
- 			d = (struct linux_dirent64 *) (buf + bpos);
--			if (type < 0 || type == (int)d->d_type) {
-+			if ((type < 0 || type == (int)d->d_type) &&
-+			    (!ino || ino == d->d_ino)) {
- 				ret = 0;
- 				printf("%s %c\n", d->d_name, DT_CHAR(d->d_type));
- 			}
+diff --git a/tests/overlay/group b/tests/overlay/group
+index c5048c4..39169d3 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -18,9 +18,9 @@
+ 013 auto quick copyup
+ 014 auto quick copyup
+ 015 auto quick whiteout
+-016 auto quick copyup
+-017 auto quick copyup
+-018 auto quick copyup
++016 auto quick copyup experimental
++017 auto quick copyup experimental
++018 auto quick copyup experimental
+ 019 auto stress
+ 020 auto quick copyup perms
+ 021 auto quick copyup
 -- 
 2.7.4
 
