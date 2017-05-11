@@ -1,108 +1,141 @@
-Received: from mx1.redhat.com ([209.132.183.28]:52254 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754977AbdEKLfK (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 11 May 2017 07:35:10 -0400
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id A7F1C8553D
-        for <fstests@vger.kernel.org>; Thu, 11 May 2017 11:35:09 +0000 (UTC)
-From: Andreas Gruenbacher <agruenba@redhat.com>
-Subject: [PATCH] src/seek_sanity_test: Fix for filesystems without unwritten extent support
-Date: Thu, 11 May 2017 13:35:07 +0200
-Message-Id: <1494502507-27742-1-git-send-email-agruenba@redhat.com>
+Received: from mx2.suse.de ([195.135.220.15]:34418 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1757894AbdEKQsU (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 11 May 2017 12:48:20 -0400
+From: Jan Kara <jack@suse.cz>
+Subject: [PATCH] generic/285: Add more SEEK_HOLE tests
+Date: Thu, 11 May 2017 18:48:09 +0200
+Message-Id: <20170511164809.29739-1-jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Andreas Gruenbacher <agruenba@redhat.com>
+Cc: linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org, Jan Kara <jack@suse.cz>
 List-ID: <fstests@vger.kernel.org>
 
-src/seek_sanity_test (test generic/285) assumes that after preallocating
-space in a file with fallocate, fseek SEEK_HOLE / SEEK_DATA will still
-report the allocated space as a hole.  On filesystems without unwritten
-extent support, that space will be reported as data, though.
+Add tests for bugs found in ext4 & xfs SEEK_HOLE implementations
+fixed by following patches:
 
-Tested on ext4, xfs, and gfs2 + patches for fseek SEEK_HOLE / SEEK_DATA
-support.
+xfs: Fix missed holes in SEEK_HOLE implementation
+ext4: Fix SEEK_HOLE
 
-Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
+Signed-off-by: Jan Kara <jack@suse.cz>
 ---
- src/seek_sanity_test.c | 35 +++++++++++++++++++++++++++++++++++
- 1 file changed, 35 insertions(+)
+ src/seek_sanity_test.c | 96 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 96 insertions(+)
 
 diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
-index a6dd48c..0d7fa0a 100644
+index a6dd48cc257b..86a9397fa7e9 100644
 --- a/src/seek_sanity_test.c
 +++ b/src/seek_sanity_test.c
-@@ -37,6 +37,7 @@
+@@ -246,6 +246,100 @@ out:
+ }
  
- static blksize_t alloc_size;
- int default_behavior = 0;
-+int unwritten_extents = 0;
- char *base_file_path;
- 
- static void get_file_system(int fd)
-@@ -282,6 +283,11 @@ static int test09(int fd, int testnum)
- 	int bufsz = alloc_size;
- 	int filsz = 8 << 20;
- 
-+	if (!unwritten_extents) {
-+		fprintf(stdout, "Test skipped\n");
-+		goto out;
-+	}
+ /*
++ * test file with unwritten extents, only have pagevec worth of dirty pages
++ * in page cache, a hole and then another page.
++ */
++static int test14(int fd, int testnum)
++{
++	int ret = 0;
++	char *buf = NULL;
++	int bufsz = sysconf(_SC_PAGE_SIZE) * 14;
++	int filsz = 4 << 20;
 +
- 	/*
- 	 * HOLE - unwritten DATA in dirty page - HOLE -
- 	 * unwritten DATA in writeback page
-@@ -338,6 +344,11 @@ static int test08(int fd, int testnum)
- 	int bufsz = alloc_size;
- 	int filsz = 4 << 20;
- 
-+	if (!unwritten_extents) {
-+		fprintf(stdout, "Test skipped\n");
++	/* HOLE - unwritten DATA in dirty page */
++	/* Each unit is bufsz */
++	buf = do_malloc(bufsz);
++	if (!buf)
 +		goto out;
-+	}
++	memset(buf, 'a', bufsz);
 +
- 	/* HOLE - unwritten DATA in writeback page */
- 	/* Each unit is bufsz */
- 	buf = do_malloc(bufsz);
-@@ -387,6 +398,11 @@ static int test07(int fd, int testnum)
- 	int bufsz = alloc_size;
- 	int filsz = 4 << 20;
- 
-+	if (!unwritten_extents) {
-+		fprintf(stdout, "Test skipped\n");
-+		goto out;
-+	}
-+
- 	/* HOLE - unwritten DATA in dirty page */
- 	/* Each unit is bufsz */
- 	buf = do_malloc(bufsz);
-@@ -776,6 +792,25 @@ static int test_basic_support(void)
- 		fprintf(stderr, "File system supports the default behavior.\n");
- 	}
- 
-+	ftruncate(fd, 0);
-+	if (fallocate(fd, 0, 0, alloc_size) == -1) {
++	/* preallocate 4M space to file */
++	ret = do_fallocate(fd, 0, filsz, 0);
++	if (ret < 0) {
++		/* Report success if fs doesn't support fallocate */
 +		if (errno == EOPNOTSUPP) {
-+			fprintf(stderr, "File system does not support fallocate.");
-+		} else {
-+			fprintf(stderr, "ERROR %d: Failed to preallocate "
-+				"space to %ld bytes.", errno, (long) alloc_size);
++			fprintf(stdout, "Test skipped as fs doesn't support fallocate.\n");
++			ret = 0;
 +		}
-+		fprintf(stderr, "  Skipping unwritten extent tests.\n");
 +		goto out;
-+	} else {
-+		pos = lseek(fd, 0, SEEK_DATA);
-+		if (pos == 0) {
-+			fprintf(stderr, "File system does not support unwritten extents.\n");
-+			goto out;
-+		}
 +	}
-+	unwritten_extents = 1;
 +
- 	printf("\n");
++	ret = do_pwrite(fd, buf, bufsz, 0);
++	if (ret)
++		goto out;
++
++	ret = do_pwrite(fd, buf, bufsz, 3 * bufsz);
++	if (ret)
++		goto out;
++
++	/* offset at the beginning */
++	ret += do_lseek(testnum,  1, fd, filsz, SEEK_HOLE, 0, bufsz);
++	ret += do_lseek(testnum,  2, fd, filsz, SEEK_HOLE, 1, bufsz);
++	ret += do_lseek(testnum,  2, fd, filsz, SEEK_HOLE, 3 * bufsz, 4 * bufsz);
++	ret += do_lseek(testnum,  3, fd, filsz, SEEK_DATA, 0, 0);
++	ret += do_lseek(testnum,  4, fd, filsz, SEEK_DATA, 1, 1);
++	ret += do_lseek(testnum,  3, fd, filsz, SEEK_DATA, bufsz, 3 * bufsz);
++
++out:
++	do_free(buf);
++	return ret;
++}
++
++/*
++ * test file with unwritten extents, only have pagevec worth of dirty pages
++ * in page cache.
++ */
++static int test13(int fd, int testnum)
++{
++	int ret = 0;
++	char *buf = NULL;
++	int bufsz = sysconf(_SC_PAGE_SIZE) * 14;
++	int filsz = 4 << 20;
++
++	/* HOLE - unwritten DATA in dirty page */
++	/* Each unit is bufsz */
++	buf = do_malloc(bufsz);
++	if (!buf)
++		goto out;
++	memset(buf, 'a', bufsz);
++
++	/* preallocate 4M space to file */
++	ret = do_fallocate(fd, 0, filsz, 0);
++	if (ret < 0) {
++		/* Report success if fs doesn't support fallocate */
++		if (errno == EOPNOTSUPP) {
++			fprintf(stdout, "Test skipped as fs doesn't support fallocate.\n");
++			ret = 0;
++		}
++		goto out;
++	}
++
++	ret = do_pwrite(fd, buf, bufsz, 0);
++	if (ret)
++		goto out;
++
++	/* offset at the beginning */
++	ret += do_lseek(testnum,  1, fd, filsz, SEEK_HOLE, 0, bufsz);
++	ret += do_lseek(testnum,  2, fd, filsz, SEEK_HOLE, 1, bufsz);
++	ret += do_lseek(testnum,  3, fd, filsz, SEEK_DATA, 0, 0);
++	ret += do_lseek(testnum,  4, fd, filsz, SEEK_DATA, 1, 1);
++
++out:
++	do_free(buf);
++	return ret;
++}
++
++/*
+  * Test huge file to check for overflows of block counts due to usage of
+  * 32-bit types.
+  */
+@@ -678,6 +772,8 @@ struct testrec seek_tests[] = {
+        { 10, test10, "Test a huge file for offset overflow" },
+        { 11, test11, "Test a huge file for block number signed" },
+        { 12, test12, "Test a huge file for block number overflow" },
++       { 13, test13, "Test file with unwritten extents, only have pagevec dirty pages" },
++       { 14, test14, "Test file with unwritten extents, small hole after pagevec dirty pages" },
+ };
  
- out:
+ static int run_test(struct testrec *tr)
 -- 
-2.7.4
+2.12.0
 
