@@ -1,43 +1,84 @@
-Received: from mx1.redhat.com ([209.132.183.28]:42828 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750917AbdEKH1u (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 11 May 2017 03:27:50 -0400
-Date: Thu, 11 May 2017 15:27:47 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v6 4/5] generic/432: Add a copy test for overwriting
- small amounts of data
-Message-ID: <20170511072747.GH7250@eguan.usersys.redhat.com>
-References: <20170510174628.22895-1-Anna.Schumaker@Netapp.com>
- <20170510174628.22895-5-Anna.Schumaker@Netapp.com>
- <20170510183745.GE5970@birch.djwong.org>
- <658f2572-9767-3dd7-c48e-9cb8f2b28510@Netapp.com>
+Received: from bombadil.infradead.org ([65.50.211.133]:45332 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751208AbdEKHad (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 11 May 2017 03:30:33 -0400
+Date: Thu, 11 May 2017 00:30:32 -0700
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH 1/9] bio-integrity: Do not allocate integrity context for
+ bio w/o data
+Message-ID: <20170511073032.GA26586@infradead.org>
+References: <1494429652-9488-1-git-send-email-dmonakhov@openvz.org>
+ <1494429652-9488-2-git-send-email-dmonakhov@openvz.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <658f2572-9767-3dd7-c48e-9cb8f2b28510@Netapp.com>
+In-Reply-To: <1494429652-9488-2-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
-To: Anna Schumaker <Anna.Schumaker@Netapp.com>
-Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org, linux-nfs@vger.kernel.org, hch@infradead.org
+To: Dmitry Monakhov <dmonakhov@openvz.org>
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-block@vger.kernel.org, axboe@kernel.dk
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, May 10, 2017 at 02:39:46PM -0400, Anna Schumaker wrote:
-> 
-> 
-> On 05/10/2017 02:37 PM, Darrick J. Wong wrote:
-> > On Wed, May 10, 2017 at 01:46:27PM -0400, Anna Schumaker wrote:
-> >> This test is similar to 345, except that it copies one byte at a time to
-> > 
-> > 345?  Or is that now 431?  Perhaps amend the commit message to "This
-> > test is similar to the previous one, except..."?
-> 
-> Yeah, I forgot to update that :(   It's supposed to be for the previous test, so that's probably the best wording to use.
+Jens, can you pick this up for 4.12?
 
-I can fix it at commit time. Thanks for the tests! And thanks Darrick
-for reviewing!
-
-BTW, seq number should be dropped in summary line too, tests are always
-re-numberd on commit anyway, "generic: Add copy to new file test" should
-be fine :)
-
-Thanks,
-Eryu
+On Wed, May 10, 2017 at 07:20:44PM +0400, Dmitry Monakhov wrote:
+> If bio has no data, such as ones from blkdev_issue_flush(),
+> then we have nothing to protect.
+> 
+> This patch prevent bugon like follows:
+> 
+> kfree_debugcheck: out of range ptr ac1fa1d106742a5ah
+> kernel BUG at mm/slab.c:2773!
+> invalid opcode: 0000 [#1] SMP
+> Modules linked in: bcache
+> CPU: 0 PID: 4428 Comm: xfs_io Tainted: G        W       4.11.0-rc4-ext4-00041-g2ef0043-dirty #43
+> Hardware name: Virtuozzo KVM, BIOS seabios-1.7.5-11.vz7.4 04/01/2014
+> task: ffff880137786440 task.stack: ffffc90000ba8000
+> RIP: 0010:kfree_debugcheck+0x25/0x2a
+> RSP: 0018:ffffc90000babde0 EFLAGS: 00010082
+> RAX: 0000000000000034 RBX: ac1fa1d106742a5a RCX: 0000000000000007
+> RDX: 0000000000000000 RSI: 0000000000000000 RDI: ffff88013f3ccb40
+> RBP: ffffc90000babde8 R08: 0000000000000000 R09: 0000000000000000
+> R10: 00000000fcb76420 R11: 00000000725172ed R12: 0000000000000282
+> R13: ffffffff8150e766 R14: ffff88013a145e00 R15: 0000000000000001
+> FS:  00007fb09384bf40(0000) GS:ffff88013f200000(0000) knlGS:0000000000000000
+> CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> CR2: 00007fd0172f9e40 CR3: 0000000137fa9000 CR4: 00000000000006f0
+> Call Trace:
+>  kfree+0xc8/0x1b3
+>  bio_integrity_free+0xc3/0x16b
+>  bio_free+0x25/0x66
+>  bio_put+0x14/0x26
+>  blkdev_issue_flush+0x7a/0x85
+>  blkdev_fsync+0x35/0x42
+>  vfs_fsync_range+0x8e/0x9f
+>  vfs_fsync+0x1c/0x1e
+>  do_fsync+0x31/0x4a
+>  SyS_fsync+0x10/0x14
+>  entry_SYSCALL_64_fastpath+0x1f/0xc2
+> 
+> Reviewed-by: Christoph Hellwig <hch@lst.de>
+> Reviewed-by: Hannes Reinecke <hare@suse.com>
+> Reviewed-by: Martin K. Petersen <martin.petersen@oracle.com>
+> Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
+> ---
+>  block/bio-integrity.c | 3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/block/bio-integrity.c b/block/bio-integrity.c
+> index 5384713..b5009a8 100644
+> --- a/block/bio-integrity.c
+> +++ b/block/bio-integrity.c
+> @@ -175,6 +175,9 @@ bool bio_integrity_enabled(struct bio *bio)
+>  	if (bio_op(bio) != REQ_OP_READ && bio_op(bio) != REQ_OP_WRITE)
+>  		return false;
+>  
+> +	if (!bio_sectors(bio))
+> +		return false;
+> +
+>  	/* Already protected? */
+>  	if (bio_integrity(bio))
+>  		return false;
+> -- 
+> 2.9.3
+> 
+---end quoted text---
