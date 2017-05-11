@@ -1,49 +1,43 @@
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:35178 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754746AbdEKGzD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 11 May 2017 02:55:03 -0400
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 4/4] overlay: tag tests 016-018 as experimental
-Date: Thu, 11 May 2017 09:55:10 +0300
-Message-Id: <1494485710-2400-5-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1494485710-2400-1-git-send-email-amir73il@gmail.com>
-References: <1494485710-2400-1-git-send-email-amir73il@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:42828 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750917AbdEKH1u (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 11 May 2017 03:27:50 -0400
+Date: Thu, 11 May 2017 15:27:47 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v6 4/5] generic/432: Add a copy test for overwriting
+ small amounts of data
+Message-ID: <20170511072747.GH7250@eguan.usersys.redhat.com>
+References: <20170510174628.22895-1-Anna.Schumaker@Netapp.com>
+ <20170510174628.22895-5-Anna.Schumaker@Netapp.com>
+ <20170510183745.GE5970@birch.djwong.org>
+ <658f2572-9767-3dd7-c48e-9cb8f2b28510@Netapp.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <658f2572-9767-3dd7-c48e-9cb8f2b28510@Netapp.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, Xiong Zhou <xzhou@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: Anna Schumaker <Anna.Schumaker@Netapp.com>
+Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org, linux-nfs@vger.kernel.org, hch@infradead.org
 List-ID: <fstests@vger.kernel.org>
 
-The tests 016-018 were added to track overlayfs 'Non-standard behavior'
-as are documented in Documentation/filesystems/overlayfs.txt, with the
-intention of fixing those behaviors 'some day'.
+On Wed, May 10, 2017 at 02:39:46PM -0400, Anna Schumaker wrote:
+> 
+> 
+> On 05/10/2017 02:37 PM, Darrick J. Wong wrote:
+> > On Wed, May 10, 2017 at 01:46:27PM -0400, Anna Schumaker wrote:
+> >> This test is similar to 345, except that it copies one byte at a time to
+> > 
+> > 345?  Or is that now 431?  Perhaps amend the commit message to "This
+> > test is similar to the previous one, except..."?
+> 
+> Yeah, I forgot to update that :(   It's supposed to be for the previous test, so that's probably the best wording to use.
 
-While that day seems to be seen in the horizon, at least for test 017,
-it may take a while longer for all those tests to pass.
-Add those tests to group 'experimental' so at least this special status
-is published somehow.
+I can fix it at commit time. Thanks for the tests! And thanks Darrick
+for reviewing!
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/overlay/group | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+BTW, seq number should be dropped in summary line too, tests are always
+re-numberd on commit anyway, "generic: Add copy to new file test" should
+be fine :)
 
-diff --git a/tests/overlay/group b/tests/overlay/group
-index c5048c4..39169d3 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -18,9 +18,9 @@
- 013 auto quick copyup
- 014 auto quick copyup
- 015 auto quick whiteout
--016 auto quick copyup
--017 auto quick copyup
--018 auto quick copyup
-+016 auto quick copyup experimental
-+017 auto quick copyup experimental
-+018 auto quick copyup experimental
- 019 auto stress
- 020 auto quick copyup perms
- 021 auto quick copyup
--- 
-2.7.4
-
+Thanks,
+Eryu
