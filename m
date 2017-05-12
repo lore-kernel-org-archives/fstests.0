@@ -1,169 +1,189 @@
-Received: from mx1.redhat.com ([209.132.183.28]:57806 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49706 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752018AbdELIEq (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 12 May 2017 04:04:46 -0400
-Date: Fri, 12 May 2017 16:04:43 +0800
+        id S1756997AbdELIMg (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 12 May 2017 04:12:36 -0400
+Date: Fri, 12 May 2017 16:12:28 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic/285: Add more SEEK_HOLE tests
-Message-ID: <20170512080443.GN7250@eguan.usersys.redhat.com>
-References: <20170511164809.29739-1-jack@suse.cz>
+Subject: Re: [PATCH v4] Code to allow cros-compilation on chromeOS
+Message-ID: <20170512081228.GO7250@eguan.usersys.redhat.com>
+References: <CAMHSBOXJHiuadYEdbrpcD05dSAxw95RzfWa3mMo24X0Lf7Df3Q@mail.gmail.com>
+ <20170419233348.33617-1-gwendal@chromium.org>
+ <20170425130944.GX26397@eguan.usersys.redhat.com>
+ <5910462F.7060704@cn.fujitsu.com>
+ <20170508105014.GX7250@eguan.usersys.redhat.com>
+ <59116BCD.2010104@cn.fujitsu.com>
+ <59155058.4070200@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170511164809.29739-1-jack@suse.cz>
+In-Reply-To: <59155058.4070200@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jan Kara <jack@suse.cz>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: Gwendal Grignou <gwendal@chromium.org>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 11, 2017 at 06:48:09PM +0200, Jan Kara wrote:
-> Add tests for bugs found in ext4 & xfs SEEK_HOLE implementations
-> fixed by following patches:
+On Fri, May 12, 2017 at 02:04:08PM +0800, Xiao Yang wrote:
+> Hi Eryu
 > 
-> xfs: Fix missed holes in SEEK_HOLE implementation
-> ext4: Fix SEEK_HOLE
-> 
-> Signed-off-by: Jan Kara <jack@suse.cz>
+> I tried to use higher version autoconf (e.g,
+> autoconf-2.65-1.fc13.noarch.rpm) to compile the lastest xfstests on
+> RHEL6.9GA, and
+> it worked fine.   Shoud we update  autoconf-2.63-5.1.el6.noarch on RHEL6.9GA
+> or fix xfstests to adapt to older version autoconf? :-)
 
-This will cause ext4 and xfs start to fail with current linus tree and
-appear as a new regression. So we usually don't add new tests to
-existing cases.
+Sorry for the late response, because I'm still wondering why it worked
+fine on my RHEL6.9 test host, it has the same version of autoconf,
+automake, libtool etc. as you installed.
 
-But seek_sanity_test.c deals with different SEEK_DATA/HOLE implentations
-nicely, which would be a bit tricky to do in a new test by shell, and it
-has all the infrastructures for new tests like this. So I think I'd
-prefer merging this patch as is, and document the false regression alert
-in release announce email.
+But this is an relatively low priority task for me, because RHEL6 is in
+its late stage, no new features will be added, and non-critical bugs are
+unlikely to get fixed, so testing on RHEL6 is relatively low priority
+too.
 
-I'm including this patch in release testing now, please shout if ext4
-and/or xfs developers have different thoughts, there'll be around two
-days before new release :)
+Thanks for all the effort you made so far on this issue!
 
-Thanks,
 Eryu
 
-> ---
->  src/seek_sanity_test.c | 96 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 96 insertions(+)
 > 
-> diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
-> index a6dd48cc257b..86a9397fa7e9 100644
-> --- a/src/seek_sanity_test.c
-> +++ b/src/seek_sanity_test.c
-> @@ -246,6 +246,100 @@ out:
->  }
->  
->  /*
-> + * test file with unwritten extents, only have pagevec worth of dirty pages
-> + * in page cache, a hole and then another page.
-> + */
-> +static int test14(int fd, int testnum)
-> +{
-> +	int ret = 0;
-> +	char *buf = NULL;
-> +	int bufsz = sysconf(_SC_PAGE_SIZE) * 14;
-> +	int filsz = 4 << 20;
-> +
-> +	/* HOLE - unwritten DATA in dirty page */
-> +	/* Each unit is bufsz */
-> +	buf = do_malloc(bufsz);
-> +	if (!buf)
-> +		goto out;
-> +	memset(buf, 'a', bufsz);
-> +
-> +	/* preallocate 4M space to file */
-> +	ret = do_fallocate(fd, 0, filsz, 0);
-> +	if (ret < 0) {
-> +		/* Report success if fs doesn't support fallocate */
-> +		if (errno == EOPNOTSUPP) {
-> +			fprintf(stdout, "Test skipped as fs doesn't support fallocate.\n");
-> +			ret = 0;
-> +		}
-> +		goto out;
-> +	}
-> +
-> +	ret = do_pwrite(fd, buf, bufsz, 0);
-> +	if (ret)
-> +		goto out;
-> +
-> +	ret = do_pwrite(fd, buf, bufsz, 3 * bufsz);
-> +	if (ret)
-> +		goto out;
-> +
-> +	/* offset at the beginning */
-> +	ret += do_lseek(testnum,  1, fd, filsz, SEEK_HOLE, 0, bufsz);
-> +	ret += do_lseek(testnum,  2, fd, filsz, SEEK_HOLE, 1, bufsz);
-> +	ret += do_lseek(testnum,  2, fd, filsz, SEEK_HOLE, 3 * bufsz, 4 * bufsz);
-> +	ret += do_lseek(testnum,  3, fd, filsz, SEEK_DATA, 0, 0);
-> +	ret += do_lseek(testnum,  4, fd, filsz, SEEK_DATA, 1, 1);
-> +	ret += do_lseek(testnum,  3, fd, filsz, SEEK_DATA, bufsz, 3 * bufsz);
-> +
-> +out:
-> +	do_free(buf);
-> +	return ret;
-> +}
-> +
-> +/*
-> + * test file with unwritten extents, only have pagevec worth of dirty pages
-> + * in page cache.
-> + */
-> +static int test13(int fd, int testnum)
-> +{
-> +	int ret = 0;
-> +	char *buf = NULL;
-> +	int bufsz = sysconf(_SC_PAGE_SIZE) * 14;
-> +	int filsz = 4 << 20;
-> +
-> +	/* HOLE - unwritten DATA in dirty page */
-> +	/* Each unit is bufsz */
-> +	buf = do_malloc(bufsz);
-> +	if (!buf)
-> +		goto out;
-> +	memset(buf, 'a', bufsz);
-> +
-> +	/* preallocate 4M space to file */
-> +	ret = do_fallocate(fd, 0, filsz, 0);
-> +	if (ret < 0) {
-> +		/* Report success if fs doesn't support fallocate */
-> +		if (errno == EOPNOTSUPP) {
-> +			fprintf(stdout, "Test skipped as fs doesn't support fallocate.\n");
-> +			ret = 0;
-> +		}
-> +		goto out;
-> +	}
-> +
-> +	ret = do_pwrite(fd, buf, bufsz, 0);
-> +	if (ret)
-> +		goto out;
-> +
-> +	/* offset at the beginning */
-> +	ret += do_lseek(testnum,  1, fd, filsz, SEEK_HOLE, 0, bufsz);
-> +	ret += do_lseek(testnum,  2, fd, filsz, SEEK_HOLE, 1, bufsz);
-> +	ret += do_lseek(testnum,  3, fd, filsz, SEEK_DATA, 0, 0);
-> +	ret += do_lseek(testnum,  4, fd, filsz, SEEK_DATA, 1, 1);
-> +
-> +out:
-> +	do_free(buf);
-> +	return ret;
-> +}
-> +
-> +/*
->   * Test huge file to check for overflows of block counts due to usage of
->   * 32-bit types.
->   */
-> @@ -678,6 +772,8 @@ struct testrec seek_tests[] = {
->         { 10, test10, "Test a huge file for offset overflow" },
->         { 11, test11, "Test a huge file for block number signed" },
->         { 12, test12, "Test a huge file for block number overflow" },
-> +       { 13, test13, "Test file with unwritten extents, only have pagevec dirty pages" },
-> +       { 14, test14, "Test file with unwritten extents, small hole after pagevec dirty pages" },
->  };
->  
->  static int run_test(struct testrec *tr)
-> -- 
-> 2.12.0
+> Thanks,
+> Xiao Yang.
+> On 2017/05/09 15:12, Xiao Yang wrote:
+> > On 2017/05/08 18:50, Eryu Guan wrote:
+> > > On Mon, May 08, 2017 at 06:19:27PM +0800, Xiao Yang wrote:
+> > > > On 2017/04/25 21:09, Eryu Guan wrote:
+> > > > > On Wed, Apr 19, 2017 at 04:33:48PM -0700, Gwendal Grignou wrote:
+> > > > > > - Request LIBTOOL to be used
+> > > > > > - Set topbuildir based on a Makefile variable to call libtool
+> > > > > > - Use /usr/local instead of /var for xfstest final location
+> > > > > > - Move macros from aclocal.m4 to acinclude.m4,
+> > > > > > aclocal.m4 is autogenerated.
+> > > > > > - Use autoconf variables @prefix@, @exec_prefix@.
+> > > > > > 
+> > > > > > The regular way of compiling xfstests - make - remains.
+> > > > > > But it now runs autoreconf and libtoolize -i to produce a valid
+> > > > > > configure.
+> > > > > > Verified with 'make install --dry-run' that files are
+> > > > > > installed at the
+> > > > > > same place.
+> > > > > > Verified compiling in chromeOS chroot works as well.
+> > > > > > 
+> > > > > > Signed-off-by: Gwendal Grignou<gwendal@chromium.org>
+> > > > > > ---
+> > > > > > 
+> > > > > > Changes in v2:
+> > > > > > Removal of instal-sh, use of autoreconf
+> > > > > > 
+> > > > > > Changes in v3:
+> > > > > > Use of @exec_prefix@ variable, unify installation location.
+> > > > > > 
+> > > > > > Changes in v4:
+> > > > > > Add --install option to autoreconf so that aclocal is
+> > > > > > called with -I m4.
+> > > > > > Keep using AC_CONFIG_MACRO_DIR when autoconf is called directly.
+> > > > > > With --install option and AC_CONFIG_MACRO_DIR undefined
+> > > > > > verify that configure
+> > > > > > still works.
+> > > > > Thanks a lot for the update! v4 works for me too with RHEL6, RHEL7 and
+> > > > > Fedora 25 hosts.
+> > > > > 
+> > > > Hi Eryu
+> > > > 
+> > > > When appling v4 patch, i still got the following error messgae
+> > > > on RHEL6.9GA:
+> > > > ============================================================================
+> > > > 
+> > > > [root@RHEL6U9GA_Intel64 xfstests]# make
+> > > > autoreconf --include=m4
+> > > > configure.ac:5: error: possibly undefined macro: AC_PACKAGE_GLOBALS
+> > > > If this token and others are legitimate, please use m4_pattern_allow.
+> > > > See the Autoconf documentation.
+> > > > configure.ac:6: error: possibly undefined macro: AC_PACKAGE_UTILITIES
+> > > > configure.ac:43: error: possibly undefined macro:
+> > > > AC_PACKAGE_NEED_UUIDCOMPARE
+> > > > configure.ac:48: error: possibly undefined macro:
+> > > > AC_PACKAGE_NEED_SYS_ACL_H
+> > > > configure.ac:49: error: possibly undefined macro:
+> > > > AC_PACKAGE_NEED_ATTRIBUTES_H
+> > > > configure.ac:50: error: possibly undefined macro: AC_PACKAGE_WANT_NDBM
+> > > > configure.ac:51: error: possibly undefined macro:
+> > > > AC_PACKAGE_NEED_IRIX_LIBHANDLE
+> > > > configure.ac:56: error: possibly undefined macro: AC_MULTILIB
+> > > > configure.ac:57: error: possibly undefined macro:
+> > > > AC_PACKAGE_NEED_XFS_XFS_H
+> > > > configure.ac:58: error: possibly undefined macro:
+> > > > AC_PACKAGE_WANT_LIBXFS_H
+> > > > configure.ac:59: error: possibly undefined macro:
+> > > > AC_PACKAGE_WANT_XLOG_ASSIGN_LSN
+> > > > configure.ac:60: error: possibly undefined macro:
+> > > > AC_PACKAGE_NEED_XFS_XQM_H
+> > > > configure.ac:61: error: possibly undefined macro:
+> > > > AC_PACKAGE_NEED_XFSCTL_MACRO
+> > > > configure.ac:62: error: possibly undefined macro:
+> > > > AC_PACKAGE_NEED_XFS_HANDLE_H
+> > > > configure.ac:64: error: possibly undefined macro:
+> > > > AC_PACKAGE_NEED_ATTRLIST_LIBHANDLE
+> > > > configure.ac:65: error: possibly undefined macro:
+> > > > AC_PACKAGE_NEED_ATTR_XATTR_H
+> > > > configure.ac:67: error: possibly undefined macro:
+> > > > AC_PACKAGE_WANT_ATTRLIST_LIBATTR
+> > > > configure.ac:68: error: possibly undefined macro:
+> > > > AC_PACKAGE_NEED_GETXATTR_LIBATTR
+> > > > configure.ac:71: error: possibly undefined macro:
+> > > > AC_PACKAGE_NEED_ACL_LIBACL_H
+> > > > configure.ac:72: error: possibly undefined macro:
+> > > > AC_PACKAGE_NEED_ACLINIT_LIBACL
+> > > > configure.ac:74: error: possibly undefined macro: AC_PACKAGE_WANT_GDBM
+> > > > configure.ac:75: error: possibly undefined macro: AC_PACKAGE_WANT_AIO
+> > > > configure.ac:76: error: possibly undefined macro: AC_PACKAGE_WANT_DMAPI
+> > > > configure.ac:82: error: possibly undefined macro: AC_PACKAGE_WANT_SSL
+> > > > autoreconf: /usr/bin/autoconf failed with exit status: 1
+> > > > make: *** [configure] Error 1
+> > > > [root@RHEL6U9GA_Intel64 xfstests]# uname -r
+> > > > 2.6.32-696.el6.x86_64
+> > > > [root@RHEL6U9GA_Intel64 ~]# rpm -q automake autoconf m4 libtool
+> > > > automake-1.11.1-4.el6.noarch
+> > > > autoconf-2.63-5.1.el6.noarch
+> > > > m4-1.4.13-5.el6.x86_64
+> > > > libtool-2.2.6-15.5.el6.x86_64
+> > > > ============================================================================
+> > > > 
+> > > > 
+> > > > autoreconf with --include m4 may not fix undefined macro on RHEL6.9GA,
+> > > > do you have the same issue?
+> > > No, make works fine on my RHEL6.9 host. And this patch should be pushed
+> > > to upstream already. Does 'make realclean' make any difference? Does a
+> > > clean 'git clone' work for you?
+> > > 
+> > > Thanks,
+> > > Eryu
+> > > 
+> > > 
+> > Hi Eryu and Gwendal,
+> > 
+> > I found that autoreconf could not pass -I/--include option to aclocal in
+> > autoconf-2.63-5.1.el6.noarch on RHEL6.9GA.
+> > This bug has been fixed by the following patch:
+> > http://git.savannah.gnu.org/gitweb/?p=autoconf.git;a=commit;h=44fbeef86d03f2b754a4444e38f38631ad318946
+> > 
+> > 
+> > This fixed patch was not merged into autoconf-2.63-5.1.el6.noarch.  I
+> > tried to apply this patch into autoconf-2.63-5.1.el6.noarch,
+> > so make worked fine in xfstests on RHEL6.9GA.  How can we workaroud this
+> > issue?
+> > 
+> > Thanks,
+> > Xiao Yang
+> > > .
+> > > 
+> > 
+> > 
+> > 
+> > -- 
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > .
+> > 
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
