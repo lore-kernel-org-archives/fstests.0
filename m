@@ -1,329 +1,120 @@
-Received: from mx1.redhat.com ([209.132.183.28]:60026 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751334AbdENIBo (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 14 May 2017 04:01:44 -0400
-Date: Sun, 14 May 2017 16:01:41 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH] fsstress: add AIO read and write test
-Message-ID: <20170514080141.GE19070@dhcp12-143.nay.redhat.com>
-References: <1494685432-11360-1-git-send-email-zlang@redhat.com>
- <20170514042834.GB4514@birch.djwong.org>
+Received: from mail-pf0-f193.google.com ([209.85.192.193]:36317 "EHLO
+        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751689AbdENJ2d (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 14 May 2017 05:28:33 -0400
+Received: by mail-pf0-f193.google.com with SMTP id n23so10965634pfb.3
+        for <fstests@vger.kernel.org>; Sun, 14 May 2017 02:28:33 -0700 (PDT)
+Received: from localhost ([128.199.137.77])
+        by smtp.gmail.com with ESMTPSA id t66sm16025533pfe.134.2017.05.14.02.28.30
+        for <fstests@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Sun, 14 May 2017 02:28:31 -0700 (PDT)
+Message-ID: <5918233f.45a6620a.43941.5330@mx.google.com>
+From: Eryu Guan <guaneryu@gmail.com>
+Date: Sun, 14 May 2017 17:28:28 +0800
+Subject: [ANNOUNCE] fstests: master branch updated to 777e1d628029
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="6Rgjq4rpTD5n"
 Content-Disposition: inline
-In-Reply-To: <20170514042834.GB4514@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, May 13, 2017 at 09:28:35PM -0700, Darrick J. Wong wrote:
-> On Sat, May 13, 2017 at 10:23:52PM +0800, Zorro Lang wrote:
-> > We found some bugs by aio read/write test, but there's not related
-> > operations in fsstress. So add AIO read/write test into fsstress to
-> > increase AIO stress test.
-> 
-> I bet you'd find even /more/ problems if you tried adding io_prep_fsync
-> to fsstress. ;)
 
-Good idea! How about add an afsync_f() likes fsync_f() in fsstress, likes:
+--6Rgjq4rpTD5n
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-void
-afsync_f(int opno, long r)
-{
-#ifdef AIO
-        int             e;
-        pathname_t      f;
-        int             fd;
-        int             v;
-        struct iocb     iocb;
-        struct iocb     *iocbs[] = { &iocb };
-        struct io_event event;
+Hi all,
 
-        init_pathname(&f);
-        if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
-                if (v)
-                        printf("%d/%d: afsync - no filename\n", procid, opno);
-                free_pathname(&f);
-                return;
-        }
-        fd = open_path(&f, O_WRONLY | O_DIRECT);
-        e = fd < 0 ? errno : 0;
-        check_cwd();
-        if (fd < 0) {
-                if (v)
-                        printf("%d/%d: afsync - open %s failed %d\n",
-                               procid, opno, f.path, e);
-                free_pathname(&f);
-                return;
-        }
+The master branch of the xfstests repository at:
 
-        io_prep_fsync(&iocb, fd);
-        if (io_submit(io_ctx, 1, iocbs) != 1) {
-                if (v)
-                        printf("%d/%d: afsync - io_submit %s %d\n",
-                               procid, opno, f.path, errno);
-                free_pathname(&f);
-                close(fd);
-                return;
-        }
-        if (io_getevents(io_ctx, 1, 1, &event, NULL) != 1) {
-                if (v)
-                        printf("%d/%d: afsync - io_getevents failed %d\n",
-                               procid, opno, errno);
-                free_pathname(&f);
-                close(fd);
-                return;
-        }
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-        e = event.res < 0 ? errno : 0;
-        if (v)
-                printf("%d/%d: afsync %s %d\n", procid, opno, f.path, e);
-        free_pathname(&f);
-        close(fd);
-#endif
-}
+have just been updated. There're five new generic tests for copy_file_range(2)
+syscall added in this update. Many thanks to Anna Schumaker, also thank Darrick
+for reviewing these new tests! Besides that, there're improvements to
+set_prog_path function to make things run a bit faster, more improvements to
+overlayfs consistent inode test, and a bug fix to seek_sanity_test found in
+cephfs testing.
 
-Or do you have any other ideas?
+New failures I've noticed in this update:
+- copy_file_range(2) tests generic/430, generic/433 and generic/434 fail when
+  testing cifs against a Linux samba server, tests return EIO if offset of
+  source file is or greater than file size.
 
 Thanks,
-Zorro
+Eryu
 
-> 
-> --D
-> 
-> > 
-> > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > ---
-> >  ltp/fsstress.c | 157 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  1 file changed, 157 insertions(+)
-> > 
-> > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> > index 6d8f117..5d5c362 100644
-> > --- a/ltp/fsstress.c
-> > +++ b/ltp/fsstress.c
-> > @@ -35,6 +35,10 @@
-> >  #ifdef HAVE_SYS_PRCTL_H
-> >  #include <sys/prctl.h>
-> >  #endif
-> > +#ifdef AIO
-> > +#include <libaio.h>
-> > +io_context_t	io_ctx;
-> > +#endif
-> >  
-> >  #ifndef FS_IOC_GETFLAGS
-> >  #define FS_IOC_GETFLAGS                 _IOR('f', 1, long)
-> > @@ -52,8 +56,10 @@
-> >  
-> >  typedef enum {
-> >  	OP_ALLOCSP,
-> > +	OP_AREAD,
-> >  	OP_ATTR_REMOVE,
-> >  	OP_ATTR_SET,
-> > +	OP_AWRITE,
-> >  	OP_BULKSTAT,
-> >  	OP_BULKSTAT1,
-> >  	OP_CHOWN,
-> > @@ -153,8 +159,10 @@ struct print_string {
-> >  #define	MAXFSIZE32	((1ULL << 40) - 1ULL)
-> >  
-> >  void	allocsp_f(int, long);
-> > +void	aread_f(int, long);
-> >  void	attr_remove_f(int, long);
-> >  void	attr_set_f(int, long);
-> > +void	awrite_f(int, long);
-> >  void	bulkstat_f(int, long);
-> >  void	bulkstat1_f(int, long);
-> >  void	chown_f(int, long);
-> > @@ -195,8 +203,10 @@ void	write_f(int, long);
-> >  opdesc_t	ops[] = {
-> >       /* { OP_ENUM, "name", function, freq, iswrite }, */
-> >  	{ OP_ALLOCSP, "allocsp", allocsp_f, 1, 1 },
-> > +	{ OP_AREAD, "aread", aread_f, 1, 0 },
-> >  	{ OP_ATTR_REMOVE, "attr_remove", attr_remove_f, /* 1 */ 0, 1 },
-> >  	{ OP_ATTR_SET, "attr_set", attr_set_f, /* 2 */ 0, 1 },
-> > +	{ OP_AWRITE, "awrite", awrite_f, 1, 1 },
-> >  	{ OP_BULKSTAT, "bulkstat", bulkstat_f, 1, 0 },
-> >  	{ OP_BULKSTAT1, "bulkstat1", bulkstat1_f, 1, 0 },
-> >  	{ OP_CHOWN, "chown", chown_f, 3, 1 },
-> > @@ -576,8 +586,20 @@ int main(int argc, char **argv)
-> >  				}
-> >  			}
-> >  			procid = i;
-> > +#ifdef AIO
-> > +			if (io_setup(128, &io_ctx) != 0) {
-> > +				perror("io_setup failed");
-> > +				exit(1);
-> > +			}
-> > +#endif
-> >  			for (i = 0; !loops || (i < loops); i++)
-> >  				doproc();
-> > +#ifdef AIO
-> > +			if(io_destroy(io_ctx) != 0) {
-> > +				perror("io_destroy failed");
-> > +				return 1;
-> > +			}
-> > +#endif
-> >  			return 0;
-> >  		}
-> >  	}
-> > @@ -1730,6 +1752,133 @@ allocsp_f(int opno, long r)
-> >  	close(fd);
-> >  }
-> >  
-> > +#ifdef AIO
-> > +void
-> > +do_aio_rw(int opno, long r, int flags)
-> > +{
-> > +	__int64_t	align;
-> > +	char		*buf;
-> > +	struct dioattr	diob;
-> > +	int		e;
-> > +	pathname_t	f;
-> > +	int		fd;
-> > +	size_t		len;
-> > +	__int64_t	lr;
-> > +	off64_t		off;
-> > +	struct stat64	stb;
-> > +	int		v;
-> > +	char		st[1024];
-> > +	char		*dio_env;
-> > +	struct iocb	iocb;
-> > +	struct io_event	event;
-> > +	struct iocb	*iocbs[] = { &iocb };
-> > +	int		iswrite = (flags & (O_WRONLY | O_RDWR)) ? 1 : 0;
-> > +
-> > +	init_pathname(&f);
-> > +	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
-> > +		if (v)
-> > +			printf("%d/%d: do_aio_rw - no filename\n", procid, opno);
-> > +		free_pathname(&f);
-> > +		return;
-> > +	}
-> > +	fd = open_path(&f, flags|O_DIRECT);
-> > +	e = fd < 0 ? errno : 0;
-> > +	check_cwd();
-> > +	if (fd < 0) {
-> > +		if (v)
-> > +			printf("%d/%d: do_aio_rw - open %s failed %d\n",
-> > +			       procid, opno, f.path, e);
-> > +		free_pathname(&f);
-> > +		return;
-> > +	}
-> > +	if (fstat64(fd, &stb) < 0) {
-> > +		if (v)
-> > +			printf("%d/%d: do_aio_rw - fstat64 %s failed %d\n",
-> > +			       procid, opno, f.path, errno);
-> > +		free_pathname(&f);
-> > +		close(fd);
-> > +		return;
-> > +	}
-> > +	inode_info(st, sizeof(st), &stb, v);
-> > +	if (!iswrite && stb.st_size == 0) {
-> > +		if (v)
-> > +			printf("%d/%d: do_aio_rw - %s%s zero size\n", procid, opno,
-> > +			       f.path, st);
-> > +		free_pathname(&f);
-> > +		close(fd);
-> > +		return;
-> > +	}
-> > +	if (xfsctl(f.path, fd, XFS_IOC_DIOINFO, &diob) < 0) {
-> > +		if (v)
-> > +			printf(
-> > +			"%d/%d: do_aio_rw - xfsctl(XFS_IOC_DIOINFO) %s%s failed %d\n",
-> > +				procid, opno, f.path, st, errno);
-> > +		free_pathname(&f);
-> > +		close(fd);
-> > +		return;
-> > +	}
-> > +	dio_env = getenv("XFS_DIO_MIN");
-> > +	if (dio_env)
-> > +		diob.d_mem = diob.d_miniosz = atoi(dio_env);
-> > +	align = (__int64_t)diob.d_miniosz;
-> > +	lr = ((__int64_t)random() << 32) + random();
-> > +	len = (random() % FILELEN_MAX) + 1;
-> > +	len -= (len % align);
-> > +	if (len <= 0)
-> > +		len = align;
-> > +	else if (len > diob.d_maxiosz)
-> > +		len = diob.d_maxiosz;
-> > +	buf = memalign(diob.d_mem, len);
-> > +
-> > +	if (iswrite) {
-> > +		off = (off64_t)(lr % MIN(stb.st_size + (1024 * 1024), MAXFSIZE));
-> > +		off -= (off % align);
-> > +		off %= maxfsize;
-> > +		memset(buf, nameseq & 0xff, len);
-> > +		io_prep_pwrite(&iocb, fd, buf, len, off);
-> > +	} else {
-> > +		off = (off64_t)(lr % stb.st_size);
-> > +		off -= (off % align);
-> > +		io_prep_pread(&iocb, fd, buf, len, off);
-> > +	}
-> > +	if (io_submit(io_ctx, 1, iocbs) != 1) {
-> > +		if (v)
-> > +			printf("%d/%d: %s - io_submit failed %d\n",
-> > +			       procid, opno, iswrite ? "awrite" : "aread",
-> > +			       errno);
-> > +		free_pathname(&f);
-> > +		close(fd);
-> > +		return;
-> > +	}
-> > +	if (io_getevents(io_ctx, 1, 1, &event, NULL) != 1) {
-> > +		if (v)
-> > +			printf("%d/%d: %s - io_getevents failed %d\n",
-> > +			       procid, opno, iswrite ? "awrite" : "aread",
-> > +			       errno);
-> > +		free_pathname(&f);
-> > +		close(fd);
-> > +		return;
-> > +	}
-> > +
-> > +	e = event.res < 0 ? errno : 0;
-> > +	free(buf);
-> > +	if (v)
-> > +		printf("%d/%d: %s %s%s [%lld,%d] %d\n",
-> > +		       procid, opno, iswrite ? "awrite" : "aread",
-> > +		       f.path, st, (long long)off, (int)len, e);
-> > +	free_pathname(&f);
-> > +	close(fd);
-> > +}
-> > +#endif
-> > +
-> > +void
-> > +aread_f(int opno, long r)
-> > +{
-> > +#ifdef AIO
-> > +	do_aio_rw(opno, r, O_RDONLY);
-> > +#endif
-> > +}
-> > +
-> >  void
-> >  attr_remove_f(int opno, long r)
-> >  {
-> > @@ -1834,6 +1983,14 @@ attr_set_f(int opno, long r)
-> >  }
-> >  
-> >  void
-> > +awrite_f(int opno, long r)
-> > +{
-> > +#ifdef AIO
-> > +	do_aio_rw(opno, r, O_WRONLY);
-> > +#endif
-> > +}
-> > +
-> > +void
-> >  bulkstat_f(int opno, long r)
-> >  {
-> >  	int		count;
-> > -- 
-> > 2.7.4
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The new head of the master branch is commit:
+
+777e1d628029 overlay/017: test consistent st_ino/d_ino for hardlinks
+
+New commits:
+
+Amir Goldstein (3):
+      [0b7318100594] src/t_dir_type: support filtering by inode number
+      [a19298e36317] overlay/017: use t_dir_type to find file by d_ino
+      [777e1d628029] overlay/017: test consistent st_ino/d_ino for hardlinks
+
+Anna Schumaker (5):
+      [330ba8b3c36a] generic: Add copy to new file test
+      [7dada91d00b5] generic: Add small copies to new file test
+      [cd3908f4dc07] generic: Add copy test that overwrites data
+      [e52ffc092397] generic: Add a copy test for overwriting small amounts of data
+      [dabd808a5233] generic: Add a copy test for invalid input
+
+Eric Biggers (2):
+      [7b1ae2457c81] common/config: make set_prog_path() accept one argument only
+      [904a46958ca0] common/config: implement set_prog_path() using 'type -P'
+
+Luis Henriques (1):
+      [763008fd8800] src/seek_sanity_test: ensure file size is big enough
+
+
+Code Diffstat:
+
+ common/config              |  20 +--------
+ common/rc                  |   6 +++
+ doc/auxiliary-programs.txt |   7 ++++
+ src/seek_sanity_test.c     |   6 +--
+ src/t_dir_type.c           |  11 +++--
+ tests/generic/430          | 102 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/430.out      |  25 +++++++++++
+ tests/generic/431          |  83 ++++++++++++++++++++++++++++++++++++
+ tests/generic/431.out      |  15 +++++++
+ tests/generic/432          | 100 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/432.out      |  17 ++++++++
+ tests/generic/433          |  87 ++++++++++++++++++++++++++++++++++++++
+ tests/generic/433.out      |  17 ++++++++
+ tests/generic/434          |  79 +++++++++++++++++++++++++++++++++++
+ tests/generic/434.out      |  14 +++++++
+ tests/generic/group        |   5 +++
+ tests/overlay/017          |   9 ++--
+ 17 files changed, 575 insertions(+), 28 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
+
+--6Rgjq4rpTD5n
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJZGB7AAAoJECZSqilcj+djE34QANJu1Yp/WFXlrm8pP5sI7z2m
+AWXLTsNrjkcgSR/VkCfINdlHfwbAbkeBbFLeW9Zw5I8GDuOOOP+rmH9IMjA4cdm0
+gXaz3GMPn7NcZKjp/ZFhhCZtYs6qijohUnLaLb9Af7ErSbh9u1FInczzq9AkuZ98
+Kyua0YxdIqD/HwLwDwX0oP6EfNCwDbj+g0Qc+LoSV3UvKliekiQ3jdYlCrMIkiCE
+urqYs5fuQ/3P3y8P8+ZRG0ICsIRiRfzn36WOtUeCcLcb3JX0W1SbIuFis7qrctIz
+8xSiICn8/zG0MBp3ECXI+pGKLtTVvK/v9GMAF89YLFIFtnW4OlhCRy6lgXMNKwnK
+sN4ypyfNsUuJyRp3jalF56ehRkNP6A65CoLiJ9QRC9tEgxPMBrzzYeIgH5o/gUtk
+u+2g6DraSCilUroHZBmt22nYMd1pImRt1304tEWIDR8ck3irU/MOKMGmH6W++cYO
+dg1n84vH+cPlmMGGot/p1dA8nf51AQEV+1zmcwg3Rn43aKzKKRH4KFKYoUstNpep
+7PIW0aIxSKVKfsaAfgLHEuJAiyCZd3XegLYSCqDj2LURnkWkhFsIJGIxAjskxY8l
+NQHxc1yVAYSo15Aj434i3PMN1jpepoy8YJXFTb0uppub3l8wUikO1moXtX9ccnf7
+BbnFlGOIbb94IYYUjC8R
+=zXNP
+-----END PGP SIGNATURE-----
+
+--6Rgjq4rpTD5n--
