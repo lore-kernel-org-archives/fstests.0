@@ -1,61 +1,287 @@
-Received: from mx2.suse.de ([195.135.220.15]:35191 "EHLO mx1.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:45470 "EHLO mx1.suse.de"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1755038AbdEOMbj (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 15 May 2017 08:31:39 -0400
-Date: Mon, 15 May 2017 14:31:26 +0200
+        id S933222AbdEOOeB (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 15 May 2017 10:34:01 -0400
 From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH] generic/285: Add more SEEK_HOLE tests
-Message-ID: <20170515123126.GG16182@quack2.suse.cz>
-References: <20170511164809.29739-1-jack@suse.cz>
- <20170512080443.GN7250@eguan.usersys.redhat.com>
- <20170512230657.GP12369@dastard>
- <20170513172620.GR7250@eguan.usersys.redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170513172620.GR7250@eguan.usersys.redhat.com>
+Subject: [PATCH v2] generic/435: Add more SEEK_HOLE tests
+Date: Mon, 15 May 2017 16:33:51 +0200
+Message-Id: <20170515143351.20690-1-jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Dave Chinner <david@fromorbit.com>, Jan Kara <jack@suse.cz>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>, Jan Kara <jack@suse.cz>
 List-ID: <fstests@vger.kernel.org>
 
-On Sun 14-05-17 01:26:21, Eryu Guan wrote:
-> On Sat, May 13, 2017 at 09:06:57AM +1000, Dave Chinner wrote:
-> > On Fri, May 12, 2017 at 04:04:43PM +0800, Eryu Guan wrote:
-> > > On Thu, May 11, 2017 at 06:48:09PM +0200, Jan Kara wrote:
-> > > > Add tests for bugs found in ext4 & xfs SEEK_HOLE implementations
-> > > > fixed by following patches:
-> > > > 
-> > > > xfs: Fix missed holes in SEEK_HOLE implementation
-> > > > ext4: Fix SEEK_HOLE
-> > > > 
-> > > > Signed-off-by: Jan Kara <jack@suse.cz>
-> > > 
-> > > This will cause ext4 and xfs start to fail with current linus tree and
-> > > appear as a new regression. So we usually don't add new tests to
-> > > existing cases.
-> > > 
-> > > But seek_sanity_test.c deals with different SEEK_DATA/HOLE implentations
-> > > nicely, which would be a bit tricky to do in a new test by shell, and it
-> > > has all the infrastructures for new tests like this. So I think I'd
-> > > prefer merging this patch as is, and document the false regression alert
-> > > in release announce email.
-> > 
-> > Make the new tests optional (i.e. on a cli switch) and add a new
-> > xfstest that runs them? Old test remains unchanged, doesn't fail,
-> > new test covers the new tests, will fail on old kernels (which is ok
-> > for new tests).
-> 
-> Yeah, this should work and looks a better solution to me. This avoids
-> regressing generic/285 again when adding another new test in future,
-> future tests could just follow this path too. Thanks for the suggestion!
-> 
-> Jan, could you please update the patch and, as suggested by Dave, make
-> it a new test? I can do it too if you like.
+Add tests for bugs found in ext4 & xfs SEEK_HOLE implementations
+fixed by following patches:
 
-Yeah, Dave's idea looks good. I'll work on it and send an updated version.
+xfs: Fix missed holes in SEEK_HOLE implementation
+ext4: Fix SEEK_HOLE
 
-								Honza
+Signed-off-by: Jan Kara <jack@suse.cz>
+---
+ src/seek_sanity_test.c | 126 +++++++++++++++++++++++++++++++++++++++++++++++--
+ tests/generic/435      |  63 +++++++++++++++++++++++++
+ tests/generic/435.out  |   1 +
+ tests/generic/group    |   1 +
+ 4 files changed, 186 insertions(+), 5 deletions(-)
+ create mode 100755 tests/generic/435
+ create mode 100644 tests/generic/435.out
+
+diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
+index a6dd48cc257b..646da058e102 100644
+--- a/src/seek_sanity_test.c
++++ b/src/seek_sanity_test.c
+@@ -246,6 +246,100 @@ out:
+ }
+ 
+ /*
++ * test file with unwritten extents, only have pagevec worth of dirty pages
++ * in page cache, a hole and then another page.
++ */
++static int test14(int fd, int testnum)
++{
++	int ret = 0;
++	char *buf = NULL;
++	int bufsz = sysconf(_SC_PAGE_SIZE) * 14;
++	int filsz = 4 << 20;
++
++	/* HOLE - unwritten DATA in dirty page */
++	/* Each unit is bufsz */
++	buf = do_malloc(bufsz);
++	if (!buf)
++		goto out;
++	memset(buf, 'a', bufsz);
++
++	/* preallocate 4M space to file */
++	ret = do_fallocate(fd, 0, filsz, 0);
++	if (ret < 0) {
++		/* Report success if fs doesn't support fallocate */
++		if (errno == EOPNOTSUPP) {
++			fprintf(stdout, "Test skipped as fs doesn't support fallocate.\n");
++			ret = 0;
++		}
++		goto out;
++	}
++
++	ret = do_pwrite(fd, buf, bufsz, 0);
++	if (ret)
++		goto out;
++
++	ret = do_pwrite(fd, buf, bufsz, 3 * bufsz);
++	if (ret)
++		goto out;
++
++	/* offset at the beginning */
++	ret += do_lseek(testnum,  1, fd, filsz, SEEK_HOLE, 0, bufsz);
++	ret += do_lseek(testnum,  2, fd, filsz, SEEK_HOLE, 1, bufsz);
++	ret += do_lseek(testnum,  2, fd, filsz, SEEK_HOLE, 3 * bufsz, 4 * bufsz);
++	ret += do_lseek(testnum,  3, fd, filsz, SEEK_DATA, 0, 0);
++	ret += do_lseek(testnum,  4, fd, filsz, SEEK_DATA, 1, 1);
++	ret += do_lseek(testnum,  3, fd, filsz, SEEK_DATA, bufsz, 3 * bufsz);
++
++out:
++	do_free(buf);
++	return ret;
++}
++
++/*
++ * test file with unwritten extents, only have pagevec worth of dirty pages
++ * in page cache.
++ */
++static int test13(int fd, int testnum)
++{
++	int ret = 0;
++	char *buf = NULL;
++	int bufsz = sysconf(_SC_PAGE_SIZE) * 14;
++	int filsz = 4 << 20;
++
++	/* HOLE - unwritten DATA in dirty page */
++	/* Each unit is bufsz */
++	buf = do_malloc(bufsz);
++	if (!buf)
++		goto out;
++	memset(buf, 'a', bufsz);
++
++	/* preallocate 4M space to file */
++	ret = do_fallocate(fd, 0, filsz, 0);
++	if (ret < 0) {
++		/* Report success if fs doesn't support fallocate */
++		if (errno == EOPNOTSUPP) {
++			fprintf(stdout, "Test skipped as fs doesn't support fallocate.\n");
++			ret = 0;
++		}
++		goto out;
++	}
++
++	ret = do_pwrite(fd, buf, bufsz, 0);
++	if (ret)
++		goto out;
++
++	/* offset at the beginning */
++	ret += do_lseek(testnum,  1, fd, filsz, SEEK_HOLE, 0, bufsz);
++	ret += do_lseek(testnum,  2, fd, filsz, SEEK_HOLE, 1, bufsz);
++	ret += do_lseek(testnum,  3, fd, filsz, SEEK_DATA, 0, 0);
++	ret += do_lseek(testnum,  4, fd, filsz, SEEK_DATA, 1, 1);
++
++out:
++	do_free(buf);
++	return ret;
++}
++
++/*
+  * Test huge file to check for overflows of block counts due to usage of
+  * 32-bit types.
+  */
+@@ -678,6 +772,8 @@ struct testrec seek_tests[] = {
+        { 10, test10, "Test a huge file for offset overflow" },
+        { 11, test11, "Test a huge file for block number signed" },
+        { 12, test12, "Test a huge file for block number overflow" },
++       { 13, test13, "Test file with unwritten extents, only have pagevec dirty pages" },
++       { 14, test14, "Test file with unwritten extents, small hole after pagevec dirty pages" },
+ };
+ 
+ static int run_test(struct testrec *tr)
+@@ -786,7 +882,7 @@ out:
+ 
+ void usage(char *cmd)
+ {
+-	fprintf(stdout, "Usage: %s [-t] base_file_path\n", cmd);
++	fprintf(stdout, "Usage: %s [-t] [-s <starttest>] [-e <endtest>] base_file_path\n", cmd);
+ 	exit(1);
+ }
+ 
+@@ -797,12 +893,29 @@ int main(int argc, char **argv)
+ 	int opt;
+ 	int check_support = 0;
+ 	int numtests = sizeof(seek_tests) / sizeof(struct testrec);
++	int teststart = 1, testend = 12;
+ 
+-	while ((opt = getopt(argc, argv, "t")) != -1) {
++	while ((opt = getopt(argc, argv, "ts:e:")) != -1) {
+ 		switch (opt) {
+ 		case 't':
+ 			check_support++;
+ 			break;
++		case 's':
++			teststart = strtol(optarg, NULL, 10);
++			if (teststart <= 0) {
++				fprintf(stdout, "Invalid starting test: %s\n",
++					optarg);
++				usage(argv[0]);
++			}
++			break;
++		case 'e':
++			testend = strtol(optarg, NULL, 10);
++			if (testend <= 0) {
++				fprintf(stdout, "Invalid final test: %s\n",
++					optarg);
++				usage(argv[0]);
++			}
++			break;
+ 		default:
+ 			usage(argv[0]);
+ 		}
+@@ -819,9 +932,12 @@ int main(int argc, char **argv)
+ 		goto out;
+ 
+ 	for (i = 0; i < numtests; ++i) {
+-		ret = run_test(&seek_tests[i]);
+-		if (ret)
+-			break;
++		if (seek_tests[i].test_num >= teststart &&
++		    seek_tests[i].test_num <= testend) {
++			ret = run_test(&seek_tests[i]);
++			if (ret)
++				break;
++		}
+ 	}
+ 
+ out:
+diff --git a/tests/generic/435 b/tests/generic/435
+new file mode 100755
+index 000000000000..80baf3b9a25b
+--- /dev/null
++++ b/tests/generic/435
+@@ -0,0 +1,63 @@
++#! /bin/bash
++# FS QA Test No. 435
++#
++# More SEEK_DATA/SEEK_HOLE sanity tests.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2011 Oracle Inc.  All Rights Reserved.
++# Copyright (c) 2011 Red Hat.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++_supported_fs generic
++_supported_os Linux
++
++_require_test
++_require_seek_data_hole
++
++BASE_TEST_FILE=$TEST_DIR/seek_sanity_testfile
++
++_require_test_program "seek_sanity_test"
++
++# Disable extent zeroing for ext4 as that change where holes are created
++if [ "$FSTYP" = "ext4" ]; then
++	DEV=`_short_dev $TEST_DEV`
++	echo 0 >/sys/fs/ext4/$DEV/extent_max_zeroout_kb
++fi
++
++_cleanup()
++{
++	eval "rm -f $BASE_TEST_FILE.*"
++}
++
++$here/src/seek_sanity_test -s 13 -e 16 $BASE_TEST_FILE > $seqres.full 2>&1 ||
++	_fail "seek sanity check failed!"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/435.out b/tests/generic/435.out
+new file mode 100644
+index 000000000000..e10caa0f0b5f
+--- /dev/null
++++ b/tests/generic/435.out
+@@ -0,0 +1 @@
++QA output created by 435
+diff --git a/tests/generic/group b/tests/generic/group
+index 9fc7f9d419a8..c6628d97af76 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -432,3 +432,4 @@
+ 427 auto quick aio rw
+ 428 auto quick
+ 429 auto encrypt
++435 auto quick rw
 -- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+2.12.0
+
