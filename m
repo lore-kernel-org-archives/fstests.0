@@ -1,287 +1,355 @@
-Received: from mx2.suse.de ([195.135.220.15]:45470 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S933222AbdEOOeB (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 15 May 2017 10:34:01 -0400
-From: Jan Kara <jack@suse.cz>
-Subject: [PATCH v2] generic/435: Add more SEEK_HOLE tests
-Date: Mon, 15 May 2017 16:33:51 +0200
-Message-Id: <20170515143351.20690-1-jack@suse.cz>
+Received: from userp1040.oracle.com ([156.151.31.81]:33884 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935060AbdEOQCx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 15 May 2017 12:02:53 -0400
+Date: Mon, 15 May 2017 09:02:47 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] fsstress: add AIO read and write test
+Message-ID: <20170515160247.GC4514@birch.djwong.org>
+References: <1494685432-11360-1-git-send-email-zlang@redhat.com>
+ <20170514042834.GB4514@birch.djwong.org>
+ <20170514080141.GE19070@dhcp12-143.nay.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170514080141.GE19070@dhcp12-143.nay.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>, Jan Kara <jack@suse.cz>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Add tests for bugs found in ext4 & xfs SEEK_HOLE implementations
-fixed by following patches:
+On Sun, May 14, 2017 at 04:01:41PM +0800, Zorro Lang wrote:
+> On Sat, May 13, 2017 at 09:28:35PM -0700, Darrick J. Wong wrote:
+> > On Sat, May 13, 2017 at 10:23:52PM +0800, Zorro Lang wrote:
+> > > We found some bugs by aio read/write test, but there's not related
+> > > operations in fsstress. So add AIO read/write test into fsstress to
+> > > increase AIO stress test.
+> > 
+> > I bet you'd find even /more/ problems if you tried adding io_prep_fsync
+> > to fsstress. ;)
+> 
+> Good idea! How about add an afsync_f() likes fsync_f() in fsstress, likes:
+> 
+> void
+> afsync_f(int opno, long r)
+> {
+> #ifdef AIO
+>         int             e;
+>         pathname_t      f;
+>         int             fd;
+>         int             v;
+>         struct iocb     iocb;
+>         struct iocb     *iocbs[] = { &iocb };
+>         struct io_event event;
+> 
+>         init_pathname(&f);
+>         if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+>                 if (v)
+>                         printf("%d/%d: afsync - no filename\n", procid, opno);
+>                 free_pathname(&f);
+>                 return;
+>         }
+>         fd = open_path(&f, O_WRONLY | O_DIRECT);
+>         e = fd < 0 ? errno : 0;
+>         check_cwd();
+>         if (fd < 0) {
+>                 if (v)
+>                         printf("%d/%d: afsync - open %s failed %d\n",
+>                                procid, opno, f.path, e);
+>                 free_pathname(&f);
+>                 return;
+>         }
+> 
+>         io_prep_fsync(&iocb, fd);
+>         if (io_submit(io_ctx, 1, iocbs) != 1) {
+>                 if (v)
+>                         printf("%d/%d: afsync - io_submit %s %d\n",
+>                                procid, opno, f.path, errno);
+>                 free_pathname(&f);
+>                 close(fd);
+>                 return;
+>         }
+>         if (io_getevents(io_ctx, 1, 1, &event, NULL) != 1) {
+>                 if (v)
+>                         printf("%d/%d: afsync - io_getevents failed %d\n",
+>                                procid, opno, errno);
 
-xfs: Fix missed holes in SEEK_HOLE implementation
-ext4: Fix SEEK_HOLE
+Uh... I think io_getevents passes negative error codes back via return
+value, not via errno.  Or so claims the manpage.
 
-Signed-off-by: Jan Kara <jack@suse.cz>
----
- src/seek_sanity_test.c | 126 +++++++++++++++++++++++++++++++++++++++++++++++--
- tests/generic/435      |  63 +++++++++++++++++++++++++
- tests/generic/435.out  |   1 +
- tests/generic/group    |   1 +
- 4 files changed, 186 insertions(+), 5 deletions(-)
- create mode 100755 tests/generic/435
- create mode 100644 tests/generic/435.out
+>                 free_pathname(&f);
+>                 close(fd);
+>                 return;
+>         }
+> 
+>         e = event.res < 0 ? errno : 0;
 
-diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
-index a6dd48cc257b..646da058e102 100644
---- a/src/seek_sanity_test.c
-+++ b/src/seek_sanity_test.c
-@@ -246,6 +246,100 @@ out:
- }
- 
- /*
-+ * test file with unwritten extents, only have pagevec worth of dirty pages
-+ * in page cache, a hole and then another page.
-+ */
-+static int test14(int fd, int testnum)
-+{
-+	int ret = 0;
-+	char *buf = NULL;
-+	int bufsz = sysconf(_SC_PAGE_SIZE) * 14;
-+	int filsz = 4 << 20;
-+
-+	/* HOLE - unwritten DATA in dirty page */
-+	/* Each unit is bufsz */
-+	buf = do_malloc(bufsz);
-+	if (!buf)
-+		goto out;
-+	memset(buf, 'a', bufsz);
-+
-+	/* preallocate 4M space to file */
-+	ret = do_fallocate(fd, 0, filsz, 0);
-+	if (ret < 0) {
-+		/* Report success if fs doesn't support fallocate */
-+		if (errno == EOPNOTSUPP) {
-+			fprintf(stdout, "Test skipped as fs doesn't support fallocate.\n");
-+			ret = 0;
-+		}
-+		goto out;
-+	}
-+
-+	ret = do_pwrite(fd, buf, bufsz, 0);
-+	if (ret)
-+		goto out;
-+
-+	ret = do_pwrite(fd, buf, bufsz, 3 * bufsz);
-+	if (ret)
-+		goto out;
-+
-+	/* offset at the beginning */
-+	ret += do_lseek(testnum,  1, fd, filsz, SEEK_HOLE, 0, bufsz);
-+	ret += do_lseek(testnum,  2, fd, filsz, SEEK_HOLE, 1, bufsz);
-+	ret += do_lseek(testnum,  2, fd, filsz, SEEK_HOLE, 3 * bufsz, 4 * bufsz);
-+	ret += do_lseek(testnum,  3, fd, filsz, SEEK_DATA, 0, 0);
-+	ret += do_lseek(testnum,  4, fd, filsz, SEEK_DATA, 1, 1);
-+	ret += do_lseek(testnum,  3, fd, filsz, SEEK_DATA, bufsz, 3 * bufsz);
-+
-+out:
-+	do_free(buf);
-+	return ret;
-+}
-+
-+/*
-+ * test file with unwritten extents, only have pagevec worth of dirty pages
-+ * in page cache.
-+ */
-+static int test13(int fd, int testnum)
-+{
-+	int ret = 0;
-+	char *buf = NULL;
-+	int bufsz = sysconf(_SC_PAGE_SIZE) * 14;
-+	int filsz = 4 << 20;
-+
-+	/* HOLE - unwritten DATA in dirty page */
-+	/* Each unit is bufsz */
-+	buf = do_malloc(bufsz);
-+	if (!buf)
-+		goto out;
-+	memset(buf, 'a', bufsz);
-+
-+	/* preallocate 4M space to file */
-+	ret = do_fallocate(fd, 0, filsz, 0);
-+	if (ret < 0) {
-+		/* Report success if fs doesn't support fallocate */
-+		if (errno == EOPNOTSUPP) {
-+			fprintf(stdout, "Test skipped as fs doesn't support fallocate.\n");
-+			ret = 0;
-+		}
-+		goto out;
-+	}
-+
-+	ret = do_pwrite(fd, buf, bufsz, 0);
-+	if (ret)
-+		goto out;
-+
-+	/* offset at the beginning */
-+	ret += do_lseek(testnum,  1, fd, filsz, SEEK_HOLE, 0, bufsz);
-+	ret += do_lseek(testnum,  2, fd, filsz, SEEK_HOLE, 1, bufsz);
-+	ret += do_lseek(testnum,  3, fd, filsz, SEEK_DATA, 0, 0);
-+	ret += do_lseek(testnum,  4, fd, filsz, SEEK_DATA, 1, 1);
-+
-+out:
-+	do_free(buf);
-+	return ret;
-+}
-+
-+/*
-  * Test huge file to check for overflows of block counts due to usage of
-  * 32-bit types.
-  */
-@@ -678,6 +772,8 @@ struct testrec seek_tests[] = {
-        { 10, test10, "Test a huge file for offset overflow" },
-        { 11, test11, "Test a huge file for block number signed" },
-        { 12, test12, "Test a huge file for block number overflow" },
-+       { 13, test13, "Test file with unwritten extents, only have pagevec dirty pages" },
-+       { 14, test14, "Test file with unwritten extents, small hole after pagevec dirty pages" },
- };
- 
- static int run_test(struct testrec *tr)
-@@ -786,7 +882,7 @@ out:
- 
- void usage(char *cmd)
- {
--	fprintf(stdout, "Usage: %s [-t] base_file_path\n", cmd);
-+	fprintf(stdout, "Usage: %s [-t] [-s <starttest>] [-e <endtest>] base_file_path\n", cmd);
- 	exit(1);
- }
- 
-@@ -797,12 +893,29 @@ int main(int argc, char **argv)
- 	int opt;
- 	int check_support = 0;
- 	int numtests = sizeof(seek_tests) / sizeof(struct testrec);
-+	int teststart = 1, testend = 12;
- 
--	while ((opt = getopt(argc, argv, "t")) != -1) {
-+	while ((opt = getopt(argc, argv, "ts:e:")) != -1) {
- 		switch (opt) {
- 		case 't':
- 			check_support++;
- 			break;
-+		case 's':
-+			teststart = strtol(optarg, NULL, 10);
-+			if (teststart <= 0) {
-+				fprintf(stdout, "Invalid starting test: %s\n",
-+					optarg);
-+				usage(argv[0]);
-+			}
-+			break;
-+		case 'e':
-+			testend = strtol(optarg, NULL, 10);
-+			if (testend <= 0) {
-+				fprintf(stdout, "Invalid final test: %s\n",
-+					optarg);
-+				usage(argv[0]);
-+			}
-+			break;
- 		default:
- 			usage(argv[0]);
- 		}
-@@ -819,9 +932,12 @@ int main(int argc, char **argv)
- 		goto out;
- 
- 	for (i = 0; i < numtests; ++i) {
--		ret = run_test(&seek_tests[i]);
--		if (ret)
--			break;
-+		if (seek_tests[i].test_num >= teststart &&
-+		    seek_tests[i].test_num <= testend) {
-+			ret = run_test(&seek_tests[i]);
-+			if (ret)
-+				break;
-+		}
- 	}
- 
- out:
-diff --git a/tests/generic/435 b/tests/generic/435
-new file mode 100755
-index 000000000000..80baf3b9a25b
---- /dev/null
-+++ b/tests/generic/435
-@@ -0,0 +1,63 @@
-+#! /bin/bash
-+# FS QA Test No. 435
-+#
-+# More SEEK_DATA/SEEK_HOLE sanity tests.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2011 Oracle Inc.  All Rights Reserved.
-+# Copyright (c) 2011 Red Hat.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+_supported_fs generic
-+_supported_os Linux
-+
-+_require_test
-+_require_seek_data_hole
-+
-+BASE_TEST_FILE=$TEST_DIR/seek_sanity_testfile
-+
-+_require_test_program "seek_sanity_test"
-+
-+# Disable extent zeroing for ext4 as that change where holes are created
-+if [ "$FSTYP" = "ext4" ]; then
-+	DEV=`_short_dev $TEST_DEV`
-+	echo 0 >/sys/fs/ext4/$DEV/extent_max_zeroout_kb
-+fi
-+
-+_cleanup()
-+{
-+	eval "rm -f $BASE_TEST_FILE.*"
-+}
-+
-+$here/src/seek_sanity_test -s 13 -e 16 $BASE_TEST_FILE > $seqres.full 2>&1 ||
-+	_fail "seek sanity check failed!"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/435.out b/tests/generic/435.out
-new file mode 100644
-index 000000000000..e10caa0f0b5f
---- /dev/null
-+++ b/tests/generic/435.out
-@@ -0,0 +1 @@
-+QA output created by 435
-diff --git a/tests/generic/group b/tests/generic/group
-index 9fc7f9d419a8..c6628d97af76 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -432,3 +432,4 @@
- 427 auto quick aio rw
- 428 auto quick
- 429 auto encrypt
-+435 auto quick rw
--- 
-2.12.0
+IO errors during the aio operation are returned via
+event.res/event.res2, but this drops both error codes entirely, right?
+I was expecting:
 
+e = event.res < 0 ? event.res : event.res2;
+
+Since the io_getevents manpage already states that libaio doesn't set
+errno unless you happen to be invoking the syscalls directly it via
+syscall().
+
+(Apologies for doing this retroactively, but I think you had better
+check the aio read/write patch for this issue too.)
+
+--D
+
+>         if (v)
+>                 printf("%d/%d: afsync %s %d\n", procid, opno, f.path, e);
+>         free_pathname(&f);
+>         close(fd);
+> #endif
+> }
+> 
+> Or do you have any other ideas?
+> 
+> Thanks,
+> Zorro
+> 
+> > 
+> > --D
+> > 
+> > > 
+> > > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > > ---
+> > >  ltp/fsstress.c | 157 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+> > >  1 file changed, 157 insertions(+)
+> > > 
+> > > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> > > index 6d8f117..5d5c362 100644
+> > > --- a/ltp/fsstress.c
+> > > +++ b/ltp/fsstress.c
+> > > @@ -35,6 +35,10 @@
+> > >  #ifdef HAVE_SYS_PRCTL_H
+> > >  #include <sys/prctl.h>
+> > >  #endif
+> > > +#ifdef AIO
+> > > +#include <libaio.h>
+> > > +io_context_t	io_ctx;
+> > > +#endif
+> > >  
+> > >  #ifndef FS_IOC_GETFLAGS
+> > >  #define FS_IOC_GETFLAGS                 _IOR('f', 1, long)
+> > > @@ -52,8 +56,10 @@
+> > >  
+> > >  typedef enum {
+> > >  	OP_ALLOCSP,
+> > > +	OP_AREAD,
+> > >  	OP_ATTR_REMOVE,
+> > >  	OP_ATTR_SET,
+> > > +	OP_AWRITE,
+> > >  	OP_BULKSTAT,
+> > >  	OP_BULKSTAT1,
+> > >  	OP_CHOWN,
+> > > @@ -153,8 +159,10 @@ struct print_string {
+> > >  #define	MAXFSIZE32	((1ULL << 40) - 1ULL)
+> > >  
+> > >  void	allocsp_f(int, long);
+> > > +void	aread_f(int, long);
+> > >  void	attr_remove_f(int, long);
+> > >  void	attr_set_f(int, long);
+> > > +void	awrite_f(int, long);
+> > >  void	bulkstat_f(int, long);
+> > >  void	bulkstat1_f(int, long);
+> > >  void	chown_f(int, long);
+> > > @@ -195,8 +203,10 @@ void	write_f(int, long);
+> > >  opdesc_t	ops[] = {
+> > >       /* { OP_ENUM, "name", function, freq, iswrite }, */
+> > >  	{ OP_ALLOCSP, "allocsp", allocsp_f, 1, 1 },
+> > > +	{ OP_AREAD, "aread", aread_f, 1, 0 },
+> > >  	{ OP_ATTR_REMOVE, "attr_remove", attr_remove_f, /* 1 */ 0, 1 },
+> > >  	{ OP_ATTR_SET, "attr_set", attr_set_f, /* 2 */ 0, 1 },
+> > > +	{ OP_AWRITE, "awrite", awrite_f, 1, 1 },
+> > >  	{ OP_BULKSTAT, "bulkstat", bulkstat_f, 1, 0 },
+> > >  	{ OP_BULKSTAT1, "bulkstat1", bulkstat1_f, 1, 0 },
+> > >  	{ OP_CHOWN, "chown", chown_f, 3, 1 },
+> > > @@ -576,8 +586,20 @@ int main(int argc, char **argv)
+> > >  				}
+> > >  			}
+> > >  			procid = i;
+> > > +#ifdef AIO
+> > > +			if (io_setup(128, &io_ctx) != 0) {
+> > > +				perror("io_setup failed");
+> > > +				exit(1);
+> > > +			}
+> > > +#endif
+> > >  			for (i = 0; !loops || (i < loops); i++)
+> > >  				doproc();
+> > > +#ifdef AIO
+> > > +			if(io_destroy(io_ctx) != 0) {
+> > > +				perror("io_destroy failed");
+> > > +				return 1;
+> > > +			}
+> > > +#endif
+> > >  			return 0;
+> > >  		}
+> > >  	}
+> > > @@ -1730,6 +1752,133 @@ allocsp_f(int opno, long r)
+> > >  	close(fd);
+> > >  }
+> > >  
+> > > +#ifdef AIO
+> > > +void
+> > > +do_aio_rw(int opno, long r, int flags)
+> > > +{
+> > > +	__int64_t	align;
+> > > +	char		*buf;
+> > > +	struct dioattr	diob;
+> > > +	int		e;
+> > > +	pathname_t	f;
+> > > +	int		fd;
+> > > +	size_t		len;
+> > > +	__int64_t	lr;
+> > > +	off64_t		off;
+> > > +	struct stat64	stb;
+> > > +	int		v;
+> > > +	char		st[1024];
+> > > +	char		*dio_env;
+> > > +	struct iocb	iocb;
+> > > +	struct io_event	event;
+> > > +	struct iocb	*iocbs[] = { &iocb };
+> > > +	int		iswrite = (flags & (O_WRONLY | O_RDWR)) ? 1 : 0;
+> > > +
+> > > +	init_pathname(&f);
+> > > +	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+> > > +		if (v)
+> > > +			printf("%d/%d: do_aio_rw - no filename\n", procid, opno);
+> > > +		free_pathname(&f);
+> > > +		return;
+> > > +	}
+> > > +	fd = open_path(&f, flags|O_DIRECT);
+> > > +	e = fd < 0 ? errno : 0;
+> > > +	check_cwd();
+> > > +	if (fd < 0) {
+> > > +		if (v)
+> > > +			printf("%d/%d: do_aio_rw - open %s failed %d\n",
+> > > +			       procid, opno, f.path, e);
+> > > +		free_pathname(&f);
+> > > +		return;
+> > > +	}
+> > > +	if (fstat64(fd, &stb) < 0) {
+> > > +		if (v)
+> > > +			printf("%d/%d: do_aio_rw - fstat64 %s failed %d\n",
+> > > +			       procid, opno, f.path, errno);
+> > > +		free_pathname(&f);
+> > > +		close(fd);
+> > > +		return;
+> > > +	}
+> > > +	inode_info(st, sizeof(st), &stb, v);
+> > > +	if (!iswrite && stb.st_size == 0) {
+> > > +		if (v)
+> > > +			printf("%d/%d: do_aio_rw - %s%s zero size\n", procid, opno,
+> > > +			       f.path, st);
+> > > +		free_pathname(&f);
+> > > +		close(fd);
+> > > +		return;
+> > > +	}
+> > > +	if (xfsctl(f.path, fd, XFS_IOC_DIOINFO, &diob) < 0) {
+> > > +		if (v)
+> > > +			printf(
+> > > +			"%d/%d: do_aio_rw - xfsctl(XFS_IOC_DIOINFO) %s%s failed %d\n",
+> > > +				procid, opno, f.path, st, errno);
+> > > +		free_pathname(&f);
+> > > +		close(fd);
+> > > +		return;
+> > > +	}
+> > > +	dio_env = getenv("XFS_DIO_MIN");
+> > > +	if (dio_env)
+> > > +		diob.d_mem = diob.d_miniosz = atoi(dio_env);
+> > > +	align = (__int64_t)diob.d_miniosz;
+> > > +	lr = ((__int64_t)random() << 32) + random();
+> > > +	len = (random() % FILELEN_MAX) + 1;
+> > > +	len -= (len % align);
+> > > +	if (len <= 0)
+> > > +		len = align;
+> > > +	else if (len > diob.d_maxiosz)
+> > > +		len = diob.d_maxiosz;
+> > > +	buf = memalign(diob.d_mem, len);
+> > > +
+> > > +	if (iswrite) {
+> > > +		off = (off64_t)(lr % MIN(stb.st_size + (1024 * 1024), MAXFSIZE));
+> > > +		off -= (off % align);
+> > > +		off %= maxfsize;
+> > > +		memset(buf, nameseq & 0xff, len);
+> > > +		io_prep_pwrite(&iocb, fd, buf, len, off);
+> > > +	} else {
+> > > +		off = (off64_t)(lr % stb.st_size);
+> > > +		off -= (off % align);
+> > > +		io_prep_pread(&iocb, fd, buf, len, off);
+> > > +	}
+> > > +	if (io_submit(io_ctx, 1, iocbs) != 1) {
+> > > +		if (v)
+> > > +			printf("%d/%d: %s - io_submit failed %d\n",
+> > > +			       procid, opno, iswrite ? "awrite" : "aread",
+> > > +			       errno);
+> > > +		free_pathname(&f);
+> > > +		close(fd);
+> > > +		return;
+> > > +	}
+> > > +	if (io_getevents(io_ctx, 1, 1, &event, NULL) != 1) {
+> > > +		if (v)
+> > > +			printf("%d/%d: %s - io_getevents failed %d\n",
+> > > +			       procid, opno, iswrite ? "awrite" : "aread",
+> > > +			       errno);
+> > > +		free_pathname(&f);
+> > > +		close(fd);
+> > > +		return;
+> > > +	}
+> > > +
+> > > +	e = event.res < 0 ? errno : 0;
+> > > +	free(buf);
+> > > +	if (v)
+> > > +		printf("%d/%d: %s %s%s [%lld,%d] %d\n",
+> > > +		       procid, opno, iswrite ? "awrite" : "aread",
+> > > +		       f.path, st, (long long)off, (int)len, e);
+> > > +	free_pathname(&f);
+> > > +	close(fd);
+> > > +}
+> > > +#endif
+> > > +
+> > > +void
+> > > +aread_f(int opno, long r)
+> > > +{
+> > > +#ifdef AIO
+> > > +	do_aio_rw(opno, r, O_RDONLY);
+> > > +#endif
+> > > +}
+> > > +
+> > >  void
+> > >  attr_remove_f(int opno, long r)
+> > >  {
+> > > @@ -1834,6 +1983,14 @@ attr_set_f(int opno, long r)
+> > >  }
+> > >  
+> > >  void
+> > > +awrite_f(int opno, long r)
+> > > +{
+> > > +#ifdef AIO
+> > > +	do_aio_rw(opno, r, O_WRONLY);
+> > > +#endif
+> > > +}
+> > > +
+> > > +void
+> > >  bulkstat_f(int opno, long r)
+> > >  {
+> > >  	int		count;
+> > > -- 
+> > > 2.7.4
+> > > 
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
