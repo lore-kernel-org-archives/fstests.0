@@ -1,269 +1,149 @@
-Received: from mx2.suse.de ([195.135.220.15]:57751 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750765AbdEPJuW (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 16 May 2017 05:50:22 -0400
-From: Jan Kara <jack@suse.cz>
-Subject: [PATCH v3] generic/435: Add more SEEK_HOLE tests
-Date: Mon, 15 May 2017 18:08:16 +0200
-Message-Id: <20170515160816.21750-1-jack@suse.cz>
+Received: from mx1.redhat.com ([209.132.183.28]:55126 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751567AbdEPMLp (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 16 May 2017 08:11:45 -0400
+From: Eryu Guan <eguan@redhat.com>
+Subject: [RFC PATCH] nfs: test nfs4_getfacl near page size ACL from server
+Date: Tue, 16 May 2017 20:09:09 +0800
+Message-Id: <20170516120909.827-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>, Jan Kara <jack@suse.cz>
+Cc: Eryu Guan <eguan@redhat.com>, "J . Bruce Fields" <bfields@redhat.com>, Weston Andros Adamson <dros@primarydata.com>, linux-nfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Add tests for bugs found in ext4 & xfs SEEK_HOLE implementations
-fixed by following patches:
+Test nfs4_getfacl gets ACL list correctly from server when the ACL
+length is close enough to the end of a page. On buggy NFS client
+getxattr could return ERANGE. Upstream commit ed92d8c137b7 ("NFSv4:
+fix getacl ERANGE for some ACL buffer sizes") fixed this bug in 4.11
+kernel.
 
-xfs: Fix missed holes in SEEK_HOLE implementation
-ext4: Fix SEEK_HOLE
+Note that this reproducer was originally written by J. Bruce Fields.
 
-Signed-off-by: Jan Kara <jack@suse.cz>
+Cc: J. Bruce Fields <bfields@redhat.com>
+Cc: Weston Andros Adamson <dros@primarydata.com>
+Cc: linux-nfs@vger.kernel.org
+Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- src/seek_sanity_test.c | 177 +++++++++++++++++++++++++++++++++++++++++++++++--
- tests/generic/435      |  63 ++++++++++++++++++
- tests/generic/435.out  |   1 +
- tests/generic/group    |   1 +
- 4 files changed, 237 insertions(+), 5 deletions(-)
- create mode 100755 tests/generic/435
- create mode 100644 tests/generic/435.out
 
-Added one more buggy case found by Brian.
+Hi all,
 
-diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
-index a6dd48cc257b..7d63590e9ca3 100644
---- a/src/seek_sanity_test.c
-+++ b/src/seek_sanity_test.c
-@@ -246,6 +246,150 @@ out:
- }
+This is the first attempt to add NFS specific tests to fstests with the hope
+that we'll have more NFS tests go to fstests and more people testing NFS by
+running fstests, it would be great if fstests could be part of the Linux NFS
+development workflow too.
+
+fstests does find NFS bugs (some are regression bugs), I noticed at least three
+regressions introduced in 4.12-rc1 release, one was reported to nfs list[1].
+The other two regressions are:
+a) generic/095 crashes NFS (not sure server or client yet, not reproduced
+   manually yet)
+b) copy_file_range(2) hang on NFSv4.2 mount, caught by just added
+   copy_file_range tests.
+
+I'm still working on bisecting them now, will report to NFS list once I get
+something.
+
+Thanks,
+Eryu
+
+[1] https://www.spinics.net/lists/linux-nfs/msg63767.html
+
+ common/config      |  2 ++
+ common/nfs         | 35 +++++++++++++++++++++++++
+ common/rc          |  1 +
+ tests/nfs/001      | 77 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/nfs/001.out  |  2 ++
+ tests/nfs/Makefile | 20 ++++++++++++++
+ tests/nfs/group    |  6 +++++
+ 7 files changed, 143 insertions(+)
+ create mode 100644 common/nfs
+ create mode 100755 tests/nfs/001
+ create mode 100644 tests/nfs/001.out
+ create mode 100644 tests/nfs/Makefile
+ create mode 100644 tests/nfs/group
+
+diff --git a/common/config b/common/config
+index 8211356..c3e9997 100644
+--- a/common/config
++++ b/common/config
+@@ -196,6 +196,8 @@ export XZ_PROG="`set_prog_path xz`"
+ export FLOCK_PROG="`set_prog_path flock`"
+ export LDD_PROG="`set_prog_path ldd`"
+ export TIMEOUT_PROG="`set_prog_path timeout`"
++export NFS4_SETFACL_PROG="`set_prog_path nfs4_setfacl`"
++export NFS4_GETFACL_PROG="`set_prog_path nfs4_getfacl`"
  
- /*
-+ * test file with unwritten extents, having page just after end of unwritten
-+ * extent.
-+ */
-+static int test15(int fd, int testnum)
-+{
-+	int ret = 0;
-+	char *buf = NULL;
-+	int bufsz = sysconf(_SC_PAGE_SIZE);
-+	int filsz = 4 << 20;
-+
-+	/* HOLE - unwritten DATA in dirty page */
-+	/* Each unit is bufsz */
-+	buf = do_malloc(bufsz);
-+	if (!buf)
-+		goto out;
-+	memset(buf, 'a', bufsz);
-+
-+	/* preallocate 4M space to file */
-+	ret = do_fallocate(fd, 0, filsz, 0);
-+	if (ret < 0) {
-+		/* Report success if fs doesn't support fallocate */
-+		if (errno == EOPNOTSUPP) {
-+			fprintf(stdout, "Test skipped as fs doesn't support fallocate.\n");
-+			ret = 0;
-+		}
-+		goto out;
-+	}
-+
-+	ret = do_pwrite(fd, buf, bufsz, 0);
-+	if (ret)
-+		goto out;
-+
-+	/* One page written just after end of unwritten extent... */
-+	ret = do_pwrite(fd, buf, bufsz, filsz);
-+	if (ret)
-+		goto out;
-+
-+	/* offset at the beginning */
-+	ret += do_lseek(testnum,  1, fd, filsz, SEEK_HOLE, 0, bufsz);
-+	ret += do_lseek(testnum,  2, fd, filsz, SEEK_HOLE, 1, bufsz);
-+	ret += do_lseek(testnum,  3, fd, filsz, SEEK_DATA, 0, 0);
-+	ret += do_lseek(testnum,  4, fd, filsz, SEEK_DATA, 1, 1);
-+	ret += do_lseek(testnum,  5, fd, filsz, SEEK_DATA, bufsz, filsz);
-+
-+out:
-+	do_free(buf);
-+	return ret;
-+}
-+
-+/*
-+ * test file with unwritten extents, only have pagevec worth of dirty pages
-+ * in page cache, a hole and then another page.
-+ */
-+static int test14(int fd, int testnum)
-+{
-+	int ret = 0;
-+	char *buf = NULL;
-+	int bufsz = sysconf(_SC_PAGE_SIZE) * 14;
-+	int filsz = 4 << 20;
-+
-+	/* HOLE - unwritten DATA in dirty page */
-+	/* Each unit is bufsz */
-+	buf = do_malloc(bufsz);
-+	if (!buf)
-+		goto out;
-+	memset(buf, 'a', bufsz);
-+
-+	/* preallocate 4M space to file */
-+	ret = do_fallocate(fd, 0, filsz, 0);
-+	if (ret < 0) {
-+		/* Report success if fs doesn't support fallocate */
-+		if (errno == EOPNOTSUPP) {
-+			fprintf(stdout, "Test skipped as fs doesn't support fallocate.\n");
-+			ret = 0;
-+		}
-+		goto out;
-+	}
-+
-+	ret = do_pwrite(fd, buf, bufsz, 0);
-+	if (ret)
-+		goto out;
-+
-+	ret = do_pwrite(fd, buf, bufsz, 3 * bufsz);
-+	if (ret)
-+		goto out;
-+
-+	/* offset at the beginning */
-+	ret += do_lseek(testnum,  1, fd, filsz, SEEK_HOLE, 0, bufsz);
-+	ret += do_lseek(testnum,  2, fd, filsz, SEEK_HOLE, 1, bufsz);
-+	ret += do_lseek(testnum,  3, fd, filsz, SEEK_HOLE, 3 * bufsz, 4 * bufsz);
-+	ret += do_lseek(testnum,  4, fd, filsz, SEEK_DATA, 0, 0);
-+	ret += do_lseek(testnum,  5, fd, filsz, SEEK_DATA, 1, 1);
-+	ret += do_lseek(testnum,  6, fd, filsz, SEEK_DATA, bufsz, 3 * bufsz);
-+
-+out:
-+	do_free(buf);
-+	return ret;
-+}
-+
-+/*
-+ * test file with unwritten extents, only have pagevec worth of dirty pages
-+ * in page cache.
-+ */
-+static int test13(int fd, int testnum)
-+{
-+	int ret = 0;
-+	char *buf = NULL;
-+	int bufsz = sysconf(_SC_PAGE_SIZE) * 14;
-+	int filsz = 4 << 20;
-+
-+	/* HOLE - unwritten DATA in dirty page */
-+	/* Each unit is bufsz */
-+	buf = do_malloc(bufsz);
-+	if (!buf)
-+		goto out;
-+	memset(buf, 'a', bufsz);
-+
-+	/* preallocate 4M space to file */
-+	ret = do_fallocate(fd, 0, filsz, 0);
-+	if (ret < 0) {
-+		/* Report success if fs doesn't support fallocate */
-+		if (errno == EOPNOTSUPP) {
-+			fprintf(stdout, "Test skipped as fs doesn't support fallocate.\n");
-+			ret = 0;
-+		}
-+		goto out;
-+	}
-+
-+	ret = do_pwrite(fd, buf, bufsz, 0);
-+	if (ret)
-+		goto out;
-+
-+	/* offset at the beginning */
-+	ret += do_lseek(testnum,  1, fd, filsz, SEEK_HOLE, 0, bufsz);
-+	ret += do_lseek(testnum,  2, fd, filsz, SEEK_HOLE, 1, bufsz);
-+	ret += do_lseek(testnum,  3, fd, filsz, SEEK_DATA, 0, 0);
-+	ret += do_lseek(testnum,  4, fd, filsz, SEEK_DATA, 1, 1);
-+
-+out:
-+	do_free(buf);
-+	return ret;
-+}
-+
-+/*
-  * Test huge file to check for overflows of block counts due to usage of
-  * 32-bit types.
-  */
-@@ -678,6 +822,9 @@ struct testrec seek_tests[] = {
-        { 10, test10, "Test a huge file for offset overflow" },
-        { 11, test11, "Test a huge file for block number signed" },
-        { 12, test12, "Test a huge file for block number overflow" },
-+       { 13, test13, "Test file with unwritten extents, only have pagevec dirty pages" },
-+       { 14, test14, "Test file with unwritten extents, small hole after pagevec dirty pages" },
-+       { 15, test15, "Test file with unwritten extents, page after unwritten extent" },
- };
- 
- static int run_test(struct testrec *tr)
-@@ -786,7 +933,7 @@ out:
- 
- void usage(char *cmd)
- {
--	fprintf(stdout, "Usage: %s [-t] base_file_path\n", cmd);
-+	fprintf(stdout, "Usage: %s [-t] [-s <starttest>] [-e <endtest>] base_file_path\n", cmd);
- 	exit(1);
- }
- 
-@@ -797,12 +944,29 @@ int main(int argc, char **argv)
- 	int opt;
- 	int check_support = 0;
- 	int numtests = sizeof(seek_tests) / sizeof(struct testrec);
-+	int teststart = 1, testend = 12;
- 
--	while ((opt = getopt(argc, argv, "t")) != -1) {
-+	while ((opt = getopt(argc, argv, "ts:e:")) != -1) {
- 		switch (opt) {
- 		case 't':
- 			check_support++;
- 			break;
-+		case 's':
-+			teststart = strtol(optarg, NULL, 10);
-+			if (teststart <= 0) {
-+				fprintf(stdout, "Invalid starting test: %s\n",
-+					optarg);
-+				usage(argv[0]);
-+			}
-+			break;
-+		case 'e':
-+			testend = strtol(optarg, NULL, 10);
-+			if (testend <= 0) {
-+				fprintf(stdout, "Invalid final test: %s\n",
-+					optarg);
-+				usage(argv[0]);
-+			}
-+			break;
- 		default:
- 			usage(argv[0]);
- 		}
-@@ -819,9 +983,12 @@ int main(int argc, char **argv)
- 		goto out;
- 
- 	for (i = 0; i < numtests; ++i) {
--		ret = run_test(&seek_tests[i]);
--		if (ret)
--			break;
-+		if (seek_tests[i].test_num >= teststart &&
-+		    seek_tests[i].test_num <= testend) {
-+			ret = run_test(&seek_tests[i]);
-+			if (ret)
-+				break;
-+		}
- 	}
- 
- out:
-diff --git a/tests/generic/435 b/tests/generic/435
-new file mode 100755
-index 000000000000..2654768c838d
+ # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+ # newer systems have udevadm command but older systems like RHEL5 don't.
+diff --git a/common/nfs b/common/nfs
+new file mode 100644
+index 0000000..a03eaf4
 --- /dev/null
-+++ b/tests/generic/435
-@@ -0,0 +1,63 @@
-+#! /bin/bash
-+# FS QA Test No. 435
++++ b/common/nfs
+@@ -0,0 +1,35 @@
 +#
-+# More SEEK_DATA/SEEK_HOLE sanity tests.
++# NFS specific common functions.
++#
++
++# given an NFS export and a NFS version number, return 0 if
++# the mounted NFS is the given version. e.g.
++# _is_nfs_version $SCRATCH_DEV 4.2
++_is_nfs_version()
++{
++	local nfs_exp=$1
++	local nfs_ver=$2
++	_fs_options $1 | grep -q "vers=$2"
++}
++
++# require $TEST_DEV mounted as a given NFS version
++# e.g. _require_test_nfs_version 4.2
++_require_test_nfs_version()
++{
++	_require_test
++	if ! _is_nfs_version $TEST_DEV $1; then
++		_notrun "Test requires \$TEST_DEV mounted as NFSv$1"
++	fi
++}
++
++# require $SCRATCH_DEV mounted as a given NFS version
++# e.g. _require_scratch_nfs_version 4
++_require_scratch_nfs_version()
++{
++	_require_scratch
++	_scratch_mount
++	if ! _is_nfs_version $SCRATCH_DEV $1; then
++		_notrun "Test requires \$SCRATCH_DEV mounted as NFSv$1"
++	fi
++	_scratch_unmount
++}
+diff --git a/common/rc b/common/rc
+index aa35b5e..ca0a284 100644
+--- a/common/rc
++++ b/common/rc
+@@ -162,6 +162,7 @@ case "$FSTYP" in
+ 	 [ "$MKFS_F2FS_PROG" = "" ] && _fatal "mkfs.f2fs not found"
+ 	 ;;
+     nfs)
++	 . ./common/nfs
+ 	 ;;
+     cifs)
+ 	 ;;
+diff --git a/tests/nfs/001 b/tests/nfs/001
+new file mode 100755
+index 0000000..764cde3
+--- /dev/null
++++ b/tests/nfs/001
+@@ -0,0 +1,77 @@
++#! /bin/bash
++# FS QA Test 001
++#
++# Test nfs4_getfacl gets ACL list correctly from server when the ACL length is
++# close enough to the end of a page. On buggy NFS client getxattr could return
++# ERANGE. Upstream commit ed92d8c137b7 ("NFSv4: fix getacl ERANGE for some ACL
++# buffer sizes") fixed this bug.
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2011 Oracle Inc.  All Rights Reserved.
-+# Copyright (c) 2011 Red Hat.  All Rights Reserved.
++# Copyright (c) 2017 Red Hat Inc., All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -285,56 +165,98 @@ index 000000000000..2654768c838d
 +echo "QA output created by $seq"
 +
 +here=`pwd`
++tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.* $acltest.*
++}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
 +
-+_supported_fs generic
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs nfs
 +_supported_os Linux
++_require_test_nfs_version 4
++_require_command $NFS4_SETFACL_PROG "nfs4_setfacl"
++_require_command $NFS4_GETFACL_PROG "nfs4_getfacl"
 +
-+_require_test
-+_require_seek_data_hole
++acltest=$TEST_DIR/acltest.$seq
++rm -f $acltest.*
++touch $acltest.file $acltest.list
 +
-+BASE_TEST_FILE=$TEST_DIR/seek_sanity_testfile
++# Setup a carefully made ACE list to make attr buffer length is close enough to
++# PAGE_SIZE (size is 4088 in this case, and this only works for 4k page size)
++# that leaves too little room for adding extra attr bitmap in this page
++echo "A::OWNER@:RW" >$acltest.list
++for ((i=9802; i < 10002; i++)); do echo "A::$i:RW" >>$acltest.list; done
++echo "A::GROUP@:RW" >>$acltest.list
++echo "A::EVERYONE@:RW" >>$acltest.list
 +
-+_require_test_program "seek_sanity_test"
++# Save ACL to testfile
++$NFS4_SETFACL_PROG -S $acltest.list $acltest.file
 +
-+# Disable extent zeroing for ext4 as that change where holes are created
-+if [ "$FSTYP" = "ext4" ]; then
-+	DEV=`_short_dev $TEST_DEV`
-+	echo 0 >/sys/fs/ext4/$DEV/extent_max_zeroout_kb
-+fi
-+
-+_cleanup()
-+{
-+	eval "rm -f $BASE_TEST_FILE.*"
-+}
-+
-+$here/src/seek_sanity_test -s 13 -e 15 $BASE_TEST_FILE > $seqres.full 2>&1 ||
-+	_fail "seek sanity check failed!"
++# Dump ACL, expect correct number of ACE entries
++$NFS4_GETFACL_PROG $acltest.file >>$seqres.full 2>&1
++$NFS4_GETFACL_PROG $acltest.file | wc -l
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/435.out b/tests/generic/435.out
+diff --git a/tests/nfs/001.out b/tests/nfs/001.out
 new file mode 100644
-index 000000000000..e10caa0f0b5f
+index 0000000..741ade0
 --- /dev/null
-+++ b/tests/generic/435.out
-@@ -0,0 +1 @@
-+QA output created by 435
-diff --git a/tests/generic/group b/tests/generic/group
-index 9fc7f9d419a8..c6628d97af76 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -432,3 +432,4 @@
- 427 auto quick aio rw
- 428 auto quick
- 429 auto encrypt
-+435 auto quick rw
++++ b/tests/nfs/001.out
+@@ -0,0 +1,2 @@
++QA output created by 001
++203
+diff --git a/tests/nfs/Makefile b/tests/nfs/Makefile
+new file mode 100644
+index 0000000..754f2b2
+--- /dev/null
++++ b/tests/nfs/Makefile
+@@ -0,0 +1,20 @@
++#
++# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
++#
++
++TOPDIR = ../..
++include $(TOPDIR)/include/builddefs
++
++NFS_DIR = nfs
++TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(NFS_DIR)
++
++include $(BUILDRULES)
++
++install:
++	$(INSTALL) -m 755 -d $(TARGET_DIR)
++	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
++	$(INSTALL) -m 644 group $(TARGET_DIR)
++	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
++
++# Nothing.
++install-dev install-lib:
+diff --git a/tests/nfs/group b/tests/nfs/group
+new file mode 100644
+index 0000000..2619eae
+--- /dev/null
++++ b/tests/nfs/group
+@@ -0,0 +1,6 @@
++# QA groups control file
++# Defines test groups and nominal group owners
++# - do not start group names with a digit
++# - comment line before each group is "new" description
++#
++001 auto quick nfs4_acl acl
 -- 
-2.12.0
+2.9.3
 
