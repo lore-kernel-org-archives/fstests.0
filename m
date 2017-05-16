@@ -1,275 +1,255 @@
-Received: from mx1.redhat.com ([209.132.183.28]:54746 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750765AbdEPPIF (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 16 May 2017 11:08:05 -0400
-Date: Tue, 16 May 2017 11:07:45 -0400
-From: "J. Bruce Fields" <bfields@redhat.com>
-Subject: Re: [RFC PATCH] nfs: test nfs4_getfacl near page size ACL from server
-Message-ID: <20170516150745.GB21704@parsley.fieldses.org>
-References: <20170516120909.827-1-eguan@redhat.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:19498 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751011AbdEPSt6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 16 May 2017 14:49:58 -0400
+Date: Tue, 16 May 2017 11:48:46 -0600
+From: Liu Bo <bo.li.liu@oracle.com>
+Subject: Re: [PATCH 3/6] fstests: regression test for btrfs dio read repair
+Message-ID: <20170516174846.GB2736@localhost.localdomain>
+Reply-To: bo.li.liu@oracle.com
+References: <1494352571-17199-1-git-send-email-bo.li.liu@oracle.com>
+ <1494352571-17199-4-git-send-email-bo.li.liu@oracle.com>
+ <20170510105326.GB7250@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170516120909.827-1-eguan@redhat.com>
+In-Reply-To: <20170510105326.GB7250@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, Weston Andros Adamson <dros@primarydata.com>, linux-nfs@vger.kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, May 16, 2017 at 08:09:09PM +0800, Eryu Guan wrote:
-> Test nfs4_getfacl gets ACL list correctly from server when the ACL
-> length is close enough to the end of a page. On buggy NFS client
-> getxattr could return ERANGE. Upstream commit ed92d8c137b7 ("NFSv4:
-> fix getacl ERANGE for some ACL buffer sizes") fixed this bug in 4.11
-> kernel.
+On Wed, May 10, 2017 at 06:53:26PM +0800, Eryu Guan wrote:
+> On Tue, May 09, 2017 at 11:56:08AM -0600, Liu Bo wrote:
+> > This case tests whether dio read can repair the bad copy if we have
+> > a good copy.
+> > 
+> > Commit 2dabb3248453 ("Btrfs: Direct I/O read: Work on sectorsized blocks")
+> > introduced the regression.
+> > 
+> > The upstream fix is
+> > 	Btrfs: fix invalid dereference in btrfs_retry_endio
+> 
+> I noticed this is in upstream now, you can refer to it along with hash
+> tag too.
+> 
+> > 
+> > Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+> > ---
+> >  tests/btrfs/140     | 115 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/btrfs/140.out |  39 ++++++++++++++++++
+> >  tests/btrfs/group   |   1 +
+> >  3 files changed, 155 insertions(+)
+> >  create mode 100755 tests/btrfs/140
+> >  create mode 100644 tests/btrfs/140.out
+> > 
+> > diff --git a/tests/btrfs/140 b/tests/btrfs/140
+> > new file mode 100755
+> > index 0000000..09a9939
+> > --- /dev/null
+> > +++ b/tests/btrfs/140
+> > @@ -0,0 +1,115 @@
+> > +#! /bin/bash
+> > +# FS QA Test 140
+> > +#
+> > +# Regression test for btrfs DIO read's repair during read.
+> > +#
+> > +# Commit 2dabb3248453 ("Btrfs: Direct I/O read: Work on sectorsized blocks")
+> > +# introduced the regression.
+> > +# The upstream fix is
+> > +# 	Btrfs: fix invalid dereference in btrfs_retry_endio
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +#
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs btrfs
+> > +_supported_os Linux
+> > +_require_scratch_dev_pool 2
+> > +
+> > +_require_btrfs_command inspect-internal dump-tree
+> > +_require_command "$FILEFRAG_PROG" filefrag
+> > +_require_odirect
+> > +
+> > +get_physical()
+> > +{
+> > +	# $1 is logical address
+> > +	# print chunk tree and find devid 2 which is $SCRATCH_DEV
+> > +	$BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | \
+> > +	grep $1 -A 6 | awk '($1 ~ /stripe/ && $3 ~ /devid/ && $4 ~ /1/) { print $6 }'
+> > +}
+> > +
+> > +_scratch_dev_pool_get 2
+> > +# step 1, create a raid1 btrfs which contains one 128k file.
+> > +echo "step 1......mkfs.btrfs" >>$seqres.full
+> > +
+> > +mkfs_opts="-d raid1 -b 1G"
+> > +_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+> > +
+> > +# -o nospace_cache makes sure data is written to the start position of the data
+> > +# chunk
+> > +_scratch_mount -o nospace_cache
+> > +
+> > +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" | _filter_xfs_io
+> > +
+> > +# step 2, corrupt the first 64k of one copy (on SCRATCH_DEV which is the first
+> > +# one in $SCRATCH_DEV_POOL
+> > +echo "step 2......corrupt file extent" >>$seqres.full
+> > +
+> > +${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar >> $seqres.full
+> > +logical_in_btrfs=`${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar | _filter_filefrag | cut -d '#' -f 1`
+> > +physical_on_scratch=`get_physical ${logical_in_btrfs}`
+> > +
+> > +_scratch_unmount
+> > +$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical_on_scratch 64K" $SCRATCH_DEV | _filter_xfs_io
+> > +
+> > +_scratch_mount
+> > +
+> > +# step 3, 128k dio read (this read can repair bad copy)
+> > +echo "step 3......repair the bad copy" >>$seqres.full
+> > +
+> > +# since raid1 consists of two copies, and the following read may read the good
+> > +# copy directly, so lets loop 10 times here and discard output that dio reads
+> > +# give
+> > +for i in `seq 1 10`; do
+> > +	$XFS_IO_PROG -d -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" > /dev/null
+> > +	_get_current_dmesg | grep -q -e "csum failed" && break
+> > +done
+> 
+> Half of the time I got test failure because pread from SCRATCH_DEV read
+> 0xbb instead of 0xaa on v4.11 kernel (bug should be fixed there), tested
+> on two different hosts and could hit failure on both hosts.
+> 
+> Similar failure happened to all the 4 tests randomly. I thought it was
+> because "csum failed" was never hit, so I tried a "while true; do" loop,
+> and that did fix the btrfs/140 failure for me, but then btrfs/141 would
+> loop forever sometimes.
+> 
+> On the other hand, the tests from your last post always passed on the
+> same test host, but I didn't see anything particular would make this
+> difference..
+> 
+> Can you please take a look? Thanks!
+> 
 
-Thanks.
+Oh, sorry for the trouble, it's all due to the same reason, that
+is, the stripe read balance in btrfs simply looks at
+(current->pid % num_stripes) and picks up a stripe to read from.
 
-> Note that this reproducer was originally written by J. Bruce Fields.
-> 
-> Cc: J. Bruce Fields <bfields@redhat.com>
-> Cc: Weston Andros Adamson <dros@primarydata.com>
-> Cc: linux-nfs@vger.kernel.org
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> ---
-> 
-> Hi all,
-> 
-> This is the first attempt to add NFS specific tests to fstests with the hope
-> that we'll have more NFS tests go to fstests and more people testing NFS by
-> running fstests, it would be great if fstests could be part of the Linux NFS
-> development workflow too.
+Since I put the bad data on stripe 1 in raid1 profile, we need an
+odd $pid to trigger the checksum failures, but I have no idea how
+to certainly get a task with odd pid number in one shot, so I'll
+just use "while true; do" for now, and update it later if I find
+a solution.
 
-What's the difference between fstests and xfstests?
+Thanks,
 
---b.
-
-> 
-> fstests does find NFS bugs (some are regression bugs), I noticed at least three
-> regressions introduced in 4.12-rc1 release, one was reported to nfs list[1].
-> The other two regressions are:
-> a) generic/095 crashes NFS (not sure server or client yet, not reproduced
->    manually yet)
-> b) copy_file_range(2) hang on NFSv4.2 mount, caught by just added
->    copy_file_range tests.
-> 
-> I'm still working on bisecting them now, will report to NFS list once I get
-> something.
-> 
-> Thanks,
+-liubo
 > Eryu
 > 
-> [1] https://www.spinics.net/lists/linux-nfs/msg63767.html
-> 
->  common/config      |  2 ++
->  common/nfs         | 35 +++++++++++++++++++++++++
->  common/rc          |  1 +
->  tests/nfs/001      | 77 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/nfs/001.out  |  2 ++
->  tests/nfs/Makefile | 20 ++++++++++++++
->  tests/nfs/group    |  6 +++++
->  7 files changed, 143 insertions(+)
->  create mode 100644 common/nfs
->  create mode 100755 tests/nfs/001
->  create mode 100644 tests/nfs/001.out
->  create mode 100644 tests/nfs/Makefile
->  create mode 100644 tests/nfs/group
-> 
-> diff --git a/common/config b/common/config
-> index 8211356..c3e9997 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -196,6 +196,8 @@ export XZ_PROG="`set_prog_path xz`"
->  export FLOCK_PROG="`set_prog_path flock`"
->  export LDD_PROG="`set_prog_path ldd`"
->  export TIMEOUT_PROG="`set_prog_path timeout`"
-> +export NFS4_SETFACL_PROG="`set_prog_path nfs4_setfacl`"
-> +export NFS4_GETFACL_PROG="`set_prog_path nfs4_getfacl`"
->  
->  # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
->  # newer systems have udevadm command but older systems like RHEL5 don't.
-> diff --git a/common/nfs b/common/nfs
-> new file mode 100644
-> index 0000000..a03eaf4
-> --- /dev/null
-> +++ b/common/nfs
-> @@ -0,0 +1,35 @@
-> +#
-> +# NFS specific common functions.
-> +#
-> +
-> +# given an NFS export and a NFS version number, return 0 if
-> +# the mounted NFS is the given version. e.g.
-> +# _is_nfs_version $SCRATCH_DEV 4.2
-> +_is_nfs_version()
-> +{
-> +	local nfs_exp=$1
-> +	local nfs_ver=$2
-> +	_fs_options $1 | grep -q "vers=$2"
-> +}
-> +
-> +# require $TEST_DEV mounted as a given NFS version
-> +# e.g. _require_test_nfs_version 4.2
-> +_require_test_nfs_version()
-> +{
-> +	_require_test
-> +	if ! _is_nfs_version $TEST_DEV $1; then
-> +		_notrun "Test requires \$TEST_DEV mounted as NFSv$1"
-> +	fi
-> +}
-> +
-> +# require $SCRATCH_DEV mounted as a given NFS version
-> +# e.g. _require_scratch_nfs_version 4
-> +_require_scratch_nfs_version()
-> +{
-> +	_require_scratch
-> +	_scratch_mount
-> +	if ! _is_nfs_version $SCRATCH_DEV $1; then
-> +		_notrun "Test requires \$SCRATCH_DEV mounted as NFSv$1"
-> +	fi
-> +	_scratch_unmount
-> +}
-> diff --git a/common/rc b/common/rc
-> index aa35b5e..ca0a284 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -162,6 +162,7 @@ case "$FSTYP" in
->  	 [ "$MKFS_F2FS_PROG" = "" ] && _fatal "mkfs.f2fs not found"
->  	 ;;
->      nfs)
-> +	 . ./common/nfs
->  	 ;;
->      cifs)
->  	 ;;
-> diff --git a/tests/nfs/001 b/tests/nfs/001
-> new file mode 100755
-> index 0000000..764cde3
-> --- /dev/null
-> +++ b/tests/nfs/001
-> @@ -0,0 +1,77 @@
-> +#! /bin/bash
-> +# FS QA Test 001
-> +#
-> +# Test nfs4_getfacl gets ACL list correctly from server when the ACL length is
-> +# close enough to the end of a page. On buggy NFS client getxattr could return
-> +# ERANGE. Upstream commit ed92d8c137b7 ("NFSv4: fix getacl ERANGE for some ACL
-> +# buffer sizes") fixed this bug.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Red Hat Inc., All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.* $acltest.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs nfs
-> +_supported_os Linux
-> +_require_test_nfs_version 4
-> +_require_command $NFS4_SETFACL_PROG "nfs4_setfacl"
-> +_require_command $NFS4_GETFACL_PROG "nfs4_getfacl"
-> +
-> +acltest=$TEST_DIR/acltest.$seq
-> +rm -f $acltest.*
-> +touch $acltest.file $acltest.list
-> +
-> +# Setup a carefully made ACE list to make attr buffer length is close enough to
-> +# PAGE_SIZE (size is 4088 in this case, and this only works for 4k page size)
-> +# that leaves too little room for adding extra attr bitmap in this page
-> +echo "A::OWNER@:RW" >$acltest.list
-> +for ((i=9802; i < 10002; i++)); do echo "A::$i:RW" >>$acltest.list; done
-> +echo "A::GROUP@:RW" >>$acltest.list
-> +echo "A::EVERYONE@:RW" >>$acltest.list
-> +
-> +# Save ACL to testfile
-> +$NFS4_SETFACL_PROG -S $acltest.list $acltest.file
-> +
-> +# Dump ACL, expect correct number of ACE entries
-> +$NFS4_GETFACL_PROG $acltest.file >>$seqres.full 2>&1
-> +$NFS4_GETFACL_PROG $acltest.file | wc -l
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/nfs/001.out b/tests/nfs/001.out
-> new file mode 100644
-> index 0000000..741ade0
-> --- /dev/null
-> +++ b/tests/nfs/001.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 001
-> +203
-> diff --git a/tests/nfs/Makefile b/tests/nfs/Makefile
-> new file mode 100644
-> index 0000000..754f2b2
-> --- /dev/null
-> +++ b/tests/nfs/Makefile
-> @@ -0,0 +1,20 @@
-> +#
-> +# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +
-> +TOPDIR = ../..
-> +include $(TOPDIR)/include/builddefs
-> +
-> +NFS_DIR = nfs
-> +TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(NFS_DIR)
-> +
-> +include $(BUILDRULES)
-> +
-> +install:
-> +	$(INSTALL) -m 755 -d $(TARGET_DIR)
-> +	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
-> +	$(INSTALL) -m 644 group $(TARGET_DIR)
-> +	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
-> +
-> +# Nothing.
-> +install-dev install-lib:
-> diff --git a/tests/nfs/group b/tests/nfs/group
-> new file mode 100644
-> index 0000000..2619eae
-> --- /dev/null
-> +++ b/tests/nfs/group
-> @@ -0,0 +1,6 @@
-> +# QA groups control file
-> +# Defines test groups and nominal group owners
-> +# - do not start group names with a digit
-> +# - comment line before each group is "new" description
-> +#
-> +001 auto quick nfs4_acl acl
-> -- 
-> 2.9.3
-> 
+> > +
+> > +_scratch_unmount
+> > +
+> > +# check if the repair works
+> > +$XFS_IO_PROG -d -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_DEV | _filter_xfs_io
+> > +
+> > +_scratch_dev_pool_put
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
+> > new file mode 100644
+> > index 0000000..c8565f5
+> > --- /dev/null
+> > +++ b/tests/btrfs/140.out
+> > @@ -0,0 +1,39 @@
+> > +QA output created by 140
+> > +wrote 131072/131072 bytes at offset 0
+> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > +wrote 65536/65536 bytes at offset 136708096
+> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > +08260000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +08260010:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +08260020:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +08260030:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +08260040:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +08260050:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +08260060:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +08260070:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +08260080:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +08260090:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +082600a0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +082600b0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +082600c0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +082600d0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +082600e0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +082600f0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +08260100:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +08260110:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +08260120:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +08260130:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +08260140:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +08260150:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +08260160:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +08260170:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +08260180:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +08260190:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +082601a0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +082601b0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +082601c0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +082601d0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +082601e0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +082601f0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> > +read 512/512 bytes at offset 136708096
+> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > diff --git a/tests/btrfs/group b/tests/btrfs/group
+> > index 9d4b80b..1cb9c98 100644
+> > --- a/tests/btrfs/group
+> > +++ b/tests/btrfs/group
+> > @@ -141,3 +141,4 @@
+> >  137 auto quick send
+> >  138 auto compress
+> >  139 auto qgroup
+> > +140 auto quick
+> > -- 
+> > 2.5.0
+> > 
