@@ -1,18 +1,20 @@
-Received: from mail-pf0-f196.google.com ([209.85.192.196]:36707 "EHLO
-        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751705AbdEQTF5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 17 May 2017 15:05:57 -0400
-Received: by mail-pf0-f196.google.com with SMTP id n23so2799814pfb.3
-        for <fstests@vger.kernel.org>; Wed, 17 May 2017 12:05:57 -0700 (PDT)
-Date: Wed, 17 May 2017 12:05:54 -0700
+Received: from mail-pg0-f65.google.com ([74.125.83.65]:33973 "EHLO
+        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753011AbdEQTVt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 17 May 2017 15:21:49 -0400
+Received: by mail-pg0-f65.google.com with SMTP id u187so2961916pgb.1
+        for <fstests@vger.kernel.org>; Wed, 17 May 2017 12:21:49 -0700 (PDT)
+Date: Wed, 17 May 2017 12:21:46 -0700
 From: Eric Biggers <ebiggers3@gmail.com>
-Subject: Re: Add UBIFS support to xfstests
-Message-ID: <20170517190554.GC91213@gmail.com>
+Subject: Re: [PATCH 2/2] Accept failing with EPERM in addition to ENOKEY for
+ rename without key
+Message-ID: <20170517192146.GD91213@gmail.com>
 References: <20170517095531.11818-1-david.oberhollenzer@sigma-star.at>
+ <20170517095531.11818-3-david.oberhollenzer@sigma-star.at>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170517095531.11818-1-david.oberhollenzer@sigma-star.at>
+In-Reply-To: <20170517095531.11818-3-david.oberhollenzer@sigma-star.at>
 Sender: fstests-owner@vger.kernel.org
 To: David Oberhollenzer <david.oberhollenzer@sigma-star.at>
 Cc: fstests@vger.kernel.org, linux-mtd@lists.infradead.org, richard@nod.at
@@ -20,38 +22,53 @@ List-ID: <fstests@vger.kernel.org>
 
 Hi David,
 
-On Wed, May 17, 2017 at 11:55:28AM +0200, David Oberhollenzer wrote:
+On Wed, May 17, 2017 at 11:55:30AM +0200, David Oberhollenzer wrote:
+> Some filesystems (e.g. UBIFS) fail with EPERM when trying to move a
+> file into an encrypted directory via cross rename, without having
+> access to the encryption key.
 > 
-> Modifying the xfstests-bld patch to use nandsim (which simulates a NAND
-> flash MTD device) instead of block2mtd has been considered, however the
-> default size of 128MiB is slightly too small for generic/129.
+> Since rename is perfectly allowed to return EPERM, which is also tested
+> for, and no precise specification seems to exist that clarifys when to
+> expect EPERM and when ENOKEY, this patch modifies the generic/398 test
+> to accept both, for the test case where the key is not available.
 > 
-> Nandsim does not have an option to directly specify the size of the
-> backing buffer but instead requires a set of NAND ID bytes that imply
-> (among other things) the size of the chip (example, see 1). The ID bytes
-> would have to be added to the kernel arguments for the UBIFS case. It
-> might be desirable to document this somehow, for the next person who
-> has to adjust the size, once a new test exhausts it. Also, it would be
-> ultimately limted by available RAM and what can be encoded using the
-> NAND ID bytes.
-> 
-> So right now, it looks like block2mtd is the simplest option for getting
-> xfstests-bld to work with UBIFS.
->
 
-It probably would be a good idea to document this decision somewhere more
-permanent, maybe in a comment in
-kvm-xfstests/test-appliance/files/root/fs/ubifs/config, which is where the
-block2mtd devices get set up.
+Specifically, the operation is expected to fail for two logically independent
+reasons:
+- It shouldn't be possible to link or rename an unencrypted file into an
+  encrypted directory, as this violates the "one encryption policy per directory
+  tree" constraint (EPERM)
+- It shouldn't be possible to link or rename files into an encrypted directory
+  without the directory's encryption key (ENOKEY)
 
-Or, it could be useful to add a documentation file for UBIFS in the xfstests-bld
-documentation directory, which would also document any "gotchas" specific to how
-UBIFS support is implemented in the test appliances, e.g the two issues I listed
-in my patch description.  Also the fact that you need to configure your kernel
-with UBIFS and block2mtd support.  Ideally we'd just fix these issues, though,
-so there would be nothing special to document.  (We could at least solve the
-kernel configuration issue by renaming the example configs in the
-kernel-configs/ directory from "ext4-" to "xfstests-", then enabling support for
-ubifs, f2fs, btrfs, etc.  in them.)
+Therefore it's not an ideal test, though it seemed worthwhile originally because
+it was, in fact, broken in both ways, causing the operation to succeed :)
+
+> Signed-off-by: David Oberhollenzer <david.oberhollenzer@sigma-star.at>
+> ---
+>  tests/generic/398 | 10 ++++++++--
+>  1 file changed, 8 insertions(+), 2 deletions(-)
+> 
+> diff --git a/tests/generic/398 b/tests/generic/398
+> index b486b9c5..390c4380 100755
+> --- a/tests/generic/398
+> +++ b/tests/generic/398
+> @@ -43,6 +43,12 @@ _cleanup()
+>  	rm -f $tmp.*
+>  }
+>  
+> +_filter_rename()
+> +{
+> +	# rename without key can also fail with EPERM instead of ENOKEY
+> +	sed -e "s/Operation not permitted/Required key not available/g"
+> +}
+> +
+
+It doesn't matter much, but IMO it would make a little more sense to substitute
+ENOKEY with EPERM instead of the other way around, then updating 398.out to
+expect "Operation not permitted".  The reason for this is that everything else
+in generic/398 is testing for EPERM, because the test script is checking for
+situations in which the "one encryption policy per directory tree" constraint
+can be violated, and such violations normally result in EPERM.
 
 Eric
