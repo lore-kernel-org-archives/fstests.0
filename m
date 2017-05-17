@@ -1,274 +1,96 @@
-Received: from mga01.intel.com ([192.55.52.88]:47102 "EHLO mga01.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753227AbdEQRRr (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 17 May 2017 13:17:47 -0400
-From: Ross Zwisler <ross.zwisler@linux.intel.com>
-Subject: [PATCH] generic: add regression test for DAX PTE/PMD races
-Date: Wed, 17 May 2017 11:17:42 -0600
-Message-Id: <20170517171742.14848-1-ross.zwisler@linux.intel.com>
-In-Reply-To: <20170517171639.14501-2-ross.zwisler@linux.intel.com>
-References: <20170517171639.14501-2-ross.zwisler@linux.intel.com>
+Received: from mail-pg0-f67.google.com ([74.125.83.67]:34274 "EHLO
+        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754019AbdEQSpn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 17 May 2017 14:45:43 -0400
+Received: by mail-pg0-f67.google.com with SMTP id u187so2847901pgb.1
+        for <fstests@vger.kernel.org>; Wed, 17 May 2017 11:45:38 -0700 (PDT)
+Date: Wed, 17 May 2017 11:45:35 -0700
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: Re: [PATCH 1/2] Add support for UBIFS
+Message-ID: <20170517184535.GB91213@gmail.com>
+References: <20170517095531.11818-1-david.oberhollenzer@sigma-star.at>
+ <20170517095531.11818-2-david.oberhollenzer@sigma-star.at>
+ <20170517115355.GE7250@eguan.usersys.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170517115355.GE7250@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, Xiong Zhou <xzhou@redhat.com>, Eryu Guan <eguan@redhat.com>
-Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, Alexander Viro <viro@zeniv.linux.org.uk>, Christoph Hellwig <hch@lst.de>, Dan Williams <dan.j.williams@intel.com>, Dave Hansen <dave.hansen@intel.com>, Jan Kara <jack@suse.cz>, Matthew Wilcox <mawilcox@microsoft.com>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-nvdimm@ml01.01.org, Andrew Morton <akpm@linux-foundation.org>, linux-kernel@vger.kernel.org, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Pawel Lebioda <pawel.lebioda@intel.com>, Dave Jiang <dave.jiang@intel.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: David Oberhollenzer <david.oberhollenzer@sigma-star.at>, fstests@vger.kernel.org, linux-mtd@lists.infradead.org, richard@nod.at
 List-ID: <fstests@vger.kernel.org>
 
-This adds a regression test for the following kernel patches:
+On Wed, May 17, 2017 at 07:53:55PM +0800, Eryu Guan wrote:
+> On Wed, May 17, 2017 at 11:55:29AM +0200, David Oberhollenzer wrote:
+> > This patch is mostly based on the previous attempts of Eric Biggers
+> > and Dongsheng Yang at adding UBIFS support to xfstests.
+> > 
+> > In addition to rebasing the previous attempts to recent xfstests,
+> > most of the encryption tests now also support UBIFS with this patch.
+> > 
+> > Since mkfs.ubifs doesn't support creating encryption-capable filesystems
+> > yet, _scratch_mkfs_encrypted() is modified to wipe the underlying UBI
+> > volume. The filesystem is then created when mounting the emtpy volume.
+> > 
+> > Some tests that require SCRATCH_DEV to be a block device, despite
+> > not using device-mapper or otherwise doing something block device
+> > specific have that requirement removed.
+> > 
+> > Signed-off-by: David Oberhollenzer <david.oberhollenzer@sigma-star.at>
+> 
+> Thanks for the patch! I know only very little about ubifs (from previous
+> reviews to attempts to add ubifs support to fstests), but it's still
+> good to have some words to introduce ubifs briefly in commit log,
+> especially the fact that it uses char device not block device.
+> 
+> > ---
+> >  check             |  2 ++
+> >  common/config     |  7 +++++++
+> >  common/encrypt    |  3 +++
+> >  common/rc         | 24 ++++++++++++++++++++++++
+> >  tests/generic/076 |  1 -
+> >  tests/generic/409 |  1 -
+> >  tests/generic/410 |  1 -
+> >  tests/generic/411 |  1 -
+> >  8 files changed, 36 insertions(+), 4 deletions(-)
+> > 
+> > diff --git a/check b/check
+> > index 9cef58b4..f8db3cd6 100755
+> > --- a/check
+> > +++ b/check
+> > @@ -70,6 +70,7 @@ check options
+> >      -overlay		test overlay
+> >      -pvfs2          test PVFS2
+> >      -tmpfs              test TMPFS
+> > +    -ubifs              test ubifs
+> >      -l			line mode diff
+> >      -udiff		show unified diff (default)
+> >      -n			show me, do not run tests
+> > @@ -267,6 +268,7 @@ while [ $# -gt 0 ]; do
+> >  	-overlay)	FSTYP=overlay; export OVERLAY=true ;;
+> >  	-pvfs2)		FSTYP=pvfs2 ;;
+> >  	-tmpfs)		FSTYP=tmpfs ;;
+> > +	-ubifs)		FSTYP=ubifs ;;
+> 
+> As being pointed out in previous reviews, it'll be great if we can probe
+> ubifs from the char device if possible instead of adding new fs-specific
+> option, just as what we're doing at the end of common/config for other
+> local filesystems. But I'm not sure if blkid works for char device and
+> ubifs (probably not).
+> 
 
-  mm: avoid spurious 'bad pmd' warning messages
-  dax: Fix race between colliding PMD & PTE entries
+It seems to work fine without the -ubifs option:
 
-The above patches fix two related PMD vs PTE races in the DAX code.  These
-can both be easily triggered by having two threads reading and writing
-simultaneously to the same private mapping, with the key being that private
-mapping reads can be handled with PMDs but private mapping writes are
-always handled with PTEs so that we can COW.
+# blkid -o value -s TYPE /dev/ubi0_0
+ubifs
 
-Without this 2-patch kernel series, the newly added test will result in the
-following errors:
+# TEST_DEV=/dev/ubi0_0 TEST_DIR=/vdb ./check  generic/001
+FSTYP         -- ubifs
+PLATFORM      -- Linux/x86_64 kvm-xfstests 4.12.0-rc1-xfstests-00083-ga844e08648f0-dirty
 
-  run fstests generic/435 at 2017-05-16 16:53:43
-  mm/pgtable-generic.c:39: bad pmd ffff8808daa49b88(84000001006000a5)
-  	... a bunch of the bad pmd messages ...
-  BUG: Bad rss-counter state mm:ffff8800a8c1b700 idx:1 val:1
-  BUG: non-zero nr_ptes on freeing mm: 38
-  XFS (pmem0p1): Unmounting Filesystem
+generic/001	[  372.213194] run fstests generic/001 at 2017-05-17 11:43:47
+ 8s
+Ran: generic/001
+Passed all 1 tests
 
-Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
----
- .gitignore            |   1 +
- src/Makefile          |   3 +-
- src/t_mmap_cow_race.c | 106 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/435     |  61 +++++++++++++++++++++++++++++
- tests/generic/435.out |   2 +
- tests/generic/group   |   1 +
- 6 files changed, 173 insertions(+), 1 deletion(-)
- create mode 100644 src/t_mmap_cow_race.c
- create mode 100755 tests/generic/435
- create mode 100644 tests/generic/435.out
-
-diff --git a/.gitignore b/.gitignore
-index 38f3a00..a6ac25e 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -149,6 +149,7 @@
- /src/t_rename_overwrite
- /src/t_mmap_dio
- /src/t_mmap_stale_pmd
-+/src/t_mmap_cow_race
- 
- # dmapi/ binaries
- /dmapi/src/common/cmd/read_invis
-diff --git a/src/Makefile b/src/Makefile
-index e5042c9..b505b42 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -12,7 +12,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
- 	godown resvtest writemod makeextents itrash rename \
- 	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
- 	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
--	holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd
-+	holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd \
-+	t_mmap_cow_race
- 
- LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-diff --git a/src/t_mmap_cow_race.c b/src/t_mmap_cow_race.c
-new file mode 100644
-index 0000000..207ba42
---- /dev/null
-+++ b/src/t_mmap_cow_race.c
-@@ -0,0 +1,106 @@
-+#include <errno.h>
-+#include <fcntl.h>
-+#include <libgen.h>
-+#include <pthread.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <string.h>
-+#include <sys/mman.h>
-+#include <sys/stat.h>
-+#include <sys/types.h>
-+#include <unistd.h>
-+
-+#define MiB(a) ((a)*1024*1024)
-+#define NUM_THREADS 2
-+
-+void err_exit(char *op)
-+{
-+	fprintf(stderr, "%s: %s\n", op, strerror(errno));
-+	exit(1);
-+}
-+
-+void worker_fn(void *ptr)
-+{
-+	char *data = (char *)ptr;
-+	volatile int a;
-+	int i, err;
-+
-+	for (i = 0; i < 10; i++) {
-+		a = data[0];
-+		data[0] = a;
-+
-+		err = madvise(data, MiB(2), MADV_DONTNEED);
-+		if (err < 0)
-+			err_exit("madvise");
-+
-+		/* Mix up the thread timings to encourage the race. */
-+		err = usleep(rand() % 100);
-+		if (err < 0)
-+			err_exit("usleep");
-+	}
-+}
-+
-+int main(int argc, char *argv[])
-+{
-+	pthread_t thread[NUM_THREADS];
-+	int i, j, fd, err;
-+	char *data;
-+
-+	if (argc < 2) {
-+		printf("Usage: %s <file>\n", basename(argv[0]));
-+		exit(0);
-+	}
-+
-+	fd = open(argv[1], O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
-+	if (fd < 0)
-+		err_exit("fd");
-+
-+	/* This allows us to map a huge page. */
-+	ftruncate(fd, 0);
-+	ftruncate(fd, MiB(2));
-+
-+	/*
-+	 * First we set up a shared mapping.  Our write will (hopefully) get
-+	 * the filesystem to give us a 2MiB huge page DAX mapping.  We will
-+	 * then use this 2MiB page for our private mapping race.
-+	 */
-+	data = mmap(NULL, MiB(2), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-+	if (data == MAP_FAILED)
-+		err_exit("shared mmap");
-+
-+	data[0] = 1;
-+
-+	err = munmap(data, MiB(2));
-+	if (err < 0)
-+		err_exit("shared munmap");
-+
-+	for (i = 0; i < 500; i++) {
-+		data = mmap(NULL, MiB(2), PROT_READ|PROT_WRITE, MAP_PRIVATE,
-+				fd, 0);
-+		if (data == MAP_FAILED)
-+			err_exit("private mmap");
-+
-+		for (j = 0; j < NUM_THREADS; j++) {
-+			err = pthread_create(&thread[j], NULL,
-+					(void*)&worker_fn, data);
-+			if (err)
-+				err_exit("pthread_create");
-+		}
-+
-+		for (j = 0; j < NUM_THREADS; j++) {
-+			err = pthread_join(thread[j], NULL);
-+			if (err)
-+				err_exit("pthread_join");
-+		}
-+
-+		err = munmap(data, MiB(2));
-+		if (err < 0)
-+			err_exit("private munmap");
-+	}
-+
-+	err = close(fd);
-+	if (err < 0)
-+		err_exit("close");
-+
-+	return 0;
-+}
-diff --git a/tests/generic/435 b/tests/generic/435
-new file mode 100755
-index 0000000..f1413f1
---- /dev/null
-+++ b/tests/generic/435
-@@ -0,0 +1,61 @@
-+#! /bin/bash
-+# FS QA Test 435
-+#
-+# This is a regression test for kernel patches:
-+#   mm: avoid spurious 'bad pmd' warning messages
-+#   dax: Fix race between colliding PMD & PTE entries
-+# created by Ross Zwisler <ross.zwisler@linux.intel.com>
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Intel Corporation.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+_require_test_program "t_mmap_cow_race"
-+
-+# real QA test starts here
-+src/t_mmap_cow_race $TEST_DIR/testfile
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/435.out b/tests/generic/435.out
-new file mode 100644
-index 0000000..6a175d3
---- /dev/null
-+++ b/tests/generic/435.out
-@@ -0,0 +1,2 @@
-+QA output created by 435
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index c4911b8..ac43f42 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -437,3 +437,4 @@
- 432 auto quick copy
- 433 auto quick copy
- 434 auto quick copy
-+435 auto quick
--- 
-2.9.4
-
+- Eric
