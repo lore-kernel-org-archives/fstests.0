@@ -1,217 +1,365 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:22821 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753446AbdEQXgx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 17 May 2017 19:36:53 -0400
-From: Liu Bo <bo.li.liu@oracle.com>
-Subject: [PATCH v2 3/5] fstests: regression test for btrfs buffered read's repair
-Date: Wed, 17 May 2017 16:36:08 -0600
-Message-Id: <20170517223610.3916-4-bo.li.liu@oracle.com>
-In-Reply-To: <20170517223610.3916-1-bo.li.liu@oracle.com>
-References: <20170517223610.3916-1-bo.li.liu@oracle.com>
+Received: from mail-pg0-f66.google.com ([74.125.83.66]:36701 "EHLO
+        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751701AbdEQX4C (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 17 May 2017 19:56:02 -0400
+Received: by mail-pg0-f66.google.com with SMTP id h64so3640077pge.3
+        for <fstests@vger.kernel.org>; Wed, 17 May 2017 16:56:02 -0700 (PDT)
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: [PATCH] xfstests-bld: clean up outdated documentation files
+Date: Wed, 17 May 2017 16:54:56 -0700
+Message-Id: <20170517235456.63783-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@gmail.com>, Eryu Guan <eguan@redhat.com>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-This case tests whether buffered read can repair the bad copy if we
-have a good copy.
+From: Eric Biggers <ebiggers@google.com>
 
-Commit 20a7db8ab3f2 ("btrfs: add dummy callback for readpage_io_failed
-and drop checks") introduced the regression.
+Replace kvm-xfstests/README and kvm-xfstests/README.GCE with pointers to
+where the documentation is now.  Also delete the top-level README, since
+it's been replaced with README.md right next to it.
 
-The upstream fix is
-	Btrfs: bring back repair during read
-
-Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
-v2: - In order to make the tests deterministic, change to check pid for
-      odd/even instead of doing grep with key words in dmesg
+ README                  |  85 ---------------------------
+ kvm-xfstests/README     |  81 +-------------------------
+ kvm-xfstests/README.GCE | 148 +-----------------------------------------------
+ 3 files changed, 3 insertions(+), 311 deletions(-)
+ delete mode 100644 README
 
- tests/btrfs/141     | 118 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/141.out |  39 +++++++++++++++++
- tests/btrfs/group   |   1 +
- 3 files changed, 158 insertions(+)
- create mode 100755 tests/btrfs/141
- create mode 100644 tests/btrfs/141.out
-
-diff --git a/tests/btrfs/141 b/tests/btrfs/141
-new file mode 100755
-index 0000000..f70453c
---- /dev/null
-+++ b/tests/btrfs/141
-@@ -0,0 +1,118 @@
-+#! /bin/bash
-+# FS QA Test 141
-+#
-+# Regression test for btrfs buffered read's repair during read.
-+#
-+# Commit 20a7db8ab3f2 ("btrfs: add dummy callback for readpage_io_failed
-+# and drop checks") introduced the regression.
-+#
-+# The upstream fix is
-+#	Commit 9d0d1c8b1c9d ("Btrfs: bring back repair during read")
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch_dev_pool 2
-+
-+_require_btrfs_command inspect-internal dump-tree
-+_require_command "$FILEFRAG_PROG" filefrag
-+
-+get_physical()
-+{
-+        # $1 is logical address
-+        # print chunk tree and find devid 2 which is $SCRATCH_DEV
-+        $BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | \
-+	grep $1 -A 6 | awk '($1 ~ /stripe/ && $3 ~ /devid/ && $4 ~ /1/) { print $6 }'
-+}
-+
-+_scratch_dev_pool_get 2
-+# step 1, create a raid1 btrfs which contains one 128k file.
-+echo "step 1......mkfs.btrfs" >>$seqres.full
-+
-+mkfs_opts="-d raid1 -b 1G"
-+_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
-+
-+# -o nospace_cache makes sure data is written to the start position of the data
-+# chunk
-+_scratch_mount -o nospace_cache
-+
-+$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" | _filter_xfs_io
-+
-+# step 2, corrupt the first 64k of one copy (on SCRATCH_DEV which is the first
-+# one in $SCRATCH_DEV_POOL
-+echo "step 2......corrupt file extent" >>$seqres.full
-+
-+${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar >> $seqres.full
-+logical_in_btrfs=`${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar | _filter_filefrag | cut -d '#' -f 1`
-+physical_on_scratch=`get_physical ${logical_in_btrfs}`
-+
-+_scratch_unmount
-+$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical_on_scratch 64K" $SCRATCH_DEV | _filter_xfs_io
-+
-+_scratch_mount
-+
-+# step 3, 128k buffered read (this read can repair bad copy)
-+echo "step 3......repair the bad copy" >>$seqres.full
-+
-+# since raid1 consists of two copies, and the following read may read the good
-+# copy directly, lets loop until repair gets triggered and discard output that
-+# buffered reads give
-+while true; do
-+	echo 3 > /proc/sys/vm/drop_caches
-+	$XFS_IO_PROG -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" > /dev/null &
-+	pid=$!
-+	wait
-+	[ $((pid % 2)) == 1 ] && break
-+done
-+
-+_scratch_unmount
-+
-+# check if the repair works
-+$XFS_IO_PROG -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_DEV | _filter_xfs_io
-+
-+_scratch_dev_pool_put
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/141.out b/tests/btrfs/141.out
-new file mode 100644
-index 0000000..2e08fc2
---- /dev/null
-+++ b/tests/btrfs/141.out
-@@ -0,0 +1,39 @@
-+QA output created by 141
-+wrote 131072/131072 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 65536/65536 bytes at offset 136708096
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+08260000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+08260010:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+08260020:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+08260030:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+08260040:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+08260050:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+08260060:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+08260070:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+08260080:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+08260090:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+082600a0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+082600b0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+082600c0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+082600d0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+082600e0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+082600f0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+08260100:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+08260110:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+08260120:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+08260130:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+08260140:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+08260150:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+08260160:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+08260170:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+08260180:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+08260190:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+082601a0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+082601b0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+082601c0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+082601d0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+082601e0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+082601f0:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+read 512/512 bytes at offset 136708096
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 1cb9c98..7b380e5 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -142,3 +142,4 @@
- 138 auto compress
- 139 auto qgroup
- 140 auto quick
-+141 auto quick
+diff --git a/README b/README
+deleted file mode 100644
+index ef87668..0000000
+--- a/README
++++ /dev/null
+@@ -1,85 +0,0 @@
+-
+-The xfstests-bld package makes it easy to build xfstests in a hermetic
+-build environment (so it is not dependent on possibly out-of-date
+-distro versions of libaio, xfsprogs, etc.).  It also contains scripts
+-which make it easy to run xfstests in a KVM guest.  It is currently
+-optimized for ext4 testing, but it should be fairly simple to
+-generalize this for testing other file systems.
+-
+-If you are using debian testing, it is pretty simple to generate your
+-own test appliance which uses kvm to run xfstests.  If you are using a
+-different distribution, you can fetch a copy of root_fs.img from
+-https://www.kernel.org/pub/linux/kernel/people/tytso/kvm-xfstests.
+-
+-Or you can take a look at the kvm-xfstests/test-appliance/gen-image
+-and create something which works for your distribution.  Please let me
+-know if create something which works well for other distributions.
+-
+-1.  "make ; make tarball" to generate the xfstests.tar.gz file.
+-2.  cd to kvm-xfstests/test-appliance, and run as root the shell script
+-    "gen-image".  This will create the root_fs.img file.
+-3.  build a kernel which does not use modules (at least for all of the
+-    device drivers required for running under kvm).  There are sample
+-    kernel configs found in the top-level kernel-configs directory.
+-    Note that if you build a 32-bit i386 kernel, you will need to make
+-    to build the root_fs.img file in 32-bit build chroot.  You can use
+-    a 32-bit userspace with a 64-bit kernel; in fact, this is a good
+-    way to sanity check the ioctl compatibility code.
+-4.  Adjust the KERNEL= line in kvm-xfstests/config to point at your
+-    kernel's bzImage file.
+-5.  cd to kvm-xfstests, and run "kvm-xfstests smoke".  More details of
+-    how to run kvm-xfstests can be found in kvm-xfstests/README.  If
+-    you adjust the DIR= line in kvm-xfstests, it will not be
+-    necessary to be cd'ed into the kvm-xfstests directory before
+-    kicking off the shell script.
+-
+-When the kvm-xfstests is done, it will print a summary of which tests
+-passed and failed.  It will also save the output of the test in a
+-log.YYYYMMDDHHSS file.  The "get-results" script will parse the log
+-file and generate the test summary.
+-
+-
+-Instructions for building a 32-bit test-appliance image in a chroot
+--------------------------------------------------------------------
+-
+-These instructions assumes you are using Debian; it should probably
+-work for Ubuntu as well.
+-
+-If you want to build a 64-bit test image, just remove the --arch=i386
+-in step #3, or if you don't want to use a build-chroot, you should be
+-able to just use the "./do-all" script all by itself --- or you can
+-use the manual instructions described in steps #1 and #2 above.
+-
+-1)  Install the necessary packages to build host OS
+-
+-# sudo apt-get install schroot debootstrap
+-
+-2) Add the following to /etc/schroot.conf, replacing "tytso" with your
+-username, and /u1/jessie-root with path where you plan to put your
+-build chroot
+-
+-[jessie]
+-description=Debian jessie
+-type=directory
+-directory=/u1/jessie-root
+-users=tytso,root
+-root-users=tytso
+-
+-3) Create the build chroot (again, replace /u1/jessie-root with the
+-pathname to your build chroot directory):
+-
+-# cd /u1
+-# debootstrap --arch=i386 jessie /u1/jessie-root
+-# schroot -c jessie -u root
+-(jessie)root@closure:/u1# apt-get install build-essential autoconf autoconf2.64 automake libgdbm-dev libtool-bin qemu-utils gettext e2fslibs-dev git debootstrap
+-(jessie)root@closure:/u1# exit
+-
+-4) Copy config to config.custom, and then change the lines which
+-define SUDO_ENV and BUILD_ENV to:
+-
+-SUDO_ENV="schroot -c jessie -u root --"
+-BUILD_ENV="schroot -c jessie --"
+-
+-5)  Kick off the build!
+-
+-./do-all
+diff --git a/kvm-xfstests/README b/kvm-xfstests/README
+index b213e10..a938488 100644
+--- a/kvm-xfstests/README
++++ b/kvm-xfstests/README
+@@ -1,79 +1,2 @@
+-XFStests using virtualization
+-
+-To set up the necessary scratch disks used by the kvm-xfstests, run
+-the "./setup" script.  You will need approximately 60 gigs of disk
+-space to run all of the ext4 tests.
+-
+-The current working directory must be kvm-xfstests directory.  This
+-restriction can be relaxed if you edit the "DIR=" line in the
+-kvm-xfstests script.  In addition, you will probably need to customize
+-the paths in the "config" file so that your compiled kernel can be
+-found, and where to find qemu/kvm binary.
+-
+-The kvm-xfstests script is used as follows:
+-
+-*) kvm-xfstests [-c <cfg>] [-g <group>]|[<tests>] ...
+-
+-	By default <cfg> defaults to all, which will run the following
+-	configurations: "4k", "1k", "ext3", "nojournal", "ext3conv",
+-	"dioread_nolock, "data_journal", "inline", "bigalloc", and
+-	"bigalloc_1k".  You may specify a single configuration or a
+-	comma separated list if you want to run a subset of all
+-	possible file system configurations.
+-
+-	Tests can be specified using an xfstests group
+-	via "-g <group>", or can be an xfstests (e.g., "generic/068")
+-
+-*) kvm-xfstests smoke
+-
+-	This is the equivalent of specifying "-c 4k -g quick"
+-
+-*) kvm-xfstests shell
+-
+-	Will allow you to examine the tests environment or to run
+-	tests manually.  Any changes to the root partition will be
+-	reverted when you exit the VM.
+-
+-	To run tests manually source the /root/test-env file, and then
+-	set the FSTESTCFG and FSTESTSET environment variables before
+-	running /root/runtests.sh.
+-
+-*) kvm-xfstests maint
+-
+-	Will drop you into a root shell and allows you to modify the
+-	root file system.  KVM uses and modifies the root_fs.img file,
+-	which is a compressed qcow2 image.  After doing a lot of
+-	maintenance, the root_fs.img can get quite large.  If so, the
+-	compress-rootfs shell script can be helpful.
+-
+-
+-To extract the interesting results from the log file, run the command
+-"get-results":
+-
+-% ./get-results log.201312220828
+-[    0.000000] Linux version 3.13.0-rc2-00010-ge128f1f (tytso@lambda) (gcc version 4.8.2 (Debian 4.8.2-1) ) #1564 SMP Sat Dec 21 23:43:09 EST 2013
+-FSTESTCFG is "all"
+-FSTESTSET is "-g auto"
+-BEGIN TEST: Ext4 4k block Sun Dec 22 08:28:47 EST 2013
+-MKFS_OPTIONS  -- -q /dev/vdc
+-MOUNT_OPTIONS -- -o acl,user_xattr -o block_validity /dev/vdc /vdc
+-Ran: ext4/271 ext4/305 generic/001 generic/002 generic/005 generic/006 generic/007 generic/011 generic/013 generic/014 generic/015 generic/020 generic/053 generic/062 generic/069 generic/070 generic/074 generic/075 generic/076 generic/079 generic/083 generic/088 generic/089 generic/091 generic/100 generic/105 generic/112 generic/113 generic/117 generic/120 generic/123 generic/124 generic/125 generic/126 generic/127 generic/128 generic/129 generic/130 generic/131 generic/132 generic/133 generic/135 generic/141 generic/169 generic/184 generic/192 generic/193 generic/198 generic/204 generic/207 generic/208 generic/209 generic/210 generic/211 generic/212 generic/213 generic/214 generic/215 generic/219 generic/221 generic/223 generic/224 generic/225 generic/226 generic/228 generic/230 generic/231 generic/232 generic/233 generic/234 generic/235 generic/236 generic/237 generic/239 generic/240 generic/245 generic/246 generic/247 generic/248 generic/249 generic/255 generic/257 gener!
+ ic/258 generic/263 generic/269 generic/270 generic/277 generic/280 generic/285 generic/286 generic/294 generic/299 generic/300 generic/306 generic/307 generic/308 generic/309 generic/310 generic/313 generic/314 generic/315 generic/316 generic/317 generic/318 generic/319 shared/218 shared/243 shared/272 shared/289 shared/298
+-Failures: generic/223 generic/318 shared/218
+-END TEST: Ext4 4k block Sun Dec 22 09:02:47 EST 2013
+-BEGIN TEST: Ext4 4k block w/nodelalloc, no flex_bg, and no extents Sun Dec 22 09:02:49 EST 2013
+-MKFS_OPTIONS  -- -q -O ^extents,^flex_bg,^uninit_bg /dev/vdc
+-MOUNT_OPTIONS -- -o acl,user_xattr -o block_validity,nodelalloc /dev/vdc /vdc
+-Ran: ext4/271 ext4/305 generic/001 generic/002 generic/005 generic/006 generic/007 generic/011 generic/013 generic/014 generic/015 generic/020 generic/053 generic/062 generic/069 generic/070 generic/074 generic/075 generic/076 generic/079 generic/083 generic/088 generic/089 generic/091 generic/100 generic/105 generic/112 generic/113 generic/117 generic/120 generic/123 generic/124 generic/125 generic/126 generic/127 generic/128 generic/129 generic/130 generic/131 generic/132 generic/133 generic/135 generic/141 generic/169 generic/184 generic/192 generic/193 generic/198 generic/204 generic/207 generic/208 generic/209 generic/210 generic/211 generic/212 generic/215 generic/219 generic/221 generic/224 generic/225 generic/226 generic/230 generic/231 generic/232 generic/233 generic/234 generic/235 generic/236 generic/237 generic/239 generic/240 generic/245 generic/246 generic/247 generic/248 generic/249 generic/257 generic/258 generic/263 generic/269 generic/270 generic/277 gener!
+ ic/280 generic/285 generic/286 generic/294 generic/299 generic/300 generic/306 generic/307 generic/308 generic/309 generic/310 generic/313 generic/314 generic/315 generic/316 generic/317 generic/318 generic/319 shared/218 shared/272 shared/289 shared/298
+-Failures: generic/300 generic/318 shared/218
+-END TEST: Ext4 4k block w/nodelalloc, no flex_bg, and no extents Sun Dec 22 09:36:38 EST 2013
+-BEGIN TEST: Ext4 4k block w/ no journal Sun Dec 22 09:36:39 EST 2013
+-MKFS_OPTIONS  -- -q -O ^has_journal /dev/vdc
+-MOUNT_OPTIONS -- -o acl,user_xattr -o block_validity,noload /dev/vdc /vdc
+-Ran: ext4/271 ext4/305 generic/001 generic/002 generic/005 generic/006 generic/007 generic/011 generic/013 generic/014 generic/015 generic/020 generic/053 generic/062 generic/069 generic/070 generic/074 generic/075 generic/076 generic/079 generic/083 generic/088 generic/089 generic/091 generic/100 generic/105 generic/112 generic/113 generic/117 generic/120 generic/123 generic/124 generic/125 generic/126 generic/127 generic/128 generic/129 generic/130 generic/131 generic/132 generic/133 generic/135 generic/141 generic/169 generic/184 generic/192 generic/193 generic/198 generic/204 generic/207 generic/208 generic/209 generic/210 generic/211 generic/212 generic/213 generic/214 generic/215 generic/219 generic/221 generic/223 generic/224 generic/225 generic/226 generic/228 generic/230 generic/231 generic/232 generic/233 generic/234 generic/235 generic/236 generic/237 generic/239 generic/240 generic/245 generic/246 generic/247 generic/248 generic/249 generic/255 generic/257 gener!
+ ic/258 generic/263 generic/269 generic/270 generic/277 generic/285 generic/286 generic/294 generic/299 generic/300 generic/306 generic/307 generic/308 generic/309 generic/310 generic/313 generic/314 generic/315 generic/316 generic/317 generic/318 generic/319 shared/218 shared/243 shared/272 shared/289 shared/298
+-Failures: generic/318
+-END TEST: Ext4 4k block w/ no journal Sun Dec 22 10:01:56 EST 2013
+-....
+-
+-(If there is a missing "END TEST", it's likely because there was a
+-kernel bug which caused the kernel to crash before the test run was
+-able to complete.)
++This documentation has been moved to Documentation/kvm-quickstart.md and
++Documentation/kvm-xfstests.md.
+diff --git a/kvm-xfstests/README.GCE b/kvm-xfstests/README.GCE
+index 8634572..2b561af 100644
+--- a/kvm-xfstests/README.GCE
++++ b/kvm-xfstests/README.GCE
+@@ -1,147 +1 @@
+-
+-	      Running xfstests on Google Compute Engine
+-
+-Getting a Google Compute Engine account
+----------------------------------------
+-
+-If you don't have GCE account, you can go to https://cloud.google.com
+-and sign up for a free trial.  This will get you $300 dollars worth of
+-credit which you can use over a 60 day period (as of this writing).
+-Given that a full test costs around a $1.50, and a smoke test costs
+-pennies, that should be enough for plenty of testing.  :-)
+-
+-Configuration
+--------------
+-
+-You will need to set up the following configuration parameters in
+-~/.config/kvm-xfststs:
+-
+-GS_BUCKET	The name of the Google Storage bucket which should be
+-		used by gce-xfstests.  Your Google Compute Engine account
+-		must have access to read and write files in this bucket.
+-
+-GCE_PROJECT	The name of Google Compute Engine project which should
+-		be used to create and run GCE instances and disks.
+-
+-GCE_ZONE	The name of the Google Compute Engine zone which should
+-		be used by xfstests.
+-
+-GCE_KERNEL	The pathname to kernel that should be used for gce-xfstests
+-		by default.
+-
+-If you have a sendgrid account, you can set the following
+-configuration parameters in order to have reports e-mailed to you:
+-
+-GCE_SG_USER	The username for the sendgrid account used to send email
+-
+-GCE_SG_PASS	The password for the sendgrid account used to send email
+-
+-GCE_REPORT_EMAIL The email addressed for which test results should be
+-sent.
+-
+-An example ~//.config/kvm-xfstests might look like this:
+-
+-GS_BUCKET=tytso-xfstests
+-GCE_PROJECT=tytso-linux
+-GCE_ZONE=us-central1-c
+-GCE_KERNEL=/build/ext4-64/arch/x86/boot/bzImage
+-
+-
+-Creating the image
+-------------------
+-
+-You will need to install the following packages (debian package names
+-used):
+-
+-	jq xz-utils git autoconf2.59 libtool-bin automake libc6-dev
+-	gcc make e2fslibs-dev pkg-config gettext libpopt-dev
+-
+-You will also need to install the Google Cloud SDK.
+-
+-1)  make ; make tarball
+-
+-2)  cd kvm-xfstests/test-appliance ; ./gce-create-image
+-
+-Running gce-xfstests
+---------------------
+-
+-Running gce-xfstests is much like kvm-xfstests; see the README file in
+-this directory for more details.
+-
+-The gce-xfstests command also has a few other commands:
+-
+-gce-xfstests ssh INSTANCE
+-
+-	Remotely login as root to a test instances.  This is a
+-	convenience shorthand for: "gcloud compute --project
+-	GCE_PROJECT ssh root@INSTNACE --zone GCE_ZONE".
+-
+-gce-xfstests console INSTANCE
+-
+-	Fetch the serial console from a test instance.  This is a
+-	convenience shorthand for: "gcloud compute --project
+-	GCE_PROJECT get-serial-port-output INSTANCE --zone GCE_ZONE".
+-
+-gce-xfstests ls-instances [-l ]
+-gce-xfstests ls-gce
+-
+-	List the current test instances.  With the -l option, it will
+-	list the current status of each instance.
+-
+-	The ls-gce option is a convenience command for "gcloud compute
+-	--project GCE_PROJECT instances list --regexp ^xfstests.*"
+-
+-	ALIAS: gce-xfstests ls
+-
+-gce-xfstests rm-instances INSTANCE
+-gce-xfstests abort-instances INSTANCE
+-
+-	Shut down the instance.  The abort command will delete make
+-	sure the results disk to be deleted.  If test kernel has hung,
+-	it may be useful to use "gce-xfstests console" to fetch the
+-	console, and then use "gce-xfstests rm" and examine the
+-	results disk before deleting it.
+-
+-	ALIAS: gce-xfstests rm
+-	ALIAS: gce-xfstests abort
+-
+-gce-xfstests ls-disks
+-
+-	List the GCE disks.  This is a convenience command for "gcloud
+-	compute --project "$GCE_PROJECT" disks list --regexp
+-	^xfstests.*"
+-
+-	ALIAS: gce-xfstests ls-disk
+-
+-gce-xfstests rm-disks DISK
+-
+-	Delete a specified GCE disk.  This is a convenience command
+-	for "gcloud compute --project "$GCE_PROJECT" disks delete DISK"
+-
+-ALIAS: gce-xfstests rm-disk
+-
+-gce-xfstests ls-results
+-gce-xfstests ls-gcs
+-
+-	List the available results tarballs stored in the Google Cloud
+-	Storage bucket.  This is a convenience command for
+-	"gsutil ls gs://GS_BUCKET/results.*" (ls-results) or
+-	"gsutil ls gs://GS_BUCKET" (ls-gcs).
+-
+-gce-xfstests rm-results RESULT_FILE
+-
+-	Delete a specified result tarball.  This is a convenience
+-	command for "gsutil ls gs://GS_BUCKET/RESULT_FILE".
+-
+-gce-xfstests get-results [--unpack | --summary | --failures ] RESULT_FILE
+-
+-	Fetch the run-tests.log file from the RESULT_FILE stored in
+-	the Google Cloud Storage bucket.  The --summary or --failures
+-	option will cause the log file to be piped into the
+-	"get-results" script to summarize the log file using the "-s"
+-	or "-F" option, respectively.  The "--failures" or "-F" option
+-	results in a more succint summary than the "--summary" or "-s"
+-	option.
+-
+-	The --unpack option will cause the complete results directory
+-	to be unpacked into a directory in /tmp instead.
++This documentation has been moved to Documentation/gce-xfstests.md.
 -- 
-2.5.0
+2.13.0.303.g4ebf302169-goog
 
