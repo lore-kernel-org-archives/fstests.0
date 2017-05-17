@@ -1,11 +1,11 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:22819 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753164AbdEQXgx (ORCPT
+Received: from aserp1040.oracle.com ([141.146.126.69]:43745 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753397AbdEQXgx (ORCPT
         <rfc822;fstests@vger.kernel.org>); Wed, 17 May 2017 19:36:53 -0400
 From: Liu Bo <bo.li.liu@oracle.com>
-Subject: [PATCH v2 4/5] fstests: regression test for nocsum dio read's repair
-Date: Wed, 17 May 2017 16:36:09 -0600
-Message-Id: <20170517223610.3916-5-bo.li.liu@oracle.com>
+Subject: [PATCH v2 2/5] fstests: regression test for btrfs dio read repair
+Date: Wed, 17 May 2017 16:36:07 -0600
+Message-Id: <20170517223610.3916-3-bo.li.liu@oracle.com>
 In-Reply-To: <20170517223610.3916-1-bo.li.liu@oracle.com>
 References: <20170517223610.3916-1-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,40 +13,42 @@ To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@gmail.com>, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
+This case tests whether dio read can repair the bad copy if we have
+a good copy.
+
 Commit 2dabb3248453 ("Btrfs: Direct I/O read: Work on sectorsized blocks")
-introduced this regression.  It'd cause 'Segmentation fault' error.
+introduced the regression.
 
 The upstream fix is
-	Btrfs: fix segment fault when doing dio read
+	Btrfs: fix invalid dereference in btrfs_retry_endio
 
 Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
 ---
 v2: - In order to make the tests deterministic, change to check pid for
       odd/even instead of doing grep with key words in dmesg
 
- tests/btrfs/142     | 140 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/142.out |  39 +++++++++++++++
+ tests/btrfs/140     | 117 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/140.out |  39 ++++++++++++++++++
  tests/btrfs/group   |   1 +
- 3 files changed, 180 insertions(+)
- create mode 100755 tests/btrfs/142
- create mode 100644 tests/btrfs/142.out
+ 3 files changed, 157 insertions(+)
+ create mode 100755 tests/btrfs/140
+ create mode 100644 tests/btrfs/140.out
 
-diff --git a/tests/btrfs/142 b/tests/btrfs/142
+diff --git a/tests/btrfs/140 b/tests/btrfs/140
 new file mode 100755
-index 0000000..9c5d606
+index 0000000..5ab0e9d
 --- /dev/null
-+++ b/tests/btrfs/142
-@@ -0,0 +1,140 @@
++++ b/tests/btrfs/140
+@@ -0,0 +1,117 @@
 +#! /bin/bash
-+# FS QA Test 142
++# FS QA Test 140
 +#
-+# Regression test for btrfs DIO read's repair during read without checksum.
++# Regression test for btrfs DIO read's repair during read.
 +#
 +# Commit 2dabb3248453 ("Btrfs: Direct I/O read: Work on sectorsized blocks")
-+# introduced this regression.  It'd cause 'Segmentation fault' error.
-+#
++# introduced the regression.
 +# The upstream fix is
-+#	commit 97bf5a5589aa ("Btrfs: fix segmentation fault when doing dio read")
++#	commit 2e949b0a5592 ("Btrfs: fix invalid dereference in btrfs_retry_endio")
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
@@ -93,36 +95,18 @@ index 0000000..9c5d606
 +# Modify as appropriate.
 +_supported_fs btrfs
 +_supported_os Linux
-+_require_fail_make_request
 +_require_scratch_dev_pool 2
 +
 +_require_btrfs_command inspect-internal dump-tree
 +_require_command "$FILEFRAG_PROG" filefrag
++_require_odirect
 +
 +get_physical()
 +{
-+        # $1 is logical address
-+        # print chunk tree and find devid 2 which is $SCRATCH_DEV
-+        $BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | \
++	# $1 is logical address
++	# print chunk tree and find devid 2 which is $SCRATCH_DEV
++	$BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | \
 +	grep $1 -A 6 | awk '($1 ~ /stripe/ && $3 ~ /devid/ && $4 ~ /1/) { print $6 }'
-+}
-+
-+
-+SYSFS_BDEV=`_sysfs_dev $SCRATCH_DEV`
-+
-+start_fail()
-+{
-+	echo 100 > $DEBUGFS_MNT/fail_make_request/probability
-+	echo 2 > $DEBUGFS_MNT/fail_make_request/times
-+	echo 0 > $DEBUGFS_MNT/fail_make_request/verbose
-+	echo 1 > $SYSFS_BDEV/make-it-fail
-+}
-+
-+stop_fail()
-+{
-+	echo 0 > $DEBUGFS_MNT/fail_make_request/probability
-+	echo 0 > $DEBUGFS_MNT/fail_make_request/times
-+	echo 0 > $SYSFS_BDEV/make-it-fail
 +}
 +
 +_scratch_dev_pool_get 2
@@ -134,7 +118,7 @@ index 0000000..9c5d606
 +
 +# -o nospace_cache makes sure data is written to the start position of the data
 +# chunk
-+_scratch_mount -o nospace_cache,nodatasum
++_scratch_mount -o nospace_cache
 +
 +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" | _filter_xfs_io
 +
@@ -149,7 +133,7 @@ index 0000000..9c5d606
 +_scratch_unmount
 +$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical_on_scratch 64K" $SCRATCH_DEV | _filter_xfs_io
 +
-+_scratch_mount -o nospace_cache
++_scratch_mount
 +
 +# step 3, 128k dio read (this read can repair bad copy)
 +echo "step 3......repair the bad copy" >>$seqres.full
@@ -158,32 +142,28 @@ index 0000000..9c5d606
 +# copy directly, so lets loop until repair gets triggered and discard output
 +# that dio reads give
 +while true; do
-+	# start_fail only fails the following dio read so the repair is
-+	# supposed to work.
-+	start_fail
 +	$XFS_IO_PROG -d -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" > /dev/null &
 +	pid=$!
 +	wait
-+	stop_fail
 +	[ $((pid % 2)) == 1 ] && break
 +done
 +
 +_scratch_unmount
 +
 +# check if the repair works
-+$XFS_IO_PROG -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_DEV | _filter_xfs_io
++$XFS_IO_PROG -d -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_DEV | _filter_xfs_io
 +
 +_scratch_dev_pool_put
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/btrfs/142.out b/tests/btrfs/142.out
+diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
 new file mode 100644
-index 0000000..d8be7fb
+index 0000000..c8565f5
 --- /dev/null
-+++ b/tests/btrfs/142.out
++++ b/tests/btrfs/140.out
 @@ -0,0 +1,39 @@
-+QA output created by 142
++QA output created by 140
 +wrote 131072/131072 bytes at offset 0
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 +wrote 65536/65536 bytes at offset 136708096
@@ -223,14 +203,14 @@ index 0000000..d8be7fb
 +read 512/512 bytes at offset 136708096
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 7b380e5..a4f97cd 100644
+index 9d4b80b..1cb9c98 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -143,3 +143,4 @@
+@@ -141,3 +141,4 @@
+ 137 auto quick send
+ 138 auto compress
  139 auto qgroup
- 140 auto quick
- 141 auto quick
-+142 auto quick
++140 auto quick
 -- 
 2.5.0
 
