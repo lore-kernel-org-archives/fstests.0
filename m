@@ -1,293 +1,274 @@
-Received: from mx1.redhat.com ([209.132.183.28]:53146 "EHLO mx1.redhat.com"
+Received: from mga01.intel.com ([192.55.52.88]:47102 "EHLO mga01.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751558AbdEQRUo (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 17 May 2017 13:20:44 -0400
-Date: Wed, 17 May 2017 13:20:36 -0400
-From: "J. Bruce Fields" <bfields@redhat.com>
-Subject: Re: [RFC PATCH] nfs: test nfs4_getfacl near page size ACL from server
-Message-ID: <20170517172035.GD5011@parsley.fieldses.org>
-References: <20170516120909.827-1-eguan@redhat.com>
- <20170516150745.GB21704@parsley.fieldses.org>
- <20170517033854.GA7250@eguan.usersys.redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170517033854.GA7250@eguan.usersys.redhat.com>
+        id S1753227AbdEQRRr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 17 May 2017 13:17:47 -0400
+From: Ross Zwisler <ross.zwisler@linux.intel.com>
+Subject: [PATCH] generic: add regression test for DAX PTE/PMD races
+Date: Wed, 17 May 2017 11:17:42 -0600
+Message-Id: <20170517171742.14848-1-ross.zwisler@linux.intel.com>
+In-Reply-To: <20170517171639.14501-2-ross.zwisler@linux.intel.com>
+References: <20170517171639.14501-2-ross.zwisler@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, Weston Andros Adamson <dros@primarydata.com>, linux-nfs@vger.kernel.org
+To: fstests@vger.kernel.org, Xiong Zhou <xzhou@redhat.com>, Eryu Guan <eguan@redhat.com>
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, Alexander Viro <viro@zeniv.linux.org.uk>, Christoph Hellwig <hch@lst.de>, Dan Williams <dan.j.williams@intel.com>, Dave Hansen <dave.hansen@intel.com>, Jan Kara <jack@suse.cz>, Matthew Wilcox <mawilcox@microsoft.com>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-nvdimm@ml01.01.org, Andrew Morton <akpm@linux-foundation.org>, linux-kernel@vger.kernel.org, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Pawel Lebioda <pawel.lebioda@intel.com>, Dave Jiang <dave.jiang@intel.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, May 17, 2017 at 11:38:54AM +0800, Eryu Guan wrote:
-> On Tue, May 16, 2017 at 11:07:45AM -0400, J. Bruce Fields wrote:
-> > On Tue, May 16, 2017 at 08:09:09PM +0800, Eryu Guan wrote:
-> > > Test nfs4_getfacl gets ACL list correctly from server when the ACL
-> > > length is close enough to the end of a page. On buggy NFS client
-> > > getxattr could return ERANGE. Upstream commit ed92d8c137b7 ("NFSv4:
-> > > fix getacl ERANGE for some ACL buffer sizes") fixed this bug in 4.11
-> > > kernel.
-> > 
-> > Thanks.
-> > 
-> > > Note that this reproducer was originally written by J. Bruce Fields.
-> > > 
-> > > Cc: J. Bruce Fields <bfields@redhat.com>
-> > > Cc: Weston Andros Adamson <dros@primarydata.com>
-> > > Cc: linux-nfs@vger.kernel.org
-> > > Signed-off-by: Eryu Guan <eguan@redhat.com>
-> > > ---
-> > > 
-> > > Hi all,
-> > > 
-> > > This is the first attempt to add NFS specific tests to fstests with the hope
-> > > that we'll have more NFS tests go to fstests and more people testing NFS by
-> > > running fstests, it would be great if fstests could be part of the Linux NFS
-> > > development workflow too.
-> > 
-> > What's the difference between fstests and xfstests?
-> 
-> Sorry, I should have mentioned that xfstests has been renamed to
-> fstests in 2014[1], so they're the same thing.
+This adds a regression test for the following kernel patches:
 
-That could be better advertised.  A google search for "fstests" for
-example turns up mostly irrelevant results.  And I can't recall anyone
-at LSF/MM meetings, for example, calling it anything other than
-"xfstests"?
+  mm: avoid spurious 'bad pmd' warning messages
+  dax: Fix race between colliding PMD & PTE entries
 
-Anyway, thanks for adding this.  I do a partial fstests run as part of
-my regular testing but I'm not great about keeping it updated.
+The above patches fix two related PMD vs PTE races in the DAX code.  These
+can both be easily triggered by having two threads reading and writing
+simultaneously to the same private mapping, with the key being that private
+mapping reads can be handled with PMDs but private mapping writes are
+always handled with PTEs so that we can COW.
 
---b.
+Without this 2-patch kernel series, the newly added test will result in the
+following errors:
 
-> > > fstests does find NFS bugs (some are regression bugs), I noticed at least three
-> > > regressions introduced in 4.12-rc1 release, one was reported to nfs list[1].
-> > > The other two regressions are:
-> > > a) generic/095 crashes NFS (not sure server or client yet, not reproduced
-> > >    manually yet)
-> > > b) copy_file_range(2) hang on NFSv4.2 mount, caught by just added
-> > >    copy_file_range tests.
-> > > 
-> > > I'm still working on bisecting them now, will report to NFS list once I get
-> > > something.
-> > > 
-> > > Thanks,
-> > > Eryu
-> > > 
-> > > [1] https://www.spinics.net/lists/linux-nfs/msg63767.html
-> > > 
-> > >  common/config      |  2 ++
-> > >  common/nfs         | 35 +++++++++++++++++++++++++
-> > >  common/rc          |  1 +
-> > >  tests/nfs/001      | 77 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/nfs/001.out  |  2 ++
-> > >  tests/nfs/Makefile | 20 ++++++++++++++
-> > >  tests/nfs/group    |  6 +++++
-> > >  7 files changed, 143 insertions(+)
-> > >  create mode 100644 common/nfs
-> > >  create mode 100755 tests/nfs/001
-> > >  create mode 100644 tests/nfs/001.out
-> > >  create mode 100644 tests/nfs/Makefile
-> > >  create mode 100644 tests/nfs/group
-> > > 
-> > > diff --git a/common/config b/common/config
-> > > index 8211356..c3e9997 100644
-> > > --- a/common/config
-> > > +++ b/common/config
-> > > @@ -196,6 +196,8 @@ export XZ_PROG="`set_prog_path xz`"
-> > >  export FLOCK_PROG="`set_prog_path flock`"
-> > >  export LDD_PROG="`set_prog_path ldd`"
-> > >  export TIMEOUT_PROG="`set_prog_path timeout`"
-> > > +export NFS4_SETFACL_PROG="`set_prog_path nfs4_setfacl`"
-> > > +export NFS4_GETFACL_PROG="`set_prog_path nfs4_getfacl`"
-> > >  
-> > >  # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
-> > >  # newer systems have udevadm command but older systems like RHEL5 don't.
-> > > diff --git a/common/nfs b/common/nfs
-> > > new file mode 100644
-> > > index 0000000..a03eaf4
-> > > --- /dev/null
-> > > +++ b/common/nfs
-> > > @@ -0,0 +1,35 @@
-> > > +#
-> > > +# NFS specific common functions.
-> > > +#
-> > > +
-> > > +# given an NFS export and a NFS version number, return 0 if
-> > > +# the mounted NFS is the given version. e.g.
-> > > +# _is_nfs_version $SCRATCH_DEV 4.2
-> > > +_is_nfs_version()
-> > > +{
-> > > +	local nfs_exp=$1
-> > > +	local nfs_ver=$2
-> > > +	_fs_options $1 | grep -q "vers=$2"
-> > > +}
-> > > +
-> > > +# require $TEST_DEV mounted as a given NFS version
-> > > +# e.g. _require_test_nfs_version 4.2
-> > > +_require_test_nfs_version()
-> > > +{
-> > > +	_require_test
-> > > +	if ! _is_nfs_version $TEST_DEV $1; then
-> > > +		_notrun "Test requires \$TEST_DEV mounted as NFSv$1"
-> > > +	fi
-> > > +}
-> > > +
-> > > +# require $SCRATCH_DEV mounted as a given NFS version
-> > > +# e.g. _require_scratch_nfs_version 4
-> > > +_require_scratch_nfs_version()
-> > > +{
-> > > +	_require_scratch
-> > > +	_scratch_mount
-> > > +	if ! _is_nfs_version $SCRATCH_DEV $1; then
-> > > +		_notrun "Test requires \$SCRATCH_DEV mounted as NFSv$1"
-> > > +	fi
-> > > +	_scratch_unmount
-> > > +}
-> > > diff --git a/common/rc b/common/rc
-> > > index aa35b5e..ca0a284 100644
-> > > --- a/common/rc
-> > > +++ b/common/rc
-> > > @@ -162,6 +162,7 @@ case "$FSTYP" in
-> > >  	 [ "$MKFS_F2FS_PROG" = "" ] && _fatal "mkfs.f2fs not found"
-> > >  	 ;;
-> > >      nfs)
-> > > +	 . ./common/nfs
-> > >  	 ;;
-> > >      cifs)
-> > >  	 ;;
-> > > diff --git a/tests/nfs/001 b/tests/nfs/001
-> > > new file mode 100755
-> > > index 0000000..764cde3
-> > > --- /dev/null
-> > > +++ b/tests/nfs/001
-> > > @@ -0,0 +1,77 @@
-> > > +#! /bin/bash
-> > > +# FS QA Test 001
-> > > +#
-> > > +# Test nfs4_getfacl gets ACL list correctly from server when the ACL length is
-> > > +# close enough to the end of a page. On buggy NFS client getxattr could return
-> > > +# ERANGE. Upstream commit ed92d8c137b7 ("NFSv4: fix getacl ERANGE for some ACL
-> > > +# buffer sizes") fixed this bug.
-> > > +#
-> > > +#-----------------------------------------------------------------------
-> > > +# Copyright (c) 2017 Red Hat Inc., All Rights Reserved.
-> > > +#
-> > > +# This program is free software; you can redistribute it and/or
-> > > +# modify it under the terms of the GNU General Public License as
-> > > +# published by the Free Software Foundation.
-> > > +#
-> > > +# This program is distributed in the hope that it would be useful,
-> > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > > +# GNU General Public License for more details.
-> > > +#
-> > > +# You should have received a copy of the GNU General Public License
-> > > +# along with this program; if not, write the Free Software Foundation,
-> > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > > +#-----------------------------------------------------------------------
-> > > +#
-> > > +
-> > > +seq=`basename $0`
-> > > +seqres=$RESULT_DIR/$seq
-> > > +echo "QA output created by $seq"
-> > > +
-> > > +here=`pwd`
-> > > +tmp=/tmp/$$
-> > > +status=1	# failure is the default!
-> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +	cd /
-> > > +	rm -f $tmp.* $acltest.*
-> > > +}
-> > > +
-> > > +# get standard environment, filters and checks
-> > > +. ./common/rc
-> > > +. ./common/filter
-> > > +
-> > > +# remove previous $seqres.full before test
-> > > +rm -f $seqres.full
-> > > +
-> > > +# real QA test starts here
-> > > +_supported_fs nfs
-> > > +_supported_os Linux
-> > > +_require_test_nfs_version 4
-> > > +_require_command $NFS4_SETFACL_PROG "nfs4_setfacl"
-> > > +_require_command $NFS4_GETFACL_PROG "nfs4_getfacl"
-> > > +
-> > > +acltest=$TEST_DIR/acltest.$seq
-> > > +rm -f $acltest.*
-> > > +touch $acltest.file $acltest.list
-> > > +
-> > > +# Setup a carefully made ACE list to make attr buffer length is close enough to
-> > > +# PAGE_SIZE (size is 4088 in this case, and this only works for 4k page size)
-> > > +# that leaves too little room for adding extra attr bitmap in this page
-> > > +echo "A::OWNER@:RW" >$acltest.list
-> > > +for ((i=9802; i < 10002; i++)); do echo "A::$i:RW" >>$acltest.list; done
-> > > +echo "A::GROUP@:RW" >>$acltest.list
-> > > +echo "A::EVERYONE@:RW" >>$acltest.list
-> > > +
-> > > +# Save ACL to testfile
-> > > +$NFS4_SETFACL_PROG -S $acltest.list $acltest.file
-> > > +
-> > > +# Dump ACL, expect correct number of ACE entries
-> > > +$NFS4_GETFACL_PROG $acltest.file >>$seqres.full 2>&1
-> > > +$NFS4_GETFACL_PROG $acltest.file | wc -l
-> > > +
-> > > +# success, all done
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/nfs/001.out b/tests/nfs/001.out
-> > > new file mode 100644
-> > > index 0000000..741ade0
-> > > --- /dev/null
-> > > +++ b/tests/nfs/001.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 001
-> > > +203
-> > > diff --git a/tests/nfs/Makefile b/tests/nfs/Makefile
-> > > new file mode 100644
-> > > index 0000000..754f2b2
-> > > --- /dev/null
-> > > +++ b/tests/nfs/Makefile
-> > > @@ -0,0 +1,20 @@
-> > > +#
-> > > +# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
-> > > +#
-> > > +
-> > > +TOPDIR = ../..
-> > > +include $(TOPDIR)/include/builddefs
-> > > +
-> > > +NFS_DIR = nfs
-> > > +TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(NFS_DIR)
-> > > +
-> > > +include $(BUILDRULES)
-> > > +
-> > > +install:
-> > > +	$(INSTALL) -m 755 -d $(TARGET_DIR)
-> > > +	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
-> > > +	$(INSTALL) -m 644 group $(TARGET_DIR)
-> > > +	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
-> > > +
-> > > +# Nothing.
-> > > +install-dev install-lib:
-> > > diff --git a/tests/nfs/group b/tests/nfs/group
-> > > new file mode 100644
-> > > index 0000000..2619eae
-> > > --- /dev/null
-> > > +++ b/tests/nfs/group
-> > > @@ -0,0 +1,6 @@
-> > > +# QA groups control file
-> > > +# Defines test groups and nominal group owners
-> > > +# - do not start group names with a digit
-> > > +# - comment line before each group is "new" description
-> > > +#
-> > > +001 auto quick nfs4_acl acl
-> > > -- 
-> > > 2.9.3
-> > > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+  run fstests generic/435 at 2017-05-16 16:53:43
+  mm/pgtable-generic.c:39: bad pmd ffff8808daa49b88(84000001006000a5)
+  	... a bunch of the bad pmd messages ...
+  BUG: Bad rss-counter state mm:ffff8800a8c1b700 idx:1 val:1
+  BUG: non-zero nr_ptes on freeing mm: 38
+  XFS (pmem0p1): Unmounting Filesystem
+
+Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+---
+ .gitignore            |   1 +
+ src/Makefile          |   3 +-
+ src/t_mmap_cow_race.c | 106 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/435     |  61 +++++++++++++++++++++++++++++
+ tests/generic/435.out |   2 +
+ tests/generic/group   |   1 +
+ 6 files changed, 173 insertions(+), 1 deletion(-)
+ create mode 100644 src/t_mmap_cow_race.c
+ create mode 100755 tests/generic/435
+ create mode 100644 tests/generic/435.out
+
+diff --git a/.gitignore b/.gitignore
+index 38f3a00..a6ac25e 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -149,6 +149,7 @@
+ /src/t_rename_overwrite
+ /src/t_mmap_dio
+ /src/t_mmap_stale_pmd
++/src/t_mmap_cow_race
+ 
+ # dmapi/ binaries
+ /dmapi/src/common/cmd/read_invis
+diff --git a/src/Makefile b/src/Makefile
+index e5042c9..b505b42 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -12,7 +12,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	godown resvtest writemod makeextents itrash rename \
+ 	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
+ 	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
+-	holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd
++	holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd \
++	t_mmap_cow_race
+ 
+ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+diff --git a/src/t_mmap_cow_race.c b/src/t_mmap_cow_race.c
+new file mode 100644
+index 0000000..207ba42
+--- /dev/null
++++ b/src/t_mmap_cow_race.c
+@@ -0,0 +1,106 @@
++#include <errno.h>
++#include <fcntl.h>
++#include <libgen.h>
++#include <pthread.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/mman.h>
++#include <sys/stat.h>
++#include <sys/types.h>
++#include <unistd.h>
++
++#define MiB(a) ((a)*1024*1024)
++#define NUM_THREADS 2
++
++void err_exit(char *op)
++{
++	fprintf(stderr, "%s: %s\n", op, strerror(errno));
++	exit(1);
++}
++
++void worker_fn(void *ptr)
++{
++	char *data = (char *)ptr;
++	volatile int a;
++	int i, err;
++
++	for (i = 0; i < 10; i++) {
++		a = data[0];
++		data[0] = a;
++
++		err = madvise(data, MiB(2), MADV_DONTNEED);
++		if (err < 0)
++			err_exit("madvise");
++
++		/* Mix up the thread timings to encourage the race. */
++		err = usleep(rand() % 100);
++		if (err < 0)
++			err_exit("usleep");
++	}
++}
++
++int main(int argc, char *argv[])
++{
++	pthread_t thread[NUM_THREADS];
++	int i, j, fd, err;
++	char *data;
++
++	if (argc < 2) {
++		printf("Usage: %s <file>\n", basename(argv[0]));
++		exit(0);
++	}
++
++	fd = open(argv[1], O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
++	if (fd < 0)
++		err_exit("fd");
++
++	/* This allows us to map a huge page. */
++	ftruncate(fd, 0);
++	ftruncate(fd, MiB(2));
++
++	/*
++	 * First we set up a shared mapping.  Our write will (hopefully) get
++	 * the filesystem to give us a 2MiB huge page DAX mapping.  We will
++	 * then use this 2MiB page for our private mapping race.
++	 */
++	data = mmap(NULL, MiB(2), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
++	if (data == MAP_FAILED)
++		err_exit("shared mmap");
++
++	data[0] = 1;
++
++	err = munmap(data, MiB(2));
++	if (err < 0)
++		err_exit("shared munmap");
++
++	for (i = 0; i < 500; i++) {
++		data = mmap(NULL, MiB(2), PROT_READ|PROT_WRITE, MAP_PRIVATE,
++				fd, 0);
++		if (data == MAP_FAILED)
++			err_exit("private mmap");
++
++		for (j = 0; j < NUM_THREADS; j++) {
++			err = pthread_create(&thread[j], NULL,
++					(void*)&worker_fn, data);
++			if (err)
++				err_exit("pthread_create");
++		}
++
++		for (j = 0; j < NUM_THREADS; j++) {
++			err = pthread_join(thread[j], NULL);
++			if (err)
++				err_exit("pthread_join");
++		}
++
++		err = munmap(data, MiB(2));
++		if (err < 0)
++			err_exit("private munmap");
++	}
++
++	err = close(fd);
++	if (err < 0)
++		err_exit("close");
++
++	return 0;
++}
+diff --git a/tests/generic/435 b/tests/generic/435
+new file mode 100755
+index 0000000..f1413f1
+--- /dev/null
++++ b/tests/generic/435
+@@ -0,0 +1,61 @@
++#! /bin/bash
++# FS QA Test 435
++#
++# This is a regression test for kernel patches:
++#   mm: avoid spurious 'bad pmd' warning messages
++#   dax: Fix race between colliding PMD & PTE entries
++# created by Ross Zwisler <ross.zwisler@linux.intel.com>
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Intel Corporation.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_test
++_require_test_program "t_mmap_cow_race"
++
++# real QA test starts here
++src/t_mmap_cow_race $TEST_DIR/testfile
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/generic/435.out b/tests/generic/435.out
+new file mode 100644
+index 0000000..6a175d3
+--- /dev/null
++++ b/tests/generic/435.out
+@@ -0,0 +1,2 @@
++QA output created by 435
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index c4911b8..ac43f42 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -437,3 +437,4 @@
+ 432 auto quick copy
+ 433 auto quick copy
+ 434 auto quick copy
++435 auto quick
+-- 
+2.9.4
+
