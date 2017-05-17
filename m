@@ -1,11 +1,11 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:43749 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754039AbdEQXgy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 17 May 2017 19:36:54 -0400
+Received: from userp1040.oracle.com ([156.151.31.81]:22821 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753446AbdEQXgx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 17 May 2017 19:36:53 -0400
 From: Liu Bo <bo.li.liu@oracle.com>
-Subject: [PATCH v2 5/5] fstests: regression test for nocsum buffered read's repair
-Date: Wed, 17 May 2017 16:36:10 -0600
-Message-Id: <20170517223610.3916-6-bo.li.liu@oracle.com>
+Subject: [PATCH v2 3/5] fstests: regression test for btrfs buffered read's repair
+Date: Wed, 17 May 2017 16:36:08 -0600
+Message-Id: <20170517223610.3916-4-bo.li.liu@oracle.com>
 In-Reply-To: <20170517223610.3916-1-bo.li.liu@oracle.com>
 References: <20170517223610.3916-1-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,15 +13,11 @@ To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@gmail.com>, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-This is to test whether buffered read retry-repair code is able to work in
-raid1 case as expected.
+This case tests whether buffered read can repair the bad copy if we
+have a good copy.
 
-Please note that without checksum, btrfs doesn't know if the data used to
-repair is correct, so repair is more of resync which makes sure that both
-of the copy has the same content.
-
-Commit 20a7db8ab3f2 ("btrfs: add dummy callback for readpage_io_failed and drop
-checks") introduced the regression.
+Commit 20a7db8ab3f2 ("btrfs: add dummy callback for readpage_io_failed
+and drop checks") introduced the regression.
 
 The upstream fix is
 	Btrfs: bring back repair during read
@@ -31,36 +27,29 @@ Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
 v2: - In order to make the tests deterministic, change to check pid for
       odd/even instead of doing grep with key words in dmesg
 
- tests/btrfs/143     | 150 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/143.out |  39 ++++++++++++++
+ tests/btrfs/141     | 118 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/141.out |  39 +++++++++++++++++
  tests/btrfs/group   |   1 +
- 3 files changed, 190 insertions(+)
- create mode 100755 tests/btrfs/143
- create mode 100644 tests/btrfs/143.out
+ 3 files changed, 158 insertions(+)
+ create mode 100755 tests/btrfs/141
+ create mode 100644 tests/btrfs/141.out
 
-diff --git a/tests/btrfs/143 b/tests/btrfs/143
+diff --git a/tests/btrfs/141 b/tests/btrfs/141
 new file mode 100755
-index 0000000..d62e5c7
+index 0000000..f70453c
 --- /dev/null
-+++ b/tests/btrfs/143
-@@ -0,0 +1,150 @@
++++ b/tests/btrfs/141
+@@ -0,0 +1,118 @@
 +#! /bin/bash
-+# FS QA Test 143
++# FS QA Test 141
 +#
-+# Regression test for btrfs buffered read's repair during read without checksum.
++# Regression test for btrfs buffered read's repair during read.
 +#
-+# This is to test whether buffered read retry-repair code is able to work in
-+# raid1 case as expected.
-+#
-+# Please note that without checksum, btrfs doesn't know if the data used to
-+# repair is correct, so repair is more of resync which makes sure that both
-+# of the copy has the same content.
-+#
-+# Commit 20a7db8ab3f2 ("btrfs: add dummy callback for readpage_io_failed and drop
-+# checks") introduced the regression.
++# Commit 20a7db8ab3f2 ("btrfs: add dummy callback for readpage_io_failed
++# and drop checks") introduced the regression.
 +#
 +# The upstream fix is
-+#	commit 9d0d1c8b1c9d ("Btrfs: bring back repair during read")
++#	Commit 9d0d1c8b1c9d ("Btrfs: bring back repair during read")
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
@@ -107,7 +96,6 @@ index 0000000..d62e5c7
 +# Modify as appropriate.
 +_supported_fs btrfs
 +_supported_os Linux
-+_require_fail_make_request
 +_require_scratch_dev_pool 2
 +
 +_require_btrfs_command inspect-internal dump-tree
@@ -121,26 +109,6 @@ index 0000000..d62e5c7
 +	grep $1 -A 6 | awk '($1 ~ /stripe/ && $3 ~ /devid/ && $4 ~ /1/) { print $6 }'
 +}
 +
-+SYSFS_BDEV=`_sysfs_dev $SCRATCH_DEV`
-+
-+start_fail()
-+{
-+	echo 100 > $DEBUGFS_MNT/fail_make_request/probability
-+	# the 1st one fails the first bio which is reading 4k (or more due to
-+	# readahead), and the 2nd one fails the retry of validation so that it
-+	# triggers read-repair
-+	echo 2 > $DEBUGFS_MNT/fail_make_request/times
-+	echo 0 > $DEBUGFS_MNT/fail_make_request/verbose
-+	echo 1 > $SYSFS_BDEV/make-it-fail
-+}
-+
-+stop_fail()
-+{
-+	echo 0 > $DEBUGFS_MNT/fail_make_request/probability
-+	echo 0 > $DEBUGFS_MNT/fail_make_request/times
-+	echo 0 > $SYSFS_BDEV/make-it-fail
-+}
-+
 +_scratch_dev_pool_get 2
 +# step 1, create a raid1 btrfs which contains one 128k file.
 +echo "step 1......mkfs.btrfs" >>$seqres.full
@@ -150,7 +118,7 @@ index 0000000..d62e5c7
 +
 +# -o nospace_cache makes sure data is written to the start position of the data
 +# chunk
-+_scratch_mount -o nospace_cache,nodatasum
++_scratch_mount -o nospace_cache
 +
 +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" | _filter_xfs_io
 +
@@ -165,23 +133,19 @@ index 0000000..d62e5c7
 +_scratch_unmount
 +$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical_on_scratch 64K" $SCRATCH_DEV | _filter_xfs_io
 +
-+_scratch_mount -o nospace_cache
++_scratch_mount
 +
 +# step 3, 128k buffered read (this read can repair bad copy)
 +echo "step 3......repair the bad copy" >>$seqres.full
 +
 +# since raid1 consists of two copies, and the following read may read the good
-+# copy directly, so lets loop until repair gets triggered and discard output
-+# that buffered reads give
++# copy directly, lets loop until repair gets triggered and discard output that
++# buffered reads give
 +while true; do
-+	# start_fail only fails the following buffered read so the repair is
-+	# supposed to work.
 +	echo 3 > /proc/sys/vm/drop_caches
-+	start_fail
-+	$XFS_IO_PROG -c "pread 0 4K" "$SCRATCH_MNT/foobar" > /dev/null &
++	$XFS_IO_PROG -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" > /dev/null &
 +	pid=$!
 +	wait
-+	stop_fail
 +	[ $((pid % 2)) == 1 ] && break
 +done
 +
@@ -194,13 +158,13 @@ index 0000000..d62e5c7
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/btrfs/143.out b/tests/btrfs/143.out
+diff --git a/tests/btrfs/141.out b/tests/btrfs/141.out
 new file mode 100644
-index 0000000..97bf45c
+index 0000000..2e08fc2
 --- /dev/null
-+++ b/tests/btrfs/143.out
++++ b/tests/btrfs/141.out
 @@ -0,0 +1,39 @@
-+QA output created by 143
++QA output created by 141
 +wrote 131072/131072 bytes at offset 0
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 +wrote 65536/65536 bytes at offset 136708096
@@ -240,14 +204,14 @@ index 0000000..97bf45c
 +read 512/512 bytes at offset 136708096
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index a4f97cd..6f19619 100644
+index 1cb9c98..7b380e5 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -144,3 +144,4 @@
+@@ -142,3 +142,4 @@
+ 138 auto compress
+ 139 auto qgroup
  140 auto quick
- 141 auto quick
- 142 auto quick
-+143 auto quick
++141 auto quick
 -- 
 2.5.0
 
