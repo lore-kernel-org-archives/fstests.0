@@ -1,13 +1,13 @@
-Received: from mail-pg0-f67.google.com ([74.125.83.67]:34572 "EHLO
-        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752968AbdEQXe7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 17 May 2017 19:34:59 -0400
-Received: by mail-pg0-f67.google.com with SMTP id u187so3593922pgb.1
-        for <fstests@vger.kernel.org>; Wed, 17 May 2017 16:34:59 -0700 (PDT)
+Received: from mail-pg0-f68.google.com ([74.125.83.68]:36404 "EHLO
+        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753408AbdEQXfA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 17 May 2017 19:35:00 -0400
+Received: by mail-pg0-f68.google.com with SMTP id h64so3591150pge.3
+        for <fstests@vger.kernel.org>; Wed, 17 May 2017 16:35:00 -0700 (PDT)
 From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH 3/5] kernel-configs: use CONFIG_LOCALVERSION="-xfstests"
-Date: Wed, 17 May 2017 16:32:31 -0700
-Message-Id: <20170517233233.61244-4-ebiggers3@gmail.com>
+Subject: [PATCH 4/5] kernel-configs: enable f2fs support
+Date: Wed, 17 May 2017 16:32:32 -0700
+Message-Id: <20170517233233.61244-5-ebiggers3@gmail.com>
 In-Reply-To: <20170517233233.61244-1-ebiggers3@gmail.com>
 References: <20170517233233.61244-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -17,192 +17,213 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Eric Biggers <ebiggers@google.com>
 
+Merged the following into each config:
+
+    CONFIG_F2FS_FS=y
+    CONFIG_F2FS_FS_SECURITY=y
+    CONFIG_F2FS_FS_ENCRYPTION=y
+
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
  kernel-configs/i386-config-3.10   | 1 +
- kernel-configs/i386-config-3.14   | 1 +
- kernel-configs/i386-config-3.3    | 1 +
- kernel-configs/i386-config-3.6    | 1 +
+ kernel-configs/i386-config-3.14   | 2 ++
  kernel-configs/i386-config-3.8    | 1 +
- kernel-configs/i386-config-4.1    | 1 +
- kernel-configs/i386-config-4.7    | 1 +
- kernel-configs/i386-config-4.9    | 1 +
+ kernel-configs/i386-config-4.1    | 2 ++
+ kernel-configs/i386-config-4.7    | 5 +++--
  kernel-configs/x86_64-config-3.10 | 1 +
- kernel-configs/x86_64-config-3.14 | 2 +-
- kernel-configs/x86_64-config-3.18 | 1 +
- kernel-configs/x86_64-config-3.2  | 1 +
- kernel-configs/x86_64-config-3.4  | 1 +
- kernel-configs/x86_64-config-4.1  | 1 +
- kernel-configs/x86_64-config-4.4  | 1 +
- kernel-configs/x86_64-config-4.7  | 2 +-
- kernel-configs/x86_64-config-4.9  | 2 +-
- 17 files changed, 17 insertions(+), 3 deletions(-)
+ kernel-configs/x86_64-config-3.14 | 2 ++
+ kernel-configs/x86_64-config-3.18 | 2 ++
+ kernel-configs/x86_64-config-4.1  | 2 ++
+ kernel-configs/x86_64-config-4.4  | 3 +++
+ kernel-configs/x86_64-config-4.7  | 5 +++--
+ kernel-configs/x86_64-config-4.9  | 4 +++-
+ 12 files changed, 25 insertions(+), 5 deletions(-)
 
 diff --git a/kernel-configs/i386-config-3.10 b/kernel-configs/i386-config-3.10
-index 039c3ae..b919604 100644
+index b919604..f8588db 100644
 --- a/kernel-configs/i386-config-3.10
 +++ b/kernel-configs/i386-config-3.10
-@@ -1,4 +1,5 @@
- # CONFIG_64BIT is not set
-+CONFIG_LOCALVERSION="-xfstests"
- CONFIG_SYSVIPC=y
- CONFIG_POSIX_MQUEUE=y
- CONFIG_FHANDLE=y
+@@ -314,6 +314,7 @@ CONFIG_TMPFS_POSIX_ACL=y
+ CONFIG_HUGETLBFS=y
+ CONFIG_ECRYPT_FS=y
+ CONFIG_CRAMFS=y
++CONFIG_F2FS_FS=y
+ CONFIG_NFS_FS=y
+ CONFIG_NFS_V4=y
+ CONFIG_NFSD=y
 diff --git a/kernel-configs/i386-config-3.14 b/kernel-configs/i386-config-3.14
-index 12a91d8..30da52b 100644
+index 30da52b..ff3fd44 100644
 --- a/kernel-configs/i386-config-3.14
 +++ b/kernel-configs/i386-config-3.14
-@@ -1,4 +1,5 @@
- # CONFIG_64BIT is not set
-+CONFIG_LOCALVERSION="-xfstests"
- CONFIG_SYSVIPC=y
- CONFIG_POSIX_MQUEUE=y
- CONFIG_FHANDLE=y
-diff --git a/kernel-configs/i386-config-3.3 b/kernel-configs/i386-config-3.3
-index d3ebf66..182038e 100644
---- a/kernel-configs/i386-config-3.3
-+++ b/kernel-configs/i386-config-3.3
-@@ -1,4 +1,5 @@
- CONFIG_EXPERIMENTAL=y
-+CONFIG_LOCALVERSION="-xfstests"
- CONFIG_SYSVIPC=y
- CONFIG_POSIX_MQUEUE=y
- CONFIG_BSD_PROCESS_ACCT=y
-diff --git a/kernel-configs/i386-config-3.6 b/kernel-configs/i386-config-3.6
-index fcb89ba..b9c85ef 100644
---- a/kernel-configs/i386-config-3.6
-+++ b/kernel-configs/i386-config-3.6
-@@ -1,4 +1,5 @@
- CONFIG_EXPERIMENTAL=y
-+CONFIG_LOCALVERSION="-xfstests"
- CONFIG_SYSVIPC=y
- CONFIG_POSIX_MQUEUE=y
- CONFIG_BSD_PROCESS_ACCT=y
+@@ -334,6 +334,8 @@ CONFIG_TMPFS_POSIX_ACL=y
+ CONFIG_HUGETLBFS=y
+ CONFIG_ECRYPT_FS=y
+ CONFIG_CRAMFS=y
++CONFIG_F2FS_FS=y
++CONFIG_F2FS_FS_SECURITY=y
+ CONFIG_EFIVAR_FS=m
+ CONFIG_NFS_FS=y
+ CONFIG_NFS_V4=y
 diff --git a/kernel-configs/i386-config-3.8 b/kernel-configs/i386-config-3.8
-index 5ce7488..d0eed3c 100644
+index d0eed3c..5578d33 100644
 --- a/kernel-configs/i386-config-3.8
 +++ b/kernel-configs/i386-config-3.8
-@@ -1,3 +1,4 @@
-+CONFIG_LOCALVERSION="-xfstests"
- CONFIG_SYSVIPC=y
- CONFIG_FHANDLE=y
- CONFIG_AUDIT=y
+@@ -291,6 +291,7 @@ CONFIG_PROC_KCORE=y
+ CONFIG_TMPFS_POSIX_ACL=y
+ CONFIG_HUGETLBFS=y
+ CONFIG_CRAMFS=y
++CONFIG_F2FS_FS=y
+ CONFIG_NFS_FS=y
+ CONFIG_NFS_V4=y
+ CONFIG_NFSD=y
 diff --git a/kernel-configs/i386-config-4.1 b/kernel-configs/i386-config-4.1
-index fb1e601..120c4ef 100644
+index 120c4ef..b245303 100644
 --- a/kernel-configs/i386-config-4.1
 +++ b/kernel-configs/i386-config-4.1
-@@ -1,4 +1,5 @@
- # CONFIG_64BIT is not set
-+CONFIG_LOCALVERSION="-xfstests"
- CONFIG_SYSVIPC=y
- CONFIG_POSIX_MQUEUE=y
- CONFIG_FHANDLE=y
+@@ -250,6 +250,8 @@ CONFIG_XFS_QUOTA=y
+ CONFIG_XFS_POSIX_ACL=y
+ CONFIG_BTRFS_FS=y
+ CONFIG_BTRFS_FS_POSIX_ACL=y
++CONFIG_F2FS_FS=y
++CONFIG_F2FS_FS_SECURITY=y
+ CONFIG_FS_DAX=y
+ CONFIG_QUOTA=y
+ CONFIG_QUOTA_NETLINK_INTERFACE=y
 diff --git a/kernel-configs/i386-config-4.7 b/kernel-configs/i386-config-4.7
-index 4cd4f12..bf31694 100644
+index bf31694..9bc0ebe 100644
 --- a/kernel-configs/i386-config-4.7
 +++ b/kernel-configs/i386-config-4.7
-@@ -1,4 +1,5 @@
- # CONFIG_64BIT is not set
-+CONFIG_LOCALVERSION="-xfstests"
- CONFIG_SYSVIPC=y
- CONFIG_POSIX_MQUEUE=y
- CONFIG_AUDIT=y
-diff --git a/kernel-configs/i386-config-4.9 b/kernel-configs/i386-config-4.9
-index eb4761d..78b48f1 100644
---- a/kernel-configs/i386-config-4.9
-+++ b/kernel-configs/i386-config-4.9
-@@ -1,4 +1,5 @@
- # CONFIG_64BIT is not set
-+CONFIG_LOCALVERSION="-xfstests"
- CONFIG_SYSVIPC=y
- CONFIG_POSIX_MQUEUE=y
- CONFIG_AUDIT=y
+@@ -268,8 +268,10 @@ CONFIG_XFS_QUOTA=y
+ CONFIG_XFS_POSIX_ACL=y
+ CONFIG_BTRFS_FS=y
+ CONFIG_BTRFS_FS_POSIX_ACL=y
++CONFIG_F2FS_FS=y
++CONFIG_F2FS_FS_SECURITY=y
++CONFIG_F2FS_FS_ENCRYPTION=y
+ CONFIG_FS_DAX=y
+-CONFIG_FS_ENCRYPTION=y
+ CONFIG_QUOTA=y
+ CONFIG_QUOTA_NETLINK_INTERFACE=y
+ CONFIG_QUOTA_DEBUG=y
+@@ -345,7 +347,6 @@ CONFIG_CRYPTO_CMAC=y
+ CONFIG_CRYPTO_XCBC=y
+ CONFIG_CRYPTO_VMAC=y
+ CONFIG_CRYPTO_CRC32C_INTEL=y
+-CONFIG_CRYPTO_CRC32=y
+ CONFIG_CRYPTO_CRC32_PCLMUL=y
+ CONFIG_CRYPTO_MICHAEL_MIC=y
+ CONFIG_CRYPTO_RMD160=y
 diff --git a/kernel-configs/x86_64-config-3.10 b/kernel-configs/x86_64-config-3.10
-index ce8b014..441acf3 100644
+index 441acf3..6cfc5c2 100644
 --- a/kernel-configs/x86_64-config-3.10
 +++ b/kernel-configs/x86_64-config-3.10
-@@ -1,3 +1,4 @@
-+CONFIG_LOCALVERSION="-xfstests"
- CONFIG_SYSVIPC=y
- CONFIG_POSIX_MQUEUE=y
- CONFIG_FHANDLE=y
+@@ -228,6 +228,7 @@ CONFIG_SQUASHFS_XATTR=y
+ CONFIG_SQUASHFS_LZO=y
+ CONFIG_SQUASHFS_XZ=y
+ CONFIG_ROMFS_FS=y
++CONFIG_F2FS_FS=y
+ # CONFIG_NETWORK_FILESYSTEMS is not set
+ CONFIG_NLS_DEFAULT="utf8"
+ CONFIG_NLS_CODEPAGE_437=y
 diff --git a/kernel-configs/x86_64-config-3.14 b/kernel-configs/x86_64-config-3.14
-index be87d1a..56d0a42 100644
+index 56d0a42..f356c94 100644
 --- a/kernel-configs/x86_64-config-3.14
 +++ b/kernel-configs/x86_64-config-3.14
-@@ -1,4 +1,4 @@
--CONFIG_LOCALVERSION="-ext4"
-+CONFIG_LOCALVERSION="-xfstests"
- CONFIG_SYSVIPC=y
- CONFIG_POSIX_MQUEUE=y
- CONFIG_FHANDLE=y
+@@ -238,6 +238,8 @@ CONFIG_SQUASHFS_XATTR=y
+ CONFIG_SQUASHFS_LZO=y
+ CONFIG_SQUASHFS_XZ=y
+ CONFIG_ROMFS_FS=y
++CONFIG_F2FS_FS=y
++CONFIG_F2FS_FS_SECURITY=y
+ # CONFIG_NETWORK_FILESYSTEMS is not set
+ CONFIG_NLS_DEFAULT="utf8"
+ CONFIG_NLS_CODEPAGE_437=y
 diff --git a/kernel-configs/x86_64-config-3.18 b/kernel-configs/x86_64-config-3.18
-index 94e96f4..746c873 100644
+index 746c873..bc530c9 100644
 --- a/kernel-configs/x86_64-config-3.18
 +++ b/kernel-configs/x86_64-config-3.18
-@@ -1,3 +1,4 @@
-+CONFIG_LOCALVERSION="-xfstests"
- CONFIG_SYSVIPC=y
- CONFIG_POSIX_MQUEUE=y
- CONFIG_FHANDLE=y
-diff --git a/kernel-configs/x86_64-config-3.2 b/kernel-configs/x86_64-config-3.2
-index 50dc9d8..146af1e 100644
---- a/kernel-configs/x86_64-config-3.2
-+++ b/kernel-configs/x86_64-config-3.2
-@@ -1,4 +1,5 @@
- CONFIG_EXPERIMENTAL=y
-+CONFIG_LOCALVERSION="-xfstests"
- CONFIG_SYSVIPC=y
- CONFIG_POSIX_MQUEUE=y
- CONFIG_BSD_PROCESS_ACCT=y
-diff --git a/kernel-configs/x86_64-config-3.4 b/kernel-configs/x86_64-config-3.4
-index 0563e33..6bd8e19 100644
---- a/kernel-configs/x86_64-config-3.4
-+++ b/kernel-configs/x86_64-config-3.4
-@@ -1,4 +1,5 @@
- CONFIG_EXPERIMENTAL=y
-+CONFIG_LOCALVERSION="-xfstests"
- CONFIG_SYSVIPC=y
- CONFIG_POSIX_MQUEUE=y
- CONFIG_BSD_PROCESS_ACCT=y
+@@ -239,6 +239,8 @@ CONFIG_SQUASHFS_XATTR=y
+ CONFIG_SQUASHFS_LZO=y
+ CONFIG_SQUASHFS_XZ=y
+ CONFIG_ROMFS_FS=y
++CONFIG_F2FS_FS=y
++CONFIG_F2FS_FS_SECURITY=y
+ # CONFIG_NETWORK_FILESYSTEMS is not set
+ CONFIG_NLS_DEFAULT="utf8"
+ CONFIG_NLS_CODEPAGE_437=y
 diff --git a/kernel-configs/x86_64-config-4.1 b/kernel-configs/x86_64-config-4.1
-index d5e0825..ec73222 100644
+index ec73222..12db1cc 100644
 --- a/kernel-configs/x86_64-config-4.1
 +++ b/kernel-configs/x86_64-config-4.1
-@@ -1,3 +1,4 @@
-+CONFIG_LOCALVERSION="-xfstests"
- CONFIG_SYSVIPC=y
- CONFIG_POSIX_MQUEUE=y
- CONFIG_FHANDLE=y
+@@ -216,6 +216,8 @@ CONFIG_XFS_QUOTA=y
+ CONFIG_XFS_POSIX_ACL=y
+ CONFIG_XFS_RT=y
+ CONFIG_BTRFS_FS=y
++CONFIG_F2FS_FS=y
++CONFIG_F2FS_FS_SECURITY=y
+ CONFIG_FANOTIFY=y
+ CONFIG_FANOTIFY_ACCESS_PERMISSIONS=y
+ CONFIG_QUOTA=y
 diff --git a/kernel-configs/x86_64-config-4.4 b/kernel-configs/x86_64-config-4.4
-index cf09247..bdf4087 100644
+index bdf4087..efbab94 100644
 --- a/kernel-configs/x86_64-config-4.4
 +++ b/kernel-configs/x86_64-config-4.4
-@@ -1,3 +1,4 @@
-+CONFIG_LOCALVERSION="-xfstests"
- CONFIG_SYSVIPC=y
- CONFIG_POSIX_MQUEUE=y
- CONFIG_FHANDLE=y
+@@ -225,6 +225,9 @@ CONFIG_XFS_QUOTA=y
+ CONFIG_XFS_POSIX_ACL=y
+ CONFIG_XFS_RT=y
+ CONFIG_BTRFS_FS=y
++CONFIG_F2FS_FS=y
++CONFIG_F2FS_FS_SECURITY=y
++CONFIG_F2FS_FS_ENCRYPTION=y
+ CONFIG_FANOTIFY=y
+ CONFIG_FANOTIFY_ACCESS_PERMISSIONS=y
+ CONFIG_QUOTA=y
 diff --git a/kernel-configs/x86_64-config-4.7 b/kernel-configs/x86_64-config-4.7
-index 40f626a..eb4a51f 100644
+index eb4a51f..8752ebf 100644
 --- a/kernel-configs/x86_64-config-4.7
 +++ b/kernel-configs/x86_64-config-4.7
-@@ -1,4 +1,4 @@
--CONFIG_LOCALVERSION="-ext4"
-+CONFIG_LOCALVERSION="-xfstests"
- CONFIG_SYSVIPC=y
- CONFIG_POSIX_MQUEUE=y
- CONFIG_AUDIT=y
+@@ -225,8 +225,10 @@ CONFIG_XFS_QUOTA=y
+ CONFIG_XFS_POSIX_ACL=y
+ CONFIG_XFS_RT=y
+ CONFIG_BTRFS_FS=y
++CONFIG_F2FS_FS=y
++CONFIG_F2FS_FS_SECURITY=y
++CONFIG_F2FS_FS_ENCRYPTION=y
+ CONFIG_FS_DAX=y
+-CONFIG_FS_ENCRYPTION=y
+ CONFIG_FANOTIFY=y
+ CONFIG_FANOTIFY_ACCESS_PERMISSIONS=y
+ CONFIG_QUOTA=y
+@@ -315,7 +317,6 @@ CONFIG_CRYPTO_CMAC=y
+ CONFIG_CRYPTO_XCBC=y
+ CONFIG_CRYPTO_VMAC=y
+ CONFIG_CRYPTO_CRC32C_INTEL=y
+-CONFIG_CRYPTO_CRC32=y
+ CONFIG_CRYPTO_CRC32_PCLMUL=y
+ CONFIG_CRYPTO_CRCT10DIF_PCLMUL=y
+ CONFIG_CRYPTO_MD4=y
 diff --git a/kernel-configs/x86_64-config-4.9 b/kernel-configs/x86_64-config-4.9
-index a977f51..0937576 100644
+index 0937576..5cf43a4 100644
 --- a/kernel-configs/x86_64-config-4.9
 +++ b/kernel-configs/x86_64-config-4.9
-@@ -1,4 +1,4 @@
--CONFIG_LOCALVERSION="-ext4"
-+CONFIG_LOCALVERSION="-xfstests"
- CONFIG_SYSVIPC=y
- CONFIG_POSIX_MQUEUE=y
- CONFIG_AUDIT=y
+@@ -224,6 +224,9 @@ CONFIG_XFS_QUOTA=y
+ CONFIG_XFS_POSIX_ACL=y
+ CONFIG_XFS_RT=y
+ CONFIG_BTRFS_FS=y
++CONFIG_F2FS_FS=y
++CONFIG_F2FS_FS_SECURITY=y
++CONFIG_F2FS_FS_ENCRYPTION=y
+ CONFIG_FS_DAX=y
+ CONFIG_FANOTIFY=y
+ CONFIG_FANOTIFY_ACCESS_PERMISSIONS=y
+@@ -314,7 +317,6 @@ CONFIG_CRYPTO_CMAC=y
+ CONFIG_CRYPTO_XCBC=y
+ CONFIG_CRYPTO_VMAC=y
+ CONFIG_CRYPTO_CRC32C_INTEL=y
+-CONFIG_CRYPTO_CRC32=y
+ CONFIG_CRYPTO_CRC32_PCLMUL=y
+ CONFIG_CRYPTO_CRCT10DIF_PCLMUL=y
+ CONFIG_CRYPTO_MD4=y
 -- 
 2.13.0.303.g4ebf302169-goog
 
