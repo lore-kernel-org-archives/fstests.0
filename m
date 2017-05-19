@@ -1,72 +1,79 @@
-Received: from imap.thunk.org ([74.207.234.97]:42842 "EHLO imap.thunk.org"
+Received: from sandeen.net ([63.231.237.45]:51518 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751472AbdESOnN (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 19 May 2017 10:43:13 -0400
-Date: Fri, 19 May 2017 10:43:10 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH 1/5] kernel-configs: switch to using defconfigs
-Message-ID: <20170519144310.h52nam76bkxback2@thunk.org>
-References: <20170517233233.61244-1-ebiggers3@gmail.com>
- <20170517233233.61244-2-ebiggers3@gmail.com>
- <20170518184433.qq2g43s4za6hrfjz@thunk.org>
- <CAOQ4uxiygvNT07ZWLss8nnNRe4VVNuhAF5WRLSpRP7vYffibyA@mail.gmail.com>
+        id S1751279AbdESQjH (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 19 May 2017 12:39:07 -0400
+Subject: Re: [PATCH V2] xfs/289: test fragmented multi-fsb readdir
+References: <ca07fe07-ac0a-a927-494f-34f7205e81d4@sandeen.net>
+ <fbad53d8-9807-1912-c3e4-e932020c19d3@sandeen.net>
+ <591E5BEB.5070008@cn.fujitsu.com>
+ <a511db57-db7f-6a7c-39ea-e6d3b003970c@sandeen.net>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <9940cc65-677e-eeac-7a7c-ec3ba5ef2db4@sandeen.net>
+Date: Fri, 19 May 2017 11:39:06 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxiygvNT07ZWLss8nnNRe4VVNuhAF5WRLSpRP7vYffibyA@mail.gmail.com>
+In-Reply-To: <a511db57-db7f-6a7c-39ea-e6d3b003970c@sandeen.net>
+Content-Type: text/plain; charset=utf-8
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Eric Biggers <ebiggers3@gmail.com>, fstests <fstests@vger.kernel.org>, David Oberhollenzer <david.oberhollenzer@sigma-star.at>, Eric Biggers <ebiggers@google.com>
+Content-Transfer-Encoding: quoted-printable
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>, Eryu Guan <eguan@redhat.com>
+Cc: fstests <fstests@vger.kernel.org>, Zorro Lang <zlang@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, May 19, 2017 at 10:05:35AM +0300, Amir Goldstein wrote:
-> 
-> Applied where? github is 2 weeks behind. kernel.org is 2 weeks behind.
+On 5/18/17 10:30 PM, Eric Sandeen wrote:
 
-Pushed out now.  There can be a day or two lag between when I accept
-patches and when they get pushed out.  That's normally because I do a
-test verification in a batch process, and if there are substantive
-changes, I do like to at least do a smoke test before pushing stuff
-out.  In this case, where it's just Documentation and kernel-configs
-changes, I do push something out first.
+>=20
+> That's an odd failure; I wrote the test for upstream...
+>=20
+> On that kernel, despite free inodes:
+>=20
+> # df -i /mnt/scratch
+> Filesystem     Inodes IUsed IFree IUse% Mounted on
+> /dev/loop1      10260   490  9770    5% /mnt/scratch
+>=20
+> and xfs_db concurs (more or less?):
+>=20
+> icount =3D 10240
+> ifree =3D 9750
+>=20
+> creating a new inode fails:
+>=20
+> # touch /mnt/scratch/testdir/12345678901234567890169
+> touch: cannot touch =E2=80=98/mnt/scratch/testdir/123456789012345678901=
+69=E2=80=99: No space left on device
+>=20
+> Everything about the fs looks the same as if we run it upstream, includ=
+ing
+> the reserved blocks:
+>=20
+> reserved blocks =3D 6553
+> available reserved blocks =3D 6553
+>=20
+> But, it's failing to allocate the space:
+>=20
+>            touch-12302 [005] d... 118038.499302: ret_xfs_mod_fdblocks: =
+(xfs_trans_reserve+0x123/0x200 [xfs] <- xfs_mod_fdblocks) arg1=3D0xffffff=
+e4
+>=20
+> (arg1 is the return value, -ENOSPC)
+>=20
+> It's not clear to me at this point why we can't create another inode on=
+ this fs.
 
-> BTW, I am curious to know why the kernel-configs in this repository have
-> no obvious debug config options.
-> 
-> Aren't you guys testing regularly with lockdep etc? does everyone carry
-> their own home brewed debug configs like I do [1]?
+Ugh, I can't believe I missed this - I actually didn't do anything to ens=
+ure that
+there is free space to grow the actual directory into.
 
-We do actually have LOCKDEP enabled in the x86_64 4.9 config.  The
-current set of configs were always maintained informally, and were
-originally intended to help people who were getting started to be able
-to build a kernel that would actually work using KVM or GCE.  So they
-were made by copying my current development configs to kernel-config
-directory.  That's why there is a certain amount of inconsistency over
-which debugging options were turned on.
+If I add this just prior to the last 1300-file touch loop:
 
-In particular, I never bothered to turn on LOCKDEP debugging for the
-stable kernel verification effort that I did a year or so ago.  (I've
-been too busy to run the full set of regression tests on 3.18.x,
-et. al; I suspect if I did we would discover some additional number of
-bug fixes that need to be hand cherry picked back to ancient kernels.
-This also reflects that I'm no longer directly involved with trying to
-build Android kernels; which is why I started running the regression
-tests on LTS kernel releases, out of sheer self-defense, and so I
-could point out to various folks --- well, if your BSP kernel had
-_bothered_ to keep up with the stable kernels, you'd find the bug fix
-in 3.18.y....)  I probably should have turned on LOCKDEP debugging,
-but at the time, finding bugs in the 3.10 kernel was easy enough
-without turning on LOCKDEP.  :-)
+./src/punch-alternating $SCRATCH_MNT/spacefile1 >> $seqres.full 2>&1
 
-> What do you say about including -debug variants to the maintained
-> kernel-configs in this repo? or turn on the obvious debugging features
-> by default?
-> 
-> [1] https://github.com/amir73il/xfstests-bld/commit/af76cac689ea726cb8f5b222010b7818a689809b
+that seems to let the test proceed w/o ENOSPC, and properly fragment the
+dir.
 
-No objections to me, in general, so long as it doesn't trash
-performance _too_ much.  I will note that test diversity can be a good
-thing, since it could be that certain timing related bugs can be
-suppressed if various debugging options are turned on....
+(OTOH upstream, now the test is reporting fs corruption, though I don't
+see it after the test completes.  Very confused now.  It might be
+confusing xfs_check?  Repair is happy...)
 
-	      	      			    - Ted
+I'm still not sure why the rhel kernel differs from upstream, though.
+
+-Eric
