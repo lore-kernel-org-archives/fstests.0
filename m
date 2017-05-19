@@ -1,101 +1,79 @@
-Received: from sandeen.net ([63.231.237.45]:48316 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751398AbdESDa1 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 18 May 2017 23:30:27 -0400
-Subject: Re: [PATCH V2] xfs/289: test fragmented multi-fsb readdir
-References: <ca07fe07-ac0a-a927-494f-34f7205e81d4@sandeen.net>
- <fbad53d8-9807-1912-c3e4-e932020c19d3@sandeen.net>
- <591E5BEB.5070008@cn.fujitsu.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <a511db57-db7f-6a7c-39ea-e6d3b003970c@sandeen.net>
-Date: Thu, 18 May 2017 22:30:25 -0500
-MIME-Version: 1.0
-In-Reply-To: <591E5BEB.5070008@cn.fujitsu.com>
-Content-Type: text/plain; charset=utf-8
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:36798 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750952AbdESGu4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 19 May 2017 02:50:56 -0400
+Received: by mail-wm0-f67.google.com with SMTP id k15so14837922wmh.3
+        for <fstests@vger.kernel.org>; Thu, 18 May 2017 23:50:55 -0700 (PDT)
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH] test-appliance: use new overlay xfstest config
+Date: Fri, 19 May 2017 09:51:03 +0300
+Message-Id: <1495176663-2226-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Xiao Yang <yangx.jy@cn.fujitsu.com>, Eryu Guan <eguan@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>, Zorro Lang <zlang@redhat.com>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Eryu Guan <eguan@redhat.com>, Eric Biggers <ebiggers@google.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+requires xfstests commit 33e4199
+("overlay: use OVL_BASE_SCRATCH_MNT instead of SCRATCH_DEV")
 
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/large | 8 ++++----
+ kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/small | 8 ++++----
+ 2 files changed, 8 insertions(+), 8 deletions(-)
 
-On 5/18/17 9:43 PM, Xiao Yang wrote:
-> Hi Eric and Eryu
->=20
-> I tested it on RHE7.3GA and RHEL7.4Alpha=EF=BC=8C i got ENOSPC error in=
-stead of hang.  Is it expected behavior?
->=20
-> Please see the following detailed message:
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D
-> [root@RHEL7U4Alpha_Intel64 xfstests]# ./check xfs/294
-> FSTYP         -- xfs (non-debug)
-> PLATFORM      -- Linux/x86_64 RHEL7U4Alpha_Intel64 3.10.0-657.el7.x86_6=
-4
-> MKFS_OPTIONS  -- -f -bsize=3D4096 /dev/sda11
-> MOUNT_OPTIONS -- -o context=3Dsystem_u:object_r:root_t:s0 /dev/sda11 /m=
-nt/xfstests/scratch
->=20
-> xfs/294 10s ... - output mismatch (see /var/lib/xfstests/results//xfs/2=
-94.out.bad)
->     --- tests/xfs/294.out    2017-05-19 10:39:31.798010275 +0800
->     +++ /var/lib/xfstests/results//xfs/294.out.bad    2017-05-19 10:40:=
-02.112008755 +0800
->     @@ -1,2 +1,1234 @@
->      QA output created by 294
->     -23accd029fad51ec02e4ec1f24799878  -
->     +touch: cannot touch '/mnt/xfstests/scratch/testdir/123456789012345=
-67890169': No space left on device
->     +touch: cannot touch '/mnt/xfstests/scratch/testdir/123456789012345=
-67890170': No space left on device
->     +touch: cannot touch '/mnt/xfstests/scratch/testdir/123456789012345=
-67890171': No space left on device
->     +touch: cannot touch '/mnt/xfstests/scratch/testdir/123456789012345=
-67890172': No space left on device
->     +touch: cannot touch '/mnt/xfstests/scratch/testdir/123456789012345=
-67890173': No space left on device
->     ...
->     (Run 'diff -u tests/xfs/294.out /var/lib/xfstests/results//xfs/294.=
-out.bad'  to see the entire diff)
+Ted,
 
-That's an odd failure; I wrote the test for upstream...
+Forgot to post this one in addition to the github PR:
+https://github.com/tytso/xfstests-bld/pull/4
 
-On that kernel, despite free inodes:
+Using the new overlay xfstest config is helping catch reference leak
+bugs all the time, because it mount cycle the underlying base fs on
+every test and within tests that do cycle_mount.
 
-# df -i /mnt/scratch
-Filesystem     Inodes IUsed IFree IUse% Mounted on
-/dev/loop1      10260   490  9770    5% /mnt/scratch
+Please pull.
 
-and xfs_db concurs (more or less?):
+Thanks,
+Amir.
 
-icount =3D 10240
-ifree =3D 9750
-
-creating a new inode fails:
-
-# touch /mnt/scratch/testdir/12345678901234567890169
-touch: cannot touch =E2=80=98/mnt/scratch/testdir/12345678901234567890169=
-=E2=80=99: No space left on device
-
-Everything about the fs looks the same as if we run it upstream, includin=
-g
-the reserved blocks:
-
-reserved blocks =3D 6553
-available reserved blocks =3D 6553
-
-But, it's failing to allocate the space:
-
-           touch-12302 [005] d... 118038.499302: ret_xfs_mod_fdblocks: (x=
-fs_trans_reserve+0x123/0x200 [xfs] <- xfs_mod_fdblocks) arg1=3D0xffffffe4
-
-(arg1 is the return value, -ENOSPC)
-
-It's not clear to me at this point why we can't create another inode on t=
-his fs.
-
--Eric
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/large b/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/large
+index ec1adf0..ab9a2bb 100644
+--- a/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/large
++++ b/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/large
+@@ -9,10 +9,10 @@ function format_filesystem()
+ }
+ 
+ SIZE=large
+-export TEST_DEV=$LG_TST_MNT/ovl
+-export TEST_DIR=$LG_TST_MNT/testarea
+-export SCRATCH_DEV=$LG_SCR_MNT/ovl
+-export SCRATCH_MNT=$LG_SCR_MNT/testarea
++export TEST_DEV=$LG_TST_DEV
++export TEST_DIR=$LG_TST_MNT
++export SCRATCH_DEV=$LG_SCR_DEV
++export SCRATCH_MNT=$LG_SCR_MNT
+ export EXT_MOUNT_OPTIONS=""
+ TESTNAME="overlayfs large"
+ mkdir -p /test/tmp /test/scratch
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/small b/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/small
+index a28a191..552e302 100644
+--- a/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/small
++++ b/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/small
+@@ -9,10 +9,10 @@ function format_filesystem()
+ }
+ 
+ SIZE=small
+-export TEST_DEV=$SM_TST_MNT/ovl
+-export TEST_DIR=$SM_TST_MNT/testarea
+-export SCRATCH_DEV=$SM_SCR_MNT/ovl
+-export SCRATCH_MNT=$SM_SCR_MNT/testarea
++export TEST_DEV=$SM_TST_DEV
++export TEST_DIR=$SM_TST_MNT
++export SCRATCH_DEV=$SM_SCR_DEV
++export SCRATCH_MNT=$SM_SCR_MNT
+ export EXT_MOUNT_OPTIONS=""
+ TESTNAME="overlayfs small"
+ mkdir -p /test/tmp /test/scratch
+-- 
+2.7.4
 
