@@ -1,89 +1,176 @@
-Received: from bombadil.infradead.org ([65.50.211.133]:56101 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750803AbdEUHMj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 21 May 2017 03:12:39 -0400
-Date: Sun, 21 May 2017 00:12:37 -0700
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 1/9] bio-integrity: Do not allocate integrity context for
- bio w/o data
-Message-ID: <20170521071237.GA23226@infradead.org>
-References: <1494429652-9488-1-git-send-email-dmonakhov@openvz.org>
- <1494429652-9488-2-git-send-email-dmonakhov@openvz.org>
- <20170511073032.GA26586@infradead.org>
+Received: from mail-pg0-f68.google.com ([74.125.83.68]:34159 "EHLO
+        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751092AbdEUISU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 21 May 2017 04:18:20 -0400
+Received: by mail-pg0-f68.google.com with SMTP id u187so14250550pgb.1
+        for <fstests@vger.kernel.org>; Sun, 21 May 2017 01:18:20 -0700 (PDT)
+Received: from localhost ([128.199.137.77])
+        by smtp.gmail.com with ESMTPSA id i68sm28474416pfi.72.2017.05.21.01.18.18
+        for <fstests@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Sun, 21 May 2017 01:18:19 -0700 (PDT)
+Message-ID: <59214d4b.4722620a.9134b.10b8@mx.google.com>
+From: Eryu Guan <guaneryu@gmail.com>
+Date: Sun, 21 May 2017 16:18:16 +0800
+Subject: [ANNOUNCE] fstests: master branch updated to 9000551d9b78
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="rDrWlvioMOjO"
 Content-Disposition: inline
-In-Reply-To: <20170511073032.GA26586@infradead.org>
 Sender: fstests-owner@vger.kernel.org
-To: axboe@kernel.dk
-Cc: Dmitry Monakhov <dmonakhov@openvz.org>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-block@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 11, 2017 at 12:30:32AM -0700, Christoph Hellwig wrote:
-> Jens, can you pick this up for 4.12?
 
-ping?
+--rDrWlvioMOjO
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> On Wed, May 10, 2017 at 07:20:44PM +0400, Dmitry Monakhov wrote:
-> > If bio has no data, such as ones from blkdev_issue_flush(),
-> > then we have nothing to protect.
-> > 
-> > This patch prevent bugon like follows:
-> > 
-> > kfree_debugcheck: out of range ptr ac1fa1d106742a5ah
-> > kernel BUG at mm/slab.c:2773!
-> > invalid opcode: 0000 [#1] SMP
-> > Modules linked in: bcache
-> > CPU: 0 PID: 4428 Comm: xfs_io Tainted: G        W       4.11.0-rc4-ext4-00041-g2ef0043-dirty #43
-> > Hardware name: Virtuozzo KVM, BIOS seabios-1.7.5-11.vz7.4 04/01/2014
-> > task: ffff880137786440 task.stack: ffffc90000ba8000
-> > RIP: 0010:kfree_debugcheck+0x25/0x2a
-> > RSP: 0018:ffffc90000babde0 EFLAGS: 00010082
-> > RAX: 0000000000000034 RBX: ac1fa1d106742a5a RCX: 0000000000000007
-> > RDX: 0000000000000000 RSI: 0000000000000000 RDI: ffff88013f3ccb40
-> > RBP: ffffc90000babde8 R08: 0000000000000000 R09: 0000000000000000
-> > R10: 00000000fcb76420 R11: 00000000725172ed R12: 0000000000000282
-> > R13: ffffffff8150e766 R14: ffff88013a145e00 R15: 0000000000000001
-> > FS:  00007fb09384bf40(0000) GS:ffff88013f200000(0000) knlGS:0000000000000000
-> > CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> > CR2: 00007fd0172f9e40 CR3: 0000000137fa9000 CR4: 00000000000006f0
-> > Call Trace:
-> >  kfree+0xc8/0x1b3
-> >  bio_integrity_free+0xc3/0x16b
-> >  bio_free+0x25/0x66
-> >  bio_put+0x14/0x26
-> >  blkdev_issue_flush+0x7a/0x85
-> >  blkdev_fsync+0x35/0x42
-> >  vfs_fsync_range+0x8e/0x9f
-> >  vfs_fsync+0x1c/0x1e
-> >  do_fsync+0x31/0x4a
-> >  SyS_fsync+0x10/0x14
-> >  entry_SYSCALL_64_fastpath+0x1f/0xc2
-> > 
-> > Reviewed-by: Christoph Hellwig <hch@lst.de>
-> > Reviewed-by: Hannes Reinecke <hare@suse.com>
-> > Reviewed-by: Martin K. Petersen <martin.petersen@oracle.com>
-> > Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
-> > ---
-> >  block/bio-integrity.c | 3 +++
-> >  1 file changed, 3 insertions(+)
-> > 
-> > diff --git a/block/bio-integrity.c b/block/bio-integrity.c
-> > index 5384713..b5009a8 100644
-> > --- a/block/bio-integrity.c
-> > +++ b/block/bio-integrity.c
-> > @@ -175,6 +175,9 @@ bool bio_integrity_enabled(struct bio *bio)
-> >  	if (bio_op(bio) != REQ_OP_READ && bio_op(bio) != REQ_OP_WRITE)
-> >  		return false;
-> >  
-> > +	if (!bio_sectors(bio))
-> > +		return false;
-> > +
-> >  	/* Already protected? */
-> >  	if (bio_integrity(bio))
-> >  		return false;
-> > -- 
-> > 2.9.3
-> > 
-> ---end quoted text---
----end quoted text---
+Hi all,
+
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. This update is a bit bigger than usual, it contains 12
+commits from 6 authors, many thanks to all of them!
+
+There're new encryption, SEEK_DATA/HOLE, dax and btrfs tests added, aio related
+tests are not running if CONFIG_AIO isn't enabled. Xiao Yang helped clean up
+the _require_xfs_io_command() function, there should be no behavior change.
+
+New failures I've noticed in this update:
+- generic/436: new SEEK_HOLE test fails on current (4.12-rc1) XFS and ext4
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+9000551d9b78 fstests: skip AIO-related tests when CONFIG_AIO=n
+
+New commits:
+
+Eric Biggers (2):
+      [b245c5e43f28] generic: test that encrypted filenames are presented without collisions
+      [9000551d9b78] fstests: skip AIO-related tests when CONFIG_AIO=n
+
+Jan Kara (1):
+      [2508d61b63ed] generic: Add more SEEK_HOLE tests
+
+Liu Bo (5):
+      [7453987aaa65] common/filter: add _filter_filefrag
+      [4f2ea4abc1d6] btrfs: regression test for btrfs dio read repair
+      [d3a1eb354e4f] btrfs: regression test for btrfs buffered read's repair
+      [495d11cd2da0] btrfs: regression test for nocsum dio read's repair
+      [aaf96798d84a] btrfs: regression test for nocsum buffered read's repair
+
+Ross Zwisler (1):
+      [44f649f632a8] generic: add regression test for DAX PTE/PMD races
+
+Xiao Yang (2):
+      [eaa2d30dbaa1] common: use _require_xfs_io_command() directly to check fiemap
+      [704c27f69fa1] common: cleanup _require_xfs_io_command
+
+Zorro Lang (1):
+      [5a1b35a74352] fsstress: cleanup flist with test directory together
+
+
+Code Diffstat:
+
+ .gitignore             |   1 +
+ common/filter          |  19 ++++
+ common/rc              |  46 ++++++----
+ common/reflink         |   2 +-
+ ltp/fsstress.c         |  21 +++++
+ src/Makefile           |   4 +-
+ src/feature.c          |  42 ++++++++-
+ src/seek_sanity_test.c | 242 ++++++++++++++++++++++++++++++++++++++++++++++++-
+ src/t_mmap_cow_race.c  | 106 ++++++++++++++++++++++
+ tests/btrfs/140        | 117 ++++++++++++++++++++++++
+ tests/btrfs/140.out    |  39 ++++++++
+ tests/btrfs/141        | 118 ++++++++++++++++++++++++
+ tests/btrfs/141.out    |  39 ++++++++
+ tests/btrfs/142        | 140 ++++++++++++++++++++++++++++
+ tests/btrfs/142.out    |  39 ++++++++
+ tests/btrfs/143        | 150 ++++++++++++++++++++++++++++++
+ tests/btrfs/143.out    |  39 ++++++++
+ tests/btrfs/group      |   4 +
+ tests/generic/043      |   2 +-
+ tests/generic/044      |   2 +-
+ tests/generic/045      |   2 +-
+ tests/generic/046      |   2 +-
+ tests/generic/047      |   2 +-
+ tests/generic/048      |   2 +-
+ tests/generic/049      |   2 +-
+ tests/generic/092      |   2 +-
+ tests/generic/112      |   1 +
+ tests/generic/113      |   1 +
+ tests/generic/301      |   2 +-
+ tests/generic/302      |   2 +-
+ tests/generic/305      |   2 +-
+ tests/generic/326      |   2 +-
+ tests/generic/327      |   2 +-
+ tests/generic/328      |   2 +-
+ tests/generic/352      |   2 +-
+ tests/generic/353      |   2 +-
+ tests/generic/372      |   2 +-
+ tests/generic/414      |   2 +-
+ tests/generic/425      |   2 +-
+ tests/generic/435      |  99 ++++++++++++++++++++
+ tests/generic/435.out  |   4 +
+ tests/generic/436      |  64 +++++++++++++
+ tests/generic/436.out  |   2 +
+ tests/generic/437      |  61 +++++++++++++
+ tests/generic/437.out  |   2 +
+ tests/generic/group    |   3 +
+ tests/xfs/180          |   2 +-
+ tests/xfs/182          |   2 +-
+ tests/xfs/184          |   2 +-
+ tests/xfs/192          |   2 +-
+ tests/xfs/193          |   2 +-
+ tests/xfs/198          |   2 +-
+ tests/xfs/200          |   2 +-
+ tests/xfs/204          |   2 +-
+ tests/xfs/207          |   2 +-
+ tests/xfs/208          |   2 +-
+ tests/xfs/209          |   2 +-
+ tests/xfs/210          |   2 +-
+ tests/xfs/211          |   2 +-
+ tests/xfs/212          |   2 +-
+ tests/xfs/213          |   2 +-
+ tests/xfs/214          |   2 +-
+ tests/xfs/231          |   2 +-
+ tests/xfs/232          |   2 +-
+ tests/xfs/240          |   3 +-
+ tests/xfs/241          |   3 +-
+ tests/xfs/344          |   2 +-
+ tests/xfs/345          |   2 +-
+ tests/xfs/346          |   2 +-
+ tests/xfs/347          |   2 +-
+ 70 files changed, 1420 insertions(+), 73 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
+
+--rDrWlvioMOjO
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJZIUwqAAoJECZSqilcj+djdO0QAMCBKU/cFpSMEV0hHAkAaRqg
+PuYjNe8DSCYHgWwKJoYNyMLNeSGirAD68draJWDRlgTkxKXxOnKjKluZqiHhtm+Z
+VDvA8YDLonabvJVW/nFCt5ZCsgIemuCINXJYt6X4n0PStoHCaZQRC4MR8YoCZLY4
+PRHOhcuE/X2qsWoDh7wTzdfAh6AKAUE8Eu6r9MIK2mfAt8fbHoBIeQJVuEM4kYi1
+ExA989t3dE1254zXKHYzSYGprL8ZC3rRmzOk6DWNOpuUMu965NANoW1yqnNbUR7p
+qv8h5yOQLSN/M3qffbu2XNAX0xdSpnXB8BbbLbvpMcR9133naZnidvo8I2DVkknO
+pARl35nGDDTW5kAvS7uoj8QVWLSa70jGsXd4w2gy2ziT2/iJ1z5Xz1oenO4fYzpA
+1chig+p/UI+gBktDf2EM/3MxlyjprErPMHLcWik+XS5cquqTB4FTwEFPI+MclKqf
+pGBllf/V4Quv6EiEaB3yAqIC6I1DrUkgdRpdboGwKfpm4Dvc7e+zRu+hQvFw3ICO
+l9/77TBF414I2AQ/Bd98stD9RoOTrF9amb7RWohfDTrF08olUf4gwwW/w3fAH77+
+MNA6kftMk6pjSSqQOvcfUDH+3JxxeIMAi+lyvuz3C4Jkpv4RZA5koz65fGQOtGs5
+pPCEyHpEcU4v7rBrlkQZ
+=u7wW
+-----END PGP SIGNATURE-----
+
+--rDrWlvioMOjO--
