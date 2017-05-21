@@ -1,44 +1,89 @@
-Received: from mail.sigma-star.at ([95.130.255.111]:45996 "EHLO
-        mail.sigma-star.at" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750748AbdETWGW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 20 May 2017 18:06:22 -0400
-From: Richard Weinberger <richard@nod.at>
-Subject: [PATCH] stat_test: Fix stx_attributes check
-Date: Sun, 21 May 2017 00:06:13 +0200
-Message-Id: <1495317973-24072-1-git-send-email-richard@nod.at>
+Received: from bombadil.infradead.org ([65.50.211.133]:56101 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750803AbdEUHMj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 21 May 2017 03:12:39 -0400
+Date: Sun, 21 May 2017 00:12:37 -0700
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH 1/9] bio-integrity: Do not allocate integrity context for
+ bio w/o data
+Message-ID: <20170521071237.GA23226@infradead.org>
+References: <1494429652-9488-1-git-send-email-dmonakhov@openvz.org>
+ <1494429652-9488-2-git-send-email-dmonakhov@openvz.org>
+ <20170511073032.GA26586@infradead.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170511073032.GA26586@infradead.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: dhowells@redhat.com, amir73il@gmail.com, darrick.wong@oracle.com, eguan@redhat.com, Richard Weinberger <richard@nod.at>
+To: axboe@kernel.dk
+Cc: Dmitry Monakhov <dmonakhov@openvz.org>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-block@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-I found that this test succeeds on UBIFS:
-stat_test /mnt/foo attr=+compressed attr=-compressed
+On Thu, May 11, 2017 at 12:30:32AM -0700, Christoph Hellwig wrote:
+> Jens, can you pick this up for 4.12?
 
-Since stx_attributes can hold many flags, check the flags
-correctly with the & operator.
+ping?
 
-Signed-off-by: Richard Weinberger <richard@nod.at>
----
- src/stat_test.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/src/stat_test.c b/src/stat_test.c
-index 3dc44bbdb71d..fc87ed5c6e8f 100644
---- a/src/stat_test.c
-+++ b/src/stat_test.c
-@@ -621,10 +621,10 @@ static void check_attribute(const struct statx *stx, char *arg)
- 
- 	attr = p->attr_flag;
- 	if (set) {
--		check(stx->stx_attributes && attr,
-+		check((stx->stx_attributes & attr) == attr,
- 		      "Attribute %s should be set\n", arg);
- 	} else {
--		check(~stx->stx_attributes && attr,
-+		check((stx->stx_attributes & attr) == 0,
- 		      "Attribute %s should be unset\n", arg);
- 	}
- }
--- 
-2.7.3
-
+> On Wed, May 10, 2017 at 07:20:44PM +0400, Dmitry Monakhov wrote:
+> > If bio has no data, such as ones from blkdev_issue_flush(),
+> > then we have nothing to protect.
+> > 
+> > This patch prevent bugon like follows:
+> > 
+> > kfree_debugcheck: out of range ptr ac1fa1d106742a5ah
+> > kernel BUG at mm/slab.c:2773!
+> > invalid opcode: 0000 [#1] SMP
+> > Modules linked in: bcache
+> > CPU: 0 PID: 4428 Comm: xfs_io Tainted: G        W       4.11.0-rc4-ext4-00041-g2ef0043-dirty #43
+> > Hardware name: Virtuozzo KVM, BIOS seabios-1.7.5-11.vz7.4 04/01/2014
+> > task: ffff880137786440 task.stack: ffffc90000ba8000
+> > RIP: 0010:kfree_debugcheck+0x25/0x2a
+> > RSP: 0018:ffffc90000babde0 EFLAGS: 00010082
+> > RAX: 0000000000000034 RBX: ac1fa1d106742a5a RCX: 0000000000000007
+> > RDX: 0000000000000000 RSI: 0000000000000000 RDI: ffff88013f3ccb40
+> > RBP: ffffc90000babde8 R08: 0000000000000000 R09: 0000000000000000
+> > R10: 00000000fcb76420 R11: 00000000725172ed R12: 0000000000000282
+> > R13: ffffffff8150e766 R14: ffff88013a145e00 R15: 0000000000000001
+> > FS:  00007fb09384bf40(0000) GS:ffff88013f200000(0000) knlGS:0000000000000000
+> > CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> > CR2: 00007fd0172f9e40 CR3: 0000000137fa9000 CR4: 00000000000006f0
+> > Call Trace:
+> >  kfree+0xc8/0x1b3
+> >  bio_integrity_free+0xc3/0x16b
+> >  bio_free+0x25/0x66
+> >  bio_put+0x14/0x26
+> >  blkdev_issue_flush+0x7a/0x85
+> >  blkdev_fsync+0x35/0x42
+> >  vfs_fsync_range+0x8e/0x9f
+> >  vfs_fsync+0x1c/0x1e
+> >  do_fsync+0x31/0x4a
+> >  SyS_fsync+0x10/0x14
+> >  entry_SYSCALL_64_fastpath+0x1f/0xc2
+> > 
+> > Reviewed-by: Christoph Hellwig <hch@lst.de>
+> > Reviewed-by: Hannes Reinecke <hare@suse.com>
+> > Reviewed-by: Martin K. Petersen <martin.petersen@oracle.com>
+> > Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
+> > ---
+> >  block/bio-integrity.c | 3 +++
+> >  1 file changed, 3 insertions(+)
+> > 
+> > diff --git a/block/bio-integrity.c b/block/bio-integrity.c
+> > index 5384713..b5009a8 100644
+> > --- a/block/bio-integrity.c
+> > +++ b/block/bio-integrity.c
+> > @@ -175,6 +175,9 @@ bool bio_integrity_enabled(struct bio *bio)
+> >  	if (bio_op(bio) != REQ_OP_READ && bio_op(bio) != REQ_OP_WRITE)
+> >  		return false;
+> >  
+> > +	if (!bio_sectors(bio))
+> > +		return false;
+> > +
+> >  	/* Already protected? */
+> >  	if (bio_integrity(bio))
+> >  		return false;
+> > -- 
+> > 2.9.3
+> > 
+> ---end quoted text---
+---end quoted text---
