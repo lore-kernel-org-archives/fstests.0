@@ -1,56 +1,59 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:20720 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932968AbdEWDSy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 22 May 2017 23:18:54 -0400
-Date: Mon, 22 May 2017 20:18:41 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] stat_test: Fix stx_attributes check
-Message-ID: <20170523031841.GJ4521@birch.djwong.org>
-References: <1495317973-24072-1-git-send-email-richard@nod.at>
+Received: from cn.fujitsu.com ([59.151.112.132]:34931 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1759927AbdEWICT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 23 May 2017 04:02:19 -0400
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Subject: [PATCH] fstests: common: Make _test_mount to include MOUNT_OPTIONS to allow consistent _test_cycle_mount
+Date: Tue, 23 May 2017 16:02:05 +0800
+Message-ID: <20170523080205.12556-1-quwenruo@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1495317973-24072-1-git-send-email-richard@nod.at>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Richard Weinberger <richard@nod.at>
-Cc: fstests@vger.kernel.org, dhowells@redhat.com, amir73il@gmail.com, eguan@redhat.com
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, May 21, 2017 at 12:06:13AM +0200, Richard Weinberger wrote:
-> I found that this test succeeds on UBIFS:
-> stat_test /mnt/foo attr=+compressed attr=-compressed
-> 
-> Since stx_attributes can hold many flags, check the flags
-> correctly with the & operator.
-> 
-> Signed-off-by: Richard Weinberger <richard@nod.at>
+[BUG]
+If using MOUNT_OPTIONS="-o nodatasum" and btrfs to run genierc/142
+generic/143 and generic/154, it will cause false alert like:
+cp: failed to clone '/mnt/test/test-154/file2' from '/mnt/test/test-154/file1': Invalid argument
 
-Looks ok to /me/...
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+[REASON]
+It is caused by _test_cycle_mount function, which unmount test device,
+but when trying to re-mount it again using _test_mount(), we don't pass
+$MOUNT_OPTIONS.
 
---D
+So this makes mount options differs between _test_cycle_mount().
 
-> ---
->  src/stat_test.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/src/stat_test.c b/src/stat_test.c
-> index 3dc44bbdb71d..fc87ed5c6e8f 100644
-> --- a/src/stat_test.c
-> +++ b/src/stat_test.c
-> @@ -621,10 +621,10 @@ static void check_attribute(const struct statx *stx, char *arg)
->  
->  	attr = p->attr_flag;
->  	if (set) {
-> -		check(stx->stx_attributes && attr,
-> +		check((stx->stx_attributes & attr) == attr,
->  		      "Attribute %s should be set\n", arg);
->  	} else {
-> -		check(~stx->stx_attributes && attr,
-> +		check((stx->stx_attributes & attr) == 0,
->  		      "Attribute %s should be unset\n", arg);
->  	}
->  }
-> -- 
-> 2.7.3
-> 
+And btrfs doesn't allow different csum flags between reflink source and
+destination inodes, so it returns -EINVAL for reflink operation.
+
+[FIX]
+Fix it by passing $MOUNT_OPTIONS to _test_mount(), so that
+_test_cycle_mount() won't cause different mount options.
+So btrfs with "-o nodatasum" mount option can pass generic/14[23]
+and generic/154 without false alert.
+
+Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+---
+ common/rc | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/common/rc b/common/rc
+index ba215961..a591907c 100644
+--- a/common/rc
++++ b/common/rc
+@@ -522,7 +522,8 @@ _test_mount()
+         return $?
+     fi
+     _test_options mount
+-    _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
++    _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS \
++		$MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
+ }
+ 
+ _test_unmount()
+-- 
+2.13.0
+
+
+
