@@ -1,54 +1,56 @@
-Received: from mail-pf0-f196.google.com ([209.85.192.196]:36251 "EHLO
-        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753404AbdEWCyl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 22 May 2017 22:54:41 -0400
-Received: by mail-pf0-f196.google.com with SMTP id n23so24085306pfb.3
-        for <fstests@vger.kernel.org>; Mon, 22 May 2017 19:54:41 -0700 (PDT)
-Date: Mon, 22 May 2017 19:54:37 -0700
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: Re: [PATCH] kvm-xfstests, gce-xfstests: improve recommended kernel
- config
-Message-ID: <20170523025437.GA606@zzz>
-References: <20170522172420.136541-1-ebiggers3@gmail.com>
- <20170523021938.biqavccr6bdyy5sc@thunk.org>
+Received: from userp1040.oracle.com ([156.151.31.81]:20720 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932968AbdEWDSy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 22 May 2017 23:18:54 -0400
+Date: Mon, 22 May 2017 20:18:41 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] stat_test: Fix stx_attributes check
+Message-ID: <20170523031841.GJ4521@birch.djwong.org>
+References: <1495317973-24072-1-git-send-email-richard@nod.at>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170523021938.biqavccr6bdyy5sc@thunk.org>
+In-Reply-To: <1495317973-24072-1-git-send-email-richard@nod.at>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, Amir Goldstein <amir73il@gmail.com>, Eric Biggers <ebiggers@google.com>
+To: Richard Weinberger <richard@nod.at>
+Cc: fstests@vger.kernel.org, dhowells@redhat.com, amir73il@gmail.com, eguan@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-Hi Ted,
+On Sun, May 21, 2017 at 12:06:13AM +0200, Richard Weinberger wrote:
+> I found that this test succeeds on UBIFS:
+> stat_test /mnt/foo attr=+compressed attr=-compressed
+> 
+> Since stx_attributes can hold many flags, check the flags
+> correctly with the & operator.
+> 
+> Signed-off-by: Richard Weinberger <richard@nod.at>
 
-On Mon, May 22, 2017 at 10:19:38PM -0400, Theodore Ts'o wrote:
-> On Mon, May 22, 2017 at 10:24:20AM -0700, Eric Biggers wrote:
-> > -CONFIG_LOCK_STAT=y
-> > -CONFIG_DEBUG_LOCKDEP=y
-> 
-> Lockdep has *definitely* found bugs for us, and so I don't think we
-> want to turn it off.  lockstat is a interesting case.  It definitely
-> can cause performance degredations, but it also can very find
-> performance problems.
-> 
-> I can definitely see us potentially looking for locking hotspots by
-> using a DAX configuration (or a /dev/ram configuration) using a
-> n1-highcpu-64 GCE VM.  (Indeed, since Eric Whitney retired from HP,
-> we've lost our only "big iron" system for doing scalability testing.)
-> 
-> The test appliance does currently export /proc/lock_stat via the www
-> interface, although we're currently not saving it in the results
-> tar.gz file.  (That's an oversight.)
-> 
-> So I have a slight preferene for leaving LOCK_STAT enabled, even if
-> we're not using most of the time.  We're certainly not doing
-> performance benchmarks using this config, at any rate!
-> 
+Looks ok to /me/...
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-DEBUG_LOCKDEP is for debugging lockdep itself, not for turning on lockdep
-(that's CONFIG_PROVE_LOCKING).  So I don't think it's needed.
+--D
 
-I'm fine with leaving on LOCK_STAT; I didn't know there was interest in it.
-
-Eric
+> ---
+>  src/stat_test.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/src/stat_test.c b/src/stat_test.c
+> index 3dc44bbdb71d..fc87ed5c6e8f 100644
+> --- a/src/stat_test.c
+> +++ b/src/stat_test.c
+> @@ -621,10 +621,10 @@ static void check_attribute(const struct statx *stx, char *arg)
+>  
+>  	attr = p->attr_flag;
+>  	if (set) {
+> -		check(stx->stx_attributes && attr,
+> +		check((stx->stx_attributes & attr) == attr,
+>  		      "Attribute %s should be set\n", arg);
+>  	} else {
+> -		check(~stx->stx_attributes && attr,
+> +		check((stx->stx_attributes & attr) == 0,
+>  		      "Attribute %s should be unset\n", arg);
+>  	}
+>  }
+> -- 
+> 2.7.3
+> 
