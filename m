@@ -1,425 +1,104 @@
-Received: from mail-pf0-f193.google.com ([209.85.192.193]:33046 "EHLO
-        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751722AbdEWRqk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 23 May 2017 13:46:40 -0400
-Received: by mail-pf0-f193.google.com with SMTP id f27so29101996pfe.0
-        for <fstests@vger.kernel.org>; Tue, 23 May 2017 10:46:39 -0700 (PDT)
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH v2] kvm-xfstests, gce-xfstests: improve recommended kernel config
-Date: Tue, 23 May 2017 10:45:57 -0700
-Message-Id: <20170523174557.60810-1-ebiggers3@gmail.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:52294 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1763444AbdEXAWj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 23 May 2017 20:22:39 -0400
+Subject: Re: [PATCH] fstests: common: Make _test_mount to include
+ MOUNT_OPTIONS to allow consistent _test_cycle_mount
+References: <20170523080205.12556-1-quwenruo@cn.fujitsu.com>
+ <20170523111350.GZ7250@eguan.usersys.redhat.com>
+From: Qu Wenruo <quwenruo@cn.fujitsu.com>
+Message-ID: <68cba4cb-538a-c689-e13a-70028ca0fc0a@cn.fujitsu.com>
+Date: Wed, 24 May 2017 08:22:25 +0800
+MIME-Version: 1.0
+In-Reply-To: <20170523111350.GZ7250@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, Amir Goldstein <amir73il@gmail.com>, Eric Biggers <ebiggers@google.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
 
-Trim more unneeded features from the recommended kernel config, then
-enable some more relatively lightweight debugging options.
 
-For now, just update the latest x86_64 config.  But if people are okay
-with these changes I'll update some of the other configs too.
+At 05/23/2017 07:13 PM, Eryu Guan wrote:
+> On Tue, May 23, 2017 at 04:02:05PM +0800, Qu Wenruo wrote:
+>> [BUG]
+>> If using MOUNT_OPTIONS="-o nodatasum" and btrfs to run genierc/142
+>> generic/143 and generic/154, it will cause false alert like:
+>> cp: failed to clone '/mnt/test/test-154/file2' from '/mnt/test/test-154/file1': Invalid argument
+> 
+> MOUNT_OPTIONS is for scratch mount, and TEST_FS_MOUNT_OPTS is for test
+> dev mount, so I think setting TEST_FS_MOUNT_OPTS to "-o nodatasum"
+> should fix your problem.
 
-Tested with both kvm-xfstests and gce-xfstests.
+Nope, the problem is the inconsistent of TEST_MNT setup.
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
+As I described, the TEST_MNT is setup *with* MOUNT_OPTIONS for the 1st 
+time, maybe by "check" script.
 
-v2: keep CONFIG_LOCK_STAT=y
+But _test_cycle_mount() uses TEST_FS_MOUNT_OPTS otherthan MOUNT_OPTIONS, 
+and leads to the problem.
 
- kernel-configs/x86_64-config-4.9 | 244 ++++-----------------------------------
- 1 file changed, 23 insertions(+), 221 deletions(-)
+If using TEST_FS_MOUNT_OPTS, then 1st setup should also use 
+TEST_FS_MOUNT_OPTS.
 
-diff --git a/kernel-configs/x86_64-config-4.9 b/kernel-configs/x86_64-config-4.9
-index ce7afbb..13650b2 100644
---- a/kernel-configs/x86_64-config-4.9
-+++ b/kernel-configs/x86_64-config-4.9
-@@ -1,34 +1,19 @@
- CONFIG_LOCALVERSION="-xfstests"
- CONFIG_SYSVIPC=y
- CONFIG_POSIX_MQUEUE=y
--CONFIG_AUDIT=y
- CONFIG_NO_HZ=y
- CONFIG_HIGH_RES_TIMERS=y
--CONFIG_BSD_PROCESS_ACCT=y
--CONFIG_TASKSTATS=y
--CONFIG_TASK_DELAY_ACCT=y
--CONFIG_TASK_XACCT=y
--CONFIG_TASK_IO_ACCOUNTING=y
- CONFIG_IKCONFIG=y
- CONFIG_IKCONFIG_PROC=y
- CONFIG_CGROUPS=y
--CONFIG_CGROUP_SCHED=y
- # CONFIG_UTS_NS is not set
- # CONFIG_IPC_NS is not set
- # CONFIG_PID_NS is not set
- # CONFIG_NET_NS is not set
--CONFIG_SYSFS_DEPRECATED=y
- CONFIG_BLK_DEV_INITRD=y
--CONFIG_CC_OPTIMIZE_FOR_SIZE=y
--CONFIG_BPF_SYSCALL=y
--CONFIG_USERFAULTFD=y
- # CONFIG_COMPAT_BRK is not set
- CONFIG_SLAB=y
--CONFIG_PROFILING=y
- CONFIG_JUMP_LABEL=y
--CONFIG_BLK_DEV_INTEGRITY=y
--CONFIG_PARTITION_ADVANCED=y
--CONFIG_BSD_DISKLABEL=y
- CONFIG_SMP=y
- CONFIG_X86_X2APIC=y
- # CONFIG_X86_EXTENDED_PLATFORM is not set
-@@ -40,172 +25,67 @@ CONFIG_MCORE2=y
- CONFIG_NR_CPUS=48
- # CONFIG_X86_MCE_AMD is not set
- # CONFIG_MICROCODE is not set
--CONFIG_X86_MSR=y
--CONFIG_X86_CPUID=y
- CONFIG_NUMA=y
- # CONFIG_AMD_NUMA is not set
--CONFIG_X86_PMEM_LEGACY=y
- CONFIG_X86_CHECK_BIOS_CORRUPTION=y
- CONFIG_HZ_300=y
- CONFIG_KEXEC=y
--CONFIG_KEXEC_FILE=y
--CONFIG_CRASH_DUMP=y
--CONFIG_PHYSICAL_ALIGN=0x1000000
--CONFIG_HOTPLUG_CPU=y
- # CONFIG_SUSPEND is not set
- # CONFIG_ACPI_REV_OVERRIDE_POSSIBLE is not set
- # CONFIG_ACPI_TABLE_UPGRADE is not set
- CONFIG_CPU_FREQ=y
--CONFIG_CPU_FREQ_DEFAULT_GOV_USERSPACE=y
--CONFIG_CPU_FREQ_GOV_PERFORMANCE=y
--CONFIG_CPU_FREQ_GOV_ONDEMAND=y
--CONFIG_CPU_IDLE_GOV_LADDER=y
- CONFIG_PCI_MSI=y
--CONFIG_BINFMT_MISC=y
- CONFIG_IA32_EMULATION=y
- CONFIG_NET=y
- CONFIG_PACKET=y
- CONFIG_PACKET_DIAG=y
- CONFIG_UNIX=y
- CONFIG_UNIX_DIAG=y
--CONFIG_XFRM_USER=y
--CONFIG_NET_KEY=y
- CONFIG_INET=y
--CONFIG_IP_MULTICAST=y
--CONFIG_IP_ADVANCED_ROUTER=y
--CONFIG_IP_FIB_TRIE_STATS=y
--CONFIG_IP_MULTIPLE_TABLES=y
--CONFIG_IP_ROUTE_MULTIPATH=y
--CONFIG_IP_ROUTE_VERBOSE=y
--CONFIG_NET_IPIP=y
--CONFIG_NET_IPGRE_DEMUX=y
--CONFIG_NET_IPGRE=y
--CONFIG_NET_IPGRE_BROADCAST=y
- CONFIG_SYN_COOKIES=y
--CONFIG_NET_FOU=y
--CONFIG_INET_IPCOMP=y
-+# CONFIG_INET_XFRM_MODE_TRANSPORT is not set
-+# CONFIG_INET_XFRM_MODE_TUNNEL is not set
-+# CONFIG_INET_XFRM_MODE_BEET is not set
- CONFIG_INET_UDP_DIAG=y
--CONFIG_IPV6_ROUTER_PREF=y
- # CONFIG_INET6_XFRM_MODE_TRANSPORT is not set
--CONFIG_IPV6_TUNNEL=y
--CONFIG_IPV6_MULTIPLE_TABLES=y
--CONFIG_IPV6_SUBTREES=y
--CONFIG_NETWORK_SECMARK=y
--CONFIG_VLAN_8021Q=y
--CONFIG_DNS_RESOLVER=y
-+# CONFIG_INET6_XFRM_MODE_TUNNEL is not set
-+# CONFIG_INET6_XFRM_MODE_BEET is not set
- CONFIG_NETLINK_DIAG=y
--CONFIG_CGROUP_NET_PRIO=y
--CONFIG_CGROUP_NET_CLASSID=y
- # CONFIG_WIRELESS is not set
--CONFIG_CEPH_LIB=y
--CONFIG_UEVENT_HELPER_PATH="/sbin/hotplug"
- CONFIG_DEVTMPFS=y
--CONFIG_FW_LOADER_USER_HELPER_FALLBACK=y
--CONFIG_CONNECTOR=y
- CONFIG_MTD=y
- CONFIG_MTD_BLOCK2MTD=y
- CONFIG_MTD_UBI=y
- CONFIG_BLK_DEV_LOOP=y
--CONFIG_BLK_DEV_RAM=y
--CONFIG_BLK_DEV_RAM_SIZE=65536
- CONFIG_VIRTIO_BLK=y
-+CONFIG_SCSI=y
- # CONFIG_SCSI_PROC_FS is not set
- CONFIG_BLK_DEV_SD=y
- CONFIG_SCSI_VIRTIO=y
--CONFIG_ATA=y
--# CONFIG_SATA_PMP is not set
--# CONFIG_ATA_SFF is not set
- CONFIG_MD=y
--CONFIG_MD_LINEAR=y
--CONFIG_MD_RAID0=y
--CONFIG_MD_MULTIPATH=y
--CONFIG_MD_FAULTY=y
- CONFIG_BLK_DEV_DM=y
--CONFIG_DM_CRYPT=y
- CONFIG_DM_SNAPSHOT=y
- CONFIG_DM_THIN_PROVISIONING=y
--CONFIG_DM_MIRROR=y
--CONFIG_DM_RAID=y
- CONFIG_DM_ZERO=y
- CONFIG_DM_FLAKEY=y
- CONFIG_NETDEVICES=y
--CONFIG_DUMMY=y
--CONFIG_NETCONSOLE=y
--CONFIG_NETCONSOLE_DYNAMIC=y
--CONFIG_TUN=y
--CONFIG_VETH=y
- CONFIG_VIRTIO_NET=y
--# CONFIG_NET_VENDOR_3COM is not set
--# CONFIG_NET_VENDOR_ADAPTEC is not set
--# CONFIG_NET_VENDOR_AGERE is not set
--# CONFIG_NET_VENDOR_ALTEON is not set
--# CONFIG_NET_VENDOR_AMAZON is not set
--# CONFIG_NET_VENDOR_AMD is not set
--# CONFIG_NET_VENDOR_ARC is not set
--# CONFIG_NET_VENDOR_ATHEROS is not set
--# CONFIG_NET_CADENCE is not set
--# CONFIG_NET_VENDOR_BROADCOM is not set
--# CONFIG_NET_VENDOR_BROCADE is not set
--# CONFIG_NET_VENDOR_CAVIUM is not set
--# CONFIG_NET_VENDOR_CHELSIO is not set
--# CONFIG_NET_VENDOR_CISCO is not set
--# CONFIG_NET_VENDOR_DEC is not set
--# CONFIG_NET_VENDOR_DLINK is not set
--# CONFIG_NET_VENDOR_EMULEX is not set
--# CONFIG_NET_VENDOR_EZCHIP is not set
--# CONFIG_NET_VENDOR_EXAR is not set
--# CONFIG_NET_VENDOR_HP is not set
--CONFIG_E1000=y
--CONFIG_E1000E=y
--CONFIG_IXGBEVF=y
--CONFIG_I40EVF=y
--# CONFIG_NET_VENDOR_MARVELL is not set
--# CONFIG_NET_VENDOR_MELLANOX is not set
--# CONFIG_NET_VENDOR_MICREL is not set
--# CONFIG_NET_VENDOR_MYRI is not set
--# CONFIG_NET_VENDOR_NATSEMI is not set
--# CONFIG_NET_VENDOR_NVIDIA is not set
--# CONFIG_NET_VENDOR_OKI is not set
--# CONFIG_NET_PACKET_ENGINE is not set
--# CONFIG_NET_VENDOR_QLOGIC is not set
--# CONFIG_NET_VENDOR_QUALCOMM is not set
--# CONFIG_NET_VENDOR_REALTEK is not set
--# CONFIG_NET_VENDOR_RENESAS is not set
--# CONFIG_NET_VENDOR_RDC is not set
--# CONFIG_NET_VENDOR_ROCKER is not set
--# CONFIG_NET_VENDOR_SAMSUNG is not set
--# CONFIG_NET_VENDOR_SEEQ is not set
--# CONFIG_NET_VENDOR_SILAN is not set
--# CONFIG_NET_VENDOR_SIS is not set
--# CONFIG_NET_VENDOR_SMSC is not set
--# CONFIG_NET_VENDOR_STMICRO is not set
--# CONFIG_NET_VENDOR_SUN is not set
--# CONFIG_NET_VENDOR_SYNOPSYS is not set
--# CONFIG_NET_VENDOR_TEHUTI is not set
--# CONFIG_NET_VENDOR_TI is not set
--# CONFIG_NET_VENDOR_VIA is not set
--# CONFIG_NET_VENDOR_WIZNET is not set
--CONFIG_PHYLIB=y
-+# CONFIG_ETHERNET is not set
- # CONFIG_WLAN is not set
- # CONFIG_INPUT_MOUSEDEV is not set
- # CONFIG_INPUT_MOUSE is not set
- # CONFIG_SERIO_SERPORT is not set
--CONFIG_VT_HW_CONSOLE_BINDING=y
-+# CONFIG_LEGACY_PTYS is not set
- CONFIG_SERIAL_8250=y
- # CONFIG_SERIAL_8250_DEPRECATED_OPTIONS is not set
- CONFIG_SERIAL_8250_CONSOLE=y
- CONFIG_SERIAL_8250_NR_UARTS=32
- CONFIG_SERIAL_8250_RUNTIME_UARTS=32
--CONFIG_VIRTIO_CONSOLE=y
--# CONFIG_HW_RANDOM_INTEL is not set
--# CONFIG_HW_RANDOM_AMD is not set
--# CONFIG_HW_RANDOM_VIA is not set
--CONFIG_HW_RANDOM_VIRTIO=y
-+# CONFIG_HW_RANDOM is not set
- # CONFIG_HWMON is not set
- # CONFIG_X86_PKG_TEMP_THERMAL is not set
- # CONFIG_HID is not set
- # CONFIG_USB_SUPPORT is not set
--CONFIG_EDAC=y
- CONFIG_RTC_CLASS=y
- # CONFIG_RTC_DRV_CMOS is not set
- CONFIG_VIRT_DRIVERS=y
-@@ -213,7 +93,7 @@ CONFIG_VIRTIO_PCI=y
- CONFIG_VIRTIO_BALLOON=y
- # CONFIG_X86_PLATFORM_DEVICES is not set
- # CONFIG_IOMMU_SUPPORT is not set
--CONFIG_DMI_SYSFS=y
-+# CONFIG_DMIID is not set
- CONFIG_EXT2_FS=y
- CONFIG_EXT2_FS_XATTR=y
- CONFIG_EXT2_FS_POSIX_ACL=y
-@@ -222,55 +102,40 @@ CONFIG_EXT4_FS=y
- CONFIG_EXT4_FS_POSIX_ACL=y
- CONFIG_EXT4_FS_SECURITY=y
- CONFIG_EXT4_ENCRYPTION=y
-+CONFIG_EXT4_DEBUG=y
-+CONFIG_JBD2_DEBUG=y
- CONFIG_XFS_FS=y
- CONFIG_XFS_QUOTA=y
- CONFIG_XFS_POSIX_ACL=y
- CONFIG_XFS_RT=y
- CONFIG_BTRFS_FS=y
-+CONFIG_BTRFS_FS_POSIX_ACL=y
-+CONFIG_BTRFS_DEBUG=y
-+CONFIG_BTRFS_ASSERT=y
- CONFIG_F2FS_FS=y
- CONFIG_F2FS_FS_SECURITY=y
-+CONFIG_F2FS_CHECK_FS=y
- CONFIG_F2FS_FS_ENCRYPTION=y
- CONFIG_FS_DAX=y
--CONFIG_FANOTIFY=y
--CONFIG_FANOTIFY_ACCESS_PERMISSIONS=y
- CONFIG_QUOTA=y
- CONFIG_QUOTA_NETLINK_INTERFACE=y
- # CONFIG_PRINT_QUOTA_WARNING is not set
- CONFIG_QFMT_V2=y
- CONFIG_AUTOFS4_FS=y
--CONFIG_FUSE_FS=y
--CONFIG_CUSE=y
- CONFIG_OVERLAY_FS=y
--CONFIG_FSCACHE=y
--CONFIG_FSCACHE_STATS=y
--CONFIG_CACHEFILES=y
--CONFIG_VFAT_FS=y
- CONFIG_PROC_KCORE=y
- CONFIG_PROC_CHILDREN=y
- CONFIG_TMPFS=y
- CONFIG_TMPFS_POSIX_ACL=y
--CONFIG_CONFIGFS_FS=y
--CONFIG_ECRYPT_FS=y
--CONFIG_ECRYPT_FS_MESSAGING=y
- CONFIG_UBIFS_FS=y
--CONFIG_CRAMFS=y
--CONFIG_SQUASHFS=y
--CONFIG_SQUASHFS_XATTR=y
--CONFIG_SQUASHFS_LZO=y
--CONFIG_SQUASHFS_XZ=y
--CONFIG_ROMFS_FS=y
- # CONFIG_NETWORK_FILESYSTEMS is not set
- CONFIG_NLS_DEFAULT="utf8"
--CONFIG_NLS_CODEPAGE_437=y
--CONFIG_NLS_CODEPAGE_850=y
- CONFIG_NLS_ASCII=y
--CONFIG_NLS_ISO8859_1=y
- CONFIG_NLS_UTF8=y
--CONFIG_DLM=y
- CONFIG_PRINTK_TIME=y
-+CONFIG_DYNAMIC_DEBUG=y
- CONFIG_DEBUG_INFO=y
--# CONFIG_ENABLE_MUST_CHECK is not set
--# CONFIG_UNUSED_SYMBOLS is not set
-+CONFIG_DEBUG_INFO_REDUCED=y
- CONFIG_DEBUG_SECTION_MISMATCH=y
- CONFIG_MAGIC_SYSRQ=y
- CONFIG_DEBUG_KERNEL=y
-@@ -283,89 +148,26 @@ CONFIG_DEBUG_KMEMLEAK_EARLY_LOG_SIZE=3000
- CONFIG_DEBUG_KMEMLEAK_DEFAULT_OFF=y
- CONFIG_DEBUG_STACKOVERFLOW=y
- CONFIG_LOCKUP_DETECTOR=y
--# CONFIG_DETECT_HUNG_TASK is not set
- CONFIG_WQ_WATCHDOG=y
- CONFIG_PANIC_TIMEOUT=5
--# CONFIG_SCHED_DEBUG is not set
- CONFIG_DEBUG_RT_MUTEXES=y
- CONFIG_PROVE_LOCKING=y
- CONFIG_LOCK_STAT=y
--CONFIG_DEBUG_LOCKDEP=y
--CONFIG_RCU_CPU_STALL_TIMEOUT=60
-+CONFIG_DEBUG_ATOMIC_SLEEP=y
-+CONFIG_DEBUG_LIST=y
-+CONFIG_DEBUG_SG=y
- CONFIG_RCU_EQS_DEBUG=y
- CONFIG_FAULT_INJECTION=y
- CONFIG_FAIL_MAKE_REQUEST=y
- CONFIG_FAULT_INJECTION_DEBUG_FS=y
-+CONFIG_FUNCTION_TRACER=y
- CONFIG_FTRACE_SYSCALLS=y
- CONFIG_TRACER_SNAPSHOT=y
--CONFIG_STACK_TRACER=y
- CONFIG_BLK_DEV_IO_TRACE=y
- CONFIG_FUNCTION_PROFILER=y
--CONFIG_STRICT_DEVMEM=y
--# CONFIG_DEBUG_RODATA_TEST is not set
- CONFIG_DEBUG_WX=y
--# CONFIG_X86_DEBUG_FPU is not set
--CONFIG_SECURITY=y
--CONFIG_SECURITYFS=y
--CONFIG_SECURITY_NETWORK=y
--CONFIG_SECURITY_NETWORK_XFRM=y
--CONFIG_SECURITY_PATH=y
--CONFIG_SECURITY_YAMA=y
--CONFIG_CRYPTO_USER=y
- # CONFIG_CRYPTO_MANAGER_DISABLE_TESTS is not set
--CONFIG_CRYPTO_AUTHENC=y
--CONFIG_CRYPTO_CCM=y
--CONFIG_CRYPTO_GCM=y
--CONFIG_CRYPTO_PCBC=y
--CONFIG_CRYPTO_CMAC=y
--CONFIG_CRYPTO_XCBC=y
--CONFIG_CRYPTO_VMAC=y
- CONFIG_CRYPTO_CRC32C_INTEL=y
- CONFIG_CRYPTO_CRC32_PCLMUL=y
--CONFIG_CRYPTO_CRCT10DIF_PCLMUL=y
--CONFIG_CRYPTO_MD4=y
--CONFIG_CRYPTO_MICHAEL_MIC=y
--CONFIG_CRYPTO_RMD128=y
--CONFIG_CRYPTO_RMD160=y
--CONFIG_CRYPTO_RMD256=y
--CONFIG_CRYPTO_RMD320=y
--CONFIG_CRYPTO_SHA1_SSSE3=y
--CONFIG_CRYPTO_SHA256_SSSE3=y
--CONFIG_CRYPTO_SHA512_SSSE3=y
--CONFIG_CRYPTO_SHA1_MB=y
--CONFIG_CRYPTO_TGR192=y
--CONFIG_CRYPTO_WP512=y
--CONFIG_CRYPTO_GHASH_CLMUL_NI_INTEL=y
- CONFIG_CRYPTO_AES_NI_INTEL=y
--CONFIG_CRYPTO_ANUBIS=y
--CONFIG_CRYPTO_ARC4=y
--CONFIG_CRYPTO_BLOWFISH=y
--CONFIG_CRYPTO_BLOWFISH_X86_64=y
--CONFIG_CRYPTO_CAMELLIA=y
--CONFIG_CRYPTO_CAMELLIA_AESNI_AVX2_X86_64=y
--CONFIG_CRYPTO_CAST5_AVX_X86_64=y
--CONFIG_CRYPTO_CAST6_AVX_X86_64=y
--CONFIG_CRYPTO_DES3_EDE_X86_64=y
--CONFIG_CRYPTO_FCRYPT=y
--CONFIG_CRYPTO_KHAZAD=y
--CONFIG_CRYPTO_SALSA20=y
--CONFIG_CRYPTO_SALSA20_X86_64=y
--CONFIG_CRYPTO_SEED=y
--CONFIG_CRYPTO_SERPENT_SSE2_X86_64=y
--CONFIG_CRYPTO_SERPENT_AVX2_X86_64=y
--CONFIG_CRYPTO_TEA=y
--CONFIG_CRYPTO_TWOFISH=y
--CONFIG_CRYPTO_TWOFISH_AVX_X86_64=y
--CONFIG_CRYPTO_LZ4=y
--CONFIG_CRYPTO_LZ4HC=y
--CONFIG_CRYPTO_ANSI_CPRNG=y
--CONFIG_CRYPTO_DRBG_HASH=y
--CONFIG_CRYPTO_DRBG_CTR=y
--CONFIG_CRYPTO_USER_API_HASH=y
--CONFIG_CRYPTO_USER_API_SKCIPHER=y
--CONFIG_ASYMMETRIC_KEY_TYPE=y
--CONFIG_ASYMMETRIC_PUBLIC_KEY_SUBTYPE=y
--CONFIG_CRC_CCITT=y
--CONFIG_CRC_ITU_T=y
--CONFIG_CRC8=y
--CONFIG_CORDIC=y
-+# CONFIG_CRYPTO_HW is not set
--- 
-2.13.0.219.gdb65acc882-goog
+Thanks,
+Qu
+
+> 
+> Yeah, MOUNT_OPTIONS and TEST_FS_MOUNT_OPTS (and almost all other global
+> variables) are not documented properly..
+> 
+> Thanks,
+> Eryu
+> 
+>>
+>> [REASON]
+>> It is caused by _test_cycle_mount function, which unmount test device,
+>> but when trying to re-mount it again using _test_mount(), we don't pass
+>> $MOUNT_OPTIONS.
+>>
+>> So this makes mount options differs between _test_cycle_mount().
+>>
+>> And btrfs doesn't allow different csum flags between reflink source and
+>> destination inodes, so it returns -EINVAL for reflink operation.
+>>
+>> [FIX]
+>> Fix it by passing $MOUNT_OPTIONS to _test_mount(), so that
+>> _test_cycle_mount() won't cause different mount options.
+>> So btrfs with "-o nodatasum" mount option can pass generic/14[23]
+>> and generic/154 without false alert.
+>>
+>> Signed-off-by: Qu Wenruo <quwenruo@cn.fujitsu.com>
+>> ---
+>>   common/rc | 3 ++-
+>>   1 file changed, 2 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/common/rc b/common/rc
+>> index ba215961..a591907c 100644
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -522,7 +522,8 @@ _test_mount()
+>>           return $?
+>>       fi
+>>       _test_options mount
+>> -    _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
+>> +    _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS \
+>> +		$MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
+>>   }
+>>   
+>>   _test_unmount()
+>> -- 
+>> 2.13.0
+>>
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+
 
