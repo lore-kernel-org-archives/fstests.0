@@ -1,46 +1,83 @@
-Received: from mx2.suse.de ([195.135.220.15]:34877 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1757500AbdEYJIu (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 25 May 2017 05:08:50 -0400
-Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
-        by mx1.suse.de (Postfix) with ESMTP id 8669AAB09
-        for <fstests@vger.kernel.org>; Thu, 25 May 2017 09:08:49 +0000 (UTC)
-From: Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH] generic/108: Fix return value check from _get_scsi_debug_dev
-Date: Thu, 25 May 2017 12:08:46 +0300
-Message-Id: <1495703326-1269-1-git-send-email-nborisov@suse.com>
+Received: from mx1.redhat.com ([209.132.183.28]:51002 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S966118AbdEYN0d (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 25 May 2017 09:26:33 -0400
+Date: Thu, 25 May 2017 09:26:25 -0400
+From: "J. Bruce Fields" <bfields@redhat.com>
+Subject: Re: [RFC PATCH] nfs: test nfs4_getfacl near page size ACL from server
+Message-ID: <20170525132625.GA6658@parsley.fieldses.org>
+References: <20170516120909.827-1-eguan@redhat.com>
+ <20170516150745.GB21704@parsley.fieldses.org>
+ <20170517033854.GA7250@eguan.usersys.redhat.com>
+ <20170517172035.GD5011@parsley.fieldses.org>
+ <20170525040119.GB23805@eguan.usersys.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170525040119.GB23805@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Nikolay Borisov <nborisov@suse.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, Weston Andros Adamson <dros@primarydata.com>, linux-nfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-_get_scsi_debug_dev is supposed to return a "/dev/$device".
-However, in case the scsi device is not mapped to a disk, hence
-/dev/sd* doesn't exist, then get_scsi_debug_dev would return only the
-"/dev/" string. In generic/108 we check whether return value is ""
-and only then consider it a failure. This behavior allows the
-test to erroneously consider _get_scsi_debug_dev succeeded even
-if it returned a malformed string. Fix this by correctly checking
-whether the return value is "/dev/"
+On Thu, May 25, 2017 at 12:01:19PM +0800, Eryu Guan wrote:
+> Yes, that's a problem, it's been 'xfstests' for at least 14 years and
+> 'fstests' is only there for 3 years, sometimes (or most of the times) we
+> still call it 'xfstests' for a better understanding.
 
-Signed-off-by: Nikolay Borisov <nborisov@suse.com>
----
- tests/generic/108 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Just to troll slightly: I actually don't believe you when you say it's
+been renamed.  I don't see any evidence of that.
 
-diff --git a/tests/generic/108 b/tests/generic/108
-index cc8d7038..1525dfb6 100755
---- a/tests/generic/108
-+++ b/tests/generic/108
-@@ -64,7 +64,7 @@ rm -f $seqres.full
- 
- # _get_scsi_debug_dev returns a scsi debug device with 128M in size by default
- SCSI_DEBUG_DEV=`_get_scsi_debug_dev`
--if [ "$SCSI_DEBUG_DEV" == "" ]; then
-+if [ "$SCSI_DEBUG_DEV" == "/dev/" ]; then
- 	_fail "Failed to initialize scsi debug device"
- fi
- echo "SCSI debug device $SCSI_DEBUG_DEV" >>$seqres.full
--- 
-2.12.3
+The repository still seems to be called xfstests-dev, the README calls
+it "the FSQA suite" or "xfstests", with only a brief mention of the
+fstest mailing list at the end.  In fact that's the only use of the term
+"fstests" in the entire repository:
 
+	$ git grep '\<xfstests'|wc -l
+	36
+	$ git grep '\<fstests'|wc -l
+	1
+
+And I'm not turning up any references to fstests from google except for
+references to the mailing list name.  Your email here is the only
+reference I can find to the project being renamed at all.  (I do see one
+mail announcing the mailist name change.)
+
+> > Anyway, thanks for adding this.  I do a partial fstests run as part of
+> 
+> Can I take it as a "Reviewed-by" tag? :)
+
+Sure.
+
+> For a quick smoke test
+> 
+> './check -nfs -g quick'
+> 
+> (run tests in 'quick' group) will do, it only takes around 10 minutes for me to complete.
+> 
+> And for something more thoroughly, you can do
+> 
+> './check -nfs -g auto'
+
+Thanks!
+
+I've got my own handpicked list of tests, partly because I didn't notice
+the existance of "quick", partly because there were some failures I
+didn't have the time to triage.
+
+> (run tests in 'auto' group), which will take longer time but runs many
+> more tests.
+> 
+> I test every RC release with local-mounted NFS, with NFSv3,
+> NFSv4.0/4.1/4.2. Here're the 'known issues' I have for 4.11 kernel (I
+> think some failures are false alert, the tests need updates, some
+> failures may long standing & low priority bugs on NFS? But I'm not sure
+> which is which)
+> 
+> Failures for all NFS versions:
+...
+
+Thanks again!  I'll try to set aside some time to reconcile this with my
+own list and see if I can figure out some of the failures.
+
+--b.
