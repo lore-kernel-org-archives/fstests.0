@@ -1,83 +1,209 @@
-Received: from mx1.redhat.com ([209.132.183.28]:51002 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S966118AbdEYN0d (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 25 May 2017 09:26:33 -0400
-Date: Thu, 25 May 2017 09:26:25 -0400
-From: "J. Bruce Fields" <bfields@redhat.com>
-Subject: Re: [RFC PATCH] nfs: test nfs4_getfacl near page size ACL from server
-Message-ID: <20170525132625.GA6658@parsley.fieldses.org>
-References: <20170516120909.827-1-eguan@redhat.com>
- <20170516150745.GB21704@parsley.fieldses.org>
- <20170517033854.GA7250@eguan.usersys.redhat.com>
- <20170517172035.GD5011@parsley.fieldses.org>
- <20170525040119.GB23805@eguan.usersys.redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170525040119.GB23805@eguan.usersys.redhat.com>
+Received: from mx2.suse.de ([195.135.220.15]:33280 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S969231AbdEYNt4 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 25 May 2017 09:49:56 -0400
+From: Jan Kara <jack@suse.cz>
+Subject: [PATCH] generic: Add regression test for tail page zeroing
+Date: Thu, 25 May 2017 15:49:47 +0200
+Message-Id: <20170525134947.15130-1-jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, Weston Andros Adamson <dros@primarydata.com>, linux-nfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Michael Zimmer <michael@swarm64.com>, linux-ext4@vger.kernel.org, Eryu Guan <eguan@redhat.com>, Jan Kara <jack@suse.cz>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 25, 2017 at 12:01:19PM +0800, Eryu Guan wrote:
-> Yes, that's a problem, it's been 'xfstests' for at least 14 years and
-> 'fstests' is only there for 3 years, sometimes (or most of the times) we
-> still call it 'xfstests' for a better understanding.
+Add test checking for a race in ext4 writeback that could result in
+zeroing too much from the tail page during writeback.
 
-Just to troll slightly: I actually don't believe you when you say it's
-been renamed.  I don't see any evidence of that.
+Signed-off-by: Jan Kara <jack@suse.cz>
+---
+ src/Makefile           |  2 +-
+ src/t_mmap_fallocate.c | 61 ++++++++++++++++++++++++++++++++++++++++
+ tests/generic/438      | 75 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/438.out  |  2 ++
+ tests/generic/group    |  1 +
+ 5 files changed, 140 insertions(+), 1 deletion(-)
+ create mode 100644 src/t_mmap_fallocate.c
+ create mode 100755 tests/generic/438
+ create mode 100644 tests/generic/438.out
 
-The repository still seems to be called xfstests-dev, the README calls
-it "the FSQA suite" or "xfstests", with only a brief mention of the
-fstest mailing list at the end.  In fact that's the only use of the term
-"fstests" in the entire repository:
+diff --git a/src/Makefile b/src/Makefile
+index 47246622ce7f..adbfd286fe89 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -13,7 +13,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
+ 	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
+ 	holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd \
+-	t_mmap_cow_race
++	t_mmap_cow_race t_mmap_fallocate
+ 
+ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+diff --git a/src/t_mmap_fallocate.c b/src/t_mmap_fallocate.c
+new file mode 100644
+index 000000000000..fd69fb0ae833
+--- /dev/null
++++ b/src/t_mmap_fallocate.c
+@@ -0,0 +1,61 @@
++#include <fcntl.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <sys/mman.h>
++#include <unistd.h>
++
++int main(int argc, char **argv)
++{
++	int fd;
++	char *buf;
++	size_t fsize, i;
++
++	if (argc != 3) {
++		fputs("Usage: mmap_fallocate <file> <size-in-MB>\n", stderr);
++		exit(1);
++	}
++
++	fsize = strtol(argv[2], NULL, 10);
++	if (fsize <= 0) {
++		fprintf(stderr, "Invalid file size: %s\n", argv[2]);
++		exit(1);
++	}
++	fsize <<= 20;
++
++	fd = open(argv[1], O_RDWR | O_CREAT | O_TRUNC, 0644);
++	if (fd < 0) {
++		perror("Cannot open file");
++	        exit(1);
++	}
++
++	buf = mmap(NULL, fsize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
++	if (buf == MAP_FAILED) {
++		perror("Cannot memory map");
++		exit(1);
++	}
++
++	for (i = 0; i < fsize; i++) {
++		if (posix_fallocate(fd, i, 1) != 0) {
++			perror("Cannot fallocate");
++			exit(1);
++		}
++		buf[i] = 0x78;
++
++		if (buf[i] != 0x78) {
++			fprintf(stderr,
++				"Value not written correctly (off=%lu)\n",
++				(unsigned long)i);
++			exit(1);
++		}
++	}
++
++	for (i = 0; i < fsize; i++) {
++		if (buf[i] != 0x78) {
++			fprintf(stderr, "Value has been modified (off=%lu)\n",
++				(unsigned long)i);
++			exit(1);
++		}
++	}
++
++	return 0;
++}
+diff --git a/tests/generic/438 b/tests/generic/438
+new file mode 100755
+index 000000000000..d935ac0362ad
+--- /dev/null
++++ b/tests/generic/438
+@@ -0,0 +1,75 @@
++#! /bin/bash
++# FS QA Test 438
++#
++# This is a regression test for kernel patch
++#   "ext4: Fix data corruption for mmap writes"
++#
++# The problem this test checks for is when too much is zeroed in the tail
++# page that gets written out just while the file gets extended and written
++# to through mmap.
++#
++# Based on test program by Michael Zimmer <michael@swarm64.com>
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 SUSE.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_test
++_require_test_program "t_mmap_fallocate"
++
++# real QA test starts here
++FILE=$TEST_DIR/testfile_fallocate
++# Make sure file exists
++echo >$FILE
++# Force frequent writeback of the file
++while true; do fsync $FILE; done &
++SYNCPID=$!
++
++# Run the test
++src/t_mmap_fallocate $FILE 10 && echo "Silence is golden"
++
++kill $SYNCPID
++wait
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/438.out b/tests/generic/438.out
+new file mode 100644
+index 000000000000..4968f4d7f691
+--- /dev/null
++++ b/tests/generic/438.out
+@@ -0,0 +1,2 @@
++QA output created by 438
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 438c299030f2..d88f5bb44514 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -440,3 +440,4 @@
+ 435 auto encrypt
+ 436 auto quick rw
+ 437 auto quick
++438 auto quick
+-- 
+2.12.0
 
-	$ git grep '\<xfstests'|wc -l
-	36
-	$ git grep '\<fstests'|wc -l
-	1
-
-And I'm not turning up any references to fstests from google except for
-references to the mailing list name.  Your email here is the only
-reference I can find to the project being renamed at all.  (I do see one
-mail announcing the mailist name change.)
-
-> > Anyway, thanks for adding this.  I do a partial fstests run as part of
-> 
-> Can I take it as a "Reviewed-by" tag? :)
-
-Sure.
-
-> For a quick smoke test
-> 
-> './check -nfs -g quick'
-> 
-> (run tests in 'quick' group) will do, it only takes around 10 minutes for me to complete.
-> 
-> And for something more thoroughly, you can do
-> 
-> './check -nfs -g auto'
-
-Thanks!
-
-I've got my own handpicked list of tests, partly because I didn't notice
-the existance of "quick", partly because there were some failures I
-didn't have the time to triage.
-
-> (run tests in 'auto' group), which will take longer time but runs many
-> more tests.
-> 
-> I test every RC release with local-mounted NFS, with NFSv3,
-> NFSv4.0/4.1/4.2. Here're the 'known issues' I have for 4.11 kernel (I
-> think some failures are false alert, the tests need updates, some
-> failures may long standing & low priority bugs on NFS? But I'm not sure
-> which is which)
-> 
-> Failures for all NFS versions:
-...
-
-Thanks again!  I'll try to set aside some time to reconcile this with my
-own list and see if I can figure out some of the failures.
-
---b.
