@@ -1,13 +1,13 @@
-Received: from mail-pf0-f194.google.com ([209.85.192.194]:34275 "EHLO
-        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1036608AbdEYT1D (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 25 May 2017 15:27:03 -0400
-Received: by mail-pf0-f194.google.com with SMTP id w69so41051385pfk.1
-        for <fstests@vger.kernel.org>; Thu, 25 May 2017 12:27:02 -0700 (PDT)
+Received: from mail-pf0-f196.google.com ([209.85.192.196]:34307 "EHLO
+        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1036627AbdEYT1G (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 25 May 2017 15:27:06 -0400
+Received: by mail-pf0-f196.google.com with SMTP id w69so41051608pfk.1
+        for <fstests@vger.kernel.org>; Thu, 25 May 2017 12:27:05 -0700 (PDT)
 From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH 3/7] get-all: fail if optional repositories have been deconfigured
-Date: Thu, 25 May 2017 12:25:45 -0700
-Message-Id: <20170525192549.138518-4-ebiggers3@gmail.com>
+Subject: [PATCH 5/7] do-all, get-all: run with 'set -e'
+Date: Thu, 25 May 2017 12:25:47 -0700
+Message-Id: <20170525192549.138518-6-ebiggers3@gmail.com>
 In-Reply-To: <20170525192549.138518-1-ebiggers3@gmail.com>
 References: <20170525192549.138518-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -17,35 +17,38 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Eric Biggers <ebiggers@google.com>
 
-If an optional repository is enabled and then later disabled, require
-that the corresponding directory manually be removed; otherwise, it
-would still be included in the build.
+If one of the steps fails, we should not continue on.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- get-all | 9 +++++++++
- 1 file changed, 9 insertions(+)
+ do-all  | 2 ++
+ get-all | 2 ++
+ 2 files changed, 4 insertions(+)
 
+diff --git a/do-all b/do-all
+index d4daad0..d6b8169 100755
+--- a/do-all
++++ b/do-all
+@@ -1,5 +1,7 @@
+ #!/bin/bash
+ 
++set -e
++
+ if test -f config.custom ; then
+ 	. config.custom
+ else
 diff --git a/get-all b/get-all
-index a0f0d05..fa27229 100755
+index fa27229..bb1cd4c 100755
 --- a/get-all
 +++ b/get-all
-@@ -81,6 +81,15 @@ setup_repo()
- 	fi
-     fi
+@@ -1,5 +1,7 @@
+ #!/bin/bash
  
-+    if [ -z "$repo_url" ] && ! $required; then
-+	cat 1>&2 <<EOF
-+ERROR: $repo_url_variable has been removed from the config file,
-+but the $repo_name directory still exists.  Remove it if you don't
-+want it to be built.
-+EOF
-+	exit 1
-+    fi
++set -e
 +
-     # If a specific commit was specified, check it out.
-     if [ -n "$commit" ]; then
- 	( cd "$repo_name";
+ if test -f config.custom ; then
+ 	. config.custom
+ else
 -- 
 2.13.0.219.gdb65acc882-goog
 
