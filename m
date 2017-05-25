@@ -1,35 +1,52 @@
-Received: from bombadil.infradead.org ([65.50.211.133]:40111 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S942829AbdEYQ7G (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 25 May 2017 12:59:06 -0400
-Date: Thu, 25 May 2017 09:59:05 -0700
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [RFC PATCH] nfs: test nfs4_getfacl near page size ACL from server
-Message-ID: <20170525165905.GA17207@infradead.org>
-References: <20170516120909.827-1-eguan@redhat.com>
- <20170516150745.GB21704@parsley.fieldses.org>
- <20170517033854.GA7250@eguan.usersys.redhat.com>
- <20170517172035.GD5011@parsley.fieldses.org>
- <20170525040119.GB23805@eguan.usersys.redhat.com>
- <20170525132625.GA6658@parsley.fieldses.org>
+Received: from imap.thunk.org ([74.207.234.97]:38296 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S942950AbdEYRYO (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 25 May 2017 13:24:14 -0400
+Date: Thu, 25 May 2017 13:24:11 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH v2] kvm-xfstests, gce-xfstests: improve recommended
+ kernel config
+Message-ID: <20170525172411.tbi56oe27oz6rnuj@thunk.org>
+References: <20170523174557.60810-1-ebiggers3@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170525132625.GA6658@parsley.fieldses.org>
+In-Reply-To: <20170523174557.60810-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: "J. Bruce Fields" <bfields@redhat.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, Weston Andros Adamson <dros@primarydata.com>, linux-nfs@vger.kernel.org
+To: Eric Biggers <ebiggers3@gmail.com>
+Cc: fstests@vger.kernel.org, Amir Goldstein <amir73il@gmail.com>, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 25, 2017 at 09:26:25AM -0400, J. Bruce Fields wrote:
-> On Thu, May 25, 2017 at 12:01:19PM +0800, Eryu Guan wrote:
-> > Yes, that's a problem, it's been 'xfstests' for at least 14 years and
-> > 'fstests' is only there for 3 years, sometimes (or most of the times) we
-> > still call it 'xfstests' for a better understanding.
+On Tue, May 23, 2017 at 10:45:57AM -0700, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
 > 
-> Just to troll slightly: I actually don't believe you when you say it's
-> been renamed.  I don't see any evidence of that.
+> Trim more unneeded features from the recommended kernel config, then
+> enable some more relatively lightweight debugging options.
+> 
+> For now, just update the latest x86_64 config.  But if people are okay
+> with these changes I'll update some of the other configs too.
+> 
+> Tested with both kvm-xfstests and gce-xfstests.
+> 
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
 
-The only thing that seems to be called fstests is the mailing list.
-I was very much against that name back then, but DAve won the fight.
-I don't think it's been very helpful evern retrospectively.
+This looks good to me.  Would you mind sending a patch which updates
+the rest of the configs similarly, so we can update all of the configs
+at once?
+
+As an aside, I *do* use the HW_RANDOM_VIRTIO from time to time (that's
+why it was enabled in the config), and in fact kvm-xfstests is wired
+up to supply the virtio random number generator by default (since it
+doesn't really cost much):
+
+if test -z "$NO_VIRTIO_RNG" ; then
+    VIRTIO_RNG="-object rng-random,filename=/dev/urandom,id=rng0 \
+	-device virtio-rng-pci,rng=rng0"
+fi
+
+But that's for my kernel RNG testing, and it's fair to say that that
+most users of kvm-xfstests won't need it.
+
+Thanks,
+
+					- Ted
