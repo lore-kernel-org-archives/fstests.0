@@ -1,126 +1,134 @@
-Received: from mail-pf0-f175.google.com ([209.85.192.175]:35843 "EHLO
-        mail-pf0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750909AbdE1Is6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 28 May 2017 04:48:58 -0400
-Received: by mail-pf0-f175.google.com with SMTP id m17so35091555pfg.3
-        for <fstests@vger.kernel.org>; Sun, 28 May 2017 01:48:58 -0700 (PDT)
-Received: from localhost ([128.199.137.77])
-        by smtp.gmail.com with ESMTPSA id g63sm11005088pgc.59.2017.05.28.01.48.56
-        for <fstests@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Sun, 28 May 2017 01:48:57 -0700 (PDT)
-Message-ID: <592a8ef9.426b630a.63702.84dd@mx.google.com>
-From: Eryu Guan <guaneryu@gmail.com>
-Date: Sun, 28 May 2017 16:48:51 +0800
-Subject: [ANNOUNCE] fstests: master branch updated to 16985be90e5e
+Received: from mx2.suse.de ([195.135.220.15]:43470 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750913AbdE2LbC (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 29 May 2017 07:31:02 -0400
+Date: Mon, 29 May 2017 13:30:59 +0200
+From: Jan Kara <jack@suse.cz>
+Subject: Re: [PATCH] generic: Add regression test for tail page zeroing
+Message-ID: <20170529113059.GF3608@quack2.suse.cz>
+References: <20170525134947.15130-1-jack@suse.cz>
+ <20170526122527.GN23805@eguan.usersys.redhat.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="XLdWZvusQT12"
-Content-Disposition: inline
-Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-List-ID: <fstests@vger.kernel.org>
-
-
---XLdWZvusQT12
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20170526122527.GN23805@eguan.usersys.redhat.com>
+Sender: fstests-owner@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: Jan Kara <jack@suse.cz>, fstests@vger.kernel.org, Michael Zimmer <michael@swarm64.com>, linux-ext4@vger.kernel.org
+List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+On Fri 26-05-17 20:25:27, Eryu Guan wrote:
+> On Thu, May 25, 2017 at 03:49:47PM +0200, Jan Kara wrote:
+> > Add test checking for a race in ext4 writeback that could result in
+> > zeroing too much from the tail page during writeback.
+> > 
+> > Signed-off-by: Jan Kara <jack@suse.cz>
+> > ---
+> >  src/Makefile           |  2 +-
+> >  src/t_mmap_fallocate.c | 61 ++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/438      | 75 ++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/438.out  |  2 ++
+> >  tests/generic/group    |  1 +
+> >  5 files changed, 140 insertions(+), 1 deletion(-)
+> >  create mode 100644 src/t_mmap_fallocate.c
+> >  create mode 100755 tests/generic/438
+> >  create mode 100644 tests/generic/438.out
+> > 
+> > diff --git a/src/Makefile b/src/Makefile
+> > index 47246622ce7f..adbfd286fe89 100644
+> > --- a/src/Makefile
+> > +++ b/src/Makefile
+> > @@ -13,7 +13,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+> >  	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
+> >  	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
+> >  	holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd \
+> > -	t_mmap_cow_race
+> > +	t_mmap_cow_race t_mmap_fallocate
+> 
+> A new test program needs an entry in .gitignore file :)
 
-The master branch of the xfstests repository at:
+Thanks. Fixed.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+> > +	if (argc != 3) {
+> > +		fputs("Usage: mmap_fallocate <file> <size-in-MB>\n", stderr);
+>                               ^^^^^^^^^^^^^^ t_mmap_fallocate or argv[0] ?
 
-have just been updated. The first NFS specific test has been added in this
-update, hope that we'll have more NFS tests. Another major change is that
-OpenSSL is not required anymore for building fstests. Other changes are all
-minor bug fixes and build warning fixes.
+Yeah, used basename(argv[0]).
 
-There should be no new failures introduced in this update.
+> > +	buf = mmap(NULL, fsize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+> > +	if (buf == MAP_FAILED) {
+> > +		perror("Cannot memory map");
+> > +		exit(1);
+> > +	}
+> > +
+> > +	for (i = 0; i < fsize; i++) {
+> > +		if (posix_fallocate(fd, i, 1) != 0) {
+> > +			perror("Cannot fallocate");
+> > +			exit(1);
+> > +		}
+> > +		buf[i] = 0x78;
+> 
+> It seems hard to understand the purpose of this part without looking at
+> the referenced kernel patch. I think it's good to have some comments in
+> this c program to explain the test steps.
 
-Thanks,
-Eryu
+OK, will add.
 
-The new head of the master branch is commit:
+> > +# Modify as appropriate.
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +_require_test
+> > +_require_test_program "t_mmap_fallocate"
+> > +
+> > +# real QA test starts here
+> > +FILE=$TEST_DIR/testfile_fallocate
+> > +# Make sure file exists
+> > +echo >$FILE
+> > +# Force frequent writeback of the file
+> > +while true; do fsync $FILE; done &
+> 
+> Meant '$XFS_IO_PROG -c fsync $FILE' ? There's no 'fsync' command
+> avalable on my host.
 
-16985be90e5e nfs: test nfs4_getfacl near page size ACL from server
+Ah, OK.
 
-New commits:
+> > +SYNCPID=$!
+> > +
+> > +# Run the test
+> > +src/t_mmap_fallocate $FILE 10 && echo "Silence is golden"
+> 
+> Hmm, iterating over a 10MB file takes xfs 203s to finish on my test vm,
+> and takes btrfs 8178s to finish.. That's too long time for a test in
+> auto group.
+> 
+> I found that if I change t_mmap_fallocate to accept file size in KB
+> instead MB, and specify file size as 16 in the test, the ext4 bug can
+> still be reproduced pretty quickly, and xfs and btrfs also finish the
+> test quickly (1s for xfs, 11s for btrfs on my host).
 
-Eryu Guan (1):
-      [16985be90e5e] nfs: test nfs4_getfacl near page size ACL from server
+OK, I'll change it. I was originally sizing the test with just background
+writeback (without the fsync running in a loop) and that required much
+larger sizes. With fsync the problem reproduces more easily and so reducing
+the file size is fine. However 16 seems too low for me to reproduce. I need
+at least 256 KB for the problem to reproduce reasonably reliably - I've
+changed the file size to that.
 
-Luis Henriques (1):
-      [890f2b5ae24f] src/seek_sanity_test: fix test15 SEEK_HOLE expected results
+> Another problem I hit was that at times something was pinning the
+> filesystem in use after test, and test harness failed to umount TEST_DIR
+> then reported test failure, because the device was busy. I'm not sure
+> the exact reason for now, but removing $FILE in _cleanup does resolve
+> the problem for me.
 
-Nikolay Borisov (2):
-      [2d77f8580636] xfs/293: Make 'man' hard requirement
-      [c51ab0a8502e] generic/108: Fix return value check from _get_scsi_debug_dev
+I've hit that once but then the problem disappeared so I thought I've fixed
+it by some twiddling. I've added rm $FILE to _cleanup since it makes sense
+however I suppose the culprit of the problem is that kill and wait just
+work with the shell that gets executed in the background. However xfs_io
+(or fsync) command it spawns still can be executing and they can pin the
+mountpoint. Actually I was able to hit the problem when trying hard enough
+even with 'rm'. I've fixed the problem by trapping the signal in the
+subshell and making sure xfs_io is finished when the shell exits...
 
-Richard Weinberger (1):
-      [b14d1bb8b3f6] src/stat_test: Fix stx_attributes check
-
-Theodore Ts'o (2):
-      [7ee1b53d77e5] src: fix compiler warnings
-      [d0ef33ce972d] build: Stop relying on OpenSSL
-
-Zorro Lang (2):
-      [1262cc70fa42] xfs/196: fallback to fail_writes for old kernel
-      [ce16ed94a8d9] xfs/288: filter out extra mkfs warning
-
-
-Code Diffstat:
-
- README                                   |   2 +-
- common/config                            |   3 +
- common/nfs                               |  35 ++++
- common/rc                                |   1 +
- configure.ac                             |   1 -
- include/builddefs.in                     |   1 -
- m4/package_ssldev.m4                     |   4 -
- src/Makefile                             |  18 +-
- src/aio-dio-regress/aio-dio-eof-race.c   |   3 +-
- src/aio-dio-regress/aio-dio-fcntl-race.c |  32 +++-
- src/dio-invalidate-cache.c               |   6 +-
- src/fssum.c                              |   6 +-
- src/holetest.c                           |   8 +-
- src/md5.c                                | 291 +++++++++++++++++++++++++++++++
- src/md5.h                                |  45 +++++
- src/seek_sanity_test.c                   |   5 +-
- src/stat_test.c                          |   4 +-
- src/t_rename_overwrite.c                 |   3 +-
- tests/generic/108                        |   2 +-
- tests/nfs/001                            |  77 ++++++++
- tests/nfs/001.out                        |   2 +
- tests/nfs/Makefile                       |  20 +++
- tests/nfs/group                          |   6 +
- tests/xfs/196                            |  16 +-
- tests/xfs/288                            |   2 +-
- tests/xfs/293                            |   6 +-
- 26 files changed, 549 insertions(+), 50 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
-
---XLdWZvusQT12
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJZKo5AAAoJECZSqilcj+djtNMQANfl3cZ34MVnSZ6F+e5v9YZZ
-+TjcZwBEg6ijDJj1FLi85r+xWKOf11dGORk2NIbPqv//g9wXpwwYRj+OpZk8v0t8
-1fuWxZ4Bsah3CYs00WfQT/8O73Ft2ZMUIkzZ27HlA4EuRUILvrhzQPWVVYcA8q6u
-7hB8lcQL2X7Wq/2wSqLf8Nc6XfEyZTrXQXFc6iRKOsaBahUHjuoeUECuizE8CIWB
-LpGy5zO9eF86gXusPi+FoiAe7pwOpBK0kByqnQJ2+UaPtSkcw2jml0aZ/CIuzJS5
-NVTNZc9L68NHC5F/b3LtpBLlmmLpTJMjbCpmiX5NrgUiqCimR1mwPFecTN//yR9C
-RLze5RKSYVGLdVhfjEsBct6dydAXEleYGBEKDjW9Qh1/XWbgsWz7dTVP7pO1eVat
-hKzCQ77fiq+IUZCnlVdsT47+HVU1CzS7HJNOeS8QOQGYHlwCZVHGGRRaAPpxYv2r
-/AssX2gUIm4qF4lJ9bkHjpx3mpq5skPEUPQuGrHHba9moFLtpydrjoq2IJJQcuQV
-asyWoObCtVOx5JZj10SK3DaHBqWcDertdF2iJw7JPRsuLjUjZvlrue9xrSluZ4kS
-i5EBCjxZpACIdHT8MayOIm8MdNiWBaj2QkUahJh7FwpEYoiP5WpEhyiAmgGR35uu
-hPHMUQUihYOcUbq9muOJ
-=hMei
------END PGP SIGNATURE-----
-
---XLdWZvusQT12--
+								Honza
+-- 
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
