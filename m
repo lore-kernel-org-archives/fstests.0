@@ -1,353 +1,175 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:33579 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751441AbdFARMZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 1 Jun 2017 13:12:25 -0400
-Date: Thu, 1 Jun 2017 10:12:20 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v2] fsstress: add AIO read/write and fsync test
-Message-ID: <20170601171220.GT4521@birch.djwong.org>
-References: <1496332870-22354-1-git-send-email-zlang@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1496332870-22354-1-git-send-email-zlang@redhat.com>
+Received: from mail.kernel.org ([198.145.29.99]:58264 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751096AbdFARbv (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 1 Jun 2017 13:31:51 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH v2] generic: test for hole punching followed by writes in the same range
+Date: Tue, 30 May 2017 05:52:50 +0100
+Message-Id: <20170530045250.861-1-fdmanana@kernel.org>
+In-Reply-To: <20170528163243.32018-1-fdmanana@kernel.org>
+References: <20170528163243.32018-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jun 02, 2017 at 12:01:10AM +0800, Zorro Lang wrote:
-> We found some bugs by aio read/write and fsync test, but there's
-> not related operations in fsstress. So add AIO test into fsstress to
-> increase AIO stress test.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
-> 
-> V2 did below changes:
-> 1) add aio fsync test.
-> 2) Turn to checking the return vaule of libaio functions, not errno.
-> 
-> 
-> Hi Darrick,
-> 
-> As your suggestion, I've add io_prep_fsync to fsstress in this V2 patch.
-> But by my testing, it always return EINVAL, due to linux doesn't support
-> aio fsync.
-> 
-> And I've asked AIO maintainer, he said there's not a plan to support that
-> until now.
+From: Filipe Manana <fdmanana@suse.com>
 
-Undoubtedly a side effect of:
-https://patchwork.kernel.org/patch/8012401/
-and:
-http://oss.sgi.com/archives/xfs/2014-06/msg00214.html
+Test that if we punch a hole in a file, with either a range that goes
+beyond the file's size or covers a file range that is already a hole,
+and that if after we do some buffered write operations that cover
+different parts of the hole, no warnings are emmitted in syslog/dmesg
+and the file's content is correct after remounting the filesystem.
 
-> So do you think we need to keep this io_prep_fsync test in
-> fsstress and set the frequency to 0 by default?
+This test is motivated by a bug in btrfs that is manifested in kernel
+4.12-rc1 onwards (the bug existed long time ago but was not so easy
+to expose before 4.12-rc1). The btrfs patch that fixes the issue is
+titled: "Btrfs: fix invalid extent maps due to hole punching".
 
-Eh, I guess. :)
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
 
-Someone should make a xfstest case specifically for io_prep_fsync just
-so we'll continue to bang into this broken bit of userland interface...
-I know of various projects (postgres being one of them) that would like
-an asynchronous fsync but have clunky workarounds in place because we've
-never supported it.
+V2: Test for an additional case that failed in btrfs.
 
---D
+ tests/generic/438     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/438.out | 31 ++++++++++++++++++++
+ tests/generic/group   |  1 +
+ 3 files changed, 112 insertions(+)
+ create mode 100755 tests/generic/438
+ create mode 100644 tests/generic/438.out
 
-> 
-> Thanks,
-> Zorro
-> 
->  ltp/fsstress.c | 214 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 214 insertions(+)
-> 
-> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> index e9fd276..da4f749 100644
-> --- a/ltp/fsstress.c
-> +++ b/ltp/fsstress.c
-> @@ -35,6 +35,10 @@
->  #ifdef HAVE_SYS_PRCTL_H
->  #include <sys/prctl.h>
->  #endif
-> +#ifdef AIO
-> +#include <libaio.h>
-> +io_context_t	io_ctx;
-> +#endif
->  
->  #ifndef FS_IOC_GETFLAGS
->  #define FS_IOC_GETFLAGS                 _IOR('f', 1, long)
-> @@ -51,9 +55,12 @@
->  #define FILELEN_MAX		(32*4096)
->  
->  typedef enum {
-> +	OP_AFSYNC,
->  	OP_ALLOCSP,
-> +	OP_AREAD,
->  	OP_ATTR_REMOVE,
->  	OP_ATTR_SET,
-> +	OP_AWRITE,
->  	OP_BULKSTAT,
->  	OP_BULKSTAT1,
->  	OP_CHOWN,
-> @@ -152,9 +159,12 @@ struct print_string {
->  #define	MAXFSIZE	((1ULL << 63) - 1ULL)
->  #define	MAXFSIZE32	((1ULL << 40) - 1ULL)
->  
-> +void	afsync_f(int, long);
->  void	allocsp_f(int, long);
-> +void	aread_f(int, long);
->  void	attr_remove_f(int, long);
->  void	attr_set_f(int, long);
-> +void	awrite_f(int, long);
->  void	bulkstat_f(int, long);
->  void	bulkstat1_f(int, long);
->  void	chown_f(int, long);
-> @@ -194,9 +204,12 @@ void	write_f(int, long);
->  
->  opdesc_t	ops[] = {
->       /* { OP_ENUM, "name", function, freq, iswrite }, */
-> +	{ OP_AFSYNC, "afsync", afsync_f, 1, 1 },
->  	{ OP_ALLOCSP, "allocsp", allocsp_f, 1, 1 },
-> +	{ OP_AREAD, "aread", aread_f, 1, 0 },
->  	{ OP_ATTR_REMOVE, "attr_remove", attr_remove_f, /* 1 */ 0, 1 },
->  	{ OP_ATTR_SET, "attr_set", attr_set_f, /* 2 */ 0, 1 },
-> +	{ OP_AWRITE, "awrite", awrite_f, 1, 1 },
->  	{ OP_BULKSTAT, "bulkstat", bulkstat_f, 1, 0 },
->  	{ OP_BULKSTAT1, "bulkstat1", bulkstat1_f, 1, 0 },
->  	{ OP_CHOWN, "chown", chown_f, 3, 1 },
-> @@ -577,8 +590,20 @@ int main(int argc, char **argv)
->  				}
->  			}
->  			procid = i;
-> +#ifdef AIO
-> +			if (io_setup(128, &io_ctx) != 0) {
-> +				perror("io_setup failed");
-> +				exit(1);
-> +			}
-> +#endif
->  			for (i = 0; !loops || (i < loops); i++)
->  				doproc();
-> +#ifdef AIO
-> +			if(io_destroy(io_ctx) != 0) {
-> +				perror("io_destroy failed");
-> +				return 1;
-> +			}
-> +#endif
->  			return 0;
->  		}
->  	}
-> @@ -1698,6 +1723,62 @@ void inode_info(char *str, size_t sz, struct stat64 *s, int verbose)
->  }
->  
->  void
-> +afsync_f(int opno, long r)
-> +{
-> +#ifdef AIO
-> +	int		e;
-> +	pathname_t	f;
-> +	int		fd;
-> +	int		v;
-> +	struct iocb	iocb;
-> +	struct iocb	*iocbs[] = { &iocb };
-> +	struct io_event	event;
-> +
-> +	init_pathname(&f);
-> +	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
-> +		if (v)
-> +			printf("%d/%d: afsync - no filename\n", procid, opno);
-> +		free_pathname(&f);
-> +		return;
-> +	}
-> +	fd = open_path(&f, O_WRONLY | O_DIRECT);
-> +	e = fd < 0 ? errno : 0;
-> +	check_cwd();
-> +	if (fd < 0) {
-> +		if (v)
-> +			printf("%d/%d: afsync - open %s failed %d\n",
-> +			       procid, opno, f.path, e);
-> +		free_pathname(&f);
-> +		return;
-> +	}
-> +
-> +	io_prep_fsync(&iocb, fd);
-> +	if ((e = io_submit(io_ctx, 1, iocbs)) != 1) {
-> +		if (v)
-> +			printf("%d/%d: afsync - io_submit %s %d\n",
-> +			       procid, opno, f.path, e);
-> +		free_pathname(&f);
-> +		close(fd);
-> +		return;
-> +	}
-> +	if ((e = io_getevents(io_ctx, 1, 1, &event, NULL)) != 1) {
-> +		if (v)
-> +			printf("%d/%d: afsync - io_getevents failed %d\n",
-> +			       procid, opno, e);
-> +		free_pathname(&f);
-> +		close(fd);
-> +		return;
-> +	}
-> +
-> +	e = event.res2;
-> +	if (v)
-> +		printf("%d/%d: afsync %s %d\n", procid, opno, f.path, e);
-> +	free_pathname(&f);
-> +	close(fd);
-> +#endif
-> +}
-> +
-> +void
->  allocsp_f(int opno, long r)
->  {
->  	int		e;
-> @@ -1751,6 +1832,131 @@ allocsp_f(int opno, long r)
->  	close(fd);
->  }
->  
-> +#ifdef AIO
-> +void
-> +do_aio_rw(int opno, long r, int flags)
-> +{
-> +	__int64_t	align;
-> +	char		*buf;
-> +	struct dioattr	diob;
-> +	int		e;
-> +	pathname_t	f;
-> +	int		fd;
-> +	size_t		len;
-> +	__int64_t	lr;
-> +	off64_t		off;
-> +	struct stat64	stb;
-> +	int		v;
-> +	char		st[1024];
-> +	char		*dio_env;
-> +	struct iocb	iocb;
-> +	struct io_event	event;
-> +	struct iocb	*iocbs[] = { &iocb };
-> +	int		iswrite = (flags & (O_WRONLY | O_RDWR)) ? 1 : 0;
-> +
-> +	init_pathname(&f);
-> +	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
-> +		if (v)
-> +			printf("%d/%d: do_aio_rw - no filename\n", procid, opno);
-> +		free_pathname(&f);
-> +		return;
-> +	}
-> +	fd = open_path(&f, flags|O_DIRECT);
-> +	e = fd < 0 ? errno : 0;
-> +	check_cwd();
-> +	if (fd < 0) {
-> +		if (v)
-> +			printf("%d/%d: do_aio_rw - open %s failed %d\n",
-> +			       procid, opno, f.path, e);
-> +		free_pathname(&f);
-> +		return;
-> +	}
-> +	if (fstat64(fd, &stb) < 0) {
-> +		if (v)
-> +			printf("%d/%d: do_aio_rw - fstat64 %s failed %d\n",
-> +			       procid, opno, f.path, errno);
-> +		free_pathname(&f);
-> +		close(fd);
-> +		return;
-> +	}
-> +	inode_info(st, sizeof(st), &stb, v);
-> +	if (!iswrite && stb.st_size == 0) {
-> +		if (v)
-> +			printf("%d/%d: do_aio_rw - %s%s zero size\n", procid, opno,
-> +			       f.path, st);
-> +		free_pathname(&f);
-> +		close(fd);
-> +		return;
-> +	}
-> +	if (xfsctl(f.path, fd, XFS_IOC_DIOINFO, &diob) < 0) {
-> +		if (v)
-> +			printf(
-> +			"%d/%d: do_aio_rw - xfsctl(XFS_IOC_DIOINFO) %s%s failed %d\n",
-> +				procid, opno, f.path, st, errno);
-> +		free_pathname(&f);
-> +		close(fd);
-> +		return;
-> +	}
-> +	dio_env = getenv("XFS_DIO_MIN");
-> +	if (dio_env)
-> +		diob.d_mem = diob.d_miniosz = atoi(dio_env);
-> +	align = (__int64_t)diob.d_miniosz;
-> +	lr = ((__int64_t)random() << 32) + random();
-> +	len = (random() % FILELEN_MAX) + 1;
-> +	len -= (len % align);
-> +	if (len <= 0)
-> +		len = align;
-> +	else if (len > diob.d_maxiosz)
-> +		len = diob.d_maxiosz;
-> +	buf = memalign(diob.d_mem, len);
-> +
-> +	if (iswrite) {
-> +		off = (off64_t)(lr % MIN(stb.st_size + (1024 * 1024), MAXFSIZE));
-> +		off -= (off % align);
-> +		off %= maxfsize;
-> +		memset(buf, nameseq & 0xff, len);
-> +		io_prep_pwrite(&iocb, fd, buf, len, off);
-> +	} else {
-> +		off = (off64_t)(lr % stb.st_size);
-> +		off -= (off % align);
-> +		io_prep_pread(&iocb, fd, buf, len, off);
-> +	}
-> +	if ((e = io_submit(io_ctx, 1, iocbs)) != 1) {
-> +		if (v)
-> +			printf("%d/%d: %s - io_submit failed %d\n",
-> +			       procid, opno, iswrite ? "awrite" : "aread", e);
-> +		free_pathname(&f);
-> +		close(fd);
-> +		return;
-> +	}
-> +	if ((e = io_getevents(io_ctx, 1, 1, &event, NULL)) != 1) {
-> +		if (v)
-> +			printf("%d/%d: %s - io_getevents failed %d\n",
-> +			       procid, opno, iswrite ? "awrite" : "aread", e);
-> +		free_pathname(&f);
-> +		close(fd);
-> +		return;
-> +	}
-> +
-> +	e = event.res != len ? event.res2 : 0;
-> +	free(buf);
-> +	if (v)
-> +		printf("%d/%d: %s %s%s [%lld,%d] %d\n",
-> +		       procid, opno, iswrite ? "awrite" : "aread",
-> +		       f.path, st, (long long)off, (int)len, e);
-> +	free_pathname(&f);
-> +	close(fd);
-> +}
-> +#endif
-> +
-> +void
-> +aread_f(int opno, long r)
-> +{
-> +#ifdef AIO
-> +	do_aio_rw(opno, r, O_RDONLY);
-> +#endif
-> +}
-> +
->  void
->  attr_remove_f(int opno, long r)
->  {
-> @@ -1855,6 +2061,14 @@ attr_set_f(int opno, long r)
->  }
->  
->  void
-> +awrite_f(int opno, long r)
-> +{
-> +#ifdef AIO
-> +	do_aio_rw(opno, r, O_WRONLY);
-> +#endif
-> +}
-> +
-> +void
->  bulkstat_f(int opno, long r)
->  {
->  	int		count;
-> -- 
-> 2.7.4
-> 
+diff --git a/tests/generic/438 b/tests/generic/438
+new file mode 100755
+index 00000000..e6c39248
+--- /dev/null
++++ b/tests/generic/438
+@@ -0,0 +1,80 @@
++#! /bin/bash
++# FS QA Test No. generic/438
++#
++# Test that if we punch a hole in a file, with either a range that goes beyond
++# the file's size or covers a file range that is already a hole, and that if
++# after we do some buffered write operations that cover different parts of the
++# hole, no warnings are emmitted in syslog/dmesg and the file's content is
++# correct after remounting the filesystem.
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2017 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_test
++_require_scratch
++_require_xfs_io_command "fpunch"
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 100K" $SCRATCH_MNT/f | _filter_xfs_io
++$XFS_IO_PROG -c "fpunch 60K 90K" $SCRATCH_MNT/f
++$XFS_IO_PROG -c "pwrite -S 0xbb -b 100K 50K 100K" $SCRATCH_MNT/f | _filter_xfs_io
++$XFS_IO_PROG -c "pwrite -S 0xcc -b 50K 100K 50K" $SCRATCH_MNT/f | _filter_xfs_io
++
++$XFS_IO_PROG -f -c "fpunch 695K 820K" $SCRATCH_MNT/f2
++$XFS_IO_PROG -c "pwrite -S 0xaa 1008K 307K" $SCRATCH_MNT/f2 |  _filter_xfs_io
++$XFS_IO_PROG -c "pwrite -S 0xbb -b 630K 1073K 630K" $SCRATCH_MNT/f2 \
++	| _filter_xfs_io
++$XFS_IO_PROG -c "pwrite -S 0xcc -b 459K 1068K 459K" $SCRATCH_MNT/f2 \
++	| _filter_xfs_io
++
++_scratch_cycle_mount
++
++echo "File f contents after remounting filesystem:"
++od -t x1 $SCRATCH_MNT/f
++echo "File f2 contents after remounting filesystem:"
++od -t x1 $SCRATCH_MNT/f2
++
++status=0
++exit
+diff --git a/tests/generic/438.out b/tests/generic/438.out
+new file mode 100644
+index 00000000..40067e79
+--- /dev/null
++++ b/tests/generic/438.out
+@@ -0,0 +1,31 @@
++QA output created by 438
++wrote 102400/102400 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 102400/102400 bytes at offset 51200
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 51200/51200 bytes at offset 102400
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 314368/314368 bytes at offset 1032192
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 645120/645120 bytes at offset 1098752
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 470016/470016 bytes at offset 1093632
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File f contents after remounting filesystem:
++0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
++*
++0144000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
++*
++0310000 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc
++*
++0454000
++File f2 contents after remounting filesystem:
++0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
++*
++3740000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
++*
++4130000 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc
++*
++5756000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
++*
++6516000
+diff --git a/tests/generic/group b/tests/generic/group
+index 438c2990..34f176a9 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -440,3 +440,4 @@
+ 435 auto encrypt
+ 436 auto quick rw
+ 437 auto quick
++438 auto quick punch
+-- 
+2.11.0
+
