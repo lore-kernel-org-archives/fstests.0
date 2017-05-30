@@ -1,11 +1,13 @@
-Received: from mx2.suse.de ([195.135.220.15]:46574 "EHLO mx1.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:51462 "EHLO mx1.suse.de"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751224AbdE3Nvf (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 30 May 2017 09:51:35 -0400
+        id S1751004AbdE3OKM (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 30 May 2017 10:10:12 -0400
 From: Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH] listxattr: Fix read past end of array
-Date: Tue, 30 May 2017 16:51:28 +0300
-Message-Id: <1496152288-4101-1-git-send-email-nborisov@suse.com>
+Subject: [PATCHv2] src/listxattr: Fix reading past the end of the user buffer
+Date: Tue, 30 May 2017 17:10:07 +0300
+Message-Id: <1496153407-6060-1-git-send-email-nborisov@suse.com>
+In-Reply-To: <1496152288-4101-1-git-send-email-nborisov@suse.com>
+References: <1496152288-4101-1-git-send-email-nborisov@suse.com>
 Sender: fstests-owner@vger.kernel.org
 To: eguan@redhat.com
 Cc: fstests@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
@@ -19,28 +21,38 @@ null-terminated entry up to bufsize (which is user passed parameter).
 This can lead to a situation where listxattr users N bytes out of
 M bytes big buffer ( M > N). This will leave the rest (M-N)
 as garbage, which in turn will be printed by listxattr. Fix this
-by modifying the terminating condition of the loop to print
-up to the return value of listxattr which in case of success is the
-amount of bytes used in the passed buffer.
+by converting the 'for' loop to 'while' and properly ensuring
+we are reading at most howevermany elements the syscall reported
+it returned
 
 Signed-off-by: Nikolay Borisov <nborisov@suse.com>
 ---
- src/listxattr.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+
+v2: 
+ Rewrite the loop, hopefully making the code a bit more legible.
+ Functionally it's the same as my previous fix
+
+ src/listxattr.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/src/listxattr.c b/src/listxattr.c
-index cd46637a..f07c23f8 100644
+index cd46637a..584ebb2d 100644
 --- a/src/listxattr.c
 +++ b/src/listxattr.c
-@@ -61,7 +61,7 @@ int main(int argc, char **argv)
+@@ -60,10 +60,10 @@ int main(int argc, char **argv)
+         if (ret < 0) {
                  perror("listxattr");
          } else {
-                 char *l;
+-                char *l;
 -                for (l = buf; l != (buf + bufsize) && *l != '\0';
-+                for (l = buf; l != (buf + ret) && *l != '\0';
-                                 l = strchr(l, '\0') + 1) {
+-                                l = strchr(l, '\0') + 1) {
++                char *l = buf;
++                while (l != (buf + ret)) {
                          printf("xattr: %s\n", l);
++                        l = strchr(l, '\0') + 1;
                  }
+         }
+ 
 -- 
 2.12.3
 
