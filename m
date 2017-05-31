@@ -1,13 +1,13 @@
-Received: from mail-pf0-f193.google.com ([209.85.192.193]:36689 "EHLO
-        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751140AbdEaWkI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 31 May 2017 18:40:08 -0400
-Received: by mail-pf0-f193.google.com with SMTP id n23so4596294pfb.3
-        for <fstests@vger.kernel.org>; Wed, 31 May 2017 15:40:08 -0700 (PDT)
+Received: from mail-pf0-f179.google.com ([209.85.192.179]:33110 "EHLO
+        mail-pf0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751053AbdEaWkJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 31 May 2017 18:40:09 -0400
+Received: by mail-pf0-f179.google.com with SMTP id e193so19647988pfh.0
+        for <fstests@vger.kernel.org>; Wed, 31 May 2017 15:40:09 -0700 (PDT)
 From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH 4/6] tests: clean up per-OS output files
-Date: Wed, 31 May 2017 15:36:53 -0700
-Message-Id: <20170531223655.130613-5-ebiggers3@gmail.com>
+Subject: [PATCH 5/6] common: remove IRIX-specific code
+Date: Wed, 31 May 2017 15:36:54 -0700
+Message-Id: <20170531223655.130613-6-ebiggers3@gmail.com>
 In-Reply-To: <20170531223655.130613-1-ebiggers3@gmail.com>
 References: <20170531223655.130613-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -17,458 +17,314 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Eric Biggers <ebiggers@google.com>
 
-Some tests had separate output files for IRIX and Linux.  Now that the
-IRIX ones have been removed, rename the Linux ones and remove the
-now-unneeded .cfg files and calls to _link_out_file.
+As xfstests is no longer supported on IRIX, remove IRIX-specific code
+from the common helper scripts.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- .gitignore                                   | 13 -------------
- tests/generic/088                            |  3 ---
- tests/generic/088.cfg                        |  1 -
- tests/generic/{088.out.linux => 088.out}     |  0
- tests/xfs/018                                |  3 ---
- tests/xfs/018.cfg                            |  1 -
- tests/xfs/{018.op.linux => 018.op}           |  0
- tests/xfs/022                                |  3 ---
- tests/xfs/022.cfg                            |  1 -
- tests/xfs/{022.out.linux => 022.out}         |  0
- tests/xfs/023                                |  3 ---
- tests/xfs/023.cfg                            |  1 -
- tests/xfs/{023.out.linux => 023.out}         |  0
- tests/xfs/030                                |  3 ---
- tests/xfs/030.cfg                            |  1 -
- tests/xfs/{030.out.linux => 030.out}         |  0
- tests/xfs/031                                |  3 ---
- tests/xfs/031.cfg                            |  1 -
- tests/xfs/{031.out.linux => 031.out}         |  0
- tests/xfs/033                                |  4 ++--
- tests/xfs/033.cfg                            |  3 +--
- tests/xfs/{033.out.crc.linux => 033.out.crc} |  0
- tests/xfs/{033.out.linux => 033.out.default} |  0
- tests/xfs/035                                |  3 ---
- tests/xfs/035.cfg                            |  1 -
- tests/xfs/{035.out.linux => 035.out}         |  0
- tests/xfs/036                                |  3 ---
- tests/xfs/036.cfg                            |  1 -
- tests/xfs/{036.out.linux => 036.out}         |  0
- tests/xfs/039                                |  3 ---
- tests/xfs/039.cfg                            |  1 -
- tests/xfs/{039.out.linux => 039.out}         |  0
- tests/xfs/043                                |  3 ---
- tests/xfs/043.cfg                            |  1 -
- tests/xfs/{043.out.linux => 043.out}         |  0
- tests/xfs/055                                |  3 ---
- tests/xfs/{055.out.linux => 055.out}         |  0
- tests/xfs/082                                |  3 ---
- tests/xfs/082.cfg                            |  1 -
- tests/xfs/{082.op.linux => 082.op}           |  0
- tests/xfs/146                                |  3 ---
- tests/xfs/146.cfg                            |  1 -
- tests/xfs/{146.out.linux => 146.out}         |  0
- 43 files changed, 3 insertions(+), 68 deletions(-)
- delete mode 100644 tests/generic/088.cfg
- rename tests/generic/{088.out.linux => 088.out} (100%)
- delete mode 100644 tests/xfs/018.cfg
- rename tests/xfs/{018.op.linux => 018.op} (100%)
- delete mode 100644 tests/xfs/022.cfg
- rename tests/xfs/{022.out.linux => 022.out} (100%)
- delete mode 100644 tests/xfs/023.cfg
- rename tests/xfs/{023.out.linux => 023.out} (100%)
- delete mode 100644 tests/xfs/030.cfg
- rename tests/xfs/{030.out.linux => 030.out} (100%)
- delete mode 100644 tests/xfs/031.cfg
- rename tests/xfs/{031.out.linux => 031.out} (100%)
- rename tests/xfs/{033.out.crc.linux => 033.out.crc} (100%)
- rename tests/xfs/{033.out.linux => 033.out.default} (100%)
- delete mode 100644 tests/xfs/035.cfg
- rename tests/xfs/{035.out.linux => 035.out} (100%)
- delete mode 100644 tests/xfs/036.cfg
- rename tests/xfs/{036.out.linux => 036.out} (100%)
- delete mode 100644 tests/xfs/039.cfg
- rename tests/xfs/{039.out.linux => 039.out} (100%)
- delete mode 100644 tests/xfs/043.cfg
- rename tests/xfs/{043.out.linux => 043.out} (100%)
- rename tests/xfs/{055.out.linux => 055.out} (100%)
- delete mode 100644 tests/xfs/082.cfg
- rename tests/xfs/{082.op.linux => 082.op} (100%)
- delete mode 100644 tests/xfs/146.cfg
- rename tests/xfs/{146.out.linux => 146.out} (100%)
+ common/attr        |  6 +-----
+ common/config      | 12 ------------
+ common/dump        | 39 +++------------------------------------
+ common/filestreams | 43 ++++++-------------------------------------
+ common/log         |  1 -
+ common/rc          | 23 +++--------------------
+ 6 files changed, 13 insertions(+), 111 deletions(-)
 
-diff --git a/.gitignore b/.gitignore
-index 388f5af3..feeaed45 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -231,19 +231,6 @@
- /dmapi/src/suite2/src/test_rights
+diff --git a/common/attr b/common/attr
+index c840ce42..42a197fe 100644
+--- a/common/attr
++++ b/common/attr
+@@ -122,11 +122,7 @@ _acl_list()
+ {
+     _file1=$1
  
- # Symlinked files
--/tests/generic/088.out
--/tests/xfs/018.op
--/tests/xfs/022.out
--/tests/xfs/023.out
--/tests/xfs/030.out
--/tests/xfs/031.out
- /tests/xfs/033.out
--/tests/xfs/035.out
--/tests/xfs/036.out
--/tests/xfs/039.out
--/tests/xfs/043.out
--/tests/xfs/055.out
- /tests/xfs/071.out
--/tests/xfs/082.op
- /tests/xfs/096.out
--/tests/xfs/146.out
-diff --git a/tests/generic/088 b/tests/generic/088
-index 1f01c4f5..8d31741b 100755
---- a/tests/generic/088
-+++ b/tests/generic/088
-@@ -42,9 +42,6 @@ _filter()
-     _filter_test_dir | sed -e '/----------/d'
+-    if [ $HOSTOS = "IRIX" ]; then
+-	ls -dD $_file1 | _acl_filter_id
+-    else 
+-        chacl -l $_file1 | _acl_filter_id
+-    fi
++    chacl -l $_file1 | _acl_filter_id
  }
  
--# link correct .out file
--_link_out_file
--
- # real QA test starts here
- _supported_fs generic
- _supported_os Linux
-diff --git a/tests/generic/088.cfg b/tests/generic/088.cfg
-deleted file mode 100644
-index 7fd51a7d..00000000
---- a/tests/generic/088.cfg
-+++ /dev/null
-@@ -1 +0,0 @@
--linux: linux
-diff --git a/tests/generic/088.out.linux b/tests/generic/088.out
-similarity index 100%
-rename from tests/generic/088.out.linux
-rename to tests/generic/088.out
-diff --git a/tests/xfs/018 b/tests/xfs/018
-index 253af940..b2913821 100755
---- a/tests/xfs/018
-+++ b/tests/xfs/018
-@@ -53,9 +53,6 @@ rm -f $seqres.full $tmp.*
- _require_scratch
- _require_v2log
+ # create an ACL with n ACEs in it
+diff --git a/common/config b/common/config
+index 090e9117..09237519 100644
+--- a/common/config
++++ b/common/config
+@@ -52,15 +52,10 @@
+ export LANG=C
+ export LC_ALL=C
  
--# link correct .out file
--_link_out_file_named $seqfull.op $(_get_os_name)
--
- echo "*** init FS"
- _scratch_unmount >/dev/null 2>&1
+-# Warning: don't put freeware before /usr/bsd on IRIX coz you'll
+-#  get the wrong hostname and set your system name to -s  :)
+-[ -d /usr/bsd ] && PATH=$PATH:/usr/bsd
+-[ -d /usr/freeware/bin ] && PATH=$PATH:/usr/freeware/bin
+ PATH=".:$PATH"
  
-diff --git a/tests/xfs/018.cfg b/tests/xfs/018.cfg
-deleted file mode 100644
-index 7fd51a7d..00000000
---- a/tests/xfs/018.cfg
-+++ /dev/null
-@@ -1 +0,0 @@
--linux: linux
-diff --git a/tests/xfs/018.op.linux b/tests/xfs/018.op
-similarity index 100%
-rename from tests/xfs/018.op.linux
-rename to tests/xfs/018.op
-diff --git a/tests/xfs/022 b/tests/xfs/022
-index 1cd6d28e..ebe539ab 100755
---- a/tests/xfs/022
-+++ b/tests/xfs/022
-@@ -38,9 +38,6 @@ trap "rm -rf $tmp.*; exit \$status" 0 1 2 3 15
- . ./common/rc
- . ./common/dump
+ export HOST=`hostname -s`
+ export HOSTOS=`uname -s`
+-[ "$HOSTOS" = "IRIX64" ] && export HOSTOS="IRIX"
  
--# link correct .out file
--_link_out_file
--
- # real QA test starts here
- _supported_fs xfs
- _supported_os Linux
-diff --git a/tests/xfs/022.cfg b/tests/xfs/022.cfg
-deleted file mode 100644
-index 7fd51a7d..00000000
---- a/tests/xfs/022.cfg
-+++ /dev/null
-@@ -1 +0,0 @@
--linux: linux
-diff --git a/tests/xfs/022.out.linux b/tests/xfs/022.out
-similarity index 100%
-rename from tests/xfs/022.out.linux
-rename to tests/xfs/022.out
-diff --git a/tests/xfs/023 b/tests/xfs/023
-index d304384b..fff49d56 100755
---- a/tests/xfs/023
-+++ b/tests/xfs/023
-@@ -37,9 +37,6 @@ trap "rm -rf $tmp.*; exit \$status" 0 1 2 3 15
- . ./common/rc
- . ./common/dump
+ export MODULAR=0               # using XFS as a module or not
+ export BOOT="/boot"            # install target for kernels
+@@ -219,13 +214,6 @@ fi
+ export UDEV_SETTLE_PROG
  
--# link correct .out file
--_link_out_file
--
- # real QA test starts here
- _supported_fs xfs
- _supported_os Linux
-diff --git a/tests/xfs/023.cfg b/tests/xfs/023.cfg
-deleted file mode 100644
-index 7fd51a7d..00000000
---- a/tests/xfs/023.cfg
-+++ /dev/null
-@@ -1 +0,0 @@
--linux: linux
-diff --git a/tests/xfs/023.out.linux b/tests/xfs/023.out
-similarity index 100%
-rename from tests/xfs/023.out.linux
-rename to tests/xfs/023.out
-diff --git a/tests/xfs/030 b/tests/xfs/030
-index 4d8d7d67..bc807753 100755
---- a/tests/xfs/030
-+++ b/tests/xfs/030
-@@ -45,9 +45,6 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
- . ./common/filter
- . ./common/repair
+ case "$HOSTOS" in
+-    IRIX*)
+-        export MKFS_XFS_PROG="`set_prog_path mkfs_xfs`"
+-        export MKFS_UDF_PROG="`set_prog_path mkfs_udf`"
+-        export XFS_FSR_PROG="`set_prog_path /usr/etc/fsr_xfs`"
+-        export MKFS_NFS_PROG="false"
+-        export MKFS_CIFS_PROG="false"
+-        ;;
+     Linux)
+         export MKFS_XFS_PROG="`set_prog_path mkfs.xfs`"
+         export MKFS_EXT4_PROG="`set_prog_path mkfs.ext4`"
+diff --git a/common/dump b/common/dump
+index d6663e0c..b0e4a12f 100644
+--- a/common/dump
++++ b/common/dump
+@@ -395,8 +395,6 @@ End-of-File
  
--# link correct .out file
--_link_out_file
--
- # nuke the superblock, AGI, AGF, AGFL; then try repair the damage
- #
- _check_ag()
-diff --git a/tests/xfs/030.cfg b/tests/xfs/030.cfg
-deleted file mode 100644
-index 7fd51a7d..00000000
---- a/tests/xfs/030.cfg
-+++ /dev/null
-@@ -1 +0,0 @@
--linux: linux
-diff --git a/tests/xfs/030.out.linux b/tests/xfs/030.out
-similarity index 100%
-rename from tests/xfs/030.out.linux
-rename to tests/xfs/030.out
-diff --git a/tests/xfs/031 b/tests/xfs/031
-index 678c3249..b05f28b0 100755
---- a/tests/xfs/031
-+++ b/tests/xfs/031
-@@ -38,9 +38,6 @@ rm -f $seqres.full
- . ./common/repair
- . ./common/filter
- 
--# link correct .out file
--_link_out_file
--
- _check_repair()
+ _mk_fillconfig_perm()
  {
- 	echo "Repairing, round 0" >> $seqres.full
-diff --git a/tests/xfs/031.cfg b/tests/xfs/031.cfg
-deleted file mode 100644
-index 7fd51a7d..00000000
---- a/tests/xfs/031.cfg
-+++ /dev/null
-@@ -1 +0,0 @@
--linux: linux
-diff --git a/tests/xfs/031.out.linux b/tests/xfs/031.out
-similarity index 100%
-rename from tests/xfs/031.out.linux
-rename to tests/xfs/031.out
-diff --git a/tests/xfs/033 b/tests/xfs/033
-index a6f93f29..321856fc 100755
---- a/tests/xfs/033
-+++ b/tests/xfs/033
-@@ -86,9 +86,9 @@ if [ $isize -lt 512 ]; then
- fi
- 
- # link correct .out file
--FEATURES=$(_get_os_name)
-+FEATURES=
- if [ $_fs_has_crcs -eq 1 ]; then
--	FEATURES=$FEATURES,crc
-+	FEATURES=crc
- fi
- _link_out_file_named $seqfull.out "$FEATURES"
- 
-diff --git a/tests/xfs/033.cfg b/tests/xfs/033.cfg
-index 768ca9e0..46df3b03 100644
---- a/tests/xfs/033.cfg
-+++ b/tests/xfs/033.cfg
-@@ -1,2 +1 @@
--linux,crc: crc.linux
--linux: linux
-+crc: crc
-diff --git a/tests/xfs/033.out.crc.linux b/tests/xfs/033.out.crc
-similarity index 100%
-rename from tests/xfs/033.out.crc.linux
-rename to tests/xfs/033.out.crc
-diff --git a/tests/xfs/033.out.linux b/tests/xfs/033.out.default
-similarity index 100%
-rename from tests/xfs/033.out.linux
-rename to tests/xfs/033.out.default
-diff --git a/tests/xfs/035 b/tests/xfs/035
-index 6b6c86b7..1fde45df 100755
---- a/tests/xfs/035
-+++ b/tests/xfs/035
-@@ -36,9 +36,6 @@ trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
- . ./common/rc
- . ./common/dump
- 
--# link correct .out file
--_link_out_file
+-    # dir_guid: ugo=rwx,g+s on dir is for IRIX chmod(1)
 -
- # real QA test starts here
- _supported_fs xfs
- _supported_os Linux
-diff --git a/tests/xfs/035.cfg b/tests/xfs/035.cfg
-deleted file mode 100644
-index 7fd51a7d..00000000
---- a/tests/xfs/035.cfg
-+++ /dev/null
-@@ -1 +0,0 @@
--linux: linux
-diff --git a/tests/xfs/035.out.linux b/tests/xfs/035.out
-similarity index 100%
-rename from tests/xfs/035.out.linux
-rename to tests/xfs/035.out
-diff --git a/tests/xfs/036 b/tests/xfs/036
-index c65523f5..2a930b20 100755
---- a/tests/xfs/036
-+++ b/tests/xfs/036
-@@ -36,9 +36,6 @@ trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
- . ./common/rc
- . ./common/dump
+     cat <<End-of-File >$tmp.config
+ # pathname	size/dir  user group mode
+ #
+@@ -406,7 +404,7 @@ file_sticky	10	$nobody	$nobody	01777
+ file_mix1	10	$nobody	$nobody	761
+ file_mix2	10	$nobody	$nobody	642
+ dir_suid	d	$nobody	$nobody	04777
+-dir_guid	d	$nobody	$nobody	ugo=rwx,g+s
++dir_guid	d	$nobody	$nobody	02777
+ dir_sticky	d	$nobody	$nobody	01777
+ dir_mix1	d	$nobody	$nobody	761
+ dir_mix2	d	$nobody	$nobody	642
+@@ -798,25 +796,6 @@ _ls_filter()
+   | sed -e 's/total [0-9][0-9]*/total TOTAL/'
+ }
  
--# link correct .out file
--_link_out_file
+-#
+-# Filtering of Irix character hwgraph device names
+-# e.g.
+-# chardev: /hw/node/xtalk/15/pci/0/scsi_ctlr/0/target/1/lun/0/disk/partition/4/char
+-# blkdev:  /dev/dsk/dks0d1s4
+-#
+-_filter_devchar()
+-{
+-    $AWK_PROG '
+-	/\/hw\/node/ {
+-	    sub(/\/hw.*scsi_ctlr\//,"/dev/dsk/dks")  # blah blah /dev/dsk/dks0/target/1/....
+-	    sub(/\/target\//,"d")                    # blah blah /dev/dsk/dks0d1/lun/0/disk.....
+-	    sub(/\/lun.*partition\//,"s")            # blah blah /dev/dsk/dks0d1s4/char
+-	    sub(/\/char/,"")			     # blah blah /dev/dsk/dks0d1s4
+-	}
+-	{ print }
+-    '
+-}
 -
- # real QA test starts here
- _supported_fs xfs
- _supported_os Linux
-diff --git a/tests/xfs/036.cfg b/tests/xfs/036.cfg
-deleted file mode 100644
-index 7fd51a7d..00000000
---- a/tests/xfs/036.cfg
-+++ /dev/null
-@@ -1 +0,0 @@
--linux: linux
-diff --git a/tests/xfs/036.out.linux b/tests/xfs/036.out
-similarity index 100%
-rename from tests/xfs/036.out.linux
-rename to tests/xfs/036.out
-diff --git a/tests/xfs/039 b/tests/xfs/039
-index 62735906..51d5544a 100755
---- a/tests/xfs/039
-+++ b/tests/xfs/039
-@@ -36,9 +36,6 @@ trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
- . ./common/rc
- . ./common/dump
  
--# link correct .out file
--_link_out_file
+ #
+ # Filter out the non-deterministic dump msgs from
+@@ -824,7 +803,6 @@ _filter_devchar()
+ #
+ _dump_filter_main()
+ {
+-  _filter_devchar |\
+   sed \
+       -e "s#$__XFSDUMP_PROG#xfsdump#"			\
+       -e "s#$XFSRESTORE_PROG#xfsrestore#"		\
+@@ -1191,7 +1169,7 @@ _do_restore_toc()
+     echo "Contents of dump ..."
+     opts="$_restore_debug$restore_args -f $dump_file -t"
+     echo "xfsrestore $opts" | _dir_filter
+-    cd $SCRATCH_MNT # for IRIX which needs xfs cwd
++    cd $SCRATCH_MNT
+     $XFSRESTORE_PROG $opts 2>&1 | tee -a $seqres.full | _dump_filter_main |\
+     _check_quota_file |\
+     _check_quota_entries |\
+@@ -1484,25 +1462,14 @@ _check_quota_entries()
+ # xfsrestore: user quota information written to ...'
+ # xfsrestore: group quota information written to ...'
+ # xfsrestore: project quota information written to ...'
+-#
+-# If on IRIX then look for:
+-# xfsrestore: use 'edquota' to restore quotas
+-# Else look for:
+ # xfsrestore: use 'xfs_quota' to restore quotas
+ #
+ _check_quota_dumprestore()
+ {
+-    if [ "$HOSTOS" == "IRIX" ]; then
+ 	_check_quota 'user quota information' \
+ 		     'group quota information' \
+ 		     'project quota information' | \
+-	sed "/xfsrestore:.*use 'edquota' to restore quotas/d"
+-    else
+-	_check_quota 'user quota information' \
+-		     'group quota information' \
+-		     'project quota information' | \
+-	sed "/xfsrestore:.*use 'xfs_quota' to restore quotas/d"
+-    fi
++		sed "/xfsrestore:.*use 'xfs_quota' to restore quotas/d"
+ }
+ 
+ #
+diff --git a/common/filestreams b/common/filestreams
+index 4d146648..f5441f5a 100644
+--- a/common/filestreams
++++ b/common/filestreams
+@@ -21,35 +21,12 @@
+ 
+ _check_filestreams_support()
+ {
+-	local irix_timeout_sysvar="xfs_mfstream_timeout"
+-	local linux_timeout_procvar="/proc/sys/fs/xfs/filestream_centisecs"
+-	local streams_avail=""
+-	if [ "$HOSTOS" == "IRIX" ]; then
+-		# check for the filestreams timeout systune variable in irix
+-		streams_avail=`systune $irix_timeout_sysvar 2>&1 |
+-			perl -ne 'if (/'$irix_timeout_sysvar'\s+=\s+\d+/) {print "true"}'`
+-	else
+-		# check for the filestreams timeout proc entry in linux
+-		[ -f $linux_timeout_procvar ] && streams_avail="true"
+-	fi
 -
- # real QA test starts here
- _supported_fs xfs
- _supported_os Linux
-diff --git a/tests/xfs/039.cfg b/tests/xfs/039.cfg
-deleted file mode 100644
-index 7fd51a7d..00000000
---- a/tests/xfs/039.cfg
-+++ /dev/null
-@@ -1 +0,0 @@
--linux: linux
-diff --git a/tests/xfs/039.out.linux b/tests/xfs/039.out
-similarity index 100%
-rename from tests/xfs/039.out.linux
-rename to tests/xfs/039.out
-diff --git a/tests/xfs/043 b/tests/xfs/043
-index caca73da..9bd6f1ec 100755
---- a/tests/xfs/043
-+++ b/tests/xfs/043
-@@ -38,9 +38,6 @@ trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
- . ./common/rc
- . ./common/dump
+-	if [ "$streams_avail" == "true" ]; then
+-		return 0
+-	else
+-		return 1
+-	fi
++	[ -f /proc/sys/fs/xfs/filestream_centisecs ]
+ }
  
--# link correct .out file
--_link_out_file
--
- # real QA test starts here
- _supported_fs xfs
- _supported_os Linux
-diff --git a/tests/xfs/043.cfg b/tests/xfs/043.cfg
-deleted file mode 100644
-index 7fd51a7d..00000000
---- a/tests/xfs/043.cfg
-+++ /dev/null
-@@ -1 +0,0 @@
--linux: linux
-diff --git a/tests/xfs/043.out.linux b/tests/xfs/043.out
-similarity index 100%
-rename from tests/xfs/043.out.linux
-rename to tests/xfs/043.out
-diff --git a/tests/xfs/055 b/tests/xfs/055
-index 383058a5..9f67e176 100755
---- a/tests/xfs/055
-+++ b/tests/xfs/055
-@@ -36,9 +36,6 @@ trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
- . ./common/rc
- . ./common/dump
+ _set_stream_timeout_centisecs()
+ {
+-	local new_timeout_csecs=$1
+-	local irix_timeout_sysvar="xfs_mfstream_timeout"
+-	local linux_timeout_procvar="/proc/sys/fs/xfs/filestream_centisecs"
+-	if [ "$HOSTOS" == "IRIX" ]; then
+-		echo y | systune -r $irix_timeout_sysvar $new_timeout_csecs >/dev/null
+-	else
+-		echo $new_timeout_csecs > $linux_timeout_procvar
+-	fi
++	echo $1 > /proc/sys/fs/xfs/filestream_centisecs
+ }
  
--# link correct .out file
--_link_out_file
--
- # real QA test starts here
- _supported_fs xfs
- _supported_os Linux
-diff --git a/tests/xfs/055.out.linux b/tests/xfs/055.out
-similarity index 100%
-rename from tests/xfs/055.out.linux
-rename to tests/xfs/055.out
-diff --git a/tests/xfs/082 b/tests/xfs/082
-index f824d5ef..03878379 100755
---- a/tests/xfs/082
-+++ b/tests/xfs/082
-@@ -54,9 +54,6 @@ rm -f $seqres.full $tmp.*
- _require_scratch
- _require_v2log 
+ _do_stream()
+@@ -63,22 +40,14 @@ _do_stream()
+ 	local blocks_in_file=`expr $file_size / $bsize`
  
--# link correct .out file
--_link_out_file_named $seqfull.op $(_get_os_name)
--
- echo "*** init FS"
- _scratch_unmount >/dev/null 2>&1
+ 	mkdir $directory_name
+-	if [ "$iflag" = "1" -a "$HOSTOS" != "IRIX" ]; then
++	if [ "$iflag" = "1" ]; then
+ 		$XFS_IO_PROG -x -c "chattr +S" $directory_name \
+ 			|| _fail "chattr of filestream flag"
+ 	fi
+ 	cd $directory_name
  
-diff --git a/tests/xfs/082.cfg b/tests/xfs/082.cfg
-deleted file mode 100644
-index 7fd51a7d..00000000
---- a/tests/xfs/082.cfg
-+++ /dev/null
-@@ -1 +0,0 @@
--linux: linux
-diff --git a/tests/xfs/082.op.linux b/tests/xfs/082.op
-similarity index 100%
-rename from tests/xfs/082.op.linux
-rename to tests/xfs/082.op
-diff --git a/tests/xfs/146 b/tests/xfs/146
-index ea448db2..9d93e951 100755
---- a/tests/xfs/146
-+++ b/tests/xfs/146
-@@ -47,9 +47,6 @@ _report_filter () {
- _supported_fs xfs
- _supported_os Linux
+-	local dd_cmd=""
+-	if [ "$HOSTOS" == "IRIX" ]; then
+-		# for irix use lmdd
+-		dd_cmd="lmdd"
+-		[ "$dio" = "1" ] && dd_cmd="$dd_cmd odirect=1"
+-	else
+-		# for linux use dd
+-		dd_cmd="dd"
+-		[ "$dio" = "1" ] && dd_cmd="$dd_cmd oflag=direct"
+-	fi
++	local dd_cmd="dd"
++	[ "$dio" = "1" ] && dd_cmd="$dd_cmd oflag=direct"
+ 	dd_cmd="$dd_cmd if=/dev/zero bs=${bsize} count=${blocks_in_file}"
  
--# link correct .out file
--_link_out_file
--
- _require_scratch
- _scratch_mkfs_xfs >/dev/null 2>&1
- _dmapi_scratch_mount
-diff --git a/tests/xfs/146.cfg b/tests/xfs/146.cfg
-deleted file mode 100644
-index 7fd51a7d..00000000
---- a/tests/xfs/146.cfg
-+++ /dev/null
-@@ -1 +0,0 @@
--linux: linux
-diff --git a/tests/xfs/146.out.linux b/tests/xfs/146.out
-similarity index 100%
-rename from tests/xfs/146.out.linux
-rename to tests/xfs/146.out
+ 	local i=1
+@@ -140,7 +109,7 @@ _test_streams() {
+ 	_scratch_mkfs_xfs -dsize=$size,agcount=$agcount >/dev/null 2>&1 \
+ 		|| _fail "mkfs failed"
+ 
+-	if [ "$use_iflag" = "0" -o "$HOSTOS" == "IRIX" ]; then
++	if [ "$use_iflag" = "0" ]; then
+ 		# mount using filestreams mount option
+ 		_scratch_mount "-o filestreams" \
+ 			|| _fail "filestreams mount failed"
+diff --git a/common/log b/common/log
+index d1c19ff5..bdb4ed68 100644
+--- a/common/log
++++ b/common/log
+@@ -314,7 +314,6 @@ _print_operation()
+ # and may not match with the FS mounted at a different LR size 
+ # => xlog_do_recovery_pass() can not handle the different hdr sizes
+ #    it assumes them all to be the same between the start..finish
+-# NB: On IRIX there is no UMOUNT record and so we could start from -s 0.
+ 
+ _print_transaction_inode()
+ {
+diff --git a/common/rc b/common/rc
+index 743df427..346b23af 100644
+--- a/common/rc
++++ b/common/rc
+@@ -235,7 +235,7 @@ _scratch_options()
+ 
+     case $type in
+     mkfs)
+-	[ "$HOSTOS" != "IRIX" ] && SCRATCH_OPTIONS="$SCRATCH_OPTIONS -f"
++	SCRATCH_OPTIONS="$SCRATCH_OPTIONS -f"
+ 	rt_opt="-r"
+         log_opt="-l"
+ 	;;
+@@ -284,14 +284,7 @@ _mount_ops_filter()
+     [ $last_index -gt 0 ] && shift $last_index
+     FS_ESCAPED=$1
+     
+-    # irix is fussy about how it is fed its mount options
+-    # - multiple -o's are not allowed
+-    # - no spaces between comma delimitered options
+-    # the sed script replaces all -o's (except the first) with a comma
+-    # not required for linux, but won't hurt
+-    
+-    echo $params | sed -e 's/[[:space:]]\+-o[[:space:]]*/UnIqUe/1; s/[[:space:]]\+-o[[:space:]]*/,/g; s/UnIqUe/ -o /1' \
+-        | sed -e 's/dmapi/dmi/' \
++    echo $params | sed -e 's/dmapi/dmi/' \
+         | $PERL_PROG -ne "s#mtpt=[^,|^\n|^\s]*#mtpt=$FS_ESCAPED\1\2#; print;"
+ 
+ }
+@@ -2042,12 +2035,7 @@ s,^\s*$,,;
+ 
+ _user_do()
+ {
+-    if [ "$HOSTOS" == "IRIX" ]
+-	then
+-	echo $1 | /bin/bash "su $qa_user 2>&1" | _filter_user_do
+-    else
+ 	echo $1 | su -s /bin/bash $qa_user 2>&1 | _filter_user_do
+-    fi
+ }
+ 
+ _require_xfs_io_command()
+@@ -2606,9 +2594,7 @@ _full_platform_details()
+ 
+ _get_os_name()
+ {
+-	if [ "`uname`" == "IRIX64" ] || [ "`uname`" == "IRIX" ]; then
+-		echo 'irix'
+-	elif [ "`uname`" == "Linux" ]; then
++	if [ "`uname`" == "Linux" ]; then
+ 		echo 'linux'
+ 	else
+ 		echo Unknown operating system: `uname`
+@@ -3172,9 +3158,6 @@ run_check()
+ 
+ _require_test_symlinks()
+ {
+-	# IRIX UDF does not support symlinks
+-	[ "$HOSTOS" = "IRIX" -a "$FSTYP" = 'udf' ] && \
+-		_notrun "Require symlinks support"
+ 	target=`mktemp -p $TEST_DIR`
+ 	link=`mktemp -p $TEST_DIR -u`
+ 	ln -s `basename $target` $link
 -- 
 2.13.0.506.g27d5fe0cd-goog
 
