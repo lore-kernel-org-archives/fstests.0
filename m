@@ -1,68 +1,40 @@
-Received: from mx2.suse.de ([195.135.220.15]:34713 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751172AbdEaI6P (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 31 May 2017 04:58:15 -0400
-Subject: Re: [PATCHv2] src/listxattr: Fix reading past the end of the user
- buffer
-References: <1496152288-4101-1-git-send-email-nborisov@suse.com>
- <1496153407-6060-1-git-send-email-nborisov@suse.com>
-From: Nikolay Borisov <nborisov@suse.com>
-Message-ID: <70269450-8b2e-3b8f-e7ac-e44221797e34@suse.com>
-Date: Wed, 31 May 2017 11:58:12 +0300
+Received: from cn.fujitsu.com ([59.151.112.132]:58195 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1750912AbdEaJKu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 31 May 2017 05:10:50 -0400
+Received: from G08CNEXCHPEKD01.g08.fujitsu.local (unknown [10.167.33.80])
+        by cn.fujitsu.com (Postfix) with ESMTP id 354A047C6522
+        for <fstests@vger.kernel.org>; Wed, 31 May 2017 17:10:48 +0800 (CST)
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH 1/2] xfs/055: add missing 055.cfg
+Date: Wed, 31 May 2017 17:10:26 +0800
+Message-ID: <1496221827-22720-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-In-Reply-To: <1496153407-6060-1-git-send-email-nborisov@suse.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
+_link_output_file sets output file suffix to null because 055.cfg is
+missing, so add it.
+
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+---
+ tests/xfs/055.cfg | 2 ++
+ 1 file changed, 2 insertions(+)
+ create mode 100644 tests/xfs/055.cfg
+
+diff --git a/tests/xfs/055.cfg b/tests/xfs/055.cfg
+new file mode 100644
+index 0000000..7ffdfc0
+--- /dev/null
++++ b/tests/xfs/055.cfg
+@@ -0,0 +1,2 @@
++irix: irix
++linux: linux
+-- 
+1.8.3.1
 
 
-On 30.05.2017 17:10, Nikolay Borisov wrote:
-> listxattr reaturns a null-terminated list of entries that represent
-> the xattr names. However, if it is passed larger buffer than it
-> requires it won't zero-out the rest of the memory. The way the
-> loop iterator in listxattr.c is written makes it go print every
-> null-terminated entry up to bufsize (which is user passed parameter).
-> This can lead to a situation where listxattr users N bytes out of
-> M bytes big buffer ( M > N). This will leave the rest (M-N)
-> as garbage, which in turn will be printed by listxattr. Fix this
-> by converting the 'for' loop to 'while' and properly ensuring
-> we are reading at most howevermany elements the syscall reported
-> it returned
-> 
-> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
-> ---
-> 
-> v2: 
->  Rewrite the loop, hopefully making the code a bit more legible.
->  Functionally it's the same as my previous fix
-> 
->  src/listxattr.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
-> 
-> diff --git a/src/listxattr.c b/src/listxattr.c
-> index cd46637a..584ebb2d 100644
-> --- a/src/listxattr.c
-> +++ b/src/listxattr.c
-> @@ -60,10 +60,10 @@ int main(int argc, char **argv)
->          if (ret < 0) {
->                  perror("listxattr");
->          } else {
-> -                char *l;
-> -                for (l = buf; l != (buf + bufsize) && *l != '\0';
-> -                                l = strchr(l, '\0') + 1) {
-> +                char *l = buf;
-> +                while (l != (buf + ret)) {
 
-Actually I believe while (l < (buf + ret)) is the correct form.
-
->                          printf("xattr: %s\n", l);
-> +                        l = strchr(l, '\0') + 1;
->                  }
->          }
->  
-> 
