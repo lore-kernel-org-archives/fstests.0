@@ -1,51 +1,69 @@
-Received: from mail-pf0-f177.google.com ([209.85.192.177]:34334 "EHLO
-        mail-pf0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751113AbdFAD3H (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 31 May 2017 23:29:07 -0400
-Received: by mail-pf0-f177.google.com with SMTP id 9so25001294pfj.1
-        for <fstests@vger.kernel.org>; Wed, 31 May 2017 20:29:07 -0700 (PDT)
-Date: Wed, 31 May 2017 20:29:04 -0700
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: Re: [PATCH 0/6] xfstests: remove most IRIX-specific code
-Message-ID: <20170601032904.GA1083@zzz>
-References: <20170531223655.130613-1-ebiggers3@gmail.com>
- <20170601031235.GV23805@eguan.usersys.redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:39138 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751054AbdFAEHf (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 1 Jun 2017 00:07:35 -0400
+Date: Thu, 1 Jun 2017 12:07:33 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 2/2] xfs: fix installation for extended output files
+Message-ID: <20170601040733.GW23805@eguan.usersys.redhat.com>
+References: <20170601025327.GU23805@eguan.usersys.redhat.com>
+ <1496286073-23298-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170601031235.GV23805@eguan.usersys.redhat.com>
+In-Reply-To: <1496286073-23298-1-git-send-email-yangx.jy@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 01, 2017 at 11:12:35AM +0800, Eryu Guan wrote:
-> On Wed, May 31, 2017 at 03:36:49PM -0700, Eric Biggers wrote:
-> > From: Eric Biggers <ebiggers@google.com>
-> > 
-> > For some time xfstests has de facto not supported IRIX anymore.  The
-> > final release of IRIX was over 10 years ago and it seems no one has
-> > been running the latest xfstests releases on any IRIX system, as at
-> > the very least xfstests now assumes the existence of some util-linux
-> > binaries.  There are probably other examples of this bitrot too.
-> > 
-> > Therefore, this patchset simplifies things removing IRIX support from
-> > the xfstests tests, build system, and documentation.
-> > 
-> > It focuses on making larger, more obvious cleanups.  Of course,
-> > there's more to do if people want to spend more time going through
-> > some of the more intricate details, especially XFS-specific details.
-> > But this should be a good start.
+On Thu, Jun 01, 2017 at 11:01:13AM +0800, Xiao Yang wrote:
+> The installation of these extended output files are skipped
+> because they aren't matched by xfstests.  So we rename them
+> to adapt building rules.
 > 
-> Thanks a lot for doing this!! I didn't see patch #2 and #3 hit the list
-> (too big for the list?). Do you have a public git repo that I can pull
-> from?
-> 
+> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 
-Ick, I guess the size limit must be 100K.  I've pushed the series out to
-repository https://github.com/ebiggers/xfstests, branch "remove_irix_support".
+This patch is 2.4M in size, no wonder it didn't hit the list..
 
-Note that the two biggest patches can be more easily reviewed with
-'git diff -D', since that abbreviates the file deletions.
+(cc linux-xfs list for these xfs specific tests)
 
-Eric
+> ---
+>  tests/xfs/018                         |    8 +-
+>  tests/xfs/018.op.irix                 | 5628 ---------------------------------
+>  tests/xfs/018.op.linux                | 4714 ---------------------------
+>  tests/xfs/018.out.irix                | 5628 +++++++++++++++++++++++++++++++++
+>  tests/xfs/018.out.linux               | 4714 +++++++++++++++++++++++++++
+>  tests/xfs/018.out.trans_buf           | 1821 +++++++++++
+>  tests/xfs/018.out.trans_inode         | 2609 +++++++++++++++
+>  tests/xfs/018.trans_buf               | 1821 -----------
+>  tests/xfs/018.trans_inode             | 2609 ---------------
+
+xfs/018 081 and 082 are all marked as 'deprecated', I'm wondering if we
+can just remove them.
+
+>  tests/xfs/040                         |    4 +-
+>  tests/xfs/040.good                    |   16 -
+>  tests/xfs/040.out.good                |   16 +
+
+xfs/040 is doing source code diff between userspace vs kernel space, I'm
+not sure if this is still needed. But xfs/040 requires KWORKAREA points
+to a directory that contains both userspace and kernel code, I suspect
+it's rarely run.
+
+>  tests/xfs/081                         |    2 +-
+>  tests/xfs/081.out.ugquota.trans_inode | 3091 ++++++++++++++++++
+>  tests/xfs/081.ugquota.trans_inode     | 3091 ------------------
+>  tests/xfs/082                         |    8 +-
+>  tests/xfs/082.op.irix                 | 5628 ---------------------------------
+>  tests/xfs/082.op.linux                | 4714 ---------------------------
+>  tests/xfs/082.out.irix                | 5628 +++++++++++++++++++++++++++++++++
+>  tests/xfs/082.out.linux               | 4714 +++++++++++++++++++++++++++
+>  tests/xfs/082.out.trans_buf           | 1821 +++++++++++
+>  tests/xfs/082.out.trans_inode         | 2609 +++++++++++++++
+>  tests/xfs/082.trans_buf               | 1821 -----------
+>  tests/xfs/082.trans_inode             | 2609 ---------------
+>  24 files changed, 32662 insertions(+), 32662 deletions(-)
+
+Thanks,
+Eryu
