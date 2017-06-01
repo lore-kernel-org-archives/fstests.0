@@ -1,71 +1,42 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:26688 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751075AbdFADBu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 31 May 2017 23:01:50 -0400
-Message-ID: <592F8395.1000400@cn.fujitsu.com>
-Date: Thu, 1 Jun 2017 11:01:41 +0800
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Received: from mx1.redhat.com ([209.132.183.28]:54698 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751090AbdFADMh (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 31 May 2017 23:12:37 -0400
+Date: Thu, 1 Jun 2017 11:12:35 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 0/6] xfstests: remove most IRIX-specific code
+Message-ID: <20170601031235.GV23805@eguan.usersys.redhat.com>
+References: <20170531223655.130613-1-ebiggers3@gmail.com>
 MIME-Version: 1.0
-Subject: Re: [PATCH 1/2] xfs/055: add missing 055.cfg
-References: <1496221827-22720-1-git-send-email-yangx.jy@cn.fujitsu.com> <20170601025327.GU23805@eguan.usersys.redhat.com>
-In-Reply-To: <20170601025327.GU23805@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170531223655.130613-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: Eric Biggers <ebiggers3@gmail.com>
+Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 2017/06/01 10:53, Eryu Guan wrote:
-> On Wed, May 31, 2017 at 05:10:26PM +0800, Xiao Yang wrote:
->> _link_output_file sets output file suffix to null because 055.cfg is
->> missing, so add it.
->>
->> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
-> Thanks for the patch! But we eventually want to remove IRIX support, I
-> don't think this is needed at this stage, especially that Eric Biggers
-> has posted patches to remove IRIX support.
->
-> BTW, your patch has '1/2' prefix, but I didn't see the second patch, do
-> you have a second patch that didn't hit the list?
-Hi Eryu
+On Wed, May 31, 2017 at 03:36:49PM -0700, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
+> 
+> For some time xfstests has de facto not supported IRIX anymore.  The
+> final release of IRIX was over 10 years ago and it seems no one has
+> been running the latest xfstests releases on any IRIX system, as at
+> the very least xfstests now assumes the existence of some util-linux
+> binaries.  There are probably other examples of this bitrot too.
+> 
+> Therefore, this patchset simplifies things removing IRIX support from
+> the xfstests tests, build system, and documentation.
+> 
+> It focuses on making larger, more obvious cleanups.  Of course,
+> there's more to do if people want to spend more time going through
+> some of the more intricate details, especially XFS-specific details.
+> But this should be a good start.
 
-Yeah, i will send the second patch again. :-)
+Thanks a lot for doing this!! I didn't see patch #2 and #3 hit the list
+(too big for the list?). Do you have a public git repo that I can pull
+from?
 
-Thanks,
-Xiao Yang
-> Thanks,
-> Eryu
->
->> ---
->>   tests/xfs/055.cfg | 2 ++
->>   1 file changed, 2 insertions(+)
->>   create mode 100644 tests/xfs/055.cfg
->>
->> diff --git a/tests/xfs/055.cfg b/tests/xfs/055.cfg
->> new file mode 100644
->> index 0000000..7ffdfc0
->> --- /dev/null
->> +++ b/tests/xfs/055.cfg
->> @@ -0,0 +1,2 @@
->> +irix: irix
->> +linux: linux
->> -- 
->> 1.8.3.1
->>
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe fstests" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
+Thanks again!
 
-
-
+Eryu
