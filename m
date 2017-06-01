@@ -1,69 +1,74 @@
-Received: from mx1.redhat.com ([209.132.183.28]:39138 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:41712 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751054AbdFAEHf (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 1 Jun 2017 00:07:35 -0400
-Date: Thu, 1 Jun 2017 12:07:33 +0800
+        id S1750926AbdFAFET (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 1 Jun 2017 01:04:19 -0400
+Date: Thu, 1 Jun 2017 13:04:17 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/2] xfs: fix installation for extended output files
-Message-ID: <20170601040733.GW23805@eguan.usersys.redhat.com>
-References: <20170601025327.GU23805@eguan.usersys.redhat.com>
- <1496286073-23298-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Subject: Re: [PATCHv2] src/listxattr: Fix reading past the end of the user
+ buffer
+Message-ID: <20170601050417.GX23805@eguan.usersys.redhat.com>
+References: <1496152288-4101-1-git-send-email-nborisov@suse.com>
+ <1496153407-6060-1-git-send-email-nborisov@suse.com>
+ <70269450-8b2e-3b8f-e7ac-e44221797e34@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1496286073-23298-1-git-send-email-yangx.jy@cn.fujitsu.com>
+In-Reply-To: <70269450-8b2e-3b8f-e7ac-e44221797e34@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Nikolay Borisov <nborisov@suse.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 01, 2017 at 11:01:13AM +0800, Xiao Yang wrote:
-> The installation of these extended output files are skipped
-> because they aren't matched by xfstests.  So we rename them
-> to adapt building rules.
+On Wed, May 31, 2017 at 11:58:12AM +0300, Nikolay Borisov wrote:
 > 
-> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+> 
+> On 30.05.2017 17:10, Nikolay Borisov wrote:
+> > listxattr reaturns a null-terminated list of entries that represent
+> > the xattr names. However, if it is passed larger buffer than it
+> > requires it won't zero-out the rest of the memory. The way the
+> > loop iterator in listxattr.c is written makes it go print every
+> > null-terminated entry up to bufsize (which is user passed parameter).
+> > This can lead to a situation where listxattr users N bytes out of
+> > M bytes big buffer ( M > N). This will leave the rest (M-N)
+> > as garbage, which in turn will be printed by listxattr. Fix this
+> > by converting the 'for' loop to 'while' and properly ensuring
+> > we are reading at most howevermany elements the syscall reported
+> > it returned
+> > 
+> > Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+> > ---
+> > 
+> > v2: 
+> >  Rewrite the loop, hopefully making the code a bit more legible.
+> >  Functionally it's the same as my previous fix
+> > 
+> >  src/listxattr.c | 6 +++---
+> >  1 file changed, 3 insertions(+), 3 deletions(-)
+> > 
+> > diff --git a/src/listxattr.c b/src/listxattr.c
+> > index cd46637a..584ebb2d 100644
+> > --- a/src/listxattr.c
+> > +++ b/src/listxattr.c
+> > @@ -60,10 +60,10 @@ int main(int argc, char **argv)
+> >          if (ret < 0) {
+> >                  perror("listxattr");
+> >          } else {
+> > -                char *l;
+> > -                for (l = buf; l != (buf + bufsize) && *l != '\0';
+> > -                                l = strchr(l, '\0') + 1) {
+> > +                char *l = buf;
+> > +                while (l != (buf + ret)) {
+> 
+> Actually I believe while (l < (buf + ret)) is the correct form.
 
-This patch is 2.4M in size, no wonder it didn't hit the list..
+Fixed while committing, thanks for the update!
 
-(cc linux-xfs list for these xfs specific tests)
-
-> ---
->  tests/xfs/018                         |    8 +-
->  tests/xfs/018.op.irix                 | 5628 ---------------------------------
->  tests/xfs/018.op.linux                | 4714 ---------------------------
->  tests/xfs/018.out.irix                | 5628 +++++++++++++++++++++++++++++++++
->  tests/xfs/018.out.linux               | 4714 +++++++++++++++++++++++++++
->  tests/xfs/018.out.trans_buf           | 1821 +++++++++++
->  tests/xfs/018.out.trans_inode         | 2609 +++++++++++++++
->  tests/xfs/018.trans_buf               | 1821 -----------
->  tests/xfs/018.trans_inode             | 2609 ---------------
-
-xfs/018 081 and 082 are all marked as 'deprecated', I'm wondering if we
-can just remove them.
-
->  tests/xfs/040                         |    4 +-
->  tests/xfs/040.good                    |   16 -
->  tests/xfs/040.out.good                |   16 +
-
-xfs/040 is doing source code diff between userspace vs kernel space, I'm
-not sure if this is still needed. But xfs/040 requires KWORKAREA points
-to a directory that contains both userspace and kernel code, I suspect
-it's rarely run.
-
->  tests/xfs/081                         |    2 +-
->  tests/xfs/081.out.ugquota.trans_inode | 3091 ++++++++++++++++++
->  tests/xfs/081.ugquota.trans_inode     | 3091 ------------------
->  tests/xfs/082                         |    8 +-
->  tests/xfs/082.op.irix                 | 5628 ---------------------------------
->  tests/xfs/082.op.linux                | 4714 ---------------------------
->  tests/xfs/082.out.irix                | 5628 +++++++++++++++++++++++++++++++++
->  tests/xfs/082.out.linux               | 4714 +++++++++++++++++++++++++++
->  tests/xfs/082.out.trans_buf           | 1821 +++++++++++
->  tests/xfs/082.out.trans_inode         | 2609 +++++++++++++++
->  tests/xfs/082.trans_buf               | 1821 -----------
->  tests/xfs/082.trans_inode             | 2609 ---------------
->  24 files changed, 32662 insertions(+), 32662 deletions(-)
-
-Thanks,
 Eryu
+
+> 
+> >                          printf("xattr: %s\n", l);
+> > +                        l = strchr(l, '\0') + 1;
+> >                  }
+> >          }
+> >  
+> > 
