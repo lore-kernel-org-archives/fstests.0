@@ -1,56 +1,77 @@
-Received: from mx1.redhat.com ([209.132.183.28]:52816 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751047AbdFAH3E (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 1 Jun 2017 03:29:04 -0400
-Date: Thu, 1 Jun 2017 15:29:02 +0800
-From: Eryu Guan <eguan@redhat.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:28998 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751058AbdFAPdz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 1 Jun 2017 11:33:55 -0400
+Date: Thu, 1 Jun 2017 08:33:47 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
 Subject: Re: [PATCH 0/6] xfstests: remove most IRIX-specific code
-Message-ID: <20170601072902.GY23805@eguan.usersys.redhat.com>
+Message-ID: <20170601153347.GG4519@birch.djwong.org>
 References: <20170531223655.130613-1-ebiggers3@gmail.com>
  <20170601031235.GV23805@eguan.usersys.redhat.com>
  <20170601032904.GA1083@zzz>
+ <20170601072902.GY23805@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170601032904.GA1083@zzz>
+In-Reply-To: <20170601072902.GY23805@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers3@gmail.com>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>, linux-xfs@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: Eric Biggers <ebiggers3@gmail.com>, fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, May 31, 2017 at 08:29:04PM -0700, Eric Biggers wrote:
-> On Thu, Jun 01, 2017 at 11:12:35AM +0800, Eryu Guan wrote:
-> > On Wed, May 31, 2017 at 03:36:49PM -0700, Eric Biggers wrote:
-> > > From: Eric Biggers <ebiggers@google.com>
+On Thu, Jun 01, 2017 at 03:29:02PM +0800, Eryu Guan wrote:
+> On Wed, May 31, 2017 at 08:29:04PM -0700, Eric Biggers wrote:
+> > On Thu, Jun 01, 2017 at 11:12:35AM +0800, Eryu Guan wrote:
+> > > On Wed, May 31, 2017 at 03:36:49PM -0700, Eric Biggers wrote:
+> > > > From: Eric Biggers <ebiggers@google.com>
+> > > > 
+> > > > For some time xfstests has de facto not supported IRIX anymore.  The
+> > > > final release of IRIX was over 10 years ago and it seems no one has
+> > > > been running the latest xfstests releases on any IRIX system, as at
+> > > > the very least xfstests now assumes the existence of some util-linux
+> > > > binaries.  There are probably other examples of this bitrot too.
+> > > > 
+> > > > Therefore, this patchset simplifies things removing IRIX support from
+> > > > the xfstests tests, build system, and documentation.
+> > > > 
+> > > > It focuses on making larger, more obvious cleanups.  Of course,
+> > > > there's more to do if people want to spend more time going through
+> > > > some of the more intricate details, especially XFS-specific details.
+> > > > But this should be a good start.
 > > > 
-> > > For some time xfstests has de facto not supported IRIX anymore.  The
-> > > final release of IRIX was over 10 years ago and it seems no one has
-> > > been running the latest xfstests releases on any IRIX system, as at
-> > > the very least xfstests now assumes the existence of some util-linux
-> > > binaries.  There are probably other examples of this bitrot too.
+> > > Thanks a lot for doing this!! I didn't see patch #2 and #3 hit the list
+> > > (too big for the list?). Do you have a public git repo that I can pull
+> > > from?
 > > > 
-> > > Therefore, this patchset simplifies things removing IRIX support from
-> > > the xfstests tests, build system, and documentation.
-> > > 
-> > > It focuses on making larger, more obvious cleanups.  Of course,
-> > > there's more to do if people want to spend more time going through
-> > > some of the more intricate details, especially XFS-specific details.
-> > > But this should be a good start.
 > > 
-> > Thanks a lot for doing this!! I didn't see patch #2 and #3 hit the list
-> > (too big for the list?). Do you have a public git repo that I can pull
-> > from?
+> > Ick, I guess the size limit must be 100K.  I've pushed the series out to
+> > repository https://github.com/ebiggers/xfstests, branch "remove_irix_support".
 > > 
+> > Note that the two biggest patches can be more easily reviewed with
+> > 'git diff -D', since that abbreviates the file deletions.
 > 
-> Ick, I guess the size limit must be 100K.  I've pushed the series out to
-> repository https://github.com/ebiggers/xfstests, branch "remove_irix_support".
+> Thanks!
 > 
-> Note that the two biggest patches can be more easily reviewed with
-> 'git diff -D', since that abbreviates the file deletions.
+> I also cc'ed linux-xfs list for review, as IRIX support is mainly for
+> XFS.
 
-Thanks!
+I think it's safe to drop IRIX support; xfsprogs dropped it in 4.10.
 
-I also cc'ed linux-xfs list for review, as IRIX support is mainly for
-XFS.
+That said, I also think "tests: remove IRIX-specific tests" removes too
+many tests.  generic/097 looks like a fairly generic xattr usage test,
+why not just fix it to work on Linux (and sort the attrs to stabilize
+the output)?  Neither of the removed udf tests seem to test anything
+Irix specific; either fix them to work with the Linux udf tools (or kill
+udf/102).
 
-Eryu
+I looked through the rest of the patches in the branch and they looked
+ok to me.  Thanks for cleaning out that cruft.
+
+--D
+
+> 
+> Eryu
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
