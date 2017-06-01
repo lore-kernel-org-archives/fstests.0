@@ -1,62 +1,53 @@
-Received: from mail.kernel.org ([198.145.29.99]:58264 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751096AbdFARbv (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 1 Jun 2017 13:31:51 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH v2] generic: test for hole punching followed by writes in the same range
-Date: Tue, 30 May 2017 05:52:50 +0100
-Message-Id: <20170530045250.861-1-fdmanana@kernel.org>
-In-Reply-To: <20170528163243.32018-1-fdmanana@kernel.org>
-References: <20170528163243.32018-1-fdmanana@kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:35936 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751083AbdFATDy (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 1 Jun 2017 15:03:54 -0400
+Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx1.suse.de (Postfix) with ESMTP id 19223AAB4
+        for <fstests@vger.kernel.org>; Thu,  1 Jun 2017 19:03:53 +0000 (UTC)
+From: Goldwyn Rodrigues <rgoldwyn@suse.de>
+Subject: [PATCH] btrfs/144: quota exhausts prematurely with direct I/O
+Date: Thu,  1 Jun 2017 14:03:48 -0500
+Message-Id: <20170601190348.7617-1-rgoldwyn@suse.de>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Cc: Goldwyn Rodrigues <rgoldwyn@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+From: Goldwyn Rodrigues <rgoldwyn@suse.com>
 
-Test that if we punch a hole in a file, with either a range that goes
-beyond the file's size or covers a file range that is already a hole,
-and that if after we do some buffered write operations that cover
-different parts of the hole, no warnings are emmitted in syslog/dmesg
-and the file's content is correct after remounting the filesystem.
+While performing direct I/O in small blocksizes, the
+quota gets exhausted prematurely. In the test, we are
+trying to create ~180M file with a block size of 512 bytes
+using direct I/O on a subvolume which is allocated 200M.
 
-This test is motivated by a bug in btrfs that is manifested in kernel
-4.12-rc1 onwards (the bug existed long time ago but was not so easy
-to expose before 4.12-rc1). The btrfs patch that fixes the issue is
-titled: "Btrfs: fix invalid extent maps due to hole punching".
+This test is currently failing.
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
 ---
+ tests/btrfs/144     | 70 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/144.out |  3 +++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 74 insertions(+)
+ create mode 100755 tests/btrfs/144
+ create mode 100644 tests/btrfs/144.out
 
-V2: Test for an additional case that failed in btrfs.
-
- tests/generic/438     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/438.out | 31 ++++++++++++++++++++
- tests/generic/group   |  1 +
- 3 files changed, 112 insertions(+)
- create mode 100755 tests/generic/438
- create mode 100644 tests/generic/438.out
-
-diff --git a/tests/generic/438 b/tests/generic/438
+diff --git a/tests/btrfs/144 b/tests/btrfs/144
 new file mode 100755
-index 00000000..e6c39248
+index 00000000..34156716
 --- /dev/null
-+++ b/tests/generic/438
-@@ -0,0 +1,80 @@
++++ b/tests/btrfs/144
+@@ -0,0 +1,70 @@
 +#! /bin/bash
-+# FS QA Test No. generic/438
++# FS QA Test 144
 +#
-+# Test that if we punch a hole in a file, with either a range that goes beyond
-+# the file's size or covers a file range that is already a hole, and that if
-+# after we do some buffered write operations that cover different parts of the
-+# hole, no warnings are emmitted in syslog/dmesg and the file's content is
-+# correct after remounting the filesystem.
++# Check if btrfs quota limits are not reached when direct writes
++# are performed in small blocks.
++#
++# This test is currently failing.
 +#
 +#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2017 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
++# Copyright (c) 2017 SUSE. All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -77,6 +68,7 @@ index 00000000..e6c39248
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
++here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
@@ -91,85 +83,49 @@ index 00000000..e6c39248
 +. ./common/rc
 +. ./common/filter
 +
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+_require_xfs_io_command "fpunch"
-+
++# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
-+_scratch_mkfs >>$seqres.full 2>&1
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++
++_scratch_mkfs > /dev/null 2>&1
 +_scratch_mount
 +
-+$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 100K" $SCRATCH_MNT/f | _filter_xfs_io
-+$XFS_IO_PROG -c "fpunch 60K 90K" $SCRATCH_MNT/f
-+$XFS_IO_PROG -c "pwrite -S 0xbb -b 100K 50K 100K" $SCRATCH_MNT/f | _filter_xfs_io
-+$XFS_IO_PROG -c "pwrite -S 0xcc -b 50K 100K 50K" $SCRATCH_MNT/f | _filter_xfs_io
++SUBVOL=$SCRATCH_MNT/subvol
 +
-+$XFS_IO_PROG -f -c "fpunch 695K 820K" $SCRATCH_MNT/f2
-+$XFS_IO_PROG -c "pwrite -S 0xaa 1008K 307K" $SCRATCH_MNT/f2 |  _filter_xfs_io
-+$XFS_IO_PROG -c "pwrite -S 0xbb -b 630K 1073K 630K" $SCRATCH_MNT/f2 \
-+	| _filter_xfs_io
-+$XFS_IO_PROG -c "pwrite -S 0xcc -b 459K 1068K 459K" $SCRATCH_MNT/f2 \
-+	| _filter_xfs_io
++_run_btrfs_util_prog subvolume create $SUBVOL
++_run_btrfs_util_prog quota enable $SCRATCH_MNT
++_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
++_run_btrfs_util_prog qgroup limit -e 200M $SUBVOL
 +
-+_scratch_cycle_mount
 +
-+echo "File f contents after remounting filesystem:"
-+od -t x1 $SCRATCH_MNT/f
-+echo "File f2 contents after remounting filesystem:"
-+od -t x1 $SCRATCH_MNT/f2
++# Direct write file within 200M limits
 +
++dd if=/dev/zero of=$SUBVOL/file1 count=36000 bs=512 oflag=direct 
++
++# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/438.out b/tests/generic/438.out
+diff --git a/tests/btrfs/144.out b/tests/btrfs/144.out
 new file mode 100644
-index 00000000..40067e79
+index 00000000..49244bdb
 --- /dev/null
-+++ b/tests/generic/438.out
-@@ -0,0 +1,31 @@
-+QA output created by 438
-+wrote 102400/102400 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 102400/102400 bytes at offset 51200
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 51200/51200 bytes at offset 102400
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 314368/314368 bytes at offset 1032192
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 645120/645120 bytes at offset 1098752
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 470016/470016 bytes at offset 1093632
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+File f contents after remounting filesystem:
-+0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-+*
-+0144000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
-+*
-+0310000 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc
-+*
-+0454000
-+File f2 contents after remounting filesystem:
-+0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+3740000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-+*
-+4130000 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc
-+*
-+5756000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
-+*
-+6516000
-diff --git a/tests/generic/group b/tests/generic/group
-index 438c2990..34f176a9 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -440,3 +440,4 @@
- 435 auto encrypt
- 436 auto quick rw
- 437 auto quick
-+438 auto quick punch
++++ b/tests/btrfs/144.out
+@@ -0,0 +1,3 @@
++QA output created by 144
++36000+0 records in
++36000+0 records out
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 6f19619e..1de7c161 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -145,3 +145,4 @@
+ 141 auto quick
+ 142 auto quick
+ 143 auto quick
++144 auto quick qgroup
 -- 
-2.11.0
+2.12.3
 
