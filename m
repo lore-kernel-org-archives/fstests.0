@@ -1,127 +1,133 @@
-Received: from mx1.redhat.com ([209.132.183.28]:48654 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750747AbdFBGYR (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 2 Jun 2017 02:24:17 -0400
-Date: Fri, 2 Jun 2017 14:24:14 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/2] xfs: fix installation for extended output files
-Message-ID: <20170602062414.GA19952@eguan.usersys.redhat.com>
-References: <20170601025327.GU23805@eguan.usersys.redhat.com>
- <1496286073-23298-1-git-send-email-yangx.jy@cn.fujitsu.com>
- <20170601040733.GW23805@eguan.usersys.redhat.com>
- <20170601154849.GH4519@birch.djwong.org>
- <5930D027.9050606@cn.fujitsu.com>
- <20170602054539.GA5636@birch.djwong.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170602054539.GA5636@birch.djwong.org>
+Received: from mail-oi0-f43.google.com ([209.85.218.43]:34877 "EHLO
+        mail-oi0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750813AbdFBIXu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 2 Jun 2017 04:23:50 -0400
+Received: by mail-oi0-f43.google.com with SMTP id l18so83177704oig.2
+        for <fstests@vger.kernel.org>; Fri, 02 Jun 2017 01:23:49 -0700 (PDT)
+From: Omar Sandoval <osandov@osandov.com>
+Subject: [PATCH] generic: test Btrfs delalloc accounting overflow
+Date: Fri,  2 Jun 2017 01:23:41 -0700
+Message-Id: <49a0c7551c337566be29b2c073ba0be57779d321.1496391726.git.osandov@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Cc: kernel-team@fb.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 01, 2017 at 10:45:39PM -0700, Darrick J. Wong wrote:
-> On Fri, Jun 02, 2017 at 10:40:39AM +0800, Xiao Yang wrote:
-> > On 2017/06/01 23:48, Darrick J. Wong wrote:
-> > >On Thu, Jun 01, 2017 at 12:07:33PM +0800, Eryu Guan wrote:
-> > >>On Thu, Jun 01, 2017 at 11:01:13AM +0800, Xiao Yang wrote:
-> > >>>The installation of these extended output files are skipped
-> > >>>because they aren't matched by xfstests.  So we rename them
-> > >>>to adapt building rules.
-> > >>>
-> > >>>Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
-> > >>This patch is 2.4M in size, no wonder it didn't hit the list..
-> > >>
-> > >>(cc linux-xfs list for these xfs specific tests)
-> > >>
-> > >>>---
-> > >>>  tests/xfs/018                         |    8 +-
-> > >>>  tests/xfs/018.op.irix                 | 5628 ---------------------------------
-> > >>>  tests/xfs/018.op.linux                | 4714 ---------------------------
-> > >>>  tests/xfs/018.out.irix                | 5628 +++++++++++++++++++++++++++++++++
-> > >>>  tests/xfs/018.out.linux               | 4714 +++++++++++++++++++++++++++
-> > >>>  tests/xfs/018.out.trans_buf           | 1821 +++++++++++
-> > >>>  tests/xfs/018.out.trans_inode         | 2609 +++++++++++++++
-> > >>>  tests/xfs/018.trans_buf               | 1821 -----------
-> > >>>  tests/xfs/018.trans_inode             | 2609 ---------------
-> > >>xfs/018 081 and 082 are all marked as 'deprecated', I'm wondering if we
-> > >>can just remove them.
-> > >I have little good to say about these -- diffing logprint outputs will
-> > >break every time we add new log item types (which we have) so these are
-> > >brittle.
-> > >
-> > >>>  tests/xfs/040                         |    4 +-
-> > >>>  tests/xfs/040.good                    |   16 -
-> > >>>  tests/xfs/040.out.good                |   16 +
-> > >>xfs/040 is doing source code diff between userspace vs kernel space, I'm
-> > >>not sure if this is still needed. But xfs/040 requires KWORKAREA points
-> > >>to a directory that contains both userspace and kernel code, I suspect
-> > >>it's rarely run.
-> > >It's /never/ run, because it requires dmapi.h, which doesn't exist on
-> > >Linux, and it appears to assume the pre-libxfs-split directory layout.
-> > >Seeing as xfsprogs ships its own "compare the libxfs code" tool now,
-> > >I think it better to go fix it.  Patch for x/040 coming soon.
-> > Hi Darrick
-> > 
-> > The libxfs code is being updated regularly, so I think the difference is not
-> > immutable.
-> > Is it necessary to run this case?
-> 
-> For the upstream maintainers, yes, because we want to keep the libxfs/
-> code synchronized between, say, Linux 4.12 and xfsprogs 4.12.  Right now
-> we more or less just run it manually, but I think there's value in
-> enabling everyone else to keep us honest by providing everyone a way to
-> look for missing pieces in an automated fashion. :)
+From: Omar Sandoval <osandov@fb.com>
 
-Agreed. The only concerns I have are a) it only passes with latest
-upstream kernel & xfsprogs code, and is a false alert for distribution
-testers; and b) 040.out files needs update regularly, which seems like a
-maintaince burden.
+This is a regression test for "[PATCH] Btrfs: fix delalloc accounting
+leak caused by u32 overflow". It creates a bunch of delalloc extents and
+merges them together to make sure the accounting is done right.
 
-For the first problem, I think we could at least remove it from auto
-group. But I don't have a better thought on the second problem right
-now..
+Signed-off-by: Omar Sandoval <osandov@fb.com>
+---
+ tests/generic/438     | 77 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/438.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 80 insertions(+)
+ create mode 100755 tests/generic/438
+ create mode 100644 tests/generic/438.out
 
-Thanks,
-Eryu
+diff --git a/tests/generic/438 b/tests/generic/438
+new file mode 100755
+index 00000000..8edac03d
+--- /dev/null
++++ b/tests/generic/438
+@@ -0,0 +1,77 @@
++#! /bin/bash
++# FS QA Test 438
++#
++# Test delayed allocation with a large number of extents that are merged.
++# Regression test for patch "Btrfs: fix delalloc accounting leak caused by u32
++# overflow".
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Facebook.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++test_file="$TEST_DIR/$seq"
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.* "$test_file"
++}
++
++. ./common/rc
++. ./common/filter
++
++rm -f $seqres.full
++
++_supported_fs generic
++_supported_os Linux
++_require_test
++
++# Create 32k extents. All of these extents will be accounted as outstanding and
++# reserved.
++for ((i = 0; i < 32 * 1024; i++)); do
++	xfs_io -f -c "pwrite $((2 * 4096 * i)) 4096" "$test_file" >>"$seqres.full"
++done
++
++# Fill in the gaps between the created extents. The outstanding extents will
++# all be merged into 1, but there will still be 32k reserved.
++for ((i = 0; i < 32 * 1024; i++)); do
++	xfs_io -f -c "pwrite $((2 * 4096 * i + 1)) 4096" "$test_file" >>"$seqres.full"
++done
++
++# Flush the delayed allocations.
++sync
++
++# Make sure that we didn't leak any metadata space.
++if [[ $FSTYP = btrfs ]]; then
++	uuid="$(findmnt -n -o UUID "$TEST_DIR")"
++	cd "/sys/fs/btrfs/$uuid/allocation"
++	echo "$(($(cat metadata/bytes_may_use) - $(cat global_rsv_reserved))) bytes leaked" | grep -v '^0 '
++fi
++
++echo "Silence is golden"
++
++status=0
++exit
+diff --git a/tests/generic/438.out b/tests/generic/438.out
+new file mode 100644
+index 00000000..4968f4d7
+--- /dev/null
++++ b/tests/generic/438.out
+@@ -0,0 +1,2 @@
++QA output created by 438
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 438c2990..c804b05d 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -440,3 +440,4 @@
+ 435 auto encrypt
+ 436 auto quick rw
+ 437 auto quick
++438 auto
+-- 
+2.13.0
 
-> 
-> --D
-> 
-> > 
-> > Thanks,
-> > Xiao Yang
-> > >>>  tests/xfs/081                         |    2 +-
-> > >>>  tests/xfs/081.out.ugquota.trans_inode | 3091 ++++++++++++++++++
-> > >>>  tests/xfs/081.ugquota.trans_inode     | 3091 ------------------
-> > >>>  tests/xfs/082                         |    8 +-
-> > >>>  tests/xfs/082.op.irix                 | 5628 ---------------------------------
-> > >>>  tests/xfs/082.op.linux                | 4714 ---------------------------
-> > >>>  tests/xfs/082.out.irix                | 5628 +++++++++++++++++++++++++++++++++
-> > >>>  tests/xfs/082.out.linux               | 4714 +++++++++++++++++++++++++++
-> > >>>  tests/xfs/082.out.trans_buf           | 1821 +++++++++++
-> > >>>  tests/xfs/082.out.trans_inode         | 2609 +++++++++++++++
-> > >>>  tests/xfs/082.trans_buf               | 1821 -----------
-> > >>>  tests/xfs/082.trans_inode             | 2609 ---------------
-> > >>>  24 files changed, 32662 insertions(+), 32662 deletions(-)
-> > >Ye $deities!
-> > >
-> > >--D
-> > >
-> > >>Thanks,
-> > >>Eryu
-> > >>--
-> > >>To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> > >>the body of a message to majordomo@vger.kernel.org
-> > >>More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > >
-> > >.
-> > >
-> > 
-> > 
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
