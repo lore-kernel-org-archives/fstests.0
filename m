@@ -1,180 +1,38 @@
-Received: from mail.kernel.org ([198.145.29.99]:46346 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751299AbdFGPgi (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 7 Jun 2017 11:36:38 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH] fstests: btrfs, test incremental send after renaming and linking file
-Date: Wed,  7 Jun 2017 16:36:31 +0100
-Message-Id: <20170607153631.23227-1-fdmanana@kernel.org>
+Received: from mail-pg0-f42.google.com ([74.125.83.42]:35773 "EHLO
+        mail-pg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751433AbdFGReP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 7 Jun 2017 13:34:15 -0400
+Received: by mail-pg0-f42.google.com with SMTP id k71so7535503pgd.2
+        for <fstests@vger.kernel.org>; Wed, 07 Jun 2017 10:34:15 -0700 (PDT)
+Date: Wed, 7 Jun 2017 10:34:13 -0700
+From: Omar Sandoval <osandov@osandov.com>
+Subject: Re: [PATCH] btrfs: test Btrfs delalloc accounting overflow
+Message-ID: <20170607173413.GA7481@vader.DHCP.thefacebook.com>
+References: <e7bcf330422ed18883c9ad8ad4caa57624ed7cc0.1496818581.git.osandov@fb.com>
+ <20170607093645.GZ19952@eguan.usersys.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170607093645.GZ19952@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, kernel-team@fb.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Wed, Jun 07, 2017 at 05:36:45PM +0800, Eryu Guan wrote:
+> On Tue, Jun 06, 2017 at 11:57:10PM -0700, Omar Sandoval wrote:
+> > From: Omar Sandoval <osandov@fb.com>
+> > 
+> > This is a regression test for "[PATCH] Btrfs: fix delalloc accounting
+> > leak caused by u32 overflow". It creates a bunch of delalloc extents and
+> > merges them together to make sure the accounting is done right.
+> > 
+> > Signed-off-by: Omar Sandoval <osandov@fb.com>
+> 
+> I refer to the patch by its commit id 8b8b08cbfb90 as well, and replaced
+> xfs_io with $XFS_IO_PROG, and queued for next update.
 
-Test that an incremental send operation works correctly when an inode A
-is renamed, a new hard link added to it and some other inode B is renamed
-to the old name of inode A.
+Hi, Eryu,
 
-The btrfs bug is fixed by the following patch for the linux kernel:
-
-  "Btrfs: send, fix invalid path after renaming and linking file"
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/144     | 118 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/144.out |   6 +++
- tests/btrfs/group   |   1 +
- 3 files changed, 125 insertions(+)
- create mode 100755 tests/btrfs/144
- create mode 100644 tests/btrfs/144.out
-
-diff --git a/tests/btrfs/144 b/tests/btrfs/144
-new file mode 100755
-index 00000000..c4c7be2a
---- /dev/null
-+++ b/tests/btrfs/144
-@@ -0,0 +1,118 @@
-+#! /bin/bash
-+# FS QA Test No. btrfs/144
-+#
-+# Test that an incremental send operation works correctly when an inode A is
-+# renamed, a new hard link added to it and some other inode B is renamed to
-+# the old name of inode A.
-+#
-+#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2017 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -fr $send_files_dir
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+_require_fssum
-+
-+send_files_dir=$TEST_DIR/btrfs-test-$seq
-+
-+rm -f $seqres.full
-+rm -fr $send_files_dir
-+mkdir $send_files_dir
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+touch $SCRATCH_MNT/f1
-+touch $SCRATCH_MNT/f2
-+touch $SCRATCH_MNT/f3
-+
-+# Filesystem looks like:
-+#
-+# .                                                             (ino 256)
-+# |
-+# |--- f1                                                       (ino 257)
-+# |--- f2                                                       (ino 258)
-+# |--- f3                                                       (ino 259)
-+#
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+	$SCRATCH_MNT/mysnap1 > /dev/null
-+
-+$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap \
-+	$SCRATCH_MNT/mysnap1 2>&1 1>/dev/null | _filter_scratch
-+
-+mv $SCRATCH_MNT/f3 $SCRATCH_MNT/f4
-+ln $SCRATCH_MNT/f2 $SCRATCH_MNT/f5
-+mv $SCRATCH_MNT/f2 $SCRATCH_MNT/f3
-+mv $SCRATCH_MNT/f1 $SCRATCH_MNT/f2
-+
-+# Filesystem now looks like:
-+#
-+# .                                                             (ino 256)
-+# |
-+# |--- f2                                                       (ino 257)
-+# |--- f3                                                       (ino 258)
-+# |--- f4                                                       (ino 259)
-+# |--- f5                                                       (ino 258)
-+#
-+
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+		 $SCRATCH_MNT/mysnap2 > /dev/null
-+
-+$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+		 $SCRATCH_MNT/mysnap2 2>&1 1>/dev/null | _filter_scratch
-+
-+$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-+$FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
-+	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
-+
-+# Now recreate the filesystem by receiving both send streams and verify we get
-+# the same content that the original filesystem had.
-+_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT > /dev/null
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT > /dev/null
-+$FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-+$FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/144.out b/tests/btrfs/144.out
-new file mode 100644
-index 00000000..f9e34ddb
---- /dev/null
-+++ b/tests/btrfs/144.out
-@@ -0,0 +1,6 @@
-+QA output created by 144
-+At subvol SCRATCH_MNT/mysnap1
-+At subvol SCRATCH_MNT/mysnap2
-+At subvol mysnap1
-+OK
-+OK
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 6f19619e..f6f20cb7 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -145,3 +145,4 @@
- 141 auto quick
- 142 auto quick
- 143 auto quick
-+144 auto quick send
--- 
-2.11.0
-
+8b8b08cbfb90 is actually a different fix, my patch isn't upstream yet
+(but Dave has it queued up for 4.13).
