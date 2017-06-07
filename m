@@ -1,134 +1,79 @@
-Received: from mail-pf0-f169.google.com ([209.85.192.169]:34530 "EHLO
-        mail-pf0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751003AbdFGG5U (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 7 Jun 2017 02:57:20 -0400
-Received: by mail-pf0-f169.google.com with SMTP id 9so2329337pfj.1
-        for <fstests@vger.kernel.org>; Tue, 06 Jun 2017 23:57:20 -0700 (PDT)
-From: Omar Sandoval <osandov@osandov.com>
-Subject: [PATCH] btrfs: test Btrfs delalloc accounting overflow
-Date: Tue,  6 Jun 2017 23:57:10 -0700
-Message-Id: <e7bcf330422ed18883c9ad8ad4caa57624ed7cc0.1496818581.git.osandov@fb.com>
+Received: from mail.sigma-star.at ([95.130.255.111]:45996 "EHLO
+        mail.sigma-star.at" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750739AbdFGIXb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 7 Jun 2017 04:23:31 -0400
+From: David Oberhollenzer <david.oberhollenzer@sigma-star.at>
+Subject: [PATCH v3] Add UBIFS support to xfstests
+Date: Wed,  7 Jun 2017 10:20:43 +0200
+Message-Id: <20170607082047.10802-1-david.oberhollenzer@sigma-star.at>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Cc: kernel-team@fb.com
+To: fstests@vger.kernel.org
+Cc: linux-mtd@lists.infradead.org, richard@nod.at
 List-ID: <fstests@vger.kernel.org>
 
-From: Omar Sandoval <osandov@fb.com>
+Hello,
 
-This is a regression test for "[PATCH] Btrfs: fix delalloc accounting
-leak caused by u32 overflow". It creates a bunch of delalloc extents and
-merges them together to make sure the accounting is done right.
 
-Signed-off-by: Omar Sandoval <osandov@fb.com>
----
- tests/btrfs/010     | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/010.out |  2 ++
- tests/btrfs/group   |  1 +
- 3 files changed, 78 insertions(+)
- create mode 100755 tests/btrfs/010
- create mode 100644 tests/btrfs/010.out
+this patch series attempts to add support for UBIFS to xfstests,
+loosely based on the previous patches for xfstests-dev.
 
-diff --git a/tests/btrfs/010 b/tests/btrfs/010
-new file mode 100755
-index 00000000..a5d10880
---- /dev/null
-+++ b/tests/btrfs/010
-@@ -0,0 +1,75 @@
-+#! /bin/bash
-+# FS QA Test 10
-+#
-+# Test delayed allocation with a large number of extents that are merged.
-+# Regression test for patch "Btrfs: fix delalloc accounting leak caused by u32
-+# overflow".
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Facebook.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+test_file="$TEST_DIR/$seq"
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.* "$test_file"
-+}
-+
-+. ./common/rc
-+. ./common/filter
-+
-+rm -f $seqres.full
-+
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_test
-+
-+# Create 32k extents. All of these extents will be accounted as outstanding and
-+# reserved.
-+for ((i = 0; i < 32 * 1024; i++)); do
-+	xfs_io -f -c "pwrite $((2 * 4096 * i)) 4096" "$test_file" >>"$seqres.full"
-+done
-+
-+# Fill in the gaps between the created extents. The outstanding extents will
-+# all be merged into 1, but there will still be 32k reserved.
-+for ((i = 0; i < 32 * 1024; i++)); do
-+	xfs_io -f -c "pwrite $((2 * 4096 * i + 1)) 4096" "$test_file" >>"$seqres.full"
-+done
-+
-+# Flush the delayed allocations.
-+sync
-+
-+# Make sure that we didn't leak any metadata space.
-+uuid="$(findmnt -n -o UUID "$TEST_DIR")"
-+cd "/sys/fs/btrfs/$uuid/allocation"
-+echo "$(($(cat metadata/bytes_may_use) - $(cat global_rsv_reserved))) bytes leaked" | grep -v '^0 '
-+
-+echo "Silence is golden"
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/010.out b/tests/btrfs/010.out
-new file mode 100644
-index 00000000..1d83a8d6
---- /dev/null
-+++ b/tests/btrfs/010.out
-@@ -0,0 +1,2 @@
-+QA output created by 010
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 6f19619e..1fa6c781 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -12,6 +12,7 @@
- 007 auto quick rw metadata send
- 008 auto quick send
- 009 auto quick subvol
-+010 auto
- 011 auto replace
- 012 auto convert
- 013 auto quick balance
--- 
-2.13.0
+UBIFS is a filesystem for unmanaged flash memory devices. It works on
+top of UBI (Unsorted Block Images) which is a wear leveling and volume
+management layer on top of MTD (memory technology device) which
+abstracts flash memory devices.
 
+Since the semantics of MTD and UBI devices are drastically different
+from normal block devices, they are exposed to user space as character
+devices with ioctls for special operations.
+
+The first patch adds helpers for dealing with character devices, the
+second one actually adds the UBIFS support and goes into a little more
+detail in its commit message on the quirks of UBIFS in contrast to
+other file systems.
+
+One notable quirk is the lack of needing an mkfs.ubifs tool. The kernel
+component automatically formats empty UBI devices when mounting them
+with '-t ubifs'.
+
+There actually is an mkfs.ubifs, but it is mainly used for creating
+images. Also, at the time of writing, it does not yet support the
+recently added UBIFS extensions for file level encryption.
+
+Instead of using the mkfs.ubifs tool, the _scratch_mkfs function is
+patched to truncate the UBI volume instead, which also required some
+changes to a few tests.
+
+The last two patches modify existing tests to work with UBIFS, i.e. in
+case of generic/398 to be more tolerant of returned error numbers and
+in the last patch to also accept a local character device and properly
+specify the filesystem type when remounting.
+
+
+The patch series has been tested inside a Debian Jessie VM, using the 
+UBIFS
+kernel tree from git://git.infradead.org/linux-ubifs.git and nandsim 
+emulating a nand flash device.
+
+
+The necessity of an additional -ubifs switch was discussed but
+auto detection of UBIFS formated UBI devices could not be reproduced
+on my end and is unlikely to work with empty UBI volumes anyway.
+
+
+Changes from v1 to v2:
+ - Minor refactoring and verbose commentary added as requested
+ - Added check for required utilities
+ - Addition of a _require_local_device helper for some tests
+   instead of completely removing the local device check
+ - Broken up into more fine grained patch set and split away
+   xfstests-bld patches which are currently still in progress
+
+Changes from v2 to v3:
+ - More coding style changes
+ - Detect and use ubiupdatevol the same way as other utility programs
+
+
+
+David
+
+[1] http://www.linux-mtd.infradead.org/nand-data/nanddata.html
