@@ -1,181 +1,110 @@
-Received: from mail-pf0-f194.google.com ([209.85.192.194]:35029 "EHLO
-        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751790AbdFIWlX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 9 Jun 2017 18:41:23 -0400
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH] generic: test for buggy fscrypt context consistency check
-Date: Fri,  9 Jun 2017 15:36:33 -0700
-Message-Id: <20170609223633.24882-1-ebiggers3@gmail.com>
+Received: from mail-pf0-f196.google.com ([209.85.192.196]:35128 "EHLO
+        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751975AbdFJPpl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 10 Jun 2017 11:45:41 -0400
+Received: by mail-pf0-f196.google.com with SMTP id u26so11736103pfd.2
+        for <fstests@vger.kernel.org>; Sat, 10 Jun 2017 08:45:41 -0700 (PDT)
+Received: from localhost ([128.199.137.77])
+        by smtp.gmail.com with ESMTPSA id 65sm8754295pgf.14.2017.06.10.08.45.38
+        for <fstests@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Sat, 10 Jun 2017 08:45:39 -0700 (PDT)
+Message-ID: <593c1423.4405630a.41f5.21dc@mx.google.com>
+From: Eryu Guan <guaneryu@gmail.com>
+Date: Sat, 10 Jun 2017 23:45:36 +0800
+Subject: [ANNOUNCE] fstests: master branch updated to 034744b82385
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="S8bNVz5XBZn5"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Eric Biggers <ebiggers@google.com>, linux-fscrypt@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
 
-Add a regression test for a bug where ->lookup() in an encrypted
-directory would incorrectly return EPERM, depending on which inodes
-happened to have their keys still cached in memory following removal of
-the keyring key.  This bug was fixed in v4.12-rc1, v4.9.29, and v4.4.70.
+--S8bNVz5XBZn5
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Cc: linux-fscrypt@vger.kernel.org
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- tests/generic/500     | 114 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/500.out |  13 ++++++
- tests/generic/group   |   1 +
- 3 files changed, 128 insertions(+)
- create mode 100755 tests/generic/500
- create mode 100644 tests/generic/500.out
+Hi all,
 
-diff --git a/tests/generic/500 b/tests/generic/500
-new file mode 100755
-index 00000000..01af62a1
---- /dev/null
-+++ b/tests/generic/500
-@@ -0,0 +1,114 @@
-+#! /bin/bash
-+# FS QA Test generic/500
-+#
-+# Test that when the filesystem tries to enforce that all files in a directory
-+# tree use the same encryption policy, it doesn't get confused and incorrectly
-+# return EPERM in cases where the parent's key is cached but not the child's, or
-+# vice versa.  Such situations can arise following removal of the master key
-+# from the keyring.  Regression test for:
-+#	272f98f68462 ("fscrypt: fix context consistency check when key(s) unavailable")
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Google, Inc.  All Rights Reserved.
-+#
-+# Author: Eric Biggers <ebiggers@google.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/encrypt
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch_encryption
-+_require_xfs_io_command "set_encpolicy"
-+_require_command "$KEYCTL_PROG" keyctl
-+
-+# Set up an encryption-capable filesystem and an encryption key.
-+_new_session_keyring
-+_scratch_mkfs_encrypted &>> $seqres.full
-+_scratch_mount
-+keydesc=$(_generate_key_descriptor)
-+raw_key=$(_generate_raw_encryption_key)
-+_add_encryption_key $keydesc $raw_key
-+
-+# Set up an encrypted directory containing a regular file, a subdirectory, and a
-+# symlink.
-+mkdir $SCRATCH_MNT/edir
-+$XFS_IO_PROG -c "set_encpolicy $keydesc" $SCRATCH_MNT/edir
-+mkdir $SCRATCH_MNT/edir/subdir
-+ln -s target $SCRATCH_MNT/edir/symlink
-+echo contents > $SCRATCH_MNT/edir/file
-+
-+# Starting from a fresh mount (no inodes have their encryption key cached),
-+# reproduce the situation where an encrypted file *without* its key cached is
-+# looked up or opened from within a directory *with* its key cached, and no key
-+# is in the keyring.  Try with a regular file, a directory, and a symlink.
-+_scratch_cycle_mount
-+echo
-+echo "***** Parent has key, but child doesn't *****"
-+exec 3< $SCRATCH_MNT/edir # pin inode with cached key in memory
-+ls $SCRATCH_MNT/edir | sort
-+_unlink_encryption_key $keydesc
-+cat $SCRATCH_MNT/edir/file |& _filter_scratch
-+ls $SCRATCH_MNT/edir/subdir
-+cat $SCRATCH_MNT/edir/symlink |& _filter_scratch
-+exec 3>&-
-+
-+# Now, the inverse: an encrypted file *with* its key cached is looked up or
-+# opened from within a directory *without* its key cached, and no key is in the
-+# keyring.  This is most easily reproducible using a hard link.  Note: the
-+# expected behavior (at least, until we have a real API for revoking filesystem
-+# encryption keys) is that we should still be able to open the file and read its
-+# plaintext contents, even though its filename is shown in ciphertext!
-+echo
-+echo "***** Child has key, but parent doesn't *****"
-+_add_encryption_key $keydesc $raw_key
-+mkdir $SCRATCH_MNT/edir2
-+$XFS_IO_PROG -c "set_encpolicy $keydesc" $SCRATCH_MNT/edir2
-+ln $SCRATCH_MNT/edir/file $SCRATCH_MNT/edir2/link
-+_scratch_cycle_mount
-+cat $SCRATCH_MNT/edir2/link
-+exec 3< $SCRATCH_MNT/edir2/link # pin inode with cached key in memory
-+_unlink_encryption_key $keydesc
-+stat $SCRATCH_MNT/edir/file |& _filter_scratch
-+cat "$(find $SCRATCH_MNT/edir/ -type f)"
-+exec 3>&-
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/500.out b/tests/generic/500.out
-new file mode 100644
-index 00000000..fcbbc109
---- /dev/null
-+++ b/tests/generic/500.out
-@@ -0,0 +1,13 @@
-+QA output created by 500
-+
-+***** Parent has key, but child doesn't *****
-+file
-+subdir
-+symlink
-+cat: SCRATCH_MNT/edir/file: Required key not available
-+cat: SCRATCH_MNT/edir/symlink: No such file or directory
-+
-+***** Child has key, but parent doesn't *****
-+contents
-+stat: cannot stat 'SCRATCH_MNT/edir/file': No such file or directory
-+contents
-diff --git a/tests/generic/group b/tests/generic/group
-index 5d3e4dcf..e35bb99a 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -442,3 +442,4 @@
- 437 auto quick
- 438 auto
- 439 auto quick punch
-+500 auto quick encrypt
--- 
-2.13.1.508.gb3defc5cc-goog
+The master branch of the xfstests repository at:
 
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. fstests gains ubifs support in this update, many thanks
+to David Oberhollenzer! Besides that, there're two new btrfs tests and a minor
+bug fix added in this update.
+
+New failures I've noticed:
+- btrfs/144 fails on latest 4.12-rc4 kernel
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+034744b82385 btrfs: test incremental send after renaming and linking file
+
+New commits:
+
+David Oberhollenzer (4):
+      [d4c9003b5294] common/rc: Add tests for character devices
+      [cc34c5f81f26] fstests: Add support for UBIFS
+      [62de87749aeb] generic/398: Accept failing with EPERM in addition to ENOKEY for rename without key
+      [1cc2487f501f] fstests: Fix block device requirements and manual scratch mounts
+
+Filipe Manana (1):
+      [034744b82385] btrfs: test incremental send after renaming and linking file
+
+Nikolay Borisov (1):
+      [7b6729e9ab5a] generic/019: Silence possible kill failure
+
+Omar Sandoval (1):
+      [ff1f614f3373] btrfs: test Btrfs delalloc accounting overflow
+
+
+Code Diffstat:
+
+ check                 |   2 +
+ common/config         |  17 ++++++--
+ common/encrypt        |   4 ++
+ common/rc             |  68 +++++++++++++++++++++++++++++
+ tests/btrfs/010       |  75 ++++++++++++++++++++++++++++++++
+ tests/btrfs/010.out   |   2 +
+ tests/btrfs/144       | 118 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/144.out   |   6 +++
+ tests/btrfs/group     |   2 +
+ tests/generic/019     |   2 +-
+ tests/generic/076     |   2 +-
+ tests/generic/398     |  10 ++++-
+ tests/generic/398.out |   4 +-
+ tests/generic/409     |   8 ++--
+ tests/generic/410     |   8 ++--
+ tests/generic/411     |  10 ++---
+ 16 files changed, 316 insertions(+), 22 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
+
+--S8bNVz5XBZn5
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJZPBOCAAoJECZSqilcj+dji9UP/jKhngaF2lfmr1Yb1UmARCdp
+RpaK8XLxCOb5Hd50fUyRBKZQ6XmE5B0vOrVW16s5FmFLe152FVCrHbypMeLLw7qy
+T5Gb1Cq3lmAx/pIcd1bYShYm7ypu1FTvOLAPM5XClPkRxiF83WvtpQM587aRbO3j
+D2EG9G7qf7WOu+oZAhdFD8A0YjYH9MUP9H3MlL+fEiSwdou7CGeH0Vw9+BdcDa5o
+5fSbcvqAGmRrrcO98sVFcE/9SyLwAv6WkGv/j5jfrcg90mA6Nfo9eJTDnAwXgboF
+CCApYcIt+PLR/SWRaAcKcTeuRwwCbJeK6y7qentiE6kbwrRyzj2HxZn8eusoyZzN
+63AjqXqcFTA5ZUm/Mb+9ea608V8+cQ2/s3OcjCg71joG9+kPjLX4P2iR8Y5xEo+B
+9bzsoPG6SfgfUL03a7Xpe69donXB68SW4bCkGmD10iF4WdQr+Wd3rPvE0pnEO1sN
+WceXka4nPcoAobUH0f6iG+VtMQIc2LWAE7uRRvDxzXJF34fjzqGiH0fN7BFgdb1N
+/65uI1n6G3A139gIbBoBtVn0abifSyR9yWEhPiIJ5L/L+TJZrIrfrSXw+QKRbL5S
+XFO9oSl20Cngf+z70dSiidFKXZHLwYNiMVZEk5kXACOIGYr1fxrsHPwplGLqmxtS
+GyjPQrgTMG47IGD65dk4
+=gO+Q
+-----END PGP SIGNATURE-----
+
+--S8bNVz5XBZn5--
