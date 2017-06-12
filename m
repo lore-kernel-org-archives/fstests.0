@@ -1,110 +1,60 @@
-Received: from mail-pf0-f196.google.com ([209.85.192.196]:35128 "EHLO
-        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751975AbdFJPpl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 10 Jun 2017 11:45:41 -0400
-Received: by mail-pf0-f196.google.com with SMTP id u26so11736103pfd.2
-        for <fstests@vger.kernel.org>; Sat, 10 Jun 2017 08:45:41 -0700 (PDT)
-Received: from localhost ([128.199.137.77])
-        by smtp.gmail.com with ESMTPSA id 65sm8754295pgf.14.2017.06.10.08.45.38
-        for <fstests@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Sat, 10 Jun 2017 08:45:39 -0700 (PDT)
-Message-ID: <593c1423.4405630a.41f5.21dc@mx.google.com>
-From: Eryu Guan <guaneryu@gmail.com>
-Date: Sat, 10 Jun 2017 23:45:36 +0800
-Subject: [ANNOUNCE] fstests: master branch updated to 034744b82385
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="S8bNVz5XBZn5"
-Content-Disposition: inline
+Received: from mail-pf0-f195.google.com ([209.85.192.195]:36211 "EHLO
+        mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752065AbdFLVQM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 12 Jun 2017 17:16:12 -0400
+Received: by mail-pf0-f195.google.com with SMTP id y7so17681392pfd.3
+        for <fstests@vger.kernel.org>; Mon, 12 Jun 2017 14:16:11 -0700 (PDT)
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: [PATCH] generic/397: be compatible with ignored SIGPIPE
+Date: Mon, 12 Jun 2017 14:15:28 -0700
+Message-Id: <20170612211528.45666-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
+From: Eric Biggers <ebiggers@google.com>
 
---S8bNVz5XBZn5
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+If generic/397 is executed in an environment with SIGPIPE ignored, it
+fails because the 'yes' program prints an error message:
 
-Hi all,
+    yes: standard output: Broken pipe
+    yes: write error
 
-The master branch of the xfstests repository at:
+This can be reproduced with:
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+    trap '' SIGPIPE; ./check generic/397
 
-have just been updated. fstests gains ubifs support in this update, many thanks
-to David Oberhollenzer! Besides that, there're two new btrfs tests and a minor
-bug fix added in this update.
+Fix it by generating the string of 255 y's using just 'head' and 'tr'
+instead of 'yes', 'head', and 'tr'.
 
-New failures I've noticed:
-- btrfs/144 fails on latest 4.12-rc4 kernel
+Although it's not really a good idea to execute xfstests with SIGPIPE
+ignored, this is the only test I've noticed where it causes a problem,
+so it might as well be fixed in the test.
 
-Thanks,
-Eryu
+It would be much nicer to prevent this problem for all tests by making
+the 'check' script restore the default SIGPIPE handler.  But that isn't
+straightforward because bash's 'trap' builtin doesn't allow un-ignoring
+signals that were ignored on entry to the shell.
 
-The new head of the master branch is commit:
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ tests/generic/397 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-034744b82385 btrfs: test incremental send after renaming and linking file
+diff --git a/tests/generic/397 b/tests/generic/397
+index 7077d048..ba920891 100755
+--- a/tests/generic/397
++++ b/tests/generic/397
+@@ -69,7 +69,7 @@ for dir in $SCRATCH_MNT/edir $SCRATCH_MNT/ref_dir; do
+ 	touch $dir/empty > /dev/null
+ 	$XFS_IO_PROG -t -f -c "pwrite 0 4k" $dir/a > /dev/null
+ 	$XFS_IO_PROG -t -f -c "pwrite 0 33k" $dir/abcdefghijklmnopqrstuvwxyz > /dev/null
+-	maxname=$(yes | head -255 | tr -d '\n') # 255 character filename
++	maxname=$(head -c 255 /dev/zero | tr '\0' y) # 255 character filename
+ 	$XFS_IO_PROG -t -f -c "pwrite 0 1k" $dir/$maxname > /dev/null
+ 	ln -s a $dir/symlink
+ 	ln -s abcdefghijklmnopqrstuvwxyz $dir/symlink2
+-- 
+2.13.1.508.gb3defc5cc-goog
 
-New commits:
-
-David Oberhollenzer (4):
-      [d4c9003b5294] common/rc: Add tests for character devices
-      [cc34c5f81f26] fstests: Add support for UBIFS
-      [62de87749aeb] generic/398: Accept failing with EPERM in addition to ENOKEY for rename without key
-      [1cc2487f501f] fstests: Fix block device requirements and manual scratch mounts
-
-Filipe Manana (1):
-      [034744b82385] btrfs: test incremental send after renaming and linking file
-
-Nikolay Borisov (1):
-      [7b6729e9ab5a] generic/019: Silence possible kill failure
-
-Omar Sandoval (1):
-      [ff1f614f3373] btrfs: test Btrfs delalloc accounting overflow
-
-
-Code Diffstat:
-
- check                 |   2 +
- common/config         |  17 ++++++--
- common/encrypt        |   4 ++
- common/rc             |  68 +++++++++++++++++++++++++++++
- tests/btrfs/010       |  75 ++++++++++++++++++++++++++++++++
- tests/btrfs/010.out   |   2 +
- tests/btrfs/144       | 118 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/144.out   |   6 +++
- tests/btrfs/group     |   2 +
- tests/generic/019     |   2 +-
- tests/generic/076     |   2 +-
- tests/generic/398     |  10 ++++-
- tests/generic/398.out |   4 +-
- tests/generic/409     |   8 ++--
- tests/generic/410     |   8 ++--
- tests/generic/411     |  10 ++---
- 16 files changed, 316 insertions(+), 22 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
-
---S8bNVz5XBZn5
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJZPBOCAAoJECZSqilcj+dji9UP/jKhngaF2lfmr1Yb1UmARCdp
-RpaK8XLxCOb5Hd50fUyRBKZQ6XmE5B0vOrVW16s5FmFLe152FVCrHbypMeLLw7qy
-T5Gb1Cq3lmAx/pIcd1bYShYm7ypu1FTvOLAPM5XClPkRxiF83WvtpQM587aRbO3j
-D2EG9G7qf7WOu+oZAhdFD8A0YjYH9MUP9H3MlL+fEiSwdou7CGeH0Vw9+BdcDa5o
-5fSbcvqAGmRrrcO98sVFcE/9SyLwAv6WkGv/j5jfrcg90mA6Nfo9eJTDnAwXgboF
-CCApYcIt+PLR/SWRaAcKcTeuRwwCbJeK6y7qentiE6kbwrRyzj2HxZn8eusoyZzN
-63AjqXqcFTA5ZUm/Mb+9ea608V8+cQ2/s3OcjCg71joG9+kPjLX4P2iR8Y5xEo+B
-9bzsoPG6SfgfUL03a7Xpe69donXB68SW4bCkGmD10iF4WdQr+Wd3rPvE0pnEO1sN
-WceXka4nPcoAobUH0f6iG+VtMQIc2LWAE7uRRvDxzXJF34fjzqGiH0fN7BFgdb1N
-/65uI1n6G3A139gIbBoBtVn0abifSyR9yWEhPiIJ5L/L+TJZrIrfrSXw+QKRbL5S
-XFO9oSl20Cngf+z70dSiidFKXZHLwYNiMVZEk5kXACOIGYr1fxrsHPwplGLqmxtS
-GyjPQrgTMG47IGD65dk4
-=gO+Q
------END PGP SIGNATURE-----
-
---S8bNVz5XBZn5--
