@@ -1,169 +1,80 @@
-Received: from verein.lst.de ([213.95.11.211]:53646 "EHLO newverein.lst.de"
+Received: from mx1.redhat.com ([209.132.183.28]:34602 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752622AbdFMGr3 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 13 Jun 2017 02:47:29 -0400
-Date: Tue, 13 Jun 2017 08:47:28 +0200
-From: Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH] sample xfstests IMA-appraisal test module (resending)
-Message-ID: <20170613064728.GC31372@lst.de>
-References: <1497031364-19949-1-git-send-email-zohar@linux.vnet.ibm.com> <1497038143.21594.251.camel@linux.vnet.ibm.com>
+        id S1752713AbdFMGym (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 13 Jun 2017 02:54:42 -0400
+Date: Tue, 13 Jun 2017 14:54:38 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] generic/397: be compatible with ignored SIGPIPE
+Message-ID: <20170613065438.GA4788@eguan.usersys.redhat.com>
+References: <20170612211528.45666-1-ebiggers3@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1497038143.21594.251.camel@linux.vnet.ibm.com>
+In-Reply-To: <20170612211528.45666-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Mimi Zohar <zohar@linux.vnet.ibm.com>
-Cc: Christoph Hellwig <hch@lst.de>, Al Viro <viro@zeniv.linux.org.uk>, James Morris <jmorris@namei.org>, linux-fsdevel@vger.kernel.org, linux-ima-devel@lists.sourceforge.net, linux-security-module@vger.kernel.org, fstests@vger.kernel.org
+To: Eric Biggers <ebiggers3@gmail.com>
+Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-Adding the fstests list..
+On Mon, Jun 12, 2017 at 02:15:28PM -0700, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
+> 
+> If generic/397 is executed in an environment with SIGPIPE ignored, it
+> fails because the 'yes' program prints an error message:
+> 
+>     yes: standard output: Broken pipe
+>     yes: write error
+> 
+> This can be reproduced with:
+> 
+>     trap '' SIGPIPE; ./check generic/397
+> 
+> Fix it by generating the string of 255 y's using just 'head' and 'tr'
+> instead of 'yes', 'head', and 'tr'.
+> 
+> Although it's not really a good idea to execute xfstests with SIGPIPE
+> ignored, this is the only test I've noticed where it causes a problem,
+> so it might as well be fixed in the test.
 
-On Fri, Jun 09, 2017 at 03:55:43PM -0400, Mimi Zohar wrote:
-> On systems where IMA-appraisal is configured, the file system properly
-> labeled and the system booted with the "ima_tcb ima_appraise_tcb" boot
-> command line options, new files created by root will have a file hash
-> written out as security.ima.
+I'm just curious, why do you need to run fstests with SIGPIPE ignored?
+
 > 
-> This xfstests creates a file and compares the security.ima before and
-> after modifying the file.  The results are compared with the "good"
-> file.
+> It would be much nicer to prevent this problem for all tests by making
+> the 'check' script restore the default SIGPIPE handler.  But that isn't
+> straightforward because bash's 'trap' builtin doesn't allow un-ignoring
+> signals that were ignored on entry to the shell.
 > 
-> (For filesystems that are configured with IMA-appraisal, but aren't
-> labeled properly, boot the system with the "ima_appraise=tcb" boot
-> command line option as well.)
-> 
-> Mimi Zohar <zohar@linux.vnet.ibm.com>
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
 > ---
->  tests/generic/440     | 89 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/440.out | 13 ++++++++
->  tests/generic/group   |  1 +
->  3 files changed, 103 insertions(+)
->  create mode 100755 tests/generic/440
->  create mode 100644 tests/generic/440.out
+>  tests/generic/397 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/tests/generic/440 b/tests/generic/440
-> new file mode 100755
-> index 0000000..8616a48
-> --- /dev/null
-> +++ b/tests/generic/440
-> @@ -0,0 +1,89 @@
-> +#! /bin/bash
-> +# FS QA Test No. 440
-> +#
-> +# Tests IMA-appraisal
-> +# Derived from 062 tests
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/attr
-> +
-> +if [ "$FSTYP" = "btrfs" ]; then
-> +. ./common/btrfs
-> +elif [ "$FSTYP" = "xfs" ]; then
-> +. ./common/xfs
-> +fi
-> +
-> +_cleanup()
-> +{
-> +        cd /
-> +	echo; echo "*** unmount"
-> +	_scratch_unmount 2>/dev/null
-> +	rm -f $tmp.*
-> +}
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +getfattr()
-> +{
-> +    $GETFATTR_PROG --absolute-names -dh $@ 2>&1 | _filter_scratch
-> +}
-> +
-> +setfattr()
-> +{
-> +    $SETFATTR_PROG $@ 2>&1 | _filter_scratch
-> +}
-> +
-> +_create_test_bed()
-> +{
-> +	echo "*** create temporary file"
-> +	echo "Hello" >  $SCRATCH_MNT/hello.txt
-> +}
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +
-> +_require_scratch
-> +_require_attrs
-> +_require_command "$(which timeout)" "timeout"
-> +
-> +# real QA test starts here
-> +_scratch_mkfs > /dev/null 2>&1 || _fail "mkfs failed"
-> +_scratch_mount || _fail "mount failed"
-> +_create_test_bed
-> +
-> +xattr="security.ima"
-> +testfile="hello.txt"
-> +
-> +if [ ! -f $SCRATCH_MNT/$testfile ]; then
-> +	echo "File $testfile does not exist"
-> +	msleep 1
-> +fi
-> +
-> +echo "*** Reading $SCRATCH_MNT"
-> +timeout -s KILL 2 cat $SCRATCH_MNT/$testfile > /dev/null
-> +if [ $? -ne 0 ]; then
-> +	echo "Failed to read $SCRATCH_MNT/$testfile"
-> +fi
-> +
-> +echo "*** initial security.ima hash"
-> +getfattr -e hex -n $xattr $SCRATCH_MNT/$testfile
-> +
-> +echo " World!" >> $SCRATCH_MNT/$testfile
-> +
-> +echo "*** updated security.ima hash"
-> +getfattr -e hex -n $xattr $SCRATCH_MNT/$testfile
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/440.out b/tests/generic/440.out
-> new file mode 100644
-> index 0000000..a827377
-> --- /dev/null
-> +++ b/tests/generic/440.out
-> @@ -0,0 +1,13 @@
-> +QA output created by 440
-> +*** create temporary file
-> +*** Reading /mnt/scratch
-> +*** initial security.ima hash
-> +# file: SCRATCH_MNT/hello.txt
-> +security.ima=0x040466a045b452102c59d840ec097d59d9467e13a3f34f6494e539ffd32c1bb35f18
-> +
-> +*** updated security.ima hash
-> +# file: SCRATCH_MNT/hello.txt
-> +security.ima=0x0404cddd9990ad741e165a6a50990afe969c2233fc8794d027cdbf382f698a62a22f
-> +
-> +
-> +*** unmount
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 5d3e4dc..c1ecc23 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -442,3 +442,4 @@
->  437 auto quick
->  438 auto
->  439 auto quick punch
-> +440 attr
+> diff --git a/tests/generic/397 b/tests/generic/397
+> index 7077d048..ba920891 100755
+> --- a/tests/generic/397
+> +++ b/tests/generic/397
+> @@ -69,7 +69,7 @@ for dir in $SCRATCH_MNT/edir $SCRATCH_MNT/ref_dir; do
+>  	touch $dir/empty > /dev/null
+>  	$XFS_IO_PROG -t -f -c "pwrite 0 4k" $dir/a > /dev/null
+>  	$XFS_IO_PROG -t -f -c "pwrite 0 33k" $dir/abcdefghijklmnopqrstuvwxyz > /dev/null
+> -	maxname=$(yes | head -255 | tr -d '\n') # 255 character filename
+> +	maxname=$(head -c 255 /dev/zero | tr '\0' y) # 255 character filename
+
+Using perl seems simpler, we have some other tests do similar tasks
+using perl too.
+
+	maxname=$($PERL_PROG -e 'print "y" x 255;')
+
+Thanks,
+Eryu
+
+>  	$XFS_IO_PROG -t -f -c "pwrite 0 1k" $dir/$maxname > /dev/null
+>  	ln -s a $dir/symlink
+>  	ln -s abcdefghijklmnopqrstuvwxyz $dir/symlink2
 > -- 
-> 2.9.3
----end quoted text---
+> 2.13.1.508.gb3defc5cc-goog
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
