@@ -1,222 +1,131 @@
-Received: from mx2.suse.de ([195.135.220.15]:43567 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751677AbdFONpp (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 15 Jun 2017 09:45:45 -0400
-Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
-        by mx1.suse.de (Postfix) with ESMTP id 3DA14AAB9
-        for <fstests@vger.kernel.org>; Thu, 15 Jun 2017 13:45:44 +0000 (UTC)
-From: Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH] btrfs/145: Test various btrfs operations rounding behavior
-Date: Thu, 15 Jun 2017 16:45:38 +0300
-Message-Id: <1497534338-11433-1-git-send-email-nborisov@suse.com>
+Received: from sandeen.net ([63.231.237.45]:58546 "EHLO sandeen.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751016AbdFOOTs (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 15 Jun 2017 10:19:48 -0400
+Subject: Re: [PATCH V2] xfs/289: test fragmented multi-fsb readdir
+References: <ca07fe07-ac0a-a927-494f-34f7205e81d4@sandeen.net>
+ <fbad53d8-9807-1912-c3e4-e932020c19d3@sandeen.net>
+ <591E5BEB.5070008@cn.fujitsu.com>
+ <a511db57-db7f-6a7c-39ea-e6d3b003970c@sandeen.net>
+ <9940cc65-677e-eeac-7a7c-ec3ba5ef2db4@sandeen.net>
+ <35eca5c0-1cab-e27c-f5e5-a35a30530c85@sandeen.net>
+ <59424158.3040401@cn.fujitsu.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <f58a62ec-9017-fd5e-7e5d-de259ac3c638@sandeen.net>
+Date: Thu, 15 Jun 2017 09:19:44 -0500
+MIME-Version: 1.0
+In-Reply-To: <59424158.3040401@cn.fujitsu.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: jeffm@suse.com, Nikolay Borisov <nborisov@suse.com>
+Content-Transfer-Encoding: quoted-printable
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, Zorro Lang <zlang@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-When changing the size of disks/filesystem we should always be
-rounding down to a multiple of sectorsize. This is a test for the following
-btrfs patche: 
+On 6/15/17 3:12 AM, Xiao Yang wrote:
+> On 2017/05/20 10:25, Eric Sandeen wrote:
+>>
+>> On 5/19/17 11:39 AM, Eric Sandeen wrote:
+>>> On 5/18/17 10:30 PM, Eric Sandeen wrote:
+>>>
+>>>> That's an odd failure; I wrote the test for upstream...
+>>>>
+>>>> On that kernel, despite free inodes:
+>>>>
+>>>> # df -i /mnt/scratch
+>>>> Filesystem     Inodes IUsed IFree IUse% Mounted on
+>>>> /dev/loop1      10260   490  9770    5% /mnt/scratch
+>>>>
+>>>> and xfs_db concurs (more or less?):
+>>>>
+>>>> icount =3D 10240
+>>>> ifree =3D 9750
+>>>>
+>>>> creating a new inode fails:
+>>>>
+>>>> # touch /mnt/scratch/testdir/12345678901234567890169
+>>>> touch: cannot touch =E2=80=98/mnt/scratch/testdir/123456789012345678=
+90169=E2=80=99: No space left on device
+>>>>
+>>>> Everything about the fs looks the same as if we run it upstream, inc=
+luding
+>>>> the reserved blocks:
+>>>>
+>>>> reserved blocks =3D 6553
+>>>> available reserved blocks =3D 6553
+>>>>
+>>>> But, it's failing to allocate the space:
+>>>>
+>>>>             touch-12302 [005] d... 118038.499302: ret_xfs_mod_fdbloc=
+ks: (xfs_trans_reserve+0x123/0x200 [xfs]<- xfs_mod_fdblocks) arg1=3D0xfff=
+fffe4
+>>>>
+>>>> (arg1 is the return value, -ENOSPC)
+>>>>
+>>>> It's not clear to me at this point why we can't create another inode=
+ on this fs.
+>>> Ugh, I can't believe I missed this - I actually didn't do anything to=
+ ensure that
+>>> there is free space to grow the actual directory into.
+>>>
+>>> If I add this just prior to the last 1300-file touch loop:
+>>>
+>>> ./src/punch-alternating $SCRATCH_MNT/spacefile1>>  $seqres.full 2>&1
+>>>
+>>> that seems to let the test proceed w/o ENOSPC, and properly fragment =
+the
+>>> dir.
+>>>
+>>> (OTOH upstream, now the test is reporting fs corruption, though I don=
+'t
+>>> see it after the test completes.  Very confused now.  It might be
+>>> confusing xfs_check?  Repair is happy...)
+>>>
+>>> I'm still not sure why the rhel kernel differs from upstream, though.
+>> The more I look at this, the more I realize how fragile the test is.  =
+It's
+>> trying to control allocation, which is almost nearly impossible to do
+>> reliably in a test.
+>>
+>> I'm not quite sure how to make this one better...
+> Hi Eric
+>=20
+> Sorry for the late reply.
+>=20
+> Firstly, The following command works abnormally on RHEL7.3 and RHEL7.4.
+> dd conv=3Dfsync if=3D/dev/zero of=3D$SCRATCH_MNT/spacefile2 bs=3D1M cou=
+nt=3D64
+>=20
+> If bs is set to 1M and the remaining freespace is less than 1M, dd coul=
+d not write any data
+> into spacefile2.  However, it still writes data into spacefile2 and lea=
+ds that there is no
+> enough free space to grow the actual directory.
+>=20
+> Secondly, I tested this case with upstream kernel in RHEL7.3 on virtual=
+ machine, but i awlays don't
+> trigger this bug.  Is there some specific settings?
+>=20
+> Could we use the following command to consume a lot of remaining free s=
+pace, but reserve
+> some free space to create the last 1300-file:
+> dd conv=3Dfsync if=3D/dev/zero of=3D$SCRATCH_MNT/spacefile2 bs=3D1K cou=
+nt=3D35000
+>=20
+> I am not sure if this change can still trigger kernel bug.  :-)
 
-btrfs: Round up values which are written for total_bytes_size
+Honestly, I think this test should probably be removed.  It's trying too =
+hard to
+control allocation behavior, which is not possible in general.
 
-Signed-off-by: Nikolay Borisov <nborisov@suse.com>
----
- tests/btrfs/145     | 147 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/145.out |  20 +++++++
- tests/btrfs/group   |   1 +
- 3 files changed, 168 insertions(+)
- create mode 100755 tests/btrfs/145
- create mode 100644 tests/btrfs/145.out
+The only other approach I can think of is to create a lot of one-block fi=
+les,
+map them all, and then decide which ones to remove (or perhaps better, tr=
+uncate to
+0 length) in an effort to create perfectly fragmented freespace.  At leas=
+t that
+way we would not be trying control or expect allocation patterns ahead of=
+ time.
 
-diff --git a/tests/btrfs/145 b/tests/btrfs/145
-new file mode 100755
-index 0000000..4461b37
---- /dev/null
-+++ b/tests/btrfs/145
-@@ -0,0 +1,147 @@
-+#! /bin/bash
-+# FS QA Test No. btrfs/145
-+# 
-+# Test that various code paths which deal with modifying the total size
-+# of devices/superblock correctly round the value to a multiple of 
-+# sector size
-+#
-+#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2017 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Nikolay Borisov <nborisov@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	$UMOUNT_PROG $loop_mnt 
-+	_destroy_loop_device $loop_dev1
-+	_destroy_loop_device $loop_dev2
-+	cd /
-+	rm -f $tmp.*
-+	
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_loop
-+_require_block_device $SCRATCH_DEV
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+
-+#Size of devices which are going to be half a page larger than 
-+#default sectorsize (4kb)
-+expectedsize=$(( 1 * 1024 * 1024 * 1024 )) 
-+filesize=$(( $expectedsize + 2048 ))
-+loop_mnt=$SCRATCH_MNT/mount
-+fs_img1=$SCRATCH_MNT/disk1.img
-+fs_img2=$SCRATCH_MNT/disk2.img
-+
-+mkdir $loop_mnt
-+
-+#create files to hold dummy devices
-+$XFS_IO_PROG -f -c "falloc 0 $filesize" $fs_img1 &> /dev/null
-+$XFS_IO_PROG -f -c "falloc 0 $filesize" $fs_img2 &> /dev/null
-+
-+loop_dev1=$(_create_loop_device $fs_img1)
-+loop_dev2=$(_create_loop_device $fs_img2) 
-+
-+#create fs only on the first device
-+_mkfs_dev $loop_dev1 
-+_mount $loop_dev1 $loop_mnt
-+
-+echo "Size from mkfs"
-+$BTRFS_UTIL_PROG inspect-internal dump-super /dev/loop0 | grep total
-+
-+#resize down to 768mb + 2k
-+$BTRFS_UTIL_PROG fi resize 824182784 $loop_mnt >>$seqres.full 2>&1 
-+sync
-+
-+echo ""
-+
-+echo "Size after resizing down"
-+$BTRFS_UTIL_PROG inspect-internal dump-super $loop_dev1 | grep total
-+
-+echo ""
-+
-+#now resize back up to 1 gb
-+$BTRFS_UTIL_PROG fi resize max $loop_mnt >>$seqres.full 2>&1 
-+sync
-+
-+echo "Size after resizing up"
-+$BTRFS_UTIL_PROG inspect-internal dump-super /dev/loop0 | grep total
-+
-+#Add fs load for later balance operations, we need to do this 
-+#before adding a second device
-+$FSSTRESS_PROG -w -n 15000 -p 2 -d $loop_mnt >> $seqres.full 2>&1
-+
-+#add second unaligned device, this checks the btrfs_init_new_device codepath 
-+#device should be aligned
-+$BTRFS_UTIL_PROG device add $loop_dev2 $loop_mnt >>$seqres.full 2>&1
-+sync
-+
-+echo ""
-+
-+#Ensure that adding a device doesn't cause the superbock to be
-+#unaligned
-+echo "Size of superblock after device addition"
-+$BTRFS_UTIL_PROG inspect-internal dump-super $loop_dev1 | grep total
-+
-+echo ""
-+
-+#The newly added device must also be aligned
-+echo "Size of superblock/device for second device"
-+$BTRFS_UTIL_PROG inspect-internal dump-super $loop_dev2 | grep total
-+
-+#now start a balance, this might produce warnings while
-+#it's relocating chunks and updating the size of devices
-+$BTRFS_UTIL_PROG balance start $loop_mnt >> $seqres.full 2>&1
-+sync
-+
-+#delete everything and then run balance
-+rm -rf $loop_mnt/*
-+
-+#do a bit more stress testing until we fill the fs 
-+$FSSTRESS_PROG -w -n 15000 -p 4 -d $loop_mnt >> $seqres.full 2>&1
-+rm -rf $loop_mnt/p0 $loop_mnt/p2
-+
-+#run balance again, this time we will be freeing chunks 
-+$BTRFS_UTIL_PROG balance start $loop_mnt >> $seqres.full 2>&1
-+sync
-+
-+#Warnings are produced if we try to store unaligned values
-+_check_dmesg
-+
-+status=$?
-+exit
-diff --git a/tests/btrfs/145.out b/tests/btrfs/145.out
-new file mode 100644
-index 0000000..7340db2
---- /dev/null
-+++ b/tests/btrfs/145.out
-@@ -0,0 +1,20 @@
-+QA output created by 145
-+Size from mkfs
-+total_bytes		1073741824
-+dev_item.total_bytes	1073741824
-+
-+Size after resizing down
-+total_bytes		824180736
-+dev_item.total_bytes	824180736
-+
-+Size after resizing up
-+total_bytes		1073741824
-+dev_item.total_bytes	1073741824
-+
-+Size of superblock after device addition
-+total_bytes		2147483648
-+dev_item.total_bytes	1073741824
-+
-+Size of superblock/device for second device
-+total_bytes		2147483648
-+dev_item.total_bytes	1073741824
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index be05487..6c930d4 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -147,3 +147,4 @@
- 142 auto quick
- 143 auto quick
- 144 auto quick send
-+145 auto quick
--- 
-2.7.4
-
+-Eric
