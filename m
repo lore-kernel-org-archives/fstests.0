@@ -1,193 +1,119 @@
-Received: from mail.kernel.org ([198.145.29.99]:56360 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752252AbdFNRgc (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 14 Jun 2017 13:36:32 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH] btrfs: test incremental send after renaming a file and a directory
-Date: Tue, 13 Jun 2017 16:06:39 +0100
-Message-Id: <20170613150639.8363-1-fdmanana@kernel.org>
+Received: from cn.fujitsu.com ([59.151.112.132]:49084 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1752140AbdFOIMU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 15 Jun 2017 04:12:20 -0400
+Message-ID: <59424158.3040401@cn.fujitsu.com>
+Date: Thu, 15 Jun 2017 16:12:08 +0800
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+MIME-Version: 1.0
+Subject: Re: [PATCH V2] xfs/289: test fragmented multi-fsb readdir
+References: <ca07fe07-ac0a-a927-494f-34f7205e81d4@sandeen.net> <fbad53d8-9807-1912-c3e4-e932020c19d3@sandeen.net> <591E5BEB.5070008@cn.fujitsu.com> <a511db57-db7f-6a7c-39ea-e6d3b003970c@sandeen.net> <9940cc65-677e-eeac-7a7c-ec3ba5ef2db4@sandeen.net> <35eca5c0-1cab-e27c-f5e5-a35a30530c85@sandeen.net>
+In-Reply-To: <35eca5c0-1cab-e27c-f5e5-a35a30530c85@sandeen.net>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Content-Transfer-Encoding: quoted-printable
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, Zorro Lang <zlang@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+On 2017/05/20 10:25, Eric Sandeen wrote:
+>
+> On 5/19/17 11:39 AM, Eric Sandeen wrote:
+>> On 5/18/17 10:30 PM, Eric Sandeen wrote:
+>>
+>>> That's an odd failure; I wrote the test for upstream...
+>>>
+>>> On that kernel, despite free inodes:
+>>>
+>>> # df -i /mnt/scratch
+>>> Filesystem     Inodes IUsed IFree IUse% Mounted on
+>>> /dev/loop1      10260   490  9770    5% /mnt/scratch
+>>>
+>>> and xfs_db concurs (more or less?):
+>>>
+>>> icount =3D 10240
+>>> ifree =3D 9750
+>>>
+>>> creating a new inode fails:
+>>>
+>>> # touch /mnt/scratch/testdir/12345678901234567890169
+>>> touch: cannot touch =E2=80=98/mnt/scratch/testdir/1234567890123456789=
+0169=E2=80=99: No space left on device
+>>>
+>>> Everything about the fs looks the same as if we run it upstream, incl=
+uding
+>>> the reserved blocks:
+>>>
+>>> reserved blocks =3D 6553
+>>> available reserved blocks =3D 6553
+>>>
+>>> But, it's failing to allocate the space:
+>>>
+>>>             touch-12302 [005] d... 118038.499302: ret_xfs_mod_fdblock=
+s: (xfs_trans_reserve+0x123/0x200 [xfs]<- xfs_mod_fdblocks) arg1=3D0xffff=
+ffe4
+>>>
+>>> (arg1 is the return value, -ENOSPC)
+>>>
+>>> It's not clear to me at this point why we can't create another inode =
+on this fs.
+>> Ugh, I can't believe I missed this - I actually didn't do anything to =
+ensure that
+>> there is free space to grow the actual directory into.
+>>
+>> If I add this just prior to the last 1300-file touch loop:
+>>
+>> ./src/punch-alternating $SCRATCH_MNT/spacefile1>>  $seqres.full 2>&1
+>>
+>> that seems to let the test proceed w/o ENOSPC, and properly fragment t=
+he
+>> dir.
+>>
+>> (OTOH upstream, now the test is reporting fs corruption, though I don'=
+t
+>> see it after the test completes.  Very confused now.  It might be
+>> confusing xfs_check?  Repair is happy...)
+>>
+>> I'm still not sure why the rhel kernel differs from upstream, though.
+> The more I look at this, the more I realize how fragile the test is.  I=
+t's
+> trying to control allocation, which is almost nearly impossible to do
+> reliably in a test.
+>
+> I'm not quite sure how to make this one better...
+Hi Eric
 
-Test that an incremental send works if we rename some directory inode A
-and then rename some file inode B to the name inode A had, for the case
-where the directory inode A is an ancestor of inode B in the parent
-snapshot.
+Sorry for the late reply.
 
-This issue is fixed by the following patch for the linux kernel:
+Firstly, The following command works abnormally on RHEL7.3 and RHEL7.4.
+dd conv=3Dfsync if=3D/dev/zero of=3D$SCRATCH_MNT/spacefile2 bs=3D1M count=
+=3D64
 
-  "Btrfs: incremental send, fix invalid path for unlink commands"
+If bs is set to 1M and the remaining freespace is less than 1M, dd could =
+not write any data
+into spacefile2.  However, it still writes data into spacefile2 and leads=
+ that there is no
+enough free space to grow the actual directory.
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/145     | 130 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/145.out |   6 +++
- tests/btrfs/group   |   1 +
- 3 files changed, 137 insertions(+)
- create mode 100755 tests/btrfs/145
- create mode 100644 tests/btrfs/145.out
+Secondly, I tested this case with upstream kernel in RHEL7.3 on virtual m=
+achine, but i awlays don't
+trigger this bug.  Is there some specific settings?
 
-diff --git a/tests/btrfs/145 b/tests/btrfs/145
-new file mode 100755
-index 00000000..ef03292e
---- /dev/null
-+++ b/tests/btrfs/145
-@@ -0,0 +1,130 @@
-+#! /bin/bash
-+# FS QA Test No. btrfs/145
-+#
-+# Test that an incremental send works if we rename some directory inode A and
-+# then rename some file inode B to the name inode A had, for the case where the
-+# directory inode A is an ancestor of inode B in the parent snapshot.
-+#
-+#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2017 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -fr $send_files_dir
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+_require_fssum
-+
-+send_files_dir=$TEST_DIR/btrfs-test-$seq
-+
-+rm -f $seqres.full
-+rm -fr $send_files_dir
-+mkdir $send_files_dir
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+mkdir $SCRATCH_MNT/dir1
-+mkdir $SCRATCH_MNT/dir1/dir2
-+touch $SCRATCH_MNT/dir1/dir2/file1
-+touch $SCRATCH_MNT/dir1/dir2/file2
-+touch $SCRATCH_MNT/dir1/dir2/file3
-+mkdir $SCRATCH_MNT/dir1/dir3
-+mv $SCRATCH_MNT/dir1/dir2/file2 $SCRATCH_MNT/dir1/dir3/file22
-+mkdir $SCRATCH_MNT/dir1/dir3/dir4
-+
-+# Filesystem looks like:
-+#
-+# .                                                      (ino 256)
-+# |
-+# |--- dir1/                                             (ino 257)
-+#       |--- dir2/                                       (ino 258)
-+#       |     |--- file1                                 (ino 259)
-+#       |     |--- file3                                 (ino 261)
-+#       |
-+#       |--- dir3/                                       (ino 262)
-+#             |--- file22                                (ino 260)
-+#             |--- dir4/                                 (ino 263)
-+#
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+	$SCRATCH_MNT/mysnap1 > /dev/null
-+
-+$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap \
-+	$SCRATCH_MNT/mysnap1 2>&1 1>/dev/null | _filter_scratch
-+
-+mv $SCRATCH_MNT/dir1/dir2/file3 $SCRATCH_MNT/dir1/dir3/dir4/file33
-+mv $SCRATCH_MNT/dir1/dir2/file1 $SCRATCH_MNT/dir1/dir3/dir4/file11
-+mv $SCRATCH_MNT/dir1/dir3 $SCRATCH_MNT/dir1/file3
-+mv $SCRATCH_MNT/dir1/file3/file22 $SCRATCH_MNT/dir1/dir3
-+
-+# Filesystem now looks like:
-+#
-+# .                                                      (ino 256)
-+# |
-+# |--- dir1/                                             (ino 257)
-+#       |--- dir2/                                       (ino 258)
-+#       |--- dir3                                        (ino 260)
-+#       |--- file3/                                      (ino 262)
-+#             |--- dir4/                                 (ino 263)
-+#                   |--- file11                          (ino 269)
-+#                   |--- file33                          (ino 261)
-+#
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+		 $SCRATCH_MNT/mysnap2 > /dev/null
-+
-+$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+		 $SCRATCH_MNT/mysnap2 2>&1 1>/dev/null | _filter_scratch
-+
-+$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-+$FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
-+	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
-+
-+# Now recreate the filesystem by receiving both send streams and verify we get
-+# the same content that the original filesystem had.
-+_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT > /dev/null
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT > /dev/null
-+$FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-+$FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/145.out b/tests/btrfs/145.out
-new file mode 100644
-index 00000000..af4dc52e
---- /dev/null
-+++ b/tests/btrfs/145.out
-@@ -0,0 +1,6 @@
-+QA output created by 145
-+At subvol SCRATCH_MNT/mysnap1
-+At subvol SCRATCH_MNT/mysnap2
-+At subvol mysnap1
-+OK
-+OK
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index f6f20cb7..91e901df 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -146,3 +146,4 @@
- 142 auto quick
- 143 auto quick
- 144 auto quick send
-+145 auto quick send
--- 
-2.11.0
+Could we use the following command to consume a lot of remaining free spa=
+ce, but reserve
+some free space to create the last 1300-file:
+dd conv=3Dfsync if=3D/dev/zero of=3D$SCRATCH_MNT/spacefile2 bs=3D1K count=
+=3D35000
+
+I am not sure if this change can still trigger kernel bug.  :-)
+
+Thanks
+Xiao Yang.
+> -Eric
+>
+>
+> .
+>
+
+
 
