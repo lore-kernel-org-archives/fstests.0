@@ -1,51 +1,189 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43584 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:53078 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751546AbdFPQLh (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 16 Jun 2017 12:11:37 -0400
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 570E8C0467CB
-        for <fstests@vger.kernel.org>; Fri, 16 Jun 2017 16:11:37 +0000 (UTC)
-Received: from localhost.localdomain.com (ovpn-12-139.pek2.redhat.com [10.72.12.139])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 62ADB8E240
-        for <fstests@vger.kernel.org>; Fri, 16 Jun 2017 16:11:36 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH 4/4] xfs/068: update golden output due to new operations in fsstress
-Date: Sat, 17 Jun 2017 00:11:06 +0800
-Message-Id: <1497629466-22647-4-git-send-email-zlang@redhat.com>
-In-Reply-To: <1497629466-22647-1-git-send-email-zlang@redhat.com>
-References: <1497629466-22647-1-git-send-email-zlang@redhat.com>
+        id S1750798AbdFPQqV (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 16 Jun 2017 12:46:21 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: [PATCH] tests/xfs: test for log recovery failure after tail overwrite
+Date: Fri, 16 Jun 2017 12:46:19 -0400
+Message-Id: <1497631579-14454-1-git-send-email-bfoster@redhat.com>
+In-Reply-To: <1497631473-14278-1-git-send-email-bfoster@redhat.com>
+References: <1497631473-14278-1-git-send-email-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: linux-xfs@vger.kernel.org
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-I added some new operatoins to fsstress, and it changed the total
-number of test operstions.
+XFS is susceptible to log recovery problems if the fs crashes under
+certain circumstances. If the tail has been pinned for long enough
+to the log to fill and the next batch of log buffer submissions
+happen to fail, the filesystem shutsdown having potentially
+overwritten part of the range between the last good tail->head range
+in the log. This causes log recovery to fail with crc mismatch or
+invalid log record errors.
 
-xfs/068 use a fixed seed (-s) and number of operations (-n) to run
-fsstress, to get fixed number of files and directories. Due to my
-patches break these fixed things, so update its expected result
-in golden image.
+This problem is not yet fixed and thus known/expected to fail. At
+this time, this test serves as a reminder that the problem exists
+and a reproducer for future verification purposes. Note that this
+problem is currently only reproducible with larger (non-default) log
+buffer sizes (i.e., '-o logbsize=256k') or smaller block sizes (1k).
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Brian Foster <bfoster@redhat.com>
 ---
- tests/xfs/068.out | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/tests/xfs/068.out b/tests/xfs/068.out
-index b20604f..37c75bf 100644
---- a/tests/xfs/068.out
-+++ b/tests/xfs/068.out
-@@ -22,7 +22,7 @@ xfsrestore: session id: ID
- xfsrestore: media ID: ID
- xfsrestore: searching media for directory dump
- xfsrestore: reading directories
--xfsrestore: 474 directories and 1592 entries processed
-+xfsrestore: 413 directories and 1347 entries processed
- xfsrestore: directory post-processing
- xfsrestore: restoring non-directory files
- xfsrestore: restore complete: SECS seconds elapsed
+Hi all,
+
+This patch uses the XFS debug kernel mechanism recently posted for
+review[1] to reproduce an XFS log recovery problem. Note that this test
+depends on the aforementioned patch and thus should not be merged
+until/unless the corresponding kernel patch is merged.
+
+Brian
+
+[1] "xfs: debug mode sysfs flag to force [un]pin the log tail"
+
+ tests/xfs/999     | 113 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/999.out |   2 +
+ tests/xfs/group   |   1 +
+ 3 files changed, 116 insertions(+)
+ create mode 100644 tests/xfs/999
+ create mode 100644 tests/xfs/999.out
+
+diff --git a/tests/xfs/999 b/tests/xfs/999
+new file mode 100644
+index 0000000..6913a43
+--- /dev/null
++++ b/tests/xfs/999
+@@ -0,0 +1,113 @@
++#! /bin/bash
++# FS QA Test No. 999
++#
++# Attempt to reproduce log recovery failure by writing corrupt log records over
++# the last good tail in the log. The tail is force pinned while a workload runs
++# the head as close as possible behind the tail. Once the head is pinned,
++# corrupted log records are written to the log and the filesystem shuts down.
++#
++# While log recovery should handle the corrupted log records, it has historical
++# problems dealing with the situation where the corrupted log records may have
++# overwritten the tail of the previous good record in the log. If this occurs,
++# log recovery may fail.
++#
++# This can be reproduced more reliably under non-default conditions such as with
++# the smallest supported FSB sizes and/or largest supported log buffer sizes and
++# counts (logbufs and logbsize mount options).
++#
++# Note that this test requires a DEBUG mode kernel.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Red Hat, Inc. All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
++	[ -e /sys/fs/xfs/$sdev/log/log_pin_tail ] &&
++		echo 0 > /sys/fs/xfs/$sdev/log/log_pin_tail
++	wait > /dev/null 2>&1
++}
++
++rm -f $seqres.full
++
++# get standard environment, filters and checks
++. ./common/rc
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs xfs
++_supported_os Linux
++_require_xfs_sysfs $(_short_dev $TEST_DEV)/log/log_badcrc_factor
++_require_xfs_sysfs $(_short_dev $TEST_DEV)/log/log_pin_tail
++_require_scratch
++_require_command "$KILLALL_PROG" killall
++
++echo "Silence is golden."
++
++sdev=$(_short_dev $SCRATCH_DEV)
++
++_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
++_scratch_mount || _fail "mount failed"
++
++# populate the fs with some data and cycle the mount to reset the log head/tail
++$FSSTRESS_PROG -d $SCRATCH_MNT -z -fcreat=1 -p 4 -n 100000 > /dev/null 2>&1
++_scratch_cycle_mount || _fail "mount failed"
++
++# Pin the tail and start a file removal workload. File removal tends to
++# reproduce the corruption more reliably.
++echo 1 > /sys/fs/xfs/$sdev/log/log_pin_tail
++
++rm -rf $SCRATCH_MNT/* > /dev/null 2>&1 &
++workpid=$!
++
++# wait for the head to stop pushing forward
++prevhead=-1
++head=`cat /sys/fs/xfs/$sdev/log/log_head_lsn`
++while [ "$head" != "$prevhead" ]; do
++	sleep 5
++	prevhead=$head
++	head=`cat /sys/fs/xfs/$sdev/log/log_head_lsn`
++done
++
++# Once the head is pinned behind the tail, enable log record corruption and
++# unpin the tail. All subsequent log buffer writes end up corrupted on-disk and
++# result in log I/O errors.
++echo 1 > /sys/fs/xfs/$sdev/log/log_badcrc_factor
++echo 0 > /sys/fs/xfs/$sdev/log/log_pin_tail
++
++# wait for fs shutdown to kill the workload
++wait $workpid
++
++# cycle mount to test log recovery
++_scratch_cycle_mount
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+new file mode 100644
+index 0000000..d254382
+--- /dev/null
++++ b/tests/xfs/999.out
+@@ -0,0 +1,2 @@
++QA output created by 999
++Silence is golden.
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 792161a..d94f010 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -416,3 +416,4 @@
+ 416 dangerous_fuzzers dangerous_scrub dangerous_repair
+ 417 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+ 418 dangerous_fuzzers dangerous_scrub dangerous_repair
++999 auto log
 -- 
-2.7.4
+2.7.5
 
