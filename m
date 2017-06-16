@@ -1,32 +1,22 @@
-Received: from mx1.redhat.com ([209.132.183.28]:50638 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751755AbdFPGer (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 16 Jun 2017 02:34:47 -0400
-Date: Fri, 16 Jun 2017 14:34:45 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2] ext4: fsmap tests
-Message-ID: <20170616063445.GH17436@eguan.usersys.redhat.com>
-References: <20170602225220.GA5634@birch.djwong.org>
+Received: from bombadil.infradead.org ([65.50.211.133]:51409 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751956AbdFPGoa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 16 Jun 2017 02:44:30 -0400
+Date: Thu, 15 Jun 2017 23:44:28 -0700
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH 0/9] block: T10/DIF Fixes and cleanups v4
+Message-ID: <20170616064428.GA4935@infradead.org>
+References: <1494429652-9488-1-git-send-email-dmonakhov@openvz.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170602225220.GA5634@birch.djwong.org>
+In-Reply-To: <1494429652-9488-1-git-send-email-dmonakhov@openvz.org>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: Dmitry Monakhov <dmonakhov@openvz.org>
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-block@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Darrick,
+Hi Dmitry,
 
-On Fri, Jun 02, 2017 at 03:52:20PM -0700, Darrick J. Wong wrote:
-> Test the GETFSMAP ioctl against ext4.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-
-I'm planning to merge this patch after merging Jeff's patch that adds
-external log dev support to ext4 (Jeff's patchset is still in its review
-cycle), if you're not in a hurry. Please let me know if you'd like to
-see ext4 fsmap tests sooner.
-
-Thanks,
-Eryu
+can you resend the remaining patches relative to Jens' for-4.13/block
+branch.
