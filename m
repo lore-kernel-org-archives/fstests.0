@@ -1,55 +1,48 @@
-Received: from mx1.redhat.com ([209.132.183.28]:51464 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:37476 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751755AbdFPTkt (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 16 Jun 2017 15:40:49 -0400
+        id S1751956AbdFPTks (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 16 Jun 2017 15:40:48 -0400
 Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id CE77581235
+        by mx1.redhat.com (Postfix) with ESMTPS id 8345F80468
         for <fstests@vger.kernel.org>; Fri, 16 Jun 2017 19:40:48 +0000 (UTC)
 Received: from tleilax.poochiereds.net (ovpn-120-225.rdu2.redhat.com [10.10.120.225])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 99965189E9
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 4DDFA18EFA
         for <fstests@vger.kernel.org>; Fri, 16 Jun 2017 19:40:48 +0000 (UTC)
 From: Jeff Layton <jlayton@redhat.com>
-Subject: [xfstests PATCH v5 5/5] btrfs: make a btrfs version of writeback error reporting test
-Date: Fri, 16 Jun 2017 15:40:46 -0400
-Message-Id: <20170616194046.15923-6-jlayton@redhat.com>
+Subject: [xfstests PATCH v5 4/5] generic: test writeback error handling on dmerror devices
+Date: Fri, 16 Jun 2017 15:40:45 -0400
+Message-Id: <20170616194046.15923-5-jlayton@redhat.com>
 In-Reply-To: <20170616194046.15923-1-jlayton@redhat.com>
 References: <20170616194046.15923-1-jlayton@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-For btrfs, we can test how it reports data writeback errors on fsync by
-implementing a suggestion from Chris Mason:
+Ensure that we get an error back on all fds when a block device is
+open by multiple writers and writeback fails.
 
-Build a filesystem with 2 devices that stripes the data across
-both devices, but mirrors metadata across both. Then, make one
-of the devices fail and test what it does.
-
-Cc: Chris Mason <clm@fb.com>
 Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- tests/btrfs/999     | 94 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/999.out |  3 ++
- tests/btrfs/group   |  1 +
- 3 files changed, 98 insertions(+)
- create mode 100755 tests/btrfs/999
- create mode 100644 tests/btrfs/999.out
+ tests/generic/998     | 63 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/998.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 66 insertions(+)
+ create mode 100755 tests/generic/998
+ create mode 100644 tests/generic/998.out
 
-diff --git a/tests/btrfs/999 b/tests/btrfs/999
+diff --git a/tests/generic/998 b/tests/generic/998
 new file mode 100755
-index 000000000000..903e36526708
+index 000000000000..ef528f18986e
 --- /dev/null
-+++ b/tests/btrfs/999
-@@ -0,0 +1,94 @@
++++ b/tests/generic/998
+@@ -0,0 +1,63 @@
 +#! /bin/bash
-+# FS QA Test No. 999
++# FS QA Test No. 998
 +#
-+# Open a file several times, write to it, fsync on all fds and make sure that
-+# they all return 0. Change the device to start throwing errors. Write again
-+# on all fds and fsync on all fds. Ensure that we get errors on all of them.
-+# Then fsync on all one last time and verify that all return 0.
++# Test writeback error handling when writing to block devices via pagecache.
++# See src/fsync-err.c for details of what test actually does.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2017, Jeff Layton <jlayton@redhat.com>
@@ -91,70 +84,41 @@ index 000000000000..903e36526708
 +
 +# real QA test starts here
 +_supported_os Linux
-+_supported_fs btrfs
++_require_scratch
 +_require_dm_target error
 +_require_test_program fsync-err
 +_require_test_program dmerror
 +
-+# bring up dmerror device
-+_scratch_unmount
-+_dmerror_init
-+
-+# Replace first device with error-test device
-+old_SCRATCH_DEV=$SCRATCH_DEV
-+SCRATCH_DEV_POOL=`echo $SCRATCH_DEV_POOL | perl -pe "s#$SCRATCH_DEV#$DMERROR_DEV#"`
-+SCRATCH_DEV=$DMERROR_DEV
-+
-+_require_scratch
-+_require_scratch_dev_pool
-+
 +rm -f $seqres.full
 +
-+echo "Format and mount"
++_dmerror_init
 +
-+_scratch_pool_mkfs "-d raid0 -m raid1" > $seqres.full 2>&1
-+_scratch_mount
-+
-+# How much do we need to write? We need to hit all of the stripes. btrfs uses
-+# a fixed 64k stripesize, so write enough to hit each one
-+number_of_devices=`echo $SCRATCH_DEV_POOL | wc -w`
-+write_kb=$(($number_of_devices * 64))
-+_require_fs_space $SCRATCH_MNT $write_kb
-+
-+testfile=$SCRATCH_MNT/fsync-err-test
-+
-+SCRATCH_DEV=$old_SCRATCH_DEV
-+$here/src/fsync-err -b $(($write_kb * 1024)) -d $here/src/dmerror $testfile
++$here/src/fsync-err -d $here/src/dmerror $DMERROR_DEV
 +
 +# success, all done
 +_dmerror_load_working_table
-+
-+# fs may be corrupt after this -- attempt to repair it
-+_repair_scratch_fs >> $seqres.full
-+
-+# remove dmerror device
 +_dmerror_cleanup
-+
++_scratch_mkfs > $seqres.full 2>&1
 +status=0
 +exit
-diff --git a/tests/btrfs/999.out b/tests/btrfs/999.out
+diff --git a/tests/generic/998.out b/tests/generic/998.out
 new file mode 100644
-index 000000000000..2e48492ff6d1
+index 000000000000..658c438820e2
 --- /dev/null
-+++ b/tests/btrfs/999.out
-@@ -0,0 +1,3 @@
-+QA output created by 999
-+Format and mount
++++ b/tests/generic/998.out
+@@ -0,0 +1,2 @@
++QA output created by 998
 +Test passed!
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index be0548796260..c9063f0a4087 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -147,3 +147,4 @@
- 142 auto quick
- 143 auto quick
- 144 auto quick send
-+999 auto quick
+diff --git a/tests/generic/group b/tests/generic/group
+index b56bae8f04f0..9c62ab13ad36 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -442,4 +442,5 @@
+ 437 auto quick
+ 438 auto
+ 439 auto quick punch
++998 blockdev
+ 999 auto quick
 -- 
 2.13.0
 
