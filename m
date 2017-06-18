@@ -1,124 +1,99 @@
-Received: from mx1.redhat.com ([209.132.183.28]:37476 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751956AbdFPTks (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 16 Jun 2017 15:40:48 -0400
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 8345F80468
-        for <fstests@vger.kernel.org>; Fri, 16 Jun 2017 19:40:48 +0000 (UTC)
-Received: from tleilax.poochiereds.net (ovpn-120-225.rdu2.redhat.com [10.10.120.225])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 4DDFA18EFA
-        for <fstests@vger.kernel.org>; Fri, 16 Jun 2017 19:40:48 +0000 (UTC)
-From: Jeff Layton <jlayton@redhat.com>
-Subject: [xfstests PATCH v5 4/5] generic: test writeback error handling on dmerror devices
-Date: Fri, 16 Jun 2017 15:40:45 -0400
-Message-Id: <20170616194046.15923-5-jlayton@redhat.com>
-In-Reply-To: <20170616194046.15923-1-jlayton@redhat.com>
-References: <20170616194046.15923-1-jlayton@redhat.com>
+Received: from mail-pf0-f173.google.com ([209.85.192.173]:34673 "EHLO
+        mail-pf0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751965AbdFRM5j (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 18 Jun 2017 08:57:39 -0400
+Received: by mail-pf0-f173.google.com with SMTP id s66so42186743pfs.1
+        for <fstests@vger.kernel.org>; Sun, 18 Jun 2017 05:57:38 -0700 (PDT)
+Received: from localhost ([128.199.137.77])
+        by smtp.gmail.com with ESMTPSA id h123sm14546412pgc.36.2017.06.18.05.57.36
+        for <fstests@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Sun, 18 Jun 2017 05:57:37 -0700 (PDT)
+Message-ID: <594678c1.816c630a.b0b23.ee2f@mx.google.com>
+From: Eryu Guan <guaneryu@gmail.com>
+Date: Sun, 18 Jun 2017 20:57:32 +0800
+Subject: [ANNOUNCE] fstests: master branch updated to 9bcb266cd778
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="nNlsyQDAz5Vs"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Ensure that we get an error back on all fds when a block device is
-open by multiple writers and writeback fails.
 
-Signed-off-by: Jeff Layton <jlayton@redhat.com>
----
- tests/generic/998     | 63 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/998.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 66 insertions(+)
- create mode 100755 tests/generic/998
- create mode 100644 tests/generic/998.out
+--nNlsyQDAz5Vs
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-diff --git a/tests/generic/998 b/tests/generic/998
-new file mode 100755
-index 000000000000..ef528f18986e
---- /dev/null
-+++ b/tests/generic/998
-@@ -0,0 +1,63 @@
-+#! /bin/bash
-+# FS QA Test No. 998
-+#
-+# Test writeback error handling when writing to block devices via pagecache.
-+# See src/fsync-err.c for details of what test actually does.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017, Jeff Layton <jlayton@redhat.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf $tmp.* $testdir
-+    _dmerror_cleanup
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmerror
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scratch
-+_require_dm_target error
-+_require_test_program fsync-err
-+_require_test_program dmerror
-+
-+rm -f $seqres.full
-+
-+_dmerror_init
-+
-+$here/src/fsync-err -d $here/src/dmerror $DMERROR_DEV
-+
-+# success, all done
-+_dmerror_load_working_table
-+_dmerror_cleanup
-+_scratch_mkfs > $seqres.full 2>&1
-+status=0
-+exit
-diff --git a/tests/generic/998.out b/tests/generic/998.out
-new file mode 100644
-index 000000000000..658c438820e2
---- /dev/null
-+++ b/tests/generic/998.out
-@@ -0,0 +1,2 @@
-+QA output created by 998
-+Test passed!
-diff --git a/tests/generic/group b/tests/generic/group
-index b56bae8f04f0..9c62ab13ad36 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -442,4 +442,5 @@
- 437 auto quick
- 438 auto
- 439 auto quick punch
-+998 blockdev
- 999 auto quick
--- 
-2.13.0
+Hi all,
 
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. This is a relatively small update, which has new tests
+for fscrypt and btrfs, and minor fixes for UDF.
+
+New failure I've noticed in this update:
+- btrfs/145 fails with latest 4.12-rc5 Linus tree
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+9bcb266cd778 generic/397: be compatible with ignored SIGPIPE
+
+New commits:
+
+Eric Biggers (2):
+      [7e442cf0cf95] generic: test for buggy fscrypt context consistency check
+      [9bcb266cd778] generic/397: be compatible with ignored SIGPIPE
+
+Filipe Manana (1):
+      [31e424c4aa3c] btrfs: incremental send after renaming a file and a directory
+
+Jan Kara (2):
+      [0a2d8332195a] generic/360: Create symlink with valid path
+      [fabaef26ad59] common: UDF does not support journalling
+
+
+Code Diffstat:
+
+ common/rc             |   2 +-
+ tests/btrfs/145       | 130 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/145.out   |   6 +++
+ tests/btrfs/group     |   1 +
+ tests/generic/360     |   4 +-
+ tests/generic/360.out |   2 +-
+ tests/generic/397     |   2 +-
+ tests/generic/440     | 114 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/440.out |  13 +++++
+ tests/generic/group   |   1 +
+ 10 files changed, 271 insertions(+), 4 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
+
+--nNlsyQDAz5Vs
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJZRngVAAoJECZSqilcj+djzdEP/jYUKQ5I2g6ZizGTuVKXsh+u
+2i5Zw3vj+trEOcoGj1pIG5g9laRj+hzqT3WbDKMdrmNAQKLtjwtq/k61WmvAqDjw
+EY8ZfAonNglJqVR3hFMy4CQjzejuCmSKHMNmRMA4noqDNYIMNrVSQ5rxDNHVC/TT
+vM3E5aqmZq4+QJ9C11Doe/50V9Z4QvwrJwpfz9tjCKnRUPLe5omQJujI6iwbQXkR
+g5H22Cd7LTS2zPu6ZEM5aONrGc/rXmkZ/+AVrFl+6BieFHIxh5rCJwbgYt9ykgmO
+t+SCTGviBNG/tomt8UJWbA2Eh4YBkrubwb4kJL4jNXWx6os1KlIGpe6f7HqBLCmJ
+rowYKexgC/yJzPAW2orArilgD88eIHr8WBSkOvh/dNXjeG6Mpo8KJwlcBT7zzv/Z
+wan1f3xQPEEbQ6quEKMcClxG/RLlGRZTVfrPj25GzOggW54pNRILaOt2Ar4sPtn5
+l2Tncb9Lu321iMO9I4DP5Xy0lvrQrrbl7AFQASr9ECEyVuVwz5VRv7I9nsxstGYE
+SVjVBVbtLgJKeL26QlaOsF2tWvrccaFItOVat1QMl3pv8C+dif5h+eah1Me7i9/V
+YR8I0TNpJOFjx5ytDjVR388nv/BbmH3Du21+CQRgIhpCqjIT/GMslTLTPUSXuqd5
+RoJ20lPDRA7lumTaPAOQ
+=cug+
+-----END PGP SIGNATURE-----
+
+--nNlsyQDAz5Vs--
