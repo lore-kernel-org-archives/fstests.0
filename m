@@ -1,99 +1,155 @@
-Received: from mail-pf0-f173.google.com ([209.85.192.173]:34673 "EHLO
-        mail-pf0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751965AbdFRM5j (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 18 Jun 2017 08:57:39 -0400
-Received: by mail-pf0-f173.google.com with SMTP id s66so42186743pfs.1
-        for <fstests@vger.kernel.org>; Sun, 18 Jun 2017 05:57:38 -0700 (PDT)
-Received: from localhost ([128.199.137.77])
-        by smtp.gmail.com with ESMTPSA id h123sm14546412pgc.36.2017.06.18.05.57.36
-        for <fstests@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Sun, 18 Jun 2017 05:57:37 -0700 (PDT)
-Message-ID: <594678c1.816c630a.b0b23.ee2f@mx.google.com>
-From: Eryu Guan <guaneryu@gmail.com>
-Date: Sun, 18 Jun 2017 20:57:32 +0800
-Subject: [ANNOUNCE] fstests: master branch updated to 9bcb266cd778
+Received: from szxga01-in.huawei.com ([45.249.212.187]:8749 "EHLO
+        szxga01-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750768AbdFSDvc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 18 Jun 2017 23:51:32 -0400
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Subject: [xfstests PATCH] overlay: test whiteout check in impure dir
+Date: Mon, 19 Jun 2017 11:53:39 +0800
+Message-ID: <1497844419-23824-1-git-send-email-yi.zhang@huawei.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="nNlsyQDAz5Vs"
-Content-Disposition: inline
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: linux-unionfs@vger.kernel.org, eguan@redhat.com, amir73il@gmail.com, miklos@szeredi.hu, yi.zhang@huawei.com, miaoxie@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
+The unmerged and impure upper directories may contain invalid
+whiteouts when we umount && modify lowerdir(e.g. clean up dir) and
+remount overlay. This may lead to whiteouts exposure and rmdir
+failure.
 
---nNlsyQDAz5Vs
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+This case test impure dir's whiteouts check in ovl_iterate() and
+ovl_remove_xxx().
 
-Hi all,
+Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+---
+ tests/overlay/031     | 97 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/031.out |  2 ++
+ tests/overlay/group   |  1 +
+ 3 files changed, 100 insertions(+)
+ create mode 100755 tests/overlay/031
+ create mode 100644 tests/overlay/031.out
 
-The master branch of the xfstests repository at:
+diff --git a/tests/overlay/031 b/tests/overlay/031
+new file mode 100755
+index 0000000..674c11f
+--- /dev/null
++++ b/tests/overlay/031
+@@ -0,0 +1,97 @@
++#! /bin/bash
++# FS QA Test 031
++#
++# The unmerged and impure upper directories may contain invalid
++# whiteouts when we change lowerdir(e.g. clean up dir) and remount
++# overlay. This may lead to whiteouts exposure and rmdir failure.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Huawei.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++_require_scratch
++
++# remove all files from previous runs
++_scratch_mkfs
++
++# create test directory and test file
++lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
++upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
++workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
++mkdir -p $lowerdir/testdir
++touch $lowerdir/testdir/a
++
++# mount overlayfs and remove testfile to create a whiteout
++_scratch_mount
++
++rm -f $SCRATCH_MNT/testdir/a
++
++# unmount overlayfs but not base fs
++$UMOUNT_PROG $SCRATCH_MNT
++
++# clean up the lower directory and mount overlay again,
++# whiteout will expose.
++rm -rf $lowerdir/testdir
++
++_scratch_mount
++
++ls $SCRATCH_MNT/testdir
++
++# try to remove test dir from overlay dir, trigger ovl_remove_upper,
++# it will not clean up the dir and lead to rmdir failure.
++rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
++
++# umount overlay again, create a new file with the same name and
++# mount overlay again.
++$UMOUNT_PROG $SCRATCH_MNT
++touch $lowerdir/testdir
++
++_scratch_mount
++
++# try to remove test dir from overlay dir, trigger ovl_remove_and_whiteout,
++# it will not clean up the dir and lead to residue.
++rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
++ls $workdir/work
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/overlay/031.out b/tests/overlay/031.out
+new file mode 100644
+index 0000000..b3d0bb0
+--- /dev/null
++++ b/tests/overlay/031.out
+@@ -0,0 +1,2 @@
++QA output created by 031
++Silence is golden
+diff --git a/tests/overlay/group b/tests/overlay/group
+index c5048c4..4001820 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -33,3 +33,4 @@
+ 028 auto copyup quick
+ 029 auto quick
+ 030 auto quick perms
++031 auto quick
+-- 
+1.8.3.1
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. This is a relatively small update, which has new tests
-for fscrypt and btrfs, and minor fixes for UDF.
-
-New failure I've noticed in this update:
-- btrfs/145 fails with latest 4.12-rc5 Linus tree
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-9bcb266cd778 generic/397: be compatible with ignored SIGPIPE
-
-New commits:
-
-Eric Biggers (2):
-      [7e442cf0cf95] generic: test for buggy fscrypt context consistency check
-      [9bcb266cd778] generic/397: be compatible with ignored SIGPIPE
-
-Filipe Manana (1):
-      [31e424c4aa3c] btrfs: incremental send after renaming a file and a directory
-
-Jan Kara (2):
-      [0a2d8332195a] generic/360: Create symlink with valid path
-      [fabaef26ad59] common: UDF does not support journalling
-
-
-Code Diffstat:
-
- common/rc             |   2 +-
- tests/btrfs/145       | 130 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/145.out   |   6 +++
- tests/btrfs/group     |   1 +
- tests/generic/360     |   4 +-
- tests/generic/360.out |   2 +-
- tests/generic/397     |   2 +-
- tests/generic/440     | 114 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/440.out |  13 +++++
- tests/generic/group   |   1 +
- 10 files changed, 271 insertions(+), 4 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
-
---nNlsyQDAz5Vs
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJZRngVAAoJECZSqilcj+djzdEP/jYUKQ5I2g6ZizGTuVKXsh+u
-2i5Zw3vj+trEOcoGj1pIG5g9laRj+hzqT3WbDKMdrmNAQKLtjwtq/k61WmvAqDjw
-EY8ZfAonNglJqVR3hFMy4CQjzejuCmSKHMNmRMA4noqDNYIMNrVSQ5rxDNHVC/TT
-vM3E5aqmZq4+QJ9C11Doe/50V9Z4QvwrJwpfz9tjCKnRUPLe5omQJujI6iwbQXkR
-g5H22Cd7LTS2zPu6ZEM5aONrGc/rXmkZ/+AVrFl+6BieFHIxh5rCJwbgYt9ykgmO
-t+SCTGviBNG/tomt8UJWbA2Eh4YBkrubwb4kJL4jNXWx6os1KlIGpe6f7HqBLCmJ
-rowYKexgC/yJzPAW2orArilgD88eIHr8WBSkOvh/dNXjeG6Mpo8KJwlcBT7zzv/Z
-wan1f3xQPEEbQ6quEKMcClxG/RLlGRZTVfrPj25GzOggW54pNRILaOt2Ar4sPtn5
-l2Tncb9Lu321iMO9I4DP5Xy0lvrQrrbl7AFQASr9ECEyVuVwz5VRv7I9nsxstGYE
-SVjVBVbtLgJKeL26QlaOsF2tWvrccaFItOVat1QMl3pv8C+dif5h+eah1Me7i9/V
-YR8I0TNpJOFjx5ytDjVR388nv/BbmH3Du21+CQRgIhpCqjIT/GMslTLTPUSXuqd5
-RoJ20lPDRA7lumTaPAOQ
-=cug+
------END PGP SIGNATURE-----
-
---nNlsyQDAz5Vs--
