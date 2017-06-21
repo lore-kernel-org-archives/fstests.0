@@ -1,294 +1,491 @@
-Received: from mx1.redhat.com ([209.132.183.28]:37082 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:42632 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752582AbdFUJfi (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 21 Jun 2017 05:35:38 -0400
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 676D64E326
-        for <fstests@vger.kernel.org>; Wed, 21 Jun 2017 09:35:23 +0000 (UTC)
-Date: Wed, 21 Jun 2017 17:35:21 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH] generic: test writev with pega fault when it processes
- iov
-Message-ID: <20170621093521.GA4858@dhcp12-143.nay.redhat.com>
-References: <1498033406-15392-1-git-send-email-zlang@redhat.com>
- <20170621091731.GE17669@eguan.usersys.redhat.com>
+        id S1751994AbdFUKNM (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 21 Jun 2017 06:13:12 -0400
+Date: Wed, 21 Jun 2017 18:13:10 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] xfs: test that we can SEEK_HOLE/DATA data and holes that
+ are in the CoW fork only
+Message-ID: <20170621101310.GA23360@eguan.usersys.redhat.com>
+References: <20170620195336.GC3787@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170621091731.GE17669@eguan.usersys.redhat.com>
+In-Reply-To: <20170620195336.GC3787@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jun 21, 2017 at 05:17:31PM +0800, Eryu Guan wrote:
-> On Wed, Jun 21, 2017 at 04:23:26PM +0800, Zorro Lang wrote:
-> > We met a kernel assertion failure recently as below:
-> > 
-> >   XFS: Assertion failed: tp->t_blk_res_used <= tp->t_blk_res, file: fs/xfs/xfs_trans.c, line: 309
-> > 
-> > The problem comes when the several IO vectors are copied in, and
-> > it runs into page faults.
+On Tue, Jun 20, 2017 at 12:53:36PM -0700, Darrick J. Wong wrote:
+> Create a file with a hole in the data fork and CoW reservations in the
+> same region in the CoW fork.  Ensure that SEEK_HOLE/DATA find the data.
 > 
-> Can you please provide more information in commit log? It's not so clear
-> where the problem lies in right now.
-
-Sure, I'll explain more.
-
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  tests/xfs/901     |  150 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/901.out |   52 ++++++++++++++++++
+>  tests/xfs/902     |  150 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/902.out |   52 ++++++++++++++++++
+>  tests/xfs/group   |    2 +
+>  5 files changed, 406 insertions(+)
+>  create mode 100755 tests/xfs/901
+>  create mode 100644 tests/xfs/901.out
+>  create mode 100755 tests/xfs/902
+>  create mode 100644 tests/xfs/902.out
 > 
-> And there's a typo in subject line :)
+> diff --git a/tests/xfs/901 b/tests/xfs/901
+> new file mode 100755
+> index 0000000..ab99fb2
+> --- /dev/null
+> +++ b/tests/xfs/901
+> @@ -0,0 +1,150 @@
+> +#! /bin/bash
+> +# FS QA Test No. 901
+> +#
+> +# Test SEEK_HOLE/SEEK_DATA into a region that is marked CoW'd for
+> +# speculative preallocation in the CoW fork and isn't backed by
+> +# data fork extents.
+> +#
+> +# - Set a huge cowextsize hint.
+> +# - Create a file "DD      " (two data blocks, six hole blocks)
+> +# - Reflink copy this file to a second file.
+> +# - Write to the first block of the second file to create a single
+> +#   large CoW reservation covering the whole file.
+> +# - Write to block 3, which should be a hole in the data fork.
+> +# - Display the SEEK_HOLE/SEEK_DATA info for the second file to confirm
+> +#   that we see the data in blocks 0-1, the hole at block 2, the data
+> +#   at block 3, and the hole for the rest of the file.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017, Oracle and/or its affiliates.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -rf $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/reflink
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs xfs
+> +_require_scratch_reflink
+> +_require_cp_reflink
+> +_require_xfs_io_command "fiemap"
+> +_require_xfs_io_command "cowextsize"
+> +_require_xfs_io_command "funshare"
 
-Yeah, Pega... I think you can understand the reason :-P
+I think you meant "fpunch" here? funshare is not used in both tests, but
+fpunch is used.
 
-> 
-> generic: test writev with pega fault when it processes iov
->                           ^^^^ page
-> > 
-> > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > ---
-> > 
-> > Hi,
-> > 
-> > Although I'm trying to add writev/readv test to fsstress, and it has tiny
-> > chance to cover this bug (very hard to reproduce). But I still think using
-> > a special case to cover this part is better.
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> >  .gitignore                |  1 +
-> >  src/Makefile              |  2 +-
-> >  src/writev_on_pagefault.c | 74 +++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/443         | 61 ++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/443.out     |  2 ++
-> >  tests/generic/group       |  1 +
-> >  6 files changed, 140 insertions(+), 1 deletion(-)
-> >  create mode 100644 src/writev_on_pagefault.c
-> >  create mode 100755 tests/generic/443
-> >  create mode 100644 tests/generic/443.out
-> > 
-> > diff --git a/.gitignore b/.gitignore
-> > index 39664b0..043e87f 100644
-> > --- a/.gitignore
-> > +++ b/.gitignore
-> > @@ -130,6 +130,7 @@
-> >  /src/unwritten_sync
-> >  /src/usemem
-> >  /src/writemod
-> > +/src/writev_on_pagefault
-> >  /src/xfsctl
-> >  /src/aio-dio-regress/aio-dio-extend-stat
-> >  /src/aio-dio-regress/aio-dio-fcntl-race
-> > diff --git a/src/Makefile b/src/Makefile
-> > index 6b0e4b0..9d54fe7 100644
-> > --- a/src/Makefile
-> > +++ b/src/Makefile
-> > @@ -9,7 +9,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
-> >  	nametest permname randholes runas truncfile usemem \
-> >  	mmapcat append_reader append_writer dirperf metaperf \
-> >  	devzero feature alloc fault fstest t_access_root \
-> > -	godown resvtest writemod makeextents itrash rename \
-> > +	godown resvtest writemod writev_on_pagefault makeextents itrash rename \
-> >  	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
-> >  	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
-> >  	holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd \
-> > diff --git a/src/writev_on_pagefault.c b/src/writev_on_pagefault.c
-> > new file mode 100644
-> > index 0000000..54845c3
-> > --- /dev/null
-> > +++ b/src/writev_on_pagefault.c
-> > @@ -0,0 +1,74 @@
-> > +/*
-> > + * Takes page fault while writev is iterating over the vectors in the IOV
-> > + *
-> > + * Copyright (C) 2017 Red Hat, Inc. All Rights reserved.
-> > + *
-> > + * This program is free software; you can redistribute it and/or modify
-> > + * it under the terms of the GNU General Public License as published by
-> > + * the Free Software Foundation; either version 2 of the License, or
-> > + * (at your option) any later version.
-> > + *
-> > + * This program is distributed in the hope that it will be useful,
-> > + * but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > + * GNU General Public License for more details.
-> > + *
-> > + * You should have received a copy of the GNU General Public License
-> > + * along with this program; if not, write to the Free Software
-> > + * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-> > + */
-> > +#include <stdio.h>
-> > +#include <stdlib.h>
-> > +#include <sys/types.h>
-> > +#include <sys/stat.h>
-> > +#include <fcntl.h>
-> > +#include <string.h>
-> > +#include <unistd.h>
-> > +#include <sys/uio.h>
-> > +
-> > +#define IOV_CNT	3
-> 
-> Make it a default value and can be specified via command line as well?
+> +
+> +rm -f $seqres.full
+> +
+> +echo "Format and mount"
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount >> $seqres.full 2>&1
+> +
+> +testdir=$SCRATCH_MNT/test-$seq
+> +mkdir $testdir
+> +
+> +blksz=65536
+> +nr=8
+> +filesize=$((blksz * nr))
+> +
+> +echo "Create the original files"
+> +$XFS_IO_PROG -c "cowextsize" $testdir >> $seqres.full
+> +$XFS_IO_PROG -c "cowextsize $filesize" $testdir >> $seqres.full
+> +$XFS_IO_PROG -c "cowextsize" $testdir >> $seqres.full
+> +$XFS_IO_PROG -f -c "pwrite -S 0x61 0 $((blksz * 2))" -c "truncate $filesize" -c "fpunch $((blksz * 2)) $((blksz * (nr - 2) ))" $testdir/file1 >> $seqres.full
+> +_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
+> +$XFS_IO_PROG -f -c "pwrite -S 0 0 $filesize" -c "pwrite -S 0x61 0 $((blksz * 2))" $testdir/file3 >> $seqres.full
+> +_scratch_cycle_mount
 
-OK, I don't know how helpful is it, but I can do that.
+file3 is not mentioned in test description, there's no comments about it
+either, it'd be good go have some. (I assume file3 is there only for
+comparison with file2, right?)
 
-> 
-> > +
-> > +void
-> > +usage(char *progname)
-> > +{
-> > +	fprintf(stderr, "usage: %s filename\n", progname);
-> > +	exit(1);
-> > +}
-> > +
-> > +int main(int argc, char *argv[])
-> > +{
-> > +	int fd, i;
-> > +	size_t ret;
-> > +	struct iovec *iov;
-> > +	int pagesz = 4096;
-> > +	char *data = NULL;
-> > +
-> > +	if (argc != 2)
-> > +		usage(argv[0]);
-> > +
-> > +	pagesz = getpagesize();
-> > +	data = malloc(pagesz * IOV_CNT);
-> 
-> Check return value of malloc.
-
-OK
-
-> 
-> > +
-> > +	/* no pre-writing on the buffer before writev */
-> > +
-> > +        iov = calloc(IOV_CNT, sizeof(struct iovec));
-> 
-> Check return value of iov.
-> 
-> And from this line on, you're mixing tab and spaces for indention.
-> Please use tab consistently.
-
-OK, I'll check this. V2 will be sent soon.
+It's not clear what's the purpose of setting cowextsize either, I can
+see the explanation from the "simplify the Q_GETNEXTQUOTA
+implementation" thread in xfs list, but it'd be good to have it in the
+test too.
 
 Thanks,
-Zorro
+Eryu
 
-> 
-> Thanks,
-> Eryu
-> 
-> > +        for (i = 0; i < IOV_CNT; i++) {
-> > +	        (iov + i)->iov_base = (data + pagesz * i);
-> > +	        (iov + i)->iov_len  = 1;
-> > +        }
-> > +
-> > +        if ((fd = open(argv[1], O_TRUNC|O_CREAT|O_RDWR, 0644)) < 0) {
-> > +	        perror("open failed");
-> > +	        return 1;
-> > +        }
-> > +
-> > +
-> > +        ret = writev(fd, iov, IOV_CNT);
-> > +        if (ret < 0)
-> > +	        perror("writev failed");
-> > +        else
-> > +	        printf("wrote %d bytes\n", (int)ret);
-> > +
-> > +        close(fd);
-> > +        return 0;
-> > +}
-> > diff --git a/tests/generic/443 b/tests/generic/443
-> > new file mode 100755
-> > index 0000000..89e12b0
-> > --- /dev/null
-> > +++ b/tests/generic/443
-> > @@ -0,0 +1,61 @@
-> > +#! /bin/bash
-> > +# FS QA Test 443
-> > +#
-> > +# Takes page fault while writev is iterating over the vectors in the IOV
-> > +#
-> > +#-----------------------------------------------------------------------
-> > +# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
-> > +#
-> > +# This program is free software; you can redistribute it and/or
-> > +# modify it under the terms of the GNU General Public License as
-> > +# published by the Free Software Foundation.
-> > +#
-> > +# This program is distributed in the hope that it would be useful,
-> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > +# GNU General Public License for more details.
-> > +#
-> > +# You should have received a copy of the GNU General Public License
-> > +# along with this program; if not, write the Free Software Foundation,
-> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > +#-----------------------------------------------------------------------
-> > +#
-> > +
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
-> > +# real QA test starts here
-> > +_supported_fs generic
-> > +_supported_os Linux
-> > +_require_test
-> > +_require_test_program "writev_on_pagefault"
-> > +
-> > +# This program use several vectors for writev(), the kernel goes over them
-> > +# one at a time, copying them from userspace, getting the user data ready
-> > +# for IO. If it takes a page fault while iterating over the vectors in the
-> > +# IOV, it stops, and sends what it got so far. We try to find a bug at this
-> > +# moment.
-> > +$here/src/writev_on_pagefault $TEST_DIR/testfile.$seq
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/generic/443.out b/tests/generic/443.out
-> > new file mode 100644
-> > index 0000000..2d5acf9
-> > --- /dev/null
-> > +++ b/tests/generic/443.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 443
-> > +wrote 3 bytes
-> > diff --git a/tests/generic/group b/tests/generic/group
-> > index ab1e9d3..5046c97 100644
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -443,3 +443,4 @@
-> >  440 auto quick encrypt
-> >  441 auto quick
-> >  442 blockdev
-> > +443 auto quick rw
-> > -- 
-> > 2.7.5
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> +
+> +echo "Compare files"
+> +md5sum $testdir/file1 | _filter_scratch
+> +md5sum $testdir/file2 | _filter_scratch
+> +md5sum $testdir/file3 | _filter_scratch
+> +
+> +echo "CoW the shared part then write into the empty part" | tee -a $seqres.full
+> +$XFS_IO_PROG -c "cowextsize" $testdir/file1 >> $seqres.full
+> +$XFS_IO_PROG -c "cowextsize" $testdir/file2 >> $seqres.full
+> +$XFS_IO_PROG -c "pwrite -S 0x63 0 $blksz" $testdir/file2 >> $seqres.full
+> +$XFS_IO_PROG -c "pwrite -S 0x63 $((blksz * 3)) $blksz" $testdir/file2 >> $seqres.full
+> +
+> +$XFS_IO_PROG -c "pwrite -S 0x63 0 $blksz" $testdir/file3 >> $seqres.full
+> +$XFS_IO_PROG -c "pwrite -S 0x63 $((blksz * 3)) $blksz" $testdir/file3 >> $seqres.full
+> +
+> +$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
+> +$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
+> +$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
+> +
+> +echo "Seek holes and data in file1"
+> +$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
+> +echo "Seek holes and data in file2"
+> +$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
+> +
+> +echo "Compare files"
+> +md5sum $testdir/file1 | _filter_scratch
+> +md5sum $testdir/file2 | _filter_scratch
+> +md5sum $testdir/file3 | _filter_scratch
+> +
+> +echo "sync filesystem" | tee -a $seqres.full
+> +sync
+> +
+> +$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
+> +$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
+> +$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
+> +
+> +echo "Seek holes and data in file1"
+> +$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
+> +echo "Seek holes and data in file2"
+> +$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
+> +
+> +echo "Compare files"
+> +md5sum $testdir/file1 | _filter_scratch
+> +md5sum $testdir/file2 | _filter_scratch
+> +md5sum $testdir/file3 | _filter_scratch
+> +
+> +echo "Remount" | tee -a $seqres.full
+> +_scratch_cycle_mount
+> +
+> +$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
+> +$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
+> +$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
+> +
+> +echo "Seek holes and data in file1"
+> +$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
+> +echo "Seek holes and data in file2"
+> +$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
+> +
+> +echo "Compare files"
+> +md5sum $testdir/file1 | _filter_scratch
+> +md5sum $testdir/file2 | _filter_scratch
+> +md5sum $testdir/file3 | _filter_scratch
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/901.out b/tests/xfs/901.out
+> new file mode 100644
+> index 0000000..4a829e3
+> --- /dev/null
+> +++ b/tests/xfs/901.out
+> @@ -0,0 +1,52 @@
+> +QA output created by 901
+> +Format and mount
+> +Create the original files
+> +Compare files
+> +c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-901/file1
+> +c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-901/file2
+> +c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-901/file3
+> +CoW the shared part then write into the empty part
+> +Seek holes and data in file1
+> +Whence	Result
+> +DATA	0
+> +HOLE	131072
+> +Seek holes and data in file2
+> +Whence	Result
+> +DATA	0
+> +HOLE	131072
+> +DATA	196608
+> +HOLE	262144
+> +Compare files
+> +c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-901/file1
+> +017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-901/file2
+> +017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-901/file3
+> +sync filesystem
+> +Seek holes and data in file1
+> +Whence	Result
+> +DATA	0
+> +HOLE	131072
+> +Seek holes and data in file2
+> +Whence	Result
+> +DATA	0
+> +HOLE	131072
+> +DATA	196608
+> +HOLE	262144
+> +Compare files
+> +c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-901/file1
+> +017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-901/file2
+> +017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-901/file3
+> +Remount
+> +Seek holes and data in file1
+> +Whence	Result
+> +DATA	0
+> +HOLE	131072
+> +Seek holes and data in file2
+> +Whence	Result
+> +DATA	0
+> +HOLE	131072
+> +DATA	196608
+> +HOLE	262144
+> +Compare files
+> +c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-901/file1
+> +017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-901/file2
+> +017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-901/file3
+> diff --git a/tests/xfs/902 b/tests/xfs/902
+> new file mode 100755
+> index 0000000..e5271d9
+> --- /dev/null
+> +++ b/tests/xfs/902
+> @@ -0,0 +1,150 @@
+> +#! /bin/bash
+> +# FS QA Test No. 902
+> +#
+> +# Test SEEK_HOLE/SEEK_DATA into a region that is marked CoW'd for
+> +# speculative preallocation in the CoW fork and isn't backed by
+> +# data fork extents.
+> +#
+> +# - Set a huge cowextsize hint.
+> +# - Create a file "DD      " (two data blocks, six hole blocks)
+> +# - Reflink copy this file to a second file.
+> +# - dio write to the first block of the second file to create a single
+> +#   large CoW reservation covering the whole file.
+> +# - dio write to block 3, which should be a hole in the data fork.
+> +# - Display the SEEK_HOLE/SEEK_DATA info for the second file to confirm
+> +#   that we see the data in blocks 0-1, the hole at block 2, the data
+> +#   at block 3, and the hole for the rest of the file.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017, Oracle and/or its affiliates.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -rf $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/reflink
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs xfs
+> +_require_scratch_reflink
+> +_require_cp_reflink
+> +_require_xfs_io_command "fiemap"
+> +_require_xfs_io_command "cowextsize"
+> +_require_xfs_io_command "funshare"
+> +
+> +rm -f $seqres.full
+> +
+> +echo "Format and mount"
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount >> $seqres.full 2>&1
+> +
+> +testdir=$SCRATCH_MNT/test-$seq
+> +mkdir $testdir
+> +
+> +blksz=65536
+> +nr=8
+> +filesize=$((blksz * nr))
+> +
+> +echo "Create the original files"
+> +$XFS_IO_PROG -c "cowextsize" $testdir >> $seqres.full
+> +$XFS_IO_PROG -c "cowextsize $filesize" $testdir >> $seqres.full
+> +$XFS_IO_PROG -c "cowextsize" $testdir >> $seqres.full
+> +$XFS_IO_PROG -f -c "pwrite -S 0x61 0 $((blksz * 2))" -c "truncate $filesize" -c "fpunch $((blksz * 2)) $((blksz * (nr - 2) ))" $testdir/file1 >> $seqres.full
+> +_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
+> +$XFS_IO_PROG -f -c "pwrite -S 0 0 $filesize" -c "pwrite -S 0x61 0 $((blksz * 2))" $testdir/file3 >> $seqres.full
+> +_scratch_cycle_mount
+> +
+> +echo "Compare files"
+> +md5sum $testdir/file1 | _filter_scratch
+> +md5sum $testdir/file2 | _filter_scratch
+> +md5sum $testdir/file3 | _filter_scratch
+> +
+> +echo "CoW the shared part then write into the empty part" | tee -a $seqres.full
+> +$XFS_IO_PROG -c "cowextsize" $testdir/file1 >> $seqres.full
+> +$XFS_IO_PROG -c "cowextsize" $testdir/file2 >> $seqres.full
+> +$XFS_IO_PROG -d -c "pwrite -S 0x63 0 $blksz" $testdir/file2 >> $seqres.full
+> +$XFS_IO_PROG -d -c "pwrite -S 0x63 $((blksz * 3)) $blksz" $testdir/file2 >> $seqres.full
+> +
+> +$XFS_IO_PROG -d -c "pwrite -S 0x63 0 $blksz" $testdir/file3 >> $seqres.full
+> +$XFS_IO_PROG -d -c "pwrite -S 0x63 $((blksz * 3)) $blksz" $testdir/file3 >> $seqres.full
+> +
+> +$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
+> +$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
+> +$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
+> +
+> +echo "Seek holes and data in file1"
+> +$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
+> +echo "Seek holes and data in file2"
+> +$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
+> +
+> +echo "Compare files"
+> +md5sum $testdir/file1 | _filter_scratch
+> +md5sum $testdir/file2 | _filter_scratch
+> +md5sum $testdir/file3 | _filter_scratch
+> +
+> +echo "sync filesystem" | tee -a $seqres.full
+> +sync
+> +
+> +$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
+> +$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
+> +$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
+> +
+> +echo "Seek holes and data in file1"
+> +$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
+> +echo "Seek holes and data in file2"
+> +$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
+> +
+> +echo "Compare files"
+> +md5sum $testdir/file1 | _filter_scratch
+> +md5sum $testdir/file2 | _filter_scratch
+> +md5sum $testdir/file3 | _filter_scratch
+> +
+> +echo "Remount" | tee -a $seqres.full
+> +_scratch_cycle_mount
+> +
+> +$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
+> +$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
+> +$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
+> +
+> +echo "Seek holes and data in file1"
+> +$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
+> +echo "Seek holes and data in file2"
+> +$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
+> +
+> +echo "Compare files"
+> +md5sum $testdir/file1 | _filter_scratch
+> +md5sum $testdir/file2 | _filter_scratch
+> +md5sum $testdir/file3 | _filter_scratch
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/902.out b/tests/xfs/902.out
+> new file mode 100644
+> index 0000000..d5b8eae
+> --- /dev/null
+> +++ b/tests/xfs/902.out
+> @@ -0,0 +1,52 @@
+> +QA output created by 902
+> +Format and mount
+> +Create the original files
+> +Compare files
+> +c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-902/file1
+> +c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-902/file2
+> +c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-902/file3
+> +CoW the shared part then write into the empty part
+> +Seek holes and data in file1
+> +Whence	Result
+> +DATA	0
+> +HOLE	131072
+> +Seek holes and data in file2
+> +Whence	Result
+> +DATA	0
+> +HOLE	131072
+> +DATA	196608
+> +HOLE	262144
+> +Compare files
+> +c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-902/file1
+> +017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-902/file2
+> +017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-902/file3
+> +sync filesystem
+> +Seek holes and data in file1
+> +Whence	Result
+> +DATA	0
+> +HOLE	131072
+> +Seek holes and data in file2
+> +Whence	Result
+> +DATA	0
+> +HOLE	131072
+> +DATA	196608
+> +HOLE	262144
+> +Compare files
+> +c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-902/file1
+> +017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-902/file2
+> +017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-902/file3
+> +Remount
+> +Seek holes and data in file1
+> +Whence	Result
+> +DATA	0
+> +HOLE	131072
+> +Seek holes and data in file2
+> +Whence	Result
+> +DATA	0
+> +HOLE	131072
+> +DATA	196608
+> +HOLE	262144
+> +Compare files
+> +c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-902/file1
+> +017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-902/file2
+> +017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-902/file3
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index 5f37c5a..faf0095 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -417,3 +417,5 @@
+>  417 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+>  418 dangerous_fuzzers dangerous_scrub dangerous_repair
+>  701 auto quick
+> +901 auto quick clone dedupe
+> +902 auto quick clone dedupe
