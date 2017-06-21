@@ -1,11 +1,11 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:43938 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752376AbdFUV5W (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Jun 2017 17:57:22 -0400
-Subject: [PATCH 1/8] ext4: fsmap tests
+Received: from userp1040.oracle.com ([156.151.31.81]:36589 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752133AbdFUV5d (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Jun 2017 17:57:33 -0400
+Subject: [PATCH 2/8] xfs/274: flip shared bits to reflect xfsprogs usage
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Wed, 21 Jun 2017 14:57:11 -0700
-Message-ID: <149808223165.8924.16060163704407458224.stgit@birch.djwong.org>
+Date: Wed, 21 Jun 2017 14:57:20 -0700
+Message-ID: <149808224050.8924.8528476315643334436.stgit@birch.djwong.org>
 In-Reply-To: <149808222258.8924.1682057078986741098.stgit@birch.djwong.org>
 References: <149808222258.8924.1682057078986741098.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -18,292 +18,35 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Test the GETFSMAP ioctl against ext4.
+xfs_io's fsmap command flipped the attrfork and shared bits, so we
+have to change them here too.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/ext4/700     |   76 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/700.out |    7 +++++
- tests/ext4/701     |   65 ++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/701.out |    3 ++
- tests/ext4/702     |   66 +++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/702.out |    4 +++
- tests/ext4/group   |    3 ++
- 7 files changed, 224 insertions(+)
- create mode 100755 tests/ext4/700
- create mode 100644 tests/ext4/700.out
- create mode 100755 tests/ext4/701
- create mode 100644 tests/ext4/701.out
- create mode 100755 tests/ext4/702
- create mode 100644 tests/ext4/702.out
+ tests/xfs/274 |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 
-diff --git a/tests/ext4/700 b/tests/ext4/700
-new file mode 100755
-index 0000000..a4a1b83
---- /dev/null
-+++ b/tests/ext4/700
-@@ -0,0 +1,76 @@
-+#! /bin/bash
-+# FS QA Test No. 700
-+#
-+# Check that getfsmap reports the BG metadata we're expecting.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename "$0"`
-+seqres="$RESULT_DIR/$seq"
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f "$tmp".* $TEST_DIR/fsmap $TEST_DIR/testout
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs ext4
-+_require_scratch
-+_require_xfs_io_command "fsmap"
-+
-+rm -f "$seqres.full"
-+
-+echo "Format and mount"
-+_scratch_mkfs > "$seqres.full" 2>&1
-+_scratch_mount
-+
-+echo "Get fsmap" | tee -a $seqres.full
-+$XFS_IO_PROG -c 'fsmap' $SCRATCH_MNT > $TEST_DIR/fsmap
-+cat $TEST_DIR/fsmap >> $seqres.full
-+
-+echo "Check fs metadata" | tee -a $seqres.full
-+x=$(grep -c 'static fs metadata' $TEST_DIR/fsmap)
-+test $x -gt 0 || echo "No fs metadata?"
-+
-+echo "Check block bitmap" | tee -a $seqres.full
-+x=$(grep -c 'special 102:1' $TEST_DIR/fsmap)
-+test $x -gt 0 || echo "No block bitmaps?"
-+
-+echo "Check inode bitmap" | tee -a $seqres.full
-+x=$(grep -c 'special 102:2' $TEST_DIR/fsmap)
-+test $x -gt 0 || echo "No inode bitmaps?"
-+
-+echo "Check inodes" | tee -a $seqres.full
-+x=$(grep -c 'inodes' $TEST_DIR/fsmap)
-+test $x -gt 0 || echo "No inodes?"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/ext4/700.out b/tests/ext4/700.out
-new file mode 100644
-index 0000000..3984319
---- /dev/null
-+++ b/tests/ext4/700.out
-@@ -0,0 +1,7 @@
-+QA output created by 700
-+Format and mount
-+Get fsmap
-+Check fs metadata
-+Check block bitmap
-+Check inode bitmap
-+Check inodes
-diff --git a/tests/ext4/701 b/tests/ext4/701
-new file mode 100755
-index 0000000..6ae93d7
---- /dev/null
-+++ b/tests/ext4/701
-@@ -0,0 +1,65 @@
-+#! /bin/bash
-+# FS QA Test No. 701
-+#
-+# Populate filesystem, check that fsmap -n10000 matches fsmap -n1.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename "$0"`
-+seqres="$RESULT_DIR/$seq"
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f "$tmp".* $TEST_DIR/a $TEST_DIR/b
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/populate
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs ext4
-+_require_scratch
-+_require_populate_commands
-+_require_xfs_io_command "fsmap"
-+
-+rm -f "$seqres.full"
-+
-+echo "Format and mount"
-+_scratch_populate_cached nofill > $seqres.full 2>&1
-+
-+echo "Compare fsmap" | tee -a $seqres.full
-+_scratch_mount
-+$XFS_IO_PROG -c 'fsmap -n 65536' $SCRATCH_MNT | grep -v 'EXT:' > $TEST_DIR/a
-+$XFS_IO_PROG -c 'fsmap -n 1' $SCRATCH_MNT | grep -v 'EXT:' > $TEST_DIR/b
-+cat $TEST_DIR/a $TEST_DIR/b >> $seqres.full
-+
-+diff -uw $TEST_DIR/a $TEST_DIR/b
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/ext4/701.out b/tests/ext4/701.out
-new file mode 100644
-index 0000000..41ef1c6
---- /dev/null
-+++ b/tests/ext4/701.out
-@@ -0,0 +1,3 @@
-+QA output created by 701
-+Format and mount
-+Compare fsmap
-diff --git a/tests/ext4/702 b/tests/ext4/702
-new file mode 100755
-index 0000000..ce3ae11
---- /dev/null
-+++ b/tests/ext4/702
-@@ -0,0 +1,66 @@
-+#! /bin/bash
-+# FS QA Test No. 702
-+#
-+# Check that getfsmap reports external log devices
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename "$0"`
-+seqres="$RESULT_DIR/$seq"
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f "$tmp".* $TEST_DIR/fsmap $TEST_DIR/testout
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs ext4
-+_require_logdev
-+_require_scratch
-+_require_xfs_io_command "fsmap"
-+
-+rm -f "$seqres.full"
-+
-+echo "Format and mount"
-+_scratch_mkfs > "$seqres.full" 2>&1
-+_scratch_mount
-+
-+echo "Get fsmap" | tee -a $seqres.full
-+$XFS_IO_PROG -c 'fsmap' $SCRATCH_MNT >> $seqres.full
-+$XFS_IO_PROG -c 'fsmap' $SCRATCH_MNT | tr '[]()' '    ' > $TEST_DIR/fsmap
-+
-+echo "Check device field of FS metadata and journalling log"
-+data_dev=$(grep 'static fs metadata' $TEST_DIR/fsmap | head -n 1 | awk '{print $2}')
-+journal_dev=$(grep 'journalling log' $TEST_DIR/fsmap | head -n 1 | awk '{print $2}')
-+test "${data_dev}" != "${journal_dev}" || echo "data ${data_dev} journal ${journal_dev}?"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/ext4/702.out b/tests/ext4/702.out
-new file mode 100644
-index 0000000..1d3b7ef
---- /dev/null
-+++ b/tests/ext4/702.out
-@@ -0,0 +1,4 @@
-+QA output created by 702
-+Format and mount
-+Get fsmap
-+Check device field of FS metadata and journalling log
-diff --git a/tests/ext4/group b/tests/ext4/group
-index 664c059..9007adf 100644
---- a/tests/ext4/group
-+++ b/tests/ext4/group
-@@ -37,3 +37,6 @@
- 306 auto rw resize quick
- 307 auto ioctl rw defrag
- 308 auto ioctl rw prealloc quick defrag
-+700 auto quick fsmap
-+701 auto quick fsmap
-+702 auto quick fsmap
+diff --git a/tests/xfs/274 b/tests/xfs/274
+index 209c067..ee433e0 100755
+--- a/tests/xfs/274
++++ b/tests/xfs/274
+@@ -70,7 +70,7 @@ $XFS_IO_PROG -c 'bmap -v' $SCRATCH_MNT/f1 | grep '^[[:space:]]*[0-9]*:' | grep -
+ 
+ echo "Check f1 bmap and fsmap" | tee -a $seqres.full
+ cat $TEST_DIR/bmap | while read ext offrange colon blockrange ag agrange total crap; do
+-	qstr="^[[:space:]]*[0-9]*:[[:space:]]*[0-9]*:[0-9]*[[:space:]]*${blockrange} :[[:space:]]*${ino}[[:space:]]*${offrange}[[:space:]]*${ag}[[:space:]]*${agrange}[[:space:]]*${total} 1000000$"
++	qstr="^[[:space:]]*[0-9]*:[[:space:]]*[0-9]*:[0-9]*[[:space:]]*${blockrange} :[[:space:]]*${ino}[[:space:]]*${offrange}[[:space:]]*${ag}[[:space:]]*${agrange}[[:space:]]*${total} 0100000$"
+ 	echo "${qstr}" >> $seqres.full
+ 	grep "${qstr}" $TEST_DIR/fsmap >> $seqres.full
+ 	found=$(grep -c "${qstr}" $TEST_DIR/fsmap)
+@@ -83,7 +83,7 @@ $XFS_IO_PROG -c 'bmap -v' $SCRATCH_MNT/f2 | grep '^[[:space:]]*[0-9]*:' | grep -
+ 
+ echo "Check f2 bmap and fsmap" | tee -a $seqres.full
+ cat $TEST_DIR/bmap | while read ext offrange colon blockrange ag agrange total crap; do
+-	qstr="^[[:space:]]*[0-9]*:[[:space:]]*[0-9]*:[0-9]*[[:space:]]*${blockrange} :[[:space:]]*${ino}[[:space:]]*${offrange}[[:space:]]*${ag}[[:space:]]*${agrange}[[:space:]]*${total} 1000000$"
++	qstr="^[[:space:]]*[0-9]*:[[:space:]]*[0-9]*:[0-9]*[[:space:]]*${blockrange} :[[:space:]]*${ino}[[:space:]]*${offrange}[[:space:]]*${ag}[[:space:]]*${agrange}[[:space:]]*${total} 0100000$"
+ 	echo "${qstr}" >> $seqres.full
+ 	grep "${qstr}" $TEST_DIR/fsmap >> $seqres.full
+ 	found=$(grep -c "${qstr}" $TEST_DIR/fsmap)
 
