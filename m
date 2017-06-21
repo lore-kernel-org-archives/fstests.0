@@ -1,50 +1,171 @@
-Received: from mx2.suse.de ([195.135.220.15]:40201 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752218AbdFUHun (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 21 Jun 2017 03:50:43 -0400
-From: Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH v2] btrfs/146: Test various btrfs operations rounding behavior
-Date: Wed, 21 Jun 2017 10:50:35 +0300
-Message-Id: <1498031435-28344-1-git-send-email-nborisov@suse.com>
+Received: from mx1.redhat.com ([209.132.183.28]:54814 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752579AbdFUIXi (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 21 Jun 2017 04:23:38 -0400
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 890B9C04D29A
+        for <fstests@vger.kernel.org>; Wed, 21 Jun 2017 08:23:32 +0000 (UTC)
+Received: from dhcp-12-155.nay.redhat.com (dhcp-12-155.nay.redhat.com [10.66.12.155])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id C75D086340
+        for <fstests@vger.kernel.org>; Wed, 21 Jun 2017 08:23:30 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] generic: test writev with pega fault when it processes iov
+Date: Wed, 21 Jun 2017 16:23:26 +0800
+Message-Id: <1498033406-15392-1-git-send-email-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, dsterba@suse.com, Nikolay Borisov <nborisov@suse.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-When changing the size of disks/filesystem we should always be
-rounding down to a multiple of sectorsize
+We met a kernel assertion failure recently as below:
 
-Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+  XFS: Assertion failed: tp->t_blk_res_used <= tp->t_blk_res, file: fs/xfs/xfs_trans.c, line: 309
+
+The problem comes when the several IO vectors are copied in, and
+it runs into page faults.
+
+Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
 
-Changes since v1: 
- - Worked on incorporated feedback by Eryu 
- - Changed test number to 146 to avoid clashes
+Hi,
 
- tests/btrfs/146     | 147 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/146.out |  20 +++++++
- tests/btrfs/group   |   1 +
- 3 files changed, 168 insertions(+)
- create mode 100755 tests/btrfs/146
- create mode 100644 tests/btrfs/146.out
+Although I'm trying to add writev/readv test to fsstress, and it has tiny
+chance to cover this bug (very hard to reproduce). But I still think using
+a special case to cover this part is better.
 
-diff --git a/tests/btrfs/146 b/tests/btrfs/146
-new file mode 100755
-index 0000000..7e6d40f
+Thanks,
+Zorro
+
+ .gitignore                |  1 +
+ src/Makefile              |  2 +-
+ src/writev_on_pagefault.c | 74 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/441         | 61 ++++++++++++++++++++++++++++++++++++++
+ tests/generic/441.out     |  2 ++
+ tests/generic/group       |  1 +
+ 6 files changed, 140 insertions(+), 1 deletion(-)
+ create mode 100644 src/writev_on_pagefault.c
+ create mode 100755 tests/generic/441
+ create mode 100644 tests/generic/441.out
+
+diff --git a/.gitignore b/.gitignore
+index 39664b0..043e87f 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -130,6 +130,7 @@
+ /src/unwritten_sync
+ /src/usemem
+ /src/writemod
++/src/writev_on_pagefault
+ /src/xfsctl
+ /src/aio-dio-regress/aio-dio-extend-stat
+ /src/aio-dio-regress/aio-dio-fcntl-race
+diff --git a/src/Makefile b/src/Makefile
+index 6b0e4b0..9d54fe7 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -9,7 +9,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	nametest permname randholes runas truncfile usemem \
+ 	mmapcat append_reader append_writer dirperf metaperf \
+ 	devzero feature alloc fault fstest t_access_root \
+-	godown resvtest writemod makeextents itrash rename \
++	godown resvtest writemod writev_on_pagefault makeextents itrash rename \
+ 	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
+ 	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
+ 	holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd \
+diff --git a/src/writev_on_pagefault.c b/src/writev_on_pagefault.c
+new file mode 100644
+index 0000000..54845c3
 --- /dev/null
-+++ b/tests/btrfs/146
-@@ -0,0 +1,147 @@
++++ b/src/writev_on_pagefault.c
+@@ -0,0 +1,74 @@
++/*
++ * Takes page fault while writev is iterating over the vectors in the IOV
++ *
++ * Copyright (C) 2017 Red Hat, Inc. All Rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
++ */
++#include <stdio.h>
++#include <stdlib.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <fcntl.h>
++#include <string.h>
++#include <unistd.h>
++#include <sys/uio.h>
++
++#define IOV_CNT	3
++
++void
++usage(char *progname)
++{
++	fprintf(stderr, "usage: %s filename\n", progname);
++	exit(1);
++}
++
++int main(int argc, char *argv[])
++{
++	int fd, i;
++	size_t ret;
++	struct iovec *iov;
++	int pagesz = 4096;
++	char *data = NULL;
++
++	if (argc != 2)
++		usage(argv[0]);
++
++	pagesz = getpagesize();
++	data = malloc(pagesz * IOV_CNT);
++
++	/* no pre-writing on the buffer before writev */
++
++        iov = calloc(IOV_CNT, sizeof(struct iovec));
++        for (i = 0; i < IOV_CNT; i++) {
++	        (iov + i)->iov_base = (data + pagesz * i);
++	        (iov + i)->iov_len  = 1;
++        }
++
++        if ((fd = open(argv[1], O_TRUNC|O_CREAT|O_RDWR, 0644)) < 0) {
++	        perror("open failed");
++	        return 1;
++        }
++
++
++        ret = writev(fd, iov, IOV_CNT);
++        if (ret < 0)
++	        perror("writev failed");
++        else
++	        printf("wrote %d bytes\n", (int)ret);
++
++        close(fd);
++        return 0;
++}
+diff --git a/tests/generic/441 b/tests/generic/441
+new file mode 100755
+index 0000000..89e12b0
+--- /dev/null
++++ b/tests/generic/441
+@@ -0,0 +1,61 @@
 +#! /bin/bash
-+# FS QA Test No. btrfs/146
++# FS QA Test 441
 +#
-+# Test that various code paths which deal with modifying the total size
-+# of devices/superblock correctly round the value to a multiple of
-+# sector size
++# Takes page fault while writev is iterating over the vectors in the IOV
 +#
 +#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2017 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Nikolay Borisov <nborisov@suse.com>
++# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -65,157 +186,57 @@ index 0000000..7e6d40f
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
++here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+	$UMOUNT_PROG $loop_mnt 
-+	_destroy_loop_device $loop_dev1
-+	_destroy_loop_device $loop_dev2
 +	cd /
 +	rm -f $tmp.*
-+	
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
 +
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_loop
-+_require_block_device $SCRATCH_DEV
-+_require_btrfs_command inspect-internal dump-super
-+# ~2.1 gigabytes just to be on the safe side
-+_require_fs_space $SCRATCH_MNT $(( 2202009 ))
-+
++# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_test
++_require_test_program "writev_on_pagefault"
 +
++# This program use several vectors for writev(), the kernel goes over them
++# one at a time, copying them from userspace, getting the user data ready
++# for IO. If it takes a page fault while iterating over the vectors in the
++# IOV, it stops, and sends what it got so far. We try to find a bug at this
++# moment.
++$here/src/writev_on_pagefault $TEST_DIR/testfile.$seq
 +
-+# Size of devices which are going to be half a page larger than
-+# default sectorsize (4kb)
-+expectedsize=$(( 1 * 1024 * 1024 * 1024 ))
-+filesize=$(( $expectedsize + 2048 ))
-+loop_mnt=$SCRATCH_MNT/mount
-+fs_img1=$SCRATCH_MNT/disk1.img
-+fs_img2=$SCRATCH_MNT/disk2.img
-+
-+mkdir $loop_mnt
-+
-+#create files to hold dummy devices
-+$XFS_IO_PROG -f -c "falloc 0 $filesize" $fs_img1 &> /dev/null
-+$XFS_IO_PROG -f -c "falloc 0 $filesize" $fs_img2 &> /dev/null
-+
-+loop_dev1=$(_create_loop_device $fs_img1)
-+loop_dev2=$(_create_loop_device $fs_img2)
-+
-+#create fs only on the first device
-+_mkfs_dev $loop_dev1
-+_mount $loop_dev1 $loop_mnt
-+
-+echo "Size from mkfs"
-+$BTRFS_UTIL_PROG inspect-internal dump-super /dev/loop0 | grep total
-+
-+#resize down to 768mb + 2k
-+$BTRFS_UTIL_PROG filesystem resize 824182784 $loop_mnt >>$seqres.full 2>&1
-+sync
-+
-+echo ""
-+
-+echo "Size after resizing down"
-+$BTRFS_UTIL_PROG inspect-internal dump-super $loop_dev1 | grep total
-+
-+echo ""
-+
-+#now resize back up to 1 gb
-+$BTRFS_UTIL_PROG filesystem resize max $loop_mnt >>$seqres.full 2>&1
-+sync
-+
-+echo "Size after resizing up"
-+$BTRFS_UTIL_PROG inspect-internal dump-super /dev/loop0 | grep total
-+
-+# Add fs load for later balance operations, we need to do this
-+# before adding a second device
-+$FSSTRESS_PROG -w -n 15000 -p 2 -d $loop_mnt >> $seqres.full 2>&1
-+
-+# add second unaligned device, this checks the btrfs_init_new_device codepath
-+# device should be aligned
-+$BTRFS_UTIL_PROG device add $loop_dev2 $loop_mnt >>$seqres.full 2>&1
-+sync
-+
-+echo ""
-+
-+# Ensure that adding a device doesn't cause the superbock to be
-+# unaligned
-+echo "Size of superblock after device addition"
-+$BTRFS_UTIL_PROG inspect-internal dump-super $loop_dev1 | grep total
-+
-+echo ""
-+
-+# The newly added device must also be aligned
-+echo "Size of superblock/device for second device"
-+$BTRFS_UTIL_PROG inspect-internal dump-super $loop_dev2 | grep total
-+
-+# now start a balance, this might produce warnings while
-+# it's relocating chunks and updating the size of devices
-+$BTRFS_UTIL_PROG balance start $loop_mnt >> $seqres.full 2>&1
-+sync
-+
-+# delete everything and then run balance
-+rm -rf $loop_mnt/*
-+
-+# do a bit more stress testing until we fill the fs
-+$FSSTRESS_PROG -w -n 15000 -p 4 -d $loop_mnt >> $seqres.full 2>&1
-+rm -rf $loop_mnt/p0 $loop_mnt/p2
-+
-+# run balance again, this time we will be freeing chunks
-+$BTRFS_UTIL_PROG balance start $loop_mnt >> $seqres.full 2>&1
-+sync
-+
-+status=$?
++# success, all done
++status=0
 +exit
-diff --git a/tests/btrfs/146.out b/tests/btrfs/146.out
+diff --git a/tests/generic/441.out b/tests/generic/441.out
 new file mode 100644
-index 0000000..8fb671b
+index 0000000..2d5acf9
 --- /dev/null
-+++ b/tests/btrfs/146.out
-@@ -0,0 +1,20 @@
-+QA output created by 146
-+Size from mkfs
-+total_bytes		1073741824
-+dev_item.total_bytes	1073741824
-+
-+Size after resizing down
-+total_bytes		824180736
-+dev_item.total_bytes	824180736
-+
-+Size after resizing up
-+total_bytes		1073741824
-+dev_item.total_bytes	1073741824
-+
-+Size of superblock after device addition
-+total_bytes		2147483648
-+dev_item.total_bytes	1073741824
-+
-+Size of superblock/device for second device
-+total_bytes		2147483648
-+dev_item.total_bytes	1073741824
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 629919b..f74f50c 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -148,3 +148,4 @@
- 143 auto quick
- 144 auto quick send
- 145 auto quick send
-+146 auto quick
++++ b/tests/generic/441.out
+@@ -0,0 +1,2 @@
++QA output created by 441
++wrote 3 bytes
+diff --git a/tests/generic/group b/tests/generic/group
+index ab1e9d3..5046c97 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -443,3 +443,4 @@
+ 438 auto
+ 439 auto quick punch
+ 440 auto quick encrypt
++441 auto quick rw
 -- 
-2.7.4
+2.7.5
 
